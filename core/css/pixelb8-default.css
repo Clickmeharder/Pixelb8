@@ -240,7 +240,7 @@ select::-webkit-scrollbar {}
 select::-webkit-scrollbar-thumb {}
 /*----------------------*/
 /*    Button Elements */
-button {}
+button {background-color:#444;}
 button:hover {}
 button:active {}
 button:focus {}
