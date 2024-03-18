@@ -189,11 +189,11 @@ body {
     outline: 0px;
     border: 2px inset var(--scrollbar-border-color);
 }
-::-webkit-scrollbar-corner {background-color: var(--border-color);}/*var(--scrollbar-bg-color);}*/
+::-webkit-scrollbar-corner {background-color: var(--border-color);}
 ::-webkit-scrollbar-track {}
 ::-webkit-scrollbar-thumb {
     color:;
-    background-color:var(--scrollbar-thumb-bg-color);
+    background-color: var(--scrollbar-thumb-bg-color);
     border: 1px solid var(--scrollbar-thumb-border-color);
     border-style: var(--scrollbar-thumb-border-style);
     border-radius: var(--scrollbar-thumb-border-radius);
