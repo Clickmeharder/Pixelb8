@@ -55,7 +55,8 @@
   --staticpage-HFpanels-border-radius: 8px;
   --staticpage-HFpanels-border-color: #000;
   --staticpage-HFpanels-bg-color: #0c1c2c;
-  --staticpage-HFpanels-text-color: rgb(39 75 102, 1.0);
+  --staticpage-HTitle-text-color: rgb(39, 75, 102, 1.0);
+  --staticpage-HFpanels-text-color: #444;
   --staticpage-HFpanels-opacity: 0.9;
 
 /*----------------------------------|*/
