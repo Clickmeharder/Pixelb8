@@ -477,7 +477,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     flex-direction: column;
     justify-content: center;
     overflow-y: auto;
-    height: 1000px; /* Set a fixed height */ 
+    /*height: 1000px;*/ /* the original height */
+    height: 25vh;
     color: var(--staticpage-panels-text-color);
     background-color:var(--staticpage-inner-bg-color);
     border: 2px solid var(--staticpage-border-color);
