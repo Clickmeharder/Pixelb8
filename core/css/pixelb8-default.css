@@ -274,8 +274,8 @@ select::-webkit-scrollbar {}
 select::-webkit-scrollbar-thumb {}
 /*----------------------*/
 /*    Button Elements */
-button {background-color:#444;}
-button:hover {}
+button {background-color:#444;cursor: var(--cursor000-image);}
+button:hover {cursor: var(--cursor000-image);}
 button:active {}
 button:focus {}
 button:disabled {}
