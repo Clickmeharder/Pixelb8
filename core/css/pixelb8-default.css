@@ -975,7 +975,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 /*-----------
 /* fontfaces */
 /*----------------*/
-/*@font-face {
+/*
+@font-face {
     font-family: 'Pixelify';
     src: url('../../assets/fonts/static/Pixelify_Sans/PixelifySans-Regular.ttf') format('truetype'),
          url('../../assets/fonts/static/Pixelify_Sans/PixelifySans-Bold.ttf') format('truetype'),
