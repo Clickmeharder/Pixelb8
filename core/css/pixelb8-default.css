@@ -141,7 +141,9 @@ body {
     font-family: Arial, sans-serif;
     color: var(--mainbody-text-color);
     background-color: var(--mainbody-bg-color);
-    background-image: url('assets/images/bg/spaace.jpg');
+    background-image: url('../../assets/images/bg/spaace.jpg');
+   /*background-image: url('https://pixelb8/assets/images/bg/spaace.jpg');*/
+    
     opacity: var(--mainbody-opacity);
 }
 /*----------------*/
