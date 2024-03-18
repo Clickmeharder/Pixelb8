@@ -189,15 +189,7 @@
 	--fc-border-color: #1c6a7ad9;
 	--fc-today-bg-color: #0346f41c;
 */
-@font-face {
-    font-family: 'Pixelify Sans';
-    src: url('../../assets/fonts/Pixelify_Sans/PixelifySans-Regular.ttf') format('truetype'),
-         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Bold.ttf') format('truetype'),
-         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Medium.ttf') format('truetype');,
- 	 url('../../assets/fonts/Pixelify_Sans/PixelifySans-SemiBold.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
+
 /*----------------------*/
 /*      The Body        */
 /*----------------------*/
@@ -976,6 +968,19 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     background-size: cover;
     transform: scale(1.3);
     transition: background-image 0.6s ease;
+}
+
+/*-----------
+/* fontfaces */
+/*----------------*/
+@font-face {
+    font-family: 'Pixelify';
+    src: url('../../assets/fonts/static/Pixelify_Sans/PixelifySans-Regular.ttf') format('truetype'),
+         url('../../assets/fonts/static/Pixelify_Sans/PixelifySans-Bold.ttf') format('truetype'),
+         url('../../assets/fonts/static/Pixelify_Sans/PixelifySans-Medium.ttf') format('truetype');,
+ 	 url('../../assets/fonts/static/Pixelify_Sans/PixelifySans-SemiBold.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
 }
 /*-----------
 /* background classes 1 */
