@@ -87,13 +87,13 @@
   --staticpage-controlpanel-text-color: #555;
   --staticpage-controlpanel-opacity: 0.9;
  /*STATICPAGE contentpanelB styles*/
-  --staticpage-contentpanelB-border-width: 3px;
-  --staticpage-contentpanelB-border-style: outset;
-  --staticpage-contentpanelB-border-radius: 8px;
-  --staticpage-contentpanelB-border-color: #000;
-  --staticpage-contentpanelB-bg-color: #222;
-  --staticpage-contentpanelB-text-color: #555;
-  --staticpage-contentpanelB-opacity: 0.9;
+  --staticpage-contentpanel-border-width: 3px;
+  --staticpage-contentpanel-border-style: outset;
+  --staticpage-contentpanel-border-radius: 8px;
+  --staticpage-contentpanel-border-color: #000;
+  --staticpage-contentpanel-bg-color: #111;
+  --staticpage-contentpanel-text-color: #555;
+  --staticpage-contentpanel-opacity: 0.9;
 /*----------------------------------------|*/
 
 /*                 HUD                    |*/
@@ -481,16 +481,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   background-color: var(--staticpage-sidepanels-bg-color);
   opacity: var(--staticpage-sidepanels-opacity);
 }
-.content-panel {
-  color: var(--staticpage-sidepanels-text-color);
-  border-color: var(--staticpage-sidepanels-border-color);
-  border-width: var(--staticpage-sidepanels-border-width);
-  border-style: var(--staticpage-sidepanels-border-style);
-  border-radius: var(--staticpage-sidepanels-border-radius);
-  background-color: var(--staticpage-sidepanels-bg-color);
-  opacity: var(--staticpage-sidepanels-opacity);
-}
-.content-panel .controlpanel {
+.controlpanel {
   margin-right: 10px;
   color: var(--staticpage-controlpanel-text-color);
   border-color: var(--staticpage-controlpanel-border-color);
@@ -500,18 +491,15 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   background-color: var(--staticpage-controlpanel-bg-color);
   opacity: var(--staticpage-controlpanel-opacity);
 }
-
-
-
-.content-panel .content {
+.content-panel {
   margin-left: 10px;
-  color: var(--staticpage-sidepanels-text-color);
-  border-color: var(--staticpage-contentpanelB-border-color);
-  border-width: var(--staticpage-contentpanelB-border-width);
-  border-style: var(--staticpage-contentpanelB-border-style);
-  border-radius: var(--staticpage-contentpanelB-border-radius);
-  background-color: var(--staticpage-contentpanelB-bg-color);
-  opacity: var(--staticpage-contentpanelB-opacity);
+  color: var(--staticpage-contentpanel-text-color);
+  border-color: var(--staticpage-contentpanel-border-color);
+  border-width: var(--staticpage-contentpanel-border-width);
+  border-style: var(--staticpage-contentpanel-border-style);
+  border-radius: var(--staticpage-contentpanel-border-radius);
+  background-color: var(--staticpage-contentpanel-bg-color);
+  opacity: var(--staticpage-contentpanel-opacity);
 }
 .panel-title {
     color: var(--staticpage-HFpanels-text-color);
