@@ -973,13 +973,43 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 /*-----------
 /* fontfaces */
 /*----------------*/
-@font-face {
+/*@font-face {
     font-family: 'Pixelify';
     src: url('../../assets/fonts/static/Pixelify_Sans/PixelifySans-Regular.ttf') format('truetype'),
          url('../../assets/fonts/static/Pixelify_Sans/PixelifySans-Bold.ttf') format('truetype'),
          url('../../assets/fonts/static/Pixelify_Sans/PixelifySans-Medium.ttf') format('truetype');,
  	 url('../../assets/fonts/static/Pixelify_Sans/PixelifySans-SemiBold.ttf') format('truetype');
     font-weight: normal;
+    font-style: normal;
+}*/
+
+@font-face {
+    font-family: 'Pixelify Sans';
+    /* Regular */
+    src: url('../../assets/fonts/Pixelify_Sans/PixelifySans-Regular.ttf') format('truetype'),
+         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Regular.woff') format('woff'),
+         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pixelify Sans';
+    /* Bold */
+    src: url('../../assets/fonts/Pixelify_Sans/PixelifySans-Bold.ttf') format('truetype'),
+         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Bold.woff') format('woff'),
+         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Bold.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pixelify Sans';
+    /* Medium */
+    src: url('../../assets/fonts/Pixelify_Sans/PixelifySans-Medium.ttf') format('truetype'),
+         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Medium.woff') format('woff'),
+         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Medium.woff2') format('woff2');
+    font-weight: 500;
     font-style: normal;
 }
 /*-----------
