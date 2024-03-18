@@ -1,9 +1,9 @@
 		
 
 function updateCursor() {
+    
     console.log("Custom cursors are disabled.");
 }
-
 
 /*		document.addEventListener('DOMContentLoaded', function () {	
 		  const interactiveElements = document.querySelectorAll('.cursorbutton, .input, .select');
