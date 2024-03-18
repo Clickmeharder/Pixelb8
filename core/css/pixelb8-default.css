@@ -863,7 +863,9 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 
 }
 .customcursor:hover {
-  cursor:none;}
+  }
+/*.customcursor:hover {
+  cursor:none;}*/
 #cursorImage {
       position: fixed;
       bottom: 0;
