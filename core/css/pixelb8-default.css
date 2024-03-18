@@ -489,7 +489,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   background-color: var(--staticpage-sidepanels-bg-color);
   opacity: var(--staticpage-sidepanels-opacity);
 }
-.controlpanel {
+.control-panel {
   display: flex;
   max-width: 25vw;
   margin-right: 10px;
@@ -512,6 +512,18 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   border-radius: var(--staticpage-contentpanel-border-radius);
   background-color: var(--staticpage-contentpanel-bg-color);
   opacity: var(--staticpage-contentpanel-opacity);
+}
+.ad-panel {
+  display: inline-flex;
+  max-width: 28vw;
+  margin-left: 5px;margin-right:5px;
+  color: var(--staticpage-adpanel-text-color);
+  border-color: var(--staticpage-adpanel-border-color);
+  border-width: var(--staticpage-adpanel-border-width);
+  border-style: var(--staticpage-adpanel-border-style);
+  border-radius: var(--staticpage-adpanel-border-radius);
+  background-color: var(--staticpage-adpanel-bg-color);
+  opacity: var(--staticpage-adpanel-opacity);
 }
 .panel-title {
     color: var(--staticpage-HFpanels-text-color);
