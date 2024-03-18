@@ -312,7 +312,7 @@ function drawCharacter() {
 
     // Create an image element
     var characterImage = document.createElement("img");
-    characterImage.src = "https://cdn.discordapp.com/attachments/1024035256346611753/1204376441261789214/msagent-3.png?ex=65d481f7&is=65c20cf7&hm=cd144eade8c78dea47c91e91c97457251e9c3e5542efb809c14377a7c07479d9";
+    characterImage.src = "../assets/images/icons/msagent-3.png";
     characterImage.style.maxWidth = "100%"; // Ensure the image fits within the container
     characterImage.style.filter = "hue-rotate(180deg) saturate(200%)"; // Apply filter effect to twist colors
     characterImage.style.transform = "scaleX(-1)"; // Flip horizontally
