@@ -133,25 +133,25 @@
 /*custom curser variables variables*/
   /*cursor paths*/
 
-  --cursor000-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
-  --cursor00-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-00.gif');
-  --cursor01-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-01.gif');
-  --cursor02-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-02.gif');
-  --cursor03-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-03.gif');
-  --cursor04-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-04.gif');
-  --editcursor-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-05.gif');
-  --cursor06-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-06.gif');
-  --cursor07-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-07.gif');
-  --cursor08-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-08.gif');
-  --cursor09-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-09.gif');
-  --inputcursor-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-09.gif');
-  --cursor010-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-010.gif');
-  --cursor011-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-011.gif');
-  --cursor012-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-012.gif');
-  --cursor013-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-013.gif');
-  --cursor014-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-014.gif');
-  --cursor015-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-015.gif');
-  --cursor016-image: url('../../Assets/cursors/gif-box/eu-cursors/cursor-016.gif');
+  --cursor000-image: url('../../assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
+  --cursor00-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-00.gif');
+  --cursor01-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-01.gif');
+  --cursor02-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-02.gif');
+  --cursor03-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-03.gif');
+  --cursor04-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-04.gif');
+  --editcursor-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-05.gif');
+  --cursor06-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-06.gif');
+  --cursor07-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-07.gif');
+  --cursor08-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-08.gif');
+  --cursor09-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.gif');
+  --inputcursor-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.gif');
+  --cursor010-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-010.gif');
+  --cursor011-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-011.gif');
+  --cursor012-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-012.gif');
+  --cursor013-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-013.gif');
+  --cursor014-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-014.gif');
+  --cursor015-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-015.gif');
+  --cursor016-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-016.gif');
 
 /*add more vars*/
   --newradiobutton2: #222;/*unused vars   /*-|*/
