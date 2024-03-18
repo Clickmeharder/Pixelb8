@@ -482,6 +482,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   opacity: var(--staticpage-sidepanels-opacity);
 }
 .controlpanel {
+  display: flex;
+  max-width: 25vw;
   margin-right: 10px;
   color: var(--staticpage-controlpanel-text-color);
   border-color: var(--staticpage-controlpanel-border-color);
@@ -492,8 +494,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   opacity: var(--staticpage-controlpanel-opacity);
 }
 .content-panel {
-  display:flex-row;
-  max-width:70vw;
+  display: inline-flex;
+  max-width: 35vw;
   margin-left: 10px;margin-right:10px;
   color: var(--staticpage-contentpanel-text-color);
   border-color: var(--staticpage-contentpanel-border-color);
