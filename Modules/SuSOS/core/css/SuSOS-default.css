@@ -1121,7 +1121,7 @@ the base styles of  all huds)*/
     justify-content: space-between; /* Distribute space between items */
 	padding: 1px; /* Adjust as needed */
 	border-bottom: 1px solid #2a7370;
-	cursor: url('../../Assets/cursors/gif-box/eu-cursors/cursor-09.GIF')8 5, auto;
+	cursor: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.GIF')8 5, auto; 
 	font-size: 10px; /* Adjust as needed */
 }
 #eventsCalculatorDetailsWinrulediv .eventrules-option label {
@@ -1130,7 +1130,7 @@ the base styles of  all huds)*/
 	margin: 5px;
     margin-left: 3px;
     margin-right: auto;
-	cursor: url('../../Assets/cursors/gif-box/eu-cursors/cursor-09.GIF')8 5, auto;
+	cursor: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.GIF')8 5, auto; 
 }
 
 #hud-EuEventPlanner .eventrules-option input[type="checkbox"] {
@@ -1145,7 +1145,7 @@ the base styles of  all huds)*/
     background-color: #236d85 !important;
     border: 1px solid #a0a0a0;
     border-radius: 8px;
-    cursor: url('../../Assets/cursors/gif-box/eu-cursors/check-1.png'), auto;
+    cursor: url('../../assets/cursors/gif-box/eu-cursors/check-1.png'), auto;
 }
 
 #hud-EuEventPlanner .eventrules-option input[type="checkbox"]:checked {
@@ -1162,7 +1162,7 @@ the base styles of  all huds)*/
 	padding: 2px;
     text-align: center;
     border: 1px outset #128884;
-	cursor: url('../../Assets/cursors/gif-box/eu-cursors/cursor-09.GIF')8 5, auto;
+	cursor: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.GIF')8 5, auto;
 	white-space: pre-wrap;
 }
 label.Innerinforbox.ValueLabels {white-space:pre-wrap;}
@@ -1554,7 +1554,7 @@ div#displaypanel-budgets{
 		border-style: inset;
 		border-color: #1b252b;
 		text-align: right;
-		/* cursor: url(../../Assets/cursors/gif-box/eu-cursors/cursor-09.GIF)8 5, auto; */
+		/* cursor: url(../../assets/cursors/gif-box/eu-cursors/cursor-09.GIF)8 5, auto; */
 }
 	#hud-EuItemStashAdditions #smallform-labeltext {
 		background: linear-gradient(-4deg, #1e2123, #121216eb);
@@ -1715,7 +1715,7 @@ div#displaypanel-budgets{
 		border-style: inset;
 		border-color: #1b252b;
 		text-align: right;
-		/* cursor: url(../../Assets/cursors/gif-box/eu-cursors/cursor-09.GIF)8 5, auto; */
+		/* cursor: url(../../assets/cursors/gif-box/eu-cursors/cursor-09.GIF)8 5, auto; */
 	}
 
 	/* Item Stash Tool -restock stash display*/
@@ -2008,7 +2008,7 @@ div#Box-A-Headerbox.Headerbox{font-weight:bold;padding-left:24px;padding-top:2px
     border-style: inset;
     border-color: rgb(27, 37, 43);
     text-align: right;
-    cursor: url(../../Assets/cursors/gif-box/eu-cursors/cursor-09.GIF) 8 5, auto;
+    cursor: url(../../assets/cursors/gif-box/eu-cursors/cursor-09.GIF) 8 5, auto;
 }
 #hud-OrdinanceJuxtapositioner .internalcontent {
 	overflow-x:hidden;
