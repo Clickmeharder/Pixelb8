@@ -550,7 +550,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     border-radius: var(--staticpage-border-radius);
 }
 .featured-section {
-    margin-top: 15px;
+    margin-top: 0px;
     padding: 10px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     color: var(--staticpage-panels-text-color);
