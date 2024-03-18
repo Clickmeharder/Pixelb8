@@ -77,6 +77,23 @@
   --staticpage-maincontent-bg-color: #222;
   --staticpage-inner-bg-color: #222;
   --staticpage-maincontent-opacity: 0.9;
+/*----------------------------------|*/
+ /*STATICPAGE control panel styles*/
+  --staticpage-controlpanel-border-width: 3px;
+  --staticpage-controlpanel-border-style: outset;
+  --staticpage-controlpanel-border-radius: 8px;
+  --staticpage-controlpanel-border-color: #000;
+  --staticpage-controlpanel-bg-color: #222;
+  --staticpage-controlpanel-text-color: #555;
+  --staticpage-controlpanel-opacity: 0.9;
+ /*STATICPAGE contentpanelB styles*/
+  --staticpage-contentpanelB-border-width: 3px;
+  --staticpage-contentpanelB-border-style: outset;
+  --staticpage-contentpanelB-border-radius: 8px;
+  --staticpage-contentpanelB-border-color: #000;
+  --staticpage-contentpanelB-bg-color: #222;
+  --staticpage-contentpanelB-text-color: #555;
+  --staticpage-contentpanelB-opacity: 0.9;
 /*----------------------------------------|*/
 
 /*                 HUD                    |*/
@@ -463,6 +480,38 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   border-radius: var(--staticpage-sidepanels-border-radius);
   background-color: var(--staticpage-sidepanels-bg-color);
   opacity: var(--staticpage-sidepanels-opacity);
+}
+.content-panel {
+  color: var(--staticpage-sidepanels-text-color);
+  border-color: var(--staticpage-sidepanels-border-color);
+  border-width: var(--staticpage-sidepanels-border-width);
+  border-style: var(--staticpage-sidepanels-border-style);
+  border-radius: var(--staticpage-sidepanels-border-radius);
+  background-color: var(--staticpage-sidepanels-bg-color);
+  opacity: var(--staticpage-sidepanels-opacity);
+}
+.content-panel .controlpanel {
+  margin-right: 10px;
+  color: var(--staticpage-controlpanel-text-color);
+  border-color: var(--staticpage-controlpanel-border-color);
+  border-width: var(--staticpage-controlpanel-border-width);
+  border-style: var(--staticpage-controlpanel-border-style);
+  border-radius: var(--staticpage-controlpanel-border-radius);
+  background-color: var(--staticpage-controlpanel-bg-color);
+  opacity: var(--staticpage-controlpanel-opacity);
+}
+
+
+
+.content-panel .content {
+  margin-left: 10px;
+  color: var(--staticpage-sidepanels-text-color);
+  border-color: var(--staticpage-contentpanelB-border-color);
+  border-width: var(--staticpage-contentpanelB-border-width);
+  border-style: var(--staticpage-contentpanelB-border-style);
+  border-radius: var(--staticpage-contentpanelB-border-radius);
+  background-color: var(--staticpage-contentpanelB-bg-color);
+  opacity: var(--staticpage-contentpanelB-opacity);
 }
 .panel-title {
     color: var(--staticpage-HFpanels-text-color);
