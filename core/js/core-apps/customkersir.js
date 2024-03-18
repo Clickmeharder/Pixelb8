@@ -1,4 +1,11 @@
-		document.addEventListener('DOMContentLoaded', function () {
+		
+
+function updateCursor() {
+    console.log("Custom cursors are disabled.");
+}
+
+
+/*		document.addEventListener('DOMContentLoaded', function () {	
 		  const interactiveElements = document.querySelectorAll('.cursorbutton, .input, .select');
 		  const currentGifDiv = document.getElementById('currentgifdiv');
 		  const currentCursorDiv = document.getElementById('currentgifcursordiv');
@@ -34,4 +41,4 @@
 			currentCursorDiv.style.left = x + offsetX + 'px';
 			currentCursorDiv.style.top = y + offsetY + 'px';
 		  });
-		});
+		});*/
