@@ -1,4 +1,4 @@
-blank.jsconst radioButtons = document.querySelectorAll('input[name="ST-styleRadio"]');
+const radioButtons = document.querySelectorAll('input[name="ST-styleRadio"]');
 const currentColorSpan = document.querySelector('#ST-CurrentColor span');
 const colorPicker = document.getElementById('ST-colorPicker');
 const opacitySlider = document.getElementById('opacity-slider');
