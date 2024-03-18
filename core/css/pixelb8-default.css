@@ -94,6 +94,14 @@
   --staticpage-contentpanel-bg-color: #111;
   --staticpage-contentpanel-text-color: #555;
   --staticpage-contentpanel-opacity: 0.9;
+ /*STATICPAGE adpanel styles*/
+  --staticpage-adpanel-border-width: 3px;
+  --staticpage-adpanel-border-style: outset;
+  --staticpage-adpanel-border-radius: 8px;
+  --staticpage-adpanel-border-color: #000;
+  --staticpage-adpanel-bg-color: #222;
+  --staticpage-adpanel-text-color: #555;
+  --staticpage-adpanel-opacity: 0.9;
 /*----------------------------------------|*/
 
 /*                 HUD                    |*/
