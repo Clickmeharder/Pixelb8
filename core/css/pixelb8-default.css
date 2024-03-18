@@ -531,7 +531,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 }
 .themed-main {
     width: 100%;
-    max-width: 60vw
+    max-width: 60vw;
     margin: auto;
     margin-top: 0;
     padding: 8px;
@@ -541,6 +541,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     overflow-y: auto;
     /*height: 1000px;*/ /* the original height */
     height: 25vh;
+    min-height:125px;max-height:500px;
     color: var(--staticpage-panels-text-color);
     background-color:var(--staticpage-inner-bg-color);
     border: 2px solid var(--staticpage-border-color);
