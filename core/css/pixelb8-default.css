@@ -476,7 +476,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     padding: 8px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: ;
     overflow-y: auto;
     /*height: 1000px;*/ /* the original height */
     height: 25vh;
