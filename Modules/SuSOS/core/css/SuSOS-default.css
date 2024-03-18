@@ -2530,3 +2530,7 @@ textarea#itemData::-webkit-scrollbar {
   font-weight:bold;
   font-family:Arial, sans-serif;
 }
+.collapsed {
+    height: 0;
+    transition: height 0.6s ease;
+}
