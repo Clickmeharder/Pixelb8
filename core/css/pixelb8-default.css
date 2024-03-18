@@ -859,6 +859,23 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     Custom cursor
 ---------------------*/
 
+.customcursor {
+
+}
+.customcursor:hover {
+  cursor:none;}
+#cursorImage {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 32px;
+      height: 32px;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+    }
+
+
 #currentgifdiv {
     position: fixed;
     bottom: 0px;
