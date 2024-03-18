@@ -575,27 +575,27 @@ const waypoint_label_positions = {
 const creatures = {
     "cosmic_horror": {
         label: "Cosmic Horror",
-        img: "img/creatures/Cosmic_Horror.png",
+        img: "Modules/SuSOS/apps/stolencalymap/assets/img/creatures/Cosmic_Horror.png",
     },
     "dymlek": {
         label: "Dymlek",
-        img: "img/creatures/Dymlek.png",
+        img: "Modules/SuSOS/apps/stolencalymap/assets/img/creatures/Dymlek.png",
     },
     "hermit": {
         label: "Hermit",
-        img: "img/creatures/Hermit.png",
+        img: "Modules/SuSOS/apps/stolencalymap/assets/img/creatures/Hermit.png",
     },
     "locusta": {
         label: "Locusta",
-        img: "img/creatures/Locusta.png",
+        img: "Modules/SuSOS/apps/stolencalymap/assets/img/creatures/Locusta.png",
     },
     "Skyflail": {
         label: "Skyflail",
-        img: "img/creatures/Skyflail.png",
+        img: "Modules/SuSOS/apps/stolencalymap/assets/img/creatures/Skyflail.png",
     },
     "dropship": {
         label: "Dropship",
-        img: "img/creatures/Dropship.png",
+        img: "Modules/SuSOS/apps/stolencalymap/assets/img/creatures/Dropship.png",
     }
 };
 const planets = {
@@ -660,12 +660,20 @@ L.control.zoom({
 
 var w = 2554,
     h = 2042,
+//original theft location urls
     url = 'https://space.calypsomap.com/img/map.jpg',
     // url = 'img/map_labelled.png',
     boarder_url = 'https://space.calypsomap.com/img/overlay_boarder.png',
     pvp_url = 'https://space.calypsomap.com/img/overlay_pvp.png',
+  //my urls
+ // url = 'Modules/SuSOS/apps/stolencalymap/assets/img/map.jpg',
+ // url = 'Modules/SuSOS/apps/stolencalymap/assets/img/map_labelled.png',
+ // boarder_url = 'Modules/SuSOS/apps/stolencalymap/assets/img/overlay_boarder.png',
+ // pvp_url = 'Modules/SuSOS/apps/stolencalymap/assets/img/overlay_pvp.png',
+    //
+    //
+    //
     buffer = 500;
-
 // calculate the edges of the image, in coordinate space
 var bounds = L.latLngBounds([[-2042,0], [0,2554]]);
 // Allow a larger viewing area for the panning limits
