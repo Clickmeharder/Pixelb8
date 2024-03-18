@@ -1120,9 +1120,11 @@ the base styles of  all huds)*/
     align-items: center; /* Vertically center items */
     justify-content: space-between; /* Distribute space between items */
 	padding: 1px; /* Adjust as needed */
-	border-bottom: 1px solid #2a7370;
+	border-bottom: 1px solid #2a7370; 
+	cursor: var(--cursor09-image);
 	/*cursor: url('../assets/cursors/gif-box/eu-cursors/cursor-09.gif')8 5, auto;*/
-	cursor: url('../../../assets/cursors/gif-box/eu-cursors/cursor-09.gif'), auto;
+	/*cursor: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.gif'), auto;*/
+	/*cursor: url('../../../assets/cursors/gif-box/eu-cursors/cursor-09.gif'), auto;*/
 	/*cursor: url('Modules/SuSOS/core/assets/cursors/gif-box/eu-cursors/cursor-09.gif')8 5, auto;*/
 	font-size: 10px; /* Adjust as needed */
 }
@@ -1132,9 +1134,7 @@ the base styles of  all huds)*/
 	margin: 5px;
     margin-left: 3px;
     margin-right: auto;
-	/*cursor: url('../assets/cursors/gif-box/eu-cursors/cursor-09.gif')8 5, auto;*/
-	cursor: url('../../../assets/cursors/gif-box/eu-cursors/cursor-09.gif'), auto;
-	/*cursor: url('Modules/SuSOS/core/assets/cursors/gif-box/eu-cursors/cursor-09.gif')8 5, auto;*/
+	cursor: var(--cursor09-image);
 }
 
 #hud-EuEventPlanner .eventrules-option input[type="checkbox"] {
@@ -1166,9 +1166,7 @@ the base styles of  all huds)*/
 	padding: 2px;
     text-align: center;
     border: 1px outset #128884;
-	/*cursor: url('../assets/cursors/gif-box/eu-cursors/cursor-09.gif')8 5, auto;*/
-	cursor: url('../../../assets/cursors/gif-box/eu-cursors/cursor-09.gif'), auto;
-	/*cursor: url('Modules/SuSOS/core/assets/cursors/gif-box/eu-cursors/cursor-09.gif')8 5, auto;*/
+	cursor: var(--cursor09-image);
 	white-space: pre-wrap;
 }
 label.Innerinforbox.ValueLabels {white-space:pre-wrap;}
@@ -1560,7 +1558,7 @@ div#displaypanel-budgets{
 		border-style: inset;
 		border-color: #1b252b;
 		text-align: right;
-		/* cursor: url(../../assets/cursors/gif-box/eu-cursors/cursor-09.GIF)8 5, auto; */
+		cursor: var(--cursor09-image);
 }
 	#hud-EuItemStashAdditions #smallform-labeltext {
 		background: linear-gradient(-4deg, #1e2123, #121216eb);
@@ -1721,6 +1719,7 @@ div#displaypanel-budgets{
 		border-style: inset;
 		border-color: #1b252b;
 		text-align: right;
+		cursor: var(--cursor09-image);
 		/* cursor: url(../../assets/cursors/gif-box/eu-cursors/cursor-09.GIF)8 5, auto; */
 	}
 
@@ -2014,7 +2013,8 @@ div#Box-A-Headerbox.Headerbox{font-weight:bold;padding-left:24px;padding-top:2px
     border-style: inset;
     border-color: rgb(27, 37, 43);
     text-align: right;
-    cursor: url(../../assets/cursors/gif-box/eu-cursors/cursor-09.gif) 8 5, auto;
+    cursor: var(--cursor09-image);
+    
 }
 #hud-OrdinanceJuxtapositioner .internalcontent {
 	overflow-x:hidden;
