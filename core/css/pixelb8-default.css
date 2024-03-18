@@ -470,6 +470,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 }
 .themed-main {
     width: 100%;
+    max-width: 60vw
     margin: auto;
     margin-top: 0;
     padding: 8px;
