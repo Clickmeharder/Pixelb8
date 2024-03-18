@@ -986,9 +986,9 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 @font-face {
     font-family: 'Pixelify Sans';
     /* Regular */
-    src: url('../../assets/fonts/Pixelify_Sans/PixelifySans-Regular.ttf') format('truetype'),
-         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Regular.woff') format('woff'),
-         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Regular.woff2') format('woff2');
+    src: url('../../assets/fonts/Pixelify_Sans/static/PixelifySans-Regular.ttf') format('truetype'),
+         url('../../assets/fonts/Pixelify_Sans/static/PixelifySans-Regular.woff') format('woff'),
+         url('../../assets/fonts/Pixelify_Sans/static/PixelifySans-Regular.woff2') format('woff2');
     font-weight: normal;
     font-style: normal;
 }
@@ -996,9 +996,9 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 @font-face {
     font-family: 'Pixelify Sans';
     /* Bold */
-    src: url('../../assets/fonts/Pixelify_Sans/PixelifySans-Bold.ttf') format('truetype'),
-         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Bold.woff') format('woff'),
-         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Bold.woff2') format('woff2');
+    src: url('../../assets/fonts/Pixelify_Sans/static/PixelifySans-Bold.ttf') format('truetype'),
+         url('../../assets/fonts/Pixelify_Sans/static/PixelifySans-Bold.woff') format('woff'),
+         url('../../assets/fonts/Pixelify_Sans/static/PixelifySans-Bold.woff2') format('woff2');
     font-weight: bold;
     font-style: normal;
 }
@@ -1006,8 +1006,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 @font-face {
     font-family: 'Pixelify Sans';
     /* Medium */
-    src: url('../../assets/fonts/Pixelify_Sans/PixelifySans-Medium.ttf') format('truetype'),
-         url('../../assets/fonts/Pixelify_Sans/PixelifySans-Medium.woff') format('woff'),
+    src: url('../../assets/fonts/Pixelify_Sans/static/PixelifySans-Medium.ttf') format('truetype'),
+         url('../../assets/fonts/Pixelify_Sans/static/PixelifySans-Medium.woff') format('woff'),
          url('../../assets/fonts/Pixelify_Sans/PixelifySans-Medium.woff2') format('woff2');
     font-weight: 500;
     font-style: normal;
