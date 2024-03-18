@@ -312,7 +312,7 @@ function drawCharacter() {
 
     // Create an image element
     var characterImage = document.createElement("img");
-    characterImage.src = "../assets/images/icons/msagent-3.png";
+    characterImage.src = "../../assets/images/icons/msagent-3.png";
     characterImage.style.maxWidth = "100%"; // Ensure the image fits within the container
     characterImage.style.filter = "hue-rotate(180deg) saturate(200%)"; // Apply filter effect to twist colors
     characterImage.style.transform = "scaleX(-1)"; // Flip horizontally
