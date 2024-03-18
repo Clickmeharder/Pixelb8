@@ -141,7 +141,7 @@ body {
     font-family: Arial, sans-serif;
     color: var(--mainbody-text-color);
     background-color: var(--mainbody-bg-color);
-    background-image: url('../../Assets/images/Backgrounds/spaace.jpg');
+    background-image: url('assets/images/bg/spaace.jpg');
     opacity: var(--mainbody-opacity);
 }
 /*----------------*/
@@ -491,22 +491,11 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   border-style: var(--staticpage-HFpanels-border-style);
   border-radius: var(--staticpage-HFpanels-border-radius);
 }/* Footer Styles */
-/* end of staticpage styles
- for "mainpage"  */
-/*-----------------*/
-/*    HUD OVERLAY  */
 
 
-
-
-
-
-
-
-/*---------
-END OF STATICPAGE MAIN STYLES
-*/
-
+/*---------------------------*/
+/* END OF STATICPAGE MAIN STYLES
+        for "mainpage"      */
 /*__________________________*/
 
 #characterFace {
