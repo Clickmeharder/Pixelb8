@@ -492,7 +492,9 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   opacity: var(--staticpage-controlpanel-opacity);
 }
 .content-panel {
-  margin-left: 10px;
+  display:flex-row;
+  max-width:70vw;
+  margin-left: 10px;margin-right:10px;
   color: var(--staticpage-contentpanel-text-color);
   border-color: var(--staticpage-contentpanel-border-color);
   border-width: var(--staticpage-contentpanel-border-width);
