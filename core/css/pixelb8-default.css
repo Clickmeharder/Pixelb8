@@ -95,12 +95,12 @@
   --staticpage-contentpanel-bg-color: #111;
   --staticpage-contentpanel-text-color: #555;
   --staticpage-contentpanel-opacity: 0.9;
- /*STATICPAGE adpanel styles*/
+ /*STATICPAGE adpanel styles*/ 
   --staticpage-adpanel-border-width: 3px;
   --staticpage-adpanel-border-style: outset;
   --staticpage-adpanel-border-radius: 8px;
-  --staticpage-adpanel-border-color: #000;
-  --staticpage-adpanel-bg-color: #222;
+  --staticpage-adpanel-border-color: #1a1a1a;
+  --staticpage-adpanel-bg-color: #1a0a03;
   --staticpage-adpanel-text-color: #555;
   --staticpage-adpanel-opacity: 0.9;
 /*----------------------------------------|*/
@@ -527,6 +527,17 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   border-radius: var(--staticpage-adpanel-border-radius);
   background-color: var(--staticpage-adpanel-bg-color);
   opacity: var(--staticpage-adpanel-opacity);
+}
+.static-slideshowpromoter{
+    margin: 5px;
+    width: 510px;
+    height: 382.5px;
+    background-image: url(images/Mainslide/eu-sus-image.jpg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    border: 1px inset #1a1a1a;
+    border-radius: 10px;
+    opacity: 0.9;
 }
 .static-videopanel{
     display: flex;
