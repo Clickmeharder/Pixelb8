@@ -520,7 +520,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     display: inline-flex;
     max-width: 25vw;
     min-width: 0vw;
-    height: auto;min-height:200px;
+    height: auto;min-height:180px;
     margin: auto;
     margin-left: 1px;
     margin-bottom: 0px;
