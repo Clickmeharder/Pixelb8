@@ -583,7 +583,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     background-color:var(--staticpage-inner-bg-color);
     border: 2px solid var(--staticpage-border-color);
     border-radius: var(--staticpage-border-radius);
-    resize: horizontal;
+    resize: none;
+	
 }
 .featured-section {
     margin-top: 0px;
