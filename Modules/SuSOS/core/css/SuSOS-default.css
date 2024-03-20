@@ -1718,8 +1718,7 @@ div#displaypanel-budgets{
 	}
 
 	/* Item Stash Tool -restock stash display*/
-#hud-EuRestockItemStashMenu, #hud-EuSellitemsMenu{
-    display: none;
+#hud-EuRestockItemStashMenu{
     left: 574px;
     top: 182px;
     padding: 4px;padding-left:1px;padding-right:1px;
@@ -1733,7 +1732,20 @@ div#displaypanel-budgets{
     opacity: 1;
 
 }
+ #hud-EuSellitemsMenu{
+    left: 574px;
+    top: 182px;
+    padding: 4px;padding-left:1px;padding-right:1px;
+    min-width: 247px;
+	width:255px;
+	height:308px;
+	max-height: 308px;
+    background:;
+    border:;
+    border-radius:;
+    opacity: 1;
 
+}
 #EurestockItemStashMenuwindow{overflow:hidden;overflow-y:auto;height: calc(99% - 8px);}
 #EusellitemsMenuwindow{overflow:hidden;overflow-y:auto;height: calc(99% - 8px);}
 #hud-EuRestockItemStashMenu .innerlabel-text, #hud-EuSellitemsMenu .innerlabel-text {
