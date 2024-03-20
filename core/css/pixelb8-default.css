@@ -568,8 +568,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 .themed-main {
-    width: 100%;
-    max-width: 60vw;
+    width: 543px;
+    max-width: 45vw;
     margin: auto;
     padding: 6px;
     display: flex;
