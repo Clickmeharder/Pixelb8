@@ -1577,7 +1577,6 @@ div#displaypanel-budgets{
 
 	/* Item Stash Tool -edit stash display*/
 #hud-EuEditStashMenu{
-    display: none;
     left: 574px;
     top: 182px;
     padding: 4px;padding-left:1px;padding-right:1px;
