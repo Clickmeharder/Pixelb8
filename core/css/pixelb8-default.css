@@ -585,6 +585,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     color: var(--staticpage-panels-text-color);
     background-color:var(--staticpage-inner-bg-color);
     border: 2px solid var(--staticpage-border-color);
+    border-style: ridge;
     border-radius: var(--staticpage-border-radius);
     resize: none;
 	
