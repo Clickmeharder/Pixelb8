@@ -233,7 +233,8 @@ body {
 /*    Main Elements */
 div {}
 br {}
-hr {}
+hr {padding-inline-start: 10px;
+    margin-block-start: 0em;}
 ul {}
 ol {}
 li {}
