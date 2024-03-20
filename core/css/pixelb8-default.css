@@ -519,7 +519,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 .ad-panel {
     display: inline-flex;
     max-width: 28vw;
-    height: auto;
+    height: auto;min-height:200px;
     margin: auto;
     margin-left: 1px;
     margin-bottom: 0px;
