@@ -518,7 +518,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 }
 .ad-panel {
     display: inline-flex;
-    max-width: 28vw;
+    max-width: 25vw;
+    min-width: 0vw;
     height: auto;min-height:200px;
     margin: auto;
     margin-left: 1px;
@@ -530,13 +531,13 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     border-radius: var(--staticpage-adpanel-border-radius);
     background-color: var(--staticpage-adpanel-bg-color);
     opacity: var(--staticpage-adpanel-opacity);
-    padding: 8px;
+    padding: 8px;overflow:hidden;
 
 }
 .static-slideshowpromoter{
     margin: 5px;
     width: 95%;
-    height: auto;
+    height: ;
     background-image: url(images/Mainslide/eu-sus-image.jpg);
     background-size: contain;
     background-repeat: no-repeat;
