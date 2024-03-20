@@ -233,9 +233,9 @@ body {
 /*    Main Elements */
 div {}
 br {}
-hr {padding-inline-start: 10px;
+hr {}
+ul {padding-inline-start: 10px;
     margin-block-start: 0em;}
-ul {}
 ol {}
 li {}
 nav {}
