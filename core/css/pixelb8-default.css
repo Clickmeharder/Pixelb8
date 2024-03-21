@@ -1210,3 +1210,13 @@ Button Classes
 .nofilter{
   filter:unset;
 }
+#lockedinput img {
+		width: auto;
+		height: 125%;
+		object-fit: cover;
+		cursor:var(--cursorkey-image)!important;
+		transition: filter 1.9s;
+}
+#lockedinput img:hover {
+		cursor:var(--cursorkey-image)!important;
+}
