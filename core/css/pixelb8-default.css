@@ -1114,6 +1114,40 @@ Button Classes
   display: inline-block; /* Display the arrow inline with the label */
   vertical-align: middle; /* Align the arrow vertically with the label text */
 }
+.refreshstashtable {
+  width: 20px; /* Adjust width as needed */
+  height: 20px; /* Adjust height as needed */
+  position: relative; /* Position arrow within a container */
+  overflow: hidden; /* Hide overflow for the circle effect */
+}
+
+.refreshstashtable::before {
+  content: ''; /* Create the arrow shape */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg); /* Rotate arrow to form a half-circle */
+  width: 10px; /* Adjust arrow width */
+  height: 10px; /* Adjust arrow height */
+  border-top: 2px solid #00CCFF; /* Set color to #00CCFF */
+  border-right: 2px solid #00CCFF; /* Set color to #00CCFF */
+  border-radius: 0 0 50% 50%; /* Create half-circle effect */
+  z-index: 1; /* Ensure arrow is above the circle */
+}
+
+.refreshstashtable::after {
+  content: ''; /* Create the circle */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px; /* Adjust circle diameter */
+  height: 20px; /* Adjust circle diameter */
+  border: 2px solid #00CCFF; /* Set border color to #00CCFF */
+  border-radius: 50%; /* Make the circle round */
+  z-index: 0; /* Ensure circle is below the arrow */
+}
+
 /*______________________|*/
 /*-----------
 /* important classes 1 */
