@@ -1122,18 +1122,22 @@ Button Classes
 }
 
 .refreshstashtable::before {
-    content: '';
+    content: 'R';
+    font-family: ui-monospace;
+    font-weight: normal;
+    font-size: 15px;
+    color: #0ff2ff;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(45deg);
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 14px;
     border-top: 3px solid #00CCFF;
     border-right: 3px solid #00CCFF;
-    border-bottom: 5px ridge #00ccff;
-    border-left: -2px inset #00ccff;
-    border-radius: 50% 71% 50% 66%;
+    border-bottom: 3px ridge #00ccff;
+    border-left: 8px outset #00ccff;
+    border-radius: 50% 50% 50% 45%;
     z-index: 1;
 }
 
@@ -1149,8 +1153,13 @@ Button Classes
   border-radius: 50%; /* Make the circle round */
   z-index: 0; /* Ensure circle is below the arrow */
 }
-.cachebutton .refreshstashtable:hover::before {
-  transform: translate(-50%, -50%) rotate(405deg); /* Rotate the arrow on hover */
+.refreshstashtable:hover::before {
+    transform: translate(-50%, -50%) rotate(585deg);
+	color: #3ba812;
+	font-size: 18px;
+	font-weight: bold;
+    transition: transform 0.9s, font-size 0.9s, font-weight 0.9s, color 0.9s;
+	
 }
 /*______________________|*/
 /*-----------
