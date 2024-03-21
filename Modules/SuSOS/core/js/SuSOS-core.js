@@ -333,7 +333,7 @@ lockedElements.forEach(button => {
 
         // Change the image source based on the disabled state
         const img = this.querySelector("img");
-        img.src = targetElement.disabled ? "../../Assets/images/mouse_padlock.png" : "../../Assets/images/tools_gear-0.png";
+        img.src = targetElement.disabled ? "../../../../Assets/images/icons/mouse_padlock.png" : "../../../../Assets/images/icons/tools_gear-0.png";
     });
 });
 
