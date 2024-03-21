@@ -178,8 +178,8 @@
   --cursor014-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-014.gif'), auto;
   --cursor015-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-015.gif'), auto;
   --cursor016-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-016.gif'), auto;
-  --cursorkey-image: url('../../assets/cursors/gif-box/eu-cursors/cursor_key.png'), auto;
-  --cursorcheck-image:url('../../assets/cursors/gif-box/eu-cursors/check-1.png'), auto;
+  --cursorkey-image: url('../../assets/cursors/gif-box/eu-cursors/cursor_key.png')16 6, auto;
+  --cursorcheck-image:url('../../assets/cursors/gif-box/eu-cursors/check-1.png')8 5, auto;
 /*add more vars*/
   --newradiobutton2: #222;/*unused vars   /*-|*/
   --newradiobutton3: #333;
