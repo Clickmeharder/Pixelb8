@@ -1511,7 +1511,7 @@ div#displaypanel-budgets{
 */
 	/* Item Stash Tool -add stash item display*/
 #hud-EuItemStashAdditions{
-		left:35px;top:525px;height:unset;max-height:255px;width:225px;min-width:175px;max-width:350px;
+		left:35px;top:265px;height:unset;max-height:255px;width:250px;min-width:175px;max-width:350px;
 	}
 	#EuweaponCacheAdditionswindow{
 		min-width:unset;
