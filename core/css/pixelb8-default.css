@@ -1122,17 +1122,19 @@ Button Classes
 }
 
 .refreshstashtable::before {
-  content: ''; /* Create the arrow shape */
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(45deg); /* Rotate arrow to form a half-circle */
-  width: 10px; /* Adjust arrow width */
-  height: 10px; /* Adjust arrow height */
-  border-top: 2px solid #00CCFF; /* Set color to #00CCFF */
-  border-right: 2px solid #00CCFF; /* Set color to #00CCFF */
-  border-radius: 0 0 50% 50%; /* Create half-circle effect */
-  z-index: 1; /* Ensure arrow is above the circle */
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    border-top: 3px solid #00CCFF;
+    border-right: 3px solid #00CCFF;
+    border-bottom: 5px ridge #00ccff;
+    border-left: -2px inset #00ccff;
+    border-radius: 50% 71% 50% 66%;
+    z-index: 1;
 }
 
 .refreshstashtable::after {
@@ -1147,7 +1149,9 @@ Button Classes
   border-radius: 50%; /* Make the circle round */
   z-index: 0; /* Ensure circle is below the arrow */
 }
-
+.refreshstashtable:hover::before {
+  transform: translate(-50%, -50%) rotate(405deg); /* Rotate the arrow on hover */
+}
 /*______________________|*/
 /*-----------
 /* important classes 1 */
