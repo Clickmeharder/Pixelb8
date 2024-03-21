@@ -509,7 +509,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 .content-panel {
   display: inline-flex;
   max-width: 35vw;
-  margin-left: 10px;margin-right:10px;
+  margin-left: 5px;margin-right:10px;
   color: var(--staticpage-contentpanel-text-color);
   border-color: var(--staticpage-contentpanel-border-color);
   border-width: var(--staticpage-contentpanel-border-width);
