@@ -573,7 +573,6 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     opacity: 0.6;
   }
   25% {
-	max-width: 14.5vw;
     border-top-color: ;
     border-top-left-radius: 87%;
     border-bottom-left-radius: 152%;
@@ -582,7 +581,6 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     opacity: 0.8;
   }
   50% {
-	max-width: 15vw;
     border-bottom-color:;
     border-top-left-radius: 120%;
     border-bottom-left-radius: 173%;
@@ -591,7 +589,6 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     opacity: 0.8;
   }
   75% {
-	max-width: 14.5vw;
     border-left-color: ;
 	border-top-color: ;
     border-top-left-radius: 120%;
@@ -603,7 +600,6 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   }
   100% {
 	transform: matrix(1, 0, 0, 1, 0, 0);
-	max-width: 14.5vw;
     border-color: ;
     border-top-left-radius: 120%;
     border-bottom-left-radius: 173%;
