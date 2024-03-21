@@ -2545,3 +2545,6 @@ textarea#itemData::-webkit-scrollbar {
     height: 0;
     transition: height 0.6s ease;
 }
+.cachebutton .refreshstashtable:hover::before {
+  transform: translate(-50%, -50%) rotate(405deg); /* Rotate the arrow on hover */
+}

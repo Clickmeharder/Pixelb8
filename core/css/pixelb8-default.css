@@ -1149,7 +1149,7 @@ Button Classes
   border-radius: 50%; /* Make the circle round */
   z-index: 0; /* Ensure circle is below the arrow */
 }
-.refreshstashtable:hover::before {
+.cachebutton .refreshstashtable:hover::before {
   transform: translate(-50%, -50%) rotate(405deg); /* Rotate the arrow on hover */
 }
 /*______________________|*/
