@@ -1154,11 +1154,11 @@ Button Classes
   z-index: 0; /* Ensure circle is below the arrow */
 }
 .refreshstashtable:hover::before {
-    transform: translate(-50%, -50%) rotate(585deg);
+    transform: translate(-50%, -50%) rotate(720deg);
 	color: #3ba812;
 	font-size: 18px;
 	font-weight: bold;
-    transition: transform 0.9s, font-size 0.9s, font-weight 0.9s, color 0.9s;
+    transition: transform 1.9s, font-size 1.9s, font-weight 1.9s, color 1.9s;
 	
 }
 /*______________________|*/
