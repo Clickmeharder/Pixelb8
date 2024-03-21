@@ -1,5 +1,9 @@
 
-// Function to export multiple tables to CSV
+// Function to toggle the Item Price List Menu
+function refreshStashTable(clickedbutton) {
+   // Reload the data to reflect the changes in the UI
+	loadCacheDataFromLocalStorage();
+}
 // Function to export multiple tables to CSV
 function exportTablesToCSV(tableIds, filename) {
     const csv = [];
@@ -526,6 +530,8 @@ document.getElementById("EditorUpdatestashValues").addEventListener("click", fun
         updateStashValues(selectedItem, updatedValues);
     }
 });
+
+
 
 document.getElementById("removestashedItem-button").addEventListener("click", function () {
     // Get the selected item
@@ -1121,6 +1127,8 @@ function updateStashValues(selectedItem, updatedValues) {
         console.error(`No matching item found for "${selectedItem}" in the data array.`);
     }
 }
+
+
 //load event
 document.addEventListener("DOMContentLoaded", function () {
     console.log("DOMContentLoaded Event");
