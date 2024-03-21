@@ -533,7 +533,9 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     color: var(--staticpage-contentpanel-text-color);
     border-color: var(--staticpage-contentpanel-border-color);
     border-width: 8px;
-    border-style: groove;
+    border-style: outset;
+	border-right-style:inset;
+	border-bottom-style:inset;
     border-top-left-radius: 155%;
     border-bottom-left-radius: 173%;
     border-top-right-radius: 100%;
