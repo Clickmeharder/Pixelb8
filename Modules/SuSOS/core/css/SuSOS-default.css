@@ -1671,10 +1671,8 @@ div#displaypanel-budgets{
 		width: auto;
 		height: 125%;
 		object-fit: cover;
-		cursor: var(--cursorkey-image);
+		cursor:var(--cursorkey-image);
 		transition: filter 1.9s;
-	}
-	#lockedinput img:hover {
 		
 	}
 	#hud-EuEditStashMenu .cachebutton, #hud-EuRestockItemStashMenu .cachebutton, #hud-EuSellitemsMenu .cachebutton {
