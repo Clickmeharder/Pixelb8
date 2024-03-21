@@ -1143,7 +1143,7 @@ the base styles of  all huds)*/
     background-color: #236d85 !important;
     border: 1px solid #a0a0a0;
     border-radius: 8px;
-    cursor: url('../../../assets/cursors/gif-box/eu-cursors/check-1.png'), auto;
+    cursor: var(--cursorcheck-image);
 }
 
 #hud-EuEventPlanner .eventrules-option input[type="checkbox"]:checked {

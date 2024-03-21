@@ -160,25 +160,26 @@
   /*cursor paths*/
 
   --cursor000-image: url('../../assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
-  --cursor00-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-00.gif');
-  --cursor01-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-01.gif');
-  --cursor02-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-02.gif');
-  --cursor03-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-03.gif');
-  --cursor04-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-04.gif');
-  --editcursor-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-05.gif');
-  --cursor06-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-06.gif');/*8 5, auto*/
-  --cursor07-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-07.gif');
-  --cursor08-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-08.gif');
-  --cursor09-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.gif');
-  --inputcursor-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.gif');
-  --cursor010-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-010.gif');
-  --cursor011-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-011.gif');
-  --cursor012-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-012.gif');
-  --cursor013-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-013.gif');
-  --cursor014-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-014.gif');
-  --cursor015-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-015.gif');
-  --cursor016-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-016.gif');
-  --cursorkey-image: url('../../assets/cursors/gif-box/eu-cursors/cursor_key.png');
+  --cursor00-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-00.gif'), auto;
+  --cursor01-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-01.gif'), auto;
+  --cursor02-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-02.gif'), auto;
+  --cursor03-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-03.gif'), auto;
+  --cursor04-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-04.gif'), auto;
+  --editcursor-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-05.gif'), auto;
+  --cursor06-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-06.gif')8 5, auto;/*8 5, auto*/
+  --cursor07-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-07.gif'), auto;
+  --cursor08-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-08.gif'), auto;
+  --cursor09-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.gif'), auto;
+  --inputcursor-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.gif'), auto;
+  --cursor010-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-010.gif'), auto;
+  --cursor011-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-011.gif'), auto;
+  --cursor012-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-012.gif'), auto;
+  --cursor013-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-013.gif'), auto;
+  --cursor014-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-014.gif'), auto;
+  --cursor015-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-015.gif'), auto;
+  --cursor016-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-016.gif'), auto;
+  --cursorkey-image: url('../../assets/cursors/gif-box/eu-cursors/cursor_key.png'), auto;
+  --cursorcheck-image:url('../../assets/cursors/gif-box/eu-cursors/check-1.png'), auto;
 /*add more vars*/
   --newradiobutton2: #222;/*unused vars   /*-|*/
   --newradiobutton3: #333;
@@ -301,8 +302,8 @@ select::-webkit-scrollbar {}
 select::-webkit-scrollbar-thumb {}
 /*----------------------*/
 /*    Button Elements */
-button {background-color:#444;cursor: var(--cursor000-image);}
-button:hover {cursor: var(--cursor000-image);}
+button {background-color:#444;}
+button:hover {}
 button:active {}
 button:focus {}
 button:disabled {}
@@ -1210,12 +1211,11 @@ Button Classes
 .nofilter{
   filter:unset;
 }
+#lockedinput  {
+	cursor:var(--cursorkey-image)!important;
+}
 #lockedinput img {
-		width: auto;
-		height: 125%;
-		object-fit: cover;
 		cursor:var(--cursorkey-image)!important;
-		transition: filter 1.9s;
 }
 #lockedinput img:hover {
 		cursor:var(--cursorkey-image)!important;
