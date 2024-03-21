@@ -496,8 +496,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 }
 .control-panel {
   display: flex;
-  max-width: 25vw;
-  margin-right: 10px;
+  max-width: 20vw;
+  margin-right: 0px;
   color: var(--staticpage-controlpanel-text-color);
   border-color: var(--staticpage-controlpanel-border-color);
   border-width: var(--staticpage-controlpanel-border-width);
@@ -517,6 +517,23 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   border-radius: var(--staticpage-contentpanel-border-radius);
   background-color: var(--staticpage-contentpanel-bg-color);
   opacity: var(--staticpage-contentpanel-opacity);
+}
+.portal-panel {
+    display: inline-flex;
+    max-width: 25vw;
+    margin-left: 0px;
+    z-index: 0;
+    margin-right: 10px;
+    color: var(--staticpage-contentpanel-text-color);
+    border-color: var(--staticpage-contentpanel-border-color);
+    border-width: 8px;
+    border-style: groove;
+    border-top-left-radius: 155%;
+    border-bottom-left-radius: 173%;
+    border-top-right-radius: 100%;
+    border-bottom-right-radius: 100%;
+    background-color: var(--staticpage-contentpanel-bg-color);
+    opacity: var(--staticpage-contentpanel-opacity);
 }
 .ad-panel {
     display: inline-flex;
