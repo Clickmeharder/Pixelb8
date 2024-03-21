@@ -302,7 +302,7 @@ select::-webkit-scrollbar {}
 select::-webkit-scrollbar-thumb {}
 /*----------------------*/
 /*    Button Elements */
-button {background-color:#444;}
+button {background-color:#444;cursor:var(--cursor000-image);}
 button:hover {}
 button:active {}
 button:focus {}
