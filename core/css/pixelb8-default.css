@@ -520,57 +520,99 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 }
 .portal-panel {
     display: inline-flex;
-    max-width: 25vw;
+    max-width: 10vw;
     margin-left: 0px;
     z-index: 0;
     margin-right: 10px;
     color: var(--staticpage-contentpanel-text-color);
-    border-color: var(--staticpage-contentpanel-border-color);
+    border-color: #2a7d19ed;
     background-color: var(--staticpage-contentpanel-bg-color);
     opacity: var(--staticpage-contentpanel-opacity);
 }
 .portal-panel {
+	outline: 0px double #197d4fed;
     color: var(--staticpage-contentpanel-text-color);
-    border-color: var(--staticpage-contentpanel-border-color);
-    border-width: 8px;
+    border-color: #2a7d19ed;
+    border-width: 3px;
     border-style: groove;
-	border-right-style:inset;
-	border-bottom-style:inset;
-    border-top-left-radius: 155%;
+    border-right-style: ridge;
+    border-bottom-style: ridge;
+    border-top-left-radius: 120%;
     border-bottom-left-radius: 173%;
-    border-top-right-radius: 100%;
-    border-bottom-right-radius: 100%;
-    background-color: var(--staticpage-contentpanel-bg-color);
+    border-top-right-radius: 85%;
+    border-bottom-right-radius: 52%;
     opacity: var(--staticpage-contentpanel-opacity);
+	transition: 0.6s linear;
+	box-shadow: 0 0vmin 19vmin #166a3f inset, 0 2vmin 5vmin MediumPurple inset, 0 -4vmin 7vmin purple inset;
   /* Apply animation to border-color and border-radius */
-	animation: morphPortal 5s infinite alternate;
+	filter: hue-rotate (-75deg);
+	transform: matrix(1, 0, 0, 1, 0, 0);
+    transition: transform 2.6s linear; /* Add transition for smooth rotation */
+	animation: morphPortal 8s infinite alternate;
+}
+.portal-panel {
+	position: relative;
+		position: relative;
+	background:;
 }
 
+
+
+.portal-panel:after {
+	filter: blur(50px);
+}
 @keyframes morphPortal {
   0% {
-	border-style: outset;
-    border-color: var(--staticpage-contentpanel-border-color);
-    border-top-left-radius: 155%;
+	  transform: rotate(0deg);
+	max-width: 15vw;
+    border-color: ;
+    border-top-left-radius: 120%;
     border-bottom-left-radius: 173%;
-    border-top-right-radius: 100%;
-    border-bottom-right-radius: 100%;
+    border-top-right-radius: 85%;
+    border-bottom-right-radius: 52%;
+    opacity: 0.6;
+  }
+  25% {
+	max-width: 14.5vw;
+    border-top-color: ;
+    border-top-left-radius: 87%;
+    border-bottom-left-radius: 152%;
+    border-top-right-radius: 120%;
+    border-bottom-right-radius: 173%;
+    opacity: 0.8;
   }
   50% {
-	border-style: solid;
-    border-color: #ff3344; /* Change border color halfway through animation */
-    border-top-left-radius: 173%;
-    border-bottom-left-radius: 155%;
-    border-top-right-radius: 100%;
-    border-bottom-right-radius: 100%;
+	max-width: 15vw;
+    border-bottom-color:;
+    border-top-left-radius: 120%;
+    border-bottom-left-radius: 173%;
+    border-top-right-radius: 85%;
+    border-bottom-right-radius: 52%;
+    opacity: 0.8;
+  }
+  75% {
+	max-width: 14.5vw;
+    border-left-color: ;
+	border-top-color: ;
+    border-top-left-radius: 120%;
+    border-bottom-left-radius: 173%;
+    border-top-right-radius: 85%;
+    border-bottom-right-radius: 52%;
+	filter:hue-rotate 250deg;
+    opacity: 0.8;
   }
   100% {
-    border-color: var(--staticpage-contentpanel-border-color);
-    border-top-left-radius: 100%;
-    border-bottom-left-radius: 100%;
-    border-top-right-radius: 173%;
-    border-bottom-right-radius: 155%;
+	transform: matrix(1, 0, 0, 1, 0, 0);
+	max-width: 14.5vw;
+    border-color: ;
+    border-top-left-radius: 120%;
+    border-bottom-left-radius: 173%;
+    border-top-right-radius: 85%;
+    border-bottom-right-radius: 52%;
+	box-shadow: 0 0vmin 1vmin #166a65 inset, 0 -1vmin 4vmin #391781 inset, 0 -2vmin 0vmin purple inset;
+    opacity: 0.9;
   }
-}
+} 
 .ad-panel {
     display: inline-flex;
     max-width: 28vw;
