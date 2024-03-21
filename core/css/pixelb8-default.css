@@ -522,11 +522,11 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     display: inline-flex;
     max-width: 10vw;
     margin-left: 0px;
-    z-index: 0;
+    z-index: 2;
     margin-right: 10px;
     color: var(--staticpage-contentpanel-text-color);
     border-color: #2a7d19ed;
-    background-color: var(--staticpage-contentpanel-bg-color);
+    background-color: transparent;
     opacity: var(--staticpage-contentpanel-opacity);
 }
 .portal-panel {
@@ -552,12 +552,28 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 }
 .portal-panel {
 	position: relative;
-		position: relative;
 	background:;
 }
+.portal-panel h2{
+	position: absolute;
+	background:;
+}
+.portal-panel {
+    position: relative; /* Set the position to relative to contain absolute positioning */
+    overflow: clip; /* Hide overflow to ensure image stays within panel borders */
+    z-index: 2; /* Set z-index higher than the image */
+}
 
-
-
+#webportal-image {
+	position:absolute;
+    width: 100%;
+    height: 100%;
+    background-image: url(Modules/webportal/assets/images/entropiapartners-webport-img.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 1;
+    z-index: 3; /* Set z-index lower than the .portal-panel */
+}
 .portal-panel:after {
 	filter: blur(50px);
 }
