@@ -539,7 +539,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     margin: 5px;
     width: 95%;
     height: ;
-    background-image: url(images/Mainslide/eu-sus-image.jpg);
+    background-image: /* url(images/Mainslide/eu-sus-image.jpg) */;
     background-size: contain;
     background-repeat: no-repeat;
     border: 1px inset #1a1a1a;
