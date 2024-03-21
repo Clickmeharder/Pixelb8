@@ -526,6 +526,12 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     margin-right: 10px;
     color: var(--staticpage-contentpanel-text-color);
     border-color: var(--staticpage-contentpanel-border-color);
+    background-color: var(--staticpage-contentpanel-bg-color);
+    opacity: var(--staticpage-contentpanel-opacity);
+}
+.portal-panel {
+    color: var(--staticpage-contentpanel-text-color);
+    border-color: var(--staticpage-contentpanel-border-color);
     border-width: 8px;
     border-style: groove;
     border-top-left-radius: 155%;
@@ -534,6 +540,32 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     border-bottom-right-radius: 100%;
     background-color: var(--staticpage-contentpanel-bg-color);
     opacity: var(--staticpage-contentpanel-opacity);
+  /* Apply animation to border-color and border-radius */
+	animation: morphPortal 5s infinite alternate;
+}
+
+@keyframes morphPortal {
+  0% {
+    border-color: var(--staticpage-contentpanel-border-color);
+    border-top-left-radius: 155%;
+    border-bottom-left-radius: 173%;
+    border-top-right-radius: 100%;
+    border-bottom-right-radius: 100%;
+  }
+  50% {
+    border-color: #ff3344; /* Change border color halfway through animation */
+    border-top-left-radius: 173%;
+    border-bottom-left-radius: 155%;
+    border-top-right-radius: 100%;
+    border-bottom-right-radius: 100%;
+  }
+  100% {
+    border-color: var(--staticpage-contentpanel-border-color);
+    border-top-left-radius: 100%;
+    border-bottom-left-radius: 100%;
+    border-top-right-radius: 173%;
+    border-bottom-right-radius: 155%;
+  }
 }
 .ad-panel {
     display: inline-flex;
