@@ -1675,7 +1675,7 @@ div#displaypanel-budgets{
 		transition: filter 1.9s;
 	}
 	#lockedinput img:hover {
-		;
+		
 	}
 	#hud-EuEditStashMenu .cachebutton, #hud-EuRestockItemStashMenu .cachebutton, #hud-EuSellitemsMenu .cachebutton {
 		width: 30px;
