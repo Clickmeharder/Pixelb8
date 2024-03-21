@@ -533,7 +533,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     color: var(--staticpage-contentpanel-text-color);
     border-color: var(--staticpage-contentpanel-border-color);
     border-width: 8px;
-    border-style: outset;
+    border-style: groove;
 	border-right-style:inset;
 	border-bottom-style:inset;
     border-top-left-radius: 155%;
@@ -548,6 +548,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 
 @keyframes morphPortal {
   0% {
+	border-style: outset;
     border-color: var(--staticpage-contentpanel-border-color);
     border-top-left-radius: 155%;
     border-bottom-left-radius: 173%;
@@ -555,6 +556,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     border-bottom-right-radius: 100%;
   }
   50% {
+	border-style: solid;
     border-color: #ff3344; /* Change border color halfway through animation */
     border-top-left-radius: 173%;
     border-bottom-left-radius: 155%;
