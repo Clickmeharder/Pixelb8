@@ -44,7 +44,7 @@
   --staticpage-panels-border-style: outset;
   --staticpage-panels-border-radius: 8px;
   --staticpage-panels-border-color: #222;
-  --staticpage-panels-bg-color: #222;
+  --staticpage-panels-bg-color: #171726;
   --staticpage-panels-headertext-color: #888;
   --staticpage-panels-text-color: #555;
   --staticpage-panels-opacity: 1.0;
@@ -556,7 +556,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     background-color: transparent;
     opacity: var(--staticpage-contentpanel-opacity);
 }
-select.webtp{width:98%;background-color:var(--staticpage-HFpanels-bg-color)/*#1111118c*/;color:#932604;}
+select.webtp{font-weight:bold;width:98%;background-color:var(--staticpage-HFpanels-bg-color)/*#1111118c*/;color:#932604;}
 .portal-panel {
 	outline: 0px double #197d4fed;
     color: var(--staticpage-contentpanel-text-color);
