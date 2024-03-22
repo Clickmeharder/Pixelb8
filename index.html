@@ -2102,13 +2102,47 @@ staticPage BLOCK
 <!-- Content Panels -->
 	<!-- Content Panel A -->
   <div class="row">
-    <div class="panel control-panel">
-        <h2 class="panel-title">Control panel</h2>
-        <div id="static-content-panel-controls">
+    <div class="panel control-panel column">
+		<div class="row">
+			<h2 class="panel-title" id="WebPortalControls-Title">WebPortal Controls</h2>
+			<Button class="roundbutt-webtp" id="Openwebportal" style="margin:auto;">Open</button>
+        </div>
+		<div id="static-content-panel-controls">
+        <!-- Filter for Official Websites -->
+			<select class="webtp" id="options-webportal-Pixelb8-links">
+				<option value="initial" selected disabled>Pixelb8 WebPortals</option>
+				<option value="official">Secret universal services</option>
+				<option value="planet-partners">ClickPlace Website</option>
+				<option value="planet-partners">ClickPlace Shop</option>
+			</select>
+			<div class="row">
+				<p class="panel-title" id="WebPortalControls-EuTitle">Entropia</p>
+				<Button class="roundbutt-webtp" id="Openwebportal" style="">Open</button>
+			</div>
+			<!-- Entropia Websites -->
+			<select class="webtp" id="optionfilter-webportal-EUrelated-links">
+				<option value="initial" selected disabled>Select Filter</option>
+				<option value="official">Official M.A.</option>
+				<option value="planet-partners">Planetary</option>
+				<option value="planet-partners">Forums</option>
+				<option value="tips-tricks-guides">Information & data</option>
+				<option value="planet-partners">Miscelaneous 3rd Party</option>
+				<option value="colonist-services">Colonist Services & Content</option>
+				<option value="entropia-creators">Entropia Creators</option>
+				<option value="all">All</option>
+			</select>
+			<select class="webtp" id="options-webportal-EUrelated-links">
+				<option value="initial" selected disabled>External Destination</option>
+				<option value="official">Mindark.com</option>
+				<option value="planet-partners">Entropiauniverse.com</option>
+				<option value="planet-partners">PlanetCalypso.com</option>
+				<option value="all">All</option>
+			</select>
+			<Button class="flex" id="closewebportal" style="margin-top:4px;width: 98%;">Close WebPortal</button>
         </div>
     </div>
 	<div class="panel portal-panel">
-		<h2 class="panel-title">WebPortal</h2>
+		<h2 class="panel-title" style="max-width:70%">Entropia Partners</h2>
 		<div id="webportal-image" style="background-image: url('Modules/webportal/assets/images/entropiapartners-webport-img.png');"></div> <!-- Move the image inside the .portal-panel -->
 	</div>
     <div class="panel content-panel" style="display:hidden;">

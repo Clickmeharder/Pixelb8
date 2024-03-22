@@ -496,7 +496,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 }
 .control-panel {
   display: flex;
-  max-width: 20vw;
+  min-width:8vw;
+  max-width: 10vw;
   margin-right: 0px;
   color: var(--staticpage-controlpanel-text-color);
   border-color: var(--staticpage-controlpanel-border-color);
@@ -505,6 +506,32 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   border-radius: var(--staticpage-controlpanel-border-radius);
   background-color: var(--staticpage-controlpanel-bg-color);
   opacity: var(--staticpage-controlpanel-opacity);
+}
+#WebPortalControls-Title{
+	font-size: 18px;
+	line-height:0.8;
+	color:var(--staticpage-HFpanels-bg-color);
+	text-shadow: 1px 1px 2px rgba(147, 38, 4, 0.82);
+
+}
+.roundbutt-webtp {
+    width: 32px;
+    HEIGHT: 32px;
+    padding: 0px;
+    margin: auto;
+    background-color: var(--HUD-windows-bg-color);
+    border-color: #2a7d19ed;
+    border-radius: 15px;
+    color: inherit;
+
+}
+#WebPortalControls-EuTitle{
+    margin-top: 12px;
+    font-size: 21px;
+    font-weight: bold;
+    font-family: Yatra 'Yatra One';
+    color: #16599b;
+    text-shadow: 1px 1px 2px rgb(218 218 218 / 82%);
 }
 .content-panel {
   display: inline-flex;
@@ -529,6 +556,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     background-color: transparent;
     opacity: var(--staticpage-contentpanel-opacity);
 }
+select.webtp{width:98%;background-color:var(--staticpage-HFpanels-bg-color)/*#1111118c*/;color:#932604;}
 .portal-panel {
 	outline: 0px double #197d4fed;
     color: var(--staticpage-contentpanel-text-color);
@@ -556,7 +584,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 }
 .portal-panel h2{
 	position: absolute;
-	background:;
+	background:;color:#93260463;
 }
 .portal-panel {
     position: relative; /* Set the position to relative to contain absolute positioning */
