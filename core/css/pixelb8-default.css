@@ -87,9 +87,9 @@ option:disabled {
   --staticpage-controlpanel-border-style: outset;
   --staticpage-controlpanel-border-radius: 8px;
   --staticpage-controlpanel-border-color: #444;
-  --staticpage-controlpanel-bg-color: #222;
+  --staticpage-controlpanel-bg-color: rgb(26 24 24 / 100%);
   --staticpage-controlpanel-text-color: #555;
-  --staticpage-controlpanel-opacity: 0.9;
+  --staticpage-controlpanel-opacity: 0.95;
  /*STATICPAGE contentpanelB styles*/
   --staticpage-contentpanel-border-width: 3px;
   --staticpage-contentpanel-border-style: outset;
@@ -735,6 +735,7 @@ select.webtp option:hover {
     border: 3px ridge #124753e0;
     outline: 4px outset #08001369;
     border-radius: 10px;
+	background: radial-gradient(black, #25145380);
     overflow: hidden;
     resize: horizontal;
 	
@@ -743,7 +744,7 @@ select.webtp option:hover {
 	font-size: 18px;
 	line-height:0.8;
 	color:var(--staticpage-HFpanels-bg-color);
-	text-shadow: 1px 1px 2px rgba(147, 38, 4, 0.82);
+	text-shadow: 3px 1px 2px rgb(152 0 212 / 93%);
 
 }
 .roundbutt-webtp {
