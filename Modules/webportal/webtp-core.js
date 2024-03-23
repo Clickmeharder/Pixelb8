@@ -90,7 +90,37 @@ document.getElementById('eulinkfilter').addEventListener('change', function() {
             break;
     }
 });*/
+function Togglewebportal(clickedbutton) {
+    var portalcontainer = document.getElementById("webtp");
+    var portal = document.getElementById("thewebportal");
+    var portalimg = document.getElementById("webportal-image");
 
+    // Toggle the display style of the portal container
+    if (portalcontainer.style.width === "50px") {
+        portalcontainer.style.width = "350px";
+		portalcontainer.style.height = "95%";
+		portalcontainer.style.opacity = "1.0";
+    } else {
+        portalcontainer.style.width = "50px";
+		portalcontainer.style.height = "5%";
+		portalcontainer.style.opacity = "0.3";
+    }
+
+    // Toggle the visibility style of the portal
+    if (portal.style.visibility === "hidden") {
+        portal.style.visibility = "visible";
+		
+    } else {
+        portal.style.visibility = "";
+    }
+
+    // Toggle the opacity style of the portal image
+    if (portalimg.style.visibility === "hidden") {
+        portalimg.style.visibility = "visible";
+    } else {
+        portalimg.style.visibility = "hidden";
+    }
+}
 // Function to update the options in the select based on checked checkboxes
 function updateWebtpOptions() {
     var optionsSelect = document.getElementById('webtpoptions');
@@ -130,6 +160,12 @@ function updateWebtpOptions() {
                     break;
                 case 'Entropian Creators':
                     optionsSelect.add(new Option('PlanetCalypso.com', 'option2'));
+                    break;
+                case 'My Favourites':
+                    optionsSelect.add(new Option('Pixelb8.lol', 'option2'));
+                    break;
+                case 'My Portals':
+                    optionsSelect.add(new Option('mywebsite.lol', 'option2'));
                     break;
                 case 'All Options':
                     optionsSelect.add(new Option('PlanetCalypso.com', 'option2'));

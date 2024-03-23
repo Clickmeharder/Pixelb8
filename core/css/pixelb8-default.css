@@ -699,8 +699,9 @@ select.webtp option:hover {
     border-top-right-radius: unset;
     border-bottom-right-radius: unset;
     background-color: #19042dd9;
-	box-shadow: 0 0vmin 19vmin #166a3f inset, 0 2vmin 5vmin Purple inset, 0 -4vmin 7vmin purple inset;
+	box-shadow: 0 0.5vmin 2vmin #166a3f inset, 0 -1vmin 3vmin Purple inset, 0 1vmin 2vmin purple inset;
     z-index: ;
+	transition:width 0.9s, linear 2.8s;
 }
 
 .control-panel {
@@ -738,6 +739,7 @@ select.webtp option:hover {
 	background: radial-gradient(black, #25145380);
     overflow: hidden;
     resize: horizontal;
+	
 	
 }
 #WebPortalControls-Title{

@@ -2105,7 +2105,7 @@ staticPage BLOCK
 		<div class="panel control-panel column">
 			<div class="row" id="webtpHeader">
 				<h2 class="panel-title" id="WebPortalControls-Title">WebPortal Controls</h2>
-				<Button class="roundbutt-webtp" id="Openwebportal" style="margin:auto;">Open</button>
+				<Button class="roundbutt-webtp" id="Openwebportal" style="margin:auto;" onclick="Togglewebportal(this)">Open</button>
 			</div>
 			<div id="static-content-panel-controls">
 
@@ -2145,8 +2145,16 @@ staticPage BLOCK
 							<input type="checkbox" id="filter8" value="Entropian Creators">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter9" >All</label>
-							<input type="checkbox" id="filter9" value="All Options">
+							<label for="filter9" title="" alt="">My Favourites</label>
+							<input type="checkbox" id="filter9" value="My Favourites">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter10" title="" alt="">My Portals</label>
+							<input type="checkbox" id="filter10" value="My Portals">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter11" >All</label>
+							<input type="checkbox" id="filter11" value="All Options">
 						</div>
 					</div>
 					<div class="webtpfilters-selected row" onclick="togglewebtpfilterOptions(this)">
@@ -2168,7 +2176,7 @@ staticPage BLOCK
 			</div>
 		</div>	
 		<div class="panel" id="webtp">
-			<div class="panel portal-panel">
+			<div class="panel portal-panel" id="thewebportal">
 				<h2 class="panel-title" style="">Entropia Partners</h2>
 				<div id="webportal-image" style="background-image: url('Modules/webportal/assets/images/entropiapartners-webport-img.png');"></div> <!-- Move the image inside the .portal-panel -->
 			</div>
