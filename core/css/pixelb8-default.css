@@ -726,7 +726,7 @@ select.webtp option:hover {
 }
 #webtp-pullout{
     width: 350px;
-    min-width: 177px;
+    min-width: 159px;
     max-width: 376px;
     margin-top: 8px;
 	margin-left:12px;margin-right:auto;
