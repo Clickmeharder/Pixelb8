@@ -836,6 +836,7 @@ select.webtp option:hover {
     transform: skew(-7deg, -6deg);
     transform: scale3d(1, 2.2, 1.5);
     transform-style: preserve-3d;
+	cursor:var(--cursor08-image);
 }
 .portal-panel:after {
 	filter: blur(50px);
