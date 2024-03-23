@@ -2100,65 +2100,112 @@ staticPage BLOCK
 <!-- Content Panels -->
 	<!-- Content Panel A -->
   <div class="row">
-    <div class="panel control-panel column">
-		<div class="row">
-			<h2 class="panel-title" id="WebPortalControls-Title">WebPortal Controls</h2>
-			<Button class="roundbutt-webtp" id="Openwebportal" style="margin:auto;">Open</button>
-        </div>
-		<div id="static-content-panel-controls">
-        <!-- -->
-			<div class="row">
-				<p class="panel-title" id="WebPortalControls-EuTitle">Entropia</p>
-			</div>
-			<!-- Entropia Websites -->
-			<select class="webtp" id="optionfilter-webportal-EUrelated-links">
-				<option value="initial" selected disabled>Select Filter</option>
-				<option value="official">Official M.A.</option>
-				<option value="planet-partners">Planetary</option>
-				<option value="planet-partners">Forums</option>
-				<option value="tips-tricks-guides">Information & data</option>
-				<option value="planet-partners">Miscelaneous 3rd Party</option>
-				<option value="colonist-services">Colonist Services & Content</option>
-				<option value="entropia-creators">Entropia Creators</option>
-				<option value="all">All</option>
-			</select>
-			<select class="webtp" id="options-webportal-EUrelated-links">
-				<option value="initial" selected disabled>External Destination</option>
-				<option value="official">Mindark.com</option>
-				<option value="planet-partners">Entropiauniverse.com</option>
-				<option value="planet-partners">PlanetCalypso.com</option>
-				<option value="all">All</option>
-			</select>
-			<Button class="flex" id="closewebportal" style="margin-top:4px;width: 98%;">Close WebPortal</button>
-        </div>
-    </div>
-	<div class="panel portal-panel">
-		<h2 class="panel-title" style="max-width:70%">Entropia Partners</h2>
-		<div id="webportal-image" style="background-image: url('Modules/webportal/assets/images/entropiapartners-webport-img.png');"></div> <!-- Move the image inside the .portal-panel -->
-	</div>
-    <div class="panel content-panel" style="display:hidden;">
-        <h2 class="panel-title">Content Panel</h2>
-        <div id="staticpage-content-contentpanelB">
-        </div>
-    </div>
 
-    <div class="panel ad-panel">
-        <h2 class="panel-title"></h2>
-        <div id="staticpage-adpanel-contentwrapper">
-		<div class="static-videopanel">
-		<iframe
-		    width="225"
-		    height="148"
-		    src="https://www.youtube.com/embed/aOrOQRUXFEk"
-		    title="YouTube video player"
-		    frameborder="0"
-		    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-		    allowfullscreen
-		    style="max-height: 180px; width: 100%;"
-		></iframe>
-	    </div>
-        </div>
-    </div>
+	<div class="row" id="webtp-pullout">
+		<div class="panel control-panel column">
+			<div class="row" id="webtpHeader">
+				<h2 class="panel-title" id="WebPortalControls-Title">WebPortal Controls</h2>
+				<Button class="roundbutt-webtp" id="Openwebportal" style="margin:auto;">Open</button>
+			</div>
+			<div id="static-content-panel-controls">
+				<div class="row">
+					<p class="panel-title" id="WebPortalControls-EuTitle">Entropia</p>
+				</div>
+				<!-- Entropia Websites -->
+				<div class="">
+					<div class="webtpfilteroptions-container" style="display: ;">
+						<div class="webtpfilters-option">
+							<label for="filter1" title="Official Mindark Websites" alt="Official Mindark Websites" >Official M.A</label>
+							<input type="checkbox" id="filter1" value="Official Filter">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter2" title="Planetary Websites (disabled)" alt="Planetary Websites(disabled)">Planetary</label>
+							<input type="checkbox" id="filter2" value="Planetary Filter" disabled="">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter3" title="" alt="" >Forums</label>
+							<input type="checkbox" id="filter3" value="Forum Filter" disabled="">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter4" title="" alt="">Info & Data</label>
+							<input type="checkbox" id="filter4" value="Information andData">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter5" title="" alt="">Societies</label>
+							<input type="checkbox" id="filter5" value="No Melee Weapons">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter6" title="" alt="">Miscelaneous 3rd Party</label>
+							<input type="checkbox" id="filter6" value="Misc 3rdparty">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter7" title="" alt="">Colonist Services & Content</label>
+							<input type="checkbox" id="filter7" value="Colonist Services">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter8" title="" alt="">Entropian Creators</label>
+							<input type="checkbox" id="filter8" value="Entropian Creators">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter9" >All</label>
+							<input type="checkbox" id="filter9" value="All Options">
+						</div>
+					</div>
+					<div class="webtpfilters-selected row" onclick="togglewebtpfilterOptions()">Filters<div class="single-round-button"><button class="testbutton" id="Toggleexpandbudgets-Button" title="toggle to show/hide all budgets" onclick="toggleexpandbudgets(this)">
+									<img src="../assets/images/icons/expandtoggle.png" alt="Recent Expense window Toggle">
+								</button>
+							</div></div>
+				</div>
+				
+				<select class="webtp" id="eulinkfilter">
+					<option value="option0" selected disabled>Select Filter</option>
+					<option value="option1">Official M.A.</option>
+					<option value="option2">Planetary</option>
+					<option value="option3">Forums</option>
+					<option value="option4">Information & data</option>
+					<option value="option5">Societies</option>
+					<option value="option6">Miscelaneous 3rd Party</option>
+					<option value="option7">Colonist Services & Content</option>
+					<option value="option8">Entropia Creators</option>
+					<option value="option99">All</option>
+				</select>
+				<select class="webtp" id="webtpoptions">
+					<option value="option1" selected disabled>External Destination</option>
+					<option value="option2">Mindark.com</option>
+					<option value="option3">Entropiauniverse.com</option>
+					<option value="option4">PlanetCalypso.com</option>
+				</select>
+				<Button class="flex" id="closewebportal" style="margin-top:4px;width: 98%;">Close WebPortal</button>
+			</div>
+		</div>	
+		<div class="panel" id="webtp">
+			<div class="panel portal-panel">
+				<h2 class="panel-title" style="">Entropia Partners</h2>
+				<div id="webportal-image" style="background-image: url('Modules/webportal/assets/images/entropiapartners-webport-img.png');"></div> <!-- Move the image inside the .portal-panel -->
+			</div>
+		</div>
+	</div>
+	<div class="panel content-panel" style="display:hidden;">
+		<h2 class="panel-title">Content Panel</h2>
+		<div id="staticpage-content-contentpanelB">[_]</div>
+	</div>
+	<div class="panel ad-panel">
+		<h2 class="panel-title"></h2>
+		<div id="staticpage-adpanel-contentwrapper">
+			<div class="static-videopanel">
+				<iframe
+					width="225"
+					height="148"
+					src="https://www.youtube.com/embed/aOrOQRUXFEk"
+					title="YouTube video player"
+					frameborder="0"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					allowfullscreen
+					style="max-height: 180px; width: 100%;"
+				></iframe>
+			</div>
+		</div>
+	</div>
   </div>
   <!-- Footer -->
   <footer class="themed-footer">
@@ -2226,7 +2273,7 @@ staticPage BLOCK
 	-->
 	<script src="Modules/SuSOS/core/js/SuSOS-core.js"></script>
 	<script src="Modules/SuSOS/core/js/core-apps/hudclock.js"></script>
-	
+	<script src="Modules/webportal/webtp-core.js"></script>
 	<script src="Modules/StyleTuner/core/js/STuner-core.js"></script>
 	
 	<script src="Modules/SuSOS/apps/stolencalymap/core/js/stolencalymap-core.js"></script>
