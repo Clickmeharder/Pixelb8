@@ -5,11 +5,14 @@
 /*----------------------*/
 /* ROOT VARIABLES */
 /*styletuner,Hud Overlay, thatthing,andthisother1 |*/
-
+option:disabled {
+    color: -internal-light-dark(graytext, rgb(170, 170, 170));
+}
 /* Root Variables */
 :root {                                     /*-|*/
 /*selected element and style current color*//*-|*/
-
+	--fc-highlight-color: purple;
+    --fc-event-text-color: red;
     --mainbody-bg-color: black;
     --mainbody-text-color: black;
     --mainbody-opacity: 1.0;
@@ -500,17 +503,21 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 */
 /*--------------*/
 /*Select Element*/
+#webtp-pullout {
+    cursor: url(../../Assets/cursors/gif-box/eu-cursors/cursor-06.GIF)8 5, auto;
+}
 #webtp-pullout .webtpfilters-selected {
-    padding: 2px;
-    text-align: center;
-    border: 1px outset #128884;
-    cursor: var(--cursor09-image);
-    white-space: pre-wrap;
+	margin-left:0px;
+	width:132px;
+    padding: 3px;
+	background: radial-gradient(black, #3c135eab);
+    border: 3px outset #1c447ae0;
+    cursor: url(../../Assets/cursors/gif-box/eu-cursors/cursor-06.GIF)8 5, auto;
 }
 .webtpfilteroptions-container {
     display: block;
     position: absolute;
-	margin-top: -90px;
+	margin-top: -48px;
     left: 173px;
     width: 0px;
     padding: 0px;
@@ -521,6 +528,11 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     overflow-y: auto;
 	overflow-x:hidden;
 	transition: width 1.9s;
+}
+#webtp-pullout .single-round-button{
+	margin-left:auto;
+	width: 16px;
+    height: 16px;
 }
 #webtp-pullout .testbutton {
     padding: 0px;
@@ -565,6 +577,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     font-weight: 600;
     font-size: 15px;
     background: linear-gradient(153deg, #1e2123, #121216eb);
+	cursor: var(--cursorcheck-image);
 }
 #webtp-pullout .webtpfilters-option input[type="checkbox"] {
     -webkit-appearance: none;
@@ -583,28 +596,94 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 #webtp-pullout .webtpfilters-option input[type="checkbox"]:checked {
     background-color: #0dff009c !important /* Change color for checked state */;
 }
-#webtp-pullout select {cursor: var(--cursor000-image);}
+#webtp-pullout select {
+	margin:auto;margin-left:6px;margin-top:3px;
+	cursor: inherit;
+	outline: 2px ridge #444;
+	background: repeating-linear-gradient(45deg, black, #0b0739 100px);
+	box-shadow:20px 11px 69px 3px #210c3d inset;
+	padding:2px;}
+#webtp-pullout button {
+	cursor:inherit;
+}
+#webtp-pullout select:active {
+	outline: 2px ridge #444;
+}
+#webtp-pullout #closewebportal {
+	margin:12px;margin-top:10px;margin-bottom:2px;
+	width:98%;
+	cursor: inherit;
+	color:#444;
+	font-weight:bold;
+	border-color:#444;
+	outline: 2px ridge #444;
+	background: repeating-linear-gradient(45deg, black, #0b0739 100px);
+	padding:1px;}
+#webtp-pullout #closewebportal:hover {
+	color:green;
+}
 #webtp-pullout select option:hover{background-color:pink;}
 #webtp-pullout select option:checked {background-color:purple;}
-#webtp-pullout select:focus option {background-color:inherit;}
+#webtp-pullout select:focus option {background: #07172efa;}
 #webtp-pullout select option:checked,
 #webtp-pullout select option:hover {
+	background-color:#271d40de;
     box-shadow: 0 0 10px 100px #000 inset;
 }
+#webtp-pullout select:active{
+	border-color:red;
+	outline-color:blue;
+}
+#webtp-pullout select:target{
+	border-color:red;
+	outline-color:blue;
+}
 
+#webtp-pullout select:selected{
+	border-color:red;
+	outline-color:blue;
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+}
+#webtp-pullout select:focus{
+	border-color:green;
+	outline-color:grey;
+	box-shadow: 20px 11px 69px 3px #210c3d inset/*0px 0px 5px 3px #000 inset*/;
+    background: #082c3ef5;
+}
 #webtp select:focus > option:checked { 
     background: #000 !important;
 }
-#webtp select:focus option:hover {}
+#webtp option:hover {color:red;}
+#webtp select:focus-visible {
+    outline-offset: 0px;
+	outline-color:red;
+}
+#webtp option:focus-visible {
+    outline-offset: 0px;
+	outline-color:red;
+	background-color:black;
+}
 /* Optgroups within the dropdown list */
 #webtp select optgroup {}
 /* Dropdown arrows*/
-#webtp select::-ms-expand {}/* Internet Explorer */
-#webtp select::-webkit-select-arrow {}/* WebKit browsers */
+#webtp select::-ms-expand {background:transparent;}/* Internet Explorer */
+#webtp select::-webkit-select-arrow {background:transparent;}/* WebKit browsers */
 /* Select Scrollbar */
 /* Only WebKit browsers */
 #webtpselect::-webkit-scrollbar {}
 #webtp select::-webkit-scrollbar-thumb {}
+select.webtp{font-weight:bold;width:132px;background-color:var(--staticpage-HFpanels-bg-color)/*#1111118c*/;color:#932604;border-color:#932604;}
+select.webtp option {
+    font-weight: bold;
+}
+
+/* Customize background color and text color when hovering */
+select.webtp option:hover {
+	background-color: black;
+    color: var(--hover-text-color);
+/*     background-color: var(--hover-background-color);
+    color: var(--hover-text-color); */
+}
 #webtp {
 	display: flex;
     flex: unset;
@@ -628,6 +707,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 	display: flex;
 	flex: 0;
 	width: 120px;
+    padding-left: 4px;
+    padding-right: 26px;
 	min-width: unset;
 	max-width: unset;
 	margin-top: -1px;
@@ -677,12 +758,13 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 
 }
 #WebPortalControls-EuTitle{
-    margin-top: 12px;
-    font-size: 21px;
+	position:absolute;
+    margin-top: 0px;
+    font-size: 19px;
     font-weight: bold;
-    font-family: Yatra 'Yatra One';
+    font-family: Yatra One;
     color: #16599b;
-    text-shadow: 1px 1px 2px rgb(218 218 218 / 82%);
+    text-shadow: 1px 1px 1px rgb(0 255 250 / 79%);
 }
 .content-panel {
   display: inline-flex;
@@ -697,18 +779,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   opacity: var(--staticpage-contentpanel-opacity);
 }
 
-select.webtp{font-weight:bold;width:98%;background-color:var(--staticpage-HFpanels-bg-color)/*#1111118c*/;color:#932604;border-color:#932604;}
-select.webtp option {
-    font-weight: bold;
-}
 
-/* Customize background color and text color when hovering */
-select.webtp option:hover {
-	background-color: black;
-    color: var(--hover-text-color);
-/*     background-color: var(--hover-background-color);
-    color: var(--hover-text-color); */
-}
 .portal-panel {
 	display: inline-flex;
     max-width: 10vw;

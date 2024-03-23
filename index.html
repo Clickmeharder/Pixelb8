@@ -2108,9 +2108,7 @@ staticPage BLOCK
 				<Button class="roundbutt-webtp" id="Openwebportal" style="margin:auto;">Open</button>
 			</div>
 			<div id="static-content-panel-controls">
-				<div class="row">
-					<p class="panel-title" id="WebPortalControls-EuTitle">Entropia</p>
-				</div>
+
 				<!-- Entropia Websites -->
 				<div class="">
 					<div class="webtpfilteroptions-container" style="display: ;">
@@ -2151,31 +2149,22 @@ staticPage BLOCK
 							<input type="checkbox" id="filter9" value="All Options">
 						</div>
 					</div>
-					<div class="webtpfilters-selected row" onclick="togglewebtpfilterOptions()">Filters<div class="single-round-button"><button class="testbutton" id="Toggleexpandbudgets-Button" title="toggle to show/hide all budgets" onclick="toggleexpandbudgets(this)">
-									<img src="../assets/images/icons/expandtoggle.png" alt="Recent Expense window Toggle">
-								</button>
-							</div></div>
+					<div class="webtpfilters-selected row" onclick="togglewebtpfilterOptions(this)">
+						<p class="panel-title" id="WebPortalControls-EuTitle">Entropia</p>
+						<div class="single-round-button">
+							<button class="testbutton" id="ToggleWebtpfilterbox-Button" title="toggle to show/hide all budgets" onclick="webtpTogglebuttstyle(this)">
+								<img src="assets/images/icons/expandtoggle.png" alt="Toggle Filters Window">
+							</button>
+						</div>
+					</div>
 				</div>
-				
-				<select class="webtp" id="eulinkfilter">
-					<option value="option0" selected disabled>Select Filter</option>
-					<option value="option1">Official M.A.</option>
-					<option value="option2">Planetary</option>
-					<option value="option3">Forums</option>
-					<option value="option4">Information & data</option>
-					<option value="option5">Societies</option>
-					<option value="option6">Miscelaneous 3rd Party</option>
-					<option value="option7">Colonist Services & Content</option>
-					<option value="option8">Entropia Creators</option>
-					<option value="option99">All</option>
-				</select>
 				<select class="webtp" id="webtpoptions">
-					<option value="option1" selected disabled>External Destination</option>
+					<option value="option1" selected disabled>Destination</option>
 					<option value="option2">Mindark.com</option>
 					<option value="option3">Entropiauniverse.com</option>
 					<option value="option4">PlanetCalypso.com</option>
 				</select>
-				<Button class="flex" id="closewebportal" style="margin-top:4px;width: 98%;">Close WebPortal</button>
+				<Button class="flex" id="closewebportal">Reconfigure WebPortal</button>
 			</div>
 		</div>	
 		<div class="panel" id="webtp">

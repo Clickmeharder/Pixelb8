@@ -15,8 +15,28 @@
         }
     }
 } */
+/*------------------------------------------
+regular select filter code - html and js  */
 
-
+		/*regular select filter html
+		-----------------------------*/
+/*				<select class="webtp" id="eulinkfilter">
+					<option value="option0" selected disabled>Select Filter</option>
+					<option value="option1">Official M.A.</option>
+					<option value="option2">Planetary</option>
+					<option value="option3">Forums</option>
+					<option value="option4">Information & data</option>
+					<option value="option5">Societies</option>
+					<option value="option6">Miscelaneous 3rd Party</option>
+					<option value="option7">Colonist Services & Content</option>
+					<option value="option8">Entropia Creators</option>
+					<option value="option99">All</option>
+				</select>
+*/
+/*--------------------------
+regular select filter js
+---------------------------*/
+/*
 document.getElementById('eulinkfilter').addEventListener('change', function() {
     var filterValue = this.value;
     var optionsSelect = document.getElementById('webtpoptions');
@@ -69,8 +89,58 @@ document.getElementById('eulinkfilter').addEventListener('change', function() {
             // Add default behavior or error handling
             break;
     }
-});
+});*/
 
+// Function to update the options in the select based on checked checkboxes
+function updateWebtpOptions() {
+    var optionsSelect = document.getElementById('webtpoptions');
+    var checkboxes = document.querySelectorAll('.webtpfilteroptions-container input[type="checkbox"]');
+
+    // Clear existing options except for the default option
+    while (optionsSelect.options.length > 1) {
+        optionsSelect.remove(1);
+    }
+
+    // Loop through checkboxes and add options based on checked checkboxes
+    checkboxes.forEach(function(checkbox) {
+        if (checkbox.checked) {
+            switch (checkbox.value) {
+                case 'Official Filter':
+                    optionsSelect.add(new Option('Mindark.com', 'option2'));
+                    optionsSelect.add(new Option('Entropiauniverse.com', 'option3'));
+                    optionsSelect.add(new Option('PlanetCalypso.com', 'option4'));
+                    break;
+                case 'Planetary Filter':
+                    optionsSelect.add(new Option('PlanetCalypso.com', 'option2'));
+                    break;
+                case 'Forum Filter':
+                    optionsSelect.add(new Option('forumexampleurl.com', 'option2'));
+                    break;
+                case 'Information andData':
+                    optionsSelect.add(new Option('entropiawiki.com.com', 'option2'));
+                    break;
+                case 'No Melee Weapons':
+                    optionsSelect.add(new Option('secretuniversalservices.lol', 'option2'));
+                    break;
+                case 'Misc 3rdparty':
+                    optionsSelect.add(new Option('entropiapartners.com', 'option2'));
+                    break;
+                case 'Colonist Services':
+                    optionsSelect.add(new Option('PlanetCalypso.com', 'option2'));
+                    break;
+                case 'Entropian Creators':
+                    optionsSelect.add(new Option('PlanetCalypso.com', 'option2'));
+                    break;
+                case 'All Options':
+                    optionsSelect.add(new Option('PlanetCalypso.com', 'option2'));
+                    break;
+                default:
+                    // Add default behavior or error handling
+                    break;
+            }
+        }
+    });
+}
 
 
 
@@ -132,7 +202,43 @@ function togglewebtpfilterOptions() {
                 console.log('Checkbox unchecked:', filterId);
                 setWebtpLabelColor(labelForRule, checkbox.disabled);
             }
+			updateWebtpOptions();
         });
     });
 }
+const RoundButts = document.querySelectorAll('.single-round-button');
 
+// Function to toggle single round button style
+
+function togglesingleroundButtonStyle(button) {
+    // Change button color and border color
+	button.classList.toggle('active');
+    button.style.borderColor = (button.style.borderColor === 'rgb(7, 186, 197)') ? '' : '#07bac5';
+	button.style.backgroundColor = (button.style.backgroundColor === 'black') ? '#101128f2' : 'black';
+}
+// Add event listener to each button
+RoundButts.forEach(function(button) {
+    button.addEventListener('click', function() {
+        // Call the togglesingleroundButtonStyle function when the button is clicked
+        togglesingleroundButtonStyle(button);
+    });
+});
+
+function webtpTogglebuttstyle(clickedButton) {
+
+    // Set style of the clicked button
+    clickedButton.style.borderStyle = (clickedButton.style.borderStyle === 'inset') ? '' : 'inset';
+	clickedButton.style.borderColor = (clickedButton.style.borderColor === 'rgb(7, 186, 197)') ? '' : '#07bac5';
+    clickedButton.style.backgroundColor = (clickedButton.style.backgroundColor === 'black') ? '#101128f2' : 'black';
+
+    // Set filter for the image inside the button
+    var image = clickedButton.querySelector('img');
+    if (image) {
+        var currentFilter = image.style.filter;
+        var newFilter = (currentFilter === 'brightness(80%) hue-rotate(85deg)') ? 'brightness(70%) hue-rotate(45deg)' : 'brightness(80%) hue-rotate(85deg)';
+        image.style.filter = newFilter;
+    }
+
+    // You can now reference the clicked button if needed
+    console.log('webtp filter button clicked:', clickedButton);
+}
