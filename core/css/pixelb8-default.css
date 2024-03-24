@@ -985,7 +985,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 	border-color:teal!important;
 	filter: hue-rotate(180deg);
 }
-#webtp-pullout .testbutton {
+#webtp-pullout .webtpfilters-expand-button {
     padding: 0px;
     background-color: #101128f2;
     color: #ffffff;
@@ -996,7 +996,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     filter: brightness(70%);
     overflow: hidden;
 }
-#webtp-pullout .testbutton:hover {}
+#webtp-pullout .webtpfilters-expand-button:hover {}
 #webtp-pullout .webtpfilters-option {
 	display: flex;
 	font-size: 15px;
@@ -1072,7 +1072,12 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 	background: repeating-linear-gradient(45deg, black, #0b0739 100px);
 	padding:1px;}
 #webtp-pullout #closewebportal:hover {
+	border-color:green;
 	color:green;
+}
+#webtp-pullout #closewebportal:active {
+	border-color:crimson;
+	color:crimson;
 }
 #webtp-pullout select option:hover{background-color:pink;}
 #webtp-pullout select option:checked {background-color:purple;}
@@ -1389,7 +1394,6 @@ select.webtp option:hover {
 
 .custom-tooltip.visible-tooltip {
     display: block;
-	outline:;
 }
 /*_____________________
     Custom cursor
