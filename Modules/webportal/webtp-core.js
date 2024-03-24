@@ -94,16 +94,24 @@ function Togglewebportal(clickedbutton) {
     var portalcontainer = document.getElementById("webtp");
     var portal = document.getElementById("thewebportal");
     var portalimg = document.getElementById("webportal-image");
+	var activatebutton = document.getElementById("Openwebportal");
 
     // Toggle the display style of the portal container
     if (portalcontainer.style.width === "50px") {
         portalcontainer.style.width = "350px";
 		portalcontainer.style.height = "95%";
 		portalcontainer.style.opacity = "1.0";
+		activatebutton.style.color = "green";
+		activatebutton.style.borderStyle = "ridge";
+		activatebutton.style.borderColor = "#2a7d19ed";
+		
     } else {
         portalcontainer.style.width = "50px";
 		portalcontainer.style.height = "5%";
 		portalcontainer.style.opacity = "0.3";
+		activatebutton.style.color = "inherit";
+		activatebutton.style.borderStyle = "ridge";
+		activatebutton.style.borderColor = "#111";
     }
 
     // Toggle the visibility style of the portal

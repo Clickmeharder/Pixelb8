@@ -534,6 +534,10 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 	width: 16px;
     height: 16px;
 }
+#webtp-pullout .single-round-button:hover {
+	border-color:teal!important;
+	filter: hue-rotate(180deg);
+}
 #webtp-pullout .testbutton {
     padding: 0px;
     background-color: #101128f2;
@@ -545,6 +549,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     filter: brightness(70%);
     overflow: hidden;
 }
+#webtp-pullout .testbutton:hover {}
 #webtp-pullout .webtpfilters-option {
 	display: flex;
 	font-size: 15px;
@@ -745,20 +750,44 @@ select.webtp option:hover {
 #WebPortalControls-Title{
 	font-size: 18px;
 	line-height:0.8;
-	color:var(--staticpage-HFpanels-bg-color);
+	color:#157858;
 	text-shadow: 3px 1px 2px rgb(152 0 212 / 93%);
 
 }
 .roundbutt-webtp {
-    width: 32px;
-    HEIGHT: 32px;
+    min-width: 48px;
+    HEIGHT: 34px;
     padding: 0px;
     margin: auto;
+	margin-block-start: -8px;
+    margin-left: 8px;
     background-color: var(--HUD-windows-bg-color);
-    border-color: #2a7d19ed;
-    border-radius: 15px;
-    color: inherit;
+/*     color: inherit;
+	border-color: #2a7d19ed; */
+	border-radius: 15px;
+	outline: 4px double #333;
+	font-weight:bolder;
+	font-size: 11px;
+    font-family: 'Yatra One';
+	 box-shadow: 0px 0px 10px rgba(0, 128, 128, 0.5);
 
+}
+#Openwebportal{border-width:2px;border-style:ridge;border-color: #2a7d19ed;color: #2a7d19ed;}
+#Openwebportal:hover {
+	border-color: steelblue!important;
+	border-style:ridge!important;
+	border-width:2px!important;
+	font-size: 10px;
+	color: steelblue!important;
+	box-shadow: 0px 0px 6px 8px rgba(0, 128, 128, 40%);
+}
+#Openwebportal:active{
+	border-color: crimson!important;
+	border-style:ridge!important;
+	border-width:2px!important;
+	font-size: 9px;
+	color: crimson!important;
+	box-shadow: 0px 0px 6px 14px rgb(128 0 44 / 40%);
 }
 #WebPortalControls-EuTitle{
 	position:absolute;
@@ -769,19 +798,6 @@ select.webtp option:hover {
     color: #16599b;
     text-shadow: 1px 1px 1px rgb(0 255 250 / 79%);
 }
-.content-panel {
-  display: inline-flex;
-  max-width: 35vw;
-  margin-left: auto;margin-right:10px;
-  color: var(--staticpage-contentpanel-text-color);
-  border-color: var(--staticpage-contentpanel-border-color);
-  border-width: var(--staticpage-contentpanel-border-width);
-  border-style: var(--staticpage-contentpanel-border-style);
-  border-radius: var(--staticpage-contentpanel-border-radius);
-  background-color: var(--staticpage-contentpanel-bg-color);
-  opacity: var(--staticpage-contentpanel-opacity);
-}
-
 
 .portal-panel {
 	display: inline-flex;
@@ -891,6 +907,21 @@ select.webtp option:hover {
     opacity: 0.9;
   }
 } 
+
+.content-panel {
+  display: inline-flex;
+  max-width: 35vw;
+  margin-left: auto;margin-right:10px;
+  color: var(--staticpage-contentpanel-text-color);
+  border-color: var(--staticpage-contentpanel-border-color);
+  border-width: var(--staticpage-contentpanel-border-width);
+  border-style: var(--staticpage-contentpanel-border-style);
+  border-radius: var(--staticpage-contentpanel-border-radius);
+  background-color: var(--staticpage-contentpanel-bg-color);
+  opacity: var(--staticpage-contentpanel-opacity);
+}
+
+
 
 .ad-panel {
     display: inline-flex;
