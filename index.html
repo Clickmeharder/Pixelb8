@@ -2117,12 +2117,12 @@ staticPage BLOCK
 							<input type="checkbox" id="filter1" value="Official Filter">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter2" title="Planetary Websites (disabled)" alt="Planetary Websites(disabled)">Planetary</label>
-							<input type="checkbox" id="filter2" value="Planetary Filter" disabled="">
+							<label for="filter2" title="Planetary Websites" alt="Planetary Websites">Planetary</label>
+							<input type="checkbox" id="filter2" value="Planetary Filter">
 						</div>
 						<div class="webtpfilters-option">
 							<label for="filter3" title="" alt="" >Forums</label>
-							<input type="checkbox" id="filter3" value="Forum Filter" disabled="">
+							<input type="checkbox" id="filter3" value="Forum Filter">
 						</div>
 						<div class="webtpfilters-option">
 							<label for="filter4" title="" alt="">Info & Data</label>
@@ -2130,7 +2130,7 @@ staticPage BLOCK
 						</div>
 						<div class="webtpfilters-option">
 							<label for="filter5" title="" alt="">Societies</label>
-							<input type="checkbox" id="filter5" value="No Melee Weapons">
+							<input type="checkbox" id="filter5" value="Societies">
 						</div>
 						<div class="webtpfilters-option">
 							<label for="filter6" title="" alt="">Miscelaneous 3rd Party</label>
@@ -2160,25 +2160,25 @@ staticPage BLOCK
 					<div class="webtpfilters-selected row" onclick="togglewebtpfilterOptions(this)">
 						<p class="panel-title" id="WebPortalControls-EuTitle">Entropia</p>
 						<div class="single-round-button">
-							<button class="webtpfilters-expand-button" id="ToggleWebtpfilterbox-Button" title="toggle to show/hide all budgets" onclick="webtpTogglebuttstyle(this)">
-								<img src="assets/images/icons/expandtoggle.png" alt="Toggle Filters Window">
+							<button class="webtpfilters-expand-button" id="ToggleWebtpfilterbox-Button" title="Filterbox Toggle" onclick="webtpTogglebuttstyle(this)">
+								<img src="assets/images/icons/expandtoggle.png" alt="Filterbox Toggle">
 							</button>
 						</div>
 					</div>
 				</div>
 				<select class="webtp" id="webtpoptions">
-					<option value="option1" selected disabled>Destination</option>
-					<option value="option2">Mindark.com</option>
-					<option value="option3">Entropiauniverse.com</option>
-					<option value="option4">PlanetCalypso.com</option>
+					<option value="option0" selected disabled>Destination</option>
+					<option value="option1">Mindark.com</option>
+					<option value="option2">Entropiauniverse.com</option>
+					<option value="option3">PlanetCalypso.com</option>
 				</select>
 				<Button class="flex" id="closewebportal">Reconfigure WebPortal</button>
 			</div>
 		</div>	
 		<div class="panel" id="webtp">
 			<div class="panel portal-panel" id="thewebportal">
-				<h2 class="panel-title" style="">Entropia Partners</h2>
-				<div id="webportal-image" title="Jump in" alt="Jump in" style="background-image: url('Modules/webportal/assets/images/entropiapartners-webport-img.png');"></div> <!-- Move the image inside the .portal-panel -->
+				<h2 class="panel-title" id="portalLinktitle" style="">Entropia Partners</h2>
+				<div id="webportal-image" title="Jump in" alt="Jump in" style=""></div> <!-- Move the image inside the .portal-panel -->
 			</div>
 		</div>
 	</div>

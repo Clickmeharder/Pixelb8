@@ -1300,7 +1300,7 @@ select.webtp option:hover {
     margin-left: -7px;
     width: 100%;
     height: 39%;
-    background-image: url(Modules/webportal/assets/images/entropiapartners-webport-img.png);
+    background-image: url('../../Modules/webportal/assets/images/entropiapartners-webtp.png');
     background-size: contain;
     background-repeat: no-repeat;
     overflow: hidden;

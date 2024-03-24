@@ -286,3 +286,45 @@ function webtpTogglebuttstyle(clickedButton) {
     // You can now reference the clicked button if needed
     console.log('webtp filter button clicked:', clickedButton);
 }
+
+document.getElementById('webtpoptions').addEventListener('change', function() {
+    var selectedValue = this.value;
+    var portalLinktitle = document.getElementById('portalLinktitle');
+    var webportalImage = document.getElementById('webportal-image');
+
+    // Update the title text based on the selected option
+    switch (selectedValue) {
+        case 'option0':
+            portalLinktitle.innerText = 'Entropia Partners';
+            break;
+        case 'option1':
+            portalLinktitle.innerText = 'Mindark';
+            break;
+        case 'option2':
+            portalLinktitle.innerText = 'Entropia Universe';
+            break;
+        case 'option3':
+            portalLinktitle.innerText = 'Planet Calypso';
+            break;
+        default:
+            break;
+    }
+
+    // Update the background image of webportal-image based on the selected option
+    switch (selectedValue) {
+        case 'option1':
+            webportalImage.style.backgroundImage = "url('Pixelb8.lol/Modules/webportal/assets/images/entropiapartners-webtp.png')";
+            break;
+        case 'option2':
+            webportalImage.style.backgroundImage = "url('https://www.mindark.com/images/norobot/MetaVerseImage_x770.jpg')";/*"url('Modules/webportal/assets/images/mindark-webtp.png')"*/
+            break;
+        case 'option3':
+            webportalImage.style.backgroundImage = "url('Modules/webportal/assets/images/entropiauniverse-webtp.png')";
+            break;
+        case 'option4':
+            webportalImage.style.backgroundImage = "url('Modules/webportal/assets/images/planetcalypso-webtp.png')";
+            break;
+        default:
+            break;
+    }
+});
