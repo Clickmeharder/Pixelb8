@@ -1369,7 +1369,7 @@ select.webtp option:hover {
 
 /*_____________________
     Custom Tool Tip
----------------------*/
+----------------------*/
 .custom-tooltip {
     position: absolute;
     z-index: 999; /* Set a higher z-index value */
@@ -1389,6 +1389,7 @@ select.webtp option:hover {
 
 .custom-tooltip.visible-tooltip {
     display: block;
+	outline:;
 }
 /*_____________________
     Custom cursor
