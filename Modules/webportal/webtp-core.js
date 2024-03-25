@@ -199,5 +199,28 @@ function Updatewebportal() {
     }
 }
 
-// Event listener for option select
-document.getElementById('webtpoptions').addEventListener('change', Updatewebportal);
+// Function to toggle the styles of #portaldestinationDetails
+function toggledestinationdetails(clickedbutton) {
+    var portalDetails = document.getElementById('portaldestinationDetails');
+	console.log('Button clicked', clickedbutton);
+    // Check if the button is activated (has a specific class or attribute)
+    if (clickedbutton.classList.contains('activated')) {
+        // If activated, remove the activated class and reset styles
+        console.log('webtpdetails butt smacked: Portal Details De-activated');
+        clickedbutton.classList.remove('activated');
+        portalDetails.style.maxWidth = '174px';
+        portalDetails.style.marginLeft = '146px';
+        // Reset button color and border
+        clickedbutton.style.color = '#ffac00a1';
+        clickedbutton.style.borderColor = '#ffac00a1';
+    } else {
+        // If not activated, add the activated class and apply styles
+        console.log('webtpdetails butt smacked: Portal Details Activated');
+        clickedbutton.classList.add('activated');
+        portalDetails.style.maxWidth = '132px';
+        portalDetails.style.marginLeft = '4px';
+        // Change button color and border
+        clickedbutton.style.color = '#444'; // Adjust color as needed
+        clickedbutton.style.borderColor = '#333'; // Adjust border color as needed
+    }
+}

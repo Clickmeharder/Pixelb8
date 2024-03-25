@@ -479,6 +479,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 }
 .left-panel {
   margin-right: 10px;
+  padding:8px;
   color: var(--staticpage-sidepanels-text-color);
   border-color: var(--staticpage-sidepanels-border-color);
   border-width: var(--staticpage-sidepanels-border-width);
@@ -486,6 +487,11 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   border-radius: var(--staticpage-sidepanels-border-radius);
   background-color: var(--staticpage-sidepanels-bg-color);
   opacity: var(--staticpage-sidepanels-opacity);
+}
+.left-panel button.leftcheek {
+	width:98%;min-width:98%;max-width:98%;
+	margin:0px;
+	padding:0px;
 }
 .right-panel {
   margin-left: 10px;
@@ -702,7 +708,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 /*    ROOT TUNER/TYLE TUNER  */
 /*--------------------------|*/
 #ST-wrapper {
- position: fixed; top: 98px; left: -165px;z-index:15;width: 120px;
+ position: fixed; top: 50px; left: -165px;z-index:15;width: 120px;
     height: ;max-width:120px;max-height:;transition:1.9s, min-height 2.9s, min-width 0.6s, max-height 1.9s, max-width 0.6s linear;
 }
 #styletuner {
@@ -1061,24 +1067,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 #webtp-pullout select:active {
 	outline: 2px ridge #444;
 }
-#webtp-pullout #closewebportal {
-	margin:12px;margin-top:10px;margin-bottom:2px;
-	width:98%;
-	cursor: inherit;
-	color:#444;
-	font-weight:bold;
-	border-color:#444;
-	outline: 2px ridge #444;
-	background: repeating-linear-gradient(45deg, black, #0b0739 100px);
-	padding:1px;}
-#webtp-pullout #closewebportal:hover {
-	border-color:green;
-	color:green;
-}
-#webtp-pullout #closewebportal:active {
-	border-color:crimson;
-	color:crimson;
-}
+
 #webtp-pullout select option:hover{background-color:pink;}
 #webtp-pullout select option:checked {background-color:purple;}
 #webtp-pullout select:focus option {background: #07172efa;}
@@ -1368,6 +1357,48 @@ select.webtp option:hover {
   }
 } 
 
+#webtp-pullout #buttportaldetails {
+	margin:12px;margin-top:10px;margin-bottom:2px;
+	width:98%;
+	cursor: inherit;
+	color:#ffac00a1;
+	font-weight:bold;
+	border-color:#ffac00a1;
+	outline: 2px ridge #444;
+	background: repeating-linear-gradient(45deg, black, #0b0739 100px);
+	padding:1px;
+	transition:0.3s ease;
+}
+#webtp-pullout #buttportaldetails:hover {
+	border-color:green!important;
+	color:green!important;
+}
+#webtp-pullout #buttportaldetails:active {
+	border-color:crimson!important;
+	color:crimson!important;
+}
+#portaldestinationDetails{
+	position: absolute;
+    max-width: 174px;
+    height: 126px;
+    white-space: normal;
+    margin-top: 6px;
+    margin-left: 146px;
+    padding: 12px;
+    padding-left: 18px;
+    padding-right: 4px;
+    width: ;
+    color: #2a832aa8;
+    background-color: #00000080;
+    border: 1px inset green;
+    outline: 4px groove #24584b;
+    outline-offset: -1px;
+	transition:0.9s ease;
+}
+/* activated sus butt should do this:
+width or max-width becomes:132px
+margin-left becomes: 4px
+*/
 /*
 	END OF WEBPORTAL CSS BLOCK
 */

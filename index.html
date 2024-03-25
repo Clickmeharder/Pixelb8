@@ -2044,12 +2044,29 @@ staticPage BLOCK
   <main class="main-content">
       <!-- Left Panel -->
       <div class="panel left-panel">
-		<h2 class="panel-title">Left Panel</h2>
-			<button value="initial" selected disabled>Pixelb8 WebPortals</button>
-			<button value="official">Secret universal services</button>
-			<button value="planet-partners">ClickPlace Website</button>
-			<button value="planet-partners">ClickPlace Shop</button>
-      </div>
+		<h2 class="panel-title" style="line-height:0.65;margin-top:0px;margin-bottom:8px;">Internal Spelunking</h2>
+			<a href="https://Pixelb8.lol/faq">
+				<button class="leftcheek" value="faq" selected disabled>Pixelb8 FAQ</button>
+			</a>
+			<a href="https://Pixelb8.lol/creators">
+				<button class="leftcheek" value="creators" disabled>Creators Corner</button>
+			</a>
+			<a href="https://Pixelb8.lol/sus">
+				<button class="leftcheek" value="sus" disabled>Secret Universal Services</button>
+			</a>
+			<a href="https://Pixelb8.lol/clickplace">
+				<button class="leftcheek" value="clickplace" disabled>ClickPlace MC</button>
+			</a>
+			<a href="https://Pixelb8.lol/eu">
+				<button class="leftcheek" value="entropiapage" disabled>Entropian Pixelb8</button>
+			</a>
+			<a href="https://Pixelb8.lol/example1">
+				<button class="leftcheek" value="example" disabled>example 1</button>
+			</a>
+			<a href="https://Pixelb8.lol/example2">
+				<button class="leftcheek" value="example2" disabled> example 2</button>
+			</a>
+	  </div>
       <div class="panel ad-panel">
 	<div class="static-slideshowpromoter">
             <!-- Add your slideshow content here -->
@@ -2170,17 +2187,18 @@ staticPage BLOCK
 					<option value="option0" selected disabled>Destination</option>
 
 				</select>
-				<Button class="flex" id="closewebportal">Reconfigure WebPortal</button>
+				<Button class="flex" id="buttportaldetails" onclick="toggledestinationdetails(this)">《《   S.U.S   》》</button>
 			</div>
 		</div>	
 		<div class="panel" id="webtp">
 			<div class="panel portal-panel" id="thewebportal">
 				<h2 class="panel-title" id="portalLinktitle" style="">Entropia Partners</h2>
-				<a href="https://example.com" target="_blank">
+				<a href="https://www.entropiapartners.com/?r=94031" target="_blank">
 					<div id="webportal-image" title="Jump in" alt="Jump in" style=""></div> <!-- Move the image inside the .portal-panel -->
 				</a>
 			</div>
 		</div>
+		<div id="portaldestinationDetails">Text describing the selected destination will go here</div>
 	</div>
 	<div class="panel content-panel" style="display:hidden;">
 		<h2 class="panel-title">Content Panel</h2>
