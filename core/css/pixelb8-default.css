@@ -981,6 +981,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     max-height: 141px;
     overflow-y: auto;
     overflow-x: hidden;
+	opacity:0.8;
     transition: width 1.9s;
 }
 #webtp-pullout .single-round-button{
