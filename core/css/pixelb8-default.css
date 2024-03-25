@@ -970,17 +970,18 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 .webtpfilteroptions-container {
     display: block;
     position: absolute;
-	margin-top: -48px;
-    left: 173px;
+    margin-top: -39px;
+    left: 174px;
     width: 0px;
     padding: 0px;
-    border: 1px solid #2a7370;
+    border: 1px inset #2a7370;
+    outline: 4px groove darkslateblue;
     background: linear-gradient(153deg, #121216eb,#1e2123);
-    z-index: 1;
-    max-height: 132px;
+    z-index: -1;
+    max-height: 141px;
     overflow-y: auto;
-	overflow-x:hidden;
-	transition: width 1.9s;
+    overflow-x: hidden;
+    transition: width 1.9s;
 }
 #webtp-pullout .single-round-button{
 	margin-left:auto;
