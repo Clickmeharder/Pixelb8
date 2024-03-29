@@ -2128,50 +2128,62 @@ staticPage BLOCK
 
 				<!-- Entropia Websites -->
 				<div class="">
-					<div class="webtpfilteroptions-container" style="display: ;">
+					<div class="webtpfilteroptions-container">
 						<div class="webtpfilters-option">
-							<label for="filter1" title="Official Mindark Websites" alt="Official Mindark Websites" >Official M.A</label>
+							<label for="filter1" title="Official Mindark Websites" alt="Official Mindark Websites" >Official M.A & PP</label>
 							<input type="checkbox" id="filter1" value="Official Filter">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter2" title="Planetary Websites" alt="Planetary Websites">Planetary</label>
-							<input type="checkbox" id="filter2" value="Planetary Filter">
+							<label for="filter2" title="" alt="Planet Partner websites" >Planet Partners</label>
+							<input type="checkbox" id="filter2" value="PP Filter">
+						</div>
+						<div class="webtpfilters-option" style="display: none;">
+							<label for="filter3" title="Planetary Websites" alt="Planetary Websites">Planetary</label>
+							<input type="checkbox" id="filter3" value="Planetary Filter">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter3" title="" alt="" >Forums</label>
-							<input type="checkbox" id="filter3" value="Forum Filter">
+							<label for="filter4" title="" alt="" >Forums</label>
+							<input type="checkbox" id="filter4" value="Forum Filter">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter4" title="" alt="">Info & Data</label>
-							<input type="checkbox" id="filter4" value="Information andData">
+							<label for="filter5" title="" alt="">Entropia Maps</label>
+							<input type="checkbox" id="filter5" value="Maps Filter">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter5" title="" alt="">Societies</label>
-							<input type="checkbox" id="filter5" value="Societies">
+							<label for="filter6" title="" alt="">Entropia Tools</label>
+							<input type="checkbox" id="filter6" value="Tools Filter">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter6" title="" alt="">Miscelaneous 3rd Party</label>
-							<input type="checkbox" id="filter6" value="Misc 3rdparty">
+							<label for="filter7" title="" alt="">Info & Data</label>
+							<input type="checkbox" id="filter7" value="Information andData">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter7" title="" alt="">Colonist Services & Content</label>
-							<input type="checkbox" id="filter7" value="Colonist Services">
+							<label for="filter8" title="" alt="">Societies</label>
+							<input type="checkbox" id="filter8" value="Societies">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter8" title="" alt="">Entropian Creators</label>
-							<input type="checkbox" id="filter8" value="Entropian Creators">
+							<label for="filter8" title="" alt="">Miscelaneous 3rd Party</label>
+							<input type="checkbox" id="filter8" value="Misc 3rdparty">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter9" title="" alt="">My Favourites</label>
-							<input type="checkbox" id="filter9" value="My Favourites">
+							<label for="filter9" title="" alt="">Colonist Services & Content</label>
+							<input type="checkbox" id="filter9" value="Colonist Services">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter10" title="" alt="">My Portals</label>
-							<input type="checkbox" id="filter10" value="My Portals">
+							<label for="filter10" title="" alt="">Entropian Creators</label>
+							<input type="checkbox" id="filter10" value="Entropian Creators">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter11" >All</label>
-							<input type="checkbox" id="filter11" value="All Options">
+							<label for="filter11" title="" alt="">My Favourites</label>
+							<input type="checkbox" id="filter11" value="My Favourites">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter12" title="" alt="">My Portals</label>
+							<input type="checkbox" id="filter12" value="My Portals">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter13" >All</label>
+							<input type="checkbox" id="filter13" value="All Options">
 						</div>
 					</div>
 					<div class="webtpfilters-selected row" onclick="togglewebtpfilterOptions(this)">
@@ -2198,7 +2210,7 @@ staticPage BLOCK
 				</a>
 			</div>
 		</div>
-		<div id="portaldestinationDetails">Text describing the selected destination will go here</div>
+		<div id="portaldestinationDetails"></div>
 	</div>
 	<div class="panel content-panel" style="display:hidden;">
 		<h2 class="panel-title">Content Panel</h2>

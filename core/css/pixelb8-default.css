@@ -1282,14 +1282,16 @@ select.webtp option:hover {
 .portal-panel h2{
 	position: absolute;
 	background:;color:#93260463;
+	margin-left: 25px;
+    max-width: 150px;
 }
 
 
 #webportal-image {
     position: absolute;
-    margin-top: 47px;
-    margin-left: -7px;
-    width: 100%;
+    margin-top: 32px;
+    margin-left: 36px;
+    width: 70%;
     height: 39%;
     background-image: url('../../Modules/webportal/assets/images/entropiapartners-webtp.png');
     background-size: contain;
