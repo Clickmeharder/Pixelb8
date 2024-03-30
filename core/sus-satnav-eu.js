@@ -72,7 +72,8 @@ function init() {
   );
   var earth_bump = new THREE.TextureLoader().load(
     //"https://imgur.com/h8UcRzr"
-    "https://imgur.com/RXs3ea8"
+    //"https://imgur.com/RXs3ea8"
+	"https://pixelb8.lul/modules/globemaps/arkadia/newspecularmap.png"
   );
   var earth_specular = new THREE.TextureLoader().load(
     //"https://i.imgur.com/yPiv3Gk.png"
