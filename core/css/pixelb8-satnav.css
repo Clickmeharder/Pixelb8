@@ -1,0 +1,27 @@
+body {
+  background-image: url("https://i.postimg.cc/br3g30GL/bg.jpg");
+  background-position: center center;
+  overflow: hidden;
+  background-size: cover;
+}
+.cssbody {
+  background-position: center center;
+
+}
+
+#cityOverlay {
+        position: relative;
+        z-index: 100;
+        display: none; /* Initially hide the overlay */
+        background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+        padding: 10px;
+        border-radius: 5px;
+    }
+.city-marker {
+  position: absolute;
+  color: white;
+  background-color: rgba(255, 0, 0, 0.8);
+  padding: 4px 8px;
+  border-radius: 4px;
+  pointer-events: none; /* This ensures that the markers don't block mouse events on the globe */
+}
