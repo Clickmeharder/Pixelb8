@@ -68,7 +68,7 @@ function init() {
     map: earth_texture,
     bumpMap: earth_bump,
     specularMap: earth_specular,
-    displacementMap: earth_displacement, // Add the displacement map
+    displacementMap: earth_displacement, 
     displacementScale: 1.1, // Adjust the displacement scale as needed
     aoMap: earth_ao, // Add the ambient occlusion map
     aoMapIntensity: 1.8, // Adjust the intensity of ambient occlusion effect
@@ -98,7 +98,7 @@ function init() {
    var heatmap_specular = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
   );
-  var heatmap_geometry = new THREE.SphereGeometry(16.5, 32, 32);
+  var heatmap_geometry = new THREE.SphereGeometry(15, 32, 32);
   var heatmap_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
     bumpScale: 1.12,
