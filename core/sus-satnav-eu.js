@@ -101,7 +101,7 @@ function init() {
   var heatmap_geometry = new THREE.SphereGeometry(16.5, 32, 32);
   var heatmap_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
-    bumpScale: .12,
+    bumpScale: 1.12,
 
     map: heatmap_texture,
 	bumpMap: earth_bump,
@@ -109,10 +109,9 @@ function init() {
 	
 	displacementMap: earth_displacement,
 	
-	displacementScale: 1.1, // Adjust the displacement scale as needed
+	displacementScale: 1.1, 
     transparent: true,
-    opacity: 0.8,
- // Adjust the intensity of ambient occlusion effect	
+    opacity: 0.8,	
 	
 	
   });
