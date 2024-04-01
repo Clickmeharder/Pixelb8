@@ -118,7 +118,33 @@ function init() {
   });
   heatmap = new THREE.Mesh(heatmap_geometry, heatmap_material);
   scene.add(heatmap);
-
+  // TPmap
+  var TPmap_texture = new THREE.TextureLoader().load(
+    "https://pixelb8.lol/Modules/globemaps/arkadia/ark-TPmap.png"
+  );
+   var TPmap_bump = new THREE.TextureLoader().load(
+    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapspecular.png"
+  );
+   var TPmap_specular = new THREE.TextureLoader().load(
+    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
+  );
+  var TPmap_geometry = new THREE.SphereGeometry(16.1, 32, 32);
+  var TPmap_material = new THREE.MeshPhongMaterial({
+	shininess: 1,
+    bumpScale: .12,
+    map: TPmap_texture,
+	bumpMap: earth_bump,
+	specularMap: earth_specular,
+	displacementMap: earth_displacement,
+	displacementScale: 1.1, // Adjust the displacement scale as needed
+    transparent: true,
+    opacity: 0.8,
+ // Adjust the intensity of ambient occlusion effect	
+	
+	
+  });
+  TPmap = new THREE.Mesh(TPmap_geometry, TPmap_material);
+  scene.add(TPmap);
 
 	function addTextLabel(marker, labelText) {
 	  // Create a div element for the label
@@ -198,6 +224,7 @@ function animate() {
   earth.rotation.y += rotationSpeed;
   cloud.rotation.y += rotationSpeed;
   heatmap.rotation.y += rotationSpeed;
+  TPmap.rotation.y += rotationSpeed;
   // Rotate the markers around the globe's center
   markers.forEach(marker => {
     marker.rotateY(rotationAngle); // Rotate around the y-axis
@@ -241,6 +268,8 @@ function rotateScene(deltaX, deltaY) {
   cloud.rotation.x += deltaY / 300;
   heatmap.rotation.y += deltaX / 300;
   heatmap.rotation.x += deltaY / 300;
+  TPmap.rotation.y += deltaX / 300;
+  TPmap.rotation.x += deltaY / 300;
   // Rotate the markers around the globe's center
   markers.forEach(marker => {
     marker.rotation.y += deltaY / 300; // Rotate around the y-axis
