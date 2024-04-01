@@ -28,7 +28,7 @@ function init() {
   );
   camera.position.z = 80;
   stats = new Stats();
-  stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+  stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
   stats.dom.style.position = 'relative';
   stats.dom.style.display = 'flex-block!important';
   stats.dom.style.top = '0';
@@ -118,39 +118,7 @@ function init() {
   });
   heatmap = new THREE.Mesh(heatmap_geometry, heatmap_material);
   scene.add(heatmap);
-  //city marker stuff------------------------------------------------------
-	// Create marker geometries (spheres for simplicity)
-	var markerGeometry = new THREE.SphereGeometry(1, 8, 8);
-  // Move the pivot point of the marker geometry up to its center
-    markerGeometry.translate(0, 1, 0);
-	// Move the pivot point of the marker geometry up to its center
-	markerGeometry.translate(0, 1, 0);
 
-	// Create markers
-	var centerMarker = new THREE.Mesh(markerGeometry, markerMaterial);
-	centerMarker.position.set(0, 0, 0); // Position at the center of the map
-	markers.push(centerMarker); // Add to markers array
-
-
-	// Add city markers
-	var cities = [
-	  { name: 'New York', position: new THREE.Vector3(10, 0, 10) },
-	  { name: 'North Pole', position: new THREE.Vector3(0, 14.5, 0) },
-	  { name: 'South Pole', position: new THREE.Vector3(0, -14.5, 0) },
-	  { name: 'London', position: new THREE.Vector3(-10, 0, -10) },
-	  { name: 'London', position: new THREE.Vector3(-10, 0, -10) },
-	  { name: 'Celeste Outpost', position: new THREE.Vector3(14.31204, .5, 14.9521) },
-	  { name: 'Celeste Quarry', position: new THREE.Vector3(-15, 0, 5) }
-	];
-
-	var markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-	var markerGeometry = new THREE.SphereGeometry(1, 8, 8);
-
-	cities.forEach(city => {
-	  var cityMarker = new THREE.Mesh(markerGeometry, markerMaterial);
-	  cityMarker.position.copy(city.position);
-	  earth.add(cityMarker); // Add city markers to the earth mesh
-	});
 
 	function addTextLabel(marker, labelText) {
 	  // Create a div element for the label
@@ -230,10 +198,6 @@ function animate() {
   earth.rotation.y += rotationSpeed;
   cloud.rotation.y += rotationSpeed;
   heatmap.rotation.y += rotationSpeed;
-
-  // Calculate the rotation angle for the markers
-  var rotationAngle = rotationSpeed * 300; // Adjust the factor as needed
-
   // Rotate the markers around the globe's center
   markers.forEach(marker => {
     marker.rotateY(rotationAngle); // Rotate around the y-axis
@@ -283,15 +247,6 @@ function rotateScene(deltaX, deltaY) {
     marker.rotation.x += deltaX / 300; // Adjust the x-axis rotation based on deltaY
   });
 
-  // Log rotation values for debugging
-  console.log('Delta X:', deltaX);
-  console.log('Delta Y:', deltaY);
-  console.log('Earth Rotation Y:', earth.rotation.y);
-  console.log('Cloud Rotation Y:', cloud.rotation.y);
-  markers.forEach((marker, index) => {
-    console.log(`Marker ${index} Rotation Y:`, marker.rotation.y);
-    console.log(`Marker ${index} Rotation X:`, marker.rotation.x);
-  });
 }
 // Add an event listener for the wheel event
 document.addEventListener("wheel", onScroll);
