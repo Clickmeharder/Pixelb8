@@ -95,11 +95,20 @@ function init() {
    var heatmap_bump = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
   );
+   var heatmap_specular = new THREE.TextureLoader().load(
+    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapspecular.png"
+  );
   var heatmap_geometry = new THREE.SphereGeometry(15.5, 32, 32);
   var heatmap_material = new THREE.MeshBasicMaterial({
+	shininess: 0,
+    bumpScale: 0.01,
+
     map: heatmap_texture,
-	bumpScale: 0.11,
-	bumpMap: heatmap_texture,
+	bumpMap: heatmap_bump,
+	specularMap: heatmap_specular,
+	
+	displacementMap: earth_displacement,
+	
 	displacementScale: 1.5, // Adjust the displacement scale as needed
     transparent: true,
     opacity: 0.4
