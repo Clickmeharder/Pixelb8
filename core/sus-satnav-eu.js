@@ -176,7 +176,7 @@ function init() {
 
 //End of city marker stuff------------------------------------------------------
 
-  //point light (upper left)
+  //point light (upper left) 
   pointLight = new THREE.PointLight(0xffffff);
   pointLight.position.set(-400, 100, 150);
   scene.add(pointLight);
