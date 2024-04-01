@@ -90,7 +90,7 @@ function init() {
   scene.add(cloud);
   // heatmap
   var heatmap_texture = new THREE.TextureLoader().load(
-    "https://pixelb8.lol/Modules/globemaps/arkadia/ark-landarias.png"
+    "https://pixelb8.lol/Modules/globemaps/arkadia/ark-landareas.png"
   );
    var heatmap_bump = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapspecular.png"
