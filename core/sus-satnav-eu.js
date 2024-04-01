@@ -78,7 +78,7 @@ function init() {
 
   // Earth cloud
   var cloud_texture = new THREE.TextureLoader().load(
-    "https://pixelb8.lul/Modules/globemaps/arkadia/ark-tpheatmapwithpins"
+    "https://i.postimg.cc/k4WhFtFh/cloud.png"
   );
   var cloud_geometry = new THREE.SphereGeometry(15.5, 32, 32);
   var cloud_material = new THREE.MeshBasicMaterial({
@@ -90,11 +90,14 @@ function init() {
   scene.add(cloud);
   // heatmap
   var heatmap_texture = new THREE.TextureLoader().load(
-    "https://i.imgur.com/7QpVGnq"
+    "https://pixelb8.lol/Modules/globemaps/arkadia/ark-tpheatmapwithpins.png"
   );
   var heatmap_geometry = new THREE.SphereGeometry(15.5, 32, 32);
   var heatmap_material = new THREE.MeshBasicMaterial({
     map: heatmap_texture,
+	bumpScale: 0.11,
+	bumpMap: heatmap_texture,
+	displacementScale: 1.5, // Adjust the displacement scale as needed
     transparent: true,
     opacity: 0.4
   });
