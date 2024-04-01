@@ -162,7 +162,7 @@ function init() {
 	  labelElement.style.left = x + 'px';
 	  labelElement.style.top = y + 'px';
 	  labelElement.style.pointerEvents = 'none'; // Ensure the label doesn't block mouse events
-	  labelElement.style.zIndex = 100; // Set the z-index to ensure it's above other elements
+	  labelElement.style.zIndex = 100; 
 
 	  // Append the label to the document body
 	  document.body.appendChild(labelElement);
