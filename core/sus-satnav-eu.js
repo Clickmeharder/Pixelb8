@@ -106,7 +106,7 @@ function init() {
 	bumpMap: earth_bump,
 	specularMap: earth_specular,
     transparent: true,
-    opacity: 0.8,	
+    opacity: 0.8	
 	
 	
   });
@@ -132,9 +132,7 @@ function init() {
 	displacementMap: earth_displacement,
 	displacementScale: 0.1, 
     transparent: true,
-    opacity: 0.8,
- // Adjust the intensity of ambient occlusion effect	
-	
+    opacity: 0.8
 	
   });
   TPmap = new THREE.Mesh(TPmap_geometry, TPmap_material);
