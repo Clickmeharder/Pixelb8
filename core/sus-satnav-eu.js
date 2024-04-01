@@ -134,7 +134,7 @@ function init() {
 	bumpMap: earth_bump,
 	specularMap: earth_specular,
 	displacementMap: earth_displacement,
-	displacementScale: 1.1, // Adjust the displacement scale as needed
+	displacementScale: 0.1, // Adjust the displacement scale as needed
     transparent: true,
     opacity: 0.8,
  // Adjust the intensity of ambient occlusion effect	
