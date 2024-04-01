@@ -1,6 +1,6 @@
 
 var camera, scene, renderer;
-var earth, cloud, heatmap;
+var earth, cloud, heatmap, TPmap;
 
 var pointLight, ambientLight;
 var mouseDown = false,
