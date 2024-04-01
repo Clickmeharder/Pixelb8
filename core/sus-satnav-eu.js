@@ -97,7 +97,7 @@ function init() {
    var heatmap_specular = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
   );
-  var heatmap_geometry = new THREE.SphereGeometry(15.4, 32, 32);
+  var heatmap_geometry = new THREE.SphereGeometry(16.4, 32, 32);
   var heatmap_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
     bumpScale: 1.12,
