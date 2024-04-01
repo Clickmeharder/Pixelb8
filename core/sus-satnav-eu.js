@@ -137,8 +137,7 @@ function init() {
 	displacementScale: 0.1, 
     transparent: true,
     opacity: 0.8,
- // Adjust the intensity of ambient occlusion effect	
-	
+
 	
   });
   TPmap = new THREE.Mesh(TPmap_geometry, TPmap_material);
