@@ -93,7 +93,7 @@ function init() {
     "https://pixelb8.lol/Modules/globemaps/arkadia/ark-landareas.png"
   );
    var heatmap_bump = new THREE.TextureLoader().load(
-    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapspecular.png"
+    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
   );
    var heatmap_specular = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
@@ -123,7 +123,7 @@ function init() {
     "https://pixelb8.lol/Modules/globemaps/arkadia/ark-TPmap.png"
   );
    var TPmap_bump = new THREE.TextureLoader().load(
-    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapspecular.png"
+    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
   );
    var TPmap_specular = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
