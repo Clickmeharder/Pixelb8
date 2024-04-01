@@ -7,7 +7,6 @@ var mouseDown = false,
   mouseX = 0,
   mouseY = 0;
 var stats;
-// Define the markers array
 var markers = [];
 var markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 var markerGeometry = new THREE.SphereGeometry(1, 8, 8);
