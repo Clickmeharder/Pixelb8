@@ -92,6 +92,9 @@ function init() {
   var heatmap_texture = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/ark-tpheatmapwithpins.png"
   );
+   var heatmap_bump = new THREE.TextureLoader().load(
+    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
+  );
   var heatmap_geometry = new THREE.SphereGeometry(15.5, 32, 32);
   var heatmap_material = new THREE.MeshBasicMaterial({
     map: heatmap_texture,
