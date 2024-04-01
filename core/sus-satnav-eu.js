@@ -90,28 +90,31 @@ function init() {
   scene.add(cloud);
   // heatmap
   var heatmap_texture = new THREE.TextureLoader().load(
-    "https://pixelb8.lol/Modules/globemaps/arkadia/ark-tpheatmapwithpins.png"
+    "https://pixelb8.lol/Modules/globemaps/arkadia/arkmapoverla-unlabelled.png"
   );
    var heatmap_bump = new THREE.TextureLoader().load(
-    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
-  );
-   var heatmap_specular = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapspecular.png"
   );
-  var heatmap_geometry = new THREE.SphereGeometry(15.5, 32, 32);
+   var heatmap_specular = new THREE.TextureLoader().load(
+    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
+  );
+  var heatmap_geometry = new THREE.SphereGeometry(16.5, 32, 32);
   var heatmap_material = new THREE.MeshPhongMaterial({
-	shininess: 0,
-    bumpScale: 0.01,
+	shininess: 1,
+    bumpScale: .12,
 
     map: heatmap_texture,
-	bumpMap: heatmap_bump,
-	specularMap: heatmap_specular,
+	bumpMap: earth_bump,
+	specularMap: earth_specular,
 	
 	displacementMap: earth_displacement,
 	
-	displacementScale: 1.5, // Adjust the displacement scale as needed
+	displacementScale: 1.1, // Adjust the displacement scale as needed
     transparent: true,
-    opacity: 0.4
+    opacity: 0.8,
+ // Adjust the intensity of ambient occlusion effect	
+	
+	
   });
   heatmap = new THREE.Mesh(heatmap_geometry, heatmap_material);
   scene.add(heatmap);
