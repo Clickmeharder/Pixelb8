@@ -108,8 +108,7 @@ function init() {
   var heatmap_geometry = new THREE.SphereGeometry(16.5, 32, 32);
   var heatmap_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
-    bumpScale: 0.5,
-
+    bumpScale: 0.01,
     map: heatmap_texture,
 	bumpMap: earth_bump,
 	specularMap: earth_specular,
