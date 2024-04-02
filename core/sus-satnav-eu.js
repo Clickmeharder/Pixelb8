@@ -1,7 +1,7 @@
 
 var camera, scene, renderer;
-var earth, cloud, heatmap, TPmap;
-
+var earth, cloud, TPmap;
+var heatmap;
 var pointLight, ambientLight;
 var mouseDown = false,
   mouseX = 0,
@@ -87,13 +87,12 @@ function init() {
     "https://pixelb8.lol/Modules/globemaps/arkadia/ark-TPmap.png"
   );
   var TPmap_geometry = new THREE.SphereGeometry(15.5, 32, 32);
-  var TPmap_material = new new THREE.MeshBasicMaterial({
+  var TPmap_material = new THREE.MeshBasicMaterial({
     map: TPmap_texture,
-	transparent: true,
-    opacity: 0.8,
+    transparent: true,
+    opacity: 0.4
   });
   TPmap = new THREE.Mesh(TPmap_geometry, TPmap_material);
-  TPmap.position.y = + 0.1; 
   scene.add(TPmap);
   // heatmap
   var heatmap_texture = new THREE.TextureLoader().load(
