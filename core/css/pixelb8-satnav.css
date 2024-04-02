@@ -19,3 +19,39 @@ body {
 button {
 	backgorund-color:#444;
 }
+<style>
+  /* Styling for sliders */
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 10px;
+    background: #ddd;
+    border-radius: 5px;
+    outline: none;
+    margin-bottom: 10px;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #4CAF50;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #4CAF50;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  /* Optional: style the labels for sliders */
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
