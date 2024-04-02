@@ -3,7 +3,7 @@ var camera, scene, renderer;
 var earth, cloud, TPmap;
 var landareas;
 var pointLight, ambientLight;
-var rotationEnabled = false;
+var rotationEnabled = true;
 var mouseDown = false,
   mouseX = 0,
   mouseY = 0;
