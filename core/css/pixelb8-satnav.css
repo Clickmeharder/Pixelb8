@@ -84,15 +84,13 @@ button {
 
 
 .glow {
-  --c: rgb(0, 255, 255, calc(0.25 + var(--val) / 125));
-  --c: hsl(160deg 80% 50% / calc(0.25 + var(--val) / 125));
+  --c: #0d5866;
   -webkit-appearance: none;
   -moz-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
-  width: 15rem;
-  position: relative;
+    appearance: none;
+    background: #3b3b3b;
+    cursor: pointer;
+    width: auto;
 }
 
 .glow::before {

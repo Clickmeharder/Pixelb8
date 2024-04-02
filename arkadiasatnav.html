@@ -40,8 +40,8 @@
 		<button onclick="toggleElement('landareas')">Toggle Land areas</button>
 		<button onclick="toggleElement('TPmap')">Toggle Teleports</button>
 		<button onclick="toggleElement('cloud')">Toggle Cloud</button>
-		<input id="cloudOpacity" type="range" class="glow" min="0.1" max="1.0" step="0.1" value="0.4" oninput="adjustOpacity(this.value, 'cloud')">Cloud Opacity</input>
-		<input id="lightIntensitySlider" type="range" min="0" max="2" step="0.1" value="1" oninput="adjustLightIntensity(this.value)">Light Intensity</input>
+		<input id="cloudOpacity" type="range" class="glow" style="--val: 50" value="50" min="0" max="100" oninput="adjustOpacity(this.value, 'cloud')">Cloud Opacity</input>
+		<input id="lightIntensitySlider" type="range" class="glow" min="0" max="2" step="0.1" value="1" oninput="adjustLightIntensity(this.value)">Light Intensity</input>
 		<input type="checkbox" id="rotationCheckbox" onchange="toggleRotation()">
 		<label for="rotationCheckbox">Enable Rotation</label>
 	<script src="core/sus-satnav-eu.js"></script>
