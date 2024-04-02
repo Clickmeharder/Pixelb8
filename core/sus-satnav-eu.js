@@ -104,9 +104,7 @@ function init() {
     map: heatmap_texture,
 	bumpMap: earth_bump,
 	specularMap: earth_specular,
-	
 	displacementMap: earth_displacement,
-	
 	displacementScale: 1.1, 
     transparent: true,
     opacity: 0.8,	
@@ -128,12 +126,12 @@ function init() {
   var TPmap_geometry = new THREE.SphereGeometry(15.5, 32, 32);
   var TPmap_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
-    bumpScale: .12,
+    bumpScale: 0.12,
     map: TPmap_texture,
 	bumpMap: earth_bump,
 	specularMap: earth_specular,
 	displacementMap: earth_displacement,
-	displacementScale: 1.1, // Adjust the displacement scale as needed
+	displacementScale: 1.1,
     transparent: true,
     opacity: 0.8,
  // Adjust the intensity of ambient occlusion effect	
