@@ -308,11 +308,9 @@ function adjustOpacity(value, elementName) {
 function adjustLightIntensity(value) {
   pointLight.intensity = parseFloat(value);
 }
-// Example of adding event listeners to HTML elements
-document.getElementById('cloudOpacity').addEventListener('input', function() {
-  adjustOpacity(this.value, 'cloud');
-});
-// Function to adjust light intensity based on slider input
-function adjustLightIntensity(value) {
-  pointLight.intensity = parseFloat(value);
+
+// Function to adjust ambient light intensity based on slider input
+function adjustAmbientLightIntensity(value) {
+  ambientLight.intensity = parseFloat(value);
 }
+
