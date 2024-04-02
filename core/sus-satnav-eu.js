@@ -97,15 +97,20 @@ function init() {
    var heatmap_specular = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
   );
-  var heatmap_geometry = new THREE.SphereGeometry(16.4, 32, 32);
+  var heatmap_geometry = new THREE.SphereGeometry(15, 32, 32);
   var heatmap_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
     bumpScale: 1.12,
+
     map: heatmap_texture,
 	bumpMap: earth_bump,
 	specularMap: earth_specular,
+	
+	displacementMap: earth_displacement,
+	
+	displacementScale: 1.1, 
     transparent: true,
-    opacity: 0.8	
+    opacity: 0.8,	
 	
 	
   });
@@ -121,7 +126,7 @@ function init() {
    var TPmap_specular = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
   );
-  var TPmap_geometry = new THREE.SphereGeometry(15.4.0, 32, 32);
+  var TPmap_geometry = new THREE.SphereGeometry(16.5, 32, 32);
   var TPmap_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
     bumpScale: .12,
@@ -129,9 +134,11 @@ function init() {
 	bumpMap: earth_bump,
 	specularMap: earth_specular,
 	displacementMap: earth_displacement,
-	displacementScale: 0.1, 
+	displacementScale: 0.1, // Adjust the displacement scale as needed
     transparent: true,
-    opacity: 0.8
+    opacity: 0.8,
+ // Adjust the intensity of ambient occlusion effect	
+	
 	
   });
   TPmap = new THREE.Mesh(TPmap_geometry, TPmap_material);
@@ -159,7 +166,7 @@ function init() {
 	  labelElement.style.left = x + 'px';
 	  labelElement.style.top = y + 'px';
 	  labelElement.style.pointerEvents = 'none'; // Ensure the label doesn't block mouse events
-	  labelElement.style.zIndex = 100; 
+	  labelElement.style.zIndex = 100; // Set the z-index to ensure it's above other elements
 
 	  // Append the label to the document body
 	  document.body.appendChild(labelElement);
