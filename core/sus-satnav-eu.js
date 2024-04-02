@@ -10,8 +10,7 @@ var stats;
 var markers = [];
 var markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 var markerGeometry = new THREE.SphereGeometry(1, 8, 8);
-  // Add city markers
-  var cities = [];
+var cities = [];
 
 init();
 animate();
