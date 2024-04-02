@@ -266,3 +266,42 @@ function onScroll(event) {
     camera.position.z -= 1; // You can adjust the speed of zooming here
   }
 }
+
+
+
+
+
+
+
+//------------------
+// controlbar
+//-----------------------------
+
+// Function to toggle visibility of an element
+function toggleElement(elementName) {
+  var element = scene.getObjectByName(elementName);
+  if (element) {
+    element.visible = !element.visible;
+  }
+}
+
+// Function to adjust opacity of an element
+function adjustOpacity(value, elementName) {
+  var element = scene.getObjectByName(elementName);
+  if (element) {
+    element.material.opacity = parseFloat(value);
+  }
+}
+
+// Example of adding more control functions for other elements and properties
+function adjustLightIntensity(value) {
+  pointLight.intensity = parseFloat(value);
+}
+// Example of adding event listeners to HTML elements
+document.getElementById('cloudOpacity').addEventListener('input', function() {
+  adjustOpacity(this.value, 'cloud');
+});
+
+document.getElementById('lightIntensity').addEventListener('input', function() {
+  adjustLightIntensity(this.value);
+});
