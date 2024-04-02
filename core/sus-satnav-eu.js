@@ -3,6 +3,7 @@ var camera, scene, renderer;
 var earth, cloud, TPmap;
 var heatmap;
 var pointLight, ambientLight;
+var rotationEnabled = false;
 var mouseDown = false,
   mouseX = 0,
   mouseY = 0;
@@ -212,7 +213,10 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
-
+// Function to toggle rotation based on checkbox state
+function toggleRotation() {
+  rotationEnabled = document.getElementById('rotationCheckbox').checked;
+}
 function onMouseMove(evt) {
   if (!mouseDown) return;
   evt.preventDefault();
@@ -224,6 +228,7 @@ function onMouseMove(evt) {
 }
 
 function onMouseDown(evt) {
+  if (!rotationEnabled) return;
   evt.preventDefault();
   mouseDown = true;
   mouseX = evt.clientX;
@@ -235,6 +240,7 @@ function onMouseUp(evt) {
   mouseDown = false;
 }
 function rotateScene(deltaX, deltaY) {
+  if (!rotationEnabled) return;
   // Rotate the Earth and clouds based on mouse movement
   earth.rotation.y += deltaX / 300;
   earth.rotation.x += deltaY / 300;
@@ -251,22 +257,27 @@ function rotateScene(deltaX, deltaY) {
   });
 
 }
-// Add an event listener for the wheel event
-document.addEventListener("wheel", onScroll);
-
 function onScroll(event) {
- // event.preventDefault(); // Prevent the default scroll behavior
+  // Check if rotation is enabled
+  if (!rotationEnabled) return;
 
   // Check the deltaY property to determine the scroll direction
   if (event.deltaY > 0) {
     // Scrolling down, move the camera closer (decrease z position)
-    camera.position.z += 1; // You can adjust the speed of zooming here
+    camera.position.z -= 1; // Decrease the distance by 1 unit
+    // Optionally, add a limit for how close the camera can go
+    if (camera.position.z < 50) { // Adjust the limit as needed
+      camera.position.z = 50; // Set a minimum distance
+    }
   } else {
     // Scrolling up, move the camera farther (increase z position)
-    camera.position.z -= 1; // You can adjust the speed of zooming here
+    camera.position.z += 1; // Increase the distance by 1 unit
+    // Optionally, add a limit for how far the camera can go
+    if (camera.position.z > 150) { // Adjust the limit as needed
+      camera.position.z = 150; // Set a maximum distance
+    }
   }
 }
-
 
 
 
