@@ -33,22 +33,16 @@ function init() {
   stats.dom.style.width = '100%'; // Set the desired width
   stats.dom.style.height = '100%'; // Set the desired height
   document.getElementById('stats-container').appendChild(stats.dom);
-
-
   // Load the displacement map
   var earth_displacement = new THREE.TextureLoader().load(
     "https://i.imgur.com/5zCuDBG.png"
   );
-
   // Load the ambient occlusion map
   var earth_ao = new THREE.TextureLoader().load(
     "https://i.imgur.com/r6vbejH.png"
   );
-
   // Earth terrain
   var earth_texture = new THREE.TextureLoader().load(
-    //"https://i.imgur.com/jX5Uhq2.png"
-    //"https://i.imgur.com/saFysjd.jpeg"
 	"https://pixelb8.lol/Modules/globemaps/arkadia/arkmap-tpmap.png"
     //"https://i.imgur.com/6mWrheX.jpeg"
   );
@@ -87,6 +81,20 @@ function init() {
   });
   cloud = new THREE.Mesh(cloud_geometry, cloud_material);
   scene.add(cloud);
+
+  // TPmap
+  var TPmap_texture = new THREE.TextureLoader().load(
+    "https://pixelb8.lol/Modules/globemaps/arkadia/ark-TPmap.png"
+  );
+  var TPmap_geometry = new THREE.SphereGeometry(15.5, 32, 32);
+  var TPmap_material = new new THREE.MeshBasicMaterial({
+    map: TPmap_texture,
+	transparent: true,
+    opacity: 0.8,
+  });
+  TPmap = new THREE.Mesh(TPmap_geometry, TPmap_material);
+  TPmap.position.y = + 0.1; 
+  scene.add(TPmap);
   // heatmap
   var heatmap_texture = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/ark-landareas.png"
@@ -114,29 +122,6 @@ function init() {
   });
   heatmap = new THREE.Mesh(heatmap_geometry, heatmap_material);
   scene.add(heatmap);
-  // TPmap
-  var TPmap_texture = new THREE.TextureLoader().load(
-    "https://pixelb8.lol/Modules/globemaps/arkadia/ark-TPmap.png"
-  );
-   var TPmap_bump = new THREE.TextureLoader().load(
-    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
-  );
-   var TPmap_specular = new THREE.TextureLoader().load(
-    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
-  );
-  var TPmap_geometry = new THREE.SphereGeometry(15.5, 32, 32);
-  var TPmap_material = new new THREE.MeshBasicMaterial({
-    transparent: true,
-    opacity: 0.8,
-	
- // Adjust the intensity of ambient occlusion effect	
-	
-	
-  });
-  TPmap = new THREE.Mesh(TPmap_geometry, TPmap_material);
-  TPmap.position.y = + 0.1; 
-  scene.add(TPmap);
-
 	function addTextLabel(marker, labelText) {
 	  // Create a div element for the label
 	  var labelElement = document.createElement('div');
