@@ -116,3 +116,7 @@ button {
   height: ;
 }
 
+fieldset {
+	position:fixed;
+	top:20%;
+}
