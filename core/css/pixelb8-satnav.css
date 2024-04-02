@@ -17,7 +17,7 @@ body {
 }
 
 button {
-	backgorund-color:#444;
+	background-color:#444;
 }
 <style>
   /* Styling for sliders */
@@ -51,7 +51,7 @@ button {
 
   /* Optional: style the labels for sliders */
   label {
-    display: block;
+    display: inline-flex;
     margin-bottom: 5px;
     font-weight: bold;
   }
