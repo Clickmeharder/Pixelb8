@@ -99,12 +99,7 @@ function init() {
   var landareas_texture = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/ark-landareas.png"
   );
-   var landareas_bump = new THREE.TextureLoader().load(
-    "https://pixelb8.lol/Modules/globemaps/arkadia/landareasnormal.png"
-  );
-   var landareas_specular = new THREE.TextureLoader().load(
-    "https://pixelb8.lol/Modules/globemaps/arkadia/landareasnormal.png"
-  );
+
   var landareas_geometry = new THREE.SphereGeometry(16.5, 32, 32);
   var landareas_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
