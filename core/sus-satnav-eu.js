@@ -264,14 +264,14 @@ function onScroll(event) {
   // Check the deltaY property to determine the scroll direction
   if (event.deltaY > 0) {
     // Scrolling down, move the camera closer (decrease z position)
-    camera.position.z -= 1; // Decrease the distance by 1 unit
+    camera.position.z += 1; // Decrease the distance by 1 unit
     // Optionally, add a limit for how close the camera can go
     if (camera.position.z < 50) { // Adjust the limit as needed
       camera.position.z = 50; // Set a minimum distance
     }
   } else {
     // Scrolling up, move the camera farther (increase z position)
-    camera.position.z += 1; // Increase the distance by 1 unit
+    camera.position.z -= 1; // Increase the distance by 1 unit
     // Optionally, add a limit for how far the camera can go
     if (camera.position.z > 150) { // Adjust the limit as needed
       camera.position.z = 150; // Set a maximum distance
