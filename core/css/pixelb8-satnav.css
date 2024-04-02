@@ -3,13 +3,16 @@ body {
   background-position: center center;
   overflow: hidden;
   background-size: cover;
+
 }
 #stats-container{
-
+  height:100%;
+  width:100%;
 }
 .cssbody {
   background-position: center center;
-
+  height:100vh;
+  width:100vw;
 }
 #controls {
 	border: 3px ridge #444;
