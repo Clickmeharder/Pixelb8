@@ -49,7 +49,8 @@ function init() {
   var earth_texture = new THREE.TextureLoader().load(
     //"https://i.imgur.com/jX5Uhq2.png"
     //"https://i.imgur.com/saFysjd.jpeg"
-    "https://i.imgur.com/6mWrheX.jpeg"
+	"https://pixelb8.lul/modules/globemaps/arkadia/arkadia-tp-pinsandheatmap.png"
+    //"https://i.imgur.com/6mWrheX.jpeg"
   );
   var earth_bump = new THREE.TextureLoader().load(
     "https://i.imgur.com/bjFnZmK.jpeg"
