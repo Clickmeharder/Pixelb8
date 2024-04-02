@@ -256,7 +256,7 @@ function rotateScene(deltaX, deltaY) {
 }
 function onScroll(event) {
   // Check if rotation is enabled
-  if (!rotationEnabled) return;
+
 
   // Check the deltaY property to determine the scroll direction
   if (event.deltaY > 0) {
