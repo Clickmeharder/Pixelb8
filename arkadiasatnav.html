@@ -45,7 +45,7 @@
 		<button onclick="toggleElement('cloud')">Toggle thing3</button>
 		<input id="cloudOpacity" type="range" class="glow" style="--val: 50" value="50" min="0" max="100" oninput="adjustOpacity(this.value, 'cloud')">Cloud Opacity</input>
 		<input id="lightIntensitySlider" type="range" class="glow" style="--val: 50" value="5" min="0.1" max="50.00"  oninput="adjustLightIntensity(this.value)">Light Intensity</input>
-		<input type="checkbox" id="rotationCheckbox" onchange="toggleRotation()">
+		<input type="checkbox" id="rotationCheckbox" onchange="toggleRotation()" checked>
 		<label for="rotationCheckbox">Enable Rotation</label>
 	<script src="core/sus-satnav-eu.js"></script>
 	</body>
