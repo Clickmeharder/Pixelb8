@@ -219,7 +219,6 @@ function toggleRotation() {
 }
 function onMouseMove(evt) {
   if (!mouseDown) return;
-  evt.preventDefault();
   var deltaX = evt.clientX - mouseX,
     deltaY = evt.clientY - mouseY;
   mouseX = evt.clientX;
@@ -229,14 +228,12 @@ function onMouseMove(evt) {
 
 function onMouseDown(evt) {
   if (!rotationEnabled) return;
-  evt.preventDefault();
   mouseDown = true;
   mouseX = evt.clientX;
   mouseY = evt.clientY;
 }
 
 function onMouseUp(evt) {
-  evt.preventDefault();
   mouseDown = false;
 }
 function rotateScene(deltaX, deltaY) {
