@@ -101,7 +101,6 @@ function init() {
   var heatmap_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
     bumpScale: 1.12,
-
     map: heatmap_texture,
 	bumpMap: earth_bump,
 	specularMap: earth_specular,
