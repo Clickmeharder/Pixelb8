@@ -99,7 +99,7 @@ function init() {
   var heatmap_geometry = new THREE.SphereGeometry(16.5, 32, 32);
   var heatmap_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
-    bumpScale: 1.12,
+    bumpScale: 0.5,
 
     map: heatmap_texture,
 	bumpMap: earth_bump,
@@ -126,7 +126,7 @@ function init() {
   var TPmap_geometry = new THREE.SphereGeometry(16.5, 32, 32);
   var TPmap_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
-    bumpScale: 0.12,
+    bumpScale: 0.05,
     map: TPmap_texture,
 	bumpMap: earth_bump,
 	specularMap: earth_specular,
@@ -134,11 +134,13 @@ function init() {
 	displacementScale: 1.1,
     transparent: true,
     opacity: 0.8,
+	
  // Adjust the intensity of ambient occlusion effect	
 	
 	
   });
   TPmap = new THREE.Mesh(TPmap_geometry, TPmap_material);
+  TPmap.position.y = -2; 
   scene.add(TPmap);
 
 	function addTextLabel(marker, labelText) {
