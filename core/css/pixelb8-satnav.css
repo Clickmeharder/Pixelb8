@@ -75,16 +75,7 @@ button {
   
   
   
-  
-  styles based on this guide: 
- - https://www.smashingmagazine.com/2021/12/create-custom-range-input-consistent-browsers/
 
-design based on these demos: 
-  - https://codepen.io/alvaromontoro/pen/yLwPvaG
-  - https://codepen.io/jh3y/pen/YzgYPNb
-
-*/
-/* this property may not be needed as we update based on --val */
 @property --c {
   syntax: '<color>';
   inherits: true;
