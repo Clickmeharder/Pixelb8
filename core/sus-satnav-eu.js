@@ -254,6 +254,9 @@ function rotateScene(deltaX, deltaY) {
   });
 
 }
+// Add an event listener for the wheel event
+document.addEventListener("wheel", onScroll);
+
 function onScroll(event) {
   // Check if rotation is enabled
 
