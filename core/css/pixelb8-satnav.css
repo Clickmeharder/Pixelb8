@@ -125,7 +125,8 @@ fieldset {
     position: fixed;
     top: 35%;
     width: 130px;
-    border-color: #0c6098e0;
+	color:#00bfffcf;
+    border-color: #00bfffcf;/*#0c6098e0;*/
 
 }
 
