@@ -301,7 +301,7 @@ function adjustLightIntensity(value) {
 document.getElementById('cloudOpacity').addEventListener('input', function() {
   adjustOpacity(this.value, 'cloud');
 });
-
-document.getElementById('lightIntensitySlider').addEventListener('input', function() {
-  adjustLightIntensity(this.value);
-});
+// Function to adjust light intensity based on slider input
+function adjustLightIntensity(value) {
+  pointLight.intensity = parseFloat(value);
+}
