@@ -302,6 +302,6 @@ document.getElementById('cloudOpacity').addEventListener('input', function() {
   adjustOpacity(this.value, 'cloud');
 });
 
-document.getElementById('lightIntensity').addEventListener('input', function() {
+document.getElementById('lightIntensitySlider').addEventListener('input', function() {
   adjustLightIntensity(this.value);
 });

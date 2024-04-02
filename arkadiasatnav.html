@@ -39,9 +39,7 @@
 	<div id="controls">
 		<button onclick="toggleElement('cloud')">Toggle Cloud</button>
 		<input id="cloudOpacity" type="range" min="0" max="1" step="0.1" value="0.4" oninput="adjustOpacity(this.value, 'cloud')">Cloud Opacity</input>
-		 <button onclick="adjustLightIntensity(0.5)">Low Light</button>
-		 <button onclick="adjustLightIntensity(1)">Normal Light</button>
-		 <button onclick="adjustLightIntensity(2)">High Light</button>
+		<input id="lightIntensitySlider" type="range" min="0" max="2" step="0.1" value="1" oninput="adjustLightIntensity(this.value)">Light Intensity</input>
 	<script src="core/sus-satnav-eu.js"></script>
 	</body>
 
