@@ -11,3 +11,11 @@ body {
   background-position: center center;
 
 }
+#controls {
+	border: 3px ridge #444;
+	background-color: #333;
+}
+
+button {
+	backgorund-color:#444;
+}
