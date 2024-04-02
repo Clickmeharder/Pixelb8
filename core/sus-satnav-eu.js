@@ -1,7 +1,7 @@
 
 var camera, scene, renderer;
 var earth, cloud, TPmap;
-var heatmap;
+var landareas;
 var pointLight, ambientLight;
 var rotationEnabled = false;
 var mouseDown = false,
@@ -95,21 +95,21 @@ function init() {
   });
   TPmap = new THREE.Mesh(TPmap_geometry, TPmap_material);
   scene.add(TPmap);
-  // heatmap
-  var heatmap_texture = new THREE.TextureLoader().load(
+  // landareas
+  var landareas_texture = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/ark-landareas.png"
   );
-   var heatmap_bump = new THREE.TextureLoader().load(
-    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
+   var landareas_bump = new THREE.TextureLoader().load(
+    "https://pixelb8.lol/Modules/globemaps/arkadia/landareasnormal.png"
   );
-   var heatmap_specular = new THREE.TextureLoader().load(
-    "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
+   var landareas_specular = new THREE.TextureLoader().load(
+    "https://pixelb8.lol/Modules/globemaps/arkadia/landareasnormal.png"
   );
-  var heatmap_geometry = new THREE.SphereGeometry(16.5, 32, 32);
-  var heatmap_material = new THREE.MeshPhongMaterial({
+  var landareas_geometry = new THREE.SphereGeometry(16.5, 32, 32);
+  var landareas_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
     bumpScale: 0.01,
-    map: heatmap_texture,
+    map: landareas_texture,
 	bumpMap: earth_bump,
 	specularMap: earth_specular,
 	displacementMap: earth_displacement,
@@ -119,8 +119,8 @@ function init() {
 	
 	
   });
-  heatmap = new THREE.Mesh(heatmap_geometry, heatmap_material);
-  scene.add(heatmap);
+  landareas = new THREE.Mesh(landareas_geometry, landareas_material);
+  scene.add(landareas);
 	function addTextLabel(marker, labelText) {
 	  // Create a div element for the label
 	  var labelElement = document.createElement('div');
@@ -198,7 +198,7 @@ function animate() {
   var rotationSpeed = 0.001; // Adjust this value as needed for the desired rotation speed
   earth.rotation.y += rotationSpeed;
   cloud.rotation.y += rotationSpeed;
-  heatmap.rotation.y += rotationSpeed;
+  landareas.rotation.y += rotationSpeed;
   TPmap.rotation.y += rotationSpeed;
   // Rotate the markers around the globe's center
   markers.forEach(marker => {
@@ -243,8 +243,8 @@ function rotateScene(deltaX, deltaY) {
   earth.rotation.x += deltaY / 300;
   cloud.rotation.y += deltaX / 300;
   cloud.rotation.x += deltaY / 300;
-  heatmap.rotation.y += deltaX / 300;
-  heatmap.rotation.x += deltaY / 300;
+  landareas.rotation.y += deltaX / 300;
+  landareas.rotation.x += deltaY / 300;
   TPmap.rotation.y += deltaX / 300;
   TPmap.rotation.x += deltaY / 300;
   // Rotate the markers around the globe's center
