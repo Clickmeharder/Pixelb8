@@ -140,7 +140,7 @@ function init() {
 	
   });
   TPmap = new THREE.Mesh(TPmap_geometry, TPmap_material);
-  TPmap.position.y = -2; 
+  TPmap.position.y = -0.1; 
   scene.add(TPmap);
 
 	function addTextLabel(marker, labelText) {
