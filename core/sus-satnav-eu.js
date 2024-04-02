@@ -126,7 +126,7 @@ function init() {
    var TPmap_specular = new THREE.TextureLoader().load(
     "https://pixelb8.lol/Modules/globemaps/arkadia/heatmapnormal.png"
   );
-  var TPmap_geometry = new THREE.SphereGeometry(15.3, 32, 32);
+  var TPmap_geometry = new THREE.SphereGeometry(15.0, 32, 32);
   var TPmap_material = new THREE.MeshPhongMaterial({
 	shininess: 1,
     bumpScale: .12,
@@ -134,7 +134,7 @@ function init() {
 	bumpMap: earth_bump,
 	specularMap: earth_specular,
 	displacementMap: earth_displacement,
-	displacementScale: 0.1, // Adjust the displacement scale as needed
+	displacementScale: 1.1, // Adjust the displacement scale as needed
     transparent: true,
     opacity: 0.8,
  // Adjust the intensity of ambient occlusion effect	
