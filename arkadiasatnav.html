@@ -40,7 +40,7 @@
 	<div id="stats-container"></div>
 	<div id="controls">
 		<div id="divcontrollerpowerbutts">
-			<button id="globemenubutt"></button>
+			<button id="globemenubutt">🌍</button>
 			<button id="globeinputbutt"></button>
 			<button id="globepowerbutt"></button>
 		</div>
@@ -53,15 +53,26 @@
 			<label for="GlobeLandareasCheckbox">L.A Display</label>
 		</div>
 		<div id="globecontralButts">
-			<h2 for="cloudOpacity">Toggles</h2>
-			<button onclick="toggleElement('landareas')">Land areas</button>
-			<button onclick="toggleElement('TPmap')">Teleports</button>
-			<button onclick="toggleElement('cloud')">Cloud</button>
-			<button onclick="toggleElement('thing')">Mob Spawns</button>
-			<button onclick="toggleElement('thing2')">PvP zones</button>
-			<button onclick="toggleElement('thing3')">thing3</button>
-			<button onclick="toggleElement('thing4')">thing4</button>
+		  <h2 for="cloudOpacity">Toggles</h2>
+		  <button onclick="toggleElement('landareas')" title="Land Areas">🏞️</button>
+		  <button onclick="toggleElement('TPmap')" title="Teleport Map">🌌</button>
+		  <button onclick="toggleElement('cloud')" title="Cloud">☁️</button>
+		  <button onclick="toggleElement('mobmap')" title="Monster Map">👾</button>
+		  <button onclick="toggleElement('pvp')" title="Player vs Player">⚔️</button>
+		  <button onclick="toggleElement('pvplootable')" title="PvP Lootable">☠</button>
+		  <button onclick="toggleElement('light')" title="Light">☀️</button>
+		  <button onclick="toggleElement('mining')" title="Mining">⛏️</button>
+		  <button onclick="toggleElement('enmatter')" title="Enmatter">🌠</button>
+		  <button onclick="toggleElement('mineral')" title="Mineral">💎</button>
+		  <button onclick="toggleElement('treasure')" title="Treasure">🏆</button>
+		  <button onclick="toggleElement('trees')" title="Trees">🌲</button>
+		  <button onclick="toggleElement('instances')" title="Instances">🗝️</button>
+		  <button onclick="toggleElement('towns')" title="Towns">🏰</button>
+		  <button onclick="toggleElement('missions')" title="Missions">📜</button>
+		  <button onclick="toggleElement('shops')" title="Shops">🛒</button>
+		  <button onclick="toggleElement('sweatareas')" title="Sweat Extraction Areas">💧</button>
 		</div>
+
 		<div id="sliderbox-gloveLights">
 			<input id="cloudOpacity" type="range" class="glow" value="50" min="0.0" max="100" step="0.1" oninput="adjustOpacity(this.value, 'cloud')"></input>
 			<label for="cloudOpacity">Cloud Opacity</label>

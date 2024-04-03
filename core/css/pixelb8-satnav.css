@@ -36,6 +36,10 @@ body {
 #controls:hover{
 	opacity:0.8;
 }
+#globecontralButts{
+	border:2px ridge #333;
+	
+}
 button {
     background-color: #444;
     outline: 1px inset #222;
