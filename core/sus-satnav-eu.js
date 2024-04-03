@@ -52,6 +52,9 @@ function init() {
   var ark_defaulttexture = new THREE.TextureLoader().load(
 	"https://pixelb8.lol/Modules/globemaps/arkadia/arkadiaglobemap.png"
   );
+  var ark_tptexture = new THREE.TextureLoader().load(
+	"https://pixelb8.lol/Modules/globemaps/arkadia/arkmap-tpmap.png"
+  );
   var caly_defaulttexture = new THREE.TextureLoader().load(
 	"https://pixelb8.lol/Modules/globemaps/arkadia/PlanetCalypsomap.jpg"
   );
