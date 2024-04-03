@@ -354,6 +354,42 @@ function toggleTPmap() {
 	console.log('TPmap toggled OFF');
   }
 }
+function toggleWildlifemap() {
+  // Check the current opacity of the cloud material
+  var currentOpacity = Wildlifemap.material.opacity;
+  // Toggle the opacity between 0 and 1.00
+  if (currentOpacity === 0) {
+    Wildlifemap.material.opacity = 1.00;
+	console.log('TPmap toggled ON');
+  } else {
+    Wildlifemap.material.opacity = 0;
+	console.log('TPmap toggled OFF');
+  }
+}
+function togglePvpzonemap() {
+  // Check the current opacity of the cloud material
+  var currentOpacity = Pvpzonemap.material.opacity;
+  // Toggle the opacity between 0 and 1.00
+  if (currentOpacity === 0) {
+    Pvpzonemap.material.opacity = 1.00;
+	console.log('TPmap toggled ON');
+  } else {
+    Pvpzonemap.material.opacity = 0;
+	console.log('TPmap toggled OFF');
+  }
+}
+function togglePvplootablemap() {
+  // Check the current opacity of the cloud material
+  var currentOpacity = Pvplootablemap.material.opacity;
+  // Toggle the opacity between 0 and 1.00
+  if (currentOpacity === 0) {
+    Pvplootablemap.material.opacity = 1.00;
+	console.log('TPmap toggled ON');
+  } else {
+    Pvplootablemap.material.opacity = 0;
+	console.log('TPmap toggled OFF');
+  }
+}
 //SLIDERS
 // Function to adjust cloud opacity
 function adjustCloudOpacity(value) {
