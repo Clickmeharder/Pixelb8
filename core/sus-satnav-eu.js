@@ -286,7 +286,7 @@ function onScroll(event) {
 // Function to toggle visibility of an element
 function toggleElement(elementName) {
   var element = scene.getObjectByName(elementName);
-  console.log('Toggling element:', elementId);
+  console.log('Toggling element:', elementName);
   if (element) {
     element.visible = !element.visible;
   }
@@ -295,7 +295,7 @@ function toggleElement(elementName) {
 // Function to adjust opacity of an element
 function adjustOpacity(value, elementName) {
   var element = scene.getObjectByName(elementName);
-  console.log('Adjusting opacity for element:', elementId, 'with value:', value);
+  console.log('Adjusting opacity for element:', elementName, 'with value:', value);
   if (element) {
     element.material.opacity = parseFloat(value);
   }
