@@ -41,6 +41,11 @@ button {
     outline: 1px inset #222;
 	width: 80px;
 }
+
+
+input#rotationCheckbox {
+    height: min-content;
+}
   /* Styling for sliders */
   input[type="range"] {
     -webkit-appearance: none;
@@ -79,6 +84,7 @@ button {
     display: inline-flex;
     margin-bottom: 5px;
     font-weight: bold;
+	height: min-content;
   }
   
 #globecontralButts {

@@ -39,8 +39,10 @@
 	
 	<div id="stats-container"></div>
 	<div id="controls">
-		<input type="checkbox" id="rotationCheckbox" onchange="toggleRotation()" checked>
-		<label for="rotationCheckbox">Enable Rotation</label>
+		<div id="globecontrollortopbox">
+			<input type="checkbox" id="rotationCheckbox" onchange="toggleRotation()" checked>
+			<label for="rotationCheckbox">Enable Rotation</label>
+		</div>
 		<div id="globecontralButts">
 			<h2 for="cloudOpacity">Toggles</h2>
 			<button onclick="toggleElement('landareas')">Land areas</button>
