@@ -435,5 +435,5 @@ function cycleMap() {
   // You can set a flag to indicate that a render update is needed
   // This flag can be checked in your animation loop or update function
   // and trigger a render update when necessary
-  needsRenderUpdate = true;
+ /*  needsRenderUpdate = true; */
 }
