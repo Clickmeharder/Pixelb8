@@ -308,6 +308,14 @@ function onScroll(event) {
   cloud.material.opacity = 0;
   console.log('clouds toggled');
 } */
+/* function toggleTPmap() {
+  TPmap.material.opacity = 0;
+  console.log('TPmap toggled');
+} */
+/* function togglelandareas() {
+  landareas.material.opacity = 0;
+  console.log('landareas toggled');
+} */
 function toggleClouds() {
   // Check the current opacity of the cloud material
   var currentOpacity = cloud.material.opacity;
