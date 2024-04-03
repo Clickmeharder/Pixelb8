@@ -72,7 +72,7 @@ function init() {
   var ark_infotexture = new THREE.TextureLoader().load(
 	"https://pixelb8.lol/Modules/globemaps/arkadia/arkadialabelledmap.png"
   );
-  var ark_mobinfoinfotexture = new THREE.TextureLoader().load(
+  var ark_mobinfotexture = new THREE.TextureLoader().load(
 	"https://pixelb8.lol/Modules/globemaps/arkadia/arkadiamobinfomap.png"
   );
 
