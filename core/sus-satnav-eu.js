@@ -53,7 +53,7 @@ function init() {
 	"https://pixelb8.lol/Modules/globemaps/arkadia/arkadiaglobemap.png"
   );
   var caly_defaulttexture = new THREE.TextureLoader().load(
-	"https://pixelb8.lol/Modules/globemaps/arkadia/PlanetCalypsomap.jpeg"
+	"https://pixelb8.lol/Modules/globemaps/arkadia/PlanetCalypsomap.jpg"
   );
   var earth_bump = new THREE.TextureLoader().load(
     "https://i.imgur.com/bjFnZmK.jpeg"
