@@ -16,13 +16,14 @@ body {
 }
 #controls {
     position: fixed;
-    border: 3px ridge #444;
-    background-color: #333;
+    border: 3px ridge #637a7dc7;
+    background-color: #26a3bc6b;
     height: 185px;
     width: 288px;
     top: 12%;
     right: 8px;
     opacity: 0.59;
+	padding:4px;
 }
 #controls:hover{
 	opacity:0.8;
@@ -69,13 +70,17 @@ button {
     font-weight: bold;
   }
   
-
+#globecontralButts {
+	width:95%;
+	
+}
 
 div#sliderbox-gloveLights {
     width: 275px;
     border: 2px ridge #444;
     margin: 2px;
-    margin-left: 4px;
+    margin-top: 4px;
+    margin-bottom: -6px;
 }
   
   
