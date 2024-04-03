@@ -22,17 +22,16 @@ body {
 #controls {
 	position: fixed;
     display: flex;
-    border: 12px ridge #04899b6e;
-    border-style: double;
-    border-radius: 28px;
-    outline: 5px inset #26a3bc;
-    background-color: #26a3bc6b;
+    border: 4px ridge #414849eb;
+    border-radius: 22px;
+    outline: 3px ridge #4c4e4ee3;
+    background-color: #6c6e6e;
     height: 409px;
     width: 146px;
     top: 12%;
     right: 8px;
     opacity: 0.59;
-    padding: 4px;
+    padding: 0px;
     transition: 1.3s;
     flex-direction: column;
 }
@@ -44,11 +43,11 @@ div#divcontrollerpowerbutts {
     display: inline-flex;
     flex-direction: row;
 	border:2px ridge #333;
-
+}
 button {
     background-color: #444;
-    outline: 1px inset #222;
-	width: 30px;
+    outline: 2px solid #222;
+    width: 30px;
     height: 18px;
     line-height: 0.8;
     padding-bottom: 3px;
@@ -58,8 +57,10 @@ button#globemenubutt {
     border-radius: 50%;
     width: 32px;
     height: 32px;
-    padding: 0;
+    padding: 0px;
     font-size: 22px;
+    margin-top: 3px;
+    margin-right: 1px;
 }
 
 
