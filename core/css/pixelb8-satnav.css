@@ -29,6 +29,7 @@ body {
     right: 8px;
     opacity: 0.59;
 	padding:4px;
+	transition:1.3s;
 }
 #controls:hover{
 	opacity:0.8;
