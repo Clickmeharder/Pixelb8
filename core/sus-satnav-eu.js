@@ -72,6 +72,9 @@ function init() {
   var ark_infotexture = new THREE.TextureLoader().load(
 	"https://pixelb8.lol/Modules/globemaps/arkadia/arkadialabelledmap.png"
   );
+  var ark_mobinfoinfotexture = new THREE.TextureLoader().load(
+	"https://pixelb8.lol/Modules/globemaps/arkadia/arkadiamobinfomap.png"
+  );
 
   var earth_bump = new THREE.TextureLoader().load(
     "https://i.imgur.com/bjFnZmK.jpeg"
@@ -81,7 +84,7 @@ function init() {
     //"https://i.imgur.com/yPiv3Gk.png"
     "https://i.imgur.com/YBFt7oC.jpeg"
   );
-  mapTextures.push(earth_texture, ark_defaulttexture, ark_tptexture, ark_infotexture, earth_displacement, earth_bump, earth_specular);
+  mapTextures.push(earth_texture, ark_defaulttexture, ark_tptexture, ark_infotexture, ark_mobinfotexture, earth_displacement, earth_bump, earth_specular);
   planetTextures.push(ark_defaulttexture, caly_defaulttexture, cyrene_defaulttexture, rocktropia_defaulttexture);
   var earth_geometry = new THREE.SphereGeometry(14.5, 32, 32);
   var earth_material = new THREE.MeshPhongMaterial({
