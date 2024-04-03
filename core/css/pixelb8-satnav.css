@@ -39,15 +39,16 @@ body {
 button {
     background-color: #444;
     outline: 1px inset #222;
-	width: 80px;
+    width: 70px;
+    line-height: 0.8;
+    padding-bottom: 3px;
 }
 
-
-input#rotationCheckbox {
+#rotationCheckbox {
     height: min-content;
 }
   /* Styling for sliders */
-  input[type="range"] {
+input[type="range"] {
     -webkit-appearance: none;
     width: 95%;
     max-width: 75px;
@@ -78,7 +79,10 @@ input#rotationCheckbox {
     border-radius: 50%;
     cursor: pointer;
   }
-
+h2 {
+    margin: 3px;
+    text-align: center;
+}
   /* Optional: style the labels for sliders */
   label {
     display: inline-flex;
@@ -94,6 +98,7 @@ input#rotationCheckbox {
 
 div#sliderbox-gloveLights {
 	width: 120px;
+	height:230px;
     border: 2px ridge #444;
     margin: 2px;
     margin-top: 4px;
