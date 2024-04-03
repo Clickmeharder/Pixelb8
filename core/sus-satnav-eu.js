@@ -44,8 +44,16 @@ function init() {
   );
   // Earth terrain
   var earth_texture = new THREE.TextureLoader().load(
-	"https://pixelb8.lol/Modules/globemaps/arkadia/arkmap-tpmap.png"
+	"https://pixelb8.lol/Modules/globemaps/arkadia/arkadiaglobemap.png"
+	// "https://pixelb8.lol/Modules/globemaps/arkadia/arkmap-tpmap.png"
     //"https://i.imgur.com/6mWrheX.jpeg"
+  );
+  // Earth terrain
+  var ark_defaulttexture = new THREE.TextureLoader().load(
+	"https://pixelb8.lol/Modules/globemaps/arkadia/arkadiaglobemap.png"
+  );
+  var caly_defaulttexture = new THREE.TextureLoader().load(
+	"https://pixelb8.lol/Modules/globemaps/arkadia/PlanetCalypsomap.jpeg"
   );
   var earth_bump = new THREE.TextureLoader().load(
     "https://i.imgur.com/bjFnZmK.jpeg"
