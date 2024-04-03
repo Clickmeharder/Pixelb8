@@ -51,10 +51,12 @@ div#divcontrollerpowerbutts {
 button {
     background-color: #444;
     outline: 2px solid #222;
-    width: 30px;
-    height: 18px;
-    line-height: 0.8;
-    padding-bottom: 3px;
+    width: 29px;
+    height: 20px;
+    line-height: 0;
+    padding: 2px;
+    padding-bottom: 4px;
+    font-size: 14px;
 }
 
 button#globemenubutt {
