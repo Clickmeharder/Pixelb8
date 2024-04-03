@@ -129,17 +129,16 @@ h2 {
 }
 
 div#sliderbox-gloveLights {
-	width: 120px;
-    height: 185px;
+    width: 120px;
+    height: 75px;
     min-height: 20px;
     max-height: 30vh;
-    border: 2px ridge #444;
+    border: 5px ridge #444;
     margin: auto;
     margin-top: 8px;
     margin-bottom: -6px;
     padding: 4px;
     overflow-y: scroll;
-
 }
   
   
