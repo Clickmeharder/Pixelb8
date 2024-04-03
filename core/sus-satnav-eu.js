@@ -283,21 +283,29 @@ function onScroll(event) {
 // controlbar
 //-----------------------------
 
-// Function to toggle visibility of an element
+// Function to toggle visibility of specific elements
 function toggleElement(elementName) {
   var element = scene.getObjectByName(elementName);
   console.log('Toggling element:', elementName);
   if (element) {
-    element.visible = !element.visible;
+    // Toggle visibility based on checkbox state
+    element.visible = elementName.checked;
+    // Trigger rendering update
+    renderer.render(scene, camera);
   }
 }
 
-// Function to adjust opacity of an element
+// Function to adjust opacity of specific elements
 function adjustOpacity(value, elementName) {
   var element = scene.getObjectByName(elementName);
   console.log('Adjusting opacity for element:', elementName, 'with value:', value);
   if (element) {
-    element.material.opacity = parseFloat(value);
+    // Ensure opacity value is within valid range (0 to 1)
+    var opacityValue = Math.min(Math.max(parseFloat(value) / 100, 0), 1);
+    // Set opacity of the material
+    element.material.opacity = opacityValue;
+    // Trigger rendering update
+    renderer.render(scene, camera);
   }
 }
 
