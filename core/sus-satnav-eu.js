@@ -430,7 +430,7 @@ function cycleMap() {
     currentMapIndex = 0;
   }
 
-  earth_material.map = mapTextures[currentMapIndex];
+  earth.material.map = mapTextures[currentMapIndex];
 
   // You can set a flag to indicate that a render update is needed
   // This flag can be checked in your animation loop or update function
