@@ -345,7 +345,6 @@ function togglelandareas() {
 function toggleTPmap() {
   // Check the current opacity of the cloud material
   var currentOpacity = TPmap.material.opacity;
-  
   // Toggle the opacity between 0 and 1.00
   if (currentOpacity === 0) {
     TPmap.material.opacity = 1.00;
