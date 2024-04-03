@@ -35,6 +35,9 @@ function init() {
   stats.dom.style.height = '100%'; // Set the desired height
   document.getElementById('stats-container').appendChild(stats.dom);
   // Load the displacement map
+  var caly_defaulttexture = new THREE.TextureLoader().load(
+	"https://pixelb8.lol/Modules/globemaps/arkadia/PlanetCalypsomap.jpg"
+  );
   var earth_displacement = new THREE.TextureLoader().load(
     "https://i.imgur.com/5zCuDBG.png"
   );
@@ -55,9 +58,7 @@ function init() {
   var ark_tptexture = new THREE.TextureLoader().load(
 	"https://pixelb8.lol/Modules/globemaps/arkadia/arkmap-tpmap.png"
   );
-  var caly_defaulttexture = new THREE.TextureLoader().load(
-	"https://pixelb8.lol/Modules/globemaps/arkadia/PlanetCalypsomap.jpg"
-  );
+
   var earth_bump = new THREE.TextureLoader().load(
     "https://i.imgur.com/bjFnZmK.jpeg"
 	//"https://pixelb8.lul/modules/globemaps/arkadia/newspecularmap.png"
@@ -414,4 +415,25 @@ function adjustLightIntensity(value) {
 function adjustAmbientLightIntensity(value) {
   ambientLight.intensity = parseFloat(value);
 }
+var mapTextures = [
+  earth_texture,
+  ark_defaulttexture,
+  ark_tptexture,
+  earth_displacement
+];
 
+var currentMapIndex = 0;
+function cycleMap() {
+  currentMapIndex++;
+
+  if (currentMapIndex >= mapTextures.length) {
+    currentMapIndex = 0;
+  }
+
+  earth_material.map = mapTextures[currentMapIndex];
+
+  // You can set a flag to indicate that a render update is needed
+  // This flag can be checked in your animation loop or update function
+  // and trigger a render update when necessary
+  needsRenderUpdate = true;
+}
