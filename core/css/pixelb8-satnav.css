@@ -20,9 +20,12 @@ body {
   width:100vw;
 }
 #controls {
-    position: fixed;
+	position: fixed;
     display: flex;
-    border: 3px ridge #637a7dc7;
+    border: 12px ridge #04899b6e;
+    border-style: double;
+    border-radius: 28px;
+    outline: 5px inset #26a3bc;
     background-color: #26a3bc6b;
     height: 409px;
     width: 146px;
@@ -36,10 +39,12 @@ body {
 #controls:hover{
 	opacity:0.8;
 }
-#globecontralButts{
+div#divcontrollerpowerbutts {
+    justify-content: space-between;
+    display: inline-flex;
+    flex-direction: row;
 	border:2px ridge #333;
-	
-}
+
 button {
     background-color: #444;
     outline: 1px inset #222;
