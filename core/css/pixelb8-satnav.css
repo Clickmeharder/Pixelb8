@@ -31,7 +31,7 @@ body {
     opacity: 0.59;
     padding: 4px;
     transition: 1.3s;
-    flex-direction: row-reverse;
+    flex-direction: column;
 }
 #controls:hover{
 	opacity:0.8;
@@ -92,7 +92,7 @@ h2 {
   }
   
 #globecontralButts {
-	width:95%;
+	width: 100%;
 	
 }
 
