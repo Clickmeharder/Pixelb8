@@ -41,9 +41,11 @@ button {
   /* Styling for sliders */
   input[type="range"] {
     -webkit-appearance: none;
-	width: 84%;
+    width: 95%;
+    max-width: 75px;
+    min-width: 30px;
     height: 12px;
-    background: #ddd;
+    background: #03a9f4c4;
     border-radius: 5px;
     outline: none;
     margin-bottom: auto;
