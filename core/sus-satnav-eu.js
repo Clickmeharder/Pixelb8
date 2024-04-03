@@ -329,7 +329,7 @@ function toggleClouds() {
 	console.log('clouds toggled OFF');
   }
 }
-function togglelandares() {
+function togglelandareas() {
   // Check the current opacity of the cloud material
   var currentOpacity = landareas.material.opacity;
   
@@ -342,7 +342,19 @@ function togglelandares() {
 	console.log('landareas toggled OFF');
   }
 }
-
+function toggleTPmap() {
+  // Check the current opacity of the cloud material
+  var currentOpacity = TPmap.material.opacity;
+  
+  // Toggle the opacity between 0 and 1.00
+  if (currentOpacity === 0) {
+    TPmap.material.opacity = 1.00;
+	console.log('TPmap toggled ON');
+  } else {
+    TPmap.material.opacity = 0;
+	console.log('TPmap toggled OFF');
+  }
+}
 //SLIDERS
 // Function to adjust cloud opacity
 function adjustCloudOpacity(value) {
