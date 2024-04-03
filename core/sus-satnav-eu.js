@@ -4,6 +4,8 @@ var earth, cloud, TPmap;
 var earth_texture;
 var ark_defaulttexture;
 var ark_tptexture;
+var ark_infotexture;
+var ark_mobinfotexture;
 var earth_displacement;
 var landareas;
 var pointLight, ambientLight;
