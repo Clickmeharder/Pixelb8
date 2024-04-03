@@ -444,8 +444,9 @@ function cycleMap() {
 var currentPlanetIndex = 0;
 function cyclePlanet() {
   currentPlanetIndex++;
-
+	console.log('current planet toggled');
   if (currentPlanetIndex >= planetTextures.length) {
+	console.log('current planet toggle if ran');
     currentPlanetIndex = 0;
   }
 
