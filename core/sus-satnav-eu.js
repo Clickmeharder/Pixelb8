@@ -307,7 +307,7 @@ function onScroll(event) {
 
 // Function to adjust cloud opacity
 function adjustCloudOpacity(opacityValue) {
-  cloud.material.opacity = parseFloat(opacityValue) / 100;
+  cloud.material.opacity = parseFloat(value);
 }
 // Example of adding more control functions for other elements and properties
 function adjustLightIntensity(value) {
