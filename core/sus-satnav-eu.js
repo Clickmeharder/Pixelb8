@@ -304,7 +304,10 @@ function onScroll(event) {
   }
 } */
 
-
+function toggleClouds() {
+  cloud.material.opacity = 0;
+  console.log('clouds toggled');
+}
 // Function to adjust cloud opacity
 function adjustCloudOpacity(value) {
   cloud.material.opacity = parseFloat(value);
