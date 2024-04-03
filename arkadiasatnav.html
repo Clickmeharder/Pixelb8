@@ -40,13 +40,14 @@
 	<div id="stats-container"></div>
 	<div id="controls">
 		<div id="globecontralButts">
-			<button onclick="toggleElement('landareas')">Toggle Land areas</button>
-			<button onclick="toggleElement('TPmap')">Toggle Teleports</button>
-			<button onclick="toggleElement('cloud')">Toggle Cloud</button>
-			<button onclick="toggleElement('thing')">Toggle thing</button>
-			<button onclick="toggleElement('thing2')">Toggle thing2</button>
-			<button onclick="toggleElement('thing3')">Toggle thing3</button>
-			<button onclick="toggleElement('thing4')">Toggle thing4</button>
+			<h2 for="cloudOpacity">Toggles</h2>
+			<button onclick="toggleElement('landareas')">Land areas</button>
+			<button onclick="toggleElement('TPmap')">Teleports</button>
+			<button onclick="toggleElement('cloud')">Cloud</button>
+			<button onclick="toggleElement('thing')">thing</button>
+			<button onclick="toggleElement('thing2')">thing2</button>
+			<button onclick="toggleElement('thing3')">thing3</button>
+			<button onclick="toggleElement('thing4')">thing4</button>
 		</div>
 		<div id="sliderbox-gloveLights">
 			<input id="cloudOpacity" type="range" class="glow" value="50" min="0.0" max="100" step="0.1" oninput="adjustOpacity(this.value, 'cloud')"></input>

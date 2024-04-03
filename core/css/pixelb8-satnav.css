@@ -20,16 +20,19 @@ body {
   width:100vw;
 }
 #controls {
-    position: fixed;
+	position: fixed;
+    display: flex;
     border: 3px ridge #637a7dc7;
     background-color: #26a3bc6b;
-    height: 185px;
-    width: 288px;
+    height: 409px;
+    width: 136px;
     top: 12%;
     right: 8px;
     opacity: 0.59;
-	padding:4px;
-	transition:1.3s;
+    padding: 4px;
+    transition: 1.3s;
+    flex-direction: column;
+    flex-wrap: wrap;
 }
 #controls:hover{
 	opacity:0.8;
@@ -37,6 +40,7 @@ body {
 button {
     background-color: #444;
     outline: 1px inset #222;
+	width: 65px;
 }
   /* Styling for sliders */
   input[type="range"] {
