@@ -306,7 +306,7 @@ function onScroll(event) {
 
 
 // Function to adjust cloud opacity
-function adjustCloudOpacity(opacityValue) {
+function adjustCloudOpacity(value) {
   cloud.material.opacity = parseFloat(value);
 }
 // wokring functions
