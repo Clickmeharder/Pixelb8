@@ -68,6 +68,15 @@ button.globemenubutt {
     margin-top: 3px;
     margin-right: 1px;
 }
+.globemenubutt {
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    padding: 0px;
+    font-size: 22px;
+    margin-top: 3px;
+    margin-right: 1px;
+}
 
 button#globepowerbutt {
     margin-top: 4px;
