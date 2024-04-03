@@ -1,6 +1,10 @@
 
 var camera, scene, renderer;
 var earth, cloud, TPmap;
+var earth_texture;
+var ark_defaulttexture;
+var ark_tptexture;
+var earth_displacement;
 var landareas;
 var pointLight, ambientLight;
 var rotationEnabled = true;
@@ -12,6 +16,7 @@ var markers = [];
 var markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 var markerGeometry = new THREE.SphereGeometry(1, 8, 8);
 var cities = [];
+var mapTextures = [];
 
 init();
 animate();
@@ -67,6 +72,7 @@ function init() {
     //"https://i.imgur.com/yPiv3Gk.png"
     "https://i.imgur.com/YBFt7oC.jpeg"
   );
+  mapTextures.push(earth_texture, ark_defaulttexture, ark_tptexture, earth_displacement);
   var earth_geometry = new THREE.SphereGeometry(14.5, 32, 32);
   var earth_material = new THREE.MeshPhongMaterial({
     shininess: 0,
@@ -415,12 +421,6 @@ function adjustLightIntensity(value) {
 function adjustAmbientLightIntensity(value) {
   ambientLight.intensity = parseFloat(value);
 }
-var mapTextures = [
-  earth_texture,
-  ark_defaulttexture,
-  ark_tptexture,
-  earth_displacement
-];
 
 var currentMapIndex = 0;
 function cycleMap() {
