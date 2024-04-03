@@ -86,7 +86,6 @@ h2 {
   /* Optional: style the labels for sliders */
   label {
     display: inline-flex;
-    margin-bottom: 5px;
     font-weight: bold;
 	height: min-content;
   }
@@ -98,9 +97,9 @@ h2 {
 
 div#sliderbox-gloveLights {
 	width: 120px;
-	height: 55%;
-    min-height: 10%;
-    max-height: 12%;
+    height: 185px;
+    min-height: 20px;
+    max-height: 30vh;
     border: 2px ridge #444;
     margin: auto;
     margin-top: 8px;
