@@ -78,7 +78,7 @@ function init() {
     //"https://i.imgur.com/yPiv3Gk.png"
     "https://i.imgur.com/YBFt7oC.jpeg"
   );
-  mapTextures.push(earth_texture, ark_defaulttexture, ark_tptexture, earth_displacement);
+  mapTextures.push(earth_texture, ark_defaulttexture, ark_tptexture, earth_displacement, earth_bump, earth_specular);
   planetTextures.push(ark_defaulttexture, caly_defaulttexture, cyrene_defaulttexture, rocktropia_defaulttexture);
   var earth_geometry = new THREE.SphereGeometry(14.5, 32, 32);
   var earth_material = new THREE.MeshPhongMaterial({
