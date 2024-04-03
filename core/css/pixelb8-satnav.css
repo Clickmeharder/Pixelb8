@@ -39,10 +39,14 @@ body {
 	opacity:0.8;
 }
 div#divcontrollerpowerbutts {
-    justify-content: space-between;
     display: inline-flex;
     flex-direction: row;
-	border:2px ridge #333;
+    border: 2px ridge #222222;
+    border-radius: 22px;
+    padding: 3px;
+    justify-content: right;
+    align-content: end;
+    flex-wrap: wrap;
 }
 button {
     background-color: #444;
