@@ -69,11 +69,11 @@ button#globemenubutt {
 
 button#globepowerbutt {
     margin-top: 4px;
-    margin-left: 8px;margin-right:0px;
+    margin-left: 5px;margin-right:8px;
 }
 button#globeinputbutt {
     margin-top: 4px;
-    margin-left: 3px;margin-right:4px;
+    margin-left: 0px;margin-right:0px;
 }
 #rotationCheckbox {
     height: min-content;
