@@ -59,7 +59,7 @@ button {
     font-size: 14px;
 }
 
-button#globemenubutt {
+button.globemenubutt {
     border-radius: 50%;
     width: 32px;
     height: 32px;

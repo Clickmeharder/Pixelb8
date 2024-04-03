@@ -17,7 +17,7 @@ var markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 var markerGeometry = new THREE.SphereGeometry(1, 8, 8);
 var cities = [];
 var mapTextures = [];
-
+var planetTextures = [];
 init();
 animate();
 
@@ -42,6 +42,12 @@ function init() {
   // Load the displacement map
   var caly_defaulttexture = new THREE.TextureLoader().load(
 	"https://pixelb8.lol/Modules/globemaps/arkadia/PlanetCalypsomap.jpg"
+  );
+  var cyrene_defaulttexture = new THREE.TextureLoader().load(
+	"https://pixelb8.lol/Modules/globemaps/arkadia/PlanetCyrenemap.jpg"
+  );
+  var rocktropia_defaulttexture = new THREE.TextureLoader().load(
+	"https://pixelb8.lol/Modules/globemaps/arkadia/PlanetRocktropiamap.jpg"
   );
   var earth_displacement = new THREE.TextureLoader().load(
     "https://i.imgur.com/5zCuDBG.png"
@@ -73,6 +79,7 @@ function init() {
     "https://i.imgur.com/YBFt7oC.jpeg"
   );
   mapTextures.push(earth_texture, ark_defaulttexture, ark_tptexture, earth_displacement);
+  planetTextures.push(ark_defaulttexture, caly_defaulttexture, cyrene_defaulttexture, rocktropia_defaulttexture);
   var earth_geometry = new THREE.SphereGeometry(14.5, 32, 32);
   var earth_material = new THREE.MeshPhongMaterial({
     shininess: 0,
@@ -432,8 +439,16 @@ function cycleMap() {
 
   earth.material.map = mapTextures[currentMapIndex];
 
-  // You can set a flag to indicate that a render update is needed
-  // This flag can be checked in your animation loop or update function
-  // and trigger a render update when necessary
- /*  needsRenderUpdate = true; */
+}
+
+var currentPlanetIndex = 0;
+function cyclePlanet() {
+  currentPlanetIndex++;
+
+  if (currentPlanetIndex >= planetTextures.length) {
+    currentPlanetIndex = 0;
+  }
+
+  earth.material.map = planetTextures[currentPlanetIndex];
+
 }
