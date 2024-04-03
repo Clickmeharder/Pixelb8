@@ -284,31 +284,31 @@ function onScroll(event) {
 //-----------------------------
 
 // Function to toggle visibility of specific elements
-function toggleElement(elementName) {
+/* function toggleElement(elementName) {
   var element = scene.getObjectByName(elementName);
   console.log('Toggling element:', elementName);
   if (element) {
-    // Toggle visibility based on checkbox state
     element.visible = elementName.checked;
-    // Trigger rendering update
     renderer.render(scene, camera);
   }
-}
+} */
 
 // Function to adjust opacity of specific elements
-function adjustOpacity(value, elementName) {
+/* function adjustOpacity(value, elementName) {
   var element = scene.getObjectByName(elementName);
   console.log('Adjusting opacity for element:', elementName, 'with value:', value);
   if (element) {
-    // Ensure opacity value is within valid range (0 to 1)
     var opacityValue = Math.min(Math.max(parseFloat(value) / 100, 0), 1);
-    // Set opacity of the material
     element.material.opacity = opacityValue;
-    // Trigger rendering update
     renderer.render(scene, camera);
   }
-}
+} */
 
+
+// Function to adjust cloud opacity
+function adjustCloudOpacity(opacityValue) {
+  cloud.material.opacity = parseFloat(opacityValue) / 100;
+}
 // Example of adding more control functions for other elements and properties
 function adjustLightIntensity(value) {
   pointLight.intensity = parseFloat(value);
