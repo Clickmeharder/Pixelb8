@@ -309,12 +309,11 @@ function onScroll(event) {
 function adjustCloudOpacity(opacityValue) {
   cloud.material.opacity = parseFloat(value);
 }
-// Example of adding more control functions for other elements and properties
+// wokring functions
 function adjustLightIntensity(value) {
   pointLight.intensity = parseFloat(value);
 }
 
-// Function to adjust ambient light intensity based on slider input
 function adjustAmbientLightIntensity(value) {
   ambientLight.intensity = parseFloat(value);
 }
