@@ -595,6 +595,15 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     resize: none;
 	
 }
+.themed-main h2 {
+  margin: auto;
+  color: var(--staticpage-HFpanels-text-color);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+#themed-main-title{
+	position:relative;
+	z-index:5;
+}
 .featured-section {
 	min-height: 55px;max-height: 140px;
 	height: 55px;overflow: auto;
@@ -615,6 +624,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   color: var(--staticpage-HFpanels-text-color);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
+
+
 .featured-section:hover {
 	min-height:140px;
 	transition:min-height 1.3s;
