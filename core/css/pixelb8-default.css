@@ -503,6 +503,9 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   background-color: var(--staticpage-sidepanels-bg-color);
   opacity: var(--staticpage-sidepanels-opacity);
   padding: 5px;
+    height: auto;
+    min-height: 180px;
+    max-height: 27vh;
 }
 .right-panel p {
     margin: 0;
@@ -518,7 +521,11 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     border: inherit;
     border-style: ridge;
 }
-
+div#userInfoContainer {
+    border: 2px ridge #444;
+    height: 61%;
+    overflow-y: auto;
+}
 .content-panel {
   display: inline-flex;
   max-width: 35vw;
