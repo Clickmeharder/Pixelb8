@@ -2382,7 +2382,7 @@ staticPage BLOCK
 	  const photoElement = document.getElementById('profilephoto');
 	  const emailVerifiedElement = document.getElementById('emailVerified');
 	  const profileLinkElement = document.getElementById('profileLink');
-	  const loginbutton = document.getElementById('loginbutt');
+	  const loginButton = document.getElementById('loginbutt');
 
 	  if (user) {
 		// User is signed in
@@ -2392,7 +2392,7 @@ staticPage BLOCK
 		photoElement.src = user.photoURL || "default.jpg"; // Set a default image if photoURL is not available
 		emailVerifiedElement.textContent = user.emailVerified ? "Yes" : "No";
 		profileLinkElement.classList.remove('hidden');
-		loginbutton.classList.add('hidden');
+		loginButton.classList.add('hidden');
 	  } else {
 		// User is signed out
 		statusElement.textContent = "Status: Logged out";
@@ -2401,7 +2401,7 @@ staticPage BLOCK
 		photoElement.src = "default.jpg"; // Set a default image
 		emailVerifiedElement.textContent = "";
 		profileLinkElement.classList.add('hidden');
-		loginbutton.classList.remove('hidden');
+		loginButton.classList.remove('hidden');
 	  }
 	});
 	
@@ -2424,7 +2424,7 @@ staticPage BLOCK
 	  });
 	}
 	//const loginButton = document.getElementById('loginbutt');
-	loginbutton.addEventListener('click', signInWithGitHub);
+	loginButton.addEventListener('click', signInWithGitHub);
 </script>
 <!--______________________________________________________________ -->
 <!-- end of html                                                   -->
