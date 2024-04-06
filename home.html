@@ -2135,7 +2135,7 @@ staticPage BLOCK
 				<P>Username: <span id="username"></span></p>
 				<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
 				<ul>
-					<p>Login Status:<span id="loginStatus">offline</span>
+					<p>User Status:<span id="loginStatus">offline</span>
 					<p>Auth Provider: <span id="userauthProvider" class="hidden"></span></p>
 					<li>Email: <span id="email"></span></li>
 					<li>Email Verified: <span id="emailVerified"></span></li>
@@ -2402,7 +2402,7 @@ staticPage BLOCK
 			console.log("  Email: " + profile.email);
 			console.log("  Photo URL: " + profile.photoURL);
 		
-			statusElement.textContent = "Offline";
+			statusElement.textContent = "Online";
 			userauthproveriderElement.textContent = profile.providerId;
 			usernameElement.textContent = user.displayName || "Unknown";
 			emailElement.textContent = user.email || "Unknown";
@@ -2415,7 +2415,7 @@ staticPage BLOCK
 		});
 	  } else {
 		// User is signed out
-		statusElement.textContent = "Online";
+		statusElement.textContent = "offline";
 		usernameElement.textContent = "";
 		emailElement.textContent = "";
 		photoElement.src = "assets/images/logo/pixelb8logo1.png"; // Set a default image
