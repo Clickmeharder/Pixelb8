@@ -1701,3 +1701,8 @@ Button Classes
 #lockedinput img:hover {
 		cursor:var(--cursorkey-image)!important;
 }
+
+#profilephoto{
+	height:50px;
+	width:auto;
+}
