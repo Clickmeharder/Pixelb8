@@ -2139,7 +2139,7 @@ staticPage BLOCK
 				<ul>
 					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
 					<li>Email: <span id="email"></span></li>
-					<p>►<span id="emailVerified" class="hidden"></span></p>
+					<span id="emailVerified" class="hidden">►</span>
 					<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
 					<button id="loginbutt" type="button" class:="";>Login with GitHub</button>
 					<button id="logoutbutt" type="button" class:="disabled hidden">Logout</button>
@@ -2408,7 +2408,8 @@ staticPage BLOCK
 			usernameElement.textContent = user.displayName || "Unknown";
 			emailElement.textContent = user.email || "Unknown";
 			photoElement.src = user.photoURL || "default.jpg"; // Set a default image if photoURL is not available
-			emailVerifiedElement.textContent = user.emailVerified ? "Verified" : "Unverified";
+			emailVerifiedElement.textContent = user.emailVerified ? "► Verified" : " ► Unverified";
+			emailVerifiedElement.classList.remove('hidden');
 			profileLinkElement.classList.remove('hidden');
 			userauthproveriderElement.classList.remove('hidden');
 			loginButton.classList.add('hidden');
