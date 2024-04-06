@@ -2139,7 +2139,7 @@ staticPage BLOCK
 				<ul>
 					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
 					<li>Email: <span id="email"></span></li>
-					<li>Email Verified: <span id="emailVerified"></span></li>
+					<p>►<span id="emailVerified" class="hidden"></span></p>
 					<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
 					<button id="loginbutt" type="button" class:="";>Login with GitHub</button>
 					<button id="logoutbutt" type="button" class:="disabled hidden">Logout</button>
@@ -2408,11 +2408,17 @@ staticPage BLOCK
 			usernameElement.textContent = user.displayName || "Unknown";
 			emailElement.textContent = user.email || "Unknown";
 			photoElement.src = user.photoURL || "default.jpg"; // Set a default image if photoURL is not available
-			emailVerifiedElement.textContent = user.emailVerified ? "Yes" : "No";
+			emailVerifiedElement.textContent = user.emailVerified ? "Verified" : "Unverified";
 			profileLinkElement.classList.remove('hidden');
 			userauthproveriderElement.classList.remove('hidden');
 			loginButton.classList.add('hidden');
 			logoutButton.classList.remove('hidden');
+			    // Set the color based on email verification status
+			if (user.emailVerified) {
+			  emailVerifiedElement.style.color = "green"; // Green color for verified email
+			} else {
+			  emailVerifiedElement.style.color = "red"; // Red color for unverified email
+			}
 		});
 	  } else {
 		// User is signed out
