@@ -2131,14 +2131,15 @@ staticPage BLOCK
 			<p>Registered Users: 0</p>
 			<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
 			<ul>
-				<li>Provider: <span id="userauthProvider" class="hidden"></span></li>
+				<p>Provider: <span id="userauthProvider" class="hidden"></span></p>
 				<li>Username: <span id="username"></span></li>
 				<li>Email: <span id="email"></span></li>
 				<li>Email Verified: <span id="emailVerified"></span></li>
-				<li><a href="#" id="profileLink" class="disabled hidden">Profile</a></li>
+				<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
 				<button id="loginbutt" type="button" class:="";>Login with GitHub</button>
+				<button id="logoutbutt" type="button" class:="disabled hidden"><span id="loginStatus">Logout</span></button>
 			</ul>
-			<button><span id="loginStatus">Logout</span></button>
+			
 		</div>
 	 </main>
 <!-- Content Panels -->
@@ -2386,6 +2387,7 @@ staticPage BLOCK
 	  const emailVerifiedElement = document.getElementById('emailVerified');
 	  const profileLinkElement = document.getElementById('profileLink');
 	  const loginButton = document.getElementById('loginbutt');
+	  const logoutButton = document.getElementById('logoutbutt');
 
 	  if (user !== null) {
 		// User is signed in
@@ -2405,6 +2407,7 @@ staticPage BLOCK
 			profileLinkElement.classList.remove('hidden');
 			userauthproveriderElement.classList.remove('hidden');
 			loginButton.classList.add('hidden');
+			logoutButton.classList.remove('hidden');
 		});
 	  } else {
 		// User is signed out
@@ -2416,6 +2419,7 @@ staticPage BLOCK
 		profileLinkElement.classList.add('hidden');
 		userauthproveriderElement.classList.add('hidden');
 		loginButton.classList.remove('hidden');
+		logoutButton.classList.add('hidden');
 	  }
 	});
 	
