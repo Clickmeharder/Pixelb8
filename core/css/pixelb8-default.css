@@ -511,9 +511,11 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     margin: 0;
 }
 #websiteStatContainer p {
-    font-size: 12px;
+	font-size: 11px;
     line-height: 0.8;
     margin-bottom: 1px;
+    color: #34d21385;
+    font-weight: bold;
 }
 
 #websiteStatContainer {
