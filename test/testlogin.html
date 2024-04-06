@@ -185,9 +185,8 @@
 				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
 				<!-- Login Form -->
 				<form id="loginForm">
-				  <button id="loginbutt" type="button" onclick="signInWithGitHub()">Login with GitHub</button>
+					<button id="loginbutt" type="button">Login with GitHub</button>
 				</form>
-
 			</main>
 		</div>
 	</div>
@@ -232,6 +231,8 @@
         console.error(errorCode, errorMessage);
       });
   }
+  const loginButton = document.getElementById('loginbutt');
+  loginButton.addEventListener('click', signInWithGitHub);
 </script>
 
 
