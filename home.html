@@ -2352,7 +2352,7 @@ staticPage BLOCK
   //import { getAuth, signInWithPopup, GithubAuthProvider } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
   //import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
   
-  import { getAuth, signInWithPopup, GithubAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+  import { getAuth, signInWithPopup, GithubAuthProvider, onAuthStateChanged, updateProfile  } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
   
   const firebaseConfig = {
     apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
@@ -2373,7 +2373,9 @@ staticPage BLOCK
 	onAuthStateChanged(auth, (user) => {
 	  // User is signed in
 	  const uid = user.uid;
+	  const displayname = user.displayName
 	  console.log("User is signed in with UID:", uid);
+	  console.log("displayName:", displayname);
 	  const statusElement = document.getElementById('loginStatus');
 	  const usernameElement = document.getElementById('username');
 	  const profileLinkElement = document.getElementById('profileLink');
