@@ -1702,7 +1702,7 @@ Button Classes
 		cursor:var(--cursorkey-image)!important;
 }
 
-#profilephoto{
+img#profilephoto{
 	height:50px;
 	width:auto;
 }
