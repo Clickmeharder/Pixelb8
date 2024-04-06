@@ -2138,7 +2138,7 @@ staticPage BLOCK
 				<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
 				<ul>
 					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
-					<li>Email: <span id="email"></span></li>
+					<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
 					<span id="emailVerified" class="hidden">►</span>
 					<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
 					<button id="loginbutt" type="button" class:="";>Login with GitHub</button>
@@ -2388,6 +2388,7 @@ staticPage BLOCK
 	  const userauthproveriderElement = document.getElementById('userauthProvider');
 	  const usernameElement = document.getElementById('username');
 	  const emailElement = document.getElementById('email');
+	  const listedElementEmail = document.getElementById('userinfolist-email');
 	  const photoElement = document.getElementById('profilephoto');
 	  const emailVerifiedElement = document.getElementById('emailVerified');
 	  const profileLinkElement = document.getElementById('profileLink');
@@ -2410,6 +2411,7 @@ staticPage BLOCK
 			photoElement.src = user.photoURL || "default.jpg"; // Set a default image if photoURL is not available
 			emailVerifiedElement.textContent = user.emailVerified ? "► Verified" : " ► Unverified";
 			emailVerifiedElement.classList.remove('hidden');
+			listedElementEmail.classList.remove('hidden');
 			profileLinkElement.classList.remove('hidden');
 			userauthproveriderElement.classList.remove('hidden');
 			loginButton.classList.add('hidden');
@@ -2428,6 +2430,8 @@ staticPage BLOCK
 		emailElement.textContent = "";
 		photoElement.src = "assets/images/logo/pixelb8logo1.png"; // Set a default image
 		emailVerifiedElement.textContent = "";
+		emailVerifiedElement.classList.add('hidden');
+		listedElementEmail.classList.add('hidden');
 		profileLinkElement.classList.add('hidden');
 		userauthproveriderElement.classList.add('hidden');
 		loginButton.classList.remove('hidden');
