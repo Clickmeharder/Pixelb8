@@ -2129,16 +2129,16 @@ staticPage BLOCK
 		<div class="panel right-panel">
 			<h2 class="panel-title">Site Stats</h2>
 			<p>Registered Users: 0</p>
-			<button>Status: <span id="loginStatus">not signed in</span></button>
 			<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
-				<ul>
-					<li>Provider: <span id="userauthProvider" class="hidden"></span></li>
-					<li>Username: <span id="username"></span></li>
-					<li>Email: <span id="email"></span></li>
-					<li>Email Verified: <span id="emailVerified"></span></li>
-					<li><a href="#" id="profileLink" class="disabled hidden">Profile</a></li>
-					<button id="loginbutt" type="button" class:="";>Login with GitHub</button>
-				</ul>
+			<ul>
+				<li>Provider: <span id="userauthProvider" class="hidden"></span></li>
+				<li>Username: <span id="username"></span></li>
+				<li>Email: <span id="email"></span></li>
+				<li>Email Verified: <span id="emailVerified"></span></li>
+				<li><a href="#" id="profileLink" class="disabled hidden">Profile</a></li>
+				<button id="loginbutt" type="button" class:="";>Login with GitHub</button>
+			</ul>
+			<button><span id="loginStatus">Logout</span></button>
 		</div>
 	 </main>
 <!-- Content Panels -->
@@ -2396,7 +2396,7 @@ staticPage BLOCK
 			console.log("  Email: " + profile.email);
 			console.log("  Photo URL: " + profile.photoURL);
 		
-			statusElement.textContent = "Logged in";
+			statusElement.textContent = "Logout";
 			userauthproveriderElement.textContent = profile.providerId;
 			usernameElement.textContent = user.displayName || "Unknown";
 			emailElement.textContent = user.email || "Unknown";
@@ -2408,7 +2408,7 @@ staticPage BLOCK
 		});
 	  } else {
 		// User is signed out
-		statusElement.textContent = "Status: Logged out";
+		statusElement.textContent = "Login";
 		usernameElement.textContent = "";
 		emailElement.textContent = "";
 		photoElement.src = "assets/images/logo/pixelb8logo1.png"; // Set a default image
