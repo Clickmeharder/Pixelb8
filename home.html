@@ -2372,7 +2372,7 @@ staticPage BLOCK
   const analytics = getAnalytics(app);
   const auth = getAuth();
   const provider = new GithubAuthProvider();
-  const loginButton = document.getElementById('loginbutt');
+  
 	// Set up the onAuthStateChanged listener
 	onAuthStateChanged(auth, (user) => {
 	  // Get the elements where you want to display user information
@@ -2382,6 +2382,7 @@ staticPage BLOCK
 	  const photoElement = document.getElementById('photo');
 	  const emailVerifiedElement = document.getElementById('emailVerified');
 	  const profileLinkElement = document.getElementById('profileLink');
+	  const loginButton = document.getElementById('loginbutt');
 
 	  if (user) {
 		// User is signed in
