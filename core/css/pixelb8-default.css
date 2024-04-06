@@ -537,7 +537,7 @@ div#userInfoContainer {
     flex-direction: column;
     align-items: center;
 }
-#loginStatus{margin-bottom:6px;}
+#loginStatus{margin-bottom:10px;}
 .content-panel {
   display: inline-flex;
   max-width: 35vw;
