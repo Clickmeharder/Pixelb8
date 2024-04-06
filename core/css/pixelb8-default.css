@@ -522,11 +522,15 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     margin-bottom: 4px;
     border: inherit;
     border-style: ridge;
+	background-color:#000;
 }
 div#userInfoContainer {
+    display: flex;
     border: 2px ridge #444;
     height: 61%;
     overflow-y: auto;
+    flex-direction: column;
+    align-items: center;
 }
 .content-panel {
   display: inline-flex;
