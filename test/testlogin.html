@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixelb8.LoL Pre-Alpha</title>
+    <link rel="stylesheet" href="../core/css/pixelb8-default.css">
+	<link rel="stylesheet" href="Modules/SuSOS/core/css/SuSOS-default.css">
+	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="Modules/SuSOS/apps/stolencalymap/core/css/HudMap-styles.css">
+		
+    <script src="Modules/SuSOS/apps/stolencalymap/core/js/leaflet.js"></script><style type="text/css" id="operaUserStyle"></style>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
+</head>
+
+<body>
+
+
+  <div class="row">
+
+	<div class="row" id="webtp-pullout">
+		<div class="panel control-panel column">
+			<div class="row" id="webtpHeader">
+				<h2 class="panel-title" id="WebPortalControls-Title">WebPortal Controls</h2>
+				<Button class="roundbutt-webtp" id="Openwebportal" style="" onclick="Togglewebportal(this)">Activate</button>
+			</div>
+			<div id="static-content-panel-controls">
+
+				<!-- Entropia Websites -->
+				<div class="">
+					<div class="webtpfilteroptions-container">
+						<div class="webtpfilters-option">
+							<label for="filter1" title="Official Mindark Websites" alt="Official Mindark Websites" >Official M.A & PP</label>
+							<input type="checkbox" id="filter1" value="Official Filter">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter2" title="" alt="Planet Partner websites" >Planet Partners</label>
+							<input type="checkbox" id="filter2" value="PP Filter">
+						</div>
+						<div class="webtpfilters-option" style="display: none;">
+							<label for="filter3" title="Planetary Websites" alt="Planetary Websites">Planetary</label>
+							<input type="checkbox" id="filter3" value="Planetary Filter">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter4" title="" alt="" >Forums</label>
+							<input type="checkbox" id="filter4" value="Forum Filter">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter5" title="" alt="">Entropia Maps</label>
+							<input type="checkbox" id="filter5" value="Maps Filter">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter6" title="" alt="">Entropia Tools</label>
+							<input type="checkbox" id="filter6" value="Tools Filter">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter7" title="" alt="">Info & Data</label>
+							<input type="checkbox" id="filter7" value="Information andData">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter8" title="" alt="">Societies</label>
+							<input type="checkbox" id="filter8" value="Societies">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter8" title="" alt="">Miscelaneous 3rd Party</label>
+							<input type="checkbox" id="filter8" value="Misc 3rdparty">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter9" title="" alt="">Colonist Services & Content</label>
+							<input type="checkbox" id="filter9" value="Colonist Services">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter10" title="" alt="">Entropian Creators</label>
+							<input type="checkbox" id="filter10" value="Entropian Creators">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter11" title="" alt="">My Favourites</label>
+							<input type="checkbox" id="filter11" value="My Favourites">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter12" title="" alt="">My Portals</label>
+							<input type="checkbox" id="filter12" value="My Portals">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter13" >All</label>
+							<input type="checkbox" id="filter13" value="All Options">
+						</div>
+					</div>
+					<div class="webtpfilters-selected row" onclick="togglewebtpfilterOptions(this)">
+						<p class="panel-title" id="WebPortalControls-EuTitle">Entropia</p>
+						<div class="single-round-button">
+							<button class="webtpfilters-expand-button" id="ToggleWebtpfilterbox-Button" title="Filterbox Toggle" onclick="webtpTogglebuttstyle(this)">
+								<img src="assets/images/icons/expandtoggle.png" alt="Filterbox Toggle">
+							</button>
+						</div>
+					</div>
+				</div>
+				<select class="webtp" id="webtpoptions">
+					<option value="option0" selected disabled>Destination</option>
+
+				</select>
+				<Button class="flex" id="buttportaldetails" onclick="toggledestinationdetails(this)">《《   S.U.S   》》</button>
+			</div>
+		</div>	
+		<div class="panel" id="webtp">
+			<div class="panel portal-panel" id="thewebportal">
+				<h2 class="panel-title" id="portalLinktitle" style="">Entropia Partners</h2>
+				<a href="https://www.entropiapartners.com/?r=94031" target="_blank">
+					<div id="webportal-image" title="Jump in" alt="Jump in" style=""></div> <!-- Move the image inside the .portal-panel -->
+				</a>
+			</div>
+		</div>
+		<div id="portaldestinationDetails"></div>
+	</div>
+	<div class="panel content-panel" style="display:hidden;">
+		<h2 class="panel-title">Content Panel</h2>
+		<div id="staticpage-content-contentpanelB">[_]</div>
+	</div>
+	<div class="panel ad-panel">
+		<h2 class="panel-title"></h2>
+		<div id="staticpage-adpanel-contentwrapper">
+			<div class="static-videopanel">
+				<iframe
+					width="225"
+					height="148"
+					src="https://www.youtube.com/embed/aOrOQRUXFEk"
+					title="YouTube video player"
+					frameborder="0"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					allowfullscreen
+					style="max-height: 180px; width: 100%;"
+				></iframe>
+			</div>
+		</div>
+	</div>
+  </div>
+  <!-- Footer -->
+  <footer class="themed-footer">
+      <p>&copy; 2022 Your Company. All rights reserved.</p>
+  </footer>
+<!--end mainpage -->
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<div class="staticPage" id="Mainpage">
+		<header class="staticpage-header">
+			<h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
+			<nav class="main-nav">
+				<ul>
+					<li><a href="#">Home</a></li>
+					<li><a href="#">About</a></li>
+					<li><a href="#">Contact</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<div id="pageContainer">
+			<main class="themed-main">
+				<h2 id="themed-main-title">Welcome to PixelB8.lol</h2>
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+				<!-- Login Form -->
+				<form id="loginForm">
+				  <button id="loginbutt" type="button" onclick="signInWithGitHub()">Login with GitHub</button>
+				</form>
+
+			</main>
+		</div>
+	</div>
+		<footer class="themed-footer">
+			&copy; 2024 PixelB8.lol - All Rights Reserved
+		</footer>
+
+    <!-- Your JavaScript for social logins can go here -->
+    <script>
+        function loginWithGoogle() {
+            // Code for Google login
+        }
+
+        function loginWithDiscord() {
+            // Code for Discord login
+        }
+
+        function loginWithTwitter() {
+            // Code for Twitter login
+        }
+    </script>
+</body>
+</html>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
+  import { getAuth, signInWithPopup, GithubAuthProvider } from "firebase/auth";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
+    authDomain: "pixelb8lol.firebaseapp.com",
+    projectId: "pixelb8lol",
+    storageBucket: "pixelb8lol.appspot.com",
+    messagingSenderId: "373700849652",
+    appId: "1:373700849652:web:c3e59f1653dd224ba153a1",
+    measurementId: "G-5EGV2VNMX3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
+  const provider = new GithubAuthProvider();
+
+  function signInWithGitHub() {
+    const auth = getAuth();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const credential = GithubAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        const user = result.user;
+        console.log("GitHub Access Token:", token);
+        console.log("Signed-in user:", user);
+        // Redirect or perform other actions after successful login
+        window.location.href = "https://pixelb8.lol/index.html"; // Redirect to dashboard or any other page
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error(errorCode, errorMessage);
+      });
+  }
+</script>
+</script>
