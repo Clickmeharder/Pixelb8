@@ -239,7 +239,7 @@ div {}
 br {}
 hr {}
 ul {padding-inline-start: 10px;
-    margin-block-start: 0em;}
+    margin-block-start: 0em; }
 ol {}
 li {}
 nav {}
@@ -506,6 +506,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     height: auto;
     min-height: 180px;
     max-height: 27vh;
+	font-family: 'Pixelify Sans';
 }
 .right-panel p {
     margin: 0;
@@ -537,7 +538,14 @@ div#userInfoContainer {
     flex-direction: column;
     align-items: center;
 }
-#loginStatus{margin-bottom:10px;}
+
+#loginStatus{}
+div#userInfoContainer ul {
+    padding-top: 6px;
+    margin-block-end: 0em;
+    font-family: 'Pixelify Sans';
+    font-size: 9px;
+}
 .content-panel {
   display: inline-flex;
   max-width: 35vw;
