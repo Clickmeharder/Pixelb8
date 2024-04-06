@@ -2368,29 +2368,31 @@ staticPage BLOCK
   const analytics = getAnalytics(app);
   const auth = getAuth();
   const provider = new GithubAuthProvider();
-  // Set up the onAuthStateChanged listener
 	// Set up the onAuthStateChanged listener
 	onAuthStateChanged(auth, (user) => {
-	  // User is signed in
-	  const uid = user.uid;
-	  const displayname = user.displayName
-	  console.log("User is signed in with UID:", uid);
-	  console.log("displayName:", displayname);
+	  // Get the elements where you want to display user information
 	  const statusElement = document.getElementById('loginStatus');
 	  const usernameElement = document.getElementById('username');
+	  const emailElement = document.getElementById('email');
+	  const photoElement = document.getElementById('photo');
+	  const emailVerifiedElement = document.getElementById('emailVerified');
 	  const profileLinkElement = document.getElementById('profileLink');
 
 	  if (user) {
 		// User is signed in
-		const uid = user.uid;
 		statusElement.textContent = "Status: Logged in";
 		usernameElement.textContent = user.displayName || "Unknown";
+		emailElement.textContent = user.email || "Unknown";
+		photoElement.src = user.photoURL || "default.jpg"; // Set a default image if photoURL is not available
+		emailVerifiedElement.textContent = user.emailVerified ? "Yes" : "No";
 		profileLinkElement.classList.remove('hidden');
 	  } else {
 		// User is signed out
-		console.log("User is signed out");
 		statusElement.textContent = "Status: Logged out";
 		usernameElement.textContent = "";
+		emailElement.textContent = "";
+		photoElement.src = "default.jpg"; // Set a default image
+		emailVerifiedElement.textContent = "";
 		profileLinkElement.classList.add('hidden');
 	  }
 	});
