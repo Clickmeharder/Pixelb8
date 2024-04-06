@@ -524,6 +524,10 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     border-style: ridge;
 	background-color:#000;
 }
+#websiteStatContainer#sitestats h2 {
+	margin:auto;
+	text-align:center;
+}
 div#userInfoContainer {
     display: flex;
     border: 2px ridge #444;
