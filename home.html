@@ -2397,7 +2397,7 @@ staticPage BLOCK
 			console.log("  Photo URL: " + profile.photoURL);
 		});
 		statusElement.textContent = "Logged in";
-		userauthproveriderElement.textContent = user.providerID;
+		userauthproveriderElement.textContent = profile.providerId;
 		usernameElement.textContent = user.displayName || "Unknown";
 		emailElement.textContent = user.email || "Unknown";
 		photoElement.src = user.photoURL || "default.jpg"; // Set a default image if photoURL is not available
