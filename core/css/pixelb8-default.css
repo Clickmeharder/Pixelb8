@@ -502,9 +502,22 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   border-radius: var(--staticpage-sidepanels-border-radius);
   background-color: var(--staticpage-sidepanels-bg-color);
   opacity: var(--staticpage-sidepanels-opacity);
+  padding: 5px;
+}
+.right-panel p {
+    margin: 0;
+}
+#websiteStatContainer p {
+    font-size: 12px;
+    line-height: 0.8;
+    margin-bottom: 1px;
 }
 
-
+#websiteStatContainer {
+    margin-bottom: 4px;
+    border: inherit;
+    border-style: ridge;
+}
 
 .content-panel {
   display: inline-flex;
