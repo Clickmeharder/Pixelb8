@@ -2135,8 +2135,8 @@ staticPage BLOCK
 			<div id="userInfoContainer">
 				<P id="username">StrangerDanger</p>
 				<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
+				<p id="Userpixelcount" class="hidden">0px</p>
 				<p>User Status:<span id="loginStatus">offline</span></p>
-				<p id="Userpixelcount">0px</p>
 				<ul>
 					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
 					<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
@@ -2410,6 +2410,7 @@ staticPage BLOCK
       const profileLinkElement = document.getElementById('profileLink');
       const loginButton = document.getElementById('loginbutt');
       const logoutButton = document.getElementById('logoutbutt');
+	  const userpixelcountElement = document.getElementById('Userpixelcount');
 
       if (user !== null) {
         // User is signed in
@@ -2425,6 +2426,7 @@ staticPage BLOCK
           usernameElement.textContent = user.displayName || "Unknown";
           emailElement.textContent = user.email || "Unknown";
           photoElement.src = user.photoURL || "default.jpg";
+		  userpixelcountElement.classList.remove('hidden');
           emailVerifiedElement.textContent = user.emailVerified ? "► Verified" : " ► Unverified";
           emailVerifiedElement.classList.remove('hidden');
           listedElementEmail.classList.remove('hidden');
@@ -2458,6 +2460,7 @@ staticPage BLOCK
         usernameElement.textContent = "";
         emailElement.textContent = "";
         photoElement.src = "assets/images/logo/pixelb8logo1.png"; // Set a default image
+		userpixelcountElement.classList.add('hidden');
         emailVerifiedElement.textContent = "";
         emailVerifiedElement.classList.add('hidden');
         listedElementEmail.classList.add('hidden');
