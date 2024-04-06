@@ -2127,20 +2127,23 @@ staticPage BLOCK
 		
 		  <!-- Right Panel -->
 		<div class="panel right-panel">
-			<h2 class="panel-title">Site Stats</h2>
-			<p>Registered Users: 0</p>
-			<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
-			<ul>
-				<p>Login Status:<span id="loginStatus">offline</span>
-				<p>Provider: <span id="userauthProvider" class="hidden"></span></p>
-				<li>Username: <span id="username"></span></li>
-				<li>Email: <span id="email"></span></li>
-				<li>Email Verified: <span id="emailVerified"></span></li>
-				<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
-				<button id="loginbutt" type="button" class:="";>Login with GitHub</button>
-				<button id="logoutbutt" type="button" class:="disabled hidden">Logout</button>
-			</ul>
-			
+			<div id="websiteStatContainer">
+				<h2 class="panel-title">Site Stats</h2>
+				<p>Registered Users: 0</p>
+			</div>
+			<div id="userInfoContainer">
+				<P>Username: <span id="username"></span></p>
+				<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
+				<ul>
+					<p>Login Status:<span id="loginStatus">offline</span>
+					<p>Provider: <span id="userauthProvider" class="hidden"></span></p>
+					<li>Email: <span id="email"></span></li>
+					<li>Email Verified: <span id="emailVerified"></span></li>
+					<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
+					<button id="loginbutt" type="button" class:="";>Login with GitHub</button>
+					<button id="logoutbutt" type="button" class:="disabled hidden">Logout</button>
+				</ul>
+			</div>
 		</div>
 	 </main>
 <!-- Content Panels -->
