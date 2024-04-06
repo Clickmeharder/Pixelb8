@@ -2132,6 +2132,7 @@ staticPage BLOCK
 			<ul>
 				<li>Profile Photo: <img id="profilephoto" src="" alt="Profile Photo"></li>
 				<li>Status: <span id="loginStatus">not signed in</span></li>
+				<li>Provider: <span id="userauthProvider" class="hidden"></span></li>
 				<li>Username: <span id="username"></span></li>
 				<li>Email: <span id="email"></span></li>
 				<li>Email Verified: <span id="emailVerified"></span></li>
@@ -2377,6 +2378,7 @@ staticPage BLOCK
 	onAuthStateChanged(auth, (user) => {
 	  // Get the elements where you want to display user information
 	  const statusElement = document.getElementById('loginStatus');
+	  const userauthproveriderElement = document.getElementById('userauthProvider');
 	  const usernameElement = document.getElementById('username');
 	  const emailElement = document.getElementById('email');
 	  const photoElement = document.getElementById('profilephoto');
@@ -2387,11 +2389,13 @@ staticPage BLOCK
 	  if (user) {
 		// User is signed in
 		statusElement.textContent = "Logged in";
+		userauthproveriderElement.textContent = user.providerID;
 		usernameElement.textContent = user.displayName || "Unknown";
 		emailElement.textContent = user.email || "Unknown";
 		photoElement.src = user.photoURL || "default.jpg"; // Set a default image if photoURL is not available
 		emailVerifiedElement.textContent = user.emailVerified ? "Yes" : "No";
 		profileLinkElement.classList.remove('hidden');
+		userauthproveriderElement.classList.remove('hidden');
 		loginButton.classList.add('hidden');
 	  } else {
 		// User is signed out
@@ -2401,6 +2405,7 @@ staticPage BLOCK
 		photoElement.src = "default.jpg"; // Set a default image
 		emailVerifiedElement.textContent = "";
 		profileLinkElement.classList.add('hidden');
+		userauthproveriderElement.classList.add('hidden');
 		loginButton.classList.remove('hidden');
 	  }
 	});
