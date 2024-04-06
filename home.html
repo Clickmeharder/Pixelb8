@@ -2130,12 +2130,13 @@ staticPage BLOCK
 			<h2 class="panel-title">Site Stats</h2>
 			<p>Registered Users: 0</p>
 			<ul>
-				<li>Status: <span id="loginStatus">Logged out</span></li>
+				<li>Profile Photo: <img id="photo" src="" alt="Profile Photo"></li>
+				<li>Status: <span id="loginStatus">not signed in</span></li>
 				<li>Username: <span id="username"></span></li>
 				<li>Email: <span id="email"></span></li>
-				<li>Profile Photo: <img id="photo" src="" alt="Profile Photo"></li>
 				<li>Email Verified: <span id="emailVerified"></span></li>
 				<li><a href="#" id="profileLink" class="disabled hidden">Profile</a></li>
+				<button id="loginbutt" type="button" class:="";>Login with GitHub</button>
 			</ul>
 		</div>
 	 </main>
@@ -2371,6 +2372,7 @@ staticPage BLOCK
   const analytics = getAnalytics(app);
   const auth = getAuth();
   const provider = new GithubAuthProvider();
+  const loginButton = document.getElementById('loginbutt');
 	// Set up the onAuthStateChanged listener
 	onAuthStateChanged(auth, (user) => {
 	  // Get the elements where you want to display user information
@@ -2383,12 +2385,13 @@ staticPage BLOCK
 
 	  if (user) {
 		// User is signed in
-		statusElement.textContent = "Status: Logged in";
+		statusElement.textContent = "Logged in";
 		usernameElement.textContent = user.displayName || "Unknown";
 		emailElement.textContent = user.email || "Unknown";
 		photoElement.src = user.photoURL || "default.jpg"; // Set a default image if photoURL is not available
 		emailVerifiedElement.textContent = user.emailVerified ? "Yes" : "No";
 		profileLinkElement.classList.remove('hidden');
+		loginbutton.classList.add('hidden');
 	  } else {
 		// User is signed out
 		statusElement.textContent = "Status: Logged out";
@@ -2397,6 +2400,7 @@ staticPage BLOCK
 		photoElement.src = "default.jpg"; // Set a default image
 		emailVerifiedElement.textContent = "";
 		profileLinkElement.classList.add('hidden');
+		loginbutton.classList.remove('hidden');
 	  }
 	});
 	
@@ -2418,7 +2422,7 @@ staticPage BLOCK
 		console.error(errorCode, errorMessage);
 	  });
 	}
-	const loginButton = document.getElementById('loginbutt');
+	//const loginButton = document.getElementById('loginbutt');
 	loginButton.addEventListener('click', signInWithGitHub);
 </script>
 <!--______________________________________________________________ -->
