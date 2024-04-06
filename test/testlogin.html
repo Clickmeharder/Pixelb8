@@ -151,7 +151,45 @@
 
 
 
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
+  import { getAuth, signInWithPopup, GithubAuthProvider } from "firebase/auth";
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
+    authDomain: "pixelb8lol.firebaseapp.com",
+    projectId: "pixelb8lol",
+    storageBucket: "pixelb8lol.appspot.com",
+    messagingSenderId: "373700849652",
+    appId: "1:373700849652:web:c3e59f1653dd224ba153a1",
+    measurementId: "G-5EGV2VNMX3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
+  const provider = new GithubAuthProvider();
+
+  function signInWithGitHub() {
+    const auth = getAuth();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const credential = GithubAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        const user = result.user;
+        console.log("GitHub Access Token:", token);
+        console.log("Signed-in user:", user);
+        // Redirect or perform other actions after successful login
+        window.location.href = "https://pixelb8.lol/index.html"; // Redirect to dashboard or any other page
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error(errorCode, errorMessage);
+      });
+  }
+</script>
 
 
 
@@ -197,59 +235,7 @@
 			&copy; 2024 PixelB8.lol - All Rights Reserved
 		</footer>
 
-    <!-- Your JavaScript for social logins can go here -->
-    <script>
-        function loginWithGoogle() {
-            // Code for Google login
-        }
 
-        function loginWithDiscord() {
-            // Code for Discord login
-        }
-
-        function loginWithTwitter() {
-            // Code for Twitter login
-        }
-    </script>
 </body>
 </html>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
-  import { getAuth, signInWithPopup, GithubAuthProvider } from "firebase/auth";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
-    authDomain: "pixelb8lol.firebaseapp.com",
-    projectId: "pixelb8lol",
-    storageBucket: "pixelb8lol.appspot.com",
-    messagingSenderId: "373700849652",
-    appId: "1:373700849652:web:c3e59f1653dd224ba153a1",
-    measurementId: "G-5EGV2VNMX3"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-
-  const provider = new GithubAuthProvider();
-
-  function signInWithGitHub() {
-    const auth = getAuth();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const credential = GithubAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        const user = result.user;
-        console.log("GitHub Access Token:", token);
-        console.log("Signed-in user:", user);
-        // Redirect or perform other actions after successful login
-        window.location.href = "https://pixelb8.lol/index.html"; // Redirect to dashboard or any other page
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorCode, errorMessage);
-      });
-  }
-</script>
-</script>
