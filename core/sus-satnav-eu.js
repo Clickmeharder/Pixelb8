@@ -1,4 +1,4 @@
-
+//🗺️🌍🌐📍
 var camera, scene, renderer;
 var earth, cloud, TPmap;
 var earth_texture;
