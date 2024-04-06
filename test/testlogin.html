@@ -196,7 +196,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
-  import { getAuth, signInWithPopup, GithubAuthProvider } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+  import { getAuth, signInWithPopup, GithubAuthProvider, linkWithCredential } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
@@ -208,52 +208,61 @@
     measurementId: "G-5EGV2VNMX3"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
 
-  const provider = new GithubAuthProvider();
+        const provider = new GithubAuthProvider();
 
-  function signInWithGitHub() {
-    const auth = getAuth();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const credential = GithubAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        const user = result.user;
-        console.log("GitHub Access Token:", token);
-        console.log("Signed-in user:", user);
-        // Redirect or perform other actions after successful login
-        window.location.href = "https://pixelb8.lol/index.html"; // Redirect to dashboard or any other page
-      })
-      .catch((error) => {
-      // Handle sign-in errors
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      if (errorCode === 'auth/account-exists-with-different-credential') {
-        // An account already exists with the same email address but different sign-in methods.
-        // Ask the user to sign in using the other provider.
-        const pendingCred = error.credential;
-        const email = error.email;
-        auth.fetchSignInMethodsForEmail(email).then((methods) => {
-          if (methods.includes('password')) {
-            // User has a password account, prompt for password login
-            // You can implement a password prompt or redirect to a password login page
-            alert('Please sign in using your password.');
-          } else {
-            // User has other provider accounts, prompt for the other provider
-            // You can customize this based on your application's logic
-            alert('Please sign in using ' + methods.join(' or '));
-          }
-        });
-      } else {
-        // Handle other errors
-        console.error(errorCode, errorMessage);
-      }
-    });
-}
-  const loginButton = document.getElementById('loginbutt');
-  loginButton.addEventListener('click', signInWithGitHub);
-</script>
+        async function signInWithGitHub() {
+            const auth = getAuth();
+            try {
+                // Step 1: User tries to sign in using GitHub.
+                let result = await signInWithPopup(auth, provider);
+                // Step 5: Sign the user in using their chosen method.
+                let userSelectedProvider = null; // Define user's chosen method (e.g., Google, Facebook)
+                let result2 = await signInWithPopup(auth, userSelectedProvider);
+                // Step 6: Link to the GitHub credential.
+                let pendingCred = await retrievePendingCred(); // Implement `retrievePendingCred` for your app
+                if (pendingCred !== null) {
+                    // As you have access to the pending credential, you can directly call the
+                    // link method.
+                    let user = await linkWithCredential(result2.user, pendingCred);
+                }
+                // Step 7: Continue to app.
+                console.log("User signed in and linked with GitHub credential.");
+                // Redirect or perform other actions after successful login
+                window.location.href = "https://pixelb8.lol/index.html"; // Redirect to dashboard or any other page
+            } catch (error) {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                if (errorCode === 'auth/account-exists-with-different-credential') {
+                    // The user's email already exists with a different provider
+                    const pendingCred = error.credential;
+                    // Save the pending credential in temporary storage
+                    // For demonstration, I'm just logging it here
+                    console.log("Pending Credential:", pendingCred);
+                    // Let the user know that they already have an account but with a different provider
+                    // You can implement your UI logic here
+                    alert('You already have an account with a different sign-in method.');
+                    // Continue with your app logic or redirect to another page
+                    // For demonstration, I'm logging a message here
+                    console.log("Continue with your app logic or redirect to another page.");
+                } else {
+                    // Handle other errors
+                    console.error(errorCode, errorMessage);
+                }
+            }
+        }
+
+        const loginButton = document.getElementById('loginbutt');
+        loginButton.addEventListener('click', signInWithGitHub);
+
+        // Implement the retrievePendingCred function for your app
+        async function retrievePendingCred() {
+            // Your implementation to retrieve the pending credential (GitHub access token)
+            return null; // For demonstration purposes, returning null
+        }
+    </script>
 
 
 
