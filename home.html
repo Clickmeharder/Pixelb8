@@ -2133,8 +2133,8 @@ staticPage BLOCK
 				<p>Online Users: 0</p>
 			</div>
 			<div id="userInfoContainer">
-				<p>User Status:<span id="loginStatus">offline</span>
-				<P>Username: <span id="username"></span></p>
+				<p>User Status:<span id="loginStatus">offline</span></p>
+				<P id="username"></p>
 				<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
 				<ul>
 					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
@@ -2415,7 +2415,7 @@ staticPage BLOCK
         user.providerData.forEach(async (profile) => {
           console.log("Sign-in provider: " + profile.providerId);
           console.log("Provider-specific UID: " + profile.uid);
-          console.log("Name: " + profile.displayName);
+          console.log("UserName: " + profile.displayName);
           console.log("Email: " + profile.email);
           console.log("Photo URL: " + profile.photoURL);
         
