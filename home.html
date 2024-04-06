@@ -2395,16 +2395,17 @@ staticPage BLOCK
 			console.log("  Name: " + profile.displayName);
 			console.log("  Email: " + profile.email);
 			console.log("  Photo URL: " + profile.photoURL);
+		
+			statusElement.textContent = "Logged in";
+			userauthproveriderElement.textContent = profile.providerId;
+			usernameElement.textContent = user.displayName || "Unknown";
+			emailElement.textContent = user.email || "Unknown";
+			photoElement.src = user.photoURL || "default.jpg"; // Set a default image if photoURL is not available
+			emailVerifiedElement.textContent = user.emailVerified ? "Yes" : "No";
+			profileLinkElement.classList.remove('hidden');
+			userauthproveriderElement.classList.remove('hidden');
+			loginButton.classList.add('hidden');
 		});
-		statusElement.textContent = "Logged in";
-		userauthproveriderElement.textContent = profile.providerId;
-		usernameElement.textContent = user.displayName || "Unknown";
-		emailElement.textContent = user.email || "Unknown";
-		photoElement.src = user.photoURL || "default.jpg"; // Set a default image if photoURL is not available
-		emailVerifiedElement.textContent = user.emailVerified ? "Yes" : "No";
-		profileLinkElement.classList.remove('hidden');
-		userauthproveriderElement.classList.remove('hidden');
-		loginButton.classList.add('hidden');
 	  } else {
 		// User is signed out
 		statusElement.textContent = "Status: Logged out";
