@@ -226,11 +226,31 @@
         window.location.href = "https://pixelb8.lol/index.html"; // Redirect to dashboard or any other page
       })
       .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
+      // Handle sign-in errors
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      if (errorCode === 'auth/account-exists-with-different-credential') {
+        // An account already exists with the same email address but different sign-in methods.
+        // Ask the user to sign in using the other provider.
+        const pendingCred = error.credential;
+        const email = error.email;
+        auth.fetchSignInMethodsForEmail(email).then((methods) => {
+          if (methods.includes('password')) {
+            // User has a password account, prompt for password login
+            // You can implement a password prompt or redirect to a password login page
+            alert('Please sign in using your password.');
+          } else {
+            // User has other provider accounts, prompt for the other provider
+            // You can customize this based on your application's logic
+            alert('Please sign in using ' + methods.join(' or '));
+          }
+        });
+      } else {
+        // Handle other errors
         console.error(errorCode, errorMessage);
-      });
-  }
+      }
+    });
+}
   const loginButton = document.getElementById('loginbutt');
   loginButton.addEventListener('click', signInWithGitHub);
 </script>
