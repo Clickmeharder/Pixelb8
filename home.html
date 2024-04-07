@@ -2360,6 +2360,13 @@ staticPage BLOCK
 	-->
 	<!--FIREBASE AUTHENTICATION SKRIPTS-->
 	<script src="webpack.config.js"></script>
+	<script>
+	  const env = {
+		FIREBASE_API_KEY: 'process.env.FIREBASE_API_KEY',
+		FIREBASE_AUTH_DOMAIN: 'process.env.FIREBASE_AUTH_DOMAIN',
+		// Add other variables as needed
+	  };
+	</script>
 	<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
