@@ -2369,8 +2369,9 @@ staticPage BLOCK
 		FIREBASE_MESSAGING_SENDER_ID= 'process.env.FIREBASE_MESSAGING_SENDER_ID,
 		FIREBASE_APP_ID= 'process.env.FIREBASE_APP_ID',
 		FIREBASE_MEASUREMENT_ID= 'process.env.FIREBASE_MEASUREMENT_ID'
-	  }; -->
-	</script>
+	  };
+	</script> -->
+
 	<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
@@ -2379,16 +2380,15 @@ staticPage BLOCK
   
   import { getAuth, signInWithPopup, GithubAuthProvider, onAuthStateChanged, updateProfile  } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
-	const firebaseConfig = {
-	  //apiKey = "12abc3d45ef6789012345g6789h0ij12"// FAKE API KEY FOR TESTING 
-	  apiKey: env.FIREBASE_API_KEY,
-	  authDomain: env.FIREBASE_AUTH_DOMAIN,
-	  projectId: env.FIREBASE_PROJECT_ID,
-	  storageBucket: env.FIREBASE_STORAGE_BUCKET,
-	  messagingSenderId: env.FIREBASE_MESSAGING_SENDER_ID,
-	  appId: env.FIREBASE_APP_ID,
-	  measurementId: env.FIREBASE_MEASUREMENT_ID
-	};
+  const firebaseConfig = {
+    apiKey: '${{ secrets.FIREBASE_API_KEY }}',
+    authDomain: '${{ secrets.FIREBASE_AUTH_DOMAIN }}',
+    projectId: '${{ secrets.FIREBASE_PROJECT_ID }}',
+    storageBucket: '${{ secrets.FIREBASE_STORAGE_BUCKET }}',
+    messagingSenderId: '${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}',
+    appId: '${{ secrets.FIREBASE_APP_ID }}',
+    measurementId: '${{ secrets.FIREBASE_MEASUREMENT_ID }}'
+  };
 
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
