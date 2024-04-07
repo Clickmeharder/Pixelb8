@@ -1011,7 +1011,7 @@ div#userInfoContainer ul {
 /*--------------*/
 /*Select Element*/
 #webtp-pullout {
-    cursor: url(../../Assets/cursors/gif-box/eu-cursors/cursor-06.GIF)8 5, auto;
+    cursor: var(--cursor06-image);
 }
 #webtp-pullout .webtpfilters-selected {
 	margin-left:0px;
@@ -1019,7 +1019,7 @@ div#userInfoContainer ul {
     padding: 3px;
 	background: radial-gradient(black, #3c135eab);
     border: 3px outset #1c447ae0;
-    cursor: url(../../Assets/cursors/gif-box/eu-cursors/cursor-06.GIF)8 5, auto;
+    cursor: var(--cursor06-image);
 }
 .webtpfilteroptions-container {
     display: block;
@@ -1053,7 +1053,7 @@ div#userInfoContainer ul {
     color: #ffffff;
     border: 1px outset grey;
     border-radius: 50%;
-    cursor: url(../../Assets/cursors/gif-box/eu-cursors/cursor-06.GIF)8 5, auto;
+    cursor: var(--cursor06-image);
     transition: background-color 0.3s ease;
     filter: brightness(70%);
     overflow: hidden;

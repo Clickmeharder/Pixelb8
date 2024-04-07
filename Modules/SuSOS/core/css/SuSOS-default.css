@@ -1,4 +1,4 @@
-/*-----------------*/
+
 /*    HUD OVERLAY  */
 .hudMonitorPower{/* main power controls 
 (used to completely disable/enable/control
@@ -1714,7 +1714,6 @@ div#displaypanel-budgets{
 		border-color: #1b252b;
 		text-align: right;
 		cursor: var(--cursor09-image);
-		/* cursor: url(../../assets/cursors/gif-box/eu-cursors/cursor-09.GIF)8 5, auto; */
 	}
 
 	/* Item Stash Tool -restock stash display*/
