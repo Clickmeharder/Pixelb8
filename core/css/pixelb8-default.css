@@ -869,7 +869,7 @@ div#userInfoContainer ul {
   width: max-content;
   padding: 3px;
 }
-.ST-box label{font-family:;font-size:16px;font-weight:;color:;border: 0px ridge #444;border-color:inherit;}
+.ST-box label, .ST-box #st-subheader{font-family:;font-size:16px;font-weight:;color:;border: 0px ridge #444;border-color:inherit;}
 .ST-box H1, .ST-box H2{margin:auto;border:inherit;border-color:#444;}
 .ST-box H1{
 	font-family:;
