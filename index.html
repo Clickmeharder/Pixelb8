@@ -1,3 +1,4 @@
+<!--Home PAge Index -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -170,13 +171,13 @@
 		</footer>
 		
 <script type="module">
+	//import scripts
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
-  //import { getAuth, signInWithPopup, GithubAuthProvider } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-  //import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-  
   import { getAuth, signInWithPopup, GithubAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
   
+  //initialize firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
     authDomain: "pixelb8lol.firebaseapp.com",
@@ -186,11 +187,18 @@
     appId: "1:373700849652:web:c3e59f1653dd224ba153a1",
     measurementId: "G-5EGV2VNMX3"
 	 };
+	 
+	 
+	 //other firebase initiallization
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
   const auth = getAuth();
   const provider = new GithubAuthProvider();
-  // Set up the onAuthStateChanged listener
+  //new database stuff
+  const database  = getFirestore(app);
+  
+  db.settings({ timestampsInSnapshots: true });
+
 	onAuthStateChanged(auth, (user) => {
 	  if (user) {
 		// User is signed in
