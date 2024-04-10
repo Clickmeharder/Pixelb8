@@ -141,7 +141,18 @@
         console.error(errorCode, errorMessage);
       });
     }
-
+	// Define the signOutFromFirebase function
+	function signOutFromFirebase() {
+	  auth.signOut()
+		.then(() => {
+		  console.log('User signed out successfully');
+		  // Redirect or perform other actions after sign out
+		  window.location.href = 'https://pixelb8.lol'; // Redirect to home or any other page
+		})
+		.catch((error) => {
+		  console.error('Sign out error:', error);
+		});
+	}
     // Add event listener to login button
 	const loginButton = document.getElementById('loginbutt');
     loginButton.addEventListener('click', signInWithGitHub);
@@ -155,18 +166,7 @@
 		console.log('Enter Butt Sequence Initiated');
 		window.location.href = 'https://pixelb8.lol/home';
 	});
-	// Define the signOutFromFirebase function
-	function signOutFromFirebase() {
-	  auth.signOut()
-		.then(() => {
-		  console.log('User signed out successfully');
-		  // Redirect or perform other actions after sign out
-		  window.location.href = 'https://pixelb8.lol'; // Redirect to home or any other page
-		})
-		.catch((error) => {
-		  console.error('Sign out error:', error);
-		});
-	}
+
 
 	// Select the logout button element by its ID
 	const logoutButton = document.getElementById('logoutbutt');
