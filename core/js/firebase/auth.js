@@ -48,7 +48,7 @@ function populateAccountDetails(user) {
     const userDetails = [
       { key: 'Status', value: 'Online' },
       { key: 'Username', value: user.displayName || 'No Name Set' },
-      { key: 'Profile Username', value: user.displayName || '-idk-' },
+      { key: 'AuthProviderDisplayName', value: user.providerData[0]?.displayName || '-idk-' },
       { key: 'Profile Photo', value: user.photoURL || 'null' },
       { key: 'Pixel Count', value: '0px' },
       { key: 'Auth Provider', value: user.providerData[0]?.providerId || 'uknown' },
