@@ -568,6 +568,13 @@ div#userInfoContainer ul {
 button#enterButt {
     height: 22px;
     margin: auto;
+	color: #2b8ee27a;
+    border-color: #104755d1;
+    background-color: #0f487a42;
+}
+button#enterButt:hover {
+    color: #2b8ee2d9;
+    border-color: #14728aed;
 }
 div#main-content {
 	margin-top: 2px;
