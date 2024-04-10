@@ -1578,11 +1578,22 @@ margin-left becomes: 4px
   padding: 8px;
 }
 input#signup-email, input#signup-password {
-    background-color: transparent;
+	color: #0b80e787;
+    background-color: transparent;border-color: #07baff66;
 
 }
+input#signup-email:focus-visible, input#signup-password:focus-visible {
+	color: #0b80e7d6;
+    background-color: #00ffff21;
+    border-color: #69755d00;
+    border-radius: 8px;
+    outline-color: #12706ef5;
+    outline-width: 1px;
+    outline-offset: 1px;
+    outline-style: ridge;
+}
 input#signup-email{
-	margin-left:8px;
+	margin-left:10px;
 }
 /* Close button styles */
 .close {
