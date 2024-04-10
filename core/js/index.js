@@ -22,3 +22,13 @@
 		mainContent.style.width = '300px';
 	  }
 	}
+  document.addEventListener('DOMContentLoaded', function() {
+    const createAccountButton = document.getElementById('createaccountbutt');
+    const modal = document.getElementById('modal-usersignup');
+
+    createAccountButton.addEventListener('click', function() {
+      modal.classList.remove('hidden');
+      modal.classList.add('show');
+      modal.style.display = 'block';
+    });
+  });
