@@ -1555,20 +1555,24 @@ margin-left becomes: 4px
 
 .modal {
 	position: fixed;
+	font-size: 1.5vw;
 	z-index: 1000;
     left: 256px;
     top: 134px;
 	width: 45%;
 	height: 29.5%;
-	overflow: auto;
+	overflow: hidden;
 	background-color: rgba(0, 0, 0, 0.4);
+	white-space: nowrap;
+	
 }
 
 .modal-dialog {
     position: relative;
-    margin: 0.1% 0.1% auto;
+    margin: 0.5% 0.1% auto;
     padding: 4px;
-    max-width: 372px;
+    max-width: 94%;
+    height: 86%;
     border: 3px outset #007480b0;
     background-color: #1110348f;
 }
