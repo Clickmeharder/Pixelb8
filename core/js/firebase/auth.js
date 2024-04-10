@@ -22,9 +22,7 @@
     const auth = getAuth();
     const provider = new GithubAuthProvider();
 	const db = getFirestore(app);
-	//update firestore settings
-	db.settings({ timestampInSnapshots: true });
-	
+
     async function getGitHubUserData(githubIdOrLogin) {
       return fetch(
         `https://api.github.com/user/${githubIdOrLogin}`,
