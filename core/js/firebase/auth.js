@@ -152,3 +152,11 @@
 		window.location.href = 'https://pixelb8.lol/home';
 	});
 //hmmm
+function accpanelTogglebutt(button) {
+  var mainContent = document.getElementById('main-content');
+  if (mainContent.style.width === '200px') {
+    mainContent.style.width = '0px';
+  } else {
+    mainContent.style.width = '200px';
+  }
+}
