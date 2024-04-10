@@ -123,13 +123,13 @@ function populateAccountDetails(user) {
 			
 		  innerContentloggedout.classList.add('hidden');
           innerContentloggedin.classList.remove('hidden');
+		  
           // Set the color based on email verification status
           if (user.emailVerified) {
             emailVerifiedElement.style.color = "#24b500b5"; // Green color for verified email
           } else {
             emailVerifiedElement.style.color = "#dd230e66"; // Red color for unverified email
           }
-
           // Check if provider is GitHub and display name is null
           if (profile.providerId === 'github.com' && !user.displayName) {
             try {
@@ -141,7 +141,7 @@ function populateAccountDetails(user) {
               console.error("Error fetching GitHub user data:", error);
             }
           }
-		  
+		  populateAccountDetails(user);
         });
       } else {
         // User is signed out
@@ -160,8 +160,9 @@ function populateAccountDetails(user) {
         logoutButton.classList.add('hidden');
 		innerContentloggedin.classList.add('hidden');
         innerContentloggedout.classList.remove('hidden');
+		populateAccountDetails(user);
       }
-	  populateAccountDetails(user);
+
     });
 // Signup form submission event listener
 	const signUpForm = document.querySelector('#signup-form');
