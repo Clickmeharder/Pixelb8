@@ -1465,8 +1465,8 @@ margin-left becomes: 4px
   display: none; /* Hide modal by default */
   position: fixed;
   z-index: 1000;
-  left: 0;
-  top: 0;
+  left: 50;
+  top: 45;
   width: 100%;
   height: 100%;
   overflow: auto;
