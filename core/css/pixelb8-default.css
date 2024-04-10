@@ -588,8 +588,10 @@ div#main-content:hover {
 }
 #main-content h2 {
     text-align: center;
-    margin-block-end: 0px;
+    margin-block-start: 1px;
+    margin-block-end: -18px;
     font-size: 1.3em;
+	color:#145265;
 }
 #main-content p {
     margin: 0px;
