@@ -124,9 +124,9 @@
     });
 	//signup form
 	//===========================================
-	const signUpForm = document.getElementById('signup-form');
+	const signUpForm = document.querySelector('#signup-form');
 
-	signUpForm.addEventListener('submit', async (e) => {
+	signUpForm.addEventListener('submit', (e) => {
 	  e.preventDefault(); // Prevent the default form submission
 
 	  const email = document.getElementById('signup-email').value;
