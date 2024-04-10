@@ -53,6 +53,7 @@ function populateAccountDetails(user) {
       { key: 'Pixel Count', value: '0px' },
       { key: 'Auth Provider', value: user.providerData[0]?.providerId || 'uknown' },
 	  { key: 'User Email', value: user.email || 'null' }, // This can be populated if needed
+	  { key: 'Auth Provider email', value: user.providerData[0]?.email || '-idk-' },
       { key: 'EmailVerified', value: user.emailVerified ? '► Verified' : '► Unverified' }, // This can be populated if needed
     ];
 
