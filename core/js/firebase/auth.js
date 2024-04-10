@@ -48,11 +48,12 @@ function populateAccountDetails(user) {
     const userDetails = [
       { key: 'Status', value: 'Online' },
       { key: 'Username', value: user.displayName || 'No Name Set' },
-      { key: 'ProfileUsername', value: user.displayName || '-idk-' },
-      { key: 'ProfilePhoto', value: user.photoURL || 'assets/images/logo/pixelb8logo1.png' },
-      { key: 'Userpixelcount', value: '0px' },
-      { key: 'AuthProvider', value: '' }, // This can be populated if needed
-      { key: 'Email', value: '' }, // This can be populated if needed
+      { key: 'Profile Username', value: user.displayName || '-idk-' },
+      { key: 'Profile Photo', value: user.photoURL || 'assets/images/logo/pixelb8logo1.png' },
+      { key: 'Pixel Count', value: '0px' },
+      { key: 'Auth Provider', value: profile.providerId || 'null' }, // This can be populated if needed
+      { key: 'Profile Email', value: profile.email || 'null' }, // This can be populated if needed
+	  { key: 'User Email', value: user.email || 'null' }, // This can be populated if needed
       { key: 'EmailVerified', value: user.emailVerified ? '► Verified' : '► Unverified' }, // This can be populated if needed
     ];
 
@@ -67,11 +68,7 @@ function populateAccountDetails(user) {
       { key: 'Status', value: 'Offline' },
       { key: 'Username', value: 'StrangerDanger!' },
       { key: 'ProfileUsername', value: '-' },
-      { key: 'ProfilePhoto', value: 'assets/images/logo/pixelb8logo1.png' },
-      { key: 'Userpixelcount', value: '' },
-      { key: 'AuthProvider', value: '' }, // This can be populated if needed
-      { key: 'Email', value: '' }, // This can be populated if needed
-      { key: 'EmailVerified', value: '' }, // This can be populated if needed
+      { key: 'ProfilePhoto', value: 'assets/images/logo/pixelb8logo1.png' }
     ];
 
     offlineDetails.forEach((detail) => {
@@ -103,8 +100,8 @@ function populateAccountDetails(user) {
         user.providerData.forEach(async (profile) => {
           console.log("Sign-in provider: " + profile.providerId);
           console.log("Provider-specific UID: " + profile.uid);
-		  console.log("UserName: " + user.displayName);
-          console.log("UserName: " + profile.displayName);
+		  console.log("user displayname: " + user.displayName);
+          console.log("profile.displayname: " + profile.displayName);
           console.log("profile Email: " + profile.email);
 		  console.log("user Email: " + user.email);
           console.log("Photo URL: " + profile.photoURL);
