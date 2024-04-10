@@ -38,7 +38,49 @@
         return response.json();
       });
     }
+// Function to populate account details
+function populateAccountDetails(user) {
+  const accountDetailsElement = document.getElementById('accountdetails');
+  accountDetailsElement.innerHTML = ''; // Clear previous content
 
+  if (user !== null) {
+    // User is signed in
+    const userDetails = [
+      { key: 'Status', value: 'Online' },
+      { key: 'Username', value: user.displayName || 'Nameless' },
+      { key: 'ProfileUsername', value: user.displayName || '-idk-' },
+      { key: 'ProfilePhoto', value: user.photoURL || 'assets/images/logo/pixelb8logo1.png' },
+      { key: 'Userpixelcount', value: '0px' },
+      { key: 'AuthProvider', value: '' }, // This can be populated if needed
+      { key: 'Email', value: '' }, // This can be populated if needed
+      { key: 'EmailVerified', value: user.emailVerified ? '► Verified' : '► Unverified' }, // This can be populated if needed
+    ];
+
+    userDetails.forEach((detail) => {
+      const listItem = document.createElement('li');
+      listItem.textContent = `${detail.key}: ${detail.value}`;
+      accountDetailsElement.appendChild(listItem);
+    });
+  } else {
+    // User is signed out
+    const offlineDetails = [
+      { key: 'Status', value: 'Offline' },
+      { key: 'Username', value: 'StrangerDanger!' },
+      { key: 'ProfileUsername', value: '-' },
+      { key: 'ProfilePhoto', value: 'assets/images/logo/pixelb8logo1.png' },
+      { key: 'Userpixelcount', value: '' },
+      { key: 'AuthProvider', value: '' }, // This can be populated if needed
+      { key: 'Email', value: '' }, // This can be populated if needed
+      { key: 'EmailVerified', value: '' }, // This can be populated if needed
+    ];
+
+    offlineDetails.forEach((detail) => {
+      const listItem = document.createElement('li');
+      listItem.textContent = `${detail.key}: ${detail.value}`;
+      accountDetailsElement.appendChild(listItem);
+    });
+  }
+}
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
@@ -102,6 +144,7 @@
               console.error("Error fetching GitHub user data:", error);
             }
           }
+		  populateAccountDetails(user);
         });
       } else {
         // User is signed out
