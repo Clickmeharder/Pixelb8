@@ -1880,7 +1880,9 @@ Button Classes
 		cursor:var(--cursorkey-image)!important;
 }
 
-img#profilephoto{
-	height:50px;
-	width:auto;
+img#profilephoto {
+    height: 32px;
+    width: auto;
+    border: 3px ridge #333;
+    border-radius: 50%;
 }
