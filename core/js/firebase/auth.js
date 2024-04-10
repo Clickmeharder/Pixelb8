@@ -264,4 +264,10 @@ function populateAccountDetails(user) {
 	// Select the logout button element by its ID
 	const logoutButton = document.getElementById('logoutbutt');
 	logoutButton.addEventListener('click', signOutFromFirebase);
+	
+	const editProfileButton = document.getElementById('editprofilebutt');
+	editProfileButton.addEventListener('click', () => {
+	  // Show the modal for editing profile
+	  $('#modal-editProfile').modal('show');
+	});
 //hmmm
