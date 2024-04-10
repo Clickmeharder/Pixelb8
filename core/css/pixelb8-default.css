@@ -706,7 +706,8 @@ div#main-content:hover {
     position: absolute;
     background: #092438e3;
     padding: 4px;
-    width: 416px;
+    width: 543px;
+    max-width: 45vw;
     left: 0vw;
     margin-top: -9px;
 }
