@@ -49,7 +49,7 @@ function populateAccountDetails(user) {
       { key: 'Status', value: 'Online' },
       { key: 'Username', value: user.displayName || 'No Name Set' },
       { key: 'Profile Username', value: user.displayName || '-idk-' },
-      { key: 'Profile Photo', value: user.photoURL || 'assets/images/logo/pixelb8logo1.png' },
+      { key: 'Profile Photo', value: profile.photoURL || 'assets/images/logo/pixelb8logo1.png' },
       { key: 'Pixel Count', value: '0px' },
       { key: 'Auth Provider', value: profile.providerId || 'null' }, // This can be populated if needed
       { key: 'Profile Email', value: profile.email || 'null' }, // This can be populated if needed
