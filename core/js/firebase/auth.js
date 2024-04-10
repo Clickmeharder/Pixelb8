@@ -156,21 +156,8 @@
     // Add event listener to login button
 	const loginButton = document.getElementById('loginbutt');
     loginButton.addEventListener('click', signInWithGitHub);
-	
-	// Select the button element by its ID
-	const enterButton = document.getElementById('enterButt');
-
-	// Add a click event listener to the button
-	enterButton.addEventListener('click', () => {
-		// Redirect to the desired URL
-		console.log('Enter Butt Sequence Initiated');
-		window.location.href = 'https://pixelb8.lol/home';
-	});
-
 
 	// Select the logout button element by its ID
 	const logoutButton = document.getElementById('logoutbutt');
-
-	// Add a click event listener to the logout button
 	logoutButton.addEventListener('click', signOutFromFirebase);
 //hmmm

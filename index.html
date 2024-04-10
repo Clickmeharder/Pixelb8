@@ -322,6 +322,17 @@
 <!-- scripts -->
 <script src="core/js/index.js"></script>
 <script type="module" src="core/js/firebase/auth.js"></script>
+<script>
+	// Select the button element by its ID
+	const enterButton = document.getElementById('enterButt');
+
+	// Add a click event listener to the button
+	enterButton.addEventListener('click', () => {
+		// Redirect to the desired URL
+		console.log('Enter Butt Sequence Initiated');
+		window.location.href = 'https://pixelb8.lol/home';
+	});
+</script>
 </body>
 </html>
 
