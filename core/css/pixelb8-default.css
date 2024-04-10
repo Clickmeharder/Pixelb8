@@ -667,7 +667,7 @@ div#main-content:hover {
     border-style: ridge;
     border-radius: var(--staticpage-border-radius);
     resize: none;
-	
+	opacity: 0.7;
 }
 .themed-main h2 {
   margin: auto;
