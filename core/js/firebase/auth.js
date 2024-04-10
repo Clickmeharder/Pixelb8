@@ -52,6 +52,8 @@
       const loginButton = document.getElementById('loginbutt');
       const logoutButton = document.getElementById('logoutbutt');
 	  const userpixelcountElement = document.getElementById('Userpixelcount');
+	  const innerContentloggedin = document.getElementById('innercontent-loggedin');
+	  const innerContentloggedout = document.getElementById('innercontent-loggedout');
 
       if (user !== null) {
         // User is signed in
@@ -76,7 +78,9 @@
           userauthproveriderElement.classList.remove('hidden');
           loginButton.classList.add('hidden');
           logoutButton.classList.remove('hidden');
-
+			
+		  innerContentloggedout.classList.add('hidden');
+          innerContentloggedin.classList.remove('hidden');
           // Set the color based on email verification status
           if (user.emailVerified) {
             emailVerifiedElement.style.color = "#24b500b5"; // Green color for verified email
@@ -110,6 +114,8 @@
         userauthproveriderElement.classList.add('hidden');
         loginButton.classList.remove('hidden');
         logoutButton.classList.add('hidden');
+		innerContentloggedin.classList.add('hidden');
+        innerContentloggedout.classList.remove('hidden');
       }
     });
 
