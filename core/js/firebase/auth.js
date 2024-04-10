@@ -137,7 +137,14 @@
         console.error(errorCode, errorMessage);
       });
     }
-	
+	function accpanelTogglebutt(button) {
+	  var mainContent = document.getElementById('main-content');
+	  if (mainContent.style.width === '300px') {
+		mainContent.style.width = '0px';
+	  } else {
+		mainContent.style.width = '300px';
+	  }
+	}
     // Add event listener to login button
 	const loginButton = document.getElementById('loginbutt');
     loginButton.addEventListener('click', signInWithGitHub);
@@ -152,11 +159,3 @@
 		window.location.href = 'https://pixelb8.lol/home';
 	});
 //hmmm
-function accpanelTogglebutt(button) {
-  var mainContent = document.getElementById('main-content');
-  if (mainContent.style.width === '300px') {
-    mainContent.style.width = '0px';
-  } else {
-    mainContent.style.width = '300px';
-  }
-}
