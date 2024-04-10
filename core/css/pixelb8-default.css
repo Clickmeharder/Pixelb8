@@ -604,8 +604,12 @@ div#main-content:hover {
 	color:#145265;
 }
 #main-content p {
+	text-align: center;
     margin: 0px;
-    padding: 4px;
+    margin-bottom: 10px;
+    padding: 1px;
+    font-family: 'Pixelify Sans';
+    font-size: 14px;
 }
 .ad-panel {
     display: inline-flex;
