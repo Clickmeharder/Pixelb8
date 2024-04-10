@@ -1556,9 +1556,9 @@ margin-left becomes: 4px
 .modal {
 	position: fixed;
 	z-index: 1000;
-	left: 50px;
-	top: 45px;
-	width: 73%;
+    left: 256px;
+    top: 134px;
+	width: 45%;
 	height: 28.5%;
 	overflow: auto;
 	background-color: rgba(0, 0, 0, 0.4);
@@ -1568,7 +1568,7 @@ margin-left becomes: 4px
     position: relative;
     margin: 0.1% 0.1% auto;
     padding: 4px;
-    max-width: 632px;
+    max-width: 372px;
     border: 3px outset #007480b0;
     background-color: #1110348f;
 }
@@ -1577,12 +1577,12 @@ margin-left becomes: 4px
   color: #008dcdad;
   padding: 8px;
 }
-input#signup-email, input#signup-password {
+input#signup-username, input#signup-email, input#signup-password {
 	color: #0b80e787;
     background-color: transparent;border-color: #07baff66;
 
 }
-input#signup-email:focus-visible, input#signup-password:focus-visible {
+input#signup-username:focus-visible, input#signup-email:focus-visible, input#signup-password:focus-visible {
 	color: #0b80e7d6;
     background-color: #00ffff21;
     border-color: #69755d00;
@@ -1603,7 +1603,10 @@ input#signup-email{
     font-size: 1em;
     cursor: pointer;
 }
-
+button.btn.btn-primary {
+    margin-left: 122PX;
+    margin-top: 7PX;
+}
 /* Style for modal trigger buttons (if needed) */
 .modal-trigger {
   cursor: pointer;
