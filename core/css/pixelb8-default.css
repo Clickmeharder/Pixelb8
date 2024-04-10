@@ -498,6 +498,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 	padding:0px;
 }
 .right-panel {
+  margin-top: -5px;
   margin-left: -8px;
   color: var(--staticpage-sidepanels-text-color);
   border-color: var(--staticpage-sidepanels-border-color);
@@ -511,6 +512,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     min-height: 180px;
     max-height: 27vh;
 	font-family: 'Pixelify Sans';
+	box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
 }
 .right-panel p {
     margin: 0;
@@ -554,12 +556,14 @@ div#userInfoContainer ul {
     display: inline-flex;
     padding: 0px;
     max-width: fit-content;
+	height: 180px;
     margin-right: 0px;
     justify-content: flex-end;
     color: var(--staticpage-contentpanel-text-color);
     border-color: #0313186b;
     border-radius: var(--staticpage-contentpanel-border-radius);
     background-color: transparent;
+	box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
 }
 button#enterButt {
     height: 22px;
