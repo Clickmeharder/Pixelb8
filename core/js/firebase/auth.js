@@ -122,6 +122,56 @@
         innerContentloggedout.classList.remove('hidden');
       }
     });
+	//signup form
+	//===========================================
+	const signUpForm = document.getElementById('signup-form');
+
+	signUpForm.addEventListener('submit', async (e) => {
+	  e.preventDefault(); // Prevent the default form submission
+
+	  const email = document.getElementById('signup-email').value;
+	  const password = document.getElementById('signup-password').value;
+	  let username = document.getElementById('signup-username').value;
+
+	  // Check if username is empty, generate a random username if it is
+	  if (!username) {
+		const randomUsername = generateRandomUsername(); // Function to generate random username
+		username = randomUsername;
+	  }
+
+	  try {
+		// Create a new user with email and password
+		const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+		const user = userCredential.user;
+
+		// Update the user's display name (username)
+		await user.updateProfile({
+		  displayName: username
+		});
+
+		console.log('User signed up:', user);
+		// You can redirect the user to a new page or perform other actions here
+	  } catch (error) {
+		// Handle signup errors
+		const errorCode = error.code;
+		const errorMessage = error.message;
+		console.error('Signup error:', errorCode, errorMessage);
+		// Display the error to the user if needed
+	  }
+	});
+
+	// Function to generate a random username
+	function generateRandomUsername() {
+	  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	  let result = '';
+	  const charactersLength = characters.length;
+	  for (let i = 0; i < 8; i++) {
+		result += characters.charAt(Math.floor(Math.random() * charactersLength));
+	  }
+	  return result;
+	}
+//end of signupform
+//------------------------------------------------
 
     // Define the signInWithGitHub function
     function signInWithGitHub() {
