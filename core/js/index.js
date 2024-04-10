@@ -45,6 +45,6 @@
   const closeButtons = document.querySelectorAll('.close-modal-btn');
   closeButtons.forEach(button => {
     button.addEventListener('click', () => {
-      closeModalAndCancel(button.getAttribute('data-target'));
+      closeModalAndCancel(button.getAttribute('data-dismiss'));
     });
   });
