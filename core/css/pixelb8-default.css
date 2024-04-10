@@ -710,12 +710,13 @@ div#main-content:hover {
     left: 0vw;
     margin-top: -9px;
 }
-#userInfoContainer .single-round-button {
+#expandaccpaneldiv.single-round-button {
     margin-right: auto;
     width: 16px;
     height: 16px;
 }
-.accpanelinternals-expand-button {
+
+button#Toggleaccpanelinternals-Button {
     padding: 0px;
     background-color: #101128f2;
     color: #ffffff;
@@ -726,6 +727,7 @@ div#main-content:hover {
     filter: brightness(70%);
     overflow: hidden;
 }
+
 .featured-section {
 	min-height: 55px;max-height: 140px;
 	height: 55px;overflow: auto;
