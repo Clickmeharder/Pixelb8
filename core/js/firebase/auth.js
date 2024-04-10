@@ -137,6 +137,10 @@
 		  // Handle successful signup
 		  const user = userCredential.user;
 		  console.log('User signed up:', user);
+		  // Close the signup modal
+		  const modal = document.getElementById('modal-usersignup');
+		  const bootstrapModal = new bootstrap.Modal(modal);
+		  bootstrapModal.hide();
 		  // You can redirect the user to a new page or perform other actions here
 		})
 		.catch((error) => {
