@@ -4,7 +4,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
   import { getFirestore } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-  import { getAuth, signInWithPopup, GithubAuthProvider, onAuthStateChanged, updateProfile  } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GithubAuthProvider, onAuthStateChanged, updateProfile  } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
   //initialize firebase config
   
   const firebaseConfig = {
@@ -122,29 +122,30 @@
         innerContentloggedout.classList.remove('hidden');
       }
     });
-	// Signup form submission event listener
+// Signup form submission event listener
 	const signUpForm = document.querySelector('#signup-form');
 
-	signUpForm.addEventListener('submit', async (e) => {
+	signUpForm.addEventListener('submit', (e) => {
 	  e.preventDefault(); // Prevent the default form submission
 
 	  const email = document.getElementById('signup-email').value;
 	  const password = document.getElementById('signup-password').value;
 
-	  try {
-		// Create a new user with email and password
-		const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-		const user = userCredential.user;
-
-		console.log('User signed up:', user);
-		// You can redirect the user to a new page or perform other actions here
-	  } catch (error) {
-		// Handle signup errors
-		const errorCode = error.code;
-		const errorMessage = error.message;
-		console.error('Signup error:', errorCode, errorMessage);
-		// Display the error to the user if needed
-	  }
+	  // Create a new user with email and password using Firebase's createUserWithEmailAndPassword method
+	  createUserWithEmailAndPassword(auth, email, password)
+		.then((userCredential) => {
+		  // Handle successful signup
+		  const user = userCredential.user;
+		  console.log('User signed up:', user);
+		  // You can redirect the user to a new page or perform other actions here
+		})
+		.catch((error) => {
+		  // Handle signup errors
+		  const errorCode = error.code;
+		  const errorMessage = error.message;
+		  console.error('Signup error:', errorCode, errorMessage);
+		  // Display the error to the user if needed
+		});
 	});
 //end of signupform
 //------------------------------------------------
