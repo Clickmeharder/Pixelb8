@@ -6,7 +6,7 @@
   import { getFirestore } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GithubAuthProvider, onAuthStateChanged, updateProfile  } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
   //initialize firebase config
-  
+
   const firebaseConfig = {
     apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
     authDomain: "pixelb8lol.firebaseapp.com",
@@ -21,7 +21,10 @@
     const analytics = getAnalytics(app);
     const auth = getAuth();
     const provider = new GithubAuthProvider();
-
+	const db = firebase.firestore();
+	//update firestore settings
+	db.settings({ timestampInSnapshots: true });
+	
     async function getGitHubUserData(githubIdOrLogin) {
       return fetch(
         `https://api.github.com/user/${githubIdOrLogin}`,
