@@ -141,6 +141,7 @@
 	// Add a click event listener to the button
 	enterButton.addEventListener('click', () => {
 		// Redirect to the desired URL
+		console.log('Enter Butt Sequence Initiated');
 		window.location.href = 'https://pixelb8.lol/home';
 	});
 //hmmm
