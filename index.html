@@ -15,15 +15,82 @@
 </head>
 
 <body>
+<div class="staticPage" id="Mainpage">
+  <header class="staticpage-header">
+      <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
+  </header>
+  <!-- New Main Content Area -->
+  <main class="main-content">
+      <!-- Left Panel -->
 
+      <div class="panel ad-panel">
+		<div class="static-slideshowpromoter">
+            <!-- Add your slideshow content here -->
+        </div>
+      </div>
+	  <h2 id="themed-welcome-title">Welcome!</h2>
+	  <button id="enterButt">Enter Site</button>
+<!--Main landing content panel-->
+		<div class="panel content-panel" style="display:hidden;">
+			<div id="main-content">
+				
+				<h2>More Text Here!</h2>
+				<p>Laudate Lootium Divitiasque Celebremus.</p>
+				<!-- Login Form -->
+				<br>
+				<div class="logged-in" style="padding:4px; border:1px solid #222;">
+					<form id="loginForm">
+						<ul id="nav-mobile" class="hide-on-med-and-down">
+							<li class="logged-in">
+								<a href="#" class="modal-trigger" id="userAccount-modalTrigger" data-target="modal-useraccount">My Account</a>
+							</li>
+							<li class="logged-in">
+								<a href="#" class="modal-trigger" id="userProfile-editTrigger" data-target="modal-edit">Public Profile</a>
+							</li>
+						</ul>
+					</form>
+					<button class="logged-in" id="logoutbutt" type="button">Logout</button>
+				</div>
+				<div class="logged-out" style="padding:4px; border:1px solid #222;">
+					<button class="logged-out" id="createaccountbutt" type="button">Create Account</button>
+					<p>Or...</p>
+					<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
+				</div>
+			</div>
+					  <!-- Right Panel -->
+			<div class="panel right-panel">
+				<div id="websiteStatContainer">
+					<h2 class="panel-title" id="sitestats">Site Stats</h2>
+					<p>Registered Users: 0</p>
+					<p>Online Users: 0</p>
+				</div>
+				<div id="userInfoContainer">
+					<p id="username">Clickmeharder</p>
+					<img id="profilephoto" src="https://avatars.githubusercontent.com/u/69931387?v=4" alt="Profile Photo">
+					<p id="Userpixelcount" class="">0px</p>
+					<p id="loginStatus">Status: Online</p>
+					<ul>
+						<li>Auth Provided by: <span id="userauthProvider" class="">github.com</span></li>
+						<li id="userinfolist-email" class="">Email: <span id="email">Unknown</span></li>
+						<span id="emailVerified" class="" style="color: rgba(221, 35, 14, 0.4);"> ► Unverified</span>
+						<li><a href="#" id="profileLink" class="disabled">My Profile</a></li>
+						<button id="loginbutt" type="button" class:="" ;="" class="hidden">Login with GitHub</button>
+						<button id="logoutbutt" type="button" class:="disabled hidden">Logout</button>
+					</ul>
+				</div>
+			</div>
+		</div>
 
-  <div class="row">
+	 </main>
+<!-- Content Panels -->
+	<!-- Content Panel A -->
+  <div class="row transparent">
 
 	<div class="row" id="webtp-pullout">
 		<div class="panel control-panel column">
 			<div class="row" id="webtpHeader">
 				<h2 class="panel-title" id="WebPortalControls-Title">WebPortal Controls</h2>
-				<Button class="roundbutt-webtp" id="Openwebportal" style="" onclick="Togglewebportal(this)">Activate</button>
+				<button class="roundbutt-webtp" id="Openwebportal" style="" onclick="Togglewebportal(this)">Activate</button>
 			</div>
 			<div id="static-content-panel-controls">
 
@@ -31,11 +98,11 @@
 				<div class="">
 					<div class="webtpfilteroptions-container">
 						<div class="webtpfilters-option">
-							<label for="filter1" title="Official Mindark Websites" alt="Official Mindark Websites" >Official M.A & PP</label>
+							<label for="filter1" title="Official Mindark Websites" alt="Official Mindark Websites">Official M.A &amp; PP</label>
 							<input type="checkbox" id="filter1" value="Official Filter">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter2" title="" alt="Planet Partner websites" >Planet Partners</label>
+							<label for="filter2" title="" alt="Planet Partner websites">Planet Partners</label>
 							<input type="checkbox" id="filter2" value="PP Filter">
 						</div>
 						<div class="webtpfilters-option" style="display: none;">
@@ -43,7 +110,7 @@
 							<input type="checkbox" id="filter3" value="Planetary Filter">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter4" title="" alt="" >Forums</label>
+							<label for="filter4" title="" alt="">Forums</label>
 							<input type="checkbox" id="filter4" value="Forum Filter">
 						</div>
 						<div class="webtpfilters-option">
@@ -55,7 +122,7 @@
 							<input type="checkbox" id="filter6" value="Tools Filter">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter7" title="" alt="">Info & Data</label>
+							<label for="filter7" title="" alt="">Info &amp; Data</label>
 							<input type="checkbox" id="filter7" value="Information andData">
 						</div>
 						<div class="webtpfilters-option">
@@ -63,28 +130,28 @@
 							<input type="checkbox" id="filter8" value="Societies">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter8" title="" alt="">Miscelaneous 3rd Party</label>
-							<input type="checkbox" id="filter8" value="Misc 3rdparty">
+							<label for="filter9" title="" alt="">Miscelaneous 3rd Party</label>
+							<input type="checkbox" id="filter9" value="Misc 3rdparty">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter9" title="" alt="">Colonist Services & Content</label>
-							<input type="checkbox" id="filter9" value="Colonist Services">
+							<label for="filter10" title="" alt="">Colonist Services &amp; Content</label>
+							<input type="checkbox" id="filter10" value="Colonist Services">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter10" title="" alt="">Entropian Creators</label>
-							<input type="checkbox" id="filter10" value="Entropian Creators">
+							<label for="filter11" title="" alt="">Entropian Creators</label>
+							<input type="checkbox" id="filter11" value="Entropian Creators">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter11" title="" alt="">My Favourites</label>
-							<input type="checkbox" id="filter11" value="My Favourites">
+							<label for="filter12" title="" alt="">My Favourites</label>
+							<input type="checkbox" id="filter12" value="My Favourites">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter12" title="" alt="">My Portals</label>
-							<input type="checkbox" id="filter12" value="My Portals">
+							<label for="filter13" title="" alt="">My Portals</label>
+							<input type="checkbox" id="filter13" value="My Portals">
 						</div>
 						<div class="webtpfilters-option">
-							<label for="filter13" >All</label>
-							<input type="checkbox" id="filter13" value="All Options">
+							<label for="filter14">All</label>
+							<input type="checkbox" id="filter14" value="All Options">
 						</div>
 					</div>
 					<div class="webtpfilters-selected row" onclick="togglewebtpfilterOptions(this)">
@@ -97,10 +164,10 @@
 					</div>
 				</div>
 				<select class="webtp" id="webtpoptions">
-					<option value="option0" selected disabled>Destination</option>
+					<option value="option0" selected="" disabled="">Destination</option>
 
 				</select>
-				<Button class="flex" id="buttportaldetails" onclick="toggledestinationdetails(this)">《《   S.U.S   》》</button>
+				<button class="flex" id="buttportaldetails" onclick="toggledestinationdetails(this)">《《   S.U.S   》》</button>
 			</div>
 		</div>	
 		<div class="panel" id="webtp">
@@ -113,27 +180,64 @@
 		</div>
 		<div id="portaldestinationDetails"></div>
 	</div>
-	<div class="panel content-panel" style="display:hidden;">
-		<h2 class="panel-title">Content Panel</h2>
-		<div id="staticpage-content-contentpanelB">[_]</div>
-	</div>
-	<div class="panel ad-panel">
-		<h2 class="panel-title"></h2>
-		<div id="staticpage-adpanel-contentwrapper">
-			<div class="static-videopanel">
-				<iframe
-					width="225"
-					height="148"
-					src="https://www.youtube.com/embed/aOrOQRUXFEk"
-					title="YouTube video player"
-					frameborder="0"
-					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-					allowfullscreen
-					style="max-height: 180px; width: 100%;"
-				></iframe>
-			</div>
-		</div>
-	</div>
+	
+	<!--Current Main Content Area-->
+		<h2 id="themed-update-title">Latest Updates</h2>
+		<section class="themed-main">
+			<section class="featured-section">
+				<!-- <h2 class="section-title">Latest Updates</h2> -->
+				<div class="devnote">
+					<h3 class="devnote-title">Development Update - [Insert Date]</h3>
+					<p class="devnote-content">
+						<strong>Developer:</strong> Jaedraze aka General Jimbobbityboo of Secret Universal Services Society
+						<br>
+						<br>
+						Our main goal is to provide a comprehensive assistant platform for colonists in the Entropia system, offering a range of tools, information, and resources to enrich their gaming experience. While our current focus is on Planet Arkadia, we intend to gradually expand to include content regarding other planets and celestial bodies within Entropia Universe.
+						<br>
+						<br>
+						Tool Development and Expansion:
+						</p><ul>
+							<li>Create an element to display goals - Expected completion by [Insert Deadline]</li>
+							<li>Update main page content - Scheduled for [Insert Deadline]</li>
+							<!-- Add more points as needed -->
+						</ul>
+					<p></p>
+				</div>
+				<!-- End of Latest Devnote -->
+
+				<button class="themed-button" disabled="">Read More</button>
+			</section>
+	<!--       <section class="themed-main">
+          <section class="featured-section">
+              <h2 class="section-title">Attention Entropia Colonists</h2>
+              <p class="section-description">This Website is still very early in development; HOWEVER If your looking for EU Tools. they are currently available within the SuSOS. simply click the power button on the top left to turn on the SuSOS main power, you can find the eu tools in the start menu, and the stolen space map is located in the button bar on the right side of the SuSOS - to toggle the space map on and off click the button labelled "Space Map"</p>
+              <button class="themed-button" disabled>Read More</button>
+          </section> -->
+          <!-- Generic Example Elements -->
+			  <div class="example-element">
+				  <h3>Example Element 1</h3>
+				  <p>This is the first example element in the main content area after the featured content section</p>
+			  </div>
+			  <div class="example-element">
+				  <h3>Example Element 2</h3>
+				  <p>This is some example content for Element 2.</p>
+			  </div>
+			  <div class="example-element">
+				  <h3>Example Element 2</h3>
+				  <p>This is some example content for Element 2.</p>
+			  </div>
+			  <div class="example-element">
+				  <h3>Example Element 2</h3>
+				  <p>This is some example content for Element 2.</p>
+			  </div>
+			  <div class="example-element">
+				  <h3>Example Element 2</h3>
+				  <p>This is some example content for Element 2.</p>
+			  </div>
+			  <!-- End of Generic Example Elements -->
+		  </section>
+		
+	
   </div>
   <!-- Footer -->
   <footer class="themed-footer">
@@ -141,58 +245,9 @@
   </footer>
 <!--end mainpage -->
 </div>
-	<div class="staticPage" id="Mainpage">
-		<header class="staticpage-header">
-			<h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
-			<nav class="main-nav">
-				<ul>
-					<li><a href="#">Home</a></li>
-					<li><a href="#">About</a></li>
-					<li><a href="#">Contact</a></li>
-				</ul>
-			</nav>
-		</header>
-
-		<div id="pageContainer">
-			<main class="themed-main">
-				<h2 id="themed-main-title">Welcome! </h2>
-				<h2>come pixelb8 with us. </h2>
-				<p>Laudate Lootium Divitiasque Celebremus.</p>
-				<!-- Login Form -->
-				<br>
-				<form id="loginForm">
-					<button id="Useraccountbutt" type="button">My Account</button>
-					<ul id="nav-mobile" class="hide-on-med-and-down">
-						<li class="logged-in">
-							<a href="#" class="modal-trigger" id="userAccount-modalTrigger" data-target="modal-useraccount">Account</a>
-						</li>
-						<li class="logged-in">
-							<a href="#" class="" id="userAccount-logoutTrigger">logout</a>
-						</li>
-						<li class="logged-in">
-							<a href="#" class="modal-trigger" id="userProfile-editTrigger" data-target="modal-edit">Profile</a>
-						</li>
-						<li class="logged-out">
-							<a href="#" class="modal-trigger" id="userLogin-modalTrigger" data-target="modal-userlogin">Login</a>
-						</li>
-						<li class="logged-out">
-							<a href="#" class="modal-trigger" id="userAccountCreation-modalTrigger" data-target="modal-usersignup">Create Acount</a>
-						</li>
-					</ul>
-					<p>Or...</p>
-					<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
-					<button class="logged-in" id="logoutbutt" type="button">Logout</button>
-				</form>
-			</main>
-		</div>
-	</div>
-		<footer class="themed-footer">
-			&copy; 2024 PixelB8.lol - All Rights Reserved
-		</footer>
-
 
 <!-- Modal for Signup -->
-<div class="modal fade" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
+<div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -218,9 +273,8 @@
     </div>
   </div>
 </div>
-
 <!-- Modal for login -->
-<div class="modal fade" id="modal-userlogin" tabindex="-1" role="dialog" aria-labelledby="modal-userlogin-label" aria-hidden="true">
+<div class="modal fade hidden" id="modal-userlogin" tabindex="-1" role="dialog" aria-labelledby="modal-userlogin-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -246,12 +300,8 @@
     </div>
   </div>
 </div>
-
-
-
-
 <!-- Modal for account -->
-<div class="modal fade" id="modal-useraccount" tabindex="-1" role="dialog" aria-labelledby="modal-useraccount-label" aria-hidden="true">
+<div class="modal fade hidden" id="modal-useraccount" tabindex="-1" role="dialog" aria-labelledby="modal-useraccount-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -287,10 +337,8 @@
     </div>
   </div>
 </div>
-
-
 <!-- Add more modals for other functionalities as needed -->
-<div class="modal fade" id="modal-userpublicprofile" tabindex="-1" role="dialog" aria-labelledby="modal-userpublicprofile-label" aria-hidden="true">
+<div class="modal fade hidden" id="modal-userpublicprofile" tabindex="-1" role="dialog" aria-labelledby="modal-userpublicprofile-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -328,9 +376,8 @@
     </div>
   </div>
 </div>
-
 <!-- Modal for Profile -->
-<div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="modal-edit-label" aria-hidden="true">
+<div class="modal fade hidden" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="modal-edit-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -358,6 +405,8 @@
     </div>
   </div>
 </div>
+
+	<!-- scripts -->
 <script type="module" src="core/js/firebase/auth.js"></script>
 <script type="module" src="core/js/index.js"></script>
 		<!-- Add more modals for other functionalities as needed -->

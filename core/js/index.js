@@ -1,3 +1,11 @@
+// Select the button element by its ID
+const enterButton = document.getElementById('enterButt');
+
+// Add a click event listener to the button
+enterButton.addEventListener('click', () => {
+    // Redirect to the desired URL
+    window.location.href = 'https://pixelb8.lol/home';
+});
 //index.js
 document.addEventListener('DOMContentLoaded', function() {
   // Function to open the modal
