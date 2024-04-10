@@ -597,8 +597,9 @@ div#main-content:hover {
 }
 #main-content h2 {
     text-align: center;
+    font-family: Yatra one;
     margin-block-start: 1px;
-    margin-block-end: 15px;
+    margin-block-end: -16px;
     font-size: 1.3em;
 	color:#145265;
 }
@@ -1564,8 +1565,14 @@ margin-left becomes: 4px
 .logged-in{}
 .logged-out{}
 form#loginForm {
-    height: 102px;
+    height: 115px;
     overflow-y: auto;
+    font-size: 10px;
+    line-height: normal;
+    font-family: lucida console;
+    color: #0e7504;
+    background-color: #1b1818a1;
+
 }
 .modal {
 	position: fixed;
