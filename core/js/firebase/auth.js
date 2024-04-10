@@ -122,32 +122,19 @@
         innerContentloggedout.classList.remove('hidden');
       }
     });
-	//signup form
-	//===========================================
+	// Signup form submission event listener
 	const signUpForm = document.querySelector('#signup-form');
 
-	signUpForm.addEventListener('submit', (e) => {
+	signUpForm.addEventListener('submit', async (e) => {
 	  e.preventDefault(); // Prevent the default form submission
 
 	  const email = document.getElementById('signup-email').value;
 	  const password = document.getElementById('signup-password').value;
-	  let username = document.getElementById('signup-username').value;
-
-	  // Check if username is empty, generate a random username if it is
-	  if (!username) {
-		const randomUsername = generateRandomUsername(); // Function to generate random username
-		username = randomUsername;
-	  }
 
 	  try {
 		// Create a new user with email and password
 		const userCredential = await auth.createUserWithEmailAndPassword(email, password);
 		const user = userCredential.user;
-
-		// Update the user's display name (username)
-		await user.updateProfile({
-		  displayName: username
-		});
 
 		console.log('User signed up:', user);
 		// You can redirect the user to a new page or perform other actions here
@@ -159,7 +146,6 @@
 		// Display the error to the user if needed
 	  }
 	});
-
 	// Function to generate a random username
 	function generateRandomUsername() {
 	  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
