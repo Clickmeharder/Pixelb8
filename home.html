@@ -2091,7 +2091,7 @@ staticPage BLOCK
 					<button class="logged-in" id="logoutbutt" type="button">Logout</button>
 				</div>
 				<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
-					<button class="logged-out" id="createaccountbutt" type="button">Create Account</button>
+					<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
 					<p>Or...</p>
 					<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
 				</div>
@@ -2306,7 +2306,33 @@ staticPage BLOCK
 <!--end mainpage -->
 </div>
 <!--end mainpage -->
-
+<!-- Modal for Signup -->
+<div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-signup-label">Create Account</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Your signup form goes here -->
+        <form id="signup-form">
+          <div class="form-group input-field">
+            <label for="signup-email">Email address</label>
+            <input type="signup-email" class="form-control" id="signup-email" aria-describedby="emailHelp" required />
+          </div>
+          <div class="form-group input-field">
+            <label for="signup-password">Enter Password</label>
+            <input type="signup-password" class="form-control" id="signup-password" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 <div id="currentgifcursordiv" style="left: 1059px; top: 162px; background-image: none;"></div>
 <div id="currentgifdiv" style="background-image: none; background-color: black;"></div>	
 
