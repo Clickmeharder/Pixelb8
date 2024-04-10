@@ -21,7 +21,7 @@
     const analytics = getAnalytics(app);
     const auth = getAuth();
     const provider = new GithubAuthProvider();
-	const db = firebase.firestore();
+	const db = getFirestore();
 	//update firestore settings
 	db.settings({ timestampInSnapshots: true });
 	
