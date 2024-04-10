@@ -233,7 +233,7 @@ function populateAccountDetails(user) {
 	function updateProfileData(username, photoURL) {
 	  const user = auth.currentUser;
 
-	  user.updateProfile({
+	  updateProfile(user, {
 		displayName: username,
 		photoURL: photoURL
 	  }).then(() => {
