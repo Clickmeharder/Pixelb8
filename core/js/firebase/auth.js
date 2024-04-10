@@ -44,6 +44,7 @@
       const statusElement = document.getElementById('loginStatus');
       const userauthproveriderElement = document.getElementById('userauthProvider');
       const usernameElement = document.getElementById('username');
+	  const profileusernameElement = document.getElementById('profileusername');
       const emailElement = document.getElementById('email');
       const listedElementEmail = document.getElementById('userinfolist-email');
       const photoElement = document.getElementById('profilephoto');
@@ -60,6 +61,7 @@
         user.providerData.forEach(async (profile) => {
           console.log("Sign-in provider: " + profile.providerId);
           console.log("Provider-specific UID: " + profile.uid);
+		  console.log("UserName: " + user.displayName);
           console.log("UserName: " + profile.displayName);
           console.log("profile Email: " + profile.email);
 		  console.log("user Email: " + user.email);
@@ -67,7 +69,8 @@
         
           statusElement.textContent = "Status: Online";
           userauthproveriderElement.textContent = profile.providerId;
-          usernameElement.textContent = user.displayName || "Nameless";
+		  usernameElement.textContent = user.displayName || "Nameless";
+          profileusernameElement.textContent = profile.displayName || "-idk-";
           emailElement.textContent = profile.email || "Unknown";
           photoElement.src = user.photoURL || "default.jpg";
 		  userpixelcountElement.classList.remove('hidden');
@@ -104,6 +107,7 @@
         // User is signed out
         statusElement.textContent = "Status: offline";
         usernameElement.textContent = "StrangerDanger!";
+		profileusernameElement.textContent = "-";
         emailElement.textContent = "";
         photoElement.src = "assets/images/logo/pixelb8logo1.png"; // Set a default image
 		userpixelcountElement.classList.add('hidden');
