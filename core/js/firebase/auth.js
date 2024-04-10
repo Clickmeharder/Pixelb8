@@ -47,7 +47,7 @@ function populateAccountDetails(user) {
     // User is signed in
     const userDetails = [
       { key: 'Status', value: 'Online' },
-      { key: 'Username', value: user.displayName || 'Nameless' },
+      { key: 'Username', value: user.displayName || 'No Name Set' },
       { key: 'ProfileUsername', value: user.displayName || '-idk-' },
       { key: 'ProfilePhoto', value: user.photoURL || 'assets/images/logo/pixelb8logo1.png' },
       { key: 'Userpixelcount', value: '0px' },
@@ -228,6 +228,35 @@ function populateAccountDetails(user) {
 		  console.error('Sign out error:', error);
 		});
 	}
+	
+// Function to update profile
+	function updateProfileData(username, photoURL) {
+	  const user = auth.currentUser;
+
+	  user.updateProfile({
+		displayName: username,
+		photoURL: photoURL
+	  }).then(() => {
+		console.log('Profile updated successfully');
+		// Close the modal after updating the profile
+		$('#modal-editProfile').modal('hide');
+	  }).catch((error) => {
+		console.error('Error updating profile:', error);
+		// Handle error if profile update fails
+	  });
+	}
+
+	// Handle form submission for updating profile
+	const updateProfileForm = document.getElementById('update-profile-form');
+
+	updateProfileForm.addEventListener('submit', (e) => {
+	  e.preventDefault(); // Prevent default form submission
+
+	  const username = document.getElementById('update-username').value;
+	  const photoURL = document.getElementById('update-photoURL').value;
+
+	  updateProfileData(username, photoURL);
+	});
     // Add event listener to login button
 	const loginButton = document.getElementById('loginbutt');
     loginButton.addEventListener('click', signInWithGitHub);

@@ -50,6 +50,7 @@
 						</ul>
 						<ul id="accountdetails" class="">
 						</ul>
+						<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
 					</form>
 					<button class="logged-in" id="logoutbutt" type="button">Logout</button>
 				</div>
@@ -215,6 +216,36 @@
     </div>
   </div>
 </div>
+
+<!-- Modal for Edit Profile -->
+<div class="modal fade hidden" id="modal-editProfile" tabindex="-1" role="dialog" aria-labelledby="modal-editProfile-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-editProfile-label">Edit Profile</h5>
+        <button type="button" class="close close-modal-btn" data-dismiss="modal-editProfile" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Your profile update form goes here -->
+        <form id="update-profile-form">
+          <div class="form-group input-field">
+            <label for="update-username">Username</label>
+            <input type="text" class="form-control" id="update-username" aria-describedby="usernameHelp">
+          </div>
+          <div class="form-group input-field">
+            <label for="update-photoURL">Profile Photo URL</label>
+            <input type="text" class="form-control" id="update-photoURL" aria-describedby="photoURLHelp">
+          </div>
+          <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- Modal for account -->
 <div class="modal fade hidden" id="modal-useraccount" tabindex="-1" role="dialog" aria-labelledby="modal-useraccount-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -292,7 +323,7 @@
   </div>
 </div>
 <!-- Modal for Profile -->
-<div class="modal fade hidden" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="modal-edit-label" aria-hidden="true">
+<div class="modal fade hidden" id="modal-editpublicprofile" tabindex="-1" role="dialog" aria-labelledby="modal-edit-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
