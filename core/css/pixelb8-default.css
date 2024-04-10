@@ -566,9 +566,8 @@ button#enterButt {
     margin: auto;
 }
 div#main-content {
-    margin-top: auto;
-    margin-bottom: auto;
-    max-height: 184px;
+	margin-top: 2px;
+    max-height: 179px;
     width: 0px;
 	border: 4px outset #494d497a;
     border-left-width: 12px;
