@@ -22,24 +22,7 @@
 		mainContent.style.width = '300px';
 	  }
 	}
-// Define the signOutFromFirebase function
-function signOutFromFirebase() {
-  auth.signOut()
-    .then(() => {
-      console.log('User signed out successfully');
-      // Redirect or perform other actions after sign out
-      window.location.href = 'https://pixelb8.lol'; // Redirect to home or any other page
-    })
-    .catch((error) => {
-      console.error('Sign out error:', error);
-    });
-}
 
-// Select the logout button element by its ID
-const logoutButton = document.getElementById('logoutbutt');
-
-// Add a click event listener to the logout button
-logoutButton.addEventListener('click', signOutFromFirebase);
   document.addEventListener('DOMContentLoaded', function() {
     const createAccountButton = document.getElementById('createaccountbutt');
     const modal = document.getElementById('modal-usersignup');

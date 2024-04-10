@@ -155,4 +155,22 @@
 		console.log('Enter Butt Sequence Initiated');
 		window.location.href = 'https://pixelb8.lol/home';
 	});
+	// Define the signOutFromFirebase function
+	function signOutFromFirebase() {
+	  auth.signOut()
+		.then(() => {
+		  console.log('User signed out successfully');
+		  // Redirect or perform other actions after sign out
+		  window.location.href = 'https://pixelb8.lol'; // Redirect to home or any other page
+		})
+		.catch((error) => {
+		  console.error('Sign out error:', error);
+		});
+	}
+
+	// Select the logout button element by its ID
+	const logoutButton = document.getElementById('logoutbutt');
+
+	// Add a click event listener to the logout button
+	logoutButton.addEventListener('click', signOutFromFirebase);
 //hmmm
