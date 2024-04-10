@@ -83,10 +83,16 @@ function populateAccountDetails(user) {
   }
 }
 
-//get data
-db.collection('UserProfiles').get().then(snapshot => {
-	console.log(snapshot.docs);
-})	
+// Fetch data from Firestore collection
+getDocs(collection(db, 'UserProfiles'))
+  .then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      console.log(doc.data());
+    });
+  })
+  .catch((error) => {
+    console.log("Error getting documents: ", error);
+  });
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
