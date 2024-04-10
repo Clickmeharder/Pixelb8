@@ -1592,6 +1592,9 @@ input#signup-username:focus-visible, input#signup-email:focus-visible, input#sig
     outline-offset: 1px;
     outline-style: ridge;
 }
+input#signup-username{
+	margin-bottom:4px;
+}
 input#signup-email{
 	margin-left:10px;
 }
