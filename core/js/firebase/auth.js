@@ -51,8 +51,7 @@ function populateAccountDetails(user) {
       { key: 'Profile Username', value: user.displayName || '-idk-' },
       { key: 'Profile Photo', value: profile.photoURL || 'assets/images/logo/pixelb8logo1.png' },
       { key: 'Pixel Count', value: '0px' },
-      { key: 'Auth Provider', value: profile.providerId || 'null' }, // This can be populated if needed
-      { key: 'Profile Email', value: profile.email || 'null' }, // This can be populated if needed
+      { key: 'Auth Provider', value: user.providerData[0]?.providerId || 'uknown' },
 	  { key: 'User Email', value: user.email || 'null' }, // This can be populated if needed
       { key: 'EmailVerified', value: user.emailVerified ? '► Verified' : '► Unverified' }, // This can be populated if needed
     ];
