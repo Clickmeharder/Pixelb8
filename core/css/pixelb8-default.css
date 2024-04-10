@@ -598,7 +598,7 @@ div#main-content:hover {
 #main-content h2 {
     text-align: center;
     margin-block-start: 1px;
-    margin-block-end: -18px;
+    margin-block-end: 15px;
     font-size: 1.3em;
 	color:#145265;
 }
