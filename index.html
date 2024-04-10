@@ -1,4 +1,4 @@
-<!--Home PAge Index -->
+<!--Home PAge Index (landing Page) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -161,7 +161,27 @@
 				<!-- Login Form -->
 				<br>
 				<form id="loginForm">
-					<button id="loginbutt" type="button">Login with GitHub</button>
+					<button id="Useraccountbutt" type="button">My Account</button>
+					<ul id="nav-mobile" class="hide-on-med-and-down">
+						<li class="logged-in">
+							<a href="#" class="modal-trigger" id="userAccount-modalTrigger" data-target="modal-useraccount">Account</a>
+						</li>
+						<li class="logged-in">
+							<a href="#" class="" id="userAccount-logoutTrigger">logout</a>
+						</li>
+						<li class="logged-in">
+							<a href="#" class="modal-trigger" id="userProfile-editTrigger" data-target="modal-edit">Profile</a>
+						</li>
+						<li class="logged-out">
+							<a href="#" class="modal-trigger" id="userLogin-modalTrigger" data-target="modal-userlogin">Login</a>
+						</li>
+						<li class="logged-out">
+							<a href="#" class="modal-trigger" id="userAccountCreation-modalTrigger" data-target="modal-usersignup">Create Acount</a>
+						</li>
+					</ul>
+					<p>Or...</p>
+					<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
+					<button class="logged-in" id="logoutbutt" type="button">Logout</button>
 				</form>
 			</main>
 		</div>
@@ -169,8 +189,179 @@
 		<footer class="themed-footer">
 			&copy; 2024 PixelB8.lol - All Rights Reserved
 		</footer>
-		
-<script type="module">
+
+
+<!-- Modal for Signup -->
+<div class="modal fade" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-signup-label">Create Account</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Your signup form goes here -->
+        <form id="signup-form">
+          <div class="form-group input-field">
+            <label for="signup-email">Email address</label>
+            <input type="signup-email" class="form-control" id="signup-email" aria-describedby="emailHelp" required />
+          </div>
+          <div class="form-group input-field">
+            <label for="signup-password">Enter Password</label>
+            <input type="signup-password" class="form-control" id="signup-password" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for login -->
+<div class="modal fade" id="modal-userlogin" tabindex="-1" role="dialog" aria-labelledby="modal-userlogin-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-login-label">User Login</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Your login form goes here -->
+        <form id="login-form">
+          <div class="form-group input-field">
+            <label for="login-email">Email address</label>
+            <input type="login-email" class="form-control" id="login-email" aria-describedby="emailHelp" required />
+          </div>
+          <div class="form-group input-field">
+            <label for="login-password">Enter Password</label>
+            <input type="login-password" class="form-control" id="login-password" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- Modal for account -->
+<div class="modal fade" id="modal-useraccount" tabindex="-1" role="dialog" aria-labelledby="modal-useraccount-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-account-label">Account Details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Your account form goes here -->
+        <form id="account-form">
+		  <div class="account-details"></div>
+          <div class="form-group">
+            <label for="account-email">Email address</label>
+            <input type="email" class="form-control" id="account-email" aria-describedby="emailHelp">
+          </div>
+          <div class="form-group">
+            <label for="account-password">Password</label>
+            <input type="password" class="form-control" id="account-password">
+          </div>
+          <div class="form-group">
+            <label for="account-userimg">Profile Picture</label>
+            <input type="text" class="form-control" id="account-userimg">
+          </div>
+		  <div class="form-group">
+            <label for="account-colonistusername">Entropia Colonist Name</label>
+            <input type="text" class="form-control" id="account-colonistusername">
+          </div>
+          <!-- Add more fields as needed -->
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Add more modals for other functionalities as needed -->
+<div class="modal fade" id="modal-userpublicprofile" tabindex="-1" role="dialog" aria-labelledby="modal-userpublicprofile-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-publicprofile-label">publicprofile Details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Your publicprofile form goes here -->
+        <form id="editprofile-form">
+		  <div class="publicprofile-current"></div>
+          <div class="form-group input-field" id="profile-usercontactgroup">
+            <label for="publicprofile-email">Email address</label>
+            <input type="email" class="form-control" id="publicprofile-email" aria-describedby="emailHelp">
+			<label for="publicprofile-alias-eu">Entropia Name</label>
+            <input type="text" class="form-control" id="publicprofile-alias-eu">
+          </div>
+          <div class="form-group input-field">
+            <label for="publicprofile-userimg">Profile Picture</label>
+            <input type="text" class="form-control" id="publicprofile-userimg">
+          </div>
+          <div class="form-group input-field">
+            <label for="publicprofile-header">Profile Header</label>
+            <input type="text" class="form-control" id="publicprofile-password">
+          </div>
+          <div class="form-group input-field">
+            <label for="publicprofile-maintextcontent">Profile Body Text</label>
+            <textarea class="form-control" id="publicprofile-maintextcontent"></textarea>
+          </div>
+          <!-- Add more fields as needed -->
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Profile -->
+<div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="modal-edit-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-edit-label">Profile</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Your profile editing form goes here -->
+        <p>Here you can edit your profile information.</p>
+        <form>
+          <div class="form-group">
+            <label for="profile-username">Username</label>
+            <input type="text" class="form-control" id="profile-username">
+          </div>
+          <div class="form-group">
+            <label for="profile-bio">Bio</label>
+            <textarea class="form-control" id="profile-bio" rows="3"></textarea>
+          </div>
+          <!-- Add more fields as needed -->
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="core/js/firebase/auth.js"></script>
+<script type="module" src="core/js/index.js"></script>
+		<!-- Add more modals for other functionalities as needed -->
+<!-- <script type="module">
 	//import scripts
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
@@ -233,7 +424,7 @@
 	}
 	const loginButton = document.getElementById('loginbutt');
 	loginButton.addEventListener('click', signInWithGitHub);
-</script>
+</script> -->
 
 
 
