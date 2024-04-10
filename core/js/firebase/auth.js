@@ -49,7 +49,7 @@ function populateAccountDetails(user) {
       { key: 'Status', value: 'Online' },
       { key: 'Username', value: user.displayName || 'No Name Set' },
       { key: 'Auth Provider Alias', value: user.providerData[0]?.displayName || '-idk-' },
-      { key: 'Profile Photo', value: user.photoURL || 'null' },
+      { key: 'User img url', value: user.photoURL || 'null' },
       { key: 'Pixel Count', value: '0px' },
       { key: 'Auth Provider', value: user.providerData[0]?.providerId || 'uknown' },
 	  { key: 'User Email', value: user.email || 'null' }, // This can be populated if needed
