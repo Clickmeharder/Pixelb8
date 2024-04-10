@@ -144,7 +144,7 @@ function populateAccountDetails(user) {
               console.error("Error fetching GitHub user data:", error);
             }
           }
-		  populateAccountDetails(user);
+		  
         });
       } else {
         // User is signed out
@@ -164,6 +164,7 @@ function populateAccountDetails(user) {
 		innerContentloggedin.classList.add('hidden');
         innerContentloggedout.classList.remove('hidden');
       }
+	  populateAccountDetails(user);
     });
 // Signup form submission event listener
 	const signUpForm = document.querySelector('#signup-form');
