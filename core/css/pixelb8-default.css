@@ -1885,4 +1885,12 @@ img#profilephoto {
     width: auto;
     border: 3px ridge #333;
     border-radius: 50%;
+	opacity:0.6;
+}
+img#profilephoto:hover {
+    height: 32px;
+    width: auto;
+    border: 3px ridge #333;
+    border-radius: 50%;
+	opacity:0.8;
 }
