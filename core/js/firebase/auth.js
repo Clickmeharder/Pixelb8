@@ -97,6 +97,7 @@ function populateAccountDetails(user) {
 
       if (user !== null) {
         // User is signed in
+		console.log('user logged in: ', user);
         user.providerData.forEach(async (profile) => {
           console.log("Sign-in provider: " + profile.providerId);
           console.log("Provider-specific UID: " + profile.uid);
@@ -145,6 +146,7 @@ function populateAccountDetails(user) {
         });
       } else {
         // User is signed out
+		console.log('user logged out');
         statusElement.textContent = "Status: offline";
         usernameElement.textContent = "StrangerDanger!";
 		profileusernameElement.textContent = "-";
