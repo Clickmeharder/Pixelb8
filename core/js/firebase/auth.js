@@ -41,6 +41,9 @@
         return response.json();
       });
     }
+	
+
+
 // Function to populate account details
 function populateAccountDetails(user) {
   const accountDetailsElement = document.getElementById('accountdetails');
@@ -81,6 +84,11 @@ function populateAccountDetails(user) {
     });
   }
 }
+
+//get data
+db.collection('UserProfiles').get().then(snapshot => {
+	console.log(snapshot.docs);
+})	
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
