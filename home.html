@@ -2065,86 +2065,58 @@ staticPage BLOCK
 			</a>
 	  </div>
       <div class="panel ad-panel">
-	<div class="static-slideshowpromoter">
+		<div class="static-slideshowpromoter">
             <!-- Add your slideshow content here -->
         </div>
       </div>
-<!--Current Main Content Area-->
-		<h2 id="themed-main-title">Latest Updates</h2>
-		<section class="themed-main">
-			<section class="featured-section">
-				<!-- <h2 class="section-title">Latest Updates</h2> -->
-				<div class="devnote">
-					<h3 class="devnote-title">Development Update - [Insert Date]</h3>
-					<p class="devnote-content">
-						<strong>Developer:</strong> Jaedraze aka General Jimbobbityboo of Secret Universal Services Society
-						<br>
-						<br>
-						Our main goal is to provide a comprehensive assistant platform for colonists in the Entropia system, offering a range of tools, information, and resources to enrich their gaming experience. While our current focus is on Planet Arkadia, we intend to gradually expand to include content regarding other planets and celestial bodies within Entropia Universe.
-						<br>
-						<br>
-						Tool Development and Expansion:
-						<ul>
-							<li>Create an element to display goals - Expected completion by [Insert Deadline]</li>
-							<li>Update main page content - Scheduled for [Insert Deadline]</li>
-							<!-- Add more points as needed -->
+<!--this is where new thign starts-->
+		<div class="panel content-panel" style="display:hidden;">
+			<div id="main-content">
+				
+				<h2>More Text Here!</h2>
+				<p>Laudate Lootium Divitiasque Celebremus.</p>
+				<!-- Login Form -->
+				<br>
+				<div class="logged-in disabled hidden" id="innercontent-loggedin" style="padding:4px; border:1px solid #222;">
+					<form id="loginForm">
+						<ul id="nav-mobile" class="hide-on-med-and-down">
+							<li class="logged-in">
+								<a href="#" class="modal-trigger" id="userAccount-modalTrigger" data-target="modal-useraccount">My Account</a>
+							</li>
+							<li class="logged-in">
+								<a href="#" class="modal-trigger" id="userProfile-editTrigger" data-target="modal-edit">Public Profile</a>
+							</li>
 						</ul>
-					</p>
+					</form>
+					<button class="logged-in" id="logoutbutt" type="button">Logout</button>
 				</div>
-				<!-- End of Latest Devnote -->
-
-				<button class="themed-button" disabled>Read More</button>
-			</section>
-	<!--       <section class="themed-main">
-          <section class="featured-section">
-              <h2 class="section-title">Attention Entropia Colonists</h2>
-              <p class="section-description">This Website is still very early in development; HOWEVER If your looking for EU Tools. they are currently available within the SuSOS. simply click the power button on the top left to turn on the SuSOS main power, you can find the eu tools in the start menu, and the stolen space map is located in the button bar on the right side of the SuSOS - to toggle the space map on and off click the button labelled "Space Map"</p>
-              <button class="themed-button" disabled>Read More</button>
-          </section> -->
-          <!-- Generic Example Elements -->
-			  <div class="example-element">
-				  <h3>Example Element 1</h3>
-				  <p>This is the first example element in the main content area after the featured content section</p>
-			  </div>
-			  <div class="example-element">
-				  <h3>Example Element 2</h3>
-				  <p>This is some example content for Element 2.</p>
-			  </div>
-			  <div class="example-element">
-				  <h3>Example Element 2</h3>
-				  <p>This is some example content for Element 2.</p>
-			  </div>
-			  <div class="example-element">
-				  <h3>Example Element 2</h3>
-				  <p>This is some example content for Element 2.</p>
-			  </div>
-			  <div class="example-element">
-				  <h3>Example Element 2</h3>
-				  <p>This is some example content for Element 2.</p>
-			  </div>
-			  <!-- End of Generic Example Elements -->
-		  </section>
-		
-		  <!-- Right Panel -->
-		<div class="panel right-panel">
-			<div id="websiteStatContainer">
-				<h2 class="panel-title" id="sitestats">Site Stats</h2>
-				<p>Registered Users: 0</p>
-				<p>Online Users: 0</p>
+				<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
+					<button class="logged-out" id="createaccountbutt" type="button">Create Account</button>
+					<p>Or...</p>
+					<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
+				</div>
 			</div>
-			<div id="userInfoContainer">
-				<P id="username">StrangerDanger</p>
-				<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
-				<p id="Userpixelcount" class="hidden">0px</p>
-				<p id="loginStatus">Status: offline</p>
-				<ul>
-					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
-					<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
-					<span id="emailVerified" class="hidden">►</span>
-					<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
-					<button id="loginbutt" type="button" class:="";>Login with GitHub</button>
-					<button id="logoutbutt" type="button" class:="disabled hidden">Logout</button>
-				</ul>
+					  <!-- Right Panel -->
+			<div class="panel right-panel">
+				<div id="websiteStatContainer">
+					<h2 class="panel-title" id="sitestats">Site Stats</h2>
+					<p>Registered Users: 0</p>
+					<p>Online Users: 0</p>
+				</div>
+				<div id="userInfoContainer">
+					<P id="username">StrangerDanger</p>
+					<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
+					<p id="Userpixelcount" class="hidden">0px</p>
+					<p id="loginStatus">Status: offline</p>
+					<ul>
+						<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
+						<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
+						<span id="emailVerified" class="hidden">►</span>
+						<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
+						<button id="loginbutt" type="button" class:="";>Login with GitHub</button>
+						<button id="logoutbutt" type="button" class:="disabled hidden">Logout</button>
+					</ul>
+				</div>
 			</div>
 		</div>
 	 </main>
@@ -2246,10 +2218,72 @@ staticPage BLOCK
 		</div>
 		<div id="portaldestinationDetails"></div>
 	</div>
-	<div class="panel content-panel" style="display:hidden;">
-		<h2 class="panel-title">Content Panel</h2>
-		<div id="staticpage-content-contentpanelB">[_]</div>
-	</div>
+
+
+<!--Current Main Content Area-->
+		<h2 id="themed-main-title">Latest Updates</h2>
+		<section class="themed-main">
+			<section class="featured-section">
+				<!-- <h2 class="section-title">Latest Updates</h2> -->
+				<div class="devnote">
+					<h3 class="devnote-title">Development Update - [Insert Date]</h3>
+					<p class="devnote-content">
+						<strong>Developer:</strong> Jaedraze aka General Jimbobbityboo of Secret Universal Services Society
+						<br>
+						<br>
+						Our main goal is to provide a comprehensive assistant platform for colonists in the Entropia system, offering a range of tools, information, and resources to enrich their gaming experience. While our current focus is on Planet Arkadia, we intend to gradually expand to include content regarding other planets and celestial bodies within Entropia Universe.
+						<br>
+						<br>
+						Tool Development and Expansion:
+						<ul>
+							<li>Create an element to display goals - Expected completion by [Insert Deadline]</li>
+							<li>Update main page content - Scheduled for [Insert Deadline]</li>
+							<!-- Add more points as needed -->
+						</ul>
+					</p>
+				</div>
+				<!-- End of Latest Devnote -->
+
+				<button class="themed-button" disabled>Read More</button>
+			</section>
+	<!--       <section class="themed-main">
+          <section class="featured-section">
+              <h2 class="section-title">Attention Entropia Colonists</h2>
+              <p class="section-description">This Website is still very early in development; HOWEVER If your looking for EU Tools. they are currently available within the SuSOS. simply click the power button on the top left to turn on the SuSOS main power, you can find the eu tools in the start menu, and the stolen space map is located in the button bar on the right side of the SuSOS - to toggle the space map on and off click the button labelled "Space Map"</p>
+              <button class="themed-button" disabled>Read More</button>
+          </section> -->
+          <!-- Generic Example Elements -->
+			  <div class="example-element">
+				  <h3>Example Element 1</h3>
+				  <p>This is the first example element in the main content area after the featured content section</p>
+			  </div>
+			  <div class="example-element">
+				  <h3>Example Element 2</h3>
+				  <p>This is some example content for Element 2.</p>
+			  </div>
+			  <div class="example-element">
+				  <h3>Example Element 2</h3>
+				  <p>This is some example content for Element 2.</p>
+			  </div>
+			  <div class="example-element">
+				  <h3>Example Element 2</h3>
+				  <p>This is some example content for Element 2.</p>
+			  </div>
+			  <div class="example-element">
+				  <h3>Example Element 2</h3>
+				  <p>This is some example content for Element 2.</p>
+			  </div>
+			  <!-- End of Generic Example Elements -->
+		  </section>
+		
+
+
+
+
+
+
+
+
 	<div class="panel ad-panel">
 		<h2 class="panel-title"></h2>
 		<div id="staticpage-adpanel-contentwrapper">
@@ -2360,140 +2394,6 @@ staticPage BLOCK
 	-->
 	<!--FIREBASE AUTHENTICATION SKRIPTS-->
 
-
-	<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
-  import { getAuth, signInWithPopup, GithubAuthProvider, onAuthStateChanged, updateProfile  } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-
-  
-  const firebaseConfig = {
-    apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
-    authDomain: "pixelb8lol.firebaseapp.com",
-    projectId: "pixelb8lol",
-    storageBucket: "pixelb8lol.appspot.com",
-    messagingSenderId: "373700849652",
-    appId: "1:373700849652:web:c3e59f1653dd224ba153a1",
-    measurementId: "G-5EGV2VNMX3"
-	 };
-
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth();
-    const provider = new GithubAuthProvider();
-
-    async function getGitHubUserData(githubIdOrLogin) {
-      return fetch(
-        `https://api.github.com/user/${githubIdOrLogin}`,
-        { headers: { 'Accept': 'application/json' } }
-      )
-      .then((response) => {
-        if (!response.ok) {
-          const err = new Error();
-          err.response = response;
-          // Handle different error cases as needed
-          return Promise.reject(err);
-        }
-
-        return response.json();
-      });
-    }
-
-    // Set up the onAuthStateChanged listener
-    onAuthStateChanged(auth, async (user) => {
-      const statusElement = document.getElementById('loginStatus');
-      const userauthproveriderElement = document.getElementById('userauthProvider');
-      const usernameElement = document.getElementById('username');
-      const emailElement = document.getElementById('email');
-      const listedElementEmail = document.getElementById('userinfolist-email');
-      const photoElement = document.getElementById('profilephoto');
-      const emailVerifiedElement = document.getElementById('emailVerified');
-      const profileLinkElement = document.getElementById('profileLink');
-      const loginButton = document.getElementById('loginbutt');
-      const logoutButton = document.getElementById('logoutbutt');
-	  const userpixelcountElement = document.getElementById('Userpixelcount');
-
-      if (user !== null) {
-        // User is signed in
-        user.providerData.forEach(async (profile) => {
-          console.log("Sign-in provider: " + profile.providerId);
-          console.log("Provider-specific UID: " + profile.uid);
-          console.log("UserName: " + profile.displayName);
-          console.log("Email: " + profile.email);
-          console.log("Photo URL: " + profile.photoURL);
-        
-          statusElement.textContent = "Status: Online";
-          userauthproveriderElement.textContent = profile.providerId;
-          usernameElement.textContent = user.displayName || "Nameless";
-          emailElement.textContent = user.email || "Unknown";
-          photoElement.src = user.photoURL || "default.jpg";
-		  userpixelcountElement.classList.remove('hidden');
-          emailVerifiedElement.textContent = user.emailVerified ? "► Verified" : " ► Unverified";
-          emailVerifiedElement.classList.remove('hidden');
-          listedElementEmail.classList.remove('hidden');
-          profileLinkElement.classList.remove('hidden');
-          userauthproveriderElement.classList.remove('hidden');
-          loginButton.classList.add('hidden');
-          logoutButton.classList.remove('hidden');
-
-          // Set the color based on email verification status
-          if (user.emailVerified) {
-            emailVerifiedElement.style.color = "#24b500b5"; // Green color for verified email
-          } else {
-            emailVerifiedElement.style.color = "#dd230e66"; // Red color for unverified email
-          }
-
-          // Check if provider is GitHub and display name is null
-          if (profile.providerId === 'github.com' && !user.displayName) {
-            try {
-              const githubUserData = await getGitHubUserData(profile.uid);
-              if (githubUserData.login) {
-                usernameElement.textContent = githubUserData.login;
-              }
-            } catch (error) {
-              console.error("Error fetching GitHub user data:", error);
-            }
-          }
-        });
-      } else {
-        // User is signed out
-        statusElement.textContent = "Status: offline";
-        usernameElement.textContent = "StrangerDanger!";
-        emailElement.textContent = "";
-        photoElement.src = "assets/images/logo/pixelb8logo1.png"; // Set a default image
-		userpixelcountElement.classList.add('hidden');
-        emailVerifiedElement.textContent = "";
-        emailVerifiedElement.classList.add('hidden');
-        listedElementEmail.classList.add('hidden');
-        profileLinkElement.classList.add('hidden');
-        userauthproveriderElement.classList.add('hidden');
-        loginButton.classList.remove('hidden');
-        logoutButton.classList.add('hidden');
-      }
-    });
-
-    // Define the signInWithGitHub function
-    function signInWithGitHub() {
-      signInWithPopup(auth, provider)
-      .then((result) => {
-        const credential = GithubAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        const user = result.user;
-        console.log("GitHub Access Token:", token);
-        console.log("Signed-in user:", user);
-        // Redirect or perform other actions after successful login
-        window.location.href = "https://pixelb8.lol/home.html"; // Redirect to dashboard or any other page
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorCode, errorMessage);
-      });
-    }
-
-    // Add event listener to login button
-	const loginButton = document.getElementById('loginbutt');
-    loginButton.addEventListener('click', signInWithGitHub);
-  </script>
+	<script type="module" src="core/js/firebase/auth.js"></script>
 <!--______________________________________________________________ -->
 <!-- end of html                                                   --><!---->
