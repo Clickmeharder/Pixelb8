@@ -59,13 +59,14 @@
           console.log("Sign-in provider: " + profile.providerId);
           console.log("Provider-specific UID: " + profile.uid);
           console.log("UserName: " + profile.displayName);
-          console.log("Email: " + profile.email);
+          console.log("profile Email: " + profile.email);
+		  console.log("user Email: " + user.email);
           console.log("Photo URL: " + profile.photoURL);
         
           statusElement.textContent = "Status: Online";
           userauthproveriderElement.textContent = profile.providerId;
           usernameElement.textContent = user.displayName || "Nameless";
-          emailElement.textContent = user.email || "Unknown";
+          emailElement.textContent = profile.email || "Unknown";
           photoElement.src = user.photoURL || "default.jpg";
 		  userpixelcountElement.classList.remove('hidden');
           emailVerifiedElement.textContent = user.emailVerified ? "► Verified" : " ► Unverified";
