@@ -32,3 +32,19 @@
       modal.style.display = 'block';
     });
   });
+  
+   // Function to handle closing and canceling for all modals
+  function closeModalAndCancel(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.add('hidden'); // Hide the modal
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+  }
+
+  // Add event listeners to all close buttons with common class
+  const closeButtons = document.querySelectorAll('.close-modal-btn');
+  closeButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      closeModalAndCancel(button.getAttribute('data-target'));
+    });
+  });
