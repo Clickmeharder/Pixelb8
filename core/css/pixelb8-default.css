@@ -1554,35 +1554,43 @@ margin-left becomes: 4px
 .logged-out{}
 
 .modal {
-  position: fixed;
-  z-index: 1000;
-  left: 50;
-  top: 45;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
+	position: fixed;
+	z-index: 1000;
+	left: 50px;
+	top: 45px;
+	width: 73%;
+	height: 28.5%;
+	overflow: auto;
+	background-color: rgba(0, 0, 0, 0.4);
 }
 
 .modal-dialog {
-  position: relative;
-  margin: 10% auto;
-  padding: 20px;
-  max-width: 600px;
-  background-color: #fff;
+    position: relative;
+    margin: 0.1% 0.1% auto;
+    padding: 4px;
+    max-width: 632px;
+    border: 3px outset #007480b0;
+    background-color: #1110348f;
 }
 
 .modal-content {
-  padding: 20px;
+  color: #008dcdad;
+  padding: 8px;
 }
+input#signup-email, input#signup-email {
+    background-color: transparent;
 
+}
+input#signup-email{
+	margin-left:8px;
+}
 /* Close button styles */
 .close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 1.5em;
-  cursor: pointer;
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    font-size: 1em;
+    cursor: pointer;
 }
 
 /* Style for modal trigger buttons (if needed) */
