@@ -1552,7 +1552,10 @@ margin-left becomes: 4px
 #loginStatus{}
 .logged-in{}
 .logged-out{}
-
+form#loginForm {
+    height: 82px;
+    overflow-y: auto;
+}
 .modal {
 	position: fixed;
 	font-size: 1.5vw;
