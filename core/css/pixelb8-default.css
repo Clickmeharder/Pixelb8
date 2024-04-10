@@ -1553,7 +1553,7 @@ margin-left becomes: 4px
 .logged-in{}
 .logged-out{}
 form#loginForm {
-    height: 82px;
+    height: 102px;
     overflow-y: auto;
 }
 .modal {
