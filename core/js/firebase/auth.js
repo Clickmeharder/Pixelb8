@@ -95,14 +95,16 @@ getDocs(collection(db, 'UserProfiles'))
   });
 // Function to check if user has a balance and set it if not
 async function checkUserBalance(userId) {
-  const userBalancesRef = collection(db, 'UserBalances').doc(userId);
-  const userBalanceDoc = await getDocs(userBalancesRef);
+  const userBalancesRef = collection(db, 'UserBalances'); // Reference to the collection
+  const userBalanceDoc = await getDoc(doc(userBalancesRef, userId)); // Reference to a specific document within the collection
   
-  if (userBalanceDoc.empty) {
+  if (!userBalanceDoc.exists()) {
     // If UserBalance document doesn't exist, create it with initial balance
-    await setDoc(userBalancesRef, {
+    await setDoc(doc(userBalancesRef, userId), {
       Pixels: 0.01
     });
+  }
+}
   }
 }
 
