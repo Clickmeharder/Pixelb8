@@ -95,16 +95,17 @@ getDocs(collection(db, 'UserProfiles'))
   });
 // Function to check if user has a balance and set it if not
 async function checkUserBalance(userId) {
-  const userBalancesRef = firebase.firestore().collection('UserBalances').doc(userId);
-  const userBalanceDoc = await userBalancesRef.get();
+  const userBalancesRef = collection(db, 'UserBalances').doc(userId);
+  const userBalanceDoc = await getDocs(userBalancesRef);
   
-  if (!userBalanceDoc.exists) {
+  if (userBalanceDoc.empty) {
     // If UserBalance document doesn't exist, create it with initial balance
-    await userBalancesRef.set({
+    await setDoc(userBalancesRef, {
       Pixels: 0.01
     });
   }
 }
+
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
