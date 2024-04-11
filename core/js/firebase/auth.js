@@ -105,8 +105,7 @@ async function checkUserBalance(userId) {
     });
   }
 }
-  }
-}
+
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
