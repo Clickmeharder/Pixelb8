@@ -93,6 +93,18 @@ getDocs(collection(db, 'UserProfiles'))
   .catch((error) => {
     console.log("Error getting documents: ", error);
   });
+// Function to check if user has a balance and set it if not
+async function checkUserBalance(userId) {
+  const userBalancesRef = firebase.firestore().collection('UserBalances').doc(userId);
+  const userBalanceDoc = await userBalancesRef.get();
+  
+  if (!userBalanceDoc.exists) {
+    // If UserBalance document doesn't exist, create it with initial balance
+    await userBalancesRef.set({
+      Pixels: 0.01
+    });
+  }
+}
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
@@ -113,6 +125,7 @@ getDocs(collection(db, 'UserProfiles'))
       if (user !== null) {
         // User is signed in
 		console.log('user logged in: ', user);
+		await checkUserBalance(user.uid);
         user.providerData.forEach(async (profile) => {
           console.log("Sign-in provider: " + profile.providerId);
           console.log("Provider-specific UID: " + profile.uid);
