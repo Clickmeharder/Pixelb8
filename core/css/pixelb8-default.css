@@ -570,15 +570,24 @@ div#userInfoContainer ul {
     display: inline-flex;
     padding: 0px;
     max-width: -webkit-fill-available;
-    height: 180px;
-    margin-right: 12px;
-    margin-left: 12px;
+    height: 485px;
+    margin: auto;
+    margin-top: -211px;
     justify-content: center;
     color: var(--staticpage-contentpanel-text-color);
     border-color: #0313186b;
     border-radius: var(--staticpage-contentpanel-border-radius);
     background-color: transparent;
     box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
+    overflow: hidden;
+}
+div#mapimgwrapper {
+	overflow: auto;
+    width: 95%;
+    height: 90%;
+    margin: auto;
+    border: inherit;
+    border-style: ridge;
 }
 div#map-panel-controls {
     width: 20vw;
