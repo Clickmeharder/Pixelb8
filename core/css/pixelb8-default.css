@@ -567,19 +567,21 @@ div#userInfoContainer ul {
     box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
 }
 .content-panel-eumaps {
-    display: inline-flex;
+	display: inline-flex;
     padding: 0px;
     max-width: -webkit-fill-available;
     height: 485px;
     margin: auto;
+    margin-left: 12px;
     margin-top: -195px;
     justify-content: center;
     color: var(--staticpage-contentpanel-text-color);
     border-color: #0313186b;
     border-radius: var(--staticpage-contentpanel-border-radius);
-    background-color: transparent;
+    background-color: #272828;
     box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
     overflow: hidden;
+    z-index: 99;
 }
 div#mapimgwrapper {
 	overflow: auto;
