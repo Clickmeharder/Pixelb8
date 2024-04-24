@@ -573,7 +573,7 @@ div#userInfoContainer ul {
     height: 180px;
     margin-right: 12px;
     margin-left: 12px;
-    justify-content: flex-end;
+    justify-content: center;
     color: var(--staticpage-contentpanel-text-color);
     border-color: #0313186b;
     border-radius: var(--staticpage-contentpanel-border-radius);
