@@ -456,9 +456,16 @@ staticPage BLOCK
 			<img id="mapimage" src="../../assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
 		</div>
 	</div>
-	<div class="column"id="map-panel-controls">
-		<button></button>
+	<div class="column" id="map-panel-controls">
+		<select class="webtp" id="eumaplist"></select>
+		<select class="webtp" id="eumapteleportlist"></select>
+		<select class="webtp" id="eumapmoblist"></select>
 		
+		<!-- Radio buttons -->
+		<label><input type="radio" name="map-overlay" value="pvp">PvP Areas</label>
+		<label><input type="radio" name="map-overlay" value="land" checked>Land Areas</label>
+		<label><input type="radio" name="map-overlay" value="teleports">Teleports</label>
+		<label><input type="radio" name="map-overlay" value="mobs">All Mobs</label>
 	</div>
   </div>
   <!-- Footer -->
