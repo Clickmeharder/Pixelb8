@@ -555,15 +555,17 @@ div#userInfoContainer ul {
 .content-panel {
     display: inline-flex;
     padding: 0px;
-    max-width: fit-content;
-	height: 180px;
-    margin-right: 0px;
+    max-width: -webkit-fill-available;
+    height: 180px;
+    margin-right: 12px;
+    margin-left: 12px;
     justify-content: flex-end;
     color: var(--staticpage-contentpanel-text-color);
     border-color: #0313186b;
     border-radius: var(--staticpage-contentpanel-border-radius);
     background-color: transparent;
-	box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
+    box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
+}
 }
 button#enterButt {
     height: 49px;
@@ -615,7 +617,7 @@ div#main-content:hover {
     display: inline-flex;
     max-width: 28vw;
     min-width: 16vw;
-    height: auto;min-height:180px;
+    height: auto;min-height:185px;
     margin: auto;margin-right:12px;
     margin-left: 1px;
     margin-bottom: 0px;
@@ -678,7 +680,7 @@ div#main-content:hover {
     justify-content: ;
     overflow-y: auto;
     /*height: 1000px;*/ /* the original height */
-    height: 25vh;
+    height: 22vh;
     min-height:125px;max-height:500px;
     color: var(--staticpage-panels-text-color);
     background-color:var(--staticpage-inner-bg-color);

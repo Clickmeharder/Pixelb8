@@ -195,8 +195,8 @@
 	overflow-x:hidden;
     margin: 0px;
     height: 186px;
-	max-width:10px;
-	max-height:10px;
+	max-width: 3px;
+    max-height: 169px;
     width: 211px;
 	border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;

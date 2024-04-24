@@ -42,13 +42,13 @@ function init() {
   document.getElementById('stats-container').appendChild(stats.dom);
   // Load the displacement map
   var caly_defaulttexture = new THREE.TextureLoader().load(
-	"https://pixelb8.lol/Modules/globemaps/arkadia/PlanetCalypsomap.jpg"
+	"https://pixelb8.lol/Modules/globemaps/calypso/PlanetCalypsomap.jpg"
   );
   var cyrene_defaulttexture = new THREE.TextureLoader().load(
-	"https://pixelb8.lol/Modules/globemaps/arkadia/PlanetCyrenemap.jpg"
+	"https://pixelb8.lol/Modules/globemaps/cyrene/PlanetCyrenemap.jpg"
   );
   var rocktropia_defaulttexture = new THREE.TextureLoader().load(
-	"https://pixelb8.lol/Modules/globemaps/arkadia/PlanetRocktropiamap.jpg"
+	"https://pixelb8.lol/Modules/globemaps/rocktropia/PlanetRocktropiamap.jpg"
   );
   var earth_displacement = new THREE.TextureLoader().load(
     "https://i.imgur.com/5zCuDBG.png"
