@@ -566,7 +566,21 @@ div#userInfoContainer ul {
     background-color: transparent;
     box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
 }
+.content-panel-eumaps {
+    display: inline-flex;
+    padding: 0px;
+    max-width: -webkit-fill-available;
+    height: 180px;
+    margin-right: 12px;
+    margin-left: 12px;
+    justify-content: flex-end;
+    color: var(--staticpage-contentpanel-text-color);
+    border-color: #0313186b;
+    border-radius: var(--staticpage-contentpanel-border-radius);
+    background-color: transparent;
+    box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
 }
+
 button#enterButt {
     height: 49px;
     width: 142px;
