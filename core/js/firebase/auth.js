@@ -94,17 +94,6 @@ getDocs(collection(db, 'UserProfiles'))
     console.log("Error getting documents: ", error);
   });
 // Function to check if user has a balance and set it if not
-async function checkUserBalance(userId) {
-  const userBalancesRef = collection(db, 'UserBalances').doc(userId); // Reference to a specific document within the collection
-  const userBalanceDoc = await getDoc(userBalancesRef); // Fetch the document
-  
-  if (!userBalanceDoc.exists()) {
-    // If UserBalance document doesn't exist, create it with initial balance
-    await setDoc(userBalancesRef, {
-      Pixels: 0.01
-    });
-  }
-}
 
 
     // Set up the onAuthStateChanged listener
@@ -127,7 +116,6 @@ async function checkUserBalance(userId) {
       if (user !== null) {
         // User is signed in
 		console.log('user logged in: ', user);
-		await checkUserBalance(user.uid);
         user.providerData.forEach(async (profile) => {
           console.log("Sign-in provider: " + profile.providerId);
           console.log("Provider-specific UID: " + profile.uid);
