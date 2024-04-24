@@ -271,6 +271,15 @@ the base styles of  all huds)*/
   transition: 0.9s;
 
 }
+div#mapslabeldiv {
+    margin-left: -61px;
+    margin-top: -6px;
+}
+p#mapsbuttlabel {
+    font-weight: bold;
+    font-size: 1.1em;
+	transition: font-size 0.3s;
+}
 .hud .Rbutts .buttfamily {
    max-height:98%;
    overflow: auto;
@@ -281,7 +290,10 @@ the base styles of  all huds)*/
     padding-left:3px;
     transform: translateY(40%);
   }
-
+#tabfam:hover #mapsbuttlabel,
+#mapsbuttlabel:hover {
+    font-size: 2px;
+}
 #timer-stack {
     position: fixed;
     bottom: 10px;
