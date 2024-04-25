@@ -690,6 +690,9 @@ button#globeinputbutt {
     border-radius: 11px;
     border-color: #232121;
 }
+#eumaps-sweatareasbutton {
+	width: 45px;
+}
 div#sliderbox-gloveLights {
     width: 120px;
     height: 75px;
