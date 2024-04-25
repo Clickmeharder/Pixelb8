@@ -2000,6 +2000,19 @@ div#mapimgwrapper {
 #pvpzones-overlay{
 	z-index:3;
 }
+.waypoint {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: red; /* Change color as needed */
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.waypoint:hover {
+    background-color: blue; /* Change hover color as needed */
+}
 div#mapzoom-control-group {
     position: absolute;
     margin-top: 30px;

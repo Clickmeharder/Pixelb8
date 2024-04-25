@@ -94,3 +94,44 @@ function togglePvPzones() {
         pvpZonesOverlay.style.display = "none";
     }
 }
+
+// Get all waypoint elements
+const waypoints = document.querySelectorAll('.waypoint');
+
+// Add event listeners for hover and click
+waypoints.forEach(waypoint => {
+    waypoint.addEventListener('mouseover', function() {
+        // Show info on hover
+        showInfo(waypoint);
+    });
+
+    waypoint.addEventListener('mouseout', function() {
+        // Hide info on hover out
+        hideInfo(waypoint);
+    });
+
+    waypoint.addEventListener('click', function() {
+        // Show detailed info on click
+        showDetailedInfo(waypoint);
+    });
+});
+
+// Function to show info on hover
+function showInfo(waypoint) {
+    const info = waypoint.getAttribute('data-info');
+    // Show info tooltip or effect
+    console.log(info); // Example: Output info to console
+}
+
+// Function to hide info on hover out
+function hideInfo(waypoint) {
+    // Hide info tooltip or effect
+    console.log('Hide info'); // Example: Output info to console
+}
+
+// Function to show detailed info on click
+function showDetailedInfo(waypoint) {
+    const info = waypoint.getAttribute('data-info');
+    // Show detailed info modal or popup
+    alert(info); // Example: Show info in alert box
+}
