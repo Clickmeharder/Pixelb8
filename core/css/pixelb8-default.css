@@ -690,6 +690,12 @@ button#globeinputbutt {
     border-radius: 11px;
     border-color: #232121;
 }
+h2#currenteumaplabel {
+    position: absolute;
+    margin-top: -3px;
+    margin-left: 2px;
+    font-size: 2.5vw;
+}
 button#eumaps-loggingspotsbutton {
 	width: 128px;
 }
