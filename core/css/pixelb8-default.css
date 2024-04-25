@@ -690,8 +690,11 @@ button#globeinputbutt {
     border-radius: 11px;
     border-color: #232121;
 }
-#eumaps-sweatareasbutton {
-	width: 45px;
+button#eumaps-loggingspotsbutton {
+	width: 134px;
+}
+button#eumaps-sweatareasbutton {
+	width: 134px;
 }
 div#sliderbox-gloveLights {
     width: 120px;
