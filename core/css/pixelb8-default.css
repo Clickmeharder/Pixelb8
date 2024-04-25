@@ -2002,8 +2002,8 @@ div#mapimgwrapper {
 }
 .waypoint {
     position: absolute;
-    width: 20px;
-    height: 20px;
+    width: 50px;
+    height: 50px;
     background-color: blue; /* Change color as needed */
     border-radius: 50%;
     cursor: pointer;
