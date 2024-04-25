@@ -591,6 +591,16 @@ div#mapimgwrapper {
     border: inherit;
     border-style: ridge;
 }
+div#mapzoom-control-group {
+    position: relative;
+    margin-top: 28px;
+    left: 30px;
+}
+div#mapzoom-control-group Button {
+	Border-radius:;
+	font-size:bigger;
+	font-weight:bold;
+}
 div#map-panel-controls {
     width: 20vw;
     height: -webkit-fill-available;
