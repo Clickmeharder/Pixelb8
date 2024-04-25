@@ -566,185 +566,7 @@ div#userInfoContainer ul {
     background-color: transparent;
     box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
 }
-.content-panel-eumaps {
-	display: inline-flex;
-    padding: 0px;
-    max-width: -webkit-fill-available;
-    height: 604px;
-    margin: auto;
-    margin-left: 12px;
-    margin-top: -195px;
-    justify-content: center;
-    color: var(--staticpage-contentpanel-text-color);
-    border-color: #0313186b;
-    border-radius: var(--staticpage-contentpanel-border-radius);
-    background-color: #272828;
-    box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
-    overflow: hidden;
-    z-index: 99;
-}
-div#mapimgwrapper {
-	overflow: auto;
-    width: 95%;
-    height: 90%;
-    margin: auto;
-    border: inherit;
-    border-style: ridge;
-}
-div#mapzoom-control-group {
-	position: relative;
-    margin-top: 30px;
-    left: 18px;
-    margin-right: -38px;
-    height: min-content;
-    border-radius: 1px;
-    border: 8px ridge;
-    border-color: #393d43;
-}
-div#mapzoom-control-group Button {
-	Border-radius:;
-	font-size:bigger;
-	font-weight:bold;
-}
-#eumapcontrols {
-    /* position: ; */
-    display: flex;
-    border: 4px ridge #414849eb;
-    border-radius: 22px;
-    outline: 3px ridge #4c4e4ee3;
-    background-color: #353639;
-    height: 409px;
-    width: 146px;
-	margin-left: 12px;
-    margin-right: 12px;
-    top: 12%;
-    right: 8px;
-    opacity: 0.85;
-    padding: 0px;
-    transition: 1.3s;
-    flex-direction: column;
-}
 
-#eumapcontrols button {
-    background-color: #444;
-    outline: 2px solid #222;
-    width: 29px;
-    height: 20px;
-    line-height: 0;
-    padding: 2px;
-    padding-bottom: 4px;
-    font-size: 14px;
-}
-#eumapcontrols label {
-    display: inline-flex;
-    font-weight: bold;
-    height: min-content;
-}
-button.globemenubutt {
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    padding: 0px;
-    font-size: 22px;
-    margin-top: 3px;
-    margin-right: 1px;
-}
-div#divcontrollerpowerbutts {
-    display: inline-flex;
-    flex-direction: row;
-    border: 2px ridge #222222;
-    border-radius: 22px;
-    padding: 3px;
-    justify-content: right;
-    align-content: end;
-    flex-wrap: wrap;
-}
-button#modeButton {
-    margin-top: 4px;
-    margin-left: 0px;
-    margin-right: 8px;
-}
-button#globepowerbutt, button#modeButton {
-    margin-top: 4px;
-    margin-left: 5px;
-    margin-right: 0px;
-}
-button#globeinputbutt {
-    margin-top: 4px;
-    margin-left: 0px;
-    margin-right: 0px;
-}
-#rotationCheckbox {
-    height: min-content;
-}
-#globecontrolButts {
-    width: 100%;
-    margin-left: 6px;
-}
-#globecontrolButts h2 {
-    margin: 3px;
-    margin-left: -7px;
-    text-align: center;
-    font-size: 14px;
-    border-top: 2px ridge;
-    border-radius: 11px;
-    border-color: #232121;
-}
-h2#currenteumaplabel {
-    position: absolute;
-    margin-top: -3px;
-    margin-left: 2px;
-    font-size: 2.5vw;
-}
-button#eumaps-loggingspotsbutton {
-	width: 128px;
-}
-button#eumaps-sweatareasbutton {
-	width: 128px;
-}
-div#sliderbox-gloveLights {
-    width: 120px;
-    height: 75px;
-    min-height: 20px;
-    max-height: 30vh;
-    border: 5px ridge #444;
-    margin: auto;
-    margin-top: 8px;
-    margin-bottom: -6px;
-    padding: 4px;
-    overflow-y: scroll;
-}
-select.mapcontrolsSelect {
-    font-weight: bold;
-    width: 112px;
-    background-color: var(--staticpage-HFpanels-bg-color) /*#1111118c*/;
-    color: #932604;
-    border-color: #932604;
-}
-#eumapcontrols input[type="range"] {
-    -webkit-appearance: none;
-    width: 95%;
-    max-width: 75px;
-    min-width: 30px;
-    height: 12px;
-    background: #03a9f4c4;
-    border-radius: 5px;
-    outline: none;
-    margin-bottom: auto;
-}
-div#map-panel-controls {
-	width: 170px;
-    height: 200px;
-    margin: auto;
-    padding: 4px;
-    padding-top: 7px;
-    border: 3px outset #cd5c5ca3;
-}
-#mapcontrollerlabel {
-	margin: -4px;
-    text-align: center;
-    font-size: 21px;
-}
 button#enterButt {
     height: 49px;
     width: 142px;
@@ -2128,4 +1950,185 @@ img#profilephoto:hover {
     border: 3px ridge #333;
     border-radius: 50%;
 	opacity:0.8;
+}
+
+/* EU MAPS CSS */
+.content-panel-eumaps {
+	display: inline-flex;
+    padding: 0px;
+    max-width: -webkit-fill-available;
+    height: 604px;
+    margin: auto;
+    margin-left: 12px;
+    margin-top: -195px;
+    justify-content: center;
+    color: var(--staticpage-contentpanel-text-color);
+    border-color: #0313186b;
+    border-radius: var(--staticpage-contentpanel-border-radius);
+    background-color: #272828;
+    box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
+    overflow: hidden;
+    z-index: 99;
+}
+div#mapimgwrapper {
+	overflow: auto;
+    width: 95%;
+    height: 90%;
+    margin: auto;
+    border: inherit;
+    border-style: ridge;
+}
+div#mapzoom-control-group {
+	position: relative;
+    margin-top: 30px;
+    left: 18px;
+    margin-right: -38px;
+    height: min-content;
+    border-radius: 1px;
+    border: 8px ridge;
+    border-color: #393d43;
+}
+div#mapzoom-control-group Button {
+	Border-radius:;
+	font-size:bigger;
+	font-weight:bold;
+}
+#eumapcontrols {
+    /* position: ; */
+    display: flex;
+    border: 4px ridge #414849eb;
+    border-radius: 22px;
+    outline: 3px ridge #4c4e4ee3;
+    background-color: #353639;
+    height: 409px;
+    width: 146px;
+	margin-left: 12px;
+    margin-right: 12px;
+    top: 12%;
+    right: 8px;
+    opacity: 0.85;
+    padding: 0px;
+    transition: 1.3s;
+    flex-direction: column;
+}
+
+#eumapcontrols button {
+    background-color: #444;
+    outline: 2px solid #222;
+    width: 29px;
+    height: 20px;
+    line-height: 0;
+    padding: 2px;
+    padding-bottom: 4px;
+    font-size: 14px;
+}
+#eumapcontrols label {
+    display: inline-flex;
+    font-weight: bold;
+    height: min-content;
+}
+button.globemenubutt {
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    padding: 0px;
+    font-size: 22px;
+    margin-top: 3px;
+    margin-right: 1px;
+}
+div#divcontrollerpowerbutts {
+    display: inline-flex;
+    flex-direction: row;
+    border: 2px ridge #222222;
+    border-radius: 22px;
+    padding: 3px;
+    justify-content: right;
+    align-content: end;
+    flex-wrap: wrap;
+}
+button#modeButton {
+    margin-top: 4px;
+    margin-left: 0px;
+    margin-right: 8px;
+}
+button#globepowerbutt, button#modeButton {
+    margin-top: 4px;
+    margin-left: 5px;
+    margin-right: 0px;
+}
+button#globeinputbutt {
+    margin-top: 4px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+#rotationCheckbox {
+    height: min-content;
+}
+#globecontrolButts {
+    width: 100%;
+    margin-left: 6px;
+}
+#globecontrolButts h2 {
+    margin: 3px;
+    margin-left: -7px;
+    text-align: center;
+    font-size: 14px;
+    border-top: 2px ridge;
+    border-radius: 11px;
+    border-color: #232121;
+}
+h2#currenteumaplabel {
+    position: absolute;
+    margin-top: -3px;
+    margin-left: 2px;
+    font-size: 2.5vw;
+}
+button#eumaps-loggingspotsbutton {
+	width: 128px;
+}
+button#eumaps-sweatareasbutton {
+	width: 128px;
+}
+div#sliderbox-gloveLights {
+    width: 120px;
+    height: 75px;
+    min-height: 20px;
+    max-height: 30vh;
+    border: 5px ridge #444;
+    margin: auto;
+    margin-top: 8px;
+    margin-bottom: -6px;
+    padding: 4px;
+    overflow-y: scroll;
+}
+select.mapcontrolsSelect {
+    font-weight: bold;
+    width: 112px;
+    background-color: var(--staticpage-HFpanels-bg-color) /*#1111118c*/;
+    color: #932604;
+    border-color: #932604;
+}
+#eumapcontrols input[type="range"] {
+    -webkit-appearance: none;
+    width: 95%;
+    max-width: 75px;
+    min-width: 30px;
+    height: 12px;
+    background: #03a9f4c4;
+    border-radius: 5px;
+    outline: none;
+    margin-bottom: auto;
+}
+div#map-panel-controls {
+	width: 170px;
+    height: 200px;
+    margin: auto;
+    padding: 4px;
+    padding-top: 7px;
+    border: 3px outset #cd5c5ca3;
+}
+#mapcontrollerlabel {
+	margin: -4px;
+    text-align: center;
+    font-size: 21px;
 }
