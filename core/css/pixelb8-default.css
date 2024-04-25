@@ -2007,11 +2007,14 @@ div#mapimgwrapper {
     background-color: blue; /* Change color as needed */
     border-radius: 50%;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+	opacity: 35%;
+	z-index: 9;
+    transition: background-color 0.3s, opacity 0.3s, ease;
 }
 
 .waypoint:hover {
     background-color: green; /* Change hover color as needed */
+	opacity: 60%;
 }
 div#mapzoom-control-group {
     position: absolute;
