@@ -497,12 +497,33 @@ staticPage BLOCK
 		  <button onclick="toggleElement('sweatareas')" title="Sweat Extraction Areas">💧</button>
 		</div>
 		<div id="sliderbox-gloveLights">
-			<label for="cloudOpacity" title="Cloud Opacity">🌥️ ⇌ 🌤️ lul</label>
-			<input id="cloudOpacity" type="range" class="glow" value="40" min="0" max="100" step="1" oninput="adjustCloudOpacity(this.value)">
-			<label for="lightIntensitySlider" title="Light Intensity">☀️ ⇌ 💡 fkd</label>
-			<input id="lightIntensitySlider" type="range" class="glow" value="5.00" min="0.1" max="10.00" step="0.1" oninput="adjustLightIntensity(this.value)">
-			<label for="ambientLightIntensity" title="Ambient Light">🌙 ⇌ ☀️ itup</label>
-			<input id="ambientLightIntensity" type="range" class="glow" value="10.0" min="0.1" max="15.00" step="0.1" oninput="adjustAmbientLightIntensity(this.value)">
+			<select class="webtp" id="eumaplist">
+				<option value="" selected disabled>Select a Map</option>
+				<option value="space">Space Map</option>
+				<option value="thule">Thule</option>
+				<option value="calypso">Planet Calypso</option>
+				<option value="monria">Monria Moon</option>
+				<option value="dsec_mom">DSEC/MOM</option>
+				<option value="cyrene">Cyrene</option>
+				<option value="arkadia">Arkadia</option>
+				<option value="arkadia_moon">Arkadia Moon</option>
+				<option value="arkadia_underground">Arkadia Underground</option>
+				<option value="rocktropia">Rocktropia</option>
+				<option value="hell">Hell</option>
+				<option value="secret_island">Secret Island</option>
+				<option value="hunt_the_thing">Hunt the Thing</option>
+				<option value="toulan">Toulan</option>
+				<option value="next_island">Next Island</option>
+				<option value="ancient_greece">Ancient Greece</option>
+				<option value="foma">FOMA</option>
+				<option value="crystal_palace">Crystal Palace</option>
+			</select>
+			<select class="webtp" id="eumapteleportlist">
+				<option value="" selected disabled>Teleporters</option>
+			</select>
+			<select class="webtp" id="eumapmoblist">
+				<option value="" selected disabled>Select a Mobs</option>
+			</select>
 		</div>
 	</div>
 	
@@ -511,29 +532,7 @@ staticPage BLOCK
 	
 	<div class="column" id="map-panel-controls" style="display: none;">
 		<h2 id="mapcontrollerlabel">Map Controller</h2>
-		<select class="webtp" id="eumaplist">
-			<option value="" selected disabled>Select a Map</option>
-			<option value="space">Space Map</option>
-			<option value="thule">Thule</option>
-			<option value="calypso">Planet Calypso</option>
-			<option value="monria">Monria Moon</option>
-			<option value="dsec_mom">DSEC/MOM</option>
-			<option value="cyrene">Cyrene</option>
-			<option value="arkadia">Arkadia</option>
-			<option value="arkadia_moon">Arkadia Moon</option>
-			<option value="arkadia_underground">Arkadia Underground</option>
-			<option value="rocktropia">Rocktropia</option>
-			<option value="hell">Hell</option>
-			<option value="secret_island">Secret Island</option>
-			<option value="hunt_the_thing">Hunt the Thing</option>
-			<option value="toulan">Toulan</option>
-			<option value="next_island">Next Island</option>
-			<option value="ancient_greece">Ancient Greece</option>
-			<option value="foma">FOMA</option>
-			<option value="crystal_palace">Crystal Palace</option>
-		</select>
-		<select class="webtp" id="eumapteleportlist"></select>
-		<select class="webtp" id="eumapmoblist"></select>
+
 		
 		<!-- Radio buttons -->
 		<label><input type="radio" name="map-overlay" value="pvp">PvP Areas</label>
