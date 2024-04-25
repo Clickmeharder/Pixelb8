@@ -572,7 +572,7 @@ div#userInfoContainer ul {
     max-width: -webkit-fill-available;
     height: 604px;
     margin: auto;
-    margin-left: 12px;
+    margin-left: 11px;
     margin-top: -195px;
     justify-content: center;
     color: var(--staticpage-contentpanel-text-color);
