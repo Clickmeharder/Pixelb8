@@ -1984,7 +1984,11 @@ div#mapimgwrapper {
 #mapimgwrapper {
     position: relative; /* Ensure the wrapper is positioned relative */
 }
-
+#mapimage{
+	margin:;
+	position:;
+	display:;
+}
 #tpmap-overlay, #mob-overlay, #landareas-overlay, #pvpzones-overlay {
     position: absolute;
     top: 0;
