@@ -606,6 +606,107 @@ div#mapzoom-control-group Button {
 	font-size:bigger;
 	font-weight:bold;
 }
+#eumapcontrols {
+    position: fixed;
+    display: flex;
+    border: 4px ridge #414849eb;
+    border-radius: 22px;
+    outline: 3px ridge #4c4e4ee3;
+    background-color: #6c6e6e;
+    height: 409px;
+    width: 146px;
+    top: 12%;
+    right: 8px;
+    opacity: 0.59;
+    padding: 0px;
+    transition: 1.3s;
+    flex-direction: column;
+}
+
+#eumapcontrols button {
+    background-color: #444;
+    outline: 2px solid #222;
+    width: 29px;
+    height: 20px;
+    line-height: 0;
+    padding: 2px;
+    padding-bottom: 4px;
+    font-size: 14px;
+}
+#eumapcontrols label {
+    display: inline-flex;
+    font-weight: bold;
+    height: min-content;
+}
+button.globemenubutt {
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    padding: 0px;
+    font-size: 22px;
+    margin-top: 3px;
+    margin-right: 1px;
+}
+div#divcontrollerpowerbutts {
+    display: inline-flex;
+    flex-direction: row;
+    border: 2px ridge #222222;
+    border-radius: 22px;
+    padding: 3px;
+    justify-content: right;
+    align-content: end;
+    flex-wrap: wrap;
+}
+button#modeButton {
+    margin-top: 4px;
+    margin-left: 0px;
+    margin-right: 8px;
+}
+button#globepowerbutt, button#modeButton {
+    margin-top: 4px;
+    margin-left: 5px;
+    margin-right: 0px;
+}
+button#globeinputbutt {
+    margin-top: 4px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+#rotationCheckbox {
+    height: min-content;
+}
+#globecontrolButts {
+    width: 100%;
+    margin-left: 6px;
+}
+#globecontrolButts h2 {
+    margin: 3px;
+    text-align: center;
+}
+div#sliderbox-gloveLights {
+    width: 120px;
+    height: 75px;
+    min-height: 20px;
+    max-height: 30vh;
+    border: 5px ridge #444;
+    margin: auto;
+    margin-top: 8px;
+    margin-bottom: -6px;
+    padding: 4px;
+    overflow-y: scroll;
+}
+
+#eumapcontrols input[type="range"] {
+    -webkit-appearance: none;
+    width: 95%;
+    max-width: 75px;
+    min-width: 30px;
+    height: 12px;
+    background: #03a9f4c4;
+    border-radius: 5px;
+    outline: none;
+    margin-bottom: auto;
+}
 div#map-panel-controls {
 	width: 170px;
     height: 200px;

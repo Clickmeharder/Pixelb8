@@ -461,6 +461,55 @@ staticPage BLOCK
 			<img id="mapimage" src="../../Modules/globemaps/arkadia/arkadiaglobemap.png" alt="Default Map">
 		</div>
 	</div>
+	
+	<div id="eumapcontrols">
+		<div id="divcontrollerpowerbutts">
+			<button id="globeinputbutt">📍</button>
+			<button id="globepowerbutt">🗺️</button>
+			<button onclick="cycleMap()" id="modeButton">M</button>
+			<button class="globemenubutt" onclick="cyclemapPlanet()">🌍</button>
+		</div>
+		<div id="globecontrollortopbox">
+			<input type="checkbox" id="rotationCheckbox" onchange="toggleRotation()" checked="">
+			<label for="rotationCheckbox">Oscillation</label>
+		</div>
+		<div id="globecontrollortopbox" style="display: none;">
+			<input type="checkbox" id="GlobeLandareasCheckbox" onchange="toggleElement(this)" checked="">
+			<label for="GlobeLandareasCheckbox">L.A Display</label>
+		</div>
+		<div id="globecontrolButts">
+		  <h2 for="cloudOpacity">Toggles</h2>
+		  <button onclick="togglelandareas()" title="Land Areas">🏞️</button>
+		  <button onclick="toggleTPmap()" title="Teleport Map">🌌</button>
+		  <button onclick="toggleClouds()" title="Cloud">☁️</button>
+		  <button onclick="toggleMobmap()" title="Monster Map">👾</button>
+		  <button onclick="togglePvPzones()" title="Player vs Player">⚔️</button>
+		  <button onclick="toggleLootablePvP()" title="PvP Lootable">💀</button>
+		  <button onclick="toggleElement('light')" title="Light">☀️</button>
+		  <button onclick="toggleElement('mining')" title="Mining">⛏️</button>
+		  <button onclick="toggleElement('enmatter')" title="Enmatter">🌠</button>
+		  <button onclick="toggleElement('mineral')" title="Mineral">💎</button>
+		  <button onclick="toggleElement('treasure')" title="Treasure">🏆</button>
+		  <button onclick="toggleElement('trees')" title="Trees">🌲</button>
+		  <button onclick="toggleElement('instances')" title="Instances">🗝️</button>
+		  <button onclick="toggleElement('towns')" title="Towns">🏰</button>
+		  <button onclick="toggleElement('missions')" title="Missions">📜</button>
+		  <button onclick="toggleElement('shops')" title="Shops">🛒</button>
+		  <button onclick="toggleElement('sweatareas')" title="Sweat Extraction Areas">💧</button>
+		</div>
+		<div id="sliderbox-gloveLights">
+			<label for="cloudOpacity" title="Cloud Opacity">🌥️ ⇌ 🌤️ lul</label>
+			<input id="cloudOpacity" type="range" class="glow" value="40" min="0" max="100" step="1" oninput="adjustCloudOpacity(this.value)">
+			<label for="lightIntensitySlider" title="Light Intensity">☀️ ⇌ 💡 fkd</label>
+			<input id="lightIntensitySlider" type="range" class="glow" value="5.00" min="0.1" max="10.00" step="0.1" oninput="adjustLightIntensity(this.value)">
+			<label for="ambientLightIntensity" title="Ambient Light">🌙 ⇌ ☀️ itup</label>
+			<input id="ambientLightIntensity" type="range" class="glow" value="10.0" min="0.1" max="15.00" step="0.1" oninput="adjustAmbientLightIntensity(this.value)">
+		</div>
+	</div>
+	
+	
+	
+	
 	<div class="column" id="map-panel-controls">
 		<h2 id="mapcontrollerlabel">Map Controller</h2>
 		<select class="webtp" id="eumaplist">
