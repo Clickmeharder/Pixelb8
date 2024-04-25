@@ -607,9 +607,12 @@ div#mapzoom-control-group Button {
 	font-weight:bold;
 }
 div#map-panel-controls {
-	width: 175px;
+	width: 170px;
+    height: 200px;
     margin: auto;
-    height: -webkit-fill-available;
+    padding: 4px;
+    padding-top: 7px;
+    border: 3px outset #cd5c5ca3;
 }
 button#enterButt {
     height: 49px;
