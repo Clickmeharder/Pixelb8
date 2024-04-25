@@ -592,9 +592,14 @@ div#mapimgwrapper {
     border-style: ridge;
 }
 div#mapzoom-control-group {
-    position: relative;
-    margin-top: 28px;
-    left: 30px;
+	position: relative;
+    margin-top: 24px;
+    left: 17px;
+    margin-right: -38px;
+    height: min-content;
+    border-radius: 1px;
+    border: 8px ridge;
+    border-color: #393d43;
 }
 div#mapzoom-control-group Button {
 	Border-radius:;
