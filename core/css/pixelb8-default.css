@@ -1985,11 +1985,17 @@ div#mapimgwrapper {
     position: relative; /* Ensure the wrapper is positioned relative */
 }
 
-#tpmap-overlay {
+#tpmap-overlay, #mob-overlay, #landareas-overlay {
     position: absolute;
     top: 0;
     left: 0;
     z-index: 1; /* Ensure the overlay is above the map image */
+}
+#landareas-overlay {
+	z-index:2;
+}
+#mob-overlay{
+	z-index:3;
 }
 div#mapzoom-control-group {
     position: absolute;

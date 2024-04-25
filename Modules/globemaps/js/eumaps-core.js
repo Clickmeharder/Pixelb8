@@ -73,7 +73,7 @@ function toggleMobmap() {
 
 function togglelandareas() {
     // Get the land areas overlay element
-    const landAreasOverlay = document.getElementById("land-areas-overlay");
+    const landAreasOverlay = document.getElementById("landareas-overlay");
 
     // Toggle the visibility of the land areas overlay
     if (landAreasOverlay.style.display === "none" || landAreasOverlay.style.display === "") {
