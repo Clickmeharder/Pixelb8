@@ -1985,7 +1985,7 @@ div#mapimgwrapper {
     position: relative; /* Ensure the wrapper is positioned relative */
 }
 
-#map-overlay {
+#tpmap-overlay {
     position: absolute;
     top: 0;
     left: 0;
