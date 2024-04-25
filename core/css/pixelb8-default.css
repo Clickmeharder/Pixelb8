@@ -1985,7 +1985,7 @@ div#mapimgwrapper {
     position: relative; /* Ensure the wrapper is positioned relative */
 }
 
-#tpmap-overlay, #mob-overlay, #landareas-overlay {
+#tpmap-overlay, #mob-overlay, #landareas-overlay, #pvpzones-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -1997,6 +1997,9 @@ div#mapimgwrapper {
 #mob-overlay{
 	z-index:3;
 }
+#pvpzones-overlay{
+	z-index:3;
+}
 div#mapzoom-control-group {
     position: absolute;
     margin-top: 30px;
@@ -2006,7 +2009,7 @@ div#mapzoom-control-group {
     border-radius: 1px;
     border: 8px ridge;
     border-color: #393d43;
-	z-index:1;
+	z-index:10;
 }
 div#mapzoom-control-group Button {
 	Border-radius:;
