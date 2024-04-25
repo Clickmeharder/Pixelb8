@@ -1960,7 +1960,7 @@ img#profilephoto:hover {
     height: 604px;
     margin: auto;
     margin-left: 12px;
-    margin-top: -195px;
+    margin-top: 0px;/*-195px;*/
     justify-content: center;
     color: var(--staticpage-contentpanel-text-color);
     border-color: #0313186b;
