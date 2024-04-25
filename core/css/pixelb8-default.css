@@ -607,7 +607,8 @@ div#mapzoom-control-group Button {
 	font-weight:bold;
 }
 div#map-panel-controls {
-    width: 20vw;
+	width: 175px;
+    margin: auto;
     height: -webkit-fill-available;
 }
 button#enterButt {
