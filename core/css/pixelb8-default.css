@@ -2004,7 +2004,7 @@ div#mapimgwrapper {
     position: absolute;
     width: 20px;
     height: 20px;
-    background-color: red; /* Change color as needed */
+    background-color: green; /* Change color as needed */
     border-radius: 50%;
     cursor: pointer;
     transition: background-color 0.3s ease;
