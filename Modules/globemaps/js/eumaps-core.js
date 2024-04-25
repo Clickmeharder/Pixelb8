@@ -85,7 +85,7 @@ function togglelandareas() {
 
 function togglePvPzones() {
     // Get the PvP zones overlay element
-    const pvpZonesOverlay = document.getElementById("pvp-zones-overlay");
+    const pvpZonesOverlay = document.getElementById("pvpzones-overlay");
 
     // Toggle the visibility of the PvP zones overlay
     if (pvpZonesOverlay.style.display === "none" || pvpZonesOverlay.style.display === "") {
