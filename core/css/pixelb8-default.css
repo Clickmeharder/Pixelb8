@@ -612,12 +612,12 @@ div#mapzoom-control-group Button {
     border: 4px ridge #414849eb;
     border-radius: 22px;
     outline: 3px ridge #4c4e4ee3;
-    background-color: #6c6e6e;
+    background-color: #353639;
     height: 409px;
     width: 146px;
     top: 12%;
     right: 8px;
-    opacity: 0.59;
+    opacity: 0.85;
     padding: 0px;
     transition: 1.3s;
     flex-direction: column;
@@ -681,7 +681,12 @@ button#globeinputbutt {
 }
 #globecontrolButts h2 {
     margin: 3px;
+    margin-left: -7px;
     text-align: center;
+    font-size: 14px;
+    border-top: 2px ridge;
+    border-radius: 11px;
+    border-color: #232121;
 }
 div#sliderbox-gloveLights {
     width: 120px;
