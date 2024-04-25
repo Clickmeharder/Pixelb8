@@ -614,6 +614,11 @@ div#map-panel-controls {
     padding-top: 7px;
     border: 3px outset #cd5c5ca3;
 }
+#mapcontrollerlabel {
+	margin: -4px;
+    text-align: center;
+    font-size: 21px;
+}
 button#enterButt {
     height: 49px;
     width: 142px;
