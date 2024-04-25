@@ -702,7 +702,13 @@ div#sliderbox-gloveLights {
     padding: 4px;
     overflow-y: scroll;
 }
-
+select.mapcontrolsSelect {
+    font-weight: bold;
+    width: 112px;
+    background-color: var(--staticpage-HFpanels-bg-color) /*#1111118c*/;
+    color: #932604;
+    border-color: #932604;
+}
 #eumapcontrols input[type="range"] {
     -webkit-appearance: none;
     width: 95%;
