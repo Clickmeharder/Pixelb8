@@ -607,7 +607,7 @@ div#mapzoom-control-group Button {
 	font-weight:bold;
 }
 #eumapcontrols {
-    position: fixed;
+    position: ;
     display: flex;
     border: 4px ridge #414849eb;
     border-radius: 22px;
@@ -615,6 +615,8 @@ div#mapzoom-control-group Button {
     background-color: #353639;
     height: 409px;
     width: 146px;
+	margin-left: 12px;
+    margin-right: 12px;
     top: 12%;
     right: 8px;
     opacity: 0.85;
