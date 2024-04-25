@@ -58,3 +58,39 @@ function toggleTPmap() {
         mapOverlay.style.display = "none";
     }
 }
+
+function toggleMobmap() {
+    // Get the mob overlay image element
+    const mobOverlay = document.getElementById("mob-overlay");
+
+    // Toggle the visibility of the mob overlay
+    if (mobOverlay.style.display === "none" || mobOverlay.style.display === "") {
+        mobOverlay.style.display = "block";
+    } else {
+        mobOverlay.style.display = "none";
+    }
+}
+
+function togglelandareas() {
+    // Get the land areas overlay element
+    const landAreasOverlay = document.getElementById("land-areas-overlay");
+
+    // Toggle the visibility of the land areas overlay
+    if (landAreasOverlay.style.display === "none" || landAreasOverlay.style.display === "") {
+        landAreasOverlay.style.display = "block";
+    } else {
+        landAreasOverlay.style.display = "none";
+    }
+}
+
+function togglePvPzones() {
+    // Get the PvP zones overlay element
+    const pvpZonesOverlay = document.getElementById("pvp-zones-overlay");
+
+    // Toggle the visibility of the PvP zones overlay
+    if (pvpZonesOverlay.style.display === "none" || pvpZonesOverlay.style.display === "") {
+        pvpZonesOverlay.style.display = "block";
+    } else {
+        pvpZonesOverlay.style.display = "none";
+    }
+}
