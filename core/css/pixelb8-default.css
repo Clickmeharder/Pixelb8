@@ -1981,6 +1981,16 @@ div#mapimgwrapper {
     align-items: flex-start;
     justify-content: space-between;
 }
+#mapimgwrapper {
+    position: relative; /* Ensure the wrapper is positioned relative */
+}
+
+#map-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1; /* Ensure the overlay is above the map image */
+}
 div#mapzoom-control-group {
     position: absolute;
     margin-top: 30px;

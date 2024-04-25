@@ -45,3 +45,16 @@ function cyclemapPlanet() {
     // Update the src attribute of the map image with the new map URL
     document.getElementById("mapimage").src = planetMaps[currentMapIndex];
 }
+
+
+function toggleTPmap() {
+    // Get the map overlay image element
+    const mapOverlay = document.getElementById("tpmap-overlay");
+
+    // Toggle the visibility of the map overlay
+    if (mapOverlay.style.display === "none") {
+        mapOverlay.style.display = "block";
+    } else {
+        mapOverlay.style.display = "none";
+    }
+}
