@@ -1971,12 +1971,15 @@ img#profilephoto:hover {
     z-index: 99;
 }
 div#mapimgwrapper {
-	overflow: auto;
+	display: inline-flex;
+    overflow: auto;
     width: 95%;
     height: 90%;
     margin: auto;
     border: inherit;
     border-style: ridge;
+    align-items: flex-start;
+    justify-content: space-between;
 }
 div#mapzoom-control-group {
     position: absolute;
