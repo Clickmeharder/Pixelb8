@@ -593,8 +593,8 @@ div#mapimgwrapper {
 }
 div#mapzoom-control-group {
 	position: relative;
-    margin-top: 24px;
-    left: 17px;
+    margin-top: 30px;
+    left: 18px;
     margin-right: -38px;
     height: min-content;
     border-radius: 1px;
