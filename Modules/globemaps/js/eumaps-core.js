@@ -135,6 +135,12 @@ function showDetailedInfo(waypoint) {
     // Show detailed info modal or popup
     alert(info); // Example: Show info in alert box
 }
+
+
+
+
+//map dragging logic 
+
 var mapImgWrapper = document.getElementById('mapimgwrapper');
 var isDragging = false;
 var startX, startY;
