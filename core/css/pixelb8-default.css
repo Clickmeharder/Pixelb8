@@ -1974,8 +1974,8 @@ img#profilephoto:hover {
 div#mapimgwrapper {
 	display: inline-flex;
     overflow: auto;
-    width: 95%;
-    height: 90%;
+    min-width: max-content;
+    min-height: max-content;
     margin: auto;
     border: inherit;
     border-style: ridge;
