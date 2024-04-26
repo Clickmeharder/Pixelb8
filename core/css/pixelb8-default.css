@@ -1984,7 +1984,7 @@ div#mapimgwrapper {
 }
 div#eumapspanel-Interior {
 	display: inline-flex;
-    overflow: auto;
+    overflow: hidden;
     width: 95%;
     height: 90%;
     margin: auto;
