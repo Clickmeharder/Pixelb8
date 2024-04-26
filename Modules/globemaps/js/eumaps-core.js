@@ -135,41 +135,43 @@ function showDetailedInfo(waypoint) {
     // Show detailed info modal or popup
     alert(info); // Example: Show info in alert box
 }
-var mapImgWrapper = document.getElementById('mapimgwrapper');
-var isDragging = false;
-var startX, startY;
-var offsetX = 0, offsetY = 0;
+const mapImgWrapper = document.getElementById('mapimgwrapper');
+let isDragging = false;
+let mouseX;
+let mouseY;
+let offsetX;
+let offsetY;
 
-mapImgWrapper.addEventListener('mousedown', function(e) {
+mapImgWrapper.addEventListener('mousedown', handleMouseDown);
+
+function handleMouseDown(e) {
     isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    mapImgWrapper.style.cursor = 'grabbing';
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    offsetX = mapImgWrapper.offsetLeft;
+    offsetY = mapImgWrapper.offsetTop;
 
-    document.addEventListener('mousemove', mousemoveHandler);
-    document.addEventListener('mouseup', mouseupHandler);
-});
-
-function mousemoveHandler(e) {
-    if (isDragging) {
-        var deltaX = e.clientX - startX;
-        var deltaY = e.clientY - startY;
-        startX = e.clientX;
-        startY = e.clientY;
-
-        offsetX += deltaX;
-        offsetY += deltaY;
-
-        mapImgWrapper.style.left = offsetX + 'px';
-        mapImgWrapper.style.top = offsetY + 'px';
-    }
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
 }
 
-function mouseupHandler() {
-    if (isDragging) {
-        isDragging = false;
-        mapImgWrapper.style.cursor = 'grab';
-        document.removeEventListener('mousemove', mousemoveHandler);
-        document.removeEventListener('mouseup', mouseupHandler);
-    }
+function handleMouseMove(e) {
+    if (!isDragging) return;
+
+    const deltaX = e.clientX - mouseX;
+    const deltaY = e.clientY - mouseY;
+
+    // Calculate the new position
+    const newX = offsetX + deltaX;
+    const newY = offsetY + deltaY;
+
+    // Update the position of the map image
+    mapImgWrapper.style.left = newX + 'px';
+    mapImgWrapper.style.top = newY + 'px';
+}
+
+function handleMouseUp() {
+    isDragging = false;
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
 }
