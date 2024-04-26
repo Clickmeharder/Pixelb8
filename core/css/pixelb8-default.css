@@ -1975,7 +1975,7 @@ img#profilephoto:hover {
     box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
     overflow: hidden;
 	resize:both;
-    z-index: 99;
+    z-index: 0;
 	
 }
 div#mapimgwrapper {
