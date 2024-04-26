@@ -2032,6 +2032,18 @@ div#eumapspanel-Interior {
     background-color: green; /* Change hover color as needed */
 	opacity: 60%;
 }
+
+.draggable-map {
+    position: absolute;
+    z-index: 1; /* Adjust as needed */
+    cursor: grab; /* Default cursor */
+    /* Any other styles */
+}
+
+.draggable-map:active {
+    cursor: grabbing; /* Cursor when dragging */
+}
+
 div#mapzoom-control-group {
     position: absolute;
     margin-top: 30px;

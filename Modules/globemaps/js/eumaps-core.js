@@ -154,14 +154,23 @@ let mapOffsetY;
 // Event handlers for mouse down, move, and up
 const handleMapMouseDown = (e) => {
     isDraggingMap = true;
-    startX = e.clientX;
-    startY = e.clientY;
+
+    // Calculate the offset between the mouse click position and the map's top-left corner
+    const rect = draggableMap.getBoundingClientRect();
+    startX = e.clientX - rect.left;
+    startY = e.clientY - rect.top;
+
     mapOffsetX = draggableMap.offsetLeft;
     mapOffsetY = draggableMap.offsetTop;
+
+    // Add grabbing cursor style
+    draggableMap.style.cursor = 'grabbing';
 };
 
 const handleMapMouseMove = (e) => {
     if (!isDraggingMap) return;
+
+    e.preventDefault(); // Prevent text selection while dragging
 
     const deltaX = e.clientX - startX;
     const deltaY = e.clientY - startY;
@@ -173,10 +182,14 @@ const handleMapMouseMove = (e) => {
     // Update the position
     draggableMap.style.left = newLeft + 'px';
     draggableMap.style.top = newTop + 'px';
+
+    // Add grabbing cursor style
+    draggableMap.style.cursor = 'grabbing';
 };
 
 const handleMapMouseUp = () => {
     isDraggingMap = false;
+    draggableMap.style.cursor = 'grab'; // Reset cursor to grab
 };
 
 // Attach event listeners to the map
