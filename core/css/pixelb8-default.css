@@ -2063,7 +2063,7 @@ div#mapzoom-control-group Button {
 	font-weight:bold;
 }
 #eumapcontrols {
-    /* position: ; */
+    position: fixed; 
     display: flex;
     border: 4px ridge #414849eb;
     border-radius: 22px;
