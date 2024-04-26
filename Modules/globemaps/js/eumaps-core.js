@@ -95,6 +95,69 @@ function togglePvPzones() {
     }
 }
 
+
+var mapImgWrapper = document.getElementById('mapimgwrapper');
+var isDragging = false;
+var startX, startY;
+var offsetX = 0, offsetY = 0;
+
+mapImgWrapper.addEventListener('mousedown', function(e) {
+    e.preventDefault(); // Prevent default behavior
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    mapImgWrapper.style.cursor = 'grabbing';
+});
+
+document.addEventListener('mousemove', function(e) {
+    if (isDragging) {
+        var deltaX = e.clientX - startX;
+        var deltaY = e.clientY - startY;
+        startX = e.clientX;
+        startY = e.clientY;
+
+        offsetX += deltaX;
+        offsetY += deltaY;
+
+        mapImgWrapper.style.left = offsetX + 'px';
+        mapImgWrapper.style.top = offsetY + 'px';
+    }
+});
+
+document.addEventListener('mouseup', function() {
+    isDragging = false;
+    mapImgWrapper.style.cursor = 'grab';
+});
+
+
+//way point logic
+// Function to create a waypoint element with specified ID and info
+function createWaypoint(id, info) {
+    const waypoint = document.createElement('div');
+    waypoint.classList.add('waypoint');
+    waypoint.id = id;
+    waypoint.setAttribute('data-info', info);
+    waypoint.style.top = '50px'; // Adjust as needed for cluster positioning
+    waypoint.style.left = '100px'; // Adjust as needed for cluster positioning
+    return waypoint;
+}
+
+// Function to add waypoints to the map
+function addWaypoints() {
+    const mapWrapper = document.getElementById('mapimgwrapper');
+
+    // Add each waypoint to the map
+    for (let i = 1; i <= 68; i++) {
+        const id = 'waypoint' + i;
+        const info = 'Info ' + i;
+        const waypoint = createWaypoint(id, info);
+        mapWrapper.appendChild(waypoint);
+    }
+}
+
+// Call the function to add waypoints
+addWaypoints();
+
 // Get all waypoint elements
 const waypoints = document.querySelectorAll('.waypoint');
 
@@ -135,35 +198,3 @@ function showDetailedInfo(waypoint) {
     // Show detailed info modal or popup
     alert(info); // Example: Show info in alert box
 }
-var mapImgWrapper = document.getElementById('mapimgwrapper');
-var isDragging = false;
-var startX, startY;
-var offsetX = 0, offsetY = 0;
-
-mapImgWrapper.addEventListener('mousedown', function(e) {
-    e.preventDefault(); // Prevent default behavior
-    isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    mapImgWrapper.style.cursor = 'grabbing';
-});
-
-document.addEventListener('mousemove', function(e) {
-    if (isDragging) {
-        var deltaX = e.clientX - startX;
-        var deltaY = e.clientY - startY;
-        startX = e.clientX;
-        startY = e.clientY;
-
-        offsetX += deltaX;
-        offsetY += deltaY;
-
-        mapImgWrapper.style.left = offsetX + 'px';
-        mapImgWrapper.style.top = offsetY + 'px';
-    }
-});
-
-document.addEventListener('mouseup', function() {
-    isDragging = false;
-    mapImgWrapper.style.cursor = 'grab';
-});
