@@ -152,13 +152,14 @@ let initialTop;
 
 const handleMapMouseDown = (e) => {
     isDraggingMap = true;
-
+	
     startX = e.clientX;
     startY = e.clientY;
     initialLeft = mapWrapper.offsetLeft;
     initialTop = mapWrapper.offsetTop;
 
     mapWrapper.style.cursor = 'grabbing';
+	console.log('isdraggingmap = true');
 };
 
 const handleMapMouseMove = (e) => {
@@ -176,11 +177,13 @@ const handleMapMouseMove = (e) => {
     mapWrapper.style.top = newTop + 'px';
 
     mapWrapper.style.cursor = 'grabbing';
+	console.log('isdraggingmap = true + mousemove called');
 };
 
 const handleMapMouseUp = () => {
     isDraggingMap = false;
     mapWrapper.style.cursor = 'grab';
+	console.log('isdraggingmap = false mouseup');
 };
 
 mapWrapper.addEventListener('mousedown', handleMapMouseDown);
