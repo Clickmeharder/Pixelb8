@@ -126,7 +126,7 @@ function cyclemapMode() {
     }
     // Update the src attribute of the map image with the new map URL
 	console.log('cycle button clicked');
-    document.getElementById("mapimage").src = arkadiaMaps[currentMapIndex];
+    document.getElementById("mapimage").src = arkadiaMaps[currentModeIndex];
 }
 //Map Toggle Functions
 
