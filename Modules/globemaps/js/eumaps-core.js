@@ -145,9 +145,12 @@ mapImgWrapper.addEventListener('mousedown', function(e) {
     startX = e.clientX;
     startY = e.clientY;
     mapImgWrapper.style.cursor = 'grabbing';
+
+    document.addEventListener('mousemove', mousemoveHandler);
+    document.addEventListener('mouseup', mouseupHandler);
 });
 
-document.addEventListener('mousemove', function(e) {
+function mousemoveHandler(e) {
     if (isDragging) {
         var deltaX = e.clientX - startX;
         var deltaY = e.clientY - startY;
@@ -160,11 +163,13 @@ document.addEventListener('mousemove', function(e) {
         mapImgWrapper.style.left = offsetX + 'px';
         mapImgWrapper.style.top = offsetY + 'px';
     }
-});
+}
 
-document.addEventListener('mouseup', function() {
+function mouseupHandler() {
     if (isDragging) {
         isDragging = false;
         mapImgWrapper.style.cursor = 'grab';
+        document.removeEventListener('mousemove', mousemoveHandler);
+        document.removeEventListener('mouseup', mouseupHandler);
     }
-});
+}
