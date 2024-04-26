@@ -450,10 +450,6 @@ staticPage BLOCK
   <div class="row">
 	<!-- Content Panel B (MAP PANEL)-->
 	<div class="panel content-panel-eumaps">
-		<div class="column" id="mapzoom-control-group">
-			<button class="zoom-control-btn" id="maps-scale-up-btn">+</button>
-			<button class="zoom-control-btn" id="maps-scale-down-btn">-</button>
-		</div>
 		<h2 id="currenteumaplabel">Current Map: Planet Arkadia</h2>
 		<h2 class="panel-title" style="display:none;">Map Panel</h2>
 		<div id="eumapspanel-Interior" style="border: 2px ridge blue; border-color: inherit;">
@@ -494,6 +490,11 @@ staticPage BLOCK
 		  <button onclick="toggleElement('towns')" title="Towns">🏰</button>
 		  <button onclick="toggleElement('missions')" title="Missions">📜</button>
 		  <button onclick="toggleElement('shops')" title="Shops">🛒</button>
+		  <p>zoom</p>
+		  <div class="column" id="mapzoom-control-group">
+			<button class="zoom-control-btn" id="maps-scale-up-btn">+</button>
+			<button class="zoom-control-btn" id="maps-scale-down-btn">-</button>
+		  </div>
 		  <div><h2>Mining</h2></div>
 		  <button onclick="toggleElement('mining')" title="Mining">⛏️</button>
 		  <button onclick="toggleElement('enmatter')" title="Enmatter">🌠</button>
