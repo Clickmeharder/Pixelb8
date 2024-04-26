@@ -141,58 +141,56 @@ function showDetailedInfo(waypoint) {
 
 //map dragging logic 
 
-// Select the draggable map element
-const draggableMap = document.querySelector('.draggable-map');
+const mapWrapper = document.getElementById('mapimgwrapper');
+const mapContainer = document.getElementById('eumapspanel-Interior');
 
-// Initialize variables
 let isDraggingMap = false;
 let startX;
 let startY;
 let mapOffsetX;
 let mapOffsetY;
 
-// Event handlers for mouse down, move, and up
 const handleMapMouseDown = (e) => {
     isDraggingMap = true;
 
     // Calculate the offset between the mouse click position and the map's top-left corner
-    const rect = draggableMap.getBoundingClientRect();
+    const rect = mapWrapper.getBoundingClientRect();
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
 
-    mapOffsetX = draggableMap.offsetLeft;
-    mapOffsetY = draggableMap.offsetTop;
+    mapOffsetX = mapWrapper.offsetLeft;
+    mapOffsetY = mapWrapper.offsetTop;
 
-    // Add grabbing cursor style
-    draggableMap.style.cursor = 'grabbing';
+    mapWrapper.style.cursor = 'grabbing';
 };
 
 const handleMapMouseMove = (e) => {
     if (!isDraggingMap) return;
 
-    e.preventDefault(); // Prevent text selection while dragging
+    e.preventDefault();
 
     const deltaX = e.clientX - startX;
     const deltaY = e.clientY - startY;
 
-    // Calculate the new position
     const newLeft = mapOffsetX + deltaX;
     const newTop = mapOffsetY + deltaY;
 
-    // Update the position
-    draggableMap.style.left = newLeft + 'px';
-    draggableMap.style.top = newTop + 'px';
+    // Update the position only if it's within the boundaries of the map container
+    if (newLeft >= 0 && newLeft <= mapContainer.clientWidth - mapWrapper.offsetWidth) {
+        mapWrapper.style.left = newLeft + 'px';
+    }
+    if (newTop >= 0 && newTop <= mapContainer.clientHeight - mapWrapper.offsetHeight) {
+        mapWrapper.style.top = newTop + 'px';
+    }
 
-    // Add grabbing cursor style
-    draggableMap.style.cursor = 'grabbing';
+    mapWrapper.style.cursor = 'grabbing';
 };
 
 const handleMapMouseUp = () => {
     isDraggingMap = false;
-    draggableMap.style.cursor = 'grab'; // Reset cursor to grab
+    mapWrapper.style.cursor = 'grab';
 };
 
-// Attach event listeners to the map
-draggableMap.addEventListener('mousedown', handleMapMouseDown);
+mapWrapper.addEventListener('mousedown', handleMapMouseDown);
 document.addEventListener('mousemove', handleMapMouseMove);
 document.addEventListener('mouseup', handleMapMouseUp);
