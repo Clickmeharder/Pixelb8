@@ -1958,9 +1958,12 @@ img#profilephoto:hover {
 .content-panel-eumaps {
 	display: inline-flex;
     padding: 0px;
-    min-width: 669px;
+    min-width: 385px;
+    min-height: 225px;
+    width: 669px;
     height: 618px;
-	max-height: 621px;
+    max-width: 900px;
+    max-height: 621px;
     margin: auto;
     margin-left: 12px;
     margin-top: 0px;/*-195px;*/
@@ -2081,7 +2084,7 @@ div#mapzoom-control-group Button {
     flex-direction: column;
 }
 #eumapcontrols:hover {
-	bottom: -291px;
+	bottom: 0px;
 	
 }
 #eumapcontrols button {
