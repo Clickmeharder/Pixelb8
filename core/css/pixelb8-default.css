@@ -1982,6 +1982,17 @@ div#mapimgwrapper {
     align-items: flex-start;
     justify-content: space-between;
 }
+div#eumapspanel-Interior {
+	display: inline-flex;
+    overflow: auto;
+    width: 95%;
+    height: 90%;
+    margin: auto;
+    border: inherit;
+    border-style: ridge;
+    align-items: flex-start;
+    justify-content: space-between;
+}
 #mapimgwrapper {
     position: relative; /* Ensure the wrapper is positioned relative */
 }
