@@ -34,8 +34,7 @@ const arkadiaMaps = [
 	"../../Modules/globemaps/arkadia/arkmobmapbase.png",
 	"../../Modules/globemaps/arkadia/ancientarkadiamap.png",
     "../../Modules/globemaps/arkadia/newnormalmap.png",
-	"../../Modules/globemaps/arkadia/newspecularmap.png",
-	"../../Modules/globemaps/arkadia/occlusionmap.png"
+	"../../Modules/globemaps/arkadia/newspecularmap.png"
 ];
 /* const arkmoonMaps = [
 
