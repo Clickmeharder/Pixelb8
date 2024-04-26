@@ -30,8 +30,11 @@ const planetMaps = [
 ];
 const arkadiaMaps = [
     "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
-	"../../Modules/globemaps/arkadia/arkadialabelledamap.png",
-    "../../Modules/globemaps/arkadia/planetarkadiaglobe/SpecularMap.png"
+	"../../Modules/globemaps/arkadia/arkadialabelledmap.png",
+	"../../Modules/globemaps/arkadia/arkmobmapbase.png",
+    "../../Modules/globemaps/arkadia/planetarkadiaglobe/newnormalmap.png",
+	"../../Modules/globemaps/arkadia/planetarkadiaglobe/newspecularmap.png",
+	"../../Modules/globemaps/arkadia/planetarkadiaglobe/occlusionmap.png"
 ];
 /* const arkmoonMaps = [
 
