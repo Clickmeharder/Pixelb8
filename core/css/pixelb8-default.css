@@ -1955,6 +1955,9 @@ img#profilephoto:hover {
 }
 
 /* EU MAPS CSS */
+.maprow {
+    height: 615px;
+}
 .content-panel-eumaps {
 	display: inline-flex;
     padding: 0px;
