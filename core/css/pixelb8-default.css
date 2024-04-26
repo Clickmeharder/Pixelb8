@@ -483,7 +483,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 .left-panel {
-  margin-right: 10px;
+  margin-right: auto;margin-left:0px;
   padding:8px;
   color: var(--staticpage-sidepanels-text-color);
   border-color: var(--staticpage-sidepanels-border-color);
@@ -1340,7 +1340,8 @@ select.webtp option:hover {
     min-width: 174px;
     max-width: 376px;
     margin-top: 8px;
-	margin-left:12px;margin-right:auto;
+	margin-left: 12px;
+    margin-right: 12px;
     padding: 0px;
     height: 166px;
     border: 3px ridge #124753e0;
