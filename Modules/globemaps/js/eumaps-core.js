@@ -123,7 +123,7 @@ function cyclemapMode() {
     // Increment current map index
     currentModeIndex++;
     // Check if current map index exceeds the length of the array
-    if (currentModeIndex >= planetMaps.length) {
+    if (currentModeIndex >= arkadiaMaps.length) {
         currentModeIndex = 0; // Reset to the first map if exceeds length
 		console.log('currentMapIndex/currentModeIndex:'+ currentMapIndex + "/" + currentModeIndex );
     }
