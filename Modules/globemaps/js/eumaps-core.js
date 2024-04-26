@@ -141,36 +141,45 @@ function showDetailedInfo(waypoint) {
 
 //map dragging logic 
 
-var mapImgWrapper = document.getElementById('mapimgwrapper');
-var isDragging = false;
-var startX, startY;
-var offsetX = 0, offsetY = 0;
+// Select the draggable map element
+const draggableMap = document.querySelector('.draggable-map');
 
-mapImgWrapper.addEventListener('mousedown', function(e) {
-    isDragging = true;
+// Initialize variables
+let isDraggingMap = false;
+let startX;
+let startY;
+let mapOffsetX;
+let mapOffsetY;
+
+// Event handlers for mouse down, move, and up
+const handleMapMouseDown = (e) => {
+    isDraggingMap = true;
     startX = e.clientX;
     startY = e.clientY;
-    mapImgWrapper.style.cursor = 'grabbing';
-});
+    mapOffsetX = draggableMap.offsetLeft;
+    mapOffsetY = draggableMap.offsetTop;
+};
 
-document.addEventListener('mousemove', function(e) {
-    if (isDragging) {
-        var deltaX = e.clientX - startX;
-        var deltaY = e.clientY - startY;
-        startX = e.clientX;
-        startY = e.clientY;
+const handleMapMouseMove = (e) => {
+    if (!isDraggingMap) return;
 
-        offsetX += deltaX;
-        offsetY += deltaY;
+    const deltaX = e.clientX - startX;
+    const deltaY = e.clientY - startY;
 
-        mapImgWrapper.style.left = offsetX + 'px';
-        mapImgWrapper.style.top = offsetY + 'px';
-    }
-});
+    // Calculate the new position
+    const newLeft = mapOffsetX + deltaX;
+    const newTop = mapOffsetY + deltaY;
 
-document.addEventListener('mouseup', function() {
-    if (isDragging) {
-        isDragging = false;
-        mapImgWrapper.style.cursor = 'grab';
-    }
-});
+    // Update the position
+    draggableMap.style.left = newLeft + 'px';
+    draggableMap.style.top = newTop + 'px';
+};
+
+const handleMapMouseUp = () => {
+    isDraggingMap = false;
+};
+
+// Attach event listeners to the map
+draggableMap.addEventListener('mousedown', handleMapMouseDown);
+document.addEventListener('mousemove', handleMapMouseMove);
+document.addEventListener('mouseup', handleMapMouseUp);
