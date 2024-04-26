@@ -28,24 +28,105 @@ const planetMaps = [
     "../../Modules/globemaps/cyrene/PlanetCyrenemap.jpg",
     "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
 ];
+const arkadiaMaps = [
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+	"../../Modules/globemaps/arkadia/arkadialabelledamap.png",
+    "../../Modules/globemaps/arkadia/planetarkadiaglobe/SpecularMap.png"
+];
+/* const arkmoonMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+];
+
+const arkugMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+];
+const calypsoMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+];
+const monriaMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+];
+const dsecmomMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+];
+const cyreneMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+];
+const toulanMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+];
+const rocktropianMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+];
+const hellMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+];
+const huntthethingMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+];
+const secretislandMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+];
+const nextislandMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+];
+const ancientgreeceMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+]; */
+
+
 
 // Initialize current map index
 let currentMapIndex = 0;
-
-// Function to cycle through planet maps
+let currentModeIndex = 0;
+//Planet Cycle Function 
 function cyclemapPlanet() {
     // Increment current map index
     currentMapIndex++;
-    
     // Check if current map index exceeds the length of the array
     if (currentMapIndex >= planetMaps.length) {
         currentMapIndex = 0; // Reset to the first map if exceeds length
     }
-    
     // Update the src attribute of the map image with the new map URL
     document.getElementById("mapimage").src = planetMaps[currentMapIndex];
 }
-
+function cyclemapMode() {
+    // Increment current map index
+    currentModeIndex++;
+    // Check if current map index exceeds the length of the array
+    if (currentModeIndex >= planetMaps.length) {
+        currentModeIndex = 0; // Reset to the first map if exceeds length
+    }
+    // Update the src attribute of the map image with the new map URL
+    document.getElementById("mapimage").src = arkadiaMaps[currentMapIndex];
+}
+//Map Toggle Functions
 
 function toggleTPmap() {
     // Get the map overlay image element
@@ -95,6 +176,8 @@ function togglePvPzones() {
     }
 }
 
+
+//MAP DRAGGING EVENTLISTENER FUNCTIONS
 
 var mapImgWrapper = document.getElementById('mapimgwrapper');
 var isDragging = false;
