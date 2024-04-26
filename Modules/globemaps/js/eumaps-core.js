@@ -155,8 +155,8 @@ const handleMapMouseDown = (e) => {
 	
     startX = e.clientX;
     startY = e.clientY;
-    initialLeft = mapWrapper.offsetLeft;
-    initialTop = mapWrapper.offsetTop;
+/*     initialLeft = mapWrapper.offsetLeft;
+    initialTop = mapWrapper.offsetTop; */
 
     mapWrapper.style.cursor = 'grabbing';
 	console.log('isdraggingmap = true');
