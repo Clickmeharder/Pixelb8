@@ -1,5 +1,5 @@
 // Get the image element
-const mapImage = document.getElementById("mapimage");
+const mapImage = document.getElementById("mapimgwrapper");
 
 // Get the scale factor for zooming
 let scaleFactor = 1;
@@ -15,7 +15,7 @@ document.getElementById("maps-scale-down-btn").addEventListener("click", functio
     scaleFactor -= 0.1;
     mapImage.style.transform = `scale(${scaleFactor})`;
 });
-
+/* planets we dont have maps for yet:*/
 	/*     "../../Modules/globemaps/space/spacemap.png",
     "../../Modules/globemaps/thule/thulemap.png", */
 /*     "../../Modules/globemaps/monria/monriamap.png",
