@@ -199,6 +199,7 @@ option:disabled {
 /*      The Body        */
 /*----------------------*/
 body {
+	max-width: 99.5vw;
     margin: 0;
     font-family: Arial, sans-serif;
     color: var(--mainbody-text-color);
