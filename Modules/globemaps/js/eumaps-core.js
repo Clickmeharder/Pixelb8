@@ -135,35 +135,36 @@ function showDetailedInfo(waypoint) {
     // Show detailed info modal or popup
     alert(info); // Example: Show info in alert box
 }
+var mapImgWrapper = document.getElementById('mapimgwrapper');
+var isDragging = false;
+var startX, startY;
+var offsetX = 0, offsetY = 0;
 
-    var mapImgWrapper = document.getElementById('mapimgwrapper');
-    var isDragging = false;
-    var startX, startY;
-    var offsetX = 0, offsetY = 0;
+mapImgWrapper.addEventListener('mousedown', function(e) {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    mapImgWrapper.style.cursor = 'grabbing';
+});
 
-    mapImgWrapper.addEventListener('mousedown', function(e) {
-        isDragging = true;
+document.addEventListener('mousemove', function(e) {
+    if (isDragging) {
+        var deltaX = e.clientX - startX;
+        var deltaY = e.clientY - startY;
         startX = e.clientX;
         startY = e.clientY;
-        mapImgWrapper.style.cursor = 'grabbing';
-    });
 
-    document.addEventListener('mousemove', function(e) {
-        if (isDragging) {
-            var deltaX = e.clientX - startX;
-            var deltaY = e.clientY - startY;
-            startX = e.clientX;
-            startY = e.clientY;
+        offsetX += deltaX;
+        offsetY += deltaY;
 
-            offsetX += deltaX;
-            offsetY += deltaY;
+        mapImgWrapper.style.left = offsetX + 'px';
+        mapImgWrapper.style.top = offsetY + 'px';
+    }
+});
 
-            mapImgWrapper.style.left = offsetX + 'px';
-            mapImgWrapper.style.top = offsetY + 'px';
-        }
-    });
-
-    document.addEventListener('mouseup', function() {
+document.addEventListener('mouseup', function() {
+    if (isDragging) {
         isDragging = false;
         mapImgWrapper.style.cursor = 'grab';
-    });
+    }
+});
