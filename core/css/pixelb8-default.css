@@ -1957,8 +1957,9 @@ img#profilephoto:hover {
 .content-panel-eumaps {
 	display: inline-flex;
     padding: 0px;
-    max-width: -webkit-fill-available;
-    height: 604px;
+    min-width: 669px;
+    height: 618px;
+	max-height: 621px;
     margin: auto;
     margin-left: 12px;
     margin-top: 0px;/*-195px;*/
@@ -1969,7 +1970,9 @@ img#profilephoto:hover {
     background-color: #272828;
     box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
     overflow: hidden;
+	resize:both;
     z-index: 99;
+	
 }
 div#mapimgwrapper {
 	display: inline-flex;
@@ -1983,15 +1986,17 @@ div#mapimgwrapper {
     justify-content: space-between;
 }
 div#eumapspanel-Interior {
-	display: inline-flex;
+    display: inline-flex;
     overflow: hidden;
-    width: 95%;
-    height: 90%;
+    width: 97%;
+    height: 95%;
     margin: auto;
+    margin-top: 23px;
     border: inherit;
     border-style: ridge;
     align-items: flex-start;
     justify-content: space-between;
+	background-color: #1b3047;
 }
 #mapimgwrapper {
     position: relative; /* Ensure the wrapper is positioned relative */
