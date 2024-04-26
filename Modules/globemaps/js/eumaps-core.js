@@ -136,56 +136,34 @@ function showDetailedInfo(waypoint) {
     alert(info); // Example: Show info in alert box
 }
 
+    var mapImgWrapper = document.getElementById('mapimgwrapper');
+    var isDragging = false;
+    var startX, startY;
+    var offsetX = 0, offsetY = 0;
 
+    mapImgWrapper.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        mapImgWrapper.style.cursor = 'grabbing';
+    });
 
+    document.addEventListener('mousemove', function(e) {
+        if (isDragging) {
+            var deltaX = e.clientX - startX;
+            var deltaY = e.clientY - startY;
+            startX = e.clientX;
+            startY = e.clientY;
 
-//map dragging logic 
+            offsetX += deltaX;
+            offsetY += deltaY;
 
-const mapWrapper = document.getElementById('mapimgwrapper');
-const mapContainer = document.getElementById('eumapspanel-Interior');
+            mapImgWrapper.style.left = offsetX + 'px';
+            mapImgWrapper.style.top = offsetY + 'px';
+        }
+    });
 
-let isDraggingMap = false;
-let startX;
-let startY;
-let initialLeft;
-let initialTop;
-
-const handleMapMouseDown = (e) => {
-    isDraggingMap = true;
-	
-    startX = e.clientX;
-    startY = e.clientY;
-/*     initialLeft = mapWrapper.offsetLeft;
-    initialTop = mapWrapper.offsetTop; */
-
-    mapWrapper.style.cursor = 'grabbing';
-	console.log('isdraggingmap = true');
-};
-
-const handleMapMouseMove = (e) => {
-    if (!isDraggingMap) return;
-
-    e.preventDefault();
-
-    const deltaX = e.clientX - startX;
-    const deltaY = e.clientY - startY;
-
-    const newLeft = initialLeft + deltaX;
-    const newTop = initialTop + deltaY;
-
-    mapWrapper.style.left = newLeft + 'px';
-    mapWrapper.style.top = newTop + 'px';
-
-    mapWrapper.style.cursor = 'grabbing';
-	console.log('isdraggingmap = true + mousemove called');
-};
-
-const handleMapMouseUp = () => {
-    isDraggingMap = false;
-    mapWrapper.style.cursor = 'grab';
-	console.log('isdraggingmap = false mouseup');
-};
-
-mapWrapper.addEventListener('mousedown', handleMapMouseDown);
-document.addEventListener('mousemove', handleMapMouseMove);
-document.addEventListener('mouseup', handleMapMouseUp);
+    document.addEventListener('mouseup', function() {
+        isDragging = false;
+        mapImgWrapper.style.cursor = 'grab';
+    });
