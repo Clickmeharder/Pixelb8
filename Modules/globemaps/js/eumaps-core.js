@@ -147,19 +147,16 @@ const mapContainer = document.getElementById('eumapspanel-Interior');
 let isDraggingMap = false;
 let startX;
 let startY;
-let mapOffsetX;
-let mapOffsetY;
+let initialLeft;
+let initialTop;
 
 const handleMapMouseDown = (e) => {
     isDraggingMap = true;
 
-    // Calculate the offset between the mouse click position and the map's top-left corner
-    const rect = mapWrapper.getBoundingClientRect();
-    startX = e.clientX - rect.left;
-    startY = e.clientY - rect.top;
-
-    mapOffsetX = mapWrapper.offsetLeft;
-    mapOffsetY = mapWrapper.offsetTop;
+    startX = e.clientX;
+    startY = e.clientY;
+    initialLeft = mapWrapper.offsetLeft;
+    initialTop = mapWrapper.offsetTop;
 
     mapWrapper.style.cursor = 'grabbing';
 };
@@ -172,16 +169,11 @@ const handleMapMouseMove = (e) => {
     const deltaX = e.clientX - startX;
     const deltaY = e.clientY - startY;
 
-    const newLeft = mapOffsetX + deltaX;
-    const newTop = mapOffsetY + deltaY;
+    const newLeft = initialLeft + deltaX;
+    const newTop = initialTop + deltaY;
 
-    // Update the position only if it's within the boundaries of the map container
-    if (newLeft >= 0 && newLeft <= mapContainer.clientWidth - mapWrapper.offsetWidth) {
-        mapWrapper.style.left = newLeft + 'px';
-    }
-    if (newTop >= 0 && newTop <= mapContainer.clientHeight - mapWrapper.offsetHeight) {
-        mapWrapper.style.top = newTop + 'px';
-    }
+    mapWrapper.style.left = newLeft + 'px';
+    mapWrapper.style.top = newTop + 'px';
 
     mapWrapper.style.cursor = 'grabbing';
 };
