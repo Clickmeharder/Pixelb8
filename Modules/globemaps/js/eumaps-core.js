@@ -157,7 +157,7 @@ const arkadiawaypointsArray = [
 /*mbbl*/	{ id: 'Robot Factory', info: '/wp [Planet Arkadia, 21654, 13796, 100, Robot Factory]', top: '53px', left: '8px' },
 /*tm*/	{ id: 'Sanctuary Cove', info: '/wp [Planet Arkadia, 20409, 29956, 100, Sanctuary Cove]', top: '53px', left: '8px' },
 /*bl*/	{ id: 'Scrap Yard', info: '/wp [Planet Arkadia, 10882, 10712, 100, Scrap Yard]', top: '53px', left: '8px' },
-/*Tl*/	{ id: 'Sentosas Reach LA#4', info: '/wp [Planet Arkadia, 14824, 32282, 100, Sentosa`s Reach]', top: '54px', left: '389px' }
+/*Tl*/	{ id: 'Sentosas Reach LA#4', info: '/wp [Planet Arkadia, 14824, 32282, 100, Sentosa`s Reach]', top: '54px', left: '389px' },
 /*tr*/	{ id: 'Songkra Valley', info: '/wp [Planet Arkadia, 32488, 26165, 100, Songkra Valley]', top: '53px', left: '8px' },
 /*tm*/	{ id: 'Storms Keep', info: '/wp [Planet Arkadia, 23207, 31416, 100, Storm`s Keep]', top: '53px', left: '8px' },
 /*tr*/	{ id: 'Taipan Digsite', info: '/wp [Planet Arkadia, 30821, 27080, 100, Taipan Digsite]', top: '53px', left: '8px' },
