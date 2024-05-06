@@ -326,6 +326,7 @@ function createWaypoint(id, info) {
     const waypoint = document.createElement('div');
     waypoint.classList.add('waypoint');
     waypoint.id = id;
+	waypoint.title = id;
     waypoint.setAttribute('data-info', info);
     waypoint.style.top = '50px'; // Adjust as needed for cluster positioning
     waypoint.style.left = '100px'; // Adjust as needed for cluster positioning
