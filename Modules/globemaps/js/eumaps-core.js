@@ -234,35 +234,35 @@ function createWaypoint(id, info) {
     waypoint.style.left = '100px'; // Adjust as needed for cluster positioning
     return waypoint;
 }
-// Function to add waypoints to the map from an array
-function addArkadiaWaypoints(arkadiawaypointsArray) {
-    const mapWrapper = document.getElementById('mapimgwrapper');
 
-    // Add each waypoint from the array to the map
-    waypointsArray.forEach(waypointData => {
-        const { id, info, top, left } = waypointData;
-        const waypoint = createWaypoint(id, info);
-        waypoint.style.top = top;
-        waypoint.style.left = left;
-        mapWrapper.appendChild(waypoint);
-    });
 // Function to add waypoints to the map
 function addWaypoints() {
     const mapWrapper = document.getElementById('mapimgwrapper');
 
+    // Add Arkadia waypointsArray waypoints
+    arkadiawaypointsArray.forEach((waypoint, index) => {
+        const id = 'arkadiawaypoint' + index;
+        const info = waypoint.info;
+        const arkadiaWaypoint = createWaypoint(id, info);
+        arkadiaWaypoint.style.top = waypoint.top;
+        arkadiaWaypoint.style.left = waypoint.left;
+        mapWrapper.appendChild(arkadiaWaypoint);
+    });
+
     // Add each waypoint to the map
-    for (let i = 1; i <= 68; i++) {
+    for (let i = 1; i <= 50; i++) { // Changed from 68 to 50 for the cluster
         const id = 'waypoint' + i;
         const info = 'Info ' + i;
         const waypoint = createWaypoint(id, info);
+        // Adjust positioning for the cluster as needed
+        waypoint.style.top = '100px';
+        waypoint.style.left = '150px';
         mapWrapper.appendChild(waypoint);
     }
 }
-
 // Call the function to add waypoint cluster
 addWaypoints();
-// Call the function to adD ARKADIA telepot waypoints
-addWaypoints(waypointsArray);
+
 // Get all waypoint elements
 const waypoints = document.querySelectorAll('.waypoint');
 
