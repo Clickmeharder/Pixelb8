@@ -102,7 +102,13 @@ const ancientgreeceMaps = [
     "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
 ]; */
 
-
+/* MAP WAYPOINTS*/
+const arkadiawaypointsArray = [
+    { id: 'Tanner', info: '/wp [Planet Arkadia, 8709, 32284, 100, Tanner Tp]', top: '53px', left: '8px' },
+    { id: 'Land Area #4 - Sentosas Reach', info: '/wp [Planet Arkadia, 14824, 32272, 100, Sentosas Reach]', top: '54px', left: '389px' },
+    { id: 'Indomitable Firebase East', info: '/wp [Planet Arkadia, 10664, 30160, 100, Indomitable FB-East]', top: '182px', left: '141px' },
+    // Add more waypoints as needed
+];
 
 // Initialize current map index
 let currentMapIndex = 0;
@@ -228,7 +234,18 @@ function createWaypoint(id, info) {
     waypoint.style.left = '100px'; // Adjust as needed for cluster positioning
     return waypoint;
 }
+// Function to add waypoints to the map from an array
+function addArkadiaWaypoints(arkadiawaypointsArray) {
+    const mapWrapper = document.getElementById('mapimgwrapper');
 
+    // Add each waypoint from the array to the map
+    waypointsArray.forEach(waypointData => {
+        const { id, info, top, left } = waypointData;
+        const waypoint = createWaypoint(id, info);
+        waypoint.style.top = top;
+        waypoint.style.left = left;
+        mapWrapper.appendChild(waypoint);
+    });
 // Function to add waypoints to the map
 function addWaypoints() {
     const mapWrapper = document.getElementById('mapimgwrapper');
@@ -242,9 +259,10 @@ function addWaypoints() {
     }
 }
 
-// Call the function to add waypoints
+// Call the function to add waypoint cluster
 addWaypoints();
-
+// Call the function to adD ARKADIA telepot waypoints
+addWaypoints(waypointsArray);
 // Get all waypoint elements
 const waypoints = document.querySelectorAll('.waypoint');
 
