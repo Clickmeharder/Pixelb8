@@ -104,9 +104,106 @@ const ancientgreeceMaps = [
 
 /* MAP WAYPOINTS*/
 const arkadiawaypointsArray = [
-    { id: 'Tanner', info: '/wp [Planet Arkadia, 8709, 32284, 100, Tanner Tp]', top: '53px', left: '8px' },
-    { id: 'Land Area #4 - Sentosas Reach', info: '/wp [Planet Arkadia, 14824, 32272, 100, Sentosas Reach]', top: '54px', left: '389px' },
-    { id: 'Indomitable Firebase East', info: '/wp [Planet Arkadia, 10664, 30160, 100, Indomitable FB-East]', top: '182px', left: '141px' },
+/*ml*/	{ id: '8 Coins HQ', info: '/wp [Planet Arkadia, 12074, 20716, 100, 8 Coins HQ]', top: '900px', left: '250px' },
+/*ml*/	{ id: '8 Coins Town', info: '/wp [Planet Arkadia, 15360, 23100, 100, 8 Coins Town]', top: '900px', left: '250px' },
+/*ml*/	{ id: '8 Coins Windy Isles', info: '/wp [Planet Arkadia, 9280, 22340, 100, 8 Coins Windy Isles]', top: '900px', left: '250px' },
+/*mt*/	{ id: 'Aakas', info: '/wp [Planet Arkadia, 11180, 9775, 100, Aakas]', top: '999px', left: '50px' },
+/*bm*/	{ id: 'BIG Industries ALA#05', info: '/wp [Planet Arkadia, 19020, 9046, 100, BIG Ind. LA#05]', top: '53px', left: '8px' },
+/*br*/	{ id: 'Celeste Harbour', info: '/wp [Planet Arkadia, 29852, 10176, 100, Celeste Harbour]', top: '53px', left: '8px' },
+/*br*/	{ id: 'Celeste Harbour Military HQ', info: '/wp [Planet Arkadia, 30120, 10015, 100, Celeste Harbour Military HQ]', top: '53px', left: '8px' },
+/*br*/	{ id: 'Celeste Harbour North', info: '/wp [Planet Arkadia, 30025, 10336, 100, Celeste Harbour N.]', top: '53px', left: '8px' },
+/*br*/	{ id: 'Celeste Harbour South', info: '/wp [Planet Arkadia, 29779, 9873, 100, Celeste Harbour S.]', top: '53px', left: '8px' },
+/*br*/	{ id: 'Celeste Outpost', info: '/wp [Planet Arkadia, 27258, 10952, Celeste Outpost]', top: '53px', left: '8px' },
+/*br*/	{ id: 'Celeste Quarry', info: '/wp [Planet Arkadia, 31186, 9540, 100, Celeste Quarry]', top: '53px', left: '8px' },
+/*tl*/	{ id: 'Cheetah Digsite', info: '/wp [Planet Arkadia, 10952, 26068, 100, Cheetah Digsite]', top: '53px', left: '8px' },
+/*tl*/	{ id: 'Courageous Firebase', info: '/wp [Planet Arkadia, 15169, 25742, 100, Courageous Firebase]', top: '53px', left: '8px' },
+/*tl*/	{ id: 'Courageous Firebase Acadamy', info: '/wp [Planet Arkadia, 15652, 25651, 100, Courageous Firebase Academy]', top: '53px', left: '8px' },
+/*tm*/	{ id: 'Cyclone Point', info: '/wp [Planet Arkadia, 18559, 31468, 100, Cyclone Point]', top: '53px', left: '8px' },
+/*mm*/	{ id: 'Dauntless Firebase', info: '/wp [Planet Arkadia, 20268, 17436, 100, Dauntless Firebase]', top: '53px', left: '8px' },
+/*mm*/	{ id: 'Dauntless Firebase Acadamy', info: '/wp [Planet Arkadia, 21270, 17310, 100, Dauntless Firebase Academy]', top: '53px', left: '8px' },
+/*mm*/	{ id: 'Dependable Firebase', info: '/wp [Planet Arkadia, 27411, 25171, 100, Dependable Firebase]', top: '53px', left: '8px' },
+/*mm*/	{ id: 'Dependable Firebase Academy', info: '/wp [Planet Arkadia, 27055, 25346, 100, Dependable Firebase Academy]', top: '53px', left: '8px' },
+/*ml*/	{ id: 'Falcon Digsite', info: '/wp [Planet Arkadia, 12249, 13988, 100, Falcon Digsite]', top: '53px', left: '8px' },
+/*mm*/	{ id: 'Fearless Firebase', info: '/wp [Planet Arkadia, 25571, 15163, 100, Fearless Firebase]', top: '53px', left: '8px' },
+/*mm*/	{ id: 'Fearless Firebase Academy', info: '/wp [Planet Arkadia, 25324, 15537, 100, Fearless Firebase Academy]', top: '53px', left: '8px' },
+/*mt*/	{ id: 'Formidable Firebase', info: '/wp [Planet Arkadia, 21948, 25341, 100, Formidable Firebase]', top: '53px', left: '8px' },
+/*mt*/	{ id: 'Formidable Firebase Academy', info: '/wp [Planet Arkadia, 21347, 25275, 100, Formidable Firebase Academy]', top: '53px', left: '8px' },
+/*mr*/	{ id: 'Fuel Depot', info: '/wp [Planet Arkadia, 32198, 13303, 100, Fuel Depot]', top: '53px', left: '8px' },
+/*bm*/	{ id: 'Harrier Site', info: '/wp [Planet Arkadia, 15435, 10143, 100, Harrier Site]', top: '53px', left: '8px' },
+/*bl*/	{ id: 'Hawk Digsite', info: '/wp [Planet Arkadia, 10068, 13960, 100, Hawk Digsite]', top: '53px', left: '8px' },
+/*mr*/	{ id: 'IFN Supply Depot', info: '/wp [Planet Arkadia, 29984, 17847, 100, IFN Supply Depot]', top: '53px', left: '8px' },
+/*mm*/	{ id: 'Implacable Firebase', info: '/wp [Planet Arkadia, 28168, 21960, 100, Implacable Firebase]', top: '53px', left: '8px' },
+/*tl*/	{ id: 'Indomitable Firebase East', info: '/wp [Planet Arkadia, 10636, 30162, 100, Indomitable FB-East]', top: '182px', left: '141px' },
+/*tl*/	{ id: 'Indomitable Firebase West', info: '/wp [Planet Arkadia, 10409, 30116, 100, Indomitable FB-West]', top: '53px', left: '8px' },
+/*bl*/	{ id: 'Kestral Digsite', info: '/wp [Planet Arkadia, 14469, 12603, 100, Kestral Digsite]', top: '53px', left: '8px' },
+/*tl*/	{ id: 'Khorum Coast', info: '/wp [Planet Arkadia, 9100, 27404, 100, Khorum Coast]', top: '53px', left: '8px' },
+/*mm*/	{ id: 'Machinery Plant', info: '/wp [Planet Arkadia, 20546, 21850, 100, Machinery Plant]', top: '53px', left: '8px' },
+//tr	{ id: 'Mamba Digsite', info: '/wp [Planet Arkadia, 26448, 28365, 100, Mamba Digsite]', top: '53px', left: '8px' },
+//tm	{ id: 'Miltons Crest', info: '/wp [Planet Arkadia, 20208, 28304, 100, Milton`s Crest]', top: '53px', left: '8px' },
+//tm	{ id: 'Moshanes Legacy', info: '/wp [Planet Arkadia, 23822, 27840, 100, Machone`s Legacy]', top: '53px', left: '8px' },
+//bl	{ id: 'Mutation Station', info: '/wp [Planet Arkadia, 9728,9781, 100, Mutation Station]', top: '53px', left: '8px' },
+//mr	{ id: 'New Arrivals Hangar', info: '/wp [Planet Arkadia, 30315, 17968, 100, New Arrivals Hangar]', top: '53px', left: '8px' },
+//tr	{ id: 'Nursery', info: '/wp [Planet Arkadia, 28872, 24347, 100, Nursery]', top: '53px', left: '8px' },
+//tr	{ id: 'Ocean Lookout', info: '/wp [Planet Arkadia, 31869, 20021, 100, Ocean Lookout]', top: '53px', left: '8px' },
+//mm	{ id: 'Redoubtable Firebase', info: '/wp [Planet Arkadia, 23232, 21798, 100, Redoubtable Firebase]', top: '53px', left: '8px' },
+//mm	{ id: 'Refinery', info: '/wp [Planet Arkadia, 25584, 18613, 100, Refinery]', top: '53px', left: '8px' },
+//bm	{ id: 'Relentless Firebase', info: '/wp [Planet Arkadia, 23892, 9325, 100, Relentless Firebase]', top: '53px', left: '8px' },
+	
+	
+//bm	{ id: 'Relentless Firebase Academy', info: '/wp [Planet Arkadia, 23620, 9725, 100, Relentless Firebase Academy]', top: '53px', left: '8px' },
+//bl	{ id: 'Repulse Firebase', info: '/wp [Planet Arkadia, 14987, 15117, 100, Repulse Firebase]', top: '53px', left: '8px' },
+//bl   { id: 'Repulse Firebase Academy', info: '/wp [Planet Arkadia, 14787, 15650, 100, Repulse Firebase Academy]', top: '53px', left: '8px' },
+//mr	{ id: 'Resolute Firebase', info: '/wp [Planet Arkadia, 30044, 17486, 100, Resolute Firebase]', top: '53px', left: '8px' },
+//mbbl	{ id: 'Robot Factory', info: '/wp [Planet Arkadia, 21654, 13796, 100, Robot Factory]', top: '53px', left: '8px' },
+//tm	{ id: 'Sanctuary Cove', info: '/wp [Planet Arkadia, 20409, 29956, 100, Sanctuary Cove]', top: '53px', left: '8px' },
+//bl	{ id: 'Scrap Yard', info: '/wp [Planet Arkadia, 10882, 10712, 100, Scrap Yard]', top: '53px', left: '8px' },
+	{ id: 'Sentosas Reach LA#4', info: '/wp [Planet Arkadia, 14824, 32282, 100, Sentosa`s Reach]', top: '54px', left: '389px' }
+//tr	{ id: 'Songkra Valley', info: '/wp [Planet Arkadia, 32488, 26165, 100, Songkra Valley]', top: '53px', left: '8px' },
+//tm	{ id: 'Storms Keep', info: '/wp [Planet Arkadia, 23207, 31416, 100, Storm`s Keep]', top: '53px', left: '8px' },
+//tr   { id: 'Taipan Digsite', info: '/wp [Planet Arkadia, 30821, 27080, 100, Taipan Digsite]', top: '53px', left: '8px' },
+//br	{ id: 'Timber Mill', info: '/wp [Planet Arkadia, 28204, 13549, 100, Timber Mill]', top: '53px', left: '8px' },
+//mlm	{ id: 'Valiant Firebase', info: '/wp [Planet Arkadia, 17212, 23092, 100, Valiant Firebase]', top: '53px', left: '8px' },
+//blm	{ id: 'Victorious Firebase', info: '/wp [Planet Arkadia, 18528, 10362, 100, Victorious Firebase]', top: '53px', left: '8px' }
+	
+//AREAS
+
+/* 	{ id: 'Aakas Island', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+	{ id: 'Arkadia Event Area 1', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+	{ id: 'Arkadia Event Area 2', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+    { id: 'Arkadia Event Area 3', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+    { id: 'Arkadia Event Area 4', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+	{ id: 'Big Industries ALA#05', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+	{ id: 'Cyclone Point', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+	{ id: 'Drillrig', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+    { id: 'IFN Commando Training', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+    { id: 'IFN Commando Training', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+	{ id: 'Khorum Coast', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+	{ id: 'Lightning Coast', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+	{ id: 'Lootable PvP', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+    { id: 'Mutation Station', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+    { id: 'Sanctuary Bay', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+	{ id: 'Sanctuary Shores', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+	{ id: 'Sentosas Reach', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+	{ id: 'Songkra Valley', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+    { id: 'Storms Keep', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+    { id: 'Thunder Hills', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' },
+	{ id: 'Thunder Ridge', info: '/wp [Planet Arkadia, , 100, Tanner Tp]', top: '53px', left: '8px' } */
+    
+   //CITIES
+
+/* 	{ id: 'Carabok and Gallard Wave', info: '/wp [Planet Arkadia, 28228, 13748, 100, Carabak & Gallard Spawn]', top: '53px', left: '8px' },
+	{ id: 'Celeste Outpost Stable', info: '/wp [Planet Arkadia, 27275, 11030, 100, Celeste Outpost Stable]', top: '53px', left: '8px' },
+	{ id: 'Miltons Crest', info: '/wp [Planet Arkadia, 20240, 28302, 100, Miltons Crest]', top: '53px', left: '8px' },
+    { id: 'New Player Arrival', info: '/wp [Planet Arkadia, 30321, 17652, 100, New Player Arrival]', top: '53px', left: '8px' },
+    { id: 'Nusul Wave Spawn', info: '/wp [Planet Arkadia, 27693, 11322, 100, Nusul Wave Spawn]', top: '53px', left: '8px' },
+	
+	{ id: 'Oratan Camp', info: '/wp [Planet Arkadia, 17897, 23303, 100, Oratan Camp]', top: '53px', left: '8px' },
+    { id: 'Oratan Camp', info: '/wp [Planet Arkadia, 26830, 22436, 100, Oratan Camp]', top: '53px', left: '8px' },
+    { id: 'Oratan Prospector Wave Spawn', info: '/wp [Planet Arkadia, 32395, 8668, 100, Oratan Prospector Wave Spawn]', top: '53px', left: '8px' },
+	{ id: 'Redoubtable Stable', info: '/wp [Planet Arkadia, 23140, 21680, 100, Redoubtable Stable]', top: '53px', left: '8px' },
+    { id: 'Resolute Stable', info: '/wp [Planet Arkadia, 29995, 17576, 100, Resolute Stable]', top: '53px', left: '8px' }
+	
+*/
     // Add more waypoints as needed
 ];
 
