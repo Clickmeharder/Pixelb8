@@ -377,10 +377,10 @@ function toggleTPmap() {
     // Toggle the visibility of the map overlay
     if (mapOverlay.style.display === "none") {
         mapOverlay.style.display = "block";
-		waypoint.style.display = "block";
+		waypoints.style.display = "block";
     } else {
         mapOverlay.style.display = "none";
-		waypoint.style.display = "none";
+		waypoints.style.display = "none";
     }
 }
 
