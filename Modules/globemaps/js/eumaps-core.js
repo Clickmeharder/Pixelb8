@@ -243,55 +243,7 @@ function cyclemapMode() {
 	console.log('cycle button clicked');
     document.getElementById("mapimage").src = arkadiaMaps[currentModeIndex];
 }
-//Map Toggle Functions
 
-function toggleTPmap() {
-    // Get the map overlay image element
-    const mapOverlay = document.getElementById("tpmap-overlay");
-
-    // Toggle the visibility of the map overlay
-    if (mapOverlay.style.display === "none") {
-        mapOverlay.style.display = "block";
-    } else {
-        mapOverlay.style.display = "none";
-    }
-}
-
-function toggleMobmap() {
-    // Get the mob overlay image element
-    const mobOverlay = document.getElementById("mob-overlay");
-
-    // Toggle the visibility of the mob overlay
-    if (mobOverlay.style.display === "none" || mobOverlay.style.display === "") {
-        mobOverlay.style.display = "block";
-    } else {
-        mobOverlay.style.display = "none";
-    }
-}
-
-function togglelandareas() {
-    // Get the land areas overlay element
-    const landAreasOverlay = document.getElementById("landareas-overlay");
-
-    // Toggle the visibility of the land areas overlay
-    if (landAreasOverlay.style.display === "none" || landAreasOverlay.style.display === "") {
-        landAreasOverlay.style.display = "block";
-    } else {
-        landAreasOverlay.style.display = "none";
-    }
-}
-
-function togglePvPzones() {
-    // Get the PvP zones overlay element
-    const pvpZonesOverlay = document.getElementById("pvpzones-overlay");
-
-    // Toggle the visibility of the PvP zones overlay
-    if (pvpZonesOverlay.style.display === "none" || pvpZonesOverlay.style.display === "") {
-        pvpZonesOverlay.style.display = "block";
-    } else {
-        pvpZonesOverlay.style.display = "none";
-    }
-}
 
 
 //MAP DRAGGING EVENTLISTENER FUNCTIONS
@@ -353,6 +305,8 @@ function addWaypoints() {
         const info = waypoint.info;
         const arkadiaWaypoint = createWaypoint(id, info);
 		arkadiaWaypoint.title = waypoint.title;
+		arkadiaWaypoint.style.display = "none";
+		
         arkadiaWaypoint.style.top = waypoint.top;
         arkadiaWaypoint.style.left = waypoint.left;
         mapWrapper.appendChild(arkadiaWaypoint);
@@ -411,4 +365,59 @@ function showDetailedInfo(waypoint) {
     const info = waypoint.getAttribute('data-info');
     // Show detailed info modal or popup
     alert(info); // Example: Show info in alert box
+}
+
+
+
+//Map Toggle Functions
+function toggleTPmap() {
+    // Get the map overlay image element
+    const mapOverlay = document.getElementById("tpmap-overlay");
+
+    // Toggle the visibility of the map overlay
+    if (mapOverlay.style.display === "none") {
+        mapOverlay.style.display = "block";
+		arkadiaWaypoint.style.display = "block";
+    } else {
+        mapOverlay.style.display = "none";
+		arkadiaWaypoint.style.display = "none";
+    }
+}
+
+
+
+function toggleMobmap() {
+    // Get the mob overlay image element
+    const mobOverlay = document.getElementById("mob-overlay");
+
+    // Toggle the visibility of the mob overlay
+    if (mobOverlay.style.display === "none" || mobOverlay.style.display === "") {
+        mobOverlay.style.display = "block";
+    } else {
+        mobOverlay.style.display = "none";
+    }
+}
+
+function togglelandareas() {
+    // Get the land areas overlay element
+    const landAreasOverlay = document.getElementById("landareas-overlay");
+
+    // Toggle the visibility of the land areas overlay
+    if (landAreasOverlay.style.display === "none" || landAreasOverlay.style.display === "") {
+        landAreasOverlay.style.display = "block";
+    } else {
+        landAreasOverlay.style.display = "none";
+    }
+}
+
+function togglePvPzones() {
+    // Get the PvP zones overlay element
+    const pvpZonesOverlay = document.getElementById("pvpzones-overlay");
+
+    // Toggle the visibility of the PvP zones overlay
+    if (pvpZonesOverlay.style.display === "none" || pvpZonesOverlay.style.display === "") {
+        pvpZonesOverlay.style.display = "block";
+    } else {
+        pvpZonesOverlay.style.display = "none";
+    }
 }
