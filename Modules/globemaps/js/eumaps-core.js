@@ -368,8 +368,6 @@ function showDetailedInfo(waypoint) {
 }
 
 
-
-//Map Toggle Functions
 //Map Toggle Functions
 function toggleTPmap() {
     // Get the map overlay image element
