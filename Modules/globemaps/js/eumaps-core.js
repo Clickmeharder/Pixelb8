@@ -31,7 +31,6 @@ const planetMaps = [
 const arkadiaMaps = [
     "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
 	"../../Modules/globemaps/arkadia/arkadialabelledmap.png",
-	"../../Modules/globemaps/arkadia/arkmobmapbase.png",
     "../../Modules/globemaps/arkadia/newnormalmap.png",
 	"../../Modules/globemaps/arkadia/newspecularmap.png"
 ];
