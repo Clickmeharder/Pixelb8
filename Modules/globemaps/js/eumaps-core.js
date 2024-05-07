@@ -157,8 +157,6 @@ const arkadiawaypointsArray = [
 	{ id: 'Redoubtable Firebase', info: '/wp [Arkadia, 23232, 21798, 100, Redoubtable Firebase]', top: '707px', left: '916px' },
 	{ id: 'Refinery', info: '/wp [Arkadia, 25584, 18613, 100, Refinery]', top: '906px', left: '1061px' },
 	{ id: 'Relentless Firebase', info: '/wp [Arkadia, 23892, 9325, 100, Relentless Firebase]', top: '1482px', left: '956px' },
-	
-	
 	{ id: 'Relentless Firebase Academy', info: '/wp [Arkadia, 23620, 9725, 100, Relentless Firebase Academy]', top: '1460px', left: '940px' },
 	{ id: 'Repulse Firebase', info: '/wp [Arkadia, 14987, 15117, 100, Repulse Firebase]', top: '1125px', left: '403px' },
 	{ id: 'Repulse Firebase Academy', info: '/wp [Arkadia, 14787, 15650, 100, Repulse Firebase Academy]', top: '1092px', left: '387px' },
@@ -168,7 +166,6 @@ const arkadiawaypointsArray = [
 	{ id: 'Sanctuary Cove', info: '/wp [Arkadia, 20409, 29956, 100, Sanctuary Cove]', top: '195px', left: '740px' },
 	{ id: 'Scoria Camp', info: '/wp [Arkadia, 12291, 23382, 100, Scoria Camp]', top: '609pxpx', left: '232px' },
 	{ id: 'Scrap Yard', info: '/wp [Arkadia, 10882, 10712, 100, Scrap Yard]', top: '1399px', left: '144px' },
-
 	{ id: 'Sentosas Reach LA#4', info: '/wp [Arkadia, 14824, 32282, 100, Sentosa`s Reach]', top: '54px', left: '389px' },
 	{ id: 'Songkra Valley', info: '/wp [Arkadia, 32488, 26165, 100, Songkra Valley]', top: '434px', left: '1493px' },
 	{ id: 'Steadfast Firebase', info: '/wp [Arkadia, 18583, 13747, 182, Steadfast Firebase]', top: '1208px', left: '626px' },
@@ -339,8 +336,8 @@ document.addEventListener('mouseup', function() {
 function createWaypoint(id, info) {
     const waypoint = document.createElement('div');
     waypoint.classList.add('waypoint');
-    waypoint.id = id;
 	waypoint.title = id;
+    waypoint.id = id;
     waypoint.setAttribute('data-info', info);
     waypoint.style.top = '50px'; // Adjust as needed for cluster positioning
     waypoint.style.left = '100px'; // Adjust as needed for cluster positioning
