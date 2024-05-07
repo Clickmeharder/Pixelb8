@@ -2079,7 +2079,8 @@ div#mapzoom-control-group Button {
     width: 146px;
 	margin-left: 12px;
     margin-right: 12px;
-	bottom: -291px;
+	/* bottom: -291px;  Hover Transition effect*/
+	bottom: 0px;
     right: 8px;
     opacity: 0.85;
     padding: 0px;
