@@ -377,10 +377,10 @@ function toggleTPmap() {
     // Toggle the visibility of the map overlay
     if (mapOverlay.style.display === "none") {
         mapOverlay.style.display = "block";
-		arkadiaWaypoint.style.display = "block";
+		waypoint.style.display = "block";
     } else {
         mapOverlay.style.display = "none";
-		arkadiaWaypoint.style.display = "none";
+		waypoint.style.display = "none";
     }
 }
 
