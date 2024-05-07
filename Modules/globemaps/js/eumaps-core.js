@@ -370,6 +370,7 @@ function showDetailedInfo(waypoint) {
 
 
 //Map Toggle Functions
+//Map Toggle Functions
 function toggleTPmap() {
     // Get the map overlay image element
     const mapOverlay = document.getElementById("tpmap-overlay");
@@ -377,11 +378,29 @@ function toggleTPmap() {
     // Toggle the visibility of the map overlay
     if (mapOverlay.style.display === "none") {
         mapOverlay.style.display = "block";
-		waypoints.style.display = "block";
+        // Show all waypoints when the map overlay is displayed
+        showAllWaypoints();
     } else {
         mapOverlay.style.display = "none";
-		waypoints.style.display = "none";
+        // Hide all waypoints when the map overlay is hidden
+        hideAllWaypoints();
     }
+}
+
+// Function to show all waypoints
+function showAllWaypoints() {
+    const waypoints = document.querySelectorAll('.waypoint');
+    waypoints.forEach(waypoint => {
+        waypoint.style.display = "block";
+    });
+}
+
+// Function to hide all waypoints
+function hideAllWaypoints() {
+    const waypoints = document.querySelectorAll('.waypoint');
+    waypoints.forEach(waypoint => {
+        waypoint.style.display = "none";
+    });
 }
 
 
