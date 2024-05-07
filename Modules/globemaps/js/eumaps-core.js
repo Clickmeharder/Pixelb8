@@ -338,8 +338,8 @@ function createWaypoint(id, info) {
 	waypoint.title = id;
     waypoint.id = id;
     waypoint.setAttribute('data-info', info);
-    waypoint.style.top = '50px'; // Adjust as needed for cluster positioning
-    waypoint.style.left = '100px'; // Adjust as needed for cluster positioning
+    waypoint.style.top = '0px'; // Adjust as needed for cluster positioning
+    waypoint.style.left = '0px'; // Adjust as needed for cluster positioning
     return waypoint;
 }
 
@@ -363,8 +363,8 @@ function addWaypoints() {
         const info = 'Info ' + i;
         const waypoint = createWaypoint(id, info);
         // Adjust positioning for the cluster as needed
-        waypoint.style.top = '100px';
-        waypoint.style.left = '150px';
+        waypoint.style.top = '0px';
+        waypoint.style.left = '0px';
         mapWrapper.appendChild(waypoint);
     }
 }
