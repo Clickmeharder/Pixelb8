@@ -153,26 +153,28 @@ const arkadiawaypointsArray = [
 /*mr*/	{ id: 'New Arrivals Hangar', info: '/wp [Planet Arkadia, 30315, 17968, 100, New Arrivals Hangar]', top: '945px', left: '1359px' },
 /*tr*/	{ id: 'Nursery', info: '/wp [Planet Arkadia, 28872, 24347, 100, Nursery]', top: '548px', left: '1269px' },
 /*tr*/	{ id: 'Ocean Lookout', info: '/wp [Planet Arkadia, 31869, 20021, 100, Ocean Lookout]', top: '818px', left: '1454px' },
-/*mm*/	{ id: 'Redoubtable Firebase', info: '/wp [Planet Arkadia, 23232, 21798, 100, Redoubtable Firebase]', top: '707px', left: '916px' },
-/*mm*/	{ id: 'Refinery', info: '/wp [Planet Arkadia, 25584, 18613, 100, Refinery]', top: '906px', left: '1061px' },
-/*bm*/	{ id: 'Relentless Firebase', info: '/wp [Planet Arkadia, 23892, 9325, 100, Relentless Firebase]', top: '1482px', left: '956px' },
+	{ id: 'Redoubtable Firebase', info: '/wp [Planet Arkadia, 23232, 21798, 100, Redoubtable Firebase]', top: '707px', left: '916px' },
+	{ id: 'Refinery', info: '/wp [Planet Arkadia, 25584, 18613, 100, Refinery]', top: '906px', left: '1061px' },
+	{ id: 'Relentless Firebase', info: '/wp [Planet Arkadia, 23892, 9325, 100, Relentless Firebase]', top: '1482px', left: '956px' },
 	
 	
-/*bm*/	{ id: 'Relentless Firebase Academy', info: '/wp [Planet Arkadia, 23620, 9725, 100, Relentless Firebase Academy]', top: '1460px', left: '940px' },
-/*bl*/	{ id: 'Repulse Firebase', info: '/wp [Planet Arkadia, 14987, 15117, 100, Repulse Firebase]', top: '1125px', left: '403px' },
-/*bl*/	{ id: 'Repulse Firebase Academy', info: '/wp [Planet Arkadia, 14787, 15650, 100, Repulse Firebase Academy]', top: '1092px', left: '387px' },
-/*mr*/	{ id: 'Resolute Firebase', info: '/wp [Planet Arkadia, 30044, 17486, 100, Resolute Firebase]', top: '983px', left: '1374px' },
-/*mbbl*/	{ id: 'Robot Factory', info: '/wp [Planet Arkadia, 21654, 13796, 100, Robot Factory]', top: '1206px', left: '817px' },
-/*tm*/	{ id: 'Sanctuary Cove', info: '/wp [Planet Arkadia, 20409, 29956, 100, Sanctuary Cove]', top: '195px', left: '740px' },
-/*bl*/	{ id: 'Scrap Yard', info: '/wp [Planet Arkadia, 10882, 10712, 100, Scrap Yard]', top: '1399px', left: '144px' },
+	{ id: 'Relentless Firebase Academy', info: '/wp [Arkadia, 23620, 9725, 100, Relentless Firebase Academy]', top: '1460px', left: '940px' },
+	{ id: 'Repulse Firebase', info: '/wp [Arkadia, 14987, 15117, 100, Repulse Firebase]', top: '1125px', left: '403px' },
+	{ id: 'Repulse Firebase Academy', info: '/wp [Arkadia, 14787, 15650, 100, Repulse Firebase Academy]', top: '1092px', left: '387px' },
+	{ id: 'Resolute Firebase', info: '/wp [Arkadia, 30044, 17486, 100, Resolute Firebase]', top: '983px', left: '1374px' },
+	{ id: 'Robot Factory', info: '/wp [Arkadia, 21654, 13796, 100, Robot Factory]', top: '1206px', left: '817px' },
+	{ id: 'Sanctuary Cove', info: '/wp [Arkadia, 20409, 29956, 100, Sanctuary Cove]', top: '195px', left: '740px' },
+	{ id: 'Scrap Yard', info: '/wp [Arkadia, 10882, 10712, 100, Scrap Yard]', top: '1399px', left: '144px' },
 
-/*Tl*/	{ id: 'Sentosas Reach LA#4', info: '/wp [Planet Arkadia, 14824, 32282, 100, Sentosa`s Reach]', top: '54px', left: '389px' },
-/*tr*/	{ id: 'Songkra Valley', info: '/wp [Planet Arkadia, 32488, 26165, 100, Songkra Valley]', top: '434px', left: '1493px' },
-/*tm*/	{ id: 'Storms Keep', info: '/wp [Planet Arkadia, 23207, 31416, 100, Storm`s Keep]', top: '105px', left: '913px' },
-/*tr*/	{ id: 'Taipan Digsite', info: '/wp [Planet Arkadia, 30821, 27080, 100, Taipan Digsite]', top: '377px', left: '1388px' },
-/*br*/	{ id: 'Timber Mill', info: '/wp [Planet Arkadia, 28204, 13549, 100, Timber Mill]', top: '1218px', left: '1226px' },
-/*mlm*/	{ id: 'Valiant Firebase', info: '/wp [Planet Arkadia, 17212, 23092, 100, Valiant Firebase]', top: '626px', left: '541px' },
-/*blm*/	{ id: 'Victorious Firebase', info: '/wp [Planet Arkadia, 18528, 10362, 100, Victorious Firebase]', top: '1418px', left: '621px' }
+	{ id: 'Sentosas Reach LA#4', info: '/wp [Arkadia, 14824, 32282, 100, Sentosa`s Reach]', top: '54px', left: '389px' },
+	{ id: 'Songkra Valley', info: '/wp [Arkadia, 32488, 26165, 100, Songkra Valley]', top: '434px', left: '1493px' },
+	{ id: 'Steadfast Firebase', info: '/wp [Arkadia, 18583, 13747, 182, Steadfast Firebase]', top: '1206px', left: '517px' },
+	{ id: 'Storms Keep', info: '/wp [Arkadia, 23207, 31416, 100, Storm`s Keep]', top: '105px', left: '913px' },
+	{ id: 'Taipan Digsite', info: '/wp [Arkadia, 30821, 27080, 100, Taipan Digsite]', top: '377px', left: '1388px' },
+	{ id: 'Tannery', info: '/wp [Arkadia, 8710, 32286, 200, Tannery] nusul punies near', top: '50px', left: '8x' },
+	{ id: 'Timber Mill', info: '/wp [Arkadia, 28204, 13549, 100, Timber Mill]', top: '1218px', left: '1226px' },
+	{ id: 'Valiant Firebase', info: '/wp [Arkadia, 17212, 23092, 100, Valiant Firebase]', top: '626px', left: '541px' },
+	{ id: 'Victorious Firebase', info: '/wp [Arkadia, 18528, 10362, 100, Victorious Firebase]', top: '1418px', left: '621px' }
 	
 //AREAS
 
