@@ -174,7 +174,7 @@ const arkadiawaypointsArray = [
 	{ id: 'Steadfast Firebase', info: '/wp [Arkadia, 18583, 13747, 182, Steadfast Firebase]', top: '1208px', left: '626px' },
 	{ id: 'Storms Keep', info: '/wp [Arkadia, 23207, 31416, 100, Storm`s Keep]', top: '105px', left: '913px' },
 	{ id: 'Taipan Digsite', info: '/wp [Arkadia, 30821, 27080, 100, Taipan Digsite]', top: '377px', left: '1388px' },
-	{ id: 'Tannery', info: '/wp [Arkadia, 8710, 32286, 200, Tannery] nusuls punies near shuld be right now', top: '52px', left: '8x' },
+	{ id: 'Tannery', info: '/wp [Arkadia, 8710, 32286, 200, Tannery] nusuls punies', top: '52px', left: '8x' },
 	{ id: 'Timber Mill', info: '/wp [Arkadia, 28204, 13549, 100, Timber Mill]', top: '1218px', left: '1226px' },
 	{ id: 'Valiant Firebase', info: '/wp [Arkadia, 17212, 23092, 100, Valiant Firebase]', top: '626px', left: '541px' },
 	{ id: 'Victorious Firebase', info: '/wp [Arkadia, 18528, 10362, 100, Victorious Firebase]', top: '1418px', left: '621px' }
