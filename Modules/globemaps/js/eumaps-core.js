@@ -115,28 +115,23 @@ const arkadiawaypointsArray = [
 	{ id: 'Celeste Harbour North', info: '/wp [Arkadia, 30025, 10336, 100, Celeste Harbour N.]', top: '1418px', left: '1342px' },
 	{ id: 'Celeste Harbour South', info: '/wp [Arkadia, 29779, 9873, 100, Celeste Harbour S.]', top: '1450px', left: '1325px' },
 	{ id: 'Celeste Outpost', info: '/wp [Arkadia, 27258, 10952, Celeste Outpost]', top: '1383px', left: '1166px' },
-
-
-/*br*/	{ id: 'Celeste Quarry', info: '/wp [Arkadia, 31186, 9540, 100, Celeste Quarry]', top: '1470px', left: '1412px' },
-/*tl*/	{ id: 'Cheetah Digsite', info: '/wp [Arkadia, 10952, 26068, 100, Cheetah Digsite]', top: '441px', left: '150px' },
+	{ id: 'Celeste Quarry', info: '/wp [Arkadia, 31186, 9540, 100, Celeste Quarry]', top: '1470px', left: '1412px' },
+	{ id: 'Cheetah Digsite', info: '/wp [Arkadia, 10952, 26068, 100, Cheetah Digsite]', top: '441px', left: '150px' },
 	{ id: 'Chemical Factory', info: '/wp [Arkadia, 24809, 10378, 100, Chemical Factory]', top: '1418px', left: '1013px' },
-
-/*tl*/	{ id: 'Courageous Firebase', info: '/wp [Arkadia, 15169, 25742, 100, Courageous Firebase]', top: '460px', left: '411px' },
-/*tl*/	{ id: 'Courageous Firebase Acadamy', info: '/wp [Arkadia, 15652, 25651, 100, Courageous Firebase Academy]', top: '470px', left: '443px' },
-/*tm*/	{ id: 'Cyclone Point', info: '/wp [Arkadia, 18559, 31468, 100, Cyclone Point]', top: '103px', left: '623px' },
-/*mm*/	{ id: 'Dauntless Firebase', info: '/wp [Arkadia, 20268, 17436, 100, Dauntless Firebase]', top: '980px', left: '730px' },
-
-
-/*mm*/	{ id: 'Dauntless Firebase Acadamy', info: '/wp [Arkadia, 21270, 17310, 100, Dauntless Firebase Academy]', top: '988px', left: '730px' },
-/*mm*/	{ id: 'Dependable Firebase', info: '/wp [Arkadia, 27411, 25171, 100, Dependable Firebase]', top: '495px', left: '1176px' },
-/*mm*/	{ id: 'Dependable Firebase Academy', info: '/wp [Arkadia, 27055, 25346, 100, Dependable Firebase Academy]', top: '485px', left: '1153px' },
-/*ml*/	{ id: 'Falcon Digsite', info: '/wp [Arkadia, 12249, 13988, 100, Falcon Digsite]', top: '1194px', left: '231px' },
-/*mm*/	{ id: 'Fearless Firebase', info: '/wp [Arkadia, 25571, 15163, 100, Fearless Firebase]', top: '1121px', left: '1060px' },
-/*mm*/	{ id: 'Fearless Firebase Academy', info: '/wp [Arkadia, 25324, 15537, 100, Fearless Firebase Academy]', top: '1096px', left: '1043px' },
-/*mt*/	{ id: 'Formidable Firebase', info: '/wp [Arkadia, 21948, 25341, 100, Formidable Firebase]', top: '484px', left: '835px' },
-/*mt*/	{ id: 'Formidable Firebase Academy', info: '/wp [Arkadia, 21347, 25275, 100, Formidable Firebase Academy]', top: '490px', left: '800px' },
-/*mr*/	{ id: 'Fuel Depot', info: '/wp [Arkadia, 32198, 13303, 100, Fuel Depot]', top: '1235px', left: '1475px' },
-/*bm*/	{ id: 'Harrier Site', info: '/wp [Arkadia, 15435, 10143, 100, Harrier Site]', top: '1432px', left: '429px' },
+	{ id: 'Courageous Firebase', info: '/wp [Arkadia, 15169, 25742, 100, Courageous Firebase]', top: '460px', left: '411px' },
+	{ id: 'Courageous Firebase Acadamy', info: '/wp [Arkadia, 15652, 25651, 100, Courageous Firebase Academy]', top: '470px', left: '443px' },
+	{ id: 'Cyclone Point', info: '/wp [Arkadia, 18559, 31468, 100, Cyclone Point]', top: '103px', left: '623px' },
+	{ id: 'Dauntless Firebase', info: '/wp [Arkadia, 20268, 17436, 100, Dauntless Firebase]', top: '980px', left: '730px' },
+	{ id: 'Dauntless Firebase Acadamy', info: '/wp [Arkadia, 21270, 17310, 100, Dauntless Firebase Academy]', top: '988px', left: '790px' },
+	{ id: 'Dependable Firebase', info: '/wp [Arkadia, 27411, 25171, 100, Dependable Firebase]', top: '495px', left: '1176px' },
+	{ id: 'Dependable Firebase Academy', info: '/wp [Arkadia, 27055, 25346, 100, Dependable Firebase Academy]', top: '485px', left: '1153px' },
+	{ id: 'Falcon Digsite', info: '/wp [Arkadia, 12249, 13988, 100, Falcon Digsite]', top: '1194px', left: '231px' },
+	{ id: 'Fearless Firebase', info: '/wp [Arkadia, 25571, 15163, 100, Fearless Firebase]', top: '1121px', left: '1060px' },
+	{ id: 'Fearless Firebase Academy', info: '/wp [Arkadia, 25324, 15537, 100, Fearless Firebase Academy]', top: '1096px', left: '1043px' },
+	{ id: 'Formidable Firebase', info: '/wp [Arkadia, 21948, 25341, 100, Formidable Firebase]', top: '484px', left: '835px' },
+	{ id: 'Formidable Firebase Academy', info: '/wp [Arkadia, 21347, 25275, 100, Formidable Firebase Academy]', top: '490px', left: '800px' },
+	{ id: 'Fuel Depot', info: '/wp [Arkadia, 32198, 13303, 100, Fuel Depot]', top: '1235px', left: '1475px' },
+	{ id: 'Harrier Site', info: '/wp [Arkadia, 15435, 10143, 100, Harrier Site]', top: '1432px', left: '429px' },
 
 
 /*bl*/	{ id: 'Hawk Digsite', info: '/wp [Arkadia, 10068, 13960, 100, Hawk Digsite]', top: '1194px', left: '94px' },
@@ -144,6 +139,10 @@ const arkadiawaypointsArray = [
 /*mm*/	{ id: 'Implacable Firebase', info: '/wp [Arkadia, 28168, 21960, 100, Implacable Firebase]', top: '698px', left: '1223px' },
 /*tl*/	{ id: 'Indomitable Firebase East', info: '/wp [Arkadia, 10636, 30162, 100, Indomitable FB-East]', top: '186px', left: '133px' },
 /*tl*/	{ id: 'Indomitable Firebase West', info: '/wp [Arkadia, 10409, 30116, 100, Indomitable FB-West]', top: '189px', left: '116px' },
+
+	{ id: 'Jaguar Digsite resetwp', info: '/wp [Arkadia, 10952, 26068, 100, Cheetah Digsite]', top: '434px', left: '290px' }
+	{ id: 'Leapord Digsite resetwp', info: '/wp [Arkadia, 10952, 26068, 100, Cheetah Digsite]', top: '280px', left: '444px' }
+	{ id: 'Panther Digsite resetwp', info: '/wp [Arkadia, 10952, 26068, 100, Cheetah Digsite]', top: '369px', left: '359px' }
 /*bl*/	{ id: 'Kestral Digsite', info: '/wp [Arkadia, 14469, 12603, 100, Kestral Digsite]', top: '1279px', left: '370px' },
 /*tl*/	{ id: 'Khorum Coast', info: '/wp [Arkadia, 9100, 27404, 100, Khorum Coast]', top: '357px', left: '35px' },
 /*mm*/	{ id: 'Machinery Plant', info: '/wp [Arkadia, 20546, 21850, 100, Machinery Plant]', top: '702px', left: '748px' },
@@ -174,7 +173,7 @@ const arkadiawaypointsArray = [
 	{ id: 'Steadfast Firebase', info: '/wp [Arkadia, 18583, 13747, 182, Steadfast Firebase]', top: '1208px', left: '626px' },
 	{ id: 'Storms Keep', info: '/wp [Arkadia, 23207, 31416, 100, Storm`s Keep]', top: '105px', left: '913px' },
 	{ id: 'Taipan Digsite', info: '/wp [Arkadia, 30821, 27080, 100, Taipan Digsite]', top: '377px', left: '1388px' },
-	{ id: 'Tannery', info: '/wp [Arkadia, 8710, 32286, 200, Tannery] nusul punies near', top: '50px', left: '8x' },
+	{ id: 'Tannery', info: '/wp [Arkadia, 8710, 32286, 200, Tannery] nusul punies near', top: '52px', left: '8x' },
 	{ id: 'Timber Mill', info: '/wp [Arkadia, 28204, 13549, 100, Timber Mill]', top: '1218px', left: '1226px' },
 	{ id: 'Valiant Firebase', info: '/wp [Arkadia, 17212, 23092, 100, Valiant Firebase]', top: '626px', left: '541px' },
 	{ id: 'Victorious Firebase', info: '/wp [Arkadia, 18528, 10362, 100, Victorious Firebase]', top: '1418px', left: '621px' }
