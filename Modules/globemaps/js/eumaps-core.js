@@ -339,8 +339,8 @@ function createWaypoint(id, info) {
 	waypoint.title = id;
     waypoint.id = id;
     waypoint.setAttribute('data-info', info);
-    waypoint.style.top = '50px'; // Adjust as needed for cluster positioning
-    waypoint.style.left = '100px'; // Adjust as needed for cluster positioning
+    waypoint.style.top = '0px'; // Adjust as needed for cluster positioning
+    waypoint.style.left = '0px'; // Adjust as needed for cluster positioning
     return waypoint;
 }
 
