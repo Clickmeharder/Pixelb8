@@ -163,7 +163,7 @@ const arkadiawaypointsArray = [
 	{ id: 'Robot Factory', info: '/wp [Arkadia, 21654, 13796, 100, Robot Factory]', top: '1206px', left: '817px' },
 	{ id: 'Rocky Ridge', info: '/wp [Arkadia, 17156, 17975, 100, Rocky Ridge]', top: '944px', left: '536px' },
 	{ id: 'Sanctuary Cove', info: '/wp [Arkadia, 20409, 29956, 100, Sanctuary Cove]', top: '195px', left: '740px' },
-	{ id: 'Scoria Camp', info: '/wp [Arkadia, 12291, 23382, 100, Scoria Camp]', top: '609pxpx', left: '232px' },
+	{ id: 'Scoria Camp', info: '/wp [Arkadia, 12291, 23382, 100, Scoria Camp]', top: '609px', left: '232px' },
 	{ id: 'Scrap Yard', info: '/wp [Arkadia, 10882, 10712, 100, Scrap Yard]', top: '1399px', left: '144px' },
 	{ id: 'Sentosas Reach LA#4', info: '/wp [Arkadia, 14824, 32282, 100, Sentosa`s Reach]', top: '54px', left: '389px' },
 	{ id: 'Songkra Valley', info: '/wp [Arkadia, 32488, 26165, 100, Songkra Valley]', top: '434px', left: '1493px' },
@@ -338,8 +338,8 @@ function createWaypoint(id, info) {
 	waypoint.title = id;
     waypoint.id = id;
     waypoint.setAttribute('data-info', info);
-    waypoint.style.top = '0px'; // Adjust as needed for cluster positioning
-    waypoint.style.left = '0px'; // Adjust as needed for cluster positioning
+    waypoint.style.top = '50px'; // Adjust as needed for cluster positioning
+    waypoint.style.left = '100px'; // Adjust as needed for cluster positioning
     return waypoint;
 }
 
