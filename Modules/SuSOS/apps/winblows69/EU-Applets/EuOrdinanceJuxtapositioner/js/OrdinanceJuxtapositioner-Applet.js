@@ -3178,6 +3178,7 @@ function calculateStats(setNumber) {
 			Ammo:<strong>${Ammo_Type}</strong><br>
 			<div class="textline"><p>TT Value: ${Max_TT}</p> (Broken at: ${Min_TT})</div>
 			<div class="textline">Range: <strong>${rangeValue} m</strong></div>
+			<div class="textline">Efficiency: <p class="title">${Efficiency}</p> </div>
 			<div class="textline">DamageInterval: <p class="title">${DamageInterval}</p> </div>
 
 			<br>
