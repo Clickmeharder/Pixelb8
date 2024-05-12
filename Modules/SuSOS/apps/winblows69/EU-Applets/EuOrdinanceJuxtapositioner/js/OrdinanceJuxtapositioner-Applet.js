@@ -3230,6 +3230,7 @@ Range: ${Range} × 100.00% × 100.00% = ${rangeValue} m<br>
     console.log('Type:', Type);
     console.log('Ammo:', Ammo);
     console.log('Ammo_Type:', Ammo_Type);
+	console.log('Efficiency:', Efficiency);
     console.log('AmmoburnCost:', AmmoburnCost);
     console.log('Impact_Radius:', Impact_Radius);
     console.log('SIB:', SIB);
