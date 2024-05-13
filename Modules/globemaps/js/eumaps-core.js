@@ -288,8 +288,8 @@ function updatemapLabelbyPlanet() {
         case 2:
             h2Element.textContent = "Current Map: Cyrene - Visit Cyrenedreams.com";
 			currententropiaPlanet = "Cyrene";
-			mapWrapper.style.top = '-285px';
-			mapWrapper.style.left = '-550px';
+			mapWrapper.style.top = '0px';
+			mapWrapper.style.left = '0px';
             break;
         case 3:
             h2Element.textContent = "Current Map: Calypso - visit Calypsomap.com";
