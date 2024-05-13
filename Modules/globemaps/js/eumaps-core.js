@@ -248,7 +248,7 @@ var offsetX = 0, offsetY = 0;
 // Function to update the text content of the h2 element based on currentModeIndex
 function updatemapLabelbyDepth() {
     const h2Element = document.getElementById("currenteumaplabel");
-    switch (currentMapIndex) {
+    switch (currentMapdepthIndex) {
         case 0:
             h2Element.textContent = "Current Map: Planet Arkadia Surface";
             break;
@@ -339,7 +339,7 @@ function toggleUGmode() {
     }
     // Update the src attribute of the map image with the new map URL
 	hideOverlays();
-    document.getElementById("mapimage").src = arkugMaps[currentMapDepthIndex];
+    document.getElementById("mapimage").src = arkugMaps[currentMapdepthIndex];
 	// Call the functions to update the map label
     updatemapLabelbyDepth();
 }
