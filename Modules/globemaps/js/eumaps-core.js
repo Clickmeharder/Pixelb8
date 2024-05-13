@@ -127,7 +127,7 @@ const arkadiawaypointsArray = [
 	{ id: 'Cyclone Point', tpname: 'Cyclone Point', info: '/wp [Arkadia, 18559, 31468, 100, Cyclone Point]', top: '103px', left: '623px' },
 	{ id: 'Dauntless Firebase', tpname: 'Dauntless Firebase', info: '/wp [Arkadia, 20268, 17436, 100, Dauntless Firebase]', top: '980px', left: '730px' },
 	{ id: 'Dauntless Firebase Acadamy', tpname: 'Dauntless Firebase Acadamy', info: '/wp [Arkadia, 21270, 17310, 100, Dauntless Firebase Academy]', top: '986px', left: '792px' },
-	{ id: 'Defiant Firebase', tpname: 'Defiant Firebase', info: '/wp [Arkadia, 14792, 19984, 100, Defiant Firebase]', top: '820px', left: '388x' },
+	{ id: 'Defiant Firebase', tpname: 'Defiant Firebase', info: '/wp [Arkadia, 14792, 19984, 100, Defiant Firebase]', top: '819px', left: '388px' },
 	{ id: 'Dependable Firebase', tpname: 'Dependable Firebase', info: '/wp [Arkadia, 27411, 25171, 100, Dependable Firebase]', top: '495px', left: '1176px' },
 	{ id: 'Dependable Firebase Academy', tpname: 'Dependable Firebase Academy', info: '/wp [Arkadia, 27055, 25346, 100, Dependable Firebase Academy]', top: '485px', left: '1153px' },
 	{ id: 'Falcon Digsite', tpname: 'Falcon Digsite', info: '/wp [Arkadia, 12249, 13988, 100, Falcon Digsite]', top: '1194px', left: '231px' },
