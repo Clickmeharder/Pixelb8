@@ -276,26 +276,26 @@ function updatemapLabelbyPlanet() {
         case 0:
             h2Element.textContent = "Current Map: Planet Arkadia - Pixelb8.lol";
 			currententropiaPlanet = "Arkadia";
-			mapWrapper.style.top = '-285px';
-			mapWrapper.style.left = '-550px';
+			mapWrapper.style.top = '';
+			mapWrapper.style.left = '';
             break;
         case 1:
             h2Element.textContent = "Current Map: Rocktropia - entropiawiki.com";
 			currententropiaPlanet = "Rocktropia";
-			mapWrapper.style.top = '-7px';
-			mapWrapper.style.left = '-42px';
+			mapWrapper.style.top = '';
+			mapWrapper.style.left = '';
             break;
         case 2:
             h2Element.textContent = "Current Map: Cyrene - Visit Cyrenedreams.com";
 			currententropiaPlanet = "Cyrene";
-			mapWrapper.style.top = '0px';
-			mapWrapper.style.left = '0px';
+			mapWrapper.style.top = '';
+			mapWrapper.style.left = '';
             break;
         case 3:
             h2Element.textContent = "Current Map: Calypso - visit Calypsomap.com";
 			currententropiaPlanet = "Calypso";
-			mapWrapper.style.top = '-619px';
-			mapWrapper.style.left = '-1059px';
+			mapWrapper.style.top = '';
+			mapWrapper.style.left = '';
             break;
         default:
             h2Element.textContent = "Current Map: Unknown Map";
