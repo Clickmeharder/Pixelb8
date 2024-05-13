@@ -2174,8 +2174,10 @@ button#globeinputbutt {
     width: 100%;
     margin-left: 6px;
 }
-button#moonmodeButton {
-    width: 54px;
+
+button#f5Button {
+	width: 54px;
+	margin-left:2px;
 }
 button#undergroundmodeButton {
     font-size: small;
