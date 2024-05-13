@@ -1,4 +1,4 @@
-console.log('JS Update 1 - 24/5/12 10:53pm');
+console.log('JS Update 2 - 24/5/12 11:22pm');
 // Get the image element
 const mapImage = document.getElementById("mapimgwrapper");
 
