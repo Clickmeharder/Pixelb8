@@ -232,22 +232,9 @@ function cyclemapPlanet() {
         currentMapIndex = 0; // Reset to the first map if exceeds length
     }
     // Update the src attribute of the map image with the new map URL
+	hideOverlays();
     document.getElementById("mapimage").src = planetMaps[currentMapIndex];
 }
-
-//old mapmode cycle ( simply does not not include map h2 element updating but otherwise is the same)
-/* function cyclemapMode() {
-    // Increment current map index
-    currentModeIndex++;
-    // Check if current map index exceeds the length of the array
-    if (currentModeIndex >= arkadiaMaps.length) {
-        currentModeIndex = 0; // Reset to the first map if exceeds length
-		console.log('currentMapIndex/currentModeIndex:'+ currentMapIndex + "/" + currentModeIndex );
-    }
-    // Update the src attribute of the map image with the new map URL
-	console.log('cycle button clicked');
-    document.getElementById("mapimage").src = arkadiaMaps[currentModeIndex];
-} */
 
 function cyclemapMode() {
     // Increment current map index
@@ -479,4 +466,19 @@ function togglePvPzones() {
     } else {
         pvpZonesOverlay.style.display = "none";
     }
+}
+
+//hide overlays Function
+function hideOverlays() {
+    // Get the map overlay image element
+    const tpmapOverlay = document.getElementById("tpmap-overlay");
+	const mobOverlay = document.getElementById("mob-overlay");
+	const landAreasOverlay = document.getElementById("landareas-overlay");
+	const pvpZonesOverlay = document.getElementById("pvpzones-overlay");
+        mapOverlay.style.display = "none";
+		mobOverlay.style.display = "none";
+		landAreasOverlay.style.display = "none";
+		pvpZonesOverlay.style.display = "none";
+        // Hide all waypoints when the map overlay is hidden
+        hideAllWaypoints();
 }
