@@ -42,14 +42,14 @@ const arkadiaMaps = [
 
 const Depthmaps = [
     "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
-    "../../Modules/globemaps/calypso/arkugbasemap.png",
-	"../../Modules/globemaps/calypso/arkmoonbasemap.png"
+    "../../Modules/globemaps/arkadia/arkugbasemap.png",
+	"../../Modules/globemaps/arkadia/arkmoonbasemap.png"
 ];
 const arkugMaps = [
 
     "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
-    "../../Modules/globemaps/calypso/arkugbasemap.png",
-	"../../Modules/globemaps/calypso/arkmoonbasemap.png"
+    "../../Modules/globemaps/arkadia/arkugbasemap.png",
+	"../../Modules/globemaps/arkadia/arkmoonbasemap.png"
 ];
 /* const arkmoonMaps = [
 
