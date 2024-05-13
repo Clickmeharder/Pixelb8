@@ -2045,6 +2045,7 @@ div#eumapspanel-Interior {
     font-weight: bolder;
     min-width: 60px;
     max-width: max-content;
+	opacity: 0.8;
 	transition: color 0.3s, opacity 0.3s, ease;
 }
 .waypoint:hover {
@@ -2053,6 +2054,7 @@ div#eumapspanel-Interior {
 }
 .waypoint-label:hover {
     color: blue;
+	opacity: 100%;
 }
 
 .draggable-map {
