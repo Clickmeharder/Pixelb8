@@ -2115,6 +2115,8 @@ div#mapzoom-control-group Button {
 	bottom: 0px;
 	
 }
+
+
 #eumapcontrols button {
     background-color: #444;
     outline: 2px solid #222;
@@ -2171,6 +2173,13 @@ button#globeinputbutt {
 #globecontrolButts {
     width: 100%;
     margin-left: 6px;
+}
+button#moonmodeButton {
+    width: 54px;
+}
+button#undergroundmodeButton {
+    font-size: small;
+    width: 87px;
 }
 #globecontrolButts h2 {
     margin: 3px;
