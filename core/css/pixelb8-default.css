@@ -2040,9 +2040,19 @@ div#eumapspanel-Interior {
     transition: background-color 0.3s, opacity 0.3s, ease;
 }
 
+.waypoint-label {
+    color: #00ff18;
+    font-weight: bolder;
+    min-width: 60px;
+    max-width: max-content;
+	transition: color 0.3s, opacity 0.3s, ease;
+}
 .waypoint:hover {
     background-color: green; /* Change hover color as needed */
 	opacity: 60%;
+}
+.waypoint-label:hover {
+    color: blue;
 }
 
 .draggable-map {
