@@ -1,8 +1,8 @@
 
-console.log('JS Update eumaps-core.js 4 - 24/5/12 11:44pm - added waypoint labels and label styling');
+console.log('eumaps-core.js ver 8');
 console.log('JS Update eumaps-core.js 5 - 24/5/13 12:01pm- added waypoint and waypoint label titles');
 console.log('JS Update eumaps-core.js 6 - 24/5/13 3:24am- fixed planet cycle button');
-console.log('JS Update eumaps-core.js 7 - 24/5/13 5:14am- making adjustments to map positioning');
+console.log('last JS Update eumaps-core.js 7 - 24/5/13 5:14am- making adjustments to map positioning');
 // Get the image element
 const mapImage = document.getElementById("mapimgwrapper");
 
