@@ -234,7 +234,9 @@ function cyclemapPlanet() {
     // Update the src attribute of the map image with the new map URL
     document.getElementById("mapimage").src = planetMaps[currentMapIndex];
 }
-function cyclemapMode() {
+
+//old mapmode cycle ( simply does not not include map h2 element updating but otherwise is the same)
+/* function cyclemapMode() {
     // Increment current map index
     currentModeIndex++;
     // Check if current map index exceeds the length of the array
@@ -245,8 +247,40 @@ function cyclemapMode() {
     // Update the src attribute of the map image with the new map URL
 	console.log('cycle button clicked');
     document.getElementById("mapimage").src = arkadiaMaps[currentModeIndex];
-}
+} */
 
+function cyclemapMode() {
+    // Increment current map index
+    currentModeIndex++;
+    // Check if current map index exceeds the length of the array
+    if (currentModeIndex >= arkadiaMaps.length) {
+        currentModeIndex = 0; // Reset to the first map if exceeds length
+		console.log('currentMapIndex/currentModeIndex:'+ currentMapIndex + "/" + currentModeIndex );
+    }
+    // Update the src attribute of the map image with the new map URL
+	console.log('"cycle map mode" button clicked');
+    document.getElementById("mapimage").src = arkadiaMaps[currentModeIndex];
+
+    // Update the text content of the h2 element based on currentModeIndex
+    const h2Element = document.getElementById("currenteumaplabel");
+    switch (currentModeIndex) {
+        case 0:
+            h2Element.textContent = "Current Map: Planet Arkadia by Pixelb8.lol";
+            break;
+        case 1:
+            h2Element.textContent = "Current Map: Arkadia Tp Map by Arkadiaforum.com";
+            break;
+        case 2:
+            h2Element.textContent = "Current Map: Arkadia bumpmap by Pixelb8.lol";
+            break;
+        case 3:
+            h2Element.textContent = "Current Map: Arkadia Specular by Pixelb8";
+            break;
+        default:
+            h2Element.textContent = "Current Map: Unknown Map";
+            break;
+    }
+}
 
 
 //MAP DRAGGING EVENTLISTENER FUNCTIONS
