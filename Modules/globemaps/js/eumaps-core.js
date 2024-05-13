@@ -260,8 +260,8 @@ function updatemapLabelbyDepth() {
             h2Element.textContent = "Current Map: Unknown Map";
             break;
     }
-	mapWrapper.style.top = '';
-	mapWrapper.style.left = '';
+/* 	mapWrapper.style.top = '';
+	mapWrapper.style.left = ''; */
 }
 // Function to update the text content of the h2 element based on currentModeIndex
 
