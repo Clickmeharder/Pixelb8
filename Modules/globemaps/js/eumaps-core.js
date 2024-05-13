@@ -103,8 +103,8 @@ const ancientgreeceMaps = [
 
 /* MAP WAYPOINTS*/
 const arkadiawaypointsArray = [
-	{ id: '8 Coins HQ', info: '/wp [Arkadia, 12074, 20716, 100, 8 Coins HQ]', top: '775px', left: '220px' },
-	{ id: '8 Coins Town', info: '/wp [Arkadia, 15360, 23100, 100, 8 Coins Town]', top: '626px', left: '426px' },
+	{ id: '8 Coins HQ', tpname: '8 Coins HQ', info: '/wp [Arkadia, 12074, 20716, 100, 8 Coins HQ]', top: '775px', left: '220px' },
+	{ id: '8 Coins Town', tpname: '8 Coins Town', info: '/wp [Arkadia, 15360, 23100, 100, 8 Coins Town]', top: '626px', left: '426px' },
 	{ id: '8 Coins Windy Isles', info: '/wp [Arkadia, 9280, 22340, 100, 8 Coins Windy Isles]', top: '673px', left: '46px' },
 	{ id: '8 Coins Teladon Camp', info: '/wp [Arkadia, 13293, 17483, 100, 8 Coins Teladon Camp]', top: '976px', left: '294px' },
 	{ id: 'Aakas', info: '/wp [Arkadia, 11180, 9775, 100, Aakas]', top: '1456px', left: '165px' },
@@ -283,15 +283,21 @@ document.addEventListener('mouseup', function() {
 
 
 //way point logic
-// Function to create a waypoint element with specified ID and info
-function createWaypoint(id, info) {
+// Function to create a waypoint element with specified ID, info, and label
+function createWaypoint(id, info, label) {
     const waypoint = document.createElement('div');
     waypoint.classList.add('waypoint');
-	waypoint.title = id;
     waypoint.id = id;
     waypoint.setAttribute('data-info', info);
     waypoint.style.top = '-100px'; // Adjust as needed for cluster positioning
     waypoint.style.left = '-100px'; // Adjust as needed for cluster positioning
+
+    // Create and append the label element
+    const labelElement = document.createElement('div');
+    labelElement.classList.add('waypoint-label');
+    labelElement.textContent = label;
+    waypoint.appendChild(labelElement);
+
     return waypoint;
 }
 
@@ -303,10 +309,8 @@ function addWaypoints() {
     arkadiawaypointsArray.forEach((waypoint, index) => {
         const id = 'arkadiawaypoint' + index;
         const info = waypoint.info;
-        const arkadiaWaypoint = createWaypoint(id, info);
-		arkadiaWaypoint.title = waypoint.title;
-		arkadiaWaypoint.style.display = "none";
-		
+        const wpname = waypoint.tpname;
+        const arkadiaWaypoint = createWaypoint(id, info, wpname);
         arkadiaWaypoint.style.top = waypoint.top;
         arkadiaWaypoint.style.left = waypoint.left;
         mapWrapper.appendChild(arkadiaWaypoint);
@@ -316,13 +320,13 @@ function addWaypoints() {
     for (let i = 1; i <= 50; i++) { // Changed from 68 to 50 for the cluster
         const id = 'waypoint' + i;
         const info = 'Info ' + i;
-        const waypoint = createWaypoint(id, info);
-        // Adjust positioning for the cluster as needed
+        const waypoint = createWaypoint(id, info, ''); // Empty label for non-Arkadia waypoints
         waypoint.style.top = '-100px';
         waypoint.style.left = '-100px';
         mapWrapper.appendChild(waypoint);
     }
 }
+
 // Call the function to add waypoint cluster
 addWaypoints();
 
