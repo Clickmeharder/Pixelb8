@@ -1,5 +1,6 @@
-console.log('JS Update 4 - 24/5/12 11:44pm');
-console.log('JS Update 4 - added waypoint labels and label styling');
+
+console.log('JS Update 4 - 24/5/12 11:44pm - added waypoint labels and label styling');
+console.log('JS Update 5 - 24/5/13 12:01pm- added waypoint and waypoint label titles');
 // Get the image element
 const mapImage = document.getElementById("mapimgwrapper");
 
