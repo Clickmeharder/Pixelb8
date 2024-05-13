@@ -2176,8 +2176,8 @@ button#globeinputbutt {
 }
 
 button#f5Button {
-	width: 54px;
-	margin-left:2px;
+    width: 48px;
+    margin-left: 4px;
 }
 button#undergroundmodeButton {
     font-size: small;
