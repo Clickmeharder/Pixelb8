@@ -263,30 +263,47 @@ function updatemapLabelbyDepth() {
     }
 }
 // Function to update the text content of the h2 element based on currentModeIndex
+
+
+//calypso map position
+//	left: -1059px;
+//    top: -619px;
+//waypoint.style.top = '-100px'; // Adjust as needed for cluster positioning
+//    waypoint.style.left = '-100px'; // Adjust as needed for cluster positioning
 function updatemapLabelbyPlanet() {
     const h2Element = document.getElementById("currenteumaplabel");
+	const mapWrapper = document.getElementById('mapimgwrapper');
     switch (currentMapIndex) {
         case 0:
             h2Element.textContent = "Current Map: Planet Arkadia - Pixelb8.lol";
 			currententropiaPlanet = "Arkadia";
+			mapWrapper.style.top = '-285px';
+			mapWrapper..style.left = '-550px';
             break;
         case 1:
             h2Element.textContent = "Current Map: Rocktropia - entropiawiki.com";
 			currententropiaPlanet = "Rocktropia";
+			mapWrapper.style.top = '-285px';
+			mapWrapper..style.left = '-550px';
             break;
         case 2:
             h2Element.textContent = "Current Map: Cyrene - Visit Cyrenedreams.com";
 			currententropiaPlanet = "Cyrene";
+			mapWrapper.style.top = '-285px';
+			mapWrapper..style.left = '-550px';
             break;
         case 3:
             h2Element.textContent = "Current Map: Calypso - visit Calypsomap.com";
 			currententropiaPlanet = "Calypso";
+			mapWrapper.style.top = '-619px';
+			mapWrapper..style.left = '-1059px';
             break;
         default:
             h2Element.textContent = "Current Map: Unknown Map";
             break;
     }
 }
+
 function updatemapLabelbyMode() {
     const h2Element = document.getElementById("currenteumaplabel");
     switch (currentModeIndex) {
@@ -344,11 +361,6 @@ function cyclemapPlanet() {
 }
 
 
-//calypso map position
-//	left: -1059px;
-//    top: -619px;
-//waypoint.style.top = '-100px'; // Adjust as needed for cluster positioning
-//    waypoint.style.left = '-100px'; // Adjust as needed for cluster positioning
 
 
 
