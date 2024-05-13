@@ -38,6 +38,18 @@ const arkadiaMaps = [
     "../../Modules/globemaps/arkadia/newnormalmap.png",
 	"../../Modules/globemaps/arkadia/newspecularmap.png"
 ];
+
+const Depthmaps = [
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/arkugbasemap.png",
+	"../../Modules/globemaps/calypso/arkmoonbasemap.png"
+];
+const arkugMaps = [
+
+    "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
+    "../../Modules/globemaps/calypso/arkugbasemap.png",
+	"../../Modules/globemaps/calypso/arkmoonbasemap.png"
+];
 /* const arkmoonMaps = [
 
     "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
@@ -223,8 +235,9 @@ const arkadiawaypointsArray = [
 
 // Initialize current map index
 let currentMapIndex = 0;
+let currentMapdepthIndex = 0;
 let currentModeIndex = 0;
-
+let currententropiaPlanet = "Arkadia";
 
 var mapImgWrapper = document.getElementById('mapimgwrapper');
 var isDragging = false;
@@ -232,20 +245,42 @@ var startX, startY;
 var offsetX = 0, offsetY = 0;
 
 // Function to update the text content of the h2 element based on currentModeIndex
+function updatemapLabelbyDepth() {
+    const h2Element = document.getElementById("currenteumaplabel");
+    switch (currentMapIndex) {
+        case 0:
+            h2Element.textContent = "Current Map: Planet Arkadia Surface";
+            break;
+        case 1:
+            h2Element.textContent = "Current Map: Ark Underground";
+            break;
+        case 2:
+            h2Element.textContent = "Current Map: Arkadia Moon";
+            break;
+        default:
+            h2Element.textContent = "Current Map: Unknown Map";
+            break;
+    }
+}
+// Function to update the text content of the h2 element based on currentModeIndex
 function updatemapLabelbyPlanet() {
     const h2Element = document.getElementById("currenteumaplabel");
     switch (currentMapIndex) {
         case 0:
             h2Element.textContent = "Current Map: Planet Arkadia - Pixelb8.lol";
+			currententropiaPlanet = "Arkadia";
             break;
         case 1:
-            h2Element.textContent = "Current Map: Planet Rocktropia - entropiawiki.com";
+            h2Element.textContent = "Current Map: Rocktropia - entropiawiki.com";
+			currententropiaPlanet = "Rocktropia";
             break;
         case 2:
             h2Element.textContent = "Current Map: Cyrene - Visit Cyrenedreams.com";
+			currententropiaPlanet = "Cyrene";
             break;
         case 3:
-            h2Element.textContent = "Current Map: Planet Calypso - visit Calypsomap.com";
+            h2Element.textContent = "Current Map: Calypso - visit Calypsomap.com";
+			currententropiaPlanet = "Calypso";
             break;
         default:
             h2Element.textContent = "Current Map: Unknown Map";
@@ -271,6 +306,24 @@ function updatemapLabelbyMode() {
             h2Element.textContent = "Current Map: Unknown Map";
             break;
     }
+}
+
+
+//toggle underground mode Function 
+function toggleUGmode() {
+	console.log('"toggle underground mode" button clicked');
+    // Increment current map index
+    currentMapdepthIndex++;
+    // Check if current map index exceeds the length of the array
+    if (currentMapdepthIndex >= arkugMaps.length) {
+        currentMapdepthIndex = 0; // Reset to the first map if exceeds length
+		console.log('currentMapIndex/currentModeIndex/currentMapdepthIndex:'+ currentMapIndex + "/" + currentModeIndex + "/" + currentMapdepthIndex );
+    }
+    // Update the src attribute of the map image with the new map URL
+	hideOverlays();
+    document.getElementById("mapimage").src = arkugMaps[currentMapDepthIndex];
+	// Call the functions to update the map label
+    updatemapLabelbyDepth();
 }
 
 //Planet Cycle Function 
