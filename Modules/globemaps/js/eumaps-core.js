@@ -1,4 +1,5 @@
-console.log('JS Update 2 - 24/5/12 11:22pm');
+console.log('JS Update 4 - 24/5/12 11:44pm');
+console.log('JS Update 4 - added waypoint labels and label styling');
 // Get the image element
 const mapImage = document.getElementById("mapimgwrapper");
 
@@ -112,9 +113,9 @@ const arkadiawaypointsArray = [
 	{ id: 'Aakas Island', tpname: 'Aakas Island', info: '/wp [Arkadia, 18584, 13748, 100, Aakas Island]', top: '1500px', left: '654px' },
 	{ id: 'BIG Industries ALA#05', tpname: 'BIG Industries ALA#05', info: '/wp [Arkadia, 19020, 9046, 100, BIG Ind. LA#05]', top: '59px', left: '1089px' },
 	{ id: 'Celeste Harbour', tpname: 'Celeste Harbour', info: '/wp [Arkadia, 29852, 10176, 100, Celeste Harbour]', top: '1431px', left: '1329px' },
-	{ id: 'Celeste Harbour Military HQ', tpname: 'Celeste Harbour Military HQ', info: '/wp [Arkadia, 30120, 10015, 100, Celeste Harbour Military HQ]', top: '1451px', left: '1355px' },
 	{ id: 'Celeste Harbour North', tpname: 'Celeste Harbour North', info: '/wp [Arkadia, 30025, 10336, 100, Celeste Harbour N.]', top: '1418px', left: '1342px' },
 	{ id: 'Celeste Harbour South', tpname: 'Celeste Harbour South', info: '/wp [Arkadia, 29779, 9873, 100, Celeste Harbour S.]', top: '1450px', left: '1325px' },
+	{ id: 'Celeste Harbour Military HQ', tpname: 'Celeste Harbour Military HQ', info: '/wp [Arkadia, 30120, 10015, 100, Celeste Harbour Military HQ]', top: '1451px', left: '1355px' },
 	{ id: 'Celeste Outpost', tpname: 'Celeste Outpost', info: '/wp [Arkadia, 27258, 10952, Celeste Outpost]', top: '1383px', left: '1166px' },
 	{ id: 'Celeste Quarry', tpname: 'Celeste Quarry', info: '/wp [Arkadia, 31186, 9540, 100, Celeste Quarry]', top: '1470px', left: '1412px' },
 	{ id: 'Cobra Digsite', tpname: 'Cobra Digsite', info: '/wp [Arkadia, 27700, 26852, 100, Cobra Digsite]', top: '390px', left: '1192px' },
