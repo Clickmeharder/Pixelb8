@@ -1,7 +1,8 @@
 
-console.log('JS Update 4 - 24/5/12 11:44pm - added waypoint labels and label styling');
-console.log('JS Update 5 - 24/5/13 12:01pm- added waypoint and waypoint label titles');
-console.log('JS Update 6 - 24/5/13 3:24am- fixed planet cycle button');
+console.log('JS Update eumaps-core.js 4 - 24/5/12 11:44pm - added waypoint labels and label styling');
+console.log('JS Update eumaps-core.js 5 - 24/5/13 12:01pm- added waypoint and waypoint label titles');
+console.log('JS Update eumaps-core.js 6 - 24/5/13 3:24am- fixed planet cycle button');
+console.log('JS Update eumaps-core.js 7 - 24/5/13 5:14am- making adjustments to map positioning');
 // Get the image element
 const mapImage = document.getElementById("mapimgwrapper");
 
@@ -278,25 +279,25 @@ function updatemapLabelbyPlanet() {
             h2Element.textContent = "Current Map: Planet Arkadia - Pixelb8.lol";
 			currententropiaPlanet = "Arkadia";
 			mapWrapper.style.top = '-285px';
-			mapWrapper..style.left = '-550px';
+			mapWrapper.style.left = '-550px';
             break;
         case 1:
             h2Element.textContent = "Current Map: Rocktropia - entropiawiki.com";
 			currententropiaPlanet = "Rocktropia";
 			mapWrapper.style.top = '-285px';
-			mapWrapper..style.left = '-550px';
+			mapWrapper.style.left = '-550px';
             break;
         case 2:
             h2Element.textContent = "Current Map: Cyrene - Visit Cyrenedreams.com";
 			currententropiaPlanet = "Cyrene";
 			mapWrapper.style.top = '-285px';
-			mapWrapper..style.left = '-550px';
+			mapWrapper.style.left = '-550px';
             break;
         case 3:
             h2Element.textContent = "Current Map: Calypso - visit Calypsomap.com";
 			currententropiaPlanet = "Calypso";
 			mapWrapper.style.top = '-619px';
-			mapWrapper..style.left = '-1059px';
+			mapWrapper.style.left = '-1059px';
             break;
         default:
             h2Element.textContent = "Current Map: Unknown Map";
