@@ -29,7 +29,7 @@ const planetMaps = [
     "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
 	"../../Modules/globemaps/rocktropia/PlanetRocktropiamap.jpg",
     "../../Modules/globemaps/cyrene/PlanetCyrenemap.jpg",
-    "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg"
+/*     "../../Modules/globemaps/calypso/PlanetCalypsomap.jpg" */
 ];
 const arkadiaMaps = [
     "../../Modules/globemaps/arkadia/arkadiaglobemap.png",
