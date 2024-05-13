@@ -475,7 +475,7 @@ function hideOverlays() {
 	const mobOverlay = document.getElementById("mob-overlay");
 	const landAreasOverlay = document.getElementById("landareas-overlay");
 	const pvpZonesOverlay = document.getElementById("pvpzones-overlay");
-        mapOverlay.style.display = "none";
+        tpmapOverlay.style.display = "none";
 		mobOverlay.style.display = "none";
 		landAreasOverlay.style.display = "none";
 		pvpZonesOverlay.style.display = "none";
