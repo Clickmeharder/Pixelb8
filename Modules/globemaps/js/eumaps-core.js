@@ -263,41 +263,29 @@ function updatemapLabelbyDepth() {
 /* 	mapWrapper.style.top = '';
 	mapWrapper.style.left = ''; */
 }
-// Function to update the text content of the h2 element based on currentModeIndex
+// Function to update the text content of the h2 element based on currentMapIndex
 
-
-//calypso map position
-//	left: -1059px;
-//    top: -619px;
-//waypoint.style.top = '-100px'; // Adjust as needed for cluster positioning
-//    waypoint.style.left = '-100px'; // Adjust as needed for cluster positioning
 function updatemapLabelbyPlanet() {
     const h2Element = document.getElementById("currenteumaplabel");
 	const mapWrapper = document.getElementById('mapimgwrapper');
+	const themapimg = document.getElementById("mapimage");
     switch (currentMapIndex) {
         case 0:
             h2Element.textContent = "Current Map: Planet Arkadia - Pixelb8.lol";
 			currententropiaPlanet = "Arkadia";
-			mapWrapper.style.top = '';
-			mapWrapper.style.left = '';
             break;
         case 1:
             h2Element.textContent = "Current Map: Rocktropia - entropiawiki.com";
 			currententropiaPlanet = "Rocktropia";
-			mapWrapper.style.top = '';
-			mapWrapper.style.left = '';
             break;
         case 2:
             h2Element.textContent = "Current Map: Cyrene - Visit Cyrenedreams.com";
 			currententropiaPlanet = "Cyrene";
-			mapWrapper.style.top = '';
-			mapWrapper.style.left = '';
             break;
         case 3:
             h2Element.textContent = "Current Map: Calypso - visit Calypsomap.com";
 			currententropiaPlanet = "Calypso";
-			mapWrapper.style.top = '';
-			mapWrapper.style.left = '';
+			themapimg.style.bottom = "-1024px";
             break;
         default:
             h2Element.textContent = "Current Map: Unknown Map";
@@ -305,6 +293,7 @@ function updatemapLabelbyPlanet() {
     }
 }
 
+// Function to update the text content of the h2 element based on currentMapIndex
 function updatemapLabelbyMode() {
     const h2Element = document.getElementById("currenteumaplabel");
     switch (currentModeIndex) {
