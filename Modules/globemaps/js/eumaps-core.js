@@ -224,45 +224,48 @@ const arkadiawaypointsArray = [
 // Initialize current map index
 let currentMapIndex = 0;
 let currentModeIndex = 0;
-//Planet Cycle Function 
-function cyclemapPlanet() {
-    // Increment current map index
-    currentMapIndex++;
-    // Check if current map index exceeds the length of the array
-    if (currentMapIndex >= planetMaps.length) {
-        currentMapIndex = 0; // Reset to the first map if exceeds length
+
+
+var mapImgWrapper = document.getElementById('mapimgwrapper');
+var isDragging = false;
+var startX, startY;
+var offsetX = 0, offsetY = 0;
+
+// Function to update the text content of the h2 element based on currentModeIndex
+function updatemapLabelbyPlanet() {
+    const h2Element = document.getElementById("currenteumaplabel");
+    switch (currentMapIndex) {
+        case 0:
+            h2Element.textContent = "Current Map: Planet Arkadia - Pixelb8.lol";
+            break;
+        case 1:
+            h2Element.textContent = "Current Map: Planet Rocktropia - entropiawiki.com";
+            break;
+        case 2:
+            h2Element.textContent = "Current Map: Cyrene - Visit Cyrenedreams.com";
+            break;
+        case 3:
+            h2Element.textContent = "Current Map: Planet Calypso - visit Calypsomap.com";
+            break;
+        default:
+            h2Element.textContent = "Current Map: Unknown Map";
+            break;
     }
-    // Update the src attribute of the map image with the new map URL
-	hideOverlays();
-    document.getElementById("mapimage").src = planetMaps[currentMapIndex];
 }
-
-function cyclemapMode() {
-    // Increment current map index
-    currentModeIndex++;
-    // Check if current map index exceeds the length of the array
-    if (currentModeIndex >= arkadiaMaps.length) {
-        currentModeIndex = 0; // Reset to the first map if exceeds length
-		console.log('currentMapIndex/currentModeIndex:'+ currentMapIndex + "/" + currentModeIndex );
-    }
-    // Update the src attribute of the map image with the new map URL
-	console.log('"cycle map mode" button clicked');
-    document.getElementById("mapimage").src = arkadiaMaps[currentModeIndex];
-
-    // Update the text content of the h2 element based on currentModeIndex
+function updatemapLabelbyMode() {
     const h2Element = document.getElementById("currenteumaplabel");
     switch (currentModeIndex) {
         case 0:
-            h2Element.textContent = "Current Map: Planet Arkadia by Pixelb8.lol";
+            h2Element.textContent = "Current Map: Planet Arkadia - Pixelb8.lol";
             break;
         case 1:
-            h2Element.textContent = "Current Map: Arkadia Tp Map by Arkadiaforum.com";
+            h2Element.textContent = "Current Map: Arkadia Tp Map - Arkadiaforum.com";
             break;
         case 2:
-            h2Element.textContent = "Current Map: Arkadia bumpmap by Pixelb8.lol";
+            h2Element.textContent = "Current Map: Arkadia bumpmap - Pixelb8.lol";
             break;
         case 3:
-            h2Element.textContent = "Current Map: Arkadia Specular by Pixelb8";
+            h2Element.textContent = "Current Map: Arkadia Specular - Pixelb8";
             break;
         default:
             h2Element.textContent = "Current Map: Unknown Map";
@@ -270,13 +273,53 @@ function cyclemapMode() {
     }
 }
 
+//Planet Cycle Function 
+function cyclemapPlanet() {
+	console.log('"cycle map mode" button clicked');
+    // Increment current map index
+    currentMapIndex++;
+    // Check if current map index exceeds the length of the array
+    if (currentMapIndex >= planetMaps.length) {
+        currentMapIndex = 0; // Reset to the first map if exceeds length
+		console.log('currentMapIndex/currentModeIndex:'+ currentMapIndex + "/" + currentModeIndex );
+    }
+    // Update the src attribute of the map image with the new map URL
+	hideOverlays();
+    document.getElementById("mapimage").src = planetMaps[currentMapIndex];
+	// Call the functions to update the map label
+    updatemapLabelbyPlanet();
+}
+
+
+//calypso map position
+//	left: -1059px;
+//    top: -619px;
+//waypoint.style.top = '-100px'; // Adjust as needed for cluster positioning
+//    waypoint.style.left = '-100px'; // Adjust as needed for cluster positioning
+
+
+
+
+// Function to cycle through map modes
+function cyclemapMode() {
+    // Increment current map index
+    currentModeIndex++;
+	console.log('"cycle map mode" button clicked');
+    // Check if current map index exceeds the length of the array
+    if (currentModeIndex >= arkadiaMaps.length) {
+        currentModeIndex = 0; // Reset to the first map if exceeds length
+		console.log('currentMapIndex/currentModeIndex:'+ currentMapIndex + "/" + currentModeIndex );
+    }
+    // Update the src attribute of the map image with the new map URL
+    document.getElementById("mapimage").src = arkadiaMaps[currentModeIndex];
+
+    // Call the functions to update the map label
+	updatemapLabelbyMode();
+
+    
+}
 
 //MAP DRAGGING EVENTLISTENER FUNCTIONS
-
-var mapImgWrapper = document.getElementById('mapimgwrapper');
-var isDragging = false;
-var startX, startY;
-var offsetX = 0, offsetY = 0;
 
 mapImgWrapper.addEventListener('mousedown', function(e) {
     e.preventDefault(); // Prevent default behavior
@@ -306,7 +349,7 @@ document.addEventListener('mouseup', function() {
     mapImgWrapper.style.cursor = 'grab';
 });
 
-
+//8====D
 //way point logic
 // Function to create a waypoint element with specified ID, info, and label
 function createWaypoint(id, info, label) {
@@ -423,14 +466,6 @@ function showAllWaypoints() {
     });
 }
 
-// Function to hide all waypoints
-function hideAllWaypoints() {
-    const waypoints = document.querySelectorAll('.waypoint');
-    waypoints.forEach(waypoint => {
-        waypoint.style.display = "none";
-    });
-}
-
 
 
 function toggleMobmap() {
@@ -468,6 +503,14 @@ function togglePvPzones() {
         pvpZonesOverlay.style.display = "none";
     }
 }
+// Function to hide all waypoints
+function hideAllWaypoints() {
+    const waypoints = document.querySelectorAll('.waypoint');
+    waypoints.forEach(waypoint => {
+        waypoint.style.display = "none";
+		console.log('Waypoints have been hidden');
+    });
+}
 
 //hide overlays Function
 function hideOverlays() {
@@ -480,6 +523,7 @@ function hideOverlays() {
 		mobOverlay.style.display = "none";
 		landAreasOverlay.style.display = "none";
 		pvpZonesOverlay.style.display = "none";
+		console.log('Overlays hidden (tpmapOverlay, mobOverlay, landAreasOverlay, pvpZonesOverlay');
         // Hide all waypoints when the map overlay is hidden
         hideAllWaypoints();
 }
