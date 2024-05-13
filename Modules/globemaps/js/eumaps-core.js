@@ -313,6 +313,7 @@ function addWaypoints() {
         const info = waypoint.info;
         const wpname = waypoint.tpname;
         const arkadiaWaypoint = createWaypoint(id, info, wpname);
+		arkadiaWaypoint.title = wpname + ' - ' + waypoint.info;
         arkadiaWaypoint.style.top = waypoint.top;
         arkadiaWaypoint.style.left = waypoint.left;
         mapWrapper.appendChild(arkadiaWaypoint);
