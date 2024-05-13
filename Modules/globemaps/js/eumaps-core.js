@@ -284,8 +284,8 @@ function updatemapLabelbyPlanet() {
         case 1:
             h2Element.textContent = "Current Map: Rocktropia - entropiawiki.com";
 			currententropiaPlanet = "Rocktropia";
-			mapWrapper.style.top = '-285px';
-			mapWrapper.style.left = '-550px';
+			mapWrapper.style.top = '-7px';
+			mapWrapper.style.left = '-42px';
             break;
         case 2:
             h2Element.textContent = "Current Map: Cyrene - Visit Cyrenedreams.com";
