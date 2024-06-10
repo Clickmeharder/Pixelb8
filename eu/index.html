@@ -2066,11 +2066,11 @@ staticPage BLOCK
 			</a>
 
 	  </div>
-      <div class="panel ad-panel">
-	<div class="static-slideshowpromoter">
-            <!-- Add your slideshow content here -->
+<!--       <div class="panel ad-panel">
+		<div class="static-slideshowpromoter">
+      
         </div>
-      </div>
+      </div> -->
 <!--Current Main Content Area-->
 		<h2 id="themed-main-title">Latest Updates</h2>
 		<section class="themed-main">
@@ -2128,61 +2128,25 @@ staticPage BLOCK
 		  </section>
 		
 		  <!-- Right Panel -->
-				<div class="panel content-panel" style="display:hidden;">
-			<div id="main-content">
-				<h2>Account Details</h2>
-				<p>Laudate Lootium Divitiasque Celebremus.</p>
-				<!-- Login Form -->
-				<div class="logged-in disabled hidden" id="innercontent-loggedin" style="padding:4px; border:1px solid #222;">
-					<form id="loginForm">
-<!-- 						<ul id="nav-mobile" class="hide-on-med-and-down">
-							<li class="logged-in">
-								<a href="#" class="modal-trigger" id="userAccount-modalTrigger" data-target="modal-useraccount">My Account</a>
-							</li>
-							<li class="logged-in">
-								<a href="#" class="modal-trigger" id="userProfile-editTrigger" data-target="modal-edit">Public Profile</a>
-							</li>
-						</ul> -->
-						<ul id="accountdetails" class="">
-						</ul>
-					</form>
-					<div class="row">
-						<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
-						<button class="logged-in" id="logoutbutt" type="button">Logout</button>
-					</div>
-				</div>
-				<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
-					<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
-					<p>Or...</p>
-					<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
-				</div>
+		<div class="panel right-panel">
+			<div id="websiteStatContainer">
+				<h2 class="panel-title" id="sitestats">Site Stats</h2>
+				<p>Registered Users: too many</p>
+				<p>Online Users: more than facebook</p>
 			</div>
-					  <!-- Right Panel -->
-			<div class="panel right-panel">
-				<div id="websiteStatContainer">
-					<h2 class="panel-title" id="sitestats">Site Stats</h2>
-					<p>Registered Users: Lots</p>
-					<p>Online Users: everyone</p>
-				</div>
-				<div id="userInfoContainer">
-					<P id="username">StrangerDanger</p>
-					<P id="profileusername">-</p>
-					<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
-					<p id="Userpixelcount" class="hidden">0px</p>
-					<p id="loginStatus">Status: offline</p>
-					<ul>
-						<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
-						<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
-						<span id="emailVerified" class="hidden">►</span>
-						<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
-						
-					</ul>
-				</div>
-				<div id="expandaccpaneldiv"class="single-round-button">
-					<button class="accpanelinternals-expand-button" id="Toggleaccpanelinternals-Button" title="Account panel Toggle" onclick="accpanelTogglebutt(this)">
-						<img src="assets/images/icons/expandtoggle.png" alt="Account panel Toggle">
-					</button>
-				</div>
+			<div id="userInfoContainer">
+				<P id="username">StrangerDanger</p>
+				<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
+				<p id="Userpixelcount" class="hidden">0px</p>
+				<p id="loginStatus">Status: offline</p>
+				<ul>
+					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
+					<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
+					<span id="emailVerified" class="hidden">►</span>
+					<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
+					<button id="loginbutt" type="button" class:="";>Login with GitHub</button>
+					<button id="logoutbutt" type="button" class:="disabled hidden">Logout</button>
+				</ul>
 			</div>
 		</div>
 	 </main>
