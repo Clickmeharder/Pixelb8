@@ -619,7 +619,7 @@ div#main-content:hover {
     max-width: 28vw;
     min-width: 16vw;
     height: auto;min-height:185px;
-    margin: auto;margin-right:12px;
+    margin: auto;margin-right:auto;
     margin-left: 1px;
     margin-bottom: 0px;
     color: var(--staticpage-adpanel-text-color);
