@@ -1,0 +1,164 @@
+TO DO LIST:
+
+[MAIN PAGES] 
+
+
+
+
+----------
+2) match the site stats boxes up -> MODULARIZE EVERYTHING
+
+
+
+
+
+3    -.relocate both sus society link and akadia satvan button and page to appropriate spots inside eu tools page
+     (may require moving files and editing image locations in code etc)
+
+3.5  - create new buttons for entropia maps, sus society, satbav, tools etc on the eu tools page 
+(seperate them from the main nav somehow)
+
+
+
+4) fix eu maps page - (top panels and page structure)
+
+4.5) review all pages and ensure we are happy with structure abd everything.
+
+
+-----------------------------------------------------------------------------------------------
+[ SUS OS DEVELOPMENT ]
+
+NUMERO UNO: find out why the susos doesnt behave the same on all pages and address it.
+
+5-	REMOVE HUD- FROM EU APPLET NAMES if we can first
+
+-------------------
+
+6- fix stash manager and euitemstash
+6.5-group stashmanager and euitemstash more intuitively - also in the folder
+
+-------------------
+
+7- fix the timer and text 
+7.5- more cool intuitive button for timer with some options
+
+--------------------
+
+8- make sure pages look good and are structured well. 
+9- add individual tool pages - only important ones if necesary. 
+
+
+---------------------
+
+
+-*- at this point we need to ensure we are ready to be able to add new os programs and updates individually easily as well as
+having the js os load and unload them efficiently, debug them, and give user access to there code 
+----------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+
+10-
+
+ review and figure out what ur doing for sure, adjust goals and todolist if needed
+
+
+
+
+11- susos js os loads and unloads applets efficiently 
+12- create a good default program that makes it easier to create various applets
+---------------------------------------------------
+12.5-   - add the settings windows to susos
+		- add the ctrl panel windows to sus os 
+--------------------------------------------------
+
+4- add substance to power button
+
+5-remove myeucodex
+
+6- add a website disclaimer that entropia owns all its stuff and im not affiliated with anyone etc
+
+7- add disclaimer to event planner about certain event areas having highr costs till we find solution
+
+____________________________________________________________________________________________________________
+
+ if this goes well we can now hopefully duplicate a blank or default program mould or window
+  - default program shuld look like most other windows and used for duplication
+ optional- consider buttons and inputs for options to adjust the window creation
+  from here we would have to implement logic to handle adding the new programs if we want them automatically added directly
+  a problem to solve later
+
+ we can use place holder progs/applets for now maybe unless we have successfully built a program builder 
+ 
+ 
+ 
+13 - add the individual tool pages on eu page and placeholder pages on rsc page
+14 - add basic calculator,tools, widgets to unused big right panel on susos -
+ also include the necessary profile/user info& access
+ 
+
+ 
+15 - fix style tuner so it matches the proper values etc and controls all the aesthetics
+--------------------------------------------------------------
+			- add a way to save/reset to default
+ 
+			-current  -automatically stays however u set/leave it and be the one u load in with.
+			-custom1 - a saved custom scheme
+			custom2 - ""
+			custom3	- ""
+			-default1 - the default look
+			-default2 - a secondary default look (we may add these in the future)
+			
+  then we will have a default they can use or also revert a custom one to. 
+  copy save revert on current and
+default schemes will require: copy save revert
+custom schemes will require:  edit, rename, delete, revert
+
+( REVERT will be used to revert to the last saved version of that scheme)
+- add cursor options to style tuner even if its a placeholder button for now that doesnt function.
+-------------------------------------------------------------------------------------
+_________________________________________________________________________________
+  
+  16 - update and improve the clock, 
+          + add timers and stopwatch functions in the clock
+  17 - create a js os clock calender, and ability to set schedules, routines, todolists, reminders etc
+
+ 17.5 - see if theres a way we can send push notifications ^
+             if so implement them to both calender, clock and necessary timers.
+ 
+-fix maps tab in susos so they function or change them
+
+
+18) modifying old scripts and integrating new versions into susos :0 
+
+EULOGSEARCH:
+-create/add eulogsearch
+------------------------------------------
+
+TERMINAL:
+*** modifier and add a new version of terminal to sus os 
+-------------------------------------------------
+create and implement logic for :
+  ***  shutdown/logoff/selfdestruct
+  
+  -implement & integrate settings windows
+ 
+ -implement notes 
+ -implement simple text editor applet
+ (we will save paint for later, we will use one of the nice little buttons in topright of susos and stick a pantbrush in it.
+ then we can have a paint overlayer that lets u paint , overtop of whatever u were doing or also give u a background)
+
+
+  -[ DESKTOP ][ALTERNATE]
+
+   - add tabs to sus os at the top
+
+  
+  - desktop is what contains all the programs, alternate is the current placeholder tab name text
+  this new alternate tab will be on the right side of the desktop 
+  clicking the tab will shrink the opposite so that the others contents is expanded -
+  one click will highlight desktop, or halfsize it
+  second will maximize it, third will minimize it, and it will cycle
+ 
+ or double click to maximize and single click to highlight
+ 
+ -we want to use the right side for games and stuff with an ar vibe potentially.
+ first challenge will be to build a snake game that appears to not have a window or container
