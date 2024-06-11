@@ -17,11 +17,13 @@ ________________________________________________________________________________
 
 ______________________________________________________________________________________________________
                                   [ SUS OS (JS-OS DEVELOPMENT) ]
-
+-------------------
 [o][1] find out why the susos doesnt behave the same on all pages and address it.
+	edit: i have begun fixing all of the os on the home page, i may have to make some small changes to duplicate fixes on eu page
 [comments: ]
-[o][2]	REMOVE HUD- FROM EU APPLET NAMES if we can first
-[comments: ]
+-------------------
+[X][2]-	Remove "hud-" from EU Applet tab butt textcontent if we can first
+[comments: "hud-" has been removed from the textcontent in the tab buttons for the hud windows, it is still being used in id's as it should be ]
 -------------------
 
 [o][3] fix stash manager and euitemstash
