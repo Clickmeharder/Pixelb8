@@ -574,11 +574,11 @@ div#userInfoContainer ul {
 	position: absolute;
     display: inline-flex;
     padding: 0px;
-    width: 406px;
+    width: 420px;
     min-width: 50px;
     max-width: 80vw;
 	min-height: 50px;
-    height: 226px;
+    height: 222px;
     top: 5px;
     left: 18vw;
     margin-top: -15px;
