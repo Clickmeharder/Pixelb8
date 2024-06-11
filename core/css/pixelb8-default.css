@@ -638,12 +638,14 @@ div#main-content:hover {
     font-size: 14px;
 }
 .ad-panel {
-    display: inline-flex;
+	display: inline-flex;
     max-width: 28vw;
     min-width: 16vw;
-    height: auto;min-height:185px;
-    margin: auto;margin-right:12px;
-    margin-left: 1px;
+    height: auto;
+    min-height: 185px;
+    margin: auto;
+    margin-right: 12px;
+    margin-left: auto;
     margin-bottom: 0px;
     color: var(--staticpage-adpanel-text-color);
     border-color: var(--staticpage-adpanel-border-color);
