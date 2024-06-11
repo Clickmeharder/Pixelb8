@@ -597,6 +597,10 @@ div#userInfoContainer ul {
 	resize: both;
 }
 
+.eucontent-panel:hover {
+	opacity:0.8;
+}
+
 .eucontent-header{
 	width: 100%;
 	min-height:16px;
