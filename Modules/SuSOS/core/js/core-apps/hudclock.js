@@ -632,8 +632,8 @@ function playTimerExpiredMessage(label) {
 
 //------------------------------------
 //stopwatch functionality
-let startTime;
-let timer;
+let watchstartTime;
+let watchtimer;
 let elapsedTime = 0;
 let isRunning = false;
 const playButton = document.getElementById("stopwatch-play");
@@ -647,14 +647,14 @@ const startStopwatch = () => {
 };
 
 const start = () => {
-  startTime = new Date().getTime() - elapsedTime;
+  watchstartTime = new Date().getTime() - elapsedTime;
   isRunning = true;
   update();
 };
 
 const stop = () => {
   isRunning = false;
-  clearTimeout(timer);
+  clearTimeout(watchtimer);
 };
 
 const displaying = (hour, minute, second, millisecond) => {
@@ -676,9 +676,9 @@ const update = () => {
   const currentTime = new Date().getTime();
 
   if (isRunning) {
-    elapsedTime = currentTime - startTime;
+    elapsedTime = currentTime - watchstartTime;
     updateDisplay(elapsedTime);
-    timer = setTimeout(update, 10);
+    watchtimer = setTimeout(update, 10);
   }
 };
 
@@ -689,18 +689,18 @@ function updateDisplay(elapsedTime) {
   const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
 
   displaying(
-    formatTime(hours),
-    formatTime(minutes),
-    formatTime(seconds),
-    formatMilliseconds(milliseconds)
+    formatwatchTime(hours),
+    formatwatchTime(minutes),
+    formatwatchTime(seconds),
+    formatwatchMilliseconds(milliseconds)
   );
 }
 
-const formatTime = (time) => {
+const formatwatchTime = (time) => {
   return time < 10 ? "0" + time : time;
 };
 
-function formatMilliseconds(milliseconds) {
+function formatwatchMilliseconds(milliseconds) {
   let result;
 
   if (milliseconds < 10) {
