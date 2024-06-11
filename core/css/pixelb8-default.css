@@ -596,6 +596,16 @@ div#userInfoContainer ul {
 	resize: both;
 }
 
+.eucontent-header{
+	width: 98%;
+    padding: 2px;
+    padding-left: 2px;
+    border: 2px outset #0cf;
+    border-color: inherit;
+    margin: auto;
+    overflow: hidden;
+    word-wrap: none;
+}
 .eucontent-resizableinterior{
 	height:95%;
 	width:98%;
