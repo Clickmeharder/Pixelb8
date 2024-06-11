@@ -1,8 +1,9 @@
-let dieSounds = ["die_Sound1off", "die_Sound2off", "die_Sound3off"];
-let eatSounds = ["eat_Sound1off", "eat_Sound2off", "eat_Sound3off", "eat_Sound4off"];
+let dieSounds = ["die_Sound1", "die_Sound2", "die_Sound3"];
+let eatSounds = ["eat_Sound1", "eat_Sound2", "eat_Sound3", "eat_Sound4"];
 const canvas = document.getElementById("snakeCanvas");
 const context = canvas.getContext("2d");
 const gridSize = 4;
+
 let score = 0;
 let snake = [{ x: 5, y: 5 }];
 let food = { x: 10, y: 10 };
@@ -17,6 +18,8 @@ let highscores = JSON.parse(localStorage.getItem("highscores")) || [
 ];
 let isShiftPressed = false;
 let gameInterval = 150; // Base interval for normal speed
+let isGameActive = false;
+
 const resetButton = document.getElementById("resetButton");
 resetButton.addEventListener("click", function () {
   startSnakeGame();
@@ -29,8 +32,7 @@ function startSnakeGame() {
   direction = "right";
   isShiftPressed = false;
   gameInterval = 150;
-  let dieSounds = ["die_Sound1", "die_Sound2", "die_Sound3"];
-  let eatSounds = ["eat_Sound1", "eat_Sound2", "eat_Sound3", "eat_Sound4"];
+  isGameActive = true;
   // Clear the game interval if it's running
   clearInterval(gameIntervalId);
 
@@ -39,6 +41,8 @@ function startSnakeGame() {
 
   // Start the game again with the updated initial values
   gameIntervalId = setInterval(updateGameArea, gameInterval);
+  // Set game active state to true
+  isGameActive = true;
 }
 
 function drawSnakePart(part, isFast) {
@@ -107,7 +111,7 @@ function updateGameArea() {
     displayGameOver(); // Call the function to display game over
     const randomIndex = Math.floor(Math.random() * dieSounds.length); //choose random sound
     playSound(dieSounds[randomIndex]); // Play the "die" sound
-
+	isGameActive = false;
     return;
   }
 
@@ -143,6 +147,7 @@ displayHudContainer.appendChild(speedIndicator);
 displayHudContainer.appendChild(speedDisplay);
 
 document.addEventListener("keydown", function (event) {
+  if (!isGameActive) return; // Check if the game is active before playing sounds
   switch (event.key) {
     case "ArrowUp":
     case "w":
@@ -257,7 +262,7 @@ function displayGameOver() {
       context.fillText("Press any key to retry", canvas.width / 1.72 - 110, canvas.height / 2 + 40);
     }
   }
-
+	
   setTimeout(typeNextCharacter, 1000);
 
   // Listen for key press events only if key press is not disabled
