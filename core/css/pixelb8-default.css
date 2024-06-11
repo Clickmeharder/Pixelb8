@@ -601,7 +601,14 @@ div#userInfoContainer ul {
 .eucontent-panel:hover {
 	opacity:1;
 }
-
+.staticwindowcontrolbar{
+    font-family: Lucida Console;
+    margin: auto;
+    padding: 1px;
+    border-width: 1px;
+	border-style: outset;
+    border-color: var(--hudoverlay-border-color);
+}
 .eucontent-header{
 	width: 100%;
 	min-height:16px;
