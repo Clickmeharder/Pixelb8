@@ -620,10 +620,11 @@ div#userInfoContainer ul {
 	background-color: #1a457f7d;
 }
 .eucontent-interior{
-	height:95%;
-	width:98%;
+	height: calc(100% - 52px);
+    width: 100.5%;
 	margin: auto;
 	border:0px solid #333;
+	overflow-y: auto;
 }
 
 button#enterButt {
