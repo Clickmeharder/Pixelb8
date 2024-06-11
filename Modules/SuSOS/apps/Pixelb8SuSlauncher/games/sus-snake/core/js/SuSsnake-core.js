@@ -28,8 +28,8 @@ function startSnakeGame() {
   direction = "right";
   isShiftPressed = false;
   gameInterval = 150;
-  const dieSounds = ["die_Sound1", "die_Sound2", "die_Sound3"];
-  const eatSounds = ["eat_Sound1", "eat_Sound2", "eat_Sound3", "eat_Sound4"];
+  let dieSounds = ["die_Sound1", "die_Sound2", "die_Sound3"];
+  let eatSounds = ["eat_Sound1", "eat_Sound2", "eat_Sound3", "eat_Sound4"];
   // Clear the game interval if it's running
   clearInterval(gameIntervalId);
 
