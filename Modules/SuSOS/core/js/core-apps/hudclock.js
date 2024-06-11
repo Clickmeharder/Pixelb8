@@ -468,6 +468,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			});
 		}
 
+
 		// Call the function to load scheduled events when the page loads
 		/* loadScheduledEventsList(); */
 		updateClock('localtime', 'EUtime');
@@ -478,15 +479,17 @@ document.addEventListener('DOMContentLoaded', function () {
 		timerButton.addEventListener('click', function () {
 			// Ask the user for input
 			var hours = prompt('Enter the number of hours for the timer:');
+			var minutes = prompt('Enter the number of minutes for the timer:'); // Added prompt for minutes
 			var label;
-			    // Check if the user canceled the input
-			if (hours === null) {
+			
+			// Check if the user canceled the input
+			if (hours === null || minutes === null) {
 				alert('Timer creation canceled.'); // Notify the user
 				return; // Exit the function
 			}
 
-			// Ask for label only if the user provided hours
-			if (hours !== '') {
+			// Ask for label only if the user provided hours and minutes
+			if (hours !== '' && minutes !== '') {
 				label = prompt('Enter a label for the timer:');
 
 				// Check if the user canceled the input
@@ -495,14 +498,16 @@ document.addEventListener('DOMContentLoaded', function () {
 					return; // Exit the function
 				}
 			}
+
 			// Save the current local time and the total time in milliseconds
 			var startTime = new Date().getTime();
-			var totalTime = hours * 60 * 60 * 1000;
+			var totalTime = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000); // Calculate total time in milliseconds
 
 			// Create a new timer element
 			var timerElement = document.createElement('div');
 			timerElement.className = 'timer';
-			timerElement.textContent = label + ' - ' + hours + ' hours';
+			timerElement.textContent = label + ' - ' + hours + 'h ' + minutes + 'm'; // Updated display format
+
 
 			// Create a countdown timer
 			var countdownInterval = setInterval(function () {
