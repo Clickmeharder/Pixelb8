@@ -13,6 +13,10 @@ ________________________________________________________________________________
 [comments: ]
 [o][5] - add slideshow images and js logic for automatic advertisement slideshow inside the ad panel 
 [comments: ]
+[o][3] fix stash manager and euitemstash
+[comments: ]
+[o][4]-group stashmanager and euitemstash more intuitively - also in the folder
+[comments: ]
 ______________________________________________________________________________________________________|
 
 ______________________________________________________________________________________________________
@@ -29,10 +33,7 @@ ________________________________________________________________________________
 -------------------
 
 
-[o][3] fix stash manager and euitemstash
-[comments: ]
-[o][4]-group stashmanager and euitemstash more intuitively - also in the folder
-[comments: ]
+
 -------------------
 
 [o][5]- fix the timer and text
@@ -58,7 +59,7 @@ having the js os load and unload them efficiently, debug them, and give user acc
  review and figure out what ur doing for sure, adjust goals and todolist if needed
 [comments: ]
 
-
+[o][9.5] - add local storage size etc display functionality
 
 [o][10] susos js os loads and unloads applets efficiently 
 [comments: ]
