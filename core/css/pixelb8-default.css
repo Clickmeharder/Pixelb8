@@ -576,7 +576,7 @@ div#userInfoContainer ul {
     width: -webkit-fill-available;
     min-width: 20vw;
     max-width: 40vw;
-    height: 335px;
+    height: 226px;
     top: -186px;
     left: 25vw;
     margin-bottom: -140px;
@@ -586,7 +586,7 @@ div#userInfoContainer ul {
     color: var(--staticpage-contentpanel-text-color);
     border-color: #0313186b;
     border-radius: var(--staticpage-contentpanel-border-radius);
-    background-color: #222223;
+    background-color: #231e1edb;
     box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
     z-index: 0;
 }
