@@ -600,7 +600,7 @@ div#userInfoContainer ul {
 	height:98%;
 	width:98%;
 	resize:both;
-	border:1px solid red;
+	border:0px solid red;
 }
 
 button#enterButt {
