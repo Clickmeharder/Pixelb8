@@ -606,7 +606,7 @@ div#userInfoContainer ul {
     overflow: hidden;
     word-wrap: none;
 }
-.eucontent-resizableinterior{
+.eucontent-interior{
 	height:95%;
 	width:98%;
 	resize:both;
