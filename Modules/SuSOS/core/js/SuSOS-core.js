@@ -168,10 +168,11 @@ windows.forEach(window => {
 // Function to add a tab button to the tabcontainer
 const addTabButton = (windowId, windowName) => {
     // Create a new button element for the tab
+	const windowtabName = windowName.replace(/^hud-/, '');
     const tabButton = document.createElement('button');
     tabButton.className = 'tabButt';
     tabButton.id = windowId + 'tab'; // Use the windowId to ensure unique IDs
-    tabButton.textContent = windowName; // Set the text content to the windowName
+    tabButton.textContent = windowtabName; // Set the text content to the windowName
 
     // Create a close button inside the tab button
     const closeButton = document.createElement('span');
