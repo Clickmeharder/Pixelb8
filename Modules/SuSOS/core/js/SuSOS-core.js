@@ -26,30 +26,30 @@ powerCheckbox.addEventListener('change', function() {
 const windowIds = [];
 
 // Push window IDs into the array
-windowIds.push('hud-Applets');
-windowIds.push('hud-Example');
-windowIds.push('hud-NewDigs');
+windowIds.push('Applets');
+windowIds.push('Example');
+windowIds.push('NewDigs');
 
 
 // Push EuApplet window IDs into the array
 windowIds.push('hud-EuTools');
-windowIds.push('hud-EuItemSorter');
-windowIds.push('hud-OrdinanceJuxtapositioner');
-windowIds.push('hud-EuStashManager');
-windowIds.push('hud-EuCalender');
-windowIds.push('hud-EuEventPlanner');
+windowIds.push('EuItemSorter');
+windowIds.push('OrdinanceJuxtapositioner');
+windowIds.push('EuStashManager');
+windowIds.push('EuCalender');
+windowIds.push('EuEventPlanner');
 // Push EuApplet EuStash submenu window IDs into the array
-windowIds.push('hud-EuItemstash');
-windowIds.push('hud-EuItemStashAdditions');
-windowIds.push('hud-EuEditStashMenu');
-windowIds.push('hud-EuRestockItemStashMenu');
-windowIds.push('hud-EuSellitemsMenu');
-windowIds.push('hud-EuStashpriceListMenu');
+windowIds.push('EuItemstash');
+windowIds.push('EuItemStashAdditions');
+windowIds.push('EuEditStashMenu');
+windowIds.push('EuRestockItemStashMenu');
+windowIds.push('EuSellitemsMenu');
+windowIds.push('EuStashpriceListMenu');
 
 // Push Games Applet window IDs into the array
-windowIds.push('hud-Games');
+windowIds.push('Games');
 // Push sus-snake Game Applet window ID into the array
-windowIds.push('hud-sus-snake');
+windowIds.push('sus-snake');
 //MAKING HUD WINDOWS DRAGGABLE
 const makeDraggable = (header, windowElement) => {
     let isDragging = false;
@@ -308,7 +308,7 @@ const openAppletWindow = (appName) => {
     // Remove the '.exe' suffix from the applet name
     appName = appName.replace('.exe', '');
     
-    const windowId = 'hud-' + appName; // Assuming the window IDs are prefixed with 'hud-'
+    const windowId = appName; // Assuming the window IDs are prefixed with 'hud-'
     const windowElement = document.getElementById(windowId);
     if (windowElement) {
         // Toggle the visibility of the window
