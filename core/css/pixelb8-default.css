@@ -610,10 +610,14 @@ div#userInfoContainer ul {
     padding: 2px;
     padding-left: 2px;
     border: 2px outset #0cf;
+	background-color: #0c1f397d;
     border-color: inherit;
     margin: auto;
     overflow: hidden;
     word-wrap: none;
+}
+.eucontent-header:hover{
+	background-color: #1a457f7d;
 }
 .eucontent-interior{
 	height:95%;
