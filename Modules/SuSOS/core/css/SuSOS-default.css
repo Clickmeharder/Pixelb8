@@ -2585,6 +2585,7 @@ textarea#itemData::-webkit-scrollbar {
   box-shadow: 4px 4px 16px rgba(2, 4, 3, 0.5),
     -4px -4px 16px rgba(245, 245, 245, 0.05);
 }
+
 .stopwatch-container #stopwatch-display {
   display: flex;
   justify-content: center;
