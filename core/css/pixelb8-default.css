@@ -571,13 +571,15 @@ div#userInfoContainer ul {
 }
 
 .eucontent-panel {
+	position: absolute;
     display: inline-flex;
     padding: 0px;
     width: -webkit-fill-available;
     min-width: 20vw;
     max-width: 40vw;
     height: 335px;
-    margin-top: -163px;
+    top: -186px;
+    left: 25vw;
     margin-bottom: -140px;
     margin-right: 12px;
     margin-left: 12px;
