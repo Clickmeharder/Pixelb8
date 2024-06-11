@@ -2,36 +2,38 @@ TO DO LIST:
 
 [MAIN PAGES] 
 
-4.5) review all pages and ensure we are happy with structure abd everything.
+[o][2] review all pages and ensure we are happy with structure abd everything.
 
----------------------------------------------------------------------------------------------------|
-[Skipping and comming back to this later]                                                          |
-  3.5  - create new buttons for entropia maps, sus society, satbav, tools etc on the eu tools page |
-(seperate them from the main nav somehow)    
-4) fix eu maps page - (top panels and page structure)                                                      |
-___________________________________________________________________________________________________|
+______________________________________________________________________________________________________
+	[Skipping and comming back to this later]                                      		     		  |
+[o][3]  - create new buttons for entropia maps, sus society, satbav, tools etc on the eu tools page
+              (seperate them from the main nav somehow)
+			                                                                                
+[o][4] - fix eu maps page - (top panels and page structure)                                         
+[o][5] - add slideshow images and js logic for automatic advertisement slideshow inside the ad panel 
 
------------------------------------------------------------------------------------------------
-[ SUS OS DEVELOPMENT ]
+______________________________________________________________________________________________________|
 
-NUMERO UNO: find out why the susos doesnt behave the same on all pages and address it.
+______________________________________________________________________________________________________
+                                  [ SUS OS (JS-OS DEVELOPMENT) ]
 
-5-	REMOVE HUD- FROM EU APPLET NAMES if we can first
-
--------------------
-
-6- fix stash manager and euitemstash
-6.5-group stashmanager and euitemstash more intuitively - also in the folder
+[o][1] find out why the susos doesnt behave the same on all pages and address it.
+[o][2]	REMOVE HUD- FROM EU APPLET NAMES if we can first
 
 -------------------
 
-7- fix the timer and text 
-7.5- more cool intuitive button for timer with some options
+[o][3] fix stash manager and euitemstash
+[o][4]-group stashmanager and euitemstash more intuitively - also in the folder
+
+-------------------
+
+[o][5]- fix the timer and text 
+[o][6]- more cool intuitive button for timer with some options
 
 --------------------
 
-8- make sure pages look good and are structured well. 
-9- add individual tool pages - only important ones if necesary. 
+[o][7] make sure pages look good and are structured well. 
+[o][8] add individual tool pages - only important ones if necesary. 
 
 
 ---------------------
@@ -42,27 +44,27 @@ having the js os load and unload them efficiently, debug them, and give user acc
 ----------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------
 
-10-
+[o][9]
 
  review and figure out what ur doing for sure, adjust goals and todolist if needed
 
 
 
 
-11- susos js os loads and unloads applets efficiently 
-12- create a good default program that makes it easier to create various applets
+[o][10] susos js os loads and unloads applets efficiently 
+[o][11] create a good default program that makes it easier to create various applets
 ---------------------------------------------------
-12.5-   - add the settings windows to susos
-		- add the ctrl panel windows to sus os 
+[o][12] - add the settings windows to susos
+[o][13] - add the ctrl panel windows to sus os 
 --------------------------------------------------
 
-4- add substance to power button
+[o][14] add substance to power button
 
-5-remove myeucodex
+[o][15] -remove myeucodex
 
-6- add a website disclaimer that entropia owns all its stuff and im not affiliated with anyone etc
+[o][16] - add a website disclaimer that entropia owns all its stuff and im not affiliated with anyone etc
 
-7- add disclaimer to event planner about certain event areas having highr costs till we find solution
+[o][17] - add disclaimer to event planner about certain event areas having highr costs till we find solution
 
 ____________________________________________________________________________________________________________
 
@@ -76,22 +78,22 @@ ________________________________________________________________________________
  
  
  
-13 - add the individual tool pages on eu page and placeholder pages on rsc page
-14 - add basic calculator,tools, widgets to unused big right panel on susos -
+[o][18] - add the individual tool pages on eu page and placeholder pages on rsc page
+[o][19] - add basic calculator,tools, widgets to unused big right panel on susos -
  also include the necessary profile/user info& access
  
 
  
-15 - fix style tuner so it matches the proper values etc and controls all the aesthetics
+[o][20] - fix style tuner so it matches the proper values etc and controls all the aesthetics
 --------------------------------------------------------------
-			- add a way to save/reset to default
+		[o][20-A]	- add a way to save/reset to default
  
-			-current  -automatically stays however u set/leave it and be the one u load in with.
-			-custom1 - a saved custom scheme
-			custom2 - ""
-			custom3	- ""
-			-default1 - the default look
-			-default2 - a secondary default look (we may add these in the future)
+		[o][20-A]	-current  -automatically stays however u set/leave it and be the one u load in with.
+		[o][20-B]	-custom1 - a saved custom scheme
+		[o][20-C]	custom2 - ""
+		[o][20-D]	custom3	- ""
+		[o][20-E]	-default1 - the default look
+		[o][20-F]	-default2 - a secondary default look (we may add these in the future)
 			
   then we will have a default they can use or also revert a custom one to. 
   copy save revert on current and
@@ -99,43 +101,44 @@ default schemes will require: copy save revert
 custom schemes will require:  edit, rename, delete, revert
 
 ( REVERT will be used to revert to the last saved version of that scheme)
-- add cursor options to style tuner even if its a placeholder button for now that doesnt function.
+[o][21] - add cursor options to style tuner even if its a placeholder button for now that doesnt function.
 -------------------------------------------------------------------------------------
 _________________________________________________________________________________
   
-  16 - update and improve the clock, 
+  [o][22] - update and improve the clock, 
           + add timers and stopwatch functions in the clock
-  17 - create a js os clock calender, and ability to set schedules, routines, todolists, reminders etc
+  [o][23] - create a js os clock calender, and ability to set schedules, routines, todolists, reminders etc
 
- 17.5 - see if theres a way we can send push notifications ^
+ [o][24] - - see if theres a way we can send push notifications ^
              if so implement them to both calender, clock and necessary timers.
  
 -fix maps tab in susos so they function or change them
 
 
-18) modifying old scripts and integrating new versions into susos :0 
+ [o][25] - modifying old scripts and integrating new versions into susos :0 
 
 EULOGSEARCH:
--create/add eulogsearch
+ -> *[o][26] -create/add eulogsearch*
 ------------------------------------------
 
 TERMINAL:
-*** modifier and add a new version of terminal to sus os 
+ -> *[o][27] - modify and add a new version of terminal to sus os*
 -------------------------------------------------
 create and implement logic for :
-  ***  shutdown/logoff/selfdestruct
-  
-  -implement & integrate settings windows
+ -> *[o][28] -shutdown/logoff/selfdestruct*
+-------------------------------------------------
+[o][29] -implement & integrate settings windows
  
- -implement notes 
- -implement simple text editor applet
+[o][30] -implement notes 
+[o][31] -implement simple text editor applet
+
  (we will save paint for later, we will use one of the nice little buttons in topright of susos and stick a pantbrush in it.
  then we can have a paint overlayer that lets u paint , overtop of whatever u were doing or also give u a background)
 
 
   -[ DESKTOP ][ALTERNATE]
 
-   - add tabs to sus os at the top
+   [o][32] - add tabs to sus os at the top
 
   
   - desktop is what contains all the programs, alternate is the current placeholder tab name text
