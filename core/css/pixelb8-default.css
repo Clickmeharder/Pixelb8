@@ -575,8 +575,9 @@ div#userInfoContainer ul {
     display: inline-flex;
     padding: 0px;
     width: -webkit-fill-available;
-    min-width: 46vw;
+    min-width: 50px;
     max-width: 51vw;
+	min-height: 50px;
     height: 226px;
     top: 26px;
     left: 25vw;
@@ -584,13 +585,15 @@ div#userInfoContainer ul {
     margin-bottom: -58px;
     margin-right: 12px;
     margin-left: 12px;
-    justify-content: flex-end;
+    justify-content: ;
     color: var(--staticpage-contentpanel-text-color);
     border-color: #0313186b;
     border-radius: var(--staticpage-contentpanel-border-radius);
     background-color: #231e1edb;
     box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
     z-index: 0;
+	overflow: hidden;
+	resize: both;
 }
 
 .eucontent-resizableinterior{
