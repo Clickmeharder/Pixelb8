@@ -2647,8 +2647,8 @@ button#stopwatch-play{
     justify-content: center;
     align-items: center;
     font-size: var(--button-font-size);
-    width: var(--button-size);
-    height: var(--button-size);
+    width: 27px;
+    height: 27px;
     margin: 0 3px;
     border: none;
     border-radius: 50%;
