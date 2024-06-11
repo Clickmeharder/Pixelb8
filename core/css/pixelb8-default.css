@@ -624,7 +624,7 @@ div#userInfoContainer ul {
     border: 2px outset #0cf;
 	background-color: #0c1f397d;
     border-color: inherit;
-    margin: auto;
+    margin: auto!important;
     overflow: hidden;
     word-wrap: none;
 }
