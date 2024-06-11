@@ -809,10 +809,14 @@ button#Toggleaccpanelinternals-Button {
 }
 
 .featured-section {
-	min-height: 32px;max-height: 140px;
-	height: 32px;overflow: auto;
-    margin-top: 6px;
+	min-height: 32px;
+    max-height: 140px;
+    height: 32px;
+    overflow: auto;
+    margin-top: 4px;
+    margin-bottom: -11px;
     padding: 10px;
+    padding-bottom: 30px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     color: var(--staticpage-panels-text-color);
     border-color: var(--staticpage-panels-border-color);
