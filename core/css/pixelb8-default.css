@@ -621,10 +621,13 @@ div#userInfoContainer ul {
 }
 .eucontent-interior{
 	height: calc(100% - 52px);
-    width: 100.5%;
-	margin: auto;
-	border:0px solid #333;
-	overflow-y: auto;
+    width: 99.6%;
+    margin: auto;
+    margin-top: 2px;
+    border: 0px solid #333;
+    overflow-y: auto;
+    padding-right: 0px;
+    padding-left: 4px;
 }
 
 button#enterButt {
