@@ -2628,15 +2628,16 @@ textarea#itemData::-webkit-scrollbar {
   box-shadow: 4px 4px 7px #acacac, -4px -4px 7px #ffffff;
 }
 button#stopwatch-play{
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  font-size: var(--button-font-size);
-  width: var(--button-size);
-  height: var(--button-size);
-  margin: 0 3px;
-  border: none;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #f0f0f0, var(--color-2));
-  box-shadow: 4px 4px 7px #acacac, -4px -4px 7px #ffffff;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    color: #444;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: small;
+    font-weight: normal;
+    margin: 0 3px;
+    width: 80px;
+    height: 31px;
+    border-radius: 0%;
+    box-shadow: 4px 4px 9px #2f2a2a, -4px -4px 14px #2f2f2f;
 }
