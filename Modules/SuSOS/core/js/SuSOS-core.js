@@ -26,30 +26,30 @@ powerCheckbox.addEventListener('change', function() {
 const windowIds = [];
 
 // Push window IDs into the array
-windowIds.push('Applets');
-windowIds.push('Example');
-windowIds.push('NewDigs');
+windowIds.push('hud-Applets');
+windowIds.push('hud-Example');
+windowIds.push('hud-NewDigs');
 
 
 // Push EuApplet window IDs into the array
 windowIds.push('hud-EuTools');
-windowIds.push('EuItemSorter');
-windowIds.push('OrdinanceJuxtapositioner');
-windowIds.push('EuStashManager');
-windowIds.push('EuCalender');
-windowIds.push('EuEventPlanner');
+windowIds.push('hud-EuItemSorter');
+windowIds.push('hud-OrdinanceJuxtapositioner');
+windowIds.push('hud-EuStashManager');
+windowIds.push('hud-EuCalender');
+windowIds.push('hud-EuEventPlanner');
 // Push EuApplet EuStash submenu window IDs into the array
-windowIds.push('EuItemstash');
-windowIds.push('EuItemStashAdditions');
-windowIds.push('EuEditStashMenu');
-windowIds.push('EuRestockItemStashMenu');
-windowIds.push('EuSellitemsMenu');
-windowIds.push('EuStashpriceListMenu');
+windowIds.push('hud-EuItemstash');
+windowIds.push('hud-EuItemStashAdditions');
+windowIds.push('hud-EuEditStashMenu');
+windowIds.push('hud-EuRestockItemStashMenu');
+windowIds.push('hud-EuSellitemsMenu');
+windowIds.push('hud-EuStashpriceListMenu');
 
 // Push Games Applet window IDs into the array
-windowIds.push('Games');
+windowIds.push('hud-Games');
 // Push sus-snake Game Applet window ID into the array
-windowIds.push('sus-snake');
+windowIds.push('hud-sus-snake');
 //MAKING HUD WINDOWS DRAGGABLE
 const makeDraggable = (header, windowElement) => {
     let isDragging = false;
@@ -166,12 +166,12 @@ windows.forEach(window => {
 
 //wINDOW MENU BAR TAB BUTTONS
 // Function to add a tab button to the tabcontainer
-const addTabButton = (windowId, windowName) => {
+const addTabButton = (windowId, appName) => {
     // Create a new button element for the tab
     const tabButton = document.createElement('button');
     tabButton.className = 'tabButt';
     tabButton.id = windowId + 'tab'; // Use the windowId to ensure unique IDs
-    tabButton.textContent = windowName; // Set the text content to the windowName
+    tabButton.textContent = appName; // Set the text content to the windowName
 
     // Create a close button inside the tab button
     const closeButton = document.createElement('span');
@@ -308,7 +308,7 @@ const openAppletWindow = (appName) => {
     // Remove the '.exe' suffix from the applet name
     appName = appName.replace('.exe', '');
     
-    const windowId = appName; // Assuming the window IDs are prefixed with 'hud-'
+    const windowId = 'hud-' + appName; // Assuming the window IDs are prefixed with 'hud-'
     const windowElement = document.getElementById(windowId);
     if (windowElement) {
         // Toggle the visibility of the window
