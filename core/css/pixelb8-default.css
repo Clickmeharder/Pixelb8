@@ -485,7 +485,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 .left-panel {
-  margin-right: auto;margin-left:0px;
+  margin-right: 7px;margin-left:0px;
   padding:8px;
   color: var(--staticpage-sidepanels-text-color);
   border-color: var(--staticpage-sidepanels-border-color);
