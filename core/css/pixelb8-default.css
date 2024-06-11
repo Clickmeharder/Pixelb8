@@ -610,9 +610,9 @@ div#userInfoContainer ul {
     border-color: var(--hudoverlay-border-color);
 }
 .staticxbutt{
-	width:25px!important;
+	width: 25px;
     height: 24px;
-    margin: auto;
+    margin: 4px;
 }
 .eucontent-header{
 	width: 100%;
