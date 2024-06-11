@@ -612,7 +612,7 @@ div#userInfoContainer ul {
 .staticxbutt{
 	width: 25px;
     height: 24px;
-    margin: 4px;
+    margin: 0px;
 }
 .eucontent-header{
 	width: 100%;
@@ -624,7 +624,7 @@ div#userInfoContainer ul {
     border: 2px outset #0cf;
 	background-color: #0c1f397d;
     border-color: inherit;
-    margin: auto!important;
+    margin: auto;
     overflow: hidden;
     word-wrap: none;
 }

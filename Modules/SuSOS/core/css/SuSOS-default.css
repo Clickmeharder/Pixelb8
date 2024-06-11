@@ -664,7 +664,7 @@ p#mapsbuttlabel {
 .staticxbutt{
 	width:25px;
     height: 24px;
-    margin: 4px;
+    margin: 0px;
 }
 .toggle-toolbar{
   font-size:16px;
