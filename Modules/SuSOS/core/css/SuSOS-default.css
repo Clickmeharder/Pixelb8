@@ -2586,7 +2586,7 @@ textarea#itemData::-webkit-scrollbar {
   display: none;
   position:fixed;
   bottom: 54px;
-  right: 52px;
+  right: 2px;
   justify-content: center;
   align-items: center;
   font-family: Arial, Helvetica, sans-serif;
