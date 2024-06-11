@@ -574,7 +574,7 @@ div#userInfoContainer ul {
 	position: absolute;
     display: inline-flex;
     padding: 0px;
-    width: -webkit-fill-available;
+    width: 406px;
     min-width: 50px;
     max-width: 80vw;
 	min-height: 50px;
