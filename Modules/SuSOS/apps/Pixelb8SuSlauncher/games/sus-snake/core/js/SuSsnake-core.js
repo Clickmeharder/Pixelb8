@@ -41,8 +41,6 @@ function startSnakeGame() {
 
   // Start the game again with the updated initial values
   gameIntervalId = setInterval(updateGameArea, gameInterval);
-  // Set game active state to true
-  isGameActive = true;
 }
 
 function drawSnakePart(part, isFast) {
@@ -258,7 +256,7 @@ function displayGameOver() {
     } else {
       context.textDecoration = "none"; // Reset text decoration
       context.font = "14px Arial";
-      context.fillText("Press any key to retry", canvas.width / 1.72 - 110, canvas.height / 2 + 40);
+      context.fillText("better luck next time!", canvas.width / 1.72 - 110, canvas.height / 2 + 40);
     }
   }
 	
@@ -268,10 +266,10 @@ function displayGameOver() {
   document.addEventListener("keydown", function handleKeyPress(event) {
     if (!isKeyPressDisabled) {
       document.removeEventListener("keydown", handleKeyPress);
-
+		
       if (event.key !== "Shift") {
         isShiftPressed = false;
-        startSnakeGame();
+        /* startSnakeGame(); */
         // Reload the page to restart the game
       }
     }
