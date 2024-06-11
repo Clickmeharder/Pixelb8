@@ -575,13 +575,13 @@ div#userInfoContainer ul {
     display: inline-flex;
 	flex-direction: column;
     padding: 0px;
-    width: 723px;
+    width: 299px;
     min-width: 228px;
     max-width: 80vw;
 	min-height: 36px;
-    height: 357px;
-    top: 5px;
-    left: 194px;
+    height: 121px;
+    top: 26px;
+    left: 183px;
     margin-top: -15px;
     margin-bottom: -58px;
     margin-right: 12px;
