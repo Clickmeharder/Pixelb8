@@ -2,39 +2,44 @@ TO DO LIST:
 
 [MAIN PAGES] 
 
-[o][2] review all pages and ensure we are happy with structure abd everything.
-
+[X][2] review all pages and ensure we are happy with structure abd everything.
+[comments: all looks good for now, still need to pretty up entropia maps page and add the slideshow functionality to ad panel ]
 ______________________________________________________________________________________________________
 	[Skipping and comming back to this later]                                      		     		  |
 [o][3]  - create new buttons for entropia maps, sus society, satbav, tools etc on the eu tools page
               (seperate them from the main nav somehow)
-			                                                                                
+[comments: ]			                                                                                
 [o][4] - fix eu maps page - (top panels and page structure)                                         
+[comments: ]
 [o][5] - add slideshow images and js logic for automatic advertisement slideshow inside the ad panel 
-
+[comments: ]
 ______________________________________________________________________________________________________|
 
 ______________________________________________________________________________________________________
                                   [ SUS OS (JS-OS DEVELOPMENT) ]
 
 [o][1] find out why the susos doesnt behave the same on all pages and address it.
+[comments: ]
 [o][2]	REMOVE HUD- FROM EU APPLET NAMES if we can first
-
+[comments: ]
 -------------------
 
 [o][3] fix stash manager and euitemstash
+[comments: ]
 [o][4]-group stashmanager and euitemstash more intuitively - also in the folder
-
+[comments: ]
 -------------------
 
-[o][5]- fix the timer and text 
+[o][5]- fix the timer and text
+[comments: ] 
 [o][6]- more cool intuitive button for timer with some options
-
+[comments: ]
 --------------------
 
 [o][7] make sure pages look good and are structured well. 
+[comments: ]
 [o][8] add individual tool pages - only important ones if necesary. 
-
+[comments: ]
 
 ---------------------
 
@@ -45,17 +50,20 @@ having the js os load and unload them efficiently, debug them, and give user acc
 ------------------------------------------------------------------------------------------------------------
 
 [o][9]
-
  review and figure out what ur doing for sure, adjust goals and todolist if needed
-
+[comments: ]
 
 
 
 [o][10] susos js os loads and unloads applets efficiently 
+[comments: ]
 [o][11] create a good default program that makes it easier to create various applets
+[comments: ]
 ---------------------------------------------------
 [o][12] - add the settings windows to susos
+[comments: ]
 [o][13] - add the ctrl panel windows to sus os 
+[comments: ]
 --------------------------------------------------
 
 [o][14] add substance to power button
