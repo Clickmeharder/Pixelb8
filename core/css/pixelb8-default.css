@@ -603,7 +603,7 @@ div#userInfoContainer ul {
 }
 .staticwindowcontrolbar{
     font-family: Lucida Console;
-    margin: auto;
+    margin: 0px;
     padding: 1px;
     border-width: 1px;
 	border-style: outset;
