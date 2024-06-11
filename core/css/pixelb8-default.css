@@ -612,8 +612,8 @@ div#userInfoContainer ul {
 .eucontent-interior{
 	height:95%;
 	width:98%;
-	resize:both;
-	border:0px solid red;
+	margin: auto;
+	border:0px solid #333;
 }
 
 button#enterButt {
