@@ -730,13 +730,14 @@ div#main-content:hover {
     width: 543px;
     max-width: 45vw;
     margin: auto;
+	margin-top: 7px;
     padding: 6px;
     display: flex;
     flex-direction: column;
     justify-content: ;
     overflow-y: auto;
     /*height: 1000px;*/ /* the original height */
-    height: 22vh;
+    height: 28vh;
     min-height:125px;max-height:500px;
     color: var(--staticpage-panels-text-color);
     background-color:var(--staticpage-inner-bg-color);
