@@ -147,7 +147,6 @@ displayHudContainer.appendChild(speedIndicator);
 displayHudContainer.appendChild(speedDisplay);
 
 document.addEventListener("keydown", function (event) {
-  if (!isGameActive) return; // Check if the game is active before playing sounds
   switch (event.key) {
     case "ArrowUp":
     case "w":
@@ -321,12 +320,16 @@ displayHighscores();
 //-----------------------
 //=======================
 
+// Function to play sound
 function playSound(soundId) {
-  const soundElement = document.getElementById(soundId);
-  soundElement.currentTime = 0;
-  soundElement.play();
-}
+  if (!isGameActive) return; // Check if the game is active before playing the sound
 
+  const sound = document.getElementById(soundId);
+  if (sound) {
+    sound.currentTime = 0; // Rewind the sound to the start
+    sound.play();
+  }
+}
 document.getElementById("hud-sus-snake").addEventListener("transitionend", function () {
   if (!this.classList.contains("hidden")) {
     startSnakeGame();
