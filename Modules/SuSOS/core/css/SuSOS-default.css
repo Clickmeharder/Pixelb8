@@ -2612,9 +2612,22 @@ textarea#itemData::-webkit-scrollbar {
 }
 
 .stopwatch-container .stopwatch-buttons {
-  margin: 10px 0;
+  margin: 10px 0!important;
 }
 .stopwatch-buttons stopwatch-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: var(--button-font-size);
+  width: var(--button-size);
+  height: var(--button-size);
+  margin: 0 3px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f0f0f0, var(--color-2));
+  box-shadow: 4px 4px 7px #acacac, -4px -4px 7px #ffffff;
+}
+button#stopwatch-play{
   display: inline-flex;
   justify-content: center;
   align-items: center;
