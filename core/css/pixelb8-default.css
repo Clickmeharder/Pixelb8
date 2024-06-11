@@ -571,6 +571,7 @@ div#userInfoContainer ul {
 }
 
 .eucontent-panel {
+	position:absolute;
     display: inline-flex;
     padding: 0px;
     width: -webkit-fill-available;
