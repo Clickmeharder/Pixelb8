@@ -649,7 +649,7 @@ const startStopwatch = () => {
 const start = () => {
   watchstartTime = new Date().getTime() - elapsedTime;
   isRunning = true;
-  playButton.innerHTML = "<i class='fa-solid fa-play icon'></i>❚❚";
+  playButton.innerHTML = "<i class='fa-solid fa-pause icon'></i>❚❚";
   update();
 };
 
