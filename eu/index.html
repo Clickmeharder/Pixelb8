@@ -2280,6 +2280,65 @@ staticPage BLOCK
 <!--end mainpage -->
 </div>
 <!--end mainpage -->
+<!-- Modal for Signup -->
+<div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-signup-label">Create Account</h5>
+        <button type="button" class="close close-modal-btn" data-dismiss="modal-usersignup" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+      </div>
+      <div class="modal-body">
+        <!-- Your signup form goes here -->
+        <form id="signup-form">
+          <div class="form-group input-field">
+            <label for="signup-username">Username</label>
+            <input type="signup-username" class="form-control" id="signup-username" aria-describedby="usernameHelp">
+          </div>
+          <div class="form-group input-field">
+            <label for="signup-email">Email address</label>
+            <input type="signup-email" class="form-control" id="signup-email" aria-describedby="emailHelp" required />
+          </div>
+          <div class="form-group input-field">
+            <label for="signup-password">Enter Password</label>
+            <input type="signup-password" class="form-control" id="signup-password" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Edit Profile -->
+<div class="modal fade hidden" id="modal-editProfile" tabindex="-1" role="dialog" aria-labelledby="modal-editProfile-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-editProfile-label">Edit Profile</h5>
+        <button type="button" class="close close-modal-btn" data-dismiss="modal-editProfile" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Your profile update form goes here -->
+        <form id="update-profile-form">
+          <div class="form-group input-field">
+            <label for="update-username">Username</label>
+            <input type="text" class="form-control" id="update-username" aria-describedby="usernameHelp">
+          </div>
+          <div class="form-group input-field">
+            <label for="update-photoURL">Profile Photo URL</label>
+            <input type="text" class="form-control" id="update-photoURL" aria-describedby="photoURLHelp">
+          </div>
+          <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="staticPage" id="pageContainer"></div>
 <div class="staticPage" id="SuSnet"></div>
 <div id="currentgifcursordiv" style="left: 1059px; top: 162px; background-image: none;"></div>
