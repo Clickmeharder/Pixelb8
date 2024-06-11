@@ -403,9 +403,37 @@
 					</div>
 				</div>
 				<div id="clockwrapper">
-					<button id="timer-button" title="Set Timer">
-						<img class="cursorbutton customcursor" src="assets/images/icons/clock-1.png" alt="Clock Icon" onmouseover="updateCursor('cursor02')">
+					<button id="clocktools-button" title="Clock tools">
+						<img class="cursorbutton customcursor" src="assets/images/icons/clock-1.png" alt="Clock Tools" onmouseover="updateCursor('cursor02')">
 					</button>
+				</div>
+				
+				<div class="stopwatch-wrapper">
+				  <section class="stopwatch-container">
+					<div id="stopwatch-display">
+					  <span class="stopwatch-time stopwatch-hour">00</span>
+					  <p class="stopwatch-dot">:</p>
+					  <span class="stopwatch-time stopwatch-minute">00</span>
+					  <p class="stopwatch-dot">:</p>
+					  <span class="stopwatch-time stopwatch-second">00</span>
+					  <p class="stopwatch-dot">:</p>
+					  <span class="stopwatch-time stopwatch-millisecond">000</span>
+					</div>
+
+					<div class="stopwatch-buttons">
+					  <button id="stopwatch-play" onclick="startStopwatch()">
+						<i class="fa-solid fa-play icon"></i>Start/Stop Watch
+					  </button>
+					  <button id="reset" onclick="reset()">
+						<i class="fa-solid fa-arrow-rotate-left"></i>
+					  </button>
+					</div>
+					<div class="stopwatch-buttons">
+					  <button id="timer-button" title="Set Timer">
+								<i class="fas fa-bell"></i>Set a Timer
+							</button>
+					</div>
+				  </section>
 				</div>
 			</div>
 		</div>

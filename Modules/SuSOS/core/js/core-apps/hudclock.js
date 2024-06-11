@@ -629,3 +629,111 @@ function playTimerExpiredMessage(label) {
     var message = new SpeechSynthesisUtterance('Captain,  The, ' + label + ' Timer. has expired.');
     speechSynthesis.speak(message);
 }
+
+//------------------------------------
+//stopwatch functionality
+let startTime;
+let timer;
+let elapsedTime = 0;
+let isRunning = false;
+const playButton = document.getElementById("stopwatch-play");
+
+const startStopwatch = () => {
+  if (isRunning) {
+    stop();
+  } else {
+    start();
+  }
+};
+
+const start = () => {
+  startTime = new Date().getTime() - elapsedTime;
+  isRunning = true;
+  update();
+};
+
+const stop = () => {
+  isRunning = false;
+  clearTimeout(timer);
+};
+
+const displaying = (hour, minute, second, millisecond) => {
+  document.querySelector(".stopwatch-hour").innerHTML = hour;
+  document.querySelector(".stopwatch-minute").innerHTML = minute;
+  document.querySelector(".stopwatch-second").innerHTML = second;
+  document.querySelector(".stopwatch-millisecond").innerHTML = millisecond;
+};
+
+const reset = () => {
+  stop();
+  displaying("00", "00", "00", "000");
+  elapsedTime = 0;
+  playButton.innerHTML = "<i class='fa-solid fa-play icon'></i>";
+  update();
+};
+
+const update = () => {
+  const currentTime = new Date().getTime();
+
+  if (isRunning) {
+    elapsedTime = currentTime - startTime;
+    updateDisplay(elapsedTime);
+    timer = setTimeout(update, 10);
+  }
+};
+
+function updateDisplay(elapsedTime) {
+  const milliseconds = Math.floor(elapsedTime % 1000);
+  const seconds = Math.floor((elapsedTime / 1000) % 60);
+  const minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
+  const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+
+  displaying(
+    formatTime(hours),
+    formatTime(minutes),
+    formatTime(seconds),
+    formatMilliseconds(milliseconds)
+  );
+}
+
+const formatTime = (time) => {
+  return time < 10 ? "0" + time : time;
+};
+
+function formatMilliseconds(milliseconds) {
+  let result;
+
+  if (milliseconds < 10) {
+    result = "00" + milliseconds;
+  } else if (milliseconds < 100) {
+    result = "0" + milliseconds;
+  } else {
+    result = milliseconds;
+  }
+
+  return result;
+}
+
+playButton.addEventListener("click", () => {
+  const icon = document.querySelector(".icon");
+
+  if (icon.classList.contains("fa-play")) {
+    icon.classList.remove("fa-play");
+    icon.classList.add("fa-pause");
+  } else {
+    icon.classList.remove("fa-pause");
+    icon.classList.add("fa-play");
+  }
+});
+// Function to toggle the display of the stopwatch wrapper
+function toggleStopwatchDisplay() {
+    const stopwatchWrapper = document.querySelector('.stopwatch-wrapper');
+    if (stopwatchWrapper.style.display === 'none' || stopwatchWrapper.style.display === '') {
+        stopwatchWrapper.style.display = 'flex';
+    } else {
+        stopwatchWrapper.style.display = 'none';
+    }
+}
+
+// Add event listener to the clocktools-button
+document.getElementById('clocktools-button').addEventListener('click', toggleStopwatchDisplay);

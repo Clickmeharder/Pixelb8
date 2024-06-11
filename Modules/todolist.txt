@@ -22,10 +22,10 @@ ________________________________________________________________________________
 [comments: "hud-" has been removed from the textcontent in the tab buttons for the hud windows, it is still being used in id's as it should be ]
 -------------------
 -------------------
-[o][2] find out why the susos doesnt behave the same on all pages and address it.
+[X][2] find out why the susos doesnt behave the same on all pages and address it.
 	edit: i have begun fixing all of the os on the home page, i may have to make some small changes to duplicate fixes on eu page
-	    -  [o][2.5] - check to see if both pages seem to be the same at its current state, if not make it so. 
-[comments: ]
+	    -  [X][2.5] - check to see if both pages seem to be the same at its current state, if not make it so. 
+[comments: they currently seem to work the same, so far fully functional]
 -------------------
 
 
