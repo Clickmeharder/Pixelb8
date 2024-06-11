@@ -314,6 +314,24 @@ p#mapsbuttlabel {
 }
 
 #clocktools-button {
+    width: 40px;
+    height: 40px;
+    background-color: transparent;
+    color: #fff;
+    border: 1px outset #24a1d0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+}
+	
+#clocktools-button img {
+    opacity: 0.5;
+    filter: invert(100%);
+}
+	
+#timer-button {
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -325,24 +343,6 @@ p#mapsbuttlabel {
     border-radius: 3px;
     background: linear-gradient(185deg, #181c21, #233c52);
     box-shadow: 4px 4px 7px #191f21, -4px -4px 7px #233c52;	
-}
-	
-#clocktools-button img {
-    opacity: 0.5;
-    filter: invert(100%);
-}
-	
-#timer-button {
-    width: 40px;
-    height: 40px;
-    background-color: transparent;
-    color: #fff;
-    border: 1px outset #24a1d0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.5;
 }
 
 .clockbox{
