@@ -668,7 +668,7 @@ const reset = () => {
   stop();
   displaying("00", "00", "00", "000");
   elapsedTime = 0;
-  playButton.innerHTML = "<i class='fa-solid fa-play icon'></i>❚❚";
+  playButton.innerHTML = "<i class='fa-solid fa-play icon'></i>►/❚❚";
   update();
 };
 
