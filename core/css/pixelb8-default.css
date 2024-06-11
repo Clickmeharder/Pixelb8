@@ -593,7 +593,7 @@ div#userInfoContainer ul {
     z-index: 0;
 }
 
-.eucontent-innerinterior{
+.eucontent-resizableinterior{
 	height:98%;
 	width:98%;
 	resize:both;
