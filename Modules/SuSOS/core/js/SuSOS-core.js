@@ -171,7 +171,7 @@ const addTabButton = (windowId, windowName) => {
     const tabButton = document.createElement('button');
     tabButton.className = 'tabButt';
     tabButton.id = windowId + 'tab'; // Use the windowId to ensure unique IDs
-    tabButton.textContent = windowTabtext; // Set the text content to the windowName
+    tabButton.textContent = windowName; // Set the text content to the windowName
 
     // Create a close button inside the tab button
     const closeButton = document.createElement('span');
@@ -309,7 +309,6 @@ const openAppletWindow = (appName) => {
     appName = appName.replace('.exe', '');
     
     const windowId = 'hud-' + appName; // Assuming the window IDs are prefixed with 'hud-'
-	const windowTabtext = appName.replace('hud-', '');
     const windowElement = document.getElementById(windowId);
     if (windowElement) {
         // Toggle the visibility of the window
