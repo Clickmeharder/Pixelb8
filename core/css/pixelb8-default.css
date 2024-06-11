@@ -593,12 +593,13 @@ div#userInfoContainer ul {
     background-color: #231e1edb;
     box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
     z-index: 0;
+	opacity: 0.8;
 	overflow: hidden;
 	resize: both;
 }
 
 .eucontent-panel:hover {
-	opacity:0.8;
+	opacity:1;
 }
 
 .eucontent-header{
