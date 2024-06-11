@@ -312,6 +312,26 @@ p#mapsbuttlabel {
 #clockwrapper:hover {
     margin-right: 181px;transition:margin 0.8s;
 }
+
+#clocktools-button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    width: fit-content;
+    height: var(--button-size);
+    margin: 0 3px;
+    border: none;
+    border-radius: 3px;
+    background: linear-gradient(185deg, #181c21, #233c52);
+    box-shadow: 4px 4px 7px #191f21, -4px -4px 7px #233c52;	
+}
+	
+#clocktools-button img {
+    opacity: 0.5;
+    filter: invert(100%);
+}
+	
 #timer-button {
     width: 40px;
     height: 40px;
@@ -324,10 +344,7 @@ p#mapsbuttlabel {
     justify-content: center;
     opacity: 0.5;
 }
-#timer-button img {
-    opacity: 0.5;
-    filter: invert(100%);
-}
+
 .clockbox{
   position: absolute;
   width:max-content;
