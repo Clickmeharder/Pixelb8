@@ -2,28 +2,17 @@ TO DO LIST:
 
 [MAIN PAGES] 
 
-
-
-
-----------
-2) match the site stats boxes up -> MODULARIZE EVERYTHING
-
-
-
-
-
-3    -.relocate both sus society link and akadia satvan button and page to appropriate spots inside eu tools page
-     (may require moving files and editing image locations in code etc)
-
-3.5  - create new buttons for entropia maps, sus society, satbav, tools etc on the eu tools page 
-(seperate them from the main nav somehow)
-
-
-
 4) fix eu maps page - (top panels and page structure)
-
 4.5) review all pages and ensure we are happy with structure abd everything.
 
+
+
+
+---------------------------------------------------------------------------------------------------|
+[Skipping and comming back to this later]                                                          |
+  3.5  - create new buttons for entropia maps, sus society, satbav, tools etc on the eu tools page |
+(seperate them from the main nav somehow)                                                          |
+___________________________________________________________________________________________________|
 
 -----------------------------------------------------------------------------------------------
 [ SUS OS DEVELOPMENT ]
