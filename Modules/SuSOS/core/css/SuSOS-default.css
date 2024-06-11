@@ -651,6 +651,7 @@ p#mapsbuttlabel {
   transition: background-color 1.8s, color 1.0;
 	transition: transform 0.s filter 0.6s;
 }
+
 .toggle-toolbar, .minbutt, .maxbutt, .xbutt{
   font-family: Lucida Console;font-weight:800;
   width:24%;
@@ -659,6 +660,11 @@ p#mapsbuttlabel {
   color: var(--HUD-windows-text-color);
   background-color:var(--HUD-windows-bg-color);
 
+}
+.staticxbutt{
+	width:25px;
+    height: 24px;
+    margin: auto;
 }
 .toggle-toolbar{
   font-size:16px;
