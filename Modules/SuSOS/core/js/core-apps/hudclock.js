@@ -649,11 +649,13 @@ const startStopwatch = () => {
 const start = () => {
   watchstartTime = new Date().getTime() - elapsedTime;
   isRunning = true;
+  playButton.innerHTML = "<i class='fa-solid fa-play icon'></i>❚❚";
   update();
 };
 
 const stop = () => {
   isRunning = false;
+  playButton.innerHTML = "<i class='fa-solid fa-play icon'></i>►";
   clearTimeout(watchtimer);
 };
 
@@ -668,7 +670,7 @@ const reset = () => {
   stop();
   displaying("00", "00", "00", "000");
   elapsedTime = 0;
-  playButton.innerHTML = "<i class='fa-solid fa-play icon'></i>►/❚❚";
+  playButton.innerHTML = "<i class='fa-solid fa-play icon'></i>►";
   update();
 };
 
