@@ -599,7 +599,8 @@ div#userInfoContainer ul {
 
 .eucontent-header{
 	width: 100%;
-	height:25px;
+	min-height:116px;
+	height:16px;
 	max-height: 25px;
     padding: 2px;
     padding-left: 2px;
