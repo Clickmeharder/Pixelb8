@@ -454,6 +454,8 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 }
 /* New Main Content Styles*/
 .main-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   padding: 4px;
   justify-content: space-between;
