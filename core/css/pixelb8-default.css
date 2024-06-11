@@ -597,7 +597,7 @@ div#userInfoContainer ul {
 }
 
 .eucontent-resizableinterior{
-	height:98%;
+	height:95%;
 	width:98%;
 	resize:both;
 	border:0px solid red;
