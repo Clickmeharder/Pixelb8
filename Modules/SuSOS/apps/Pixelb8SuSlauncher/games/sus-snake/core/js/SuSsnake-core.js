@@ -1,4 +1,5 @@
-
+let dieSounds = ["die_Sound1off", "die_Sound2off", "die_Sound3off"];
+let eatSounds = ["eat_Sound1off", "eat_Sound2off", "eat_Sound3off", "eat_Sound4off"];
 const canvas = document.getElementById("snakeCanvas");
 const context = canvas.getContext("2d");
 const gridSize = 4;
