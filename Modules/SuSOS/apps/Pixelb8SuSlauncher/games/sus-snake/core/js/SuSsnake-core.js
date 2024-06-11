@@ -146,25 +146,25 @@ displayHudContainer.appendChild(speedDisplay);
 
 document.addEventListener("keydown", function (event) {
   switch (event.key) {
-    case "ArrowUp":
+//    case "ArrowUp":
     case "w":
     case "W":
       playSound("move_Sound"); // Play the "up" sound
       direction = "up";
       break;
-    case "ArrowDown":
+//    case "ArrowDown":
     case "s":
     case "S":
       playSound("move_Sound"); // Play the "down" sound
       direction = "down";
       break;
-    case "ArrowLeft":
+//    case "ArrowLeft":
     case "a":
     case "A":
       playSound("move_Sound"); // Play the "left" sound
       direction = "left";
       break;
-    case "ArrowRight":
+//    case "ArrowRight":
     case "d":
     case "D":
       direction = "right";
