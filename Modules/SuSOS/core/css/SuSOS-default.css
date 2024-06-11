@@ -2612,9 +2612,9 @@ textarea#itemData::-webkit-scrollbar {
 }
 
 .stopwatch-container .stopwatch-buttons {
-  margin: 10px 0!important;
+  margin: 10px 0;
 }
-.stopwatch-buttons stopwatch-button {
+.stopwatch-buttons button {
   display: inline-flex;
   justify-content: center;
   align-items: center;
