@@ -2568,8 +2568,8 @@ textarea#itemData::-webkit-scrollbar {
 .stopwatch-wrapper {
   display: none;
   position:fixed;
-  bottom:75px;
-  right:25px;
+  bottom: 110px;
+  right: 138px;
   justify-content: center;
   align-items: center;
   font-family: Arial, Helvetica, sans-serif;
