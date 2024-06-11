@@ -809,9 +809,9 @@ button#Toggleaccpanelinternals-Button {
 }
 
 .featured-section {
-	min-height: 55px;max-height: 140px;
-	height: 55px;overflow: auto;
-    margin-top: 0px;
+	min-height: 32px;max-height: 140px;
+	height: 32px;overflow: auto;
+    margin-top: 6px;
     padding: 10px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     color: var(--staticpage-panels-text-color);
