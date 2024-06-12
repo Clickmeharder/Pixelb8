@@ -13,9 +13,12 @@ ________________________________________________________________________________
 [comments: ]
 [o][5] - add slideshow images and js logic for automatic advertisement slideshow inside the ad panel 
 [comments: ]
-[o][3] fix stash manager and euitemstash
+[o][6] fix stash manager and euitemstash
 [comments: ]
-[o][4]-group stashmanager and euitemstash more intuitively - also in the folder
+[o][7]-group stashmanager and euitemstash more intuitively - also in the folder
+[comments: ]
+
+[o][8]- implement a space taxi meter into hudclock tools
 [comments: ]
 ______________________________________________________________________________________________________|
 
@@ -36,9 +39,9 @@ ________________________________________________________________________________
 
 -------------------
 
-[o][5]- fix the timer and text
+[x][5]- fix the timer and text
 [comments: ] 
-[o][6]- more cool intuitive button for timer with some options
+[x][6]- more cool intuitive button for timer with some options
 [comments: ]
 --------------------
 

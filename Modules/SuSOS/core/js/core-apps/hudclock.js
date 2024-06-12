@@ -532,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				// Check if the countdown is finished
 				if (remainingTime <= 0) {
 					clearInterval(countdownInterval);
-					timerElement.textContent = label + ' - Timer Expired';
+					timerElement.textContent = 'Ding! Ding! Ding! a skoozie senior' + label + ', Timer has Expired.';
 					// Play the timer expired message
 					
 					
@@ -631,7 +631,7 @@ function speakLabel(label, desiredVoiceIndex) {
 } */
 // Function to play a message when the timer expires
 function playTimerExpiredMessage(label) {
-    var message = new SpeechSynthesisUtterance('Captain,  The, ' + label + ' Timer. has expired.');
+    var message = new SpeechSynthesisUtterance('Attention Captain,  The, ' + label + ' Timer. has expired. I repeat. the' + label + 'Timer has expired.');
     speechSynthesis.speak(message);
 }
 
