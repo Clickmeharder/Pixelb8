@@ -381,6 +381,34 @@ document.addEventListener('DOMContentLoaded', function () {
 		loadScheduledEventsList();
 		updateClock('localtime', 'EUtime');
 
+// Define arrays of prefixes and suffixes
+var utterancePrefixes = [
+    'Excuse me, Captain, your custom timer labelled ',
+    'Attention, a custom timer with the label ',
+    'Ding! Ding! Ding! Timer ',
+    'Heads up! The timer named ',
+    'Alert! Timer named ',
+    'Yo! Timer ',
+    'Beep Beep! Timer '
+];
+
+var utteranceSuffixes = [
+    ' has expired.',
+    ' has finished.',
+    ' will self-destruct in 3, 2, 1...',
+    ' is done. Hope you enjoyed the wait!',
+    ' is up. Time flies, doesn’t it?',
+    ' has run out of time. Time for a break!',
+    ' is complete. Take a breather!'
+];
+
+// Function to get a random element from an array
+function getRandomElement(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+
+		// Load timers from local storage and create the countdown
 		function loadTimersFromLocalStorage() {
 			var timers = JSON.parse(localStorage.getItem('timers')) || [];
 			timers.forEach(function (timer) {
@@ -481,7 +509,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			var hours = prompt('Enter the number of hours for the timer:');
 			var minutes = prompt('Enter the number of minutes for the timer:'); // Added prompt for minutes
 			var label;
-			
+
 			// Check if the user canceled the input
 			if (hours === null || minutes === null) {
 				alert('Timer creation canceled.'); // Notify the user
@@ -498,7 +526,6 @@ document.addEventListener('DOMContentLoaded', function () {
 					return; // Exit the function
 				}
 			}
-
 			// Save the current local time and the total time in milliseconds
 			var startTime = new Date().getTime();
 			var totalTime = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000); // Calculate total time in milliseconds
@@ -507,7 +534,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			var timerElement = document.createElement('div');
 			timerElement.className = 'timer';
 			timerElement.textContent = label + ' - ' + hours + 'h ' + minutes + 'm'; // Updated display format
-
 
 			// Create a countdown timer
 			var countdownInterval = setInterval(function () {
@@ -532,27 +558,13 @@ document.addEventListener('DOMContentLoaded', function () {
 				// Check if the countdown is finished
 				if (remainingTime <= 0) {
 					clearInterval(countdownInterval);
-					timerElement.textContent = 'Ding! Ding! Ding! a skoozie senior' + label + ', Timer has Expired.';
+					timerElement.textContent = label + ' - Timer Expired';
 					// Play the timer expired message
-					
-					
-					var voices = speechSynthesis.getVoices();
-					console.log("Available Voices:");
-					voices.forEach(function (voice, index) {
-						console.log(index + ": " + voice.name);
-					});
 					playTimerExpiredMessage(label);
+
 					// Display a message and ask the user to click to hear the label
 					timerElement.innerHTML += '<br>Click to hear label';
 					timerElement.addEventListener('click', function () {
-						
-						// Log available voices and their indices
-						var voices = speechSynthesis.getVoices();
-						console.log("Available Voices:");
-						voices.forEach(function (voice, index) {
-							console.log(index + ": " + voice.name);
-						});
-
 						// Read the label using text-to-speech
 						speakLabel(label);
 
@@ -570,71 +582,73 @@ document.addEventListener('DOMContentLoaded', function () {
 			saveTimerToLocalStorage(label, totalTime, startTime);
 		});
 
-	// Function to save a timer to local storage
-	function saveTimerToLocalStorage(label, totalTime, startTime) {
-		var timers = JSON.parse(localStorage.getItem('timers')) || [];
-		timers.push({ label: label, totalTime: totalTime, startTime: startTime });
-		localStorage.setItem('timers', JSON.stringify(timers));
-	}
+		// Function to save a timer to local storage
+		function saveTimerToLocalStorage(label, totalTime, startTime) {
+			var timers = JSON.parse(localStorage.getItem('timers')) || [];
+			timers.push({ label: label, totalTime: totalTime, startTime: startTime });
+			localStorage.setItem('timers', JSON.stringify(timers));
+		}
 
-	// Function to load timers from local storage when the page loads
-	loadTimersFromLocalStorage();
-	});
-// Function to remove a timer from local storage by label
-function removeTimerFromLocalStorage(label) {
-    var timers = JSON.parse(localStorage.getItem('timers')) || [];
-    timers = timers.filter(function (timer) {
-        return timer.label !== label;
-    });
-    localStorage.setItem('timers', JSON.stringify(timers));
-}
+		// Function to load timers from local storage when the page loads
+		loadTimersFromLocalStorage();
+		// Function to remove a timer from local storage by label
+		function removeTimerFromLocalStorage(label) {
+			var timers = JSON.parse(localStorage.getItem('timers')) || [];
+			timers = timers.filter(function (timer) {
+				return timer.label !== label;
+			});
+			localStorage.setItem('timers', JSON.stringify(timers));
+		}
 
-// Function to remove a timer from the stack
-function removeTimerFromStack(label) {
-    var timerStack = document.getElementById('timer-stack');
-    var timers = timerStack.getElementsByClassName('timer');
 
-    for (var i = 0; i < timers.length; i++) {
-        var timerLabel = timers[i].textContent.split(' - ')[0];
-        if (timerLabel === label) {
-            timerStack.removeChild(timers[i]);
-            break;
-        }
-    }
-}
+		// Function to remove a timer from the stack
+		function removeTimerFromStack(label) {
+			var timerStack = document.getElementById('timer-stack');
+			var timers = timerStack.getElementsByClassName('timer');
 
-// Function to handle utterance end event
-function onUtteranceEnd(label) {
-    console.log('Utterance ended for label: ' + label);
-    removeTimerFromStack(label);
-    removeTimerFromLocalStorage(label);
-}
+			for (var i = 0; i < timers.length; i++) {
+				var timerLabel = timers[i].textContent.split(' - ')[0];
+				if (timerLabel === label) {
+					timerStack.removeChild(timers[i]);
+					break;
+				}
+			}
+		}
 
-// Modify your existing speakLabel function
-function speakLabel(label, desiredVoiceIndex) {
-    // Create a new SpeechSynthesisUtterance
-    var utterance = new SpeechSynthesisUtterance(label);
+		// Function to handle utterance end event
+		function onUtteranceEnd(label) {
+			console.log('Utterance ended for label: ' + label);
+			removeTimerFromStack(label);
+			removeTimerFromLocalStorage(label);
+		}
 
-   
-    // Set up the onend event listener
-    utterance.onend = function () {
-        onUtteranceEnd(label);
-    };
+		// Modify your existing speakLabel function to include the new utterance format
+		function speakLabel(label) {
+			var prefix = getRandomElement(utterancePrefixes);
+			var suffix = getRandomElement(utteranceSuffixes);
+			var message = new SpeechSynthesisUtterance(prefix + label + suffix);
+			
+			// Set up the onend event listener
+			message.onend = function () {
+				onUtteranceEnd(label);
+			};
 
-    // Speak the utterance
-    speechSynthesis.speak(utterance);
-}
+			// Speak the utterance
+			speechSynthesis.speak(message);
+		}
+
 // Function to play the timer expired sound
 /* function playTimerExpiredSound() {
     var audio = new Audio('sounds/timeend_sound1.mp3');
     audio.play();
 } */
 // Function to play a message when the timer expires
-function playTimerExpiredMessage(label) {
-    var message = new SpeechSynthesisUtterance('Attention Captain,  The, ' + label + ' Timer. has expired. I repeat. the' + label + 'Timer has expired.');
-    speechSynthesis.speak(message);
-}
-
+	function playTimerExpiredMessage(label) {
+		var prefix = getRandomElement(utterancePrefixes);
+		var suffix = getRandomElement(utteranceSuffixes);
+		var message = new SpeechSynthesisUtterance(prefix + label + suffix);
+		speechSynthesis.speak(message);
+	}
 //------------------------------------
 //stopwatch functionality
 let watchstartTime;
