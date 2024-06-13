@@ -2656,7 +2656,27 @@ button#stopwatch-play{
     box-shadow: 4px 4px 7px #191f21, -4px -4px 7px #233c52;
 }
 
+input.verticalslider[type="range"] {
+    -webkit-appearance: none;
+    width: 55px;
+    height: 3px; /* Adjust height as needed */
+    background: linear-gradient(to bottom, #333861, #00b7ff); /* Gradient from top to bottom */
+    border-radius: 5px;
+    outline: 3px ridge;
+    margin-top: 5px;
+    transform: rotate(270deg); /* Rotate the range input */
+}
 
+input.verticalslider[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 3px;
+    height: 22px; /* Adjust height as needed */
+    border-radius: 5px;
+    cursor: pointer;
+	background: #ac8181;
+    box-shadow: 0 0 10px rgba(0, 0, 255, 1);
+    transform: rotate(90deg); /* Rotate the thumb */
+}
 
 input.volumeslider[type="range"] {
     -webkit-appearance: none;
