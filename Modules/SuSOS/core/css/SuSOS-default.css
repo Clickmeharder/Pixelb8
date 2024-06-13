@@ -2667,7 +2667,7 @@ button#stopwatch-play{
 div#MasterAudioControlbox {
     width: 69px;
 }
-div#MasterAudioControlbox {
+div#AudioControlbox {
     width: 50px;
 }
 .mastervolumesliderlabel{width:min-content;}
@@ -2706,17 +2706,18 @@ input.volumeslider[type="range"] {
 
 input.volumeslider[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 3px;
+    width: 4px;
     height: 22px;
+	border:5px outset #01e5ffbf;
     border-radius: 5px;
     cursor: pointer;
 	background: #ac8181;
     box-shadow: 0 0 10px rgba(0, 0, 255, 1);
-    
+    transition:0.8s;
 }
 
 input.volumeslider[type="range"]::-webkit-slider-thumb:hover {
     background: #06d914;
+	border:5px outset #2a584e61;
     box-shadow: 0 0 6px rgb(0 0 0);
 }
-
