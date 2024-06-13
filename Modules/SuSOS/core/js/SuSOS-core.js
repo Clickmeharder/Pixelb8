@@ -63,7 +63,7 @@ function onPlayerReady(event) {
   }
 
   $(".duration").text(Math.floor(total));
-} */
+} 
 
 /*
 Some Commonly used Methods:
