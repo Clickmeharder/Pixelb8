@@ -2673,10 +2673,18 @@ div#MasterAudioControlbox {
 div#AudioControlbox {
     width: 50px;
 }
-.mastervolumesliderlabel{width:min-content;transform: rotate(270deg);}
+.mastervolumesliderlabel{
+	font-weight: bold;
+	font-size:larger;
+    font-family: Yatra none;
+    margin: 4px;
+    transform: rotate(270deg);
+    padding: 4px;
+    padding-right: 69px;
+    margin-left: 69px;
+	}
 p#audiodial-musicLabel {
     font-weight: bold;
-	font-size:larger;
     font-family: Yatra none;
     margin: 4px;
     transform: rotate(270deg);
