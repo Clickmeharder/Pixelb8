@@ -172,8 +172,36 @@ function clearexpiredTimer(label) {
     removeTimerFromStack(label);
     removeTimerFromLocalStorage(label);
 }
-
+/*TESTING AUDIO CONTROL FUNCTIONS*/
+// Function to handle SpeechSynthesis notifications
 function robSays(label, desiredVoiceIndex = null) {
+	var thesewords = new SpeechSynthesisUtterance("clearing expired timer " + label);
+	if (desiredVoiceIndex !== null) {
+		var voices = speechSynthesis.getVoices();
+		thesewords.voice = voices[desiredVoiceIndex];
+	}
+	thesewords.volume = currentVolume / 100;
+	thesewords.onend = function () {
+		clearexpiredTimer(label);
+	};
+	console.log('Voice index used =', desiredVoiceIndex);
+	speechSynthesis.speak(thesewords);
+}
+
+function robSaysTimesup(label, desiredVoiceIndex = null) {
+	var prefix = getRandomArrayobject(robotimerPrefixes);
+	var suffix = getRandomArrayobject(robotimerSuffixes);
+	var spokenmessage = new SpeechSynthesisUtterance(prefix + label + suffix);
+	if (desiredVoiceIndex !== null) {
+		var voices = speechSynthesis.getVoices();
+		spokenmessage.voice = voices[desiredVoiceIndex];
+	}
+	spokenmessage.volume = currentVolume / 100;
+	console.log('Voice index used =', desiredVoiceIndex);
+	speechSynthesis.speak(spokenmessage);
+}
+
+/* function robSays(label, desiredVoiceIndex = null) {
     // Create a new SpeechSynthesisUtterance
     var thesewords = new SpeechSynthesisUtterance("clearing expired timer " + label);
     
@@ -207,7 +235,7 @@ function robSaysTimesup(label, desiredVoiceIndex = null) {
 	console.log('voice index used =', desiredVoiceIndex);
 	// Speak the utterance
     speechSynthesis.speak(spokenmessage);
-}
+} */
 // Modify your existing speakLabel function
 function speakLabel(label, desiredVoiceIndex) {
     // Create a new SpeechSynthesisUtterance
