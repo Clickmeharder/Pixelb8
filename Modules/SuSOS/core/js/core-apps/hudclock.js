@@ -911,3 +911,4 @@ function toggleStopwatchDisplay() {
 
 // Add event listener to the clocktools-button
 document.getElementById('clocktools-button').addEventListener('click', toggleStopwatchDisplay);
+console.log('hudclock finally went thru');
