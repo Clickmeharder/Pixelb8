@@ -470,7 +470,7 @@
 									<div class="row">
 									  <button class="boxbutt menu-a" id="menua">file</button>
 									  <button class="boxbutt menu-b" id="menub">edit</button>
-									  <button class="boxbutt menu-c" id="menuc">search</buttonc>
+									  <button class="boxbutt menu-c" id="menuc">search</button>
 									  <button class="boxbutt menu-d" id="menud">settings</button>
 									  <button class="boxbutt menu-e" id="menud">resources</button>
 									  <button class="boxbutt menu-f" id="menuf">help</button>
@@ -681,11 +681,9 @@
 									<div class="Innerinfobox row" id="ValueB">
 										<div class="button" id="play-button">Resume</div>
 										<div class="button" id="pause-button">Pause</div>
-
 									</div>
 									<hr>
-									<div class="row" style="max-width:500px;">
-
+									<div class="row" style="">
 										<div class="Innerinfobox" id="AudioControlbox">
 											<p class="innerlabel-text smallform-labeltext volumesliderlabel" id="audiodial-musicLabel">Music&Video</p>
 											<input type="range" class="volumeslider verticalslider" id="musicPlayerAudioDial" name="musicPlayerAudioDial" min="0" max="100" value="50">
@@ -725,21 +723,7 @@
 								</div>
 							</div>
 
-							<script>
-								function populateVoiceList() {
-									const select = document.getElementById('robbotvoiceSelect');
-									const voices = window.speechSynthesis.getVoices();
-									
-									voices.forEach((voice, index) => {
-										const option = document.createElement('option');
-										option.textContent = `${voice.name} (${voice.lang})`;
-										option.value = index;
-										select.appendChild(option);
-									});
-								}
-
-								window.speechSynthesis.onvoiceschanged = populateVoiceList;
-							</script>
+							
 
 					<!-- EU Tools Folder start of first eu tool test windows -->
 							<div class="window column resizable draggable-menu" id="hud-EuTools" data-draggable="true">
