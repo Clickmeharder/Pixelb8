@@ -642,9 +642,8 @@ timerButton.addEventListener('click', function () {
 	timerStack.appendChild(timerElement);
 	saveTimerToLocalStorage(label, totalTime, startTime);
 });
-// Function to load timers from local storage when the page loads
-loadTimersFromLocalStorage();
-});
+
+
 	
 
 //------------------------------------
@@ -763,6 +762,8 @@ function toggleStopwatchDisplay() {
 //----finished event listeners-----------------------------------------------------
 
 // Call the function to load scheduled events when the page loads
+// Function to load timers from local storage when the page loads
+loadTimersFromLocalStorage();
 loadScheduledEventsList();
 updateClock('localtime', 'EUtime');
 
