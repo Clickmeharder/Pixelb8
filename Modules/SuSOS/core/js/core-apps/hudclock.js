@@ -589,7 +589,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (currentMonthWarpDates) {
 				// Add events for specific dates
 				currentMonthWarpDates.forEach(function (day) {
-					console.log('Adding Event for Day:', day);
+					// console.log('Adding Event for Day:', day);
 					calendar.addEvent({
 						title: 'Yamato M.S. Warp',
 						start: new Date(new Date().getFullYear(), currentMonth - 1, day, 18, 45),
