@@ -29,6 +29,9 @@ const windowIds = [];
 windowIds.push('hud-Applets');
 windowIds.push('hud-Example');
 windowIds.push('hud-NewDigs');
+windowIds.push('hud-Settings');
+
+windowIds.push('hud-AudioSettings');
 
 
 // Push EuApplet window IDs into the array
