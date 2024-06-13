@@ -2668,12 +2668,17 @@ div#hud-AudioSettings {
 }
 
 select#robbotvoiceSelect {
-    width: 170px;
-    min-width: 170px;
-    max-width: 170px;
+    width: 146px;
+    min-width: 146px;
+    max-width: 146px;
 }
 p#voiceselectLabel {
+    font-family: 'Pixelify Sans';
+    font-size: 23px;
     width: min-content;
+    margin: auto;
+    margin-top: 7px;
+    padding-left: 0px;
 }
 div#Audiosettings {
     width: 100%;
@@ -2817,6 +2822,22 @@ input.volumeslider.verticalslider:disabled + button#lockedinput.audiomasterlock 
     border: none;
 }
 button#lockedinput.audiomasterlock {
+    position: relative;
+    top: 97px;
+    left: -201px;
+    border: none;
+    border-radius: 50%;
+    transform: rotate3d(0, 0, 1, -30deg) translateX(-54px);
+    transition: 0.8s, smooth;
+}
+input.volumeslider.verticalslider:disabled + button#lockedinput.robbotvoicelock {
+    left: -148px;
+    top: 25px;
+    transform: rotate3d(0, 1, 2, 28deg) translateX(-5px);
+    transition: 3.3s;
+    border: none;
+}
+button#lockedinput.robbotvoicelock {
     position: relative;
     top: 97px;
     left: -201px;
