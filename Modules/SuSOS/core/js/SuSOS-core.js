@@ -29,7 +29,8 @@ function onPlayerReady(event) {
     total = player.getDuration();
     time = player.getCurrentTime();
 
-    
+    playerTimeDifference = (time / total) * 100;
+    progress(playerTimeDifference, $("#progressBar"));
     $(".current").text(Math.round(time));
   });
 
@@ -54,6 +55,8 @@ function onPlayerReady(event) {
       time = player.getCurrentTime();
       playerTimeDifference = (time / total) * 100;
 
+      // progress(playerTimeDifference, $("#progressBar"));
+
       $(".current").text(Math.round(time));
     }, 1000); // 100 means repeat in 100 ms
   } else {
@@ -63,7 +66,7 @@ function onPlayerReady(event) {
   }
 
   $(".duration").text(Math.floor(total));
-} */
+} 
 
 /*
 Some Commonly used Methods:
@@ -99,6 +102,13 @@ player.setPlaybackQuality(suggestedQuality:String) - Return type Void
 
 */
  
+function progress(percent, $element) {
+  var progressBarWidth = (percent * $element.width()) / 100;
+
+  // $element.find('div').animate({ width: progressBarWidth }, 500).html(percent + "%&nbsp;");
+
+  $element.find("#progressBar").animate({ width: progressBarWidth });
+}
 
 $(document).ready(function (e) {
   $("#mainAudioDial").on("mousemove", function () {
