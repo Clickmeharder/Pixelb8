@@ -191,10 +191,10 @@ function robotSays(label, desiredVoiceIndex) {
 function robotSays2(label) {
     var prefix = getRandomElement(robotimerPrefixes);
     var suffix = getRandomElement(robotimerSuffixes);
-    var message = new SpeechSynthesisUtterance(prefix + label + suffix);
+    var spokenmessage = new SpeechSynthesisUtterance(prefix + label + suffix);
     // Set up the onend event listener
-    utterance.onend = function () {
-        onUtteranceEnd(label);
+    spokenmessage.onend = function () {
+        clearexpiredTimer(label);
     };
     // Speak the utterance
     speechSynthesis.speak(message);
