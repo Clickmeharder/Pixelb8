@@ -173,7 +173,7 @@ function clearexpiredTimer(label) {
     removeTimerFromLocalStorage(label);
 }
 
-function robotSays(label, desiredVoiceIndex = null) {
+function robSays(label, desiredVoiceIndex = null) {
     // Create a new SpeechSynthesisUtterance
     var thesewords = new SpeechSynthesisUtterance("clearing expired timer " + label);
     
