@@ -563,7 +563,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			console.log('Date clicked:', date);
 		}
 	});
-}
+})
 //countdown timer:
 var timerButton = document.getElementById('timer-button');
 var timerStack = document.getElementById('timer-stack');
