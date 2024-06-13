@@ -29,8 +29,7 @@ function onPlayerReady(event) {
     total = player.getDuration();
     time = player.getCurrentTime();
 
-    playerTimeDifference = (time / total) * 100;
-    progress(playerTimeDifference, $("#progressBar"));
+    
     $(".current").text(Math.round(time));
   });
 
@@ -43,7 +42,7 @@ function onPlayerReady(event) {
   });
 }
 
-/* function onPlayerStateChange(event) {
+ function onPlayerStateChange(event) {
   if (event.data == 1) {
     // playing
 
@@ -54,8 +53,6 @@ function onPlayerReady(event) {
     myTimer = setInterval(function () {
       time = player.getCurrentTime();
       playerTimeDifference = (time / total) * 100;
-
-      progress(playerTimeDifference, $("#progressBar"));
 
       $(".current").text(Math.round(time));
     }, 1000); // 100 means repeat in 100 ms
@@ -102,13 +99,6 @@ player.setPlaybackQuality(suggestedQuality:String) - Return type Void
 
 */
  
-function progress(percent, $element) {
-  var progressBarWidth = (percent * $element.width()) / 100;
-
-  // $element.find('div').animate({ width: progressBarWidth }, 500).html(percent + "%&nbsp;");
-
-  $element.find("#progressBar").animate({ width: progressBarWidth });
-}
 
 $(document).ready(function (e) {
   $("#mainAudioDial").on("mousemove", function () {
