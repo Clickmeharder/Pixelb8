@@ -43,7 +43,7 @@ function onPlayerReady(event) {
   });
 }
 
-function onPlayerStateChange(event) {
+/* function onPlayerStateChange(event) {
   if (event.data == 1) {
     // playing
 
@@ -66,7 +66,7 @@ function onPlayerStateChange(event) {
   }
 
   $(".duration").text(Math.floor(total));
-}
+} */
 
 /*
 Some Commonly used Methods:
@@ -101,7 +101,7 @@ highres, hd1080, hd720, large, medium and small
 player.setPlaybackQuality(suggestedQuality:String) - Return type Void
 
 */
-
+ 
 function progress(percent, $element) {
   var progressBarWidth = (percent * $element.width()) / 100;
 
