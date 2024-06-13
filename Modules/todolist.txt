@@ -35,6 +35,9 @@ ________________________________________________________________________________
 [comments: ]
 [o][8]- implement logic and fix to save user highscores for snake and future games
 [comments: ]
+
+[o][8]- implement independant Rob.Bot js code and give him life and intelligence.
+[comments: ]
 ______________________________________________________________________________________________________|
 
 ______________________________________________________________________________________________________
