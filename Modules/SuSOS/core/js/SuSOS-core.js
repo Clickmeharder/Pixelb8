@@ -587,7 +587,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	];
 
-	const hudMenu = document.getElementById('hudmenu');
+	const hudMenu = document.getElementById('hudstartmenu');
 
 	buttons.forEach(button => {
 		const btnElement = document.createElement('button');
