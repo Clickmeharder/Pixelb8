@@ -599,7 +599,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		if (button.subButtons.length > 0) {
 			const subBox = document.createElement('div');
 			subBox.className = 'collapsingbox column';
-			subBox.id = `hudmenu${buttons.indexOf(button) + 1}`;
+			subBox.id = `hudstartmenu${buttons.indexOf(button) + 1}`;
 			button.subButtons.forEach(subButton => {
 				const subBtnElement = document.createElement('button');
 				subBtnElement.className = 'hudsubmenuButt';
