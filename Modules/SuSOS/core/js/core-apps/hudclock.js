@@ -626,7 +626,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					timerElement.innerHTML += '<br>Click to hear label';
 					timerElement.addEventListener('click', function () {
 						// Read the label using text-to-speech
-						robSaysTimesup(expiredLabel);
+						robSaysTimesup(expiredLabel, 2);
 
 						// Remove the timer from the stack
 						timerStack.removeChild(timerElement);
@@ -677,7 +677,7 @@ document.addEventListener('DOMContentLoaded', function () {
 							timerElement.innerHTML += '<br>Click to hear label';
 							timerElement.addEventListener('click', function () {
 								// Read the label using text-to-speech
-								robSaysTimesup(expiredLabel);
+								robSaysTimesup(expiredLabel, 2);
 
 								// Remove the timer from the stack
 								timerStack.removeChild(timerElement);
@@ -781,7 +781,7 @@ document.addEventListener('DOMContentLoaded', function () {
 						});
 
 						// Read the label using text-to-speech
-						robSays(label, 1);
+						robSays(label, 2);
 
 						// Remove the timer from the stack
 						timerStack.removeChild(timerElement);
