@@ -2666,7 +2666,14 @@ select#robbotvoiceSelect {
     min-width: 170px;
     max-width: 170px;
 }
-
+p#voiceselectLabel {
+    width: min-content;
+}
+div#Audiosettings {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
 div#MasterAudioControlbox {
     width: 85px;
 }
@@ -2674,15 +2681,20 @@ div#AudioControlbox {
     width: 50px;
 }
 .mastervolumesliderlabel{
-	font-weight: bold;
-	font-size:larger;
+    font-weight: normal;
+    font-size: 34px;
     font-family: Yatra none;
     margin: 4px;
     transform: rotate(270deg);
-    padding: 4px;
-    padding-right: 69px;
-    margin-left: 69px;
+    padding: 0px;
+    margin-bottom: -36px;
+    padding-right: 172px;
+    margin-left: 30px;
 	}
+input#mainAudioDial {
+    margin-left: 48px;
+    width: 200%;
+}
 p#audiodial-musicLabel {
     font-weight: bold;
     font-family: Yatra none;
