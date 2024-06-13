@@ -2656,6 +2656,22 @@ button#stopwatch-play{
     box-shadow: 4px 4px 7px #191f21, -4px -4px 7px #233c52;
 }
 
+
+
+
+
+
+
+
+/*audio settings controls*/
+div#MasterAudioControlbox {
+    width: 69px;
+}
+div#MasterAudioControlbox {
+    width: 50px;
+}
+.mastervolumesliderlabel{width:min-content;}
+.volumesliderlabel{width:min-content;}
 input.verticalslider[type="range"] {
     -webkit-appearance: none;
     width: 55px;
@@ -2703,3 +2719,4 @@ input.volumeslider[type="range"]::-webkit-slider-thumb:hover {
     background: #06d914;
     box-shadow: 0 0 6px rgb(0 0 0);
 }
+
