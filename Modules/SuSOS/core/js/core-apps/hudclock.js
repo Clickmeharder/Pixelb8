@@ -768,7 +768,7 @@ document.addEventListener('DOMContentLoaded', function () {
 						console.log(index + ": " + voice.name);
 					});
 					//playTimerExpiredMessage(label);
-					robSaysTimesup(label);
+					robSaysTimesup(label, 2);
 					// Display a message and ask the user to click to hear the label
 					timerElement.innerHTML += '<br>Click to hear label';
 					timerElement.addEventListener('click', function () {
