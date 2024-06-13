@@ -2659,7 +2659,11 @@ button#stopwatch-play{
 
 
 
-
+div#hud-AudioSettings {
+    min-width: 150px;
+    max-width: 220px;
+    max-height: 400px;
+}
 
 select#robbotvoiceSelect {
     width: 170px;
@@ -2675,24 +2679,35 @@ div#Audiosettings {
     overflow-y: auto;
 }
 div#MasterAudioControlbox {
-    width: 85px;
+	width: 86px;
+    height: 134px;
+    border: 4px outset rgb(23, 130, 182, 0.8);
+    padding-top: 44px;
+    padding-bottom: 39px;
 }
 div#AudioControlbox {
-    width: 50px;
+    width: 25px;
+    border: 4px outset rgb(23, 130, 182, 0.8);
+    padding-top: 12px;
+    padding-bottom: 100px;
 }
-.mastervolumesliderlabel{
-    font-weight: normal;
-    font-size: 34px;
-    font-family: Yatra none;
+
+.mastervolumesliderlabel {
+	position: relative;
+    right: 0px;
+    font-size: 21px;
+    font-family: 'Pixelify Sans';
     margin: 4px;
-    transform: rotate(270deg);
+    transform: rotate(270deg) translateX(-82px);
     padding: 0px;
-    margin-bottom: -36px;
-    padding-right: 172px;
-    margin-left: 30px;
-	}
+    margin-bottom: -33px;
+    padding-top: 0px;
+    padding-right: 0px;
+}
 input#mainAudioDial {
-    margin-left: 48px;
+    position: relative;
+    left: -29px;
+    top: -9px;
     width: 200%;
 }
 p#audiodial-musicLabel {
@@ -2758,12 +2773,13 @@ input.verticalslider[type="range"]::-webkit-slider-thumb {
 input.volumeslider[type="range"] {
     -webkit-appearance: none;
     width: min-content;
-    height: 2px;
+    height: 3px;
     background: linear-gradient(to right, #333861, #00b7ff);
     border-radius: 5px;
-    outline: 3px ridge;
-	margin-top: 27px;
+    outline: 6px ridge;
+    margin-top: 63px;
     margin-left: -34px;
+    margin-bottom: 0px;
 }
 
 input.volumeslider[type="range"]::-webkit-slider-thumb {
@@ -2787,15 +2803,18 @@ input.volumeslider[type="range"]::-webkit-slider-thumb:hover {
 }
 
 input.volumeslider.verticalslider:disabled + button#lockedinput.audiomasterlock {
-    left: -120px;
-    top: 27px;
+    left: -148px;
+    top: 25px;
     transform: rotate3d(0, 1, 2, 28deg) translateX(-5px);
     transition: 3.3s;
     border: none;
 }
 button#lockedinput.audiomasterlock {
     position: relative;
-    top: 78px;
-    left: -161px;
-    transform: rotate3d(0, 0, 1, -13deg) translateX(-54px);
+    top: 97px;
+    left: -201px;
+    border: none;
+    border-radius: 50%;
+    transform: rotate3d(0, 0, 1, -30deg) translateX(-54px);
     transition: 0.8s, smooth;
+}
