@@ -470,7 +470,6 @@ function loadScheduledEventsList() {
 			duration: { hours: 2 },
 			backgroundColor: '#0a6211e0',
 		});
-	}
 	// Add events for Saturday & Sunday at 15:00
 	calendar.addEvent({
 		title: 'Big Industries SSI',
@@ -491,7 +490,7 @@ function loadScheduledEventsList() {
 //-----------------------------------------------------------------
 //new calender function - 
 //----------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', function () {
+/* document.addEventListener('DOMContentLoaded', function () {
     addCustomStyles();
 
     var calendarEl = document.getElementById('calendar');
@@ -505,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Other FullCalendar options...
     });
     calendar.render();
-});
+}); */
 //-----------------------------------------------------------------
 //old calender function - 
 //----------------------------------------------------------------
