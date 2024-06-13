@@ -280,67 +280,6 @@ closeAllWindows();
 //------------END OF WINDOW main code------------------------
 
 
-// Add event listeners to the menu buttons
-const menuButtons = document.querySelectorAll('.menubutt');
-// event listener function for menu buttons
-menuButtons.forEach(button => {
-  button.addEventListener('click', function() {
-    // Get the data-window-id attribute value of the clicked button
-    const windowId = button.getAttribute('data-window-id');
-    // Toggle the visibility of the corresponding window
-    toggleWindowVisibility(windowId);
-  });
-});
-// get the submenu buttons in side the hudmenu
-const submenuButtons = document.querySelectorAll('.hudsubmenuButt');
-// event listener function for menu buttons
-submenuButtons.forEach(button => {
-  button.addEventListener('click', function() {
-    // Get the data-window-id attribute value of the clicked button
-    const windowId = button.getAttribute('data-window-id');
-    // Toggle the visibility of the corresponding window
-    toggleWindowVisibility(windowId);
-  });
-});
-
-
-//APPLET WINDOW - ( LIST OF ITEMS SIMILAR TO FILE FOLDER PERHAPS RENAME THIGNS TO INSINUATE THIS FOR INTUITIVENESS)
-// Get all the buttons inside the .applet-list
-const appletButtons = document.querySelectorAll('.applet-list .applet');
-// Function to open the corresponding window when an applet button is clicked
-const openAppletWindow = (appName) => {
-    // Remove the '.exe' suffix from the applet name
-    appName = appName.replace('.exe', '');
-    
-    const windowId = 'hud-' + appName; // Assuming the window IDs are prefixed with 'hud-'
-    const windowElement = document.getElementById(windowId);
-    if (windowElement) {
-        // Toggle the visibility of the window
-        toggleWindowVisibility(windowId);
-    } else {
-        console.log('Window for ' + appName + ' does not exist.');
-    }
-};
-// Add click event listeners to each applet button
-appletButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        const appName = button.textContent.trim(); // Get the text content of the button
-        openAppletWindow(appName);
-    });
-});
-
-const lockedElements = document.querySelectorAll("#lockedinput");
-lockedElements.forEach(button => {
-    button.addEventListener("click", function () {
-        const targetElement = this.parentElement.querySelector("input, select");
-        targetElement.disabled = !targetElement.disabled;
-
-        // Change the image source based on the disabled state
-        const img = this.querySelector("img");
-        img.src = targetElement.disabled ? "../../assets/images/icons/mouse_padlock.png" : "../../assets/images/icons/tools_gear-0.png";
-    });
-});
-
 // Function to toggle the Sell Item Stash Menu
 function toggleSellItemStashMenu(clickedButton) {
     openAppletWindow('EuSellitemsMenu');
@@ -623,4 +562,66 @@ document.addEventListener('click', (event) => {
             });
 
         });
+		
+//----------
+// Add event listeners to the menu buttons
+const menuButtons = document.querySelectorAll('.menubutt');
+// event listener function for menu buttons
+menuButtons.forEach(button => {
+  button.addEventListener('click', function() {
+    // Get the data-window-id attribute value of the clicked button
+    const windowId = button.getAttribute('data-window-id');
+    // Toggle the visibility of the corresponding window
+    toggleWindowVisibility(windowId);
+  });
+});
+// get the submenu buttons in side the hudmenu
+const submenuButtons = document.querySelectorAll('.hudsubmenuButt');
+// event listener function for menu buttons
+submenuButtons.forEach(button => {
+  button.addEventListener('click', function() {
+    // Get the data-window-id attribute value of the clicked button
+    const windowId = button.getAttribute('data-window-id');
+    // Toggle the visibility of the corresponding window
+    toggleWindowVisibility(windowId);
+  });
+});
+
+//APPLET WINDOW - ( LIST OF ITEMS SIMILAR TO FILE FOLDER PERHAPS RENAME THIGNS TO INSINUATE THIS FOR INTUITIVENESS)
+// Get all the buttons inside the .applet-list
+const appletButtons = document.querySelectorAll('.applet-list .applet');
+// Function to open the corresponding window when an applet button is clicked
+const openAppletWindow = (appName) => {
+    // Remove the '.exe' suffix from the applet name
+    appName = appName.replace('.exe', '');
+    
+    const windowId = 'hud-' + appName; // Assuming the window IDs are prefixed with 'hud-'
+    const windowElement = document.getElementById(windowId);
+    if (windowElement) {
+        // Toggle the visibility of the window
+        toggleWindowVisibility(windowId);
+    } else {
+        console.log('Window for ' + appName + ' does not exist.');
+    }
+};
+// Add click event listeners to each applet button
+appletButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const appName = button.textContent.trim(); // Get the text content of the button
+        openAppletWindow(appName);
+    });
+});
+
+const lockedElements = document.querySelectorAll("#lockedinput");
+lockedElements.forEach(button => {
+    button.addEventListener("click", function () {
+        const targetElement = this.parentElement.querySelector("input, select");
+        targetElement.disabled = !targetElement.disabled;
+
+        // Change the image source based on the disabled state
+        const img = this.querySelector("img");
+        img.src = targetElement.disabled ? "../../assets/images/icons/mouse_padlock.png" : "../../assets/images/icons/tools_gear-0.png";
+    });
+});
+
 console.log('ughh sus os core finally went thru');
