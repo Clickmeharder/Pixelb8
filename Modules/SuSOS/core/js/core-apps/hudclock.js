@@ -193,11 +193,19 @@ function robSays(label, desiredVoiceIndex = null) {
     speechSynthesis.speak(thesewords);
 }
 // Modified speakLabel function to include the new utterance format
-function robSaysTimesup(label) {
+function robSaysTimesup(label, desiredVoiceIndex = null) {
     var prefix = getRandomArrayobject(robotimerPrefixes);
     var suffix = getRandomArrayobject(robotimerSuffixes);
     var spokenmessage = new SpeechSynthesisUtterance(prefix + label + suffix);
+        // Optionally set the voice if desiredVoiceIndex is provided
+    if (desiredVoiceIndex !== null) {
+        var voices = speechSynthesis.getVoices();
+        spokenmessage.voice = voices[desiredVoiceIndex];
+    }
+
     // Speak the utterance
+	console.log('voice index used =', desiredVoiceIndex);
+	// Speak the utterance
     speechSynthesis.speak(spokenmessage);
 }
 // Modify your existing speakLabel function
