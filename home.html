@@ -764,7 +764,10 @@
 								}
 								console.log('Updated Volume:', volume);
 							  };
-
+							  const toggleLock = () => {
+								audioDial.disabled = !audioDial.disabled;
+								lockButton.classList.toggle('locked');
+							  };
 							  audioDial.addEventListener('input', updateVolume);
 							  lockButton.addEventListener('click', toggleLock);
 
