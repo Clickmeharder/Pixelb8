@@ -260,7 +260,7 @@ const closeAllWindows = () => {
         const windowElement = document.getElementById(windowId);
         if (windowElement && !windowElement.classList.contains('hidden')) {
             windowElement.classList.add('hidden');
-            console.log('all open windows closed');
+            console.log(windowId + ' closed');
             // Remove the tab button when the window is closed
             const tabButton = tabButtons[windowId];
             if (tabButton) {
@@ -279,6 +279,67 @@ const closeAllWindows = () => {
 closeAllWindows();
 //------------END OF WINDOW main code------------------------
 
+
+// Add event listeners to the menu buttons
+const menuButtons = document.querySelectorAll('.menubutt');
+// event listener function for menu buttons
+menuButtons.forEach(button => {
+  button.addEventListener('click', function() {
+    // Get the data-window-id attribute value of the clicked button
+    const windowId = button.getAttribute('data-window-id');
+    // Toggle the visibility of the corresponding window
+    toggleWindowVisibility(windowId);
+  });
+});
+// get the submenu buttons in side the hudmenu
+const submenuButtons = document.querySelectorAll('.hudsubmenuButt');
+// event listener function for menu buttons
+submenuButtons.forEach(button => {
+  button.addEventListener('click', function() {
+    // Get the data-window-id attribute value of the clicked button
+    const windowId = button.getAttribute('data-window-id');
+    // Toggle the visibility of the corresponding window
+    toggleWindowVisibility(windowId);
+  });
+});
+
+
+//APPLET WINDOW - ( LIST OF ITEMS SIMILAR TO FILE FOLDER PERHAPS RENAME THIGNS TO INSINUATE THIS FOR INTUITIVENESS)
+// Get all the buttons inside the .applet-list
+const appletButtons = document.querySelectorAll('.applet-list .applet');
+// Function to open the corresponding window when an applet button is clicked
+const openAppletWindow = (appName) => {
+    // Remove the '.exe' suffix from the applet name
+    appName = appName.replace('.exe', '');
+    
+    const windowId = 'hud-' + appName; // Assuming the window IDs are prefixed with 'hud-'
+    const windowElement = document.getElementById(windowId);
+    if (windowElement) {
+        // Toggle the visibility of the window
+        toggleWindowVisibility(windowId);
+    } else {
+        console.log('Window for ' + appName + ' does not exist.');
+    }
+};
+// Add click event listeners to each applet button
+appletButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const appName = button.textContent.trim(); // Get the text content of the button
+        openAppletWindow(appName);
+    });
+});
+
+const lockedElements = document.querySelectorAll("#lockedinput");
+lockedElements.forEach(button => {
+    button.addEventListener("click", function () {
+        const targetElement = this.parentElement.querySelector("input, select");
+        targetElement.disabled = !targetElement.disabled;
+
+        // Change the image source based on the disabled state
+        const img = this.querySelector("img");
+        img.src = targetElement.disabled ? "../../assets/images/icons/mouse_padlock.png" : "../../assets/images/icons/tools_gear-0.png";
+    });
+});
 
 // Function to toggle the Sell Item Stash Menu
 function toggleSellItemStashMenu(clickedButton) {
@@ -451,177 +512,3 @@ document.addEventListener('click', (event) => {
     }
   });
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const buttons = [
-                {
-                    id: "hudmenubutt",
-                    label: "Menu",
-                    type: "button",
-                    subButtons: []
-                },
-                {
-                    id: "hudButtmenu1",
-                    label: "Applets",
-                    type: "menubutt",
-                    subButtons: [
-                        { id: "hud-Example", label: "ExampleWinblow" },
-                        { id: "hud-NewDigs", label: "NewDigs" },
-                        { id: "hud-Example3forvisuals", label: "Example3forvisuals" }
-                    ]
-                },
-                {
-                    id: "hudButtmenu2",
-                    label: "Games",
-                    type: "menubutt",
-                    subButtons: [
-                        { id: "hud-sus-snake", label: "sus-snake" },
-                        { id: "hud-rejewelled", label: "rejewelled" }
-                    ]
-                },
-                {
-                    id: "hudButtmenuB3",
-                    label: "Office",
-                    type: "menubutt",
-                    subButtons: [
-                        { id: "hud-paint", label: "paint" },
-                        { id: "hud-text-editor", label: "text editor" },
-                        { id: "hud-something-else", label: "something else" }
-                    ]
-                },
-                {
-                    id: "hudButtmenuB4",
-                    label: "Settings",
-                    type: "menubutt",
-                    subButtons: [
-                        { id: "hud-Appearance-Settings", label: "Appearance Settings" },
-                        { id: "hud-Local-Storage-Settings", label: "Local Storage Settings" },
-                        { id: "hud-Account-Settings", label: "Account Settings" },
-                        { id: "hud-Sound-Settings", label: "Sound Settings" }
-                    ]
-                },
-                {
-                    id: "hudButtmenuB5",
-                    label: "EU Tools",
-                    type: "menubutt",
-                    subButtons: [
-                        { id: "hud-EuItemSorter", label: "Sort Items" },
-                        { id: "hud-EuStashManager", label: "Stash Mgr." },
-                        { id: "hud-EuOrdinanceJuxtapositioner", label: "Ordinance" },
-                        { id: "hud-EuCalender", label: "Eu Calender" },
-                        { id: "hud-EuEventPlanner", label: "My Events" },
-                        { id: "hud-EuChatSearch", label: "Search .log" }
-                    ]
-                },
-                {
-                    id: "hudButtmenuB6",
-                    label: "Ctrl Panel",
-                    type: "menubutt",
-                    subButtons: [
-                        { id: "hud-Terminal", label: "Terminal" },
-                        { id: "hud-Task-Manager", label: "Task Manager" },
-                        { id: "hud-Log-Off", label: "Log Off" },
-                        { id: "hud-ShutDown", label: "ShutDown" },
-                        { id: "hud-Self-Destruct", label: "Self Destruct" }
-                    ]
-                }
-            ];
-
-            const hudMenu = document.getElementById('hudstartmenu');
-
-            buttons.forEach(button => {
-                const btnElement = document.createElement('button');
-                btnElement.id = button.id;
-                btnElement.className = button.type;
-                btnElement.textContent = button.label;
-                hudMenu.appendChild(btnElement);
-
-                if (button.subButtons.length > 0) {
-                    const subBox = document.createElement('div');
-                    subBox.className = 'collapsingbox column';
-                    subBox.id = `hudstartmenu${buttons.indexOf(button) + 1}`;
-                    button.subButtons.forEach(subButton => {
-                        const subBtnElement = document.createElement('button');
-                        subBtnElement.className = 'hudsubmenuButt';
-                        subBtnElement.dataset.windowId = subButton.id;
-                        subBtnElement.textContent = subButton.label;
-                        subBox.appendChild(subBtnElement);
-                    });
-                    hudMenu.appendChild(subBox);
-                }
-            });
-
-            // Event delegation
-            hudMenu.addEventListener('click', function(event) {
-                const target = event.target;
-                if (target.classList.contains('menubutt') || target.classList.contains('hudsubmenuButt')) {
-                    const windowId = target.getAttribute('data-window-id');
-                    if (windowId) {
-                        toggleWindowVisibility(windowId);
-                    }
-                }
-            });
-
-        });
-		
-//----------
-// Add event listeners to the menu buttons
-const menuButtons = document.querySelectorAll('.menubutt');
-// event listener function for menu buttons
-menuButtons.forEach(button => {
-  button.addEventListener('click', function() {
-    // Get the data-window-id attribute value of the clicked button
-    const windowId = button.getAttribute('data-window-id');
-    // Toggle the visibility of the corresponding window
-    toggleWindowVisibility(windowId);
-  });
-});
-// get the submenu buttons in side the hudmenu
-const submenuButtons = document.querySelectorAll('.hudsubmenuButt');
-// event listener function for menu buttons
-submenuButtons.forEach(button => {
-  button.addEventListener('click', function() {
-    // Get the data-window-id attribute value of the clicked button
-    const windowId = button.getAttribute('data-window-id');
-    // Toggle the visibility of the corresponding window
-    toggleWindowVisibility(windowId);
-  });
-});
-
-//APPLET WINDOW - ( LIST OF ITEMS SIMILAR TO FILE FOLDER PERHAPS RENAME THIGNS TO INSINUATE THIS FOR INTUITIVENESS)
-// Get all the buttons inside the .applet-list
-const appletButtons = document.querySelectorAll('.applet-list .applet');
-// Function to open the corresponding window when an applet button is clicked
-const openAppletWindow = (appName) => {
-    // Remove the '.exe' suffix from the applet name
-    appName = appName.replace('.exe', '');
-    
-    const windowId = 'hud-' + appName; // Assuming the window IDs are prefixed with 'hud-'
-    const windowElement = document.getElementById(windowId);
-    if (windowElement) {
-        // Toggle the visibility of the window
-        toggleWindowVisibility(windowId);
-    } else {
-        console.log('Window for ' + appName + ' does not exist.');
-    }
-};
-// Add click event listeners to each applet button
-appletButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        const appName = button.textContent.trim(); // Get the text content of the button
-        openAppletWindow(appName);
-    });
-});
-
-const lockedElements = document.querySelectorAll("#lockedinput");
-lockedElements.forEach(button => {
-    button.addEventListener("click", function () {
-        const targetElement = this.parentElement.querySelector("input, select");
-        targetElement.disabled = !targetElement.disabled;
-
-        // Change the image source based on the disabled state
-        const img = this.querySelector("img");
-        img.src = targetElement.disabled ? "../../assets/images/icons/mouse_padlock.png" : "../../assets/images/icons/tools_gear-0.png";
-    });
-});
-
-console.log('ughh  againn sus os core finally went thru');
