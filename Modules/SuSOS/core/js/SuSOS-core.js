@@ -1,6 +1,122 @@
 //==========================
 // Main Hud Power and Power Button CODE
 //===================================================================
+var total = "";
+/*initialize*/
+var tag = document.createElement("script");
+tag.id = "iframe-demo";
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName("script")[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+/*player creation*/
+
+var player;
+
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player("video1", {
+    events: {
+      onReady: onPlayerReady /*Callbacks*/,
+      onStateChange: onPlayerStateChange
+    }
+  });
+}
+
+/*Loading a video player*/
+function onPlayerReady(event) {
+  $("#play-button").click(function () {
+    player.playVideo();
+    total = player.getDuration();
+    time = player.getCurrentTime();
+
+    playerTimeDifference = (time / total) * 100;
+    progress(playerTimeDifference, $("#progressBar"));
+    $(".current").text(Math.round(time));
+  });
+
+  $("#pause-button").click(function () {
+    player.pauseVideo();
+    total = player.getDuration();
+    time = player.getCurrentTime();
+    playerTimeDifference = (time / total) * 100;
+    progress(playerTimeDifference, $("#progressBar"));
+  });
+}
+
+function onPlayerStateChange(event) {
+  if (event.data == 1) {
+    // playing
+
+    $("#progressBar").show();
+
+    total = player.getDuration();
+
+    myTimer = setInterval(function () {
+      time = player.getCurrentTime();
+      playerTimeDifference = (time / total) * 100;
+
+      progress(playerTimeDifference, $("#progressBar"));
+
+      $(".current").text(Math.round(time));
+    }, 1000); // 100 means repeat in 100 ms
+  } else {
+    // not playing
+
+    $("#progressBar").hide();
+  }
+
+  $(".duration").text(Math.floor(total));
+}
+
+/*
+Some Commonly used Methods:
+
+player.getDuration(); - Returns Time in Numbers
+-------------------
+player.playVideo();
+ --------------------	
+player.pauseVideo();
+------------------
+player.getVideoUrl():String
+------------------
+player.getVideoEmbedCode():String
+------------------
+player.destroy():Void
+------------------
+player.getPlayerState():
+
+    -1 – unstarted
+    0 – ended
+    1 – playing
+    2 – paused
+    3 – buffering
+    5 – video cued
+-------------------
+player.getCurrentTime() - Returns Time in Numbers
+-----------------
+player.getPlaybackQuality():String
+
+highres, hd1080, hd720, large, medium and small 
+-----------------
+player.setPlaybackQuality(suggestedQuality:String) - Return type Void
+
+*/
+
+function progress(percent, $element) {
+  var progressBarWidth = (percent * $element.width()) / 100;
+
+  // $element.find('div').animate({ width: progressBarWidth }, 500).html(percent + "%&nbsp;");
+
+  $element.find("div").animate({ width: progressBarWidth });
+}
+
+$(document).ready(function (e) {
+  $("#mainAudioDial").on("mousemove", function () {
+    //alert();
+    $(".vol").text($(this).val());
+    player.setVolume($(this).val());
+  });
+});
 
 const powerCheckbox = document.getElementById('powercheckbox');
 const hudMonitorPower = document.querySelector('.hudMonitorPower');

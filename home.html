@@ -695,7 +695,7 @@
 										</div>
 										<div class="Innerinfobox" id="MasterAudioControlbox" >
 											<p class="innerlabel-text smallform-labeltext mastervolumesliderlabel" id="audiodial-mainLabel">Master Volume</p>
-											<input type="range" class="volumeslider verticalslider" id="mainAudioDial" name="mainAudioDial" min="0" max="100" value="50">
+											<input type="range" class="volumeslider verticalslider" id="mainAudioDial" name="mainAudioDial" min="0" max="100" value="50" min="0" max="100" step="1" value="30" />
 											<button class="cachebutton audiomasterlock" id="lockedinput"><img src="assets/images/icons/mouse_padlock.png" alt=""></button>
 										</div>
 									</div>
@@ -735,50 +735,7 @@
 
 								window.speechSynthesis.onvoiceschanged = populateVoiceList;
 							</script>
-							  <script>
-							let ytPlayer;
-							let currentVolume = document.getElementById('mainAudioDial').value;
 
-							document.addEventListener('DOMContentLoaded', () => {
-							  const audioDial = document.getElementById('mainAudioDial');
-							  const lockButton = document.getElementById('lockedinput');
-
-							  window.onYouTubeIframeAPIReady = () => {
-								ytPlayer = new YT.Player('youtubePlayer', {
-								  events: {
-									'onReady': onPlayerReady
-								  }
-								});
-							  };
-
-							  const onPlayerReady = () => {
-								const initialVolume = audioDial.value;
-								ytPlayer.setVolume(initialVolume);
-							  };
-
-							  const updateVolume = (event) => {
-								const volume = event.target.value;
-								currentVolume = volume;
-								if (ytPlayer && ytPlayer.setVolume) {
-								  ytPlayer.setVolume(volume);
-								}
-								console.log('Updated Volume:', volume);
-							  };
-							  const toggleLock = () => {
-								audioDial.disabled = !audioDial.disabled;
-								lockButton.classList.toggle('locked');
-							  };
-							  audioDial.addEventListener('input', updateVolume);
-							  lockButton.addEventListener('click', toggleLock);
-
-							  const initialVolume = audioDial.value;
-							  if (ytPlayer && ytPlayer.setVolume) {
-								ytPlayer.setVolume(initialVolume);
-							  }
-							});
-
-
-						  </script>
 					<!-- EU Tools Folder start of first eu tool test windows -->
 							<div class="window column resizable draggable-menu" id="hud-EuTools" data-draggable="true">
 							  <div class="headerbar" id="Hud-header-EuTools">
@@ -2519,9 +2476,11 @@ staticPage BLOCK
 		<div id="staticpage-adpanel-contentwrapper">
 			<div class="static-videopanel">
 				<iframe
+					id="video1"
 				   width="225"
+				   id="video1"
 				   height="148"
-				   src="https://www.youtube.com/embed/videoseries?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&index=284"
+				   src="https://www.youtube.com/embed/videoseries?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&index=284&enablejsapi=1&autoplay=0&rel=0&html5=1&showinfo=0&controls=0" frameborder="0""
 				   title="YouTube video player"
 				   frameborder="0"
 				   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
