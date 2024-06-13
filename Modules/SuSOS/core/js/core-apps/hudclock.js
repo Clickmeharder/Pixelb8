@@ -1,5 +1,5 @@
 // Function to get a random element from an array
-function getRandomElement(arr) {
+function getRandomArrayobject(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
@@ -186,8 +186,8 @@ function robotSays(label, desiredVoiceIndex) {
 }
 // Modified speakLabel function to include the new utterance format
 function robSaysTimesup(label) {
-    var prefix = getRandomElement(robotimerPrefixes);
-    var suffix = getRandomElement(robotimerSuffixes);
+    var prefix = getRandomArrayobject(robotimerPrefixes);
+    var suffix = getRandomArrayobject(robotimerSuffixes);
     var spokenmessage = new SpeechSynthesisUtterance(prefix + label + suffix);
     // Set up the onend event listener
     spokenmessage.onend = function () {
