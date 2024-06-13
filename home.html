@@ -593,7 +593,7 @@
 									<div class="row">
 									  <button class="boxbutt menu-a" id="menua">file</button>
 									  <button class="boxbutt menu-b" id="menub">edit</button>
-									  <button class="boxbutt menu-c" id="menuc">search</buttonc>
+									  <button class="boxbutt menu-c" id="menuc">search</button>
 									  <button class="boxbutt menu-d" id="menud">settings</button>
 									  <button class="boxbutt menu-e" id="menud">resources</button>
 									  <button class="boxbutt menu-f" id="menuf">help</button>
@@ -636,6 +636,90 @@
 							  </div>
 							</div><!--end examplewindow2-->
 					<!-- end of new window -->
+												<!--audiosettings test winow-->
+							<div class= "window column resizable draggable-menu" id="hud-AudioSettings" data-draggable="true">	
+								<div class="headerbar" id="Hud-header-Audiosettings">
+									<div class="header row" id="HudTitle-Audiosetting">
+									  <h4 class="draggable-header">AudioSettings</h4>
+									  <!-- titlebar control buttons -->
+									  <div class="windowcontrolbar row">
+										<button class="toggle-toolbar" id="toggletoolbarbutt">▽</button>
+										<button class="minbutt" id="minWindow">_</button>
+										<button class="maxbutt" id="maxWindow">□</button>
+										<button class="xbutt" id="CloseWindow">X</button>
+									  </div>
+									</div>
+									<div class="toolBar collapsed" id="AudiosettingstoolBar">
+										<div class="row">
+											<button class="boxbutt menu-a" id="menua">file</button>
+											<button class="boxbutt menu-b" id="menub">edit</button>
+											<button class="boxbutt menu-c" id="menuc">search</button>
+											<button class="boxbutt menu-d" id="menud">settings</button>
+											<button class="boxbutt menu-e" id="menud">resources</button>
+											<button class="boxbutt menu-f" id="menuf">help</button>
+											<div class="innerbuttBar row" id="internalBbar-AudiosettingsWindow">
+												<button class="roundbutt">A</button>
+												<button class="roundbutt">B</button>
+												<button class="roundbutt">C</button>
+												<button class="roundbutt">D</button>
+											</div>
+											<button class="roundbutt" id="pinAudiosettings">P</button>
+										</div>
+									</div>
+								</div>
+								<div class="boxcontent"id="Audiosettings">
+									<div class="Innerinfobox" id="PlanetSelect"><!--planet select -->
+										<p class="innerlabel-text smallform-labeltext editstashlabels" id="stashavailLabel">planet</p>
+										<select class="dropdown" id="Weaponscache-selectplanettoaudiosettings" disabled>
+											<option value="default" disabled selected>all</option>
+											<option value="Entropia Universe">Entropia Universe</option>
+											<option value="Next Island">Next Island</option>
+											<option value="Cyrene">Cyrene</option>
+										</select>
+										<button class="cachebutton" id="lockedinput"><img src="assets/images/icons/mouse_padlock.png" alt=""></button>
+									</div>
+									<div class="Innerinfobox" id="ValueB">
+										<select class="dropdown" id="audiosettingsselect">
+										</select>
+									</div>
+									<div class="Innerinfobox" id="ValueB">
+										<p class="innerlabel-text smallform-labeltext" id="currentitemstockLabel"># in Stock</p>
+										<p class="numbers" id="currentitemstock"></p>
+									</div>
+									<div class="Innerinfobox" id="ValueB">
+										<p class="innerlabel-text smallform-labeltext" id="currentstashedpedLabel">Allocated Ped</p>
+										<p class="numbers" id="allocatedstashped"></p>
+									</div>
+									<div class="Innerinfobox" id="ValueB">
+										<p class="innerlabel-text smallform-labeltext" id="understockLabel">audiosettings Limit</p>
+										<p class="numbers" id="audiosettingslimit">n/a</p>
+									</div>
+									<div class="Innerinfobox" id="ValueB">
+									</div>
+									<div class="Innerinfobox" id="ItemCount">
+										<p class="innerlabel-text smallform-labeltext editstashlabels" id="item amount">item Count</p>
+										<input type="number" id="numberofcacheitemstoadd" placeholder="0">
+									</div>
+									<div class="Innerinfobox" id="MUpercent">
+										<p class="innerlabel-text smallform-labeltext editstashlabels" id="stashavailLabel">MU %</p>
+										<input type="text" id="audiosettingsotherid" placeholder="100.00%" disabled>
+										<button class="cachebutton" id="lockedinput"><img src="assets/images/icons/mouse_padlock.png" alt=""></button>
+									</div>
+									<div class="Innerinfobox" id="ValueB">
+										<p class="innerlabel-text smallform-labeltext" id="audiosettingscostLabel">Cost per item</p>
+										<p class="numbers" id="audiosettingscostperitem">n/a</p>
+									</div>
+									<div class="Innerinfobox" id="ValueB">
+										<p class="innerlabel-text smallform-labeltext" id="audiosettingscostLabel">total cost</p>
+										<p class="numbers" id="totalaudiosettingscost">n/a</p>
+									</div>
+									<div class="single-round-button pushright"><!--confirm form button-->
+										<button class="testbutton" id="audiosettingsitemConfirm" title="confirm weapon purchase log entry">
+											<img src="assets/images/icons/directory_check-0.png" alt="audiosettings Entry Log Confirm">
+										</button>
+									</div>
+								</div>
+							</div>
 					<!-- EU Tools Folder start of first eu tool test windows -->
 							<div class="window column resizable draggable-menu" id="hud-EuTools" data-draggable="true">
 							  <div class="headerbar" id="Hud-header-EuTools">
@@ -700,6 +784,74 @@
 								  <button class="boxInfo" id="examplewindow-Z">Z:1</button>
 								  <button class="boxInfo" id="exampleWindow-W">w:0px</button>
 								  <button class="boxInfo" id="examplewindow-Ht">h:0px</button>
+								</div>
+							  </div>
+							</div><!--end examplewindow2-->
+					<!-- end of new window -->
+					<!--Settings Folder start of first Settings test windows -->
+							<div class="window column resizable draggable-menu" id="hud-Settings" data-draggable="true">
+							  <div class="headerbar" id="Hud-header-Settings">
+								<div class="header row" id="HudTitle-Settings">
+								  <h4 class="draggable-header">Settings</h4>
+								  <!-- titlebar control buttons -->
+								  <div class="windowcontrolbar row">
+									<button class="toggle-toolbar" id="toggletoolbarbutt">▽</button>
+									<button class="minbutt" id="minWindow">_</button>
+									<button class="maxbutt" id="maxWindow">□</button>
+									<button class="xbutt" id="CloseWindow">X</button>
+								  </div>
+								</div>
+								<div class="toolBar collapsed" id="SettingstoolBar">
+									<div class="row">
+									  <button class="boxbutt menu-a" id="menua">file</button>
+									  <button class="boxbutt menu-b" id="menub">edit</button>
+									  <button class="boxbutt menu-c" id="menuc">search</button>
+									  <button class="boxbutt menu-d" id="menud">settings</button>
+									  <button class="boxbutt menu-e" id="menud">resources</button>
+									  <button class="boxbutt menu-f" id="menuf">help</button>
+									  <div class="innerbuttBar row" id="internalBbar-SettingsWindow">
+										<button class="roundbutt">A</button>
+										<button class="roundbutt">B</button>
+										<button class="roundbutt">C</button>
+										<button class="roundbutt">D</button>
+									  </div>
+									  <button class="roundbutt" id="pinSettings">P</button>
+									</div>
+								</div>
+							  </div>
+							  <div class="boxcontent"id="Settingswindow">
+								<div class="column internals" id="" style="padding:2px;">
+								  <div class="column internalcontent">
+									<div class=" border-testsmall" id="hud-Settings-InternalHeader">Settings Directory
+									</div>
+									<!--interchangeable insides div-->
+									<div class="border-testsmall fillheight">
+									  <div class="applet-list">
+										<div class="applet" title="View and manage Audio Settings" alt="Eu Item Sorting Tool">AudioSettings.exe</div>
+										<div class="applet" title="View and manage Visual Settings" alt="Ordinance Juxtapositioning">VisualSettings.exe</div>
+										<div class="applet" title="View and Manage Account Settings" alt="Eu Stash Management">AccountSettings.exe</div>
+										<div class="applet" title="View and Manage Storage settings" alt="Stash Table View">StorageSettings.exe</div>
+										<div class="applet" title="thhis is a filler thing cuz idk" alt="Eu EventPlanner tool">Other.exe</div>
+										<div class="applet" title="Idk yup" alt="Eu Calender">idk.exe</div>
+										<div class="applet indev" title="Still under Development" alt="Coming Soon!">anotherthing.exe</div>
+										<!--proper chat log title and alt : title="Search through your Entropia chatlogs" alt="SuS Intel Tool"-->
+										<!-- Add more file elements as needed -->
+									  </div>
+									  <!--
+									   place different window contents in here
+									  -->
+									</div>
+								  </div><!--end internalcontent-->
+								</div><!--end internals-->
+							  </div><!--end of window boxcontent-->
+							  <div class="boxfooterBar border-test">
+								<div class="buttBar" id="Settings-boxInfo">
+								  <button class="boxInfo" id="Settings-pos">pos.</button>
+								  <button class="boxInfo" id="Settings-Y">y:0</button>
+								  <button class="boxInfo" id="Settings-X">x:0</button>
+								  <button class="boxInfo" id="Settings-Z">Z:1</button>
+								  <button class="boxInfo" id="Settings-W">w:0px</button>
+								  <button class="boxInfo" id="Settings-Ht">h:0px</button>
 								</div>
 							  </div>
 							</div><!--end examplewindow2-->
