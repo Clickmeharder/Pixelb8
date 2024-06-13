@@ -2,6 +2,7 @@
 // Main Hud Audio drivers & controllor
 //===================================================================
 var total = "";
+var currentVolume = "25"; 
 /*initialize*/
 var tag = document.createElement("script");
 tag.id = "iframe-demo";
