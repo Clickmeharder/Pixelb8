@@ -119,7 +119,7 @@ var robotimerSuffixes = [
     ' has run out of time. Time for a break!',
     ' is complete. Take a breather!',
 	' is uhh, yea times up homie',
-	' is done, anything else?'
+	' is done, anything else?',
 	'completed',
 	'is done boss',
 	'is done, you wanna go get a drink now?',
