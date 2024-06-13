@@ -115,14 +115,14 @@ var robotimerSuffixes = [
     ' will self-destruct in 3, 2, 1...',
 	'im afraid',
 	'ended',
-	'completed boop beep boop',
+	'completed! boop. boob. beep boop',
     ' is done. Hope you enjoyed the wait!',
     ' is up. Time flies, doesn’t it?',
     ' has run out of time. Time for a break!',
     ' is complete. Take a breather!',
 	' is uhh, yea times up homie',
 	' is done, anything else?',
-	'completed',
+	'is now completed',
 	'is done boss',
 	'is done, you wanna go get a drink now?',
 	'is finished, we could maybe go grab a bite to eat?',
@@ -190,7 +190,7 @@ function robotSays(label, desiredVoiceIndex) {
     speechSynthesis.speak(thesewords);
 }
 // Modified speakLabel function to include the new utterance format
-function robotSays2(label) {
+function robSaysTimesup(label) {
     var prefix = getRandomElement(robotimerPrefixes);
     var suffix = getRandomElement(robotimerSuffixes);
     var spokenmessage = new SpeechSynthesisUtterance(prefix + label + suffix);
@@ -626,7 +626,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					timerElement.innerHTML += '<br>Click to hear label';
 					timerElement.addEventListener('click', function () {
 						// Read the label using text-to-speech
-						robotSays2(timer.label);
+						robSaysTimesup(timer.label);
 
 						// Remove the timer from the stack
 						timerStack.removeChild(timerElement);
@@ -677,7 +677,7 @@ document.addEventListener('DOMContentLoaded', function () {
 							timerElement.innerHTML += '<br>Click to hear label';
 							timerElement.addEventListener('click', function () {
 								// Read the label using text-to-speech
-								robotSays2(timer.label);
+								robSaysTimesup(timer.label);
 
 								// Remove the timer from the stack
 								timerStack.removeChild(timerElement);
@@ -767,7 +767,8 @@ document.addEventListener('DOMContentLoaded', function () {
 					voices.forEach(function (voice, index) {
 						console.log(index + ": " + voice.name);
 					});
-					playTimerExpiredMessage(label);
+					//playTimerExpiredMessage(label);
+					robSaysTimesup(label);
 					// Display a message and ask the user to click to hear the label
 					timerElement.innerHTML += '<br>Click to hear label';
 					timerElement.addEventListener('click', function () {
@@ -780,7 +781,7 @@ document.addEventListener('DOMContentLoaded', function () {
 						});
 
 						// Read the label using text-to-speech
-						robotSays2(label);
+						robSaysTimesup(label);
 
 						// Remove the timer from the stack
 						timerStack.removeChild(timerElement);
