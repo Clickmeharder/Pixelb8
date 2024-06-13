@@ -643,17 +643,16 @@
 							</div><!--end examplewindow2-->
 					<!-- end of new window -->
 												<!--audiosettings test winow-->
-							<div class= "window column resizable draggable-menu" id="hud-AudioSettings" data-draggable="true">	
+							<div class="window column resizable draggable-menu" id="hud-AudioSettings" data-draggable="true">
 								<div class="headerbar" id="Hud-header-Audiosettings">
 									<div class="header row" id="HudTitle-Audiosetting">
-									  <h4 class="draggable-header">AudioSettings</h4>
-									  <!-- titlebar control buttons -->
-									  <div class="windowcontrolbar row">
-										<button class="toggle-toolbar" id="toggletoolbarbutt">▽</button>
-										<button class="minbutt" id="minWindow">_</button>
-										<button class="maxbutt" id="maxWindow">□</button>
-										<button class="xbutt" id="CloseWindow">X</button>
-									  </div>
+										<h4 class="draggable-header">AudioSettings</h4>
+										<div class="windowcontrolbar row">
+											<button class="toggle-toolbar" id="toggletoolbarbutt">▽</button>
+											<button class="minbutt" id="minWindow">_</button>
+											<button class="maxbutt" id="maxWindow">□</button>
+											<button class="xbutt" id="CloseWindow">X</button>
+										</div>
 									</div>
 									<div class="toolBar collapsed" id="AudiosettingstoolBar">
 										<div class="row">
@@ -673,8 +672,8 @@
 										</div>
 									</div>
 								</div>
-								<div class="boxcontent"id="Audiosettings">
-									<div class="Innerinfobox" id="PlanetSelect"><!--planet select -->
+								<div class="boxcontent" id="Audiosettings">
+									<div class="Innerinfobox" id="PlanetSelect">
 										<p class="innerlabel-text smallform-labeltext editstashlabels" id="stashavailLabel">planet</p>
 										<select class="dropdown" id="Weaponscache-selectplanettoaudiosettings" disabled>
 											<option value="default" disabled selected>all</option>
@@ -685,47 +684,65 @@
 										<button class="cachebutton" id="lockedinput"><img src="assets/images/icons/mouse_padlock.png" alt=""></button>
 									</div>
 									<div class="Innerinfobox" id="ValueB">
-										<select class="dropdown" id="audiosettingsselect">
+										<p class="innerlabel-text smallform-labeltext" id="audiomuteLable">mute all audio</p>
+										<input type="radio" id="Audiosettings-mute" name="vol-Mute" value="Audiosettings-mute">
+									</div>
+									<div class="Innerinfobox" id="ValueB">
+										<p class="innerlabel-text smallform-labeltext" id="audiodial-mainLabel">Main Audio dial</p>
+										<input type="range" id="mainAudioDial" name="mainAudioDial" min="0" max="100" value="50">
+									</div>
+									<div class="Innerinfobox" id="ValueB">
+										<p class="innerlabel-text smallform-labeltext" id="audiodial-ytLabel">Video player Audio dial</p>
+										<input type="range" id="videoPlayerAudioDial" name="videoPlayerAudioDial" min="0" max="100" value="50">
+									</div>
+									<div class="Innerinfobox" id="ValueB">
+										<p class="innerlabel-text smallform-labeltext" id="audiodial-musicLabel">Music player Audio dial</p>
+										<input type="range" id="musicPlayerAudioDial" name="musicPlayerAudioDial" min="0" max="100" value="50">
+									</div>
+									<div class="Innerinfobox" id="ValueB">
+										<p class="innerlabel-text smallform-labeltext" id="audiodial-sfxLabel">SFX Audio dial</p>
+										<input type="range" id="sfxAudioDial" name="sfxAudioDial" min="0" max="100" value="50">
+									</div>
+									<div class="Innerinfobox" id="ValueB">
+										<p class="innerlabel-text smallform-labeltext" id="audiodial-gamesLabel">Games Audio dial</p>
+										<input type="range" id="gamesAudioDial" name="gamesAudioDial" min="0" max="100" value="50">
+									</div>
+									<div class="Innerinfobox" id="ValueB" style="height: 20px; border-bottom: 1px solid #ccc;"></div>
+									<div class="Innerinfobox" id="robbotVoiceselect">
+										<p class="innerlabel-text smallform-labeltext editstashlabels" id="voiceselectLabel">RobBot Voice:</p>
+										<select class="dropdown" id="robbotvoiceSelect">
+											<!--will populate this with js to allow setting of desired voice index for speech synthesis audio-->
 										</select>
-									</div>
-									<div class="Innerinfobox" id="ValueB">
-										<p class="innerlabel-text smallform-labeltext" id="currentitemstockLabel"># in Stock</p>
-										<p class="numbers" id="currentitemstock"></p>
-									</div>
-									<div class="Innerinfobox" id="ValueB">
-										<p class="innerlabel-text smallform-labeltext" id="currentstashedpedLabel">Allocated Ped</p>
-										<p class="numbers" id="allocatedstashped"></p>
-									</div>
-									<div class="Innerinfobox" id="ValueB">
-										<p class="innerlabel-text smallform-labeltext" id="understockLabel">audiosettings Limit</p>
-										<p class="numbers" id="audiosettingslimit">n/a</p>
-									</div>
-									<div class="Innerinfobox" id="ValueB">
-									</div>
-									<div class="Innerinfobox" id="ItemCount">
-										<p class="innerlabel-text smallform-labeltext editstashlabels" id="item amount">item Count</p>
-										<input type="number" id="numberofcacheitemstoadd" placeholder="0">
-									</div>
-									<div class="Innerinfobox" id="MUpercent">
-										<p class="innerlabel-text smallform-labeltext editstashlabels" id="stashavailLabel">MU %</p>
-										<input type="text" id="audiosettingsotherid" placeholder="100.00%" disabled>
 										<button class="cachebutton" id="lockedinput"><img src="assets/images/icons/mouse_padlock.png" alt=""></button>
 									</div>
-									<div class="Innerinfobox" id="ValueB">
-										<p class="innerlabel-text smallform-labeltext" id="audiosettingscostLabel">Cost per item</p>
-										<p class="numbers" id="audiosettingscostperitem">n/a</p>
+									<div class="single-round-button pushright">
+										<button class="testbutton" id="audiosettingsrevertConfirm" title="Revert Audio settings back to default.">
+											<img src="assets/images/icons/directory_check-0.png" alt="Confirm to Revert audioSettings to default">
+										</button>
 									</div>
-									<div class="Innerinfobox" id="ValueB">
-										<p class="innerlabel-text smallform-labeltext" id="audiosettingscostLabel">total cost</p>
-										<p class="numbers" id="totalaudiosettingscost">n/a</p>
-									</div>
-									<div class="single-round-button pushright"><!--confirm form button-->
-										<button class="testbutton" id="audiosettingsitemConfirm" title="confirm weapon purchase log entry">
-											<img src="assets/images/icons/directory_check-0.png" alt="audiosettings Entry Log Confirm">
+									<div class="single-round-button pushright">
+										<button class="testbutton" id="audiosettingsitemConfirm" title="save and apply settings">
+											<img src="assets/images/icons/directory_check-0.png" alt="audiosettings apply Confirm">
 										</button>
 									</div>
 								</div>
 							</div>
+
+							<script>
+								function populateVoiceList() {
+									const select = document.getElementById('robbotvoiceSelect');
+									const voices = window.speechSynthesis.getVoices();
+									
+									voices.forEach((voice, index) => {
+										const option = document.createElement('option');
+										option.textContent = `${voice.name} (${voice.lang})`;
+										option.value = index;
+										select.appendChild(option);
+									});
+								}
+
+								window.speechSynthesis.onvoiceschanged = populateVoiceList;
+							</script>
 					<!-- EU Tools Folder start of first eu tool test windows -->
 							<div class="window column resizable draggable-menu" id="hud-EuTools" data-draggable="true">
 							  <div class="headerbar" id="Hud-header-EuTools">
@@ -860,7 +877,7 @@
 								  <button class="boxInfo" id="Settings-Ht">h:0px</button>
 								</div>
 							  </div>
-							</div><!--end examplewindow2-->
+							</div><!--end of settings window-->
 					<!-- end of new window -->
 							<!-- Euapplet Windows- ordinance juxtapositioner window-->
 							<div class="window column resizable draggable-menu" id="hud-OrdinanceJuxtapositioner" data-draggable="true">
