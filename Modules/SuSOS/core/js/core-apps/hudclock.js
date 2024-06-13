@@ -1,5 +1,5 @@
 // Function to get a random element from an array
-function getRandomArrayobject(arr) {
+function getRandomElement(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 

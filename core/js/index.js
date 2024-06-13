@@ -1,3 +1,13 @@
+//rename this script to engineroom.js -
+// it will contain all the common js functions as well as any required for static portion of the website
+// (everything except the susos)
+
+//Function to get a random element from an array
+function getRandomArrayobject(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+
 	function accpanelTogglebutt(clickedButton) {
 		// Set style of the clicked button
 		clickedButton.style.borderStyle = (clickedButton.style.borderStyle === 'inset') ? '' : 'inset';
