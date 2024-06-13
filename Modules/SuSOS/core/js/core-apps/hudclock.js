@@ -189,6 +189,7 @@ function robotSays(label, desiredVoiceIndex = null) {
     };
     
     // Speak the utterance
+	console.log('voice index used =', desiredVoiceIndex);
     speechSynthesis.speak(thesewords);
 }
 // Modified speakLabel function to include the new utterance format
