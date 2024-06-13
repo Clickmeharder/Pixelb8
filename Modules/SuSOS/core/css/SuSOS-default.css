@@ -2663,9 +2663,8 @@ button#stopwatch-play{
 
 
 
-/*audio settings controls*/
 div#MasterAudioControlbox {
-    width: 69px;
+    width: 85px;
 }
 div#AudioControlbox {
     width: 50px;
@@ -2696,8 +2695,8 @@ input.verticalslider[type="range"]::-webkit-slider-thumb {
 
 input.volumeslider[type="range"] {
     -webkit-appearance: none;
-    width: fit-content;
-    height: 7px;
+    width: min-content;
+    height: 2px;
     background: linear-gradient(to right, #333861, #00b7ff);
     border-radius: 5px;
     outline: 3px ridge;
@@ -2706,18 +2705,20 @@ input.volumeslider[type="range"] {
 
 input.volumeslider[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 4px;
+    width: 5px;
     height: 22px;
-	border:5px outset #01e5ffbf;
+	border:4px outset #01e5ffbf;
     border-radius: 5px;
     cursor: pointer;
 	background: #ac8181;
     box-shadow: 0 0 10px rgba(0, 0, 255, 1);
-    transition:0.8s;
+    transition:2.8s, smooth;
 }
 
 input.volumeslider[type="range"]::-webkit-slider-thumb:hover {
     background: #06d914;
+	width: 22px;
+	border-radius:100%;
 	border:5px outset #2a584e61;
     box-shadow: 0 0 6px rgb(0 0 0);
 }
