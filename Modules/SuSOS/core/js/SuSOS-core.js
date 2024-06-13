@@ -1,5 +1,5 @@
 //==========================
-// Main Hud Audio drivers & controllor
+// Main Hud Power and Power Button CODE
 //===================================================================
 var total = "";
 /*initialize*/
@@ -26,25 +26,47 @@ function onYouTubeIframeAPIReady() {
 function onPlayerReady(event) {
   $("#play-button").click(function () {
     player.playVideo();
+    total = player.getDuration();
+    time = player.getCurrentTime();
+
+    playerTimeDifference = (time / total) * 100;
+    progress(playerTimeDifference, $("#progressBar"));
+    $(".current").text(Math.round(time));
   });
 
   $("#pause-button").click(function () {
     player.pauseVideo();
-
+    total = player.getDuration();
+    time = player.getCurrentTime();
+    playerTimeDifference = (time / total) * 100;
+    progress(playerTimeDifference, $("#progressBar"));
   });
 }
 
-function onPlayerStateChange(event) {
-}
+ function onPlayerStateChange(event) {
+  if (event.data == 1) {
+    // playing
 
+    $("#progressBar").show();
 
-$(document).ready(function (e) {
-  $("#volume").on("mousemove", function () {
-    //alert();
-    $(".vol").text($(this).val());
-    player.setVolume($(this).val());
-  });
-});
+    total = player.getDuration();
+
+    myTimer = setInterval(function () {
+      time = player.getCurrentTime();
+      playerTimeDifference = (time / total) * 100;
+
+      // progress(playerTimeDifference, $("#progressBar"));
+
+      $(".current").text(Math.round(time));
+    }, 1000); // 100 means repeat in 100 ms
+  } else {
+    // not playing
+
+    $("#progressBar").hide();
+  }
+
+  $(".duration").text(Math.floor(total));
+} 
 
 /*
 Some Commonly used Methods:
@@ -79,16 +101,23 @@ highres, hd1080, hd720, large, medium and small
 player.setPlaybackQuality(suggestedQuality:String) - Return type Void
 
 */
-
-
+ 
+function progress(percent, $element) {
+  var progressBarWidth = (percent * $element.width()) / 100;
 
   // $element.find('div').animate({ width: progressBarWidth }, 500).html(percent + "%&nbsp;");
 
+  $element.find("#progressBar").animate({ width: progressBarWidth });
+}
 
+$(document).ready(function (e) {
+  $("#mainAudioDial").on("mousemove", function () {
+    //alert();
+    $(".vol").text($(this).val());
+    player.setVolume($(this).val());
+  });
+});
 
-//==========================
-// Main Hud Power and Power Button CODE
-//===================================================================
 const powerCheckbox = document.getElementById('powercheckbox');
 const hudMonitorPower = document.querySelector('.hudMonitorPower');
 
