@@ -587,7 +587,7 @@ document.addEventListener('click', (event) => {
                 }
             ];
 
-            const hudMenu = document.getElementById('hudmenu');
+            const hudMenu = document.getElementById('hudstartmenu');
 
             buttons.forEach(button => {
                 const btnElement = document.createElement('button');
@@ -599,7 +599,7 @@ document.addEventListener('click', (event) => {
                 if (button.subButtons.length > 0) {
                     const subBox = document.createElement('div');
                     subBox.className = 'collapsingbox column';
-                    subBox.id = `hudmenu${buttons.indexOf(button) + 1}`;
+                    subBox.id = `hudstartmenu${buttons.indexOf(button) + 1}`;
                     button.subButtons.forEach(subButton => {
                         const subBtnElement = document.createElement('button');
                         subBtnElement.className = 'hudsubmenuButt';
@@ -623,4 +623,4 @@ document.addEventListener('click', (event) => {
             });
 
         });
-console.log('sus os core finally went thru');
+console.log('ughh sus os core finally went thru');
