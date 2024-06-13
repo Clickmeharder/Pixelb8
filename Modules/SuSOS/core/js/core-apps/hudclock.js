@@ -174,25 +174,6 @@ function clearexpiredTimer(label) {
 }
 /*TESTING AUDIO CONTROL FUNCTIONS*/
 // Function to handle SpeechSynthesis notifications
-
-function populateVoiceList() {
-	const select = document.getElementById('robbotvoiceSelect');
-	const voices = window.speechSynthesis.getVoices();
-	
-	voices.forEach((voice, index) => {
-		const option = document.createElement('option');
-		option.textContent = `${voice.name} (${voice.lang})`;
-		option.value = index;
-		select.appendChild(option);
-	});
-}
-
-window.speechSynthesis.onvoiceschanged = populateVoiceList;
-
-
-
-
-
 function robSays(label, desiredVoiceIndex = null) {
 	var thesewords = new SpeechSynthesisUtterance("clearing expired timer " + label);
 	if (desiredVoiceIndex !== null) {
