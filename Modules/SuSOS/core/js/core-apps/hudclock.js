@@ -172,12 +172,7 @@ function clearexpiredTimer(label) {
     removeTimerFromStack(label);
     removeTimerFromLocalStorage(label);
 }
-// Function to handle utterance end event
-function onUtteranceEnd(label) {
-    console.log('Utterance ended for label: ' + label);
-    removeTimerFromStack(label);
-    removeTimerFromLocalStorage(label);
-}
+
 // the function that sets up rob's speach for expired timers
 function robotSays(label, desiredVoiceIndex) {
     // Create a new SpeechSynthesisUtterance
@@ -207,7 +202,7 @@ function speakLabel(label, desiredVoiceIndex) {
     var utterance = new SpeechSynthesisUtterance(label);
     // Set up the onend event listener
     utterance.onend = function () {
-        onUtteranceEnd(label);
+        clearexpiredTimer(label);
     };
     // Speak the utterance
     speechSynthesis.speak(utterance);
