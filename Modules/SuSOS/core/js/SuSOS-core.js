@@ -512,103 +512,115 @@ document.addEventListener('click', (event) => {
     }
   });
 
-document.addEventListener("DOMContentLoaded", function () {
-	const buttons = [
-		{
-			id: "hudmenubutt",
-			label: "Menu",
-			type: "button",
-			subButtons: []
-		},
-		{
-			id: "hudButtmenu1",
-			label: "Applets",
-			type: "menubutt",
-			subButtons: [
-				{ id: "hud-Example", label: "ExampleWinblow" },
-				{ id: "hud-NewDigs", label: "NewDigs" },
-				{ id: "hud-Example3forvisuals", label: "Example3forvisuals" }
-			]
-		},
-		{
-			id: "hudButtmenu2",
-			label: "Games",
-			type: "menubutt",
-			subButtons: [
-				{ id: "hud-sus-snake", label: "sus-snake" },
-				{ id: "hud-rejewelled", label: "rejewelled" }
-			]
-		},
-		{
-			id: "hudButtmenuB3",
-			label: "Office",
-			type: "menubutt",
-			subButtons: [
-				{ id: "hud-paint", label: "paint" },
-				{ id: "hud-text-editor", label: "text editor" },
-				{ id: "hud-something-else", label: "something else" }
-			]
-		},
-		{
-			id: "hudButtmenuB4",
-			label: "Settings",
-			type: "menubutt",
-			subButtons: [
-				{ id: "hud-Appearance-Settings", label: "Appearance Settings" },
-				{ id: "hud-Local-Storage-Settings", label: "Local Storage Settings" },
-				{ id: "hud-Account-Settings", label: "Account Settings" },
-				{ id: "hud-Sound-Settings", label: "Sound Settings" }
-			]
-		},
-		{
-			id: "hudButtmenuB5",
-			label: "EU Tools",
-			type: "menubutt",
-			subButtons: [
-				{ id: "hud-EuItemSorter", label: "Sort Items" },
-				{ id: "hud-EuStashManager", label: "Stash Mgr." },
-				{ id: "hud-EuOrdinanceJuxtapositioner", label: "Ordinance" },
-				{ id: "hud-EuCalender", label: "Eu Calender" },
-				{ id: "hud-EuEventPlanner", label: "My Events" },
-				{ id: "hud-EuChatSearch", label: "Search .log" }
-			]
-		},
-		{
-			id: "hudButtmenuB6",
-			label: "Ctrl Panel",
-			type: "menubutt",
-			subButtons: [
-				{ id: "hud-Terminal", label: "Terminal" },
-				{ id: "hud-Task-Manager", label: "Task Manager" },
-				{ id: "hud-Log-Off", label: "Log Off" },
-				{ id: "hud-ShutDown", label: "ShutDown" },
-				{ id: "hud-Self-Destruct", label: "Self Destruct" }
-			]
-		}
-	];
+        document.addEventListener("DOMContentLoaded", function () {
+            const buttons = [
+                {
+                    id: "hudmenubutt",
+                    label: "Menu",
+                    type: "button",
+                    subButtons: []
+                },
+                {
+                    id: "hudButtmenu1",
+                    label: "Applets",
+                    type: "menubutt",
+                    subButtons: [
+                        { id: "hud-Example", label: "ExampleWinblow" },
+                        { id: "hud-NewDigs", label: "NewDigs" },
+                        { id: "hud-Example3forvisuals", label: "Example3forvisuals" }
+                    ]
+                },
+                {
+                    id: "hudButtmenu2",
+                    label: "Games",
+                    type: "menubutt",
+                    subButtons: [
+                        { id: "hud-sus-snake", label: "sus-snake" },
+                        { id: "hud-rejewelled", label: "rejewelled" }
+                    ]
+                },
+                {
+                    id: "hudButtmenuB3",
+                    label: "Office",
+                    type: "menubutt",
+                    subButtons: [
+                        { id: "hud-paint", label: "paint" },
+                        { id: "hud-text-editor", label: "text editor" },
+                        { id: "hud-something-else", label: "something else" }
+                    ]
+                },
+                {
+                    id: "hudButtmenuB4",
+                    label: "Settings",
+                    type: "menubutt",
+                    subButtons: [
+                        { id: "hud-Appearance-Settings", label: "Appearance Settings" },
+                        { id: "hud-Local-Storage-Settings", label: "Local Storage Settings" },
+                        { id: "hud-Account-Settings", label: "Account Settings" },
+                        { id: "hud-Sound-Settings", label: "Sound Settings" }
+                    ]
+                },
+                {
+                    id: "hudButtmenuB5",
+                    label: "EU Tools",
+                    type: "menubutt",
+                    subButtons: [
+                        { id: "hud-EuItemSorter", label: "Sort Items" },
+                        { id: "hud-EuStashManager", label: "Stash Mgr." },
+                        { id: "hud-EuOrdinanceJuxtapositioner", label: "Ordinance" },
+                        { id: "hud-EuCalender", label: "Eu Calender" },
+                        { id: "hud-EuEventPlanner", label: "My Events" },
+                        { id: "hud-EuChatSearch", label: "Search .log" }
+                    ]
+                },
+                {
+                    id: "hudButtmenuB6",
+                    label: "Ctrl Panel",
+                    type: "menubutt",
+                    subButtons: [
+                        { id: "hud-Terminal", label: "Terminal" },
+                        { id: "hud-Task-Manager", label: "Task Manager" },
+                        { id: "hud-Log-Off", label: "Log Off" },
+                        { id: "hud-ShutDown", label: "ShutDown" },
+                        { id: "hud-Self-Destruct", label: "Self Destruct" }
+                    ]
+                }
+            ];
 
-	const hudMenu = document.getElementById('hudstartmenu');
+            const hudMenu = document.getElementById('hudmenu');
 
-	buttons.forEach(button => {
-		const btnElement = document.createElement('button');
-		btnElement.id = button.id;
-		btnElement.className = button.type;
-		btnElement.textContent = button.label;
-		hudMenu.appendChild(btnElement);
+            buttons.forEach(button => {
+                const btnElement = document.createElement('button');
+                btnElement.id = button.id;
+                btnElement.className = button.type;
+                btnElement.textContent = button.label;
+                hudMenu.appendChild(btnElement);
 
-		if (button.subButtons.length > 0) {
-			const subBox = document.createElement('div');
-			subBox.className = 'collapsingbox column';
-			subBox.id = `hudstartmenu${buttons.indexOf(button) + 1}`;
-			button.subButtons.forEach(subButton => {
-				const subBtnElement = document.createElement('button');
-				subBtnElement.className = 'hudsubmenuButt';
-				subBtnElement.dataset.windowId = subButton.id;
-				subBtnElement.textContent = subButton.label;
-				subBox.appendChild(subBtnElement);
-			});
-			hudMenu.appendChild(subBox);
-		}
-	});
-});
+                if (button.subButtons.length > 0) {
+                    const subBox = document.createElement('div');
+                    subBox.className = 'collapsingbox column';
+                    subBox.id = `hudmenu${buttons.indexOf(button) + 1}`;
+                    button.subButtons.forEach(subButton => {
+                        const subBtnElement = document.createElement('button');
+                        subBtnElement.className = 'hudsubmenuButt';
+                        subBtnElement.dataset.windowId = subButton.id;
+                        subBtnElement.textContent = subButton.label;
+                        subBox.appendChild(subBtnElement);
+                    });
+                    hudMenu.appendChild(subBox);
+                }
+            });
+
+            // Event delegation
+            hudMenu.addEventListener('click', function(event) {
+                const target = event.target;
+                if (target.classList.contains('menubutt') || target.classList.contains('hudsubmenuButt')) {
+                    const windowId = target.getAttribute('data-window-id');
+                    if (windowId) {
+                        toggleWindowVisibility(windowId);
+                    }
+                }
+            });
+
+        });
 console.log('sus os core finally went thru');
