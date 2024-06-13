@@ -614,6 +614,14 @@ div#userInfoContainer ul {
     height: 24px;
     margin: 0px;
 }
+.butthuvred:hover{
+    color: darkred;
+    border-color: darkred;
+}
+button.xbutt:hover {
+    color: darkred;
+    border-color: darkred;
+}
 .eucontent-header{
 	width: 100%;
 	min-height:16px;
