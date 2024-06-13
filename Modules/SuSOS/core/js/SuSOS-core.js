@@ -107,7 +107,7 @@ function progress(percent, $element) {
 
   // $element.find('div').animate({ width: progressBarWidth }, 500).html(percent + "%&nbsp;");
 
-  $element.find("div").animate({ width: progressBarWidth });
+  $element.find("#progressBar").animate({ width: progressBarWidth });
 }
 
 $(document).ready(function (e) {
