@@ -2701,18 +2701,37 @@ p#audiodial-musicLabel {
     margin: 4px;
     transform: rotate(270deg);
     padding: 4px;
-    padding-right: 69px;
-    margin-left: 69px;
+    padding-right: 4px;
+    margin-left: 0px;
 }
 
+p#audiodial-sfxLabel {
+    font-weight: bold;
+    font-family: Yatra none;
+    margin: 4px;
+    transform: rotate(270deg) translateX(-38px);
+    padding: 4px;
+    padding-right: 50px;
+    margin-left: -4px;
+}
+
+p#audiodial-gamesLabel {
+    font-weight: bold;
+    font-family: Yatra none;
+    margin: 4px;
+    transform: rotate(270deg) translateX(-6px);
+    padding: 4px;
+    padding-right: 50px;
+    margin-left: -5px;
+}
 .volumesliderlabel {
     font-weight: bold;
     font-family: Yatra none;
     margin: 4px;
     transform: rotate(270deg);
     padding: 4px;
-    padding-right: 69px;
-    margin-left: 69px;
+    padding-right: 0px;
+    margin-left: 0px;
 }
 input.verticalslider[type="range"] {
     -webkit-appearance: none;
@@ -2743,7 +2762,8 @@ input.volumeslider[type="range"] {
     background: linear-gradient(to right, #333861, #00b7ff);
     border-radius: 5px;
     outline: 3px ridge;
-    margin-top: 5px;
+	margin-top: 27px;
+    margin-left: -34px;
 }
 
 input.volumeslider[type="range"]::-webkit-slider-thumb {
@@ -2765,3 +2785,17 @@ input.volumeslider[type="range"]::-webkit-slider-thumb:hover {
 	border:5px outset #2a584e61;
     box-shadow: 0 0 6px rgb(0 0 0);
 }
+
+input.volumeslider.verticalslider:disabled + button#lockedinput.audiomasterlock {
+    left: -120px;
+    top: 27px;
+    transform: rotate3d(0, 1, 2, 28deg) translateX(-5px);
+    transition: 3.3s;
+    border: none;
+}
+button#lockedinput.audiomasterlock {
+    position: relative;
+    top: 78px;
+    left: -161px;
+    transform: rotate3d(0, 0, 1, -13deg) translateX(-54px);
+    transition: 0.8s, smooth;
