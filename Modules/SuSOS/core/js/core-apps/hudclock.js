@@ -173,14 +173,21 @@ function clearexpiredTimer(label) {
     removeTimerFromLocalStorage(label);
 }
 
-// the function that sets up rob's speach for expired timers
-function robotSays(label, desiredVoiceIndex) {
+function robotSays(label, desiredVoiceIndex = null) {
     // Create a new SpeechSynthesisUtterance
-    var thesewords = new SpeechSynthesisUtterance("clearing expired timer" + label);
+    var thesewords = new SpeechSynthesisUtterance("clearing expired timer " + label);
+    
+    // Optionally set the voice if desiredVoiceIndex is provided
+    if (desiredVoiceIndex !== null) {
+        var voices = speechSynthesis.getVoices();
+        thesewords.voice = voices[desiredVoiceIndex];
+    }
+
     // Set up the onend event listener
     thesewords.onend = function () {
         clearexpiredTimer(label);
     };
+    
     // Speak the utterance
     speechSynthesis.speak(thesewords);
 }
