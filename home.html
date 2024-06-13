@@ -735,6 +735,78 @@
 
 								window.speechSynthesis.onvoiceschanged = populateVoiceList;
 							</script>
+							  <script>
+							let ytPlayer;
+							let currentVolume = document.getElementById('mainAudioDial').value;
+
+							document.addEventListener('DOMContentLoaded', () => {
+							  const audioDial = document.getElementById('mainAudioDial');
+							  const lockButton = document.getElementById('lockedinput');
+
+							  window.onYouTubeIframeAPIReady = () => {
+								ytPlayer = new YT.Player('youtubePlayer', {
+								  events: {
+									'onReady': onPlayerReady
+								  }
+								});
+							  };
+
+							  const onPlayerReady = () => {
+								const initialVolume = audioDial.value;
+								ytPlayer.setVolume(initialVolume);
+							  };
+
+							  const updateVolume = (event) => {
+								const volume = event.target.value;
+								currentVolume = volume;
+								if (ytPlayer && ytPlayer.setVolume) {
+								  ytPlayer.setVolume(volume);
+								}
+								console.log('Updated Volume:', volume);
+							  };
+
+							  const toggleLock = () => {
+								audioDial.disabled = !audioDial.disabled;
+								lockButton.classList.toggle('locked');
+							  };
+
+							  audioDial.addEventListener('input', updateVolume);
+							  lockButton.addEventListener('click', toggleLock);
+
+							  const initialVolume = audioDial.value;
+							  if (ytPlayer && ytPlayer.setVolume) {
+								ytPlayer.setVolume(initialVolume);
+							  }
+							});
+
+							// Function to handle SpeechSynthesis notifications
+							function robSays(label, desiredVoiceIndex = null) {
+								var thesewords = new SpeechSynthesisUtterance("clearing expired timer " + label);
+								if (desiredVoiceIndex !== null) {
+									var voices = speechSynthesis.getVoices();
+									thesewords.voice = voices[desiredVoiceIndex];
+								}
+								thesewords.volume = currentVolume / 100;
+								thesewords.onend = function () {
+									clearexpiredTimer(label);
+								};
+								console.log('Voice index used =', desiredVoiceIndex);
+								speechSynthesis.speak(thesewords);
+							}
+
+							function robSaysTimesup(label, desiredVoiceIndex = null) {
+								var prefix = getRandomArrayobject(robotimerPrefixes);
+								var suffix = getRandomArrayobject(robotimerSuffixes);
+								var spokenmessage = new SpeechSynthesisUtterance(prefix + label + suffix);
+								if (desiredVoiceIndex !== null) {
+									var voices = speechSynthesis.getVoices();
+									spokenmessage.voice = voices[desiredVoiceIndex];
+								}
+								spokenmessage.volume = currentVolume / 100;
+								console.log('Voice index used =', desiredVoiceIndex);
+								speechSynthesis.speak(spokenmessage);
+							}
+						  </script>
 					<!-- EU Tools Folder start of first eu tool test windows -->
 							<div class="window column resizable draggable-menu" id="hud-EuTools" data-draggable="true">
 							  <div class="headerbar" id="Hud-header-EuTools">
