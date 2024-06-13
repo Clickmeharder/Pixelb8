@@ -181,7 +181,7 @@ function robotSays(label, desiredVoiceIndex) {
     // Create a new SpeechSynthesisUtterance
     var thesewords = new SpeechSynthesisUtterance(label);
     // Set up the onend event listener
-    utterance.onend = function () {
+    thesewords.onend = function () {
         clearexpiredTimer(label);
     };
     // Speak the utterance
@@ -197,7 +197,7 @@ function robotSays2(label) {
         clearexpiredTimer(label);
     };
     // Speak the utterance
-    speechSynthesis.speak(message);
+    speechSynthesis.speak(spokenmessage);
 }
 // Modify your existing speakLabel function
 function speakLabel(label, desiredVoiceIndex) {
