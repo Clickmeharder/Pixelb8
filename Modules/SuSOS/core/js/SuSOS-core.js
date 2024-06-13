@@ -611,3 +611,4 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	});
 });
+console.log('sus os core finally went thru');
