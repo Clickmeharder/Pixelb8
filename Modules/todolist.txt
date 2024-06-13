@@ -16,9 +16,41 @@ TO DO LIST:
 [comments: they currently seem to work the same, so far fully functional]
 -------------------
 
+-------------------
 
+[x][5]- fix the timer and text
+[comments: finished] 
+[x][6]- more cool intuitive button for timer with some options
+[comments: finished for now - want to include settings for sound and rob.bot  susos settings -]
+
+-------------------
+[x][7] make sure all site pages look good and are structured well. 
+[comments: finished for now but i need to come back to entorpia maps page eventually - i think i will include it on entropia page directly. we will see]
+
+-------------------------------
+
+[X][16] - add a website disclaimer that entropia owns all its stuff and im not affiliated with anyone etc
+comments: finished i think, not sure if its legal but good enough for now.
+
+  [X][22] - update and improve the clock, 
+          + add timers and stopwatch functions in the clock
+[Comments: finished]
+
+
+//////////////////////////////////////////////
+//     REVIEW EVERYTHING YOU SKIPPED AND MAKE NEW PRIORITY LIST
+///////////////////////
 ______________________________________________________________________________________________________
-	[Skipping and comming back to this later]                                      		     		  |
+	[Skipping and comming back to this later]
+[o][15] -remove myeucodex	|
+---------------------------------------------------
+[o][12] - add the settings windows to susos
+[comments: ]
+[o][13] - add the ctrl panel windows to sus os 
+[comments: ]
+--------------------------------------------------
+
+[o][14] add substance to power button
 [o][3]  - create new buttons for entropia maps, sus society, satbav, tools etc on the eu tools page
               (seperate them from the main nav somehow)
 [comments: ]			                                                                                
@@ -38,108 +70,28 @@ ________________________________________________________________________________
 
 [o][8]- implement independant Rob.Bot js code and give him life and intelligence.
 [comments: ]
-______________________________________________________________________________________________________|
-
-______________________________________________________________________________________________________
-                                  [ SUS OS (JS-OS DEVELOPMENT) ]
-								  
-
-
-
-
-
--------------------
-
-[x][5]- fix the timer and text
-[comments: ] 
-[x][6]- more cool intuitive button for timer with some options
-[comments: ]
---------------------
-
-[o][7] make sure pages look good and are structured well. 
-[comments: ]
+[o][9.5] - add local storage  saved files and used storage size etc display functionality
+[comments:]
 [o][8] add individual tool pages - only important ones if necesary. 
-[comments: ]
-
+[comments: display embeddable versions of tools and the link to their respective codepen page or something]
+[comments:]
+[o][17] - add disclaimer to event planner about certain event areas having highr costs till we find solution
+[comments:]
+[o][20] - fix style tuner so it matches the proper values etc and controls all the aesthetics
+[comments:SCROLL DOWN TO SEE styletuner chores]
+[o][8] considering adding a gallery page for images. 
+[comments:]
+[o][23] - create a js os clock calender, and ability to set schedules, routines, todolists, reminders etc
 ---------------------
 
-
--*- at this point we need to ensure we are ready to be able to add new os programs and updates individually easily as well as
-having the js os load and unload them efficiently, debug them, and give user access to there code 
-----------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------
-
-[o][9]
- review and figure out what ur doing for sure, adjust goals and todolist if needed
-[comments: ]
-
-[o][9.5] - add local storage size etc display functionality
-
-[o][10] susos js os loads and unloads applets efficiently 
-[comments: ]
-[o][11] create a good default program that makes it easier to create various applets
-[comments: ]
----------------------------------------------------
-[o][12] - add the settings windows to susos
-[comments: ]
-[o][13] - add the ctrl panel windows to sus os 
-[comments: ]
---------------------------------------------------
-
-[o][14] add substance to power button
-
-[o][15] -remove myeucodex
-
-[o][16] - add a website disclaimer that entropia owns all its stuff and im not affiliated with anyone etc
-
-[o][17] - add disclaimer to event planner about certain event areas having highr costs till we find solution
-
-____________________________________________________________________________________________________________
-
- if this goes well we can now hopefully duplicate a blank or default program mould or window
-  - default program shuld look like most other windows and used for duplication
- optional- consider buttons and inputs for options to adjust the window creation
-  from here we would have to implement logic to handle adding the new programs if we want them automatically added directly
-  a problem to solve later
-
- we can use place holder progs/applets for now maybe unless we have successfully built a program builder 
- 
- 
- 
 [o][18] - add the individual tool pages on eu page and placeholder pages on rsc page
 [o][19] - add basic calculator,tools, widgets to unused big right panel on susos -
  also include the necessary profile/user info& access
  
-
- 
-[o][20] - fix style tuner so it matches the proper values etc and controls all the aesthetics
---------------------------------------------------------------
-		[o][20-A]	- add a way to save/reset to default
- 
-		[o][20-A]	-current  -automatically stays however u set/leave it and be the one u load in with.
-		[o][20-B]	-custom1 - a saved custom scheme
-		[o][20-C]	custom2 - ""
-		[o][20-D]	custom3	- ""
-		[o][20-E]	-default1 - the default look
-		[o][20-F]	-default2 - a secondary default look (we may add these in the future)
-			
-  then we will have a default they can use or also revert a custom one to. 
-  copy save revert on current and
-default schemes will require: copy save revert
-custom schemes will require:  edit, rename, delete, revert
-
-( REVERT will be used to revert to the last saved version of that scheme)
-[o][21] - add cursor options to style tuner even if its a placeholder button for now that doesnt function.
--------------------------------------------------------------------------------------
-_________________________________________________________________________________
-  
-  [o][22] - update and improve the clock, 
-          + add timers and stopwatch functions in the clock
-  [o][23] - create a js os clock calender, and ability to set schedules, routines, todolists, reminders etc
-
- [o][24] - - see if theres a way we can send push notifications ^
+ ---------------------
+  [o][24] - - see if theres a way we can send push notifications ^
              if so implement them to both calender, clock and necessary timers.
- 
+			 
 -fix maps tab in susos so they function or change them
 
 
@@ -161,7 +113,80 @@ create and implement logic for :
 [o][31] -implement simple text editor applet
 
  (we will save paint for later, we will use one of the nice little buttons in topright of susos and stick a pantbrush in it.
- then we can have a paint overlayer that lets u paint , overtop of whatever u were doing or also give u a background)
+ then we can have a paint overlayer that lets u paint , overtop of whatever u were doing or also give u a background)			 
+			 
+			 
+
+______________________________________________________________________________________________________|
+
+______________________________________________________________________________________________________
+                                  [ SUS OS (JS-OS DEVELOPMENT) ]
+								
+--------------------
+
+
+
+
+
+-*- at SOME point we need to ensure we are ready to be able to add new os programs and updates individually easily as well as
+having the js os load and unload them efficiently, debug them, and give user access to there code.
+
+this will require development and implementation of a lazyloader into the susos specific to this purpose.
+----------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+
+[o][10] susos js os loads and unloads applets efficiently 
+[comments: ]
+
+[o][11] create a good default applet that makes it easier for yourself to create various new applets using it as a base
+[comments: ]
+[o][11] build off the default applet in order to create an applet that allows you to:
+          -create new applets directly in the sus os with options or code or a mix
+[comments: ]
+
+____________________________________________________________________________________________________________
+
+ if this goes well we can now hopefully duplicate a blank or default program mould or window
+  - default program shuld look like most other windows and used for duplication
+ optional- consider buttons and inputs for options to adjust the window creation
+  from here we would have to implement logic to handle adding the new programs if we want them automatically added directly
+  a problem to solve later
+
+ we can use place holder progs/applets for now maybe unless we have successfully built a program builder 
+ 
+ 
+ 
+
+ 
+
+ STYLE TUNER CHORES
+[o][20] - fix style tuner so it matches the proper values etc and controls all the aesthetics
+--------------------------------------------------------------
+		[o][20-A]	- add a way to save/reset to default
+ 
+		[o][20-A]	-current  -automatically stays however u set/leave it and be the one u load in with.
+		[o][20-B]	-custom1 - a saved custom scheme
+		[o][20-C]	custom2 - ""
+		[o][20-D]	custom3	- ""
+		[o][20-E]	-default1 - the default look
+		[o][20-F]	-default2 - a secondary default look (we may add these in the future)
+			
+  then we will have a default they can use or also revert a custom one to. 
+  copy save revert on current and
+default schemes will require: copy save revert
+custom schemes will require:  edit, rename, delete, revert
+
+( REVERT will be used to revert to the last saved version of that scheme)
+[o][21] - add cursor options to style tuner even if its a placeholder button for now that doesnt function.
+-------------------------------------------------------------------------------------
+_________________________________________________________________________________
+  
+
+  
+
+
+ ****************************************************************************
+
 
 
   -[ DESKTOP ][ALTERNATE]
