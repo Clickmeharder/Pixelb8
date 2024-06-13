@@ -620,12 +620,13 @@ document.addEventListener('DOMContentLoaded', function () {
 				// Check if the timer has already expired
 				if (remainingTime <= 0) {
 					timerElement.textContent = timer.label + ' - Timer Expired';
+					expiredLabel = timerElement.textContent;
 
 					// Display a message and ask the user to click to hear the label
 					timerElement.innerHTML += '<br>Click to hear label';
 					timerElement.addEventListener('click', function () {
 						// Read the label using text-to-speech
-						robSaysTimesup(timer.label);
+						robSaysTimesup(expiredLabel);
 
 						// Remove the timer from the stack
 						timerStack.removeChild(timerElement);
@@ -676,7 +677,7 @@ document.addEventListener('DOMContentLoaded', function () {
 							timerElement.innerHTML += '<br>Click to hear label';
 							timerElement.addEventListener('click', function () {
 								// Read the label using text-to-speech
-								robSaysTimesup(timer.label);
+								robSaysTimesup(expiredLabel);
 
 								// Remove the timer from the stack
 								timerStack.removeChild(timerElement);
