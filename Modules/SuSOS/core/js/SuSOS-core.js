@@ -22,6 +22,37 @@ powerCheckbox.addEventListener('change', function() {
 //==========================
 // START OF HUD CODE
 //===================================================================
+
+//AUDIO CONTROL CODE
+// Get references to the HTML elements
+const audioDial = document.getElementById('mainAudioDial');
+const lockButton = document.getElementById('lockedinput');
+
+// Placeholder for the audio element, assuming you have an <audio> element in your HTML
+const audioElement = document.getElementById('yourAudioElementId');
+
+// Function to update the audio volume
+const updateVolume = (event) => {
+  const volume = event.target.value / 100; // Convert from 0-100 to 0-1
+  audioElement.volume = volume;
+};
+
+// Function to toggle lock state
+const toggleLock = () => {
+  audioDial.disabled = !audioDial.disabled; // Toggle the disabled property
+  lockButton.classList.toggle('locked'); // Assuming you have some CSS to indicate locked state
+};
+
+// Event listeners
+audioDial.addEventListener('input', updateVolume);
+lockButton.addEventListener('click', toggleLock);
+
+// Set the initial volume
+audioElement.volume = audioDial.value / 100;
+
+//END OF AUDIO code
+console.log('HOPEFULLY, the global volume will work');
+
 // windows
 const windowIds = [];
 
