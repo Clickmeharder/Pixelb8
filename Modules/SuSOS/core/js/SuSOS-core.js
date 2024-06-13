@@ -260,7 +260,7 @@ const closeAllWindows = () => {
         const windowElement = document.getElementById(windowId);
         if (windowElement && !windowElement.classList.contains('hidden')) {
             windowElement.classList.add('hidden');
-            console.log(windowId + ' closed');
+            console.log('all open windows closed');
             // Remove the tab button when the window is closed
             const tabButton = tabButtons[windowId];
             if (tabButton) {
