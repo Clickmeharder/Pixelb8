@@ -176,7 +176,7 @@ function clearexpiredTimer(label) {
 // the function that sets up rob's speach for expired timers
 function robotSays(label, desiredVoiceIndex) {
     // Create a new SpeechSynthesisUtterance
-    var thesewords = new SpeechSynthesisUtterance(label);
+    var thesewords = new SpeechSynthesisUtterance("clearing expired timer" + label);
     // Set up the onend event listener
     thesewords.onend = function () {
         clearexpiredTimer(label);
@@ -189,10 +189,6 @@ function robSaysTimesup(label) {
     var prefix = getRandomArrayobject(robotimerPrefixes);
     var suffix = getRandomArrayobject(robotimerSuffixes);
     var spokenmessage = new SpeechSynthesisUtterance(prefix + label + suffix);
-    // Set up the onend event listener
-    spokenmessage.onend = function () {
-        clearexpiredTimer(label);
-    };
     // Speak the utterance
     speechSynthesis.speak(spokenmessage);
 }
@@ -776,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function () {
 						});
 
 						// Read the label using text-to-speech
-						robSaysTimesup(label);
+						robSays(label, 1);
 
 						// Remove the timer from the stack
 						timerStack.removeChild(timerElement);
