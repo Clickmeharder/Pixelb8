@@ -512,3 +512,4 @@ document.addEventListener('click', (event) => {
     }
   });
 
+console.log('sus os core finally reverted, try to again.');
