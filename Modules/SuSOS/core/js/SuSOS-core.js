@@ -1,5 +1,5 @@
 //==========================
-// Main Hud Power and Power Button CODE
+// youtube player code
 //===================================================================
 var total = "";
 var currentVolume = 45;
@@ -139,7 +139,9 @@ player.setPlaybackQuality(suggestedQuality:String) - Return type Void
  
 
 
-
+//==========================
+// Main Hud Power and Power Button CODE
+//===================================================================
 const powerCheckbox = document.getElementById('powercheckbox');
 const hudMonitorPower = document.querySelector('.hudMonitorPower');
 

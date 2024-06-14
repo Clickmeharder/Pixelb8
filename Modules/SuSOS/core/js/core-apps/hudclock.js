@@ -1,8 +1,5 @@
 
-// Function to get a random element from an array
-function getRandomElement(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
+
 
 var robotimerPrefixes = [
     'Excuse me, Captain, your custom timer labelled as',
