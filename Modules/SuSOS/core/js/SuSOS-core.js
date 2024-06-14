@@ -94,8 +94,7 @@ function onPlayerReady(event) {
 	currentVolume = $(this).val(); // Update currentVolume
 	$(".vol").text(currentVolume);
 	player.setVolume(currentVolume);
-	console.log('-Shitty VideoPlayer-');
-	console.log('Volume: ' + currentVolume);
+	console.log('-Shitty VideoPlayer Volume: ' + currentVolume);
 	// Call speech synthesis function if needed
 	//announceVolume(currentVolume);
   });
