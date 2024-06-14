@@ -78,20 +78,14 @@ function onPlayerStateChange(event) {
   }
 
   $(".duration").text(Math.floor(total));
-} 
-    function fetchytVideoTitle(videoId) {
-      $.ajax({
-        url: `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet`,
-        type: 'GET',
-        success: function (data) {
-          const ytvideoTitle = data.items[0].snippet.title;
-          $('#ytvideoTitle span').text(ytvideoTitle);
-        },
-        error: function () {
-          console.error('Failed to fetch video title');
-        }
-      });
+}
+	function fetchytVideoTitle() {
+      const videoData = player.getVideoData();
+      const ytvideoTitle = videoData.title;
+      $('#ytvideoTitle span').text(ytvideoTitle);
     }
+		
+
 
 /* $(document).ready(function (e) {
   $("#mainAudioDial").on("mousemove", function () {
@@ -108,13 +102,14 @@ function onPlayerReady(event) {
 	currentVolume = $(this).val(); // Update currentVolume
 	$(".vol").text(currentVolume);
 	player.setVolume(currentVolume);
+	console.log('Shitty VideoPlayer Initialized:');
 	console.log('Volume: ' + currentVolume);
 	// Call speech synthesis function if needed
 	//announceVolume(currentVolume);
   });
 }
 function announceVolume(volume) {
-  var msg = new SpeechSynthesisUtterance("The current volume is " + volume);
+  var msg = new SpeechSynthesisUtterance("Robbot: My volume level is set to" + volume + '.');
   speechSynthesis.speak(msg);
 }
 /* stuff i removed and shuld re implement:*/
