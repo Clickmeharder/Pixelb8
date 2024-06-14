@@ -1,6 +1,4 @@
 
-
-
 var robotimerPrefixes = [
     'Excuse me, Captain, your custom timer labelled as',
 	'the timer labelled as, ',
@@ -490,205 +488,186 @@ document.addEventListener('DOMContentLoaded', function () {
 	});
 
 		// Function to load the scheduled events list from local storage
-	function loadScheduledEventsList() {
-		// Retrieve the JSON string from local storage
-		var scheduledEventsListJson = localStorage.getItem('scheduledEventsList');
+		function loadScheduledEventsList() {
+			// Retrieve the JSON string from local storage
+			var scheduledEventsListJson = localStorage.getItem('scheduledEventsList');
 
-		// Parse the JSON string to get the scheduled events list
-		var scheduledevents = JSON.parse(scheduledEventsListJson) || [];
+			// Parse the JSON string to get the scheduled events list
+			var scheduledevents = JSON.parse(scheduledEventsListJson) || [];
 
-		// Add scheduled events to the FullCalendar
-		scheduledevents.forEach(function (event) {
-			calendar.addEvent({
-				title: event.eventName,
-				start: event.date + 'T' + event.time + ':00',
-				backgroundColor: '#620a0ae0',  // Change to the desired background color  blue  #0a3662d1 green #0a6211e0 red #620a0ae0 purple #8c27b0a3 pink #b8166c9c
-				borderColor: '#d77901',
-				textColor: '#00e7ff',
-				extendedProps: {
-					prizeValue: event.prizeValue || '0.00',
-					ticketPrice: event.totalTicketPrice || '0.00'
-					// Add other properties as needed
-				}
-			});
-		});
-
-		// Add events for weekdays at 21:00
-		for (var i = 1; i <= 5; i++) {
-			calendar.addEvent({
-				title: 'Big Industries SSI',
-				daysOfWeek: [i],
-				startTime: '21:00',
-				duration: { hours: 2 },
-				backgroundColor: '#0a6211e0',
-			});
-		}
-
-		// Add events for Saturday & Sunday at 15:00
-		calendar.addEvent({
-			title: 'Big Industries SSI',
-			daysOfWeek: [0, 6],
-			startTime: '15:00',
-			duration: { hours: 2 },
-			backgroundColor: '#0a6211e0',
-		});
-		// Call the function to set warp days
-		setWarpDays();
-		
-		// Add Kronan M.S Warp events
-		addKronanMSWarpEvents();
-
-		// Re-render the calendar to display the new events
-		calendar.render();
-	}
-	// Function to set warp days based on specific dates for all 12 months
-	function addKronanMSWarpEvents() {
-		// Array of Kronan M.S Warp events with departure and arrival details
-		var kronanEvents = [
-			{ title: 'Kronan Ark-Caly', start: '2024-01-01T00:30:00', duration: '00:15' },
-			{ title: 'Kronan Caly-Rt', start: '2024-01-01T01:00:00', duration: '00:15' },
-			{ title: 'Kronan Rt-Request*', start: '2024-01-01T01:30:00', duration: '00:15' },
-			{ title: 'Kronan Request*-Caly', start: '2024-01-01T01:40:00', duration: '00:15' },
-			{ title: 'Kronan Caly-Ark', start: '2024-01-01T02:05:00', duration: '00:15' }
-			// Add more events as needed
-		];
-		// Add Kronan M.S Warp events to the calendar
-		kronanEvents.forEach(function (event) {
-			// Set the event start and end times in extendedProps
-			var extendedProps = {
-				departureandArrival: ``,
-				dayPassPrice: '10.00', // Default day pass price for Kronan warps
-				originPlanet: event.title.split('Kronan')[1]?.split('-')[0] || event.title.split('Kronan')[1]?.split('*')[0] || '', // Assuming the origin planet is part of the event title
-				destinationPlanet: event.title.split('-')[1] || event.title.split('*')[1] || '', // Assuming the destination planet is part of the event title
-			};
-
-			calendar.addEvent({
-				title: event.title,
-				start: event.start,
-				end: addDuration(event.start, event.duration), // Set arrival time as the end of the duration
-				backgroundColor: '#yourBackgroundColor',  // Change to your desired background color
-				borderColor: '#yourBorderColor',  // Change to your desired border color
-				textColor: '#yourTextColor',  // Change to your desired text color
-				daysOfWeek: [0, 1, 2, 3, 4, 5, 6],  // Repeat every day of the week except Saturday (0 is Sunday),
-				extendedProps: extendedProps,
-				eventContent: function (arg) {
-					// Customize the rendering of each event
-					var eventDetails = document.createElement('div');
-					eventDetails.innerHTML = `<strong>${arg.event.title}</strong>`;
-					// Display departure and arrival times
-					eventDetails.innerHTML += `<br>Departure: ${event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-					eventDetails.innerHTML += `<br>Arrival: ${addDuration(event.start, event.duration).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-					return { domNodes: [eventDetails] };
-				},
-			});
-		});
-	}
-
-	// Function to add duration to a date and return the new date
-	function addDuration(dateString, duration) {
-		var date = new Date(dateString);
-		var hours = parseInt(duration.split(':')[0]);
-		var minutes = parseInt(duration.split(':')[1]);
-		date.setHours(date.getHours() + hours);
-		date.setMinutes(date.getMinutes() + minutes);
-		return date;
-	}
-	function setWarpDays() {
-		var warpDates = {
-			1: [5, 12, 19, 25, 7, 14, 21, 29], //month 1
-			2: [2, 9, 16, 22, 4, 11, 18, 26],   //month 2
-			3: [1, 8, 15, 22, 28, 2, 9, 16, 23], //month 3
-			4: [1, 5, 12, 19, 25, 7, 14, 21, 29],  //month 4
-			5: [3, 10, 17, 23, 5, 12, 19, 27],  //month 5
-			6: [7, 14, 21, 27, 2, 9, 16, 23], //month 6
-			7: [1, 5, 12, 19, 25, 7, 14, 21, 29],  // month 7
-			8: [2, 9, 16, 22, 30, 4, 11, 18, 26], //month 8
-			9: [6, 13, 20, 26, 1, 8, 15, 22, 30], //month 9
-			10: [4, 10, 18, 25, 6, 14, 20, 27],  //month 10
-			11: [1, 8, 15, 21, 29, 3, 10, 17, 25], //month 11
-			12: [6, 13, 20, 26, 1, 8, 15, 22, 30] //month 12
-		};
-
-		// Get the current month
-		var currentMonth = new Date().getMonth() + 1;
-
-		// Access the array for the current month directly
-		var currentMonthWarpDates = warpDates[currentMonth];
-
-		// Log some information for debugging
-		console.log('Current Month:', currentMonth);
-		console.log('Warp Dates for Current Month:', currentMonthWarpDates);
-
-		// Check if the current month has warp dates
-		if (currentMonthWarpDates) {
-			// Add events for specific dates
-			currentMonthWarpDates.forEach(function (day) {
-				// console.log('Adding Event for Day:', day);
+			// Add scheduled events to the FullCalendar
+			scheduledevents.forEach(function (event) {
 				calendar.addEvent({
-					title: 'Yamato M.S. Warp',
-					start: new Date(new Date().getFullYear(), currentMonth - 1, day, 18, 45),
-					end: new Date(new Date().getFullYear(), currentMonth - 1, day, 22, 30),
-					backgroundColor: '#0a3662d1',
+					title: event.eventName,
+					start: event.date + 'T' + event.time + ':00',
+					backgroundColor: '#620a0ae0',  // Change to the desired background color  blue  #0a3662d1 green #0a6211e0 red #620a0ae0 purple #8c27b0a3 pink #b8166c9c
+					borderColor: '#d77901',
+					textColor: '#00e7ff',
 					extendedProps: {
-						ticketPrice: '6.00'
+						prizeValue: event.prizeValue || '0.00',
+						ticketPrice: event.totalTicketPrice || '0.00'
+						// Add other properties as needed
 					}
 				});
 			});
-		}
-	}
-	// Call the function to load scheduled events when the page loads
-	loadScheduledEventsList();
-	updateClock('localtime', 'EUtime');
 
-	function loadTimersFromLocalStorage() {
-		var timers = JSON.parse(localStorage.getItem('timers')) || [];
-		timers.forEach(function (timer) {
-			var timerElement = document.createElement('div');
-			timerElement.className = 'timer';
-
-			// Calculate the remaining time based on current local time
-			var currentTime = new Date().getTime();
-			var elapsed = currentTime - timer.startTime;
-			var remainingTime = timer.totalTime - elapsed;
-
-			// Check if the timer has already expired
-			if (remainingTime <= 0) {
-				timerElement.textContent = timer.label + ' - Timer Expired';
-				expiredLabel = timerElement.textContent;
-
-				// Display a message and ask the user to click to hear the label
-				timerElement.innerHTML += '<br>Click to hear label';
-				timerElement.addEventListener('click', function () {
-					// Read the label using text-to-speech
-					robSaysTimesup(expiredLabel, 2);
-
-					// Remove the timer from the stack
-					timerStack.removeChild(timerElement);
-
-					// Remove the timer from local storage
-					removeTimerFromLocalStorage(timer.label);
+			// Add events for weekdays at 21:00
+			for (var i = 1; i <= 5; i++) {
+				calendar.addEvent({
+					title: 'Big Industries SSI',
+					daysOfWeek: [i],
+					startTime: '21:00',
+					duration: { hours: 2 },
+					backgroundColor: '#0a6211e0',
 				});
-			} else {
-				// Calculate hours, minutes, and seconds
-				var hoursLeft = Math.floor(remainingTime / (60 * 60 * 1000));
-				var minutesLeft = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
-				var secondsLeft = Math.floor((remainingTime % (60 * 1000)) / 1000);
+			}
 
-				// Display the remaining time
-				timerElement.textContent = timer.label + ' - ' + hoursLeft + 'h ' + minutesLeft + 'm ' + secondsLeft + 's';
+			// Add events for Saturday & Sunday at 15:00
+			calendar.addEvent({
+				title: 'Big Industries SSI',
+				daysOfWeek: [0, 6],
+				startTime: '15:00',
+				duration: { hours: 2 },
+				backgroundColor: '#0a6211e0',
+			});
+			// Call the function to set warp days
+			setWarpDays();
+			
+			// Add Kronan M.S Warp events
+			addKronanMSWarpEvents();
 
-				// Change text color when remaining time is below 30 minutes
-				if (remainingTime < 30 * 60 * 1000) {
-					timerElement.style.color = 'red'; // Change to your desired color
-				}
+			// Re-render the calendar to display the new events
+			calendar.render();
+		}
+		// Function to set warp days based on specific dates for all 12 months
+		function addKronanMSWarpEvents() {
+			// Array of Kronan M.S Warp events with departure and arrival details
+			var kronanEvents = [
+				{ title: 'Kronan Ark-Caly', start: '2024-01-01T00:30:00', duration: '00:15' },
+				{ title: 'Kronan Caly-Rt', start: '2024-01-01T01:00:00', duration: '00:15' },
+				{ title: 'Kronan Rt-Request*', start: '2024-01-01T01:30:00', duration: '00:15' },
+				{ title: 'Kronan Request*-Caly', start: '2024-01-01T01:40:00', duration: '00:15' },
+				{ title: 'Kronan Caly-Ark', start: '2024-01-01T02:05:00', duration: '00:15' }
+				// Add more events as needed
+			];
 
-				// Create a countdown timer
-				var countdownInterval = setInterval(function () {
-					// Calculate the remaining time based on current local time
-					var currentTime = new Date().getTime();
-					var elapsed = currentTime - timer.startTime;
-					var remainingTime = timer.totalTime - elapsed;
+			// Add Kronan M.S Warp events to the calendar
+			kronanEvents.forEach(function (event) {
+				// Set the event start and end times in extendedProps
+				var extendedProps = {
+					departureandArrival: ``,
+					dayPassPrice: '10.00', // Default day pass price for Kronan warps
+					originPlanet: event.title.split('Kronan')[1]?.split('-')[0] || event.title.split('Kronan')[1]?.split('*')[0] || '', // Assuming the origin planet is part of the event title
+					destinationPlanet: event.title.split('-')[1] || event.title.split('*')[1] || '', // Assuming the destination planet is part of the event title
+				};
 
+				calendar.addEvent({
+					title: event.title,
+					start: event.start,
+					end: addDuration(event.start, event.duration), // Set arrival time as the end of the duration
+					backgroundColor: '#yourBackgroundColor',  // Change to your desired background color
+					borderColor: '#yourBorderColor',  // Change to your desired border color
+					textColor: '#yourTextColor',  // Change to your desired text color
+					daysOfWeek: [0, 1, 2, 3, 4, 5, 6],  // Repeat every day of the week except Saturday (0 is Sunday),
+					extendedProps: extendedProps,
+					eventContent: function (arg) {
+						// Customize the rendering of each event
+						var eventDetails = document.createElement('div');
+						eventDetails.innerHTML = `<strong>${arg.event.title}</strong>`;
+						// Display departure and arrival times
+						eventDetails.innerHTML += `<br>Departure: ${event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+						eventDetails.innerHTML += `<br>Arrival: ${addDuration(event.start, event.duration).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+						return { domNodes: [eventDetails] };
+					},
+				});
+			});
+		}
+
+		// Function to add duration to a date and return the new date
+		function addDuration(dateString, duration) {
+			var date = new Date(dateString);
+			var hours = parseInt(duration.split(':')[0]);
+			var minutes = parseInt(duration.split(':')[1]);
+			date.setHours(date.getHours() + hours);
+			date.setMinutes(date.getMinutes() + minutes);
+			return date;
+		}
+		function setWarpDays() {
+			var warpDates = {
+				1: [5, 12, 19, 25, 7, 14, 21, 29], //month 1
+				2: [2, 9, 16, 22, 4, 11, 18, 26],   //month 2
+				3: [1, 8, 15, 22, 28, 2, 9, 16, 23], //month 3
+				4: [1, 5, 12, 19, 25, 7, 14, 21, 29],  //month 4
+				5: [3, 10, 17, 23, 5, 12, 19, 27],  //month 5
+				6: [7, 14, 21, 27, 2, 9, 16, 23], //month 6
+				7: [1, 5, 12, 19, 25, 7, 14, 21, 29],  // month 7
+				8: [2, 9, 16, 22, 30, 4, 11, 18, 26], //month 8
+				9: [6, 13, 20, 26, 1, 8, 15, 22, 30], //month 9
+				10: [4, 10, 18, 25, 6, 14, 20, 27],  //month 10
+				11: [1, 8, 15, 21, 29, 3, 10, 17, 25], //month 11
+				12: [6, 13, 20, 26, 1, 8, 15, 22, 30] //month 12
+			};
+
+			// Get the current month
+			var currentMonth = new Date().getMonth() + 1;
+
+			// Access the array for the current month directly
+			var currentMonthWarpDates = warpDates[currentMonth];
+
+			// Log some information for debugging
+			console.log('Current Month:', currentMonth);
+			console.log('Warp Dates for Current Month:', currentMonthWarpDates);
+
+			// Check if the current month has warp dates
+			if (currentMonthWarpDates) {
+				// Add events for specific dates
+				currentMonthWarpDates.forEach(function (day) {
+					// console.log('Adding Event for Day:', day);
+					calendar.addEvent({
+						title: 'Yamato M.S. Warp',
+						start: new Date(new Date().getFullYear(), currentMonth - 1, day, 18, 45),
+						end: new Date(new Date().getFullYear(), currentMonth - 1, day, 22, 30),
+						backgroundColor: '#0a3662d1',
+						extendedProps: {
+							ticketPrice: '6.00'
+						}
+					});
+				});
+			}
+		}
+		// Call the function to load scheduled events when the page loads
+		loadScheduledEventsList();
+		updateClock('localtime', 'EUtime');
+
+		function loadTimersFromLocalStorage() {
+			var timers = JSON.parse(localStorage.getItem('timers')) || [];
+			timers.forEach(function (timer) {
+				var timerElement = document.createElement('div');
+				timerElement.className = 'timer';
+
+				// Calculate the remaining time based on current local time
+				var currentTime = new Date().getTime();
+				var elapsed = currentTime - timer.startTime;
+				var remainingTime = timer.totalTime - elapsed;
+
+				// Check if the timer has already expired
+				if (remainingTime <= 0) {
+					timerElement.textContent = timer.label + ' - Timer Expired';
+					expiredLabel = timerElement.textContent;
+
+					// Display a message and ask the user to click to hear the label
+					timerElement.innerHTML += '<br>Click to hear label';
+					timerElement.addEventListener('click', function () {
+						// Read the label using text-to-speech
+						robSaysTimesup(expiredLabel, 2);
+
+						// Remove the timer from the stack
+						timerStack.removeChild(timerElement);
+
+						// Remove the timer from local storage
+						removeTimerFromLocalStorage(timer.label);
+					});
+				} else {
 					// Calculate hours, minutes, and seconds
 					var hoursLeft = Math.floor(remainingTime / (60 * 60 * 1000));
 					var minutesLeft = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
@@ -702,138 +681,159 @@ document.addEventListener('DOMContentLoaded', function () {
 						timerElement.style.color = 'red'; // Change to your desired color
 					}
 
-					// Check if the countdown is finished
-					if (remainingTime <= 0) {
-						clearInterval(countdownInterval);
-						timerElement.textContent = timer.label + ' - Timer Expired';
+					// Create a countdown timer
+					var countdownInterval = setInterval(function () {
+						// Calculate the remaining time based on current local time
+						var currentTime = new Date().getTime();
+						var elapsed = currentTime - timer.startTime;
+						var remainingTime = timer.totalTime - elapsed;
 
-						// Display a message and ask the user to click to hear the label
-						timerElement.innerHTML += '<br>Click to hear label';
-						timerElement.addEventListener('click', function () {
-							// Read the label using text-to-speech
-							robSaysTimesup(expiredLabel, 2);
+						// Calculate hours, minutes, and seconds
+						var hoursLeft = Math.floor(remainingTime / (60 * 60 * 1000));
+						var minutesLeft = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
+						var secondsLeft = Math.floor((remainingTime % (60 * 1000)) / 1000);
 
-							// Remove the timer from the stack
-							timerStack.removeChild(timerElement);
+						// Display the remaining time
+						timerElement.textContent = timer.label + ' - ' + hoursLeft + 'h ' + minutesLeft + 'm ' + secondsLeft + 's';
 
-							// Remove the timer from local storage
-							removeTimerFromLocalStorage(timer.label);
-						});
-					}
-				}, 1000);
-			}
+						// Change text color when remaining time is below 30 minutes
+						if (remainingTime < 30 * 60 * 1000) {
+							timerElement.style.color = 'red'; // Change to your desired color
+						}
 
-			// Add the timer to the stack
-			timerStack.appendChild(timerElement);
-		});
-	}
+						// Check if the countdown is finished
+						if (remainingTime <= 0) {
+							clearInterval(countdownInterval);
+							timerElement.textContent = timer.label + ' - Timer Expired';
 
-	// Call the function to load scheduled events when the page loads
-	/* loadScheduledEventsList(); */
+							// Display a message and ask the user to click to hear the label
+							timerElement.innerHTML += '<br>Click to hear label';
+							timerElement.addEventListener('click', function () {
+								// Read the label using text-to-speech
+								robSaysTimesup(expiredLabel, 2);
 
-	function newtimerCountdown(){ 
-		// Ask the user for input
-		var hours = prompt('Enter the number of hours for the timer:');
-		var minutes = prompt('Enter the number of minutes for the timer:'); // Added prompt for minutes
-		var label;
-		
-		// Check if the user canceled the input
-		if (hours === null || minutes === null) {
-			alert('Timer creation canceled.'); // Notify the user
-			return; // Exit the function
+								// Remove the timer from the stack
+								timerStack.removeChild(timerElement);
+
+								// Remove the timer from local storage
+								removeTimerFromLocalStorage(timer.label);
+							});
+						}
+					}, 1000);
+				}
+
+				// Add the timer to the stack
+				timerStack.appendChild(timerElement);
+			});
 		}
 
-		// Ask for label only if the user provided hours and minutes
-		if (hours !== '' && minutes !== '') {
-			label = prompt('Enter a label for the timer:');
 
+		// Call the function to load scheduled events when the page loads
+		/* loadScheduledEventsList(); */
+		
+
+		var timerButton = document.getElementById('timer-button');
+		var timerStack = document.getElementById('timer-stack');
+
+		timerButton.addEventListener('click', function () {
+			// Ask the user for input
+			var hours = prompt('Enter the number of hours for the timer:');
+			var minutes = prompt('Enter the number of minutes for the timer:'); // Added prompt for minutes
+			var label;
+			
 			// Check if the user canceled the input
-			if (label === null) {
+			if (hours === null || minutes === null) {
 				alert('Timer creation canceled.'); // Notify the user
 				return; // Exit the function
 			}
-		}
 
-		// Save the current local time and the total time in milliseconds
-		var startTime = new Date().getTime();
-		var totalTime = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000); // Calculate total time in milliseconds
+			// Ask for label only if the user provided hours and minutes
+			if (hours !== '' && minutes !== '') {
+				label = prompt('Enter a label for the timer:');
 
-		// Create a new timer element
-		var timerElement = document.createElement('div');
-		timerElement.className = 'timer';
-		timerElement.textContent = label + ' - ' + hours + 'h ' + minutes + 'm'; // Updated display format
-
-
-		// Create a countdown timer
-		var countdownInterval = setInterval(function () {
-			// Calculate the remaining time based on current local time
-			var currentTime = new Date().getTime();
-			var elapsed = currentTime - startTime;
-			var remainingTime = totalTime - elapsed;
-
-			// Calculate hours, minutes, and seconds
-			var hoursLeft = Math.floor(remainingTime / (60 * 60 * 1000));
-			var minutesLeft = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
-			var secondsLeft = Math.floor((remainingTime % (60 * 1000)) / 1000);
-
-			// Display the remaining time
-			timerElement.textContent = label + ' - ' + hoursLeft + 'h ' + minutesLeft + 'm ' + secondsLeft + 's';
-
-			// Change text color when remaining time is below 30 minutes
-			if (remainingTime < 30 * 60 * 1000) {
-				timerElement.style.color = 'red'; // Change to your desired color
+				// Check if the user canceled the input
+				if (label === null) {
+					alert('Timer creation canceled.'); // Notify the user
+					return; // Exit the function
+				}
 			}
 
-			// Check if the countdown is finished
-			if (remainingTime <= 0) {
-				clearInterval(countdownInterval);
-				timerElement.textContent = label + ' - Timer Expired';
-				// Play the timer expired message
-				
-				
-				var voices = speechSynthesis.getVoices();
-				console.log("Available Voices:");
-				voices.forEach(function (voice, index) {
-					console.log(index + ": " + voice.name);
-				});
-				//playTimerExpiredMessage(label);
-				robSaysTimesup(label, 2);
-				// Display a message and ask the user to click to hear the label
-				timerElement.innerHTML += '<br>Click to hear label';
-				timerElement.addEventListener('click', function () {
+			// Save the current local time and the total time in milliseconds
+			var startTime = new Date().getTime();
+			var totalTime = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000); // Calculate total time in milliseconds
+
+			// Create a new timer element
+			var timerElement = document.createElement('div');
+			timerElement.className = 'timer';
+			timerElement.textContent = label + ' - ' + hours + 'h ' + minutes + 'm'; // Updated display format
+
+
+			// Create a countdown timer
+			var countdownInterval = setInterval(function () {
+				// Calculate the remaining time based on current local time
+				var currentTime = new Date().getTime();
+				var elapsed = currentTime - startTime;
+				var remainingTime = totalTime - elapsed;
+
+				// Calculate hours, minutes, and seconds
+				var hoursLeft = Math.floor(remainingTime / (60 * 60 * 1000));
+				var minutesLeft = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
+				var secondsLeft = Math.floor((remainingTime % (60 * 1000)) / 1000);
+
+				// Display the remaining time
+				timerElement.textContent = label + ' - ' + hoursLeft + 'h ' + minutesLeft + 'm ' + secondsLeft + 's';
+
+				// Change text color when remaining time is below 30 minutes
+				if (remainingTime < 30 * 60 * 1000) {
+					timerElement.style.color = 'red'; // Change to your desired color
+				}
+
+				// Check if the countdown is finished
+				if (remainingTime <= 0) {
+					clearInterval(countdownInterval);
+					timerElement.textContent = label + ' - Timer Expired';
+					// Play the timer expired message
 					
-					// Log available voices and their indices
+					
 					var voices = speechSynthesis.getVoices();
 					console.log("Available Voices:");
 					voices.forEach(function (voice, index) {
 						console.log(index + ": " + voice.name);
 					});
+					//playTimerExpiredMessage(label);
+					robSaysTimesup(label, 2);
+					// Display a message and ask the user to click to hear the label
+					timerElement.innerHTML += '<br>Click to hear label';
+					timerElement.addEventListener('click', function () {
+						
+						// Log available voices and their indices
+						var voices = speechSynthesis.getVoices();
+						console.log("Available Voices:");
+						voices.forEach(function (voice, index) {
+							console.log(index + ": " + voice.name);
+						});
 
-					// Read the label using text-to-speech
-					robSays(label, 2);
+						// Read the label using text-to-speech
+						robSays(label, 2);
 
-					// Remove the timer from the stack
-					timerStack.removeChild(timerElement);
+						// Remove the timer from the stack
+						timerStack.removeChild(timerElement);
 
-					// Remove the timer from local storage
-					removeTimerFromLocalStorage(label);
-				});
-			}
-		}, 1000);
+						// Remove the timer from local storage
+						removeTimerFromLocalStorage(label);
+					});
+				}
+			}, 1000);
 
-		// Add the timer and start time to the stack
-		timerStack.appendChild(timerElement);
-		saveTimerToLocalStorage(label, totalTime, startTime);
-		console.log(' the new timer function ran and completed, hopefully error free');
-	};
+			// Add the timer and start time to the stack
+			timerStack.appendChild(timerElement);
+			saveTimerToLocalStorage(label, totalTime, startTime);
+		});
 
-	timerButton.addEventListener('click', function () {
-		newtimerCountdown();
-	});
 	// run Functions to update clock and load timers from local storage when the page loads
 	updateClock('localtime', 'EUtime');
 	loadTimersFromLocalStorage();
-});
+	});
 
 
 
