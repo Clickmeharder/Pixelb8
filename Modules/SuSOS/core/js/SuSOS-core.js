@@ -26,9 +26,7 @@ function onYouTubeIframeAPIReady() {
 }
 function progress(percent, $element) {
   var progressBarWidth = (percent * $element.width()) / 100;
-
   // $element.find('div').animate({ width: progressBarWidth }, 500).html(percent + "%&nbsp;");
-
   $element.find("div").animate({ width: progressBarWidth });
 }
 
@@ -38,8 +36,8 @@ function onPlayerReady(event) {
     player.playVideo();
     total = player.getDuration();
     time = player.getCurrentTime();
-
-    
+	title = player.getTitle();
+    console.log('Timer creation canceled.' + title + 'length:' time);
     $(".currentprogress").text(Math.round(time));
   });
 
