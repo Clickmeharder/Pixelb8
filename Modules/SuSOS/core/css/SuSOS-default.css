@@ -2851,19 +2851,12 @@ button#lockedinput.robbotvoicelock {
 
 
 #progressBar {
-    width: 85%;
-    height: 18px;
-    background-color: #172043c9;
-    border: 4px inset #444444eb;
-    border-right-width: 5px;
-    border-right-color: #333b44;
-    outline: 1px solid #008000e0;
+    width: 0;
+    height: 0;
+    background-color: transparent /*#172043*/;
+    border: 0px /*4px*/ inset transparent /*#444444eb*/;
+    border-right-width: 0 /*5px*/;
     display: ;
-    margin: auto;
-    margin-top: 1px;
-    padding: 0px;
-    padding-left: 3px;
-    padding-top: 1px;
 }
 #progressBar div#progbarinner {
     position: fixed;
