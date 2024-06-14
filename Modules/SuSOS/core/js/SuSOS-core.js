@@ -10,10 +10,6 @@ tag.id = "iframe-demo";
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-
-
-
 /*player creation*/
 var player;
 
@@ -37,12 +33,6 @@ function onPlayerReady(event) {
     player.playVideo();
     total = player.getDuration();
     time = player.getCurrentTime();
-	//videoData = player.getVideoData();
-	
-	//videotesttitle = player.getVideoTitle();
-	//var title = videotesttitle;
-
-	//$('#ytvideoTitle').text(title);
     $(".currentprogress").text(Math.round(time));
   });
 
@@ -58,40 +48,23 @@ function onPlayerReady(event) {
 function onPlayerStateChange(event) {
   if (event.data == 1) {
     // playing
-
     $("#progressBar").show();
-
     total = player.getDuration();
-
     myTimer = setInterval(function () {
       time = player.getCurrentTime();
       playerTimeDifference = (time / total) * 100;
-
       $(".currentprogress").text(Math.round(time));
     }, 1000); // 100 means repeat in 100 ms
   } else {
     // not playing
-
     $("#progressBar").hide();
   }
-
   $(".duration").text(Math.floor(total));
 }
 
-		
 
-
-/* $(document).ready(function (e) {
-  $("#mainAudioDial").on("mousemove", function () {
-    //alert();
-    $(".vol").text($(this).val());
-    player.setVolume($(this).val());
-	
-  });
-});
- */
-const masterVolume = document.getElementById('mastervolumewrapper');
-const volumeWrapper = document.getElementById('masterVolume');
+const volumeWrapper = document.getElementById('mastervolumewrapper');
+const masterVolume = document.getElementById('masterVolume');
 /*Loading a video player*/
 function onPlayerReady(event) {
   $("#mainAudioDial").on("input", function () {
@@ -114,10 +87,7 @@ function announceVolume(volume) {
   var msg = new SpeechSynthesisUtterance("Robbot: My volume level is set to" + volume + '.');
   speechSynthesis.speak(msg);
 }
-/* stuff i removed and shuld re implement:*/
 
-
-/*
 
 
 */
