@@ -37,8 +37,10 @@ function onPlayerReady(event) {
     total = player.getDuration();
     time = player.getCurrentTime();
 	videoData = player.getVideoData();
-	title = videoData.title;
+	title = videoData.Title;
+	videotesttitle = player.getVideoTitle();
 	console.log('Shitty VideoPlayer Initialized:');
+	console.log('testvid title:' + videotesttitle );
     console.log('Title.' + title + 'length:' + time);
 	$('#ytvideoTitle span').text(title);
     $(".currentprogress").text(Math.round(time));
@@ -98,8 +100,6 @@ function onPlayerReady(event) {
 	player.setVolume(currentVolume);
 	console.log('-Shitty VideoPlayer Volume: ' + currentVolume);
 	masterVolume.textContent = currentVolume;
-	//how would i add a delay here before hiding the volume?
-	volumeWrapper.style.display = "";
     // Show the volume wrapper
     volumeWrapper.style.display = "";
 
