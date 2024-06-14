@@ -88,7 +88,8 @@ function onPlayerStateChange(event) {
   });
 });
  */
-const masterVolume = document.getElementById('masterVolume');
+const masterVolume = document.getElementById('mastervolumewrapper');
+const volumeWrapper = document.getElementById('masterVolume');
 /*Loading a video player*/
 function onPlayerReady(event) {
   $("#mainAudioDial").on("input", function () {
@@ -97,8 +98,15 @@ function onPlayerReady(event) {
 	player.setVolume(currentVolume);
 	console.log('-Shitty VideoPlayer Volume: ' + currentVolume);
 	masterVolume.textContent = currentVolume;
-	// Call speech synthesis function if needed
-	//announceVolume(currentVolume);
+	//how would i add a delay here before hiding the volume?
+	volumeWrapper.style.display = "";
+    // Show the volume wrapper
+    volumeWrapper.style.display = "";
+
+    // Add a delay before hiding the volume wrapper
+    setTimeout(function() {
+      volumeWrapper.style.display = "none";
+    }, 2000); // Delay of 2000 milliseconds (2 seconds)
   });
 }
 function announceVolume(volume) {
