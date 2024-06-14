@@ -24,6 +24,13 @@ function onYouTubeIframeAPIReady() {
     }
   });
 }
+function progress(percent, $element) {
+  var progressBarWidth = (percent * $element.width()) / 100;
+
+  // $element.find('div').animate({ width: progressBarWidth }, 500).html(percent + "%&nbsp;");
+
+  $element.find("div").animate({ width: progressBarWidth });
+}
 
 /*Loading a video player*/
 function onPlayerReady(event) {
@@ -75,6 +82,16 @@ $(document).ready(function (e) {
     player.setVolume($(this).val());
   });
 });
+
+
+
+/* stuff i removed and shuld re implement:*/
+
+
+/*
+
+
+*/
 /*
 Some Commonly used Methods:
 
