@@ -75,15 +75,26 @@ function onPlayerReady(event) {
   $(".duration").text(Math.floor(total));
 } 
 
-$(document).ready(function (e) {
+/* $(document).ready(function (e) {
   $("#mainAudioDial").on("mousemove", function () {
     //alert();
     $(".vol").text($(this).val());
     player.setVolume($(this).val());
+	
   });
 });
-
-
+ */
+/*Loading a video player*/
+function onPlayerReady(event) {
+  $("#mainAudioDial").on("input", function () {
+	currentVolume = $(this).val(); // Update currentVolume
+	$(".vol").text(currentVolume);
+	player.setVolume(currentVolume);
+	console.log('Volume: ' + currentVolume);
+	// Call speech synthesis function if needed
+	announceVolume(currentVolume);
+  });
+}
 
 /* stuff i removed and shuld re implement:*/
 

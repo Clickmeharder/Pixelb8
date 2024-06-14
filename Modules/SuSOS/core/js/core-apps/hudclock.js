@@ -186,6 +186,7 @@ function robSays(label, desiredVoiceIndex = null) {
 		clearexpiredTimer(label);
 	};
 	console.log('Voice index used =', desiredVoiceIndex);
+	console.log('currentVolume value: ' + currentVolume);
 	speechSynthesis.speak(thesewords);
 }
 
@@ -492,100 +493,99 @@ document.addEventListener('DOMContentLoaded', function () {
 	});
 
 		// Function to load the scheduled events list from local storage
-		function loadScheduledEventsList() {
-			// Retrieve the JSON string from local storage
-			var scheduledEventsListJson = localStorage.getItem('scheduledEventsList');
+	function loadScheduledEventsList() {
+		// Retrieve the JSON string from local storage
+		var scheduledEventsListJson = localStorage.getItem('scheduledEventsList');
 
-			// Parse the JSON string to get the scheduled events list
-			var scheduledevents = JSON.parse(scheduledEventsListJson) || [];
+		// Parse the JSON string to get the scheduled events list
+		var scheduledevents = JSON.parse(scheduledEventsListJson) || [];
 
-			// Add scheduled events to the FullCalendar
-			scheduledevents.forEach(function (event) {
-				calendar.addEvent({
-					title: event.eventName,
-					start: event.date + 'T' + event.time + ':00',
-					backgroundColor: '#620a0ae0',  // Change to the desired background color  blue  #0a3662d1 green #0a6211e0 red #620a0ae0 purple #8c27b0a3 pink #b8166c9c
-					borderColor: '#d77901',
-					textColor: '#00e7ff',
-					extendedProps: {
-						prizeValue: event.prizeValue || '0.00',
-						ticketPrice: event.totalTicketPrice || '0.00'
-						// Add other properties as needed
-					}
-				});
+		// Add scheduled events to the FullCalendar
+		scheduledevents.forEach(function (event) {
+			calendar.addEvent({
+				title: event.eventName,
+				start: event.date + 'T' + event.time + ':00',
+				backgroundColor: '#620a0ae0',  // Change to the desired background color  blue  #0a3662d1 green #0a6211e0 red #620a0ae0 purple #8c27b0a3 pink #b8166c9c
+				borderColor: '#d77901',
+				textColor: '#00e7ff',
+				extendedProps: {
+					prizeValue: event.prizeValue || '0.00',
+					ticketPrice: event.totalTicketPrice || '0.00'
+					// Add other properties as needed
+				}
 			});
+		});
 
-			// Add events for weekdays at 21:00
-			for (var i = 1; i <= 5; i++) {
-				calendar.addEvent({
-					title: 'Big Industries SSI',
-					daysOfWeek: [i],
-					startTime: '21:00',
-					duration: { hours: 2 },
-					backgroundColor: '#0a6211e0',
-				});
-			}
-
-			// Add events for Saturday & Sunday at 15:00
+		// Add events for weekdays at 21:00
+		for (var i = 1; i <= 5; i++) {
 			calendar.addEvent({
 				title: 'Big Industries SSI',
-				daysOfWeek: [0, 6],
-				startTime: '15:00',
+				daysOfWeek: [i],
+				startTime: '21:00',
 				duration: { hours: 2 },
 				backgroundColor: '#0a6211e0',
 			});
-			// Call the function to set warp days
-			setWarpDays();
-			
-			// Add Kronan M.S Warp events
-			addKronanMSWarpEvents();
-
-			// Re-render the calendar to display the new events
-			calendar.render();
 		}
-		// Function to set warp days based on specific dates for all 12 months
-		function addKronanMSWarpEvents() {
-			// Array of Kronan M.S Warp events with departure and arrival details
-			var kronanEvents = [
-				{ title: 'Kronan Ark-Caly', start: '2024-01-01T00:30:00', duration: '00:15' },
-				{ title: 'Kronan Caly-Rt', start: '2024-01-01T01:00:00', duration: '00:15' },
-				{ title: 'Kronan Rt-Request*', start: '2024-01-01T01:30:00', duration: '00:15' },
-				{ title: 'Kronan Request*-Caly', start: '2024-01-01T01:40:00', duration: '00:15' },
-				{ title: 'Kronan Caly-Ark', start: '2024-01-01T02:05:00', duration: '00:15' }
-				// Add more events as needed
-			];
 
-			// Add Kronan M.S Warp events to the calendar
-			kronanEvents.forEach(function (event) {
-				// Set the event start and end times in extendedProps
-				var extendedProps = {
-					departureandArrival: ``,
-					dayPassPrice: '10.00', // Default day pass price for Kronan warps
-					originPlanet: event.title.split('Kronan')[1]?.split('-')[0] || event.title.split('Kronan')[1]?.split('*')[0] || '', // Assuming the origin planet is part of the event title
-					destinationPlanet: event.title.split('-')[1] || event.title.split('*')[1] || '', // Assuming the destination planet is part of the event title
-				};
+		// Add events for Saturday & Sunday at 15:00
+		calendar.addEvent({
+			title: 'Big Industries SSI',
+			daysOfWeek: [0, 6],
+			startTime: '15:00',
+			duration: { hours: 2 },
+			backgroundColor: '#0a6211e0',
+		});
+		// Call the function to set warp days
+		setWarpDays();
+		
+		// Add Kronan M.S Warp events
+		addKronanMSWarpEvents();
 
-				calendar.addEvent({
-					title: event.title,
-					start: event.start,
-					end: addDuration(event.start, event.duration), // Set arrival time as the end of the duration
-					backgroundColor: '#yourBackgroundColor',  // Change to your desired background color
-					borderColor: '#yourBorderColor',  // Change to your desired border color
-					textColor: '#yourTextColor',  // Change to your desired text color
-					daysOfWeek: [0, 1, 2, 3, 4, 5, 6],  // Repeat every day of the week except Saturday (0 is Sunday),
-					extendedProps: extendedProps,
-					eventContent: function (arg) {
-						// Customize the rendering of each event
-						var eventDetails = document.createElement('div');
-						eventDetails.innerHTML = `<strong>${arg.event.title}</strong>`;
-						// Display departure and arrival times
-						eventDetails.innerHTML += `<br>Departure: ${event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-						eventDetails.innerHTML += `<br>Arrival: ${addDuration(event.start, event.duration).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-						return { domNodes: [eventDetails] };
-					},
-				});
+		// Re-render the calendar to display the new events
+		calendar.render();
+	}
+	// Function to set warp days based on specific dates for all 12 months
+	function addKronanMSWarpEvents() {
+		// Array of Kronan M.S Warp events with departure and arrival details
+		var kronanEvents = [
+			{ title: 'Kronan Ark-Caly', start: '2024-01-01T00:30:00', duration: '00:15' },
+			{ title: 'Kronan Caly-Rt', start: '2024-01-01T01:00:00', duration: '00:15' },
+			{ title: 'Kronan Rt-Request*', start: '2024-01-01T01:30:00', duration: '00:15' },
+			{ title: 'Kronan Request*-Caly', start: '2024-01-01T01:40:00', duration: '00:15' },
+			{ title: 'Kronan Caly-Ark', start: '2024-01-01T02:05:00', duration: '00:15' }
+			// Add more events as needed
+		];
+		// Add Kronan M.S Warp events to the calendar
+		kronanEvents.forEach(function (event) {
+			// Set the event start and end times in extendedProps
+			var extendedProps = {
+				departureandArrival: ``,
+				dayPassPrice: '10.00', // Default day pass price for Kronan warps
+				originPlanet: event.title.split('Kronan')[1]?.split('-')[0] || event.title.split('Kronan')[1]?.split('*')[0] || '', // Assuming the origin planet is part of the event title
+				destinationPlanet: event.title.split('-')[1] || event.title.split('*')[1] || '', // Assuming the destination planet is part of the event title
+			};
+
+			calendar.addEvent({
+				title: event.title,
+				start: event.start,
+				end: addDuration(event.start, event.duration), // Set arrival time as the end of the duration
+				backgroundColor: '#yourBackgroundColor',  // Change to your desired background color
+				borderColor: '#yourBorderColor',  // Change to your desired border color
+				textColor: '#yourTextColor',  // Change to your desired text color
+				daysOfWeek: [0, 1, 2, 3, 4, 5, 6],  // Repeat every day of the week except Saturday (0 is Sunday),
+				extendedProps: extendedProps,
+				eventContent: function (arg) {
+					// Customize the rendering of each event
+					var eventDetails = document.createElement('div');
+					eventDetails.innerHTML = `<strong>${arg.event.title}</strong>`;
+					// Display departure and arrival times
+					eventDetails.innerHTML += `<br>Departure: ${event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+					eventDetails.innerHTML += `<br>Arrival: ${addDuration(event.start, event.duration).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+					return { domNodes: [eventDetails] };
+				},
 			});
-		}
+		});
+	}
 
 		// Function to add duration to a date and return the new date
 		function addDuration(dateString, duration) {
@@ -731,15 +731,11 @@ document.addEventListener('DOMContentLoaded', function () {
 			});
 		}
 
-
 		// Call the function to load scheduled events when the page loads
 		/* loadScheduledEventsList(); */
-		
-
 		var timerButton = document.getElementById('timer-button');
 		var timerStack = document.getElementById('timer-stack');
-
-		timerButton.addEventListener('click', function () {
+		function newtimerCountdown(){ 
 			// Ask the user for input
 			var hours = prompt('Enter the number of hours for the timer:');
 			var minutes = prompt('Enter the number of minutes for the timer:'); // Added prompt for minutes
@@ -834,6 +830,9 @@ document.addEventListener('DOMContentLoaded', function () {
 			saveTimerToLocalStorage(label, totalTime, startTime);
 		});
 
+	timerButton.addEventListener('click', function () {
+		newtimerCountdown();
+	};
 	// run Functions to update clock and load timers from local storage when the page loads
 	updateClock('localtime', 'EUtime');
 	loadTimersFromLocalStorage();
