@@ -37,11 +37,10 @@ function onPlayerReady(event) {
     total = player.getDuration();
     time = player.getCurrentTime();
 	videoData = player.getVideoData();
-	title = videoData.Title;
+	
 	videotesttitle = player.getVideoTitle();
-	console.log('Shitty VideoPlayer Initialized:');
-	console.log('testvid title:' + videotesttitle );
-    console.log('Title.' + title + 'length:' + time);
+	title = videotesttitle;
+
 	$('#ytvideoTitle span').text(title);
     $(".currentprogress").text(Math.round(time));
   });
