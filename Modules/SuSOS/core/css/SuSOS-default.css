@@ -2851,6 +2851,7 @@ button#lockedinput.robbotvoicelock {
 
 
 #progressBar {
+	display:none;
     width: 0;
     height: 0;
     background-color: transparent /*#172043*/;
