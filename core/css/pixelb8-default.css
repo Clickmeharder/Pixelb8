@@ -941,11 +941,11 @@ button#Toggleaccpanelinternals-Button {
 .powerswitch svg {width: 1.3em;}
 .powerswitch svg path {fill: rgb(99, 99, 99);}
 #powercheckbox:checked + .powerswitch {
-	width: 48px;
+  width: 48px;
   height: 48px;
-  border: 1px solid rgb(255, 255, 255);
+  border: 1px solid transparent;
   background-color: rgb(146, 180, 184);
-	transform: translateY(2px);
+  transform: translateY(3px);
   box-shadow: 0px 0px 1px rgb(151, 243, 255) inset,
     0px 0px 2px rgb(151, 243, 255) inset, 0px 0px 10px rgb(151, 243, 255) inset,
     0px 0px 1px rgb(151, 243, 255), 0px 0px 14px rgb(151, 243, 255),
