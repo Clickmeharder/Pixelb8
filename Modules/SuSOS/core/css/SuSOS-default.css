@@ -2889,6 +2889,13 @@ span.val.ytvideotitle-label {
     font-size: 8px;
     margin: 0;
 }
+#mastervolumewrapper{
+    display: none;
+    border: inherit;
+    background: transparent;
+    outline: none;
+}
+
 .val {
     font-family: 'lucida console';
     font-size: 10px;
@@ -2896,3 +2903,4 @@ span.val.ytvideotitle-label {
     font-weight: bold;
     margin: 5px;
 }
+
