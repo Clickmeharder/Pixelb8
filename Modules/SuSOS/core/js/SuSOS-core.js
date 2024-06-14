@@ -88,6 +88,7 @@ function onPlayerStateChange(event) {
   });
 });
  */
+const masterVolume = document.getElementById('masterVolume');
 /*Loading a video player*/
 function onPlayerReady(event) {
   $("#mainAudioDial").on("input", function () {
@@ -95,6 +96,7 @@ function onPlayerReady(event) {
 	$(".vol").text(currentVolume);
 	player.setVolume(currentVolume);
 	console.log('-Shitty VideoPlayer Volume: ' + currentVolume);
+	masterVolume.textContent = currentVolume;
 	// Call speech synthesis function if needed
 	//announceVolume(currentVolume);
   });
