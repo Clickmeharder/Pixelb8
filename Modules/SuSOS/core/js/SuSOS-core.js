@@ -2,7 +2,7 @@
 // Main Hud Power and Power Button CODE
 //===================================================================
 var total = "";
-var currentVolume = 46;
+let currentVolume;
 /*initialize*/
 var tag = document.createElement("script");
 tag.id = "iframe-demo";
@@ -33,7 +33,7 @@ function onPlayerReady(event) {
     time = player.getCurrentTime();
 
     
-    $(".current").text(Math.round(time));
+    $(".currentprogress").text(Math.round(time));
   });
 
   $("#pause-button").click(function () {
@@ -57,7 +57,7 @@ function onPlayerReady(event) {
       time = player.getCurrentTime();
       playerTimeDifference = (time / total) * 100;
 
-      $(".current").text(Math.round(time));
+      $(".currentprogress").text(Math.round(time));
     }, 1000); // 100 means repeat in 100 ms
   } else {
     // not playing
@@ -68,6 +68,13 @@ function onPlayerReady(event) {
   $(".duration").text(Math.floor(total));
 } 
 
+$(document).ready(function (e) {
+  $("#mainAudioDial").on("mousemove", function () {
+    //alert();
+    $(".vol").text($(this).val());
+    player.setVolume($(this).val());
+  });
+});
 /*
 Some Commonly used Methods:
 
@@ -103,13 +110,7 @@ player.setPlaybackQuality(suggestedQuality:String) - Return type Void
 */
  
 
-$(document).ready(function (e) {
-  $("#mainAudioDial").on("mousemove", function () {
-    //alert();
-    $(".vol").text($(this).val());
-    player.setVolume($(this).val());
-  });
-});
+
 
 const powerCheckbox = document.getElementById('powercheckbox');
 const hudMonitorPower = document.querySelector('.hudMonitorPower');
