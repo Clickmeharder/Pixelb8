@@ -630,7 +630,6 @@ document.addEventListener('click', (event) => {
       // XBUTT CLOSE BUTTON
         } else if (clickedButton.classList.contains('xbutt')) {
         // If the clicked button has class .xbutt, perform close functionality
-        console.log('Close button clicked');
         const closestWindow = clickedButton.closest('.window');
         if (closestWindow) {
             closestWindow.classList.add('hidden');
