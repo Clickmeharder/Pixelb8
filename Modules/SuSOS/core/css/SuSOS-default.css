@@ -2718,7 +2718,7 @@ input#mainAudioDial {
     width: 200%;
     transition: smooth, 8.6s, 1s;
 }
-input.volumeslider:disabled {
+input#audiodial-musicLabel:disabled,input#audiodial-sfxLabel:disabled,input#audiodial-gamesLabel:disabled {
     outline-color: darkblue;
     background: transparent;
     transition: smooth, 8.6s;
