@@ -587,91 +587,111 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	}
 
-		// Function to add duration to a date and return the new date
-		function addDuration(dateString, duration) {
-			var date = new Date(dateString);
-			var hours = parseInt(duration.split(':')[0]);
-			var minutes = parseInt(duration.split(':')[1]);
-			date.setHours(date.getHours() + hours);
-			date.setMinutes(date.getMinutes() + minutes);
-			return date;
-		}
-		function setWarpDays() {
-			var warpDates = {
-				1: [5, 12, 19, 25, 7, 14, 21, 29], //month 1
-				2: [2, 9, 16, 22, 4, 11, 18, 26],   //month 2
-				3: [1, 8, 15, 22, 28, 2, 9, 16, 23], //month 3
-				4: [1, 5, 12, 19, 25, 7, 14, 21, 29],  //month 4
-				5: [3, 10, 17, 23, 5, 12, 19, 27],  //month 5
-				6: [7, 14, 21, 27, 2, 9, 16, 23], //month 6
-				7: [1, 5, 12, 19, 25, 7, 14, 21, 29],  // month 7
-				8: [2, 9, 16, 22, 30, 4, 11, 18, 26], //month 8
-				9: [6, 13, 20, 26, 1, 8, 15, 22, 30], //month 9
-				10: [4, 10, 18, 25, 6, 14, 20, 27],  //month 10
-				11: [1, 8, 15, 21, 29, 3, 10, 17, 25], //month 11
-				12: [6, 13, 20, 26, 1, 8, 15, 22, 30] //month 12
-			};
+	// Function to add duration to a date and return the new date
+	function addDuration(dateString, duration) {
+		var date = new Date(dateString);
+		var hours = parseInt(duration.split(':')[0]);
+		var minutes = parseInt(duration.split(':')[1]);
+		date.setHours(date.getHours() + hours);
+		date.setMinutes(date.getMinutes() + minutes);
+		return date;
+	}
+	function setWarpDays() {
+		var warpDates = {
+			1: [5, 12, 19, 25, 7, 14, 21, 29], //month 1
+			2: [2, 9, 16, 22, 4, 11, 18, 26],   //month 2
+			3: [1, 8, 15, 22, 28, 2, 9, 16, 23], //month 3
+			4: [1, 5, 12, 19, 25, 7, 14, 21, 29],  //month 4
+			5: [3, 10, 17, 23, 5, 12, 19, 27],  //month 5
+			6: [7, 14, 21, 27, 2, 9, 16, 23], //month 6
+			7: [1, 5, 12, 19, 25, 7, 14, 21, 29],  // month 7
+			8: [2, 9, 16, 22, 30, 4, 11, 18, 26], //month 8
+			9: [6, 13, 20, 26, 1, 8, 15, 22, 30], //month 9
+			10: [4, 10, 18, 25, 6, 14, 20, 27],  //month 10
+			11: [1, 8, 15, 21, 29, 3, 10, 17, 25], //month 11
+			12: [6, 13, 20, 26, 1, 8, 15, 22, 30] //month 12
+		};
 
-			// Get the current month
-			var currentMonth = new Date().getMonth() + 1;
+		// Get the current month
+		var currentMonth = new Date().getMonth() + 1;
 
-			// Access the array for the current month directly
-			var currentMonthWarpDates = warpDates[currentMonth];
+		// Access the array for the current month directly
+		var currentMonthWarpDates = warpDates[currentMonth];
 
-			// Log some information for debugging
-			console.log('Current Month:', currentMonth);
-			console.log('Warp Dates for Current Month:', currentMonthWarpDates);
+		// Log some information for debugging
+		console.log('Current Month:', currentMonth);
+		console.log('Warp Dates for Current Month:', currentMonthWarpDates);
 
-			// Check if the current month has warp dates
-			if (currentMonthWarpDates) {
-				// Add events for specific dates
-				currentMonthWarpDates.forEach(function (day) {
-					// console.log('Adding Event for Day:', day);
-					calendar.addEvent({
-						title: 'Yamato M.S. Warp',
-						start: new Date(new Date().getFullYear(), currentMonth - 1, day, 18, 45),
-						end: new Date(new Date().getFullYear(), currentMonth - 1, day, 22, 30),
-						backgroundColor: '#0a3662d1',
-						extendedProps: {
-							ticketPrice: '6.00'
-						}
-					});
+		// Check if the current month has warp dates
+		if (currentMonthWarpDates) {
+			// Add events for specific dates
+			currentMonthWarpDates.forEach(function (day) {
+				// console.log('Adding Event for Day:', day);
+				calendar.addEvent({
+					title: 'Yamato M.S. Warp',
+					start: new Date(new Date().getFullYear(), currentMonth - 1, day, 18, 45),
+					end: new Date(new Date().getFullYear(), currentMonth - 1, day, 22, 30),
+					backgroundColor: '#0a3662d1',
+					extendedProps: {
+						ticketPrice: '6.00'
+					}
 				});
-			}
+			});
 		}
-		// Call the function to load scheduled events when the page loads
-		loadScheduledEventsList();
-		updateClock('localtime', 'EUtime');
+	}
+	// Call the function to load scheduled events when the page loads
+	loadScheduledEventsList();
+	updateClock('localtime', 'EUtime');
 
-		function loadTimersFromLocalStorage() {
-			var timers = JSON.parse(localStorage.getItem('timers')) || [];
-			timers.forEach(function (timer) {
-				var timerElement = document.createElement('div');
-				timerElement.className = 'timer';
+	function loadTimersFromLocalStorage() {
+		var timers = JSON.parse(localStorage.getItem('timers')) || [];
+		timers.forEach(function (timer) {
+			var timerElement = document.createElement('div');
+			timerElement.className = 'timer';
 
-				// Calculate the remaining time based on current local time
-				var currentTime = new Date().getTime();
-				var elapsed = currentTime - timer.startTime;
-				var remainingTime = timer.totalTime - elapsed;
+			// Calculate the remaining time based on current local time
+			var currentTime = new Date().getTime();
+			var elapsed = currentTime - timer.startTime;
+			var remainingTime = timer.totalTime - elapsed;
 
-				// Check if the timer has already expired
-				if (remainingTime <= 0) {
-					timerElement.textContent = timer.label + ' - Timer Expired';
-					expiredLabel = timerElement.textContent;
+			// Check if the timer has already expired
+			if (remainingTime <= 0) {
+				timerElement.textContent = timer.label + ' - Timer Expired';
+				expiredLabel = timerElement.textContent;
 
-					// Display a message and ask the user to click to hear the label
-					timerElement.innerHTML += '<br>Click to hear label';
-					timerElement.addEventListener('click', function () {
-						// Read the label using text-to-speech
-						robSaysTimesup(expiredLabel, 2);
+				// Display a message and ask the user to click to hear the label
+				timerElement.innerHTML += '<br>Click to hear label';
+				timerElement.addEventListener('click', function () {
+					// Read the label using text-to-speech
+					robSaysTimesup(expiredLabel, 2);
 
-						// Remove the timer from the stack
-						timerStack.removeChild(timerElement);
+					// Remove the timer from the stack
+					timerStack.removeChild(timerElement);
 
-						// Remove the timer from local storage
-						removeTimerFromLocalStorage(timer.label);
-					});
-				} else {
+					// Remove the timer from local storage
+					removeTimerFromLocalStorage(timer.label);
+				});
+			} else {
+				// Calculate hours, minutes, and seconds
+				var hoursLeft = Math.floor(remainingTime / (60 * 60 * 1000));
+				var minutesLeft = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
+				var secondsLeft = Math.floor((remainingTime % (60 * 1000)) / 1000);
+
+				// Display the remaining time
+				timerElement.textContent = timer.label + ' - ' + hoursLeft + 'h ' + minutesLeft + 'm ' + secondsLeft + 's';
+
+				// Change text color when remaining time is below 30 minutes
+				if (remainingTime < 30 * 60 * 1000) {
+					timerElement.style.color = 'red'; // Change to your desired color
+				}
+
+				// Create a countdown timer
+				var countdownInterval = setInterval(function () {
+					// Calculate the remaining time based on current local time
+					var currentTime = new Date().getTime();
+					var elapsed = currentTime - timer.startTime;
+					var remainingTime = timer.totalTime - elapsed;
+
 					// Calculate hours, minutes, and seconds
 					var hoursLeft = Math.floor(remainingTime / (60 * 60 * 1000));
 					var minutesLeft = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
@@ -685,151 +705,130 @@ document.addEventListener('DOMContentLoaded', function () {
 						timerElement.style.color = 'red'; // Change to your desired color
 					}
 
-					// Create a countdown timer
-					var countdownInterval = setInterval(function () {
-						// Calculate the remaining time based on current local time
-						var currentTime = new Date().getTime();
-						var elapsed = currentTime - timer.startTime;
-						var remainingTime = timer.totalTime - elapsed;
+					// Check if the countdown is finished
+					if (remainingTime <= 0) {
+						clearInterval(countdownInterval);
+						timerElement.textContent = timer.label + ' - Timer Expired';
 
-						// Calculate hours, minutes, and seconds
-						var hoursLeft = Math.floor(remainingTime / (60 * 60 * 1000));
-						var minutesLeft = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
-						var secondsLeft = Math.floor((remainingTime % (60 * 1000)) / 1000);
+						// Display a message and ask the user to click to hear the label
+						timerElement.innerHTML += '<br>Click to hear label';
+						timerElement.addEventListener('click', function () {
+							// Read the label using text-to-speech
+							robSaysTimesup(expiredLabel, 2);
 
-						// Display the remaining time
-						timerElement.textContent = timer.label + ' - ' + hoursLeft + 'h ' + minutesLeft + 'm ' + secondsLeft + 's';
+							// Remove the timer from the stack
+							timerStack.removeChild(timerElement);
 
-						// Change text color when remaining time is below 30 minutes
-						if (remainingTime < 30 * 60 * 1000) {
-							timerElement.style.color = 'red'; // Change to your desired color
-						}
+							// Remove the timer from local storage
+							removeTimerFromLocalStorage(timer.label);
+						});
+					}
+				}, 1000);
+			}
 
-						// Check if the countdown is finished
-						if (remainingTime <= 0) {
-							clearInterval(countdownInterval);
-							timerElement.textContent = timer.label + ' - Timer Expired';
+			// Add the timer to the stack
+			timerStack.appendChild(timerElement);
+		});
+	}
 
-							// Display a message and ask the user to click to hear the label
-							timerElement.innerHTML += '<br>Click to hear label';
-							timerElement.addEventListener('click', function () {
-								// Read the label using text-to-speech
-								robSaysTimesup(expiredLabel, 2);
+	// Call the function to load scheduled events when the page loads
+	/* loadScheduledEventsList(); */
 
-								// Remove the timer from the stack
-								timerStack.removeChild(timerElement);
-
-								// Remove the timer from local storage
-								removeTimerFromLocalStorage(timer.label);
-							});
-						}
-					}, 1000);
-				}
-
-				// Add the timer to the stack
-				timerStack.appendChild(timerElement);
-			});
+	function newtimerCountdown(){ 
+		// Ask the user for input
+		var hours = prompt('Enter the number of hours for the timer:');
+		var minutes = prompt('Enter the number of minutes for the timer:'); // Added prompt for minutes
+		var label;
+		
+		// Check if the user canceled the input
+		if (hours === null || minutes === null) {
+			alert('Timer creation canceled.'); // Notify the user
+			return; // Exit the function
 		}
 
-		// Call the function to load scheduled events when the page loads
-		/* loadScheduledEventsList(); */
-		var timerButton = document.getElementById('timer-button');
-		var timerStack = document.getElementById('timer-stack');
-		function newtimerCountdown(){ 
-			// Ask the user for input
-			var hours = prompt('Enter the number of hours for the timer:');
-			var minutes = prompt('Enter the number of minutes for the timer:'); // Added prompt for minutes
-			var label;
-			
+		// Ask for label only if the user provided hours and minutes
+		if (hours !== '' && minutes !== '') {
+			label = prompt('Enter a label for the timer:');
+
 			// Check if the user canceled the input
-			if (hours === null || minutes === null) {
+			if (label === null) {
 				alert('Timer creation canceled.'); // Notify the user
 				return; // Exit the function
 			}
+		}
 
-			// Ask for label only if the user provided hours and minutes
-			if (hours !== '' && minutes !== '') {
-				label = prompt('Enter a label for the timer:');
+		// Save the current local time and the total time in milliseconds
+		var startTime = new Date().getTime();
+		var totalTime = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000); // Calculate total time in milliseconds
 
-				// Check if the user canceled the input
-				if (label === null) {
-					alert('Timer creation canceled.'); // Notify the user
-					return; // Exit the function
-				}
+		// Create a new timer element
+		var timerElement = document.createElement('div');
+		timerElement.className = 'timer';
+		timerElement.textContent = label + ' - ' + hours + 'h ' + minutes + 'm'; // Updated display format
+
+
+		// Create a countdown timer
+		var countdownInterval = setInterval(function () {
+			// Calculate the remaining time based on current local time
+			var currentTime = new Date().getTime();
+			var elapsed = currentTime - startTime;
+			var remainingTime = totalTime - elapsed;
+
+			// Calculate hours, minutes, and seconds
+			var hoursLeft = Math.floor(remainingTime / (60 * 60 * 1000));
+			var minutesLeft = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
+			var secondsLeft = Math.floor((remainingTime % (60 * 1000)) / 1000);
+
+			// Display the remaining time
+			timerElement.textContent = label + ' - ' + hoursLeft + 'h ' + minutesLeft + 'm ' + secondsLeft + 's';
+
+			// Change text color when remaining time is below 30 minutes
+			if (remainingTime < 30 * 60 * 1000) {
+				timerElement.style.color = 'red'; // Change to your desired color
 			}
 
-			// Save the current local time and the total time in milliseconds
-			var startTime = new Date().getTime();
-			var totalTime = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000); // Calculate total time in milliseconds
-
-			// Create a new timer element
-			var timerElement = document.createElement('div');
-			timerElement.className = 'timer';
-			timerElement.textContent = label + ' - ' + hours + 'h ' + minutes + 'm'; // Updated display format
-
-
-			// Create a countdown timer
-			var countdownInterval = setInterval(function () {
-				// Calculate the remaining time based on current local time
-				var currentTime = new Date().getTime();
-				var elapsed = currentTime - startTime;
-				var remainingTime = totalTime - elapsed;
-
-				// Calculate hours, minutes, and seconds
-				var hoursLeft = Math.floor(remainingTime / (60 * 60 * 1000));
-				var minutesLeft = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
-				var secondsLeft = Math.floor((remainingTime % (60 * 1000)) / 1000);
-
-				// Display the remaining time
-				timerElement.textContent = label + ' - ' + hoursLeft + 'h ' + minutesLeft + 'm ' + secondsLeft + 's';
-
-				// Change text color when remaining time is below 30 minutes
-				if (remainingTime < 30 * 60 * 1000) {
-					timerElement.style.color = 'red'; // Change to your desired color
-				}
-
-				// Check if the countdown is finished
-				if (remainingTime <= 0) {
-					clearInterval(countdownInterval);
-					timerElement.textContent = label + ' - Timer Expired';
-					// Play the timer expired message
+			// Check if the countdown is finished
+			if (remainingTime <= 0) {
+				clearInterval(countdownInterval);
+				timerElement.textContent = label + ' - Timer Expired';
+				// Play the timer expired message
+				
+				
+				var voices = speechSynthesis.getVoices();
+				console.log("Available Voices:");
+				voices.forEach(function (voice, index) {
+					console.log(index + ": " + voice.name);
+				});
+				//playTimerExpiredMessage(label);
+				robSaysTimesup(label, 2);
+				// Display a message and ask the user to click to hear the label
+				timerElement.innerHTML += '<br>Click to hear label';
+				timerElement.addEventListener('click', function () {
 					
-					
+					// Log available voices and their indices
 					var voices = speechSynthesis.getVoices();
 					console.log("Available Voices:");
 					voices.forEach(function (voice, index) {
 						console.log(index + ": " + voice.name);
 					});
-					//playTimerExpiredMessage(label);
-					robSaysTimesup(label, 2);
-					// Display a message and ask the user to click to hear the label
-					timerElement.innerHTML += '<br>Click to hear label';
-					timerElement.addEventListener('click', function () {
-						
-						// Log available voices and their indices
-						var voices = speechSynthesis.getVoices();
-						console.log("Available Voices:");
-						voices.forEach(function (voice, index) {
-							console.log(index + ": " + voice.name);
-						});
 
-						// Read the label using text-to-speech
-						robSays(label, 2);
+					// Read the label using text-to-speech
+					robSays(label, 2);
 
-						// Remove the timer from the stack
-						timerStack.removeChild(timerElement);
+					// Remove the timer from the stack
+					timerStack.removeChild(timerElement);
 
-						// Remove the timer from local storage
-						removeTimerFromLocalStorage(label);
-					});
-				}
-			}, 1000);
+					// Remove the timer from local storage
+					removeTimerFromLocalStorage(label);
+				});
+			}
+		}, 1000);
 
-			// Add the timer and start time to the stack
-			timerStack.appendChild(timerElement);
-			saveTimerToLocalStorage(label, totalTime, startTime);
-			console.log(' the new timer function ran and completed, hopefully error free');
-		});
+		// Add the timer and start time to the stack
+		timerStack.appendChild(timerElement);
+		saveTimerToLocalStorage(label, totalTime, startTime);
+		console.log(' the new timer function ran and completed, hopefully error free');
+	};
 
 	timerButton.addEventListener('click', function () {
 		newtimerCountdown();
