@@ -3,6 +3,7 @@
 //===================================================================
 var total = "";
 var currentVolume = 45;
+var title = "nAn"
 /*initialize*/
 var tag = document.createElement("script");
 tag.id = "iframe-demo";
@@ -39,7 +40,7 @@ function onPlayerReady(event) {
 	videoData = player.getVideoData();
 	
 	videotesttitle = player.getVideoTitle();
-	title = videotesttitle;
+	var title = videotesttitle;
 
 	$('#ytvideoTitle span').text(title);
     $(".currentprogress").text(Math.round(time));
@@ -105,6 +106,7 @@ function onPlayerReady(event) {
     // Add a delay before hiding the volume wrapper
     setTimeout(function() {
       volumeWrapper.style.display = "none";
+	  console.log('-Shitty VideoPlayer media Title: ' + title);
     }, 2000); // Delay of 2000 milliseconds (2 seconds)
   });
 }
