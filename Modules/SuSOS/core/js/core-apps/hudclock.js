@@ -832,11 +832,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	timerButton.addEventListener('click', function () {
 		newtimerCountdown();
-	};
+	});
 	// run Functions to update clock and load timers from local storage when the page loads
 	updateClock('localtime', 'EUtime');
 	loadTimersFromLocalStorage();
-	});
+});
 
 
 
