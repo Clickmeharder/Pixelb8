@@ -39,10 +39,10 @@ function onPlayerReady(event) {
     time = player.getCurrentTime();
 	//videoData = player.getVideoData();
 	
-	videotesttitle = player.getVideoTitle();
-	var title = videotesttitle;
+	//videotesttitle = player.getVideoTitle();
+	//var title = videotesttitle;
 
-	$('#ytvideoTitle').text(title);
+	//$('#ytvideoTitle').text(title);
     $(".currentprogress").text(Math.round(time));
   });
 
