@@ -92,10 +92,13 @@ function onPlayerReady(event) {
 	player.setVolume(currentVolume);
 	console.log('Volume: ' + currentVolume);
 	// Call speech synthesis function if needed
-	announceVolume(currentVolume);
+	//announceVolume(currentVolume);
   });
 }
-
+function announceVolume(volume) {
+  var msg = new SpeechSynthesisUtterance("The current volume is " + volume);
+  speechSynthesis.speak(msg);
+}
 /* stuff i removed and shuld re implement:*/
 
 
