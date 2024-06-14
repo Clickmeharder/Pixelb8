@@ -417,7 +417,7 @@ const closeAllWindows = () => {
         const windowElement = document.getElementById(windowId);
         if (windowElement && !windowElement.classList.contains('hidden')) {
             windowElement.classList.add('hidden');
-            console.log(windowId + ' closed');
+            console.log('Closed all open windows');
             // Remove the tab button when the window is closed
             const tabButton = tabButtons[windowId];
             if (tabButton) {
@@ -669,4 +669,4 @@ document.addEventListener('click', (event) => {
     }
   });
 
-console.log('sus os core finally reverted, try to again.');
+console.log('this dev sux.');
