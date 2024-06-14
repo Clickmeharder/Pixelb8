@@ -37,7 +37,7 @@ function onPlayerReady(event) {
     total = player.getDuration();
     time = player.getCurrentTime();
 	title = player.getTitle();
-    console.log('Timer creation canceled.' + title + 'length:' time);
+    console.log('Timer creation canceled.' + title + 'length:' + time);
     $(".currentprogress").text(Math.round(time));
   });
 
