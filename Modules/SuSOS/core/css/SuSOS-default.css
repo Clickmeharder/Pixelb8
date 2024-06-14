@@ -2863,7 +2863,7 @@ button#lockedinput.robbotvoicelock {
     position: fixed;
     top: 0;
     right: 0;
-    height: 13px;
+    height: 27px;
     width: 120px;
     border: 3px outset #03d5036b;
     color: #039803;
@@ -2872,6 +2872,16 @@ button#lockedinput.robbotvoicelock {
     background-color: #0a074b9c;
     text-align: center;
     vertical-align: middle;
+}
+
+span#ytvideoTitle {
+    font-size: 8px;
+    font-family: lucida console;
+}
+span.val.ytvideotitle-label {
+    font-family: lucida console;
+    font-size: 8px;
+    margin: 0;
 }
 .val {
     font-family: 'lucida console';
