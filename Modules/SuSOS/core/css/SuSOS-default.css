@@ -2851,19 +2851,38 @@ button#lockedinput.robbotvoicelock {
 
 
 #progressBar {
-  width: 100%;
-  height: 20px;
-  background-color: red;
-  display: ;
-  margin-top: 1px;
-  padding:3px;
+    width: 85%;
+    height: 18px;
+    background-color: #172043c9;
+    border: 4px inset #444444eb;
+    border-right-width: 5px;
+    border-right-color: #333b44;
+    outline: 1px solid #008000e0;
+    display: ;
+    margin: auto;
+    margin-top: 1px;
+    padding: 0px;
+    padding-left: 3px;
+    padding-top: 1px;
 }
 #progressBar div#progbarinner {
-  height: 70%;
-  width: 120px;
-  border:2px outset green;
-  background-color: #d4cdcd;
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 13px;
+    width: 120px;
+    border: 3px outset #03d5036b;
+    color: #039803;
+    font-weight: bold;
+    font-size: 10px;
+    background-color: #0a074b9c;
+    text-align: center;
+    vertical-align: middle;
 }
 .val {
-  color: red;
+    font-family: 'lucida console';
+    font-size: 10px;
+    color: #039803;
+    font-weight: bold;
+    margin: 5px;
 }
