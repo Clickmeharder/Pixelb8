@@ -101,7 +101,7 @@ function onPlayerReady(event) {
 	console.log('-Shitty VideoPlayer Volume: ' + currentVolume);
 	masterVolume.textContent = currentVolume;
     // Show the volume wrapper
-    volumeWrapper.style.display = "";
+    volumeWrapper.style.display = "initial";
 
     // Add a delay before hiding the volume wrapper
     setTimeout(function() {
