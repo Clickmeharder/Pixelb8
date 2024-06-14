@@ -52,7 +52,12 @@ function onPlayerReady(event) {
   });
 }
 
- function onPlayerStateChange(event) {
+function onPlayerStateChange(event) {
+   if (event.data == YT.PlayerState.PLAYING) {
+	   const videoData = player.getVideoData();
+	   const videoId = videoData.video_id;
+	   fetchytVideoTitle(videoId);
+	}
   if (event.data == 1) {
     // playing
 
@@ -74,6 +79,19 @@ function onPlayerReady(event) {
 
   $(".duration").text(Math.floor(total));
 } 
+    function fetchytVideoTitle(videoId) {
+      $.ajax({
+        url: `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet`,
+        type: 'GET',
+        success: function (data) {
+          const ytvideoTitle = data.items[0].snippet.title;
+          $('#ytvideoTitle span').text(ytvideoTitle);
+        },
+        error: function () {
+          console.error('Failed to fetch video title');
+        }
+      });
+    }
 
 /* $(document).ready(function (e) {
   $("#mainAudioDial").on("mousemove", function () {
