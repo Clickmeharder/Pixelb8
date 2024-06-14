@@ -485,13 +485,6 @@
 							  </div>
 							  <!-- content inside a HUD window scroll 1 -->
 							  <div class="boxcontent"id="examplewindow">
-							  <!--internal mainbuttonbar [I1-I4 (IB) buttons inside windows]-->
-					<!--                     <div class="row innerbuttBar" id="internalBbar-exampleWindow">
-								  <button class="roundbutt">I1</button>
-								  <button class="roundbutt">I2</button>
-								  <button class="roundbutt">I3</button>
-								  <button class="roundbutt">I4</button>
-								</div> -->
 								<!--scroll 2-->
 								<div class="column internals" id="" style="padding:2px;">
 								  <!--scroll 3-->
@@ -539,7 +532,7 @@
 									<div class="row">
 									  <button class="boxbutt menu-a" id="menua">file</button>
 									  <button class="boxbutt menu-b" id="menub">edit</button>
-									  <button class="boxbutt menu-c" id="menuc">search</buttonc>
+									  <button class="boxbutt menu-c" id="menuc">search</button>
 									  <button class="boxbutt menu-d" id="menud">settings</button>
 									  <button class="boxbutt menu-e" id="menud">resources</button>
 									  <button class="boxbutt menu-f" id="menuf">help</button>
@@ -553,12 +546,6 @@
 								</div>
 							  </div>
 							  <div class="boxcontent"id="examplewindow">
-					<!--                     <div class="row innerbuttBar" id="internalBbar-exampleWindow">
-								  <button class="roundbutt">I1</button>
-								  <button class="roundbutt">I2</button>
-								  <button class="roundbutt">I3</button>
-								  <button class="roundbutt">I4</button>
-								</div> -->
 								<div class="column internals">
 								  <div class="column internalcontent">
 									<div class="bold">New digs content header
@@ -677,14 +664,13 @@
 									<div class="Innerinfobox row" id="ValueB">
 										<p class="innerlabel-text smallform-labeltext" id="audiomuteLable">mute all audio</p>
 										<input type="radio" id="Audiosettings-mute" name="vol-Mute" value="Audiosettings-mute" title="under development" alt="under development" disabled>
-									<div class="Innerinfobox row" id="ValueB">
+									</div>
+									<div class="Innerinfobox row mediaplaypause" id="ValueB">
 										<div class="button" id="play-button">►</div>
 										<div class="button" id="pause-button">❚❚</div>
-
 									</div>
 									<hr>
-									<div class="row" style="max-width:500px;">
-
+									<div class="row" id="audiocontrolbox-wrapper">
 										<div class="Innerinfobox" id="AudioControlbox">
 											<p class="innerlabel-text smallform-labeltext volumesliderlabel" id="audiodial-musicLabel">Music&Video</p>
 											<input type="range" class="volumeslider verticalslider" id="musicPlayerAudioDial" name="musicPlayerAudioDial" min="0" max="100" value="50">
@@ -699,11 +685,12 @@
 										</div>
 										<div class="Innerinfobox" id="MasterAudioControlbox" >
 											<p class="innerlabel-text smallform-labeltext mastervolumesliderlabel" id="audiodial-mainLabel">Master Volume</p>
-											<input type="range" class="volumeslider verticalslider" id="mainAudioDial" name="mainAudioDial" min="0" max="100" value="50" min="0" max="100" step="1" value="30" />
+											<input type="range" class="volumeslider verticalslider" id="mainAudioDial" name="mainAudioDial" min="0" max="100" value="50" min="0" max="100" step="1" value="30">
 											<button class="cachebutton audiomasterlock" id="lockedinput"><img src="assets/images/icons/mouse_padlock.png" alt=""></button>
 										</div>
 									</div>
-									<div class="Innerinfobox" id="ValueB" style="height: 69px; border-bottom: 1px solid #ccc;"></div>
+									<div class="Innerinfobox" id="ValueB" style="height: 69px; border-bottom: 1px solid #ccc;">
+									</div>
 									<div class="Innerinfobox" id="robbotVoiceselect">
 										<p class="innerlabel-text smallform-labeltext editstashlabels" id="voiceselectLabel">RobBot Voice:</p>
 										<select class="dropdown" id="robbotvoiceSelect">
@@ -721,7 +708,8 @@
 											<img src="assets/images/icons/directory_check-0.png" alt="(logic indev) audiosettings apply Confirm">
 										</button>
 									</div>
-								</div>
+
+								 </div>
 							</div>
 
 							<script>
@@ -1012,13 +1000,6 @@
 								</div>
 							  </div>
 							  <div class="boxcontent"id="EuItemSorterwindow">
-							<!--<div class="row innerbuttBar" id="internalBbar-EuItemSorterWindow">
-								  <button class="roundbutt">I1</button>
-								  <button class="roundbutt">I2</button>
-								  <button class="roundbutt">I3</button>
-								  <button class="roundbutt">I4</button>
-								</div> -->
-								<!--interchangeable insides div-->
 									<div class="Container" id="Hud-EUitemSorter-Displaypanel">
 										<div class="Innercontainer scrollheight" id="EUitemSorterWindow-Interior">
 											<div class="Innerinfobox" id="ValueA">
@@ -1087,16 +1068,19 @@ Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 									</div>
 							  </div><!--end of window boxcontent-->
 							  <div class="boxfooterBar border-test">
-								<div class="buttBar" id="exampleWindow-boxInfo">
-								  <button class="boxInfo" id="exampleWindow-pos">pos.</button>
-								  <button class="boxInfo" id="exampleWindow-Y">y:0</button>
-								  <button class="boxInfo" id="exampleWindow-X">x:0</button>
-								  <button class="boxInfo" id="examplewindow-Z">Z:1</button>
-								  <button class="boxInfo" id="exampleWindow-W">w:0px</button>
-								  <button class="boxInfo" id="examplewindow-Ht">h:0px</button>
-								</div>
+								 <div class="buttBar" id="exampleWindow-boxInfo">
+									  <button class="boxInfo" id="exampleWindow-pos">pos.</button>
+									  <button class="boxInfo" id="exampleWindow-Y">y:0</button>
+									  <button class="boxInfo" id="exampleWindow-X">x:0</button>
+									  <button class="boxInfo" id="examplewindow-Z">Z:1</button>
+									  <button class="boxInfo" id="exampleWindow-W">w:0px</button>
+									  <button class="boxInfo" id="examplewindow-Ht">h:0px</button>
+								 </div>
 							  </div>
 							</div><!--end examplewindow2-->
+
+
+
 					<!---->
 							<div class="window column resizable draggable-menu" id="hud-EuCalender" data-draggable="true">
 								<div class="headerbar" id="Hud-header-EuCalender">
@@ -1137,7 +1121,7 @@ Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 												<div class="Container" id="displaypanel-Calender">
 													<div class="Innercontainer" id="Box-A-Innercontainer" style="max-width: unset; max-width: 98%; width: 98%;">
 														<div class="Innerinfobox" id="ValueA" style="position:relative;">
-											<!-- Calendar view -->
+															<!-- Calendar view -->
 															<div id="calendar-container">
 																<div id="calendar"></div>
 															</div>
@@ -1161,36 +1145,36 @@ Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 							</div>
 					<!--HUD-Overlay CONTROL PANEL (RIGHT)-->
 							<div class="window column resizable hudwindow draggable-menu" id="hud-EuEventPlanner" data-draggable="true">
-							  <div class="headerbar" id="Hud-header-EuEventplanner">
-								<div class="header row" id="HudTitle-EuEventPlanner">
-								  <h4 class="draggable-header">EuEventPlanner.exe</h4>
-								  <!-- titlebar control buttons -->
-								  <div class="windowcontrolbar row">
-									<button class="toggle-toolbar" id="toggletoolbarbutt">▽</button>
-									<button class="minbutt" id="minWindow">_</button>
-									<button class="maxbutt" id="maxWindow">□</button>
-									<button class="xbutt" id="CloseWindow">X</button>
-								  </div>
-								</div>
-								<div class="toolBar collapsed" id="EuEventPlannertoolBar">
-									<div class="row">
-									  <button class="boxbutt menu-a" id="menua">file</button>
-									  <button class="boxbutt menu-b" id="menub">edit</button>
-									  <button class="boxbutt menu-c" id="menuc">search</button>
-									  <button class="boxbutt menu-d" id="menud">settings</button>
-									  <button class="boxbutt menu-e" id="menud">resources</button>
-									  <button class="boxbutt menu-f" id="menuf">help</button>
-									  <div class="innerbuttBar row" id="internalBbar-EuCalenderWindow">
-										<button class="roundbutt">A</button>
-										<button class="roundbutt">B</button>
-										<button class="roundbutt">C</button>
-										<button class="roundbutt">D</button>
-									  </div>
-									  <button class="roundbutt" id="pinEuCalender">P</button>
+								<div class="headerbar" id="Hud-header-EuEventplanner">
+									<div class="header row" id="HudTitle-EuEventPlanner">
+										<h4 class="draggable-header">EuEventPlanner.exe</h4>
+										<!-- titlebar control buttons -->
+										<div class="windowcontrolbar row">
+											<button class="toggle-toolbar" id="toggletoolbarbutt">▽</button>
+											<button class="minbutt" id="minWindow">_</button>
+											<button class="maxbutt" id="maxWindow">□</button>
+											<button class="xbutt" id="CloseWindow">X</button>
+										</div>
+									</div>
+									<div class="toolBar collapsed" id="EuEventPlannertoolBar">
+										<div class="row">
+										  <button class="boxbutt menu-a" id="menua">file</button>
+										  <button class="boxbutt menu-b" id="menub">edit</button>
+										  <button class="boxbutt menu-c" id="menuc">search</button>
+										  <button class="boxbutt menu-d" id="menud">settings</button>
+										  <button class="boxbutt menu-e" id="menud">resources</button>
+										  <button class="boxbutt menu-f" id="menuf">help</button>
+										  <div class="innerbuttBar row" id="internalBbar-EuCalenderWindow">
+											<button class="roundbutt">A</button>
+											<button class="roundbutt">B</button>
+											<button class="roundbutt">C</button>
+											<button class="roundbutt">D</button>
+										  </div>
+										  <button class="roundbutt" id="pinEuCalender">P</button>
+										</div>
 									</div>
 								</div>
-							  </div>
-							  <div class="boxcontent"id="EuEventplannerwindow">
+								<div class="boxcontent"id="EuEventplannerwindow">
 								<div class=" border-testsmall" id="EuApplet-EuEventplanner-InternalHeader">Event Planner Header</div>
 								<!--interchangeable insides div-->
 								<div class="Container" id="displaypanel-eventplanner">
@@ -1428,7 +1412,7 @@ Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 									</DIV>
 								</div>
 							  </div><!--end of window boxcontent-->
-							  <div class="boxfooterBar border-test">
+								<div class="boxfooterBar border-test">
 								<div class="buttBar" id="exampleWindow-boxInfo">
 								  <button class="boxInfo" id="exampleWindow-pos">pos.</button>
 								  <button class="boxInfo" id="exampleWindow-Y">y:0</button>
@@ -1855,6 +1839,10 @@ Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 									</div>
 								</div>
 							</div>
+					
+					
+					
+					
 					<!--restock stash menu-->
 							<div class= "window column resizable draggable-menu" id="hud-EuRestockItemStashMenu" data-draggable="true">	
 								<div class="headerbar" id="Hud-header-EurestockItemStashMenu">
@@ -2059,7 +2047,10 @@ Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 									</div>
 								</div>
 							</div>
-					<!-- GAMES Folder start of first GAMES test windows -->
+					
+					
+					
+					<!-- GAMES Folder -->
 							<div class="window column resizable draggable-menu" id="hud-Games" data-draggable="true">
 							  <div class="headerbar" id="Hud-header-Games">
 								<div class="header row" id="HudTitle-Games">
@@ -2123,42 +2114,43 @@ Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 							  </div>
 							</div><!--end examplewindow2-->
 					<!-- end of new window -->
-					<!-- GAMES - SUS-SNAKE WINDOW first GAMES test window -->
+
+					<!-- a GAME window #1 - SUS-SNAKE WINDOW first GAMES test window -->
 							<div class="window column resizable draggable-menu" id="hud-sus-snake" data-draggable="true">
-							  <div class="headerbar" id="Hud-header-sus-snake">
-								<div class="header row" id="HudTitle-sus-snake">
-								  <h4 class="draggable-header">sus-snake</h4>
-								  <!-- titlebar control buttons -->
-								  <div class="windowcontrolbar row">
-									<button class="toggle-toolbar" id="toggletoolbarbutt">▽</button>
-									<button class="minbutt" id="minWindow">_</button>
-									<button class="maxbutt" id="maxWindow">□</button>
-									<button class="xbutt" id="CloseWindow">X</button>
-								  </div>
-								</div>
-								<div class="toolBar collapsed" id="sus-snaketoolBar">
-									<div class="row">
-									  <button class="boxbutt menu-a" id="menua">file</button>
-									  <button class="boxbutt menu-b" id="menub">edit</button>
-									  <button class="boxbutt menu-c" id="menuc">search</button>
-									  <button class="boxbutt menu-d" id="menud">settings</button>
-									  <button class="boxbutt menu-e" id="menud">resources</button>
-									  <button class="boxbutt menu-f" id="menuf">help</button>
-									  <div class="innerbuttBar row" id="internalBbar-sus-snakeWindow">
-										<button class="roundbutt">A</button>
-										<button class="roundbutt">B</button>
-										<button class="roundbutt">C</button>
-										<button class="roundbutt">D</button>
-									  </div>
-									  <button class="roundbutt" id="pinsus-snake">P</button>
+								<div class="headerbar" id="Hud-header-sus-snake">
+									<div class="header row" id="HudTitle-sus-snake">
+										<h4 class="draggable-header">sus-snake</h4>
+										<!-- titlebar control buttons -->
+										<div class="windowcontrolbar row">
+											<button class="toggle-toolbar" id="toggletoolbarbutt">▽</button>
+											<button class="minbutt" id="minWindow">_</button>
+											<button class="maxbutt" id="maxWindow">□</button>
+											<button class="xbutt" id="CloseWindow">X</button>
+										</div>
+									</div>
+									<div class="toolBar collapsed" id="sus-snaketoolBar">
+										<div class="row">
+											<button class="boxbutt menu-a" id="menua">file</button>
+											<button class="boxbutt menu-b" id="menub">edit</button>
+											<button class="boxbutt menu-c" id="menuc">search</button>
+											<button class="boxbutt menu-d" id="menud">settings</button>
+											<button class="boxbutt menu-e" id="menud">resources</button>
+											<button class="boxbutt menu-f" id="menuf">help</button>
+											<div class="innerbuttBar row" id="internalBbar-sus-snakeWindow">
+												<button class="roundbutt">A</button>
+												<button class="roundbutt">B</button>
+												<button class="roundbutt">C</button>
+												<button class="roundbutt">D</button>
+											</div>
+											<button class="roundbutt" id="pinsus-snake">P</button>
+										</div>
 									</div>
 								</div>
-							  </div>
-							  <div class="boxcontent"id="sus-snakewindow">
-								<div class="column internals" id="" style="padding:2px;">
-								  <div class="column internalcontent">
-									<!--interchangeable insides div-->
-									<div class="border-testsmall fillheight">
+								<div class="boxcontent"id="sus-snakewindow">
+									<div class="column internals" id="" style="padding:2px;">
+										<div class="column internalcontent">
+										<!--interchangeable insides div-->
+										<div class="border-testsmall fillheight">
 									  <div class="hudGameScreen">
 										<div class="displayhud-container">
 										  <div class="container-holder">
@@ -2181,8 +2173,8 @@ Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 									</div>
 								  </div><!--end internalcontent-->
 								</div><!--end internals-->
-							  </div><!--end of window boxcontent-->
-							  <div class="boxfooterBar border-test">
+								</div><!--end of window boxcontent-->
+								<div class="boxfooterBar border-test">
 								<div class="buttBar" id="sus-snakeWindow-boxInfo">
 								  <button class="boxInfo" id="sus-snakeWindow-pos">pos.</button>
 								  <button class="boxInfo" id="sus-snakeWindow-Y">y:0</button>
@@ -2204,6 +2196,14 @@ Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
   </div>
   <!--end hud overlay -->
 </div>
+
+
+
+
+
+
+
+
 
 <!-- 
 staticPage BLOCK 
@@ -2397,9 +2397,9 @@ staticPage BLOCK
 						</div>
 					</div>
 				</div>
+
 				<select class="webtp" id="webtpoptions">
 					<option value="option0" selected disabled>Destination</option>
-
 				</select>
 				<Button class="flex" id="buttportaldetails" onclick="toggledestinationdetails(this)">《《   S.U.S   》》</button>
 			</div>
@@ -2420,7 +2420,6 @@ staticPage BLOCK
 		<h2 id="themed-main-title">Latest Updates</h2>
 		<section class="themed-main">
 			<section class="featured-section">
-				<!-- <h2 class="section-title">Latest Updates</h2> -->
 				<div class="devnote">
 					<h3 class="devnote-title">Development Update - [2024-05-16 06:06:12 UTC]</h3>
 					<p class="devnote-content">
@@ -2439,19 +2438,10 @@ staticPage BLOCK
 					</p>
 				</div>
 				<!-- End of Latest Devnote -->
-
 				<button class="themed-button" disabled>Read More</button>
 			</section>
-	<!--       <section class="themed-main">
-          <section class="featured-section">
-              <h2 class="section-title">Attention Entropia Colonists</h2>
-              <p class="section-description">This Website is still very early in development; HOWEVER If your looking for EU Tools. they are currently available within the SuSOS. simply click the power button on the top left to turn on the SuSOS main power, you can find the eu tools in the start menu, and the stolen space map is located in the button bar on the right side of the SuSOS - to toggle the space map on and off click the button labelled "Space Map"</p>
-              <button class="themed-button" disabled>Read More</button>
-          </section> -->
-          <!-- Generic Example Elements -->
 			  <div class="example-element">
 				  <h3>Latest Update [2024-05-16 06:06:12 UTC]:</h3>
-				  
 				  <p>You can add songs or videos to the playlist by clicking 
 					  <a href="https://www.youtube.com/playlist?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&jct=1HjZpUGdnwSWLgr5B3y5p-9IcSsRsg" target="_blank" rel="noopener noreferrer">this link</a>.
 				  </p>
@@ -2473,34 +2463,32 @@ staticPage BLOCK
 				  <p> This should be created in such a way that the oldest stuff will end up here. and the newest on the top, just under the featured section</p>
 			  </div>
 			  <!-- End of Generic Example Elements -->
-		  </section>
-
-	<div class="panel ad-panel">
-		<h2 class="panel-title"></h2>
-		<div id="staticpage-adpanel-contentwrapper">
-			<div class="static-videopanel">
-				<iframe
-					id="video1"
-				   width="225"
-				   id="video1"
-				   height="148"
-				   src="https://www.youtube.com/embed/videoseries?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&index=284&enablejsapi=1&autoplay=0&rel=0&html5=1&showinfo=0&controls=0" frameborder="0""
-				   title="YouTube video player"
-				   frameborder="0"
-				   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-				   allowfullscreen
-				   style="max-height: 180px; width: 100%;"
-				></iframe>
+		</section>
+		<div class="panel ad-panel">
+			<h2 class="panel-title"></h2>
+			<div id="staticpage-adpanel-contentwrapper">
+				<div class="static-videopanel">
+					<iframe
+						id="video1"
+						width="225"
+						height="148"
+						src="https://www.youtube.com/embed/videoseries?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&index=284&enablejsapi=1&autoplay=0&rel=0&html5=1&showinfo=0&controls=0" frameborder="0"
+						title="YouTube video player"
+						frameborder="0"
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+						allowfullscreen
+						style="max-height: 180px; width: 100%;"
+					></iframe>
+				</div>
+				<div id="progresswrapper">progress wrapper
+					<div id="progressBar">
+						<div id="progbarinner">
+							<span class="val current"></span><span class="val duration"></span>
+						</div>
+					</div>
+				</div>
 			</div>
-			<div id="progresswrapper">progress wrapper
-			  <div id="progressBar">
-				<div id="progbarinner">
-					<span class="val current"></span><p>/</p><span class="val duration"></span></div>
-			  </div>
-			</div>
-
 		</div>
-	</div>
   </div>
   <!-- Footer -->
   <footer class="themed-footer">
