@@ -36,8 +36,10 @@ function onPlayerReady(event) {
     player.playVideo();
     total = player.getDuration();
     time = player.getCurrentTime();
-	title = player.getTitle();
-    console.log('Timer creation canceled.' + title + 'length:' + time);
+	videoData = player.getVideoData();
+	title = videoData.title;
+	console.log('Shitty VideoPlayer Initialized:');
+    console.log('Title.' + title + 'length:' + time);
 	$('#ytvideoTitle span').text(title);
     $(".currentprogress").text(Math.round(time));
   });
@@ -92,7 +94,7 @@ function onPlayerReady(event) {
 	currentVolume = $(this).val(); // Update currentVolume
 	$(".vol").text(currentVolume);
 	player.setVolume(currentVolume);
-	console.log('Shitty VideoPlayer Initialized:');
+	console.log('-Shitty VideoPlayer-');
 	console.log('Volume: ' + currentVolume);
 	// Call speech synthesis function if needed
 	//announceVolume(currentVolume);
