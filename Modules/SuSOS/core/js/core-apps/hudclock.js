@@ -615,8 +615,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			var currentMonthWarpDates = warpDates[currentMonth];
 
 			// Log some information for debugging
-			console.log('Current Month:', currentMonth);
-			console.log('Warp Dates for Current Month:', currentMonthWarpDates);
+			console.log( currentMonth + '/2024');
+			console.log('This months Kronan Warp Dates:', currentMonthWarpDates);
 
 			// Check if the current month has warp dates
 			if (currentMonthWarpDates) {
