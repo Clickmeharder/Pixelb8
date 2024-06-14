@@ -828,6 +828,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			// Add the timer and start time to the stack
 			timerStack.appendChild(timerElement);
 			saveTimerToLocalStorage(label, totalTime, startTime);
+			console.log(' the new timer function ran and completed, hopefully error free');
 		});
 
 	timerButton.addEventListener('click', function () {
