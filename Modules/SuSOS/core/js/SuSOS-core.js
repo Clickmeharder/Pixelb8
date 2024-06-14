@@ -2,6 +2,7 @@
 // Main Hud Power and Power Button CODE
 //===================================================================
 var total = "";
+var currentVolume = 46;
 /*initialize*/
 var tag = document.createElement("script");
 tag.id = "iframe-demo";
@@ -9,8 +10,10 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-/*player creation*/
 
+
+
+/*player creation*/
 var player;
 
 function onYouTubeIframeAPIReady() {

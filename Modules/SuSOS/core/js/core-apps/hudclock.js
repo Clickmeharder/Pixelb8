@@ -1,3 +1,4 @@
+var currentVolume = 45;
 // Function to get a random element from an array
 function getRandomElement(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
