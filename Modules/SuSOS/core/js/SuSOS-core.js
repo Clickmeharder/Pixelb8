@@ -38,6 +38,7 @@ function onPlayerReady(event) {
     time = player.getCurrentTime();
 	title = player.getTitle();
     console.log('Timer creation canceled.' + title + 'length:' + time);
+	$('#ytvideoTitle span').text(title);
     $(".currentprogress").text(Math.round(time));
   });
 
@@ -51,11 +52,6 @@ function onPlayerReady(event) {
 }
 
 function onPlayerStateChange(event) {
-   if (event.data == YT.PlayerState.PLAYING) {
-	   const videoData = player.getVideoData();
-	   const videoId = videoData.video_id;
-	   fetchytVideoTitle(videoId);
-	}
   if (event.data == 1) {
     // playing
 
@@ -77,11 +73,7 @@ function onPlayerStateChange(event) {
 
   $(".duration").text(Math.floor(total));
 }
-	function fetchytVideoTitle() {
-      const videoData = player.getVideoData();
-      const ytvideoTitle = videoData.title;
-      $('#ytvideoTitle span').text(ytvideoTitle);
-    }
+
 		
 
 
