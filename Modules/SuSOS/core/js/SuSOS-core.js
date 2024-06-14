@@ -2,7 +2,7 @@
 // Main Hud Power and Power Button CODE
 //===================================================================
 var total = "";
-let currentVolume;
+var currentVolume = 45;
 /*initialize*/
 var tag = document.createElement("script");
 tag.id = "iframe-demo";
