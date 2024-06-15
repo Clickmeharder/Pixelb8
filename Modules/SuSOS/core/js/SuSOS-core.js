@@ -81,14 +81,24 @@ function onPlayerReady(event) {
     playerTimeDifference = (time / total) * 100;
     progress(playerTimeDifference, $("#progressBar"));
   });
-  
+
+  $("#audiosettings-previous-button").click(function () {
+	player.previousVideo();
+	updateCurrentProgress();
+  });
+
   $("#audiosettings-play-button").click(function () {
     player.playVideo();
     total = player.getDuration();
     time = player.getCurrentTime();
     $(".currentprogress").text(Math.round(time));
   });
-
+  
+  $("#audiosettings-next-button").click(function () {
+    player.nextVideo();
+    updateCurrentProgress();
+  });
+  
   $("#audiosettings-pause-button").click(function () {
     player.pauseVideo();
     total = player.getDuration();
