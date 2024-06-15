@@ -60,3 +60,57 @@ function getRandomArrayobject(arr) {
     });
   });
   
+  
+  
+//advertisement slideshow logic:
+
+    // Array of image paths
+    const images = [
+      'assets/images/ads/ad1.png',
+      'assets/images/ads/ad2.png',
+      'assets/images/ads/ad3.png',
+	  'assets/images/ads/ad4.png',
+      'assets/images/ads/ad5.png',
+      'assets/images/ads/ad6.png',
+	  'assets/images/ads/ad7.png',
+      'assets/images/ads/ad8.png',
+      'assets/images/ads/ad9.png',
+	  'assets/images/ads/ad10.png',
+      'assets/images/ads/ad11.png',
+      'assets/images/ads/ad12.png',
+	  'assets/images/ads/ad13.png',
+      'assets/images/ads/ad14.png',
+      'assets/images/ads/ad15.png',
+	  'assets/images/ads/ad16.png',
+      'assets/images/ads/ad17.png',
+      'assets/images/ads/ad18.png'
+      // Add more images as needed
+    ];
+
+    let currentIndex = 0;
+    const slideshowContainer = document.getElementById('slideshow');
+
+    // Function to create img elements
+    function createSlideshow() {
+      images.forEach((imageSrc, index) => {
+        const img = document.createElement('img');
+        img.src = imageSrc;
+        if (index === 0) {
+          img.classList.add('active');
+        }
+        slideshowContainer.appendChild(img);
+      });
+    }
+
+    // Function to change the active image
+    function changeImage() {
+      const imgs = slideshowContainer.getElementsByTagName('img');
+      imgs[currentIndex].classList.remove('active');
+      currentIndex = (currentIndex + 1) % images.length;
+      imgs[currentIndex].classList.add('active');
+    }
+
+    // Initialize the slideshow
+    createSlideshow();
+    setInterval(changeImage, 3000); // Change image every 3 seconds
+  
