@@ -2904,6 +2904,25 @@ span.val.ytvideotitle-label {
     font-weight: bold;
     margin: 5px;
 }
+
+div#audiosettings-play-button, div#audiosettings-pause-button {
+    border: 1px ridge #1782b6;
+    border-radius: 50%;
+    width: 25px;
+    height: 24px;
+    text-align: center;
+    color: #1782b6;
+	transition:0s, color 3s, border 3s, smooth;
+}
+div#audiosettings-play-button:hover {
+    border-color: purple;
+    color: purple;
+}
+div#audiosettings-pause-button:hover {
+    border-color: purple;
+    color: purple;
+}
+
 #mediacontrols{
 	position: fixed;
     top: 16px;
@@ -2920,35 +2939,6 @@ span.val.ytvideotitle-label {
 }
 div.mediaplaypause {
     justify-content: space-evenly;
-}
-div#audiosettings-play-button {
-    border: 3px ridge purple;
-    border-radius: 50%;
-    width: 20px;
-    height: 18px;
-    text-align: center;
-    color: #1782b6;
-}
-
-div#audiosettings-pause-button {
-    border: 3px ridge purple;
-    border-radius: 50%;
-    width: 20px;
-    height: 18px;
-    text-align: center;
-    color: #1782b6;
-}
-
-div#audiosettings-play-button:hover {
-    border-color: #1782b6;
-    color: purple;
-	transform:scale(1.25);
-}
-
-div#audiosettings-pause-button:hover {
-    border-color: #1782b6;
-    color: purple;
-	transform:scale(1.25);
 }
 
 .mediaplaypause#play-button:hover {
