@@ -88,23 +88,13 @@ function getRandomArrayobject(arr) {
       // Add more images as needed
     ];
 
-
-
-    // Function to change the background image
+// Function to change the background image
     function changeImage() {
       slideshowContainer.style.backgroundImage = `url(${images[currentIndex]})`;
       slideshowContainer.classList.add('active');
       currentIndex = (currentIndex + 1) % images.length;
     }
 
-    // Fetch images from the server
-    fetch('list_images.php')
-      .then(response => response.json())
-      .then(data => {
-        images = data;
-        if (images.length > 0) {
-          changeImage(); // Set the first image
-          setInterval(changeImage, 30000); // Change image every 3 seconds
-        }
-      })
-      .catch(error => console.error('Error fetching images:', error));
+    // Initialize the slideshow
+    changeImage(); // Set the first image
+    setInterval(changeImage, 30000); // Change image every 3 seconds
