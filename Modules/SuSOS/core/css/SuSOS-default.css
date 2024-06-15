@@ -2937,6 +2937,20 @@ div#audiosettings-pause-button:hover {
     background-color: #0a074b9c;
     text-align: center;
 }
+div#previous-button {
+    font-size: 13px;
+    letter-spacing: -7px;
+    margin: auto;
+    margin-top: 1px;
+    margin-right: 9px;
+}
+div#next-button {
+    font-size: 13px;
+    letter-spacing: -7px;
+    margin: auto;
+    margin-top: 1px;
+    margin-left: 9px;
+}
 div.mediaplaypause {
     justify-content: space-evenly;
 }
