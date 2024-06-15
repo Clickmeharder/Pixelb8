@@ -108,9 +108,10 @@ function getRandomArrayobject(arr) {
       imgs[currentIndex].classList.remove('active');
       currentIndex = (currentIndex + 1) % images.length;
       imgs[currentIndex].classList.add('active');
+	  console.log('current image:' currentIndex);
     }
 
     // Initialize the slideshow
     createSlideshow();
-    setInterval(changeImage, 3000); // Change image every 3 seconds
+    setInterval(changeImage, 18000); // Change image every 3 seconds
   
