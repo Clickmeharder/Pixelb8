@@ -2918,6 +2918,37 @@ span.val.ytvideotitle-label {
     background-color: #0a074b9c;
     text-align: center;
 }
+
+div#audiosettings-play-button {
+    border: 3px ridge purple;
+    border-radius: 50%;
+    width: 20px;
+    height: 18px;
+    text-align: center;
+    color: #1782b6;
+}
+
+div#audiosettings-pause-button {
+    border: 3px ridge purple;
+    border-radius: 50%;
+    width: 20px;
+    height: 18px;
+    text-align: center;
+    color: #1782b6;
+}
+
+div#audiosettings-play-button:hover {
+    border-color: #1782b6;
+    color: purple;
+	transform:scale(1.25);
+}
+
+div#audiosettings-pause-button:hover {
+    border-color: #1782b6;
+    color: purple;
+	transform:scale(1.25);
+}
+
 .mediaplaypause#play-button:hover {
     color:purple;
     transform: scale(1.25);
