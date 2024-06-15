@@ -2661,10 +2661,11 @@ button#stopwatch-play{
 div#hud-AudioSettings {
     min-width: 165px;
     max-width: 165px;
-    min-height: 350px;
+    min-height: 376px;
     max-height: 400px;
     left: 5px;
     top: 5px;
+	height:376px;
 }
 
 select#robbotvoiceSelect {
