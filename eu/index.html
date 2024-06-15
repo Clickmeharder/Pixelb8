@@ -2437,18 +2437,34 @@ staticPage BLOCK
 		<div id="staticpage-adpanel-contentwrapper">
 			<div class="static-videopanel">
 				<iframe
-				   width="225"
-				   height="148"
-				   src="https://www.youtube.com/embed/videoseries?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&index=284"
-				   title="YouTube video player"
-				   frameborder="0"
-				   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-				   allowfullscreen
-				   style="max-height: 180px; width: 100%;"
+					id="video1"
+					width="225"
+					height="148"
+					src="https://www.youtube.com/embed/videoseries?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&index=284&enablejsapi=1&autoplay=0&rel=0&html5=1&showinfo=0&controls=0" frameborder="0"
+					title="YouTube video player"
+					frameborder="0"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					allowfullscreen
+					style="max-height: 180px; width: 100%;"
 				></iframe>
 			</div>
+			<div id="progressBar">
+				<div id="progbarinner">
+					<span class="val currentprogress"></span>s / <span class="val duration"></span>s Total<br>
+					<!-- <span class="val ytvideotitle-label">Title:</span><span class="val" id="ytvideoTitle">err: testing</span><br> -->
+					<div id="mastervolumewrapper">
+						<span class="val ytvideotitle-label">Volume:</span><span class="val" id="masterVolume">45</span>
+					</div>
+				</div>
+			</div>
+			<div class="row mediaplaypause" id="mediacontrols">
+				<div class="button buttpress" id="previous-button">◄◄</div>
+				<div class="button buttpress" id="play-button">►</div>
+				<div class="button buttpress" id="pause-button">❚❚</div>
+				<div class="button buttpress" id="next-button">►►</div>
+				<div class="button buttpress" id="shuffle-button">SHUFFLE</div>
+			</div>
 		</div>
-		<!--collab / add song link: https://www.youtube.com/playlist?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&jct=1HjZpUGdnwSWLgr5B3y5p-9IcSsRsg -->
 	</div>
   </div>
   <!-- Footer -->
