@@ -63,7 +63,8 @@ function getRandomArrayobject(arr) {
   
   
 //advertisement slideshow logic:
-
+   const slideshowContainer = document.getElementById('ad-slide');
+    let currentIndex = 0;
     // Array of image paths
     const images = [
       'assets/images/ads/ad1.png',
@@ -87,31 +88,23 @@ function getRandomArrayobject(arr) {
       // Add more images as needed
     ];
 
-    let currentIndex = 0;
-    const slideshowContainer = document.getElementById('ad-slide');
 
-    // Function to create img elements
-    function createSlideshow() {
-      images.forEach((imageSrc, index) => {
-        const img = document.createElement('img');
-        img.src = imageSrc;
-        if (index === 0) {
-          img.classList.add('active');
-        }
-        slideshowContainer.appendChild(img);
-      });
-    }
 
-    // Function to change the active image
+    // Function to change the background image
     function changeImage() {
-      const imgs = slideshowContainer.getElementsByTagName('img');
-      imgs[currentIndex].classList.remove('active');
+      slideshowContainer.style.backgroundImage = `url(${images[currentIndex]})`;
+      slideshowContainer.classList.add('active');
       currentIndex = (currentIndex + 1) % images.length;
-      imgs[currentIndex].classList.add('active');
-	  console.log('current image:' currentIndex);
     }
 
-    // Initialize the slideshow
-    createSlideshow();
-    setInterval(changeImage, 18000); // Change image every 3 seconds
-  
+    // Fetch images from the server
+    fetch('list_images.php')
+      .then(response => response.json())
+      .then(data => {
+        images = data;
+        if (images.length > 0) {
+          changeImage(); // Set the first image
+          setInterval(changeImage, 3000); // Change image every 3 seconds
+        }
+      })
+      .catch(error => console.error('Error fetching images:', error));
