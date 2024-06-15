@@ -2936,8 +2936,8 @@ div#audiosettings-pause-button:hover {
     top: 16px;
     right: 0;
     height: 20px;
-    width: 32px;
-    border: 3px outset #03d5036b;
+    width: max-content;
+    border: 2px outset #03d5036b;
     color: #039803;
     font-weight: bold;
     font-size: 16px;
