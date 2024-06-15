@@ -2918,7 +2918,9 @@ span.val.ytvideotitle-label {
     background-color: #0a074b9c;
     text-align: center;
 }
-
+div.mediaplaypause {
+    justify-content: space-evenly;
+}
 div#audiosettings-play-button {
     border: 3px ridge purple;
     border-radius: 50%;
