@@ -81,6 +81,23 @@ function onPlayerReady(event) {
     playerTimeDifference = (time / total) * 100;
     progress(playerTimeDifference, $("#progressBar"));
   });
+  
+  $("#audiosettings-play-button").click(function () {
+    player.playVideo();
+    total = player.getDuration();
+    time = player.getCurrentTime();
+    $(".currentprogress").text(Math.round(time));
+  });
+
+  $("#audiosettings-pause-button").click(function () {
+    player.pauseVideo();
+    total = player.getDuration();
+    time = player.getCurrentTime();
+    playerTimeDifference = (time / total) * 100;
+    progress(playerTimeDifference, $("#progressBar"));
+  });
+  
+  
   $("#mainAudioDial").on("input", function () {
 	currentVolume = $(this).val(); // Update currentVolume
 	$(".vol").text(currentVolume);
