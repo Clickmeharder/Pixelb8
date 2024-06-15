@@ -2870,8 +2870,8 @@ button#lockedinput.robbotvoicelock {
     position: fixed;
     top: 0;
     right: 0;
-    height: 24px;
-    width: 120px;
+    height: 12px;
+    width: max-content;
     border: 3px outset #03d5036b;
     color: #039803;
     font-weight: bold;
@@ -2906,7 +2906,7 @@ span.val.ytvideotitle-label {
 }
 #mediacontrols{
 	position: fixed;
-    top: 25px;
+    top: 16px;
     right: 0;
     height: 20px;
     width: 32px;
