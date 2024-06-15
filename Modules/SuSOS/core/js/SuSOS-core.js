@@ -49,6 +49,7 @@ function progress(percent, $element) {
 function onPlayerStateChange(event) {
   if (event.data == 1) {
     // playing
+	playlist = player.getPlaylist();
     $("#progressBar").show();
     total = player.getDuration();
     myTimer = setInterval(function () {
