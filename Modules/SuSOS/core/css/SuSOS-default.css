@@ -248,10 +248,18 @@ the base styles of  all huds)*/
   backround-color: var(--HUD-bg-color);
 }
   .buttpad #lpbutt{
-  width:24px;
-  height:24px;
-  background:var(--HUD-bg-color);
+	width: 25px;
+    height: 26px;
+    background: var(--HUD-bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+}
+button#lpbutt img {
+    max-width: 258%;
+    opacity: 0.6;
+    filter: hue-rotate(180deg);
 }
 .hud .Rbutts{
   position:absolute;
