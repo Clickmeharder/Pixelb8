@@ -2904,3 +2904,14 @@ span.val.ytvideotitle-label {
     margin: 5px;
 }
 
+.mediaplaypause#play-button:active {
+    padding: ;
+    transform: scale(0.95);
+}
+.mediaplaypause#pause-button:active {
+    padding: ;
+    transform: scale(0.95);
+}
+.buttpress:active{
+	transform: scale(0.95);	
+}
