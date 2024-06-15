@@ -2794,7 +2794,7 @@ input.volumeslider[type="range"] {
     height: 3px;
     background: linear-gradient(to right, #333861, #00b7ff);
     border-radius: 5px;
-    outline: 6px ridge;
+    outline: 6px ridge transparent;
     margin-top: 63px;
     margin-left: -34px;
     margin-bottom: 0px;

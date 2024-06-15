@@ -24,11 +24,11 @@ function onYouTubeIframeAPIReady() {
 function progress(percent, $element) {
   var progressBarWidth = (percent * $element.width()) / 100;
   // $element.find('div').animate({ width: progressBarWidth }, 500).html(percent + "%&nbsp;");
-  $element.find("div").animate({ width: progressBarWidth });
+  //$element.find("div").animate({ width: progressBarWidth });
 }
 
 /*Loading a video player*/
-function onPlayerReady(event) {
+/* function onPlayerReady(event) {
   $("#play-button").click(function () {
     player.playVideo();
     total = player.getDuration();
@@ -43,7 +43,7 @@ function onPlayerReady(event) {
     playerTimeDifference = (time / total) * 100;
     progress(playerTimeDifference, $("#progressBar"));
   });
-}
+} */
 
 function onPlayerStateChange(event) {
   if (event.data == 1) {
@@ -67,6 +67,20 @@ const volumeWrapper = document.getElementById('mastervolumewrapper');
 const masterVolume = document.getElementById('masterVolume');
 /*Loading a video player*/
 function onPlayerReady(event) {
+  $("#play-button").click(function () {
+    player.playVideo();
+    total = player.getDuration();
+    time = player.getCurrentTime();
+    $(".currentprogress").text(Math.round(time));
+  });
+
+  $("#pause-button").click(function () {
+    player.pauseVideo();
+    total = player.getDuration();
+    time = player.getCurrentTime();
+    playerTimeDifference = (time / total) * 100;
+    progress(playerTimeDifference, $("#progressBar"));
+  });
   $("#mainAudioDial").on("input", function () {
 	currentVolume = $(this).val(); // Update currentVolume
 	$(".vol").text(currentVolume);
