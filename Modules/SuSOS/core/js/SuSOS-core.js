@@ -65,8 +65,12 @@ function onPlayerStateChange(event) {
 }
 function shufflePlaylist() {
   if (playlist.length > 0) {
-	var randomIndex = Math.floor(Math.random() * playlist.length);
-	player.playVideoAt(randomIndex);
+    var randomIndex = Math.floor(Math.random() * playlist.length);
+    player.playVideoAt(randomIndex);
+  } else if (playlist.length > 0 && playlist.length < 301) {
+    var randomNumber = Math.floor(Math.random() * 300) + 1;
+    console.log("Random number between 1 and 300: " + randomNumber);
+    // Additional logic can be added here if needed
   }
 }
 
