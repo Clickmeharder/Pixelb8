@@ -88,9 +88,6 @@ function announceVolume(volume) {
   speechSynthesis.speak(msg);
 }
 
-
-
-*/
 /*
 Some Commonly used Methods:
 
