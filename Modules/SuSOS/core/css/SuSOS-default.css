@@ -2971,6 +2971,10 @@ div.mediaplaypause {
     justify-content: space-evenly;
 }
 
+.mediaplaypause.button:hover {
+    transform: skewX(8deg);
+    filter: invert(100%);
+}
 .mediaplaypause#play-button:hover {
     color:purple;
     transform: scale(1.25);
