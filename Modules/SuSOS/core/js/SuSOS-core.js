@@ -69,7 +69,7 @@ function shufflePlaylist() {
     player.playVideoAt(randomIndex);
   } else if (playlist.length > 0 && playlist.length < 301) {
     var randomNumber = Math.floor(Math.random() * 300) + 1;
-    console.log("Random number between 1 and 300: " + randomNumber);
+    console.log("RobBot: I think i will play track number " + randomNumber);
     // Additional logic can be added here if needed
   }
 }
