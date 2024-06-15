@@ -85,15 +85,12 @@ function onPlayerReady(event) {
 	currentVolume = $(this).val(); // Update currentVolume
 	$(".vol").text(currentVolume);
 	player.setVolume(currentVolume);
-	console.log('-Shitty VideoPlayer Volume: ' + currentVolume);
 	masterVolume.textContent = currentVolume;
     // Show the volume wrapper
     volumeWrapper.style.display = "initial";
-	console.log(+ 'masterVolume display-is = ' + volumeWrapper.style.display);
     // Add a delay before hiding the volume wrapper
     setTimeout(function() {
       volumeWrapper.style.display = "none";
-	  console.log(+ 'masterVolume display-is = ' + volumeWrapper.style.display);
     }, 2000); // Delay of 2000 milliseconds (2 seconds)
   });
 }
