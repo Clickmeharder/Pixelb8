@@ -201,6 +201,7 @@ the base styles of  all huds)*/
   opacity: var(--HUD-opacity);
   z-index:5;
   transition: 2.6s;
+  overflow-x: hidden;
   h{
     font-family:Lucida console;
     font-weight: bold;
