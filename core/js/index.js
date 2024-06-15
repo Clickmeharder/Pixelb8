@@ -104,7 +104,7 @@ function getRandomArrayobject(arr) {
         images = data;
         if (images.length > 0) {
           changeImage(); // Set the first image
-          setInterval(changeImage, 3000); // Change image every 3 seconds
+          setInterval(changeImage, 30000); // Change image every 3 seconds
         }
       })
       .catch(error => console.error('Error fetching images:', error));
