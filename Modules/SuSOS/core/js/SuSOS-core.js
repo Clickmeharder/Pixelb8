@@ -105,12 +105,7 @@ function onPlayerReady(event) {
     time = player.getCurrentTime();
     $(".currentprogress").text(Math.round(time));
   });
-  $("#audiosettings-previous-button").click(function () {
-	player.previousVideo();
-	total = player.getDuration();
-    time = player.getCurrentTime();
-    $(".currentprogress").text(Math.round(time));
-  });
+
 
   $("#audiosettings-play-button").click(function () {
     player.playVideo();
@@ -118,14 +113,7 @@ function onPlayerReady(event) {
     time = player.getCurrentTime();
     $(".currentprogress").text(Math.round(time));
   });
-  
-  $("#audiosettings-next-button").click(function () {
-    player.nextVideo();
-	total = player.getDuration();
-    time = player.getCurrentTime();
-    $(".currentprogress").text(Math.round(time));
-  });
-  
+
   $("#audiosettings-pause-button").click(function () {
     player.pauseVideo();
     total = player.getDuration();
@@ -133,12 +121,25 @@ function onPlayerReady(event) {
     playerTimeDifference = (time / total) * 100;
     progress(playerTimeDifference, $("#progressBar"));
   });
+/* 
+  $("#audiosettings-previous-button").click(function () {
+	player.previousVideo();
+	total = player.getDuration();
+    time = player.getCurrentTime();
+    $(".currentprogress").text(Math.round(time));
+  });
+  $("#audiosettings-next-button").click(function () {
+    player.nextVideo();
+	total = player.getDuration();
+    time = player.getCurrentTime();
+    $(".currentprogress").text(Math.round(time));
+  });
    $("#audiosettings-shuffle-button").click(function () {
 	shufflePlaylist();
 	total = player.getDuration();
     time = player.getCurrentTime();
     $(".currentprogress").text(Math.round(time));
-  });
+  }); */
 
   $("#mainAudioDial").on("input", function () {
 	currentVolume = $(this).val(); // Update currentVolume
