@@ -2875,19 +2875,18 @@ button#lockedinput.robbotvoicelock {
     display: ;
 }
 #progressBar div#progbarinner {
-    position: fixed;
-    top: 0;
+	position: fixed;
+    top: 16px;
     right: 0;
-    height: 12px;
-    min-width: 100px;
-	width: max-content;
-    border: 3px outset #03d5036b;
+    height: 20px;
+    width: max-content;
+    border: 2px outset #03d5036b;
     color: #039803;
     font-weight: bold;
-    font-size: 10px;
+    font-size: 16px;
+    padding: 2px;
     background-color: #0a074b9c;
     text-align: center;
-    vertical-align: middle;
 }
 
 span#ytvideoTitle {
@@ -2934,8 +2933,8 @@ div#audiosettings-pause-button:hover {
 
 #mediacontrols{
 	position: fixed;
-    top: 16px;
-    right: 0;
+    top: 43px;
+    right: 7px;
     height: 20px;
     width: max-content;
     border: 2px outset #03d5036b;
@@ -2966,6 +2965,20 @@ div#next-button {
     margin-top: 2px;
     margin-left: 4px;
     margin-right: 9px;
+}
+div#shuffle-button {
+    position: fixed;
+    top: 74px;
+    right: 15px;
+    height: 9px;
+    width: max-content;
+    border: 2px outset #03d5036b;
+    color: #039803;
+    font-weight: normal;
+    font-size: 9px;
+    padding: 2px;
+    background-color: #0a074b9c;
+    text-align: center;
 }
 div.mediaplaypause {
     justify-content: space-evenly;
