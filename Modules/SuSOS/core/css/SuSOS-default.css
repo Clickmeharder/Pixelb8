@@ -2922,15 +2922,17 @@ div#audiosettings-play-button, div#audiosettings-pause-button {
     height: 24px;
     text-align: center;
     color: #1782b6;
-	transition:0s, color 3s, border 3s, smooth;
+	transition:1.8s, smooth;
 }
 div#audiosettings-play-button:hover {
-    border-color: purple;
-    color: purple;
+	border-color: #2ecc0be3;
+    color: #2ecc0be3;
+    outline: 1px groove #089315;
 }
 div#audiosettings-pause-button:hover {
-    border-color: purple;
-    color: purple;
+	border-color: #2ecc0be3;
+    color: #2ecc0be3;
+    outline: 1px groove #089315;
 }
 
 #mediacontrols{
