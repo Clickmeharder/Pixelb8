@@ -88,7 +88,7 @@ function getRandomArrayobject(arr) {
     ];
 
     let currentIndex = 0;
-    const slideshowContainer = document.getElementById('slideshow');
+    const slideshowContainer = document.getElementById('ad-slide');
 
     // Function to create img elements
     function createSlideshow() {
