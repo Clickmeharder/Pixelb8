@@ -2876,14 +2876,15 @@ button#lockedinput.robbotvoicelock {
 }
 #progressBar div#progbarinner {
 	position: fixed;
-    top: 16px;
-    right: 0;
-    height: 20px;
+    top: 18px;
+    right: 21px;
+    height: 10px;
     width: max-content;
     border: 2px outset #03d5036b;
     color: #039803;
+	font-family:lucida console;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 9px;
     padding: 2px;
     background-color: #0a074b9c;
     text-align: center;
@@ -2974,7 +2975,8 @@ div#shuffle-button {
     width: max-content;
     border: 2px outset #03d5036b;
     color: #039803;
-    font-weight: normal;
+	font-family:lucida console;
+    font-weight: bold;
     font-size: 9px;
     padding: 2px;
     background-color: #0a074b9c;
