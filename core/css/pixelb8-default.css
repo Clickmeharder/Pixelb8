@@ -1496,12 +1496,12 @@ select.webtp option:hover {
 	color: crimson!important;
 	box-shadow: 0px 0px 6px 14px rgb(128 0 44 / 40%);
 }
-#WebPortalControls-EuTitle{
-	position:absolute;
-    margin-top: 0px;
-    font-size: 19px;
-    font-weight: bold;
-    font-family: Yatra One;
+#WebPortalControls-EuTitle {
+    position: absolute;
+    margin-top: 6px;
+    letter-spacing: -0.2px;
+    font-size: 10px;
+    font-family: lucida console;
     color: #16599b;
     text-shadow: 1px 1px 1px rgb(0 255 250 / 79%);
 }
