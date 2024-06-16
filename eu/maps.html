@@ -302,185 +302,22 @@ staticPage BLOCK
         </div>
       </div>
 <!--Current Main Content Area-->
-	  <div class="row" id="webtp-pullout">
-		<div class="panel control-panel column">
-			<div class="row" id="webtpHeader">
-				<h2 class="panel-title" id="WebPortalControls-Title">WebPortal Controls</h2>
-				<Button class="roundbutt-webtp" id="Openwebportal" style="" onclick="Togglewebportal(this)">Activate</button>
-			</div>
-			<div id="static-content-panel-controls">
-
-				<!-- Entropia Websites -->
-				<div class="">
-					<div class="webtpfilteroptions-container">
-						<div class="webtpfilters-option">
-							<label for="filter1" title="Official Mindark Websites" alt="Official Mindark Websites" >Official M.A & PP</label>
-							<input type="checkbox" id="filter1" value="Official Filter">
-						</div>
-						<div class="webtpfilters-option">
-							<label for="filter2" title="" alt="Planet Partner websites" >Planet Partners</label>
-							<input type="checkbox" id="filter2" value="PP Filter">
-						</div>
-						<div class="webtpfilters-option" style="display: none;">
-							<label for="filter3" title="Planetary Websites" alt="Planetary Websites">Planetary</label>
-							<input type="checkbox" id="filter3" value="Planetary Filter">
-						</div>
-						<div class="webtpfilters-option">
-							<label for="filter4" title="" alt="" >Forums</label>
-							<input type="checkbox" id="filter4" value="Forum Filter">
-						</div>
-						<div class="webtpfilters-option">
-							<label for="filter5" title="" alt="">Entropia Maps</label>
-							<input type="checkbox" id="filter5" value="Maps Filter">
-						</div>
-						<div class="webtpfilters-option">
-							<label for="filter6" title="" alt="">Entropia Tools</label>
-							<input type="checkbox" id="filter6" value="Tools Filter">
-						</div>
-						<div class="webtpfilters-option">
-							<label for="filter7" title="" alt="">Info & Data</label>
-							<input type="checkbox" id="filter7" value="Information andData">
-						</div>
-						<div class="webtpfilters-option">
-							<label for="filter8" title="" alt="">Societies</label>
-							<input type="checkbox" id="filter8" value="Societies">
-						</div>
-						<div class="webtpfilters-option">
-							<label for="filter9" title="" alt="">Miscelaneous 3rd Party</label>
-							<input type="checkbox" id="filter9" value="Misc 3rdparty">
-						</div>
-						<div class="webtpfilters-option">
-							<label for="filter10" title="" alt="">Colonist Services & Content</label>
-							<input type="checkbox" id="filter10" value="Colonist Services">
-						</div>
-						<div class="webtpfilters-option">
-							<label for="filter11" title="" alt="">Entropian Creators</label>
-							<input type="checkbox" id="filter11" value="Entropian Creators">
-						</div>
-						<div class="webtpfilters-option">
-							<label for="filter12" title="" alt="">My Favourites</label>
-							<input type="checkbox" id="filter12" value="My Favourites">
-						</div>
-						<div class="webtpfilters-option">
-							<label for="filter13" title="" alt="">My Portals</label>
-							<input type="checkbox" id="filter13" value="My Portals">
-						</div>
-						<div class="webtpfilters-option">
-							<label for="filter14" >All</label>
-							<input type="checkbox" id="filter14" value="All Options">
-						</div>
-					</div>
-					<div class="webtpfilters-selected row" onclick="togglewebtpfilterOptions(this)">
-						<p class="panel-title" id="WebPortalControls-EuTitle">Entropia</p>
-						<div class="single-round-button">
-							<button class="webtpfilters-expand-button" id="ToggleWebtpfilterbox-Button" title="Filterbox Toggle" onclick="webtpTogglebuttstyle(this)">
-								<img src="../../assets/images/icons/expandtoggle.png" alt="Filterbox Toggle">
-							</button>
-						</div>
-					</div>
-				</div>
-				<select class="webtp" id="webtpoptions">
-					<option value="option0" selected disabled>Destination</option>
-
-				</select>
-				<Button class="flex" id="buttportaldetails" onclick="toggledestinationdetails(this)">《《   S.U.S   》》</button>
-			</div>
-		</div>	
-		<div class="panel" id="webtp">
-			<div class="panel portal-panel" id="thewebportal">
-				<h2 class="panel-title" id="portalLinktitle" style="">Entropia Partners</h2>
-				<a href="https://www.entropiapartners.com/?r=94031" target="_blank">
-					<div id="webportal-image" title="Jump in" alt="Jump in" style=""></div> <!-- Move the image inside the .portal-panel -->
-				</a>
-			</div>
-		</div>
-		<div id="portaldestinationDetails"></div>
-	  </div>
       <div class="panel left-panel">
 		<h2 class="panel-title" style="line-height:0.65;margin-top:0px;margin-bottom:8px;">Internal Spelunking</h2>
 			<a href="https://Pixelb8.lol/eu">
-				<button class="leftcheek" value="entropiapage" disabled>Entropian Pixelb8</button>
+				<button class="leftcheek" value="entropiapage" disabled>'←Go Back←</button>
 			</a>
-			<a href="https://Pixelb8.lol/sus">
-				<button class="leftcheek" value="sus" disabled>Secret Universal Services</button>
-			</a>
-<!-- 			<a href="https://Pixelb8.lol/clickplace">
-				<button class="leftcheek" value="clickplace" disabled>ClickPlace MC</button>
-			</a> -->
-			<a href="https://Pixelb8.lol/eu/maps">
+			<a href="https://Pixelb8.lol/eu/maps" disabled>
 				<button class="leftcheek" value="entropiamaps" >Entropia Maps</button>
-			</a>
-			<a href="https://Pixelb8.lol/eu/tools">
-				<button class="leftcheek" value="embeddabletools" disabled>Embeddable Tools (indev)</button>
 			</a>
 			<a href="https://pixelb8.lol/eu/arksatnav">
 				<button class="leftcheek" value="example" >Arkadia SatNav(beta)</button>
 			</a>
 
 	  </div>		
-		  <!-- Right Panel -->
-			<div id="main-content">
-				<h2>Account Details</h2>
-				<p>Laudate Lootium Divitiasque Celebremus.</p>
-				<!-- Login Form -->
-				<div class="logged-in disabled hidden" id="innercontent-loggedin" style="padding:4px; border:1px solid #222;">
-					<form id="loginForm">
-<!-- 						<ul id="nav-mobile" class="hide-on-med-and-down">
-							<li class="logged-in">
-								<a href="#" class="modal-trigger" id="userAccount-modalTrigger" data-target="modal-useraccount">My Account</a>
-							</li>
-							<li class="logged-in">
-								<a href="#" class="modal-trigger" id="userProfile-editTrigger" data-target="modal-edit">Public Profile</a>
-							</li>
-						</ul> -->
-						<ul id="accountdetails" class="">
-						</ul>
-					</form>
-					<div class="row">
-						<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
-						<button class="logged-in" id="logoutbutt" type="button">Logout</button>
-					</div>
-				</div>
-				<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
-					<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
-					<p>Or...</p>
-					<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
-				</div>
-			</div>
-					  <!-- Right Panel -->
-			<div class="panel right-panel">
-				<div id="websiteStatContainer">
-					<h2 class="panel-title" id="sitestats">Site Stats</h2>
-					<p>Registered&gt; Lots</p>
-					<p>Online&gt; everyone</p>
-				</div>
-				<div id="userInfoContainer">
-					<P id="username">StrangerDanger</p>
-					<P id="profileusername">-</p>
-					<img id="profilephoto" src="../assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
-					<p id="Userpixelcount" class="hidden">0px</p>
-					<p id="loginStatus">Status: offline</p>
-					<ul>
-						<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
-						<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
-						<span id="emailVerified" class="hidden">►</span>
-						<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
-						
-					</ul>
-				</div>
-				<div id="expandaccpaneldiv"class="single-round-button">
-					<button class="accpanelinternals-expand-button" id="Toggleaccpanelinternals-Button" title="Account panel Toggle" onclick="accpanelTogglebutt(this)">
-						<img src="../assets/images/icons/expandtoggle.png" alt="Account panel Toggle">
-					</button>
-				</div>
-			</div>
-	 </main>
+
 <!-- Content Panels -->
 	<!-- Content Panel A -->
-  <div class="row">
-
-	
-  </div>
   <div class="maprow">
 	<!-- Content Panel B (MAP PANEL)-->
 	<div class="panel content-panel-eumaps">
@@ -654,7 +491,6 @@ staticPage BLOCK
 	-->
 	<!--FIREBASE AUTHENTICATION SKRIPTS-->
 	<script src="../../core/js/index.js"></script>
-	<script type="module" src="../../core/js/firebase/auth.js"></script>
 	</body>
 </html>
 <!--______________________________________________________________ -->
