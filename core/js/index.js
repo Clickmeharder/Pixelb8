@@ -67,24 +67,24 @@ function getRandomArrayobject(arr) {
     let currentIndex = 0;
     // Array of image paths
     const images = [
-      'assets/images/ads/ad1.png',
-      'assets/images/ads/ad2.png',
-      'assets/images/ads/ad3.png',
-	  'assets/images/ads/ad4.png',
-      'assets/images/ads/ad5.png',
-      'assets/images/ads/ad6.png',
-	  'assets/images/ads/ad7.png',
-      'assets/images/ads/ad8.png',
-      'assets/images/ads/ad9.png',
-	  'assets/images/ads/ad10.png',
-      'assets/images/ads/ad11.png',
-      'assets/images/ads/ad12.png',
-	  'assets/images/ads/ad13.png',
-      'assets/images/ads/ad14.png',
-      'assets/images/ads/ad15.png',
-	  'assets/images/ads/ad16.png',
-      'assets/images/ads/ad17.png',
-      'assets/images/ads/ad18.png'
+      'assets/images/ads/ads1.png',
+      'assets/images/ads/ads2.png',
+      'assets/images/ads/ads3.png',
+	  'assets/images/ads/ads4.png',
+      'assets/images/ads/ads5.png',
+      'assets/images/ads/ads6.png',
+	  'assets/images/ads/ads7.png',
+      'assets/images/ads/ads8.png',
+      'assets/images/ads/ads9.png',
+	  'assets/images/ads/ads10.png',
+      'assets/images/ads/ads11.png',
+      'assets/images/ads/ads12.png',
+	  'assets/images/ads/ads13.png',
+      'assets/images/ads/ads14.png',
+      'assets/images/ads/ads15.png',
+	  'assets/images/ads/ads16.png',
+      'assets/images/ads/ads17.png',
+      'assets/images/ads/ads18.png'
       // Add more images as needed
     ];
 
