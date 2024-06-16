@@ -84,7 +84,12 @@ function getRandomArrayobject(arr) {
       'assets/images/ads/ads15.png',
 	  'assets/images/ads/ads16.png',
       'assets/images/ads/ads17.png',
-      'assets/images/ads/ads18.png'
+      'assets/images/ads/ads19.png',
+	  'assets/images/ads/ads20.png',
+	  'assets/images/ads/ads21.png',
+	  'assets/images/ads/ads22.png',
+	  'assets/images/ads/ads23.png',
+	  'assets/images/ads/ads24.png'
       // Add more images as needed
     ];
 
