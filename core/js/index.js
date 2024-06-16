@@ -103,4 +103,4 @@ function getRandomArrayobject(arr) {
 
     // Initialize the slideshow
     changeImage(); // Set the first image
-    setInterval(changeImage, 30000); // Change image every 3 seconds
+    setInterval(changeImage, 20000); // Change image every 3 seconds
