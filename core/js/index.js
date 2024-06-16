@@ -66,33 +66,34 @@ function getRandomArrayobject(arr) {
    const slideshowContainer = document.getElementById('ad-slide');
     let currentIndex = 0;
     // Array of image paths
-    const images = [
-      'assets/images/ads/ads1.png',
-      'assets/images/ads/ads2.jpeg',
-      'assets/images/ads/ads3.png',
-	  'assets/images/ads/ads4.png',
-      'assets/images/ads/ads5.jpeg',
-      'assets/images/ads/ads6.jpg',
-	  'assets/images/ads/ads7.png',
-      'assets/images/ads/ads8.png',
-      'assets/images/ads/ads9.jpeg',
-	  'assets/images/ads/ads10.png',
-      'assets/images/ads/ads11.png',
-      'assets/images/ads/ads12.jpeg',
-	  'assets/images/ads/ads13.png',
-      'assets/images/ads/ads14.jpg',
-      'assets/images/ads/ads15.jpeg',
-	  'assets/images/ads/ads16.png',
-      'assets/images/ads/ads17.jpeg',
-	  'assets/images/ads/ads18.png',
-      'assets/images/ads/ads19.jpeg',
-	  'assets/images/ads/ads20.png',
-	  'assets/images/ads/ads21.jpeg',
-	  'assets/images/ads/ads22.png',
-	  'assets/images/ads/ads23.png',
-	  'assets/images/ads/ads24.jpeg'
-      // Add more images as needed
-    ];
+       // Array of image paths from your website
+	const images = [
+		'https://pixelb8.lol/assets/images/ads/ads1.png',
+		'https://pixelb8.lol/assets/images/ads/ads2.jpeg',
+		'https://pixelb8.lol/assets/images/ads/ads3.png',
+		'https://pixelb8.lol/assets/images/ads/ads4.png',
+		'https://pixelb8.lol/assets/images/ads/ads5.jpeg',
+		'https://pixelb8.lol/assets/images/ads/ads6.jpg',
+		'https://pixelb8.lol/assets/images/ads/ads7.png',
+		'https://pixelb8.lol/assets/images/ads/ads8.png',
+		'https://pixelb8.lol/assets/images/ads/ads9.jpeg',
+		'https://pixelb8.lol/assets/images/ads/ads10.png',
+		'https://pixelb8.lol/assets/images/ads/ads11.png',
+		'https://pixelb8.lol/assets/images/ads/ads12.jpeg',
+		'https://pixelb8.lol/assets/images/ads/ads13.png',
+		'https://pixelb8.lol/assets/images/ads/ads14.jpg',
+		'https://pixelb8.lol/assets/images/ads/ads15.jpeg',
+		'https://pixelb8.lol/assets/images/ads/ads16.png',
+		'https://pixelb8.lol/assets/images/ads/ads17.jpeg',
+		'https://pixelb8.lol/assets/images/ads/ads18.png',
+		'https://pixelb8.lol/assets/images/ads/ads19.jpeg',
+		'https://pixelb8.lol/assets/images/ads/ads20.png',
+		'https://pixelb8.lol/assets/images/ads/ads21.jpeg',
+		'https://pixelb8.lol/assets/images/ads/ads22.png',
+		'https://pixelb8.lol/assets/images/ads/ads23.png',
+		'https://pixelb8.lol/assets/images/ads/ads24.jpeg'
+		// Add more images as needed
+	];
 
 // Function to change the background image
     function changeImage() {
@@ -104,3 +105,5 @@ function getRandomArrayobject(arr) {
     // Initialize the slideshow
     changeImage(); // Set the first image
     setInterval(changeImage, 20000); // Change image every 3 seconds
+	
+	
