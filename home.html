@@ -2546,36 +2546,21 @@ staticPage BLOCK
 			<section class="featured-section">
 				<div class="devnote">
 					<h3 class="devnote-title">Development Update - [2024-05-16 06:06:12 UTC]</h3>
-					<p class="devnote-content">
-						<strong>Developer:</strong> Jaedraze aka General Jimbobbityboo of Secret Universal Services Society
-						<br>
-						<br>
-						Our main goal is to provide a comprehensive assistant platform for colonists in the Entropia system, offering a range of tools, information, and resources to enrich their gaming experience. While our current focus is on Planet Arkadia, we intend to gradually expand to include content regarding other planets and celestial bodies within Entropia Universe.
-						<br>
-						<br>
-						Tool Development and Expansion:
-						<ul>
-							<li>Ive added a youtube embed for music-. scroll down to learn more!</li>
-							<li>Update main page content - Scheduled for [Insert Deadline]</li>
-							<!-- Add more points as needed -->
-						</ul>
-					</p>
+					<p class="devnote-content"></p>
 				</div>
 				<!-- End of Latest Devnote -->
 				<button class="themed-button" disabled>Read More</button>
 			</section>
 			  <div class="older-devnote">
-				  <h3>Latest Update [2024-05-16 06:06:12 UTC]:</h3>
-				  <p>You can add songs or videos to the playlist by clicking 
-					  <a href="https://www.youtube.com/playlist?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&jct=1HjZpUGdnwSWLgr5B3y5p-9IcSsRsg" target="_blank" rel="noopener noreferrer">this link</a>.
-				  </p>
+				  <h3>Default h3</h3>
+				  <p> some example text goes here but this should be dynamically updated</p>
 			  </div>
 			  <div class="older-devnote">
-				  <h3>2nd Example Element</h3>
+				  <h3>Default h3</h3>
 				  <p>This is the first example element, it should be the newest section</p>
 			  </div>
 			  <div class="older-devnote">
-				  <h3>Example Element 3</h3>
+				  <h3>Default h3</h3>
 				  <p>This is some example content for Element 2.</p>
 			  </div>
 			  <div class="older-devnote">
@@ -2601,28 +2586,26 @@ staticPage BLOCK
 							const devnoteDiv = document.querySelector(".devnote");
 							devnoteDiv.querySelector(".devnote-title").innerText = `Development Update - [${latestUpdate.date}]`;
 							devnoteDiv.querySelector(".devnote-content").innerHTML = `
-								<strong>Developer:</strong> ${latestUpdate.developer}
+								<strong>Developer:</strong>${latestUpdate.developer}
 								<br><br>
 								${latestUpdate.content}
 								<br><br>
-								Tool Development and Expansion:
+								It always says this text:
 								<ul>
 									${latestUpdate.points.map(point => `<li>${point}</li>`).join('')}
 								</ul>
 							`;
-
-							// Populate older devnotes
 							const olderDevnotesDivs = document.querySelectorAll(".older-devnote");
 							olderUpdates.forEach((update, index) => {
 								if (index < olderDevnotesDivs.length) {
 									const olderDiv = olderDevnotesDivs[index];
 									olderDiv.querySelector("h3").innerText = `Latest Update [${update.date}]:`;
 									olderDiv.querySelector("p").innerHTML = `
-										<strong>Developer:</strong> ${update.developer}
+										<strong>Developer:</strong>${update.developer}
 										<br><br>
 										${update.content}
 										<br><br>
-										Tool Development and Expansion:
+										It always says this text:
 										<ul>
 											${update.points.map(point => `<li>${point}</li>`).join('')}
 										</ul>
