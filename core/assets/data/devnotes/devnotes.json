@@ -1,0 +1,43 @@
+[
+ {
+        "date": "2024-06-17 09:45:12 UTC",
+        "developer": "Jaedraze aka General Jimbobbityboo",
+        "content": "I've attempted to add a script to handle posting updates for me, we should see how it went by now.",
+        "points": [
+            "-currently updates should by automatically updated",
+            "annd now I just need to automatically create them directly in the website, I'll come back to that..."
+        ]
+    },
+ {
+        "date": "2024-06-17 06:35:25 UTC",
+        "developer": "Jaedraze aka General Jimbobbityboo",
+        "content": "I've made a ton of changes and fixes.Perhaps il give a full note on it all later after I finish making the devnotesupdate thing functional...probably not... but the main points are:",
+        "points": [
+            "added the entropia chat .log file search tool to the O.S.",
+            "added custom youtube player buttons and sound settings window for easier music control",
+			"added a stopwatch",
+			"made some improvements to the timer",
+			"seemingly fixed the stashmanager, (untested- and plans to improve/overhaul it)",
+			"made the background sparkly",
+			"improved website structure slightly"
+        ]
+    },
+    {
+        "date": "2024-05-16 06:06:12 UTC",
+        "developer": "Jaedraze aka General Jimbobbityboo of Secret Universal Services Society",
+        "content": "Our main goal is to provide a comprehensive assistant platform for colonists in the Entropia system, offering a range of tools, information, and resources to enrich their gaming experience. While our current focus is on Planet Arkadia, we intend to gradually expand to include content regarding other planets and celestial bodies within Entropia Universe.",
+        "points": [
+            "I've added a YouTube embed for music. Scroll down to learn more!",
+            "Update main page content - Scheduled for [Insert Deadline]"
+        ]
+    },
+    {
+        "date": "2024-05-16 06:06:12 UTC",
+        "developer": "Jaedraze aka General Jimbobbityboo",
+        "content": "You can add songs or videos to the playlist by following this link:",
+        "points": [
+            "https://www.youtube.com/playlist?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&jct=1HjZpUGdnwSWLgr5B3y5p-9IcSsRsg",
+            "a more convenient button will be added to add songs soon!"
+        ]
+    }
+]
