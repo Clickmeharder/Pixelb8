@@ -3271,6 +3271,15 @@ select#sortOrder{
 }
 select#sortOrder:focus-visible{border-color:#ff6100;outline:#ff6100;}
 
+.buttbox#susintelbuttbox{
+	height: 45px;
+    width: 98%;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 14px;
+    justify-content: space-around;
+}
+
 .popup-content {
     position: absolute;
     display: flex;
@@ -3294,4 +3303,7 @@ button#susIntel-downloadButton {
     margin-right: 79px;
     border-radius: 10px;
 }
+
+
+
 #closepupup{right:0;}
