@@ -23,79 +23,16 @@
 </div>
 
 <div class="staticPage" id="Mainpage" style="margin: auto;margin-top: 195px;width: 75vw;border-radius: 10px;">
-  <header class="staticpage-header">
-      <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
-  </header>
+	<header class="staticpage-header">
+		<h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
+		<button id="enterButt">Back to Home Page</button><button id="funButt" disabled>game1</button><button id="funButt">game2</button><button id="funButt">game3</button>
+	</header>
   <!-- New Main Content Area -->
-  <main class="main-content">
-      <!-- Left Panel -->
-
-<!--       <div class="panel ad-panel">
-		<div class="static-slideshowpromoter">
-             Add your slideshow content here
-        </div>
-      </div> -->
-	 <!--  <h2 id="themed-welcome-title">Welcome!</h2> -->
-	  <button id="enterButt">Back to Home Page</button><button id="funButt1">game1</button><button id="funButt2">game2</button><button id="funButt3">game3</button>
-<!--Main landing content panel-->
-		<div class="panel content-panel" style="max-width:fit-content;">
-			<div id="main-content">
-				<h2>Account Details</h2>
-				<p>Laudate Lootium Divitiasque Celebremus.</p>
-				<!-- Login Form -->
-				<div class="logged-in disabled hidden" id="innercontent-loggedin" style="padding:4px; border:1px solid #222;">
-					<form id="loginForm">
-<!-- 						<ul id="nav-mobile" class="">
-							<li class="logged-in">
-								<a href="#" class="modal-trigger" id="userAccount-modalTrigger" data-target="modal-useraccount">My Account</a>
-							</li>
-							<li class="logged-in">
-								<a href="#" class="modal-trigger" id="userProfile-editTrigger" data-target="modal-edit">Public Profile</a>
-							</li>
-						</ul> -->
-						<ul id="accountdetails" class="">
-						</ul>
-					</form>
-					<div class="row">
-						<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
-						<button class="logged-in" id="logoutbutt" type="button">Logout</button>
-					</div>
-				</div>
-				<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
-					<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
-					<p>Or...</p>
-					<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
-				</div>
-			</div>
-					  <!-- Right Panel -->
-			<div class="panel right-panel">
-				<div id="websiteStatContainer">
-					<h2 class="panel-title" id="sitestats">Site Stats</h2>
-					<p>Registered&gt; Lots</p>
-					<p>Online&gt; everyone</p>
-				</div>
-				<div id="userInfoContainer">
-					<P id="username">StrangerDanger</p>
-					<P id="profileusername">-</p>
-					<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
-					<p id="Userpixelcount" class="hidden">0px</p>
-					<p id="loginStatus">Status: offline</p>
-					<ul>
-						<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
-						<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
-						<span id="emailVerified" class="hidden">►</span>
-						<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
-					</ul>
-				</div>
-				<div id="expandaccpaneldiv"class="single-round-button">
-					<button class="accpanelinternals-expand-button" id="Toggleaccpanelinternals-Button" title="Account panel Toggle" onclick="accpanelTogglebutt(this)">
-						<img src="assets/images/icons/expandtoggle.png" alt="Account panel Toggle">
-					</button>
-				</div>
-			</div>
-		</div>
-
-	 </main>
+	<main class="main-content">
+		<div>
+		<!--Main game area content panel-->
+		</div>	
+	</main>
 <!-- Content Panels -->
 	<!-- Content Panel A -->
   <div class="row transparent">
@@ -118,21 +55,11 @@
 						</p><ul>
 							<li>Create an element to display goals - Expected completion by [Insert Deadline]</li>
 							<li>Update main page content - Scheduled for [Insert Deadline]</li>
-							<!-- Add more points as needed -->
 						</ul>
 					<p></p>
 				</div>
-				<!-- End of Latest Devnote -->
-
 				<button class="themed-button" disabled="">Read More</button>
 			</section>
-	<!--       <section class="themed-main">
-          <section class="featured-section">
-              <h2 class="section-title">Attention Entropia Colonists</h2>
-              <p class="section-description">This Website is still very early in development; HOWEVER If your looking for EU Tools. they are currently available within the SuSOS. simply click the power button on the top left to turn on the SuSOS main power, you can find the eu tools in the start menu, and the stolen space map is located in the button bar on the right side of the SuSOS - to toggle the space map on and off click the button labelled "Space Map"</p>
-              <button class="themed-button" disabled>Read More</button>
-          </section> -->
-          <!-- Generic Example Elements -->
 			  <div class="example-element">
 				  <h3>Example Element 1</h3>
 				  <p>This is the first example element in the main content area after the featured content section</p>
@@ -155,9 +82,65 @@
 			  </div>
 			  <!-- End of Generic Example Elements -->
 		  </section>
-		
-	
   </div>
+  
+  <div class="panel content-panel" style="max-width:fit-content; display:none;">
+	<div id="main-content">
+		<h2>Account Details</h2>
+		<p>Laudate Lootium Divitiasque Celebremus.</p>
+		<!-- Login Form -->
+		<div class="logged-in disabled hidden" id="innercontent-loggedin" style="padding:4px; border:1px solid #222;">
+			<form id="loginForm">
+<!-- 						<ul id="nav-mobile" class="">
+					<li class="logged-in">
+						<a href="#" class="modal-trigger" id="userAccount-modalTrigger" data-target="modal-useraccount">My Account</a>
+					</li>
+					<li class="logged-in">
+						<a href="#" class="modal-trigger" id="userProfile-editTrigger" data-target="modal-edit">Public Profile</a>
+					</li>
+				</ul> -->
+				<ul id="accountdetails" class="">
+				</ul>
+			</form>
+			<div class="row">
+				<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
+				<button class="logged-in" id="logoutbutt" type="button">Logout</button>
+			</div>
+		</div>
+		<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
+			<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
+			<p>Or...</p>
+			<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
+		</div>
+	</div>
+			  <!-- Right Panel -->
+		<div class="panel right-panel">
+			<div id="websiteStatContainer">
+				<h2 class="panel-title" id="sitestats">Site Stats</h2>
+				<p>Registered&gt; Lots</p>
+				<p>Online&gt; everyone</p>
+			</div>
+			<div id="userInfoContainer">
+				<P id="username">StrangerDanger</p>
+				<P id="profileusername">-</p>
+				<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
+				<p id="Userpixelcount" class="hidden">0px</p>
+				<p id="loginStatus">Status: offline</p>
+				<ul>
+					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
+					<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
+					<span id="emailVerified" class="hidden">►</span>
+					<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
+				</ul>
+			</div>
+			<div id="expandaccpaneldiv"class="single-round-button">
+				<button class="accpanelinternals-expand-button" id="Toggleaccpanelinternals-Button" title="Account panel Toggle" onclick="accpanelTogglebutt(this)">
+					<img src="assets/images/icons/expandtoggle.png" alt="Account panel Toggle">
+				</button>
+			</div>
+		</div>
+	</div>
+
   <!-- Footer -->
   <footer class="themed-footer" style="display:none;">
       <p>&copy; 2022 Your Company. All rights reserved.</p>
