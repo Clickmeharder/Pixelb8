@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+</head>
+
+<styles>
+	body {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 100vh;
+		margin: 0;
+		background-color: #121212;
+	}
+	#gameArea {
+		position: relative;
+		width: 800px;
+		height: 600px;
+		background-color: #1e1e1e;
+	}
+	#pixelb8 {
+		position: absolute;
+		width: 124px; /* Adjust according to your sprite size */
+		height: 124px; /* Adjust according to your sprite size */
+		background-image: url('https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
+		background-size: cover;
+	}
+	@keyframes move {
+		from { background-position: 0 0; }
+		to { background-position: -500px 0; } /* Adjust according to your spritesheet width */
+	}
+	.animate {
+		animation: move 1.8s steps(4) infinite; /* 4 frames per second */
+	}	
+</styles>
+<body>
+    <div id="gameArea">
+      <div id="pixelb8" style="border: 3px dotted #444;"></div>
+    </div>
+  <script src="core/js/core-apps/pixelbot-movement.js"></script>
+</body>
