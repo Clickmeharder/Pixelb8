@@ -408,6 +408,18 @@
 					  <!-- dynamically add open tabs here? -->
 					</div>
 				</div>
+				<div id="popupContainer" class="popup" style="display:none;">
+					<div class="popup-content">
+						<label for="olderthanXdays">Delete logs older than:</label>
+						<input type="number" id="olderthanXdays" placeholder="7">
+						<label for="daystext">Days</label>
+						<div class="row">
+							<button id="susIntel-downloadButton">Download trimmed Log</button>
+							<button id="closepopup">Cancel</button>
+							<label for="downloadsize"></label>
+						</div>
+					</div>
+				</div>
 				<div id="clockwrapper">
 					<button id="clocktools-button" title="Clock tools">
 						<img class="cursorbutton customcursor" src="../assets/images/icons/clock-1.png" alt="Clock Tools" onmouseover="updateCursor('cursor02')">
