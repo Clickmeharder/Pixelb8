@@ -2590,27 +2590,36 @@ staticPage BLOCK
 								<br><br>
 								${latestUpdate.content}
 								<br><br>
-								It always says this text:
+								Tool Development and Expansion:
 								<ul>
 									${latestUpdate.points.map(point => `<li>${point}</li>`).join('')}
 								</ul>
 							`;
-							const olderDevnotesDivs = document.querySelectorAll(".older-devnote");
-							olderUpdates.forEach((update, index) => {
-								if (index < olderDevnotesDivs.length) {
-									const olderDiv = olderDevnotesDivs[index];
-									olderDiv.querySelector("h3").innerText = `Latest Update [${update.date}]:`;
-									olderDiv.querySelector("p").innerHTML = `
+
+							// Get the container for older devnotes
+							const themedMain = document.querySelector(".themed-main");
+
+							// Remove existing older devnotes to avoid duplication
+							document.querySelectorAll(".older-devnote").forEach(el => el.remove());
+
+							// Populate older devnotes
+							olderUpdates.forEach(update => {
+								const olderDiv = document.createElement("div");
+								olderDiv.classList.add("older-devnote");
+								olderDiv.innerHTML = `
+									<h3>Latest Update [${update.date}]:</h3>
+									<p>
 										<strong>Developer:</strong>${update.developer}
 										<br><br>
 										${update.content}
 										<br><br>
-										It always says this text:
+										Tool Development and Expansion:
 										<ul>
 											${update.points.map(point => `<li>${point}</li>`).join('')}
 										</ul>
-									`;
-								}
+									</p>
+								`;
+								themedMain.appendChild(olderDiv);
 							});
 						}
 					})
