@@ -467,7 +467,19 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   opacity: var(--staticpage-opacity);
   z-index: 1;
 }
-
+.staticgamePage {
+    color: var(--staticpage-text-color);
+    border-color: var(--staticpage-border-color);
+    border-width: var(--staticpage-border-width);
+    border-style: var(--staticpage-border-style);
+    opacity: var(--staticpage-opacity);
+    z-index: 1;
+    margin: auto;
+    margin-top: 10px;
+    width: 96vw;
+    height: 95vh;
+    border-radius: 10px;
+}
 /* STATICPAGE STYLES MAIN  */
 /* Header Styles */
 .staticpage-header {
@@ -481,7 +493,26 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   border-style: var(--staticpage-HFpanels-border-style);
   border-radius: var(--staticpage-HFpanels-border-radius);
 }
+.staticgamepage-header {
+    padding: 10px;
+    max-height: 54px;
+    text-align: center;
+    text-shadow: 0px 0px 0.7px #fff;
+    background-color: var(--staticpage-HFpanels-bg-color);
+    color: var(--staticpage-HFpanels-text-color);
+    border-color: var(--staticpage-HFpanels-border-color);
+    border-width: var(--staticpage-HFpanels-border-width);
+    border-style: var(--staticpage-HFpanels-border-style);
+    border-radius: var(--staticpage-HFpanels-border-radius);
+}
 .staticPage .title {
+    font-family: 'Pixelify Sans';
+    font-size: 45px;
+    margin: 0;
+    margin-bottom: -18px;
+    color: var(--staticpage-HTitle-text-color); text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);/* text-shadow: 1px 1px 4px rgba(10, 10, 10, 0.5); */
+}
+.staticgamePage .title {
     font-family: 'Pixelify Sans';
     font-size: 45px;
     margin: 0;
