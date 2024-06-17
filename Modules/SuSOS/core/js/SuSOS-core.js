@@ -245,6 +245,7 @@ windowIds.push('hud-OrdinanceJuxtapositioner');
 windowIds.push('hud-EuStashManager');
 windowIds.push('hud-EuCalender');
 windowIds.push('hud-EuEventPlanner');
+windowIds.push('hud-susIntel');
 // Push EuApplet EuStash submenu window IDs into the array
 windowIds.push('hud-EuItemstash');
 windowIds.push('hud-EuItemStashAdditions');

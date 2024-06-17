@@ -3004,3 +3004,294 @@ div.mediaplaypause {
 .buttpress:active{
 	transform: scale(0.95);	
 }
+
+
+
+/*STYLES FOR SUS INTEL TOOL*/
+.windowcontentblock {
+    padding: 1px;
+    padding-top: 2px;
+    width: calc(99% - 2px);
+    height: calc(99% - 6px);
+    overflow: hidden;
+    overflow-y: auto;
+    border: 2px solid #333;
+}
+
+
+.windowcontentblock::-webkit-resizer {
+    color: black;
+    background-color: black;
+    border-width: 1px;
+    min-width: 12px;
+    max-width: 12px;
+    border-color: #03a9f4a1;
+    border-top: 4px double #00f6ff96;
+    border-left: 4px double #00f6ff96;
+    border-right-style: dotted;
+    border-bottom: 10px ridge #5da3a573;
+    border-radius: 0%;
+}
+
+.windowcontentblock::-webkit-scrollbar-thumb {
+	border-width: 2px;
+    border-color: #1a30457a;
+    border-style: outset;
+    border-radius: 8px;
+}
+
+.hud .window.generic {
+    background: linear-gradient(153deg, #1e2123, #121216eb);
+    top: 0px;
+    left: 3%;
+    padding: 2px;
+    flex-direction: column;
+    width: 355px;
+    height: 515px;
+    min-width: 325px;
+    opacity: 0.9;
+    resize: both;
+}
+.Container.generic {
+    max-width: unset;
+    width: 100%;
+    height: calc(100% - 1px);
+    overflow: hidden;
+}
+#hud-susIntel{
+  
+}
+
+textarea#susIntel-keyword {
+  width:90%;
+  margin-left:10px;
+  height:17px;
+  background-color: #000000e3;
+}
+
+#susIntel-results {
+  flex: 1;
+  background: black;
+  color: green;
+  min-height: 350px;
+  max-height: 350px;
+  padding: 1px;
+  margin: 1px;
+  border: 2px inset grey;
+  border-radius: 10px;
+  overflow: auto;
+}
+.controlscontainer {
+    background: black;
+    color: grey;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 2px inset #1a1a1a;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+
+#susIntelwindow hr{
+    border-color: #00CCFF;
+    opacity: 0.5;
+}
+
+
+#susIntel-toolinfobawx label {
+    font-weight: 600;
+    font-size: 16px;
+    padding-top: 0px;
+    padding-top: 0px;
+    margin-top: -5px;
+}
+textarea#susIntel-toolinfo {
+    width: 101%;
+    height: 100%;
+    background-color: black;
+    color: green;
+    padding: 4px;
+    padding-top: ;
+    padding-left: 0px;
+    padding-right: 4px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    border: none;
+    transition: height 1.6s ease;
+    overflow: none;
+}
+#Hud-susIntel-Displaypanel label{
+  transition:1.6s;
+}
+#Hud-susIntel-Displaypanel label:hover {
+    color: #FF4500;
+}
+textarea#susIntel-toolinfo {
+    transition:font-weight 1s ease-in-out;
+    resize: none;
+}
+textarea#susIntel-toolinfo:hover {
+    font-size:13px;
+    font-weight:bold;
+    filter:hue-rotate(45deg);
+    resize: none;
+}
+input#susIntel-fileInput {
+  min-width:100%;
+  margin-left:6px;
+}
+input#susIntel-fileInput::-webkit-file-upload-button {
+  padding: 3px;
+  border: 2px solid #4CAF50;
+  border-radius: 5px;
+  background-color: #4CAF50;
+  color: blue;
+  cursor: pointer;
+}
+input[type="file"]::-webkit-file-upload-button {
+  padding: 3px;
+  border: 2px solid #4CAF50;
+  border-radius: 5px;
+  background-color: #4CAF50;
+  color: blue;
+  cursor: pointer;
+}
+input[type="file"]::-webkit-file-upload-button:hover{filter:hue-rotate(45deg);}
+
+
+.sifi {
+    display: flex;
+    flex-direction: row;
+    gap: 10px; /* Adds some space between the elements */
+    align-items: center; /* Aligns items vertically in the center */
+}
+
+.sifi label {
+    font-size: 16px; /* Adjust the font size of the labels */
+    color: #09ff00c7; /* Neon green color for the labels */
+    cursor: pointer; /* Make the cursor a pointer when hovering over the labels */
+}
+
+.sifi input[type="checkbox"] {
+    width: 20px; /* Width of the checkbox */
+    height: 20px; /* Height of the checkbox */
+    background-color: #1a1a1a; /* Dark background color */
+    border: 2px solid #ff6100; /* Neon orang border color */
+    border-radius:50%;
+    cursor: pointer; /* Make the cursor a pointer when hovering over the checkboxes */
+    appearance: none; /* Remove default styling */
+    position: relative;
+    box-shadow: 0 0 20px #00f6ff;
+    transition:1.3s;
+}
+
+.sifi input[type="checkbox"]:checked {
+    background-color: #1a1a1a; /* Keep dark background color */
+    border: 2px solid #205e1d; /* Maintain the neon border color */
+    border-radius:50%;
+}
+
+.sifi input[type="checkbox"]:checked::before {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 2px;
+    width: 15px;
+    height: 15px;
+    border-radius:50%;
+    background-color: #00ff0a91; /* Neon green color for the checkmark */
+}
+
+.sifi input[type="checkbox"]:focus {
+    outline: none; /* Remove the default focus outline */
+    box-shadow: 0 0 19px  #8cff00f5; /* Add a neon glow effect */
+}
+
+/* Hide the spin buttons in other browsers and create custom buttons */
+#resultsolderthanXdays {
+    -moz-appearance: textfield; /* Hide default spin buttons in Firefox */
+}
+
+#resultsolderthanXdays::-webkit-outer-spin-button,
+#resultsolderthanXdays::-webkit-inner-spin-button {
+    -webkit-appearance: none; /* Hide default spin buttons in Chrome and Safari */
+    margin: 3;
+}
+
+/* Create custom buttons if needed */
+.custom-number-input {
+    position: relative;
+    width: 60px; /* Adjust width as needed */
+}
+
+.custom-number-input input {
+    font-size:20px;
+    text-align:center;
+    width:33px;
+    height:25px;
+    color:var(--HUD-text-color);
+    border-color: green;
+    padding-left:7px;
+    padding-right: 12px; /* Make space for custom buttons */
+}
+.custom-number-input input:focus-visible{
+  outline:green;
+  border-color:#d25c08;
+}
+.custom-number-input .spin-button {
+    position: absolute;
+    right: 0px;
+    margin-left:auto;
+    width: 12px; /* Adjust width as needed */
+    height: 11px; /* Adjust height as needed */
+    background-color: #00ff99; /* Custom background color */
+    border: 1px solid #1a1a1a; /* Custom border color */
+    color: #1a1a1a; /* Custom text color */
+    font-size: 12px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 16px; /* Center text vertically */
+}
+
+.custom-number-input .spin-button.up {
+    top: -3px;
+    padding-bottom: 3px;
+}
+
+.custom-number-input .spin-button.down {
+    bottom: 1px;
+    padding-bottom:2px;
+}
+.custom-number-input .spin-button:hover{
+  background-color:#d25c08;
+ }
+select#sortOrder{
+  color:#ff6100;border-color:var(--hudoverlay-border-color);-webkit-appearance: none;
+}
+select#sortOrder:focus-visible{border-color:#ff6100;outline:#ff6100;}
+
+.popup-content {
+    position: absolute;
+    display: flex;
+    top: 50%;
+    left: 50%;
+    width: 300px;
+    height: 125px;
+    transform: translate(-50%, -50%);
+    background-color: #0e2435;
+    padding: 9px;
+    border: 2px ridge var(--HUD-border-color);
+    border-radius: 18px;
+    z-index: 9999;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+button#susIntel-downloadButton {
+    width: 163px;
+    margin-right: 79px;
+    border-radius: 10px;
+}
+#closepupup{right:0;}
