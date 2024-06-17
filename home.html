@@ -2549,7 +2549,7 @@ staticPage BLOCK
 					<p class="devnote-content"></p>
 				</div>
 				<!-- End of Latest Devnote -->
-				<button class="themed-button" disabled>Read More</button>
+				<button class="themed-button" style="display:none;"disabled>Read More</button>
 			</section>
 			  <div class="older-devnote">
 				  <h3>Default h3</h3>
@@ -2590,7 +2590,7 @@ staticPage BLOCK
 								<br><br>
 								${latestUpdate.content}
 								<br><br>
-								Tool Development and Expansion:
+								The Breakdown:
 								<ul>
 									${latestUpdate.points.map(point => `<li>${point}</li>`).join('')}
 								</ul>
@@ -2613,7 +2613,7 @@ staticPage BLOCK
 										<br><br>
 										${update.content}
 										<br><br>
-										Tool Development and Expansion:
+										The Breakdown:
 										<ul>
 											${update.points.map(point => `<li>${point}</li>`).join('')}
 										</ul>
