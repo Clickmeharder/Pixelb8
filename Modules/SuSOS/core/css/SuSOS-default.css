@@ -3279,6 +3279,14 @@ select#sortOrder:focus-visible{border-color:#ff6100;outline:#ff6100;}
     font-size: 14px;
     justify-content: space-around;
 }
+#susintelbuttbox{
+	height: 45px;
+    width: 98%;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 14px;
+    justify-content: space-around;
+}
 
 .popup-content {
     position: absolute;
