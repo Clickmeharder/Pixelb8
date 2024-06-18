@@ -18,6 +18,17 @@
 		height: 124px; /* Adjust according to your sprite size */
 		background-image: url('https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
 		background-size: cover;
+		opacity:0.8;
+		transition:0.3, smooth;
+	}
+	#pixelb8.batterylow {
+		position: absolute;
+		width: 124px; /* Adjust according to your sprite size */
+		height: 124px; /* Adjust according to your sprite size */
+		background-image: url('https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
+		background-size: cover;
+		opacity: 0.8;
+		transition: all 1.9s ease 0s;
 	}
 	@keyframes move {
 		from { background-position: 0 0; }
