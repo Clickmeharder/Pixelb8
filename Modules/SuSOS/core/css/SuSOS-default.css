@@ -1432,6 +1432,9 @@ a.paginate_button.current {
     color: #899ca37d;
     transition: 0.6s;
 }
+#stashTable:hover {
+    background-color: #137295ba;
+}
 #stashTable th, #WTStable th, #WTBtable th, #stashTable tr, #WTStable tr, #WTBtable tr {
     background-color: #1c1c1c;
     height: 25px;
@@ -2005,6 +2008,48 @@ div#Box-A-Headerbox.Headerbox{font-weight:bold;padding-left:24px;padding-top:2px
  background: linear-gradient(153deg, #1e2123, #121216eb);}
  /*end of stash windows
 */
+
+ /*new hover effects of stash windows
+*/
+#weaponCacheAdditions:hover {
+	background: linear-gradient(153deg, #1e2123, #191714);
+	border-color: #00ccff85/*#0cf*/;opacity: 1;
+}
+#weaponCacheStash:hover, #itempriceList:hover {
+	background: linear-gradient(153deg,#121216eb, #1e2123);
+	border-color: #00ccff85;opacity: 1;
+}
+#weaponCacheStash:hover .Headerbox h6, #itempriceList:hover .Headerbox h6 {
+    /* Your hover styles for the Headerbox h6 go here */
+    color: #246780e0;
+    font-weight: bold; /* You can adjust other styles as needed */
+}
+#stashTable:hover {
+	background-color: #137295ba;
+}
+.tradetable:hover {
+	background-color: #137295ba;
+}
+
+stashTable tr:hover, #WTStable tr:hover, #WTBtable tr:hover {
+    background-color: #0c0707; /* Set the background color for the hovered row */
+    color: #00f3ff; /* Set the text color for the hovered row */
+	cursor: url('../../Assets/cursors/gif-box/eu-cursors/cursor_inspect1.png'), auto;
+/* 	cursor: url(''), auto; */
+}
+#weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #stashTable,
+ #weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #WTStable,
+ #weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #WTBtable {
+    background-color: #434c4feb;color: #6e8892ed;
+}
+#weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #stashTable:hover,
+ #weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #WTStable:hover,
+ #weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #WTBtable:hover {
+    background-color: #409ec09c;/*#137295ba;*/
+	color: #246780e0;
+/* cache stash table styles */
+
+
  /*end of stash windows
 */
  /*end of stash windows
