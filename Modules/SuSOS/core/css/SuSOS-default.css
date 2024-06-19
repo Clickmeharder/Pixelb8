@@ -1455,8 +1455,14 @@ a.paginate_button.current {
     font-family: Lucida Console;
     font-weight: lighter;
     letter-spacing: -1.1px;
-    font-size: 14px;
+    font-size: 13px;
     background-image: none;
+}
+#stashTable td {
+    white-space: pre-wrap;
+    min-width: min-content;
+    font-weight: normal;
+    font-size: 13px;
 }
 #ItemstashInner {
     min-height: 15px;
