@@ -1590,7 +1590,7 @@ div#displaypanel-budgets{
 	#hud-EuItemStashAdditions select, #hud-EuItemStashAdditions input {
 		display: inline-block;
 		margin: 0 auto 0 auto;
-		color: #29252b;
+		color: #3ab80beb;
 		background-color: #454040;
 		width: 95%;
 		overflow: hidden;
@@ -1598,8 +1598,17 @@ div#displaypanel-budgets{
 		text-overflow: ellipsis;
 		border-style: inset;
 		border-color: #1b252b;
+		border-radius: 10px;
 		text-align: right;
 		
+}
+
+#hud-EuItemStashAdditions input:focus-visible {
+    color: #ff8124;
+    outline: none;
+    border-radius: 10px;
+    border-color: #ff6a04d6;
+    box-shadow: 0 0 10px #ff8124, 0 0 6px #ff8124, 0 0 3px #ff8124, 0 0 40px #ff8124;
 }
 	#hud-EuItemStashAdditions #smallform-labeltext {
 		background: linear-gradient(-4deg, #1e2123, #121216eb);
