@@ -1025,7 +1025,44 @@ div#hud-EuCalender {
     height: 465px;
 	width: 578px;
 }
+.fc-theme-standard .fc-scrollgrid {
+    /* border: 2px solid #05cbd7; */
+}
+.fc-theme-standard td {
+    border-color: #05cbd7;
+}
+.fc-scrollgrid-sync-inner {
+    border: 2px solid #06abbccc;
+    outline: none;
+}
+.fc-daygrid-event.fc-daygrid-block-event {
+    min-height: 25px;
+    margin: auto;
+    margin-right: 2px;
+    overflow: auto;
+    width: 99%;
+}
+.fc-daygrid-day-top {
+    color: #009cff;
+    border: 2px solid #444;
+    border-color: inherit;
+    border-radius: 15px;
+    opacity: 0.8;
+}
+.fc-day-past{
+	background: #600a0ab8;
+    border-width: 1px;
+    border-color: #0e58ca;
+}
 
+.fc-day-today {
+    background: #0e5d0a;
+    color: #F44336;
+    border-width: 8px;
+    border-radius: 18px;
+    outline: 3px solid;
+    outline-color: #32b71fe6;
+}
 .win
 /* EuApplet- Event Planner Tool*/
 #hud-EuEventPlanner{
