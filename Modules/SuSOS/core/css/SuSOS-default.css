@@ -2034,7 +2034,7 @@ div#Box-A-Headerbox.Headerbox{font-weight:bold;padding-left:24px;padding-top:2px
 stashTable tr:hover, #WTStable tr:hover, #WTBtable tr:hover {
     background-color: #0c0707; /* Set the background color for the hovered row */
     color: #00f3ff; /* Set the text color for the hovered row */
-	cursor: url('../../Assets/cursors/gif-box/eu-cursors/cursor_inspect1.png'), auto;
+	cursor: url('assets/images/icons/cursor_inspect1.png'), auto;
 /* 	cursor: url(''), auto; */
 }
 #weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #stashTable,
