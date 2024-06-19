@@ -1587,20 +1587,21 @@ div#displaypanel-budgets{
     margin: 0;
     margin-top: 2px;
 }
-	#hud-EuItemStashAdditions select, #hud-EuItemStashAdditions input {
-		display: inline-block;
-		margin: 0 auto 0 auto;
-		color: #3ab80beb;
-		background-color: #454040;
-		width: 95%;
-		overflow: hidden;
-		white-space: nowrap;
-		text-overflow: ellipsis;
-		border-style: inset;
-		border-color: #1b252b;
-		border-radius: 10px;
-		text-align: right;
-		
+#hud-EuItemStashAdditions select, #hud-EuItemStashAdditions input {
+    display: inline-block;
+    margin: 0 0 0 auto;
+    color: #3ab80beb;
+    font-weight: bold;
+    background-color: #454040;
+    width: 120px;
+    max-width: 120px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border-style: inset;
+    border-color: #1b252b;
+    border-radius: 10px;
+    text-align: right;
 }
 
 #hud-EuItemStashAdditions input:focus-visible {
@@ -1612,8 +1613,10 @@ div#displaypanel-budgets{
 }
 	#hud-EuItemStashAdditions #smallform-labeltext {
 		background: linear-gradient(-4deg, #1e2123, #121216eb);
-		margin: 2px;
-		min-width: 48%;
+		margin: auto;
+		min-width: 42px;
+		width: 100%;
+		max-width: 140px;
 	}
 	#hud-EuItemStashAdditions .innerlabel-text {
 		margin: 1px;
