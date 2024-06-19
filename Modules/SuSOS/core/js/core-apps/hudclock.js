@@ -556,7 +556,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			kronanEvents.forEach(function (event) {
 				// Set the event start and end times in extendedProps
 				var extendedProps = {
-					departureandArrival: ``,
+					departureandArrival: event.time + ':00',
 					dayPassPrice: '10.00', // Default day pass price for Kronan warps
 					originPlanet: event.title.split('Kronan')[1]?.split('-')[0] || event.title.split('Kronan')[1]?.split('*')[0] || '', // Assuming the origin planet is part of the event title
 					destinationPlanet: event.title.split('-')[1] || event.title.split('*')[1] || '', // Assuming the destination planet is part of the event title
