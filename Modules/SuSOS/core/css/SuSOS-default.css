@@ -1063,6 +1063,9 @@ div#hud-EuCalender {
     margin: 0px;
     overflow: hidden;
 }
+/* .fc-theme-standard td {
+    width: 189px;
+} */
 .fc-theme-standard .fc-scrollgrid {
     /* border: 2px solid #05cbd7; */
 }
