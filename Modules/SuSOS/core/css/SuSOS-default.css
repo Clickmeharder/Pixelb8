@@ -1500,7 +1500,7 @@ a.paginate_button.current {
 
 /* Item Stash Tool -stash value display window*/
 .hud .window#hud-EuStashManager{
-    min-width: 250px;
+    min-width: 142px;
     min-height: 136px;
     max-height: 165px;
     padding-bottom: 0px;
@@ -1528,8 +1528,9 @@ div#displaypanel-budgets{
     margin: 1px;
     text-align: left;
     padding-left: 10px;
-    min-width: 64px;
-    max-width: 111px;
+    min-width: 41px;
+    width: -webkit-fill-available;
+    max-width: -webkit-fill-available;
 }
 .hud #hud-EuStashManager .numbers {
     color: green;
