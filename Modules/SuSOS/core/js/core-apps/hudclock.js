@@ -329,6 +329,7 @@ function extractLocationTime(eventTitle, dateTimeString) {
     };
 }
 document.addEventListener('DOMContentLoaded', function () {
+	var calendarElement = document.getElementById('hud-EuCalender');
 	var calendarEl = document.getElementById('calendar');
 	var calendar = new FullCalendar.Calendar(calendarEl, {
 		eventMouseEnter: function (info) {
@@ -582,7 +583,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				});
 			});
 		}
-
+		
 		// Function to add duration to a date and return the new date
 		function addDuration(dateString, duration) {
 			var date = new Date(dateString);
@@ -945,5 +946,19 @@ function toggleStopwatchDisplay() {
     }
 }
 
+
+
+var resizeObserver = new ResizeObserver(function(entries) {
+	for (let entry of entries) {
+		if (entry.target === calendarElement) {
+			calendar.render();
+		}
+	}
+});
 // Add event listener to the clocktools-button
 document.getElementById('clocktools-button').addEventListener('click', toggleStopwatchDisplay);
+
+// Add click event listener
+	calendarElement.addEventListener('click', calendar.render);
+			// Optionally, if you want to refresh on window resize
+	window.addEventListener('resize', calendar.render);
