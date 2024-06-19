@@ -1021,9 +1021,17 @@ div#calendar {
     border: 1px solid grey;
 }
 
+/*ENTROPIA CALENDER AND FULL CALENDER STYLES*/
+
 div#hud-EuCalender {
     height: 465px;
 	width: 578px;
+}
+
+#calendar-container strong {
+    font-weight: bolder;
+    color: #b75409;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
 }
 .fc-theme-standard .fc-scrollgrid {
     /* border: 2px solid #05cbd7; */
@@ -1063,7 +1071,49 @@ div#hud-EuCalender {
     outline: 3px solid;
     outline-color: #32b71fe6;
 }
-.win
+/*UNTESTED GROUP OF FULLCALENDER STYLES IMPORTED FROM SPEND TOOL*/
+#calendar-container strong {
+	font-weight: bolder;
+	color:#b75409;/* orange #b75409  blue #00bcd4 green #088a0e initially #1ba7aa*/ 
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9); /* Add a shadow with some transparency */
+}
+.fc-daygrid-event {
+    white-space: wrap;
+}
+.fc-timegrid-event {
+	font-weight: bolder;
+	background-color: inherit;
+}
+.fc-timegrid-event-harness-inset .fc-timegrid-event, .fc-timegrid-event.fc-event-mirror, .fc-timegrid-more-link {
+    box-shadow: 0 0 0 1px #fff0;
+}
+.Headerbox h6 {
+	color: #575151;
+	margin: auto;
+	font-weight: bold;
+	padding-left: 4px;
+	font-size: 13px;
+}
+
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 columns */
+  grid-template-rows: repeat(12, 1fr);   /* 12 rows */
+  gap: 2px;
+  border: 1px solid #000;
+}
+
+.cell {
+  border: 1px inset grey; /* Add borders for cell separation (optional) */
+  padding: 5px;
+  text-align: center; /* Center cell content (optional) */
+}
+
+
+
+
+
 /* EuApplet- Event Planner Tool*/
 #hud-EuEventPlanner{
 	height: 324px;
