@@ -833,7 +833,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	
 	// run Functions to update clock and load timers from local storage when the page loads
-	calender.render();
 	updateClock('localtime', 'EUtime');
 	loadTimersFromLocalStorage();
 	});
