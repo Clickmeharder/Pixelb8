@@ -1,5 +1,14 @@
 [
  {
+        "date": "2024-06-19 10:42:10 UTC",
+        "developer": "Jaedraze aka General Jimbobbityboo",
+        "content": "i fixed some of the appearance of some elements in the sus os",
+        "points": [
+            "entropia item stash tool subwindows background is no longer completely transparant,it's easier to see inputs now ",
+            "started fixing entropia calender appearance, fullcalender css styling is a pain in the ass to mess with"
+        ]
+    },
+ {
         "date": "2024-06-17 09:45:12 UTC",
         "developer": "Jaedraze aka General Jimbobbityboo",
         "content": "I've attempted to add a script to handle posting updates for me, we should see how it went by now.",
