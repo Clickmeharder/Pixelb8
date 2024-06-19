@@ -1,4 +1,9 @@
-
+:root {
+	--fc-border-color: #1c6a7ad9;
+	--fc-event-bg-color: #0f530d6b;
+	--fc-today-bg-color: #09680ebf;
+	
+}
 /*    HUD OVERLAY  */
 .hudMonitorPower{/* main power controls 
 (used to completely disable/enable/control
@@ -1028,11 +1033,6 @@ div#hud-EuCalender {
 	width: 578px;
 }
 
-#calendar-container strong {
-    font-weight: bolder;
-    color: #b75409;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
-}
 .fc-theme-standard .fc-scrollgrid {
     /* border: 2px solid #05cbd7; */
 }
@@ -1052,15 +1052,15 @@ div#hud-EuCalender {
 }
 .fc-daygrid-day-top {
     color: #009cff;
-    border: 2px solid #444;
-    border-color: inherit;
+/*     border: 2px solid #444;
+    border-color: inherit; */
     border-radius: 15px;
     opacity: 0.8;
 }
 .fc-day-past{
 	background: #600a0ab8;
-    border-width: 1px;
-    border-color: #0e58ca;
+/*     border-width: 1px;
+    border-color: #0e58ca; */
 }
 
 .fc-day-today {
@@ -1074,7 +1074,7 @@ div#hud-EuCalender {
 /*UNTESTED GROUP OF FULLCALENDER STYLES IMPORTED FROM SPEND TOOL*/
 #calendar-container strong {
 	font-weight: bolder;
-	color:#b75409;/* orange #b75409  blue #00bcd4 green #088a0e initially #1ba7aa*/ 
+	color: #b75409c9;/* orange #b75409  blue #00bcd4 green #088a0e initially #1ba7aa*/ 
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9); /* Add a shadow with some transparency */
 }
 .fc-daygrid-event {
