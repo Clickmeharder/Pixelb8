@@ -1672,7 +1672,8 @@ input#itemname {
 #EuEditStashMenuwindow{    height: calc(100% - 8px);
     max-height: calc(99% - 40px);overflow-y:auto;}
 	#hud-EuEditStashMenu .Container,#hud-EuRestockItemStashMenu .Container, #hud-EuSellitemsMenu .Container{
-		max-width: 202px;
+		max-width: 94%;
+		width: 95%;
 		margin: 4px;
 		padding: 2px;
 		border: 1px inset #454040;
