@@ -1859,6 +1859,8 @@ body.modal-open {
     Custom Tool Tip
 ----------------------*/
 .custom-tooltip {
+	color:#777777db;/*if hudoverlay var is too bright use this*/
+	/* color:var(--hudoverlay-text-color); */
     position: absolute;
     z-index: 999; /* Set a higher z-index value */
     background: linear-gradient(153deg, #1e2123, #121216eb);
