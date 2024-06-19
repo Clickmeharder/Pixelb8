@@ -1039,6 +1039,14 @@ div#hud-EuCalender {
     margin-bottom: 0.5em;
     max-width: 99%;
 }
+.fc .fc-toolbar-title {
+    font-size: 1.4em;
+    min-width: 54px;
+    max-width: 225px;
+    white-space: pre-wrap;
+    margin: 0px;
+    overflow: hidden;
+}
 .fc-theme-standard .fc-scrollgrid {
     /* border: 2px solid #05cbd7; */
 }
