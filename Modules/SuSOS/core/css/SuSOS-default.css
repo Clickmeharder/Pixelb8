@@ -1451,6 +1451,147 @@ label.Innerinforbox.ValueLabels {white-space:pre-wrap;}
     font-weight: 600;
 }
 /* Item Stash Tool -main stash display*/
+
+
+/*this section contains old spendtool styles - im atempting to fix current pricelist appearance*/
+
+
+#itempriceList {
+	display: none;
+	position: fixed;
+    left: 53px;
+    top: 122px;
+	padding: 8px;
+	max-height: 515px;
+	background: linear-gradient(153deg, #1e2123, #121216eb);border: 2px solid #4c4c4c;border-radius: 10px;/*#2234AE,#191714 */
+	opacity: 0.8;
+}
+#weaponCacheAdditions:hover {
+	background: linear-gradient(153deg, #1e2123, #191714);
+	border-color: #00ccff85/*#0cf*/;opacity: 1;
+}
+#weaponCacheStash:hover, #itempriceList:hover {
+	background: linear-gradient(153deg,#121216eb, #1e2123);
+	border-color: #00ccff85;opacity: 1;
+}
+#weaponCacheStash:hover .Headerbox h6, #itempriceList:hover .Headerbox h6 {
+    /* Your hover styles for the Headerbox h6 go here */
+    color: #246780e0;
+    font-weight: bold; /* You can adjust other styles as needed */
+}
+#stashTable:hover {
+	background-color: #137295ba;
+}
+.tradetable:hover {
+	background-color: #137295ba;
+}
+/* cache stash table styles */
+#stashTable, #WTBtable, #WTStable {
+    width: 98%;
+    border-collapse: collapse;
+    margin-top: 10px;
+	background-color: #13729524;
+	color: #899ca37d;/*#6e8892ed;*/
+	transition: 0.6s;
+}
+#stashTable th, #stashTable td, #WTStable th, #WTStable td,#WTBtable th, #WTBtable td {
+    border-top: 6px outset #403f3f78;
+    border-bottom: 6px outset #403f3f78;
+    border-left: 2px inset #403f3f78;
+    border-right: 2px inset #403f3f78;
+    padding: 2px;
+    text-align: center;
+    white-space: nowrap; /* Prevent content from wrapping */
+    overflow: hidden;    /* Hide any overflow */
+	font-family: Lucida Console;
+    font-weight: lighter;
+    letter-spacing: -1.1px;
+    font-size: 14px;
+	background-image: none;
+}
+
+
+#stashTable th, #WTStable th, #WTBtable th, #stashTable tr, #WTStable tr, #WTBtable tr {
+    background-color: #1c1c1c;
+    height: 25px;
+    max-height: 25px;
+    overflow: hidden;
+	font-size: 12px;
+	font-weight: normal;
+}
+
+#stashTable tr:hover, #WTStable tr:hover, #WTBtable tr:hover {
+    background-color: #0c0707; /* Set the background color for the hovered row */
+    color: #00f3ff; /* Set the text color for the hovered row */
+	cursor: url('../../Assets/cursors/gif-box/eu-cursors/cursor_inspect1.png'), auto;
+/* 	cursor: url(''), auto; */
+}
+#weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #stashTable,
+ #weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #WTStable,
+ #weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #WTBtable {
+    background-color: #434c4feb;color: #6e8892ed;
+}
+#weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #stashTable:hover,
+ #weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #WTStable:hover,
+ #weaponCacheStash:hover #valuecontainer #WeaponsCacheDisplay #WTBtable:hover {
+    background-color: #409ec09c;/*#137295ba;*/
+	color: #246780e0;
+}
+
+#stashTable td:hover {
+}
+
+a.paginate_button.current {
+    padding: 0em 0.2em !important;
+	background: none !important;
+    background-color: #000 !important;
+	border: 2px outset #4c4c4c !important;
+    color: #5A4181;
+}
+.dataTables_wrapper .dataTables_info {
+	padding-top: 0.255em!important;
+}
+.dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate {
+    text-align: unset!important;
+	margin-top: 0px!important;
+	font-size: 11px;
+}
+
+.dataTables_filter label {
+	font-size: 12px;
+}
+.dataTables_filter input {
+	height: 15px;
+}
+.dataTables_wrapper .dataTables_length select {
+	height: 20px;
+    padding-top: 0px!important;
+    padding-bottom: 0px!important;
+}
+.dataTables_wrapper .dataTables_length label {
+    font-size: 12px;
+	width: 130px;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+	padding: 0.1em 1em!important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*end of the old styles attempting to fish pricelist window*/
 #hud-EuItemstash{
 	
 }
