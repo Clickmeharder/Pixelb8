@@ -332,6 +332,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	var calendarElement = document.getElementById('hud-EuCalender');
 	var calendarEl = document.getElementById('calendar');
 	var calendar = new FullCalendar.Calendar(calendarEl, {
+		
 		eventMouseEnter: function (info) {
 			// Create a tooltip element
 			var tooltip = document.createElement('div');
@@ -430,7 +431,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			right: 'dayGridMonth,timeGridWeek,timeGridDay'
 		},
 		initialView: 'dayGridMonth',
-
+		height: 'parent',
 		events: [], // Empty array to be populated dynamically
 
 		eventContent: function (arg) {
