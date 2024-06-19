@@ -949,15 +949,15 @@ function toggleStopwatchDisplay() {
 
 
 
-/* var resizeObserver = new ResizeObserver(function(entries) {
+ var resizeObserver = new ResizeObserver(function(entries) {
 	for (let entry of entries) {
 		if (entry.target === calendarElement) {
 			calendar.render();
 		}
 	}
-}); */
+});
 			// Optionally, if you want to refresh on window resize
-/* 	window.addEventListener('resize', calendar.render); */
+window.addEventListener('resize', calendar.render);
 // Add event listener to the clocktools-button
 document.getElementById('clocktools-button').addEventListener('click', toggleStopwatchDisplay);
 
