@@ -651,6 +651,8 @@ div#calendar {
 }
 /*Header Bar - Wrapper for header,control buttons & toolbar*/
 .hud .window .headerbar {
+  min-width: 60px;
+  max-width: 98%;
   border:2px solid black;border-width:2px;border-color:inherit;
   border-radius:inherit;
   background-color:var(--HUD-windows-bg-color);
