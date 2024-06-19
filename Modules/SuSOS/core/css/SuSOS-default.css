@@ -1054,9 +1054,11 @@ div#hud-EuCalender {
     max-width: 99%;
 }
 .fc .fc-toolbar-title {
-    font-size: 1.4em;
+    font-size: 1em;
+    word-spacing: -6px;
     min-width: 54px;
-    max-width: 225px;
+    width: fit-content;
+    max-width: 202px;
     white-space: pre-wrap;
     margin: 0px;
     overflow: hidden;
