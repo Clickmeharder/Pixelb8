@@ -329,7 +329,6 @@ function extractLocationTime(eventTitle, dateTimeString) {
     };
 }
 document.addEventListener('DOMContentLoaded', function () {
-	var calendarElement = document.getElementById('hud-EuCalender');
 	var calendarEl = document.getElementById('calendar');
 	var calendar = new FullCalendar.Calendar(calendarEl, {
 		
@@ -432,6 +431,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		},
 		initialView: 'dayGridMonth',
 		height: 'parent',
+		width: 'parent',
 		events: [], // Empty array to be populated dynamically
 
 		eventContent: function (arg) {
@@ -948,7 +948,7 @@ function toggleStopwatchDisplay() {
 }
 
 
-
+document.getElementById('calendar')
  var resizeObserver = new ResizeObserver(function(entries) {
 	for (let entry of entries) {
 		if (entry.target === calendarElement) {
@@ -956,6 +956,7 @@ function toggleStopwatchDisplay() {
 		}
 	}
 });
+
 			// Optionally, if you want to refresh on window resize
 window.addEventListener('resize', calendar.render);
 // Add event listener to the clocktools-button
