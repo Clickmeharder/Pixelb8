@@ -961,4 +961,4 @@ function toggleStopwatchDisplay() {
 document.getElementById('clocktools-button').addEventListener('click', toggleStopwatchDisplay);
 
 // Add click event listener
-	calendarElement.addEventListener('click', calendar.render);
+document.getElementById('hud-EuCalender').addEventListener('click', calendar.render);
