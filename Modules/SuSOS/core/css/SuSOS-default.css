@@ -389,7 +389,17 @@ p#mapsbuttlabel {
 	max-width:800px;max-height:500px;height:450px;width:500px;resize:both;}
 
 
-
+div#displaypanel-Calender {
+    position: relative;
+    max-width: 100%;
+    height: 99.6%;
+    max-height: 99.6%;
+    overflow-y: auto;
+}
+div#calendar {
+    height: -webkit-fill-available;
+    width: 103%;
+}
 /*hud main panels*/
 .hud .Hpanel{
   position:absolute;
