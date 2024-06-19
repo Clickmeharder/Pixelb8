@@ -1,7 +1,7 @@
 :root {
 	--fc-border-color: #1c6a7ad9;
 	--fc-event-bg-color: #0f530d6b;
-	--fc-today-bg-color: #09680ebf;
+	--fc-today-bg-color: #1f604e99;/* #09680ebf; */
 	
 }
 /*    HUD OVERLAY  */
@@ -1049,6 +1049,10 @@ div#hud-EuCalender {
     margin-right: 2px;
     overflow: auto;
     width: 99%;
+	white-space:no-wrap;
+}
+.fc-daygrid-event {
+    white-space: pre-wrap;
 }
 .fc-daygrid-day-top {
     color: #009cff;
@@ -1058,7 +1062,7 @@ div#hud-EuCalender {
     opacity: 0.8;
 }
 .fc-day-past{
-	background: #600a0ab8;
+	background: #600a0a87;
 /*     border-width: 1px;
     border-color: #0e58ca; */
 }
