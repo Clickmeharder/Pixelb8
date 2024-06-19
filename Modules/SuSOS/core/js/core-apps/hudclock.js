@@ -830,8 +830,9 @@ document.addEventListener('DOMContentLoaded', function () {
 			timerStack.appendChild(timerElement);
 			saveTimerToLocalStorage(label, totalTime, startTime);
 		});
-
+	
 	// run Functions to update clock and load timers from local storage when the page loads
+	calender.render();
 	updateClock('localtime', 'EUtime');
 	loadTimersFromLocalStorage();
 	});
@@ -961,4 +962,4 @@ function toggleStopwatchDisplay() {
 document.getElementById('clocktools-button').addEventListener('click', toggleStopwatchDisplay);
 
 // Add click event listener
-document.getElementById('hud-EuCalender').addEventListener('click', calendar.render);
+/* document.getElementById('hud-EuCalender').addEventListener('click', calendar.render); */
