@@ -1040,7 +1040,7 @@ div#hud-EuCalender {
     border-color: #05cbd7;
 }
 .fc-scrollgrid-sync-inner {
-    border: 2px solid #06abbccc;
+    border: 1px solid #06abbccc;
     outline: none;
 }
 .fc-daygrid-event.fc-daygrid-block-event {
@@ -1071,9 +1071,8 @@ div#hud-EuCalender {
 .fc-day-today {
     background: #0e5d0a;
     color: #F44336;
-    border-width: 8px;
     border-radius: 18px;
-    outline: 3px solid;
+    outline: 3px ridge;
     outline-color: #32b71fe6;
 }
 /*UNTESTED GROUP OF FULLCALENDER STYLES IMPORTED FROM SPEND TOOL*/
