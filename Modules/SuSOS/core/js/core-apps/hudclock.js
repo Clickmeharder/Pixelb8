@@ -431,7 +431,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		},
 		initialView: 'dayGridMonth',
 		height: 'parent',
-		width: 'parent',
 		events: [], // Empty array to be populated dynamically
 
 		eventContent: function (arg) {
