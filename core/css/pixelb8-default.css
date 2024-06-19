@@ -2081,6 +2081,13 @@ Button Classes
     transition: transform 1.9s, font-size 1.9s, font-weight 1.9s, color 1.9s;
 	
 }
+
+#stashTable tr:hover, #WTStable tr:hover, #WTBtable tr:hover {
+    background-color: #0c0707; /* Set the background color for the hovered row */
+    color: #00f3ff; /* Set the text color for the hovered row */
+	cursor: url('../../assets/images/icons/cursor_inspect1.png'), auto;
+/* 	cursor: url(''), auto; */
+}
 /*______________________|*/
 /*-----------
 /* important classes 1 */
