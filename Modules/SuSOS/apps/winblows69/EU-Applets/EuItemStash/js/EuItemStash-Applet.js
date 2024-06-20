@@ -282,7 +282,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
     htmlContent.push('</div>');
 
     // Create a wrapper div for tables with dark-themed styles
-    htmlContent.push('<div style="display: flex;flex-wrap: wrap; background-color: #333; padding: 0px 0px;position: absolute; max-width: 100%;">');
+    htmlContent.push('<div style="display: flex;flex-wrap: wrap; background-color: #333; padding: 0px 0px;position: ; max-width: 100%;">');
 
     // Iterate over table IDs
     tableIds.forEach((tableId, index) => {
