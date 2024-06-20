@@ -271,7 +271,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
     // Add the button group on the right side
 	
     htmlContent.push('<div style="display: flex;">');
-    htmlContent.push('<button style="margin-right: 5px;">/wisper []</button>');
+    htmlContent.push('<button style="margin-right: 5px;">/wisper [');
 	htmlContent.push(`${colonistName}`);
 	htmlContent.push(']</button>');
     htmlContent.push('<button style="margin-right: 5px;">My Links</button>');
