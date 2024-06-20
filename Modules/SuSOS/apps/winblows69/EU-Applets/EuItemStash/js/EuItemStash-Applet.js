@@ -481,18 +481,20 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	document.body.appendChild(closeButton);
     // Remove the textarea
     //document.body.removeChild(textarea);
+	// Add event listener to the button to remove both elements
+	closeButton.addEventListener('click', function() {
+		const textarea = document.getElementById("fancypricelist-html");
+		const button = document.getElementById("closefancypricelist-textarea");
+		if (textarea) {
+			document.body.removeChild(textarea);
+		}
+		if (button) {
+			document.body.removeChild(button);
+		}
+	});
+
 }
-// Add event listener to the button to remove both elements
-closeButton.addEventListener('click', function() {
-    const textarea = document.getElementById("fancypricelist-html");
-    const button = document.getElementById("closefancypricelist-textarea");
-    if (textarea) {
-        document.body.removeChild(textarea);
-    }
-    if (button) {
-        document.body.removeChild(button);
-    }
-});
+
 document.getElementById("PLcopyfancyhtml-button").addEventListener("click", function () {
 	console.log('copyfancyhtml button clicked');
 	
