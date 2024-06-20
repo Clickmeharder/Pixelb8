@@ -457,20 +457,36 @@ function copyTablesFancyHtml(tableIds, colonistName) {
     // Create a textarea element with the ID "fancypricelist-html"
 	const textarea = document.createElement('textarea');
 	textarea.id = 'fancypricelist-html'; // Set the ID
-	textarea.value = combinedHtml;
-	textarea.style.position = 'fixed'; // Set position to fixed
-	textarea.style.zIndex = '999';
     textarea.value = combinedHtml;
     document.body.appendChild(textarea);
 
     // Select the text in the textarea
     textarea.select();
     //document.execCommand('copy');
+	// Create a close button
+	const closeButton = document.createElement('button');
+	closeButton.id = 'closefancypricelist-textarea'; // Set the ID
+	closeButton.textContent = 'Close'; // Set button text
+	closeButton.style.position = 'fixed'; // Set position to fixed
+	closeButton.style.zIndex = '1000'; // Ensure it's above the textarea
+	closeButton.style.top = '10px'; // Adjust as needed
+	closeButton.style.left = 'calc(100vw - 60px)'; // Adjust to place it on the right side
+	closeButton.style.padding = '5px 10px'; // Add some padding for better visibility
+	closeButton.style.backgroundColor = '#f00'; // Red background for visibility
+	closeButton.style.color = '#fff'; // White text color
+	closeButton.style.border = 'none'; // Remove border
+	closeButton.style.cursor = 'pointer'; // Change cursor on hover
 
+	// Append the button to the document body
+	document.body.appendChild(closeButton);
     // Remove the textarea
     //document.body.removeChild(textarea);
 }
-
+// Add event listener to the button to remove both elements
+closeButton.addEventListener('click', function() {
+    document.body.removeChild(textarea);
+    document.body.removeChild(closeButton);
+});
 document.getElementById("PLcopyfancyhtml-button").addEventListener("click", function () {
 	console.log('copyfancyhtml button clicked');
 	

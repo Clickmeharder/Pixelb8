@@ -2179,7 +2179,23 @@ div#Box-A-Headerbox.Headerbox{font-weight:bold;padding-left:24px;padding-top:2px
  background: linear-gradient(153deg, #1e2123, #121216eb);}
  /*end of stash windows
 */
-
+textarea#fancypricelist-html {
+    position: fixed;
+    bottom: 1%;
+    right: 7px;
+    z-index: 99;
+    height: 44vw;
+    width: 40vw;
+    background: rgba(0, 0, 0, 0.55);
+    color: green;
+    border-color: #03a9f4c9;
+    outline: 1px ridge #63200bba;
+}
+textarea#fancypricelist-html:focus-visible {
+    z-index: 99;
+    border-color: #03a9f4c9;
+    outline: 6px ridge #63200bba;
+}
  /*new hover effects of stash windows
 */
 #weaponCacheAdditions:hover {
