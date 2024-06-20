@@ -264,7 +264,6 @@ function copyTablesFancyHtml(tableIds) {
 	htmlContent.push('    font-weight:;');
 	htmlContent.push('    border:0px solid #524e4e;');
 	htmlContent.push('    color: #524e4e;">');
-	htmlContent.push('    font-weight:;');
 	htmlContent.push('    Pixelbots Example Pricelist');
 	htmlContent.push('</h1>');
 	htmlContent.push('</div>');
@@ -469,12 +468,20 @@ function copyTablesFancyHtml(tableIds) {
 }
 
 document.getElementById("PLcopyfancyhtml-button").addEventListener("click", function () {
-	console.log('copybasichtml button clicked');
-    copyTablesFancyHtml(["WTStable", "WTBtable"]);
-	console.log('attempting to copy basic html to clipboard');
+	console.log('copyfancyhtml button clicked');
+	
+	// Prompt the user to enter their Colonist name
+	const colonistName = prompt("Please enter your Colonist name:");
 
+	// If the user provided a name, run the function
+	if (colonistName) {
+		copyTablesFancyHtml(["WTStable", "WTBtable"], colonistName);
+		console.log('Attempting to copy fancy HTML to clipboard');
+	} else {
+		console.log('No Colonist name entered. Operation cancelled.');
+	}
 });
-// Usage example without custom HTML
+// Usage example without custom HTML styling
 document.getElementById("PLcopyhtml-button").addEventListener("click", function () {
 	console.log('copy fancy htmlbutton clicked');
     copyTablesHtml(["WTStable", "WTBtable"]);
