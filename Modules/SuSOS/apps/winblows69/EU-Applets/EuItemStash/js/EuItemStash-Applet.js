@@ -243,7 +243,7 @@ function copyTablesFancyHtml(tableIds) {
     htmlContent.push('<div style="background-color: #2b2a2a; padding: 10px;max-height:100%; max-width: 99vw; margin: 0 auto; position: relative;">');
 
     // Create an absolute wrapper for the content
-    htmlContent.push('<div style="position: relative; top: 0; left: 0; right: 0; bottom: 0;"height:98%; width: 98%;');
+    htmlContent.push('<div style="position: relative; top: 0; left: 0; right: 0; bottom: 0;height:98%; width: 98%;">');
 
 
     // Create a wrapper div for the header and subheader with dark-themed styles
@@ -251,13 +251,25 @@ function copyTablesFancyHtml(tableIds) {
 
     // Add the page header with an image and button group
     htmlContent.push('<div style="display: flex; align-items: center;">');
-    htmlContent.push('<img src="https://cdn.discordapp.com/attachments/1125594015442669639/1197511732738932746/msagent-4.png?ex=65bb88b5&is=65a913b5&hm=6450f6bdb740b23de05984a08b54bbeb9fa485fdacdf6ae123eac3e23f71eb78&" alt="Page Logo" style="height: 60px; margin-right: 10px;">'); // Replace your_image_url.jpg with the actual URL of your image
-
+    htmlContent.push('<img src="https://Pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-transform-clean.gif" alt="Page Logo" style="height: 60px; margin-right: 10px;">'); // Replace your_image_url.jpg with the actual URL of your image
     // Add the page header text
-    htmlContent.push('<h1 style="color: #524e4e;">Page Header</h1>');
+    htmlContent.push('<h3 style="margin-bottom:0px;color: #1782b6;">Pixelb8.lol</h3>');
     htmlContent.push('</div>');
-
+	
+	//add the customizable header text
+	htmlContent.push('<div style="margin:0;">');
+	htmlContent.push('<!--change the options below to customize the header. -->')
+	htmlContent.push('<h1 style="padding:2px;margin:auto;');
+	htmlContent.push('    font-family:;');
+	htmlContent.push('    font-weight:;');
+	htmlContent.push('    border:0px solid #524e4e;');
+	htmlContent.push('    color: #524e4e;">');
+	htmlContent.push('    font-weight:;');
+	htmlContent.push('    Pixelbots Example Pricelist');
+	htmlContent.push('</h1>');
+	htmlContent.push('</div>');
     // Add the button group on the right side
+	
     htmlContent.push('<div style="display: flex;">');
     htmlContent.push('<button style="margin-right: 5px;">/wisper</button>');
     htmlContent.push('<button style="margin-right: 5px;">My Links</button>');
@@ -429,6 +441,8 @@ function copyTablesFancyHtml(tableIds) {
 
             // Close the wrapper div for each table
             htmlContent.push('</div>');
+			// Close the other div 
+			htmlContent.push('</div>');
         }
     });
 
