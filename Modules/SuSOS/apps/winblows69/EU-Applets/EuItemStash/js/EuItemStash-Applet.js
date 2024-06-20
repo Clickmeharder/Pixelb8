@@ -466,16 +466,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	// Create a close button
 	const closeButton = document.createElement('button');
 	closeButton.id = 'closefancypricelist-textarea'; // Set the ID
-	closeButton.textContent = 'Close'; // Set button text
-	closeButton.style.position = 'fixed'; // Set position to fixed
-	closeButton.style.zIndex = '1000'; // Ensure it's above the textarea
-	closeButton.style.top = '10px'; // Adjust as needed
-	closeButton.style.left = 'calc(100vw - 60px)'; // Adjust to place it on the right side
-	closeButton.style.padding = '5px 10px'; // Add some padding for better visibility
-	closeButton.style.backgroundColor = '#f00'; // Red background for visibility
-	closeButton.style.color = '#fff'; // White text color
-	closeButton.style.border = 'none'; // Remove border
-	closeButton.style.cursor = 'pointer'; // Change cursor on hover
+	closeButton.textContent = 'Close Text Box'; // Set button text
 
 	// Append the button to the document body
 	document.body.appendChild(closeButton);
