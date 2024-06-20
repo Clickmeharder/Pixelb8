@@ -2196,6 +2196,18 @@ textarea#fancypricelist-html:focus-visible {
     border-color: #03a9f4c9;
     outline: 6px ridge #63200bba;
 }
+button#closefancypricelist-textarea {
+    position: fixed;
+    z-index: 1000;
+    bottom: 83px;
+    right: 78px;
+    padding: 5px 10px;
+    background-color: rgb(139 64 9 / 69%);
+    color: rgb(0 0 0);
+    font-weight: bold;
+    border: 3px ridge #63200bba;
+    cursor: pointer;
+}
  /*new hover effects of stash windows
 */
 #weaponCacheAdditions:hover {
