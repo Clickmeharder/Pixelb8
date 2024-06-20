@@ -474,7 +474,7 @@ document.getElementById("PLcopyfancyhtml-button").addEventListener("click", func
 
 	// If the user provided a name, run the function
 	if (colonistName) {
-		copyTablesFancyHtml(["WTStable", "WTBtable"], colonistName);
+		copyTablesFancyHtml(["WTStable", "WTBtable"]);
 		console.log('Attempting to copy fancy HTML to clipboard');
 	} else {
 		console.log('No Colonist name entered. Operation cancelled.');
