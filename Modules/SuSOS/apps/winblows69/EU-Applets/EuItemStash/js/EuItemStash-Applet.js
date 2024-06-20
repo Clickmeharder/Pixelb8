@@ -454,17 +454,21 @@ function copyTablesFancyHtml(tableIds, colonistName) {
     // Combine HTML content with line breaks
     const combinedHtml = htmlContent.join('\n');
 
-    // Create a textarea element to hold the HTML content
-    const textarea = document.createElement('textarea');
+    // Create a textarea element with the ID "fancypricelist-html"
+	const textarea = document.createElement('textarea');
+	textarea.id = 'fancypricelist-html'; // Set the ID
+	textarea.value = combinedHtml;
+	textarea.style.position = 'fixed'; // Set position to fixed
+	textarea.style.zIndex = '999';
     textarea.value = combinedHtml;
     document.body.appendChild(textarea);
 
     // Select the text in the textarea
     textarea.select();
-    document.execCommand('copy');
+    //document.execCommand('copy');
 
     // Remove the textarea
-    document.body.removeChild(textarea);
+    //document.body.removeChild(textarea);
 }
 
 document.getElementById("PLcopyfancyhtml-button").addEventListener("click", function () {
