@@ -239,11 +239,12 @@ function copyTablesHtml(tableIds) {
 function copyTablesFancyHtml(tableIds, colonistName) {
     const htmlContent = [];
 
-    // Create a wrapper div for the body with background color and max-width
-    htmlContent.push('<div style="background-color: #2b2a2a; padding: 10px; max-height:100%; max-width: 99vw; margin: 0 auto; position: relative;">');
+        // Create a wrapper div for the body with background color and max-width
+    htmlContent.push('<div style="background-color: #2b2a2a; padding: 10px;max-height:100%; max-width: 99vw; margin: 0 auto; position: relative;">');
 
     // Create an absolute wrapper for the content
     htmlContent.push('<div style="position: relative; top: 0; left: 0; right: 0; bottom: 0;height:98%; width: 98%;">');
+
 
     // Create a wrapper div for the header and subheader with dark-themed styles
     htmlContent.push('<div style="border: 1px solid #333; background-color: #222; color: #444; padding: 10px 6px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">');
@@ -254,16 +255,21 @@ function copyTablesFancyHtml(tableIds, colonistName) {
     // Add the page header text
     htmlContent.push('<h3 style="margin-bottom:0px;color: #1782b6;">Pixelb8.lol</h3>');
     htmlContent.push('</div>');
-
-    // Add the customizable header text
-    htmlContent.push('<div style="margin:0;">');
-    htmlContent.push('<!--change the options below to customize the header. -->')
-    htmlContent.push('<h1 style="padding:2px;margin:auto; font-family:; font-weight:; border:0px solid #524e4e; color: #524e4e;">');
-    htmlContent.push(`Colonist: ${colonistName}`);
-    htmlContent.push('</h1>');
-    htmlContent.push('</div>');
-
+	
+	//add the customizable header text
+	htmlContent.push('<div style="margin:0;">');
+	htmlContent.push('<!--change the options below to customize the header. -->')
+	htmlContent.push('<h1 style="padding:2px;margin:auto;');
+	htmlContent.push('    font-family:;');
+	htmlContent.push('    font-weight:;');
+	htmlContent.push('    border:0px solid #524e4e;');
+	htmlContent.push('    color: #524e4e;">');
+	htmlContent.push('    Colonist:');
+	htmlContent.push(`${colonistName}`);
+	htmlContent.push('</h1>');
+	htmlContent.push('</div>');
     // Add the button group on the right side
+	
     htmlContent.push('<div style="display: flex;">');
     htmlContent.push('<button style="margin-right: 5px;">/wisper</button>');
     htmlContent.push('<button style="margin-right: 5px;">My Links</button>');
@@ -280,6 +286,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
     tableIds.forEach((tableId, index) => {
         const table = document.getElementById(tableId);
         if (table) {
+			
             // Create a wrapper div for each table with dark-themed styles
             htmlContent.push('<div style="border: 1px solid #222; flex: 1; margin: 4px; background-color: #444; padding: 4px 4px;">');
 
@@ -325,108 +332,108 @@ function copyTablesFancyHtml(tableIds, colonistName) {
             const script = document.createElement('script');
             script.textContent = `
                  document.addEventListener('DOMContentLoaded', function () {
-                // Select all input fields
-                const inputFields = document.querySelectorAll('table input[type="text"]');
+				// Select all input fields
+				const inputFields = document.querySelectorAll('table input[type="text"]');
+				
+				// Apply additional styles to table cells and input fields
+				const additionalStyles = document.createElement('style');
+				additionalStyles.textContent = \`
+					table.dataTable tbody th, table.dataTable tbody td {
+						padding: 1px 0px !important;
+						text-align: center !important;
+						min-width: 121px !important;
+						width: 166px !important;
+						color: #80898b;
+						border: 3px inset #4f595d;
+						background: #313131;
+					}
+					body {
+						background-color: #333;
+						color: ;
+						width: 100vw;
+					}
+					input {
+						width: 85x !important;
+						background: #0000004f;
+					}
+					select {
+						background-color: #0000004f;
+						opacity: 0.7;
+					}
+					button {
+						color: #444;
+						background-color: #0000004f;
+					}
+					.paginate_button.current {
+						background-color: #0000004f;
+					}
+					table.dataTable thead .sorting {
+						border: 3px outset #454545;
+						text-align: center;
+						background-color: #18162d;
+						color: #333c46de!important;
+						padding: 0px;
+					}
+					table.dataTable thead .sorting_asc {
+						border: 3px outset #454545;
+						color: #385a80c9;
+						background-color: #18162d;
+						box-shadow: -0px 5px 30px 0px #020a13e0;
+						text-align: center;
+					}
+					table.dataTable thead .sorting_desc {
+						border: 3px outset #454545;
+						color: #385a80c9;
+						background-color: #18162d;
+						box-shadow: -0px 5px 30px 0px #020a13e0;
+						text-align: center;
+					}
+				\`;
+				document.head.appendChild(additionalStyles);
+				
+				// Add event listener to each input field
+				inputFields.forEach(function (input) {
+				  input.addEventListener('input', function (event) {
+					updateTotalCost(event);
+					updatePricePerItem(event);
+				  });
+				});
 
-                // Apply additional styles to table cells and input fields
-                const additionalStyles = document.createElement('style');
-                additionalStyles.textContent = \`
-                    table.dataTable tbody th, table.dataTable tbody td {
-                        padding: 1px 0px !important;
-                        text-align: center !important;
-                        min-width: 121px !important;
-                        width: 166px !important;
-                        color: #80898b;
-                        border: 3px inset #4f595d;
-                        background: #313131;
-                    }
-                    body {
-                        background-color: #333;
-                        color: ;
-                        width: 100vw;
-                    }
-                    input {
-                        width: 85x !important;
-                        background: #0000004f;
-                    }
-                    select {
-                        background-color: #0000004f;
-                        opacity: 0.7;
-                    }
-                    button {
-                        color: #444;
-                        background-color: #0000004f;
-                    }
-                    .paginate_button.current {
-                        background-color: #0000004f;
-                    }
-                    table.dataTable thead .sorting {
-                        border: 3px outset #454545;
-                        text-align: center;
-                        background-color: #18162d;
-                        color: #333c46de!important;
-                        padding: 0px;
-                    }
-                    table.dataTable thead .sorting_asc {
-                        border: 3px outset #454545;
-                        color: #385a80c9;
-                        background-color: #18162d;
-                        box-shadow: -0px 5px 30px 0px #020a13e0;
-                        text-align: center;
-                    }
-                    table.dataTable thead .sorting_desc {
-                        border: 3px outset #454545;
-                        color: #385a80c9;
-                        background-color: #18162d;
-                        box-shadow: -0px 5px 30px 0px #020a13e0;
-                        text-align: center;
-                    }
-                \`;
-                document.head.appendChild(additionalStyles);
+				// Function to update total cost
+				function updateTotalCost(event) {
+				  // Get the parent row of the input field
+				  const row = event.target.closest('tr');
 
-                // Add event listener to each input field
-                inputFields.forEach(function (input) {
-                  input.addEventListener('input', function (event) {
-                    updateTotalCost(event);
-                    updatePricePerItem(event);
-                  });
-                });
+				  // Get the input value and price per item from the current row
+				  const inputValue = parseFloat(row.querySelector('td:nth-child(7) input').value) || 0;
+				  const pricePerItem = parseFloat(row.querySelector('td:nth-child(5)').textContent) || 0;
 
-                // Function to update total cost
-                function updateTotalCost(event) {
-                  // Get the parent row of the input field
-                  const row = event.target.closest('tr');
+				  // Calculate total cost
+				  const totalCost = inputValue * pricePerItem;
 
-                  // Get the input value and price per item from the current row
-                  const inputValue = parseFloat(row.querySelector('td:nth-child(7) input').value) || 0;
-                  const pricePerItem = parseFloat(row.querySelector('td:nth-child(5)').textContent) || 0;
+				  // Update the total cost cell in the current row
+				  row.querySelector('td:nth-child(8)').textContent = totalCost.toFixed(2);
+				}
 
-                  // Calculate total cost
-                  const totalCost = inputValue * pricePerItem;
+				// Function to update price per item
+				function updatePricePerItem(event) {
+				  // Get the parent row of the input field
+				  const row = event.target.closest('tr');
 
-                  // Update the total cost cell in the current row
-                  row.querySelector('td:nth-child(8)').textContent = totalCost.toFixed(2);
-                }
+				  // Get the markup value and tt value from the current row
+				  const markupValue = parseFloat(row.querySelector('td:nth-child(4) input').value) || 0;
+				  const ttValue = parseFloat(row.querySelector('td:nth-child(3)').textContent) || 0;
 
-                // Function to update price per item
-                function updatePricePerItem(event) {
-                  // Get the parent row of the input field
-                  const row = event.target.closest('tr');
+				  // Calculate price per item
+				  const pricePerItem = ttValue * (markupValue / 100);
 
-                  // Get the markup value and tt value from the current row
-                  const markupValue = parseFloat(row.querySelector('td:nth-child(4) input').value) || 0;
-                  const ttValue = parseFloat(row.querySelector('td:nth-child(3)').textContent) || 0;
-
-                  // Calculate price per item
-                  const pricePerItem = ttValue * (markupValue / 100);
-
-                  // Update the price per item cell in the current row
-                  row.querySelector('td:nth-child(5)').textContent = pricePerItem.toFixed(2);
-                }
-                 $(document).ready(function() {
-                        $('#WTStable, #WTBtable').DataTable();
-                    });
-              });
+				  // Update the price per item cell in the current row
+				  row.querySelector('td:nth-child(5)').textContent = pricePerItem.toFixed(2);
+				}
+				 $(document).ready(function() {
+						$('#WTStable, #WTBtable').DataTable();
+					});
+			  });
             `;
 
             // Combine HTML content with the script
@@ -434,6 +441,8 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 
             // Close the wrapper div for each table
             htmlContent.push('</div>');
+			// Close the other div 
+			htmlContent.push('</div>');
         }
     });
 
@@ -460,25 +469,24 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 }
 
 document.getElementById("PLcopyfancyhtml-button").addEventListener("click", function () {
-    console.log('copyfancyhtml button clicked');
-    
-    // Prompt the user to enter their Colonist name
-    const colonistName = prompt("Please enter your Colonist name:");
+	console.log('copyfancyhtml button clicked');
+	
+	// Prompt the user to enter their Colonist name
+	const colonistName = prompt("Please enter your Colonist name:");
 
-    // If the user provided a name, run the function
-    if (colonistName) {
-        copyTablesFancyHtml(["WTStable", "WTBtable"], colonistName);
-        console.log('Attempting to copy fancy HTML to clipboard');
-    } else {
-        console.log('No Colonist name entered. Operation cancelled.');
-    }
+	// If the user provided a name, run the function
+	if (colonistName) {
+		copyTablesFancyHtml(["WTStable", "WTBtable"], colonistName);
+		console.log('Attempting to copy fancy HTML to clipboard');
+	} else {
+		console.log('No Colonist name entered. Operation cancelled.');
+	}
 });
-
 // Usage example without custom HTML styling
 document.getElementById("PLcopyhtml-button").addEventListener("click", function () {
-    console.log('copy fancy htmlbutton clicked');
+	console.log('copy fancy htmlbutton clicked');
     copyTablesHtml(["WTStable", "WTBtable"]);
-    console.log('attempting to copy fancy html to clipboard');
+	console.log('attempting to copy fancy html to clipboard');
 });
 
 document.addEventListener("DOMContentLoaded", function () {
