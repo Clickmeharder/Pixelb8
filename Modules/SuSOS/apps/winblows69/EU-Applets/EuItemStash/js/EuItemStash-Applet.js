@@ -236,7 +236,7 @@ function copyTablesHtml(tableIds) {
 
 
 // Function to copy fancy HTML content of tables with image and button group in the header
-function copyTablesFancyHtml(tableIds) {
+function copyTablesFancyHtml(tableIds, colonistName) {
     const htmlContent = [];
 
         // Create a wrapper div for the body with background color and max-width
@@ -264,8 +264,7 @@ function copyTablesFancyHtml(tableIds) {
 	htmlContent.push('    font-weight:;');
 	htmlContent.push('    border:0px solid #524e4e;');
 	htmlContent.push('    color: #524e4e;">');
-	htmlContent.push('    Pixelbots Example Pricelist');
-	htmlContent.push('</h1>');
+	htmlContent.push('    Colonist: ${colonistName}</h1>`);');
 	htmlContent.push('</div>');
     // Add the button group on the right side
 	
