@@ -238,7 +238,7 @@ function copyTablesHtml(tableIds) {
 // Function to copy fancy HTML content of tables with image and button group in the header
 function copyTablesFancyHtml(tableIds, colonistName) {
     const htmlContent = [];
-
+	var customHeader = colonistName;
         // Create a wrapper div for the body with background color and max-width
     htmlContent.push('<div style="background-color: #2b2a2a; padding: 10px;max-height:100%; max-width: 99vw; margin: 0 auto; position: relative;">');
 
@@ -265,7 +265,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	htmlContent.push('    border:0px solid #524e4e;');
 	htmlContent.push('    color: #524e4e;">');
 	htmlContent.push('    Colonist:');
-	htmlContent.push(`${colonistName}`);
+	htmlContent.push(`${customHeader}`);
 	htmlContent.push('</h1>');
 	htmlContent.push('</div>');
     // Add the button group on the right side
@@ -441,8 +441,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 
             // Close the wrapper div for each table
             htmlContent.push('</div>');
-			// Close the other div 
-			htmlContent.push('</div>');
+
         }
     });
 
