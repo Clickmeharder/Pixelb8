@@ -264,7 +264,8 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	htmlContent.push('    font-weight:;');
 	htmlContent.push('    border:0px solid #524e4e;');
 	htmlContent.push('    color: #524e4e;">');
-	htmlContent.push('    Colonist: ${colonistName}</h1>`);');
+	htmlContent.push('    Colonist:' + ${colonistName}+ '</h1>`);');
+	htmlContent.push('</h1>');
 	htmlContent.push('</div>');
     // Add the button group on the right side
 	
@@ -474,7 +475,7 @@ document.getElementById("PLcopyfancyhtml-button").addEventListener("click", func
 
 	// If the user provided a name, run the function
 	if (colonistName) {
-		copyTablesFancyHtml(["WTStable", "WTBtable"]);
+		copyTablesFancyHtml(["WTStable", "WTBtable"], colonistName);
 		console.log('Attempting to copy fancy HTML to clipboard');
 	} else {
 		console.log('No Colonist name entered. Operation cancelled.');
