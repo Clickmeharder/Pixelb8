@@ -264,14 +264,14 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	htmlContent.push('    font-weight:;');
 	htmlContent.push('    border:0px solid #524e4e;');
 	htmlContent.push('    color: #524e4e;">');
-	htmlContent.push('    Colonist:');
 	htmlContent.push(`${colonistName}`);
+	htmlContent.push('Item Pricelist');
 	htmlContent.push('</h1>');
 	htmlContent.push('</div>');
     // Add the button group on the right side
 	
     htmlContent.push('<div style="display: flex;">');
-    htmlContent.push('<button style="margin-right: 5px;">/wisper</button>');
+    htmlContent.push('<button style="margin-right: 5px;">/wisper [`${colonistName}`]</button>');
     htmlContent.push('<button style="margin-right: 5px;">My Links</button>');
     // Add more buttons as needed
     htmlContent.push('</div>');
