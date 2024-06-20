@@ -451,9 +451,6 @@ function copyTablesFancyHtml(tableIds, colonistName) {
     // Close the main flex row wrapper
     htmlContent.push('</div>');
 
-    // Close the wrapper div for the body
-    htmlContent.push('</div>');
-
     // Combine HTML content with line breaks
     const combinedHtml = htmlContent.join('\n');
 
