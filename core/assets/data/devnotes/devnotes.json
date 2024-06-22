@@ -5,9 +5,8 @@
         "content": "Made some small fixes and changes to the Entropia Item Stash Tool",
         "points": [
             "- The copy fancy html button to copy pricelist html including js functionality has been modified so it now appears in a text box. the user must now copy it themselves, this was done due to the limitations of the  js functionality to copy straight to clipboard being surpassed",
-            "- all aspects of the tool should now have basic functionality working properly, however ther are some changes that need to be made such as the following:",
-			" 1: need to modify the restock,edit,sell buttons to be disabled until an item stash has been loaded. this is required because currently it will not function properly before loading a saved item stash.",
-			"probably lots more that i cant think of currently. but thats next"
+			"- The restock,edit,sell buttons will now be disabled until the user clicks the load stash button and an item stash has been succesfully loaded. this is required because currently it will not function properly before loading a saved item stash. which should be expected. but now a user might understand this more intuitively with these changes",
+			"- all aspects of the tool should now have basic functionality working properly...hopefully."
         ]
     },
  {
