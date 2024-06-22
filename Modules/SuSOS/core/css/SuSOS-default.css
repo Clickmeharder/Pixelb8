@@ -1834,8 +1834,17 @@ input#itemname {
 		font-weight: bold;
 		font-size: 11px;
 	}
-
 	#hud-EuEditStashMenu .Innerinfobox, #hud-EuRestockItemStashMenu .Innerinfobox, #hud-EuSellitemsMenu .Innerinfobox {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		margin-left: 0;
+		border: 2px outset #49494f5c;
+	}
+	.hud .window .Innerinfobox.TypeA  {
+		color: #474747;
+		font-weight: bold;
+		font-size: 11px;
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
