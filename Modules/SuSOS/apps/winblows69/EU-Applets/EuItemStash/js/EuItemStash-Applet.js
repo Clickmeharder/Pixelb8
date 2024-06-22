@@ -1465,6 +1465,11 @@ function loadsavedCachedata() {
 				loadCacheDataFromLocalStorage(); 
             });
             console.log("Data loaded successfully from the key: ", userKey);
+			// Enable the buttons after loading the cache data
+			stashloadedButtonsPurchaseLog.disabled = false;
+			stashloadedButtonsSalesLog.disabled = false;
+			stashloadedButtonsPriceLists.disabled = false;
+			console.log("Purchase Log, Sales log, and Pricelist buttons enabled");
         } else {
             console.log("Invalid key or no data found.");
         }
@@ -1474,7 +1479,15 @@ function loadsavedCachedata() {
 }
 // button event listener - Load Unique cache
 document.getElementById("LoadUniquecache").addEventListener("click", loadsavedCachedata);
+// Getting references to the buttons
+const stashloadedButtonsPurchaseLog = document.getElementById("logweaponpurchase-Button");
+const stashloadedButtonsSalesLog = document.getElementById("sellitemsmenu-Button");
+const stashloadedButtonsPriceLists = document.getElementById("pricelistmenu-Button");
 
+// Initially disable the buttons
+stashloadedButtonsPurchaseLog.disabled = true;
+stashloadedButtonsSalesLog.disabled = true;
+stashloadedButtonsPriceLists.disabled = true;
 // Function to delete saved data based on the user's input
 function deleteSavedCacheData() {
     console.log("Deleting saved cache data");
