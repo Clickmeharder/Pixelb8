@@ -2110,6 +2110,7 @@ Or, simply Click 'Analyze' to update the table with the example item list contai
 										<button class="cachebutton" id="Exportjson-button" title="Export as json"><img src="../assets/images/icons/floppysave-1.png" alt="Export as Json"></button>
 										<button class="cachebutton" id="PLcopyhtml-button" title="Copy Html to clipboard"><img src="../assets/images/icons/html_icon.png" alt="Copy Html to clipboard"></button>
 										<button class="cachebutton" id="PLcopyfancyhtml-button" title="Copy Html with JS Script to clipboard"><img src="../assets/images/icons/htmlwithscript_icon.png" alt="Copy Html & JS script to clipboard"></button>
+										<button class="cachebutton" id="PLcreate-button" title="Create a code block for your own Pricelist webpage" alt="Create a pricelist for Entropia Universe">📋</button>
 										<div class="Innerinfobox" id="PriceTotaldiv">
 											<p class="innerlabel-text smallform-labeltext" id="totalpriceLabel">Total Sale Price</p>
 											<p class="numbers" id="totalcost-WTStable">n/a</p>
@@ -2184,6 +2185,73 @@ Or, simply Click 'Analyze' to update the table with the example item list contai
 								</div>
 							</div>
 					
+					<!--stash Pricelist creation menu-->
+							<div class= "window column resizable draggable-menu" id="hud-EucreatePLMenu" data-draggable="true">	
+								<div class="headerbar" id="Hud-header-EurestockItemStashMenu">
+									<div class="header row" id="HudTitle-EurestockItemStashMenu">
+									  <h4 class="draggable-header">Create Pricelist</h4>
+									  <!-- titlebar control buttons -->
+									  <div class="windowcontrolbar row">
+										<button class="minbutt" id="minWindow">_</button>
+										<button class="xbutt" id="CloseWindow">X</button>
+									  </div>
+									</div>
+								</div>
+								<div class="boxcontent"id="EurestockItemStashMenuwindow">
+									<div class="Container">
+										<div class="Innercontainer">
+											<div class="Innerinfobox" id="PLcreate-Select1">
+												<p class="innerlabel-text smallform-labeltext editstashlabels" id="PL-label-selectPlanet">planet</p>
+												<select class="dropdown" id="PL-selectPlanet" disabled>
+													<option value="default">Do not Specify</option>
+													<option value="Any">Any Planet</option>
+													<option value="Entropia Universe">Entropia Universe</option>
+													<option value="Space">Space</option>
+													<option value="Crystal Palace">Crystal Palace</option>
+													<option value="Foma~Fortuna">Foma-Fortuna</option>
+													<option value="Planet Calypso">Planet Calypso</option>
+													<option value="Monria Moon">Monria Moon</option>
+													<option value="Planet Arkadia">Planet Arkadia</option>
+													<option value="Arkadia Moon">Arkadia Moon</option>
+													<option value="Ark UG">Ark UG</option>
+													<option value="Rocktropia">Rocktropia</option>
+													<option value="The Hub">The Hub</option>
+													<option value="Toulan">Toulan</option>
+													<option value="Next Island">Next Island</option>
+													<option value="Ancient Greece">Ancient Greece</option>
+													<option value="Cyrene">Cyrene</option>
+												</select>
+												<button class="cachebutton" id="lockedinput"><img src="assets/images/icons/mouse_padlock.png" alt=""></button>
+											</div>
+											<div class="Innerinfobox" id="ValueB">
+												<select class="dropdown" id="PL-selectTables"></select>
+											</div>
+											<div class="Innerinfobox" id="ValueB">
+												<p class="innerlabel-text smallform-labeltext" id="PL-label-input-colonistName"># in Stock</p>
+												<p class="numbers" id="PL-input-colonistName"></p>
+											</div>
+											<div class="Innerinfobox" id="ValueB">
+												<p class="innerlabel-text smallform-labeltext" id="PL-label-textarea-userinput-plbody">Main Body:</p>
+												<textarea class="" id="PL-textarea-userinput-plbody"></textarea>
+											</div>
+											<div class="Innerinfobox" id="ValueB">
+											</div>
+											<div class="Innerinfobox" id="PL-userimg">
+												<p class="innerlabel-text smallform-labeltext editstashlabels" id="PL-Label-input-userimage">Image Url</p>
+												<input type="text" id="PL-input-userimg" placeholder="enter image url" disabled>
+												<button class="cachebutton" id="lockedinput"><img src="assets/images/icons/mouse_padlock.png" alt=""></button>
+											</div>
+											<div class="single-round-button pushright"><!--confirm form button-->
+												<button class="testbutton" id="PL-button-Confirm-plcreate" title="Confirm Code Creation" alt="Confirm Code Creation">
+													<img src="assets/images/icons/directory_check-0.png" alt="Confirm Code Creation">
+												</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+					
+
 					<!--end of entropia item stash tool html-->
 					
 					<!-- GAMES Folder -->
