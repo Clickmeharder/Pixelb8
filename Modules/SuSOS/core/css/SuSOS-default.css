@@ -1707,6 +1707,14 @@ div#displaypanel-budgets{
     background: linear-gradient(153deg, rgb(30, 33, 35), rgba(18, 18, 22, 0.92));
     border: 2px outset rgba(29, 69, 75, 0.34);
 }
+
+/*Hud-EuItemstash main table window*/
+div#hud-EuItemstash {
+    left: 15%;
+    top: 17%;
+    height: 271px;
+    width: 510px;
+}
 /* Item Stash Tool -stash submenu window displays
 */
 	/* Item Stash Tool -add stash item display*/
