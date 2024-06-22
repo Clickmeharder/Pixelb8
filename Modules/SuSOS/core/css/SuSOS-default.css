@@ -2277,6 +2277,12 @@ button#closefancypricelist-textarea {
 /*end of stash windows
 */
  /* EuApplet- OrdinanceJuxtapositioner Tool*/
+ div#hud-OrdinanceJuxtapositioner {
+    height: 311px;
+    width: 402px;
+    left: 18%;
+    top: 15%;
+}
 #displaypanel-OrdinanceJuxtapositioner {
 	font-family: monospace;
     position: relative;
