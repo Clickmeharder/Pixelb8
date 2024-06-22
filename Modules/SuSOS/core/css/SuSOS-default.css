@@ -1453,9 +1453,10 @@ label.Innerinforbox.ValueLabels {white-space:pre-wrap;}
 /* Item Stash Tool -main stash display*/
 
 
-/
 #hud-EuItemstash{
-	
+    width: 300px;
+    height: 322px;
+    min-width: 212px;
 }
 #EuItemstashwindow{
 	overflow:hidden;
