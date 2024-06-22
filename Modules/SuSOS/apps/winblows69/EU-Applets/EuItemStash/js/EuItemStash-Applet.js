@@ -390,6 +390,9 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 						box-shadow: -0px 5px 30px 0px #020a13e0;
 						text-align: center;
 					}
+					td.dataTables_empty {
+						display: none;
+					}
 				\`;
 				document.head.appendChild(additionalStyles);
 				
