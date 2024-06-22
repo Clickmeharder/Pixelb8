@@ -1465,10 +1465,15 @@ function loadsavedCachedata() {
 				loadCacheDataFromLocalStorage(); 
             });
             console.log("Data loaded successfully from the key: ", userKey);
+			// make the buttons visible after loading the cache data
+			stashloadedButtonsPurchaseLog.classList.add("stash-button-visible");
+			stashloadedButtonsSalesLog.classList.add("stash-button-visible");
+			stashloadedButtonsPriceLists.classList.add("stash-button-visible");
 			// Enable the buttons after loading the cache data
 			stashloadedButtonsPurchaseLog.disabled = false;
 			stashloadedButtonsSalesLog.disabled = false;
 			stashloadedButtonsPriceLists.disabled = false;
+			    
 			console.log("Purchase Log, Sales log, and Pricelist buttons enabled");
         } else {
             console.log("Invalid key or no data found.");
