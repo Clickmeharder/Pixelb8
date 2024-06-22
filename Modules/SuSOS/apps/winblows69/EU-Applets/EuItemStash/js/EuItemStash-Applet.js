@@ -1466,10 +1466,12 @@ function loadsavedCachedata() {
             });
             console.log("Data loaded successfully from the key: ", userKey);
 			// make the buttons visible after loading the cache data
+			stashloadedButtonsEditStash.classList.add("stash-button-visible");
 			stashloadedButtonsPurchaseLog.classList.add("stash-button-visible");
 			stashloadedButtonsSalesLog.classList.add("stash-button-visible");
 			stashloadedButtonsPriceLists.classList.add("stash-button-visible");
 			// Enable the buttons after loading the cache data
+			stashloadedButtonsEditStash.disabled = false;
 			stashloadedButtonsPurchaseLog.disabled = false;
 			stashloadedButtonsSalesLog.disabled = false;
 			stashloadedButtonsPriceLists.disabled = false;
@@ -1482,21 +1484,26 @@ function loadsavedCachedata() {
         console.log("Invalid key. Data not loaded.");
     }
 }
+//------------------------
 // button event listener - Load Unique cache
 document.getElementById("LoadUniquecache").addEventListener("click", loadsavedCachedata);
 // Getting references to the buttons
+const stashloadedButtonsEditStash = document.getElementById("editcachemenu-Button");
 const stashloadedButtonsPurchaseLog = document.getElementById("logweaponpurchase-Button");
 const stashloadedButtonsSalesLog = document.getElementById("sellitemsmenu-Button");
 const stashloadedButtonsPriceLists = document.getElementById("pricelistmenu-Button");
-
 // Initially disable the buttons
+stashloadedButtonsEditStash.disabled = true;
 stashloadedButtonsPurchaseLog.disabled = true;
 stashloadedButtonsSalesLog.disabled = true;
 stashloadedButtonsPriceLists.disabled = true;
 // Initially add the class to hide the buttons
+stashloadedButtonsEditStash.classList.add("stash-button");
 stashloadedButtonsPurchaseLog.classList.add("stash-button");
 stashloadedButtonsSalesLog.classList.add("stash-button");
 stashloadedButtonsPriceLists.classList.add("stash-button");
+//----------------------------
+
 // Function to delete saved data based on the user's input
 function deleteSavedCacheData() {
     console.log("Deleting saved cache data");
