@@ -2210,6 +2210,19 @@ button#closefancypricelist-textarea {
 }
  /*new hover effects of stash windows
 */
+/* Initially hide the buttons */
+.stash-button {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+}
+
+/* Class to make buttons visible */
+.stash-button-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
 #weaponCacheAdditions:hover {
 	background: linear-gradient(153deg, #1e2123, #191714);
 	border-color: #00ccff85/*#0cf*/;opacity: 1;
