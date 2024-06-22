@@ -2454,12 +2454,12 @@ select#weaponType.blackbg.grntxt.hoverbrighter, select#weaponType2.blackbg.grntx
 #hud-EuItemSorter {
     background: linear-gradient(153deg, #1e2123, #121216eb);
     top: 0px;
-    left: 3%;
+    left: 21%;
     padding: 2px;
-    flex-direction: column;
-    width: 355px;
-    height: 515px;
+	height: 481px;
+    width: 518px;
     min-width: 325px;
+	flex-direction: column;
     opacity: 0.9;
 	resize:both;
 }
