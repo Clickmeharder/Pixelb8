@@ -1493,6 +1493,10 @@ const stashloadedButtonsPriceLists = document.getElementById("pricelistmenu-Butt
 stashloadedButtonsPurchaseLog.disabled = true;
 stashloadedButtonsSalesLog.disabled = true;
 stashloadedButtonsPriceLists.disabled = true;
+// Initially add the class to hide the buttons
+stashloadedButtonsPurchaseLog.classList.add("stash-button");
+stashloadedButtonsSalesLog.classList.add("stash-button");
+stashloadedButtonsPriceLists.classList.add("stash-button");
 // Function to delete saved data based on the user's input
 function deleteSavedCacheData() {
     console.log("Deleting saved cache data");
