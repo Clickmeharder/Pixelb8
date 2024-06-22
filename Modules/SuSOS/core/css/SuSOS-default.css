@@ -1640,9 +1640,9 @@ a.paginate_button.current {
     min-height: 136px;
     max-height: 165px;
     padding-bottom: 0px;
-    left: 435px;
-    height: 165px;
-    width: 186px;
+    left: 28%;
+    height: 135px;
+    width: 246px;
 }
 div#displaypanel-budgets{
 	height:99%;
