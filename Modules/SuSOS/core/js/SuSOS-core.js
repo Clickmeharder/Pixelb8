@@ -253,7 +253,7 @@ windowIds.push('hud-EuEditStashMenu');
 windowIds.push('hud-EuRestockItemStashMenu');
 windowIds.push('hud-EuSellitemsMenu');
 windowIds.push('hud-EuStashpriceListMenu');
-
+windowIds.push('hud-EucreatePLMenu');
 // Push Games Applet window IDs into the array
 windowIds.push('hud-Games');
 // Push sus-snake Game Applet window ID into the array
@@ -549,6 +549,10 @@ lockedElements.forEach(button => {
 // Function to toggle the Sell Item Stash Menu
 function toggleSellItemStashMenu(clickedButton) {
     openAppletWindow('EuSellitemsMenu');
+}
+// Function to toggle the Sell Item Stash Menu
+function toggleCreatePLMenu(clickedButton) {
+    openAppletWindow('EucreatePLMenu');
 }
 
 // Function to toggle the Edit Cache Menu
