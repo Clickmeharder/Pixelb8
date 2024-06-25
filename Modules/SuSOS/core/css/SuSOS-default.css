@@ -1851,6 +1851,18 @@ input#itemname {
 		margin-left: 0;
 		border: 2px outset #49494f5c;
 	}
+	
+	.hud .window .Container.TypeA{
+		max-width: 94%;
+		width: 95%;
+		margin: 4px;
+		padding: 2px;
+		border: 1px inset #454040;
+		border-radius: 5px;
+		background: linear-gradient(181deg, #17232b, #1819209e);
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		color: #3a3838;
+	}
 	#hud-EuEditStashMenu .editstashlabels, #hud-EuRestockItemStashMenu .editstashlabels, #hud-EuSellitemsMenu .editstashlabels {
 		padding: 0px;
 		min-width: 46%;
