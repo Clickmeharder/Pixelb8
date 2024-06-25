@@ -1,5 +1,16 @@
 [
  {
+        "date": "2024-06-24 04:35:48 UTC",
+        "developer": "Jaedraze aka Jimbobbityboo",
+        "content": "The Entropia Item Stash Tool Pricelist creation is being overhauled",
+        "points": [
+            "- The copy fancy html button to copy pricelist html including js functionality will be moved to be contained within a pricelist creation popup containing some options",
+			"- once completed users will be able to specify wether to include items for sale, item purchase offers, or both",
+			"- users will also be able to easily change an image url and some other basic options for customizing their pricelist",
+			"- I intend to include options such as background image, background color, text options, etc for further customization"
+        ]
+    },
+ {
         "date": "2024-06-20 6:37:30 UTC",
         "developer": "Jaedraze aka Jimbobbityboo",
         "content": "Made some small fixes and changes to the Entropia Item Stash Tool",
