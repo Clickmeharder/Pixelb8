@@ -390,6 +390,22 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 					td.dataTables_empty {
 						display: none;
 					}
+					.dataTables_wrapper .dataTables_length select {
+						border: 1px inset #000;
+						border-radius: 3px;
+						padding: 5px;
+						color: #08aeff;
+						background-color: #18162d;
+						padding: 4px;
+					}
+					.dataTables_wrapper .dataTables_filter input {
+						border: 1px inset #000;
+						border-radius: 3px;
+						padding: 5px;
+						color: #08aeff;
+						background-color: #18162d;
+						padding: 4px;
+					}
 				\`;
 				document.head.appendChild(additionalStyles);
 				
