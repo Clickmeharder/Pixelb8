@@ -489,20 +489,55 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 
 }
 
-document.getElementById("PLcopyfancyhtml-button").addEventListener("click", function () {
-	console.log('copyfancyhtml button clicked');
-	
-	// Prompt the user to enter their Colonist name
-	const colonistName = prompt("Please enter your Colonist name:");
 
-	// If the user provided a name, run the function
-	if (colonistName) {
-		copyTablesFancyHtml(["WTStable", "WTBtable"], colonistName);
-		console.log('Attempting to copy fancy HTML to clipboard');
-	} else {
-		console.log('No Colonist name entered. Operation cancelled.');
-	}
+document.getElementById("PL-selectTables").addEventListener("change", function() {
+    const selectedOption = this.value;
+    
+    if (selectedOption === "For Sale") {
+        // Code to execute if "For Sale" is selected
+        console.log("For Sale selected");
+    } else if (selectedOption === "Purchase Offers") {
+        // Code to execute if "Purchase Offers" is selected
+        console.log("Purchase Offers selected");
+    } else if (selectedOption === "Include Both") {
+        // Code to execute if "Include Both" is selected
+        console.log("Include Both selected");
+    }
+
+
+
+document.getElementById("PLcopyfancyhtml-button").addEventListener("click", function () {
+    console.log('copyfancyhtml button clicked');
+    
+    // Get the selected value from the dropdown
+    const selectedOption = document.getElementById("PL-selectTables").value;
+    console.log(selectedOption);
+    
+    // Get the user's entered Colonist name
+    const colonistNameInputField = document.getElementById("PL-input-colonistName");
+    const colonistName = colonistNameInputField.value;
+
+    // If the user provided a name, run the function
+    if (colonistName) {
+        console.log('Attempting to copy fancy HTML to clipboard');
+        console.log('Colonist name entered:', colonistName);
+        
+        // Example if statement based on the selected option
+        if (selectedOption === "For Sale") {
+            copyTablesFancyHtml(["WTStable"], colonistName);
+            console.log("For Sale selected");
+        } else if (selectedOption === "Purchase Offers") {
+            copyTablesFancyHtml(["WTBtable"], colonistName);
+            console.log("Purchase Offers selected");
+        } else if (selectedOption === "Include Both") {
+            copyTablesFancyHtml(["WTStable", "WTBtable"], colonistName);
+            console.log("Include Both selected");
+        }
+    } else {
+        console.log('No Colonist name entered. Operation cancelled.');
+    }
 });
+
 // Usage example without custom HTML styling
 document.getElementById("PLcopyhtml-button").addEventListener("click", function () {
 	console.log('copy fancy htmlbutton clicked');
