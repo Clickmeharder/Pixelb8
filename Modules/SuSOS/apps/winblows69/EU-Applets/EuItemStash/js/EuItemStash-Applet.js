@@ -1,4 +1,5 @@
 let selectedOption, colonistName, userInput, userImg;
+let plComment = "";
 // Function to toggle the Item Price List Menu
 function refreshStashTable(clickedbutton) {
    // Reload the data to reflect the changes in the UI
@@ -270,8 +271,8 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	htmlContent.push('    border:0px solid #524e4e;');
 	htmlContent.push('    color: #524e4e;">');
 	htmlContent.push(`${colonistName}`);
-	htmlContent.push('Item Pricelist');
 	htmlContent.push('</h1>');
+	htmlContent.push('<h1>Item Pricelist</h1>');
 	htmlContent.push('</div>');
     // Add the button group on the right side
 	
@@ -282,7 +283,11 @@ function copyTablesFancyHtml(tableIds, colonistName) {
     htmlContent.push('<button style="margin-right: 5px;">My Links</button>');
     // Add more buttons as needed
     htmlContent.push('</div>');
-
+	htmlContent.push('<div id="merchantcommentbox">');
+	htmlContent.push('<p id="merchantcomment">');
+	htmlContent.push(`${plComment}`);
+	htmlContent.push('</p>');
+	htmlContent.push('</div>');
     // Close the wrapper div for the header and subheader
     htmlContent.push('</div>');
 
@@ -505,7 +510,9 @@ document.getElementById("PLcreate-button-fancy").addEventListener("click", funct
     console.log('Colonist name entered:', colonistName);
 // Get and set the user's input from the textarea
     userInput = document.getElementById("PL-textarea-userinput-plbody").value;
+	plComment = userInput;
     console.log('User input:', userInput);
+	console.log('new user comment:', plComment);
 // Get and set the user's input from the image input
     userImg = document.getElementById("PL-input-userimg").value;
     console.log('User image input:', userImg);
