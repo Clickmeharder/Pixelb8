@@ -288,10 +288,9 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	htmlContent.push('<p id="merchantcomment">');
 	htmlContent.push(`${plComment}`);
 	htmlContent.push('</p>');
-	htmlContent.push('</div>');
+	
     // Close the wrapper div for the header and subheader
-    htmlContent.push('</div>');
-
+	htmlContent.push('</div>');
 
     // Create a wrapper div for tables with dark-themed styles
     htmlContent.push('<div style="display: flex;flex-wrap: wrap; background-color: #333; padding: 0px 0px;position: ; max-width: 99vw;margin:auto;margin-top:0;">');
