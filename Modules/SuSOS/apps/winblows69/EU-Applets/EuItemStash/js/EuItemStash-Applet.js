@@ -285,8 +285,9 @@ function copyTablesFancyHtml(tableIds, colonistName) {
     // Close the wrapper div for the header and subheader
     htmlContent.push('</div>');
 
+
     // Create a wrapper div for tables with dark-themed styles
-    htmlContent.push('<div style="display: flex;flex-wrap: wrap; background-color: #333; padding: 0px 0px;position: ; max-width: 100%;">');
+    htmlContent.push('<div style="display: flex;flex-wrap: wrap; background-color: #333; padding: 0px 0px;position: ; max-width: 99vw;margin:auto;margin-top:0;">');
 
     // Iterate over table IDs
     tableIds.forEach((tableId, index) => {
@@ -294,7 +295,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
         if (table) {
 			
             // Create a wrapper div for each table with dark-themed styles
-            htmlContent.push('<div style="border: 1px solid #222; flex: 1; margin: 4px; background-color: #444; padding: 4px 4px;">');
+            htmlContent.push('<div style="border: 1px solid #222; flex: 1; margin: 4px; background-color: #444; padding: 4px 4px;max-width:99vw;margin:auto;margin-top:0;">');
 
             // Add an <h4> label inside the table wrapper div based on the tableId
             let h4Label = '';
