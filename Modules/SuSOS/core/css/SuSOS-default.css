@@ -2207,8 +2207,12 @@ div#hud-EucreatePLMenu{
 	/* Item Stash Tool -stash pricelists display*/
 #hud-EuStashpriceListMenu{
 	padding: 2px;
-	width:621;min-width:;max-width:831px;
-    height:511px;max-height: 515px;opacity:1;
+    width: 672px;
+    min-width: ;
+    max-width: 831px;
+    height: 355px;
+    max-height: 515px;
+    opacity: 1;
 }
 #hud-EuStashpriceListMenu .header-buttongroups {
     display: flex;
