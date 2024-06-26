@@ -272,7 +272,6 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	htmlContent.push('    color: #524e4e;">');
 	htmlContent.push(`${colonistName}`);
 	htmlContent.push('</h1>');
-	htmlContent.push('<h1>Item Pricelist</h1>');
 	htmlContent.push('</div>');
     // Add the button group on the right side
 	
@@ -283,6 +282,8 @@ function copyTablesFancyHtml(tableIds, colonistName) {
     htmlContent.push('<button style="margin-right: 5px;">My Links</button>');
     // Add more buttons as needed
     htmlContent.push('</div>');
+	htmlContent.push('<br>');
+	htmlContent.push('<h1>Item Pricelist</h1>');
 	htmlContent.push('<div id="merchantcommentbox">');
 	htmlContent.push('<p id="merchantcomment">');
 	htmlContent.push(`${plComment}`);
