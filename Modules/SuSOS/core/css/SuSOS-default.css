@@ -1863,6 +1863,40 @@ input#itemname {
 		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 		color: #3a3838;
 	}
+	
+	.hud .window select.dropdown.TypeA {
+		font-weight: bold;
+		color: #00bcd4b0;
+		background: linear-gradient(153deg, #1e2123, #121216eb);
+	}
+
+	.hud .window .Innerinfobox.TypeA input,.hud .window .Innerinfobox.TypeA select {
+		display: inline-block;
+		margin: 0 auto 0 auto;
+		color: #29252b;
+		background-color: #454040;
+		width: 95%;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		border-style: inset;
+		border-color: #1b252b;
+		text-align: right;
+		cursor: var(--cursor09-image);
+	}
+	.hud .window .Innerinfobox.TypeA input {
+		font-weight: bold;
+		color: #00bcd4b0;
+		background: linear-gradient(153deg, #1e2123, #121216eb);
+		margin: auto;
+		margin-top: 2px;
+		max-width: 64px;
+	}
+
+
+	
+	
+	
 	#hud-EuEditStashMenu .editstashlabels, #hud-EuRestockItemStashMenu .editstashlabels, #hud-EuSellitemsMenu .editstashlabels {
 		padding: 0px;
 		min-width: 46%;
