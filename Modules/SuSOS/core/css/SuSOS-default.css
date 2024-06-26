@@ -1827,6 +1827,9 @@ div#hud-EucreatePLMenu{
     border-radius:;
     opacity: 1;
 }
+.hud .window .boxcontent.TypeB{height: calc(100% - 8px);max-height: calc(99% - 40px);overflow-y: auto;}
+#EucreatePLMenuwindow {height: calc(100% - 8px);max-height: calc(99% - 40px);overflow-y: auto;}
+
 #EuEditStashMenuwindow{    height: calc(100% - 8px);
     max-height: calc(99% - 40px);overflow-y:auto;}
 	#hud-EuEditStashMenu .Container,#hud-EuRestockItemStashMenu .Container, #hud-EuSellitemsMenu .Container{
