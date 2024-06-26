@@ -238,7 +238,11 @@ function copyTablesHtml(tableIds) {
 // Function to copy fancy HTML content of tables with image and button group in the header
 function copyTablesFancyHtml(tableIds, colonistName) {
     const htmlContent = [];
-
+	htmlContent.push('<head>');
+	htmlContent.push('<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>');
+	htmlContent.push('<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">');
+	htmlContent.push('<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>');
+	htmlContent.push('</head>');
         // Create a wrapper div for the body with background color and max-width
     htmlContent.push('<div style="background-color: #2b2a2a; padding: 10px;max-height:100%; max-width: 99vw; margin: 0 auto; position: relative;">');
 
@@ -380,14 +384,14 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 						border: 3px outset #454545;
 						color: #385a80c9;
 						background-color: #18162d;
-						box-shadow: -0px 5px 30px 0px #020a13e0;
+						box-shadow: ;
 						text-align: center;
 					}
 					table.dataTable thead .sorting_desc {
 						border: 3px outset #454545;
 						color: #385a80c9;
 						background-color: #18162d;
-						box-shadow: -0px 5px 30px 0px #020a13e0;
+						box-shadow: ;
 						text-align: center;
 					}
 					td.dataTables_empty {
