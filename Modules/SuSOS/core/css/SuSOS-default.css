@@ -1871,7 +1871,12 @@ input#itemname {
 	}
 	
 
-
+	.hud .window .Innerinfobox.TypeA input:focus-visible,.hud .window .Innerinfobox.TypeA select:focus-visible {
+		outline: 1px solid #ff650082;
+		outline-offset: -3px;
+		color: #bc5901;
+		font-weight: bold;
+	}
 	.hud .window .Innerinfobox.TypeA input,.hud .window .Innerinfobox.TypeA select {
 		display: inline-block;
 		margin: 0 auto 0 auto;
