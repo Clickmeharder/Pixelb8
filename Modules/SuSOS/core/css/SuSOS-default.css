@@ -1949,6 +1949,23 @@ input#itemname {
 		overflow: hidden;
 	}
 /* end of generalized css and start of specific stuff that i need to start minimizing */	
+	textarea#PL-textarea-userinput-plbody:focus-visible {
+		outline: 1px solid #ff650082;
+		outline-offset: -5px;
+		color: #bc5901;
+		font-weight: bold;
+	}
+
+	textarea#PL-textarea-userinput-plbody {
+		background: linear-gradient(181deg, #17232b, #262e6873);
+		border: 3px inset #49494f5c;
+		color: #30bc15c4;
+		height: 100%;
+		resize: vertical;
+		transition: color 0.8s, smooth;
+	}
+
+
 	#hud-EuEditStashMenu .editstashlabels, #hud-EuRestockItemStashMenu .editstashlabels, #hud-EuSellitemsMenu .editstashlabels {
 		padding: 0px;
 		min-width: 46%;
