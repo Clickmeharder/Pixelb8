@@ -1919,8 +1919,30 @@ input#itemname {
 		/* cursor: pointer; */
 		opacity: 0.8;
 	}	
+	.hud .window .Innerinfobox.TypeA .single-round-button {
+		display: flex;
+		background-color: #202125;
+		padding: 2px;
+		border: 2px outset #3d3d3d;
+		width: 25px;
+		height: 25px;
+		border-radius: 50%;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		opacity: 1;
+	}
 	
-	
+	.hud .window .Innerinfobox.TypeA .single-round-button .testbutton {
+		padding: 0px;
+		background-color: #101128f2;
+		color: #ffffff;
+		border: 1px outset grey;
+		border-radius: 50%;
+		cursor: var(--cursor06-image);
+		transition: background-color 0.3s ease;
+		filter: brightness(70%);
+		overflow: hidden;
+	}
+/* end of generalized css and start of specific stuff that i need to start minimizing */	
 	#hud-EuEditStashMenu .editstashlabels, #hud-EuRestockItemStashMenu .editstashlabels, #hud-EuSellitemsMenu .editstashlabels {
 		padding: 0px;
 		min-width: 46%;
