@@ -1932,7 +1932,7 @@ div#hud-EucreatePLMenu{
 
 	.hud .window .Innerinfobox.TypeA .innerlabel-text {
 		font-size: 13px;
-		color: #00bcd4b0;
+		color: var(--hudoverlay-text-color);
 		background: linear-gradient(185deg, #27323ea1, #1819209e);
 		margin: auto 2px auto 2px;
 		text-align: left;
