@@ -536,19 +536,7 @@ document.getElementById("PLcreate-button-fancy").addEventListener("click", funct
     }
 });
 
-document.getElementById("PLcopyfancyhtml-button").addEventListener("click", function () {
-	console.log('copyfancyhtml button clicked');
-	// Prompt the user to enter their Colonist name
-	const colonistName = prompt("Please enter your Colonist name:");
-	
-	// If the user provided a name, run the function
-	if (colonistName) {
-		copyTablesFancyHtml(["WTStable", "WTBtable"], colonistName);
-		console.log('Attempting to copy fancy HTML to clipboard');
-	} else {
-		console.log('No Colonist name entered. Operation cancelled.');
-	}
-});
+
 // Usage example without custom HTML styling
 document.getElementById("PLcopyhtml-button").addEventListener("click", function () {
 	console.log('copy fancy htmlbutton clicked');
