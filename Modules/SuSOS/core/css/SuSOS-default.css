@@ -1841,6 +1841,12 @@ input#itemname {
 		margin-left: 0;
 		border: 2px outset #49494f5c;
 	}
+	
+	
+	
+	.hud .window .subsized button#minWindow,.hud .window .subsized button#CloseWindow {
+		width: 45%;
+	}
 	.hud .window .Innerinfobox.TypeA  {
 		color: #474747;
 		font-weight: bold;
