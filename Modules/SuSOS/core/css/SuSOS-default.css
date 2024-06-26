@@ -1808,7 +1808,7 @@ input#itemname {
     padding: 4px;padding-left:1px;padding-right:1px;
     min-width: 247px;
 	width:255px;
-	max-height: 263px;
+	max-height: 286px;
     background:;
     border:;
     border-radius:;
@@ -1827,7 +1827,7 @@ div#hud-EucreatePLMenu{
     border-radius:;
     opacity: 1;
 }
-.hud .window .boxcontent.TypeB{height: calc(100% - 8px);max-height: calc(99% - 40px);overflow-y: auto;}
+.hud .window .boxcontent.TypeB {height: calc(100% - 8px);max-height: calc(99% - 40px);overflow-y: auto;}
 #EucreatePLMenuwindow {height: calc(100% - 8px);max-height: calc(99% - 40px);overflow-y: auto;}
 
 #EuEditStashMenuwindow{    height: calc(100% - 8px);
