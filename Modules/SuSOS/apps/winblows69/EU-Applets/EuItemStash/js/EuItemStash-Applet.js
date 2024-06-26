@@ -292,11 +292,11 @@ function copyTablesFancyHtml(tableIds, colonistName) {
             // Add an <h4> label inside the table wrapper div based on the tableId
             let h4Label = '';
             if (tableId === 'WTStable') {
-                h4Label = 'Items for Sale:';
+                h4Label = 'Items for Sale';
             } else if (tableId === 'WTBtable') {
-                h4Label = 'Item Purchase Offers:';
+                h4Label = 'Item Purchase Offers';
             }
-            htmlContent.push(`<h4 style="color: #727476; font-weight:bold;">${h4Label}</h4>`);
+            htmlContent.push(`<h4 style="color: #000000;font-weight:bold;margin:0;width:max-content;">${h4Label}</h4>`);
 
             // Clone the table to avoid modifying the original
             const clonedTable = table.cloneNode(true);
