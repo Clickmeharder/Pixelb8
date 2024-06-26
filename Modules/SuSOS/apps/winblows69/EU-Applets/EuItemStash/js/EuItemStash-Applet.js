@@ -266,6 +266,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	htmlContent.push('<h1 style="padding:2px;margin:auto;');
 	htmlContent.push('    font-family:;');
 	htmlContent.push('    font-weight:;');
+	htmlContent.push('font-size:calc(1em + 1vw);');
 	htmlContent.push('    border:0px solid #524e4e;');
 	htmlContent.push('    color: #524e4e;">');
 	htmlContent.push(`${colonistName}`);
