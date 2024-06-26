@@ -241,10 +241,10 @@ function copyTablesFancyHtml(tableIds, colonistName) {
     htmlContent.push('<div style="border: 1px solid #333; background-color: #222; color: #444; padding: 10px 6px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">');
 
     // Add the page header with an image and button group
-    htmlContent.push('<div style="display: flex; align-items: center;">');
-    htmlContent.push('<img src="https://Pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-transform-clean.gif" alt="Page Logo" style="height: 60px; margin-right: 10px;">'); // Replace your_image_url.jpg with the actual URL of your image
+    htmlContent.push('<div style="display: flex; align-items:center;background-color:rgb(113 116 122 / 40%);border:2px outset #000;padding:4px;">');
+    htmlContent.push('<img src="https://Pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-transform-clean.gif" alt="Page Logo" style="height: 60px; margin-right: -60px;">');
     // Add the page header text
-    htmlContent.push('<h3 style="margin-bottom:0px;color: #1782b6;">Pixelb8.lol</h3>');
+    htmlContent.push('<h3 style="margin: 0px;margin-left: 37px;color: #08aeff;text-shadow: -6px 8px 3px black;transform: rotate(-22deg);">Pixelb8.lol</h3>');
     htmlContent.push('</div>');
 	
 	//add the customizable header text
