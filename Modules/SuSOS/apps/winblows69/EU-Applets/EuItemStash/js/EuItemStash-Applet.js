@@ -491,19 +491,19 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 
 document.getElementById("PLcreate-button-fancy").addEventListener("click", function () {
     console.log('copyfancyhtml button clicked');
-    // Get and set the selected value from the dropdown
+// Get and set the selected value from the dropdown
     selectedOption = document.getElementById("PL-selectTables").value;
     console.log(selectedOption);
-    // Get and set the user's entered Colonist name
+// Get and set the user's entered Colonist name
     colonistName = document.getElementById("PL-input-colonistName").value;
     console.log('Colonist name entered:', colonistName);
-    // Get and set the user's input from the textarea
+// Get and set the user's input from the textarea
     userInput = document.getElementById("PL-textarea-userinput-plbody").value;
     console.log('User input:', userInput);
-    // Get and set the user's input from the image input
+// Get and set the user's input from the image input
     userImg = document.getElementById("PL-input-userimg").value;
     console.log('User image input:', userImg);
-    // If the user provided a name, run the function
+	// If the user provided a name, run the function
     if (colonistName) {
         console.log('Attempting to copy fancy HTML to clipboard'); 
         // Example if statement based on the selected option
