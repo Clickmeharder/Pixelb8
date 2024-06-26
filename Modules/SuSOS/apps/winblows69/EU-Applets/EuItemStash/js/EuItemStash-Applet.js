@@ -98,29 +98,22 @@ document.getElementById("Exportjson-button").addEventListener("click", function 
 // Function to copy PLAIN  HTML content of tables
 function copyTablesHtml(tableIds) {
     const htmlContent = [];
-
     // Create a wrapper div for the header and subheader with a border
     htmlContent.push('<div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 20px;">');
-
     // Add the page header
     htmlContent.push('<h1>Page Header</h1>');
-
     // Add the subheader
     htmlContent.push('<h2>Subheader</h2>');
-
     // Close the wrapper div for the header and subheader
     htmlContent.push('</div>');
-
     // Create a wrapper div for tables
     htmlContent.push('<div style="display: flex;">');
-
     // Iterate over table IDs
     tableIds.forEach((tableId, index) => {
         const table = document.getElementById(tableId);
         if (table) {
             // Create a wrapper div for each table with a border
             htmlContent.push('<div style="border: 1px solid #ddd; flex: 1; margin: 10px;">');
-
             // Add an <h4> label inside the table wrapper div based on the tableId
             let h4Label = '';
             if (tableId === 'WTStable') {
@@ -129,20 +122,16 @@ function copyTablesHtml(tableIds) {
                 h4Label = 'Item Purchase Offers:';
             }
             htmlContent.push(`<h4>${h4Label}</h4>`);
-
             // Clone the table to avoid modifying the original
             const clonedTable = table.cloneNode(true);
-
             // Apply styling to the table for a more visually appealing look
             clonedTable.style.width = '100%';
             clonedTable.style.borderCollapse = 'collapse';
             clonedTable.style.fontSize = '14px';
-
             // Add a new column for displaying the planet information
             const planetColumnHeader = document.createElement('th');
             planetColumnHeader.textContent = 'Planet';
             clonedTable.querySelector('thead tr').insertBefore(planetColumnHeader, clonedTable.querySelector('thead tr').firstChild);
-
             // Iterate over rows to add planet information
             const dataRows = clonedTable.querySelectorAll('tbody tr');
             dataRows.forEach(row => {
@@ -151,10 +140,8 @@ function copyTablesHtml(tableIds) {
                 planetCell.textContent = itemTitle; // Set planet cell to the title of the item
                 row.insertBefore(planetCell, row.firstChild);
             });
-
             // Get the outer HTML content of the cloned table
             const tableHtml = clonedTable.outerHTML;
-
             // Add a script to the HTML for keyup event on markup cell input
             const script = document.createElement('script');
             script.textContent = `
@@ -207,21 +194,16 @@ function copyTablesHtml(tableIds) {
 					});
 			  });
             `;
-
             // Combine HTML content with the script
             htmlContent.push(tableHtml, script.outerHTML);
-
             // Close the wrapper div for each table
             htmlContent.push('</div>');
         }
     });
-
     // Close the main flex row wrapper
     htmlContent.push('</div>');
-
     // Combine HTML content with line breaks
     const combinedHtml = htmlContent.join('\n');
-
     // Create a textarea element to hold the HTML content
     const textarea = document.createElement('textarea');
     textarea.value = combinedHtml;
@@ -234,17 +216,21 @@ function copyTablesHtml(tableIds) {
     // Remove the textarea
     document.body.removeChild(textarea);
 }
-
+//end of copyTablesHtml function
 
 // Function to copy fancy HTML content of tables with image and button group in the header
 function copyTablesFancyHtml(tableIds, colonistName) {
     const htmlContent = [];
 	htmlContent.push('<head>');
+	htmlContent.push('<title>Pixelb8-');
+	htmlContent.push(`${colonistName}`);
+	htmlContent.push('</title>');
+	htmlContent.push('<link rel="icon" type="image/png" href="https://pixelb8.lol/assets/images/logo/pixelbotfavicon.png">');
 	htmlContent.push('<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>');
 	htmlContent.push('<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">');
 	htmlContent.push('<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>');
 	htmlContent.push('</head>');
-        // Create a wrapper div for the body with background color and max-width
+    // Create a wrapper div for the body with background color and max-width
     htmlContent.push('<div style="background-color: #2b2a2a; padding: 10px;max-height:100%; max-width: 99vw; margin: 0 auto; position: relative;">');
 
     // Create an absolute wrapper for the content
@@ -283,9 +269,9 @@ function copyTablesFancyHtml(tableIds, colonistName) {
     // Add more buttons as needed
     htmlContent.push('</div>');
 	htmlContent.push('</div>');
-	htmlContent.push('<div id="merchantcommentbox">');
-	htmlContent.push('<h1>Item Pricelist</h1>');
-	htmlContent.push('<p id="merchantcomment">');
+	htmlContent.push('<div id="merchantcommentbox" style="opacity:1;color: #222;font-family:lucida console;background:#3a3a3a;border:3px outset #000;padding:4px;">');
+	htmlContent.push('<h1 style="font-size:14px;margin:auto;text-align:center;">Item Pricelist</h1>');
+	htmlContent.push('<p id="merchantcomment" style="text-align:left;border:3px inset #444;font-family:lucida ;background:black;color:green;">');
 	htmlContent.push(`${plComment}`);
 	htmlContent.push('</p>');
 	
