@@ -1,4 +1,4 @@
-
+let selectedOption, colonistName, userInput, userImg;
 // Function to toggle the Item Price List Menu
 function refreshStashTable(clickedbutton) {
    // Reload the data to reflect the changes in the UI
@@ -489,39 +489,23 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 
 }
 
-
-document.getElementById("PL-selectTables").addEventListener("change", function() {
-    const selectedOption = this.value;
-    
-    if (selectedOption === "For Sale") {
-        // Code to execute if "For Sale" is selected
-        console.log("For Sale selected");
-    } else if (selectedOption === "Purchase Offers") {
-        // Code to execute if "Purchase Offers" is selected
-        console.log("Purchase Offers selected");
-    } else if (selectedOption === "Include Both") {
-        // Code to execute if "Include Both" is selected
-        console.log("Include Both selected");
-    }
-
-
-
-document.getElementById("PLcopyfancyhtml-button").addEventListener("click", function () {
+document.getElementById("PLcreate-button-fancy").addEventListener("click", function () {
     console.log('copyfancyhtml button clicked');
-    
-    // Get the selected value from the dropdown
-    const selectedOption = document.getElementById("PL-selectTables").value;
+    // Get and set the selected value from the dropdown
+    selectedOption = document.getElementById("PL-selectTables").value;
     console.log(selectedOption);
-    
-    // Get the user's entered Colonist name
-    const colonistNameInputField = document.getElementById("PL-input-colonistName");
-    const colonistName = colonistNameInputField.value;
-
+    // Get and set the user's entered Colonist name
+    colonistName = document.getElementById("PL-input-colonistName").value;
+    console.log('Colonist name entered:', colonistName);
+    // Get and set the user's input from the textarea
+    userInput = document.getElementById("PL-textarea-userinput-plbody").value;
+    console.log('User input:', userInput);
+    // Get and set the user's input from the image input
+    userImg = document.getElementById("PL-input-userimg").value;
+    console.log('User image input:', userImg);
     // If the user provided a name, run the function
     if (colonistName) {
-        console.log('Attempting to copy fancy HTML to clipboard');
-        console.log('Colonist name entered:', colonistName);
-        
+        console.log('Attempting to copy fancy HTML to clipboard'); 
         // Example if statement based on the selected option
         if (selectedOption === "For Sale") {
             copyTablesFancyHtml(["WTStable"], colonistName);
@@ -538,6 +522,19 @@ document.getElementById("PLcopyfancyhtml-button").addEventListener("click", func
     }
 });
 
+document.getElementById("PLcopyfancyhtml-button").addEventListener("click", function () {
+	console.log('copyfancyhtml button clicked');
+	// Prompt the user to enter their Colonist name
+	const colonistName = prompt("Please enter your Colonist name:");
+	
+	// If the user provided a name, run the function
+	if (colonistName) {
+		copyTablesFancyHtml(["WTStable", "WTBtable"], colonistName);
+		console.log('Attempting to copy fancy HTML to clipboard');
+	} else {
+		console.log('No Colonist name entered. Operation cancelled.');
+	}
+});
 // Usage example without custom HTML styling
 document.getElementById("PLcopyhtml-button").addEventListener("click", function () {
 	console.log('copy fancy htmlbutton clicked');
