@@ -1933,7 +1933,7 @@ div#hud-EucreatePLMenu{
 	.hud .window .Innerinfobox.TypeA .innerlabel-text {
 		font-size: 13px;
 		color: #00bcd4b0;
-		background: linear-gradient(185deg, #415975bd, #121216eb);
+		background: linear-gradient(185deg, #27323ea1, #1819209e);
 		margin: auto 2px auto 2px;
 		text-align: left;
 		padding-left: 4px;
@@ -2006,7 +2006,7 @@ div#hud-EucreatePLMenu{
 	}
 
 	#hud-EuEditStashMenu .smallform-labeltext, #hud-EuRestockItemStashMenu .smallform-labeltext,#hud-EuSellitemsMenu .smallform-labeltext {
-		background: linear-gradient(153deg, #1e2123, #121216eb);
+		background: linear-gradient(185deg, #27323ea1, #1819209e);
 		margin: 2px;
 		font-size: 13px;
 		min-width: 55%;
