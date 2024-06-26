@@ -406,6 +406,10 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 						background-color: #18162d;
 						padding: 4px;
 					}
+					input[type="search"]:focus-visible {
+						outline: 1px ridge #00f1ff;
+						color: #00f1ff;
+					}
 				\`;
 				document.head.appendChild(additionalStyles);
 				
