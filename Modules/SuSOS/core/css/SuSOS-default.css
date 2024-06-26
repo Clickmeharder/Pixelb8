@@ -1870,11 +1870,7 @@ input#itemname {
 		color: #3a3838;
 	}
 	
-	.hud .window select.dropdown.TypeA {
-		font-weight: bold;
-		color: #00bcd4b0;
-		background: linear-gradient(153deg, #1e2123, #121216eb);
-	}
+
 
 	.hud .window .Innerinfobox.TypeA input,.hud .window .Innerinfobox.TypeA select {
 		display: inline-block;
@@ -1890,6 +1886,11 @@ input#itemname {
 		text-align: right;
 		cursor: var(--cursor09-image);
 	}
+	.hud .window .Innerinfobox.TypeA select.dropdown {
+		font-weight: bold;
+		color: #00bcd4b0;
+		background: linear-gradient(153deg, #1e2123, #121216eb);
+	}
 	.hud .window .Innerinfobox.TypeA input {
 		font-weight: bold;
 		color: #00bcd4b0;
@@ -1898,6 +1899,7 @@ input#itemname {
 		margin-top: 2px;
 		max-width: 100px;
 	}
+
 	.hud .window .Innerinfobox.TypeA .innerlabel-text {
 		font-size: 13px;
 		color: #00bcd4b0;
