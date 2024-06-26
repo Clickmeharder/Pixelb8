@@ -1857,6 +1857,16 @@ input#itemname {
 		margin-left: 0;
 		border: 2px outset #49494f5c;
 	}
+	.hud .window .Innerinfobox.Confirmbox  {
+		color: #474747;
+		font-weight: bold;
+		font-size: 11px;
+		display: flex;
+		flex-direction: row;
+		justify-content: right;
+		margin-left: 0;
+		border: 2px outset #49494f5c;
+	}
 	
 	.hud .window .Container.TypeA{
 		max-width: 94%;
