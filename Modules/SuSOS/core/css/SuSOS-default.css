@@ -1815,6 +1815,18 @@ input#itemname {
     opacity: 1;
 
 }
+div#hud-EucreatePLMenu{
+    left: 574px;
+    top: 182px;
+    padding: 4px;padding-left:1px;padding-right:1px;
+    min-width: 247px;
+	width:255px;
+	max-height: 263px;
+    background:;
+    border:;
+    border-radius:;
+    opacity: 1;
+}
 #EuEditStashMenuwindow{    height: calc(100% - 8px);
     max-height: calc(99% - 40px);overflow-y:auto;}
 	#hud-EuEditStashMenu .Container,#hud-EuRestockItemStashMenu .Container, #hud-EuSellitemsMenu .Container{
@@ -1845,7 +1857,7 @@ input#itemname {
 	
 	
 	.hud .window .subsized button#minWindow,.hud .window .subsized button#CloseWindow {
-		width: 45%;
+		width: 45%;margin:auto;
 	}
 	.hud .window .Innerinfobox.TypeA  {
 		color: #474747;
