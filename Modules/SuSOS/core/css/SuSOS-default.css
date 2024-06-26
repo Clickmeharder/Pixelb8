@@ -1887,14 +1887,38 @@ input#itemname {
 	.hud .window .Innerinfobox.TypeA input {
 		font-weight: bold;
 		color: #00bcd4b0;
+		background: #1e2123;
+		margin: 0 auto 0 auto;
+		margin-top: 2px;
+		max-width: 100px;
+	}
+	.hud .window .Innerinfobox.TypeA .innerlabel-text {
+		font-size: 13px;
+		color: #00bcd4b0;
 		background: linear-gradient(153deg, #1e2123, #121216eb);
 		margin: auto;
-		margin-top: 2px;
-		max-width: 64px;
+		text-align: left;
+		padding-left: 4px;
+		min-width: 102px;
+		width: -webkit-fill-available;
+		max-width: 60%;
 	}
 
+	.hud .window .Innerinfobox.TypeA #lockedinput {
+		width: 19px;
+		height: 19px;
+	}
 
-	
+	.hud .window .Innerinfobox.TypeA .cachebutton {
+		width: 30px;
+		height: 30px;
+		border-radius: 50%;
+		border: 2px solid #60839b8f;
+		background-color: transparent;
+		margin-bottom: 2px;
+		/* cursor: pointer; */
+		opacity: 0.8;
+	}	
 	
 	
 	#hud-EuEditStashMenu .editstashlabels, #hud-EuRestockItemStashMenu .editstashlabels, #hud-EuSellitemsMenu .editstashlabels {
@@ -2040,7 +2064,7 @@ input#itemname {
 	#hud-EuRestockItemStashMenu select,#hud-EuEditStashMenu select,#hud-EuSellitemsMenu select{
 		font-weight:bold;
 		color: #00bcd4b0;
-		background: linear-gradient(153deg, #1e2123, #121216eb);
+		background: #1e2123;
 	}
 	 #hud-EuRestockItemStashMenu input,#hud-EuEditStashMenu input,#hud-EuSellitemsMenu input {
 		font-weight:bold;
