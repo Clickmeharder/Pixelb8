@@ -233,9 +233,9 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	htmlContent.push('</head>');
 	// create a body element to wrap the page div that contains all of the content.
 	htmlContent.push('<body ');
-	htmlContent.push('style="background-image:');
-	htmlContent.push(`${userImg}`);
-	htmlContent.push(';">');
+	htmlContent.push(`<body style="background-image:url('`);
+	htmlContent.push(`${userImg}'`);
+	htmlContent.push(');">');
     // Create a wrapper div for all of the page content inside the body
     htmlContent.push('<div style="background-color: #2b2a2a; padding: 10px;max-height:100%; max-width: 99vw; margin: 0 auto; position: relative;opacity:0.8;">');
 
