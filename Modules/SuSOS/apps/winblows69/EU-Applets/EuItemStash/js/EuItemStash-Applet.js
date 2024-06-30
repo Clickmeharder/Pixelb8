@@ -541,7 +541,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 			htmlContent.push('</div>');
 			// Close the body wrapper
 			htmlContent.push('</body>');
-
+			htmlContent.push('<script src="https://pixelb8.lol/core/js/core-apps/pixelbot-movement.js"></script>');
         }
     });
 
