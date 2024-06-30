@@ -233,8 +233,8 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	htmlContent.push('</head>');
 	// create a body element to wrap the page div that contains all of the content.
 	htmlContent.push(`<body style="background-image:url('${userImg}');">`);
-	htmlContent.push('<div id="gameArea">'>
-	htmlContent.push('<div id="pixelb8" style="opacity: 0.8; background-image: url(&quot;https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-transform-clean.gif&quot;); left: 353px; top: 268px;" class="animate"></div>'>
+	htmlContent.push('<div id="gameArea">');
+	htmlContent.push('<div id="pixelb8" style="opacity: 0.8; background-image: url(&quot;https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-transform-clean.gif&quot;); left: 353px; top: 268px;" class="animate"></div>');
 	htmlContent.push('</div>');
     // Create a wrapper div for all of the page content inside the body
     htmlContent.push('<div style="background-color: #2b2a2a; padding: 10px;max-height:100%; max-width: 99vw; margin: 0 auto; position: relative;opacity:0.8;">');
