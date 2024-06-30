@@ -453,6 +453,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 						width: 100vw;
 						height: 100vh;
 						z-index: 100;
+						pointer-events: none;
 						/* opacity: 1.0; */
 					}
 					#pixelb8 {
