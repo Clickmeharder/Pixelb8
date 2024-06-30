@@ -1,4 +1,5 @@
 let selectedOption, colonistName, userInput, userImg;
+var userImg = "url('https://pixelb8.lol/assets/images/ads/ads15.jpeg')";
 let plComment = "";
 // Function to toggle the Item Price List Menu
 function refreshStashTable(clickedbutton) {
@@ -230,8 +231,10 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	htmlContent.push('<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">');
 	htmlContent.push('<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>');
 	htmlContent.push('</head>');
-    // Create a wrapper div for the body with background color and max-width
-    htmlContent.push('<div style="background-color: #2b2a2a; padding: 10px;max-height:100%; max-width: 99vw; margin: 0 auto; position: relative;">');
+	// create a body element to wrap the page div that contains all of the content.
+	htmlContent.push('<body>');
+    // Create a wrapper div for all of the page content inside the body
+    htmlContent.push('<div style="background-color: #2b2a2a; padding: 10px;max-height:100%; max-width: 99vw; margin: 0 auto; position: relative;opacity:0.8;">');
 
     // Create an absolute wrapper for the content
     htmlContent.push('<div style="position: relative; top: 0; left: 0; right: 0; bottom: 0;height:98%; width: 98%;">');
@@ -271,7 +274,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	htmlContent.push('</div>');
 	htmlContent.push('<div id="merchantcommentbox" style="opacity:1;color: #222;font-family:lucida console;background:#3a3a3a;border:3px outset #000;padding:4px;">');
 	htmlContent.push('<h1 style="font-size:14px;margin:auto;text-align:center;">Item Pricelist</h1>');
-	htmlContent.push('<p id="merchantcomment" style="text-align:left;border:3px inset #444;font-family:lucida ;background:black;color:green;">');
+	htmlContent.push('<p id="merchantcomment" style="text-align:left;border:3px inset #444;font-family:lucida ;background:#00000087;color:green;opacity:1;">');
 	htmlContent.push(`${plComment}`);
 	htmlContent.push('</p>');
 	
@@ -348,7 +351,12 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 					}
 					body {
 						background-color: #333;
+						background-image: url(`${userImg}`);
+						background-size: cover;
+						background-repeat: no-repeat;
+						background-position: center;
 						color: ;
+						opacity:1;
 						width: 100vw;
 					}
 					input {
@@ -465,6 +473,9 @@ function copyTablesFancyHtml(tableIds, colonistName) {
             htmlContent.push('</div>');
 			// Close the other div 
 			htmlContent.push('</div>');
+			// Close the body wrapper
+			htmlContent.push('</body>');
+
         }
     });
 
