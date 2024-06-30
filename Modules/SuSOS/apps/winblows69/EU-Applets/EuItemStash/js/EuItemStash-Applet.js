@@ -233,6 +233,9 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	htmlContent.push('</head>');
 	// create a body element to wrap the page div that contains all of the content.
 	htmlContent.push(`<body style="background-image:url('${userImg}');">`);
+	htmlContent.push('<div id="gameArea">'>
+	htmlContent.push('<div id="pixelb8" style="opacity: 0.8; background-image: url(&quot;https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-transform-clean.gif&quot;); left: 353px; top: 268px;" class="animate"></div>'>
+	htmlContent.push('</div>');
     // Create a wrapper div for all of the page content inside the body
     htmlContent.push('<div style="background-color: #2b2a2a; padding: 10px;max-height:100%; max-width: 99vw; margin: 0 auto; position: relative;opacity:0.8;">');
 
@@ -418,6 +421,65 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 						outline: 1px ridge #00f1ff;
 						color: #00f1ff;
 					}
+					.custom-scrollbar::-webkit-scrollbar {
+						 /* Hides scrollbar in WebKit browsers (Chrome, Safari) */
+					}
+
+					.custom-scrollbar {
+						-ms-overflow-style: none;  /* Hides scrollbar in IE and Edge */
+						scrollbar-width: 1px;
+						scrollbar-opacity:0.1!important;/* Hides scrollbar in Firefox */
+					}
+							/* Custom scrollbar for WebKit browsers (Chrome, Safari) */
+					.custom-scrollbar::-webkit-scrollbar {
+						width: 7px; /* Width of the scrollbar */
+					}
+
+					.custom-scrollbar::-webkit-scrollbar-track {
+					  opacity:0.1;
+						background: ; /* Background of the scrollbar track */
+					}
+
+					.custom-scrollbar::-webkit-scrollbar-thumb {
+						background: #888; /* Background of the scrollbar thumb */
+						border-radius: 6px; /* Round edges of the scrollbar thumb */
+					}
+
+					.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+						background: #555; /* Background of the scrollbar thumb on hover */
+					}
+					#gameArea {
+						position: fixed;
+						width: 100vw;
+						height: 100vh;
+						z-index: 100;
+						/* opacity: 1.0; */
+					}
+					#pixelb8 {
+						position: fixed;
+						width: 124px; /* Adjust according to your sprite size */
+						height: 124px; /* Adjust according to your sprite size */
+						background-image: url('https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
+						background-size: cover;
+						opacity:1.0;
+						transition:0.3, smooth;
+					}
+					#pixelb8.batterylow {
+						position: fixed;
+						width: 124px; /* Adjust according to your sprite size */
+						height: 124px; /* Adjust according to your sprite size */
+						background-image: url('https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
+						background-size: cover;
+						opacity: 0.8;
+						transition: all 1.9s ease 0s;
+					}
+					@keyframes move {
+						from { background-position: 0 0; }
+						to { background-position: -500px 0; } /* Adjust according to your spritesheet width */
+					}
+					.animate {
+						animation: move 1.8s steps(4) infinite; /* 4 frames per second */
+					}
 				\`;
 				document.head.appendChild(additionalStyles);
 				
@@ -473,14 +535,16 @@ function copyTablesFancyHtml(tableIds, colonistName) {
             htmlContent.push('</div>');
 			// Close the other div 
 			htmlContent.push('</div>');
+			// Close the other div 
+			htmlContent.push('</div>');
+			// Close the other div 
+			htmlContent.push('</div>');
 			// Close the body wrapper
 			htmlContent.push('</body>');
 
         }
     });
 
-    // Close the main flex row wrapper
-    htmlContent.push('</div>');
 
     // Combine HTML content with line breaks
     const combinedHtml = htmlContent.join('\n');
