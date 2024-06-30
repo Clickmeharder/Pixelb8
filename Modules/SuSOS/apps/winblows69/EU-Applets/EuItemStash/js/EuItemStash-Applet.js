@@ -1,4 +1,4 @@
-let selectedOption, colonistName, userInput, userImg;
+let selectedOption, colonistName, userInput;
 var userImg = "url('https://pixelb8.lol/assets/images/ads/ads15.jpeg')";
 let plComment = "";
 // Function to toggle the Item Price List Menu
