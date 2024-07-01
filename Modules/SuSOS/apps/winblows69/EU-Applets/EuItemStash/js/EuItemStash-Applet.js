@@ -438,24 +438,30 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 						width: 100%;
 						max-width: 13% !important;
 					}
-					/* Style the sorting buttons */
+					/* Style the sorting indicators */
 					th.sorting::after,
 					th.sorting_asc::after,
 					th.sorting_desc::after {
-						font-family: FontAwesome;
-						content: "\f0dc"; /* Default icon (e.g., fa-sort) */
-						padding-left: 10px;
-						color: #000; /* Customize color */
+						display: inline-block;
+						margin-left: 10px;
+						border-width: 5px;
+						border-style: solid;
+						border-color: transparent;
 					}
 
-					/* Ascending sort icon */
+					/* Default sort indicator */
+					th.sorting::after {
+						border-top-color: #000; /* Triangle pointing upwards */
+					}
+
+					/* Ascending sort indicator */
 					th.sorting_asc::after {
-						content: "\f0de"; /* Upward arrow (e.g., fa-sort-up) */
+						border-bottom-color: #000; /* Triangle pointing downwards */
 					}
 
-					/* Descending sort icon */
+					/* Descending sort indicator */
 					th.sorting_desc::after {
-						content: "\f0dd"; /* Downward arrow (e.g., fa-sort-down) */
+						border-top-color: #000; /* Triangle pointing upwards */
 					}
 					.custom-scrollbar::-webkit-scrollbar {
 						 /* Hides scrollbar in WebKit browsers (Chrome, Safari) */
