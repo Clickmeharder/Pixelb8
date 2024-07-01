@@ -2436,6 +2436,8 @@ button#closefancypricelist-textarea {
     width: min-content;
     max-width: 69px;
     text-align: center;
+	font-weight: bold;
+    color: #00a704;
 }
 /* cache stash table styles */
 
