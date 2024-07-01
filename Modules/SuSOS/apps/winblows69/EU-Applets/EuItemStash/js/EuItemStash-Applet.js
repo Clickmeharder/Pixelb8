@@ -423,6 +423,19 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 						outline: 1px ridge #00f1ff;
 						color: #00f1ff;
 					}
+					table.dataTable tbody td:nth-child(1) {
+						width: 100% !important;
+						min-width: 5% !important;
+						max-width: 25% !important;
+					}
+					table.dataTable tbody td:nth-child(2) {
+						width: 50% !important;
+					}
+					td {
+						min-width: 90px !important;
+						width: 100%;
+						max-width: 13% !important;
+					}
 					.custom-scrollbar::-webkit-scrollbar {
 						 /* Hides scrollbar in WebKit browsers (Chrome, Safari) */
 					}
