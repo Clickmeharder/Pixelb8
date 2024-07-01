@@ -2437,6 +2437,9 @@ button#closefancypricelist-textarea {
     max-width: 69px;
     text-align: center;
 	font-weight: bold;
+    color: #247a26;/*#00a704;*/
+}
+#WTStable input[type="text"]:focus-visible,#WTBtable input[type="text"]:focus-visible {
     color: #00a704;
 }
 /* cache stash table styles */
