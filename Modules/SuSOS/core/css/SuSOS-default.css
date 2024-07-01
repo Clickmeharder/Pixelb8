@@ -2441,6 +2441,8 @@ button#closefancypricelist-textarea {
 }
 #WTStable input[type="text"]:focus-visible,#WTBtable input[type="text"]:focus-visible {
     color: #00a704;
+	outline: 1px solid #00cbff;
+    outline-offset: -4.5px;
 }
 /* cache stash table styles */
 
