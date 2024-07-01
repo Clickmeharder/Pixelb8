@@ -429,12 +429,33 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 						max-width: 25% !important;
 					}
 					table.dataTable tbody td:nth-child(2) {
+						color: #a15c0f;
+						font-weight: bold;
 						width: 50% !important;
 					}
 					td {
 						min-width: 90px !important;
 						width: 100%;
 						max-width: 13% !important;
+					}
+					/* Style the sorting buttons */
+					th.sorting::after,
+					th.sorting_asc::after,
+					th.sorting_desc::after {
+						font-family: FontAwesome;
+						content: "\f0dc"; /* Default icon (e.g., fa-sort) */
+						padding-left: 10px;
+						color: #000; /* Customize color */
+					}
+
+					/* Ascending sort icon */
+					th.sorting_asc::after {
+						content: "\f0de"; /* Upward arrow (e.g., fa-sort-up) */
+					}
+
+					/* Descending sort icon */
+					th.sorting_desc::after {
+						content: "\f0dd"; /* Downward arrow (e.g., fa-sort-down) */
 					}
 					.custom-scrollbar::-webkit-scrollbar {
 						 /* Hides scrollbar in WebKit browsers (Chrome, Safari) */
