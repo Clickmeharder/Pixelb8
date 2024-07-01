@@ -234,7 +234,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 	// create a body element to wrap the page div that contains all of the content.
 	htmlContent.push(`<body style="background-image:url('${userImg}');">`);
 	htmlContent.push('<div id="gameArea">');
-	htmlContent.push('<div id="pixelb8" style="opacity: 0.8; background-image: url(&quot;https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-transform-clean.gif&quot;); left: 353px; top: 268px;" class="animate"></div>');
+	htmlContent.push('<div id="pixelb8" style="opacity: 0.8; background-image: url(&quot;https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-transform-clean.gif&quot;); left: 27px; top: 34px;" class="animate"></div>');
 	htmlContent.push('</div>');
     // Create a wrapper div for all of the page content inside the body
     htmlContent.push('<div style="background-color: #2b2a2a; padding: 10px;max-height:100%; max-width: 99vw; margin: 0 auto; position: relative;opacity:0.8;">');
@@ -248,7 +248,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 
     // Add the page header with an image and button group
     htmlContent.push('<div style="display: flex; align-items:center;background-color:rgb(113 116 122 / 40%);border:2px outset #000;padding:4px;">');
-    htmlContent.push('<img src="https://Pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-transform-clean.gif" alt="Page Logo" style="height: 60px; margin-right: -60px;">');
+    htmlContent.push('<img src="https://Pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-transform-clean.gif" alt="Page Logo" style="visibility: hidden;height: 60px; margin-right: -60px;">');
     // Add the page header text
     htmlContent.push('<h3 style="margin: 0px;margin-left: 37px;color: #08aeff;text-shadow: -6px 8px 3px black;transform: rotate(-22deg);">Pixelb8.lol</h3>');
     htmlContent.push('</div>');
@@ -365,6 +365,8 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 					input {
 						width: 85x !important;
 						background: #0000004f;
+						color: #00defad6;
+						font-weight: bold;
 					}
 					select {
 						background-color: #0000004f;
@@ -458,8 +460,8 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 					}
 					#pixelb8 {
 						position: fixed;
-						width: 124px; /* Adjust according to your sprite size */
-						height: 124px; /* Adjust according to your sprite size */
+						width: 64px; /* Adjust according to your sprite size */
+						height: 64px; /* Adjust according to your sprite size */
 						background-image: url('https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
 						background-size: cover;
 						opacity:1.0;
@@ -467,19 +469,20 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 					}
 					#pixelb8.batterylow {
 						position: fixed;
-						width: 124px; /* Adjust according to your sprite size */
-						height: 124px; /* Adjust according to your sprite size */
+						width: 64px; /* Adjust according to your sprite size */
+						height: 64px; /* Adjust according to your sprite size */
 						background-image: url('https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
 						background-size: cover;
 						opacity: 0.8;
 						transition: all 1.9s ease 0s;
 					}
 					@keyframes move {
-						from { background-position: 0 0; }
-						to { background-position: -500px 0; } /* Adjust according to your spritesheet width */
+						0% { background-position: 0 0; }
+						100% { background-position: -124px 0; } /* Move to the second frame */
 					}
+
 					.animate {
-						animation: move 1.8s steps(4) infinite; /* 4 frames per second */
+						animation: move 1s steps(2) infinite; /* 1s duration, 2 steps (frames), infinite loop */
 					}
 				\`;
 				document.head.appendChild(additionalStyles);
@@ -928,7 +931,7 @@ document.querySelectorAll('.pricelistmarkupInput').forEach(function (markupInput
 
             // Run your calculateItemPrice function with the cell values
             const pricePerItem = calculateItemPrice(ttValueCell.innerText, markupInput.value);
-            console.log("Calculated Price Per Item:", pricePerItem.toFixed(2));
+            console.log("Calculated Price Per Item:", pricePerItem.toFixed(4));
 
             // You can update other elements or perform additional actions as needed
         }
@@ -944,7 +947,7 @@ function updatePricePerItem(row) {
     // Check if the parsed value is a valid number
     if (!isNaN(markupValue)) {
         const pricePerItem = ttValue * (markupValue / 100);
-        row.cells[3].innerText = pricePerItem.toFixed(2);
+        row.cells[3].innerText = pricePerItem.toFixed(4);
     } else {
         console.error("Invalid sale markup percentage");
         row.cells[3].innerText = "0.00";
@@ -1058,7 +1061,7 @@ function addToPriceList(itemData) {
 
     if (existingRow) {
         // Update existing row with new values
-        existingRow.cells[1].innerText = itemData.ttValue;
+        existingRow.cells[1].innerText = parseFloat(itemData.ttValue).toFixed(4);
 
         // Update existing input value
         const markupInput = existingRow.cells[2].getElementsByTagName("input")[0];

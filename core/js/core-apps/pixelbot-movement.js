@@ -1,6 +1,6 @@
 const pixelb8 = document.getElementById('pixelb8');
-let x = 368; // Starting position (centered for 800x600)
-let y = 268; // Starting position (centered for 800x600)
+let x = 27; // Starting position (centered for 800x600)
+let y = 34; // Starting position (centered for 800x600)
 let idleTimer;
 
 const directions = {
