@@ -165,3 +165,116 @@ document.addEventListener("DOMContentLoaded", function () {
     handleClosePopup();
   });
 });
+
+const makeDraggable = (header, windowElement) => {
+    let isDragging = false;
+    let mouseX;
+    let mouseY;
+    let offsetX;
+    let offsetY;
+    let lastElement;
+    let currentElement;
+    let lastElemendid;
+    let lastElementzIndex;
+    let currentzIndex;
+    let newzIndex;
+    const windowBoundaries = document.querySelector('.layerheight');
+    const  handleMouseDown = (e) => {
+        isDragging = true;
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        offsetX = windowElement.offsetLeft;
+        offsetY = windowElement.offsetTop;
+        if (lastElement) { //Check if lastelement exists
+            lastElement.classList.remove('currentwindow'); 
+        } else {
+          lastElement = windowElement;
+          lastElemendid = windowElement.id;// Update lastelement
+        }
+        header.classList.add('dragging-header');
+        windowElement.classList.remove('lastwindow');
+        windowElement.classList.add('currentwindow');
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDragging) return;
+
+        const deltaX = e.clientX - mouseX;
+        const deltaY = e.clientY - mouseY;
+
+        // Calculate the new position
+        const newX = offsetX + deltaX;
+        const newY = offsetY + deltaY;
+
+        // Check if the new position is within the boundaries of the horizontalScroll div
+        const maxX = windowBoundaries.offsetWidth - windowElement.offsetWidth;
+        const maxY = windowBoundaries.offsetHeight - windowElement.offsetHeight;
+
+        // Update the position only if it's within the boundaries
+        if (newX >= 0 && newX <= maxX) {
+            windowElement.style.left = newX + 'px';
+        }
+        if (newY >= 0 && newY <= maxY) {
+            windowElement.style.top = newY + 'px';
+        }
+    };
+
+    const handleMouseUp = () => {
+        isDragging = false;
+        // Remove 'dragging-header' class on mouseup
+        header.classList.remove('dragging-header');
+        // Remove 'active' class from the window
+        windowElement.classList.remove('active');
+    };
+
+    header.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+};
+
+// Apply draggable functionality to all elements with the class "draggable-header"
+const draggableHeaders = document.querySelectorAll('.draggable-header');
+draggableHeaders.forEach((header) => {
+    const windowElement = header.closest('[data-draggable="true"]');
+    if (windowElement) {
+        makeDraggable(header, windowElement);
+    }
+});
+// Select all elements with the class "window"
+const windows = document.querySelectorAll('.window');
+// Select all elements with the class "draggable-header"
+// Add click event listeners to each draggable header for setting border-color
+draggableHeaders.forEach(header => {
+  header.addEventListener('mousedown', (e) => {
+    // Remove the 'current' class from all windows
+    windows.forEach(win => {
+      win.classList.remove('current');
+    });
+
+    // Add the 'active' and 'current' classes to the window containing the clicked header
+    const windowElement = header.closest('.window');
+    if (windowElement) {
+      windowElement.classList.add('active', 'current');
+    }
+
+    // Prevent default behavior to avoid interference with dragging functionality
+    e.preventDefault();
+  });
+});
+// Function to remove classes .current and .currentwindow from all windows
+const removeCurrentClasses = () => {
+    windows.forEach(window => {
+        window.classList.remove('current', 'currentwindow');
+    });
+};
+// Function to handle window click event
+const handleWindowClick = (event) => {
+    const clickedWindow = event.currentTarget;
+    removeCurrentClasses();
+    clickedWindow.classList.add('current', 'currentwindow');
+};
+// Remove the previous click event listeners from the windows
+windows.forEach(window => {
+  window.addEventListener('click', handleWindowClick);
+  window.removeEventListener('mousedown', () => {});
+});
