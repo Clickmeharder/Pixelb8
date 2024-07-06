@@ -211,12 +211,9 @@ const makeDraggable = (header, windowElement) => {
         const maxY = windowBoundaries.offsetHeight - windowElement.offsetHeight;
 
         // Update the position only if it's within the boundaries
-        if (newX >= 0 && newX <= maxX) {
+       
             windowElement.style.left = newX + 'px';
-        }
-        if (newY >= 0 && newY <= maxY) {
             windowElement.style.top = newY + 'px';
-        }
     };
 
     const handleMouseUp = () => {
