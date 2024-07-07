@@ -36,19 +36,37 @@ function handleSearch() {
 
     if (document.fileContent) {
         console.log('Sending data to worker');
+
+        // Show the status message
+        document.getElementById('statusMessage').innerText = 'Pixelbot is Searching your logs.';
+
         const worker = new Worker('js/worker.js');
         worker.postMessage({ content: document.fileContent, keywords, channels, days });
+        
         worker.onmessage = function(event) {
             console.log('Received data from worker');
             displayResults(event.data);
+
+            // Hide the status message
+            document.getElementById('statusMessage').innerText = '';
         };
+        
         worker.onerror = function(error) {
             console.error('Worker error:', error);
+
+            // Hide the status message
+            document.getElementById('statusMessage').innerText = 'Error processing logs.';
         };
     } else {
         console.error('No file content available');
         alert('Please select a file first.');
     }
+}
+
+function displayResults(results) {
+    console.log('Displaying results');
+    const resultContainer = document.getElementById('susIntel-results');
+    resultContainer.innerHTML = results.join('<br>');
 }
 function displayResults(results) {
     console.log('Displaying results');
