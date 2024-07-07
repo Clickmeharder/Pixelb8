@@ -23,7 +23,12 @@ function handleSearch() {
     console.log('Analyze button clicked');
     const keywords = document.getElementById('susIntel-keyword').value.split(',');
     const channels = Array.from(document.querySelectorAll('input[name="logType"]:checked')).map(input => input.value);
-    const days = parseInt(document.getElementById('resultsolderthanXdays').value, 10);
+    let days = parseInt(document.getElementById('resultsolderthanXdays').value, 10);
+
+    // Default to 7 if days is NaN or less than 1
+    if (isNaN(days) || days < 1) {
+        days = 7;
+    }
 
     console.log('Keywords:', keywords);
     console.log('Channels:', channels);
@@ -45,7 +50,6 @@ function handleSearch() {
         alert('Please select a file first.');
     }
 }
-
 function displayResults(results) {
     console.log('Displaying results');
     const resultContainer = document.getElementById('susIntel-results');
