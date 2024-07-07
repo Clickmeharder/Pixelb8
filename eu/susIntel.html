@@ -244,67 +244,59 @@
 	<div class="Innercontainer scrollheight windowcontentblock" id="susIntelWindow-Interior">
 	  <div class="Innerinfobox" id="ValueA">
 		<div class="column minheight98" id="">
-		  <!--   V the insides V    ????  -->
-		  <div id="inputContainer">
-			<div class="textbawxA column" id="susIntel-toolinfobawx">
-			  <label for="susIntel-toolinfo">Instructions:</label>
-			  <textarea id="susIntel-toolinfo" placeholder="Step #1: 
-Locate your Entropia Universe Chat .log file, it should be found within your entropia game files...wow!
-Step #2:
-Once your file has been located and selected, choose your prefered filters..
-
-Step #3:
-Click the Analyze Button
-
-Or, simply Click 'Analyze' to update the table with the example item list contained."></textarea>
-			</div>
-			<div class="textbawx" style="max-height:125px;">
-				<input type="file" id="susIntel-fileInput">
-				<div id="filtersContainer">
-					<strong>Channels</strong>
-					<div class="flexrow sifi">
-						<label for="susIntel-systemLog">System</label>
-						<input type="checkbox" id="susIntel-systemLog" name="logType" value="[system]" checked>
-						<label for="susIntel-rookieLog">Rookie</label>
-						<input type="checkbox" id="susIntel-rookieLog" name="logType" value="[Rookie]" checked>
-						<label for="susIntel-tradeLog">Trade</label>
-						<input type="checkbox" id="susIntel-tradeLog" name="logType" value="Trade],trade]" checked>
-					</div>
-					<strong>Time</strong>
-					<div class="flexrow row">
-						<label for="resultsolderthanXdays" style="margin:auto;margin-left:0;margin-right:0;">hide logs older than:</label>
-						<div class="custom-number-input">
-							<input type="number" id="resultsolderthanXdays" placeholder="7">
-							<div class="spin-button up" onclick="document.getElementById('resultsolderthanXdays').stepUp()">▲</div>
-							<div class="spin-button down" onclick="document.getElementById('resultsolderthanXdays').stepDown()">▼</div>
+			<div id="inputContainer">
+				<div class="textbawxA column" id="susIntel-toolinfobawx">
+					<label for="susIntel-toolinfo">Instructions:</label>
+					<textarea id="susIntel-toolinfo" placeholder="Step #1: Locate your Entropia Universe Chat .log file, it should be found within your entropia game files...wow! Step #2: Once your file has been located and selected, choose your preferred filters.. Step #3: Click the Analyze Button Or, simply Click 'Analyze' to update the table with the example item list contained."></textarea>
+				</div>
+				<div class="textbawx" style="max-height:125px;">
+					<input type="file" id="susIntel-fileInput">
+					<div id="filtersContainer">
+						<strong>Channels</strong>
+						<div class="flexrow sifi">
+							<label for="susIntel-systemLog">System</label>
+							<input type="checkbox" id="susIntel-systemLog" name="logType" value="[system]" checked>
+							<label for="susIntel-rookieLog">Rookie</label>
+							<input type="checkbox" id="susIntel-rookieLog" name="logType" value="[Rookie]" checked>
+							<label for="susIntel-tradeLog">Trade</label>
+							<input type="checkbox" id="susIntel-tradeLog" name="logType" value="[Trade]" checked>
 						</div>
-						<label for="daystext" style="margin:auto;margin-left:4px;margin-right:0;">Days</label>
+						<strong>Time</strong>
+						<div class="flexrow row">
+							<label for="resultsolderthanXdays" style="margin:auto;margin-left:0;margin-right:0;">hide logs older than:</label>
+							<div class="custom-number-input">
+								<input type="number" id="resultsolderthanXdays" placeholder="7">
+								<div class="spin-button up" onclick="document.getElementById('resultsolderthanXdays').stepUp()">▲</div>
+								<div class="spin-button down" onclick="document.getElementById('resultsolderthanXdays').stepDown()">▼</div>
+							</div>
+							<label for="daystext" style="margin:auto;margin-left:4px;margin-right:0;">Days</label>
+						</div>
 					</div>
 				</div>
 			</div>
-		  </div>
-		  <div class="buttbox" id="susintelbuttbox">
-			<textarea id="susIntel-keyword" placeholder="Enter, keywords, sepereated, by, comma"></textarea>
-			<label for="susIntel-keyword">ex: 2017-08-13, Lysterium </label>
-			<button class="processeuitemlistbutt" id="susIntel-searchButton">Analyze</button>
-		  </div>
-		  <div id="inventorySortingMenu">
-			<div class="selectbox">
-			  <button id="cleanpopupButton" style="margin-left: auto;">Delete old Logs</button>
-			</div><hr>
-			<div class="valuebox column">
-			  <span id="ListedValue"></span>
-			  <span id="" style="color:green;max-height:22px;text-align:center;overflow:auto;" >01101110 01101111 01101111 01100010</span>
-			</div>  
-		  </div>
-		  <button id="sortresultsButton">Sort</button>
-		  <select id="sortOrder" style="">
-			<option value="newest">Newest First</option>
-			<option value="oldest">Oldest First</option>
-		  </select>
+			<div class="buttbox" id="susintelbuttbox">
+				<textarea id="susIntel-keyword" placeholder="Enter, keywords, separated, by, comma"></textarea>
+				<label for="susIntel-keyword">ex: 2017-08-13, Lysterium </label>
+				<button class="processeuitemlistbutt" id="susIntel-searchButton">Analyze</button>
+			</div>
+			<div id="inventorySortingMenu">
+				<div class="selectbox">
+					<button id="cleanpopupButton" style="margin-left: auto;">Delete old Logs</button>
+				</div>
+				<hr>
+				<div class="valuebox column">
+					<span id="ListedValue"></span>
+					<span id="" style="color:green;max-height:22px;text-align:center;overflow:auto;">01101110 01101111 01101111 01100010</span>
+				</div>
+			</div>
+			<button id="sortresultsButton">Sort</button>
+			<select id="sortOrder" style="">
+				<option value="newest">Newest First</option>
+				<option value="oldest">Oldest First</option>
+			</select>
 		</div>
 		<div id="susIntel-results"></div>
-	  </div>
+	</div>
 	</div>
   </div>
 </div>
@@ -662,7 +654,9 @@ staticPage BLOCK
 	<!-- Enabled SuSOS EU Applet Skripts 
 	path= Modules/SuSOS/apps/
 	-->
-	<script src="js/susIntel.js"></script>
+	<!-- <script src="js/susIntel.js"></script> -->
+	<script src="js/main.js"></script>
+	<script src="js/worker.js"></script>
 	<!--FIREBASE AUTHENTICATION SKRIPTS-->
 	<script src="../core/js/index.js"></script>
 	<script type="module" src="../core/js/firebase/auth.js"></script>
