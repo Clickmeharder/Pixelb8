@@ -178,7 +178,7 @@ const makeDraggable = (header, windowElement) => {
     let lastElementzIndex;
     let currentzIndex;
     let newzIndex;
-    const windowBoundaries = document.querySelector('.layerheight');
+    const windowBoundaries = document.querySelector('body');
     const  handleMouseDown = (e) => {
         isDragging = true;
         mouseX = e.clientX;
