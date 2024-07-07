@@ -19,7 +19,7 @@ function handleSearch() {
     const days = parseInt(document.getElementById('resultsolderthanXdays').value, 10);
 
     if (document.fileContent) {
-        const worker = new Worker('worker.js');
+        const worker = new Worker('js/worker.js');
         worker.postMessage({ content: document.fileContent, keywords, channels, days });
         worker.onmessage = function(event) {
             displayResults(event.data);
