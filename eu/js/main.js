@@ -7,29 +7,47 @@ function handleFileSelect(event) {
         const reader = new FileReader();
         reader.onload = function(e) {
             const content = e.target.result;
+            console.log('File loaded successfully');
             document.fileContent = content; // Save the file content to use later
         };
+        reader.onerror = function() {
+            console.error('Error reading file');
+        };
         reader.readAsText(file);
+    } else {
+        console.error('No file selected');
     }
 }
 
 function handleSearch() {
+    console.log('Analyze button clicked');
     const keywords = document.getElementById('susIntel-keyword').value.split(',');
     const channels = Array.from(document.querySelectorAll('input[name="logType"]:checked')).map(input => input.value);
     const days = parseInt(document.getElementById('resultsolderthanXdays').value, 10);
 
+    console.log('Keywords:', keywords);
+    console.log('Channels:', channels);
+    console.log('Days:', days);
+
     if (document.fileContent) {
+        console.log('Sending data to worker');
         const worker = new Worker('js/worker.js');
         worker.postMessage({ content: document.fileContent, keywords, channels, days });
         worker.onmessage = function(event) {
+            console.log('Received data from worker');
             displayResults(event.data);
         };
+        worker.onerror = function(error) {
+            console.error('Worker error:', error);
+        };
     } else {
+        console.error('No file content available');
         alert('Please select a file first.');
     }
 }
 
 function displayResults(results) {
+    console.log('Displaying results');
     const resultContainer = document.getElementById('susIntel-results');
     resultContainer.innerHTML = results.join('<br>');
 }

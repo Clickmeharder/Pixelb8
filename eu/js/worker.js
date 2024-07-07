@@ -1,5 +1,6 @@
 self.onmessage = function(event) {
     const { content, keywords, channels, days } = event.data;
+    console.log('Worker received data');
     const lines = content.split('\n');
     const filteredLines = lines.filter(line => {
         const matchesKeyword = keywords.some(keyword => line.includes(keyword));
@@ -8,11 +9,13 @@ self.onmessage = function(event) {
         const isWithinDateRange = isWithinDays(logDate, days); // Implement this function to check date range
         return matchesKeyword && matchesChannel && isWithinDateRange;
     });
+    console.log('Worker finished processing');
     self.postMessage(filteredLines);
 };
 
 function extractDateFromLog(line) {
     // Implement date extraction logic based on your log file format
+    return new Date(); // Placeholder implementation
 }
 
 function isWithinDays(date, days) {
