@@ -557,7 +557,7 @@ function copyTablesFancyHtml(tableIds, colonistName) {
 				  const row = event.target.closest('tr');
 
 				  // Get the markup value and tt value from the current row
-				  const markupValue = parseFloat(row.querySelector('td:nth-child(4) input').value) || 0;
+				  const markupValue = parseFloat(row.querySelector('td:nth-child(4) input').value) || markupValue;
 				  const ttValue = parseFloat(row.querySelector('td:nth-child(3)').textContent) || 0;
 
 				  // Calculate price per item
