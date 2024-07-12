@@ -709,14 +709,14 @@ document.getElementById("EditorUpdatestashValues").addEventListener("click", fun
     const selectedItem = selectedItemObject.name;
 
     // Get the changed values from the input fields
-    const updatedValues = {
-        selectedPlanet: document.getElementById("currentitemPlanet").value,
-        storageContainer: document.getElementById("currentitemContainer").value,
-        ttValue: document.getElementById("currentitemttvalue").value,
-        maxMarkup: document.getElementById("currentitemmaxmarkup").value,
-        amountStashed: document.getElementById("currentitemcount").value,
-        stashedPed: document.getElementById("currentitemstashedped").value
-    };
+	const updatedValues = {
+		selectedPlanet: document.getElementById("currentitemPlanet").value,
+		storageContainer: document.getElementById("currentitemContainer").value,
+		ttValue: document.getElementById("currentitemttvalue").value,
+		maxMarkup: document.getElementById("currentitemmaxmarkup").value,
+		amountStashed: document.getElementById("currentitemcount").value,
+		stashedPed: parseFloat(parseFloat(document.getElementById("currentitemstashedped").value).toFixed(2))
+	};
 
     // Prompt the user with confirmation and display the item and changed values
     const confirmationMessage = `Are you sure you want to update the values for "${selectedItem}" with the following changes?\n\n`;
