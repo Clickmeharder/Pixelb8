@@ -238,14 +238,16 @@
 <div class="hudMonitorPower" style="display:hidden;">
 
 </div>
-<div class="Innercontainer scrollheight" id="EUitemSorterWindow-Interior">
-											<div class="Innerinfobox" id="ValueA">
-												<div class="column minheight98" id="EUitemsortercontent">
-												<!--   V the insides V    ????  -->
-													<div id="inputContainer">
-														<div class="textbawxA column" id="euitemsorter-toolinfobawx">
-															<label for="euitemsorter-toolinfo">How does the Sorting Tool work?:</label>
-															<textarea id="euitemsorter-toolinfo" placeholder="Step #1: 
+<div class="boxcontent"id="EuItemSorterwindow">
+	<div class="Container" id="Hud-EUitemSorter-Displaypanel">
+		<div class="Innercontainer scrollheight" id="EUitemSorterWindow-Interior">
+			<div class="Innerinfobox" id="ValueA">
+				<div class="column minheight98" id="EUitemsortercontent">
+				<!--   V the insides V    ????  -->
+					<div id="inputContainer">
+						<div class="textbawxA column" id="euitemsorter-toolinfobawx">
+							<label for="euitemsorter-toolinfo">How does the Sorting Tool work?:</label>
+							<textarea id="euitemsorter-toolinfo" placeholder="Step #1: 
 Triple click the Item Inventory table on the Entropia Universe website
 https://www.entropiauniverse.com
 Step #2:
@@ -255,52 +257,55 @@ Step #3:
 Click the Analyze Button
 
 Or, simply Click 'Analyze' to update the table with the example item list contained."></textarea>
-														</div>
-														<div class="textbawx">
-															<textarea id="itemData" rows="10" cols="50" placeholder="Triple click the table on the Entropia Universe website and then Paste your item data inside this text input/...">Name	Quantity	Value	Container
+						</div>
+						<div class="textbawx">
+							<textarea id="itemData" rows="10" cols="50" placeholder="Triple click the table on the Entropia Universe website and then Paste your item data inside this text input/...">Name	Quantity	Value	Container
 Musca Thigh Guards (L) Blueprint	1	0.01	Arkadia Armour▣
 Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
-															</textarea>
-														</div>
-													</div>
-													<div class="buttbox">
-														<button class="processeuitemlistbutt" id="processitemlistdatabutt" onclick="processInput()">Analyze</button>
-													</div>
-													<div id="inventorySortingMenu">
-														<div class="selectbox">
-															<label for="planetSelect">Select a Planet</label><div class="down-arrow-blue"></div><hr>
-															<select id="planetSelect" onchange="filterItemsByPlanet()" placeholder="Select a Planet!">
-																<option value="Selected" disabled="" selected="">Select a planet</option>
-													  <!-- Planet options will be dynamically populated here -->
-															<option value=""></option><option value="Arkadia">Arkadia</option><option value="Calypso">Calypso</option><option value="DSEC9">DSEC9</option><option value="Monria">Monria</option><option value="Planet Cyrene">Planet Cyrene</option><option value="Rocktropia">Rocktropia</option></select>
-															<input id="inventorySearch" type="text" placeholder="Search Inventory.../" oninput="searchInventory()">
-														</div><hr>
-														<div class="valuebox column">
-															<span id="ListedValue"></span>
-															<span id="totalValue">Ttl: 63.56 Ped</span>
-														</div>  
-													</div>
-													<div id="tablewrap">
-														<table id="itemTable">
-														<thead>
-															<tr>
-																<th onclick="sortTable(0)">Name</th>
-																<th onclick="sortTable(1)">Quantity</th>
-																<th onclick="sortTable(2)">Value</th>
-																<th onclick="sortTable(3)">Container</th>
-															</tr>
-														</thead>
-															<tbody><tr><td>Musca Thigh Guards (L) Blueprint</td><td>1</td><td>0.01</td><td>Arkadia Armour▣</td></tr><tr><td>Pirrel Pellets</td><td>7</td><td>2.1</td><td>STORAGE (Arkadia)</td></tr><tr><td>Pile Of Garnets</td><td>96</td><td>14.4</td><td>STORAGE (Arkadia)</td></tr><tr><td>Pet Name Tag</td><td>12</td><td>0</td><td>STORAGE (Arkadia)</td></tr><tr><td>Zolphic Oil</td><td>2</td><td>0.08</td><td>STORAGE (Calypso)</td></tr><tr><td>Zolphic Grease</td><td>6</td><td>0.48</td><td>STORAGE (Calypso)</td></tr><tr><td>Weapon Cells</td><td>100000</td><td>10</td><td>STORAGE (DSEC9)</td></tr><tr><td>Vibrant Sweat</td><td>25</td><td>0</td><td>STORAGE (DSEC9)</td></tr><tr><td>Universal Ammo</td><td>2946</td><td>0.29</td><td>STORAGE (Monria)</td></tr><tr><td>Tier 2 Component</td><td>1</td><td>0.14</td><td>STORAGE (Monria)</td></tr><tr><td>Universal Ammo</td><td>101804</td><td>10.18</td><td>STORAGE (Planet Cyrene)</td></tr><tr><td>Yellow Cassette</td><td>10</td><td>0.1</td><td>STORAGE (Rocktropia)</td></tr><tr><td>ArMatrix LP-25 (L)</td><td>1</td><td>12.89</td><td>CARRIED</td></tr><tr><td>ArMatrix LP-25 (L)</td><td>1</td><td>12.89</td><td>ESTATE</td></tr></tbody>
-														</table>
-													</div>
-												</div>
-											</div>
-										</div>
-
+							</textarea>
+						</div>
+					</div>
+					<div class="buttbox">
+						<button class="processeuitemlistbutt" id="processitemlistdatabutt" onclick="processInput()">Analyze</button>
+					</div>
+					<div id="inventorySortingMenu">
+						<div class="selectbox">
+							<label for="planetSelect">Select a Planet</label><div class="down-arrow-blue"></div><hr>
+							<select id="planetSelect" onchange="filterItemsByPlanet()" placeholder="Select a Planet!">
+								<option value="Selected" disabled selected>Select a planet</option>
+					  <!-- Planet options will be dynamically populated here -->
+							</select>
+							<input id="inventorySearch" type="text" placeholder="Search Inventory.../"  oninput="searchInventory()">
+						</div><hr>
+						<div class="valuebox column">
+							<span id="ListedValue"></span>
+							<span id="totalValue"></span>
+						</div>  
+					</div>
+					<div id="tablewrap">
+						<table id="itemTable">
+						<thead>
+							<tr>
+								<th onclick="sortTable(0)">Name</th>
+								<th onclick="sortTable(1)">Quantity</th>
+								<th onclick="sortTable(2)">Value</th>
+								<th onclick="sortTable(3)">Container</th>
+							</tr>
+						</thead>
+							<tbody>
+						  <!-- Populated here -->
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div><!--end of window boxcontent-->
 <!-- end of new SuS itemlist analizer window-->
 <!-- 
 staticPage BLOCK 
