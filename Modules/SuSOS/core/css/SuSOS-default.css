@@ -4,6 +4,9 @@
 	--fc-today-bg-color: #1f604e99;/* #09680ebf; */
 	
 }
+td {
+	color:sienna;
+}
 /*    HUD OVERLAY  */
 .hudMonitorPower{/* main power controls 
 (used to completely disable/enable/control
@@ -2941,6 +2944,7 @@ textarea#itemData::-webkit-scrollbar {
   text-align: left;
   font-family:system-ui;
 }
+
 #Hud-EUitemSorter-Displaypanel td {
   font-size:smaller;
   border: 2px ridge #5da3a573;
