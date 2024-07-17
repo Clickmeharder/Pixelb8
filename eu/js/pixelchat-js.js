@@ -1,15 +1,27 @@
-	(function () {
-	  firebase.initializeApp({
-		apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
-		authDomain: "pixelb8lol.firebaseapp.com",
-		projectId: "pixelb8lol",
-		storageBucket: "pixelb8lol.appspot.com",
-		messagingSenderId: "373700849652",
-		appId: "1:373700849652:web:c3e59f1653dd224ba153a1",
-		measurementId: "G-5EGV2VNMX3"
-	  });
+// firebase/auth.js
 
-	  const firestore = firebase.firestore();
+	//import scripts
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GithubAuthProvider, onAuthStateChanged, updateProfile  } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+  //initialize firebase config
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBiOOomMnXO0Ps7ak0kkPJwRCgV8ThWBb0",
+    authDomain: "pixelb8lol.firebaseapp.com",
+    projectId: "pixelb8lol",
+    storageBucket: "pixelb8lol.appspot.com",
+    messagingSenderId: "373700849652",
+    appId: "1:373700849652:web:c3e59f1653dd224ba153a1",
+    measurementId: "G-5EGV2VNMX3"
+	 };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth();
+    const provider = new GithubAuthProvider();
+	const db = getFirestore(app);
 	  const chatsRef = firestore.collection("chat");
 
 	  let startAt = null;
