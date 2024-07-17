@@ -334,8 +334,5 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("AddItem-button").addEventListener("click", function () {
         const container = document.querySelector('#container'); // Adjust the selector to your actual container
         addItemsToWeaponsCacheCollection(container)
-            .catch((error) => {
-                console.error("Error adding item to Weapons Cache collection: ", error);
-            });
     });
 });
