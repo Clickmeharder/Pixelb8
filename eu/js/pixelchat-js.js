@@ -118,7 +118,7 @@
 		}
 	  };
 	  user.focus();
-	})();
+	
 
 	function addMessage(message, append = true, showEle = false) {
 	  var div = document.createElement("div");
