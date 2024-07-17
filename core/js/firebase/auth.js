@@ -293,7 +293,7 @@ getDocs(collection(db, 'UserProfiles'))
 
 // Function to fetch weapons cache budget
 async function getWeaponsCacheBudget() {
-	const treasuryDoc = await getDoc(doc(db, 'SuS-Treasury', 'Weapons Cache Budget'));
+	const treasuryDoc = await getDocs(doc(db, 'SuS-Treasury', 'Weapons Cache Budget'));
 	if (treasuryDoc.exists()) {
 		return treasuryDoc.data().value; // Assuming the budget value is stored under the 'value' key
 	} else {
