@@ -3,7 +3,7 @@
 	//import scripts
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
-  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GithubAuthProvider, onAuthStateChanged, updateProfile  } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
   //initialize firebase config
 
@@ -289,55 +289,53 @@ getDocs(collection(db, 'UserProfiles'))
 	  $('#modal-editProfile').modal('show');
 	});
 //hmmm
-
-
 // Function to fetch weapons cache budget
 async function getWeaponsCacheBudget() {
-	const treasuryDoc = await getDocs(doc(db, 'SuS-Treasury', 'Weapons Cache Budget'));
-	if (treasuryDoc.exists()) {
-		return treasuryDoc.data().value; // Assuming the budget value is stored under the 'value' key
-	} else {
-		console.log('No such document!');
-		return null;
-	}
+    const treasuryDoc = await getDoc(doc(db, 'SuS-Treasury', 'Weapons Cache Budget'));
+    if (treasuryDoc.exists()) {
+        return treasuryDoc.data().value; // Assuming the budget value is stored under the 'value' key
+    } else {
+        console.log('No such document!');
+        return null;
+    }
 }
 
 // Helper functions to get input values
 function getValueFromInput(id, container) {
-	return container.querySelector(`#${id}`).value;
+    return container.querySelector(`#${id}`).value;
 }
 
 function getValueFromSelect(id, container) {
-	return container.querySelector(`#${id}`).value;
+    return container.querySelector(`#${id}`).value;
 }
 
 // Function to add items to Weapons Cache collection
 async function addItemsToWeaponsCacheCollection(container) {
-	const budget = await getWeaponsCacheBudget();
-	if (budget === null) return;
+    const budget = await getWeaponsCacheBudget();
+    if (budget === null) return;
 
-	const newData = {
-		item: getValueFromInput("itemname", container),
-		ttValue: getValueFromInput("pedamount", container),
-		maxMarkup: getValueFromInput("maxmarkup", container),
-		amountStashed: getValueFromInput("amount", container),
-		stashedPed: getValueFromInput("pedamount-stashed", container),
-		selectedPlanet: getValueFromSelect("Weaponscache-selectplanet", container),
-		storageContainer: getValueFromInput("storagecontainername", container)
-	};
+    const newData = {
+        item: getValueFromInput("itemname", container),
+        ttValue: getValueFromInput("pedamount", container),
+        maxMarkup: getValueFromInput("maxmarkup", container),
+        amountStashed: getValueFromInput("amount", container),
+        stashedPed: getValueFromInput("pedamount-stashed", container),
+        selectedPlanet: getValueFromSelect("Weaponscache-selectplanet", container),
+        storageContainer: getValueFromInput("storagecontainername", container)
+    };
 
-	const newCollectionRef = collection(db, 'WeaponsCache');
-	await addDoc(newCollectionRef, newData);
-	console.log('Item added to Weapons Cache collection:', newData);
+    const newCollectionRef = collection(db, 'WeaponsCache');
+    await addDoc(newCollectionRef, newData);
+    console.log('Item added to Weapons Cache collection:', newData);
 }
 
 // Event listener for adding items
 document.addEventListener("DOMContentLoaded", () => {
-	document.getElementById("AddItem-button").addEventListener("click", function () {
-		const container = document.querySelector('#container'); // Adjust the selector to your actual container
-		addItemsToWeaponsCacheCollection(container)
-			.catch((error) => {
-				console.error("Error adding item to Weapons Cache collection: ", error);
-			});
-	});
+    document.getElementById("AddItem-button").addEventListener("click", function () {
+        const container = document.querySelector('#container'); // Adjust the selector to your actual container
+        addItemsToWeaponsCacheCollection(container)
+            .catch((error) => {
+                console.error("Error adding item to Weapons Cache collection: ", error);
+            });
+    });
 });
