@@ -22,7 +22,7 @@
     const auth = getAuth();
     const provider = new GithubAuthProvider();
 	const db = getFirestore(app);
-	  const chatsRef = firestore.collection("chat");
+	  const chatsRef = db.collection("chat");
 
 	  let startAt = null;
 
