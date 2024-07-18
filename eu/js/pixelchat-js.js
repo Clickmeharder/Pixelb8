@@ -124,11 +124,9 @@ function addMessage(message, append = true, showEle = false) {
   
   var textCont = document.createElement("div");
   textCont.classList.add("text");
-  
+  div.appendChild(dateCont);
   div.appendChild(nameCont);
   div.appendChild(textCont);
-  div.appendChild(dateCont);
-  
   nameCont.innerText = `[${message.username}]:`;
   textCont.innerText = message.text;
   dateCont.innerText = `[${new Intl.DateTimeFormat("default", {
@@ -153,9 +151,9 @@ function sendMessage(username, message) {
   send.disabled = true;
 
   addDoc(chatsRef, {
+	time: Date.now(),
     username,
-    text: message,
-    time: Date.now()
+    text: message
   })
   .then(() => {
     text.disabled = false;
