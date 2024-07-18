@@ -114,34 +114,40 @@ function addMessage(message, append = true, showEle = false) {
   var div = document.createElement("div");
   div.id = message.id;
   div.classList.add('message');
-  var nameCont = document.createElement("div");
-  nameCont.classList.add("username");
-  var textCont = document.createElement("div");
-  textCont.classList.add("text");
+  
   var dateCont = document.createElement("div");
   dateCont.classList.add("text");
   dateCont.classList.add("date");
+  
+  var nameCont = document.createElement("div");
+  nameCont.classList.add("username");
+  
+  var textCont = document.createElement("div");
+  textCont.classList.add("text");
+  
   div.appendChild(nameCont);
   div.appendChild(textCont);
   div.appendChild(dateCont);
-  nameCont.innerText = message.username;
+  
+  nameCont.innerText = `[${message.username}]:`;
   textCont.innerText = message.text;
-  dateCont.innerText = new Intl.DateTimeFormat("default", {
+  dateCont.innerText = `[${new Intl.DateTimeFormat("default", {
     hour: "numeric",
     minute: "numeric",
     hour12: false,
     year: "numeric",
     month: "short",
     day: "numeric"
-  }).format(new Date(message.time));
+  }).format(new Date(message.time))}]`;
+  
   if (append) {
     messages.append(div);
   } else {
     trigger.after(div);
   }
+  
   showEle && div.scrollIntoView();
 }
-
 function sendMessage(username, message) {
   text.disabled = true;
   send.disabled = true;
