@@ -1,27 +1,59 @@
 
-
-
+Entropia Universe
+JimBoo'S Mentorship Series
+ 
+ description links:
+ Developer notes on Loot 2.0
+ https://www.entropiauniverse.com/bulletin/buzz/2017/06/26/Developer-Notes--12---Loot-2.0-Follow-Up.xml
 ___________________________________________________________
                            EPISODE 1
+						  Orientation
 -----------------------------------------------------------
-      Thule - A Colonist is Born
+      Thule - Calypso Gateway - Learning The Basic's
 -----------------------------------------------------------
--
--
--
--
--
--
--
--
--------------------------------------------------------------------------------
-END OF EPISODE
-_______________________________________________________________________________
+… Welcome Everyone! Your watching Part one of The three part Entropia universe disciple Orientation series. 
+brought to you by The Secret Universal Services! 
+Forging Questionable Skills and Lifetime adjacent-Memories since 2022 
+
+Now, Entropia Universe is not just a game. It is in fact a whole digital Universe with Asteroids, space stations 6 habitable planets
+ and 2 habitable moons. 
+ 
+ It's a place where you can explore, Make Contacts, and even earn real money. 
+ But like any universe, Entropia has rules and systems to learn.
+ If you're new to Entropia Universe or need a refresher on the basics, a free to play player or 
+ just an Old and confused Noober Don't worry,Just follow along and we'll guide you through it.
+ If your a bit of a gamer or your just not very slow, you can probably skip to part two in this series.
+ First things first, let's get you oriented with the basics:
+ make sure you set up your controls press L to unlock your Interface and Then open the actions window, Or
+ press escape to modify keybindings and settings. if you have any troubles, don't fret!
+ You can always ask More experienced players questions in the Rookie chat channel. 
+ This Channel is Specifically Dedicated to Helping new Players. 
+ 
+ A common bug with this new User Interface involves the satnav being offscreen.
+ If your satnav ever seems to dissapear, Try pressing the Alt key and the enter key at the same time to toggle fullscreen mode, then once more to toggle it back.
+ this usually fixes it. 
+ Setting up your controls and action bars efficiently will streamline your operations in the field. 
+ Your inventory holds everything you collect, craft, or purchase in the game.
+ It's essential for survival and success in this vast digital world.
+ Before you venture out into the wilds of Calypso or the bustling cities of Rocktropia, take some time to organize your items.
+ Efficient inventory and storage management will save you time, frustration, and even help you avoid losing track of valuable resources.
+ Let's dive in!
+ ....skript continues
+--------------------------------------------------------------------
+Orientation Part 2: 
+				
+--------------------------------
+		-
+
+		
+	
+--------------------------------------------------------------
+
+
 _________________________________________________________
-                    EPISODE 2		 
---------------------------------------------------------
-       Camp Icarus, Welcome to Planet Calypso
---------------------------------------------------------
+ (pause:3s)Secret Universal Services-
+				   CDF Disciple Training 2-	 
+ -Welcome to Camp Icarus, Planet Calypso.
 CUTSCENE:
 (show the planet from space) 
 (describe planet calypso and monria moon)
@@ -29,9 +61,7 @@ CUTSCENE:
 special thanks to MOM and Droopy for creating a great resourse.
  I used this to help remember some of these mission details in the Calypso Series:
  https://the-gladiators.forumotion.com/t667-beginner-mission-chains
----------------------------------------------------------------------------------------------------------------
-        Chapter 1 - Your Adventure Begins Here.
------------------------------------------------------------------------------------------------------------------             
+        
 Talk to Sgt. Saana on the shore
 Head up to Camp Icarus and find hayes
 
@@ -42,10 +72,8 @@ now is a good time to go say hello and meet a few locals players.
 -Take note of the npc dressed in all white next to the thingymajig, thats a team instance ( basicly a team dungeon )
 we will need to do this instance asap - as the first time you complete it you are iven some gread rewards:
 -Vivo s10 (repairable healing tool) ->this will be your best friend for a while
- 
------------------------------------------
-             FIND CAPTAIN HAYES
-			 
+
+ FIND CAPTAIN HAYES 
 If you havent already, go and Talk to Cpt. Hayes up in front of the ramp at Camp Icarus
  (CDF Scout armour Part 1/7)
 1.1a-no one likes frogs
@@ -59,8 +87,25 @@ Talk to the Big and Beautiful Mr. Bukin:
 1.7- Big Game Hunting
 Reward: bukin's spare rifle (repairable laser rifle)
 
+			 additional tips
+*Discuss tab targetting and Using the F key for semi afk auto play
+	-Pressing F for semi afk auto play
+	
+*explain ammo burn and shrapnel, and how to convert it 
+	-Shrapnel converts to ammo at a rate of 101% - 95 shrapnel converts to 96. odd.
+	
+	- the next mining finder tool you will want to get is either the f105
+    -the f105 has a search range of 55 metres. this makes little difference
+    - because its a radius i suggest trying to overlap them by dropping probes roughly 85-95 meters apart
+	*Minerals, Enmatter, and Treasure
+	-theres three different types of loot you can find while mining, treasure is unique to planet arkadia so its not yet important.
+	-minerals and enmatter are fould all over the universe
+	*Depth
+	-more rare loot will be found at deeper depths, most consider this the most important stat of finder tools and mining. 
+	*Double and & tripple Dropping & Node Clusters
+	-when you find a node it is recommended you stop and drop another probe, as nodes seem to cluster
 -----------------------------------------------------------------------
-1.8- Chapter 2 - Making friends and completing The Gauntlet (team Instance)
+ Chapter 2- Making friends and completing The Gauntlet (team Instance)
 -----------------------------------------------------------------------
  - at this point we need someone to help do the gauntlet team instance.
  ask in local chat and in rookie chat and find someone to help you run it. 
@@ -78,13 +123,13 @@ Save them for later. we will go over why these Tokens are great later.
  -once you have succesfully completed gauntlet stage one and stage 2 and have recieved your vivos10 and free ammo reward
  
  ------------------------------------------------------------------------------------------------------------------------------------
- 1.9A- The Berycle Pit (optional)   - gives 1 impact penetration buff for 25min-
+ 2A- The Berycle Pit (optional)   - gives 1 impact penetration buff for 25min-
  -----------------------------------------------------------------------------------------------------------------------------------
  - requires some skill or - a friend to help.   
  If you bought a starter pack you may be able to handle it on your own, 
  otherwise it may be possible but there is a high risk of multiple deaths if a new colonist attempted this alone.
  ---------------------------------------------------------------
- 1.9B- Robot Beacon (optional team instance) (requires 3 people)
+ 2B- Robot Beacon (optional team instance) (requires 3 people)
  ----------------------------------------------------------------
    I recommend you save the instance key for later, its an instance similar to the gauntlet, however this key can only be used one time;
 		*!CAUTION!* - this instance rewards ALL OF THE LOOT in a chest at the end,  
@@ -96,7 +141,6 @@ Save them for later. we will go over why these Tokens are great later.
 		it may also be important to note that when doing team hunts or instances with shares loot, its generally suggested that;
 		  everyone uses the same weapons or dps to ensure fairness.
 
---------------------------------------
 Camp Icarus Chapter 3 - The Way To PA
 --------------------------------------
 
@@ -133,19 +177,11 @@ Find and talk to Ingrid J., Iron Puny Mission Broker, standing near the PA Offic
 Get inside the mall, use televator to top floor, get the Mall TP by running over it or operating it (useful since vehicles can be spawned on Mall roof)
 Get the regular PA TP
 * KARONA MISSION IS DISCONTINUED UNFORTUNATELY
-Talk to the TP Technician standing next to it (gives free additional TPs)
--------------------------------------------------------------------------------
-END OF EPISODE
-_______________________________________________________________________________
+Talk to the TP Technician standing next to it (this gives free additional TP's)
 
-
-
-_____________________________________________________________________________________________________________________________
-                                   EPISODE 3  
------------------------------------------------------------------------------------------------------------------------------
-    EXPLORING THE PLANET: PART 1
-------------------------------------------------------------------------------------------------------------------------------
-Chapter 4.5 - SWAMP CAMP  - [ Special Thanks to Droops - https://the-gladiators.forumotion.com/t667-beginner-mission-chains ]
+-chapter 2-
+    EXPLORING THE PLANET-
+  SWAMP CAMP  - [ Special Thanks to Droops - https://the-gladiators.forumotion.com/t667-beginner-mission-chains ]
 -----------------------------------------------------------------
 Swamp camp North {/wp [Calypso, 61965, 76182, 139, Swampo North]}:
 
@@ -174,7 +210,7 @@ Reward : Surveying skills
 (example: You have gained 1.4854 experience in your Surveying skill.)
 
 --------------------------------------------------------
-Chapter 6: FORT TROY
+Chapter 3: FORT TROY
 --------------------------------------------------------
   Go to Isle of Troy.
  -Use the shortcut TP plate in the NE corner.
@@ -231,22 +267,14 @@ This is a mission you can do without firing a shot. The reward will boost your f
 
 Now you can get the missing armor parts			  			  
 			  
-Teleport to Half Moon Cove
--------------------------------------------------------------------------------
-END OF EPISODE
-_______________________________________________________________________________
+Teleport to Half Moon Cove.
 
-_____________________________________________________________________________________________________________________________
-                                   EPISODE 4
------------------------------------------------------------------------------------------------------------------------------
-    EXPLORING THE PLANET: Part 2
-------------------------------------------------------------------------------------------------------------------------------
-----------------------------
+ (pause:3s)-Chapter 3-
 Chapter 7 - Half Moon Cove
-----------------------------
+
 Talk to Foreman Sanders, complete the chain. 
 If in team with your mentor, must be leader to be able to enter the sabakuma cave (Solo Instance anyway).
-       (((DISPLAY HOW TO SOLO SWUNT SABAKUMA, ,ALSO HOW TO TRAIN GRENADIER ON THEM)))
+       (DISPLAY HOW TO SOLO SWUNT SABAKUMA, ,ALSO HOW TO TRAIN GRENADIER ON THEM)
 	   
 Once you have completed the mission called "Kill it with Fire":
 ->Speak With Larchi  
@@ -278,47 +306,31 @@ explain and discuss daily terminal.
 explain terminals better some terminal and storage management thoughts and tips
 
 -display and discuss auctions, and minimal trading tips 
--------------------------------------------------------------------------------
-END OF EPISODE
-_______________________________________________________________________________
-_____________________________________________________________________________________________________________________________
-                                   EPISODE 4
------------------------------------------------------------------------------------------------------------------------------
-    EXPLORING THE PLANET: Part 3
-------------------------------------------------------------------------------------------------------------------------------
-
+ (pasue:2s)-Chapter 4-
  If you havent already, find the npc nearby to start "Find CDF Outpost Alpha" Mission chain
- 
 ->head to CDF OP Alpha:
  type  " /wp [Calypso, 61451, 87376, 142, CDF OP-Alpha] " into chat to recieve a waypoint.
-
  Further exploration on this path leads to Camp Phoenix where you can hunt snable-snots
  (a great low level hunting spot, it contains mobs with some great high markup loot that drops commonly)
  theres a handfull of other sidequests for you all along on the way, from Corinth to Pheonix, HOWEVER;
  You may want to save your ammunition for the Fort Sisyphus missions and do them first. Up to you.
  regardless I Recommend to continue and pick up any missions along the way.
-   
+ 
 -if you want to save some ammo, you can return to finish these missions later they arent going anywhere.
  The rewards are minimal and not very important. so dont worry. there is no rush for these yet. 
  
  Regardless you should follow the path anyway:
------------------------------------------------------------------
-
+ 
   If you dont have the Megavolt teleport unlocked already visit:
 	->  /wp [Calypso, 59080, 84466, 222, The Megavolt]
- 
   Continue to outpost delta:
 	->  /wp [Calypso, 60255, 84568, 109, CDF OP-Delta]
-
   Visit sharpclaw ridge
 	->  /wp [Calypso, 60641, 83831, 170, Sharpclaw Ridge]
- 
   Continue to CDF outpost Epsilon
 	->  /wp [Calypso, 60899, 82736, 113, CDF OP-Epsilon]
-	
   Continue to camp pheonix:
 	->  /wp [Calypso, 62484, 82573, 369, Camp Pheonix]
-
 *If you havent made any deposits or bought a starter pack yet, pick up the camp pheonix missions, but you may want to wait to complete them*
   the snable snots are a great low level mob and have some great common markup loot drops -
   
@@ -329,50 +341,32 @@ ________________________________________________________________________________
  *if You do not have Orthos West Mount teleport unlocked, Tp to camp Icarus instead, and follow the road leaving the camp to the north
  travel on foot and continue north until you arrive at Orthos. 
 for a waypoint to the destination simply type " /wp [Calypso, 64096, 77244, 109, Orthos West Mound] " into the chat.
--------------------------------------------------------------------------------
-END OF EPISODE
-_______________________________________________________________________________
-_____________________________________________________________________________________________________________________________
-                                   EPISODE 5
------------------------------------------------------------------------------------------------------------------------------
-    CDF NEEDS HELP AT FORT SIPHILIS- 
------------------------------------------------------------------------------------------------------------------------------
-----------------------------------------
-  Chapter 8 - Orthos to Fort Siphilis
------------------------------------------
+Chapter 5-
+    Orthos to Fort Siphilis
 Although your currently fairly close to Fort Siphilis
 -teleport to Orthos West Mount north of Camp Icarus (near the pvp zone)
-  
  *if You do not have Orthos West Mount teleport unlocked, Tp to camp Icarus instead, and follow the road leaving the camp to the north
  travel on foot and continue north until you arrive at Orthos. 
 for a waypoint to the destination simply type " /wp [Calypso, 64096, 77244, 109, Orthos West Mound] " into the chat.
---------------------------------------------------------------
-CUTSCENE:
-          (Visit the rig for the viewer.)
-(((share some history about Orthers Oil Rig and screenshots)))
----------------------------------------------------------------
 
-(((Continue guide:)))
+          (Visit Orthos rig for the viewer.)
+(share some history about Orthers Oil Rig and screenshots)))
 
 -Speak to the Cdf Scout to get teleported to Fort Sisyphus
-
---------------------------------------------------------------------------------------------------------------------------------------
 CUTSCENE:
-((((welcome to fort Sisyphus, surrounded by low level robots - its a prime location for a low level hunter
+(welcome to fort Sisyphus, surrounded by low level robots - its a prime location for a low level hunter)
 - this is one of; if not, the best spot to hunt for low level weapons - 
-weapons such as the azuro, ep2, rubio, lancehead and b101 amp laser weapon attachments are looted from the surrounding robots commonly))))
----------------------------------------------------------------------------------------------------------------------------------------
+weapons such as the azuro, ep2, rubio, lancehead and b101 amp laser weapon attachments are looted from the surrounding robots commonly.
 
 -Talk to Captain Atreida in Fort Sisyphus: 
     accept and finish all 4 stages of "Holding Fort Sisyphus" for the missing 4 pieces of your CDF Scout armor set. 
 This may prove to be very difficult for a new player on their own,It is recomended to have your Mentor help you with this.
  if your mentory is unfortunately unable to help at this time and you dont want to wait,and you have no online friends you have made
 along the way yet, consider asking in rookie chat for help.
---------------------------------------------------------------------------------------------------------------------------------------
+
 CUTSCENE:
-((((talk about fort defence events, wall repairing, and their boss mobs))))) 
----------------------------------------------------------------------------------------------------------------------------------------
------------------------------------
+(talk about fort defence events, wall repairing, and their boss mobs)
+
 Chapter 9 - Spiff up the spare rifle
 -----------------------------------
 By now your skills should be good enough that you can use the Adjusted Bukins Rifle 
@@ -381,12 +375,8 @@ By now your skills should be good enough that you can use the Adjusted Bukins Ri
 to upgrade the rifle, go to Fort Sisyphus:
  Atreida should give you the mission to enhance Bukin's Spare Rifle.
  Engineer Paula is in Half Moon Cove.
- 
--------------------------------------------------------------------------------
-END OF EPISODE
-_______________________________________________________________________________
-_____________________________________________________________________________________________________________________________
-                                   EPISODE 6
+ However I recommend you Avoid the upgrade, as it can be hard to find good low damage weapons.
+
 -----------------------------------------------------------------------------------------------------------------------------
         CLEANING UP FORT LAHAR 
 -----------------------------------------------------------------------------------------------------------------------------
