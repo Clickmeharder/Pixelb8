@@ -1,0 +1,11 @@
+[Jaedraze]
+Name: Jimmy Jimbobbityboo Bo-bobbity
+HP: 241
+DPS: 50
+Planet: Monria Moon
+
+[cory step]
+Name: Jondlar
+HP: 240
+DPS: 50
+Planet: Calypso
