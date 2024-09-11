@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marble Race Winners</title>
+</head>
+<body>
+    <h1>Marble Race Prize Winners</h1>
+    <table id="winnersTable" border="1">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Winner Name</th>
+                <th>Amount</th>
+                <th>Prize</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        function loadCSVFile() {
+            const csvPath = 'data/JaedrazeTTV-EU-viewerPrizelist.txt';  // relative path to the CSV file
+            fetch(csvPath)
+                .then(response => response.text())
+                .then(data => {
+                    const rows = data.split('\n');
+                    const tableBody = document.querySelector('#winnersTable tbody');
+
+                    rows.forEach(row => {
+                        const columns = row.split(',');
+                        if (columns.length === 5) { // Adjust for 5 columns: Date, Winner Name, Amount, Prize, Status
+                            const tableRow = document.createElement('tr');
+                            columns.forEach(column => {
+                                const cell = document.createElement('td');
+                                cell.textContent = column.trim();
+                                tableRow.appendChild(cell);
+                            });
+                            tableBody.appendChild(tableRow);
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading CSV file:', error));
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCSVFile);
+    </script>
+</body>
+</html>
