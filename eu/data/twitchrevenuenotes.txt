@@ -1,0 +1,30 @@
+          Ad Revenue Allocation Plan
+----------------------------------------------------------------------------------
+Once you receive your payout, divide it as follows:
+
+Uncertainty Buffer: 15%
+	Purpose: To cover unforeseen costs, taxes, or small fluctuations in revenue.
+
+Profit Buffer: 15%
+	Purpose: To ensure you’re consistently generating profit each month.
+
+SuS Fund: 70%
+Purpose: REDACTED.
+__________________________________________________________________________________
+
+
+
+Current Twitch Revenue Allocations
+--------------------------------
+Twitch Marble Race and Event Budget Plan
+
+Current Daily Marble Race Budget:
+	Amount: 5-15 PED per day
+	Monthly Total: 150-300 PED per month (equivalent to $15-30 USD)
+
+SuS Fund:
+ad revenue: increase 70% of revenue after deposit
+Contribution: 0.03 PED per 1 bit cheered
+
+Next Marble Race Prize
+Increase: 0.01 PED per 1 bit cheered
