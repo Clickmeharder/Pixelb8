@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="icon" type="image/png" href="../../assets/images/logo/pixelbotfavicon.png">
-	<link rel="stylesheet" href="../../core/css/pixelb8-default.css">
-	<link rel="stylesheet" href="../../Modules/SuSOS/core/css/SuSOS-default.css">
+    <link rel="icon" type="image/png" href="../../assets/images/logo/pixelbotfavicon.png">
+    <link rel="stylesheet" href="../../core/css/pixelb8-default.css">
+    <link rel="stylesheet" href="../../Modules/SuSOS/core/css/SuSOS-default.css">
     <title>Marble Race Winners</title>
 </head>
-<body style="color:#2775a7; background-image: url('https://pixelb8.lol/assets/images/ads/ads15.jpeg');>
+<body style="color:#2775a7; background-image: url('https://pixelb8.lol/assets/images/ads/ads15.jpeg');">
     <h1 style="color:#2775a7;">Marble Race Prize Winners</h1>
     <table id="winnersTable" border="1">
         <thead>
@@ -36,8 +36,13 @@
 
                     rows.forEach(row => {
                         const columns = row.split(',');
-                        if (columns.length === 5) { // Adjust for 5 columns: Date, Winner Name, Amount, Prize, Status
+                        if (columns.length === 5) { // Ensure 5 columns: Date, Winner Name, Amount, Prize, Status
                             const tableRow = document.createElement('tr');
+                            // Check the status column (last column) to see if it's "claimed"
+                            if (columns[4].trim().toLowerCase() === 'claimed') {
+                                tableRow.style.backgroundColor = 'red'; // Set background color for claimed items
+                            }
+
                             columns.forEach(column => {
                                 const cell = document.createElement('td');
                                 cell.textContent = column.trim();
