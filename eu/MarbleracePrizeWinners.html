@@ -48,23 +48,28 @@
                         const columns = row.split(',');
                         if (columns.length === 5) { // Ensure 5 columns: Date, Winner Name, Amount, Prize, Status
                             const tableRow = document.createElement('tr');
-                            
-                            // Check the status column (last column) to see if it's "claimed"
-                            if (columns[4].trim().toLowerCase() === 'claimed') {
-								tableRow.querySelectorAll('td').forEach(cell => {
-									cell.style.backgroundColor = 'green';  // Set background color for claimed items
-								});
-							} else if (columns[4].trim().toLowerCase() === 'unclaimed') {
-								tableRow.querySelectorAll('td').forEach(cell => {
-									cell.style.backgroundColor = 'red';  // Set background color for unclaimed items
-								});
-							}
 
-                            columns.forEach(column => {
+                            // Apply background color to the <tr> based on the Status column
+                            if (columns[4].trim().toLowerCase() === 'claimed') {
+                                tableRow.style.backgroundColor = '#6e6d6d8a';  // Light green for claimed rows
+                            } else if (columns[4].trim().toLowerCase() === 'unclaimed') {
+                                tableRow.style.backgroundColor = '#70200a66';  // Light red for unclaimed rows
+                            }
+                            
+                            columns.forEach((column, index) => {
                                 const cell = document.createElement('td');
                                 cell.textContent = column.trim();
+                                
+                                // Apply background color to each <td> based on the Status column
+                                if (columns[4].trim().toLowerCase() === 'claimed') {
+                                    cell.style.Color = index === 4 ? '#a6d5a9' : '#444';  // Darker green for "claimed" cells
+                                } else if (columns[4].trim().toLowerCase() === 'unclaimed') {
+                                    cell.style.Color = index === 4 ? '##444' : 'orange';  // Darker red for "unclaimed" cells
+                                }
+
                                 tableRow.appendChild(cell);
                             });
+
                             tableBody.appendChild(tableRow);
                         }
                     });
