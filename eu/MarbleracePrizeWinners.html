@@ -48,24 +48,25 @@
                         const columns = row.split(',');
                         if (columns.length === 5) { // Ensure 5 columns: Date, Winner Name, Amount, Prize, Status
                             const tableRow = document.createElement('tr');
+                            
                             // Check the status column (last column) to see if it's "claimed"
                             if (columns[4].trim().toLowerCase() === 'claimed') {
-                                tableRow.style.Color = 'green'; // Set background color for claimed items
-								else if (columns[4].trim().toLowerCase() === 'unclaimed') {;
-									tableRow.style.Color = 'red'; 
-								}
+                                tableRow.style.backgroundColor = 'green'; // Set background color for claimed items
+                            } else if (columns[4].trim().toLowerCase() === 'unclaimed') {
+                                tableRow.style.backgroundColor = 'red'; // Set background color for unclaimed items
+                            }
 
-								columns.forEach(column => {
-									const cell = document.createElement('td');
-									cell.textContent = column.trim();
-									tableRow.appendChild(cell);
-								});
-								tableBody.appendChild(tableRow);
-							}
-						});
-					})
-					.catch(error => console.error('Error loading CSV file:', error));
-			}
+                            columns.forEach(column => {
+                                const cell = document.createElement('td');
+                                cell.textContent = column.trim();
+                                tableRow.appendChild(cell);
+                            });
+                            tableBody.appendChild(tableRow);
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading CSV file:', error));
+        }
 
         document.addEventListener('DOMContentLoaded', loadCSVFile);
     </script>
