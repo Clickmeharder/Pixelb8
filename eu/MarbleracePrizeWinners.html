@@ -50,20 +50,22 @@
                             const tableRow = document.createElement('tr');
                             // Check the status column (last column) to see if it's "claimed"
                             if (columns[4].trim().toLowerCase() === 'claimed') {
-                                tableRow.style.backgroundColor = 'red'; // Set background color for claimed items
-                            }
+                                tableRow.style.Color = 'green'; // Set background color for claimed items
+								else if (columns[4].trim().toLowerCase() === 'unclaimed') {;
+									tableRow.style.Color = 'red'; 
+								}
 
-                            columns.forEach(column => {
-                                const cell = document.createElement('td');
-                                cell.textContent = column.trim();
-                                tableRow.appendChild(cell);
-                            });
-                            tableBody.appendChild(tableRow);
-                        }
-                    });
-                })
-                .catch(error => console.error('Error loading CSV file:', error));
-        }
+								columns.forEach(column => {
+									const cell = document.createElement('td');
+									cell.textContent = column.trim();
+									tableRow.appendChild(cell);
+								});
+								tableBody.appendChild(tableRow);
+							}
+						});
+					})
+					.catch(error => console.error('Error loading CSV file:', error));
+			}
 
         document.addEventListener('DOMContentLoaded', loadCSVFile);
     </script>
