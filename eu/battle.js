@@ -65,11 +65,14 @@ function startBattle() {
     }
 
     const player = players[currentPlayerIndex];
-    const attackPower = 1; // Each player does 1 damage per attack
+    const attackPower = 10; // Each player does 10 damage per attack
     bossHP -= attackPower;
 
     // Update boss HP display
     bossHPElement.textContent = Math.max(bossHP, 0); // Ensure boss HP doesn't go below 0
+
+    // Append system message when a player attacks the boss
+    appendSystemMessage(`${player.name} attacks the boss for ${attackPower} damage!`);
 
     // Visual feedback (e.g., change boss color briefly)
     document.getElementById('boss').style.borderColor = '#f00'; // Red flash
@@ -102,6 +105,9 @@ function bossAttack() {
 
   const damage = Math.floor(Math.random() * 6) + 5; // Boss deals 5-10 damage
   player.hp -= damage;
+
+  // Append system message when the boss attacks a player
+  appendSystemMessage(`Boss attacks ${player.name} for ${damage} damage!`);
 
   // Update player's HP display
   player.playerHP.innerText = `HP: ${Math.max(player.hp, 0)}`; // Ensure HP doesn't go below 0
