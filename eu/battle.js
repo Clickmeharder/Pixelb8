@@ -23,7 +23,7 @@ function generatePlayers(playerNames) {
     
     const player = document.createElement('div');
     player.classList.add('player');
-    player.style.backgroundImage = `url('https//:pixelb8.lol/assets/images/icons/avatarwavingg.png')`; // Replace with your player image
+	player.style.backgroundImage = `url('assets/images/avatarwavingg.png')`; // Replace with your player image
     player.style.top = `${Math.random() * 400}px`;
     player.style.left = `${Math.random() * 600}px`;
 
