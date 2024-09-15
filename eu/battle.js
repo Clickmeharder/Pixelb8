@@ -54,7 +54,7 @@ function generatePlayers(playerNames) {
   document.getElementById('startBattleButton').disabled = false;
 }
 
-// Attack boss one player at a time
+// Attack boss one player at a time, and the boss attacks players
 function startBattle() {
   let currentPlayerIndex = 0;
 
@@ -77,14 +77,45 @@ function startBattle() {
     }, 500);
 
     currentPlayerIndex++;
+
     if (bossHP > 0) {
-      setTimeout(attackNextPlayer, 1000); // Move to next player after 1 second
+      setTimeout(() => {
+        // Boss attacks a random player
+        bossAttack();
+        if (bossHP > 0) {
+          setTimeout(attackNextPlayer, 1000); // Move to next player after 1 second
+        }
+      }, 1000); // Boss takes turn after player's attack
     } else {
       alert('Boss Defeated!');
     }
   }
 
   attackNextPlayer();
+}
+
+// Boss attacks a random player
+function bossAttack() {
+  const randomPlayerIndex = Math.floor(Math.random() * players.length);
+  const player = players[randomPlayerIndex];
+
+  const damage = Math.floor(Math.random() * 6) + 5; // Boss deals 5-10 damage
+  player.hp -= damage;
+
+  // Update player's HP display
+  player.playerHP.innerText = `HP: ${Math.max(player.hp, 0)}`; // Ensure HP doesn't go below 0
+
+  // Visual feedback (e.g., change player border color to red briefly)
+  player.playerContainer.style.borderColor = '#f00'; // Red flash
+  setTimeout(() => {
+    player.playerContainer.style.borderColor = '#4caf50'; // Back to green
+  }, 500);
+
+  // Check if the player is defeated
+  if (player.hp <= 0) {
+    player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
+    alert(`${player.name} has been defeated!`);
+  }
 }
 
 // Initialize file input and button functionality
