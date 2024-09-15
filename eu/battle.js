@@ -1,5 +1,5 @@
 let players = [];
-let bossHP = 1000; // Boss HP
+let bossHP = 350; // Boss HP
 const bossHPElement = document.getElementById('boss-hp');
 const systemMessagesElement = document.getElementById('systemMessages');
 const headerMessagesElement = document.getElementById('headerTexts');
