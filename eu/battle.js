@@ -2,7 +2,7 @@ let players = [];
 let bossHP = 1000; // Boss HP
 const bossHPElement = document.getElementById('boss-hp');
 const systemMessagesElement = document.getElementById('systemMessages');
-const gameMessageElement = document.getElementById('gamemessage'); // Game message for end of battle
+const headerMessagesElement = document.getElementById('headerTexts');
 const maxBossHP = 1000; // The maximum HP the boss can heal to
 
 // Handle the file upload and parse player names
@@ -18,7 +18,7 @@ function handleFileUpload(event) {
     reader.readAsText(file); // Read the file content as text
   }
 }
-
+r
 // Add player images, names, and HP to the page
 function generatePlayers(playerNames) {
   const playersDiv = document.getElementById('players');
@@ -96,7 +96,8 @@ function startBattle() {
         }
       }, 1000); // Boss takes turn after player's attack
     } else {
-      bossDefeated(); // Call the function when the boss is defeated
+      appendSystemMessage('Boss Defeated!');
+	  setgameMessage('Boss Defeated!');
     }
   }
 
@@ -147,7 +148,7 @@ function bossAttack() {
     if (player.hp <= 0) {
       player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
       appendSystemMessage(`${player.name} has been defeated!`);
-      checkForAllPlayersDefeated(); // Check if all players are defeated
+	  setgameMessage('All Plavers have been Defeated!');
     }
 
   } else if (randomAttack === 1) {
@@ -169,13 +170,12 @@ function bossAttack() {
       if (player.hp <= 0) {
         player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
         appendSystemMessage(`${player.name} has been defeated!`);
+		
       }
     });
 
     // Append system message for area attack
     appendSystemMessage(`Boss uses area attack, damaging all players for ${areaDamage} damage!`);
-
-    checkForAllPlayersDefeated(); // Check if all players are defeated
 
   } else if (randomAttack === 2) {
     // Self-heal: Boss heals 1-10 HP
@@ -190,21 +190,6 @@ function bossAttack() {
   }
 }
 
-// Check if all players are defeated
-function checkForAllPlayersDefeated() {
-  const allPlayersDefeated = players.every(player => player.hp <= 0);
-  if (allPlayersDefeated) {
-    gameMessageElement.innerHTML = "<h2>Players Defeated</h2>";
-    appendSystemMessage("All players have been defeated! The boss wins.");
-  }
-}
-
-// Handle the boss defeated scenario
-function bossDefeated() {
-  gameMessageElement.innerHTML = "<h2>Boss Defeated</h2>";
-  appendSystemMessage("Congratulations! The boss has been defeated.");
-}
-
 // Function to append system messages to the system messages box
 function appendSystemMessage(message) {
   const messageElement = document.createElement('div');
@@ -214,7 +199,13 @@ function appendSystemMessage(message) {
   // Scroll to the bottom of the messages box
   systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight;
 }
+// Function to append system messages to the system messages box
+function setgameMessage(message) {
+  const gameMessage = document.createElement('div');
+  gameMessage.innerText = message;
+  headerMessagesElement.appendChild(gameMessage);
+}
 
 // Initialize file input and button functionality
 document.getElementById('fileInput').addEventListener('change', handleFileUpload);
-document.getElementById('startBattleButton').addEventListener
+document.getElementById('startBattleButton').addEventListener('click', startBattle);
