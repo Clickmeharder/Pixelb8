@@ -16,7 +16,7 @@ function handleFileUpload(event) {
   }
 }
 
-// Add player images and names to the page
+// Add player images, names, and HP to the page
 function generatePlayers(playerNames) {
   const playersDiv = document.getElementById('players');
   playersDiv.innerHTML = ''; // Clear existing players
@@ -34,14 +34,20 @@ function generatePlayers(playerNames) {
     playerName.innerText = name;
     playerName.classList.add('player-name');
 
-    // Append player and name to the container
+    // Create a span to hold the player's HP
+    const playerHP = document.createElement('span');
+    playerHP.innerText = 'HP: 100'; // Default HP for each player
+    playerHP.classList.add('player-hp');
+
+    // Append player, name, and HP to the container
     playerContainer.appendChild(player);
     playerContainer.appendChild(playerName);
+    playerContainer.appendChild(playerHP);
 
     // Append player container to the playersDiv
     playersDiv.appendChild(playerContainer);
 
-    return { name, playerContainer };
+    return { name, playerContainer, playerHP, hp: 100 }; // Store player's HP
   });
 
   // Enable the Start Battle button
@@ -58,7 +64,7 @@ function startBattle() {
     }
 
     const player = players[currentPlayerIndex];
-    const attackPower = 1; // Each player does 100 damage per attack
+    const attackPower = 1; // Each player does 1 damage per attack
     bossHP -= attackPower;
 
     // Update boss HP display
