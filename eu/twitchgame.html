@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Twitch Battle</title>
+  <title>Twitch Colonists</title>
   <style>
     body {
       display: flex;
@@ -104,16 +102,26 @@
       width: 80%;
     }
   </style>
-</head>
+<style type="text/css" id="operaUserStyle"></style></head>
 <body>
-  <div id="pagetitle">EuColonizes Twitch</div>
   <div id="fileInputContainer">
     <input type="file" id="fileInput" accept=".txt">
     <button id="loadPlayersButton">Load Players</button>
   </div>
- <!-- Start Battle Button -->
+<!-- Start Battle Button --><div id="battleControl">
+    <button id="startBattleButton" disabled="">Start Battle</button>
+</div>
+<div id="pagetitle" style="
+    font-size: 64px;
+    font-family: lucida console;
+    color: teal;
+    border: 3px ridge teal;
+    text-align: center;
+">Twitch Colonists</div>
+  
+ 
   <div id="battleControl">
-    <button id="startBattleButton" disabled>Start Battle</button>
+    <button id="startBattleButton" disabled="">Start Battle</button>
   </div>
   <div id="headerTexts"></div>
   <!-- Boss Section -->
@@ -128,5 +136,6 @@
   <div id="systemMessages"></div>
   <script src="battle.js"></script>
 
-</body>
-</html>
+
+
+</body></html>
