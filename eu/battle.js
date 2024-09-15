@@ -1,6 +1,7 @@
 let players = [];
 let bossHP = 1000; // Boss HP
 const bossHPElement = document.getElementById('boss-hp');
+const systemMessagesElement = document.getElementById('systemMessages');
 
 // Handle the file upload and parse player names
 function handleFileUpload(event) {
@@ -87,7 +88,7 @@ function startBattle() {
         }
       }, 1000); // Boss takes turn after player's attack
     } else {
-      alert('Boss Defeated!');
+      appendSystemMessage('Boss Defeated!');
     }
   }
 
@@ -114,8 +115,18 @@ function bossAttack() {
   // Check if the player is defeated
   if (player.hp <= 0) {
     player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
-    alert(`${player.name} has been defeated!`);
+    appendSystemMessage(`${player.name} has been defeated!`);
   }
+}
+
+// Function to append system messages to the system messages box
+function appendSystemMessage(message) {
+  const messageElement = document.createElement('div');
+  messageElement.innerText = message;
+  systemMessagesElement.appendChild(messageElement);
+
+  // Scroll to the bottom of the messages box
+  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight;
 }
 
 // Initialize file input and button functionality

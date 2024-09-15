@@ -93,6 +93,16 @@
 	  margin-top: 5px;
 	  color: #f0f0f0; /* Light text color */
 	}
+	#systemMessages {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #4caf50;
+      border-radius: 5px;
+      background-color: #2e2e2e; /* Dark grey background for messages */
+      max-height: 200px;
+      overflow-y: auto;
+      width: 80%;
+    }
   </style>
 </head>
 <body>
@@ -114,7 +124,7 @@
 
   <!-- Player Section -->
   <div id="players"></div>
-
+  <div id="systemMessages"></div>
   <script src="battle.js"></script>
 
 </body>
