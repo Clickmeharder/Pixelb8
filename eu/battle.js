@@ -2,6 +2,7 @@ let players = [];
 let bossHP = 1000; // Boss HP
 const bossHPElement = document.getElementById('boss-hp');
 const systemMessagesElement = document.getElementById('systemMessages');
+const maxBossHP = 1000; // The maximum HP the boss can heal to
 
 // Handle the file upload and parse player names
 function handleFileUpload(event) {
@@ -98,30 +99,70 @@ function startBattle() {
   attackNextPlayer();
 }
 
-// Boss attacks a random player
+// Boss attacks with one of three options
 function bossAttack() {
-  const randomPlayerIndex = Math.floor(Math.random() * players.length);
-  const player = players[randomPlayerIndex];
+  const randomAttack = Math.floor(Math.random() * 3); // Generate a number between 0 and 2
 
-  const damage = Math.floor(Math.random() * 6) + 5; // Boss deals 5-10 damage
-  player.hp -= damage;
+  if (randomAttack === 0) {
+    // Default attack: Boss attacks a random player
+    const randomPlayerIndex = Math.floor(Math.random() * players.length);
+    const player = players[randomPlayerIndex];
+    const damage = Math.floor(Math.random() * 6) + 5; // Boss deals 5-10 damage
+    player.hp -= damage;
 
-  // Append system message when the boss attacks a player
-  appendSystemMessage(`Boss attacks ${player.name} for ${damage} damage!`);
+    // Append system message when the boss attacks a player
+    appendSystemMessage(`Boss attacks ${player.name} for ${damage} damage!`);
 
-  // Update player's HP display
-  player.playerHP.innerText = `HP: ${Math.max(player.hp, 0)}`; // Ensure HP doesn't go below 0
+    // Update player's HP display
+    player.playerHP.innerText = `HP: ${Math.max(player.hp, 0)}`; // Ensure HP doesn't go below 0
 
-  // Visual feedback (e.g., change player border color to red briefly)
-  player.playerContainer.style.borderColor = '#f00'; // Red flash
-  setTimeout(() => {
-    player.playerContainer.style.borderColor = '#4caf50'; // Back to green
-  }, 500);
+    // Visual feedback (e.g., change player border color to red briefly)
+    player.playerContainer.style.borderColor = '#f00'; // Red flash
+    setTimeout(() => {
+      player.playerContainer.style.borderColor = '#4caf50'; // Back to green
+    }, 500);
 
-  // Check if the player is defeated
-  if (player.hp <= 0) {
-    player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
-    appendSystemMessage(`${player.name} has been defeated!`);
+    // Check if the player is defeated
+    if (player.hp <= 0) {
+      player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
+      appendSystemMessage(`${player.name} has been defeated!`);
+    }
+
+  } else if (randomAttack === 1) {
+    // Area attack: Boss damages all players for 1-10 damage
+    const areaDamage = Math.floor(Math.random() * 10) + 1;
+    players.forEach(player => {
+      player.hp -= areaDamage;
+
+      // Update player's HP display
+      player.playerHP.innerText = `HP: ${Math.max(player.hp, 0)}`;
+
+      // Visual feedback for all players
+      player.playerContainer.style.borderColor = '#f00'; // Red flash
+      setTimeout(() => {
+        player.playerContainer.style.borderColor = '#4caf50'; // Back to green
+      }, 500);
+
+      // Check if the player is defeated
+      if (player.hp <= 0) {
+        player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
+        appendSystemMessage(`${player.name} has been defeated!`);
+      }
+    });
+
+    // Append system message for area attack
+    appendSystemMessage(`Boss uses area attack, damaging all players for ${areaDamage} damage!`);
+
+  } else if (randomAttack === 2) {
+    // Self-heal: Boss heals 1-10 HP
+    const healAmount = Math.floor(Math.random() * 10) + 1;
+    bossHP = Math.min(bossHP + healAmount, maxBossHP); // Boss can't heal beyond max HP
+
+    // Update boss HP display
+    bossHPElement.textContent = bossHP;
+
+    // Append system message for self-heal
+    appendSystemMessage(`Boss heals itself for ${healAmount} HP!`);
   }
 }
 
