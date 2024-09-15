@@ -1,7 +1,4 @@
-2024-09-10 2:59 AM, jaedraze, 1, test prize, claimed
-2024-09-10 4:14 AM, viahk, 1, testprize, unclaimed
-2024-09-10 4:17 AM, jaedraze, 1, testprize, claimed
-2024-09-10 4:21 AM, jaedraze, 12, testprize, claimed
+2024-09-10 4:14 AM, viahk, 1, rubio, unclaimed
 2024-09-13 2:14 AM, gosu_rival, 1, rubio, unclaimed
 2024-09-13 12:07 PM, speechy23, 2.81, ped, claimed
 2024-09-14 5:00 PM, immortaltimp, 3.05, ped, unclaimed
