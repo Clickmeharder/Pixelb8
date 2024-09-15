@@ -3,7 +3,7 @@ let bossHP = 350; // Boss HP
 const bossHPElement = document.getElementById('boss-hp');
 const systemMessagesElement = document.getElementById('systemMessages');
 const headerMessagesElement = document.getElementById('headerTexts');
-const maxBossHP = 1000; // The maximum HP the boss can heal to
+const maxBossHP = 500; // The maximum HP the boss can heal to
 
 // Handle the file upload and parse player names
 function handleFileUpload(event) {
