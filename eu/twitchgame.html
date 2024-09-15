@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twitch Battle</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-color: #f0f0f0;
+      height: 100vh;
+    }
+    #boss {
+      width: 200px;
+      height: 200px;
+      background-image: url('boss_image.png'); /* Replace with your boss image */
+      background-size: cover;
+      margin-bottom: 50px;
+      position: relative;
+    }
+    .player {
+      width: 50px;
+      height: 50px;
+      background-size: cover;
+      margin: 5px;
+      position: absolute;
+    }
+    #fileInputContainer {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="fileInputContainer">
+    <input type="file" id="fileInput" accept=".txt">
+    <button id="loadPlayersButton">Load Players</button>
+  </div>
+
+  <div id="boss"></div>
+  <div id="players"></div>
+
+  <script src="battle.js"></script>
+
+</body>
+</html>
