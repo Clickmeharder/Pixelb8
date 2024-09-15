@@ -66,20 +66,23 @@ function startBattle() {
     }
 
     const player = players[currentPlayerIndex];
-    const attackPower = 10; // Each player does 10 damage per attack
-    bossHP -= attackPower;
+    const randomPlayerAction = Math.floor(Math.random() * 3); // Generate random action for player (0, 1, or 2)
 
-    // Update boss HP display
-    bossHPElement.textContent = Math.max(bossHP, 0); // Ensure boss HP doesn't go below 0
-
-    // Append system message when a player attacks the boss
-    appendSystemMessage(`${player.name} attacks the boss for ${attackPower} damage!`);
-
-    // Visual feedback (e.g., change boss color briefly)
-    document.getElementById('boss').style.borderColor = '#f00'; // Red flash
-    setTimeout(() => {
-      document.getElementById('boss').style.borderColor = '#4caf50'; // Back to green
-    }, 500);
+    if (randomPlayerAction === 0) {
+      // Default attack
+      playerAttackBoss(player, 10); // Each player does 10 damage per attack
+    } else if (randomPlayerAction === 1) {
+      // Double attack
+      appendSystemMessage(`${player.name} attacks the boss twice!`);
+      playerAttackBoss(player, 10); // First attack
+      playerAttackBoss(player, 10); // Second attack
+    } else if (randomPlayerAction === 2) {
+      // Player heals
+      const healAmount = Math.floor(Math.random() * 6); // Heal 0-5 HP
+      player.hp = Math.min(player.hp + healAmount, 100); // Max HP is 100
+      player.playerHP.innerText = `HP: ${player.hp}`; // Update player's HP display
+      appendSystemMessage(`${player.name} heals for ${healAmount} HP!`);
+    }
 
     currentPlayerIndex++;
 
@@ -97,6 +100,23 @@ function startBattle() {
   }
 
   attackNextPlayer();
+}
+
+// Player attacks boss with damage
+function playerAttackBoss(player, damage) {
+  bossHP -= damage;
+
+  // Update boss HP display
+  bossHPElement.textContent = Math.max(bossHP, 0); // Ensure boss HP doesn't go below 0
+
+  // Append system message when a player attacks the boss
+  appendSystemMessage(`${player.name} attacks the boss for ${damage} damage!`);
+
+  // Visual feedback (e.g., change boss color briefly)
+  document.getElementById('boss').style.borderColor = '#f00'; // Red flash
+  setTimeout(() => {
+    document.getElementById('boss').style.borderColor = '#4caf50'; // Back to green
+  }, 500);
 }
 
 // Boss attacks with one of three options
