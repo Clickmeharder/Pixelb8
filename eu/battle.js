@@ -12,20 +12,18 @@ function handleFileUpload(event) {
   }
 }
 
-// Add player images and names to the page and animate them
+// Add player images and names to the page (no animations)
 function generatePlayers(playerNames) {
   const playersDiv = document.getElementById('players');
   playersDiv.innerHTML = ''; // Clear existing players
 
-  playerNames.forEach((name, index) => {
+  playerNames.forEach((name) => {
     const playerContainer = document.createElement('div');
     playerContainer.classList.add('player-container');
     
     const player = document.createElement('div');
     player.classList.add('player');
-	player.style.backgroundImage = `url('data/images/avatarwavingg.png')`; // Replace with your player image
-    player.style.top = `${Math.random() * 400}px`;
-    player.style.left = `${Math.random() * 600}px`;
+    player.style.backgroundImage = `url('assets/images/avatarwavingg.png')`; // Replace with your player image
 
     // Create a span to hold the player's name
     const playerName = document.createElement('span');
@@ -38,30 +36,8 @@ function generatePlayers(playerNames) {
 
     // Append player container to the playersDiv
     playersDiv.appendChild(playerContainer);
-
-    // Animate players attacking boss
-    animatePlayer(player);
   });
 }
 
-// Simple animation function for players
-function animatePlayer(player) {
-  let posX = 0;
-  let posY = 0;
-  const boss = document.getElementById('boss');
-  const bossRect = boss.getBoundingClientRect();
-
-  const interval = setInterval(() => {
-    const playerRect = player.getBoundingClientRect();
-    if (playerRect.left >= bossRect.left && playerRect.top >= bossRect.top) {
-      clearInterval(interval); // Stop when near boss
-      player.style.backgroundColor = 'red'; // Indicate hit
-    } else {
-      player.style.left = `${posX += 5}px`;
-      player.style.top = `${posY += 5}px`;
-    }
-  }, 100);
-}
-
-// Initialize file input and button functionality
+// Initialize file input functionality
 document.getElementById('fileInput').addEventListener('change', handleFileUpload);
