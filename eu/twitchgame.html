@@ -5,32 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Twitch Battle</title>
   <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      background-color: #f0f0f0;
-      height: 100vh;
-    }
-    #boss {
-      width: 200px;
-      height: 200px;
-      background-image: url('boss_image.png'); /* Replace with your boss image */
-      background-size: cover;
-      margin-bottom: 50px;
-      position: relative;
-    }
-    .player {
-      width: 50px;
-      height: 50px;
-      background-size: cover;
-      margin: 5px;
-      position: absolute;
-    }
-    #fileInputContainer {
-      margin-bottom: 20px;
-    }
+	  body {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		background-color: #f0f0f0;
+		height: 100vh;
+	  }
+
+	  #boss {
+		width: 200px;
+		height: 200px;
+		background-image: url('https//:pixelb8.lol/assets/images/icons/msagent-3.png'); /* Replace with your boss image */
+		background-size: cover;
+		margin-bottom: 50px;
+		position: relative;
+	  }
+
+	  .player-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		position: absolute;
+	  }
+
+	  .player {
+		width: 50px;
+		height: 50px;
+		background-size: cover;
+		margin: 5px;
+		position: relative;
+	  }
+
+	  .player-name {
+		font-size: 12px;
+		margin-top: 5px;
+		text-align: center;
+		color: #333;
+	  }
   </style>
 </head>
 <body>

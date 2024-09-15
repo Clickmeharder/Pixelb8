@@ -12,21 +12,35 @@ function handleFileUpload(event) {
   }
 }
 
-// Add player images to the page and animate them
+// Add player images and names to the page and animate them
 function generatePlayers(playerNames) {
   const playersDiv = document.getElementById('players');
   playersDiv.innerHTML = ''; // Clear existing players
 
   playerNames.forEach((name, index) => {
+    const playerContainer = document.createElement('div');
+    playerContainer.classList.add('player-container');
+    
     const player = document.createElement('div');
     player.classList.add('player');
-    player.style.backgroundImage = `url('player_image.png')`; // Replace with your player image
+    player.style.backgroundImage = `url('https//:pixelb8.lol/assets/images/icons/avatarwavingg.png')`; // Replace with your player image
     player.style.top = `${Math.random() * 400}px`;
     player.style.left = `${Math.random() * 600}px`;
-    
+
+    // Create a span to hold the player's name
+    const playerName = document.createElement('span');
+    playerName.innerText = name;
+    playerName.classList.add('player-name');
+
+    // Append player and name to the container
+    playerContainer.appendChild(player);
+    playerContainer.appendChild(playerName);
+
+    // Append player container to the playersDiv
+    playersDiv.appendChild(playerContainer);
+
     // Animate players attacking boss
     animatePlayer(player);
-    playersDiv.appendChild(player);
   });
 }
 
