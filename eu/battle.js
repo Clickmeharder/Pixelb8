@@ -58,7 +58,7 @@ function startBattle() {
     }
 
     const player = players[currentPlayerIndex];
-    const attackPower = 100; // Each player does 100 damage per attack
+    const attackPower = 1; // Each player does 100 damage per attack
     bossHP -= attackPower;
 
     // Update boss HP display
