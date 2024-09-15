@@ -26,7 +26,7 @@ function generatePlayers(playerNames) {
 
     const player = document.createElement('div');
     player.classList.add('player');
-    player.style.backgroundImage = `url('assets/images/avatar.png')`; // Replace with your player image
+    player.style.backgroundImage = `url('data/images/femaledefault.png.png')`; // Replace with your player image
 
     // Create a span to hold the player's name
     const playerName = document.createElement('span');
