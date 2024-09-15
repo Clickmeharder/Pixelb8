@@ -26,7 +26,7 @@ function generatePlayers(playerNames) {
 
     const player = document.createElement('div');
     player.classList.add('player');
-    player.style.backgroundImage = `url('assets/images/avatar.png')`;
+    player.style.backgroundImage = `url('assets/images/avatar.png')`; // Replace with your player image
 
     // Create a span to hold the player's name
     const playerName = document.createElement('span');
@@ -51,7 +51,7 @@ function generatePlayers(playerNames) {
   startRoaming();
 }
 
-// Make players randomly roam around the screen
+// Make players randomly roam around the screen, but smoothly
 function startRoaming() {
   setInterval(() => {
     players.forEach(player => {
@@ -60,7 +60,7 @@ function startRoaming() {
       player.playerContainer.style.top = newTop;
       player.playerContainer.style.left = newLeft;
     });
-  }, 2000); // Roam every 2 seconds
+  }, 10000); // Roam every 10 seconds for smoother movement
 
   // Start searching for resources every 5 minutes
   setInterval(searchForResources, 300000); // 5 minutes
