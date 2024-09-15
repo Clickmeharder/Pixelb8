@@ -18,7 +18,7 @@ function handleFileUpload(event) {
     reader.readAsText(file); // Read the file content as text
   }
 }
-r
+
 // Add player images, names, and HP to the page
 function generatePlayers(playerNames) {
   const playersDiv = document.getElementById('players');
