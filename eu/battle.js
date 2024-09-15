@@ -2,6 +2,7 @@ let players = [];
 let bossHP = 1000; // Boss HP
 const bossHPElement = document.getElementById('boss-hp');
 const systemMessagesElement = document.getElementById('systemMessages');
+const gameMessageElement = document.getElementById('gamemessage'); // Game message for end of battle
 const maxBossHP = 1000; // The maximum HP the boss can heal to
 
 // Handle the file upload and parse player names
@@ -95,7 +96,7 @@ function startBattle() {
         }
       }, 1000); // Boss takes turn after player's attack
     } else {
-      appendSystemMessage('Boss Defeated!');
+      bossDefeated(); // Call the function when the boss is defeated
     }
   }
 
@@ -144,58 +145,4 @@ function bossAttack() {
 
     // Check if the player is defeated
     if (player.hp <= 0) {
-      player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
-      appendSystemMessage(`${player.name} has been defeated!`);
-    }
-
-  } else if (randomAttack === 1) {
-    // Area attack: Boss damages all players for 1-10 damage
-    const areaDamage = Math.floor(Math.random() * 10) + 1;
-    players.forEach(player => {
-      player.hp -= areaDamage;
-
-      // Update player's HP display
-      player.playerHP.innerText = `HP: ${Math.max(player.hp, 0)}`;
-
-      // Visual feedback for all players
-      player.playerContainer.style.borderColor = '#f00'; // Red flash
-      setTimeout(() => {
-        player.playerContainer.style.borderColor = '#4caf50'; // Back to green
-      }, 500);
-
-      // Check if the player is defeated
-      if (player.hp <= 0) {
-        player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
-        appendSystemMessage(`${player.name} has been defeated!`);
-      }
-    });
-
-    // Append system message for area attack
-    appendSystemMessage(`Boss uses area attack, damaging all players for ${areaDamage} damage!`);
-
-  } else if (randomAttack === 2) {
-    // Self-heal: Boss heals 1-10 HP
-    const healAmount = Math.floor(Math.random() * 10) + 1;
-    bossHP = Math.min(bossHP + healAmount, maxBossHP); // Boss can't heal beyond max HP
-
-    // Update boss HP display
-    bossHPElement.textContent = bossHP;
-
-    // Append system message for self-heal
-    appendSystemMessage(`Boss heals itself for ${healAmount} HP!`);
-  }
-}
-
-// Function to append system messages to the system messages box
-function appendSystemMessage(message) {
-  const messageElement = document.createElement('div');
-  messageElement.innerText = message;
-  systemMessagesElement.appendChild(messageElement);
-
-  // Scroll to the bottom of the messages box
-  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight;
-}
-
-// Initialize file input and button functionality
-document.getElementById('fileInput').addEventListener('change', handleFileUpload);
-document.getElementById('startBattleButton').addEventListener('click', startBattle);
+      player.playerContainer.style.opacity = '0.5'; // Make
