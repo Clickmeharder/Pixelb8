@@ -145,4 +145,76 @@ function bossAttack() {
 
     // Check if the player is defeated
     if (player.hp <= 0) {
-      player.playerContainer.style.opacity = '0.5'; // Make
+      player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
+      appendSystemMessage(`${player.name} has been defeated!`);
+      checkForAllPlayersDefeated(); // Check if all players are defeated
+    }
+
+  } else if (randomAttack === 1) {
+    // Area attack: Boss damages all players for 1-10 damage
+    const areaDamage = Math.floor(Math.random() * 10) + 1;
+    players.forEach(player => {
+      player.hp -= areaDamage;
+
+      // Update player's HP display
+      player.playerHP.innerText = `HP: ${Math.max(player.hp, 0)}`;
+
+      // Visual feedback for all players
+      player.playerContainer.style.borderColor = '#f00'; // Red flash
+      setTimeout(() => {
+        player.playerContainer.style.borderColor = '#4caf50'; // Back to green
+      }, 500);
+
+      // Check if the player is defeated
+      if (player.hp <= 0) {
+        player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
+        appendSystemMessage(`${player.name} has been defeated!`);
+      }
+    });
+
+    // Append system message for area attack
+    appendSystemMessage(`Boss uses area attack, damaging all players for ${areaDamage} damage!`);
+
+    checkForAllPlayersDefeated(); // Check if all players are defeated
+
+  } else if (randomAttack === 2) {
+    // Self-heal: Boss heals 1-10 HP
+    const healAmount = Math.floor(Math.random() * 10) + 1;
+    bossHP = Math.min(bossHP + healAmount, maxBossHP); // Boss can't heal beyond max HP
+
+    // Update boss HP display
+    bossHPElement.textContent = bossHP;
+
+    // Append system message for self-heal
+    appendSystemMessage(`Boss heals itself for ${healAmount} HP!`);
+  }
+}
+
+// Check if all players are defeated
+function checkForAllPlayersDefeated() {
+  const allPlayersDefeated = players.every(player => player.hp <= 0);
+  if (allPlayersDefeated) {
+    gameMessageElement.innerHTML = "<h2>Players Defeated</h2>";
+    appendSystemMessage("All players have been defeated! The boss wins.");
+  }
+}
+
+// Handle the boss defeated scenario
+function bossDefeated() {
+  gameMessageElement.innerHTML = "<h2>Boss Defeated</h2>";
+  appendSystemMessage("Congratulations! The boss has been defeated.");
+}
+
+// Function to append system messages to the system messages box
+function appendSystemMessage(message) {
+  const messageElement = document.createElement('div');
+  messageElement.innerText = message;
+  systemMessagesElement.appendChild(messageElement);
+
+  // Scroll to the bottom of the messages box
+  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight;
+}
+
+// Initialize file input and button functionality
+document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+document.getElementById('startBattleButton').addEventListener
