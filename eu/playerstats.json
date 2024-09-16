@@ -1,0 +1,103 @@
+{
+  "players": {
+    "Jaedraze": {
+      "combat": {
+        "level": 1,
+        "experience": 0
+      },
+      "healing": {
+        "level": 1,
+        "experience": 0
+      },
+      "mining": {
+        "level": 0,
+        "experience": 0
+      },
+      "fishing": {
+        "level": 0,
+        "experience": 5
+      },
+      "woodcutting": {
+        "level": 0,
+        "experience": 0
+      },
+      "crafting": {
+        "level": 0,
+        "experience": 0
+      },
+      "stamina": {
+        "level": 1,
+        "experience": 0
+      },
+      "totalLevel": 3,
+      "experience": 0,
+      "pixels": 0
+    },
+    "New Player": {
+      "combat": {
+        "level": 1,
+        "experience": 0
+      },
+      "healing": {
+        "level": 1,
+        "experience": 0
+      },
+      "mining": {
+        "level": 0,
+        "experience": 0
+      },
+      "fishing": {
+        "level": 0,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 0,
+        "experience": 0
+      },
+      "crafting": {
+        "level": 0,
+        "experience": 0
+      },
+      "stamina": {
+        "level": 1,
+        "experience": 0
+      },
+      "totalLevels": 3,
+      "experience": 0,
+      "pixelcoins": 0
+    },
+    "Secret Agent001": {
+      "combat": {
+        "level": 2,
+        "experience": 120
+      },
+      "healing": {
+        "level": 1,
+        "experience": 50
+      },
+      "mining": {
+        "level": 2,
+        "experience": 80
+      },
+      "fishing": {
+        "level": 1,
+        "experience": 45
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 60
+      },
+      "crafting": {
+        "level": 2,
+        "experience": 90
+      },
+      "stamina": {
+        "level": 2,
+        "experience": 150
+      },
+      "totalLevels": 11,
+      "experience": 595,
+      "pixelcoins": 200
+    }
+  }
+}
