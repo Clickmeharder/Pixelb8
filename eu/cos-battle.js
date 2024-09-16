@@ -1,6 +1,6 @@
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 'beta 0.0189';
+let currentCOSbattleversion = 'beta 0.019';
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -267,11 +267,14 @@ function handleBattleEnd() {
   if (bossHP <= 0) {
 	setgameMessage('The battle is over. The players have defeated the boss!');
     appendSystemMessage('The battle is over. The players have defeated the boss!');
+	calculateSurvivalBonus();
   } else if (players.every(player => player.hp <= 0)) {
 	setgameMessage('All players have been defeated. The boss wins.');
     appendSystemMessage('All players have been defeated. The boss wins.');
+	calculateSurvivalBonus();
   }
-  calculateSurvivalBonus();
+  setgameMessage('All players have been defeated. The boss wins.');
+  appendSystemMessage('All players have been defeated. The boss wins.');
   // Display stats and XP for all players
   updatePlayerStats();
 }
