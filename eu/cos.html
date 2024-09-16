@@ -85,7 +85,7 @@
 
     .player {
       width: 60px;
-    height: 60px;
+      height: 60px;
       background-size: cover;
       margin-bottom: 5px;
       border-radius: 50%;
@@ -101,6 +101,24 @@
 	  font-size: 12px;
 	  margin-top: 5px;
 	  color: #f0f0f0; /* Light text color */
+	}
+	
+	#playerStats {
+	  margin-top: 20px;
+	  padding: 10px;
+	  border: 1px solid #ccc;
+	  background-color: #f9f9f9;
+	}
+
+	.player-stats {
+	  margin-bottom: 10px;
+	  padding: 5px;
+	  border: 1px solid #ddd;
+	  border-radius: 5px;
+	}
+
+	.player-stats div {
+	  margin: 2px 0;
 	}
 	#systemMessages {
       margin-top: 20px;
@@ -149,5 +167,8 @@
 		  <script src="cos-battle.js"></script>
 	  </div>
 	</div>
-
+<div id="playerStats">
+  <h2>Player Stats</h2>
+  <div id="playerStatsList"></div>
+</div>
 </body></html>

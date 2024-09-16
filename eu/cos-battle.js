@@ -68,7 +68,7 @@ function startBattle() {
   let currentPlayerIndex = 0;
 
   function attackNextPlayer() {
-    if (bossHP <= 0 || players.every(player => player.hp <= 0)) {
+    if (players.every(player => player.hp <= 0) || bossHP <= 0) {
       handleBattleEnd();
       return; // Stop if all players are defeated or boss is defeated
     }
@@ -95,20 +95,24 @@ function startBattle() {
       player.xp += healAmount; // Gain XP equal to healing amount
     }
 
+    updatePlayerStats(); // Update player stats display
+
     currentPlayerIndex++;
 
-    if (currentPlayerIndex >= players.length) {
-      currentPlayerIndex = 0; // Loop back to the first player
-    }
-
-    if (bossHP > 0 && players.some(player => player.hp > 0)) {
+    if (bossHP > 0) {
       setTimeout(() => {
         // Boss attacks a random player
         bossAttack();
-        setTimeout(attackNextPlayer, 1000); // Move to next player after 1 second
+        if (players.some(player => player.hp > 0) && bossHP > 0) {
+          setTimeout(attackNextPlayer, 1000); // Move to next player after 1 second
+        }
       }, 1000); // Boss takes turn after player's attack
     } else {
-      handleBattleEnd(); // End the battle if the boss is defeated
+      appendSystemMessage('Boss Defeated!');
+      setgameMessage('Boss Defeated!');
+
+      // Call XP calculation after boss is defeated
+      calculateSurvivalBonus();
     }
   }
 
@@ -138,11 +142,8 @@ function bossAttack() {
 
   if (randomAttack === 0) {
     // Default attack: Boss attacks a random player
-    const activePlayers = players.filter(player => player.hp > 0); // Get only players with HP > 0
-    if (activePlayers.length === 0) return; // If no active players, return
-
-    const randomPlayerIndex = Math.floor(Math.random() * activePlayers.length);
-    const player = activePlayers[randomPlayerIndex];
+    const randomPlayerIndex = Math.floor(Math.random() * players.length);
+    const player = players[randomPlayerIndex];
     const damage = Math.floor(Math.random() * 6) + 5; // Boss deals 5-10 damage
     player.hp -= damage;
 
@@ -203,39 +204,74 @@ function bossAttack() {
 }
 
 // Handle the end of the battle, calculate survival bonus XP
-function handleBattleEnd() {
-  if (bossHP <= 0) {
-    appendSystemMessage('Boss has been defeated! The battle is over!');
-    // Award players a 5% bonus XP for not dying
-    players.forEach(player => {
-      if (player.hp > 0) {
-        const bonusXP = Math.floor(player.xp * 0.05);
-        player.xp += bonusXP;
-        appendSystemMessage(`${player.name} receives ${bonusXP} bonus XP for surviving the battle!`);
-      }
-    });
-  } else {
-    appendSystemMessage('All players have been defeated. The boss wins!');
-  }
-
-  // Disable the Start Battle button
-  document.getElementById('startBattleButton').disabled = true;
+function calculateSurvivalBonus() {
+  players.forEach(player => {
+    if (player.hp > 0) {
+      const bonusXP = Math.floor(player.xp * 0.05); // 5% XP bonus for survival
+      player.xp += bonusXP;
+      appendSystemMessage(`${player.name} survived and gains a ${bonusXP} XP bonus! Total XP: ${player.xp}`);
+    }
+  });
 }
 
-// Append messages to the system messages area
+// Helper function to append system messages
 function appendSystemMessage(message) {
-  const messageElement = document.createElement('div');
-  messageElement.textContent = message;
-  systemMessagesElement.appendChild(messageElement);
-  // Scroll to the bottom to show the latest message
-  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight;
+  const newMessage = document.createElement('p');
+  newMessage.innerText = message;
+  systemMessagesElement.appendChild(newMessage);
+  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight; // Auto-scroll to the bottom
 }
 
-// Add event listener for file upload
-document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+// Handle header message display
+function setgameMessage(message) {
+  headerMessagesElement.innerHTML = message;
+}
 
-// Add event listener for Start Battle button
-document.getElementById('startBattleButton').addEventListener('click', startBattle);
+// Update and display player stats
+function updatePlayerStats() {
+  const playerStatsList = document.getElementById('playerStatsList');
+  playerStatsList.innerHTML = ''; // Clear existing stats
 
+  players.forEach(player => {
+    const statsDiv = document.createElement('div');
+    statsDiv.classList.add('player-stats');
 
+    // Create HTML elements to display player's stats
+    const nameElement = document.createElement('div');
+    nameElement.textContent = `Name: ${player.name}`;
 
+    const hpElement = document.createElement('div');
+    hpElement.textContent = `HP: ${player.hp}`;
+
+    const xpElement = document.createElement('div');
+    xpElement.textContent = `XP: ${player.xp}`;
+
+    // Append the elements to the statsDiv
+    statsDiv.appendChild(nameElement);
+    statsDiv.appendChild(hpElement);
+    statsDiv.appendChild(xpElement);
+
+    // Append statsDiv to the playerStatsList
+    playerStatsList.appendChild(statsDiv);
+  });
+}
+
+// Handle battle end, check if all players are defeated or the boss is defeated
+function handleBattleEnd() {
+  if (players.every(player => player.hp <= 0)) {
+    setgameMessage('All players are defeated!');
+    appendSystemMessage('All players are defeated!');
+  } else if (bossHP <= 0) {
+    setgameMessage('Boss Defeated!');
+    appendSystemMessage('Boss Defeated!');
+  }
+}
+
+// Event listener for file upload
+document.getElementById('fileUpload').addEventListener('change', handleFileUpload);
+
+// Event listener for starting the battle
+document.getElementById('startBattleButton').addEventListener('click', () => {
+  startBattle();
+  updatePlayerStats(); // Update stats when battle starts
+});
