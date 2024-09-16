@@ -167,9 +167,15 @@ function startBattle() {
   let currentPlayerIndex = 0;
 
   function attackNextPlayer() {
-    if (currentPlayerIndex >= players.length || bossHP <= 0) {
+    // Check if all players are defeated or boss is defeated
+    if (players.every(player => player.hp <= 0) || bossHP <= 0) {
       handleBattleEnd();
       return; // Stop if no more players or boss is defeated
+    }
+
+    // Proceed with the current player's turn
+    if (currentPlayerIndex >= players.length) {
+      currentPlayerIndex = 0; // Reset to the first player if all have taken a turn
     }
 
     const player = players[currentPlayerIndex];
@@ -200,8 +206,10 @@ function startBattle() {
       setTimeout(() => {
         // Boss attacks a random player
         bossAttack();
-        if (bossHP > 0) {
-          setTimeout(attackNextPlayer, 1000); // Move to next player after 1 second
+        if (players.every(player => player.hp > 0) && bossHP > 0) {
+          setTimeout(attackNextPlayer, 1000); // Move to next player after 1 second if boss and players are still active
+        } else {
+          handleBattleEnd(); // End battle if all players are defeated or boss is defeated
         }
       }, 1000); // Boss takes turn after player's attack
     } else {
@@ -313,6 +321,24 @@ function playerAttackBoss(player, damage) {
 
 
 //Player Experience
+function handleBattleEnd() {
+  // Check if the boss is defeated
+  if (bossHP <= 0) {
+    appendSystemMessage('Boss Defeated!');
+    setgameMessage('Boss Defeated!');
+    calculateSurvivalBonus();
+  } else {
+    // If the boss is not defeated, check if all players are dead
+    const allPlayersDefeated = players.every(player => player.hp <= 0);
+    if (allPlayersDefeated) {
+      appendSystemMessage('All players are defeated. Battle over!');
+      setgameMessage('All players are defeated. Battle over!');
+    }
+  }
+
+  // Disable the Start Battle button if the battle is over
+  document.getElementById('startBattleButton').disabled = true;
+}
 
 // Handle the end of the battle, calculate survival bonus XP
 function calculateSurvivalBonus() {
