@@ -1,7 +1,7 @@
 
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 'beta 0.018' ;
+let currentCOSbattleversion = 'beta 0.0181' ;
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -62,8 +62,10 @@ function generatePlayers(playerNames) {
       name, 
       playerContainer, 
       playerHP, 
-      hp: 100, 
+      hp: 100,
+	  combatLvl: 0,
       combatXP: 0,  // Combat XP starts at 0
+	  HealingLvl: 0,
       healingXP: 0,  // Healing XP starts at 0
     }; 
   });
@@ -133,113 +135,6 @@ function startBattle() {
 
   attackNextPlayer();
 }
-// Player attacks boss with damage
-function playerAttackBoss(player, damage) {
-  bossHP -= damage;
-
-  // Update boss HP display
-  bossHPElement.textContent = Math.max(bossHP, 0); // Ensure boss HP doesn't go below 0
-
-  // Append system message when a player attacks the boss
-  appendSystemMessage(`${player.name} attacks the boss for ${damage} damage!`);
-
-  // Visual feedback (e.g., change boss color briefly)
-  document.getElementById('boss').style.borderColor = '#f00'; // Red flash
-  setTimeout(() => {
-    document.getElementById('boss').style.borderColor = '#4caf50'; // Back to green
-  }, 500);
-}
-
-// Boss attacks with one of three options
-function bossAttack() {
-  const randomAttack = Math.floor(Math.random() * 3); // Generate a number between 0 and 2
-
-  if (randomAttack === 0) {
-    // Default attack: Boss attacks a random player
-    const randomPlayerIndex = Math.floor(Math.random() * players.length);
-    const player = players[randomPlayerIndex];
-    const damage = Math.floor(Math.random() * 6) + 5; // Boss deals 5-10 damage
-    player.hp -= damage;
-
-    // Append system message when the boss attacks a player
-    appendSystemMessage(`Boss attacks ${player.name} for ${damage} damage!`);
-
-    // Update player's HP display
-    player.playerHP.innerText = `HP: ${Math.max(player.hp, 0)}`; // Ensure HP doesn't go below 0
-
-    // Visual feedback (e.g., change player border color to red briefly)
-    player.playerContainer.style.borderColor = '#f00'; // Red flash
-    setTimeout(() => {
-      player.playerContainer.style.borderColor = '#4caf50'; // Back to green
-    }, 500);
-
-    // Check if the player is defeated
-    if (player.hp <= 0) {
-      player.playerContainer.style.opacity = '0.3'; // Make defeated player look "faded"
-      appendSystemMessage(`${player.name} has been defeated!`);
-    }
-
-  } else if (randomAttack === 1) {
-    // Area attack: Boss damages all players for 1-10 damage
-    const areaDamage = Math.floor(Math.random() * 10) + 1;
-    players.forEach(player => {
-      player.hp -= areaDamage;
-
-      // Update player's HP display
-      player.playerHP.innerText = `HP: ${Math.max(player.hp, 0)}`;
-
-      // Visual feedback for all players
-      player.playerContainer.style.borderColor = '#f00'; // Red flash
-      setTimeout(() => {
-        player.playerContainer.style.borderColor = '#4caf50'; // Back to green
-      }, 500);
-
-      // Check if the player is defeated
-      if (player.hp <= 0) {
-        player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
-        appendSystemMessage(`${player.name} has been defeated!`);
-      }
-    });
-
-    // Append system message for area attack
-    appendSystemMessage(`Boss uses area attack, damaging all players for ${areaDamage} damage!`);
-
-  } else if (randomAttack === 2) {
-    // Self-heal: Boss heals 1-10 HP
-    const healAmount = Math.floor(Math.random() * 10) + 1;
-    bossHP = Math.min(bossHP + healAmount, maxBossHP); // Boss can't heal beyond max HP
-
-    // Update boss HP display
-    bossHPElement.textContent = bossHP;
-
-    // Append system message for boss self-heal
-    appendSystemMessage(`Boss heals for ${healAmount} HP!`);
-  }
-}
-
-// Handle the end of the battle, calculate survival bonus XP
-function calculateSurvivalBonus() {
-  players.forEach(player => {
-    if (player.hp > 0) {
-      const bonusXP = Math.floor(player.xp * 0.05); // 5% XP bonus for survival
-      player.xp += bonusXP;
-      appendSystemMessage(`${player.name} survived and gains a ${bonusXP} XP bonus! Total XP: ${player.xp}`);
-    }
-  });
-}
-
-// Helper function to append system messages
-function appendSystemMessage(message) {
-  const newMessage = document.createElement('p');
-  newMessage.innerText = message;
-  systemMessagesElement.appendChild(newMessage);
-  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight; // Auto-scroll to the bottom
-}
-
-// Handle header message display
-function setgameMessage(message) {
-  headerMessagesElement.innerHTML = message;
-}
 
 // Update and display player stats
 function updatePlayerStats() {
@@ -257,19 +152,27 @@ function updatePlayerStats() {
     const hpElement = document.createElement('div');
     hpElement.textContent = `HP: ${player.hp}`;
 
-    const xpElement = document.createElement('div');
-    xpElement.textContent = `XP: ${player.xp}`;
+	const combatLvlElement = document.createElement('div');
+    combatLvlElement.textContent = `Combat Lvl: 1`;
+    const combatXpElement = document.createElement('div');
+    combatXpElement.textContent = `Combat XP: ${player.combatXP}`;
+	const healingLvlElement = document.createElement('div');
+    healingLvlElement.textContent = `Healing Lvl: 1`;
+    const healingXpElement = document.createElement('div');
+    healingXpElement.textContent = `Healing XP: ${player.healingXP}`;
 
     // Append the elements to the statsDiv
     statsDiv.appendChild(nameElement);
     statsDiv.appendChild(hpElement);
-    statsDiv.appendChild(xpElement);
+	statsDiv.appendChild(combatLvlElement);
+    statsDiv.appendChild(combatXpElement);
+	statsDiv.appendChild(healingLvlElement);
+    statsDiv.appendChild(healingXpElement);
 
     // Append statsDiv to the playerStatsList
     playerStatsList.appendChild(statsDiv);
   });
 }
-
 // Handle battle end, check if all players are defeated or the boss is defeated
 function handleBattleEnd() {
   if (players.every(player => player.hp <= 0)) {
