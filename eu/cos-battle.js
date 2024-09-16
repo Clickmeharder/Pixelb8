@@ -1,6 +1,6 @@
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 'beta 0.0187';
+let currentCOSbattleversion = 'beta 0.0188';
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -225,7 +225,7 @@ function updatePlayerStats() {
 
   players.forEach(player => {
     const statsElement = document.createElement('li');
-    statsElement.textContent = `${player.name} - Combat XP: ${player.combatXP}, Healing XP: ${player.healingXP}, HP: ${player.hp}`;
+    statsElement.textContent = `${player.name} - Combat Lvl: ${player.combatLvl}, Combat XP: ${player.combatXP}, Healing Lvl: ${player.healingLvl}, Healing XP: ${player.healingXP}, HP: ${player.hp}`;
     playerStatsList.appendChild(statsElement);
   });
 }
