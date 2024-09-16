@@ -19,7 +19,7 @@ function handleFileUpload(event) {
   }
 }
 
-// Add player images, names, and HP to the page
+// Add player images, names, HP, and XP to the page
 function generatePlayers(playerNames) {
   const playersDiv = document.getElementById('players');
   playersDiv.innerHTML = ''; // Clear existing players
@@ -50,19 +50,26 @@ function generatePlayers(playerNames) {
     // Append player container to the playersDiv
     playersDiv.appendChild(playerContainer);
 
-    return { name, playerContainer, playerHP, hp: 100 }; // Store player's HP
+    return { 
+      name, 
+      playerContainer, 
+      playerHP, 
+      hp: 100, 
+      xp: 0  // Add XP property for each player
+    }; 
   });
 
   // Enable the Start Battle button
   document.getElementById('startBattleButton').disabled = false;
 }
 
-// Attack boss one player at a time, and the boss attacks players
+// Start the battle and loop through players
 function startBattle() {
   let currentPlayerIndex = 0;
 
   function attackNextPlayer() {
     if (currentPlayerIndex >= players.length || bossHP <= 0) {
+      handleBattleEnd();
       return; // Stop if no more players or boss is defeated
     }
 
@@ -72,17 +79,20 @@ function startBattle() {
     if (randomPlayerAction === 0) {
       // Default attack
       playerAttackBoss(player, 10); // Each player does 10 damage per attack
+      player.xp += 10; // Gain 10 XP for attacking
     } else if (randomPlayerAction === 1) {
       // Double attack
       appendSystemMessage(`${player.name} attacks the boss twice!`);
       playerAttackBoss(player, 10); // First attack
       playerAttackBoss(player, 10); // Second attack
+      player.xp += 20; // Gain 20 XP for double attack
     } else if (randomPlayerAction === 2) {
       // Player heals
       const healAmount = Math.floor(Math.random() * 6); // Heal 0-5 HP
       player.hp = Math.min(player.hp + healAmount, 100); // Max HP is 100
       player.playerHP.innerText = `HP: ${player.hp}`; // Update player's HP display
       appendSystemMessage(`${player.name} heals for ${healAmount} HP!`);
+      player.xp += healAmount; // Gain XP equal to healing amount
     }
 
     currentPlayerIndex++;
@@ -148,7 +158,7 @@ function bossAttack() {
     if (player.hp <= 0) {
       player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
       appendSystemMessage(`${player.name} has been defeated!`);
-	  setgameMessage('All Plavers have been Defeated!');
+	  setgameMessage('All Players have been Defeated!');
     }
 
   } else if (randomAttack === 1) {
@@ -170,7 +180,6 @@ function bossAttack() {
       if (player.hp <= 0) {
         player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
         appendSystemMessage(`${player.name} has been defeated!`);
-		
       }
     });
 
@@ -185,27 +194,33 @@ function bossAttack() {
     // Update boss HP display
     bossHPElement.textContent = bossHP;
 
-    // Append system message for self-heal
-    appendSystemMessage(`Boss heals itself for ${healAmount} HP!`);
+    // Append system message for boss self-heal
+    appendSystemMessage(`Boss heals for ${healAmount} HP!`);
   }
 }
 
-// Function to append system messages to the system messages box
+// Handle the end of the battle, grant XP bonuses to surviving players
+function handleBattleEnd() {
+  players.forEach(player => {
+    if (player.hp > 0) {
+      const bonusXP = Math.floor(player.xp * 0.05); // 5% XP bonus
+      player.xp += bonusXP;
+      appendSystemMessage(`${player.name} survived and gains a ${bonusXP} XP bonus! Total XP: ${player.xp}`);
+    }
+  });
+}
+
+// Helper function to append system messages
 function appendSystemMessage(message) {
-  const messageElement = document.createElement('div');
-  messageElement.innerText = message;
-  systemMessagesElement.appendChild(messageElement);
-
-  // Scroll to the bottom of the messages box
-  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight;
-}
-// Function to append system messages to the system messages box
-function setgameMessage(message) {
-  const gameMessage = document.createElement('div');
-  gameMessage.innerText = message;
-  headerMessagesElement.appendChild(gameMessage);
+  const newMessage = document.createElement('p');
+  newMessage.innerText = message;
+  systemMessagesElement.appendChild(newMessage);
+  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight; // Auto-scroll to the bottom
 }
 
-// Initialize file input and button functionality
-document.getElementById('fileInput').addEventListener('change', handleFileUpload);
-document.getElementById('startBattleButton').addEventListener('click', startBattle);
+//handle header Message
+function setgameMessage(message)
+{
+	headerMessagesElement.innerHTML = message;
+}
+
