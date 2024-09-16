@@ -1,6 +1,9 @@
+let currentCOSbattleversion = 'beta 0.0193';
+
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 'beta 0.0192';
+// Declare a global variable to track the round
+let currentRound = 1;
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -130,8 +133,20 @@ function startBattle() {
 	  handleBattleEnd();
     }
   }
-
+  updateRoundMessage();
   attackNextPlayer();
+}
+
+
+
+
+// Function to set the game message and increment the round
+function updateRoundMessage() {
+  // Set the game message to the current round number
+  setgameMessage('Round ' + currentRound);
+
+  // Increment the round for the next time
+  currentRound++;
 }
 
 // Player attacks boss with damage
@@ -283,9 +298,8 @@ function handleBattleEnd() {
     appendSystemMessage('All players have been defeated. The boss wins.');
 	calculateSurvivalBonus();
   }
-  setgameMessage('All players have been defeated. The boss wins.');
-  appendSystemMessage('All players have been defeated. The boss wins.');
   // Display stats and XP for all players
+  setgameMessage('round 0' + 1);
   updatePlayerStats();
 }
 
