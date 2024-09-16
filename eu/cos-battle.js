@@ -1,6 +1,6 @@
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 'beta 0.019';
+let currentCOSbattleversion = 'beta 0.0191';
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -181,7 +181,6 @@ function bossAttack() {
       player.playerContainer.style.opacity = '0.3'; // Make defeated player look "faded"
 	  setgameMessage(`${player.name} has been defeated!`);
       appendSystemMessage(`${player.name} has been defeated!`);
-	  handleBattleEnd();
     }
 
   } else if (randomAttack === 1) {
