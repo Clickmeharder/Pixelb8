@@ -279,4 +279,4 @@ document.getElementById('startBattleButton').addEventListener('click', () => {
   startBattle();
   updatePlayerStats(); // Update stats when battle starts
 });
-battleversionElement.innerText = `Current Version: ${currentCOSbattleversion}`;
+battleversionElement.innerText = `COS Battle Version: ${currentCOSbattleversion}`;
