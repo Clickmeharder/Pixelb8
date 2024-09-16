@@ -1,7 +1,7 @@
 
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 1.01;
+let currentCOSbattleversion = 0.02;
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -257,7 +257,7 @@ function updatePlayerStats() {
 
     // Append statsDiv to the playerStatsList
     playerStatsList.appendChild(statsDiv);
-    startBattle();
+    handleBattleEnd();
   });
 }
 
