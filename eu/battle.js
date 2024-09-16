@@ -107,7 +107,10 @@ function startBattle() {
       }, 1000); // Boss takes turn after player's attack
     } else {
       appendSystemMessage('Boss Defeated!');
-	  setgameMessage('Boss Defeated!');
+      setgameMessage('Boss Defeated!');
+
+      // Call XP calculation after boss is defeated
+      calculateSurvivalBonus(); 
     }
   }
 
@@ -158,7 +161,6 @@ function bossAttack() {
     if (player.hp <= 0) {
       player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
       appendSystemMessage(`${player.name} has been defeated!`);
-	  setgameMessage('All Players have been Defeated!');
     }
 
   } else if (randomAttack === 1) {
@@ -199,11 +201,11 @@ function bossAttack() {
   }
 }
 
-// Handle the end of the battle, grant XP bonuses to surviving players
-function handleBattleEnd() {
+// Handle the end of the battle, calculate survival bonus XP
+function calculateSurvivalBonus() {
   players.forEach(player => {
     if (player.hp > 0) {
-      const bonusXP = Math.floor(player.xp * 0.05); // 5% XP bonus
+      const bonusXP = Math.floor(player.xp * 0.05); // 5% XP bonus for survival
       player.xp += bonusXP;
       appendSystemMessage(`${player.name} survived and gains a ${bonusXP} XP bonus! Total XP: ${player.xp}`);
     }
@@ -218,10 +220,9 @@ function appendSystemMessage(message) {
   systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight; // Auto-scroll to the bottom
 }
 
-//handle header Message
-function setgameMessage(message)
-{
-	headerMessagesElement.innerHTML = message;
+// Handle header message display
+function setgameMessage(message) {
+  headerMessagesElement.innerHTML = message;
 }
 
 // Initialize file input and button functionality
