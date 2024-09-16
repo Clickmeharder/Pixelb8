@@ -276,6 +276,11 @@ function setVersionText() {
     console.error('Element with id "cos-battle-version" not found.');
   }
 }
+// Event listener for starting the battle
+document.getElementById('startBattleButton').addEventListener('click', () => {
+  startBattle();
+  updatePlayerStats(); // Update stats when battle starts
+});
 
 // Call the function on page load
 window.addEventListener('load', setVersionText);
@@ -283,8 +288,3 @@ window.addEventListener('load', setVersionText);
 // Event listener for file upload
 document.getElementById('fileUpload').addEventListener('change', handleFileUpload);
 
-// Event listener for starting the battle
-document.getElementById('startBattleButton').addEventListener('click', () => {
-  startBattle();
-  updatePlayerStats(); // Update stats when battle starts
-});
