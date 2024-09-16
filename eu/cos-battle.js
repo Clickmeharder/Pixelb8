@@ -1,7 +1,7 @@
 
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 'beta 0.0181' ;
+let currentCOSbattleversion = 'beta 0.0182' ;
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -184,6 +184,18 @@ function handleBattleEnd() {
   }
 }
 
+// Helper function to append system messages
+function appendSystemMessage(message) {
+  const newMessage = document.createElement('p');
+  newMessage.innerText = message;
+  systemMessagesElement.appendChild(newMessage);
+  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight; // Auto-scroll to the bottom
+}
+
+// Handle header message display
+function setgameMessage(message) {
+  headerMessagesElement.innerHTML = message;
+}
 
 
 battleversionElement.innerText = `COS Battle Version: ${currentCOSbattleversion}`;
