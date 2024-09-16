@@ -1,7 +1,7 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Twitch Battle</title>
+  <title>Colonists on Stream</title>
   <style>
     body {
       display: flex;
@@ -115,38 +115,39 @@
   </style>
 <style type="text/css" id="operaUserStyle"></style></head>
 <body>
-  <div id="wrapper" style="border: 3px ridge teal;padding: 4px;"> 
-	  <div id="fileInputContainer">
-		<input type="file" id="fileInput" accept=".txt">
-		<button id="loadPlayersButton">Load Players</button>
-	  </div>
-	<!-- Start Battle Button -->
-	  <div id="battleControl">
-		<button id="startBattleButton" disabled="">Start Battle</button>
-	  </div>
-		<div id="pagetitle" style="
-			font-size: 64px;
-			font-family: lucida console;
-			color: teal;
-			border: 3px ridge teal;
-			text-align: center;
-		">Twitch Colonists</div>
-	  
-	 
+	<div id="battlewrapper">
+	  <div id="wrapper" style="border: 3px ridge teal;padding: 4px;"> 
+		  <div id="fileInputContainer">
+			<input type="file" id="fileInput" accept=".txt">
+			<button id="loadPlayersButton">Load Players</button>
+		  </div>
+		<!-- Start Battle Button -->
+		  <div id="battleControl">
+			<button id="startBattleButton" disabled="">Start Battle</button>
+		  </div>
+			<div id="pagetitle" style="
+				font-size: 64px;
+				font-family: lucida console;
+				color: teal;
+				border: 3px ridge teal;
+				text-align: center;
+			">Twitch Colonists</div>
+		  
+		 
 
-	  <div id="headerTexts"></div>
-	  <!-- Boss Section -->
-	  <div id="boss-info">
-		<div>Virtual Gallard Lvl: <span id="boss-level">10</span></div>
-		<div>HP: <span id="boss-hp">350</span></div>
+		  <div id="headerTexts"></div>
+		  <!-- Boss Section -->
+		  <div id="boss-info">
+			<div>Virtual Gallard Lvl: <span id="boss-level">10</span></div>
+			<div>HP: <span id="boss-hp">350</span></div>
+		  </div>
+		  <div id="boss"></div>
+
+		  <!-- Player Section -->
+		  <div id="players"></div>
+		  <div id="systemMessages"></div>
+		  <script src="battle.js"></script>
 	  </div>
-	  <div id="boss"></div>
-
-	  <!-- Player Section -->
-	  <div id="players"></div>
-	  <div id="systemMessages"></div>
-	  <script src="battle.js"></script>
-  </div>
-
+	</div>
 
 </body></html>
