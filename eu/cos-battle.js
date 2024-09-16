@@ -1,7 +1,7 @@
 
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 'beta 0.017' ;
+let currentCOSbattleversion = 'beta 0.018' ;
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -57,12 +57,14 @@ function generatePlayers(playerNames) {
     // Append player container to the playersDiv
     playersDiv.appendChild(playerContainer);
 
+    // Track combatXP and healingXP separately
     return { 
       name, 
       playerContainer, 
       playerHP, 
       hp: 100, 
-      xp: 0  // Add XP property for each player
+      combatXP: 0,  // Combat XP starts at 0
+      healingXP: 0,  // Healing XP starts at 0
     }; 
   });
 
@@ -92,20 +94,20 @@ function startBattle() {
     if (randomPlayerAction === 0) {
       // Default attack
       playerAttackBoss(player, 10); // Each player does 10 damage per attack
-      player.xp += 10; // Gain 10 XP for attacking
+      player.combatXP += 10; // Gain 10 Combat XP for attacking
     } else if (randomPlayerAction === 1) {
       // Double attack
       appendSystemMessage(`${player.name} attacks the boss twice!`);
       playerAttackBoss(player, 10); // First attack
       playerAttackBoss(player, 10); // Second attack
-      player.xp += 20; // Gain 20 XP for double attack
+      player.combatXP += 20; // Gain 20 Combat XP for double attack
     } else if (randomPlayerAction === 2) {
       // Player heals
       const healAmount = Math.floor(Math.random() * 6); // Heal 0-5 HP
       player.hp = Math.min(player.hp + healAmount, 100); // Max HP is 100
       player.playerHP.innerText = `HP: ${player.hp}`; // Update player's HP display
       appendSystemMessage(`${player.name} heals for ${healAmount} HP!`);
-      player.xp += healAmount; // Gain XP equal to healing amount
+      player.healingXP += healAmount; // Gain Healing XP equal to healing amount
     }
 
     updatePlayerStats(); // Update player stats display
@@ -173,7 +175,7 @@ function bossAttack() {
 
     // Check if the player is defeated
     if (player.hp <= 0) {
-      player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
+      player.playerContainer.style.opacity = '0.3'; // Make defeated player look "faded"
       appendSystemMessage(`${player.name} has been defeated!`);
     }
 
