@@ -1,7 +1,7 @@
 
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 1.00;
+let currentCOSbattleversion = 1.01;
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -257,6 +257,7 @@ function updatePlayerStats() {
 
     // Append statsDiv to the playerStatsList
     playerStatsList.appendChild(statsDiv);
+    startBattle();
   });
 }
 
@@ -271,12 +272,9 @@ function handleBattleEnd() {
   }
 }
 
-// Event listener for file upload
-document.getElementById('fileUpload').addEventListener('change', handleFileUpload);
 
-// Event listener for starting the battle
-document.getElementById('startBattleButton').addEventListener('click', () => {
-  startBattle();
-  updatePlayerStats(); // Update stats when battle starts
-});
+
 battleversionElement.innerText = `COS Battle Version: ${currentCOSbattleversion}`;
+// Initialize file input and button functionality
+document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+document.getElementById('startBattleButton').addEventListener('click', updatePlayerStats);
