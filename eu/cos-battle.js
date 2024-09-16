@@ -1,6 +1,6 @@
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 'beta 0.0188';
+let currentCOSbattleversion = 'beta 0.0189';
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -98,6 +98,7 @@ function startBattle() {
       player.combatXP += 10; // Gain 10 Combat XP for attacking
     } else if (randomPlayerAction === 1) {
       // Double attack
+	  setgameMessage(`${player.name} attacks the boss twice!`);
       appendSystemMessage(`${player.name} attacks the boss twice!`);
       playerAttackBoss(player, 10); // First attack
       playerAttackBoss(player, 10); // Second attack
@@ -107,6 +108,7 @@ function startBattle() {
       const healAmount = Math.floor(Math.random() * 6); // Heal 0-5 HP
       player.hp = Math.min(player.hp + healAmount, 100); // Max HP is 100
       player.playerHP.innerText = `HP: ${player.hp}`; // Update player's HP display
+	  setgameMessage(`${player.name} heals for ${healAmount} HP!`);
       appendSystemMessage(`${player.name} heals for ${healAmount} HP!`);
       player.healingXP += healAmount; // Gain Healing XP equal to healing amount
     }
@@ -140,6 +142,7 @@ function playerAttackBoss(player, damage) {
   bossHPElement.textContent = Math.max(bossHP, 0); // Ensure boss HP doesn't go below 0
 
   // Append system message when a player attacks the boss
+  setgameMessage(`${player.name} attacks the boss for ${damage} damage!`);
   appendSystemMessage(`${player.name} attacks the boss for ${damage} damage!`);
 
   // Visual feedback (e.g., change boss color briefly)
@@ -161,6 +164,7 @@ function bossAttack() {
     player.hp -= damage;
 
     // Append system message when the boss attacks a player
+	setgameMessage(`Boss attacks ${player.name} for ${damage} damage!`);
     appendSystemMessage(`Boss attacks ${player.name} for ${damage} damage!`);
 
     // Update player's HP display
@@ -175,6 +179,7 @@ function bossAttack() {
     // Check if the player is defeated
     if (player.hp <= 0) {
       player.playerContainer.style.opacity = '0.3'; // Make defeated player look "faded"
+	  setgameMessage(`${player.name} has been defeated!`);
       appendSystemMessage(`${player.name} has been defeated!`);
 	  handleBattleEnd();
     }
@@ -197,12 +202,14 @@ function bossAttack() {
       // Check if the player is defeated
       if (player.hp <= 0) {
         player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
+		setgameMessage(`${player.name} has been defeated!`);
         appendSystemMessage(`${player.name} has been defeated!`);
 		handleBattleEnd();
       }
     });
 
     // Append system message for area attack
+	setgameMessage(`Boss uses area attack, damaging all players for ${areaDamage} damage!`);
     appendSystemMessage(`Boss uses area attack, damaging all players for ${areaDamage} damage!`);
 
   } else if (randomAttack === 2) {
@@ -214,6 +221,7 @@ function bossAttack() {
     bossHPElement.textContent = bossHP;
 
     // Append system message for boss self-heal
+	setgameMessage(`Boss heals for ${healAmount} HP!`);
     appendSystemMessage(`Boss heals for ${healAmount} HP!`);
   }
 }
@@ -237,6 +245,7 @@ function calculateSurvivalBonus() {
       // Add a 5% bonus to combat and healing XP if the player survived the battle
       player.combatXP += Math.floor(player.combatXP * 0.05);
       player.healingXP += Math.floor(player.healingXP * 0.05);
+	  setgameMessage(`${player.name} survived the battle and earned a 5% XP bonus!`);
       appendSystemMessage(`${player.name} survived the battle and earned a 5% XP bonus!`);
     }
   });
@@ -256,8 +265,10 @@ function appendSystemMessage(message) {
 // Handle end of the battle
 function handleBattleEnd() {
   if (bossHP <= 0) {
+	setgameMessage('The battle is over. The players have defeated the boss!');
     appendSystemMessage('The battle is over. The players have defeated the boss!');
   } else if (players.every(player => player.hp <= 0)) {
+	setgameMessage('All players have been defeated. The boss wins.');
     appendSystemMessage('All players have been defeated. The boss wins.');
   }
   calculateSurvivalBonus();
