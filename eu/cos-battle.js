@@ -298,7 +298,6 @@ function handleBattleEnd() {
 	calculateSurvivalBonus();
   }
   // Display stats and XP for all players
-  setgameMessage('round 0' + 1);
   updatePlayerStats();
 }
 
