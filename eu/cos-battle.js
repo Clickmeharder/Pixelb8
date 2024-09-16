@@ -72,53 +72,56 @@ function startBattle() {
   let currentPlayerIndex = 0;
 
   function attackNextPlayer() {
-    if (players.every(player => player.hp <= 0) || bossHP <= 0) {
-      handleBattleEnd();
-      return; // Stop if all players are defeated or boss is defeated
-    }
+	  if (players.every(player => player.hp <= 0) || bossHP <= 0) {
+		handleBattleEnd();
+		return;
+	  }
 
-    const player = players[currentPlayerIndex];
-    const randomPlayerAction = Math.floor(Math.random() * 3); // Generate random action for player (0, 1, or 2)
+	  const player = players[currentPlayerIndex];
+	  console.log(`Current Player Index: ${currentPlayerIndex}`, player);
 
-    if (randomPlayerAction === 0) {
-      // Default attack
-      playerAttackBoss(player, 10); // Each player does 10 damage per attack
-      player.xp += 10; // Gain 10 XP for attacking
-    } else if (randomPlayerAction === 1) {
-      // Double attack
-      appendSystemMessage(`${player.name} attacks the boss twice!`);
-      playerAttackBoss(player, 10); // First attack
-      playerAttackBoss(player, 10); // Second attack
-      player.xp += 20; // Gain 20 XP for double attack
-    } else if (randomPlayerAction === 2) {
-      // Player heals
-      const healAmount = Math.floor(Math.random() * 6); // Heal 0-5 HP
-      player.hp = Math.min(player.hp + healAmount, 100); // Max HP is 100
-      player.playerHP.innerText = `HP: ${player.hp}`; // Update player's HP display
-      appendSystemMessage(`${player.name} heals for ${healAmount} HP!`);
-      player.xp += healAmount; // Gain XP equal to healing amount
-    }
+	  if (!player) {
+		console.error('Player is undefined at index:', currentPlayerIndex);
+		handleBattleEnd();
+		return;
+	  }
 
-    updatePlayerStats(); // Update player stats display
+	  const randomPlayerAction = Math.floor(Math.random() * 3);
 
-    currentPlayerIndex++;
+	  if (randomPlayerAction === 0) {
+		playerAttackBoss(player, 10);
+		player.xp += 10;
+	  } else if (randomPlayerAction === 1) {
+		appendSystemMessage(`${player.name} attacks the boss twice!`);
+		playerAttackBoss(player, 10);
+		playerAttackBoss(player, 10);
+		player.xp += 20;
+	  } else if (randomPlayerAction === 2) {
+		const healAmount = Math.floor(Math.random() * 6);
+		player.hp = Math.min(player.hp + healAmount, 100);
+		player.playerHP.innerText = `HP: ${player.hp}`;
+		appendSystemMessage(`${player.name} heals for ${healAmount} HP!`);
+		player.xp += healAmount;
+	  }
 
-    if (bossHP > 0) {
-      setTimeout(() => {
-        // Boss attacks a random player
-        bossAttack();
-        if (players.some(player => player.hp > 0) && bossHP > 0) {
-          setTimeout(attackNextPlayer, 1000); // Move to next player after 1 second
-        }
-      }, 1000); // Boss takes turn after player's attack
-    } else {
-      appendSystemMessage('Boss Defeated!');
-      setgameMessage('Boss Defeated!');
+	  updatePlayerStats();
 
-      // Call XP calculation after boss is defeated
-      calculateSurvivalBonus();
-    }
-  }
+	  currentPlayerIndex++;
+
+	  if (bossHP > 0) {
+		setTimeout(() => {
+		  bossAttack();
+		  if (players.some(player => player.hp > 0) && bossHP > 0) {
+			setTimeout(attackNextPlayer, 1000);
+		  }
+		}, 1000);
+	  } else {
+		appendSystemMessage('Boss Defeated!');
+		setgameMessage('Boss Defeated!');
+		calculateSurvivalBonus();
+	  }
+	}
+
 
   attackNextPlayer();
 }
