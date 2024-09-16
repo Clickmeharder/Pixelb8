@@ -1,7 +1,7 @@
 
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 'beta 0.0184' ;
+let currentCOSbattleversion = 'beta 0.0185' ;
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -153,6 +153,7 @@ function playerAttackBoss(player, damage) {
   }, 500);
 }
 
+
 // Boss attacks with one of three options
 function bossAttack() {
   const randomAttack = Math.floor(Math.random() * 3); // Generate a number between 0 and 2
@@ -203,21 +204,22 @@ function bossAttack() {
         appendSystemMessage(${player.name} has been defeated!);
       }
     });
-	 // Append system message for area attack
-		appendSystemMessage(Boss uses area attack, damaging all players for ${areaDamage} damage!);
 
-	  } else if (randomAttack === 2) {
-		// Self-heal: Boss heals 1-10 HP
-		const healAmount = Math.floor(Math.random() * 10) + 1;
-		bossHP = Math.min(bossHP + healAmount, maxBossHP); // Boss can't heal beyond max HP
+    // Append system message for area attack
+    appendSystemMessage(Boss uses area attack, damaging all players for ${areaDamage} damage!);
 
-		// Update boss HP display
-		bossHPElement.textContent = bossHP;
+  } else if (randomAttack === 2) {
+    // Self-heal: Boss heals 1-10 HP
+    const healAmount = Math.floor(Math.random() * 10) + 1;
+    bossHP = Math.min(bossHP + healAmount, maxBossHP); // Boss can't heal beyond max HP
 
-		// Append system message for boss self-heal
-		appendSystemMessage(Boss heals for ${healAmount} HP!);
-	  }
-	}
+    // Update boss HP display
+    bossHPElement.textContent = bossHP;
+
+    // Append system message for boss self-heal
+    appendSystemMessage(Boss heals for ${healAmount} HP!);
+  }
+}
 // Update and display player stats
 function updatePlayerStats() {
   const playerStatsList = document.getElementById('playerStatsList');
