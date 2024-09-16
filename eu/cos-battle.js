@@ -1,7 +1,7 @@
 
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 'beta 0.015' ;
+let currentCOSbattleversion = 'beta 0.016' ;
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
