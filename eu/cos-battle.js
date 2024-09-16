@@ -152,6 +152,27 @@ function playerAttackBoss(player, damage) {
   }, 500);
 }
 
+// Check if a player is defeated and move them to defeatedPlayers div
+function checkIfPlayerDefeated(player) {
+  if (player.hp <= 0) {
+    player.playerContainer.style.opacity = '0.3'; // Fade out defeated player
+    setgameMessage(`${player.name} has been defeated!`);
+    appendSystemMessage(`${player.name} has been defeated!`);
+
+    // Move player to the defeatedPlayers div
+    const defeatedPlayersDiv = document.getElementById('defeatedPlayers');
+    defeatedPlayersDiv.appendChild(player.playerContainer); // Move the player's container to the defeated section
+
+    // Remove player from the active players list
+    players = players.filter(p => p.name !== player.name);
+
+    // Call handleBattleEnd if all players are defeated
+    if (players.length === 0) {
+      handleBattleEnd();
+    }
+  }
+}
+
 // Boss attacks with one of three options
 function bossAttack() {
   const randomAttack = Math.floor(Math.random() * 3); // Generate a number between 0 and 2
@@ -164,7 +185,7 @@ function bossAttack() {
     player.hp -= damage;
 
     // Append system message when the boss attacks a player
-	setgameMessage(`Boss attacks ${player.name} for ${damage} damage!`);
+    setgameMessage(`Boss attacks ${player.name} for ${damage} damage!`);
     appendSystemMessage(`Boss attacks ${player.name} for ${damage} damage!`);
 
     // Update player's HP display
@@ -177,11 +198,7 @@ function bossAttack() {
     }, 500);
 
     // Check if the player is defeated
-    if (player.hp <= 0) {
-      player.playerContainer.style.opacity = '0.3'; // Make defeated player look "faded"
-	  setgameMessage(`${player.name} has been defeated!`);
-      appendSystemMessage(`${player.name} has been defeated!`);
-    }
+    checkIfPlayerDefeated(player);
 
   } else if (randomAttack === 1) {
     // Area attack: Boss damages all players for 1-10 damage
@@ -199,16 +216,11 @@ function bossAttack() {
       }, 500);
 
       // Check if the player is defeated
-      if (player.hp <= 0) {
-        player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
-		setgameMessage(`${player.name} has been defeated!`);
-        appendSystemMessage(`${player.name} has been defeated!`);
-		handleBattleEnd();
-      }
+      checkIfPlayerDefeated(player);
     });
 
     // Append system message for area attack
-	setgameMessage(`Boss uses area attack, damaging all players for ${areaDamage} damage!`);
+    setgameMessage(`Boss uses area attack, damaging all players for ${areaDamage} damage!`);
     appendSystemMessage(`Boss uses area attack, damaging all players for ${areaDamage} damage!`);
 
   } else if (randomAttack === 2) {
@@ -220,7 +232,7 @@ function bossAttack() {
     bossHPElement.textContent = bossHP;
 
     // Append system message for boss self-heal
-	setgameMessage(`Boss heals for ${healAmount} HP!`);
+    setgameMessage(`Boss heals for ${healAmount} HP!`);
     appendSystemMessage(`Boss heals for ${healAmount} HP!`);
   }
 }
@@ -236,7 +248,6 @@ function updatePlayerStats() {
     playerStatsList.appendChild(statsElement);
   });
 }
-
 // Calculate XP bonus for players who survived the battle
 function calculateSurvivalBonus() {
   players.forEach(player => {

@@ -69,7 +69,12 @@
       flex-wrap: wrap;
       justify-content: center;
     }
-
+    #defeatedplayers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+	  opacity:0.3;
+    }
     .player-container {
 	  display: flex;
 	  flex-direction: column;
@@ -164,6 +169,9 @@
 
 		  <!-- Player Section -->
 		  <div id="players"></div>
+		  <div id="defeatedPlayers">
+		    <h2>Defeated Players</h2>
+		  </div>
 		  <div id="systemMessages"></div>
 		  <script src="cos-battle.js"></script>
 	  </div>
