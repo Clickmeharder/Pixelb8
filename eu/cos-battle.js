@@ -1,6 +1,6 @@
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 'beta 0.0186';
+let currentCOSbattleversion = 'beta 0.0187';
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -124,11 +124,8 @@ function startBattle() {
         }
       }, 1000); // Boss takes turn after player's attack
     } else {
-      appendSystemMessage('Boss Defeated!');
-      setgameMessage('Boss Defeated!');
-
-      // Call XP calculation after boss is defeated
-      calculateSurvivalBonus();
+      
+	  handleBattleEnd();
     }
   }
 
@@ -179,6 +176,7 @@ function bossAttack() {
     if (player.hp <= 0) {
       player.playerContainer.style.opacity = '0.3'; // Make defeated player look "faded"
       appendSystemMessage(`${player.name} has been defeated!`);
+	  handleBattleEnd();
     }
 
   } else if (randomAttack === 1) {
@@ -200,6 +198,7 @@ function bossAttack() {
       if (player.hp <= 0) {
         player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
         appendSystemMessage(`${player.name} has been defeated!`);
+		handleBattleEnd();
       }
     });
 
@@ -261,7 +260,7 @@ function handleBattleEnd() {
   } else if (players.every(player => player.hp <= 0)) {
     appendSystemMessage('All players have been defeated. The boss wins.');
   }
-
+  calculateSurvivalBonus();
   // Display stats and XP for all players
   updatePlayerStats();
 }
