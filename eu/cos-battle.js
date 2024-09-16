@@ -1,7 +1,6 @@
-
 let players = [];
 let bossHP = 350; // Boss HP
-let currentCOSbattleversion = 'beta 0.0185' ;
+let currentCOSbattleversion = 'beta 0.0186';
 const battleversionElement = document.getElementById('cos-battle-version');
 
 const bossHPElement = document.getElementById('boss-hp');
@@ -63,9 +62,9 @@ function generatePlayers(playerNames) {
       playerContainer, 
       playerHP, 
       hp: 100,
-	  combatLvl: 0,
+      combatLvl: 0,
       combatXP: 0,  // Combat XP starts at 0
-	  HealingLvl: 0,
+      healingLvl: 0,
       healingXP: 0,  // Healing XP starts at 0
     }; 
   });
@@ -144,7 +143,7 @@ function playerAttackBoss(player, damage) {
   bossHPElement.textContent = Math.max(bossHP, 0); // Ensure boss HP doesn't go below 0
 
   // Append system message when a player attacks the boss
-  appendSystemMessage(${player.name} attacks the boss for ${damage} damage!);
+  appendSystemMessage(`${player.name} attacks the boss for ${damage} damage!`);
 
   // Visual feedback (e.g., change boss color briefly)
   document.getElementById('boss').style.borderColor = '#f00'; // Red flash
@@ -152,7 +151,6 @@ function playerAttackBoss(player, damage) {
     document.getElementById('boss').style.borderColor = '#4caf50'; // Back to green
   }, 500);
 }
-
 
 // Boss attacks with one of three options
 function bossAttack() {
@@ -166,10 +164,10 @@ function bossAttack() {
     player.hp -= damage;
 
     // Append system message when the boss attacks a player
-    appendSystemMessage(Boss attacks ${player.name} for ${damage} damage!);
+    appendSystemMessage(`Boss attacks ${player.name} for ${damage} damage!`);
 
     // Update player's HP display
-    player.playerHP.innerText = HP: ${Math.max(player.hp, 0)}; // Ensure HP doesn't go below 0
+    player.playerHP.innerText = `HP: ${Math.max(player.hp, 0)}`; // Ensure HP doesn't go below 0
 
     // Visual feedback (e.g., change player border color to red briefly)
     player.playerContainer.style.borderColor = '#f00'; // Red flash
@@ -180,7 +178,7 @@ function bossAttack() {
     // Check if the player is defeated
     if (player.hp <= 0) {
       player.playerContainer.style.opacity = '0.3'; // Make defeated player look "faded"
-      appendSystemMessage(${player.name} has been defeated!);
+      appendSystemMessage(`${player.name} has been defeated!`);
     }
 
   } else if (randomAttack === 1) {
@@ -190,7 +188,7 @@ function bossAttack() {
       player.hp -= areaDamage;
 
       // Update player's HP display
-      player.playerHP.innerText = HP: ${Math.max(player.hp, 0)};
+      player.playerHP.innerText = `HP: ${Math.max(player.hp, 0)}`;
 
       // Visual feedback for all players
       player.playerContainer.style.borderColor = '#f00'; // Red flash
@@ -201,12 +199,12 @@ function bossAttack() {
       // Check if the player is defeated
       if (player.hp <= 0) {
         player.playerContainer.style.opacity = '0.5'; // Make defeated player look "faded"
-        appendSystemMessage(${player.name} has been defeated!);
+        appendSystemMessage(`${player.name} has been defeated!`);
       }
     });
 
     // Append system message for area attack
-    appendSystemMessage(Boss uses area attack, damaging all players for ${areaDamage} damage!);
+    appendSystemMessage(`Boss uses area attack, damaging all players for ${areaDamage} damage!`);
 
   } else if (randomAttack === 2) {
     // Self-heal: Boss heals 1-10 HP
@@ -217,72 +215,64 @@ function bossAttack() {
     bossHPElement.textContent = bossHP;
 
     // Append system message for boss self-heal
-    appendSystemMessage(Boss heals for ${healAmount} HP!);
+    appendSystemMessage(`Boss heals for ${healAmount} HP!`);
   }
 }
+
 // Update and display player stats
 function updatePlayerStats() {
   const playerStatsList = document.getElementById('playerStatsList');
   playerStatsList.innerHTML = ''; // Clear existing stats
 
   players.forEach(player => {
-    const statsDiv = document.createElement('div');
-    statsDiv.classList.add('player-stats');
-
-    // Create HTML elements to display player's stats
-    const nameElement = document.createElement('div');
-    nameElement.textContent = `Name: ${player.name}`;
-
-    const hpElement = document.createElement('div');
-    hpElement.textContent = `HP: ${player.hp}`;
-
-	const combatLvlElement = document.createElement('div');
-    combatLvlElement.textContent = `Combat Lvl: 1`;
-    const combatXpElement = document.createElement('div');
-    combatXpElement.textContent = `Combat XP: ${player.combatXP}`;
-	const healingLvlElement = document.createElement('div');
-    healingLvlElement.textContent = `Healing Lvl: 1`;
-    const healingXpElement = document.createElement('div');
-    healingXpElement.textContent = `Healing XP: ${player.healingXP}`;
-
-    // Append the elements to the statsDiv
-    statsDiv.appendChild(nameElement);
-    statsDiv.appendChild(hpElement);
-	statsDiv.appendChild(combatLvlElement);
-    statsDiv.appendChild(combatXpElement);
-	statsDiv.appendChild(healingLvlElement);
-    statsDiv.appendChild(healingXpElement);
-
-    // Append statsDiv to the playerStatsList
-    playerStatsList.appendChild(statsDiv);
+    const statsElement = document.createElement('li');
+    statsElement.textContent = `${player.name} - Combat XP: ${player.combatXP}, Healing XP: ${player.healingXP}, HP: ${player.hp}`;
+    playerStatsList.appendChild(statsElement);
   });
 }
-// Handle battle end, check if all players are defeated or the boss is defeated
-function handleBattleEnd() {
-  if (players.every(player => player.hp <= 0)) {
-    setgameMessage('All players are defeated!');
-    appendSystemMessage('All players are defeated!');
-  } else if (bossHP <= 0) {
-    setgameMessage('Boss Defeated!');
-    appendSystemMessage('Boss Defeated!');
-  }
+
+// Calculate XP bonus for players who survived the battle
+function calculateSurvivalBonus() {
+  players.forEach(player => {
+    if (player.hp > 0) {
+      // Add a 5% bonus to combat and healing XP if the player survived the battle
+      player.combatXP += Math.floor(player.combatXP * 0.05);
+      player.healingXP += Math.floor(player.healingXP * 0.05);
+      appendSystemMessage(`${player.name} survived the battle and earned a 5% XP bonus!`);
+    }
+  });
+  updatePlayerStats(); // Refresh the displayed stats
 }
 
-// Helper function to append system messages
+// Display system messages in the chat box
 function appendSystemMessage(message) {
-  const newMessage = document.createElement('p');
-  newMessage.innerText = message;
-  systemMessagesElement.appendChild(newMessage);
-  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight; // Auto-scroll to the bottom
+  const messageElement = document.createElement('p');
+  messageElement.textContent = message;
+  systemMessagesElement.appendChild(messageElement);
+
+  // Scroll to the bottom of the chat box
+  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight;
 }
 
-// Handle header message display
+// Handle end of the battle
+function handleBattleEnd() {
+  if (bossHP <= 0) {
+    appendSystemMessage('The battle is over. The players have defeated the boss!');
+  } else if (players.every(player => player.hp <= 0)) {
+    appendSystemMessage('All players have been defeated. The boss wins.');
+  }
+
+  // Display stats and XP for all players
+  updatePlayerStats();
+}
+
+// Set the header message for the game
 function setgameMessage(message) {
-  headerMessagesElement.innerHTML = message;
+  headerMessagesElement.textContent = message;
 }
 
-
-battleversionElement.innerText = `COS Battle Version: ${currentCOSbattleversion}`;
+// Display battle version at the top of the page
+battleversionElement.textContent = currentCOSbattleversion;
 // Initialize file input and button functionality
 document.getElementById('fileInput').addEventListener('change', handleFileUpload);
 document.getElementById('startBattleButton').addEventListener('click', startBattle);
