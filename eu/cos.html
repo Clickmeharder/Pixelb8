@@ -13,6 +13,26 @@
       color: #f0f0f0; /* Light text color */
       font-family: Arial, sans-serif;
     }
+	#battlewrapper {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      flex-direction: column;
+      background-color: #2c2c2c; /* Dark grey background */
+      height: 60vh;
+      color: #f0f0f0; /* Light text color */
+      font-family: Arial, sans-serif;
+    }
+	#secondwrapper {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      flex-direction: column;
+      background-color: #2c2c2c; /* Dark grey background */
+      height: 40vh;
+      color: #f0f0f0; /* Light text color */
+      font-family: Arial, sans-serif;
+    }
 	#pagetitle {
 		font-size: 59px;
 		font-family: lucida console;
@@ -132,13 +152,18 @@
 	  margin: 2px 0;
 	}
 	#systemMessages {
+	  margin:auto;
       margin-top: 20px;
       padding: 10px;
       border: 1px solid #4caf50;
       border-radius: 5px;
-      background-color: #2e2e2e; /* Dark grey background for messages */
-      max-height: 30px;
+      background-color: black; /* Dark grey background for messages */
+	  color:green;
+	  font-family: lucida console;
+      max-height: 80px;
+	  min-height: 30px;
       overflow-y: auto;
+	  resize: vertical;
       width: 80%;
     }
   </style>
@@ -172,12 +197,14 @@
 
 	  </div>
 	</div>
-	<div id="defeatedPlayers">
-		<h2>Graveyard</h2>
-	</div>
-	<div id="systemMessages"></div>
-	<div class="player-stats">
-		<div id="playerStatsList"></div>
+	<div id="secondwrapper">
+		<div id="defeatedPlayers">
+			<h2>Graveyard</h2>
+		</div>
+		<div id="systemMessages"></div>
+		<div class="player-stats">
+			<div id="playerStatsList"></div>
+		</div>
 	</div>
 	<script src="cos-battle.js"></script>
 </body></html>
