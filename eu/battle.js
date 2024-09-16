@@ -224,3 +224,6 @@ function setgameMessage(message)
 	headerMessagesElement.innerHTML = message;
 }
 
+// Initialize file input and button functionality
+document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+document.getElementById('startBattleButton').addEventListener('click', startBattle);
