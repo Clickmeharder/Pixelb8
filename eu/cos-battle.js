@@ -1,11 +1,11 @@
-let currentCOSbattleversion = 'beta 0.0193';
+let currentCOSbattleversion = 'beta 0.0194';
 
 let players = [];
 let bossHP = 350; // Boss HP
 // Declare a global variable to track the round
 let currentRound = 1;
 const battleversionElement = document.getElementById('cos-battle-version');
-
+const currentRoundElement = document.getElementById('currentRound');
 const bossHPElement = document.getElementById('boss-hp');
 const systemMessagesElement = document.getElementById('systemMessages');
 const headerMessagesElement = document.getElementById('headerTexts');
@@ -133,21 +133,12 @@ function startBattle() {
 	  handleBattleEnd();
     }
   }
-  updateRoundMessage();
   attackNextPlayer();
 }
 
 
 
 
-// Function to set the game message and increment the round
-function updateRoundMessage() {
-  // Set the game message to the current round number
-  setgameMessage('Round ' + currentRound);
-
-  // Increment the round for the next time
-  currentRound++;
-}
 
 // Player attacks boss with damage
 function playerAttackBoss(player, damage) {
@@ -250,6 +241,7 @@ function bossAttack() {
     setgameMessage(`Boss heals for ${healAmount} HP!`);
     appendSystemMessage(`Boss heals for ${healAmount} HP!`);
   }
+  updateRoundMessage();
 }
 
 // Update and display player stats
@@ -275,6 +267,13 @@ function calculateSurvivalBonus() {
     }
   });
   updatePlayerStats(); // Refresh the displayed stats
+}
+// Function to update & increment the round
+function updateRoundMessage() {
+  // Set the game message to the current round number
+  currentRoundElement.textContent = 'Round ' + currentRound;
+  // Increment the round for the next time
+  currentRound++;
 }
 
 // Display system messages in the chat box
