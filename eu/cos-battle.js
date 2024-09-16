@@ -18,65 +18,13 @@ function handleFileUpload(event) {
     reader.readAsText(file); // Read the file content as text
   }
 }
-//player, boss and object loading
-//object and area loading
 
-// Load player stats from local storage or initialize with default values
-function loadPlayerStats() {
-  const storedStats = localStorage.getItem('playerStats');
-  return storedStats ? JSON.parse(storedStats) : {
-    "New Player": {
-      "combat": { "level": 1, "experience": 0 },
-      "healing": { "level": 1, "experience": 0 },
-      "mining": { "level": 0, "experience": 0 },
-      "fishing": { "level": 0, "experience": 0 },
-      "woodcutting": { "level": 0, "experience": 0 },
-      "crafting": { "level": 0, "experience": 0 },
-      "stamina": { "level": 1, "experience": 0 },
-      "totalLevels": 3,
-      "experience": 0,
-      "pixelcoins": 0
-    }
-  };
-}
-
-// Save player stats to local storage
-function savePlayerStats(stats) {
-  localStorage.setItem('playerStats', JSON.stringify(stats));
-}
-
-
-function synchronizePlayerStats(playerNames) {
-  const stats = loadPlayerStats();
-  const newPlayerName = "New Player";
-  
-  // Check and add missing players
-  playerNames.forEach(name => {
-    if (!(name in stats)) {
-      stats[name] = { ...stats[newPlayerName] }; // Clone default stats
-    }
-  });
-  
-  // Remove the "New Player" entry if present
-  delete stats[newPlayerName];
-  
-  // Save updated stats
-  savePlayerStats(stats);
-  
-  // Return filtered player stats (excluding "New Player")
-  return stats;
-}
-//---
-// player loading
- 
-//Add player images, names, HP, and XP to the page
+// Add player images, names, HP, and XP to the page
 function generatePlayers(playerNames) {
   const playersDiv = document.getElementById('players');
   playersDiv.innerHTML = ''; // Clear existing players
 
-  const stats = synchronizePlayerStats(playerNames);
-
-  players = playerNames.map((name) => {
+  players = playerNames.map((name, index) => {
     const playerContainer = document.createElement('div');
     playerContainer.classList.add('player-container');
     
@@ -89,26 +37,9 @@ function generatePlayers(playerNames) {
     playerName.innerText = name;
     playerName.classList.add('player-name');
 
-    // Calculate HP based on stamina level
-    const playerStats = stats[name] || {
-      stamina: { level: 1 },
-      experience: 0,
-      combat: { level: 1, experience: 0 },
-      healing: { level: 1, experience: 0 },
-      mining: { level: 0, experience: 0 },
-      fishing: { level: 0, experience: 0 },
-      woodcutting: { level: 0, experience: 0 },
-      crafting: { level: 0, experience: 0 },
-      totalLevels: 3,
-      pixelcoins: 0
-    };
-
-    const hp = (playerStats.stamina?.level || 1) * 10;
-    const xp = playerStats.experience || 0;
-
     // Create a span to hold the player's HP
     const playerHP = document.createElement('span');
-    playerHP.innerText = `HP: ${hp}`; // Set HP based on stamina
+    playerHP.innerText = 'HP: 100'; // Default HP for each player
     playerHP.classList.add('player-hp');
 
     // Append player, name, and HP to the container
@@ -123,8 +54,8 @@ function generatePlayers(playerNames) {
       name, 
       playerContainer, 
       playerHP, 
-      hp, 
-      xp 
+      hp: 100, 
+      xp: 0  // Add XP property for each player
     }; 
   });
 
@@ -132,50 +63,14 @@ function generatePlayers(playerNames) {
   document.getElementById('startBattleButton').disabled = false;
 }
 
-
-
-
-//---
-// mob or boss loading
-
-
-
-//---
-
-//--------------------------------------------------
-//  MAIN  
-//--------------------------------------------------
-// Helper function to append system messages
-function appendSystemMessage(message) {
-  const newMessage = document.createElement('p');
-  newMessage.innerText = message;
-  systemMessagesElement.appendChild(newMessage);
-  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight; // Auto-scroll to the bottom
-}
-
-// Handle header message display
-function setgameMessage(message) {
-  headerMessagesElement.innerHTML = message;
-}
-
-
-//------------------------------------------------
-// BATTLE SEQUENCE
-
 // Start the battle and loop through players
 function startBattle() {
   let currentPlayerIndex = 0;
 
   function attackNextPlayer() {
-    // Check if all players are defeated or boss is defeated
-    if (players.every(player => player.hp <= 0) || bossHP <= 0) {
+    if (bossHP <= 0 || players.every(player => player.hp <= 0)) {
       handleBattleEnd();
-      return; // Stop if no more players or boss is defeated
-    }
-
-    // Proceed with the current player's turn
-    if (currentPlayerIndex >= players.length) {
-      currentPlayerIndex = 0; // Reset to the first player if all have taken a turn
+      return; // Stop if all players are defeated or boss is defeated
     }
 
     const player = players[currentPlayerIndex];
@@ -202,30 +97,40 @@ function startBattle() {
 
     currentPlayerIndex++;
 
-    if (bossHP > 0) {
+    if (currentPlayerIndex >= players.length) {
+      currentPlayerIndex = 0; // Loop back to the first player
+    }
+
+    if (bossHP > 0 && players.some(player => player.hp > 0)) {
       setTimeout(() => {
         // Boss attacks a random player
         bossAttack();
-        if (players.every(player => player.hp > 0) && bossHP > 0) {
-          setTimeout(attackNextPlayer, 1000); // Move to next player after 1 second if boss and players are still active
-        } else {
-          handleBattleEnd(); // End battle if all players are defeated or boss is defeated
-        }
+        setTimeout(attackNextPlayer, 1000); // Move to next player after 1 second
       }, 1000); // Boss takes turn after player's attack
     } else {
-      appendSystemMessage('Boss Defeated!');
-      setgameMessage('Boss Defeated!');
-
-      // Call XP calculation after boss is defeated
-      calculateSurvivalBonus(); 
+      handleBattleEnd(); // End the battle if the boss is defeated
     }
   }
 
   attackNextPlayer();
 }
 
-//-------
-//bosses attack function
+// Player attacks boss with damage
+function playerAttackBoss(player, damage) {
+  bossHP -= damage;
+
+  // Update boss HP display
+  bossHPElement.textContent = Math.max(bossHP, 0); // Ensure boss HP doesn't go below 0
+
+  // Append system message when a player attacks the boss
+  appendSystemMessage(`${player.name} attacks the boss for ${damage} damage!`);
+
+  // Visual feedback (e.g., change boss color briefly)
+  document.getElementById('boss').style.borderColor = '#f00'; // Red flash
+  setTimeout(() => {
+    document.getElementById('boss').style.borderColor = '#4caf50'; // Back to green
+  }, 500);
+}
 
 // Boss attacks with one of three options
 function bossAttack() {
@@ -233,8 +138,11 @@ function bossAttack() {
 
   if (randomAttack === 0) {
     // Default attack: Boss attacks a random player
-    const randomPlayerIndex = Math.floor(Math.random() * players.length);
-    const player = players[randomPlayerIndex];
+    const activePlayers = players.filter(player => player.hp > 0); // Get only players with HP > 0
+    if (activePlayers.length === 0) return; // If no active players, return
+
+    const randomPlayerIndex = Math.floor(Math.random() * activePlayers.length);
+    const player = activePlayers[randomPlayerIndex];
     const damage = Math.floor(Math.random() * 6) + 5; // Boss deals 5-10 damage
     player.hp -= damage;
 
@@ -294,83 +202,40 @@ function bossAttack() {
   }
 }
 
-
-//------------------------------------------------
-//    PLAYERS
-
-
-//---------------------------------------
-//player attacks
-
-// Player attacks boss with damage
-function playerAttackBoss(player, damage) {
-  bossHP -= damage;
-
-  // Update boss HP display
-  bossHPElement.textContent = Math.max(bossHP, 0); // Ensure boss HP doesn't go below 0
-
-  // Append system message when a player attacks the boss
-  appendSystemMessage(`${player.name} attacks the boss for ${damage} damage!`);
-
-  // Visual feedback (e.g., change boss color briefly)
-  document.getElementById('boss').style.borderColor = '#f00'; // Red flash
-  setTimeout(() => {
-    document.getElementById('boss').style.borderColor = '#4caf50'; // Back to green
-  }, 500);
-}
-
-
-//Player Experience
+// Handle the end of the battle, calculate survival bonus XP
 function handleBattleEnd() {
-  // Check if the boss is defeated
   if (bossHP <= 0) {
-    appendSystemMessage('Boss Defeated!');
-    setgameMessage('Boss Defeated!');
-    calculateSurvivalBonus();
+    appendSystemMessage('Boss has been defeated! The battle is over!');
+    // Award players a 5% bonus XP for not dying
+    players.forEach(player => {
+      if (player.hp > 0) {
+        const bonusXP = Math.floor(player.xp * 0.05);
+        player.xp += bonusXP;
+        appendSystemMessage(`${player.name} receives ${bonusXP} bonus XP for surviving the battle!`);
+      }
+    });
   } else {
-    // If the boss is not defeated, check if all players are dead
-    const allPlayersDefeated = players.every(player => player.hp <= 0);
-    if (allPlayersDefeated) {
-      appendSystemMessage('All players are defeated. Battle over!');
-      setgameMessage('All players are defeated. Battle over!');
-    }
+    appendSystemMessage('All players have been defeated. The boss wins!');
   }
 
-  // Disable the Start Battle button if the battle is over
+  // Disable the Start Battle button
   document.getElementById('startBattleButton').disabled = true;
 }
 
-// Handle the end of the battle, calculate survival bonus XP
-function calculateSurvivalBonus() {
-  players.forEach(player => {
-    if (player.hp > 0) {
-      const bonusXP = Math.floor(player.xp * 0.05); // 5% XP bonus for survival
-      player.xp += bonusXP;
-      appendSystemMessage(`${player.name} survived and gains a ${bonusXP} XP bonus! Total XP: ${player.xp}`);
-    }
-  });
+// Append messages to the system messages area
+function appendSystemMessage(message) {
+  const messageElement = document.createElement('div');
+  messageElement.textContent = message;
+  systemMessagesElement.appendChild(messageElement);
+  // Scroll to the bottom to show the latest message
+  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight;
 }
 
-
-
-
-
-
-
-
-
-
-//------------------------------------------------
-//File Initialization
-
-// Initialize file input and button functionality
+// Add event listener for file upload
 document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
+// Add event listener for Start Battle button
 document.getElementById('startBattleButton').addEventListener('click', startBattle);
-
-
-
-
-
 
 
 
