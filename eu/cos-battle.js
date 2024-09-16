@@ -271,7 +271,7 @@ function handleBattleEnd() {
 function setVersionText() {
   const versionDiv = document.getElementById('cos-battle-version');
   if (versionDiv) {
-    versionDiv.textContent = 'COS-Battle version 1.00';
+    versionDiv.textContent = 'COS-Battle version 1.01';
   } else {
     console.error('Element with id "cos-battle-version" not found.');
   }
