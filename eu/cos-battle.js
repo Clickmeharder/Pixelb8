@@ -1,5 +1,9 @@
+
 let players = [];
 let bossHP = 350; // Boss HP
+let currentCOSbattleversion = 1.00;
+const battleversionElement = document.getElementById('cos-battle-version');
+
 const bossHPElement = document.getElementById('boss-hp');
 const systemMessagesElement = document.getElementById('systemMessages');
 const headerMessagesElement = document.getElementById('headerTexts');
@@ -275,3 +279,4 @@ document.getElementById('startBattleButton').addEventListener('click', () => {
   startBattle();
   updatePlayerStats(); // Update stats when battle starts
 });
+battleversionElement.innerText = `Current Version: ${currentCOSbattleversion}`;
