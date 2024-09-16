@@ -267,6 +267,19 @@ function handleBattleEnd() {
   }
 }
 
+// Function to set the version text on load
+function setVersionText() {
+  const versionDiv = document.getElementById('cos-battle-version');
+  if (versionDiv) {
+    versionDiv.textContent = 'COS-Battle version 1.00';
+  } else {
+    console.error('Element with id "cos-battle-version" not found.');
+  }
+}
+
+// Call the function on page load
+window.addEventListener('load', setVersionText);
+
 // Event listener for file upload
 document.getElementById('fileUpload').addEventListener('change', handleFileUpload);
 
