@@ -250,22 +250,23 @@ function bossAttack() {
     setgameMessage(`Boss heals for ${healAmount} HP!`);
     appendSystemMessage(`Boss heals for ${healAmount} HP!`);
 
-    // Play healing sound
+    // Change the boss background image to the healing GIF
+    const bossDiv = document.getElementById('boss');
+    bossDiv.style.backgroundImage = 'url(data/images/mobs/gallard/gallardheal.gif)';
+
+    // Play the heal sound
     const healSound = document.getElementById('attackSound');
     healSound.play();
 
-    // Change boss image to healing image
-    const bossImage = document.getElementById('bossImage');
-    bossImage.src = "data/images/boss_healing.png"; // Set the image to the healing state
-
-    // After a delay, change the image back to the normal image
+    // Revert back to the default image after 1.5 seconds
     setTimeout(() => {
-      bossImage.src = "data/images/boss_normal.png"; // Revert back to normal image
-    }, 1000); // Change image back after 1 second
+      bossDiv.style.backgroundImage = 'url(data/images/mobs/gallard/gallarddefault.png)';
+    }, 1500);
   }
 
   updateRoundMessage();
 }
+
 
 // Update and display player stats
 function updatePlayerStats() {
