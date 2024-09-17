@@ -277,22 +277,19 @@ function calculateSurvivalBonus() {
   });
   updatePlayerStats(); // Refresh the displayed stats
 }
-function getRandomLootAmount(totalPrizePool) {
+function getRandomLootAmount(maxLoot) {
   // Define the minimum loot amount
   const minLoot = 0.01;
 
-  // Generate a random loot amount between minLoot and totalPrizePool
-  const lootAmount = Math.random() * (totalPrizePool - minLoot) + minLoot;
-
-  return lootAmount;
+  // Generate a random loot amount between minLoot and maxLoot
+  return Math.random() * (maxLoot - minLoot) + minLoot;
 }
-
 
 function distributeLoot() {
   const prizePoolElement = document.getElementById('prizePool');
   const prizePoolText = prizePoolElement.innerText;
   const match = prizePoolText.match(/Current Prize Pool: (\d+(\.\d+)?)/);
-  
+
   if (!match) {
     console.error('Prize pool value not found.');
     return;
@@ -306,8 +303,8 @@ function distributeLoot() {
     return;
   }
 
-  // Calculate total damage dealt by all players
-  const totalDamage = players.reduce((sum, player) => sum + (player.totalDamageDealt || 0), 0);
+  // Calculate the maximum loot to distribute (85% of the total prize pool)
+  const maxLootAmount = totalPrizePool * 0.85;
 
   // Calculate total loot distributed
   let totalLootDistributed = 0;
@@ -318,9 +315,20 @@ function distributeLoot() {
 
   survivingPlayers.forEach(player => {
     const playerDamage = player.totalDamageDealt || 0;
+    const totalDamage = players.reduce((sum, player) => sum + (player.totalDamageDealt || 0), 0);
     const damagePercentage = playerDamage / totalDamage;
-    const lootShare = Math.random() * totalPrizePool; // Random loot between 0 and totalPrizePool
+
+    // Generate random loot share based on the damage percentage
+    const lootShare = getRandomLootAmount(maxLootAmount * damagePercentage);
+    
     totalLootDistributed += lootShare;
+
+    // Prevent distributing more than the maximum loot amount
+    if (totalLootDistributed > maxLootAmount) {
+      const excessAmount = totalLootDistributed - maxLootAmount;
+      lootShare -= excessAmount;
+      totalLootDistributed = maxLootAmount;
+    }
 
     // Display loot for each player
     const lootMessage = `${player.name} receives ${lootShare.toFixed(2)} from the loot pool.`;
@@ -329,10 +337,7 @@ function distributeLoot() {
   });
 
   // Calculate remaining prize pool
-  totalPrizePool -= totalLootDistributed;
-
-  // Display remaining prize pool
-  const remainingLootMessage = `Remaining Prize Pool: ${totalPrizePool.toFixed(2)}`;
+  const remainingLootMessage = `Remaining Prize Pool: ${(totalPrizePool - totalLootDistributed).toFixed(2)}`;
   appendSystemMessage(remainingLootMessage); // Append to system messages
   lootDiv.innerHTML += `<p>${remainingLootMessage}</p>`;
 }
