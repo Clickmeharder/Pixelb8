@@ -324,7 +324,7 @@ function distributeLoot() {
 
     // Display loot for each player
     const lootMessage = `${player.name} receives ${lootShare.toFixed(2)} from the loot pool.`;
-    systemMessage(lootMessage); // Append to system messages
+    appendSystemMessage(lootMessage); // Append to system messages
     lootDiv.innerHTML += `<p>${lootMessage}</p>`;
   });
 
