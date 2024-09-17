@@ -293,7 +293,7 @@ function distributeLoot() {
     return;
   }
 
-  const totalPrizePool = parseFloat(match[1]);
+  let totalPrizePool = parseFloat(match[1]);
   const survivingPlayers = players.filter(player => player.hp > 0);
 
   if (survivingPlayers.length === 0) {
@@ -301,37 +301,35 @@ function distributeLoot() {
     return;
   }
 
-  // Generate a random loot amount
-  const totalLoot = getRandomLootAmount(totalPrizePool);
-
   // Calculate total damage dealt by all players
   const totalDamage = players.reduce((sum, player) => sum + (player.totalDamageDealt || 0), 0);
 
-  // Display loot distribution in the loot div
+  // Calculate total loot distributed
+  let totalLootDistributed = 0;
+
+  // Clear previous loot messages
   const lootDiv = document.getElementById('loot');
-  lootDiv.innerHTML = ''; // Clear previous loot distribution
+  lootDiv.innerHTML = '';
 
   survivingPlayers.forEach(player => {
     const playerDamage = player.totalDamageDealt || 0;
     const damagePercentage = playerDamage / totalDamage;
-    const lootShare = damagePercentage * totalLoot;
+    const lootShare = Math.random() * totalPrizePool; // Random loot between 0 and totalPrizePool
+    totalLootDistributed += lootShare;
 
-    // Create a new element to display each player's loot
-    const lootElement = document.createElement('p');
-    lootElement.textContent = `${player.name} receives ${lootShare.toFixed(2)} from the loot pool.`;
-    lootDiv.appendChild(lootElement);
-
-    // Display loot information using appendSystemMessage
-    appendSystemMessage(`${player.name} receives ${lootShare.toFixed(2)} from the loot pool.`);
+    // Display loot for each player
+    const lootMessage = `${player.name} receives ${lootShare.toFixed(2)} from the loot pool.`;
+    systemMessage(lootMessage); // Append to system messages
+    lootDiv.innerHTML += `<p>${lootMessage}</p>`;
   });
 
-  // Display the total loot amount in the loot div
-  const totalLootElement = document.createElement('p');
-  totalLootElement.textContent = `Total loot distributed: ${totalLoot.toFixed(2)}`;
-  lootDiv.appendChild(totalLootElement);
+  // Calculate remaining prize pool
+  totalPrizePool -= totalLootDistributed;
 
-  // Optionally, also display the total loot amount using appendSystemMessage
-  appendSystemMessage(`Total loot distributed: ${totalLoot.toFixed(2)}`);
+  // Display remaining prize pool
+  const remainingLootMessage = `Remaining Prize Pool: ${totalPrizePool.toFixed(2)}`;
+  systemMessage(remainingLootMessage); // Append to system messages
+  lootDiv.innerHTML += `<p>${remainingLootMessage}</p>`;
 }
 
 
