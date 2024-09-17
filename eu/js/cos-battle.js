@@ -45,15 +45,14 @@ function generatePlayers(playerNames) {
     const playerName = document.createElement('span');
     playerName.innerText = name;
     playerName.classList.add('player-name');
-
     // Create a span to hold the player's HP
     const playerHP = document.createElement('span');
     playerHP.innerText = 'HP: 100'; // Default HP for each player
     playerHP.classList.add('player-hp');
     // Create a span to hold the player's cb lvl
     const playerCB = document.createElement('span');
-    playerHP.innerText = 'Cb lvl: 1'; // Default HP for each player
-    playerHP.classList.add('player-cb');
+    playerCB.innerText = 'Cb lvl: 1'; // Default HP for each player
+    playerCB.classList.add('player-cb');
 
     // Append player, name, and HP to the container
     playerContainer.appendChild(player);
@@ -69,7 +68,7 @@ function generatePlayers(playerNames) {
       playerContainer, 
       playerHP, 
       hp: 100,
-      playerCB: 0,
+      combatLvl: 0,
       combatXP: 0,  // Combat XP starts at 0
       healingLvl: 0,
       healingXP: 0,  // Healing XP starts at 0
@@ -255,7 +254,7 @@ function updatePlayerStats() {
 
   players.forEach(player => {
     const statsElement = document.createElement('li');
-    statsElement.textContent = `${player.name} - Combat Lvl: ${player.cb}, Combat XP: ${player.combatXP}, HP: ${player.hp} Healing Lvl: ${player.healingLvl}, Healing XP: ${player.healingXP}`;
+    statsElement.textContent = `${player.name} - Combat Lvl: ${player.combatLvl}, Combat XP: ${player.combatXP}, Healing Lvl: ${player.healingLvl}, Healing XP: ${player.healingXP}, HP: ${player.hp}`;
     playerStatsList.appendChild(statsElement);
   });
 }
