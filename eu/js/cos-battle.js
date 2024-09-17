@@ -249,10 +249,21 @@ function bossAttack() {
     // Append system message for boss self-heal
     setgameMessage(`Boss heals for ${healAmount} HP!`);
     appendSystemMessage(`Boss heals for ${healAmount} HP!`);
-	// Play healing sound
-    const healSound = document.getElementById('gallardheal-Sound');
+
+    // Play healing sound
+    const healSound = document.getElementById('attackSound');
     healSound.play();
+
+    // Change boss image to healing image
+    const bossImage = document.getElementById('bossImage');
+    bossImage.src = "data/images/boss_healing.png"; // Set the image to the healing state
+
+    // After a delay, change the image back to the normal image
+    setTimeout(() => {
+      bossImage.src = "data/images/boss_normal.png"; // Revert back to normal image
+    }, 1000); // Change image back after 1 second
   }
+
   updateRoundMessage();
 }
 
