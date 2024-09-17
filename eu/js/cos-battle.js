@@ -59,7 +59,7 @@ function generatePlayers(playerNames) {
     playerContainer.appendChild(player);
     playerContainer.appendChild(playerName);
     playerContainer.appendChild(playerHP);
-	playerContainer.appendChild(playercombatLvl);
+	playerContainer.appendChild(playerCB);
     // Append player container to the playersDiv
     playersDiv.appendChild(playerContainer);
 
