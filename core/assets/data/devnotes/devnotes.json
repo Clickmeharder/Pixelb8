@@ -1,5 +1,21 @@
 [
  {
+        "date": "2024-09-15 01:55:23 UTC",
+        "developer": "Jaedraze aka Jimbobbityboo",
+        "content": "We have begun Developing our first twitch game called C.O.S",
+        "points": [
+            "- C.O.S is short for Colonists on Stream",
+			"- still very early in development but we hope to have a fully functional stream game for streamers to play with viewers soon!",
+			"- currently we are focusing on the battle simulator portion. we also currently have plans to start working on the following modes asap:",
+			"~ C.O.S Idle - The Stream viewers/Lurkers Idle Page where they can earn passive rewards for lurking and other actions on a connected stream",
+			"~ C.O.S Deathmatch - all players in the battle fight to the death for a prize!",
+			"~ C.O.S Team Deathmatch",
+			"~ C.O.S Web - a web version of c.o.s for players to be able to actively play directly on the web browser without needing to be on a connected twitch stream",
+			"Although it may be some time before we get all of these parts working - we plan on going even further. and we also intend to have them all integrated into one another",
+			" You Can View the Alpha for C.O.S at https://pixelb8.lol/eu/cos"
+        ]
+    },
+ {
         "date": "2024-06-24 04:35:48 UTC",
         "developer": "Jaedraze aka Jimbobbityboo",
         "content": "The Entropia Item Stash Tool Pricelist creation is being overhauled",
