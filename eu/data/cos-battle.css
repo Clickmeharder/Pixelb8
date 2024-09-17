@@ -51,7 +51,7 @@
 	#boss {
 		width: 100px;
 		height: 100px;
-		background-image: url(data/images/creature-1.png);
+		background-image: url(images/creature-1.png);
 		background-size: 96%;
 		margin: auto;
 		margin-bottom: 10px;
