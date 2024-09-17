@@ -363,16 +363,25 @@ function distributeLoot() {
   // Calculate total damage dealt by all players
   const totalDamage = players.reduce((sum, player) => sum + (player.totalDamageDealt || 0), 0);
 
+  // Prepare loot information
+  let lootMessages = `<h3>Total Loot Distribution:</h3><p>Total Prize Pool: ${totalPrizePool.toFixed(2)}</p>`;
+
   survivingPlayers.forEach(player => {
     const playerDamage = player.totalDamageDealt || 0;
     const damagePercentage = playerDamage / totalDamage;
     const lootShare = damagePercentage * totalPrizePool;
 
-    // Display loot for each player
-    systemMessage(`${player.name} receives ${lootShare.toFixed(2)} from the loot pool.`);
+    // Append loot info for each player
+    lootMessages += `<p>${player.name} receives ${lootShare.toFixed(2)} from the loot pool.</p>`;
   });
-}
 
+  // Display loot information
+  const lootDiv = document.getElementById('loot');
+  lootDiv.innerHTML = lootMessages;
+
+  // Optionally, display system message in chat as well
+  systemMessage('Loot distribution complete. Check the loot section for details.');
+}
 
 // Display battle version at the top of the page
 battleversionElement.textContent = currentCOSbattleversion;
