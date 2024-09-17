@@ -17,32 +17,26 @@
 	<div id="cos-battle-version">COS Battle version: 0.0</div>
 	<div id="pagetitle">Colonists on Stream</div>
 	<div id="battlewrapper" class="resizable">
-	  <div id="wrapper" class="resizable"> 
-		  <div id="fileInputContainer">
-			<input type="file" id="fileInput" accept=".txt">
-			<button id="loadPlayersButton">Load Players</button>
-		  </div>
-		<!-- Start Battle Button -->
-		  <div id="battleControl" class="resizable">
-			<button id="startBattleButton" disabled="">Start Battle</button>
-		  </div>
-		  
-		  
-		 
-
-		  <div id="headerTexts"></div>
-		  <span id="currentRound">Round 0</span>
-		  <div id="boss-info">
-			<div>Virtual Gallard Lvl: <span id="boss-level">10</span></div>
-			<div>HP: <span id="boss-hp">350</span></div>
-		  </div>
-		  <div id="boss"></div>
-
-		  <!-- Player Section -->
-		  <div id="players"></div>
-
+	  <div id="wrapper">
+		<div id="fileInputContainer">
+		  <input type="file" id="fileInput" accept=".txt">
+		  <button id="loadPlayersButton">Load Players</button>
+		</div>
+		<div id="battleControl">
+		  <button id="startBattleButton" disabled>Start Battle</button>
+		</div>
+		<div id="headerTexts"></div>
+		<span id="currentRound">Round 0</span>
+		<div id="boss-info">
+		  <div>Virtual Gallard Lvl: <span id="boss-level">10</span></div>
+		  <div>HP: <span id="boss-hp">350</span></div>
+		</div>
+		<div id="boss"></div>
+		<div id="players"></div>
 	  </div>
+	  <div class="resizer"></div> <!-- Custom resizer element -->
 	</div>
+
 	<div id="secondwrapper">
 		<div id="defeatedPlayers">
 			<h2>Graveyard</h2>
@@ -54,5 +48,6 @@
 			<div id="playerStatsList"></div>
 		</div>
 	</div>
+	<script src="js/cos-play-main.js"></script>
 	<script src="js/cos-battle.js"></script>
 </body></html>

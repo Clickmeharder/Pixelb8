@@ -40,29 +40,26 @@
 
 /* Styling for the resizable container */
 .resizable {
-  width: 100%;  /* Adjust width as needed */
-  height: 200px;  /* Initial height */
+  width: 98%;  /* Adjust width as needed */
   border: 1px solid #ccc;
   position: relative;
-  resize: vertical;  /* Allow vertical resize */
-  overflow: auto;  /* Ensure content doesn't overflow */
+  overflow: auto;
+  min-height: 150px;  /* Add a minimum height */
 }
 
 /* Resizer area */
-.resizable::after {
-  content: "";
+.resizer {
+  width: 100%;  /* Spans the entire width */
+  height: 10px;  /* Adjust the height of the resizer */
+  background-color: rgba(0, 0, 0, 0.2);  /* Visible resizer bar */
+  cursor: ns-resize;  /* Vertical resize cursor */
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;  /* Makes the resizer span the entire width */
-  height: 10px;  /* Adjust the height of the resizer area */
-  cursor: ns-resize;  /* Changes cursor to vertical resize */
-  background-color: transparent;  /* Keep resizer background invisible */
+  bottom: 0;  /* Position at the bottom of the resizable container */
 }
 
-/* Optional: Styling for resizer hover effect */
-.resizable:hover::after {
-  background-color: rgba(0, 0, 0, 0.1);  /* Slight highlight when hovering */
+/* Add hover effect for resizer */
+.resizer:hover {
+  background-color: rgba(0, 0, 0, 0.3);  /* Highlight resizer on hover */
 }
 
 
