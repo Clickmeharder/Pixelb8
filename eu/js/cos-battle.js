@@ -308,7 +308,35 @@ function handleBattleEnd() {
 function setgameMessage(message) {
   headerMessagesElement.textContent = message;
 }
+document.addEventListener('DOMContentLoaded', () => {
+  fetchPrizePool();
+});
 
+function fetchPrizePool() {
+  fetch('data/susfunds-twitch.txt')
+    .then(response => response.text())
+    .then(text => {
+      const prizePool = extractPrizePool(text);
+      displayPrizePool(prizePool);
+    })
+    .catch(error => {
+      console.error('Error fetching the prize pool file:', error);
+      document.getElementById('prizePool').innerText = 'Error loading prize pool.';
+    });
+}
+
+function extractPrizePool(text) {
+  // Use a regular expression to find the prize pool value
+  const match = text.match(/Current Total Ped pool:\s*(\d+(\.\d+)?)/);
+  if (match) {
+    return match[1]; // Return the captured value
+  }
+  return 'Not found'; // If the pattern does not match
+}
+
+function displayPrizePool(value) {
+  document.getElementById('prizePool').innerText = `Current Prize Pool: ${value}`;
+}
 // Display battle version at the top of the page
 battleversionElement.textContent = currentCOSbattleversion;
 // Initialize file input and button functionality

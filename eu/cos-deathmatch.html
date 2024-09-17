@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deathmatch on Stream</title>
+  <link rel="stylesheet" href="data/cos-battle.css">
+</head>
+<body>
+  	<div class="nav-bar">
+		<button class="button" onclick="location.href='cos.html'">Mob Hunt</button>
+		<button class="button" onclick="location.href='cos-idle.html'">Idle Game</button>
+		<button class="button" onclick="location.href='cos-deathmatch.html'" disabled>Deathmatch</button>
+	</div>
+	<div id="deathmatch-version">Deathmatch version: 0.1</div>
+	<div id="fileInputContainer">
+	  <button id="Settingstoggle">⚙</button>
+	  <input type="file" id="fileInput" style="display: none;" accept=".txt">
+	  <button id="customFileButton">Add Players</button>
+	  <span id="fileName"></span> <!-- To display the chosen file name -->
+	  <button id="loadPlayersButton">Reload Players</button>
+	  <button id="startDeathmatchButton" disabled>Start Deathmatch</button>
+	</div>
+  <!-- Deathmatch Gameplay Area -->
+
+  <div id="players"></div>
+  <div id="systemMessages"></div>
+
+
+  <script src="js/cosplay-dm-main.js"></script>
+  <script src="js/deathmatch.js"></script>
+</body>
+</html>

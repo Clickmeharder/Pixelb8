@@ -7,6 +7,55 @@
   <title>Colonists on Stream</title>
   
   <style>
+	#Settingstoggle {
+		font-size: 40px;
+		font-family: system-ui;
+		text-align: center;  /* Center the text horizontally */
+		display: flex;  /* Use flexbox for centering */
+		justify-content: center;  /* Center horizontally */
+		align-items: center;  /* Center vertically */
+		margin: auto;
+		padding: 0px;
+		width: 43px;
+		height: 43px;
+		color: #878787;
+		background-color: #688a6a30;
+		border: 3px outset #c8c4c445;
+		border-radius: 50%;
+		outline-color: #d03b3b;
+		opacity: 0.59;
+	}
+	.nav-bar {
+		display: flex;
+		justify-content: center;
+		background-color: #333;
+		padding: 10px;
+	}
+
+	.button {
+		background-color: #555;
+		border: none;
+		color: white;
+		padding: 10px 20px;
+		margin: 0 5px;
+		cursor: pointer;
+		font-size: 16px;
+		border-radius: 5px;
+		transition: background-color 0.3s;
+	}
+
+	.button:hover {
+		background-color: #777;
+	}
+
+	.button:focus {
+		outline: none;
+	}
+
+	.button.disabled {
+		background-color: #777;
+		cursor: not-allowed;
+	}
   </style>
   <style type="text/css" id="operaUserStyle"></style>
   <link rel="stylesheet" href="data/cos-battle.css">
@@ -14,16 +63,26 @@
 </head>
 
 <body>
+	<div class="nav-bar">
+		<button class="button" onclick="location.href='cos.html'" disabled>Mob Hunt</button>
+		<button class="button" onclick="location.href='cos-idle.html'">Idle Game</button>
+		<button class="button" onclick="location.href='cos-deathmatch.html'">Deathmatch</button>
+	</div>
 	<div id="cos-battle-version">COS Battle version: 0.0</div>
+	<div id="fileInputContainer">
+	  <button id="Settingstoggle">⚙</button>
+	  <input type="file" id="fileInput" style="display: none;" accept=".txt">
+	  <button id="customFileButton">Add Dna</button>
+	  <span id="fileName"></span> <!-- To display the chosen file name -->
+	  <button id="loadPlayersButton">Clone Dna</button>
+	</div>
 	<div id="pagetitle">Colonists on Stream</div>
 	<div id="battlewrapper" class="resizable">
 	  <div id="wrapper">
-		<div id="fileInputContainer">
-		  <input type="file" id="fileInput" accept=".txt">
-		  <button id="loadPlayersButton">Load Players</button>
-		</div>
-		<div id="battleControl">
+		
+		<div id="battleControl" style="display: flex;flex-direction:row;">
 		  <button id="startBattleButton" disabled>Start Battle</button>
+		  <p id="prizePool">Loading prize pool...</p>
 		</div>
 		<div id="headerTexts"></div>
 		<span id="currentRound">Round 0</span>
@@ -37,16 +96,18 @@
 	  <div class="resizer"></div> <!-- Custom resizer element -->
 	</div>
 
-	<div id="secondwrapper">
+	<div id="secondwrapper" class="resizable">
 		<div id="defeatedPlayers">
 			<h2>Graveyard</h2>
 		</div>
 		<div id="systemMessages"></div>
+		<div class="resizer"></div> <!-- Custom resizer element -->
 	</div>
-	<div id="thirdwrapper">
+	<div id="thirdwrapper" class="resizable">
 		<div class="player-stats">
 			<div id="playerStatsList"></div>
 		</div>
+		<div class="resizer"></div> <!-- Custom resizer element -->
 	</div>
 	<script src="js/cos-play-main.js"></script>
 	<script src="js/cos-battle.js"></script>

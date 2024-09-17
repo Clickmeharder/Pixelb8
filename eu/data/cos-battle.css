@@ -44,13 +44,13 @@
   border: 1px solid #ccc;
   position: relative;
   overflow: auto;
-  min-height: 150px;  /* Add a minimum height */
+  min-height: 25px;  /* Add a minimum height */
 }
 
 /* Resizer area */
 .resizer {
   width: 100%;  /* Spans the entire width */
-  height: 10px;  /* Adjust the height of the resizer */
+  height: 25px;  /* Adjust the height of the resizer */
   background-color: rgba(0, 0, 0, 0.2);  /* Visible resizer bar */
   cursor: ns-resize;  /* Vertical resize cursor */
   position: absolute;
@@ -62,7 +62,55 @@
   background-color: rgba(0, 0, 0, 0.3);  /* Highlight resizer on hover */
 }
 
+	#Settingstoggle {
+		font-size: 40px;
+		font-family: system-ui;
+		text-align: center;  /* Center the text horizontally */
+		display: flex;  /* Use flexbox for centering */
+		justify-content: center;  /* Center horizontally */
+		align-items: center;  /* Center vertically */
+		margin: auto;
+		padding: 0px;
+		width: 43px;
+		height: 43px;
+		color: #878787;
+		background-color: #688a6a30;
+		border: 3px outset #c8c4c445;
+		border-radius: 50%;
+		outline-color: #d03b3b;
+		opacity: 0.59;
+	}
+	.nav-bar {
+		display: flex;
+		justify-content: center;
+		background-color: #333;
+		padding: 10px;
+	}
 
+	.button {
+		background-color: #555;
+		border: none;
+		color: white;
+		padding: 10px 20px;
+		margin: 0 5px;
+		cursor: pointer;
+		font-size: 16px;
+		border-radius: 5px;
+		transition: background-color 0.3s;
+	}
+
+	.button:hover {
+		background-color: #777;
+	}
+
+	.button:focus {
+		outline: none;
+	}
+
+	.button.disabled {
+		background-color: #777;
+		cursor: not-allowed;
+	}
 	#battlewrapper {
 		display: flex;
 		justify-content: flex-start;
@@ -80,8 +128,8 @@
 	#wrapper {
 		border: 3px ridge teal;
 		padding: 4px;
-		width: 98%;
-		
+		width: 99%;
+		height: 101%;
 	}
 	#secondwrapper {
 		margin-top: 66px;
@@ -140,29 +188,82 @@
 		z-index: 3;
 	}
 
-    #fileInputContainer {
-      margin-bottom: 20px;
-      text-align: center;
-    }
+	#fileInputContainer {
+		display: flex;
+		flex-direction: row;
+		margin-bottom: 20px;
+		text-align: center;
+		overflow: hidden;
+		height: 44px;
+		width: 426px;
+		min-height: 44px;
+		min-width: 40px;
+		max-height: 44px;
+		max-width: fit-content;
+		resize: both;
+		border: 7px outset #90909080;
+		border-radius: 40%;
+		color: #222;
+	}
 
     input[type="file"] {
-      background-color: #4caf50; /* Green file input button */
-      color: white;
-      padding: 5px;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
+		background-color: #4d4d4d;
+		color: #222;
+		padding: 7px;
+		border: outset;
+		border-color: #494545;
+		cursor: pointer;
+		border-radius: 5px;
+	}
+	#customFileButton {
+		font-size: 16px;
+		word-break: keep-all;
+		background-color: #688a6a30;
+		border: 2px solid #c8c4c445;
+		border-radius: 5px;
+		color: #1e73a0;
+		cursor: pointer;
+		outline: none;
+		overflow: hidden;
+		min-width: 69px;
+	}
 
+	#customFileButton:hover {
+		background-color: #78a77830;
+	}
+
+	#fileName {
+		margin-left: 10px;
+		color: #878787;
+	}
+	button {
+		background-color: #444;
+		font-weight: bold;
+		color: #16afea;
+	}
+	button::hover {
+		background-color: #555;
+		font-weight: bold;
+		color: #16afea;
+	}
     #loadPlayersButton {
-      background-color: #4caf50;
-      color: white;
-      padding: 5px 10px;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
+      	font-size: 16px;
+		word-break: keep-all;
+		background-color: #688a6a30;
+		border: 2px solid #c8c4c445;
+		border-radius: 5px;
+		color: #16afea;
+		cursor: pointer;
+		outline: none;
+		overflow: hidden;
+		min-width: 69px;
+		max-width: 55px;
     }
-
+	#loadPlayersButton::hover {
+		background-color: #688a6a30;
+		font-weight: bold;
+		color: #1e73a0;
+	}
     #players {
       display: flex;
       flex-wrap: wrap;
