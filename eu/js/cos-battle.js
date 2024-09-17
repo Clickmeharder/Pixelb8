@@ -155,6 +155,11 @@ function playerAttackBoss(player, damage) {
   setgameMessage(`${player.name} attacks the boss for ${damage} damage!`);
   appendSystemMessage(`${player.name} attacks the boss for ${damage} damage!`);
 
+  // Play attack sound
+  const attackSound = document.getElementById('attackSound');
+  attackSound.currentTime = 0; // Rewind to the start
+  attackSound.play();
+
   // Visual feedback (e.g., change boss color briefly)
   document.getElementById('boss').style.borderColor = '#f00'; // Red flash
   setTimeout(() => {
