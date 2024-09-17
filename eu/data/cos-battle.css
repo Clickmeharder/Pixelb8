@@ -7,7 +7,12 @@
       height: ;
       color: #f0f0f0; 
       font-family: Arial, sans-serif;
+	  -ms-overflow-style: none;  /* IE and Edge */
+	  scrollbar-width: none;
     }
+	::-webkit-scrollbar {
+		display: none;
+	}
 	#battlewrapper {
 		display: flex;
 		justify-content: flex-start;
@@ -25,6 +30,7 @@
 	#wrapper {
 		border: 3px ridge teal;
 		padding: 4px;
+		width: 98%;
 	}
 	#secondwrapper {
 		margin-top: 66px;
