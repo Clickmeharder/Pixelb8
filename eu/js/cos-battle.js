@@ -146,9 +146,10 @@ function startBattle() {
 // Player attacks boss with damage
 function playerAttackBoss(player, damage) {
   bossHP -= damage;
+  player.totalDamageDealt = (player.totalDamageDealt || 0) + damage; // Track total damage dealt
 
   // Update boss HP display
-  bossHPElement.textContent = Math.max(bossHP, 0); // Ensure boss HP doesn't go below 0
+  bossHPElement.textContent = Math.max(bossHP, 0);
 
   // Append system message when a player attacks the boss
   setgameMessage(`${player.name} attacks the boss for ${damage} damage!`);
@@ -292,13 +293,14 @@ function appendSystemMessage(message) {
 // Handle end of the battle
 function handleBattleEnd() {
   if (bossHP <= 0) {
-	setgameMessage('The battle is over. The players have defeated the boss!');
+    setgameMessage('The battle is over. The players have defeated the boss!');
     appendSystemMessage('The battle is over. The players have defeated the boss!');
-	calculateSurvivalBonus();
+    calculateSurvivalBonus();
+    distributeLoot(); // Distribute loot when the boss is defeated
   } else if (players.every(player => player.hp <= 0)) {
-	setgameMessage('All players have been defeated. The boss wins.');
+    setgameMessage('All players have been defeated. The boss wins.');
     appendSystemMessage('All players have been defeated. The boss wins.');
-	calculateSurvivalBonus();
+    calculateSurvivalBonus();
   }
   // Display stats and XP for all players
   updatePlayerStats();
@@ -337,6 +339,41 @@ function extractPrizePool(text) {
 function displayPrizePool(value) {
   document.getElementById('prizePool').innerText = `Current Prize Pool: ${value}`;
 }
+
+
+// Calculate and distribute loot based on damage dealt percentage
+function distributeLoot() {
+  const prizePoolElement = document.getElementById('prizePool');
+  const prizePoolText = prizePoolElement.innerText;
+  const match = prizePoolText.match(/Current Prize Pool: (\d+(\.\d+)?)/);
+  
+  if (!match) {
+    console.error('Prize pool value not found.');
+    return;
+  }
+
+  const totalPrizePool = parseFloat(match[1]);
+  const survivingPlayers = players.filter(player => player.hp > 0);
+
+  if (survivingPlayers.length === 0) {
+    console.log('No surviving players to distribute loot to.');
+    return;
+  }
+
+  // Calculate total damage dealt by all players
+  const totalDamage = players.reduce((sum, player) => sum + (player.totalDamageDealt || 0), 0);
+
+  survivingPlayers.forEach(player => {
+    const playerDamage = player.totalDamageDealt || 0;
+    const damagePercentage = playerDamage / totalDamage;
+    const lootShare = damagePercentage * totalPrizePool;
+
+    // Display loot for each player
+    systemMessage(`${player.name} receives ${lootShare.toFixed(2)} from the loot pool.`);
+  });
+}
+
+
 // Display battle version at the top of the page
 battleversionElement.textContent = currentCOSbattleversion;
 // Initialize file input and button functionality
