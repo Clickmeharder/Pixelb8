@@ -382,7 +382,13 @@ function distributeLoot() {
   // Optionally, display system message in chat as well
   systemMessage('Loot distribution complete. Check the loot section for details.');
 }
-
+function simulateBossKill() {
+  // Set bossHP to 0 to simulate boss defeat
+  bossHP = 0;
+  
+  // Trigger battle end handling
+  handleBattleEnd();
+}
 // Display battle version at the top of the page
 battleversionElement.textContent = currentCOSbattleversion;
 // Initialize file input and button functionality
