@@ -333,7 +333,7 @@ function distributeLoot() {
 
   // Display remaining prize pool
   const remainingLootMessage = `Remaining Prize Pool: ${totalPrizePool.toFixed(2)}`;
-  systemMessage(remainingLootMessage); // Append to system messages
+  appendSystemMessage(remainingLootMessage); // Append to system messages
   lootDiv.innerHTML += `<p>${remainingLootMessage}</p>`;
 }
 
