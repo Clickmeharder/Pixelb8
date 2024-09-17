@@ -63,24 +63,24 @@
 </head>
 
 <body>
-	<div id="header-row" style="display:flex;flex-direction:row;">
+	
 		<div id="pagetitle">Colonists on Stream</div>
 		<div id="cos-battle-version">COS Battle version: 0.0</div>
+	<div id="header-row" style="display: flex;flex-direction: row;justify-content: space-between;max-width: 98vw;flex-wrap: wrap;">
+		<div id="fileInputContainer">
+		  <button id="Settingstoggle">⚙</button>
+		  <input type="file" id="fileInput" style="display: none;" accept=".txt">
+		  <button id="customFileButton">Add Dna</button>
+		  <span id="fileName"></span> <!-- To display the chosen file name -->
+		  <!-- <button id="loadPlayersButton">Clone Dna</button> -->
+		  <button id="simulateBossKillButton">Simulate Boss Kill</button>
+		</div>
 		<div class="nav-bar">
 			<button class="button" onclick="location.href='cos.html'" disabled>Mob Hunt</button>
 			<button class="button" onclick="location.href='cos-idle.html'">Idle Game</button>
 			<button class="button" onclick="location.href='cos-deathmatch.html'">Deathmatch</button>
 		</div>
 	</div>
-	<div id="fileInputContainer">
-	  <button id="Settingstoggle">⚙</button>
-	  <input type="file" id="fileInput" style="display: none;" accept=".txt">
-	  <button id="customFileButton">Add Dna</button>
-	  <span id="fileName"></span> <!-- To display the chosen file name -->
-	  <!-- <button id="loadPlayersButton">Clone Dna</button> -->
-	  <button id="simulateBossKillButton">Simulate Boss Kill</button>
-	</div>
-	
 	<div id="battlewrapper" class="resizable">
 	  <div id="wrapper">
 		
