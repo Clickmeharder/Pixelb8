@@ -4,20 +4,28 @@
       align-items: center;
       flex-direction: column;
       background-color: #2c2c2c; /* Dark grey background */
-      height: 100vh;
+      height: ;
       color: #f0f0f0; 
       font-family: Arial, sans-serif;
     }
 	#battlewrapper {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      flex-direction: column;
-      background-color: #2c2c2c; /* Dark grey background */
-      height: 63vh;
-      color: #f0f0f0; /* Light text color */
-      font-family: Arial, sans-serif;
-    }
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		flex-direction: column;
+		background-color: #2c2c2c;
+		max-height: 97vh;
+		width: 98vw;
+		color: #f0f0f0;
+		font-family: Arial, sans-serif;
+		border-bottom: 6px ridge #444;
+		resize: vertical;
+		overflow-y: auto;
+	}
+	#wrapper {
+		border: 3px ridge teal;
+		padding: 4px;
+	}
 	#secondwrapper {
 		margin-top: 66px;
 		display: flex;
