@@ -34,6 +34,17 @@
 		font-family: Arial, sans-serif;
 		width: fit-content;
 	}
+	#thirdwrapper {
+		margin-top: 66px;
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		flex-direction: row;
+		background-color: #2c2c2c;
+		color: #f0f0f0;
+		font-family: Arial, sans-serif;
+		width: fit-content;
+	}
 	#pagetitle {
 		font-size: 59px;
 		font-family: lucida console;
@@ -161,8 +172,8 @@
       background-color: black; /* Dark grey background for messages */
 	  color:green;
 	  font-family: lucida console;
-      max-height: 80px;
-	  min-height: 30px;
+      max-height: 200px;
+	  min-height: 200px;
       overflow-y: auto;
 	  resize: vertical;
       width: 80%;
@@ -204,8 +215,10 @@
 		</div>
 		<div id="systemMessages"></div>
 	</div>
-	<div class="player-stats">
-		<div id="playerStatsList"></div>
+	<div id="thirdwrapper">
+		<div class="player-stats">
+			<div id="playerStatsList"></div>
+		</div>
 	</div>
 	<script src="cos-battle.js"></script>
 </body></html>
