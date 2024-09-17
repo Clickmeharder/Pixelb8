@@ -69,7 +69,7 @@ function generatePlayers(playerNames) {
       playerContainer, 
       playerHP, 
       hp: 100,
-      combatLvl: 0,
+      playerCB: 0,
       combatXP: 0,  // Combat XP starts at 0
       healingLvl: 0,
       healingXP: 0,  // Healing XP starts at 0
@@ -255,7 +255,7 @@ function updatePlayerStats() {
 
   players.forEach(player => {
     const statsElement = document.createElement('li');
-    statsElement.textContent = `${player.name} - Combat Lvl: ${player.combatLvl}, Combat XP: ${player.combatXP}, Healing Lvl: ${player.healingLvl}, Healing XP: ${player.healingXP}, HP: ${player.hp}`;
+    statsElement.textContent = `${player.name} - Combat Lvl: ${player.cb}, Combat XP: ${player.combatXP}, HP: ${player.hp} Healing Lvl: ${player.healingLvl}, Healing XP: ${player.healingXP}`;
     playerStatsList.appendChild(statsElement);
   });
 }
