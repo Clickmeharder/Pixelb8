@@ -1,4 +1,4 @@
-let currentCOSbattleversion = 'alpha 0.0199';
+let currentCOSbattleversion = 'alpha 0.0200';
 
 let players = [];
 let bossHP = 350; // Boss HP
