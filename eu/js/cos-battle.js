@@ -1,4 +1,4 @@
-let currentCOSbattleversion = 'beta 0.0198';
+let currentCOSbattleversion = 'alpha 0.0199';
 
 let players = [];
 let bossHP = 350; // Boss HP
@@ -283,7 +283,6 @@ function getRandomLootAmount(totalPrizePool) {
 }
 
 
-// Calculate and distribute loot based on damage dealt percentage
 function distributeLoot() {
   const prizePoolElement = document.getElementById('prizePool');
   const prizePoolText = prizePoolElement.innerText;
@@ -308,16 +307,30 @@ function distributeLoot() {
   // Calculate total damage dealt by all players
   const totalDamage = players.reduce((sum, player) => sum + (player.totalDamageDealt || 0), 0);
 
+  // Display loot distribution in the loot div
+  const lootDiv = document.getElementById('loot');
+  lootDiv.innerHTML = ''; // Clear previous loot distribution
+
   survivingPlayers.forEach(player => {
     const playerDamage = player.totalDamageDealt || 0;
     const damagePercentage = playerDamage / totalDamage;
     const lootShare = damagePercentage * totalLoot;
 
-    // Display loot for each player
+    // Create a new element to display each player's loot
+    const lootElement = document.createElement('p');
+    lootElement.textContent = `${player.name} receives ${lootShare.toFixed(2)} from the loot pool.`;
+    lootDiv.appendChild(lootElement);
+
+    // Display loot information using appendSystemMessage
     appendSystemMessage(`${player.name} receives ${lootShare.toFixed(2)} from the loot pool.`);
   });
 
-  // Display the total loot amount
+  // Display the total loot amount in the loot div
+  const totalLootElement = document.createElement('p');
+  totalLootElement.textContent = `Total loot distributed: ${totalLoot.toFixed(2)}`;
+  lootDiv.appendChild(totalLootElement);
+
+  // Optionally, also display the total loot amount using appendSystemMessage
   appendSystemMessage(`Total loot distributed: ${totalLoot.toFixed(2)}`);
 }
 
