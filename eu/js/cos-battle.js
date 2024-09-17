@@ -272,6 +272,56 @@ function calculateSurvivalBonus() {
   });
   updatePlayerStats(); // Refresh the displayed stats
 }
+function getRandomLootAmount(totalPrizePool) {
+  // Define the minimum loot amount
+  const minLoot = 0.01;
+
+  // Generate a random loot amount between minLoot and totalPrizePool
+  const lootAmount = Math.random() * (totalPrizePool - minLoot) + minLoot;
+
+  return lootAmount;
+}
+
+
+// Calculate and distribute loot based on damage dealt percentage
+function distributeLoot() {
+  const prizePoolElement = document.getElementById('prizePool');
+  const prizePoolText = prizePoolElement.innerText;
+  const match = prizePoolText.match(/Current Prize Pool: (\d+(\.\d+)?)/);
+  
+  if (!match) {
+    console.error('Prize pool value not found.');
+    return;
+  }
+
+  const totalPrizePool = parseFloat(match[1]);
+  const survivingPlayers = players.filter(player => player.hp > 0);
+
+  if (survivingPlayers.length === 0) {
+    console.log('No surviving players to distribute loot to.');
+    return;
+  }
+
+  // Generate a random loot amount
+  const totalLoot = getRandomLootAmount(totalPrizePool);
+
+  // Calculate total damage dealt by all players
+  const totalDamage = players.reduce((sum, player) => sum + (player.totalDamageDealt || 0), 0);
+
+  survivingPlayers.forEach(player => {
+    const playerDamage = player.totalDamageDealt || 0;
+    const damagePercentage = playerDamage / totalDamage;
+    const lootShare = damagePercentage * totalLoot;
+
+    // Display loot for each player
+    appendSystemMessage(`${player.name} receives ${lootShare.toFixed(2)} from the loot pool.`);
+  });
+
+  // Display the total loot amount
+  appendSystemMessage(`Total loot distributed: ${totalLoot.toFixed(2)}`);
+}
+
+
 // Function to update & increment the round
 function updateRoundMessage() {
   // Set the game message to the current round number
@@ -341,47 +391,7 @@ function displayPrizePool(value) {
 }
 
 
-// Calculate and distribute loot based on damage dealt percentage
-function distributeLoot() {
-  const prizePoolElement = document.getElementById('prizePool');
-  const prizePoolText = prizePoolElement.innerText;
-  const match = prizePoolText.match(/Current Prize Pool: (\d+(\.\d+)?)/);
-  
-  if (!match) {
-    console.error('Prize pool value not found.');
-    return;
-  }
 
-  const totalPrizePool = parseFloat(match[1]);
-  const survivingPlayers = players.filter(player => player.hp > 0);
-
-  if (survivingPlayers.length === 0) {
-    console.log('No surviving players to distribute loot to.');
-    return;
-  }
-
-  // Calculate total damage dealt by all players
-  const totalDamage = players.reduce((sum, player) => sum + (player.totalDamageDealt || 0), 0);
-
-  // Prepare loot information
-  let lootMessages = `<h3>Total Loot Distribution:</h3><p>Total Prize Pool: ${totalPrizePool.toFixed(2)}</p>`;
-
-  survivingPlayers.forEach(player => {
-    const playerDamage = player.totalDamageDealt || 0;
-    const damagePercentage = playerDamage / totalDamage;
-    const lootShare = damagePercentage * totalPrizePool;
-
-    // Append loot info for each player
-    lootMessages += `<p>${player.name} receives ${lootShare.toFixed(2)} from the loot pool.</p>`;
-  });
-
-  // Display loot information
-  const lootDiv = document.getElementById('loot');
-  lootDiv.innerHTML = lootMessages;
-
-  // Optionally, display system message in chat as well
-  systemMessage('Loot distribution complete. Check the loot section for details.');
-}
 function simulateBossKill() {
   // Set bossHP to 0 to simulate boss defeat
   bossHP = 0;
