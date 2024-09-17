@@ -249,6 +249,9 @@ function bossAttack() {
     // Append system message for boss self-heal
     setgameMessage(`Boss heals for ${healAmount} HP!`);
     appendSystemMessage(`Boss heals for ${healAmount} HP!`);
+	// Play healing sound
+    const healSound = document.getElementById('gallardheal-Sound');
+    healSound.play();
   }
   updateRoundMessage();
 }
