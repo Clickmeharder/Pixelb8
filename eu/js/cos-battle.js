@@ -121,7 +121,7 @@ function startBattle() {
       player.playerContainer.style.borderColor = '#4CAF50'; // GREEN
       setTimeout(() => {
         player.playerContainer.style.borderColor = '#2c2c2c00'; // Back to TRANSPARENT
-      }, 500);
+      }, 1000);
     }
 
     updatePlayerStats(); // Update player stats display
