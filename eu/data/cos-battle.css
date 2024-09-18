@@ -88,29 +88,44 @@
 	}
 
 	.button {
-		background-color: #555;
-		border: none;
-		color: white;
-		padding: 10px 20px;
-		margin: 0 5px;
+		background: linear-gradient(135deg, #003333, #006666); /* Gradient matching title background */
+		border: 3px solid #00cccc; /* Border color matching title */
+		color: #00e6e6; /* Text color matching title */
+		padding: 10px 20px; /* Larger padding for better aesthetics */
+		margin: 5px; /* Adjusted margin */
 		cursor: pointer;
-		font-size: 16px;
-		border-radius: 5px;
-		transition: background-color 0.3s;
+		font-size: 1.2vw; /* Responsive font size */
+		border-radius: 10px; /* Matching the border-radius of the title */
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle text shadow for depth */
+		transition: background 0.3s, border-color 0.3s, color 0.3s; /* Smooth transitions */
 	}
 
 	.button:hover {
-		background-color: #777;
+		background: linear-gradient(135deg, #006666, #003333); /* Inverted gradient on hover */
+		border-color: #00e6e6; /* Lighter border color on hover */
+		color: #003333; /* Darker text color on hover */
 	}
 
 	.button:focus {
-		outline: none;
+		outline: none; /* Remove default outline */
 	}
 
-	.button.disabled {
-		background-color: #777;
-		cursor: not-allowed;
+	.button.disabled,
+	.button:disabled {
+		background: #004d4d; /* Darker background for disabled state */
+		border: 3px solid #004d4d; /* Matching border for disabled state */
+		color: #7f8c8d; /* Lighter text color for better readability */
+		cursor: not-allowed; /* Indicate that the button is not interactive */
+		text-shadow: none; /* Remove text shadow for a subdued appearance */
 	}
+
+	.button.disabled:hover,
+	.button:disabled:hover {
+		background: #004d4d; /* No change on hover for disabled state */
+		border-color: #004d4d; /* No change on hover for disabled state */
+		color: #7f8c8d; /* No change on hover for disabled state */
+	}
+
 	#battlewrapper {
 		display: flex;
 		justify-content: flex-start;
