@@ -51,7 +51,7 @@
 .resizer {
   width: 100%;  /* Spans the entire width */
   height: 25px;  /* Adjust the height of the resizer */
-  background-color: rgba(0, 0, 0, 0.2);  /* Visible resizer bar */
+  background-color: rgb(0 0 0 / 57%);  /* Visible resizer bar */
   cursor: ns-resize;  /* Vertical resize cursor */
   position: absolute;
   bottom: 0;  /* Position at the bottom of the resizable container */
