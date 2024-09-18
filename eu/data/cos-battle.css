@@ -127,6 +127,7 @@
 	}
 	#wrapper {
 		border: 3px ridge teal;
+		background-color: #0d4b0d;
 		padding: 4px;
 		width: 99%;
 		height: 101%;
