@@ -343,3 +343,18 @@
 		resize: vertical;
 		width: 63%;
     }
+	div#loot {
+		position: absolute;
+		right: 0;
+		font-size: 14px;
+		font-family: fangsong;
+		font-weight: bold;
+		BORDER: 5PX inset #4e5255;
+		outline: outset #8039ffe6;
+		background-color: #262626;
+		color: #6a7375;
+		line-height: 0.2;
+		padding: 4px;
+		margin: 0px;
+		margin-left: auto;
+	}
