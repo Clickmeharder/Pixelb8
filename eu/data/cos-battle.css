@@ -83,9 +83,11 @@
 	.nav-bar {
 		display: flex;
 		justify-content: center;
-		background-color: #333;
-		padding: 4px;
-		border-radius:8px;
+		flex-wrap: wrap;
+		background-color: #232222db;
+		padding: 3px;
+		border: 3px inset black;
+		width: 100vw;
 	}
 
 	.button {
@@ -227,9 +229,11 @@
 	}
 
 	#fileInputContainer {
+		position: fixed;
+		bottom: 11px;
 		display: flex;
 		flex-direction: row;
-		margin-bottom: 20px;
+		margin-bottom: 0px;
 		text-align: center;
 		overflow: hidden;
 		height: 44px;
@@ -239,11 +243,11 @@
 		max-height: 44px;
 		max-width: fit-content;
 		resize: both;
-		border: 7px outset #90909080;
+		border: 7px outset #000000c2;
 		border-radius: 40%;
 		color: #222;
+		z-index: 10;
 	}
-
     input[type="file"] {
 		background-color: #4d4d4d;
 		color: #222;
