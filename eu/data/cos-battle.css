@@ -158,18 +158,19 @@
 		width: fit-content;
 	}
 	#pagetitle {
-		font-size: 80px;
-		font-family: 'Press Start 2P', sans-serif; /* Example font from Google Fonts */
-		color: #00e6e6; /* Lighter teal for a modern touch */
-		text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); /* Adds depth with a shadow */
-		border: 3px solid #00cccc; /* Slightly lighter border for contrast */
-		background: linear-gradient(135deg, #003333, #006666); /* Gradient background for depth */
-		padding: 20px; /* Spacing inside the title area */
-		margin: 20px auto; /* Center horizontally with auto margins */
-		width: fit-content;
-		border-radius: 10px; /* Rounded corners for a sleek look */
-		text-align: center; /* Center the text inside the div */
+		font-size: 8vw; /* Font size is now based on viewport width */
+		font-family: 'Press Start 2P', sans-serif;
+		color: #00e6e6;
+		text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+		border: 0.4vw solid #00cccc; /* Adjusting border width based on viewport */
+		background: linear-gradient(135deg, #003333, #006666);
+		padding: 2vw; /* Padding also responsive */
+		margin: 5vw auto; /* Margin responsive for spacing */
+		border-radius: 1vw; /* Rounded corners scale with the viewport */
+		text-align: center;
+		display: inline-block; /* Allows the element to shrink and grow based on content */
 	}
+
 
 	/* Ensure to include the custom font */
 	@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
