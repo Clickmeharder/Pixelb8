@@ -119,7 +119,6 @@ function startBattle() {
       player.healingXP += healAmount; // Gain Healing XP equal to healing amount
 	  // Visual feedback (e.g., change player border color to red briefly)
       player.playerContainer.style.borderColor = '#4CAF50'; // GREEN
-	  flash
       setTimeout(() => {
         player.playerContainer.style.borderColor = '#2c2c2c00'; // Back to TRANSPARENT
       }, 500);
