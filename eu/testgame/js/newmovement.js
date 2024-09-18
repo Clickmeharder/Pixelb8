@@ -1,7 +1,7 @@
 // Display battle version at the top of the page
 let currentnewversion = 'beta 0.001';
 const newversionElement = document.getElementById('new-version');
-deathmatchversionElement.textContent = currentdeathmatchversion;
+newversionElement.textContent = currentnewversion;
 
 // Game setup
 const boss = document.getElementById('boss');
