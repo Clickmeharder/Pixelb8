@@ -35,7 +35,11 @@
 	::-webkit-scrollbar {
 		width: 8px;  /* Adjust the width as needed */
 	}
-	
+	h2 {
+		margin: 0px;
+		max-height: 42px;
+		margin-top: 4px;
+	}
 /*------------------------------------------*/
 
 /* Styling for the resizable container */
@@ -315,6 +319,7 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
+	  width: 65%;
 	  opacity:0.3;
     }
     .player-container {
