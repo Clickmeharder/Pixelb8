@@ -31,15 +31,14 @@
 
       // Change background based on movement direction
       if (newY < oldY) {
-        character.style.backgroundImage = 'url(assets/defaultplayer/player-walk-up.png)';
+        character.style.backgroundImage = 'url(assets/defaultplayer/femalerightdefault.png)';//'url(assets/defaultplayer/player-walk-topright.png)';
       } else if (newX > oldX) {
-        character.style.backgroundImage = 'url(assets/defaultplayer/player-walk-right.png)';
+        character.style.backgroundImage = 'url(assets/defaultplayer/femaleleftdefault.png)';//'url(assets/defaultplayer/player-walk-topleft.png)';
       } else if (newX < oldX) {
-        character.style.backgroundImage = 'url(assets/defaultplayer/player-walk-left.png)';
+        character.style.backgroundImage = 'assets/defaultplayer/femaledefault.png)';//'url(assets/defaultplayer/player-walk-down.png)';
       } else if (newY > oldY) {
-        character.style.backgroundImage = 'url(assets/defaultplayer/player-walk-down.png)';
+        character.style.backgroundImage = 'assets/defaultplayer/femaleleftdefault.png)';//'url(assets/defaultplayer/player-walk-left.png)';
       }
-
       // Update the position of the character in the game
       character.style.left = `${newX}px`;
       character.style.top = `${newY}px`;
