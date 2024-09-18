@@ -174,10 +174,14 @@
 		justify-content: flex-start;
 		align-items: center;
 		flex-direction: row;
-		background-color: #444;
-		color: #f0f0f0;
+		background-color: #444444e0;
+		color: #f0f0f04a;
 		font-family: Arial, sans-serif;
 		width: fit-content;
+	}
+	#thirdwrapper::hover {
+		color: #f0f0f0ba;
+		background-color: #444444f2;
 	}
 	#pagetitle {
 		font-size: 8vw; /* Font size is now based on viewport width */
