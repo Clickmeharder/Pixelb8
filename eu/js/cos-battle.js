@@ -117,6 +117,12 @@ function startBattle() {
 	  setgameMessage(`${player.name} heals for ${healAmount} HP!`);
       appendSystemMessage(`${player.name} heals for ${healAmount} HP!`);
       player.healingXP += healAmount; // Gain Healing XP equal to healing amount
+	  // Visual feedback (e.g., change player border color to red briefly)
+      player.playerContainer.style.borderColor = '#4CAF50'; // GREEN
+	  flash
+      setTimeout(() => {
+        player.playerContainer.style.borderColor = '#2c2c2c00'; // Back to TRANSPARENT
+      }, 500);
     }
 
     updatePlayerStats(); // Update player stats display
@@ -163,7 +169,7 @@ function playerAttackBoss(player, damage) {
   // Visual feedback (e.g., change boss color briefly)
   document.getElementById('boss').style.borderColor = '#f00'; // Red flash
   setTimeout(() => {
-    document.getElementById('boss').style.borderColor = 'transparent'; // Back to green
+    document.getElementById('boss').style.borderColor = '#2c2c2c00'; // Back to green
   }, 500);
 }
 
@@ -209,7 +215,7 @@ function bossAttack() {
     // Visual feedback (e.g., change player border color to red briefly)
     player.playerContainer.style.borderColor = '#f00'; // Red flash
     setTimeout(() => {
-      player.playerContainer.style.borderColor = 'transparent'; // Back to green
+      player.playerContainer.style.borderColor = '#2c2c2c00'; // Back to green
     }, 500);
 
     // Check if the player is defeated
@@ -227,7 +233,7 @@ function bossAttack() {
       // Visual feedback for all players
       player.playerContainer.style.borderColor = '#f00'; // Red flash
       setTimeout(() => {
-        player.playerContainer.style.borderColor = 'transparent'; // Back to green
+        player.playerContainer.style.borderColor = '#2c2c2c00'; // Back to green
       }, 500);
 
       // Check if the player is defeated
@@ -249,7 +255,11 @@ function bossAttack() {
     // Append system message for boss self-heal
     setgameMessage(`Boss heals for ${healAmount} HP!`);
     appendSystemMessage(`Boss heals for ${healAmount} HP!`);
-
+	// Visual feedback (e.g., change boss color briefly)
+    document.getElementById('boss').style.borderColor = '#4CAF50'; // Red flash
+	setTimeout(() => {
+	  document.getElementById('boss').style.borderColor = '#2c2c2c00'; // Back to green
+	}, 1000);
     // Change the boss background image to the healing GIF
     const bossDiv = document.getElementById('boss');
     bossDiv.style.backgroundImage = 'url(data/images/mobs/gallard/gallardheal.gif)';
