@@ -130,7 +130,7 @@ function startBattle() {
         if (players.some(player => player.hp > 0) && bossHP > 0) {
           setTimeout(attackNextPlayer, 1000); // Move to next player after 1 second
         }
-      }, 1000); // Boss takes turn after player's attack
+      }, 3000); // Boss takes turn after player's attack
     } else {
       
 	  handleBattleEnd();
@@ -163,7 +163,7 @@ function playerAttackBoss(player, damage) {
   // Visual feedback (e.g., change boss color briefly)
   document.getElementById('boss').style.borderColor = '#f00'; // Red flash
   setTimeout(() => {
-    document.getElementById('boss').style.borderColor = '#4caf50'; // Back to green
+    document.getElementById('boss').style.borderColor = 'transparent'; // Back to green
   }, 500);
 }
 
@@ -209,7 +209,7 @@ function bossAttack() {
     // Visual feedback (e.g., change player border color to red briefly)
     player.playerContainer.style.borderColor = '#f00'; // Red flash
     setTimeout(() => {
-      player.playerContainer.style.borderColor = '#4caf50'; // Back to green
+      player.playerContainer.style.borderColor = 'transparent'; // Back to green
     }, 500);
 
     // Check if the player is defeated
@@ -227,7 +227,7 @@ function bossAttack() {
       // Visual feedback for all players
       player.playerContainer.style.borderColor = '#f00'; // Red flash
       setTimeout(() => {
-        player.playerContainer.style.borderColor = '#4caf50'; // Back to green
+        player.playerContainer.style.borderColor = 'transparent'; // Back to green
       }, 500);
 
       // Check if the player is defeated
@@ -261,7 +261,7 @@ function bossAttack() {
     // Revert back to the default image after 1.5 seconds
     setTimeout(() => {
       bossDiv.style.backgroundImage = 'url(data/images/mobs/gallard/gallarddefault.png)';
-    }, 8000);
+    }, 3000);
   }
 
   updateRoundMessage();
