@@ -168,6 +168,7 @@
 		width: 96%;
 		margin: auto;
 		margin-left: -6px;
+		margin-top: -7px;
 		border-radius: 1vw; /* Rounded corners scale with the viewport */
 		text-align: center;
 		display: inline-block; /* Allows the element to shrink and grow based on content */
