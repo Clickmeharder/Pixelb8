@@ -35,13 +35,20 @@
   <link rel="icon" type="image/png" href="../../assets/images/logo/pixelbotfavicon.png">
 </head>
 <body>
-  <div id="new-version">new test version: 0.1</div>
-  <div id="gameArea">
-    <div id="boss" class="character"></div>
-    <div id="player1" class="character player"></div>
-    <div id="player2" class="character player"></div>
-  </div>
+	<div id="new-version">new test version: 0.1</div>
+	<div class="nav-bar">
+		<button class="button" onclick="location.href='cos.html'">Mob Hunt</button>
+		<button class="button" onclick="location.href='cos-lurk'" style="opacity:0.3;" disabled>Idle Game(comingsoon)</button>
+		<button class="button" onclick="location.href='cos-deathmatch.html'" style="opacity:0.3;">Deathmatch(comingsoon)</button>
+		<button class="button" onclick="location.href='cos-EntropianRoullette.html'" style="opacity:0.3;">Entropian Roullette(comingsoon)</button>
+	</div>
 
-  <script src="js/newmovements.js"></script>
+	<div id="gameArea">
+		<div id="boss" class="character"></div>
+		<div id="player1" class="character player"></div>
+		<div id="player2" class="character player"></div>
+	</div>
+
+	<script src="js/newmovements.js"></script>
 </body>
 </html>
