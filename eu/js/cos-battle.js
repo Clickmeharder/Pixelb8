@@ -255,13 +255,13 @@ function bossAttack() {
     bossDiv.style.backgroundImage = 'url(data/images/mobs/gallard/gallardheal.gif)';
 
     // Play the heal sound
-    const healSound = document.getElementById('attackSound');
+    const healSound = document.getElementById('gallardheal-Sound');
     healSound.play();
 
     // Revert back to the default image after 1.5 seconds
     setTimeout(() => {
       bossDiv.style.backgroundImage = 'url(data/images/mobs/gallard/gallarddefault.png)';
-    }, 3000);
+    }, 3500);
   }
 
   updateRoundMessage();
