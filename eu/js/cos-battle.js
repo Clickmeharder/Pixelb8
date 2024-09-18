@@ -261,7 +261,7 @@ function bossAttack() {
     // Revert back to the default image after 1.5 seconds
     setTimeout(() => {
       bossDiv.style.backgroundImage = 'url(data/images/mobs/gallard/gallarddefault.png)';
-    }, 5000);
+    }, 8000);
   }
 
   updateRoundMessage();
