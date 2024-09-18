@@ -145,7 +145,9 @@
 		max-width: 98vw;
 	}
 	#thirdwrapper {
-		margin-top: 66px;
+		position: fixed;
+		right: 9px;
+		margin-top: 0px;
 		display: flex;
 		justify-content: flex-start;
 		align-items: center;
@@ -156,12 +158,22 @@
 		width: fit-content;
 	}
 	#pagetitle {
-		font-size: 59px;
-		font-family: lucida console;
-		color: teal;
-		border: 3px ridge teal;
-		text-align: center;
+		font-size: 80px;
+		font-family: 'Press Start 2P', sans-serif; /* Example font from Google Fonts */
+		color: #00e6e6; /* Lighter teal for a modern touch */
+		text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); /* Adds depth with a shadow */
+		border: 3px solid #00cccc; /* Slightly lighter border for contrast */
+		background: linear-gradient(135deg, #003333, #006666); /* Gradient background for depth */
+		padding: 20px; /* Spacing inside the title area */
+		margin: 20px auto; /* Center horizontally with auto margins */
+		width: fit-content;
+		border-radius: 10px; /* Rounded corners for a sleek look */
+		text-align: center; /* Center the text inside the div */
 	}
+
+	/* Ensure to include the custom font */
+	@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 	#boss {
 		width: 100px;
 		height: 100px;
