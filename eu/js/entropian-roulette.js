@@ -193,37 +193,26 @@ function distributeLoot() {
   }
 
   let totalPrizePool = parseFloat(match[1]);
-  const survivingPlayers = players.filter(player => player.hp > 0);
 
-  if (survivingPlayers.length === 0) {
-    console.log('No surviving players to distribute loot to.');
-    return;
-  }
+  // Only distribute loot if there's exactly one remaining player (the winner)
+  if (players.length === 1) {
+    const lastSurvivingPlayer = players[0];
 
-  // Calculate total loot distributed
-  let totalLootDistributed = 0;
-
-  // Clear previous loot messages
-  const lootDiv = document.getElementById('loot');
-  lootDiv.innerHTML = '';
-
-  if (survivingPlayers.length === 1) {
-    const lastPlayer = survivingPlayers[0];
-    totalLootDistributed = totalPrizePool * 0.85;  // Give 85% of the prize pool to the last player
-    const lootMessage = `${lastPlayer.name} receives ${totalLootDistributed.toFixed(2)} from the loot pool.`;
+    // Distribute the entire prize pool to the last player
+    const lootMessage = `${lastSurvivingPlayer} receives ${totalPrizePool.toFixed(2)} from the loot pool.`;
     appendSystemMessage(lootMessage); // Append to system messages
-    lootDiv.innerHTML += `<p>${lootMessage}</p>`;
 
-    // Remaining prize pool message
-    const remainingLootMessage = `Remaining Prize Pool: ${(totalPrizePool - totalLootDistributed).toFixed(2)}`;
-    appendSystemMessage(remainingLootMessage); // Append to system messages
-    lootDiv.innerHTML += `<p>Total Value Looted: ${totalLootDistributed.toFixed(2)}</p>`;
-    lootDiv.innerHTML += `<p>${remainingLootMessage}</p>`;
+    const lootDiv = document.getElementById('loot');
+    lootDiv.innerHTML = `<p>${lootMessage}</p>`;
+    lootDiv.innerHTML += `<p>Total Value Looted: ${totalPrizePool.toFixed(2)}</p>`;
+    lootDiv.innerHTML += `<p>Remaining Prize Pool: 0.00</p>`;
+
+    // Reset the prize pool
+    prizePoolElement.innerText = 'Current Prize Pool: 0.00';
   } else {
-    console.log('Multiple players remaining, no loot distribution occurs.');
+    console.log('No winner yet or no players remaining.');
   }
 }
-
 
 // Function to update & increment the round
 function updateRoundMessage() {
