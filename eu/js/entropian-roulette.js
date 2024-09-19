@@ -4,7 +4,7 @@ let gunAngle = 0;
 
 function setupRoulette() {
   const rouletteCircle = document.getElementById('roulette-circle');
-  const radius = rouletteCircle.offsetWidth / 2 - 30;  // Increase the radius to push players further out
+  const radius = rouletteCircle.offsetWidth / 2 - 10;  // Perfect radius as you mentioned
 
   // Set the gun at the center
   const gunImage = document.getElementById('gun-image');
@@ -37,12 +37,14 @@ function startRoulette() {
   const angleToPlayer = (randomPlayerIndex / players.length) * 360;
   const damage = Math.floor(Math.random() * 11); // Damage between 0-10
 
-  // Rotate the gun to point at the selected player
+  // Rotate the gun and arrow to point at the selected player
   const gunImage = document.getElementById('gun-image');
+  const gunArrow = document.getElementById('gun-arrow');
   gunAngle += 360 + angleToPlayer;
   
-  // Ensure only the rotation is updated without affecting its position
+  // Rotate the gun and arrow together
   gunImage.style.transform = `translate(-50%, -50%) rotate(${gunAngle}deg)`;
+  gunArrow.style.transform = `translateX(-50%) rotate(${gunAngle}deg)`; // Arrow rotates with the gun
 
   // Apply damage to the player
   setTimeout(() => {
