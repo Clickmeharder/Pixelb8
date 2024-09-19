@@ -1,3 +1,7 @@
+let currentCOSbattleversion = 'VU:Pre-alpha 0.0001';
+const rouletteversionElement = document.getElementById('cos-roulette-version');
+rouletteversionElement.textContent = currentCOSrouletteversion;
+
 let players = ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8', 'Player 9', 'Player 10'];
 let playerAvatars = [];
 const systemMessagesElement = document.getElementById('systemMessages');
