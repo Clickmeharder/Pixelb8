@@ -20,8 +20,10 @@ function setupRoulette() {
 
     const playerDiv = document.createElement('div');
     playerDiv.classList.add('player-avatar');
-    playerDiv.style.left = `calc(50% + ${x}px)`;
-    playerDiv.style.top = `calc(50% + ${y}px)`;
+    
+    // Center the player avatars at their calculated (x, y) positions
+    playerDiv.style.left = `calc(50% + ${x}px - 40px)`;  // Adjusting for half avatar size
+    playerDiv.style.top = `calc(50% + ${y}px - 40px)`;   // Adjusting for half avatar size
     playerDiv.textContent = player;
 
     rouletteCircle.appendChild(playerDiv);
