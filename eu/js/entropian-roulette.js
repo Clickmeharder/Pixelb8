@@ -1,17 +1,29 @@
-const players = ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5'];
+const players = ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8', 'Player 9', 'Player 10'];
 const playerAvatars = [];
 let gunAngle = 0;
 
-// Create player avatars and place them in a circle
 function setupRoulette() {
   const rouletteCircle = document.getElementById('roulette-circle');
-  const radius = rouletteCircle.offsetWidth / 2;
+  const radius = rouletteCircle.offsetWidth / 2 - 50;  // Adjusting for player avatar size
+  
+  // Set the gun at the center
+  const gunImage = document.getElementById('gun-image');
+  gunImage.style.left = '50%';
+  gunImage.style.top = '50%';
+  gunImage.style.transform = 'translate(-50%, -50%)'; // Center the gun
 
+  // Calculate positions for each player and place them around the circle
   players.forEach((player, index) => {
-    const angle = (index / players.length) * 360;
+    const angle = (index / players.length) * 2 * Math.PI; // Convert index to radians
+    const x = Math.cos(angle) * radius;
+    const y = Math.sin(angle) * radius;
+
     const playerDiv = document.createElement('div');
     playerDiv.classList.add('player-avatar');
-    playerDiv.style.transform = `rotate(${angle}deg) translate(${radius}px) rotate(-${angle}deg)`;
+    playerDiv.style.left = `calc(50% + ${x}px)`;
+    playerDiv.style.top = `calc(50% + ${y}px)`;
+    playerDiv.textContent = player;
+
     rouletteCircle.appendChild(playerDiv);
     playerAvatars.push(playerDiv);
   });
