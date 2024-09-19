@@ -31,7 +31,6 @@ function setupRoulette() {
   });
 }
 
-// Spin the gun and choose a random player
 function startRoulette() {
   const randomPlayerIndex = Math.floor(Math.random() * players.length);
   const angleToPlayer = (randomPlayerIndex / players.length) * 360; // Angle to the player in degrees
@@ -48,57 +47,75 @@ function startRoulette() {
   // Adjust the angle based on the initial position offset of the gun (90 degrees)
   const correctedAngle = angleToPlayer - offsetAngle - 180; // Reversed direction
 
+  // Randomize the gun rotation duration between 1 and 3 seconds
+  const rotationDuration = Math.random() * 2000 + 1000; // 1000 to 3000ms
+
   // Rotate the gun and arrow together
+  gunImage.style.transition = `transform ${rotationDuration}ms ease-out`; // Smooth transition for rotation
   gunImage.style.transform = `translate(-50%, -50%) rotate(${correctedAngle}deg)`;
+  gunArrow.style.transition = `transform ${rotationDuration}ms ease-out`; // Smooth transition for rotation
   gunArrow.style.transform = `translateX(-50%) rotate(${correctedAngle}deg)`;
 
   // Turn the selected player red
   const selectedPlayer = playerAvatars[randomPlayerIndex];
   selectedPlayer.style.backgroundColor = 'red';
 
-  // Draw a line to the selected player (simple visual aid for laser)
-  drawLineToPlayer(selectedPlayer, gunLine);
-
-  // Apply damage to the player
+  // After gun rotation completes, start the laser shooting animation
   setTimeout(() => {
-    alert(`${players[randomPlayerIndex]} is shot for ${damage} damage!`);
-  }, 1000); // 1 second delay to match gun rotation
-}
+    // Draw a line to the selected player
+    drawLineToPlayer(selectedPlayer, gunLine);
 
+    // Add the shooting animation after gun rotation completes
+    setTimeout(() => {
+      // Apply damage to the player
+      console.log(`${players[randomPlayerIndex]} is shot for ${damage} damage!`);
+
+      // Hide the line after animation completes
+      setTimeout(() => {
+        gunLine.style.display = 'none';
+      }, 1000); // Match the duration of the animation
+
+      // Reset animation state
+      gunLine.style.display = 'block'; // Make sure the line is visible
+      gunLine.style.animation = 'none'; // Reset animation
+      gunLine.offsetHeight; // Trigger a reflow to restart animation
+      gunLine.style.animation = 'shootLaser 1s ease-out'; // Start animation
+    }, 500); // Slight delay before shooting after rotation
+  }, rotationDuration); // Delay for gun rotation
+}
 function drawLineToPlayer(player, gunLine) {
   const gunArrow = document.getElementById('gun-arrow');
-  const gunArrowCenter = gunArrow.getBoundingClientRect(); // Get the bounding rectangle of the gun arrow
-  const playerCenter = player.getBoundingClientRect();
+  const gunArrowRect = gunArrow.getBoundingClientRect(); // Get the bounding rectangle of the gun arrow
+  const playerRect = player.getBoundingClientRect(); // Get the bounding rectangle of the player
 
-  // Calculate the center of the gun arrow
-  const arrowCenterX = gunArrowCenter.left + gunArrowCenter.width / 2;
-  const arrowCenterY = gunArrowCenter.top + gunArrowCenter.height / 2;
+  // Calculate the center point of the gun arrow
+  const gunCenterX = gunArrowRect.left + gunArrowRect.width / 2;
+  const gunCenterY = gunArrowRect.top + gunArrowRect.height / 2;
 
-  // Calculate the distance and angle from the gun arrow to the player
-  const dx = playerCenter.left + playerCenter.width / 2 - arrowCenterX;
-  const dy = playerCenter.top + playerCenter.height / 2 - arrowCenterY;
-  const angle = Math.atan2(dy, dx) * (180 / Math.PI); // Convert to degrees
+  // Calculate the center point of the player
+  const playerCenterX = playerRect.left + playerRect.width / 2;
+  const playerCenterY = playerRect.top + playerRect.height / 2;
 
-  // Adjust the angle by adding 90 degrees to correct the rotation offset
-  const adjustedAngle = angle + 90;
+  // Calculate the distance between the gun and the player using Pythagoras theorem
+  const dx = playerCenterX - gunCenterX;
+  const dy = playerCenterY - gunCenterY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
 
-  // Set line properties
-  gunLine.style.width = '1px'; // Fixed width for the line
-  gunLine.style.height = '207px'; // Fixed height for the line
-  gunLine.style.transform = `rotate(${adjustedAngle}deg)`; // Rotate the line to point at the player
-  gunLine.style.transformOrigin = 'bottom center'; // Rotate around the bottom center of the line
-  
-  // Adjust the vertical position based on the rotation angle
-  const lineHeight = 207; // Height of the line
-  const offsetY = (lineHeight / 2) * Math.sin(angle * (Math.PI / 180)); // Calculate vertical offset based on angle
+  // Calculate the angle between the gun and the player
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI) - 90; // Subtract 45 degrees for correction
 
-  gunLine.style.left = '50%'; // Always centered horizontally
-  gunLine.style.top = `${-offsetY}px`; // Adjust top based on the rotation
 
-  gunLine.style.display = 'block';  // Show the line
-  
-  // Add animation
-  gunLine.style.animation = 'shootLaser 1s ease-out'; // Duration and easing can be adjusted
+  // Adjust line properties to point to the player
+  gunLine.style.height = `${distance}px`; // Set the line's height to the distance between the gun and player
+  gunLine.style.transform = `rotate(${angle}deg)`; // Rotate the line to face the player
+  gunLine.style.transformOrigin = '0 0'; // Set the origin to the top-left of the line
+
+  // Set the line's starting position to the center of the gun
+  gunLine.style.left = `50%`; // Set left to the gun's center X position
+  gunLine.style.top = `50%`;  // Set top to the gun's center Y position
+
+  // Make sure the line is visible
+  gunLine.style.display = 'block';
 }
 
 // Example usage with animation

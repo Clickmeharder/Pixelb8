@@ -50,7 +50,7 @@
       position: absolute;
       width: 20px;
       height: 80px;
-      background-color: red;
+      background-color: #ff000000;
       top: ;  /* Positioned above the gun */
       left: 50%;
       transform: translateX(-50%);
@@ -67,33 +67,30 @@
 	  transform: translate(-50%, -50%); /* Center the pivot point */
 	  z-index: 4;
 	}
-
 	#gun-line {
 	  position: absolute;
 	  width: 1px;
-	  height: 207px;
+	  height: 150; /* Start with height 0 for animation */
 	  background-color: #50f2ff;
-	  top: 0; /* Line will be animated vertically */
-	  left: 50%;
-	  transform-origin: bottom center;
-	  z-index: 6;
-	  display: none; /* Initially hidden */
+	  top: 50%; /* Start from the top of the gun line */
+	  left: 50%; /* Center horizontally */
+	  transform-origin: bottom center; /* Pivot at the bottom center */
+	  display: none;/*  Hide initially */
+	  opacity: 0; /* Hidden initially */
 	}
 
 	@keyframes shootLaser {
-	  0% {
-		transform: scaleY(0);
-		opacity: 1;
-	  }
-	  50% {
-		transform: scaleY(1);
-		opacity: 1;
-	  }
-	  100% {
-		transform: scaleY(1);
-		opacity: 0;
-	  }
-	}
+  0% {
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    height: 207px;
+    opacity: 1;
+  }
+}
+
+
     #startRouletteButton {
       margin-top: 20px;
       padding: 10px 20px;
@@ -136,7 +133,7 @@
 		<img id="gun-image" src="data/images/guns/capr.png" alt="Gun">
 		<div id="gun-arrow"></div> <!-- The arrow pointing from the gun -->
 		<div id="gun-line"></div>
-		<div id="pivot-point"></div> <!-- Visible pivot point -->
+		<!-- <div id="pivot-point"></div> Visible pivot point -->
 	  </div>
 	  <button id="startRouletteButton">Start Roulette</button>
 	</div>
