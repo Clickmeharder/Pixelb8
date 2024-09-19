@@ -4,13 +4,13 @@ let gunAngle = 0;
 
 function setupRoulette() {
   const rouletteCircle = document.getElementById('roulette-circle');
-  const radius = rouletteCircle.offsetWidth / 2 - 50;  // Adjusting for player avatar size
-  
+  const radius = rouletteCircle.offsetWidth / 2 - 80;  // Slightly larger radius to position players farther
+
   // Set the gun at the center
   const gunImage = document.getElementById('gun-image');
   gunImage.style.left = '50%';
   gunImage.style.top = '50%';
-  gunImage.style.transform = 'translate(-50%, -50%)'; // Center the gun
+  gunImage.style.transform = 'translate(-50%, -50%) rotate(0deg)'; // Ensure it's always centered initially
 
   // Calculate positions for each player and place them around the circle
   players.forEach((player, index) => {
@@ -40,7 +40,9 @@ function startRoulette() {
   // Rotate the gun to point at the selected player
   const gunImage = document.getElementById('gun-image');
   gunAngle += 360 + angleToPlayer;
-  gunImage.style.transform = `rotate(${gunAngle}deg)`;
+  
+  // Ensure only the rotation is updated without affecting its position
+  gunImage.style.transform = `translate(-50%, -50%) rotate(${gunAngle}deg)`;
 
   // Apply damage to the player
   setTimeout(() => {
