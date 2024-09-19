@@ -1,6 +1,6 @@
 const players = ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8', 'Player 9', 'Player 10'];
 const playerAvatars = [];
-let gunAngle = 0;
+const offsetAngle = 90; // Offset to adjust initial straight-up position of gun
 
 function setupRoulette() {
   const rouletteCircle = document.getElementById('roulette-circle');
@@ -10,7 +10,7 @@ function setupRoulette() {
   const gunImage = document.getElementById('gun-image');
   gunImage.style.left = '50%';
   gunImage.style.top = '50%';
-  gunImage.style.transform = 'translate(-50%, -50%) rotate(0deg)'; // Ensure it's always centered initially
+  gunImage.style.transform = 'translate(-50%, -50%)'; // Ensure it's always centered initially
 
   // Calculate positions for each player and place them around the circle
   players.forEach((player, index) => {
@@ -34,17 +34,30 @@ function setupRoulette() {
 // Spin the gun and choose a random player
 function startRoulette() {
   const randomPlayerIndex = Math.floor(Math.random() * players.length);
-  const angleToPlayer = (randomPlayerIndex / players.length) * 360;
+  const angleToPlayer = (randomPlayerIndex / players.length) * 360; // Angle to the player in degrees
   const damage = Math.floor(Math.random() * 11); // Damage between 0-10
 
   // Rotate the gun and arrow to point at the selected player
   const gunImage = document.getElementById('gun-image');
   const gunArrow = document.getElementById('gun-arrow');
-  gunAngle += 360 + angleToPlayer;
-  
+  const gunLine = document.getElementById('gun-line');
+
+  // Reset player colors before starting new round
+  playerAvatars.forEach(player => player.style.backgroundColor = '#688a6a');
+
+  // Adjust the angle based on the initial position offset of the gun (90 degrees)
+  const correctedAngle = angleToPlayer - offsetAngle - 180; // Reversed direction
+
   // Rotate the gun and arrow together
-  gunImage.style.transform = `translate(-50%, -50%) rotate(${gunAngle}deg)`;
-  gunArrow.style.transform = `translateX(-50%) rotate(${gunAngle}deg)`; // Arrow rotates with the gun
+  gunImage.style.transform = `translate(-50%, -50%) rotate(${correctedAngle}deg)`;
+  gunArrow.style.transform = `translateX(-50%) rotate(${correctedAngle}deg)`;
+
+  // Turn the selected player red
+  const selectedPlayer = playerAvatars[randomPlayerIndex];
+  selectedPlayer.style.backgroundColor = 'red';
+
+  // Draw a line to the selected player (simple visual aid for laser)
+  drawLineToPlayer(selectedPlayer, gunLine);
 
   // Apply damage to the player
   setTimeout(() => {
@@ -52,6 +65,39 @@ function startRoulette() {
   }, 1000); // 1 second delay to match gun rotation
 }
 
+function drawLineToPlayer(player, gunLine) {
+  const gunArrow = document.getElementById('gun-arrow');
+  const gunArrowCenter = gunArrow.getBoundingClientRect(); // Get the bounding rectangle of the gun arrow
+  const playerCenter = player.getBoundingClientRect();
+
+  // Calculate the center of the gun arrow
+  const arrowCenterX = gunArrowCenter.left + gunArrowCenter.width / 2;
+  const arrowCenterY = gunArrowCenter.top + gunArrowCenter.height / 2;
+
+  // Calculate the distance and angle from the gun arrow to the player
+  const dx = playerCenter.left + playerCenter.width / 2 - arrowCenterX;
+  const dy = playerCenter.top + playerCenter.height / 2 - arrowCenterY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI); // Convert to degrees
+
+  // Adjust the angle by adding 90 degrees to correct the rotation offset
+  const adjustedAngle = angle + 90;
+
+  // Set line properties
+  gunLine.style.width = '1px'; // Fixed width for the line
+  gunLine.style.height = '207px'; // Fixed height for the line
+  gunLine.style.transform = `rotate(${adjustedAngle}deg)`; // Rotate the line to point at the player
+  gunLine.style.transformOrigin = 'bottom center'; // Rotate around the bottom center of the line
+  
+  // Adjust the vertical position based on the rotation angle
+  const lineHeight = 207; // Height of the line
+  const offsetY = (lineHeight / 2) * Math.sin(angle * (Math.PI / 180)); // Calculate vertical offset based on angle
+
+  gunLine.style.left = '50%'; // Always centered horizontally
+  gunLine.style.top = `${-offsetY}px`; // Adjust top based on the rotation
+
+  gunLine.style.display = 'block';  // Show the line
+}
 // Initialize the roulette
 document.addEventListener('DOMContentLoaded', () => {
   setupRoulette();

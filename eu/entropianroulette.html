@@ -56,6 +56,17 @@
       transform: translateX(-50%);
       z-index: 3;
     }
+	#gun-line {
+		position: absolute;
+		width: 1px;
+		height: 207px;
+		background-color: #50f2ff;
+		top: 6px;
+		left: 54%;
+		transform-origin: 0 0;
+		z-index: 6;
+		display:; 
+	}
     #startRouletteButton {
       margin-top: 20px;
       padding: 10px 20px;
@@ -98,6 +109,7 @@
 		<div id="roulette-circle">
 		  <img id="gun-image" src="data/images/guns/capr.png" alt="Gun">
 		  <div id="gun-arrow"></div> <!-- The arrow pointing from the gun -->
+		  <div id="gun-line"></div>
 		</div>
 		<button id="startRouletteButton">Start Roulette</button>
 	</div>
