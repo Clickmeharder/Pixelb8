@@ -19,6 +19,9 @@
       height: 400px;
       border-radius: 50%;
       border: 5px solid #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .player-avatar {
@@ -27,15 +30,19 @@
       height: 80px;
       border-radius: 50%;
       background-color: #688a6a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+      text-align: center;
     }
 
     #gun-image {
       position: absolute;
-      width: 60px;
-      height: 60px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      z-index: 2;
       transition: transform 1s ease-out;
     }
 
@@ -49,16 +56,12 @@
       font-size: 18px;
     }
   </style>
-  <style type="text/css" id="operaUserStyle"></style>
-  <link rel="stylesheet" href="data/cos-battle.css">
-  <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
 </head>
 <body>
 
   <div id="roulette-wrapper">
     <div id="roulette-circle">
-      <img id="gun-image" src="data/images/guns/azuro.png" alt="Gun">
-      <!-- Player avatars will be added dynamically -->
+      <img id="gun-image" src="data/images/gun.png" alt="Gun">
     </div>
     <button id="startRouletteButton">Start Roulette</button>
   </div>
