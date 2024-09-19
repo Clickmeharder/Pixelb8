@@ -77,7 +77,6 @@ function drawLineToPlayer(player, gunLine) {
   // Calculate the distance and angle from the gun arrow to the player
   const dx = playerCenter.left + playerCenter.width / 2 - arrowCenterX;
   const dy = playerCenter.top + playerCenter.height / 2 - arrowCenterY;
-  const distance = Math.sqrt(dx * dx + dy * dy);
   const angle = Math.atan2(dy, dx) * (180 / Math.PI); // Convert to degrees
 
   // Adjust the angle by adding 90 degrees to correct the rotation offset
@@ -97,8 +96,12 @@ function drawLineToPlayer(player, gunLine) {
   gunLine.style.top = `${-offsetY}px`; // Adjust top based on the rotation
 
   gunLine.style.display = 'block';  // Show the line
+  
+  // Add animation
+  gunLine.style.animation = 'shootLaser 1s ease-out'; // Duration and easing can be adjusted
 }
-// Initialize the roulette
+
+// Example usage with animation
 document.addEventListener('DOMContentLoaded', () => {
   setupRoulette();
   document.getElementById('startRouletteButton').addEventListener('click', startRoulette);

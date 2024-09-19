@@ -56,16 +56,43 @@
       transform: translateX(-50%);
       z-index: 3;
     }
+	#pivot-point {
+	  position: absolute;
+	  width: 10px;
+	  height: 10px;
+	  background-color: yellow; /* Visible color for the pivot point */
+	  border-radius: 50%;
+	  left: 50%;
+	  top: 50%;
+	  transform: translate(-50%, -50%); /* Center the pivot point */
+	  z-index: 4;
+	}
+
 	#gun-line {
-		position: absolute;
-		width: 1px;
-		height: 207px;
-		background-color: #50f2ff;
-		top: 6px;
-		left: 54%;
-		transform-origin: 0 0;
-		z-index: 6;
-		display:; 
+	  position: absolute;
+	  width: 1px;
+	  height: 207px;
+	  background-color: #50f2ff;
+	  top: 0; /* Line will be animated vertically */
+	  left: 50%;
+	  transform-origin: bottom center;
+	  z-index: 6;
+	  display: none; /* Initially hidden */
+	}
+
+	@keyframes shootLaser {
+	  0% {
+		transform: scaleY(0);
+		opacity: 1;
+	  }
+	  50% {
+		transform: scaleY(1);
+		opacity: 1;
+	  }
+	  100% {
+		transform: scaleY(1);
+		opacity: 0;
+	  }
 	}
     #startRouletteButton {
       margin-top: 20px;
@@ -104,14 +131,14 @@
 		</div>
 	</div>
 	
-	
 	<div id="roulette-wrapper">
-		<div id="roulette-circle">
-		  <img id="gun-image" src="data/images/guns/capr.png" alt="Gun">
-		  <div id="gun-arrow"></div> <!-- The arrow pointing from the gun -->
-		  <div id="gun-line"></div>
-		</div>
-		<button id="startRouletteButton">Start Roulette</button>
+	  <div id="roulette-circle">
+		<img id="gun-image" src="data/images/guns/capr.png" alt="Gun">
+		<div id="gun-arrow"></div> <!-- The arrow pointing from the gun -->
+		<div id="gun-line"></div>
+		<div id="pivot-point"></div> <!-- Visible pivot point -->
+	  </div>
+	  <button id="startRouletteButton">Start Roulette</button>
 	</div>
 
   <script src="js/entropian-roulette.js"></script>
