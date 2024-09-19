@@ -1,3 +1,53 @@
+	#Settingstoggle {
+		font-size: 40px;
+		font-family: system-ui;
+		text-align: center;  /* Center the text horizontally */
+		display: flex;  /* Use flexbox for centering */
+		justify-content: center;  /* Center horizontally */
+		align-items: center;  /* Center vertically */
+		margin: auto;
+		padding: 0px;
+		width: 43px;
+		height: 43px;
+		color: #878787;
+		background-color: #688a6a30;
+		border: 3px outset #c8c4c445;
+		border-radius: 50%;
+		outline-color: #d03b3b;
+		opacity: 0.59;
+	}
+	.nav-bar {
+		display: flex;
+		justify-content: center;
+		background-color: #333;
+		padding: 10px;
+	}
+
+	.button {
+		background-color: #555;
+		border: none;
+		color: white;
+		padding: 10px 20px;
+		margin: 0 5px;
+		cursor: pointer;
+		font-size: 16px;
+		border-radius: 5px;
+		transition: background-color 0.3s;
+	}
+
+	.button:hover {
+		background-color: #777;
+	}
+
+	.button:focus {
+		outline: none;
+	}
+
+	.button.disabled {
+		background-color: #777;
+		cursor: not-allowed;
+	}
+
     body {
       display: flex;
       justify-content: flex-start;
@@ -349,14 +399,16 @@
     }
 
     .player-name {
-      font-size: 12px;
-      text-align: center;
-      color: #f0f0f0; /* Light text color */
-    }
+			font-size: 17px;
+			font-weight: bold;
+			font-family: monospace;
+			text-align: center;
+			color: #11deff;
+	}
 	.player-hp {
-	  font-size: 12px;
+	  font-size: 15px;
 	  margin-top: 5px;
-	  color: #f0f0f0; /* Light text color */
+	  color: #17c01ddb; /* Light text color */
 	}
 	
 	#playerStats {

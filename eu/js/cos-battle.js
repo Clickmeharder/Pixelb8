@@ -1,10 +1,10 @@
 let currentCOSbattleversion = 'VU:Pre-alpha 0.0207';
-
+const battleversionElement = document.getElementById('cos-battle-version');
 let players = [];
 let bossHP = 350; // Boss HP
 // Declare a global variable to track the round
 let currentRound = 1;
-const battleversionElement = document.getElementById('cos-battle-version');
+
 const currentRoundElement = document.getElementById('currentRound');
 const bossHPElement = document.getElementById('boss-hp');
 const systemMessagesElement = document.getElementById('systemMessages');

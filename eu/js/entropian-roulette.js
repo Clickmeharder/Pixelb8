@@ -1,125 +1,257 @@
-const players = ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8', 'Player 9', 'Player 10'];
-const playerAvatars = [];
+let players = ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8', 'Player 9', 'Player 10'];
+let playerAvatars = [];
 const offsetAngle = 90; // Offset to adjust initial straight-up position of gun
+let currentRound = 1;
 
-function setupRoulette() {
+const currentRoundElement = document.getElementById('currentRound');
+function handleFileUpload(event) {
+  console.log('File upload triggered');
+  const file = event.target.files[0];
+  if (file) {
+    console.log('File selected:', file.name);
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      console.log('File loaded:', e.target.result);
+      const text = e.target.result;
+      const playerNames = text.trim().split('\n');
+      generatePlayers(playerNames);
+    };
+    reader.readAsText(file);
+  }
+}
+
+function setupRoulette(playerCount) {
   const rouletteCircle = document.getElementById('roulette-circle');
-  const radius = rouletteCircle.offsetWidth / 2 - 10;  // Perfect radius as you mentioned
-
-  // Set the gun at the center
+  const radius = rouletteCircle.offsetWidth / 2 - 10;  // Adjust radius
   const gunImage = document.getElementById('gun-image');
+
+  // Center the gun
   gunImage.style.left = '50%';
   gunImage.style.top = '50%';
-  gunImage.style.transform = 'translate(-50%, -50%)'; // Ensure it's always centered initially
+  gunImage.style.transform = 'translate(-50%, -50%)';
 
-  // Calculate positions for each player and place them around the circle
-  players.forEach((player, index) => {
-    const angle = (index / players.length) * 2 * Math.PI; // Convert index to radians
-    const x = Math.cos(angle) * radius;
-    const y = Math.sin(angle) * radius;
-
-    const playerDiv = document.createElement('div');
-    playerDiv.classList.add('player-avatar');
-    
-    // Center the player avatars at their calculated (x, y) positions
-    playerDiv.style.left = `calc(50% + ${x}px - 40px)`;  // Adjusting for half avatar size
-    playerDiv.style.top = `calc(50% + ${y}px - 40px)`;   // Adjusting for half avatar size
-    playerDiv.textContent = player;
-
-    rouletteCircle.appendChild(playerDiv);
-    playerAvatars.push(playerDiv);
+  playerAvatars.forEach((playerDiv, index) => {
+    if (index < playerCount) {
+      playerDiv.style.display = 'block';
+      const angle = (index / playerCount) * 2 * Math.PI;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      playerDiv.style.left = `calc(50% + ${x}px - 40px)`;
+      playerDiv.style.top = `calc(50% + ${y}px - 40px)`;
+    } else {
+      playerDiv.style.display = 'none';
+    }
   });
 }
 
-function startRoulette() {
-  const randomPlayerIndex = Math.floor(Math.random() * players.length);
-  const angleToPlayer = (randomPlayerIndex / players.length) * 360; // Angle to the player in degrees
-  const damage = Math.floor(Math.random() * 11); // Damage between 0-10
+function generatePlayers(playerNames) {
+  const rouletteCircle = document.getElementById('roulette-circle');
+  playerAvatars = [];
+  players = playerNames.map((name, index) => {
+    name = name.trim();
+    const playerAvatar = document.createElement('div');
+    playerAvatar.classList.add('player-avatar');
+    playerAvatar.style.backgroundImage = `url('data/images/femaledefault.png')`;
 
-  // Rotate the gun and arrow to point at the selected player
+    const playerTextContainer = document.createElement('div');
+    playerTextContainer.classList.add('player-text-container');
+    const playerName = document.createElement('span');
+    playerName.innerText = name;
+    playerName.classList.add('player-name');
+    const playerHP = document.createElement('span');
+    playerHP.innerText = 'HP: 100';
+    playerHP.classList.add('player-hp');
+    const playerCB = document.createElement('span');
+    playerCB.innerText = 'CB lvl: 1';
+    playerCB.classList.add('player-cb');
+    playerTextContainer.appendChild(playerName);
+    playerTextContainer.appendChild(playerHP);
+    playerTextContainer.appendChild(playerCB);
+    playerAvatar.appendChild(playerTextContainer);
+    rouletteCircle.appendChild(playerAvatar);
+    playerAvatars.push(playerAvatar);
+    return name;
+  });
+  setupRoulette(playerNames.length);
+}
+
+function startRoulette() {
+  if (players.length === 1) {
+    announceWinner(players[0]);
+    return;
+  }
+
+  const randomPlayerIndex = Math.floor(Math.random() * players.length);
+  const angleToPlayer = (randomPlayerIndex / players.length) * 360;
+  const damage = Math.floor(Math.random() * 11);
+
   const gunImage = document.getElementById('gun-image');
   const gunArrow = document.getElementById('gun-arrow');
   const gunLine = document.getElementById('gun-line');
 
-  // Reset player colors before starting new round
-  playerAvatars.forEach(player => player.style.backgroundColor = '#688a6a');
+  // Define min and max rotation duration (in milliseconds)
+  const minDuration = 10;  // Fastest spin
+  const maxDuration = 1000;  // Slowest spin
+  const playerThreshold = 5; // When it slows down more
 
-  // Adjust the angle based on the initial position offset of the gun (90 degrees)
-  const correctedAngle = angleToPlayer - offsetAngle - 180; // Reversed direction
+  // Interpolate the rotation duration based on remaining players
+  let rotationDuration = minDuration + (maxDuration - minDuration) * (1 - players.length / 15);
 
-  // Randomize the gun rotation duration between 1 and 3 seconds
-  const rotationDuration = Math.random() * 2000 + 1000; // 1000 to 3000ms
 
-  // Rotate the gun and arrow together
-  gunImage.style.transition = `transform ${rotationDuration}ms ease-out`; // Smooth transition for rotation
+  // Adjust duration further when there are few players remaining
+  if (players.length <= playerThreshold) {
+    const anticipationFactor = (playerThreshold - players.length + 1) / playerThreshold;
+    rotationDuration += anticipationFactor * 1000;  // Add up to 1000ms anticipation for low players
+  }
+
+  playerAvatars.forEach(player => player.style.backgroundColor = '#10908fa8');
+  const correctedAngle = angleToPlayer - offsetAngle - 180;
+  gunImage.style.transition = `transform ${rotationDuration}ms ease-out`;
   gunImage.style.transform = `translate(-50%, -50%) rotate(${correctedAngle}deg)`;
-  gunArrow.style.transition = `transform ${rotationDuration}ms ease-out`; // Smooth transition for rotation
+  gunArrow.style.transition = `transform ${rotationDuration}ms ease-out`;
   gunArrow.style.transform = `translateX(-50%) rotate(${correctedAngle}deg)`;
 
-  // Turn the selected player red
   const selectedPlayer = playerAvatars[randomPlayerIndex];
   selectedPlayer.style.backgroundColor = 'red';
 
-  // After gun rotation completes, start the laser shooting animation
   setTimeout(() => {
-    // Draw a line to the selected player
     drawLineToPlayer(selectedPlayer, gunLine);
 
-    // Add the shooting animation after gun rotation completes
     setTimeout(() => {
-      // Apply damage to the player
-      console.log(`${players[randomPlayerIndex]} is shot for ${damage} damage!`);
+      const playerHPElement = selectedPlayer.querySelector('.player-hp');
+      let currentHP = parseInt(playerHPElement.innerText.replace('HP: ', ''));
+      currentHP = Math.max(0, currentHP - damage);
+      playerHPElement.innerText = `HP: ${currentHP}`;
+      console.log(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
 
-      // Hide the line after animation completes
+      if (currentHP <= 0) {
+        console.log(`${players[randomPlayerIndex]} is out!`);
+        players.splice(randomPlayerIndex, 1);  // Remove player from the array
+        selectedPlayer.remove();  // Remove player avatar from the DOM
+        playerAvatars.splice(randomPlayerIndex, 1);  // Remove avatar from avatars array
+
+        // Recalculate positions for remaining players
+        setupRoulette(players.length);
+		updateRoundMessage();
+      }
+
       setTimeout(() => {
         gunLine.style.display = 'none';
-      }, 1000); // Match the duration of the animation
+        attackSound.play();
+		
+        // Repeat the roulette until only one player remains
+        setTimeout(startRoulette, 1000);
+      });
 
-      // Reset animation state
-      gunLine.style.display = 'block'; // Make sure the line is visible
-      gunLine.style.animation = 'none'; // Reset animation
-      gunLine.offsetHeight; // Trigger a reflow to restart animation
-      gunLine.style.animation = 'shootLaser 1s ease-out'; // Start animation
-    }, 500); // Slight delay before shooting after rotation
-  }, rotationDuration); // Delay for gun rotation
+    }, 300);
+  }, rotationDuration);
 }
+
+function announceWinner(winner) {
+  alert(`${winner} is the winner!`);
+  console.log(`${winner} is the winner!`);
+}
+
 function drawLineToPlayer(player, gunLine) {
   const gunArrow = document.getElementById('gun-arrow');
-  const gunArrowRect = gunArrow.getBoundingClientRect(); // Get the bounding rectangle of the gun arrow
-  const playerRect = player.getBoundingClientRect(); // Get the bounding rectangle of the player
-
-  // Calculate the center point of the gun arrow
+  const gunArrowRect = gunArrow.getBoundingClientRect();
+  const playerRect = player.getBoundingClientRect();
   const gunCenterX = gunArrowRect.left + gunArrowRect.width / 2;
   const gunCenterY = gunArrowRect.top + gunArrowRect.height / 2;
-
-  // Calculate the center point of the player
   const playerCenterX = playerRect.left + playerRect.width / 2;
   const playerCenterY = playerRect.top + playerRect.height / 2;
-
-  // Calculate the distance between the gun and the player using Pythagoras theorem
   const dx = playerCenterX - gunCenterX;
   const dy = playerCenterY - gunCenterY;
   const distance = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI) - 90;
 
-  // Calculate the angle between the gun and the player
-  const angle = Math.atan2(dy, dx) * (180 / Math.PI) - 90; // Subtract 45 degrees for correction
-
-
-  // Adjust line properties to point to the player
-  gunLine.style.height = `${distance}px`; // Set the line's height to the distance between the gun and player
-  gunLine.style.transform = `rotate(${angle}deg)`; // Rotate the line to face the player
-  gunLine.style.transformOrigin = '0 0'; // Set the origin to the top-left of the line
-
-  // Set the line's starting position to the center of the gun
-  gunLine.style.left = `50%`; // Set left to the gun's center X position
-  gunLine.style.top = `50%`;  // Set top to the gun's center Y position
-
-  // Make sure the line is visible
+  gunLine.style.height = `${distance}px`;
+  gunLine.style.transform = `rotate(${angle}deg)`;
+  gunLine.style.transformOrigin = '0 0';
+  gunLine.style.left = `50%`;
+  gunLine.style.top = `50%`;
   gunLine.style.display = 'block';
 }
+// Function to update & increment the round
+function updateRoundMessage() {
+  // Set the game message to the current round number
+  currentRoundElement.textContent = 'Round ' + currentRound;
+  // Increment the round for the next time
+  currentRound++;
+}
 
-// Example usage with animation
+// Display system messages in the chat box
+function appendSystemMessage(message) {
+  const messageElement = document.createElement('p');
+  messageElement.textContent = message;
+  systemMessagesElement.appendChild(messageElement);
+
+  // Scroll to the bottom of the chat box
+  systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight;
+}
+// JavaScript for custom resizer
+const resizable = document.querySelector('.resizable');
+const resizer = document.querySelector('.resizer');
+
+resizer.addEventListener('mousedown', function(e) {
+  e.preventDefault();
+  
+  // Track initial mouse position and container height
+  const initialY = e.clientY;
+  const initialHeight = resizable.offsetHeight;
+  
+  function onMouseMove(e) {
+    // Calculate the new height
+    const newHeight = initialHeight + (e.clientY - initialY);
+    resizable.style.height = `${newHeight}px`;  // Set the new height
+  }
+
+  function onMouseUp() {
+    // Remove the event listeners when the mouse is released
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('mouseup', onMouseUp);
+  }
+
+  // Attach the event listeners to handle resizing
+  window.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('mouseup', onMouseUp);
+});
+
+// Support touch events for mobile devices
+resizer.addEventListener('touchstart', function(e) {
+  e.preventDefault();
+  
+  // Track initial touch position and container height
+  const initialY = e.touches[0].clientY;
+  const initialHeight = resizable.offsetHeight;
+  
+  function onTouchMove(e) {
+    // Calculate the new height
+    const newHeight = initialHeight + (e.touches[0].clientY - initialY);
+    resizable.style.height = `${newHeight}px`;  // Set the new height
+  }
+
+  function onTouchEnd() {
+    // Remove the event listeners when the touch is released
+    window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('touchend', onTouchEnd);
+  }
+
+  // Attach the event listeners to handle resizing
+  window.addEventListener('touchmove', onTouchMove);
+  window.addEventListener('touchend', onTouchEnd);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   setupRoulette();
+  document.getElementById('fileInput').addEventListener('change', handleFileUpload);
   document.getElementById('startRouletteButton').addEventListener('click', startRoulette);
+  document.getElementById('customFileButton').addEventListener('click', function() {
+    document.getElementById('fileInput').click();
+  });
+
+  document.getElementById('fileInput').addEventListener('change', function() {
+    const fileName = this.files[0] ? this.files[0].name : 'No file chosen';
+    document.getElementById('fileName').textContent = fileName;
+  });
 });

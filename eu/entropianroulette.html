@@ -6,12 +6,12 @@
   
   <style>
     #roulette-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
+	  display: inline-flex;
+	  text-align: center;
+	  flex-direction: row;
+	  align-items: flex-start;
+	  padding-top: 15px;
+	}
     
     #roulette-circle {
       position: relative;
@@ -29,19 +29,52 @@
       width: 80px;
       height: 80px;
       border-radius: 50%;
-      background-color: #688a6a;
+      background-color: #10908fa8;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-size: 14px;
       text-align: center;
-    }
+	  flex-wrap: wrap;
+	  background-image: url('data/images/femaledefault.png'); /* Your background image URL */
+	  background-size: cover; /* Ensure the image covers the entire div */
+	  background-position: center top; /* Center the image within the div */
+	  background-repeat: no-repeat; /* Prevent the image from repeating */
 
+    }
+	.player-text-container {
+		position: relative;
+		top: 52px;
+		padding: 2px;
+		line-height: 0.7;
+		text-align: center;
+		font-weight: bold;
+		color: #807b00;
+		background-color: #000000a3;
+		border-radius: 8px;
+	}
+
+	.player-name, .player-hp, .player-cb {
+	  display: block;      /* Ensure each text item is on its own line */
+	  margin: 2px 0;       /* Adjust spacing between text lines */
+	}
+	.player-name, .player-hp, .player-cb {
+	  font-size: 12px;
+	}
+
+	.player-hp {
+	  margin-top: 5px;
+	  color: #4CAF50;
+	}
+
+	.player-cb {
+	  margin-top: 5px;
+	}
     #gun-image {
       position: absolute;
-      width: 80px;
-      height: 80px;
+      width: 120px;
+      height: 120px;
       z-index: 2;
       transition: transform 1s ease-out;
     }
@@ -89,17 +122,11 @@
     opacity: 1;
   }
 }
+#gun-line {
+  animation: shootLaser 0.2s ease-out; /* Reduced duration */
+}
 
 
-    #startRouletteButton {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #555;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 18px;
-    }
   </style>
   <style type="text/css" id="operaUserStyle"></style>
   <link rel="stylesheet" href="data/cos-battle.css">
@@ -117,7 +144,7 @@
 		  <button id="customFileButton">Add Dna</button>
 		  <span id="fileName"></span> <!-- To display the chosen file name -->
 		  <!-- <button id="loadPlayersButton">Clone Dna</button> -->
-		  <button id="startBattleButton" disabled>Start Battle</button>
+		  <button id="startRouletteButton">Start Roulette</button>
 		  <!-- <button id="simulateBossKillButton">Simulate Boss Kill</button> -->
 		</div>
 		<div class="nav-bar">
@@ -128,16 +155,30 @@
 		</div>
 	</div>
 	
-	<div id="roulette-wrapper">
-	  <div id="roulette-circle">
+	<div id="roulette-wrapper"class="resizable" style="resize: vertical; overflow-y:scroll;">
+		<div id="headerTexts" >
+			<span id="currentRound">Round 0</span>
+			<p id="prizePool">Loading prize pool...</p>
+			<div id="loot"></div>
+			
+		</div>
+	  <div id="roulette-circle" >
 		<img id="gun-image" src="data/images/guns/capr.png" alt="Gun">
 		<div id="gun-arrow"></div> <!-- The arrow pointing from the gun -->
 		<div id="gun-line"></div>
 		<!-- <div id="pivot-point"></div> Visible pivot point -->
 	  </div>
-	  <button id="startRouletteButton">Start Roulette</button>
-	</div>
 
+	  <div class="resizer"></div> <!-- Custom resizer element -->
+	</div>
+	<div id="secondwrapper" class="resizable">
+		<div id="defeatedPlayers">
+			<h2>GY</h2>
+		</div>
+		<div id="systemMessages"></div>
+
+	</div>
+  <audio id="attackSound" src="data/cos-sounds/retropew.mp3" preload="auto"></audio>
   <script src="js/entropian-roulette.js"></script>
 </body>
 </html>
