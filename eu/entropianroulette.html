@@ -58,13 +58,35 @@
   </style>
 </head>
 <body>
-
-  <div id="roulette-wrapper">
-    <div id="roulette-circle">
-      <img id="gun-image" src="data/images/gun.png" alt="Gun">
-    </div>
-    <button id="startRouletteButton">Start Roulette</button>
-  </div>
+<body>
+	
+		<div id="pagetitle">Colonists on Stream</div>
+		
+	<div id="header-row" style="display: flex;flex-direction: row;justify-content: space-between;max-width: 98vw;flex-wrap: wrap;">
+		<div id="fileInputContainer">
+		  <button id="Settingstoggle">⚙</button>
+		  <input type="file" id="fileInput" style="display: none;" accept=".txt">
+		  <button id="customFileButton">Add Dna</button>
+		  <span id="fileName"></span> <!-- To display the chosen file name -->
+		  <!-- <button id="loadPlayersButton">Clone Dna</button> -->
+		  <button id="startBattleButton" disabled>Start Battle</button>
+		  <!-- <button id="simulateBossKillButton">Simulate Boss Kill</button> -->
+		</div>
+		<div class="nav-bar">
+			<button class="button" onclick="location.href='cos.html'" disabled>Mob Hunt (alpha)</button>
+			<button class="button" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;">Idle Game(comingsoon)</button>
+			<button class="button" onclick="location.href='deathmatch.html'" style="opacity:0.3;">Deathmatch(comingsoon)</button>
+			<button class="button" onclick="location.href='entropianroulette.html'" style="opacity:0.3;">Entropian Roulette(comingsoon)</button>
+		</div>
+	</div>
+	
+	
+	<div id="roulette-wrapper">
+		<div id="roulette-circle">
+		  <img id="gun-image" src="data/images/gun.png" alt="Gun">
+		</div>
+		<button id="startRouletteButton">Start Roulette</button>
+	</div>
 
   <script src="js/entropian-roulette.js"></script>
 </body>
