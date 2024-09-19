@@ -1,5 +1,7 @@
 let players = ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8', 'Player 9', 'Player 10'];
 let playerAvatars = [];
+const systemMessagesElement = document.getElementById('systemMessages');
+const headerMessagesElement = document.getElementById('headerTexts');
 const offsetAngle = 90; // Offset to adjust initial straight-up position of gun
 let currentRound = 1;
 
@@ -123,9 +125,13 @@ function startRoulette() {
       currentHP = Math.max(0, currentHP - damage);
       playerHPElement.innerText = `HP: ${currentHP}`;
       console.log(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
+	  setgameMessage(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
+	  appendSystemMessage(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
 
       if (currentHP <= 0) {
-        console.log(`${players[randomPlayerIndex]} is out!`);
+        console.log(`${players[randomPlayerIndex]} is dead!`);
+		setgameMessage(`${players[randomPlayerIndex]} is dead!`);
+		appendSystemMessage(`${players[randomPlayerIndex]} is dead!`);
         players.splice(randomPlayerIndex, 1);  // Remove player from the array
         selectedPlayer.remove();  // Remove player avatar from the DOM
         playerAvatars.splice(randomPlayerIndex, 1);  // Remove avatar from avatars array
@@ -150,6 +156,9 @@ function startRoulette() {
 function announceWinner(winner) {
   alert(`${winner} is the winner!`);
   console.log(`${winner} is the winner!`);
+  setgameMessage(`${winner} is the winner!`);
+  appendSystemMessage(`${winner} is the winner!`);
+  distributeLoot();
 }
 
 function drawLineToPlayer(player, gunLine) {
@@ -172,6 +181,50 @@ function drawLineToPlayer(player, gunLine) {
   gunLine.style.top = `50%`;
   gunLine.style.display = 'block';
 }
+
+function distributeLoot() {
+  const prizePoolElement = document.getElementById('prizePool');
+  const prizePoolText = prizePoolElement.innerText;
+  const match = prizePoolText.match(/Current Prize Pool: (\d+(\.\d+)?)/);
+
+  if (!match) {
+    console.error('Prize pool value not found.');
+    return;
+  }
+
+  let totalPrizePool = parseFloat(match[1]);
+  const survivingPlayers = players.filter(player => player.hp > 0);
+
+  if (survivingPlayers.length === 0) {
+    console.log('No surviving players to distribute loot to.');
+    return;
+  }
+
+  // Calculate total loot distributed
+  let totalLootDistributed = 0;
+
+  // Clear previous loot messages
+  const lootDiv = document.getElementById('loot');
+  lootDiv.innerHTML = '';
+
+  if (survivingPlayers.length === 1) {
+    const lastPlayer = survivingPlayers[0];
+    totalLootDistributed = totalPrizePool * 0.85;  // Give 85% of the prize pool to the last player
+    const lootMessage = `${lastPlayer.name} receives ${totalLootDistributed.toFixed(2)} from the loot pool.`;
+    appendSystemMessage(lootMessage); // Append to system messages
+    lootDiv.innerHTML += `<p>${lootMessage}</p>`;
+
+    // Remaining prize pool message
+    const remainingLootMessage = `Remaining Prize Pool: ${(totalPrizePool - totalLootDistributed).toFixed(2)}`;
+    appendSystemMessage(remainingLootMessage); // Append to system messages
+    lootDiv.innerHTML += `<p>Total Value Looted: ${totalLootDistributed.toFixed(2)}</p>`;
+    lootDiv.innerHTML += `<p>${remainingLootMessage}</p>`;
+  } else {
+    console.log('Multiple players remaining, no loot distribution occurs.');
+  }
+}
+
+
 // Function to update & increment the round
 function updateRoundMessage() {
   // Set the game message to the current round number
@@ -189,6 +242,47 @@ function appendSystemMessage(message) {
   // Scroll to the bottom of the chat box
   systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight;
 }
+// Set the header message for the game
+function setgameMessage(message) {
+  headerMessagesElement.textContent = message;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  fetchPrizePool();
+});
+function fetchPrizePool() {
+  fetch('data/susfunds-twitch.txt')
+    .then(response => response.text())
+    .then(text => {
+      const prizePool = extractPrizePool(text);
+      displayPrizePool(prizePool);
+    })
+    .catch(error => {
+      console.error('Error fetching the prize pool file:', error);
+      document.getElementById('prizePool').innerText = 'Error loading prize pool.';
+    });
+}
+
+function extractPrizePool(text) {
+  // Use a regular expression to find the prize pool value
+  const match = text.match(/Current Total Ped pool:\s*(\d+(\.\d+)?)/);
+  if (match) {
+    return match[1]; // Return the captured value
+  }
+  return 'Not found'; // If the pattern does not match
+}
+
+function displayPrizePool(value) {
+  document.getElementById('prizePool').innerText = `Current Prize Pool: ${value}`;
+}
+
+
+
+
+
+
+
+
 // JavaScript for custom resizer
 const resizable = document.querySelector('.resizable');
 const resizer = document.querySelector('.resizer');
