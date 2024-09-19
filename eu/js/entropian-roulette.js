@@ -1,4 +1,4 @@
-let currentCOSbattleversion = 'VU:Pre-alpha 0.0001';
+let currentCOSrouletteversion = 'VU:Pre-alpha 0.0001';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
