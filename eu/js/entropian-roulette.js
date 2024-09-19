@@ -4,7 +4,7 @@ let gunAngle = 0;
 
 function setupRoulette() {
   const rouletteCircle = document.getElementById('roulette-circle');
-  const radius = rouletteCircle.offsetWidth / 2 - 80;  // Slightly larger radius to position players farther
+  const radius = rouletteCircle.offsetWidth / 2 - 120;  // Increase the radius to push players further out
 
   // Set the gun at the center
   const gunImage = document.getElementById('gun-image');
