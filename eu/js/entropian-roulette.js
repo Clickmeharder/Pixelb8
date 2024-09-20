@@ -4,7 +4,8 @@ rouletteversionElement.textContent = currentCOSrouletteversion;
 
 let players = [];
 let playerAvatars = [];
-
+let totalPlayers = '0';
+let remainingPlayers = '0';
 
 const systemMessagesElement = document.getElementById('systemMessages');
 const headerMessagesElement = document.getElementById('headerTexts');
@@ -12,6 +13,22 @@ const offsetAngle = 90; // Offset to adjust initial straight-up position of gun
 let currentRound = 1;
 
 const currentRoundElement = document.getElementById('currentRound');
+
+function toggleHeader() {
+    const headerRow = document.getElementById('header-row');
+    const toggleButton = document.getElementById('toggleHeaderButton');
+    
+    if (headerRow.style.display === 'none') {
+        headerRow.style.display = 'flex'; // Show the header
+        toggleButton.innerText = '-'; // Change button text
+    } else {
+        headerRow.style.display = 'none'; // Hide the header
+        toggleButton.innerText = '+'; // Change button text
+    }
+}
+
+
+
 function handleFileUpload(event) {
   console.log('File upload triggered');
   const file = event.target.files[0];
@@ -51,6 +68,7 @@ function setupRoulette(playerCount) {
     }
   });
 }
+
 function updateTopPlayers() {
   const topPlayersElement = document.getElementById('mostHpList');
   topPlayersElement.innerHTML = ''; // Clear previous list
@@ -85,6 +103,21 @@ function updateTopPlayers() {
 }
 
 
+function updateTotalPlayerCount(count) {
+  totalPlayers = count;
+  remainingPlayers = count; // Set remaining players to the total at the start
+  document.getElementById('totalPlayerCount').innerText = `Total Players: ${totalPlayers}`;
+  document.getElementById('swTitle').innerText = `Good Luck!`;
+}
+
+function updateRemainingPlayers() {
+  if (remainingPlayers > 0) {
+    remainingPlayers--; // Decrease remaining players by 1
+    document.getElementById('totalRemainingCount').innerText = `${remainingPlayers}`;
+	document.getElementById('swTitle').innerText = `Remaining`;
+  }
+}
+
 function generatePlayers(playerNames) {
   const rouletteCircle = document.getElementById('roulette-circle');
   playerAvatars = [];
@@ -114,7 +147,12 @@ function generatePlayers(playerNames) {
     return name;
   });
   setupRoulette(playerNames.length);
+    // Update total players count
+  totalPlayers = playerNames.length;
+  updateTotalPlayerCount(totalPlayers);
+	
 }
+
 
 function startRoulette() {
   if (players.length === 1) {
@@ -175,6 +213,7 @@ function startRoulette() {
         players.splice(randomPlayerIndex, 1);  // Remove player from the array
         selectedPlayer.remove();  // Remove player avatar from the DOM
         playerAvatars.splice(randomPlayerIndex, 1);  // Remove avatar from avatars array
+		updateRemainingPlayers();
 
         // Recalculate positions for remaining players
         setupRoulette(players.length);
@@ -193,13 +232,49 @@ function startRoulette() {
   }, rotationDuration);
 }
 
+
+
+function randomWinnerAnnouncement(winner) {
+  const announcements = [
+    `Looks like luck was on their side! ${winner} dodged every bullet! Congratulations ${winner}! `,
+    `Against all odds, ${winner} is still breathing! big Congratulations to ${winner}!`,
+    `Bang! Bang! Just kidding, ${winner} survived the madness! absolutely astounding. Congratulations ${winner}!`,
+    `The chamber clicked, but fate spared ${winner}. Congrats!`,
+    `And then there was one... ${winner}, you're the last one standing! Congratulations ${winner}!`,
+    `With bullets flying, only ${winner} made it out alive! Congratulations ${winner}!`,
+    `Congratulations ${winner}! You all came for a game of chance, and ${winner} beat it!`,
+    `Wow! alright folks. We have a champion: ${winner}! Looks like Death decided to take a break. Congratulations ${winner}`,
+    `Boom or bust, ${winner} is the lucky one!  Congratulations ${winner}!`,
+    `None of us expected it, but ${winner} came out of this Alive! Congratulations ${winner}!`
+  ];
+
+  // Randomize and select a winner announcement
+  const randomAnnouncement = announcements[Math.floor(Math.random() * announcements.length)];
+
+  // Create the speech utterance
+  const utterance = new SpeechSynthesisUtterance(randomAnnouncement);
+
+  // Speak the random announcement
+  window.speechSynthesis.speak(utterance);
+
+  // Optionally, return the text in case you want to log or display it
+  return randomAnnouncement;
+}
+
+
 function announceWinner(winner) {
-  alert(`${winner} is the winner!`);
-  console.log(`${winner} is the winner!`);
-  setgameMessage(`${winner} is the winner!`);
-  appendSystemMessage(`${winner} is the winner!`);
+  const announcement = randomWinnerAnnouncement(winner); 
+
+  // Update other parts of your code with the announcement
+  alert(announcement);
+  console.log(announcement);
+  setgameMessage(announcement);
+  appendSystemMessage(announcement);
+  // Call the distributeLoot function after announcing the winner
   distributeLoot();
 }
+
+
 
 function drawLineToPlayer(player, gunLine) {
   const gunArrow = document.getElementById('gun-arrow');

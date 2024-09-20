@@ -8,10 +8,10 @@
 </head>
 <body>
 	<div class="nav-bar">
-		<button class="button" onclick="location.href='cos.html'">Mob Hunt</button>
-		<button class="button" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;">Idle Game(comingsoon)</button>
-		<button class="button" onclick="location.href='cos-deathmatch.html'" style="opacity:0.3;" disabled>Deathmatch(comingsoon)</button>
-		<button class="button" onclick="location.href='cos-EntropianRoullette.html'" style="opacity:0.3;">Entropian Roullette(comingsoon)</button>
+			<button class="button" onclick="location.href='cos.html'">Mob Hunt (alpha)</button>
+			<button class="button" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;">Idle Game(comingsoon)</button>
+			<button class="button" onclick="location.href='deathmatch.html'" style="opacity:0.3;" disabled>Deathmatch(comingsoon)</button>
+			<button class="button" onclick="location.href='entropianroulette.html'">Colonist Roulette(comingsoon)</button>
 	</div>
 	<div id="deathmatch-version">Deathmatch version: 0.1</div>
 	<div id="fileInputContainer">

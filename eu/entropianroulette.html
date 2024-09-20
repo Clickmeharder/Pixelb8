@@ -15,25 +15,26 @@
 <body>
 <body>
 	
+	<button id="toggleHeaderButton" class="button" onclick="toggleHeader()">-</button>
+	<div id="header-row" style="display: flex; flex-direction: row; justify-content: space-between; max-width: 98vw; flex-wrap: wrap;">
 		<div id="pagetitle">Colonists on Stream</div>
-		
-	<div id="header-row" style="display: flex;flex-direction: row;justify-content: space-between;max-width: 98vw;flex-wrap: wrap;">
-		<div id="fileInputContainer">
-		  <button id="Settingstoggle">⚙</button>
-		  <input type="file" id="fileInput" style="display: none;" accept=".txt">
-		  <button id="customFileButton">Add Dna</button>
-		  <span id="fileName"></span> <!-- To display the chosen file name -->
-		  <!-- <button id="loadPlayersButton">Clone Dna</button> -->
-		  <button id="startRouletteButton">Start Roulette</button>
-		  <!-- <button id="simulateBossKillButton">Simulate Boss Kill</button> -->
-		</div>
 		<div class="nav-bar">
 			<button class="button" onclick="location.href='cos.html'" >Mob Hunt (alpha)</button>
 			<button class="button" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;">Idle Game(comingsoon)</button>
 			<button class="button" onclick="location.href='deathmatch.html'" style="opacity:0.3;">Deathmatch(comingsoon)</button>
-			<button class="button" onclick="location.href='entropianroulette.html'" style="opacity:0.3;"disabled>Entropian Roulette(comingsoon)</button>
+			<button class="button" onclick="location.href='entropianroulette.html'" style="opacity:0.3;"disabled>Colonist Roulette(comingsoon)</button>
 		</div>
 	</div>
+	<div id="fileInputContainer">
+	  <button id="Settingstoggle">⚙</button>
+	  <input type="file" id="fileInput" style="display: none;" accept=".txt">
+	  <button id="customFileButton">Add Dna</button>
+	  <span id="fileName"></span> <!-- To display the chosen file name -->
+	  <!-- <button id="loadPlayersButton">Clone Dna</button> -->
+	  <button id="startRouletteButton">Start Roulette</button>
+	  <!-- <button id="simulateBossKillButton">Simulate Boss Kill</button> -->
+	</div>		
+
 	
 	<div id="headerTexts"></div>
 	<div id="columnwrap" style="display:flex;flex-direction:column;">
@@ -57,7 +58,8 @@
 			</div>
 			<div id="statwrapper" class="">
 				<div class="player-stats">
-					<p>Players Remaining:</p>
+					<p id="totalPlayerCount" class="playerCount"></p>
+					<p id="totalRemainingCount" class="playersremainingCount"></p><p id="swTitle">C.O.S Roulette</p>
 					<div id="mostHpList"></div>
 					<div id="playerStatsList"></div>
 				</div>

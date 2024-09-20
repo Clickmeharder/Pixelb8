@@ -1,3 +1,32 @@
+function toggleHeader() {
+    const headerRow = document.getElementById('header-row');
+    const toggleButton = document.getElementById('toggleHeaderButton');
+    
+    if (headerRow.style.display === 'none') {
+        headerRow.style.display = 'flex'; // Show the header
+        toggleButton.innerText = '-'; // Change button text
+    } else {
+        headerRow.style.display = 'none'; // Hide the header
+        toggleButton.innerText = '+'; // Change button text
+    }
+}
+
+
+
+
+const toggleNoteButton = document.getElementById('toggleNoteButton');
+const noteFromDeveloper = document.getElementById('noteFromDeveloper');
+
+toggleNoteButton.addEventListener('click', () => {
+    if (noteFromDeveloper.style.display === 'none') {
+        noteFromDeveloper.style.display = 'block';
+    } else {
+        noteFromDeveloper.style.display = 'none';
+    }
+});
+
+
+
 // JavaScript for custom file butt
 document.getElementById('customFileButton').addEventListener('click', function() {
     document.getElementById('fileInput').click(); // Simulate click on hidden file input
