@@ -602,7 +602,7 @@ span#currentRound {
     border-radius: 5px;
     display: flex;
     width: 25vw;
-    height: 432px;
+    height: 97%;
     flex-direction: column;
     flex-wrap: nowrap;
     align-items: center;
@@ -678,7 +678,7 @@ p#totalRemainingCount {
     justify-content: flex-start;
     align-items: center;
     flex-direction: column;
-    background-color: #0d4d00;
+    background-color: #0d4b0d73;
     max-height: 81vh;
     width: 69vw;
     margin-left: -2px;
