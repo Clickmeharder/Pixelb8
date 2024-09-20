@@ -87,6 +87,7 @@ function generatePlayers(playerNames) {
   document.getElementById('startBattleButton').disabled = false;
 }
 
+
 // Start the battle and loop through players
 function startBattle() {
   let currentPlayerIndex = 0;
@@ -151,9 +152,6 @@ function startBattle() {
   }
   attackNextPlayer();
 }
-
-
-
 
 
 // Player attacks boss with damage
@@ -309,6 +307,7 @@ function calculateSurvivalBonus() {
   });
   updatePlayerStats(); // Refresh the displayed stats
 }
+
 function getRandomLootAmount(maxLoot) {
   // Define the minimum loot amount
   const minLoot = 0.01;

@@ -382,6 +382,22 @@ function displayPrizePool(value) {
 
 
 
+function calculateRandomLoot(numPlayers) {
+  // Define the minimum and maximum loot amounts per player
+  const minLootPerPlayer = 0.1;
+  const maxLootPerPlayer = 0.3;
+
+  // Initialize total loot variable
+  let totalLoot = 0;
+
+  // Loop through the number of players and calculate random loot for each
+  for (let i = 0; i < numPlayers; i++) {
+    const lootForPlayer = Math.random() * (maxLootPerPlayer - minLootPerPlayer) + minLootPerPlayer;
+    totalLoot += lootForPlayer; // Add to total loot
+  }
+
+  return totalLoot; // Return the total loot prize value
+}
 
 
 
@@ -438,6 +454,13 @@ resizer.addEventListener('touchstart', function(e) {
   // Attach the event listeners to handle resizing
   window.addEventListener('touchmove', onTouchMove);
   window.addEventListener('touchend', onTouchEnd);
+});
+
+// Assuming players is already defined and contains the player data
+document.getElementById('calculateLootButton').addEventListener('click', function() {
+  const numPlayers = players.filter(player => player.isAlive).length; // Count alive players
+  const totalLootPrize = calculateRandomLoot(numPlayers);
+  console.log(`Total Loot Prize: ${totalLootPrize}`);
 });
 
 document.addEventListener('DOMContentLoaded', () => {
