@@ -300,9 +300,10 @@
 
 .button.disabled:hover,
 .button:disabled:hover {
-	background: #004d4d; /* No change on hover for disabled state */
-	border-color: #004d4d; /* No change on hover for disabled state */
-	color: #7f8c8d; /* No change on hover for disabled state */
+    background: #010707;
+    border-color: #4d1900;
+    color: #7f8c8d;
+    transition: 0.2s;
 }
 div#headerTexts {
   margin: auto;
@@ -394,9 +395,14 @@ span#currentRound {
 		border-radius: 1vw; /* Rounded corners scale with the viewport */
 		text-align: center;
 		display: inline-block; /* Allows the element to shrink and grow based on content */
+		transition: 10.2s, smooth;
 	}
-
-
+	#pagetitle:hover {
+    background: linear-gradient(135deg, #003333, #112727);
+    border-color: #4d1900;
+    color: #940505ed;
+    transition: 10.2s, smooth;
+	}
 	/* Ensure to include the custom font */
 	@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
@@ -490,6 +496,7 @@ span#currentRound {
 		font-weight: bold;
 		color: #16afea;
 	}
+
     #loadPlayersButton {
       	font-size: 16px;
 		word-break: keep-all;
