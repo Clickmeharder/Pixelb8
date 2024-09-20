@@ -2,8 +2,10 @@ let currentCOSrouletteversion = 'VU:Pre-alpha 0.0001';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
-let players = ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8', 'Player 9', 'Player 10'];
+let players = [];
 let playerAvatars = [];
+
+
 const systemMessagesElement = document.getElementById('systemMessages');
 const headerMessagesElement = document.getElementById('headerTexts');
 const offsetAngle = 90; // Offset to adjust initial straight-up position of gun
@@ -49,6 +51,39 @@ function setupRoulette(playerCount) {
     }
   });
 }
+function updateTopPlayers() {
+  const topPlayersElement = document.getElementById('mostHpList');
+  topPlayersElement.innerHTML = ''; // Clear previous list
+
+  // Sort players by HP and get the top 5
+  const sortedPlayers = players
+    .map((name, index) => ({
+      name,
+      hp: parseInt(playerAvatars[index].querySelector('.player-hp').innerText.replace('HP: ', ''))
+    }))
+    .sort((a, b) => b.hp - a.hp)
+    .slice(0, 25); // Get top 5
+
+  // Display the top players
+  sortedPlayers.forEach((player, index) => {
+    const playerElement = document.createElement('div');
+
+    // Determine the color based on HP
+    let color;
+    if (player.hp > 75) {
+      color = 'green';
+    } else if (player.hp >= 35) {
+      color = 'orange';
+    } else {
+      color = 'red';
+    }
+
+    playerElement.style.color = color; // Set the text color
+    playerElement.innerText = `${index + 1}. ${player.name} - HP: ${player.hp}`; // Add numbering
+    topPlayersElement.appendChild(playerElement);
+  });
+}
+
 
 function generatePlayers(playerNames) {
   const rouletteCircle = document.getElementById('roulette-circle');
@@ -131,6 +166,7 @@ function startRoulette() {
       console.log(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
 	  setgameMessage(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
 	  appendSystemMessage(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
+	  updateTopPlayers();
 
       if (currentHP <= 0) {
         console.log(`${players[randomPlayerIndex]} is dead!`);

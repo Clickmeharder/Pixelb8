@@ -25,7 +25,6 @@ function handleFileUpload(event) {
   }
 }
 
-// Add player images, names, HP, and XP to the page
 function generatePlayers(playerNames) {
   const playersDiv = document.getElementById('players');
   playersDiv.innerHTML = ''; // Clear existing players
@@ -40,25 +39,35 @@ function generatePlayers(playerNames) {
     const player = document.createElement('div');
     player.classList.add('player');
     player.style.backgroundImage = `url('data/images/femaledefault.png')`; // Replace with your player image
+	
+    // Create a wrapper div for the player's info (name, HP, cb lvl)
+    const playerInfoWrapper = document.createElement('div');
+    playerInfoWrapper.classList.add('player-info-wrapper');
 
     // Create a span to hold the player's name
     const playerName = document.createElement('span');
     playerName.innerText = name;
     playerName.classList.add('player-name');
+    
     // Create a span to hold the player's HP
     const playerHP = document.createElement('span');
     playerHP.innerText = 'HP: 100'; // Default HP for each player
     playerHP.classList.add('player-hp');
-    // Create a span to hold the player's cb lvl
+    
+    // Create a span to hold the player's combat level
     const playerCB = document.createElement('span');
-    playerCB.innerText = 'Cb lvl: 1'; // Default HP for each player
+    playerCB.innerText = 'Cb lvl: 1'; // Default combat level for each player
     playerCB.classList.add('player-cb');
 
-    // Append player, name, and HP to the container
+    // Append name, HP, and CB level to the info wrapper
+    playerInfoWrapper.appendChild(playerName);
+    playerInfoWrapper.appendChild(playerHP);
+    playerInfoWrapper.appendChild(playerCB);
+
+    // Append player and info wrapper to the player container
     playerContainer.appendChild(player);
-    playerContainer.appendChild(playerName);
-    playerContainer.appendChild(playerHP);
-	playerContainer.appendChild(playerCB);
+    playerContainer.appendChild(playerInfoWrapper);
+    
     // Append player container to the playersDiv
     playersDiv.appendChild(playerContainer);
 
@@ -74,7 +83,6 @@ function generatePlayers(playerNames) {
       healingXP: 0,  // Healing XP starts at 0
     }; 
   });
-
   // Enable the Start Battle button
   document.getElementById('startBattleButton').disabled = false;
 }

@@ -5,130 +5,6 @@
   <title>Entropian Roulette</title>
   
   <style>
-    span#currentRound {
-		padding-top: 22px;
-	}
-    #roulette-wrapper {
-	  display: inline-flex;
-	  text-align: center;
-	  flex-direction: row;
-	  align-items: flex-start;
-	  padding-top: 15px;
-	}
-    
-    #roulette-circle {
-      position: relative;
-      width: 400px;
-      height: 400px;
-      border-radius: 50%;
-      border: 5px solid #555;
-	  margin: auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .player-avatar {
-      position: absolute;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background-color: #10908fa8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 14px;
-      text-align: center;
-	  flex-wrap: wrap;
-	  background-image: url('data/images/femaledefault.png'); /* Your background image URL */
-	  background-size: cover; /* Ensure the image covers the entire div */
-	  background-position: center top; /* Center the image within the div */
-	  background-repeat: no-repeat; /* Prevent the image from repeating */
-
-    }
-	.player-text-container {
-		position: relative;
-		top: 52px;
-		padding: 2px;
-		line-height: 0.7;
-		text-align: center;
-		font-weight: bold;
-		color: #807b00;
-		background-color: #000000a3;
-		border-radius: 8px;
-	}
-
-	.player-name, .player-hp, .player-cb {
-	  display: block;      /* Ensure each text item is on its own line */
-	  margin: 2px 0;       /* Adjust spacing between text lines */
-	}
-	.player-name, .player-hp, .player-cb {
-	  font-size: 12px;
-	}
-
-	.player-hp {
-	  margin-top: 5px;
-	  color: #4CAF50;
-	}
-
-	.player-cb {
-	  margin-top: 5px;
-	}
-    #gun-image {
-      position: absolute;
-      width: 120px;
-      height: 120px;
-      z-index: 2;
-      transition: transform 1s ease-out;
-    }
-	
-    #gun-arrow {
-      position: absolute;
-      width: 20px;
-      height: 80px;
-      background-color: #ff000000;
-      top: ;  /* Positioned above the gun */
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 3;
-    }
-	#pivot-point {
-	  position: absolute;
-	  width: 10px;
-	  height: 10px;
-	  background-color: yellow; /* Visible color for the pivot point */
-	  border-radius: 50%;
-	  left: 50%;
-	  top: 50%;
-	  transform: translate(-50%, -50%); /* Center the pivot point */
-	  z-index: 4;
-	}
-	#gun-line {
-	  position: absolute;
-	  width: 1px;
-	  height: 150; /* Start with height 0 for animation */
-	  background-color: #50f2ff;
-	  top: 50%; /* Start from the top of the gun line */
-	  left: 50%; /* Center horizontally */
-	  transform-origin: bottom center; /* Pivot at the bottom center */
-	  display: none;/*  Hide initially */
-	  opacity: 0; /* Hidden initially */
-	}
-
-	@keyframes shootLaser {
-  0% {
-    height: 0;
-    opacity: 1;
-  }
-  100% {
-    height: 207px;
-    opacity: 1;
-  }
-}
-#gun-line {
-  animation: shootLaser 0.2s ease-out; /* Reduced duration */
-}
 
 
   </style>
@@ -152,36 +28,48 @@
 		  <!-- <button id="simulateBossKillButton">Simulate Boss Kill</button> -->
 		</div>
 		<div class="nav-bar">
-			<button class="button" onclick="location.href='cos.html'" disabled>Mob Hunt (alpha)</button>
+			<button class="button" onclick="location.href='cos.html'" >Mob Hunt (alpha)</button>
 			<button class="button" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;">Idle Game(comingsoon)</button>
 			<button class="button" onclick="location.href='deathmatch.html'" style="opacity:0.3;">Deathmatch(comingsoon)</button>
-			<button class="button" onclick="location.href='entropianroulette.html'" style="opacity:0.3;">Entropian Roulette(comingsoon)</button>
+			<button class="button" onclick="location.href='entropianroulette.html'" style="opacity:0.3;"disabled>Entropian Roulette(comingsoon)</button>
 		</div>
 	</div>
-	<div id="headerTexts" style="position:absolute;left: 4px;"></div>
-	<div id="roulette-wrapper"class="resizable" style="resize: vertical; overflow-y:scroll;">
-		<div id="battleControl" style="display: flex;flex-direction:column;margin-right:-100px;">
-		  <span id="currentRound">Round 1</span>
-		  
-		  <div id="loot"></div>
-		  <p id="prizePool">Loading prize pool...</p>
-		</div>
-	  <div id="roulette-circle" >
-		<img id="gun-image" src="data/images/guns/capr.png" alt="Gun">
-		<div id="gun-arrow"></div> <!-- The arrow pointing from the gun -->
-		<div id="gun-line"></div>
-		<!-- <div id="pivot-point"></div> Visible pivot point -->
-	  </div>
+	
+	<div id="headerTexts"></div>
+	<div id="columnwrap" style="display:flex;flex-direction:column;">
+		<div id="rowA" style="display:flex;flex:row;">
+			<div id="roulette-wrapper"class="resizable" style="resize: vertical; overflow-y:scroll;">
+				<div id="battleControl" style="display: flex;flex-direction:column;margin-right:-100px;">
+				  <div id="gameinfo">
+					<p id="prizePool">Loading prize pool...</p>
+					<span id="currentRound">Round 1</span>
+				  </div>
+				  <div id="loot"></div>
+				</div>
+			  <div id="roulette-circle" >
+				<img id="gun-image" src="data/images/guns/capr.png" alt="Gun">
+				<div id="gun-arrow"></div> <!-- The arrow pointing from the gun -->
+				<div id="gun-line"></div>
+				<!-- <div id="pivot-point"></div> Visible pivot point -->
+			  </div>
 
-	  <div class="resizer"></div> <!-- Custom resizer element -->
-	</div>
-	<div id="secondwrapper" class="resizable">
-		<div id="defeatedPlayers">
-			<h2>GY</h2>
+			  <div class="resizer"></div> <!-- Custom resizer element -->
+			</div>
+			<div id="statwrapper" class="">
+				<div class="player-stats">
+					<p>Players Remaining:</p>
+					<div id="mostHpList"></div>
+					<div id="playerStatsList"></div>
+				</div>
+			</div>
 		</div>
-		<div id="systemMessages"></div>
-
-	</div>
+		<div id="secondwrapper" class="resizable">
+			<div id="defeatedPlayers">
+				<h2>GY</h2>
+			</div>
+			<div id="systemMessages"></div>
+			<div class="resizer"></div> <!-- Custom resizer element -->
+		</div>
 	<div id="cos-roulette-version">COS Roulette version: 0.0</div>
   <audio id="attackSound" src="data/cos-sounds/retropew.mp3" preload="auto"></audio>
   <script src="js/entropian-roulette.js"></script>

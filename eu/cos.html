@@ -7,55 +7,7 @@
   <title>Colonists on Stream</title>
   
   <style>
-	#Settingstoggle {
-		font-size: 40px;
-		font-family: system-ui;
-		text-align: center;  /* Center the text horizontally */
-		display: flex;  /* Use flexbox for centering */
-		justify-content: center;  /* Center horizontally */
-		align-items: center;  /* Center vertically */
-		margin: auto;
-		padding: 0px;
-		width: 43px;
-		height: 43px;
-		color: #878787;
-		background-color: #688a6a30;
-		border: 3px outset #c8c4c445;
-		border-radius: 50%;
-		outline-color: #d03b3b;
-		opacity: 0.59;
-	}
-	.nav-bar {
-		display: flex;
-		justify-content: center;
-		background-color: #333;
-		padding: 10px;
-	}
 
-	.button {
-		background-color: #555;
-		border: none;
-		color: white;
-		padding: 10px 20px;
-		margin: 0 5px;
-		cursor: pointer;
-		font-size: 16px;
-		border-radius: 5px;
-		transition: background-color 0.3s;
-	}
-
-	.button:hover {
-		background-color: #777;
-	}
-
-	.button:focus {
-		outline: none;
-	}
-
-	.button.disabled {
-		background-color: #777;
-		cursor: not-allowed;
-	}
   </style>
   <style type="text/css" id="operaUserStyle"></style>
   <link rel="stylesheet" href="data/cos-battle.css">
@@ -77,46 +29,50 @@
 		  <!-- <button id="simulateBossKillButton">Simulate Boss Kill</button> -->
 		</div>
 		<div class="nav-bar">
-			<button class="button" onclick="location.href='cos.html'" disabled>Mob Hunt (alpha)</button>
-			<button class="button" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;">Idle Game(comingsoon)</button>
-			<button class="button" onclick="location.href='deathmatch.html'" style="opacity:0.3;">Deathmatch(comingsoon)</button>
+			<button class="button" onclick="location.href='cos.html'"disabled>Mob Hunt (alpha)</button>
+			<button class="button" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;"alt="in dev">Idle Game(comingsoon)</button>
+			<button class="button" onclick="location.href='deathmatch.html'" style="opacity:0.3;" alt="coming soon" disabled>Deathmatch(comingsoon)</button>
 			<button class="button" onclick="location.href='entropianroulette.html'" style="opacity:0.3;">Entropian Roulette(comingsoon)</button>
 		</div>
 	</div>
 	
-	
-	
-	
-	<div id="battlewrapper" class="resizable">
-	  <div id="wrapper">
+	<div id="headerTexts"></div>
+	<div id="columnwrap" style="display:flex;flex-direction:column;">
+		<div id="rowA" style="display:flex;flex:row;">
+			<div id="battlewrapper" class="resizable">
+			  <div id="wrapper">
+				
+				<div id="battleControl" style="display: flex;flex-direction:row;">
+				  <div id="gameinfo">
+					<p id="prizePool">Loading prize pool...</p>
+					<span id="currentRound">Round 1</span>
+				  </div>
+				  <div id="loot"></div>
+				  
+				</div>
+				<div id="boss-info">
+				  <div>Virtual Gallard Lvl: <span id="boss-level">10</span></div>
+				  <div>HP: <span id="boss-hp">350</span></div>
+				</div>
+				<div id="boss"></div>
+				<div id="players"></div>
+			  </div>
+			  <div class="resizer"></div> <!-- Custom resizer element -->
+			</div>
+			<div id="statwrapper" class="">
+				<div class="player-stats">
+					<div id="playerStatsList"></div>
+				</div>
+			</div>
+		</div>
+		<div id="secondwrapper" class="resizable">
+			<div id="defeatedPlayers">
+				<h2>GY</h2>
+			</div>
+			<div id="systemMessages"></div>
+			<div class="resizer"></div> <!-- Custom resizer element -->
+		</div>
 		
-		<div id="battleControl" style="display: flex;flex-direction:row;">
-		  <p id="prizePool">Loading prize pool...</p>
-		  <div id="loot"></div>
-		</div>
-		<div id="headerTexts"></div>
-		<span id="currentRound">Round 0</span>
-		<div id="boss-info">
-		  <div>Virtual Gallard Lvl: <span id="boss-level">10</span></div>
-		  <div>HP: <span id="boss-hp">350</span></div>
-		</div>
-		<div id="boss"></div>
-		<div id="players"></div>
-	  </div>
-	  <div class="resizer"></div> <!-- Custom resizer element -->
-	</div>
-
-	<div id="secondwrapper" class="resizable">
-		<div id="defeatedPlayers">
-			<h2>GY</h2>
-		</div>
-		<div id="systemMessages"></div>
-		<div class="resizer"></div> <!-- Custom resizer element -->
-	</div>
-	<div id="thirdwrapper" class="">
-		<div class="player-stats">
-			<div id="playerStatsList"></div>
-		</div>
 	</div>
 	<div id="cos-battle-version">COS Battle version: 0.0</div>
 	<audio id="gallardheal-Sound" src="data/cos-sounds/gobblenoise/Turkey-Gobble2.mp3" preload="auto"></audio>

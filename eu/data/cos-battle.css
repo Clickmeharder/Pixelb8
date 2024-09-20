@@ -116,93 +116,117 @@
   background-color: rgba(0, 0, 0, 0.3);  /* Highlight resizer on hover */
 }
 
-	#Settingstoggle {
-		font-size: 40px;
-		font-family: system-ui;
-		text-align: center;  /* Center the text horizontally */
-		display: flex;  /* Use flexbox for centering */
-		justify-content: center;  /* Center horizontally */
-		align-items: center;  /* Center vertically */
-		margin: auto;
-		padding: 0px;
-		width: 43px;
-		height: 43px;
-		color: #878787;
-		background-color: #688a6a30;
-		border: 3px outset #c8c4c445;
-		border-radius: 50%;
-		outline-color: #d03b3b;
-		opacity: 0.59;
-	}
-	.nav-bar {
-		display: flex;
-		justify-content: center;
-		flex-wrap: wrap;
-		background-color: #232222db;
-		padding: 3px;
-		border: 3px inset black;
-		width: 100vw;
-	}
+#Settingstoggle {
+	font-size: 40px;
+	font-family: system-ui;
+	text-align: center;  /* Center the text horizontally */
+	display: flex;  /* Use flexbox for centering */
+	justify-content: center;  /* Center horizontally */
+	align-items: center;  /* Center vertically */
+	margin: auto;
+	padding: 0px;
+	width: 43px;
+	height: 43px;
+	color: #878787;
+	background-color: #688a6a30;
+	border: 3px outset #c8c4c445;
+	border-radius: 50%;
+	outline-color: #d03b3b;
+	opacity: 0.59;
+}
+.nav-bar {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	background-color: #232222db;
+	padding: 3px;
+	border: 3px inset black;
+	width: 100vw;
+}
 
-	.button {
-		background: linear-gradient(135deg, #003333, #006666); /* Gradient matching title background */
-		border: 3px solid #00cccc; /* Border color matching title */
-		color: #00e6e6; /* Text color matching title */
-		padding: 10px 20px; /* Larger padding for better aesthetics */
-		margin: 5px; /* Adjusted margin */
-		cursor: pointer;
-		font-size: 1.2vw; /* Responsive font size */
-		border-radius: 10px; /* Matching the border-radius of the title */
-		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle text shadow for depth */
-		transition: background 0.3s, border-color 0.3s, color 0.3s; /* Smooth transitions */
-	}
+.button {
+	background: linear-gradient(135deg, #003333, #006666); /* Gradient matching title background */
+	border: 3px solid #00cccc; /* Border color matching title */
+	color: #00e6e6; /* Text color matching title */
+	padding: 10px 20px; /* Larger padding for better aesthetics */
+	margin: 5px; /* Adjusted margin */
+	cursor: pointer;
+	font-size: 1.2vw; /* Responsive font size */
+	border-radius: 10px; /* Matching the border-radius of the title */
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle text shadow for depth */
+	transition: background 0.3s, border-color 0.3s, color 0.3s; /* Smooth transitions */
+}
 
-	.button:hover {
-		background: linear-gradient(135deg, #006666, #003333); /* Inverted gradient on hover */
-		border-color: #00e6e6; /* Lighter border color on hover */
-		color: #003333; /* Darker text color on hover */
-	}
+.button:hover {
+	background: linear-gradient(135deg, #006666, #003333); /* Inverted gradient on hover */
+	border-color: #00e6e6; /* Lighter border color on hover */
+	color: #003333; /* Darker text color on hover */
+}
 
-	.button:focus {
-		outline: none; /* Remove default outline */
-	}
+.button:focus {
+	outline: none; /* Remove default outline */
+}
 
-	.button.disabled,
-	.button:disabled {
-		background: #004d4d; /* Darker background for disabled state */
-		border: 3px solid #004d4d; /* Matching border for disabled state */
-		color: #7f8c8d; /* Lighter text color for better readability */
-		cursor: not-allowed; /* Indicate that the button is not interactive */
-		text-shadow: none; /* Remove text shadow for a subdued appearance */
-	}
+.button.disabled,
+.button:disabled {
+	background: #004d4d; /* Darker background for disabled state */
+	border: 3px solid #004d4d; /* Matching border for disabled state */
+	color: #7f8c8d; /* Lighter text color for better readability */
+	cursor: not-allowed; /* Indicate that the button is not interactive */
+	text-shadow: none; /* Remove text shadow for a subdued appearance */
+}
 
-	.button.disabled:hover,
-	.button:disabled:hover {
-		background: #004d4d; /* No change on hover for disabled state */
-		border-color: #004d4d; /* No change on hover for disabled state */
-		color: #7f8c8d; /* No change on hover for disabled state */
-	}
-
+.button.disabled:hover,
+.button:disabled:hover {
+	background: #004d4d; /* No change on hover for disabled state */
+	border-color: #004d4d; /* No change on hover for disabled state */
+	color: #7f8c8d; /* No change on hover for disabled state */
+}
+div#headerTexts {
+  margin: auto;
+  text-align: center;
+  width: 97.1vw;
+  border: 3px inset teal;
+  font-weight: bold;
+  color: #bc631a;
+  background-color: #00000082;
+}
+div#gameinfo {
+    position: absolute;
+    left: 0;
+    width: 189px;
+    padding: 6px;
+    text-align: center;
+    background-color: #00000026;
+    border-radius: 16px;
+}
+p#prizePool {
+    margin:0;
+}
+span#currentRound {
+    margin:0;
+}
 	#battlewrapper {
-		display: flex;
-		justify-content: flex-start;
-		align-items: center;
-		flex-direction: column;
-		background-color: #2c2c2c;
-		max-height: 97vh;
-		width: 98vw;
-		color: #f0f0f0;
-		font-family: Arial, sans-serif;
-		border-bottom: 6px ridge #444;
-		resize: vertical;
-		overflow-y: auto;
+	  display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      flex-direction: column;
+      background-color: #2c2c2c;
+	  height: 346px;
+      max-height: 75vh;
+      width: 69vw;
+      color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      border-bottom: 6px ridge #444;
+      resize: vertical;
+      overflow-y: auto;
 	}
 	#wrapper {
-		border: 3px ridge teal;
-		background-color: #0d4b0d73;
-		padding: 4px;
-		width: 99%;
-		height: 101%;
+	  border: 3px ridge teal;
+      background-color: #0d4b0d73;
+      padding: 4px;
+      width: 98%;
+      height: 100%;
 	}
 	#secondwrapper {
 		margin-top: 0px;
@@ -216,20 +240,18 @@
 		width: 98vw;
 		max-width: 98vw;
 	}
-	#thirdwrapper {
-		position: fixed;
-		right: 9px;
-		margin-top: 0px;
-		display: flex;
+	#statwrapper {
+        display: flex;
 		justify-content: flex-start;
 		align-items: center;
 		flex-direction: row;
 		background-color: #444444e0;
+		border: 6px outset #00cccca1;
 		color: #f0f0f04a;
 		font-family: Arial, sans-serif;
 		width: fit-content;
 	}
-	#thirdwrapper::hover {
+	#statwrapper::hover {
 		color: #f0f0f0ba;
 		background-color: #444444f2;
 	}
@@ -257,12 +279,12 @@
 	@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 	#boss {
-		width: 100px;
+	    width: 100px;
 		height: 100px;
 		background-image: url(images/creature-1.png);
 		background-size: 96%;
 		margin: auto;
-		margin-bottom: 10px;
+		margin-bottom: -45px;
 		position: relative;
 		padding: 0;
 		border: 3px solid transparent;
@@ -364,30 +386,60 @@
 		font-weight: bold;
 		color: #1e73a0;
 	}
-    #players {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    #defeatedplayers {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-	  width: 65%;
-	  opacity:0.3;
-    }
-    .player-container {
-	  display: flex;
-	  flex-direction: column;
-	  align-items: center;
-	  position: relative;
-	  border: 2px solid transparent;/*#4caf50;  Default green border */
-	  padding: 5px;
-	  margin: 10px;
-	  border-radius: 10px;
-	  transition: border-color 0.3s ease; /* Smooth color transition */
-	}
+#players {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
 
+.player-container {
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    border: 2px solid transparent;
+    padding: 0px;
+    margin-bottom: -74px;
+    border-radius: 11px;
+    transition: border-color 0.3s ease;
+    align-content: center;
+    flex-wrap: wrap;
+    justify-content: flex-end; 
+}
+
+/* Stagger every second row */
+.player-container:nth-child(5n+2), /* For 5 players per row */
+.player-container:nth-child(5n+3) {
+  margin-top: 40px; /* Adjust stagger height */
+}
+
+/* Adjust for smaller screen sizes */
+@media (max-width: 600px) {
+  .player-container {
+    flex-basis: calc(50% - 20px); /* Two players per row on smaller screens */
+    margin: 10px;
+  }
+
+  .player-container:nth-child(5n+2),
+  .player-container:nth-child(5n+3) {
+    margin-top: 0; /* Remove stagger on smaller screens */
+  }
+}
+
+.player-info-wrapper {
+  position: relative;
+  padding: 2px;
+  padding-left: 4px;
+  top: -18px;
+  min-width: 63px;
+  line-height: 0.7;
+  text-align: center;
+  font-weight: bold;
+  color: #807b00;
+  background-color: #000000a3;
+  border-radius: 8px;
+  overflow: hidden;
+}
 
     .player {
       width: 60px;
@@ -418,16 +470,35 @@
 	  background-color: inherit;
 	}
 
-	.player-stats {
-	  margin-bottom: 10px;
-	  padding: 5px;
-	  border: 1px solid #ddd;
-	  border-radius: 5px;
-	}
+.player-stats {
+	margin: 0px;
+    padding: 3px;
+    border: 6px inset #1d4a4a;
+    background-color: #072926;
+    color: #FF5722;
+    font-weight: bold;
+    border-radius: 5px;
+    display: flex;
+    width: 25vw;
+    height: 432px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    z-index: 8;
+}
 
 	.player-stats div {
 	  margin: 2px 0;
 	}
+	
+    #defeatedplayers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+	  width: 65%;
+	  opacity:0.3;
+    }
 	#systemMessages {
 		margin-top: -1px;
 		padding: 10px;
@@ -457,3 +528,140 @@
 		margin: 0px;
 		margin-left: auto;
 	}
+	
+	
+	
+	
+	
+/*ROULETTE SPECIFIC STYLING*/
+#roulette-wrapper {
+	display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    background-color: #0d4d00;
+    max-height: 81vh;
+    width: 69vw;
+    margin-left: -2px;
+    color: #c0a205;
+    font-family: Arial, sans-serif;
+    border: 3px inset #1d4a4a;
+    border-bottom: 6px ridge #444;
+    resize: vertical;
+    overflow-y: auto;
+}
+    
+    #roulette-circle {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      border: 5px solid #19b8bd2e;
+	  margin: auto;
+	  margin-top: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .player-avatar {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #10908fa8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+      text-align: center;
+	  flex-wrap: wrap;
+	  background-image: url('data/images/femaledefault.png'); /* Your background image URL */
+	  background-size: cover; /* Ensure the image covers the entire div */
+	  background-position: center top; /* Center the image within the div */
+	  background-repeat: no-repeat; /* Prevent the image from repeating */
+
+    }
+	.player-text-container {
+		position: relative;
+		top: 52px;
+		padding: 2px;
+		line-height: 0.7;
+		text-align: center;
+		font-weight: bold;
+		color: #807b00;
+		background-color: #000000a3;
+		border-radius: 8px;
+	}
+
+	.player-name, .player-hp, .player-cb {
+	  display: block;      /* Ensure each text item is on its own line */
+	  margin: 2px 0;       /* Adjust spacing between text lines */
+	}
+	.player-name, .player-hp, .player-cb {
+	  font-size: 12px;
+	}
+
+	.player-hp {
+	  margin-top: 5px;
+	  color: #4CAF50;
+	}
+
+	.player-cb {
+	  margin-top: 5px;
+	}
+    #gun-image {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      z-index: 2;
+      transition: transform 1s ease-out;
+    }
+	
+    #gun-arrow {
+      position: absolute;
+      width: 20px;
+      height: 80px;
+      background-color: #ff000000;
+      top: ;  /* Positioned above the gun */
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+    }
+	#pivot-point {
+	  position: absolute;
+	  width: 10px;
+	  height: 10px;
+	  background-color: yellow; /* Visible color for the pivot point */
+	  border-radius: 50%;
+	  left: 50%;
+	  top: 50%;
+	  transform: translate(-50%, -50%); /* Center the pivot point */
+	  z-index: 4;
+	}
+	#gun-line {
+	  position: absolute;
+	  width: 1px;
+	  height: 150; /* Start with height 0 for animation */
+	  background-color: #50f2ff;
+	  top: 50%; /* Start from the top of the gun line */
+	  left: 50%; /* Center horizontally */
+	  transform-origin: bottom center; /* Pivot at the bottom center */
+	  display: none;/*  Hide initially */
+	  opacity: 0; /* Hidden initially */
+	}
+
+	@keyframes shootLaser {
+  0% {
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    height: 207px;
+    opacity: 1;
+  }
+}
+#gun-line {
+  animation: shootLaser 0.2s ease-out; /* Reduced duration */
+}
