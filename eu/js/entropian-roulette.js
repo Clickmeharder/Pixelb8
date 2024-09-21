@@ -1,4 +1,4 @@
-let currentCOSrouletteversion = 'VU:Pre-alpha 0.0696';
+let currentCOSrouletteversion = 'VU:Pre-alpha 0.06969';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
@@ -422,6 +422,8 @@ function saveRemainingPrizePool() {
 
     // Save the remaining prize pool to local storage
     localStorage.setItem('remainingPrizePool', totalPrizePool.toFixed(2));
+	// Log the saved value to the console
+    console.log(`Remaining Prize Pool saved: ${totalPrizePool.toFixed(2)}`);
 }
 
 // To retrieve the value later
