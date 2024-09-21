@@ -1,4 +1,4 @@
-let currentCOSrouletteversion = 'COS Roulette VU:Pre-alpha 0.06969';
+let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.06969';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
@@ -26,8 +26,6 @@ function toggleHeader() {
         toggleButton.innerText = '+'; // Change button text
     }
 }
-
-
 
 function handleFileUpload(event) {
   console.log('File upload triggered');
