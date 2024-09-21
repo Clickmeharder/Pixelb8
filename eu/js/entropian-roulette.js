@@ -194,9 +194,13 @@ function startRoulette() {
 	  updateTopPlayers();
 
       if (currentHP <= 0) {
+		// Play the death sound
+		playRandomDeathSound();
+		//send messages
         console.log(`${players[randomPlayerIndex]} is dead!`);
 		setgameMessage(`${players[randomPlayerIndex]} is dead!`);
 		appendSystemMessage(`${players[randomPlayerIndex]} is dead!`);
+		//player removal
         players.splice(randomPlayerIndex, 1);  // Remove player from the array
         selectedPlayer.remove();  // Remove player avatar from the DOM
         playerAvatars.splice(randomPlayerIndex, 1);  // Remove avatar from avatars array
@@ -282,6 +286,30 @@ function drawLineToPlayer(player, gunLine) {
   gunLine.style.top = `50%`;
   gunLine.style.display = 'block';
 }
+
+
+//sounds
+function playRandomDeathSound() {
+    // Get all death sound elements in an array
+    const deathSounds = [
+        document.getElementById('playerdeath-Sound1'),
+        document.getElementById('playerdeath-Sound2'),
+        document.getElementById('playerdeath-Sound3'),
+        document.getElementById('playerdeath-Sound4')
+    ];
+
+    // Select a random sound from the array
+    const randomIndex = Math.floor(Math.random() * deathSounds.length);
+    const selectedSound = deathSounds[randomIndex];
+
+    // Set the volume and play the sound
+    selectedSound.volume = 0.6; // Adjust the volume as desired
+    selectedSound.currentTime = 0; // Rewind to the start
+    selectedSound.play();
+}
+
+//example usage
+// playRandomDeathSound();
 
 
 // Function to update & increment the round

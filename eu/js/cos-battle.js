@@ -166,11 +166,12 @@ function playerAttackBoss(player, damage) {
   setgameMessage(`${player.name} attacks the boss for ${damage} damage!`);
   appendSystemMessage(`${player.name} attacks the boss for ${damage} damage!`);
 
-  // Play attack sound
+  // Play attack sound at a lower volume
   const attackSound = document.getElementById('attackSound');
+  attackSound.volume = 0.5; // Set volume to 50%
   attackSound.currentTime = 0; // Rewind to the start
   attackSound.play();
-
+  
   // Visual feedback (e.g., change boss color briefly)
   document.getElementById('boss').style.borderColor = '#f00'; // Red flash
   setTimeout(() => {
@@ -184,6 +185,10 @@ function checkIfPlayerDefeated(player) {
     player.playerContainer.style.opacity = '0.3'; // Fade out defeated player
     setgameMessage(`${player.name} has been defeated!`);
     appendSystemMessage(`${player.name} has been defeated!`);
+
+    // Play the death sound
+	playRandomDeathSound();
+
 
     // Move player to the defeatedPlayers div
     const defeatedPlayersDiv = document.getElementById('defeatedPlayers');
@@ -271,6 +276,8 @@ function bossAttack() {
 
     // Play the heal sound
     const healSound = document.getElementById('gallardheal-Sound');
+	healSound.volume = 0.6; // Set volume to 50%
+    healSound.currentTime = 0; // Rewind to the start
     healSound.play();
 
     // Revert back to the default image after 1.5 seconds
@@ -307,6 +314,29 @@ function calculateSurvivalBonus() {
   });
   updatePlayerStats(); // Refresh the displayed stats
 }
+
+function playRandomDeathSound() {
+    // Get all death sound elements in an array
+    const deathSounds = [
+        document.getElementById('playerdeath-Sound1'),
+        document.getElementById('playerdeath-Sound2'),
+        document.getElementById('playerdeath-Sound3'),
+        document.getElementById('playerdeath-Sound4')
+    ];
+
+    // Select a random sound from the array
+    const randomIndex = Math.floor(Math.random() * deathSounds.length);
+    const selectedSound = deathSounds[randomIndex];
+
+    // Set the volume and play the sound
+    selectedSound.volume = 0.6; // Adjust the volume as desired
+    selectedSound.currentTime = 0; // Rewind to the start
+    selectedSound.play();
+}
+
+//example usage
+// playRandomDeathSound();
+
 
 function getRandomLootAmount(maxLoot) {
   // Define the minimum loot amount
