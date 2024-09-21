@@ -1,4 +1,4 @@
-let currentCOSrouletteversion = 'VU:Pre-alpha 0.0692';
+let currentCOSrouletteversion = 'VU:Pre-alpha 0.0696';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
@@ -336,7 +336,7 @@ function distributeLoot() {
 // Function to update & increment the round
 function updateRoundMessage() {
   // Set the game message to the current round number
-  currentRoundElement.textContent = 'Round ' + currentRound;
+  currentRoundElement.textContent = 'Rounds ' + currentRound;
   // Increment the round for the next time
   currentRound++;
 }
