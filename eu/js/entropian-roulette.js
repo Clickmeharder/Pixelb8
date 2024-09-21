@@ -53,6 +53,7 @@ function setupRoulette(playerCount) {
   });
 }
 
+
 function updateTopPlayers() {
   const topPlayersElement = document.getElementById('mostHpList');
   topPlayersElement.innerHTML = ''; // Clear previous list
@@ -94,6 +95,7 @@ function updateTotalPlayerCount(count) {
   document.getElementById('swTitle').innerText = `Good Luck!`;
 }
 
+
 function updateRemainingPlayers() {
   if (remainingPlayers > 0) {
     remainingPlayers--; // Decrease remaining players by 1
@@ -101,6 +103,7 @@ function updateRemainingPlayers() {
 	document.getElementById('swTitle').innerText = `Remaining`;
   }
 }
+
 
 function generatePlayers(playerNames) {
   const rouletteCircle = document.getElementById('roulette-circle');
@@ -281,38 +284,6 @@ function drawLineToPlayer(player, gunLine) {
   gunLine.style.display = 'block';
 }
 
-function distributeLoot() {
-    const prizePoolElement = document.getElementById('prizePool');
-    const prizePoolText = prizePoolElement.innerText;
-    const match = prizePoolText.match(/Current Prize Pool: (\d+(\.\d+)?)/);
-
-    if (!match) {
-        console.error('Prize pool value not found.');
-        return;
-    }
-
-    let totalPrizePool = parseFloat(match[1]);
-
-    if (players.length === 1) {
-        const lastSurvivingPlayer = players[0];
-        const lootMessage = `${lastSurvivingPlayer} receives ${totalLoot.toFixed(2)} from the loot pool.`;
-        appendSystemMessage(lootMessage);
-
-        const lootDiv = document.getElementById('loot');
-        lootDiv.innerHTML = `<p>${lootMessage}</p>`;
-        lootDiv.innerHTML += `<p>Total Value Looted: ${totalLoot.toFixed(2)}</p>`;
-        lootDiv.innerHTML += `<p>Remaining Prize Pool: ${(totalPrizePool - totalLoot).toFixed(2)}</p>`;
-
-        // Update the prize pool
-        prizePoolElement.innerText = `Current Prize Pool: ${(totalPrizePool - totalLoot).toFixed(2)}`;
-
-        // Save the remaining prize pool to local storage
-        saveRemainingPrizePool();
-    } else {
-        console.log('No winner yet or no players remaining.');
-    }
-}
-
 
 // Function to update & increment the round
 function updateRoundMessage() {
@@ -389,6 +360,38 @@ function calculateRandomLoot() {
   document.getElementById('currentPrize').innerText = `Survival Prize: ${totalLoot.toFixed(2)}`;
   return totalLoot; // Return the total loot prize value
   document.getElementById('currentPrize').innerText = `Survival Prize: ${totalLoot.toFixed(2)}`;
+}
+
+function distributeLoot() {
+    const prizePoolElement = document.getElementById('prizePool');
+    const prizePoolText = prizePoolElement.innerText;
+    const match = prizePoolText.match(/Current Prize Pool: (\d+(\.\d+)?)/);
+
+    if (!match) {
+        console.error('Prize pool value not found.');
+        return;
+    }
+
+    let totalPrizePool = parseFloat(match[1]);
+
+    if (players.length === 1) {
+        const lastSurvivingPlayer = players[0];
+        const lootMessage = `${lastSurvivingPlayer} receives ${totalLoot.toFixed(2)} from the loot pool.`;
+        appendSystemMessage(lootMessage);
+
+        const lootDiv = document.getElementById('loot');
+        lootDiv.innerHTML = `<p>${lootMessage}</p>`;
+        lootDiv.innerHTML += `<p>Total Value Looted: ${totalLoot.toFixed(2)}</p>`;
+        lootDiv.innerHTML += `<p>Remaining Prize Pool: ${(totalPrizePool - totalLoot).toFixed(2)}</p>`;
+
+        // Update the prize pool
+        prizePoolElement.innerText = `Current Prize Pool: ${(totalPrizePool - totalLoot).toFixed(2)}`;
+
+        // Save the remaining prize pool to local storage
+        saveRemainingPrizePool();
+    } else {
+        console.log('No winner yet or no players remaining.');
+    }
 }
 
 
