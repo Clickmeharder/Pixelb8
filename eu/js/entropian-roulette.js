@@ -403,9 +403,9 @@ function calculateRandomLoot() {
     const lootForPlayer = Math.random() * (maxLootPerPlayer - minLootPerPlayer) + minLootPerPlayer;
     totalLoot += lootForPlayer; // Add to total loot
   }
-  document.getElementById('currentPrize').innerText = `Survival Prize: ${totalLoot}`;
+  document.getElementById('currentPrize').innerText = `Survival Prize: ${totalLoot.toFixed(2)}`;
   return totalLoot; // Return the total loot prize value
-  document.getElementById('currentPrize').innerText = `Survival Prize: ${totalLoot}`;
+  document.getElementById('currentPrize').innerText = `Survival Prize: ${totalLoot.toFixed(2)}`;
 }
 
 
