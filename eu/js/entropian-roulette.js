@@ -1,4 +1,4 @@
-let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.06969';
+let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.0697';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
@@ -357,9 +357,12 @@ function calculateRandomLoot() {
     const lootForPlayer = Math.random() * (maxLootPerPlayer - minLootPerPlayer) + minLootPerPlayer;
     totalLoot += lootForPlayer; // Add to total loot
   }
+
+  // Update the current prize display
   document.getElementById('currentPrize').innerText = `Survival Prize: ${totalLoot.toFixed(2)}`;
-  return totalLoot; // Return the total loot prize value
-  document.getElementById('currentPrize').innerText = `Survival Prize: ${totalLoot.toFixed(2)}`;
+
+  // Return the total loot prize value
+  return totalLoot;
 }
 
 function distributeLoot() {
@@ -371,11 +374,15 @@ function distributeLoot() {
         console.error('Prize pool value not found.');
         return;
     }
-
+	
     let totalPrizePool = parseFloat(match[1]);
 
     if (players.length === 1) {
         const lastSurvivingPlayer = players[0];
+
+        // Get the calculated loot value
+        const totalLoot = calculateRandomLoot();
+
         const lootMessage = `${lastSurvivingPlayer} receives ${totalLoot.toFixed(2)} from the loot pool.`;
         appendSystemMessage(lootMessage);
 
@@ -393,7 +400,6 @@ function distributeLoot() {
         console.log('No winner yet or no players remaining.');
     }
 }
-
 
 
 //file upload handling button
