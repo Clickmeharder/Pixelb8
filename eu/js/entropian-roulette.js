@@ -298,40 +298,37 @@ function drawLineToPlayer(player, gunLine) {
 }
 
 function distributeLoot() {
-  const prizePoolElement = document.getElementById('prizePool');
-  const prizePoolText = prizePoolElement.innerText;
-  const match = prizePoolText.match(/Current Prize Pool: (\d+(\.\d+)?)/);
+    const prizePoolElement = document.getElementById('prizePool');
+    const prizePoolText = prizePoolElement.innerText;
+    const match = prizePoolText.match(/Current Prize Pool: (\d+(\.\d+)?)/);
 
-  if (!match) {
-    console.error('Prize pool value not found.');
-    return;
-  }
+    if (!match) {
+        console.error('Prize pool value not found.');
+        return;
+    }
 
-  // Calculate the total loot using the calculateRandomLoot function
-  const totalLoot = calculateRandomLoot(); // Call to get total loot based on current players
-
-  // Only distribute loot if there's exactly one remaining player (the winner)
-  if (players.length === 1) {
-    const lastSurvivingPlayer = players[0];
-
-    // Distribute the total loot to the last player
-    const lootMessage = `${lastSurvivingPlayer} receives ${totalLoot.toFixed(2)} from the loot pool.`;
-    appendSystemMessage(lootMessage); // Append to system messages
-
-    const lootDiv = document.getElementById('loot');
-    lootDiv.innerHTML = `<p>${lootMessage}</p>`;
-    lootDiv.innerHTML += `<p>Total Value Looted: ${totalLoot.toFixed(2)}</p>`;
-
-    // Update the remaining prize pool
     let totalPrizePool = parseFloat(match[1]);
-    totalPrizePool -= totalLoot; // Subtract totalLoot from the prize pool
-    prizePoolElement.innerText = `Remaining Prize Pool: ${totalPrizePool.toFixed(2)}`;
 
-    lootDiv.innerHTML += `<p>Remaining Prize Pool: ${totalPrizePool.toFixed(2)}</p>`;
-  } else {
-    console.log('No winner yet or no players remaining.');
-  }
+    if (players.length === 1) {
+        const lastSurvivingPlayer = players[0];
+        const lootMessage = `${lastSurvivingPlayer} receives ${totalLoot.toFixed(2)} from the loot pool.`;
+        appendSystemMessage(lootMessage);
+
+        const lootDiv = document.getElementById('loot');
+        lootDiv.innerHTML = `<p>${lootMessage}</p>`;
+        lootDiv.innerHTML += `<p>Total Value Looted: ${totalLoot.toFixed(2)}</p>`;
+        lootDiv.innerHTML += `<p>Remaining Prize Pool: ${(totalPrizePool - totalLoot).toFixed(2)}</p>`;
+
+        // Update the prize pool
+        prizePoolElement.innerText = `Current Prize Pool: ${(totalPrizePool - totalLoot).toFixed(2)}`;
+
+        // Save the remaining prize pool to local storage
+        saveRemainingPrizePool();
+    } else {
+        console.log('No winner yet or no players remaining.');
+    }
 }
+
 
 // Function to update & increment the round
 function updateRoundMessage() {
@@ -408,6 +405,30 @@ function calculateRandomLoot() {
   document.getElementById('currentPrize').innerText = `Survival Prize: ${totalLoot.toFixed(2)}`;
 }
 
+
+
+
+function saveRemainingPrizePool() {
+    const prizePoolElement = document.getElementById('prizePool');
+    const prizePoolText = prizePoolElement.innerText;
+    const match = prizePoolText.match(/Current Prize Pool: (\d+(\.\d+)?)/);
+
+    if (!match) {
+        console.error('Prize pool value not found.');
+        return;
+    }
+
+    let totalPrizePool = parseFloat(match[1]);
+
+    // Save the remaining prize pool to local storage
+    localStorage.setItem('remainingPrizePool', totalPrizePool.toFixed(2));
+}
+
+// To retrieve the value later
+function getRemainingPrizePool() {
+    const lastPrizePool = parseFloat(localStorage.getItem('remainingPrizePool'));
+    return isNaN(lastPrizePool) ? 0 : lastPrizePool; // Return 0 if no value is found
+}
 
 
 
