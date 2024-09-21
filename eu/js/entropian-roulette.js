@@ -157,7 +157,7 @@ function startRoulette() {
 
   // Define min and max rotation duration (in milliseconds)
   const minDuration = 10;  // Fastest spin
-  const maxDuration = 1000;  // Slowest spin
+  const maxDuration = 500;  // Slowest spin
   const playerThreshold = 5; // When it slows down more
 
   // Interpolate the rotation duration based on remaining players
@@ -253,7 +253,6 @@ function announceWinner(winner) {
   const announcement = randomWinnerAnnouncement(winner); 
 
   // Update other parts of your code with the announcement
-  alert(announcement);
   console.log(announcement);
   setgameMessage(announcement);
   appendSystemMessage(announcement);

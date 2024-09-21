@@ -265,7 +265,31 @@
 	border: 3px inset black;
 	width: 100vw;
 }
+.button.nav {
+    height: 5vh;
+    min-width: 100px;
+    max-width: 15vw;
+    font-size: 1vw;
+    padding: 5px;
+    overflow: hidden;
+    transition: 1s;
+}
 
+/* Adjust sizes with media queries for smaller devices */
+@media (max-width: 768px) {
+    .button.nav {
+        max-width: 30vw;  /* Increase the percentage on smaller screens */
+        font-size: 3vw;   /* Increase the font size */
+    }
+}
+
+@media (max-width: 480px) {
+    .button.nav {
+        max-width: 40vw;  /* Further increase for very small devices */
+        font-size: 4vw;   /* Make font size larger */
+        height: 6vh;      /* Adjust button height */
+    }
+}
 .button {
 	background: linear-gradient(135deg, #003333, #006666); /* Gradient matching title background */
 	border: 3px solid #00cccc; /* Border color matching title */
@@ -395,7 +419,7 @@ span#currentRound {
 		border-radius: 1vw; /* Rounded corners scale with the viewport */
 		text-align: center;
 		display: inline-block; /* Allows the element to shrink and grow based on content */
-		transition: 10.2s, smooth;
+		transition: 1.8s, smooth;
 	}
 	#pagetitle:hover {
     background: linear-gradient(135deg, #003333, #112727);

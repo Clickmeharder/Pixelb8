@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colonists on Stream - Leaderboard</title>
+  
+  <style>
+    /* Add your custom CSS here */
+  </style>
+  <link rel="stylesheet" href="data/cos-battle.css">
+  <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
+</head>
+
+<body>
+  <button id="toggleHeaderButton" class="button" onclick="toggleHeader()">-</button>
+
+  <div id="header-row" style="display: flex; flex-direction: row; justify-content: space-between; max-width: 98vw; flex-wrap: wrap;">
+    <div id="pagetitle">Colonists on Stream</div>
+    <div class="nav-bar">
+      <button class="button nav" onclick="location.href='cos.html'">Mob Hunt</button>
+      <button class="button nav" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;" alt="in dev">Idle Game (coming soon)</button>
+      <button class="button nav" onclick="location.href='deathmatch.html'" style="opacity:0.3;" alt="coming soon">Deathmatch (coming soon)</button>
+      <button class="button nav" onclick="location.href='colonistroulette.html'">Colonist Roulette</button>
+	  <button class="button nav" onclick="location.href='cos-leaderboards.html'" disabled>Leaderboards</button>
+    </div>
+  </div>
+
+  <div id="fileInputContainer">
+    <button id="Settingstoggle">⚙</button>
+    <div id="leaderboardSettings">
+	</div>
+  </div>
+
+  <div id="columnwrap" style="display:flex; flex-direction:column;">
+    <div id="leaderboardContainer" style="text-align:center; margin-top:20px;">
+      <h2>Leaderboards</h2>
+      <div id="leaderboardList">
+        <!-- Leaderboard will be dynamically inserted here -->
+      </div>
+    </div>
+
+    <div id="secondwrapper" class="resizable">
+      <div id="systemMessages"></div>
+      <div class="resizer"></div> <!-- Custom resizer element -->
+    </div>
+  </div>
+
+  <div id="cos-battle-version">COS Battle version: 0.0</div>
+  <script src="js/cos-global.js"></script>
+  <script src="js/cos-leaderboards.js"></script>
+</body>
+</html>
