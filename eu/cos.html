@@ -44,9 +44,8 @@
       width: 100%;
     }
 
-    .nav-bar button {
-      background-color: #444;
-      color: white;
+    button.button.nav.main {
+	  height: 13vh;
       border: none;
       padding: 15px 20px;
       font-size: 1.5rem;
@@ -58,54 +57,21 @@
       max-width: 400px;
     }
 
-    .nav-bar button:hover {
-      background-color: #666;
-      transform: scale(1.05);
-    }
 
-    .nav-bar button:disabled {
-      background-color: #333;
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* Responsive design */
-    @media (max-width: 768px) {
-      #pagetitle {
-        font-size: 2.5rem;
-      }
-
-      .nav-bar button {
-        font-size: 1.3rem;
-        padding: 12px 15px;
-        max-width: 300px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      #pagetitle {
-        font-size: 2rem;
-      }
-
-      .nav-bar button {
-        font-size: 1.1rem;
-        padding: 10px 12px;
-        max-width: 250px;
-      }
-    }
   </style>
-  
+  <style type="text/css" id="operaUserStyle"></style>
+  <link rel="stylesheet" href="data/cos-battle.css">
   <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
 </head>
 <body>
 	<div id="header-row" style="display: flex; flex-direction: row; justify-content: space-between; max-width: 98vw; flex-wrap: wrap;">
 		<div id="pagetitle">Colonists on Stream</div>
 		<div class="nav-bar" style="height:100vh;">
-			<button class="button nav" onclick="location.href='cos-mobhunt.html'" disabled>Mob Hunt (alpha)</button>
-			<button class="button nav" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;" alt="in dev">Idle Game (coming soon)</button>
-			<button class="button nav" onclick="location.href='deathmatch.html'" style="opacity:0.3;" alt="coming soon">Deathmatch (coming soon)</button>
-			<button class="button nav" onclick="location.href='colonistroulette.html'">Colonist Roulette</button>
-			<button class="button nav" onclick="location.href='cos-leaderboards.html'">Leaderboards</button>
+			<button class="button nav main" onclick="location.href='cos-mobhunt.html'">Mob Hunt (alpha)</button>
+			<button class="button nav main" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;" alt="in dev">Idle Game (coming soon)</button>
+			<button class="button nav main" onclick="location.href='deathmatch.html'" style="opacity:0.3;" alt="coming soon">Deathmatch (coming soon)</button>
+			<button class="button nav main" onclick="location.href='colonistroulette.html'">Colonist Roulette</button>
+			<button class="button nav main" onclick="location.href='cos-leaderboards.html'">Leaderboards</button>
 		</div>
 	</div>
 
