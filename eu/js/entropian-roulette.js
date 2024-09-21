@@ -307,23 +307,27 @@ function distributeLoot() {
     return;
   }
 
-  let totalPrizePool = parseFloat(match[1]);
+  // Calculate the total loot using the calculateRandomLoot function
+  const totalLoot = calculateRandomLoot(); // Call to get total loot based on current players
 
   // Only distribute loot if there's exactly one remaining player (the winner)
   if (players.length === 1) {
     const lastSurvivingPlayer = players[0];
 
-    // Distribute the entire prize pool to the last player
-    const lootMessage = `${lastSurvivingPlayer} receives ${totalPrizePool.toFixed(2)} from the loot pool.`;
+    // Distribute the total loot to the last player
+    const lootMessage = `${lastSurvivingPlayer} receives ${totalLoot.toFixed(2)} from the loot pool.`;
     appendSystemMessage(lootMessage); // Append to system messages
 
     const lootDiv = document.getElementById('loot');
     lootDiv.innerHTML = `<p>${lootMessage}</p>`;
-    lootDiv.innerHTML += `<p>Total Value Looted: ${totalPrizePool.toFixed(2)}</p>`;
-    lootDiv.innerHTML += `<p>Remaining Prize Pool: 0.00</p>`;
+    lootDiv.innerHTML += `<p>Total Value Looted: ${totalLoot.toFixed(2)}</p>`;
 
-    // Reset the prize pool
-    prizePoolElement.innerText = 'Current Prize Pool: 0.00';
+    // Update the remaining prize pool
+    let totalPrizePool = parseFloat(match[1]);
+    totalPrizePool -= totalLoot; // Subtract totalLoot from the prize pool
+    prizePoolElement.innerText = `Current Prize Pool: ${totalPrizePool.toFixed(2)}`;
+
+    lootDiv.innerHTML += `<p>Remaining Prize Pool: ${totalPrizePool.toFixed(2)}</p>`;
   } else {
     console.log('No winner yet or no players remaining.');
   }
@@ -382,10 +386,14 @@ function displayPrizePool(value) {
 
 
 
-function calculateRandomLoot(numPlayers) {
+function calculateRandomLoot() {
+  // Get the total players from the displayed text
+  const totalPlayersText = document.getElementById('totalPlayerCount').innerText;
+  const numPlayers = parseInt(totalPlayersText.replace('Total Players: ', ''), 10);
+
   // Define the minimum and maximum loot amounts per player
-  const minLootPerPlayer = 0.1;
-  const maxLootPerPlayer = 0.3;
+  const minLootPerPlayer = 0.01;
+  const maxLootPerPlayer = 0.30;
 
   // Initialize total loot variable
   let totalLoot = 0;
@@ -395,9 +403,12 @@ function calculateRandomLoot(numPlayers) {
     const lootForPlayer = Math.random() * (maxLootPerPlayer - minLootPerPlayer) + minLootPerPlayer;
     totalLoot += lootForPlayer; // Add to total loot
   }
-
+  document.getElementById('currentPrize').innerText = `Current Prize: ${totalLoot}`;
   return totalLoot; // Return the total loot prize value
+  document.getElementById('currentPrize').innerText = `Current Prize: ${totalLoot}`;
 }
+
+
 
 
 
