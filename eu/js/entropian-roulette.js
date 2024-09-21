@@ -325,7 +325,7 @@ function distributeLoot() {
     // Update the remaining prize pool
     let totalPrizePool = parseFloat(match[1]);
     totalPrizePool -= totalLoot; // Subtract totalLoot from the prize pool
-    prizePoolElement.innerText = `Current Prize Pool: ${totalPrizePool.toFixed(2)}`;
+    prizePoolElement.innerText = `Remaining Prize Pool: ${totalPrizePool.toFixed(2)}`;
 
     lootDiv.innerHTML += `<p>Remaining Prize Pool: ${totalPrizePool.toFixed(2)}</p>`;
   } else {
@@ -403,9 +403,9 @@ function calculateRandomLoot() {
     const lootForPlayer = Math.random() * (maxLootPerPlayer - minLootPerPlayer) + minLootPerPlayer;
     totalLoot += lootForPlayer; // Add to total loot
   }
-  document.getElementById('currentPrize').innerText = `Current Prize: ${totalLoot}`;
+  document.getElementById('currentPrize').innerText = `Survival Prize: ${totalLoot}`;
   return totalLoot; // Return the total loot prize value
-  document.getElementById('currentPrize').innerText = `Current Prize: ${totalLoot}`;
+  document.getElementById('currentPrize').innerText = `Survival Prize: ${totalLoot}`;
 }
 
 
