@@ -374,7 +374,7 @@ function calculateRandomLoot() {
 
   // Define the minimum and maximum loot amounts per player
   const minLootPerPlayer = 0.01;
-  const maxLootPerPlayer = 0.30;
+  const maxLootPerPlayer = 0.50;
 
   // Initialize total loot variable
   let totalLoot = 0;
