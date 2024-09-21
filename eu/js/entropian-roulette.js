@@ -10,8 +10,9 @@ let remainingPlayers = '0';
 const systemMessagesElement = document.getElementById('systemMessages');
 const headerMessagesElement = document.getElementById('headerTexts');
 const offsetAngle = 90; // Offset to adjust initial straight-up position of gun
-let currentRound = 1;
 
+//current round
+let currentRound = 1;
 const currentRoundElement = document.getElementById('currentRound');
 
 function toggleHeader() {
@@ -27,21 +28,6 @@ function toggleHeader() {
     }
 }
 
-function handleFileUpload(event) {
-  console.log('File upload triggered');
-  const file = event.target.files[0];
-  if (file) {
-    console.log('File selected:', file.name);
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      console.log('File loaded:', e.target.result);
-      const text = e.target.result;
-      const playerNames = text.trim().split('\n');
-      generatePlayers(playerNames);
-    };
-    reader.readAsText(file);
-  }
-}
 
 function setupRoulette(playerCount) {
   const rouletteCircle = document.getElementById('roulette-circle');
@@ -335,7 +321,7 @@ function updateRoundMessage() {
   // Increment the round for the next time
   currentRound++;
 }
-
+//
 // Display system messages in the chat box
 function appendSystemMessage(message) {
   const messageElement = document.createElement('p');
@@ -345,14 +331,15 @@ function appendSystemMessage(message) {
   // Scroll to the bottom of the chat box
   systemMessagesElement.scrollTop = systemMessagesElement.scrollHeight;
 }
+//
 // Set the header message for the game
 function setgameMessage(message) {
   headerMessagesElement.textContent = message;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  fetchPrizePool();
-});
+//
+//---------------------
+//prize pool fetching, and loot/prize calculations 
 function fetchPrizePool() {
   fetch('data/susfunds-twitch.txt')
     .then(response => response.text())
@@ -366,6 +353,7 @@ function fetchPrizePool() {
     });
 }
 
+//extract prize pool value from text.match(Current Total Ped pool:\s*(\d+(\.\d+)?)/)
 function extractPrizePool(text) {
   // Use a regular expression to find the prize pool value
   const match = text.match(/Current Total Ped pool:\s*(\d+(\.\d+)?)/);
@@ -375,12 +363,12 @@ function extractPrizePool(text) {
   return 'Not found'; // If the pattern does not match
 }
 
+// display remaining prize pool value ( sets the innertext of element )
 function displayPrizePool(value) {
   document.getElementById('prizePool').innerText = `Current Prize Pool: ${value}`;
 }
 
-
-
+//calculate random loot amount based on player count
 function calculateRandomLoot() {
   // Get the total players from the displayed text
   const totalPlayersText = document.getElementById('totalPlayerCount').innerText;
@@ -405,7 +393,26 @@ function calculateRandomLoot() {
 
 
 
+//file upload handling button
+function handleFileUpload(event) {
+  console.log('File upload triggered');
+  const file = event.target.files[0];
+  if (file) {
+    console.log('File selected:', file.name);
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      console.log('File loaded:', e.target.result);
+      const text = e.target.result;
+      const playerNames = text.trim().split('\n');
+      generatePlayers(playerNames);
+    };
+    reader.readAsText(file);
+  }
+}
 
+
+
+//save the new remaining prize pool amount to local storage
 function saveRemainingPrizePool() {
     const prizePoolElement = document.getElementById('prizePool');
     const prizePoolText = prizePoolElement.innerText;
@@ -496,6 +503,7 @@ document.getElementById('calculateLootButton').addEventListener('click', functio
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  fetchPrizePool();
   setupRoulette();
   document.getElementById('fileInput').addEventListener('change', handleFileUpload);
   document.getElementById('startRouletteButton').addEventListener('click', startRoulette);
