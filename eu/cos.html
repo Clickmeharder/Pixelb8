@@ -121,6 +121,7 @@
             const redirectUri = 'https://pixelb8.lol/eu/cos';
             const scope = 'user:read:email';
             const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+
             window.location.href = authUrl;
         }
 
@@ -144,7 +145,7 @@
                     client_id: '1nvm719cyeb2ces4kjsf89bpcgsnah',
                     code: authCode,
                     grant_type: 'authorization_code',
-                    redirect_uri: 'https://pixelb8.lol/cos'
+                    redirect_uri: 'https://pixelb8.lol/eu/cos'
                 })
             })
             .then(response => response.json())
