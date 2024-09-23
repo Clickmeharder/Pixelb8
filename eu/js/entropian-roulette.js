@@ -2,6 +2,9 @@ let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.0697';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
+// Example global volume variable (default set to 0.5 for now)
+let globalVolume = 0.5;  // You can later hook this to a volume slider or button
+
 let players = [];
 let playerAvatars = [];
 let totalPlayers = '0';
@@ -13,6 +16,7 @@ const offsetAngle = 90; // Offset to adjust initial straight-up position of gun
 
 //current round
 let currentRound = 1;
+let firstDeathOccurred = false; // Track if the first death has occurred
 const currentRoundElement = document.getElementById('currentRound');
 
 function toggleHeader() {
@@ -141,90 +145,183 @@ function generatePlayers(playerNames) {
 }
 
 
-function startRoulette() {
-  if (players.length === 1) {
-    announceWinner(players[0]);
-    return;
-  }
+// Function to rotate the gun and select a player
+function rotateAndSelectPlayer(players) {
+    const randomPlayerIndex = Math.floor(Math.random() * players.length);
+    const angleToPlayer = (randomPlayerIndex / players.length) * 360;
+    const correctedAngle = angleToPlayer - offsetAngle - 180;
 
-  const randomPlayerIndex = Math.floor(Math.random() * players.length);
-  const angleToPlayer = (randomPlayerIndex / players.length) * 360;
-  const damage = Math.floor(Math.random() * 11);
+    // Define min and max rotation duration (in milliseconds)
+    const minDuration = 10;
+    const maxDuration = 500;
+    const playerThreshold = 5;
 
-  const gunImage = document.getElementById('gun-image');
-  const gunArrow = document.getElementById('gun-arrow');
-  const gunLine = document.getElementById('gun-line');
+    // Interpolate the rotation duration based on remaining players
+    let rotationDuration = minDuration + (maxDuration - minDuration) * (1 - players.length / 15);
 
-  // Define min and max rotation duration (in milliseconds)
-  const minDuration = 10;  // Fastest spin
-  const maxDuration = 500;  // Slowest spin
-  const playerThreshold = 5; // When it slows down more
+    // Adjust duration further when there are few players remaining
+    if (players.length <= playerThreshold) {
+        const anticipationFactor = (playerThreshold - players.length + 1) / playerThreshold;
+        rotationDuration += anticipationFactor * 1000;
+    }
 
-  // Interpolate the rotation duration based on remaining players
-  let rotationDuration = minDuration + (maxDuration - minDuration) * (1 - players.length / 15);
+    // Rotate gun and arrow
+    const gunImage = document.getElementById('gun-image');
+    const gunArrow = document.getElementById('gun-arrow');
+    gunImage.style.transition = `transform ${rotationDuration}ms ease-out`;
+    gunImage.style.transform = `translate(-50%, -50%) rotate(${correctedAngle}deg)`;
+    gunArrow.style.transition = `transform ${rotationDuration}ms ease-out`;
+    gunArrow.style.transform = `translateX(-50%) rotate(${correctedAngle}deg)`;
 
-
-  // Adjust duration further when there are few players remaining
-  if (players.length <= playerThreshold) {
-    const anticipationFactor = (playerThreshold - players.length + 1) / playerThreshold;
-    rotationDuration += anticipationFactor * 1000;  // Add up to 1000ms anticipation for low players
-  }
-
-  playerAvatars.forEach(player => player.style.backgroundColor = '#10908fa8');
-  const correctedAngle = angleToPlayer - offsetAngle - 180;
-  gunImage.style.transition = `transform ${rotationDuration}ms ease-out`;
-  gunImage.style.transform = `translate(-50%, -50%) rotate(${correctedAngle}deg)`;
-  gunArrow.style.transition = `transform ${rotationDuration}ms ease-out`;
-  gunArrow.style.transform = `translateX(-50%) rotate(${correctedAngle}deg)`;
-
-  const selectedPlayer = playerAvatars[randomPlayerIndex];
-  selectedPlayer.style.backgroundColor = 'red';
-
-  setTimeout(() => {
-    drawLineToPlayer(selectedPlayer, gunLine);
-
-    setTimeout(() => {
-      const playerHPElement = selectedPlayer.querySelector('.player-hp');
-      let currentHP = parseInt(playerHPElement.innerText.replace('HP: ', ''));
-      currentHP = Math.max(0, currentHP - damage);
-      playerHPElement.innerText = `HP: ${currentHP}`;
-      console.log(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
-	  setgameMessage(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
-	  appendSystemMessage(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
-	  updateTopPlayers();
-
-      if (currentHP <= 0) {
-		// Play the death sound
-		playRandomDeathSound();
-		//send messages
-        console.log(`${players[randomPlayerIndex]} is dead!`);
-		setgameMessage(`${players[randomPlayerIndex]} is dead!`);
-		appendSystemMessage(`${players[randomPlayerIndex]} is dead!`);
-		//player removal
-        players.splice(randomPlayerIndex, 1);  // Remove player from the array
-        selectedPlayer.remove();  // Remove player avatar from the DOM
-        playerAvatars.splice(randomPlayerIndex, 1);  // Remove avatar from avatars array
-		updateRemainingPlayers();
-
-        // Recalculate positions for remaining players
-        setupRoulette(players.length);
-		updateRoundMessage();
-      }
-
-      setTimeout(() => {
-        gunLine.style.display = 'none';
-        attackSound.play();
-		
-        // Repeat the roulette until only one player remains
-        setTimeout(startRoulette, 1000);
-      });
-
-    }, 300);
-  }, rotationDuration);
+    return { randomPlayerIndex, rotationDuration };
 }
 
 
 
+
+function pullGunTrigger(player, duration = 300, hideDelay = 300) {
+  const gunLine = document.getElementById('gun-line');
+  const gunArrow = document.getElementById('gun-arrow');
+  const gunArrowRect = gunArrow.getBoundingClientRect();
+  const playerRect = player.getBoundingClientRect();
+  const gunCenterX = gunArrowRect.left + gunArrowRect.width / 2;
+  const gunCenterY = gunArrowRect.top + gunArrowRect.height / 2;
+  const playerCenterX = playerRect.left + playerRect.width / 2;
+  const playerCenterY = playerRect.top + playerRect.height / 2;
+  const dx = playerCenterX - gunCenterX;
+  const dy = playerCenterY - gunCenterY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI) - 90;
+
+  // Set the gun line properties
+  gunLine.style.height = `${distance}px`;
+  gunLine.style.transform = `rotate(${angle}deg)`;
+  gunLine.style.transformOrigin = '0 0';
+  gunLine.style.left = `50%`;
+  gunLine.style.top = `50%`;
+  gunLine.style.display = 'block';
+
+  // Array of all six attack sounds
+  const attackSounds = [
+    // document.getElementById('attackSound'),
+    document.getElementById('attackSound2')/*,
+    document.getElementById('attackSound4'),
+    document.getElementById('attackSound5'),
+    document.getElementById('attackSound6') */
+  ];
+
+  // Randomize the pitch for the attack sound (smaller range for more subtle variation)
+  const randomPitch = Math.random() * 0.76 + 1.2;  // Randomize between 0.9 and 1.1
+
+  // Select a random sound from the array
+  const randomSound = attackSounds[Math.floor(Math.random() * attackSounds.length)];
+  randomSound.playbackRate = randomPitch;  // Apply the randomized pitch
+
+  // Adjust volume based on globalVolume, reduced to a lower base level for this sound
+  randomSound.volume = globalVolume * 0.1;  // Lower the volume of the attack sound
+
+
+  // Set the timeout to hide the line and play the attack sound after the delay
+  setTimeout(() => {
+    randomSound.play();  // Play the randomly chosen attack sound
+    gunLine.style.display = 'none';  // Hide the gun line after the attack
+  }, hideDelay);  // Added randomized delay
+}
+
+
+
+// Function to handle a player being shot
+function playerShot(selectedPlayer, randomPlayerIndex, damage) {
+    const playerHPElement = selectedPlayer.querySelector('.player-hp');
+    let currentHP = parseInt(playerHPElement.innerText.replace('HP: ', ''));
+    currentHP = Math.max(0, currentHP - damage);
+    playerHPElement.innerText = `HP: ${currentHP}`;
+	selectedPlayer.style.backgroundColor = 'red';
+    console.log(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
+    setgameMessage(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
+    appendSystemMessage(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
+    updateTopPlayers();
+
+    // Reset background color after the shot
+    setTimeout(() => {
+        selectedPlayer.style.backgroundColor = '#10908fa8';  // Reset to original color
+    }, 300);  // Delay to allow the red color to be visible for a moment
+
+    return currentHP;
+}
+
+
+// Function to handle a player being killed
+function playerKilled(selectedPlayer, randomPlayerIndex) {
+    console.log(`${players[randomPlayerIndex]} is dead!`);
+    setgameMessage(`${players[randomPlayerIndex]} is dead!`);
+    appendSystemMessage(`${players[randomPlayerIndex]} is dead!`);
+
+    // Play the death sound
+    playRandomDeathSound();
+
+    // Remove player from game
+    players.splice(randomPlayerIndex, 1);
+    selectedPlayer.remove();
+    playerAvatars.splice(randomPlayerIndex, 1);
+
+    updateRemainingPlayers();
+    updateRoundMessage();
+
+    // Recalculate positions for remaining players
+    setupRoulette(players.length);
+}
+
+//
+//
+// Main roulette function
+
+// Main roulette function
+function startRoulette() {
+    if (players.length === 1) {
+        announceWinner(players[0]);
+        return;
+    }
+
+    // Rotate the gun and select a player
+    const { randomPlayerIndex, rotationDuration } = rotateAndSelectPlayer(players);
+    const selectedPlayer = playerAvatars[randomPlayerIndex];
+
+    // Draw line to the selected player and apply damage
+    setTimeout(() => {
+        pullGunTrigger(selectedPlayer); // Draw the line and play sound/hide automatically
+        setTimeout(() => {
+            const damage = Math.floor(Math.random() * 11); // Random damage between 0 and 10
+            const currentHP = playerShot(selectedPlayer, randomPlayerIndex, damage);
+
+            if (currentHP <= 0) {
+                playerKilled(selectedPlayer, randomPlayerIndex);
+
+                if (!firstDeathOccurred) {
+                    console.log(`First death occurred`);
+                    firstDeathOccurred = true; // Set this to true on the first death
+					firstDeathAnnouncement();
+                    // Delay the next round by 5 seconds
+                    setTimeout(() => {
+                        startRoulette();
+                    }, 5000);
+					console.log(`5 seconds over = game should restart now`);
+                    return; // Exit to prevent the next call
+                } else {
+                    console.log(`Subsequent death occurred`);
+                }
+            }
+
+            // Set the timeout duration based on whether the first death has occurred
+            const nextTimeout = firstDeathOccurred ? 300 : 100; // Adjusted for 1000ms if first death has occurred
+            setTimeout(startRoulette, nextTimeout);
+
+        }, 300);
+    }, rotationDuration);
+}
+
+
+//-----------------------------------------
 function randomWinnerAnnouncement(winner) {
   const announcements = [
     `Looks like luck was on their side! ${winner} dodged every bullet! Congratulations ${winner}! `,
@@ -266,33 +363,13 @@ function announceWinner(winner) {
 
 
 
-function drawLineToPlayer(player, gunLine) {
-  const gunArrow = document.getElementById('gun-arrow');
-  const gunArrowRect = gunArrow.getBoundingClientRect();
-  const playerRect = player.getBoundingClientRect();
-  const gunCenterX = gunArrowRect.left + gunArrowRect.width / 2;
-  const gunCenterY = gunArrowRect.top + gunArrowRect.height / 2;
-  const playerCenterX = playerRect.left + playerRect.width / 2;
-  const playerCenterY = playerRect.top + playerRect.height / 2;
-  const dx = playerCenterX - gunCenterX;
-  const dy = playerCenterY - gunCenterY;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  const angle = Math.atan2(dy, dx) * (180 / Math.PI) - 90;
-
-  gunLine.style.height = `${distance}px`;
-  gunLine.style.transform = `rotate(${angle}deg)`;
-  gunLine.style.transformOrigin = '0 0';
-  gunLine.style.left = `50%`;
-  gunLine.style.top = `50%`;
-  gunLine.style.display = 'block';
-}
 
 
 //sounds
 function playRandomDeathSound() {
     // Get all death sound elements in an array
     const deathSounds = [
-        document.getElementById('playerdeath-Sound1'),
+/*         document.getElementById('playerdeath-Sound1'), */
         document.getElementById('playerdeath-Sound2'),
         document.getElementById('playerdeath-Sound3'),
         document.getElementById('playerdeath-Sound4')
@@ -303,7 +380,7 @@ function playRandomDeathSound() {
     const selectedSound = deathSounds[randomIndex];
 
     // Set the volume and play the sound
-    selectedSound.volume = 0.6; // Adjust the volume as desired
+    selectedSound.volume = 0.9; // Adjust the volume as desired
     selectedSound.currentTime = 0; // Rewind to the start
     selectedSound.play();
 }
@@ -316,9 +393,27 @@ function playRandomDeathSound() {
 function updateRoundMessage() {
   // Set the game message to the current round number
   currentRoundElement.textContent = 'Rounds ' + currentRound;
-  // Increment the round for the next time
-  currentRound++;
+    currentRound++;
+ // Adjust the timeout duration as needed (3000ms = 3 seconds)
 }
+
+// Function to announce the first death
+function firstDeathAnnouncement() {
+  const announcement = "Wow! alright folks, The first death of the roulette game has occured! Things should start heating up now!"; // Customize this message as needed
+
+  // Use SpeechSynthesis API for spoken announcement
+  const utterance = new SpeechSynthesisUtterance(announcement);
+  speechSynthesis.speak(utterance);
+
+  // Update other parts of your code with the announcement
+  console.log(announcement);
+  setgameMessage(announcement);
+  appendSystemMessage(announcement);
+}
+
+
+
+
 //
 // Display system messages in the chat box
 function appendSystemMessage(message) {

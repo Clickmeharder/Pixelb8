@@ -1,11 +1,11 @@
-2024-09-10 4:14 AM, viahk, 1, rubio, unclaimed
+2024-09-10 4:14 AM, viahk, 1, rubio, claimed
 2024-09-13 2:14 AM, gosu_rival, 1, rubio, unclaimed
 2024-09-13 12:07 PM, speechy23, 2.81, ped, claimed
 2024-09-14 5:00 PM, immortaltimp, 3.05, ped, unclaimed
-2024-09-14 5:23 PM, viahk, 1, rubio, unclaimed
-2024-09-14 5:23 PM, viahk, 1, azuro, unclaimed
-2024-09-15 1:12 PM, viahk, 1, azuro, unclaimed
-2024-09-15 1:13 PM, viahk, 4.33, ped, unclaimed
+2024-09-14 5:23 PM, viahk, 1, rubio, claimed
+2024-09-14 5:23 PM, viahk, 1, azuro, claimed
+2024-09-15 1:12 PM, viahk, 1, azuro, claimed
+2024-09-15 1:13 PM, viahk, 4.33, ped, claimed
 2024-09-15 1:27 PM, speechy23, 2.00, ped, unclaimed
 2024-09-15 1:29 PM, dds_ownag3, 2.00, ped, unclaimed
 2024-09-21 1:45 AM, dds_ownag3, 0.43, ped, unclaimed
