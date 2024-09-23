@@ -1,119 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Colonists on Stream</title>
-  
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: #1e1e1e;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Colonists on Stream</title>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
 
-    #header-row {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+        #header-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-    #pagetitle {
-      font-size: 3rem;
-      color: #ffcc00;
-      margin-bottom: 40px;
-    }
+        #pagetitle {
+            font-size: 3rem;
+            color: #ffcc00;
+            margin-bottom: 40px;
+        }
 
-    .nav-bar {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-    }
+        .nav-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
 
-    button.button.nav.main {
-	  height: 13vh;
-      border: none;
-      padding: 15px 20px;
-      font-size: 1.5rem;
-      border-radius: 10px;
-      margin: 10px 0;
-      cursor: pointer;
-      transition: background-color 0.3s, transform 0.3s;
-      width: 80%;
-      max-width: 400px;
-    }
+        button.button.nav.main {
+            height: 13vh;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1.5rem;
+            border-radius: 10px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            width: 80%;
+            max-width: 400px;
+        }
 
-     .TwitchButt {
-		position: fixed;
-		top: 13vw;
-		right: 2%;
-		background-color: #9146FF;
-		color: white;
-		padding: 12px 20px;
-		border: none;
-		border-radius: 5px;
-		font-size: 16px;
-		cursor: pointer;
-		text-decoration: none;
-		transition: background-color 0.3s;
-	}
+        .TwitchButt {
+            position: fixed;
+            top: 13vw;
+            right: 2%;
+            background-color: #9146FF; /* Twitch purple */
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
 
         .TwitchButt:hover {
             background-color: #7a3fbd; /* Darker purple on hover */
         }
 
         #user-info {
-          position: fixed;
-		  top: 16vw;
-		  right: 2%;
+            position: fixed;
+            top: 16vw;
+            right: 2%;
+            text-align: left;
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+            padding: 10px;
+            border-radius: 5px;
         }
-  </style>
-  <style type="text/css" id="operaUserStyle"></style>
-  <link rel="stylesheet" href="data/cos-battle.css">
-  <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
+        
+        img {
+            border-radius: 50%;
+            width: 50px; /* Fixed size for profile picture */
+            height: 50px; /* Fixed size for profile picture */
+            margin-top: 5px;
+        }
+    </style>
+    <link rel="stylesheet" href="data/cos-battle.css">
+    <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
 </head>
 <body>
-
-
-
-	<button id="toggleHeaderButton" class="button" onclick="toggleHeader()">-</button>
-	<div id="header-row" style="display: flex; flex-direction: row; justify-content: space-between; max-width: 98vw; flex-wrap: wrap;">
-		<div id="pagetitle">Colonists on Stream</div>
-		
-		
-			<!-- Twitch Stuff -->
-		<!-- Add this to the /cos page -->
-		<button class="TwitchButt" onclick="location.href='https://id.twitch.tv/oauth2/authorize?client_id=1nvm719cyeb2ces4kjsf89bpcgsnah&redirect_uri=https://pixelb8.lol/cos&response_type=code&scope=user:read:email'">Login with Twitch</button>
-		<div id="user-info"></div>
-		
-		<!--End of Twitch Stuff -->
-		
-		
-		<div class="nav-bar" style="height:100vh;">
-			<button class="button nav main" onclick="location.href='cos-mobhunt.html'">Mob Hunt (alpha)</button>
-			<button class="button nav main" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;" alt="in dev">Idle Game (coming soon)</button>
-			<button class="button nav main" onclick="location.href='deathmatch.html'" style="opacity:0.3;" alt="coming soon">Deathmatch (coming soon)</button>
-			<button class="button nav main" onclick="location.href='colonistroulette.html'">Colonist Roulette</button>
-			<button class="button nav main" onclick="location.href='cos-leaderboards.html'" style="opacity:0.3;" alt="coming soon">Leaderboards</button>
-		</div>
-	</div>
-
+    <button id="toggleHeaderButton" class="button" onclick="toggleHeader()">-</button>
+    <div id="header-row">
+        <div id="pagetitle">Colonists on Stream</div>
+        
+        <!-- Twitch Stuff -->
+        <button class="TwitchButt" onclick="loginWithTwitch()">Login with Twitch</button>
+        <div id="user-info"></div>
+        <!--End of Twitch Stuff -->
+        
+        <div class="nav-bar" style="height:100vh;">
+            <button class="button nav main" onclick="location.href='cos-mobhunt.html'">Mob Hunt (alpha)</button>
+            <button class="button nav main" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;" alt="in dev">Idle Game (coming soon)</button>
+            <button class="button nav main" onclick="location.href='deathmatch.html'" style="opacity:0.3;" alt="coming soon">Deathmatch (coming soon)</button>
+            <button class="button nav main" onclick="location.href='colonistroulette.html'">Colonist Roulette</button>
+            <button class="button nav main" onclick="location.href='cos-leaderboards.html'" style="opacity:0.3;" alt="coming soon">Leaderboards</button>
+        </div>
+    </div>
 
     <script>
+        function loginWithTwitch() {
+            const clientId = '1nvm719cyeb2ces4kjsf89bpcgsnah'; // Replace with your Client ID
+            const redirectUri = 'https://pixelb8.lol/cos';
+            const scope = 'user:read:email';
+            const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+            window.location.href = authUrl;
+        }
+
         // Function to extract query parameters from the URL
         function getQueryParam(param) {
             const params = new URLSearchParams(window.location.search);
@@ -139,11 +149,14 @@
             })
             .then(response => response.json())
             .then(data => {
-                const accessToken = data.access_token;
-                console.log('Access Token:', accessToken);
-                
-                // Now fetch the user data using the access token
-                fetchUserData(accessToken);
+                if (data.access_token) {
+                    const accessToken = data.access_token;
+                    console.log('Access Token:', accessToken);
+                    // Now fetch the user data using the access token
+                    fetchUserData(accessToken);
+                } else {
+                    console.error('No access token returned:', data);
+                }
             })
             .catch(error => console.error('Error exchanging code for token:', error));
         }
@@ -153,26 +166,28 @@
             fetch('https://api.twitch.tv/helix/users', {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
-                    'Client-ID': '1nvm719cyeb2ces4kjsf89bpcgsnah'
+                    'Client-ID': '1nvm719cyeb2ces4kjsf89bpcgsnah' // Replace with your Client ID
                 }
             })
             .then(response => response.json())
             .then(data => {
-                const userData = data.data[0];
-                const username = userData.display_name;
-                const profilePicture = userData.profile_image_url;
+                if (data.data && data.data.length > 0) {
+                    const userData = data.data[0];
+                    const username = userData.display_name;
+                    const profilePicture = userData.profile_image_url;
 
-                // Display the user info on the page
-                document.getElementById('user-info').innerHTML = `
-                    <h3>Welcome, ${username}</h3>
-                    <img src="${profilePicture}" alt="Profile Picture" />
-                `;
+                    // Display the user info on the page
+                    document.getElementById('user-info').innerHTML = `
+                        <h3>Welcome, ${username}</h3>
+                        <img src="${profilePicture}" alt="Profile Picture" />
+                    `;
+                } else {
+                    console.error('User data not found:', data);
+                }
             })
             .catch(error => console.error('Error fetching user data:', error));
         }
     </script>
-	<script src="js/cos-global.js"></script>
-
-
+    <script src="js/cos-global.js"></script>
 </body>	
 </html>
