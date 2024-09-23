@@ -57,7 +57,7 @@
       max-width: 400px;
     }
 
-        .twitch-button {
+        .TwitchButt {
             background-color: #9146FF; /* Twitch purple */
             color: white;
             padding: 12px 20px;
@@ -69,7 +69,7 @@
             transition: background-color 0.3s;
         }
 
-        .twitch-button:hover {
+        .TwitchButt:hover {
             background-color: #7a3fbd; /* Darker purple on hover */
         }
 
@@ -92,7 +92,7 @@
 		
 			<!-- Twitch Stuff -->
 		<!-- Add this to the /cos page -->
-		<a href="https://id.twitch.tv/oauth2/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=https://pixelb8.lol/cos&response_type=code&scope=user:read:email" class="twitch-button">Login with Twitch</a>
+		<button class="button nav TwitchButt" onclick="location.href='https://id.twitch.tv/oauth2/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=https://pixelb8.lol/cos&response_type=code&scope=user:read:email'">Login with Twitch</button>
 		<div id="user-info"></div>
 		
 		<!--End of Twitch Stuff -->
