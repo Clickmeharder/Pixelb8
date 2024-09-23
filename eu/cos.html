@@ -57,7 +57,25 @@
       max-width: 400px;
     }
 
+        .twitch-button {
+            background-color: #9146FF; /* Twitch purple */
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
 
+        .twitch-button:hover {
+            background-color: #7a3fbd; /* Darker purple on hover */
+        }
+
+        #user-info {
+            margin-top: 20px;
+        }
   </style>
   <style type="text/css" id="operaUserStyle"></style>
   <link rel="stylesheet" href="data/cos-battle.css">
@@ -66,15 +84,20 @@
 <body>
 
 
-	<!-- Twitch Stuff -->
-	<!-- Add this to the /cos page -->
-	<a href="https://id.twitch.tv/oauth2/authorize?client_id=1nvm719cyeb2ces4kjsf89bpcgsnah&redirect_uri=https://pixelb8.lol/cos&response_type=code&scope=user:read:email">Login with Twitch</a>
-	<div id="user-info"></div>
-	
-	<!--End of Twitch Stuff -->
+
 	
 	<div id="header-row" style="display: flex; flex-direction: row; justify-content: space-between; max-width: 98vw; flex-wrap: wrap;">
 		<div id="pagetitle">Colonists on Stream</div>
+		
+		
+			<!-- Twitch Stuff -->
+		<!-- Add this to the /cos page -->
+		<a href="https://id.twitch.tv/oauth2/authorize?client_id=1nvm719cyeb2ces4kjsf89bpcgsnah&redirect_uri=https://pixelb8.lol/cos&response_type=code&scope=user:read:email">Login with Twitch</a>
+		<div id="user-info"></div>
+		
+		<!--End of Twitch Stuff -->
+		
+		
 		<div class="nav-bar" style="height:100vh;">
 			<button class="button nav main" onclick="location.href='cos-mobhunt.html'">Mob Hunt (alpha)</button>
 			<button class="button nav main" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;" alt="in dev">Idle Game (coming soon)</button>
