@@ -136,17 +136,17 @@
         if (authCode) {
             // Exchange the authorization code for an access token
             fetch('https://id.twitch.tv/oauth2/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    client_id: '1nvm719cyeb2ces4kjsf89bpcgsnah',
-                    code: authCode,
-                    grant_type: 'authorization_code',
-                    redirect_uri: 'https://pixelb8.lol/eu/cos'
-                })
-            })
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+				body: new URLSearchParams({
+					client_id: '1nvm719cyeb2ces4kjsf89bpcgsnah',
+					code: authCode,
+					grant_type: 'authorization_code',
+					redirect_uri: 'https://pixelb8.lol/eu/cos' // Make sure this matches the URI you registered
+				})
+			})
             .then(response => response.json())
             .then(data => {
                 if (data.access_token) {
