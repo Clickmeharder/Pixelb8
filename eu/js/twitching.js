@@ -26,10 +26,15 @@
 				client_id: '1nvm719cyeb2ces4kjsf89bpcgsnah',
 				code: authCode,
 				grant_type: 'authorization_code',
-				redirect_uri: 'https://pixelb8.lol/eu/cos'
+				redirect_uri: 'https://pixelb8.lol/eu/cos' // Ensure this matches exactly with your app settings
 			})
 		})
-		.then(response => response.json())
+		.then(response => {
+			if (!response.ok) {
+				throw new Error('Network response was not ok: ' + response.statusText);
+			}
+			return response.json();
+		})
 		.then(data => {
 			if (data.access_token) {
 				const accessToken = data.access_token;
@@ -42,7 +47,9 @@
 		})
 		.catch(error => {
 			console.error('Error exchanging code for token:', error);
-			return response.text().then(text => console.error(text));
+			if (error.response) {
+				return error.response.text().then(text => console.error('Error details:', text));
+			}
 		});
 	}
 	// Function to fetch user data from Twitch
