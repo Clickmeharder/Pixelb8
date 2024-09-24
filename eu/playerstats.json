@@ -1,3 +1,11 @@
+      name, 
+      playerContainer, 
+      playerHP, 
+      hp: 100, 
+      xp: 0
+
+	  
+
 {
   "players": {
     "Jaedraze": {
@@ -9,7 +17,7 @@
         "level": 1,
         "experience": 0
       },
-      "mining": {
+      "hp": {
         "level": 0,
         "experience": 0
       },

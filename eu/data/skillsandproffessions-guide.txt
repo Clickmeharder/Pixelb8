@@ -1,0 +1,189 @@
+----------------------------------
+============================================================================================================================
+final draft
+__________________________________
+Understanding Professions and Skills in Entropia Universe
+
+1. Intro
+
+In Entropia Universe, every action you take—whether it’s combat, crafting, or other activities—builds skills.
+ These skills are connected to professions. Professions represent how good you are at specific tasks, 
+ like using a laser pistol, healing someone, mining, or crafting.
+ They also determine whether you can effectively use a weapon, tool, or blueprint.
+
+The more you use certain skills, the better you get at related professions. 
+Professions are like your "level" or rank in that area of expertise. For example;
+ when someone asks what your laser pistol level is, they’re asking about your profession level.
+------------------------------------------------------------------------------------------------------
+2. Professions
+There are 5 main categories of professions in Entropia Universe, totaling 92 professions:
+
+Combat
+At least 35 combat professions
+3 defense professions
+Manufacturing
+23 manufacturing professions
+Mindforce
+5 mindforce professions
+Resource Collecting
+10 resource professions
+Miscellaneous
+16 miscellaneous professions
+Professions are a combination of different skills, and as you grow in skills, your professions improve as well.
+------------------------------------------------------------------------------------------------------
+3. Skill Points
+Skills, or Skill Points, are gained passively as you perform any related activity. There are 13 skill categories with hundreds of skills between them. Each of your profession levels is calculated based on a specific set of skills, with some skills carrying more weight than others.
+
+Think of skills like experience points in specific actions. For example, shooting a laser pistol increases skills like Handgun and Laser Weapon Technology.
+
+When you first start, you’ll have 1 point in each category, which essentially equates to 0 skills. Skills increase automatically through use, and many skills apply to multiple professions.
+
+Skill Categories:
+Attributes – Includes some of the most important stats, like health and stamina.
+Design – Skills for coloring, texturing, and tailoring.
+Combat – 107 skills related to fighting.
+Construction – 23 skills for crafting.
+Defence – Includes dodge, evade, and decoy dispensing.
+General – Broadly used skills that affect multiple areas.
+Information – Knowledge-related skills.
+Medical – Healing skills.
+Mining – Skills for resource extraction.
+Science – Scientific research skills.
+Mindforce – Skills for psionic-like abilities.
+Beauty – Skills for makeup, hairstyling, and more.
+Social – Interaction-based skills.
+------------------------------------------------------------------------------------------------------
+4. Deeper look at Professions and related skill points
+
+1-Combat Profession Category (1of5)
+
+Let’s take a look at two specific professions: Evader and Dodger.
+
+Whenever you evade or dodge an attack, there’s a chance to increase related skills. To gain evade skills, you need to take damage from melee attacks, while dodge is gained from ranged attacks.
+
+Evader Profession
+The Evader profession determines how well you avoid direct enemy attacks (like from animals or melee weapons). This is crucial in combat, as it reduces the damage you take.
+
+Dodge Profession
+The Dodger profession measures how well you avoid ranged attacks (like guns or robot projectiles).
+
+Skills That Affect Evader:
+There are 6 skills that contribute to the Evader profession:
+
+Evade (Primary Skill)
+Athletics
+Agility
+Combat Reflexes
+Perception
+Courage
+Primary Skill: Evade has the most significant impact on the Evader profession. Every time you successfully evade an attack, this skill improves.
+
+Secondary Skills like Athletics, Agility, Combat Reflexes, Perception, and Courage also contribute, but to a lesser degree.
+
+Dodge Profession Breakdown:
+Primary Skill: Dodge (30%)
+Secondary Skills:
+Athletics (20%)
+Agility (20%)
+Combat Reflexes (15%)
+Perception (10%)
+Courage (5%)
+
+------------------------------------------------------------------------------------------------------
+5. How Combat Professions Work
+Combat professions grow as you use specific weapons or tools. For example, let’s focus on the laser pistol.
+
+There are two main professions associated with a laser pistol:
+
+Laser Pistoleer (Hit) – Determines your accuracy with laser pistols.
+Ranged Laser (Dmg) – Determines the damage you deal with laser weapons.
+Every time you fire a laser pistol, you increase skills like Handgun, Laser Weapon Technology, and Marksmanship.
+ These skills, in turn, improve your profession.
+
+By using a laser pistol, you are building both professions at the same time—your accuracy (Hit) and damage (Dmg).
+that being said. we dont really need to worry too much about the breakdown of how each skill contributes to the profession.
+but if your curious heres some skill breakdowns of contributing skills and an estimate as to how much each contributes:
+
+Laser Pistoleer (Hit) Breakdown:
+Primary Skills (70%):
+Handgun (30%)
+Marksmanship (25%)
+Weapon Handling (15%)
+Secondary Skills (30%):
+Laser Weapon Technology (15%)
+Ranged Damage Assessment (15%)
+
+Ranged Laser (Dmg) Breakdown:
+Primary Skills (70%):
+Laser Weapon Technology (40%)
+Ranged Damage Assessment (30%)
+Secondary Skills (30%):
+Handgun (10%)
+Marksmanship (20%)
+
+part 6. Other Profession Categories
+
+Medical Professions
+
+Paramedic: Increases as you use healing tools like First Aid Packs.
+Key skills: First Aid, Anatomy, and Diagnosis.
+Paramedic: Increases as you use healing tools like First Aid Packs.
+
+2-Resource Gathering Profession Category (2of5)
+Mining Professions & extracting professions
+
+Prospector and Miner: Grow as you use tools for resource collecting.
+Key skills: Surveying, Geology, Mining, and Drilling.
+
+3-Manufacturing Profession Category (3of5)
+
+Blueprint Comprehension and Weapon Engineering: Grow as you craft items.
+Key skills: Engineering, Mechanic, and Electronics.
+
+4-Mindforce Profession Category (4of5)
+
+5-Miscellaneous Profession Category (3of5)
+------------------------------------------------------------------------------------------------------
+
+7. Attributes
+
+Skills and Attributes Clarification
+
+While skills represent your ability to perform specific tasks like shooting a laser pistol or mining resources, 
+Attributes are core stats that affect your overall performance in the game.
+ These Attributes, such as Agility, Strength, Intelligence, and Psyche, provide bonuses across multiple professions and can influence many skills indirectly.
+
+As your skills improve, some Attributes, such as Agility or Strength, will also increase.
+
+  Agility (boosts your movement speed and affects dodging or evading attacks.)
+  Health () 
+  Intelligence (contributes to crafting success rates and Mindforce effectiveness.)
+  Psyche ()
+  Stamina ()	 
+  Strength (melee skills and carrying capacity)
+
+
+8. Codex Rewards
+
+---
+----
+---
+---
+
+insert codex rewards blurb for guide
+
+---
+---
+---
+
+
+
+0. Summary
+ as you use a weapon, tool, or blueprint, you will recieve related skillpoints which will contribute to
+ their related professions. Here’s a quick recap:
+
+Skills: Build automatically as you perform actions. For example, shooting a laser pistol boosts Handgun and related skills.
+Professions: These show your expertise in different tasks, such as Laser Pistoleer (Hit) or Ranged Laser (Dmg).
+Connections: Professions are made up of multiple skills. For instance, Laser Pistoleer (Hit) improves with skills like Handgun, Marksmanship, and Weapon Handling.
+Specialization: If you focus on a particular weapon or task, you’ll see faster growth in that area.
+Natural Progression: Every action you take builds your character. Keep practicing, and your skills and professions will naturally improve.

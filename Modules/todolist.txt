@@ -35,6 +35,8 @@ comments: finished i think, not sure if its legal but good enough for now.
   [X][22] - update and improve the clock, 
           + add timers and stopwatch functions in the clock
 [Comments: finished]
+[X][15] -remove myeucodex	
+[comments: ]
 
 
 //////////////////////////////////////////////
@@ -42,7 +44,6 @@ comments: finished i think, not sure if its legal but good enough for now.
 ///////////////////////
 ______________________________________________________________________________________________________
 	[Skipping and comming back to this later]
-[o][15] -remove myeucodex	|
 ---------------------------------------------------
 [o][12] - add the settings windows to susos
 [comments: ]
