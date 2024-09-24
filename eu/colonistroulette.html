@@ -6,6 +6,15 @@
   <title>Colonists on Stream</title>
   
   <style>
+	.twitch-chat{
+	  position:fixed;
+	  top:40%;
+	  left:5px;
+	  opacity:0.6;
+	  background-color:#444;
+	  color:#777;
+	  border:purple;
+	}
   </style>
   
   <style type="text/css" id="operaUserStyle"></style>
@@ -13,6 +22,10 @@
   <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
 </head>
 <body>
+	
+	<div id="twitch-chat"></div>
+	
+	
 	
 	<button id="toggleHeaderButton" class="button" onclick="toggleHeader()">-</button>
 	<div id="header-row" style="display: flex; flex-direction: row; justify-content: space-between; max-width: 98vw; flex-wrap: wrap;">
