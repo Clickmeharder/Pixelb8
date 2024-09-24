@@ -26,7 +26,7 @@
 				client_id: '1nvm719cyeb2ces4kjsf89bpcgsnah',
 				code: authCode,
 				grant_type: 'authorization_code',
-				redirect_uri: 'https://pixelb8.lol/eu/cos' // Ensure this matches exactly with your app settings
+				redirect_uri: 'https://pixelb8.lol/eu/cos'
 			})
 		})
 		.then(response => {
@@ -39,7 +39,6 @@
 			if (data.access_token) {
 				const accessToken = data.access_token;
 				console.log('Access Token:', accessToken);
-				// Now fetch the user data using the access token
 				fetchUserData(accessToken);
 			} else {
 				console.error('No access token returned:', data);
@@ -57,7 +56,7 @@
 		fetch('https://api.twitch.tv/helix/users', {
 			headers: {
 				'Authorization': `Bearer ${accessToken}`,
-				'Client-ID': '1nvm719cyeb2ces4kjsf89bpcgsnah' // Replace with your Client ID
+				'Client-ID': '1nvm719cyeb2ces4kjsf89bpcgsnah'
 			}
 		})
 		.then(response => response.json())

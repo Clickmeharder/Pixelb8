@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+	<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
@@ -115,10 +116,16 @@
         </div>
     </div>
 
-	<script>
-
+	 <script type="text/javascript">
+      ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
+        if( flags.broadcaster && command === "test" ) {
+          console.log( "!test was typed in chat" );
+        }
+      }
+      ComfyJS.Init( "jaedraze" );
     </script>
     <script src="js/cos-global.js"></script>
+	
 	<script src="js/twitching.js"></script>
 </body>	
 </html>
