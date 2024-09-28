@@ -1,27 +1,27 @@
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
-    if (flags.broadcaster) {
+    if (flags.broadcaster || flags.mod || flags.subscriber) { // You can adjust this based on who you want to respond to
         let responseMessage = "";
 
         switch (command) {
             case "test":
-                console.log("!test was typed in chat");
-                responseMessage = "!test was typed in chat";
+                console.log(`${user} typed !test in chat`);
+                responseMessage = `${user} typed !test in chat`;
                 break;
             case "test2":
-                console.log("!test2 was typed in chat");
-                responseMessage = "!test2 was typed in chat";
+                console.log(`${user} typed !test2 in chat`);
+                responseMessage = `${user} typed !test2 in chat`;
                 break;
             case "test3":
-                console.log("!test3 was typed in chat");
-                responseMessage = "!test3 was typed in chat";
+                console.log(`${user} typed !test3 in chat`);
+                responseMessage = `${user} typed !test3 in chat`;
                 break;
             case "test4":
-                console.log("!test4 was typed in chat");
-                responseMessage = "!test4 was typed in chat";
+                console.log(`${user} typed !test4 in chat`);
+                responseMessage = `${user} typed !test4 in chat`;
                 break;
             case "test5":
-                console.log("!test5 was typed in chat");
-                responseMessage = "!test5 was typed in chat";
+                console.log(`${user} typed !test5 in chat`);
+                responseMessage = `${user} typed !test5 in chat`;
                 break;
         }
 
