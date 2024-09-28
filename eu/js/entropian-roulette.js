@@ -109,9 +109,13 @@ function updateRemainingPlayers() {
 }
 
 
+let twitchusersJoined = [];
+
+// Function to generate players dynamically
 function generatePlayers(playerNames) {
   const rouletteCircle = document.getElementById('roulette-circle');
   playerAvatars = [];
+
   players = playerNames.map((name, index) => {
     name = name.trim();
     const playerAvatar = document.createElement('div');
@@ -123,25 +127,30 @@ function generatePlayers(playerNames) {
     const playerName = document.createElement('span');
     playerName.innerText = name;
     playerName.classList.add('player-name');
+
     const playerHP = document.createElement('span');
     playerHP.innerText = 'HP: 100';
     playerHP.classList.add('player-hp');
+
     const playerCB = document.createElement('span');
     playerCB.innerText = 'CB lvl: 1';
     playerCB.classList.add('player-cb');
+
     playerTextContainer.appendChild(playerName);
     playerTextContainer.appendChild(playerHP);
     playerTextContainer.appendChild(playerCB);
     playerAvatar.appendChild(playerTextContainer);
     rouletteCircle.appendChild(playerAvatar);
     playerAvatars.push(playerAvatar);
+    
     return name;
   });
+
   setupRoulette(playerNames.length);
-    // Update total players count
+
+  // Update total players count
   totalPlayers = playerNames.length;
   updateTotalPlayerCount(totalPlayers);
-	
 }
 
 
