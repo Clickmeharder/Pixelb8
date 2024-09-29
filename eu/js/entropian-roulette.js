@@ -111,6 +111,46 @@ function updateRemainingPlayers() {
 
 let twitchusersJoined = [];
 
+
+// Function to dynamically add a single player to the roulette circle
+function addPlayerToGame(playerName) {
+  const rouletteCircle = document.getElementById('roulette-circle');
+
+  // Create the player avatar and its components
+  const playerAvatar = document.createElement('div');
+  playerAvatar.classList.add('player-avatar');
+  playerAvatar.style.backgroundImage = `url('data/images/femaledefault.png')`;
+
+  const playerTextContainer = document.createElement('div');
+  playerTextContainer.classList.add('player-text-container');
+
+  const playerNameElement = document.createElement('span');
+  playerNameElement.innerText = playerName;
+  playerNameElement.classList.add('player-name');
+
+  const playerHP = document.createElement('span');
+  playerHP.innerText = 'HP: 100';
+  playerHP.classList.add('player-hp');
+
+  const playerCB = document.createElement('span');
+  playerCB.innerText = 'CB lvl: 1';
+  playerCB.classList.add('player-cb');
+
+  // Append the player info to the avatar
+  playerTextContainer.appendChild(playerNameElement);
+  playerTextContainer.appendChild(playerHP);
+  playerTextContainer.appendChild(playerCB);
+  playerAvatar.appendChild(playerTextContainer);
+
+  // Add the player avatar to the roulette circle
+  rouletteCircle.appendChild(playerAvatar);
+
+  // Update total player count
+  updateTotalPlayerCount(twitchusersJoined.length);
+
+  // Recalculate positions for all players to spread them evenly
+  setupRoulette(twitchusersJoined.length);
+}
 // Function to generate players dynamically
 function generatePlayers(playerNames) {
   const rouletteCircle = document.getElementById('roulette-circle');
