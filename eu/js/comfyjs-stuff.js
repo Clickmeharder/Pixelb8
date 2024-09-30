@@ -1,10 +1,12 @@
 let twitchusersJoined = [];
+let cheatUsageTracker = {}; // Object to track whether a player has used cheat
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     switch(command) {
-        case "joingame":
+        case "join":
             if (!twitchusersJoined.includes(user)) {
                 twitchusersJoined.push(user);
+                cheatUsageTracker[user] = false; // Initialize cheat usage for the player
                 console.log(`${user} has joined the game`);
 
                 // Append to the Twitch chat div to confirm user joined
@@ -24,8 +26,16 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         
         case "cheat":
             if (twitchusersJoined.includes(user)) {
-                // Implement cheat: Switch places with a nearby player
-                cheatCommand(user);
+                // Check if the player has already used their cheat
+                if (cheatUsageTracker[user]) {
+                    const messageDiv = document.createElement("div");
+                    messageDiv.textContent = `${user}, you've already used your cheat!`;
+                    document.getElementById("twitch-chat").appendChild(messageDiv);
+                } else {
+                    // Allow the player to use the cheat
+                    cheatCommand(user);
+                    cheatUsageTracker[user] = true; // Mark that the player has used their cheat
+                }
             } else {
                 const messageDiv = document.createElement("div");
                 messageDiv.textContent = `${user}, you need to join the game first!`;

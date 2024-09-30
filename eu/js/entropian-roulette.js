@@ -147,6 +147,7 @@ function leaveGame(user) {
     if (userIndex !== -1) {
         // Remove user from the list
         twitchusersJoined.splice(userIndex, 1);
+        delete cheatUsageTracker[user]; // Remove cheat usage tracking for the user
         console.log(`${user} has left the game`);
 
         // Regenerate the remaining players
@@ -158,7 +159,6 @@ function leaveGame(user) {
         document.getElementById("twitch-chat").appendChild(messageDiv);
     }
 }
-
 //-------------------------------------------------
 //-------------------------------------------------
 
