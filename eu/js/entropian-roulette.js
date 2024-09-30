@@ -111,6 +111,56 @@ function updateRemainingPlayers() {
 
 let twitchusersJoined = [];
 
+//commands
+// Cheat command: Switch places with nearest player randomly
+function cheatCommand(user) {
+    const userIndex = twitchusersJoined.indexOf(user);
+    let swapIndex;
+
+    // Randomly decide to switch with player to the left or right
+    if (Math.random() < 0.5) {
+        // Swap with player to the left (if exists)
+        swapIndex = userIndex - 1 >= 0 ? userIndex - 1 : twitchusersJoined.length - 1;
+    } else {
+        // Swap with player to the right (if exists)
+        swapIndex = userIndex + 1 < twitchusersJoined.length ? userIndex + 1 : 0;
+    }
+
+    // Swap positions
+    [twitchusersJoined[userIndex], twitchusersJoined[swapIndex]] = [twitchusersJoined[swapIndex], twitchusersJoined[userIndex]];
+
+    console.log(`${user} swapped places with ${twitchusersJoined[swapIndex]}`);
+
+    // Regenerate the players to update their positions in the game
+    generatePlayers(twitchusersJoined);
+
+    // Notify the chat about the cheat
+    const messageDiv = document.createElement("div");
+    messageDiv.textContent = `${user} used !cheat and swapped places with ${twitchusersJoined[swapIndex]}!`;
+    document.getElementById("twitch-chat").appendChild(messageDiv);
+}
+
+// Leave game command: Remove user and regenerate players
+function leaveGame(user) {
+    const userIndex = twitchusersJoined.indexOf(user);
+    
+    if (userIndex !== -1) {
+        // Remove user from the list
+        twitchusersJoined.splice(userIndex, 1);
+        console.log(`${user} has left the game`);
+
+        // Regenerate the remaining players
+        generatePlayers(twitchusersJoined);
+
+        // Notify the chat
+        const messageDiv = document.createElement("div");
+        messageDiv.textContent = `${user} has left the game!`;
+        document.getElementById("twitch-chat").appendChild(messageDiv);
+    }
+}
+
+//-------------------------------------------------
+//-------------------------------------------------
 
 // Function to dynamically add a single player to the roulette circle
 function addPlayerToGame(playerName) {
