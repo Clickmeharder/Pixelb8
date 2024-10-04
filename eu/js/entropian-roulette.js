@@ -206,6 +206,9 @@ function generatePlayers(playerNames) {
   const rouletteCircle = document.getElementById('roulette-circle');
   playerAvatars = [];
 
+  // Clear existing players before generating new ones
+  rouletteCircle.innerHTML = '';
+
   players = playerNames.map((name, index) => {
     name = name.trim();
     const playerAvatar = document.createElement('div');
