@@ -206,14 +206,15 @@ function generatePlayers(playerNames) {
   const rouletteCircle = document.getElementById('roulette-circle');
   playerAvatars = [];
 
-  // Clear existing players before generating new ones
-  rouletteCircle.innerHTML = '';
+  // Remove only the player avatars, keeping the gun intact
+  const existingPlayerAvatars = rouletteCircle.querySelectorAll('.player-avatar');
+  existingPlayerAvatars.forEach(avatar => rouletteCircle.removeChild(avatar));
 
   players = playerNames.map((name, index) => {
     name = name.trim();
     const playerAvatar = document.createElement('div');
     playerAvatar.classList.add('player-avatar');
-    playerAvatar.style.backgroundImage = `url('data/images/femaledefault.png')`;
+    playerAvatar.style.backgroundImage = 'url("data/images/femaledefault.png")';
 
     const playerTextContainer = document.createElement('div');
     playerTextContainer.classList.add('player-text-container');
