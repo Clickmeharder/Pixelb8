@@ -7,35 +7,34 @@
     <link rel="stylesheet" href="../../core/css/pixelb8-default.css">
     <link rel="stylesheet" href="../../Modules/SuSOS/core/css/SuSOS-default.css">
     <title>C.o.S Prize Winners</title>
+    <style>
+        .sortable:hover {
+            cursor: pointer;
+            color: #2775a7;
+        }
+    </style>
 </head>
 <body style="font-family:lucida console;color:#2775a7;background-image: url('https://pixelb8.lol/assets/images/ads/ads15.jpeg');">
-    <h1 style="color: #2775a7;
-    background-color: #0000006b;
-    border: 3px ridge;
-    border-color: #2dabfcb8;
-    border-radius: 12px;
-    text-align: center;
-    padding: 4px;">C.o.S Prize Winners</h1>
-    <table id="winnersTable" border="1" style="
-    background-color: #000000c4;
-    border-style: ridge;
-    border-width: 3px;
-">
+    <h1 style="color: #2775a7; background-color: #0000006b; border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;">C.o.S Prize Winners</h1>
+    <table id="winnersTable" border="1" style="background-color: #000000c4; border-style: ridge; border-width: 3px;">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Winner Name</th>
-                <th>Amount</th>
-                <th>Prize</th>
-                <th>Status</th>
+                <th class="sortable" data-index="0">Date</th>
+                <th class="sortable" data-index="1">Winner Name</th>
+                <th class="sortable" data-index="2">Amount</th>
+                <th class="sortable" data-index="3">Prize</th>
+                <th class="sortable" data-index="4">Status</th>
             </tr>
         </thead>
         <tbody>
             <!-- Data will be inserted here -->
         </tbody>
     </table>
+    <h2 id="totalAmount" style="text-align:center;">Total Amount: $0.00</h2>
 
     <script>
+        let prizeData = [];
+
         function loadCSVFile() {
             const csvPath = 'data/JaedrazeTTV-EU-viewerPrizelist.txt';  // relative path to the CSV file
             fetch(csvPath)
@@ -43,6 +42,7 @@
                 .then(data => {
                     const rows = data.split('\n');
                     const tableBody = document.querySelector('#winnersTable tbody');
+                    let totalAmount = 0;  // Initialize total amount
 
                     rows.forEach(row => {
                         const columns = row.split(',');
@@ -55,29 +55,65 @@
                             } else if (columns[4].trim().toLowerCase() === 'unclaimed') {
                                 tableRow.style.backgroundColor = '#70200a66';  // Light red for unclaimed rows
                             }
-                            
+
                             columns.forEach((column, index) => {
                                 const cell = document.createElement('td');
                                 cell.textContent = column.trim();
-                                
+
                                 // Apply background color to each <td> based on the Status column
                                 if (columns[4].trim().toLowerCase() === 'claimed') {
-                                    cell.style.Color = index === 4 ? '#a6d5a9' : '#444';  // Darker green for "claimed" cells
+                                    cell.style.color = index === 4 ? '#a6d5a9' : '#444';  // Darker green for "claimed" cells
                                 } else if (columns[4].trim().toLowerCase() === 'unclaimed') {
-                                    cell.style.Color = index === 4 ? '##444' : 'orange';  // Darker red for "unclaimed" cells
+                                    cell.style.color = index === 4 ? '##444' : 'orange';  // Darker red for "unclaimed" cells
                                 }
 
                                 tableRow.appendChild(cell);
                             });
 
+                            // Update total amount
+                            totalAmount += parseFloat(columns[2]) || 0;
+
                             tableBody.appendChild(tableRow);
+                            prizeData.push({ date: columns[0], winner: columns[1], amount: parseFloat(columns[2]) || 0, prize: columns[3], status: columns[4] });
                         }
                     });
+
+                    // Display total amount
+                    document.getElementById('totalAmount').textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
                 })
                 .catch(error => console.error('Error loading CSV file:', error));
         }
 
-        document.addEventListener('DOMContentLoaded', loadCSVFile);
+        function sortTable(index) {
+            const tbody = document.querySelector('#winnersTable tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                const aText = a.children[index].textContent;
+                const bText = b.children[index].textContent;
+
+                if (index === 2) { // Sorting Amount
+                    return parseFloat(aText) - parseFloat(bText);
+                } else if (index === 0) { // Sorting Date
+                    return new Date(aText) - new Date(bText);
+                } else { // Sorting by string (Winner Name, Prize, Status)
+                    return aText.localeCompare(bText);
+                }
+            });
+
+            // Append sorted rows to the tbody
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCSVFile();
+            document.querySelectorAll('.sortable').forEach(header => {
+                header.addEventListener('click', () => {
+                    const index = header.getAttribute('data-index');
+                    sortTable(index);
+                });
+            });
+        });
     </script>
 </body>
 </html>
