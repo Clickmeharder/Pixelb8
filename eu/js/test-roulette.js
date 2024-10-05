@@ -5,7 +5,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 };
 
-let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.0722';
+let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.0723';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
@@ -421,14 +421,14 @@ function playerShot(selectedPlayer, selectedPlayerIndex, weaponType = currentWea
         // Apply damage to the left player
         const leftPlayer = playerAvatars[damageValues.leftPlayerIndex];
         const leftPlayerHP = applyDamage(leftPlayer, damageValues.leftPlayerIndex, damageValues.left);
-        setgameMessage(`AOE EFFECT: ${players[damageValues.leftPlayerIndex]} (left) is hit for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
-        appendSystemMessage(`AOE EFFECT: ${players[damageValues.leftPlayerIndex]} (left) is shot for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
+        setgameMessage(`AOE: ${players[damageValues.leftPlayerIndex]} (left) is hit for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
+        appendSystemMessage(`AOE: ${players[damageValues.leftPlayerIndex]} (left) is shot for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
 
         // Apply damage to the right player
         const rightPlayer = playerAvatars[damageValues.rightPlayerIndex];
         const rightPlayerHP = applyDamage(rightPlayer, damageValues.rightPlayerIndex, damageValues.right);
-        setgameMessage(`AOE EFFECT: ${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
-        appendSystemMessage(`AOE EFFECT: ${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
+        setgameMessage(`AOE: ${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
+        appendSystemMessage(`AOE: ${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
     } else {
         // Apply damage for other weapons
         const damage = applyDamage(selectedPlayer, selectedPlayerIndex, damageValues);
