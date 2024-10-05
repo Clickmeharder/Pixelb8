@@ -5,7 +5,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 };
 
-let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.07';
+let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.071';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
@@ -366,7 +366,7 @@ function calculateDamage(weaponType = currentWeapon, selectedPlayerIndex = null)
 
         case 'rocketLauncher':
             if (selectedPlayerIndex !== null) {
-                // Rocket launcher total damage: 0-25
+                // Total damage: 0-25
                 const totalDamage = Math.floor(Math.random() * 26); // Total damage 0-25
                 console.log(`Total rocket launcher damage: ${totalDamage}`);
 
@@ -375,11 +375,13 @@ function calculateDamage(weaponType = currentWeapon, selectedPlayerIndex = null)
                 const leftPlayerIndex = (selectedPlayerIndex - 1 + numPlayers) % numPlayers;
                 const rightPlayerIndex = (selectedPlayerIndex + 1) % numPlayers;
 
-                // Randomly distribute the total damage among the selected and nearby players
-                const damageToSelected = Math.floor(Math.random() * totalDamage);
+                // Randomly distribute the total damage
+                const damageToSelected = Math.floor(Math.random() * (totalDamage + 1)); // Include 0
                 const remainingDamage = totalDamage - damageToSelected;
-                const damageToLeft = Math.floor(Math.random() * (remainingDamage + 1)); // Include 0 to remaining
-                const damageToRight = remainingDamage - damageToLeft;
+
+                // Distribute remaining damage randomly between left and right players
+                const damageToLeft = Math.floor(Math.random() * (remainingDamage + 1)); // Include 0
+                const damageToRight = remainingDamage - damageToLeft; // Ensure total damage remains
 
                 return {
                     selected: damageToSelected,
@@ -407,29 +409,22 @@ function playerShot(selectedPlayer, selectedPlayerIndex, weaponType = currentWea
     console.log('Damage Values:', damageValues);
 
     if (weaponType === 'rocketLauncher' && typeof damageValues === 'object') {
-        // Get the left and right player avatars based on their indices
-        const leftPlayer = playerAvatars[damageValues.leftPlayerIndex];
-        const rightPlayer = playerAvatars[damageValues.rightPlayerIndex];
-
         // Apply damage to the selected player
         const selectedPlayerHP = applyDamage(selectedPlayer, selectedPlayerIndex, damageValues.selected);
         setgameMessage(`${players[selectedPlayerIndex]} is shot for ${damageValues.selected} damage! Remaining HP: ${selectedPlayerHP}`);
         appendSystemMessage(`${players[selectedPlayerIndex]} is shot for ${damageValues.selected} damage! Remaining HP: ${selectedPlayerHP}`);
 
         // Apply damage to the left player
+        const leftPlayer = playerAvatars[damageValues.leftPlayerIndex];
         const leftPlayerHP = applyDamage(leftPlayer, damageValues.leftPlayerIndex, damageValues.left);
         setgameMessage(`${players[damageValues.leftPlayerIndex]} (left) is shot for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
         appendSystemMessage(`${players[damageValues.leftPlayerIndex]} (left) is shot for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
 
         // Apply damage to the right player
+        const rightPlayer = playerAvatars[damageValues.rightPlayerIndex];
         const rightPlayerHP = applyDamage(rightPlayer, damageValues.rightPlayerIndex, damageValues.right);
         setgameMessage(`${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
         appendSystemMessage(`${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
-
-        // Log messages for each hit
-        console.log(`Rocket launcher hit ${players[selectedPlayerIndex]} (Selected) for ${damageValues.selected} damage`);
-        console.log(`Rocket launcher hit ${players[damageValues.leftPlayerIndex]} (Left) for ${damageValues.left} damage`);
-        console.log(`Rocket launcher hit ${players[damageValues.rightPlayerIndex]} (Right) for ${damageValues.right} damage`);
     } else {
         // Apply damage for other weapons
         const damage = applyDamage(selectedPlayer, selectedPlayerIndex, damageValues);
@@ -439,7 +434,6 @@ function playerShot(selectedPlayer, selectedPlayerIndex, weaponType = currentWea
 
     updateTopPlayers();
 }
-
 // Function to apply damage to a player and return the updated HP
 function applyDamage(player, playerIndex, damage) {
     const playerHPElement = player.querySelector('.player-hp');
