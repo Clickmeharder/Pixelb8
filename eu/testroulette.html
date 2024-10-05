@@ -1,0 +1,115 @@
+<html lang="en">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colonists on Stream</title>
+  
+  <style>
+	div#twitch-chat{
+	  position: fixed;
+      bottom: 42%;
+      right: 3%;
+      width: 25vw;
+      height: 100px;
+      overflow: auto;
+      opacity: 1;
+      font-size: 17px;
+      font-weight: bold;
+      background-color: #072926;
+      color: #7c00ff;
+      border: 3px inset #00000085;
+      z-index: 10;
+
+	}
+  </style>
+  
+  <style type="text/css" id="operaUserStyle"></style>
+  <link rel="stylesheet" href="data/cos-battle.css">
+  <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
+</head>
+<body>
+	
+	<div id="twitch-chat"></div>
+	
+	
+	
+	<button id="toggleHeaderButton" class="button" onclick="toggleHeader()">-</button>
+	<div id="header-row" style="display: flex; flex-direction: row; justify-content: space-between; max-width: 98vw; flex-wrap: wrap;">
+		<div id="pagetitle">Colonists on Stream</div>
+		<div class="nav-bar">
+			<button class="button nav" onclick="location.href='cos-mobhunt.html'" >Mob Hunt (alpha)</button>
+			<button class="button nav" onclick="location.href='cos-lurk/index.html'" style="opacity:0.3;">Idle Game</button>
+			<button class="button nav" onclick="location.href='deathmatch.html'" style="opacity:0.3;">Deathmatch</button>
+			<button class="button nav" onclick="location.href='colonistroulette.html'" style="opacity:0.3;"disabled>Colonist Roulette</button>
+			<button class="button nav" onclick="location.href='cos-leaderboards.html'">Leaderboards</button>
+		</div>
+	</div>
+	<div id="fileInputContainer">
+	  <button id="Settingstoggle">⚙</button>
+	  <button id="testyButt">Test</button>
+	  <input type="file" id="fileInput" style="display: none;" accept=".txt">
+	  <button id="customFileButton">Add Dna</button>
+	  <span id="fileName"></span> <!-- To display the chosen file name -->
+	  <!-- <button id="loadPlayersButton">Clone Dna</button> -->
+	  <button id="calculateLootButton">Calculate Loot Prize</button>
+	  <button id="startRouletteButton">Start Roulette</button>
+	  <!-- <button id="simulateBossKillButton">Simulate Boss Kill</button> -->
+	</div>		
+
+	
+	<div id="headerTexts"></div>
+	<div id="columnwrap" style="display:flex;flex-direction:column;">
+		<div id="rowA" style="display:flex;flex:row;">
+			<div id="roulette-wrapper"class="resizable" style="resize: vertical; overflow-y:scroll;">
+				<div id="battleControl" style="display: flex;flex-direction:column;margin-right:-100px;">
+				  <div id="gameinfo">
+					<p id="prizePool">Loading prize pool...</p>
+					<span id="currentRound">Rounds 1</span>
+					<p id="currentPrize" style="margin-top:0px;">Prize undetermined...</p>
+				  </div>
+				  <div id="loot"></div>
+				</div>
+			  <div id="roulette-circle" >
+				<img id="gun-image" src="data/images/guns/capr.png" alt="Gun">
+				<div id="gun-arrow"></div> <!-- The arrow pointing from the gun -->
+				<div id="gun-line"></div>
+				<!-- <div id="pivot-point"></div> Visible pivot point -->
+			  </div>
+
+			  <div class="resizer"></div> <!-- Custom resizer element -->
+			</div>
+			<div id="statwrapper" class="">
+				<div class="player-stats">
+					<p id="totalPlayerCount" class="playerCount"></p>
+					<p id="totalRemainingCount" class="playersremainingCount"></p><p id="swTitle">C.O.S Roulette</p>
+					<div id="mostHpList"></div>
+					<div id="playerStatsList"></div>
+				</div>
+			</div>
+		</div>
+		<div id="secondwrapper" class="resizable">
+			<div id="defeatedPlayers">
+				<h2></h2>
+			</div>
+			<div id="systemMessages"></div>
+			<div class="resizer"></div> <!-- Custom resizer element -->
+		</div>
+	</div>
+    <div id="cos-roulette-version">COS Roulette version: 0.0</div>
+  <audio id="attackSound" src="data/cos-sounds/retropew.mp3" preload="auto"></audio>
+  <audio id="attackSound2" src="data/cos-sounds/pew2.wav" preload="auto"></audio>
+  <!-- <audio id="attackSound4" src="data/cos-sounds/pew.m4a" preload="auto"></audio> -->
+<!--   <audio id="attackSound5" src="data/cos-sounds/pewpew.m4a" preload="auto"></audio>
+  <audio id="attackSound6" src="data/cos-sounds/peeww.m4a" preload="auto"></audio> -->
+  <!-- <audio id="playerdeath-Sound1" src="data/cos-sounds/deadfemale.m4a" preload="auto"></audio> -->
+  <audio id="playerdeath-Sound2" src="data/cos-sounds/hurtmale1.m4a" preload="auto"></audio>
+  <audio id="playerdeath-Sound3" src="data/cos-sounds/hurtmale2.m4a" preload="auto"></audio>
+  <audio id="playerdeath-Sound4" src="data/cos-sounds/hurtmale3.m4a" preload="auto"></audio>
+  
+  
+  
+  <script src="js/comfyjs-stuff.js"></script>
+  <script src="js/test-roulette.js"></script>
+</body>
+</html>
