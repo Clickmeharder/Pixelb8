@@ -366,7 +366,7 @@ function calculateDamage(weaponType = currentWeapon, selectedPlayerIndex = null)
 
         case 'rocketLauncher':
             if (selectedPlayerIndex !== null) {
-                // Rocket launcher damage: 0-25, distributed among selected and nearby players
+                // Rocket launcher total damage: 0-25
                 const totalDamage = Math.floor(Math.random() * 26); // Total damage 0-25
                 console.log(`Total rocket launcher damage: ${totalDamage}`);
 
@@ -375,10 +375,11 @@ function calculateDamage(weaponType = currentWeapon, selectedPlayerIndex = null)
                 const leftPlayerIndex = (selectedPlayerIndex - 1 + numPlayers) % numPlayers;
                 const rightPlayerIndex = (selectedPlayerIndex + 1) % numPlayers;
 
-                // Randomly distribute the damage between the selected player, left, and right players
+                // Randomly distribute the total damage among the selected and nearby players
                 const damageToSelected = Math.floor(Math.random() * totalDamage);
-                const damageToLeft = Math.floor(Math.random() * (totalDamage - damageToSelected));
-                const damageToRight = totalDamage - damageToSelected - damageToLeft;
+                const remainingDamage = totalDamage - damageToSelected;
+                const damageToLeft = Math.floor(Math.random() * (remainingDamage + 1)); // Include 0 to remaining
+                const damageToRight = remainingDamage - damageToLeft;
 
                 return {
                     selected: damageToSelected,
@@ -397,13 +398,14 @@ function calculateDamage(weaponType = currentWeapon, selectedPlayerIndex = null)
 
     return damage;
 }
+
 // Modify playerShot to handle rocket launcher damage and append messages
 function playerShot(selectedPlayer, selectedPlayerIndex, weaponType = currentWeapon) {
     const damageValues = calculateDamage(weaponType, selectedPlayerIndex);
 
     if (weaponType === 'rocketLauncher' && typeof damageValues === 'object') {
-        const leftPlayer = playerAvatars[damageValues.leftPlayerIndex];
-        const rightPlayer = playerAvatars[damageValues.rightPlayerIndex];
+        // Calculate the total damage for the rocket launcher
+        const totalDamage = damageValues.selected + damageValues.left + damageValues.right; // Get total damage from damageValues
 
         // Apply damage to the selected player
         const selectedPlayerHP = applyDamage(selectedPlayer, selectedPlayerIndex, damageValues.selected);
@@ -411,11 +413,13 @@ function playerShot(selectedPlayer, selectedPlayerIndex, weaponType = currentWea
         appendSystemMessage(`${players[selectedPlayerIndex]} is shot for ${damageValues.selected} damage! Remaining HP: ${selectedPlayerHP}`);
 
         // Apply damage to the left player
+        const leftPlayer = playerAvatars[damageValues.leftPlayerIndex];
         const leftPlayerHP = applyDamage(leftPlayer, damageValues.leftPlayerIndex, damageValues.left);
         setgameMessage(`${players[damageValues.leftPlayerIndex]} (left) is shot for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
         appendSystemMessage(`${players[damageValues.leftPlayerIndex]} (left) is shot for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
 
         // Apply damage to the right player
+        const rightPlayer = playerAvatars[damageValues.rightPlayerIndex];
         const rightPlayerHP = applyDamage(rightPlayer, damageValues.rightPlayerIndex, damageValues.right);
         setgameMessage(`${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
         appendSystemMessage(`${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
@@ -432,6 +436,7 @@ function playerShot(selectedPlayer, selectedPlayerIndex, weaponType = currentWea
 
     updateTopPlayers();
 }
+
 // Function to apply damage to a player and return the updated HP
 function applyDamage(player, playerIndex, damage) {
     const playerHPElement = player.querySelector('.player-hp');
