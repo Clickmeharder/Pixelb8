@@ -17,3 +17,4 @@
 2024-10-04 8:09 PM, kev7420, 0.72, ped, unclaimed
 2024-10-04 8:10 PM, blckliqid, 1.99, ped, claimed
 2024-10-04 10:29 PM, immortaltimp, 1.51, ped, unclaimed
+2024-10-04 10:48 PM, kev7420, 1.96, ped, unclaimed
