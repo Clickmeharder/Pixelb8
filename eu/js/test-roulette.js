@@ -383,6 +383,8 @@ function calculateDamage(weaponType = currentWeapon, selectedPlayerIndex = null)
                 const damageToLeft = Math.floor(Math.random() * (remainingDamage + 1)); // Include 0
                 const damageToRight = remainingDamage - damageToLeft; // Ensure total damage remains
 
+                console.log(`Damage distribution - Selected: ${damageToSelected}, Left: ${damageToLeft}, Right: ${damageToRight}`);
+
                 // Return an object with all damage values
                 return {
                     selected: damageToSelected,
