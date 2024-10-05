@@ -358,15 +358,15 @@ function calculateDamage(weaponType = currentWeapon) {
 
     switch (weaponType) {
         case 'laserPistol':
-            damage = Math.floor(Math.random() * 20) + 10; // Laser pistol damage: 10-30
+            damage = Math.floor(Math.random() * 11); // Laser pistol damage: 0 and 10
             break;
 
         case 'rocketLauncher':
-            damage = Math.floor(Math.random() * 50) + 50; // Rocket launcher damage: 50-100
+            damage = Math.floor(Math.random() * 26); // Rocket launcher damage: 0-25
             break;
 
         default:
-            damage = 10; // Default damage
+            damage = Math.floor(Math.random() * 11); // Default damage
     }
 
     return damage;
