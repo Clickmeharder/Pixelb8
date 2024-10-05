@@ -4,8 +4,13 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         changeWeapon('rocketLauncher'); // Change weapon to rocket launcher
     }
 };
-
-let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.0723';
+// Example: Trigger weapon change based on a Twitch command (!nuke)
+ComfyJS.onCommand = (user, command, message, flags, extra) => {
+    if (command === 'nuke') { 
+        nuke(); // Call the nuke function
+    }
+};
+let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.0724';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
@@ -39,6 +44,25 @@ function toggleHeader() {
     }
 }
 
+// Function to randomly select 3 players and apply damage
+function nuke() {
+    // Shuffle the players array and take the first 3 unique players
+    const shuffledPlayers = players.sort(() => 0.5 - Math.random()).slice(0, 3);
+
+    // Loop through the selected players and apply random damage
+    shuffledPlayers.forEach(playerName => {
+        const playerIndex = players.indexOf(playerName);
+        const playerAvatar = playerAvatars[playerIndex];
+
+        // Calculate individual damage for this player
+        const damage = Math.floor(Math.random() * 26); // Damage between 0 and 25
+        const playerHP = applyDamage(playerAvatar, playerIndex, damage); // Apply damage to the player
+
+        // Log messages for the damage dealt
+        setgameMessage(`${playerName} has been nuked for ${damage} damage! Remaining HP: ${playerHP}`);
+        appendSystemMessage(`${playerName} has been nuked for ${damage} damage! Remaining HP: ${playerHP}`);
+    });
+}
 
 function setupRoulette(playerCount) {
   const rouletteCircle = document.getElementById('roulette-circle');
