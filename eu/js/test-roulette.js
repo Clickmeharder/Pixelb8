@@ -355,46 +355,103 @@ function pullGunTrigger(player, weaponType = currentWeapon, duration = 300, hide
 
 
 // Function to calculate different damage for different weapons
-function calculateDamage(weaponType = currentWeapon) {
+function calculateDamage(weaponType = currentWeapon, selectedPlayerIndex = null) {
     let damage;
 
     switch (weaponType) {
         case 'laserPistol':
-            damage = Math.floor(Math.random() * 11); // Laser pistol damage: 0 and 10
+            // Laser pistol damage: between 0 and 10
+            damage = Math.floor(Math.random() * 11);
             break;
 
         case 'rocketLauncher':
-            damage = Math.floor(Math.random() * 26); // Rocket launcher damage: 0-25
+            if (selectedPlayerIndex !== null) {
+                // Rocket launcher damage: 0-25, distributed among selected and nearby players
+                const totalDamage = Math.floor(Math.random() * 26); // Total damage 0-25
+                console.log(`Total rocket launcher damage: ${totalDamage}`);
+
+                // Get the left and right player indices
+                const numPlayers = players.length;
+                const leftPlayerIndex = (selectedPlayerIndex - 1 + numPlayers) % numPlayers;
+                const rightPlayerIndex = (selectedPlayerIndex + 1) % numPlayers;
+
+                // Randomly distribute the damage between the selected player, left, and right players
+                const damageToSelected = Math.floor(Math.random() * totalDamage);
+                const damageToLeft = Math.floor(Math.random() * (totalDamage - damageToSelected));
+                const damageToRight = totalDamage - damageToSelected - damageToLeft;
+
+                return {
+                    selected: damageToSelected,
+                    left: damageToLeft,
+                    right: damageToRight,
+                    leftPlayerIndex,
+                    rightPlayerIndex
+                };
+            }
             break;
 
         default:
-            damage = Math.floor(Math.random() * 11); // Default damage
+            // Default damage: between 0 and 10
+            damage = Math.floor(Math.random() * 11);
     }
 
     return damage;
 }
+// Modify playerShot to handle rocket launcher damage and append messages
+function playerShot(selectedPlayer, selectedPlayerIndex, weaponType = currentWeapon) {
+    const damageValues = calculateDamage(weaponType, selectedPlayerIndex);
 
-// Modify playerShot to use weapon-specific damage
-function playerShot(selectedPlayer, randomPlayerIndex) {
-    const playerHPElement = selectedPlayer.querySelector('.player-hp');
+    if (weaponType === 'rocketLauncher' && typeof damageValues === 'object') {
+        const leftPlayer = playerAvatars[damageValues.leftPlayerIndex];
+        const rightPlayer = playerAvatars[damageValues.rightPlayerIndex];
+
+        // Apply damage to the selected player
+        const selectedPlayerHP = applyDamage(selectedPlayer, selectedPlayerIndex, damageValues.selected);
+        setgameMessage(`${players[selectedPlayerIndex]} is shot for ${damageValues.selected} damage! Remaining HP: ${selectedPlayerHP}`);
+        appendSystemMessage(`${players[selectedPlayerIndex]} is shot for ${damageValues.selected} damage! Remaining HP: ${selectedPlayerHP}`);
+
+        // Apply damage to the left player
+        const leftPlayerHP = applyDamage(leftPlayer, damageValues.leftPlayerIndex, damageValues.left);
+        setgameMessage(`${players[damageValues.leftPlayerIndex]} (left) is shot for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
+        appendSystemMessage(`${players[damageValues.leftPlayerIndex]} (left) is shot for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
+
+        // Apply damage to the right player
+        const rightPlayerHP = applyDamage(rightPlayer, damageValues.rightPlayerIndex, damageValues.right);
+        setgameMessage(`${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
+        appendSystemMessage(`${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
+
+        console.log(`Rocket launcher hit ${players[selectedPlayerIndex]} (Selected) for ${damageValues.selected} damage`);
+        console.log(`Rocket launcher hit ${players[damageValues.leftPlayerIndex]} (Left) for ${damageValues.left} damage`);
+        console.log(`Rocket launcher hit ${players[damageValues.rightPlayerIndex]} (Right) for ${damageValues.right} damage`);
+    } else {
+        // Apply damage for other weapons
+        const damage = applyDamage(selectedPlayer, selectedPlayerIndex, damageValues);
+        setgameMessage(`${players[selectedPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${damage}`);
+        appendSystemMessage(`${players[selectedPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${damage}`);
+    }
+
+    updateTopPlayers();
+}
+// Function to apply damage to a player and return the updated HP
+function applyDamage(player, playerIndex, damage) {
+    const playerHPElement = player.querySelector('.player-hp');
     let currentHP = parseInt(playerHPElement.innerText.replace('HP: ', ''));
-    const damage = calculateDamage(); // Use weapon-specific damage
-
     currentHP = Math.max(0, currentHP - damage);
     playerHPElement.innerText = `HP: ${currentHP}`;
-    selectedPlayer.style.backgroundColor = 'red';
-    console.log(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
-	setgameMessage(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
-    appendSystemMessage(`${players[randomPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
-    updateTopPlayers();
+    player.style.backgroundColor = 'red';
+
+    console.log(`${players[playerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
 
     setTimeout(() => {
-        selectedPlayer.style.backgroundColor = '#10908fa8'; // Reset to original color
-    }, 300); 
+        player.style.backgroundColor = '#10908fa8';  // Reset to original color
+    }, 300);
+
+    if (currentHP <= 0) {
+        playerKilled(player, playerIndex); // Handle player death if HP reaches 0
+    }
 
     return currentHP;
 }
-
 
 // Function to handle a player being killed
 function playerKilled(selectedPlayer, randomPlayerIndex) {
