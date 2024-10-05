@@ -11,8 +11,8 @@
 2024-09-21 1:45 AM, dds_ownag3, 0.43, ped, unclaimed
 2024-09-21 9:03 AM, lordroger82, 1.45, ped, unclaimed
 2024-09-29 1:37 AM, kev7420, 0.14, ped, unclaimed
-2024-10-04 4:12 PM, blckliqid, 0.86, ped, unclaimed
-2024-10-04 4:58 PM, blckliqid, 0.81, ped, unclaimed
+2024-10-04 4:12 PM, blckliqid, 0.86, ped, claimed
+2024-10-04 4:58 PM, blckliqid, 0.81, ped, claimed
 2024-10-04 8:02 PM, kev7420, 0.55, ped, unclaimed
 2024-10-04 8:09 PM, kev7420, 0.72, ped, unclaimed
-2024-10-04 8:10 PM, blckliqid, 1.99, ped, unclaimed
+2024-10-04 8:10 PM, blckliqid, 1.99, ped, claimed
