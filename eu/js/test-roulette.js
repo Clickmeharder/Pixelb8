@@ -44,18 +44,32 @@ function toggleHeader() {
     }
 }
 
-// Function to randomly select 3 players and apply damage
+let nukeCalled = false; // Flag to track if the nuke command has been called
+
+// Function to randomly select 3 to 5 players and apply damage
 function nuke() {
-    // Shuffle the players array and take the first 3 unique players
-    const shuffledPlayers = players.sort(() => 0.5 - Math.random()).slice(0, 3);
+    // Check if the nuke command has already been called
+    if (nukeCalled) {
+        setgameMessage("The nuke command has already been used and cannot be called again!");
+        return; // Exit the function if nuke was already called
+    }
+
+    // Set the flag to true to prevent further calls
+    nukeCalled = true;
+
+    // Determine a random number of players to damage (between 3 and 5)
+    const numberOfPlayersToDamage = Math.floor(Math.random() * 3) + 3; // Randomly selects 3, 4, or 5
+
+    // Shuffle the players array and take the specified number of unique players
+    const shuffledPlayers = players.sort(() => 0.5 - Math.random()).slice(0, numberOfPlayersToDamage);
 
     // Loop through the selected players and apply random damage
     shuffledPlayers.forEach(playerName => {
         const playerIndex = players.indexOf(playerName);
         const playerAvatar = playerAvatars[playerIndex];
 
-        // Calculate individual damage for this player
-        const damage = Math.floor(Math.random() * 26); // Damage between 0 and 25
+        // Calculate individual damage for this player (between 0 and 50)
+        const damage = Math.floor(Math.random() * 51); // Damage between 0 and 50
         const playerHP = applyDamage(playerAvatar, playerIndex, damage); // Apply damage to the player
 
         // Log messages for the damage dealt
