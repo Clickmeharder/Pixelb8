@@ -5,7 +5,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 };
 
-let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.072';
+let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.0721';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
@@ -362,7 +362,7 @@ function calculateDamage(weaponType = currentWeapon, selectedPlayerIndex = null)
         case 'laserPistol':
             // Laser pistol damage: between 0 and 10
             damage = Math.floor(Math.random() * 11);
-            break;
+            return damage; // Return single damage value for laser pistol
 
         case 'rocketLauncher':
             if (selectedPlayerIndex !== null) {
@@ -383,6 +383,7 @@ function calculateDamage(weaponType = currentWeapon, selectedPlayerIndex = null)
                 const damageToLeft = Math.floor(Math.random() * (remainingDamage + 1)); // Include 0
                 const damageToRight = remainingDamage - damageToLeft; // Ensure total damage remains
 
+                // Return an object with all damage values
                 return {
                     selected: damageToSelected,
                     left: damageToLeft,
@@ -396,11 +397,12 @@ function calculateDamage(weaponType = currentWeapon, selectedPlayerIndex = null)
         default:
             // Default damage: between 0 and 10
             damage = Math.floor(Math.random() * 11);
+            return damage; // Return single damage value for default case
     }
 
-    return damage;
+    // If none of the cases matched, return 0 damage as fallback
+    return 0; 
 }
-
 // Modify playerShot to handle rocket launcher damage and append messages
 function playerShot(selectedPlayer, selectedPlayerIndex, weaponType = currentWeapon) {
     const damageValues = calculateDamage(weaponType, selectedPlayerIndex);
