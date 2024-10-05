@@ -306,7 +306,7 @@ function changeWeapon(weaponType) {
 
         case 'rocketLauncher':
             gunImage.src = 'data/images/guns/lancehead.png';
-            attackSound.src = 'data/cos-sounds/pewpew.m4a';
+            attackSound.src = 'data/cos-sounds/pew2.wav';
             gunLine.style.border = '5px solid orange'; // Rocket effect color
 			gunImage.style.width = '39px';
             console.log('Switched to rocket launcher');
