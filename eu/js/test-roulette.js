@@ -403,9 +403,13 @@ function calculateDamage(weaponType = currentWeapon, selectedPlayerIndex = null)
 function playerShot(selectedPlayer, selectedPlayerIndex, weaponType = currentWeapon) {
     const damageValues = calculateDamage(weaponType, selectedPlayerIndex);
 
+    // Log the calculated damage values for debugging
+    console.log('Damage Values:', damageValues);
+
     if (weaponType === 'rocketLauncher' && typeof damageValues === 'object') {
-        // Calculate the total damage for the rocket launcher
-        const totalDamage = damageValues.selected + damageValues.left + damageValues.right; // Get total damage from damageValues
+        // Get the left and right player avatars based on their indices
+        const leftPlayer = playerAvatars[damageValues.leftPlayerIndex];
+        const rightPlayer = playerAvatars[damageValues.rightPlayerIndex];
 
         // Apply damage to the selected player
         const selectedPlayerHP = applyDamage(selectedPlayer, selectedPlayerIndex, damageValues.selected);
@@ -413,17 +417,16 @@ function playerShot(selectedPlayer, selectedPlayerIndex, weaponType = currentWea
         appendSystemMessage(`${players[selectedPlayerIndex]} is shot for ${damageValues.selected} damage! Remaining HP: ${selectedPlayerHP}`);
 
         // Apply damage to the left player
-        const leftPlayer = playerAvatars[damageValues.leftPlayerIndex];
         const leftPlayerHP = applyDamage(leftPlayer, damageValues.leftPlayerIndex, damageValues.left);
         setgameMessage(`${players[damageValues.leftPlayerIndex]} (left) is shot for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
         appendSystemMessage(`${players[damageValues.leftPlayerIndex]} (left) is shot for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
 
         // Apply damage to the right player
-        const rightPlayer = playerAvatars[damageValues.rightPlayerIndex];
         const rightPlayerHP = applyDamage(rightPlayer, damageValues.rightPlayerIndex, damageValues.right);
         setgameMessage(`${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
         appendSystemMessage(`${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
 
+        // Log messages for each hit
         console.log(`Rocket launcher hit ${players[selectedPlayerIndex]} (Selected) for ${damageValues.selected} damage`);
         console.log(`Rocket launcher hit ${players[damageValues.leftPlayerIndex]} (Left) for ${damageValues.left} damage`);
         console.log(`Rocket launcher hit ${players[damageValues.rightPlayerIndex]} (Right) for ${damageValues.right} damage`);
