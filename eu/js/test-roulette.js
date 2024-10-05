@@ -300,6 +300,7 @@ function changeWeapon(weaponType) {
             gunImage.src = 'data/images/guns/laser_pistol.png';
             attackSound.src = 'data/cos-sounds/pew2.wav';
             gunLine.style.border = '2px solid red'; // Laser effect color
+			gunImage.style.width = '120px';
             console.log('Switched to laser pistol');
             break;
 
@@ -307,6 +308,7 @@ function changeWeapon(weaponType) {
             gunImage.src = 'data/images/guns/lancehead.png';
             attackSound.src = 'data/cos-sounds/pewpew.m4a';
             gunLine.style.border = '5px solid orange'; // Rocket effect color
+			gunImage.style.width = '39px';
             console.log('Switched to rocket launcher');
             break;
 
