@@ -1,11 +1,5 @@
 // Example: Trigger weapon change based on a Twitch command (!nuke)
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
-    if (command === 'noobtube') {
-        changeWeapon('rocketLauncher'); // Change weapon to rocket launcher
-    }
-};
-// Example: Trigger weapon change based on a Twitch command (!nuke)
-ComfyJS.onCommand = (user, command, message, flags, extra) => {
     if (command === 'nuke') { 
         nuke(); // Call the nuke function
     }
@@ -43,6 +37,64 @@ function toggleHeader() {
         headerRow.style.display = 'none'; // Hide the header
         toggleButton.innerText = '+'; // Change button text
     }
+}
+
+let nukeCalled = false; // Flag to track if the nuke command has been called
+// Function to create and show the explosion effect
+function showExplosionEffect() {
+    // Create an image element for the explosion
+    const explosionImg = document.createElement('img');
+    explosionImg.src = 'data/images/guns/explosion.gif';
+    explosionImg.style.position = 'absolute';
+    explosionImg.style.left = '50%';
+    explosionImg.style.top = '50%';
+    explosionImg.style.transform = 'translate(-50%, -50%)'; // Center the image
+    explosionImg.style.zIndex = '100'; // Ensure it's on top
+    explosionImg.style.pointerEvents = 'none'; // Prevent interaction with the image
+
+    // Get the roulette circle element
+    const rouletteCircle = document.getElementById('roulette-circle');
+    rouletteCircle.appendChild(explosionImg); // Append explosion image to the roulette circle
+
+    // Play the explosion sound
+    const explosionSound = new Audio('data/cos-sounds/explosion.mp3');
+    explosionSound.play();
+
+    // Remove the explosion image after a certain duration (optional)
+    setTimeout(() => {
+        rouletteCircle.removeChild(explosionImg);
+    }, 3000); // Adjust the duration as needed
+}
+// Function to randomly select 3 to 5 players and apply damage
+function nuke() {
+    // Check if the nuke command has already been called
+    if (nukeCalled) {
+        setgameMessage("The nuke command has already been used and cannot be called again!");
+        return; // Exit the function if nuke was already called
+    }
+
+    // Set the flag to true to prevent further calls
+    nukeCalled = true;
+
+    // Determine a random number of players to damage (between 3 and 5)
+    const numberOfPlayersToDamage = Math.floor(Math.random() * 3) + 3; // Randomly selects 3, 4, or 5
+
+    // Shuffle the players array and take the specified number of unique players
+    const shuffledPlayers = players.sort(() => 0.5 - Math.random()).slice(0, numberOfPlayersToDamage);
+
+    // Loop through the selected players and apply random damage
+    shuffledPlayers.forEach(playerName => {
+        const playerIndex = players.indexOf(playerName);
+        const playerAvatar = playerAvatars[playerIndex];
+		
+        // Calculate individual damage for this player (between 0 and 50)
+        const damage = Math.floor(Math.random() * 51); // Damage between 0 and 50
+        const playerHP = applyDamage(playerAvatar, playerIndex, damage); // Apply damage to the player
+		showExplosionEffect();
+        // Log messages for the damage dealt
+        setgameMessage(`${playerName} has been nuked for ${damage} damage! Remaining HP: ${playerHP}`);
+        appendSystemMessage(`${playerName} has been nuked for ${damage} damage! Remaining HP: ${playerHP}`);
+    });
 }
 
 
@@ -391,63 +443,7 @@ function playerKilled(selectedPlayer, randomPlayerIndex) {
 //
 //
 // Main roulette function
-let nukeCalled = false; // Flag to track if the nuke command has been called
-// Function to create and show the explosion effect
-function showExplosionEffect() {
-    // Create an image element for the explosion
-    const explosionImg = document.createElement('img');
-    explosionImg.src = 'data/images/guns/explosion.gif';
-    explosionImg.style.position = 'absolute';
-    explosionImg.style.left = '50%';
-    explosionImg.style.top = '50%';
-    explosionImg.style.transform = 'translate(-50%, -50%)'; // Center the image
-    explosionImg.style.zIndex = '100'; // Ensure it's on top
-    explosionImg.style.pointerEvents = 'none'; // Prevent interaction with the image
 
-    // Get the roulette circle element
-    const rouletteCircle = document.getElementById('roulette-circle');
-    rouletteCircle.appendChild(explosionImg); // Append explosion image to the roulette circle
-
-    // Play the explosion sound
-    const explosionSound = new Audio('data/cos-sounds/explosion.mp3');
-    explosionSound.play();
-
-    // Remove the explosion image after a certain duration (optional)
-    setTimeout(() => {
-        rouletteCircle.removeChild(explosionImg);
-    }, 3000); // Adjust the duration as needed
-}
-// Function to randomly select 3 to 5 players and apply damage
-function nuke() {
-    // Check if the nuke command has already been called
-    if (nukeCalled) {
-        setgameMessage("The nuke command has already been used and cannot be called again!");
-        return; // Exit the function if nuke was already called
-    }
-
-    // Set the flag to true to prevent further calls
-    nukeCalled = true;
-
-    // Determine a random number of players to damage (between 3 and 5)
-    const numberOfPlayersToDamage = Math.floor(Math.random() * 3) + 3; // Randomly selects 3, 4, or 5
-
-    // Shuffle the players array and take the specified number of unique players
-    const shuffledPlayers = players.sort(() => 0.5 - Math.random()).slice(0, numberOfPlayersToDamage);
-
-    // Loop through the selected players and apply random damage
-    shuffledPlayers.forEach(playerName => {
-        const playerIndex = players.indexOf(playerName);
-        const playerAvatar = playerAvatars[playerIndex];
-		
-        // Calculate individual damage for this player (between 0 and 50)
-        const damage = Math.floor(Math.random() * 51); // Damage between 0 and 50
-        const playerHP = applyDamage(playerAvatar, playerIndex, damage); // Apply damage to the player
-		showExplosionEffect();
-        // Log messages for the damage dealt
-        setgameMessage(`${playerName} has been nuked for ${damage} damage! Remaining HP: ${playerHP}`);
-        appendSystemMessage(`${playerName} has been nuked for ${damage} damage! Remaining HP: ${playerHP}`);
-    });
-}
 // Main roulette function
 function startRoulette() {
     if (players.length === 1) {
