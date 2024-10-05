@@ -5,7 +5,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 };
 
-let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.0721';
+let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.0722';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
