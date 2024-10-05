@@ -1,6 +1,6 @@
 // Example: Trigger weapon change based on a Twitch command (!nuke)
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
-    if (command === 'nuke') {
+    if (command === 'noobtube') {
         changeWeapon('rocketLauncher'); // Change weapon to rocket launcher
     }
 };
