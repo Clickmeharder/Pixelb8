@@ -174,7 +174,7 @@ function updateRemainingPlayers() {
 }
 
 
-
+let twitchusersJoined = [];
 //commands
 // Cheat command: Switch places with nearest player randomly
 function cheatCommand(user) {
