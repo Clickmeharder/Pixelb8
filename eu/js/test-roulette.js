@@ -1,5 +1,5 @@
 
-let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.0724';
+let currentCOSrouletteversion = 'CoS Roulette VU:Test Pre-alpha 0.0725';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
 
@@ -794,14 +794,20 @@ function distributeLoot() {
         console.error('Prize pool value not found.');
         return;
     }
-	
+
     let totalPrizePool = parseFloat(match[1]);
 
     if (players.length === 1) {
         const lastSurvivingPlayer = players[0];
 
         // Get the calculated loot value
-        const totalLoot = calculateRandomLoot();
+        let totalLoot = calculateRandomLoot();
+
+        // Check if the player has cheated
+        if (cheatUsageTracker[lastSurvivingPlayer]) {
+            totalLoot = totalLoot / 2; // Cut loot in half if the player cheated
+            appendSystemMessage(`${lastSurvivingPlayer} was caught cheating! Their loot is halved.`);
+        }
 
         const lootMessage = `${lastSurvivingPlayer} receives ${totalLoot.toFixed(2)} from the loot pool.`;
         appendSystemMessage(lootMessage);
