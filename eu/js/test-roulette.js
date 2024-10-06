@@ -4,6 +4,15 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         changeWeapon('rocketLauncher'); // Change weapon to rocket launcher
     }
 };
+
+// Handle the !heal command in ComfyJS
+ComfyJS.onCommand = (user, command, message, flags, extra) => {
+    if (command === 'heal' || command === 'fap') {
+        healPlayer(user); // Call the heal function for the user who used the command
+    }
+};
+
+
 // Example: Trigger weapon change based on a Twitch command (!nuke)
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     if (command === 'nuke') { 
@@ -43,6 +52,50 @@ function toggleHeader() {
         toggleButton.innerText = '+'; // Change button text
     }
 }
+
+let playersHealed = {}; // Object to track which players have used the heal command
+
+// Function to heal the player who used the !heal command
+function healPlayer(user) {
+    // Check if the player has already used the heal command
+    if (playersHealed[user]) {
+        setgameMessage(`${user}, you have already used the heal command!`);
+        appendSystemMessage(`${user} tried to heal but has already used the command.`);
+        return;
+    }
+
+    // Mark the player as having used the heal command
+    playersHealed[user] = true;
+
+    // Get the player index and player avatar
+    const playerIndex = players.indexOf(user);
+    if (playerIndex === -1) {
+        setgameMessage(`${user} is not in the game and cannot be healed!`);
+        return;
+    }
+
+    const playerAvatar = playerAvatars[playerIndex];
+
+    // Calculate the amount of health to heal (between 5 and 10)
+    const healAmount = Math.floor(Math.random() * 6) + 5; // Random heal between 5 and 10
+
+    // Apply healing to the player, ensuring we don't exceed max HP (let's assume max HP is 100)
+    const playerHPElement = playerAvatar.querySelector('.player-hp');
+    let currentHP = parseInt(playerHPElement.innerText.replace('HP: ', ''));
+    const newHP = Math.min(currentHP + healAmount, 100); // Cap healing at 100 HP
+
+    // Update the player's HP
+    playerHPElement.innerText = `HP: ${newHP}`;
+
+    // Log healing messages
+    setgameMessage(`${user} healed for ${healAmount} HP! Remaining HP: ${newHP}`);
+    appendSystemMessage(`${user} has healed for ${healAmount} HP! Remaining HP: ${newHP}`);
+
+    console.log(`${user} healed for ${healAmount} HP. Current HP: ${newHP}`);
+}
+
+
+
 
 let nukeCalled = false; // Flag to track if the nuke command has been called
 // Function to create and show the explosion effect
