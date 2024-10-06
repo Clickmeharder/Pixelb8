@@ -33,8 +33,6 @@ function toggleHeader() {
     }
 }
 
-let playersHealed = {}; // Object to track which players have used the heal command
-
 // Function to heal the player who used the !heal command
 function healPlayer(user) {
     // Check if the player has already used the heal command
