@@ -1,3 +1,6 @@
+
+let cheatUsageTracker = {}; // Object to track whether a player has used cheat
+
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     switch(command) {
         case "join":
