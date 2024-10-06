@@ -84,18 +84,18 @@ function showExplosionEffect() {
     explosionImg.style.zIndex = '100'; // Ensure it's on top
     explosionImg.style.pointerEvents = 'none'; // Prevent interaction with the image
 
-    // Get the roulette circle element
-    const rouletteCircle = document.getElementById('roulette-circle');
-    rouletteCircle.appendChild(explosionImg); // Append explosion image to the roulette circle
-
     // Play the explosion sound
     const explosionSound = new Audio('data/cos-sounds/explosion.mp3');
     explosionSound.play();
 
+    // Get the roulette circle element
+    const rouletteCircle = document.getElementById('roulette-circle');
+    rouletteCircle.appendChild(explosionImg); // Append explosion image to the roulette circle
+
     // Remove the explosion image after a certain duration (optional)
     setTimeout(() => {
         rouletteCircle.removeChild(explosionImg);
-    }, 3000); // Adjust the duration as needed
+    }, 1500); // Adjust the duration as needed
 }
 // Function to randomly select 3 to 5 players and apply damage
 function nuke() {
