@@ -1,4 +1,4 @@
-let currentCOSbattleversion = 'VU:Pre-alpha 0.0207';
+let currentCOSbattleversion = 'VU:Pre-alpha 0.02078test';
 const battleversionElement = document.getElementById('cos-battle-version');
 let players = [];
 let bossHP = 350; // Boss HP
@@ -24,7 +24,71 @@ function handleFileUpload(event) {
     reader.readAsText(file); // Read the file content as text
   }
 }
+function addPlayer(username) {
+    // Check if player already exists
+    if (players.some(player => player.name === username)) {
+        appendSystemMessage(`${username} is already in the game!`);
+        return; // Stop if the player is already in the game
+    }
+  
+    // Create a new player
+    const playerContainer = document.createElement('div');
+    playerContainer.classList.add('player-container');
 
+    const player = document.createElement('div');
+    player.classList.add('player');
+    player.style.backgroundImage = `url('data/images/femaledefault.png')`; // Replace with your player image
+
+    // Create a wrapper div for the player's info (name, HP, cb lvl)
+    const playerInfoWrapper = document.createElement('div');
+    playerInfoWrapper.classList.add('player-info-wrapper');
+
+    // Create a span to hold the player's name
+    const playerName = document.createElement('span');
+    playerName.innerText = username; // Use the username from Twitch
+    playerName.classList.add('player-name');
+
+    // Create a span to hold the player's HP
+    const playerHP = document.createElement('span');
+    playerHP.innerText = 'HP: 100'; // Default HP for each player
+    playerHP.classList.add('player-hp');
+
+    // Create a span to hold the player's combat level
+    const playerCB = document.createElement('span');
+    playerCB.innerText = 'Cb lvl: 1'; // Default combat level for each player
+    playerCB.classList.add('player-cb');
+
+    // Append name, HP, and CB level to the info wrapper
+    playerInfoWrapper.appendChild(playerName);
+    playerInfoWrapper.appendChild(playerHP);
+    playerInfoWrapper.appendChild(playerCB);
+
+    // Append player and info wrapper to the player container
+    playerContainer.appendChild(player);
+    playerContainer.appendChild(playerInfoWrapper);
+
+    // Append player container to the playersDiv
+    document.getElementById('players').appendChild(playerContainer);
+
+    // Add player to the players array
+    players.push({
+        name: username,
+        playerContainer,
+        playerHP,
+        hp: 100,
+        combatLvl: 0,
+        combatXP: 0,
+        healingLvl: 0,
+        healingXP: 0,
+    });
+
+    appendSystemMessage(`${username} has joined the game!`);
+
+    // Enable the Start Battle button if it's the first player
+    if (players.length === 1) {
+        document.getElementById('startBattleButton').disabled = false;
+    }
+}
 function generatePlayers(playerNames) {
   const playersDiv = document.getElementById('players');
   playersDiv.innerHTML = ''; // Clear existing players
