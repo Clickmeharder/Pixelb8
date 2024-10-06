@@ -4,7 +4,7 @@ let players = [];
 let bossHP = 350; // Boss HP
 // Declare a global variable to track the round
 let currentRound = 1;
-
+let twitchusersJoined = [];
 const currentRoundElement = document.getElementById('currentRound');
 const bossHPElement = document.getElementById('boss-hp');
 const systemMessagesElement = document.getElementById('systemMessages');
