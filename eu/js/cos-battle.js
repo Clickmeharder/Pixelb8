@@ -53,7 +53,7 @@ function teaminvite(user) {
 
     // Create a span to hold the player's name
     const playerName = document.createElement('span');
-    playerName.innerText = username; // Use the username from Twitch
+    playerName.innerText = user; // Use the username from Twitch
     playerName.classList.add('player-name');
 
     // Create a span to hold the player's HP
@@ -80,7 +80,7 @@ function teaminvite(user) {
 
     // Add player to the players array
     players.push({
-        name: username,
+        name: user,
         playerContainer,
         playerHP,
         hp: 100,
@@ -90,7 +90,7 @@ function teaminvite(user) {
         healingXP: 0,
     });
 
-    appendSystemMessage(`${username} has joined the game!`);
+    appendSystemMessage(`${user} has joined the game!`);
 
     // Enable the Start Battle button if it's the first player
     if (players.length === 1) {
