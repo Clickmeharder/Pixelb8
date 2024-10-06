@@ -1,10 +1,3 @@
-// Example: Trigger weapon change based on a Twitch command (!nuke)
-ComfyJS.onCommand = (user, command, message, flags, extra) => {
-    if (command === 'nuke') { 
-        nuke(); // Call the nuke function
-    }
-};
-
 let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.0698';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;

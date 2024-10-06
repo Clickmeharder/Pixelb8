@@ -1,24 +1,4 @@
-// Example: Trigger weapon change based on a Twitch command (!nuke)
-ComfyJS.onCommand = (user, command, message, flags, extra) => {
-    if (command === 'noobtube') {
-        changeWeapon('rocketLauncher'); // Change weapon to rocket launcher
-    }
-};
 
-// Handle the !heal command in ComfyJS
-ComfyJS.onCommand = (user, command, message, flags, extra) => {
-    if (command === 'heal' || command === 'fap') {
-        healPlayer(user); // Call the heal function for the user who used the command
-    }
-};
-
-
-// Example: Trigger weapon change based on a Twitch command (!nuke)
-ComfyJS.onCommand = (user, command, message, flags, extra) => {
-    if (command === 'nuke') { 
-        nuke(); // Call the nuke function
-    }
-};
 let currentCOSrouletteversion = 'CoS Roulette VU:Pre-alpha 0.0724';
 const rouletteversionElement = document.getElementById('cos-roulette-version');
 rouletteversionElement.textContent = currentCOSrouletteversion;
