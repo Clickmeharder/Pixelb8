@@ -16,7 +16,7 @@ let players = [];
 let playerAvatars = [];
 let totalPlayers = '0';
 let remainingPlayers = '0';
-let twitchusersJoined = [];
+
 const systemMessagesElement = document.getElementById('systemMessages');
 const headerMessagesElement = document.getElementById('headerTexts');
 const offsetAngle = 90; // Offset to adjust initial straight-up position of gun
@@ -174,7 +174,7 @@ function updateRemainingPlayers() {
 }
 
 
-
+let twitchusersJoined = [];
 
 //commands
 // Cheat command: Switch places with nearest player randomly
