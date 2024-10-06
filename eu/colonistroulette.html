@@ -7,11 +7,11 @@
   
   <style>
 	div#twitch-chat{
-	  position: fixed;
-      bottom: 42%;
-      right: 3%;
-      width: 25vw;
-      height: 100px;
+	  position: absolute;
+      top: 68%;
+      left: 1.5%;
+      width: 47vw;
+	  height: 85px;
       overflow: auto;
       opacity: 1;
       font-size: 17px;
@@ -20,7 +20,12 @@
       color: #7c00ff;
       border: 3px inset #00000085;
       z-index: 10;
-
+	  opacity: 0.6;
+	  transition:1s smooth;
+	}
+	div#twitch-chat::hover{
+		opacity:1.0;
+		transition:1s smooth;
 	}
   </style>
   
