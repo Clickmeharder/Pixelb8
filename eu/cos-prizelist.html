@@ -18,6 +18,9 @@
         .desc::after {
             content: " 🔽"; /* Arrow for descending sort */
         }
+		.td {
+			color: rgb(165 152 152);
+		}
     </style>
 </head>
 <body style="font-family:lucida console;color:#2775a7;background-image: url('https://pixelb8.lol/assets/images/ads/ads15.jpeg');">
@@ -43,53 +46,54 @@
         let sortDirections = [true, true, true, true, true]; // true for ascending, false for descending
 
         function loadCSVFile() {
-			const csvPath = 'data/JaedrazeTTV-EU-viewerPrizelist.txt';  // relative path to the CSV file
-			fetch(csvPath)
-				.then(response => response.text())
-				.then(data => {
-					const rows = data.split('\n');
-					const tableBody = document.querySelector('#winnersTable tbody');
-					let totalAmount = 0;  // Initialize total amount
+            const csvPath = 'data/JaedrazeTTV-EU-viewerPrizelist.txt';  // relative path to the CSV file
+            fetch(csvPath)
+                .then(response => response.text())
+                .then(data => {
+                    const rows = data.split('\n');
+                    const tableBody = document.querySelector('#winnersTable tbody');
+                    let totalAmount = 0;  // Initialize total amount
 
-					rows.forEach(row => {
-						const columns = row.split(',');
-						if (columns.length === 5) { // Ensure 5 columns: Date, Winner Name, Amount, Prize, Status
-							const tableRow = document.createElement('tr');
+                    rows.forEach(row => {
+                        const columns = row.split(',');
+                        if (columns.length === 5) { // Ensure 5 columns: Date, Winner Name, Amount, Prize, Status
+                            const tableRow = document.createElement('tr');
 
-							// Apply background color to the <tr> based on the Status column
-							if (columns[4].trim().toLowerCase() === 'claimed') {
-								tableRow.style.backgroundColor = '#6e6d6d8a';  // Light green for claimed rows
-							} else if (columns[4].trim().toLowerCase() === 'unclaimed') {
-								tableRow.style.backgroundColor = '#70200a66';  // Light red for unclaimed rows
-							}
+                            // Apply background color to the <tr> based on the Status column
+                            if (columns[4].trim().toLowerCase() === 'claimed') {
+                                tableRow.style.backgroundColor = '#6e6d6d8a';  // Light green for claimed rows
+                            } else if (columns[4].trim().toLowerCase() === 'unclaimed') {
+                                tableRow.style.backgroundColor = '#70200a66';  // Light red for unclaimed rows
+                            }
 
-							columns.forEach((column, index) => {
-								const cell = document.createElement('td');
-								cell.textContent = column.trim();
+                            columns.forEach((column, index) => {
+                                const cell = document.createElement('td');
+                                cell.textContent = column.trim();
 
-								// Apply background color to each <td> based on the Status column
-								if (columns[4].trim().toLowerCase() === 'claimed') {
-									cell.style.color = index === 4 ? 'rgb(165, 152, 152)' : '#444';  // Set claimed color to rgb(165, 152, 152)
-								} else if (columns[4].trim().toLowerCase() === 'unclaimed') {
-									cell.style.color = index === 4 ? '#444' : 'orange';  // Darker red for "unclaimed" cells
-								}
+                                // Apply background color to each <td> based on the Status column
+                                if (columns[4].trim().toLowerCase() === 'claimed') {
+                                    cell.style.color = index === 4 ? '#a6d5a9' : '#444';  // Darker green for "claimed" cells
+                                } else if (columns[4].trim().toLowerCase() === 'unclaimed') {
+                                    cell.style.color = index === 4 ? '##444' : 'orange';  // Darker red for "unclaimed" cells
+                                }
 
-								tableRow.appendChild(cell);
-							});
+                                tableRow.appendChild(cell);
+                            });
 
-							// Update total amount
-							totalAmount += parseFloat(columns[2]) || 0;
+                            // Update total amount
+                            totalAmount += parseFloat(columns[2]) || 0;
 
-							tableBody.appendChild(tableRow);
-							prizeData.push({ date: columns[0], winner: columns[1], amount: parseFloat(columns[2]) || 0, prize: columns[3], status: columns[4] });
-						}
-					});
+                            tableBody.appendChild(tableRow);
+                            prizeData.push({ date: columns[0], winner: columns[1], amount: parseFloat(columns[2]) || 0, prize: columns[3], status: columns[4] });
+                        }
+                    });
 
-					// Display total amount
-					document.getElementById('totalAmount').textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
-				})
-				.catch(error => console.error('Error loading CSV file:', error));
-		}
+                    // Display total amount
+                    document.getElementById('totalAmount').textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
+                })
+                .catch(error => console.error('Error loading CSV file:', error));
+        }
+
         function sortTable(index) {
             const tbody = document.querySelector('#winnersTable tbody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
