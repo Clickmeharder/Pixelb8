@@ -1,3 +1,10 @@
+// Listen for the join command
+ComfyJS.onCommand = (user, command, message, params, commandType) => {
+    if (command === "x") {
+        teaminvitePlayer(user);
+    }
+};
+
 let currentCOSbattleversion = 'VU:Pre-alpha 0.02078test';
 const battleversionElement = document.getElementById('cos-battle-version');
 let players = [];
@@ -24,7 +31,7 @@ function handleFileUpload(event) {
     reader.readAsText(file); // Read the file content as text
   }
 }
-function addPlayer(username) {
+function teaminvite(username) {
     // Check if player already exists
     if (players.some(player => player.name === username)) {
         appendSystemMessage(`${username} is already in the game!`);
