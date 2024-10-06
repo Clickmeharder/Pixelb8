@@ -12,6 +12,12 @@
             cursor: pointer;
             color: #2775a7;
         }
+        .asc::after {
+            content: " 🔼"; /* Arrow for ascending sort */
+        }
+        .desc::after {
+            content: " 🔽"; /* Arrow for descending sort */
+        }
     </style>
 </head>
 <body style="font-family:lucida console;color:#2775a7;background-image: url('https://pixelb8.lol/assets/images/ads/ads15.jpeg');">
@@ -34,6 +40,7 @@
 
     <script>
         let prizeData = [];
+        let sortDirections = [true, true, true, true, true]; // true for ascending, false for descending
 
         function loadCSVFile() {
             const csvPath = 'data/JaedrazeTTV-EU-viewerPrizelist.txt';  // relative path to the CSV file
@@ -88,21 +95,32 @@
             const tbody = document.querySelector('#winnersTable tbody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
 
+            // Toggle sort direction
+            sortDirections[index] = !sortDirections[index];
+
             rows.sort((a, b) => {
                 const aText = a.children[index].textContent;
                 const bText = b.children[index].textContent;
 
                 if (index === 2) { // Sorting Amount
-                    return parseFloat(aText) - parseFloat(bText);
+                    return sortDirections[index] ? parseFloat(aText) - parseFloat(bText) : parseFloat(bText) - parseFloat(aText);
                 } else if (index === 0) { // Sorting Date
-                    return new Date(aText) - new Date(bText);
+                    return sortDirections[index] ? new Date(aText) - new Date(bText) : new Date(bText) - new Date(aText);
                 } else { // Sorting by string (Winner Name, Prize, Status)
-                    return aText.localeCompare(bText);
+                    return sortDirections[index] ? aText.localeCompare(bText) : bText.localeCompare(aText);
                 }
             });
 
             // Append sorted rows to the tbody
             rows.forEach(row => tbody.appendChild(row));
+
+            // Update the header class to reflect the sort direction
+            document.querySelectorAll('.sortable').forEach((header, idx) => {
+                header.classList.remove('asc', 'desc');
+                if (idx === index) {
+                    header.classList.add(sortDirections[idx] ? 'asc' : 'desc');
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
