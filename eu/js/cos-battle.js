@@ -1,7 +1,7 @@
 // Listen for the join command
 ComfyJS.onCommand = (user, command, message, params, commandType) => {
     if (command === "x") {
-        teaminvitePlayer(user);
+        teaminvitePlayer(username);
     }
 };
 
