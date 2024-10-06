@@ -1,6 +1,6 @@
 
 let cheatUsageTracker = {}; // Object to track whether a player has used cheat
-let playersHealed = {}; // Object to track which players have used heal or fap
+
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     console.log(`Command received: ${command} from ${user}`);
