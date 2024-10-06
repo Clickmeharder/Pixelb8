@@ -552,9 +552,26 @@ function playRandomDeathSound() {
     selectedSound.play();
 }
 
-//example usage
-// playRandomDeathSound();
+// Function to apply damage to a player and return the updated HP
+function applyDamage(player, playerIndex, damage) {
+    const playerHPElement = player.querySelector('.player-hp');
+    let currentHP = parseInt(playerHPElement.innerText.replace('HP: ', ''));
+    currentHP = Math.max(0, currentHP - damage);
+    playerHPElement.innerText = `HP: ${currentHP}`;
+    player.style.backgroundColor = 'red';
 
+    console.log(`${players[playerIndex]} is shot for ${damage} damage! Remaining HP: ${currentHP}`);
+
+    setTimeout(() => {
+        player.style.backgroundColor = '#10908fa8';  // Reset to original color
+    }, 300);
+
+    if (currentHP <= 0) {
+        playerKilled(player, playerIndex); // Handle player death if HP reaches 0
+    }
+
+    return currentHP;
+}
 
 // Function to update & increment the round
 function updateRoundMessage() {
