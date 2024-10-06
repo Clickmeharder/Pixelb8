@@ -1,8 +1,8 @@
 // Listen for the join command
 ComfyJS.onCommand = (user, command, message, params, commandType) => {
     if (command === "hunt") {
-        teaminvite(username);
-		setgameMessage(`${username} tried to join!`);
+        teaminvite(user);
+		setgameMessage(`${user} tried to join!`);
     }
 };
 
@@ -32,10 +32,10 @@ function handleFileUpload(event) {
     reader.readAsText(file); // Read the file content as text
   }
 }
-function teaminvite(username) {
+function teaminvite(user) {
     // Check if player already exists
     if (players.some(player => player.name === username)) {
-        appendSystemMessage(`${username} is already in the game!`);
+        appendSystemMessage(`${user} is already in the game!`);
         return; // Stop if the player is already in the game
     }
   
