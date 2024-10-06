@@ -1,7 +1,7 @@
 // Listen for the join command
 ComfyJS.onCommand = (user, command, message, params, commandType) => {
     if (command === "hunt") {
-        teaminvitePlayer(username);
+        teaminvite(username);
 		setgameMessage(`${username} tried to join!`);
     }
 };
