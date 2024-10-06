@@ -58,10 +58,10 @@
 
                             // Apply background color to the <tr> based on the Status column
                             if (columns[4].trim().toLowerCase() === 'claimed') {
-                                tableRow.style.backgroundColor = '#6e6d6d8a';  // Light green for claimed rows
-                            } else if (columns[4].trim().toLowerCase() === 'unclaimed') {
-                                tableRow.style.backgroundColor = '#70200a66';  // Light red for unclaimed rows
-                            }
+								cell.style.color = index === 4 ? 'rgb(165, 152, 152)' : '#444';  // Set claimed color to rgb(165, 152, 152)
+							} else if (columns[4].trim().toLowerCase() === 'unclaimed') {
+								cell.style.color = index === 4 ? '#444' : 'orange';  // Darker red for "unclaimed" cells
+							}
 
                             columns.forEach((column, index) => {
                                 const cell = document.createElement('td');
