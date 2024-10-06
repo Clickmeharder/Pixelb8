@@ -10,7 +10,7 @@ let players = [];
 let playerAvatars = [];
 let totalPlayers = '0';
 let remainingPlayers = '0';
-let playersHealed = {}; // Object to track which players have used heal or fap
+let playersHealed = []; // Object to track which players have used heal or fap
 const systemMessagesElement = document.getElementById('systemMessages');
 const headerMessagesElement = document.getElementById('headerTexts');
 const offsetAngle = 90; // Offset to adjust initial straight-up position of gun
@@ -508,25 +508,25 @@ function playerShot(selectedPlayer, selectedPlayerIndex, weaponType = currentWea
     if (weaponType === 'rocketLauncher' && typeof damageValues === 'object') {
         // Apply damage to the selected player
         const selectedPlayerHP = applyDamage(selectedPlayer, selectedPlayerIndex, damageValues.selected);
-        setgameMessage(`${players[selectedPlayerIndex]} is shot for ${damageValues.selected} damage! Remaining HP: ${selectedPlayerHP}`);
-        appendSystemMessage(`${players[selectedPlayerIndex]} is shot for ${damageValues.selected} damage! Remaining HP: ${selectedPlayerHP}`);
+        setgameMessage(`${players[selectedPlayerIndex]} is shot for ${damageValues.selected} dmg! Remaining HP: ${selectedPlayerHP}`);
+        appendSystemMessage(`${players[selectedPlayerIndex]} is shot for ${damageValues.selected} dmg! Remaining HP: ${selectedPlayerHP}`);
 
         // Apply damage to the left player
         const leftPlayer = playerAvatars[damageValues.leftPlayerIndex];
         const leftPlayerHP = applyDamage(leftPlayer, damageValues.leftPlayerIndex, damageValues.left);
-        setgameMessage(`AOE: ${players[damageValues.leftPlayerIndex]} (left) is hit for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
-        appendSystemMessage(`AOE: ${players[damageValues.leftPlayerIndex]} (left) is shot for ${damageValues.left} damage! Remaining HP: ${leftPlayerHP}`);
+        setgameMessage(`AOE: ${players[damageValues.leftPlayerIndex]} (left) is hit for ${damageValues.left} dmg! Remaining HP: ${leftPlayerHP}`);
+        appendSystemMessage(`AOE: ${players[damageValues.leftPlayerIndex]} (left) is shot for ${damageValues.left} dmg! Remaining HP: ${leftPlayerHP}`);
 
         // Apply damage to the right player
         const rightPlayer = playerAvatars[damageValues.rightPlayerIndex];
         const rightPlayerHP = applyDamage(rightPlayer, damageValues.rightPlayerIndex, damageValues.right);
-        setgameMessage(`AOE: ${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
-        appendSystemMessage(`AOE: ${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} damage! Remaining HP: ${rightPlayerHP}`);
+        setgameMessage(`AOE: ${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} dmg! Remaining HP: ${rightPlayerHP}`);
+        appendSystemMessage(`AOE: ${players[damageValues.rightPlayerIndex]} (right) is shot for ${damageValues.right} dmg! Remaining HP: ${rightPlayerHP}`);
     } else {
         // Apply damage for other weapons
         const damage = applyDamage(selectedPlayer, selectedPlayerIndex, damageValues);
-        setgameMessage(`default dmg: ${players[selectedPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${damage}`);
-        appendSystemMessage(`default dmg: ${players[selectedPlayerIndex]} is shot for ${damage} damage! Remaining HP: ${damage}`);
+        setgameMessage(`${players[selectedPlayerIndex]} is shot for ${damage} dmg! Remaining HP: ${damage}`);
+        appendSystemMessage(`${players[selectedPlayerIndex]} is shot for ${damage} dmg! Remaining HP: ${damage}`);
     }
 
     updateTopPlayers();
