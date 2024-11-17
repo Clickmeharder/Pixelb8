@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sortable Calypso Mobs Table</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            color: #e0e0e0;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #424242;
+            color: #ffffff;
+            border: 1px solid #616161;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            background-color: #424242;
+            color: #ffffff;
+            border: 1px solid #616161;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            color: #ffffff;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #424242;
+            text-align: left;
+        }
+
+        th {
+            background-color: #333333;
+            cursor: pointer;
+        }
+
+        th:hover {
+            background-color: #555555;
+        }
+
+        tr:nth-child(even) {
+            background-color: #1e1e1e;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #212121;
+        }
+
+        tr:hover {
+            background-color: #333333;
+        }
+
+        .sorted-asc:after {
+            content: " ▲";
+        }
+
+        .sorted-desc:after {
+            content: " ▼";
+        }
+
+        /* Smaller styling for damage types */
+        .damage-types {
+            font-size: 0.8em;
+            color: #aaaaaa;
+        }
+
+        /* Hide the columns */
+        .hidden {
+            display: none;
+        }
+		#toggleButtons {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+			width: 45%; /* Set the width of the button container */
+		}
+
+		#toggleButtons button {
+			width: 100px; /* Set a fixed width for buttons */
+			height: 30px; /* Set a fixed height for buttons */
+			margin: 5px; /* Add some space between buttons */
+			font-size: 14px; /* Adjust font size if needed */
+			cursor: pointer; /* Change cursor to pointer on hover */
+		}
+    </style>
+</head>
+<body>
+
+    <h1>Sortable Calypso Mobs Table</h1>
+
+    <!-- File input to upload the CSV -->
+    <input type="file" id="csvFileInput">
+    <div id="toggleButtons"></div>
+    <table id="csvTable">
+        <thead></thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        document.getElementById('csvFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const csvData = event.target.result;
+                displayCSVTable(csvData);
+                generateToggleButtons(csvData);  // Generate buttons after table is displayed
+            };
+
+            reader.readAsText(file);
+        });
+
+        let sortOrder = {};  // Object to track the sort order for each column
+
+        function displayCSVTable(csvData) {
+            const rows = csvData.trim().split('\n').map(row => row.split(';')); // Split CSV data by rows and columns
+
+            const tableHead = document.querySelector('#csvTable thead');
+            const tableBody = document.querySelector('#csvTable tbody');
+
+            // Clear existing content
+            tableHead.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            // Build the header row with Damage Types grouping
+            const headers = rows[0];
+            const headerRow1 = document.createElement('tr');
+            const headerRow2 = document.createElement('tr');
+
+            headers.forEach((header, index) => {
+                if (index >= 3 && index <= 11) {
+                    if (index === 3) {
+                        const th = document.createElement('th');
+                        th.setAttribute('colspan', '9'); // Group 9 columns under "Damage Types"
+                        th.textContent = 'Damage Types';
+                        th.classList.add('group-damage-types'); // Added class for the group
+                        th.id = 'damageTypesHeader'; // Set ID for easier selection
+                        headerRow1.appendChild(th);
+                    }
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    th.classList.add('damage-types', 'col-' + index); // Class for individual columns
+                    headerRow2.appendChild(th);
+                } else {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    th.classList.add('col-' + index); // Class for individual columns
+                    if (index < 3 || index > 11) {
+                        th.setAttribute('rowspan', '2'); // Span over both rows
+                    }
+                    th.addEventListener('click', () => toggleSortTable(index, isNaN(rows[1][index])));
+                    headerRow1.appendChild(th);
+                }
+
+                // Initialize the sort order for each column
+                sortOrder[index] = 'asc';
+            });
+
+            tableHead.appendChild(headerRow1);
+            tableHead.appendChild(headerRow2);
+
+            // Populate the table body
+            rows.slice(1).forEach(row => {
+                const rowElement = document.createElement('tr');
+                row.forEach((cell, index) => {
+                    const cellElement = document.createElement('td');
+                    cellElement.textContent = cell;
+                    cellElement.classList.add('col-' + index); // Class for individual columns
+
+                    // Apply smaller font to damage types columns
+                    if (index >= 3 && index <= 11) {
+                        cellElement.classList.add('damage-types');
+                    }
+
+                    rowElement.appendChild(cellElement);
+                });
+                tableBody.appendChild(rowElement);
+            });
+        }
+
+        function toggleSortTable(colIndex, isAlphabetical) {
+            const table = document.querySelector('#csvTable tbody');
+            const rowsArray = Array.from(table.querySelectorAll('tr'));
+
+            // Check the current sort order for the column and toggle it
+            const currentOrder = sortOrder[colIndex];
+            const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+            sortOrder[colIndex] = newOrder;
+
+            rowsArray.sort((a, b) => {
+                const aColText = a.querySelectorAll('td')[colIndex].textContent;
+                const bColText = b.querySelectorAll('td')[colIndex].textContent;
+
+                if (isAlphabetical) {
+                    return newOrder === 'asc' 
+                        ? aColText.localeCompare(bColText)
+                        : bColText.localeCompare(aColText);
+                } else {
+                    return newOrder === 'asc' 
+                        ? parseFloat(aColText) - parseFloat(bColText)
+                        : parseFloat(bColText) - parseFloat(aColText);
+                }
+            });
+
+            // Append the sorted rows to the table body
+            rowsArray.forEach(row => table.appendChild(row));
+
+            // Remove sort indicators from all headers
+            document.querySelectorAll('th').forEach(th => th.classList.remove('sorted-asc', 'sorted-desc'));
+
+            // Add sort indicators to the clicked header
+            const header = document.querySelectorAll('th')[colIndex];
+            if (newOrder === 'asc') {
+                header.classList.add('sorted-asc');
+            } else {
+                header.classList.add('sorted-desc');
+            }
+        }
+
+        function toggleColumnVisibility(colIndex) {
+            const cells = document.querySelectorAll('.col-' + colIndex);
+            const header = document.getElementById('damageTypesHeader'); // Get the damage types header
+
+            // Toggle the header visibility
+            if (header.style.display === 'none') {
+                header.style.display = '';
+            } else {
+                header.style.display = 'none';
+            }
+
+            // Toggle the visibility for each damage types column
+            cells.forEach((cell) => {
+                if (cell.style.display === 'none') {
+                    cell.style.display = 'table-cell';
+                } else {
+                    cell.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleDamageTypesVisibility() {
+            const damageTypeColumns = [];
+            
+            // Collect all damage type column indices
+            for (let i = 3; i <= 11; i++) {
+                damageTypeColumns.push(i);
+            }
+
+            // Toggle the header visibility
+            const header = document.getElementById('damageTypesHeader');
+            header.style.display = header.style.display === 'none' ? '' : 'none';
+
+            // Toggle the visibility of the damage types columns
+            damageTypeColumns.forEach(colIndex => {
+                const cells = document.querySelectorAll('.col-' + colIndex);
+                cells.forEach(cell => {
+                    cell.style.display = cell.style.display === 'none' ? 'table-cell' : 'none';
+                });
+            });
+        }
+
+        function generateToggleButtons(csvData) {
+            const headers = csvData.trim().split('\n')[0].split(';');  // Get the header row
+            const buttonContainer = document.getElementById('toggleButtons');
+
+            buttonContainer.innerHTML = '';  // Clear any existing buttons
+
+            // Create a single button for toggling all damage types
+            const toggleButton = document.createElement('button');
+            toggleButton.textContent = 'Toggle Damage Types';
+            toggleButton.addEventListener('click', () => toggleDamageTypesVisibility());
+            
+            // Append the single toggle button to the button container
+            buttonContainer.appendChild(toggleButton);
+
+            // Optionally, create buttons for any other columns if needed
+            headers.forEach((header, index) => {
+                if (index < 3 || index > 11) { // Skip damage types columns
+                    const button = document.createElement('button');
+                    button.textContent = `Toggle ${header}`;
+                    button.addEventListener('click', () => toggleColumnVisibility(index));
+                    buttonContainer.appendChild(button);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

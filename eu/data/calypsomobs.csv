@@ -1,0 +1,171 @@
+Name;Maturity Class;Found on;Stb;Cut;Imp;Pen;Shr;Brn;Cld;Acd;Elc;Movement;Combat;Attacks;Range;Aggression;Tamable;Sweatable;Min HP;Min Global
+Chirpy;Chirpy;Planet Calypso;75; ; ; ; ; ; ;25; ;Running;None; ; ;V. Low;No;Yes;10;5
+Cornundos;Cornundos;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close;20; ;Low;No;Yes;10;10
+Freshwater Calypsocod;Calypsocod;Planet Calypso; ; ; ; ; ; ; ; ; ;Swimming;Close; ; ;Low;No;No;10; 
+Fugabarba;Fugabarba;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ;V. Low;No;Yes;10;5
+Gibnib;Gibnib;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;None; ; ;V. Low;No;Yes;10;5
+Pygmy Chomper;Chomper;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ;V. Low;No;Yes;10; 
+Sabakuma;Animal;Planet Calypso;100; ; ; ; ; ; ; ; ;Running;Close;20; ;Medium;No;Yes;10; 
+Tripudion;Tripudion;Planet Calypso; ; ;100; ; ; ; ; ; ;Jumping;Close;20; ;High;No;Yes;10; 
+Turp;Turp;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;None; ; ;V. Low;No;Yes;10;5
+Berycled;Berycled;Planet Calypso; ;50;50; ; ; ; ; ; ;Hopping;Close;20; ;Medium;No;Yes;13;5
+Caudatergus;Caudatergus;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close;24; ;Medium;No;Yes;17;10
+Bristlehog;Animal;Planet Calypso; ; ; ; ; ; ; ; ;100;Running;Ranged;19; ;Low;Yes;Yes;20;20
+Daikiba (Calypso);Daikiba;Planet Calypso;10; ;90; ; ; ; ; ; ;Running;Close;20; ;Low;No;Yes;20;10
+Highland Allophyl;Allophyl;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ;V. Low;No;Yes;20;5
+Highland Mourner;Mourner;Planet Calypso; ; ; ; ; ; ; ; ; ; ;Close; ; ;Low;No;Yes;20; 
+Maffoid;Maffoid;Planet Calypso; ;45;55; ; ; ; ; ; ;Running;Close; ; ;High;No;No;20;50
+Snablesnot Male;Animal;Planet Calypso; ; ; ; ; ; ; ;100; ;Running;Close;20; ;Medium;No;Yes;20;5
+Argonaut (Calypso);Argonaut;Planet Calypso; ;25;75; ; ; ; ; ; ;Running;Close;20; ;High;No;No;30;25
+Prototype Droka;Droka;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Firearms; ; ;Low;No;No;30; 
+Prototype Drone;Drone;Planet Calypso; ; ; ; ; ;100; ; ; ;Running;Close/Firearms; ; ;V. Low;No;No;30; 
+Shinkiba;Shinkiba;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close; ; ;Low;No;Yes;30;5
+Diripi;Diripi;Planet Calypso;100; ; ; ; ; ; ; ; ;Flying;Close; ; ;V. High;No;Yes;40; 
+Igni;Animal;Planet Calypso;80; ; ; ; ; ; ; ;20;Flying;Close; ; ;V. High;No;Yes;40;10
+JamRaider;JamRaider;Planet Calypso; ; ; ; ; ; ; ; ; ;Flying;None; ; ; ;No;No;40; 
+Plumatergus (Calypso);Plumatergus;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close;20; ;V. Low;No;Yes;40;10
+Pupugi;Pupugi;Planet Calypso;100; ; ; ; ; ; ; ; ;Flying;Close; ; ;V. High;No;Yes;40;5
+Snablesnot Female;Animal;Planet Calypso; ; ; ; ; ; ; ;100; ;Running;Close; ; ;Medium;No;Yes;40;5
+Swampland Allophyl;Allophyl;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ;Low;No;Yes;40; 
+Corinthian Kanin;Pet Breeds;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ; ;Yes;Yes;50;20
+Exarosaur (Calypso);Exarosaur;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close;20; ;Low;No;Yes;50;10
+Merp (Calypso);Merp;Planet Calypso;40; ;60; ; ; ; ; ; ;Running;Close; ; ;High;No;Yes;50;10
+RipperSnapper (Calypso);RipperSnapper;Planet Calypso;33;66; ; ; ; ; ; ; ;Swimming;Close;26; ;V. High;No;No;50;10
+Tantillion;Animal;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close; ; ;High;No;Yes;50;5
+Prancer;Prancer;Planet Calypso;100; ; ; ; ; ; ; ; ;Running;Close;20; ;Low;No;Yes;70;5
+Snarksnot;Animal;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close; ; ;High;No;Yes;70; 
+Combibo;Animal;Planet Calypso; ;40;60; ; ; ; ; ; ;Running;Close;15;5;Low;Yes;Yes;80; 
+Repesilex;Repesilex;Planet Calypso; ; ; ; ; ; ; ; ;100;Running;Close; ; ;V. Low;No;Yes;90;5
+Sabakuma Broodmother;Animal;Planet Calypso; ; ; ; ; ; ; ;100; ; ;Ranged; ; ;High;No;No;90;10
+Faucervix;Animal;Planet Calypso; ;25;75; ; ; ; ; ; ;Running;Close;20; ;High;No;Yes;100; 
+Foul (Calypso);Foul;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close; ; ;High;No;No;100;10
+Gradivore;Gradivore;Planet Calypso; ; ; ; ; ; ; ;100; ;Running;Close; ; ;Medium;No;Yes;100;25
+Kerberos (Calypso);Animal;Planet Calypso; ;20;80; ; ; ; ; ; ;Running;Close; ; ;Medium;No;Yes;110;10
+Hiryuu (Calypso);Hiryuu;Planet Calypso;50; ;50; ; ; ; ; ; ;Flying;Close; ; ;Medium;No;Yes;120;5
+Mourner;Mourner;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close; ; ;High;No;Yes;120;50
+Prototype Defender;Defender;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Firearms; ; ; ;No;No;130; 
+Cornundacauda;Cornundacauda;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close;20; ;Medium;Yes;Yes;150;10
+Merry Snarg;Snarg;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close; ; ; ;No;Yes;160;5
+Molisk;Molisk;Planet Calypso; ;33;67; ; ; ; ; ; ;Running;Close;20; ;Low;No;Yes;160; 
+Traeskeron;Animal;Planet Calypso;25; ;25; ; ; ; ;50; ;Running;Close; ; ; ;No;Yes;180; 
+Marcimex;Marcimex;Planet Calypso;50; ;50; ; ; ; ; ; ; ;Close; ; ; ;No;No;190;50
+Morsusilex;Animal;Planet Calypso; ; ;100; ; ; ; ; ; ;Hopping;Close; ; ;V. High;No;Yes;190;50
+Trilomite;Trilomite;Planet Calypso; ; ; ; ; ; ; ; ;100;Running;Close; ; ;Low;No;Yes;190; 
+Attacker;Attacker;Planet Calypso; ; ; ;25; ;75; ; ; ;Flying;Firearms; ; ;Medium;No;No;200;20
+Calamusoid;Calamusoid;Planet Calypso; ;25;75; ; ; ; ; ; ;Running;Close; ; ; ;No;No;200;50
+Kitty;Pet Breeds;Planet Calypso; ; ; ; ; ; ; ; ; ; ; ; ; ; ;Yes;Yes;200; 
+Spider Bomber;Spider Bomber;Planet Calypso; ; ; ; ; ;0; ; ;100;Hopping;Firearms; ; ;Medium;No;No;200;50
+Thorio Female;Thorio;Planet Calypso;25; ;75; ; ; ; ; ; ;Running;Close; ; ;Medium;No;No;200; 
+Zombie Dog;Mayhem;Planet Calypso;30;30; ;40; ; ; ; ; ; ;Close; ; ; ;No;No;210; 
+Armax Cow;Armax;Planet Calypso;50; ;50; ; ; ; ; ; ;Running;Close;20; ;Low;No;Yes;230;50
+Atrox (Calypso);Atrox;Planet Calypso;23;36;41; ; ; ; ; ; ;Running;Close;20; ;V. High;Yes;Yes;230;50
+Calypsocod;Calypsocod;Planet Calypso; ; ;80; ; ; ; ;20; ;Swimming;Close;15; ;Low;No;Yes;240;50
+Atrax;Atrax;Planet Calypso;38;35;27; ; ; ; ; ; ;Running;Close; ; ;V. High;No;Yes;270; 
+Equus;Equus;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close; ; ;High;No;Yes;280;50
+Gokibusagi;Gokibusagi;Planet Calypso;50;50; ; ; ; ; ; ; ;Running;Close; ; ;High;No;Yes;280;50
+Tezlapod;Tezlapod;Planet Calypso; ; ; ; ; ; ; ; ;100;Jumping;Ranged; ; ;High;No;Yes;290; 
+Drone (Calypso);Drone;Planet Calypso; ; ; ;30; ;70; ; ; ;Running;Firearms; ; ;High;No;No;300;50
+Thorio Male;Thorio;Planet Calypso; ;40;60; ; ; ; ; ; ;Running;Close; ; ;Medium;No;No;300; 
+Longu;Longu;Planet Calypso; ;26;74; ; ; ; ; ; ;Running;Close;20; ;Low;No;Yes;310;50
+Chirin Dragon;Pet Breeds;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ; ;Yes;Yes;320;20
+Longtooth;Animal;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close; ; ; ;No;Yes;320;50
+Mermoth (Calypso);Mermoth;Planet Calypso; ; ;100; ; ; ; ; ; ;Crawling;Close; ; ;V. High;No;Yes;320;50
+Snarg;Snarg;Planet Calypso; ; ;100; ; ; ; ; ; ;Jumping;Close; ; ;Medium;No;Yes;320;50
+Thorifoid Waywatcher;Thorifoid;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ; ;No;No;370;50
+Drone Coordinator;Drone Coordinator;Planet Calypso; ; ; ;30; ;70; ; ; ;Running;Firearms; ; ;Medium;No;No;390; 
+Mayhem Kerberos;Mayhem;Planet Calypso; ;33;33; ; ; ;33; ; ;Running;Close; ; ; ;No;Yes;400;50
+Neomex;Neomex;Planet Calypso;36.25; ;27.5; ; ; ; ;36.25; ; ;Close; ; ; ;No;Yes;400;50
+Thorifoid Shaman;Thorifoid;Planet Calypso; ; ; ; ; ; ;100; ; ;Running;Ranged; ; ;V. High;No;No;400;50
+Armax Bull;Armax;Planet Calypso;50; ;50; ; ; ; ; ; ;Running;Close;20; ;Medium;No;Yes;410; 
+Trooper;Trooper;Planet Calypso; ; ; ;50; ;50; ; ; ;Walking;Firearms; ; ;High;No;No;410;50
+Thorifoid Berserker;Thorifoid;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close; ; ;V. High;No;No;420;50
+Zombie Mutant;Mayhem;Planet Calypso; ;15;35;25; ; ; ; ;25;Running;Close; ; ; ;No;No;420; 
+Fungoid;Fungoid;Planet Calypso; ; ; ; ; ; ; ;100; ;Jumping;Close; ; ;Medium;No;Yes;450; 
+Harbinger;Harbinger;Planet Calypso;31.25;31.25; ; ; ;37.5; ; ; ;Running;Close; ;40;Medium;No;No;450;50
+Nexnecis;Animal;Planet Calypso;70;30; ; ; ; ; ; ; ;Running;Close; ; ;Medium;No;Yes;450; 
+Eudorian Devil;Pet Breeds;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ; ;Yes;Yes;460;24
+Droka;Droka;Planet Calypso; ; ; ;25; ;75; ; ; ;Running;Firearms; ; ;Low;No;No;480;50
+Boorum Female;Boorum;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ; ;No;No;490; 
+Allophyl;Allophyl;Planet Calypso; ; ;33; ; ; ; ; ;67;Running;Close;15; ;Low;No;Yes;500; 
+Warrior;Warrior;Planet Calypso; ;5;10;30; ;55; ; ; ;Running;Firearms; ; ;V. High;No;No;500; 
+Mulmun;Mulmun;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close; ; ;High;No;No;510; 
+Merry Daikiba;Mayhem;Planet Calypso;25;25;25; ; ; ;25; ; ;Running;Close; ; ; ;No;Yes;540;50
+Boorum Male;Boorum;Planet Calypso; ;25;75; ; ; ; ; ; ;Running;Close;30; ;Low;No;No;550; 
+Feffoid (Calypso);Feffoid;Planet Calypso; ; ;35; ; ; ;65; ; ;Running;Close; ; ;High;No;No;550; 
+Miner Bot;Miner Bot;Planet Calypso; ;50;50; ; ; ; ; ; ;Walking;Close;20; ;V. Low;No;No;550; 
+Defender;Defender;Planet Calypso; ; ; ;40; ;60; ; ; ;Walking;Firearms; ; ; ;No;No;560;50
+Tantardion;Tantardion;Planet Calypso; ; ; ; ; ; ; ; ;100;Running;Ranged; ; ;V. Low;No;Yes;560;50
+Scaboreas;Scaboreas;Planet Calypso; ; ;66; ; ; ; ;33; ;Hopping;Close; ; ;V. High;No;Yes;590;50
+Aetherex;Aetherex;Planet Calypso; ; ;100; ; ; ; ; ; ;Flying;Close; ; ;Medium;No;Yes;600;50
+Primordial Longu;Primordial Longu;Planet Calypso;29;29;29;13; ; ; ; ; ;Walking;Close; ; ;Low;No;Yes;620;50
+Mei Hua Quan;Pet Breeds;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ; ;Yes;No;630;50
+Annihilation Eviscerator;Mayhem;Planet Calypso;33.33;33.33; ; ; ; ; ; ;33.33;Running;Close; ; ; ;No;No;640;50
+Mayhem Mulmun;Mayhem;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close; ; ; ;No;No;640;50
+Merry Annihilation Daikiba;Mayhem;Planet Calypso;25;25;25; ; ; ;25; ; ;Running;Close; ; ; ;No;Yes;640;50
+Mind Reaver;Mind Reaver;Planet Calypso; ; ; ;20; ; ;80; ; ; ;Ranged; ; ; ;No;No;640;50
+Sonic Squid;Sonic Squid;Planet Calypso; ; ;66.67; ; ; ; ; ;33.33;Swimming; ; ; ;Low;No;No;660; 
+Itumatrox (Calypso);Itumatrox;Planet Calypso; ; ;25;75; ; ; ; ; ;Jumping;Close; ; ;Low;No;Yes;680; 
+Estophyl;Estophyl;Planet Calypso; ; ;75; ; ; ; ; ;25;Running;Close; ; ;High;No;Yes;700;50
+TskTsk;TskTsk;Planet Calypso; ; ;6;94; ; ; ; ; ;Flying;Ranged;22;15;V. High;No;Yes;730; 
+Hispidus;Hispidus;Planet Calypso; ;50;50; ; ; ; ; ; ;Running;Close; ; ;Medium;No;Yes;780; 
+Cersumon;Cersumon;Planet Calypso; ; ; ; ; ; ; ; ;100;Running;Ranged; ; ;Medium;No;Yes;800;50
+Legionnaire;Legionnaire;Planet Calypso; ; ;8;27; ;65; ; ; ;Walking;Ranged; ; ; ;No;No;810; 
+Razortooth;Animal;Planet Calypso; ; ;100; ; ; ; ; ; ;Swimming;Close; ; ; ;No;No;850; 
+Neconu (Calypso);Neconu;Planet Calypso; ;50;50; ; ; ; ; ; ;Running;Close; ; ;V. High;No;Yes;900;50
+Oculus (Calypso);Oculus;Planet Calypso; ; ; ; ; ; ; ; ;100;Floating;Ranged; ; ;High;No;Yes;900; 
+Eviscerator;Eviscerator;Planet Calypso;50; ; ; ; ; ; ; ;50;Running;Close; ; ;Medium;No;No;920;50
+Cornoanterion;Cornoanterion;F.O.M.A. - Fortuna; ;50;50; ; ; ; ; ; ;Running;Close, Fast; ; ;High;No;Yes;930;50
+Muluk-Hir;Muluk-Hir;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close;20; ;Low;No;No;970; 
+Ambulimax (Calypso);Ambulimax;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close;20; ;Low;No;Yes;1010;50
+Furor;Furor;Planet Calypso; ; ;50; ; ; ; ;50; ;Running (slow);Close; ;15;Low;No;No;1030;50
+Formidon;Formidon;Planet Calypso;65; ;13;22; ; ; ; ; ;Running;Close; ; ;Low;No;Yes;1100;50
+Husskling;Animal;Planet Calypso; ; ; ; ; ; ; ; ; ;None;Ranged; ; ; ;No;Yes;1100;50
+Formicacida;Formicacida;Planet Calypso;33;33; ; ; ; ; ;33; ;Running;Close; ; ;High;No;Yes;1200; 
+Mulaak'f;Mulaak'f;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close; ; ; ;No;No;1330; 
+Caperon;Caperon;F.O.M.A. - Fortuna; ; ;80; ; ; ; ;20; ;Running;Close; ; ;V. High;No;Yes;1340;50
+Merry Hispidus;Mayhem;Planet Calypso; ; ; ; ; ; ; ; ; ; ;Ranged, Close; ; ;V. High;No;No;1340;50
+Frescoquda;Animal;Planet Calypso; ; ;40; ; ; ; ;60; ;Jumping;Close; ; ;Low;No;Yes;1380; 
+Feffox;Feffox;Planet Calypso;16.66;38.88;27.77; ; ; ;16.66; ; ; ;Close; ; ; ;No;Yes;1400;50
+Sumima (Calypso);Sumima;Planet Calypso; ; ;72; ; ;15; ; ;13;Floating;Close; ; ;High;No;Yes;1450;50
+Mayhem Araneatrox;Mayhem;Planet Calypso; ;20;43; ; ; ;37; ; ;Running;Close; ; ; ;No;Yes;1500; 
+Letomie;Letomie;Planet Calypso;50; ; ; ; ; ; ;50; ;Rolling;Close; ; ;Low;No;Yes;1530;50
+Kingfisher;Animal;Planet Calypso;100; ; ; ; ; ; ; ; ;Flying;Close; ; ;V. High;No;Yes;1560; 
+Rextelum;Rextelum;Planet Calypso;15;67;33;15; ; ; ;70; ;Running;Close; ; ;High;No;No;1580; 
+Steel Bird;Steel Bird;Planet Calypso; ; ; ; ; ;63; ; ;37;Flying;Firearms;15; ;Low;No;No;1620;50
+Araneatrox;Animal;Planet Calypso;33;33;33; ; ; ; ; ; ;Running;Close; ; ;V. High;No;Yes;1660; 
+Scipulor;Scipulor;Planet Calypso;66;17;17; ; ; ; ; ; ;Running;Close, Fast; ; ;High;No;No;1660; 
+Grand Formidon;Formidon;Planet Calypso;65; ;13;22; ; ; ; ; ;Running;Close; ; ;High;No;Yes;1750;50
+The Big Pumpkin;The Big Pumpkin;Planet Calypso; ;50;50; ; ; ; ; ; ;Walking;Close; ; ; ;No;No;1800;50
+Second Entity;Second Entity;Planet Calypso; ;10; ; ; ;75; ; ;15;Running;Close; ; ;V. High;No;No;1810;50
+Phasm (Calypso);Phasm;Planet Calypso; ;80;20; ; ; ; ; ; ;Running;Close; ; ;Medium;No;Yes;1870;50
+Merry Annihilation Hispidus;Mayhem;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ; ;No;No;1920;50
+Mayhem Mulmun Ascended Alpha;Mayhem;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ; ;No;No;1950;50
+Mayhem Mulmun Ascended Elite;Mayhem;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ; ;No;No;1950;50
+Mayhem Mulmun Ascended Warrior;Mayhem;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ; ;No;No;1950;50
+Hogglo;Animal;Planet Calypso;35;18;47; ; ; ; ; ; ;Running;Close, Fast; ; ;High;No;Yes;2000; 
+Spina Worker;Spina Worker;Planet Calypso;33;33;33;0;0;0;0;0;0;Running;Close; ; ; ;No;Yes;2000;50
+Vanguard;Vanguard;Planet Calypso; ; ; ; ; ; ; ; ; ;Walking;Ranged; ; ;V. High;No;No;2000; 
+Chomper;Chomper;Planet Calypso; ; ;70; ; ; ;30; ; ;Running;Close; ; ;Low;No;Yes;2110;50
+Globster;Animal;Planet Calypso; ; ;1; ; ; ; ;99; ;Running;Ranged;26; ;V. Low;No;No;2230; 
+Malcruentor (Calypso);Malcruentor;Planet Calypso;33;33;33; ; ; ; ; ; ;Running;Close; ; ;V. High;No;Yes;2570; 
+Leviathan;Animal;Planet Calypso; ;15;60; ; ; ; ;25; ;Swimming;Close; ; ; ;No;No;2650; 
+Falxangius;Animal;Planet Calypso;10; ;90; ; ; ; ; ; ;Running;Close; ; ;High;No;Yes;2670; 
+Proteron;Animal;Planet Calypso;25; ;25; ; ; ; ;50; ;Running;Close; ; ;Medium/High;No;Yes;2910; 
+Spina Drone;Spina Drone;Planet Calypso;40;0;0;20;0;0;0;40;0; ; ; ; ; ;No;Yes;3000;50
+Osseocollum (Calypso);Osseocollum;Planet Calypso;50;50; ; ; ; ; ; ; ;Running;Close; ; ;Medium;No;Yes;3450;50
+Yulebot;Mayhem;Planet Calypso; ; ;33;33; ; ;34; ; ;Running; ; ; ; ;No;No;3600; 
+Spina Soldier;Spina Soldier;Planet Calypso;33.3;33.3;33.4; ; ; ; ; ; ;Running; ; ; ; ;No;Yes;4000;50
+Warlock;Warlock;Planet Calypso;33;33;33; ; ; ; ; ; ;Running;Close; ; ; ;No;No;4000;50
+RX;RX (Robot);Planet Calypso; ; ;25;25;25; ; ; ;25;Running;Ranged; ; ; ;No;No;5000; 
+Eomon;Animal;Planet Calypso;35; ;65; ; ; ; ; ; ;Running;Close; ; ; ;No;Yes;5020; 
+Proteron Divine;Animal;Planet Calypso; ; ; ; ; ; ; ; ; ; ;Close; ; ; ;No;No;5470; 
+Big Bulk;Big Bulk;Planet Calypso; ; ;100; ; ; ; ; ; ;Running;Close;20;15;V. High;No;No;5600; 
+Merry Hogglo;Mayhem;Planet Calypso; ; ; ; ; ; ; ; ; ; ; ; ; ; ;No;No;6710;50
+Daspletor;Daspletor;F.O.M.A. - Fortuna; ; ;100; ; ; ; ; ; ;Running;Close; ; ;V. High;No;Yes;7800;50
+Dire Hound;Mayhem;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ;V. High;No;No;10000;50
+Spina Broodmother;Animal;Planet Calypso; ; ; ; ; ; ; ; ; ;Running;Close; ; ; ;No;No;100000; 
+Hussk;Hussk;Planet Calypso; ; ; ; ; ; ; ; ; ;None;Ranged; ; ;V. High;No;Yes;1950000; 
+Beacon Mission;Beacon Mission;Planet Calypso; ; ; ; ; ; ; ; ; ; ;None; ; ; ;No;No; ; 
+Easter Robots;Mayhem;Entropia Universe; ; ; ; ; ; ; ; ; ; ; ; ; ; ;No;No; ; 
+Halloween Creatures;Mayhem;Entropia Universe; ; ;33;50; ; ; ; ;17; ; ; ; ; ;No;No; ; 
+Merry Creatures;Mayhem;Entropia Universe; ; ; ; ; ; ; ; ; ; ; ; ; ; ;No;No; ; 
