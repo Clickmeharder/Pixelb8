@@ -736,7 +736,19 @@ button.xbutt:hover {
     padding-right: 0px;
     padding-left: 4px;
 }
-
+button#sweatshop {
+    height: 49px;
+    width: 142px;
+    font-size: 1.5em;
+    margin: auto;
+	color: #2b8ee27a;
+    border-color: #104755d1;
+    background-color: #0f487a42;
+}
+button#sweatshop:hover {
+    color: #2b8ee2d9;
+    border-color: #14728aed;
+}
 button#enterButt {
     height: 49px;
     width: 142px;
