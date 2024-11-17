@@ -37,6 +37,7 @@
       </div> -->
 	 <!--  <h2 id="themed-welcome-title">Welcome!</h2> -->
 	  <button id="enterButt">Enter Site</button>
+	  <button id="sweatshop">Sweatshop</button>
 <!--Main landing content panel-->
 		<div class="panel content-panel" style="max-width:fit-content;">
 			<div id="main-content">
@@ -365,12 +366,17 @@
 <script>
 	// Select the button element by its ID
 	const enterButton = document.getElementById('enterButt');
-
+	const enterSweatshop = document.getElementById('sweatshop');
 	// Add a click event listener to the button
 	enterButton.addEventListener('click', () => {
 		// Redirect to the desired URL
 		console.log('Enter Butt Sequence Initiated');
 		window.location.href = 'https://pixelb8.lol/home';
+	});
+	enterSweatshop.addEventListener('click', () => {
+		// Redirect to the desired URL
+		console.log('Enter Butt Sequence Initiated - code=Sweatshop');
+		window.location.href = 'https://pixelb8.lol/sweatshop';
 	});
 </script>
 </body>
