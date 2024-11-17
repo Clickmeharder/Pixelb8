@@ -6,6 +6,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
     <title>Entropia Universe Sweat Shop</title>
     <style>
+	    /* Fixed back button styling */
+        .fixed-back-btn {
+            position: fixed;
+            top: 10px; /* Adjust spacing from the top */
+            left: 10px; /* Adjust spacing from the left */
+            background-color: #ff5722; /* Button background color */
+            color: white; /* Text color */
+            padding: 10px 20px; /* Padding for the button */
+            border: none; /* Remove default button border */
+            border-radius: 5px; /* Rounded corners */
+            font-size: 14px; /* Font size */
+            font-weight: bold; /* Bold text */
+            cursor: pointer; /* Pointer cursor on hover */
+            z-index: 1000; /* Ensures it stays on top of other elements */
+            text-decoration: none; /* Remove link underline */
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
+        }
+
+        /* Button hover effect */
+        .fixed-back-btn:hover {
+            background-color: #e64a19; /* Slightly darker color on hover */
+        }
         /* General Styles */
         body {
             font-family: Lucida Console, sans-serif;
@@ -229,6 +251,8 @@
     </style>
 </head>
 <body>
+	<!-- Fixed button -->
+    <a href="https://pixelb8.lol/home" class="fixed-back-btn">Back to Pixelb8</a>
     <header>
         <h1>Secret Universal Sweatshop</h1>
 		<h1 class="susheader">by Secret universal Services</h1>
