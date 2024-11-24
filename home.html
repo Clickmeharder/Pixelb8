@@ -266,6 +266,7 @@ staticPage BLOCK
 			  </div>
 			  <!-- End of Generic Example Elements -->
 		</section>
+		<!-- following script is for updating devnotes -->
 		<script>
 			document.addEventListener("DOMContentLoaded", function() {
 				fetch("/core/assets/data/devnotes/devnotes.json")
@@ -336,22 +337,6 @@ staticPage BLOCK
 						allowfullscreen
 						style="max-height: 180px; width: 100%;"
 					></iframe>
-				</div>
-				<div id="progressBar">
-					<div id="progbarinner">
-						<span class="val currentprogress"></span>s / <span class="val duration"></span>s Total<br>
-						<!-- <span class="val ytvideotitle-label">Title:</span><span class="val" id="ytvideoTitle">err: testing</span><br> -->
-						<div id="mastervolumewrapper">
-							<span class="val ytvideotitle-label">Volume:</span><span class="val" id="masterVolume">45</span>
-						</div>
-					</div>
-				</div>
-				<div class="row mediaplaypause" id="mediacontrols">
-					<div class="button buttpress" id="previous-button">◄◄</div>
-					<div class="button buttpress" id="play-button">►</div>
-					<div class="button buttpress" id="pause-button">❚❚</div>
-					<div class="button buttpress" id="next-button">►►</div>
-					<div class="button buttpress" id="shuffle-button">SHUFFLE</div>
 				</div>
 			</div>
 		</div>
