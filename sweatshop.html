@@ -283,6 +283,31 @@
 		<h1 class="susheader">by Secret universal Services</h1>
         <p>Your trusted source for buying, selling, and exchanging sweat!</p>
     </header>
+	<!-- put login Panel below -->		
+		<div class="panel right-panel" style="position:absolute;top:0px;right:0px;height:auto;">
+			<div id="userInfoContainer" style="height:100px;">
+				<P id="username">StrangerDanger</p>
+				<P id="profileusername">-</p>
+				<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
+				<p id="Userpixelcount" class="hidden">0px</p>
+				<p id="loginStatus">Status: offline</p>
+				<ul>
+					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
+					<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
+					<span id="emailVerified" class="hidden">►</span>
+					<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
+					
+				</ul>
+			</div>
+			<div class="row">
+				<button class="logged-in" id="logoutbutt" type="button">Logout</button>
+			</div>
+			<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
+				<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
+				<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
+			</div>
+		</div>
+<!-- end of login Panel-->
   <!-- New Main Content Area -->
   <main class="main-content">
       <!-- Left Panel -->
@@ -310,33 +335,7 @@
             <!-- Add your slideshow content here -->
         </div>
       </div>
-
-<!-- put login Panel below -->		
-		<div class="panel right-panel" style="position:fixed;top:0px;right:0px;height:auto;">
-			<div id="userInfoContainer" style="height:100px;">
-				<P id="username">StrangerDanger</p>
-				<P id="profileusername">-</p>
-				<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
-				<p id="Userpixelcount" class="hidden">0px</p>
-				<p id="loginStatus">Status: offline</p>
-				<ul>
-					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
-					<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
-					<span id="emailVerified" class="hidden">►</span>
-					<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
-					
-				</ul>
-			</div>
-			<div class="row">
-				<button class="logged-in" id="logoutbutt" type="button">Logout</button>
-			</div>
-			<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
-				<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
-				<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
-			</div>
-		</div>
-<!-- end of login Panel-->
-	 </main>
+  </main>
 	
 	
     <div class="container">
