@@ -588,7 +588,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 	padding:0px;
 }
 .right-panel {
-  margin-top: -5px;
+  margin-top: 0px;
   margin-left: -8px;
   color: var(--staticpage-sidepanels-text-color);
   border-color: var(--staticpage-sidepanels-border-color);
@@ -599,7 +599,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   opacity: var(--staticpage-sidepanels-opacity);
   padding: 5px;
     height: auto;
-    min-height: 180px;
+    min-height: 227px;
     max-height: 27vh;
 	font-family: 'Pixelify Sans';
 	box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
