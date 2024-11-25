@@ -9,7 +9,8 @@
 	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="Modules/SuSOS/apps/stolencalymap/core/css/HudMap-styles.css">
-
+		
+    <script src="Modules/SuSOS/apps/stolencalymap/core/js/leaflet.js"></script><style type="text/css" id="operaUserStyle"></style>
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
@@ -136,16 +137,8 @@ staticPage BLOCK
 		</div>
 <!-- end of login Panel-->
 	 </main>
-<!-- Content Panels -->
-	<!-- Content Panel A -->
-	<div>
-	  <!-- Current Main Content Area -->
-	  <iframe id="dynamicIframe" src="about:blank"></iframe>
 
-	</div>
-
-
-
+	  <div style="max-width: 950px; margin: auto" id="fullscreen"></div>
 		<!--end mainpage -->
 <!-- Modal for Signup -->
 <div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
@@ -206,7 +199,7 @@ staticPage BLOCK
     </div>
   </div>
 </div>
-<div style="max-width: 950px; margin: auto" id="fullscreen"></div>
+
 <div id="currentgifcursordiv" style="left: 1059px; top: 162px; background-image: none;"></div>
 <div id="currentgifdiv" style="background-image: none; background-color: black;"></div>	
 
@@ -218,6 +211,64 @@ staticPage BLOCK
 	<!--FIREBASE AUTHENTICATION SKRIPTS-->
 	<script src="core/js/index.js"></script>
 	<script type="module" src="core/js/firebase/auth.js"></script>
+	<script type="text/javascript" src="https://cdn.cpx-research.com/assets/js/script_tag_v2.0.js">
+		const script1 = {
+			div_id: "fullscreen",
+			theme_style: 1,
+			order_by: 2,
+			limit_surveys: 7,
+		};
+		const config = {
+			general_config: {
+				app_id: 25257,
+				ext_user_id: "", 
+				 email: "",
+				 username: "",
+			   secure_hash: "",
+				subid_1: "",
+				subid_2: "",
+			},
+			style_config: {
+				text_color: "#2b2b2b",
+				survey_box: {
+					topbar_background_color: "#ffaf20",
+					box_background_color: "white",
+					rounded_borders: true,
+					stars_filled: "black",
+				},
+			},
+			script_config: [script1],
+			debug: false,
+			 useIFrame: true,   
+			 iFramePosition: 1,
+			functions: {
+				no_surveys_available: () =>
+				{
+					console.log("no surveys available function here");
+				}, // Function without parameter, NEVER USE window.alert... because of infinite loop
+				count_new_surveys: (countsurveys) =>
+				{
+					console.log("count surveys function here, count:", countsurveys);
+				},
+				get_all_surveys: (surveys) =>
+				{
+					console.log("get all surveys function here, surveys: ", surveys);
+				},
+				get_transaction: (transactions) =>
+				{
+					console.log("transaction function here, transaction: ", transactions);
+				}
+																			
+																			
+		  }  
+		  
+		  
+		  };
+
+		window.config = config;
+
+	
+	</script>
 	</body>
 </html>
 <!--______________________________________________________________ -->
