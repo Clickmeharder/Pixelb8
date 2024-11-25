@@ -92,15 +92,7 @@ getDocs(collection(db, 'UserProfiles'))
   .catch((error) => {
     console.log("Error getting documents: ", error);
   });
-getDocs(collection(db, 'users'))
-  .then((querySnapshot) => {
-    querySnapshot.forEach((doc) => {
-      console.log(doc.data());
-    });
-  })
-  .catch((error) => {
-    console.log("Error getting documents: ", error);
-  });
+
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
@@ -134,6 +126,7 @@ getDocs(collection(db, 'users'))
 				// Log the user's pixelBalance field
 			      const userData = doc.data();
 				    console.log("Logged-in user's pixelBalance:", userData.pixelBalance);
+					console.log(doc.id, userData.pixelBalance);
 			    }
 			  });
 		    })
