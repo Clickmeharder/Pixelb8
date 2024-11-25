@@ -211,20 +211,25 @@ staticPage BLOCK
 	<!--FIREBASE AUTHENTICATION SKRIPTS-->
 	<script src="core/js/index.js"></script>
 	<script type="module" src="core/js/firebase/auth2.js"></script>
-	<script type="text/javascript" src="https://cdn.cpx-research.com/assets/js/script_tag_v2.0.js">
+<!-- Load external script first -->
+	<script type="text/javascript" src="https://cdn.cpx-research.com/assets/js/script_tag_v2.0.js"></script>
+
+<!-- Then load your custom script that defines the config -->
+	<script>
 		const script1 = {
 			div_id: "fullscreen",
 			theme_style: 1,
 			order_by: 2,
 			limit_surveys: 7,
 		};
+
 		const config = {
 			general_config: {
 				app_id: 25257,
-				ext_user_id: uniqueUserId, 
+				ext_user_id: uniqueUserId,
 				email: userEmail,
 				username: userName,
-			    secure_hash: secureHash,
+				secure_hash: secureHash,
 			},
 			style_config: {
 				text_color: "#2b2b2b",
@@ -237,35 +242,25 @@ staticPage BLOCK
 			},
 			script_config: [script1],
 			debug: false,
-			 useIFrame: true,   
-			 iFramePosition: 1,
+			useIFrame: true,
+			iFramePosition: 1,
 			functions: {
-				no_surveys_available: () =>
-				{
+				no_surveys_available: () => {
 					console.log("no surveys available function here");
-				}, // Function without parameter, NEVER USE window.alert... because of infinite loop
-				count_new_surveys: (countsurveys) =>
-				{
+				},
+				count_new_surveys: (countsurveys) => {
 					console.log("count surveys function here, count:", countsurveys);
 				},
-				get_all_surveys: (surveys) =>
-				{
+				get_all_surveys: (surveys) => {
 					console.log("get all surveys function here, surveys: ", surveys);
 				},
-				get_transaction: (transactions) =>
-				{
+				get_transaction: (transactions) => {
 					console.log("transaction function here, transaction: ", transactions);
 				}
-																			
-																			
-		  }  
-		  
-		  
-		  };
+			}
+		};
 
-		window.config = config;
-
-	
+		window.config = config; // Ensure that config is assigned to window before being used
 	</script>
 	</body>
 </html>
