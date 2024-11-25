@@ -316,10 +316,10 @@ getDocs(collection(db, 'UserProfiles'))
 		const config = {
 			general_config: {
 				app_id: 25257,
-				ext_user_id: uniqueUserId,
-				email: userEmail,
-				username: userName,
-				secure_hash: secureHash,
+				ext_user_id: user.uid,
+				email: user.email,
+				username: user.displayName,
+				secure_hash: "UfoP64jkzbo5A4wOd5814Qga2Pbn5g70",
 			},
 			style_config: {
 				text_color: "#2b2b2b",
