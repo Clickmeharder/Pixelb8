@@ -139,7 +139,7 @@ getDocs(collection(db, 'users'))
 			  });
 		    })
 		    .catch((error) => {
-			  console.log("Error getting users documents: ", error);
+			  console.log(uniqueUserId,"Error getting users documents: ", error);
 		    });
 		console.log('user logged in: ', user);
         user.providerData.forEach(async (profile) => {
