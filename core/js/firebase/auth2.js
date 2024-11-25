@@ -177,6 +177,51 @@ getDocs(collection(db, 'UserProfiles'))
             }
           }
 		  populateAccountDetails(user);
+		  		const script1 = {
+					div_id: "fullscreen",
+					theme_style: 1,
+					order_by: 2,
+					limit_surveys: 7,
+				};
+
+				const config = {
+					general_config: {
+						app_id: 25257,
+						ext_user_id: user.uid,
+						email: user.email,
+						username: user.displayName,
+						secure_hash: "UfoP64jkzbo5A4wOd5814Qga2Pbn5g70",
+					},
+					style_config: {
+						text_color: "#2b2b2b",
+						survey_box: {
+							topbar_background_color: "#ffaf20",
+							box_background_color: "white",
+							rounded_borders: true,
+							stars_filled: "black",
+						},
+					},
+					script_config: [script1],
+					debug: false,
+					useIFrame: true,
+					iFramePosition: 1,
+					functions: {
+						no_surveys_available: () => {
+							console.log("no surveys available function here");
+						},
+						count_new_surveys: (countsurveys) => {
+							console.log("count surveys function here, count:", countsurveys);
+						},
+						get_all_surveys: (surveys) => {
+							console.log("get all surveys function here, surveys: ", surveys);
+						},
+						get_transaction: (transactions) => {
+							console.log("transaction function here, transaction: ", transactions);
+						}
+					}
+				};
+
+				window.config = config; // Ensure that config is assigned to window before being used
         });
       } else {
         // User is signed out
@@ -200,7 +245,7 @@ getDocs(collection(db, 'UserProfiles'))
 		console.log("User is not signed in. Showing a default iframe or hiding it.");
         iframeElement.src = "about:blank";
       }
-
+	
     });
 // Signup form submission event listener
 	const signUpForm = document.querySelector('#signup-form');
@@ -306,49 +351,5 @@ getDocs(collection(db, 'UserProfiles'))
 	  // Show the modal for editing profile
 	  $('#modal-editProfile').modal('show');
 	});
-		const script1 = {
-			div_id: "fullscreen",
-			theme_style: 1,
-			order_by: 2,
-			limit_surveys: 7,
-		};
 
-		const config = {
-			general_config: {
-				app_id: 25257,
-				ext_user_id: user.uid,
-				email: user.email,
-				username: user.displayName,
-				secure_hash: "UfoP64jkzbo5A4wOd5814Qga2Pbn5g70",
-			},
-			style_config: {
-				text_color: "#2b2b2b",
-				survey_box: {
-					topbar_background_color: "#ffaf20",
-					box_background_color: "white",
-					rounded_borders: true,
-					stars_filled: "black",
-				},
-			},
-			script_config: [script1],
-			debug: false,
-			useIFrame: true,
-			iFramePosition: 1,
-			functions: {
-				no_surveys_available: () => {
-					console.log("no surveys available function here");
-				},
-				count_new_surveys: (countsurveys) => {
-					console.log("count surveys function here, count:", countsurveys);
-				},
-				get_all_surveys: (surveys) => {
-					console.log("get all surveys function here, surveys: ", surveys);
-				},
-				get_transaction: (transactions) => {
-					console.log("transaction function here, transaction: ", transactions);
-				}
-			}
-		};
-
-		window.config = config; // Ensure that config is assigned to window before being used
 //hmmm
