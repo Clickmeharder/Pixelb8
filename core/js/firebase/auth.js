@@ -125,8 +125,8 @@ getDocs(collection(db, 'UserProfiles'))
 			    if (doc.id === uniqueUserId) {
 				// Log the user's pixelBalance field
 			      const userData = doc.data();
-				    console.log("Logged-in user's pixelBalance:", userData.pixelBalance);
-					console.log(doc.id, userData.pixelBalance);
+				    console.log("Logged-in user's pixelBalance:", userData.balancePixels);
+					console.log(doc.id, userData.balancePixels);
 			    }
 			  });
 		    })
