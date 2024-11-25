@@ -125,6 +125,7 @@ getDocs(collection(db, 'users'))
 
 	  if (user !== null) {
 		// User is signed in
+		const uniqueUserId = user.uid;
 		  // Fetch data from the 'users' collection
 		  getDocs(collection(db, 'users'))
 		    .then((querySnapshot) => {
@@ -169,7 +170,7 @@ getDocs(collection(db, 'users'))
 			
 		  innerContentloggedout.classList.add('hidden');
           innerContentloggedin.classList.remove('hidden');
-		  const uniqueUserId = user.uid;
+		  
           const userName = encodeURIComponent(user.displayName || "Guest");
           const userEmail = encodeURIComponent(user.email || "");
 
