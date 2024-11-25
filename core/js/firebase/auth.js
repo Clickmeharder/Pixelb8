@@ -92,8 +92,35 @@ getDocs(collection(db, 'UserProfiles'))
   .catch((error) => {
     console.log("Error getting documents: ", error);
   });
-// Function to check if user has a balance and set it if not
+// Function to check if user has a balancePixels in the users collection goes below this comment
+// Get the logged-in user's UID from Firebase Authentication
+const user = firebase.auth().currentUser;
 
+if (user) {
+  // Get the user's UID
+  const uid = user.uid;
+
+  // Access the Firestore `users` collection
+  const db = firebase.firestore();
+  const userRef = db.collection('users').doc(uid);  // Reference to the user's document
+
+  // Fetch the user's document
+  userRef.get()
+    .then(doc => {
+      if (doc.exists) {
+        // Document found, retrieve the balancePixels field
+        const balancePixels = doc.data().balancePixels;
+        console.log('Balance Pixels:', balancePixels);
+      } else {
+        console.log('No such document!');
+      }
+    })
+    .catch(error => {
+      console.error('Error getting document:', error);
+    });
+} else {
+  console.log('No user is signed in');
+}
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
@@ -134,7 +161,7 @@ getDocs(collection(db, 'UserProfiles'))
           profileusernameElement.textContent = profile.displayName || "-idk-";
           emailElement.textContent = profile.email || "Unknown";
           photoElement.src = user.photoURL || "default.jpg";
-		  userpixelcountElement.textContent = profile.pixelcount || "null";
+		  userpixelcountElement.textContent = profile.pixelcount || "null";//fix this to properly set it to the logged in users balancePixels
 		  userpixelcountElement.classList.remove('hidden');
           emailVerifiedElement.textContent = user.emailVerified ? "► Verified" : " ► Unverified";
           emailVerifiedElement.classList.remove('hidden');
