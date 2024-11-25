@@ -112,6 +112,10 @@ getDocs(collection(db, 'UserProfiles'))
 	  const userpixelcountElement = document.getElementById('Userpixelcount');
 	  const innerContentloggedin = document.getElementById('innercontent-loggedin');
 	  const innerContentloggedout = document.getElementById('innercontent-loggedout');
+	  const iframeElement = document.getElementById("dynamicIframe");
+
+	  const baseURL =
+		  "https://offers.cpx-research.com/index.php?app_id=25257&ext_user_id={unique_user_id}&secure_hash={secure_hash}&username={user_name}&email={user_email}&subid_1=&subid_2";
 
       if (user !== null) {
         // User is signed in
