@@ -140,9 +140,6 @@ getDocs(collection(db, 'users'))
 		    .catch((error) => {
 			  console.log("Error getting users documents: ", error);
 		    });
-	    } else {
-	      console.log("No user is logged in.");
-	    }
 		console.log('user logged in: ', user);
         user.providerData.forEach(async (profile) => {
           console.log("Sign-in provider: " + profile.providerId);
