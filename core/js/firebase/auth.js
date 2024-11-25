@@ -147,7 +147,7 @@ getDocs(collection(db, 'UserProfiles'))
 		  innerContentloggedout.classList.add('hidden');
           innerContentloggedin.classList.remove('hidden');
 		  const uniqueUserId = user.uid;
-            const secureHash = "UfoP64jkzbo5A4wOd5814Qga2Pbn5g70"; // Replace with actual logic
+            const secureHash = "UfoP64jkzbo5A4wOd5814Qga2Pbn5g70";
             const userName = encodeURIComponent(user.displayName || "Guest");
             const userEmail = encodeURIComponent(user.email || "");
 
