@@ -114,7 +114,7 @@ getDocs(collection(db, 'UserProfiles'))
 	  const iframeElement = document.getElementById("dynamicIframe");
 
 	  const baseURL =
-		  "https://offers.cpx-research.com/index.php?app_id=25257&ext_user_id={unique_user_id}&secure_hash={secure_hash}&username={user_name}&email={user_email}&subid_1=&subid_2";
+		  "https://offers.cpx-research.com/index.php?app_id=25257&ext_user_id={unique_user_id}&username={user_name}&email={user_email}&subid_1=&subid_2=";
 
       if (user !== null) {
         // User is signed in
@@ -147,18 +147,17 @@ getDocs(collection(db, 'UserProfiles'))
 		  innerContentloggedout.classList.add('hidden');
           innerContentloggedin.classList.remove('hidden');
 		  const uniqueUserId = user.uid;
-            const secureHash = "UfoP64jkzbo5A4wOd5814Qga2Pbn5g70";
-            const userName = encodeURIComponent(user.displayName || "Guest");
-            const userEmail = encodeURIComponent(user.email || "");
+          const userName = encodeURIComponent(user.displayName || "Guest");
+          const userEmail = encodeURIComponent(user.email || "");
 
-            const finalURL = baseURL
-                .replace("{unique_user_id}", uniqueUserId)
-                .replace("{secure_hash}", secureHash)
-                .replace("{user_name}", userName)
-                .replace("{user_email}", userEmail);
+          const finalURL = baseURL
+            .replace("{unique_user_id}", uniqueUserId)
+            .replace("{user_name}", userName)
+            .replace("{user_email}", userEmail);
 
-            iframeElement.src = finalURL;
-            console.log("Updated iframe src:", finalURL);
+		  // Update or redirect to the final URL (e.g., embedding in an iframe or redirection)
+		  iframeElement.src = finalURL;
+          console.log("Updated iframe src:", finalURL);
           // Set the color based on email verification status
           if (user.emailVerified) {
             emailVerifiedElement.style.color = "#24b500b5"; // Green color for verified email
