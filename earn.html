@@ -21,7 +21,7 @@
 <style>
 	iframe {
 		width: 100vw;
-		height: 300px;
+		height: 550px;
 	}
 </style>
 <body>
@@ -207,7 +207,7 @@ staticPage BLOCK
     </div>
   </div>
 </div>
-
+<div style="max-width: 950px; margin: auto" id="fullscreen"></div>
 <div id="currentgifcursordiv" style="left: 1059px; top: 162px; background-image: none;"></div>
 <div id="currentgifdiv" style="background-image: none; background-color: black;"></div>	
 
@@ -219,6 +219,64 @@ staticPage BLOCK
 	<!--FIREBASE AUTHENTICATION SKRIPTS-->
 	<script src="core/js/index.js"></script>
 	<script type="module" src="core/js/firebase/auth.js"></script>
+	<script type="text/javascript" src="https://cdn.cpx-research.com/assets/js/script_tag_v2.0.js">
+		const script1 = {
+			div_id: "fullscreen", // string // Entry point for the script
+			theme_style: 1, // int // Theme: Select 1 for fullscreen, 2 for sidebar, 3 for sidebar single item
+			order_by: 2, // int // Sort surveys (optional): Select 1 for best score (default), 2 for best money, 3 for best conversion rate
+			limit_surveys: 7 // int // Limit the number of surveys displayed (optional). Default is 12.
+		};
+		const config = {
+			general_config: {
+				app_id: 25257, //number
+				ext_user_id: "pixelb8", // string
+				 email: "", // string
+				 username: "", // string
+			   secure_hash: "", // string if enabled on publisher area
+				subid_1: "", // string
+				subid_2: "", // string
+			},
+			style_config: {
+				text_color: "#2b2b2b", // string // hex, rgba, colorcode
+				survey_box: {
+					topbar_background_color: "#ffaf20", // string // hex, rgba, colorcode
+					box_background_color: "white", // string // hex, rgba, colorcode
+					rounded_borders: true, // boolean true || false
+					stars_filled: "black", // string // hex, rgba, colorcode
+				},
+			},
+			script_config: [script1], // Object Array
+			debug: false, // boolean
+			 useIFrame: true, //boolean    
+			 iFramePosition: 1, // 1 right (default), 2 left
+			functions: {
+				no_surveys_available: () =>
+				{
+					console.log("no surveys available function here");
+				}, // Function without parameter, NEVER USE window.alert... because of infinite loop
+				count_new_surveys: (countsurveys) =>
+				{
+					console.log("count surveys function here, count:", countsurveys);
+				},
+				get_all_surveys: (surveys) =>
+				{
+					console.log("get all surveys function here, surveys: ", surveys);
+				},
+				get_transaction: (transactions) =>
+				{
+					console.log("transaction function here, transaction: ", transactions);
+				}
+																			
+																			
+		  }  
+		  
+		  
+		  };
+
+		window.config = config;
+
+	
+	</script>
 	</body>
 </html>
 <!--______________________________________________________________ -->
