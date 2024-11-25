@@ -128,7 +128,7 @@ getDocs(collection(db, 'UserProfiles'))
 				    console.log("Logged-in user's pixelBalance:", userData.balancePixels);
 					console.log(doc.id, userData.balancePixels);
 					
-					userpixelcountElement.textContent = "Pixels" + userData.balancePixels || "null";//fix this to properly set it to the logged in users balancePixels
+					userpixelcountElement.textContent = "Pixels: " + userData.balancePixels || "null";//fix this to properly set it to the logged in users balancePixels
 			    }
 			  });
 		    })
