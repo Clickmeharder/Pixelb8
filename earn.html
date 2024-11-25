@@ -152,42 +152,11 @@ staticPage BLOCK
 	<!-- Content Panel A -->
 	<div>
 	  <!-- Current Main Content Area -->
-	  <iframe id="dynamicIframe" width="100%" frameBorder="0" height="2000px" src=""></iframe>
+	  <iframe id="dynamicIframe" src="about:blank"></iframe>
+
 	</div>
 
-	<script>
-	  const iframeElement = document.getElementById("dynamicIframe");
 
-	  // Base URL with placeholders
-	  const baseURL =
-		"https://offers.cpx-research.com/index.php?app_id=25257&ext_user_id={unique_user_id}&secure_hash={secure_hash}&username={user_name}&email={user_email}&subid_1=&subid_2";
-
-	  // Listen for auth state changes
-	  onAuthStateChanged(auth, async (user) => {
-		if (user) {
-		  // Replace placeholders with actual user data
-		  const uniqueUserId = user.uid; // Firebase UID as unique user ID
-		  const secureHash = "exampleSecureHash"; // Replace with actual logic to generate secure hash if required
-		  const userName = encodeURIComponent(user.displayName || "Guest");
-		  const userEmail = encodeURIComponent(user.email || "");
-
-		  // Generate final URL
-		  const finalURL = baseURL
-			.replace("{unique_user_id}", uniqueUserId)
-			.replace("{secure_hash}", secureHash)
-			.replace("{user_name}", userName)
-			.replace("{user_email}", userEmail);
-
-		  // Update iframe src
-		  iframeElement.src = finalURL;
-
-		  console.log("Updated iframe src:", finalURL);
-		} else {
-		  console.log("User is not signed in. Showing a default iframe or hiding it.");
-		  iframeElement.src = "about:blank"; // Or any default/fallback URL
-		}
-	  });
-	</script>
 
 		<!--end mainpage -->
 <!-- Modal for Signup -->
