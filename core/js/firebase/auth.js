@@ -92,36 +92,16 @@ getDocs(collection(db, 'UserProfiles'))
   .catch((error) => {
     console.log("Error getting documents: ", error);
   });
-// Function to check if user has a balancePixels in the users collection goes below this comment
-// Get the logged-in user's UID from Firebase Authentication
-const user = firebase.auth().currentUser;
-
-if (user) {
-  // Get the user's UID
-  const uid = user.uid;
-
-  // Access the Firestore `users` collection
-  const db = firebase.firestore();
-  const userRef = db.collection('users').doc(uid);  // Reference to the user's document
-
-  // Fetch the user's document
-  userRef.get()
-    .then(doc => {
-      if (doc.exists) {
-        // Document found, retrieve the balancePixels field
-        const balancePixels = doc.data().balancePixels;
-        console.log('Balance Pixels:', balancePixels);
-      } else {
-        console.log('No such document!');
-      }
-    })
-    .catch(error => {
-      console.error('Error getting document:', error);
+// Fetch data from users collection
+getDocs(collection(db, 'users'))
+  .then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      console.log("User:", doc.data());
     });
-} else {
-  console.log('No user is signed in');
-}
-
+  })
+  .catch((error) => {
+    console.log("Error getting users documents: ", error);
+  });
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
@@ -143,12 +123,31 @@ if (user) {
 	  const baseURL =
 		  "https://offers.cpx-research.com/index.php?app_id=25257&ext_user_id={unique_user_id}&username={user_name}&email={user_email}&subid_1=&subid_2=";
 
-      if (user !== null) {
-        // User is signed in
+	  if (user !== null) {
+		// User is signed in
+		  // Fetch data from the 'users' collection
+		  getDocs(collection(db, 'users'))
+		    .then((querySnapshot) => {
+			  querySnapshot.forEach((doc) => {
+			  // Check if the document's ID matches the logged-in user's UID
+			    if (doc.id === uniqueUserId) {
+				// Log the user's pixelBalance field
+			      const userData = doc.data();
+				    console.log("Logged-in user's pixelBalance:", userData.pixelBalance);
+			    }
+			  });
+		    })
+		    .catch((error) => {
+			  console.log("Error getting users documents: ", error);
+		    });
+	    } else {
+	      console.log("No user is logged in.");
+	    }
 		console.log('user logged in: ', user);
         user.providerData.forEach(async (profile) => {
           console.log("Sign-in provider: " + profile.providerId);
           console.log("Provider-specific UID: " + profile.uid);
+		  console.log("users uid: " + user.uid);
 		  console.log("user displayname: " + user.displayName);
           console.log("profile.displayname: " + profile.displayName);
           console.log("profile Email: " + profile.email);
