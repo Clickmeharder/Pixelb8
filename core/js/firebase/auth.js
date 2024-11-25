@@ -142,7 +142,19 @@ getDocs(collection(db, 'UserProfiles'))
 			
 		  innerContentloggedout.classList.add('hidden');
           innerContentloggedin.classList.remove('hidden');
-		  
+		  const uniqueUserId = user.uid;
+            const secureHash = "exampleSecureHash"; // Replace with actual logic
+            const userName = encodeURIComponent(user.displayName || "Guest");
+            const userEmail = encodeURIComponent(user.email || "");
+
+            const finalURL = baseURL
+                .replace("{unique_user_id}", uniqueUserId)
+                .replace("{secure_hash}", secureHash)
+                .replace("{user_name}", userName)
+                .replace("{user_email}", userEmail);
+
+            iframeElement.src = finalURL;
+            console.log("Updated iframe src:", finalURL);
           // Set the color based on email verification status
           if (user.emailVerified) {
             emailVerifiedElement.style.color = "#24b500b5"; // Green color for verified email
@@ -181,6 +193,8 @@ getDocs(collection(db, 'UserProfiles'))
 		innerContentloggedin.classList.add('hidden');
         innerContentloggedout.classList.remove('hidden');
 		populateAccountDetails(user);
+		console.log("User is not signed in. Showing a default iframe or hiding it.");
+        iframeElement.src = "about:blank";
       }
 
     });
