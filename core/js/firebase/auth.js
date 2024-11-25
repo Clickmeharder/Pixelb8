@@ -54,7 +54,7 @@ function populateAccountDetails(user) {
       { key: 'Username', value: user.displayName || 'No Name Set' },
       { key: 'Auth Alias', value: user.providerData[0]?.displayName || '-Email Account-' },
       { key: 'Profile Pic', value: user.photoURL || 'null' },
-      { key: 'Pixel Count', value: '0px' },
+      { key: 'Pixel Count', value: user.pixelcount || 'null' },
       { key: 'Auth Provider', value: user.providerData[0]?.providerId || 'uknown' },
 	  { key: 'User Email', value: user.email || 'null' }, // This can be populated if needed
 	  { key: 'Auth Provider email', value: user.providerData[0]?.email || '-idk-' },
