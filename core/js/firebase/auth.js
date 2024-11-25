@@ -92,15 +92,14 @@ getDocs(collection(db, 'UserProfiles'))
   .catch((error) => {
     console.log("Error getting documents: ", error);
   });
-// Fetch data from users collection
 getDocs(collection(db, 'users'))
   .then((querySnapshot) => {
     querySnapshot.forEach((doc) => {
-      console.log("User:", doc.data());
+      console.log(doc.data());
     });
   })
   .catch((error) => {
-    console.log("Error getting users documents: ", error);
+    console.log("Error getting documents: ", error);
   });
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
