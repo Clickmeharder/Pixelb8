@@ -33,6 +33,11 @@
 		<div id="character">
 			<p id="Character-name">Dee Falt</p>
 			<p id="Character-class">adventurer</p>
+			<div class="Character-menutabs">
+				<div class="tab active" data-tab="char-stats">Stats</div>
+				<div class="tab" data-tab="char-inventory">Inventory</div>
+				<div class="tab" data-tab="char-crafting">Crafting</div>
+			</div>
 			<div id="character-stats">
 				<!-- Stats and experience dynamically updated -->
 				<p class="char-stat">Hp: <span id="Health">100</span></p>
@@ -48,8 +53,9 @@
 				<p class="char-stat">xp: <span id="staminaxp">0</span></p>
 				<p class="char-stat">Karma: <span id="Karma">0</span></p>
 			</div>
+
 			<div id="character-inventory">
-				<p id="totalitems">Inventory: 0 items</p>
+				<p class="char-inventory-info"><span id="totalitems">0</span>/500</p>
 				<div id="items">
 					 <!-- characters items will be displayed here -->
 				</div>
