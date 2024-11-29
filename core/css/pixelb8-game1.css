@@ -32,7 +32,9 @@
     justify-content: space-around;
     margin-bottom: 10px;
 }
-
+div#character-stats {
+    color: #707070;
+}
 .tab {
     padding: 5px 10px;
     cursor: pointer;
