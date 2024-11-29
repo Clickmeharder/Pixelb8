@@ -1,4 +1,4 @@
-#game-container {
+#funwrap1 {
     position: relative;
     margin: 0 auto;
     width: 800px;
@@ -9,7 +9,7 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
 }
 
-#game-canvas {
+canvas {
     display: block;
     background: #000; /* Black background for retro feel */
     width: 100%;
