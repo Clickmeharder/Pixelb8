@@ -6,44 +6,46 @@
 }
 
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f5f5f5;
+    font-family: 'Courier New', monospace; /* Retro monospace font */
+    background-color: #222; /* Dark background for a retro feel */
+    color: #e0e0e0; /* Light text color */
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     min-height: 100vh;
-    padding: 20px;
+    padding: 10px;
 }
 
+/* Main Game Content Container */
 main {
-    display: flex;
-    flex-direction: row;
-    gap: 40px;
-    max-width: 1200px;
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: space-between;
-}
-
-/* Character Stats Area */
-#character {
-    background-color: #ffffff;
-    padding: 20px;
-    width: 300px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: 350px;
+    padding: 15px;
+    border: 2px solid #555; /* Retro border */
+    background-color: #111; /* Dark background for the container */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1); /* Subtle shadow */
+}
+
+/* Character Stats Display */
+#character {
+    background-color: #333; /* Dark background for stats section */
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #444; /* Subtle border */
+    color: #e0e0e0;
 }
 
 #Charactername {
-    font-size: 1.8em;
+    font-size: 1.5em;
     font-weight: bold;
-    color: #333;
     text-align: center;
+    margin-bottom: 10px;
+    color: #ffcc00; /* Retro yellow color for name */
 }
 
+/* Character Stats and Experience */
 #character-stats {
     display: flex;
     flex-direction: column;
@@ -51,97 +53,94 @@ main {
 }
 
 .char-stat {
+    font-size: 1em;
     font-weight: bold;
-    color: #555;
+    color: #ffcc00; /* Yellow for stat labels */
 }
 
 .char-stat- {
+    font-size: 1em;
     font-weight: bold;
-    color: #555;
+    color: #ffcc00;
 }
 
 #character-inventory {
-    background-color: #f9f9f9;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.05);
+    padding: 10px;
+    background-color: #222; /* Dark background for inventory */
+    border-radius: 5px;
+    border: 1px solid #444;
+    margin-top: 15px;
+    text-align: center;
 }
 
 #totalitems {
     font-size: 1.1em;
-    margin-bottom: 10px;
+    color: #e0e0e0;
 }
 
 #items {
+    margin-top: 10px;
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
+    justify-content: center;
 }
 
 #items .item {
-    width: 50px;
-    height: 50px;
-    background-color: #ddd;
+    width: 40px;
+    height: 40px;
+    background-color: #555; /* Gray for items */
     border-radius: 5px;
     display: flex;
     justify-content: center;
     align-items: center;
+    color: #222; /* Darker text inside items */
     font-size: 1.2em;
+}
+
+/* Game Container */
+#game-container {
+    background-color: #222; /* Dark background for game area */
+    border-radius: 8px;
+    border: 2px solid #444;
+    padding: 15px;
+    color: #e0e0e0;
     text-align: center;
 }
 
-/* Game Container Area */
-#game-container {
-    background-color: #e0e0e0;
-    border-radius: 8px;
-    width: 65%;
-    min-height: 500px;
-    position: relative;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-}
-
 #player, #enemy {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    position: absolute;
+    margin: 10px auto;
 }
 
 #player {
     background-color: #4CAF50; /* Green for player */
-    left: 10%;
 }
 
 #enemy {
     background-color: #F44336; /* Red for enemy */
-    left: 70%;
 }
 
 #hudstats {
-    background-color: #ffffff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    text-align: center;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #e0e0e0;
 }
 
 #hudstats p {
-    font-size: 1.1em;
     margin: 5px 0;
-    color: #555;
 }
 
+/* Specific styling for health and inventory */
 #hudstats p#health {
-    color: #FF6347; /* Red */
+    color: #FF6347; /* Red for health */
 }
 
 #hudstats p#inventory {
-    color: #3CB371; /* Green */
+    color: #3CB371; /* Green for inventory */
 }
