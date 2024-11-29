@@ -1,3 +1,91 @@
+/* General character container */
+#character {
+    font-family: Arial, sans-serif;
+    border: 1px solid #ccc;
+    padding: 10px;
+    max-width: 400px;
+    margin: auto;
+    background-color: #f4f4f4;
+    border-radius: 5px;
+}
+
+/* Character name and class */
+#Character-name {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 5px 0;
+    text-align: center;
+}
+
+#Character-class {
+    font-size: 16px;
+    color: #666;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* Menu tabs */
+.Character-menutabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 10px;
+}
+
+.tab {
+    padding: 5px 10px;
+    cursor: pointer;
+    background-color: #e0e0e0;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+    text-align: center;
+    flex: 1;
+}
+
+.tab:not(.active):hover {
+    background-color: #d0d0d0;
+}
+
+.tab.active {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: bold;
+}
+
+
+
+/* Stat items */
+.char-stat {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.char-stat span {
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* Equipment and inventory slots */
+#equipment,
+#items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#equipment div,
+#items div {
+    width: 60px;
+    height: 60px;
+    background-color: #dcdcdc;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+}
 /* Tabs and Subtabs Styling */
 .Character-menutabs, .subtabs {
     display: flex;
