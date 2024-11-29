@@ -403,13 +403,14 @@
 		document.getElementById("lives").textContent = lives;
 
 		// Check for game over
+		// Check for game over
 		if (lives <= 0) {
-			alert("Game Over!");
-			document.location.reload();
+			setTimeout(() => {
+				if (confirm("Game Over! Do you want to play again?")) {
+					restartGame(); // Call a function to restart the game
+				}
+			}, 100); // Slight delay to prevent any race conditions
 		}
-
-		requestAnimationFrame(update);
-	}
 
 	// Player movement
 	document.addEventListener("keydown", (e) => {
