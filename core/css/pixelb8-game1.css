@@ -1,0 +1,20 @@
+#game-area {
+    background-color: #f0f8ff;
+    border: 2px solid #333;
+    border-radius: 8px;
+    max-width: 400px;
+    margin: 50px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#click-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#click-btn:hover {
+    background-color: #0056b3;
+}

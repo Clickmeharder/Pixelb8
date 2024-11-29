@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixelb8.LoL Games</title>
     <link rel="stylesheet" href="core/css/pixelb8-default.css">
+	<link rel="stylesheet" href="core/css/pixelb8-game1.css">
 	<link rel="stylesheet" href="Modules/SuSOS/core/css/SuSOS-default.css">
 	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
@@ -27,62 +28,22 @@
 		<h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
 		<button id="enterButt">Back to Home Page</button><button id="funButt" disabled>game1</button><button id="funButt">game2</button><button id="funButt">game3</button>
 	</header>
-  <!-- New Main Content Area -->
+  <!-- New Main Game content Area -->
 	<main class="main-content">
 		<div class="funwrap" id="funwrap1" style="height:500px;width:100%;">
 		<!--Entire game and all controls must be contained in here-->
+		<div id="game-area" style="text-align: center; padding: 20px;">
+			<h1>Clicker Game</h1>
+			<p>Click the button to earn points!</p>
+			<button id="click-btn" style="padding: 10px 20px; font-size: 18px;">Click Me!</button>
+			<p style="margin-top: 20px;">Points: <span id="score">0</span></p>
+		</div>
 		</div>	
 	</main>
 <!-- Content Panels -->
 	<!-- Content Panel A -->
   <div class="row transparent">
 	<!--Current Main Content Area-->
-		
-		<section class="themed-main landing" style="display:none;">
-			<h2 id="themed-update-title" class="landing">Latest Updates</h2>
-			<section class="featured-section">
-				<!-- <h2 class="section-title">Latest Updates</h2> -->
-				<div class="devnote">
-					<h3 class="devnote-title">Development Update - [Insert Date]</h3>
-					<p class="devnote-content">
-						<strong>Developer:</strong> Jaedraze aka General Jimbobbityboo of Secret Universal Services Society
-						<br>
-						<br>
-						Our main goal is to provide a comprehensive assistant platform for colonists in the Entropia system, offering a range of tools, information, and resources to enrich their gaming experience. While our current focus is on Planet Arkadia, we intend to gradually expand to include content regarding other planets and celestial bodies within Entropia Universe.
-						<br>
-						<br>
-						Tool Development and Expansion:
-						</p><ul>
-							<li>Create an element to display goals - Expected completion by [Insert Deadline]</li>
-							<li>Update main page content - Scheduled for [Insert Deadline]</li>
-						</ul>
-					<p></p>
-				</div>
-				<button class="themed-button" disabled="">Read More</button>
-			</section>
-			  <div class="example-element">
-				  <h3>Example Element 1</h3>
-				  <p>This is the first example element in the main content area after the featured content section</p>
-			  </div>
-			  <div class="example-element">
-				  <h3>Example Element 2</h3>
-				  <p>This is some example content for Element 2.</p>
-			  </div>
-			  <div class="example-element">
-				  <h3>Example Element 2</h3>
-				  <p>This is some example content for Element 2.</p>
-			  </div>
-			  <div class="example-element">
-				  <h3>Example Element 2</h3>
-				  <p>This is some example content for Element 2.</p>
-			  </div>
-			  <div class="example-element">
-				  <h3>Final Example Element</h3>
-				  <p> This should be created in such a way that the oldest stuff will end up here. and the newest on the top, just under the featured section</p>
-			  </div>
-			  <!-- End of Generic Example Elements -->
-		  </section>
-  </div>
   
   <div class="panel content-panel" style="max-width:fit-content; display:none;">
 	<div id="main-content">
@@ -341,7 +302,20 @@
     </div>
   </div>
 </div>
+<script>
+	// Initialize score
+	let score = 0;
 
+	// Find the button and score display
+	const button = document.getElementById('click-btn');
+	const scoreDisplay = document.getElementById('score');
+
+	// Add click event to the button
+	button.addEventListener('click', () => {
+		score++; // Increment score
+		scoreDisplay.textContent = score; // Update score display
+	});
+</script>
 <!-- scripts -->
 <script src="core/js/index.js"></script>
 <script type="module" src="core/js/firebase/auth.js"></script>
