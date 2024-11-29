@@ -599,7 +599,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
   opacity: var(--staticpage-sidepanels-opacity);
   padding: 5px;
     height: auto;
-    min-height: 220px;
+    min-height: ;
     max-height: 27vh;
 	font-family: 'Pixelify Sans';
 	box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
