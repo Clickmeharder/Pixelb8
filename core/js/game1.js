@@ -3,22 +3,21 @@ class DungeonCrawler {
         this.container = document.getElementById(containerId);
         this.gridSize = 10;
         this.grid = [];
-        this.playerPosition = { x: 0, y: 0 };
-        this.exitPosition = { x: 9, y: 9 };
+        this.playerPosition = { x: 0, y: 0 }; // Player starts at top-left
+        this.exitPosition = { x: 9, y: 9 }; // Exit at bottom-right
         this.init();
     }
 
     init() {
-        this.container.innerHTML = ""; // Clear previous grid
         this.createGrid();
         this.renderGrid();
         document.addEventListener("keydown", (e) => this.handleInput(e));
     }
 
     createGrid() {
-        // Generate a simple maze: 1 = path, 0 = wall
+        // Create a random grid with walls and paths
         this.grid = Array.from({ length: this.gridSize }, () =>
-            Array.from({ length: this.gridSize }, () => (Math.random() > 0.2 ? 1 : 0))
+            Array.from({ length: this.gridSize }, () => (Math.random() > 0.2 ? 1 : 0)) // 80% paths, 20% walls
         );
 
         // Ensure player and exit positions are walkable
@@ -27,16 +26,19 @@ class DungeonCrawler {
     }
 
     renderGrid() {
+        // Clear the existing grid
+        this.container.innerHTML = "";
+
         for (let y = 0; y < this.gridSize; y++) {
             for (let x = 0; x < this.gridSize; x++) {
                 const cell = document.createElement("div");
                 cell.classList.add("cell");
 
-                // Assign classes based on grid values
+                // Assign class based on grid values
                 if (this.grid[y][x] === 1) cell.classList.add("path");
                 else cell.classList.add("wall");
 
-                // Player and Exit
+                // Player and exit
                 if (x === this.playerPosition.x && y === this.playerPosition.y) {
                     cell.classList.add("player");
                 } else if (x === this.exitPosition.x && y === this.exitPosition.y) {
@@ -54,13 +56,13 @@ class DungeonCrawler {
         let newX = x;
         let newY = y;
 
-        // Movement Logic
+        // Handle arrow keys for movement
         if (event.key === "ArrowUp") newY -= 1;
         if (event.key === "ArrowDown") newY += 1;
         if (event.key === "ArrowLeft") newX -= 1;
         if (event.key === "ArrowRight") newX += 1;
 
-        // Check bounds and wall collision
+        // Check bounds and ensure the next tile is walkable
         if (
             newX >= 0 &&
             newX < this.gridSize &&
@@ -75,16 +77,18 @@ class DungeonCrawler {
     }
 
     checkWinCondition() {
+        // Check if the player has reached the exit
         if (
             this.playerPosition.x === this.exitPosition.x &&
             this.playerPosition.y === this.exitPosition.y
         ) {
-            alert("You reached the exit! Well done!");
-            this.init(); // Restart game
+            alert("You Win! The dungeon has been cleared!");
+            this.init(); // Restart the game
         }
     }
 }
 
+// Initialize the game when the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
     new DungeonCrawler("game-container");
 });

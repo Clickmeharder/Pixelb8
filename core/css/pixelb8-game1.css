@@ -18,19 +18,18 @@
     box-sizing: border-box;
 }
 
-/* Specific Tiles */
 .cell.path {
-    background: #333;
+    background: #444; /* Dark gray path */
 }
 
 .cell.wall {
-    background: #000;
+    background: black; /* Impassable wall */
 }
 
 .cell.player {
-    background: #0f0;
+    background: limegreen; /* Player */
 }
 
 .cell.exit {
-    background: #00f;
+    background: dodgerblue; /* Exit */
 }
