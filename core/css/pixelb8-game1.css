@@ -1,12 +1,11 @@
 /* General character container */
 #character-menu {
-    font-family: Arial, sans-serif;
-    border: 1px solid #ccc;
-    padding: 10px;
-    max-width: 400px;
-    margin: auto;
-    background-color: #f4f4f4;
-    border-radius: 5px;
+    font-family: 'Pixelify Sans';
+    border: 4px outset #516284;
+    padding: 4px;
+    max-width: 170px;
+    background-color: #1b3d5cb3;
+    border-radius: 8px;
 }
 
 /* Character name and class */
@@ -46,8 +45,7 @@
 }
 
 .tab.active {
-    background-color: #007bff;
-    color: #fff;
+    color: #1e717a;
     font-weight: bold;
 }
 
@@ -69,15 +67,15 @@
 #items {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
 }
 
 #equipment div,
 #items div {
     width: 32px;
     height: 32px;
-    background-color: #dcdcdc;
-    border: 1px solid #bbb;
+    background-color: #3c3c3c;
+    border: 2px inset #757171;
     border-radius: 5px;
     display: flex;
     justify-content: center;
@@ -95,14 +93,14 @@
 
 .tab, .subtab {
     cursor: pointer;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
+    padding: 2px 2px;
+    border: 3px outset #565050;
     border-radius: 5px;
-    background-color: #f9f9f9;
+    background-color: #4f5255;
 }
 
 .tab.active, .subtab.active {
-    background-color: #e0e0e0;
+    background-color: #2c2929;
     font-weight: bold;
 }
 
