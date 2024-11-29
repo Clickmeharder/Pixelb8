@@ -49,7 +49,10 @@ main {
 #character-stats {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 1px;
+    padding: 4px;
+    background: black;
+    border: 4px inset grey;
 }
 
 .char-stat {
