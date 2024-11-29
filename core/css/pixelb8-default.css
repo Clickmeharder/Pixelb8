@@ -603,6 +603,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     max-height: 27vh;
 	font-family: 'Pixelify Sans';
 	box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
+	overflow: hidden;
 }
 .right-panel p {
     margin: 0;
