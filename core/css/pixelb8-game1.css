@@ -54,7 +54,11 @@ div#character-stats {
     font-weight: bold;
 }
 
-
+#character-stats > div {
+    display: flex; /* Ensure inner elements align horizontally */
+    justify-content: space-between; /* Distribute space between stats */
+    align-items: center; /* Align vertically in the center */
+}
 
 /* Stat items */
 .char-stat {
