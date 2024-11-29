@@ -17,16 +17,7 @@ body {
 }
 
 /* Main Game Content Container */
-main {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    width: 350px;
-    padding: 15px;
-    border: 2px solid #555; /* Retro border */
-    background-color: #111; /* Dark background for the container */
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1); /* Subtle shadow */
-}
+
 
 /* Character Stats Display */
 #character {
