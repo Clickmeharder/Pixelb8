@@ -79,28 +79,8 @@ staticPage BLOCK
         </div>
       </div>
 <!--this is where new thign starts-->
-		<div class="panel content-panel" style="max-width:fit-content;box-shadow: none;border: none;">
-			<div id="main-content">
-				<h2>Account Details</h2>
-				<p>Laudate Lootium Divitiasque Celebremus.</p>
-				<!-- Login Form -->
-				<div class="logged-in disabled hidden" id="innercontent-loggedin" style="padding:4px; border:1px solid #222;">
-					<form id="loginForm">
-<!-- 						<ul id="nav-mobile" class="hide-on-med-and-down">
-							<li class="logged-in">
-								<a href="#" class="modal-trigger" id="userAccount-modalTrigger" data-target="modal-useraccount">My Account</a>
-							</li>
-							<li class="logged-in">
-								<a href="#" class="modal-trigger" id="userProfile-editTrigger" data-target="modal-edit">Public Profile</a>
-							</li>
-						</ul> -->
-						<ul id="accountdetails" class="">
-						</ul>
-					</form>
-					<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
-				</div>
-			</div>
-		</div>
+
+
 <!-- put login Panel below -->		
 		<div class="panel right-panel">
 			<div id="websiteStatContainer">
@@ -124,10 +104,11 @@ staticPage BLOCK
 			</div>
 			<div class="row">
 				<button class="logged-in" id="logoutbutt" type="button">Logout</button>
+				<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
 			</div>
 			<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
 				<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
-				<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
+				<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>	
 			</div>
 		</div>
 <!-- end of login Panel-->
