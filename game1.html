@@ -30,11 +30,34 @@
 	</header>
   <!-- New Main Game content Area -->
 	<main class="main-content">
-		<!--Entire game and all controls must be contained in here-->
+		<div id="character">
+			<p id="Charactername">Dee Falt</p>
+			<div id="character-stats">
+			<!-- stats and experience should be dynamicly updated here -->
+				<p class="char-stat">Hp</p><p id="Health">100</p>
+				<p class="char-stat-">Strength lvl</p><p id="strength"> 1</p>
+				<p class="char-stat">xp</p><p id="strengthxp">xp: 0</p>
+				<p class="char-stat">magic lvl</p><p id="magic">magic: 1</p>
+				<p class="char-stat">xp</p><p id="magicxp">0</p>
+				<p class="char-stat">Agility</p><p id="agility">agility: 1</p>
+				<p class="char-stat">xp</p><p id="agilityxp">0</p>
+				<p class="char-stat">Defence</p><p id="defence">Defence: 1</p>
+				<p class="char-stat">xp</p><p id="defencexp">0</p>
+				<p class="char-stat">stamina</p><p id="stamina">stamina: 1</p>
+				<p class="char-stat">xp</p><p id="staminaxp">0</p>
+				<p class="char-stat">Karma</p><p id="Karma">0</p>
+			</div>
+			<div id="character-inventory">
+				<p id="totalitems">Inventory: 0 items</p>
+				<div id="items">
+					 <!-- characters items will be displayed here -->
+				</div>
+			</div>
+		</div>
 		<div id="game-container">
 			<div id="player"></div>
 			<div id="enemy"></div>
-			<div id="stats">
+			<div id="hudstats">
 				<p id="health">Health: 100</p>
 				<p id="inventory">Inventory: 0 items</p>
 			</div>

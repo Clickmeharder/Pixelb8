@@ -1,30 +1,147 @@
-#game-container {
-    position: relative;
-    width: 800px;
-    height: 600px;
-    margin: 0 auto;
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+main {
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    max-width: 1200px;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+/* Character Stats Area */
+#character {
+    background-color: #ffffff;
+    padding: 20px;
+    width: 300px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#Charactername {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}
+
+#character-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.char-stat {
+    font-weight: bold;
+    color: #555;
+}
+
+.char-stat- {
+    font-weight: bold;
+    color: #555;
+}
+
+#character-inventory {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.05);
+}
+
+#totalitems {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+#items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#items .item {
+    width: 50px;
+    height: 50px;
     background-color: #ddd;
-    border: 1px solid black;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    text-align: center;
+}
+
+/* Game Container Area */
+#game-container {
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    width: 65%;
+    min-height: 500px;
+    position: relative;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
 
 #player, #enemy {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
     position: absolute;
-    width: 50px;
-    height: 50px;
-    background-color: green;
+}
+
+#player {
+    background-color: #4CAF50; /* Green for player */
+    left: 10%;
 }
 
 #enemy {
-    background-color: red;
-    top: 100px;
-    left: 300px;
+    background-color: #F44336; /* Red for enemy */
+    left: 70%;
 }
 
-#stats {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: white;
-    font-family: 'Arial', sans-serif;
+#hudstats {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    text-align: center;
+}
+
+#hudstats p {
+    font-size: 1.1em;
+    margin: 5px 0;
+    color: #555;
+}
+
+#hudstats p#health {
+    color: #FF6347; /* Red */
+}
+
+#hudstats p#inventory {
+    color: #3CB371; /* Green */
 }
