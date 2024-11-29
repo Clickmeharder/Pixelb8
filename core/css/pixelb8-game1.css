@@ -1,5 +1,5 @@
 /* General character container */
-#character {
+#character-menu {
     font-family: Arial, sans-serif;
     border: 1px solid #ccc;
     padding: 10px;
@@ -74,8 +74,8 @@
 
 #equipment div,
 #items div {
-    width: 60px;
-    height: 60px;
+    width: 32px;
+    height: 32px;
     background-color: #dcdcdc;
     border: 1px solid #bbb;
     border-radius: 5px;
