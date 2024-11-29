@@ -3,7 +3,7 @@
     font-family: 'Pixelify Sans';
     border: 4px outset #516284;
     padding: 4px;
-    max-width: 170px;
+    max-width: 178px;
     background-color: #1b3d5cb3;
     border-radius: 8px;
 }
@@ -55,16 +55,22 @@ div#character-stats {
 }
 
 #character-stats > div {
-    display: flex; /* Ensure inner elements align horizontally */
-    justify-content: space-between; /* Distribute space between stats */
-    align-items: center; /* Align vertically in the center */
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    border: 1px outset darkolivegreen;
 }
 
 /* Stat items */
 .char-stat {
-    margin: 5px 0;
+    margin: 5px 2px;
+    font-family: Yatra none;
+    font-weight: bold;
     font-size: 14px;
+    padding: 3px;
+    border: 2px ridge darkolivegreen;
 }
+
 
 .char-stat span {
     font-weight: bold;
