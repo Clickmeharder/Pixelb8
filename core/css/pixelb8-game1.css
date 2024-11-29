@@ -1,26 +1,36 @@
-/* General Game Container */
+/* Game Container */
 #game-container {
     position: relative;
-    background: #000;
-    border: 3px solid #333;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
-    overflow: hidden;
+    margin: 0 auto;
+    width: 600px;
+    height: 600px;
+    background: black;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr); /* 10x10 grid */
+    grid-template-rows: repeat(10, 1fr);
+    gap: 1px;
 }
 
-/* Canvas Element */
-canvas {
-    display: block;
+/* Grid Cell Styles */
+.cell {
     width: 100%;
     height: 100%;
-    background: #222; /* Generic dark background */
+    box-sizing: border-box;
 }
 
-/* HUD (Optional Overlay for Game Info) */
-#hud {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: #fff;
-    font-family: "Press Start 2P", monospace; /* Retro-inspired font */
-    font-size: 14px;
+/* Specific Tiles */
+.cell.path {
+    background: #333;
+}
+
+.cell.wall {
+    background: #000;
+}
+
+.cell.player {
+    background: #0f0;
+}
+
+.cell.exit {
+    background: #00f;
 }

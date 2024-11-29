@@ -1,130 +1,90 @@
-class DodgeGame {
+class DungeonCrawler {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
-        this.canvas = document.createElement("canvas");
-        this.ctx = this.canvas.getContext("2d");
-        this.canvas.width = 800;
-        this.canvas.height = 600;
-        this.container.appendChild(this.canvas);
-
-        this.hud = document.createElement("div");
-        this.hud.id = "hud";
-        this.container.appendChild(this.hud);
-
-        this.running = false;
-        this.player = { x: 400, y: 500, size: 30, speed: 5 };
-        this.blocks = [];
-        this.score = 0;
-
-        this.keys = {};
-        this.lastFrameTime = 0;
-
+        this.gridSize = 10;
+        this.grid = [];
+        this.playerPosition = { x: 0, y: 0 };
+        this.exitPosition = { x: 9, y: 9 };
         this.init();
     }
 
     init() {
-        this.running = true;
-        this.score = 0;
-        this.blocks = [];
-        this.updateHUD("Score: 0");
-        document.addEventListener("keydown", (e) => (this.keys[e.key] = true));
-        document.addEventListener("keyup", (e) => (this.keys[e.key] = false));
-        this.gameLoop();
+        this.container.innerHTML = ""; // Clear previous grid
+        this.createGrid();
+        this.renderGrid();
+        document.addEventListener("keydown", (e) => this.handleInput(e));
     }
 
-    gameLoop() {
-        if (!this.running) return;
-        const now = performance.now();
-        const delta = now - this.lastFrameTime;
-        this.lastFrameTime = now;
+    createGrid() {
+        // Generate a simple maze: 1 = path, 0 = wall
+        this.grid = Array.from({ length: this.gridSize }, () =>
+            Array.from({ length: this.gridSize }, () => (Math.random() > 0.2 ? 1 : 0))
+        );
 
-        this.update(delta);
-        this.draw();
-
-        requestAnimationFrame(() => this.gameLoop());
+        // Ensure player and exit positions are walkable
+        this.grid[this.playerPosition.y][this.playerPosition.x] = 1;
+        this.grid[this.exitPosition.y][this.exitPosition.x] = 1;
     }
 
-    update(delta) {
-        // Update player position
-        if (this.keys["ArrowLeft"] && this.player.x > 0) {
-            this.player.x -= this.player.speed;
-        }
-        if (this.keys["ArrowRight"] && this.player.x < this.canvas.width - this.player.size) {
-            this.player.x += this.player.speed;
-        }
-        if (this.keys["ArrowUp"] && this.player.y > 0) {
-            this.player.y -= this.player.speed;
-        }
-        if (this.keys["ArrowDown"] && this.player.y < this.canvas.height - this.player.size) {
-            this.player.y += this.player.speed;
-        }
+    renderGrid() {
+        for (let y = 0; y < this.gridSize; y++) {
+            for (let x = 0; x < this.gridSize; x++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
 
-        // Add new blocks periodically
-        if (Math.random() < 0.02) {
-            const size = Math.random() * 30 + 20;
-            this.blocks.push({
-                x: Math.random() * (this.canvas.width - size),
-                y: -size,
-                size,
-                speed: Math.random() * 3 + 2,
-            });
-        }
+                // Assign classes based on grid values
+                if (this.grid[y][x] === 1) cell.classList.add("path");
+                else cell.classList.add("wall");
 
-        // Update blocks
-        for (let block of this.blocks) {
-            block.y += block.speed;
-        }
+                // Player and Exit
+                if (x === this.playerPosition.x && y === this.playerPosition.y) {
+                    cell.classList.add("player");
+                } else if (x === this.exitPosition.x && y === this.exitPosition.y) {
+                    cell.classList.add("exit");
+                }
 
-        // Remove blocks that leave the screen
-        this.blocks = this.blocks.filter((block) => block.y < this.canvas.height);
-
-        // Check for collisions
-        for (let block of this.blocks) {
-            if (
-                this.player.x < block.x + block.size &&
-                this.player.x + this.player.size > block.x &&
-                this.player.y < block.y + block.size &&
-                this.player.y + this.player.size > block.y
-            ) {
-                this.gameOver();
-                return;
+                this.container.appendChild(cell);
             }
         }
-
-        // Update score
-        this.score += Math.floor(delta / 10);
-        this.updateHUD(`Score: ${this.score}`);
     }
 
-    draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    handleInput(event) {
+        const { x, y } = this.playerPosition;
 
-        // Draw player
-        this.ctx.fillStyle = "#00FF00";
-        this.ctx.fillRect(this.player.x, this.player.y, this.player.size, this.player.size);
+        let newX = x;
+        let newY = y;
 
-        // Draw blocks
-        this.ctx.fillStyle = "#FF0000";
-        for (let block of this.blocks) {
-            this.ctx.fillRect(block.x, block.y, block.size, block.size);
+        // Movement Logic
+        if (event.key === "ArrowUp") newY -= 1;
+        if (event.key === "ArrowDown") newY += 1;
+        if (event.key === "ArrowLeft") newX -= 1;
+        if (event.key === "ArrowRight") newX += 1;
+
+        // Check bounds and wall collision
+        if (
+            newX >= 0 &&
+            newX < this.gridSize &&
+            newY >= 0 &&
+            newY < this.gridSize &&
+            this.grid[newY][newX] === 1
+        ) {
+            this.playerPosition = { x: newX, y: newY };
+            this.checkWinCondition();
+            this.renderGrid();
         }
     }
 
-    gameOver() {
-        this.running = false;
-        this.updateHUD(`Game Over! Final Score: ${this.score}. Click to Restart.`);
-        this.container.addEventListener("click", () => this.restart(), { once: true });
-    }
-
-    restart() {
-        this.init();
-    }
-
-    updateHUD(text) {
-        this.hud.textContent = text;
+    checkWinCondition() {
+        if (
+            this.playerPosition.x === this.exitPosition.x &&
+            this.playerPosition.y === this.exitPosition.y
+        ) {
+            alert("You reached the exit! Well done!");
+            this.init(); // Restart game
+        }
     }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const game = new DodgeGame("game-container");
+    new DungeonCrawler("game-container");
 });
