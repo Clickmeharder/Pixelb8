@@ -58,7 +58,7 @@ main {
 .char-stat {
     font-size: 1em;
     font-weight: bold;
-    color: #ffcc00; /* Yellow for stat labels */
+    color: #87b7b7; /* Yellow for stat labels */
 }
 
 .char-stat- {
