@@ -3,7 +3,7 @@ document.querySelectorAll('.Character-menutabs .tab').forEach(tab => {
     tab.addEventListener('click', () => {
         // Remove active class from all tabs and content
         document.querySelectorAll('.Character-menutabs .tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('#character > div:not(.Character-menutabs)').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('#character-menu > div:not(.Character-menutabs)').forEach(c => c.classList.remove('active'));
 
         // Add active class to the clicked tab and its associated content
         tab.classList.add('active');
