@@ -137,9 +137,6 @@ getDocs(collection(db, 'UserProfiles'))
 		    });
 		console.log('user logged in: ', user);
         user.providerData.forEach(async (profile) => {
-          console.log("Sign-in provider: " + profile.providerId);
-          console.log("Provider-specific UID: " + profile.uid);
-		  console.log("users uid: " + user.uid);
 		  console.log("user displayname: " + user.displayName);
           console.log("profile.displayname: " + profile.displayName);
           console.log("profile Email: " + profile.email);
@@ -175,7 +172,7 @@ getDocs(collection(db, 'UserProfiles'))
 
 		  // Update or redirect to the final URL (e.g., embedding in an iframe or redirection)
 		  iframeElement.src = finalURL;
-          console.log("Updated iframe src:", finalURL);
+          /* console.log("Updated iframe src:", finalURL); */
           // Set the color based on email verification status
           if (user.emailVerified) {
             emailVerifiedElement.style.color = "#24b500b5"; // Green color for verified email
