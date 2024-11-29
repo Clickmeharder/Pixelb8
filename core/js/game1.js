@@ -1,94 +1,54 @@
-class DungeonCrawler {
-    constructor(containerId) {
-        this.container = document.getElementById(containerId);
-        this.gridSize = 10;
-        this.grid = [];
-        this.playerPosition = { x: 0, y: 0 }; // Player starts at top-left
-        this.exitPosition = { x: 9, y: 9 }; // Exit at bottom-right
-        this.init();
+const player = document.getElementById("player");
+let playerHealth = 100;
+let inventoryCount = 0;
+
+let playerPosition = { x: 0, y: 0 };
+
+function updatePlayerPosition() {
+    player.style.left = playerPosition.x + "px";
+    player.style.top = playerPosition.y + "px";
+}
+
+function movePlayer(direction) {
+    switch(direction) {
+        case 'up':
+            playerPosition.y -= 10;
+            break;
+        case 'down':
+            playerPosition.y += 10;
+            break;
+        case 'left':
+            playerPosition.x -= 10;
+            break;
+        case 'right':
+            playerPosition.x += 10;
+            break;
     }
+    updatePlayerPosition();
+}
 
-    init() {
-        this.createGrid();
-        this.renderGrid();
-        document.addEventListener("keydown", (e) => this.handleInput(e));
-    }
-
-    createGrid() {
-        // Create a random grid with walls and paths
-        this.grid = Array.from({ length: this.gridSize }, () =>
-            Array.from({ length: this.gridSize }, () => (Math.random() > 0.2 ? 1 : 0)) // 80% paths, 20% walls
-        );
-
-        // Ensure player and exit positions are walkable
-        this.grid[this.playerPosition.y][this.playerPosition.x] = 1;
-        this.grid[this.exitPosition.y][this.exitPosition.x] = 1;
-    }
-
-    renderGrid() {
-        // Clear the existing grid
-        this.container.innerHTML = "";
-
-        for (let y = 0; y < this.gridSize; y++) {
-            for (let x = 0; x < this.gridSize; x++) {
-                const cell = document.createElement("div");
-                cell.classList.add("cell");
-
-                // Assign class based on grid values
-                if (this.grid[y][x] === 1) cell.classList.add("path");
-                else cell.classList.add("wall");
-
-                // Player and exit
-                if (x === this.playerPosition.x && y === this.playerPosition.y) {
-                    cell.classList.add("player");
-                } else if (x === this.exitPosition.x && y === this.exitPosition.y) {
-                    cell.classList.add("exit");
-                }
-
-                this.container.appendChild(cell);
-            }
-        }
-    }
-
-    handleInput(event) {
-        const { x, y } = this.playerPosition;
-
-        let newX = x;
-        let newY = y;
-
-        // Handle arrow keys for movement
-        if (event.key === "ArrowUp") newY -= 1;
-        if (event.key === "ArrowDown") newY += 1;
-        if (event.key === "ArrowLeft") newX -= 1;
-        if (event.key === "ArrowRight") newX += 1;
-
-        // Check bounds and ensure the next tile is walkable
-        if (
-            newX >= 0 &&
-            newX < this.gridSize &&
-            newY >= 0 &&
-            newY < this.gridSize &&
-            this.grid[newY][newX] === 1
-        ) {
-            this.playerPosition = { x: newX, y: newY };
-            this.checkWinCondition();
-            this.renderGrid();
-        }
-    }
-
-    checkWinCondition() {
-        // Check if the player has reached the exit
-        if (
-            this.playerPosition.x === this.exitPosition.x &&
-            this.playerPosition.y === this.exitPosition.y
-        ) {
-            alert("You Win! The dungeon has been cleared!");
-            this.init(); // Restart the game
-        }
+function enemyAttack() {
+    playerHealth -= 10;
+    document.getElementById("health").innerText = `Health: ${playerHealth}`;
+    if (playerHealth <= 0) {
+        alert("You died!");
     }
 }
 
-// Initialize the game when the DOM is fully loaded
-document.addEventListener("DOMContentLoaded", () => {
-    new DungeonCrawler("game-container");
+function addItemToInventory() {
+    inventoryCount++;
+    document.getElementById("inventory").innerText = `Inventory: ${inventoryCount} items`;
+}
+
+document.addEventListener('keydown', function(event) {
+    switch(event.key) {
+        case 'ArrowUp': movePlayer('up'); break;
+        case 'ArrowDown': movePlayer('down'); break;
+        case 'ArrowLeft': movePlayer('left'); break;
+        case 'ArrowRight': movePlayer('right'); break;
+        case ' ': addItemToInventory(); break; // Space bar adds an item
+    }
 });
+
+// Enemy attacks the player every 3 seconds
+setInterval(enemyAttack, 3000);
