@@ -19,10 +19,10 @@
 }
 
 /* Hide inactive content */
-#character > div:not(.Character-menutabs), #character-crafting .subtab-content {
+#character-menu > div:not(.Character-menutabs), #character-crafting .subtab-content {
     display: none;
 }
 
-#character > div.active, #character-crafting .subtab-content.active {
+#character-menu > div.active, #character-crafting .subtab-content.active {
     display: block;
 }
