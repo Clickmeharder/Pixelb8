@@ -607,6 +607,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 }
 .right-panel p {
     margin: 0;
+	line-height: 0.8;
 }
 #websiteStatContainer p {
 	font-size: 11px;
