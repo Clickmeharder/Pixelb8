@@ -25,27 +25,18 @@
   <div class="twinkling"></div>
 </div>
 <!-- --------------------- -->
-
-<!-- ---------- -->
-<!--main content-->
-<!-- ---------- -->
-
-<!--static page-->
 <div class="staticPage" id="Mainpage">
-
-
 <!--  Header    -->
   <header class="staticpage-header">
       <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
       <nav class="main-nav">
           <ul>
               <li><a href="https://Pixelb8.lol/home">Home</a></li>
-            <li><a href="https://Pixelb8.lol/about">About</a></li>
-              <li><a href="https://Pixelb8.lol/contact">Contact</a></li>
+            <li><a href="#">About</a></li>
+              <li><a href="#">Contact</a></li>
           </ul>
       </nav>
   </header>
-
 <!--  main content  -->
   <main class="main-content">
       <!-- Website navigation panel(spelunker) -->
@@ -70,7 +61,6 @@
 				<button id= "Leftbuttcheek6" class="leftcheek" value="colonistsonstream" disabled>Colonists on Stream</button>
 			</a>
 	  </div>
-	  
         <!-- website stats and login Panels below -->	
 		<div id="userInfoMicroDiv">
 			<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
@@ -103,21 +93,9 @@
 				<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>	
 			</div>
 		</div>
-
   </main>
-<!--  -->
-	<!-- second row?-->
+	<!-- second row-->
   <div class="row">
-<!--Current Main Content Area-->
-
-<!--note to op:-->
-    <!--updates module-->
-<!--example update feed-->
-
-<!--note to dev: go through js and make it use proper id names and ensure its all modular without dependacies and shit -->
-<!--put all the div note stuff together in a more modular container with id's-->
-<!--themed-main is long and was from before so it makes no sense-->
-        
 		<h2 id="themed-main-title">Latest Updates</h2>
 		<section class="themed-main">
 			<section class="featured-section">
@@ -150,23 +128,13 @@
 			  </div>
 			  <!-- End of Generic Example Elements -->
 		</section>
-		<!-- end of the updates stuff that-->
-
   </div>
-  
-<!-- ----------- -->
-<!-- Page Footer -->
   <footer class="themed-footer">
       <p>&copy; 2023-2027 Pixelb8 - All rights reserved.</p>
   </footer>
-
 </div>
-<!--end mainpage div -->
-
-
 <!-- ----------- -->
 <!--hidden modals (redo most/all these lol) -->
-
 <!-- ----------- -->
 <!-- Modal for Signup -->
 <div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
@@ -288,15 +256,9 @@
 	</script>
 	<!--custom cursor script-->
 	<script src="core/js/core-apps/customkersir.js"></script>
-	
-	<!--Main Scripts (global scripts all pages have)-->
-	<!--this script doesnt exist create a good global script for all pixelb8 pages-->
-	<script src="core/js/pixelb8engine.js"></script>
-	
+	<script src="core/js/pixelb8-global.js"></script>
 	<!--Firebase Auth Scripts-->
 	<script src="core/js/index.js"></script>
 	<script type="module" src="core/js/firebase/auth.js"></script>
-
-
 	</body>
 </html>

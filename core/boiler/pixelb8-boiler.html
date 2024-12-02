@@ -3,38 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixelb8.LoL Home</title>
+	<title>Pixelb8.LoL</title>
 	<link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
     <link rel="stylesheet" href="core/css/pixelb8-default.css">
+	<!-- <link rel="stylesheet" href="core/css/pixelb8-default-old.css">	 -->
+<!-- importing fonts -->
 	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-<!--i dont think we using jquery anywhere but idk yet-->
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!--im not sure what the following link is for but i think discord integration-->	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
-
-<!--fix website and git repository before using adsense and trying to monetize lol-->
-<!--adsense script-->
+<!-- adsense script -->
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7382192474927902"
      crossorigin="anonymous"></script>
 </head>
+
 <body>
-<!--Style Tuner and HUD Main Power Button-->
-<div class="background-container">
+
+<div id="starsBG"class="background-container">
   <div class="stars"></div>
   <div class="twinkling"></div>
 </div>
-<!-- --------------------- -->
 
-<!-- ---------- -->
-<!--main content-->
-<!-- ---------- -->
-
-<!--static page-->
 <div class="staticPage" id="Mainpage">
 
-
-<!--  Header    -->
   <header class="staticpage-header">
       <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
       <nav class="main-nav">
@@ -46,9 +37,8 @@
       </nav>
   </header>
 
-<!--  main content  -->
   <main class="main-content">
-      <!-- Website navigation panel(spelunker) -->
+      <!-- Website navigation panel -->
       <div class="panel left-panel" id="Spelunker">
 		<h2 class="panel-title" id="SpelunkerTitle"style="line-height:0.65;margin-top:0px;margin-bottom:8px;">Internal Spelunking</h2>
 			<a href="https://Pixelb8.lol/faq">
@@ -71,7 +61,7 @@
 			</a>
 	  </div>
 	  
-        <!-- website stats and login Panel below -->		
+<!-- website stats and login Panel below -->		
 		<div id="useraccountsPanel" class="panel right-panel">
 			<div id="websiteStatContainer">
 				<h2 class="panel-title" id="sitestats">Site Stats</h2>
@@ -105,21 +95,11 @@
 				<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>	
 			</div>
 		</div>
-
+		
   </main>
-<!--  -->
-	<!-- second row?-->
-  <div class="row">
-<!--Current Main Content Area-->
 
-<!--note to op:-->
-    <!--updates module-->
-<!--example update feed-->
-
-<!--note to dev: go through js and make it use proper id names and ensure its all modular without dependacies and shit -->
-<!--put all the div note stuff together in a more modular container with id's-->
-<!--themed-main is long and was from before so it makes no sense-->
-        
+<!-- second row-->
+  <div id="" class="row">
 		<h2 id="themed-main-title">Latest Updates</h2>
 		<section class="themed-main">
 			<section class="featured-section">
@@ -152,24 +132,33 @@
 			  </div>
 			  <!-- End of Generic Example Elements -->
 		</section>
-		<!-- end of the updates stuff that-->
-
+<!-- 		<div id="ytpanel" class="panel ad-panel">
+			<h2 class="panel-title"></h2>
+			<div id="staticpage-adpanel-contentwrapper">
+				<div class="static-videopanel">
+					<iframe
+						id="video1"
+						width="225"
+						height="148"
+						src="https://www.youtube.com/embed/videoseries?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&index=284&enablejsapi=1&autoplay=0&rel=0&html5=1&showinfo=0&controls=0" frameborder="0"
+						title="YouTube video player"
+						frameborder="0"
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+						allowfullscreen
+						style="max-height: 180px; width: 100%;"
+					></iframe>
+				</div>
+			</div>
+		</div> -->
   </div>
-  
-<!-- ----------- -->
-<!-- Page Footer -->
+
   <footer class="themed-footer">
       <p>&copy; 2023-2027 Pixelb8 - All rights reserved.</p>
   </footer>
-
 </div>
-<!--end mainpage div -->
-
 
 <!-- ----------- -->
-<!--hidden modals (redo most/all these lol) -->
-
-<!-- ----------- -->
+<!--hidden modals(redo these modals) -->
 <!-- Modal for Signup -->
 <div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -230,75 +219,18 @@
   </div>
 </div>
 
-<!--cursor stuff (im unsure if we are using this yet -->
+<!-- ----------- -->
+<!--cursor stuff (im unsure if im using this) -->
 <div id="currentgifcursordiv" style="left: 1059px; top: 162px; background-image: none;"></div>
 <div id="currentgifdiv" style="background-image: none; background-color: black;"></div>	
-<!-- ----------- -->
-		<!-- following script is for updating devnotes and needs to be moved to global js-->
-	<script>
-		document.addEventListener("DOMContentLoaded", function() {
-			fetch("/core/assets/data/devnotes/devnotes.json")
-				.then(response => response.json())
-				.then(data => {
-					if (data && data.length > 0) {
-						const latestUpdate = data[0];
-						const olderUpdates = data.slice(1);
-
-						// Populate the latest devnote
-						const devnoteDiv = document.querySelector(".devnote");
-						devnoteDiv.querySelector(".devnote-title").innerText = `Development Update - [${latestUpdate.date}]`;
-						devnoteDiv.querySelector(".devnote-content").innerHTML = `
-							<strong>Developer:</strong>${latestUpdate.developer}
-							<br><br>
-							${latestUpdate.content}
-							<br><br>
-							The Breakdown:
-							<ul>
-								${latestUpdate.points.map(point => `<li>${point}</li>`).join('')}
-							</ul>
-						`;
-
-						// Get the container for older devnotes
-						const themedMain = document.querySelector(".themed-main");
-
-						// Remove existing older devnotes to avoid duplication
-						document.querySelectorAll(".older-devnote").forEach(el => el.remove());
-
-						// Populate older devnotes
-						olderUpdates.forEach(update => {
-							const olderDiv = document.createElement("div");
-							olderDiv.classList.add("older-devnote");
-							olderDiv.innerHTML = `
-								<h3>Latest Update [${update.date}]:</h3>
-								<p>
-									<strong>Developer:</strong>${update.developer}
-									<br><br>
-									${update.content}
-									<br><br>
-									The Breakdown:
-									<ul>
-										${update.points.map(point => `<li>${point}</li>`).join('')}
-									</ul>
-								</p>
-							`;
-							themedMain.appendChild(olderDiv);
-						});
-					}
-				})
-				.catch(error => console.error("Error fetching devnotes:", error));
-		});
-	</script>
-	<!--custom cursor script-->
+<!--scripts-->
 	<script src="core/js/core-apps/customkersir.js"></script>
-	
-	<!--Main Scripts (global scripts all pages have)-->
-	<!--this script doesnt exist create a good global script for all pixelb8 pages-->
-	<script src="core/js/pixelb8engine.js"></script>
-	
+	<script src="core/js/pixelb8-global.js"></script>
 	<!--Firebase Auth Scripts-->
 	<script src="core/js/index.js"></script>
 	<script type="module" src="core/js/firebase/auth.js"></script>
-
-
 	</body>
 </html>
+<!-- -------------------------- -->
+<!--End of Html File -->
+<!-- -------------------------- -->
