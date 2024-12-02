@@ -1,52 +1,28 @@
 [
-{
-    "date": "2024-06-24 12:00:00 UTC",
-    "developer": "Developer Name",
-    "content": "Made some generic updates to the tool for testing purposes.",
-    "points": [
-        "- Placeholder point one about some change to the tool.",
-        "- Placeholder point two about fixing a bug or adding a feature.",
-        "- Placeholder point three about improving something that users probably won't notice.",
-        "- Placeholder point four about future updates that may or may not happen."
-    ]
-},
-{
-    "date": "2024-06-23 09:30:00 UTC",
-    "developer": "Developer Name",
-    "content": "Worked on random things that probably aren't finished yet.",
-    "points": [
-        "- Placeholder note on a UI change that may or may not stick.",
-        "- Placeholder bug fix that was definitely annoying someone.",
-        "- Placeholder point about rethinking a feature without implementing it.",
-        "- Placeholder point on optimizing something that was never a problem."
-    ]
-},
-{
-    "date": "2024-06-22 16:45:00 UTC",
-    "developer": "Developer Name",
-    "content": "Did some work on a project that is totally unrelated but still counts.",
-    "points": [
-        "- Placeholder note on brainstorming ideas for a feature that doesn't exist yet.",
-        "- Placeholder point on testing some functionality that nobody asked for.",
-        "- Placeholder note about fixing a typo because it was bugging me.",
-        "- Placeholder point on adding a feature just to remove it later."
-    ]
-}
+ {
+        "date": "2024-09-15 01:55:23 UTC",
+        "developer": "Jaedraze aka Jimbobbityboo",
+        "content": "We have begun Developing our first twitch game called C.O.S",
+        "points": [
+            "- this is just a placeholder example",
+			"- still very early in development but we hope to have a fully functional update example!"
+        ]
+    },
  {
         "date": "2024-06-24 04:35:48 UTC",
         "developer": "Jaedraze aka Jimbobbityboo",
         "content": "The Entropia Item Stash Tool Pricelist creation is being overhauled",
         "points": [
-            "- The copy fancy html button to copy pricelist html including js functionality will be moved to be contained within a pricelist creation popup containing some options",
-			"- once completed users will be able to specify wether to include items for sale, item purchase offers, or both",
-			"- users will also be able to easily change an image url and some other basic options for customizing their pricelist",
-			"- I intend to include options such as background image, background color, text options, etc for further customization"
+            "- pointa",
+			"- pointb",
+			"- pointc",
+			"- long sentence with words and stuff or comment, can be used here"
         ]
     },
  {
         "date": "2024-06-20 6:37:30 UTC",
         "developer": "Jaedraze aka Jimbobbityboo",
-        "content": "Made some small fixes and changes to the Entropia Item Stash Tool",
+        "content": "Made some small fixes and changes to pretend update",
         "points": [
             "- The copy fancy html button to copy pricelist html including js functionality has been modified so it now appears in a text box. the user must now copy it themselves, this was done due to the limitations of the  js functionality to copy straight to clipboard being surpassed",
 			"- The restock,edit,sell buttons will now be disabled until the user clicks the load stash button and an item stash has been succesfully loaded. this is required because currently it will not function properly before loading a saved item stash. which should be expected. but now a user might understand this more intuitively with these changes",
