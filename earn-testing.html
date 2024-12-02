@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earn on Pixelb8.LoL</title>
+	<link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
+    <link rel="stylesheet" href="core/css/pixelb8-default.css">
+	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="Modules/SuSOS/apps/stolencalymap/core/css/HudMap-styles.css">
+
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
+</head>
+<style>
+	iframe {
+		width: 100vw;
+		height: 550px;
+	}
+</style>
+<body>
+<div class="background-container">
+  <div class="stars"></div>
+  <div class="twinkling"></div>
+</div>
+
+<!-- staticPage BLOCK -->
+<div id="navigation" style="display: none;">
+	<!-- society website (still just a mockup page) -->
+    <button onclick="loadPage('https://clickmeharder.github.io/sus-eu/')">Load Main Page</button>
+	<!-- old minecraft store website  -->
+	<!-- (i wish i had time for a server but  -->
+	<!-- until i have money i need to spend time kinda wisely) -->
+    <button onclick="loadPage('https://clickplace.tebex.io')" disabled>Load Other Page</button>
+</div>
+  <!-- ooOoOooooOOoOooOoOooOoo --->
+
+<!-- div for the entire main page --->
+<div class="staticPage" id="Mainpage">
+
+  <header class="staticpage-header">
+      <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
+
+
+      <nav class="main-nav">
+          <ul>
+              <li><a href="https://Pixelb8.lol/home">Home</a></li>
+            <li><a href="#">About</a></li>
+              <li><a href="#">Contact</a></li>
+          </ul>
+      </nav>
+  </header>
+  <!-- New Main Content Area -->
+  <main class="main-content">
+      <!-- Left Panel -->
+      <div class="panel left-panel">
+
+		<h2 class="panel-title" style="line-height:0.65;margin-top:0px;margin-bottom:8px;">Internal Spelunking</h2>
+			<a href="https://Pixelb8.lol/faq">
+				<button class="leftcheek" value="faq" selected disabled>Pixelb8 FAQ</button>
+			</a>
+			<a href="https://Pixelb8.lol/pixelbot">
+				<button class="leftcheek" value="pixelbot" >Visit PixelBot</button>
+			</a>
+			<a href="https://Pixelb8.lol/eu">
+				<button class="leftcheek" value="entropiapage">Entropia Tools</button>
+			</a>
+			<a href="https://Pixelb8.lol/earn">
+				<button class="leftcheek" value="earn" disabled>earn</button>
+			</a>
+			<a href="https://Pixelb8.lol/sweatshop">
+				<button class="leftcheek" value="sweatshop" disabled>Sweatshop</button>
+			</a>
+			<a href="https://Pixelb8.lol/eu/cos">
+				<button class="leftcheek" value="colonistsonstream" disabled>Colonists on Stream</button>
+			</a>
+	  </div>
+      <div class="panel ad-panel" id="adpanelfix1">
+		<div class="static-slideshowpromoter" id="ad-slide">
+            <!-- Add your slideshow content here -->
+        </div>
+      </div>
+<!--this is where new thign starts-->
+		<div class="panel content-panel" style="max-width:fit-content;box-shadow: none;border: none;">
+			<div id="main-content">
+				<h2>Account Details</h2>
+				<p>Laudate Lootium Divitiasque Celebremus.</p>
+				<!-- Login Form -->
+				<div class="logged-in disabled hidden" id="innercontent-loggedin" style="padding:4px; border:1px solid #222;">
+					<form id="loginForm">
+<!-- 						<ul id="nav-mobile" class="hide-on-med-and-down">
+							<li class="logged-in">
+								<a href="#" class="modal-trigger" id="userAccount-modalTrigger" data-target="modal-useraccount">My Account</a>
+							</li>
+							<li class="logged-in">
+								<a href="#" class="modal-trigger" id="userProfile-editTrigger" data-target="modal-edit">Public Profile</a>
+							</li>
+						</ul> -->
+						<ul id="accountdetails" class="">
+						</ul>
+					</form>
+					<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
+				</div>
+			</div>
+		</div>
+<!-- put login Panel below -->		
+		<div class="panel right-panel">
+			<div id="websiteStatContainer">
+				<h2 class="panel-title" id="sitestats">Site Stats</h2>
+				<p>Registered&gt; Lots</p>
+				<p>Online&gt; everyone</p>
+			</div>
+			<div id="userInfoContainer">
+				<P id="username">StrangerDanger</p>
+				<P id="profileusername">-</p>
+				<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
+				<p id="Userpixelcount" class="hidden">0px</p>
+				<p id="loginStatus">Status: offline</p>
+				<ul>
+					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
+					<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
+					<span id="emailVerified" class="hidden">►</span>
+					<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
+					
+				</ul>
+			</div>
+			<div class="row">
+				<button class="logged-in" id="logoutbutt" type="button">Logout</button>
+			</div>
+			<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
+				<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
+				<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
+			</div>
+		</div>
+<!-- end of login Panel-->
+	 </main>
+<!-- Content Panels -->
+	<!-- Content Panel A -->
+	<div>
+	  <!-- Current Main Content Area -->
+	  <iframe id="dynamicIframe" src="about:blank"></iframe>
+
+	</div>
+
+
+
+		<!--end mainpage -->
+<!-- Modal for Signup -->
+<div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-signup-label">Create Account</h5>
+        <button type="button" class="close close-modal-btn" data-dismiss="modal-usersignup" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+      </div>
+      <div class="modal-body">
+        <!-- Your signup form goes here -->
+        <form id="signup-form">
+          <div class="form-group input-field">
+            <label for="signup-username">Username</label>
+            <input type="signup-username" class="form-control" id="signup-username" aria-describedby="usernameHelp">
+          </div>
+          <div class="form-group input-field">
+            <label for="signup-email">Email address</label>
+            <input type="signup-email" class="form-control" id="signup-email" aria-describedby="emailHelp" required />
+          </div>
+          <div class="form-group input-field">
+            <label for="signup-password">Enter Password</label>
+            <input type="signup-password" class="form-control" id="signup-password" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Edit Profile -->
+<div class="modal fade hidden" id="modal-editProfile" tabindex="-1" role="dialog" aria-labelledby="modal-editProfile-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-editProfile-label">Edit Profile</h5>
+        <button type="button" class="close close-modal-btn" data-dismiss="modal-editProfile" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Your profile update form goes here -->
+        <form id="update-profile-form">
+          <div class="form-group input-field">
+            <label for="update-username">Username</label>
+            <input type="text" class="form-control" id="update-username" aria-describedby="usernameHelp">
+          </div>
+          <div class="form-group input-field">
+            <label for="update-photoURL">Profile Photo URL</label>
+            <input type="text" class="form-control" id="update-photoURL" aria-describedby="photoURLHelp">
+          </div>
+          <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="currentgifcursordiv" style="left: 1059px; top: 162px; background-image: none;"></div>
+<div id="currentgifdiv" style="background-image: none; background-color: black;"></div>	
+
+
+	
+
+	<script src="core/js/core-apps/customkersir.js"></script>
+
+	<!--FIREBASE AUTHENTICATION SKRIPTS-->
+	<script src="core/js/index.js"></script>
+	<script type="module" src="core/js/firebase/auth.js"></script>
+	</body>
+</html>
+<!--______________________________________________________________ -->
+<!-- end of html                                                   --><!---->
