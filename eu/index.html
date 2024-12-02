@@ -1,34 +1,48 @@
+<!-- EU page ( Entropian Pixelb8-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixelb8.LoL Home</title>
-	<link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
-    <link rel="stylesheet" href="core/css/pixelb8-default.css">
+    <title>Pixelb8.LoL Entropia</title>
+    <link rel="stylesheet" href="../core/css/pixelb8-default.css">
+	<link rel="stylesheet" href="../Modules/SuSOS/core/css/SuSOS-default.css">
 	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-<!--i dont think we using jquery anywhere but idk yet-->
+	<link rel="stylesheet" href="../Modules/SuSOS/apps/stolencalymap/core/css/HudMap-styles.css">
+		
+    <script src="../Modules/SuSOS/apps/stolencalymap/core/js/leaflet.js"></script><style type="text/css" id="operaUserStyle"></style>
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!--im not sure what the following link is for but i think discord integration-->	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
-
-<!--fix website and git repository before using adsense and trying to monetize lol-->
-<!--adsense script-->
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+	
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7382192474927902"
      crossorigin="anonymous"></script>
 </head>
-<body>
-<!--Style Tuner and HUD Main Power Button-->
+
 <div class="background-container">
   <div class="stars"></div>
   <div class="twinkling"></div>
 </div>
-<!-- --------------------- -->
+
+<!--Style Tuner and HUD Main Power Button-->
+
+
+<!-- 
+staticPage BLOCK 
+-->
+<div id="navigation" style="display: none;">
+    <button onclick="loadPage('https://clickmeharder.github.io/sus-eu/')">Load Main Page</button>
+    <button onclick="loadPage('https://clickplace.tebex.io')" disabled>Load Other Page</button>
+</div>
+
+<!--  
+--><!--static page Line 402-474 -->
 <div class="staticPage" id="Mainpage">
-<!--  Header    -->
   <header class="staticpage-header">
-      <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
+      <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL/eu</h1>
       <nav class="main-nav">
           <ul>
               <li><a href="https://Pixelb8.lol/home">Home</a></li>
@@ -37,51 +51,76 @@
           </ul>
       </nav>
   </header>
-<!--  main content  -->
+  <!-- New Main Content Area -->
   <main class="main-content">
-      <!-- Website navigation panel(spelunker) -->
-      <div class="panel left-panel" id="Spelunker">
-		<h2 class="panel-title" id="SpelunkerTitle"style="line-height:0.65;margin-top:0px;margin-bottom:8px;">Internal Spelunking</h2>
-			<a href="https://Pixelb8.lol/faq">
-				<button id="Leftbuttcheek1" class="leftcheek" value="faq" selected disabled>Pixelb8 FAQ</button>
-			</a>
-			<a href="https://Pixelb8.lol/pixelbot">
-				<button id= "Leftbuttcheek2" class="leftcheek" value="pixelbot" >Visit PixelBot</button>
-			</a>
-			<a href="https://Pixelb8.lol/eu">
-				<button id= "Leftbuttcheek3" class="leftcheek" value="entropiapage">Entropia Tools</button>
-			</a>
-			<a href="https://Pixelb8.lol/earn">
-				<button id= "Leftbuttcheek4" class="leftcheek" value="earn" disabled>earn</button>
-			</a>
-			<a href="https://Pixelb8.lol/sweatshop">
-				<button id= "Leftbuttcheek5" class="leftcheek" value="sweatshop" disabled>Sweatshop</button>
-			</a>
+      <!-- Left Panel -->
+      <div class="panel left-panel">
+		<h2 class="panel-title" style="line-height:0.65;margin-top:0px;margin-bottom:8px;">Internal Spelunking</h2>
 			<a href="https://Pixelb8.lol/eu/cos">
-				<button id= "Leftbuttcheek6" class="leftcheek" value="colonistsonstream" disabled>Colonists on Stream</button>
+				<button class="leftcheek" value="colonistsonstream">Colonists on Stream</button>
+			</a>
+			<a href="https://Pixelb8.lol/eu/maps">
+				<button class="leftcheek" value="entropiamaps" >Arkadia Map</button>
+			</a>
+<!-- 			<a href="https://pixelb8.lol/eu/arksatnav">
+				<button class="leftcheek" value="arkadiasatnav" disabled>📡 Arkadia SatNav(beta)</button>
+			</a> -->
+			<a href="https://pixelb8.lol/sweatshop" disabled>
+				<button class="leftcheek" value="sweatshop">Sweatshop</button>
+			</a>
+			<a href="https://pixelb8.lol/eu/itemlist-analyzer">
+				<button class="leftcheek" value="EUitemsortingTool" >Sort&Search Eu Itemlist</button>
 			</a>
 	  </div>
-        <!-- website stats and login Panels below -->	
-		<div id="userInfoMicroDiv">
-			<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
+<!-- Empty Content Panel -->
+		<div class="window panel draggable-menu eucontent-panel" data-draggable="true">
+			<div class="staticwindowcontrolbar row">
+				<h4 class="draggable-header eucontent-header" style="margin:auto;">Readme.txt</h4><button class="xbutt staticxbutt butthovred" id="CloseWindow" style="width:25px;">X</button>
+			</div>
+			<div class="eucontent-interior border-test" contenteditable="true" style="cursor:text;">
+				<h2 class="panel-title">Entropia related content</h2>
+				<div id="staticpage-content-contentpanelB" contenteditable="true" style="margin-bottom:26px cursor:text;">
+					<p>Hello! Here you will find access to all of our tools and other content related to Entropia Universe. As it is right now Most of our tools are within a shitty Javascript O.S. i have thrown together, You can click the power button on the top right of this page to turn it on.</p>
+					<strong>Entropia Maps page:</strong>
+					<p> -still under development, its kinda works.. enjoy!.</p>
+					<strong>Arkadia Satnav System:</strong>
+					<p> -there is currently no plans to update or improve this. we have directed our focus to other stuff like picking our nose however; this may change at a later date. </p>
+					<hr style="border-color:#1f1f1f;">
+					<p>Play around with things a little and I'm you will figure it out fairly quickly. </p><br>
+					<p></p>
+					<p style="font-weight:bold;margin-left:33px;margin-block-end:0;">your friendly Arkadian noob,</p>
+					<strong style="margin:0;margin-left:205px;">   ~ Jimbobbityboo</strong>
+				</div>
+				<div>
+					<button style="width:fit-content;margin-left:70%;margin-right:0;margin-top:26px;margin-bottom:12px;"class="xbutt butthovred" >Close window</button>
+				</div>
+			</div>
 		</div>
-		
-		<div id="useraccountsPanel" class="panel right-panel">
+		<div class="panel ad-panel" id="adpanelfix1" style="z-index:-1;">
+			<div class="static-slideshowpromoter" id="ad-slide">
+			<!-- Add your slideshow content here  remove the syle with zindex in a bit its already in css-->
+			</div>
+		</div>
+		  <!-- Right Panel -->
+		<div class="panel content-panel" style="box-shadow: none;border: none;">
+					<div class="panel right-panel">
 			<div id="websiteStatContainer">
-				<h2 class="panel-title" id="sitestats">site stats:</h2>
+				<h2 class="panel-title" id="sitestats">Site Stats</h2>
 				<p>Registered&gt; Lots</p>
 				<p>Online&gt; everyone</p>
 			</div>
 			<div id="userInfoContainer">
-				<P id="username">Guest user</p>
+				<P id="username">StrangerDanger</p>
 				<P id="profileusername">-</p>
+				<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
 				<p id="Userpixelcount" class="hidden">0px</p>
-				<p id="loginStatus">offline</p>
+				<p id="loginStatus">Status: offline</p>
 				<ul>
 					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
 					<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
 					<span id="emailVerified" class="hidden">►</span>
 					<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
+					
 				</ul>
 			</div>
 			<div class="row">
@@ -93,51 +132,54 @@
 				<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>	
 			</div>
 		</div>
-  </main>
-	<!-- second row-->
-  <div class="row">
-		<h2 id="themed-main-title">Latest Updates</h2>
-		<section class="themed-main">
-			<section class="featured-section">
-				<div class="devnote">
-					<h3 class="devnote-title">Development Update - [2024-05-16 06:06:12 UTC]</h3>
-					<p class="devnote-content"></p>
+	 </main>
+<!-- Content Panels -->
+
+<!-- Advertisement Panel -->
+	<div class="panel ad-panel">
+		<h2 class="panel-title"></h2>
+		<div id="staticpage-adpanel-contentwrapper">
+			<div class="static-videopanel">
+				<iframe
+					id="video1"
+					width="225"
+					height="148"
+					src="https://www.youtube.com/embed/videoseries?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&index=284&enablejsapi=1&autoplay=0&rel=0&html5=1&showinfo=0&controls=0" frameborder="0"
+					title="YouTube video player"
+					frameborder="0"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					allowfullscreen
+					style="max-height: 180px; width: 100%;"
+				></iframe>
+			</div>
+			<div id="progressBar">
+				<div id="progbarinner">
+					<span class="val currentprogress"></span>s / <span class="val duration"></span>s Total<br>
+					<!-- <span class="val ytvideotitle-label">Title:</span><span class="val" id="ytvideoTitle">err: testing</span><br> -->
+					<div id="mastervolumewrapper">
+						<span class="val ytvideotitle-label">Volume:</span><span class="val" id="masterVolume">45</span>
+					</div>
 				</div>
-				<!-- End of Latest Devnote -->
-				<button class="themed-button" style="display:none;"disabled>Read More</button>
-			</section>
-			  <div class="older-devnote">
-				  <h3>Loading...</h3>
-				  <p> some example text goes here but this should be dynamically updated</p>
-			  </div>
-			  <div class="older-devnote">
-				  <h3>Default h3</h3>
-				  <p>This is the first example element, it should be the newest section</p>
-			  </div>
-			  <div class="older-devnote">
-				  <h3>Default h3</h3>
-				  <p>This is some example content for Element 2.</p>
-			  </div>
-			  <div class="older-devnote">
-				  <h3>Example Element 2</h3>
-				  <p>This is some example content for Element 2.</p>
-			  </div>
-			  <div class="older-devnote">
-				  <h3>Final Example Element</h3>
-				  <p> The oldest stuff Should end up here. and the newest on the top, just under the featured section</p>
-			  </div>
-			  <!-- End of Generic Example Elements -->
-		</section>
+			</div>
+			<div class="row mediaplaypause" id="mediacontrols">
+				<div class="button buttpress" id="previous-button">◄◄</div>
+				<div class="button buttpress" id="play-button">►</div>
+				<div class="button buttpress" id="pause-button">❚❚</div>
+				<div class="button buttpress" id="next-button">►►</div>
+				<div class="button buttpress" id="shuffle-button">SHUFFLE</div>
+			</div>
+		</div>
+	</div>
   </div>
+  <!-- Footer -->
   <footer class="themed-footer">
       <p>Pixelb8 &copy; 2023-2027 - All rights reserved.</p>
 	  <p>Entropia Universe® are copyright or registered trademark of Mindark PE AB.</p>
 	  <p>We are in no way endorsed or affiliated with Mindark PE AB - no infringement intended</p>
   </footer>
+<!--end mainpage -->
 </div>
-<!-- ----------- -->
-<!--hidden modals (redo most/all these lol) -->
-<!-- ----------- -->
+<!--end mainpage -->
 <!-- Modal for Signup -->
 <div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -197,70 +239,84 @@
     </div>
   </div>
 </div>
-
-<!--cursor stuff (im unsure if we are using this yet -->
+<div class="staticPage" id="pageContainer"></div>
+<div class="staticPage" id="SuSnet"></div>
 <div id="currentgifcursordiv" style="left: 1059px; top: 162px; background-image: none;"></div>
 <div id="currentgifdiv" style="background-image: none; background-color: black;"></div>	
-<!-- ----------- -->
-		<!-- following script is for updating devnotes and needs to be moved to global js-->
+
+<!-- -------------------------------------------
+	          SOUNDS
+-------------------------------------------- -->
+	<!-- GULP SOUNDS -->
+	<audio id="gulp_Sound1" preload="auto">
+    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/gulp.mp3" type="audio/mpeg">
+	</audio>
+         <!-- MOVEMENT SOUNDS -->
+	<audio id="move_Sound" preload="auto">
+    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakemove_sound.mp3" type="audio/mpeg">
+	</audio>
+	<!-- EATING SOUNDS -->
+	<audio id="eat_Sound1" preload="auto">
+    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakeeat_sound1.mp3" type="audio/mpeg">
+	</audio>
+	<audio id="eat_Sound2" preload="auto">
+    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakeeat_sound2.mp3" type="audio/mpeg">
+	</audio>
+	<audio id="eat_Sound3" preload="auto">
+    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakeeat_sound3.mp3" type="audio/mpeg">
+	</audio>
+	<audio id="eat_Sound4" preload="auto">
+    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakeeat_sound4.mp3" type="audio/mpeg">
+	</audio>
+	<!-- death SOUNDS -->
+	<audio id="die_Sound1" preload="auto">
+    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakedie_sound1.mp3" type="audio/mpeg">
+	</audio>
+	</audio>
+	<audio id="die_Sound2" preload="auto">
+    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakedie_sound2.mp3" type="audio/mpeg">
+	</audio>
+	<audio id="die_Sound3" preload="auto">
+    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakedie_sound3.mp3" type="audio/mpeg">
+	</audio>
 	<script>
-		document.addEventListener("DOMContentLoaded", function() {
-			fetch("/core/assets/data/devnotes/devnotes.json")
-				.then(response => response.json())
-				.then(data => {
-					if (data && data.length > 0) {
-						const latestUpdate = data[0];
-						const olderUpdates = data.slice(1);
-
-						// Populate the latest devnote
-						const devnoteDiv = document.querySelector(".devnote");
-						devnoteDiv.querySelector(".devnote-title").innerText = `Development Update - [${latestUpdate.date}]`;
-						devnoteDiv.querySelector(".devnote-content").innerHTML = `
-							<strong>Developer:</strong>${latestUpdate.developer}
-							<br><br>
-							${latestUpdate.content}
-							<br><br>
-							The Breakdown:
-							<ul>
-								${latestUpdate.points.map(point => `<li>${point}</li>`).join('')}
-							</ul>
-						`;
-
-						// Get the container for older devnotes
-						const themedMain = document.querySelector(".themed-main");
-
-						// Remove existing older devnotes to avoid duplication
-						document.querySelectorAll(".older-devnote").forEach(el => el.remove());
-
-						// Populate older devnotes
-						olderUpdates.forEach(update => {
-							const olderDiv = document.createElement("div");
-							olderDiv.classList.add("older-devnote");
-							olderDiv.innerHTML = `
-								<h3>Latest Update [${update.date}]:</h3>
-								<p>
-									<strong>Developer:</strong>${update.developer}
-									<br><br>
-									${update.content}
-									<br><br>
-									The Breakdown:
-									<ul>
-										${update.points.map(point => `<li>${point}</li>`).join('')}
-									</ul>
-								</p>
-							`;
-							themedMain.appendChild(olderDiv);
-						});
-					}
-				})
-				.catch(error => console.error("Error fetching devnotes:", error));
-		});
+	  $(document).ready(function() {
+		$('#stashTable, #WTStable, #WTBtable').DataTable();
+	});
 	</script>
-	<!--custom cursor script-->
-	<script src="core/js/core-apps/customkersir.js"></script>
-	<script src="core/js/pixelb8-global.js"></script>
-	<!--Firebase Auth Scripts-->
-	<script src="core/js/index.js"></script>
-	<script type="module" src="core/js/firebase/auth.js"></script>
+	<!--________________________-->
+	<!-- Core Skripts 
+	path= core/js/
+	-->
+	<!-- Core App Skripts 
+	path= core/js/core-apps
+	-->
+	<!-- Core Module Skripts 
+	path= Modules/SuSOS/core/js/
+	path= Modules/SuSOS/core/js/core-apps/
+	-->
+	<!-- Enabled SuSOS Applet Skripts-->
+	<!-- Enabled SuSOS EU Applet Skripts 
+	path= Modules/SuSOS/apps/
+	-->
+	
+	
+
+	<!-- Game Skripts-->
+	
+	<!---->
+	<!-- Disabled Skripts-->
+	
+	
+	
+	<!-- in dev-->
+	<!--
+	<script src="susmediaplayer.js"></script>
+	-->
+	<!--FIREBASE AUTHENTICATION SKRIPTS-->
+	<script src="../core/js/index.js"></script>
+	<script type="module" src="../core/js/firebase/auth.js"></script>
 	</body>
 </html>
+<!--______________________________________________________________ -->
+<!-- end of html                                                   --><!---->
