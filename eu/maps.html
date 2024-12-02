@@ -1,4 +1,4 @@
-<!-- EU page ( Entropian Pixelb8-->
+<!-- EU maps page ( Entropian Pixelb8-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,281 +9,14 @@
 	<!-- <link rel="stylesheet" href="../Modules/SuSOS/core/css/SuSOS-default.css"> -->
 	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-	<!-- <link rel="stylesheet" href="../Modules/SuSOS/apps/stolencalymap/core/css/HudMap-styles.css"> -->
-		
-    <!-- <script src="Modules/SuSOS/apps/stolencalymap/core/js/leaflet.js"></script><style type="text/css" id="operaUserStyle"></style> -->
+
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
-	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
-    <!-- <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script> -->
 
 </head>
-
-<!--Style Tuner and HUD Main Power Button-->
-<div>
-  <input id="powercheckbox" type="checkbox" disabled>
-	  <label class="powerswitch" for="powercheckbox" style="display:none;">
-		<svg viewBox="0 0 512 512" class="slider">
-			<path
-				d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V256c0 17.7 14.3 32 32 32s32-14.3 32-32V32zM143.5 120.6c13.6-11.3 15.4-31.5 4.1-45.1s-31.5-15.4-45.1-4.1C49.7 115.4 16 181.8 16 256c0 132.5 107.5 240 240 240s240-107.5 240-240c0-74.2-33.8-140.6-86.6-184.6c-13.6-11.3-33.8-9.4-45.1 4.1s-9.4 33.8 4.1 45.1c38.9 32.3 63.5 81 63.5 135.4c0 97.2-78.8 176-176 176s-176-78.8-176-176c0-54.4 24.7-103.1 63.5-135.4z"
-			></path>
-		</svg>
-	  </label>
-  <!--Style Tunner-->
-  <div id="ST-wrapper">
-    <div class=".max-height-control" id="styletuner">
-      <div id="ST-header">
-        <div class="ST-box">
-          <div id="ST-headertext"class="ST-box">Style Tuner</div>
-          <div class="ST-box STborder" id="st-subheader">Choose a Style:</div>
-        </div>
-      </div>
-      <!--Style Control Panel-->
-      <div id="ST-scrollbox" class="STborder2">
-        <!--Main Body Styles-Main Body Transparancy - Bg color & text color-->
-        <div class="ST-box">
-          <!--Main Body -Text color-->
-          <div>
-            <label for="mainbody-text-color"><h1 id="ST-MainBody-label">Main Body</h1></label>
-            <input type="radio" id="mainbody-text-color" name="ST-styleRadio" value="mainbody-text-color">
-            <label for="mainbody-text-color"disabled>text color</label>
-          </div>
-          <!--Main Body -BG color & Transparency-->
-          <div>
-            <input type="radio" id="mainbody-bg-color" name="ST-styleRadio" value="mainbody-bg-color">
-            <label for="mainbody-bg-color"disabled>bg color</label>
-            <input type="radio" id="mainbody-transparency" name="ST-styleRadio" value="mainbody-transparency">
-            <label for="mainbody-transparency"disabled>transparency</label>
-          </div>
-          <!--SCROLLBAR STYLES-->
-			<!--SCROLLBAR STYLES -BG and Border color-->
-          <div>
-            <label for="scrollbar-bg-color"><h2 id="ST-scrollbars-label">Scrollbars</h2></label>
-            <input type="radio" id="scrollbar-bg-color" name="ST-styleRadio" value="scrollbar-bg-color">
-            <label for="scrollbar-bg-color"disabled>bg color</label>
-            <input type="radio" id="scrollbar-border-color" name="ST-styleRadio" value="scrollbar-border-color">
-            <label for="scrollbar-border-color"disabled>border color</label>
-          </div>
-			<!--SCROLLBAR STYLES -Scrollbar Thumb Border color-->
-          <div>
-            <label for="scrollbar-thumb-border-color">Scrollbar Thumb</label><br>
-            <input type="radio" id="scrollbar-thumb-border-color" name="ST-styleRadio" value="scrollbar-thumb-border-color">
-            <label for="scrollbar-thumb-border-color"disabled>border color</label>
-          </div>
-        </div>
-        <!--Hud Overlay Style Controls-->
-        <div class="ST-box">
-          <!--Hud Overlay- Text Color & Transparancy-->
-          <div>
-            <label for="HUD-text-color"><h1 id="ST-HudOverlay-label">Hud Overlay</h1></label>
-            <input type="radio" id="HUD-text-color" name="ST-styleRadio" value="HUD-text-color">
-            <label for="HUD-text-color"disabled>text color</label>
-            <input type="radio" id="hudoverlay-transparency" name="ST-styleRadio" value="hudoverlay-transparency">
-            <label for="hudoverlay-transparency"disabled>transparency</label>
-          </div>
-          <!--Hud Overlay- bg color & border color-->
-          <div>
-            <input type="radio" id="hudoverlay-bg-color" name="ST-styleRadio" value="hudoverlay-bg-color">
-            <label for="hudoverlay-bg-color"disabled>bg color</label>
-            <input type="radio" id="hudoverlay-border-color" name="ST-styleRadio" value="hudoverlay-border-color">
-            <label for="hudoverlay-border-color"disabled>Border color</label>
-          </div>
-          <!----Main HUD-Styles-->
-  <!-- --------------------------------------------------- -->
-          <div>
-            <label for="HUD-text-color"><h2 id="ST-HudOverlaySecondary-label">Secondary</h2></label>
-            <input type="radio" id="HUD-bg-color" name="ST-styleRadio" value="HUD-bg-color">
-            <label for="HUD-bg-color"disabled>bg color #2</label>
-            <input type="radio" id="HUD-applet-border-color" name="ST-styleRadio" value="HUD-applet-border-color">
-            <label for="HUD-applet-border-color"disabled>Inner border color</label>
-          </div>        
-          <!---->
-          <div>
-            <input type="radio" id="HUD-border-color" name="ST-styleRadio" value="HUD-border-color">
-            <label for="HUD-border-color"disabled>border color #2</label>
-            <input type="radio" id="HUD-windows-bg-color" name="ST-styleRadio" value="HUD-windows-bg-color">
-            <label for="HUD-windows-bg-color"disabled>Applet Bg color</label>
-            <input type="radio" id="HUD-active-border-color" name="ST-styleRadio" value="HUD-active-border-color">
-            <label for="HUD-active-border-color"disabled>Active color</label>
-          </div>        
-          <!---->
-        </div>
-        <!--Static Main Wrapper Style Controls-->
-        <div class="ST-box">
-            <div>
-              <label for="staticpage-text-color"><h1 id="ST-StaticPage-label">Static Page</h1></label>
-              <input type="radio" id="staticpage-text-color" name="ST-styleRadio" value="staticpage-text-color">
-              <label for="staticpage-text-color"disabled>text color</label>
-            </div>
-            <div>
-              <input type="radio" id="staticpage-border-color" name="ST-styleRadio" value="staticpage-border-color">
-              <label for="staticpage-border-color"disabled>Border color</label>
-            </div>
-            <div>
-              <input type="radio" id="staticpage-bg-color" name="ST-styleRadio" value="staticpage-bg-color">
-              <label for="staticpage-bg-color"disabled>bg color</label>
-            </div>
-            <div>
-              <input type="radio" id="staticpage-transparency" name="ST-styleRadio" value="staticpage-transparency">
-              <label for="staticpage-transparency"disabled>transparency</label>
-            </div>
-          </div>
-        <!--Header and Footer Panels Style Controls-->
-        <div class= "ST-box">
-            <div>
-              <label for="staticpage-HFpanels-text-color"><h2 id="ST-StatcPage-HF-label">Header & Footer</h2></label>
-              <input type="radio" id="staticpage-HFpanels-text-color" name="ST-styleRadio" value="staticpage-HFpanels-text-color">
-              <label for="staticpage-HFpanels-text-color">text-color</label>
-            </div>
-            <div>
-              <input type="radio" id="staticpage-HFpanels-bg-color" name="ST-styleRadio" value="staticpage-HFpanels-bg-color">
-              <label for="staticpage-HFpanels-bg-color">bg color</label>
-            </div>
-            <div>
-              <input type="radio" id="staticpage-HFpanels-border-color" name="ST-styleRadio" value="staticpage-HFpanels-border-color">
-              <label for="staticpage-HFpanels-border-color">border color</label>
-            </div>
-          </div>
-        <!--Staticpage Maincontent Style Controls-->
-        <div class= "ST-box">
-          <div>
-            <label for="staticpage-maincontent-text-color"><h2 id="ST-StaticPage-MainContent-label">Main content</h2></label>
-            <input type="radio" id="staticpage-maincontent-text-color" name="ST-styleRadio" value="staticpage-maincontent-text-color">
-            <label for="staticpage-maincontent-text-color">text-color</label>
-          </div>
-          <div>
-            <input type="radio" id="staticpage-maincontent-bg-color" name="ST-styleRadio" value="staticpage-maincontent-bg-color">
-            <label for="staticpage-maincontent-bg-color">bg color</label>
-          </div>
-          <div>
-              <input type="radio" id="staticpage-maincontent-border-color" name="ST-styleRadio" value="staticpage-maincontent-border-color">
-              <label for="staticpage-maincontent-border-color">border color</label>
-          </div>
-          <div>
-              <input type="radio" id="staticpage-inner-bg-color" name="ST-styleRadio" value="staticpage-inner-bg-color">
-              <label for="staticpage-inner-bg-color">inner bg color</label>
-          </div>
-        </div>
-        <!--Side Panels Style Controls-->
-        <div class= "ST-box">
-            <div>
-              <label for="staticpage-sidepanels-text-color"><h2 id="ST-StaticPage-SidePanels-label">Side Panels</h2></label>
-              <input type="radio" id="staticpage-sidepanels-text-color" name="ST-styleRadio" value="staticpage-sidepanels-text-color">
-              <label for="staticpage-sidepanels-text-color">text-color</label>
-            </div>
-            <div>
-              <input type="radio" id="staticpage-sidepanels-bg-color" name="ST-styleRadio" value="staticpage-sidepanels-bg-color">
-              <label for="staticpage-sidepanels-bg-color">bg color</label>
-            </div>
-            <div>
-              <input type="radio" id="staticpage-sidepanels-border-color" name="ST-styleRadio" value="staticpage-sidepanels-border-color">
-              <label for="staticpage-sidepanels-border-color">border color</label>
-            </div>
-        </div>
-        <!--Panels Style Controls-->
-        <div class="ST-box">
-          <div>
-            <label for="staticpage-panels-border-color"><h2 id="ST-StaticPage-InnerPanels-label">inner Panels</h2></label><br>
-            <input type="radio" id="staticpage-panels-border-color" name="ST-styleRadio" value="staticpage-panels-border-color">
-            <label for="staticpage-panels-border-color">Border Color</label>
-          </div>
-          <div>
-            <input type="radio" id="panels-bg-color" name="ST-styleRadio" value="staticpage-panels-bg-color">
-            <label for="panels-bg-color">Bg Color</label>
-          </div>
-          <div>
-            <input type="radio" id="staticpage-panels-headertext-color" name="ST-styleRadio" value="staticpage-panels-headertext-color">
-            <label for="staticpage-panels-headertext-color">Header Text Color</label>
-          </div>
-          <div>
-            <input type="radio" id="staticpage-panels-text-color" name="ST-styleRadio" value="staticpage-panels-text-color">
-            <label for="staticpage-panels-text-color">Text Color</label>
-          </div>
-        </div>
-  <!--Ex. for root vars & newradiobutton Style Controls-->
-        <div class="ST-box">
-          <div>
-            <input type="radio" id="newradiobutton1" name="ST-styleRadio" value="newradiobutton1">
-            <label for="newradiobutton1"disabled>new root variable 1</label>
-          </div>
-          <div>
-            <input type="radio" id="newradiobutton2" name="ST-styleRadio" value="newradiobutton2">
-            <label for="newradiobutton2"disabled>new root variable 2</label>
-          </div>
-        </div>
-	</div>    
-      <div id="ST-footer">
-	  </div>
-    </div>
-    <div id="ST-currentcolorbox">
-      <label>Current Color:</label>
-      <div id="ST-CurrentColor">
-        <span></span>    </div>        
-      <input type="color" id="ST-colorPicker" name="ST-colorPicker" >
-
-</div>
-    <!-- Opacity Slider -->
-    <div class="slider-container">
-        <label for="opacity-slider" class="slider-label">Opacity:</label>
-        <input type="range" min="0" max="1" step="0.01" value="1" class="slider-input" id="opacity-slider">
-	</div>
-  </div>
-</div>
-<!-- <div class="" id="HudMap">
-	<div id="menu" class="menu_container">
-		<div id="menu_interior">
-			<div class="menu_section toggle_section">
-				<div class="floatable_section">
-					<input id="boarder_checkbox" type="checkbox">
-					<label for="boarder_checkbox">Deep Space</label>
-					<input id="names_checkbox" type="checkbox">
-					<label for="names_checkbox">Regions</label>
-				</div>
-				<div class="floatable_section">
-					<input id="pvp_checkbox" type="checkbox">
-					<label for="pvp_checkbox">Piratable</label>
-					<input id="servborder_checkbox" type="checkbox">
-					<label for="servborder_checkbox">Borders</label>
-				</div>
-			</div>
-			<div class="menu_section">
-				<label for="all_waypoint_select" class="menu_full_width dropdown_label">Waypoints</label>
-				<select id="all_waypoint_select" class="menu_full_width">
-					<option id="default_waypoint_option" value="-" selected="">No Waypoint Selected</option>
-				<optgroup label="Arkadia"><option value="arkadia_space_station">Arkadia Space Station</option><option value="arkadia_moon">Arkadia Moon</option><option value="arkadia_skyflail_nesting_grounds">Arkadia Skyflail Nesting Grounds</option><option value="arkadia_hermit_nesting_grounds">Arkadia Hermit Nesting Grounds</option><option value="arkadia_training_grounds">Arkadia Training Grounds</option></optgroup><optgroup label="Athena Space Station"><option value="athena_space_station">Athena Space Station</option><option value="welmik_express">Welmik Expanse</option><option value="new_berand">New Berand</option></optgroup><optgroup label="Calypso"><option value="calypso_space_station">Calypso Space Station</option><option value="crystal_palace_space_station">Crystal Palace Space Station</option><option value="asteroid_foma">Asteroid F.O.M.A</option><option value="calypso_skyflail_nesting_grounds">Calypso Skyflail Nesting Grounds</option><option value="calypso_hermit_nesting_grounds">Calypso Hermit Nesting Grounds</option><option value="calypso_training_grounds">Calypso Training Grounds</option><option value="dropship">Dropship Boss Wave</option></optgroup><optgroup label="Cyrene"><option value="cyrene_space_station">Cyrene Space Station</option><option value="cyrene_hermit_nesting_grounds">Cyrene Hermit Nesting Grounds</option><option value="cyrene_training_grounds">Cyrene Training Grounds</option><option value="cyrene_skyflail_nesting_grounds">Cyrene Skyflail Nesting Grounds</option></optgroup><optgroup label="Erebos Space Station"><option value="erebos_space_station">Erebos Space Station</option><option value="graveyard_fields">Graveyeard Fields</option><option value="void_of_tears">Void of tears</option></optgroup><optgroup label="Hermes Space Station"><option value="hermes_space_station">Hermes Space Station</option><option value="eschenbachs_gate">Eschenbach's Gate</option><option value="dymlin_space">Dymlin Space</option></optgroup><optgroup label="Howling Mine"><option value="howling_mine">Howling Mine</option><option value="rackhams_nest">Rackham's Nest</option></optgroup><optgroup label="Monria"><option value="monria_space_station">Monria Space Station</option><option value="monria_sky_nesting_grounds">Monria Skyflail Nesting Grounds</option><option value="sayah_space">Sayah Space</option><option value="monria_hermit_nesting_grounds">Monria Hermit Nesting Grounds</option></optgroup><optgroup label="Next Island"><option value="next_island_space_station">Next Island Space Station</option><option value="next_island_training_grounds">Next Island Training Grounds</option><option value="next_island_skyflail_nesting_grounds">Next Island Skyflail Nesting Grounds</option><option value="next_island_hermit_nesting_grounds">Next Island Hermit Nesting Grounds</option></optgroup><optgroup label="Rocktropia"><option value="rocktropia_space_station">Rocktropia Space Station</option><option value="rocktropia_skyflail_nesting_grounds">Rocktropia Skyflail Nesting Grounds</option><option value="rocktropia_hermit_nesting_grounds">Rocktropia Hermit Nesting Grounds</option><option value="rocktropia_training_grounds">Rocktropia Training Grounds</option></optgroup><optgroup label="Toulan"><option value="toulan_space_station">Toulan Space Station</option><option value="bartons_corridor">Barton's Corridor</option><option value="toulan_hermits_nesting_grounds">Toulan Hermit Nesting Grounds</option><option value="toulan_skyflail_nesting_grounds">Toulan Skyflail Nesting Grounds</option></optgroup><optgroup label="Zeus Space Station"><option value="zeus_space_station">Zeus Space Station</option><option value="gordons_belt">Gordon's Belt</option></optgroup><optgroup label="Others"><option value="locusta">Locusta</option></optgroup></select>
-				<button id="waypoint_copy_button">Click Here to Copy TP Waypoint Link</button>
-			</div>
-			<div class="menu_section">
-				<select id="planet_select" class="menu_full_width"><option value="-">Select Planet</option><option value="calypso">Calypso</option><option value="rocktropia">Rocktropia</option><option value="toulan">Toulan</option><option value="next_island">Next Island</option><option value="arkadia">Arkadia</option><option value="cyrene">Cyrene</option></select>
-				<select id="creature_select" class="menu_full_width"><option value="-">Filter By Creature</option><option value="cosmic_horror">Cosmic Horror</option><option value="dymlek">Dymlek</option><option value="hermit">Hermit</option><option value="locusta">Locusta</option><option value="Skyflail">Skyflail</option><option value="dropship">Dropship</option></select>
-			</div>
-			<div class="menu_section" id="creature_image_container">
-				<img id="creature_image">
-			</div>
-		</div>
-	</div>
-	<div id="map" class="leaflet-container leaflet-touch leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" tabindex="0" style="outline: none;"><div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(50px, -483px, 0px);display:none;"><div class="leaflet-pane leaflet-tile-pane"></div><div class="leaflet-pane leaflet-shadow-pane"></div><div class="leaflet-pane leaflet-overlay-pane"><img class="leaflet-image-layer leaflet-zoom-animated map_image" src="Modules/SuSOS/apps/stolencalymap/assets/img/map.jpg" alt="" style="z-index: 0; transform: translate3d(50px, 610px, 0px); width: 515px; height: 412px; display: block; opacity: 1.02067;"><svg pointer-events="none" class="leaflet-zoom-animated" width="860" height="798" viewBox="-122 417 860 798" style="transform: translate3d(-122px, 417px, 0px);"><g><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M353,956a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M339,959a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M352,907a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M373,942a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M321,930a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M363,815a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M352 806L352 792L372 792L372 806z"></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M362 832L362 818L377 818L377 832z"></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M111,816a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M115,822a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M114,810a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M133,799a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M162,843a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M122,843a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M163,803a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M147,956a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M162,901a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M148,935a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M120,920a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M240,816a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M250 826L250 812L264 812L264 826z"></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M257 810L257 796L271 796L271 810z"></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M479,923a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M465 917L465 902L479 902L479 917z"></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M465 952L465 938L479 938L479 952z"></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M372,696a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M355 701L355 687L369 687L369 701z"></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M106,670a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M125,678a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M149,715a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M101,714a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M492,817a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M425,817a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M457,797a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M457,838a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M250,679a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M236,704a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M218,737a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M266,737a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M448,672a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M450,704a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="red" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f03" fill-opacity="0.5" fill-rule="evenodd" d="M475,733a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M428,734a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M240,893a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M259 906L259 879L280 879L280 906z"></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M228,930a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M22,819a35,35 0 1,0 70,0 a35,35 0 1,0 -70,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M234,617a26,26 0 1,0 52,0 a26,26 0 1,0 -52,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M525,632a16,16 0 1,0 32,0 a16,16 0 1,0 -32,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M528,814a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M336,1003a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0 "></path><path class="leaflet-interactive" stroke="#f0da7b" stroke-opacity="0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f0da7b" fill-opacity="0" fill-rule="evenodd" d="M121,1011a30,30 0 1,0 60,0 a30,30 0 1,0 -60,0 "></path></g></svg><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/arkadia_space_station.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(355px, 954px, 0px); width: 102px; height: 49px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/arkadia_moon.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(273px, 954px, 0px); width: 71px; height: 17px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/arkadia_skyflail_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(357px, 866px, 0px); width: 80px; height: 34px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/arkadia_hermit_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(378px, 951px, 0px); width: 78px; height: 24px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/arkadia_training_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(279px, 908px, 0px); width: 54px; height: 22px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/athena_space_station.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(272px, 805px, 0px); width: 94px; height: 18px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/welmik_express.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(365px, 768px, 0px); width: 54px; height: 28px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/new_berand.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(301px, 825px, 0px); width: 67px; height: 17px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/calypso_space_station.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(53px, 811px, 0px); width: 67px; height: 65px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/crystal_palace_space_station.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(120px, 812px, 0px); width: 76px; height: 17px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/asteroid_foma.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(73px, 767px, 0px); width: 54px; height: 44px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/calypso_skyflail_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(131px, 757px, 0px); width: 70px; height: 33px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/calypso_hermit_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(169px, 851px, 0px); width: 78px; height: 28px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/calypso_training_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(90px, 852px, 0px); width: 54px; height: 46px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/dropship.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(161px, 783px, 0px); width: 65px; height: 33px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/cyrene_space_station.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(65px, 952px, 0px); width: 90px; height: 40px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/cyrene_hermit_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(167px, 908px, 0px); width: 84px; height: 56px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/cyrene_training_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(153px, 945px, 0px); width: 91px; height: 43px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/cyrene_skyflail_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(58px, 927px, 0px); width: 81px; height: 34px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/erebos_space_station.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(179px, 802px, 0px); width: 70px; height: 19px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/graveyard_fields.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(201px, 819px, 0px); width: 57px; height: 38px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/void_of_tears.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(264px, 784px, 0px); width: 45px; height: 18px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/hermes_space_station.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(482px, 910px, 0px); width: 72px; height: 18px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/eschenbachs_gate.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(398px, 909px, 0px); width: 72px; height: 21px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/dymlin_space.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(474px, 945px, 0px); width: 69px; height: 17px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/howling_mine.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(373px, 690px, 0px); width: 69px; height: 17px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/rackhams_nest.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(297px, 693px, 0px); width: 64px; height: 21px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/monria_space_station.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(60px, 634px, 0px); width: 60px; height: 38px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/monria_sky_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(131px, 635px, 0px); width: 80px; height: 33px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/sayah_space.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(168px, 693px, 0px); width: 46px; height: 23px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/monria_hermit_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(105px, 723px, 0px); width: 79px; height: 27px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/next_island_space_station.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(487px, 815px, 0px); width: 59px; height: 43px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/next_island_training_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(379px, 793px, 0px); width: 57px; height: 22px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/next_island_skyflail_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(475px, 767px, 0px); width: 85px; height: 30px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/next_island_hermit_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(390px, 838px, 0px); width: 77px; height: 22px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/rocktropia_space_station.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(177px, 666px, 0px); width: 81px; height: 18px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/rocktropia_skyflail_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(253px, 676px, 0px); width: 85px; height: 30px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/rocktropia_hermit_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(213px, 743px, 0px); width: 72px; height: 33px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/rocktropia_training_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(282px, 735px, 0px); width: 107px; height: 38px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/toulan_space_station.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(390px, 660px, 0px); width: 67px; height: 17px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/bartons_corridor.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(468px, 684px, 0px); width: 55px; height: 22px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/toulan_hermits_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(481px, 738px, 0px); width: 78px; height: 20px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/toulan_skyflail_nesting_grounds.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(357px, 731px, 0px); width: 79px; height: 23px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/zeus_space_station.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(197px, 890px, 0px); width: 60px; height: 24px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/gordons_belt.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(275px, 868px, 0px); width: 52px; height: 18px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/locusta.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(232px, 933px, 0px); width: 55px; height: 17px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/calypso.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(46px, 740px, 0px); width: 64px; height: 49px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/rocktropia.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(278px, 614px, 0px); width: 96px; height: 33px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/toulan.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(455px, 624px, 0px); width: 79px; height: 32px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/next_island.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(512px, 837px, 0px); width: 57px; height: 52px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/arkadia.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(376px, 995px, 0px); width: 82px; height: 33px;"><img class="leaflet-image-layer leaflet-zoom-animated label_overlay" src="Modules/SuSOS/apps/stolencalymap/assets/img/labels/cyrene.png" alt="" style="z-index: 1; opacity: 1; transform: translate3d(181px, 988px, 0px); width: 73px; height: 34px;"><img class="leaflet-image-layer leaflet-zoom-animated overlay_boarder_image" src="Modules/SuSOS/apps/stolencalymap/assets/img/overlay_boarder.png" alt="" style="z-index: 1; transform: translate3d(50px, 610px, 0px); width: 515px; height: 412px;"><img class="leaflet-image-layer leaflet-zoom-animated overlay_pvp_image" src="Modules/SuSOS/apps/stolencalymap/assets/img/overlay_pvp.png" alt="" style="z-index: 1; transform: translate3d(50px, 610px, 0px); width: 515px; height: 412px;"></div><div class="leaflet-pane leaflet-marker-pane"></div><div class="leaflet-pane leaflet-tooltip-pane"></div><div class="leaflet-pane leaflet-popup-pane"></div><div class="leaflet-proxy leaflet-zoom-animated" style="transform: translate3d(258.5px, 205.5px, 0px) scale(0.100872);"></div></div><div class="leaflet-control-container"><div class="leaflet-top leaflet-left"></div><div class="leaflet-top leaflet-right"></div><div class="leaflet-bottom leaflet-left"></div><div class="leaflet-bottom leaflet-right"><div class="leaflet-control-zoom leaflet-bar leaflet-control"><a class="leaflet-control-zoom-in" href="#" title="Zoom in" role="button" aria-label="Zoom in">+</a><a class="leaflet-control-zoom-out leaflet-disabled" href="#" title="Zoom out" role="button" aria-label="Zoom out">−</a></div></div></div></div>
-	<div id="loader" class="loader_container" style="display: none;">
-		<div class="loader"></div>
-	</div>
-</div> -->
-<!--  
--->
-
-
-<!-- 
-staticPage BLOCK 
--->
-
-
-<!--  
---><!--static page -->
 <div class="staticPage" id="Mainpage">
   <header class="staticpage-header">
       <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL/eu/maps</h1>
-
-
       <nav class="main-nav">
           <ul>
               <li><a href="#">Home</a></li>
@@ -293,11 +26,6 @@ staticPage BLOCK
       </nav>
   </header>
 
-      <div class="panel ad-panel" style="display: none;">
-		<div class="static-slideshowpromoter">
-            <!-- Add your slideshow content here -->
-        </div>
-      </div>
 <!--Current Main Content Area-->
       <div class="panel left-panel">
 		<h2 class="panel-title" style="line-height:0.65;margin-top:0px;margin-bottom:8px;">Internal Spelunking</h2>
@@ -310,11 +38,7 @@ staticPage BLOCK
 			<a href="https://pixelb8.lol/eu/arksatnav">
 				<button class="leftcheek" value="example" >Arkadia SatNav(beta)</button>
 			</a>
-
 	  </div>		
-
-<!-- Content Panels -->
-	<!-- Content Panel A -->
   <div class="maprow">
 	<!-- Content Panel B (MAP PANEL)-->
 	<div class="panel content-panel-eumaps">
@@ -439,56 +163,9 @@ staticPage BLOCK
 <div id="currentgifcursordiv" style="left: 1059px; top: 162px; background-image: none;"></div>
 <div id="currentgifdiv" style="background-image: none; background-color: black;"></div>	
 
-
-	<script>
-	  $(document).ready(function() {
-		$('#stashTable, #WTStable, #WTBtable').DataTable();
-	});
-	</script>
-	<!--________________________-->
-	<!-- Core Skripts 
-	path= core/js/
-	-->
-	
-	<!-- Core App Skripts 
-	path= core/js/core-apps
-	-->
 	<script src="../core/js/core-apps/customkersir.js"></script>
-	<!-- Core Module Skripts 
-	path= Modules/SuSOS/core/js/
-	path= Modules/SuSOS/core/js/core-apps/
-	-->
 	<script src="../../Modules/globemaps/js/eumaps-core.js"></script>
-	<script src="../Modules/webportal/webtp-core.js"></script>
-<!-- 	<script src="../Modules/SuSOS/core/js/SuSOS-core.js"></script>
-	<script src="../Modules/SuSOS/core/js/core-apps/hudclock.js"></script>
-	
-	<script src="../Modules/StyleTuner/core/js/STuner-core.js"></script> -->
-	
-<!-- 	<script src="../Modules/SuSOS/apps/stolencalymap/core/js/stolencalymap-core.js"></script> -->
-	<!-- Enabled SuSOS Applet Skripts-->
-	<!-- Enabled SuSOS EU Applet Skripts 
-	path= Modules/SuSOS/apps/
-	-->
-	
-<!-- 	<script src="../Modules/SuSOS/apps/winblows69/EU-Applets/EuBudgetPlanner/js/EuBudgetPlanner-Applet.js"></script>
-	<script src="../Modules/SuSOS/apps/winblows69/EU-Applets/EuOrdinanceJuxtapositioner/js/OrdinanceJuxtapositioner-Applet.js"></script>
-	<script src="../Modules/SuSOS/apps/winblows69/EU-Applets/EuItemStash/js/EuItemStash-Applet.js"></script>
-	<script src="../Modules/SuSOS/apps/winblows69/EU-Applets/EuItemSorter/js/EuItemSorter-Applet.js"></script> -->
-	<!-- Game Skripts-->
-	
-	<!---->
-	<!-- Disabled Skripts-->
-	<!--
-	<script src="Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/js/SuSsnake-core.js"></script>
-	-->
-	<!-- in dev-->
-	<!--
-	<script src="susmediaplayer.js"></script>
-	-->
-	<!--FIREBASE AUTHENTICATION SKRIPTS-->
+
 	<script src="../../core/js/index.js"></script>
 	</body>
 </html>
-<!--______________________________________________________________ -->
-<!-- end of html                                                   --><!---->
