@@ -26,20 +26,6 @@
   <div class="stars"></div>
   <div class="twinkling"></div>
 </div>
-
-<!--Style Tuner and HUD Main Power Button-->
-
-
-<!-- 
-staticPage BLOCK 
--->
-<div id="navigation" style="display: none;">
-    <button onclick="loadPage('https://clickmeharder.github.io/sus-eu/')">Load Main Page</button>
-    <button onclick="loadPage('https://clickplace.tebex.io')" disabled>Load Other Page</button>
-</div>
-
-<!--  
---><!--static page Line 402-474 -->
 <div class="staticPage" id="Mainpage">
   <header class="staticpage-header">
       <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL/eu</h1>
@@ -56,51 +42,16 @@ staticPage BLOCK
       <!-- Left Panel -->
       <div class="panel left-panel">
 		<h2 class="panel-title" style="line-height:0.65;margin-top:0px;margin-bottom:8px;">Internal Spelunking</h2>
-			<a href="https://Pixelb8.lol/eu/cos">
-				<button class="leftcheek" value="colonistsonstream">Colonists on Stream</button>
-			</a>
 			<a href="https://Pixelb8.lol/eu/maps">
 				<button class="leftcheek" value="entropiamaps" >Arkadia Map</button>
 			</a>
-<!-- 			<a href="https://pixelb8.lol/eu/arksatnav">
-				<button class="leftcheek" value="arkadiasatnav" disabled>📡 Arkadia SatNav(beta)</button>
-			</a> -->
 			<a href="https://pixelb8.lol/sweatshop" disabled>
-				<button class="leftcheek" value="sweatshop">Sweatshop</button>
+				<button class="leftcheek" value="sweatshop" disabled>Sweatshop</button>
 			</a>
 			<a href="https://pixelb8.lol/eu/itemlist-analyzer">
 				<button class="leftcheek" value="EUitemsortingTool" >Sort&Search Eu Itemlist</button>
 			</a>
 	  </div>
-<!-- Empty Content Panel -->
-		<div class="window panel draggable-menu eucontent-panel" data-draggable="true">
-			<div class="staticwindowcontrolbar row">
-				<h4 class="draggable-header eucontent-header" style="margin:auto;">Readme.txt</h4><button class="xbutt staticxbutt butthovred" id="CloseWindow" style="width:25px;">X</button>
-			</div>
-			<div class="eucontent-interior border-test" contenteditable="true" style="cursor:text;">
-				<h2 class="panel-title">Entropia related content</h2>
-				<div id="staticpage-content-contentpanelB" contenteditable="true" style="margin-bottom:26px cursor:text;">
-					<p>Hello! Here you will find access to all of our tools and other content related to Entropia Universe. As it is right now Most of our tools are within a shitty Javascript O.S. i have thrown together, You can click the power button on the top right of this page to turn it on.</p>
-					<strong>Entropia Maps page:</strong>
-					<p> -still under development, its kinda works.. enjoy!.</p>
-					<strong>Arkadia Satnav System:</strong>
-					<p> -there is currently no plans to update or improve this. we have directed our focus to other stuff like picking our nose however; this may change at a later date. </p>
-					<hr style="border-color:#1f1f1f;">
-					<p>Play around with things a little and I'm you will figure it out fairly quickly. </p><br>
-					<p></p>
-					<p style="font-weight:bold;margin-left:33px;margin-block-end:0;">your friendly Arkadian noob,</p>
-					<strong style="margin:0;margin-left:205px;">   ~ Jimbobbityboo</strong>
-				</div>
-				<div>
-					<button style="width:fit-content;margin-left:70%;margin-right:0;margin-top:26px;margin-bottom:12px;"class="xbutt butthovred" >Close window</button>
-				</div>
-			</div>
-		</div>
-		<div class="panel ad-panel" id="adpanelfix1" style="z-index:-1;">
-			<div class="static-slideshowpromoter" id="ad-slide">
-			<!-- Add your slideshow content here  remove the syle with zindex in a bit its already in css-->
-			</div>
-		</div>
 		  <!-- Right Panel -->
 		<div class="panel content-panel" style="box-shadow: none;border: none;">
 					<div class="panel right-panel">
@@ -133,43 +84,6 @@ staticPage BLOCK
 			</div>
 		</div>
 	 </main>
-<!-- Content Panels -->
-
-<!-- Advertisement Panel -->
-	<div class="panel ad-panel">
-		<h2 class="panel-title"></h2>
-		<div id="staticpage-adpanel-contentwrapper">
-			<div class="static-videopanel">
-				<iframe
-					id="video1"
-					width="225"
-					height="148"
-					src="https://www.youtube.com/embed/videoseries?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&index=284&enablejsapi=1&autoplay=0&rel=0&html5=1&showinfo=0&controls=0" frameborder="0"
-					title="YouTube video player"
-					frameborder="0"
-					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-					allowfullscreen
-					style="max-height: 180px; width: 100%;"
-				></iframe>
-			</div>
-			<div id="progressBar">
-				<div id="progbarinner">
-					<span class="val currentprogress"></span>s / <span class="val duration"></span>s Total<br>
-					<!-- <span class="val ytvideotitle-label">Title:</span><span class="val" id="ytvideoTitle">err: testing</span><br> -->
-					<div id="mastervolumewrapper">
-						<span class="val ytvideotitle-label">Volume:</span><span class="val" id="masterVolume">45</span>
-					</div>
-				</div>
-			</div>
-			<div class="row mediaplaypause" id="mediacontrols">
-				<div class="button buttpress" id="previous-button">◄◄</div>
-				<div class="button buttpress" id="play-button">►</div>
-				<div class="button buttpress" id="pause-button">❚❚</div>
-				<div class="button buttpress" id="next-button">►►</div>
-				<div class="button buttpress" id="shuffle-button">SHUFFLE</div>
-			</div>
-		</div>
-	</div>
   </div>
   <!-- Footer -->
   <footer class="themed-footer">
@@ -244,79 +158,7 @@ staticPage BLOCK
 <div id="currentgifcursordiv" style="left: 1059px; top: 162px; background-image: none;"></div>
 <div id="currentgifdiv" style="background-image: none; background-color: black;"></div>	
 
-<!-- -------------------------------------------
-	          SOUNDS
--------------------------------------------- -->
-	<!-- GULP SOUNDS -->
-	<audio id="gulp_Sound1" preload="auto">
-    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/gulp.mp3" type="audio/mpeg">
-	</audio>
-         <!-- MOVEMENT SOUNDS -->
-	<audio id="move_Sound" preload="auto">
-    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakemove_sound.mp3" type="audio/mpeg">
-	</audio>
-	<!-- EATING SOUNDS -->
-	<audio id="eat_Sound1" preload="auto">
-    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakeeat_sound1.mp3" type="audio/mpeg">
-	</audio>
-	<audio id="eat_Sound2" preload="auto">
-    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakeeat_sound2.mp3" type="audio/mpeg">
-	</audio>
-	<audio id="eat_Sound3" preload="auto">
-    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakeeat_sound3.mp3" type="audio/mpeg">
-	</audio>
-	<audio id="eat_Sound4" preload="auto">
-    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakeeat_sound4.mp3" type="audio/mpeg">
-	</audio>
-	<!-- death SOUNDS -->
-	<audio id="die_Sound1" preload="auto">
-    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakedie_sound1.mp3" type="audio/mpeg">
-	</audio>
-	</audio>
-	<audio id="die_Sound2" preload="auto">
-    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakedie_sound2.mp3" type="audio/mpeg">
-	</audio>
-	<audio id="die_Sound3" preload="auto">
-    <source src="../Modules/SuSOS/apps/Pixelb8SuSlauncher/games/sus-snake/core/assets/sounds/snakedie_sound3.mp3" type="audio/mpeg">
-	</audio>
-	<script>
-	  $(document).ready(function() {
-		$('#stashTable, #WTStable, #WTBtable').DataTable();
-	});
-	</script>
-	<!--________________________-->
-	<!-- Core Skripts 
-	path= core/js/
-	-->
-	<!-- Core App Skripts 
-	path= core/js/core-apps
-	-->
-	<!-- Core Module Skripts 
-	path= Modules/SuSOS/core/js/
-	path= Modules/SuSOS/core/js/core-apps/
-	-->
-	<!-- Enabled SuSOS Applet Skripts-->
-	<!-- Enabled SuSOS EU Applet Skripts 
-	path= Modules/SuSOS/apps/
-	-->
-	
-	
-
-	<!-- Game Skripts-->
-	
-	<!---->
-	<!-- Disabled Skripts-->
-	
-	
-	
-	<!-- in dev-->
-	<!--
-	<script src="susmediaplayer.js"></script>
-	-->
-	<!--FIREBASE AUTHENTICATION SKRIPTS-->
 	<script src="../core/js/index.js"></script>
 	<script type="module" src="../core/js/firebase/auth.js"></script>
 	</body>
 </html>
-<!--______________________________________________________________ -->
-<!-- end of html                                                   --><!---->
