@@ -99,6 +99,7 @@ getDocs(collection(db, 'UserProfiles'))
   .catch((error) => {
     console.log("Error getting documents: ", error);
   });
+// Fetch data from Firestore collection
 getDocs(collection(db, 'sweatexchange'))
   .then((querySnapshot) => {
     // Get the container where you want to display the data
@@ -108,7 +109,7 @@ getDocs(collection(db, 'sweatexchange'))
     sweatexchangeContainer.innerHTML = '';
 
     // Loop through each document in the snapshot
-    querySnapshot.forEach((doc) => {
+    querySnapshot.forEach(async (doc) => {
       const data = doc.data(); // Get the document data
       const exchangeDiv = document.createElement('div'); // Create a new div element
       exchangeDiv.classList.add('exchange-item'); // Optional class for styling
@@ -116,36 +117,29 @@ getDocs(collection(db, 'sweatexchange'))
       // Start creating HTML for the document data
       let docHTML = `<h3>Exchange Data for ${doc.id}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
 
-      // Check if the 'items' field exists within the document data
-      if (data.items) {
-        console.log('Items:', data.items); // Log the items field directly
+      // Check if the 'items' sub-collection exists within the document
+      const itemsCollection = collection(doc.ref, 'items');
+      const itemsSnapshot = await getDocs(itemsCollection);
 
-        // Start creating HTML for the items collection
+      // If items exist, process them
+      if (!itemsSnapshot.empty) {
         docHTML += `<h4>Items:</h4><ul>`;
 
-        // Loop through the items and display each one
-        for (const item in data.items) {
-          const itemData = data.items[item];
-
-          // Check if itemData is an object
-          if (itemData && typeof itemData === 'object') {
-            docHTML += `
-              <li>
-                <strong>${item}</strong>:
-                <ul>
-                  <li>Availability: ${itemData.availability}</li>
-                  <li>Stock: ${itemData.stock}</li>
-                  <li>Sweat Cost: ${itemData.sweatCost}</li>
-                  <li>PED Cost: ${itemData.pedCost}</li>
-                </ul>
-              </li>
-            `;
-          } else {
-            docHTML += `
-              <li><strong>${item}</strong>: Data format issue</li>
-            `;
-          }
-        }
+        // Loop through each item in the items sub-collection
+        itemsSnapshot.forEach((itemDoc) => {
+          const itemData = itemDoc.data();
+          docHTML += `
+            <li>
+              <strong>${itemDoc.id}</strong>:
+              <ul>
+                <li>Availability: ${itemData.availability}</li>
+                <li>Stock: ${itemData.stock}</li>
+                <li>Sweat Cost: ${itemData.sweatCost}</li>
+                <li>PED Cost: ${itemData.pedCost}</li>
+              </ul>
+            </li>
+          `;
+        });
 
         docHTML += `</ul>`; // Close the items list
       }
