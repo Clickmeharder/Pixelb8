@@ -40,8 +40,6 @@
       });
     }
 	
-
-
 // Function to populate account details
 function populateAccountDetails(user) {
   const accountDetailsElement = document.getElementById('accountdetails');
@@ -81,6 +79,8 @@ function populateAccountDetails(user) {
     });
   }
 }
+
+
 
 // Fetch data from Firestore collection
 getDocs(collection(db, 'UserProfiles'))
