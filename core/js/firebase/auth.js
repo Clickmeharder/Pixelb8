@@ -71,7 +71,10 @@ getDocs(collection(db, 'UserProfiles'))
 	  const userpixelcountElement = document.getElementById('Userpixelcount');
 	  /* const innerContentloggedin = document.getElementById('innercontent-loggedin'); */
 	  const innerContentloggedout = document.getElementById('innercontent-loggedout');
+	  const userprofileTab = document.getElementById('user-profile-tab');
 	  const userprofileBox = document.getElementById('user-profile-box');
+	  const receptionTab = document.getElementById('reception-tab');
+	  const receptionBox = document.getElementById('reception');
 
 	  if (user !== null) {
 		// User is signed in
@@ -118,8 +121,12 @@ getDocs(collection(db, 'UserProfiles'))
 
 		  innerContentloggedout.classList.add('hidden');
           /* innerContentloggedin.classList.remove('hidden'); */
+		  userprofileTab.classList.remove('hidden');
+		  userprofileTab.classList.add('Active');
 		  userprofileBox.classList.remove('hidden');
 		  userprofileBox.classList.add('Active');
+		  receptionTab.classList.add('hidden');
+		  receptionBox.classList.add('hidden');
           const userName = encodeURIComponent(user.displayName || "Guest");
           const userEmail = encodeURIComponent(user.email || "");
 
@@ -160,8 +167,12 @@ getDocs(collection(db, 'UserProfiles'))
 		innerContentloggedin.classList.add('hidden');
         innerContentloggedout.classList.remove('hidden');
 		populateAccountDetails(user);
+		userprofileTab.classList.remove('Active');
+		userprofileTab.classList.add('hidden');
 		userprofileBox.classList.remove('Active');
 		userprofileBox.classList.add('hidden');
+		receptionTab.classList.add('Active');
+		receptionBox.classList.add('Avtive');
 		console.log("User is not signed in.");
       }
 
