@@ -119,6 +119,7 @@ getDocs(collection(db, 'sweatexchange'))
 
       // Check if the 'items' field exists within the document data
       if (data.items) {
+	    console.log('Items:', JSON.stringify(data.items, null, 2));
         // Start creating HTML for the items collection
         docHTML += `<h4>Items:</h4><ul>`;
 
