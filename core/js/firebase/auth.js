@@ -40,7 +40,69 @@
       });
     }
 	
+// Populate tables with Firestore data
+async function populateSweatExchanges() {
+  try {
+    const exchangesCollection = collection(db, 'sweatexchange');
+    const snapshot = await getDocs(exchangesCollection);
 
+    snapshot.forEach(async (planetDoc) => {
+      const planet = planetDoc.id; // Planet name from document ID
+      const planetData = planetDoc.data();
+
+      // Get the table body for the planet
+      const tableBody = document.getElementById(`${planet}-table`);
+      tableBody.innerHTML = ''; // Clear existing rows
+
+      // Fetch items collection inside the planet document
+      const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
+      const itemsSnapshot = await getDocs(itemsCollection);
+
+      // Populate rows
+      itemsSnapshot.forEach((itemDoc) => {
+        const item = itemDoc.data();
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.availability}</td>
+          <td>${item.stock}</td>
+          <td>${itemDoc.id}</td> <!-- Use item ID instead of name -->
+          <td>${item.sweatCost}</td>
+          <td>${item.pedCost}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    });
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+}
+
+// Function to add a new item
+async function addItemToExchange(planet, newItem, uid) {
+  if (uid !== '7d7JYyj0kgUv0nXr3bDrO88R7jN2') {
+    console.error('Permission denied');
+    return;
+  }
+
+  try {
+    const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
+    await addDoc(itemsCollection, newItem);
+    console.log('Item added successfully');
+  } catch (error) {
+    console.error('Error adding item:', error);
+  }
+}
+
+// Example: Adding a new item
+document.getElementById('addItemButton').addEventListener('click', () => {
+  const newItem = {
+    availability: 'Yes',
+    stock: '20',
+    sweatCost: '200 bottles',
+    pedCost: '0.50 PED (250%)'
+  };
+  addItemToExchange('calypso', newItem, '7d7JYyj0kgUv0nXr3bDrO88R7jN2');
+});
 
 
 
@@ -281,4 +343,7 @@ getDocs(collection(db, 'UserProfiles'))
 		console.log('edit profile button clicked');
 	  /* $('#modal-editProfile').modal('show'); */
 	});
+	// Call on page load
+
+	populateSweatExchanges();
 //hmmm
