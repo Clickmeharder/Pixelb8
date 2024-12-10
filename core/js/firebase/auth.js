@@ -132,10 +132,9 @@ getDocs(collection(db, 'sweatexchange'))
             <li>
               <strong>${itemDoc.id}</strong>:
               <ul>
-                <li>Availability: ${itemData.availability}</li>
-                <li>Stock: ${itemData.stock}</li>
-                <li>Sweat Cost: ${itemData.sweatCost}</li>
-                <li>PED Cost: ${itemData.pedCost}</li>
+                <li>Stock: ${itemData.amount}</li>
+                <li>Sweat Cost: ${itemData.sweatprice}</li>
+                <li>PED Cost: ${itemData.pedprice}</li>
               </ul>
             </li>
           `;

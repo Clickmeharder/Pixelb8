@@ -356,29 +356,32 @@
 			  <form id="addItemForm">
 				<label for="planetSelect">Planet:</label>
 				<select id="planetSelect">
-				  <option value="calypso">calypso</option>
-				  <option value="rocktropia">Rocktropia</option>
+				  <option value="Calypso">calypso</option>
+				  <option value="Monria">Monria</option>
+				  <option value="Rocktropia">Rocktropia</option>
 				  <option value="Arkadia">Arkadia</option>
+				  <option value="Cyrene">Cyrene</option>
+				  <option value="Toulan">Toulan</option>
+				  <option value="NextIsland">Next Island</option>
 				  <!-- Add more planets as needed -->
 				</select>
 				
 				<label for="itemName">Item Name:</label>
 				<input type="text" id="itemName" placeholder="Enter item name" required />
 				
-				<label for="availability">Availability:</label>
-				<select id="availability">
-				  <option value="Yes">Yes</option>
-				  <option value="No">No</option>
-				</select>
+				<label for="amount">Amount:</label>
+				<input type="number" id="amount" placeholder="Enter stock count" required />
 				
-				<label for="stock">Stock:</label>
-				<input type="number" id="stock" placeholder="Enter stock count" required />
+				<label for="tt">tt:</label>
+				<input type="number" id="tt" placeholder="Enter ttvalue" required />
+				<label for="ttmax">ttmax:</label>
+				<input type="number" id="tt" placeholder="Enter maxtt value" required />
 				
-				<label for="sweatCost">Sweat Cost:</label>
-				<input type="text" id="sweatCost" placeholder="Enter sweat cost" required />
+				<label for="sweatprice">Sweat price:</label>
+				<input type="number" id="sweatprice" placeholder="Enter sweat cost" required />
 				
-				<label for="pedCost">PED Cost:</label>
-				<input type="text" id="pedCost" placeholder="Enter PED cost" required />
+				<label for="pedprice">PED price:</label>
+				<input type="number" id="pedprice" placeholder="Enter PED cost" required />
 				
 				<button type="submit-sweatitemFB">Add Item To Firebase</button>
 				<button type="submit2">Add Item To local storage json</button>
