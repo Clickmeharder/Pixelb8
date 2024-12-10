@@ -171,7 +171,7 @@ getDocs(collection(db, 'UserProfiles'))
             .replace("{user_email}", userEmail);
 
 		  // Update or redirect to the final URL (e.g., embedding in an iframe or redirection)
-		  // iframeElement.src = finalURL;
+		  iframeElement.src = finalURL;
           /* console.log("Updated iframe src:", finalURL); */
           // Set the color based on email verification status
           if (user.emailVerified) {
