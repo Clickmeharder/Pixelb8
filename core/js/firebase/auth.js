@@ -43,7 +43,6 @@
 // Function to populate account details
 function populateAccountDetails(user) {
   const accountDetailsElement = document.getElementById('accountdetails');
-  accountDetailsElement.innerHTML = ''; // Clear previous content
 
   if (user !== null) {
     // User is signed in
