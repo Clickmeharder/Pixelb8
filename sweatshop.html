@@ -350,7 +350,38 @@
         </div>
         <!-- Tab Contents -->
 		<div class="tab-content" id="user-profile-box">
-			<button class="" id="addItemButton" type="button">Edit Profile</button>
+			<div id="item-form">
+			  <h3>Add New Item</h3>
+			  <form id="addItemForm">
+				<label for="planetSelect">Planet:</label>
+				<select id="planetSelect">
+				  <option value="calypso">Calypso</option>
+				  <option value="rocktropia">Rocktropia</option>
+				  <option value="arkadia">Arkadia</option>
+				  <!-- Add more planets as needed -->
+				</select>
+				
+				<label for="itemName">Item Name:</label>
+				<input type="text" id="itemName" placeholder="Enter item name" required />
+				
+				<label for="availability">Availability:</label>
+				<select id="availability">
+				  <option value="Yes">Yes</option>
+				  <option value="No">No</option>
+				</select>
+				
+				<label for="stock">Stock:</label>
+				<input type="number" id="stock" placeholder="Enter stock count" required />
+				
+				<label for="sweatCost">Sweat Cost:</label>
+				<input type="text" id="sweatCost" placeholder="Enter sweat cost" required />
+				
+				<label for="pedCost">PED Cost:</label>
+				<input type="text" id="pedCost" placeholder="Enter PED cost" required />
+				
+				<button type="submit">Add Item</button>
+			  </form>
+			</div>
 			<button class="logged-in" id="editprofilebutt" type="button">Edit Profile</button>
 			<div class="profile-profile">
 				<div class="accountdetails"><h3>Guest</h3></div>

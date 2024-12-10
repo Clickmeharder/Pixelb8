@@ -77,31 +77,41 @@ async function populateSweatExchanges() {
   }
 }
 
-// Function to add a new item
-async function addItemToExchange(planet, newItem, uid) {
-  if (uid !== '7d7JYyj0kgUv0nXr3bDrO88R7jN2') {
-    console.error('Permission denied');
+// Add a new item via the form
+document.getElementById("addItemForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const planet = document.getElementById("planetSelect").value;
+  const itemName = document.getElementById("itemName").value.trim();
+  const availability = document.getElementById("availability").value;
+  const stock = document.getElementById("stock").value;
+  const sweatCost = document.getElementById("sweatCost").value.trim();
+  const pedCost = document.getElementById("pedCost").value.trim();
+
+  if (!itemName || !stock || !sweatCost || !pedCost) {
+    alert("Please fill in all fields.");
     return;
   }
 
+  const newItem = {
+    availability,
+    stock: parseInt(stock),
+    sweatCost,
+    pedCost,
+  };
+
   try {
+    // Add to Firestore
     const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
     await addDoc(itemsCollection, newItem);
-    console.log('Item added successfully');
-  } catch (error) {
-    console.error('Error adding item:', error);
-  }
-}
 
-// Example: Adding a new item
-document.getElementById('addItemButton').addEventListener('click', () => {
-  const newItem = {
-    availability: 'Yes',
-    stock: '20',
-    sweatCost: '200 bottles',
-    pedCost: '0.50 PED (250%)'
-  };
-  addItemToExchange('calypso', newItem, '7d7JYyj0kgUv0nXr3bDrO88R7jN2');
+    alert("Item added successfully!");
+    populateSweatExchanges(); // Refresh tables after adding an item
+    document.getElementById("addItemForm").reset(); // Clear form
+  } catch (error) {
+    console.error("Error adding item:", error);
+    alert("Failed to add item. Please try again.");
+  }
 });
 
 
