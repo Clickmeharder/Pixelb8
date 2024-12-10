@@ -102,8 +102,28 @@ getDocs(collection(db, 'UserProfiles'))
 // Fetch data from Firestore collection
 getDocs(collection(db, 'sweatexchange'))
   .then((querySnapshot) => {
+    // Get the container where you want to display the data
+    const sweatexchangeContainer = document.getElementById('sweatexchange-DB');
+    
+    // Clear any previous content in the container
+    sweatexchangeContainer.innerHTML = '';
+
+    // Loop through each document in the snapshot
     querySnapshot.forEach((doc) => {
-      console.log(doc.data());
+      const data = doc.data(); // Get the document data
+
+      // Create a new div element to display the data
+      const exchangeDiv = document.createElement('div');
+      exchangeDiv.classList.add('exchange-item'); // Add a class for styling (optional)
+
+      // Create a formatted string or structured HTML to display the data
+      exchangeDiv.innerHTML = `
+        <h3>Exchange Data for ${doc.id}</h3>
+        <pre>${JSON.stringify(data, null, 2)}</pre>
+      `;
+	  console.log(doc.data());
+      // Append the new div to the sweatexchange container
+      sweatexchangeContainer.appendChild(exchangeDiv);
     });
   })
   .catch((error) => {
