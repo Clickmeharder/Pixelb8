@@ -316,7 +316,7 @@ label {}
 textarea {}
 /*_____________________*/
      /*INPUTS*/
-input {cursor: var(--cursor000-image);}
+input {cursor: var(--cursor000-image);background: #464646;}
 input[type="text"] {}
 input[type="password"] {}
 input[type="number"] {}
@@ -347,7 +347,7 @@ legend {}
 datalist {}
 /*--------------*/
 /*Select Element*/
-select {cursor: var(--cursor000-image);}
+select {cursor: var(--cursor000-image);background: #464646;}
 select option{}
 select option:checked {}
 select:focus option {}
