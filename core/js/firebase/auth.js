@@ -111,17 +111,40 @@ getDocs(collection(db, 'sweatexchange'))
     // Loop through each document in the snapshot
     querySnapshot.forEach((doc) => {
       const data = doc.data(); // Get the document data
+      const exchangeDiv = document.createElement('div'); // Create a new div element
+      exchangeDiv.classList.add('exchange-item'); // Optional class for styling
 
-      // Create a new div element to display the data
-      const exchangeDiv = document.createElement('div');
-      exchangeDiv.classList.add('exchange-item'); // Add a class for styling (optional)
+      // Start creating HTML for the document data
+      let docHTML = `<h3>Exchange Data for ${doc.id}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
 
-      // Create a formatted string or structured HTML to display the data
-      exchangeDiv.innerHTML = `
-        <h3>Exchange Data for ${doc.id}</h3>
-        <pre>${JSON.stringify(data, null, 2)}</pre>
-      `;
-	  console.log(doc.data());
+      // Check if the 'items' field exists within the document data
+      if (data.items) {
+        // Start creating HTML for the items collection
+        docHTML += `<h4>Items:</h4><ul>`;
+
+        // Loop through the items and display each one
+        for (const item in data.items) {
+          const itemData = data.items[item];
+
+          docHTML += `
+            <li>
+              <strong>${item}</strong>:
+              <ul>
+                <li>Availability: ${itemData.availability}</li>
+                <li>Stock: ${itemData.stock}</li>
+                <li>Sweat Cost: ${itemData.sweatCost}</li>
+                <li>PED Cost: ${itemData.pedCost}</li>
+              </ul>
+            </li>
+          `;
+        }
+
+        docHTML += `</ul>`; // Close the items list
+      }
+
+      // Set the inner HTML of the exchangeDiv to the generated docHTML
+      exchangeDiv.innerHTML = docHTML;
+
       // Append the new div to the sweatexchange container
       sweatexchangeContainer.appendChild(exchangeDiv);
     });
@@ -129,7 +152,6 @@ getDocs(collection(db, 'sweatexchange'))
   .catch((error) => {
     console.log("Error getting documents: ", error);
   });
-
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
