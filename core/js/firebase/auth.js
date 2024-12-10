@@ -99,60 +99,96 @@ getDocs(collection(db, 'UserProfiles'))
   .catch((error) => {
     console.log("Error getting documents: ", error);
   });
-// Fetch data from Firestore collection
-getDocs(collection(db, 'sweatexchange'))
-  .then((querySnapshot) => {
-    // Get the container where you want to display the data
-    const sweatexchangeContainer = document.getElementById('sweatexchange-DB');
-    
-    // Clear any previous content in the container
-    sweatexchangeContainer.innerHTML = '';
+// Get the form and the container
+const form = document.getElementById('addItemForm');
+const sweatexchangeContainer = document.getElementById('sweatexchange-DB');
 
-    // Loop through each document in the snapshot
-    querySnapshot.forEach(async (doc) => {
-      const data = doc.data(); // Get the document data
-      const exchangeDiv = document.createElement('div'); // Create a new div element
-      exchangeDiv.classList.add('exchange-item'); // Optional class for styling
+// Handle form submission to add an item to Firestore
+form.addEventListener('submit', async (e) => {
+  e.preventDefault(); // Prevent default form submission
 
-      // Start creating HTML for the document data
-      let docHTML = `<h3>Exchange Data for ${doc.id}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+  // Get the form values
+  const planet = document.getElementById('planetSelect').value;
+  const itemName = document.getElementById('itemName').value;
+  const amount = document.getElementById('amount').value;
+  const tt = document.getElementById('tt').value;
+  const ttmax = document.getElementById('ttmax').value;
+  const sweatprice = document.getElementById('sweatprice').value;
+  const pedprice = document.getElementById('pedprice').value;
 
-      // Check if the 'items' sub-collection exists within the document
-      const itemsCollection = collection(doc.ref, 'items');
-      const itemsSnapshot = await getDocs(itemsCollection);
-
-      // If items exist, process them
-      if (!itemsSnapshot.empty) {
-        docHTML += `<h4>Items:</h4><ul>`;
-
-        // Loop through each item in the items sub-collection
-        itemsSnapshot.forEach((itemDoc) => {
-          const itemData = itemDoc.data();
-          docHTML += `
-            <li>
-              <strong>${itemDoc.id}</strong>:
-              <ul>
-                <li>Stock: ${itemData.amount}</li>
-                <li>Sweat Cost: ${itemData.sweatprice}</li>
-                <li>PED Cost: ${itemData.pedprice}</li>
-              </ul>
-            </li>
-          `;
-        });
-
-        docHTML += `</ul>`; // Close the items list
+  // Retrieve the specific document in 'sweatexchange' collection to add this item
+  const docRef = doc(db, 'sweatexchange', planet); // Use the selected planet as the doc ID
+  
+  // Add the item to the 'items' sub-collection
+  try {
+    await setDoc(
+      doc(collection(docRef, 'items'), itemName), // Create document by item name in 'items' collection
+      {
+        amount: amount,
+        tt: tt,
+        ttmax: ttmax,
+        sweatprice: sweatprice,
+        pedprice: pedprice
       }
+    );
 
-      // Set the inner HTML of the exchangeDiv to the generated docHTML
-      exchangeDiv.innerHTML = docHTML;
+    // Optionally: Refresh or update the exchange data on the page
+    console.log("Item added to Firebase");
+    getExchangeData(); // Re-fetch and update the displayed data
 
-      // Append the new div to the sweatexchange container
-      sweatexchangeContainer.appendChild(exchangeDiv);
+  } catch (error) {
+    console.error("Error adding item: ", error);
+  }
+});
+
+// Fetch and display updated exchange data
+function getExchangeData() {
+  getDocs(collection(db, 'sweatexchange'))
+    .then((querySnapshot) => {
+      sweatexchangeContainer.innerHTML = ''; // Clear previous content
+
+      querySnapshot.forEach(async (doc) => {
+        const data = doc.data();
+        const exchangeDiv = document.createElement('div');
+        exchangeDiv.classList.add('exchange-item');
+
+        let docHTML = `<h3>Exchange Data for ${doc.id}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+        
+        const itemsCollection = collection(doc.ref, 'items');
+        const itemsSnapshot = await getDocs(itemsCollection);
+
+        if (!itemsSnapshot.empty) {
+          docHTML += `<h4>Items:</h4><ul>`;
+
+          itemsSnapshot.forEach((itemDoc) => {
+            const itemData = itemDoc.data();
+            docHTML += `
+              <li>
+                <strong>${itemDoc.id}</strong>:
+                <ul>
+                  <li>Stock: ${itemData.amount}</li>
+                  <li>tt: ${itemData.tt}/${itemData.ttmax}</li>
+                  <li>TT max: ${itemData.ttmax}</li>
+                  <li>Sweat Cost: ${itemData.sweatprice}</li>
+                  <li>PED Cost: ${itemData.pedprice}</li>
+                </ul>
+              </li>
+            `;
+          });
+
+          docHTML += `</ul>`; // Close the items list
+        }
+
+        exchangeDiv.innerHTML = docHTML;
+        sweatexchangeContainer.appendChild(exchangeDiv);
+      });
+    })
+    .catch((error) => {
+      console.log("Error getting documents: ", error);
     });
-  })
-  .catch((error) => {
-    console.log("Error getting documents: ", error);
-  });
+}
+
+
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
@@ -380,6 +416,7 @@ getDocs(collection(db, 'sweatexchange'))
 	  /* $('#modal-editProfile').modal('show'); */
 	});
 	// Call on page load
-
+// Call the function to display the exchange data on page load
+	getExchangeData();
 	
 //hmmm
