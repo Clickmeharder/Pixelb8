@@ -134,7 +134,7 @@ form.addEventListener('submit', async (e) => {
 
     // Optionally: Refresh or update the exchange data on the page
     console.log("Item added to Firebase");
-    getExchangeData(); // Re-fetch and update the displayed data
+    //getExchangeData(); // Re-fetch and update the displayed data
 
   } catch (error) {
     console.error("Error adding item: ", error);
