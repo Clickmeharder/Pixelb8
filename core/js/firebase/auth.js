@@ -278,7 +278,7 @@ getDocs(collection(db, 'UserProfiles'))
 	
 	const editProfileButton = document.getElementById('editprofilebutt');
 	editProfileButton.addEventListener('click', () => {
-	  // Show the modal for editing profile
-	  $('#modal-editProfile').modal('show');
+		console.log('edit profile button clicked');
+	  /* $('#modal-editProfile').modal('show'); */
 	});
 //hmmm
