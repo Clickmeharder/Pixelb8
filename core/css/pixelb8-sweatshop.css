@@ -1,0 +1,5 @@
+div#sweatexchange-DB {
+    overflow-y: scroll;
+    height: 280px;
+    border: 1px ridge gray;
+}
