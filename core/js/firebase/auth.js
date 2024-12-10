@@ -43,19 +43,25 @@
 // Function to populate account details
 function populateAccountDetails(user) {
   const accountDetailsElement = document.getElementById('accountdetails');
+  
+  if (!accountDetailsElement) {
+    console.error('Element with ID "accountdetails" not found in the DOM.');
+    return;
+  }
+
+  accountDetailsElement.innerHTML = ''; // Clear existing content
 
   if (user !== null) {
-    // User is signed in
     const userDetails = [
       { key: 'Status', value: 'Online' },
       { key: 'Username', value: user.displayName || 'No Name Set' },
       { key: 'Auth Alias', value: user.providerData[0]?.displayName || '-Email Account-' },
       { key: 'Profile Pic', value: user.photoURL || 'null' },
       { key: 'Pixel Count', value: user.pixelcount || 'null' },
-      { key: 'Auth Provider', value: user.providerData[0]?.providerId || 'uknown' },
-	  { key: 'User Email', value: user.email || 'null' }, // This can be populated if needed
-	  { key: 'Auth Provider email', value: user.providerData[0]?.email || '-idk-' },
-      { key: 'EmailVerified', value: user.emailVerified ? '► Verified' : '► Unverified' }, // This can be populated if needed
+      { key: 'Auth Provider', value: user.providerData[0]?.providerId || 'unknown' },
+      { key: 'User Email', value: user.email || 'null' },
+      { key: 'Auth Provider email', value: user.providerData[0]?.email || '-idk-' },
+      { key: 'EmailVerified', value: user.emailVerified ? '► Verified' : '► Unverified' },
     ];
 
     userDetails.forEach((detail) => {
@@ -64,11 +70,10 @@ function populateAccountDetails(user) {
       accountDetailsElement.appendChild(listItem);
     });
   } else {
-    // User is signed out
     const offlineDetails = [
       { key: 'Status', value: 'Offline' },
       { key: 'Username', value: 'StrangerDanger!' },
-      { key: 'ProfilePhoto', value: 'assets/images/logo/pixelb8logo1.png' }
+      { key: 'ProfilePhoto', value: 'assets/images/logo/pixelb8logo1.png' },
     ];
 
     offlineDetails.forEach((detail) => {
