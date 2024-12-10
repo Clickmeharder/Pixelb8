@@ -587,18 +587,6 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 	margin:0px;
 	padding:0px;
 }
-/* login panel */
-div#loginpanel.panel {
-    resize: vertical;
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    border-bottom-color: rgba(77, 242, 0, 0.36);
-    min-height: 10px;
-    max-height: 123px;
-    width: 76px;
-    height: 123px;
-}
 
 .right-panel {
   margin-top: 0px;
@@ -611,17 +599,31 @@ div#loginpanel.panel {
   background-color: var(--staticpage-sidepanels-bg-color);
   opacity: var(--staticpage-sidepanels-opacity);
   padding: 5px;
-    height: auto;
-    min-height: ;
-    max-height: 27vh;
-	font-family: 'Pixelify Sans';
-	box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
-	overflow: hidden;
+  height: auto;
+  min-height: ;
+  max-height: 27vh;
+  font-family: 'Pixelify Sans';
+  box-shadow: -2px 2px 7px rgb(9 9 9 / 87%);
+  overflow: hidden;
 }
+/* login panel */
+div#useraccountPanel.panel {
+    resize: vertical;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    border-bottom-color: rgba(77, 242, 0, 0.36);
+    min-height: 10px;
+    max-height: 123px;
+    width: 76px;
+    height: 123px;
+}
+
 .right-panel p {
     margin: 0;
 	line-height: 0.8;
 }
+
 #websiteStatContainer p {
 	font-size: 11px;
     line-height: 0.8;
