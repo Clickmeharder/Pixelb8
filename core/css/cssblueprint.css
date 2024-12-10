@@ -1,0 +1,330 @@
+/* Default basic Theme Style file */
+/* 
+*/
+
+/*----------------------*/
+/* ROOT VARIABLES */
+option:disabled {
+    color: -internal-light-dark(graytext, rgb(170, 170, 170));
+}
+
+/* Root Variables */
+:root {                                     /*-|*/
+
+/*example of setting a root var*/
+  --hudmonitor-opacity: 1.0;
+/*hudoverlay*/
+  --hudoverlay-border-width: 2px;
+  --hudoverlay-border-style: outset;
+  --hudoverlay-border-radius: 8px;
+  --hudoverlay-border-color: rgb(23,130, 182, 0.8);
+  --hudoverlay-border-fullcolor: rgb(23,130, 182, 1.0);
+  --hudoverlay-text-color: rgb(23,130, 182, 0.8);
+  --hudoverlay-bg-color: rgb(0,50, 255, 0.03);
+  --hudoverlay-opacity: 0.9;
+  
+/*---------------------------------------------|*/
+ /*HUD main styles*/                        /*-|*/
+  --HUD-applet-border-color:rgb(23,130, 182, 0.8);
+  --HUD-applet-Rborder-color:rgba(0, 208, 255, 0.1);
+  --HUD-applet-innerborder-color:rgb (0, 208, 255, 0.5);
+  --HUD-border-width: 3px;
+  --HUD-border-style: outset;
+  --HUD-border-radius: 8px;
+  --HUD-border-color: rgb(23,130, 182, 0.8);
+  --HUD-border-fullcolor: rgb(23,130, 182, 1.0);
+  --HUD-active-border-color: rgba(0, 238, 255, 0.8);
+  --HUD-text-color: rgb(23,130, 182, 1.0);
+  --HUD-bg-color: rgb(0,140, 250, 0.2);
+  --HUD-opacity: 0.9;
+/*----------------|*/
+  /*----------------|*/
+/*primary*/
+  --HUD-primary-button-bg-color: inherit;
+  --HUD-primary-button-text-color: inherit;
+  --HUD-Primary-border-color: inherit;
+  --HUD-Primary-border-width: 3px;
+  --HUD-Primary-border-style: outset;
+  --HUD-Primary-border-radius: 8px;
+  --HUD-Primary-text-color: inherit;
+  --HUD-Primary-Headertext-color: rgb(23,130, 182, 0.8);
+  --HUD-Primary-subtext-color: rgb(23,130, 182, 0.8);
+/*---------------------------------------------|*/
+
+/*----------------|*/
+/*custom curser variables variables*/
+  /*cursor paths*/
+
+  --cursor000-image: url('../../assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
+  --cursor00-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-00.gif'), auto;
+  --cursor01-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-01.gif'), auto;
+  --cursor02-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-02.gif'), auto;
+  --cursor03-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-03.gif'), auto;
+  --cursor04-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-04.gif'), auto;
+  --editcursor-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-05.gif'), auto;
+  --cursor06-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-06.gif')8 5, auto;/*8 5, auto*/
+  --cursor07-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-07.gif'), auto;
+  --cursor08-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-08.gif'), auto;
+  --cursor09-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.gif'), auto;
+  --inputcursor-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.gif'), auto;
+  --cursor010-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-010.gif'), auto;
+  --cursor011-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-011.gif'), auto;
+  --cursor012-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-012.gif'), auto;
+  --cursor013-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-013.gif'), auto;
+  --cursor014-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-014.gif'), auto;
+  --cursor015-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-015.gif'), auto;
+  --cursor016-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-016.gif'), auto;
+  --cursorkey-image: url('../../assets/cursors/gif-box/eu-cursors/cursor_key.png')16 6, auto;
+  --cursorcheck-image:url('../../assets/cursors/gif-box/eu-cursors/check-1.png')8 5, auto;
+/*add more vars*/
+  --newradiobutton2: #222;/*unused vars   /*-|*/
+  --newradiobutton3: #333;
+  --newradiobutton4: #222;
+
+}
+	/*Root OverRide VARIABLES*/
+/* try them idk what they were for
+	--fc-border-color: #1c6a7ad9;
+	--fc-today-bg-color: #0346f41c;
+*/
+  
+
+/*----------------------*/
+/*      The Body        */
+/*----------------------*/
+body {
+	max-width: 99.5vw;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: var(--mainbody-text-color);
+    background-color: var(--mainbody-bg-color);
+    /*background-image: url('../../assets/images/bg/spaace.jpg');*/
+   /*background-image: url('https://pixelb8/assets/images/bg/spaace.jpg');*/
+    cursor: var(--cursor000-image);
+    opacity: var(--mainbody-opacity);
+}
+
+/*
+animated twinkly stars background styles
+*/
+    @keyframes move-background {
+      from {
+        transform: translate3d(0px, 0px, 0px);
+      }
+      to { 
+        transform: translate3d(1000px, 0px, 0px);
+      }
+    }
+
+    .background-container {
+      background: black;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+	  z-index:-1;
+    }
+
+    .stars {
+      background: black url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/stars.png) repeat;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 0;
+    }
+
+    .twinkling {
+      width: 10000px;
+      height: 100%;
+      background: transparent url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/twinkling.png") repeat;
+      background-size: 1000px 1000px;
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 2;
+      animation: move-background 140s linear infinite; /* Adjust animation duration for slower rotation */
+    }
+
+/*end of twinkly stars styles*/
+
+
+
+
+
+
+
+/*----------------*/
+/* WEBKIT STYLES  */
+/*  [scollbar, scrollthumb,scrolltrack,] */
+::-webkit-scrollbar {
+		max-width: 6px;
+    min-height: 6px;
+    max-height: 6px;
+    background-color:var(--scrollbar-bg-color);
+    outline: 0px;
+    border: 2px inset var(--scrollbar-border-color);
+}
+::-webkit-scrollbar-corner {background-color: var(--border-color);}
+::-webkit-scrollbar-track {}
+::-webkit-scrollbar-thumb {
+    color:;
+    background-color: var(--scrollbar-thumb-bg-color);
+    border: 1px solid var(--scrollbar-thumb-border-color);
+    border-style: var(--scrollbar-thumb-border-style);
+    border-radius: var(--scrollbar-thumb-border-radius);
+}
+/*____________________*/
+
+/*____________________*/
+/*---------------------------------*/
+/*  MAIN BODY/ELEMENT/CLASS STYLES  */
+/*----------------------*/
+/*    Main Elements */
+div {}
+br {}
+hr {}
+ul {padding-inline-start: 10px;
+    margin-block-start: 0em; }
+ol {}
+li {}
+nav {}
+header {}
+footer {}
+main {}
+section {}
+article {}
+/*-------------------*/
+/*___________________*/
+
+/*___________________*/
+/*=======================*//**/
+/*    Form Elements      */
+form {}
+label {}
+textarea {}
+/*_____________________*/
+     /*INPUTS*/
+input {cursor: var(--cursor000-image);}
+input[type="text"] {}
+input[type="password"] {}
+input[type="number"] {}
+input[type="email"] {}
+input[type="checkbox"] {}
+input[type="radio"] {}
+/* more input types */
+input[type="date"] {}
+input[type="time"] {}
+input[type="datetime-local"] {}
+input[type="month"] {}
+input[type="week"] {}
+input[type="file"] {}
+input[type="range"] {}
+input[type="color"] {}
+input[type="search"] {}
+input[type="tel"] {}
+input[type="url"] {}
+input[type="submit"] {}
+input[type="reset"] {}
+input[type="image"] {}
+input[type="button"] {}
+input[type="hidden"] {}
+optgroup {}
+option {}
+fieldset {}
+legend {}
+datalist {}
+/*--------------*/
+/*Select Element*/
+select {cursor: var(--cursor000-image);}
+select option{}
+select option:checked {}
+select:focus option {}
+/* Optgroups within the dropdown list */
+select optgroup {}
+/* Dropdown arrows*/
+select::-ms-expand {}/* Internet Explorer */
+select::-webkit-select-arrow {}/* WebKit browsers */
+/* Select Scrollbar */
+/* Only WebKit browsers */
+select::-webkit-scrollbar {}
+select::-webkit-scrollbar-thumb {}
+/*----------------------*/
+/*    Button Elements */
+button {background-color:#444;cursor:var(--cursor000-image);}
+button:hover {}
+button:active {}
+button:focus {}
+button:disabled {}
+button.disabled {
+  opacity: 0.7; 
+  cursor: not-allowed;
+}
+/* button classes  */
+/*----------------*//*
+/*groups*/
+/*
+-fixedbuttongroup1
+-fixedbuttongroup2
+-fixedbuttongroup3
+-buttongroup1
+-buttongroup2
+-buttongroup3
+
+-singlefixedbutton
+-sliderbutton
+-pressclickbutton
+-toggleclickbutton
+-switchbutton
+-buttontype1
+-buttontype2
+-buttontype3
+*/
+
+/*----------------------*/
+/*    Text Elements */
+
+h1 {}
+h2 {}
+h3 {}
+h4 {}
+h5 {}
+h6 {}
+p {}
+.themed-footer p {
+    margin: 0px;
+}
+span {}
+strong {}
+em {} (emphasis)
+blockquote {}
+pre {} (preformatted text)
+a {} (anchor)
+
+/*----------------------*/
+/*    Table Elements */
+
+table {}
+tr {} (table row)
+td {} (table data)
+th {} (table header)
+
+/*----------------------*/
+/*    Media Elements */
+img {} (image)
+audio {}
+video {}
+figure {}
+figcaption {}
+
+/*----------------------*/
+/*    Misc Elements */
+
+/* Interactive Elements */
+details {}summary {}dialog {}menu {}menuitem {}
+/* Other Elements */
+iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code {}small {}

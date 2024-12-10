@@ -17,82 +17,82 @@
 </head>
 
 <body>
-<div class="background-container">
-  <div class="stars"></div>
-  <div class="twinkling"></div>
-</div>
-<div class="staticPage" id="Mainpage" style="margin: auto;margin-top: 195px;width: 75vw;border-radius: 10px;">
-  <header class="staticpage-header">
-      <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
-  </header>
-  <!-- Main Content Area -->
-  <main class="main-content">
-      <!-- main Panel -->
-	  <button id="enterButt">Enter Site</button>
-	  <button id="sweatshop" disabled>Sweatshop</button>
-<!--Main landing content panel-->
-		<div class="panel content-panel" style="max-width:fit-content;">
-			<div class="panel right-panel">
-				<div id="websiteStatContainer">
-					<h2 class="panel-title" id="sitestats">Site Stats</h2>
-					<p>Registered&gt; Lots</p>
-					<p>Online&gt; everyone</p>
-				</div>
-				<div id="userInfoContainer">
-					<P id="username">StrangerDanger</p>
-					<P id="profileusername">-</p>
-					<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
-					<p id="Userpixelcount" class="hidden">0px</p>
-					<p id="loginStatus">Status: offline</p>
-					<ul>
-						<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
-						<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
-						<span id="emailVerified" class="hidden">►</span>
-						<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
-						
-					</ul>
-				</div>
-				<div class="row">
-					<button class="logged-in" id="logoutbutt" type="button">Logout</button>
-					<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
-				</div>
-				<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
-					<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
-					<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>	
+	<div class="background-container">
+	  <div class="stars"></div>
+	  <div class="twinkling"></div>
+	</div>
+	<div class="staticPage" id="Mainpage" style="margin: auto;margin-top: 195px;width: 75vw;border-radius: 10px;">
+	  <header class="staticpage-header">
+		  <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
+	  </header>
+	  <!-- Main Content Area -->
+	  <main class="main-content">
+		  <!-- main Panel -->
+		  <button id="enterButt">Enter Site</button>
+		  <button id="sweatshop" disabled>Sweatshop</button>
+	<!--Main landing content panel-->
+			<div class="panel content-panel" style="max-width:fit-content;">
+				<div class="panel right-panel">
+					<div id="websiteStatContainer">
+						<h2 class="panel-title" id="sitestats">Site Stats</h2>
+						<p>Registered&gt; Lots</p>
+						<p>Online&gt; everyone</p>
+					</div>
+					<div id="userInfoContainer">
+						<P id="username">StrangerDanger</p>
+						<P id="profileusername">-</p>
+						<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
+						<p id="Userpixelcount" class="hidden">0px</p>
+						<p id="loginStatus">Status: offline</p>
+						<ul>
+							<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
+							<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
+							<span id="emailVerified" class="hidden">►</span>
+							<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
+							
+						</ul>
+					</div>
+					<div class="row">
+						<button class="logged-in" id="logoutbutt" type="button">Logout</button>
+						<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
+					</div>
+					<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
+						<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
+						<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>	
+					</div>
 				</div>
 			</div>
-		</div>
-		
-  </main>
-	 
-<!-- Content Panels -->
-	<!-- Content Panel A -->
-  <div class="row transparent">
-	<!--second row of Content Area is currently empty and unused-->
-  </div>
+			
+	  </main>
+		 
+		<!-- Content Panels -->
+		<!-- Panel A -->
+	  <div class="row transparent">
+		<!--second row of Content Area is currently empty and unused-->
+	  </div>
 
-<!--end mainpage -->
-</div>
+	</div>
 
-<!-- scripts -->
-<script src="core/js/pixelb8-global.js"></script>
-<script src="core/js/index.js"></script>
-<script type="module" src="core/js/firebase/auth.js"></script>
-<script>
-	// Select the button element by its ID
-	const enterButton = document.getElementById('enterButt');
-	const enterSweatshop = document.getElementById('sweatshop');
-	// Add a click event listener to the button
-	enterButton.addEventListener('click', () => {
-		// Redirect to the desired URL
-		console.log('Enter Butt Sequence Initiated');
-		window.location.href = 'https://pixelb8.lol/home';
-	});
-	enterSweatshop.addEventListener('click', () => {
-		// Redirect to the desired URL
-		console.log('Enter Butt Sequence Initiated - code=Sweatshop');
-		window.location.href = 'https://pixelb8.lol/sweatshop';
-	});
-</script>
+	<!-- scripts -->
+	<script src="core/js/pixelb8-global.js"></script>
+	<script src="core/js/index.js"></script>
+	<script type="module" src="core/js/firebase/auth.js"></script>
+	<script>
+		// Select the button element by its ID
+		const enterButton = document.getElementById('enterButt');
+		const enterSweatshop = document.getElementById('sweatshop');
+		// Add a click event listener to the button
+		enterButton.addEventListener('click', () => {
+			// Redirect to the desired URL
+			console.log('Enter Butt Sequence Initiated');
+			window.location.href = 'https://pixelb8.lol/home';
+		});
+		enterSweatshop.addEventListener('click', () => {
+			// Redirect to the desired URL
+			console.log('Enter Butt Sequence Initiated - code=Sweatshop');
+			window.location.href = 'https://pixelb8.lol/sweatshop';
+		});
+	</script>
 </body>
+
 </html>
