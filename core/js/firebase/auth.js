@@ -40,49 +40,7 @@
       });
     }
 	
-// Function to populate account details
-function populateAccountDetails(user) {
-  const accountDetailsElement = document.getElementById('accountdetails');
-  
-  if (!accountDetailsElement) {
-    console.error('Element with ID "accountdetails" not found in the DOM.');
-    return;
-  }
 
-  accountDetailsElement.innerHTML = ''; // Clear existing content
-
-  if (user !== null) {
-    const userDetails = [
-      { key: 'Status', value: 'Online' },
-      { key: 'Username', value: user.displayName || 'No Name Set' },
-      { key: 'Auth Alias', value: user.providerData[0]?.displayName || '-Email Account-' },
-      { key: 'Profile Pic', value: user.photoURL || 'null' },
-      { key: 'Pixel Count', value: user.pixelcount || 'null' },
-      { key: 'Auth Provider', value: user.providerData[0]?.providerId || 'unknown' },
-      { key: 'User Email', value: user.email || 'null' },
-      { key: 'Auth Provider email', value: user.providerData[0]?.email || '-idk-' },
-      { key: 'EmailVerified', value: user.emailVerified ? '► Verified' : '► Unverified' },
-    ];
-
-    userDetails.forEach((detail) => {
-      const listItem = document.createElement('li');
-      listItem.textContent = `${detail.key}: ${detail.value}`;
-      accountDetailsElement.appendChild(listItem);
-    });
-  } else {
-    const offlineDetails = [
-      { key: 'Status', value: 'Offline' },
-      { key: 'Username', value: 'StrangerDanger!' },
-      { key: 'ProfilePhoto', value: 'assets/images/logo/pixelb8logo1.png' },
-    ];
-
-    offlineDetails.forEach((detail) => {
-      const listItem = document.createElement('li');
-      listItem.textContent = `${detail.key}: ${detail.value}`;
-      accountDetailsElement.appendChild(listItem);
-    });
-  }
-}
 
 
 
@@ -194,7 +152,7 @@ getDocs(collection(db, 'UserProfiles'))
               console.error("Error fetching GitHub user data:", error);
             }
           }
-		  populateAccountDetails(user);
+		  
         });
       } else {
         // User is signed out
