@@ -43,7 +43,7 @@
 
 
 // Add a new item via the form
-document.getElementById("addItemForm").addEventListener("submit", async (e) => {
+document.getElementById("addItemForm").addEventListener("submit-sweatitemFB", async (e) => {
   e.preventDefault();
 
   // Get the currently signed-in user UID
