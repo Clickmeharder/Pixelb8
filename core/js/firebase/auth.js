@@ -109,6 +109,7 @@ getDocs(collection(db, 'UserProfiles'))
 	  const userpixelcountElement = document.getElementById('Userpixelcount');
 	  const innerContentloggedin = document.getElementById('innercontent-loggedin');
 	  const innerContentloggedout = document.getElementById('innercontent-loggedout');
+	  const userprofileBox = document.getElementById('user-profile-box');
 	  const iframeElement = document.getElementById("dynamicIframe");
 
 	  const baseURL =
@@ -126,8 +127,7 @@ getDocs(collection(db, 'UserProfiles'))
 				// Log the user's pixelBalance field
 			      const userData = doc.data();
 				    console.log("Logged-in user's pixelBalance:", userData.balancePixels);
-					
-					userpixelcountElement.textContent = "Pixels: " + userData.balancePixels || "null";//fix this to properly set it to the logged in users balancePixels
+					userpixelcountElement.textContent = "Pixels: " + userData.balancePixels || "null";
 			    }
 			  });
 		    })
@@ -148,7 +148,7 @@ getDocs(collection(db, 'UserProfiles'))
           profileusernameElement.textContent = profile.displayName || "-idk-";
           emailElement.textContent = profile.email || "Unknown";
           photoElement.src = user.photoURL || "default.jpg";
-		  
+
 		  userpixelcountElement.classList.remove('hidden');
           emailVerifiedElement.textContent = user.emailVerified ? "► Verified" : " ► Unverified";
           emailVerifiedElement.classList.remove('hidden');
@@ -157,10 +157,11 @@ getDocs(collection(db, 'UserProfiles'))
           userauthproveriderElement.classList.remove('hidden');
           loginButton.classList.add('hidden');
           logoutButton.classList.remove('hidden');
-			
+
 		  innerContentloggedout.classList.add('hidden');
           innerContentloggedin.classList.remove('hidden');
-		  
+		  userprofileBox.classList.remove('hidden');
+		  userprofileBox.classList.add('Active');
           const userName = encodeURIComponent(user.displayName || "Guest");
           const userEmail = encodeURIComponent(user.email || "");
 
@@ -210,6 +211,8 @@ getDocs(collection(db, 'UserProfiles'))
 		innerContentloggedin.classList.add('hidden');
         innerContentloggedout.classList.remove('hidden');
 		populateAccountDetails(user);
+		userprofileBox.classList.remove('Active');
+		userprofileBox.classList.add('hidden');
 		console.log("User is not signed in. Showing a default iframe or hiding it.");
         iframeElement.src = "about:blank";
       }
