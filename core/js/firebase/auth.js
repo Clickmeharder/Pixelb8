@@ -81,6 +81,14 @@ async function populateSweatExchanges() {
 document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  // Get the currently signed-in user UID
+  const user = firebase.auth().currentUser;
+  if (user && user.uid !== "7d7JYyj0kgUv0nXr3bDrO88R7jN2") {
+    alert("You do not have permission to add items.");
+    return;
+  }
+
+  // Get form values
   const planet = document.getElementById("planetSelect").value;
   const itemName = document.getElementById("itemName").value.trim();
   const availability = document.getElementById("availability").value;
@@ -88,11 +96,13 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   const sweatCost = document.getElementById("sweatCost").value.trim();
   const pedCost = document.getElementById("pedCost").value.trim();
 
+  // Validate inputs
   if (!itemName || !stock || !sweatCost || !pedCost) {
     alert("Please fill in all fields.");
     return;
   }
 
+  // Create new item object
   const newItem = {
     availability,
     stock: parseInt(stock),
@@ -101,20 +111,18 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   };
 
   try {
-    // Add to Firestore
+    // Add the new item to Firestore
     const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
     await addDoc(itemsCollection, newItem);
 
     alert("Item added successfully!");
-    populateSweatExchanges(); // Refresh tables after adding an item
-    document.getElementById("addItemForm").reset(); // Clear form
+    populateSweatExchanges(); // Refresh the table after adding the item
+    document.getElementById("addItemForm").reset(); // Clear the form
   } catch (error) {
     console.error("Error adding item:", error);
     alert("Failed to add item. Please try again.");
   }
 });
-
-
 
 // Fetch data from Firestore collection
 getDocs(collection(db, 'UserProfiles'))
