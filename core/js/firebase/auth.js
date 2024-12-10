@@ -72,10 +72,6 @@ getDocs(collection(db, 'UserProfiles'))
 	  /* const innerContentloggedin = document.getElementById('innercontent-loggedin'); */
 	  const innerContentloggedout = document.getElementById('innercontent-loggedout');
 	  const userprofileBox = document.getElementById('user-profile-box');
-	  const iframeElement = document.getElementById("dynamicIframe");
-
-	  const baseURL =
-		  "https://offers.cpx-research.com/index.php?app_id=25257&ext_user_id={unique_user_id}&username={user_name}&email={user_email}&subid_1=&subid_2=";
 
 	  if (user !== null) {
 		// User is signed in
@@ -127,15 +123,6 @@ getDocs(collection(db, 'UserProfiles'))
           const userName = encodeURIComponent(user.displayName || "Guest");
           const userEmail = encodeURIComponent(user.email || "");
 
-          const finalURL = baseURL
-            .replace("{unique_user_id}", uniqueUserId)
-            .replace("{user_name}", userName)
-            .replace("{user_email}", userEmail);
-
-		  // Update or redirect to the final URL (e.g., embedding in an iframe or redirection)
-		  // iframeElement.src = finalURL;
-          /* console.log("Updated iframe src:", finalURL); */
-          // Set the color based on email verification status
           if (user.emailVerified) {
             emailVerifiedElement.style.color = "#24b500b5"; // Green color for verified email
           } else {
@@ -175,8 +162,7 @@ getDocs(collection(db, 'UserProfiles'))
 		populateAccountDetails(user);
 		userprofileBox.classList.remove('Active');
 		userprofileBox.classList.add('hidden');
-		console.log("User is not signed in. Showing a default iframe or hiding it.");
-        iframeElement.src = "about:blank";
+		console.log("User is not signed in.");
       }
 
     });
