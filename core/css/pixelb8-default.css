@@ -587,6 +587,18 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 	margin:0px;
 	padding:0px;
 }
+/* login panel */
+Panel.right-panel {
+    resize: vertical;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    border-bottom-color: rgba(77, 242, 0, 0.36);
+    min-height: 10px;
+    max-height: 123px;
+    width: 76px;
+    height: 123px;
+}
 .right-panel {
   margin-top: 0px;
   margin-left: -8px;
