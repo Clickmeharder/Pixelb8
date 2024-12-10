@@ -338,13 +338,13 @@
       </div>
   </main> -->
 	
-    <div class="container">
+    <div class="container" id="sweatshop">
         <!-- Tabs -->
         <div class="tabs">
 			<div class="tab active" data-tab="about">About SuS</div>
-            <div class="tab" data-tab="buy">Buy Sweat</div>
-            <div class="tab" data-tab="sell">Sell Sweat</div>
-            <div class="tab" data-tab="exchange">Exchange Sweat</div>
+            <div class="tab" data-tab="buy-sweat">Buy Sweat</div>
+            <div class="tab" data-tab="sell-sweat">Sell Sweat</div>
+            <div class="tab" data-tab="sweat-exchange">Exchange Sweat</div>
 			<div class="tab" data-tab="recruit">Join our Team</div>
         </div>
         <!-- Tab Contents -->
@@ -389,8 +389,7 @@
 				</table>
 			</div>
 		</div>
-
-        <div class="tab-content" id="buy">
+        <div class="tab-content" id="buy-sweat">
 			<div class="row purchasedesk">
 					<table>
 						<tr>
@@ -455,11 +454,11 @@
 				</div>
 
 			</div>
-			<div class="row" style="justify-content: center; border-top:3px ridge grey;">
+			<div id="subtab-disclaimer" class="row" style="justify-content: center; border-top:3px ridge grey;">
 				<p class=".bottleval">(0.002-0.0025/bottle)</p>
 			</div>
         </div>
-        <div class="tab-content" id="sell">
+        <div class="tab-content" id="sell-sweat">
 			<div class="row salesdesk">
 				<table>
 					<tr>
@@ -519,24 +518,23 @@
 					</table>
 				</div>
 			</div>
-			<div class="row" style="justify-content: center; border-top:3px ridge grey;">
+			<div id="subtab-disclaimer" class="row" style="justify-content: center; border-top:3px ridge grey;">
 				<p class=".bottleval">(0.0016-0.00195/bottle)</p>
 			</div>
 		</div>
-
-		<div class="tab-content" id="exchange">
-			<div class="subtabs">
-				<div class="subtab" data-subtab="calypso">Calypso Exchange</div>
-				<div class="subtab" data-subtab="arkadia">Arkadia Exchange</div>
-				<div class="subtab" data-subtab="rocktropia">Rocktropia Exchange</div>
+		<div class="tab-content" id="sweat-exchange">
+			<div class="firstRow subtabs">
+				<div class="subtab repOn" data-subtab="calypso">Calypso Exchange</div>
+				<div class="subtab repOff" data-subtab="arkadia">Arkadia Exchange</div>
+				<div class="subtab repOff" data-subtab="rocktropia">Rocktropia Exchange</div>
 			</div>
-			<div class="subtabs" style="margin-top:-14px;margin-bottom:0px;">
-				<div class="subtab" data-subtab="cyrene">Cyrene Exchange</div>
-				<div class="subtab" data-subtab="nextisland">Next Island Exchange</div>
-				<div class="subtab" data-subtab="toulan">Toulan Exchange</div>
-				<div class="subtab" data-subtab="monria">Monria Exchange</div>
+			<div class="secondRow subtabs" style="margin-top:-14px;margin-bottom:0px;">
+				<div class="subtab repOff noRep" data-subtab="cyrene">Cyrene Exchange</div>
+				<div class="subtab repOff noRep" data-subtab="nextisland">Next Island Exchange</div>
+				<div class="subtab repOff noRep" data-subtab="toulan">Toulan Exchange</div>
+				<div class="subtab repOff noRep" data-subtab="monria">Monria Exchange</div>
 			</div>
-			<div class="subtab-content active" id="calypso">
+			<div class="subtab-content active repOn" id="calypso">
 				<h3>Calypso Exchange (under construction)</h3>
 				<table>
 					<tr>
@@ -590,7 +588,7 @@
 					</tr>
 				</table>
 			</div>
-			<div class="subtab-content active" id="arkadia">
+			<div class="subtab-content active repOff" id="arkadia">
 				<h3>Arkadia Exchange (coming soon)</h3>
 				<table>
 					<tr>
@@ -625,7 +623,7 @@
 					</tr>
 				</table>
 			</div>
-			<div class="subtab-content active" id="rocktropia">
+			<div class="subtab-content active repOff" id="rocktropia">
 				<h3>Rocktropia Exchange (coming soon)</h3>
 				<table>
 					<tr>
@@ -660,7 +658,7 @@
 					</tr>
 				</table>
 			</div>
-			<div class="subtab-content active" id="cyrene">
+			<div class="subtab-content active repOff" id="cyrene">
 				<h3>Cyrene Exchange (Not Currently available)</h3>
 				<table>
 					<tr>
@@ -695,7 +693,7 @@
 					</tr>
 				</table>
 			</div>
-			<div class="subtab-content active" id="nextisland">
+			<div class="subtab-content active repOff" id="nextisland">
 				<h3>Next Island Exchange (Not Currently available)</h3>
 				<table>
 					<tr>
@@ -730,7 +728,7 @@
 					</tr>
 				</table>
 			</div>
-			<div class="subtab-content active" id="toulan">
+			<div class="subtab-content active repOff" id="toulan">
 				<h3>Toulan Exchange (Not Currently available)</h3>
 				<table>
 					<tr>
@@ -765,7 +763,7 @@
 					</tr>
 				</table>
 			</div>	
-			<div class="subtab-content active" id="monria">
+			<div class="subtab-content active repOff" id="monria">
 				<h3>Monria Exchange (Not Currently available)</h3>
 				<table>
 					<tr>
@@ -800,8 +798,9 @@
 					</tr>
 				</table>
 			</div>
-			<div class="row" style="justify-content: center; border-top:3px ridge grey;">
+			<div id="subtab-disclaimer" class="row" style="justify-content: center; border-top:3px ridge grey;">
 				<p class=".bottleval">(0.0016-0.0018/bottle)</p>
+				<p class=".bottleval"Prices are subject To change</p>
 			</div>
 		</div>
 		<div class="tab-content" id="recruit">
@@ -851,61 +850,6 @@
 		<p>&copy; 2024 Entropia Universe Sweatshop. All rights reserved.</p>
 	</footer> -->
 
-<!--user profile info details panel stuff below-->
-<!-- 		<div class="panel content-panel" style="max-width:fit-content;box-shadow: none;border: none;">
-			<div id="main-content">
-				<h2>Account Details</h2>
-				<p>Laudate Lootium Divitiasque Celebremus.</p> -->
-				
-				<!-- Login Form -->
-				
-				<!-- <div class="logged-in disabled hidden" id="innercontent-loggedin" style="padding:4px; border:1px solid #222;">
-					<form id="loginForm"> -->
-					
-		<!--idk what the following stuff is but it was commented out-->			
-<!-- 						<ul id="nav-mobile" class="hide-on-med-and-down">
-							<li class="logged-in">
-								<a href="#" class="modal-trigger" id="userAccount-modalTrigger" data-target="modal-useraccount">My Account</a>
-							</li>
-							<li class="logged-in">
-								<a href="#" class="modal-trigger" id="userProfile-editTrigger" data-target="modal-edit">Public Profile</a>
-							</li>
-						</ul> -->
-<!--end of commented stuff idk about-->	
-	<!--end of details block below shuld be uncommented to implement it-->						
-<!-- 						<ul id="accountdetails" class="">
-						</ul>
-					</form>
-					<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
-				</div>
-			</div>
-		</div> -->
-
-
-
-
-<!-- 	<script>
-		// Main tab switching logic
-		document.querySelectorAll('.tab').forEach(tab => {
-			tab.addEventListener('click', () => {
-				document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-				document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-				tab.classList.add('active');
-				document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
-			});
-		});
-
-		// Subtab switching logic
-		document.querySelectorAll('.subtab').forEach(subtab => {
-			subtab.addEventListener('click', () => {
-				document.querySelectorAll('.subtab').forEach(st => st.classList.remove('active'));
-				document.querySelectorAll('.subtab-content').forEach(sc => sc.classList.remove('active'));
-				subtab.classList.add('active');
-				document.getElementById(subtab.getAttribute('data-subtab')).classList.add('active');
-			});
-		});
-	</script> -->
-	
 	<script src="core/js/sweatshop.js"></script>
 	<!--index js should be fixed up-->
     <!--either put only global scripts in it 
