@@ -588,7 +588,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 	padding:0px;
 }
 /* login panel */
-Panel.right-panel {
+div#loginpanel.panel {
     resize: vertical;
     position: absolute;
     top: 0px;
@@ -599,6 +599,7 @@ Panel.right-panel {
     width: 76px;
     height: 123px;
 }
+
 .right-panel {
   margin-top: 0px;
   margin-left: -8px;
