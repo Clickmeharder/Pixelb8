@@ -107,7 +107,7 @@ getDocs(collection(db, 'UserProfiles'))
       const loginButton = document.getElementById('loginbutt');
       const logoutButton = document.getElementById('logoutbutt');
 	  const userpixelcountElement = document.getElementById('Userpixelcount');
-	  const innerContentloggedin = document.getElementById('innercontent-loggedin');
+	  /* const innerContentloggedin = document.getElementById('innercontent-loggedin'); */
 	  const innerContentloggedout = document.getElementById('innercontent-loggedout');
 	  const userprofileBox = document.getElementById('user-profile-box');
 	  const iframeElement = document.getElementById("dynamicIframe");
@@ -159,7 +159,7 @@ getDocs(collection(db, 'UserProfiles'))
           logoutButton.classList.remove('hidden');
 
 		  innerContentloggedout.classList.add('hidden');
-          innerContentloggedin.classList.remove('hidden');
+          /* innerContentloggedin.classList.remove('hidden'); */
 		  userprofileBox.classList.remove('hidden');
 		  userprofileBox.classList.add('Active');
           const userName = encodeURIComponent(user.displayName || "Guest");
