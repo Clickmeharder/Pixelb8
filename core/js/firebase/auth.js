@@ -99,7 +99,6 @@ getDocs(collection(db, 'UserProfiles'))
   .catch((error) => {
     console.log("Error getting documents: ", error);
   });
-// Fetch data from Firestore collection
 getDocs(collection(db, 'sweatexchange'))
   .then((querySnapshot) => {
     // Get the container where you want to display the data
@@ -119,7 +118,8 @@ getDocs(collection(db, 'sweatexchange'))
 
       // Check if the 'items' field exists within the document data
       if (data.items) {
-	    console.log('Items:', JSON.stringify(data.items, null, 2));
+        console.log('Items:', data.items); // Log the items field directly
+
         // Start creating HTML for the items collection
         docHTML += `<h4>Items:</h4><ul>`;
 
@@ -127,17 +127,24 @@ getDocs(collection(db, 'sweatexchange'))
         for (const item in data.items) {
           const itemData = data.items[item];
 
-          docHTML += `
-            <li>
-              <strong>${item}</strong>:
-              <ul>
-                <li>Availability: ${itemData.availability}</li>
-                <li>Stock: ${itemData.stock}</li>
-                <li>Sweat Cost: ${itemData.sweatCost}</li>
-                <li>PED Cost: ${itemData.pedCost}</li>
-              </ul>
-            </li>
-          `;
+          // Check if itemData is an object
+          if (itemData && typeof itemData === 'object') {
+            docHTML += `
+              <li>
+                <strong>${item}</strong>:
+                <ul>
+                  <li>Availability: ${itemData.availability}</li>
+                  <li>Stock: ${itemData.stock}</li>
+                  <li>Sweat Cost: ${itemData.sweatCost}</li>
+                  <li>PED Cost: ${itemData.pedCost}</li>
+                </ul>
+              </li>
+            `;
+          } else {
+            docHTML += `
+              <li><strong>${item}</strong>: Data format issue</li>
+            `;
+          }
         }
 
         docHTML += `</ul>`; // Close the items list
