@@ -40,42 +40,7 @@
       });
     }
 	
-// Populate tables with Firestore data
-async function populateSweatExchanges() {
-  try {
-    const exchangesCollection = collection(db, 'sweatexchange');
-    const snapshot = await getDocs(exchangesCollection);
 
-    snapshot.forEach(async (planetDoc) => {
-      const planet = planetDoc.id; // Planet name from document ID
-      const planetData = planetDoc.data();
-
-      // Get the table body for the planet
-      const tableBody = document.getElementById(`${planet}-table`);
-      tableBody.innerHTML = ''; // Clear existing rows
-
-      // Fetch items collection inside the planet document
-      const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
-      const itemsSnapshot = await getDocs(itemsCollection);
-
-      // Populate rows
-      itemsSnapshot.forEach((itemDoc) => {
-        const item = itemDoc.data();
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${item.availability}</td>
-          <td>${item.stock}</td>
-          <td>${itemDoc.id}</td> <!-- Use item ID instead of name -->
-          <td>${item.sweatCost}</td>
-          <td>${item.pedCost}</td>
-        `;
-        tableBody.appendChild(row);
-      });
-    });
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-}
 
 // Add a new item via the form
 document.getElementById("addItemForm").addEventListener("submit", async (e) => {
@@ -363,5 +328,5 @@ getDocs(collection(db, 'UserProfiles'))
 	});
 	// Call on page load
 
-	populateSweatExchanges();
+	
 //hmmm
