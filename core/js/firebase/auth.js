@@ -65,23 +65,23 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   // Get form values
   const planet = document.getElementById("planetSelect").value;
   const itemName = document.getElementById("itemName").value.trim();
-  const stock = document.getElementById("stock").value;
-  const sweatCost = document.getElementById("sweatprice").value.trim();
-  const pedCost = document.getElementById("pedprice").value.trim();
+  const amount = document.getElementById("amount").value;
+  const sweatprice = document.getElementById("sweatprice").value.trim();
+  const pedprice = document.getElementById("pedprice").value.trim();
   const tt = document.getElementById("tt").value.trim();
   const ttMax = document.getElementById("ttmax").value.trim();
 
   // Validate inputs
-  if (!itemName || !stock || !sweatCost || !pedCost || !tt || !ttMax) {
+  if (!itemName || !amount || !sweatprice || !pedprice || !tt || !ttMax) {
     alert("Please fill in all fields.");
     return;
   }
 
   // Create new item object
   const newItem = {
-    stock: parseInt(stock),
-    sweatCost,
-    pedCost,
+    amount: parseInt(amount),
+    sweatprice,
+    pedprice,
     tt,
     ttMax
   };
@@ -129,8 +129,8 @@ function getExchangeData() {
                   <li>Stock: ${itemData.amount}</li>
                   <li>tt: ${itemData.tt}</li>
                   <li>TT max: ${itemData.ttMax}</li>
-                  <li>Sweat Cost: ${itemData.sweatCost}</li>
-                  <li>PED Cost: ${itemData.pedCost}</li>
+                  <li>Sweat Cost: ${itemData.sweatprice}</li>
+                  <li>PED Cost: ${itemData.pedprice}</li>
                 </ul>
               </li>
             `;
@@ -188,8 +188,8 @@ document.getElementById('itemName').addEventListener('change', async function ()
       document.getElementById('amount').value = itemData.amount || '';
       document.getElementById('tt').value = itemData.tt || '';
       document.getElementById('ttmax').value = itemData.ttMax || '';
-      document.getElementById('sweatprice').value = itemData.sweatCost || '';
-      document.getElementById('pedprice').value = itemData.pedCost || '';
+      document.getElementById('sweatprice').value = itemData.sweatprice || '';
+      document.getElementById('pedprice').value = itemData.pedprice || '';
     } else {
       console.log("Item not found!");
     }
