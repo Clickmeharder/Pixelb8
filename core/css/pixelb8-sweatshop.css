@@ -3,3 +3,10 @@ div#sweatexchange-DB {
     height: 280px;
     border: 1px ridge gray;
 }
+#tt {
+  width: 200px; /* Set your desired width here */
+}
+
+#ttmax {
+  width: 300px; /* Set your desired width here */
+}
