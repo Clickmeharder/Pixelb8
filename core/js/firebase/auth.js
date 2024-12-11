@@ -126,7 +126,7 @@ function getExchangeData() {
               <li>
                 <strong>${itemDoc.id}</strong>:
                 <ul>
-                  <li>Stock: ${itemData.amount}</li>
+                  <li>amount: ${itemData.amount}</li>
                   <li>tt: ${itemData.tt}</li>
                   <li>TT max: ${itemData.ttmax}</li>
                   <li>Sweat Cost: ${itemData.sweatprice}</li>
@@ -148,62 +148,112 @@ function getExchangeData() {
     });
 }
 
-// Populate the itemName select dynamically based on the selected planet
 document.getElementById('planetSelect').addEventListener('change', async function () {
-  const planet = this.value;
-  const itemNameSelect = document.getElementById('itemName');
-  const planetSelect = document.getElementById('planetSelect');
-  
-  // Add a default option to planetSelect if it's empty or if no planet is selected
-  if (planetSelect.innerHTML.trim() === '') {
-    planetSelect.innerHTML = ''; // Clear the existing options
-    planetSelect.appendChild(new Option("Select Planet", "Default"));
-  }
+    const planet = this.value;
+    const itemNameSelect = document.getElementById('itemName');
+    
+    // Clear the itemName dropdown and add the default option
+    itemNameSelect.innerHTML = '';
+    itemNameSelect.appendChild(new Option("Select Item", "Default", true, true));
 
-  // Clear the existing itemName options
-  itemNameSelect.innerHTML = ''; 
-  
-  // Add a default option to itemName select
-  itemNameSelect.appendChild(new Option("Select Item", "Default"));
+    // Fetch items from Firestore for the selected planet
+    try {
+        const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
+        const itemsSnapshot = await getDocs(itemsCollection);
 
-  // Fetch items from Firestore for the selected planet
-  try {
-    const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
-    const itemsSnapshot = await getDocs(itemsCollection);
-
-    // Populate the item select options
-    itemsSnapshot.forEach((itemDoc) => {
-      const itemName = itemDoc.id;
-      itemNameSelect.appendChild(new Option(itemName, itemName));
-    });
-  } catch (error) {
-    console.error("Error fetching items: ", error);
-  }
-});
-// Populate other fields based on selected planet and item
-document.getElementById('itemName').addEventListener('change', async function () {
-  const planet = document.getElementById('planetSelect').value;
-  const itemName = this.value;
-  
-  if (itemName === "Default") return; // No item selected
-
-  try {
-    const itemDocRef = doc(db, `sweatexchange/${planet}/items`, itemName);
-    const itemDoc = await getDoc(itemDocRef);
-
-    if (itemDoc.exists()) {
-      const itemData = itemDoc.data();
-      document.getElementById('amount').value = itemData.amount || '';
-      document.getElementById('tt').value = itemData.tt || '';
-      document.getElementById('ttmax').value = itemData.ttmax || '';
-      document.getElementById('sweatprice').value = itemData.sweatprice || '';
-      document.getElementById('pedprice').value = itemData.pedprice || '';
-    } else {
-      console.log("Item not found!");
+        // Populate the item select options
+        itemsSnapshot.forEach((itemDoc) => {
+            const itemName = itemDoc.id;
+            itemNameSelect.appendChild(new Option(itemName, itemName));
+        });
+    } catch (error) {
+        console.error("Error fetching items: ", error);
     }
-  } catch (error) {
-    console.error("Error fetching item data: ", error);
-  }
+});
+
+// Event listener for itemName select change
+document.getElementById('itemName').addEventListener('change', async function () {
+    const selectedItem = this.value;
+    
+    if (selectedItem === "Default") {
+        // Clear input fields when "Select Item" is chosen
+        document.getElementById('itemNameInput').value = '';
+        document.getElementById('amountInput').value = '';
+        document.getElementById('sweatpriceInput').value = '';
+        document.getElementById('pedpriceInput').value = '';
+        return;
+    }
+    
+    // Populate the form with the existing item's details for editing
+    const planet = document.getElementById('planetSelect').value;
+    try {
+        const itemDocRef = doc(db, `sweatexchange/${planet}/items`, selectedItem);
+        const itemDoc = await getDoc(itemDocRef);
+
+        if (itemDoc.exists()) {
+            const itemData = itemDoc.data();
+            document.getElementById('itemNameInput').value = selectedItem; // Set the selected item as editable name
+            document.getElementById('amountInput').value = itemData.amount || '';
+            document.getElementById('sweatpriceInput').value = itemData.sweatprice || '';
+            document.getElementById('pedpriceInput').value = itemData.pedprice || '';
+        } else {
+            console.log("Item not found!");
+        }
+    } catch (error) {
+        console.error("Error fetching item data: ", error);
+    }
+});
+
+// Handle item addition or editing
+document.getElementById('submitItemBtn').addEventListener('click', async () => {
+    const planet = document.getElementById('planetSelect').value;
+    const itemName = document.getElementById('itemNameInput').value.trim();
+    const amount = document.getElementById('amountInput').value;
+    const sweatprice = document.getElementById('sweatpriceInput').value.trim();
+    const pedprice = document.getElementById('pedpriceInput').value.trim();
+    
+    // Validate input fields
+    if (!itemName || !amount || !sweatprice || !pedprice) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    // Prepare the item data
+    const newItem = {
+        amount: parseInt(amount),
+        sweatprice,
+        pedprice,
+    };
+
+    try {
+        // Check if it's a new item or an existing item
+        const itemDocRef = doc(db, `sweatexchange/${planet}/items`, itemName);
+
+        // If the item already exists, update it, otherwise add a new item
+        const itemDoc = await getDoc(itemDocRef);
+        if (itemDoc.exists()) {
+            // Update existing item
+            await updateDoc(itemDocRef, newItem);
+            alert("Item updated successfully!");
+        } else {
+            // Add new item
+            await setDoc(itemDocRef, newItem);
+            alert("Item added successfully!");
+        }
+
+        // Refresh the item list after adding or editing
+        populateSweatExchanges();
+        
+        // Clear input fields after submission
+        document.getElementById('itemNameInput').value = '';
+        document.getElementById('amountInput').value = '';
+        document.getElementById('sweatpriceInput').value = '';
+        document.getElementById('pedpriceInput').value = '';
+
+    } catch (error) {
+        console.error("Error adding/updating item: ", error);
+        alert("Failed to add/update item. Please try again.");
+    }
 });
 //end sweatshop stuff
 
