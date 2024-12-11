@@ -379,18 +379,34 @@ function getExchangeData() {
 }
 
 
+// Check user role (assuming you have a function that checks this)
+async function getUserRole() {
+    const user = firebase.auth().currentUser;
+    if (user) {
+        const userRef = doc(db, 'users', user.uid); // Assuming 'users' collection contains user data
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+            return userDoc.data().role || 'user'; // Returns 'admin' or 'user'
+        }
+    }
+    return 'user'; // Default to 'user' if no user found or role not set
+}
+
 // Handle planet change and update item list
 document.getElementById('planetSelect').addEventListener('change', async function () {
     const planet = this.value;
     const itemNameSelect = document.getElementById('itemNameInput'); // Corrected ID
+    const userRole = await getUserRole(); // Check user role
 
     // Clear the itemName dropdown and add the default option
     itemNameSelect.innerHTML = '';
     itemNameSelect.appendChild(new Option("Select Item", "Default", true, true));
 
-    // Fetch items from Firestore for the selected planet
+    // Determine which collection to fetch from
+    const itemsCollectionPath = userRole === 'admin' ? `sweatexchange/${planet}/items` : `sweatexchange/${planet}/useritems`;
+
     try {
-        const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
+        const itemsCollection = collection(db, itemsCollectionPath);
         const itemsSnapshot = await getDocs(itemsCollection);
 
         // Populate the item select options
@@ -406,6 +422,7 @@ document.getElementById('planetSelect').addEventListener('change', async functio
 // Event listener for itemName select change
 document.getElementById('itemNameInput').addEventListener('change', async function () {
     const selectedItem = this.value;
+    const userRole = await getUserRole(); // Check user role
 
     if (selectedItem === "Default") {
         // Clear input fields when "Select Item" is chosen
@@ -419,8 +436,10 @@ document.getElementById('itemNameInput').addEventListener('change', async functi
 
     // Populate the form with the existing item's details for editing
     const planet = document.getElementById('planetSelect').value;
+    const itemsCollectionPath = userRole === 'admin' ? `sweatexchange/${planet}/items` : `sweatexchange/${planet}/useritems`;
+
     try {
-        const itemDocRef = doc(db, `sweatexchange/${planet}/items`, selectedItem);
+        const itemDocRef = doc(db, itemsCollectionPath, selectedItem);
         const itemDoc = await getDoc(itemDocRef);
 
         if (itemDoc.exists()) {
