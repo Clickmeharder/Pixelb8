@@ -107,10 +107,7 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
 
   // Get the currently signed-in user UID
   const user = firebase.auth().currentUser;
-  if (user && user.uid !== "7d7JYyj0kgUv0nXr3bDrO88R7jN2") {
-    alert("You do not have permission to add items.");
-    return;
-  }
+  const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN2";
 
   // Get form values
   const planet = document.getElementById("planetSelect").value;
@@ -137,11 +134,19 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   };
 
   try {
-    // Add the new item to Firestore
-    const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
-    await addDoc(itemsCollection, newItem);
+    // Determine target collection based on user permissions
+    const targetCollectionPath = userIsAdmin
+      ? `sweatexchange/${planet}/items`
+      : `sweatexchange/${planet}/useritems`;
 
-    alert("Item added successfully!");
+    const targetCollection = collection(db, targetCollectionPath);
+
+    // Add the new item to Firestore
+    await addDoc(targetCollection, newItem);
+
+    const collectionType = userIsAdmin ? "admin items" : "user items";
+    alert(`Item added successfully to ${collectionType}!`);
+    
     populateSweatExchanges(); // Refresh the table after adding the item
     document.getElementById("addItemForm").reset(); // Clear the form
   } catch (error) {
