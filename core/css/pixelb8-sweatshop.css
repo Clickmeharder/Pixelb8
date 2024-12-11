@@ -3,7 +3,7 @@
 div#item-form {
     border: 1px ridge;
     display: flex;
-    flex-wrap: wrap;
+    /* flex-wrap: wrap; */
     border-color: #555555;
 }
 form#addItemForm {
