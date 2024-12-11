@@ -373,13 +373,16 @@
 				  <option value="NextIsland">Next Island</option>
 				  <!-- Add more planets as needed -->
 				</select>
-				
-				<input type="text" id="itemName" placeholder="Enter item name" required />
-				<input type="number" id="amount" placeholder="Enter stock count" required />
-				<input type="number" id="tt" placeholder="Enter tt value" required step="0.00001" />
-				<input type="number" id="ttmax" placeholder="Enter maxtt value" required />
-				<input type="number" id="sweatprice" placeholder="Enter sweat cost" required />
-				<input type="number" id="pedprice" placeholder="Enter PED cost" required />
+				<select id="currentItems">
+					<option value="Default">Default</option>
+				  <!-- populate items dynamically from db based on selected planet -->
+				</select>
+				<input type="text" id="itemName" placeholder="Item Name" required />
+				<input type="number" id="amount" placeholder="Amount" required />
+				<input type="number" id="tt" placeholder="TT Val." required step="0.00001" />
+				<input type="number" id="ttmax" placeholder="Max TT" required />
+				<input type="number" id="sweatprice" placeholder="Sweat Price" required />
+				<input type="number" id="pedprice" placeholder="Ped Price" required />
 				<button type="submit-sweatitemFB">Add Item To Firebase</button>
 				<button type="submit2">Add Item To local storage json</button>
 			  </form>
