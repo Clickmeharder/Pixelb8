@@ -32,9 +32,11 @@ div#exchangeItemDetailInputs {
 }
 select#itemNameInput {
     height: 30px;
+	width: 100%;
 }
 select#planetSelect {
     height: 30px;
+	width: 180px;
 }
 select#actionSelect {
 	height: 30px;
