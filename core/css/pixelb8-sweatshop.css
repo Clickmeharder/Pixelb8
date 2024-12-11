@@ -65,6 +65,26 @@ header p {
 	font-weight: unset;
 	line-height: 0.85;
 }
+/* Style all <p> elements inside #sweatexchange-DB */
+#sweatexchange-DB p {
+  font-size: 14px; /* Adjust text size */
+  color: #333; /* Dark gray for readability */
+  line-height: 1.6; /* Add space between lines */
+  margin: 8px 0; /* Space between paragraphs */
+}
+
+/* Style all <strong> elements inside #sweatexchange-DB */
+#sweatexchange-DB strong {
+  font-weight: bold; /* Make text bold */
+  color: #0056b3; /* Blue for emphasis */
+}
+
+/* Optional: Add hover effect for <strong> elements */
+#sweatexchange-DB strong:hover {
+  text-decoration: underline; /* Underline when hovered */
+  color: #003366; /* Darker blue on hover */
+}
+
 h3 {
 	color: #d07c0dba;
 	font-family: 'YATRA ONE';
