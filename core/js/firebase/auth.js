@@ -61,28 +61,28 @@ function toggleItemNameInput() {
   var itemNameTextInput = document.getElementById('itemNameTextInput');
   
   if (action === 'add') {
-    // Show the select dropdown, hide the text input
-    itemNameInput.style.display = 'block';
-    itemNameTextInput.style.display = 'none';
-    
-    // Save the current ID of itemNameInput to the variable
-    currentItemNameInputId = itemNameInput.id;
-
-  } else if (action === 'edit') {
-    // Hide the select dropdown, show the text input
+	// Hide the select dropdown, show the text input
     itemNameInput.style.display = 'none';
     itemNameTextInput.style.display = 'block';
-    
+
     // Save the current ID of itemNameTextInput to the variable
     currentItemNameInputId = itemNameTextInput.id;
 
+
+  } else if (action === 'edit') {
+	// Show the select dropdown, hide the text input
+    itemNameInput.style.display = 'block';
+    itemNameTextInput.style.display = 'none';
+    // Save the current ID of itemNameInput to the variable
+    currentItemNameInputId = itemNameInput.id;
+
+
   } else {
     // Optionally, hide both or do something else when delete is selected
-    itemNameInput.style.display = 'none';
+    itemNameInput.style.display = 'block';
     itemNameTextInput.style.display = 'none';
-    
-    // Reset to a default ID (or any other logic you want)
-    currentItemNameInputId = '';
+    // Save the current ID of itemNameInput to the variable
+    currentItemNameInputId = itemNameInput.id;
   }
 }
 
