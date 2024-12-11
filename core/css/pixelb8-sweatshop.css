@@ -1,7 +1,14 @@
+
+div#item-form {
+    border: 1px ridge;
+    display: flex;
+    flex-wrap: wrap;
+    border-color: #555555;
+}
 div#sweatexchange-DB {
     overflow-y: scroll;
     height: 175px;
-    width: 68vw;
+    width: 65vw;
     border: 1px ridge gray;
 }
 div#exchangeItemDetailInputs {
