@@ -72,6 +72,11 @@ header p {
   line-height: 1.2;
   margin: 0px 0;
 }
+/* Optional: Add hover effect for <strong> elements */
+#sweatexchange-DB p:hover {
+  text-decoration: underline; /* Underline when hovered */
+  color: #10b318;
+}
 
 /* Style all <strong> elements inside #sweatexchange-DB */
 #sweatexchange-DB strong {
@@ -82,7 +87,7 @@ header p {
 /* Optional: Add hover effect for <strong> elements */
 #sweatexchange-DB strong:hover {
   text-decoration: underline; /* Underline when hovered */
-  color: #003366; /* Darker blue on hover */
+  color: #b36d10;
 }
 
 h3 {
