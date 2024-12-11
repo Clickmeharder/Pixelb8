@@ -266,7 +266,6 @@ document.getElementById('submit-sweatitemFB').addEventListener('click', async ()
         alert("Failed to add/update item. Please try again.");
     }
 });
-
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
