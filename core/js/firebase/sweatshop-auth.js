@@ -159,9 +159,10 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
 
   // const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN2";
   const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN1";
+  
   // Get form values
   const planet = document.getElementById("planetSelect").value;
-  const itemName = document.getElementById(currentItemNameInputId).value.trim();
+  const itemName = document.getElementById(currentItemNameInputId).value.trim(); // Get item name from input field
   const amount = document.getElementById("amountInput").value;
   const sweatprice = document.getElementById("sweatpriceInput").value.trim();
   const pedprice = document.getElementById("pedpriceInput").value.trim();
@@ -182,7 +183,7 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
     tt: parseFloat(tt),
     ttmax: parseFloat(ttmax),
     ownerId: user.uid, // Add ownerId to match Firestore rules
-    uid: crypto.randomUUID() // Generate a unique identifier for the item
+    uid: crypto.randomUUID() // Generate a unique identifier for the item (optional, you can remove this if you want)
   };
 
   try {
@@ -193,8 +194,9 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
 
     const targetCollection = collection(db, targetCollectionPath);
 
-    // Add the new item to Firestore
-    await addDoc(targetCollection, newItem);
+    // Use setDoc to specify the document ID as the itemName value
+    const docRef = doc(targetCollection, itemName); // Set the document ID as the item name
+    await setDoc(docRef, newItem); // Save the item with the custom document ID
 
     const collectionType = userIsAdmin ? "admin items" : "user items";
     alert(`Item added successfully to ${collectionType}!`);
