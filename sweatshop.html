@@ -355,6 +355,10 @@
 			  <h3>Add New Item</h3>
 			  <form id="addItemForm">
 				<label for="planetSelect">Planet:</label>
+				<label for="itemName">Item Name:</label>
+				<label for="amount">Amount:</label>
+				<label for="tt">tt:</label>
+				<label for="ttmax">ttmax:</label>
 				<select id="planetSelect">
 				  <option value="Calypso">Calypso</option>
 				  <option value="Monria">Monria</option>
@@ -366,10 +370,7 @@
 				  <!-- Add more planets as needed -->
 				</select>
 				
-				<label for="itemName">Item Name:</label>
-				<label for="amount">Amount:</label>
-				<label for="tt">tt:</label>
-				<label for="ttmax">ttmax:</label>
+				
 				<input type="text" id="itemName" placeholder="Enter item name" required />
 				<input type="number" id="amount" placeholder="Enter stock count" required />
 				<input type="number" id="tt" placeholder="Enter tt value" required step="0.00001" />
