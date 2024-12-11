@@ -55,6 +55,9 @@ select#itemNameInput {
 input#itemNameTextInput {
     height: 20px;
     width: 96%;
+    margin: auto;
+    margin-top: 0;
+    margin-bottom: 2px;
 }
 select#planetSelect {
     height: 20px;
@@ -63,6 +66,7 @@ select#planetSelect {
 select#actionSelect {
 	height: 18px;
 	width: 99%;
+	border: 2px solid #0d7a98fa;
 }
 #ttInput, #ttmaxInput, #amountInput {
   width: 65px; /* Set your desired width here */
@@ -103,4 +107,19 @@ div#exchangeItemDetailInputs input[type="number"]:hover {
 }
 #itemformHeader {
 	width: 100%;	
+}
+
+
+#exchangeItemDetailInputs div {
+    margin-bottom: 10px;
+}
+
+#exchangeItemDetailInputs label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+#exchangeItemDetailInputs input, 
+#exchangeItemDetailInputs button {
+    width: 100%;
 }
