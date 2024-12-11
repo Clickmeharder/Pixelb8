@@ -59,14 +59,15 @@ select#itemNameInput {
 }
 input#itemNameTextInput {
     text-align: center;
-	color: #FF9800;
+    color: #ff9800b5;
+    font-size: 15px;
     font-weight: bold;
-	height: 20px;
+    height: 20px;
     width: 96%;
     margin: auto;
     margin-top: 5px;
     margin-bottom: 5px;
-	background: #000000;
+    background: #000000;
 }
 select#planetSelect {
     height: 20px;
