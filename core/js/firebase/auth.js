@@ -52,7 +52,7 @@ getDocs(collection(db, 'UserProfiles'))
   });
 //beginning sweatshop stuff
 // Add a new item via the form
-document.getElementById("addItemForm").addEventListener("submit-sweatitemFB", async (e) => {
+document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   // Get the currently signed-in user UID
@@ -65,23 +65,25 @@ document.getElementById("addItemForm").addEventListener("submit-sweatitemFB", as
   // Get form values
   const planet = document.getElementById("planetSelect").value;
   const itemName = document.getElementById("itemName").value.trim();
-  const availability = document.getElementById("availability").value;
   const stock = document.getElementById("stock").value;
-  const sweatCost = document.getElementById("sweatCost").value.trim();
-  const pedCost = document.getElementById("pedCost").value.trim();
+  const sweatCost = document.getElementById("sweatprice").value.trim();
+  const pedCost = document.getElementById("pedprice").value.trim();
+  const tt = document.getElementById("tt").value.trim();
+  const ttMax = document.getElementById("ttmax").value.trim();
 
   // Validate inputs
-  if (!itemName || !stock || !sweatCost || !pedCost) {
+  if (!itemName || !stock || !sweatCost || !pedCost || !tt || !ttMax) {
     alert("Please fill in all fields.");
     return;
   }
 
   // Create new item object
   const newItem = {
-    availability,
     stock: parseInt(stock),
     sweatCost,
     pedCost,
+    tt,
+    ttMax
   };
 
   try {
@@ -111,7 +113,7 @@ function getExchangeData() {
         exchangeDiv.classList.add('exchange-item');
 
         let docHTML = `<h3>Exchange Data for ${doc.id}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
-        
+
         const itemsCollection = collection(doc.ref, 'items');
         const itemsSnapshot = await getDocs(itemsCollection);
 
@@ -125,10 +127,10 @@ function getExchangeData() {
                 <strong>${itemDoc.id}</strong>:
                 <ul>
                   <li>Stock: ${itemData.amount}</li>
-                  <li>tt: ${itemData.tt}/${itemData.ttmax}</li>
-                  <li>TT max: ${itemData.ttmax}</li>
-                  <li>Sweat Cost: ${itemData.sweatprice}</li>
-                  <li>PED Cost: ${itemData.pedprice}</li>
+                  <li>tt: ${itemData.tt}</li>
+                  <li>TT max: ${itemData.ttMax}</li>
+                  <li>Sweat Cost: ${itemData.sweatCost}</li>
+                  <li>PED Cost: ${itemData.pedCost}</li>
                 </ul>
               </li>
             `;
@@ -185,9 +187,9 @@ document.getElementById('itemName').addEventListener('change', async function ()
       const itemData = itemDoc.data();
       document.getElementById('amount').value = itemData.amount || '';
       document.getElementById('tt').value = itemData.tt || '';
-      document.getElementById('ttmax').value = itemData.ttmax || '';
-      document.getElementById('sweatprice').value = itemData.sweatprice || '';
-      document.getElementById('pedprice').value = itemData.pedprice || '';
+      document.getElementById('ttmax').value = itemData.ttMax || '';
+      document.getElementById('sweatprice').value = itemData.sweatCost || '';
+      document.getElementById('pedprice').value = itemData.pedCost || '';
     } else {
       console.log("Item not found!");
     }
@@ -195,10 +197,8 @@ document.getElementById('itemName').addEventListener('change', async function ()
     console.error("Error fetching item data: ", error);
   }
 });
-
-
-
 //end sweatshop stuff
+
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
