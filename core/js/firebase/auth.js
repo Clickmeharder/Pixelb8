@@ -181,6 +181,8 @@ document.getElementById('itemName').addEventListener('change', async function ()
         document.getElementById('amountInput').value = '';
         document.getElementById('sweatpriceInput').value = '';
         document.getElementById('pedpriceInput').value = '';
+        document.getElementById('ttmaxInput').value = '';
+        document.getElementById('ttInput').value = '';
         return;
     }
     
@@ -196,6 +198,8 @@ document.getElementById('itemName').addEventListener('change', async function ()
             document.getElementById('amountInput').value = itemData.amount || '';
             document.getElementById('sweatpriceInput').value = itemData.sweatprice || '';
             document.getElementById('pedpriceInput').value = itemData.pedprice || '';
+            document.getElementById('ttmaxInput').value = itemData.ttmax || '';
+            document.getElementById('ttInput').value = itemData.tt || '';
         } else {
             console.log("Item not found!");
         }
@@ -205,15 +209,17 @@ document.getElementById('itemName').addEventListener('change', async function ()
 });
 
 // Handle item addition or editing
-document.getElementById('submitItemBtn').addEventListener('click', async () => {
+document.getElementById('submit-sweatitemFB').addEventListener('click', async () => {
     const planet = document.getElementById('planetSelect').value;
     const itemName = document.getElementById('itemNameInput').value.trim();
     const amount = document.getElementById('amountInput').value;
     const sweatprice = document.getElementById('sweatpriceInput').value.trim();
     const pedprice = document.getElementById('pedpriceInput').value.trim();
+    const ttmax = document.getElementById('ttmaxInput').value.trim();
+    const tt = document.getElementById('ttInput').value.trim();
     
     // Validate input fields
-    if (!itemName || !amount || !sweatprice || !pedprice) {
+    if (!itemName || !amount || !sweatprice || !pedprice || !ttmax || !tt) {
         alert("Please fill in all fields.");
         return;
     }
@@ -223,6 +229,8 @@ document.getElementById('submitItemBtn').addEventListener('click', async () => {
         amount: parseInt(amount),
         sweatprice,
         pedprice,
+        ttmax,
+        tt,
     };
 
     try {
@@ -249,13 +257,15 @@ document.getElementById('submitItemBtn').addEventListener('click', async () => {
         document.getElementById('amountInput').value = '';
         document.getElementById('sweatpriceInput').value = '';
         document.getElementById('pedpriceInput').value = '';
+        document.getElementById('ttmaxInput').value = '';
+        document.getElementById('ttInput').value = '';
 
     } catch (error) {
         console.error("Error adding/updating item: ", error);
         alert("Failed to add/update item. Please try again.");
     }
 });
-//end sweatshop stuff
+
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
