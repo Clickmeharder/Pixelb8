@@ -354,6 +354,12 @@
 			<div id="item-form">
 			  <h3>Manage Item</h3>
 			  <form id="addItemForm">
+				<!-- Action Select (Add, Edit, Delete) -->
+				<select id="actionSelect">
+				  <option value="add" selected>Add</option>
+				  <option value="edit">Edit</option>
+				  <option value="delete">Delete</option>
+				</select>
 				<!-- Planet Select -->
 				<select id="planetSelect">
 				  <option value="Default" disabled selected>Select Planet</option>
@@ -364,13 +370,6 @@
 				  <option value="Cyrene">Cyrene</option>
 				  <option value="Toulan">Toulan</option>
 				  <option value="NextIsland">Next Island</option>
-				</select>
-				
-				<!-- Action Select (Add, Edit, Delete) -->
-				<select id="actionSelect">
-				  <option value="add" selected>Add</option>
-				  <option value="edit">Edit</option>
-				  <option value="delete">Delete</option>
 				</select>
 				
 				<!-- Item Name (dynamically switches between text input or select based on action) -->
