@@ -3,8 +3,13 @@ div#sweatexchange-DB {
     height: 280px;
     border: 1px ridge gray;
 }
-#tt, #ttmax {
+#tt, #ttmax, #amount {
   width: 65px; /* Set your desired width here */
+  text-align: left;
+}
+
+#sweatprice, #pedprice {
+  width: 105px; /* Set your desired width here */
   text-align: left;
 }
 
