@@ -64,12 +64,12 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
 
   // Get form values
   const planet = document.getElementById("planetSelect").value;
-  const itemName = document.getElementById("itemName").value.trim();
-  const amount = document.getElementById("amount").value;
-  const sweatprice = document.getElementById("sweatprice").value.trim();
-  const pedprice = document.getElementById("pedprice").value.trim();
-  const tt = document.getElementById("tt").value.trim();
-  const ttmax = document.getElementById("ttmax").value.trim();
+  const itemName = document.getElementById("itemNameInput").value.trim();
+  const amount = document.getElementById("amountInput").value;
+  const sweatprice = document.getElementById("sweatpriceInput").value.trim();
+  const pedprice = document.getElementById("pedpriceInput").value.trim();
+  const tt = document.getElementById("ttInput").value.trim();
+  const ttmax = document.getElementById("ttmaxInput").value.trim();
 
   // Validate inputs
   if (!itemName || !amount || !sweatprice || !pedprice || !tt || !ttmax) {
