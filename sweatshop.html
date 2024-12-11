@@ -354,33 +354,34 @@
 			<div id="item-form">
 			  <div id="itemformHeader"><h3>Manage Item</h3></div>
 			  <form id="addItemForm">
-				<!-- Action Select (Add, Edit, Delete) -->
-				<select id="actionSelect">
-				  <option value="add" selected>Add</option>
-				  <option value="edit">Edit</option>
-				  <option value="delete">Delete</option>
-				</select>
-				<!-- Planet Select -->
-				<select id="planetSelect">
-				  <option value="Default" disabled selected>Select Planet</option>
-				  <option value="Calypso">Calypso</option>
-				  <option value="Monria">Monria</option>
-				  <option value="Rocktropia">Rocktropia</option>
-				  <option value="Arkadia">Arkadia</option>
-				  <option value="Cyrene">Cyrene</option>
-				  <option value="Toulan">Toulan</option>
-				  <option value="NextIsland">Next Island</option>
-				</select>
+				<div id="exchangeItemMainInputs">
+					<!-- Action Select (Add, Edit, Delete) -->
+					<select id="actionSelect">
+					  <option value="add" selected>Add</option>
+					  <option value="edit">Edit</option>
+					  <option value="delete">Delete</option>
+					</select>
+					<!-- Planet Select -->
+					<select id="planetSelect">
+					  <option value="Default" disabled selected>Select Planet</option>
+					  <option value="Calypso">Calypso</option>
+					  <option value="Monria">Monria</option>
+					  <option value="Rocktropia">Rocktropia</option>
+					  <option value="Arkadia">Arkadia</option>
+					  <option value="Cyrene">Cyrene</option>
+					  <option value="Toulan">Toulan</option>
+					  <option value="NextIsland">Next Island</option>
+					</select>
+					
+					<!-- Item Name (dynamically switches between text input or select based on action) -->
+					<select id="itemNameInput">
+					  <option value="Default">Select Item</option>
+					  <!-- Items will populate dynamically based on the selected planet -->
+					</select>
 				
-				<!-- Item Name (dynamically switches between text input or select based on action) -->
-				<select id="itemNameInput">
-				  <option value="Default">Select Item</option>
-				  <!-- Items will populate dynamically based on the selected planet -->
-				</select>
-				
-				<!-- Name input for adding new items -->
-				<input type="text" id="itemNameTextInput" placeholder="Enter item name" style="display: none;" />
-
+					<!-- Name input for adding new items -->
+					<input type="text" id="itemNameTextInput" placeholder="Enter item name" style="display: none;" />
+				</div>
 				<!-- Other item details inputs -->
 				<div id="exchangeItemDetailInputs">
 					<input type="number" id="amountInput" placeholder="Amount" required />
