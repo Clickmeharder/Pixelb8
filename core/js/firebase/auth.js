@@ -50,7 +50,8 @@ getDocs(collection(db, 'UserProfiles'))
   .catch((error) => {
     console.log("Error getting documents: ", error);
   });
-//beginning sweatshop stuff
+// beginning sweatshop stuff
+
 // Add a new item via the form
 document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -148,6 +149,7 @@ function getExchangeData() {
     });
 }
 
+// Handle planet change and update item list
 document.getElementById('planetSelect').addEventListener('change', async function () {
     const planet = this.value;
     const itemNameSelect = document.getElementById('itemNameInput');

@@ -352,17 +352,9 @@
         <!-- Tab Contents -->
 		<div class="tab-content" id="user-profile-box">
 			<div id="item-form">
-			  <h3>Add New Item</h3>
+			  <h3>Manage Item</h3>
 			  <form id="addItemForm">
-<!-- 				<label for="planetSelect">Planet:</label>
-				<label for="itemName">Item Name:</label>
-				<label for="amount">Amount:</label>
-				<label for="tt">tt:</label>
-				<label for="ttmax">ttmax:</label>
-				<label for="ttmax">ttmax:</label>
-				<label for="sweatprice">Sweat price:</label>
-				<label for="pedprice">PED price:</label>
-				-->
+				<!-- Planet Select -->
 				<select id="planetSelect">
 				  <option value="Default" disabled selected>Select Planet</option>
 				  <option value="Calypso">Calypso</option>
@@ -372,17 +364,31 @@
 				  <option value="Cyrene">Cyrene</option>
 				  <option value="Toulan">Toulan</option>
 				  <option value="NextIsland">Next Island</option>
-				  <!-- Add more planets as needed -->
 				</select>
-				<input type="text" id="itemNameInput" placeholder="Enter or select an item">
-				<!-- <input type="text" id="itemName" placeholder="Item Name" required /> -->
+				
+				<!-- Action Select (Add, Edit, Delete) -->
+				<select id="actionSelect">
+				  <option value="add" selected>Add</option>
+				  <option value="edit">Edit</option>
+				  <option value="delete">Delete</option>
+				</select>
+				
+				<!-- Item Name (dynamically switches between text input or select based on action) -->
+				<select id="itemNameInput">
+				  <option value="Default">Select Item</option>
+				  <!-- Items will populate dynamically based on the selected planet -->
+				</select>
+				
+				<!-- Name input for adding new items -->
+				<input type="text" id="itemNameTextInput" placeholder="Enter item name" style="display: none;" />
+
+				<!-- Other item details inputs -->
 				<input type="number" id="amountInput" placeholder="Amount" required />
 				<input type="number" id="ttInput" placeholder="TT Val." required step="0.00001" />
 				<input type="number" id="ttmaxInput" placeholder="Max TT" required />
 				<input type="number" id="sweatpriceInput" placeholder="Sweat Price" required />
 				<input type="number" id="pedpriceInput" placeholder="Ped Price" required />
-				<button id="submit-sweatitemFB" type="submit">Add Item To Firebase</button>
-				<button id="submit-sweatitemLocal" type="submit">Add Item To local storage json</button>
+				<button id="submit-sweatitemFB" type="submit">Submit Item</button>
 			  </form>
 			</div>
 			<button class="logged-in" id="editprofilebutt" type="button">Edit Profile</button>
