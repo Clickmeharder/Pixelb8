@@ -101,6 +101,50 @@ toggleItemNameInput();
 // Add an event listener to update the display whenever the action changes
 document.getElementById('actionSelect').addEventListener('change', toggleItemNameInput);
 // beginning sweatshop auth stuff
+// Handle item addition or editing
+/* document.getElementById('submit-sweatitemFB').addEventListener('click', async () => {
+    const planet = document.getElementById('planetSelect').value;
+    const itemName = document.getElementById(currentItemNameInputId).value.trim();
+    const amount = document.getElementById('amountInput').value;
+    const sweatprice = document.getElementById('sweatpriceInput').value.trim();
+    const pedprice = document.getElementById('pedpriceInput').value.trim();
+    const ttmax = document.getElementById('ttmaxInput').value.trim();
+    const tt = document.getElementById('ttInput').value.trim();
+    
+    if (!itemName || !amount || !sweatprice || !pedprice || !ttmax || !tt) {
+        alert("Please fill in all fields.");
+        return;
+    }
+    const newItem = {
+        amount: parseInt(amount),
+        sweatprice,
+        pedprice,
+        ttmax,
+        tt,
+    };
+    try {
+        const itemDocRef = doc(db, `sweatexchange/${planet}/items`, itemName);
+        const itemDoc = await getDoc(itemDocRef);
+        if (itemDoc.exists()) {
+            await updateDoc(itemDocRef, newItem);
+            alert("Item updated successfully!");
+        } else {
+            await setDoc(itemDocRef, newItem);
+            alert("Item added successfully!");
+        }
+		getExchangeData();
+        document.getElementById(currentItemNameInputId).value = ''; // Changed here
+        document.getElementById('amountInput').value = '';
+        document.getElementById('sweatpriceInput').value = '';
+        document.getElementById('pedpriceInput').value = '';
+        document.getElementById('ttmaxInput').value = '';
+        document.getElementById('ttInput').value = '';
+
+    } catch (error) {
+        console.error("Error adding/updating item: ", error);
+        alert("Failed to add/update item. Please try again.");
+    }
+}); */
 // Add a new item via the form
 document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -320,63 +364,7 @@ document.getElementById('itemNameInput').addEventListener('change', async functi
 
 
 
-// Handle item addition or editing
-document.getElementById('submit-sweatitemFB').addEventListener('click', async () => {
-    const planet = document.getElementById('planetSelect').value;
-    const itemName = document.getElementById(currentItemNameInputId).value.trim(); // Changed here
-    const amount = document.getElementById('amountInput').value;
-    const sweatprice = document.getElementById('sweatpriceInput').value.trim();
-    const pedprice = document.getElementById('pedpriceInput').value.trim();
-    const ttmax = document.getElementById('ttmaxInput').value.trim();
-    const tt = document.getElementById('ttInput').value.trim();
-    
-    // Validate input fields
-    if (!itemName || !amount || !sweatprice || !pedprice || !ttmax || !tt) {
-        alert("Please fill in all fields.");
-        return;
-    }
 
-    // Prepare the item data
-    const newItem = {
-        amount: parseInt(amount),
-        sweatprice,
-        pedprice,
-        ttmax,
-        tt,
-    };
-
-    try {
-        // Check if it's a new item or an existing item
-        const itemDocRef = doc(db, `sweatexchange/${planet}/items`, itemName);
-
-        // If the item already exists, update it, otherwise add a new item
-        const itemDoc = await getDoc(itemDocRef);
-        if (itemDoc.exists()) {
-            // Update existing item
-            await updateDoc(itemDocRef, newItem);
-            alert("Item updated successfully!");
-        } else {
-            // Add new item
-            await setDoc(itemDocRef, newItem);
-            alert("Item added successfully!");
-        }
-
-        // Refresh the item list after adding or editing
-        populateSweatExchanges();
-        
-        // Clear input fields after submission
-        document.getElementById(currentItemNameInputId).value = ''; // Changed here
-        document.getElementById('amountInput').value = '';
-        document.getElementById('sweatpriceInput').value = '';
-        document.getElementById('pedpriceInput').value = '';
-        document.getElementById('ttmaxInput').value = '';
-        document.getElementById('ttInput').value = '';
-
-    } catch (error) {
-        console.error("Error adding/updating item: ", error);
-        alert("Failed to add/update item. Please try again.");
-    }
-});
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
