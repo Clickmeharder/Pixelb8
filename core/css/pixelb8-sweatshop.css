@@ -30,6 +30,15 @@ div#sweatexchange-DB {
 div#exchangeItemDetailInputs {
     width: ;
 }
+select#itemNameInput {
+    height: 30px;
+}
+select#planetSelect {
+    height: 30px;
+}
+select#actionSelect {
+	height: 30px;
+}
 #ttInput, #ttmaxInput, #amountInput {
   width: 65px; /* Set your desired width here */
   text-align: left;
