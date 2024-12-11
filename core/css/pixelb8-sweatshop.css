@@ -447,3 +447,23 @@ div#exchangeItemDetailInputs input[type="number"]:hover {
 	color: #232222;
     border: 1px outset #4c4c4c;
 }
+/* Style number input spinner for WebKit browsers */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none; /* Removes default style */
+  width: 16px; /* Adjust width */
+  height: 16px; /* Adjust height */
+  background: #444; /* Dark background */
+  color: #fff; /* White arrow color */
+  border-radius: 4px; /* Optional: rounded corners */
+  border: 1px solid #555; /* Border styling */
+}
+
+/* Style number input spinner for Firefox */
+input[type="number"] {
+  -moz-appearance: textfield; /* Ensures styling consistency */
+}
+
+input[type="number"]::-moz-focus-inner {
+  border: 0; /* Remove border for Firefox */
+}
