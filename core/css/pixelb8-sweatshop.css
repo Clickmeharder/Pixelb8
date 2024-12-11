@@ -425,7 +425,7 @@ div#exchangeItemDetailInputs input[type="number"]:hover {
 	display: flex;
     width: 100%;
     border: 3px inset #063440c7;
-    overflow: hidden;
+    overflow: ;
 }
 
 #exchangeItemDetailInputs label {
