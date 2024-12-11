@@ -171,34 +171,31 @@ function getExchangeData() {
           docHTML += `<h4>Items:</h4><ul>`;
 
           itemsSnapshot.forEach((itemDoc) => {
-			const itemData = itemDoc.data();
-			docHTML += `
-				<li>
-				  <strong>${itemDoc.id}</strong>:
-				  <ul>
-					<li>Stock: ${itemData.amount}</li>
-					<li>tt: ${itemData.tt}/${itemData.ttmax}</li>
-					<li>TT max: ${itemData.ttmax}</li>
-					<li>Sweat Cost: ${itemData.sweatprice}</li>
-					<li>PED Cost: ${itemData.pedprice}</li>
-				  </ul>
-				  <button onclick="editItem('${doc.id}', '${itemDoc.id}')">Edit</button>
-				  <button onclick="removeItem('${doc.id}', '${itemDoc.id}')">Remove</button>
-				</li>
-			  `;
-			});
+  const itemData = itemDoc.data();
+  const li = document.createElement('li');
+  li.innerHTML = `
+    <strong>${itemDoc.id}</strong>:
+    <ul>
+      <li>Stock: ${itemData.amount}</li>
+      <li>tt: ${itemData.tt}/${itemData.ttmax}</li>
+      <li>TT max: ${itemData.ttmax}</li>
+      <li>Sweat Cost: ${itemData.sweatprice}</li>
+      <li>PED Cost: ${itemData.pedprice}</li>
+    </ul>
+  `;
 
-          docHTML += `</ul>`; // Close the items list
-        }
+  const editButton = document.createElement('button');
+  editButton.textContent = 'Edit';
+  editButton.addEventListener('click', () => editItem(doc.id, itemDoc.id));
 
-        exchangeDiv.innerHTML = docHTML;
-        sweatexchangeContainer.appendChild(exchangeDiv);
-      });
-    })
-    .catch((error) => {
-      console.log("Error getting documents: ", error);
-    });
-}
+  const removeButton = document.createElement('button');
+  removeButton.textContent = 'Remove';
+  removeButton.addEventListener('click', () => removeItem(doc.id, itemDoc.id));
+
+  li.appendChild(editButton);
+  li.appendChild(removeButton);
+  docHTML.appendChild(li);
+});
 function editItem(docId, itemId) {
   const docRef = doc(db, 'sweatexchange', docId, 'items', itemId);
   getDoc(docRef).then((itemDoc) => {
