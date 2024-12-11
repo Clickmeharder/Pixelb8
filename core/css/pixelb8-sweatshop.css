@@ -40,13 +40,15 @@ form#addItemForm input[type="number"],
 div#exchangeItemDetailInputs input[type="number"] {
     width: 95%;
     height: 8px;
-    transition: height 0.3s ease; /* Smooth transition for the hover effect */
+	outline: 5px solid dimgray;
+    transition: 0.3s ease; /* Smooth transition for the hover effect */
 }
 
 /* Hover effect */
 form#addItemForm input[type="number"]:hover,
 div#exchangeItemDetailInputs input[type="number"]:hover {
     height: 30px;
+	outline: 5px solid #174e0c;
 }
 #itemformHeader {
 	width: 100%;	
