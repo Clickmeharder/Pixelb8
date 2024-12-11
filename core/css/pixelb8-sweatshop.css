@@ -62,7 +62,7 @@ header h1 {
 header p {
 	margin: 0px 0 0;
 	font-size: 17px;
-	font-weight: bold;
+	font-weight: unset;
 	line-height: 0.85;
 }
 h3 {
