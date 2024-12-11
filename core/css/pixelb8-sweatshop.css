@@ -50,9 +50,13 @@ div#exchangeItemDetailInputs {
 select#itemNameInput {
     height: 20px;
 	width: 99%;
+	color: #FF9800;
+    font-weight: bold;
 }
 input#itemNameTextInput {
     text-align: center;
+	color: #FF9800;
+    font-weight: bold;
 	height: 20px;
     width: 96%;
     margin: auto;
