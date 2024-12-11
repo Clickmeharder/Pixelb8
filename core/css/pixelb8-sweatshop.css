@@ -17,6 +17,9 @@ form#addItemForm {
     justify-content: center;
     align-content: space-evenly;
 }
+#sweatexchangeModDiv {
+	width: ;
+}
 div#sweatexchange-DB {
     overflow-y: scroll;
     margin: 0px;
