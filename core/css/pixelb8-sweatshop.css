@@ -124,7 +124,10 @@ div#exchangeItemDetailInputs input[type="number"]:hover {
 
 #exchangeItemDetailInputs label {
     height: 20px;
-    width: 98%;
+    width: 91%;
+    font-size: 14px;
+    padding-left: 8px;
+    text-align: center;
 }
 
 #exchangeItemDetailInputs button {
