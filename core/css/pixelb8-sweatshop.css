@@ -135,4 +135,6 @@ div#exchangeItemDetailInputs input[type="number"]:hover {
 
 #exchangeItemDetailInputs button {
     width: 100%;
+	background: #2c2c2c;
+    border: 1px outset #4c4c4c;
 }
