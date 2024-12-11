@@ -35,7 +35,19 @@ div#exchangeItemDetailInputs {
   width: 105px; /* Set your desired width here */
   text-align: left;
 }
+/* Base style for inputs inside the specified form and div */
+form#addItemForm input[type="number"],
+div#exchangeItemDetailInputs input[type="number"] {
+    width: 95%;
+    height: 8px;
+    transition: height 0.3s ease; /* Smooth transition for the hover effect */
+}
 
+/* Hover effect */
+form#addItemForm input[type="number"]:hover,
+div#exchangeItemDetailInputs input[type="number"]:hover {
+    height: 30px;
+}
 #itemformHeader {
 	width: 100%;	
 }
