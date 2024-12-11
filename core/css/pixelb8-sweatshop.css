@@ -1,6 +1,7 @@
 div#sweatexchange-DB {
     overflow-y: scroll;
-    height: 280px;
+    height: 175px;
+    width: 68vw;
     border: 1px ridge gray;
 }
 div#exchangeItemDetailInputs {
