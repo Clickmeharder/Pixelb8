@@ -106,7 +106,8 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   // Get the currently signed-in user UID
-  const user = firebase.auth().currentUser;
+  const user = auth.currentUser; // Use the `auth` instance you initialized
+
   if (!user) {
     alert("You must be signed in to add an item.");
     return;
