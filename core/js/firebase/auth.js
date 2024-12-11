@@ -153,31 +153,50 @@ function getExchangeData() {
         const exchangeDiv = document.createElement('div');
         exchangeDiv.classList.add('exchange-item');
 
-        let docHTML = `<h3>Exchange Data for ${doc.id}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+        // Start with summary data for each planet
+        let docHTML = `
+          <h3>Exchange Data for ${doc.id}</h3>
+          <p><strong>Budget:</strong> ${data.budget || 'N/A'}</p>
+          <p><strong>Sweat Value:</strong> ${data.sweatValue || 'N/A'}</p>
+        `;
 
+        // Create a table for item data
         const itemsCollection = collection(doc.ref, 'items');
         const itemsSnapshot = await getDocs(itemsCollection);
 
         if (!itemsSnapshot.empty) {
-          docHTML += `<h4>Items:</h4><ul>`;
+          docHTML += `
+            <table border="1" style="border-collapse: collapse; width: 100%;">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th>Amount</th>
+                  <th>TT Value</th>
+                  <th>Max TT</th>
+                  <th>Sweat Cost</th>
+                  <th>PED Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
 
           itemsSnapshot.forEach((itemDoc) => {
             const itemData = itemDoc.data();
             docHTML += `
-              <li>
-                <strong>${itemDoc.id}</strong>:
-                <ul>
-                  <li>amount: ${itemData.amount}</li>
-                  <li>tt: ${itemData.tt}</li>
-                  <li>TT max: ${itemData.ttmax}</li>
-                  <li>Sweat Cost: ${itemData.sweatprice}</li>
-                  <li>PED Cost: ${itemData.pedprice}</li>
-                </ul>
-              </li>
+              <tr>
+                <td>${itemDoc.id}</td>
+                <td>${itemData.amount || 'N/A'}</td>
+                <td>${itemData.tt || 'N/A'}</td>
+                <td>${itemData.ttmax || 'N/A'}</td>
+                <td>${itemData.sweatprice || 'N/A'}</td>
+                <td>${itemData.pedprice || 'N/A'}</td>
+              </tr>
             `;
           });
 
-          docHTML += `</ul>`; // Close the items list
+          docHTML += `</tbody></table>`; // Close the table
+        } else {
+          docHTML += `<p>No items available for this exchange.</p>`;
         }
 
         exchangeDiv.innerHTML = docHTML;
