@@ -452,7 +452,7 @@ input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none; /* Removes default style */
   width: 16px; /* Adjust width */
-  height: 16px; /* Adjust height */
+  height: 8px; /* Adjust height */
   background: #444; /* Dark background */
   color: #fff; /* White arrow color */
   border-radius: 4px; /* Optional: rounded corners */
