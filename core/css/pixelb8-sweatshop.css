@@ -29,14 +29,14 @@ div#sweatexchange-DB {
     border: 3px inset dimgray;
 }
 div#exchangeItemMainInputs {
-    width: 43%;
-    height: 95%;
+    width: 98%;
+    height: 46%;
     margin: auto;
     border: 4px outset #176969;
 }
 div#exchangeItemDetailInputs {
-    width: 123px;
-    height: 97%;
+    width: 98%;
+    height: 53%;
     padding: 0px;
     margin: 0px;
     display: flex;
@@ -47,19 +47,19 @@ div#exchangeItemDetailInputs {
     border: 2px ridge dimgray;
 }
 select#itemNameInput {
-    height: 30px;
+    height: 20px;
 	width: 99%;
 }
 input#itemNameTextInput {
-    height: 30px;
+    height: 20px;
     width: 92%;
 }
 select#planetSelect {
-    height: 30px;
+    height: 20px;
 	width: 99%;
 }
 select#actionSelect {
-	height: 30px;
+	height: 18px;
 	width: 99%;
 }
 #ttInput, #ttmaxInput, #amountInput {
