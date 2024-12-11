@@ -150,7 +150,7 @@ function getExchangeData() {
 
 document.getElementById('planetSelect').addEventListener('change', async function () {
     const planet = this.value;
-    const itemNameSelect = document.getElementById('itemName');
+    const itemNameSelect = document.getElementById('itemNameInput');
     
     // Clear the itemName dropdown and add the default option
     itemNameSelect.innerHTML = '';
