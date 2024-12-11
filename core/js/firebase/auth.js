@@ -69,10 +69,10 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   const sweatprice = document.getElementById("sweatprice").value.trim();
   const pedprice = document.getElementById("pedprice").value.trim();
   const tt = document.getElementById("tt").value.trim();
-  const ttMax = document.getElementById("ttmax").value.trim();
+  const ttmax = document.getElementById("ttmax").value.trim();
 
   // Validate inputs
-  if (!itemName || !amount || !sweatprice || !pedprice || !tt || !ttMax) {
+  if (!itemName || !amount || !sweatprice || !pedprice || !tt || !ttmax) {
     alert("Please fill in all fields.");
     return;
   }
@@ -83,7 +83,7 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
     sweatprice,
     pedprice,
     tt,
-    ttMax
+    ttmax
   };
 
   try {
@@ -128,7 +128,7 @@ function getExchangeData() {
                 <ul>
                   <li>Stock: ${itemData.amount}</li>
                   <li>tt: ${itemData.tt}</li>
-                  <li>TT max: ${itemData.ttMax}</li>
+                  <li>TT max: ${itemData.ttmax}</li>
                   <li>Sweat Cost: ${itemData.sweatprice}</li>
                   <li>PED Cost: ${itemData.pedprice}</li>
                 </ul>
@@ -187,7 +187,7 @@ document.getElementById('itemName').addEventListener('change', async function ()
       const itemData = itemDoc.data();
       document.getElementById('amount').value = itemData.amount || '';
       document.getElementById('tt').value = itemData.tt || '';
-      document.getElementById('ttmax').value = itemData.ttMax || '';
+      document.getElementById('ttmax').value = itemData.ttmax || '';
       document.getElementById('sweatprice').value = itemData.sweatprice || '';
       document.getElementById('pedprice').value = itemData.pedprice || '';
     } else {
