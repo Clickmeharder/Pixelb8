@@ -150,62 +150,6 @@ form.addEventListener('submit', async (e) => {
     console.error(isEdit ? 'Error updating item: ' : 'Error adding item: ', error);
   }
 });
-
-// Fetch and display updated exchange data
-function getExchangeData() {
-  getDocs(collection(db, 'sweatexchange'))
-    .then(async (querySnapshot) => {
-      sweatexchangeContainer.innerHTML = ''; // Clear previous content
-
-      for (const doc of querySnapshot.docs) {
-        const data = doc.data();
-        const exchangeDiv = document.createElement('div');
-        exchangeDiv.classList.add('exchange-item');
-
-        let docHTML = `<h3>Exchange Data for ${doc.id}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
-        
-        const itemsCollection = collection(doc.ref, 'items');
-        const itemsSnapshot = await getDocs(itemsCollection);
-
-        if (!itemsSnapshot.empty) {
-          docHTML += `<h4>Items:</h4><ul>`;
-          itemsSnapshot.forEach((itemDoc) => {
-            const itemData = itemDoc.data();
-            const li = document.createElement('li');
-            li.innerHTML = `
-              <strong>${itemDoc.id}</strong>:
-              <ul>
-                <li>Stock: ${itemData.amount}</li>
-                <li>TT: ${itemData.tt}/${itemData.ttmax}</li>
-                <li>TT Max: ${itemData.ttmax}</li>
-                <li>Sweat Cost: ${itemData.sweatprice}</li>
-                <li>PED Cost: ${itemData.pedprice}</li>
-              </ul>
-            `;
-
-            const editButton = document.createElement('button');
-            editButton.textContent = 'Edit';
-            editButton.addEventListener('click', () => editItem(doc.id, itemDoc.id));
-
-            const removeButton = document.createElement('button');
-            removeButton.textContent = 'Remove';
-            removeButton.addEventListener('click', () => removeItem(doc.id, itemDoc.id));
-
-            li.appendChild(editButton);
-            li.appendChild(removeButton);
-            exchangeDiv.appendChild(li); // Append the completed item to the exchangeDiv
-          });
-          docHTML += `</ul>`;
-        }
-
-        exchangeDiv.innerHTML = docHTML; // Add the built HTML to the div
-        sweatexchangeContainer.appendChild(exchangeDiv); // Add the div to the container
-      }
-    })
-    .catch((error) => {
-      console.error('Error fetching exchange data:', error);
-    });
-}
 function editItem(docId, itemId) {
   const docRef = doc(db, 'sweatexchange', docId, 'items', itemId);
   getDoc(docRef).then((itemDoc) => {
@@ -227,6 +171,55 @@ function editItem(docId, itemId) {
     }
   });
 }
+// Fetch and display updated exchange data
+function getExchangeData() {
+  getDocs(collection(db, 'sweatexchange'))
+    .then((querySnapshot) => {
+      sweatexchangeContainer.innerHTML = ''; // Clear previous content
+
+      querySnapshot.forEach(async (doc) => {
+        const data = doc.data();
+        const exchangeDiv = document.createElement('div');
+        exchangeDiv.classList.add('exchange-item');
+
+        let docHTML = <h3>Exchange Data for ${doc.id}</h3><pre>${JSON.stringify(data, null, 2)}</pre>;
+        
+        const itemsCollection = collection(doc.ref, 'items');
+        const itemsSnapshot = await getDocs(itemsCollection);
+
+        if (!itemsSnapshot.empty) {
+          docHTML += <h4>Items:</h4><ul>;
+
+          itemsSnapshot.forEach((itemDoc) => {
+			const itemData = itemDoc.data();
+			docHTML += 
+				<li>
+				  <strong>${itemDoc.id}</strong>:
+				  <ul>
+					<li>Stock: ${itemData.amount}</li>
+					<li>tt: ${itemData.tt}/${itemData.ttmax}</li>
+					<li>TT max: ${itemData.ttmax}</li>
+					<li>Sweat Cost: ${itemData.sweatprice}</li>
+					<li>PED Cost: ${itemData.pedprice}</li>
+				  </ul>
+				  <button onclick="editItem('${doc.id}', '${itemDoc.id}')">Edit</button>
+				  <button onclick="removeItem('${doc.id}', '${itemDoc.id}')">Remove</button>
+				</li>
+			  ;
+			});
+
+          docHTML += </ul>; // Close the items list
+        }
+
+        exchangeDiv.innerHTML = docHTML;
+        sweatexchangeContainer.appendChild(exchangeDiv);
+      });
+    })
+    .catch((error) => {
+      console.log("Error getting documents: ", error);
+    });
+}
+
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
