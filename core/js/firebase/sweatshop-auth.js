@@ -110,12 +110,12 @@ const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt
     await setDoc(docRef, newItem);
 
     alert("Item added successfully to user items!");
-    populateSweatExchanges();
     document.getElementById("addItemForm").reset();
   } catch (error) {
     console.error("Error adding item:", error);
     alert("Failed to add item. Please try again.");
   }
+  getExchangeData()
 };
 
 // Function to add item for admin users
