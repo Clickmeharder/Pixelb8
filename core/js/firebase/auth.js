@@ -40,8 +40,16 @@
       });
     }
 	
-
-
+// Fetch data from Firestore collection
+getDocs(collection(db, 'UserProfiles'))
+  .then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      console.log(doc.data());
+    });
+  })
+  .catch((error) => {
+    console.log("Error getting documents: ", error);
+  });
 // Add a new item via the form
 document.getElementById("addItemForm").addEventListener("submit-sweatitemFB", async (e) => {
   e.preventDefault();
@@ -89,60 +97,9 @@ document.getElementById("addItemForm").addEventListener("submit-sweatitemFB", as
   }
 });
 
-// Fetch data from Firestore collection
-getDocs(collection(db, 'UserProfiles'))
-  .then((querySnapshot) => {
-    querySnapshot.forEach((doc) => {
-      console.log(doc.data());
-    });
-  })
-  .catch((error) => {
-    console.log("Error getting documents: ", error);
-  });
-// Get the form and the container
-const form = document.getElementById('addItemForm');
-const sweatexchangeContainer = document.getElementById('sweatexchange-DB');
-
-// Handle form submission to add an item to Firestore
-form.addEventListener('submit', async (e) => {
-  e.preventDefault(); // Prevent default form submission
-
-  // Get the form values
-  const planet = document.getElementById('planetSelect').value;
-  const itemName = document.getElementById('itemName').value;
-  const amount = document.getElementById('amount').value;
-  const tt = document.getElementById('tt').value;
-  const ttmax = document.getElementById('ttmax').value;
-  const sweatprice = document.getElementById('sweatprice').value;
-  const pedprice = document.getElementById('pedprice').value;
-
-  // Retrieve the specific document in 'sweatexchange' collection to add this item
-  const docRef = doc(db, 'sweatexchange', planet); // Use the selected planet as the doc ID
-  
-  // Add the item to the 'items' sub-collection
-  try {
-    await setDoc(
-      doc(collection(docRef, 'items'), itemName), // Create document by item name in 'items' collection
-      {
-        amount: amount,
-        tt: tt,
-        ttmax: ttmax,
-        sweatprice: sweatprice,
-        pedprice: pedprice
-      }
-    );
-
-    // Optionally: Refresh or update the exchange data on the page
-    console.log("Item added to Firebase");
-    //getExchangeData(); // Re-fetch and update the displayed data
-
-  } catch (error) {
-    console.error("Error adding item: ", error);
-  }
-});
-
 // Fetch and display updated exchange data
 function getExchangeData() {
+  const sweatexchangeContainer = document.getElementById('sweatexchange-DB');
   getDocs(collection(db, 'sweatexchange'))
     .then((querySnapshot) => {
       sweatexchangeContainer.innerHTML = ''; // Clear previous content
@@ -188,7 +145,55 @@ function getExchangeData() {
     });
 }
 
+// Populate the itemName select dynamically based on the selected planet
+document.getElementById('planetSelect').addEventListener('change', async function () {
+  const planet = this.value;
+  const itemNameSelect = document.getElementById('itemName');
+  itemNameSelect.innerHTML = ''; // Clear the existing options
 
+  // Fetch items from Firestore for the selected planet
+  try {
+    const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
+    const itemsSnapshot = await getDocs(itemsCollection);
+
+    // Add a default option
+    itemNameSelect.appendChild(new Option("Select Item", "Default"));
+
+    // Populate the item select options
+    itemsSnapshot.forEach((itemDoc) => {
+      const itemName = itemDoc.id;
+      itemNameSelect.appendChild(new Option(itemName, itemName));
+    });
+  } catch (error) {
+    console.error("Error fetching items: ", error);
+  }
+});
+
+// Populate other fields based on selected planet and item
+document.getElementById('itemName').addEventListener('change', async function () {
+  const planet = document.getElementById('planetSelect').value;
+  const itemName = this.value;
+  
+  if (itemName === "Default") return; // No item selected
+
+  try {
+    const itemDocRef = doc(db, `sweatexchange/${planet}/items`, itemName);
+    const itemDoc = await getDoc(itemDocRef);
+
+    if (itemDoc.exists()) {
+      const itemData = itemDoc.data();
+      document.getElementById('amount').value = itemData.amount || '';
+      document.getElementById('tt').value = itemData.tt || '';
+      document.getElementById('ttmax').value = itemData.ttmax || '';
+      document.getElementById('sweatprice').value = itemData.sweatprice || '';
+      document.getElementById('pedprice').value = itemData.pedprice || '';
+    } else {
+      console.log("Item not found!");
+    }
+  } catch (error) {
+    console.error("Error fetching item data: ", error);
+  }
+});
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
