@@ -31,9 +31,15 @@ div#exchangeItemDetailInputs {
   text-align: left;
 }
 
-#sweatprice, #pedprice {
+#sweatprice {
   width: 105px; /* Set your desired width here */
   text-align: left;
+  color: #d0982ce8;
+}
+#pedprice {
+  width: 105px; /* Set your desired width here */
+  text-align: left;
+  color: green;
 }
 /* Base style for inputs inside the specified form and div */
 form#addItemForm input[type="number"],
