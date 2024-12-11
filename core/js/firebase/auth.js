@@ -192,8 +192,8 @@ function getExchangeData() {
 // Handle planet change and update item list
 document.getElementById('planetSelect').addEventListener('change', async function () {
     const planet = this.value;
-    const itemNameSelect = document.getElementById(currentItemNameInputId); // Changed here
-    
+    const itemNameSelect = document.getElementById('itemNameInput'); // Corrected ID
+
     // Clear the itemName dropdown and add the default option
     itemNameSelect.innerHTML = '';
     itemNameSelect.appendChild(new Option("Select Item", "Default", true, true));
@@ -214,12 +214,11 @@ document.getElementById('planetSelect').addEventListener('change', async functio
 });
 
 // Event listener for itemName select change
-document.getElementById(currentItemNameInputId).addEventListener('change', async function () { // Changed here
+document.getElementById('itemNameInput').addEventListener('change', async function () {
     const selectedItem = this.value;
-    
+
     if (selectedItem === "Default") {
         // Clear input fields when "Select Item" is chosen
-        document.getElementById(currentItemNameInputId).value = ''; // Changed here
         document.getElementById('amountInput').value = '';
         document.getElementById('sweatpriceInput').value = '';
         document.getElementById('pedpriceInput').value = '';
@@ -227,7 +226,7 @@ document.getElementById(currentItemNameInputId).addEventListener('change', async
         document.getElementById('ttInput').value = '';
         return;
     }
-    
+
     // Populate the form with the existing item's details for editing
     const planet = document.getElementById('planetSelect').value;
     try {
@@ -236,7 +235,6 @@ document.getElementById(currentItemNameInputId).addEventListener('change', async
 
         if (itemDoc.exists()) {
             const itemData = itemDoc.data();
-            document.getElementById(currentItemNameInputId).value = selectedItem; // Changed here
             document.getElementById('amountInput').value = itemData.amount || '';
             document.getElementById('sweatpriceInput').value = itemData.sweatprice || '';
             document.getElementById('pedpriceInput').value = itemData.pedprice || '';
@@ -249,6 +247,9 @@ document.getElementById(currentItemNameInputId).addEventListener('change', async
         console.error("Error fetching item data: ", error);
     }
 });
+//end of thing
+
+
 
 // Handle item addition or editing
 document.getElementById('submit-sweatitemFB').addEventListener('click', async () => {
