@@ -379,19 +379,46 @@ function getExchangeData() {
 }
 
 
-// Check user role (assuming you have a function that checks this)
-async function getUserRole() {
-  const user = auth.currentUser;
-  if (user) {
-    const userRef = doc(db, 'users', user.uid); // Reference to the user document
-    const userDoc = await getDoc(userRef); // Get the document
+// Form submission event listener
+document.getElementById("addItemForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    if (userDoc.exists()) {
-      return userDoc.data().role || 'user'; // Default to 'user' if no role is set
-    }
+  // Get the currently signed-in user
+  const user = auth.currentUser;
+
+  if (!user) {
+    alert("You must be signed in to add an item.");
+    return;
   }
-  return 'user'; // Default to 'user' if no user found or role not set
-}
+
+  // Check the user's role using the getUserRole function
+  const userRole = await getUserRole();
+
+  // Get form values
+  const planet = document.getElementById("planetSelect").value;
+  const itemName = document.getElementById(currentItemNameInputId).value.trim();
+  const amount = document.getElementById("amountInput").value;
+  const sweatprice = document.getElementById("sweatpriceInput").value.trim();
+  const pedprice = document.getElementById("pedpriceInput").value.trim();
+  const tt = document.getElementById("ttInput").value.trim();
+  const ttmax = document.getElementById("ttmaxInput").value.trim();
+
+  // Validate inputs
+  if (!itemName || !amount || !sweatprice || !pedprice || !tt || !ttmax) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  // Call the appropriate function based on the user's role
+  if (userRole === 'admin') {
+    // Admin logic
+    addItemForAdmin(planet, itemName, amount, sweatprice, pedprice, tt, ttmax);
+  } else {
+    // User logic
+    addItemForUser(planet, itemName, amount, sweatprice, pedprice, tt, ttmax, user);
+  }
+});
+
 // Handle planet change and update item list
 document.getElementById('planetSelect').addEventListener('change', async function () {
     const planet = this.value;
