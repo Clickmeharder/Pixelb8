@@ -31,8 +31,10 @@ div#sweatexchange-DB {
 div#exchangeItemMainInputs {
     width: 98%;
     height: 46%;
-    margin: auto;
     border: 4px outset #176969;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 div#exchangeItemDetailInputs {
     width: 98%;
@@ -52,7 +54,7 @@ select#itemNameInput {
 }
 input#itemNameTextInput {
     height: 20px;
-    width: 92%;
+    width: 96%;
 }
 select#planetSelect {
     height: 20px;
