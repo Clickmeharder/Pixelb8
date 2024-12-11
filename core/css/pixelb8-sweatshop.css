@@ -6,9 +6,9 @@ div#item-form {
     border-color: #555555;
 }
 form#addItemForm {
-    margin: 2px;
+	margin: 0px;
     margin-top: 0px;
-    padding: 4px;
+    padding: 0px;
     padding-top: 0px;
     border: 3px ridge #464141;
     display: flex;
@@ -19,10 +19,10 @@ form#addItemForm {
 }
 div#sweatexchange-DB {
     overflow-y: scroll;
-    margin: 5px;
+    margin: 0px;
     margin-left: auto;
     margin-top: 0px;
-    padding: 2px;
+    padding: 0px;
     padding-top: 0px;
     height: 199px;
     width: 63vw;
@@ -34,7 +34,7 @@ div#exchangeItemMainInputs{
 div#exchangeItemDetailInputs {
     width: 123px;
     height: 97%;
-    padding: 6px;
+    padding: 0px;
     margin: 0px;
     display: flex;
     justify-content: space-around;
@@ -45,15 +45,15 @@ div#exchangeItemDetailInputs {
 }
 select#itemNameInput, input#itemNameTextInput {
     height: 30px;
-	width: 100%;
+	width: 99%;
 }
 select#planetSelect {
     height: 30px;
-	width: 100%;
+	width: 99%;
 }
 select#actionSelect {
 	height: 30px;
-	width: 100%;
+	width: 99%;
 }
 #ttInput, #ttmaxInput, #amountInput {
   width: 65px; /* Set your desired width here */
@@ -75,14 +75,17 @@ form#addItemForm input[type="number"],
 div#exchangeItemDetailInputs input[type="number"] {
     max-width: 85%;
     height: 8px;
-    padding-left: 8px;
+    padding-left: 4px;
     color: #33bcf0;
     border-radius: 8px;
     outline: 3px solid #69696973;
     transition: 0.3s ease;
     font-weight: bold;
 }
-
+form#addItemForm input[type="text"],
+div#exchangeItemDetailInputs input[type="text"] {
+    padding-left: 4px;
+}
 /* Hover effect */
 form#addItemForm input[type="number"]:hover,
 div#exchangeItemDetailInputs input[type="number"]:hover {
