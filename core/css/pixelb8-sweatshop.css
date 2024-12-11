@@ -1,4 +1,5 @@
 
+
 div#item-form {
     border: 1px ridge;
     display: flex;
@@ -30,7 +31,7 @@ div#sweatexchange-DB {
 }
 div#exchangeItemMainInputs {
     width: 98%;
-    border: 4px outset #176969;
+    border: 6px outset #00d0ff63;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -57,10 +58,12 @@ input#itemNameTextInput {
     margin: auto;
     margin-top: 5px;
     margin-bottom: 5px;
+	background: #000000;
 }
 select#planetSelect {
     height: 20px;
 	width: 99%;
+	
 }
 select#actionSelect {
 	height: 18px;
@@ -70,18 +73,10 @@ select#actionSelect {
 #ttInput, #ttmaxInput, #amountInput {
   width: 65px; /* Set your desired width here */
   text-align: left;
+  background: #000000;
 }
 
-#sweatpriceInput {
-  width: 105px; /* Set your desired width here */
-  text-align: left;
-  color: #d0982ce8;
-}
-#pedpriceInput {
-  width: 105px; /* Set your desired width here */
-  text-align: left;
-  color: #52d02ce8;
-}
+
 /* Base style for inputs inside the specified form and div */
 form#addItemForm input[type="number"],
 div#exchangeItemDetailInputs input[type="number"] {
@@ -90,6 +85,7 @@ div#exchangeItemDetailInputs input[type="number"] {
     padding-left: ;
     margin: auto;
     color: #33bcf0;
+	background: #000000;
     border-radius: 8px;
     outline: 3px solid #69696973;
     transition: 0.3s ease;
@@ -107,6 +103,12 @@ div#exchangeItemDetailInputs input[type="number"]:hover {
 }
 #itemformHeader {
 	width: 100%;	
+}
+#sweatpriceInput {
+  color: #d0982ce8;
+}
+#pedpriceInput {
+  color: #52d02ce8;
 }
 
 
