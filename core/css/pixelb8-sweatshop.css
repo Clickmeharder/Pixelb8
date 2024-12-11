@@ -29,11 +29,13 @@ div#sweatexchange-DB {
     border: 3px inset dimgray;
 }
 div#exchangeItemMainInputs {
-    width: 98%;
-    border: 6px outset #00d0ff63;
+    width: 96%;
+    padding: 1px;
+    border: 3px inset #ff98007d;
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 5px;
 }
 div#exchangeItemDetailInputs {
 	width: 98%;
