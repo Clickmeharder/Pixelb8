@@ -119,7 +119,8 @@ div#exchangeItemDetailInputs input[type="number"]:hover {
 #exchangeItemDetailInputs div {
 	display: flex;
     width: 100%;
-    border: 3px outset #063440c7;
+    border: 3px inset #063440c7;
+    overflow: hidden;
 }
 
 #exchangeItemDetailInputs label {
@@ -138,5 +139,6 @@ div#exchangeItemDetailInputs input[type="number"]:hover {
 #exchangeItemDetailInputs button {
     width: 100%;
 	background: #2c2c2c;
+	color: #232222;
     border: 1px outset #4c4c4c;
 }
