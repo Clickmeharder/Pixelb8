@@ -153,6 +153,8 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
 // Fetch and display updated exchange data
 function getExchangeData() {
   const sweatexchangeContainer = document.getElementById('sweatexchange-DB');
+  const planets = ['calypso', 'arkadia', 'rocktropia', 'cyrene', 'nextisland', 'toulan', 'monria'];
+
   getDocs(collection(db, 'sweatexchange'))
     .then((querySnapshot) => {
       sweatexchangeContainer.innerHTML = ''; // Clear previous content
@@ -162,14 +164,14 @@ function getExchangeData() {
         const exchangeDiv = document.createElement('div');
         exchangeDiv.classList.add('exchange-item');
 
-        // Start with summary data for each planet
+        // Add summary data for sweatexchange-DB
         let docHTML = `
           <h3>Exchange Data for ${doc.id}</h3>
           <p><strong>Sweat Budget:</strong> ${data.budget || 'N/A'}</p>
           <p><strong>Total Sweat:</strong> ${data.sweat || 'N/A'}</p>
         `;
 
-        // Create a table for item data
+        // Fetch items and create a table for sweatexchange-DB
         const itemsCollection = collection(doc.ref, 'items');
         const itemsSnapshot = await getDocs(itemsCollection);
 
@@ -210,12 +212,38 @@ function getExchangeData() {
 
         exchangeDiv.innerHTML = docHTML;
         sweatexchangeContainer.appendChild(exchangeDiv);
+
+        // Populate planet-specific exchange tables
+        const planetId = doc.id.toLowerCase(); // Ensure case-insensitive matching
+        if (planets.includes(planetId)) {
+          const planetTable = document.getElementById(`${planetId}-table`);
+          if (planetTable) {
+            let planetTableHTML = '';
+
+            itemsSnapshot.forEach((itemDoc) => {
+              const itemData = itemDoc.data();
+              planetTableHTML += `
+                <tr>
+                  <td>${itemDoc.id}</td>
+                  <td>${itemData.amount || 'N/A'}</td>
+                  <td>${itemData.tt || 'N/A'}</td>
+                  <td>${itemData.ttmax || 'N/A'}</td>
+                  <td>${itemData.sweatprice || 'N/A'}</td>
+                  <td>${itemData.pedprice || 'N/A'}</td>
+                </tr>
+              `;
+            });
+
+            planetTable.innerHTML = planetTableHTML; // Update the planet table
+          }
+        }
       });
     })
     .catch((error) => {
       console.log("Error getting documents: ", error);
     });
 }
+
 
 // Handle planet change and update item list
 document.getElementById('planetSelect').addEventListener('change', async function () {
