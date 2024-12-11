@@ -26,17 +26,17 @@ div#sweatexchange-DB {
 div#exchangeItemDetailInputs {
     width: 30vw;
 }
-#tt, #ttmax, #amount {
+#ttInput, #ttmaxInput, #amountInput {
   width: 65px; /* Set your desired width here */
   text-align: left;
 }
 
-#sweatprice {
+#sweatpriceInput {
   width: 105px; /* Set your desired width here */
   text-align: left;
   color: #d0982ce8;
 }
-#pedprice {
+#pedpriceInput {
   width: 105px; /* Set your desired width here */
   text-align: left;
   color: #52d02ce8;
