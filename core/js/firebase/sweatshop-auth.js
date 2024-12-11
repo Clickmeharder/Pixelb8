@@ -90,8 +90,27 @@ toggleItemNameInput();
 // Add an event listener to update the display whenever the action changes
 document.getElementById('actionSelect').addEventListener('change', toggleItemNameInput);
 
-// Function to add item for regular users
-const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax, user) => {
+// Function to add or delete item for regular users
+const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax, user, action) => {
+  // If the action is delete, remove the item
+  if (action === 'delete') {
+    try {
+      const targetCollectionPath = `sweatexchange/${planet}/useritems`;
+      const targetCollection = collection(db, targetCollectionPath);
+
+      const docRef = doc(targetCollection, itemName);
+      await deleteDoc(docRef); // Delete the document
+
+      alert("Item deleted successfully!");
+      getExchangeData(); // Refresh data
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("Failed to delete item. Please try again.");
+    }
+    return; // Exit the function early
+  }
+
+  // If action is not delete, proceed to add item
   const newItem = {
     amount: parseInt(amount),
     sweatprice: parseFloat(sweatprice),
@@ -111,15 +130,31 @@ const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt
 
     alert("Item added successfully to user items!");
     document.getElementById("addItemForm").reset();
+    getExchangeData();
   } catch (error) {
     console.error("Error adding item:", error);
     alert("Failed to add item. Please try again.");
   }
-  getExchangeData()
 };
 
-// Function to add item for admin users
-const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax) => {
+// Function to add or delete item for admin users
+const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax, action) => {
+  // If the action is delete, remove the item
+  if (action === 'delete') {
+    try {
+      const itemDocRef = doc(db, `sweatexchange/${planet}/items`, itemName);
+      await deleteDoc(itemDocRef); // Delete the document
+
+      alert("Item deleted successfully!");
+      getExchangeData(); // Refresh data
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("Failed to delete item. Please try again.");
+    }
+    return; // Exit the function early
+  }
+
+  // If action is not delete, proceed to add/update item
   const newItem = {
     amount: parseInt(amount),
     sweatprice,
@@ -177,20 +212,23 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   const pedprice = document.getElementById("pedpriceInput").value.trim();
   const tt = document.getElementById("ttInput").value.trim();
   const ttmax = document.getElementById("ttmaxInput").value.trim();
+  const action = document.getElementById("actionSelect").value; // Get the selected action
 
   // Validate inputs
-  if (!itemName || !amount || !sweatprice || !pedprice || !tt || !ttmax) {
+  if (!itemName && action !== 'delete') { // Only validate itemName when action isn't 'delete'
+    alert("Please fill in the item name.");
+    return;
+  }
+  if (action !== 'delete' && (!amount || !sweatprice || !pedprice || !tt || !ttmax)) {
     alert("Please fill in all fields.");
     return;
   }
 
-  // Call the appropriate function based on the user's role
+  // Call the appropriate function based on the user's role and action
   if (userRole === 'admin') {
-    // Admin logic
-    addItemForAdmin(planet, itemName, amount, sweatprice, pedprice, tt, ttmax);
+    addItemForAdmin(planet, itemName, amount, sweatprice, pedprice, tt, ttmax, action);
   } else {
-    // User logic
-    addItemForUser(planet, itemName, amount, sweatprice, pedprice, tt, ttmax, user);
+    addItemForUser(planet, itemName, amount, sweatprice, pedprice, tt, ttmax, user, action);
   }
 });
 
