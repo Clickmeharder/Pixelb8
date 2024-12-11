@@ -100,7 +100,112 @@ toggleItemNameInput();
 
 // Add an event listener to update the display whenever the action changes
 document.getElementById('actionSelect').addEventListener('change', toggleItemNameInput);
-// beginning sweatshop auth stuff
+// beginning new sweatshop auth stuff
+const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax, user) => {
+  // Create the new item object
+  const newItem = {
+    amount: parseInt(amount),
+    sweatprice: parseFloat(sweatprice),
+    pedprice: parseFloat(pedprice),
+    tt: parseFloat(tt),
+    ttmax: parseFloat(ttmax),
+    ownerId: user.uid, // Add ownerId to match Firestore rules
+    uid: crypto.randomUUID() // Generate a unique identifier for the item
+  };
+
+  try {
+    // Set the target collection path for regular users
+    const targetCollectionPath = `sweatexchange/${planet}/useritems`;
+    const targetCollection = collection(db, targetCollectionPath);
+
+    // Set the document ID as the item name and save it
+    const docRef = doc(targetCollection, itemName); // Use itemName as the document ID
+    await setDoc(docRef, newItem); // Save the item
+
+    alert("Item added successfully to user items!");
+    populateSweatExchanges(); // Refresh the table after adding the item
+    document.getElementById("addItemForm").reset(); // Clear the form
+  } catch (error) {
+    console.error("Error adding item:", error);
+    alert("Failed to add item. Please try again.");
+  }
+};
+const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax) => {
+  if (!itemName || !amount || !sweatprice || !pedprice || !ttmax || !tt) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  const newItem = {
+    amount: parseInt(amount),
+    sweatprice,
+    pedprice,
+    ttmax,
+    tt,
+  };
+
+  try {
+    const itemDocRef = doc(db, `sweatexchange/${planet}/items`, itemName);
+    const itemDoc = await getDoc(itemDocRef);
+
+    if (itemDoc.exists()) {
+      await updateDoc(itemDocRef, newItem);
+      alert("Item updated successfully!");
+    } else {
+      await setDoc(itemDocRef, newItem);
+      alert("Item added successfully!");
+    }
+
+    getExchangeData(); // Refresh data after adding/updating item
+    // Clear input fields
+    document.getElementById(currentItemNameInputId).value = '';
+    document.getElementById('amountInput').value = '';
+    document.getElementById('sweatpriceInput').value = '';
+    document.getElementById('pedpriceInput').value = '';
+    document.getElementById('ttmaxInput').value = '';
+    document.getElementById('ttInput').value = '';
+  } catch (error) {
+    console.error("Error adding/updating item:", error);
+    alert("Failed to add/update item. Please try again.");
+  }
+};
+document.getElementById("addItemForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  // Get the currently signed-in user UID
+  const user = auth.currentUser; // Use the `auth` instance you initialized
+
+  if (!user) {
+    alert("You must be signed in to add an item.");
+    return;
+  }
+
+  // Determine if the user is an admin
+  const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN1";
+
+  // Get form values
+  const planet = document.getElementById("planetSelect").value;
+  const itemName = document.getElementById(currentItemNameInputId).value.trim(); // Get item name from input field
+  const amount = document.getElementById("amountInput").value;
+  const sweatprice = document.getElementById("sweatpriceInput").value.trim();
+  const pedprice = document.getElementById("pedpriceInput").value.trim();
+  const tt = document.getElementById("ttInput").value.trim();
+  const ttmax = document.getElementById("ttmaxInput").value.trim();
+
+  // Validate inputs
+  if (!itemName || !amount || !sweatprice || !pedprice || !tt || !ttmax) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  if (userIsAdmin) {
+    // Call admin function to add or update item
+    addItemForAdmin(planet, itemName, amount, sweatprice, pedprice, tt, ttmax);
+  } else {
+    // Call user function to add item to useritems
+    addItemForUser(planet, itemName, amount, sweatprice, pedprice, tt, ttmax, user);
+  }
+});
 // Handle item addition or editing
 /* document.getElementById('submit-sweatitemFB').addEventListener('click', async () => {
     const planet = document.getElementById('planetSelect').value;
@@ -146,68 +251,51 @@ document.getElementById('actionSelect').addEventListener('change', toggleItemNam
     }
 }); */
 // Add a new item via the form
-document.getElementById("addItemForm").addEventListener("submit", async (e) => {
+/* document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-
-  // Get the currently signed-in user UID
-  const user = auth.currentUser; // Use the `auth` instance you initialized
-
+  const user = auth.currentUser;
   if (!user) {
     alert("You must be signed in to add an item.");
     return;
   }
-
-  // const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN2";
   const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN1";
-  
-  // Get form values
   const planet = document.getElementById("planetSelect").value;
-  const itemName = document.getElementById(currentItemNameInputId).value.trim(); // Get item name from input field
+  const itemName = document.getElementById(currentItemNameInputId).value.trim();
   const amount = document.getElementById("amountInput").value;
   const sweatprice = document.getElementById("sweatpriceInput").value.trim();
   const pedprice = document.getElementById("pedpriceInput").value.trim();
   const tt = document.getElementById("ttInput").value.trim();
   const ttmax = document.getElementById("ttmaxInput").value.trim();
-
-  // Validate inputs
   if (!itemName || !amount || !sweatprice || !pedprice || !tt || !ttmax) {
     alert("Please fill in all fields.");
     return;
   }
-
-  // Create new item object
   const newItem = {
     amount: parseInt(amount),
     sweatprice: parseFloat(sweatprice),
     pedprice: parseFloat(pedprice),
     tt: parseFloat(tt),
     ttmax: parseFloat(ttmax),
-    ownerId: user.uid, // Add ownerId to match Firestore rules
-    uid: crypto.randomUUID() // Generate a unique identifier for the item (optional, you can remove this if you want)
+    ownerId: user.uid,
+    uid: crypto.randomUUID()
   };
-
   try {
-    // Determine target collection based on user permissions
     const targetCollectionPath = userIsAdmin
       ? `sweatexchange/${planet}/items`
       : `sweatexchange/${planet}/useritems`;
 
     const targetCollection = collection(db, targetCollectionPath);
-
-    // Use setDoc to specify the document ID as the itemName value
-    const docRef = doc(targetCollection, itemName); // Set the document ID as the item name
-    await setDoc(docRef, newItem); // Save the item with the custom document ID
-
+    const docRef = doc(targetCollection, itemName);
+    await setDoc(docRef, newItem);
     const collectionType = userIsAdmin ? "admin items" : "user items";
     alert(`Item added successfully to ${collectionType}!`);
-    
-    populateSweatExchanges(); // Refresh the table after adding the item
-    document.getElementById("addItemForm").reset(); // Clear the form
+    getExchangeData();
+    document.getElementById("addItemForm").reset();
   } catch (error) {
     console.error("Error adding item:", error);
     alert("Failed to add item. Please try again.");
   }
-});
+}); */
 
 // Fetch and display updated exchange data
 function getExchangeData() {
