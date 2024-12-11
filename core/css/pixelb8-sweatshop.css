@@ -132,7 +132,9 @@ div#exchangeItemDetailInputs input[type="number"]:hover {
     padding-left: 8px;
     
 }
-
+#submitbuttdiv{
+	border: 3px inset #063440c7;
+}
 #exchangeItemDetailInputs button {
     width: 100%;
 	background: #2c2c2c;
