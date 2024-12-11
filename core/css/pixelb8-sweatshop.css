@@ -15,6 +15,7 @@ form#addItemForm {
     flex-wrap: wrap;
     width: 29vw;
     justify-content: center;
+    align-content: space-evenly;
 }
 div#sweatexchange-DB {
     overflow-y: scroll;
@@ -28,7 +29,16 @@ div#sweatexchange-DB {
     border: 3px inset dimgray;
 }
 div#exchangeItemDetailInputs {
-    width: ;
+    width: 123px;
+    height: 97%;
+    padding: 6px;
+    margin: 0px;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    align-content: space-around;
+    flex-direction: row;
+    border: 2px ridge dimgray;
 }
 select#itemNameInput, input#itemNameTextInput {
     height: 30px;
@@ -36,10 +46,10 @@ select#itemNameInput, input#itemNameTextInput {
 }
 select#planetSelect {
     height: 30px;
-	width: 180px;
+	width: 100%;
 }
 select#actionSelect {
-	height: 30px;
+	height: 100%;
 }
 #ttInput, #ttmaxInput, #amountInput {
   width: 65px; /* Set your desired width here */
