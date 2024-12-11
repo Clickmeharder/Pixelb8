@@ -30,19 +30,17 @@ div#sweatexchange-DB {
 }
 div#exchangeItemMainInputs {
     width: 98%;
-    height: 46%;
     border: 4px outset #176969;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 div#exchangeItemDetailInputs {
-    width: 98%;
-    height: 53%;
-    padding: 0px;
-    margin: 0px;
+	width: 98%;
+    padding: 3px;
+    margin: auto;
     display: flex;
-    justify-content: space-around;
+    justify-content: right;
     flex-wrap: wrap;
     align-content: space-around;
     flex-direction: row;
@@ -53,7 +51,7 @@ select#itemNameInput {
 	width: 99%;
 }
 input#itemNameTextInput {
-    height: 20px;
+    height: 15px;
     width: 96%;
     margin: auto;
     margin-top: 0;
@@ -86,9 +84,10 @@ select#actionSelect {
 /* Base style for inputs inside the specified form and div */
 form#addItemForm input[type="number"],
 div#exchangeItemDetailInputs input[type="number"] {
-    max-width: 85%;
     height: 8px;
+	width: 98%;
     padding-left: ;
+    margin: auto;
     color: #33bcf0;
     border-radius: 8px;
     outline: 3px solid #69696973;
@@ -111,15 +110,17 @@ div#exchangeItemDetailInputs input[type="number"]:hover {
 
 
 #exchangeItemDetailInputs div {
-    margin-bottom: 10px;
+	display: flex;
+    width: 100%;
+    border: 3px outset #102936;
 }
 
 #exchangeItemDetailInputs label {
-    display: block;
-    margin-bottom: 5px;
+    height: 20px;
+    width: 98%;
 }
 
 #exchangeItemDetailInputs input, 
 #exchangeItemDetailInputs button {
-    width: 100%;
+    width: 98%;
 }
