@@ -39,7 +39,7 @@ div#exchangeItemDetailInputs {
 #pedprice {
   width: 105px; /* Set your desired width here */
   text-align: left;
-  color: green;
+  color: #52d02ce8;
 }
 /* Base style for inputs inside the specified form and div */
 form#addItemForm input[type="number"],
@@ -49,6 +49,7 @@ div#exchangeItemDetailInputs input[type="number"] {
 	border-radius: 8px;
 	outline: 3px solid #69696973;
     transition: 0.3s ease; /* Smooth transition for the hover effect */
+	font-weight: bold;
 }
 
 /* Hover effect */
