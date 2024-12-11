@@ -1,4 +1,7 @@
 //sweatshop.js
+// Global variable to store the current ID of the element
+let currentItemNameInputId = 'itemNameInput';
+
 // Function to toggle between the select dropdown and text input
 function toggleItemNameInput() {
   var action = document.getElementById('actionSelect').value;
@@ -6,18 +9,28 @@ function toggleItemNameInput() {
   var itemNameTextInput = document.getElementById('itemNameTextInput');
   
   if (action === 'add') {
+    // Show the select dropdown, hide the text input
+    itemNameInput.style.display = 'block';
+    itemNameTextInput.style.display = 'none';
+    
+    // Save the current ID of itemNameInput to the variable
+    currentItemNameInputId = itemNameInput.id;
+
+  } else if (action === 'edit') {
     // Hide the select dropdown, show the text input
     itemNameInput.style.display = 'none';
     itemNameTextInput.style.display = 'block';
-  } else if (action === 'edit') {
-    // Show the select dropdown, hide the text input
-    itemNameInput.style.display = 'block';
-    itemNameTextInput.style.display = 'none';
+    
+    // Save the current ID of itemNameTextInput to the variable
+    currentItemNameInputId = itemNameTextInput.id;
 
   } else {
-    // Show the select dropdown, hide the text input
-    itemNameInput.style.display = 'block';
+    // Optionally, hide both or do something else when delete is selected
+    itemNameInput.style.display = 'none';
     itemNameTextInput.style.display = 'none';
+    
+    // Reset to a default ID (or any other logic you want)
+    currentItemNameInputId = '';
   }
 }
 

@@ -51,6 +51,7 @@ getDocs(collection(db, 'UserProfiles'))
     console.log("Error getting documents: ", error);
   });
 // beginning sweatshop stuff
+// beginning sweatshop stuff
 // Add a new item via the form
 document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -64,7 +65,7 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
 
   // Get form values
   const planet = document.getElementById("planetSelect").value;
-  const itemName = document.getElementById("itemNameInput").value.trim();
+  const itemName = document.getElementById(currentItemNameInputId).value.trim(); // Changed here
   const amount = document.getElementById("amountInput").value;
   const sweatprice = document.getElementById("sweatpriceInput").value.trim();
   const pedprice = document.getElementById("pedpriceInput").value.trim();
@@ -151,7 +152,7 @@ function getExchangeData() {
 // Handle planet change and update item list
 document.getElementById('planetSelect').addEventListener('change', async function () {
     const planet = this.value;
-    const itemNameSelect = document.getElementById('itemNameInput');
+    const itemNameSelect = document.getElementById(currentItemNameInputId); // Changed here
     
     // Clear the itemName dropdown and add the default option
     itemNameSelect.innerHTML = '';
@@ -173,12 +174,12 @@ document.getElementById('planetSelect').addEventListener('change', async functio
 });
 
 // Event listener for itemName select change
-document.getElementById('itemNameInput').addEventListener('change', async function () {
+document.getElementById(currentItemNameInputId).addEventListener('change', async function () { // Changed here
     const selectedItem = this.value;
     
     if (selectedItem === "Default") {
         // Clear input fields when "Select Item" is chosen
-        document.getElementById('itemNameInput').value = '';
+        document.getElementById(currentItemNameInputId).value = ''; // Changed here
         document.getElementById('amountInput').value = '';
         document.getElementById('sweatpriceInput').value = '';
         document.getElementById('pedpriceInput').value = '';
@@ -195,7 +196,7 @@ document.getElementById('itemNameInput').addEventListener('change', async functi
 
         if (itemDoc.exists()) {
             const itemData = itemDoc.data();
-            document.getElementById('itemNameInput').value = selectedItem; // Set the selected item as editable name
+            document.getElementById(currentItemNameInputId).value = selectedItem; // Changed here
             document.getElementById('amountInput').value = itemData.amount || '';
             document.getElementById('sweatpriceInput').value = itemData.sweatprice || '';
             document.getElementById('pedpriceInput').value = itemData.pedprice || '';
@@ -212,7 +213,7 @@ document.getElementById('itemNameInput').addEventListener('change', async functi
 // Handle item addition or editing
 document.getElementById('submit-sweatitemFB').addEventListener('click', async () => {
     const planet = document.getElementById('planetSelect').value;
-    const itemName = document.getElementById('itemNameInput').value.trim();
+    const itemName = document.getElementById(currentItemNameInputId).value.trim(); // Changed here
     const amount = document.getElementById('amountInput').value;
     const sweatprice = document.getElementById('sweatpriceInput').value.trim();
     const pedprice = document.getElementById('pedpriceInput').value.trim();
@@ -254,7 +255,7 @@ document.getElementById('submit-sweatitemFB').addEventListener('click', async ()
         populateSweatExchanges();
         
         // Clear input fields after submission
-        document.getElementById('itemNameInput').value = '';
+        document.getElementById(currentItemNameInputId).value = ''; // Changed here
         document.getElementById('amountInput').value = '';
         document.getElementById('sweatpriceInput').value = '';
         document.getElementById('pedpriceInput').value = '';
@@ -266,6 +267,7 @@ document.getElementById('submit-sweatitemFB').addEventListener('click', async ()
         alert("Failed to add/update item. Please try again.");
     }
 });
+
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
       const statusElement = document.getElementById('loginStatus');
