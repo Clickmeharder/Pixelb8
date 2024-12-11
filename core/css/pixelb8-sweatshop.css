@@ -67,10 +67,10 @@ header p {
 }
 /* Style all <p> elements inside #sweatexchange-DB */
 #sweatexchange-DB p {
-  font-size: 14px; /* Adjust text size */
-  color: #333; /* Dark gray for readability */
-  line-height: 1.6; /* Add space between lines */
-  margin: 8px 0; /* Space between paragraphs */
+  font-size: 14px;
+  color: #333;
+  line-height: 1.2;
+  margin: 0px 0;
 }
 
 /* Style all <strong> elements inside #sweatexchange-DB */
