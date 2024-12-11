@@ -381,17 +381,17 @@ function getExchangeData() {
 
 // Check user role (assuming you have a function that checks this)
 async function getUserRole() {
-    const user = firebase.auth().currentUser;
-    if (user) {
-        const userRef = doc(db, 'users', user.uid); // Assuming 'users' collection contains user data
-        const userDoc = await getDoc(userRef);
-        if (userDoc.exists()) {
-            return userDoc.data().role || 'user'; // Returns 'admin' or 'user'
-        }
-    }
-    return 'user'; // Default to 'user' if no user found or role not set
-}
+  const user = auth.currentUser;
+  if (user) {
+    const userRef = doc(db, 'users', user.uid); // Reference to the user document
+    const userDoc = await getDoc(userRef); // Get the document
 
+    if (userDoc.exists()) {
+      return userDoc.data().role || 'user'; // Default to 'user' if no role is set
+    }
+  }
+  return 'user'; // Default to 'user' if no user found or role not set
+}
 // Handle planet change and update item list
 document.getElementById('planetSelect').addEventListener('change', async function () {
     const planet = this.value;
