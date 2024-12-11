@@ -112,8 +112,8 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
     return;
   }
 
-  const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN2";
-
+  // const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN2";
+  const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN1";
   // Get form values
   const planet = document.getElementById("planetSelect").value;
   const itemName = document.getElementById(currentItemNameInputId).value.trim();
