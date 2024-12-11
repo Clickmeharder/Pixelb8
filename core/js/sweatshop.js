@@ -6,17 +6,18 @@ function toggleItemNameInput() {
   var itemNameTextInput = document.getElementById('itemNameTextInput');
   
   if (action === 'add') {
-    // Show the select dropdown, hide the text input
-    itemNameInput.style.display = 'block';
-    itemNameTextInput.style.display = 'none';
-  } else if (action === 'edit') {
     // Hide the select dropdown, show the text input
     itemNameInput.style.display = 'none';
     itemNameTextInput.style.display = 'block';
-  } else {
-    // Optionally, hide both or do something else when delete is selected
-    itemNameInput.style.display = 'none';
+  } else if (action === 'edit') {
+    // Show the select dropdown, hide the text input
+    itemNameInput.style.display = 'block';
     itemNameTextInput.style.display = 'none';
+
+  } else {
+    // Hide the select dropdown, show the text input
+    itemNameInput.style.display = 'none';
+    itemNameTextInput.style.display = 'block';
   }
 }
 
