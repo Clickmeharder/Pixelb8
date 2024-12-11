@@ -156,8 +156,8 @@ function getExchangeData() {
         // Start with summary data for each planet
         let docHTML = `
           <h3>Exchange Data for ${doc.id}</h3>
-          <p><strong>Budget:</strong> ${data.budget || 'N/A'}</p>
-          <p><strong>Sweat Value:</strong> ${data.sweat || 'N/A'}</p>
+          <p><strong>Sweat Budget:</strong> ${data.budget || 'N/A'}</p>
+          <p><strong>Total Sweat:</strong> ${data.sweat || 'N/A'}</p>
         `;
 
         // Create a table for item data
