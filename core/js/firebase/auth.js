@@ -152,15 +152,24 @@ function getExchangeData() {
 document.getElementById('planetSelect').addEventListener('change', async function () {
   const planet = this.value;
   const itemNameSelect = document.getElementById('itemName');
-  itemNameSelect.innerHTML = ''; // Clear the existing options
+  const planetSelect = document.getElementById('planetSelect');
+  
+  // Add a default option to planetSelect if it's empty or if no planet is selected
+  if (planetSelect.innerHTML.trim() === '') {
+    planetSelect.innerHTML = ''; // Clear the existing options
+    planetSelect.appendChild(new Option("Select Planet", "Default"));
+  }
+
+  // Clear the existing itemName options
+  itemNameSelect.innerHTML = ''; 
+  
+  // Add a default option to itemName select
+  itemNameSelect.appendChild(new Option("Select Item", "Default"));
 
   // Fetch items from Firestore for the selected planet
   try {
     const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
     const itemsSnapshot = await getDocs(itemsCollection);
-
-    // Add a default option
-    itemNameSelect.appendChild(new Option("Select Item", "Default"));
 
     // Populate the item select options
     itemsSnapshot.forEach((itemDoc) => {
@@ -171,7 +180,6 @@ document.getElementById('planetSelect').addEventListener('change', async functio
     console.error("Error fetching items: ", error);
   }
 });
-
 // Populate other fields based on selected planet and item
 document.getElementById('itemName').addEventListener('change', async function () {
   const planet = document.getElementById('planetSelect').value;
