@@ -172,7 +172,7 @@ document.getElementById('planetSelect').addEventListener('change', async functio
 });
 
 // Event listener for itemName select change
-document.getElementById('itemName').addEventListener('change', async function () {
+document.getElementById('itemNameInput').addEventListener('change', async function () {
     const selectedItem = this.value;
     
     if (selectedItem === "Default") {
