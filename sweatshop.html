@@ -354,11 +354,15 @@
 			<div id="item-form">
 			  <h3>Add New Item</h3>
 			  <form id="addItemForm">
-				<label for="planetSelect">Planet:</label>
+<!-- 				<label for="planetSelect">Planet:</label>
 				<label for="itemName">Item Name:</label>
 				<label for="amount">Amount:</label>
 				<label for="tt">tt:</label>
 				<label for="ttmax">ttmax:</label>
+				<label for="ttmax">ttmax:</label>
+				<label for="sweatprice">Sweat price:</label>
+				<label for="pedprice">PED price:</label>
+				-->
 				<select id="planetSelect">
 				  <option value="Calypso">Calypso</option>
 				  <option value="Monria">Monria</option>
@@ -370,18 +374,12 @@
 				  <!-- Add more planets as needed -->
 				</select>
 				
-				
 				<input type="text" id="itemName" placeholder="Enter item name" required />
 				<input type="number" id="amount" placeholder="Enter stock count" required />
 				<input type="number" id="tt" placeholder="Enter tt value" required step="0.00001" />
-				
-				<label for="ttmax">ttmax:</label>
 				<input type="number" id="ttmax" placeholder="Enter maxtt value" required />
-				<label for="sweatprice">Sweat price:</label>
 				<input type="number" id="sweatprice" placeholder="Enter sweat cost" required />
-				<label for="pedprice">PED price:</label>
 				<input type="number" id="pedprice" placeholder="Enter PED cost" required />
-				
 				<button type="submit-sweatitemFB">Add Item To Firebase</button>
 				<button type="submit2">Add Item To local storage json</button>
 			  </form>
