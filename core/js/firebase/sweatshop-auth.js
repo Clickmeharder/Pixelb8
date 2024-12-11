@@ -158,7 +158,7 @@ const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, t
 document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // Get the currently signed-in user UID
+  // Get the currently signed-in user
   const user = auth.currentUser;
 
   if (!user) {
@@ -166,7 +166,8 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
     return;
   }
 
-  const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN1";
+  // Get the user's role using the getUserRole function
+  const userRole = await getUserRole();
 
   // Get form values
   const planet = document.getElementById("planetSelect").value;
@@ -183,8 +184,8 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
     return;
   }
 
-  // Call the appropriate function based on the user's admin status
-  if (userIsAdmin) {
+  // Call the appropriate function based on the user's role
+  if (userRole === 'admin') {
     // Admin logic
     addItemForAdmin(planet, itemName, amount, sweatprice, pedprice, tt, ttmax);
   } else {
@@ -192,97 +193,6 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
     addItemForUser(planet, itemName, amount, sweatprice, pedprice, tt, ttmax, user);
   }
 });
-
-// Handle item addition or editing
-/* document.getElementById('submit-sweatitemFB').addEventListener('click', async () => {
-    const planet = document.getElementById('planetSelect').value;
-    const itemName = document.getElementById(currentItemNameInputId).value.trim();
-    const amount = document.getElementById('amountInput').value;
-    const sweatprice = document.getElementById('sweatpriceInput').value.trim();
-    const pedprice = document.getElementById('pedpriceInput').value.trim();
-    const ttmax = document.getElementById('ttmaxInput').value.trim();
-    const tt = document.getElementById('ttInput').value.trim();
-    
-    if (!itemName || !amount || !sweatprice || !pedprice || !ttmax || !tt) {
-        alert("Please fill in all fields.");
-        return;
-    }
-    const newItem = {
-        amount: parseInt(amount),
-        sweatprice,
-        pedprice,
-        ttmax,
-        tt,
-    };
-    try {
-        const itemDocRef = doc(db, `sweatexchange/${planet}/items`, itemName);
-        const itemDoc = await getDoc(itemDocRef);
-        if (itemDoc.exists()) {
-            await updateDoc(itemDocRef, newItem);
-            alert("Item updated successfully!");
-        } else {
-            await setDoc(itemDocRef, newItem);
-            alert("Item added successfully!");
-        }
-		getExchangeData();
-        document.getElementById(currentItemNameInputId).value = ''; // Changed here
-        document.getElementById('amountInput').value = '';
-        document.getElementById('sweatpriceInput').value = '';
-        document.getElementById('pedpriceInput').value = '';
-        document.getElementById('ttmaxInput').value = '';
-        document.getElementById('ttInput').value = '';
-
-    } catch (error) {
-        console.error("Error adding/updating item: ", error);
-        alert("Failed to add/update item. Please try again.");
-    }
-}); */
-// Add a new item via the form
-/* document.getElementById("addItemForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const user = auth.currentUser;
-  if (!user) {
-    alert("You must be signed in to add an item.");
-    return;
-  }
-  const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN1";
-  const planet = document.getElementById("planetSelect").value;
-  const itemName = document.getElementById(currentItemNameInputId).value.trim();
-  const amount = document.getElementById("amountInput").value;
-  const sweatprice = document.getElementById("sweatpriceInput").value.trim();
-  const pedprice = document.getElementById("pedpriceInput").value.trim();
-  const tt = document.getElementById("ttInput").value.trim();
-  const ttmax = document.getElementById("ttmaxInput").value.trim();
-  if (!itemName || !amount || !sweatprice || !pedprice || !tt || !ttmax) {
-    alert("Please fill in all fields.");
-    return;
-  }
-  const newItem = {
-    amount: parseInt(amount),
-    sweatprice: parseFloat(sweatprice),
-    pedprice: parseFloat(pedprice),
-    tt: parseFloat(tt),
-    ttmax: parseFloat(ttmax),
-    ownerId: user.uid,
-    uid: crypto.randomUUID()
-  };
-  try {
-    const targetCollectionPath = userIsAdmin
-      ? `sweatexchange/${planet}/items`
-      : `sweatexchange/${planet}/useritems`;
-
-    const targetCollection = collection(db, targetCollectionPath);
-    const docRef = doc(targetCollection, itemName);
-    await setDoc(docRef, newItem);
-    const collectionType = userIsAdmin ? "admin items" : "user items";
-    alert(`Item added successfully to ${collectionType}!`);
-    getExchangeData();
-    document.getElementById("addItemForm").reset();
-  } catch (error) {
-    console.error("Error adding item:", error);
-    alert("Failed to add item. Please try again.");
-  }
-}); */
 
 // Fetch and display updated exchange data
 function getExchangeData() {
@@ -379,45 +289,6 @@ function getExchangeData() {
 }
 
 
-// Form submission event listener
-document.getElementById("addItemForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  // Get the currently signed-in user
-  const user = auth.currentUser;
-
-  if (!user) {
-    alert("You must be signed in to add an item.");
-    return;
-  }
-
-  // Check the user's role using the getUserRole function
-  const userRole = await getUserRole();
-
-  // Get form values
-  const planet = document.getElementById("planetSelect").value;
-  const itemName = document.getElementById(currentItemNameInputId).value.trim();
-  const amount = document.getElementById("amountInput").value;
-  const sweatprice = document.getElementById("sweatpriceInput").value.trim();
-  const pedprice = document.getElementById("pedpriceInput").value.trim();
-  const tt = document.getElementById("ttInput").value.trim();
-  const ttmax = document.getElementById("ttmaxInput").value.trim();
-
-  // Validate inputs
-  if (!itemName || !amount || !sweatprice || !pedprice || !tt || !ttmax) {
-    alert("Please fill in all fields.");
-    return;
-  }
-
-  // Call the appropriate function based on the user's role
-  if (userRole === 'admin') {
-    // Admin logic
-    addItemForAdmin(planet, itemName, amount, sweatprice, pedprice, tt, ttmax);
-  } else {
-    // User logic
-    addItemForUser(planet, itemName, amount, sweatprice, pedprice, tt, ttmax, user);
-  }
-});
 
 // Handle planet change and update item list
 document.getElementById('planetSelect').addEventListener('change', async function () {
@@ -483,11 +354,21 @@ document.getElementById('itemNameInput').addEventListener('change', async functi
         console.error("Error fetching item data: ", error);
     }
 });
-//end of thing
 
 
+// Check user role (assuming you have a function that checks this)
+async function getUserRole() {
+  const user = auth.currentUser;
+  if (user) {
+    const userRef = doc(db, 'users', user.uid); // Reference to the user document
+    const userDoc = await getDoc(userRef); // Get the document
 
-
+    if (userDoc.exists()) {
+      return userDoc.data().role || 'user'; // Default to 'user' if no role is set
+    }
+  }
+  return 'user'; // Default to 'user' if no user found or role not set
+}
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
