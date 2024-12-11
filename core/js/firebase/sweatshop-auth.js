@@ -70,27 +70,16 @@ function toggleItemNameInput() {
   var itemNameTextInput = document.getElementById('itemNameTextInput');
   
   if (action === 'add') {
-	// Hide the select dropdown, show the text input
     itemNameInput.style.display = 'none';
     itemNameTextInput.style.display = 'block';
-
-    // Save the current ID of itemNameTextInput to the variable
     currentItemNameInputId = itemNameTextInput.id;
-
-
   } else if (action === 'edit') {
-	// Show the select dropdown, hide the text input
     itemNameInput.style.display = 'block';
     itemNameTextInput.style.display = 'none';
-    // Save the current ID of itemNameInput to the variable
     currentItemNameInputId = itemNameInput.id;
-
-
   } else {
-    // Optionally, hide both or do something else when delete is selected
     itemNameInput.style.display = 'block';
     itemNameTextInput.style.display = 'none';
-    // Save the current ID of itemNameInput to the variable
     currentItemNameInputId = itemNameInput.id;
   }
 }
@@ -100,9 +89,9 @@ toggleItemNameInput();
 
 // Add an event listener to update the display whenever the action changes
 document.getElementById('actionSelect').addEventListener('change', toggleItemNameInput);
-// beginning new sweatshop auth stuff
+
+// Function to add item for regular users
 const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax, user) => {
-  // Create the new item object
   const newItem = {
     amount: parseInt(amount),
     sweatprice: parseFloat(sweatprice),
@@ -114,28 +103,23 @@ const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt
   };
 
   try {
-    // Set the target collection path for regular users
     const targetCollectionPath = `sweatexchange/${planet}/useritems`;
     const targetCollection = collection(db, targetCollectionPath);
 
-    // Set the document ID as the item name and save it
-    const docRef = doc(targetCollection, itemName); // Use itemName as the document ID
-    await setDoc(docRef, newItem); // Save the item
+    const docRef = doc(targetCollection, itemName);
+    await setDoc(docRef, newItem);
 
     alert("Item added successfully to user items!");
-    populateSweatExchanges(); // Refresh the table after adding the item
-    document.getElementById("addItemForm").reset(); // Clear the form
+    populateSweatExchanges();
+    document.getElementById("addItemForm").reset();
   } catch (error) {
     console.error("Error adding item:", error);
     alert("Failed to add item. Please try again.");
   }
 };
-const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax) => {
-  if (!itemName || !amount || !sweatprice || !pedprice || !ttmax || !tt) {
-    alert("Please fill in all fields.");
-    return;
-  }
 
+// Function to add item for admin users
+const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax) => {
   const newItem = {
     amount: parseInt(amount),
     sweatprice,
@@ -156,7 +140,7 @@ const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, t
       alert("Item added successfully!");
     }
 
-    getExchangeData(); // Refresh data after adding/updating item
+    getExchangeData();
     // Clear input fields
     document.getElementById(currentItemNameInputId).value = '';
     document.getElementById('amountInput').value = '';
@@ -169,23 +153,24 @@ const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, t
     alert("Failed to add/update item. Please try again.");
   }
 };
+
+// Form submission event listener
 document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   // Get the currently signed-in user UID
-  const user = auth.currentUser; // Use the `auth` instance you initialized
+  const user = auth.currentUser;
 
   if (!user) {
     alert("You must be signed in to add an item.");
     return;
   }
 
-  // Determine if the user is an admin
   const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN1";
 
   // Get form values
   const planet = document.getElementById("planetSelect").value;
-  const itemName = document.getElementById(currentItemNameInputId).value.trim(); // Get item name from input field
+  const itemName = document.getElementById(currentItemNameInputId).value.trim();
   const amount = document.getElementById("amountInput").value;
   const sweatprice = document.getElementById("sweatpriceInput").value.trim();
   const pedprice = document.getElementById("pedpriceInput").value.trim();
@@ -198,14 +183,16 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
     return;
   }
 
+  // Call the appropriate function based on the user's admin status
   if (userIsAdmin) {
-    // Call admin function to add or update item
+    // Admin logic
     addItemForAdmin(planet, itemName, amount, sweatprice, pedprice, tt, ttmax);
   } else {
-    // Call user function to add item to useritems
+    // User logic
     addItemForUser(planet, itemName, amount, sweatprice, pedprice, tt, ttmax, user);
   }
 });
+
 // Handle item addition or editing
 /* document.getElementById('submit-sweatitemFB').addEventListener('click', async () => {
     const planet = document.getElementById('planetSelect').value;
