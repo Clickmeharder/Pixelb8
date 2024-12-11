@@ -8,9 +8,13 @@ div#item-form {
 form#addItemForm {
     margin: 2px;
     margin-top: 0px;
-    padding: 2px;
+    padding: 4px;
     padding-top: 0px;
     border: 3px ridge #464141;
+    display: flex;
+    flex-wrap: wrap;
+    width: 29vw;
+    justify-content: center;
 }
 div#sweatexchange-DB {
     overflow-y: scroll;
@@ -24,7 +28,7 @@ div#sweatexchange-DB {
     border: 3px inset dimgray;
 }
 div#exchangeItemDetailInputs {
-    width: 30vw;
+    width: ;
 }
 #ttInput, #ttmaxInput, #amountInput {
   width: 65px; /* Set your desired width here */
@@ -44,12 +48,14 @@ div#exchangeItemDetailInputs {
 /* Base style for inputs inside the specified form and div */
 form#addItemForm input[type="number"],
 div#exchangeItemDetailInputs input[type="number"] {
-    width: 95%;
+    max-width: 85%;
     height: 8px;
-	border-radius: 8px;
-	outline: 3px solid #69696973;
-    transition: 0.3s ease; /* Smooth transition for the hover effect */
-	font-weight: bold;
+    padding-left: 8px;
+    color: #33bcf0;
+    border-radius: 8px;
+    outline: 3px solid #69696973;
+    transition: 0.3s ease;
+    font-weight: bold;
 }
 
 /* Hover effect */
