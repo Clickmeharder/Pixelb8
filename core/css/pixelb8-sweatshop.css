@@ -30,7 +30,7 @@ div#sweatexchange-DB {
 div#exchangeItemDetailInputs {
     width: ;
 }
-select#itemNameInput {
+select#itemNameInput, input#itemNameTextInput {
     height: 30px;
 	width: 100%;
 }
