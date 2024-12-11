@@ -1,4 +1,5 @@
-// firebase/auth.js
+//sweatshop.js
+// firebase/sweatshop-auth.js
 /* 
 Availability	# in Stock	Item	Buy with Sweat	Buy with PED
 Yes	30 ish	B101 Amp	110 bottles	0.18 PED (225%)
@@ -58,6 +59,283 @@ getDocs(collection(db, 'UserProfiles'))
   .catch((error) => {
     console.log("Error getting documents: ", error);
   });
+// beginning sweatshop stuff
+// Global variable to store the current ID of the element
+let currentItemNameInputId = 'itemNameInput';
+
+// Function to toggle between the select dropdown and text input
+function toggleItemNameInput() {
+  var action = document.getElementById('actionSelect').value;
+  var itemNameInput = document.getElementById('itemNameInput');
+  var itemNameTextInput = document.getElementById('itemNameTextInput');
+  
+  if (action === 'add') {
+	// Hide the select dropdown, show the text input
+    itemNameInput.style.display = 'none';
+    itemNameTextInput.style.display = 'block';
+
+    // Save the current ID of itemNameTextInput to the variable
+    currentItemNameInputId = itemNameTextInput.id;
+
+
+  } else if (action === 'edit') {
+	// Show the select dropdown, hide the text input
+    itemNameInput.style.display = 'block';
+    itemNameTextInput.style.display = 'none';
+    // Save the current ID of itemNameInput to the variable
+    currentItemNameInputId = itemNameInput.id;
+
+
+  } else {
+    // Optionally, hide both or do something else when delete is selected
+    itemNameInput.style.display = 'block';
+    itemNameTextInput.style.display = 'none';
+    // Save the current ID of itemNameInput to the variable
+    currentItemNameInputId = itemNameInput.id;
+  }
+}
+
+// Call the function initially to set the correct state
+toggleItemNameInput();
+
+// Add an event listener to update the display whenever the action changes
+document.getElementById('actionSelect').addEventListener('change', toggleItemNameInput);
+// beginning sweatshop auth stuff
+// Add a new item via the form
+document.getElementById("addItemForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  // Get the currently signed-in user UID
+  const user = firebase.auth().currentUser;
+  if (user && user.uid !== "7d7JYyj0kgUv0nXr3bDrO88R7jN2") {
+    alert("You do not have permission to add items.");
+    return;
+  }
+
+  // Get form values
+  const planet = document.getElementById("planetSelect").value;
+  const itemName = document.getElementById(currentItemNameInputId).value.trim(); // Changed here
+  const amount = document.getElementById("amountInput").value;
+  const sweatprice = document.getElementById("sweatpriceInput").value.trim();
+  const pedprice = document.getElementById("pedpriceInput").value.trim();
+  const tt = document.getElementById("ttInput").value.trim();
+  const ttmax = document.getElementById("ttmaxInput").value.trim();
+
+  // Validate inputs
+  if (!itemName || !amount || !sweatprice || !pedprice || !tt || !ttmax) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  // Create new item object
+  const newItem = {
+    amount: parseInt(amount),
+    sweatprice,
+    pedprice,
+    tt,
+    ttmax
+  };
+
+  try {
+    // Add the new item to Firestore
+    const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
+    await addDoc(itemsCollection, newItem);
+
+    alert("Item added successfully!");
+    populateSweatExchanges(); // Refresh the table after adding the item
+    document.getElementById("addItemForm").reset(); // Clear the form
+  } catch (error) {
+    console.error("Error adding item:", error);
+    alert("Failed to add item. Please try again.");
+  }
+});
+
+// Fetch and display updated exchange data
+function getExchangeData() {
+  const sweatexchangeContainer = document.getElementById('sweatexchange-DB');
+  getDocs(collection(db, 'sweatexchange'))
+    .then((querySnapshot) => {
+      sweatexchangeContainer.innerHTML = ''; // Clear previous content
+
+      querySnapshot.forEach(async (doc) => {
+        const data = doc.data();
+        const exchangeDiv = document.createElement('div');
+        exchangeDiv.classList.add('exchange-item');
+
+        // Start with summary data for each planet
+        let docHTML = `
+          <h3>Exchange Data for ${doc.id}</h3>
+          <p><strong>Sweat Budget:</strong> ${data.budget || 'N/A'}</p>
+          <p><strong>Total Sweat:</strong> ${data.sweat || 'N/A'}</p>
+        `;
+
+        // Create a table for item data
+        const itemsCollection = collection(doc.ref, 'items');
+        const itemsSnapshot = await getDocs(itemsCollection);
+
+        if (!itemsSnapshot.empty) {
+          docHTML += `
+            <table border="1" style="border-collapse: collapse; width: 100%;">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th>Amount</th>
+                  <th>TT Value</th>
+                  <th>Max TT</th>
+                  <th>Sweat Cost</th>
+                  <th>PED Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          itemsSnapshot.forEach((itemDoc) => {
+            const itemData = itemDoc.data();
+            docHTML += `
+              <tr>
+                <td>${itemDoc.id}</td>
+                <td>${itemData.amount || 'N/A'}</td>
+                <td>${itemData.tt || 'N/A'}</td>
+                <td>${itemData.ttmax || 'N/A'}</td>
+                <td>${itemData.sweatprice || 'N/A'}</td>
+                <td>${itemData.pedprice || 'N/A'}</td>
+              </tr>
+            `;
+          });
+
+          docHTML += `</tbody></table>`; // Close the table
+        } else {
+          docHTML += `<p>No items available for this exchange.</p>`;
+        }
+
+        exchangeDiv.innerHTML = docHTML;
+        sweatexchangeContainer.appendChild(exchangeDiv);
+      });
+    })
+    .catch((error) => {
+      console.log("Error getting documents: ", error);
+    });
+}
+
+// Handle planet change and update item list
+document.getElementById('planetSelect').addEventListener('change', async function () {
+    const planet = this.value;
+    const itemNameSelect = document.getElementById('itemNameInput'); // Corrected ID
+
+    // Clear the itemName dropdown and add the default option
+    itemNameSelect.innerHTML = '';
+    itemNameSelect.appendChild(new Option("Select Item", "Default", true, true));
+
+    // Fetch items from Firestore for the selected planet
+    try {
+        const itemsCollection = collection(db, `sweatexchange/${planet}/items`);
+        const itemsSnapshot = await getDocs(itemsCollection);
+
+        // Populate the item select options
+        itemsSnapshot.forEach((itemDoc) => {
+            const itemName = itemDoc.id;
+            itemNameSelect.appendChild(new Option(itemName, itemName));
+        });
+    } catch (error) {
+        console.error("Error fetching items: ", error);
+    }
+});
+
+// Event listener for itemName select change
+document.getElementById('itemNameInput').addEventListener('change', async function () {
+    const selectedItem = this.value;
+
+    if (selectedItem === "Default") {
+        // Clear input fields when "Select Item" is chosen
+        document.getElementById('amountInput').value = '';
+        document.getElementById('sweatpriceInput').value = '';
+        document.getElementById('pedpriceInput').value = '';
+        document.getElementById('ttmaxInput').value = '';
+        document.getElementById('ttInput').value = '';
+        return;
+    }
+
+    // Populate the form with the existing item's details for editing
+    const planet = document.getElementById('planetSelect').value;
+    try {
+        const itemDocRef = doc(db, `sweatexchange/${planet}/items`, selectedItem);
+        const itemDoc = await getDoc(itemDocRef);
+
+        if (itemDoc.exists()) {
+            const itemData = itemDoc.data();
+            document.getElementById('amountInput').value = itemData.amount || '';
+            document.getElementById('sweatpriceInput').value = itemData.sweatprice || '';
+            document.getElementById('pedpriceInput').value = itemData.pedprice || '';
+            document.getElementById('ttmaxInput').value = itemData.ttmax || '';
+            document.getElementById('ttInput').value = itemData.tt || '';
+        } else {
+            console.log("Item not found!");
+        }
+    } catch (error) {
+        console.error("Error fetching item data: ", error);
+    }
+});
+//end of thing
+
+
+
+// Handle item addition or editing
+document.getElementById('submit-sweatitemFB').addEventListener('click', async () => {
+    const planet = document.getElementById('planetSelect').value;
+    const itemName = document.getElementById(currentItemNameInputId).value.trim(); // Changed here
+    const amount = document.getElementById('amountInput').value;
+    const sweatprice = document.getElementById('sweatpriceInput').value.trim();
+    const pedprice = document.getElementById('pedpriceInput').value.trim();
+    const ttmax = document.getElementById('ttmaxInput').value.trim();
+    const tt = document.getElementById('ttInput').value.trim();
+    
+    // Validate input fields
+    if (!itemName || !amount || !sweatprice || !pedprice || !ttmax || !tt) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    // Prepare the item data
+    const newItem = {
+        amount: parseInt(amount),
+        sweatprice,
+        pedprice,
+        ttmax,
+        tt,
+    };
+
+    try {
+        // Check if it's a new item or an existing item
+        const itemDocRef = doc(db, `sweatexchange/${planet}/items`, itemName);
+
+        // If the item already exists, update it, otherwise add a new item
+        const itemDoc = await getDoc(itemDocRef);
+        if (itemDoc.exists()) {
+            // Update existing item
+            await updateDoc(itemDocRef, newItem);
+            alert("Item updated successfully!");
+        } else {
+            // Add new item
+            await setDoc(itemDocRef, newItem);
+            alert("Item added successfully!");
+        }
+
+        // Refresh the item list after adding or editing
+        populateSweatExchanges();
+        
+        // Clear input fields after submission
+        document.getElementById(currentItemNameInputId).value = ''; // Changed here
+        document.getElementById('amountInput').value = '';
+        document.getElementById('sweatpriceInput').value = '';
+        document.getElementById('pedpriceInput').value = '';
+        document.getElementById('ttmaxInput').value = '';
+        document.getElementById('ttInput').value = '';
+
+    } catch (error) {
+        console.error("Error adding/updating item: ", error);
+        alert("Failed to add/update item. Please try again.");
+    }
+});
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
@@ -77,7 +355,8 @@ getDocs(collection(db, 'UserProfiles'))
 	  const innerContentloggedout = document.getElementById('innercontent-loggedout');
 	  const userprofileTab = document.getElementById('user-profile-tab');
 	  const userprofileBox = document.getElementById('user-profile-box');
-
+	  const receptionTab = document.getElementById('reception-tab');
+	  const receptionBox = document.getElementById('reception');
 
 	  if (user !== null) {
 		// User is signed in
@@ -128,6 +407,8 @@ getDocs(collection(db, 'UserProfiles'))
 		  userprofileTab.classList.add('Active');
 		  userprofileBox.classList.remove('hidden');
 		  userprofileBox.classList.add('Active');
+		  receptionTab.classList.add('hidden');
+		  receptionBox.classList.add('hidden');
           const userName = encodeURIComponent(user.displayName || "Guest");
           const userEmail = encodeURIComponent(user.email || "");
 
@@ -172,6 +453,8 @@ getDocs(collection(db, 'UserProfiles'))
 		userprofileTab.classList.add('hidden');
 		userprofileBox.classList.remove('Active');
 		userprofileBox.classList.add('hidden');
+		receptionTab.classList.add('Active');
+		receptionBox.classList.add('Avtive');
 		console.log("User is not signed in.");
       }
 
@@ -281,5 +564,7 @@ getDocs(collection(db, 'UserProfiles'))
 	  /* $('#modal-editProfile').modal('show'); */
 	});
 	// Call on page load
-
+// Call the function to display the exchange data on page load
+	getExchangeData();
+	
 //hmmm
