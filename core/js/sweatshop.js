@@ -15,9 +15,9 @@ function toggleItemNameInput() {
     itemNameTextInput.style.display = 'none';
 
   } else {
-    // Hide the select dropdown, show the text input
-    itemNameInput.style.display = 'none';
-    itemNameTextInput.style.display = 'block';
+    // Show the select dropdown, hide the text input
+    itemNameInput.style.display = 'block';
+    itemNameTextInput.style.display = 'none';
   }
 }
 
