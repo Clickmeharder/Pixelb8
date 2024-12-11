@@ -107,11 +107,16 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
 
   // Get the currently signed-in user UID
   const user = firebase.auth().currentUser;
+  if (!user) {
+    alert("You must be signed in to add an item.");
+    return;
+  }
+
   const userIsAdmin = user && user.uid === "7d7JYyj0kgUv0nXr3bDrO88R7jN2";
 
   // Get form values
   const planet = document.getElementById("planetSelect").value;
-  const itemName = document.getElementById(currentItemNameInputId).value.trim(); // Changed here
+  const itemName = document.getElementById(currentItemNameInputId).value.trim();
   const amount = document.getElementById("amountInput").value;
   const sweatprice = document.getElementById("sweatpriceInput").value.trim();
   const pedprice = document.getElementById("pedpriceInput").value.trim();
@@ -127,10 +132,12 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   // Create new item object
   const newItem = {
     amount: parseInt(amount),
-    sweatprice,
-    pedprice,
-    tt,
-    ttmax
+    sweatprice: parseFloat(sweatprice),
+    pedprice: parseFloat(pedprice),
+    tt: parseFloat(tt),
+    ttmax: parseFloat(ttmax),
+    ownerId: user.uid, // Add ownerId to match Firestore rules
+    uid: crypto.randomUUID() // Generate a unique identifier for the item
   };
 
   try {
