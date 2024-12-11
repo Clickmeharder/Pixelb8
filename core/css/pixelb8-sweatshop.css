@@ -40,7 +40,7 @@ form#addItemForm input[type="number"],
 div#exchangeItemDetailInputs input[type="number"] {
     width: 95%;
     height: 8px;
-	outline: 5px solid dimgray;
+	outline: 3px solid dimgray;
     transition: 0.3s ease; /* Smooth transition for the hover effect */
 }
 
