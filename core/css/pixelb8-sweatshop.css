@@ -3,6 +3,9 @@ div#sweatexchange-DB {
     height: 280px;
     border: 1px ridge gray;
 }
+div#exchangeItemDetailInputs {
+    width: 30vw;
+}
 #tt, #ttmax, #amount {
   width: 65px; /* Set your desired width here */
   text-align: left;
