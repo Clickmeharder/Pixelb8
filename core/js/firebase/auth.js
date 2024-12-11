@@ -51,7 +51,6 @@ getDocs(collection(db, 'UserProfiles'))
     console.log("Error getting documents: ", error);
   });
 // beginning sweatshop stuff
-
 // Add a new item via the form
 document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -267,7 +266,6 @@ document.getElementById('submit-sweatitemFB').addEventListener('click', async ()
         alert("Failed to add/update item. Please try again.");
     }
 });
-
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
