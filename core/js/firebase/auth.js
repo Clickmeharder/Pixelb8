@@ -103,41 +103,51 @@ getDocs(collection(db, 'UserProfiles'))
 const form = document.getElementById('addItemForm');
 const sweatexchangeContainer = document.getElementById('sweatexchange-DB');
 
-// Handle form submission to add an item to Firestore
+// Handle form submission to add or edit an item
 form.addEventListener('submit', async (e) => {
   e.preventDefault(); // Prevent default form submission
 
-  // Get the form values
+  // Get form values
   const planet = document.getElementById('planetSelect').value;
-  const itemName = document.getElementById('itemName').value;
-  const amount = document.getElementById('amount').value;
-  const tt = document.getElementById('tt').value;
-  const ttmax = document.getElementById('ttmax').value;
-  const sweatprice = document.getElementById('sweatprice').value;
-  const pedprice = document.getElementById('pedprice').value;
+  const itemName = document.getElementById('itemName').value.trim();
+  const amount = parseInt(document.getElementById('amount').value);
+  const tt = parseFloat(document.getElementById('tt').value);
+  const ttmax = parseFloat(document.getElementById('ttmax').value);
+  const sweatprice = parseFloat(document.getElementById('sweatprice').value);
+  const pedprice = parseFloat(document.getElementById('pedprice').value);
 
-  // Retrieve the specific document in 'sweatexchange' collection to add this item
-  const docRef = doc(db, 'sweatexchange', planet); // Use the selected planet as the doc ID
-  
-  // Add the item to the 'items' sub-collection
+  // Check if form is in edit mode
+  const isEdit = form.hasAttribute('data-doc-id') && form.hasAttribute('data-item-id');
+  const docId = form.getAttribute('data-doc-id');
+  const itemId = form.getAttribute('data-item-id');
+
   try {
-    await setDoc(
-      doc(collection(docRef, 'items'), itemName), // Create document by item name in 'items' collection
-      {
-        amount: amount,
-        tt: tt,
-        ttmax: ttmax,
-        sweatprice: sweatprice,
-        pedprice: pedprice
-      }
-    );
+    // Get reference to the 'sweatexchange' document and 'items' subcollection
+    const docRef = doc(db, 'sweatexchange', planet);
+    const itemRef = doc(collection(docRef, 'items'), isEdit ? itemId : itemName);
 
-    // Optionally: Refresh or update the exchange data on the page
-    console.log("Item added to Firebase");
-    //getExchangeData(); // Re-fetch and update the displayed data
+    // Create or update item
+    await setDoc(itemRef, {
+      amount: amount,
+      tt: tt,
+      ttmax: ttmax,
+      sweatprice: sweatprice,
+      pedprice: pedprice,
+    });
+
+    // Provide feedback
+    console.log(isEdit ? 'Item updated successfully' : 'Item added successfully');
+
+    // Reset form and attributes
+    form.reset();
+    form.removeAttribute('data-doc-id');
+    form.removeAttribute('data-item-id');
+
+    // Optionally: Refresh the displayed data
+    // getExchangeData();
 
   } catch (error) {
-    console.error("Error adding item: ", error);
+    console.error(isEdit ? 'Error updating item: ' : 'Error adding item: ', error);
   }
 });
 
@@ -161,20 +171,22 @@ function getExchangeData() {
           docHTML += `<h4>Items:</h4><ul>`;
 
           itemsSnapshot.forEach((itemDoc) => {
-            const itemData = itemDoc.data();
-            docHTML += `
-              <li>
-                <strong>${itemDoc.id}</strong>:
-                <ul>
-                  <li>Stock: ${itemData.amount}</li>
-                  <li>tt: ${itemData.tt}/${itemData.ttmax}</li>
-                  <li>TT max: ${itemData.ttmax}</li>
-                  <li>Sweat Cost: ${itemData.sweatprice}</li>
-                  <li>PED Cost: ${itemData.pedprice}</li>
-                </ul>
-              </li>
-            `;
-          });
+			const itemData = itemDoc.data();
+			docHTML += `
+				<li>
+				  <strong>${itemDoc.id}</strong>:
+				  <ul>
+					<li>Stock: ${itemData.amount}</li>
+					<li>tt: ${itemData.tt}/${itemData.ttmax}</li>
+					<li>TT max: ${itemData.ttmax}</li>
+					<li>Sweat Cost: ${itemData.sweatprice}</li>
+					<li>PED Cost: ${itemData.pedprice}</li>
+				  </ul>
+				  <button onclick="editItem('${doc.id}', '${itemDoc.id}')">Edit</button>
+				  <button onclick="removeItem('${doc.id}', '${itemDoc.id}')">Remove</button>
+				</li>
+			  `;
+			});
 
           docHTML += `</ul>`; // Close the items list
         }
@@ -187,7 +199,27 @@ function getExchangeData() {
       console.log("Error getting documents: ", error);
     });
 }
+function editItem(docId, itemId) {
+  const docRef = doc(db, 'sweatexchange', docId, 'items', itemId);
+  getDoc(docRef).then((itemDoc) => {
+    if (itemDoc.exists()) {
+      const itemData = itemDoc.data();
 
+      // Populate form fields
+      document.getElementById('planetSelect').value = docId;
+      document.getElementById('itemName').value = itemId;
+      document.getElementById('amount').value = itemData.amount;
+      document.getElementById('tt').value = itemData.tt;
+      document.getElementById('ttmax').value = itemData.ttmax;
+      document.getElementById('sweatprice').value = itemData.sweatprice;
+      document.getElementById('pedprice').value = itemData.pedprice;
+
+      // Save docId and itemId to update later
+      document.getElementById('addItemForm').setAttribute('data-doc-id', docId);
+      document.getElementById('addItemForm').setAttribute('data-item-id', itemId);
+    }
+  });
+}
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
