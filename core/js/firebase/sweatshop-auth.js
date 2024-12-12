@@ -241,7 +241,7 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   }
 });
 
-// Fetch and display updated exchange data
+
 // Fetch and display updated exchange data
 async function getExchangeData() {
   const sweatexchangeContainer = document.getElementById('sweatexchange-DB');
