@@ -282,7 +282,7 @@ async function getExchangeData() {
           <table border="1" style="border-collapse: collapse; width: 100%;">
             <thead>
               <tr>
-                <th>Type</th> <!-- New column for Type -->
+                <th>Type</th>
                 <th>Item Name</th>
                 <th>Amount</th>
                 <th>TT Value</th>
