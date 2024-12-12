@@ -295,10 +295,9 @@ async function getExchangeData() {
 
         itemsSnapshot.forEach((itemDoc) => {
           const itemData = itemDoc.data();
-          // Check if the user role is not admin and the ownerId matches the user's UID
           if (userRole === 'admin' || itemData.ownerId === userUid) {
             docHTML += `
-              <tr>
+              <tr style="background-color: ${userRole === 'admin' || itemData.ownerId !== userUid ? '#dff0d8' : '#f2dede'};">
                 <td>${itemDoc.id}</td>
                 <td>${itemData.amount || 'N/A'}</td>
                 <td>${itemData.tt || 'N/A'}</td>
@@ -325,6 +324,7 @@ async function getExchangeData() {
         if (planetTable) {
           let planetTableHTML = '';
 
+          // Fetch items from 'items' collection
           const planetItemsCollection = collection(doc.ref, 'items'); // Always use 'items' collection
           const planetItemsSnapshot = await getDocs(planetItemsCollection);
 
@@ -332,7 +332,7 @@ async function getExchangeData() {
             planetItemsSnapshot.forEach((itemDoc) => {
               const itemData = itemDoc.data();
               planetTableHTML += `
-                <tr>
+                <tr style="background-color: #dff0d8;">
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
                   <td>${itemData.tt || 'N/A'}</td>
@@ -342,9 +342,29 @@ async function getExchangeData() {
                 </tr>
               `;
             });
-
-            planetTable.innerHTML = planetTableHTML; // Update the planet table
           }
+
+          // Fetch items from 'useritems' collection
+          const planetUserItemsCollection = collection(doc.ref, 'useritems'); // Always use 'useritems' collection
+          const planetUserItemsSnapshot = await getDocs(planetUserItemsCollection);
+
+          if (!planetUserItemsSnapshot.empty) {
+            planetUserItemsSnapshot.forEach((itemDoc) => {
+              const itemData = itemDoc.data();
+              planetTableHTML += `
+                <tr style="background-color: #f2dede;">
+                  <td>${itemDoc.id}</td>
+                  <td>${itemData.amount || 'N/A'}</td>
+                  <td>${itemData.tt || 'N/A'}</td>
+                  <td>${itemData.ttmax || 'N/A'}</td>
+                  <td>${itemData.sweatprice || 'N/A'}</td>
+                  <td>${itemData.pedprice || 'N/A'}</td>
+                </tr>
+              `;
+            });
+          }
+
+          planetTable.innerHTML = planetTableHTML; // Update the planet table
         }
       }
     });
@@ -352,6 +372,7 @@ async function getExchangeData() {
     console.log("Error getting documents: ", error);
   }
 }
+
 
 
 
