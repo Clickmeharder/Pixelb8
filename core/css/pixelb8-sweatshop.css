@@ -71,7 +71,10 @@ header:hover {
 	height: 157px;
 	margin-top: 0px;
 }
-
+/* Hover effect for all headers */
+header:hover p {
+	margin-top: 0px;
+}
 /* Apply specific styles to non-susheader h1 */
 header:hover h1 {
     font-size: 67px;
