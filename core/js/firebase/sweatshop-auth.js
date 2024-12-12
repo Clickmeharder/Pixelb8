@@ -34,16 +34,16 @@ Limited	20	Shotgun (SA)	1025 bottles	2.10 PED (+0.10)
 	
 	// Role to icon mapping
 	const roleToIcon = {
-	  ceo: '👑CEO',
-	  admin: '⭐SUS',
-	  mod: '🛡️MOD',
-	  susrep: '💼REP',
-	  vip: '🌟VIP',
-	  associate: '🤝Associate',
-	  verified: '✔️Verified',
-	  user: '🙂User',
-	  guest: '👤Guest',
-	  default: '👤Default'
+	  ceo: '👑',
+	  admin: '⭐',
+	  mod: '🛡️',
+	  susrep: '💼',
+	  vip: '🌟',
+	  associate: '🤝',
+	  verified: '✔️',
+	  user: '🙂',
+	  guest: '👤',
+	  default: '👤'
 	};
 
     async function getGitHubUserData(githubIdOrLogin) {
@@ -310,10 +310,10 @@ async function getExchangeData() {
 
         itemsSnapshot.forEach((itemDoc, index) => {
           const itemData = itemDoc.data();
-          const itemTypeIcon = userRole === 'admin' ? roleToIcon[itemData.role] || '👤' : roleToIcon[userRole]; // Set icon based on role
           if (userRole === 'admin' || itemData.ownerId === userUid) {
+            const itemTypeIcon = itemsCollection === 'items' ? '⭐sus' : '👤Shady'; // Icons for public and private items
             docHTML += `
-              <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
+              <tr style="">
                 <td>${itemTypeIcon}</td>
                 <td>${itemDoc.id}</td>
                 <td>${itemData.amount || 'N/A'}</td>
@@ -348,9 +348,9 @@ async function getExchangeData() {
           if (!planetItemsSnapshot.empty) {
             planetItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
-              const itemTypeIcon = '🌐'; // Icon for public items
+              const itemTypeIcon = '⭐sus'; // Icon for public items
               planetTableHTML += `
-                <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
+                <tr style="">
                   <td>${itemTypeIcon}</td>
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
@@ -370,9 +370,9 @@ async function getExchangeData() {
           if (!planetUserItemsSnapshot.empty) {
             planetUserItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
-              const itemTypeIcon = '🔒'; // Icon for private items
+              const itemTypeIcon = '👤Shady'; // Icon for private items
               planetTableHTML += `
-                <tr style="background-color: ${index % 2 === 0 ? '#4b0082' : '#800080'};">
+                <tr style="">
                   <td>${itemTypeIcon}</td>
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
@@ -393,6 +393,7 @@ async function getExchangeData() {
     console.log("Error getting documents: ", error);
   }
 }
+
 
 
 
@@ -737,171 +738,3 @@ async function getUserRole() {
 
 
 
-// Role to icon mapping
-const roleToIcon = {
-  ceo: '👑',
-  admin: '⭐',
-  mod: '🛡️',
-  susrep: '💼',
-  vip: '🌟',
-  associate: '🤝',
-  verified: '✔️',
-  user: '🙂',
-  guest: '👤',
-  default: '👤'
-};
-
-// Check user role (assuming you have a function that checks this)
-async function getUserRole(uid) {
-  const userRef = doc(db, 'users', uid); // Reference to the user document
-  const userDoc = await getDoc(userRef); // Get the document
-
-  if (userDoc.exists()) {
-    return userDoc.data().role || 'user'; // Default to 'user' if no role is set
-  }
-  return 'guest'; // Default to 'guest' if no user found or role not set
-}
-
-// Fetch and display updated exchange data
-async function getExchangeData() {
-  const sweatexchangeContainer = document.getElementById('sweatexchange-DB');
-  const planets = ['calypso', 'arkadia', 'rocktropia', 'cyrene', 'nextisland', 'toulan', 'monria'];
-
-  try {
-    const querySnapshot = await getDocs(collection(db, 'sweatexchange'));
-    sweatexchangeContainer.innerHTML = ''; // Clear previous content
-
-    // Get the currently signed-in user
-    const user = auth.currentUser;
-    if (!user) {
-      alert("You must be signed in to view exchange data.");
-      return;
-    }
-
-    const userRole = await getUserRole(user.uid); // Check signed-in user role
-    const userUid = user.uid; // Get the signed-in user's UID
-
-    querySnapshot.forEach(async (doc) => {
-      const data = doc.data();
-      const exchangeDiv = document.createElement('div');
-      exchangeDiv.classList.add('exchange-item');
-
-      // Add summary data for sweatexchange-DB
-      let docHTML = `
-        <h3>Exchange Data for ${doc.id}</h3>
-        <p><strong>Sweat Budget:</strong> ${data.budget || 'N/A'}</p>
-        <p><strong>Total Sweat:</strong> ${data.sweat || 'N/A'}</p>
-      `;
-
-      // Fetch items based on user role for sweatexchange-DB
-      const itemsCollection = collection(doc.ref, 'useritems');
-      const itemsSnapshot = await getDocs(itemsCollection);
-
-      if (!itemsSnapshot.empty) {
-        docHTML += `
-          <table border="1" style="border-collapse: collapse; width: 100%;">
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Item Name</th>
-                <th>Amount</th>
-                <th>TT Value</th>
-                <th>Max TT</th>
-                <th>Sweat Cost</th>
-                <th>PED Cost</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-
-        for (const itemDoc of itemsSnapshot.docs) {
-          const itemData = itemDoc.data();
-          const ownerRole = await getUserRole(itemData.ownerId); // Get role of item owner
-          const itemTypeIcon = roleToIcon[ownerRole] || '👤'; // Set icon based on owner's role
-          
-          if (userRole === 'admin' || itemData.ownerId === userUid) {
-            docHTML += `
-              <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
-                <td>${itemTypeIcon}</td>
-                <td>${itemDoc.id}</td>
-                <td>${itemData.amount || 'N/A'}</td>
-                <td>${itemData.tt || 'N/A'}</td>
-                <td>${itemData.ttmax || 'N/A'}</td>
-                <td>${itemData.sweatprice || 'N/A'}</td>
-                <td>${itemData.pedprice || 'N/A'}</td>
-              </tr>
-            `;
-          }
-        }
-
-        docHTML += `</tbody></table>`; // Close the table
-      } else {
-        docHTML += `<p>No items available for this exchange.</p>`;
-      }
-
-      exchangeDiv.innerHTML = docHTML;
-      sweatexchangeContainer.appendChild(exchangeDiv);
-
-      // Populate planet-specific exchange tables with items regardless of user role
-      const planetId = doc.id.toLowerCase(); // Ensure case-insensitive matching
-      if (planets.includes(planetId)) {
-        const planetTable = document.getElementById(`${planetId}-table`);
-        if (planetTable) {
-          let planetTableHTML = '';
-
-          // Fetch items from 'items' collection
-          const planetItemsCollection = collection(doc.ref, 'items'); // Always use 'items' collection
-          const planetItemsSnapshot = await getDocs(planetItemsCollection);
-
-          if (!planetItemsSnapshot.empty) {
-            for (const itemDoc of planetItemsSnapshot.docs) {
-              const itemData = itemDoc.data();
-              const ownerRole = await getUserRole(itemData.ownerId); // Get role of item owner
-              const itemTypeIcon = roleToIcon[ownerRole] || '🌐'; // Icon for public items
-              
-              planetTableHTML += `
-                <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
-                  <td>${itemTypeIcon}</td>
-                  <td>${itemDoc.id}</td>
-                  <td>${itemData.amount || 'N/A'}</td>
-                  <td>${itemData.tt || 'N/A'}</td>
-                  <td>${itemData.ttmax || 'N/A'}</td>
-                  <td>${itemData.sweatprice || 'N/A'}</td>
-                  <td>${itemData.pedprice || 'N/A'}</td>
-                </tr>
-              `;
-            }
-          }
-
-          // Fetch items from 'useritems' collection
-          const planetUserItemsCollection = collection(doc.ref, 'useritems'); // Always use 'useritems' collection
-          const planetUserItemsSnapshot = await getDocs(planetUserItemsCollection);
-
-          if (!planetUserItemsSnapshot.empty) {
-            for (const itemDoc of planetUserItemsSnapshot.docs) {
-              const itemData = itemDoc.data();
-              const ownerRole = await getUserRole(itemData.ownerId); // Get role of item owner
-              const itemTypeIcon = roleToIcon[ownerRole] || '🔒'; // Icon for private items
-              
-              planetTableHTML += `
-                <tr style="background-color: ${index % 2 === 0 ? '#4b0082' : '#800080'};">
-                  <td>${itemTypeIcon}</td>
-                  <td>${itemDoc.id}</td>
-                  <td>${itemData.amount || 'N/A'}</td>
-                  <td>${itemData.tt || 'N/A'}</td>
-                  <td>${itemData.ttmax || 'N/A'}</td>
-                  <td>${itemData.sweatprice || 'N/A'}</td>
-                  <td>${itemData.pedprice || 'N/A'}</td>
-                </tr>
-              `;
-            }
-          }
-
-          planetTable.innerHTML = planetTableHTML; // Update the planet table
-        }
-      }
-    });
-  } catch (error) {
-    console.log("Error getting documents: ", error);
-  }
-}
