@@ -70,7 +70,7 @@ header:hover {
 
 header:hover h1 {
     font-size: 62px;
-    padding-top: 27px;
+    padding-top: 0px;
 }
 
 header p {
@@ -177,8 +177,8 @@ table {
 	width: 100%;
 	border-collapse: collapse;
 	margin: 0px 0;
-	background-color: #1e1e1e;
-	background:linear-gradient(to right, #071223, #0f2c48);
+	background-color: ;
+	background: linear-gradient(to right, #071223, #0f2c48);
 	border: 1px solid #333;
 	border-radius: 8px;
 	overflow: hidden;
