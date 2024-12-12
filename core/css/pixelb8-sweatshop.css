@@ -52,7 +52,7 @@ header {
     border-bottom: 3px solid #0c9898;
     overflow: hidden;
     height: 50px;
-    transition: height 1.3s ease;
+    transition: height 2.3s ease;
 }
 
 /* General h1 styles */
@@ -64,7 +64,7 @@ header h1 {
     padding: 8px 0;
     line-height: 0.8;
     text-shadow: 3px 5px 1px rgb(0 0 0 / 66%), 0 0 10px rgba(12, 152, 152, 0.7), 0 0 20px rgba(12, 152, 152, 0.5);
-    transition: font-size 1.3s ease, padding 1.3s ease;
+    transition: font-size 2.6s smooth, padding 1.3s ease;
 }
 
 /* Hover effect for all headers */
