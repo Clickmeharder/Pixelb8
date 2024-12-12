@@ -352,7 +352,7 @@ async function getExchangeData() {
             planetUserItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
               planetTableHTML += `
-                <tr style="background-color: ${index % 2 === 0 ? '#4b0082' : '#800080'};">
+                <tr style="background-color: ${index % 2 === 0 ? '#3b3542f7' : '#302c39f7'};">
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
                   <td>${itemData.tt || 'N/A'}</td>
