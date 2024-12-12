@@ -297,7 +297,7 @@ async function getExchangeData() {
           const itemData = itemDoc.data();
           if (userRole === 'admin' || itemData.ownerId === userUid) {
             docHTML += `
-              <tr style="background: ${index % 2 === 0 ? 'red' : 'linear-gradient(to right, #071223, #0f2c48)'};">
+              <tr style="">
                 <td>${itemDoc.id}</td>
                 <td>${itemData.amount || 'N/A'}</td>
                 <td>${itemData.tt || 'N/A'}</td>
@@ -332,7 +332,7 @@ async function getExchangeData() {
             planetItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
               planetTableHTML += `
-                <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
+                <tr style="">
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
                   <td>${itemData.tt || 'N/A'}</td>
