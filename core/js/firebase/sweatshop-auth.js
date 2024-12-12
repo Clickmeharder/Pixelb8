@@ -429,6 +429,19 @@ document.getElementById('itemNameInput').addEventListener('change', async functi
     }
 });
 
+// Check user role (assuming you have a function that checks this)
+async function getUserRole() {
+  const user = auth.currentUser;
+  if (user) {
+    const userRef = doc(db, 'users', user.uid); // Reference to the user document
+    const userDoc = await getDoc(userRef); // Get the document
+
+    if (userDoc.exists()) {
+      return userDoc.data().role || 'user'; // Default to 'user' if no role is set
+    }
+  }
+  return 'user'; // Default to 'user' if no user found or role not set
+}
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
