@@ -342,6 +342,7 @@ document.getElementById('planetSelect').addEventListener('change', async functio
     const planet = this.value;
     const itemNameSelect = document.getElementById('itemNameInput'); // Corrected ID
     const userRole = await getUserRole(); // Check user role
+    const userUid = getUserUid(); // Assuming function to get user's UID
 
     // Clear the itemName dropdown and add the default option
     itemNameSelect.innerHTML = '';
@@ -356,8 +357,11 @@ document.getElementById('planetSelect').addEventListener('change', async functio
 
         // Populate the item select options
         itemsSnapshot.forEach((itemDoc) => {
-            const itemName = itemDoc.id;
-            itemNameSelect.appendChild(new Option(itemName, itemName));
+            const itemData = itemDoc.data();
+            if (userRole === 'admin' || itemData.ownerId === userUid) {
+                const itemName = itemDoc.id;
+                itemNameSelect.appendChild(new Option(itemName, itemName));
+            }
         });
     } catch (error) {
         console.error("Error fetching items: ", error);
@@ -368,6 +372,7 @@ document.getElementById('planetSelect').addEventListener('change', async functio
 document.getElementById('itemNameInput').addEventListener('change', async function () {
     const selectedItem = this.value;
     const userRole = await getUserRole(); // Check user role
+    const userUid = getUserUid(); // Assuming function to get user's UID
 
     if (selectedItem === "Default") {
         // Clear input fields when "Select Item" is chosen
@@ -389,11 +394,15 @@ document.getElementById('itemNameInput').addEventListener('change', async functi
 
         if (itemDoc.exists()) {
             const itemData = itemDoc.data();
-            document.getElementById('amountInput').value = itemData.amount || '';
-            document.getElementById('sweatpriceInput').value = itemData.sweatprice || '';
-            document.getElementById('pedpriceInput').value = itemData.pedprice || '';
-            document.getElementById('ttmaxInput').value = itemData.ttmax || '';
-            document.getElementById('ttInput').value = itemData.tt || '';
+            if (userRole === 'admin' || itemData.ownerId === userUid) {
+                document.getElementById('amountInput').value = itemData.amount || '';
+                document.getElementById('sweatpriceInput').value = itemData.sweatprice || '';
+                document.getElementById('pedpriceInput').value = itemData.pedprice || '';
+                document.getElementById('ttmaxInput').value = itemData.ttmax || '';
+                document.getElementById('ttInput').value = itemData.tt || '';
+            } else {
+                alert("You can only edit your own items.");
+            }
         } else {
             console.log("Item not found!");
         }
@@ -401,7 +410,6 @@ document.getElementById('itemNameInput').addEventListener('change', async functi
         console.error("Error fetching item data: ", error);
     }
 });
-
 
 // Check user role (assuming you have a function that checks this)
 async function getUserRole() {
