@@ -297,7 +297,7 @@ async function getExchangeData() {
           const itemData = itemDoc.data();
           if (userRole === 'admin' || itemData.ownerId === userUid) {
             docHTML += `
-              <tr style="background-color: ${index % 2 === 0 ? 'linear-gradient(to right, #071223, #0f2c48)' : 'linear-gradient(to left, #071223, #0f2c48)'};">
+              <tr style="color: firebrick;background-color: ${index % 2 === 0 ? 'linear-gradient(to right, #071223, #0f2c48)' : 'linear-gradient(to left, #071223, #0f2c48)'};">
                 <td>${itemDoc.id}</td>
                 <td>${itemData.amount || 'N/A'}</td>
                 <td>${itemData.tt || 'N/A'}</td>
