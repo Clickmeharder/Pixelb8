@@ -34,16 +34,16 @@ Limited	20	Shotgun (SA)	1025 bottles	2.10 PED (+0.10)
 	
 	// Role to icon mapping
 	const roleToIcon = {
-	  ceo: '👑',
-	  admin: '⭐',
-	  mod: '🛡️',
-	  susrep: '💼',
-	  vip: '🌟',
-	  associate: '🤝',
-	  verified: '✔️',
-	  user: '🙂',
-	  guest: '👤',
-	  default: '👤'
+	  ceo: '👑CEO',
+	  admin: '⭐SUS',
+	  mod: '🛡️MOD',
+	  susrep: '💼REP',
+	  vip: '🌟VIP',
+	  associate: '🤝Associate',
+	  verified: '✔️Verified',
+	  user: '🙂User',
+	  guest: '👤Guest',
+	  default: '👤Default'
 	};
 
     async function getGitHubUserData(githubIdOrLogin) {
@@ -272,8 +272,8 @@ async function getExchangeData() {
       return;
     }
 
-    const userRole = await getUserRole(); // Check user role
-    const userUid = user.uid; // Get the user's UID
+    const userRole = await getUserRole(user.uid); // Check signed-in user role
+    const userUid = user.uid; // Get the signed-in user's UID
 
     querySnapshot.forEach(async (doc) => {
       const data = doc.data();
@@ -288,7 +288,7 @@ async function getExchangeData() {
       `;
 
       // Fetch items based on user role for sweatexchange-DB
-      const itemsCollection = userRole === 'admin' ? collection(doc.ref, 'items') : collection(doc.ref, 'useritems');
+      const itemsCollection = collection(doc.ref, 'useritems');
       const itemsSnapshot = await getDocs(itemsCollection);
 
       if (!itemsSnapshot.empty) {
@@ -308,9 +308,11 @@ async function getExchangeData() {
             <tbody>
         `;
 
-        itemsSnapshot.forEach((itemDoc, index) => {
+        for (const itemDoc of itemsSnapshot.docs) {
           const itemData = itemDoc.data();
-          const itemTypeIcon = userRole === 'admin' ? roleToIcon[itemData.role] || '👤' : roleToIcon[userRole]; // Set icon based on role
+          const ownerRole = await getUserRole(itemData.ownerId); // Get role of item owner
+          const itemTypeIcon = roleToIcon[ownerRole] || '👤'; // Set icon based on owner's role
+          
           if (userRole === 'admin' || itemData.ownerId === userUid) {
             docHTML += `
               <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
@@ -324,7 +326,7 @@ async function getExchangeData() {
               </tr>
             `;
           }
-        });
+        }
 
         docHTML += `</tbody></table>`; // Close the table
       } else {
@@ -346,9 +348,11 @@ async function getExchangeData() {
           const planetItemsSnapshot = await getDocs(planetItemsCollection);
 
           if (!planetItemsSnapshot.empty) {
-            planetItemsSnapshot.forEach((itemDoc, index) => {
+            for (const itemDoc of planetItemsSnapshot.docs) {
               const itemData = itemDoc.data();
-              const itemTypeIcon = '🌐'; // Icon for public items
+              const ownerRole = await getUserRole(itemData.ownerId); // Get role of item owner
+              const itemTypeIcon = roleToIcon[ownerRole] || '🌐'; // Icon for public items
+              
               planetTableHTML += `
                 <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
                   <td>${itemTypeIcon}</td>
@@ -360,7 +364,7 @@ async function getExchangeData() {
                   <td>${itemData.pedprice || 'N/A'}</td>
                 </tr>
               `;
-            });
+            }
           }
 
           // Fetch items from 'useritems' collection
@@ -368,9 +372,11 @@ async function getExchangeData() {
           const planetUserItemsSnapshot = await getDocs(planetUserItemsCollection);
 
           if (!planetUserItemsSnapshot.empty) {
-            planetUserItemsSnapshot.forEach((itemDoc, index) => {
+            for (const itemDoc of planetUserItemsSnapshot.docs) {
               const itemData = itemDoc.data();
-              const itemTypeIcon = '🔒'; // Icon for private items
+              const ownerRole = await getUserRole(itemData.ownerId); // Get role of item owner
+              const itemTypeIcon = roleToIcon[ownerRole] || '🔒'; // Icon for private items
+              
               planetTableHTML += `
                 <tr style="background-color: ${index % 2 === 0 ? '#4b0082' : '#800080'};">
                   <td>${itemTypeIcon}</td>
@@ -382,7 +388,7 @@ async function getExchangeData() {
                   <td>${itemData.pedprice || 'N/A'}</td>
                 </tr>
               `;
-            });
+            }
           }
 
           planetTable.innerHTML = planetTableHTML; // Update the planet table
@@ -733,7 +739,6 @@ async function getUserRole() {
 	getExchangeData();
 	
 //hmmm
-
 
 
 
