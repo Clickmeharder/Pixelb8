@@ -194,7 +194,10 @@ tr:nth-child(even) {
 	background: linear-gradient(to left, #071223, #0f2c48);
 }
 tr:hover {
-	background-color: #333;
+	background: linear-gradient(to left, #071223, #0f2c48);
+}
+tr:nth-child(even):hover {
+	background: linear-gradient(to right, #071223, #0f2c48);
 }
 /* Footer */
 footer {
