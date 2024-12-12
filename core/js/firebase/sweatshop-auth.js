@@ -176,8 +176,7 @@ const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt
   }
 };
 
-// Function to add or delete item for admin users
-const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax, action) => {
+const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax, action, user) => {
   // If the action is delete, remove the item
   if (action === 'delete') {
     try {
@@ -193,16 +192,28 @@ const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, t
     return; // Exit the function early
   }
 
-  // If action is not delete, proceed to add/update item
-  const newItem = {
-    amount: parseInt(amount),
-    sweatprice,
-    pedprice,
-    ttmax,
-    tt,
-  };
-
   try {
+    // Fetch the admin's entropianame
+    const userDocRef = doc(db, `users/${user.uid}`);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      alert("Admin user data not found. Cannot add item.");
+      return;
+    }
+
+    const { entropianame } = userDoc.data();
+
+    // Prepare the new item data
+    const newItem = {
+      amount: parseInt(amount),
+      sweatprice: parseFloat(sweatprice),
+      pedprice: parseFloat(pedprice),
+      tt: parseFloat(tt),
+      ttmax: parseFloat(ttmax),
+      entropianame, // Add the entropianame to the item data
+    };
+
     const itemDocRef = doc(db, `sweatexchange/${planet}/items`, itemName);
     const itemDoc = await getDoc(itemDocRef);
 
@@ -215,8 +226,9 @@ const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, t
     }
 
     getExchangeData();
+
     // Clear input fields
-    document.getElementById(currentItemNameInputId).value = '';
+    document.getElementById('itemNameInput').value = '';
     document.getElementById('amountInput').value = '';
     document.getElementById('sweatpriceInput').value = '';
     document.getElementById('pedpriceInput').value = '';
@@ -227,7 +239,6 @@ const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, t
     alert("Failed to add/update item. Please try again.");
   }
 };
-
 // Form submission event listener
 document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   e.preventDefault();
