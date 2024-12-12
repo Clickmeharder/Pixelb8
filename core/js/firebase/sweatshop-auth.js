@@ -340,7 +340,7 @@ async function getExchangeData() {
           if (userRole === 'admin' || itemData.ownerId === userUid) {
             const itemTypeIcon = itemsCollection === 'items' ? '⭐sus' : '👤Shady'; // Icons for public and private items
             docHTML += `
-              <tr style="">
+              <tr title="Posted by: ${itemDoc.entropianame}">
                 <td>${itemTypeIcon}</td>
                 <td>${itemDoc.id}</td>
                 <td>${itemData.amount || 'N/A'}</td>
@@ -377,7 +377,7 @@ async function getExchangeData() {
               const itemData = itemDoc.data();
               const itemTypeIcon = '⭐sus'; // Icon for public items
               planetTableHTML += `
-                <tr style="">
+			<tr title="Posted by: ${itemDoc.entropianame}">
                   <td>${itemTypeIcon}</td>
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
@@ -399,7 +399,7 @@ async function getExchangeData() {
               const itemData = itemDoc.data();
               const itemTypeIcon = '👤user'; // Icon for private items
               planetTableHTML += `
-                <tr style="">
+                <tr title="Posted by: ${itemDoc.entropianame}">
                   <td>${itemTypeIcon}</td>
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
