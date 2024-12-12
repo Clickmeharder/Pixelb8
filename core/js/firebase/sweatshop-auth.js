@@ -242,49 +242,87 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
 });
 
 // Fetch and display updated exchange data
-function getExchangeData() {
+async function getExchangeData() {
   const sweatexchangeContainer = document.getElementById('sweatexchange-DB');
   const planets = ['calypso', 'arkadia', 'rocktropia', 'cyrene', 'nextisland', 'toulan', 'monria'];
 
-  getDocs(collection(db, 'sweatexchange'))
-    .then((querySnapshot) => {
-      sweatexchangeContainer.innerHTML = ''; // Clear previous content
+  try {
+    const querySnapshot = await getDocs(collection(db, 'sweatexchange'));
+    sweatexchangeContainer.innerHTML = ''; // Clear previous content
 
-      querySnapshot.forEach(async (doc) => {
-        const data = doc.data();
-        const exchangeDiv = document.createElement('div');
-        exchangeDiv.classList.add('exchange-item');
+    // Get the currently signed-in user
+    const user = auth.currentUser;
+    if (!user) {
+      alert("You must be signed in to view exchange data.");
+      return;
+    }
 
-        // Add summary data for sweatexchange-DB
-        let docHTML = `
-          <h3>Exchange Data for ${doc.id}</h3>
-          <p><strong>Sweat Budget:</strong> ${data.budget || 'N/A'}</p>
-          <p><strong>Total Sweat:</strong> ${data.sweat || 'N/A'}</p>
+    const userRole = await getUserRole(); // Check user role
+
+    querySnapshot.forEach(async (doc) => {
+      const data = doc.data();
+      const exchangeDiv = document.createElement('div');
+      exchangeDiv.classList.add('exchange-item');
+
+      // Add summary data for sweatexchange-DB
+      let docHTML = `
+        <h3>Exchange Data for ${doc.id}</h3>
+        <p><strong>Sweat Budget:</strong> ${data.budget || 'N/A'}</p>
+        <p><strong>Total Sweat:</strong> ${data.sweat || 'N/A'}</p>
+      `;
+
+      // Fetch items based on user role
+      const itemsCollection = userRole === 'admin' ? collection(doc.ref, 'items') : collection(doc.ref, 'useritems');
+      const itemsSnapshot = await getDocs(itemsCollection);
+
+      if (!itemsSnapshot.empty) {
+        docHTML += `
+          <table border="1" style="border-collapse: collapse; width: 100%;">
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Amount</th>
+                <th>TT Value</th>
+                <th>Max TT</th>
+                <th>Sweat Cost</th>
+                <th>PED Cost</th>
+              </tr>
+            </thead>
+            <tbody>
         `;
 
-        // Fetch items and create a table for sweatexchange-DB
-        const itemsCollection = collection(doc.ref, 'items');
-        const itemsSnapshot = await getDocs(itemsCollection);
-
-        if (!itemsSnapshot.empty) {
+        itemsSnapshot.forEach((itemDoc) => {
+          const itemData = itemDoc.data();
           docHTML += `
-            <table border="1" style="border-collapse: collapse; width: 100%;">
-              <thead>
-                <tr>
-                  <th>Item Name</th>
-                  <th>Amount</th>
-                  <th>TT Value</th>
-                  <th>Max TT</th>
-                  <th>Sweat Cost</th>
-                  <th>PED Cost</th>
-                </tr>
-              </thead>
-              <tbody>
+            <tr>
+              <td>${itemDoc.id}</td>
+              <td>${itemData.amount || 'N/A'}</td>
+              <td>${itemData.tt || 'N/A'}</td>
+              <td>${itemData.ttmax || 'N/A'}</td>
+              <td>${itemData.sweatprice || 'N/A'}</td>
+              <td>${itemData.pedprice || 'N/A'}</td>
+            </tr>
           `;
+        });
+
+        docHTML += `</tbody></table>`; // Close the table
+      } else {
+        docHTML += `<p>No items available for this exchange.</p>`;
+      }
+
+      exchangeDiv.innerHTML = docHTML;
+      sweatexchangeContainer.appendChild(exchangeDiv);
+
+      // Populate planet-specific exchange tables
+      const planetId = doc.id.toLowerCase(); // Ensure case-insensitive matching
+      if (planets.includes(planetId)) {
+        const planetTable = document.getElementById(`${planetId}-table`);
+        if (planetTable) {
+          let planetTableHTML = '';
 
           itemsSnapshot.forEach((itemDoc) => {
             const itemData = itemDoc.data();
-            docHTML += `
+            planetTableHTML += `
               <tr>
                 <td>${itemDoc.id}</td>
                 <td>${itemData.amount || 'N/A'}</td>
@@ -296,43 +334,13 @@ function getExchangeData() {
             `;
           });
 
-          docHTML += `</tbody></table>`; // Close the table
-        } else {
-          docHTML += `<p>No items available for this exchange.</p>`;
+          planetTable.innerHTML = planetTableHTML; // Update the planet table
         }
-
-        exchangeDiv.innerHTML = docHTML;
-        sweatexchangeContainer.appendChild(exchangeDiv);
-
-        // Populate planet-specific exchange tables
-        const planetId = doc.id.toLowerCase(); // Ensure case-insensitive matching
-        if (planets.includes(planetId)) {
-          const planetTable = document.getElementById(`${planetId}-table`);
-          if (planetTable) {
-            let planetTableHTML = '';
-
-            itemsSnapshot.forEach((itemDoc) => {
-              const itemData = itemDoc.data();
-              planetTableHTML += `
-                <tr>
-                  <td>${itemDoc.id}</td>
-                  <td>${itemData.amount || 'N/A'}</td>
-                  <td>${itemData.tt || 'N/A'}</td>
-                  <td>${itemData.ttmax || 'N/A'}</td>
-                  <td>${itemData.sweatprice || 'N/A'}</td>
-                  <td>${itemData.pedprice || 'N/A'}</td>
-                </tr>
-              `;
-            });
-
-            planetTable.innerHTML = planetTableHTML; // Update the planet table
-          }
-        }
-      });
-    })
-    .catch((error) => {
-      console.log("Error getting documents: ", error);
+      }
     });
+  } catch (error) {
+    console.log("Error getting documents: ", error);
+  }
 }
 
 
