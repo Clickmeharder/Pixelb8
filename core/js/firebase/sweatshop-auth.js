@@ -259,6 +259,7 @@ async function getExchangeData() {
     }
 
     const userRole = await getUserRole(); // Check user role
+    const userUid = user.uid; // Get the user's UID
 
     querySnapshot.forEach(async (doc) => {
       const data = doc.data();
@@ -294,16 +295,19 @@ async function getExchangeData() {
 
         itemsSnapshot.forEach((itemDoc) => {
           const itemData = itemDoc.data();
-          docHTML += `
-            <tr>
-              <td>${itemDoc.id}</td>
-              <td>${itemData.amount || 'N/A'}</td>
-              <td>${itemData.tt || 'N/A'}</td>
-              <td>${itemData.ttmax || 'N/A'}</td>
-              <td>${itemData.sweatprice || 'N/A'}</td>
-              <td>${itemData.pedprice || 'N/A'}</td>
-            </tr>
-          `;
+          // Check if the user role is not admin and the ownerId matches the user's UID
+          if (userRole === 'admin' || itemData.ownerId === userUid) {
+            docHTML += `
+              <tr>
+                <td>${itemDoc.id}</td>
+                <td>${itemData.amount || 'N/A'}</td>
+                <td>${itemData.tt || 'N/A'}</td>
+                <td>${itemData.ttmax || 'N/A'}</td>
+                <td>${itemData.sweatprice || 'N/A'}</td>
+                <td>${itemData.pedprice || 'N/A'}</td>
+              </tr>
+            `;
+          }
         });
 
         docHTML += `</tbody></table>`; // Close the table
@@ -348,6 +352,7 @@ async function getExchangeData() {
     console.log("Error getting documents: ", error);
   }
 }
+
 
 
 
