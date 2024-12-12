@@ -573,8 +573,8 @@ async function getUserRole() {
 		  userprofileTab.classList.add('Active');
 		  userprofileBox.classList.remove('hidden');
 		  userprofileBox.classList.add('Active');
-		  receptionTab.classList.add('hidden');
-		  receptionBox.classList.add('hidden');
+/* 		  receptionTab.classList.add('hidden');
+		  receptionBox.classList.add('hidden'); */
           const userName = encodeURIComponent(user.displayName || "Guest");
           const userEmail = encodeURIComponent(user.email || "");
 
@@ -619,8 +619,8 @@ async function getUserRole() {
 		userprofileTab.classList.add('hidden');
 		userprofileBox.classList.remove('Active');
 		userprofileBox.classList.add('hidden');
-		receptionTab.classList.add('Active');
-		receptionBox.classList.add('Avtive');
+/* 		receptionTab.classList.add('Active');
+		receptionBox.classList.add('Avtive'); */
 		console.log("User is not signed in.");
       }
 

@@ -156,25 +156,28 @@ h3 {
 }
 .tab {
 	font-family: 'Yatra One';
-	font-size: 16px;
-	font-weight: normal;
-	text-align: center;
-	width: 16%;
-	padding: 10px 20px;
-	cursor: pointer;
-	color: #80808096;
-	background: #2c2c2c;
-	border: 1px outset #4c4c4c;
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
+    font-size: 16px;
+    font-weight: normal;
+    text-align: center;
+    width: 16%;
+    margin-top: auto;
+    padding: 6px 10px;
+    cursor: pointer;
+    color: #80808096;
+    background: #2c2c2c;
+    border: 1px outset #4c4c4c;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 }
 .tab:hover {
 	background: #444;
 }
 .tab.active {
 	background: #063440e6;
-	color: #ff98009e;
-	font-weight: bold;
+    color: #ff98009e;
+    font-weight: bold;
+    line-height: 0.85;
+    max-height: 30px;
 }
 /* Tab Content */
 .tab-content {
@@ -319,12 +322,12 @@ p.\.bottleval {
 	/* Media query for mobile devices */
 @media (max-width: 768px) {
 	.tab {
-		font-size: 16px;
-		font-weight: normal;
-		text-align: center;
-		width: 19%;
-		padding: 10px 1px;
-		line-height: 0.85;
+		font-size: 15px;
+        font-weight: normal;
+        text-align: center;
+        width: 19%;
+        padding: 6px 1px;
+        line-height: 0.85;
 	}
 	.purchasedesk, .salesdesk {
 		width: 100vw;
