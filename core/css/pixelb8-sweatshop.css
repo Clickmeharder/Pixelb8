@@ -73,8 +73,11 @@ header:hover {
 	margin-top: 0px;
 }
 /* Hover effect for all headers */
+header p {
+	margin-top: 2px;
+}
 header:hover p {
-	margin-top: -6px;
+	margin-top: 2px;
 }
 /* Apply specific styles to non-susheader h1 */
 header:hover h1 {
