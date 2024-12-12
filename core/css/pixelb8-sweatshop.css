@@ -75,11 +75,6 @@ header:hover h1 {
 header:hover h1 {
 
 }
-header:not(.susheader):hover h1 {
-    font-size: 62px;
-    padding-top: 27px;
-}
-
 header.susheader:hover h1 {
     padding-top: 0px;
     margin-bottom: 6px;
