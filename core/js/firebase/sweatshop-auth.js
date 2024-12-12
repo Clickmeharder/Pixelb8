@@ -297,7 +297,7 @@ async function getExchangeData() {
         itemsSnapshot.forEach((itemDoc, index) => {
           const itemData = itemDoc.data();
           if (userRole === 'admin' || itemData.ownerId === userUid) {
-            const itemTypeIcon = itemsCollection === 'items' ? '🌐' : '🔒'; // Icons for public and private items
+            const itemTypeIcon = itemsCollection === 'items' ? '⭐sus' : '👤Shady'; // Icons for public and private items
             docHTML += `
               <tr style="">
                 <td>${itemTypeIcon}</td>
