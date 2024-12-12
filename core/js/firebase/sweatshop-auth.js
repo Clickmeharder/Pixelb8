@@ -334,7 +334,7 @@ async function getExchangeData() {
           if (!planetItemsSnapshot.empty) {
             planetItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
-              const itemTypeIcon = '🌐'; // Icon for public items
+              const itemTypeIcon = '⭐'; // Icon for public items
               planetTableHTML += `
                 <tr style="">
                   <td>${itemTypeIcon}</td>
@@ -356,7 +356,7 @@ async function getExchangeData() {
           if (!planetUserItemsSnapshot.empty) {
             planetUserItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
-              const itemTypeIcon = '🔒'; // Icon for private items
+              const itemTypeIcon = '👤'; // Icon for private items
               planetTableHTML += `
                 <tr style="">
                   <td>${itemTypeIcon}</td>
