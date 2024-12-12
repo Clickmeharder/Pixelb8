@@ -1,13 +1,13 @@
 //sweatshop.js
 // firebase/sweatshop-auth.js
 /* 
-Availability	# in Stock	Item	Buy with Sweat	Buy with PED
-Yes	30 ish	B101 Amp	110 bottles	0.18 PED (225%)
-Yes	99+	Sollomate Rubio	123 bottles	0.20 PED (225%)
-Yes	50 ish	EP-2 Proton	321 bottles	0.50 PED (250%)
-Yes	99+	Sollomate Azuro	800 bottles	1.40 PED (200%)
-Yes	99+	Skildek Lancehead	200 bottles	0.30 PED (170%)
-Limited	20	Shotgun (SA)	1025 bottles	2.10 PED (+0.10) 
+#, Item, tt, ttmax, sweatprice, pedcost
+30,	B101 Amp,0.00,0.00, 110,0.18
+99+, Sollomate Rubio,0.00,0.00, 123, 0.20
+50, EP-2 Proton,0.00,0.00, 321, 0.50
+99, Sollomate Azuro,0.00,0.00, 800, 1.40
+99, Skildek Lancehead, 0.00,0.00,200, 0.30
+20, Shotgun (SA), 0.00,0.00, 1025, 2.10
 */
 	//import scripts
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
