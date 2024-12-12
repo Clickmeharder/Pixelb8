@@ -282,6 +282,63 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   }
 });
 
+function attachRowClickListeners() {
+  const rows = document.querySelectorAll('.exchange-item tr');
+  rows.forEach(row => {
+    row.addEventListener('click', function() {
+      const ownerId = this.getAttribute('data-owner-id');
+      showUserDetails(ownerId);
+    });
+  });
+}
+
+
+
+// Function to fetch and display user details based on ownerId
+async function showUserDetails(ownerId) {
+  const userDetailsDiv = document.getElementById('user-details'); // The div where user details will be shown
+  const entropiaNameSpan = document.getElementById('entropia-name');
+  const statusSpan = document.getElementById('status');
+  const lastLoginSpan = document.getElementById('last-login');
+  
+  try {
+    // Fetch user data from the users collection
+    const userDoc = await getDoc(doc(db, 'users', ownerId)); // Firestore collection name: 'users'
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      
+      // Extract necessary data
+      const now = new Date();
+      const lastLogin = userData.lastLogin ? new Date(userData.lastLogin) : null;
+      const isOnline = userData.isOnline || false;
+      const timeSinceLastLogin = lastLogin
+        ? `${Math.floor((now - lastLogin) / (1000 * 60 * 60 * 24))} days ago`
+        : 'Unknown';
+
+      // Display user details in the corresponding spans
+      entropiaNameSpan.innerText = userData.entropiaName || 'N/A';
+      statusSpan.innerText = isOnline ? 'Online' : `Offline (${timeSinceLastLogin})`;
+      lastLoginSpan.innerText = lastLogin ? lastLogin.toLocaleString() : 'N/A';
+
+      // Show the details div
+      userDetailsDiv.style.display = 'block';
+    } else {
+      userDetailsDiv.innerHTML = `<p>User data not found.</p>`;
+      userDetailsDiv.style.display = 'block';
+    }
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    userDetailsDiv.innerHTML = `<p>Error fetching user details. Please try again later.</p>`;
+    userDetailsDiv.style.display = 'block';
+  }
+}
+
+// Function to close the user details div
+function closeUserDetails() {
+  const userDetailsDiv = document.getElementById('user-details');
+  userDetailsDiv.style.display = 'none';
+}
+
 
 // Fetch and display updated exchange data
 async function getExchangeData() {
@@ -340,7 +397,7 @@ async function getExchangeData() {
           if (userRole === 'admin' || itemData.ownerId === userUid) {
             const itemTypeIcon = itemsCollection === 'items' ? '⭐sus' : '👤Shady'; // Icons for public and private items
             docHTML += `
-              <tr title="Posted by: ${itemData.entropiaName || 'Unknown'}">
+              <tr data-owner-id="${itemData.ownerId}" title="Posted by: ${itemData.entropiaName || 'Unknown'}">
                 <td>${itemTypeIcon}</td>
                 <td>${itemDoc.id}</td>
                 <td>${itemData.amount || 'N/A'}</td>
@@ -360,7 +417,7 @@ async function getExchangeData() {
 
       exchangeDiv.innerHTML = docHTML;
       sweatexchangeContainer.appendChild(exchangeDiv);
-
+	  attachRowClickListeners();
       // Populate planet-specific exchange tables with items regardless of user role
       const planetId = doc.id.toLowerCase(); // Ensure case-insensitive matching
       if (planets.includes(planetId)) {
@@ -377,7 +434,7 @@ async function getExchangeData() {
               const itemData = itemDoc.data();
               const itemTypeIcon = '⭐sus'; // Icon for public items
               planetTableHTML += `
-                <tr title="Posted by: ${itemData.entropiaName || 'Unknown'}">
+                <tr data-owner-id="${itemData.ownerId}" title="Posted by: ${itemData.entropiaName || 'Unknown'}">
                   <td>${itemTypeIcon}</td>
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
@@ -399,7 +456,7 @@ async function getExchangeData() {
               const itemData = itemDoc.data();
               const itemTypeIcon = '👤user'; // Icon for private items
               planetTableHTML += `
-                <tr title="Posted by: ${itemData.entropiaName || 'Unknown'}">
+                <tr data-owner-id="${itemData.ownerId}" title="Posted by: ${itemData.entropiaName || 'Unknown'}">
                   <td>${itemTypeIcon}</td>
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
@@ -413,6 +470,8 @@ async function getExchangeData() {
           }
 
           planetTable.innerHTML = planetTableHTML; // Update the planet table
+		  // Call this function after generating the table rows
+		  attachRowClickListeners();
         }
       }
     });
