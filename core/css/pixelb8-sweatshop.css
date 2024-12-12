@@ -158,6 +158,8 @@ h3 {
 }
 /* Table Styles */
 table {
+	color: dimgray;
+    font-weight: bold;
 	width: 100%;
 	border-collapse: collapse;
 	margin: 0px 0;
