@@ -92,17 +92,28 @@ document.getElementById('actionSelect').addEventListener('change', toggleItemNam
 
 // Function to add or delete item for regular users
 const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax, user, action) => {
-  // If the action is delete, remove the item
+  const targetCollectionPath = `sweatexchange/${planet}/useritems`;
+  const targetCollection = collection(db, targetCollectionPath);
+
+  // If the action is delete, check the ownerId and remove the item if it matches
   if (action === 'delete') {
     try {
-      const targetCollectionPath = `sweatexchange/${planet}/useritems`;
-      const targetCollection = collection(db, targetCollectionPath);
-
       const docRef = doc(targetCollection, itemName);
-      await deleteDoc(docRef); // Delete the document
+      const docSnapshot = await getDoc(docRef);
 
-      alert("Item deleted successfully!");
-      getExchangeData(); // Refresh data
+      if (docSnapshot.exists()) {
+        const itemData = docSnapshot.data();
+        if (itemData.ownerId === user.uid) {
+          await deleteDoc(docRef); // Delete the document
+
+          alert("Item deleted successfully!");
+          getExchangeData(); // Refresh data
+        } else {
+          alert("You can only delete your own exchange items.");
+        }
+      } else {
+        alert("Item not found.");
+      }
     } catch (error) {
       console.error("Error deleting item:", error);
       alert("Failed to delete item. Please try again.");
@@ -122,9 +133,6 @@ const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt
   };
 
   try {
-    const targetCollectionPath = `sweatexchange/${planet}/useritems`;
-    const targetCollection = collection(db, targetCollectionPath);
-
     const docRef = doc(targetCollection, itemName);
     await setDoc(docRef, newItem);
 
@@ -136,6 +144,7 @@ const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt
     alert("Failed to add item. Please try again.");
   }
 };
+
 
 // Function to add or delete item for admin users
 const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax, action) => {
