@@ -57,10 +57,10 @@ header {
 header h1 {
     font-family: 'Yatra One', sans-serif;
     font-size: 32px;
-    margin: 0;
-    padding: 10px 0;
-    line-height: 1;
-    text-shadow: 3px 5px 1px rgb(0 0 0 / 66%), 0 0 10px rgba(12, 152, 152, 0.7), 0 0 20px rgba(12, 152, 152, 0.5);
+	margin: 0;
+	padding: 10px 0;
+	line-height: 0.80;
+	text-shadow: 3px 5px 1px rgb(0 0 0 / 66%), 0 0 10px rgba(12, 152, 152, 0.7), 0 0 20px rgba(12, 152, 152, 0.5);
     transition: font-size 1.3s ease, padding 1.3s ease;
 }
 
@@ -71,6 +71,7 @@ header:hover {
 header:hover h1 {
     font-size: 62px;
     padding-top: 0px;
+	line-height: 0.80;
 }
 
 header p {
