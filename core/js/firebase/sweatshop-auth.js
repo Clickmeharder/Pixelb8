@@ -480,7 +480,6 @@ async function getExchangeData() {
   }
 }
 
-
 // Handle planet change and update item list
 document.getElementById('planetSelect').addEventListener('change', async function () {
     const planet = this.value;
