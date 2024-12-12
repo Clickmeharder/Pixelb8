@@ -422,9 +422,6 @@ async function getExchangeData() {
 }
 
 
-
-
-
 // Handle planet change and update item list
 document.getElementById('planetSelect').addEventListener('change', async function () {
     const planet = this.value;
@@ -530,6 +527,33 @@ async function getUserRole() {
   }
   return 'guest'; // Default to 'guest' if no user found or role not set
 }
+
+// Function to update the user's status in Firebase
+async function updateStatusInFirebase(status) {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("You must be signed in to update your status.");
+    return;
+  }
+
+  try {
+    // Update the user's online status in the 'users' collection
+    const userDocRef = doc(db, 'users', user.uid);
+    await updateDoc(userDocRef, {
+      isOnline: status,
+      lastStatusChange: new Date() // Optionally track the last time the status was updated
+    });
+    console.log(`Status updated to: ${status}`);
+  } catch (error) {
+    console.error('Error updating status:', error);
+  }
+}
+
+// Event listener to handle status change when the user selects an option
+document.getElementById('save-status').addEventListener('click', async () => {
+  const status = document.getElementById('status-toggle').value;
+  await updateStatusInFirebase(status);
+});
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
