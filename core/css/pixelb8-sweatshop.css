@@ -219,7 +219,7 @@ th {
 	line-height: 0.8;
 }
 tr:nth-child(even) {
-	background-color: #252525;
+	background: linear-gradient(to right, #071223, #0f2c48);
 }
 tr:hover {
 	background: linear-gradient(to left, #071223, #0f2c48);
