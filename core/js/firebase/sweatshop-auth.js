@@ -293,11 +293,11 @@ async function getExchangeData() {
             <tbody>
         `;
 
-        itemsSnapshot.forEach((itemDoc) => {
+        itemsSnapshot.forEach((itemDoc, index) => {
           const itemData = itemDoc.data();
           if (userRole === 'admin' || itemData.ownerId === userUid) {
             docHTML += `
-              <tr style="background-color: ${userRole === 'admin' || itemData.ownerId !== userUid ? '#dff0d8' : '#f2dede'};">
+              <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
                 <td>${itemDoc.id}</td>
                 <td>${itemData.amount || 'N/A'}</td>
                 <td>${itemData.tt || 'N/A'}</td>
@@ -329,10 +329,10 @@ async function getExchangeData() {
           const planetItemsSnapshot = await getDocs(planetItemsCollection);
 
           if (!planetItemsSnapshot.empty) {
-            planetItemsSnapshot.forEach((itemDoc) => {
+            planetItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
               planetTableHTML += `
-                <tr style="background-color: #dff0d8;">
+                <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
                   <td>${itemData.tt || 'N/A'}</td>
@@ -349,10 +349,10 @@ async function getExchangeData() {
           const planetUserItemsSnapshot = await getDocs(planetUserItemsCollection);
 
           if (!planetUserItemsSnapshot.empty) {
-            planetUserItemsSnapshot.forEach((itemDoc) => {
+            planetUserItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
               planetTableHTML += `
-                <tr style="background-color: #f2dede;">
+                <tr style="background-color: ${index % 2 === 0 ? '#4b0082' : '#800080'};">
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
                   <td>${itemData.tt || 'N/A'}</td>
