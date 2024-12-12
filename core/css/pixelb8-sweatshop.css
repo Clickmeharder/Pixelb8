@@ -50,6 +50,15 @@ header {
 	color: #d07c0d9c;
 	margin-top: 4px;
 	border-bottom: 3px solid #0c9898;
+	overflow: hidden;
+    height: 50px;
+	transition: height 1.3s ease;
+}
+header:hover {
+    margin-top: 0px;
+    border-bottom: 3px solid #0c9898;
+    overflow: hidden;
+    height: 157px;
 }
 header h1 {
 	font-family: 'Yatra One', sans-serif;
