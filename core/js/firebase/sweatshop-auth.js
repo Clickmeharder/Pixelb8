@@ -293,7 +293,6 @@ function attachRowClickListeners() {
 }
 
 
-
 // Function to fetch and display user details based on ownerId
 async function showUserDetails(ownerId) {
   const userDetailsDiv = document.getElementById('user-details'); // The div where user details will be shown
@@ -333,11 +332,7 @@ async function showUserDetails(ownerId) {
   }
 }
 
-// Function to close the user details div
-function closeUserDetails() {
-  const userDetailsDiv = document.getElementById('user-details');
-  userDetailsDiv.style.display = 'none';
-}
+
 
 
 // Fetch and display updated exchange data
@@ -839,7 +834,14 @@ document.getElementById('save-status').addEventListener('click', async () => {
 		console.log('edit profile button clicked');
 	  /* $('#modal-editProfile').modal('show'); */
 	});
-	// Call on page load
+
+// Select the close button by ID and attach the event listener directly
+document.getElementById('userdetails-close-button').addEventListener('click', closeUserDetails);
+
+// Function to close the user details div
+function closeUserDetails() {
+  document.getElementById('user-details').style.display = 'none';
+}
 // Call the function to display the exchange data on page load
 	getExchangeData();
 	
