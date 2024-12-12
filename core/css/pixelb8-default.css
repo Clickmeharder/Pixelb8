@@ -620,8 +620,9 @@ div#useraccountPanel.panel {
 }
 
 .right-panel p {
-    margin: 0;
-	line-height: 0.8;
+	margin: 0;
+    margin-top: 2px;
+    line-height: 0.8;
 }
 
 #websiteStatContainer p {
