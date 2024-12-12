@@ -308,10 +308,11 @@ async function getExchangeData() {
             <tbody>
         `;
 
-        for (const itemDoc of itemsSnapshot.docs) {
+        for (const [index, itemDoc] of itemsSnapshot.docs.entries()) {
           const itemData = itemDoc.data();
           const ownerRole = await getUserRole(itemData.ownerId); // Get role of item owner
-          const itemTypeIcon = roleToIcon[ownerRole] || '👤'; // Set icon based on owner's role
+          const prefixIcon = doc.ref.collection('useritems') === itemsCollection ? '' : '⭐'; // Star prefix for 'items' collection
+          const itemTypeIcon = `${prefixIcon} ${roleToIcon[ownerRole] || '👤'}`; // Set icon based on owner's role
           
           if (userRole === 'admin' || itemData.ownerId === userUid) {
             docHTML += `
@@ -348,10 +349,10 @@ async function getExchangeData() {
           const planetItemsSnapshot = await getDocs(planetItemsCollection);
 
           if (!planetItemsSnapshot.empty) {
-            for (const itemDoc of planetItemsSnapshot.docs) {
+            for (const [index, itemDoc] of planetItemsSnapshot.docs.entries()) {
               const itemData = itemDoc.data();
               const ownerRole = await getUserRole(itemData.ownerId); // Get role of item owner
-              const itemTypeIcon = roleToIcon[ownerRole] || '🌐'; // Icon for public items
+              const itemTypeIcon = `⭐ ${roleToIcon[ownerRole] || '🌐'}`; // Icon for public items
               
               planetTableHTML += `
                 <tr style="">
@@ -372,10 +373,10 @@ async function getExchangeData() {
           const planetUserItemsSnapshot = await getDocs(planetUserItemsCollection);
 
           if (!planetUserItemsSnapshot.empty) {
-            for (const itemDoc of planetUserItemsSnapshot.docs) {
+            for (const [index, itemDoc] of planetUserItemsSnapshot.docs.entries()) {
               const itemData = itemDoc.data();
               const ownerRole = await getUserRole(itemData.ownerId); // Get role of item owner
-              const itemTypeIcon = roleToIcon[ownerRole] || '🔒'; // Icon for private items
+              const itemTypeIcon = roleToIcon[ownerRole] || '🔒👤'; // Icon for private items
               
               planetTableHTML += `
                 <tr style="">
@@ -399,6 +400,7 @@ async function getExchangeData() {
     console.log("Error getting documents: ", error);
   }
 }
+
 
 
 
@@ -739,6 +741,4 @@ async function getUserRole() {
 	getExchangeData();
 	
 //hmmm
-
-
 
