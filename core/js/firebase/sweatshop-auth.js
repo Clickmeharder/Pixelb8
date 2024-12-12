@@ -332,7 +332,7 @@ async function getExchangeData() {
             planetItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
               planetTableHTML += `
-                <tr style="color:firebrick;">
+                <tr style="">
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
                   <td>${itemData.tt || 'N/A'}</td>
@@ -352,7 +352,7 @@ async function getExchangeData() {
             planetUserItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
               planetTableHTML += `
-                <tr style="color:Chocolate;">
+                <tr style="">
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
                   <td>${itemData.tt || 'N/A'}</td>
