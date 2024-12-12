@@ -282,6 +282,7 @@ async function getExchangeData() {
           <table border="1" style="border-collapse: collapse; width: 100%;">
             <thead>
               <tr>
+                <th>Type</th> <!-- New column for Type -->
                 <th>Item Name</th>
                 <th>Amount</th>
                 <th>TT Value</th>
@@ -296,8 +297,10 @@ async function getExchangeData() {
         itemsSnapshot.forEach((itemDoc, index) => {
           const itemData = itemDoc.data();
           if (userRole === 'admin' || itemData.ownerId === userUid) {
+            const itemTypeIcon = itemsCollection === 'items' ? '🌐' : '🔒'; // Icons for public and private items
             docHTML += `
-              <tr style="">
+              <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
+                <td>${itemTypeIcon}</td>
                 <td>${itemDoc.id}</td>
                 <td>${itemData.amount || 'N/A'}</td>
                 <td>${itemData.tt || 'N/A'}</td>
@@ -331,8 +334,10 @@ async function getExchangeData() {
           if (!planetItemsSnapshot.empty) {
             planetItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
+              const itemTypeIcon = '🌐'; // Icon for public items
               planetTableHTML += `
-                <tr style="">
+                <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
+                  <td>${itemTypeIcon}</td>
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
                   <td>${itemData.tt || 'N/A'}</td>
@@ -351,8 +356,10 @@ async function getExchangeData() {
           if (!planetUserItemsSnapshot.empty) {
             planetUserItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
+              const itemTypeIcon = '🔒'; // Icon for private items
               planetTableHTML += `
-                <tr style="">
+                <tr style="background-color: ${index % 2 === 0 ? '#4b0082' : '#800080'};">
+                  <td>${itemTypeIcon}</td>
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
                   <td>${itemData.tt || 'N/A'}</td>
@@ -372,8 +379,6 @@ async function getExchangeData() {
     console.log("Error getting documents: ", error);
   }
 }
-
-
 
 
 
