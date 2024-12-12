@@ -44,30 +44,35 @@ a:hover {
 }
 /* Header */
 header {
-	background: linear-gradient(to right, #071223, #0f2c48);
-	padding: 0px;
-	text-align: center;
-	color: #d07c0d9c;
-	margin-top: 4px;
-	border-bottom: 3px solid #0c9898;
-	overflow: hidden;
-    height: 50px;
-	transition: height 1.3s ease;
-}
-header:hover {
-    margin-top: 0px;
+    background: linear-gradient(to right, #071223, #0f2c48);
+    text-align: center;
+    color: #d07c0d9c;
+    margin-top: 4px;
     border-bottom: 3px solid #0c9898;
     overflow: hidden;
+    height: 50px;
+    transition: height 1.3s ease, font-size 1.3s ease;
+}
+
+header h1 {
+    font-family: 'Yatra One', sans-serif;
+    font-size: 32px;
+    margin: 0;
+    padding: 10px 0;
+    line-height: 1;
+    text-shadow: 3px 5px 1px rgb(0 0 0 / 66%), 0 0 10px rgba(12, 152, 152, 0.7), 0 0 20px rgba(12, 152, 152, 0.5);
+    transition: font-size 1.3s ease, padding 1.3s ease;
+}
+
+header:hover {
     height: 157px;
 }
-header h1 {
-	font-family: 'Yatra One', sans-serif;
-	font-size: 62px;
-	margin: 0;
-	padding-top: 27px;
-	line-height: 0.80;
-	text-shadow: 3px 5px 1px rgb(0 0 0 / 66%), 0 0 10px rgba(12, 152, 152, 0.7), 0 0 20px rgba(12, 152, 152, 0.5);
+
+header:hover h1 {
+    font-size: 62px;
+    padding-top: 27px;
 }
+
 header p {
 	margin: 0px 0 0;
 	font-size: 17px;
