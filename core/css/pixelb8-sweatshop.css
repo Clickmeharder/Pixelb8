@@ -223,11 +223,13 @@ tr:nth-child(even) {
 }
 tr:hover {
 	background: linear-gradient(to left, #071223, #0f2c48);
-	transition: background, color 1.3s ease;
+	color: chocolate;
+	border: 2px ridge #ff9800;
+	transition: background, border, color 1.3s ease;
 }
 tr:hover {
 	background: linear-gradient(to left, #071223, #0f2c48);
-	color: chocolate;
+	
 }
 /* Footer */
 footer {
