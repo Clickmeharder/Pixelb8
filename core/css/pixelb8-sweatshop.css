@@ -159,7 +159,9 @@ h3 {
     font-size: 16px;
     font-weight: normal;
     text-align: center;
+	line-height: 0.85;
     width: 16%;
+	max-height: 42px;
     margin-top: auto;
     padding: 6px 10px;
     cursor: pointer;
@@ -177,7 +179,7 @@ h3 {
     color: #ff98009e;
     font-weight: bold;
     line-height: 0.85;
-    max-height: 30px;
+    max-height: 45px;
 }
 /* Tab Content */
 .tab-content {
