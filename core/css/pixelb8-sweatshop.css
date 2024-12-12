@@ -185,8 +185,13 @@ th {
 	height: 35px;
 	line-height: 0.8;
 }
+td {
+	padding: 0px;
+	text-align: center;
+	border: 1px solid #444;
+}
 tr:nth-child(even) {
-	background-color: #252525;
+	background: linear-gradient(to left, #071223, #0f2c48);
 }
 tr:hover {
 	background-color: #333;
