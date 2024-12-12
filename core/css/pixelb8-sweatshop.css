@@ -43,6 +43,7 @@ a:hover {
 	text-decoration: underline;
 }
 /* Header */
+/* General header styles */
 header {
     background: linear-gradient(to right, #071223, #0f2c48);
     text-align: center;
@@ -51,30 +52,32 @@ header {
     border-bottom: 3px solid #0c9898;
     overflow: hidden;
     height: 50px;
-    transition: height 1.3s ease, font-size 1.3s ease;
+    transition: height 1.3s ease;
 }
 
+/* General h1 styles */
 header h1 {
     font-family: 'Yatra One', sans-serif;
     font-size: 32px;
-	margin: 0;
-	padding: 10px 0;
-	line-height: 0.80;
-	text-shadow: 3px 5px 1px rgb(0 0 0 / 66%), 0 0 10px rgba(12, 152, 152, 0.7), 0 0 20px rgba(12, 152, 152, 0.5);
+    margin: 0;
+    padding: 10px 0;
+    line-height: 1;
+    text-shadow: 3px 5px 1px rgb(0 0 0 / 66%), 0 0 10px rgba(12, 152, 152, 0.7), 0 0 20px rgba(12, 152, 152, 0.5);
     transition: font-size 1.3s ease, padding 1.3s ease;
 }
 
+/* Hover effect for all headers */
 header:hover {
     height: 157px;
 }
-header:hover h1 {
-    font-size: 62px;
-    padding-top: 26px;
-	line-height: 0.80;
-}
-header:hover h1 {
 
+/* Apply specific styles to non-susheader h1 */
+header:not(.susheader):hover h1 {
+    font-size: 64px; /* Correct size for main header */
+    padding-top: 27px;
 }
+
+/* Specific hover effect for susheader */
 header.susheader:hover h1 {
     padding-top: 0px;
     margin-bottom: 6px;
@@ -82,12 +85,7 @@ header.susheader:hover h1 {
     font-family: "Lucida Console", monospace;
     color: #616164;
 }
-header p {
-	margin: 0px 0 0;
-	font-size: 17px;
-	font-weight: unset;
-	line-height: 0.85;
-}
+
 /* Style all <p> elements inside #sweatexchange-DB */
 #sweatexchange-DB p {
   font-size: 14px;
