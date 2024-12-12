@@ -135,6 +135,22 @@ const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt
     return; // Exit the function early
   }
 
+  // Fetch the user's Entropia name
+  let entropiaName = "";
+  try {
+    const userDocRef = doc(db, `users/${user.uid}`);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      entropiaName = userDoc.data().entropianame || "Unknown"; // Default to "Unknown" if not found
+    } else {
+      alert("Failed to retrieve Entropia name. Adding item without name.");
+    }
+  } catch (error) {
+    console.error("Error fetching Entropia name:", error);
+    alert("Failed to retrieve Entropia name. Adding item without name.");
+  }
+
   // If action is not delete, proceed to add item
   const newItem = {
     amount: parseInt(amount),
@@ -143,6 +159,7 @@ const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt
     tt: parseFloat(tt),
     ttmax: parseFloat(ttmax),
     ownerId: user.uid, // Add ownerId to match Firestore rules
+    entropiaName: entropiaName, // Add Entropia name to item data
     uid: crypto.randomUUID() // Generate a unique identifier for the item
   };
 
@@ -158,7 +175,6 @@ const addItemForUser = async (planet, itemName, amount, sweatprice, pedprice, tt
     alert("Failed to add item. Please try again.");
   }
 };
-
 
 // Function to add or delete item for admin users
 const addItemForAdmin = async (planet, itemName, amount, sweatprice, pedprice, tt, ttmax, action) => {
