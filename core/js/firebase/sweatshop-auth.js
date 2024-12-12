@@ -370,7 +370,7 @@ async function getExchangeData() {
           if (!planetUserItemsSnapshot.empty) {
             planetUserItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
-              const itemTypeIcon = '👤Shady'; // Icon for private items
+              const itemTypeIcon = '👤user'; // Icon for private items
               planetTableHTML += `
                 <tr style="">
                   <td>${itemTypeIcon}</td>
