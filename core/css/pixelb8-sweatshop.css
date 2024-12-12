@@ -60,6 +60,7 @@ header h1 {
     font-family: 'Yatra One', sans-serif;
     font-size: 32px;
     margin: 0;
+	margin-top:6px;
     padding: 8px 0;
     line-height: 0.8;
     text-shadow: 3px 5px 1px rgb(0 0 0 / 66%), 0 0 10px rgba(12, 152, 152, 0.7), 0 0 20px rgba(12, 152, 152, 0.5);
