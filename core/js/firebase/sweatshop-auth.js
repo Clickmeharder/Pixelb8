@@ -282,11 +282,14 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
   }
 });
 
+// Function to add event listeners to all rows
 function attachRowClickListeners() {
-  const rows = document.querySelectorAll('.exchange-item tr');
+  const rows = document.querySelectorAll('tr[data-owner-id]');
+  
   rows.forEach(row => {
-    row.addEventListener('click', function() {
-      const ownerId = this.getAttribute('data-owner-id');
+    row.addEventListener('click', (event) => {
+      const ownerId = row.getAttribute('data-owner-id');
+      // Show the user details for the clicked row
       showUserDetails(ownerId);
     });
   });
@@ -465,8 +468,8 @@ async function getExchangeData() {
           }
 
           planetTable.innerHTML = planetTableHTML; // Update the planet table
-		  // Call this function after generating the table rows
-		  attachRowClickListeners();
+          // Call this function after generating the table rows
+          attachRowClickListeners();
         }
       }
     });
