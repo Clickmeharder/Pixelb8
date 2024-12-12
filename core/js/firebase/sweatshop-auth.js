@@ -296,6 +296,7 @@ function attachRowClickListeners() {
 }
 
 
+
 // Function to fetch and display user details based on ownerId
 async function showUserDetails(ownerId) {
   const userDetailsDiv = document.getElementById('user-details'); // The div where user details will be shown
@@ -468,8 +469,8 @@ async function getExchangeData() {
           }
 
           planetTable.innerHTML = planetTableHTML; // Update the planet table
-          // Call this function after generating the table rows
-          attachRowClickListeners();
+		  // Call this function after generating the table rows
+		  attachRowClickListeners();
         }
       }
     });
