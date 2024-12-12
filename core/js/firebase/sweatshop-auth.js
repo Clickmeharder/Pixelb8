@@ -31,6 +31,20 @@ Limited	20	Shotgun (SA)	1025 bottles	2.10 PED (+0.10)
     const auth = getAuth();
     const provider = new GithubAuthProvider();
 	const db = getFirestore(app);
+	
+	// Role to icon mapping
+	const roleToIcon = {
+	  ceo: '👑',
+	  admin: '⭐',
+	  mod: '🛡️',
+	  susrep: '💼',
+	  vip: '🌟',
+	  associate: '🤝',
+	  verified: '✔️',
+	  user: '🙂',
+	  guest: '👤',
+	  default: '👤'
+	};
 
     async function getGitHubUserData(githubIdOrLogin) {
       return fetch(
@@ -296,10 +310,10 @@ async function getExchangeData() {
 
         itemsSnapshot.forEach((itemDoc, index) => {
           const itemData = itemDoc.data();
+          const itemTypeIcon = userRole === 'admin' ? roleToIcon[itemData.role] || '👤' : roleToIcon[userRole]; // Set icon based on role
           if (userRole === 'admin' || itemData.ownerId === userUid) {
-            const itemTypeIcon = itemsCollection === 'items' ? '⭐sus' : '👤Shady'; // Icons for public and private items
             docHTML += `
-              <tr style="">
+              <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
                 <td>${itemTypeIcon}</td>
                 <td>${itemDoc.id}</td>
                 <td>${itemData.amount || 'N/A'}</td>
@@ -334,9 +348,9 @@ async function getExchangeData() {
           if (!planetItemsSnapshot.empty) {
             planetItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
-              const itemTypeIcon = '⭐sus'; // Icon for public items
+              const itemTypeIcon = '🌐'; // Icon for public items
               planetTableHTML += `
-                <tr style="">
+                <tr style="background-color: ${index % 2 === 0 ? '#1e1e1e' : '#252525'};">
                   <td>${itemTypeIcon}</td>
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
@@ -356,9 +370,9 @@ async function getExchangeData() {
           if (!planetUserItemsSnapshot.empty) {
             planetUserItemsSnapshot.forEach((itemDoc, index) => {
               const itemData = itemDoc.data();
-              const itemTypeIcon = '👤Shady'; // Icon for private items
+              const itemTypeIcon = '🔒'; // Icon for private items
               planetTableHTML += `
-                <tr style="">
+                <tr style="background-color: ${index % 2 === 0 ? '#4b0082' : '#800080'};">
                   <td>${itemTypeIcon}</td>
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
@@ -379,7 +393,6 @@ async function getExchangeData() {
     console.log("Error getting documents: ", error);
   }
 }
-
 
 
 
@@ -486,7 +499,7 @@ async function getUserRole() {
       return userDoc.data().role || 'user'; // Default to 'user' if no role is set
     }
   }
-  return 'user'; // Default to 'user' if no user found or role not set
+  return 'guest'; // Default to 'guest' if no user found or role not set
 }
 
     // Set up the onAuthStateChanged listener
@@ -720,3 +733,7 @@ async function getUserRole() {
 	getExchangeData();
 	
 //hmmm
+
+
+
+
