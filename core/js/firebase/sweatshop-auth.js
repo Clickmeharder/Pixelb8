@@ -316,7 +316,7 @@ async function showUserDetails(ownerId) {
         : 'Unknown';
 
       // Display user details in the corresponding spans
-      entropiaNameSpan.innerText = userData.entropiaName || 'N/A';
+      entropiaNameSpan.innerText = userData.entropianame || 'N/A';
       statusSpan.innerText = isOnline ? 'Online' : `Offline (${timeSinceLastLogin})`;
       lastLoginSpan.innerText = lastLogin ? lastLogin.toLocaleString() : 'N/A';
 
