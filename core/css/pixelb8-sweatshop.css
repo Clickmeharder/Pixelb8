@@ -67,13 +67,26 @@ header h1 {
 header:hover {
     height: 157px;
 }
-
 header:hover h1 {
     font-size: 62px;
-    padding-top: 0px;
+    padding-top: 26px;
 	line-height: 0.80;
 }
+header:hover h1 {
 
+}
+header:not(.susheader):hover h1 {
+    font-size: 62px;
+    padding-top: 27px;
+}
+
+header.susheader:hover h1 {
+    padding-top: 0px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-family: "Lucida Console", monospace;
+    color: #616164;
+}
 header p {
 	margin: 0px 0 0;
 	font-size: 17px;
