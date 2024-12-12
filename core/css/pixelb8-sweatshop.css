@@ -82,7 +82,7 @@ header:hover p {
 /* Apply specific styles to non-susheader h1 */
 header:hover h1 {
     font-size: 67px;
-    padding-top: 8px;
+    padding-top: 4px;
     line-height: 0.8;
 	margin-top: 17px;
     margin-bottom: -26px;
