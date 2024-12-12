@@ -242,6 +242,7 @@ document.getElementById("addItemForm").addEventListener("submit", async (e) => {
 });
 
 // Fetch and display updated exchange data
+// Fetch and display updated exchange data
 async function getExchangeData() {
   const sweatexchangeContainer = document.getElementById('sweatexchange-DB');
   const planets = ['calypso', 'arkadia', 'rocktropia', 'cyrene', 'nextisland', 'toulan', 'monria'];
@@ -271,7 +272,7 @@ async function getExchangeData() {
         <p><strong>Total Sweat:</strong> ${data.sweat || 'N/A'}</p>
       `;
 
-      // Fetch items based on user role
+      // Fetch items based on user role for sweatexchange-DB
       const itemsCollection = userRole === 'admin' ? collection(doc.ref, 'items') : collection(doc.ref, 'useritems');
       const itemsSnapshot = await getDocs(itemsCollection);
 
@@ -313,28 +314,33 @@ async function getExchangeData() {
       exchangeDiv.innerHTML = docHTML;
       sweatexchangeContainer.appendChild(exchangeDiv);
 
-      // Populate planet-specific exchange tables
+      // Populate planet-specific exchange tables with items regardless of user role
       const planetId = doc.id.toLowerCase(); // Ensure case-insensitive matching
       if (planets.includes(planetId)) {
         const planetTable = document.getElementById(`${planetId}-table`);
         if (planetTable) {
           let planetTableHTML = '';
 
-          itemsSnapshot.forEach((itemDoc) => {
-            const itemData = itemDoc.data();
-            planetTableHTML += `
-              <tr>
-                <td>${itemDoc.id}</td>
-                <td>${itemData.amount || 'N/A'}</td>
-                <td>${itemData.tt || 'N/A'}</td>
-                <td>${itemData.ttmax || 'N/A'}</td>
-                <td>${itemData.sweatprice || 'N/A'}</td>
-                <td>${itemData.pedprice || 'N/A'}</td>
-              </tr>
-            `;
-          });
+          const planetItemsCollection = collection(doc.ref, 'items'); // Always use 'items' collection
+          const planetItemsSnapshot = await getDocs(planetItemsCollection);
 
-          planetTable.innerHTML = planetTableHTML; // Update the planet table
+          if (!planetItemsSnapshot.empty) {
+            planetItemsSnapshot.forEach((itemDoc) => {
+              const itemData = itemDoc.data();
+              planetTableHTML += `
+                <tr>
+                  <td>${itemDoc.id}</td>
+                  <td>${itemData.amount || 'N/A'}</td>
+                  <td>${itemData.tt || 'N/A'}</td>
+                  <td>${itemData.ttmax || 'N/A'}</td>
+                  <td>${itemData.sweatprice || 'N/A'}</td>
+                  <td>${itemData.pedprice || 'N/A'}</td>
+                </tr>
+              `;
+            });
+
+            planetTable.innerHTML = planetTableHTML; // Update the planet table
+          }
         }
       }
     });
@@ -342,6 +348,7 @@ async function getExchangeData() {
     console.log("Error getting documents: ", error);
   }
 }
+
 
 
 
