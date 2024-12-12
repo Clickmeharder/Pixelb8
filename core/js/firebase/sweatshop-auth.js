@@ -341,8 +341,17 @@ function getExchangeData() {
 document.getElementById('planetSelect').addEventListener('change', async function () {
     const planet = this.value;
     const itemNameSelect = document.getElementById('itemNameInput'); // Corrected ID
+
+    // Get the currently signed-in user
+    const user = auth.currentUser;
+
+    if (!user) {
+        alert("You must be signed in to view items.");
+        return;
+    }
+
     const userRole = await getUserRole(); // Check user role
-    const userUid = getUserUid(); // Assuming function to get user's UID
+    const userUid = user.uid; // Get the user's UID
 
     // Clear the itemName dropdown and add the default option
     itemNameSelect.innerHTML = '';
@@ -371,8 +380,17 @@ document.getElementById('planetSelect').addEventListener('change', async functio
 // Event listener for itemName select change
 document.getElementById('itemNameInput').addEventListener('change', async function () {
     const selectedItem = this.value;
+
+    // Get the currently signed-in user
+    const user = auth.currentUser;
+
+    if (!user) {
+        alert("You must be signed in to edit items.");
+        return;
+    }
+
     const userRole = await getUserRole(); // Check user role
-    const userUid = getUserUid(); // Assuming function to get user's UID
+    const userUid = user.uid; // Get the user's UID
 
     if (selectedItem === "Default") {
         // Clear input fields when "Select Item" is chosen
@@ -411,19 +429,6 @@ document.getElementById('itemNameInput').addEventListener('change', async functi
     }
 });
 
-// Check user role (assuming you have a function that checks this)
-async function getUserRole() {
-  const user = auth.currentUser;
-  if (user) {
-    const userRef = doc(db, 'users', user.uid); // Reference to the user document
-    const userDoc = await getDoc(userRef); // Get the document
-
-    if (userDoc.exists()) {
-      return userDoc.data().role || 'user'; // Default to 'user' if no role is set
-    }
-  }
-  return 'user'; // Default to 'user' if no user found or role not set
-}
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
