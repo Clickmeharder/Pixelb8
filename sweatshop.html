@@ -552,12 +552,15 @@
 <!--hidden modals (redo most/all these lol) -->
 <!-- ----------- -->
 <!-- Container to display user details -->
-<div id="user-details" style="display: none; border: 1px solid #ccc; padding: 20px; margin-top: 20px; background-color: ;">
-  <h3>User Details</h3>
-  <p><strong>Entropia Name:</strong> <span id="entropia-name">Loading...</span></p>
-  <p><strong>Status:</strong> <span id="status">Loading...</span></p>
-  <p><strong>Last Login:</strong> <span id="last-login">Loading...</span></p>
-  <button id="userdetails-close-button">Close</button>
+<div id="user-detailsbox" style="border: 1px solid #ccc; padding: 20px; margin-top: 10px; background-color: ;">
+	<span id="user-detailsboxError" style="display:none;">error</span>
+	<div id="user-details" style="display: none; border: 1px solid #ccc; padding: 20px; margin-top: 20px; background-color: ;">
+	  <h3>User Details</h3>
+	  <p><strong>Entropia Name:</strong> <span id="entropia-name">Loading...</span></p>
+	  <p><strong>Status:</strong> <span id="status">Loading...</span></p>
+	  <p><strong>Last Login:</strong> <span id="last-login">Loading...</span></p>
+	  <button id="userdetails-close-button">Close</button>
+	</div>
 </div>
 <!-- Modal for Signup -->
 <div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">

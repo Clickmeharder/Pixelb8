@@ -300,19 +300,20 @@ function attachRowClickListeners() {
 // Function to fetch and display user details based on ownerId
 async function showUserDetails(ownerId) {
   const userDetailsDiv = document.getElementById('user-details'); // The div where user details will be shown
+  const userDetailsErrorDiv = document.getElementById('user-detailsboxError'); // Error message div
   const entropiaNameSpan = document.getElementById('entropia-name');
   const statusSpan = document.getElementById('status');
   const lastLoginSpan = document.getElementById('last-login');
+  const userDetailsBoxDiv = document.getElementById('user-detailsbox'); // The main box containing both sections
 
-  // Make sure the details div is visible before updating content
-  userDetailsDiv.style.display = 'block';
-
-  // Reset the content of the spans
-  if (entropiaNameSpan && statusSpan && lastLoginSpan) {
-    entropiaNameSpan.innerText = 'Loading...';
-    statusSpan.innerText = 'Loading...';
-    lastLoginSpan.innerText = 'Loading...';
-  }
+  // Reset the content and hide the error message initially
+  if (userDetailsErrorDiv) userDetailsErrorDiv.style.display = 'none';
+  if (userDetailsDiv) userDetailsDiv.style.display = 'none';
+  
+  // Show loading indicators
+  if (entropiaNameSpan) entropiaNameSpan.innerText = 'Loading...';
+  if (statusSpan) statusSpan.innerText = 'Loading...';
+  if (lastLoginSpan) lastLoginSpan.innerText = 'Loading...';
 
   try {
     // Fetch user data from the users collection
@@ -322,25 +323,35 @@ async function showUserDetails(ownerId) {
       
       // Extract necessary data
       const now = new Date();
-      const lastLogin = userData.lastStatusChange ? new Date(userData.lastStatusChange) : null;
+      const lastStatusChange = userData.lastStatusChange ? new Date(userData.lastStatusChange) : null;
       const isOnline = userData.isOnline || false;
-      const timeSinceLastLogin = lastLogin
-        ? `${Math.floor((now - lastLogin) / (1000 * 60 * 60 * 24))} days ago`
+
+      // Calculate days since last login
+      const daysSinceLastLogin = lastStatusChange
+        ? Math.floor((now - lastStatusChange) / (1000 * 60 * 60 * 24)) // Get the number of days
         : 'Unknown';
 
       // Display user details in the corresponding spans
       if (entropiaNameSpan) entropiaNameSpan.innerText = userData.entropianame || 'N/A';
-      if (statusSpan) statusSpan.innerText = isOnline ? 'Online' : `Offline (${timeSinceLastLogin})`;
-      if (lastLoginSpan) lastLoginSpan.innerText = lastLogin ? lastLogin.toLocaleString() : 'N/A';
+      if (statusSpan) statusSpan.innerText = isOnline ? 'Online' : `Offline (${daysSinceLastLogin} days ago)`;
+      if (lastLoginSpan) lastLoginSpan.innerText = lastStatusChange ? lastStatusChange.toLocaleString() : 'N/A';
 
+      // Hide the error message and show the user details div
+      if (userDetailsErrorDiv) userDetailsErrorDiv.style.display = 'none';
+      if (userDetailsDiv) userDetailsDiv.style.display = 'block';
     } else {
-      // If user data is not found, show a message
-      if (userDetailsDiv) userDetailsDiv.innerHTML = `<p>User data not found.</p>`;
+      // If user data is not found, show an error message
+      if (userDetailsErrorDiv) {
+        userDetailsErrorDiv.style.display = 'block';
+        userDetailsErrorDiv.innerText = 'User data not found.';
+      }
     }
   } catch (error) {
     console.error('Error fetching user details:', error);
-    if (userDetailsDiv) {
-      userDetailsDiv.innerHTML = `<p>Error fetching user details. Please try again later.</p>`;
+    // If there's an error fetching the data, show the error message
+    if (userDetailsErrorDiv) {
+      userDetailsErrorDiv.style.display = 'block';
+      userDetailsErrorDiv.innerText = 'Error fetching user details. Please try again later.';
     }
   }
 }
