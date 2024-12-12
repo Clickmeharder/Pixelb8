@@ -48,7 +48,7 @@ header {
     background: linear-gradient(to right, #071223, #0f2c48);
     text-align: center;
     color: #d07c0d9c;
-    margin-top: 4px;
+    margin-top: 0px;
     border-bottom: 3px solid #0c9898;
     overflow: hidden;
     height: 50px;
@@ -60,25 +60,28 @@ header h1 {
     font-family: 'Yatra One', sans-serif;
     font-size: 32px;
     margin: 0;
-    padding: 10px 0;
-    line-height: 1;
+    padding: 8px 0;
+    line-height: 0.8;
     text-shadow: 3px 5px 1px rgb(0 0 0 / 66%), 0 0 10px rgba(12, 152, 152, 0.7), 0 0 20px rgba(12, 152, 152, 0.5);
     transition: font-size 1.3s ease, padding 1.3s ease;
 }
 
 /* Hover effect for all headers */
 header:hover {
-    height: 157px;
+	height: 157px;
+	margin-top: 0px;
 }
 
 /* Apply specific styles to non-susheader h1 */
-header:not(.susheader):hover h1 {
-    font-size: 64px; /* Correct size for main header */
-    padding-top: 27px;
+header:hover h1 {
+    font-size: 67px;
+    padding-top: 8px;
+    line-height: 0.8;
+    margin-bottom: -26px;
 }
 
 /* Specific hover effect for susheader */
-header.susheader:hover h1 {
+header.susheader:hover h2 {
     padding-top: 0px;
     margin-bottom: 6px;
     font-size: 14px;
