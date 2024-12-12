@@ -303,7 +303,17 @@ async function showUserDetails(ownerId) {
   const entropiaNameSpan = document.getElementById('entropia-name');
   const statusSpan = document.getElementById('status');
   const lastLoginSpan = document.getElementById('last-login');
-  
+
+  // Make sure the details div is visible before updating content
+  userDetailsDiv.style.display = 'block';
+
+  // Reset the content of the spans
+  if (entropiaNameSpan && statusSpan && lastLoginSpan) {
+    entropiaNameSpan.innerText = 'Loading...';
+    statusSpan.innerText = 'Loading...';
+    lastLoginSpan.innerText = 'Loading...';
+  }
+
   try {
     // Fetch user data from the users collection
     const userDoc = await getDoc(doc(db, 'users', ownerId)); // Firestore collection name: 'users'
@@ -312,27 +322,26 @@ async function showUserDetails(ownerId) {
       
       // Extract necessary data
       const now = new Date();
-      const lastLogin = userData.lastLogin ? new Date(userData.lastLogin) : null;
+      const lastLogin = userData.lastStatusChange ? new Date(userData.lastStatusChange) : null;
       const isOnline = userData.isOnline || false;
       const timeSinceLastLogin = lastLogin
         ? `${Math.floor((now - lastLogin) / (1000 * 60 * 60 * 24))} days ago`
         : 'Unknown';
 
       // Display user details in the corresponding spans
-      entropiaNameSpan.innerText = userData.entropianame || 'N/A';
-      statusSpan.innerText = isOnline ? 'Online' : `Offline (${timeSinceLastLogin})`;
-      lastLoginSpan.innerText = lastLogin ? lastLogin.toLocaleString() : 'N/A';
+      if (entropiaNameSpan) entropiaNameSpan.innerText = userData.entropianame || 'N/A';
+      if (statusSpan) statusSpan.innerText = isOnline ? 'Online' : `Offline (${timeSinceLastLogin})`;
+      if (lastLoginSpan) lastLoginSpan.innerText = lastLogin ? lastLogin.toLocaleString() : 'N/A';
 
-      // Show the details div
-      userDetailsDiv.style.display = 'block';
     } else {
-      userDetailsDiv.innerHTML = `<p>User data not found.</p>`;
-      userDetailsDiv.style.display = 'block';
+      // If user data is not found, show a message
+      if (userDetailsDiv) userDetailsDiv.innerHTML = `<p>User data not found.</p>`;
     }
   } catch (error) {
     console.error('Error fetching user details:', error);
-    userDetailsDiv.innerHTML = `<p>Error fetching user details. Please try again later.</p>`;
-    userDetailsDiv.style.display = 'block';
+    if (userDetailsDiv) {
+      userDetailsDiv.innerHTML = `<p>Error fetching user details. Please try again later.</p>`;
+    }
   }
 }
 
