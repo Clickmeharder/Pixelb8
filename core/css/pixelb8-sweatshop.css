@@ -189,7 +189,7 @@ tr:nth-child(even) {
 	background-color: #252525;
 }
 tr:hover {
-	background-color: #333;
+	background: linear-gradient(to left, #071223, #0f2c48);
 }
 /* Footer */
 footer {
