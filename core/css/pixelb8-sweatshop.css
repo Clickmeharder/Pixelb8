@@ -163,7 +163,7 @@ table {
 	width: 100%;
 	border-collapse: collapse;
 	margin: 0px 0;
-	background: linear-gradient(to right, #071223, #0f2c48);
+	background-color: #1e1e1e;
 	border: 1px solid #333;
 	border-radius: 8px;
 	overflow: hidden;
@@ -185,19 +185,11 @@ th {
 	height: 35px;
 	line-height: 0.8;
 }
-td {
-	padding: 0px;
-	text-align: center;
-	border: 1px solid #444;
-}
 tr:nth-child(even) {
-	background: linear-gradient(to left, #071223, #0f2c48);
+	background-color: #252525;
 }
 tr:hover {
-	background: linear-gradient(to left, #071223, #0f2c48);
-}
-tr:nth-child(even):hover {
-	background: linear-gradient(to right, #071223, #0f2c48);
+	background-color: #333;
 }
 /* Footer */
 footer {
