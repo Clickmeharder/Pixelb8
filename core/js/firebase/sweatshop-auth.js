@@ -335,12 +335,12 @@ async function getExchangeData() {
             <tbody>
         `;
 
-        itemsSnapshot.forEach((itemDoc, index) => {
+        itemsSnapshot.forEach((itemDoc) => {
           const itemData = itemDoc.data();
           if (userRole === 'admin' || itemData.ownerId === userUid) {
             const itemTypeIcon = itemsCollection === 'items' ? '⭐sus' : '👤Shady'; // Icons for public and private items
             docHTML += `
-              <tr title="Posted by: ${itemDoc.entropiaName}">
+              <tr title="Posted by: ${itemData.entropiaName || 'Unknown'}">
                 <td>${itemTypeIcon}</td>
                 <td>${itemDoc.id}</td>
                 <td>${itemData.amount || 'N/A'}</td>
@@ -373,11 +373,11 @@ async function getExchangeData() {
           const planetItemsSnapshot = await getDocs(planetItemsCollection);
 
           if (!planetItemsSnapshot.empty) {
-            planetItemsSnapshot.forEach((itemDoc, index) => {
+            planetItemsSnapshot.forEach((itemDoc) => {
               const itemData = itemDoc.data();
               const itemTypeIcon = '⭐sus'; // Icon for public items
               planetTableHTML += `
-			<tr title="Posted by: ${itemDoc.entropiaName}">
+                <tr title="Posted by: ${itemData.entropiaName || 'Unknown'}">
                   <td>${itemTypeIcon}</td>
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
@@ -395,11 +395,11 @@ async function getExchangeData() {
           const planetUserItemsSnapshot = await getDocs(planetUserItemsCollection);
 
           if (!planetUserItemsSnapshot.empty) {
-            planetUserItemsSnapshot.forEach((itemDoc, index) => {
+            planetUserItemsSnapshot.forEach((itemDoc) => {
               const itemData = itemDoc.data();
               const itemTypeIcon = '👤user'; // Icon for private items
               planetTableHTML += `
-                <tr title="Posted by: ${itemDoc.entropiaName}">
+                <tr title="Posted by: ${itemData.entropiaName || 'Unknown'}">
                   <td>${itemTypeIcon}</td>
                   <td>${itemDoc.id}</td>
                   <td>${itemData.amount || 'N/A'}</td>
@@ -420,6 +420,7 @@ async function getExchangeData() {
     console.log("Error getting documents: ", error);
   }
 }
+
 
 
 
