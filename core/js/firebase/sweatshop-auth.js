@@ -866,6 +866,84 @@ document.getElementById('userdetails-close-button').addEventListener('click', cl
 function closeUserDetails() {
   document.getElementById('user-details').style.display = 'none';
 }
+
+//mail
+
+// Function to send a message
+async function sendMessage(senderId, recipientId, subject, messageContent) {
+  const now = new Date();
+  
+  await ensureMailFoldersExist(senderId);
+  await ensureMailFoldersExist(recipientId);
+
+  const outboxMessage = {
+    time: now,
+    message: messageContent,
+    sendto: recipientId
+  };
+
+  const inboxMessage = {
+    time: now,
+    message: messageContent,
+    sentby: senderId
+  };
+
+  const senderOutboxRef = doc(collection(db, 'users', senderId, 'outbox'), subject);
+  const recipientInboxRef = doc(collection(db, 'users', recipientId, 'inbox'), subject);
+  
+  await setDoc(senderOutboxRef, outboxMessage);
+  await setDoc(recipientInboxRef, inboxMessage);
+}
+
+// Fetch inbox messages
+async function fetchInboxMessages(userId) {
+  const userInboxRef = collection(db, 'users', userId, 'inbox');
+  const inboxSnapshot = await getDocs(query(userInboxRef, orderBy("time", "desc")));
+  
+  const inboxMessages = inboxSnapshot.docs.map(doc => ({
+    subject: doc.id,
+    ...doc.data()
+  }));
+  
+  return inboxMessages;
+}
+
+// Fetch outbox messages
+async function fetchOutboxMessages(userId) {
+  const userOutboxRef = collection(db, 'users', userId, 'outbox');
+  const outboxSnapshot = await getDocs(query(userOutboxRef, orderBy("time", "desc")));
+  
+  const outboxMessages = outboxSnapshot.docs.map(doc => ({
+    subject: doc.id,
+    ...doc.data()
+  }));
+
+  return outboxMessages;
+}
+
+// Delete a message
+async function deleteMessage(userId, messageSubject, isInbox) {
+  const collectionRef = isInbox
+    ? collection(db, 'users', userId, 'inbox')
+    : collection(db, 'users', userId, 'outbox');
+
+  await deleteDoc(doc(collectionRef, messageSubject));
+}
+
+export { sendMessage, fetchInboxMessages, fetchOutboxMessages, deleteMessage };
+
+
+
+
+//endmail
+
+
+
+
+
+
+
+
 // Call the function to display the exchange data on page load
 	getExchangeData();
 	
