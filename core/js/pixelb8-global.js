@@ -24,4 +24,14 @@ document.querySelectorAll('.subtab').forEach(subtab => {
 		document.getElementById(subtab.getAttribute('data-subtab')).classList.add('active');
 	});
 });
+document.querySelectorAll('.tab-btn').forEach((btn) => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+    document.querySelectorAll('.messages-container').forEach((c) => c.classList.remove('active'));
+
+    btn.classList.add('active');
+    const targetId = btn.getAttribute('data-target');
+    document.getElementById(targetId).classList.add('active');
+  });
+});
 //-------------------------------------------------------------------------
