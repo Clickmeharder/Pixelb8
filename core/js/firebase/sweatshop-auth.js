@@ -699,12 +699,16 @@ async function getMessages() {
   }
 }
 
+// JavaScript to trigger getMessages when button is clicked
+document.getElementById('loadMessagesBtn').addEventListener('click', getMessages);
+
 // Close any modal
 document.querySelectorAll(".modal-close").forEach((button) => {
   button.addEventListener("click", (e) => {
     e.target.closest(".modal").style.display = "none";
   });
 });
+
 // end mail stuff
 //----------------------------
 
