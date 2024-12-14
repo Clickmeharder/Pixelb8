@@ -658,50 +658,67 @@ async function sendMessage(senderId, recipientId, subject, messageContent) {
   await setDoc(recipientInboxRef, inboxMessage);
 }
 
-// Fetch inbox messages
-async function fetchInboxMessages(userId) {
+// Fetch all messages (inbox + outbox combined)
+async function fetchAllMessages(userId) {
   const userInboxRef = collection(db, `users/${userId}/inbox`);
-  const inboxQuery = query(userInboxRef, orderBy("time", "desc"));
-  const inboxSnapshot = await getDocs(inboxQuery);
-
-  return inboxSnapshot.docs.map((doc) => ({
-    subject: doc.id,
-    ...doc.data(),
-  }));
-}
-
-// Fetch outbox messages
-async function fetchOutboxMessages(userId) {
   const userOutboxRef = collection(db, `users/${userId}/outbox`);
+
+  const inboxQuery = query(userInboxRef, orderBy("time", "desc"));
   const outboxQuery = query(userOutboxRef, orderBy("time", "desc"));
+
+  const inboxSnapshot = await getDocs(inboxQuery);
   const outboxSnapshot = await getDocs(outboxQuery);
 
-  return outboxSnapshot.docs.map((doc) => ({
+  const inboxMessages = inboxSnapshot.docs.map((doc) => ({
+    type: 'inbox',
     subject: doc.id,
     ...doc.data(),
   }));
+
+  const outboxMessages = outboxSnapshot.docs.map((doc) => ({
+    type: 'outbox',
+    subject: doc.id,
+    ...doc.data(),
+  }));
+
+  // Combine inbox and outbox messages
+  return [...inboxMessages, ...outboxMessages];
 }
 
 // Populate messages in the modal
 function populateMessages(listId, messages) {
   const mailListElement = document.getElementById(listId);
   mailListElement.innerHTML = ""; // Clear current list
+
   messages.forEach((message) => {
     const messageDiv = document.createElement("div");
     messageDiv.className = "message-item";
     messageDiv.innerHTML = `
       <h4>${message.subject}</h4>
-      <p>${message.message}</p> <!-- Assuming 'message' field is used -->
-      <p><strong>Time:</strong> ${new Date(message.time.seconds * 1000).toLocaleString()}</p> <!-- If time is a Firebase Timestamp -->
+      <p>${message.message}</p>
+      <p><strong>Time:</strong> ${new Date(message.time).toLocaleString()}</p>
+      <p><strong>Type:</strong> ${message.type === 'inbox' ? 'Inbox' : 'Outbox'}</p>
+      <button class="delete-message" data-subject="${message.subject}" data-type="${message.type}">Delete</button>
     `;
     mailListElement.appendChild(messageDiv);
+  });
+
+  // Add delete functionality
+  document.querySelectorAll(".delete-message").forEach((button) => {
+    button.addEventListener("click", async (e) => {
+      const subject = e.target.getAttribute("data-subject");
+      const type = e.target.getAttribute("data-type");
+      const userId = "currentUserId"; // Replace with the actual user ID
+      await deleteMessage(userId, subject, type === 'inbox');
+      populateMessages(listId, await fetchAllMessages(userId)); // Refresh messages after deletion
+    });
   });
 }
 
 // Delete a message
 async function deleteMessage(userId, messageSubject, isInbox) {
   const collectionPath = isInbox ? `users/${userId}/inbox` : `users/${userId}/outbox`;
-  
+
   // Create a reference to the message document
   const messageRef = doc(db, `${collectionPath}/${messageSubject}`);
 
@@ -712,26 +729,17 @@ async function deleteMessage(userId, messageSubject, isInbox) {
 // Initialize the mail system
 document.addEventListener("DOMContentLoaded", () => {
   const viewMailModal = document.getElementById("view-mail-modal");
-  const inboxModal = document.getElementById("inbox-modal");
-  const outboxModal = document.getElementById("outbox-modal");
 
   // Open the view mail modal
   document.getElementById("view-mail")?.addEventListener("click", () => {
     viewMailModal.style.display = "block";
   });
 
-  // Show inbox messages
-  document.getElementById("show-inbox")?.addEventListener("click", async () => {
-	const userId = "currentUserId"; // Replace with the actual user ID
-	const inboxMessages = await fetchInboxMessages(userId);
-	populateMessages("mail-list", inboxMessages);
-  });
-
-	// Show outbox messages
-  document.getElementById("show-outbox")?.addEventListener("click", async () => {
-	const userId = "currentUserId"; // Replace with the actual user ID
-	const outboxMessages = await fetchOutboxMessages(userId);
-	populateMessages("mail-list", outboxMessages);
+  // Show all messages (inbox + outbox combined)
+  document.getElementById("show-all-mail")?.addEventListener("click", async () => {
+    const userId = "currentUserId"; // Replace with the actual user ID
+    const allMessages = await fetchAllMessages(userId);
+    populateMessages("mail-list", allMessages);
   });
 
   // Close the view mail modal
