@@ -644,6 +644,7 @@ async function getMessages() {
   try {
     // Get the currently signed-in user
     const user = auth.currentUser;
+    console.log("Current user:", user); // Log the user object
     if (!user) {
       alert("You must be signed in to view your messages.");
       return;
@@ -653,20 +654,13 @@ async function getMessages() {
 
     // Fetch messages from inbox (all documents inside /users/{userUid}/inbox)
     const inboxSnapshot = await getDocs(collection(db, `users/${userUid}/inbox`));
+    console.log("Inbox Snapshot:", inboxSnapshot); // Log the inbox snapshot
     inboxContainer.innerHTML = ''; // Clear previous content
 
-    inboxSnapshot.forEach(async (doc) => {
+    // Loop through all documents in the inbox collection
+    inboxSnapshot.forEach((doc) => {
       const messageData = doc.data();
-      
-      // Get the receiver's details using the receiverId
-      const receiverDocRef = doc(db, 'users', messageData.receiverId);
-      const receiverSnap = await getDoc(receiverDocRef);
-      const receiverData = receiverSnap.data(); // Get the receiver's data
-
-      // Get the sender's details using the senderId
-      const senderDocRef = doc(db, 'users', messageData.senderId);
-      const senderSnap = await getDoc(senderDocRef);
-      const senderData = senderSnap.data(); // Get the sender's data
+      console.log(messageData);  // Log the message data to check its structure
 
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message-item');
@@ -674,9 +668,9 @@ async function getMessages() {
       // Convert timestamp to a human-readable format
       const formattedDate = messageData.timestamp.toDate().toLocaleString();
 
-      // Display the inbox message with receiver and sender display names
+      // Display the inbox message
       let messageHTML = `
-        <h3>Message from ${senderData.displayName || senderData.entropianName}</h3>
+        <h3>Message from ${messageData.senderId}</h3>
         <p><strong>Content:</strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
       `;
@@ -687,20 +681,13 @@ async function getMessages() {
 
     // Fetch messages from outbox (all documents inside /users/{userUid}/outbox)
     const outboxSnapshot = await getDocs(collection(db, `users/${userUid}/outbox`));
+    console.log("Outbox Snapshot:", outboxSnapshot); // Log the outbox snapshot
     outboxContainer.innerHTML = ''; // Clear previous content
 
-    outboxSnapshot.forEach(async (doc) => {
+    // Loop through all documents in the outbox collection
+    outboxSnapshot.forEach((doc) => {
       const messageData = doc.data();
-
-      // Get the receiver's details
-      const receiverDocRef = doc(db, 'users', messageData.receiverId);
-      const receiverSnap = await getDoc(receiverDocRef);
-      const receiverData = receiverSnap.data();
-
-      // Get the sender's details
-      const senderDocRef = doc(db, 'users', messageData.senderId);
-      const senderSnap = await getDoc(senderDocRef);
-      const senderData = senderSnap.data();
+      console.log(messageData);  // Log the message data to check its structure
 
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message-item');
@@ -708,9 +695,9 @@ async function getMessages() {
       // Convert timestamp to a human-readable format
       const formattedDate = messageData.timestamp.toDate().toLocaleString();
 
-      // Display the outbox message with receiver and sender display names
+      // Display the outbox message
       let messageHTML = `
-        <h3>Message to ${receiverData.displayName || receiverData.entropianName}</h3>
+        <h3>Message to ${messageData.receiverId}</h3>
         <p><strong>Content:</strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
       `;
