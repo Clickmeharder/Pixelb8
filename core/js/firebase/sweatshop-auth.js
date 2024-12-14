@@ -895,81 +895,88 @@ async function sendMessage(senderId, recipientId, subject, messageContent) {
 
 // Fetch inbox messages
 async function fetchInboxMessages(userId) {
-  const inboxRef = collection(db, `users/${userId}/inbox`);
-  const inboxQuery = query(inboxRef, orderBy("time", "desc"));
-  const inboxSnapshot = await getDocs(inboxQuery);
-  return inboxSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const userInboxRef = firebase.firestore().collection(`users/${userId}/inbox`);
+  const inboxQuery = userInboxRef.orderBy("time", "desc");
+  const inboxSnapshot = await inboxQuery.get();
+
+  return inboxSnapshot.docs.map((doc) => ({
+    subject: doc.id,
+    ...doc.data(),
+  }));
 }
 
 // Fetch outbox messages
 async function fetchOutboxMessages(userId) {
-  const outboxRef = collection(db, `users/${userId}/outbox`);
-  const outboxQuery = query(outboxRef, orderBy("time", "desc"));
-  const outboxSnapshot = await getDocs(outboxQuery);
-  return outboxSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const userOutboxRef = firebase.firestore().collection(`users/${userId}/outbox`);
+  const outboxQuery = userOutboxRef.orderBy("time", "desc");
+  const outboxSnapshot = await outboxQuery.get();
+
+  return outboxSnapshot.docs.map((doc) => ({
+    subject: doc.id,
+    ...doc.data(),
+  }));
 }
 
-// Delete a message
-async function deleteMessage(userId, messageId, isInbox) {
-  const path = isInbox ? `users/${userId}/inbox` : `users/${userId}/outbox`;
-  const messageRef = doc(db, path, messageId);
-  await deleteDoc(messageRef);
-}
-
-// Populate message list
-function populateMessages(containerId, messages) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = "";  // Clear current list
-
-  messages.forEach(message => {
-    const messageElement = document.createElement("div");
-    messageElement.textContent = `Subject: ${message.id}, Sender: ${message.senderId}, Time: ${message.time}`;
-    container.appendChild(messageElement);
+// Populate messages in the modal
+function populateMessages(listId, messages) {
+  const mailListElement = document.getElementById(listId);
+  mailListElement.innerHTML = ""; // Clear current list
+  messages.forEach((message) => {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "message-item";
+    messageDiv.innerHTML = `
+      <h4>${message.subject}</h4>
+      <p>${message.body}</p>
+      <p><strong>Time:</strong> ${new Date(message.time.seconds * 1000).toLocaleString()}</p>
+    `;
+    mailListElement.appendChild(messageDiv);
   });
 }
 
+// Delete a message
+async function deleteMessage(userId, messageSubject, isInbox) {
+  const collectionPath = isInbox ? `users/${userId}/inbox` : `users/${userId}/outbox`;
+  const messageRef = firebase.firestore().doc(`${collectionPath}/${messageSubject}`);
+  await messageRef.delete();
+}
+
+// Initialize the mail system
 document.addEventListener("DOMContentLoaded", () => {
   const viewMailModal = document.getElementById("view-mail-modal");
-  const showInboxButton = document.getElementById("show-inbox");
-  const showOutboxButton = document.getElementById("show-outbox");
-  const closeMailModalButton = document.getElementById("close-mail-modal");
+  const inboxModal = document.getElementById("inbox-modal");
+  const outboxModal = document.getElementById("outbox-modal");
 
-  // Show View Mail modal
+  // Open the view mail modal
   document.getElementById("view-mail")?.addEventListener("click", () => {
     viewMailModal.style.display = "block";
   });
 
-  // Show inbox messages inside the mail modal
-  showInboxButton?.addEventListener("click", async () => {
-    const userId = auth.currentUser?.uid;  // Get the logged-in user's ID
-    if (userId) {
-      const inboxMessages = await fetchInboxMessages(userId);
-      populateMessages("mail-list", inboxMessages);
-    }
+  // Show inbox messages
+  document.getElementById("show-inbox")?.addEventListener("click", async () => {
+    const userId = "currentUserId"; // Replace with the actual user ID
+    const inboxMessages = await fetchInboxMessages(userId);
+    populateMessages("mail-list", inboxMessages);
   });
 
-  // Show outbox messages inside the mail modal
-  showOutboxButton?.addEventListener("click", async () => {
-    const userId = auth.currentUser?.uid;  // Get the logged-in user's ID
-    if (userId) {
-      const outboxMessages = await fetchOutboxMessages(userId);
-      populateMessages("mail-list", outboxMessages);
-    }
+  // Show outbox messages
+  document.getElementById("show-outbox")?.addEventListener("click", async () => {
+    const userId = "currentUserId"; // Replace with the actual user ID
+    const outboxMessages = await fetchOutboxMessages(userId);
+    populateMessages("mail-list", outboxMessages);
   });
 
-  // Close View Mail modal
-  closeMailModalButton?.addEventListener("click", () => {
+  // Close the view mail modal
+  document.getElementById("close-mail-modal")?.addEventListener("click", () => {
     viewMailModal.style.display = "none";
   });
 
-  // Close other modals
-  document.querySelectorAll(".modal-close").forEach(button => {
-    button.addEventListener("click", () => {
-      button.closest(".modal").style.display = "none";
+  // Close any modal
+  document.querySelectorAll(".modal-close").forEach((button) => {
+    button.addEventListener("click", (e) => {
+      e.target.closest(".modal").style.display = "none";
     });
   });
 });
-
 
 export { sendMessage, fetchInboxMessages, fetchOutboxMessages, deleteMessage };
 
