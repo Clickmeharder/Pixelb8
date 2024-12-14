@@ -658,9 +658,14 @@ async function getMessages() {
     inboxContainer.innerHTML = ''; // Clear previous content
 
     // Loop through all documents in the inbox collection
-    inboxSnapshot.forEach((doc) => {
+    inboxSnapshot.forEach(async (doc) => {
       const messageData = doc.data();
       console.log(messageData);  // Log the message data to check its structure
+
+      // Fetch sender's data (displayName and entropianame) from the user document
+      const senderDocRef = doc(db, `users/${messageData.senderId}`);
+      const senderSnapshot = await getDoc(senderDocRef);
+      const senderData = senderSnapshot.exists() ? senderSnapshot.data() : {};
 
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message-item');
@@ -668,9 +673,10 @@ async function getMessages() {
       // Convert timestamp to a human-readable format
       const formattedDate = messageData.timestamp.toDate().toLocaleString();
 
-      // Display the inbox message
+      // Display the inbox message with sender's displayName and entropianame
       let messageHTML = `
-        <h3>Message from ${messageData.senderId}</h3>
+        <h3>Message from ${senderData.displayName || messageData.senderId}</h3>
+        <p><strong>Entropianame:</strong> ${senderData.entropianame || 'Unknown'}</p>
         <p><strong>Content:</strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
         <button class="delete-btn" data-doc-id="${doc.id}">Delete</button> <!-- Delete Button -->
@@ -686,9 +692,14 @@ async function getMessages() {
     outboxContainer.innerHTML = ''; // Clear previous content
 
     // Loop through all documents in the outbox collection
-    outboxSnapshot.forEach((doc) => {
+    outboxSnapshot.forEach(async (doc) => {
       const messageData = doc.data();
       console.log(messageData);  // Log the message data to check its structure
+
+      // Fetch receiver's data (displayName and entropianame) from the user document
+      const receiverDocRef = doc(db, `users/${messageData.receiverId}`);
+      const receiverSnapshot = await getDoc(receiverDocRef);
+      const receiverData = receiverSnapshot.exists() ? receiverSnapshot.data() : {};
 
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message-item');
@@ -696,9 +707,10 @@ async function getMessages() {
       // Convert timestamp to a human-readable format
       const formattedDate = messageData.timestamp.toDate().toLocaleString();
 
-      // Display the outbox message
+      // Display the outbox message with receiver's displayName and entropianame
       let messageHTML = `
-        <h3>Message to ${messageData.receiverId}</h3>
+        <h3>Message to ${receiverData.displayName || messageData.receiverId}</h3>
+        <p><strong>Entropianame:</strong> ${receiverData.entropianame || 'Unknown'}</p>
         <p><strong>Content:</strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
         <button class="delete-btn" data-doc-id="${doc.id}">Delete</button> <!-- Delete Button -->
@@ -737,6 +749,7 @@ async function getMessages() {
     console.log("Error getting messages: ", error);
   }
 }
+
 
 // JavaScript to trigger getMessages when button is clicked
 document.getElementById('loadMessagesBtn').addEventListener('click', getMessages);
