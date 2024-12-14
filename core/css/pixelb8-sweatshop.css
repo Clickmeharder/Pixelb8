@@ -530,10 +530,10 @@ input[type="number"]::-moz-focus-inner {
 #view-mail-modal {
   display: none;
   position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 50%;
-  height: 50%;
+  top: 0;
+  left: 0;
+  width: 75%;
+  height: 75%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
   align-items: center;
