@@ -644,7 +644,7 @@ async function getMessages() {
   try {
     // Get the currently signed-in user
     const user = auth.currentUser;
-	console.log("Current user:", user); // Log the user object
+    console.log("Current user:", user); // Log the user object
     if (!user) {
       alert("You must be signed in to view your messages.");
       return;
@@ -652,42 +652,54 @@ async function getMessages() {
 
     const userUid = user.uid; // Get the user's UID
 
-    // Fetch messages from inbox
+    // Fetch messages from inbox (all documents inside /users/{userUid}/inbox)
     const inboxSnapshot = await getDocs(collection(db, `users/${userUid}/inbox`));
-	console.log("Inbox Snapshot:", inboxSnapshot); // Log the inbox snapshot
+    console.log("Inbox Snapshot:", inboxSnapshot); // Log the inbox snapshot
     inboxContainer.innerHTML = ''; // Clear previous content
 
+    // Loop through all documents in the inbox collection
     inboxSnapshot.forEach((doc) => {
       const messageData = doc.data();
+      console.log(messageData);  // Log the message data to check its structure
+
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message-item');
+
+      // Convert timestamp to a human-readable format
+      const formattedDate = messageData.timestamp.toDate().toLocaleString();
 
       // Display the inbox message
       let messageHTML = `
         <h3>Message from ${messageData.senderId}</h3>
         <p><strong>Content:</strong> ${messageData.content}</p>
-        <p><strong>Date Sent:</strong> ${messageData.timestamp}</p>
+        <p><strong>Date Sent:</strong> ${formattedDate}</p>
       `;
 
       messageDiv.innerHTML = messageHTML;
       inboxContainer.appendChild(messageDiv);
     });
 
-    // Fetch messages from outbox
+    // Fetch messages from outbox (all documents inside /users/{userUid}/outbox)
     const outboxSnapshot = await getDocs(collection(db, `users/${userUid}/outbox`));
-	console.log("Outbox Snapshot:", outboxSnapshot); // Log the outbox snapshot
+    console.log("Outbox Snapshot:", outboxSnapshot); // Log the outbox snapshot
     outboxContainer.innerHTML = ''; // Clear previous content
 
+    // Loop through all documents in the outbox collection
     outboxSnapshot.forEach((doc) => {
       const messageData = doc.data();
+      console.log(messageData);  // Log the message data to check its structure
+
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message-item');
+
+      // Convert timestamp to a human-readable format
+      const formattedDate = messageData.timestamp.toDate().toLocaleString();
 
       // Display the outbox message
       let messageHTML = `
         <h3>Message to ${messageData.receiverId}</h3>
         <p><strong>Content:</strong> ${messageData.content}</p>
-        <p><strong>Date Sent:</strong> ${messageData.timestamp}</p>
+        <p><strong>Date Sent:</strong> ${formattedDate}</p>
       `;
 
       messageDiv.innerHTML = messageHTML;
@@ -701,7 +713,48 @@ async function getMessages() {
 
 // JavaScript to trigger getMessages when button is clicked
 document.getElementById('loadMessagesBtn').addEventListener('click', getMessages);
+document.getElementById('send-message-form').addEventListener('submit', async (e) => {
+  e.preventDefault(); // Prevent default form submission behavior
 
+  const recipientId = document.getElementById('recipient').value;
+  const subject = document.getElementById('subject').value;
+  const messageContent = document.getElementById('message').value;
+  const senderId = auth.currentUser.uid;  // Get the current user's UID
+
+  const timestamp = new Date(); // Use current date for timestamp
+
+  try {
+    // Save the message to Firestore (both inbox and outbox)
+    // Save to recipient's inbox
+    await setDoc(doc(db, `users/${recipientId}/inbox`, subject), {
+      senderId,
+      receiverId: recipientId,
+      content: messageContent,
+      timestamp
+    });
+
+    // Save to sender's outbox
+    await setDoc(doc(db, `users/${senderId}/outbox`, subject), {
+      senderId,
+      receiverId: recipientId,
+      content: messageContent,
+      timestamp
+    });
+
+    // Clear form fields
+    document.getElementById('recipient').value = '';
+    document.getElementById('subject').value = '';
+    document.getElementById('message').value = '';
+
+    // Close the modal
+    document.getElementById('send-message-modal').style.display = 'none';
+
+    alert('Message sent successfully!');
+  } catch (error) {
+    console.error("Error sending message: ", error);
+    alert('Failed to send message.');
+  }
+});
 // Close any modal
 document.querySelectorAll(".modal-close").forEach((button) => {
   button.addEventListener("click", (e) => {
