@@ -560,7 +560,7 @@ input[type="number"]::-moz-focus-inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #007bff;
+  background: linear-gradient(to left, #071223, #0f2c48c9);
   color: #fff;
   padding: 15px;
 }
@@ -586,14 +586,14 @@ input[type="number"]::-moz-focus-inner {
 /* Tabs for Inbox and Outbox */
 .mailbox-tabs {
   display: flex;
-  border-bottom: 2px solid #ddd;
+  border-bottom: 2px solid rgb(23,130, 182, 1.0);
 }
 
 .tab-btn {
   flex: 1;
   padding: 10px;
   font-size: 16px;
-  background: #f9f9f9;
+  background: linear-gradient(to left, #071223, #0f2c48c9);
   border: none;
   cursor: pointer;
   text-align: center;
@@ -602,7 +602,8 @@ input[type="number"]::-moz-focus-inner {
 
 .tab-btn.active {
   background-color: #007bff;
-  color: #fff;
+  color: #d07c0dba;
+  font-weight: bold;
 }
 
 .tab-btn:not(.active):hover {
@@ -628,8 +629,8 @@ input[type="number"]::-moz-focus-inner {
 }
 
 .message-item {
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
+  background-color: #131e29eb;
+  border: 1px solid rgb(23,130, 182, 1.0);
   padding: 10px;
   border-radius: 5px;
   margin-bottom: 10px;
@@ -637,7 +638,7 @@ input[type="number"]::-moz-focus-inner {
 }
 
 .message-item:hover {
-  background-color: #e9ecef;
+  background-color: #0c2136;
 }
 
 .message-item h3 {
