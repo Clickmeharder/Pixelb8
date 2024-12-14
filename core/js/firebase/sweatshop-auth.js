@@ -705,8 +705,6 @@ async function getMessages() {
         <p><strong>Content:</strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
         <p><strong>Sender Status:</strong> ${senderDetails ? senderDetails.status : 'N/A'}</p>
-        <p><strong>Receiver:</strong> ${receiverDetails ? receiverDetails.entropiaName : 'Unknown Receiver'}</p>
-        <p><strong>Receiver Status:</strong> ${receiverDetails ? receiverDetails.status : 'N/A'}</p>
       `;
 
       messageDiv.innerHTML = messageHTML;
@@ -737,7 +735,6 @@ async function getMessages() {
         <h3>Message to ${receiverDetails ? receiverDetails.entropiaName : 'Unknown Receiver'}</h3>
         <p><strong>Content:</strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
-        <p><strong>Sender Status:</strong> ${senderDetails ? senderDetails.status : 'N/A'}</p>
         <p><strong>Receiver Status:</strong> ${receiverDetails ? receiverDetails.status : 'N/A'}</p>
       `;
 
