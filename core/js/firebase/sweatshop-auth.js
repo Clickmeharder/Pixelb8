@@ -749,54 +749,7 @@ async function getMessages() {
 
 // JavaScript to trigger getMessages when button is clicked
 document.getElementById('loadMessagesBtn').addEventListener('click', getMessages);
-document.getElementById('send-message-form').addEventListener('submit', async (e) => {
-  e.preventDefault(); // Prevent default form submission behavior
 
-  const recipientId = document.getElementById('recipient').value;
-  const subject = document.getElementById('subject').value;
-  const messageContent = document.getElementById('message').value;
-  const senderId = auth.currentUser.uid;  // Get the current user's UID
-
-  const timestamp = new Date(); // Use current date for timestamp
-
-  try {
-    // Save the message to Firestore (both inbox and outbox)
-    // Save to recipient's inbox
-    await setDoc(doc(db, `users/${recipientId}/inbox`, subject), {
-      senderId,
-      receiverId: recipientId,
-      content: messageContent,
-      timestamp
-    });
-
-    // Save to sender's outbox
-    await setDoc(doc(db, `users/${senderId}/outbox`, subject), {
-      senderId,
-      receiverId: recipientId,
-      content: messageContent,
-      timestamp
-    });
-
-    // Clear form fields
-    document.getElementById('recipient').value = '';
-    document.getElementById('subject').value = '';
-    document.getElementById('message').value = '';
-
-    // Close the modal
-    document.getElementById('send-message-modal').style.display = 'none';
-
-    alert('Message sent successfully!');
-  } catch (error) {
-    console.error("Error sending message: ", error);
-    alert('Failed to send message.');
-  }
-});
-// Close any modal
-document.querySelectorAll(".modal-close").forEach((button) => {
-  button.addEventListener("click", (e) => {
-    e.target.closest(".modal").style.display = "none";
-  });
-});
 
 // end mail stuff
 //----------------------------
@@ -1037,7 +990,60 @@ function closeUserDetails() {
   document.getElementById('user-details').style.display = 'none';
 }
 
+// Function to show the mailbox modal
+function showMailbox() {
+  document.getElementById('view-mail-modal').style.display = 'block'; // Display the modal
+}
 
+document.getElementById('send-message-form').addEventListener('submit', async (e) => {
+  e.preventDefault(); // Prevent default form submission behavior
+
+  const recipientId = document.getElementById('recipient').value;
+  const subject = document.getElementById('subject').value;
+  const messageContent = document.getElementById('message').value;
+  const senderId = auth.currentUser.uid;  // Get the current user's UID
+
+  const timestamp = new Date(); // Use current date for timestamp
+
+  try {
+    // Save the message to Firestore (both inbox and outbox)
+    // Save to recipient's inbox
+    await setDoc(doc(db, `users/${recipientId}/inbox`, subject), {
+      senderId,
+      receiverId: recipientId,
+      content: messageContent,
+      timestamp
+    });
+
+    // Save to sender's outbox
+    await setDoc(doc(db, `users/${senderId}/outbox`, subject), {
+      senderId,
+      receiverId: recipientId,
+      content: messageContent,
+      timestamp
+    });
+
+    // Clear form fields
+    document.getElementById('recipient').value = '';
+    document.getElementById('subject').value = '';
+    document.getElementById('message').value = '';
+
+    // Close the modal
+    document.getElementById('send-message-modal').style.display = 'none';
+
+    alert('Message sent successfully!');
+  } catch (error) {
+    console.error("Error sending message: ", error);
+    alert('Failed to send message.');
+  }
+});
+
+// Close any modal
+document.querySelectorAll(".modal-close").forEach((button) => {
+  button.addEventListener("click", (e) => {
+    e.target.closest(".modal").style.display = "none";
+  });
+});
 // Call the function to display the exchange data on page load
 	getExchangeData();
 	
