@@ -73,14 +73,8 @@
       </div>
   </main>
   -->
-	<!-- Button to trigger viewing mail -->
-	<button id="loadMessagesBtn">Load Messages</button>
-	<div id="inbox-messages">
-	<!-- Inbox messages will be displayed here -->
-	</div>
-	<div id="outbox-messages">
-	  <!-- Outbox messages will be displayed here -->
-	</div>
+
+	<button id="show-mailbox-modal">Mailbox</button>
 	
     <div class="container" id="sweatshop">
         <!-- Tabs -->
@@ -592,8 +586,15 @@
 <!-- Modal for viewing mail -->
 <div id="view-mail-modal" style="display: none; position: fixed; background: white; border: 1px solid #ccc; padding: 20px; z-index: 1000; top: 50%; left: 50%; transform: translate(-50%, -50%);">
     <h3>Mail</h3>
-    <div id="mail-list" style="margin-top: 20px;"></div>
-    <button id="close-mail-modal">Close</button>
+		<!-- Button to trigger viewing mail -->
+	<button id="loadMessagesBtn">Load Messages</button>
+	<div id="inbox-messages">
+	<!-- Inbox messages will be displayed here -->
+	</div>
+	<div id="outbox-messages">
+	  <!-- Outbox messages will be displayed here -->
+	</div>
+    <button id="close-mail-modal" class="modal-close">Close</button>
 </div>
 
 
