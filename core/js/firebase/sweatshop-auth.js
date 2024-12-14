@@ -680,80 +680,123 @@ async function deleteMessage(userUid, folder, messageId) {
   }
 }
 
+async function openReplyInput(receiverId) {
+  const replyContainer = document.createElement('div');
+  replyContainer.classList.add('reply-container');
+
+  const replyInput = document.createElement('textarea');
+  replyInput.placeholder = "Write your reply here...";
+  replyContainer.appendChild(replyInput);
+
+  const sendReplyButton = document.createElement('button');
+  sendReplyButton.textContent = "Send Reply";
+  sendReplyButton.addEventListener('click', async () => {
+    const replyContent = replyInput.value.trim();
+    if (replyContent) {
+      await sendReply(receiverId, replyContent);
+      alert("Reply sent!");
+      replyContainer.remove();
+    } else {
+      alert("Reply content cannot be empty.");
+    }
+  });
+
+  replyContainer.appendChild(sendReplyButton);
+  document.body.appendChild(replyContainer); // Append to body or a specific parent element
+}
+
+async function sendReply(receiverId, content) {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      alert("You must be signed in to send messages.");
+      return;
+    }
+
+    const userUid = user.uid;
+    const messageData = {
+      senderId: userUid,
+      receiverId: receiverId,
+      content: content,
+      timestamp: serverTimestamp(),
+    };
+
+    // Add the reply to the receiver's inbox
+    await addDoc(collection(db, `users/${receiverId}/inbox`), messageData);
+
+    // Optionally add the reply to the sender's outbox
+    await addDoc(collection(db, `users/${userUid}/outbox`), messageData);
+
+  } catch (error) {
+    console.error("Error sending reply: ", error);
+  }
+}
 // Fetch and display updated messages from Inbox and Outbox
 async function getMessages() {
   const inboxContainer = document.getElementById('inbox-messages');
   const outboxContainer = document.getElementById('outbox-messages');
   
   try {
-    // Get the currently signed-in user
     const user = auth.currentUser;
     if (!user) {
       alert("You must be signed in to view your messages.");
       return;
     }
 
-    const userUid = user.uid; // Get the user's UID
+    const userUid = user.uid;
 
-    // Fetch messages from inbox (all documents inside /users/{userUid}/inbox)
+    // Fetch inbox messages
     const inboxSnapshot = await getDocs(collection(db, `users/${userUid}/inbox`));
-    inboxContainer.innerHTML = ''; // Clear previous content
+    inboxContainer.innerHTML = ''; 
 
     inboxSnapshot.forEach(async (doc) => {
       const messageData = doc.data();
-      const messageId = doc.id; // Get the message ID
-
-      // Get sender's details
+      const messageId = doc.id;
       const senderDetails = await getUserDetails(messageData.senderId);
 
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message-item');
-
-      // Convert timestamp to a human-readable format
       const formattedDate = messageData.timestamp.toDate().toLocaleString();
 
-      // Display the inbox message
       let messageHTML = `
         <h3>Message from ${senderDetails ? senderDetails.entropiaName : 'Unknown Sender'}</h3>
-        <p><strong></strong> ${messageData.content}</p>
+        <p>${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
       `;
 
-      // Add the delete button
       const deleteButton = document.createElement('button');
       deleteButton.textContent = "Delete";
       deleteButton.addEventListener('click', () => deleteMessage(userUid, 'inbox', messageId));
 
+      const replyButton = document.createElement('button');
+      replyButton.textContent = "Reply";
+      replyButton.addEventListener('click', () => openReplyInput(messageData.senderId));
+
       messageDiv.innerHTML = messageHTML;
       messageDiv.appendChild(deleteButton);
+      messageDiv.appendChild(replyButton);
       inboxContainer.appendChild(messageDiv);
     });
 
-    // Fetch messages from outbox (all documents inside /users/{userUid}/outbox)
+    // Fetch outbox messages
     const outboxSnapshot = await getDocs(collection(db, `users/${userUid}/outbox`));
-    outboxContainer.innerHTML = ''; // Clear previous content
+    outboxContainer.innerHTML = ''; 
 
     outboxSnapshot.forEach(async (doc) => {
       const messageData = doc.data();
-      const messageId = doc.id; // Get the message ID
-
-      // Get receiver's details
+      const messageId = doc.id;
       const receiverDetails = await getUserDetails(messageData.receiverId);
 
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message-item');
-
-      // Convert timestamp to a human-readable format
       const formattedDate = messageData.timestamp.toDate().toLocaleString();
 
-      // Display the outbox message
       let messageHTML = `
         <h3>Message to ${receiverDetails ? receiverDetails.entropiaName : 'Unknown Receiver'}</h3>
-        <p><strong></strong> ${messageData.content}</p>
+        <p>${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
       `;
 
-      // Add the delete button
       const deleteButton = document.createElement('button');
       deleteButton.textContent = "Delete";
       deleteButton.addEventListener('click', () => deleteMessage(userUid, 'outbox', messageId));
