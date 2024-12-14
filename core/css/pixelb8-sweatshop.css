@@ -518,6 +518,11 @@ input[type="number"]::-moz-focus-inner {
   border: 0; /* Remove border for Firefox */
 }
 
+/* mailbox css*/
+.message-item {
+}
+/* end of mailbox css*/
 .modal {
     white-space: wrap;
+	overflow-y: scroll;
 }
