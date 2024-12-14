@@ -924,38 +924,43 @@ async function deleteMessage(userId, messageSubject, isInbox) {
   await deleteDoc(messageRef);
 }
 
-// Add event listeners for modal interactions
 document.addEventListener("DOMContentLoaded", () => {
   const inboxModal = document.getElementById("inbox-modal");
   const outboxModal = document.getElementById("outbox-modal");
   const sendMessageModal = document.getElementById("send-message-modal");
+  const viewMailModal = document.getElementById("view-mail-modal");
 
   const sendMessageButton = document.getElementById("sendmessage-to-user");
-  const inboxButton = document.getElementById("open-inbox");
-  const outboxButton = document.getElementById("open-outbox");
+  const viewMailButton = document.getElementById("view-mail");
 
-  // Show inbox modal
-  inboxButton?.addEventListener("click", async () => {
-    const userId = "currentUserId"; // Replace with actual user ID
+  // Show View Mail modal
+  viewMailButton?.addEventListener("click", () => {
+    viewMailModal.style.display = "block";
+  });
+
+  // Show inbox messages inside the mail modal
+  const showInboxButton = document.getElementById("show-inbox");
+  showInboxButton?.addEventListener("click", async () => {
+    const userId = "currentUserId"; // Replace with the actual user ID
     const inboxMessages = await fetchInboxMessages(userId);
-    populateMessages("inbox-messages", inboxMessages);
-    inboxModal.style.display = "block";
+    populateMessages("mail-list", inboxMessages);
   });
 
-  // Show outbox modal
-  outboxButton?.addEventListener("click", async () => {
-    const userId = "currentUserId"; // Replace with actual user ID
+  // Show outbox messages inside the mail modal
+  const showOutboxButton = document.getElementById("show-outbox");
+  showOutboxButton?.addEventListener("click", async () => {
+    const userId = "currentUserId"; // Replace with the actual user ID
     const outboxMessages = await fetchOutboxMessages(userId);
-    populateMessages("outbox-messages", outboxMessages);
-    outboxModal.style.display = "block";
+    populateMessages("mail-list", outboxMessages);
   });
 
-  // Show send message modal
-  sendMessageButton?.addEventListener("click", () => {
-    sendMessageModal.style.display = "block";
+  // Close View Mail modal
+  const closeMailModalButton = document.getElementById("close-mail-modal");
+  closeMailModalButton?.addEventListener("click", () => {
+    viewMailModal.style.display = "none";
   });
 
-  // Close modals
+  // Close other modals
   document.querySelectorAll(".modal-close").forEach((button) => {
     button.addEventListener("click", () => {
       button.closest(".modal").style.display = "none";
@@ -979,7 +984,6 @@ function populateMessages(containerId, messages) {
     container.appendChild(messageDiv);
   });
 }
-
 export { sendMessage, fetchInboxMessages, fetchOutboxMessages, deleteMessage };
 
 
