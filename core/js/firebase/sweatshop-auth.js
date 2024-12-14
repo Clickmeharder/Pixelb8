@@ -869,14 +869,12 @@ document.getElementById('loadMessagesBtn').addEventListener('click', getMessages
           console.log("profile Email: " + profile.email);
 		  console.log("user Email: " + user.email);
           console.log("Photo URL: " + profile.photoURL);
-		  console.log("users pixels: " + user.pixelcount);
           statusElement.textContent = "Status: Online";
           userauthproveriderElement.textContent = profile.providerId;
 		  usernameElement.textContent = user.displayName || "Nameless";
           profileusernameElement.textContent = profile.displayName || "-idk-";
           emailElement.textContent = profile.email || "Unknown";
           photoElement.src = user.photoURL || "default.jpg";
-
 		  userpixelcountElement.classList.remove('hidden');
           emailVerifiedElement.textContent = user.emailVerified ? "► Verified" : " ► Unverified";
           emailVerifiedElement.classList.remove('hidden');
