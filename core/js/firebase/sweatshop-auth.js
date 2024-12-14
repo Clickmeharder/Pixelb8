@@ -867,7 +867,9 @@ function closeUserDetails() {
   document.getElementById('user-details').style.display = 'none';
 }
 
-//mail
+//------------------------------------------
+// mail
+//------------------------------------------
 
 // Function to send a message
 async function sendMessage(senderId, recipientId, subject, messageContent) {
@@ -932,12 +934,92 @@ async function deleteMessage(userId, messageSubject, isInbox) {
 
 export { sendMessage, fetchInboxMessages, fetchOutboxMessages, deleteMessage };
 
+//endmail stuff 
 
+//beggining new messaging stuff
+//import { sendMessage, fetchInboxMessages, fetchOutboxMessages } from './mail.js';
+document.getElementById('sendmessage-to-user').addEventListener('click', () => {
+    document.getElementById('send-message-modal').style.display = 'block';
+});
 
+document.getElementById('close-send-modal').addEventListener('click', () => {
+    document.getElementById('send-message-modal').style.display = 'none';
+});
 
-//endmail
+document.getElementById('send-message-button').addEventListener('click', async () => {
+    const recipientId = document.getElementById('recipient-id').value;
+    const subject = document.getElementById('message-subject').value;
+    const messageContent = document.getElementById('message-content').value;
 
+    if (!recipientId || !subject || !messageContent) {
+        alert('Please fill in all fields!');
+        return;
+    }
 
+    const senderId = auth.currentUser.uid;
+
+    try {
+        await sendMessage(senderId, recipientId, subject, messageContent);
+        alert('Message sent successfully!');
+        document.getElementById('send-message-modal').style.display = 'none';
+    } catch (error) {
+        console.error('Error sending message:', error);
+        alert('Failed to send message. Try again later.');
+    }
+});
+
+document.getElementById('view-mail').addEventListener('click', async () => {
+    document.getElementById('view-mail-modal').style.display = 'block';
+
+    // Default to showing inbox
+    showInbox();
+});
+
+document.getElementById('close-mail-modal').addEventListener('click', () => {
+    document.getElementById('view-mail-modal').style.display = 'none';
+});
+
+document.getElementById('show-inbox').addEventListener('click', async () => {
+    showInbox();
+});
+
+document.getElementById('show-outbox').addEventListener('click', async () => {
+    showOutbox();
+});
+
+// Fetch and display inbox messages
+async function showInbox() {
+    const userId = auth.currentUser.uid;
+    const mailList = document.getElementById('mail-list');
+    mailList.innerHTML = 'Loading inbox...';
+
+    try {
+        const messages = await fetchInboxMessages(userId);
+        mailList.innerHTML = messages.length
+            ? messages.map(msg => `<div><strong>${msg.subject}</strong>: ${msg.message} (from: ${msg.sentby})</div>`).join('')
+            : 'Inbox is empty.';
+    } catch (error) {
+        console.error('Error fetching inbox:', error);
+        mailList.innerHTML = 'Failed to load inbox.';
+    }
+}
+
+// Fetch and display outbox messages
+async function showOutbox() {
+    const userId = auth.currentUser.uid;
+    const mailList = document.getElementById('mail-list');
+    mailList.innerHTML = 'Loading outbox...';
+
+    try {
+        const messages = await fetchOutboxMessages(userId);
+        mailList.innerHTML = messages.length
+            ? messages.map(msg => `<div><strong>${msg.subject}</strong>: ${msg.message} (to: ${msg.sendto})</div>`).join('')
+            : 'Outbox is empty.';
+    } catch (error) {
+        console.error('Error fetching outbox:', error);
+        mailList.innerHTML = 'Failed to load outbox.';
+    }
+}
 
 
 

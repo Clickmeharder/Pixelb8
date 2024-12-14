@@ -559,9 +559,37 @@
 	  <p><strong>Entropia Name:</strong> <span id="entropia-name">Loading...</span></p>
 	  <p><strong>Status:</strong> <span id="status">Loading...</span></p>
 	  <p><strong>Last Login:</strong> <span id="last-login">Loading...</span></p>
+	  <button id="sendmessage-to-user">Message</button>
+      <button id="view-mail">View Mail</button>
 	  <button id="userdetails-close-button">Close</button>
 	</div>
 </div>
+
+<!-- Modal for sending a message -->
+<div id="send-message-modal" style="display: none; position: fixed; background: white; border: 1px solid #ccc; padding: 20px; z-index: 1000; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <h3>Send Message</h3>
+    <label for="recipient-id">Recipient ID:</label>
+    <input type="text" id="recipient-id" placeholder="Enter user ID"><br>
+    <label for="message-subject">Subject:</label>
+    <input type="text" id="message-subject" placeholder="Enter subject"><br>
+    <label for="message-content">Message:</label>
+    <textarea id="message-content" placeholder="Enter your message"></textarea><br>
+    <button id="send-message-button">Send</button>
+    <button id="close-send-modal">Close</button>
+</div>
+
+<!-- Modal for viewing mail -->
+<div id="view-mail-modal" style="display: none; position: fixed; background: white; border: 1px solid #ccc; padding: 20px; z-index: 1000; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <h3>Mail</h3>
+    <div>
+        <button id="show-inbox">Inbox</button>
+        <button id="show-outbox">Outbox</button>
+    </div>
+    <div id="mail-list" style="margin-top: 20px;"></div>
+    <button id="close-mail-modal">Close</button>
+</div>
+<!--end of divs/Modals for userdetails and mail -->
+
 <!-- Modal for Signup -->
 <div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
