@@ -520,9 +520,11 @@ input[type="number"]::-moz-focus-inner {
 
 /* mailbox css*/
 .message-item {
+	border: 1px ridge dimgray;
 }
 /* end of mailbox css*/
 .modal {
+	background-color: rgb(0 0 0 / 77%);
     white-space: wrap;
 	overflow-y: scroll;
 }
