@@ -644,6 +644,7 @@ async function getMessages() {
   try {
     // Get the currently signed-in user
     const user = auth.currentUser;
+	console.log("Current user:", user); // Log the user object
     if (!user) {
       alert("You must be signed in to view your messages.");
       return;
@@ -653,6 +654,7 @@ async function getMessages() {
 
     // Fetch messages from inbox
     const inboxSnapshot = await getDocs(collection(db, `users/${userUid}/inbox`));
+	console.log("Inbox Snapshot:", inboxSnapshot); // Log the inbox snapshot
     inboxContainer.innerHTML = ''; // Clear previous content
 
     inboxSnapshot.forEach((doc) => {
@@ -673,6 +675,7 @@ async function getMessages() {
 
     // Fetch messages from outbox
     const outboxSnapshot = await getDocs(collection(db, `users/${userUid}/outbox`));
+	console.log("Outbox Snapshot:", outboxSnapshot); // Log the outbox snapshot
     outboxContainer.innerHTML = ''; // Clear previous content
 
     outboxSnapshot.forEach((doc) => {
