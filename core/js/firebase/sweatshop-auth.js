@@ -305,8 +305,11 @@ async function showUserDetails(ownerId) {
   const statusSpan = document.getElementById('status');
   const lastLoginSpan = document.getElementById('last-login');
   const userDetailsBoxDiv = document.getElementById('user-detailsbox'); // The main box containing both sections
-
+  const sendMessageButton = document.getElementById('sendmessage-to-user');
+  
   // Reset the content and hide the error message initially
+  // Reset button attribute
+  if (sendMessageButton) sendMessageButton.setAttribute('data-owner-id', ownerId);
   if (userDetailsErrorDiv) userDetailsErrorDiv.style.display = 'none';
   if (userDetailsDiv) userDetailsDiv.style.display = 'none';
   
@@ -1054,52 +1057,24 @@ function closeUserDetails() {
   document.getElementById('user-details').style.display = 'none';
 }
 
+// Add event listener for the "sendmessage-to-user" button to respond to listing
+document.getElementById('sendmessage-to-user').addEventListener('click', () => {
+  const sendMessageButton = document.getElementById('sendmessage-to-user');
+  const ownerId = sendMessageButton.getAttribute('data-owner-id');
+  
+  if (ownerId) {
+    const messageContent = prompt('Enter your message:');
+    if (messageContent) {
+      sendReply(ownerId, messageContent);
+    }
+  } else {
+    alert('Owner ID not found. Please try again.');
+  }
+});
+
 // Add event listener for the "Mailbox" button to open the modal
 document.getElementById('show-mailbox-modal').addEventListener('click', function() {
   document.getElementById('view-mail-modal').style.display = 'block'; // Display the modal
-});
-
-document.getElementById('send-message-form').addEventListener('submit', async (e) => {
-  e.preventDefault(); // Prevent default form submission behavior
-
-  const recipientId = document.getElementById('recipient').value;
-  const subject = document.getElementById('subject').value;
-  const messageContent = document.getElementById('message').value;
-  const senderId = auth.currentUser.uid;  // Get the current user's UID
-
-  const timestamp = new Date(); // Use current date for timestamp
-
-  try {
-    // Save the message to Firestore (both inbox and outbox)
-    // Save to recipient's inbox
-    await setDoc(doc(db, `users/${recipientId}/inbox`, subject), {
-      senderId,
-      receiverId: recipientId,
-      content: messageContent,
-      timestamp
-    });
-
-    // Save to sender's outbox
-    await setDoc(doc(db, `users/${senderId}/outbox`, subject), {
-      senderId,
-      receiverId: recipientId,
-      content: messageContent,
-      timestamp
-    });
-
-    // Clear form fields
-    document.getElementById('recipient').value = '';
-    document.getElementById('subject').value = '';
-    document.getElementById('message').value = '';
-
-    // Close the modal
-    document.getElementById('send-message-modal').style.display = 'none';
-
-    alert('Message sent successfully!');
-  } catch (error) {
-    console.error("Error sending message: ", error);
-    alert('Failed to send message.');
-  }
 });
 
 // Close any modal
