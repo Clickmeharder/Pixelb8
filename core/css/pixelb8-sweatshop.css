@@ -561,7 +561,7 @@ input[type="number"]::-moz-focus-inner {
   justify-content: space-between;
   align-items: center;
   background: linear-gradient(to left, #071223, #0f2c48c9);
-  color: #fff;
+  color: #d07c0dba;
   padding: 15px;
 }
 
@@ -572,8 +572,8 @@ input[type="number"]::-moz-focus-inner {
 
 .modal-close {
   background: none;
-  border: none;
-  color: #fff;
+  border-color: #0b6ece;
+  color: #0b6ece;
   font-size: 18px;
   cursor: pointer;
   transition: color 0.3s;
@@ -647,6 +647,7 @@ input[type="number"]::-moz-focus-inner {
 }
 
 .message-item p {
+  color: #d07c0d;
   margin: 5px 0;
   font-size: 14px;
 }

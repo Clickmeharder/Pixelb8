@@ -715,7 +715,7 @@ async function getMessages() {
       // Display the inbox message
       let messageHTML = `
         <h3>Message from ${senderDetails ? senderDetails.entropiaName : 'Unknown Sender'}</h3>
-        <p><strong>Content:</strong> ${messageData.content}</p>
+        <p><strong></strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
       `;
 
@@ -749,7 +749,7 @@ async function getMessages() {
       // Display the outbox message
       let messageHTML = `
         <h3>Message to ${receiverDetails ? receiverDetails.entropiaName : 'Unknown Receiver'}</h3>
-        <p><strong>Content:</strong> ${messageData.content}</p>
+        <p><strong></strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
       `;
 
