@@ -877,13 +877,13 @@ async function sendMessage(senderId, recipientId, subject, messageContent) {
   const outboxMessage = {
     time: now.toISOString(),
     message: messageContent,
-    sendto: recipientId,
+    sendto: recipientId,  // updated field name
   };
 
   const inboxMessage = {
     time: now.toISOString(),
     message: messageContent,
-    sentby: senderId,
+    sentby: senderId,  // updated field name
   };
 
   const senderOutboxRef = doc(collection(db, `users/${senderId}/outbox`), subject);
@@ -904,7 +904,6 @@ async function fetchInboxMessages(userId) {
     ...doc.data(),
   }));
 }
-
 // Fetch outbox messages
 async function fetchOutboxMessages(userId) {
   const userOutboxRef = collection(db, `users/${userId}/outbox`);
@@ -923,7 +922,6 @@ async function deleteMessage(userId, messageSubject, isInbox) {
   const messageRef = doc(db, collectionPath, messageSubject);
   await deleteDoc(messageRef);
 }
-
 document.addEventListener("DOMContentLoaded", () => {
   const inboxModal = document.getElementById("inbox-modal");
   const outboxModal = document.getElementById("outbox-modal");
