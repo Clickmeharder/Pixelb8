@@ -544,7 +544,7 @@ input[type="number"]::-moz-focus-inner {
 
 /* Mailbox Container */
 .mailbox-container {
-  background: #fff;
+  background: ;
   border-radius: 8px;
   width: 100%;
   max-width: 700px;
@@ -655,7 +655,7 @@ input[type="number"]::-moz-focus-inner {
 .mailbox-footer {
   padding: 15px;
   text-align: right;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid #1a567d;
 }
 
 .mailbox-footer button {
