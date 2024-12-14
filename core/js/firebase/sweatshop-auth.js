@@ -665,6 +665,21 @@ document.getElementById('save-status').addEventListener('click', async () => {
 // mail
 //------------------------------------------
 
+// Function to delete a message
+async function deleteMessage(userUid, folder, messageId) {
+  try {
+    // Delete the message from the specified folder (inbox or outbox)
+    await deleteDoc(doc(db, `users/${userUid}/${folder}/${messageId}`));
+    alert("Message deleted successfully.");
+
+    // Refresh messages after deletion
+    getMessages();
+  } catch (error) {
+    console.error("Error deleting message: ", error);
+    alert("Failed to delete the message.");
+  }
+}
+
 // Fetch and display updated messages from Inbox and Outbox
 async function getMessages() {
   const inboxContainer = document.getElementById('inbox-messages');
@@ -686,12 +701,10 @@ async function getMessages() {
 
     inboxSnapshot.forEach(async (doc) => {
       const messageData = doc.data();
-      
+      const messageId = doc.id; // Get the message ID
+
       // Get sender's details
       const senderDetails = await getUserDetails(messageData.senderId);
-
-      // Get receiver's details
-      const receiverDetails = await getUserDetails(messageData.receiverId);
 
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message-item');
@@ -699,15 +712,20 @@ async function getMessages() {
       // Convert timestamp to a human-readable format
       const formattedDate = messageData.timestamp.toDate().toLocaleString();
 
-      // Display the inbox message with receiver and sender display names
+      // Display the inbox message
       let messageHTML = `
         <h3>Message from ${senderDetails ? senderDetails.entropiaName : 'Unknown Sender'}</h3>
         <p><strong>Content:</strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
-        <p><strong>Sender Status:</strong> ${senderDetails ? senderDetails.status : 'N/A'}</p>
       `;
 
+      // Add the delete button
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = "Delete";
+      deleteButton.addEventListener('click', () => deleteMessage(userUid, 'inbox', messageId));
+
       messageDiv.innerHTML = messageHTML;
+      messageDiv.appendChild(deleteButton);
       inboxContainer.appendChild(messageDiv);
     });
 
@@ -717,9 +735,7 @@ async function getMessages() {
 
     outboxSnapshot.forEach(async (doc) => {
       const messageData = doc.data();
-
-      // Get sender's details
-      const senderDetails = await getUserDetails(messageData.senderId);
+      const messageId = doc.id; // Get the message ID
 
       // Get receiver's details
       const receiverDetails = await getUserDetails(messageData.receiverId);
@@ -730,15 +746,20 @@ async function getMessages() {
       // Convert timestamp to a human-readable format
       const formattedDate = messageData.timestamp.toDate().toLocaleString();
 
-      // Display the outbox message with receiver and sender display names
+      // Display the outbox message
       let messageHTML = `
         <h3>Message to ${receiverDetails ? receiverDetails.entropiaName : 'Unknown Receiver'}</h3>
         <p><strong>Content:</strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
-        <p><strong>Receiver Status:</strong> ${receiverDetails ? receiverDetails.status : 'N/A'}</p>
       `;
 
+      // Add the delete button
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = "Delete";
+      deleteButton.addEventListener('click', () => deleteMessage(userUid, 'outbox', messageId));
+
       messageDiv.innerHTML = messageHTML;
+      messageDiv.appendChild(deleteButton);
       outboxContainer.appendChild(messageDiv);
     });
 
@@ -750,7 +771,7 @@ async function getMessages() {
 // JavaScript to trigger getMessages when button is clicked
 document.getElementById('loadMessagesBtn').addEventListener('click', getMessages);
 
-
+//------------------------------------------
 // end mail stuff
 //----------------------------
 
