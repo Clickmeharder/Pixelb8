@@ -543,6 +543,9 @@ input[type="number"]::-moz-focus-inner {
   overflow: hidden;
 }
 
+.mailbox-wrapper {
+	overflow-y: scroll;
+}
 /* Mailbox Container */
 .mailbox-container {
   background: ;
