@@ -635,118 +635,66 @@ document.getElementById('save-status').addEventListener('click', async () => {
 //------------------------------------------
 // mail
 //------------------------------------------
-// Function to send a message
-async function sendMessage(senderId, recipientId, subject, messageContent) {
-  const now = new Date();
 
-  const outboxMessage = {
-    time: now.toISOString(),
-    message: messageContent,
-    sendto: recipientId,  // updated field name
-  };
+// Fetch and display updated messages from Inbox and Outbox
+async function getMessages() {
+  const inboxContainer = document.getElementById('inbox-messages');
+  const outboxContainer = document.getElementById('outbox-messages');
+  
+  try {
+    // Get the currently signed-in user
+    const user = auth.currentUser;
+    if (!user) {
+      alert("You must be signed in to view your messages.");
+      return;
+    }
 
-  const inboxMessage = {
-    time: now.toISOString(),
-    message: messageContent,
-    sentby: senderId,  // updated field name
-  };
+    const userUid = user.uid; // Get the user's UID
 
-  const senderOutboxRef = doc(collection(db, `users/${senderId}/outbox`), subject);
-  const recipientInboxRef = doc(collection(db, `users/${recipientId}/inbox`), subject);
+    // Fetch messages from inbox
+    const inboxSnapshot = await getDocs(collection(db, `users/${userUid}/inbox`));
+    inboxContainer.innerHTML = ''; // Clear previous content
 
-  await setDoc(senderOutboxRef, outboxMessage);
-  await setDoc(recipientInboxRef, inboxMessage);
-}
+    inboxSnapshot.forEach((doc) => {
+      const messageData = doc.data();
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message-item');
 
-// Fetch all messages (inbox + outbox combined)
-async function fetchAllMessages(userId) {
-  const userInboxRef = collection(db, `users/${userId}/inbox`);
-  const userOutboxRef = collection(db, `users/${userId}/outbox`);
+      // Display the inbox message
+      let messageHTML = `
+        <h3>Message from ${messageData.senderId}</h3>
+        <p><strong>Content:</strong> ${messageData.content}</p>
+        <p><strong>Date Sent:</strong> ${messageData.timestamp}</p>
+      `;
 
-  const inboxQuery = query(userInboxRef, orderBy("time", "desc"));
-  const outboxQuery = query(userOutboxRef, orderBy("time", "desc"));
-
-  const inboxSnapshot = await getDocs(inboxQuery);
-  const outboxSnapshot = await getDocs(outboxQuery);
-
-  const inboxMessages = inboxSnapshot.docs.map((doc) => ({
-    type: 'inbox',
-    subject: doc.id,
-    ...doc.data(),
-  }));
-
-  const outboxMessages = outboxSnapshot.docs.map((doc) => ({
-    type: 'outbox',
-    subject: doc.id,
-    ...doc.data(),
-  }));
-
-  // Combine inbox and outbox messages
-  return [...inboxMessages, ...outboxMessages];
-}
-
-// Populate messages in the modal
-function populateMessages(listId, messages) {
-  const mailListElement = document.getElementById(listId);
-  mailListElement.innerHTML = ""; // Clear current list
-
-  messages.forEach((message) => {
-    const messageDiv = document.createElement("div");
-    messageDiv.className = "message-item";
-    messageDiv.innerHTML = `
-      <h4>${message.subject}</h4>
-      <p>${message.message}</p>
-      <p><strong>Time:</strong> ${new Date(message.time).toLocaleString()}</p>
-      <p><strong>Type:</strong> ${message.type === 'inbox' ? 'Inbox' : 'Outbox'}</p>
-      <button class="delete-message" data-subject="${message.subject}" data-type="${message.type}">Delete</button>
-    `;
-    mailListElement.appendChild(messageDiv);
-  });
-
-  // Add delete functionality
-  document.querySelectorAll(".delete-message").forEach((button) => {
-    button.addEventListener("click", async (e) => {
-      const subject = e.target.getAttribute("data-subject");
-      const type = e.target.getAttribute("data-type");
-      const userId = "currentUserId"; // Replace with the actual user ID
-      await deleteMessage(userId, subject, type === 'inbox');
-      populateMessages(listId, await fetchAllMessages(userId)); // Refresh messages after deletion
+      messageDiv.innerHTML = messageHTML;
+      inboxContainer.appendChild(messageDiv);
     });
-  });
+
+    // Fetch messages from outbox
+    const outboxSnapshot = await getDocs(collection(db, `users/${userUid}/outbox`));
+    outboxContainer.innerHTML = ''; // Clear previous content
+
+    outboxSnapshot.forEach((doc) => {
+      const messageData = doc.data();
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message-item');
+
+      // Display the outbox message
+      let messageHTML = `
+        <h3>Message to ${messageData.receiverId}</h3>
+        <p><strong>Content:</strong> ${messageData.content}</p>
+        <p><strong>Date Sent:</strong> ${messageData.timestamp}</p>
+      `;
+
+      messageDiv.innerHTML = messageHTML;
+      outboxContainer.appendChild(messageDiv);
+    });
+
+  } catch (error) {
+    console.log("Error getting messages: ", error);
+  }
 }
-
-// Delete a message
-async function deleteMessage(userId, messageSubject, isInbox) {
-  const collectionPath = isInbox ? `users/${userId}/inbox` : `users/${userId}/outbox`;
-
-  // Create a reference to the message document
-  const messageRef = doc(db, `${collectionPath}/${messageSubject}`);
-
-  // Delete the message from Firestore
-  await deleteDoc(messageRef);
-}
-
-// Initialize the mail system
-document.addEventListener("DOMContentLoaded", () => {
-  const viewMailModal = document.getElementById("view-mail-modal");
-
-  // Open the view mail modal
-  document.getElementById("view-mail")?.addEventListener("click", () => {
-    viewMailModal.style.display = "block";
-  });
-
-  // Show all messages (inbox + outbox combined)
-  document.getElementById("show-all-mail")?.addEventListener("click", async () => {
-    const userId = "currentUserId"; // Replace with the actual user ID
-    const allMessages = await fetchAllMessages(userId);
-    populateMessages("mail-list", allMessages);
-  });
-
-  // Close the view mail modal
-  document.getElementById("close-mail-modal")?.addEventListener("click", () => {
-    viewMailModal.style.display = "none";
-  });
-
   // Close any modal
   document.querySelectorAll(".modal-close").forEach((button) => {
     button.addEventListener("click", (e) => {
