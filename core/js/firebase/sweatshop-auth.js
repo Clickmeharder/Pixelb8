@@ -356,7 +356,36 @@ async function showUserDetails(ownerId) {
   }
 }
 
+async function getUserDetails(userId) {
+  try {
+    // Fetch user data from Firestore
+    const userDoc = await getDoc(doc(db, 'users', userId)); // Firestore collection name: 'users'
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      
+      // Extract necessary data
+      const now = new Date();
+      const lastStatusChange = userData.lastStatusChange ? new Date(userData.lastStatusChange) : null;
+      const isOnline = userData.isOnline || false;
 
+      // Calculate days since last login
+      const daysSinceLastLogin = lastStatusChange
+        ? Math.floor((now - lastStatusChange) / (1000 * 60 * 60 * 24)) // Get the number of days
+        : 'Unknown';
+
+      return {
+        entropiaName: userData.entropianame || 'N/A',
+        status: isOnline ? 'Online' : `Offline (${daysSinceLastLogin} days ago)`,
+        lastLogin: lastStatusChange ? lastStatusChange.toLocaleString() : 'N/A',
+      };
+    } else {
+      return null; // No user found
+    }
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    return null;
+  }
+}
 
 
 // Fetch and display updated exchange data
@@ -644,7 +673,6 @@ async function getMessages() {
   try {
     // Get the currently signed-in user
     const user = auth.currentUser;
-    console.log("Current user:", user); // Log the user object
     if (!user) {
       alert("You must be signed in to view your messages.");
       return;
@@ -654,13 +682,16 @@ async function getMessages() {
 
     // Fetch messages from inbox (all documents inside /users/{userUid}/inbox)
     const inboxSnapshot = await getDocs(collection(db, `users/${userUid}/inbox`));
-    console.log("Inbox Snapshot:", inboxSnapshot); // Log the inbox snapshot
     inboxContainer.innerHTML = ''; // Clear previous content
 
-    // Loop through all documents in the inbox collection
-    inboxSnapshot.forEach((doc) => {
+    inboxSnapshot.forEach(async (doc) => {
       const messageData = doc.data();
-      console.log(messageData);  // Log the message data to check its structure
+      
+      // Get sender's details
+      const senderDetails = await getUserDetails(messageData.senderId);
+
+      // Get receiver's details
+      const receiverDetails = await getUserDetails(messageData.receiverId);
 
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message-item');
@@ -668,11 +699,14 @@ async function getMessages() {
       // Convert timestamp to a human-readable format
       const formattedDate = messageData.timestamp.toDate().toLocaleString();
 
-      // Display the inbox message
+      // Display the inbox message with receiver and sender display names
       let messageHTML = `
-        <h3>Message from ${messageData.senderId}</h3>
+        <h3>Message from ${senderDetails ? senderDetails.entropiaName : 'Unknown Sender'}</h3>
         <p><strong>Content:</strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
+        <p><strong>Sender Status:</strong> ${senderDetails ? senderDetails.status : 'N/A'}</p>
+        <p><strong>Receiver:</strong> ${receiverDetails ? receiverDetails.entropiaName : 'Unknown Receiver'}</p>
+        <p><strong>Receiver Status:</strong> ${receiverDetails ? receiverDetails.status : 'N/A'}</p>
       `;
 
       messageDiv.innerHTML = messageHTML;
@@ -681,13 +715,16 @@ async function getMessages() {
 
     // Fetch messages from outbox (all documents inside /users/{userUid}/outbox)
     const outboxSnapshot = await getDocs(collection(db, `users/${userUid}/outbox`));
-    console.log("Outbox Snapshot:", outboxSnapshot); // Log the outbox snapshot
     outboxContainer.innerHTML = ''; // Clear previous content
 
-    // Loop through all documents in the outbox collection
-    outboxSnapshot.forEach((doc) => {
+    outboxSnapshot.forEach(async (doc) => {
       const messageData = doc.data();
-      console.log(messageData);  // Log the message data to check its structure
+
+      // Get sender's details
+      const senderDetails = await getUserDetails(messageData.senderId);
+
+      // Get receiver's details
+      const receiverDetails = await getUserDetails(messageData.receiverId);
 
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message-item');
@@ -695,11 +732,13 @@ async function getMessages() {
       // Convert timestamp to a human-readable format
       const formattedDate = messageData.timestamp.toDate().toLocaleString();
 
-      // Display the outbox message
+      // Display the outbox message with receiver and sender display names
       let messageHTML = `
-        <h3>Message to ${messageData.receiverId}</h3>
+        <h3>Message to ${receiverDetails ? receiverDetails.entropiaName : 'Unknown Receiver'}</h3>
         <p><strong>Content:</strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
+        <p><strong>Sender Status:</strong> ${senderDetails ? senderDetails.status : 'N/A'}</p>
+        <p><strong>Receiver Status:</strong> ${receiverDetails ? receiverDetails.status : 'N/A'}</p>
       `;
 
       messageDiv.innerHTML = messageHTML;
