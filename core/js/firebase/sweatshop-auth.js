@@ -990,10 +990,10 @@ function closeUserDetails() {
   document.getElementById('user-details').style.display = 'none';
 }
 
-// Function to show the mailbox modal
-function showMailbox() {
+// Add event listener for the "Mailbox" button to open the modal
+document.getElementById('show-mailbox-modal').addEventListener('click', function() {
   document.getElementById('view-mail-modal').style.display = 'block'; // Display the modal
-}
+});
 
 document.getElementById('send-message-form').addEventListener('submit', async (e) => {
   e.preventDefault(); // Prevent default form submission behavior
