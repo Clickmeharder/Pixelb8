@@ -660,9 +660,9 @@ async function sendMessage(senderId, recipientId, subject, messageContent) {
 
 // Fetch inbox messages
 async function fetchInboxMessages(userId) {
-  const userInboxRef = firebase.firestore().collection(`users/${userId}/inbox`);
-  const inboxQuery = userInboxRef.orderBy("time", "desc");
-  const inboxSnapshot = await inboxQuery.get();
+  const userInboxRef = collection(db, `users/${userId}/inbox`);
+  const inboxQuery = query(userInboxRef, orderBy("time", "desc"));
+  const inboxSnapshot = await getDocs(inboxQuery);
 
   return inboxSnapshot.docs.map((doc) => ({
     subject: doc.id,
@@ -672,9 +672,9 @@ async function fetchInboxMessages(userId) {
 
 // Fetch outbox messages
 async function fetchOutboxMessages(userId) {
-  const userOutboxRef = firebase.firestore().collection(`users/${userId}/outbox`);
-  const outboxQuery = userOutboxRef.orderBy("time", "desc");
-  const outboxSnapshot = await outboxQuery.get();
+  const userOutboxRef = collection(db, `users/${userId}/outbox`);
+  const outboxQuery = query(userOutboxRef, orderBy("time", "desc"));
+  const outboxSnapshot = await getDocs(outboxQuery);
 
   return outboxSnapshot.docs.map((doc) => ({
     subject: doc.id,
@@ -691,8 +691,8 @@ function populateMessages(listId, messages) {
     messageDiv.className = "message-item";
     messageDiv.innerHTML = `
       <h4>${message.subject}</h4>
-      <p>${message.body}</p>
-      <p><strong>Time:</strong> ${new Date(message.time.seconds * 1000).toLocaleString()}</p>
+      <p>${message.message}</p> <!-- Assuming 'message' field is used -->
+      <p><strong>Time:</strong> ${new Date(message.time.seconds * 1000).toLocaleString()}</p> <!-- If time is a Firebase Timestamp -->
     `;
     mailListElement.appendChild(messageDiv);
   });
@@ -701,8 +701,12 @@ function populateMessages(listId, messages) {
 // Delete a message
 async function deleteMessage(userId, messageSubject, isInbox) {
   const collectionPath = isInbox ? `users/${userId}/inbox` : `users/${userId}/outbox`;
-  const messageRef = firebase.firestore().doc(`${collectionPath}/${messageSubject}`);
-  await messageRef.delete();
+  
+  // Create a reference to the message document
+  const messageRef = doc(db, `${collectionPath}/${messageSubject}`);
+
+  // Delete the message from Firestore
+  await deleteDoc(messageRef);
 }
 
 // Initialize the mail system
@@ -718,16 +722,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Show inbox messages
   document.getElementById("show-inbox")?.addEventListener("click", async () => {
-    const userId = "currentUserId"; // Replace with the actual user ID
-    const inboxMessages = await fetchInboxMessages(userId);
-    populateMessages("mail-list", inboxMessages);
+	const userId = "currentUserId"; // Replace with the actual user ID
+	const inboxMessages = await fetchInboxMessages(userId);
+	populateMessages("mail-list", inboxMessages);
   });
 
-  // Show outbox messages
+	// Show outbox messages
   document.getElementById("show-outbox")?.addEventListener("click", async () => {
-    const userId = "currentUserId"; // Replace with the actual user ID
-    const outboxMessages = await fetchOutboxMessages(userId);
-    populateMessages("mail-list", outboxMessages);
+	const userId = "currentUserId"; // Replace with the actual user ID
+	const outboxMessages = await fetchOutboxMessages(userId);
+	populateMessages("mail-list", outboxMessages);
   });
 
   // Close the view mail modal
@@ -742,6 +746,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+//end mail stuff
+//----------------------------
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
