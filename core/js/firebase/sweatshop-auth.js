@@ -695,15 +695,16 @@ async function getMessages() {
     console.log("Error getting messages: ", error);
   }
 }
-  // Close any modal
-  document.querySelectorAll(".modal-close").forEach((button) => {
-    button.addEventListener("click", (e) => {
-      e.target.closest(".modal").style.display = "none";
-    });
+
+// Close any modal
+document.querySelectorAll(".modal-close").forEach((button) => {
+  button.addEventListener("click", (e) => {
+    e.target.closest(".modal").style.display = "none";
   });
 });
-//end mail stuff
+// end mail stuff
 //----------------------------
+
 
     // Set up the onAuthStateChanged listener
     onAuthStateChanged(auth, async (user) => {
