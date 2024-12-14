@@ -993,13 +993,6 @@ function closeUserDetails() {
 }
 
 
-
-export { sendMessage, fetchInboxMessages, fetchOutboxMessages, deleteMessage };
-
-
-
-
-
 // Call the function to display the exchange data on page load
 	getExchangeData();
 	
