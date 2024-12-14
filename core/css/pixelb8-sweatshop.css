@@ -530,16 +530,17 @@ input[type="number"]::-moz-focus-inner {
 #view-mail-modal {
   display: none;
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 20%;
+  left: 2%;
   width: 75%;
-  height: 75%;
+  height: 70%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  border-radius: 50%;
+  border-radius: 15px;
+  overflow: hidden;
 }
 
 /* Mailbox Container */
