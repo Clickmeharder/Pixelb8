@@ -673,6 +673,7 @@ async function getMessages() {
         <h3>Message from ${messageData.senderId}</h3>
         <p><strong>Content:</strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
+        <button class="delete-btn" data-doc-id="${doc.id}">Delete</button> <!-- Delete Button -->
       `;
 
       messageDiv.innerHTML = messageHTML;
@@ -700,10 +701,36 @@ async function getMessages() {
         <h3>Message to ${messageData.receiverId}</h3>
         <p><strong>Content:</strong> ${messageData.content}</p>
         <p><strong>Date Sent:</strong> ${formattedDate}</p>
+        <button class="delete-btn" data-doc-id="${doc.id}">Delete</button> <!-- Delete Button -->
       `;
 
       messageDiv.innerHTML = messageHTML;
       outboxContainer.appendChild(messageDiv);
+    });
+
+    // Add event listener to delete buttons after messages are loaded
+    document.querySelectorAll('.delete-btn').forEach((button) => {
+      button.addEventListener('click', async (e) => {
+        const messageId = e.target.getAttribute('data-doc-id');
+        const isInbox = e.target.closest('#inbox-messages') !== null;  // Check if the message is in the inbox or outbox
+        
+        try {
+          // Delete the message from Firestore
+          if (isInbox) {
+            await deleteDoc(doc(db, `users/${userUid}/inbox`, messageId));
+          } else {
+            await deleteDoc(doc(db, `users/${userUid}/outbox`, messageId));
+          }
+          
+          // Refresh messages after deletion
+          getMessages(); // Reload the messages
+
+          alert('Message deleted successfully');
+        } catch (error) {
+          console.error('Error deleting message:', error);
+          alert('Failed to delete message');
+        }
+      });
     });
 
   } catch (error) {
