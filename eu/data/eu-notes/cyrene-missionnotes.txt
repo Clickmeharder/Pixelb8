@@ -1,0 +1,125 @@
+[Cyrene Routine]
+Dailys: https://cyrenedream.org/daily-missions
+
+weeklies/creature pill:
+/wp [Planet Cyrene, 137544, 80897, 101, Doctor Byler] 
+
+Get Sweaty (turn in 500 sweat for arc faction badge):
+/wp [Planet Cyrene, 138461, 77298, 101, Andrina - Sweat Collections]
+Turn in yellow crystal/zornstar Ore to 
+[Planet Cyrene, 138829, 77094, 113, A.R.C Staging-miner 49r bot]
+turn in 3 blue crystals daily:
+[Planet Cyrene, 138883, 77256, 101, A.R.C Hq TP]
+
+Green Healing!	Turn in 5 Green Crystals	3x Cyrene Mission Token	21 Hours
+/wp [Planet Cyrene, 138781, 77094, 113, Requisitions Office Kevin]
+
+
+Rebuilding the base:
+Turn in 5 Zorn Star Ingots
+3x Cyrene Mission Token	(21 Hour cd)
+/wp [Planet Cyrene, 138341, 77217, 108, Requisitions Officer]
+
+The Ambassador Needs You!
+Turn in 5 Scrap Metal
+4x Cyrene Mission Token (21 Hour cd)
+/wp [Planet Cyrene, 138375, 77669, 119, A.R.C. Ambassador Ravensloft]
+
+Electronic Component Enhancements
+Turn in 5 Kaisenite Ingots
+6x Cyrene Mission Token (21 Hour cd)
+/wp [Planet Cyrene, 133210, 75013, 110, Requisitions Officer]
+
+Tribute to the Councilmen.
+Turn in 20 Bonding Liquid
+8x Cyrene Mission Token	(48 Hour cd)
+/wp [Planet Cyrene, 138317, 77714, 121, Zyn'Kimbro Guardian]
+
+Tribute to the Councilmen!
+Turn in 40 Zorn Star Ore
+8x Cyrene Mission Token	(48 Hour cd)
+/wp [Planet Cyrene, 138318, 77720, 119, ZynKimbro Guardian]
+
+Daily Texture Trade
+Turn in 50 A.R.C. Faction Badges
+Turn in 10x Robotics Enhancing Gel
+20 Clicks of your choice of (L) Molten Texture Blueprint (24 Hour cd)
+/wp [Planet Cyrene, 138039, 78718, 165, Hoban Statsk]
+
+Ben’s Polkadot Blueprint - Pleak Feathers (Daily)
+Trade 15 Rare Pleak Wings and 15 Animal Oil Residue
+Rewards:
+Black and White Polka dot Texture Blueprint (L) x (10) Value: 0.1000 PED
+Or
+Red and White Polka dot Texture Blueprint (L) x (10) Value: 0.1000 PED
+Or
+Green and White Polka dot Texture Blueprint (L) x (10) Value: 0.1000 PED
+Or
+Halloween Polka dot Texture Blueprint (L) x (10) Value: 0.1000 PED	24 Hours	
+/wp [Planet Cyrene, 138745, 77763, 103, Ben Keery]
+
+Zyn'Tukano Mission Chain (Zyn Psyhe Master):
+/wp [Planet Cyrene, 138080, 78716, 166, zorncomponant-Dailies]
+-zorn componant A x12
+-muscle componant B (requires zyn psyche master aten'ten rank 2)
+-Zorn Oil Mixture C (requires zyn psyche master aten'ten rank 3)
+-------------------------------------------------------------------------------
+
+Go to docks to get mazhammer daily
+do mazehammer missions
+--------------------------------------------------------------------------------
+Taming:
+[Planet Cyrene, 138270, 77450, 102, lowlvl taming daily]
+[Planet Cyrene, 138264, 77450, 102, ZynTao caged pet pill]
+
+Daily sweat- Axe at sweat area
+Daily Paneleon- Jameson on bridge
+Meet the zyn Daily paneleon killpoints - combat reflexes
+
+
+/wp [Planet Cyrene, 138970, 77914, 108, Tornauk]
+[Planet Cyrene, 139014, 77450, 100, Malbow](21hrs)
+Meet the Turrellion kill dusters(A.R.C faction)/wp[Planet Cyrene, 138730, 77863, 102, Zentab]
+
+[Planet Cyrene, 138447, 77428, 102, Second Hand Hub Duvall]
+-go arc immigration zyn tp
+-pick up Get Slimed-/wp [Planet Cyrene, 138377, 77671, 119, Captain Wrigley]
+-Test of strength - [Planet Cyrene, 138349, 77634, 120, TestofStrength]
+-Test of Courage - [Planet Cyrene, 138397, 77810, 104, Waypoint]
+-picts pollen[Planet Cyrene, 138353, 77634, 120, Zyn-Kimbro Gatherer Pict]
+---------------
+Getting slimed[Planet Cyrene, 138375, 77664, 119, Waypoint]
+[Planet Cyrene, 138851, 77077, 101, James Henry]
+[Planet Cyrene, 138821, 77114, 101, Scout McCulloch]
+
+Puny Tempo Missions:
+/wp [Planet Cyrene, 137956, 77501, 111, Pleak Tempo Manager]
+/wp [Planet Cyrene, 138045, 77123, 100, Crystal Pede Tempo Manager]
+/wp [Planet Cyrene, 138026, 76827, 101, Junk Bot Tempo Manager]
+/wp [Planet Cyrene, 137788, 77024, 103, Tree Dragon Tempo Manager]
+/wp [Planet Cyrene, 137526, 77527, 110, Dire Weed Tempo Manager]
+
+Merfolken missions:
+/wp [Planet Cyrene, 132228, 75723, 100, Merfolken Beachead]
+/wp [Planet Cyrene, 132196, 75272, 100, Regent Halbird]
+/wp [Planet Cyrene, 132430, 75849, 102, Lord Pyscidon]
+
+Arc faction dailies:
+scoutbot collector xt - [Planet Cyrene, 133308, 74889, 110, Waypoint]
+loc:/wp [Planet Cyrene, 131653, 76400, 105, Scout Bot Collector XT]
+/wp [Planet Cyrene, 133308, 74891, 110, A.R.C. Faction Mission Terminal]
+
+mutated dire weed
+/wp [Planet Cyrene, 133308, 74891, 110, A.R.C. Faction Mission Terminal]
+
+swamp lurker
+/wp [Planet Cyrene, 138353, 77634, 122, Zyn'Kimbro Gatherer Pict]
+
+drill bots
+/wp[Planet Cyrene, 133210, 75010, 110, scout thompkins - 10drillbots]
+/wp [Planet Cyrene, 138889, 77248, 101, Lt. Johnson]
+/wp [Planet Cyrene, 138851, 77077, 112, James Henry]
+
+-------------------------------
+___________________________________________________________________________
+

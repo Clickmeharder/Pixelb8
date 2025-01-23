@@ -1,0 +1,725 @@
+==========================================================================
+NEXT ISLAND
+--------------------------------
+[Next Island]
+--------
+The Tree
+/wp [Next Island, 135785, 87215, 260, The Tree] 
+[Next Island, 135785, 87215, 260, Waypoint]
+------------------------------------------------------------------------------------
+Next Island Routine(Current):
+
+Pickup your missions:
+
+wp 0: /wp [Ancient Greece, 36199, 20727, 181, Evridiki-Daily Islander]
+wp 1: /wp [Next Island, 131648, 84646, 102, Mr Bottle-Sweat Missions]
+wp 2: /wp [Next Island, 136745, 83664, 101, The Cartographer-mobcontainment]
+wp 3: /wp [Next Island, 137871, 83138, 120, Sebastian-killpapoo]
+wp 4: /wp [Next Island, 131529, 84239, 101, Nikita-kill femalescreechers]
+wp 5: /wp [Next Island, 127494, 82782, 120, Cecily-kill redpapoo stalkers]
+wp 6: /wp [Next Island, 136841, 83355, 183, Juliana-daily multifact nihelper]
+wp 7: /wp [Next Island, 126305, 89439, 156, Hiresh-daily crystal hoarder]
+wp 8: /wp [Next Island, 135933, 83344, 119, Chef Jamie-harvest And collect]
+wp 9: /wp [Next Island, 131530, 84223, 101, Michael-Easy Race]
+wp 10: /wp [Next Island, 131530, 84232, 101, Danica- Hard Race]
+
+complete your missions: 
+
+wp 11: Village boar Piglets
+wp 12: Mountain Boar Piglets
+wp 13: Male Screecher
+wp 14: Female Screecher
+wp 15: Grey Papoo
+wp 16: Yellow Papoo
+wp 17: 50 red papoo stalkers
+wp 18: /wp [Ancient Greece, 35573, 19407, 145, small cyclops Location]
+
+Do Harvesting and Fishing Missions:
+harvesting wp :/wp [Next Island, 137814, 96234, 101, Waypoint]
+fishing wp :
+fishing turn in wp's:
+
+after completing the hunting for the day its time to relax:
+ Do the Crafting Missions and turn in missions:
+ Crafting missions:
+ 
+ turn in missions:
+
+---------------------------------------------------------------------------------
+ 
+1: pick up Mr bottle missions:
+Daily Collecting for Bronze Ticket
+Daily sweat for Silver
+Daily Sweat for Gold
+
+
+2: Visit the Cartogropher at:
+/wp [Next Island, 136745, 83664, 101, The Cartographer]
+to pick up dailys:
+-Daily Papoo Containment (kill gray papoo for 110 oil)
+-Daily Screecher Containment (kill male screecher for 750 oil)
+-Daily Village Boar Containment ( kill village boars for 250 oil)
+-Monkeying Around (get 250 yellow papoo kill points for 2 ped papoo guardian mob pill)
+
+3: Visit sebastion at:
+/wp [Next Island, 137871, 83138, 120, Sebastian]
+for Daily boar piglet hunting:
+- Sebastion mission (Kill 200 Mountain boar piglets for 1600 Elysian Tech Chips)
+
+4: say hi to npc: Nikita at: 
+/wp [Next Island, 131529, 84239, 101, Nikita]
+to pick up the Female Screecher Hunt Repeatable mission
+objective: hand over 8 Short Moonleaf Board & Kill 222 Female Screechers
+Reward: 5 Click Bp Choice of various Bumpercar Blueprint (L)]
+
+5: Pick up daily stalker challenge from cecily at:
+/wp [Next Island, 127494, 82782, 120, Cecily]
+Kill 50 red papoo stalkers with a NI Basic Laser Pistol (L) or E.A.C. Laspistol (L)
+for 2.5ped universal ammo
+
+6: pick up Daily Multi-Faction Mission from Juliana at:
+  (check ni helper maybe)
+ (not sure about mission pickup n this one please update after figrue it out)
+/wp [Next Island, 136841, 83355, 183, Crystal Peak Teleport]
+
+7: pick up Daily Crystal Hoarder Mission from Hiresh at kamba outpost
+/wp [Next Island, 126305, 89439, 156, Hiresh]
+kill mobs in ancient greece
+
+pick up other missions:
+
+visit jamie the chef for weekly harvesting and daily resource gathering missions at:
+/wp [Next Island, 135933, 83344, 119, Jamie the Chef]
+location: paradise landing
+
+-------------
+Do the Races!
+easy: 
+/wp [Next Island, 131530, 84223, 101, Michael]
+harder:
+/wp [Next Island, 131530, 84232, 101, Danica]
+
+-------------
+Do the Hunting missions:
+
+-------------
+Do the Collection missions:
+-harvesting
+-fishing dailys:
+/wp [Next Island, 132056, 84425, 115, Luiza]
+/wp [Next Island, 132059, 84423, 117, Kayla]
+/wp [Next Island, 132051, 84425, 115, Ale]
+
+Get a fishing Pole daily from Luiza:
+requirements: NA but need to hand over 5 or 7 gold tickets to get fishing pole blueprint	
+
+Daily Fishing:
+Objective: Get 50 successful fish catches.
+Rewards: Skinning, Scavenger, or Butchering skills (level requirements apply).
+
+Catch of the Day at:
+/wp [Next Island, 132051, 84425, 115, Ale]
+Objective: Hand over your fish.
+Rewards: Various Wall Mount Blueprints (L), Plushie Blueprint (L), Gold Tickets, etc.
+
+-------------
+Do the Crafting Missions:
+
+
+Daily Crystalline Core Challenge
+Objective: 100 attempts at Crystalline Core crafting.
+Rewards: 0.6 PED Engineering skill.
+Location: Sypherton Gardens.
+Cooldown: 20 hours.
+wp:
+
+Daily Lesser Elysia Challenge
+Objective: 50 successful crafts of Lesser Elysia.
+Rewards: Based on success rate.
+Location: (Not specified).
+Cooldown: 20 hours.
+wp: /wp [Next Island, 135359, 88603, 446, May]
+
+Daily Clothes Fashionista
+Aria Sachs Talk to Valentino at /wp [Next Island, 132326, 84059, 101, Valentino]
+Objective: 1,000 attempts at Jungle Shorts
+Reward: 6 ped Tailoring Skill
+Location: Paradise Landing
+Cooldown: 20 hours.
+wp: /wp [Next Island, 135900, 83371, 109, Aria Sachs]
+
+Crafting My Future
+Objective: Deliver items related to the Dark Queen questline.
+Rewards: Book of the Gorgons Shade.
+Location: Knossos (Ancient Greece).
+Cooldown: Next stage available after 20 hours.
+wp: /wp [Ancient Greece, 36717, 17324, 101, Aegeus]
+
+Daily Magic Flowers Challenge	Adwin	Loyalist V.I.P.	Attempt to craft 50 Magical Flowers	A choice of a 5 click bp:
+Cactus Big/Small, Island Beer, Stone Path Grey/Red/Green, Loyalist Fence Complete, Loyalist Fence Long, Loyalist Fence Short, Palm Tree Pink, Ancient Greece Banner, Luminescence Stalks Pink Blueprint (L)	First-Wave Settlement	
+/wp [Next Island, 136560, 84254, 249, Adwin]
+ Copy WP	20 hours
+
+-------------
+Do the turn in Missions:
+(total 27 to 28 gold tickets & 4 bronze for all)
+Turn in missions at Carnival Island Entrance
+
+Club Fight Challenge - npc: Rocky
+/wp [Next Island, 131703, 83920, 101, Rocky]
+Objective: Hand over 4 [NI Carnival Ticket Bronze]. & Kill 2 People in PVP without dying
+reward: 1 [NI Carnival Ticket Gold]
+
+Clothes Shopping
+/wp [Next Island, 132331, 84062, 101, Cree]
+Objective: Hand over 7 [NI Carnival Ticket Gold]
+
+Costume Shopping
+/wp [Next Island, 132271, 84022, 101, Letitia]
+Objective: Hand over 7 [NI Carnival Ticket Gold] 
+
+Furniture Shopping
+/wp [Next Island, 132322, 84004, 102, Svea]
+Objective: Hand over 7 [NI Carnival Ticket Gold]
+
+Mixed Shopping	
+/wp [Next Island, 132311, 84034, 102, Hellevi]
+Objective: Hand over 7 [NI Carnival Ticket Gold]
+__________________________________________________________________________________________________________
+_______________________________________________________________
+---------------------------------------------------------------|
+Full(ish) DAILY MISSION LIST                                   |
+---------------------------------------------------------------|
+
+Race!
+npc: Michael
+requirements: Hand over 1 Bronze Ticket
+Objective: timed race around the track (2 minutes and 39 seconds)
+Reward: Choice of 3 options
+-[Screecher Puny Lollipop] + [C6H12O6]
+-[Piglet Lollipop] + [C6H12O6]
+-[Tree Finder Corndog] + [C6H12O6]
+location: Carnival Island Entrance	
+cooldown: 20 hours.
+wp: /wp [Next Island, 131530, 84223, 101, Michael]
+ 
+Race Faster!
+npc: Danica
+requirements: Hand in 1 Silver Ticket
+Objective: timed race around the track (2 minutes and 36 seconds)
+Reward: Choice of 5 clicks of:
+-Toy Bumpercar Red/grean/blue/yellow/teal/pink Blueprint (L)
+-NI Carnival Ticket Gold	Carnival Island Entrance	
+cooldown: 20 hours.
+wp: /wp [Next Island, 131530, 84232, 101, Danica]
+---------------------------------------------------------------------------
+
+Daily Maybe
+npc: Lasse
+requirements: NA Bonus mission you dont always get
+Objective: hunt 500 Portal Guardians
+Reward: Choice of 2 options:
+-*5 Clicks of Haruspex Anti-Grav Chest Blueprint (L) + 1 click of Haruspex Chest Key Blueprint (L)
+-*5 clicks of Reaper III Blueprint (L) + 1 click of Reaper II (L) Blueprint (L) + 1 click of Reaper III (L) Blueprint (L)
+-or 7 NI Carnival Ticket Gold
+location: Carnival Island Entrance	
+cooldown: 20 hours.
+wp: /wp [Next Island, 131530, 84228, 101, lasse]
+
+Daily Multi-Faction Mission
+npc: Juliana
+requirements: NA
+obective: choose mining hunting and complete 50
+reward: craft 5 click clothes/texture bp)
+location: multiple
+cooldown: 20 hours.
+wp: theres like 5 get off nihelper
+
+
+Mr. Bottle Sweat Dailies:
+carnival island:
+collect sweat
+Daily Islander Pursuit:
+sweat 2k sweat
+
+HUNTING:                                                       
+/wp [Next Island, 136745, 83664, 101, The Cartographer]        
+
+
+cyclops:
+cyclops crystal hoarder:
+/wp [Next Island, 126305, 89439, 156, Hiresh]
+ [Ancient Greece, 35573, 19407, 145, cyclops hof]
+
+
+Weekly Harversting:
+
+Daily Crafting:
+-Daily Clothes Fashionista
+
+The best place to get fruity is apparantly Shatterrock. 
+-------------------------------------------------------------------------------
+chat gpts:
+
+
+
+_____________________________________________________
+
+Combat Missions:
+-----------------------------------------------------
+Daily Achelous Hunt
+Objective: Hunt 500 Achelous.
+Rewards: Biology skill, Bustamite Crystal, or Minotaur Arms.
+Location: Tanzanite View.
+Cooldown: 20 hours.
+wp: /wp [Next Island, 135223, 88545, 448, Hunting specialist]
+
+Daily Asterion Hunt
+Objective: Hunt 500 Asterions.
+Rewards: Computer skill, Azurite Crystals, or Minotaur Horns.
+Location: Tanzanite View.
+Cooldown: 20 hours.
+wp: /wp [Next Island, 135223, 88545, 448, Hunting specialist]
+
+Drake Eradication Daily
+Objective: Kill 50 Drakes (various types).
+Rewards: Drake scales, tech chips, universal ammo, and armor plate blueprints.
+Location: Sypherton Gardens.
+Cooldown: 20 hours.
+wp: /wp [Next Island, 133387, 94085, 120, Overseer Alice]
+
+Daily Drake Hunt for Crystalline Core Mats	Automated daily mission broker for Crystalline Core Mats	Getting N.E.O. V.I.P. Access	Hunt 400 Drakes (any kind or any maturity)	200 Bloodstone Crystal 18 ped
+500 Phenacite Crystal 10 ped
+500 Bustamite Crystal 15 ped
+200 Citrine Crystal 14 ped
+Sypherton Garden	
+/wp [Next Island, 133432, 93991, 758, mission broker]
+ Copy WP	20 hour
+
+Daily Praetonium Challenge	Nicolas	NA	Find 50 points of Praetonium	0.15 Ped Skill Choice of
+prospecting
+mining	Thebes Market	
+/wp [Ancient Greece, 36478, 20298, 116, Nicolas]
+ Copy WP	20 hours
+ 
+Daily Resa boar hunt	Trax	Need Resa V.I.P.	Hunt (Choice between)
+700 Village Boar
+200 Wild Boar
+50 Sand Boar	0.50 skill choice of
+Inflict Ranged
+Inflict Melee
+Electrokenisis
+Tailoring	Kamba Outpost	
+/wp [Next Island, 126289, 89477, 156, Trax]
+ Copy WP	20 hours
+ 
+Daily Resa Hunt for Armor BPs	Elof	Need Resa V.I.P.	Kill 1,000 Chimeras	Choice of
+Arcticus Armor (L) Blueprint (L) 0.05 (5 clicks)	Kamba Outpost	
+/wp [Next Island, 126288, 89478, 156, Elof]
+ Copy WP	20 hours
+ 
+
+Daily Papoo Containment	The Cartographer	NA	Kill Grey Papoo	110 Oil	Crystal Peak Dock	
+/wp [Next Island, 136745, 83664, 101, The Cartographer]
+Copy WP	20 hours
+
+Daily Screecher Containment	The Cartographer	NA	Kill Male Screechers	760 Oil	Crystal Peak Dock	
+/wp [Next Island, 136745, 83664, 101, The Cartographer]
+ Copy WP	20 hours
+
+Daily Sebastian's Mission
+Sebastian
+NA
+Kill 200 Mountain boar piglets
+1600 Elysian Tech Chips
+Papoo Village	
+/wp [Next Island, 137871, 83138, 120, Sebastian]
+ Copy WP	20 hours
+
+Monkeying around
+npc: The Cartographer
+requirements: NA
+objective: Kill Yellow papoo 250 points
+reward: 2 PED Papoo Guardian Mob Pill.
+location: Crystal Peak Dock
+cooldown: 20 hours.
+wp: /wp [Next Island, 136745, 83664, 101, The Cartographer]
+
+Daily Village Boar Containment
+npc: The Cartographer
+requirements: NA
+objective: Kill Village Boar
+reward: 240 Oil
+location: Crystal Peak Dock	
+cooldown: 20 hours.
+wp:/wp [Next Island, 136745, 83664, 101, The Cartographer]
+
+Daily Mutant Boar Hunt
+Flight Instructor Adde
+Requirements: Stel V.I.P.
+objective: Kill 500 Mutant Boar
+Reward: 5 clicks of Skyripper Scavenger (L) blueprint (L)
+location: Oasis Outlook
+cooldown: 20 hours.
+wp: /wp [Next Island, 127633, 82873, 120, Stel Building NPCs]
+
+Female Screecher Hunt Repeatable
+npc: Nikita
+requirements: NA
+objective: hand over 8 Short Moonleaf Board & Kill 222 Female Screechers
+Reward: 5 Click Bp Choice of: Pink/Teal/Red/Green/Blue/Yellow/Custom (L) Bumpercar Blueprint (L)]
+Location: Carnival Island Entrance	
+cooldown: 2 days 22 hours (70 hours)
+wp: /wp [Next Island, 131529, 84239, 101, Nikita]
+
+ 
+
+Daily Stalker Challenge
+npc: Cecily
+requirements: NA
+objective: Kill 50 red papoo stalkers with a NI Basic Laser Pistol (L) or E.A.C. Laspistol (L)
+(ONLY the kill shot matters)
+Reward: 2.5 ped universal ammo
+location: Oasis Outlook
+cooldown: 20 hours.
+wp: /wp [Next Island, 127494, 82782, 120, Cecily]
+
+Daily Brown Papoo Hunting
+requirements: loyalist V.i.P
+Objective: Kill 2,000 Brown Papoo.
+Rewards: Machinery, Genetics, or Coloring skills.
+Location: First-Wave Settlement.
+Cooldown: 20 hours.
+wp: /wp [Next Island, 136556, 84255, 249, Winda]
+
+
+Daily Grey Papoo
+npc: Pierre
+requirements: Haruspex V.I.P.
+Objective: Kill 1,000 Grey Papoo (Leonardo counts as Grey).
+Rewards: Coloring, Hair Stylist skills, or Rhodonite (tt 3 ped).
+Location: Tanzanite View.
+Cooldown: 20 hours.
+wp: /wp [Next Island, 135268, 	88548, 447, Pierre]
+
+
+
+
+Daily Color Mania (Salvador)
+npc: Salvador Papoo
+Requirements: NA
+objective: Kill 500 Salvador Papoo
+Reward: Choice of:
+-Color matching 0.3 ped
+-Coloring 0.3 ped
+-Coloring methodology 0.3 ped	
+location: Carinival Island Entrance
+cooldown: 20 hours.
+wp:/wp [Next Island, 132162, 84805, 130, Yell]
+ 
+Daily Color Mania (Pablo)	Pablo Papoo	NA	Kill 500 Pablo Papoo	Reward Choice of:
+Color matching 0.2 ped
+Coloring 0.2 ped
+Coloring methodology 0.2 ped	Carnival Island Entrance	
+/wp [Next Island, 132162, 84805, 130, Yell]
+ Copy WP	20 hours
+ 
+Daily Color Mania (Frida)	Frida Papoo	NA	Kill 500 Frida Papoo	Reward Choice of:
+Color matching 0.5 ped
+Coloring 0.5 ped
+Coloring methodology 0.5 ped	Carnival Island Entrance	
+/wp [Next Island, 132162, 84805, 130, Yell]
+ Copy WP	20 hours
+ 
+Daily Color Mania (Leonardo)	Leonardo Papoo	NA	Kill 500 Leonardo Papoo	Reward Choice of:
+Color matching 0.4 ped
+Coloring 0.4 ped
+Coloring methodology 0.4 ped	Carnival Island Entrance	
+/wp [Next Island, 132162, 84805, 130, Yell]
+ Copy WP	20 hours
+ 
+Daily Crystal Hoarder Mission
+npc: Hiresh
+requirements: NA
+objective: Kill 100 of Brontes, Cyclops or Arges
+Rewards: Choose 1
+Cyclops:
+*0.64 ped Phenacite Crystal
+*0.63 ped Bloodstone Crystal
+*0.60 ped Halite Crystal
+*0.60 ped Purpurite Crystal
+*Sodalite Crystal
+Arges:
+*4.48 ped Phenacite Crystal
+*4.5 ped Bloodstone Crystal
+*4.5 ped Halite Crystal
+*4.5 ped Purpurite Crystal
+*Sodalite Crystal
+Brontes:
+*12.8 ped Phenacite Crystal
+*12.78 ped Bloodstone Crystal
+*12.8 ped Halite Crystal
+*12.78 ped Purpurite Crystal
+*Sodalite Crystal	
+location: kamba outpost
+cooldown: 20 hours
+wp: /wp [Next Island, 126305, 89439, 156, Hiresh]
+_________________________________________________________________
+Collection/Fishing/Exploration Missions:
+
+Daily Sweat for Silver Ticket	Automatic Sweat Converter	NA	get 500 successful sweat pulls, hand over 500 sweat bottles	1 NI Carnival Ticket Silver	Carnival Island Entrance	
+/wp [Next Island, 131647, 84648, 102, mr bottle]
+ Copy WP	20 hours
+
+Daily Sweat for Gold Ticket	Bigger Automatic Sweat Converter	NA	get 1000 successful sweat pulls, hand over 1000 sweat bottles	1 NI Carnival Ticket Gold	Carnival Island Entrance	
+/wp [Next Island, 131648, 84646, 102, mrs bottle]
+ Copy WP	20 hours
+
+
+Daily Collecting for Bronze Ticket
+Objective: Find 15 Broken Elysian Tech Chips and hand over 515 Broken Tech Chips.
+Rewards: 1 NI Carnival Ticket Bronze.
+Location: Carnival Island Entrance.
+Cooldown: 20 hours.
+wp: /wp [Next Island, 131645, 84649, 102, Baby Bottle]
+
+Weekly Harvesting	Automated Harvesting Recorder	NA	Harvest 10,000 points (cut trees)	10 Click Bp, Choice of:
+Next Island Coffee Table Acacia Blueprint (L)
+Next Island Bar Stool Blueprint (L)
+Next Island Bar Stool (C) Blueprint (L)
+Next Island Bar Blueprint (L)	Paradise Landing	
+/wp [Next Island, 135933, 83344, 119, Jamie the Chef]
+ Copy WP	7 days (168 hours)
+
+Daily Scouting Resources Mission
+npc: Jamie The Chef
+requirements: NA
+Objective: Gather fruit (1500), stones (500) and dung (250)
+reward: 5 Click Bp, Choice of:
+Chef's Pan, Chefs Apron (C or non C) or Chefs Hat (C or Non C)	Paradise Landing
+cooldown: 0 hour.
+/wp [Next Island, 135933, 83344, 119, Jamie the Chef]
+
+Daily Taming
+npc: Lorelei
+Requirements: NA
+Objective: Tame 100 Adaptable Brown Papoo
+reward: Animal Lore 0.03 Ped
+location: Carnival Island
+cooldown: 20 hours.
+wp: /wp [Next Island, 132566, 84487, 102, Lorelei]
+
+Daily, To tame Asclarias
+npc: Perik
+Requirement: NA
+Objective: 20 Unspawned L.A.R.A. Pets, 500 points from hunting: Arges, Brontes or Myrinian
+location: Asclarias Powercore	Orpheus' Cave (Ancient Greece)
+cooldown: 20 hours.
+wp: /wp [Ancient Greece, 36020, 19868, 164, Perik]
+
+Getting a Pole
+npc: Luiza
+requirements: NA
+objective: hand over 5 or 7 gold tickets
+reward: Bamboo Fishing Pole (C) Blueprint (L) or Regular Bamboo Fishing Pole Blueprint (L) 0.05 ped (5 Clicks)
+location: Carnival Entrance (Fishing Flowerport)	
+cooldown: 20 hours.
+wp: /wp [Next Island, 132056, 84425, 115, Luiza]
+
+Daily Fishing
+Objective: Get 50 successful fish catches.
+Rewards: Skinning, Scavenger, or Butchering skills (level requirements apply).
+Location: Carnival Island.
+Cooldown: 20 hours.
+wp: /wp [Next Island, 132059, 84423, 117, Kayla]
+
+Catch of the Day
+Objective: Hand over your fish.
+Rewards: Various Wall Mount Blueprints (L), Plushie Blueprint (L), Gold Tickets, etc.
+Location: Carnival Entrance (Fishing Flowerport).
+Cooldown: 20 hours.
+wp: /wp [Next Island, 132051, 84425, 115, Ale]
+
+Daily Resa Mining
+npc: Mica
+requirements: Need Resa V.I.P.
+objective: Get 1 ped or more claims of NI ore/enmatter 25 times
+rewards: 0.25 skill choice of Mining or Mineral Sense
+location: Kamba Outpost
+cooldown: 20 hours.
+wp: /wp [Next Island, 126287, 89478, 156, mica]
+
+
+Crafting Missions:
+------------------------------------------
+
+Crafting My Future
+Objective: Deliver items related to the Dark Queen questline.
+Rewards: Book of the Gorgons Shade.
+Location: Knossos (Ancient Greece).
+Cooldown: Next stage available after 20 hours.
+wp: /wp [Ancient Greece, 36717, 17324, 101, Aegeus]
+
+
+Daily Crystalline Core Challenge
+Objective: 100 attempts at Crystalline Core crafting.
+Rewards: 0.6 PED Engineering skill.
+Location: Sypherton Gardens.
+Cooldown: 20 hours.
+wp:
+
+Daily Lesser Elysia Challenge
+Objective: 50 successful crafts of Lesser Elysia.
+Rewards: Based on success rate.
+Location: (Not specified).
+Cooldown: 20 hours.
+wp: /wp [Next Island, 135359, 88603, 446, May]
+
+Daily Clothes Fashionista
+Aria Sachs Talk to Valentino at /wp [Next Island, 132326, 84059, 101, Valentino]
+Objective: 1,000 attempts at Jungle Shorts
+Reward: 6 ped Tailoring Skill
+Location: Paradise Landing
+Cooldown: 20 hours.
+wp: /wp [Next Island, 135900, 83371, 109, Aria Sachs]
+
+Daily Magic Flowers Challenge	Adwin	Loyalist V.I.P.	Attempt to craft 50 Magical Flowers	A choice of a 5 click bp:
+Cactus Big/Small, Island Beer, Stone Path Grey/Red/Green, Loyalist Fence Complete, Loyalist Fence Long, Loyalist Fence Short, Palm Tree Pink, Ancient Greece Banner, Luminescence Stalks Pink Blueprint (L)	First-Wave Settlement	
+/wp [Next Island, 136560, 84254, 249, Adwin]
+ Copy WP	20 hours
+________________________________________________
+Turn in missions:
+-----------------------------------------
+Clothes Shopping	
+npc: Cree
+requirements: NA
+Objective: Hand over 7 [NI Carnival Ticket Gold]
+Reward: Choice of 5 click bps:
+-Jungle Raincoat (C) Blueprint (L)
+-Island Wellies (C) Blueprint (L)
+-Jungle Hat (C) Blueprint (L)
+-Tropical Bra (F) Blueprint (L)
+-Island Bowtie (M) Blueprint (L)
+Location: Carnival Island Entrance	
+cooldown: 20 hours
+wp: /wp [Next Island, 132331, 84062, 101, Cree]
+
+
+Club Fight Challenge
+npc: Rocky
+Requirements: NA
+Objective: Hand over 4 [NI Carnival Ticket Bronze]. & Kill 2 People in PVP without dying
+reward: 1 [NI Carnival Ticket Gold]
+location: Carnival Island Entrance
+cooldown: 20 hours.
+wp: /wp [Next Island, 131703, 83920, 101, Rocky]
+
+Costume Shopping
+npc: Letitia
+requirements: NA
+Objective: Hand over 7 [NI Carnival Ticket Gold]
+Reward: Choice of 5 click bps:
+-[Minotaur Horns Blueprint (L)]
+-[Cyclops Mask Blueprint (L)]
+-[Boar Tusks Blueprint (L)]
+-[Pegleg Blueprint (L)]
+Location: Carnival Island Entrance	
+cooldown: 20 hours.
+wp: /wp [Next Island, 132271, 84022, 101, Letitia]
+
+Furniture Shopping	Svea	NA	Hand over 7 [NI Carnival Ticket Gold]	Choice of 5 click bps:
+Beach Chair Blue/Green/Red/Yellow/Custom Blueprint (L), Beach Umbrella Blue/Green/Red/Yellow/Custom Blueprint (L), Beach Table Blue/Green/Red/Yellow Blueprint (L), Iron Fence Blueprint (L), Picket Fence Blueprint (L), Broken Iron Fence Blueprint (L), Broken Picket Fence Blueprint (L)	Carnival Island Entrance	
+/wp [Next Island, 132322, 84004, 102, Svea]
+ Copy WP	20 hours
+
+Mixed Shopping	Hellevi	NA	Hand over 7 [NI Carnival Ticket Gold]	Choice of 5 click bps:
+Pegleg (C) Blueprint (L)
+Shoulder Parrot Blueprint (L)
+Eye Patch Black Blueprint (L)
+Eye Patch (C) Blueprint (L)
+Minotaur Horns (C) Blueprint (L)
+Island Bowtie (C) Blueprint (L)
+Carnival Island Entrance	
+/wp [Next Island, 132311, 84034, 102, Hellevi]
+ Copy WP	20 hours
+
+________________________________________________
+WEEKLYS
+---------------------
+Weekly Lady Fri's Oddities	Fri	Haruspex V.I.P.	7 Stages of crafting
+Hand in 1 item from each stage at the end	A choice of:
+Lara Plushie
+Zeus shield
+Wall/Cystal Lake/Restaurant/Collision Site/Haruspex/Theatre/Escapees Painting
+Tanzanite View	
+/wp [Next Island, 135289, 88531, 451, Fri]
+ Copy WP	7 days (168 hours)
+ 
+Weekly N.E.O. Crafting	Automated weekly mission broker for crafting	Getting N.E.O. V.I.P. Access	Attempt 50 egg blueprints	Bp Reward
+10 Clicks of
+Reaper II (L) Blueprint (L)
+Reaper III (L) Blueprint (L)	Sypherton Garden	
+/wp [Next Island, 133432, 93991, 758, Automated weekly mission broker for crafting]
+ Copy WP	7 days (168 hours)
+ 
+Weekly N.E.O. Hunting	Automated weekly mission broker for hunting	Getting N.E.O. V.I.P. Access	Hunt 1,000 Chimeras	1 Ped Skill Choice of
+Mechanics
+Concentration
+Medicine
+Material Comprehension	Sypherton Gardens	
+/wp [Next Island, 133428, 93991, 758, Automated weekly mission broker for hunting]
+ Copy WP	7 days (168 hours)
+ 
+Weekly N.E.O. Mining	Automated weekly mission broker for Mining	Getting N.E.O. V.I.P. Access	Mine 100 points	A choice of bp 10 Clicks:
+Drake Wings Ignis/Arcticus/Acid/Custom Blueprint (L)	Sypherton Garden	
+/wp [Next Island, 133425, 93990, 757, Automated weekly mission broker for Mining]
+ Copy WP	7 days (168 hours)
+ 
+Weekly hunt for Eir Mk 1(L) BP(L)	Regina	NA	Kill 2,000 Chimera	15 Click Bp
+Eir Mk 1 (L) Blueprint (L)	Sypherton Garden	
+/wp [Next Island, 133360, 94063, 760, Regina]
+ Copy WP	7 days (168 hours)
+ 
+Weekly hunt for Eir Mk 2(L) BP(L)	Regina	NA	Kill 3,000 Steropes	15 Click Bp
+Eir Mk 2 (L) Blueprint (L)	Sypherton Garden	
+/wp [Next Island, 133360, 94063, 760, Regina]
+ Copy WP	7 days (168 hours)
+ 
+Weekly hunt for Eir Mk 3(L) BP(L)	Regina	NA	Kill 5,000 Centaur	15 Click Bp
+Eir Mk 3 (L) Blueprint (L)	Sypherton Garden	
+/wp [Next Island, 133360, 94063, 760, Regina]
+ Copy WP	7 days (168 hours)
+ 
+ 
+-------------------------
+ WAVE EVENTS
+--------------------------
+Screecher Mob wave event (8 waves no boss)
+	/wp [Next Island, 133336, 85176, 124, Screecher wave] 
+
+Papoo waves:
+->Yellow Papoo (ends with king on last wave)
+	/wp [Next Island, 137284, 83436, 112, Yellow papoo wave]
+->Red Papoo (ends with king on last wave)
+	/wp [Next Island, 137752, 83181, 110 Red papoo wave] 
+->Brown Papoo (ends with king on last wave)
+	/wp [Next Island, 137505, 83991, 147, Brown papoo wave]
+->Grey Papoo (does NOT end with a boss)
+	/wp [Next Island, 137939, 84295, 181, Grey papoo wave]
+
+Village Boar Wave event (6 waves no boss)
+	/wp [Next Island, 136698, 86875, 131, Village Boar]
+============================================================
+
+xmas holiday mission 2024:
+
+[Crystalline Core Blueprint]
+[NI Xmas Lights Texture]
+[Wrapped Present Blueprint]
+[Wrapped Present Pink Blueprint]
+& purpite texture bp
+reward:
+[Drake Wings Sacred (M)]
+[Halo (M)]
+-----------------------------------------------------------------
+_________________________________________________________________
