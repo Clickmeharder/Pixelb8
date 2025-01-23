@@ -616,7 +616,7 @@ div#useraccountPanel.panel {
     border-bottom-color: rgba(77, 242, 0, 0.36);
     min-height: 10px;
     max-height: 178px;
-    width: 76px;
+    width: 166px;
     height: 177px;
 }
 
@@ -630,7 +630,7 @@ div#useraccountPanel.panel {
 	font-size: 11px;
     line-height: 0.8;
     margin-bottom: 1px;
-    color: #34d21385;
+    color: #34d213;
     font-weight: bold;
 }
 
