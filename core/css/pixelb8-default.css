@@ -542,6 +542,7 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 /* New Main Content Styles*/
 .main-content {
   position: relative;
+  min-height: 190px;
   z-index: 1;
   display: flex;
   padding: 4px;
@@ -614,9 +615,9 @@ div#useraccountPanel.panel {
     right: 0px;
     border-bottom-color: rgba(77, 242, 0, 0.36);
     min-height: 10px;
-    max-height: 123px;
+    max-height: 178px;
     width: 76px;
-    height: 123px;
+    height: 177px;
 }
 
 .right-panel p {
