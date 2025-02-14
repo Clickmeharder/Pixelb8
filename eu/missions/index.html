@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entropia Mission Tracker</title>
+  <link rel="stylesheet" href="assets/styles/style.css">
+</head>
+<body>
+  <h1>Entropia Mission Tracker</h1>
+
+  <label for="planetSelect">Choose a Planet:</label>
+  <select id="planetSelect">
+    <option value="" disabled selected>Select Planet</option>
+    <option value="Arkadia">Arkadia</option>
+    <option value="Calypso">Calypso</option>
+    <option value="Cyrene">Cyrene</option>
+  </select>
+
+  <button id="missionsTab">Show Missions</button>
+  <button id="addMissionBtn">Add Mission</button>
+  <button id="deleteAllMissionsBtn">Delete All User Missions</button>
+
+  <ul id="missionsList"></ul>
+
+  <!-- Add Mission Modal -->
+  <div id="addMissionModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h2 id="modalTitle">Add Mission</h2>
+      <form id="missionForm">
+        <label for="missionName">Mission Name:</label>
+        <input type="text" id="missionName" required>
+
+        <label for="objective">Objective:</label>
+        <input type="text" id="objective" required>
+
+        <label for="reward">Reward:</label>
+        <input type="text" id="reward">
+
+        <button type="submit">Save Mission</button>
+        <button type="button" id="closeModalBtn">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="scripts/app.js"></script>
+</body>
+</html>

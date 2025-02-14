@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entropia Pokedex</title>
+  <link rel="stylesheet" href="assets/styles/style.css">
+</head>
+<body>
+  <div class="device">
+    <div class="screen">
+      <h1>Entropia dex</h1>
+      <p>Select a planet to explore</p>
+
+      <!-- Planet Dropdown -->
+      <div class="planet-select">
+        <label for="planetSelect">Choose a Planet:</label>
+        <select id="planetSelect">
+          <option value="" disabled selected>Select Planet</option>
+          <option value="arkadia">Arkadia</option>
+          <option value="calypso">Calypso</option>
+          <!-- Add more planets as needed -->
+        </select>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tab-nav">
+		<button class="tab-btn" id="missionsTab">Missions</button>
+		<button class="tab-btn" id="creatureCodexTab">Creature Codex</button>
+		<button class="tab-btn" id="miningClaimsTab">Mining Claims</button>
+
+      </div>
+
+      <!-- Tab Content -->
+      <div id="missionsContent" class="content-section">
+		<button id="showAllMissionsBtn">Show All Missions</button>
+		<button id="deleteAllMissionsBtn">Delete All Missions</button>
+        <div class="card" id="missionsList">
+          <h3>Missions</h3>
+          <!-- Mission List -->
+		  <ul id="missionsList"></ul>
+        </div>
+        <button class="nav-btn" id="addMissionBtn">Add Mission</button>
+      </div>
+
+      <div id="creatureCodexContent" class="content-section">
+        <div class="card" id="creatureCodexList">
+          <h3>Creature Codex</h3>
+          <ul></ul>
+        </div>
+        <button class="nav-btn" id="addCreatureBtn" onclick="showModal('creature')">Add Creature</button>
+      </div>
+
+      <div id="miningClaimsContent" class="content-section">
+        <div class="card" id="miningClaimsList">
+          <h3>Mining Claims</h3>
+          <ul></ul>
+        </div>
+        <button class="nav-btn" id="addClaimBtn" onclick="showModal('claim')">Add Mining Claim</button>
+      </div>
+    </div>
+  </div>
+	<!-- Add Mission Modal -->
+	<div id="addMissionModal" class="modal">
+		<div class="modal-content">
+			<span id="closeMissionModalBtn" class="close">&times;</span>
+			<h2 id="modalTitle">Add Mission</h2>
+			<form id="missionForm">
+				<label for="missionName">Mission Name:</label>
+				<input type="text" id="missionName">
+
+				<label for="pickupLocation">Pickup Location:</label>
+				<input type="text" id="pickupLocation">
+
+				<label for="objective">Mission Objective:</label>
+				<input type="text" id="objective">
+
+				<label for="objectiveLocations">Objective Location(s):</label>
+				<input type="text" id="objectiveLocations">
+
+				<label for="turnInLocation">Turn-in Location:</label>
+				<input type="text" id="turnInLocation">
+
+				<label for="reward">Reward(s):</label>
+				<input type="text" id="reward">
+
+				<label for="category">Category:</label>
+				<select id="category">
+					<option value="hunting">Hunting</option>
+					<option value="mining">Mining</option>
+					<option value="crafting">Crafting</option>
+					<option value="exploration">Exploration</option>
+					<option value="other">Other</option>
+				</select>
+
+				<label for="repeatable">Repeatable:</label>
+				<input type="checkbox" id="repeatable">
+
+				<label for="prerequisite">Prerequisite Mission:</label>
+				<input type="text" id="prerequisite">
+
+				<button type="submit" id="saveEntryBtn">Save Mission</button>
+				<button class="nav-btn" id="closeModalBtn">Cancel</button>
+			</form>
+		</div>
+	</div>
+  <!-- <script src="scripts/data.js"></script> -->
+  <!-- <script src="scripts/app.js"></script> -->
+  <script src="scripts/ui.js"></script>
+  <script src="scripts/missions.js"></script>
+  <script src="scripts/dexapp.js"></script>
+</body>
+</html>

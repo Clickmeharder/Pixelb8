@@ -1,0 +1,41 @@
+{
+  "scene": {
+    "name": "StreamerRoomScene",
+    "objects": [
+      {
+        "type": "Chair",
+        "position": { "x": 0, "y": 0, "z": -2 },
+        "rotation": { "x": 0, "y": 0, "z": 0 },
+        "material": {
+          "texture": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Black_chair.jpg"
+        }
+      },
+      {
+        "type": "Bed",
+        "position": { "x": -2, "y": 0, "z": -5 },
+        "rotation": { "x": 0, "y": 0, "z": 0 },
+        "material": {
+          "texture": "https://upload.wikimedia.org/wikipedia/commons/1/1c/Blue_bed.jpg"
+        }
+      },
+      {
+        "type": "Wall",
+        "position": { "x": 0, "y": 0, "z": -10 },
+        "rotation": { "x": 0, "y": 0, "z": 0 },
+        "material": {
+          "texture": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Wallpaper_sample.jpg"
+        }
+      },
+      {
+        "type": "Light",
+        "position": { "x": 2, "y": 3, "z": 0 },
+        "color": "#FFD700",
+        "intensity": 1.5
+      }
+    ],
+    "camera": {
+      "position": { "x": 0, "y": 1.5, "z": 5 },
+      "lookAt": { "x": 0, "y": 1, "z": 0 }
+    }
+  }
+}

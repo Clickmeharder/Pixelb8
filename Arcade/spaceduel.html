@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Space Duel Clone with Research Drone Visuals & Crafting Progress</title>
+  <style>
+    body { margin: 0; background: black; font-family: Arial, sans-serif; }
+    /* Overall layout: three panels (left, center, right) */
+    #gameContainer {
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    /* Left Panel: Equipment, Inventory, Resources */
+    #leftPanel {
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px;
+      margin: 10px;
+      border: 2px solid grey;
+      border-radius: 8px;
+      width: 250px;
+      box-sizing: border-box;
+    }
+    #leftTabNav {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 10px;
+    }
+    #leftTabNav button {
+      background: grey;
+      color: white;
+      border: none;
+      padding: 5px;
+      cursor: pointer;
+      flex: 1;
+      margin: 0 2px;
+    }
+    #leftTabNav button.active { background: darkgrey; }
+    .leftContent { display: none; }
+    .leftContent.active { display: block; }
+    /* Equipment Tab Content */
+    .equipmentSlot {
+      border: 1px solid grey;
+      padding: 5px;
+      margin-bottom: 5px;
+      text-align: center;
+      cursor: pointer;
+    }
+    /* Inventory Tab Content */
+    .inventoryItem {
+      border: 1px solid grey;
+      padding: 5px;
+      margin-bottom: 5px;
+      text-align: center;
+      cursor: pointer;
+    }
+    /* Center Canvas */
+    canvas {
+      border: 3px ridge grey;
+      background: black;
+      margin: 10px;
+    }
+    /* Right Panel: Crafting & Research */
+    #rightPanel {
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px;
+      margin: 10px;
+      border: 2px solid grey;
+      border-radius: 8px;
+      width: 250px;
+      box-sizing: border-box;
+    }
+    #tabNav {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 10px;
+    }
+    #tabNav button {
+      background: grey;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      flex: 1;
+      margin: 0 2px;
+    }
+    #tabNav button.active { background: darkgrey; }
+    .tabContent { display: none; }
+    .tabContent.active { display: block; }
+    /* Additional right panel styles */
+    #resourceDisplayRight { text-align: center; margin-bottom: 10px; }
+    #craftingStatus { margin-bottom: 10px; }
+    #craftingSelect, #craftButton {
+      width: 100%;
+      margin-top: 5px;
+      padding: 5px;
+    }
+    #craftProgress { margin-top: 5px; }
+    #deployDroneButton {
+      width: 100%;
+      padding: 5px;
+      margin-top: 5px;
+    }
+    /* Research Drone Progress Bars */
+    #droneProgress {
+      margin-top: 10px;
+    }
+    #droneProgress progress {
+      width: 100%;
+    }
+	 #retrieveDataButton {
+		  display: ;
+		  width: 100%;
+		  padding: 5px;
+		  margin-top: 5px;
+		  background: green;
+		  color: white;
+		  border: none;
+		  cursor: pointer;
+		}
+    #timer { margin-top: 20px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+    <!-- Left Panel: Equipment, Inventory, Resources -->
+    <div id="leftPanel">
+      <div id="leftTabNav">
+        <button id="leftTabEquipment" class="active">Equipment</button>
+        <button id="leftTabInventory">Inventory</button>
+        <button id="leftTabResources">Resources</button>
+      </div>
+      <div id="leftContentEquipment" class="leftContent active">
+        <h3>Equipment</h3>
+        <div class="equipmentSlot" id="slot1">Slot 1: Empty</div>
+        <div class="equipmentSlot" id="slot2">Slot 2: Empty</div>
+        <p>(Click a slot to unequip)</p>
+      </div>
+      <div id="leftContentInventory" class="leftContent">
+        <h3>Inventory</h3>
+        <div id="inventoryList">
+          <!-- Inventory items will be listed here -->
+        </div>
+        <p>(Click an item to equip it if possible)</p>
+      </div>
+      <div id="leftContentResources" class="leftContent">
+        <h3>Resources</h3>
+        <div id="resourceDisplayLeft">
+          <!-- Resource info will appear here -->
+        </div>
+      </div>
+    </div>
+    <!-- Center Canvas -->
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <!-- Right Panel: Crafting & Research -->
+    <div id="rightPanel">
+      <div id="tabNav">
+        <button id="tabCrafting" class="active">Crafting</button>
+        <button id="tabResearch">Research</button>
+      </div>
+      <div id="tabContentCrafting" class="tabContent active">
+        <div id="craftingStatus">
+          Crafting Level: <span id="craftingLevel">1</span><br>
+          XP: <span id="craftingXP">0</span>/<span id="craftingXPNeeded">10</span>
+        </div>
+        <div id="resourceDisplayRight">
+          Resources: Iron: 0, Copper: 0, Titanium: 0, Data
+        </div>
+        <select id="craftingSelect">
+          <!-- Options populated via JS -->
+        </select>
+        <button id="craftButton">Craft</button>
+        <div id="craftProgress"></div>
+      </div>
+      <div id="tabContentResearch" class="tabContent">
+        <div id="researchStatus">
+          Available Research Drones: <span id="availableDrones">0</span><br>
+          Deployed Research Drone: <span id="deployedDrone">No</span>
+        </div>
+        <button id="deployDroneButton">Deploy Research Drone</button>
+        <div id="droneProgress">
+          <div>
+            <label>Data Collection:</label>
+            <progress id="dataCollectionProgress" value="0" max="100"></progress>
+          </div>
+          <div>
+            <label>Data Transmission:</label>
+            <progress id="dataTransmissionProgress" value="0" max="100"></progress>
+          </div>
+          <div>
+            Transmission Received: <span id="transmissionReceived">No</span>
+			<span id="droneCooldownTimer">Ready</span>
+          </div>
+		  <button id="retrieveDataButton">Retrieve Data</button>
+        </div>
+      </div>
+      <div id="timer"></div>
+    </div>
+  </div>
+  <script>
+    // --- Global Variables & Delta Time Setup ---
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    let respawnTimerStarted = false;
+    let nextWaveTime = null;
+    const respawnDelay = 120000; // 2 minutes
+    let lastTime = Date.now(); // for deltaTime calculations
+
+    // --- Asteroid Class ---
+    class Asteroid {
+      constructor(x, y, size) {
+        this.x = x;
+        this.y = y;
+        this.size = size;
+        this.speedX = (Math.random() - 0.5) * 2;
+        this.speedY = (Math.random() - 0.5) * 2;
+        this.shape = this.generateShape();
+      }
+      generateShape() {
+        let points = [];
+        let sides = 6 + Math.floor(Math.random() * 4);
+        for (let i = 0; i < sides; i++) {
+          let angle = (Math.PI * 2 * i) / sides;
+          let radius = this.size * (0.8 + Math.random() * 0.4);
+          points.push({ x: Math.cos(angle) * radius, y: Math.sin(angle) * radius });
+        }
+        return points;
+      }
+      move() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.x > canvas.width) this.x = 0;
+        if (this.y < 0) this.y = canvas.height;
+        if (this.y > canvas.height) this.y = canvas.height;
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.beginPath();
+        this.shape.forEach((point, index) => {
+          if (index === 0) ctx.moveTo(point.x, point.y);
+          else ctx.lineTo(point.x, point.y);
+        });
+        ctx.closePath();
+        ctx.strokeStyle = "white";
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // --- WeaponGenerator Class ---
+    class WeaponGenerator {
+      constructor() {
+        this.ammo = 0;
+        this.maxAmmo = 500;
+        this.lastUpdate = Date.now();
+        this.generateRate = 1; // 1 ammo per second
+        this.type = "weaponGen";
+        this.name = "Basic Weapon Generator";
+      }
+      update() {
+        let now = Date.now();
+        let delta = now - this.lastUpdate;
+        if (delta >= 1000) {
+          let increments = Math.floor(delta / 1000);
+          this.ammo = Math.min(this.maxAmmo, this.ammo + increments);
+          this.lastUpdate += increments * 1000;
+        }
+      }
+    }
+
+    // --- ResearchDrone Class ---
+    class ResearchDrone {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.dataCollectionProgress = 0;
+        this.dataTransmissionProgress = 0;
+        this.transmissionReceived = false;
+        this.collecting = true;
+        this.transmitting = false;
+      }
+      update(deltaTime) {
+        if (this.collecting) {
+          this.dataCollectionProgress += deltaTime * 0.01; // adjust rate as needed
+          if (this.dataCollectionProgress >= 100) {
+            this.dataCollectionProgress = 100;
+            this.collecting = false;
+            this.transmitting = true;
+          }
+        } else if (this.transmitting) {
+          this.dataTransmissionProgress += deltaTime * 0.02; // adjust rate as needed
+          if (this.dataTransmissionProgress >= 100) {
+            this.dataTransmissionProgress = 100;
+            this.transmitting = false;
+            this.transmissionReceived = true;
+          }
+        }
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.fillStyle = "cyan";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+// --- Ship Class (Player 1 Only) ---
+class Ship {
+  constructor(x, y, color, keys, player) {
+    this.x = x;
+    this.y = y;
+    this.angle = 0;
+    this.color = color;
+    this.keys = keys;
+    this.bullets = [];
+    this.alive = true;
+    this.player = player;
+    // Resources: common = Iron, lessCommon = Copper, uncommon = Titanium
+    this.resources = { common: 0, lessCommon: 0, uncommon: 0, researchData: 0 };
+    this.equipment = [null, null];
+    this.inventory = [];
+    // Crafting properties
+    this.craftingLevel = 1;
+    this.craftingXP = 0;
+    this.craftingXPNeeded = 10;
+
+    // Research drone (store instance when deployed)
+    this.deployedResearchDrone = null;
+    this.currentCraftingProcess = null;
+  }
+  move() {
+    moveShip(this);
+  }
+  shoot() {
+    shootBullet(this);
+  }
+  checkCollision() {
+    checkShipCollision(this);
+  }
+  draw() {
+    drawShip(this);
+  }
+}
+
+// --- Ship Functions ---
+function moveShip(ship) {
+  if (keysPressed[ship.keys.left]) ship.angle -= 0.05;
+  if (keysPressed[ship.keys.right]) ship.angle += 0.05;
+  if (keysPressed[ship.keys.thrust]) {
+    ship.x += Math.cos(ship.angle) * 2;
+    ship.y += Math.sin(ship.angle) * 2;
+  }
+  if (ship.x < 0) ship.x = canvas.width;
+  if (ship.x > canvas.width) ship.x = 0;
+  if (ship.y < 0) ship.y = canvas.height;
+  if (ship.y > canvas.height) ship.y = canvas.height;
+}
+
+function shootBullet(ship) {
+  if (ship.player === "player1") {
+    if (ship.equipment && (ship.equipment[0] !== null || ship.equipment[1] !== null)) {
+      let shotFired = false;
+      for (let i = 0; i < ship.equipment.length; i++) {
+        let gen = ship.equipment[i];
+        if (gen && gen.ammo > 0) {
+          gen.ammo--;
+          shotFired = true;
+          break;
+        }
+      }
+      if (!shotFired) return;
+    }
+  }
+  ship.bullets.push({ x: ship.x, y: ship.y, angle: ship.angle, speed: 5 });
+}
+
+function checkShipCollision(ship) {
+  ship.bullets.forEach((bullet, bIndex) => {
+    asteroids.forEach((asteroid, aIndex) => {
+      if (Math.hypot(bullet.x - asteroid.x, bullet.y - asteroid.y) < asteroid.size) {
+        let rand = Math.random();
+        let resourceType;
+        if (rand < 0.7) resourceType = "common";
+        else if (rand < 0.9) resourceType = "lessCommon";
+        else resourceType = "uncommon";
+        ship.resources[resourceType] += 1;
+        updateResourceDisplays();
+        ship.bullets.splice(bIndex, 1);
+        asteroids.splice(aIndex, 1);
+        if (asteroid.size > 15) {
+          asteroids.push(new Asteroid(asteroid.x, asteroid.y, asteroid.size / 2));
+          asteroids.push(new Asteroid(asteroid.x, asteroid.y, asteroid.size / 2));
+        }
+      }
+    });
+  });
+}
+
+function drawShip(ship) {
+  if (!ship.alive) return;
+  ctx.save();
+  ctx.translate(ship.x, ship.y);
+  ctx.rotate(ship.angle);
+  ctx.beginPath();
+  ctx.moveTo(10, 0);
+  ctx.lineTo(-10, 7);
+  ctx.lineTo(-5, 0);
+  ctx.lineTo(-10, -7);
+  ctx.closePath();
+  ctx.strokeStyle = ship.color;
+  ctx.stroke();
+  ctx.restore();
+  ship.bullets.forEach((bullet, index) => {
+    bullet.x += Math.cos(bullet.angle) * bullet.speed;
+    bullet.y += Math.sin(bullet.angle) * bullet.speed;
+    ctx.fillStyle = "white";
+    ctx.fillRect(bullet.x, bullet.y, 3, 3);
+    if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+      ship.bullets.splice(index, 1);
+    }
+  });
+}
+
+	function checkCollisions() {
+	  // Check for asteroid-asteroid collisions
+	  for (let i = 0; i < asteroids.length; i++) {
+		for (let j = i + 1; j < asteroids.length; j++) {
+		  let a1 = asteroids[i];
+		  let a2 = asteroids[j];
+		  let dx = a1.x - a2.x;
+		  let dy = a1.y - a2.y;
+		  let distance = Math.hypot(dx, dy);
+		  let minDistance = a1.size + a2.size;
+
+		  if (distance < minDistance) {
+			// Simple elastic collision response
+			let angle = Math.atan2(dy, dx);
+			let speed1 = Math.hypot(a1.speedX, a1.speedY);
+			let speed2 = Math.hypot(a2.speedX, a2.speedY);
+			let dir1 = Math.atan2(a1.speedY, a1.speedX);
+			let dir2 = Math.atan2(a2.speedY, a2.speedX);
+
+			// Swap speeds along the collision direction
+			a1.speedX = speed2 * Math.cos(angle);
+			a1.speedY = speed2 * Math.sin(angle);
+			a2.speedX = speed1 * Math.cos(angle + Math.PI);
+			a2.speedY = speed1 * Math.sin(angle + Math.PI);
+		  }
+		}
+	  }
+
+	  // Check for asteroid-drone collisions
+	  for (let i = 0; i < asteroids.length; i++) {
+		let asteroid = asteroids[i];
+		if (player1.deployedResearchDrone) {
+		  let drone = player1.deployedResearchDrone;
+		  let dx = asteroid.x - drone.x;
+		  let dy = asteroid.y - drone.y;
+		  let distance = Math.hypot(dx, dy);
+		  let minDistance = asteroid.size + 10; // Drone radius is 10
+
+		  if (distance < minDistance) {
+			console.log("Drone destroyed!");
+			player1.deployedResearchDrone = null; // Remove drone
+		  }
+		}
+	  }
+	}
+
+    // --- Global Variables & Key Handling ---
+    let asteroids = [];
+    const keysPressed = {};
+    window.addEventListener("keydown", (e) => {
+      keysPressed[e.key.toLowerCase()] = true;
+      if (e.key === " " && player1.alive) player1.shoot();
+    });
+    window.addEventListener("keyup", (e) => {
+      keysPressed[e.key.toLowerCase()] = false;
+    });
+
+    // Create player1
+    const player1 = new Ship(200, 300, "red", { left: "a", right: "d", thrust: "w" }, "player1");
+
+    // Initialize asteroids
+    for (let i = 0; i < 5; i++) {
+      asteroids.push(new Asteroid(Math.random() * canvas.width, Math.random() * canvas.height, 40));
+    }
+
+    // --- Craftable Items Definitions ---
+    const craftableItems = {
+      weaponGen: {
+        name: "Basic Weapon Generator",
+        cost: { common: 3, lessCommon: 2, uncommon: 1 },
+        craftingTime: 5000, // instantaneous
+        xp: 10,
+        onCraft: function(player) {
+          let newGen = new WeaponGenerator();
+          let equipped = false;
+          for (let i = 0; i < player.equipment.length; i++) {
+            if (!player.equipment[i]) {
+              player.equipment[i] = newGen;
+              equipped = true;
+              break;
+            }
+          }
+          if (!equipped) {
+            player.inventory.push(newGen);
+          }
+          return true;
+        }
+      },
+      researchDrone: {
+        name: "Level 1 Research Drone",
+        cost: { common: 6, lessCommon: 4, uncommon: 2 },
+        craftingTime: 55000, // 5 seconds
+        xp: 2,
+        onCraft: function(player) {
+          let droneItem = { type: "researchDrone", name: "Level 1 Research Drone" };
+          player.inventory.push(droneItem);
+          return true;
+        }
+      }
+    };
+
+    // --- UI Update Functions ---
+    function updateResourceDisplays() {
+      document.getElementById("resourceDisplayRight").innerText =
+        `Resources: Iron: ${player1.resources.common}, Copper: ${player1.resources.lessCommon}, Titanium: ${player1.resources.uncommon},Data: ${player1.resources.researchData}`;
+      document.getElementById("resourceDisplayLeft").innerText =
+        `Iron: ${player1.resources.common}\nCopper: ${player1.resources.lessCommon}\nTitanium: ${player1.resources.uncommon}\nData: ${player1.resources.researchData}`;
+    }
+
+    function updateEquipmentUI() {
+      let slot1Div = document.getElementById("slot1");
+      let slot2Div = document.getElementById("slot2");
+      let eq1 = player1.equipment[0];
+      let eq2 = player1.equipment[1];
+      slot1Div.innerText = eq1 ? `${eq1.name} (Ammo: ${eq1.ammo}/${eq1.maxAmmo})` : "Slot 1: Empty";
+      slot2Div.innerText = eq2 ? `${eq2.name} (Ammo: ${eq2.ammo}/${eq2.maxAmmo})` : "Slot 2: Empty";
+    }
+
+    function updateInventoryUI() {
+      let inventoryDiv = document.getElementById("inventoryList");
+      inventoryDiv.innerHTML = "";
+      if (player1.inventory.length === 0) {
+        inventoryDiv.innerText = "Inventory is empty.";
+        return;
+      }
+      player1.inventory.forEach((item, index) => {
+        let div = document.createElement("div");
+        div.className = "inventoryItem";
+        if (item.type === "weaponGen") {
+          div.innerText = `${item.name} (Ammo: ${item.ammo}/${item.maxAmmo})`;
+        } else if (item.type === "researchDrone") {
+          div.innerText = item.name;
+        } else {
+          div.innerText = item.name || "Unknown Item";
+        }
+        div.addEventListener("click", () => {
+          if (item.type === "weaponGen") {
+            let equipped = false;
+            for (let i = 0; i < player1.equipment.length; i++) {
+              if (!player1.equipment[i]) {
+                player1.equipment[i] = item;
+                equipped = true;
+                break;
+              }
+            }
+            if (equipped) {
+              player1.inventory.splice(index, 1);
+              updateEquipmentUI();
+              updateInventoryUI();
+            } else {
+              alert("No free equipment slot available.");
+            }
+          }
+        });
+        inventoryDiv.appendChild(div);
+      });
+    }
+
+    function updateCraftingStatus() {
+      document.getElementById("craftingLevel").innerText = player1.craftingLevel;
+      document.getElementById("craftingXP").innerText = player1.craftingXP;
+      document.getElementById("craftingXPNeeded").innerText = player1.craftingXPNeeded;
+      populateCraftingDropdown();
+    }
+
+    function populateCraftingDropdown() {
+      const select = document.getElementById("craftingSelect");
+      select.innerHTML = "";
+      let optionWeapon = document.createElement("option");
+      optionWeapon.value = "weaponGen";
+      optionWeapon.text = craftableItems.weaponGen.name;
+      select.add(optionWeapon);
+      if (player1.craftingLevel >= 2) {
+        let optionDrone = document.createElement("option");
+        optionDrone.value = "researchDrone";
+        optionDrone.text = craftableItems.researchDrone.name;
+        select.add(optionDrone);
+      }
+    }
+
+    function addCraftingXP(xp) {
+      player1.craftingXP += xp;
+      while (player1.craftingXP >= player1.craftingXPNeeded) {
+        player1.craftingXP -= player1.craftingXPNeeded;
+        player1.craftingLevel++;
+        player1.craftingXPNeeded += 5;
+        alert("Crafting leveled up! Now Level " + player1.craftingLevel);
+      }
+      updateCraftingStatus();
+    }
+
+// Handles crafting item selection and checks requirements
+function handleCrafting() {
+    if (player1.currentCraftingProcess) {
+        alert("Already crafting an item. Please wait.");
+        return;
+    }
+    const selectedItemKey = document.getElementById("craftingSelect").value;
+    const item = craftableItems[selectedItemKey];
+    if (!canAffordCrafting(item)) {
+        alert(`Not enough resources to craft ${item.name}!`);
+        return;
+    }
+    deductResources(item.cost);
+    updateResourceDisplays();
+    if (item.craftingTime > 0) {
+        startCraftingProcess(item);
+    } else {
+        finalizeCrafting(item);
+    }
+}
+
+// Checks if the player has enough resources to craft the item
+function canAffordCrafting(item) {
+    return (
+        player1.resources.common >= item.cost.common &&
+        player1.resources.lessCommon >= item.cost.lessCommon &&
+        player1.resources.uncommon >= item.cost.uncommon
+    );
+}
+
+// Deducts the required resources from the player's inventory
+function deductResources(cost) {
+    player1.resources.common -= cost.common;
+    player1.resources.lessCommon -= cost.lessCommon;
+    player1.resources.uncommon -= cost.uncommon;
+}
+
+// Starts the crafting process with a progress bar
+function startCraftingProcess(item) {
+    const progressDiv = document.getElementById("craftProgress");
+    progressDiv.innerHTML = "";
+    const progressBar = document.createElement("progress");
+    progressBar.id = "craftProgressBar";
+    progressBar.value = 0;
+    progressBar.max = 100;
+    progressDiv.appendChild(progressBar);
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        progressBar.value = Math.min(100, (elapsed / item.craftingTime) * 100);
+    }, 100);
+    player1.currentCraftingProcess = setTimeout(() => {
+        clearInterval(interval);
+        finalizeCrafting(item);
+        progressDiv.innerHTML = "";
+    }, item.craftingTime);
+}
+
+// Completes crafting and applies effects
+function finalizeCrafting(item) {
+    let success = item.onCraft(player1);
+    if (success) {
+        addCraftingXP(item.xp);
+    }
+    player1.currentCraftingProcess = null;
+    updateEquipmentUI();
+    updateInventoryUI();
+}
+
+// Attach event listener to craft button
+document.getElementById("craftButton").addEventListener("click", handleCrafting);
+
+// --- Research Tab Functions ---
+function updateResearchStatus() {
+    let count = player1.inventory.filter(item => item.type === "researchDrone").length;
+    document.getElementById("availableDrones").innerText = count;
+
+    if (player1.deployedResearchDrone) {
+        document.getElementById("deployedDrone").innerText = "Yes";
+        document.getElementById("dataCollectionProgress").value = player1.deployedResearchDrone.dataCollectionProgress;
+        document.getElementById("dataTransmissionProgress").value = player1.deployedResearchDrone.dataTransmissionProgress;
+        document.getElementById("transmissionReceived").innerText = player1.deployedResearchDrone.transmissionReceived ? "Yes" : "No";
+
+        // Store collected data once when dataCollectionProgress reaches 100%
+        if (player1.deployedResearchDrone.dataCollectionProgress >= 100 && !player1.deployedResearchDrone.dataAdded) {
+            let dataType = "researchData"; 
+            let collectedAmount = 10; 
+
+            if (!player1.resources) {
+                player1.resources = {};
+            }
+            if (!player1.resources[dataType]) {
+                player1.resources[dataType] = 0;
+            }
+
+            player1.resources[dataType] += collectedAmount;
+            player1.deployedResearchDrone.dataAdded = true; // Prevent multiple additions
+
+            console.log(`Stored ${collectedAmount} ${dataType} in player resources.`);
+        }
+
+    } else {
+        document.getElementById("deployedDrone").innerText = "No";
+        document.getElementById("dataCollectionProgress").value = 0;
+        document.getElementById("dataTransmissionProgress").value = 0;
+        document.getElementById("transmissionReceived").innerText = "No";
+    }
+}
+
+// Deploy Drone Button
+function deployResearchDrone(player) {
+    if (player.deployedResearchDrone) {
+        alert("Research drone already deployed.");
+        return;
+    }
+
+    let index = player.inventory.findIndex(item => item.type === "researchDrone");
+    if (index !== -1) {
+        player.deployedResearchDrone = new ResearchDrone(player.x + 50, player.y);
+        player.inventory.splice(index, 1);
+
+        updateResearchStatus();
+        updateInventoryUI();
+        alert("Research drone deployed.");
+    } else {
+        alert("No research drones available.");
+    }
+}
+
+function retrieveResearchData(player) {
+    if (player.deployedResearchDrone && player.deployedResearchDrone.transmissionReceived) {
+        alert("Research data retrieved successfully!");
+
+        // Reset drone tracking flags & progress
+        player.deployedResearchDrone.dataCollectionProgress = 0;
+        player.deployedResearchDrone.dataTransmissionProgress = 0;
+        player.deployedResearchDrone.transmissionReceived = false;
+        player.deployedResearchDrone.dataAdded = false; // Allow new data collection
+        updateResearchStatus();
+
+        // Start cooldown before next collection
+        let cooldown = 300; // 5 minutes in seconds
+        let cooldownDisplay = document.getElementById("droneCooldownTimer");
+
+        let cooldownInterval = setInterval(() => {
+            cooldown--;
+            cooldownDisplay.innerText = `Cooldown: ${cooldown}s`;
+
+            if (cooldown <= 0) {
+                clearInterval(cooldownInterval);
+                cooldownDisplay.innerText = "Ready";
+                console.log("Research drone is ready to collect data again.");
+            }
+        }, 1000);
+    } else {
+        alert("No completed research data available to retrieve.");
+    }
+}
+
+// Attach event listeners to buttons
+document.getElementById("deployDroneButton").addEventListener("click", () => {
+    deployResearchDrone(player1);
+});
+document.getElementById("retrieveDataButton").addEventListener("click", () => {
+    retrieveResearchData(player1);
+});
+function switchTab(tabs, contents, activeTabId) {
+    tabs.forEach(tab => {
+        document.getElementById(tab).classList.toggle("active", tab === activeTabId);
+    });
+
+    contents.forEach(content => {
+        document.getElementById(content).classList.toggle("active", content === `leftContent${activeTabId.replace("leftTab", "")}` ||
+                                                                                   content === `tabContent${activeTabId.replace("tab", "")}`);
+    });
+
+    // Call specific update functions if needed
+    if (activeTabId === "leftTabInventory") updateInventoryUI();
+    if (activeTabId === "leftTabResources") updateResourceDisplays();
+    if (activeTabId === "tabResearch") updateResearchStatus();
+}
+
+// Left Panel Tabs
+const leftTabs = ["leftTabEquipment", "leftTabInventory", "leftTabResources"];
+const leftContents = ["leftContentEquipment", "leftContentInventory", "leftContentResources"];
+
+leftTabs.forEach(tab => {
+    document.getElementById(tab).addEventListener("click", () => switchTab(leftTabs, leftContents, tab));
+});
+
+// Right Panel Tabs (Crafting & Research)
+const rightTabs = ["tabCrafting", "tabResearch"];
+const rightContents = ["tabContentCrafting", "tabContentResearch"];
+
+rightTabs.forEach(tab => {
+    document.getElementById(tab).addEventListener("click", () => switchTab(rightTabs, rightContents, tab));
+});
+
+// Equipment Slot Click to Unequip
+function unequipItem(slotIndex) {
+    if (player1.equipment[slotIndex]) {
+        player1.inventory.push(player1.equipment[slotIndex]);
+        player1.equipment[slotIndex] = null;
+        updateEquipmentUI();
+        updateInventoryUI();
+    }
+}
+
+document.getElementById("slot1").addEventListener("click", () => unequipItem(0));
+document.getElementById("slot2").addEventListener("click", () => unequipItem(1));
+
+    // --- Timer Display and Asteroid Respawn ---
+    function updateTimerDisplay() {
+      let timerDiv = document.getElementById("timer");
+      if (nextWaveTime) {
+        let remaining = Math.max(0, Math.ceil((nextWaveTime - Date.now()) / 1000));
+        let minutes = Math.floor(remaining / 60);
+        let seconds = remaining % 60;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+        timerDiv.innerText = `Next Wave in: ${minutes}:${seconds}`;
+      } else {
+        timerDiv.innerText = "";
+      }
+    }
+    function checkRespawn() {
+      if (asteroids.length === 0 && !respawnTimerStarted) {
+        respawnTimerStarted = true;
+        nextWaveTime = Date.now() + respawnDelay;
+        setTimeout(() => {
+          for (let i = 0; i < 5; i++) {
+            asteroids.push(new Asteroid(Math.random() * canvas.width, Math.random() * canvas.height, 40));
+          }
+          respawnTimerStarted = false;
+          nextWaveTime = null;
+        }, respawnDelay);
+      }
+    }
+
+    // --- Main Game Loop ---
+    function gameLoop() {
+      let now = Date.now();
+      let deltaTime = now - lastTime;
+      lastTime = now;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      asteroids.forEach(asteroid => {
+        asteroid.move();
+        asteroid.draw();
+      });
+      player1.move();
+      player1.draw();
+      player1.checkCollision();
+      if (player1.equipment) {
+        player1.equipment.forEach(gen => { if (gen) gen.update(); });
+        updateEquipmentUI();
+      }
+      if (player1.deployedResearchDrone) {
+        player1.deployedResearchDrone.update(deltaTime);
+        player1.deployedResearchDrone.draw(ctx);
+      }
+	  checkCollisions();
+      checkRespawn();
+      updateTimerDisplay();
+      updateResearchStatus();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // --- Initialization ---
+    document.addEventListener("DOMContentLoaded", () => {
+      populateCraftingDropdown();
+      updateCraftingStatus();
+      updateResearchStatus();
+      updateResourceDisplays();
+      gameLoop();
+    });
+  </script>
+</body>
+</html>

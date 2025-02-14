@@ -1,0 +1,118 @@
+    body { margin: 0; background: black; font-family: Arial, sans-serif; }
+    /* Overall layout: three panels (left, center, right) */
+    #gameContainer {
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    /* Left Panel: Equipment, Inventory, Resources */
+    #leftPanel {
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px;
+      margin: 10px;
+      border: 2px solid grey;
+      border-radius: 8px;
+      width: 250px;
+      box-sizing: border-box;
+    }
+    #leftTabNav {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 10px;
+    }
+    #leftTabNav button {
+      background: grey;
+      color: white;
+      border: none;
+      padding: 5px;
+      cursor: pointer;
+      flex: 1;
+      margin: 0 2px;
+    }
+    #leftTabNav button.active { background: darkgrey; }
+    .leftContent { display: none; }
+    .leftContent.active { display: block; }
+    /* Equipment Tab Content */
+    .equipmentSlot {
+      border: 1px solid grey;
+      padding: 5px;
+      margin-bottom: 5px;
+      text-align: center;
+      cursor: pointer;
+    }
+    /* Inventory Tab Content */
+    .inventoryItem {
+      border: 1px solid grey;
+      padding: 5px;
+      margin-bottom: 5px;
+      text-align: center;
+      cursor: pointer;
+    }
+    /* Center Canvas */
+    canvas {
+      border: 3px ridge grey;
+      background: black;
+      margin: 10px;
+    }
+    /* Right Panel: Crafting & Research */
+    #rightPanel {
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px;
+      margin: 10px;
+      border: 2px solid grey;
+      border-radius: 8px;
+      width: 250px;
+      box-sizing: border-box;
+    }
+    #tabNav {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 10px;
+    }
+    #tabNav button {
+      background: grey;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      flex: 1;
+      margin: 0 2px;
+    }
+    #tabNav button.active { background: darkgrey; }
+    .tabContent { display: none; }
+    .tabContent.active { display: block; }
+    /* Additional right panel styles */
+    #resourceDisplayRight { text-align: center; margin-bottom: 10px; }
+    #craftingStatus { margin-bottom: 10px; }
+    #craftingSelect, #craftButton {
+      width: 100%;
+      margin-top: 5px;
+      padding: 5px;
+    }
+    #craftProgress { margin-top: 5px; }
+    #deployDroneButton {
+      width: 100%;
+      padding: 5px;
+      margin-top: 5px;
+    }
+    /* Research Drone Progress Bars */
+    #droneProgress {
+      margin-top: 10px;
+    }
+    #droneProgress progress {
+      width: 100%;
+    }
+	 #retrieveDataButton {
+		  display: ;
+		  width: 100%;
+		  padding: 5px;
+		  margin-top: 5px;
+		  background: green;
+		  color: white;
+		  border: none;
+		  cursor: pointer;
+		}
+    #timer { margin-top: 20px; text-align: center; }
