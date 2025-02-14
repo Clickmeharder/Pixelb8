@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Load default missions from CSV
     async function loadDefaultMissions() {
         try {
-            const response = await fetch("/assets/data/defaultmissions.csv");
+            const response = await fetch("/eu/missions/assets/data/defaultmissions.csv");
             if (!response.ok) throw new Error("Failed to load missions");
 
             const csvText = await response.text();
