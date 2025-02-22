@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Low MU Items for Sale</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #0a0a0a;
+            color: #00ff00;
+            text-align: center;
+            padding: 20px;
+            background-image: radial-gradient(rgba(0, 255, 0, 0.2) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+		h1 {
+			color: #00ff00;
+			text-shadow: 0 0 10px #00ff00, 0 0 20px #00aa00;
+			font-size: 3em;
+		}
+
+        h2 {
+            color: #33ff33;
+            text-shadow: 0 0 8px #33ff33;
+        }
+
+        h3 {
+            color: #66ff66;
+            font-size: 2em;
+            margin-top: 30px;
+            text-shadow: 0 0 6px #66ff66;
+        }
+
+        .divider {
+            width: 100%;
+            margin: 20px auto;
+            border-top: 3px ridge #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .container {
+            width: 90%;
+            margin: auto;
+            max-width: 800px;
+            background: rgb(0 0 0 / 24%);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #111;
+            border: 1px solid #00ff00;
+        }
+
+        th, td {
+            border: 2px solid #00ff00;
+            padding: 10px;
+            text-align: left;
+            color: #00ff00;
+        }
+
+        th {
+            background: #002200;
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        tr:hover {
+            background: rgba(0, 255, 0, 0.1);
+            transition: 0.3s ease-in-out;
+        }
+
+        /* Neon Glow Animation */
+        @keyframes glow {
+            0% { text-shadow: 0 0 5px #00ff00, 0 0 10px #00aa00; }
+            50% { text-shadow: 0 0 10px #00ff00, 0 0 20px #00aa00; }
+            100% { text-shadow: 0 0 5px #00ff00, 0 0 10px #00aa00; }
+        }
+
+        h1, h2, h3 {
+            animation: glow 2s infinite alternate;
+        }
+
+        span {
+            color: #00ff00;
+            text-shadow: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            padding: 2px 5px;
+            border-radius: 5px;
+        }
+
+        .twitch-link {
+            color: #9146ff; /* Purple Twitch color */
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+            font-family: Arial, sans-serif; /* Minimal and clean font */
+        }
+
+        .twitch-link:hover {
+            color: #33ff33; /* Green glow on hover */
+            text-shadow: none;
+        }
+
+        /* Optional: Add a border or underline for extra professionalism */
+        .twitch-link {
+            border-bottom: 2px solid transparent; 
+        }
+
+        .twitch-link:hover {
+            border-bottom: 2px solid #33ff33;
+        }
+
+        /* Responsive Table Adjustments */
+        @media (max-width: 768px) {
+            /* Adjust table layout for small screens */
+            th, td {
+                padding: 8px;
+            }
+
+            h1 {
+                font-size: 2.0em; /* Adjust font size */
+            }
+
+            h2, h3 {
+                font-size: 1.2em; /* Adjust font size for headings */
+            }
+
+            /* Add padding inside container */
+            .container {
+                padding: 10px;
+            }
+
+            /* Adjust the Twitch link for smaller screens */
+            .twitch-link {
+                font-size: 1.2em;
+                display: block;
+                margin-top: 10px;
+            }
+
+            /* Allow horizontal scrolling for tables */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling */
+            }
+        }
+
+        /* For very small screens (Mobile devices in portrait mode) */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px; /* Reduce padding */
+            }
+
+            h1 {
+                font-size: 2.0em; /* Further reduce font size for small screens */
+            }
+
+            .container {
+                padding: 5px;
+            }
+
+            table {
+                font-size: 0.9em; /* Adjust table font size */
+            }
+
+            .twitch-link {
+                font-size: 1em; /* Slightly smaller text for Twitch link */
+            }
+        }
+		#toggleButton {
+		  position: absolute;
+		  top: 10px;
+		  right: 10px;
+		  padding: 10px 20px;
+		  font-size: 16px;
+		  background-color: #6441a5; /* Twitch purple, you can change this */
+		  color: white;
+		  border: none;
+		  border-radius: 5px;
+		  cursor: pointer;
+		  z-index: 1000; /* Ensures it stays above other content */
+		}
+
+		#streamContainer {
+		  width: 100%;
+		  height: 0;
+		  transition: height 0.3s ease-in-out;
+		}
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <h1>Jimbob's Junk</h1>
+		<button id="toggleButton">Show Stream</button>
+		<div id="streamContainer" style="display:none;">
+		  <iframe src="https://player.twitch.tv/?channel=jaedraze&parent=pixelb8.lol" height="720" width="1280" frameborder="0" scrolling="no" allowfullscreen="true"></iframe>
+		</div>
+		<div> 
+			<a href="https://twitch.tv/jaedraze" target="_blank" class="twitch-link">
+				twitch.tv/jaedraze
+			</a>
+		</div>
+		<span>type /w Jimbobbity and press tab to whisper me ingame</span>
+		<div class="divider"></div>
+		<span>ITEMS 4 SALE</span>
+        <h2>Resources: ores/enmatter</h2>
+		<div class="table-container">
+			<table>
+				<tr>
+					<th>Item</th>
+					<th>Quantity</th>
+					<th>TT Value</th>
+					<th>Markup</th>
+					<th>Final Price</th>
+				</tr>
+				<tr><td>Magerian Spray</td><td>47</td><td>23.50tt</td><td>108%</td><td>25.38</td></tr>
+				<tr><td>Putty</td><td>15</td><td>11.70tt</td><td>130%</td><td>15.21</td></tr>
+				<tr><td>Telfium Ingot</td><td>81</td><td>34.02tt</td><td>103%</td><td>35.04</td></tr>
+				<tr><td>Wenrex Ingot</td><td>47</td><td>23.97tt</td><td>110%</td><td>26.36</td></tr>
+				<tr><td>Ignisium Ingot</td><td>5</td><td>10.50tt</td><td>120%</td><td>12.60</td></tr>
+			</table>
+		</div>
+        <div class="divider"></div>
+        <h3>Materials</h3>
+		<h2>Veneers</h2>
+		<div class="table-container">
+			<table>
+				<tr>
+					<th>Item</th>
+					<th>Quantity</th>
+					<th>TT Value</th>
+					<th>Markup</th>
+					<th>Final Price</th>
+				</tr>
+				<tr><td>Corria Veneer</td><td>2980</td><td>29.80tt</td><td>110%</td><td>32.78</td></tr>
+				<tr><td>Arkace Veneer</td><td>1020</td><td>10.20tt</td><td>118%</td><td>12.03</td></tr>
+				<tr><td>Miluca Veneer</td><td>1610</td><td>16.10tt</td><td>140%</td><td>22.54</td></tr>
+				<tr><td>Hekia Timber</td><td>1</td><td>TT</td><td>-</td><td>Free with any veneer Purchase</td></tr>
+				<tr><td>Tier 1 Component</td><td>396</td><td>39.6tt</td><td>106%</td><td>41.96</td></tr>
+				<tr><td>Tier 2 Component</td><td>86</td><td>11.76tt</td><td>170%</td><td>19.99</td></tr>
+				<tr><td>Surface Hardener Component</td><td>114</td><td>22.80tt</td><td>105%</td><td>23.94</td></tr>
+			</table>
+        </div>
+        <h2>Extractors</h2>
+		<div class="table-container">
+			<table>
+				<tr>
+					<th>Item</th>
+					<th>Quantity</th>
+					<th>TT Value</th>
+					<th>Markup</th>
+					<th>Final Price</th>
+				</tr>
+				<tr><td>Diluted Mineral Extractor</td><td>48</td><td>0.48tt</td><td>500%</td><td>2.40</td></tr>
+				<tr><td>Basic Mineral Extractor</td><td>542</td><td>5.42tt</td><td>135%</td><td>7.31</td></tr>
+				<tr><td>Diluted Cloth Extractor</td><td>646</td><td>6.46tt</td><td>110%</td><td>7.11</td></tr>
+				<tr><td>Inferior Cloth Extractor</td><td>998</td><td>9.98tt</td><td>105%</td><td>10.48</td></tr>
+				<tr><td>Weak Cloth Extractor</td><td>1167</td><td>11.67tt</td><td>120%</td><td>14.00</td></tr>
+				<tr><td>Basic Cloth Extractor</td><td>672</td><td>6.72tt</td><td>105%</td><td>7.06</td></tr>
+			</table>
+        </div>
+        <h2>Treasures</h2>
+		<div class="table-container">
+			<table>
+				<tr>
+					<th>Item</th>
+					<th>Quantity</th>
+					<th>TT Value</th>
+					<th>Markup</th>
+					<th>Final Price</th>
+				</tr>
+				<tr><td>Fossil Ammonite</td><td>271</td><td>16.26tt</td><td>105%</td><td>17.07</td></tr>
+				<tr><td>Bismuth Plating</td><td>21</td><td>12.60tt</td><td>160%</td><td>20.16</td></tr>
+				<tr><td>Diagen Matrix</td><td>26</td><td>3.12tt</td><td>110%</td><td>3.43</td></tr>
+			</table>
+		</div>
+    </div>
+    <script>
+        // Get elements
+        const toggleButton = document.getElementById('toggleButton');
+        const streamContainer = document.getElementById('streamContainer');
+
+        // Toggle stream visibility
+        toggleButton.addEventListener('click', () => {
+            if (streamContainer.style.display === "none") {
+                streamContainer.style.display = "block";
+                streamContainer.style.height = "720px"; // Adjust to your desired height
+                toggleButton.innerText = "Hide Stream";
+            } else {
+                streamContainer.style.display = "none";
+                streamContainer.style.height = "0"; // Collapse to zero height
+                toggleButton.innerText = "Show Stream";
+            }
+        });
+    </script>
+</body>
+</html>
