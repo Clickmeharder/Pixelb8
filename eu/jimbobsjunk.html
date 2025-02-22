@@ -193,21 +193,40 @@
 
 		/* CSS for the stream container */
 		#streamContainer {
-			width: 80%; /* Adjust the width as needed */
-			max-width: 1280px; /* Optional: Set a max width */
+			width: 100%;
 			height: 0;
-			margin: 0 auto; /* Centers the container horizontally */
 			transition: height 0.3s ease-in-out;
 			overflow: hidden;
 			position: relative;
 		}
 
-		/* Optionally, add a wrapper for vertical centering */
+		/* Wrapper for centering the stream and making it responsive */
 		#streamWrapper {
 			display: flex;
 			justify-content: center;
 			align-items: center;
 			height: 100vh; /* Full screen height for vertical centering */
+		}
+
+		/* CSS for the Twitch iframe */
+		#streamWrapper iframe {
+			width: 100%;
+			max-width: 1280px; /* Max width to prevent excessive scaling */
+			height: 720px; /* Default height, will scale for responsiveness */
+			object-fit: contain; /* Makes the iframe maintain aspect ratio */
+		}
+
+		/* For mobile responsiveness, adjust the height proportionally */
+		@media (max-width: 768px) {
+			#streamWrapper iframe {
+				height: 400px; /* Adjust height for smaller screens */
+			}
+		}
+
+		@media (max-width: 480px) {
+			#streamWrapper iframe {
+				height: 250px; /* Even smaller height for very small screens */
+			}
 		}
     </style>
 
