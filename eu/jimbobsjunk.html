@@ -178,10 +178,7 @@
         }
 		/* CSS for floating button */
 		
-		#toggleButton {
-			position: ;
-			top: ;
-			right: ;
+<!-- 		#toggleButton {
 			padding: 10px 20px;
 			font-size: 16px;
 			background-color: #6441a5; /* Twitch purple, you can change this */
@@ -190,7 +187,7 @@
 			border-radius: 5px;
 			cursor: pointer;
 			z-index: ; /* Ensures it stays above other content */
-		}
+		} -->
 		#streaminfoDiv {
 			display: flex;
 			justify-content: center; /* Centers content horizontally */
@@ -200,6 +197,27 @@
 			width: 100%; /* Ensures the div takes up full width */
 		}
 
+		.twitch-link {
+			text-decoration: none;
+			color: #9147ff; /* Twitch purple */
+			font-weight: bold;
+			font-size: 16px;
+		}
+
+		#toggleButton {
+			padding: 8px 15px;
+			border: none;
+			background-color: #9147ff; /* Twitch theme */
+			color: white;
+			font-weight: bold;
+			cursor: pointer;
+			border-radius: 5px;
+			transition: background-color 0.3s ease;
+		}
+
+		#toggleButton:hover {
+			background-color: #772ce8; /* Slightly darker Twitch purple */
+		}
 		/* CSS for the stream container */
 		#streamContainer {
 			width: 100%;
