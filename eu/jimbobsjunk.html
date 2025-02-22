@@ -266,6 +266,32 @@
 				height: 250px; /* Even smaller height for very small screens */
 			}
 		}
+
+
+		.collapsible {
+			background-color: #222;
+			color: #00ff00;
+			cursor: pointer;
+			padding: 10px;
+			width: 100%;
+			border: 1px solid #00ff00;
+			text-align: left;
+			outline: none;
+			font-size: 1.2em;
+			transition: background-color 0.3s ease;
+		}
+
+		.collapsible:hover {
+			background-color: #333;
+		}
+
+		.content {
+			padding: 10px;
+			display: none;
+			overflow: hidden;
+			background-color: #111;
+			border: 1px solid #00ff00;
+		}
     </style>
 
 </head>
@@ -285,79 +311,88 @@
 		</div>
 		<span>type /w Jimbobbity and press tab to whisper me ingame</span>
 		<div class="divider"></div>
-		<span>ITEMS 4 SALE</span>
-        <h2>Resources: ores/enmatter</h2>
-		<div class="table-container">
-			<table>
-				<tr>
-					<th>Item</th>
-					<th>Quantity</th>
-					<th>TT Value</th>
-					<th>Markup</th>
-					<th>Final Price</th>
-				</tr>
-				<tr><td>Magerian Spray</td><td>47</td><td>23.50tt</td><td>108%</td><td>25.38</td></tr>
-				<tr><td>Putty</td><td>15</td><td>11.70tt</td><td>130%</td><td>15.21</td></tr>
-				<tr><td>Telfium Ingot</td><td>81</td><td>34.02tt</td><td>103%</td><td>35.04</td></tr>
-				<tr><td>Wenrex Ingot</td><td>47</td><td>23.97tt</td><td>110%</td><td>26.36</td></tr>
-				<tr><td>Ignisium Ingot</td><td>5</td><td>10.50tt</td><td>120%</td><td>12.60</td></tr>
-			</table>
+		<div class="collapsible-container">
+			<button class="collapsible">Planet Arkadia</button>
+			<div class="content">
+				<span>ITEMS 4 SALE</span>
+				<h2>Resources: ores/enmatter</h2>
+				<div class="table-container">
+					<table>
+						<tr>
+							<th>Item</th>
+							<th>Quantity</th>
+							<th>TT Value</th>
+							<th>Markup</th>
+							<th>Final Price</th>
+						</tr>
+						<tr><td>Magerian Spray</td><td>47</td><td>23.50tt</td><td>108%</td><td>25.38</td></tr>
+						<tr><td>Putty</td><td>15</td><td>11.70tt</td><td>130%</td><td>15.21</td></tr>
+						<tr><td>Telfium Ingot</td><td>81</td><td>34.02tt</td><td>103%</td><td>35.04</td></tr>
+						<tr><td>Wenrex Ingot</td><td>47</td><td>23.97tt</td><td>110%</td><td>26.36</td></tr>
+						<tr><td>Ignisium Ingot</td><td>5</td><td>10.50tt</td><td>120%</td><td>12.60</td></tr>
+					</table>
+				</div>
+				<div class="divider"></div>
+				<h3>Materials</h3>
+				<h2>Veneers</h2>
+				<div class="table-container">
+					<table>
+						<tr>
+							<th>Item</th>
+							<th>Quantity</th>
+							<th>TT Value</th>
+							<th>Markup</th>
+							<th>Final Price</th>
+						</tr>
+						<tr><td>Corria Veneer</td><td>2980</td><td>29.80tt</td><td>110%</td><td>32.78</td></tr>
+						<tr><td>Arkace Veneer</td><td>1020</td><td>10.20tt</td><td>118%</td><td>12.03</td></tr>
+						<tr><td>Miluca Veneer</td><td>1610</td><td>16.10tt</td><td>140%</td><td>22.54</td></tr>
+						<tr><td>Hekia Timber</td><td>1</td><td>TT</td><td>-</td><td>Free with any veneer Purchase</td></tr>
+						<tr><td>Tier 1 Component</td><td>396</td><td>39.6tt</td><td>106%</td><td>41.96</td></tr>
+						<tr><td>Tier 2 Component</td><td>86</td><td>11.76tt</td><td>170%</td><td>19.99</td></tr>
+						<tr><td>Surface Hardener Component</td><td>114</td><td>22.80tt</td><td>105%</td><td>23.94</td></tr>
+					</table>
+				</div>
+				<h2>Extractors</h2>
+				<div class="table-container">
+					<table>
+						<tr>
+							<th>Item</th>
+							<th>Quantity</th>
+							<th>TT Value</th>
+							<th>Markup</th>
+							<th>Final Price</th>
+						</tr>
+						<tr><td>Diluted Mineral Extractor</td><td>48</td><td>0.48tt</td><td>500%</td><td>2.40</td></tr>
+						<tr><td>Basic Mineral Extractor</td><td>542</td><td>5.42tt</td><td>135%</td><td>7.31</td></tr>
+						<tr><td>Diluted Cloth Extractor</td><td>646</td><td>6.46tt</td><td>110%</td><td>7.11</td></tr>
+						<tr><td>Inferior Cloth Extractor</td><td>998</td><td>9.98tt</td><td>105%</td><td>10.48</td></tr>
+						<tr><td>Weak Cloth Extractor</td><td>1167</td><td>11.67tt</td><td>120%</td><td>14.00</td></tr>
+						<tr><td>Basic Cloth Extractor</td><td>672</td><td>6.72tt</td><td>105%</td><td>7.06</td></tr>
+					</table>
+				</div>
+				<h2>Treasures</h2>
+				<div class="table-container">
+					<table>
+						<tr>
+							<th>Item</th>
+							<th>Quantity</th>
+							<th>TT Value</th>
+							<th>Markup</th>
+							<th>Final Price</th>
+						</tr>
+						<tr><td>Fossil Ammonite</td><td>271</td><td>16.26tt</td><td>105%</td><td>17.07</td></tr>
+						<tr><td>Bismuth Plating</td><td>21</td><td>12.60tt</td><td>160%</td><td>20.16</td></tr>
+						<tr><td>Diagen Matrix</td><td>26</td><td>3.12tt</td><td>110%</td><td>3.43</td></tr>
+					</table>
+				</div>
+			</div>
+		    <button class="collapsible">Howling Mine: Coming Soonish</button>
+			<div class="content">
+				<p>Tables will be added here later.</p>
+			</div>
 		</div>
-        <div class="divider"></div>
-        <h3>Materials</h3>
-		<h2>Veneers</h2>
-		<div class="table-container">
-			<table>
-				<tr>
-					<th>Item</th>
-					<th>Quantity</th>
-					<th>TT Value</th>
-					<th>Markup</th>
-					<th>Final Price</th>
-				</tr>
-				<tr><td>Corria Veneer</td><td>2980</td><td>29.80tt</td><td>110%</td><td>32.78</td></tr>
-				<tr><td>Arkace Veneer</td><td>1020</td><td>10.20tt</td><td>118%</td><td>12.03</td></tr>
-				<tr><td>Miluca Veneer</td><td>1610</td><td>16.10tt</td><td>140%</td><td>22.54</td></tr>
-				<tr><td>Hekia Timber</td><td>1</td><td>TT</td><td>-</td><td>Free with any veneer Purchase</td></tr>
-				<tr><td>Tier 1 Component</td><td>396</td><td>39.6tt</td><td>106%</td><td>41.96</td></tr>
-				<tr><td>Tier 2 Component</td><td>86</td><td>11.76tt</td><td>170%</td><td>19.99</td></tr>
-				<tr><td>Surface Hardener Component</td><td>114</td><td>22.80tt</td><td>105%</td><td>23.94</td></tr>
-			</table>
-        </div>
-        <h2>Extractors</h2>
-		<div class="table-container">
-			<table>
-				<tr>
-					<th>Item</th>
-					<th>Quantity</th>
-					<th>TT Value</th>
-					<th>Markup</th>
-					<th>Final Price</th>
-				</tr>
-				<tr><td>Diluted Mineral Extractor</td><td>48</td><td>0.48tt</td><td>500%</td><td>2.40</td></tr>
-				<tr><td>Basic Mineral Extractor</td><td>542</td><td>5.42tt</td><td>135%</td><td>7.31</td></tr>
-				<tr><td>Diluted Cloth Extractor</td><td>646</td><td>6.46tt</td><td>110%</td><td>7.11</td></tr>
-				<tr><td>Inferior Cloth Extractor</td><td>998</td><td>9.98tt</td><td>105%</td><td>10.48</td></tr>
-				<tr><td>Weak Cloth Extractor</td><td>1167</td><td>11.67tt</td><td>120%</td><td>14.00</td></tr>
-				<tr><td>Basic Cloth Extractor</td><td>672</td><td>6.72tt</td><td>105%</td><td>7.06</td></tr>
-			</table>
-        </div>
-        <h2>Treasures</h2>
-		<div class="table-container">
-			<table>
-				<tr>
-					<th>Item</th>
-					<th>Quantity</th>
-					<th>TT Value</th>
-					<th>Markup</th>
-					<th>Final Price</th>
-				</tr>
-				<tr><td>Fossil Ammonite</td><td>271</td><td>16.26tt</td><td>105%</td><td>17.07</td></tr>
-				<tr><td>Bismuth Plating</td><td>21</td><td>12.60tt</td><td>160%</td><td>20.16</td></tr>
-				<tr><td>Diagen Matrix</td><td>26</td><td>3.12tt</td><td>110%</td><td>3.43</td></tr>
-			</table>
-		</div>
-    </div>
+	</div>
     <script>
         // Get elements
         const toggleButton = document.getElementById('toggleButton');
@@ -376,5 +411,18 @@
             }
         });
     </script>
+	<script>
+		document.querySelectorAll('.collapsible').forEach(button => {
+			button.addEventListener('click', function () {
+				this.classList.toggle('active');
+				let content = this.nextElementSibling;
+				if (content.style.display === "block") {
+					content.style.display = "none";
+				} else {
+					content.style.display = "block";
+				}
+			});
+		});
+	</script>
 </body>
 </html>
