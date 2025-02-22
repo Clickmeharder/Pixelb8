@@ -177,6 +177,7 @@
             }
         }
 		/* CSS for floating button */
+		
 		#toggleButton {
 			position: ;
 			top: ;
@@ -189,6 +190,14 @@
 			border-radius: 5px;
 			cursor: pointer;
 			z-index: ; /* Ensures it stays above other content */
+		}
+		#streamControls {
+			display: flex;
+			justify-content: center; /* Centers content horizontally */
+			align-items: center; /* Centers content vertically */
+			gap: 15px; /* Adds space between the link and button */
+			padding-left: 20px; /* Adds left padding */
+			width: 100%; /* Ensures the div takes up full width */
 		}
 
 		/* CSS for the stream container */
@@ -242,7 +251,7 @@
 	</div>
     <div class="container">
         <h1>Jimbob's Junk</h1>
-		<div> 
+		<div id="streamDiv">
 			<a href="https://twitch.tv/jaedraze" target="_blank" class="twitch-link">
 				twitch.tv/jaedraze
 			</a>
