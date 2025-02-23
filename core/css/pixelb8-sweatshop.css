@@ -336,6 +336,9 @@ p.\.bottleval {
         padding: 6px 1px;
         line-height: 0.85;
 	}
+	.tab-content {
+		font-size: 0.8em;
+	}
 	.purchasedesk, .salesdesk {
 		width: 100vw;
 		max-width: 87vw;
