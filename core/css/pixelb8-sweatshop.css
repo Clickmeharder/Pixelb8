@@ -339,7 +339,7 @@ p.\.bottleval {
 		max-width: 87vw;
 	}
 	.subtab {
-		font-size: 12px;
+		font-size: 0.9em;
 		text-align: center;
 		padding: 3px 3px;
 		cursor: pointer;
