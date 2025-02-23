@@ -231,7 +231,17 @@
 			padding-left: 20px; /* Adds left padding */
 			width: 100%; /* Ensures the div takes up full width */
 		}
-
+		.fixed-profile {
+			position: fixed;
+			top: 10px;
+			right: 10px;
+			width: 80px; /* Adjust size as needed */
+			height: 80px;
+			border-radius: 50%; /* Makes it round */
+			border: 3px solid white; /* Optional border */
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Optional shadow */
+			object-fit: cover; /* Ensures the image fills the circle */
+		}
 		.twitch-link {
 			text-decoration: none;
 			color: #9147ff; /* Twitch purple */
@@ -337,6 +347,7 @@
 		</div>
 	</div>
 	<div id="streaminfoDiv">
+		<img src="/assets/images/jaedrazepfp.png" alt="Profile Picture" class="fixed-profile">
 		<a href="https://twitch.tv/jaedraze" target="_blank" class="twitch-link">
 			twitch.tv/jaedraze
 		</a>
