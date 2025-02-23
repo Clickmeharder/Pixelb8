@@ -315,10 +315,12 @@ p.\.bottleval {
 		background: #063440e6;
 		color: #ff98009e;
 		font-weight: bold;
+		
 	}
 
 	.subtab-content {
 		display: none;
+		font-size: 0.9em;
 	}
 
 	.subtab-content.active {
@@ -339,7 +341,7 @@ p.\.bottleval {
 		max-width: 87vw;
 	}
 	.subtab {
-		font-size: 0.9em;
+		font-size: 12px;
 		text-align: center;
 		padding: 3px 3px;
 		cursor: pointer;
