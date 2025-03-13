@@ -29,6 +29,7 @@
 
         let audioCtx, analyser, source, bufferLength, dataArray;
         let mediaRecorder, recordedChunks = [];
+        let isAudioSetup = false;
 
         fileInput.addEventListener("change", function(event) {
             const file = event.target.files[0];
@@ -36,20 +37,21 @@
                 const objectURL = URL.createObjectURL(file);
                 audio.src = objectURL;
                 audio.load();
-                setupAudioContext();
             }
         });
 
         function setupAudioContext() {
+            if (isAudioSetup) return; // Prevent multiple setups
+
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioCtx.createAnalyser();
             source = audioCtx.createMediaElementSource(audio);
             source.connect(analyser);
             analyser.connect(audioCtx.destination);
-
             analyser.fftSize = 256;
             bufferLength = analyser.frequencyBinCount;
             dataArray = new Uint8Array(bufferLength);
+            isAudioSetup = true;
 
             drawVisualizer();
         }
@@ -66,16 +68,14 @@
 
             for (let i = 0; i < bufferLength; i++) {
                 barHeight = dataArray[i];
-
-                ctx.fillStyle = `rgba(${barHeight + 100}, 50, 200, 1)`; // Transparent color
+                ctx.fillStyle = `rgba(${barHeight + 100}, 50, 200, 1)`;
                 ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-
                 x += barWidth + 2;
             }
         }
- 
-        // Recording Setup
+
         function startRecording() {
+            if (!isAudioSetup) setupAudioContext(); // Ensure audio context is ready
             recordedChunks = [];
             const stream = canvas.captureStream(30); // 30 FPS recording
             mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm; codecs=vp9" });
@@ -103,6 +103,13 @@
             startRecBtn.disabled = false;
             stopRecBtn.disabled = true;
         }
+
+        audio.addEventListener("play", () => {
+            if (audioCtx && audioCtx.state === "suspended") {
+                audioCtx.resume();
+            }
+            setupAudioContext();
+        });
 
         startRecBtn.addEventListener("click", startRecording);
         stopRecBtn.addEventListener("click", stopRecording);
