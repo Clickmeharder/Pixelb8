@@ -16,6 +16,7 @@
             transition: opacity 0.3s ease-in-out;
         }
         .controls-container:hover .controls { opacity: 1; }
+        button { margin: 5px; padding: 8px; border: none; cursor: pointer; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -31,6 +32,8 @@
                     <option value="circles">Circles</option>
                 </select>
             </label>
+            <button id="startRecording">Record</button>
+            <button id="stopRecording" disabled>Stop & Download</button>
         </div>
     </div>
     <canvas id="visualizer"></canvas>
@@ -42,12 +45,15 @@
         const ctx = canvas.getContext("2d", { alpha: true });
         const barColorInput = document.getElementById("barColor");
         const visualizerStyle = document.getElementById("visualizerStyle");
+        const startRecordingBtn = document.getElementById("startRecording");
+        const stopRecordingBtn = document.getElementById("stopRecording");
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
         let audioCtx, analyser, source, bufferLength, dataArray;
         let isAudioSetup = false;
+        let mediaRecorder, recordedChunks = [];
 
         fileInput.addEventListener("change", function(event) {
             const file = event.target.files[0];
@@ -116,6 +122,37 @@
                 ctx.fill();
             }
         }
+
+        function startRecording() {
+            recordedChunks = [];
+            let stream = canvas.captureStream();
+            mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+            mediaRecorder.ondataavailable = event => recordedChunks.push(event.data);
+            mediaRecorder.onstop = saveRecording;
+            mediaRecorder.start();
+            startRecordingBtn.disabled = true;
+            stopRecordingBtn.disabled = false;
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            startRecordingBtn.disabled = false;
+            stopRecordingBtn.disabled = true;
+        }
+
+        function saveRecording() {
+            const blob = new Blob(recordedChunks, { type: "video/webm" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "visualizer.webm";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        startRecordingBtn.addEventListener("click", startRecording);
+        stopRecordingBtn.addEventListener("click", stopRecording);
 
         audio.addEventListener("play", () => {
             if (audioCtx && audioCtx.state === "suspended") {
