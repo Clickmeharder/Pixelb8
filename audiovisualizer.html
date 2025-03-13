@@ -3,32 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transparent Audio Visualizer</title>
+    <title>Customizable Audio Visualizer</title>
     <style>
         body { text-align: center; background: #222; color: white; font-family: Arial, sans-serif; }
         canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; }
+        .controls { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px; }
     </style>
 </head>
 <body>
-    <input type="file" id="audioFile" accept="audio/*">
-    <audio id="audio" controls></audio>
-    <button id="startRecording">Start Recording</button>
-    <button id="stopRecording" disabled>Stop & Download</button>
+    <div class="controls">
+        <input type="file" id="audioFile" accept="audio/*">
+        <audio id="audio" controls></audio>
+        <label>Color: <input type="color" id="barColor" value="#ff0000"></label>
+        <label>Style:
+            <select id="visualizerStyle">
+                <option value="bars">Bars</option>
+                <option value="wave">Wave</option>
+                <option value="circles">Circles</option>
+            </select>
+        </label>
+    </div>
     <canvas id="visualizer"></canvas>
 
     <script>
         const audio = document.getElementById("audio");
         const fileInput = document.getElementById("audioFile");
         const canvas = document.getElementById("visualizer");
-        const ctx = canvas.getContext("2d", { alpha: true }); // Enable transparency
-        const startRecBtn = document.getElementById("startRecording");
-        const stopRecBtn = document.getElementById("stopRecording");
+        const ctx = canvas.getContext("2d", { alpha: true });
+        const barColorInput = document.getElementById("barColor");
+        const visualizerStyle = document.getElementById("visualizerStyle");
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
         let audioCtx, analyser, source, bufferLength, dataArray;
-        let mediaRecorder, recordedChunks = [];
         let isAudioSetup = false;
 
         fileInput.addEventListener("change", function(event) {
@@ -41,8 +49,7 @@
         });
 
         function setupAudioContext() {
-            if (isAudioSetup) return; // Prevent multiple setups
-
+            if (isAudioSetup) return;
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioCtx.createAnalyser();
             source = audioCtx.createMediaElementSource(audio);
@@ -52,56 +59,52 @@
             bufferLength = analyser.frequencyBinCount;
             dataArray = new Uint8Array(bufferLength);
             isAudioSetup = true;
-
             drawVisualizer();
         }
 
         function drawVisualizer() {
             requestAnimationFrame(drawVisualizer);
             analyser.getByteFrequencyData(dataArray);
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = barColorInput.value;
+            
+            const style = visualizerStyle.value;
+            if (style === "bars") drawBars();
+            else if (style === "wave") drawWave();
+            else if (style === "circles") drawCircles();
+        }
 
-            const barWidth = (canvas.width / bufferLength) * 2.5;
+        function drawBars() {
+            let barWidth = (canvas.width / bufferLength) * 2.5;
             let barHeight;
             let x = 0;
-
             for (let i = 0; i < bufferLength; i++) {
                 barHeight = dataArray[i];
-                ctx.fillStyle = `rgba(${barHeight + 100}, 50, 200, 1)`;
                 ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
                 x += barWidth + 2;
             }
         }
 
-        function startRecording() {
-            if (!isAudioSetup) setupAudioContext(); // Ensure audio context is ready
-            recordedChunks = [];
-            const stream = canvas.captureStream(30); // 30 FPS recording
-            mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm; codecs=vp9" });
-
-            mediaRecorder.ondataavailable = event => {
-                if (event.data.size > 0) recordedChunks.push(event.data);
-            };
-
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(recordedChunks, { type: "video/webm" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "visualizer.webm";
-                a.click();
-            };
-
-            mediaRecorder.start();
-            startRecBtn.disabled = true;
-            stopRecBtn.disabled = false;
+        function drawWave() {
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2);
+            for (let i = 0; i < bufferLength; i++) {
+                let y = canvas.height / 2 + dataArray[i] - 128;
+                ctx.lineTo(i * (canvas.width / bufferLength), y);
+            }
+            ctx.strokeStyle = barColorInput.value;
+            ctx.stroke();
         }
 
-        function stopRecording() {
-            mediaRecorder.stop();
-            startRecBtn.disabled = false;
-            stopRecBtn.disabled = true;
+        function drawCircles() {
+            for (let i = 0; i < bufferLength; i += 5) {
+                let radius = dataArray[i] / 3;
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
 
         audio.addEventListener("play", () => {
@@ -110,9 +113,6 @@
             }
             setupAudioContext();
         });
-
-        startRecBtn.addEventListener("click", startRecording);
-        stopRecBtn.addEventListener("click", stopRecording);
     </script>
 </body>
 </html>
