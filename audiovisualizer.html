@@ -7,7 +7,11 @@
     <style>
         body { text-align: center; background: #222; color: white; font-family: Arial, sans-serif; margin: 0; overflow: hidden; }
         canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; }
-        .controls-container { position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index:100; }
+        .description {
+		  color: white;
+		  border: 2px ridge orange;
+		}
+		.controls-container { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); z-index:100; }
         .controls {
             background: rgba(0, 0, 0, 0.7); 
             padding: 10px; 
@@ -26,13 +30,12 @@
     </style>
 </head>
 <body>
-	<div class="controls-container">
-	<h3 id="description-header">--controls--</h3>
-	<span>a simple tool to create a simple audiovisualizer for any song. download as webm and then visit https://cloudconvert.com/webm-to-mp4 to convert to mp4, mov, avi, or mkv</span>
+	<div class="description">
+		<h3 id="description-header">--controls--</h3>
+		<span>a simple tool to create a simple audiovisualizer for any song. download as webm and then visit https://cloudconvert.com/webm-to-mp4 to convert to mp4, mov, avi, or mkv</span>
+	</div>
     <div class="controls-container">
         <div class="controls">
-			--controls-- a simple tool to create a simple audiovisualizer for any song. download as webm and then visit https://cloudconvert.com/webm-to-mp4 to convert to mp4, mov, avi, or mkv 
-			
             <input type="file" id="audioFile" accept="audio/*">
             <audio id="audio" controls></audio>
             <label>Color: <input type="color" id="barColor" value="#ff0000"></label>
