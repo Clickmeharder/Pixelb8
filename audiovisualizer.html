@@ -6,27 +6,82 @@
     <title>Customizable Audio Visualizer</title>
     <style>
         body { text-align: center; background: #222; color: white; font-family: Arial, sans-serif; margin: 0; overflow: hidden; }
-        canvas { position: absolute; top: 25%; left: 0; width: 75%; height: 75vh; }
+        canvas { position: absolute; top: 25%; left: 0; width: 75%; height: 75vh; border: 3px inset yellow; }
         .description {
 		  color: white;
 		  border: 2px ridge orange;
 		}
-		.controls-container { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); z-index:100; }
-        .controls {
-            background: rgba(0, 0, 0, 0.7); 
-            padding: 10px; 
-			border: 2px ridge green;
-            border-radius: 8px; 
-            max-height: 0;
-			opacity: 0.5;
-			overflow: hidden;
-			transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        }
-        .controls-container:hover .controls { 
-			max-height: 150px;
-			opacity: 1;
+		/* Container for control panel */
+		.controls-container {
+		  position: absolute;
+		  top: 10%;
+		  left: 50%;
+		  transform: translateX(-50%);
+		  z-index: 100;
+		  transition: transform 0.3s ease;
 		}
-        button { margin: 5px; padding: 8px; border: none; cursor: pointer; border-radius: 5px; }
+
+		/* Control panel box */
+		.controls {
+		  background: rgba(0, 0, 0, 0.8); /* Darker background for better contrast */
+		  padding: 15px;
+		  border: 2px solid #28a745; /* Bright green border for visibility */
+		  border-radius: 12px;
+		  max-height: 0;
+		  opacity: 0;
+		  overflow: hidden;
+		  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, transform 0.3s ease;
+		  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4); /* Added shadow for depth */
+		}
+
+		/* Hover effect to open the control panel */
+		.controls-container:hover .controls {
+		  max-height: 300px; /* Increased max height */
+		  opacity: 1;
+		  transform: translateY(10px); /* Subtle downward movement when open */
+		}
+
+		/* Buttons */
+		button {
+		  margin: 5px;
+		  padding: 12px 20px;
+		  background-color: #28a745; /* Green background */
+		  color: white;
+		  border: none;
+		  cursor: pointer;
+		  border-radius: 6px;
+		  font-size: 16px;
+		  transition: background-color 0.3s, transform 0.2s ease;
+		}
+
+		button:hover {
+		  background-color: #218838; /* Darker green on hover */
+		  transform: translateY(-2px); /* Subtle lift on hover */
+		}
+
+		button:active {
+		  transform: translateY(1px); /* Button press effect */
+		}
+
+		/* Mobile responsiveness */
+		@media (max-width: 768px) {
+		  .controls-container {
+			top: 5%;
+		  }
+		  .controls {
+			padding: 10px;
+		  }
+		  button {
+			font-size: 14px; /* Smaller buttons on mobile */
+			padding: 10px 18px;
+		  }
+		}
+
+		@media (max-width: 480px) {
+		  .controls {
+			max-height: 250px; /* Slightly smaller panel for very small screens */
+		  }
+		}
     </style>
 </head>
 <body>
