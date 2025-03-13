@@ -62,11 +62,12 @@
 		  overflow: hidden;
 		  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, width 0.3s ease;
 		  box-shadow: 4px 0px 6px rgba(0, 0, 0, 0.5); /* Adding shadow to the right */
+		  z-index:999;
 		}
 
 		/* Hover effect to expand the panel and show the controls */
 		.controls-container:hover {
-		  width: 236px; /* Width when expanded */
+		  width: 238px; /* Width when expanded */
 		  width: 227px;
 		  border: 2px outset #333;
 		  border-radius: 0px 8px 0px 0px;
@@ -77,7 +78,7 @@
 		  opacity: 1;
 		  width: 200px; /* Same width as the container when open */
 		  border: 3px inset #333;
-		  margin-top: 6px;
+		  margin-top: 3px;
 		}
 		audio {
 			width: 200px;
