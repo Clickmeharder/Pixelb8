@@ -5,23 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customizable Audio Visualizer</title>
     <style>
-        body { text-align: center; background: #222; color: white; font-family: Arial, sans-serif; }
+        body { text-align: center; background: #222; color: white; font-family: Arial, sans-serif; margin: 0; overflow: hidden; }
         canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; }
-        .controls { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px; }
+        .controls-container { position: absolute; top: 0; left: 50%; transform: translateX(-50%); }
+        .controls {
+            background: rgba(0, 0, 0, 0.7); 
+            padding: 10px; 
+            border-radius: 8px; 
+            opacity: 0; 
+            transition: opacity 0.3s ease-in-out;
+        }
+        .controls-container:hover .controls { opacity: 1; }
     </style>
 </head>
 <body>
-    <div class="controls">
-        <input type="file" id="audioFile" accept="audio/*">
-        <audio id="audio" controls></audio>
-        <label>Color: <input type="color" id="barColor" value="#ff0000"></label>
-        <label>Style:
-            <select id="visualizerStyle">
-                <option value="bars">Bars</option>
-                <option value="wave">Wave</option>
-                <option value="circles">Circles</option>
-            </select>
-        </label>
+    <div class="controls-container">
+        <div class="controls">
+            <input type="file" id="audioFile" accept="audio/*">
+            <audio id="audio" controls></audio>
+            <label>Color: <input type="color" id="barColor" value="#ff0000"></label>
+            <label>Style:
+                <select id="visualizerStyle">
+                    <option value="bars">Bars</option>
+                    <option value="wave">Wave</option>
+                    <option value="circles">Circles</option>
+                </select>
+            </label>
+        </div>
     </div>
     <canvas id="visualizer"></canvas>
 
