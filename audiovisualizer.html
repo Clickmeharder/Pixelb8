@@ -11,46 +11,53 @@
 		  color: white;
 		  border: 2px ridge orange;
 		}
-		/* Container for control panel */
+		/* Container for control panel, positioned on the left */
 		.controls-container {
-		  position: absolute;
-		  top: 10%;
-		  left: 50%;
-		  transform: translateX(-50%);
+		  position: fixed;
+		  top: 20%;
+		  left: 0;
 		  z-index: 100;
-		  transition: transform 0.3s ease;
+		  transition: all 0.3s ease;
+		  width: 50px; /* Initial tab width */
+		  height: auto;
+		  background-color: #333;
+		  border-radius: 10px 0 0 10px; /* Rounded corners on the left */
 		}
 
-		/* Control panel box */
+		/* Control panel content */
 		.controls {
-		  background: rgba(0, 0, 0, 0.8); /* Darker background for better contrast */
+		  background: rgba(0, 0, 0, 0.8); /* Darker background */
 		  padding: 15px;
-		  border: 2px solid #28a745; /* Bright green border for visibility */
-		  border-radius: 12px;
+		  border-radius: 8px;
 		  max-height: 0;
 		  opacity: 0;
 		  overflow: hidden;
-		  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, transform 0.3s ease;
-		  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4); /* Added shadow for depth */
+		  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, width 0.3s ease;
+		  box-shadow: 4px 0px 6px rgba(0, 0, 0, 0.5); /* Adding shadow to the right */
 		}
 
-		/* Hover effect to open the control panel */
+		/* Hover effect to expand the panel and show the controls */
+		.controls-container:hover {
+		  width: 200px; /* Width when expanded */
+		}
+
 		.controls-container:hover .controls {
-		  max-height: 300px; /* Increased max height */
+		  max-height: 300px; /* Max height for control list when expanded */
 		  opacity: 1;
-		  transform: translateY(10px); /* Subtle downward movement when open */
+		  width: 200px; /* Same width as the container when open */
 		}
 
-		/* Buttons */
+		/* Button styles */
 		button {
-		  margin: 5px;
-		  padding: 12px 20px;
+		  margin: 5px 0;
+		  padding: 10px;
 		  background-color: #28a745; /* Green background */
 		  color: white;
 		  border: none;
 		  cursor: pointer;
 		  border-radius: 6px;
-		  font-size: 16px;
+		  font-size: 14px;
+		  width: 100%; /* Make buttons take full width of the container */
 		  transition: background-color 0.3s, transform 0.2s ease;
 		}
 
@@ -66,20 +73,26 @@
 		/* Mobile responsiveness */
 		@media (max-width: 768px) {
 		  .controls-container {
-			top: 5%;
+			width: 60px; /* Smaller tab width for mobile */
+		  }
+		  .controls-container:hover {
+			width: 180px; /* Smaller expanded width on mobile */
 		  }
 		  .controls {
 			padding: 10px;
 		  }
 		  button {
-			font-size: 14px; /* Smaller buttons on mobile */
-			padding: 10px 18px;
+			font-size: 12px; /* Smaller buttons on mobile */
+			padding: 8px;
 		  }
 		}
 
 		@media (max-width: 480px) {
-		  .controls {
-			max-height: 250px; /* Slightly smaller panel for very small screens */
+		  .controls-container {
+			width: 60px;
+		  }
+		  .controls-container:hover {
+			width: 150px; /* Even smaller expanded width */
 		  }
 		}
     </style>
