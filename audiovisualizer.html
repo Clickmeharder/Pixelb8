@@ -11,11 +11,17 @@
         .controls {
             background: rgba(0, 0, 0, 0.7); 
             padding: 10px; 
+			border: 2px ridge green;
             border-radius: 8px; 
-            opacity: 0; 
-            transition: opacity 0.3s ease-in-out;
+            max-height: 0;
+			opacity: 0;
+			overflow: hidden;
+			transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
-        .controls-container:hover .controls { opacity: 1; }
+        .controls-container:hover .controls { 
+			max-height: 20px;
+			opacity: 1;
+		}
         button { margin: 5px; padding: 8px; border: none; cursor: pointer; border-radius: 5px; }
     </style>
 </head>
