@@ -299,4 +299,159 @@ animated twinkly stars background styles
                 padding: 12px 30px;
             }
         }
+.column{display: flex;flex-direction: column;}
+.row{display: flex;flex-direction: row;}
+.hidden{display: none;}
+.fillheight{
+  height:calc(90% - 2px);
+}
+.collapsed{height:0;transition:height 0.6s ease;}
+.expanded{height:;transition:height 0.6s ease;}
+.resizable{overflow: hidden;overflow-x: hidden;resize: both;}
+.hoveffect1{transition: linear, 3.6s;}
+.hoveffect1:hover{
+	border-color:var(--HUD-active-border-color);
+	filter:var(--transition1);
+	background-color:inherit;
+}
+.themed-main {
+    width: 490px;
+    max-width: 46vw;
+    margin: auto;
+	margin-top: 7px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: ;
+    overflow-y: auto;
+    /*height: 1000px;*/ /* the original height */
+    height: 28vh;
+    min-height:125px;max-height:500px;
+    color: var(--staticpage-panels-text-color);
+    background-color:var(--staticpage-inner-bg-color);
+    border: 2px solid var(--staticpage-border-color);
+    border-style: ridge;
+    border-radius: var(--staticpage-border-radius);
+    resize: none;
+	opacity: 0.7;
+}
+.themed-main.landing {
+	margin-left:0;
+}
+.themed-main h2 {
+  margin: auto;
+  color: var(--staticpage-HFpanels-text-color);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+#themed-welcome-title {
+    position: absolute;
+    margin: auto;
+    color: var(--staticpage-HFpanels-text-color);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    left: 32vw;
+}
+#themed-main-title{
+    margin: auto;
+	margin-top: -6px;
+    color: var(--staticpage-HFpanels-text-color);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    position: absolute;
+    left: 46vw;
+}
+#themed-update-title{
+    margin: auto;
+    color: var(--staticpage-HFpanels-text-color);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    position: fixed;
+    left: 46vw;
+}
+#themed-update-title.landing {
+    margin: auto;
+    font-size: 19px;
+    color: var(--staticpage-HFpanels-text-color);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    position: absolute;
+    background: #092438e3;
+    padding: 4px;
+    width: 543px;
+    max-width: 45vw;
+    left: 0vw;
+    margin-top: -9px;
+}
+#expandaccpaneldiv.single-round-button {
+    margin-right: auto;
+    width: 16px;
+    height: 16px;
+}
 
+button#Toggleaccpanelinternals-Button {
+    padding: 0px;
+    background-color: #101128f2;
+    color: #ffffff;
+    border: 1px outset grey;
+    border-radius: 50%;
+    cursor: var(--cursor06-image);
+    transition: background-color 0.3s ease;
+    filter: brightness(70%);
+    overflow: hidden;
+}
+
+.featured-section {
+	min-height: 32px;
+    max-height: 140px;
+    height: 32px;
+    overflow: auto;
+    margin-top: 4px;
+    margin-bottom: -11px;
+    padding: 10px;
+    padding-bottom: 30px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    color: var(--staticpage-panels-text-color);
+    border-color: var(--staticpage-panels-border-color);
+    border-width: var(--staticpage-panels-border-width);
+    border-style: var(--staticpage-panels-border-style);
+    border-radius: var(--staticpage-panels-border-radius);
+    background-color: var(--staticpage-panels-bg-color);
+    opacity: var(--staticpage-panels-opacity);
+	transition:min-height 1.3s
+}
+.featured-section h2 {
+  margin: auto;
+  color: var(--staticpage-HFpanels-text-color);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+
+.featured-section:hover {
+	min-height:140px;
+	transition:min-height 1.3s;
+}
+.older-devnote {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px outset #4c4c4c;border-radius: 5px;box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    color: var(--staticpage-panels-text-color);
+    border-color: var(--staticpage-panels-border-color);
+    border-width: var(--staticpage-panels-border-width);
+    border-style: var(--staticpage-panels-border-style);
+    border-radius: var(--staticpage-panels-border-radius);
+    background-color: var(--staticpage-panels-bg-color);
+    opacity: var(--staticpage-panels-opacity);
+}
+.older-devnote h3 {
+  color: var(--staticpage-panels-headertext-color);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+.themed-footer {
+  padding: 3px;
+  min-width: 33vw;
+  width: fit-content;
+  max-width: 50vw;
+  text-align: center;
+  color: var(--staticpage-HFpanels-text-color);
+  background-color: var(--staticpage-HFpanels-bg-color);
+  border-color: var(--staticpage-HFpanels-border-color); 
+  border-width: var(--staticpage-HFpanels-border-width);
+  border-style: var(--staticpage-HFpanels-border-style);
+  border-radius: var(--staticpage-HFpanels-border-radius);
+}/* Footer Styles */
