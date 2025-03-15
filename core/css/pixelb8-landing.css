@@ -1,0 +1,302 @@
+/* Default Theme Styles */
+/* 
+*/
+
+/*----------------------*/
+/* ROOT VARIABLES */
+/*styletuner,Hud Overlay, thatthing,andthisother1 |*/
+option:disabled {
+    color: -internal-light-dark(graytext, rgb(170, 170, 170));
+}
+/* Root Variables */
+:root {                                     /*-|*/
+/*selected element and style current color*//*-|*/
+	--fc-highlight-color: purple;
+    --fc-event-text-color: red;
+    --mainbody-bg-color: black;
+    --mainbody-text-color: black;
+    --mainbody-opacity: 1.0;
+    --current-color: #fff;
+    --textshadow: 1px -1px 0 #000,1px -1px 0 #000,-1px  1px 0 #0090,1px  1px 0 #000;
+    --transition1: hue-rotate(-70deg);
+    --filter-chill: hue-rotate(-70deg);
+    --filter-rgb: hue-rotate(360deg);
+    --filter-transition: filter 2.6s linear;
+/*SCROLLBAR STYLE VARIABLES*/
+    --scrollbar-bg-color: rgb(0,0, 0, 0.9);
+    --scrollbar-border-color:rgba(45, 255, 10, 0.6);
+    --scrollbar-thumb-bg-color: ;
+    --scrollbar-thumb-border-color:rgba(38, 60, 150, 1);
+    --scrollbar-thumb-border-style: solid;
+    --scrollbar-thumb-border-radius: 15%;
+/*----------------------------------|*/
+/* STYLE GROUP - STATICPAGE    |*/
+/*----------------------------------------|*/
+  /*staticpage  styles*/
+  --staticpage-border-width: 2px;
+  --staticpage-border-style: outset;
+  --staticpage-border-radius: 1px;
+  --staticpage-border-color: #38567f69/*#38567f9c*/;
+  --staticpage-bg-color: #0f252dc4/*#222*/;
+  --staticpage-text-color: #555;
+  --staticpage-opacity: 1.0;
+/*---------------------------|*/
+/*                           |*/
+/*STATICPAGE panel styles*/
+  --staticpage-panels-border-width: 3px;
+  --staticpage-panels-border-style: outset;
+  --staticpage-panels-border-radius: 8px;
+  --staticpage-panels-border-color: #38567f9c;
+  --staticpage-panels-bg-color: #171726;
+  --staticpage-panels-headertext-color: #888;
+  --staticpage-panels-text-color: #555;
+  --staticpage-panels-opacity: 1.0;
+/*STATICPAGE header/footer styles*/
+  
+  --staticpage-HFpanels-border-width: 2px;
+  --staticpage-HFpanels-border-style: outset;
+  --staticpage-HFpanels-border-radius: 8px;
+  --staticpage-HFpanels-border-color: #38567f9c;
+  --staticpage-HFpanels-bg-color: #0c1c2c;
+  --staticpage-HTitle-text-color: #035469;
+  --staticpage-HFpanels-text-color: #333;
+  --staticpage-HFpanels-opacity: 0.9;
+
+/*----------------------------------|*/
+ /*STATICPAGE side panels styles*/
+  --staticpage-sidepanels-border-width: 3px;
+  --staticpage-sidepanels-border-style: outset;
+  --staticpage-sidepanels-border-radius: 8px;
+  --staticpage-sidepanels-border-color: #444;
+  --staticpage-sidepanels-bg-color: #222;
+  --staticpage-sidepanels-text-color: #555;
+  --staticpage-sidepanels-opacity: 0.9;
+/*STATICPAGE main content styles*/
+  
+  --staticpage-maincontent-border-width: 2px;
+  --staticpage-maincontent-border-style: outset;
+  --staticpage-maincontent-border-radius: 8px;
+  --staticpage-maincontent-border-color: #4444443d;
+  --staticpage-maincontent-text-color: #333;
+  --staticpage-maincontent-bg-color: #12273a29/*#222*/;
+  --staticpage-inner-bg-color: #222;
+  --staticpage-maincontent-opacity: 0.9;
+/*----------------------------------|*/
+ /*STATICPAGE control panel styles*/
+  --staticpage-controlpanel-border-width: 3px;
+  --staticpage-controlpanel-border-style: outset;
+  --staticpage-controlpanel-border-radius: 8px;
+  --staticpage-controlpanel-border-color: #444;
+  --staticpage-controlpanel-bg-color: rgb(26 24 24 / 100%);
+  --staticpage-controlpanel-text-color: #555;
+  --staticpage-controlpanel-opacity: 0.95;
+ /*STATICPAGE contentpanelB styles*/
+  --staticpage-contentpanel-border-width: 3px;
+  --staticpage-contentpanel-border-style: outset;
+  --staticpage-contentpanel-border-radius: 8px;
+  --staticpage-contentpanel-border-color: #444;
+  --staticpage-contentpanel-bg-color: #1111117a/*#111*/;
+  --staticpage-contentpanel-text-color: #555;
+  --staticpage-contentpanel-opacity: 0.9;
+ /*STATICPAGE adpanel styles*/ 
+  --staticpage-adpanel-border-width: 2px;
+  --staticpage-adpanel-border-style: outset;
+  --staticpage-adpanel-border-radius: 8px;
+  --staticpage-adpanel-border-color: #53321842;
+  --staticpage-adpanel-bg-color: #1a0a03;
+  --staticpage-adpanel-text-color: #555;
+  --staticpage-adpanel-opacity: 0.9;
+/*----------------------------------------|*/
+
+/*                 HUD                    |*/
+  /*hudoverlay main styles*/           /*-|*/
+/*------------------------------------|*/
+/*main hud power = monitor*/
+  --hudmonitor-opacity: 1.0;
+/*hudoverlay*/
+  --hudoverlay-border-width: 2px;
+  --hudoverlay-border-style: outset;
+  --hudoverlay-border-radius: 8px;
+  --hudoverlay-border-color: rgb(23,130, 182, 0.8);
+  --hudoverlay-border-fullcolor: rgb(23,130, 182, 1.0);
+  --hudoverlay-text-color: rgb(23,130, 182, 0.8);
+  --hudoverlay-bg-color: rgb(0,50, 255, 0.03);
+  --hudoverlay-opacity: 0.9;
+  
+/*---------------------------------------------|*/
+ /*HUD main styles*/                        /*-|*/
+  --HUD-applet-border-color:rgb(23,130, 182, 0.8);
+  --HUD-applet-Rborder-color:rgba(0, 208, 255, 0.1);
+  --HUD-applet-innerborder-color:rgb (0, 208, 255, 0.5);
+  --HUD-border-width: 3px;
+  --HUD-border-style: outset;
+  --HUD-border-radius: 8px;
+  --HUD-border-color: rgb(23,130, 182, 0.8);
+  --HUD-border-fullcolor: rgb(23,130, 182, 1.0);
+  --HUD-active-border-color: rgba(0, 238, 255, 0.8);
+  --HUD-text-color: rgb(23,130, 182, 1.0);
+  --HUD-bg-color: rgb(0,140, 250, 0.2);
+  --HUD-opacity: 0.9;
+/*----------------|*/
+/*hud primary variables*/
+  /*HUD Windows styling*/
+  --HUD-windows-bg-color: rgb(0,22, 44, 0.7);
+/*--------------------|*/
+  
+  
+  /*----------------|*/
+/*primary*/
+
+  --HUD-primary-button-bg-color: inherit;
+  --HUD-primary-button-text-color: inherit;
+  --HUD-Primary-border-color: inherit;
+  --HUD-Primary-border-width: 3px;
+  --HUD-Primary-border-style: outset;
+  --HUD-Primary-border-radius: 8px;
+  --HUD-Primary-text-color: inherit;
+  --HUD-Primary-Headertext-color: rgb(23,130, 182, 0.8);
+  --HUD-Primary-subtext-color: rgb(23,130, 182, 0.8);
+/*---------------------------------------------|*/
+
+/*----------------|*/
+/*custom curser variables variables*/
+  /*cursor paths*/
+
+  --cursor000-image: url('../../assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
+  --cursor00-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-00.gif'), auto;
+  --cursor01-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-01.gif'), auto;
+  --cursor02-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-02.gif'), auto;
+  --cursor03-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-03.gif'), auto;
+  --cursor04-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-04.gif'), auto;
+  --editcursor-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-05.gif'), auto;
+  --cursor06-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-06.gif')8 5, auto;/*8 5, auto*/
+  --cursor07-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-07.gif'), auto;
+  --cursor08-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-08.gif'), auto;
+  --cursor09-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.gif'), auto;
+  --inputcursor-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-09.gif'), auto;
+  --cursor010-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-010.gif'), auto;
+  --cursor011-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-011.gif'), auto;
+  --cursor012-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-012.gif'), auto;
+  --cursor013-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-013.gif'), auto;
+  --cursor014-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-014.gif'), auto;
+  --cursor015-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-015.gif'), auto;
+  --cursor016-image: url('../../assets/cursors/gif-box/eu-cursors/cursor-016.gif'), auto;
+  --cursorkey-image: url('../../assets/cursors/gif-box/eu-cursors/cursor_key.png')16 6, auto;
+  --cursorcheck-image:url('../../assets/cursors/gif-box/eu-cursors/check-1.png')8 5, auto;
+/*add more vars*/
+  --newradiobutton2: #222;/*unused vars   /*-|*/
+  --newradiobutton3: #333;
+  --newradiobutton4: #222;
+
+}
+	/*Root OverRide VARIABLES*/
+/* try them idk what they were for
+	--fc-border-color: #1c6a7ad9;
+	--fc-today-bg-color: #0346f41c;
+*/
+  
+
+/*----------------------*/
+/*      The Body        */
+/*----------------------*/
+body {
+	max-width: 99.5vw;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: var(--mainbody-text-color);
+    background-color: var(--mainbody-bg-color);
+    /*background-image: url('../../assets/images/bg/spaace.jpg');*/
+   /*background-image: url('https://pixelb8/assets/images/bg/spaace.jpg');*/
+    cursor: var(--cursor000-image);
+    opacity: var(--mainbody-opacity);
+}
+
+/*
+animated twinkly stars background styles
+*/
+    @keyframes move-background {
+      from {
+        transform: translate3d(0px, 0px, 0px);
+      }
+      to { 
+        transform: translate3d(1000px, 0px, 0px);
+      }
+    }
+
+    .background-container {
+      background: black;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+	  z-index:-1;
+    }
+
+    .stars {
+      background: black url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/stars.png) repeat;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 0;
+    }
+
+    .twinkling {
+      width: 10000px;
+      height: 100%;
+      background: transparent url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/twinkling.png") repeat;
+      background-size: 1000px 1000px;
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 2;
+      animation: move-background 140s linear infinite; /* Adjust animation duration for slower rotation */
+    }
+
+/*end of twinkly stars styles*/
+
+        .enter-button {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 84px;
+            color: #0ff;
+            padding: 15px 40px;
+            border: 2px solid #0ff;
+            background: transparent;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            overflow: hidden;
+            transition: color 0.4s, border-color 0.4s;
+        }
+        .enter-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 255, 255, 0.2);
+            transition: left 0.4s;
+        }
+        .enter-button:hover::before {
+            left: 0;
+        }
+        .enter-button:hover {
+            color: #154300;
+            border-color: #154300;
+        }
+        @media (max-width: 600px) {
+            .enter-button {
+                font-size: 18px;
+                padding: 12px 30px;
+            }
+        }
+
