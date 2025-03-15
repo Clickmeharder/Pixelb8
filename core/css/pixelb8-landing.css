@@ -209,6 +209,7 @@ body {
    /*background-image: url('https://pixelb8/assets/images/bg/spaace.jpg');*/
     cursor: var(--cursor000-image);
     opacity: var(--mainbody-opacity);
+	overflow:auto;
 }
 
 /*
