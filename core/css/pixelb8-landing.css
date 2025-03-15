@@ -300,6 +300,29 @@ animated twinkly stars background styles
                 padding: 12px 30px;
             }
         }
+		
+/*----------------*/
+/* WEBKIT STYLES  */
+/*  [scollbar, scrollthumb,scrolltrack,] */
+::-webkit-scrollbar {
+		max-width: 6px;
+    min-height: 6px;
+    max-height: 6px;
+    background-color:var(--scrollbar-bg-color);
+    outline: 0px;
+    border: 2px inset var(--scrollbar-border-color);
+}
+::-webkit-scrollbar-corner {background-color: var(--border-color);}
+::-webkit-scrollbar-track {}
+::-webkit-scrollbar-thumb {
+    color:;
+    background-color: var(--scrollbar-thumb-bg-color);
+    border: 1px solid var(--scrollbar-thumb-border-color);
+    border-style: var(--scrollbar-thumb-border-style);
+    border-radius: var(--scrollbar-thumb-border-radius);
+}
+
+
 .column{display: flex;flex-direction: column;}
 .row{display: flex;flex-direction: row;}
 .hidden{display: none;}
