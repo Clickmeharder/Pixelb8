@@ -370,6 +370,15 @@
 		  <iframe src="https://player.twitch.tv/?channel=jaedraze&parent=pixelb8.lol" height="720" width="1280" frameborder="0" scrolling="no" allowfullscreen="true"></iframe>
 		</div>
 	</div>
+	<button class="menu-button" onclick="toggleMenu()">☰</button>
+    <div class="nav-menu" id="navMenu">
+        <a href="https://Pixelb8.lol/home">Home</a>
+		<a href="https://Pixelb8.lol/eu">Entropia</a>
+        <a href="https://Pixelb8.lol/Media">Media</a>
+		<a href="https://Pixelb8.lol/tools">Tools</a>
+		<a href="https://Pixelb8.lol/arcade">Arcade</a>
+    </div>
+	
 	<div id="streaminfoDiv">
 		<a href="https://www.twitch.tv/jaedraze" target="_blank">
 			<img src="/assets/images/jaedrazepfp.png" alt="Jaedraze Twitch Profile" class="fixed-profile">
@@ -523,6 +532,12 @@
 			</div>
 		</div>
 	</div>
+	<script>
+        function toggleMenu() {
+            const menu = document.getElementById("navMenu");
+            menu.style.left = menu.style.left === "0px" ? "-250px" : "0px";
+        }
+    </script>
     <script>
         // Get elements
         const toggleButton = document.getElementById('toggleButton');
