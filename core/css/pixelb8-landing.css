@@ -290,17 +290,91 @@ animated twinkly stars background styles
         .enter-button:hover::before {
             left: 0;
         }
-        .enter-button:hover {
-            color: #154300;
-            border-color: #154300;
+		
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 6px;
+            text-align: center;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            border-bottom: 2px solid #0b7272;
         }
+
+        .menu-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: transparent;
+            border: 2px solid #0b7272;
+            color: #0ff;
+            font-size: 20px;
+            padding: 2px 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .menu-button:hover {
+            color: #ff00ff;
+            border-color: #ff00ff;
+        }
+
+        .nav-menu {
+            position: fixed;
+            top: 50px;
+            left: -115px;
+            width: 90px;
+            height: 85%;
+            background: rgba(0, 0, 0, 0.9);
+			border-right: 2px solid #0b7272;
+            padding: 20px;
+            transition: left 0.4s;
+        }
+
+        .nav-menu a {
+            display: block;
+            color: #0ff;
+            text-decoration: none;
+			border-bottom: 2px solid #0b7272;
+            padding: 10px;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .nav-menu a:hover {
+            color: #ff00ff;
+			border-bottom: 2px inset #ff00ff;
+        }
+
+        .enter-button {
+            font-size: 24px;
+            color: #0ff;
+            padding: 15px 40px;
+            border: 2px solid #0ff;
+            background: transparent;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.4s, border-color 0.4s;
+        }
+        .enter-button:hover {
+            color: #ff00ff;
+            border-color: #ff00ff;
+        }
+
         @media (max-width: 600px) {
+            .header {
+                font-size: 22px;
+            }
             .enter-button {
                 font-size: 18px;
                 padding: 12px 30px;
             }
         }
-		
 /*----------------*/
 /* WEBKIT STYLES  */
 /*  [scollbar, scrollthumb,scrolltrack,] */
