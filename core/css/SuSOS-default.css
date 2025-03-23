@@ -2656,11 +2656,12 @@ select#weaponType.blackbg.grntxt.hoverbrighter, select#weaponType2.blackbg.grntx
 	background: linear-gradient(-360deg, #191714, #1e2123);
 
 }
-#Hud-EUitemSorter-Displaypanel{
-	max-width:unset;
-	width: 100%;
-	height:calc(100% - 1px);
-	overflow:hidden;
+#Hud-EUitemSorter-Displaypanel {
+    max-width: unset;
+    width: 95vw;
+    margin-left: 42px;
+    height: calc(100% - 1px);
+    overflow: hidden;
 }
 #hud-EuItemSorter #ValueA{
 	margin:1px;
