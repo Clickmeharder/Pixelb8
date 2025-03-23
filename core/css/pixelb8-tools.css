@@ -12,10 +12,6 @@
     margin: auto;
 }
 
-.disabled {
-	opacity: 0.3;
-}
-
 .tool-card {
 	color: #ac4915;
     background: rgba(20, 20, 20, 0.9);
@@ -26,8 +22,17 @@
     box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
 }
 
+.tool-card.disabled {
+	opacity: 0.3;
+}
+
+
 .tool-card:hover {
     box-shadow: 0 0 15px cyan;
+    transform: scale(1.05);
+}
+.tool-card.disabled:hover {
+    box-shadow: 0 0 15px red;
     transform: scale(1.05);
 }
 
