@@ -17,22 +17,30 @@
 
 </head>
 
-<div class="background-container">
-  <div class="stars"></div>
-  <div class="twinkling"></div>
-</div>
-<div id="characterFace"></div>
-<!--Itemsorter content-->
-<div class="boxcontent"id="EuItemSorterwindow">
-	<div class="Container" id="Hud-EUitemSorter-Displaypanel">
-		<div class="Innercontainer scrollheight" id="EUitemSorterWindow-Interior">
-			<div class="Innerinfobox" id="ValueA">
-				<div class="column minheight98" id="EUitemsortercontent">
-				<!--   V the insides V    ????  -->
-					<div id="inputContainer">
-						<div class="textbawxA column" id="euitemsorter-toolinfobawx">
-							<label for="euitemsorter-toolinfo">How does the Sorting Tool work?:</label>
-							<textarea id="euitemsorter-toolinfo" placeholder="Step #1: 
+	<div class="background-container">
+	  <div class="stars"></div>
+	  <div class="twinkling"></div>
+	</div>
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+    <div class="nav-menu" id="navMenu">
+        <a href="https://Pixelb8.lol/home">Home</a>
+		<a href="https://Pixelb8.lol/eu">Entropia</a>
+        <a href="https://Pixelb8.lol/Media">Media</a>
+		<a href="https://Pixelb8.lol/tools">Tools</a>
+		<a href="https://Pixelb8.lol/arcade">Arcade</a>
+    </div>
+	<div id="characterFace"></div>
+	<!--Itemsorter content-->
+	<div class="boxcontent"id="EuItemSorterwindow">
+		<div class="Container" id="Hud-EUitemSorter-Displaypanel">
+			<div class="Innercontainer scrollheight" id="EUitemSorterWindow-Interior">
+				<div class="Innerinfobox" id="ValueA">
+					<div class="column minheight98" id="EUitemsortercontent">
+					<!--   V the insides V    ????  -->
+						<div id="inputContainer">
+							<div class="textbawxA column" id="euitemsorter-toolinfobawx">
+								<label for="euitemsorter-toolinfo">How does the Sorting Tool work?:</label>
+								<textarea id="euitemsorter-toolinfo" placeholder="Step #1: 
 Triple click the Item Inventory table on the Entropia Universe website
 https://www.entropiauniverse.com
 Step #2:
@@ -42,63 +50,64 @@ Step #3:
 Click the Analyze Button
 
 Or, simply Click 'Analyze' to update the table with the example item list contained."></textarea>
-						</div>
-						<div class="textbawx">
-							<textarea id="itemData" rows="10" cols="50" placeholder="Triple click the table on the Entropia Universe website and then Paste your item data inside this text input/...">Name	Quantity	Value	Container
+							</div>
+							<div class="textbawx">
+								<textarea id="itemData" rows="10" cols="50" placeholder="Triple click the table on the Entropia Universe website and then Paste your item data inside this text input/...">Name	Quantity	Value	Container
 Musca Thigh Guards (L) Blueprint	1	0.01	Arkadia Armour▣
 Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
 Pistol (SA) (L)	1	0.14	Pitbull Mk. 1 (C,L)▣
-							</textarea>
+								</textarea>
+							</div>
 						</div>
-					</div>
-					<div class="buttbox">
-						<button class="processeuitemlistbutt" id="processitemlistdatabutt" onclick="processInput()">Analyze</button>
-					</div>
-					<div id="inventorySortingMenu">
-						<div class="selectbox">
-							<label for="planetSelect">Select a Planet</label><div class="down-arrow-blue"></div><hr>
-							<select id="planetSelect" onchange="filterItemsByPlanet()" placeholder="Select a Planet!">
-								<option value="Selected" disabled selected>Select a planet</option>
-					  <!-- Planet options will be dynamically populated here -->
-							</select>
-							<input id="inventorySearch" type="text" placeholder="Search Inventory.../"  oninput="searchInventory()">
-						</div><hr>
-						<div class="valuebox column">
-							<span id="ListedValue"></span>
-							<span id="totalValue"></span>
-						</div>  
-					</div>
-					<div id="tablewrap">
-						<table id="itemTable">
-						<thead>
-							<tr>
-								<th onclick="sortTable(0)">Name</th>
-								<th onclick="sortTable(1)">Quantity</th>
-								<th onclick="sortTable(2)">Value</th>
-								<th onclick="sortTable(3)">Container</th>
-							</tr>
-						</thead>
-							<tbody>
-						  <!-- Populated here -->
-							</tbody>
-						</table>
+						<div class="buttbox">
+							<button class="processeuitemlistbutt" id="processitemlistdatabutt" onclick="processInput()">Analyze</button>
+						</div>
+						<div id="inventorySortingMenu">
+							<div class="selectbox">
+								<label for="planetSelect">Select a Planet</label><div class="down-arrow-blue"></div><hr>
+								<select id="planetSelect" onchange="filterItemsByPlanet()" placeholder="Select a Planet!">
+									<option value="Selected" disabled selected>Select a planet</option>
+						  <!-- Planet options will be dynamically populated here -->
+								</select>
+								<input id="inventorySearch" type="text" placeholder="Search Inventory.../"  oninput="searchInventory()">
+							</div><hr>
+							<div class="valuebox column">
+								<span id="ListedValue"></span>
+								<span id="totalValue"></span>
+							</div>  
+						</div>
+						<div id="tablewrap">
+							<table id="itemTable">
+							<thead>
+								<tr>
+									<th onclick="sortTable(0)">Name</th>
+									<th onclick="sortTable(1)">Quantity</th>
+									<th onclick="sortTable(2)">Value</th>
+									<th onclick="sortTable(3)">Container</th>
+								</tr>
+							</thead>
+								<tbody>
+							  <!-- Populated here -->
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-</div><!--end of window boxcontent-->
+	</div><!--end of window boxcontent-->
 <!-- end of new SuS itemlist analizer window-->
 <!-- 
 staticPage BLOCK 
 -->
-<div id="navigation" style="display: none;">
-    <button onclick="loadPage('https://clickmeharder.github.io/sus-eu/')">Load Main Page</button>
-    <button onclick="loadPage('https://clickplace.tebex.io')" disabled>Load Other Page</button>
-</div>
+	<div id="navigation" style="display: none;">
+		<button onclick="loadPage('https://clickmeharder.github.io/sus-eu/')">Load Main Page</button>
+		<button onclick="loadPage('https://clickplace.tebex.io')" disabled>Load Other Page</button>
+	</div>
+
 	<!-- <script src="js/susIntel.js"></script> -->
 	<script src="js/EuItemSorter.js"></script>
 	<script src="core/js/pixelb8-global.js"></script>
