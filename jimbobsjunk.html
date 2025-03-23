@@ -380,19 +380,6 @@
 
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: url('https://source.unsplash.com/1600x900/?cyberpunk,neon') no-repeat center center/cover;
-            overflow: hidden;
-            color: #0b7272;
-            font-family: 'Orbitron', sans-serif;
-        }
-
         .header {
             position: fixed;
             top: 0;
@@ -451,30 +438,9 @@
 			border-bottom: 2px inset #ff00ff;
         }
 
-        .enter-button {
-            font-size: 24px;
-            color: #0ff;
-            padding: 15px 40px;
-            border: 2px solid #0ff;
-            background: transparent;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            cursor: pointer;
-            position: relative;
-            transition: color 0.4s, border-color 0.4s;
-        }
-        .enter-button:hover {
-            color: #ff00ff;
-            border-color: #ff00ff;
-        }
-
         @media (max-width: 600px) {
             .header {
                 font-size: 22px;
-            }
-            .enter-button {
-                font-size: 18px;
-                padding: 12px 30px;
             }
         }
     </style>
