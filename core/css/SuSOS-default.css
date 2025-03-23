@@ -2922,9 +2922,8 @@ textarea#itemData::-webkit-scrollbar {
     max-height: 99%;
     resize: vertical;
     margin-bottom: 2px;
-    border-bottom: 1px outset #3db0c9;
-	border-right: 1px outset #3db0c9;
-	border-left: 1px outset #3db0c9;
+    border: 1px outset #3db0c9;
+	border-top: 0px outset #3db0c9;
 }
 #Hud-EUitemSorter-Displaypanel table {
   font-family: Arial, sans-serif;
