@@ -1,3 +1,9 @@
+.eu-container {
+	text-align: center;
+	margin: 20px;
+	margin-top: 8%;
+}
+
 .eu-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
