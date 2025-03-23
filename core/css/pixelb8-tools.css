@@ -12,6 +12,10 @@
     margin: auto;
 }
 
+.disabled {
+	opacity: 0.3;
+}
+
 .tool-card {
 	color: #ac4915;
     background: rgba(20, 20, 20, 0.9);
