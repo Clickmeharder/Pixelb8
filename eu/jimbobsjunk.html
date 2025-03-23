@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Low MU Items for Sale</title>
+	<link rel="stylesheet" href="../core/css/pixelb8-tools.css">
+	<!-- <link rel="stylesheet" href="../core/css/jimbobsjunk.css"> -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
@@ -422,6 +424,38 @@
                 font-size: 22px;
             }
         }
+
+		#jimbobsjunk {
+			display: none;
+			background: rgba(20, 20, 20, 0.9);
+			padding: 20px;
+			border-radius: 10px;
+			text-align: center;
+			box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			z-index: 1000;
+			width: 80%;
+			max-width: 600px;
+		}
+
+		#jimbobsjunk.active {
+			display: block;
+		}
+
+		.close-btn {
+			position: absolute;
+			top: 10px;
+			right: 15px;
+			background: red;
+			color: white;
+			padding: 5px 10px;
+			cursor: pointer;
+			border-radius: 5px;
+			border: none;
+		}
     </style>
 
 </head>
@@ -455,7 +489,17 @@
 		</a>
 		<button id="toggleButton">Show Stream</button>
 	</div>
-    <div class="container">
+	<div class="tool-card" id="openJimbob">
+		<i class="fa-solid fa-store"></i>
+		<p>Jimbob's Junk Shop</p>
+	</div>
+
+	<div class="container" id="jimbobsjunk">
+		<button class="close-btn" id="closeJimbob">X</button>
+		<h2>Jimbob's Junk Shop</h2>
+		<p>Welcome to Jimbob's Junk Shop! Browse our selection of random goods.</p>
+	</div>
+    <div class="container" id="jimbobsjunk">
         <h1>Jimbob's Junk</h1>
 		<span>Want to support my stream or my dream of one day owning a howling mine shop?</span>
 		<span>~ Take a look at this incomplete list of some of the items im selling. :D ~</span>
@@ -631,6 +675,15 @@
 					content.style.display = "block";
 				}
 			});
+		});
+	</script>
+	<script>
+		document.getElementById("openJimbob").addEventListener("click", function() {
+			document.getElementById("jimbobsjunk").classList.add("active");
+		});
+
+		document.getElementById("closeJimbob").addEventListener("click", function() {
+			document.getElementById("jimbobsjunk").classList.remove("active");
 		});
 	</script>
 </body>
