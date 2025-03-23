@@ -332,6 +332,7 @@ animated twinkly stars background styles
 			border-right: 2px solid #0b7272;
             padding: 20px;
             transition: left 0.4s;
+			z-index: 1000;
         }
 
         .nav-menu a {
