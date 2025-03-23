@@ -35,24 +35,24 @@
 		<a href="https://Pixelb8.lol/tools">Tools</a>
 		<a href="https://Pixelb8.lol/arcade">Arcade</a>
     </div>
-
-    <h1 style="color: #2775a7; background-color: #0000006b; border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;">C.o.S Prize Winners</h1>
-    <table id="winnersTable" border="1" style="background-color: #000000c4; border-style: ridge; border-width: 3px;">
-        <thead>
-            <tr>
-                <th class="sortable" data-index="0">Date</th>
-                <th class="sortable" data-index="1">Winner Name</th>
-                <th class="sortable" data-index="2">Amount</th>
-                <th class="sortable" data-index="3">Prize</th>
-                <th class="sortable" data-index="4">Status</th>
-            </tr>
-        </thead>
-        <tbody style="color:rgb(165 152 152);">
-            <!-- Data will be inserted here -->
-        </tbody>
-    </table>
-    <h2 id="totalAmount" style="text-align:center;">Total Amount: $0.00</h2>
-
+	<div class="container" id="prizelistWrapper">
+		<h1 style="color: #2775a7; background-color: #0000006b; border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;">C.o.S Prize Winners</h1>
+		<table id="winnersTable" border="1" style="background-color: #000000c4; border-style: ridge; border-width: 3px;">
+			<thead>
+				<tr>
+					<th class="sortable" data-index="0">Date</th>
+					<th class="sortable" data-index="1">Winner Name</th>
+					<th class="sortable" data-index="2">Amount</th>
+					<th class="sortable" data-index="3">Prize</th>
+					<th class="sortable" data-index="4">Status</th>
+				</tr>
+			</thead>
+			<tbody style="color:rgb(165 152 152);">
+				<!-- Data will be inserted here -->
+			</tbody>
+		</table>
+		<h2 id="totalAmount" style="text-align:center;">Total Amount: $0.00</h2>
+	</div>
     <script>
         let prizeData = [];
         let sortDirections = [true, true, true, true, true]; // true for ascending, false for descending
