@@ -5,6 +5,11 @@
 //tab switching logic is currently only being used in sheatshop but i like it 
 //- might redo main page layout
 //
+function toggleMenu() {
+	const menu = document.getElementById("navMenu");
+	menu.style.left = menu.style.left === "0px" ? "-250px" : "0px";
+}
+
 // Main tab switching logic
 document.querySelectorAll('.tab').forEach(tab => {
 	tab.addEventListener('click', () => {
