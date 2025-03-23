@@ -2932,6 +2932,7 @@ textarea#itemData::-webkit-scrollbar {
   border-collapse: collapse;
   border: 2px solid #5da3a573; /* Set the border color for the entire table */
   margin-top:6px;
+  margin-left: 4px;
 }
 #Hud-EUitemSorter-Displaypanel th {
   color: rgb(0, 204, 255, 0.7);
