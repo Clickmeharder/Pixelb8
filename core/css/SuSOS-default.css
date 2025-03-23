@@ -2916,13 +2916,14 @@ textarea#itemData::-webkit-scrollbar {
 
 
 #Hud-EUitemSorter-Displaypanel #tablewrap {
-	overflow-y:auto;
-	min-height:100px;
-	height:260px;
-	max-height:99%;
-	resize:vertical;
-	margin-bottom:2px;
-	
+	overflow-y: auto;
+    min-height: 100px;
+    height: 400px;
+    max-height: 99%;
+    resize: vertical;
+    margin-bottom: 2px;
+    border-bottom: 1px outset #3db0c9;
+	border-right: 1px outset #3db0c9;
 }
 #Hud-EUitemSorter-Displaypanel table {
   font-family: Arial, sans-serif;
