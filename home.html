@@ -3,203 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixelb8.LoL Home</title>
+    <title>PixelB8 Homepage</title>
+	<link rel="stylesheet" href="core/css/pixelb8-landing.css">
 	<link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
-    <link rel="stylesheet" href="core/css/pixelb8-default.css">
-	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-<!--i dont think we using jquery anywhere but idk yet-->
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!--im not sure what the following link is for but i think discord integration-->	
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
-<!--fix website and git repository before using adsense and trying to monetize lol-->
-<!--adsense script-->
-	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7382192474927902"
-     crossorigin="anonymous"></script>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: url('https://source.unsplash.com/1600x900/?cyberpunk,neon') no-repeat center center/cover;
+            overflow: hidden;
+            color: #0b7272;
+            font-family: 'Orbitron', sans-serif;
+        }
+		@keyframes move-background {
+		  from {
+			transform: translate3d(0px, 0px, 0px);
+		  }
+		  to { 
+			transform: translate3d(1000px, 0px, 0px);
+		  }
+		}
+
+		.background-container {
+		  background: black;
+		  position: fixed;
+		  top: 0;
+		  left: 0;
+		  bottom: 0;
+		  right: 0;
+		  z-index:-1;
+		}
+
+		.stars {
+		  background: black url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/stars.png) repeat;
+		  position: absolute;
+		  top: 0;
+		  left: 0;
+		  width: 100%;
+		  height: 100%;
+		  display: block;
+		  z-index: 0;
+		}
+
+		.twinkling {
+		  width: 10000px;
+		  height: 100%;
+		  background: transparent url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/twinkling.png") repeat;
+		  background-size: 1000px 1000px;
+		  position: absolute;
+		  right: 0;
+		  top: 0;
+		  bottom: 0;
+		  z-index: 2;
+		  animation: move-background 140s linear infinite; /* Adjust animation duration for slower rotation */
+		}
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 6px;
+            text-align: center;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            border-bottom: 2px solid #0b7272;
+        }
+
+        .menu-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: transparent;
+            border: 2px solid #0b7272;
+            color: #0ff;
+            font-size: 20px;
+            padding: 2px 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .menu-button:hover {
+            color: #ff00ff;
+            border-color: #ff00ff;
+        }
+
+        .nav-menu {
+            position: fixed;
+            top: 50px;
+            left: -115px;
+            width: 90px;
+            height: 85%;
+            background: rgba(0, 0, 0, 0.9);
+			border-right: 2px solid #0b7272;
+            padding: 20px;
+            transition: left 0.4s;
+        }
+
+        .nav-menu a {
+            display: block;
+            color: #0ff;
+            text-decoration: none;
+			border-bottom: 2px solid #0b7272;
+            padding: 10px;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .nav-menu a:hover {
+            color: #ff00ff;
+			border-bottom: 2px inset #ff00ff;
+        }
+
+        .enter-button {
+            font-size: 24px;
+            color: #0ff;
+            padding: 15px 40px;
+            border: 2px solid #0ff;
+            background: transparent;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.4s, border-color 0.4s;
+        }
+        .enter-button:hover {
+            color: #ff00ff;
+            border-color: #ff00ff;
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                font-size: 22px;
+            }
+            .enter-button {
+                font-size: 18px;
+                padding: 12px 30px;
+            }
+        }
+    </style>
 </head>
 <body>
-<!--Style Tuner and HUD Main Power Button-->
-<div class="background-container">
-  <div class="stars"></div>
-  <div class="twinkling"></div>
-</div>
-<!-- --------------------- -->
-<div class="staticPage" id="Mainpage">
-<!--  Header    -->
-  <header class="staticpage-header">
-      <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL</h1>
-      <nav class="main-nav">
-          <ul>
-              <li><a href="https://Pixelb8.lol/home">Home</a></li>
-            <li><a href="#">About</a></li>
-              <li><a href="#">Contact</a></li>
-          </ul>
-      </nav>
-  </header>
-<!--  main content  -->
-  <main class="main-content">
-      <!-- Website navigation panel(spelunker) -->
-      <div class="panel left-panel" id="Spelunker">
-		<h2 class="panel-title" id="SpelunkerTitle"style="line-height:0.65;margin-top:0px;margin-bottom:8px;">Internal Spelunking</h2>
-			<a href="https://Pixelb8.lol/faq">
-				<button id="Leftbuttcheek1" class="leftcheek" value="faq" selected disabled>Pixelb8 FAQ</button>
-			</a>
-			<a href="https://Pixelb8.lol/pixelbot">
-				<button id= "Leftbuttcheek2" class="leftcheek" value="pixelbot" >Visit PixelBot</button>
-			</a>
-			<a href="https://Pixelb8.lol/eu">
-				<button id= "Leftbuttcheek3" class="leftcheek" value="entropiapage">Eu</button>
-			</a>
-<!-- 			<a href="https://Pixelb8.lol/earn" disabled>
-				<button id= "Leftbuttcheek4" class="leftcheek" value="earn" disabled>earn</button>
-			</a> -->
-<!-- 			<a href="https://Pixelb8.lol/sweatshop" disabled>
-				<button id= "Leftbuttcheek5" class="leftcheek" value="sweatshop" disabled>Sweatshop</button>
-			</a> -->
-	  </div>
-        <!-- website stats and login Panels below -->	
-		<div id="userInfoMicroDiv">
-			<img id="profilephoto" src="assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
-		</div>
-		
-		<div id="useraccountPanel" class="panel right-panel">
-			<div id="websiteStatContainer">
-				<h2 class="panel-title" id="sitestats">site stats:</h2>
-				<p>Registered&gt; Lots</p>
-				<p>Online&gt; everyone</p>
-			</div>
-			<div id="userInfoContainer">
-				<P id="username">Guest user</p>
-				<P id="profileusername">-</p>
-				<p id="Userpixelcount" class="hidden">0px</p>
-				<p id="loginStatus">offline</p>
-				<ul>
-					<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
-					<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
-					<span id="emailVerified" class="hidden">►</span>
-					<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
-				</ul>
-			</div>
-			<div class="row">
-				<button class="logged-in" id="logoutbutt" type="button">Logout</button>
-				<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
-			</div>
-			<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
-				<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
-				<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>	
-			</div>
-		</div>
-  </main>
-	<!-- second row-->
-  <div class="row">
-		<h2 id="themed-main-title">Latest Updates</h2>
+	<div class="background-container">
+	  <div class="stars"></div>
+	  <div class="twinkling"></div>
+	</div>
+    <div class="header">PixelB8.LoL</div>
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+    <div class="nav-menu" id="navMenu">
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#">Tools</a>
+		<a href="#">Arcade</a>
+		<a href="#">EU</a>
+        <a href="#">-</a>
+    </div>
+	<div class="row">
+		<h2 id="themed-main-title">Welcome</h2>
 		<section class="themed-main">
-			<section class="featured-section">
-				<div class="devnote">
-					<h3 class="devnote-title">Development Update - [2024-05-16 06:06:12 UTC]</h3>
-					<p class="devnote-content"></p>
-				</div>
-				<!-- End of Latest Devnote -->
-				<button class="themed-button" style="display:none;"disabled>Read More</button>
-			</section>
-			  <div class="older-devnote">
-				  <h3>Loading...</h3>
-				  <p> some example text goes here but this should be dynamically updated</p>
-			  </div>
-			  <div class="older-devnote">
-				  <h3>Default h3</h3>
-				  <p>This is the first example element, it should be the newest section</p>
-			  </div>
-			  <div class="older-devnote">
-				  <h3>Default h3</h3>
-				  <p>This is some example content for Element 2.</p>
-			  </div>
-			  <div class="older-devnote">
-				  <h3>Example Element 2</h3>
-				  <p>This is some example content for Element 2.</p>
-			  </div>
-			  <div class="older-devnote">
-				  <h3>Final Example Element</h3>
-				  <p> The oldest stuff Should end up here. and the newest on the top, just under the featured section</p>
-			  </div>
-			  <!-- End of Generic Example Elements -->
+
 		</section>
-  </div>
-  <footer class="themed-footer">
-      <p>Pixelb8 &copy; 2023-2027 - All rights reserved.</p>
-	  <p>Entropia Universe® are copyright or registered trademark of Mindark PE AB.</p>
-	  <p>We are in no way endorsed or affiliated with Mindark PE AB - no infringement intended</p>
-  </footer>
-</div>
-<!-- ----------- -->
-<!--hidden modals (redo most/all these lol) -->
-<!-- ----------- -->
-<!-- Modal for Signup -->
-<div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modal-signup-label">Create Account</h5>
-        <button type="button" class="close close-modal-btn" data-dismiss="modal-usersignup" aria-label="Close">
-			<span aria-hidden="true">&times;</span>
-		</button>
-      </div>
-      <div class="modal-body">
-        <!-- Your signup form goes here -->
-        <form id="signup-form">
-          <div class="form-group input-field">
-            <label for="signup-username">Username</label>
-            <input type="signup-username" class="form-control" id="signup-username" aria-describedby="usernameHelp">
-          </div>
-          <div class="form-group input-field">
-            <label for="signup-email">Email address</label>
-            <input type="signup-email" class="form-control" id="signup-email" aria-describedby="emailHelp" required />
-          </div>
-          <div class="form-group input-field">
-            <label for="signup-password">Enter Password</label>
-            <input type="signup-password" class="form-control" id="signup-password" required />
-          </div>
-          <button type="submit" class="btn btn-primary">Create Account</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
+	</div>
 
-<!-- Modal for Edit Profile -->
-<div class="modal fade hidden" id="modal-editProfile" tabindex="-1" role="dialog" aria-labelledby="modal-editProfile-label" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modal-editProfile-label">Edit Profile</h5>
-        <button type="button" class="close close-modal-btn" data-dismiss="modal-editProfile" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- Your profile update form goes here -->
-        <form id="update-profile-form">
-          <div class="form-group input-field">
-            <label for="update-username">Username</label>
-            <input type="text" class="form-control" id="update-username" aria-describedby="usernameHelp">
-          </div>
-          <div class="form-group input-field">
-            <label for="update-photoURL">Profile Photo URL</label>
-            <input type="text" class="form-control" id="update-photoURL" aria-describedby="photoURLHelp">
-          </div>
-          <button type="submit" class="btn btn-primary">Update Profile</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!--cursor stuff (im unsure if we are using this yet -->
-<div id="currentgifcursordiv" style="left: 1059px; top: 162px; background-image: none;"></div>
-<div id="currentgifdiv" style="background-image: none; background-color: black;"></div>	
-<!-- ----------- -->
-		<!-- following script is for updating devnotes and needs to be moved to global js-->
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById("navMenu");
+            menu.style.left = menu.style.left === "0px" ? "-250px" : "0px";
+        }
+    </script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
 			fetch("/core/assets/data/devnotes/devnotes.json")
@@ -253,11 +230,5 @@
 				.catch(error => console.error("Error fetching devnotes:", error));
 		});
 	</script>
-	<!--custom cursor script-->
-	<script src="core/js/core-apps/customkersir.js"></script>
-	<script src="core/js/pixelb8-global.js"></script>
-	<!--Firebase Auth Scripts-->
-	<script src="core/js/index.js"></script>
-	<script type="module" src="core/js/firebase/auth.js"></script>
 </body>
 </html>
