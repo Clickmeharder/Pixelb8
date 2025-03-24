@@ -153,19 +153,25 @@
 			startCountdown();
 		}
 
-        function startCountdown() {
-            let countdown = 300;
-            document.getElementById("next-question-timer").textContent = `Next question in: ${countdown}s`;
+		function startCountdown() {
+			let countdown = 300; // 5 minutes = 300 seconds
+			updateCountdownDisplay(countdown);
 
-            countdownTimer = setInterval(() => {
-                countdown--;
-                document.getElementById("next-question-timer").textContent = `Next question in: ${countdown}s`;
-                if (countdown <= 0) {
-                    clearInterval(countdownTimer);
-                    startQuestion();
-                }
-            }, 1000);
-        }
+			countdownTimer = setInterval(() => {
+				countdown--;
+				updateCountdownDisplay(countdown);
+				if (countdown <= 0) {
+					clearInterval(countdownTimer);
+					startQuestion();
+				}
+			}, 1000);
+		}
+
+		function updateCountdownDisplay(seconds) {
+			const minutes = Math.floor(seconds / 60);
+			const remainingSeconds = seconds % 60;
+			document.getElementById("next-question-timer").textContent = `Next question in: ${minutes}m ${remainingSeconds}s`;
+		}
 
         function checkAnswer(user, message) {
             if (!activeQuestion || answeredUsers.has(user)) return;
