@@ -65,11 +65,13 @@
                 leaderboardElement.appendChild(li);
             });
         }
-
+		ComfyJS.onCommand = (user, command, message, flags, extra) => {
+			console.log(`Command received: ${command} from ${user}`);
+		};
         // Whenever a new answer comes in
         ComfyJS.onChat((user, message) => {
             // Check if the message is an answer
-			console.log(`Command received: ${command} from ${user}`);
+			console.log(`Command received: ${message} from ${user}`);
             const currentQuestion = triviaQuestions[currentQuestionIndex];
             if (message.toLowerCase() === currentQuestion.answer.toLowerCase()) {
                 if (!userScores[user]) {
