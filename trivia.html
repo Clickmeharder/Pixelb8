@@ -14,9 +14,8 @@
             width: 100vw;
             height: 100vh;
         }
-        #question {
+        #questionWrapper {
             position: absolute;
-            font-weight: bold;
             top: 20px;
             right: 8px;
             width: 65%;
@@ -26,9 +25,15 @@
             background: linear-gradient(135deg, #001f1f, #004040);
             border: 3px solid teal;
             border-radius: 12px;
+			box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
+        }
+        #question {
+            font-weight: bold;
+            top: 20px;
+            right: 8px;
+            text-align: center;
             color: white;
             text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);
-            box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
         }
         #leaderboard {
             position: absolute;
@@ -62,14 +67,16 @@
             color: lightblue;
         }
 		div#next-question-timer {
-			margin-top: 100px;
+			
 		}
     </style>
 </head>
 <body>
-    <div id="question">Waiting for next question...</div>
-    <div id="timer"></div>
-    <div id="next-question-timer"></div>
+	<div id="next-question-timer"></div>
+	<div id="questionWrapper">
+		<div id="question">Waiting for next question...</div>
+		<div id="timer"></div>
+	</div>
     <ul id="leaderboard">
         <p>Leaderboard</p>
     </ul>
@@ -123,7 +130,7 @@
 			firstAnswerUser = null;
 
 			document.getElementById("question").textContent = activeQuestion.question;
-			document.getElementById("question").style.visibility = "visible"; // Ensure question is visible
+			document.getElementById("questionWrapper").style.visibility = "visible"; // Ensure question is visible
 			document.getElementById("timer").textContent = "Time left: 2:30";
 			document.getElementById("next-question-timer").textContent = "";
 
@@ -147,7 +154,7 @@
 
 			// Hide the question after 45 seconds
 			hideQuestionTimer = setTimeout(() => {
-				document.getElementById("question").style.visibility = "hidden";
+				document.getElementById("questionWrapper").style.visibility = "hidden";
 			}, 10000);
 
 			startCountdown();
