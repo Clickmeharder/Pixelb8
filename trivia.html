@@ -43,8 +43,6 @@
 
         let currentQuestionIndex = 0;
         let userScores = {}; // To track scores
-
-        // Initialize ComfyJS and connect to Twitch
         // Initialize ComfyJS with the correct Twitch username
 		ComfyJS.Init("jaedraze");
 
@@ -86,6 +84,7 @@
         // Start the trivia game
         function startTrivia() {
             updateQuestionDisplay();
+			console.log('comfy said ')
             ComfyJS.Say(`Next Question: ${triviaQuestions[currentQuestionIndex].question}`);
         }
 
