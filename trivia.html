@@ -114,6 +114,8 @@
 		// Update question on overlay
         function updateQuestionDisplay() {
             document.getElementById("question").textContent = triviaQuestions[currentQuestionIndex].question;
+			console.log('Next question');
+			console.log(`${triviaQuestions[currentQuestionIndex].question}`);
             document.getElementById("question").style.border = "3px solid teal";
             document.getElementById("question").style.color = "white";
             document.getElementById("correct-answer").textContent = "";
@@ -131,6 +133,7 @@
         function handleNoAnswer() {
             document.getElementById("correct-answer").textContent = `Nobody answered correctly. The correct answer was: ${triviaQuestions[currentQuestionIndex].answer}. Next question in 5 minutes.`;
             questionActive = false;
+			console.log('nobody answered correctly');
             nextQuestion(300000); // 5 minutes
         }
         function handleCorrectAnswer(user) {
@@ -138,6 +141,7 @@
             document.getElementById("question").style.border = "3px solid green";
             document.getElementById("question").style.color = "lightgreen";
             document.getElementById("correct-answer").textContent = `${user} got it right! Answer: ${triviaQuestions[currentQuestionIndex].answer}. Next question in 10 minutes.`;
+			console.log(`${user} got it right! Answer: ${message}. They now have ${userScores[user]} points!`);
             userScores[user] = (userScores[user] || 0) + 1;
             updateLeaderboard();
             questionActive = false;
@@ -168,6 +172,8 @@
 					const li = document.createElement("li");
 					li.textContent = `${user}: ${score} pts`;
 					leaderboardElement.appendChild(li);
+					console.log(`leader board updated!`);
+					console.log(`${user}: ${score} pts`);
 				});
 		}
 
@@ -176,8 +182,8 @@
 			updateQuestionDisplay();
 			console.log(`Next Question: ${triviaQuestions[currentQuestionIndex].question}`);
 		}
-
-		// Twitch Commands
+		
+		// listen for Twitch Commands
 		ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			console.log(`Command received: ${command} from ${user}`);
 			switch (command.toLowerCase()) {
@@ -187,60 +193,19 @@
 						userScores[user] = 0; // Initialize score
 						console.log(`${user} has joined the Trivia Game!`);
 					} else {
-						console.log(`${user}, you're already in the game!`);
+						console.log(`${user},did !playtrivia but is already in the game!`);
 					}
 					break;
 
 				case "trivia":
-					startTrivia();
+					updateQuestionDisplay();
 					break;
 			}
 		};
-
-		// Check for correct answers in chat
-		ComfyJS.onChat = (user, message, flags, self, extra) => {
-			message = message.toLowerCase();
-			console.log(`[CHAT] ${user}: ${message}`);
-			// Only allow answers from players who joined
-			if (!twitchUsersJoined.includes(user)) return;
-
-			// Check if message is the correct answer (case insensitive)
-			if (questionActive && message.toLowerCase() === triviaQuestions[currentQuestionIndex].answer.toLowerCase()) {
-				userScores[user] += 1; // Award point
-				updateLeaderboard();
-				console.log(`${user} got it right! Answer: ${message}. They now have ${userScores[user]} points!`);
-
-				// Move to the next question
-				currentQuestionIndex = (currentQuestionIndex + 1) % triviaQuestions.length;
-				setTimeout(startTrivia, 3000); // Wait 3 seconds before next question
-				questionActive = false; // Prevent multiple answers
-			}
-		};
-
-		ComfyJS.Init("jaedraze");
-	</script>
-
-</body>
-</html>
-
-
-
-
-
----------
-
-
-    <script>
-
-
-
-        ComfyJS.onCommand = (user, command, message, flags, extra) => {
-            if (command.toLowerCase() === "trivia") {
-                updateQuestionDisplay();
-            }
-        };
-
+		
+		//check for correct answers in chat
         ComfyJS.onChat = (user, message, flags, self, extra) => {
+			console.log(`[CHAT] ${user}: ${message}`);
             if (!twitchUsersJoined.includes(user)) return;
             if (!questionActive) return;
             message = message.toLowerCase();
@@ -249,7 +214,8 @@
             }
         };
 
-        ComfyJS.Init("jaedraze");
-    </script>
+		//initialize twitch connection
+		ComfyJS.Init("jaedraze");
+	</script>
 </body>
 </html>
