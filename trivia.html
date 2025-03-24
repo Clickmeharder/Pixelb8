@@ -11,35 +11,60 @@
             text-align: center;
             margin: 0;
             padding: 0;
-            width: 100vw;
-            height: 100vh;
+			width: 100vw;
+			height: 100vh;
         }
         #question {
-            position: absolute;
-            font-weight: bold;
-            top: 20px;
-            right: 8px;
-            width: 65%;
-            max-width: 700px;
-            text-align: center;
-            padding: 15px 20px;
-            background: linear-gradient(135deg, #001f1f, #004040);
-            border: 3px solid teal;
-            border-radius: 12px;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);
-            box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
-            transition: transform 0.2s ease-in-out;
+			position: absolute;
+			font-weight: bold;
+			top: 20px;
+			right: 8px;
+			width: 65%;
+			max-width: 700px;
+			text-align: center;
+			padding: 15px 20px;
+			background: linear-gradient(135deg, #001f1f, #004040);
+			border: 3px solid teal;
+			border-radius: 12px;
+			color: white;
+			text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);
+			box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
+			transition: transform 0.2s ease-in-out;
+		}
+
+		#question:hover {
+			transform: scale(1.05); /* Slight hover effect for interactivity */
+		}
+        #leaderboard {
+			position: absolute;
+			top: 9%;
+			font-size: 15px;
+			right: 14px;
+		}
+		#leaderboard p {
+			background: #001f1f;
+			width: 155px;
+			padding: 4px;
+			margin: 0px;
+			font-size: 18px;
+			border: 2px outset #095656;
+			border-radius: 0px;
+		}
+        #leaderboard li {
+            margin: -6px 0 0px 0;
+			text-align: center;
+			padding: 4px 9px;
+			width: ;
+			max-width: ;
+			background: linear-gradient(135deg, #001f1f, #004040);
+			border: 3px solid teal;
+			border-radius: 12px;
+			color: #12ebeb;
+			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+			transition: transform 0.2s ease-in-out;
         }
-        #timer {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 24px;
-            font-weight: bold;
-            color: yellow;
-        }
-        #correct-answer {
+		#correct-answer {
             margin-top: 50px;
             font-size: 18px;
             color: lightgreen;
@@ -58,30 +83,35 @@
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <script>
         const triviaQuestions = [
+			{ question: "converting 100 shrapnel results in how much universal ammo?", answer: "101" },
+            { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" },
             { question: "What is 5 + 3?", answer: "8" },
             { question: "Who painted the Mona Lisa?", answer: "da vinci" },
+			{ question: "what is the smallest Skildek support weapon?", answer: "lancehead" },
+			{ question: "what amp drops from bots found at orthos oilfield", answer: "b101" },
+			{ question: "what does CDF stand for", answer: "calypso defense force" },
+			{ question: "what does IFN stand for", answer: "imperial federal navy" },
+			{ question: "what is Jaedraze's avatars first name", answer: "Jimmy" },
+			{ question: "what is Jaedraze's avatars middle name", answer: "Jimbobbityboo" },
+			{ question: "what year is it?", answer: "2025" },
+			{ question: "what items are used to craft explosive projectiles?", answer: "nanocubes" },
+			{ question: "what is the name of the starting zone on calypso", answer: "thule" },
+			{ question: "how many paint cans or textures for max success?", answer: "323" },
+			{ question: "how many ped is 100pec worth?", answer: "1" },
+			{ question: "how many pec is 1ped worth?", answer: "100" },
+			{ question: "how many pec is 10ped worth?", answer: "1000" },
+			{ question: "if the questions answer is the fourth word of the question. what is the answer?", answer: "answer" },
+            // Add more questions here
         ];
 
-        let twitchUsersJoined = [];
-        let userScores = {};
-        let currentQuestionIndex = 0;
-        let questionActive = false;
-        let timer;
+		let twitchUsersJoined = [];
+		let userScores = {}; 
+		let currentQuestionIndex = 0;
+		let questionActive = false; // Prevent multiple answers per question
+		let timer;
         let countdown = 30;
 
-        function startTimer() {
-            countdown = 30;
-            document.getElementById("timer").textContent = countdown;
-            timer = setInterval(() => {
-                countdown--;
-                document.getElementById("timer").textContent = countdown;
-                if (countdown <= 0) {
-                    clearInterval(timer);
-                    nextQuestion();
-                }
-            }, 1000);
-        }
-
+		// Update question on overlay
         function updateQuestionDisplay() {
             document.getElementById("question").textContent = triviaQuestions[currentQuestionIndex].question;
             document.getElementById("question").style.border = "3px solid teal";
@@ -90,35 +120,119 @@
             questionActive = true;
             startTimer();
         }
-
-        function nextQuestion() {
-            currentQuestionIndex = (currentQuestionIndex + 1) % triviaQuestions.length;
-            updateQuestionDisplay();
+		
+        function nextQuestion(delay) {
+            setTimeout(() => {
+                currentQuestionIndex = (currentQuestionIndex + 1) % triviaQuestions.length;
+                updateQuestionDisplay();
+            }, delay);
         }
 
-        function updateLeaderboard() {
-            const leaderboardElement = document.getElementById("leaderboard");
-            leaderboardElement.innerHTML = "<p>Leaderboard</p>";
-            Object.entries(userScores)
-                .sort((a, b) => b[1] - a[1])
-                .forEach(([user, score]) => {
-                    const li = document.createElement("li");
-                    li.textContent = `${user}: ${score} pts`;
-                    leaderboardElement.appendChild(li);
-                });
+        function handleNoAnswer() {
+            document.getElementById("correct-answer").textContent = `Nobody answered correctly. The correct answer was: ${triviaQuestions[currentQuestionIndex].answer}. Next question in 5 minutes.`;
+            questionActive = false;
+            nextQuestion(300000); // 5 minutes
         }
-
         function handleCorrectAnswer(user) {
             clearInterval(timer);
             document.getElementById("question").style.border = "3px solid green";
             document.getElementById("question").style.color = "lightgreen";
-            document.getElementById("correct-answer").textContent = `${user} got it right! Answer: ${triviaQuestions[currentQuestionIndex].answer}`;
-            userScores[user] += 1;
+            document.getElementById("correct-answer").textContent = `${user} got it right! Answer: ${triviaQuestions[currentQuestionIndex].answer}. Next question in 10 minutes.`;
+            userScores[user] = (userScores[user] || 0) + 1;
             updateLeaderboard();
             questionActive = false;
-            
-            setTimeout(nextQuestion, 10000);
+            nextQuestion(600000); // 10 minutes
         }
+		//start timer
+        function startTimer() {
+            countdown = 30;
+            document.getElementById("timer").textContent = countdown;
+            timer = setInterval(() => {
+                countdown--;
+                document.getElementById("timer").textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    handleNoAnswer();
+                }
+            }, 1000);
+        }
+
+//----------------------------
+		// Update leaderboard
+		function updateLeaderboard() {
+			const leaderboardElement = document.getElementById("leaderboard");
+			leaderboardElement.innerHTML = "<p>Leaderboard</p>";
+			Object.entries(userScores)
+				.sort((a, b) => b[1] - a[1])
+				.forEach(([user, score]) => {
+					const li = document.createElement("li");
+					li.textContent = `${user}: ${score} pts`;
+					leaderboardElement.appendChild(li);
+				});
+		}
+
+		// Start the trivia round
+		function startTrivia() {
+			updateQuestionDisplay();
+			console.log(`Next Question: ${triviaQuestions[currentQuestionIndex].question}`);
+		}
+
+		// Twitch Commands
+		ComfyJS.onCommand = (user, command, message, flags, extra) => {
+			console.log(`Command received: ${command} from ${user}`);
+			switch (command.toLowerCase()) {
+				case "playtrivia":
+					if (!twitchUsersJoined.includes(user)) {
+						twitchUsersJoined.push(user);
+						userScores[user] = 0; // Initialize score
+						console.log(`${user} has joined the Trivia Game!`);
+					} else {
+						console.log(`${user}, you're already in the game!`);
+					}
+					break;
+
+				case "trivia":
+					startTrivia();
+					break;
+			}
+		};
+
+		// Check for correct answers in chat
+		ComfyJS.onChat = (user, message, flags, self, extra) => {
+			message = message.toLowerCase();
+			console.log(`[CHAT] ${user}: ${message}`);
+			// Only allow answers from players who joined
+			if (!twitchUsersJoined.includes(user)) return;
+
+			// Check if message is the correct answer (case insensitive)
+			if (questionActive && message.toLowerCase() === triviaQuestions[currentQuestionIndex].answer.toLowerCase()) {
+				userScores[user] += 1; // Award point
+				updateLeaderboard();
+				console.log(`${user} got it right! Answer: ${message}. They now have ${userScores[user]} points!`);
+
+				// Move to the next question
+				currentQuestionIndex = (currentQuestionIndex + 1) % triviaQuestions.length;
+				setTimeout(startTrivia, 3000); // Wait 3 seconds before next question
+				questionActive = false; // Prevent multiple answers
+			}
+		};
+
+		ComfyJS.Init("jaedraze");
+	</script>
+
+</body>
+</html>
+
+
+
+
+
+---------
+
+
+    <script>
+
+
 
         ComfyJS.onCommand = (user, command, message, flags, extra) => {
             if (command.toLowerCase() === "trivia") {
