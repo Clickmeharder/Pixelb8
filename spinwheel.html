@@ -13,6 +13,7 @@
             height: 100vh;
             margin: 0;
             background-color: #f4f4f4;
+            flex-direction: column;
         }
 
         #wheel-container {
@@ -26,18 +27,31 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
-        button {
+        #pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            margin-left: -15px;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 30px solid #ff5733;
+        }
+
+        #result {
             margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
         }
     </style>
 </head>
 <body>
     <div id="wheel-container">
+        <div id="pointer"></div>
         <canvas id="wheel" width="500" height="500"></canvas>
-        <button id="spin-btn">Spin</button>
+        <div id="result">Spinning...</div>
     </div>
 
     <script>
@@ -47,6 +61,8 @@
 
         const wheel = document.getElementById('wheel');
         const ctx = wheel.getContext('2d');
+        const resultText = document.getElementById('result');
+        const pointer = document.getElementById('pointer');
 
         const angle = 2 * Math.PI / segments.length;
 
@@ -89,7 +105,11 @@
                 // Get the winning segment
                 const spinAngle = spinAngleStart - Math.pow(spinTime, 2) / (2 * spinTimeTotal);
                 const result = Math.floor((spinAngle / (Math.PI * 2)) * segments.length);
-                alert(`You won: ${segments[result]}`);
+                // Show result
+                resultText.textContent = `You won: ${segments[result]}`;
+                // Set pointer to point at winning segment
+                const pointerAngle = (spinAngle % (Math.PI * 2)) - Math.PI / 2; // Adjust pointer to correct position
+                pointer.style.transform = `rotate(${pointerAngle}rad)`;
             } else {
                 const spinAngle = spinAngleStart - Math.pow(spinTime, 2) / (2 * spinTimeTotal);
                 wheel.style.transform = `rotate(${spinAngle}deg)`;
@@ -97,12 +117,13 @@
         }
 
         function startSpin() {
-            spinTime = 0;
+            spinTime = 3;
             drawWheel();
             spinInterval = setInterval(rotateWheel, 30);
         }
 
-        document.getElementById('spin-btn').addEventListener('click', startSpin);
+        // Automatically start spinning when page loads
+        window.onload = startSpin;
 
         // Initial drawing of wheel
         drawWheel();
