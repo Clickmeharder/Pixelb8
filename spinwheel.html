@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin Wheel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        #wheel-container {
+            position: relative;
+            text-align: center;
+        }
+
+        #wheel {
+            border-radius: 50%;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="wheel-container">
+        <canvas id="wheel" width="500" height="500"></canvas>
+        <button id="spin-btn">Spin</button>
+    </div>
+
+    <script>
+        // Setup wheel data
+        const segments = ["Prize 1", "Prize 2", "Prize 3", "Prize 4", "Prize 5", "Prize 6"];
+        const colors = ["#FF5733", "#FF8D1A", "#FFCC00", "#33FF57", "#3385FF", "#8E44AD"];
+
+        const wheel = document.getElementById('wheel');
+        const ctx = wheel.getContext('2d');
+
+        const angle = 2 * Math.PI / segments.length;
+
+        // Draw wheel
+        function drawWheel() {
+            const radius = wheel.width / 2;
+            const stepAngle = Math.PI * 2 / segments.length;
+
+            for (let i = 0; i < segments.length; i++) {
+                const startAngle = stepAngle * i;
+                const endAngle = startAngle + stepAngle;
+
+                ctx.beginPath();
+                ctx.arc(radius, radius, radius, startAngle, endAngle, false);
+                ctx.lineTo(radius, radius);
+                ctx.fillStyle = colors[i];
+                ctx.fill();
+
+                // Draw text in the center of each segment
+                ctx.save();
+                ctx.translate(radius, radius);
+                ctx.rotate(startAngle + stepAngle / 2);
+                ctx.fillStyle = "#fff";
+                ctx.font = "20px Arial";
+                ctx.fillText(segments[i], radius / 2, 0);
+                ctx.restore();
+            }
+        }
+
+        // Spin wheel
+        let spinAngleStart = Math.random() * 10 + 10;
+        let spinTime = 0;
+        let spinTimeTotal = Math.random() * 3 + 4;
+
+        function rotateWheel() {
+            spinTime += 1;
+            if (spinTime >= spinTimeTotal) {
+                // Stop wheel
+                clearInterval(spinInterval);
+                // Get the winning segment
+                const spinAngle = spinAngleStart - Math.pow(spinTime, 2) / (2 * spinTimeTotal);
+                const result = Math.floor((spinAngle / (Math.PI * 2)) * segments.length);
+                alert(`You won: ${segments[result]}`);
+            } else {
+                const spinAngle = spinAngleStart - Math.pow(spinTime, 2) / (2 * spinTimeTotal);
+                wheel.style.transform = `rotate(${spinAngle}deg)`;
+            }
+        }
+
+        function startSpin() {
+            spinTime = 0;
+            drawWheel();
+            spinInterval = setInterval(rotateWheel, 30);
+        }
+
+        document.getElementById('spin-btn').addEventListener('click', startSpin);
+
+        // Initial drawing of wheel
+        drawWheel();
+    </script>
+</body>
+</html>
