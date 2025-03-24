@@ -119,8 +119,8 @@
         // Start the trivia game
         function startTrivia() {
             updateQuestionDisplay();
-			console.log('comfy said ')
-            ComfyJS.Say(`Next Question: ${triviaQuestions[currentQuestionIndex].question}`);
+			console.log('comfy said:')
+            console.log(`Next Question: ${triviaQuestions[currentQuestionIndex].question}`);
         }
 		
 		// Initialize ComfyJS with the correct Twitch username
