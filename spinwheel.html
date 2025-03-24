@@ -97,7 +97,7 @@
             height: 100%;
             object-fit: cover;
             border-radius: 50%;
-			background: #00000091;
+            background: #00000091;
         }
 		.fixed-profile {
 			border: 3px solid #9146FF;
@@ -249,7 +249,6 @@
         const spinClass = "is-spinning";
         const selectedClass = "selected";
         const spinnerStyles = window.getComputedStyle(spinner);
-        let tickerAnim;
         let rotation = 0;
         let currentSlice = 0;
         let prizeNodes;
@@ -292,48 +291,34 @@
             return Math.floor(Math.random() * (max - min + 1)) + min;
         };
 
-        const runTickerAnimation = () => {
-			// Get the current rotation of the spinner
-			const values = spinnerStyles.transform.split("(")[1].split(")")[0].split(",");
-			const a = values[0];
-			const b = values[1];  
-			let rad = Math.atan2(b, a);
-			let deg = rad * (180 / Math.PI);
-			deg = deg < 0 ? deg + 360 : deg;
+        const onSpinClick = () => {
+            if (wheel.classList.contains(spinClass)) return;
 
-			// Find the winner based on the current rotation
-			let winner = Math.floor(deg / prizeSlice);
-			currentSlice = winner;
+            wheel.classList.add(spinClass);
+            trigger.disabled = true;
 
-			// Remove the selected class from the previous slice and add it to the new slice
-			prizeNodes.forEach(prize => prize.classList.remove(selectedClass));
-			prizeNodes[winner].classList.add(selectedClass);
+            const winningPrize = Math.floor(Math.random() * prizes.length);
+            const rotationDest = spinertia(1440, 3600);
 
-			// Add a delay to prevent multiple slices from animating at the same time
-			setTimeout(() => {
-				prizeNodes[winner].classList.remove(selectedClass);  // Remove selection after a short delay
-				currentSlice = (currentSlice + 1) % prizeNodes.length;  // Move to the next slice
-				prizeNodes[currentSlice].classList.add(selectedClass);  // Add selection to the next slice
-			}, 1000); // Adjust this timeout for the desired delay before ticker starts
-		};
+            rotation += rotationDest + (prizeSlice * winningPrize);
+            spinner.style.transition = "none";
+            spinner.style.transform = `rotate(${rotation}deg)`;
 
-        trigger.addEventListener("click", () => {
-            if (!wheel.classList.contains(spinClass)) {
-                wheel.classList.add(spinClass);
+            setTimeout(() => {
+                spinner.style.transition = "transform 8s cubic-bezier(0.1, -0.01, 0, 1)";
+                spinner.style.transform = `rotate(${rotation + (prizeSlice * winningPrize)}deg)`;
+            }, 50);
 
-                rotation += spinertia(6000, 8000);
-                spinner.style.transition = "transform 8s ease-out";
-                spinner.style.transform = `rotate(${rotation}deg)`;
-
-                setTimeout(() => {
-                    wheel.classList.remove(spinClass);
-                    spinner.style.transition = "";
-                    runTickerAnimation();
-                }, 8000);
-            }
-        });
+            setTimeout(() => {
+                const selectedPrize = prizeNodes[winningPrize];
+                selectedPrize.classList.add(selectedClass);
+                trigger.disabled = false;
+                wheel.classList.remove(spinClass);
+            }, 8000);
+        };
 
         setupWheel();
+        trigger.addEventListener("click", onSpinClick);
     </script>
 </body>
 </html>
