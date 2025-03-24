@@ -89,180 +89,155 @@
     </ul>
 
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
-    <script>
-        const triviaQuestions = [
-			{ question: "converting 100 shrapnel results in how much universal ammo?", answer: "101" },
-            { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" },
-            { question: "What is 5 + 3?", answer: "8" },
-            { question: "Who painted the Mona Lisa?", answer: "da vinci" },
-			{ question: "what is the smallest Skildek support weapon?", answer: "lancehead" },
-			{ question: "what amp drops from bots found at orthos oilfield", answer: "b101" },
-			{ question: "what does CDF stand for", answer: "calypso defense force" },
-			{ question: "what does IFN stand for", answer: "imperial federal navy" },
-			{ question: "what is Jaedraze's avatars first name", answer: "Jimmy" },
-			{ question: "what is Jaedraze's avatars middle name", answer: "Jimbobbityboo" },
-			{ question: "what year is it?", answer: "2025" },
-			{ question: "what items are used to craft explosive projectiles?", answer: "nanocubes" },
-			{ question: "what is the name of the starting zone on calypso", answer: "thule" },
-			{ question: "how many paint cans or textures for max success?", answer: "323" },
-			{ question: "how many ped is 100pec worth?", answer: "1" },
-			{ question: "how many pec is 1ped worth?", answer: "100" },
-			{ question: "how many pec is 10ped worth?", answer: "1000" },
-			{ question: "if the questions answer is the fourth word of the question. what is the answer?", answer: "answer" },
-            // Add more questions here
-        ];
+<script>
+    const triviaQuestions = [
+        { question: "converting 100 shrapnel results in how much universal ammo?", answer: "101" },
+        { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" },
+        { question: "What is 5 + 3?", answer: "8" },
+        { question: "Who painted the Mona Lisa?", answer: "da vinci" },
+        { question: "what is the smallest Skildek support weapon?", answer: "lancehead" },
+        { question: "what amp drops from bots found at orthos oilfield", answer: "b101" },
+        { question: "what does CDF stand for", answer: "calypso defense force" },
+        { question: "what does IFN stand for", answer: "imperial federal navy" },
+        { question: "what is Jaedraze's avatars first name", answer: "Jimmy" },
+        { question: "what is Jaedraze's avatars middle name", answer: "Jimbobbityboo" },
+        { question: "what year is it?", answer: "2025" },
+        { question: "what items are used to craft explosive projectiles?", answer: "nanocubes" },
+        { question: "what is the name of the starting zone on calypso", answer: "thule" },
+        { question: "how many paint cans or textures for max success?", answer: "323" },
+        { question: "how many ped is 100pec worth?", answer: "1" },
+        { question: "how many pec is 1ped worth?", answer: "100" },
+        { question: "how many pec is 10ped worth?", answer: "1000" },
+        { question: "if the questions answer is the fourth word of the question. what is the answer?", answer: "answer" },
+    ];
 
-		let twitchUsersJoined = [];
-		let userScores = {}; 
-		let currentQuestionIndex = 0;
-		let questionActive = false; // Prevent multiple answers per question
-		let timer;
-        let countdown = 240;
-		let firstAnswerGiven = false; // Flag to track if the first answer has been given
-		let nextQuestionCountdown = 0; // Variable to track time until the next question (in ms)
-		let lateAnswerPoints = 0.5; // Points for late answers
+    let twitchUsersJoined = [];
+    let userScores = {}; 
+    let currentQuestionIndex = 0;
+    let questionActive = false; 
+    let timer;
+    let countdown = 300; // Start with 5 minutes (300 seconds)
+    let nextQuestionCountdown = 0; 
+    let firstAnswerGiven = false; // Track first answer
+    let firstAnswerUser = ''; // Track who gave the first answer
 
-		// Update question on overlay
-        function updateQuestionDisplay() {
-            document.getElementById("question").textContent = triviaQuestions[currentQuestionIndex].question;
-			console.log('Next question');
-			console.log(`${triviaQuestions[currentQuestionIndex].question}`);
-            document.getElementById("question").style.border = "3px solid teal";
-            document.getElementById("question").style.color = "white";
-            document.getElementById("correct-answer").textContent = "";
-            questionActive = true;
-            startTimer();
+    // Update question on overlay
+    function updateQuestionDisplay() {
+        document.getElementById("question").textContent = triviaQuestions[currentQuestionIndex].question;
+        document.getElementById("question").style.border = "3px solid teal";
+        document.getElementById("question").style.color = "white";
+        document.getElementById("correct-answer").textContent = "";
+        questionActive = true;
+        startTimer();
+    }
+
+    // Function to update the countdown
+    function updateCountdown() {
+        document.getElementById("timer").textContent = countdown; // Update main countdown
+        if (nextQuestionCountdown > 0) {
+            let timeLeft = Math.ceil(nextQuestionCountdown / 1000); // Convert ms to seconds
+            document.getElementById("next-question-timer").textContent = `Next question in: ${timeLeft}s`;
+        } else {
+            document.getElementById("next-question-timer").textContent = ""; // Hide if no timer
         }
-		// Function to update the countdown
-		function updateCountdown() {
-			document.getElementById("timer").textContent = countdown; // Update main countdown
-			if (nextQuestionCountdown > 0) {
-				let timeLeft = Math.ceil(nextQuestionCountdown / 1000); // Convert ms to seconds
-				document.getElementById("next-question-timer").textContent = `Next question in: ${timeLeft}s`;
-			} else {
-				document.getElementById("next-question-timer").textContent = ""; // Hide if no timer
-			}
-		}
-		// Function to handle the next question
-		function nextQuestion() {
-			currentQuestionIndex = (currentQuestionIndex + 1) % triviaQuestions.length;
-			updateQuestionDisplay();
-			startTimer(); // Start the countdown for the next question
-		}
+    }
 
-        function handleNoAnswer() {
-            document.getElementById("correct-answer").textContent = `Nobody answered correctly. The correct answer was: ${triviaQuestions[currentQuestionIndex].answer}. Next question in 5 minutes.`;
-            questionActive = false;
-			console.log('nobody answered correctly');
-            nextQuestion(300000); // 5 minutes
+    // Function to handle the next question
+    function nextQuestion() {
+        currentQuestionIndex = (currentQuestionIndex + 1) % triviaQuestions.length;
+        updateQuestionDisplay();
+    }
+
+    // Function to handle the correct answer
+    function handleCorrectAnswer(user) {
+        clearInterval(timer);
+        document.getElementById("question").style.border = "3px solid green";
+        document.getElementById("question").style.color = "lightgreen";
+        document.getElementById("correct-answer").textContent = `${user} got it right! Answer: ${triviaQuestions[currentQuestionIndex].answer}.`;
+
+        if (!firstAnswerGiven) {
+            // First correct answer, give 3 points
+            userScores[user] = (userScores[user] || 0) + 3;
+            firstAnswerGiven = true;
+            firstAnswerUser = user; // Track the user who answered first
+            countdown = 60; // Set countdown to 60 seconds after first answer
+        } else if (user !== firstAnswerUser) {
+            // Late answers, give 1 point
+            userScores[user] = (userScores[user] || 0) + 1;
         }
-		// Function to handle the correct answer
-		function handleCorrectAnswer(user, message) {
-			clearInterval(timer);
-			document.getElementById("question").style.border = "3px solid green";
-			document.getElementById("question").style.color = "lightgreen";
-			document.getElementById("correct-answer").textContent = `${user} got it right! Answer: ${triviaQuestions[currentQuestionIndex].answer}. Next question in 10 minutes.`;
-			
-			if (!firstAnswerGiven) {
-				// First correct answer, give 1 point
-				userScores[user] = (userScores[user] || 0) + 1;
-				firstAnswerGiven = true; // Mark that the first answer was given
-			} else {
-				// Late answer, give 0.5 points
-				userScores[user] = (userScores[user] || 0) + lateAnswerPoints;
-			}
 
-			console.log(`${user} got it right! Answer: ${message}. They now have ${userScores[user]} points!`);
-			updateLeaderboard(); // Update leaderboard
-			
-			// Set the "Next Question In" countdown for 10 minutes (600000ms)
-			nextQuestionCountdown = 600000; // 10 minutes in milliseconds
-			updateCountdown();
-			questionActive = false;
-			
-			setTimeout(nextQuestion, 600000); // Wait 10 minutes before moving to the next question
-		}
-		//start timer
-		// Function to start the countdown
-		function startTimer() {
-			countdown = 30;
-			document.getElementById("timer").textContent = countdown;
-			nextQuestionCountdown = 0; // Reset "Next Question In" timer
-			clearInterval(timer);
-			timer = setInterval(() => {
-				countdown--;
-				updateCountdown(); // Update both countdowns
-				if (countdown <= 0) {
-					clearInterval(timer);
-					nextQuestion(); // Proceed to the next question
-				}
-			}, 1000);
-		}
+        console.log(`${user} got it right! Answer: ${triviaQuestions[currentQuestionIndex].answer}. They now have ${userScores[user]} points!`);
+        updateLeaderboard(); // Update leaderboard
 
-//----------------------------
-		// Update leaderboard
-		function updateLeaderboard() {
-			const leaderboardElement = document.getElementById("leaderboard");
-			leaderboardElement.innerHTML = "<p>Leaderboard</p>";
-			Object.entries(userScores)
-				.sort((a, b) => b[1] - a[1])
-				.forEach(([user, score]) => {
-					const li = document.createElement("li");
-					li.textContent = `${user}: ${score} pts`;
-					leaderboardElement.appendChild(li);
-					console.log(`leader board updated!`);
-					console.log(`${user}: ${score} pts`);
-				});
-		}
+        // Start the countdown for the next question (5 minutes)
+        nextQuestionCountdown = 300000; // 5 minutes in milliseconds
+        updateCountdown();
+        questionActive = false;
 
-		// Start the trivia round
-		function startTrivia() {
-			updateQuestionDisplay();
-			console.log(`Next Question: ${triviaQuestions[currentQuestionIndex].question}`);
-		}
-		
-		// listen for Twitch Commands
-		ComfyJS.onCommand = (user, command, message, flags, extra) => {
-			console.log(`Command received: ${command} from ${user}`);
-			switch (command.toLowerCase()) {
-				case "playtrivia":
-					if (!twitchUsersJoined.includes(user)) {
-						twitchUsersJoined.push(user);
-						userScores[user] = 0; // Initialize score
-						console.log(`${user} has joined the Trivia Game!`);
-					} else {
-						console.log(`${user},did !playtrivia but is already in the game!`);
-					}
-					break;
+        setTimeout(nextQuestion, 300000); // Wait 5 minutes before moving to the next question
+    }
 
-				case "trivia":
-					updateQuestionDisplay();
-					break;
-			}
-		};
-		
-		//check for correct answers in chat
-		ComfyJS.onChat = (user, message, flags, self, extra) => {
-			console.log(`[CHAT] ${user}: ${message}`);
-			<!-- if (!twitchUsersJoined.includes(user)) return; // Only handle users who joined the game -->
-			if (!questionActive) return; // Ignore chat when no question is active
+    // Function to start the countdown timer
+    function startTimer() {
+        clearInterval(timer);
+        timer = setInterval(() => {
+            countdown--;
+            updateCountdown(); // Update both countdowns
+            if (countdown <= 0) {
+                clearInterval(timer);
+                nextQuestion(); // Proceed to the next question
+            }
+        }, 1000);
+    }
 
-			message = message.toLowerCase(); // Normalize message to lowercase
+    // Update leaderboard
+    function updateLeaderboard() {
+        const leaderboardElement = document.getElementById("leaderboard");
+        leaderboardElement.innerHTML = "<p>Leaderboard</p>";
+        Object.entries(userScores)
+            .sort((a, b) => b[1] - a[1])
+            .forEach(([user, score]) => {
+                const li = document.createElement("li");
+                li.textContent = `${user}: ${score} pts`;
+                leaderboardElement.appendChild(li);
+            });
+    }
 
-			// Check if the answer is correct
-			if (message === triviaQuestions[currentQuestionIndex].answer.toLowerCase()) {
-				// If this is the first correct answer
-				if (questionActive) {
-					handleCorrectAnswer(user, message); // Full point for the first correct answer
-				} else {
-					// For any late answers after the first correct answer
-					handleLateCorrectAnswer(user, message); // 0.5 points for late answers
-				}
-			}
-		};
+    // Start the trivia round
+    function startTrivia() {
+        updateQuestionDisplay();
+    }
 
-		//initialize twitch connection
-		ComfyJS.Init("jaedraze");
-	</script>
+    // Listen for Twitch Commands
+    ComfyJS.onCommand = (user, command, message, flags, extra) => {
+        switch (command.toLowerCase()) {
+            case "playtrivia":
+                if (!twitchUsersJoined.includes(user)) {
+                    twitchUsersJoined.push(user);
+                    userScores[user] = 0; // Initialize score
+                }
+                break;
+            case "trivia":
+                updateQuestionDisplay();
+                break;
+        }
+    };
+
+    // Check for correct answers in chat
+    ComfyJS.onChat = (user, message, flags, self, extra) => {
+        if (!questionActive) return; // Ignore chat when no question is active
+
+        message = message.toLowerCase(); // Normalize message to lowercase
+
+        // Check if the answer is correct
+        if (message === triviaQuestions[currentQuestionIndex].answer.toLowerCase()) {
+            handleCorrectAnswer(user); // Call the function for the correct answer
+        }
+    };
+
+    // Initialize Twitch connection
+    ComfyJS.Init("jaedraze");
+</script>
+
 </body>
 </html>
