@@ -292,30 +292,35 @@
         };
 
         const onSpinClick = () => {
-            if (wheel.classList.contains(spinClass)) return;
+			if (wheel.classList.contains(spinClass)) return;
 
-            wheel.classList.add(spinClass);
-            trigger.disabled = true;
+			wheel.classList.add(spinClass);
+			trigger.disabled = true;
 
-            const winningPrize = Math.floor(Math.random() * prizes.length);
-            const rotationDest = spinertia(1440, 3600);
+			const winningPrize = Math.floor(Math.random() * prizes.length);
+			const rotationDest = spinertia(1440, 3600);
 
-            rotation += rotationDest + (prizeSlice * winningPrize);
-            spinner.style.transition = "none";
-            spinner.style.transform = `rotate(${rotation}deg)`;
+			rotation += rotationDest + (prizeSlice * winningPrize);
+			spinner.style.transition = "none";
+			spinner.style.transform = `rotate(${rotation}deg)`;
 
-            setTimeout(() => {
-                spinner.style.transition = "transform 8s cubic-bezier(0.1, -0.01, 0, 1)";
-                spinner.style.transform = `rotate(${rotation + (prizeSlice * winningPrize)}deg)`;
-            }, 50);
+			setTimeout(() => {
+				spinner.style.transition = "transform 8s cubic-bezier(0.1, -0.01, 0, 1)";
+				spinner.style.transform = `rotate(${rotation + (prizeSlice * winningPrize)}deg)`;
+			}, 50);
 
-            setTimeout(() => {
-                const selectedPrize = prizeNodes[winningPrize];
-                selectedPrize.classList.add(selectedClass);
-                trigger.disabled = false;
-                wheel.classList.remove(spinClass);
-            }, 8000);
-        };
+			setTimeout(() => {
+				// Determine which prize slice the ticker is pointing at
+				const tickerRotation = (rotation + (prizeSlice * winningPrize)) % 360;
+				const selectedSliceIndex = Math.floor(tickerRotation / prizeSlice);
+
+				// Apply the animation to the correct slice
+				const selectedPrize = prizeNodes[selectedSliceIndex];
+				selectedPrize.classList.add(selectedClass);
+				trigger.disabled = false;
+				wheel.classList.remove(spinClass);
+			}, 8000);
+		};
 
         setupWheel();
         trigger.addEventListener("click", onSpinClick);
