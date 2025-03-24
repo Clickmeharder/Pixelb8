@@ -83,7 +83,7 @@
 		<div id="timer"></div>
 	</div>
     <ul id="leaderboard">
-        <p>Leaderboard</p>
+        <p>Trivia</p>
     </ul>
 
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
@@ -223,7 +223,7 @@
 
         function updateLeaderboard() {
             const leaderboardElement = document.getElementById("leaderboard");
-            leaderboardElement.innerHTML = "<p>Leaderboard</p>";
+            leaderboardElement.innerHTML = "<p>Trivia</p>";
             Object.entries(userScores)
                 .sort((a, b) => b[1] - a[1])
                 .forEach(([user, score]) => {
