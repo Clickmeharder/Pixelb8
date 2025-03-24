@@ -136,17 +136,38 @@
 			console.log('nobody answered correctly');
             nextQuestion(300000); // 5 minutes
         }
-        function handleCorrectAnswer(user, message) {
-            clearInterval(timer);
-            document.getElementById("question").style.border = "3px solid green";
-            document.getElementById("question").style.color = "lightgreen";
-            document.getElementById("correct-answer").textContent = `${user} got it right! Answer: ${triviaQuestions[currentQuestionIndex].answer}. Next question in 10 minutes.`;
-			console.log(`${user} got it right! Answer: ${message}. They now have ${userScores[user]} points!`);
-            userScores[user] = (userScores[user] || 0) + 1;
-            updateLeaderboard();
-            questionActive = false;
-            nextQuestion(600000); // 10 minutes
-        }
+		function handleCorrectAnswer(user, message) {
+			// First correct answer handling
+			if (questionActive) {
+				document.getElementById("question").style.border = "3px solid green";
+				document.getElementById("question").style.color = "lightgreen";
+				document.getElementById("correct-answer").textContent = 
+					`${user} got it right first! Answer: ${triviaQuestions[currentQuestionIndex].answer}. Others can still answer for ${countdown} seconds (0.5 points).`;
+
+				console.log(`${user} got it right first! Answer: ${message}. They now have ${userScores[user]} points!`);
+
+				// Award full point to first correct answer
+				userScores[user] = (userScores[user] || 0) + 1;
+				updateLeaderboard();
+
+				// Mark question as inactive for first answer and stop countdown
+				questionActive = false;
+				countdown = 0; // Stop further countdown from affecting the delay
+
+				// Schedule next question after remaining countdown time
+				setTimeout(() => {
+					document.getElementById("correct-answer").textContent += " Moving to next question...";
+					nextQuestion(600000); // 10 minutes delay before next question
+				}, countdown * 1000);
+			} else {
+				// Late correct answers get 0.5 points
+				document.getElementById("correct-answer").textContent += ` ${user} also got it right! (+0.5 pts)`;
+				console.log(`${user} also got it right! Answer: ${message}. They now have ${userScores[user]} points!`);
+
+				userScores[user] = (userScores[user] || 0) + 0.5;
+				updateLeaderboard();
+			}
+		}
 		//start timer
         function startTimer() {
             countdown = 30;
@@ -204,15 +225,24 @@
 		};
 		
 		//check for correct answers in chat
-        ComfyJS.onChat = (user, message, flags, self, extra) => {
+		ComfyJS.onChat = (user, message, flags, self, extra) => {
 			console.log(`[CHAT] ${user}: ${message}`);
-            if (!twitchUsersJoined.includes(user)) return;
-            if (!questionActive) return;
-            message = message.toLowerCase();
-            if (message === triviaQuestions[currentQuestionIndex].answer.toLowerCase()) {
-                handleCorrectAnswer(user, message);
-            }
-        };
+			if (!twitchUsersJoined.includes(user)) return; // Only handle users who joined the game
+			if (!questionActive) return; // Ignore chat when no question is active
+
+			message = message.toLowerCase(); // Normalize message to lowercase
+
+			// Check if the answer is correct
+			if (message === triviaQuestions[currentQuestionIndex].answer.toLowerCase()) {
+				// If this is the first correct answer
+				if (questionActive) {
+					handleCorrectAnswer(user, message); // Full point for the first correct answer
+				} else {
+					// For any late answers after the first correct answer
+					handleLateCorrectAnswer(user, message); // 0.5 points for late answers
+				}
+			}
+		};
 
 		//initialize twitch connection
 		ComfyJS.Init("jaedraze");
