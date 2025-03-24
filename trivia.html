@@ -46,7 +46,7 @@
 			{ question: "what is Jaedraze's avatars first name", answer: "Jimmy" },
 			{ question: "what is Jaedraze's avatars middle name", answer: "Jimbobbityboo" },
 			{ question: "what year is it?", answer: "2025" },
-			{ question: "what items are used to craft explosive projectiles?", answer: "nanucubes" },
+			{ question: "what items are used to craft explosive projectiles?", answer: "nanocubes" },
 			{ question: "what is the name of the starting zone on calypso", answer: "thule" },
 			{ question: "how many paint cans or textures for max success?", answer: "323" },
 			{ question: "how many ped is 100pec worth?", answer: "1" },
@@ -84,7 +84,6 @@
 		function startTrivia() {
 			updateQuestionDisplay();
 			console.log(`Next Question: ${triviaQuestions[currentQuestionIndex].question}`);
-			ComfyJS.Say(`Next Question: ${triviaQuestions[currentQuestionIndex].question}`);
 		}
 
 		// Twitch Commands
@@ -95,10 +94,9 @@
 					if (!twitchUsersJoined.includes(user)) {
 						twitchUsersJoined.push(user);
 						userScores[user] = 0; // Initialize score
-						console.log(`${user} has joined the game!`);
-						ComfyJS.Say(`${user} has joined the Trivia Game!`);
+						console.log(`${user} has joined the Trivia Game!`);
 					} else {
-						ComfyJS.Say(`${user}, you're already in the game!`);
+						console.log(`${user}, you're already in the game!`);
 					}
 					break;
 
@@ -110,8 +108,8 @@
 
 		// Check for correct answers in chat
 		ComfyJS.onChat = (user, message, flags, self, extra) => {
+			message = message.toLowerCase();
 			console.log(`[CHAT] ${user}: ${message}`);
-
 			// Only allow answers from players who joined
 			if (!twitchUsersJoined.includes(user)) return;
 
@@ -119,7 +117,7 @@
 			if (questionActive && message.toLowerCase() === triviaQuestions[currentQuestionIndex].answer.toLowerCase()) {
 				userScores[user] += 1; // Award point
 				updateLeaderboard();
-				ComfyJS.Say(`${user} got it right! Answer: ${message}. They now have ${userScores[user]} points!`);
+				console.log(`${user} got it right! Answer: ${message}. They now have ${userScores[user]} points!`);
 
 				// Move to the next question
 				currentQuestionIndex = (currentQuestionIndex + 1) % triviaQuestions.length;
