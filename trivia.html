@@ -35,9 +35,24 @@
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <script>
         const triviaQuestions = [
-            { question: "What is the capital of France?", answer: "paris" },
+			{ question: "converting 100 shrapnel results in how much universal ammo?", answer: "101" },
+            { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" },
             { question: "What is 5 + 3?", answer: "8" },
             { question: "Who painted the Mona Lisa?", answer: "da vinci" },
+			{ question: "what is the smallest Skildek support weapon?", answer: "lancehead" },
+			{ question: "what amp drops from bots found at orthos oilfield", answer: "b101" },
+			{ question: "what does CDF stand for", answer: "calypso defense force" },
+			{ question: "what does IFN stand for", answer: "imperial federal navy" },
+			{ question: "what is Jaedraze's avatars first name", answer: "Jimmy" },
+			{ question: "what is Jaedraze's avatars middle name", answer: "Jimbobbityboo" },
+			{ question: "what year is it?", answer: "2025" },
+			{ question: "what items are used to craft explosive projectiles?", answer: "nanucubes" },
+			{ question: "what is the name of the starting zone on calypso", answer: "thule" },
+			{ question: "how many paint cans or textures for max success?", answer: "323" },
+			{ question: "how many ped is 100pec worth?", answer: "1" },
+			{ question: "how many pec is 1ped worth?", answer: "100" },
+			{ question: "how many pec is 10ped worth?", answer: "1000" },
+			{ question: "if the questions answer is the fourth word of the question. what is the answer?", answer: "answer" },
             // Add more questions here
         ];
 
@@ -71,7 +86,7 @@
 			console.log(`Command received: ${command} from ${user}`);
 			switch(command.toLowerCase()) { // Convert to lowercase to avoid case sensitivity issues
 				
-				case "join":
+				case "playtrivia":
 					if (!twitchusersJoined.includes(user)) {
 						twitchusersJoined.push(user);
 						cheatUsageTracker[user] = false; // Initialize cheat usage for the player
@@ -112,9 +127,6 @@
 		
 		// Initialize ComfyJS with the correct Twitch username
 		ComfyJS.Init("jaedraze");
-		ComfyJS.onConnected = (address, port, isReconnect) => {
-			console.log(`Connected to Twitch chat at ${address}:${port}, Reconnect: ${isReconnect}`);
-		};
 		ComfyJS.onChat = (user, message, flags, self, extra) => {
 			console.log(`[CHAT] ${user}: ${message}`);
 		};
