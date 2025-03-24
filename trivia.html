@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivia v2.11</title>
+    <title>Trivia v2.71</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,221 +11,188 @@
             text-align: center;
             margin: 0;
             padding: 0;
-			width: 100vw;
-			height: 100vh;
+            width: 100vw;
+            height: 100vh;
         }
         #question {
-			position: absolute;
-			font-weight: bold;
-			top: 20px;
-			right: 8px;
-			width: 65%;
-			max-width: 700px;
-			text-align: center;
-			padding: 15px 20px;
-			background: linear-gradient(135deg, #001f1f, #004040);
-			border: 3px solid teal;
-			border-radius: 12px;
-			color: white;
-			text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);
-			box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
-			transition: transform 0.2s ease-in-out;
-		}
-
-		#question:hover {
-			transform: scale(1.05); /* Slight hover effect for interactivity */
-		}
+            position: absolute;
+            font-weight: bold;
+            top: 20px;
+            right: 8px;
+            width: 65%;
+            max-width: 700px;
+            text-align: center;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #001f1f, #004040);
+            border: 3px solid teal;
+            border-radius: 12px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);
+            box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
+        }
         #leaderboard {
-			position: absolute;
-			top: 9%;
-			font-size: 15px;
-			right: 14px;
-		}
-		#leaderboard p {
-			background: #001f1f;
-			width: 155px;
-			padding: 4px;
-			margin: 0px;
-			font-size: 18px;
-			border: 2px outset #095656;
-			border-radius: 0px;
-		}
+            position: absolute;
+            top: 9%;
+            font-size: 15px;
+            right: 14px;
+        }
+        #leaderboard p {
+            background: #001f1f;
+            width: 155px;
+            padding: 4px;
+            margin: 0px;
+            font-size: 18px;
+            border: 2px outset #095656;
+            border-radius: 0px;
+        }
         #leaderboard li {
             margin: -6px 0 0px 0;
-			text-align: center;
-			padding: 4px 9px;
-			width: ;
-			max-width: ;
-			background: linear-gradient(135deg, #001f1f, #004040);
-			border: 3px solid teal;
-			border-radius: 12px;
-			color: #12ebeb;
-			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
-			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
-			transition: transform 0.2s ease-in-out;
+            text-align: center;
+            padding: 4px 9px;
+            background: linear-gradient(135deg, #001f1f, #004040);
+            border: 3px solid teal;
+            border-radius: 12px;
+            color: #12ebeb;
+            text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
+            box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
         }
-		#correct-answer {
-			position: absolute;
-			top: 0px;
-			right: 0px;
-			font-size: 18px;
-			padding: 6px;
-			width: 261px;
-			background: #004040f2;
-			border-radius: 18px;
-			color: #8d7c7f;
-			z-index: 100;
-		}
+        #timer, #next-question-timer {
+            font-size: 20px;
+            font-weight: bold;
+            color: lightblue;
+        }
     </style>
 </head>
 <body>
-    <div id="question">-</div>
-	<div id="next-question-timer"></div>
-    <div id="timer">30</div>
-    <div id="correct-answer"></div>
+    <div id="question">Waiting for next question...</div>
+    <div id="timer"></div>
+    <div id="next-question-timer"></div>
     <ul id="leaderboard">
         <p>Leaderboard</p>
-        <li>...</li>
     </ul>
 
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
-<script>
-	const triviaQuestions = [
-		{ question: "converting 100 shrapnel results in how much universal ammo?", answer: "101" },
-		{ question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" },
-		{ question: "What is 5 + 3?", answer: "8" },
-		{ question: "Who painted the Mona Lisa?", answer: "da vinci" },
-		{ question: "what is the smallest Skildek support weapon?", answer: "lancehead" },
-		{ question: "what amp drops from bots found at orthos oilfield", answer: "b101" },
-		{ question: "what does CDF stand for", answer: "calypso defense force" },
-		{ question: "what does IFN stand for", answer: "imperial federal navy" },
-		{ question: "what is Jaedraze's avatars first name", answer: "Jimmy" },
-		{ question: "what is Jaedraze's avatars middle name", answer: "Jimbobbityboo" },
-		{ question: "what year is it?", answer: "2025" },
-		{ question: "what items are used to craft explosive projectiles?", answer: "nanocubes" },
-		{ question: "what is the name of the starting zone on calypso", answer: "thule" },
-		{ question: "how many paint cans or textures for max success?", answer: "323" },
-		{ question: "how many ped is 100pec worth?", answer: "1" },
-		{ question: "how many pec is 1ped worth?", answer: "100" },
-		{ question: "how many pec is 10ped worth?", answer: "1000" },
-		{ question: "if the questions answer is the fourth word of the question. what is the answer?", answer: "answer" },
-	];
+    <script>
+        const triviaQuestions = [
+            { question: "Converting 100 shrapnel results in how much universal ammo?", answer: "101" },
+            { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" },
+            { question: "What is 5 + 3?", answer: "8" },
+            { question: "Who painted the Mona Lisa?", answer: "da vinci" },
+            { question: "What is the smallest Skildek support weapon?", answer: "lancehead" },
+            { question: "What amp drops from bots found at Orthos Oilfield?", answer: "b101" },
+            { question: "What does CDF stand for?", answer: "calypso defense force" },
+            { question: "What does IFN stand for?", answer: "imperial federal navy" },
+            { question: "What is Jaedraze's avatar's first name?", answer: "Jimmy" },
+            { question: "What is Jaedraze's avatar's middle name?", answer: "Jimbobbityboo" },
+            { question: "What year is it?", answer: "2025" },
+            { question: "What items are used to craft explosive projectiles?", answer: "nanocubes" },
+            { question: "What is the name of the starting zone on Calypso?", answer: "thule" },
+            { question: "How many paint cans or textures for max success?", answer: "323" },
+            { question: "How many PED is 100 PEC worth?", answer: "1" },
+            { question: "How many PEC is 1 PED worth?", answer: "100" },
+            { question: "How many PEC is 10 PED worth?", answer: "1000" }
+        ];
 
-	let userScores = {}; 
-	let currentQuestionIndex = 0;
-	let questionActive = false; 
-	let timer;
-	let answerTime = 120; // 2 minutes
-	let timeBetweenQuestions = 180; // 3 minutes
-	let firstAnswerGiven = false;
-	let firstAnswerUser = null;
+        let userScores = {};
+        let usedQuestions = [];
+        let activeQuestion = null;
+        let answeredUsers = new Set();
+        let firstAnswerUser = null;
+        let questionTimer, countdownTimer;
 
-	// Get a random question index
-	function getRandomQuestionIndex() {
-		return Math.floor(Math.random() * triviaQuestions.length);
-	}
+        function getRandomQuestion() {
+            if (usedQuestions.length === triviaQuestions.length) {
+                usedQuestions = []; // Reset when all questions have been used
+            }
 
-	// Update and show a new question
-	function updateQuestionDisplay() {
-		currentQuestionIndex = getRandomQuestionIndex();
-		document.getElementById("question").textContent = triviaQuestions[currentQuestionIndex].question;
-		document.getElementById("question").style.border = "3px solid teal";
-		document.getElementById("question").style.color = "white";
-		document.getElementById("correct-answer").textContent = "";
-		questionActive = true;
-		firstAnswerGiven = false;
-		firstAnswerUser = null;
-		startTimer();
-	}
+            let availableQuestions = triviaQuestions.filter(q => !usedQuestions.includes(q));
+            let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+            usedQuestions.push(question);
+            return question;
+        }
 
-	// Proceed to the next question
-	function nextQuestion() {
-		updateQuestionDisplay();
-	}
+        function startQuestion() {
+            clearTimeout(countdownTimer);
+            activeQuestion = getRandomQuestion();
+            answeredUsers.clear();
+            firstAnswerUser = null;
 
-	// Start countdown timer
-	function startTimer() {
-		clearInterval(timer);
-		answerTime = 120;
-		timer = setInterval(() => {
-			answerTime--;
-			document.getElementById("timer").textContent = answerTime;
-			if (answerTime <= 0) {
-				clearInterval(timer);
-				document.getElementById("correct-answer").textContent = `Time's up! Answer: ${triviaQuestions[currentQuestionIndex].answer}`;
-				questionActive = false;
-				startNextQuestionTimer();
-			}
-		}, 1000);
-	}
+            document.getElementById("question").textContent = activeQuestion.question;
+            document.getElementById("timer").textContent = "Time left: 5:00";
+            document.getElementById("next-question-timer").textContent = "";
 
-	// Start a timer for the next question
-	function startNextQuestionTimer() {
-		setTimeout(nextQuestion, timeBetweenQuestions * 1000);
-	}
+            let secondsLeft = 300;
+            questionTimer = setInterval(() => {
+                secondsLeft--;
+                document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
+                if (secondsLeft <= 0) {
+                    endQuestion();
+                }
+            }, 1000);
+        }
 
-	// Check user answers
-	function checkAnswer(user, message) {
-		if (!questionActive) return;
+        function endQuestion() {
+            clearInterval(questionTimer);
+            document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
+            setTimeout(() => {
+                document.getElementById("question").textContent = "Next question starting soon...";
+            }, 3000);
+            startCountdown();
+        }
 
-		let correctAnswer = triviaQuestions[currentQuestionIndex].answer.toLowerCase();
-		let userAnswer = message.trim().toLowerCase();
+        function startCountdown() {
+            let countdown = 30;
+            document.getElementById("next-question-timer").textContent = `Next question in: ${countdown}s`;
 
-		if (userAnswer === correctAnswer) {
-			handleCorrectAnswer(user);
-		}
-	}
+            countdownTimer = setInterval(() => {
+                countdown--;
+                document.getElementById("next-question-timer").textContent = `Next question in: ${countdown}s`;
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                    startQuestion();
+                }
+            }, 1000);
+        }
 
-	// Handle a correct answer
-	function handleCorrectAnswer(user) {
-		clearInterval(timer);
-		document.getElementById("question").style.border = "3px solid green";
-		document.getElementById("question").style.color = "lightgreen";
-		document.getElementById("correct-answer").textContent = `${user} got it right! Answer: ${triviaQuestions[currentQuestionIndex].answer}.`;
+        function checkAnswer(user, message) {
+            if (!activeQuestion || answeredUsers.has(user)) return;
 
-		if (!firstAnswerGiven) {
-			userScores[user] = (userScores[user] || 0) + 3;
-			firstAnswerGiven = true;
-			firstAnswerUser = user;
-			answerTime = 120;
-		} else if (user !== firstAnswerUser) {
-			userScores[user] = (userScores[user] || 0) + 1;
-		}
+            let correctAnswer = activeQuestion.answer.toLowerCase();
+            let userAnswer = message.trim().toLowerCase();
 
-		updateLeaderboard();
-		startNextQuestionTimer();
-	}
+            if (userAnswer === correctAnswer) {
+                answeredUsers.add(user);
+                if (!firstAnswerUser) {
+                    firstAnswerUser = user;
+                    userScores[user] = (userScores[user] || 0) + 3;
+                } else {
+                    userScores[user] = (userScores[user] || 0) + 1;
+                }
+                updateLeaderboard();
+            }
+        }
 
-	// Update leaderboard
-	function updateLeaderboard() {
-		const leaderboardElement = document.getElementById("leaderboard");
-		leaderboardElement.innerHTML = "<p>Leaderboard</p>";
-		Object.entries(userScores)
-			.sort((a, b) => b[1] - a[1])
-			.forEach(([user, score]) => {
-				const li = document.createElement("li");
-				li.textContent = `${user}: ${score} pts`;
-				leaderboardElement.appendChild(li);
-			});
-	}
+        function updateLeaderboard() {
+            const leaderboardElement = document.getElementById("leaderboard");
+            leaderboardElement.innerHTML = "<p>Leaderboard</p>";
+            Object.entries(userScores)
+                .sort((a, b) => b[1] - a[1])
+                .forEach(([user, score]) => {
+                    const li = document.createElement("li");
+                    li.textContent = `${user}: ${score} pts`;
+                    leaderboardElement.appendChild(li);
+                });
+        }
 
-	// Listen for Twitch chat commands
-	ComfyJS.onCommand = (user, command, message, flags, extra) => {
-		if (command.toLowerCase() === "playtrivia") {
-			updateQuestionDisplay();
-		}
-	};
+        ComfyJS.onChat = (user, message, flags, self) => {
+            if (!self) {
+                checkAnswer(user, message);
+            }
+        };
 
-	// Listen for user messages to check answers
-	ComfyJS.onChat = (user, message) => {
-		checkAnswer(user, message);
-	};
+        ComfyJS.Init("jaedraze");
 
-	// Connect to Twitch chat
-	ComfyJS.Init("jaedraze");
-	// Start the first trivia question
-	updateQuestionDisplay();
-</script>
-
+        startQuestion();
+    </script>
 </body>
 </html>
