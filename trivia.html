@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivia v2.01</title>
+    <title>Trivia v2.11</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -111,22 +111,21 @@
 		{ question: "if the questions answer is the fourth word of the question. what is the answer?", answer: "answer" },
 	];
 
-	let twitchUsersJoined = [];
 	let userScores = {}; 
 	let currentQuestionIndex = 0;
 	let questionActive = false; 
 	let timer;
-	let countdown = 120; // 2 minutes (120 seconds)
-	let nextQuestionCountdown = 180; // Time for next question (3 minutes)
+	let answerTime = 120; // 2 minutes
+	let timeBetweenQuestions = 180; // 3 minutes
 	let firstAnswerGiven = false;
-	let firstAnswerUser = '';
+	let firstAnswerUser = null;
 
-	// Randomize question order
+	// Get a random question index
 	function getRandomQuestionIndex() {
 		return Math.floor(Math.random() * triviaQuestions.length);
 	}
 
-	// Update question on overlay
+	// Update and show a new question
 	function updateQuestionDisplay() {
 		currentQuestionIndex = getRandomQuestionIndex();
 		document.getElementById("question").textContent = triviaQuestions[currentQuestionIndex].question;
@@ -134,31 +133,47 @@
 		document.getElementById("question").style.color = "white";
 		document.getElementById("correct-answer").textContent = "";
 		questionActive = true;
+		firstAnswerGiven = false;
+		firstAnswerUser = null;
 		startTimer();
 	}
 
-	// Update countdown for both the main timer and next question timer
-	function updateCountdown() {
-		document.getElementById("timer").textContent = countdown; // Update main countdown
-		if (nextQuestionCountdown > 0) {
-			let timeLeft = Math.ceil(nextQuestionCountdown / 1000); // Convert ms to seconds
-			document.getElementById("next-question-timer").textContent = `Next question in: ${timeLeft}s`;
-		} else {
-			document.getElementById("next-question-timer").textContent = ""; // Hide if no timer
-		}
-	}
-
-	// Handle the next question after the timer runs out
+	// Proceed to the next question
 	function nextQuestion() {
 		updateQuestionDisplay();
-		resetCountdowns();
 	}
 
-	// Reset countdowns for the next question
-	function resetCountdowns() {
-		countdown = 120; // Reset to 120 seconds
-		nextQuestionCountdown = 180; // Reset next question countdown to 3 minutes
-		firstAnswerGiven = false; // Reset first answer flag
+	// Start countdown timer
+	function startTimer() {
+		clearInterval(timer);
+		answerTime = 120;
+		timer = setInterval(() => {
+			answerTime--;
+			document.getElementById("timer").textContent = answerTime;
+			if (answerTime <= 0) {
+				clearInterval(timer);
+				document.getElementById("correct-answer").textContent = `Time's up! Answer: ${triviaQuestions[currentQuestionIndex].answer}`;
+				questionActive = false;
+				startNextQuestionTimer();
+			}
+		}, 1000);
+	}
+
+	// Start a timer for the next question
+	function startNextQuestionTimer() {
+		setTimeout(nextQuestion, timeBetweenQuestions * 1000);
+	}
+
+	// Check user answers
+	function checkAnswer(user, message) {
+		if (!questionActive) return;
+
+		let correctAnswer = triviaQuestions[currentQuestionIndex].answer.toLowerCase();
+		let userAnswer = message.trim().toLowerCase();
+
+		if (userAnswer === correctAnswer) {
+			handleCorrectAnswer(user);
+		}
 	}
 
 	// Handle a correct answer
@@ -169,13 +184,11 @@
 		document.getElementById("correct-answer").textContent = `${user} got it right! Answer: ${triviaQuestions[currentQuestionIndex].answer}.`;
 
 		if (!firstAnswerGiven) {
-			// First correct answer, give 3 points
 			userScores[user] = (userScores[user] || 0) + 3;
 			firstAnswerGiven = true;
-			firstAnswerUser = user; // Track the user who answered first
-			countdown = 120; // Set countdown to 120 seconds after first answer
+			firstAnswerUser = user;
+			answerTime = 120;
 		} else if (user !== firstAnswerUser) {
-			// Late answers, give 1 point
 			userScores[user] = (userScores[user] || 0) + 1;
 		}
 
@@ -183,7 +196,7 @@
 		startNextQuestionTimer();
 	}
 
-	// Update the leaderboard
+	// Update leaderboard
 	function updateLeaderboard() {
 		const leaderboardElement = document.getElementById("leaderboard");
 		leaderboardElement.innerHTML = "<p>Leaderboard</p>";
@@ -196,57 +209,22 @@
 			});
 	}
 
-	// Start the timer for the next question after 3 minutes
-	function startNextQuestionTimer() {
-		nextQuestionCountdown = 180; // 3 minutes in seconds
-		let nextTimer = setInterval(() => {
-			nextQuestionCountdown--;
-			updateCountdown();
-			if (nextQuestionCountdown <= 0) {
-				clearInterval(nextTimer);
-				nextQuestion(); // Move to the next question
-			}
-		}, 1000);
-	}
-
-	// Start the countdown timer
-	function startTimer() {
-		clearInterval(timer);
-		timer = setInterval(() => {
-			countdown--;
-			updateCountdown();
-			if (countdown <= 0) {
-				clearInterval(timer);
-				nextQuestion(); // Proceed to the next question
-			}
-		}, 1000);
-	}
-
-	// Listen for Twitch Commands
+	// Listen for Twitch chat commands
 	ComfyJS.onCommand = (user, command, message, flags, extra) => {
-		switch (command.toLowerCase()) {
-			case "playtrivia":
-				if (!twitchUsersJoined.includes(user)) {
-					twitchUsersJoined.push(user);
-					userScores[user] = 0; // Initialize score
-				}
-				break;
-			case "trivia":
-				updateQuestionDisplay();
-				break;
+		if (command.toLowerCase() === "playtrivia") {
+			updateQuestionDisplay();
 		}
 	};
 
-	// Check for correct answers in chat
-	ComfyJS.onChat = (user, message, flags, self, extra) => {
-		if (!questionActive) return; // Ignore chat when no question is active
-		message = message.toLowerCase(); // Normalize message to lowercase
-
-		// Check if the answer is correct
-		if (message === triviaQuestions[currentQuestionIndex].answer.toLowerCase()) {
-			handleCorrectAnswer(user); // Call the function for the correct answer
-		}
+	// Listen for user messages to check answers
+	ComfyJS.onChat = (user, message) => {
+		checkAnswer(user, message);
 	};
+
+	// Connect to Twitch chat
+	ComfyJS.Init("jaedraze");
+
+
 
 	// Initialize Twitch connection
 	ComfyJS.Init("jaedraze");
