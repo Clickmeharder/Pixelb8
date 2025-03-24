@@ -61,6 +61,9 @@
             font-weight: bold;
             color: lightblue;
         }
+		div#next-question-timer {
+			margin-top: 100px;
+		}
     </style>
 </head>
 <body>
@@ -136,12 +139,12 @@
             document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
             setTimeout(() => {
                 document.getElementById("question").textContent = "Next question starting soon...";
-            }, 1000);
+            }, 3000);
             startCountdown();
         }
 
         function startCountdown() {
-            let countdown = 3000;
+            let countdown = 30;
             document.getElementById("next-question-timer").textContent = `Next question in: ${countdown}s`;
 
             countdownTimer = setInterval(() => {
