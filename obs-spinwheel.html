@@ -66,6 +66,7 @@
             opacity: 0.8;
             overflow: hidden;
             transform-origin: center center;
+            transition: transform 8s cubic-bezier(0.1, -0.01, 0, 1);
         }
 
         .prize {
@@ -169,16 +170,7 @@
             });
         };
 
-        const createConicGradient = () => {
-            const gradient = prizes.map(({ color }, i) => {
-                return `${color} ${i * (100 / prizes.length)}%`;
-            }).join(', ');
-
-            spinner.style.background = `conic-gradient(${gradient})`;
-        };
-
         const setupWheel = () => {
-            createConicGradient();
             createPrizeNodes();
             prizeNodes = wheel.querySelectorAll(".prize");
         };
@@ -197,13 +189,13 @@
             spinner.style.transform = `rotate(${rotation}deg)`;
 
             setTimeout(() => {
-                // Find the prize slice based on the current rotation
-                const tickerPosition = (rotation % 360);
-                const winningPrizeIndex = Math.floor(tickerPosition / prizeSlice);
-                const winningPrize = prizeNodes[winningPrizeIndex];
+                // Find the slice closest to the ticker
+                const sliceAngle = 360 / prizes.length;
+                const tickerPosition = (rotation % 360) + sliceAngle / 2; // Add half slice angle to get the midpoint
+                const selectedSliceIndex = Math.floor(tickerPosition / sliceAngle);
 
                 // Apply the "selected" class to the winning prize
-                winningPrize.classList.add("selected");
+                prizeNodes[selectedSliceIndex].classList.add("selected");
             }, 8000); // Wait for the animation to finish
         };
 
