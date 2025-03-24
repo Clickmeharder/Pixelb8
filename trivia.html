@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivia v2.91</title>
+    <title>Trivia v2.92</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -114,34 +114,43 @@
             return question;
         }
 
-        function startQuestion() {
-            clearTimeout(countdownTimer);
-            activeQuestion = getRandomQuestion();
-            answeredUsers.clear();
-            firstAnswerUser = null;
+		function startQuestion() {
+			clearTimeout(countdownTimer);
+			clearTimeout(hideQuestionTimer); // Clear any previous hide timers
+			activeQuestion = getRandomQuestion();
+			answeredUsers.clear();
+			firstAnswerUser = null;
 
-            document.getElementById("question").textContent = activeQuestion.question;
-            document.getElementById("timer").textContent = "Time left: 1:00";
-            document.getElementById("next-question-timer").textContent = "";
+			document.getElementById("question").textContent = activeQuestion.question;
+			document.getElementById("question").style.visibility = "visible"; // Ensure question is visible
+			document.getElementById("timer").textContent = "Time left: 1:00";
+			document.getElementById("next-question-timer").textContent = "";
 
-            let secondsLeft = 60;
-            questionTimer = setInterval(() => {
-                secondsLeft--;
-                document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
-                if (secondsLeft <= 0) {
-                    endQuestion();
-                }
-            }, 1000);
-        }
+			let secondsLeft = 60;
+			questionTimer = setInterval(() => {
+				secondsLeft--;
+				document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
+				if (secondsLeft <= 0) {
+					endQuestion();
+				}
+			}, 1000);
+		}
 
-        function endQuestion() {
-            clearInterval(questionTimer);
-            document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
-            setTimeout(() => {
-                document.getElementById("question").textContent = "Next question starting soon...";
-            }, 3000);
-            startCountdown();
-        }
+		function endQuestion() {
+			clearInterval(questionTimer);
+			document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
+
+			setTimeout(() => {
+				document.getElementById("question").textContent = "Next question starting soon...";
+			}, 3000);
+
+			// Hide the question after 45 seconds
+			hideQuestionTimer = setTimeout(() => {
+				document.getElementById("question").style.visibility = "hidden";
+			}, 45000);
+
+			startCountdown();
+		}
 
         function startCountdown() {
             let countdown = 30;
