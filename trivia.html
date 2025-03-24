@@ -124,10 +124,10 @@
 
 			document.getElementById("question").textContent = activeQuestion.question;
 			document.getElementById("question").style.visibility = "visible"; // Ensure question is visible
-			document.getElementById("timer").textContent = "Time left: 1:00";
+			document.getElementById("timer").textContent = "Time left: 2:30";
 			document.getElementById("next-question-timer").textContent = "";
 
-			let secondsLeft = 60;
+			let secondsLeft = 150;
 			questionTimer = setInterval(() => {
 				secondsLeft--;
 				document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
@@ -154,7 +154,7 @@
 		}
 
         function startCountdown() {
-            let countdown = 30;
+            let countdown = 300;
             document.getElementById("next-question-timer").textContent = `Next question in: ${countdown}s`;
 
             countdownTimer = setInterval(() => {
