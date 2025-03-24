@@ -74,9 +74,9 @@
 <body>
 	<div id="next-question-timer"></div>
 	<div id="questionWrapper">
+		<p id="question-counter">Question: 0 / 12</p>
 		<div id="question">Waiting for next question...</div>
 		<div id="timer"></div>
-		<p id="question-counter">Questions Asked: 0 / 12</p>
 	</div>
     <ul id="leaderboard">
         <p>Leaderboard</p>
@@ -117,7 +117,7 @@
 		const questionsPerRound = 12;
 
 		function updateQuestionCounter() {
-			document.getElementById("question-counter").textContent = `Questions Asked: ${questionsAsked} / ${questionsPerRound}`;
+			document.getElementById("question-counter").textContent = `Question: ${questionsAsked} / ${questionsPerRound}`;
 		}
 		
         function getRandomQuestion() {
@@ -149,7 +149,8 @@
 
 			document.getElementById("question").textContent = activeQuestion.question;
 			document.getElementById("questionWrapper").style.visibility = "visible";
-			document.getElementById("timer").textContent = "Time left: 2:30";
+			document.getElementById("leaderboard").style.visibility = "hidden";
+			document.getElementById("timer").textContent = "2:30";
 			document.getElementById("next-question-timer").textContent = "";
 
 			let secondsLeft = 150;
@@ -172,6 +173,7 @@
 
 			hideQuestionTimer = setTimeout(() => {
 				document.getElementById("questionWrapper").style.visibility = "hidden";
+				document.getElementById("leaderboard").style.visibility = "hidden";
 			}, 10000);
 
 			startCountdown();
