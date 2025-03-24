@@ -59,7 +59,9 @@
 </head>
 <body>
     <div id="question">-</div>
-    <ul id="leaderboard">Leaderboard
+	
+    <ul id="leaderboard">
+		<p>Leaderboard</p>
         <li>...</li>
     </ul>
 
@@ -101,7 +103,7 @@
 		// Update leaderboard
 		function updateLeaderboard() {
 			const leaderboardElement = document.getElementById("leaderboard");
-			leaderboardElement.innerHTML = "";
+			leaderboardElement.innerHTML = "<p>Leaderboard</p>";
 			Object.entries(userScores)
 				.sort((a, b) => b[1] - a[1])
 				.forEach(([user, score]) => {
