@@ -172,7 +172,7 @@
 
     <script>
         const prizes = [
-            { text: "Guess the next Loot", color: "hsl(197 30% 43%)" },
+            { text: "10% Off Sticker Price", color: "hsl(197 30% 43%)" },
             { text: "Free Beer", color: "hsl(173 58% 39%)" },
             { text: "Trivia", color: "hsl(43 74% 66%)" },
             { text: "Merp Race", color: "hsl(27 87% 67%)" },
@@ -228,26 +228,21 @@
         };
 
         const spinWheel = () => {
-			if (wheel.classList.contains("is-spinning")) return;
+            if (wheel.classList.contains("is-spinning")) return;
 
-			wheel.classList.add("is-spinning");
-			rotation = spinertia(5000, 10000); // Random spin time
-			spinner.style.transform = `rotate(${rotation}deg)`;
+            wheel.classList.add("is-spinning");
+            rotation = spinertia(5000, 10000); // Random spin time
+            spinner.style.transform = `rotate(${rotation}deg)`;
 
-			setTimeout(() => {
-				// Calculate the angle of the ticker's position
-				const tickerAngle = parseFloat(getComputedStyle(ticker).transform.split(',')[1]);
-				// Adjust the rotation to take into account the ticker's position
-				const adjustedRotation = (rotation + tickerAngle) % 360;
+            setTimeout(() => {
+                // Calculate the winner after the wheel stops spinning
+                const winningPrizeIndex = Math.floor(((rotation % 360) + prizeSlice / 2) / prizeSlice);
+                const winningPrize = prizeNodes[winningPrizeIndex];
 
-				// Calculate the winning prize index based on the adjusted rotation
-				const winningPrizeIndex = Math.floor(((adjustedRotation % 360) + prizeSlice / 2) / prizeSlice);
-				const winningPrize = prizeNodes[winningPrizeIndex];
-
-				// Apply the "selected" class to the winning prize
-				winningPrize.classList.add("selected");
-			}, 8000); // Wait for the animation to finish
-		};
+                // Apply the "selected" class to the winning prize
+                winningPrize.classList.add("selected");
+            }, 8000); // Wait for the animation to finish
+        };
 
         window.addEventListener("load", () => {
             setupWheel();
