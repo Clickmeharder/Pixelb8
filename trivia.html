@@ -101,6 +101,7 @@
         let activeQuestion = null;
         let answeredUsers = new Set();
         let firstAnswerUser = null;
+		let hideQuestionTimer;
         let questionTimer, countdownTimer;
 
         function getRandomQuestion() {
