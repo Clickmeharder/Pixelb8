@@ -3,162 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../../assets/images/logo/pixelbotfavicon.png">
+    <link rel="stylesheet" href="core/css/pixelb8-default.css">
+    <link rel="stylesheet" href="core/css/pixelb8-tools.css">
+    <link rel="stylesheet" href="core/css/pixelb8-landing.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
     <title>Wheel of Fortune Prize Wheel</title>
     <style>
+        /* Apply box-sizing to deal-wheel and its children only */
+        .deal-wheel, 
+        .deal-wheel * {
+            box-sizing: border-box;
+        }
+
+        html,
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-			overflow: hidden;
-        }
-
-        .wheel-container {
-            position: relative;
-            display: inline-block;
-            width: 500px;
-            height: 500px;
-        }
-
-        .wheel {
-            position: relative;
-            width: 100%;
             height: 100%;
-            border-radius: 50%;
-            border: 10px solid #333;
-            background: conic-gradient(
-                #ff5733 0deg 60deg,
-                #ff8d1a 60deg 120deg,
-                #ffcc00 120deg 180deg,
-                #33ff57 180deg 240deg,
-                #3385ff 240deg 300deg,
-                #8e44ad 300deg 360deg
-            );
-            transition: transform 5s ease-out;
-            transform-origin: center;
-            position: absolute;
         }
 
-        .segment {
-            position: absolute;
-            top: 0;
-            left: 0;
+        body {
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .deal-wheel {
+            --size: clamp(200px, 70vmin, 600px);
+            position: relative;
+            display: grid;
+            grid-gap: 2px;
+            align-items: center;
+            grid-template-areas: "spinner";
+            font-family: 'Orbitron', sans-serif;
+            font-size: calc(var(--size) / 21);
+            color: black;
+            line-height: 1;
+            text-transform: lowercase;
+        }
+
+        .deal-wheel > * {
+            grid-area: spinner;
+        }
+
+        .spinner {
+            position: relative;
+            display: grid;
+            align-items: center;
+            grid-template-areas: "spinner";
+            width: var(--size);
+            height: var(--size);
+            transform: rotate(0deg);
+            border-radius: 50%;
+            border: 3px solid rgb(12 75 105 / 80%);
+            box-shadow: 0 0 10px #0b7272;
+            opacity: 0.8;
+        }
+
+        .spinner * {
+            grid-area: spinner;
+        }
+
+        .prize {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 calc(var(--size) / 6) 0 calc(var(--size) / 20);
             width: 50%;
             height: 50%;
-            overflow: hidden;
-            transform-origin: 100% 100%;
+            transform-origin: center right;
+            transform: rotate(var(--rotate));
+            user-select: none;
+        }
+
+        .cap {
+            --cap-size: calc(var(--size) / 4);
+            position: relative;
+            justify-self: center;
+            width: var(--cap-size);
+            height: var(--cap-size);
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
         }
 
-        .segment span {
-            position: absolute;
-			margin-left: 136px;
-			transform-origin: 50% 50%;
-			text-align: center;
-			font-size: 23px;
-			color: white;
-			font-weight: bold;
-			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-			transform: rotate(66deg);
-			width: 100%;
-			display: flex;
-			justify-content: center;
-			align-items: center;
+        .cap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background: #00000091;
         }
 
-        .pointer {
-            position: absolute;
-            top: 118px;
-            left: 5%;
-            margin-left: 0px;
-            width: 0;
-            height: 0;
-            border-left: 16px solid transparent;
-            border-right: 15px solid transparent;
-            border-bottom: 30px solid #ff5733;
-            z-index: 2;
+        .ticker {
+            position: relative;
+            top: -11px;
+            left: calc(var(--size) / -15);
+            width: calc(var(--size) / 10);
+            height: calc(var(--size) / 20);
+            background: var(--lg);
+            z-index: 1;
+            clip-path: polygon(20% 0, 100% 50%, 20% 100%, 0% 50%);
+            transform-origin: center left;
         }
 
-        .result {
-            margin-top: 20px;
-            font-size: 24px;
+        /* Spinning animation */
+        .is-spinning .spinner {
+            transition: transform 8s cubic-bezier(0.1, -0.01, 0, 1);
+        }
+
+        .is-spinning .ticker {
+            animation: tick 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes tick {
+            40% {
+                transform: rotate(-12deg);
+            }
+        }
+
+        /* Selected prize animation */
+        .prize.selected .text {
+            color: #0ff;
+            font-size: larger;
             font-weight: bold;
-            color: #333;
+            animation: selected 800ms ease;
+            text-shadow: 2px 2px 5px rgb(0 0 0 / 85%), 0 0 25px rgb(0 0 0), 0 0 5px rgb(0 0 0 / 86%);
         }
 
+        @keyframes selected {
+            25% {
+                transform: scale(1.25);
+                text-shadow: 1vmin 1vmin 0 hsla(0 0% 0% / 0.1);
+            }
+            40% {
+                transform: scale(0.92);
+                text-shadow: 0 0 0 hsla(0 0% 0% / 0.2);
+            }
+            60% {
+                transform: scale(1.02);
+                text-shadow: 0.5vmin 0.5vmin 0 hsla(0 0% 0% / 0.1);
+            }
+            75% {
+                transform: scale(0.98);
+            }
+            85% {
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="wheel-container">
-        <div class="pointer"></div>
-        <div class="wheel" id="wheel">
-            <div class="segment" style="transform: rotate(0deg);">
-                <span>Solomate Rubio</span>
-            </div>
-            <div class="segment" style="transform: rotate(60deg);">
-                <span>EP-2 Proton</span>
-            </div>
-            <div class="segment" style="transform: rotate(120deg);">
-                <span>Skildek Lancehead</span>
-            </div>
-            <div class="segment" style="transform: rotate(180deg);">
-                <span>Motorhead Keg</span>
-            </div>
-            <div class="segment" style="transform: rotate(240deg);">
-                <span>Solomate Azuro</span>
-            </div>
-            <div class="segment" style="transform: rotate(300deg);">
-                <span>Recycling Scrip</span>
-            </div>
-        </div>
-
+    <div class="deal-wheel">
+        <ul class="spinner"></ul>
+        <figure class="cap">
+            <img src="/assets/images/jaedrazepfp.png" alt="Jaedraze Twitch Profile" class="fixed-profile">
+        </figure>
+        <div class="ticker"></div>
     </div>
-    <div class="result" id="result">Spinning...</div>
 
     <script>
-        // Prize segments
-        const segments = [
-            "Solomate Rubio",
-            "EP-2 Proton",
-            "Skildek Lancehead",
-            "Motorhead Keg",
-            "Solomate Azuro",
-            "Recycling Scrip"
+        const prizes = [
+            { text: "10% Off Sticker Price", color: "hsl(197 30% 43%)" },
+            { text: "Free Car", color: "hsl(173 58% 39%)" },
+            { text: "No Money Down", color: "hsl(43 74% 66%)" },
+            { text: "Half Off Sticker Price", color: "hsl(27 87% 67%)" },
+            { text: "Free DIY Carwash", color: "hsl(12 76% 61%)" },
+            { text: "Eternal Damnation", color: "hsl(350 60% 52%)" },
+            { text: "Used Travel Mug", color: "hsl(91 43% 54%)" },
+            { text: "One Solid Hug", color: "hsl(140 36% 74%)" }
         ];
 
-        const wheel = document.getElementById('wheel');
-        const resultText = document.getElementById('result');
-        const winningIndicator = document.getElementById('winning-indicator');
-        
-        // Spin animation function
-        function spinWheel() {
-            // Randomize the amount of spins (spin times between 5 and 8 seconds)
-            const spinDuration = Math.random() * 3 + 5; // Between 5 and 8 seconds
-            const spins = Math.random() * 3 + 4; // Randomize number of spins between 4 and 6
+        const wheel = document.querySelector(".deal-wheel");
+        const spinner = wheel.querySelector(".spinner");
+        const ticker = wheel.querySelector(".ticker");
+        const prizeSlice = 360 / prizes.length;
+        const prizeOffset = Math.floor(180 / prizes.length);
+        let rotation = 0;
+        let prizeNodes;
 
-            // Apply the spin using a CSS rotation
-            wheel.style.transition = `transform ${spinDuration}s ease-out`;
-            wheel.style.transform = `rotate(${spins * 360}deg)`;
-
-            // Determine which prize is won after the spin ends
-            const winningAngle = (spins * 360) % 360; // The angle at which the wheel stops
-            const prizeIndex = Math.floor((360 - winningAngle) / (360 / segments.length)) % segments.length;
-            setTimeout(() => {
-                resultText.textContent = `You won: ${segments[prizeIndex]}`;
-            }, spinDuration * 1000); // Display result after the wheel stops
-        }
-
-        // Start spinning on page load
-        window.onload = function() {
-            spinWheel();
+        const createPrizeNodes = () => {
+            prizes.forEach(({ text, color }, i) => {
+                const rotation = ((prizeSlice * i) * -1) - prizeOffset;
+                spinner.insertAdjacentHTML(
+                    "beforeend",
+                    `<li class="prize" style="--rotate: ${rotation}deg">
+                        <span class="text">${text}</span>
+                    </li>`
+                );
+            });
         };
+
+        const createConicGradient = () => {
+            spinner.setAttribute(
+                "style",
+                `background: conic-gradient(
+                    from -90deg,
+                    ${prizes
+                        .map(({ color }, i) => `${color} 0 ${(100 / prizes.length) * (prizes.length - i)}%`)
+                        .reverse()
+                    }
+                );`
+            );
+        };
+
+        const setupWheel = () => {
+            createConicGradient();
+            createPrizeNodes();
+            prizeNodes = wheel.querySelectorAll(".prize");
+        };
+
+        const spinertia = (min, max) => {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        };
+
+        const spinWheel = () => {
+            if (wheel.classList.contains("is-spinning")) return;
+
+            wheel.classList.add("is-spinning");
+            rotation = spinertia(5000, 10000); // Random spin time
+            spinner.style.transform = `rotate(${rotation}deg)`;
+        };
+
+        window.addEventListener("load", () => {
+            setupWheel();
+            spinWheel(); // Start spinning automatically when the page loads
+        });
     </script>
 </body>
 </html>
