@@ -65,10 +65,17 @@
 			transition: transform 0.2s ease-in-out;
         }
 		#correct-answer {
-            margin-top: 50px;
-            font-size: 18px;
-            color: lightgreen;
-        }
+			position: absolute;
+			top: 0px;
+			right: 0px;
+			font-size: 18px;
+			padding: 6px;
+			width: 261px;
+			background: #004040f2;
+			border-radius: 18px;
+			color: #8d7c7f;
+			z-index: 100;
+		}
     </style>
 </head>
 <body>
@@ -109,7 +116,7 @@
 		let currentQuestionIndex = 0;
 		let questionActive = false; // Prevent multiple answers per question
 		let timer;
-        let countdown = 30;
+        let countdown = 240;
 
 		// Update question on overlay
         function updateQuestionDisplay() {
@@ -170,7 +177,7 @@
 		}
 		//start timer
         function startTimer() {
-            countdown = 30;
+            countdown = 240;
             document.getElementById("timer").textContent = countdown;
             timer = setInterval(() => {
                 countdown--;
