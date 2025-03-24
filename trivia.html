@@ -143,12 +143,12 @@
 
 			setTimeout(() => {
 				document.getElementById("question").textContent = "Next question starting soon...";
-			}, 3000);
+			}, 1000);
 
 			// Hide the question after 45 seconds
 			hideQuestionTimer = setTimeout(() => {
 				document.getElementById("question").style.visibility = "hidden";
-			}, 45000);
+			}, 10000);
 
 			startCountdown();
 		}
