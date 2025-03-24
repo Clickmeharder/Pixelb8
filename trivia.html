@@ -43,8 +43,7 @@
 
         let currentQuestionIndex = 0;
         let userScores = {}; // To track scores
-        // Initialize ComfyJS with the correct Twitch username
-		ComfyJS.Init("jaedraze");
+
 
         // Update question on overlay
         function updateQuestionDisplay() {
@@ -89,6 +88,9 @@
         }
 
         startTrivia();  // Initialize the first question
+		
+		// Initialize ComfyJS with the correct Twitch username
+		ComfyJS.Init("jaedraze");
     </script>
 </body>
 </html>
