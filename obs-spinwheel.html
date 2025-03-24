@@ -117,6 +117,20 @@
             transform-origin: center left;
         }
 
+        .indicator {
+            position: absolute;
+            top: 50%;
+            left: -12px; /* Position the indicator on the left side of the wheel */
+            width: calc(var(--size) / 12);
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 2px solid #0ff; /* Glowing border */
+            border-radius: 50%;
+            box-shadow: 0 0 10px #0ff;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
         .is-spinning .spinner {
             transition: transform 8s cubic-bezier(0.1, -0.01, 0, 1);
         }
@@ -163,6 +177,7 @@
 </head>
 <body>
     <div class="deal-wheel">
+        <div class="indicator"></div> <!-- Added indicator -->
         <ul class="spinner"></ul>
         <figure class="cap">
             <img src="/assets/images/jaedrazepfp.png" alt="Jaedraze Twitch Profile" class="fixed-profile">
@@ -171,86 +186,85 @@
     </div>
 
     <script>
-    const prizes = [
-        { text: "10% Off Sticker Price", color: "hsl(197 30% 43%)" },
-        { text: "Free Beer", color: "hsl(173 58% 39%)" },
-        { text: "Trivia", color: "hsl(43 74% 66%)" },
-        { text: "Merp Race", color: "hsl(27 87% 67%)" },
-        { text: "Colonist Roulette", color: "hsl(12 76% 61%)" },
-        { text: "Eternal Damnation", color: "hsl(350 60% 52%)" },
-        { text: "Ordinance Crates", color: "hsl(91 43% 54%)" },
-        { text: "One Solid Hug", color: "hsl(140 36% 74%)" }
-    ];
+        const prizes = [
+            { text: "10% Off Sticker Price", color: "hsl(197 30% 43%)" },
+            { text: "Free Beer", color: "hsl(173 58% 39%)" },
+            { text: "Trivia", color: "hsl(43 74% 66%)" },
+            { text: "Merp Race", color: "hsl(27 87% 67%)" },
+            { text: "Colonist Roulette", color: "hsl(12 76% 61%)" },
+            { text: "Eternal Damnation", color: "hsl(350 60% 52%)" },
+            { text: "Ordinance Crates", color: "hsl(91 43% 54%)" },
+            { text: "One Solid Hug", color: "hsl(140 36% 74%)" }
+        ];
 
-    const wheel = document.querySelector(".deal-wheel");
-    const spinner = wheel.querySelector(".spinner");
-    const ticker = wheel.querySelector(".ticker");
-    const prizeSlice = 360 / prizes.length;
-    const prizeOffset = Math.floor(180 / prizes.length);
-    let rotation = 0;
-    let prizeNodes;
+        const wheel = document.querySelector(".deal-wheel");
+        const spinner = wheel.querySelector(".spinner");
+        const ticker = wheel.querySelector(".ticker");
+        const prizeSlice = 360 / prizes.length;
+        const prizeOffset = Math.floor(180 / prizes.length);
+        let rotation = 0;
+        let prizeNodes;
 
-    const createPrizeNodes = () => {
-        prizes.forEach(({ text, color }, i) => {
-            const rotation = ((prizeSlice * i) * -1) - prizeOffset;
-            spinner.insertAdjacentHTML(
-                "beforeend",
-                `<li class="prize" style="--rotate: ${rotation}deg">
-                    <span class="text">${text}</span>
-                </li>`
+        const createPrizeNodes = () => {
+            prizes.forEach(({ text, color }, i) => {
+                const rotation = ((prizeSlice * i) * -1) - prizeOffset;
+                spinner.insertAdjacentHTML(
+                    "beforeend",
+                    `<li class="prize" style="--rotate: ${rotation}deg">
+                        <span class="text">${text}</span>
+                    </li>`
+                );
+            });
+        };
+
+        const createConicGradient = () => {
+            spinner.setAttribute(
+                "style",
+                `background: conic-gradient(
+                    from -90deg,
+                    ${prizes
+                        .map(({ color }, i) => `${color} 0 ${(100 / prizes.length) * (prizes.length - i)}%`)
+                        .reverse()
+                    }
+                );`
             );
+        };
+
+        const setupWheel = () => {
+            createConicGradient();
+            createPrizeNodes();
+            prizeNodes = wheel.querySelectorAll(".prize");
+        };
+
+        const spinertia = (min, max) => {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        };
+
+        const spinWheel = () => {
+            if (wheel.classList.contains("is-spinning")) return;
+
+            wheel.classList.add("is-spinning");
+            rotation = spinertia(5000, 10000); // Random spin time
+            spinner.style.transform = `rotate(${rotation}deg)`;
+
+            setTimeout(() => {
+                // Check the slice that's under the indicator
+                const indicator = document.querySelector(".indicator");
+                const indicatorRotation = parseFloat(indicator.style.transform.replace("rotate(", "").replace("deg)", "")) || 0;
+                const winningPrizeIndex = Math.floor(((rotation + indicatorRotation) % 360) / prizeSlice);
+
+                const winningPrize = prizeNodes[winningPrizeIndex];
+                // Apply the "selected" class to the winning prize
+                winningPrize.classList.add("selected");
+            }, 8000); // Wait for the animation to finish
+        };
+
+        window.addEventListener("load", () => {
+            setupWheel();
+            spinWheel(); // Start spinning automatically when the page loads
         });
-    };
-
-    const createConicGradient = () => {
-        spinner.setAttribute(
-            "style",
-            `background: conic-gradient(
-                from -90deg,
-                ${prizes
-                    .map(({ color }, i) => `${color} 0 ${(100 / prizes.length) * (prizes.length - i)}%`)
-                    .reverse()
-                }
-            );`
-        );
-    };
-
-    const setupWheel = () => {
-        createConicGradient();
-        createPrizeNodes();
-        prizeNodes = wheel.querySelectorAll(".prize");
-    };
-
-    const spinertia = (min, max) => {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    };
-
-    const spinWheel = () => {
-        if (wheel.classList.contains("is-spinning")) return;
-
-        wheel.classList.add("is-spinning");
-        rotation = spinertia(5000, 10000); // Random spin time
-        spinner.style.transform = `rotate(${rotation}deg)`;
-
-        setTimeout(() => {
-            // Find the position of the ticker (relative to the wheel's rotation)
-            const tickerPosition = (rotation % 360) + prizeSlice / 2;
-
-            // Find the prize slice closest to the ticker
-            const winningPrizeIndex = Math.floor((tickerPosition % 360) / prizeSlice);
-            const winningPrize = prizeNodes[winningPrizeIndex];
-
-            // Apply the "selected" class to the winning prize
-            winningPrize.classList.add("selected");
-        }, 8000); // Wait for the animation to finish
-    };
-
-    window.addEventListener("load", () => {
-        setupWheel();
-        spinWheel(); // Start spinning automatically when the page loads
-    });
     </script>
 </body>
 </html>
