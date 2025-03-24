@@ -5,347 +5,322 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wheel of Fortune Prize Wheel</title>
     <style>
-		@import url("https://fonts.googleapis.com/css2?family=Girassol&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Girassol&display=swap");
 
-		* {
-		  box-sizing: border-box;
-		}
+        * {
+            box-sizing: border-box;
+        }
 
-		html,
-		body {
-		  height: 100%;
-		}
+        html,
+        body {
+            height: 100%;
+        }
 
-		body {
-		  display: grid;
-		  place-items: center;
-		  overflow: hidden;
-		}
+        body {
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+        }
 
-		.deal-wheel {
-		  --size: clamp(250px, 80vmin, 700px);
-		  --lg-hs: 0 3%;
-		  --lg-stop: 50%;
-		  --lg: linear-gradient(
-			  hsl(var(--lg-hs) 0%) 0 var(--lg-stop),
-			  hsl(var(--lg-hs) 20%) var(--lg-stop) 100%
-			);
-		  
-		  position: relative;
-		  display: grid;
-		  grid-gap: calc(var(--size) / 20);
-		  align-items: center;
-		  grid-template-areas:
-			"spinner"
-			"trigger";
-		  font-family: "Girassol", sans-serif;
-		  font-size: calc(var(--size) / 21);
-		  line-height: 1;
-		  text-transform: lowercase;
-		}
+        .deal-wheel {
+            --size: clamp(250px, 80vmin, 700px);
+            --lg-hs: 0 3%;
+            --lg-stop: 50%;
+            --lg: linear-gradient(
+                hsl(var(--lg-hs) 0%) 0 var(--lg-stop),
+                hsl(var(--lg-hs) 20%) var(--lg-stop) 100%
+            );
 
-		.deal-wheel > * {
-		  grid-area: spinner;
-		}
+            position: relative;
+            display: grid;
+            grid-gap: calc(var(--size) / 20);
+            align-items: center;
+            grid-template-areas:
+                "spinner"
+                "trigger";
+            font-family: "Girassol", sans-serif;
+            font-size: calc(var(--size) / 21);
+            line-height: 1;
+            text-transform: lowercase;
+        }
 
-		.deal-wheel .btn-spin {
-		  grid-area: trigger;
-		  justify-self: center;
-		}
+        .deal-wheel > * {
+            grid-area: spinner;
+        }
 
-		.spinner {
-		  position: relative;
-		  display: grid;
-		  align-items: center;
-		  grid-template-areas: "spinner";
-		  width: var(--size);
-		  height: var(--size);
-		  transform: rotate(calc(var(--rotate, 25) * 1deg));
-		  border-radius: 50%;
-		  box-shadow: inset 0 0 0 calc(var(--size) / 40) hsl(0deg 0% 0% / 0.06);
-		}
+        .deal-wheel .btn-spin {
+            grid-area: trigger;
+            justify-self: center;
+        }
 
-		.spinner * {
-		  grid-area: spinner;
-		}
+        .spinner {
+            position: relative;
+            display: grid;
+            align-items: center;
+            grid-template-areas: "spinner";
+            width: var(--size);
+            height: var(--size);
+            transform: rotate(calc(var(--rotate, 25) * 1deg));
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 calc(var(--size) / 40) hsl(0deg 0% 0% / 0.06);
+        }
 
-		.prize {
-		  position: relative;
-		  display: flex;
-		  align-items: center;
-		  padding: 0 calc(var(--size) / 6) 0 calc(var(--size) / 20);
-		  width: 50%;
-		  height: 50%;
-		  transform-origin: center right;
-		  transform: rotate(var(--rotate));
-		  user-select: none;
-		}
+        .spinner * {
+            grid-area: spinner;
+        }
 
-		.cap {
-		  --cap-size: calc(var(--size) / 4);
-		  position: relative;
-		  justify-self: center;
-		  width: var(--cap-size);
-		  height: var(--cap-size);
-		}
+        .prize {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 calc(var(--size) / 6) 0 calc(var(--size) / 20);
+            width: 50%;
+            height: 50%;
+            transform-origin: center right;
+            transform: rotate(var(--rotate));
+            user-select: none;
+        }
 
-		/* Hide select dropdown from SVG import file */
-		.cap select {
-		  display: none;
-		}
+        .cap {
+            --cap-size: calc(var(--size) / 4);
+            position: relative;
+            justify-self: center;
+            width: var(--cap-size);
+            height: var(--cap-size);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-		.cap svg {
-		  width: 100%;
-		}
+        .cap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
 
-		.ticker {
-		  position: relative;
-		  left: calc(var(--size) / -15);
-		  width: calc(var(--size) / 10);
-		  height: calc(var(--size) / 20);
-		  background: var(--lg);
-		  z-index: 1;
-		  clip-path: polygon(20% 0, 100% 50%, 20% 100%, 0% 50%);
-		  transform-origin: center left;
-		}
+        .ticker {
+            position: relative;
+            left: calc(var(--size) / -15);
+            width: calc(var(--size) / 10);
+            height: calc(var(--size) / 20);
+            background: var(--lg);
+            z-index: 1;
+            clip-path: polygon(20% 0, 100% 50%, 20% 100%, 0% 50%);
+            transform-origin: center left;
+        }
 
-		.btn-spin {
-		  color: hsl(0deg 0% 100%);
-		  background: var(--lg);
-		  border: none;
-		  font-family: inherit;
-		  font-size: inherit;
-		  line-height: inherit;
-		  text-transform: inherit;
-		  padding: 0.9rem 2rem 1rem;
-		  border-radius: 0.25rem;
-		  cursor: pointer;
-		  transition: opacity 200ms ease-out;
-		}
+        .btn-spin {
+            color: hsl(0deg 0% 100%);
+            background: var(--lg);
+            border: none;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            text-transform: inherit;
+            padding: 0.9rem 2rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: opacity 200ms ease-out;
+        }
 
-		.btn-spin:focus {
-		  outline-offset: 2px;
-		}
+        .btn-spin:focus {
+            outline-offset: 2px;
+        }
 
-		.btn-spin:active {
-		  transform: translateY(1px);
-		}
+        .btn-spin:active {
+            transform: translateY(1px);
+        }
 
-		.btn-spin:disabled {
-		  cursor: progress;
-		  opacity: 0.25;
-		}
+        .btn-spin:disabled {
+            cursor: progress;
+            opacity: 0.25;
+        }
 
-		/* Spinning animation */
-		.is-spinning .spinner {
-		  transition: transform 8s cubic-bezier(0.1, -0.01, 0, 1);
-		}
+        /* Spinning animation */
+        .is-spinning .spinner {
+            transition: transform 8s cubic-bezier(0.1, -0.01, 0, 1);
+        }
 
-		.is-spinning .ticker {
-		  animation: tick 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
-		}
+        .is-spinning .ticker {
+            animation: tick 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
 
-		@keyframes tick {
-		  40% {
-			transform: rotate(-12deg);
-		  }
-		}
+        @keyframes tick {
+            40% {
+                transform: rotate(-12deg);
+            }
+        }
 
-		/* Selected prize animation */
-		.prize.selected .text {
-		  color: white;
-		  animation: selected 800ms ease;
-		}
+        /* Selected prize animation */
+        .prize.selected .text {
+            color: white;
+            animation: selected 800ms ease;
+        }
 
-		@keyframes selected {
-		  25% {
-			transform: scale(1.25);
-			text-shadow: 1vmin 1vmin 0 hsla(0 0% 0% / 0.1);
-		  }
-		  40% {
-			transform: scale(0.92);
-			text-shadow: 0 0 0 hsla(0 0% 0% / 0.2);
-		  }
-		  60% {
-			transform: scale(1.02);
-			text-shadow: 0.5vmin 0.5vmin 0 hsla(0 0% 0% / 0.1);
-		  }
-		  75% {
-			transform: scale(0.98);
-		  }
-		  85% {
-			transform: scale(1);
-		  }
-		}
+        @keyframes selected {
+            25% {
+                transform: scale(1.25);
+                text-shadow: 1vmin 1vmin 0 hsla(0 0% 0% / 0.1);
+            }
+            40% {
+                transform: scale(0.92);
+                text-shadow: 0 0 0 hsla(0 0% 0% / 0.2);
+            }
+            60% {
+                transform: scale(1.02);
+                text-shadow: 0.5vmin 0.5vmin 0 hsla(0 0% 0% / 0.1);
+            }
+            75% {
+                transform: scale(0.98);
+            }
+            85% {
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
- <div class="deal-wheel">
-  <ul class="spinner"></ul>
-  <figure class="cap">
-    <!-- Grim reaper SVG import -->
-    [[[https://codepen.io/hexagoncircle/pen/vYxKLOa]]]
-  </figure>
-  <div class="ticker"></div>
-  <button class="btn-spin">Spin the wheel</button>
-</div>
+    <div class="deal-wheel">
+        <ul class="spinner"></ul>
+        <figure class="cap">
+            <!-- Use your Twitch profile image -->
+            <img src="https://static-cdn.jtvnw.net/jtv_user_pictures/jaedraze-profile_image-18e4e8d31953f46f-300x300.png" alt="Profile Image">
+        </figure>
+        <div class="ticker"></div>
+        <button class="btn-spin">Spin the wheel</button>
+    </div>
 
     <script>
-	 /**
-	 * Prize data will space out evenly on the deal wheel based on the amount of items available.
-	 * @param text [string] name of the prize
-	 * @param color [string] background color of the prize
-	 * @param reaction ['resting' | 'dancing' | 'laughing' | 'shocked'] Sets the reaper's animated reaction
-	 */
-	const prizes = [
-	  {
-		text: "10% Off Sticker Price",
-		color: "hsl(197 30% 43%)",
-		reaction: "dancing"
-	  },
-	  { 
-		text: "Free Car",
-		color: "hsl(173 58% 39%)",
-		reaction: "shocked"
-	  },
-	  { 
-		text: "No Money Down",
-		color: "hsl(43 74% 66%)",
-		reaction: "shocked" 
-	  },
-	  {
-		text: "Half Off Sticker Price",
-		color: "hsl(27 87% 67%)",
-		reaction: "shocked"
-	  },
-	  {
-		text: "Free DIY Carwash",
-		color: "hsl(12 76% 61%)",
-		reaction: "dancing"
-	  },
-	  {
-		text: "Eternal Damnation",
-		color: "hsl(350 60% 52%)",
-		reaction: "laughing"
-	  },
-	  {
-		text: "Used Travel Mug",
-		color: "hsl(91 43% 54%)",
-		reaction: "laughing"
-	  },
-	  {
-		text: "One Solid Hug",
-		color: "hsl(140 36% 74%)",
-		reaction: "dancing"
-	  }
-	];
+        const prizes = [
+            {
+                text: "10% Off Sticker Price",
+                color: "hsl(197 30% 43%)"
+            },
+            { 
+                text: "Free Car",
+                color: "hsl(173 58% 39%)"
+            },
+            { 
+                text: "No Money Down",
+                color: "hsl(43 74% 66%)"
+            },
+            {
+                text: "Half Off Sticker Price",
+                color: "hsl(27 87% 67%)"
+            },
+            {
+                text: "Free DIY Carwash",
+                color: "hsl(12 76% 61%)"
+            },
+            {
+                text: "Eternal Damnation",
+                color: "hsl(350 60% 52%)"
+            },
+            {
+                text: "Used Travel Mug",
+                color: "hsl(91 43% 54%)"
+            },
+            {
+                text: "One Solid Hug",
+                color: "hsl(140 36% 74%)"
+            }
+        ];
 
-	const wheel = document.querySelector(".deal-wheel");
-	const spinner = wheel.querySelector(".spinner");
-	const trigger = wheel.querySelector(".btn-spin");
-	const ticker = wheel.querySelector(".ticker");
-	const reaper = wheel.querySelector(".grim-reaper");
-	const prizeSlice = 360 / prizes.length;
-	const prizeOffset = Math.floor(180 / prizes.length);
-	const spinClass = "is-spinning";
-	const selectedClass = "selected";
-	const spinnerStyles = window.getComputedStyle(spinner);
-	let tickerAnim;
-	let rotation = 0;
-	let currentSlice = 0;
-	let prizeNodes;
+        const wheel = document.querySelector(".deal-wheel");
+        const spinner = wheel.querySelector(".spinner");
+        const trigger = wheel.querySelector(".btn-spin");
+        const ticker = wheel.querySelector(".ticker");
+        const prizeSlice = 360 / prizes.length;
+        const prizeOffset = Math.floor(180 / prizes.length);
+        const spinClass = "is-spinning";
+        const selectedClass = "selected";
+        const spinnerStyles = window.getComputedStyle(spinner);
+        let tickerAnim;
+        let rotation = 0;
+        let currentSlice = 0;
+        let prizeNodes;
 
-	const createPrizeNodes = () => {
-	  prizes.forEach(({ text, color, reaction }, i) => {
-		const rotation = ((prizeSlice * i) * -1) - prizeOffset;
-		
-		spinner.insertAdjacentHTML(
-		  "beforeend",
-		  `<li class="prize" data-reaction=${reaction} style="--rotate: ${rotation}deg">
-			<span class="text">${text}</span>
-		  </li>`
-		);
-	  });
-	};
+        const createPrizeNodes = () => {
+            prizes.forEach(({ text, color }, i) => {
+                const rotation = ((prizeSlice * i) * -1) - prizeOffset;
 
-	const createConicGradient = () => {
-	  spinner.setAttribute(
-		"style",
-		`background: conic-gradient(
-		  from -90deg,
-		  ${prizes
-			.map(({ color }, i) => `${color} 0 ${(100 / prizes.length) * (prizes.length - i)}%`)
-			.reverse()
-		  }
-		);`
-	  );
-	};
+                spinner.insertAdjacentHTML(
+                    "beforeend",
+                    `<li class="prize" style="--rotate: ${rotation}deg">
+                        <span class="text">${text}</span>
+                    </li>`
+                );
+            });
+        };
 
+        const createConicGradient = () => {
+            spinner.setAttribute(
+                "style",
+                `background: conic-gradient(
+                    from -90deg,
+                    ${prizes
+                        .map(({ color }, i) => `${color} 0 ${(100 / prizes.length) * (prizes.length - i)}%`)
+                        .reverse()
+                    }
+                );`
+            );
+        };
 
-	const setupWheel = () => {
-	  createConicGradient();
-	  createPrizeNodes();
-	  prizeNodes = wheel.querySelectorAll(".prize");
-	};
+        const setupWheel = () => {
+            createConicGradient();
+            createPrizeNodes();
+            prizeNodes = wheel.querySelectorAll(".prize");
+        };
 
-	const spinertia = (min, max) => {
-	  min = Math.ceil(min);
-	  max = Math.floor(max);
-	  return Math.floor(Math.random() * (max - min + 1)) + min;
-	};
+        const spinertia = (min, max) => {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        };
 
-	const runTickerAnimation = () => {
-	  // https://css-tricks.com/get-value-of-css-rotation-through-javascript/
-	  const values = spinnerStyles.transform.split("(")[1].split(")")[0].split(",");
-	  const a = values[0];
-	  const b = values[1];  
-	  let rad = Math.atan2(b, a);
-	  
-	  if (rad < 0) rad += (2 * Math.PI);
-	  
-	  const angle = Math.round(rad * (180 / Math.PI));
-	  const slice = Math.floor(angle / prizeSlice);
+        const runTickerAnimation = () => {
+			// Get the current rotation of the spinner
+			const values = spinnerStyles.transform.split("(")[1].split(")")[0].split(",");
+			const a = values[0];
+			const b = values[1];  
+			let rad = Math.atan2(b, a);
+			let deg = rad * (180 / Math.PI);
+			deg = deg < 0 ? deg + 360 : deg;
 
-	  if (currentSlice !== slice) {
-		ticker.style.animation = "none";
-		setTimeout(() => ticker.style.animation = null, 10);
-		currentSlice = slice;
-	  }
+			// Find the winner based on the current rotation
+			let winner = Math.floor(deg / prizeSlice);
+			currentSlice = winner;
 
-	  tickerAnim = requestAnimationFrame(runTickerAnimation);
-	};
+			// Remove the selected class from the previous slice and add it to the new slice
+			prizeNodes.forEach(prize => prize.classList.remove(selectedClass));
+			prizeNodes[winner].classList.add(selectedClass);
 
-	const selectPrize = () => {
-	  const selected = Math.floor(rotation / prizeSlice);
-	  prizeNodes[selected].classList.add(selectedClass);
-	  reaper.dataset.reaction = prizeNodes[selected].dataset.reaction;
-	};
+			// Add a delay to prevent multiple slices from animating at the same time
+			setTimeout(() => {
+				prizeNodes[winner].classList.remove(selectedClass);  // Remove selection after a short delay
+				currentSlice = (currentSlice + 1) % prizeNodes.length;  // Move to the next slice
+				prizeNodes[currentSlice].classList.add(selectedClass);  // Add selection to the next slice
+			}, 1000); // Adjust this timeout for the desired delay before ticker starts
+		};
 
-	trigger.addEventListener("click", () => {
-	  if (reaper.dataset.reaction !== "resting") {
-		reaper.dataset.reaction = "resting";
-	  }
+        trigger.addEventListener("click", () => {
+            if (!wheel.classList.contains(spinClass)) {
+                wheel.classList.add(spinClass);
 
-	  trigger.disabled = true;
-	  rotation = Math.floor(Math.random() * 360 + spinertia(2000, 5000));
-	  prizeNodes.forEach((prize) => prize.classList.remove(selectedClass));
-	  wheel.classList.add(spinClass);
-	  spinner.style.setProperty("--rotate", rotation);
-	  ticker.style.animation = "none";
-	  runTickerAnimation();
-	});
+                rotation += spinertia(6000, 8000);
+                spinner.style.transition = "transform 8s ease-out";
+                spinner.style.transform = `rotate(${rotation}deg)`;
 
-	spinner.addEventListener("transitionend", () => {
-	  cancelAnimationFrame(tickerAnim);
-	  trigger.disabled = false;
-	  trigger.focus();
-	  rotation %= 360;
-	  selectPrize();
-	  wheel.classList.remove(spinClass);
-	  spinner.style.setProperty("--rotate", rotation);
-	});
+                setTimeout(() => {
+                    wheel.classList.remove(spinClass);
+                    spinner.style.transition = "";
+                    runTickerAnimation();
+                }, 8000);
+            }
+        });
 
-	setupWheel();
+        setupWheel();
     </script>
 </body>
 </html>
