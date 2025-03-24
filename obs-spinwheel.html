@@ -228,25 +228,27 @@
     };
 
     const spinWheel = () => {
-        if (wheel.classList.contains("is-spinning")) return;
+		if (wheel.classList.contains("is-spinning")) return;
 
-        wheel.classList.add("is-spinning");
-        rotation = spinertia(5000, 10000); // Random spin time
-        spinner.style.transform = `rotate(${rotation}deg)`;
+		wheel.classList.add("is-spinning");
+		rotation = spinertia(5000, 10000); // Random spin time
+		spinner.style.transform = `rotate(${rotation}deg)`;
 
-        setTimeout(() => {
-            // Find the position of the ticker (relative to the wheel's rotation)
-            const tickerPosition = (rotation % 360) + prizeSlice / 2;
+		setTimeout(() => {
+			// Calculate the angle where the ticker will point after the spin
+			const currentRotation = (rotation % 360) + prizeOffset;
+			
+			// Calculate which prize slice is closest to the ticker
+			const winningPrizeIndex = Math.floor((currentRotation % 360) / prizeSlice);
+			const winningPrize = prizeNodes[winningPrizeIndex];
 
-            // Find the prize slice closest to the ticker
-            const winningPrizeIndex = Math.floor((tickerPosition % 360) / prizeSlice);
-            const winningPrize = prizeNodes[winningPrizeIndex];
+			// Remove "selected" class from all prizes first to reset any previous selection
+			prizeNodes.forEach(prize => prize.classList.remove("selected"));
 
-            // Apply the "selected" class to the winning prize
-            winningPrize.classList.add("selected");
-        }, 8000); // Wait for the animation to finish
-    };
-
+			// Apply the "selected" class to the winning prize
+			winningPrize.classList.add("selected");
+		}, 8000); // Wait for the animation to finish
+	};
     window.addEventListener("load", () => {
         setupWheel();
         spinWheel(); // Start spinning automatically when the page loads
