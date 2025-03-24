@@ -7,17 +7,21 @@
     <link rel="stylesheet" href="core/css/pixelb8-default.css">
 	<link rel="stylesheet" href="core/css/pixelb8-tools.css">
 	<link rel="stylesheet" href="core/css/pixelb8-landing.css">
+	<link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
     <title>Wheel of Fortune Prize Wheel</title>
     <style>
         @import url("https://fonts.googleapis.com/css2?family=Girassol&display=swap");
 
-        * {
-            box-sizing: border-box;
-        }
+        /* Apply box-sizing to deal-wheel and its children only */
+		.deal-wheel, 
+		.deal-wheel * {
+			box-sizing: border-box;
+		}
 
         html,
         body {
             height: 100%;
+			
         }
 
         body {
@@ -27,23 +31,20 @@
         }
 
         .deal-wheel {
-            --size: clamp(250px, 80vmin, 700px);
+            --size: clamp(200px, 70vmin, 600px);
             --lg-hs: 0 3%;
             --lg-stop: 50%;
-            --lg: linear-gradient(
-                hsl(var(--lg-hs) 0%) 0 var(--lg-stop),
-                hsl(var(--lg-hs) 20%) var(--lg-stop) 100%
-            );
-
+            --lg: linear-gradient(hsl(193.47deg 49.74% 49.25% / 93%) 0 var(--lg-stop), rgb(23, 130, 182, 0.8) var(--lg-stop) 100%);
             position: relative;
             display: grid;
-            grid-gap: calc(var(--size) / 20);
+            grid-gap: 2px;
             align-items: center;
             grid-template-areas:
                 "spinner"
                 "trigger";
-            font-family: "Girassol", sans-serif;
+            font-family: 'Orbitron', sans-serif;
             font-size: calc(var(--size) / 21);
+			color: black;
             line-height: 1;
             text-transform: lowercase;
         }
@@ -126,19 +127,19 @@
             transform-origin: center left;
         }
 
-        .btn-spin {
-            color: hsl(0deg 0% 100%);
-            background: var(--lg);
-            border: none;
-            font-family: inherit;
-            font-size: inherit;
-            line-height: inherit;
-            text-transform: inherit;
-            padding: 0.9rem 2rem 1rem;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            transition: opacity 200ms ease-out;
-        }
+	.btn-spin {
+		color: rgb(23 146 182);
+		background: rgb(23, 130, 182, 0.8);
+		border: 2px outset #25a9a9;
+		font-family: inherit;
+		font-size: inherit;
+		line-height: inherit;
+		text-transform: inherit;
+		padding: 0.9rem 2rem 1rem;
+		border-radius: 0.25rem;
+		cursor: pointer;
+		transition: opacity 200ms ease-out;
+	}
 
         .btn-spin:focus {
             outline-offset: 2px;
@@ -170,9 +171,12 @@
 
         /* Selected prize animation */
         .prize.selected .text {
-            color: white;
-            animation: selected 800ms ease;
-        }
+			color: #0ff;
+			font-size: larger;
+			font-weight: bold;
+			animation: selected 800ms ease;
+			text-shadow: 2px 2px 5px rgb(0 0 0 / 85%), 0 0 25px rgb(0 0 0), 0 0 5px rgb(0 0 0 / 86%);
+		}
 
         @keyframes selected {
             25% {
