@@ -121,7 +121,7 @@
             document.getElementById("timer").textContent = "Time left: 5:00";
             document.getElementById("next-question-timer").textContent = "";
 
-            let secondsLeft = 300;
+            let secondsLeft = 60;
             questionTimer = setInterval(() => {
                 secondsLeft--;
                 document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
