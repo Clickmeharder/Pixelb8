@@ -65,6 +65,10 @@
         const pointer = document.getElementById('pointer');
 
         const angle = 2 * Math.PI / segments.length;
+        let spinAngleStart = Math.random() * 10 + 10; // Random initial speed
+        let spinTime = 0;
+        let spinTimeTotal = Math.random() * 3 + 4; // Longer total spin time for smoother stopping
+        let spinInterval;
 
         // Draw wheel
         function drawWheel() {
@@ -93,33 +97,30 @@
         }
 
         // Spin wheel
-        let spinAngleStart = Math.random() * 10 + 10;
-        let spinTime = 0;
-        let spinTimeTotal = Math.random() * 3 + 4;
-
         function rotateWheel() {
             spinTime += 1;
             if (spinTime >= spinTimeTotal) {
-                // Stop wheel
+                // Stop wheel and get the final angle
                 clearInterval(spinInterval);
-                // Get the winning segment
+
                 const spinAngle = spinAngleStart - Math.pow(spinTime, 2) / (2 * spinTimeTotal);
-                const result = Math.floor((spinAngle / (Math.PI * 2)) * segments.length);
-                // Show result
+                const result = Math.floor((spinAngle % (Math.PI * 2)) / (Math.PI * 2 / segments.length)); // Normalize angle to get segment
                 resultText.textContent = `You won: ${segments[result]}`;
+
                 // Set pointer to point at winning segment
                 const pointerAngle = (spinAngle % (Math.PI * 2)) - Math.PI / 2; // Adjust pointer to correct position
                 pointer.style.transform = `rotate(${pointerAngle}rad)`;
             } else {
+                // Rotate wheel during spin
                 const spinAngle = spinAngleStart - Math.pow(spinTime, 2) / (2 * spinTimeTotal);
                 wheel.style.transform = `rotate(${spinAngle}deg)`;
             }
         }
 
         function startSpin() {
-            spinTime = 3;
+            spinTime = 0;
             drawWheel();
-            spinInterval = setInterval(rotateWheel, 30);
+            spinInterval = setInterval(rotateWheel, 30); // Spin interval
         }
 
         // Automatically start spinning when page loads
