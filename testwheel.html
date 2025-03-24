@@ -5,13 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spin Wheel</title>
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+
     .wheel-container {
       position: relative;
       width: 300px;
       height: 300px;
       border-radius: 50%;
       overflow: hidden;
-      margin: 0 auto;
+      border: 5px solid #ccc;
     }
 
     .wheel {
@@ -20,25 +30,32 @@
       height: 100%;
       transform-origin: center center;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      transition: transform 4s ease-out;
     }
 
     .slice {
-      flex: 1;
       position: absolute;
       top: 0;
-      bottom: 0;
       left: 50%;
       width: 50%;
-      background-color: lightgray;
+      height: 50%;
+      background-color: gray;
+      clip-path: polygon(100% 50%, 0% 0%, 0% 100%);
       transform-origin: 100% 50%;
-      transform: rotate(calc(45deg * var(--index))) skewY(-30deg);
       display: flex;
       justify-content: center;
       align-items: center;
       text-align: center;
-      font-weight: bold;
       color: white;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .slice span {
+      transform: rotate(90deg);
     }
 
     .ticker {
@@ -55,7 +72,6 @@
     button {
       margin-top: 20px;
       display: block;
-      margin: 20px auto;
       padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
@@ -86,17 +102,11 @@
 
   <div class="wheel-container">
     <div class="wheel">
-      <div class="slice" data-index="0"></div>
-      <div class="slice" data-index="1"></div>
-      <div class="slice" data-index="2"></div>
-      <div class="slice" data-index="3"></div>
-      <div class="slice" data-index="4"></div>
-      <div class="slice" data-index="5"></div>
-      <div class="slice" data-index="6"></div>
-      <div class="slice" data-index="7"></div>
+      <!-- Wheel slices will be generated here -->
     </div>
     <div class="ticker"></div>
   </div>
+  
   <button onclick="spinWheel()">Spin</button>
 
   <script>
@@ -112,33 +122,34 @@
     ];
 
     const wheel = document.querySelector('.wheel');
-    const slices = document.querySelectorAll('.slice');
-    const ticker = document.querySelector('.ticker');
 
     function createWheel() {
       const angle = 360 / prizes.length;
-      slices.forEach((slice, index) => {
-        const prize = prizes[index];
-        slice.style.backgroundColor = prize.color;
+
+      prizes.forEach((prize, index) => {
+        const slice = document.createElement('div');
+        slice.classList.add('slice');
         slice.style.transform = `rotate(${angle * index}deg)`;
+        slice.style.backgroundColor = prize.color;
         slice.innerHTML = `<span>${prize.text}</span>`;
-        slice.querySelector('span').style.transform = 'rotate(-90deg)';
+        wheel.appendChild(slice);
       });
     }
 
     function spinWheel() {
       const rotation = Math.floor(Math.random() * 360) + 5000;  // Spin for a random angle plus 5000 to ensure it's a long enough spin
-      wheel.style.transition = 'transform 5s ease-out';
+      wheel.style.transition = 'transform 4s ease-out';
       wheel.style.transform = `rotate(${rotation}deg)`;
 
       // After the wheel stops spinning, find the slice under the ticker
       setTimeout(() => {
         const selectedSliceIndex = Math.floor((rotation % 360) / (360 / prizes.length));
         highlightSlice(selectedSliceIndex);
-      }, 5000);  // Same duration as the spin animation
+      }, 4000);  // Same duration as the spin animation
     }
 
     function highlightSlice(index) {
+      const slices = document.querySelectorAll('.slice');
       const selectedSlice = slices[index];
       selectedSlice.style.animation = 'highlight 1s ease';
       setTimeout(() => {
