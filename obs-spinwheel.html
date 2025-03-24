@@ -231,29 +231,22 @@
 			if (wheel.classList.contains("is-spinning")) return;
 
 			wheel.classList.add("is-spinning");
-
-			const spinAmount = spinertia(2000, 5000); // Ensure a more reasonable spin range
-			rotation += spinAmount; // Add spin inertia to the current rotation
-
-			// Ensure rotation is within 0-360 range for easier calculations
-			const normalizedRotation = rotation % 360;
-
-			// Find the winning slice
-			const winningIndex = Math.floor(((360 - normalizedRotation) % 360) / prizeSlice);
-			
-			// Apply the rotation to the spinner
-			spinner.style.transition = "transform 4s ease-out";
+			rotation = spinertia(5000, 10000); // Random spin time
 			spinner.style.transform = `rotate(${rotation}deg)`;
 
 			setTimeout(() => {
-				wheel.classList.remove("is-spinning");
+				// Calculate the angle of the ticker's position
+				const tickerAngle = parseFloat(getComputedStyle(ticker).transform.split(',')[1]);
+				// Adjust the rotation to take into account the ticker's position
+				const adjustedRotation = (rotation + tickerAngle) % 360;
 
-				// Highlight the winning prize
-				prizeNodes.forEach(node => node.classList.remove("selected"));
-				prizeNodes[winningIndex].classList.add("selected");
+				// Calculate the winning prize index based on the adjusted rotation
+				const winningPrizeIndex = Math.floor(((adjustedRotation % 360) + prizeSlice / 2) / prizeSlice);
+				const winningPrize = prizeNodes[winningPrizeIndex];
 
-				console.log("Winning Prize:", prizes[winningIndex].text);
-			}, 4000);
+				// Apply the "selected" class to the winning prize
+				winningPrize.classList.add("selected");
+			}, 8000); // Wait for the animation to finish
 		};
 
         window.addEventListener("load", () => {
