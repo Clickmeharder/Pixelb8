@@ -38,14 +38,15 @@
         #leaderboard {
             position: absolute;
 			top: 9%;
-			font-size: 18px;
+			font-size: 14px;
 			right: 1px;
         }
         #leaderboard li {
             margin: 5px 0;
 			text-align: center;
 			padding: 4px 9px;
-			width: 211px;
+			width: ;
+			max-width: ;
 			background: linear-gradient(135deg, #001f1f, #004040);
 			border: 3px solid teal;
 			border-radius: 12px;
@@ -105,7 +106,7 @@
 				.sort((a, b) => b[1] - a[1])
 				.forEach(([user, score]) => {
 					const li = document.createElement("li");
-					li.textContent = `${user}: ${score} points`;
+					li.textContent = `${user}: ${score} pts`;
 					leaderboardElement.appendChild(li);
 				});
 		}
