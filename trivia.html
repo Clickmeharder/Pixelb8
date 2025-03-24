@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivia v2.71</title>
+    <title>Trivia v2.81</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -184,11 +184,16 @@
                 });
         }
 
-        ComfyJS.onChat = (user, message, flags, self) => {
-            if (!self) {
-                checkAnswer(user, message);
-            }
-        };
+        	// Listen for Twitch chat commands
+		ComfyJS.onCommand = (user, command, message, flags, extra) => {
+			if (command.toLowerCase() === "playtrivia") {
+				updateQuestionDisplay();
+			}
+		};
+		// Listen for user messages to check answers
+		ComfyJS.onChat = (user, message) => {
+			checkAnswer(user, message);
+		};
 
         ComfyJS.Init("jaedraze");
 
