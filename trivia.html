@@ -170,11 +170,11 @@
 			updateLeaderboard(); // Update leaderboard
 
 			// Start the countdown for the next question (5 minutes)
-			nextQuestionCountdown = 300000; // 5 minutes in milliseconds
+			nextQuestionCountdown = 3000; // 5 minutes in milliseconds
 			updateCountdown();
 			questionActive = false;
 
-			setTimeout(nextQuestion, 300000); // Wait 5 minutes before moving to the next question
+			setTimeout(nextQuestion, 3000); // Wait 5 minutes before moving to the next question
 		}
 
 		// Function to start the countdown timer
