@@ -65,55 +65,42 @@
                 leaderboardElement.appendChild(li);
             });
         }
-        // Whenever a new answer comes in
-ComfyJS.onChat = (user, command, message, flags, extra) => {
-	// Check if the message is an answer
-	console.log(`Message received: ${message} from ${user}`);
-	const currentQuestion = triviaQuestions[currentQuestionIndex];
-	if (message.toLowerCase() === currentQuestion.answer.toLowerCase()) {
-		if (!userScores[user]) {
-			userScores[user] = 0;
-		}
-		userScores[user] += 1;
-	}
 
-	updateLeaderboard();
-};
 
-ComfyJS.onCommand = (user, command, message, flags, extra) => {
-    console.log(`Command received: ${command} from ${user}`);
-    switch(command.toLowerCase()) { // Convert to lowercase to avoid case sensitivity issues
-        
-        case "join":
-            if (!twitchusersJoined.includes(user)) {
-                twitchusersJoined.push(user);
-                cheatUsageTracker[user] = false; // Initialize cheat usage for the player
-                console.log(`${user} has joined the game`);
+		ComfyJS.onCommand = (user, command, message, flags, extra) => {
+			console.log(`Command received: ${command} from ${user}`);
+			switch(command.toLowerCase()) { // Convert to lowercase to avoid case sensitivity issues
+				
+				case "join":
+					if (!twitchusersJoined.includes(user)) {
+						twitchusersJoined.push(user);
+						cheatUsageTracker[user] = false; // Initialize cheat usage for the player
+						console.log(`${user} has joined the game`);
 
-                // Append to the Twitch chat div to confirm user joined
-                const messageDiv = document.createElement("div");
-                messageDiv.textContent = `${user} has joined the game!`;
-                document.getElementById("twitch-chat").appendChild(messageDiv);
+						// Append to the Twitch chat div to confirm user joined
+						const messageDiv = document.createElement("div");
+						messageDiv.textContent = `${user} has joined the game!`;
+						document.getElementById("twitch-chat").appendChild(messageDiv);
 
-                // Dynamically generate the player for the new user
-                generatePlayers(twitchusersJoined);
-            } else {
-                // If user is already in the game, notify them
-                const messageDiv = document.createElement("div");
-                messageDiv.textContent = `${user}, you're already in the game!`;
-                document.getElementById("twitch-chat").appendChild(messageDiv);
-            }
-            break;
+						// Dynamically generate the player for the new user
+						generatePlayers(twitchusersJoined);
+					} else {
+						// If user is already in the game, notify them
+						const messageDiv = document.createElement("div");
+						messageDiv.textContent = `${user}, you're already in the game!`;
+						document.getElementById("twitch-chat").appendChild(messageDiv);
+					}
+					break;
 
-        case "trivia":
-            startTrivia(); // Call the nuke function
-            break;
+				case "trivia":
+					startTrivia(); // Call the nuke function
+					break;
 
-        default:
-            console.log(`Unknown command: ${command}`);
-            break;
-    }
-};
+				default:
+					console.log(`Unknown command: ${command}`);
+					break;
+			}
+		};
         // Start the trivia game
         function startTrivia() {
             updateQuestionDisplay();
@@ -125,6 +112,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		
 		// Initialize ComfyJS with the correct Twitch username
 		ComfyJS.Init("jaedraze");
+		ComfyJS.onConnected = (address, port, isReconnect) => {
+			console.log(`Connected to Twitch chat at ${address}:${port}, Reconnect: ${isReconnect}`);
+		};
+		ComfyJS.onChat = (user, message, flags, self, extra) => {
+			console.log(`[CHAT] ${user}: ${message}`);
+		};
     </script>
 </body>
 </html>
