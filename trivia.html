@@ -227,7 +227,7 @@
 		//check for correct answers in chat
 		ComfyJS.onChat = (user, message, flags, self, extra) => {
 			console.log(`[CHAT] ${user}: ${message}`);
-			if (!twitchUsersJoined.includes(user)) return; // Only handle users who joined the game
+			<!-- if (!twitchUsersJoined.includes(user)) return; // Only handle users who joined the game -->
 			if (!questionActive) return; // Ignore chat when no question is active
 
 			message = message.toLowerCase(); // Normalize message to lowercase
