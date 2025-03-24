@@ -76,6 +76,7 @@
 	<div id="questionWrapper">
 		<div id="question">Waiting for next question...</div>
 		<div id="timer"></div>
+		<p id="question-counter">Questions Asked: 0 / 12</p>
 	</div>
     <ul id="leaderboard">
         <p>Leaderboard</p>
@@ -112,9 +113,13 @@
         let questionTimer, countdownTimer;
 		
 		let round = 1;
-		let roundQuestionsCap = 12;
-		let questionsAskedInRound = 0;
+		let questionsAsked = 0;
+		const questionsPerRound = 12;
 
+		function updateQuestionCounter() {
+			document.getElementById("question-counter").textContent = `Questions Asked: ${questionsAsked} / ${questionsPerRound}`;
+		}
+		
         function getRandomQuestion() {
             if (usedQuestions.length === triviaQuestions.length) {
                 usedQuestions = []; // Reset when all questions have been used
@@ -127,11 +132,10 @@
         }
 
 		function startQuestion() {
-			if (questionsAskedInRound >= roundQuestionsCap) {
+			if (questionsAsked >= questionsPerRound) {
 				document.getElementById("question").textContent = `Trivia Round ${round} Over!`;
-				document.getElementById("timer").textContent = "";
-				document.getElementById("next-question-timer").textContent = "Waiting for !triviaround2 to start...";
-				return; // Stop further questions
+				clearInterval(questionTimer);
+				return;
 			}
 
 			clearTimeout(countdownTimer);
@@ -139,6 +143,9 @@
 			activeQuestion = getRandomQuestion();
 			answeredUsers.clear();
 			firstAnswerUser = null;
+			questionsAsked++;
+
+			updateQuestionCounter(); // Update the display
 
 			document.getElementById("question").textContent = activeQuestion.question;
 			document.getElementById("questionWrapper").style.visibility = "visible";
@@ -153,8 +160,6 @@
 					endQuestion();
 				}
 			}, 1000);
-
-			questionsAskedInRound++; // Track the number of questions asked
 		}
 
 		function endQuestion() {
@@ -227,7 +232,7 @@
 			if (command.toLowerCase() === "triviaround2") {
 				if (round === 1) {
 					round = 2;
-					questionsAskedInRound = 0; // Reset for the new round
+					questionsAsked = 0; // Reset for the new round
 					document.getElementById("question").textContent = "Trivia Round 2 Begins!";
 					setTimeout(startQuestion, 3000); // Start after a short delay
 				}
