@@ -133,7 +133,16 @@
             questionActive = true;
             startTimer();
         }
-		
+		// Function to update the countdown
+		function updateCountdown() {
+			document.getElementById("timer").textContent = countdown; // Update main countdown
+			if (nextQuestionCountdown > 0) {
+				let timeLeft = Math.ceil(nextQuestionCountdown / 1000); // Convert ms to seconds
+				document.getElementById("next-question-timer").textContent = `Next question in: ${timeLeft}s`;
+			} else {
+				document.getElementById("next-question-timer").textContent = ""; // Hide if no timer
+			}
+		}
 		// Function to handle the next question
 		function nextQuestion() {
 			currentQuestionIndex = (currentQuestionIndex + 1) % triviaQuestions.length;
