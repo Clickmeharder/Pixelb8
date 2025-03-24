@@ -45,10 +45,8 @@
         let userScores = {}; // To track scores
 
         // Initialize ComfyJS and connect to Twitch
-        const twitchUsername = "jaedraze";  // Your Twitch username
-        const oauthToken = "YOUR_OAUTH_TOKEN_HERE";  // Replace this with your OAuth token
-
-        ComfyJS.Init(twitchUsername, oauthToken); // Initialize Twitch chat connection
+        // Initialize ComfyJS with the correct Twitch username
+		ComfyJS.Init("jaedraze");
 
         // Update question on overlay
         function updateQuestionDisplay() {
