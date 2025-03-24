@@ -10,40 +10,53 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
     <title>Wheel of Fortune Prize Wheel</title>
     <style>
+        @import url("https://fonts.googleapis.com/css2?family=Girassol&display=swap");
+
         /* Apply box-sizing to deal-wheel and its children only */
-        .deal-wheel, 
-        .deal-wheel * {
-            box-sizing: border-box;
-        }
+		.deal-wheel, 
+		.deal-wheel * {
+			box-sizing: border-box;
+		}
 
         html,
         body {
             height: 100%;
+			
         }
 
         body {
             display: grid;
             place-items: center;
             overflow: hidden;
-            background: #000;
         }
 
         .deal-wheel {
+			margin-top: 8%;
             --size: clamp(200px, 70vmin, 600px);
+            --lg-hs: 0 3%;
+            --lg-stop: 50%;
+            --lg: linear-gradient(hsl(193.47deg 49.74% 49.25% / 93%) 0 var(--lg-stop), rgb(23, 130, 182, 0.8) var(--lg-stop) 100%);
             position: relative;
             display: grid;
             grid-gap: 2px;
             align-items: center;
-            grid-template-areas: "spinner";
+            grid-template-areas:
+                "spinner"
+                "trigger";
             font-family: 'Orbitron', sans-serif;
             font-size: calc(var(--size) / 21);
-            color: black;
+			color: black;
             line-height: 1;
             text-transform: lowercase;
         }
 
         .deal-wheel > * {
             grid-area: spinner;
+        }
+
+        .deal-wheel .btn-spin {
+            grid-area: trigger;
+            justify-self: center;
         }
 
         .spinner {
@@ -53,11 +66,11 @@
             grid-template-areas: "spinner";
             width: var(--size);
             height: var(--size);
-            transform: rotate(0deg);
+            transform: rotate(calc(var(--rotate, 25) * 1deg));
             border-radius: 50%;
             border: 3px solid rgb(12 75 105 / 80%);
-            box-shadow: 0 0 10px #0b7272;
-            opacity: 0.8;
+			box-shadow: 0 0 10px #0b7272;
+			opacity: 0.8;
         }
 
         .spinner * {
@@ -94,10 +107,21 @@
             border-radius: 50%;
             background: #00000091;
         }
+		.fixed-profile {
+			border: 3px solid #9146FF;
+			box-shadow: 0 0 10px rgba(145, 70, 255, 0.6);
+			object-fit: cover;
+			transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+		}
 
+		/* Hover effect */
+		a:hover .fixed-profile {
+			transform: scale(1.1); /* Slight zoom effect */
+			box-shadow: 0 0 15px rgba(145, 70, 255, 0.9); /* Stronger glow */
+		}
         .ticker {
             position: relative;
-            top: -11px;
+			top: -11px;
             left: calc(var(--size) / -15);
             width: calc(var(--size) / 10);
             height: calc(var(--size) / 20);
@@ -106,6 +130,7 @@
             clip-path: polygon(20% 0, 100% 50%, 20% 100%, 0% 50%);
             transform-origin: center left;
         }
+
 
         /* Spinning animation */
         .is-spinning .spinner {
