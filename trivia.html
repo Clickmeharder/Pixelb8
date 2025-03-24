@@ -80,6 +80,7 @@
 </head>
 <body>
     <div id="question">-</div>
+	<div id="next-question-timer"></div>
     <div id="timer">30</div>
     <div id="correct-answer"></div>
     <ul id="leaderboard">
@@ -117,6 +118,9 @@
 		let questionActive = false; // Prevent multiple answers per question
 		let timer;
         let countdown = 240;
+		let firstAnswerGiven = false; // Flag to track if the first answer has been given
+		let nextQuestionCountdown = 0; // Variable to track time until the next question (in ms)
+		let lateAnswerPoints = 0.5; // Points for late answers
 
 		// Update question on overlay
         function updateQuestionDisplay() {
@@ -130,12 +134,12 @@
             startTimer();
         }
 		
-        function nextQuestion(delay) {
-            setTimeout(() => {
-                currentQuestionIndex = (currentQuestionIndex + 1) % triviaQuestions.length;
-                updateQuestionDisplay();
-            }, delay);
-        }
+		// Function to handle the next question
+		function nextQuestion() {
+			currentQuestionIndex = (currentQuestionIndex + 1) % triviaQuestions.length;
+			updateQuestionDisplay();
+			startTimer(); // Start the countdown for the next question
+		}
 
         function handleNoAnswer() {
             document.getElementById("correct-answer").textContent = `Nobody answered correctly. The correct answer was: ${triviaQuestions[currentQuestionIndex].answer}. Next question in 5 minutes.`;
@@ -143,51 +147,48 @@
 			console.log('nobody answered correctly');
             nextQuestion(300000); // 5 minutes
         }
+		// Function to handle the correct answer
 		function handleCorrectAnswer(user, message) {
-			// First correct answer handling
-			if (questionActive) {
-				document.getElementById("question").style.border = "3px solid green";
-				document.getElementById("question").style.color = "lightgreen";
-				document.getElementById("correct-answer").textContent = 
-					`${user} got it right first! Answer: ${triviaQuestions[currentQuestionIndex].answer}. Others can still answer for ${countdown} seconds (0.5 points).`;
-
-				console.log(`${user} got it right first! Answer: ${message}. They now have ${userScores[user]} points!`);
-
-				// Award full point to first correct answer
+			clearInterval(timer);
+			document.getElementById("question").style.border = "3px solid green";
+			document.getElementById("question").style.color = "lightgreen";
+			document.getElementById("correct-answer").textContent = `${user} got it right! Answer: ${triviaQuestions[currentQuestionIndex].answer}. Next question in 10 minutes.`;
+			
+			if (!firstAnswerGiven) {
+				// First correct answer, give 1 point
 				userScores[user] = (userScores[user] || 0) + 1;
-				updateLeaderboard();
-
-				// Mark question as inactive for first answer and stop countdown
-				questionActive = false;
-				countdown = 30; // Stop further countdown from affecting the delay
-
-				// Schedule next question after remaining countdown time
-				setTimeout(() => {
-					document.getElementById("correct-answer").textContent += " Moving to next question...";
-					nextQuestion(600000); // 10 minutes delay before next question
-				}, countdown * 1000);
+				firstAnswerGiven = true; // Mark that the first answer was given
 			} else {
-				// Late correct answers get 0.5 points
-				document.getElementById("correct-answer").textContent += ` ${user} also got it right! (+0.5 pts)`;
-				console.log(`${user} also got it right! Answer: ${message}. They now have ${userScores[user]} points!`);
-
-				userScores[user] = (userScores[user] || 0) + 0.5;
-				updateLeaderboard();
+				// Late answer, give 0.5 points
+				userScores[user] = (userScores[user] || 0) + lateAnswerPoints;
 			}
+
+			console.log(`${user} got it right! Answer: ${message}. They now have ${userScores[user]} points!`);
+			updateLeaderboard(); // Update leaderboard
+			
+			// Set the "Next Question In" countdown for 10 minutes (600000ms)
+			nextQuestionCountdown = 600000; // 10 minutes in milliseconds
+			updateCountdown();
+			questionActive = false;
+			
+			setTimeout(nextQuestion, 600000); // Wait 10 minutes before moving to the next question
 		}
 		//start timer
-        function startTimer() {
-            countdown = 240;
-            document.getElementById("timer").textContent = countdown;
-            timer = setInterval(() => {
-                countdown--;
-                document.getElementById("timer").textContent = countdown;
-                if (countdown <= 0) {
-                    clearInterval(timer);
-                    handleNoAnswer();
-                }
-            }, 1000);
-        }
+		// Function to start the countdown
+		function startTimer() {
+			countdown = 30;
+			document.getElementById("timer").textContent = countdown;
+			nextQuestionCountdown = 0; // Reset "Next Question In" timer
+			clearInterval(timer);
+			timer = setInterval(() => {
+				countdown--;
+				updateCountdown(); // Update both countdowns
+				if (countdown <= 0) {
+					clearInterval(timer);
+					nextQuestion(); // Proceed to the next question
+				}
+			}, 1000);
+		}
 
 //----------------------------
 		// Update leaderboard
