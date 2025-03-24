@@ -1,121 +1,149 @@
-
-<style>
-#app {
-  width: 400px;
-  height: 400px;
-  margin: 0 auto;
-  position: relative;
-}
-
-.display {
-  margin-top: 2rem;
-  border-top: 1px solid red;
-}
-
-.marker {
-  position: absolute;
-  width: 60px;
-  left: 172px;
-  top: -20px;
-  z-index: 2;
-}
-
-.wheel {
-  width: 100%;
-  height: 100%;
-}
-
-.button {
-  display: block;
-  width: 250px;
-  margin: 40px auto;
-  cursor: pointer;
-}
-
-.button:hover {
-  opacity: 0.8;
-}
-
-.blur {
-  animation: blur 10s;
-}
-
-@keyframes blur {
-  0% {
-    filter: blur(1.2px);
-  }
-  80% {
-    filter: blur(1.2px);
-  }
-  100% {
-    filter: blur(0px);
-  }
-}
-
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin Wheel</title>
+    <style>
+        #canvas1 {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
-	<div id="app" style="margin-top: 50px">
-	  <img class="marker" src="https://i.postimg.cc/vT2rLMdL/marker.png" />
-	  <img class="wheel" src="https://i.postimg.cc/wBmH0ysn/wheel-1.png" />
-	  <div class="display">-</div>
-	</div>
-	<script>
-		(function () {
-		  // Counter clockwise
-		  const symbolSegments = {
-			1: "Additional 5% off on existing discount", //  prob 1
-			2: "Additional 10% off on existing discount", // prob 1
-			3: "Flat 25% off probability", // 0.10
-			4: "Flat 50% off, probability", //  0.10
-			5: "Please try your luck again", //prob 0.8
-			6: "Rs. 200 off on min. purchase Rs. 1,999", // prob 2
-			7: "Rs. 450 off on min. purchase Rs. 3499", // prob 2
-			8: "Rs. 750 off on Min. purchase of Rs. 4,999" // prob 3
-		  };
-		  function generateRandNo() {
-			const random = Math.floor(Math.random() * 101);
-			return random;
-		  }
+    <canvas id="canvas1"></canvas>
+    <script>
+		let canvas = document.getElementById("canvas1");
+		let sections = ["FREE SHIPPING", "15% OFF", "FREE SHIPPING", "15% OFF", "FREE SHIPPING", "15% OFF", "FREE SHIPPING", "15% OFF"];
+		let colors = ["#369", "#399"];
+		let wheels = null;
+		let frame = null;
 
-		  function generateBiasedValue() {
-			let randNo = generateRandNo();
+		function repaint(angle) {
+			let r = Math.min(innerWidth, innerHeight) / 2.25 | 0;
 			
-			if (randNo >=1 && randNo <= 90) biasedValue = 43;
-			else biasedValue = 44;
-			return biasedValue;
-		  }
-		  const wheel = document.querySelector(".wheel");
-		  const display = document.querySelector(".display");
+			if (wheels === null) {
+				wheels = [];
+				
+				// Create the wheel segments
+				for (let selected = 0; selected < sections.length; selected++) {
+					let canvas = document.createElement("canvas");
+					canvas.width = canvas.height = 2 * r + 10;
+					let ctx = canvas.getContext("2d");
+					let cx = 5 + r, cy = 5 + r;
 
-		  let deg = 0;
-		  let zoneSize = 45; // deg
+					// Loop through and draw each section
+					for (let i = 0; i < sections.length; i++) {
+						let a0 = 2 * Math.PI * i / sections.length;
+						let a1 = a0 + 2 * Math.PI / sections.length;
+						let a = 2 * Math.PI * (i + 0.5) / sections.length;
+						
+						ctx.beginPath();
+						ctx.moveTo(cx, cy);
+						ctx.arc(cx, cy, r, a0, a1, false);
+						ctx.fillStyle = colors[i % 2];
+						ctx.fill();
+						ctx.strokeStyle = "#fff";
+						ctx.lineWidth = 1;
+						ctx.stroke();
 
-		  const handleWin = (actualDeg) => {
-			const winningSymbolNr = Math.ceil(actualDeg / zoneSize);
-			display.innerHTML = symbolSegments[winningSymbolNr];
-		  };
+						// Draw the text
+						ctx.save();
+						ctx.fillStyle = "#FFF";
+						ctx.font = "bold " + r / sections.length * 0.4 + "px sans-serif";
+						ctx.textAlign = "center";
+						ctx.textBaseline = "middle";
+						ctx.translate(cx, cy);
+						ctx.rotate(a);
+						ctx.fillText(sections[i], r * 0.62, 0);
+						ctx.restore();
+					}
+					wheels.push(canvas);
+				}
+			}
 
-		  wheel.addEventListener("click", () => {
-			wheel.style.pointerEvents = "none";
-			display.innerHTML = "-";
-			generateBiasedValue();
-			deg = 500 + 36 * biasedValue;
+			// Create the frame (outer circle and pointer)
+			if (frame === null) {
+				frame = document.createElement("canvas");
+				frame.width = frame.height = 10 + 2 * r * 1.25 | 0;
+				let ctx = frame.getContext("2d"), cx = frame.width / 2, cy = frame.height / 2;
 
-			wheel.style.transition = "all 5s ease-out";
-			wheel.style.transform = `rotate(${deg}deg)`;
-			wheel.classList.add("blur");
-		  });
+				ctx.beginPath();
+				ctx.arc(cx, cy, r * 1.025, 0, 2 * Math.PI, true);
+				ctx.arc(cx, cy, r * 0.975, 0, 2 * Math.PI, false);
+				ctx.fillStyle = "#0ff";
+				ctx.fill();
+				
+				ctx.fillStyle = "#fff";
+				ctx.strokeStyle = "#0ff";
+				ctx.lineWidth = 15;
+				ctx.beginPath();
+				ctx.arc(cx, cy, r / 3.5, 0, 2 * Math.PI, false);
+				ctx.fill();
+				ctx.stroke();
+				
+				ctx.translate(cx, cy);
+				ctx.rotate(Math.PI - 0.2);
+				ctx.beginPath();
+				ctx.moveTo(- r * 1.1, - r * 0.05);
+				ctx.lineTo(- r * 0.9, 0);
+				ctx.lineTo(- r * 1.1, r * 0.05);
+				ctx.fillStyle = "#f00";
+				ctx.fill();
+			}
 
-		  wheel.addEventListener("transitionend", () => {
-			wheel.classList.remove("blur");
-			wheel.style.pointerEvents = "auto";
-			wheel.style.transition = "none";
-			const actualDeg = deg % 360;
-			wheel.style.transform = `rotate(${actualDeg}deg)`;
-			console.log(`${actualDeg}deg`);
-			handleWin(actualDeg);
-		  });
-		})();
-	</script>
+			// Set canvas size
+			canvas.width = innerWidth;
+			canvas.height = innerHeight;
+			let cx = innerWidth / 2, cy = innerHeight / 2;
+			let ctx = canvas.getContext("2d");
+
+			// Get the selected section based on the current angle
+			let selected = (Math.floor((-0.2 - angle) * sections.length / (2 * Math.PI)) % sections.length);
+			if (selected < 0) selected += sections.length;
+
+			// Draw the selected segment
+			ctx.save();
+			ctx.translate(cx, cy);
+			ctx.rotate(angle);
+			ctx.translate(-wheels[selected].width / 2, -wheels[selected].height / 2);
+			ctx.drawImage(wheels[selected], 0, 0);
+			ctx.restore();
+
+			// Draw the outer frame
+			ctx.drawImage(frame, cx - frame.width / 2, cy - frame.height / 2);
+		}
+
+		// Spin function
+		let angle = 0, running = false;
+
+		function spinTo(winner, duration) {
+			let final_angle = (-0.2) - (0.5 + winner) * 2 * Math.PI / sections.length;
+			let start_angle = angle - Math.floor(angle / (2 * Math.PI)) * 2 * Math.PI - 5 * 2 * Math.PI;
+		  
+			let start = performance.now();
+			function frame() {
+				let now = performance.now();
+				let t = Math.min(1, (now - start) / duration);
+				t = 3 * t * t - 2 * t * t * t; // ease in out
+				angle = start_angle + t * (final_angle - start_angle);
+				repaint(angle);
+				if (t < 1) requestAnimationFrame(frame); else running = false;
+			}
+			requestAnimationFrame(frame);
+			running = true;
+		}
+
+		// Bind the spin to mouse click
+		canvas.onmousedown = function() {
+			if (!running) {
+				spinTo(Math.random() * sections.length | 0, 5000);
+			}
+		};
+
+		repaint(angle);
+
+	</script> <!-- Make sure to load your wheel script here -->
 </body>
+</html>
