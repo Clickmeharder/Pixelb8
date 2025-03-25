@@ -89,25 +89,26 @@
 
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <script>
-        const triviaQuestions = [
-            { question: "Converting 100 shrapnel results in how much universal ammo?", answer: "101" },
-            { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" },
-            { question: "What is 5 + 3?", answer: "8" },
-            { question: "Who painted the Mona Lisa?", answer: "da vinci" },
-            { question: "What is the smallest Skildek support weapon?", answer: "lancehead" },
-            { question: "What amp drops from bots found at Orthos Oilfield?", answer: "b101" },
-            { question: "What does CDF stand for?", answer: "calypso defense force" },
-            { question: "What does IFN stand for?", answer: "imperial federal navy" },
-            { question: "What is Jaedraze's avatar's first name?", answer: "Jimmy" },
-            { question: "What is Jaedraze's avatar's middle name?", answer: "Jimbobbityboo" },
-            { question: "What year is it?", answer: "2025" },
-            { question: "What items are used to craft explosive projectiles?", answer: "nanocubes" },
-            { question: "What is the name of the starting zone on Calypso?", answer: "thule" },
-            { question: "How many paint cans or textures for max success?", answer: "323" },
-            { question: "How many PED is 100 PEC worth?", answer: "1" },
-            { question: "How many PEC is 1 PED worth?", answer: "100" },
-            { question: "How many PEC is 10 PED worth?", answer: "1000" }
-        ];
+		
+        <!-- const triviaQuestions = [ -->
+            <!-- { question: "Converting 100 shrapnel results in how much universal ammo?", answer: "101" }, -->
+            <!-- { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" }, -->
+            <!-- { question: "What is 5 + 3?", answer: "8" }, -->
+            <!-- { question: "Who painted the Mona Lisa?", answer: "da vinci" }, -->
+            <!-- { question: "What is the smallest Skildek support weapon?", answer: "lancehead" }, -->
+            <!-- { question: "What amp drops from bots found at Orthos Oilfield?", answer: "b101" }, -->
+            <!-- { question: "What does CDF stand for?", answer: "calypso defense force" }, -->
+            <!-- { question: "What does IFN stand for?", answer: "imperial federal navy" }, -->
+            <!-- { question: "What is Jaedraze's avatar's first name?", answer: "Jimmy" }, -->
+            <!-- { question: "What is Jaedraze's avatar's middle name?", answer: "Jimbobbityboo" }, -->
+            <!-- { question: "What year is it?", answer: "2025" }, -->
+            <!-- { question: "What items are used to craft explosive projectiles?", answer: "nanocubes" }, -->
+            <!-- { question: "What is the name of the starting zone on Calypso?", answer: "thule" }, -->
+            <!-- { question: "How many paint cans or textures for max success?", answer: "323" }, -->
+            <!-- { question: "How many PED is 100 PEC worth?", answer: "1" }, -->
+            <!-- { question: "How many PEC is 1 PED worth?", answer: "100" }, -->
+            <!-- { question: "How many PEC is 10 PED worth?", answer: "1000" } -->
+        <!-- ]; -->
 
         let userScores = {};
         let usedQuestions = [];
@@ -120,21 +121,34 @@
 		let round = 1;
 		let questionsAsked = 0;
 		const questionsPerRound = 12;
+		let triviaQuestions = { round1: [], round2: [] };
+
+		// Load questions from JSON file
+		fetch("questions.json")
+			.then(response => response.json())
+			.then(data => {
+				triviaQuestions = data;
+				startQuestion();
+			})
+			.catch(error => console.error("Error loading trivia questions:", error));
 
 		function updateQuestionCounter() {
 			document.getElementById("question-counter").textContent = `Question: ${questionsAsked} / ${questionsPerRound}`;
 		}
 		
-        function getRandomQuestion() {
-            if (usedQuestions.length === triviaQuestions.length) {
-                usedQuestions = []; // Reset when all questions have been used
-            }
+		function getRandomQuestion() {
+			let currentRound = round === 1 ? "round1" : "round2";
+			let availableQuestions = triviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
 
-            let availableQuestions = triviaQuestions.filter(q => !usedQuestions.includes(q));
-            let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-            usedQuestions.push(question);
-            return question;
-        }
+			if (availableQuestions.length === 0) {
+				usedQuestions = []; // Reset when all questions are used
+				availableQuestions = [...triviaQuestions[currentRound]];
+			}
+
+			let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+			usedQuestions.push(question);
+			return question;
+		}
 
 		function startQuestion() {
 			if (questionsAsked >= questionsPerRound) {
@@ -235,20 +249,16 @@
                 });
         }
 
-		// Twitch Command to Start Round 2
+				// Twitch Command to Start Round 2
 		ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			if (command.toLowerCase() === "triviaround2") {
 				if (round === 1) {
 					round = 2;
 					questionsAsked = 0; // Reset for the new round
 					document.getElementById("question").textContent = "Trivia Round 2 Begins!";
-					setTimeout(startQuestion, 3000); // Start after a short delay
+					setTimeout(startQuestion, 3000);
 				}
 			}
-		};
-
-		ComfyJS.onChat = (user, message) => {
-			checkAnswer(user, message);
 		};
 
         ComfyJS.Init("jaedraze");
