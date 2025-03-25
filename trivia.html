@@ -123,15 +123,18 @@
 		const questionsPerRound = 12;
 		let triviaQuestions = { round1: [], round2: [] };
 
-		// Load questions from JSON file
 		fetch("questions.json")
 			.then(response => response.json())
 			.then(data => {
-				triviaQuestions = data;
-				startQuestion();
+				if (data && data.round1 && data.round1.length > 0) { 
+					triviaQuestions = data;
+					startQuestion();
+				} else {
+					console.error("Trivia questions not found or empty.");
+				}
 			})
 			.catch(error => console.error("Error loading trivia questions:", error));
-
+	
 		function updateQuestionCounter() {
 			document.getElementById("question-counter").textContent = `Question: ${questionsAsked} / ${questionsPerRound}`;
 		}
@@ -263,7 +266,6 @@
 
         ComfyJS.Init("jaedraze");
 
-        startQuestion();
     </script>
 </body>
 </html>
