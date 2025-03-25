@@ -140,6 +140,7 @@
 			if (questionsAsked >= questionsPerRound) {
 				document.getElementById("question").textContent = `Trivia Round ${round} Over!`;
 				clearInterval(questionTimer);
+				document.getElementById("questionWrapper").style.visibility = "visible";
 				return;
 			}
 
@@ -158,7 +159,7 @@
 			document.getElementById("timer").textContent = "2:30";
 			document.getElementById("next-question-timer").textContent = "";
 
-			let secondsLeft = 120;
+			let secondsLeft = 90;
 			questionTimer = setInterval(() => {
 				secondsLeft--;
 				document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
@@ -185,7 +186,7 @@
 		}
 
 		function startCountdown() {
-			let countdown = 300;
+			let countdown = 150;
 			updateCountdownDisplay(countdown);
 
 			countdownTimer = setInterval(() => {
