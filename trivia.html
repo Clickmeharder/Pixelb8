@@ -154,11 +154,11 @@
 
 			document.getElementById("question").textContent = activeQuestion.question;
 			document.getElementById("questionWrapper").style.visibility = "visible";
-			document.getElementById("leaderboard").style.visibility = "visible";
+			document.getElementById("leaderboard").style.visibility = "hidden";
 			document.getElementById("timer").textContent = "2:30";
 			document.getElementById("next-question-timer").textContent = "";
 
-			let secondsLeft = 150;
+			let secondsLeft = 120;
 			questionTimer = setInterval(() => {
 				secondsLeft--;
 				document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
@@ -178,7 +178,7 @@
 
 			hideQuestionTimer = setTimeout(() => {
 				document.getElementById("questionWrapper").style.visibility = "hidden";
-				document.getElementById("leaderboard").style.visibility = "hidden";
+				document.getElementById("leaderboard").style.visibility = "visible";
 			}, 10000);
 
 			startCountdown();
