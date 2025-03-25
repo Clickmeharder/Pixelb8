@@ -156,7 +156,7 @@
 			document.getElementById("question").textContent = activeQuestion.question;
 			document.getElementById("questionWrapper").style.visibility = "visible";
 			document.getElementById("leaderboard").style.visibility = "hidden";
-			document.getElementById("timer").textContent = "2:30";
+			document.getElementById("timer").textContent = "1:30";
 			document.getElementById("next-question-timer").textContent = "";
 
 			let secondsLeft = 90;
@@ -175,7 +175,7 @@
 
 			setTimeout(() => {
 				document.getElementById("question").textContent = "Next question starting soon...";
-			}, 1000);
+			}, 3000);
 
 			hideQuestionTimer = setTimeout(() => {
 				document.getElementById("questionWrapper").style.visibility = "hidden";
