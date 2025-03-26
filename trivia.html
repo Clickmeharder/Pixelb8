@@ -473,7 +473,14 @@ function displayChatMessage(user, message, flags, extra) {
         chatContainer.removeChild(chatContainer.firstChild);
     }
 }
-
+// Function to play a sound from your directory
+function playSound() {
+    const sound = new Audio("/assets/sounds/snakedie_sound1.mp3");
+    
+    sound.play().catch(error => {
+        console.error("Error playing the sound:", error);
+    });
+}
 // ComfyJS onChat event handler
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message);
@@ -491,10 +498,14 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			
             triviaSplash(); // Call the startTrivia function
         }
+		
         // Handle start trivia command
         if (command.toLowerCase() === "trivia") {
             startTrivia();
         }
+		if (command.toLowerCase() === "playsound") {
+				playSound(); // Play the sound when !playsound is typed in chat
+			}
         // Handle trivia round 2 command
         if (command.toLowerCase() === "triviaround2") {
             if (round === 1) {
