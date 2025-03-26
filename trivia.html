@@ -68,21 +68,10 @@
         #timer, #next-question-timer {font-size: 20px;font-weight: bold;color: lightblue;}
 		div#next-question-timer {position: absolute;bottom: 24%;left: 2%;}
 		
-#triviaSplash {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-}
-
 #logoContainer {
     opacity: 0;
     transform: scale(0.5) rotate(-15deg);
-    animation: logoDropIn 2.5s ease-out forwards, glowPulse 3s infinite alternate 3s;
+    animation: logoDropIn 5s ease-out forwards, glowPulse 3s infinite alternate 5s;
 }
 
 @keyframes logoDropIn {
@@ -110,7 +99,7 @@
     margin-top: 20px;
     opacity: 0;
     display: inline-block;
-    animation: textReveal 4s ease-in-out forwards;
+    animation: textReveal 4s ease-in-out forwards 5s;
 }
 
 @keyframes textReveal {
@@ -119,6 +108,10 @@
     100% { text-shadow: 0px 0px 10px #0ea4a4; }
 }
 
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+}
 		#TriviaWrapper {visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
 		#twitchchatContainer {position: absolute;left: 0;bottom: 30%;border: 1px solid #67d1d173;width: 29%;}
 		div#twitchMessagebox {text-align: left;border: 2px inset #102d2de3;max-height: 170px;}
@@ -273,29 +266,34 @@ function toggleTrivia() {
 function triviaSplash() {
     return new Promise((resolve) => {
         const splash = document.getElementById("triviaSplash");
-        // Simulate user interaction by triggering the hidden button
-        const hiddenButton = document.getElementById("hiddenButton");
-        hiddenButton.click(); // Simulate the button click
-		playSound("gameshowintro"); 
+        const logo = document.getElementById("logoContainer");
+        const splashText = document.getElementById("splashText");
+
+        playSound("gameshowintro"); // Play the sound
+
         // Make splash visible
         splash.style.display = "block";
         splash.style.visibility = "visible";
         splash.style.opacity = "1";
 
-        // Wait for 4 seconds (longer effect)
+        // Start animations after the song (10s delay)
+        setTimeout(() => {
+            logo.style.animation = "logoDropIn 2.5s ease-out forwards, glowPulse 3s infinite alternate 3s";
+            splashText.style.animation = "textReveal 4s ease-in-out forwards";
+        }, 10000); // Delay animation start until the song ends
+
+        // Hide splash **exactly at 10s**
         setTimeout(() => {
             splash.style.opacity = "0";  // Fade out
             splash.style.visibility = "hidden";
 
-
-            // Wait 1 second for fade-out, then hide completely
             setTimeout(() => {
                 splash.style.display = "none";  // Hide completely
-                resolve();  // Finish animation
-            }, 1000);
-        }, 4000); // Duration for splash screen to stay on screen
+                resolve();
+            }, 1000); // 1s fade-out time
+        }, 20000); // The song (10s) + animation duration (10s)
     }).then(() => {
-        // After the splash animation is done, show the trivia
+        // After everything finishes, show the trivia
         toggleTrivia();
     });
 }
