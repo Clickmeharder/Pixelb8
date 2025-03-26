@@ -132,6 +132,8 @@
 		<div id="twitchMessagebox">
 		</div>
 	</div>
+	<!-- Add this to your HTML to simulate user interaction -->
+<button id="hiddenButton" style="display:none;">Start Trivia</button>
 	<div id="triviaOverlay" style="">
 		<div id="triviaSplash" style="display:none;">
 			<div id="logoContainer">
@@ -271,6 +273,10 @@ function toggleTrivia() {
 function triviaSplash() {
     return new Promise((resolve) => {
         const splash = document.getElementById("triviaSplash");
+
+        // Simulate user interaction by triggering the hidden button
+        const hiddenButton = document.getElementById("hiddenButton");
+        hiddenButton.click(); // Simulate the button click
 
         // Sound effect: Intro jingle (start of splash screen)
         const introJingle = new Audio("https://www.freesound.org/data/previews/265/265659_5076638-lq.mp3");
@@ -546,7 +552,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         }
     }
 };
-triviaSplash();
 <!-- fetchTriviaQuestions(); -->
 ComfyJS.Init("jaedraze");
 
