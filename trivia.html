@@ -196,11 +196,9 @@ let triviaQuestions = { round1: [], round2: [] };
 	<!-- }) -->
 	<!-- .catch(error => console.error("Error loading trivia questions:", error)); -->
 
-// Function to fetch trivia questions only when the trivia starts
 function fetchTriviaQuestions() {
     return new Promise((resolve, reject) => {
-        // Example URL for fetching trivia questions (replace with your actual URL)
-        const questionsUrl = 'questions.json';  // Replace with actual path
+        const questionsUrl = 'questions.json'; // Replace with actual path
 
         fetch(questionsUrl)
             .then(response => {
@@ -210,11 +208,16 @@ function fetchTriviaQuestions() {
                 return response.json();
             })
             .then(data => {
-                resolve(data);  // Resolve with the questions data
+                if (data && data.round1 && data.round1.length > 0) {
+                    triviaQuestions = data;
+                    resolve(data);  // Only resolve if data is valid
+                } else {
+                    throw new Error('Invalid trivia data: Missing or empty rounds.');
+                }
             })
             .catch(error => {
                 console.error('Error fetching trivia questions:', error);
-                reject(error);  // Reject if fetching fails
+                reject(error);
             });
     });
 }
@@ -237,7 +240,6 @@ function triviaSplash() {
                 splash.style.opacity = 0;  // Fade out splash animation
                 setTimeout(() => {
                     splash.style.display = "none";  // Hide splash screen completely
-                    
                 }, 500);  // Short delay after fade-out
             }, 3000);  // Wait for 3 seconds to show splash animation
         })
