@@ -384,7 +384,7 @@ function updateLeaderboard() {
 }
 
 // Function to run splash animation, then fetch trivia questions
-function triviaSplashfetch() {
+function startTrivia() {
     console.log("Trivia should splash and fetch questions");
 
     triviaSplash() // Run splash first
@@ -399,9 +399,7 @@ function triviaSplashfetch() {
         });
 }
 
-function startTrivia() {
-	startQuestion();
-}	
+
 
 //-------------end of trivia game
 
@@ -464,10 +462,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         }
         // Handle start trivia command
         if (command.toLowerCase() === "trivia") {
-            triviaSplashfetch(); // Call the startTrivia function
-        }
-        // Handle start trivia command
-        if (command.toLowerCase() === "starttrivia") {
             startTrivia();
         }
         // Handle trivia round 2 command
