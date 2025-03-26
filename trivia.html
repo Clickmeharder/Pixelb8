@@ -473,14 +473,19 @@ function displayChatMessage(user, message, flags, extra) {
         chatContainer.removeChild(chatContainer.firstChild);
     }
 }
-// Function to play a sound from your directory
+// Preload the audio and mute it initially
+const sound = new Audio("/assets/sounds/snakedie_sound1.mp3");
+sound.muted = true;
+sound.load();
+
+// Function to play the sound when triggered by Twitch chat
 function playSound() {
-    const sound = new Audio("/assets/sounds/snakedie_sound1.mp3");
-    
+    sound.muted = false; // Unmute the audio
     sound.play().catch(error => {
         console.error("Error playing the sound:", error);
     });
 }
+
 // ComfyJS onChat event handler
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message);
