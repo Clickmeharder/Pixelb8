@@ -242,7 +242,7 @@ function triviaSplash() {
     });
 }
 // Splash screen function with animation, fetching trivia questions and starting the trivia
-function triviaSplashstart() {
+function triviaSplashfetch() {
 	console.log('Trivia should spash and fetch questions');
     // Show splash screen (you can replace this with your custom splash animation)
     const splash = document.getElementById("triviaSplash");
@@ -452,8 +452,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             triviaSplash(); // Call the startTrivia function
         }
         // Handle start trivia command
-        if (command.toLowerCase() === "triviasplashstart") {
-            triviaSplashstart(); // Call the startTrivia function
+        if (command.toLowerCase() === "triviasplashfetch") {
+            triviaSplashfetch(); // Call the startTrivia function
         }
         // Handle start trivia command
         if (command.toLowerCase() === "starttrivia") {
