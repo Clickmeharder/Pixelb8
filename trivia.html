@@ -226,14 +226,19 @@ function fetchTriviaQuestions() {
 }
 
 // Function to show splash screen with animation
+// Function to show splash screen with animation
 function triviaSplash() {
     return new Promise((resolve) => {
         const splash = document.getElementById("triviaSplash");
+
+        // Ensure it's visible and reset styles
         splash.style.display = "block";
-        splash.style.opacity = 1;  
+        splash.style.opacity = "1";
+        splash.style.transition = "opacity 0.5s ease-in-out"; // Smooth fade-in/out
 
         setTimeout(() => {
-            splash.style.opacity = 0;  // Fade out animation
+            splash.style.opacity = "0";  // Fade out animation
+
             setTimeout(() => {
                 splash.style.display = "none";  // Hide splash completely
                 resolve();  // Resolve when splash disappears
@@ -241,31 +246,20 @@ function triviaSplash() {
         }, 3000);  // Show splash for 3 seconds
     });
 }
-// Splash screen function with animation, fetching trivia questions and starting the trivia
-function triviaSplashfetch() {
-	console.log('Trivia should spash and fetch questions');
-    // Show splash screen (you can replace this with your custom splash animation)
-    const splash = document.getElementById("triviaSplash");
-    splash.style.display = "block";  // Make splash visible
-    splash.style.opacity = 1;  // Show splash with opacity
-    // Fetch trivia questions before starting the game
-    fetchTriviaQuestions()
-        .then(questions => {
-            console.log('Trivia Questions Loaded:', questions);
-            // Store the questions globally (in a window variable or elsewhere)
-            window.triviaQuestions = questions;
 
-            // Delay the start of trivia to give time for splash animation
-            setTimeout(() => {
-                splash.style.opacity = 0;  // Fade out splash animation
-                setTimeout(() => {
-                    splash.style.display = "none";  // Hide splash screen completely
-                }, 500);  // Short delay after fade-out
-            }, 3000);  // Wait for 3 seconds to show splash animation
+// Function to run splash animation, then fetch trivia questions
+function triviaSplashfetch() {
+    console.log("Trivia should splash and fetch questions");
+
+    triviaSplash() // Run splash first
+        .then(() => fetchTriviaQuestions()) // Fetch questions after splash
+        .then(questions => {
+            console.log("Trivia Questions Loaded:", questions);
+            window.triviaQuestions = questions;
+            startQuestion(); // Start the trivia after fetching
         })
         .catch(error => {
-            console.error('Error loading trivia questions:', error);
-            // Handle error (you can add a fallback splash if fetching fails)
+            console.error("Error loading trivia questions:", error);
         });
 }
 
