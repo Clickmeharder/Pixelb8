@@ -68,9 +68,23 @@
         #timer, #next-question-timer {font-size: 20px;font-weight: bold;color: lightblue;}
 		div#next-question-timer {position: absolute;bottom: 24%;left: 2%;}
 		
-#logoContainer {
+#triviaSplash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 9999;
     opacity: 0;
-    transform: scale(0.5) rotate(-15deg);
+    visibility: hidden;
+}
+		
+#logoContainer {
+    position: absolute;  /* Ensures it is positioned inside #triviaSplash */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5) rotate(-15deg);  /* Center and apply starting animation */
+    opacity: 0;
     animation: logoDropIn 5s ease-out forwards, glowPulse 3s infinite alternate 5s;
 }
 
