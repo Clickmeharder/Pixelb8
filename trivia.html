@@ -242,7 +242,32 @@ function toggleTrivia() {
         triviaContainer.style.opacity = "0";
     }
 }
-// Function to show splash screen with animation
+<!-- // Function to show splash screen with animation -->
+<!-- function triviaSplash() { -->
+    <!-- return new Promise((resolve) => { -->
+        <!-- const splash = document.getElementById("triviaSplash"); -->
+
+        <!-- // Make it visible -->
+        <!-- splash.style.display = "block"; -->
+        <!-- splash.style.visibility = "visible"; -->
+        <!-- splash.style.opacity = "1"; -->
+
+        <!-- // Wait for 6 seconds for animations to complete -->
+        <!-- setTimeout(() => { -->
+            <!-- splash.style.opacity = "0";  // Fade out -->
+            <!-- splash.style.visibility = "hidden"; -->
+
+            <!-- setTimeout(() => { -->
+                <!-- splash.style.display = "none";  // Hide completely -->
+                <!-- resolve();  // Finish animation -->
+            <!-- }, 2000);  // Match the fade-out time (2s) -->
+        <!-- }, 6000);  // Splash stays visible for 6 seconds (total duration) -->
+    <!-- }).then(() => { -->
+        <!-- // After the splash animation is done, show the trivia -->
+        <!-- toggleTrivia(); -->
+    <!-- }); -->
+<!-- } -->
+
 function triviaSplash() {
     return new Promise((resolve) => {
         const splash = document.getElementById("triviaSplash");
@@ -280,8 +305,6 @@ function triviaSplash() {
         applauseSound.play();
     });
 }
-
-
 
 
 function getRandomQuestion() {
