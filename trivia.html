@@ -276,7 +276,7 @@ function triviaSplash() {
         // Simulate user interaction by triggering the hidden button
         const hiddenButton = document.getElementById("hiddenButton");
         hiddenButton.click(); // Simulate the button click
-
+		playSound("gameshowintro"); 
         // Make splash visible
         splash.style.display = "block";
         splash.style.visibility = "visible";
@@ -473,19 +473,30 @@ function displayChatMessage(user, message, flags, extra) {
         chatContainer.removeChild(chatContainer.firstChild);
     }
 }
-// Preload the audio and mute it initially
-const sound = new Audio("/assets/sounds/snakedie_sound1.mp3");
-sound.muted = true;
-sound.load();
+// Preload sounds and store them in an object
+const sounds = {
+    snakedie: new Audio("/assets/sounds/snakedie_sound1.mp3"),
+    gameshowintro: new Audio("/assets/sounds/gameshow_intro.mp3"),
+    // Add more sounds here
+};
 
-// Function to play the sound when triggered by Twitch chat
-function playSound() {
-    sound.muted = false; // Unmute the audio
-    sound.play().catch(error => {
-        console.error("Error playing the sound:", error);
-    });
+// Ensure all sounds are loaded and muted initially
+for (const sound in sounds) {
+    sounds[sound].muted = true;
+    sounds[sound].load();
 }
-
+// Generic function to play any sound
+function playSound(name) {
+    if (sounds[name]) {
+        sounds[name].muted = false; // Unmute the sound
+        sounds[name].currentTime = 0; // Reset sound to start
+        sounds[name].play().catch(error => {
+            console.error(`Error playing ${name}:`, error);
+        });
+    } else {
+        console.error(`Sound '${name}' not found.`);
+    }
+}
 // ComfyJS onChat event handler
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message);
