@@ -388,7 +388,7 @@ function startTrivia() {
 }	
 // Function to start trivia in sequence
 function startTrivia2() {
-    triviaSplash2()
+    triviaSplash()
         .then(() => fetchTriviaQuestions())  // Fetch after splash
         .then(() => startQuestion())  // Start game after fetching
         .catch(error => console.error('Trivia start error:', error));
