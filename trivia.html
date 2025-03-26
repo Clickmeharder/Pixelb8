@@ -278,33 +278,19 @@ function displayChatMessage(user, message, flags, extra) {
     const userColor = extra.userColor || "#FFFFFF"; // Default to white if no color is set
     usernameSpan.style.color = userColor; // Apply user color dynamically
 
-    // Check flags and add badges or special labels
-    if (flags.broadcaster) {
-        const badgeSpan = document.createElement("span");
-        badgeSpan.classList.add("badge", "broadcaster");
-        badgeSpan.innerText = "Broadcaster"; // Example: Add broadcaster badge
-        chatMessage.appendChild(badgeSpan);
-    }
-    if (flags.mod) {
-        const badgeSpan = document.createElement("span");
-        badgeSpan.classList.add("badge", "mod");
-        badgeSpan.innerText = "Mod"; // Example: Add mod badge
-        chatMessage.appendChild(badgeSpan);
-    }
-    if (flags.subscriber) {
-        const badgeSpan = document.createElement("span");
-        badgeSpan.classList.add("badge", "subscriber");
-        badgeSpan.innerText = "Subscriber"; // Example: Add subscriber badge
-        chatMessage.appendChild(badgeSpan);
-    }
-
-    // Add badges from the extra parameter
+    // Add badges from the extra parameter (directly using userBadges)
     if (extra.userBadges) {
         Object.keys(extra.userBadges).forEach(badge => {
-            const badgeSpan = document.createElement("span");
-            badgeSpan.classList.add("badge");
-            badgeSpan.innerText = badge; // Customize to show badge icons if needed
-            chatMessage.appendChild(badgeSpan);
+            const badgeId = extra.userBadges[badge]; // Get badge ID from userBadges
+
+            // Create an image element for the badge and set its attributes
+            const badgeImg = document.createElement("img");
+            badgeImg.src = `https://static-cdn.jtvnw.net/badges/v1/${badgeId}/1`; // Use Twitch's badge URL pattern
+            badgeImg.alt = badge; // Set the badge type as the alt text
+            badgeImg.classList.add("badge"); // Add badge class for styling
+
+            // Append the badge image to the chat message
+            chatMessage.appendChild(badgeImg);
         });
     }
 
@@ -323,11 +309,11 @@ function displayChatMessage(user, message, flags, extra) {
     // Apply a fade effect to the chat message after a delay
     setTimeout(() => {
         chatMessage.style.opacity = '0'; // Fade out after 9 seconds
-    }, 9000);
+    }, 15000);
 
     setTimeout(() => {
         chatMessage.remove();
-    }, 4000); // Remove after 4 seconds (1 second for fading)
+    }, 15000); // Remove after 4 seconds (1 second for fading)
 
     // Limit the number of messages displayed in the chat container
     if (chatContainer.children.length > 5) {
@@ -343,7 +329,6 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
     displayChatMessage(user, message, flags, extra);  // Show message in chat box
     checkAnswer(user, message);         // Check if it's an answer
 };
-
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "triviaround2") {
 		if (round === 1) {
