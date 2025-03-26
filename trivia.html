@@ -247,24 +247,37 @@ function triviaSplash() {
     return new Promise((resolve) => {
         const splash = document.getElementById("triviaSplash");
 
-        // Make it visible
+        // Sound effect: Intro jingle (start of splash screen)
+        const introJingle = new Audio("https://www.soundjay.com/button/beep-07.wav");
+        introJingle.play();
+
+        // Make splash visible
         splash.style.display = "block";
         splash.style.visibility = "visible";
         splash.style.opacity = "1";
 
-        // Wait for 6 seconds for animations to complete
+        // Wait for 4 seconds (longer effect)
         setTimeout(() => {
             splash.style.opacity = "0";  // Fade out
             splash.style.visibility = "hidden";
 
+            // Sound effect: Explosive fade-out or transition
+            const explosionSound = new Audio("https://www.soundjay.com/button/beep-03.wav");
+            explosionSound.play();
+
+            // Wait 1 second for fade-out, then hide completely
             setTimeout(() => {
                 splash.style.display = "none";  // Hide completely
                 resolve();  // Finish animation
-            }, 2000);  // Match the fade-out time (2s)
-        }, 6000);  // Splash stays visible for 6 seconds (total duration)
+            }, 1000);
+        }, 4000); // Duration for splash screen to stay on screen
     }).then(() => {
         // After the splash animation is done, show the trivia
         toggleTrivia();
+
+        // Sound effect: Audience applause after splash disappears
+        const applauseSound = new Audio("https://www.soundjay.com/button/beep-08.wav");
+        applauseSound.play();
     });
 }
 
