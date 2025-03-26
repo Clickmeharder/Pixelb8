@@ -68,7 +68,7 @@
 		div#next-question-timer {position: absolute;bottom: 25%;left: 2%;}
 		
 		#twitchchatContainer {position: absolute;left: 0;bottom: 30%;border: 1px solid orangered;width: 38%;}
-		div#twitchMessagebox {text-align: left;border: 2px dotted #ff1b00;}
+		div#twitchMessagebox {text-align: left;border: 2px dotted #ff1b00;max-height: 170px;}
 		#username {font-weight:bold;}
 		.chatMessage {background-color: #000000c2;border: 1px dashed #696969;}
     </style>
@@ -294,9 +294,11 @@
 
 	function updateMessageStyles() {
 		const chatMessages = document.querySelectorAll(".chatMessage");
+		const totalMessages = chatMessages.length;
 
 		chatMessages.forEach((msg, index) => {
-			const opacity = 1 - (index * 0.15); // Newest = 1, Older = fade out
+			// Change the opacity calculation so the oldest messages (top) fade more
+			const opacity = (index + 1) / totalMessages; // Oldest = faded, Newest = full opacity
 			const bgBrightness = 15 + (index * 20); // Darkest = 15, Lighter as it gets older
 
 			msg.style.opacity = opacity;
