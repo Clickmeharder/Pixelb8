@@ -264,53 +264,32 @@
 // Chat message display function
 function displayChatMessage(user, message, flags, extra) {
     const chatContainer = document.getElementById("twitchMessagebox");
-
     // Create a new chat message element
     const chatMessage = document.createElement("div");
     chatMessage.classList.add("chatMessage");
 
-    // Create the username element and set its innerHTML
     const usernameSpan = document.createElement("span");
     usernameSpan.classList.add("username");
-    usernameSpan.innerHTML = user + ":";
+    usernameSpan.innerHTML = user + ": ";
 
-    // Get the userColor from the extra parameter and apply it
     const userColor = extra.userColor || "#FFFFFF"; // Default to white if no color is set
     usernameSpan.style.color = userColor; // Apply user color dynamically
-
-    // Add badges from the extra parameter (directly using userBadges)
-    if (extra.userBadges) {
-        Object.keys(extra.userBadges).forEach(badge => {
-            const badgeId = extra.userBadges[badge]; // Get badge ID from userBadges
-
-            // Create an image element for the badge and set its attributes
-            const badgeImg = document.createElement("img");
-            badgeImg.src = `https://static-cdn.jtvnw.net/badges/v1/${badgeId}/1`; // Use Twitch's badge URL pattern
-            badgeImg.alt = badge; // Set the badge type as the alt text
-            badgeImg.classList.add("badge"); // Add badge class for styling
-
-            // Append the badge image to the chat message
-            chatMessage.appendChild(badgeImg);
-        });
-    }
 
     // Create the message element and set its innerHTML
     const messageSpan = document.createElement("span");
     messageSpan.classList.add("twitchmessage");
     messageSpan.innerHTML = message;
-
+	
     // Append the username and message spans to the chat message div
     chatMessage.appendChild(usernameSpan);
     chatMessage.appendChild(messageSpan);
-
+	
     // Add the chat message to the container
     chatContainer.appendChild(chatMessage);
-
     // Apply a fade effect to the chat message after a delay
     setTimeout(() => {
         chatMessage.style.opacity = '0'; // Fade out after 9 seconds
     }, 15000);
-
     setTimeout(() => {
         chatMessage.remove();
     }, 15000); // Remove after 4 seconds (1 second for fading)
@@ -323,8 +302,7 @@ function displayChatMessage(user, message, flags, extra) {
 
 // ComfyJS onChat event handler
 ComfyJS.onChat = (user, message, color, flags, extra) => {
-    console.log("User:", user, "Message:", message, "Flags:", flags, "Badges:", extra.userBadges, "UserColor:", extra.userColor);
-
+    console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message);
     // Call the displayChatMessage function and pass flags and extra for userColor and badges
     displayChatMessage(user, message, flags, extra);  // Show message in chat box
     checkAnswer(user, message);         // Check if it's an answer
