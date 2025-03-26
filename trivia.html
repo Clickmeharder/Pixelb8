@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivia v2.99</title>
+    <title>Trivia v3.00</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -37,14 +37,14 @@
 		p#question-counter {
 			margin: 0;
 		}
-		#leaderboard {
+		#triviaboard {
 			position: absolute;
 			top: 0%;
 			font-size: 15px;
 			right: 0;
 			margin:0;
 		}
-        #leaderboard p {
+        #triviaboard p {
             background: #001f1f;
             width: 155px;
             padding: 4px;
@@ -53,7 +53,7 @@
             border: 2px outset #095656;
             border-radius: 0px;
         }
-        #leaderboard li {
+        #triviaboard li {
             margin: -6px 0 0px 0;
             text-align: center;
             padding: 4px 9px;
@@ -74,19 +74,29 @@
 			bottom: 25%;
 			left: 2%;
 		}
+		
+		#twitchchatContainer {position: absolute; left: 0; top:40%;}
+		#twitchmessageBox  {display: flex; flex-direction:row;}
+		#username {font-weight:bold;}
+		#twitchmessage {}
     </style>
 </head>
 <body>
-	<div id="next-question-timer"></div>
-	<div id="questionWrapper">
-		<p id="question-counter">Question: 0 / 12</p>
-		<div id="question">Waiting for next question...</div>
-		<div id="timer"></div>
+	<div id="twitchchatContainer">
+		<div id="twitchMessagebox">
+		</div>
 	</div>
-    <ul id="leaderboard">
-        <p>Trivia</p>
-    </ul>
-
+	<div id="TriviaWrapper">
+		<div id="next-question-timer"></div>
+		<div id="questionWrapper">
+			<p id="question-counter">Question: 0 / 12</p>
+			<div id="question">Waiting for next question...</div>
+			<div id="timer"></div>
+		</div>
+		<ul id="triviaboard">
+			<p>Trivia</p>
+		</ul>
+	</div>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <script>
 		
@@ -172,7 +182,7 @@
 
 			document.getElementById("question").textContent = activeQuestion.question;
 			document.getElementById("questionWrapper").style.visibility = "visible";
-			document.getElementById("leaderboard").style.visibility = "hidden";
+			<!-- document.getElementById("triviaboard").style.visibility = "hidden"; -->
 			document.getElementById("timer").textContent = "1:30";
 			document.getElementById("next-question-timer").textContent = "";
 
@@ -196,7 +206,7 @@
 
 			hideQuestionTimer = setTimeout(() => {
 				document.getElementById("questionWrapper").style.visibility = "hidden";
-				document.getElementById("leaderboard").style.visibility = "visible";
+				document.getElementById("triviaboard").style.visibility = "visible";
 			}, 10000);
 
 			startCountdown();
@@ -236,21 +246,39 @@
                 } else {
                     userScores[user] = (userScores[user] || 0) + 1;
                 }
-                updateLeaderboard();
+                updateTriviaboard();
             }
         }
 
         function updateLeaderboard() {
-            const leaderboardElement = document.getElementById("leaderboard");
-            leaderboardElement.innerHTML = "<p>Trivia</p>";
+            const triviaboardElement = document.getElementById("triviaboard");
+            triviaboardElement.innerHTML = "<p>Trivia</p>";
             Object.entries(userScores)
                 .sort((a, b) => b[1] - a[1])
                 .forEach(([user, score]) => {
                     const li = document.createElement("li");
                     li.textContent = `${user}: ${score} pts`;
-                    leaderboardElement.appendChild(li);
+                    triviaboardElement.appendChild(li);
                 });
         }
+
+		function displayChatMessage(user, message) {
+			const chatContainer = document.getElementById("twitchMessagebox");
+
+			// Create a new chat message element
+			const chatMessage = document.createElement("div");
+			chatMessage.classList.add("chatMessage"); // Add a class for styling
+			chatMessage.innerHTML = `<span id="username">${user}:</span> <span id="twitchmessage">${message}</span>`;
+
+			// Append message to chat container
+			chatContainer.appendChild(chatMessage);
+
+			// Remove oldest messages if more than 5 exist
+			while (chatContainer.children.length > 5) {
+				chatContainer.removeChild(chatContainer.firstChild);
+			}
+		}
+
 
 				// Twitch Command to Start Round 2
 		ComfyJS.onCommand = (user, command, message, flags, extra) => {
@@ -265,7 +293,8 @@
 		};
 
 		ComfyJS.onChat = (user, message) => {
-			checkAnswer(user, message);
+			displayChatMessage(user, message);  // Show message in chat box
+			checkAnswer(user, message);         // Check if it's an answer
 		};
 
         ComfyJS.Init("jaedraze");
