@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ovrlay-v0.43</title>
 
-    <style><!--trivia styling-->
+    <style>
         body {
             font-family: Arial, sans-serif;
             color: orangered;
@@ -68,54 +68,51 @@
         #timer, #next-question-timer {font-size: 20px;font-weight: bold;color: lightblue;}
 		div#next-question-timer {position: absolute;bottom: 24%;left: 2%;}
 		
-#triviaSplash {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 1s ease-out;
-}
+		#triviaSplash {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			text-align: center;
+			z-index: 9999;
+			opacity: 0;
+			visibility: hidden;
+			transition: opacity 1s ease-out;
+		}
 
-#logoContainer {
-    animation: logoAnimation 2s forwards;
-}
+		#logoContainer {
+			animation: logoAnimation 2s forwards;
+		}
 
-@keyframes logoAnimation {
-    0% {
-        opacity: 0;
-        transform: scale(0.5);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
+		@keyframes logoAnimation {
+			0% {
+				opacity: 0;
+				transform: scale(0.5);
+			}
+			100% {
+				opacity: 1;
+				transform: scale(1);
+			}
+		}
 
-#splashText {
-    font-size: 2em;
-    color: white;
-    margin-top: 20px;
-    opacity: 0;
-    animation: textAnimation 1s 2s forwards;
-}
+		#splashText {
+			font-size: 2em;
+			color: white;
+			margin-top: 20px;
+			opacity: 0;
+			animation: textAnimation 1s 2s forwards;
+		}
 
-@keyframes textAnimation {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-    </style>
-    <style><!--chat styling-->
-		
-		
-		
+		@keyframes textAnimation {
+			0% {
+				opacity: 0;
+			}
+			100% {
+				opacity: 1;
+			}
+		}
+
+	
 		#twitchchatContainer {position: absolute;left: 0;bottom: 30%;border: 1px solid #67d1d173;width: 29%;}
 		div#twitchMessagebox {text-align: left;border: 2px inset #102d2de3;max-height: 170px;}
 		#twitchMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
