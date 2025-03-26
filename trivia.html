@@ -446,9 +446,10 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     // Only allow streamer (jaedraze) or mods to trigger these commands
     if (user.toLowerCase() === "jaedraze" || flags.mod) {
-
+		console.log( "User:", user, "command:", command);
         // Handle start trivia command
         if (command.toLowerCase() === "triviasplash") {
+			
             triviaSplash(); // Call the startTrivia function
         }
         // Handle start trivia command
