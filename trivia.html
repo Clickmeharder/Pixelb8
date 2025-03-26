@@ -82,7 +82,7 @@
 #logoContainer {
     opacity: 0;
     transform: scale(0.5) rotate(-15deg);
-    animation: logoDropIn 1.5s ease-out forwards, glowPulse 2s infinite alternate 2.5s;
+    animation: logoDropIn 2.5s ease-out forwards, glowPulse 3s infinite alternate 3s;
 }
 
 @keyframes logoDropIn {
@@ -110,7 +110,7 @@
     margin-top: 20px;
     opacity: 0;
     display: inline-block;
-    animation: textReveal 3s ease-in-out forwards;
+    animation: textReveal 4s ease-in-out forwards;
 }
 
 @keyframes textReveal {
@@ -251,7 +251,7 @@ function triviaSplash() {
         splash.style.visibility = "visible";
         splash.style.opacity = "1";
 
-        // Wait for 4 seconds (longer effect)
+        // Wait for 6 seconds for animations to complete
         setTimeout(() => {
             splash.style.opacity = "0";  // Fade out
             splash.style.visibility = "hidden";
@@ -259,8 +259,8 @@ function triviaSplash() {
             setTimeout(() => {
                 splash.style.display = "none";  // Hide completely
                 resolve();  // Finish animation
-            }, 15000);
-        }, 4000);
+            }, 2000);  // Match the fade-out time (2s)
+        }, 6000);  // Splash stays visible for 6 seconds (total duration)
     }).then(() => {
         // After the splash animation is done, show the trivia
         toggleTrivia();
