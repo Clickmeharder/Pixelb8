@@ -551,6 +551,13 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         }
     }
 };
+// Automatically trigger the "Enable Audio" action when page loads or after user joins
+window.onload = () => {
+    // Simulate an invisible button click to enable audio
+    document.getElementById("enableAudio").click();
+	console.log('enableAudio button clicked on windowload'); // Log the joke sent to the console
+	
+};
 <!-- fetchTriviaQuestions(); -->
 ComfyJS.Init("jaedraze");
 
