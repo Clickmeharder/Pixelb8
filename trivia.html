@@ -247,21 +247,7 @@ function triviaSplash() {
     });
 }
 
-// Function to run splash animation, then fetch trivia questions
-function triviaSplashfetch() {
-    console.log("Trivia should splash and fetch questions");
 
-    triviaSplash() // Run splash first
-        .then(() => fetchTriviaQuestions()) // Fetch questions after splash
-        .then(questions => {
-            console.log("Trivia Questions Loaded:", questions);
-            window.triviaQuestions = questions;
-            startQuestion(); // Start the trivia after fetching
-        })
-        .catch(error => {
-            console.error("Error loading trivia questions:", error);
-        });
-}
 
 
 function getRandomQuestion() {
@@ -376,7 +362,23 @@ function updateLeaderboard() {
 			triviaboardElement.appendChild(li);
 		});
 }
-		
+
+// Function to run splash animation, then fetch trivia questions
+function triviaSplashfetch() {
+    console.log("Trivia should splash and fetch questions");
+
+    triviaSplash() // Run splash first
+        .then(() => fetchTriviaQuestions()) // Fetch questions after splash
+        .then(questions => {
+            console.log("Trivia Questions Loaded:", questions);
+            window.triviaQuestions = questions;
+            startQuestion(); // Start the trivia after fetching
+        })
+        .catch(error => {
+            console.error("Error loading trivia questions:", error);
+        });
+}
+
 function startTrivia() {
 	startQuestion();
 }	
