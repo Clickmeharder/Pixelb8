@@ -268,20 +268,24 @@ function displayChatMessage(user, message, color, badges) {
     const chatMessage = document.createElement("div");
     chatMessage.classList.add("chatMessage");
 
-    // Create the username element and set its innerHTML and color
+    // Create the username element and set its innerHTML
     const usernameSpan = document.createElement("span");
     usernameSpan.classList.add("username");
     usernameSpan.innerHTML = user + ":";
 
-    // Set the color of the username
-    usernameSpan.style.color = color;
+    // Check if the color exists, then apply it
+    if (color) {
+        usernameSpan.style.color = color; // Set the username color dynamically
+    } else {
+        usernameSpan.style.color = "black"; // Fallback color if none is provided
+    }
 
     // Add badges if they exist
     if (badges) {
-        badges.forEach(badge => {
+        Object.keys(badges).forEach(badge => {
             const badgeSpan = document.createElement("span");
             badgeSpan.classList.add("badge");
-            badgeSpan.innerText = badge; // You can also use an icon here
+            badgeSpan.innerText = badge; // You can customize this to show badge icons
             chatMessage.appendChild(badgeSpan);
         });
     }
@@ -311,6 +315,7 @@ function displayChatMessage(user, message, color, badges) {
     if (chatContainer.children.length > 5) {
         chatContainer.removeChild(chatContainer.firstChild);
     }
+}
 }
 		ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			if (command.toLowerCase() === "triviaround2") {
