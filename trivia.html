@@ -246,6 +246,7 @@ function triviaSplash() {
             // Handle error (you can add a fallback splash if fetching fails)
         });
 }
+
 function getRandomQuestion() {
 	let currentRound = round === 1 ? "round1" : "round2";
 	let availableQuestions = triviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
@@ -259,6 +260,7 @@ function getRandomQuestion() {
 	usedQuestions.push(question);
 	return question;
 }
+
 function startQuestion() {
 	if (questionsAsked >= questionsPerRound) {
 		document.getElementById("question").textContent = `Trivia Round ${round} Over!`;
@@ -475,7 +477,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 };
 
-fetchTriviaQuestions();
+<!-- fetchTriviaQuestions(); -->
 ComfyJS.Init("jaedraze");
 
 </script>
