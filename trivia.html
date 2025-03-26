@@ -200,7 +200,7 @@ let triviaQuestions = { round1: [], round2: [] };
 function fetchTriviaQuestions() {
     return new Promise((resolve, reject) => {
         // Example URL for fetching trivia questions (replace with your actual URL)
-        const questionsUrl = 'path_to_your_questions.json';  // Replace with actual path
+        const questionsUrl = 'questions.json';  // Replace with actual path
 
         fetch(questionsUrl)
             .then(response => {
