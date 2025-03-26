@@ -126,7 +126,7 @@
 		</div>
 	</div>
 	<div id="triviaOverlay" style="">
-		<div id="triviaSplash" style="display:block;">
+		<div id="triviaSplash" style="display:none;">
 			<div id="logoContainer">
 				<img src="../assets/images/logo/pixelbotfavicon.png" alt="Trivia Logo" id="triviaLogo" />
 			</div>
@@ -232,12 +232,13 @@ function triviaSplash() {
 
         // Ensure it's visible and reset styles
         splash.style.display = "block";
+		splash.style.visibility = "visible";
         splash.style.opacity = "1";
         splash.style.transition = "opacity 0.5s ease-in-out"; // Smooth fade-in/out
 
         setTimeout(() => {
             splash.style.opacity = "0";  // Fade out animation
-
+			splash.style.visibility = "hidden";
             setTimeout(() => {
                 splash.style.display = "none";  // Hide splash completely
                 resolve();  // Resolve when splash disappears
