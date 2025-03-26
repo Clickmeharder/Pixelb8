@@ -68,49 +68,56 @@
         #timer, #next-question-timer {font-size: 20px;font-weight: bold;color: lightblue;}
 		div#next-question-timer {position: absolute;bottom: 24%;left: 2%;}
 		
-		#triviaSplash {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			text-align: center;
-			z-index: 9999;
-			opacity: 0;
-			visibility: hidden;
-			transition: opacity 1s ease-out;
-		}
+#triviaSplash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+}
 
-		#logoContainer {
-			animation: logoAnimation 2s forwards;
-		}
+#logoContainer {
+    opacity: 0;
+    transform: scale(0.5) rotate(-15deg);
+    animation: logoDropIn 1.5s ease-out forwards, glowPulse 2s infinite alternate 2.5s;
+}
 
-		@keyframes logoAnimation {
-			0% {
-				opacity: 0;
-				transform: scale(0.5);
-			}
-			100% {
-				opacity: 1;
-				transform: scale(1);
-			}
-		}
+@keyframes logoDropIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-15deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2) rotate(5deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
 
-		#splashText {
-			font-size: 2em;
-			color: #0ea4a4;
-			margin-top: 20px;
-			opacity: 0;
-			animation: textAnimation 1s 2s forwards;
-		}
+@keyframes glowPulse {
+    0% { filter: drop-shadow(0 0 5px #0ea4a4); }
+    100% { filter: drop-shadow(0 0 15px #0ea4a4); }
+}
 
-		@keyframes textAnimation {
-			0% {
-				opacity: 0;
-			}
-			100% {
-				opacity: 1;
-			}
-		}
+#splashText {
+    font-size: 2.5em;
+    color: #0ea4a4;
+    margin-top: 20px;
+    opacity: 0;
+    display: inline-block;
+    animation: textReveal 3s ease-in-out forwards;
+}
+
+@keyframes textReveal {
+    0% { opacity: 0; transform: translateY(10px); }
+    50% { opacity: 1; transform: translateY(0px); }
+    100% { text-shadow: 0px 0px 10px #0ea4a4; }
+}
 
 	
 		#twitchchatContainer {position: absolute;left: 0;bottom: 30%;border: 1px solid #67d1d173;width: 29%;}
@@ -225,25 +232,25 @@ function fetchTriviaQuestions() {
 }
 
 // Function to show splash screen with animation
-// Function to show splash screen with animation
 function triviaSplash() {
     return new Promise((resolve) => {
         const splash = document.getElementById("triviaSplash");
 
-        // Ensure it's visible and reset styles
+        // Make it visible
         splash.style.display = "block";
-		splash.style.visibility = "visible";
+        splash.style.visibility = "visible";
         splash.style.opacity = "1";
-        splash.style.transition = "opacity 0.5s ease-in-out"; // Smooth fade-in/out
 
+        // Wait for 4 seconds (longer effect)
         setTimeout(() => {
-            splash.style.opacity = "0";  // Fade out animation
-			splash.style.visibility = "hidden";
+            splash.style.opacity = "0";  // Fade out
+            splash.style.visibility = "hidden";
+
             setTimeout(() => {
-                splash.style.display = "none";  // Hide splash completely
-                resolve();  // Resolve when splash disappears
-            }, 500);
-        }, 3000);  // Show splash for 3 seconds
+                splash.style.display = "none";  // Hide completely
+                resolve();  // Finish animation
+            }, 1000);
+        }, 4000);
     });
 }
 
