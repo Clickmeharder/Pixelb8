@@ -380,13 +380,7 @@ function updateLeaderboard() {
 function startTrivia() {
 	startQuestion();
 }	
-// Function to start trivia in sequence
-function startTrivia2() {
-    triviaSplash()
-        .then(() => fetchTriviaQuestions())  // Fetch after splash
-        .then(() => startQuestion())  // Start game after fetching
-        .catch(error => console.error('Trivia start error:', error));
-}
+
 //-------------end of trivia game
 
 //--------	Chat ---|
@@ -447,17 +441,13 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             triviaSplash(); // Call the startTrivia function
         }
         // Handle start trivia command
-        if (command.toLowerCase() === "triviasplashfetch") {
+        if (command.toLowerCase() === "trivia") {
             triviaSplashfetch(); // Call the startTrivia function
         }
         // Handle start trivia command
         if (command.toLowerCase() === "starttrivia") {
-            startTrivia(); // Call the startTrivia function
+            startTrivia();
         }
-        // Handle start trivia command
-        if (command.toLowerCase() === "starttrivia2") {
-            startTrivia2(); // Call the startTrivia function
-        }		
         // Handle trivia round 2 command
         if (command.toLowerCase() === "triviaround2") {
             if (round === 1) {
