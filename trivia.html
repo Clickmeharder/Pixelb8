@@ -133,7 +133,7 @@
 		</div>
 	</div>
 	<!-- Add this to your HTML to simulate user interaction -->
-<button id="enableAudio" style="display:none;">Enable Audio</button>
+<button id="hiddeninteractButton" style="display:none;">Enable Audio</button>
 	<div id="triviaOverlay" style="">
 		<div id="triviaSplash" style="display:none;">
 			<div id="logoContainer">
@@ -274,7 +274,7 @@ function triviaSplash() {
     return new Promise((resolve) => {
         const splash = document.getElementById("triviaSplash");
         // Simulate user interaction by triggering the hidden button
-        const hiddenButton = document.getElementById("hiddenButton");
+        const hiddenButton = document.getElementById("hiddeninteractButton");
         hiddenButton.click(); // Simulate the button click
 
         // Make splash visible
@@ -473,14 +473,19 @@ function displayChatMessage(user, message, flags, extra) {
         chatContainer.removeChild(chatContainer.firstChild);
     }
 }
-// Function to play a sound from your directory
+// Preload the audio and mute it initially
+const sound = new Audio("/assets/sounds/snakedie_sound1.mp3");
+sound.muted = true;
+sound.load();
+
+// Function to play the sound when triggered by Twitch chat
 function playSound() {
-    const sound = new Audio("/assets/sounds/snakedie_sound1.mp3");
-    
+    sound.muted = false; // Unmute the audio
     sound.play().catch(error => {
         console.error("Error playing the sound:", error);
     });
 }
+
 // ComfyJS onChat event handler
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message);
