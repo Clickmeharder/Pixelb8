@@ -273,14 +273,9 @@ function toggleTrivia() {
 function triviaSplash() {
     return new Promise((resolve) => {
         const splash = document.getElementById("triviaSplash");
-
         // Simulate user interaction by triggering the hidden button
         const hiddenButton = document.getElementById("hiddenButton");
         hiddenButton.click(); // Simulate the button click
-
-        // Sound effect: Intro jingle (start of splash screen)
-        const introJingle = new Audio("https://www.freesound.org/data/previews/265/265659_5076638-lq.mp3");
-        introJingle.play();
 
         // Make splash visible
         splash.style.display = "block";
@@ -292,9 +287,6 @@ function triviaSplash() {
             splash.style.opacity = "0";  // Fade out
             splash.style.visibility = "hidden";
 
-            // Sound effect: Explosive fade-out or transition
-            const explosionSound = new Audio("https://www.freesound.org/data/previews/433/433674_6050732-lq.mp3");
-            explosionSound.play();
 
             // Wait 1 second for fade-out, then hide completely
             setTimeout(() => {
@@ -305,10 +297,6 @@ function triviaSplash() {
     }).then(() => {
         // After the splash animation is done, show the trivia
         toggleTrivia();
-
-        // Sound effect: Audience applause after splash disappears
-        const applauseSound = new Audio("https://www.freesound.org/data/previews/401/401407_6668850-lq.mp3");
-        applauseSound.play();
     });
 }
 
