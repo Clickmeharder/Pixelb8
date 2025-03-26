@@ -247,7 +247,19 @@ function triviaSplash() {
             // Handle error (you can add a fallback splash if fetching fails)
         });
 }
+function getRandomQuestion() {
+	let currentRound = round === 1 ? "round1" : "round2";
+	let availableQuestions = triviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
 
+	if (availableQuestions.length === 0) {
+		usedQuestions = []; // Reset when all questions are used
+		availableQuestions = [...triviaQuestions[currentRound]];
+	}
+
+	let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+	usedQuestions.push(question);
+	return question;
+}
 function startQuestion() {
 	if (questionsAsked >= questionsPerRound) {
 		document.getElementById("question").textContent = `Trivia Round ${round} Over!`;
@@ -278,19 +290,7 @@ function startQuestion() {
 	}, 1000);
 }
 
-function getRandomQuestion() {
-	let currentRound = round === 1 ? "round1" : "round2";
-	let availableQuestions = triviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
 
-	if (availableQuestions.length === 0) {
-		usedQuestions = []; // Reset when all questions are used
-		availableQuestions = [...triviaQuestions[currentRound]];
-	}
-
-	let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-	usedQuestions.push(question);
-	return question;
-}
 
 function startCountdown() {
 	let countdown = 150;
