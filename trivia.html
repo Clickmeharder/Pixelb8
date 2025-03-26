@@ -69,6 +69,7 @@
 		
 		#twitchchatContainer {position: absolute;left: 0;bottom: 30%;border: 1px solid orangered;width: 30%;}
 		div#twitchMessagebox {text-align: left;border: 2px dotted #ff1b00;max-height: 170px;}
+		#twitchMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
 		#username {font-weight:bold;}
 		.chatMessage {background-color: #000000c2;border: 1px dashed #696969;}
     </style>
@@ -260,52 +261,57 @@
 //-------------end of trivia game
 
 //--------	Chat ---|
-	function displayChatMessage(user, message) {
-		const chatContainer = document.getElementById("twitchMessagebox");
+function displayChatMessage(user, message, color, badges) {
+    const chatContainer = document.getElementById("twitchMessagebox");
 
-		// Create a new chat message element
-		const chatMessage = document.createElement("div");
-		chatMessage.classList.add("chatMessage");
+    // Create a new chat message element
+    const chatMessage = document.createElement("div");
+    chatMessage.classList.add("chatMessage");
 
-		// Create the username element and set its innerHTML directly
-		const usernameSpan = document.createElement("span");
-		usernameSpan.classList.add("username");
-		usernameSpan.innerHTML = user + ":";
+    // Create the username element and set its innerHTML and color
+    const usernameSpan = document.createElement("span");
+    usernameSpan.classList.add("username");
+    usernameSpan.innerHTML = user + ":";
 
-		// Create the message element and set its innerHTML directly
-		const messageSpan = document.createElement("span");
-		messageSpan.classList.add("twitchmessage");
-		messageSpan.innerHTML = message;
+    // Set the color of the username
+    usernameSpan.style.color = color;
 
-		// Append the username and message spans to the chat message div
-		chatMessage.appendChild(usernameSpan);
-		chatMessage.appendChild(messageSpan);
+    // Add badges if they exist
+    if (badges) {
+        badges.forEach(badge => {
+            const badgeSpan = document.createElement("span");
+            badgeSpan.classList.add("badge");
+            badgeSpan.innerText = badge; // You can also use an icon here
+            chatMessage.appendChild(badgeSpan);
+        });
+    }
 
-		// Add the chat message to the container
-		chatContainer.appendChild(chatMessage);
+    // Create the message element and set its innerHTML
+    const messageSpan = document.createElement("span");
+    messageSpan.classList.add("twitchmessage");
+    messageSpan.innerHTML = message;
 
-		// Remove older messages if there are more than 5
-		while (chatContainer.children.length > 5) {
-			chatContainer.removeChild(chatContainer.firstChild);
-		}
+    // Append the username and message spans to the chat message div
+    chatMessage.appendChild(usernameSpan);
+    chatMessage.appendChild(messageSpan);
 
-		updateMessageStyles();
-	}
+    // Add the chat message to the container
+    chatContainer.appendChild(chatMessage);
 
-	function updateMessageStyles() {
-		const chatMessages = document.querySelectorAll(".chatMessage");
-		const totalMessages = chatMessages.length;
+    // Apply a fade effect to the chat message after a delay
+    setTimeout(() => {
+        chatMessage.style.opacity = '0'; // Fade out after 3 seconds
+    }, 3000);
 
-		chatMessages.forEach((msg, index) => {
-			// Change the opacity calculation so the oldest messages (top) fade more
-			const opacity = (index + 1) / totalMessages; // Oldest = faded, Newest = full opacity
-			//const bgBrightness = 15 + (index * 20); // Darkest = 15, Lighter as it gets older
+    setTimeout(() => {
+        chatMessage.remove();
+    }, 4000); // Remove after 4 seconds (1 second for fading)
 
-			msg.style.opacity = opacity;
-			//msg.style.backgroundColor = `rgb(${bgBrightness}, ${bgBrightness}, ${bgBrightness})`;
-		});
-	}
-
+    // Limit the number of messages displayed in the chat container
+    if (chatContainer.children.length > 5) {
+        chatContainer.removeChild(chatContainer.firstChild);
+    }
+}
 		ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			if (command.toLowerCase() === "triviaround2") {
 				if (round === 1) {
@@ -317,8 +323,8 @@
 			}
 		};
 
-		ComfyJS.onChat = (user, message) => {
-			displayChatMessage(user, message);  // Show message in chat box
+		ComfyJS.onChat = (user, message, color, badges) => {
+			displayChatMessage(user, message, color, badges);  // Show message in chat box
 			checkAnswer(user, message);         // Check if it's an answer
 		};
 	
