@@ -113,8 +113,10 @@
     margin-top: 20px;
     opacity: 0;
     display: inline-block;
-    animation: textReveal 4s ease-in-out forwards 5s;
+    animation: textReveal 4s ease-in-out forwards;
+    animation-delay: 12s; /* Match the delay in JS */
 }
+
 
 @keyframes textReveal {
     0% { opacity: 0; transform: translateY(10px); }
@@ -293,10 +295,10 @@ function triviaSplash() {
         // Start animations after the song (10s delay)
         setTimeout(() => {
             logo.style.animation = "logoDropIn 2.5s ease-out forwards, glowPulse 3s infinite alternate 3s";
-            splashText.style.animation = "textReveal 4s ease-in-out forwards";
+            splashText.style.animation = "textReveal 4s ease-in-out forwards"; // No need for setTimeout, CSS handles delay now
         }, 10000); // Delay animation start until the song ends
 
-        // Hide splash **exactly at 10s**
+        // Hide splash **exactly at 20s**
         setTimeout(() => {
             splash.style.opacity = "0";  // Fade out
             splash.style.visibility = "hidden";
@@ -307,8 +309,7 @@ function triviaSplash() {
             }, 1000); // 1s fade-out time
         }, 20000); // The song (10s) + animation duration (10s)
     }).then(() => {
-        // After everything finishes, show the trivia
-        toggleTrivia();
+        toggleTrivia(); // Show trivia after splash disappears
     });
 }
 
