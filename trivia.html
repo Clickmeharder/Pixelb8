@@ -299,10 +299,10 @@
 		chatMessages.forEach((msg, index) => {
 			// Change the opacity calculation so the oldest messages (top) fade more
 			const opacity = (index + 1) / totalMessages; // Oldest = faded, Newest = full opacity
-			const bgBrightness = 15 + (index * 20); // Darkest = 15, Lighter as it gets older
+			//const bgBrightness = 15 + (index * 20); // Darkest = 15, Lighter as it gets older
 
 			msg.style.opacity = opacity;
-			msg.style.backgroundColor = `rgb(${bgBrightness}, ${bgBrightness}, ${bgBrightness})`;
+			//msg.style.backgroundColor = `rgb(${bgBrightness}, ${bgBrightness}, ${bgBrightness})`;
 		});
 	}
 
