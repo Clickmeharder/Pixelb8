@@ -225,7 +225,6 @@ function triviaSplash() {
     const splash = document.getElementById("triviaSplash");
     splash.style.display = "block";  // Make splash visible
     splash.style.opacity = 1;  // Show splash with opacity
-
     // Fetch trivia questions before starting the game
     fetchTriviaQuestions()
         .then(questions => {
@@ -238,7 +237,7 @@ function triviaSplash() {
                 splash.style.opacity = 0;  // Fade out splash animation
                 setTimeout(() => {
                     splash.style.display = "none";  // Hide splash screen completely
-                    startQuestion();  // Start the trivia questions
+                    
                 }, 500);  // Short delay after fade-out
             }, 3000);  // Wait for 3 seconds to show splash animation
         })
@@ -359,9 +358,9 @@ function updateLeaderboard() {
 		});
 }
 		
-// Trivia starting function
+
 function startTrivia() {
-    triviaSplash();  // Display splash animation
+	startQuestion();
 }	
 //-------------end of trivia game
 
@@ -418,7 +417,11 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     if (user.toLowerCase() === "jaedraze" || flags.mod) {
 
         // Handle start trivia command
-        if (command.toLowerCase() === "trivia") {
+        if (command.toLowerCase() === "trivia splash") {
+            triviaSplash(); // Call the startTrivia function
+        }
+        // Handle start trivia command
+        if (command.toLowerCase() === "trivia start") {
             startTrivia(); // Call the startTrivia function
         }    
         // Handle trivia round 2 command
@@ -472,7 +475,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 };
 
-
+fetchTriviaQuestions();
 ComfyJS.Init("jaedraze");
 
 </script>
