@@ -419,15 +419,15 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     if (user.toLowerCase() === "jaedraze" || flags.mod) {
 
         // Handle start trivia command
-        if (command.toLowerCase() === "trivia splash") {
+        if (command.toLowerCase() === "triviasplash") {
             triviaSplash(); // Call the startTrivia function
         }
         // Handle start trivia command
-        if (command.toLowerCase() === "trivia start") {
+        if (command.toLowerCase() === "triviastart") {
             startTrivia(); // Call the startTrivia function
         }    
         // Handle trivia round 2 command
-        if (command.toLowerCase() === "trivia round 2") {
+        if (command.toLowerCase() === "triviaround2") {
             if (round === 1) {
                 round = 2;
                 questionsAsked = 0; // Reset for the new round
