@@ -125,8 +125,7 @@
 		<div id="twitchMessagebox">
 		</div>
 	</div>
-	<div id="TriviaWrapper">
-		<!-- Splash screen content -->
+	<div id="triviaOverlay" style="">
 		<div id="triviaSplash" style="display:none;">
 			<div id="logoContainer">
 				<!-- Your trivia logo or text here -->
@@ -134,15 +133,18 @@
 			</div>
 			<div id="splashText">Get Ready for the Trivia!</div>
 		</div>
-		<div id="timeuntil-nextQ"></div>
-		<div id="questionWrapper">
-			<p id="question-counter">Question: 0 / 12</p>
-			<div id="question">Waiting for next question...</div>
-			<div id="timer"></div>
+		<div id="TriviaWrapper">
+			<!-- Splash screen content -->
+			<div id="timeuntil-nextQ"></div>
+			<div id="questionWrapper">
+				<p id="question-counter">Question: 0 / 12</p>
+				<div id="question">Waiting for next question...</div>
+				<div id="timer"></div>
+			</div>
+			<ul id="triviaboard">
+				<p>Trivia</p>
+			</ul>
 		</div>
-		<ul id="triviaboard">
-			<p>Trivia</p>
-		</ul>
 	</div>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
     <script>
