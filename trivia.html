@@ -196,6 +196,7 @@ let triviaQuestions = { round1: [], round2: [] };
 	<!-- }) -->
 	<!-- .catch(error => console.error("Error loading trivia questions:", error)); -->
 
+// Function to fetch trivia questions
 function fetchTriviaQuestions() {
     return new Promise((resolve, reject) => {
         const questionsUrl = 'questions.json'; // Replace with actual path
@@ -209,8 +210,8 @@ function fetchTriviaQuestions() {
             })
             .then(data => {
                 if (data && data.round1 && data.round1.length > 0) {
-                    triviaQuestions = data;
-                    resolve(data);  // Only resolve if data is valid
+                    window.triviaQuestions = data;  // Store globally
+                    resolve(data);  
                 } else {
                     throw new Error('Invalid trivia data: Missing or empty rounds.');
                 }
@@ -222,32 +223,23 @@ function fetchTriviaQuestions() {
     });
 }
 
-// Splash screen function with animation, fetching trivia questions and starting the trivia
+// Function to show splash screen with animation
 function triviaSplash() {
-    // Show splash screen (you can replace this with your custom splash animation)
-    const splash = document.getElementById("triviaSplash");
-    splash.style.display = "block";  // Make splash visible
-    splash.style.opacity = 1;  // Show splash with opacity
-    // Fetch trivia questions before starting the game
-    fetchTriviaQuestions()
-        .then(questions => {
-            console.log('Trivia Questions Loaded:', questions);
-            // Store the questions globally (in a window variable or elsewhere)
-            window.triviaQuestions = questions;
+    return new Promise((resolve) => {
+        const splash = document.getElementById("triviaSplash");
+        splash.style.display = "block";
+        splash.style.opacity = 1;  
 
-            // Delay the start of trivia to give time for splash animation
+        setTimeout(() => {
+            splash.style.opacity = 0;  // Fade out animation
             setTimeout(() => {
-                splash.style.opacity = 0;  // Fade out splash animation
-                setTimeout(() => {
-                    splash.style.display = "none";  // Hide splash screen completely
-                }, 500);  // Short delay after fade-out
-            }, 3000);  // Wait for 3 seconds to show splash animation
-        })
-        .catch(error => {
-            console.error('Error loading trivia questions:', error);
-            // Handle error (you can add a fallback splash if fetching fails)
-        });
+                splash.style.display = "none";  // Hide splash completely
+                resolve();  // Resolve when splash disappears
+            }, 500);
+        }, 3000);  // Show splash for 3 seconds
+    });
 }
+
 
 function getRandomQuestion() {
 	let currentRound = round === 1 ? "round1" : "round2";
@@ -363,9 +355,13 @@ function updateLeaderboard() {
 }
 		
 
+// Function to start trivia in sequence
 function startTrivia() {
-	startQuestion();
-}	
+    triviaSplash()
+        .then(() => fetchTriviaQuestions())  // Fetch after splash
+        .then(() => startQuestion())  // Start game after fetching
+        .catch(error => console.error('Trivia start error:', error));
+}
 //-------------end of trivia game
 
 //--------	Chat ---|
