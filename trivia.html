@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ovrlay v0.13</title>
+    <title>Ovrlay-v0.23</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -262,8 +262,7 @@
 
 //--------	Chat ---|
 // Chat message display function
-// Chat message display function
-function displayChatMessage(user, message, color, badges) {
+function displayChatMessage(user, message, flags, extra) {
     const chatContainer = document.getElementById("twitchMessagebox");
 
     // Create a new chat message element
@@ -275,35 +274,36 @@ function displayChatMessage(user, message, color, badges) {
     usernameSpan.classList.add("username");
     usernameSpan.innerHTML = user + ":";
 
-    // Debugging log to check if color exists
-    console.log("Received color:", color);
+    // Get the userColor from the extra parameter and apply it
+    const userColor = extra.userColor || "#FFFFFF"; // Default to white if no color is set
+    usernameSpan.style.color = userColor; // Apply user color dynamically
 
-    // Extract color if it's an object
-    if (typeof color === 'object' && color !== null) {
-        // Check if color is from badges or user text color
-        if (color.subscriber) {
-            usernameSpan.style.color = "#2BFF00"; // Subscriber color
-        } else if (color.broadcaster) {
-            usernameSpan.style.color = "#FF0000"; // Broadcaster color
-        } else if (color.mod) {
-            usernameSpan.style.color = "#00FFFF"; // Mod color
-        } else {
-            usernameSpan.style.color = "#FFFFFF"; // Default color
-        }
-    } else {
-        // If color is passed as a string (hex or named color), apply it
-        usernameSpan.style.color = color || "black"; // Default color as fallback
+    // Check flags and add badges or special labels
+    if (flags.broadcaster) {
+        const badgeSpan = document.createElement("span");
+        badgeSpan.classList.add("badge", "broadcaster");
+        badgeSpan.innerText = "Broadcaster"; // Example: Add broadcaster badge
+        chatMessage.appendChild(badgeSpan);
+    }
+    if (flags.mod) {
+        const badgeSpan = document.createElement("span");
+        badgeSpan.classList.add("badge", "mod");
+        badgeSpan.innerText = "Mod"; // Example: Add mod badge
+        chatMessage.appendChild(badgeSpan);
+    }
+    if (flags.subscriber) {
+        const badgeSpan = document.createElement("span");
+        badgeSpan.classList.add("badge", "subscriber");
+        badgeSpan.innerText = "Subscriber"; // Example: Add subscriber badge
+        chatMessage.appendChild(badgeSpan);
     }
 
-    // Debugging log to check badges
-    console.log("Received badges:", badges);
-
-    // Add badges if they exist
-    if (badges) {
-        Object.keys(badges).forEach(badge => {
+    // Add badges from the extra parameter
+    if (extra.userBadges) {
+        Object.keys(extra.userBadges).forEach(badge => {
             const badgeSpan = document.createElement("span");
             badgeSpan.classList.add("badge");
-            badgeSpan.innerText = badge; // You can customize this to show badge icons
+            badgeSpan.innerText = badge; // Customize to show badge icons if needed
             chatMessage.appendChild(badgeSpan);
         });
     }
@@ -322,7 +322,7 @@ function displayChatMessage(user, message, color, badges) {
 
     // Apply a fade effect to the chat message after a delay
     setTimeout(() => {
-        chatMessage.style.opacity = '0'; // Fade out after 3 seconds
+        chatMessage.style.opacity = '0'; // Fade out after 9 seconds
     }, 9000);
 
     setTimeout(() => {
@@ -336,9 +336,11 @@ function displayChatMessage(user, message, color, badges) {
 }
 
 // ComfyJS onChat event handler
-ComfyJS.onChat = (user, message, color, badges) => {
-    console.log("User:", user, "Message:", message, "Color:", color, "Badges:", badges);
-    displayChatMessage(user, message, color, badges);  // Show message in chat box
+ComfyJS.onChat = (user, message, color, flags, extra) => {
+    console.log("User:", user, "Message:", message, "Flags:", flags, "Badges:", extra.userBadges, "UserColor:", extra.userColor);
+
+    // Call the displayChatMessage function and pass flags and extra for userColor and badges
+    displayChatMessage(user, message, flags, extra);  // Show message in chat box
     checkAnswer(user, message);         // Check if it's an answer
 };
 
