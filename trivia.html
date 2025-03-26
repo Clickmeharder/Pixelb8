@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ovrlay v0.03</title>
+    <title>Ovrlay v0.13</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -262,6 +262,7 @@
 
 //--------	Chat ---|
 // Chat message display function
+// Chat message display function
 function displayChatMessage(user, message, color, badges) {
     const chatContainer = document.getElementById("twitchMessagebox");
 
@@ -277,11 +278,21 @@ function displayChatMessage(user, message, color, badges) {
     // Debugging log to check if color exists
     console.log("Received color:", color);
 
-    // Check if the color exists, then apply it
-    if (color) {
-        usernameSpan.style.color = color; // Set the username color dynamically
+    // Extract color if it's an object
+    if (typeof color === 'object' && color !== null) {
+        // Check if color is from badges or user text color
+        if (color.subscriber) {
+            usernameSpan.style.color = "#2BFF00"; // Subscriber color
+        } else if (color.broadcaster) {
+            usernameSpan.style.color = "#FF0000"; // Broadcaster color
+        } else if (color.mod) {
+            usernameSpan.style.color = "#00FFFF"; // Mod color
+        } else {
+            usernameSpan.style.color = "#FFFFFF"; // Default color
+        }
     } else {
-        usernameSpan.style.color = "black"; // Fallback color if none is provided
+        // If color is passed as a string (hex or named color), apply it
+        usernameSpan.style.color = color || "black"; // Default color as fallback
     }
 
     // Debugging log to check badges
@@ -326,11 +337,10 @@ function displayChatMessage(user, message, color, badges) {
 
 // ComfyJS onChat event handler
 ComfyJS.onChat = (user, message, color, badges) => {
-	console.log("User:", user, "Message:", message, "Color:", color, "Badges:", badges);
-	displayChatMessage(user, message, color, badges);  // Show message in chat box
-	checkAnswer(user, message);         // Check if it's an answer
+    console.log("User:", user, "Message:", message, "Color:", color, "Badges:", badges);
+    displayChatMessage(user, message, color, badges);  // Show message in chat box
+    checkAnswer(user, message);         // Check if it's an answer
 };
-
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "triviaround2") {
