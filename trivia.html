@@ -261,6 +261,7 @@
 //-------------end of trivia game
 
 //--------	Chat ---|
+// Chat message display function
 function displayChatMessage(user, message, color, badges) {
     const chatContainer = document.getElementById("twitchMessagebox");
 
@@ -273,12 +274,18 @@ function displayChatMessage(user, message, color, badges) {
     usernameSpan.classList.add("username");
     usernameSpan.innerHTML = user + ":";
 
+    // Debugging log to check if color exists
+    console.log("Received color:", color);
+
     // Check if the color exists, then apply it
     if (color) {
         usernameSpan.style.color = color; // Set the username color dynamically
     } else {
         usernameSpan.style.color = "black"; // Fallback color if none is provided
     }
+
+    // Debugging log to check badges
+    console.log("Received badges:", badges);
 
     // Add badges if they exist
     if (badges) {
@@ -305,7 +312,7 @@ function displayChatMessage(user, message, color, badges) {
     // Apply a fade effect to the chat message after a delay
     setTimeout(() => {
         chatMessage.style.opacity = '0'; // Fade out after 3 seconds
-    }, 3000);
+    }, 9000);
 
     setTimeout(() => {
         chatMessage.remove();
@@ -316,25 +323,29 @@ function displayChatMessage(user, message, color, badges) {
         chatContainer.removeChild(chatContainer.firstChild);
     }
 }
-		ComfyJS.onCommand = (user, command, message, flags, extra) => {
-			if (command.toLowerCase() === "triviaround2") {
-				if (round === 1) {
-					round = 2;
-					questionsAsked = 0; // Reset for the new round
-					document.getElementById("question").textContent = "Trivia Round 2 Begins!";
-					setTimeout(startQuestion, 3000);
-				}
-			}
-		};
 
-		ComfyJS.onChat = (user, message, color, badges) => {
-			displayChatMessage(user, message, color, badges);  // Show message in chat box
-			checkAnswer(user, message);         // Check if it's an answer
-		};
-	
-        ComfyJS.Init("jaedraze");
+// ComfyJS onChat event handler
+ComfyJS.onChat = (user, message, color, badges) => {
+	console.log("User:", user, "Message:", message, "Color:", color, "Badges:", badges);
+	displayChatMessage(user, message, color, badges);  // Show message in chat box
+	checkAnswer(user, message);         // Check if it's an answer
+};
 
-    </script>
+
+ComfyJS.onCommand = (user, command, message, flags, extra) => {
+	if (command.toLowerCase() === "triviaround2") {
+		if (round === 1) {
+			round = 2;
+			questionsAsked = 0; // Reset for the new round
+			document.getElementById("question").textContent = "Trivia Round 2 Begins!";
+			setTimeout(startQuestion, 3000);
+		}
+	}
+};
+
+ComfyJS.Init("jaedraze");
+
+</script>
 </body>
 </html>
 
