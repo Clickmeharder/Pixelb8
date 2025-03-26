@@ -114,7 +114,6 @@
     opacity: 0;
     display: inline-block;
     animation: textReveal 4s ease-in-out forwards;
-    animation-delay: 12s; /* Match the delay in JS */
 }
 
 
@@ -278,7 +277,6 @@ function toggleTrivia() {
         <!-- toggleTrivia(); -->
     <!-- }); -->
 <!-- } -->
-
 function triviaSplash() {
     return new Promise((resolve) => {
         const splash = document.getElementById("triviaSplash");
@@ -294,8 +292,13 @@ function triviaSplash() {
 
         // Start animations after the song (10s delay)
         setTimeout(() => {
+            logo.style.animation = "none"; // Reset animation
+            splashText.style.animation = "none"; // Reset animation
+            void splashText.offsetWidth; // Force reflow
+            void logo.offsetWidth; // Force reflow
+
             logo.style.animation = "logoDropIn 2.5s ease-out forwards, glowPulse 3s infinite alternate 3s";
-            splashText.style.animation = "textReveal 4s ease-in-out forwards"; // No need for setTimeout, CSS handles delay now
+            splashText.style.animation = "textReveal 4s ease-in-out forwards";
         }, 10000); // Delay animation start until the song ends
 
         // Hide splash **exactly at 20s**
@@ -312,7 +315,6 @@ function triviaSplash() {
         toggleTrivia(); // Show trivia after splash disappears
     });
 }
-
 
 function getRandomQuestion() {
 	let currentRound = round === 1 ? "round1" : "round2";
