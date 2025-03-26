@@ -76,9 +76,9 @@
 		}
 		
 		#twitchchatContainer {position: absolute; left: 0; top:40%;}
-		#twitchmessageBox  {display: flex; flex-direction:row;}
+		div#twitchMessagebox {width: 32%;text-align: left;border: 2px dotted #ff1b00;}
 		#username {font-weight:bold;}
-		#twitchmessage {}
+		.chatMessage {background-color: #000000c2;border: 1px dashed #696969;}
     </style>
 </head>
 <body>
@@ -98,6 +98,9 @@
 		</ul>
 	</div>
     <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
+    <script>
+
+    </script>
     <script>
 		
         <!-- const triviaQuestions = [ -->
@@ -119,7 +122,8 @@
             <!-- { question: "How many PEC is 1 PED worth?", answer: "100" }, -->
             <!-- { question: "How many PEC is 10 PED worth?", answer: "1000" } -->
         <!-- ]; -->
-
+//--------- TRIVIA -----------
+//trivia game code starts here
         let userScores = {};
         let usedQuestions = [];
         let activeQuestion = null;
@@ -261,26 +265,53 @@
                     triviaboardElement.appendChild(li);
                 });
         }
+//-------------end of trivia game
 
-		function displayChatMessage(user, message) {
-			const chatContainer = document.getElementById("twitchMessagebox");
+//--------	Chat ---|
+	function displayChatMessage(user, message) {
+		const chatContainer = document.getElementById("twitchMessagebox");
 
-			// Create a new chat message element
-			const chatMessage = document.createElement("div");
-			chatMessage.classList.add("chatMessage"); // Add a class for styling
-			chatMessage.innerHTML = `<span id="username">${user}:</span> <span id="twitchmessage">${message}</span>`;
+		// Create a new chat message element
+		const chatMessage = document.createElement("div");
+		chatMessage.classList.add("chatMessage");
 
-			// Append message to chat container
-			chatContainer.appendChild(chatMessage);
+		// Create the username element and set its innerHTML directly
+		const usernameSpan = document.createElement("span");
+		usernameSpan.classList.add("username");
+		usernameSpan.innerHTML = user + ":";
 
-			// Remove oldest messages if more than 5 exist
-			while (chatContainer.children.length > 5) {
-				chatContainer.removeChild(chatContainer.firstChild);
-			}
+		// Create the message element and set its innerHTML directly
+		const messageSpan = document.createElement("span");
+		messageSpan.classList.add("twitchmessage");
+		messageSpan.innerHTML = message;
+
+		// Append the username and message spans to the chat message div
+		chatMessage.appendChild(usernameSpan);
+		chatMessage.appendChild(messageSpan);
+
+		// Add the chat message to the container
+		chatContainer.appendChild(chatMessage);
+
+		// Remove older messages if there are more than 5
+		while (chatContainer.children.length > 5) {
+			chatContainer.removeChild(chatContainer.firstChild);
 		}
 
+		updateMessageStyles();
+	}
 
-				// Twitch Command to Start Round 2
+	function updateMessageStyles() {
+		const chatMessages = document.querySelectorAll(".chatMessage");
+
+		chatMessages.forEach((msg, index) => {
+			const opacity = 1 - (index * 0.15); // Newest = 1, Older = fade out
+			const bgBrightness = 15 + (index * 20); // Darkest = 15, Lighter as it gets older
+
+			msg.style.opacity = opacity;
+			msg.style.backgroundColor = `rgb(${bgBrightness}, ${bgBrightness}, ${bgBrightness})`;
+		});
+	}
+
 		ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			if (command.toLowerCase() === "triviaround2") {
 				if (round === 1) {
@@ -296,9 +327,11 @@
 			displayChatMessage(user, message);  // Show message in chat box
 			checkAnswer(user, message);         // Check if it's an answer
 		};
-
+	
         ComfyJS.Init("jaedraze");
 
     </script>
 </body>
 </html>
+
+
