@@ -133,7 +133,7 @@
 		</div>
 	</div>
 	<!-- Add this to your HTML to simulate user interaction -->
-<button id="hiddeninteractButton" style="display:none;">Enable Audio</button>
+<button id="hiddenButton" style="display:none;">Start Trivia</button>
 	<div id="triviaOverlay" style="">
 		<div id="triviaSplash" style="display:none;">
 			<div id="logoContainer">
@@ -274,7 +274,7 @@ function triviaSplash() {
     return new Promise((resolve) => {
         const splash = document.getElementById("triviaSplash");
         // Simulate user interaction by triggering the hidden button
-        const hiddenButton = document.getElementById("hiddeninteractButton");
+        const hiddenButton = document.getElementById("hiddenButton");
         hiddenButton.click(); // Simulate the button click
 
         // Make splash visible
@@ -559,7 +559,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 // Automatically trigger the "Enable Audio" action when page loads or after user joins
 window.onload = () => {
     // Simulate an invisible button click to enable audio
-    document.getElementById("hiddeninteractButton").click();
+    document.getElementById("enableAudio").click();
 	console.log('enableAudio button clicked on windowload'); // Log the joke sent to the console
 	
 };
