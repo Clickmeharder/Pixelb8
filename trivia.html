@@ -473,19 +473,14 @@ function displayChatMessage(user, message, flags, extra) {
         chatContainer.removeChild(chatContainer.firstChild);
     }
 }
-// Preload the audio and mute it initially
-const sound = new Audio("/assets/sounds/snakedie_sound1.mp3");
-sound.muted = true;
-sound.load();
-
-// Function to play the sound when triggered by Twitch chat
+// Function to play a sound from your directory
 function playSound() {
-    sound.muted = false; // Unmute the audio
+    const sound = new Audio("/assets/sounds/snakedie_sound1.mp3");
+    
     sound.play().catch(error => {
         console.error("Error playing the sound:", error);
     });
 }
-
 // ComfyJS onChat event handler
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message);
@@ -559,8 +554,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 // Automatically trigger the "Enable Audio" action when page loads or after user joins
 window.onload = () => {
     // Simulate an invisible button click to enable audio
-    document.getElementById("hiddenButton").click();
-	console.log('enableAudio button clicked on windowload'); // Log the joke sent to the console
+    document.getElementById("enableAudio").click();
+	
 	
 };
 <!-- fetchTriviaQuestions(); -->
