@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ovrlay-v0.23</title>
-    <style>
+
+    <style><!--trivia styling-->
         body {
             font-family: Arial, sans-serif;
             color: orangered;
@@ -67,6 +68,54 @@
         #timer, #next-question-timer {font-size: 20px;font-weight: bold;color: lightblue;}
 		div#next-question-timer {position: absolute;bottom: 24%;left: 2%;}
 		
+#triviaSplash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1s ease-out;
+}
+
+#logoContainer {
+    animation: logoAnimation 2s forwards;
+}
+
+@keyframes logoAnimation {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+#splashText {
+    font-size: 2em;
+    color: white;
+    margin-top: 20px;
+    opacity: 0;
+    animation: textAnimation 1s 2s forwards;
+}
+
+@keyframes textAnimation {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+    </style>
+    <style><!--chat styling-->
+		
+		
+		
 		#twitchchatContainer {position: absolute;left: 0;bottom: 30%;border: 1px solid #67d1d173;width: 29%;}
 		div#twitchMessagebox {text-align: left;border: 2px inset #102d2de3;max-height: 170px;}
 		#twitchMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
@@ -80,6 +129,14 @@
 		</div>
 	</div>
 	<div id="TriviaWrapper">
+		<!-- Splash screen content -->
+		<div id="triviaSplash" style="display:none;">
+			<div id="logoContainer">
+				<!-- Your trivia logo or text here -->
+				<img src="your_logo_url.png" alt="Trivia Logo" id="triviaLogo" />
+			</div>
+			<div id="splashText">Get Ready for the Trivia!</div>
+		</div>
 		<div id="next-question-timer"></div>
 		<div id="questionWrapper">
 			<p id="question-counter">Question: 0 / 12</p>
@@ -117,147 +174,198 @@
         <!-- ]; -->
 //--------- TRIVIA -----------
 //trivia game code starts here
-        let userScores = {};
-        let usedQuestions = [];
-        let activeQuestion = null;
-        let answeredUsers = new Set();
-        let firstAnswerUser = null;
-		let hideQuestionTimer;
-        let questionTimer, countdownTimer;
-		
-		let round = 1;
-		let questionsAsked = 0;
-		const questionsPerRound = 12;
-		let triviaQuestions = { round1: [], round2: [] };
+let userScores = {};
+let usedQuestions = [];
+let activeQuestion = null;
+let answeredUsers = new Set();
+let firstAnswerUser = null;
+let hideQuestionTimer;
+let questionTimer, countdownTimer;
 
-		fetch("questions.json")
-			.then(response => response.json())
-			.then(data => {
-				if (data && data.round1 && data.round1.length > 0) { 
-					triviaQuestions = data;
-					startQuestion();
-				} else {
-					console.error("Trivia questions not found or empty.");
-				}
-			})
-			.catch(error => console.error("Error loading trivia questions:", error));
-	
-		function updateQuestionCounter() {
-			document.getElementById("question-counter").textContent = `Question: ${questionsAsked} / ${questionsPerRound}`;
-		}
-		
-		function getRandomQuestion() {
-			let currentRound = round === 1 ? "round1" : "round2";
-			let availableQuestions = triviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
+let round = 1;
+let questionsAsked = 0;
+const questionsPerRound = 12;
+let triviaQuestions = { round1: [], round2: [] };
 
-			if (availableQuestions.length === 0) {
-				usedQuestions = []; // Reset when all questions are used
-				availableQuestions = [...triviaQuestions[currentRound]];
-			}
+<!-- fetch("questions.json") -->
+	<!-- .then(response => response.json()) -->
+	<!-- .then(data => { -->
+		<!-- if (data && data.round1 && data.round1.length > 0) {  -->
+			<!-- triviaQuestions = data; -->
 
-			let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-			usedQuestions.push(question);
-			return question;
-		}
+		<!-- } else { -->
+			<!-- console.error("Trivia questions not found or empty."); -->
+		<!-- } -->
+	<!-- }) -->
+	<!-- .catch(error => console.error("Error loading trivia questions:", error)); -->
 
-		function startQuestion() {
-			if (questionsAsked >= questionsPerRound) {
-				document.getElementById("question").textContent = `Trivia Round ${round} Over!`;
-				clearInterval(questionTimer);
-				document.getElementById("questionWrapper").style.visibility = "visible";
-				return;
-			}
+// Function to fetch trivia questions only when the trivia starts
+function fetchTriviaQuestions() {
+    return new Promise((resolve, reject) => {
+        // Example URL for fetching trivia questions (replace with your actual URL)
+        const questionsUrl = 'path_to_your_questions.json';  // Replace with actual path
 
-			clearTimeout(countdownTimer);
-			clearTimeout(hideQuestionTimer);
-			activeQuestion = getRandomQuestion();
-			answeredUsers.clear();
-			firstAnswerUser = null;
-			questionsAsked++;
-
-			updateQuestionCounter(); // Update the display
-
-			document.getElementById("question").textContent = activeQuestion.question;
-			document.getElementById("questionWrapper").style.visibility = "visible";
-			<!-- document.getElementById("triviaboard").style.visibility = "hidden"; -->
-			document.getElementById("timer").textContent = "1:30";
-			document.getElementById("next-question-timer").textContent = "";
-
-			let secondsLeft = 90;
-			questionTimer = setInterval(() => {
-				secondsLeft--;
-				document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
-				if (secondsLeft <= 0) {
-					endQuestion();
-				}
-			}, 1000);
-		}
-
-		function endQuestion() {
-			clearInterval(questionTimer);
-			document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
-
-			setTimeout(() => {
-				document.getElementById("question").textContent = "Next question starting soon...";
-			}, 3000);
-
-			hideQuestionTimer = setTimeout(() => {
-				document.getElementById("questionWrapper").style.visibility = "hidden";
-				document.getElementById("triviaboard").style.visibility = "visible";
-			}, 10000);
-
-			startCountdown();
-		}
-
-		function startCountdown() {
-			let countdown = 150;
-			updateCountdownDisplay(countdown);
-
-			countdownTimer = setInterval(() => {
-				countdown--;
-				updateCountdownDisplay(countdown);
-				if (countdown <= 0) {
-					clearInterval(countdownTimer);
-					startQuestion();
-				}
-			}, 1000);
-		}
-
-		function updateCountdownDisplay(seconds) {
-			const minutes = Math.floor(seconds / 60);
-			const remainingSeconds = seconds % 60;
-			document.getElementById("next-question-timer").textContent = `Next question in: ${minutes}m ${remainingSeconds}s`;
-		}
-
-        function checkAnswer(user, message) {
-            if (!activeQuestion || answeredUsers.has(user)) return;
-
-            let correctAnswer = activeQuestion.answer.toLowerCase();
-            let userAnswer = message.trim().toLowerCase();
-
-            if (userAnswer === correctAnswer) {
-                answeredUsers.add(user);
-                if (!firstAnswerUser) {
-                    firstAnswerUser = user;
-                    userScores[user] = (userScores[user] || 0) + 3;
-                } else {
-                    userScores[user] = (userScores[user] || 0) + 1;
+        fetch(questionsUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load trivia questions');
                 }
-                updateTriviaboard();
-            }
-        }
+                return response.json();
+            })
+            .then(data => {
+                resolve(data);  // Resolve with the questions data
+            })
+            .catch(error => {
+                console.error('Error fetching trivia questions:', error);
+                reject(error);  // Reject if fetching fails
+            });
+    });
+}
 
-        function updateLeaderboard() {
-            const triviaboardElement = document.getElementById("triviaboard");
-            triviaboardElement.innerHTML = "<p>Trivia</p>";
-            Object.entries(userScores)
-                .sort((a, b) => b[1] - a[1])
-                .forEach(([user, score]) => {
-                    const li = document.createElement("li");
-                    li.textContent = `${user}: ${score} pts`;
-                    triviaboardElement.appendChild(li);
-                });
-        }
+// Splash screen function with animation, fetching trivia questions and starting the trivia
+function triviaSplash() {
+    // Show splash screen (you can replace this with your custom splash animation)
+    const splash = document.getElementById("triviaSplash");
+    splash.style.display = "block";  // Make splash visible
+    splash.style.opacity = 1;  // Show splash with opacity
+
+    // Fetch trivia questions before starting the game
+    fetchTriviaQuestions()
+        .then(questions => {
+            console.log('Trivia Questions Loaded:', questions);
+            // Store the questions globally (in a window variable or elsewhere)
+            window.triviaQuestions = questions;
+
+            // Delay the start of trivia to give time for splash animation
+            setTimeout(() => {
+                splash.style.opacity = 0;  // Fade out splash animation
+                setTimeout(() => {
+                    splash.style.display = "none";  // Hide splash screen completely
+                    startQuestion();  // Start the trivia questions
+                }, 500);  // Short delay after fade-out
+            }, 3000);  // Wait for 3 seconds to show splash animation
+        })
+        .catch(error => {
+            console.error('Error loading trivia questions:', error);
+            // Handle error (you can add a fallback splash if fetching fails)
+        });
+}
+
+function startQuestion() {
+	if (questionsAsked >= questionsPerRound) {
+		document.getElementById("question").textContent = `Trivia Round ${round} Over!`;
+		clearInterval(questionTimer);
+		document.getElementById("questionWrapper").style.visibility = "visible";
+		return;
+	}
+	clearTimeout(countdownTimer);
+	clearTimeout(hideQuestionTimer);
+	activeQuestion = getRandomQuestion();
+	answeredUsers.clear();
+	firstAnswerUser = null;
+	questionsAsked++;
+	updateQuestionCounter(); // Update the display
+	document.getElementById("question").textContent = activeQuestion.question;
+	document.getElementById("questionWrapper").style.visibility = "visible";
+	<!-- document.getElementById("triviaboard").style.visibility = "hidden"; -->
+	document.getElementById("timer").textContent = "1:30";
+	document.getElementById("next-question-timer").textContent = "";
+
+	let secondsLeft = 90;
+	questionTimer = setInterval(() => {
+		secondsLeft--;
+		document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
+		if (secondsLeft <= 0) {
+			endQuestion();
+		}
+	}, 1000);
+}
+
+function getRandomQuestion() {
+	let currentRound = round === 1 ? "round1" : "round2";
+	let availableQuestions = triviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
+
+	if (availableQuestions.length === 0) {
+		usedQuestions = []; // Reset when all questions are used
+		availableQuestions = [...triviaQuestions[currentRound]];
+	}
+
+	let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+	usedQuestions.push(question);
+	return question;
+}
+
+function startCountdown() {
+	let countdown = 150;
+	updateCountdownDisplay(countdown);
+	countdownTimer = setInterval(() => {
+		countdown--;
+		updateCountdownDisplay(countdown);
+		if (countdown <= 0) {
+			clearInterval(countdownTimer);
+			startQuestion();
+		}
+	}, 1000);
+}
+
+function updateQuestionCounter() {
+	document.getElementById("question-counter").textContent = `Question: ${questionsAsked} / ${questionsPerRound}`;
+}
+
+function endQuestion() {
+	clearInterval(questionTimer);
+	document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
+
+	setTimeout(() => {
+		document.getElementById("question").textContent = "Next question starting soon...";
+	}, 3000);
+
+	hideQuestionTimer = setTimeout(() => {
+		document.getElementById("questionWrapper").style.visibility = "hidden";
+		document.getElementById("triviaboard").style.visibility = "visible";
+	}, 10000);
+
+	startCountdown();
+}
+
+function updateCountdownDisplay(seconds) {
+	const minutes = Math.floor(seconds / 60);
+	const remainingSeconds = seconds % 60;
+	document.getElementById("next-question-timer").textContent = `Next question in: ${minutes}m ${remainingSeconds}s`;
+}
+
+function checkAnswer(user, message) {
+	if (!activeQuestion || answeredUsers.has(user)) return;
+	let correctAnswer = activeQuestion.answer.toLowerCase();
+	let userAnswer = message.trim().toLowerCase();
+	if (userAnswer === correctAnswer) {
+		answeredUsers.add(user);
+		if (!firstAnswerUser) {
+			firstAnswerUser = user;
+			userScores[user] = (userScores[user] || 0) + 3;
+		} else {
+			userScores[user] = (userScores[user] || 0) + 1;
+		}
+		updateTriviaboard();
+	}
+}
+
+function updateLeaderboard() {
+	const triviaboardElement = document.getElementById("triviaboard");
+	triviaboardElement.innerHTML = "<p>Trivia</p>";
+	Object.entries(userScores)
+		.sort((a, b) => b[1] - a[1])
+		.forEach(([user, score]) => {
+			const li = document.createElement("li");
+			li.textContent = `${user}: ${score} pts`;
+			triviaboardElement.appendChild(li);
+		});
+}
+		
+// Trivia starting function
+function startTrivia() {
+    triviaSplash();  // Display splash animation
+}	
 //-------------end of trivia game
 
 //--------	Chat ---|
@@ -307,16 +415,66 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
     displayChatMessage(user, message, flags, extra);  // Show message in chat box
     checkAnswer(user, message);         // Check if it's an answer
 };
+
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
-	if (command.toLowerCase() === "triviaround2") {
-		if (round === 1) {
-			round = 2;
-			questionsAsked = 0; // Reset for the new round
-			document.getElementById("question").textContent = "Trivia Round 2 Begins!";
-			setTimeout(startQuestion, 3000);
-		}
-	}
+    // Only allow streamer (jaedraze) or mods to trigger these commands
+    if (user.toLowerCase() === "jaedraze" || flags.mod) {
+
+        // Handle start trivia command
+        if (command.toLowerCase() === "trivia") {
+            startTrivia(); // Call the startTrivia function
+        }    
+        // Handle trivia round 2 command
+        if (command.toLowerCase() === "trivia round 2") {
+            if (round === 1) {
+                round = 2;
+                questionsAsked = 0; // Reset for the new round
+                document.getElementById("question").textContent = "Trivia Round 2 Begins!";
+                setTimeout(startQuestion, 3000);
+            }
+        }
+        // Handle toggle chat visibility command
+        if (command.toLowerCase() === "togglechat") {
+            let chatContainer = document.getElementById("twitchchatContainer");
+            if (chatContainer.style.visibility === "hidden") {
+                chatContainer.style.visibility = "visible"; // Show the chat if it's hidden
+            } else {
+                chatContainer.style.visibility = "hidden"; // Hide the chat if it's visible
+            }
+        }
+
+        // Handle toggle trivia visibility command
+        if (command.toLowerCase() === "toggletrivia") {
+            let triviaContainer = document.getElementById("TriviaWrapper");
+            if (triviaContainer.style.visibility === "hidden") {
+                triviaContainer.style.visibility = "visible"; // Show the trivia if it's hidden
+            } else {
+                triviaContainer.style.visibility = "hidden"; // Hide the trivia if it's visible
+            }
+        }
+
+    } else {
+        // Example commands that any user can trigger
+        if (command.toLowerCase() === "helloworld") {
+            // Custom logic to send "Hello, world!" to your overlay chat
+            const message = "Hello, world!";
+            displayChatMessage("System", message, {}, {}); // Call the function to display the message in the chat overlay
+            console.log(`Sent message to overlay: ${message}`); // Log to the console
+        }
+
+        if (command.toLowerCase() === "joke") {
+            const jokes = [
+                "Why don't skeletons fight each other? They don't have the guts!",
+                "Why did the scarecrow win an award? Because he was outstanding in his field!",
+                "I told my computer I needed a break, and now it won’t stop sending me Kit-Kats!"
+            ];
+            const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+            displayChatMessage("System", randomJoke, {}, {}); // Sends a random joke to the overlay chat
+            console.log(`Sent joke to overlay: ${randomJoke}`); // Log the joke sent to the console
+        }
+    }
 };
+
 
 ComfyJS.Init("jaedraze");
 
