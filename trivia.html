@@ -6,15 +6,15 @@
     <title>Ovrlay-v0.43</title>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            color: orangered;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-        }
+		body {
+			font-family: Arial, sans-serif;
+			color: orangered;
+			text-align: center;
+			margin: 0;
+			padding: 0;
+			width: 100vw;
+			height: 100vh;
+		}
 		#questionWrapper {
 			position: absolute;
 			top: 71%;
@@ -28,13 +28,13 @@
 			border-radius: 12px;
 			box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
 		}
-        #question {
-            font-weight: bold;
-            text-align: center;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);
-        }
-		
+		#question {
+			font-weight: bold;
+			text-align: center;
+			color: white;
+			text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);
+		}
+
 		p#question-counter {
 			margin: 0;
 		}
@@ -45,89 +45,124 @@
 			right: 0;
 			margin:0;
 		}
-        #triviaboard p {
-            background: #001f1f;
-            width: 155px;
-            padding: 4px;
-            margin: 0px;
-            font-size: 18px;
-            border: 2px outset #095656;
-            border-radius: 0px;
-        }
-        #triviaboard li {
-            margin: -6px 0 0px 0;
-            text-align: center;
-            padding: 4px 9px;
-            background: linear-gradient(135deg, #001f1f, #004040);
-            border: 3px solid teal;
-            border-radius: 12px;
-            color: #12ebeb;
-            text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
-            box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
-        }
-        #timer, #timeuntil-nextQ {font-size: 20px;font-weight: bold;color: lightblue;}
+		#triviaboard p {
+			background: #001f1f;
+			width: 155px;
+			padding: 4px;
+			margin: 0px;
+			font-size: 18px;
+			border: 2px outset #095656;
+			border-radius: 0px;
+		}
+		#triviaboard li {
+			margin: -6px 0 0px 0;
+			text-align: center;
+			padding: 4px 9px;
+			background: linear-gradient(135deg, #001f1f, #004040);
+			border: 3px solid teal;
+			border-radius: 12px;
+			color: #12ebeb;
+			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+		}
+		#timer, #timeuntil-nextQ {font-size: 20px;font-weight: bold;color: lightblue;}
 		div#timeuntil-nextQ {position: absolute;bottom: 24%;left: 2%;}
-		
-#triviaSplash {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-}
-		
-#logoContainer {
-    position: absolute;  /* Ensures it is positioned inside #triviaSplash */
-    top: 46%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.5) rotate(-15deg);  /* Center and apply starting animation */
-    opacity: 0;
-    animation: logoDropIn 5s ease-out forwards, glowPulse 3s infinite alternate 5s;
-}
+				
+		#triviaSplash {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			text-align: center;
+			z-index: 9999;
+			opacity: 0;
+			visibility: hidden;
+		}
+				
+		#logoContainer {position: absolute;  /* Ensures it is positioned inside #triviaSplash */top: 46%;left: 50%;transform: translate(-50%, -50%) scale(0.5) rotate(-15deg);  /* Center and apply starting animation */opacity: 0;animation: logoDropIn 5s ease-out forwards, glowPulse 3s infinite alternate 5s;}
 
-@keyframes logoDropIn {
-    0% {
-        opacity: 0;
-        transform: scale(0.5) rotate(-15deg);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.2) rotate(5deg);
-    }
-    100% {
-        transform: scale(1) rotate(0deg);
-    }
-}
+		/*ANIMATIONS*/
+		/* Fade In */
+		@keyframes fadeIn {
+			from { opacity: 0; transform: translateY(10px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
 
-@keyframes glowPulse {
-    0% { filter: drop-shadow(0 0 5px #0ea4a4); }
-    100% { filter: drop-shadow(0 0 15px #0ea4a4); }
-}
+		/* Fade Out */
+		@keyframes fadeOut {
+			from { opacity: 1; transform: translateY(0); }
+			to { opacity: 0; transform: translateY(-10px); }
+		}
 
-#splashText {
-    font-size: 2.5em;
-    color: #0ea4a4;
-    margin-top: 20px;
-    opacity: 0;
-    display: inline-block;
-    animation: textReveal 4s ease-in-out forwards;
-}
+		/* Slide In */
+		@keyframes slideIn {
+			from { opacity: 0; transform: translateX(-50px); }
+			to { opacity: 1; transform: translateX(0); }
+		}
+
+		/* Slide Out */
+		@keyframes slideOut {
+			from { opacity: 1; transform: translateX(0); }
+			to { opacity: 0; transform: translateX(50px); }
+		}
 
 
-@keyframes textReveal {
-    0% { opacity: 0; transform: translateY(10px); }
-    50% { opacity: 1; transform: translateY(0px); }
-    100% { text-shadow: 0px 0px 10px #0ea4a4; }
-}
+		@keyframes logoDropIn {
+			0% {
+				opacity: 0;
+				transform: scale(0.5) rotate(-15deg);
+			}
+			50% {
+				opacity: 1;
+				transform: scale(1.2) rotate(5deg);
+			}
+			100% {
+				transform: scale(1) rotate(0deg);
+			}
+		}
 
-@keyframes fadeOut {
-    0% { opacity: 1; }
-    100% { opacity: 0; visibility: hidden; }
-}
+		@keyframes glowPulse {
+			0% { filter: drop-shadow(0 0 5px #0ea4a4); }
+			100% { filter: drop-shadow(0 0 15px #0ea4a4); }
+		}
+
+		/* Hidden state */
+		.hidden {
+			opacity: 0;
+			visibility: hidden;
+			pointer-events: none;
+		}
+
+		#splashText {
+			font-size: 2.5em;
+			color: #0ea4a4;
+			margin-top: 20px;
+			opacity: 0;
+			display: inline-block;
+			animation: textReveal 4s ease-in-out forwards;
+		}
+
+
+		@keyframes textReveal {
+			0% { opacity: 0; transform: translateY(10px); }
+			50% { opacity: 1; transform: translateY(0px); }
+			100% { text-shadow: 0px 0px 10px #0ea4a4; }
+		}
+
+		@keyframes fadeOut {
+			0% { opacity: 1; }
+			100% { opacity: 0; visibility: hidden; }
+		}
+
 		#TriviaWrapper {visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
+
+		#winnersWrapper {display: flex;flex-direction: column;align-items: center;justify-content: center;gap: 15px;}
+		.winner {text-align: center;}
+		.winner img {border-radius: 50%;width: 100px;height: 100px;margin-bottom: 10px;}
+		.winner-name {font-size: 1.2em;font-weight: bold;}
+		.winner-score {font-size: 1em;color: #666;}
+		.small {font-size: 0.9em;color: #888;}
+				
 		#twitchchatContainer {position: absolute;left: 0;bottom: 30%;border: 1px solid #67d1d173;width: 29%;}
 		div#twitchMessagebox {text-align: left;border: 2px inset #102d2de3;max-height: 170px;}
 		#twitchMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
@@ -136,13 +171,16 @@
     </style>
 </head>
 <body>
+	<!-- Add this to your HTML to simulate user interaction -->
+	<button id="hiddenButton" style="display:none;">Start Trivia</button>
+	<!--                                                              -->
 	<div id="twitchchatContainer">
 		<div id="twitchMessagebox">
 		</div>
 	</div>
-	<!-- Add this to your HTML to simulate user interaction -->
-<button id="hiddenButton" style="display:none;">Start Trivia</button>
+	<!--                                                              -->
 	<div id="triviaOverlay" style="">
+		<!-- Wrapper for the Trivia Splash Animation -->
 		<div id="triviaSplash" style="display:none;">
 			<div id="logoContainer">
 				<!-- <img src="../assets/images/logo/pixelbotfavicon.png" alt="Trivia Logo" id="triviaLogo" /> -->
@@ -150,14 +188,45 @@
 			</div>
 			<div id="splashText">Get Ready for the Trivia!</div>
 		</div>
+		<!-- Wrapper for the Trivia main elements -->
 		<div id="TriviaWrapper">
-			<!-- Splash screen content -->
+			<!-- Wrapper for the winners' announcement -->
+			<div id="winnersWrapper" style="display: none;">
+				<!-- Top 3 winners -->
+				<div class="winner" id="winner1">
+					<img id="winner1Profile" src="" alt="Profile Image" class="winner-profile">
+					<p id="winner1Name" class="winner-name"></p>
+					<p id="winner1Score" class="winner-score"></p>
+				</div>
+				<div class="winner" id="winner2">
+					<img id="winner2Profile" src="" alt="Profile Image" class="winner-profile">
+					<p id="winner2Name" class="winner-name"></p>
+					<p id="winner2Score" class="winner-score"></p>
+				</div>
+				<div class="winner" id="winner3">
+					<img id="winner3Profile" src="" alt="Profile Image" class="winner-profile">
+					<p id="winner3Name" class="winner-name"></p>
+					<p id="winner3Score" class="winner-score"></p>
+				</div>
+				<!-- 4th and 5th place winners (smaller) -->
+				<div class="winner small" id="winner4">
+					<p id="winner4Name" class="winner-name"></p>
+					<p id="winner4Score" class="winner-score"></p>
+				</div>
+				<div class="winner small" id="winner5">
+					<p id="winner5Name" class="winner-name"></p>
+					<p id="winner5Score" class="winner-score"></p>
+				</div>
+			</div>
+			<!-- time until next question -->
 			<div id="timeuntil-nextQ"></div>
+			<!-- questions wrapper -->
 			<div id="questionWrapper">
 				<p id="question-counter">Question: 0 / 12</p>
 				<div id="question">Waiting for next question...</div>
 				<div id="timer"></div>
 			</div>
+			<!-- Trivia leaderboard -->
 			<ul id="triviaboard">
 				<p>Trivia</p>
 			</ul>
@@ -284,31 +353,7 @@ function fetchTriviaQuestions() {
     });
 }
 
-<!-- // Function to show splash screen with animation -->
-<!-- function triviaSplash() { -->
-    <!-- return new Promise((resolve) => { -->
-        <!-- const splash = document.getElementById("triviaSplash"); -->
 
-        <!-- // Make it visible -->
-        <!-- splash.style.display = "block"; -->
-        <!-- splash.style.visibility = "visible"; -->
-        <!-- splash.style.opacity = "1"; -->
-
-        <!-- // Wait for 6 seconds for animations to complete -->
-        <!-- setTimeout(() => { -->
-            <!-- splash.style.opacity = "0";  // Fade out -->
-            <!-- splash.style.visibility = "hidden"; -->
-
-            <!-- setTimeout(() => { -->
-                <!-- splash.style.display = "none";  // Hide completely -->
-                <!-- resolve();  // Finish animation -->
-            <!-- }, 2000);  // Match the fade-out time (2s) -->
-        <!-- }, 6000);  // Splash stays visible for 6 seconds (total duration) -->
-    <!-- }).then(() => { -->
-        <!-- // After the splash animation is done, show the trivia -->
-        <!-- toggleTrivia(); -->
-    <!-- }); -->
-<!-- } -->
 function triviaSplash() {
     return new Promise((resolve) => {
         const splash = document.getElementById("triviaSplash");
@@ -322,7 +367,7 @@ function triviaSplash() {
         splash.style.visibility = "visible";
         splash.style.opacity = "1";
 
-        // Start animations after the song (10s delay)
+        // Start animations **3 seconds** after song starts
         setTimeout(() => {
             logo.style.animation = "none"; // Reset animation
             splashText.style.animation = "none"; // Reset animation
@@ -331,18 +376,18 @@ function triviaSplash() {
 
             logo.style.animation = "logoDropIn 2.5s ease-out forwards, glowPulse 3s infinite alternate 3s";
             splashText.style.animation = "textReveal 4s ease-in-out forwards";
-        }, 10000); // Delay animation start until the song ends
+        }, 3000); // Start 3 seconds after song starts
 
-        // Hide splash **exactly at 20s**
+        // Hide splash **3 seconds after animation finishes**
         setTimeout(() => {
-            splash.style.opacity = "0";  // Fade out
+            splash.style.opacity = "0";  // Fade out quickly
             splash.style.visibility = "hidden";
 
             setTimeout(() => {
                 splash.style.display = "none";  // Hide completely
                 resolve();
-            }, 1000); // 1s fade-out time
-        }, 20000); // The song (10s) + animation duration (10s)
+            }, 700); // 0.7s fade-out time (shorter hide animation)
+        }, 14000); // Song (10s) + animation delay (3s) + main animation (~4s)
     }).then(() => {
         toggleTrivia(); // Show trivia after splash disappears
     });
@@ -362,13 +407,54 @@ function getRandomQuestion() {
 	return question;
 }
 
+function endTriviaRound() {
+    document.getElementById("question").textContent = `Trivia Round ${round} Over!`;
+    clearInterval(questionTimer);
+    toggleElement("questionWrapper", "fade"); // Show message with fade animation
+	//document.getElementById("questionWrapper").style.visibility = "visible";//use this if toggleelement is wierd
+	document.getElementById("timer").textContent = "";
+	document.getElementById("timeuntil-nextQ").textContent = "";
+}
+function nextQuestion() {
+    clearTimeout(countdownTimer);
+    clearTimeout(hideQuestionTimer);
+    
+    activeQuestion = getRandomQuestion();
+    answeredUsers.clear();
+    firstAnswerUser = null;
+    questionsAsked++;
+    updateQuestionCounter(); // Update the display
+    
+    document.getElementById("question").textContent = activeQuestion.question;
+    document.getElementById("questionWrapper").style.visibility = "visible";
+    // document.getElementById("triviaboard").style.visibility = "hidden"; 
+    
+    document.getElementById("timer").textContent = "1:30";
+    document.getElementById("timeuntil-nextQ").textContent = "";
+
+    let secondsLeft = 90;
+    questionTimer = setInterval(() => {
+        secondsLeft--;
+        document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
+        if (secondsLeft <= 0) {
+            endQuestion();
+        }
+    }, 1000);
+}
+
+function startQuestion() {
+    if (questionsAsked >= questionsPerRound) {
+        endTriviaRound();
+        return;
+    }
+    nextQuestion();
+}
 function startQuestion() {
 	if (questionsAsked >= questionsPerRound) {
-		document.getElementById("question").textContent = `Trivia Round ${round} Over!`;
-		clearInterval(questionTimer);
-		document.getElementById("questionWrapper").style.visibility = "visible";
+		endTriviaRound();
 		return;
 	}
+	nextQuestion();
 	clearTimeout(countdownTimer);
 	clearTimeout(hideQuestionTimer);
 	activeQuestion = getRandomQuestion();
@@ -393,13 +479,13 @@ function startQuestion() {
 }
 
 
-
+//function to update the time remaining before the next question
 function startCountdown() {
 	let countdown = 150;
-	updateCountdownDisplay(countdown);
+	nextquestionTimer(countdown);
 	countdownTimer = setInterval(() => {
 		countdown--;
-		updateCountdownDisplay(countdown);
+		nextquestionTimer(countdown);
 		if (countdown <= 0) {
 			clearInterval(countdownTimer);
 			startQuestion();
@@ -407,6 +493,7 @@ function startCountdown() {
 	}, 1000);
 }
 
+//update the guestion counter (how many questions have been asked out of the total questions in the round)
 function updateQuestionCounter() {
 	document.getElementById("question-counter").textContent = `Question: ${questionsAsked} / ${questionsPerRound}`;
 }
@@ -427,12 +514,14 @@ function endQuestion() {
 	startCountdown();
 }
 
-function updateCountdownDisplay(seconds) {
+//function to update the countdown until next question
+function nextquestionTimer(seconds) {
 	const minutes = Math.floor(seconds / 60);
 	const remainingSeconds = seconds % 60;
 	document.getElementById("timeuntil-nextQ").textContent = `Next question in: ${minutes}m ${remainingSeconds}s`;
 }
 
+//function to check if a users chat message is the correct answer
 function checkAnswer(user, message) {
 	if (!activeQuestion || answeredUsers.has(user)) return;
 	let correctAnswer = activeQuestion.answer.toLowerCase();
@@ -449,7 +538,7 @@ function checkAnswer(user, message) {
 	}
 }
 
-function updateLeaderboard() {
+function updateTriviaboard() {
 	const triviaboardElement = document.getElementById("triviaboard");
 	triviaboardElement.innerHTML = "<p>Trivia</p>";
 	Object.entries(userScores)
@@ -463,14 +552,31 @@ function updateLeaderboard() {
 
 //function to toggle trivia overlay/ui display
 function toggleTrivia() {
-    let triviaContainer = document.getElementById("TriviaWrapper");
-    
-    if (triviaContainer.style.visibility === "hidden" || triviaContainer.style.visibility === "") {
-        triviaContainer.style.visibility = "visible";
-        triviaContainer.style.opacity = "1";
+    const wrapper = document.getElementById("questionWrapper");
+    const board = document.getElementById("triviaboard");
+    const timer = document.getElementById("timer");
+    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
+
+    if (wrapper.style.visibility === "hidden" || wrapper.style.visibility === "") {
+        // Show elements with animations
+        wrapper.style.visibility = "visible";
+        wrapper.style.opacity = "1";
+        wrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+
+        board.style.animation = "slideIn 0.8s ease-out forwards";
+        timer.style.animation = "fadeIn 1s ease-in-out forwards";
+        timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
     } else {
-        triviaContainer.style.visibility = "hidden";
-        triviaContainer.style.opacity = "0";
+        // Hide elements with animations
+        wrapper.style.animation = "fadeOut 0.5s ease-in forwards";
+        board.style.animation = "slideOut 0.5s ease-in forwards";
+        timer.style.animation = "fadeOut 0.5s ease-in forwards";
+        timeUntilNextQ.style.animation = "fadeOut 0.5s ease-in forwards";
+
+        setTimeout(() => {
+            wrapper.style.visibility = "hidden";
+            wrapper.style.opacity = "0";
+        }, 500); // Matches the fade-out animation duration
     }
 }
 
@@ -480,7 +586,6 @@ function startTrivia() {
         console.log("Trivia is already running! Ignoring duplicate command.");
         return; // Stop if trivia is already running
     }
-
     console.log("Trivia should splash and fetch questions");
     triviaGameState = "started"; // Mark trivia as started
 	console.log("triviaGameState = " + triviaGameState);
@@ -495,6 +600,33 @@ function startTrivia() {
             console.error("Error loading trivia questions:", error);
             triviaGameState = null; // Reset state on failure
         });
+}
+
+function announceWinners() {
+    // Get top 5 sorted users
+    const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
+
+    // Update top 3 winners
+    for (let i = 0; i < 3; i++) {
+        const [user, score] = sortedUsers[i] || [];
+        if (user) {
+            document.getElementById(`winner${i + 1}Name`).textContent = user;
+            document.getElementById(`winner${i + 1}Score`).textContent = `Score: ${score}`;
+            document.getElementById(`winner${i + 1}Profile`).src = `https://static-cdn.jtvnw.net/jtv_user_pictures/${user}-profile_image-300x300.jpg`;
+        }
+    }
+
+    // Update 4th and 5th place winners
+    for (let i = 3; i < 5; i++) {
+        const [user, score] = sortedUsers[i] || [];
+        if (user) {
+            document.getElementById(`winner${i + 1}Name`).textContent = user;
+            document.getElementById(`winner${i + 1}Score`).textContent = `Score: ${score}`;
+        }
+    }
+
+    // Make the winners' wrapper visible
+    document.getElementById("winnersWrapper").style.display = "block";
 }
 
 function endTrivia() {
@@ -516,10 +648,37 @@ function endTrivia() {
     toggleTrivia(); // Hide the trivia UI
 }
 
+//-end of trivia game----------
+//____________________________|
 
-//-------------end of trivia game
+
+//-----------------------
+//---generic ui logic---|
+
+//function to toggle element visibility
+function toggleElement(elementId, animationType = "fade") {
+    const element = document.getElementById(elementId);
+
+    if (!element) return;
+
+    if (element.style.visibility === "hidden" || element.style.visibility === "") {
+        // Show element with animation
+        element.style.visibility = "visible";
+        element.style.opacity = "1";
+        element.style.animation = animationType === "slide" ? "slideIn 0.8s ease-out forwards" : "fadeIn 0.8s ease-out forwards";
+    } else {
+        // Hide element with animation
+        element.style.animation = animationType === "slide" ? "slideOut 0.5s ease-in forwards" : "fadeOut 0.5s ease-in forwards";
+
+        setTimeout(() => {
+            element.style.visibility = "hidden";
+            element.style.opacity = "0";
+        }, 500); // Matches animation duration
+    }
+}
 
 
+//---AUDIO LOGIC-----------------|
 // Preload sounds and store them in an object
 const sounds = {
     snakedie: new Audio("/assets/sounds/snakedie_sound1.mp3"),
@@ -558,17 +717,31 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     // Only allow streamer (jaedraze) or mods to trigger these commands
     if (user.toLowerCase() === "jaedraze" || flags.mod) {
 		console.log( "User:", user, "command:", command);
+		if (command.toLowerCase() === "testsound-1") {
+				playSound(); // Play the sound when !playsound is typed in chat
+			}
         // Handle start trivia command
-        if (command.toLowerCase() === "triviasplash") {
+        if (command.toLowerCase() === "testtriviasplash") {
             triviaSplash(); // Call the startTrivia function
         }
         // Handle start trivia command
         if (command.toLowerCase() === "trivia") {
             startTrivia();
         }
-		if (command.toLowerCase() === "playsound") {
-				playSound(); // Play the sound when !playsound is typed in chat
-			}
+		if (command === "togglechat") {
+			toggleElement("twitchchatContainer", "fade");
+		}
+		if (command === "toggletriviaboard") {
+			toggleElement("triviaboard", "slide");
+		}
+		if (command === "togglequestions") {
+			toggleElement("questionWrapper", "fade");
+		}
+        // Handle toggle trivia visibility command
+        if (command.toLowerCase() === "toggletrivia") {
+			toggleTrivia();
+            toggleElement("triviaWrapper", "fade");
+        }
         // Handle trivia round 2 command
         if (command.toLowerCase() === "triviaround2") {
             if (round === 1) {
@@ -588,10 +761,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             }
         }
 
-        // Handle toggle trivia visibility command
-        if (command.toLowerCase() === "toggletrivia") {
-            toggleTrivia();
-        }
 
     } else {
         // Example commands that any user can trigger
