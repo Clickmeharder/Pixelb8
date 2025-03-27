@@ -184,36 +184,43 @@
 		<div id="triviaSplash" style="display:none;">
 			<div id="logoContainer">
 				<!-- <img src="../assets/images/logo/pixelbotfavicon.png" alt="Trivia Logo" id="triviaLogo" /> -->
-				<img src="https://www.example.com/path/to/your/large-logo.png" alt="Trivia Logo" id="triviaLogo" />
+				<img src="/assets/images/jaedrazepfp.png" alt="Trivia Logo" id="triviaLogo" />
 			</div>
 			<div id="splashText">Get Ready for the Trivia!</div>
 		</div>
 		<!-- Wrapper for the Trivia main elements -->
+		
+		<!-- add user trivia rank and rank badges: rank1🥇 rank2🥈 rank3🥉 rank4🏅 rank5-10?🎖️-->
 		<div id="TriviaWrapper">
 			<!-- Wrapper for the winners' announcement -->
 			<div id="winnersWrapper" style="display: none;">
 				<!-- Top 3 winners -->
 				<div class="winner" id="winner1">
-					<img id="winner1Profile" src="" alt="Profile Image" class="winner-profile">
+					<span class="trophy gold">🏆1st</span>
 					<p id="winner1Name" class="winner-name"></p>
 					<p id="winner1Score" class="winner-score"></p>
+					<!-- add these to each winner block 1st-3rd -->
+					<!-- total first to answer correctly --><!-- total correct answers -->
+					<!-- Total game wins --><!-- lifetime trivia points -->
 				</div>
 				<div class="winner" id="winner2">
-					<img id="winner2Profile" src="" alt="Profile Image" class="winner-profile">
+					<span class="trophy silver">🥈2nd</span>
 					<p id="winner2Name" class="winner-name"></p>
 					<p id="winner2Score" class="winner-score"></p>
 				</div>
 				<div class="winner" id="winner3">
-					<img id="winner3Profile" src="" alt="Profile Image" class="winner-profile">
+					<span class="trophy bronze">🥉3rd</span>
 					<p id="winner3Name" class="winner-name"></p>
 					<p id="winner3Score" class="winner-score"></p>
 				</div>
 				<!-- 4th and 5th place winners (smaller) -->
 				<div class="winner small" id="winner4">
+					<span class="runnerup ribbon">🏅4th</span>
 					<p id="winner4Name" class="winner-name"></p>
 					<p id="winner4Score" class="winner-score"></p>
 				</div>
 				<div class="winner small" id="winner5">
+					<span class="runnerup medal">🎖️5th</span>
 					<p id="winner5Name" class="winner-name"></p>
 					<p id="winner5Score" class="winner-score"></p>
 				</div>
@@ -300,20 +307,22 @@ function displayChatMessage(user, message, flags, extra) {
         <!-- ]; -->
 //--------- TRIVIA -----------
 //trivia game code starts here
-let triviaGameState = null; 
+let triviaGameState = null;
+let userStats = {}; // This will store the count of correct answers and first answers
+let userOverallStats = {}; // This will store the users lifetime stats ie: number of games played. number of games won. total correct answers total first correct answers
 let userScores = {};
 let usedQuestions = [];
 let activeQuestion = null;
 let answeredUsers = new Set();
 let firstAnswerUser = null;
-let userStats = {}; // This will store the count of correct answers and first answers
+
 let hideQuestionTimer;
 let questionTimer, countdownTimer;
 let timetoAnswer = 30;
 
-let round = 1;
 let questionsAsked = 0;
 let questionsPerRound = 3;
+let round = 1;
 let triviaQuestions = { round1: [], round2: [] };
 
 <!-- fetch("questions.json") -->
@@ -332,7 +341,6 @@ let triviaQuestions = { round1: [], round2: [] };
 function fetchTriviaQuestions() {
     return new Promise((resolve, reject) => {
         const questionsUrl = 'questions.json'; // Replace with actual path
-
         fetch(questionsUrl)
             .then(response => {
                 if (!response.ok) {
@@ -361,8 +369,8 @@ function triviaSplash() {
         const splash = document.getElementById("triviaSplash");
         const logo = document.getElementById("logoContainer");
         const splashText = document.getElementById("splashText");
-
-        playSound("gameshowintro"); // Play the sound
+		// Play the sound
+        playSound("gameshowintro");
 
         // Make splash visible
         splash.style.display = "block";
@@ -409,15 +417,7 @@ function getRandomQuestion() {
 	return question;
 }
 
-function endTriviaRound() {
-    document.getElementById("question").textContent = `Round ${round} Over!`;
-    clearInterval(questionTimer);
-    toggleElement("questionWrapper", "fade"); // Show message with fade animation
-	//document.getElementById("questionWrapper").style.visibility = "visible";//use this if toggleelement is wierd
-	document.getElementById("timer").textContent = "";
-	document.getElementById("timeuntil-nextQ").textContent = "";
-	announceWinners();
-}
+
 
 function nextQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
@@ -452,32 +452,7 @@ function startQuestion() {
     }
     nextQuestion();
 }
-<!-- function startQuestion() { -->
-	<!-- if (questionsAsked >= questionsPerRound) { -->
-		<!-- endTriviaRound(); -->
-		<!-- return; -->
-	<!-- } -->
-	<!-- nextQuestion(); -->
-	<!-- clearTimeout(countdownTimer); -->
-	<!-- clearTimeout(hideQuestionTimer); -->
-	<!-- activeQuestion = getRandomQuestion(); -->
-	<!-- answeredUsers.clear(); -->
-	<!-- firstAnswerUser = null; -->
-	<!-- questionsAsked++; -->
-	<!-- updateQuestionCounter(); // Update the display -->
-	<!-- document.getElementById("question").textContent = activeQuestion.question; -->
-	<!-- document.getElementById("questionWrapper").style.visibility = "visible"; -->
-	<!-- document.getElementById("timer").textContent = "1:30"; -->
-	<!-- document.getElementById("timeuntil-nextQ").textContent = ""; -->
-	<!-- let secondsLeft = 90; -->
-	<!-- questionTimer = setInterval(() => { -->
-		<!-- secondsLeft--; -->
-		<!-- document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`; -->
-		<!-- if (secondsLeft <= 0) { -->
-			<!-- endQuestion(); -->
-		<!-- } -->
-	<!-- }, 1000); -->
-<!-- } -->
+
 
 
 //function to update the time remaining before the next question
@@ -668,21 +643,94 @@ function startTrivia() {
         });
 }
 
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+function updateUserOverallStats() {
+    const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
+
+    sortedUsers.forEach(([user, score]) => {
+        if (!userOverallStats[user]) {
+            userOverallStats[user] = {
+                correctAnswers: 0,
+                firstAnswers: 0,
+                round1wins: 0,
+                round2wins: 0,
+                round3wins: 0,
+                // Add more rounds as needed
+            };
+        }
+
+        // Accumulate stats
+        userOverallStats[user].correctAnswers += userStats[user]?.correctAnswers || 0;
+        userOverallStats[user].firstAnswers += userStats[user]?.firstAnswers || 0;
+    });
+
+    // Award round win to the top scorer
+    if (sortedUsers.length > 0) {
+        let topUser = sortedUsers[0][0]; // Get username of the top scorer
+        let roundKey = `round${round}wins`;
+
+        if (!userOverallStats[topUser][roundKey]) {
+            userOverallStats[topUser][roundKey] = 0;
+        }
+        userOverallStats[topUser][roundKey]++; // Increment their round wins
+    }
+
+    console.log("Updated Overall Stats:", userOverallStats); // Debug log
+}
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+function endTriviaRoundOLD() {
+    document.getElementById("question").textContent = `Round ${round} Over!`;
+    clearInterval(questionTimer);
+    toggleElement("questionWrapper", "fade"); // Show message with fade animation
+	//document.getElementById("questionWrapper").style.visibility = "visible";//use this if toggleelement is wierd
+	document.getElementById("timer").textContent = "";
+	document.getElementById("timeuntil-nextQ").textContent = "";
+	announceWinners();
+}
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+function endTriviaRound() {
+    document.getElementById("question").textContent = `Round ${round} Over!`;
+    clearInterval(questionTimer);
+    toggleElement("questionWrapper", "fade");
+    document.getElementById("timer").textContent = "";
+    document.getElementById("timeuntil-nextQ").textContent = "";
+
+    // Store round stats in overall stats
+    updateUserOverallStats();
+
+    // Announce winners
+    announceWinners();
+
+    // Prepare for the next round
+    round++;
+    userStats = {}; // Reset stats for the new round
+}
+
 function announceWinners() {
     // Get top 5 sorted users
     const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
 
     // Log sorted users for debugging
     console.log("Sorted users:", sortedUsers);
-
     // Update top 3 winners
     for (let i = 0; i < 3; i++) {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
             console.log(`Winner ${i + 1}: ${user} - Score: ${score}`);  // Debug log for winners
+            displayChatMessage("Console:", `Winner ${i + 1}: ${user} - Score: ${score}`, {}, {}); 
             document.getElementById(`winner${i + 1}Name`).textContent = user;
             document.getElementById(`winner${i + 1}Score`).textContent = `Score: ${score}`;
-            document.getElementById(`winner${i + 1}Profile`).src = `https://static-cdn.jtvnw.net/jtv_user_pictures/${user.toLowerCase()}-profile_image-300x300.jpg`;
+
+            // Add first answers and total correct answers
+            let firstAnswers = userStats[user]?.firstAnswers || 0;
+            let correctAnswers = userStats[user]?.correctAnswers || 0;
+
+            let extraStats = document.createElement("p");
+            extraStats.className = "winner-stats";
+            extraStats.textContent = `🎯 First: ${firstAnswers} | ✅ Correct: ${correctAnswers}`;
+            document.getElementById(`winner${i + 1}`).appendChild(extraStats);
         }
     }
 
@@ -700,9 +748,11 @@ function announceWinners() {
     const winnersWrapper = document.getElementById("winnersWrapper");
     if (winnersWrapper) {
         console.log("Found winnersWrapper. Displaying...");
+		displayChatMessage("Console:", "Found winnersWrapper. Displaying...", {}, {}); 
         winnersWrapper.style.display = "block";  // Show the wrapper
     } else {
         console.log("Error: winnersWrapper element not found!");
+		displayChatMessage("Console:", "Error: winnersWrapper element not found!", {}, {}); 
     }
 }
 
@@ -820,10 +870,10 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			if (!isNaN(newQuestionsPerRound) && newQuestionsPerRound > 0) {
 				questionsPerRound = newQuestionsPerRound;
 				console.log(`Questions per round is now set to ${newQuestionsPerRound}!`);
-				displayChatMessage("System:", `Questions per round is now set to ${newQuestionsPerRound}!`);
+				displayChatMessage("System:", `Questions per round is now set to ${newQuestionsPerRound}!`, {}, {});
 			} else {
 				console.log("Invalid number of questions. Please provide a positive number.");
-				displayChatMessage("System:", "Invalid number of questions. Please provide a positive number.");
+				displayChatMessage("System:", "Invalid number of questions. Please provide a positive number.", {}, {});
 			}
 		}
         // Handle start trivia command
