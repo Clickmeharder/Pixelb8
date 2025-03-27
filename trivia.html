@@ -313,7 +313,7 @@ let timetoAnswer = 30;
 
 let round = 1;
 let questionsAsked = 0;
-const questionsPerRound = 3;
+let questionsPerRound = 3;
 let triviaQuestions = { round1: [], round2: [] };
 
 <!-- fetch("questions.json") -->
@@ -811,6 +811,19 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			} else {
 				console.log("Invalid time. Please provide a positive number.");
 				displayChatMessage("System:", "Invalid time. Please provide a positive number.");
+			}
+		}
+		// Check if the command is 'triviaset' and the second part is 'questionsperround'
+		if (command === "triviaset" && params[0] === "questionsperround" && params.length === 2) {
+			let newQuestionsPerRound = parseInt(params[1]);
+
+			if (!isNaN(newQuestionsPerRound) && newQuestionsPerRound > 0) {
+				questionsPerRound = newQuestionsPerRound;
+				console.log(`Questions per round is now set to ${newQuestionsPerRound}!`);
+				displayChatMessage("System:", `Questions per round is now set to ${newQuestionsPerRound}!`);
+			} else {
+				console.log("Invalid number of questions. Please provide a positive number.");
+				displayChatMessage("System:", "Invalid number of questions. Please provide a positive number.");
 			}
 		}
         // Handle start trivia command
