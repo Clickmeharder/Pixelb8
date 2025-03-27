@@ -390,7 +390,7 @@ function triviaSplash() {
             }, 700); // 0.7s fade-out time (shorter hide animation)
         }, 14000); // Song (10s) + animation delay (3s) + main animation (~4s)
     }).then(() => {
-        toggleTrivia(); // Show trivia after splash disappears
+        showTrivia(); // Show trivia after splash disappears
     });
 }
 
@@ -573,6 +573,41 @@ function updateTriviaboard() {
 		<!-- }); -->
 <!-- } -->
 
+
+//function to show the trivia overlay/ui display
+function showTrivia() {
+    const wrapper = document.getElementById("questionWrapper");
+    const board = document.getElementById("triviaboard");
+    const timer = document.getElementById("timer");
+    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
+
+    // Show elements with animations
+    wrapper.style.visibility = "visible";
+    wrapper.style.opacity = "1";
+    wrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+
+    board.style.animation = "slideIn 0.8s ease-out forwards";
+    timer.style.animation = "fadeIn 1s ease-in-out forwards";
+    timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
+}
+//function to hide the trivia overlay/ui display
+function hideTrivia() {
+    const wrapper = document.getElementById("questionWrapper");
+    const board = document.getElementById("triviaboard");
+    const timer = document.getElementById("timer");
+    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
+
+    // Hide elements with animations
+    wrapper.style.animation = "fadeOut 0.5s ease-in forwards";
+    board.style.animation = "slideOut 0.5s ease-in forwards";
+    timer.style.animation = "fadeOut 0.5s ease-in forwards";
+    timeUntilNextQ.style.animation = "fadeOut 0.5s ease-in forwards";
+
+    setTimeout(() => {
+        wrapper.style.visibility = "hidden";
+        wrapper.style.opacity = "0";
+    }, 500); // Matches the fade-out animation duration
+}
 //function to toggle trivia overlay/ui display
 function toggleTrivia() {
     const wrapper = document.getElementById("questionWrapper");
@@ -668,7 +703,7 @@ function endTrivia() {
     // Hide UI elements or reset text
     document.getElementById("timeuntil-nextQ").textContent = "";
 
-    toggleTrivia(); // Hide the trivia UI
+    hideTrivia(); // Hide the trivia UI
 }
 
 //-end of trivia game----------
