@@ -306,6 +306,7 @@ let usedQuestions = [];
 let activeQuestion = null;
 let answeredUsers = new Set();
 let firstAnswerUser = null;
+let userStats = {}; // This will store the count of correct answers and first answers
 let hideQuestionTimer;
 let questionTimer, countdownTimer;
 
@@ -449,34 +450,32 @@ function startQuestion() {
     }
     nextQuestion();
 }
-function startQuestion() {
-	if (questionsAsked >= questionsPerRound) {
-		endTriviaRound();
-		return;
-	}
-	nextQuestion();
-	clearTimeout(countdownTimer);
-	clearTimeout(hideQuestionTimer);
-	activeQuestion = getRandomQuestion();
-	answeredUsers.clear();
-	firstAnswerUser = null;
-	questionsAsked++;
-	updateQuestionCounter(); // Update the display
-	document.getElementById("question").textContent = activeQuestion.question;
-	document.getElementById("questionWrapper").style.visibility = "visible";
-	<!-- document.getElementById("triviaboard").style.visibility = "hidden"; -->
-	document.getElementById("timer").textContent = "1:30";
-	document.getElementById("timeuntil-nextQ").textContent = "";
-
-	let secondsLeft = 90;
-	questionTimer = setInterval(() => {
-		secondsLeft--;
-		document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
-		if (secondsLeft <= 0) {
-			endQuestion();
-		}
-	}, 1000);
-}
+<!-- function startQuestion() { -->
+	<!-- if (questionsAsked >= questionsPerRound) { -->
+		<!-- endTriviaRound(); -->
+		<!-- return; -->
+	<!-- } -->
+	<!-- nextQuestion(); -->
+	<!-- clearTimeout(countdownTimer); -->
+	<!-- clearTimeout(hideQuestionTimer); -->
+	<!-- activeQuestion = getRandomQuestion(); -->
+	<!-- answeredUsers.clear(); -->
+	<!-- firstAnswerUser = null; -->
+	<!-- questionsAsked++; -->
+	<!-- updateQuestionCounter(); // Update the display -->
+	<!-- document.getElementById("question").textContent = activeQuestion.question; -->
+	<!-- document.getElementById("questionWrapper").style.visibility = "visible"; -->
+	<!-- document.getElementById("timer").textContent = "1:30"; -->
+	<!-- document.getElementById("timeuntil-nextQ").textContent = ""; -->
+	<!-- let secondsLeft = 90; -->
+	<!-- questionTimer = setInterval(() => { -->
+		<!-- secondsLeft--; -->
+		<!-- document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`; -->
+		<!-- if (secondsLeft <= 0) { -->
+			<!-- endQuestion(); -->
+		<!-- } -->
+	<!-- }, 1000); -->
+<!-- } -->
 
 
 //function to update the time remaining before the next question
@@ -521,34 +520,58 @@ function nextquestionTimer(seconds) {
 	document.getElementById("timeuntil-nextQ").textContent = `Next question in: ${minutes}m ${remainingSeconds}s`;
 }
 
-//function to check if a users chat message is the correct answer
 function checkAnswer(user, message) {
-	if (!activeQuestion || answeredUsers.has(user)) return;
-	let correctAnswer = activeQuestion.answer.toLowerCase();
-	let userAnswer = message.trim().toLowerCase();
-	if (userAnswer === correctAnswer) {
-		answeredUsers.add(user);
-		if (!firstAnswerUser) {
-			firstAnswerUser = user;
-			userScores[user] = (userScores[user] || 0) + 3;
-		} else {
-			userScores[user] = (userScores[user] || 0) + 1;
-		}
-		updateTriviaboard();
-	}
+    if (!activeQuestion || answeredUsers.has(user)) return;
+    let correctAnswer = activeQuestion.answer.toLowerCase();
+    let userAnswer = message.trim().toLowerCase();
+    if (userAnswer === correctAnswer) {
+        // Track correct answers
+        if (!userStats[user]) {
+            userStats[user] = {
+                correctAnswers: 0,
+                firstAnswers: 0
+            };
+        }
+        userStats[user].correctAnswers++; // Increment correct answers count
+
+        // Track if the user answered first
+        if (!firstAnswerUser) {
+            firstAnswerUser = user;
+            userStats[user].firstAnswers++; // Increment first answers count
+            userScores[user] = (userScores[user] || 0) + 3; // Add 3 points for first correct answer
+        } else {
+            userScores[user] = (userScores[user] || 0) + 1; // Add 1 point for a correct answer after the first
+        }
+        updateTriviaboard();
+    }
 }
 
 function updateTriviaboard() {
-	const triviaboardElement = document.getElementById("triviaboard");
-	triviaboardElement.innerHTML = "<p>Trivia</p>";
-	Object.entries(userScores)
-		.sort((a, b) => b[1] - a[1])
-		.forEach(([user, score]) => {
-			const li = document.createElement("li");
-			li.textContent = `${user}: ${score} pts`;
-			triviaboardElement.appendChild(li);
-		});
+    const triviaboardElement = document.getElementById("triviaboard");
+    triviaboardElement.innerHTML = "<p>Trivia</p>";
+
+    Object.entries(userScores)
+        .sort((a, b) => b[1] - a[1]) // Sort by score
+        .forEach(([user, score]) => {
+            const li = document.createElement("li");
+            const correctAnswers = userStats[user] ? userStats[user].correctAnswers : 0;
+            const firstAnswers = userStats[user] ? userStats[user].firstAnswers : 0;
+            li.textContent = `${user}: ${score} pts | Correct Answers: ${correctAnswers} | First Answers: ${firstAnswers}`;
+            triviaboardElement.appendChild(li);
+        });
 }
+
+<!-- function updateTriviaboard() { -->
+	<!-- const triviaboardElement = document.getElementById("triviaboard"); -->
+	<!-- triviaboardElement.innerHTML = "<p>Trivia</p>"; -->
+	<!-- Object.entries(userScores) -->
+		<!-- .sort((a, b) => b[1] - a[1]) -->
+		<!-- .forEach(([user, score]) => { -->
+			<!-- const li = document.createElement("li"); -->
+			<!-- li.textContent = `${user}: ${score} pts`; -->
+			<!-- triviaboardElement.appendChild(li); -->
+		<!-- }); -->
+<!-- } -->
 
 //function to toggle trivia overlay/ui display
 function toggleTrivia() {
