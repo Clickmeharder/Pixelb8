@@ -312,7 +312,7 @@ let questionTimer, countdownTimer;
 
 let round = 1;
 let questionsAsked = 0;
-const questionsPerRound = 12;
+const questionsPerRound = 3;
 let triviaQuestions = { round1: [], round2: [] };
 
 <!-- fetch("questions.json") -->
@@ -430,10 +430,10 @@ function nextQuestion() {
     document.getElementById("questionWrapper").style.visibility = "visible";
     // document.getElementById("triviaboard").style.visibility = "hidden"; 
     
-    document.getElementById("timer").textContent = "1:30";
+    document.getElementById("timer").textContent = "0:30";
     document.getElementById("timeuntil-nextQ").textContent = "";
 
-    let secondsLeft = 90;
+    let secondsLeft = 30;
     questionTimer = setInterval(() => {
         secondsLeft--;
         document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
@@ -670,13 +670,17 @@ function announceWinners() {
     // Get top 5 sorted users
     const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
 
+    // Log sorted users for debugging
+    console.log("Sorted users:", sortedUsers);
+
     // Update top 3 winners
     for (let i = 0; i < 3; i++) {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
+            console.log(`Winner ${i + 1}: ${user} - Score: ${score}`);  // Debug log for winners
             document.getElementById(`winner${i + 1}Name`).textContent = user;
             document.getElementById(`winner${i + 1}Score`).textContent = `Score: ${score}`;
-            document.getElementById(`winner${i + 1}Profile`).src = `https://static-cdn.jtvnw.net/jtv_user_pictures/${user}-profile_image-300x300.jpg`;
+            document.getElementById(`winner${i + 1}Profile`).src = `https://static-cdn.jtvnw.net/jtv_user_pictures/${user.toLowerCase()}-profile_image-300x300.jpg`;
         }
     }
 
@@ -684,13 +688,20 @@ function announceWinners() {
     for (let i = 3; i < 5; i++) {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
+            console.log(`Winner ${i + 1} (4th/5th place): ${user} - Score: ${score}`);  // Debug log for 4th/5th place
             document.getElementById(`winner${i + 1}Name`).textContent = user;
             document.getElementById(`winner${i + 1}Score`).textContent = `Score: ${score}`;
         }
     }
 
-    // Make the winners' wrapper visible
-    document.getElementById("winnersWrapper").style.display = "block";
+    // Check if winnersWrapper exists and log visibility change
+    const winnersWrapper = document.getElementById("winnersWrapper");
+    if (winnersWrapper) {
+        console.log("Found winnersWrapper. Displaying...");
+        winnersWrapper.style.display = "block";  // Show the wrapper
+    } else {
+        console.log("Error: winnersWrapper element not found!");
+    }
 }
 
 function endTrivia() {
