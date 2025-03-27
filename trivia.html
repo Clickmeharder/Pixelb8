@@ -576,15 +576,18 @@ function updateTriviaboard() {
 
 //function to show the trivia overlay/ui display
 function showTrivia() {
-    const wrapper = document.getElementById("questionWrapper");
+	const triviaWrapper = document.getElementById("TriviaWrapper");
+    const questionWrapper = document.getElementById("questionWrapper");
     const board = document.getElementById("triviaboard");
     const timer = document.getElementById("timer");
     const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
 
     // Show elements with animations
-    wrapper.style.visibility = "visible";
-    wrapper.style.opacity = "1";
-    wrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+	triviaWrapper.style.visibility = "visible";
+	triviaWrapper.style.opacity = "1";
+    questionWrapper.style.visibility = "visible";
+    questionWrapper.style.opacity = "1";
+    questionWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
 
     board.style.animation = "slideIn 0.8s ease-out forwards";
     timer.style.animation = "fadeIn 1s ease-in-out forwards";
@@ -592,13 +595,14 @@ function showTrivia() {
 }
 //function to hide the trivia overlay/ui display
 function hideTrivia() {
-    const wrapper = document.getElementById("questionWrapper");
+	const triviaWrapper = document.getElementById("TriviaWrapper");
+    const questionWrapper = document.getElementById("questionWrapper");
     const board = document.getElementById("triviaboard");
     const timer = document.getElementById("timer");
     const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
 
     // Hide elements with animations
-    wrapper.style.animation = "fadeOut 0.5s ease-in forwards";
+    questionWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
     board.style.animation = "slideOut 0.5s ease-in forwards";
     timer.style.animation = "fadeOut 0.5s ease-in forwards";
     timeUntilNextQ.style.animation = "fadeOut 0.5s ease-in forwards";
@@ -606,6 +610,8 @@ function hideTrivia() {
     setTimeout(() => {
         wrapper.style.visibility = "hidden";
         wrapper.style.opacity = "0";
+		triviaWrapper.style.visibility = "hidden";
+		triviaWrapper.style.opacity = "0";
     }, 500); // Matches the fade-out animation duration
 }
 //function to toggle trivia overlay/ui display
