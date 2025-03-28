@@ -81,14 +81,14 @@
 			flex-wrap: wrap;
 			border: 3px inset #8b8585;
 			overflow: hidden;
-			height: 0; /* Start collapsed */
-			transition: height 0.3s ease-in-out, padding 0.3s ease-in-out;
-			padding: 0; /* Remove padding when collapsed */
+			max-height: 20px; /* Initially small */
+			padding: 0 10px; /* Horizontal padding stays */
+			transition: max-height 0.6s ease-out, padding 0.3s ease-out;
 		}
 
 		div#trivia-settings:hover {
-			height: auto; /* Expand when hovered */
-			padding: 10px; /* Add padding when expanded */
+			max-height: 500px; /* Expands smoothly */
+			padding: 10px; /* Adds padding when expanded */
 		}
 		/* Trivia Settings Header */
 		#trivia-settingsheader {
