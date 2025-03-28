@@ -577,19 +577,23 @@ function triviaSplash() {
             splashText.classList.add("animate");  // Apply animation class
         }, 1000); // Delay start of animation (to sync with sound)
 
-        // Hide splash after a set amount of time (e.g., 10 seconds)
+        // Fade out splash after a set amount of time (e.g., 10 seconds)
         setTimeout(() => {
+            splash.style.transition = "opacity 3s ease-in-out";  // Add a smooth fade-out transition
             splash.style.opacity = "0";  // Fade out effect
+
+            // After fade-out, hide the splash
             setTimeout(() => {
                 splash.style.visibility = "hidden";  // Hide splash
                 splash.style.display = "none";  // Ensure it's completely hidden
                 resolve();  // Resolve the promise after hiding the splash
-            }, 1000);  // Wait 1 second before hiding
+            }, 3000);  // Match the fade-out duration (3 seconds here)
         }, 13000); // Keep splash visible for 13 seconds (adjust as needed)
     }).then(() => {
         showTrivia();  // Show trivia after splash disappears
     });
 }
+
 
 function getRandomQuestion() {
 	let currentRound = round === 1 ? "round1" : "round2";
