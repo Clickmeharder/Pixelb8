@@ -1230,11 +1230,11 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
     console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
 
     let answer = null;
-    if (message.startsWith("?")) {
+    if (message.startsWith("? ")) {
         answer = message.slice(1).trim();
-    } else if (message.startsWith("/a")) {
+    } else if (message.startsWith("a ")) {
         answer = message.slice(2).trim();
-    } else if (message.startsWith("/answer ")) {
+    } else if (message.startsWith("= ")) {
         answer = message.slice(8).trim();
     } else if (message.startsWith("answer ")) {
         answer = message.slice(7).trim();
