@@ -399,7 +399,7 @@
 		</div>
 		<!-- triviaAnnouncementWrapper -->
 		<div id="triviaAnnouncementWrapper">
-			<div id="triviaAnnouncement">Round Starting soon...</div>
+			<div id="triviaAnnouncement"></div>
 			<div id="roundstarttimer"></div>
 		</div>
 		<!-- Wrapper for the Trivia main elements -->
@@ -597,7 +597,7 @@ function showAnnouncement(message, triviaAnnouncementTime) {
             roundStartTimer.style.display = "block"; // Show timer
 
             const countdownInterval = setInterval(() => {
-                roundStartTimer.innerText = `Round starting in: ${triviaAnnouncementTime} seconds`;
+                roundStartTimer.innerText = `${triviaAnnouncementTime} seconds`;
 
                 // Decrease triviaAnnouncementTime
                 triviaAnnouncementTime--;
@@ -666,7 +666,7 @@ function triviaSplash() {
     return new Promise((resolve) => {
         splashAnimation()  // Show the splash animation
             .then(() => {
-                return showAnnouncement("Round starting in...", 30);  // Show announcement with a 30-second countdown
+                return showAnnouncement("Round starts in:", 30);  // Show announcement with a 30-second countdown
             })
             .then(() => {
                 showTrivia();  // Show trivia after the countdown ends
