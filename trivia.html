@@ -341,7 +341,15 @@
 
 		#TriviaWrapper {visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
 
-		#triviaPodium {display: flex;flex-direction: column;align-items: center;justify-content: center;gap: 15px;}
+		#triviaPodium {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 15px;
+		}
 		.winner {text-align: center;}
 		.winner img {border-radius: 50%;width: 100px;height: 100px;margin-bottom: 10px;}
 		.winner-name {font-size: 1.2em;font-weight: bold;}
