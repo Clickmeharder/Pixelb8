@@ -172,36 +172,38 @@
 				
 		/* Trivia Splash Centering */
 		#triviaSplash {
-			position: fixed; /* Use fixed so it stays centered even on scroll */
+			position: fixed;  /* Stays centered even on scroll */
 			top: 50%;
 			left: 50%;
-			transform: translate(-50%, -50%);
+			transform: translate(-50%, -50%);  /* Center it properly */
 			text-align: center;
 			z-index: 9999;
 			opacity: 0;
 			visibility: hidden;
-			width: 100%; /* Ensures it spans the screen */
-			max-width: 600px; /* Limits the width for better scaling */
+			width: 100%;
+			max-width: 600px;  /* Limits width for better scaling */
 			padding: 20px;
+			box-sizing: border-box;  /* Ensures padding doesn't affect the layout */
 		}
 
 		/* Logo Container for Proper Scaling */
 		#logoContainer {
-			position: relative; 
+			position: relative;
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			width: 100%; /* Ensures it's responsive */
+			width: 100%;
+			height: auto;
 		}
 
 		/* Actual Logo Scaling */
 		#triviaLogo {
-			width: 150px; /* Adjust size as needed */
+			width: 150px;  /* Adjust size */
 			height: auto;
 			max-width: 100%;
 			opacity: 0;
-			transform: rotate(-15deg);
-			animation: logoDropIn 1.5s ease-out forwards, glowPulse 3s infinite alternate 1.5s;
+			transform: scale(0.5) rotate(-15deg);
+			animation: logoDropIn 2s ease-out forwards, glowPulse 3s infinite alternate 2s;  /* Adjusted timing */
 		}
 
 		/* Splash Text Styling */
@@ -211,10 +213,53 @@
 			color: #0ea4a4;
 			margin-top: 10px;
 			opacity: 0;
-			animation: fadeIn 1.5s ease-out 1.5s forwards;
+			animation: textReveal 2s ease-out 3s forwards;  /* Slight delay for synchronization */
 		}
 
-		/*ANIMATIONS*/
+		/* ANIMATIONS */
+
+		/* Logo Drop-In */
+		@keyframes logoDropIn {
+			0% {
+				opacity: 0;
+				transform: scale(0.5) rotate(-15deg);
+			}
+			50% {
+				opacity: 1;
+				transform: scale(1.2) rotate(5deg);
+			}
+			100% {
+				opacity: 1;
+				transform: scale(1) rotate(0deg);
+			}
+		}
+
+		/* Glow Pulse */
+		@keyframes glowPulse {
+			0% {
+				filter: drop-shadow(0 0 5px #0ea4a4);
+			}
+			100% {
+				filter: drop-shadow(0 0 15px #0ea4a4);
+			}
+		}
+
+		/* Text Reveal */
+		@keyframes textReveal {
+			0% {
+				opacity: 0;
+				transform: translateY(10px);
+			}
+			50% {
+				opacity: 1;
+				transform: translateY(0);
+			}
+			100% {
+				opacity: 1;
+				text-shadow: 0px 0px 10px #0ea4a4;
+			}
+		}
+
 		/* Fade In */
 		@keyframes fadeIn {
 			from { opacity: 0; transform: translateY(10px); }
@@ -240,7 +285,7 @@
 		}
 
 
-		@keyframes logoDropIn {
+		@keyframes oldlogoDropIn {
 			0% {
 				opacity: 0;
 				transform: scale(0.5) rotate(-15deg);
@@ -254,11 +299,11 @@
 			}
 		}
 
-		@keyframes glowPulse {
+		@keyframes oldglowPulse {
 			0% { filter: drop-shadow(0 0 5px #0ea4a4); }
 			100% { filter: drop-shadow(0 0 15px #0ea4a4); }
 		}
-		@keyframes textReveal {
+		@keyframes oldtextReveal {
 			0% { opacity: 0; transform: translateY(10px); }
 			50% { opacity: 1; transform: translateY(0px); }
 			100% { text-shadow: 0px 0px 10px #0ea4a4; }
@@ -517,37 +562,32 @@ function triviaSplash() {
         const splash = document.getElementById("triviaSplash");
         const logo = document.getElementById("logoContainer");
         const splashText = document.getElementById("splashText");
-		// Play the sound
+
+        // Play the sound
         playSound("gameshowintro");
 
         // Make splash visible
-        splash.style.display = "block";
+        splash.style.display = "flex";  // Use flexbox for centering
         splash.style.visibility = "visible";
-        splash.style.opacity = "1";
+        splash.style.opacity = "1";  // Fade in
 
-        // Start animations **3 seconds** after song starts
+        // Start animations after 1 second (this can be adjusted)
         setTimeout(() => {
-            logo.style.animation = "none"; // Reset animation
-            splashText.style.animation = "none"; // Reset animation
-            void splashText.offsetWidth; // Force reflow
-            void logo.offsetWidth; // Force reflow
+            logo.classList.add("animate");  // Apply animation class
+            splashText.classList.add("animate");  // Apply animation class
+        }, 1000); // Delay start of animation (to sync with sound)
 
-            logo.style.animation = "logoDropIn 2.5s ease-out forwards, glowPulse 3s infinite alternate 3s";
-            splashText.style.animation = "textReveal 4s ease-in-out forwards";
-        }, 3000); // Start 3 seconds after song starts
-
-        // Hide splash **3 seconds after animation finishes**
+        // Hide splash after a set amount of time (e.g., 10 seconds)
         setTimeout(() => {
-            splash.style.opacity = "0";  // Fade out quickly
-            splash.style.visibility = "hidden";
-
+            splash.style.opacity = "0";  // Fade out effect
             setTimeout(() => {
-                splash.style.display = "none";  // Hide completely
-                resolve();
-            }, 700); // 0.7s fade-out time (shorter hide animation)
-        }, 14000); // Song (10s) + animation delay (3s) + main animation (~4s)
+                splash.style.visibility = "hidden";  // Hide splash
+                splash.style.display = "none";  // Ensure it's completely hidden
+                resolve();  // Resolve the promise after hiding the splash
+            }, 1000);  // Wait 1 second before hiding
+        }, 13000); // Keep splash visible for 13 seconds (adjust as needed)
     }).then(() => {
-        showTrivia(); // Show trivia after splash disappears
+        showTrivia();  // Show trivia after splash disappears
     });
 }
 
