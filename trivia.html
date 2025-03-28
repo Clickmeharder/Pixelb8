@@ -371,7 +371,7 @@
 	<script>//trivia options togglebutton
 		document.getElementById("trivia-toggle").addEventListener("click", function () {
 			let container = document.getElementById("triviacontrolContainer");
-			container.style.display = container.style.display === "block" ? "none" : "block";
+			container.classList.toggle("active");
 		});
 	</script>
     <script>
