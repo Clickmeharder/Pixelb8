@@ -1487,12 +1487,33 @@ let streamername = "jaedraze"; // Default streamer name
 ComfyJS.Init(streamername);
 
 function setStreamer(newStreamer) {
+    const button = document.getElementById("interactButt"); // Get the button element
+    const input = document.querySelector("#triviacontrolContainer input[type='text']"); // Get the input element
+    
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
         ComfyJS.Init(streamername);
         console.log(`Connected to Twitch chat for: ${streamername}`);
+
+        // Change button text to include the connected streamer
+        button.textContent = `Connected to: ${streamername}`; // Set button text with the connected streamer name
+        button.style.backgroundColor = "#28a745"; // Green background
+        button.style.color = "#ffffff"; // White text color
+        button.style.border = "1px solid #28a745"; // Green border
+
+        // Set the outline to green when valid input
+        input.style.outline = "3px outset #28a745"; // Green outline for valid input
     } else {
         console.log("Please enter a valid streamer name.");
+
+        // Change button to red theme for invalid input
+        button.textContent = "Please enter a valid streamer name"; // Update button text for error
+        button.style.backgroundColor = "#dc3545"; // Red background
+        button.style.color = "#ffffff"; // White text color
+        button.style.border = "1px solid #dc3545"; // Red border
+
+        // Set the outline to red when invalid input
+        input.style.outline = "3px outset #dc3545"; // Red outline for invalid input
     }
 }
 
