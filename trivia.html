@@ -170,8 +170,9 @@
 		#timer, #timeuntil-nextQ {font-size: 20px;font-weight: bold;color: lightblue;}
 		div#timeuntil-nextQ {position: absolute;bottom: 24%;left: 2%;}
 				
+		/* Trivia Splash Centering */
 		#triviaSplash {
-			position: absolute;
+			position: fixed; /* Use fixed so it stays centered even on scroll */
 			top: 50%;
 			left: 50%;
 			transform: translate(-50%, -50%);
@@ -179,9 +180,39 @@
 			z-index: 9999;
 			opacity: 0;
 			visibility: hidden;
+			width: 100%; /* Ensures it spans the screen */
+			max-width: 600px; /* Limits the width for better scaling */
+			padding: 20px;
 		}
-				
-		#logoContainer {position: absolute;  /* Ensures it is positioned inside #triviaSplash */top: 46%;left: 50%;transform: translate(-50%, -50%) scale(0.5) rotate(-15deg);  /* Center and apply starting animation */opacity: 0;animation: logoDropIn 5s ease-out forwards, glowPulse 3s infinite alternate 5s;}
+
+		/* Logo Container for Proper Scaling */
+		#logoContainer {
+			position: relative; 
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 100%; /* Ensures it's responsive */
+		}
+
+		/* Actual Logo Scaling */
+		#triviaLogo {
+			width: 150px; /* Adjust size as needed */
+			height: auto;
+			max-width: 100%;
+			opacity: 0;
+			transform: rotate(-15deg);
+			animation: logoDropIn 1.5s ease-out forwards, glowPulse 3s infinite alternate 1.5s;
+		}
+
+		/* Splash Text Styling */
+		#splashText {
+			font-size: 24px;
+			font-weight: bold;
+			color: #0ea4a4;
+			margin-top: 10px;
+			opacity: 0;
+			animation: fadeIn 1.5s ease-out 1.5s forwards;
+		}
 
 		/*ANIMATIONS*/
 		/* Fade In */
@@ -227,6 +258,11 @@
 			0% { filter: drop-shadow(0 0 5px #0ea4a4); }
 			100% { filter: drop-shadow(0 0 15px #0ea4a4); }
 		}
+		@keyframes textReveal {
+			0% { opacity: 0; transform: translateY(10px); }
+			50% { opacity: 1; transform: translateY(0px); }
+			100% { text-shadow: 0px 0px 10px #0ea4a4; }
+		}
 
 		/* Hidden state */
 		.hidden {
@@ -235,26 +271,7 @@
 			pointer-events: none;
 		}
 
-		#splashText {
-			font-size: 2.5em;
-			color: #0ea4a4;
-			margin-top: 20px;
-			opacity: 0;
-			display: inline-block;
-			animation: textReveal 4s ease-in-out forwards;
-		}
 
-
-		@keyframes textReveal {
-			0% { opacity: 0; transform: translateY(10px); }
-			50% { opacity: 1; transform: translateY(0px); }
-			100% { text-shadow: 0px 0px 10px #0ea4a4; }
-		}
-
-		@keyframes fadeOut {
-			0% { opacity: 1; }
-			100% { opacity: 0; visibility: hidden; }
-		}
 
 		#TriviaWrapper {visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
 
