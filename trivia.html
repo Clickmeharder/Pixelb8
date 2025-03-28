@@ -408,43 +408,47 @@
 			<!-- Wrapper for the winners' announcement -->
 			<div id="winnersWrapper" style="display: none;">
 				<!-- Top 3 winners -->
-				<div class="winner" id="winner1">
-					<span class="trophy gold">🏆1st</span>
-					<p id="winner1Name" class="winner-name"></p>
-					<p id="winner1Score" class="winner-score"></p>
-					<!-- add these to each winner block 1st-3rd -->
-					<!-- total first to answer correctly --><!-- total correct answers -->
-					<!-- Total game wins --><!-- lifetime trivia points -->
-				</div>
-				<div class="winner" id="winner2">
-					<span class="trophy silver">🥈2nd</span>
-					<p id="winner2Name" class="winner-name"></p>
-					<p id="winner2Score" class="winner-score"></p>
-				</div>
-				<div class="winner" id="winner3">
-					<span class="trophy bronze">🥉3rd</span>
-					<p id="winner3Name" class="winner-name"></p>
-					<p id="winner3Score" class="winner-score"></p>
+				<div id="triviaPodium">
+					<div class="winner" id="winner1">
+						<span class="trophy gold">🏆1st</span>
+						<p id="winner1Name" class="winner-name"></p>
+						<p id="winner1Score" class="winner-score"></p>
+						<!-- add these to each winner block 1st-3rd -->
+						<!-- total first to answer correctly --><!-- total correct answers -->
+						<!-- Total game wins --><!-- lifetime trivia points -->
+					</div>
+					<div class="winner" id="winner2">
+						<span class="trophy silver">🥈2nd</span>
+						<p id="winner2Name" class="winner-name"></p>
+						<p id="winner2Score" class="winner-score"></p>
+					</div>
+					<div class="winner" id="winner3">
+						<span class="trophy bronze">🥉3rd</span>
+						<p id="winner3Name" class="winner-name"></p>
+						<p id="winner3Score" class="winner-score"></p>
+					</div>
 				</div>
 				<!-- 4th and 5th place winners (smaller) -->
-				<div class="winner small" id="winner4">
-					<span class="runnerup ribbon">🏅4th</span>
-					<p id="winner4Name" class="winner-name"></p>
-					<p id="winner4Score" class="winner-score"></p>
-				</div>
-				<div class="winner small" id="winner5">
-					<span class="runnerup medal">🎖️5th</span>
-					<p id="winner5Name" class="winner-name"></p>
-					<p id="winner5Score" class="winner-score"></p>
+				<div id="triviarunnerups">
+					<div class="winner small" id="winner4">
+						<span class="runnerup ribbon">🏅4th</span>
+						<p id="winner4Name" class="winner-name"></p>
+						<p id="winner4Score" class="winner-score"></p>
+					</div>
+					<div class="winner small" id="winner5">
+						<span class="runnerup medal">🎖️5th</span>
+						<p id="winner5Name" class="winner-name"></p>
+						<p id="winner5Score" class="winner-score"></p>
+					</div>
 				</div>
 			</div>
 			<!-- time until next question -->
 			<div id="timeuntil-nextQ"></div>
 
-			<!-- questions wrapper -->triviaAnnouncementWrapper
+			<!-- questions wrapper -->
 			<div id="questionWrapper">
 				<p id="question-counter">Question: 0 / 12</p>
-				<div id="question">Waiting for next question...</div>
+				<div id="question">...</div>
 				<div id="timer"></div>
 			</div>
 			<!-- Trivia leaderboard -->
@@ -789,7 +793,7 @@ function endQuestion() {
 	document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
 
 	setTimeout(() => {
-		document.getElementById("question").textContent = "Next question starting soon...";
+		document.getElementById("question").textContent = "...";
 	}, 3000);
 
 	hideQuestionTimer = setTimeout(() => {
