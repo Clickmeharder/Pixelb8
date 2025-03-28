@@ -1159,56 +1159,52 @@ function endTriviaRound() {
     userStats = {}; // Reset stats for the new round
 }
 
+let userColors = {}; // Store user colors
+
 function announceWinners() {
     // Get top 5 sorted users
     const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
 
-    // Log sorted users for debugging
     console.log("Sorted users:", sortedUsers);
 
-    // Update top 3 winners
     for (let i = 0; i < 3; i++) {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
             console.log(`Winner ${i + 1}: ${user} - Score: ${score}`);
             displayChatMessage("Console:", `Winner ${i + 1}: ${user} - Score: ${score}`, {}, {});
 
-            // Update winner name and score
             document.getElementById(`winner${i + 1}Name`).textContent = user;
             document.getElementById(`winner${i + 1}Score`).textContent = `Score: ${score}`;
 
-            // Fetch the winner's container (e.g., #first, #second, etc.)
+            // Set user color if available
+            let userColor = userColors[user] || "#FFFFFF"; // Default white if no color
+            document.getElementById(`winner${i + 1}Name`).style.color = userColor;
+
+            // Parent container
             const winnerContainer = document.getElementById(`winner${i + 1}`).parentElement;
 
-            // Create an extra stats div
+            // Create extra stats div
             let extraStatsDiv = document.createElement("div");
             extraStatsDiv.className = "extraStats";
 
-            // Create separate elements for each stat
+            // Create and set stats elements
             let firstAnswersElement = document.createElement("p");
             let correctAnswersElement = document.createElement("p");
             let incorrectAnswersElement = document.createElement("p");
 
-            // Get user stats
             let firstAnswers = userStats[user]?.firstAnswers || 0;
             let correctAnswers = userStats[user]?.correctAnswers || 0;
             let incorrectAnswers = userStats[user]?.incorrectAnswers || 0;
 
-            // Set text content
-			incorrectAnswersElement.textContent = `❌ Incorrect: ${incorrectAnswers}`;
-			correctAnswersElement.textContent = `✅ Correct: ${correctAnswers}`;
             firstAnswersElement.textContent = `🎯 First: ${firstAnswers}`;
-            
-            
+            correctAnswersElement.textContent = `✅ Correct: ${correctAnswers}`;
+            incorrectAnswersElement.textContent = `❌ Incorrect: ${incorrectAnswers}`;
 
-            // Append stats to the extraStatsDiv
-			extraStatsDiv.appendChild(incorrectAnswersElement);
-			extraStatsDiv.appendChild(correctAnswersElement);
+            extraStatsDiv.appendChild(incorrectAnswersElement);
+            extraStatsDiv.appendChild(correctAnswersElement);
             extraStatsDiv.appendChild(firstAnswersElement);
-            
 
-
-            // Append the extraStatsDiv as a sibling to the winner div
+            // Append the extraStatsDiv next to the winner container
             winnerContainer.appendChild(extraStatsDiv);
         }
     }
@@ -1220,15 +1216,18 @@ function announceWinners() {
             console.log(`Winner ${i + 1} (4th/5th place): ${user} - Score: ${score}`);
             document.getElementById(`winner${i + 1}Name`).textContent = user;
             document.getElementById(`winner${i + 1}Score`).textContent = `Score: ${score}`;
+
+            let userColor = userColors[user] || "orangered"; // Default color
+            document.getElementById(`winner${i + 1}Name`).style.color = userColor;
         }
     }
 
-    // Check if triviaPodium exists and log visibility change
+    // Show podium
     const triviaPodium = document.getElementById("triviaPodium");
     if (triviaPodium) {
-        console.log("Found triviaPodium. Displaying...");
-        displayChatMessage("Console:", "Found triviaPodium. Displaying...", {}, {});
-        triviaPodium.style.display = "flex"; // Show the wrapper
+        console.log("Displaying triviaPodium...");
+        displayChatMessage("Console:", "Displaying triviaPodium...", {}, {});
+        triviaPodium.style.display = "flex";
     } else {
         console.log("Error: triviaPodium element not found!");
         displayChatMessage("Console:", "Error: triviaPodium element not found!", {}, {});
@@ -1342,6 +1341,11 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
 
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
+    // Store user color from extra
+    if (!userColors[user]) {
+        userColors[user] = extra.userColor || "#FFFFFF"; // Default to white if no color is provided
+    }
+
     // Only allow streamer (jaedraze) or mods to trigger these commands
     if (user.toLowerCase() === "jaedraze" || flags.mod) {
 		console.log( "User:", user, "command:", command);
