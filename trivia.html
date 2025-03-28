@@ -946,8 +946,9 @@ function updateTriviaboard() {
         .forEach(([user, score]) => {
             const li = document.createElement("li");
             const correctAnswers = userStats[user] ? userStats[user].correctAnswers : 0;
+			const incorrectAnswers = userStats[user] ? userStats[user].incorrectAnswers : 0;
             const firstAnswers = userStats[user] ? userStats[user].firstAnswers : 0;
-            li.textContent = `${user}: ${score} pts | Correct Answers: ${correctAnswers} | First Answers: ${firstAnswers}`;
+            li.textContent = `${user}: ${score} pts | ✅: ${correctAnswers}| 🎯: ${firstAnswers}| ❌: ${incorrectAnswers}`;
             triviaboardElement.appendChild(li);
         });
 }
@@ -1140,10 +1141,10 @@ function announceWinners() {
             // Add first answers and total correct answers
             let firstAnswers = userStats[user]?.firstAnswers || 0;
             let correctAnswers = userStats[user]?.correctAnswers || 0;
-
+			const incorrectAnswers = userStats[user] ? userStats[user].incorrectAnswers : 0;
             let extraStats = document.createElement("p");
             extraStats.className = "winner-stats";
-            extraStats.textContent = `🎯 First: ${firstAnswers} | ✅ Correct: ${correctAnswers}`;
+            extraStats.textContent = `🎯 First: ${firstAnswers} | ✅ Correct: ${correctAnswers}| ❌ inCorrect: ${incorrectAnswers}`;
             document.getElementById(`winner${i + 1}`).appendChild(extraStats);
         }
     }
