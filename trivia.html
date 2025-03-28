@@ -1045,8 +1045,8 @@ function hideTrivia() {
     timeUntilNextQ.style.animation = "fadeOut 0.5s ease-in forwards";
 
     setTimeout(() => {
-        wrapper.style.visibility = "hidden";
-        wrapper.style.opacity = "0";
+        questionwrapper.style.visibility = "hidden";
+        questionwrapper.style.opacity = "0";
 		triviaWrapper.style.visibility = "hidden";
 		triviaWrapper.style.opacity = "0";
     }, 500); // Matches the fade-out animation duration
@@ -1499,7 +1499,7 @@ function setStreamer(newStreamer) {
         console.log(`Connected to Twitch chat for: ${streamername}`);
 
         // Update button styles
-        button.display = "none";
+        button.style.display = "none";
         button.style.backgroundColor = "#28a745"; 
         button.style.color = "#0e5b75"; 
         button.style.border = "1px solid #28a745"; 
@@ -1518,7 +1518,7 @@ function setStreamer(newStreamer) {
 
         // Update UI for disconnection
         twitchdisconnectbutton.style.display = "none"; 
-        button.textContent = "Not connected!";
+        button.textContent = "id10t err: try diff name";
         button.style.backgroundColor = "#dc3545"; 
         button.style.color = "#ffffff"; 
         button.style.border = "1px solid #dc3545"; 
@@ -1554,7 +1554,7 @@ function disconnectBot() {
     const input = document.querySelector("#triviacontrolContainer input[type='text']");
 
     twitchdisconnectbutton.style.display = "none"; 
-    button.textContent = "id10t err: try diff name";
+    button.textContent = "Connect";
     button.style.backgroundColor = "#dc3545"; 
     button.style.color = "#ffffff"; 
     button.style.border = "1px solid #dc3545"; 
@@ -1565,10 +1565,11 @@ function disconnectBot() {
 // Button event listener: first endTrivia, then setStreamer
 document.getElementById("streamersButt").addEventListener("click", function() {
     if (triviaGameState === "started") {
+		console.log("Ending Trivia.");
         endTrivia(); // Only end trivia if it's running
     }
-
     let newStreamer = document.querySelector("input[name='yourTextName']").value;
+	console.log("attempting to Connect to:" + newStreamer);
     setStreamer(newStreamer); // Then, set the new streamer
 });
 // Button event listener: first endTrivia, then setStreamer
@@ -1577,9 +1578,6 @@ document.getElementById("startGame").addEventListener("click", function() {
 		startTrivia(); // Only start trivia if it's not running 
     }
 });
-
-
-
 // Button event listener: canceL AND reset game
 document.getElementById("cancelGame").addEventListener("click", function() {
     if (triviaGameState === "started") {
