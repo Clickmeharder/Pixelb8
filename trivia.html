@@ -948,7 +948,7 @@ function updateTriviaboard() {
             const correctAnswers = userStats[user] ? userStats[user].correctAnswers : 0;
 			const incorrectAnswers = userStats[user] ? userStats[user].incorrectAnswers : 0;
             const firstAnswers = userStats[user] ? userStats[user].firstAnswers : 0;
-            li.textContent = `${user}: ${score} pts | ✅: ${correctAnswers}| 🎯: ${firstAnswers}| ❌: ${incorrectAnswers}`;
+            li.textContent = `${user}: ${score} pts |🎯 ${firstAnswers} |✅ ${correctAnswers} |❌ ${incorrectAnswers}`;
             triviaboardElement.appendChild(li);
         });
 }
@@ -1068,6 +1068,7 @@ function updateUserOverallStats() {
             userOverallStats[user] = {
                 correctAnswers: 0,
                 firstAnswers: 0,
+				incorrectAnswers: 0,
                 round1wins: 0,
                 round2wins: 0,
                 round3wins: 0,
@@ -1078,6 +1079,7 @@ function updateUserOverallStats() {
         // Accumulate stats
         userOverallStats[user].correctAnswers += userStats[user]?.correctAnswers || 0;
         userOverallStats[user].firstAnswers += userStats[user]?.firstAnswers || 0;
+		userOverallStats[user].incorrectAnswers += userStats[user]?.incorrectAnswers || 0;
     });
 
     // Award round win to the top scorer
@@ -1093,17 +1095,7 @@ function updateUserOverallStats() {
 
     console.log("Updated Overall Stats:", userOverallStats); // Debug log
 }
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-function endTriviaRoundOLD() {
-    document.getElementById("question").textContent = `Round ${round} Over!`;
-    clearInterval(questionTimer);
-    toggleElement("questionWrapper", "fade"); // Show message with fade animation
-	//document.getElementById("questionWrapper").style.visibility = "visible";//use this if toggleelement is wierd
-	document.getElementById("timer").textContent = "";
-	document.getElementById("timeuntil-nextQ").textContent = "";
-	announceWinners();
-}
+
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 function endTriviaRound() {
     document.getElementById("question").textContent = `Round ${round} Over!`;
