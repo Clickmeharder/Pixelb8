@@ -36,7 +36,7 @@
 			left: 10px;
 			width: 350px;
 			padding: 10px;
-			background: rgba(0, 0, 0, 0.9);
+			background: linear-gradient(135deg, #001f1f, #004040);
 			color: white;
 			border-radius: 8px;
 			box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
@@ -49,7 +49,7 @@
 
 		/* When active (visible) */
 		#comfycontrolContainer.active {
-			opacity: 1;
+			opacity: 0.85;
 			transform: translateY(0);
 			pointer-events: all; /* Allow interactions */
 		}
@@ -61,6 +61,8 @@
 			text-align: center;
 			padding: 5px;
 			margin: 5px 0;
+			color: #30b524;
+			background-color: #30363c;
 			border: 3px inset #ccc;
 			border-radius: 5px;
 		}
@@ -1371,7 +1373,7 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     // Store user color from extra
     if (!userColors[user]) {
-        userColors[user] = extra.userColor || "#FFFFFF"; // Default to white if no color is provided
+        userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
     }
 
     // Only allow streamer (jaedraze) or mods to trigger these commands
@@ -1500,8 +1502,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 <!-- fetchTriviaQuestions(); -->//function to fetch questions on load
 
 let streamername = "jaedraze"; // Default streamer name
-
-
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
@@ -1515,9 +1515,7 @@ function setStreamer(newStreamer) {
 
         // Update button styles
         button.style.display = "none";
-        button.style.backgroundColor = "#28a745"; 
-        button.style.color = "#0e5b75"; 
-        button.style.border = "1px solid #28a745"; 
+
 
         twitchdisconnectbutton.style.display = "block"; 
         twitchdisconnectbutton.style.backgroundColor = "#dc3545"; 
@@ -1570,9 +1568,9 @@ function disconnectBot() {
 
     twitchdisconnectbutton.style.display = "none"; 
     button.textContent = "Connect";
-    button.style.backgroundColor = "#dc3545";
-    button.style.color = "#ffffff"; 
-    button.style.border = "1px solid #dc3545"; 
+    button.style.backgroundColor = "#28a745"; 
+    button.style.color = "#0e5b75"; 
+    button.style.border = "1px solid #28a745";  
     input.style.outline = "3px outset #dc3545"; 
 }
 
