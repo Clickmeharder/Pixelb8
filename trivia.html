@@ -117,6 +117,25 @@
 			width: 100vw;
 			height: 100vh;
 		}
+		#triviaAnnouncementWrapper {
+			position: absolute;
+			top: 71%;
+			left: 2px;
+			width: 25%;
+			max-width: 25%;
+			text-align: center;
+			padding: 15px 20px;
+			background: linear-gradient(135deg, #001f1f, #004040);
+			border: 3px solid teal;
+			border-radius: 12px;
+			box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
+		}
+		#triviaAnnouncement {
+			font-weight: bold;
+			text-align: center;
+			color: white;
+			text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);
+		}
 		#questionWrapper {
 			position: absolute;
 			top: 71%;
@@ -414,7 +433,12 @@
 			</div>
 			<!-- time until next question -->
 			<div id="timeuntil-nextQ"></div>
-			<!-- questions wrapper -->
+			<!-- triviaAnnouncementWrapper -->
+			<div id="triviaAnnouncementWrapper">
+				<div id="triviaAnnouncement">Round Starting soon...</div>
+				<div id="roundstarttimer"></div>
+			</div>
+			<!-- questions wrapper -->triviaAnnouncementWrapper
 			<div id="questionWrapper">
 				<p id="question-counter">Question: 0 / 12</p>
 				<div id="question">Waiting for next question...</div>
@@ -556,8 +580,98 @@ function fetchTriviaQuestions() {
     });
 }
 
+function showAnnouncement(message, triviaAnnouncementTime) {
+    return new Promise((resolve) => {
+        const announcementWrapper = document.getElementById("triviaAnnouncementWrapper");
+        const triviaAnnouncement = document.getElementById("triviaAnnouncement");
+        const roundStartTimer = document.getElementById("roundstarttimer");
+
+        // Set the announcement message
+        triviaAnnouncement.innerText = message;
+
+        // If a triviaAnnouncementTime is provided, start the countdown
+        if (triviaAnnouncementTime !== undefined) {
+            roundStartTimer.style.display = "block"; // Show timer
+
+            const countdownInterval = setInterval(() => {
+                roundStartTimer.innerText = `Round starting in: ${triviaAnnouncementTime} seconds`;
+
+                // Decrease triviaAnnouncementTime
+                triviaAnnouncementTime--;
+
+                if (triviaAnnouncementTime < 0) {
+                    clearInterval(countdownInterval);  // Stop the timer
+                    roundStartTimer.style.display = "none"; // Hide timer
+                    resolve(); // Resolve promise when countdown ends
+                }
+            }, 1000); // Update every second
+        } else {
+            // No countdown, resolve after 10 seconds
+            setTimeout(() => {
+                resolve(); // Resolve promise after 10 seconds
+            }, 10000); // Show for 10 seconds
+        }
+
+        // Show the announcement wrapper
+        announcementWrapper.style.display = "flex";
+        announcementWrapper.style.opacity = "1";
+
+        // Fade out announcement after a set time (if no countdown) or after triviaAnnouncementTime
+        setTimeout(() => {
+            announcementWrapper.style.transition = "opacity 2s ease-in-out";
+            announcementWrapper.style.opacity = "0";
+        }, triviaAnnouncementTime !== undefined ? triviaAnnouncementTime * 1000 : 10000); // Wait for triviaAnnouncementTime or 10 seconds
+    });
+}
+
+function splashAnimation() {
+    return new Promise((resolve) => {
+        const splash = document.getElementById("triviaSplash");
+        const logo = document.getElementById("logoContainer");
+        const splashText = document.getElementById("splashText");
+
+        // Play the sound
+        playSound("gameshowintro");
+
+        // Make splash visible
+        splash.style.display = "flex";  // Use flexbox for centering
+        splash.style.visibility = "visible";
+        splash.style.opacity = "1";  // Fade in
+
+        // Start animations after 1 second (this can be adjusted)
+        setTimeout(() => {
+            logo.classList.add("animate");  // Apply animation class to logo
+            splashText.classList.add("animate");  // Apply animation class to text
+        }, 1000); // Delay start of animation (to sync with sound)
+
+        // Fade out splash after a set amount of time (e.g., 13 seconds)
+        setTimeout(() => {
+            splash.style.transition = "opacity 3s ease-in-out";  // Smooth fade-out transition
+            splash.style.opacity = "0";  // Fade out effect
+
+            // After fade-out, hide the splash
+            setTimeout(() => {
+                splash.style.visibility = "hidden";  // Hide splash
+                splash.style.display = "none";  // Ensure it's completely hidden
+                resolve();  // Resolve the promise after hiding the splash
+            }, 3000);  // Wait for the fade-out duration (3 seconds)
+        }, 13000); // Keep splash visible for 13 seconds (adjust as needed)
+    });
+}
 
 function triviaSplash() {
+    return new Promise((resolve) => {
+        splashAnimation()  // Show the splash animation
+            .then(() => {
+                return showAnnouncement("Round starting in...", 30);  // Show announcement with a 30-second countdown
+            })
+            .then(() => {
+                showTrivia();  // Show trivia after the countdown ends
+                resolve();  // Resolve the promise after trivia starts
+            });
+    });
+}
+function oldtriviaSplash() {
     return new Promise((resolve) => {
         const splash = document.getElementById("triviaSplash");
         const logo = document.getElementById("logoContainer");
@@ -593,6 +707,7 @@ function triviaSplash() {
         showTrivia();  // Show trivia after splash disappears
     });
 }
+
 
 
 function getRandomQuestion() {
