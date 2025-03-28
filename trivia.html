@@ -385,6 +385,7 @@
 			<input type="number" id="questionsPerRound" value="5" min="1" step="1">
 			<label for="numberOfRounds">Number of Rounds:</label>
 			<input type="number" id="numberOfRounds" value="3" min="1" step="1">
+			<label><input type="checkbox" id="chatAnswersToggle" />Allow Chat Answers</label>
 			<button id="saveSettings">Save Settings</button>
 		</div>
 	</div>
@@ -467,6 +468,15 @@
 		document.getElementById("trivia-toggle").addEventListener("click", function () {
 			let container = document.getElementById("triviacontrolContainer");
 			container.classList.toggle("active");
+		});
+		
+		// Get the checkbox element
+		const chatAnswersToggle = document.getElementById('chatAnswersToggle');
+
+		// Set up an event listener to update the `chatanswers` variable when the checkbox is toggled
+		chatAnswersToggle.addEventListener('change', () => {
+			chatanswers = chatAnswersToggle.checked;  // Set chatanswers based on the checkbox
+			console.log("Chat answers are now", chatanswers ? "enabled" : "disabled");
 		});
 	</script>
     <script>
