@@ -79,6 +79,16 @@
 			display: flex;
 			flex-direction: column;
 			flex-wrap: wrap;
+			border: 3px inset #8b8585;
+			overflow: hidden;
+			height: 0; /* Start collapsed */
+			transition: height 0.3s ease-in-out, padding 0.3s ease-in-out;
+			padding: 0; /* Remove padding when collapsed */
+		}
+
+		div#trivia-settings:hover {
+			height: auto; /* Expand when hovered */
+			padding: 10px; /* Add padding when expanded */
 		}
 		/* Trivia Settings Header */
 		#trivia-settingsheader {
