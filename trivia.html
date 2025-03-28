@@ -424,6 +424,7 @@
 		<img id="streamerPFP" src="" alt="Streamer Profile Picture" />
 		<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
 		<button id="streamersButt">Connect</button>
+		<button onclick="disconnectBot()">Disconnect from Twitch</button>
 		<div id="trivia-controls">
 			<button id="startGame">Start Game</button>
 			<button id="nextQuestion">Next Question</button>
@@ -1523,6 +1524,12 @@ document.getElementById("startGame").addEventListener("click", function() {
 		startTrivia(); // Only start trivia if it's not running 
     }
 });
+
+function disconnectBot() {
+	ComfyJS.Disconnect();
+	console.log("Bot disconnected from Twitch.");
+}
+
 // Button event listener: canceL AND reset game
 document.getElementById("cancelGame").addEventListener("click", function() {
     if (triviaGameState === "started") {
