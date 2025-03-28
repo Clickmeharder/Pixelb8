@@ -641,9 +641,11 @@ function olddisplayChatMessage(user, message, flags, extra) {
 
 
 
-
+//initialize streamer chat
+let streamername = "jaedraze";
 
 //trivia game code starts here
+
 let triviaGameState = null;
 let userStats = {}; // This will store the count of correct answers and first answers
 let userOverallStats = {}; // This will store the users lifetime stats ie: number of games played. number of games won. total correct answers total first correct answers
@@ -1359,7 +1361,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 
     // Only allow streamer (jaedraze) or mods to trigger these commands
-    if (user.toLowerCase() === "jaedraze" || flags.mod) {
+    if (user.toLowerCase() === streamername || flags.mod) {
 		console.log( "User:", user, "command:", command);
 		if (command.toLowerCase() === "testsound-1") {
 				playSound(); // Play the sound when !playsound is typed in chat
@@ -1484,10 +1486,25 @@ window.onload = () => {
 
 <!-- fetchTriviaQuestions(); -->//function to fetch questions on load
 
-//initialize Twitch stream with comfy.js
+let streamername = "jaedraze"; // Default streamer name
+ComfyJS.Init(streamername);
 
-ComfyJS.Init("jaedraze");
+function setStreamer(newStreamer) {
+    if (newStreamer && newStreamer.trim() !== "") {
+        streamername = newStreamer.trim();
+        ComfyJS.Init(streamername);
+        console.log(`Connected to Twitch chat for: ${streamername}`);
+    } else {
+        console.log("Please enter a valid streamer name.");
+    }
+}
 
+// Button event listener: first endTrivia, then setStreamer
+document.getElementById("interactButt").addEventListener("click", function() {
+    endTrivia(); // First, end the trivia
+    let newStreamer = document.querySelector("input[name='yourTextName']").value;
+    setStreamer(newStreamer); // Then, set the new streamer
+});
 </script>
 </body>
 </html>
