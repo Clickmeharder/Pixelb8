@@ -1,5 +1,6 @@
 //--------	Chat ---|
 //add this to html:
+// <img id="streamerPFP" src="" alt="Streamer Profile Picture" />
 //	<div id="twitchchatContainer">
 //		<div id="twitchMessagebox">
 //		</div>
