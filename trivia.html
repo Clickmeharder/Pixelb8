@@ -1129,6 +1129,7 @@ function announceWinners() {
 
     // Log sorted users for debugging
     console.log("Sorted users:", sortedUsers);
+
     // Update top 3 winners
     for (let i = 0; i < 3; i++) {
         const [user, score] = sortedUsers[i] || [];
@@ -1141,11 +1142,29 @@ function announceWinners() {
             // Add first answers and total correct answers
             let firstAnswers = userStats[user]?.firstAnswers || 0;
             let correctAnswers = userStats[user]?.correctAnswers || 0;
-			const incorrectAnswers = userStats[user] ? userStats[user].incorrectAnswers : 0;
-            let extraStats = document.createElement("p");
-            extraStats.className = "winner-stats";
-            extraStats.textContent = `🎯 First: ${firstAnswers} | ✅ Correct: ${correctAnswers}| ❌ inCorrect: ${incorrectAnswers}`;
-            document.getElementById(`winner${i + 1}`).appendChild(extraStats);
+            const incorrectAnswers = userStats[user] ? userStats[user].incorrectAnswers : 0;
+
+            // Create separate elements for each stat
+            let userFirstAnswersElement = document.createElement("p");
+            let userCorrectAnswersElement = document.createElement("p");
+            let userIncorrectAnswersElement = document.createElement("p");
+
+            // Assign text content for each stat
+            userFirstAnswersElement.textContent = `🎯 First: ${firstAnswers}`;
+            userCorrectAnswersElement.textContent = `✅ Correct: ${correctAnswers}`;
+            userIncorrectAnswersElement.textContent = `❌ Incorrect: ${incorrectAnswers}`;
+
+            // Create the container div for extra stats and append the stats to it
+            let extraStatsDiv = document.createElement("div");
+            extraStatsDiv.className = "winner-stats";
+
+            // Append each individual stat element to the container
+            extraStatsDiv.appendChild(userFirstAnswersElement);
+            extraStatsDiv.appendChild(userCorrectAnswersElement);
+            extraStatsDiv.appendChild(userIncorrectAnswersElement);
+
+            // Append the stats container to the winner's section
+            document.getElementById(`winner${i + 1}`).appendChild(extraStatsDiv);
         }
     }
 
@@ -1163,11 +1182,11 @@ function announceWinners() {
     const triviaPodium = document.getElementById("triviaPodium");
     if (triviaPodium) {
         console.log("Found triviaPodium. Displaying...");
-		displayChatMessage("Console:", "Found triviaPodium. Displaying...", {}, {}); 
+        displayChatMessage("Console:", "Found triviaPodium. Displaying...", {}, {}); 
         triviaPodium.style.display = "block";  // Show the wrapper
     } else {
         console.log("Error: triviaPodium element not found!");
-		displayChatMessage("Console:", "Error: triviaPodium element not found!", {}, {}); 
+        displayChatMessage("Console:", "Error: triviaPodium element not found!", {}, {}); 
     }
 }
 
