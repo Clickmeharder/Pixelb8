@@ -1367,15 +1367,19 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         }
     } else {
         // Example commands that any user can trigger
-		if (command === "a" || command === "answer") {
+        if (command === "a" || command === "answer") {
             let answer = message.trim();  // Extract the answer
-            let isCorrect = checkAnswer(user, answer);  // Check if correct
-
-            // Only display message if the user hasn't already answered
-            if (!answeredUsers.has(user)) {
-                displayChatMessage(user, `!${command} ${answer}`, flags, extra, isCorrect);  // Show in chat
+            let isCorrect = checkAnswer(user, answer);  // Check if the answer is correct
+            // Display the answer in chat regardless of whether it's correct or incorrect
+            if (isCorrect) {
+                // If the answer is correct, display the answer with a ✅ checkmark
+                displayChatMessage(user, `!${command} ${answer} ✅`, flags, extra, true);  // Show correct answer in chat
+            } else if (!answeredUsers.has(user)) {
+                // If the user hasn't answered correctly yet, display the answer with an ❌ X mark
+                displayChatMessage(user, `!${command} ${answer} ❌`, flags, extra, false);  // Show incorrect answer in chat
             } else {
-                console.log(`${user} has already answered.`);
+                // If the user has already answered correctly, do nothing (ignore their further answers)
+                console.log(`${user} has already answered correctly. Ignoring further answers.`);
             }
         }
         if (command.toLowerCase() === "helloworld") {
