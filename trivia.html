@@ -1327,7 +1327,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             }
         }
 
-
+        // Example commands that any user can trigger
+		if (command === "a" || command === "answer") {
+			let answer = message.trim();  // Extract the answer
+			let isCorrect = checkAnswer(user, answer); // Check if correct
+			displayChatMessage(user, `!${command} ${answer}`, flags, extra, isCorrect); // Show in chat
+		}
     } else {
         // Example commands that any user can trigger
 		if (command === "a" || command === "answer") {
