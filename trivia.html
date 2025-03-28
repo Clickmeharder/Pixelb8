@@ -30,7 +30,7 @@
 		}
 
 		/* Trivia Control Container */
-		#triviacontrolContainer {
+		#comfycontrolContainer {
 			position: fixed;
 			top: 10px;
 			left: 10px;
@@ -48,14 +48,14 @@
 		}
 
 		/* When active (visible) */
-		#triviacontrolContainer.active {
+		#comfycontrolContainer.active {
 			opacity: 1;
 			transform: translateY(0);
 			pointer-events: all; /* Allow interactions */
 		}
 
 		/* Trivia Input */
-		#triviacontrolContainer input[type="text"] {
+		#comfycontrolContainer input[type="text"] {
 			width: 92%;
 			font-size: larger;
 			text-align: center;
@@ -66,7 +66,7 @@
 		}
 
 		/* Trivia Buttons */
-		#triviacontrolContainer button {
+		#comfycontrolContainer button {
 			width: 100%;
 			padding: 9px;
 			margin: 5px 0;
@@ -79,7 +79,7 @@
 			transition: background 0.3s ease, color: 0.3s ease;
 		}
 
-		#triviacontrolContainer button:hover {
+		#comfycontrolContainer button:hover {
 			background: #27ae60;
 			color: #0e5b75;
 		}
@@ -435,10 +435,10 @@
 		</div>
 	</div>
 	<!--                                                              -->
-		<!-- Floating Button -->
+	<!-- Floating Button -->
 	<button id="trivia-toggle">⚙</button>
 	<!-- Trivia Control Container -->
-	<div id="triviacontrolContainer">
+	<div id="comfycontrolContainer">
 		<img id="streamerPFP" src="" alt="Streamer Profile Picture" />
 		<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
 		<button id="streamersButt">Connect</button>
@@ -540,7 +540,7 @@
     </script>
 	<script>//trivia options togglebutton
 		document.getElementById("trivia-toggle").addEventListener("click", function () {
-			let container = document.getElementById("triviacontrolContainer");
+			let container = document.getElementById("comfycontrolContainer");
 			container.classList.toggle("active");
 		});
 		
@@ -1506,7 +1506,7 @@ let streamername = "jaedraze"; // Default streamer name
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
-    const input = document.querySelector("#triviacontrolContainer input[type='text']");
+    const input = document.querySelector("#comfycontrolContainer input[type='text']");
 
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
@@ -1554,7 +1554,7 @@ window.onload = function () {
 
 function disconnectBot() {
 	const button = document.getElementById("streamersButt");
-	button.display = "block";
+	button.style.display = "block";
     ComfyJS.Disconnect();
 	
     console.log("Bot disconnected from Twitch.");
@@ -1567,11 +1567,11 @@ function disconnectBot() {
 
     // Update UI after disconnecting
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
-    const input = document.querySelector("#triviacontrolContainer input[type='text']");
+    const input = document.querySelector("#comfycontrolContainer input[type='text']");
 
     twitchdisconnectbutton.style.display = "none"; 
     button.textContent = "Connect";
-    button.style.backgroundColor = "#dc3545"; 
+    button.style.backgroundColor = "#dc3545";
     button.style.color = "#ffffff"; 
     button.style.border = "1px solid #dc3545"; 
     input.style.outline = "3px outset #dc3545"; 

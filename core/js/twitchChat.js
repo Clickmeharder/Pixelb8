@@ -1,6 +1,31 @@
 //--------	Chat ---|
 //add this to html:
-// <img id="streamerPFP" src="" alt="Streamer Profile Picture" />
+// 
+/* 	<!-- Floating Button -->
+	<button id="controls-toggle">⚙</button>
+	<!-- Trivia Control Container -->
+	<div id="comfycontrolContainer">
+		<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
+		<button id="streamersButt">Connect</button>
+		<button id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
+		<div id="more-controls">
+			<button id="unused">Start Game</button>
+			<button id="unused">End Game</button>
+		</div>
+		<div id="comfy-settings">
+			<span id="comfy-settingsheader">Settings</span>
+			<label for="timeBetweenQuestions">Seconds Between Questions:</label>
+			<input type="number" id="timeBetweenQuestions" value="5" min="1" step="1">
+			<label for="timeToAnswer">Time to Answer (seconds):</label>
+			<input type="number" id="timeToAnswer" value="10" min="1" step="1">
+			<label for="questionsPerRound">Questions Per Round:</label>
+			<input type="number" id="questionsPerRound" value="5" min="1" step="1">
+			<label for="numberOfRounds">Number of Rounds:</label>
+			<input type="number" id="numberOfRounds" value="3" min="1" step="1">
+			<label><input type="checkbox" id="chatAnswersToggle" />Allow Chat Answers</label>
+			<button id="saveSettings">Save Settings</button>
+		</div>
+	</div> */
 //	<div id="twitchchatContainer">
 //		<div id="twitchMessagebox">
 //		</div>
@@ -124,46 +149,92 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 };
 
+
 let streamername = "jaedraze"; // Default streamer name
-ComfyJS.Init(streamername);
+
 
 function setStreamer(newStreamer) {
-    const button = document.getElementById("streamersButt"); // Get the button element
-    const input = document.querySelector("#triviacontrolContainer input[type='text']"); // Get the input element
-    
+    const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
+    const button = document.getElementById("streamersButt"); 
+    const input = document.querySelector("#comfycontrolContainer input[type='text']");
+
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
+        localStorage.setItem("lastStreamer", streamername); // Save to localStorage
         ComfyJS.Init(streamername);
         console.log(`Connected to Twitch chat for: ${streamername}`);
 
-        // Change button text to include the connected streamer
-        button.textContent = `Connected to: ${streamername}`; // Set button text with the connected streamer name
-        button.style.backgroundColor = "#28a745"; // Green background
-        button.style.color = "#0e5b75"; // White text color
-        button.style.border = "1px solid #28a745"; // Green border
+        // Update button styles
+        button.style.display = "none";
+        button.style.backgroundColor = "#28a745"; 
+        button.style.color = "#0e5b75"; 
+        button.style.border = "1px solid #28a745"; 
 
-        // Set the outline to green when valid input
-        input.style.outline = "3px outset #28a745"; // Green outline for valid input
+        twitchdisconnectbutton.style.display = "block"; 
+        twitchdisconnectbutton.style.backgroundColor = "#dc3545"; 
+        twitchdisconnectbutton.style.color = "#ffffff"; 
+        twitchdisconnectbutton.style.border = "1px solid #dc3545"; 
+
+        // Green outline for valid input
+        input.style.outline = "3px outset #28a745"; 
     } else {
         console.log("Please enter a valid streamer name.");
+        disconnectBot(); // Ensure disconnection
+        localStorage.removeItem("lastStreamer"); // Remove stored streamer name
 
-        // Change button to red theme for invalid input
-        button.textContent = "not connected!"; // Update button text for error
-        button.style.backgroundColor = "#dc3545"; // Red background
-        button.style.color = "#ffffff"; // White text color
-        button.style.border = "1px solid #dc3545"; // Red border
+        // Update UI for disconnection
+        twitchdisconnectbutton.style.display = "none"; 
+        button.textContent = "id10t err: try diff name";
+        button.style.backgroundColor = "#dc3545"; 
+        button.style.color = "#ffffff"; 
+        button.style.border = "1px solid #dc3545"; 
 
-        // Set the outline to red when invalid input
-        input.style.outline = "3px outset #dc3545"; // Red outline for invalid input
+        // Red outline for invalid input
+        input.style.outline = "3px outset #dc3545"; 
     }
 }
 
-// Button event listener: first endTrivia, then setStreamer
-document.getElementById("streamersButt").addEventListener("click", function() {
-    if (triviaGameState === "started") {
-        endTrivia(); // Only end trivia if it's running
+// Auto-reconnect on page load
+window.onload = function () {
+    const savedStreamer = localStorage.getItem("lastStreamer");
+    if (savedStreamer) {
+        setStreamer(savedStreamer); // Auto-connect
+    }
+};
+
+function disconnectBot() {
+	const button = document.getElementById("streamersButt");
+	button.style.display = "block";
+    ComfyJS.Disconnect();
+	
+    console.log("Bot disconnected from Twitch.");
+
+    // Remove stored streamer name from localStorage
+    if (localStorage.getItem("lastStreamer")) {
+        localStorage.removeItem("lastStreamer");
+        console.log("Removed last connected streamer from storage.");
     }
 
+    // Update UI after disconnecting
+    const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
+    const input = document.querySelector("#comfycontrolContainer input[type='text']");
+
+    twitchdisconnectbutton.style.display = "none"; 
+    button.textContent = "Connect";
+    button.style.backgroundColor = "#dc3545"; 
+    button.style.color = "#ffffff"; 
+    button.style.border = "1px solid #dc3545"; 
+    input.style.outline = "3px outset #dc3545"; 
+}
+
+
+// Button event listener: first endTrivia, then setStreamer
+document.getElementById("streamersButt").addEventListener("click", function() {
+/*     if (triviaGameState === "started") {
+		console.log("Ending Trivia.");
+        endTrivia(); // Only end trivia if it's running
+    } */
     let newStreamer = document.querySelector("input[name='yourTextName']").value;
+	console.log("attempting to Connect to:" + newStreamer);
     setStreamer(newStreamer); // Then, set the new streamer
 });
