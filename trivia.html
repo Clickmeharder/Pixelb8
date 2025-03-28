@@ -423,7 +423,7 @@
 	<div id="triviacontrolContainer">
 		
 		<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
-		<button id="interactButt">Connect</button>
+		<button id="streamersButt">Connect</button>
 		<div id="trivia-controls">
 			<button id="startGame">Start Game</button>
 			<button id="nextQuestion">Next Question</button>
@@ -1497,8 +1497,11 @@ function setStreamer(newStreamer) {
 }
 
 // Button event listener: first endTrivia, then setStreamer
-document.getElementById("interactButt").addEventListener("click", function() {
-    endTrivia(); // First, end the trivia
+document.getElementById("streamersButt").addEventListener("click", function() {
+    if (triviaGameState === "started") {
+        endTrivia(); // Only end trivia if it's running
+    }
+
     let newStreamer = document.querySelector("input[name='yourTextName']").value;
     setStreamer(newStreamer); // Then, set the new streamer
 });
