@@ -1342,20 +1342,31 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
                 chatContainer.style.visibility = "hidden"; // Hide the chat if it's visible
             }
         }
-
         // Example commands that any user can trigger
 		if (command === "a" || command === "answer") {
             let answer = message.trim();  // Extract the answer
             let isCorrect = checkAnswer(user, answer);  // Check if correct
-            displayChatMessage(user, `!${command} ${answer}`, flags, extra, isCorrect);  // Show in chat
+
+            // Only display message if the user hasn't already answered
+            if (!answeredUsers.has(user)) {
+                displayChatMessage(user, `!${command} ${answer}`, flags, extra, isCorrect);  // Show in chat
+            } else {
+                console.log(`${user} has already answered.`);
+            }
         }
     } else {
         // Example commands that any user can trigger
 		if (command === "a" || command === "answer") {
-			let answer = message.trim();  // Extract the answer
-			let isCorrect = checkAnswer(user, answer); // Check if correct
-			displayChatMessage(user, `!${command} ${answer}`, flags, extra, isCorrect); // Show in chat
-		}
+            let answer = message.trim();  // Extract the answer
+            let isCorrect = checkAnswer(user, answer);  // Check if correct
+
+            // Only display message if the user hasn't already answered
+            if (!answeredUsers.has(user)) {
+                displayChatMessage(user, `!${command} ${answer}`, flags, extra, isCorrect);  // Show in chat
+            } else {
+                console.log(`${user} has already answered.`);
+            }
+        }
         if (command.toLowerCase() === "helloworld") {
             // Custom logic to send "Hello, world!" to your overlay chat
             const message = "Hello, world!";
