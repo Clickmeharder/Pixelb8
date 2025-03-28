@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ovrlay-v1.43</title>
+    <title>Ovrlay-v1.44</title>
 	<style>
 		/* Trivia Control Button */
 		#trivia-toggle {
@@ -248,6 +248,31 @@
 		</div>
 	</div>
 	<!--                                                              -->
+		<!-- Floating Button -->
+	<button id="trivia-toggle">⚙</button>
+	<!-- Trivia Control Container -->
+	<div id="triviacontrolContainer">
+		<button id="interactButt">Interact with page</button>
+		<input type="text" name="yourTextName" placeholder="Enter Twitch Streamer Name to connect">
+		<div id="trivia-controls">
+			<button id="startGame">Start Game</button>
+			<button id="nextQuestion">Next Question</button>
+			<button id="showAnswer">Show Answer</button>
+			<button id="endGame">End Game</button>
+		</div>
+		<div id="trivia-settings">
+			<span id="trivia-settingsheader">Settings</span>
+			<label for="timeBetweenQuestions">Seconds Between Questions:</label>
+			<input type="number" id="timeBetweenQuestions" value="5" min="1" step="1">
+			<label for="timeToAnswer">Time to Answer (seconds):</label>
+			<input type="number" id="timeToAnswer" value="10" min="1" step="1">
+			<label for="questionsPerRound">Questions Per Round:</label>
+			<input type="number" id="questionsPerRound" value="5" min="1" step="1">
+			<label for="numberOfRounds">Number of Rounds:</label>
+			<input type="number" id="numberOfRounds" value="3" min="1" step="1">
+			<button id="saveSettings">Save Settings</button>
+		</div>
+	</div>
 	<div id="triviaOverlay" style="">
 		<!-- Wrapper for the Trivia Splash Animation -->
 		<div id="triviaSplash" style="display:none;">
@@ -260,31 +285,6 @@
 		<!-- Wrapper for the Trivia main elements -->
 		<!-- add user trivia rank and rank badges: rank1🥇 rank2🥈 rank3🥉 rank4🏅 rank5-10?🎖️-->
 		<div id="TriviaWrapper">
-			<!-- Floating Button -->
-			<button id="trivia-toggle">⚙</button>
-			<!-- Trivia Control Container -->
-			<div id="triviacontrolContainer">
-				<button id="interactButt">Interact with page</button>
-				<input type="text" name="yourTextName" placeholder="Enter Twitch Streamer Name to connect">
-				<div id="trivia-controls">
-					<button id="startGame">Start Game</button>
-					<button id="nextQuestion">Next Question</button>
-					<button id="showAnswer">Show Answer</button>
-					<button id="endGame">End Game</button>
-				</div>
-				<div id="trivia-settings">
-					<span id="trivia-settingsheader">Settings</span>
-					<label for="timeBetweenQuestions">Seconds Between Questions:</label>
-					<input type="number" id="timeBetweenQuestions" value="5" min="1" step="1">
-					<label for="timeToAnswer">Time to Answer (seconds):</label>
-					<input type="number" id="timeToAnswer" value="10" min="1" step="1">
-					<label for="questionsPerRound">Questions Per Round:</label>
-					<input type="number" id="questionsPerRound" value="5" min="1" step="1">
-					<label for="numberOfRounds">Number of Rounds:</label>
-					<input type="number" id="numberOfRounds" value="3" min="1" step="1">
-					<button id="saveSettings">Save Settings</button>
-				</div>
-			</div>
 			<!-- Wrapper for the winners' announcement -->
 			<div id="winnersWrapper" style="display: none;">
 				<!-- Top 3 winners -->
