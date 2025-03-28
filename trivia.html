@@ -846,21 +846,25 @@ function updateQuestionCounter() {
 }
 
 function endQuestion() {
-	clearInterval(questionTimer);
-	document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
-
-	setTimeout(() => {
-		document.getElementById("question").textContent = "...";
-	}, 3000);
-
-	hideQuestionTimer = setTimeout(() => {
-		document.getElementById("questionWrapper").style.visibility = "hidden";
-		document.getElementById("triviaboard").style.visibility = "visible";
-	}, 10000);
-
-	startCountdown();
+    clearInterval(questionTimer);
+    document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
+    setTimeout(() => {
+        document.getElementById("question").textContent = "...";
+    }, 3000);
+    hideQuestionTimer = setTimeout(() => {
+        document.getElementById("questionWrapper").style.visibility = "hidden";
+        document.getElementById("triviaboard").style.visibility = "visible";
+    }, 10000);
+    // Check if we've asked the maximum number of questions for the round
+    if (questionsAsked >= questionsPerRound) {
+        // End the trivia round if we've reached the limit
+        endTriviaRound();
+        return;
+    } else {
+        // Otherwise, start the countdown for the next question
+        startCountdown();
+    }
 }
-
 //function to update the countdown until next question
 function nextquestionTimer(seconds) {
 	const minutes = Math.floor(seconds / 60);
