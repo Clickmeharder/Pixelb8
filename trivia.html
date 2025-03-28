@@ -341,7 +341,7 @@
 
 		#TriviaWrapper {visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
 
-		#winnersWrapper {display: flex;flex-direction: column;align-items: center;justify-content: center;gap: 15px;}
+		#triviaPodium {display: flex;flex-direction: column;align-items: center;justify-content: center;gap: 15px;}
 		.winner {text-align: center;}
 		.winner img {border-radius: 50%;width: 100px;height: 100px;margin-bottom: 10px;}
 		.winner-name {font-size: 1.2em;font-weight: bold;}
@@ -406,9 +406,9 @@
 		<!-- add user trivia rank and rank badges: rank1🥇 rank2🥈 rank3🥉 rank4🏅 rank5-10?🎖️-->
 		<div id="TriviaWrapper">
 			<!-- Wrapper for the winners' announcement -->
-			<div id="winnersWrapper" style="display: none;">
-				<!-- Top 3 winners -->
-				<div id="triviaPodium">
+			<!-- Top 3 winners -->
+			<div id="triviaPodium" style="display: none;">
+				<div id="first">
 					<div class="winner" id="winner1">
 						<span class="trophy gold">🏆1st</span>
 						<p id="winner1Name" class="winner-name"></p>
@@ -417,6 +417,8 @@
 						<!-- total first to answer correctly --><!-- total correct answers -->
 						<!-- Total game wins --><!-- lifetime trivia points -->
 					</div>
+				</div>
+				<div id="secondandthirdplace">
 					<div class="winner" id="winner2">
 						<span class="trophy silver">🥈2nd</span>
 						<p id="winner2Name" class="winner-name"></p>
@@ -1058,15 +1060,15 @@ function announceWinners() {
         }
     }
 
-    // Check if winnersWrapper exists and log visibility change
-    const winnersWrapper = document.getElementById("winnersWrapper");
-    if (winnersWrapper) {
-        console.log("Found winnersWrapper. Displaying...");
-		displayChatMessage("Console:", "Found winnersWrapper. Displaying...", {}, {}); 
-        winnersWrapper.style.display = "block";  // Show the wrapper
+    // Check if triviaPodium exists and log visibility change
+    const triviaPodium = document.getElementById("triviaPodium");
+    if (triviaPodium) {
+        console.log("Found triviaPodium. Displaying...");
+		displayChatMessage("Console:", "Found triviaPodium. Displaying...", {}, {}); 
+        triviaPodium.style.display = "block";  // Show the wrapper
     } else {
-        console.log("Error: winnersWrapper element not found!");
-		displayChatMessage("Console:", "Error: winnersWrapper element not found!", {}, {}); 
+        console.log("Error: triviaPodium element not found!");
+		displayChatMessage("Console:", "Error: triviaPodium element not found!", {}, {}); 
     }
 }
 
