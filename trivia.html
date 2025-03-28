@@ -581,6 +581,11 @@ function olddisplayChatMessage(user, message, flags, extra) {
             <!-- { question: "How many PEC is 10 PED worth?", answer: "1000" } -->
         <!-- ]; -->
 //--------- TRIVIA -----------
+
+
+
+
+
 //trivia game code starts here
 let triviaGameState = null;
 let userStats = {}; // This will store the count of correct answers and first answers
@@ -864,7 +869,7 @@ function nextquestionTimer(seconds) {
 }
 
 function checkAnswer(user, message) {
-    if (!activeQuestion || answeredUsers.has(user)) return false; // Return false if already answered
+    if (!activeQuestion || answeredUsers.has(user)) return false;  // Check if user has already answered
     let correctAnswer = activeQuestion.answer.toLowerCase();
     let userAnswer = message.trim().toLowerCase();
     
@@ -876,20 +881,24 @@ function checkAnswer(user, message) {
                 firstAnswers: 0
             };
         }
-        userStats[user].correctAnswers++; // Increment correct count
+        userStats[user].correctAnswers++;  // Increment correct count
 
         // Track first correct answer
         if (!firstAnswerUser) {
             firstAnswerUser = user;
             userStats[user].firstAnswers++;
-            userScores[user] = (userScores[user] || 0) + 3; // First answer gets 3 points
+            userScores[user] = (userScores[user] || 0) + 3;  // First answer gets 3 points
         } else {
-            userScores[user] = (userScores[user] || 0) + 1; // Others get 1 point
+            userScores[user] = (userScores[user] || 0) + 1;  // Others get 1 point
         }
+
+        // Mark the user as having answered
+        answeredUsers.add(user);
+        
         updateTriviaboard();
-        return true; // Return true for a correct answer
+        return true;  // Return true for a correct answer
     }
-    return false; // Return false if incorrect
+    return false;  // Return false if incorrect
 }
 
 function oldcheckAnswer(user, message) {
@@ -1336,10 +1345,10 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
         // Example commands that any user can trigger
 		if (command === "a" || command === "answer") {
-			let answer = message.trim();  // Extract the answer
-			let isCorrect = checkAnswer(user, answer); // Check if correct
-			displayChatMessage(user, `!${command} ${answer}`, flags, extra, isCorrect); // Show in chat
-		}
+            let answer = message.trim();  // Extract the answer
+            let isCorrect = checkAnswer(user, answer);  // Check if correct
+            displayChatMessage(user, `!${command} ${answer}`, flags, extra, isCorrect);  // Show in chat
+        }
     } else {
         // Example commands that any user can trigger
 		if (command === "a" || command === "answer") {
