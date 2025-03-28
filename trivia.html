@@ -342,14 +342,17 @@
 		#TriviaWrapper {height: 100vh;visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
 
 		#triviaPodium {
-			margin: auto;
+			position: absolute;
+			bottom: 38%;
+			left: 20%;
 			display: flex;
 			flex-direction: row;
 			flex-wrap: wrap;
 			flex-direction: column;
-			align-items: center;
-			justify-content: center;
 			gap: 15px;
+			align-items: center;
+			align-content: flex-start;
+			z-index: 1000;
 		}
 		.winner {text-align: center;}
 		.winner img {border-radius: 50%;width: 100px;height: 100px;margin-bottom: 10px;}
