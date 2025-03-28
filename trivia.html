@@ -472,7 +472,46 @@
     <script>
 //--------	Chat ---|
 // Chat message display function
-function displayChatMessage(user, message, flags, extra) {
+function displayChatMessage(user, message, flags, extra, isCorrect = false) {
+    const chatContainer = document.getElementById("twitchMessagebox");
+    // Create a new chat message element
+    const chatMessage = document.createElement("div");
+    chatMessage.classList.add("chatMessage");
+
+    const usernameSpan = document.createElement("span");
+    usernameSpan.classList.add("username");
+    usernameSpan.innerHTML = user + ": ";
+
+    const userColor = extra.userColor || "#FFFFFF"; // Default to white if no color is set
+    usernameSpan.style.color = userColor; // Apply user color dynamically
+
+    // Create the message element
+    const messageSpan = document.createElement("span");
+    messageSpan.classList.add("twitchmessage");
+    messageSpan.innerHTML = message + (isCorrect ? " ✅" : ""); // Append ✅ if correct
+	
+    // Append elements to the chat message div
+    chatMessage.appendChild(usernameSpan);
+    chatMessage.appendChild(messageSpan);
+	
+    // Add the chat message to the container
+    chatContainer.appendChild(chatMessage);
+    
+    // Apply a fade effect after a delay
+    setTimeout(() => {
+        chatMessage.style.opacity = '0'; // Fade out after 9 seconds
+    }, 15000);
+    setTimeout(() => {
+        chatMessage.remove();
+    }, 15000); // Remove after 4 seconds
+
+    // Limit messages to the last 5
+    if (chatContainer.children.length > 5) {
+        chatContainer.removeChild(chatContainer.firstChild);
+    }
+}
+
+function olddisplayChatMessage(user, message, flags, extra) {
     const chatContainer = document.getElementById("twitchMessagebox");
     // Create a new chat message element
     const chatMessage = document.createElement("div");
@@ -814,6 +853,35 @@ function nextquestionTimer(seconds) {
 }
 
 function checkAnswer(user, message) {
+    if (!activeQuestion || answeredUsers.has(user)) return false; // Return false if already answered
+    let correctAnswer = activeQuestion.answer.toLowerCase();
+    let userAnswer = message.trim().toLowerCase();
+    
+    if (userAnswer === correctAnswer) {
+        // Track correct answers
+        if (!userStats[user]) {
+            userStats[user] = {
+                correctAnswers: 0,
+                firstAnswers: 0
+            };
+        }
+        userStats[user].correctAnswers++; // Increment correct count
+
+        // Track first correct answer
+        if (!firstAnswerUser) {
+            firstAnswerUser = user;
+            userStats[user].firstAnswers++;
+            userScores[user] = (userScores[user] || 0) + 3; // First answer gets 3 points
+        } else {
+            userScores[user] = (userScores[user] || 0) + 1; // Others get 1 point
+        }
+        updateTriviaboard();
+        return true; // Return true for a correct answer
+    }
+    return false; // Return false if incorrect
+}
+
+function oldcheckAnswer(user, message) {
     if (!activeQuestion || answeredUsers.has(user)) return;
     let correctAnswer = activeQuestion.answer.toLowerCase();
     let userAnswer = message.trim().toLowerCase();
@@ -1149,12 +1217,42 @@ function playSound(name) {
 
 //comfy js specific logic/functions
 // ComfyJS onChat event handler
+
+<!-- ComfyJS.onChat = (user, message, color, flags, extra) => { -->
+    <!-- console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message); -->
+    <!-- // Call the displayChatMessage function and pass flags and extra for userColor and badges -->
+    <!-- displayChatMessage(user, message, flags, extra);  // Show message in chat box -->
+    <!-- checkAnswer(user, message);         // Check if it's an answer -->
+<!-- }; -->
+
+// ComfyJS onChat event handler (supports trivia commands)
 ComfyJS.onChat = (user, message, color, flags, extra) => {
-    console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message);
-    // Call the displayChatMessage function and pass flags and extra for userColor and badges
-    displayChatMessage(user, message, flags, extra);  // Show message in chat box
-    checkAnswer(user, message);         // Check if it's an answer
+    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
+
+    let answer = null;
+    if (message.startsWith("?")) {
+        answer = message.slice(1).trim();
+    } else if (message.startsWith("/a")) {
+        answer = message.slice(2).trim();
+    } else if (message.startsWith("/answer ")) {
+        answer = message.slice(8).trim();
+    } else if (message.startsWith("answer ")) {
+        answer = message.slice(7).trim();
+    }
+
+    // Check answer and store result
+    let isCorrect = answer ? checkAnswer(user, answer) : false;
+    displayChatMessage(user, message, flags, extra, isCorrect);
 };
+
+// Simple ComfyJS onChat version (without trivia commands)
+ComfyJS.onChat = (user, message, color, flags, extra) => {
+    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
+    
+    let isCorrect = checkAnswer(user, message); // Check if message is an answer
+    displayChatMessage(user, message, flags, extra, isCorrect);
+};
+
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
     // Only allow streamer (jaedraze) or mods to trigger these commands
@@ -1232,6 +1330,11 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
     } else {
         // Example commands that any user can trigger
+		if (command === "a" || command === "answer") {
+			let answer = message.trim();  // Extract the answer
+			let isCorrect = checkAnswer(user, answer); // Check if correct
+			displayChatMessage(user, `!${command} ${answer}`, flags, extra, isCorrect); // Show in chat
+		}
         if (command.toLowerCase() === "helloworld") {
             // Custom logic to send "Hello, world!" to your overlay chat
             const message = "Hello, world!";
