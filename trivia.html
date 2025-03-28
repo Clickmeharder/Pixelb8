@@ -498,12 +498,12 @@ function displayChatMessage(user, message, flags, extra, isCorrect = false) {
     // Create the message element
     const messageSpan = document.createElement("span");
     messageSpan.classList.add("twitchmessage");
-    messageSpan.innerHTML = message + (isCorrect ? " ✅" : ""); // Append ✅ if correct
-	
+    messageSpan.innerHTML = message + (isCorrect ? " ✅" : " ❌"); // Append ✅ if correct, ❌ if wrong
+    
     // Append elements to the chat message div
     chatMessage.appendChild(usernameSpan);
     chatMessage.appendChild(messageSpan);
-	
+    
     // Add the chat message to the container
     chatContainer.appendChild(chatMessage);
     
@@ -513,7 +513,7 @@ function displayChatMessage(user, message, flags, extra, isCorrect = false) {
     }, 15000);
     setTimeout(() => {
         chatMessage.remove();
-    }, 15000); // Remove after 4 seconds
+    }, 15000); // Remove after 15 seconds
 
     // Limit messages to the last 5
     if (chatContainer.children.length > 5) {
@@ -869,20 +869,27 @@ function nextquestionTimer(seconds) {
 }
 
 function checkAnswer(user, message) {
-    if (!activeQuestion || answeredUsers.has(user)) return false;  // Check if user has already answered
+    // Check if there's an active question and if the user has already answered correctly
+    if (!activeQuestion || answeredUsers.has(user)) return false;  // If the user has already answered correctly, don't process further answers
+
     let correctAnswer = activeQuestion.answer.toLowerCase();
     let userAnswer = message.trim().toLowerCase();
-    
-    if (userAnswer === correctAnswer) {
-        // Track correct answers
-        if (!userStats[user]) {
-            userStats[user] = {
-                correctAnswers: 0,
-                firstAnswers: 0
-            };
-        }
-        userStats[user].correctAnswers++;  // Increment correct count
 
+    // Initialize user stats if they don't exist
+    if (!userStats[user]) {
+        userStats[user] = {
+            correctAnswers: 0,
+            incorrectAnswers: 0,
+            firstAnswers: 0,
+        };
+    }
+
+    // Track if the answer is correct or incorrect
+    if (userAnswer === correctAnswer) {
+        // Correct answer logic
+        userStats[user].correctAnswers++;  // Increment correct count only if correct answer
+        answeredUsers.add(user);  // Mark the user as having answered correctly
+        
         // Track first correct answer
         if (!firstAnswerUser) {
             firstAnswerUser = user;
@@ -892,15 +899,14 @@ function checkAnswer(user, message) {
             userScores[user] = (userScores[user] || 0) + 1;  // Others get 1 point
         }
 
-        // Mark the user as having answered
-        answeredUsers.add(user);
-        
-        updateTriviaboard();
-        return true;  // Return true for a correct answer
+        updateTriviaboard();  // Update the trivia board with new stats
+        return true;  // Return true for correct answers
+    } else {
+        // Incorrect answer logic
+        userStats[user].incorrectAnswers++;  // Increment incorrect count only if incorrect answer
+        return false;  // Return false for incorrect answers
     }
-    return false;  // Return false if incorrect
 }
-
 function oldcheckAnswer(user, message) {
     if (!activeQuestion || answeredUsers.has(user)) return;
     let correctAnswer = activeQuestion.answer.toLowerCase();
@@ -1343,15 +1349,20 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             }
         }
         // Example commands that any user can trigger
-		if (command === "a" || command === "answer") {
+        if (command === "a" || command === "answer") {
             let answer = message.trim();  // Extract the answer
-            let isCorrect = checkAnswer(user, answer);  // Check if correct
+            let isCorrect = checkAnswer(user, answer);  // Check if the answer is correct
 
-            // Only display message if the user hasn't already answered
-            if (!answeredUsers.has(user)) {
-                displayChatMessage(user, `!${command} ${answer}`, flags, extra, isCorrect);  // Show in chat
+            // Display the answer in chat regardless of whether it's correct or incorrect
+            if (isCorrect) {
+                // If the answer is correct, display the answer with a ✅ checkmark
+                displayChatMessage(user, `!${command} ${answer} ✅`, flags, extra, true);  // Show correct answer in chat
+            } else if (!answeredUsers.has(user)) {
+                // If the user hasn't answered correctly yet, display the answer with an ❌ X mark
+                displayChatMessage(user, `!${command} ${answer} ❌`, flags, extra, false);  // Show incorrect answer in chat
             } else {
-                console.log(`${user} has already answered.`);
+                // If the user has already answered correctly, do nothing (ignore their further answers)
+                console.log(`${user} has already answered correctly. Ignoring further answers.`);
             }
         }
     } else {
