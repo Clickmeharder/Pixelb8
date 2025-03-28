@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ovrlay-v1.54</title>
+    <title>Ovrlay-v1.64</title>
 	<style>
 		/* Trivia Control Button */
 		#trivia-toggle {
@@ -414,21 +414,22 @@
 						<span class="trophy gold">🏆1st</span>
 						<p id="winner1Name" class="winner-name">Undefined</p>
 						<p id="winner1Score" class="winner-score">score: 0</p>
-						<!-- add these to each winner block 1st-3rd -->
-						<!-- total first to answer correctly --><!-- total correct answers -->
-						<!-- Total game wins --><!-- lifetime trivia points -->
 					</div>
 				</div>
 				<div id="secondandthirdplace">
-					<div class="winner" id="winner2">
-						<span class="trophy silver">🥈2nd</span>
-						<p id="winner2Name" class="winner-name">Undefined69</p>
-						<p id="winner2Score" class="winner-score">score: 0</p>
+					<div id="second">
+						<div class="winner" id="winner2">
+							<span class="trophy silver">🥈2nd</span>
+							<p id="winner2Name" class="winner-name">Undefined69</p>
+							<p id="winner2Score" class="winner-score">score: 0</p>
+						</div>
 					</div>
-					<div class="winner" id="winner3">
-						<span class="trophy bronze">🥉3rd</span>
-						<p id="winner3Name" class="winner-name">undefined420</p>
-						<p id="winner3Score" class="winner-score">score: 0</p>
+					<div id="third">
+						<div class="winner" id="winner3">
+							<span class="trophy bronze">🥉3rd</span>
+							<p id="winner3Name" class="winner-name">undefined420</p>
+							<p id="winner3Score" class="winner-score">score: 0</p>
+						</div>
 					</div>
 				</div>
 				<!-- 4th and 5th place winners (smaller) -->
@@ -1113,37 +1114,42 @@ function announceWinners() {
     for (let i = 0; i < 3; i++) {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
-            console.log(`Winner ${i + 1}: ${user} - Score: ${score}`);  // Debug log for winners
-            displayChatMessage("Console:", `Winner ${i + 1}: ${user} - Score: ${score}`, {}, {}); 
+            console.log(`Winner ${i + 1}: ${user} - Score: ${score}`);
+            displayChatMessage("Console:", `Winner ${i + 1}: ${user} - Score: ${score}`, {}, {});
+
+            // Update winner name and score
             document.getElementById(`winner${i + 1}Name`).textContent = user;
             document.getElementById(`winner${i + 1}Score`).textContent = `Score: ${score}`;
 
-            // Add first answers and total correct answers
-            let firstAnswers = userStats[user]?.firstAnswers || 0;
-            let correctAnswers = userStats[user]?.correctAnswers || 0;
-            const incorrectAnswers = userStats[user] ? userStats[user].incorrectAnswers : 0;
+            // Fetch the winner's container (e.g., #first, #second, etc.)
+            const winnerContainer = document.getElementById(`winner${i + 1}`).parentElement;
+
+            // Create an extra stats div
+            let extraStatsDiv = document.createElement("div");
+            extraStatsDiv.className = "extraStats";
 
             // Create separate elements for each stat
-            let userFirstAnswersElement = document.createElement("p");
-            let userCorrectAnswersElement = document.createElement("p");
-            let userIncorrectAnswersElement = document.createElement("p");
+            let firstAnswersElement = document.createElement("p");
+            let correctAnswersElement = document.createElement("p");
+            let incorrectAnswersElement = document.createElement("p");
 
-            // Assign text content for each stat
-            userFirstAnswersElement.textContent = `🎯 First: ${firstAnswers}`;
-            userCorrectAnswersElement.textContent = `✅ Correct: ${correctAnswers}`;
-            userIncorrectAnswersElement.textContent = `❌ Incorrect: ${incorrectAnswers}`;
+            // Get user stats
+            let firstAnswers = userStats[user]?.firstAnswers || 0;
+            let correctAnswers = userStats[user]?.correctAnswers || 0;
+            let incorrectAnswers = userStats[user]?.incorrectAnswers || 0;
 
-            // Create the container div for extra stats and append the stats to it
-            let extraStatsDiv = document.createElement("div");
-            extraStatsDiv.className = "winner-stats";
+            // Set text content
+            firstAnswersElement.textContent = `🎯 First Answers: ${firstAnswers}`;
+            correctAnswersElement.textContent = `✅ Correct Answers: ${correctAnswers}`;
+            incorrectAnswersElement.textContent = `❌ Incorrect Answers: ${incorrectAnswers}`;
 
-            // Append each individual stat element to the container
-            extraStatsDiv.appendChild(userFirstAnswersElement);
-            extraStatsDiv.appendChild(userCorrectAnswersElement);
-            extraStatsDiv.appendChild(userIncorrectAnswersElement);
+            // Append stats to the extraStatsDiv
+            extraStatsDiv.appendChild(firstAnswersElement);
+            extraStatsDiv.appendChild(correctAnswersElement);
+            extraStatsDiv.appendChild(incorrectAnswersElement);
 
-            // Append the stats container to the winner's section
-            document.getElementById(`winner${i + 1}`).appendChild(extraStatsDiv);
+            // Append the extraStatsDiv as a sibling to the winner div
+            winnerContainer.appendChild(extraStatsDiv);
         }
     }
 
@@ -1151,7 +1157,7 @@ function announceWinners() {
     for (let i = 3; i < 5; i++) {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
-            console.log(`Winner ${i + 1} (4th/5th place): ${user} - Score: ${score}`);  // Debug log for 4th/5th place
+            console.log(`Winner ${i + 1} (4th/5th place): ${user} - Score: ${score}`);
             document.getElementById(`winner${i + 1}Name`).textContent = user;
             document.getElementById(`winner${i + 1}Score`).textContent = `Score: ${score}`;
         }
@@ -1161,13 +1167,14 @@ function announceWinners() {
     const triviaPodium = document.getElementById("triviaPodium");
     if (triviaPodium) {
         console.log("Found triviaPodium. Displaying...");
-        displayChatMessage("Console:", "Found triviaPodium. Displaying...", {}, {}); 
-        triviaPodium.style.display = "block";  // Show the wrapper
+        displayChatMessage("Console:", "Found triviaPodium. Displaying...", {}, {});
+        triviaPodium.style.display = "block"; // Show the wrapper
     } else {
         console.log("Error: triviaPodium element not found!");
-        displayChatMessage("Console:", "Error: triviaPodium element not found!", {}, {}); 
+        displayChatMessage("Console:", "Error: triviaPodium element not found!", {}, {});
     }
 }
+
 
 function endTrivia() {
     clearInterval(questionTimer);
