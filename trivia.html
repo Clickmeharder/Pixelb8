@@ -498,7 +498,7 @@ function displayChatMessage(user, message, flags, extra, isCorrect = false) {
     // Create the message element
     const messageSpan = document.createElement("span");
     messageSpan.classList.add("twitchmessage");
-    messageSpan.innerHTML = message + (isCorrect ? " ✅" : " ❌"); // Append ✅ if correct, ❌ if wrong
+    messageSpan.innerHTML = message;
     
     // Append elements to the chat message div
     chatMessage.appendChild(usernameSpan);
@@ -870,7 +870,7 @@ function nextquestionTimer(seconds) {
 
 function checkAnswer(user, message) {
     // Check if there's an active question and if the user has already answered correctly
-    if (!activeQuestion || answeredUsers.has(user)) return false;  // If the user has already answered correctly, don't process further answers
+    if (!activeQuestion || answeredUsers.has(user)) return;  // If the user has already answered correctly, don't process further answers
 
     let correctAnswer = activeQuestion.answer.toLowerCase();
     let userAnswer = message.trim().toLowerCase();
