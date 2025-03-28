@@ -118,6 +118,8 @@
 			height: 100vh;
 		}
 		#triviaAnnouncementWrapper {
+			display: none;
+			opacity: 1;
 			position: absolute;
 			top: 71%;
 			left: 2px;
@@ -395,6 +397,11 @@
 			</div>
 			<div id="splashText">Pixelb8's Entropian Trivia</div>
 		</div>
+		<!-- triviaAnnouncementWrapper -->
+		<div id="triviaAnnouncementWrapper">
+			<div id="triviaAnnouncement">Round Starting soon...</div>
+			<div id="roundstarttimer"></div>
+		</div>
 		<!-- Wrapper for the Trivia main elements -->
 		<!-- add user trivia rank and rank badges: rank1🥇 rank2🥈 rank3🥉 rank4🏅 rank5-10?🎖️-->
 		<div id="TriviaWrapper">
@@ -433,11 +440,7 @@
 			</div>
 			<!-- time until next question -->
 			<div id="timeuntil-nextQ"></div>
-			<!-- triviaAnnouncementWrapper -->
-			<div id="triviaAnnouncementWrapper">
-				<div id="triviaAnnouncement">Round Starting soon...</div>
-				<div id="roundstarttimer"></div>
-			</div>
+
 			<!-- questions wrapper -->triviaAnnouncementWrapper
 			<div id="questionWrapper">
 				<p id="question-counter">Question: 0 / 12</p>
