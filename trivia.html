@@ -1228,26 +1228,33 @@ function playSound(name) {
     <!-- checkAnswer(user, message);         // Check if it's an answer -->
 <!-- }; -->
 
-// ComfyJS onChat event handler (supports trivia commands)
 ComfyJS.onChat = (user, message, color, flags, extra) => {
-    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
+    console.log("RAW MESSAGE:", JSON.stringify(message));
+    console.log("CHAR ARRAY:", [...message]); // Show exact characters
 
+    let cleanMessage = message.trim().toLowerCase(); // Ensure no spaces and case uniformity
     let answer = null;
-    if (message.startsWith("?")) {
-        answer = message.slice(1).trim();
-    } else if (message.startsWith("a ")) {
-        answer = message.slice(2).trim();
-    } else if (message.startsWith("= ")) {
-        answer = message.slice(2).trim();
-    } else if (message.startsWith("answer ")) {
-        answer = message.slice(7).trim();
+
+    if (cleanMessage.startsWith("?")) {
+        answer = cleanMessage.substring(1).trim();
+    } else if (cleanMessage.startsWith("a ")) {
+        answer = cleanMessage.substring(2).trim();
+    } else if (cleanMessage.startsWith("= ")) {
+        answer = cleanMessage.substring(2).trim();
+    } else if (cleanMessage.startsWith("answer ")) {
+        answer = cleanMessage.substring(7).trim();
     }
 
-    // Check answer and store result
-    let isCorrect = answer ? checkAnswer(user, answer) : false;
-    displayChatMessage(user, message, flags, extra, isCorrect);
-};
+    console.log("Extracted Answer:", JSON.stringify(answer));
 
+    if (answer) {
+        let isCorrect = checkAnswer(user, answer);
+        console.log("ANSWER CHECK RESULT:", isCorrect);
+        displayChatMessage(user, message, flags, extra, isCorrect);
+    } else {
+        displayChatMessage(user, message, flags, extra, false);
+    }
+};
 // Simple ComfyJS onChat version (without trivia commands)
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
