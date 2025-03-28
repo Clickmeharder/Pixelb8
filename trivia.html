@@ -599,7 +599,7 @@ let firstAnswerUser = null;
 let hideQuestionTimer;
 let questionTimer, countdownTimer;
 let timetoAnswer = 30;
-
+let timebetweenQuestions = 90;
 let questionsAsked = 0;
 let questionsPerRound = 3;
 let round = 1;
@@ -828,7 +828,7 @@ function startQuestion() {
 
 //function to update the time remaining before the next question
 function startCountdown() {
-	let countdown = 150;
+	let countdown = timebetweenQuestions;
 	nextquestionTimer(countdown);
 	countdownTimer = setInterval(() => {
 		countdown--;
