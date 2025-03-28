@@ -589,6 +589,7 @@ let questionsAsked = 0;
 let questionsPerRound = 3;
 let round = 1;
 let triviaQuestions = { round1: [], round2: [] };
+let chatanswers = false;  // Set to true when you want to check answers
 
 <!-- fetch("questions.json") -->
 	<!-- .then(response => response.json()) -->
@@ -1228,39 +1229,20 @@ function playSound(name) {
     <!-- checkAnswer(user, message);         // Check if it's an answer -->
 <!-- }; -->
 
+
+
 ComfyJS.onChat = (user, message, color, flags, extra) => {
-    console.log("RAW MESSAGE:", JSON.stringify(message));
-    console.log("CHAR ARRAY:", [...message]); // Show exact characters
-
-    let cleanMessage = message.trim().toLowerCase(); // Ensure no spaces and case uniformity
-    let answer = null;
-
-    if (cleanMessage.startsWith("?")) {
-        answer = cleanMessage.substring(1).trim();
-    } else if (cleanMessage.startsWith("a ")) {
-        answer = cleanMessage.substring(2).trim();
-    } else if (cleanMessage.startsWith("= ")) {
-        answer = cleanMessage.substring(2).trim();
-    } else if (cleanMessage.startsWith("answer ")) {
-        answer = cleanMessage.substring(7).trim();
-    }
-
-    console.log("Extracted Answer:", JSON.stringify(answer));
-
-    if (answer) {
-        let isCorrect = checkAnswer(user, answer);
-        console.log("ANSWER CHECK RESULT:", isCorrect);
+    // If chat answers are enabled, check the message for answers
+    if (chatanswers) {
+        console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
+        // Check if the message is correct
+        let isCorrect = checkAnswer(user, message);
+        // Display the message with whether it's correct or not
         displayChatMessage(user, message, flags, extra, isCorrect);
     } else {
+        // Otherwise, just display the message without checking
         displayChatMessage(user, message, flags, extra, false);
     }
-};
-// Simple ComfyJS onChat version (without trivia commands)
-ComfyJS.onChat = (user, message, color, flags, extra) => {
-    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
-    
-    let isCorrect = checkAnswer(user, message); // Check if message is an answer
-    displayChatMessage(user, message, flags, extra, isCorrect);
 };
 
 
@@ -1271,6 +1253,11 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (command.toLowerCase() === "testsound-1") {
 				playSound(); // Play the sound when !playsound is typed in chat
 			}
+        if (command === "chatanswers") {
+            chatanswers = !chatanswers;  // Toggle chatanswers
+            // Show in the chat whether chat answers are now enabled or disabled
+            displayChatMessage(user, `Chat answers are now ${chatanswers ? "enabled" : "disabled"}.`, flags, extra, false);
+        }
         // Handle start trivia command
         if (command.toLowerCase() === "testtriviasplash") {
             triviaSplash(); // Call the startTrivia function
