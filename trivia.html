@@ -40,8 +40,18 @@
 			color: white;
 			border-radius: 8px;
 			box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-			display: none;
+			opacity: 0; /* Start hidden */
+			transform: translateY(-10px); /* Slight slide-up effect */
+			transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+			pointer-events: none; /* Prevent interaction when hidden */
 			z-index: 999;
+		}
+
+		/* When active (visible) */
+		#triviacontrolContainer.active {
+			opacity: 1;
+			transform: translateY(0);
+			pointer-events: all; /* Allow interactions */
 		}
 
 		/* Trivia Input */
