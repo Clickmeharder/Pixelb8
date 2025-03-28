@@ -1180,7 +1180,7 @@ function announceWinners() {
     if (triviaPodium) {
         console.log("Found triviaPodium. Displaying...");
         displayChatMessage("Console:", "Found triviaPodium. Displaying...", {}, {});
-        triviaPodium.style.display = "block"; // Show the wrapper
+        triviaPodium.style.display = "flex"; // Show the wrapper
     } else {
         console.log("Error: triviaPodium element not found!");
         displayChatMessage("Console:", "Error: triviaPodium element not found!", {}, {});
