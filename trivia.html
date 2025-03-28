@@ -172,48 +172,48 @@
 				
 		/* Trivia Splash Centering */
 		#triviaSplash {
-			position: fixed;  /* Stays centered even on scroll */
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);  /* Center it properly */
+			position: fixed;
+			top: 28vh;
+			left: 0;
 			text-align: center;
 			z-index: 9999;
 			opacity: 0;
 			visibility: hidden;
-			width: 100%;
-			max-width: 600px;  /* Limits width for better scaling */
-			padding: 20px;
-			box-sizing: border-box;  /* Ensures padding doesn't affect the layout */
+			width: 60%;
+			max-width: 582px;
+			padding: 3px;
+			box-sizing: border-box;
+			border: 5px dashed darkgrey;
 		}
+
 
 		/* Logo Container for Proper Scaling */
 		#logoContainer {
-			position: relative;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			width: 100%;
-			height: auto;
+			border: 1px dotted red;
 		}
 
 		/* Actual Logo Scaling */
 		#triviaLogo {
-			width: 150px;  /* Adjust size */
 			height: auto;
-			max-width: 100%;
+			max-width: 37vw;
+			max-height: 38vh;
 			opacity: 0;
 			transform: scale(0.5) rotate(-15deg);
-			animation: logoDropIn 2s ease-out forwards, glowPulse 3s infinite alternate 2s;  /* Adjusted timing */
+			animation: logoDropIn 2s ease-out forwards, glowPulse 3s infinite alternate 2s;
 		}
 
 		/* Splash Text Styling */
 		#splashText {
-			font-size: 24px;
+			position: absolute;
+			text-align: center;
+			left: 44%;
+			bottom: 3%;
+			width: 153px;
+			font-size: 31px;
 			font-weight: bold;
 			color: #0ea4a4;
-			margin-top: 10px;
 			opacity: 0;
-			animation: textReveal 2s ease-out 3s forwards;  /* Slight delay for synchronization */
+			animation: textReveal 2s ease-out 3s forwards;
 		}
 
 		/* ANIMATIONS */
@@ -374,7 +374,7 @@
 				<!-- <img src="../assets/images/logo/pixelbotfavicon.png" alt="Trivia Logo" id="triviaLogo" /> -->
 				<img src="/assets/images/jaedrazepfp.png" alt="Trivia Logo" id="triviaLogo" />
 			</div>
-			<div id="splashText">Get Ready for the Trivia!</div>
+			<div id="splashText">Pixelb8's Entropian Trivia</div>
 		</div>
 		<!-- Wrapper for the Trivia main elements -->
 		<!-- add user trivia rank and rank badges: rank1🥇 rank2🥈 rank3🥉 rank4🏅 rank5-10?🎖️-->
