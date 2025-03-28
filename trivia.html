@@ -1499,7 +1499,7 @@ function setStreamer(newStreamer) {
         console.log(`Connected to Twitch chat for: ${streamername}`);
 
         // Update button styles
-        button.textContent = `Connected to: ${streamername}`;
+        button.display = "none";
         button.style.backgroundColor = "#28a745"; 
         button.style.color = "#0e5b75"; 
         button.style.border = "1px solid #28a745"; 
@@ -1537,7 +1537,10 @@ window.onload = function () {
 };
 
 function disconnectBot() {
+	const button = document.getElementById("streamersButt");
+	button.display = "";
     ComfyJS.Disconnect();
+	
     console.log("Bot disconnected from Twitch.");
 
     // Remove stored streamer name from localStorage
