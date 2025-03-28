@@ -339,9 +339,10 @@
 
 
 
-		#TriviaWrapper {visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
+		#TriviaWrapper {height: 100vh;visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
 
 		#triviaPodium {
+			margin: auto;
 			display: flex;
 			flex-direction: row;
 			flex-wrap: wrap;
@@ -352,10 +353,32 @@
 		}
 		.winner {text-align: center;}
 		.winner img {border-radius: 50%;width: 100px;height: 100px;margin-bottom: 10px;}
-		.winner-name {font-size: 1.2em;font-weight: bold;}
-		.winner-score {font-size: 1em;color: #666;}
+		.winner-name {
+			font-size: 1.9em;
+			font-weight: bold;
+			margin: 0px;
+			padding: 0px;
+			padding-left: 6px;
+			padding-right: 6px;
+			border: 5px ridge teal;
+			border-color: teal;
+		}
+		.winner-score {
+			font-size: 1em;
+			font-weight: bold;
+			color: #19e607;
+			background-color: #000000d4;
+			margin: 0;
+		}
 		.extraStats p { 
 			margin: 0;
+		}
+		div#first {
+			padding: 4px;
+			background: linear-gradient(135deg, #001f1f, #004040);
+			border: 2px outset gold;
+			border-radius: 50%;
+			box-shadow: 0px 0px 24px rgb(255 128 0 / 84%);
 		}
 		div#secondandthirdplace {
 			display: flex;
@@ -1169,14 +1192,18 @@ function announceWinners() {
             let incorrectAnswers = userStats[user]?.incorrectAnswers || 0;
 
             // Set text content
-            firstAnswersElement.textContent = `🎯 First Answers: ${firstAnswers}`;
-            correctAnswersElement.textContent = `✅ Correct Answers: ${correctAnswers}`;
-            incorrectAnswersElement.textContent = `❌ Incorrect Answers: ${incorrectAnswers}`;
+			incorrectAnswersElement.textContent = `❌ Incorrect: ${incorrectAnswers}`;
+			correctAnswersElement.textContent = `✅ Correct: ${correctAnswers}`;
+            firstAnswersElement.textContent = `🎯 First: ${firstAnswers}`;
+            
+            
 
             // Append stats to the extraStatsDiv
+			extraStatsDiv.appendChild(incorrectAnswersElement);
+			extraStatsDiv.appendChild(correctAnswersElement);
             extraStatsDiv.appendChild(firstAnswersElement);
-            extraStatsDiv.appendChild(correctAnswersElement);
-            extraStatsDiv.appendChild(incorrectAnswersElement);
+            
+
 
             // Append the extraStatsDiv as a sibling to the winner div
             winnerContainer.appendChild(extraStatsDiv);
