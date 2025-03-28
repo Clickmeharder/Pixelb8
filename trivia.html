@@ -1173,15 +1173,22 @@ function announceWinners() {
             console.log(`Winner ${i + 1}: ${user} - Score: ${score}`);
             displayChatMessage("Console:", `Winner ${i + 1}: ${user} - Score: ${score}`, {}, {});
 
-            document.getElementById(`winner${i + 1}Name`).textContent = user;
-            document.getElementById(`winner${i + 1}Score`).textContent = `Score: ${score}`;
+            let nameElement = document.getElementById(`winner${i + 1}Name`);
+            let scoreElement = document.getElementById(`winner${i + 1}Score`);
 
-            // Set user color if available
-            let userColor = userColors[user] || "#FFFFFF"; // Default white if no color
-            document.getElementById(`winner${i + 1}Name`).style.color = userColor;
+            nameElement.textContent = user;
+            scoreElement.textContent = `Score: ${score}`;
+
+            // Apply user color
+            let userColor = userColors[user] || "#FFFFFF"; // Default white
+            nameElement.style.color = userColor;
 
             // Parent container
             const winnerContainer = document.getElementById(`winner${i + 1}`).parentElement;
+
+            // Remove any existing extra stats div to prevent duplicates
+            let oldExtraStats = winnerContainer.querySelector(".extraStats");
+            if (oldExtraStats) oldExtraStats.remove();
 
             // Create extra stats div
             let extraStatsDiv = document.createElement("div");
@@ -1214,11 +1221,15 @@ function announceWinners() {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
             console.log(`Winner ${i + 1} (4th/5th place): ${user} - Score: ${score}`);
-            document.getElementById(`winner${i + 1}Name`).textContent = user;
-            document.getElementById(`winner${i + 1}Score`).textContent = `Score: ${score}`;
+
+            let nameElement = document.getElementById(`winner${i + 1}Name`);
+            let scoreElement = document.getElementById(`winner${i + 1}Score`);
+
+            nameElement.textContent = user;
+            scoreElement.textContent = `Score: ${score}`;
 
             let userColor = userColors[user] || "orangered"; // Default color
-            document.getElementById(`winner${i + 1}Name`).style.color = userColor;
+            nameElement.style.color = userColor;
         }
     }
 
@@ -1233,6 +1244,7 @@ function announceWinners() {
         displayChatMessage("Console:", "Error: triviaPodium element not found!", {}, {});
     }
 }
+
 
 
 function endTrivia() {
