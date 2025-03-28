@@ -1194,6 +1194,9 @@ function toggleElement(elementId, animationType = "fade") {
 const sounds = {
     snakedie: new Audio("/assets/sounds/snakedie_sound1.mp3"),
     gameshowintro: new Audio("/assets/sounds/gameshow_intro.mp3"),
+	triviaRoundfin: new Audio("/assets/sounds/gameshow_intro.mp3"),
+	triviauserbuzz: new Audio("/assets/sounds/gameshow_intro.mp3"),
+	triviacorrectding: new Audio("/assets/sounds/gameshow_intro.mp3"),
     // Add more sounds here
 };
 
@@ -1230,12 +1233,12 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
     console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
 
     let answer = null;
-    if (message.startsWith("? ")) {
+    if (message.startsWith("?")) {
         answer = message.slice(1).trim();
     } else if (message.startsWith("a ")) {
         answer = message.slice(2).trim();
     } else if (message.startsWith("= ")) {
-        answer = message.slice(8).trim();
+        answer = message.slice(2).trim();
     } else if (message.startsWith("answer ")) {
         answer = message.slice(7).trim();
     }
