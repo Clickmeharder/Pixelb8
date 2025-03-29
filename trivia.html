@@ -358,10 +358,11 @@
 		}
 
 		div#first {
-			padding: 4px;
+			padding: 13px;
 			background: linear-gradient(135deg, #001f1f, #004040);
-			border: 2px outset gold;
+			border: 12px dotted gold;
 			border-radius: 50%;
+			outline: 4px ridge #1197cb;
 			width: 250px;
 			box-shadow: 0px 0px 24px rgb(255 128 0 / 84%);
 		}
@@ -373,19 +374,15 @@
 		}
 		.winner img {border-radius: 50%;width: 100px;height: 100px;margin-bottom: 10px;}
 		.winner-name {
-			word-wrap: break-word;
 			white-space: normal;
 			line-height: 0.7;
 			flex-wrap: wrap;
 			position: relative;
-			font-size: 1.9em;
-			font-weight: bold;
-			padding: 0px;
-			padding-left: 6px;
-			padding-right: 6px;
+			font-size: 2.5em;
+			padding: 3px;
+			padding-left: 3px;
+			padding-right: 3px;
 			width: max-content;
-			border: 5px ridge teal;
-			border-color: teal;
 			margin: 0px;
 		}
 		.winner-score {
@@ -393,16 +390,26 @@
 			font-weight: bold;
 			color: #19e607;
 			background-color: #000000d4;
+			border: 3px inset grey;
 			margin: auto;
-			max-width: 100%;
+			padding: 2px 8px;
+			width: 123px;
+			max-width: 70%;
 		}
 		.extraStats {
 			display: flex;
 			flex-wrap: wrap;
 			justify-content: center;
 		}
-		.extraStats p { 
+		.extraStats p {
 			margin: 0;
+			padding: 3px;
+			background: linear-gradient(135deg, #001f1f, #004040);
+			border: 3px solid teal;
+			border-radius: 12px;
+			color: #12ebeb;
+			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
 		}
 		
 		span.trophy.gold {
@@ -433,11 +440,15 @@
 			gap: 20px;
 		}
 		p#winner4Name {
-			max-width: 142px;
+			max-width: 245px;
+			margin: 0px;
+			padding: 0px;
 			overflow: hidden;
 		}
 		p#winner5Name {
-			max-width: 142px;
+			max-width: 245px;
+			margin: 0px;
+			padding: 0px;
 			overflow: hidden;
 		}
 		.small {font-size: 0.9em;color: #888;}
