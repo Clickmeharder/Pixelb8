@@ -1419,24 +1419,50 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
 
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
-    // Store user color from extra
+	console.log( "User:", user, "command:", command);
+    // Store user color from extra	
     if (!userColors[user]) {
         userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
     }
+	if (command === "a" || command === "answer") {
+		let answer = message.trim();  // Extract the answer
+		let isCorrect = checkAnswer(user, answer);  // Check if the answer is correct
 
+		// Display the answer in chat regardless of whether it's correct or incorrect
+		if (isCorrect) {
+			// If the answer is correct, display the answer with a ✅ checkmark
+			displayChatMessage(user, `!${command} ${answer} ✅`, flags, extra, true);  // Show correct answer in chat
+		} else if (!answeredUsers.has(user)) {
+			// If the user hasn't answered correctly yet, display the answer with an ❌ X mark
+			displayChatMessage(user, `!${command} ${answer} ❌`, flags, extra, false);  // Show incorrect answer in chat
+		} else {
+			// If the user has already answered correctly, do nothing (ignore their further answers)
+			console.log(`${user} has already answered correctly. Ignoring further answers.`);
+		}
+	}
     // Only allow streamer (jaedraze) or mods to trigger these commands
     if (user.toLowerCase() === streamername || flags.mod) {
-		console.log( "User:", user, "command:", command);
 		if (command.toLowerCase() === "testsound-1") {
 				playSound(); // Play the sound when !playsound is typed in chat
 			}
+        // Handle start trivia command
+        if (command.toLowerCase() === "trivia") {
+            startTrivia();
+        }
+        // Handle trivia round 2 command
+        if (command.toLowerCase() === "trivianextround") {
+			console.log("Current Round:", round);
+            questionsAsked = 0; // Reset for the new round
+            document.getElementById("question").textContent = "Trivia Round:"+ round;
+            setTimeout(startQuestion, 10000);
+        }
         if (command === "chatanswers") {
             chatanswers = !chatanswers;  // Toggle chatanswers
             // Show in the chat whether chat answers are now enabled or disabled
             displayChatMessage(user, `Chat answers are now ${chatanswers ? "enabled" : "disabled"}.`, flags, extra, false);
         }
         // Handle start trivia command
-        if (command.toLowerCase() === "testtriviasplash") {
+        if (command.toLowerCase() === "triviatestsplash") {
             triviaSplash(); // Call the startTrivia function
         }
 		if (command === "triviaset" && params[0] === "answertime" && params.length === 2) {
@@ -1464,13 +1490,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 				displayChatMessage("System:", "Invalid number of questions. Please provide a positive number.", {}, {});
 			}
 		}
-        // Handle start trivia command
-        if (command.toLowerCase() === "trivia") {
-            startTrivia();
-        }
-		if (command === "togglechat") {
-			toggleElement("twitchchatContainer", "fade");
-		}
 		if (command === "toggletriviaboard") {
 			toggleElement("triviaboard", "slide");
 		}
@@ -1482,15 +1501,13 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			toggleTrivia();
             toggleElement("triviaWrapper", "fade");
         }
-        // Handle trivia round 2 command
-        if (command.toLowerCase() === "trivianextround") {
-			console.log("Current Round:", round);
-            questionsAsked = 0; // Reset for the new round
-            document.getElementById("question").textContent = "Trivia Round:", round;
-            setTimeout(startQuestion, 10000);
-        }
+        // Example commands that any user can trigger
+
         // Handle toggle chat visibility command
-        if (command.toLowerCase() === "togglechat") {
+		if (command === "togglechat1") {
+			toggleElement("twitchchatContainer", "fade");
+		}
+        if (command.toLowerCase() === "togglechat2") {
             let chatContainer = document.getElementById("twitchchatContainer");
             if (chatContainer.style.visibility === "hidden") {
                 chatContainer.style.visibility = "visible"; // Show the chat if it's hidden
@@ -1498,25 +1515,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
                 chatContainer.style.visibility = "hidden"; // Hide the chat if it's visible
             }
         }
-        // Example commands that any user can trigger
-        if (command === "a" || command === "answer") {
-            let answer = message.trim();  // Extract the answer
-            let isCorrect = checkAnswer(user, answer);  // Check if the answer is correct
-
-            // Display the answer in chat regardless of whether it's correct or incorrect
-            if (isCorrect) {
-                // If the answer is correct, display the answer with a ✅ checkmark
-                displayChatMessage(user, `!${command} ${answer} ✅`, flags, extra, true);  // Show correct answer in chat
-            } else if (!answeredUsers.has(user)) {
-                // If the user hasn't answered correctly yet, display the answer with an ❌ X mark
-                displayChatMessage(user, `!${command} ${answer} ❌`, flags, extra, false);  // Show incorrect answer in chat
-            } else {
-                // If the user has already answered correctly, do nothing (ignore their further answers)
-                console.log(`${user} has already answered correctly. Ignoring further answers.`);
-            }
-        }
     } else {
-
         if (command.toLowerCase() === "helloworld") {
             // Custom logic to send "Hello, world!" to your overlay chat
             const message = "Hello, world!";
@@ -1555,35 +1554,34 @@ function setStreamer(newStreamer) {
 
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
-        localStorage.setItem("lastStreamer", streamername); // Save to localStorage
+		 // Save to localStorage
+        localStorage.setItem("lastStreamer", streamername);
         ComfyJS.Init(streamername);
         console.log(`Connected to Twitch chat for: ${streamername}`);
-
         // Update button styles
+		//hide connect button and streamer input
         button.style.display = "none";
-
-
+		input.style.display: "none";
+		// Green outline for valid input --remove if display none/block works right
+        input.style.outline = "3px outset #28a745";
+		//show disconnect button and style it
         twitchdisconnectbutton.style.display = "block"; 
         twitchdisconnectbutton.style.backgroundColor = "#dc3545"; 
         twitchdisconnectbutton.style.color = "#ffffff"; 
-        twitchdisconnectbutton.style.border = "1px solid #dc3545"; 
-
-        // Green outline for valid input
-        input.style.outline = "3px outset #28a745"; 
+        twitchdisconnectbutton.style.border = "1px solid #dc3545";  
     } else {
         console.log("Please enter a valid streamer name.");
         disconnectBot(); // Ensure disconnection
         localStorage.removeItem("lastStreamer"); // Remove stored streamer name
-
+        // Show input with Red outline
+		input.style.display: "block";
+		input.style.outline = "3px outset #dc3545"; 
         // Update UI for disconnection
         twitchdisconnectbutton.style.display = "none"; 
         button.textContent = "id10t err: try diff name";
         button.style.backgroundColor = "#dc3545"; 
         button.style.color = "#ffffff"; 
         button.style.border = "1px solid #dc3545"; 
-
-        // Red outline for invalid input
-        input.style.outline = "3px outset #dc3545"; 
     }
 }
 
@@ -1597,22 +1595,20 @@ window.onload = function () {
 
 function disconnectBot() {
 	const button = document.getElementById("streamersButt");
+	const input = document.querySelector("#comfycontrolContainer input[type='text']");
 	button.style.display = "block";
+	input.style.display: "block";
     ComfyJS.Disconnect();
-	
     console.log("Bot disconnected from Twitch.");
-
     // Remove stored streamer name from localStorage
     if (localStorage.getItem("lastStreamer")) {
         localStorage.removeItem("lastStreamer");
         console.log("Removed last connected streamer from storage.");
     }
-
     // Update UI after disconnecting
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
-    const input = document.querySelector("#comfycontrolContainer input[type='text']");
-
-    twitchdisconnectbutton.style.display = "none"; 
+    
+    twitchdisconnectbutton.style.display = "none";
     button.textContent = "Connect";
     button.style.backgroundColor = "#28a745"; 
     button.style.color = "#0e5b75"; 
