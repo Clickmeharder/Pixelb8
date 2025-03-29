@@ -6,55 +6,164 @@
     <title>entrivia-v1.00</title>
 	<style>
 		/* Trivia Control Button */
-		#trivia-toggle {position: fixed;top: 0px;right: 0px;width: 80px;height: 30px;border-radius: 19%;background: linear-gradient(113deg, #001f1f, #004040);color: #12ebeb;border: none;font-size: 27px;padding: 0px;line-height: 0.1;cursor: pointer;text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;z-index: 1000;opacity: 0.65;}
+		#trivia-toggle {
+			position: fixed;
+			top: 0px;
+			right: 0px;
+			width: 80px;
+			height: 30px;
+			border-radius: 19%;
+			background: linear-gradient(113deg, #001f1f, #004040);
+			color: #12ebeb;
+			border: none;
+			font-size: 27px;
+			padding: 0px;
+			line-height: 0.1;
+			cursor: pointer;
+			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+			transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
+			z-index: 1000;
+			opacity: 0.65;
+		}
 
-		#trivia-toggle:hover {background-color: #2980b9;transform: scale(1.1);opacity: 1;}
+		#trivia-toggle:hover {
+			background-color: #2980b9;
+			transform: scale(1.1);
+			opacity: 1;
+		}
 
-		/* Trivia Control Container
-		#comfycontrolContainer {position: fixed;top: 10px;left: 10px;width: 350px;padding: 10px;background: linear-gradient(135deg, #001f1f, #004040);color: white;border-radius: 8px;box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);opacity: 0;transform: translateY(-10px);transition: opacity 0.4s ease-out, transform 0.4s ease-out;pointer-events: none;z-index: 999;}
+		/* Trivia Control Container */
+		#comfycontrolContainer {
+			position: fixed;
+			top: 10px;
+			left: 10px;
+			width: 350px;
+			padding: 10px;
+			background: linear-gradient(135deg, #001f1f, #004040);
+			color: white;
+			border-radius: 8px;
+			box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+			opacity: 0; /* Start hidden */
+			transform: translateY(-10px); /* Slight slide-up effect */
+			transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+			pointer-events: none; /* Prevent interaction when hidden */
+			z-index: 999;
+		}
 
 		/* When active (visible) */
-		#comfycontrolContainer.active {opacity: 0.85;transform: translateY(0);pointer-events: all; /* Allow interactions */}
+		#comfycontrolContainer.active {
+			opacity: 0.85;
+			transform: translateY(0);
+			pointer-events: all; /* Allow interactions */
+		}
 
 		/* Trivia Input */
-		#comfycontrolContainer input[type="text"] {width: 92%;font-size: larger;text-align: center;padding: 5px;margin: 5px 0;color: #30b524;background-color: #30363c;border: 3px inset #ccc;border-radius: 5px;}
+		#comfycontrolContainer input[type="text"] {
+			width: 92%;
+			font-size: larger;
+			text-align: center;
+			padding: 5px;
+			margin: 5px 0;
+			color: #30b524;
+			background-color: #30363c;
+			border: 3px inset #ccc;
+			border-radius: 5px;
+		}
 
 		/* Trivia Buttons */
-		#comfycontrolContainer button {width: 100%;padding: 9px;margin: 5px 0;border: 2px ridge #1f9fb8;background: #305a62;color: #00fff9;font-size: x-large;border-radius: 5px;cursor: pointer;transition: background 0.3s ease, color: 0.3s ease;}
+		#comfycontrolContainer button {
+			width: 100%;
+			padding: 9px;
+			margin: 5px 0;
+			border: 2px ridge #1f9fb8;
+			background: #305a62;
+			color: #00fff9;
+			font-size: x-large;
+			border-radius: 5px;
+			cursor: pointer;
+			transition: background 0.3s ease, color: 0.3s ease;
+		}
 
-		#comfycontrolContainer button:hover {background: #27ae60;color: #0e5b75;}
+		#comfycontrolContainer button:hover {
+			background: #27ae60;
+			color: #0e5b75;
+		}
 		/* Trivia Settings */
-		div#trivia-settings {text-align: start;display: flex;flex-direction: column;border: 3px inset #8b8585;overflow: hidden;max-height: 20px; /* Initially small */padding: 0 10px; /* Horizontal padding stays */transition: max-height 0.6s ease-out, padding 0.3s ease-out;}
+		div#trivia-settings {
+			text-align: start;
+			display: flex;
+			flex-direction: column;
+			border: 3px inset #8b8585;
+			overflow: hidden;
+			max-height: 20px; /* Initially small */
+			padding: 0 10px; /* Horizontal padding stays */
+			transition: max-height 0.6s ease-out, padding 0.3s ease-out;
+		}
 
-		div#trivia-settings:hover {max-height: 500px;padding: 10px;}
+		div#trivia-settings:hover {
+			max-height: 500px; /* Expands smoothly */
+			padding: 10px; /* Adds padding when expanded */
+		}
 		/* Trivia Settings Header */
-		#trivia-settingsheader {font-weight: bold;font-size: 16px;margin-bottom: 5px;display: block;}
-	</style>
-	<style>
-		body {
-		font-family: Arial, sans-serif;
-		color: orangered;
-		text-align: center;
-		margin: 0;
-		padding: 0;
-		width: 100vw;
-		height: 100vh;
-	}
+		#trivia-settingsheader {
+			font-weight: bold;
+			font-size: 16px;
+			margin-bottom: 5px;
+			display: block;
+		}
 	</style>
     <style>
-		/* Trivia Splash Animation Styling */
-		#triviaSplash {position: fixed;top: 28vh;left: 0;text-align: center;width: 60%;max-width: 582px;padding: 3px;box-sizing: border-box;z-index: 9999;opacity: 0;visibility: hidden;}
-		#logoContainer {/*border: 1px dotted red;*/}
-		#triviaLogo {height: auto;max-width: 37vw;max-height: 38vh;opacity: 0;transform: scale(0.5) rotate(-15deg);animation: logoDropIn 2s ease-out forwards, glowPulse 3s infinite alternate 2s;}
-		/* Splash Text Styling */
-		#splashText {position: absolute;text-align: center;left: 44%;bottom: 3%;width: 153px;font-size: 31px;font-weight: bold;color: #0ea4a4;opacity: 0;animation: textReveal 2s ease-out 3s forwards;}
+		body {
+			font-family: Arial, sans-serif;
+			color: orangered;
+			text-align: center;
+			margin: 0;
+			padding: 0;
+			width: 100vw;
+			height: 100vh;
+		}
+		#triviaAnnouncementWrapper {
+			display: none;
+			opacity: 1;
+			position: absolute;
+			top: 71%;
+			left: 2px;
+			width: 25%;
+			max-width: 25%;
+			text-align: center;
+			padding: 15px 20px;
+			background: linear-gradient(135deg, #001f1f, #004040);
+			border: 3px solid teal;
+			border-radius: 12px;
+			box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
+		}
+		#triviaAnnouncement {
+			font-weight: bold;
+			text-align: center;
+			color: white;
+			text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);
+		}
+		#questionWrapper {
+			position: absolute;
+			top: 71%;
+			left: 2px;
+			width: 25%;
+			max-width: 25%;
+			text-align: center;
+			padding: 15px 20px;
+			background: linear-gradient(135deg, #001f1f, #004040);
+			border: 3px solid teal;
+			border-radius: 12px;
+			box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
+		}
+		#question {
+			font-weight: bold;
+			text-align: center;
+			color: white;
+			text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);
+		}
 
-		/* Trivia Wrapper & internal Styling */
-		#TriviaWrapper {height: 100vh;visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
-		#triviaAnnouncementWrapper {display: none;opacity: 1;position: absolute;top: 71%;left: 2px;width: 25%;max-width: 25%;text-align: center;padding: 15px 20px;background: linear-gradient(135deg, #001f1f, #004040);border: 3px solid teal;border-radius: 12px;box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);}
-		#triviaAnnouncement {font-weight: bold;text-align: center;color: white;text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);}
-		#questionWrapper {position: absolute;top: 71%;left: 2px;width: 25%;max-width: 25%;text-align: center;padding: 15px 20px;background: linear-gradient(135deg, #001f1f, #004040);border: 3px solid teal;border-radius: 12px;box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);}
-		#question {font-weight: bold;text-align: center;color: white;text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);}
 		#currenttriviaRound {
 			position: fixed;
 			top:4px;
@@ -62,36 +171,213 @@
 			border 2px outset teal
 			border-radius: 50%;
 		}
-		p#question-counter {margin: 0;}
-		#triviaboard {position: absolute;top: 0%;font-size: 15px;right: 0;margin:0;}
-		#triviaboard p {background: #001f1f;width: 155px;padding: 4px;margin: 0px;font-size: 18px;border: 2px outset #095656;border-radius: 0px;}
-		#triviaboard li {margin: -6px 0 0px 0;text-align: center;padding: 4px 9px;background: linear-gradient(135deg, #001f1f, #004040);border: 3px solid teal;border-radius: 12px;color: #12ebeb;text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);}
+
+		p#question-counter {
+			margin: 0;
+		}
+		#triviaboard {
+			position: absolute;
+			top: 0%;
+			font-size: 15px;
+			right: 0;
+			margin:0;
+		}
+		#triviaboard p {
+			background: #001f1f;
+			width: 155px;
+			padding: 4px;
+			margin: 0px;
+			font-size: 18px;
+			border: 2px outset #095656;
+			border-radius: 0px;
+		}
+		#triviaboard li {
+			margin: -6px 0 0px 0;
+			text-align: center;
+			padding: 4px 9px;
+			background: linear-gradient(135deg, #001f1f, #004040);
+			border: 3px solid teal;
+			border-radius: 12px;
+			color: #12ebeb;
+			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+		}
 		#timer, #timeuntil-nextQ {font-size: 20px;font-weight: bold;color: lightblue;}
 		div#timeuntil-nextQ {position: absolute;bottom: 24%;left: 2%;}
+				
+		/* Trivia Splash Centering */
+		#triviaSplash {
+			position: fixed;
+			top: 28vh;
+			left: 0;
+			text-align: center;
+			z-index: 9999;
+			opacity: 0;
+			visibility: hidden;
+			width: 60%;
+			max-width: 582px;
+			padding: 3px;
+			box-sizing: border-box;
+			/*border: 5px dashed darkgrey;*/
+		}
 
-		#triviaPodium {position: absolute;bottom: 30%;left: 14%;display: flex;flex-wrap: wrap;flex-direction: column;gap: 4px;align-items: center;align-content: flex-start;z-index: 1000;}
 
-		div#first {padding: 0px 23px 26px 23px;background: linear-gradient(135deg, #001f1f, #004040);border: 10px dotted gold;border-radius: 50%;outline: 4px ridge #1197cb;box-shadow: 0px 0px 24px rgb(255 161 0 / 88%);}
-		.winner {text-align: center;display: grid;justify-content: center;gap: 0px;}
+		/* Logo Container for Proper Scaling */
+		#logoContainer {
+			/*border: 1px dotted red;*/
+		}
+
+		/* Actual Logo Scaling */
+		#triviaLogo {
+			height: auto;
+			max-width: 37vw;
+			max-height: 38vh;
+			opacity: 0;
+			transform: scale(0.5) rotate(-15deg);
+			animation: logoDropIn 2s ease-out forwards, glowPulse 3s infinite alternate 2s;
+		}
+
+		/* Splash Text Styling */
+		#splashText {
+			position: absolute;
+			text-align: center;
+			left: 44%;
+			bottom: 3%;
+			width: 153px;
+			font-size: 31px;
+			font-weight: bold;
+			color: #0ea4a4;
+			opacity: 0;
+			animation: textReveal 2s ease-out 3s forwards;
+		}
+
+
+		#TriviaWrapper {height: 100vh;visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
+
+		#triviaPodium {
+			position: absolute;
+			bottom: 30%;
+			left: 14%;
+			display: flex;
+			flex-wrap: wrap;
+			flex-direction: column;
+			gap: 4px;
+			align-items: center;
+			align-content: flex-start;
+			z-index: 1000;
+		}
+
+		div#first {
+			padding: 0px 23px 26px 23px;
+			background: linear-gradient(135deg, #001f1f, #004040);
+			border: 10px dotted gold;
+			border-radius: 50%;
+			outline: 4px ridge #1197cb;
+			box-shadow: 0px 0px 24px rgb(255 161 0 / 88%);
+		}
+		.winner {
+			text-align: center;
+			display: grid;
+			justify-content: center;
+			gap: 0px;
+		}
 		.winner img {border-radius: 50%;width: 100px;height: 100px;margin-bottom: 10px;}
-		.winner-name {white-space: normal;line-height: 0.7;flex-wrap: wrap;position: relative;font-size: 2.5em;padding: 4px;padding-left: 7px;padding-right: 7px;padding-bottom: 2px;width: max-content;text-shadow: -4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;border: 3px inset #3c3939;border-radius: 15px;outline: 2px ridge;margin: 6px;margin-top: 4px;margin-right: 0px;margin-left: 0px;}
-		.winner-score {font-size: 1em;font-weight: bold;color: #19e607;background-color: #000000d4;border: 3px inset grey;border-radius: 15px;margin: auto;padding: 2px 8px;width: 123px;max-width: 70%;}
-		.extraStats {display: flex;flex-wrap: wrap;justify-content: center;}
-		.extraStats p {margin: 0;padding: 3px;background: linear-gradient(135deg, #001f1f, #004040);border: 3px solid teal;border-radius: 12px;color: #12ebeb;text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);}
+		.winner-name {
+			white-space: normal;
+			line-height: 0.7;
+			flex-wrap: wrap;
+			position: relative;
+			font-size: 2.5em;
+			padding: 4px;
+			padding-left: 7px;
+			padding-right: 7px;
+			padding-bottom: 2px;
+			width: max-content;
+			text-shadow: -4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;
+			border: 3px inset #3c3939;
+			border-radius: 15px;
+			outline: 2px ridge;
+			margin: 6px;
+			margin-top: 4px;
+			margin-right: 0px;
+			margin-left: 0px;
+		}
+		.winner-score {
+			font-size: 1em;
+			font-weight: bold;
+			color: #19e607;
+			background-color: #000000d4;
+			border: 3px inset grey;
+			border-radius: 15px;
+			margin: auto;
+			padding: 2px 8px;
+			width: 123px;
+			max-width: 70%;
+		}
+		.extraStats {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+		}
+		.extraStats p {
+			margin: 0;
+			padding: 3px;
+			background: linear-gradient(135deg, #001f1f, #004040);
+			border: 3px solid teal;
+			border-radius: 12px;
+			color: #12ebeb;
+			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+		}
 		
-		span.trophy.gold {font-size: xx-large;color: #e7a31e;text-shadow:-4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;}
-		span.trophy.silver {font-size: x-large;text-shadow:-4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;}
-		span.trophy.bronze {font-size: x-large;text-shadow:-4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;}
-		span.runnerup.ribbon {font-size: 22px;text-shadow:-4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;}
-		span.runnerup.medal {font-size: 22px;text-shadow:-4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;}
+		span.trophy.gold {
+			font-size: xx-large;
+			color: #e7a31e;
+			text-shadow:-4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;
+		}
+		span.trophy.silver {
+			font-size: x-large;
+			text-shadow:-4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;
+			
+		}
+		span.trophy.bronze {
+			font-size: x-large;
+			text-shadow:-4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;
+		}
+		span.runnerup.ribbon {
+			font-size: 22px;
+			text-shadow:-4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;
+		}
+		span.runnerup.medal {
+			font-size: 22px;
+			text-shadow:-4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;
+		}
 
-		div#secondandthirdplace {display: flex;flex-direction: row;gap: 50px;padding: 0px;}
-		div#triviarunnerups {display: flex;gap: 40px;}
-		p#winner4Name {max-width: 245px;margin: 0px;padding: 0px;overflow: hidden;}
-		p#winner5Name {max-width: 245px;margin: 0px;padding: 0px;overflow: hidden;}
+
+		div#secondandthirdplace {
+			display: flex;
+			flex-direction: row;
+			gap: 50px;
+			padding: 0px;
+		}
+		div#triviarunnerups {
+			display: flex;
+			gap: 40px;
+		}
+		p#winner4Name {
+			max-width: 245px;
+			margin: 0px;
+			padding: 0px;
+			overflow: hidden;
+		}
+		p#winner5Name {
+			max-width: 245px;
+			margin: 0px;
+			padding: 0px;
+			overflow: hidden;
+		}
 		.small {font-size: 0.9em;color: #888;}
-	</style>
-	<style>			
+				
 		#twitchchatContainer {position: absolute;left: 0;bottom: 30%;border: 1px solid #67d1d173;width: 29%;}
 		div#twitchMessagebox {text-align: left;border: 2px inset #102d2de3;max-height: 170px;}
 		#twitchMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
@@ -100,6 +386,7 @@
     </style>
     <style>
 		/* ANIMATIONS */
+
 		/* Logo Drop-In */
 		@keyframes logoDropIn {
 			0% {
@@ -576,6 +863,42 @@ function triviaSplash() {
             });
     });
 }
+function oldtriviaSplash() {
+    return new Promise((resolve) => {
+        const splash = document.getElementById("triviaSplash");
+        const logo = document.getElementById("logoContainer");
+        const splashText = document.getElementById("splashText");
+
+        // Play the sound
+        playSound("gameshowintro");
+
+        // Make splash visible
+        splash.style.display = "flex";  // Use flexbox for centering
+        splash.style.visibility = "visible";
+        splash.style.opacity = "1";  // Fade in
+
+        // Start animations after 1 second (this can be adjusted)
+        setTimeout(() => {
+            logo.classList.add("animate");  // Apply animation class
+            splashText.classList.add("animate");  // Apply animation class
+        }, 1000); // Delay start of animation (to sync with sound)
+
+        // Fade out splash after a set amount of time (e.g., 10 seconds)
+        setTimeout(() => {
+            splash.style.transition = "opacity 3s ease-in-out";  // Add a smooth fade-out transition
+            splash.style.opacity = "0";  // Fade out effect
+
+            // After fade-out, hide the splash
+            setTimeout(() => {
+                splash.style.visibility = "hidden";  // Hide splash
+                splash.style.display = "none";  // Ensure it's completely hidden
+                resolve();  // Resolve the promise after hiding the splash
+            }, 3000);  // Match the fade-out duration (3 seconds here)
+        }, 13000); // Keep splash visible for 13 seconds (adjust as needed)
+    }).then(() => {
+        showTrivia();  // Show trivia after splash disappears
+    });
+}
 
 
 
@@ -592,6 +915,8 @@ function getRandomQuestion() {
 	usedQuestions.push(question);
 	return question;
 }
+
+
 
 function nextQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
@@ -618,6 +943,7 @@ function nextQuestion() {
     }, 1000);
 }
 
+
 function startQuestion() {
     if (questionsAsked >= questionsPerRound) {
         endTriviaRound();
@@ -625,6 +951,8 @@ function startQuestion() {
     }
     nextQuestion();
 }
+
+
 
 //function to update the time remaining before the next question
 function startCountdown() {
@@ -753,6 +1081,75 @@ function updateTriviaboard() {
         });
 }
 
+//function to show the trivia overlay/ui display
+function showTrivia() {
+	const triviaWrapper = document.getElementById("TriviaWrapper");
+    const questionWrapper = document.getElementById("questionWrapper");
+    const board = document.getElementById("triviaboard");
+    const timer = document.getElementById("timer");
+    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
+
+    // Show elements with animations
+	triviaWrapper.style.visibility = "visible";
+	triviaWrapper.style.opacity = "1";
+    questionWrapper.style.visibility = "visible";
+    questionWrapper.style.opacity = "1";
+    questionWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+
+    board.style.animation = "slideIn 0.8s ease-out forwards";
+    timer.style.animation = "fadeIn 1s ease-in-out forwards";
+    timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
+}
+//function to hide the trivia overlay/ui display
+function hideTrivia() {
+	const triviaWrapper = document.getElementById("TriviaWrapper");
+    const questionWrapper = document.getElementById("questionWrapper");
+    const board = document.getElementById("triviaboard");
+    const timer = document.getElementById("timer");
+    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
+
+    // Hide elements with animations
+    questionWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
+    board.style.animation = "slideOut 0.5s ease-in forwards";
+    timer.style.animation = "fadeOut 0.5s ease-in forwards";
+    timeUntilNextQ.style.animation = "fadeOut 0.5s ease-in forwards";
+
+    setTimeout(() => {
+        questionWrapper.style.visibility = "hidden";
+        questionWrapper.style.opacity = "0";
+		triviaWrapper.style.visibility = "hidden";
+		triviaWrapper.style.opacity = "0";
+    }, 500); // Matches the fade-out animation duration
+}
+//function to toggle trivia overlay/ui display
+function toggleTrivia() {
+    const wrapper = document.getElementById("questionWrapper");
+    const board = document.getElementById("triviaboard");
+    const timer = document.getElementById("timer");
+    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
+
+    if (wrapper.style.visibility === "hidden" || wrapper.style.visibility === "") {
+        // Show elements with animations
+        wrapper.style.visibility = "visible";
+        wrapper.style.opacity = "1";
+        wrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+
+        board.style.animation = "slideIn 0.8s ease-out forwards";
+        timer.style.animation = "fadeIn 1s ease-in-out forwards";
+        timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
+    } else {
+        // Hide elements with animations
+        wrapper.style.animation = "fadeOut 0.5s ease-in forwards";
+        board.style.animation = "slideOut 0.5s ease-in forwards";
+        timer.style.animation = "fadeOut 0.5s ease-in forwards";
+        timeUntilNextQ.style.animation = "fadeOut 0.5s ease-in forwards";
+
+        setTimeout(() => {
+            wrapper.style.visibility = "hidden";
+            wrapper.style.opacity = "0";
+        }, 500); // Matches the fade-out animation duration
+    }
+}
 
 // Function to start trivia and run the triviasplash animation
 function startTrivia() {
@@ -919,6 +1316,8 @@ function announceWinners() {
     }
 }
 
+
+
 function endTrivia() {
     clearInterval(questionTimer);
     clearInterval(countdownTimer);
@@ -936,77 +1335,6 @@ function endTrivia() {
     document.getElementById("timeuntil-nextQ").textContent = "";
 
     hideTrivia(); // Hide the trivia UI
-}
-
-
-//function to show the trivia overlay/ui display
-function showTrivia() {
-	const triviaWrapper = document.getElementById("TriviaWrapper");
-    const questionWrapper = document.getElementById("questionWrapper");
-    const board = document.getElementById("triviaboard");
-    const timer = document.getElementById("timer");
-    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
-
-    // Show elements with animations
-	triviaWrapper.style.visibility = "visible";
-	triviaWrapper.style.opacity = "1";
-    questionWrapper.style.visibility = "visible";
-    questionWrapper.style.opacity = "1";
-    questionWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
-
-    board.style.animation = "slideIn 0.8s ease-out forwards";
-    timer.style.animation = "fadeIn 1s ease-in-out forwards";
-    timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
-}
-//function to hide the trivia overlay/ui display
-function hideTrivia() {
-	const triviaWrapper = document.getElementById("TriviaWrapper");
-    const questionWrapper = document.getElementById("questionWrapper");
-    const board = document.getElementById("triviaboard");
-    const timer = document.getElementById("timer");
-    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
-
-    // Hide elements with animations
-    questionWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
-    board.style.animation = "slideOut 0.5s ease-in forwards";
-    timer.style.animation = "fadeOut 0.5s ease-in forwards";
-    timeUntilNextQ.style.animation = "fadeOut 0.5s ease-in forwards";
-
-    setTimeout(() => {
-        questionWrapper.style.visibility = "hidden";
-        questionWrapper.style.opacity = "0";
-		triviaWrapper.style.visibility = "hidden";
-		triviaWrapper.style.opacity = "0";
-    }, 500); // Matches the fade-out animation duration
-}
-//function to toggle trivia overlay/ui display
-function toggleTrivia() {
-    const wrapper = document.getElementById("questionWrapper");
-    const board = document.getElementById("triviaboard");
-    const timer = document.getElementById("timer");
-    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
-
-    if (wrapper.style.visibility === "hidden" || wrapper.style.visibility === "") {
-        // Show elements with animations
-        wrapper.style.visibility = "visible";
-        wrapper.style.opacity = "1";
-        wrapper.style.animation = "fadeIn 0.8s ease-out forwards";
-
-        board.style.animation = "slideIn 0.8s ease-out forwards";
-        timer.style.animation = "fadeIn 1s ease-in-out forwards";
-        timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
-    } else {
-        // Hide elements with animations
-        wrapper.style.animation = "fadeOut 0.5s ease-in forwards";
-        board.style.animation = "slideOut 0.5s ease-in forwards";
-        timer.style.animation = "fadeOut 0.5s ease-in forwards";
-        timeUntilNextQ.style.animation = "fadeOut 0.5s ease-in forwards";
-
-        setTimeout(() => {
-            wrapper.style.visibility = "hidden";
-            wrapper.style.opacity = "0";
-        }, 500); // Matches the fade-out animation duration
-    }
 }
 
 //-end of trivia game----------
@@ -1160,11 +1488,14 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             toggleElement("triviaWrapper", "fade");
         }
         // Handle trivia round 2 command
-        if (command.toLowerCase() === "trivianextround") {
+        if (command.toLowerCase() === "triviaround2") {
 			console.log("Current Round:", round);
-			questionsAsked = 0; // Reset for the new round
-            document.getElementById("question").textContent = "Trivia Round", round, "Will begin shortly!";
-            setTimeout(startQuestion, 10000);
+            if (round === 1) {
+                round = 2;
+                questionsAsked = 0; // Reset for the new round
+                document.getElementById("question").textContent = "Trivia Round 2 Begins!";
+                setTimeout(startQuestion, 3000);
+            }
         }
         // Handle toggle chat visibility command
         if (command.toLowerCase() === "togglechat") {
