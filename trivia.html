@@ -916,8 +916,6 @@ function getRandomQuestion() {
 	return question;
 }
 
-
-
 function nextQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
@@ -943,7 +941,6 @@ function nextQuestion() {
     }, 1000);
 }
 
-
 function startQuestion() {
     if (questionsAsked >= questionsPerRound) {
         endTriviaRound();
@@ -952,6 +949,24 @@ function startQuestion() {
     nextQuestion();
 }
 
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+function endTriviaRound() {
+    document.getElementById("question").textContent = `Round ${round} Over!`;
+    clearInterval(questionTimer);
+    toggleElement("questionWrapper", "fade");
+    document.getElementById("timer").textContent = "";
+    document.getElementById("timeuntil-nextQ").textContent = "";
+
+    // Store round stats in overall stats
+    updateUserOverallStats();
+
+    // Announce winners
+    announceWinners();
+
+    // Prepare for the next round
+    round++;
+    userStats = {}; // Reset stats for the new round
+}
 
 
 //function to update the time remaining before the next question
@@ -1211,24 +1226,6 @@ function updateUserOverallStats() {
     console.log("Updated Overall Stats:", userOverallStats); // Debug log
 }
 
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-function endTriviaRound() {
-    document.getElementById("question").textContent = `Round ${round} Over!`;
-    clearInterval(questionTimer);
-    toggleElement("questionWrapper", "fade");
-    document.getElementById("timer").textContent = "";
-    document.getElementById("timeuntil-nextQ").textContent = "";
-
-    // Store round stats in overall stats
-    updateUserOverallStats();
-
-    // Announce winners
-    announceWinners();
-
-    // Prepare for the next round
-    round++;
-    userStats = {}; // Reset stats for the new round
-}
 
 let userColors = {}; // Store user colors
 
@@ -1315,8 +1312,6 @@ function announceWinners() {
         displayChatMessage("Console:", "Error: triviaPodium element not found!", {}, {});
     }
 }
-
-
 
 function endTrivia() {
     clearInterval(questionTimer);
@@ -1488,14 +1483,11 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             toggleElement("triviaWrapper", "fade");
         }
         // Handle trivia round 2 command
-        if (command.toLowerCase() === "triviaround2") {
+        if (command.toLowerCase() === "trivianextround") {
 			console.log("Current Round:", round);
-            if (round === 1) {
-                round = 2;
-                questionsAsked = 0; // Reset for the new round
-                document.getElementById("question").textContent = "Trivia Round 2 Begins!";
-                setTimeout(startQuestion, 3000);
-            }
+            questionsAsked = 0; // Reset for the new round
+            document.getElementById("question").textContent = "Trivia Round 2 Begins!";
+            setTimeout(startQuestion, 3000);
         }
         // Handle toggle chat visibility command
         if (command.toLowerCase() === "togglechat") {
