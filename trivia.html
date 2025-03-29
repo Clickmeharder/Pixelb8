@@ -1236,8 +1236,8 @@ function announceWinners() {
             let incorrectAnswers = userStats[user]?.incorrectAnswers || 0;
 
             firstAnswersElement.textContent = `🎯 First: ${firstAnswers}`;
-            correctAnswersElement.textContent = `✅ Correct: ${correctAnswers}`;
-            incorrectAnswersElement.textContent = `❌ Incorrect: ${incorrectAnswers}`;
+            correctAnswersElement.textContent = `✅ ${correctAnswers}`;
+            incorrectAnswersElement.textContent = `❌ ${incorrectAnswers}`;
 
             extraStatsDiv.appendChild(incorrectAnswersElement);
             extraStatsDiv.appendChild(correctAnswersElement);
