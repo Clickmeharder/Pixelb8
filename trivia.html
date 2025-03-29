@@ -361,9 +361,9 @@
 		}
 
 		div#first {
-			padding: 11px 59px;
+			padding: 1px 13px 9px 13px;
 			background: linear-gradient(135deg, #001f1f, #004040);
-			border: 12px dotted gold;
+			border: 10px dotted gold;
 			border-radius: 50%;
 			outline: 4px ridge #1197cb;
 			box-shadow: 0px 0px 24px rgb(255 161 0 / 88%);
@@ -381,11 +381,19 @@
 			flex-wrap: wrap;
 			position: relative;
 			font-size: 2.5em;
-			padding: 3px;
-			padding-left: 3px;
-			padding-right: 3px;
+			padding: 4px;
+			padding-left: 7px;
+			padding-right: 7px;
+			padding-bottom: 2px;
 			width: max-content;
-			margin: 0px;
+			text-shadow: -4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;
+			border: 3px inset #3c3939;
+			border-radius: 15px;
+			outline: 2px ridge;
+			margin: 12px;
+			margin-top: 4px;
+			margin-right: 0px;
+			margin-left: 0px;
 		}
 		.winner-score {
 			font-size: 1em;
@@ -524,18 +532,19 @@
 				</div>
 				<div id="secondandthirdplace">
 					<div id="second">
-						<div class="winner" id="winner2">
-							<p id="winner2Name" class="winner-name">Undefined69</p>
-							<p id="winner2Score" class="winner-score">score: 0</p>
-						</div>
 						<span class="trophy silver">🥈2nd</span>
+						<div class="winner" id="winner2">
+							<p id="winner2Score" class="winner-score">score: 0</p>
+							<p id="winner2Name" class="winner-name">Undefined69</p>
+						</div>
 					</div>
 					<div id="third">
-						<div class="winner" id="winner3">
-							<p id="winner3Name" class="winner-name">undefined420</p>
-							<p id="winner3Score" class="winner-score">score: 0</p>
-						</div>
 						<span class="trophy bronze">🥉3rd</span>
+						<div class="winner" id="winner3">
+							<p id="winner3Score" class="winner-score">score: 0</p>
+							<p id="winner3Name" class="winner-name">undefined420</p>
+						</div>
+
 					</div>
 				</div>
 				<!-- 4th and 5th place winners (smaller) -->
