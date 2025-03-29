@@ -1486,8 +1486,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         if (command.toLowerCase() === "trivianextround") {
 			console.log("Current Round:", round);
             questionsAsked = 0; // Reset for the new round
-            document.getElementById("question").textContent = "Trivia Round 2 Begins!";
-            setTimeout(startQuestion, 3000);
+            document.getElementById("question").textContent = "Trivia Round:", round;
+            setTimeout(startQuestion, 10000);
         }
         // Handle toggle chat visibility command
         if (command.toLowerCase() === "togglechat") {
