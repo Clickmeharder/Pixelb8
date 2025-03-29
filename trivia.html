@@ -349,26 +349,24 @@
 
 		#triviaPodium {
 			position: absolute;
-			bottom: 34%;
-			left: 20%;
+			bottom: 30%;
+			left: 14%;
 			display: flex;
-			flex-direction: row;
 			flex-wrap: wrap;
 			flex-direction: column;
-			gap: 15px;
+			gap: 4px;
 			align-items: center;
 			align-content: flex-start;
 			z-index: 1000;
 		}
 
 		div#first {
-			padding: 13px;
+			padding: 11px 59px;
 			background: linear-gradient(135deg, #001f1f, #004040);
 			border: 12px dotted gold;
 			border-radius: 50%;
 			outline: 4px ridge #1197cb;
-			width: 327px;
-			box-shadow: 0px 0px 24px rgb(255 128 0 / 84%);
+			box-shadow: 0px 0px 24px rgb(255 161 0 / 88%);
 		}
 		.winner {
 			text-align: center;
@@ -518,11 +516,11 @@
 			<!-- Top 3 winners -->
 			<div id="triviaPodium" style="display: none;">
 				<div id="first">
-					<div class="winner" id="winner1">
-						<p id="winner1Name" class="winner-name">Undefined</p>
-						<p id="winner1Score" class="winner-score">score: 0</p>
-					</div>
 					<span class="trophy gold">🏆1st</span>
+					<div class="winner" id="winner1">
+						<p id="winner1Score" class="winner-score">score: 0</p>
+						<p id="winner1Name" class="winner-name">Undefined</p>
+					</div>
 				</div>
 				<div id="secondandthirdplace">
 					<div id="second">
