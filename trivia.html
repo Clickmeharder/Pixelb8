@@ -1616,7 +1616,7 @@ function setStreamer(newStreamer) {
         disconnectBot(); // Ensure disconnection
         localStorage.removeItem("lastStreamer"); // Remove stored streamer name
         // Show input with Red outline
-		input.style.display: "block";
+		input.style.display = "block";
 		input.style.outline = "3px outset #dc3545"; 
         // Update UI for disconnection
         twitchdisconnectbutton.style.display = "none"; 
