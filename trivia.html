@@ -944,7 +944,6 @@ function nextQuestion() {
 
 
 function handlephaseTrivia() {
-
     if (questionsAsked >= questionsPerRound) {
         if (round >= totalRounds) {
 
@@ -988,12 +987,10 @@ function endTriviaGame() {
 	playSound("winsequence1");
     // Store round stats in overall stats
     updateUserOverallStats();
-
     // Announce winners
     announceWinners();
-
     // Prepare for the next round
-    round++;
+    round = 1;
     userStats = {}; // Reset stats for the new round
 }
 
@@ -1029,7 +1026,7 @@ function endQuestion() {
         // Check if we've asked the maximum number of questions for the round
         if (questionsAsked >= questionsPerRound) {
             // End the trivia round if we've reached the limit
-            endTriviaRound();
+            handlephaseTrivia();
             return;
         } else {
             // Otherwise, start the countdown for the next question
@@ -1048,7 +1045,6 @@ function nextquestionTimer(seconds) {
 function checkAnswer(user, message) {
     // Check if there's an active question and if the user has already answered correctly
     if (!activeQuestion || answeredUsers.has(user)) return;  // If the user has already answered correctly, don't process further answers
-
     let correctAnswer = activeQuestion.answer.toLowerCase();
     let userAnswer = message.trim().toLowerCase();
 
@@ -1239,7 +1235,7 @@ let userColors = {}; // Store user colors
 function announceWinners() {
     // Get top 5 sorted users
     const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
-	
+	console.log("Announcing winners");
     console.log("Sorted users:", sortedUsers);
 
     for (let i = 0; i < 3; i++) {
