@@ -730,6 +730,7 @@ let timetoAnswer = 30;
 let timebetweenQuestions = 90;
 let questionsAsked = 0;
 let questionsPerRound = 3;
+let totalRounds = 2;
 let round = 1;
 let triviaQuestions = { round1: [], round2: [] };
 let chatanswers = false;  // Set to true when you want to check answers
@@ -948,9 +949,39 @@ function startQuestion() {
     }
     nextQuestion();
 }
-
+function handlephaseTrivia() {
+    if (questionsAsked >= questionsPerRound) {
+        if (round >= totalRounds) {
+			console.error('Round:', round);
+			console.error('Total Rounds:', totalRounds);
+            endTriviaGame();
+            return;
+        } else {
+            endTriviaRound();
+            return;
+        }
+    }
+    nextQuestion();
+}
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 function endTriviaRound() {
+    document.getElementById("question").textContent = `Round ${round} Over!`;
+    clearInterval(questionTimer);
+    toggleElement("questionWrapper", "fade");
+    document.getElementById("timer").textContent = "";
+    document.getElementById("timeuntil-nextQ").textContent = "";
+
+    // Store round stats in overall stats
+    updateUserOverallStats();
+
+    // Announce winners
+//    announceWinners();
+
+    // Prepare for the next round
+    round++;
+    userStats = {}; // Reset stats for the new round
+}
+function endTriviaGame() {
     document.getElementById("question").textContent = `Round ${round} Over!`;
     clearInterval(questionTimer);
     toggleElement("questionWrapper", "fade");
@@ -967,6 +998,7 @@ function endTriviaRound() {
     round++;
     userStats = {}; // Reset stats for the new round
 }
+
 
 
 //function to update the time remaining before the next question
@@ -1181,7 +1213,8 @@ function startTrivia() {
         .then(questions => {
             console.log("Trivia Questions Loaded:", questions);
             window.triviaQuestions = questions;
-            startQuestion(); // Start the trivia after fetching
+            //startQuestion(); // Start the trivia after fetching
+			handlephaseTrivia();
         })
         .catch(error => {
             console.error("Error loading trivia questions:", error);
