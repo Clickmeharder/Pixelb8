@@ -1422,10 +1422,10 @@ for (const sound in sounds) {
 }
 // Generic function to play any sound
 function playSound(name) {
-    if (sounds[name]) {
-        sounds[name].muted = false; // Unmute the sound
-        sounds[name].currentTime = 0; // Reset sound to start
-        sounds[name].play().catch(error => {
+    if (triviasounds[name]) {
+        triviasounds[name].muted = false; // Unmute the sound
+        triviasounds[name].currentTime = 0; // Reset sound to start
+        triviasounds[name].play().catch(error => {
             console.error(`Error playing ${name}:`, error);
         });
     } else {
