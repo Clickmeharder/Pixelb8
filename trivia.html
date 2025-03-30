@@ -942,13 +942,7 @@ function nextQuestion() {
     }, 1000);
 }
 
-function startQuestion() {
-    if (questionsAsked >= questionsPerRound) {
-        endTriviaRound();
-        return;
-    }
-    nextQuestion();
-}
+
 function handlephaseTrivia() {
 
     if (questionsAsked >= questionsPerRound) {
@@ -1089,31 +1083,6 @@ function checkAnswer(user, message) {
         // Incorrect answer logic
         userStats[user].incorrectAnswers++;  // Increment incorrect count only if incorrect answer
         return false;  // Return false for incorrect answers
-    }
-}
-function oldcheckAnswer(user, message) {
-    if (!activeQuestion || answeredUsers.has(user)) return;
-    let correctAnswer = activeQuestion.answer.toLowerCase();
-    let userAnswer = message.trim().toLowerCase();
-    if (userAnswer === correctAnswer) {
-        // Track correct answers
-        if (!userStats[user]) {
-            userStats[user] = {
-                correctAnswers: 0,
-                firstAnswers: 0
-            };
-        }
-        userStats[user].correctAnswers++; // Increment correct answers count
-
-        // Track if the user answered first
-        if (!firstAnswerUser) {
-            firstAnswerUser = user;
-            userStats[user].firstAnswers++; // Increment first answers count
-            userScores[user] = (userScores[user] || 0) + 3; // Add 3 points for first correct answer
-        } else {
-            userScores[user] = (userScores[user] || 0) + 1; // Add 1 point for a correct answer after the first
-        }
-        updateTriviaboard();
     }
 }
 
