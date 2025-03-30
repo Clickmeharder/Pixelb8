@@ -950,10 +950,10 @@ function startQuestion() {
     nextQuestion();
 }
 function handlephaseTrivia() {
+
     if (questionsAsked >= questionsPerRound) {
         if (round >= totalRounds) {
-			console.error('Round:', round);
-			console.error('Total Rounds:', totalRounds);
+
             endTriviaGame();
             return;
         } else {
@@ -965,6 +965,8 @@ function handlephaseTrivia() {
 }
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 function endTriviaRound() {
+	console.log('Round:', round);
+	console.log('Total Rounds:', totalRounds);
     document.getElementById("question").textContent = `Round ${round} Over!`;
     clearInterval(questionTimer);
     toggleElement("questionWrapper", "fade");
@@ -982,6 +984,8 @@ function endTriviaRound() {
     userStats = {}; // Reset stats for the new round
 }
 function endTriviaGame() {
+	console.log('Round:', round);
+	console.log('Total Rounds:', totalRounds);
     document.getElementById("question").textContent = `Round ${round} Over!`;
     clearInterval(questionTimer);
     toggleElement("questionWrapper", "fade");
