@@ -1469,7 +1469,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			console.log("Current Round:", round);
             questionsAsked = 0; // Reset for the new round
             document.getElementById("question").textContent = "Trivia Round:"+ round;
-            setTimeout(startQuestion, 10000);
+            setTimeout(handlephaseTrivia, 10000);
         }
         if (command === "chatanswers") {
             chatanswers = !chatanswers;  // Toggle chatanswers
