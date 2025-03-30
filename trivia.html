@@ -714,7 +714,7 @@ function olddisplayChatMessage(user, message, flags, extra) {
 
 
 //trivia game code starts here
-
+let userColors = {}; // Store user colors
 let triviaGameState = null;
 let userStats = {}; // This will store the count of correct answers and first answers
 let userOverallStats = {}; // This will store the users lifetime stats ie: number of games played. number of games won. total correct answers total first correct answers
@@ -1228,7 +1228,7 @@ function updateUserOverallStats() {
 }
 
 
-let userColors = {}; // Store user colors
+
 
 function announceWinners() {
     // Get top 5 sorted users
