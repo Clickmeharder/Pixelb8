@@ -1367,12 +1367,18 @@ function toggleElement(elementId, animationType = "fade") {
 const sounds = {
     snakedie: new Audio("/assets/sounds/snakedie_sound1.mp3"),
     gameshowintro: new Audio("/assets/sounds/gameshow_intro.mp3"),
-	triviaRoundfin: new Audio("/assets/sounds/gameshow_intro.mp3"),
-	triviauserbuzz: new Audio("/assets/sounds/gameshow_intro.mp3"),
-	triviacorrectding: new Audio("/assets/sounds/gameshow_intro.mp3"),
     // Add more sounds here
 };
-
+const triviasounds = {
+    snakedie: new Audio("/assets/sounds/entrivia/openingtheme-entriviauniverse.mp3"),
+    gameshowintro: new Audio("/assets/sounds/entrivia/openingtheme2-entriviauniverse.mp3"),
+	triviaRoundfin: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
+	triviauserbuzz: new Audio("/assets/sounds/entrivia/trivia-roundover.mp3"),
+	triviacorrectding: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
+	triviacorrectding: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
+	triviacorrectding: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
+    // Add more sounds here
+};
 // Ensure all sounds are loaded and muted initially
 for (const sound in sounds) {
     sounds[sound].muted = true;
