@@ -1018,11 +1018,9 @@ function updateQuestionCounter() {
 function endQuestion() {
     clearInterval(questionTimer);
     document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
-	
     hideQuestionTimer = setTimeout(() => {
         document.getElementById("questionWrapper").style.visibility = "hidden";
         document.getElementById("triviaboard").style.visibility = "visible";
-        
         // Check if we've asked the maximum number of questions for the round
         if (questionsAsked >= questionsPerRound) {
             // End the trivia round if we've reached the limit
