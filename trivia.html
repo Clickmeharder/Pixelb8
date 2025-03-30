@@ -1008,7 +1008,7 @@ function startCountdown() {
 		nextquestionTimer(countdown);
 		if (countdown <= 0) {
 			clearInterval(countdownTimer);
-			startQuestion();
+			handlephaseTrivia();
 		}
 	}, 1000);
 }
