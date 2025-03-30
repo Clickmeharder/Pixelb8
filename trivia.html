@@ -823,7 +823,7 @@ function splashAnimation() {
         const splashText = document.getElementById("splashText");
 
         // Play the sound
-        playSound("gameshowintro");
+        playSound("openingtheme");
 
         // Make splash visible
         splash.style.display = "flex";  // Use flexbox for centering
@@ -1042,6 +1042,7 @@ function checkAnswer(user, message) {
             firstAnswerUser = user;
             userStats[user].firstAnswers++;
             userScores[user] = (userScores[user] || 0) + 3;  // First answer gets 3 points
+			playSound("triviacorrect");
         } else {
             userScores[user] = (userScores[user] || 0) + 1;  // Others get 1 point
         }
@@ -1232,7 +1233,7 @@ let userColors = {}; // Store user colors
 function announceWinners() {
     // Get top 5 sorted users
     const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
-
+	playSound("winsequence1");
     console.log("Sorted users:", sortedUsers);
 
     for (let i = 0; i < 3; i++) {
@@ -1364,6 +1365,8 @@ function toggleElement(elementId, animationType = "fade") {
 
 //---AUDIO LOGIC-----------------|
 // Preload sounds and store them in an object
+        // Play the sound
+//       playSound("winsequence1");
 const sounds = {
     snakedie: new Audio("/assets/sounds/snakedie_sound1.mp3"),
     gameshowintro: new Audio("/assets/sounds/gameshow_intro.mp3"),
@@ -1372,8 +1375,8 @@ const sounds = {
 const triviasounds = {
     openingtheme: new Audio("/assets/sounds/entrivia/openingtheme-entriviauniverse.mp3"),
     openingtheme2: new Audio("/assets/sounds/entrivia/openingtheme2-entriviauniverse.mp3"),
-	trivia-correct: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
-	trivia-roundover: new Audio("/assets/sounds/entrivia/trivia-roundover.mp3"),
+	triviacorrect: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
+	triviaroundover: new Audio("/assets/sounds/entrivia/trivia-roundover.mp3"),
 	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
 	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
 	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
