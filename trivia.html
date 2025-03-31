@@ -810,7 +810,7 @@ function splashAnimation() {
                 splash.style.display = "none";  // Ensure it's completely hidden
                 resolve();  // Resolve the promise after hiding the splash
             }, 3000);  // Wait for the fade-out duration (3 seconds)
-        }, 20000); // Keep splash visible for 13 seconds (adjust as needed)
+        }, 20000); // Keep splash visible for 20 seconds (adjust as needed)
     });
 }
 function triviaSplash() {
@@ -829,7 +829,6 @@ function triviaSplash() {
 function getRandomQuestion() {
 	let currentRound = round === 1 ? "round1" : "round2";
 	let availableQuestions = triviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
-
 	if (availableQuestions.length === 0) {
 		usedQuestions = []; // Reset when all questions are used
 		availableQuestions = [...triviaQuestions[currentRound]];
