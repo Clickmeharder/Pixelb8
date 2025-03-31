@@ -916,9 +916,9 @@ function startCountdown() {
 
 function endQuestion() {
     clearInterval(questionTimer);
-	activeQuestion = null;
     document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
 	document.getElementById("timer").textContent = "";
+	activeQuestion = null;
     hideQuestionTimer = setTimeout(() => {
         document.getElementById("questionWrapper").style.visibility = "hidden";
         document.getElementById("triviaboard").style.visibility = "visible";
