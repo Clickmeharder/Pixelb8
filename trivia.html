@@ -792,7 +792,7 @@ function splashAnimation() {
         const splashText = document.getElementById("splashText");
 
         // Play the sound
-        playSound("openingtheme");
+        playSound("openingtheme1");
 
         // Make splash visible
         splash.style.display = "flex";  // Use flexbox for centering
@@ -1346,10 +1346,11 @@ const sounds = {
 };
 const triviasounds = {
     openingtheme: new Audio("/assets/sounds/entrivia/openingtheme-entriviauniverse.mp3"),
+	openingtheme1: new Audio("/assets/sounds/entrivia/openingtheme1-entriviauniverse.mp3"),
     openingtheme2: new Audio("/assets/sounds/entrivia/openingtheme2-entriviauniverse.mp3"),
-	triviafirstcorrect: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
+	triviafirstcorrect: new Audio("/assets/sounds/entrivia/trivia-firstcorrect.mp3"),
 	triviacorrect: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
-	triviawrong: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
+	triviawrong: new Audio("/assets/sounds/entrivia/trivia-wrong.mp3"),
 	triviaroundover: new Audio("/assets/sounds/entrivia/trivia-roundover.mp3"),
 	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
 	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
@@ -1360,6 +1361,7 @@ const triviaWinsounds = {
 	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
 	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
 	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
+	closingtheme: new Audio("/assets/sounds/entrivia/closingtheme-entriviauniverse.mp3"),
     // Add more sounds here
 };
 
