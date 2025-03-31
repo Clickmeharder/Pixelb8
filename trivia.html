@@ -648,72 +648,15 @@ function displayChatMessage(user, message, flags, extra, isCorrect = false) {
         chatContainer.removeChild(chatContainer.firstChild);
     }
 }
-
-function olddisplayChatMessage(user, message, flags, extra) {
-    const chatContainer = document.getElementById("twitchMessagebox");
-    // Create a new chat message element
-    const chatMessage = document.createElement("div");
-    chatMessage.classList.add("chatMessage");
-
-    const usernameSpan = document.createElement("span");
-    usernameSpan.classList.add("username");
-    usernameSpan.innerHTML = user + ": ";
-
-    const userColor = extra.userColor || "#FFFFFF"; // Default to white if no color is set
-    usernameSpan.style.color = userColor; // Apply user color dynamically
-
-    // Create the message element and set its innerHTML
-    const messageSpan = document.createElement("span");
-    messageSpan.classList.add("twitchmessage");
-    messageSpan.innerHTML = message;
-	
-    // Append the username and message spans to the chat message div
-    chatMessage.appendChild(usernameSpan);
-    chatMessage.appendChild(messageSpan);
-	
-    // Add the chat message to the container
-    chatContainer.appendChild(chatMessage);
-    // Apply a fade effect to the chat message after a delay
-    setTimeout(() => {
-        chatMessage.style.opacity = '0'; // Fade out after 9 seconds
-    }, 15000);
-    setTimeout(() => {
-        chatMessage.remove();
-    }, 15000); // Remove after 4 seconds (1 second for fading)
-
-    // Limit the number of messages displayed in the chat container
-    if (chatContainer.children.length > 5) {
-        chatContainer.removeChild(chatContainer.firstChild);
-    }
-}
 //end of chat logic --------------------|
 
-//---Trivia logic-------------------|
-        <!-- const triviaQuestions = [ -->
-            <!-- { question: "Converting 100 shrapnel results in how much universal ammo?", answer: "101" }, -->
-            <!-- { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" }, -->
-            <!-- { question: "What is 5 + 3?", answer: "8" }, -->
-            <!-- { question: "Who painted the Mona Lisa?", answer: "da vinci" }, -->
-            <!-- { question: "What is the smallest Skildek support weapon?", answer: "lancehead" }, -->
-            <!-- { question: "What amp drops from bots found at Orthos Oilfield?", answer: "b101" }, -->
-            <!-- { question: "What does CDF stand for?", answer: "calypso defense force" }, -->
-            <!-- { question: "What does IFN stand for?", answer: "imperial federal navy" }, -->
-            <!-- { question: "What is Jaedraze's avatar's first name?", answer: "Jimmy" }, -->
-            <!-- { question: "What is Jaedraze's avatar's middle name?", answer: "Jimbobbityboo" }, -->
-            <!-- { question: "What year is it?", answer: "2025" }, -->
-            <!-- { question: "What items are used to craft explosive projectiles?", answer: "nanocubes" }, -->
-            <!-- { question: "What is the name of the starting zone on Calypso?", answer: "thule" }, -->
-            <!-- { question: "How many paint cans or textures for max success?", answer: "323" }, -->
-            <!-- { question: "How many PED is 100 PEC worth?", answer: "1" }, -->
-            <!-- { question: "How many PEC is 1 PED worth?", answer: "100" }, -->
-            <!-- { question: "How many PEC is 10 PED worth?", answer: "1000" } -->
-        <!-- ]; -->
-//--------- TRIVIA -----------
-
-
-
-
+//-----------------------------
+//--------- TRIVIA -----------|
 //trivia game code starts here
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!
+// Trivia Initialization  
+//!!!!!!!!!!!!!!!!!!!!!!!!
 let userColors = {}; // Store user colors
 let triviaGameState = null;
 let userStats = {}; // This will store the count of correct answers and first answers
@@ -723,7 +666,6 @@ let usedQuestions = [];
 let activeQuestion = null;
 let answeredUsers = new Set();
 let firstAnswerUser = null;
-
 let hideQuestionTimer;
 let questionTimer, countdownTimer;
 let timetoAnswer = 30;
@@ -734,20 +676,32 @@ let totalRounds = 2;
 let round = 1;
 let triviaQuestions = { round1: [], round2: [] };
 let chatanswers = false;  // Set to true when you want to check answers
+//!!!!!!!!!!!!!!!!!!!!!!!!
 
-<!-- fetch("questions.json") -->
-	<!-- .then(response => response.json()) -->
-	<!-- .then(data => { -->
-		<!-- if (data && data.round1 && data.round1.length > 0) {  -->
-			<!-- triviaQuestions = data; -->
+//Example Questions
+<!-- const triviaQuestions = [ -->
+<!-- { question: "Converting 100 shrapnel results in how much universal ammo?", answer: "101" }, -->
+<!-- { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" }, -->
+<!-- { question: "What is 5 + 3?", answer: "8" }, -->
+<!-- { question: "Who painted the Mona Lisa?", answer: "da vinci" }, -->
+<!-- { question: "What is the smallest Skildek support weapon?", answer: "lancehead" }, -->
+<!-- { question: "What amp drops from bots found at Orthos Oilfield?", answer: "b101" }, -->
+<!-- { question: "What does CDF stand for?", answer: "calypso defense force" }, -->
+<!-- { question: "What does IFN stand for?", answer: "imperial federal navy" }, -->
+<!-- { question: "What is Jaedraze's avatar's first name?", answer: "Jimmy" }, -->
+<!-- { question: "What is Jaedraze's avatar's middle name?", answer: "Jimbobbityboo" }, -->
+<!-- { question: "What year is it?", answer: "2025" }, -->
+<!-- { question: "What items are used to craft explosive projectiles?", answer: "nanocubes" }, -->
+<!-- { question: "What is the name of the starting zone on Calypso?", answer: "thule" }, -->
+<!-- { question: "How many paint cans or textures for max success?", answer: "323" }, -->
+<!-- { question: "How many PED is 100 PEC worth?", answer: "1" }, -->
+<!-- { question: "How many PEC is 1 PED worth?", answer: "100" }, -->
+<!-- { question: "How many PEC is 10 PED worth?", answer: "1000" } -->
+        <!-- ]; -->
+//----------------------------
 
-		<!-- } else { -->
-			<!-- console.error("Trivia questions not found or empty."); -->
-		<!-- } -->
-	<!-- }) -->
-	<!-- .catch(error => console.error("Error loading trivia questions:", error)); -->
-
-// Function to fetch trivia questions
+//------------------------
+// fetch trivia questions
 function fetchTriviaQuestions() {
     return new Promise((resolve, reject) => {
         const questionsUrl = 'questions.json'; // Replace with actual path
@@ -851,7 +805,6 @@ function splashAnimation() {
         }, 20000); // Keep splash visible for 13 seconds (adjust as needed)
     });
 }
-
 function triviaSplash() {
     return new Promise((resolve) => {
         splashAnimation()  // Show the splash animation
@@ -864,44 +817,6 @@ function triviaSplash() {
             });
     });
 }
-function oldtriviaSplash() {
-    return new Promise((resolve) => {
-        const splash = document.getElementById("triviaSplash");
-        const logo = document.getElementById("logoContainer");
-        const splashText = document.getElementById("splashText");
-
-        // Play the sound
-        playSound("gameshowintro");
-
-        // Make splash visible
-        splash.style.display = "flex";  // Use flexbox for centering
-        splash.style.visibility = "visible";
-        splash.style.opacity = "1";  // Fade in
-
-        // Start animations after 1 second (this can be adjusted)
-        setTimeout(() => {
-            logo.classList.add("animate");  // Apply animation class
-            splashText.classList.add("animate");  // Apply animation class
-        }, 1000); // Delay start of animation (to sync with sound)
-
-        // Fade out splash after a set amount of time (e.g., 10 seconds)
-        setTimeout(() => {
-            splash.style.transition = "opacity 3s ease-in-out";  // Add a smooth fade-out transition
-            splash.style.opacity = "0";  // Fade out effect
-
-            // After fade-out, hide the splash
-            setTimeout(() => {
-                splash.style.visibility = "hidden";  // Hide splash
-                splash.style.display = "none";  // Ensure it's completely hidden
-                resolve();  // Resolve the promise after hiding the splash
-            }, 3000);  // Match the fade-out duration (3 seconds here)
-        }, 13000); // Keep splash visible for 13 seconds (adjust as needed)
-    }).then(() => {
-        showTrivia();  // Show trivia after splash disappears
-    });
-}
-
-
 
 function getRandomQuestion() {
 	let currentRound = round === 1 ? "round1" : "round2";
@@ -941,13 +856,12 @@ function nextQuestion() {
         }
     }, 1000);
 }
-
-
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 function handlephaseTrivia() {
     if (questionsAsked >= questionsPerRound) {
         if (round >= totalRounds) {
 
-            endTriviaGame();
+            triviaGameFinished();
             return;
         } else {
             endTriviaRound();
@@ -977,9 +891,6 @@ function endTriviaRound() {
     userStats = {}; // Reset stats for the new round
 }
 
-
-
-
 //function to update the time remaining before the next question
 function startCountdown() {
 	let countdown = timebetweenQuestions;
@@ -992,11 +903,6 @@ function startCountdown() {
 			handlephaseTrivia();
 		}
 	}, 1000);
-}
-
-//update the guestion counter (how many questions have been asked out of the total questions in the round)
-function updateQuestionCounter() {
-	document.getElementById("question-counter").textContent = `Question: ${questionsAsked} / ${questionsPerRound}`;
 }
 
 function endQuestion() {
@@ -1017,13 +923,12 @@ function endQuestion() {
     }, 13000); // Delay timeout of 13 seconds to wait before checking
 }
 
-//function to update the countdown until next question
+//update the countdown timer until next question
 function nextquestionTimer(seconds) {
 	const minutes = Math.floor(seconds / 60);
 	const remainingSeconds = seconds % 60;
 	document.getElementById("timeuntil-nextQ").textContent = `Next question in: ${minutes}m ${remainingSeconds}s`;
 }
-
 function checkAnswer(user, message) {
     // Check if there's an active question and if the user has already answered correctly
     if (!activeQuestion || answeredUsers.has(user)) return;  // If the user has already answered correctly, don't process further answers
@@ -1066,6 +971,10 @@ function checkAnswer(user, message) {
     }
 }
 
+//update the guestion counter
+function updateQuestionCounter() {
+	document.getElementById("question-counter").textContent = `Question: ${questionsAsked} / ${questionsPerRound}`;
+}
 function updateTriviaboard() {
     const triviaboardElement = document.getElementById("triviaboard");
     triviaboardElement.innerHTML = "<p>Entrivia</p>";
@@ -1115,6 +1024,74 @@ function updateUserOverallStats() {
     }
 
     console.log("Updated Overall Stats:", userOverallStats); // Debug log
+}
+function updatePodium() {
+    // Get top 5 sorted users
+    const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
+	console.log("Updating Podium");
+    console.log("Sorted users:", sortedUsers);
+    for (let i = 0; i < 3; i++) {
+        const [user, score] = sortedUsers[i] || [];
+        if (user) {
+            console.log(`Winner ${i + 1}: ${user} - Score: ${score}`);
+            displayChatMessage("Console:", `Winner ${i + 1}: ${user} - Score: ${score}`, {}, {});
+
+            let nameElement = document.getElementById(`winner${i + 1}Name`);
+            let scoreElement = document.getElementById(`winner${i + 1}Score`);
+
+            nameElement.textContent = user;
+            scoreElement.textContent = `Score: ${score}`;
+
+            // Apply user color
+            let userColor = userColors[user] || "#FFFFFF"; // Default white
+            nameElement.style.color = userColor;
+
+            // Parent container
+            const winnerContainer = document.getElementById(`winner${i + 1}`).parentElement;
+
+            // Remove any existing extra stats div to prevent duplicates
+            let oldExtraStats = winnerContainer.querySelector(".extraStats");
+            if (oldExtraStats) oldExtraStats.remove();
+
+            // Create extra stats div
+            let extraStatsDiv = document.createElement("div");
+            extraStatsDiv.className = "extraStats";
+
+            // Create and set stats elements
+            let firstAnswersElement = document.createElement("p");
+            let correctAnswersElement = document.createElement("p");
+            let incorrectAnswersElement = document.createElement("p");
+
+            let firstAnswers = userStats[user]?.firstAnswers || 0;
+            let correctAnswers = userStats[user]?.correctAnswers || 0;
+            let incorrectAnswers = userStats[user]?.incorrectAnswers || 0;
+
+            firstAnswersElement.textContent = `🎯 First: ${firstAnswers}`;
+            correctAnswersElement.textContent = `✅ ${correctAnswers}`;
+            incorrectAnswersElement.textContent = `❌ ${incorrectAnswers}`;
+
+            extraStatsDiv.appendChild(incorrectAnswersElement);
+            extraStatsDiv.appendChild(correctAnswersElement);
+            extraStatsDiv.appendChild(firstAnswersElement);
+
+            // Append the extraStatsDiv next to the winner container
+            winnerContainer.appendChild(extraStatsDiv);
+        }
+    }
+
+    // Update 4th and 5th place winners
+    for (let i = 3; i < 5; i++) {
+        const [user, score] = sortedUsers[i] || [];
+        if (user) {
+            console.log(`Winner ${i + 1} (4th/5th place): ${user} - Score: ${score}`);
+            let nameElement = document.getElementById(`winner${i + 1}Name`);
+            let scoreElement = document.getElementById(`winner${i + 1}Score`);
+            nameElement.textContent = user;
+            scoreElement.textContent = `Score: ${score}`;
+            let userColor = userColors[user] || "orangered"; // Default color
+            nameElement.style.color = userColor;
+        }
+    }
 }
 
 //function to show the trivia overlay/ui display
@@ -1202,8 +1179,6 @@ function hidePodium() {
 		console.log("TriviaPodium hidden!...");
     }, 500); // Matches the fade-out animation duration
 }
-
-//function to toggle trivia overlay/ui display
 function toggleTrivia() {
     const wrapper = document.getElementById("questionWrapper");
     const board = document.getElementById("triviaboard");
@@ -1233,7 +1208,7 @@ function toggleTrivia() {
     }
 }
 
-// Function to start trivia and run the triviasplash animation
+
 function startTrivia() {
     if (triviaGameState === "started") {
         console.log("Trivia is already running! Ignoring duplicate command.");
@@ -1256,80 +1231,35 @@ function startTrivia() {
         });
 }
 
-
-
-function updatePodium() {
-    // Get top 5 sorted users
-    const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
-	console.log("Updating Podium");
-    console.log("Sorted users:", sortedUsers);
-    for (let i = 0; i < 3; i++) {
-        const [user, score] = sortedUsers[i] || [];
-        if (user) {
-            console.log(`Winner ${i + 1}: ${user} - Score: ${score}`);
-            displayChatMessage("Console:", `Winner ${i + 1}: ${user} - Score: ${score}`, {}, {});
-
-            let nameElement = document.getElementById(`winner${i + 1}Name`);
-            let scoreElement = document.getElementById(`winner${i + 1}Score`);
-
-            nameElement.textContent = user;
-            scoreElement.textContent = `Score: ${score}`;
-
-            // Apply user color
-            let userColor = userColors[user] || "#FFFFFF"; // Default white
-            nameElement.style.color = userColor;
-
-            // Parent container
-            const winnerContainer = document.getElementById(`winner${i + 1}`).parentElement;
-
-            // Remove any existing extra stats div to prevent duplicates
-            let oldExtraStats = winnerContainer.querySelector(".extraStats");
-            if (oldExtraStats) oldExtraStats.remove();
-
-            // Create extra stats div
-            let extraStatsDiv = document.createElement("div");
-            extraStatsDiv.className = "extraStats";
-
-            // Create and set stats elements
-            let firstAnswersElement = document.createElement("p");
-            let correctAnswersElement = document.createElement("p");
-            let incorrectAnswersElement = document.createElement("p");
-
-            let firstAnswers = userStats[user]?.firstAnswers || 0;
-            let correctAnswers = userStats[user]?.correctAnswers || 0;
-            let incorrectAnswers = userStats[user]?.incorrectAnswers || 0;
-
-            firstAnswersElement.textContent = `🎯 First: ${firstAnswers}`;
-            correctAnswersElement.textContent = `✅ ${correctAnswers}`;
-            incorrectAnswersElement.textContent = `❌ ${incorrectAnswers}`;
-
-            extraStatsDiv.appendChild(incorrectAnswersElement);
-            extraStatsDiv.appendChild(correctAnswersElement);
-            extraStatsDiv.appendChild(firstAnswersElement);
-
-            // Append the extraStatsDiv next to the winner container
-            winnerContainer.appendChild(extraStatsDiv);
-        }
-    }
-
-    // Update 4th and 5th place winners
-    for (let i = 3; i < 5; i++) {
-        const [user, score] = sortedUsers[i] || [];
-        if (user) {
-            console.log(`Winner ${i + 1} (4th/5th place): ${user} - Score: ${score}`);
-            let nameElement = document.getElementById(`winner${i + 1}Name`);
-            let scoreElement = document.getElementById(`winner${i + 1}Score`);
-            nameElement.textContent = user;
-            scoreElement.textContent = `Score: ${score}`;
-            let userColor = userColors[user] || "orangered"; // Default color
-            nameElement.style.color = userColor;
-        }
-    }
-    showPodium();
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+function resetTrivia() {
+	console.log('Game Ended on Round:', round,'||Total Rounds:', totalRounds);
+	// Prepare for the next Game
+    clearInterval(questionTimer);
+    clearInterval(countdownTimer);
+    clearTimeout(hideQuestionTimer);
+    triviaGameState = null;
+    questionsAsked = 0;
+    round = 1;
+    usedQuestions = [];
+	userStats = {};
+    userScores = {};
+    answeredUsers.clear();
+    firstAnswerUser = null;
+    // Hide UI elements or reset text
+	//document.getElementById("question").textContent = `Round ${round}`;
+	document.getElementById("question").textContent = "Type !Trivia to play";
+    document.getElementById("timeuntil-nextQ").textContent = "";
+    document.getElementById("timer").textContent = "";
+    document.getElementById("timeuntil-nextQ").textContent = "";
+    toggleElement("questionWrapper", "fade");
+	console.log('Trivia Reset - current round:', round,'||Total Rounds:', totalRounds);
 }
 
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-function endTriviaGame() {
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//    Game finished
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+function triviaGameFinished() {
 	console.log('Round:', round);
 	console.log('Total Rounds:', totalRounds);
     document.getElementById("question").textContent = `Round ${round}`;
@@ -1337,41 +1267,23 @@ function endTriviaGame() {
     document.getElementById("timeuntil-nextQ").textContent = "";
     toggleElement("questionWrapper", "fade");
     // play gameover sound
-	playSound("winsequence1");
+	playRandomWinSound();
 	// Store Game stats in overall stats
     updateUserOverallStats();
-    // update podium and Announce winners
     updatePodium();
- // Prepare for the next round
-    userStats = {}; // Reset stats for the new round
-    clearInterval(questionTimer);
-    clearInterval(countdownTimer);
-    clearTimeout(hideQuestionTimer);
-    triviaGameState = null;
-    questionsAsked = 0;
-    round = 1;
-    usedQuestions = [];
-    userScores = {};
-    answeredUsers.clear();
-    firstAnswerUser = null;
-
-    // Hide UI elements or reset text
-    document.getElementById("timeuntil-nextQ").textContent = "";
+	showPodium();
+	// Prepare for the next Game
+	resetTrivia();
 	// Hide podium after 5 minutes
-
     setTimeout(hidePodium, 300000);
 }
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-//updatePodium();
-//showPodium();
-//hidePodium();
-
-
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 function endTrivia() {
     clearInterval(questionTimer);
     clearInterval(countdownTimer);
     clearTimeout(hideQuestionTimer);
-
     triviaGameState = null;
     questionsAsked = 0;
     round = 1;
@@ -1379,20 +1291,18 @@ function endTrivia() {
     userScores = {};
     answeredUsers.clear();
     firstAnswerUser = null;
-
     // Hide UI elements or reset text
     document.getElementById("timeuntil-nextQ").textContent = "";
-
     hideTrivia(); // Hide the trivia UI
 }
-
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //-end of trivia game----------
 //____________________________|
 
 
+//------------------------
+//---generic ui logic----|
 //-----------------------
-//---generic ui logic---|
-
 //function to toggle element visibility
 function toggleElement(elementId, animationType = "fade") {
     const element = document.getElementById(elementId);
@@ -1415,8 +1325,9 @@ function toggleElement(elementId, animationType = "fade") {
     }
 }
 
-
-//---AUDIO LOGIC-----------------|
+//------------------------
+//---Audio logic----|
+//-----------------------
 // Preload sounds and store them in an object
         // Play the sound
 //       playSound("winsequence1");
@@ -1437,12 +1348,18 @@ const triviasounds = {
 	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
     // Add more sounds here
 };
-// Ensure all sounds are loaded and muted initially
-for (const sound in sounds) {
-    sounds[sound].muted = true;
-    sounds[sound].load();
+const triviaWinsounds = {
+	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
+	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
+	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
+    // Add more sounds here
+};
+
+// Function to get a random key from triviaWinsounds
+function getRandomWinSound() {
+    const keys = Object.keys(triviaWinsounds);
+    return keys[Math.floor(Math.random() * keys.length)];
 }
-// Generic function to play any sound
 function playSound(name) {
     if (triviasounds[name]) {
         triviasounds[name].muted = false; // Unmute the sound
@@ -1454,18 +1371,27 @@ function playSound(name) {
         console.error(`Sound '${name}' not found.`);
     }
 }
+// Function to play a specific win sound
+function playWinSound(name) {
+    if (triviaWinsounds[name]) {
+        triviaWinsounds[name].muted = false; // Unmute the sound
+        triviaWinsounds[name].currentTime = 0; // Reset sound to start
+        triviaWinsounds[name].play().catch(error => {
+            console.error(`Error playing ${name}:`, error);
+        });
+    } else {
+        console.error(`Sound '${name}' not found.`);
+    }
+}
+// Function to play a random win sound
+function playRandomWinSound() {
+    const randomSound = getRandomWinSound();
+    playWinSound(randomSound);
+}
 
-//comfy js specific logic/functions
-// ComfyJS onChat event handler
-
-<!-- ComfyJS.onChat = (user, message, color, flags, extra) => { -->
-    <!-- console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message); -->
-    <!-- // Call the displayChatMessage function and pass flags and extra for userColor and badges -->
-    <!-- displayChatMessage(user, message, flags, extra);  // Show message in chat box -->
-    <!-- checkAnswer(user, message);         // Check if it's an answer -->
-<!-- }; -->
-
-
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// COMFY JS specific logic/functions
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     // If chat answers are enabled, check the message for answers
@@ -1480,7 +1406,6 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
         displayChatMessage(user, message, flags, extra, false);
     }
 };
-
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	console.log( "User:", user, "command:", command);
@@ -1600,16 +1525,17 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 };
 
-
-
-//window on load stuffs
-<!-- window.onload = () => { -->
-    <!-- document.getElementById("interactButt").click(); -->
-	<!-- console.log('enableAudio button clicked on windowload'); -->
+// Basic ComfyJS onChat event handler
+<!-- ComfyJS.onChat = (user, message, color, flags, extra) => { -->
+    <!-- console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message); -->
+    <!-- // Call the displayChatMessage function and pass flags and extra for userColor and badges -->
+    <!-- displayChatMessage(user, message, flags, extra);  // Show message in chat box -->
+    <!-- checkAnswer(user, message);         // Check if it's an answer -->
 <!-- }; -->
 
-<!-- fetchTriviaQuestions(); -->//function to fetch questions on load
-
+//!!!!!!!!!!!!!!!!!!!!!!!
+// Our Comfy Connection
+//!!!!!!!!!!!!!!!!!!!!!!!
 let streamername = "jaedraze"; // Default streamer name
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
@@ -1648,15 +1574,6 @@ function setStreamer(newStreamer) {
         button.style.border = "1px solid #dc3545"; 
     }
 }
-
-// Auto-reconnect on page load
-window.onload = function () {
-    const savedStreamer = localStorage.getItem("lastStreamer");
-    if (savedStreamer) {
-        setStreamer(savedStreamer); // Auto-connect
-    }
-};
-
 function disconnectBot() {
 	const button = document.getElementById("streamersButt");
 	const input = document.querySelector("#comfycontrolContainer input[type='text']");
@@ -1679,8 +1596,13 @@ function disconnectBot() {
     button.style.border = "1px solid #28a745";  
     input.style.outline = "3px outset #dc3545"; 
 }
-
-
+// Auto-reconnect on page load
+window.onload = function () {
+    const savedStreamer = localStorage.getItem("lastStreamer");
+    if (savedStreamer) {
+        setStreamer(savedStreamer); // Auto-connect
+    }
+};
 // Button event listener: first endTrivia, then setStreamer
 document.getElementById("streamersButt").addEventListener("click", function() {
     if (triviaGameState === "started") {
