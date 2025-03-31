@@ -857,6 +857,7 @@ function nextQuestion() {
     document.getElementById("questionWrapper").style.visibility = "visible";
     document.getElementById("timer").textContent = timetoAnswer;
     document.getElementById("timeuntil-nextQ").textContent = "";
+	playRandomQuestionSound();
     let secondsLeft = timetoAnswer;
     questionTimer = setInterval(() => {
         secondsLeft--;
@@ -915,7 +916,9 @@ function startCountdown() {
 
 function endQuestion() {
     clearInterval(questionTimer);
+	activeQuestion = null;
     document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
+	document.getElementById("timer").textContent = "";
     hideQuestionTimer = setTimeout(() => {
         document.getElementById("questionWrapper").style.visibility = "hidden";
         document.getElementById("triviaboard").style.visibility = "visible";
@@ -939,10 +942,11 @@ function nextquestionTimer(seconds) {
 }
 function checkAnswer(user, message) {
     // Check if there's an active question and if the user has already answered correctly
-    if (!activeQuestion || answeredUsers.has(user)) return;  // If the user has already answered correctly, don't process further answers
+    if (!activeQuestion) return; // If time is up, don't check answers
+	// If the user has already answered correctly, don't process further answers
+    if (answeredUsers.has(user)) return; // Prevent duplicate correct answers
     let correctAnswer = activeQuestion.answer.toLowerCase();
     let userAnswer = message.trim().toLowerCase();
-
     // Initialize user stats if they don't exist
     if (!userStats[user]) {
         userStats[user] = {
@@ -951,7 +955,6 @@ function checkAnswer(user, message) {
             firstAnswers: 0,
         };
     }
-
     // Track if the answer is correct or incorrect
     if (userAnswer === correctAnswer) {
         // Correct answer logic
@@ -974,6 +977,7 @@ function checkAnswer(user, message) {
     } else {
         // Incorrect answer logic
         userStats[user].incorrectAnswers++;  // Increment incorrect count only if incorrect answer
+		userScores[user] = (userScores[user] || 0) - 1;
 		playSound("triviawrong");
         return false;  // Return false for incorrect answers
     }
@@ -1357,6 +1361,10 @@ const triviasounds = {
 	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
     // Add more sounds here
 };
+const triviaQuestionsounds = {
+	triviabloop1: new Audio("/assets/sounds/entrivia/trivia-bloop1.mp3"),
+	triviabloop2: new Audio("/assets/sounds/entrivia/trivia-bloop2.mp3"),
+}
 const triviaWinsounds = {
 	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
 	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
@@ -1365,6 +1373,11 @@ const triviaWinsounds = {
     // Add more sounds here
 };
 
+// Function to get a random key from triviaWinsounds
+function getRandomQuestionSound() {
+    const keys = Object.keys(triviaQuestionsounds);
+    return keys[Math.floor(Math.random() * keys.length)];
+}
 // Function to get a random key from triviaWinsounds
 function getRandomWinSound() {
     const keys = Object.keys(triviaWinsounds);
@@ -1382,6 +1395,17 @@ function playSound(name) {
     }
 }
 // Function to play a specific win sound
+function playQuestionSound(name) {
+    if (triviaQuestionsounds[name]) {
+        triviaQuestionsounds[name].muted = false; // Unmute the sound
+        triviaQuestionsounds[name].currentTime = 0; // Reset sound to start
+        triviaQuestionsounds[name].play().catch(error => {
+            console.error(`Error playing ${name}:`, error);
+        });
+    } else {
+        console.error(`Sound '${name}' not found.`);
+    }
+}
 function playWinSound(name) {
     if (triviaWinsounds[name]) {
         triviaWinsounds[name].muted = false; // Unmute the sound
@@ -1392,6 +1416,11 @@ function playWinSound(name) {
     } else {
         console.error(`Sound '${name}' not found.`);
     }
+}
+
+function playRandomQuestionSound() {
+    const randomSound = getRandomQuestionSound();
+    playQuestionSound(randomSound);
 }
 // Function to play a random win sound
 function playRandomWinSound() {
