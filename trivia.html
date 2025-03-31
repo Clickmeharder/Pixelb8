@@ -656,6 +656,11 @@ function displayChatMessage(user, message, flags, extra, isCorrect = false) {
 //--------- TRIVIA -----------|
 //trivia game code starts here
 
+//option to allow users to do /entrivia me
+//(ask the user a random question)
+
+
+
 //!!!!!!!!!!!!!!!!!!!!!!!!!
 // Trivia Initialization  
 //!!!!!!!!!!!!!!!!!!!!!!!!
@@ -672,6 +677,7 @@ let hideQuestionTimer;
 let questionTimer, countdownTimer;
 let timetoAnswer = 30;
 let timebetweenQuestions = 90;
+let timebetweenRounds = 60;
 let questionsAsked = 0;
 let questionsPerRound = 3;
 let totalRounds = 2;
@@ -837,18 +843,15 @@ function getRandomQuestion() {
 function nextQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
-
     activeQuestion = getRandomQuestion();
     answeredUsers.clear();
     firstAnswerUser = null;
     questionsAsked++;
     updateQuestionCounter(); // Update the display
-
     document.getElementById("question").textContent = activeQuestion.question;
     document.getElementById("questionWrapper").style.visibility = "visible";
     document.getElementById("timer").textContent = timetoAnswer;
     document.getElementById("timeuntil-nextQ").textContent = "";
-
     let secondsLeft = timetoAnswer;
     questionTimer = setInterval(() => {
         secondsLeft--;
@@ -884,13 +887,11 @@ function endTriviaRound() {
 	playSound("triviaroundover");
     // Store round stats in overall stats
     updateUserOverallStats();
-
-    // Announce winners
-//    updatePodium();
-
     // Prepare for the next round
     round++;
     userStats = {}; // Reset stats for the new round
+	questionsAsked = 0;
+	setTimeout(nextQuestion, timebetweenRounds * 1000);
 }
 
 //function to update the time remaining before the next question
