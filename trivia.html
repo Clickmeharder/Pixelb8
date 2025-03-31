@@ -867,19 +867,37 @@ function nextQuestion() {
         }
     }, 1000);
 }
+
+function startTriviaRound() {
+    console.log('Round:', round);
+    console.log('Total Rounds:', totalRounds);
+
+    document.getElementById("question").textContent = `Round ${round}`;
+    document.getElementById("timer").textContent = "Starting in...";
+    document.getElementById("timeuntil-nextQ").textContent = "10 Seconds";
+
+    toggleElement("questionWrapper", "fade");
+
+    // Set a delay before calling nextQuestion (e.g., 3 seconds)
+    setTimeout(nextQuestion, 10000);
+}
+
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-function handlephaseTrivia() {
+function handlePhaseTrivia() {
+    if (questionsAsked === 0) { 
+        startTriviaRound(); // If no questions have been asked yet, start the round
+        return;
+    }
     if (questionsAsked >= questionsPerRound) {
         if (round >= totalRounds) {
-
-            triviaGameFinished();
+            triviaGameFinished(); // If all rounds are completed, finish the game
             return;
         } else {
-            endTriviaRound();
+            endTriviaRound(); // If the round is completed but not the game, end the round
             return;
         }
     }
-    nextQuestion();
+    nextQuestion(); // Otherwise, just move to the next question
 }
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 function endTriviaRound() {
@@ -1227,15 +1245,16 @@ function startTrivia() {
         return; // Stop if trivia is already running
     }
     console.log("Trivia should splash and fetch questions");
-    triviaGameState = "started"; // Mark trivia as started
-	console.log("triviaGameState = " + triviaGameState);
+
     triviaSplash() // Run splash first
         .then(() => fetchTriviaQuestions()) // Fetch questions after splash
         .then(questions => {
-            console.log("Trivia Questions Loaded:", questions);
+		    triviaGameState = "started"; // Mark trivia as started
             window.triviaQuestions = questions;
-            //startQuestion(); // Start the trivia after fetching
+			console.log("triviaGameState = " + triviaGameState);
+            console.log("Trivia Questions Loaded:", questions);
 			handlephaseTrivia();
+			
         })
         .catch(error => {
             console.error("Error loading trivia questions:", error);
@@ -1455,7 +1474,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command === "a" || command === "answer") {
 		let answer = message.trim();  // Extract the answer
 		let isCorrect = checkAnswer(user, answer);  // Check if the answer is correct
-		
 		// Display the answer in chat regardless of whether it's correct or incorrect
 		if (isCorrect) {
 			// If the answer is correct, display the answer with a ✅ checkmark
