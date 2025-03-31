@@ -848,7 +848,7 @@ function splashAnimation() {
                 splash.style.display = "none";  // Ensure it's completely hidden
                 resolve();  // Resolve the promise after hiding the splash
             }, 3000);  // Wait for the fade-out duration (3 seconds)
-        }, 10000); // Keep splash visible for 13 seconds (adjust as needed)
+        }, 20000); // Keep splash visible for 13 seconds (adjust as needed)
     });
 }
 
@@ -970,29 +970,13 @@ function endTriviaRound() {
     updateUserOverallStats();
 
     // Announce winners
-//    announceWinners();
+//    updatePodium();
 
     // Prepare for the next round
     round++;
     userStats = {}; // Reset stats for the new round
 }
-function endTriviaGame() {
-	console.log('Round:', round);
-	console.log('Total Rounds:', totalRounds);
-    document.getElementById("question").textContent = `Round ${round} Over!`;
-    clearInterval(questionTimer);
-    toggleElement("questionWrapper", "fade");
-    document.getElementById("timer").textContent = "";
-    document.getElementById("timeuntil-nextQ").textContent = "";
-	playSound("winsequence1");
-    // Store round stats in overall stats
-    updateUserOverallStats();
-    // Announce winners
-    announceWinners();
-    // Prepare for the next round
-    round = 1;
-    userStats = {}; // Reset stats for the new round
-}
+
 
 
 
@@ -1066,9 +1050,10 @@ function checkAnswer(user, message) {
             firstAnswerUser = user;
             userStats[user].firstAnswers++;
             userScores[user] = (userScores[user] || 0) + 3;  // First answer gets 3 points
-			playSound("triviacorrect");
+			playSound("triviafirstcorrect");
         } else {
             userScores[user] = (userScores[user] || 0) + 1;  // Others get 1 point
+			playSound("triviacorrect");
         }
 
         updateTriviaboard();  // Update the trivia board with new stats
@@ -1076,6 +1061,7 @@ function checkAnswer(user, message) {
     } else {
         // Incorrect answer logic
         userStats[user].incorrectAnswers++;  // Increment incorrect count only if incorrect answer
+		playSound("triviawrong");
         return false;  // Return false for incorrect answers
     }
 }
@@ -1094,6 +1080,41 @@ function updateTriviaboard() {
             li.textContent = `${user}: ${score} pts |🎯 ${firstAnswers} |✅ ${correctAnswers} |❌ ${incorrectAnswers}`;
             triviaboardElement.appendChild(li);
         });
+}
+function updateUserOverallStats() {
+    const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
+
+    sortedUsers.forEach(([user, score]) => {
+        if (!userOverallStats[user]) {
+            userOverallStats[user] = {
+                correctAnswers: 0,
+                firstAnswers: 0,
+				incorrectAnswers: 0,
+                round1wins: 0,
+                round2wins: 0,
+                round3wins: 0,
+                // Add more rounds as needed
+            };
+        }
+
+        // Accumulate stats
+        userOverallStats[user].correctAnswers += userStats[user]?.correctAnswers || 0;
+        userOverallStats[user].firstAnswers += userStats[user]?.firstAnswers || 0;
+		userOverallStats[user].incorrectAnswers += userStats[user]?.incorrectAnswers || 0;
+    });
+
+    // Award round win to the top scorer
+    if (sortedUsers.length > 0) {
+        let topUser = sortedUsers[0][0]; // Get username of the top scorer
+        let roundKey = `round${round}wins`;
+
+        if (!userOverallStats[topUser][roundKey]) {
+            userOverallStats[topUser][roundKey] = 0;
+        }
+        userOverallStats[topUser][roundKey]++; // Increment their round wins
+    }
+
+    console.log("Updated Overall Stats:", userOverallStats); // Debug log
 }
 
 //function to show the trivia overlay/ui display
@@ -1115,9 +1136,9 @@ function showTrivia() {
     timer.style.animation = "fadeIn 1s ease-in-out forwards";
     timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
 }
-//function to hide the trivia overlay/ui display
 function hideTrivia() {
 	const triviaWrapper = document.getElementById("TriviaWrapper");
+	const triviaPodium = document.getElementById("triviaPodium");
     const questionWrapper = document.getElementById("questionWrapper");
     const board = document.getElementById("triviaboard");
     const timer = document.getElementById("timer");
@@ -1125,6 +1146,7 @@ function hideTrivia() {
 
     // Hide elements with animations
     questionWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
+	triviaPodium.style.animation = "fadeOut 0.5s ease-in forwards";
     board.style.animation = "slideOut 0.5s ease-in forwards";
     timer.style.animation = "fadeOut 0.5s ease-in forwards";
     timeUntilNextQ.style.animation = "fadeOut 0.5s ease-in forwards";
@@ -1136,6 +1158,51 @@ function hideTrivia() {
 		triviaWrapper.style.opacity = "0";
     }, 500); // Matches the fade-out animation duration
 }
+//function to show/hide the trivia podium overlay/ui display
+function showPodium() {
+	const triviaPodium = document.getElementById("triviaPodium");
+	const triviaWrapper = document.getElementById("TriviaWrapper");
+	const board = document.getElementById("triviaboard");
+    if (triviaPodium) {
+		// Show elements with animations
+		// ensure wrapper is visible
+		triviaPodium.style.display = "flex";
+		triviaWrapper.style.visibility = "visible";
+		triviaWrapper.style.opacity = "1";
+		// Show podium and triviaboard with animations
+		triviaPodium.style.visibility = "visible";
+		triviaPodium.style.opacity = "1";
+		board.style.visibility = "visible";
+		board.style.opacity = "1";
+		triviaPodium.style.animation = "fadeIn 0.8s ease-out forwards";
+		board.style.animation = "slideIn 0.8s ease-out forwards";
+		//log in console & display console message on screen
+        console.log("Displaying triviaPodium...");
+        displayChatMessage("Console:", "Displaying triviaPodium...", {}, {});
+    } else {
+		//log in console & display console message on screen
+        console.log("Error: triviaPodium element not found!");
+        displayChatMessage("Console:", "Error: triviaPodium element not found!", {}, {});
+    }
+}
+function hidePodium() {
+	const triviaPodium = document.getElementById("triviaPodium");
+    const board = document.getElementById("triviaboard");
+    const timer = document.getElementById("timer");
+    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
+	console.log("Hiding triviaPodium...");
+    // Hide elements with animations
+	triviaPodium.style.animation = "fadeOut 0.5s ease-in forwards";
+    board.style.animation = "slideOut 0.5s ease-in forwards";
+    timer.style.animation = "fadeOut 0.5s ease-in forwards";
+    timeUntilNextQ.style.animation = "fadeOut 0.5s ease-in forwards";
+    setTimeout(() => {
+        triviaPodium.style.visibility = "hidden";
+        triviaPodium.style.opacity = "0";
+		console.log("TriviaPodium hidden!...");
+    }, 500); // Matches the fade-out animation duration
+}
+
 //function to toggle trivia overlay/ui display
 function toggleTrivia() {
     const wrapper = document.getElementById("questionWrapper");
@@ -1190,52 +1257,12 @@ function startTrivia() {
 }
 
 
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-function updateUserOverallStats() {
-    const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
 
-    sortedUsers.forEach(([user, score]) => {
-        if (!userOverallStats[user]) {
-            userOverallStats[user] = {
-                correctAnswers: 0,
-                firstAnswers: 0,
-				incorrectAnswers: 0,
-                round1wins: 0,
-                round2wins: 0,
-                round3wins: 0,
-                // Add more rounds as needed
-            };
-        }
-
-        // Accumulate stats
-        userOverallStats[user].correctAnswers += userStats[user]?.correctAnswers || 0;
-        userOverallStats[user].firstAnswers += userStats[user]?.firstAnswers || 0;
-		userOverallStats[user].incorrectAnswers += userStats[user]?.incorrectAnswers || 0;
-    });
-
-    // Award round win to the top scorer
-    if (sortedUsers.length > 0) {
-        let topUser = sortedUsers[0][0]; // Get username of the top scorer
-        let roundKey = `round${round}wins`;
-
-        if (!userOverallStats[topUser][roundKey]) {
-            userOverallStats[topUser][roundKey] = 0;
-        }
-        userOverallStats[topUser][roundKey]++; // Increment their round wins
-    }
-
-    console.log("Updated Overall Stats:", userOverallStats); // Debug log
-}
-
-
-
-
-function announceWinners() {
+function updatePodium() {
     // Get top 5 sorted users
     const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
-	console.log("Announcing winners");
+	console.log("Updating Podium");
     console.log("Sorted users:", sortedUsers);
-
     for (let i = 0; i < 3; i++) {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
@@ -1290,29 +1317,55 @@ function announceWinners() {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
             console.log(`Winner ${i + 1} (4th/5th place): ${user} - Score: ${score}`);
-
             let nameElement = document.getElementById(`winner${i + 1}Name`);
             let scoreElement = document.getElementById(`winner${i + 1}Score`);
-
             nameElement.textContent = user;
             scoreElement.textContent = `Score: ${score}`;
-
             let userColor = userColors[user] || "orangered"; // Default color
             nameElement.style.color = userColor;
         }
     }
-
-    // Show podium
-    const triviaPodium = document.getElementById("triviaPodium");
-    if (triviaPodium) {
-        console.log("Displaying triviaPodium...");
-        displayChatMessage("Console:", "Displaying triviaPodium...", {}, {});
-        triviaPodium.style.display = "flex";
-    } else {
-        console.log("Error: triviaPodium element not found!");
-        displayChatMessage("Console:", "Error: triviaPodium element not found!", {}, {});
-    }
+    showPodium();
 }
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+function endTriviaGame() {
+	console.log('Round:', round);
+	console.log('Total Rounds:', totalRounds);
+    document.getElementById("question").textContent = `Round ${round}`;
+    document.getElementById("timer").textContent = "Game Over";
+    document.getElementById("timeuntil-nextQ").textContent = "";
+    toggleElement("questionWrapper", "fade");
+    // play gameover sound
+	playSound("winsequence1");
+	// Store Game stats in overall stats
+    updateUserOverallStats();
+    // update podium and Announce winners
+    updatePodium();
+ // Prepare for the next round
+    userStats = {}; // Reset stats for the new round
+    clearInterval(questionTimer);
+    clearInterval(countdownTimer);
+    clearTimeout(hideQuestionTimer);
+    triviaGameState = null;
+    questionsAsked = 0;
+    round = 1;
+    usedQuestions = [];
+    userScores = {};
+    answeredUsers.clear();
+    firstAnswerUser = null;
+
+    // Hide UI elements or reset text
+    document.getElementById("timeuntil-nextQ").textContent = "";
+	// Hide podium after 5 minutes
+
+    setTimeout(hidePodium, 300000);
+}
+
+//updatePodium();
+//showPodium();
+//hidePodium();
+
 
 function endTrivia() {
     clearInterval(questionTimer);
@@ -1375,7 +1428,9 @@ const sounds = {
 const triviasounds = {
     openingtheme: new Audio("/assets/sounds/entrivia/openingtheme-entriviauniverse.mp3"),
     openingtheme2: new Audio("/assets/sounds/entrivia/openingtheme2-entriviauniverse.mp3"),
+	triviafirstcorrect: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
 	triviacorrect: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
+	triviawrong: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
 	triviaroundover: new Audio("/assets/sounds/entrivia/trivia-roundover.mp3"),
 	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
 	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
@@ -1462,7 +1517,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         if (command.toLowerCase() === "trivianextround") {
 			console.log("Current Round:", round);
             questionsAsked = 0; // Reset for the new round
-            document.getElementById("question").textContent = "Trivia Round:"+ round;
+            document.getElementById("question").textContent = "Entrivia Round:"+ round;
             setTimeout(handlephaseTrivia, 10000);
         }
         if (command === "chatanswers") {
