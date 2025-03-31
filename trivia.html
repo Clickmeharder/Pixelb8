@@ -831,7 +831,15 @@ function triviaSplash() {
             });
     });
 }
-
+function triviaNosplash() {
+    return new Promise((resolve) => {
+        showAnnouncement("Round starts in:", 30)  // Show announcement with a 30-second countdown
+            .then(() => {
+                showTrivia();  // Show trivia after the countdown ends
+                resolve();  // Resolve the promise after trivia starts
+            });
+    });
+}
 function getRandomQuestion() {
 	let currentRound = round === 1 ? "round1" : "round2";
 	let availableQuestions = triviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
@@ -873,21 +881,21 @@ function startTriviaRound() {
     console.log('Total Rounds:', totalRounds);
 
     document.getElementById("question").textContent = `Round ${round}`;
-    document.getElementById("timer").textContent = "Starting in...";
-    document.getElementById("timeuntil-nextQ").textContent = "10 Seconds";
+    document.getElementById("timer").textContent = "Starting...";
+    document.getElementById("timeuntil-nextQ").textContent = "";
 
     toggleElement("questionWrapper", "fade");
 
     // Set a delay before calling nextQuestion (e.g., 3 seconds)
-    setTimeout(nextQuestion, 10000);
+    setTimeout(nextQuestion, 1000);
 }
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 function handlePhaseTrivia() {
-    if (questionsAsked === 0) { 
-        startTriviaRound(); // If no questions have been asked yet, start the round
-        return;
-    }
+    <!-- if (questionsAsked === 0) {  -->
+        <!-- startTriviaRound(); -->
+        <!-- return; -->
+    <!-- } -->
     if (questionsAsked >= questionsPerRound) {
         if (round >= totalRounds) {
             triviaGameFinished(); // If all rounds are completed, finish the game
@@ -897,6 +905,7 @@ function handlePhaseTrivia() {
             return;
         }
     }
+
     nextQuestion(); // Otherwise, just move to the next question
 }
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
