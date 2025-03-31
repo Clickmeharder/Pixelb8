@@ -847,7 +847,6 @@ function getRandomQuestion() {
 		usedQuestions = []; // Reset when all questions are used
 		availableQuestions = [...triviaQuestions[currentRound]];
 	}
-
 	let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
 	usedQuestions.push(question);
 	return question;
@@ -856,9 +855,9 @@ function getRandomQuestion() {
 function nextQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
-    activeQuestion = getRandomQuestion();
     answeredUsers.clear();
     firstAnswerUser = null;
+    activeQuestion = getRandomQuestion();
     questionsAsked++;
     updateQuestionCounter(); // Update the display
     document.getElementById("question").textContent = activeQuestion.question;
@@ -876,6 +875,7 @@ function nextQuestion() {
     }, 1000);
 }
 
+//!!!!! fn currently not used:startTriviaRound()
 function startTriviaRound() {
     console.log('Round:', round);
     console.log('Total Rounds:', totalRounds);
