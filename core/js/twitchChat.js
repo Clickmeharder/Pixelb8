@@ -127,7 +127,7 @@ function animateFloatingEmote(emoteURL) {
     setTimeout(() => {
         emote.style.transform = `translateY(-120vh) scale(${Math.random() * 0.8 + 0.5})`;
         emote.style.opacity = "0";
-    }, 100);
+    }, 2000);
 
     // Remove after animation
     setTimeout(() => emote.remove(), 4000);
