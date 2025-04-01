@@ -1748,96 +1748,101 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		}
 	}
 	// Handle start trivia command 
-	if (command.toLowerCase() === "trivia-authtest") {
+	if (command.toLowerCase() === "triviatest-auth") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
         displayChatMessage(user, `!${command} ✅`, flags, extra, true);
     }
-
+	if (command.toLowerCase() === "triviatest-sounds") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
+		displayConsoleMessage(user, `!${command} ✅`);
+		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+	}
     if (command.toLowerCase() === "trivia-start") {
         if (!isStreamerAndAuthorize(user, command)) return;
         startTrivia();
         displayConsoleMessage(user, `!${command} ✅`);
         displayChatMessage(user, `!${command} ✅`, flags, extra, true);
     }
-
-	if (command.toLowerCase() === "trivia-ask") {
-		startTriviaAsk();
-		displayConsoleMessage(user, `!${command} ✅`);
-		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
-	}
+    if (command.toLowerCase() === "trivia-ask") {
+        if (!isStreamerAndAuthorize(user, command)) return;
+        startTriviaAsk();
+        displayConsoleMessage(user, `!${command} ✅`);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+    }
 	if (command.toLowerCase() === "trivia-lastask") {
+        if (!isStreamerAndAuthorize(user, command)) return;
 		displayLastWinner();
+		displayConsoleMessage(user, `!${command} ✅`);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+    }
+	if (command.toLowerCase() === "trivia-nextround") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		console.log("Current Round:", round);
+		questionsAsked = 0; // Reset for the new round
+		document.getElementById("question").textContent = "Entrivia Round:"+ round;
+		setTimeout(handlephaseTrivia, 10000);
+	}
+	if (command === "chatanswers") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		chatanswers = !chatanswers;  // Toggle chatanswers
+		// Show in the chat whether chat answers are now enabled or disabled
+		displayConsoleMessage(user, `!${command} ✅`);
+		displayChatMessage(user, `Chat answers are now ${chatanswers ? "enabled" : "disabled"}.`, flags, extra, false);
+	}
+	if (command.toLowerCase() === "trivia-audio") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
+		displayChatMessage(user, `!triviaaudio toggle ✅`, flags, extra, true);
+		toggleAudioSetting();
+	}
+	if (command === "toggletriviaboard") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		toggleElement("triviaboard", "slide");
+	}
+	if (command === "togglequestions") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		toggleElement("questionWrapper", "fade");
+	}
+	// Handle toggle trivia visibility command
+	if (command.toLowerCase() === "toggletrivia") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		toggleTrivia();
+		toggleElement("triviaWrapper", "fade");
+	}
+	// Example commands that any user can trigger
+
+	// Handle toggle chat visibility command
+	if (command === "togglechat1") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		toggleElement("twitchchatContainer", "fade");
+		displayConsoleMessage(user, `!${command} ✅`);
+	}
+	if (command.toLowerCase() === "togglechat2") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
+		let chatContainer = document.getElementById("twitchchatContainer");
+		if (chatContainer.style.visibility === "hidden") {
+			chatContainer.style.visibility = "visible"; // Show the chat if it's hidden
+		} else {
+			chatContainer.style.visibility = "hidden"; // Hide the chat if it's visible
+		}
 	}
     // Only allow streamer (jaedraze) or mods to trigger these commands displayLastWinner()
-    if (user.toLowerCase() === streamername || flags.mod) {
-		if (command.toLowerCase() === "trivia-testsound") {
-				playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
-			}
-        // Handle start trivia command 
-        if (command.toLowerCase() === "trivia-start") {
-            startTrivia();
-			displayConsoleMessage(user, `!${command} ✅`);
-			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
-        }
-		if (command.toLowerCase() === "trivia-askrandom") {
-			triviaAskrandom();
-			displayConsoleMessage(user, `!${command} ✅`);
-			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
-		}
-        // Handle start trivia command
-        if (command.toLowerCase() === "trivia-splash") {
-            triviaSplash(); // Call the startTrivia function
-			displayConsoleMessage(user, `!${command} ✅`);
-			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
-        }
-        // Handle trivia round 2 command
-        if (command.toLowerCase() === "trivia-continue") {
-			console.log("Current Round:", round);
-            questionsAsked = 0; // Reset for the new round
-            document.getElementById("question").textContent = "Entrivia Round:"+ round;
-            setTimeout(handlephaseTrivia, 10000);
-        }
-		if (command.toLowerCase() === "trivia-audio") {
-			displayConsoleMessage(user, `!${command} ✅`);
-			displayChatMessage(user, `!triviaaudio toggle ✅`, flags, extra, true);
-			toggleAudioSetting();
-		}
-        if (command === "chatanswers") {
-            chatanswers = !chatanswers;  // Toggle chatanswers
-            // Show in the chat whether chat answers are now enabled or disabled
-			displayConsoleMessage(user, `!${command} ✅`);
-            displayChatMessage(user, `Chat answers are now ${chatanswers ? "enabled" : "disabled"}.`, flags, extra, false);
-        }
-		if (command === "toggletriviaboard") {
-			toggleElement("triviaboard", "slide");
-		}
-		if (command === "togglequestions") {
-			toggleElement("questionWrapper", "fade");
-		}
-        // Handle toggle trivia visibility command
-        if (command.toLowerCase() === "toggletrivia") {
-			toggleTrivia();
-            toggleElement("triviaWrapper", "fade");
-        }
-        // Example commands that any user can trigger
-
-        // Handle toggle chat visibility command
-		if (command === "togglechat1") {
+    if (flags.mod) {
+		if (command === "triviamod-test") {
+			if (!isStreamerAndAuthorize(user, command)) return;
 			toggleElement("twitchchatContainer", "fade");
+			displayConsoleMessage(user, `!${command} ✅`);
+			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 		}
-        if (command.toLowerCase() === "togglechat2") {
-            let chatContainer = document.getElementById("twitchchatContainer");
-            if (chatContainer.style.visibility === "hidden") {
-                chatContainer.style.visibility = "visible"; // Show the chat if it's hidden
-            } else {
-                chatContainer.style.visibility = "hidden"; // Hide the chat if it's visible
-            }
-        }
+	}
     } else {
         if (command.toLowerCase() === "helloworld") {
             // Custom logic to send "Hello, world!" to your overlay chat
             const message = "Hello, world!";
+			displayConsoleMessage(user, `!${command} ✅`);
             displayChatMessage("System", message, {}, {}); // Call the function to display the message in the chat overlay
             console.log(`Sent message to overlay: ${message}`); // Log to the console
         }
@@ -1850,6 +1855,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             ];
             const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
             displayChatMessage("System", randomJoke, {}, {}); // Sends a random joke to the overlay chat
+			displayConsoleMessage(user, `!${command} ✅`);
             console.log(`Sent joke to overlay: ${randomJoke}`); // Log the joke sent to the console
         }
     }
