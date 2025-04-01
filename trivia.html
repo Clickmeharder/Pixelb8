@@ -1555,6 +1555,10 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             document.getElementById("question").textContent = "Entrivia Round:"+ round;
             setTimeout(handlephaseTrivia, 10000);
         }
+		if (command.toLowerCase() === "trivia" && args[0]?.toLowerCase() === "toggle" && args[1]?.toLowerCase() === "audio") {
+			displayChatMessage(user, `!trivia toggle audio ✅`, flags, extra, true);
+			toggleAudioSetting();
+		}
         if (command === "chatanswers") {
             chatanswers = !chatanswers;  // Toggle chatanswers
             // Show in the chat whether chat answers are now enabled or disabled
