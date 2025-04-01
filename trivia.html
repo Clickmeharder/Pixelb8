@@ -1346,7 +1346,11 @@ function endTrivia() {
 //-end of trivia classic game----------
 //____________________________|
 function triviaAskrandom() {
+	displayChatMessage("system", "triviasplash fn called");
     if (activeQuestion !== null) {
+		
+		displayChatMessage("system", `activeQuestion = ${activeQuestion}`);
+		displayChatMessage("system", "returning line 1354");
         return; // Exit early if there's an active question
     }
     clearTimeout(questionTimer); // Clear previous timer if any
@@ -1574,7 +1578,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			console.log(`${user} has already answered correctly. Ignoring further answers.`);
 		}
 	}
-	if (command.toLowerCase() === "trivia-askrandom") {
+	// Handle start trivia command 
+	if (command.toLowerCase() === "trivia-teststart") {
+		startTrivia();
+		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+	}
+	if (command.toLowerCase() === "trivia-ask") {
 		triviaAskrandom();
 		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 	}
@@ -1588,6 +1597,10 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             startTrivia();
 			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
         }
+		if (command.toLowerCase() === "trivia-askrandom") {
+			triviaAskrandom();
+			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+		}
         // Handle start trivia command
         if (command.toLowerCase() === "trivia-splash") {
             triviaSplash(); // Call the startTrivia function
