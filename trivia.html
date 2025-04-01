@@ -1540,18 +1540,23 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			console.log(`${user} has already answered correctly. Ignoring further answers.`);
 		}
 	}
-	if (command.toLowerCase() === "trivia-start1") {
+	if (command.toLowerCase() === "trivia-teststart") {
 		startTrivia();
 		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 	}
     // Only allow streamer (jaedraze) or mods to trigger these commands
     if (user.toLowerCase() === streamername || flags.mod) {
-		if (command.toLowerCase() === "testsound-1") {
+		if (command.toLowerCase() === "trivia-testsound") {
 				playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
 			}
         // Handle start trivia command
         if (command.toLowerCase() === "trivia-start") {
             startTrivia();
+			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+        }
+        // Handle start trivia command
+        if (command.toLowerCase() === "trivia-splash") {
+            triviaSplash(); // Call the startTrivia function
 			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
         }
         // Handle trivia round 2 command
@@ -1570,35 +1575,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             // Show in the chat whether chat answers are now enabled or disabled
             displayChatMessage(user, `Chat answers are now ${chatanswers ? "enabled" : "disabled"}.`, flags, extra, false);
         }
-        // Handle start trivia command
-        if (command.toLowerCase() === "triviatestsplash") {
-            triviaSplash(); // Call the startTrivia function
-        }
-		if (command === "triviaset" && params[0] === "answertime" && params.length === 2) {
-			let newTime = parseInt(params[1]); // The time will be the second parameter
-
-			if (!isNaN(newTime) && newTime > 0) {
-				timetoAnswer = newTime;
-				console.log(`Time to answer is now set to ${newTime} seconds!`);
-				displayChatMessage("System:", `Time to answer is now set to ${newTime} seconds!`);
-			} else {
-				console.log("Invalid time. Please provide a positive number.");
-				displayChatMessage("System:", "Invalid time. Please provide a positive number.");
-			}
-		}
-		// Check if the command is 'triviaset' and the second part is 'questionsperround'
-		if (command === "triviaset" && params[0] === "questionsperround" && params.length === 2) {
-			let newQuestionsPerRound = parseInt(params[1]);
-
-			if (!isNaN(newQuestionsPerRound) && newQuestionsPerRound > 0) {
-				questionsPerRound = newQuestionsPerRound;
-				console.log(`Questions per round is now set to ${newQuestionsPerRound}!`);
-				displayChatMessage("System:", `Questions per round is now set to ${newQuestionsPerRound}!`, {}, {});
-			} else {
-				console.log("Invalid number of questions. Please provide a positive number.");
-				displayChatMessage("System:", "Invalid number of questions. Please provide a positive number.", {}, {});
-			}
-		}
 		if (command === "toggletriviaboard") {
 			toggleElement("triviaboard", "slide");
 		}
