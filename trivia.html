@@ -851,25 +851,7 @@ function getRandomQuestion() {
 	usedQuestions.push(question);
 	return question;
 }
-function getRandomAsk() {
-    return fetchTriviaQuestions()  // Fetch trivia questions
-        .then(() => {
-            // After fetching trivia questions, proceed with the logic
-            let currentRound = round === 1 ? "round1" : "round2";
-            let availableQuestions = triviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
-            if (availableQuestions.length === 0) {
-                usedQuestions = []; // Reset when all questions are used
-                availableQuestions = [...triviaQuestions[currentRound]];
-            }
-            let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-            usedQuestions.push(question);
-            return question;  // Return the selected question
-        })
-        .catch(error => {
-            console.error("Error fetching trivia questions:", error);
-            return null;  // Return null if there's an error
-        });
-}
+
 function nextQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
@@ -1171,21 +1153,7 @@ function showTrivia() {
     timer.style.animation = "fadeIn 1s ease-in-out forwards";
     timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
 }
-function showTriviaAsk() {
-	const triviaWrapper = document.getElementById("TriviaWrapper");
-    const questionWrapper = document.getElementById("questionWrapper");
-    const timer = document.getElementById("timer");
-    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
-	displayChatMessage("system", "showTriviaAsk() called");
-    // Show elements with animations
-	triviaWrapper.style.visibility = "visible";
-	triviaWrapper.style.opacity = "1";
-    questionWrapper.style.visibility = "visible";
-    questionWrapper.style.opacity = "1";
-    questionWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
-    timer.style.animation = "fadeIn 1s ease-in-out forwards";
-    timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
-}
+
 function hideTrivia() {
 	const triviaWrapper = document.getElementById("TriviaWrapper");
 	const triviaPodium = document.getElementById("triviaPodium");
@@ -1378,24 +1346,67 @@ function endTrivia() {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //-end of trivia classic game----------
 //____________________________|
-function triviaAskrandom() {
-	displayChatMessage("system", "triviaAskrandom fn called");
-    if (activeQuestion !== null) {
-		
-		displayChatMessage("system", `activeQuestion = ${activeQuestion}`);
-		displayChatMessage("system", "returning line 1354");
-        return; // Exit early if there's an active question
-    }
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//- ASK SINGLE RANDOM QUESTION - TESTING CUZ NOOB
+let singleActiveAsk = null;
+function askSplash() {
+    return new Promise((resolve) => {
+        playSound("triviatimesup");  // Show the splash animation
+            .then(() => {
+                return showAnnouncement("Asking Question in:", 30);  // Show announcement with a 30-second countdown
+            })
+            .then(() => {
+                showTriviaAsk();  // Show trivia after the countdown ends
+                resolve();  // Resolve the promise after trivia starts
+            });
+    });
+}
+function showTriviaAsk() {
+	const triviaWrapper = document.getElementById("TriviaWrapper");
+    const questionWrapper = document.getElementById("questionWrapper");
+    const timer = document.getElementById("timer");
+    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
+	displayChatMessage("system", "showTriviaAsk() called");
+    // Show elements with animations
+	triviaWrapper.style.visibility = "visible";
+	triviaWrapper.style.opacity = "1";
+    questionWrapper.style.visibility = "visible";
+    questionWrapper.style.opacity = "1";
+    questionWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+    timer.style.animation = "fadeIn 1s ease-in-out forwards";
+    timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
+}
+function getRandomAsk() {
+	let currentRound = round === 1 ? "round1" : "round2";
+	let availableQuestions = triviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
+	if (availableQuestions.length === 0) {
+		usedQuestions = []; // Reset when all questions are used
+		availableQuestions = [...triviaQuestions[currentRound]];
+	}
+	let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+	usedQuestions.push(question);
+	return question;
+}
+function endAsk() {
+    clearInterval(questionTimer);
+    document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
+	document.getElementById("timer").textContent = "";
+	activeQuestion = null;
+	singleActiveAsk = null;
+	playSound("triviatimesup");
+    hideQuestionTimer = setTimeout(() => {
+        document.getElementById("questionWrapper").style.visibility = "hidden";
+        document.getElementById("triviaboard").style.visibility = "visible";
+    }, 13000); // Delay timeout of 13 seconds to wait before checking
+}
+
+function AskQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
-	showTriviaAsk();
     answeredUsers.clear();
     firstAnswerUser = null;
-    activeQuestion = getRandomAsk();
-	// Log the active question to the console
-    console.log("Active Question:", activeQuestion);
-    // Display the active question in chat
-    displayChatMessage("system", `Trivia Question: ${activeQuestion.question}`);
+    activeQuestion = getRandomQuestion();
     updateQuestionCounter(); // Update the display
     document.getElementById("question").textContent = activeQuestion.question;
     document.getElementById("questionWrapper").style.visibility = "visible";
@@ -1407,21 +1418,41 @@ function triviaAskrandom() {
         secondsLeft--;
         document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
         if (secondsLeft <= 0) {
-            endAskrandom(); // Call your function to end the question once time runs out
+            endAsk(); // Call your function to end the question once time runs out
         }
     }, 1000);
 }
+function startTriviaAsk() {
+	displayChatMessage("system", "startTrivia fn called");
+    if (triviaGameState === "started") {
+		displayChatMessage("system", "Trivia is already running! Ignoring duplicate command.");
+        console.log("Trivia is already running! Ignoring duplicate command.");
+        return; // Stop if trivia is already running
+    }
+    if (singleActiveAsk === "Active") {
+		displayChatMessage("system", "Trivia is already Asking a question! Ignoring duplicate command.");
+        console.log("Trivia is already running! Ignoring duplicate command.");
+        return; // Stop if trivia is already running
+    }
+	displayChatMessage("system", "Trivia ask continues");
+    console.log("Trivia should splash and fetch questions");
 
-function endAskrandom() {
-    clearInterval(questionTimer);
-    document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
-	document.getElementById("timer").textContent = "";
-	activeQuestion = null;
-	playSound("triviatimesup");
-    hideQuestionTimer = setTimeout(() => {
-        document.getElementById("questionWrapper").style.visibility = "hidden";
-        document.getElementById("triviaboard").style.visibility = "visible";
-    }, 13000); // Delay timeout of 13 seconds to wait before checking
+    askSplash() // Run splash first
+        .then(() => fetchTriviaQuestions()) // Fetch questions after splash
+        .then(questions => {
+		    singleActiveAsk = "Active"; // Mark trivia as started
+            window.triviaQuestions = questions;
+			console.log("singleActiveAsk = " + singleActiveAsk);
+            console.log("Trivia Questions Loaded:", questions);
+			displayChatMessage("system", `singleActiveAsk = ${singleActiveAsk}`);
+			AskQuestion();
+        })
+        .catch(error => {
+            console.error("Error loading trivia questions:", error);
+			displayChatMessage("system", `Error loading trivia questions: ${error}`);
+            singleActiveAsk = null; // Reset state on failure
+        });
+
 }
 //------------------------
 //---generic ui logic----|
