@@ -1540,10 +1540,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			console.log(`${user} has already answered correctly. Ignoring further answers.`);
 		}
 	}
-	if (command.toLowerCase() === "trivia-teststart") {
-		startTrivia();
-		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
-	}
+
     // Only allow streamer (jaedraze) or mods to trigger these commands
     if (user.toLowerCase() === streamername || flags.mod) {
 		if (command.toLowerCase() === "trivia-testsound") {
