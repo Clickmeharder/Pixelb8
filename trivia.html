@@ -1454,7 +1454,16 @@ function playWinSound(name) {
         console.error(`Sound '${name}' not found.`);
     }
 }
-
+// Function to get a random key from triviaWinsounds
+function getRandomQuestionSound() {
+    const keys = Object.keys(triviaQuestionsounds);
+    return keys[Math.floor(Math.random() * keys.length)];
+}
+// Function to get a random key from triviaWinsounds
+function getRandomWinSound() {
+    const keys = Object.keys(triviaWinsounds);
+    return keys[Math.floor(Math.random() * keys.length)];
+}
 // Functions for random sounds
 function playRandomQuestionSound() {
     if (audioSetting === "off") return; // Stop if audio is disabled
@@ -1470,13 +1479,6 @@ function playRandomWinSound() {
     playWinSound(randomSound);
 }
 
-// Function to toggle audio on/off
-function toggleAudioSetting() {
-    audioSetting = audioSetting === "on" ? "off" : "on";
-    console.log(`Audio setting is now: ${audioSetting}`);
-}
-
-
 function playRandomQuestionSound() {
     const randomSound = getRandomQuestionSound();
     playQuestionSound(randomSound);
@@ -1486,6 +1488,15 @@ function playRandomWinSound() {
     const randomSound = getRandomWinSound();
     playWinSound(randomSound);
 }
+
+// Function to toggle audio on/off
+function toggleAudioSetting() {
+    audioSetting = audioSetting === "on" ? "off" : "on";
+    console.log(`Audio setting is now: ${audioSetting}`);
+}
+
+
+
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // COMFY JS specific logic/functions
