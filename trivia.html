@@ -946,6 +946,7 @@ function endQuestion() {
     document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
 	document.getElementById("timer").textContent = "";
 	activeQuestion = null;
+	playSound("triviatimesup");
     hideQuestionTimer = setTimeout(() => {
         document.getElementById("questionWrapper").style.visibility = "hidden";
         document.getElementById("triviaboard").style.visibility = "visible";
@@ -1370,7 +1371,7 @@ function toggleElement(elementId, animationType = "fade") {
 //-----------------------
 // Preload sounds and store them in an object
         // Play the sound
-//       playSound("winsequence1");
+//       playSound("triviatimesup");
 const sounds = {
     snakedie: new Audio("/assets/sounds/snakedie_sound1.mp3"),
     //gameshowintro: new Audio("/assets/sounds/gameshow_intro.mp3"),
@@ -1385,6 +1386,7 @@ const triviasounds = {
 	triviacorrect: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
 	triviawrong: new Audio("/assets/sounds/entrivia/trivia-wrong.mp3"),
 	triviaroundover: new Audio("/assets/sounds/entrivia/trivia-roundover.mp3"),
+	triviatimesup: new Audio("/assets/sounds/entrivia/trivia-timesup1.mp3"),	
 	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
 	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
 	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
