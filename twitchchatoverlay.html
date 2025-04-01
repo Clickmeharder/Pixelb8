@@ -116,6 +116,22 @@
 			margin-bottom: 5px;
 			display: block;
 		}
+		.twitchEmote {
+			width: 1em;
+			height: 1em;
+			vertical-align: middle;
+			margin: 0 2px;
+		}
+
+		.floatingEmote {
+			position: fixed;
+			width: 48px;
+			height: 48px;
+			transition: transform 3.5s linear, opacity 3.5s ease-out;
+			opacity: 1;
+			pointer-events: none;
+			z-index: 999;
+		}
 		#twitchchatContainer {
 			position: absolute;
 			left: 0;

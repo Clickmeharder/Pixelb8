@@ -35,6 +35,7 @@
 
 // Chat message display function
 // Chat message display function
+// Chat message display function
 function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = false) {
     const chatContainer = document.getElementById("twitchMessagebox");
 
@@ -49,10 +50,13 @@ function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = f
     const userColor = extra.userColor || "#FFFFFF"; // Default to white if no color is set
     usernameSpan.style.color = userColor; // Apply user color dynamically
 
-    // Process the message with emotes
+    // Process the message and get emotes
+    const processedMessage = processMessageWithEmotes(message, extra.messageEmotes);
+
+    // Create the message element
     const messageSpan = document.createElement("span");
     messageSpan.classList.add("twitchmessage");
-    messageSpan.innerHTML = processMessageWithEmotes(message, extra.messageEmotes);
+    messageSpan.innerHTML = processedMessage.message; 
 
     // Append elements to the chat message div
     chatMessage.appendChild(usernameSpan);
@@ -61,6 +65,9 @@ function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = f
     // Add the chat message to the container
     chatContainer.appendChild(chatMessage);
     
+    // Trigger emote animation effect
+    processedMessage.emoteList.forEach(emoteURL => animateFloatingEmote(emoteURL));
+
     // Apply a fade effect after a delay
     setTimeout(() => {
         chatMessage.style.opacity = '0'; // Fade out after 9 seconds
@@ -74,6 +81,58 @@ function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = f
         chatContainer.removeChild(chatContainer.firstChild);
     }
 }
+
+/**
+ * Process a message and replace Twitch emotes with images.
+ * Returns: { message: formattedMessage, emoteList: [emoteURLs] }
+ */
+function processMessageWithEmotes(message, messageEmotes) {
+    if (!messageEmotes) return { message, emoteList: [] }; // No emotes, return original
+
+    let messageArray = message.split('');
+    let emoteList = [];
+
+    Object.keys(messageEmotes).forEach(emoteID => {
+        messageEmotes[emoteID].forEach(range => {
+            let [start, end] = range.split('-').map(Number);
+            let emoteURL = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteID}/default/dark/3.0`;
+            emoteList.push(emoteURL); // Store for floating effect
+
+            // Insert emote image and clear old characters
+            messageArray[start] = `<img src="${emoteURL}" class="twitchEmote">`;
+            for (let i = start + 1; i <= end; i++) {
+                messageArray[i] = ''; 
+            }
+        });
+    });
+
+    return { message: messageArray.join(''), emoteList };
+}
+/**
+ * Create a floating animation for Twitch emotes
+ */
+function animateFloatingEmote(emoteURL) {
+    const emote = document.createElement("img");
+    emote.src = emoteURL;
+    emote.classList.add("floatingEmote");
+
+    // Set random starting position
+    emote.style.left = Math.random() * 80 + "vw"; // Random horizontal start
+    emote.style.top = "100vh"; // Start at bottom of the screen
+    emote.style.transform = `scale(${Math.random() * 0.5 + 0.5})`; // Random size
+
+    document.body.appendChild(emote);
+
+    // Animate upwards and fade out
+    setTimeout(() => {
+        emote.style.transform = `translateY(-120vh) scale(${Math.random() * 0.8 + 0.5})`;
+        emote.style.opacity = "0";
+    }, 100);
+
+    // Remove after animation
+    setTimeout(() => emote.remove(), 4000);
+}
+
 
 function togglechatElement(elementId, animationType = "fade") {
     const element = document.getElementById(elementId);
@@ -124,31 +183,7 @@ function toggleChatAudioSetting() {
 }
 
 
-/**
- * Process a message and replace Twitch emotes with images
- */
-function processMessageWithEmotes(message, messageEmotes) {
-    if (!messageEmotes) return message; // No emotes, return the original message
 
-    // Convert the message into an array of characters (to replace emotes properly)
-    let messageArray = message.split('');
-    
-    // Replace emotes in the correct positions
-    Object.keys(messageEmotes).forEach(emoteID => {
-        messageEmotes[emoteID].forEach(range => {
-            let [start, end] = range.split('-').map(Number);
-            let emoteURL = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteID}/default/dark/3.0`;
-            messageArray[start] = `<img src="${emoteURL}" class="twitchEmote">`;
-            
-            // Remove characters that were part of the emote text
-            for (let i = start + 1; i <= end; i++) {
-                messageArray[i] = ''; 
-            }
-        });
-    });
-
-    return messageArray.join('');
-}
 //end of chat logic --------------------|
 // ComfyJS onChat event handler
 let streamername = "jaedraze"; // Default streamer name
