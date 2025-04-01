@@ -679,7 +679,10 @@ function displayConsoleMessage(message) {
     messageSpan.classList.add("consolemessage");
     messageSpan.innerHTML = message;
 
-    // Append the message to the console container
+    // Append the messageSpan to the consoleMessage div
+    consoleMessage.appendChild(messageSpan);
+
+    // Append the consoleMessage to the console container
     consoleContainer.appendChild(consoleMessage);
 
     // Apply a fade effect after a delay
@@ -696,6 +699,7 @@ function displayConsoleMessage(message) {
         consoleContainer.removeChild(consoleContainer.firstChild);
     }
 }
+
 function toggleConsoleMessages() {
     consoleMessages = !consoleMessages;  // Toggle the boolean value
     console.log(`Console messages are now ${consoleMessages ? "enabled" : "disabled"}`);
