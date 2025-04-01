@@ -1153,6 +1153,21 @@ function showTrivia() {
     timer.style.animation = "fadeIn 1s ease-in-out forwards";
     timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
 }
+function showTriviaAsk() {
+	const triviaWrapper = document.getElementById("TriviaWrapper");
+    const questionWrapper = document.getElementById("questionWrapper");
+    const timer = document.getElementById("timer");
+    const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
+	displayChatMessage("system", "showTriviaAsk() called");
+    // Show elements with animations
+	triviaWrapper.style.visibility = "visible";
+	triviaWrapper.style.opacity = "1";
+    questionWrapper.style.visibility = "visible";
+    questionWrapper.style.opacity = "1";
+    questionWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+    timer.style.animation = "fadeIn 1s ease-in-out forwards";
+    timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
+}
 function hideTrivia() {
 	const triviaWrapper = document.getElementById("TriviaWrapper");
 	const triviaPodium = document.getElementById("triviaPodium");
@@ -1250,7 +1265,7 @@ function toggleTrivia() {
 
 
 function startTrivia() {
-	displayChatMessage("system", "triviasplash fn called");
+	displayChatMessage("system", "startTrivia fn called");
     if (triviaGameState === "started") {
 		displayChatMessage("system", "Trivia is already running! Ignoring duplicate command.");
         console.log("Trivia is already running! Ignoring duplicate command.");
@@ -1346,7 +1361,7 @@ function endTrivia() {
 //-end of trivia classic game----------
 //____________________________|
 function triviaAskrandom() {
-	const triviaWrapper = document.getElementById("TriviaWrapper");
+	showTriviaAsk();
 	displayChatMessage("system", "triviaAskrandom fn called");
     if (activeQuestion !== null) {
 		
