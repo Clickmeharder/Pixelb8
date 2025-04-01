@@ -1750,7 +1750,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	// Handle start trivia command 
 	if (command.toLowerCase() === "trivia-authtest") {
         if (!isStreamerAndAuthorize(user, command)) return;
-        startTrivia();
         displayConsoleMessage(user, `!${command} ✅`);
         displayChatMessage(user, `!${command} ✅`, flags, extra, true);
     }
