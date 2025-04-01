@@ -152,6 +152,15 @@
 			overflow-wrap: break-word; /* Same as word-wrap, just for consistency */
 			white-space: normal; /* Ensures that the text doesn't overflow on one line */
 		}
+		.consoleMessage {
+			padding: 10px;
+			color: #ffffff;
+			background-color: #333333;
+			margin: 5px 0;
+			border: 1px dashed #696969;
+			opacity: 1;
+			transition: opacity 1s ease-out;
+		}
 		/* Hidden state */
 		.hidden {
 			opacity: 0;
@@ -187,6 +196,7 @@
 			<button id="saveSettings">Save Settings</button>
 		</div>
 	</div>
+	<div id="consoleMessagebox"></div>
 	<div id="twitchchatContainer">
 		<div id="twitchMessagebox">
 		</div>

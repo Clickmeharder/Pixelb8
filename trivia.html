@@ -482,7 +482,15 @@
 			50% { opacity: 1; transform: translateY(0px); }
 			100% { text-shadow: 0px 0px 10px #0ea4a4; }
 		}
-
+		.consoleMessage {
+			padding: 10px;
+			color: #ffffff;
+			background-color: #333333;
+			margin: 5px 0;
+			border: 1px dashed #696969;
+			opacity: 1;
+			transition: opacity 1s ease-out;
+		}
 		/* Hidden state */
 		.hidden {
 			opacity: 0;
@@ -539,6 +547,7 @@
 			<div id="roundstarttimer"></div>
 		</div>
 		<!-- add user trivia rank and rank badges: rank1🥇 rank2🥈 rank3🥉 rank4🏅 rank5-10?🎖️-->
+		<div id="consoleMessagebox"></div>
 		<div id="TriviaWrapper">
 			<div id="triviaPodium" style="display: none;">
 				<div id="first">
