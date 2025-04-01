@@ -1346,6 +1346,7 @@ function endTrivia() {
 //-end of trivia classic game----------
 //____________________________|
 function triviaAskrandom() {
+	const triviaWrapper = document.getElementById("TriviaWrapper");
 	displayChatMessage("system", "triviaAskrandom fn called");
     if (activeQuestion !== null) {
 		
@@ -1359,6 +1360,8 @@ function triviaAskrandom() {
     firstAnswerUser = null;
     activeQuestion = getRandomQuestion();
     updateQuestionCounter(); // Update the display
+	triviaWrapper.style.visibility = "visible";
+	triviaWrapper.style.opacity = "1";
     document.getElementById("question").textContent = activeQuestion.question;
     document.getElementById("questionWrapper").style.visibility = "visible";
     document.getElementById("timer").textContent = timetoAnswer;
