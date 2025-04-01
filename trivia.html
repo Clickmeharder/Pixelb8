@@ -1473,6 +1473,16 @@ function startTriviaAsk() {
         });
 
 }
+
+function displayLastWinner() {
+    if (TriviaSingleAskLastWinner) {
+        const message = `🎉 Congratulations to ${TriviaSingleAskLastWinner} for answering first correctly! 🎉`;
+        displayChatMessage("system", message, {type: "system"}, {}, false);
+    } else {
+        const message = "No winner yet.";
+        displayChatMessage("system", message, {type: "system"}, {}, false);
+    }
+}
 //------------------------
 //---generic ui logic----|
 //-----------------------
@@ -1675,7 +1685,10 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		startTriviaAsk();
 		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 	}
-    // Only allow streamer (jaedraze) or mods to trigger these commands
+	if (command.toLowerCase() === "trivia-lastask") {
+		displayLastWinner();
+	}
+    // Only allow streamer (jaedraze) or mods to trigger these commands displayLastWinner()
     if (user.toLowerCase() === streamername || flags.mod) {
 		if (command.toLowerCase() === "trivia-testsound") {
 				playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
