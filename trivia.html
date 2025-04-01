@@ -1717,7 +1717,7 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
 };
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
-	console.log( "User:", user, "command:", command);
+	console.log( "User:", user, "command:", command,);
 	displayConsoleMessage(user, `!${command}`);
     // Store user color from extra	
     if (!userColors[user]) {
@@ -1742,8 +1742,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 	// Handle start trivia command 
 	if (command.toLowerCase() === "trivia-authtest") {
-		if (user.toLowerCase() !== streamerName.toLowerCase()) {
-			displayConsoleMessage(user, `❌ Unauthorized: Only ${streamerName} can start trivia.`);
+		if (user.toLowerCase() !== streamername.toLowerCase()) {
+			displayConsoleMessage(user, `❌ Unauthorized: Only ${streamername} can start trivia.`);
 			return; // Exit the function if the user is not the streamer
 		}
 
