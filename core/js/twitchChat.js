@@ -236,6 +236,11 @@ window.onload = function () {
         setStreamer(savedStreamer); // Auto-connect
     }
 };
+
+document.getElementById("controls-toggle").addEventListener("click", function () {
+	let container = document.getElementById("comfycontrolContainer");
+	container.classList.toggle("active");
+});
 // Button event listener: first endTrivia, then setStreamer
 document.getElementById("streamersButt").addEventListener("click", function() {
     if (triviaGameState === "started") {
