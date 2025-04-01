@@ -968,47 +968,65 @@ function nextquestionTimer(seconds) {
 	document.getElementById("timeuntil-nextQ").textContent = `Next question in: ${minutes}m ${remainingSeconds}s`;
 }
 function checkAnswer(user, message) {
-    // Check if there's an active question and if the user has already answered correctly
-    if (!activeQuestion) return; // If time is up, don't check answers
-	// If the user has already answered correctly, don't process further answers
-    if (answeredUsers.has(user)) return; // Prevent duplicate correct answers
+    if (!activeQuestion) return; // No active question, ignore answer
+    if (answeredUsers.has(user)) return; // Ignore duplicate correct answers
+
     let correctAnswer = activeQuestion.answer.toLowerCase();
     let userAnswer = message.trim().toLowerCase();
-    // Initialize user stats if they don't exist
-    if (!userStats[user]) {
-        userStats[user] = {
-            correctAnswers: 0,
-            incorrectAnswers: 0,
-            firstAnswers: 0,
-        };
-    }
-    // Track if the answer is correct or incorrect
+
+
+
     if (userAnswer === correctAnswer) {
-        // Correct answer logic
-        userStats[user].correctAnswers++;  // Increment correct count only if correct answer
-        answeredUsers.add(user);  // Mark the user as having answered correctly
+        // If `singleActiveAsk` is active, only allow the first correct answer
+        if (singleActiveAsk !== null) {
+            if (!firstAnswerUser) {
+                firstAnswerUser = user;
+                playSound("triviafirstcorrect");
+                return true; // First correct answer counts
+            }
+            return false; // Ignore all other correct answers
+        }
+
+        // Normal trivia logic (multiple correct answers allowed)
+		// Initialize user stats if they don't exist
+		if (!userStats[user]) {
+			userStats[user] = {
+				correctAnswers: 0,
+				incorrectAnswers: 0,
+				firstAnswers: 0,
+			};
+		}
+        userStats[user].correctAnswers++;
+        answeredUsers.add(user);
         
-        // Track first correct answer
         if (!firstAnswerUser) {
             firstAnswerUser = user;
             userStats[user].firstAnswers++;
             userScores[user] = (userScores[user] || 0) + 3;  // First answer gets 3 points
-			playSound("triviafirstcorrect");
+            playSound("triviafirstcorrect");
         } else {
             userScores[user] = (userScores[user] || 0) + 1;  // Others get 1 point
-			playSound("triviacorrect");
+            playSound("triviacorrect");
         }
 
-        updateTriviaboard();  // Update the trivia board with new stats
-        return true;  // Return true for correct answers
-    } else {
-        // Incorrect answer logic
-        userStats[user].incorrectAnswers++;  // Increment incorrect count only if incorrect answer
-		userScores[user] = (userScores[user] || 0) - 1;
-		playSound("triviawrong");
-        return false;  // Return false for incorrect answers
+        updateTriviaboard();  
+        return true; 
+    } 
+
+    // If `singleActiveAsk` is active, only play sound but don't track incorrect answers
+    if (singleActiveAsk !== null) {
+        playSound("triviawrong");
+        return false;
     }
+
+    // Normal incorrect answer logic
+    userStats[user].incorrectAnswers++;  
+    userScores[user] = (userScores[user] || 0) - 1;
+    playSound("triviawrong");
+
+    return false;  
 }
+
 
 //update the guestion counter
 function updateQuestionCounter() {
