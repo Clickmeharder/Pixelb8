@@ -136,8 +136,8 @@ function animateFloatingEmote(emoteURL) {
     setTimeout(() => {
         emote.style.transition = "transform 5s linear, opacity 8s ease-out"; // **Floats faster**
         emote.style.transform = `translate(${randomX}px, ${randomY}px) scale(${Math.random() * 0.8 + 0.8})`; 
-        emote.style.opacity = "0";
-    }, 1000);
+        emote.style.opacity = "0.7";
+    }, 100);
 
     setTimeout(() => emote.remove(), 7000); // **Lasts 5 seconds before removal**
 }
