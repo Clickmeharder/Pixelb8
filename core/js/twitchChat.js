@@ -189,7 +189,7 @@ function setStreamer(newStreamer) {
         input.style.outline = "3px outset #28a745";
 		//show disconnect button and style it
         twitchdisconnectbutton.style.display = "block"; 
-        twitchdisconnectbutton.style.backgroundColor = "#dc3545"; 
+        twitchdisconnectbutton.style.backgroundColor = "#b71a29eb"; 
         twitchdisconnectbutton.style.color = "#ffffff"; 
         twitchdisconnectbutton.style.border = "1px solid #dc3545";  
     } else {
@@ -202,7 +202,7 @@ function setStreamer(newStreamer) {
         // Update UI for disconnection
         twitchdisconnectbutton.style.display = "none"; 
         button.textContent = "id10t err: try diff name";
-        button.style.backgroundColor = "#dc3545"; 
+        button.style.backgroundColor = "#b71a29eb"; 
         button.style.color = "#ffffff"; 
         button.style.border = "1px solid #dc3545"; 
     }
