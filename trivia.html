@@ -1351,16 +1351,13 @@ function endTrivia() {
 //- ASK SINGLE RANDOM QUESTION - TESTING CUZ NOOB
 let singleActiveAsk = null;
 function askSplash() {
-    return new Promise((resolve) => {
-        playRandomQuestionSound()  // Show the splash animation
-            .then(() => {
-                return showAnnouncement("Asking Question in:", 30);  // Show announcement with a 30-second countdown
-            })
-            .then(() => {
-                showTriviaAsk();  // Show trivia after the countdown ends
-                resolve();  // Resolve the promise after trivia starts
-            });
-    });
+    return showAnnouncement("Asking Question in:", 30) // Ensure this returns a Promise
+        .then(() => {
+            showTriviaAsk();  // Show trivia after the countdown
+        })
+        .catch(error => {
+            console.error("Error in askSplash:", error);
+        });
 }
 function showTriviaAsk() {
 	const triviaWrapper = document.getElementById("TriviaWrapper");
