@@ -669,6 +669,9 @@ function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = f
 //!!!!!!!!!!!!!!!!!!!!!!!!!
 // Trivia Initialization  
 //!!!!!!!!!!!!!!!!!!!!!!!!
+let TriviaSingleAskLastWinner = null;  // Store the last winner's username
+let TriviaSingleAskWinners = [];  // Store the list of winners
+
 let userColors = {}; // Store user colors
 let triviaGameState = null;
 let userStats = {}; // This will store the count of correct answers and first answers
@@ -981,6 +984,8 @@ function checkAnswer(user, message) {
         if (singleActiveAsk !== null) {
             if (!firstAnswerUser) {
                 firstAnswerUser = user;
+                TriviaSingleAskLastWinner = user;  // Store the last winner
+                TriviaSingleAskWinners.push(user);  // Add to winners list
                 playSound("triviafirstcorrect");
                 return true; // First correct answer counts
             }
