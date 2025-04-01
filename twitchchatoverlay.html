@@ -140,7 +140,18 @@
 		div#twitchMessagebox {text-align: left;border:;max-height: 170px;}
 		#twitchMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
 		#username {font-weight:bold;}
-		.chatMessage {font-size: 18px;padding-left:8px;padding-right:8px;color: white;background-color: #000000c2;border: 1px dashed #696969;}
+		.chatMessage {
+			font-size: 18px;
+			padding-left: 8px;
+			padding-right: 8px;
+			color: white;
+			background-color: #000000c2;
+			border: 1px dashed #696969;
+			word-wrap: break-word; /* Allow long words to break onto the next line */
+			overflow-wrap: break-word; /* Same as word-wrap, just for consistency */
+			word-break: break-word; /* Ensures breaking in long words/URLs */
+			white-space: normal; /* Ensures that the text doesn't overflow on one line */
+		}
 		/* Hidden state */
 		.hidden {
 			opacity: 0;
