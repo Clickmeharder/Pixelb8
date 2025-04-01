@@ -1216,14 +1216,7 @@ function updatePodium() {
             let correctAnswers = userStats[user]?.correctAnswers || 0;
             let incorrectAnswers = userStats[user]?.incorrectAnswers || 0;
 
-			lastTriviaClassicWinners.push({
-                place: i + 1,
-                user,
-                score,
-                firstAnswers,
-                correctAnswers,
-                incorrectAnswers,
-            });
+
             firstAnswersElement.textContent = `🎯 First: ${firstAnswers}`;
             correctAnswersElement.textContent = `✅ ${correctAnswers}`;
             incorrectAnswersElement.textContent = `❌ ${incorrectAnswers}`;
@@ -1234,6 +1227,14 @@ function updatePodium() {
 
             // Append the extraStatsDiv next to the winner container
             winnerContainer.appendChild(extraStatsDiv);
+			lastTriviaClassicWinners.push({
+                place: i + 1,
+                user,
+                score,
+                firstAnswers,
+                correctAnswers,
+                incorrectAnswers,
+            });
         }
     }
 
