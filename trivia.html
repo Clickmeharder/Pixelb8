@@ -1702,6 +1702,13 @@ function toggleAudioSetting() {
 // COMFY JS specific logic/functions
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 let streamername = "jaedraze"; // Default streamer name
+function isStreamerAndAuthorize(user, command) {
+    if (user.toLowerCase() !== streamerName.toLowerCase()) {
+        displayConsoleMessage(user, `❌ Unauthorized: Only ${streamerName} can use !${command}`);
+        return false;
+    }
+    return true;
+}
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     // If chat answers are enabled, check the message for answers
     if (chatanswers) {
@@ -1742,18 +1749,19 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 	// Handle start trivia command 
 	if (command.toLowerCase() === "trivia-authtest") {
-		if (user.toLowerCase() !== streamername.toLowerCase()) {
-			displayConsoleMessage(user, `❌ Unauthorized: Only ${streamername} can start trivia.`);
-			return; // Exit the function if the user is not the streamer
-		}
-		displayConsoleMessage(user, `!${command} ✅`);
-		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
-	}
-	if (command.toLowerCase() === "trivia-teststart") {
-		startTrivia();
-		displayConsoleMessage(user, `!${command} ✅`);
-		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
-	}
+        if (!isStreamerAndAuthorize(user, command)) return;
+        startTrivia();
+        displayConsoleMessage(user, `!${command} ✅`);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+    }
+
+    if (command.toLowerCase() === "trivia-start") {
+        if (!isStreamerAndAuthorize(user, command)) return;
+        startTrivia();
+        displayConsoleMessage(user, `!${command} ✅`);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+    }
+
 	if (command.toLowerCase() === "trivia-ask") {
 		startTriviaAsk();
 		displayConsoleMessage(user, `!${command} ✅`);
