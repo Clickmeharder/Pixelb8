@@ -120,21 +120,28 @@ function animateFloatingEmote(emoteURL) {
     emote.style.width = `${size}px`;
     emote.style.height = `${size}px`;
 
-    emote.style.left = Math.random() * 80 + "vw"; // Random horizontal start position
-    emote.style.top = "100vh"; // Start from the bottom
+    // Random starting position
+    emote.style.left = Math.random() * 80 + "vw";
+    emote.style.top = Math.random() * 80 + "vh";
+
     emote.style.opacity = "1";
     emote.style.transform = `scale(${Math.random() * 0.2 + 0.9})`;
 
     document.body.appendChild(emote);
 
+    // Random floating direction
+    let randomX = (Math.random() - 0.5) * 200; // Move left or right
+    let randomY = (Math.random() - 0.5) * 200; // Move up or down
+
     setTimeout(() => {
-        emote.style.transition = "transform 10s linear, opacity 8s ease-out"; // **Floats slower**
-        emote.style.transform = `translateY(-120vh) scale(${Math.random() * 0.8 + 0.8})`; 
+        emote.style.transition = "transform 10s linear, opacity 8s ease-out";
+        emote.style.transform = `translate(${randomX}px, ${randomY}px) scale(${Math.random() * 0.8 + 0.8})`;
         emote.style.opacity = "0";
     }, 100);
 
-    setTimeout(() => emote.remove(), 10000); // **Lasts 10 seconds before removal**
+    setTimeout(() => emote.remove(), 10000);
 }
+
 
 function togglechatElement(elementId, animationType = "fade") {
     const element = document.getElementById(elementId);
