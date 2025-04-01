@@ -1722,7 +1722,6 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
         displayChatMessage(user, message, flags, extra, false);
     }
 };
-
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	console.log( "User:", user, "command:", command,);
 	displayConsoleMessage(user, `!${command}`);
@@ -1747,7 +1746,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			console.log(`${user} has already answered correctly. Ignoring further answers.`);
 		}
 	}
-	// Handle start trivia command 
+	// Only allow streamer to trigger these commands:
+//-------------------------------------------------------
 	if (command.toLowerCase() === "triviatest-auth") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
@@ -1805,15 +1805,11 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		toggleElement("questionWrapper", "fade");
 	}
-	// Handle toggle trivia visibility command
 	if (command.toLowerCase() === "toggletrivia") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		toggleTrivia();
 		toggleElement("triviaWrapper", "fade");
 	}
-	// Example commands that any user can trigger
-
-	// Handle toggle chat visibility command
 	if (command === "togglechat1") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		toggleElement("twitchchatContainer", "fade");
@@ -1829,7 +1825,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			chatContainer.style.visibility = "hidden"; // Hide the chat if it's visible
 		}
 	}
-    // Only allow streamer (jaedraze) or mods to trigger these commands displayLastWinner()
+//-------------------------------------------------------
+    // Only allow mods to trigger these commands:
     if (flags.mod) {
 		if (command === "triviamod-test") {
 			if (!isStreamerAndAuthorize(user, command)) return;
@@ -1839,6 +1836,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		}
 	}
     } else {
+		// allow any user to trigger these commands:
         if (command.toLowerCase() === "helloworld") {
             // Custom logic to send "Hello, world!" to your overlay chat
             const message = "Hello, world!";
@@ -1846,7 +1844,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             displayChatMessage("System", message, {}, {}); // Call the function to display the message in the chat overlay
             console.log(`Sent message to overlay: ${message}`); // Log to the console
         }
-
         if (command.toLowerCase() === "joke") {
             const jokes = [
                 "Why don't skeletons fight each other? They don't have the guts!",
