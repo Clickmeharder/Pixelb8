@@ -72,9 +72,10 @@ function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = f
     setTimeout(() => {
         chatMessage.style.opacity = '0'; // Fade out after 9 seconds
     }, 15000);
-    setTimeout(() => {
-        chatMessage.remove();
-    }, 15000); // Remove after 15 seconds
+	// Remove after 15 seconds
+    // setTimeout(() => {
+        // chatMessage.remove();
+    // }, 15000);
 
     // Limit messages to the last 5
     if (chatContainer.children.length > 5) {
