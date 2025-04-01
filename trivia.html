@@ -1153,6 +1153,16 @@ function updatePodium() {
     const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
 	console.log("Updating Podium");
     console.log("Sorted users:", sortedUsers);
+	    // Save last game's winners to history with a timestamp before resetting
+    if (lastTriviaClassicWinners.length > 0) {
+        TriviaClassicHistory.push({
+            timestamp: new Date().toLocaleString(),
+            winners: [...lastTriviaClassicWinners],
+        });
+        saveTriviaHistory(); // Save updated history to localStorage
+    }
+    // Reset lastTriviaClassicWinners
+    lastTriviaClassicWinners = [];
     for (let i = 0; i < 3; i++) {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
@@ -1189,6 +1199,14 @@ function updatePodium() {
             let correctAnswers = userStats[user]?.correctAnswers || 0;
             let incorrectAnswers = userStats[user]?.incorrectAnswers || 0;
 
+			lastTriviaClassicWinners.push({
+                place: i + 1,
+                user,
+                score,
+                firstAnswers,
+                correctAnswers,
+                incorrectAnswers,
+            });
             firstAnswersElement.textContent = `🎯 First: ${firstAnswers}`;
             correctAnswersElement.textContent = `✅ ${correctAnswers}`;
             incorrectAnswersElement.textContent = `❌ ${incorrectAnswers}`;
@@ -1332,7 +1350,6 @@ function toggleTrivia() {
     }
 }
 
-
 function startTrivia() {
 	displayConsoleMessage("system", "startTrivia fn called");
     if (triviaGameState === "started") {
@@ -1426,6 +1443,7 @@ function endTrivia() {
     document.getElementById("timeuntil-nextQ").textContent = "";
     hideTrivia(); // Hide the trivia UI
 }
+
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //-end of trivia classic game----------
 //____________________________|
@@ -1544,6 +1562,40 @@ function displayLastWinner() {
         displayConsoleMessage("system", message);
     }
 }
+// Function to display last game's winners
+function displayLastTriviaWinners() {
+    if (lastTriviaClassicWinners.length === 0) {
+        displayChatMessage("Console:", "No winners from the last trivia game.", {}, {});
+        return;
+    }
+
+    displayChatMessage("Console:", "📢 Last Trivia Winners:", {}, {});
+
+    lastTriviaClassicWinners.forEach((winner) => {
+        let message = `🏆 ${winner.place} - ${winner.user}: ${winner.score} points | 🎯 First: ${winner.firstAnswers} | ✅ ${winner.correctAnswers} | ❌ ${winner.incorrectAnswers}`;
+        displayChatMessage("Console:", message, {}, {});
+    });
+}
+// Function to display all past trivia games from history
+function displayTriviaHistory() {
+    if (TriviaClassicHistory.length === 0) {
+        displayChatMessage("Console:", "No past trivia games recorded.", {}, {});
+        return;
+    }
+
+    displayChatMessage("Console:", "📜 Trivia History:", {}, {});
+
+    TriviaClassicHistory.forEach((game) => {
+        displayChatMessage("Console:", `📆 ${game.timestamp}`, {}, {});
+        game.winners.forEach((winner) => {
+            let message = `🏆 ${winner.place} - ${winner.user}: ${winner.score} points | 🎯 First: ${winner.firstAnswers} | ✅ ${winner.correctAnswers} | ❌ ${winner.incorrectAnswers}`;
+            displayChatMessage("Console:", message, {}, {});
+        });
+    });
+}
+
+// Load saved history when the bot starts
+loadTriviaHistory();
 //------------------------
 //---generic ui logic----|
 //-----------------------
