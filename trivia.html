@@ -1538,10 +1538,10 @@ function startTriviaAsk() {
 function displayLastWinner() {
     if (TriviaSingleAskLastWinner) {
         const message = `🎉 Congratulations to ${TriviaSingleAskLastWinner} for answering first correctly! 🎉`;
-        displayConsoleMessage("system", message, {type: "system"}, {}, false);
+        displayConsoleMessage("system", message);
     } else {
         const message = "No winner yet.";
-        displayConsoleMessage("system", message, {type: "system"}, {}, false);
+        displayConsoleMessage("system", message);
     }
 }
 //------------------------
@@ -1692,6 +1692,7 @@ function playRandomWinSound() {
 function toggleAudioSetting() {
     audioSetting = audioSetting === "on" ? "off" : "on";
     console.log(`Audio setting is now: ${audioSetting}`);
+	displayConsoleMessage("system", `Audio setting is now: ${audioSetting}`);
 }
 
 
@@ -1717,7 +1718,7 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	console.log( "User:", user, "command:", command);
-	displayChatMessage(user, `!${command}`, flags, extra, true);
+	displayConsoleMessage(user, `!${command}`);
     // Store user color from extra	
     if (!userColors[user]) {
         userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
@@ -1728,9 +1729,11 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		// Display the answer in chat regardless of whether it's correct or incorrect
 		if (isCorrect) {
 			// If the answer is correct, display the answer with a ✅ checkmark
+			displayConsoleMessage(user, `!${command} ${answer} ✅`);
 			displayChatMessage(user, `!${command} ${answer} ✅`, flags, extra, true);  // Show correct answer in chat
 		} else if (!answeredUsers.has(user)) {
 			// If the user hasn't answered correctly yet, display the answer with an ❌ X mark
+			displayConsoleMessage(user, `!${command} ${answer} ❌`);
 			displayChatMessage(user, `!${command} ${answer} ❌`, flags, extra, false);// Show incorrect answer in chat
 		} else {
 			// If the user has already answered correctly, do nothing (ignore their further answers)
@@ -1740,10 +1743,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	// Handle start trivia command 
 	if (command.toLowerCase() === "trivia-teststart") {
 		startTrivia();
+		displayConsoleMessage(user, `!${command} ✅`);
 		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 	}
 	if (command.toLowerCase() === "trivia-ask") {
 		startTriviaAsk();
+		displayConsoleMessage(user, `!${command} ✅`);
 		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 	}
 	if (command.toLowerCase() === "trivia-lastask") {
@@ -1757,15 +1762,18 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         // Handle start trivia command 
         if (command.toLowerCase() === "trivia-start") {
             startTrivia();
+			displayConsoleMessage(user, `!${command} ✅`);
 			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
         }
 		if (command.toLowerCase() === "trivia-askrandom") {
 			triviaAskrandom();
+			displayConsoleMessage(user, `!${command} ✅`);
 			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 		}
         // Handle start trivia command
         if (command.toLowerCase() === "trivia-splash") {
             triviaSplash(); // Call the startTrivia function
+			displayConsoleMessage(user, `!${command} ✅`);
 			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
         }
         // Handle trivia round 2 command
@@ -1776,12 +1784,14 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             setTimeout(handlephaseTrivia, 10000);
         }
 		if (command.toLowerCase() === "trivia-audio") {
+			displayConsoleMessage(user, `!${command} ✅`);
 			displayChatMessage(user, `!triviaaudio toggle ✅`, flags, extra, true);
 			toggleAudioSetting();
 		}
         if (command === "chatanswers") {
             chatanswers = !chatanswers;  // Toggle chatanswers
             // Show in the chat whether chat answers are now enabled or disabled
+			displayConsoleMessage(user, `!${command} ✅`);
             displayChatMessage(user, `Chat answers are now ${chatanswers ? "enabled" : "disabled"}.`, flags, extra, false);
         }
 		if (command === "toggletriviaboard") {
