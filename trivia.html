@@ -1251,7 +1251,7 @@ function toggleTrivia() {
 
 function startTrivia() {
     if (triviaGameState === "started") {
-		displayChatMessage("system", "Trivia is already running! Ignoring duplicate command.", flags, extra, true);
+		displayChatMessage("system", "Trivia is already running! Ignoring duplicate command.", , ,);
         console.log("Trivia is already running! Ignoring duplicate command.");
         return; // Stop if trivia is already running
     }
@@ -1377,7 +1377,7 @@ function toggleElement(elementId, animationType = "fade") {
         // Play the sound
 //       playSound("triviatimesup");
 
-let audioSetting = "off"; // Change to "off" to mute all sounds
+let audioSetting = "on"; // Change to "off" to mute all sounds
 
 const sounds = {
     snakedie: new Audio("/assets/sounds/snakedie_sound1.mp3"),
