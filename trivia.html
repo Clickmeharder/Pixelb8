@@ -1352,7 +1352,7 @@ function endTrivia() {
 let singleActiveAsk = null;
 function askSplash() {
     return new Promise((resolve) => {
-        playSound("triviatimesup");  // Show the splash animation
+        playRandomQuestionSound()  // Show the splash animation
             .then(() => {
                 return showAnnouncement("Asking Question in:", 30);  // Show announcement with a 30-second countdown
             })
@@ -1400,7 +1400,6 @@ function endAsk() {
         document.getElementById("triviaboard").style.visibility = "visible";
     }, 13000); // Delay timeout of 13 seconds to wait before checking
 }
-
 function AskQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
