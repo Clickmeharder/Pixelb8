@@ -734,7 +734,8 @@ function toggleConsoleMessages() {
 //!!!!!!!!!!!!!!!!!!!!!!!!
 let TriviaSingleAskLastWinner = null;  // Store the last winner's username
 let TriviaSingleAskWinners = [];  // Store the list of winners
-
+let lastTriviaClassicWinners = [];
+let TriviaClassicHistory = [];
 let userColors = {}; // Store user colors
 let triviaGameState = null;
 let userStats = {}; // This will store the count of correct answers and first answers
@@ -806,6 +807,19 @@ function fetchTriviaQuestions() {
     });
 }
 
+// Save trivia history to localStorage
+// & Load previous trivia history from localStorage when the bot starts
+function loadTriviaHistory() {
+    const savedHistory = localStorage.getItem("TriviaClassicHistory");
+    if (savedHistory) {
+        TriviaClassicHistory = JSON.parse(savedHistory);
+    }
+}
+function saveTriviaHistory() {
+    localStorage.setItem("TriviaClassicHistory", JSON.stringify(TriviaClassicHistory));
+}
+
+//show announcements with optional timer
 function showAnnouncement(message, triviaAnnouncementTime) {
     return new Promise((resolve) => {
         const announcementWrapper = document.getElementById("triviaAnnouncementWrapper");
