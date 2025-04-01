@@ -1503,7 +1503,7 @@ function toggleAudioSetting() {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // COMFY JS specific logic/functions
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+let streamername = "jaedraze"; // Default streamer name
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     // If chat answers are enabled, check the message for answers
     if (chatanswers) {
@@ -1632,7 +1632,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 //!!!!!!!!!!!!!!!!!!!!!!!
 // Our Comfy Connection
 //!!!!!!!!!!!!!!!!!!!!!!!
-let streamername = "jaedraze"; // Default streamer name
+
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
