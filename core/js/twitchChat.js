@@ -34,8 +34,10 @@
 //<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 
 // Chat message display function
+// Chat message display function
 function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = false) {
     const chatContainer = document.getElementById("twitchMessagebox");
+
     // Create a new chat message element
     const chatMessage = document.createElement("div");
     chatMessage.classList.add("chatMessage");
@@ -47,11 +49,11 @@ function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = f
     const userColor = extra.userColor || "#FFFFFF"; // Default to white if no color is set
     usernameSpan.style.color = userColor; // Apply user color dynamically
 
-    // Create the message element
+    // Process the message with emotes
     const messageSpan = document.createElement("span");
     messageSpan.classList.add("twitchmessage");
-    messageSpan.innerHTML = message;
-    
+    messageSpan.innerHTML = processMessageWithEmotes(message, extra.messageEmotes);
+
     // Append elements to the chat message div
     chatMessage.appendChild(usernameSpan);
     chatMessage.appendChild(messageSpan);
@@ -121,12 +123,38 @@ function toggleChatAudioSetting() {
     console.log(`chat Audio setting is now: ${chataudioSetting}`);
 }
 
+
+/**
+ * Process a message and replace Twitch emotes with images
+ */
+function processMessageWithEmotes(message, messageEmotes) {
+    if (!messageEmotes) return message; // No emotes, return the original message
+
+    // Convert the message into an array of characters (to replace emotes properly)
+    let messageArray = message.split('');
+    
+    // Replace emotes in the correct positions
+    Object.keys(messageEmotes).forEach(emoteID => {
+        messageEmotes[emoteID].forEach(range => {
+            let [start, end] = range.split('-').map(Number);
+            let emoteURL = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteID}/default/dark/3.0`;
+            messageArray[start] = `<img src="${emoteURL}" class="twitchEmote">`;
+            
+            // Remove characters that were part of the emote text
+            for (let i = start + 1; i <= end; i++) {
+                messageArray[i] = ''; 
+            }
+        });
+    });
+
+    return messageArray.join('');
+}
 //end of chat logic --------------------|
 // ComfyJS onChat event handler
 let streamername = "jaedraze"; // Default streamer name
 ComfyJS.onChat = (user, message, color, flags, extra) => {
-    console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message);
-    // Call the displayChatMessage function and pass flags and extra for userColor and badges
+    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
+    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
     displayChatMessage(user, message, flags, extra);  // Show message in chat box
 };
 
@@ -150,17 +178,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
             const message = "Hello, world!";
             displayChatMessage("System", message, {}, {}); // Call the function to display the message in the chat overlay
             console.log(`Sent message to overlay: ${message}`); // Log to the console
-        }
-
-        if (command.toLowerCase() === "chatjoke") {
-            const jokes = [
-                "Why don't skeletons fight each other? They don't have the guts!",
-                "Why did the scarecrow win an award? Because he was outstanding in his field!",
-                "I told my computer I needed a break, and now it won’t stop sending me Kit-Kats!"
-            ];
-            const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
-            displayChatMessage("System", randomJoke, {}, {}); // Sends a random joke to the overlay chat
-            console.log(`Sent joke to overlay: ${randomJoke}`); // Log the joke sent to the console
         }
     }
 };

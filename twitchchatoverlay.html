@@ -136,18 +136,19 @@
     </style>
 </head>
 <body>
+<!-- can we figure out emojis? -->
 	<!-- Floating Button -->
 	<button id="controls-toggle">⚙</button>
-	<!-- Trivia Control Container -->
+	<!-- Chat Control Container -->
 	<div id="comfycontrolContainer">
 		<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
 		<button id="streamersButt">Connect</button>
 		<button id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
-		<div id="more-controls">
+		<div id="more-controls" style="display:none;">
 			<button id="unused">do nothing</button>
 			<button id="unused">do nothing</button>
 		</div>
-		<div id="comfy-settings">
+		<div id="comfy-settings" style="display:none;">
 			<span id="comfy-settingsheader">Settings</span>
 			<label for="timeBetweenQuestions">Seconds Between Questions:</label>
 			<input type="number" id="timeBetweenQuestions" value="5" min="1" step="1">
