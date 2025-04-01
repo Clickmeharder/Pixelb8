@@ -84,30 +84,46 @@ function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = f
 }
 let consoleMessages = false;  // Flag to control whether to show console messages
 
-function displayConsoleMessage(message) {
+function displayConsoleMessage(user, message) {
     if (!consoleMessages) return;  // If consoleMessages is false, do nothing
+
     // Create a new console message element
     const consoleContainer = document.getElementById("consoleMessagebox");
     const consoleMessage = document.createElement("div");
     consoleMessage.classList.add("consoleMessage");
+
+    // Create the user element
+    const usernameSpan = document.createElement("span");
+    usernameSpan.classList.add("consoleUser");
+    usernameSpan.innerHTML = `${user}: `;  // Display user before message
+
     // Create the message element
     const messageSpan = document.createElement("span");
-    messageSpan.classList.add("consolemessage");
+    messageSpan.classList.add("consoleMessageText");
     messageSpan.innerHTML = message;
-    // Append the message to the console container
+
+    // Append the username and message to the console message div
+    consoleMessage.appendChild(usernameSpan);
+    consoleMessage.appendChild(messageSpan);
+
+    // Append the console message to the console container
     consoleContainer.appendChild(consoleMessage);
+
     // Apply a fade effect after a delay
     setTimeout(() => {
-        consoleMessage.style.opacity = '0'; // Fade out after 9 seconds
+        consoleMessage.style.opacity = '0'; // Fade out after 15 seconds
     }, 15000);
+
     setTimeout(() => {
         consoleMessage.remove();
     }, 15000); // Remove after 15 seconds
+
     // Limit messages to the last 5
     if (consoleContainer.children.length > 5) {
         consoleContainer.removeChild(consoleContainer.firstChild);
     }
 }
+
 function toggleConsoleMessages() {
     consoleMessages = !consoleMessages;  // Toggle the boolean value
     console.log(`Console messages are now ${consoleMessages ? "enabled" : "disabled"}`);
