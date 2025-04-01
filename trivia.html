@@ -618,7 +618,7 @@
     <script>
 //--------	Chat ---|
 // Chat message display function
-function displayChatMessage(user, message, flags, extra, isCorrect = false) {
+function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = false) {
     const chatContainer = document.getElementById("twitchMessagebox");
     // Create a new chat message element
     const chatMessage = document.createElement("div");
@@ -1251,11 +1251,11 @@ function toggleTrivia() {
 
 function startTrivia() {
     if (triviaGameState === "started") {
-		displayChatMessage("system", "Trivia is already running! Ignoring duplicate command.", , ,);
+		displayChatMessage("system", "Trivia is already running! Ignoring duplicate command.");
         console.log("Trivia is already running! Ignoring duplicate command.");
         return; // Stop if trivia is already running
     }
-	displayChatMessage("system", "Trivia should splash and fetch", , , );
+	displayChatMessage("system", "Trivia Should splash and fetch.");
     console.log("Trivia should splash and fetch questions");
 
     triviaSplash() // Run splash first
@@ -1265,13 +1265,13 @@ function startTrivia() {
             window.triviaQuestions = questions;
 			console.log("triviaGameState = " + triviaGameState);
             console.log("Trivia Questions Loaded:", questions);
-			showAnnouncement("triviaGameState = " + triviaGameState);
+			displayChatMessage("system", `triviaGameState = ${triviaGameState}`);
 			handlephaseTrivia();
 			
         })
         .catch(error => {
             console.error("Error loading trivia questions:", error);
-			displayChatMessage(error, "Error loading trivia questions:", flags, extra, true);
+			displayChatMessage("system", `Error loading trivia questions: ${error}`);
             triviaGameState = null; // Reset state on failure
         });
 }
