@@ -1483,6 +1483,7 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	console.log( "User:", user, "command:", command);
+	showAnnouncement( "User:", user, "command:", command);
     // Store user color from extra	
     if (!userColors[user]) {
         userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
