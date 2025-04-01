@@ -1381,6 +1381,7 @@ function showTriviaAsk() {
     const questionWrapper = document.getElementById("questionWrapper");
     const timer = document.getElementById("timer");
     const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
+	document.getElementById("question-counter").textContent = `First Correct Answer Wins`;
 	displayChatMessage("system", "showTriviaAsk() called");
     // Show elements with animations
 	triviaWrapper.style.visibility = "visible";
