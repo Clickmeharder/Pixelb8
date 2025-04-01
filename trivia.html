@@ -1343,10 +1343,44 @@ function endTrivia() {
     hideTrivia(); // Hide the trivia UI
 }
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//-end of trivia game----------
+//-end of trivia classic game----------
 //____________________________|
+function triviaAskrandom() {
+    if (activeQuestion !== null) {
+        return; // Exit early if there's an active question
+    }
+    clearTimeout(questionTimer); // Clear previous timer if any
+    clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
+    answeredUsers.clear();
+    firstAnswerUser = null;
+    activeQuestion = getRandomQuestion();
+    updateQuestionCounter(); // Update the display
+    document.getElementById("question").textContent = activeQuestion.question;
+    document.getElementById("questionWrapper").style.visibility = "visible";
+    document.getElementById("timer").textContent = timetoAnswer;
+    document.getElementById("timeuntil-nextQ").textContent = "";
+	playRandomQuestionSound();
+    let secondsLeft = timetoAnswer;
+    questionTimer = setInterval(() => {
+        secondsLeft--;
+        document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
+        if (secondsLeft <= 0) {
+            endAskrandom(); // Call your function to end the question once time runs out
+        }
+    }, 1000);
+}
 
-
+function endAskrandom() {
+    clearInterval(questionTimer);
+    document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
+	document.getElementById("timer").textContent = "";
+	activeQuestion = null;
+	playSound("triviatimesup");
+    hideQuestionTimer = setTimeout(() => {
+        document.getElementById("questionWrapper").style.visibility = "hidden";
+        document.getElementById("triviaboard").style.visibility = "visible";
+    }, 13000); // Delay timeout of 13 seconds to wait before checking
+}
 //------------------------
 //---generic ui logic----|
 //-----------------------
@@ -1546,7 +1580,11 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (command.toLowerCase() === "trivia-testsound") {
 				playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
 			}
-        // Handle start trivia command
+        if (command.toLowerCase() === "trivia-askrandom") {
+            triviaAskrandom();
+			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+        }
+        // Handle start trivia command 
         if (command.toLowerCase() === "trivia-start") {
             startTrivia();
 			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
