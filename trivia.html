@@ -1652,7 +1652,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 	}
 	if (command.toLowerCase() === "trivia-ask") {
-		triviaAskrandom();
+		startTriviaAsk();
 		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 	}
     // Only allow streamer (jaedraze) or mods to trigger these commands
