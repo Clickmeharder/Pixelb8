@@ -1746,8 +1746,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			displayConsoleMessage(user, `❌ Unauthorized: Only ${streamername} can start trivia.`);
 			return; // Exit the function if the user is not the streamer
 		}
-
-		startTrivia();
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 	}
