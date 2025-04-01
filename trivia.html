@@ -1375,8 +1375,6 @@ function triviaAskrandom() {
     firstAnswerUser = null;
     activeQuestion = getRandomQuestion();
     updateQuestionCounter(); // Update the display
-	triviaWrapper.style.visibility = "visible";
-	triviaWrapper.style.opacity = "1";
     document.getElementById("question").textContent = activeQuestion.question;
     document.getElementById("questionWrapper").style.visibility = "visible";
     document.getElementById("timer").textContent = timetoAnswer;
