@@ -120,26 +120,25 @@ function animateFloatingEmote(emoteURL) {
     emote.style.width = `${size}px`;
     emote.style.height = `${size}px`;
 
-    // Random starting position
-    emote.style.left = Math.random() * 80 + "vw";
-    emote.style.top = Math.random() * 80 + "vh";
-
+    // Start from a random position (anywhere on screen)
+    emote.style.left = Math.random() * 100 + "vw";
+    emote.style.top = Math.random() * 100 + "vh";
     emote.style.opacity = "1";
     emote.style.transform = `scale(${Math.random() * 0.2 + 0.9})`;
 
     document.body.appendChild(emote);
 
-    // Random floating direction
-    let randomX = (Math.random() - 0.5) * 200; // Move left or right
-    let randomY = (Math.random() - 0.5) * 200; // Move up or down
+    // Random movement directions
+    let randomX = (Math.random() - 0.5) * 200; // Moves left or right
+    let randomY = (Math.random() - 0.5) * 200; // Moves up or down
 
     setTimeout(() => {
-        emote.style.transition = "transform 10s linear, opacity 8s ease-out";
-        emote.style.transform = `translate(${randomX}px, ${randomY}px) scale(${Math.random() * 0.8 + 0.8})`;
+        emote.style.transition = "transform 10s linear, opacity 8s ease-out"; // **Floats slower**
+        emote.style.transform = `translate(${randomX}px, ${randomY}px) scale(${Math.random() * 0.8 + 0.8})`; 
         emote.style.opacity = "0";
     }, 100);
 
-    setTimeout(() => emote.remove(), 10000);
+    setTimeout(() => emote.remove(), 10000); // **Lasts 10 seconds before removal**
 }
 
 
