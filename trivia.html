@@ -1703,8 +1703,8 @@ function toggleAudioSetting() {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 let streamername = "jaedraze"; // Default streamer name
 function isStreamerAndAuthorize(user, command) {
-    if (user.toLowerCase() !== streamerName.toLowerCase()) {
-        displayConsoleMessage(user, `❌ Unauthorized: Only ${streamerName} can use !${command}`);
+    if (user.toLowerCase() !== streamername.toLowerCase()) {
+        displayConsoleMessage(user, `❌ Unauthorized: Only ${streamername} can use !${command}`);
         return false;
     }
     return true;
