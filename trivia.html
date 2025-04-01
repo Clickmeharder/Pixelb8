@@ -1376,6 +1376,9 @@ function toggleElement(elementId, animationType = "fade") {
 // Preload sounds and store them in an object
         // Play the sound
 //       playSound("triviatimesup");
+
+let audioSetting = "off"; // Change to "off" to mute all sounds
+
 const sounds = {
     snakedie: new Audio("/assets/sounds/snakedie_sound1.mp3"),
     //gameshowintro: new Audio("/assets/sounds/gameshow_intro.mp3"),
@@ -1408,17 +1411,11 @@ const triviaWinsounds = {
     // Add more sounds here
 };
 
-// Function to get a random key from triviaWinsounds
-function getRandomQuestionSound() {
-    const keys = Object.keys(triviaQuestionsounds);
-    return keys[Math.floor(Math.random() * keys.length)];
-}
-// Function to get a random key from triviaWinsounds
-function getRandomWinSound() {
-    const keys = Object.keys(triviaWinsounds);
-    return keys[Math.floor(Math.random() * keys.length)];
-}
+
+
 function playSound(name) {
+    if (audioSetting === "off") return; // Stop if audio is disabled
+
     if (triviasounds[name]) {
         triviasounds[name].muted = false; // Unmute the sound
         triviasounds[name].currentTime = 0; // Reset sound to start
@@ -1429,8 +1426,10 @@ function playSound(name) {
         console.error(`Sound '${name}' not found.`);
     }
 }
-// Function to play a specific win sound
+
 function playQuestionSound(name) {
+    if (audioSetting === "off") return; // Stop if audio is disabled
+
     if (triviaQuestionsounds[name]) {
         triviaQuestionsounds[name].muted = false; // Unmute the sound
         triviaQuestionsounds[name].currentTime = 0; // Reset sound to start
@@ -1441,7 +1440,10 @@ function playQuestionSound(name) {
         console.error(`Sound '${name}' not found.`);
     }
 }
+
 function playWinSound(name) {
+    if (audioSetting === "off") return; // Stop if audio is disabled
+
     if (triviaWinsounds[name]) {
         triviaWinsounds[name].muted = false; // Unmute the sound
         triviaWinsounds[name].currentTime = 0; // Reset sound to start
@@ -1452,6 +1454,28 @@ function playWinSound(name) {
         console.error(`Sound '${name}' not found.`);
     }
 }
+
+// Functions for random sounds
+function playRandomQuestionSound() {
+    if (audioSetting === "off") return; // Stop if audio is disabled
+
+    const randomSound = getRandomQuestionSound();
+    playQuestionSound(randomSound);
+}
+
+function playRandomWinSound() {
+    if (audioSetting === "off") return; // Stop if audio is disabled
+
+    const randomSound = getRandomWinSound();
+    playWinSound(randomSound);
+}
+
+// Function to toggle audio on/off
+function toggleAudioSetting() {
+    audioSetting = audioSetting === "on" ? "off" : "on";
+    console.log(`Audio setting is now: ${audioSetting}`);
+}
+
 
 function playRandomQuestionSound() {
     const randomSound = getRandomQuestionSound();
