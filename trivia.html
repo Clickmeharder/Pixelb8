@@ -654,6 +654,43 @@ function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = f
         chatContainer.removeChild(chatContainer.firstChild);
     }
 }
+
+let consoleMessages = true;  // Flag to control whether to show console messages
+
+function displayConsoleMessage(message) {
+    if (!consoleMessages) return;  // If consoleMessages is false, do nothing
+
+    // Create a new console message element
+    const consoleContainer = document.getElementById("consoleMessagebox");
+    const consoleMessage = document.createElement("div");
+    consoleMessage.classList.add("consoleMessage");
+
+    // Create the message element
+    const messageSpan = document.createElement("span");
+    messageSpan.classList.add("consolemessage");
+    messageSpan.innerHTML = message;
+
+    // Append the message to the console container
+    consoleContainer.appendChild(consoleMessage);
+
+    // Apply a fade effect after a delay
+    setTimeout(() => {
+        consoleMessage.style.opacity = '0'; // Fade out after 9 seconds
+    }, 15000);
+
+    setTimeout(() => {
+        consoleMessage.remove();
+    }, 15000); // Remove after 15 seconds
+
+    // Limit messages to the last 5
+    if (consoleContainer.children.length > 5) {
+        consoleContainer.removeChild(consoleContainer.firstChild);
+    }
+}
+function toggleConsoleMessages() {
+    consoleMessages = !consoleMessages;  // Toggle the boolean value
+    console.log(`Console messages are now ${consoleMessages ? "enabled" : "disabled"}`);
+}
 //end of chat logic --------------------|
 
 //-----------------------------
