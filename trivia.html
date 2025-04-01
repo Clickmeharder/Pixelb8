@@ -1574,16 +1574,15 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			console.log(`${user} has already answered correctly. Ignoring further answers.`);
 		}
 	}
-
+	if (command.toLowerCase() === "trivia-askrandom") {
+		triviaAskrandom();
+		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+	}
     // Only allow streamer (jaedraze) or mods to trigger these commands
     if (user.toLowerCase() === streamername || flags.mod) {
 		if (command.toLowerCase() === "trivia-testsound") {
 				playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
 			}
-        if (command.toLowerCase() === "trivia-askrandom") {
-            triviaAskrandom();
-			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
-        }
         // Handle start trivia command 
         if (command.toLowerCase() === "trivia-start") {
             startTrivia();
