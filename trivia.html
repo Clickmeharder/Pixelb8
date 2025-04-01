@@ -1251,11 +1251,11 @@ function toggleTrivia() {
 
 function startTrivia() {
     if (triviaGameState === "started") {
-		showAnnouncement("Trivia is already running! Ignoring duplicate command.");
+		displayChatMessage("system", "Trivia is already running! Ignoring duplicate command.", flags, extra, true);
         console.log("Trivia is already running! Ignoring duplicate command.");
         return; // Stop if trivia is already running
     }
-	showAnnouncement("Trivia should splash and fetch questions");
+	displayChatMessage("system", "Trivia should splash and fetch", flags, extra, true);
     console.log("Trivia should splash and fetch questions");
 
     triviaSplash() // Run splash first
@@ -1271,7 +1271,7 @@ function startTrivia() {
         })
         .catch(error => {
             console.error("Error loading trivia questions:", error);
-			showAnnouncement("Error loading trivia questions:", error);
+			displayChatMessage(error, "Error loading trivia questions:", flags, extra, true);
             triviaGameState = null; // Reset state on failure
         });
 }
@@ -1483,7 +1483,7 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
 
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	console.log( "User:", user, "command:", command);
-	showAnnouncement( "User:", user, "command:", command);
+	displayChatMessage(user, `!${command}`, flags, extra, true);
     // Store user color from extra	
     if (!userColors[user]) {
         userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
@@ -1510,6 +1510,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			}
         // Handle start trivia command
         if (command.toLowerCase() === "trivia") {
+			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
             startTrivia();
         }
         // Handle trivia round 2 command
