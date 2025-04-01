@@ -1540,6 +1540,10 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			console.log(`${user} has already answered correctly. Ignoring further answers.`);
 		}
 	}
+	if (command.toLowerCase() === "trivia-start1") {
+		startTrivia();
+		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+	}
     // Only allow streamer (jaedraze) or mods to trigger these commands
     if (user.toLowerCase() === streamername || flags.mod) {
 		if (command.toLowerCase() === "testsound-1") {
@@ -1547,8 +1551,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			}
         // Handle start trivia command
         if (command.toLowerCase() === "trivia-start") {
-			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
             startTrivia();
+			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
         }
         // Handle trivia round 2 command
         if (command.toLowerCase() === "trivia-continue") {
