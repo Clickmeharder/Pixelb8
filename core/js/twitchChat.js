@@ -116,23 +116,25 @@ function animateFloatingEmote(emoteURL) {
     emote.src = emoteURL;
     emote.classList.add("floatingEmote");
 
-    // Set random starting position
-    emote.style.left = Math.random() * 80 + "vw"; // Random horizontal start
-    emote.style.top = "100vh"; // Start at bottom of the screen
-    emote.style.transform = `scale(${Math.random() * 0.5 + 0.5})`; // Random size
+    let size = Math.random() * 16 + 64; // Random size between **64px - 80px**
+    emote.style.width = `${size}px`;
+    emote.style.height = `${size}px`;
+
+    emote.style.left = Math.random() * 80 + "vw"; // Random horizontal start position
+    emote.style.top = "100vh"; // Start from the bottom
+    emote.style.opacity = "1";
+    emote.style.transform = `scale(${Math.random() * 0.2 + 0.9})`;
 
     document.body.appendChild(emote);
 
-    // Animate upwards and fade out
     setTimeout(() => {
-        emote.style.transform = `translateY(-120vh) scale(${Math.random() * 0.8 + 0.5})`;
+        emote.style.transition = "transform 10s linear, opacity 8s ease-out"; // **Floats slower**
+        emote.style.transform = `translateY(-120vh) scale(${Math.random() * 0.8 + 0.8})`; 
         emote.style.opacity = "0";
-    }, 2000);
+    }, 100);
 
-    // Remove after animation
-    setTimeout(() => emote.remove(), 4000);
+    setTimeout(() => emote.remove(), 10000); // **Lasts 10 seconds before removal**
 }
-
 
 function togglechatElement(elementId, animationType = "fade") {
     const element = document.getElementById(elementId);
