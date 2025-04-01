@@ -1251,9 +1251,11 @@ function toggleTrivia() {
 
 function startTrivia() {
     if (triviaGameState === "started") {
+		showAnnouncement("Trivia is already running! Ignoring duplicate command.");
         console.log("Trivia is already running! Ignoring duplicate command.");
         return; // Stop if trivia is already running
     }
+	showAnnouncement("Trivia should splash and fetch questions");
     console.log("Trivia should splash and fetch questions");
 
     triviaSplash() // Run splash first
@@ -1263,6 +1265,7 @@ function startTrivia() {
             window.triviaQuestions = questions;
 			console.log("triviaGameState = " + triviaGameState);
             console.log("Trivia Questions Loaded:", questions);
+			showAnnouncement("triviaGameState = " + triviaGameState");
 			handlephaseTrivia();
 			
         })
