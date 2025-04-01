@@ -82,7 +82,7 @@ function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = f
         chatContainer.removeChild(chatContainer.firstChild);
     }
 }
-let consoleMessages = true;  // Flag to control whether to show console messages
+let consoleMessages = false;  // Flag to control whether to show console messages
 
 function displayConsoleMessage(message) {
     if (!consoleMessages) return;  // If consoleMessages is false, do nothing
