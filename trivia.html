@@ -743,19 +743,22 @@ let userOverallStats = {}; // This will store the users lifetime stats ie: numbe
 let userScores = {};
 let usedQuestions = [];
 let activeQuestion = null;
+let singleActiveAsk = null;
 let answeredUsers = new Set();
 let firstAnswerUser = null;
 let hideQuestionTimer;
 let questionTimer, countdownTimer;
+
+let totalRounds = 2;
+let round = 1;
+let triviaQuestions = { round1: [], round2: [] };
+// TRIVIA OPTIONS
+let chatanswers = false;  // Set to true when you want to check answers
 let timetoAnswer = 30;
 let timebetweenQuestions = 90;
 let timebetweenRounds = 60;
 let questionsAsked = 0;
 let questionsPerRound = 3;
-let totalRounds = 2;
-let round = 1;
-let triviaQuestions = { round1: [], round2: [] };
-let chatanswers = false;  // Set to true when you want to check answers
 //!!!!!!!!!!!!!!!!!!!!!!!!
 
 //Example Questions
@@ -1464,7 +1467,7 @@ function endTrivia() {
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //- ASK SINGLE RANDOM QUESTION - TESTING CUZ NOOB
-let singleActiveAsk = null;
+
 function askSplash() {
     return showAnnouncement("Asking Question in:", 30)
         .then(() => {
