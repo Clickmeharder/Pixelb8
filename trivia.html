@@ -1544,7 +1544,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 				playSound(); // Play the sound when !playsound is typed in chat
 			}
         // Handle start trivia command
-        if (command.toLowerCase() === "trivia") {
+        if (command.toLowerCase() === "trivia" && args[0]?.toLowerCase() === "start") {
 			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
             startTrivia();
         }
