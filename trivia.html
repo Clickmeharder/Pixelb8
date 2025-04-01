@@ -1265,12 +1265,13 @@ function startTrivia() {
             window.triviaQuestions = questions;
 			console.log("triviaGameState = " + triviaGameState);
             console.log("Trivia Questions Loaded:", questions);
-			showAnnouncement("triviaGameState = " + triviaGameState");
+			showAnnouncement("triviaGameState = " + triviaGameState);
 			handlephaseTrivia();
 			
         })
         .catch(error => {
             console.error("Error loading trivia questions:", error);
+			showAnnouncement("Error loading trivia questions:", error);
             triviaGameState = null; // Reset state on failure
         });
 }
