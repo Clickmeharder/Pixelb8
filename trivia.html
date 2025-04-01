@@ -1013,8 +1013,6 @@ function checkAnswer(user, message) {
     let correctAnswer = activeQuestion.answer.toLowerCase();
     let userAnswer = message.trim().toLowerCase();
 
-
-
     if (userAnswer === correctAnswer) {
         // If `singleActiveAsk` is active, only allow the first correct answer
         if (singleActiveAsk !== null) {
@@ -1254,11 +1252,11 @@ function showPodium() {
 		board.style.animation = "slideIn 0.8s ease-out forwards";
 		//log in console & display console message on screen
         console.log("Displaying triviaPodium...");
-        displayChatMessage("Console:", "Displaying triviaPodium...", {}, {});
+        displayConsoleMessage("Console:", "Displaying triviaPodium...", {}, {});
     } else {
 		//log in console & display console message on screen
         console.log("Error: triviaPodium element not found!");
-        displayChatMessage("Console:", "Error: triviaPodium element not found!", {}, {});
+        displayConsoleMessage("Console:", "Error: triviaPodium element not found!", {}, {});
     }
 }
 function hidePodium() {
@@ -1309,13 +1307,13 @@ function toggleTrivia() {
 
 
 function startTrivia() {
-	displayChatMessage("system", "startTrivia fn called");
+	displayConsoleMessage("system", "startTrivia fn called");
     if (triviaGameState === "started") {
-		displayChatMessage("system", "Trivia is already running! Ignoring duplicate command.");
+		displayConsoleMessage("system", "Trivia is already running! Ignoring duplicate command.");
         console.log("Trivia is already running! Ignoring duplicate command.");
         return; // Stop if trivia is already running
     }
-	displayChatMessage("system", "Trivia Should splash and fetch.");
+	displayConsoleMessage("system", "Trivia Should splash and fetch.");
     console.log("Trivia should splash and fetch questions");
 
     triviaSplash() // Run splash first
@@ -1325,13 +1323,13 @@ function startTrivia() {
             window.triviaQuestions = questions;
 			console.log("triviaGameState = " + triviaGameState);
             console.log("Trivia Questions Loaded:", questions);
-			displayChatMessage("system", `triviaGameState = ${triviaGameState}`);
+			displayConsoleMessage("system", `triviaGameState = ${triviaGameState}`);
 			handlephaseTrivia();
 			
         })
         .catch(error => {
             console.error("Error loading trivia questions:", error);
-			displayChatMessage("system", `Error loading trivia questions: ${error}`);
+			displayConsoleMessage("system", `Error loading trivia questions: ${error}`);
             triviaGameState = null; // Reset state on failure
         });
 
@@ -1422,7 +1420,7 @@ function showTriviaAsk() {
     const questionWrapper = document.getElementById("questionWrapper");
     const timer = document.getElementById("timer");
     const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
-	displayChatMessage("system", "showTriviaAsk() called");
+	displayConsoleMessage("system", "showTriviaAsk() called");
     // Show elements with animations
 	triviaWrapper.style.visibility = "visible";
 	triviaWrapper.style.opacity = "1";
@@ -1478,18 +1476,18 @@ function AskQuestion() {
     }, 1000);
 }
 function startTriviaAsk() {
-	displayChatMessage("system", "startTrivia fn called");
+	displayConsoleMessage("system", "startTrivia fn called");
     if (triviaGameState === "started") {
 		displayChatMessage("system", "Trivia is already running! Ignoring duplicate command.");
         console.log("Trivia is already running! Ignoring duplicate command.");
         return; // Stop if trivia is already running
     }
     if (singleActiveAsk === "Active") {
-		displayChatMessage("system", "Trivia is already Asking a question! Ignoring duplicate command.");
+		displayConsoleMessage("system", "Trivia is already Asking a question! Ignoring duplicate command.");
         console.log("Trivia is already running! Ignoring duplicate command.");
         return; // Stop if trivia is already running
     }
-	displayChatMessage("system", "Trivia ask continues");
+	displayConsoleMessage("system", "Trivia ask continues");
     console.log("Trivia should splash and fetch questions");
 
     askSplash() // Run splash first
@@ -1499,12 +1497,12 @@ function startTriviaAsk() {
             window.triviaQuestions = questions;
 			console.log("singleActiveAsk = " + singleActiveAsk);
             console.log("Trivia Questions Loaded:", questions);
-			displayChatMessage("system", `singleActiveAsk = ${singleActiveAsk}`);
+			displayConsoleMessage("system", `singleActiveAsk = ${singleActiveAsk}`);
 			AskQuestion();
         })
         .catch(error => {
             console.error("Error loading trivia questions:", error);
-			displayChatMessage("system", `Error loading trivia questions: ${error}`);
+			displayConsoleMessage("system", `Error loading trivia questions: ${error}`);
             singleActiveAsk = null; // Reset state on failure
         });
 
@@ -1513,10 +1511,10 @@ function startTriviaAsk() {
 function displayLastWinner() {
     if (TriviaSingleAskLastWinner) {
         const message = `🎉 Congratulations to ${TriviaSingleAskLastWinner} for answering first correctly! 🎉`;
-        displayChatMessage("system", message, {type: "system"}, {}, false);
+        displayConsoleMessage("system", message, {type: "system"}, {}, false);
     } else {
         const message = "No winner yet.";
-        displayChatMessage("system", message, {type: "system"}, {}, false);
+        displayConsoleMessage("system", message, {type: "system"}, {}, false);
     }
 }
 //------------------------
