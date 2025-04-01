@@ -1541,21 +1541,21 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     // Only allow streamer (jaedraze) or mods to trigger these commands
     if (user.toLowerCase() === streamername || flags.mod) {
 		if (command.toLowerCase() === "testsound-1") {
-				playSound(); // Play the sound when !playsound is typed in chat
+				playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
 			}
         // Handle start trivia command
-        if (command.toLowerCase() === "trivia" && args[0]?.toLowerCase() === "start") {
+        if (command.toLowerCase() === "trivia-start") {
 			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
             startTrivia();
         }
         // Handle trivia round 2 command
-        if (command.toLowerCase() === "trivianextround") {
+        if (command.toLowerCase() === "trivia-continue") {
 			console.log("Current Round:", round);
             questionsAsked = 0; // Reset for the new round
             document.getElementById("question").textContent = "Entrivia Round:"+ round;
             setTimeout(handlephaseTrivia, 10000);
         }
-		if (command.toLowerCase() === "triviaaudio" && args[0]?.toLowerCase() === "toggle") {
+		if (command.toLowerCase() === "trivia-audio") {
 			displayChatMessage(user, `!triviaaudio toggle ✅`, flags, extra, true);
 			toggleAudioSetting();
 		}
