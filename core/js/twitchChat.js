@@ -34,7 +34,7 @@
 //<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 
 // Chat message display function
-function displayChatMessage(user, message, flags, extra) {
+function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = false) {
     const chatContainer = document.getElementById("twitchMessagebox");
     // Create a new chat message element
     const chatMessage = document.createElement("div");
@@ -47,26 +47,27 @@ function displayChatMessage(user, message, flags, extra) {
     const userColor = extra.userColor || "#FFFFFF"; // Default to white if no color is set
     usernameSpan.style.color = userColor; // Apply user color dynamically
 
-    // Create the message element and set its innerHTML
+    // Create the message element
     const messageSpan = document.createElement("span");
     messageSpan.classList.add("twitchmessage");
     messageSpan.innerHTML = message;
-	
-    // Append the username and message spans to the chat message div
+    
+    // Append elements to the chat message div
     chatMessage.appendChild(usernameSpan);
     chatMessage.appendChild(messageSpan);
-	
+    
     // Add the chat message to the container
     chatContainer.appendChild(chatMessage);
-    // Apply a fade effect to the chat message after a delay
+    
+    // Apply a fade effect after a delay
     setTimeout(() => {
         chatMessage.style.opacity = '0'; // Fade out after 9 seconds
     }, 15000);
     setTimeout(() => {
         chatMessage.remove();
-    }, 15000); // Remove after 4 seconds (1 second for fading)
+    }, 15000); // Remove after 15 seconds
 
-    // Limit the number of messages displayed in the chat container
+    // Limit messages to the last 5
     if (chatContainer.children.length > 5) {
         chatContainer.removeChild(chatContainer.firstChild);
     }
@@ -93,21 +94,36 @@ function togglechatElement(elementId, animationType = "fade") {
     }
 }
 
-// Generic function to play any sound
-function playchatSound(name) {
-    if (sounds[name]) {
-        sounds[name].muted = false; // Unmute the sound
-        sounds[name].currentTime = 0; // Reset sound to start
-        sounds[name].play().catch(error => {
+let chataudioSetting = "on"; // Change to "off" to mute all sounds
+
+const chatsounds = {
+    messageSound: new Audio("/assets/sounds/snakedie_sound1.mp3"),
+	commandSound: new Audio("/assets/sounds/snakedie_sound1.mp3"),
+    //gameshowintro: new Audio("/assets/sounds/gameshow_intro.mp3"),
+    // Add more sounds here
+};
+function playChatSound(name) {
+    if (chataudioSetting === "off") return; // Stop if audio is disabled
+
+    if (chatsounds[name]) {
+        chatsounds[name].muted = false; // Unmute the sound
+        chatsounds[name].currentTime = 0; // Reset sound to start
+        chatsounds[name].play().catch(error => {
             console.error(`Error playing ${name}:`, error);
         });
     } else {
         console.error(`Sound '${name}' not found.`);
     }
 }
+// Function to toggle audio on/off
+function toggleChatAudioSetting() {
+    chataudioSetting = chataudioSetting === "on" ? "off" : "on";
+    console.log(`chat Audio setting is now: ${chataudioSetting}`);
+}
 
 //end of chat logic --------------------|
 // ComfyJS onChat event handler
+let streamername = "jaedraze"; // Default streamer name
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message);
     // Call the displayChatMessage function and pass flags and extra for userColor and badges
@@ -150,8 +166,9 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 };
 
 
-let streamername = "jaedraze"; // Default streamer name
-
+//!!!!!!!!!!!!!!!!!!!!!!!
+// Our Comfy Connection
+//!!!!!!!!!!!!!!!!!!!!!!!
 
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
@@ -160,40 +177,58 @@ function setStreamer(newStreamer) {
 
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
-        localStorage.setItem("lastStreamer", streamername); // Save to localStorage
+		 // Save to localStorage
+        localStorage.setItem("lastStreamer", streamername);
         ComfyJS.Init(streamername);
         console.log(`Connected to Twitch chat for: ${streamername}`);
-
         // Update button styles
+		//hide connect button and streamer input
         button.style.display = "none";
-        button.style.backgroundColor = "#28a745"; 
-        button.style.color = "#0e5b75"; 
-        button.style.border = "1px solid #28a745"; 
-
+		input.style.display = "none";
+		// Green outline for valid input --remove if display none/block works right
+        input.style.outline = "3px outset #28a745";
+		//show disconnect button and style it
         twitchdisconnectbutton.style.display = "block"; 
         twitchdisconnectbutton.style.backgroundColor = "#dc3545"; 
         twitchdisconnectbutton.style.color = "#ffffff"; 
-        twitchdisconnectbutton.style.border = "1px solid #dc3545"; 
-
-        // Green outline for valid input
-        input.style.outline = "3px outset #28a745"; 
+        twitchdisconnectbutton.style.border = "1px solid #dc3545";  
     } else {
         console.log("Please enter a valid streamer name.");
         disconnectBot(); // Ensure disconnection
         localStorage.removeItem("lastStreamer"); // Remove stored streamer name
-
+        // Show input with Red outline
+		input.style.display = "block";
+		input.style.outline = "3px outset #dc3545"; 
         // Update UI for disconnection
         twitchdisconnectbutton.style.display = "none"; 
         button.textContent = "id10t err: try diff name";
         button.style.backgroundColor = "#dc3545"; 
         button.style.color = "#ffffff"; 
         button.style.border = "1px solid #dc3545"; 
-
-        // Red outline for invalid input
-        input.style.outline = "3px outset #dc3545"; 
     }
 }
-
+function disconnectBot() {
+	const button = document.getElementById("streamersButt");
+	const input = document.querySelector("#comfycontrolContainer input[type='text']");
+	button.style.display = "block";
+	input.style.display = "block";
+    ComfyJS.Disconnect();
+    console.log("Bot disconnected from Twitch.");
+    // Remove stored streamer name from localStorage
+    if (localStorage.getItem("lastStreamer")) {
+        localStorage.removeItem("lastStreamer");
+        console.log("Removed last connected streamer from storage.");
+    }
+    // Update UI after disconnecting
+    const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
+    
+    twitchdisconnectbutton.style.display = "none";
+    button.textContent = "Connect";
+    button.style.backgroundColor = "#28a745"; 
+    button.style.color = "#0e5b75"; 
+    button.style.border = "1px solid #28a745";  
+    input.style.outline = "3px outset #dc3545"; 
+}
 // Auto-reconnect on page load
 window.onload = function () {
     const savedStreamer = localStorage.getItem("lastStreamer");
@@ -201,39 +236,12 @@ window.onload = function () {
         setStreamer(savedStreamer); // Auto-connect
     }
 };
-
-function disconnectBot() {
-	const button = document.getElementById("streamersButt");
-	button.style.display = "block";
-    ComfyJS.Disconnect();
-	
-    console.log("Bot disconnected from Twitch.");
-
-    // Remove stored streamer name from localStorage
-    if (localStorage.getItem("lastStreamer")) {
-        localStorage.removeItem("lastStreamer");
-        console.log("Removed last connected streamer from storage.");
-    }
-
-    // Update UI after disconnecting
-    const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
-    const input = document.querySelector("#comfycontrolContainer input[type='text']");
-
-    twitchdisconnectbutton.style.display = "none"; 
-    button.textContent = "Connect";
-    button.style.backgroundColor = "#dc3545"; 
-    button.style.color = "#ffffff"; 
-    button.style.border = "1px solid #dc3545"; 
-    input.style.outline = "3px outset #dc3545"; 
-}
-
-
 // Button event listener: first endTrivia, then setStreamer
 document.getElementById("streamersButt").addEventListener("click", function() {
-/*     if (triviaGameState === "started") {
+    if (triviaGameState === "started") {
 		console.log("Ending Trivia.");
         endTrivia(); // Only end trivia if it's running
-    } */
+    }
     let newStreamer = document.querySelector("input[name='yourTextName']").value;
 	console.log("attempting to Connect to:" + newStreamer);
     setStreamer(newStreamer); // Then, set the new streamer
