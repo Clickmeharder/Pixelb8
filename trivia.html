@@ -1351,7 +1351,7 @@ function endTrivia() {
 //- ASK SINGLE RANDOM QUESTION - TESTING CUZ NOOB
 let singleActiveAsk = null;
 function askSplash() {
-    return showAnnouncement("Asking Question in:", 30) // Ensure this returns a Promise
+    return showAnnouncement("Asking Question in:", 30)
         .then(() => {
             showTriviaAsk();  // Show trivia after the countdown
         })
