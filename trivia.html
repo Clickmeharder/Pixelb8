@@ -377,7 +377,14 @@
 			overflow: hidden;
 		}
 		.small {font-size: 0.9em;color: #888;}
-				
+		#entriviaCmdContainer {
+			position: absolute;
+			left: 0;
+			bottom: 30%;
+			width: 29%;
+		}
+		div#entriviaMessagebox {text-align: left;border:;max-height: 170px;}
+		#entriviaMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
 		#twitchchatContainer {
 			position: absolute;
 			left: 0;
@@ -388,6 +395,11 @@
 		#twitchMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
 		#username {font-weight:bold;}
 		.chatMessage {font-size: 18px;padding-left:8px;padding-right:8px;color: white;background-color: #000000c2;border: 1px dashed #696969;}
+
+		.consoleMessage {padding: 10px;color: #ffffff;background-color: #333333;margin: 5px 0;border: 1px dashed #696969;opacity: 1;transition: opacity 1s ease-out;}
+		.consoleUser {font-weight: bold;color: #ff6600;}
+		.consoleMessageText {color: #ffffff;}
+
     </style>
     <style>
 		/* ANIMATIONS */
@@ -482,23 +494,7 @@
 			50% { opacity: 1; transform: translateY(0px); }
 			100% { text-shadow: 0px 0px 10px #0ea4a4; }
 		}
-		.consoleMessage {
-			padding: 10px;
-			color: #ffffff;
-			background-color: #333333;
-			margin: 5px 0;
-			border: 1px dashed #696969;
-			opacity: 1;
-			transition: opacity 1s ease-out;
-		}
-		.consoleUser {
-			font-weight: bold;
-			color: #ff6600; /* Example color */
-		}
 
-		.consoleMessageText {
-			color: #ffffff; /* White for the message */
-		}
 		/* Hidden state */
 		.hidden {
 			opacity: 0;
@@ -508,9 +504,13 @@
     </style>
 </head>
 <body>
-	<!--                                                              -->
+	<!--                   -->
 	<div id="twitchchatContainer">
 		<div id="twitchMessagebox">
+		</div>
+	</div>
+	<div id="entriviaCmdContainer">
+		<div id="entriviaMessagebox">
 		</div>
 	</div>
 	<!--                                                              -->
@@ -664,6 +664,44 @@ function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = f
     }, 15000);
     setTimeout(() => {
         chatMessage.remove();
+    }, 15000); // Remove after 15 seconds
+
+    // Limit messages to the last 5
+    if (chatContainer.children.length > 5) {
+        chatContainer.removeChild(chatContainer.firstChild);
+    }
+}
+function displayTriviaMessage(user, message, flags = {}, extra = {}, isCorrect = false) {
+    const chatContainer = document.getElementById("entriviaMessagebox");
+    // Create a new chat message element
+    const entriviaMessage = document.createElement("div");
+    entriviaMessage.classList.add("chatMessage");
+
+    const usernameSpan = document.createElement("span");
+    usernameSpan.classList.add("username");
+    usernameSpan.innerHTML = user + ": ";
+
+    const userColor = extra.userColor || "#FFFFFF"; // Default to white if no color is set
+    usernameSpan.style.color = userColor; // Apply user color dynamically
+
+    // Create the message element
+    const messageSpan = document.createElement("span");
+    messageSpan.classList.add("twitchmessage");
+    messageSpan.innerHTML = message;
+    
+    // Append elements to the chat message div
+    entriviaMessage.appendChild(usernameSpan);
+    entriviaMessage.appendChild(messageSpan);
+    
+    // Add the chat message to the container
+    chatContainer.appendChild(entriviaMessage);
+    
+    // Apply a fade effect after a delay
+    setTimeout(() => {
+        entriviaMessage.style.opacity = '0'; // Fade out after 9 seconds
+    }, 15000);
+    setTimeout(() => {
+        entriviaMessage.remove();
     }, 15000); // Remove after 15 seconds
 
     // Limit messages to the last 5
