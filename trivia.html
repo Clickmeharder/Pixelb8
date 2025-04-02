@@ -1100,6 +1100,15 @@ function checkAnswer(user, message) {
     let correctAnswer = activeQuestion.answer.toLowerCase();
     let userAnswer = message.trim().toLowerCase();
 
+    // Initialize userStats[user] to prevent undefined issues
+    if (!userStats[user]) {
+        userStats[user] = {
+            correctAnswers: 0,
+            incorrectAnswers: 0,
+            firstAnswers: 0,
+        };
+    }
+
     // If `singleActiveAsk` is active, only allow the first correct answer
     if (singleActiveAsk !== null) {
         if (!firstAnswerUser) {
@@ -1114,14 +1123,6 @@ function checkAnswer(user, message) {
     }
 
     // Normal trivia logic (multiple correct answers allowed)
-    if (!userStats[user]) {
-        userStats[user] = {
-            correctAnswers: 0,
-            incorrectAnswers: 0,
-            firstAnswers: 0,
-        };
-    }
-
     if (userAnswer === correctAnswer) {
         userStats[user].correctAnswers++;
         answeredUsers.add(user);
@@ -1138,7 +1139,7 @@ function checkAnswer(user, message) {
 
         updateTriviaboard();
         return true;
-    } 
+    } else {
 
     // Normal incorrect answer logic
     userStats[user].incorrectAnswers++;  
@@ -1147,6 +1148,7 @@ function checkAnswer(user, message) {
 
     return false;
 }
+
 
 
 //update the guestion counter
