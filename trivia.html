@@ -1839,15 +1839,15 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 	if (command.toLowerCase() === "triviatest-sounds") {
 		if (!isStreamerAndAuthorize(user, command)) return;
-		playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+		playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
 	}
     if (command.toLowerCase() === "trivia-start") {
         if (!isStreamerAndAuthorize(user, command)) return;
-        startTrivia();
         displayConsoleMessage(user, `!${command} ✅`);
         displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+		startTrivia();
     }
 	if (command.toLowerCase() === "trivia-nextround") {
 		if (!isStreamerAndAuthorize(user, command)) return;
@@ -1858,58 +1858,61 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
     if (command.toLowerCase() === "trivia-ask") {
         if (!isStreamerAndAuthorize(user, command)) return;
-        startTriviaAsk();
         displayConsoleMessage(user, `!${command} ✅`);
         displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+        startTriviaAsk();
     }
 	if (command.toLowerCase() === "trivia-lastask") {
         if (!isStreamerAndAuthorize(user, command)) return;
-		displayLastWinner();
 		displayConsoleMessage(user, `!${command} ✅`);
         displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+		displayLastWinner();
     }
 	if (command.toLowerCase() === "trivia-lastwinners") {
         if (!isStreamerAndAuthorize(user, command)) return;
-		displayLastTriviaWinners();
 		displayConsoleMessage(user, `!${command} ✅`);
         displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+		displayLastTriviaWinners();
     }
 	if (command.toLowerCase() === "trivia-history") {
         if (!isStreamerAndAuthorize(user, command)) return;
-		displayTriviaHistory();
 		displayConsoleMessage(user, `!${command} ✅`);
         displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+		displayTriviaHistory();
     }
 	if (command === "chatanswers") {
 		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
 		chatanswers = !chatanswers;  // Toggle chatanswers
 		// Show in the chat whether chat answers are now enabled or disabled
-		displayConsoleMessage(user, `!${command} ✅`);
 		displayChatMessage(user, `Chat answers are now ${chatanswers ? "enabled" : "disabled"}.`, flags, extra, false);
 	}
 	if (command.toLowerCase() === "trivia-audio") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayChatMessage(user, `!triviaaudio toggle ✅`, flags, extra, true);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 		toggleAudioSetting();
 	}
 	if (command === "toggletriviaboard") {
 		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
 		toggleElement("triviaboard", "slide");
 	}
 	if (command === "togglequestions") {
 		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
 		toggleElement("questionWrapper", "fade");
 	}
 	if (command.toLowerCase() === "toggletrivia") {
 		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
 		toggleTrivia();
 		toggleElement("triviaWrapper", "fade");
 	}
 	if (command === "togglechat1") {
 		if (!isStreamerAndAuthorize(user, command)) return;
-		toggleElement("twitchchatContainer", "fade");
 		displayConsoleMessage(user, `!${command} ✅`);
+		toggleElement("twitchchatContainer", "fade");
 	}
 	if (command.toLowerCase() === "togglechat2") {
 		if (!isStreamerAndAuthorize(user, command)) return;
@@ -1926,9 +1929,9 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     if (flags.mod) {
 		if (command === "triviamod-test") {
 			if (!isStreamerAndAuthorize(user, command)) return;
-			toggleElement("twitchchatContainer", "fade");
 			displayConsoleMessage(user, `!${command} ✅`);
 			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+			toggleElement("twitchchatContainer", "fade");
 		}
 	}
 
