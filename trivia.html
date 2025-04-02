@@ -1103,7 +1103,7 @@ function checkAnswer(user, message) {
 		// Normal incorrect answer logic
 		userStats[user].incorrectAnswers++;  
 		userScores[user] = (userScores[user] || 0) - 1;
-		updateTriviaboard();
+		
 		playSound("triviawrong");
 		return false;  
 }
