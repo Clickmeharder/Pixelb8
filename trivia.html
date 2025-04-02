@@ -43,7 +43,7 @@
 			background: linear-gradient(135deg, #001f1fe8, #004040eb);
 			color: white;
 			border-radius: 8px;
-			box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
 			opacity: 0; /* Start hidden */
 			transform: translateY(-10px); /* Slight slide-up effect */
 			transition: opacity 0.4s ease-out, transform 0.4s ease-out;
@@ -94,45 +94,72 @@
 			text-align: start;
 			display: flex;
 			color: #00bafff0;
+			background-color: #07141bc7;
 			text-shadow: 1px 1px 4px rgb(2 25 23 / 92%);
 			flex-direction: column;
-			border: 3px inset #8b8585;
+			border: 3px inset #302b2b;
 			overflow: hidden;
 			max-height: 20px; /* Initially small */
 			padding: 0 10px; /* Horizontal padding stays */
+			padding-top: 4px;
 			transition: max-height 0.6s ease-out, padding 0.3s ease-out;
 		}
 
 		div#trivia-settings:hover {
 			max-height: 300px;
 			padding: 10px;
+			padding-top: 4px;
 			height: 3%;
 			overflow-y: scroll;
 		}
 		/* Trivia Settings Header */
 		#trivia-settingsheader {
+			font-family: yatra one;
 			font-weight: bold;
-			font-size: 16px;
+			text-align: center;
+			font-size: 22px;
 			margin-bottom: 5px;
 			display: block;
+			border: 3px outset #273a4c;
 		}
 		div#trivia-settings label {
 			color: #f36402;
 			font-weight: bold;
 		}
 		h3 {
+			color: #e54513;
+			text-align: center;
+			border: 5px ridge #273a4c;
 			margin: 0;
 		}
+		div#addCustomQuestionForm {
+			text-align: center;
+		}
+		div#manageCustomQuestions {
+			text-align: center;
+			border: inherit;
+		}
 		#trivia-settings input, #trivia-settings select, select#questionList {
+			color: #cbcbcb;
 			background-color: #25292ef7;
+		}
+		#trivia-settings input {
+			color: #cbcbcb;
+			font-size: 16px;
+			font-weight: bold;
+			text-align: center;
+			width: 15%;
 		}
 		select#questionList {
 			color: #cbcbcb;
+			width: 100%;
 		}
 		.entriviasettings-inputRow {
 			display: flex;
 			flex-direction: row;
+			justify-content: space-between;
 			align-items: center;
+			border: 2px ridge #273a4c;
 		}
 		#trivia-settings input {width:10%;}
 
