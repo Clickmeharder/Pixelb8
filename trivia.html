@@ -129,6 +129,9 @@
 		select#questionList {
 			color: #cbcbcb;
 		}
+		.entriviasettings-inputRow {
+			
+		}
 
 	</style>
     <style>
@@ -568,14 +571,22 @@
 				<button id="deleteQuestionBtn">Delete Selected Question</button>
 			</div>
 			<h3>Settings</h3>
-			<label for="timeBetweenQuestions">Seconds Between Questions:</label>
-			<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
-			<label for="timeToAnswer">Time to Answer (seconds):</label>
-			<input type="number" id="timeToAnswer" value="30" min="1" step="1">
-			<label for="questionsPerRound">Questions Per Round:</label>
-			<input type="number" id="questionsPerRound" value="1" min="1" step="1">
-			<label for="timeBetweenRounds">Seconds between Rounds:</label>
-			<input type="number" id="timeBetweenRounds" value="30" min="1" step="1">
+			<div class ="entriviasettings-inputRow">
+				<label for="timeBetweenQuestions">Seconds Between Questions:</label>
+				<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
+			</div>
+			<div class ="entriviasettings-inputRow">
+				<label for="timeToAnswer">Time to Answer (seconds):</label>
+				<input type="number" id="timeToAnswer" value="30" min="1" step="1">
+			</div>
+			<div class ="entriviasettings-inputRow">
+				<label for="questionsPerRound">Questions Per Round:</label>
+				<input type="number" id="questionsPerRound" value="1" min="1" step="1">
+			</div>
+			<div class ="entriviasettings-inputRow">
+				<label for="timeBetweenRounds">Seconds between Rounds:</label>
+				<input type="number" id="timeBetweenRounds" value="30" min="1" step="1">
+			</div>
 			<button id="changeSettings">Change Settings</button>
 			<button id="resetSettings">Reset to Default</button>
 		</div>
