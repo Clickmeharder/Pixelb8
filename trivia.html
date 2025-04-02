@@ -1606,6 +1606,10 @@ function displayTriviaHistory() {
     });
 }
 
+//displayLastWinner();
+//displayLastTriviaWinners();
+//displayTriviaHistory();
+
 // Load saved history when the bot starts
 loadTriviaHistory();
 //------------------------
@@ -1838,6 +1842,18 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "trivia-lastask") {
         if (!isStreamerAndAuthorize(user, command)) return;
 		displayLastWinner();
+		displayConsoleMessage(user, `!${command} ✅`);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+    }
+	if (command.toLowerCase() === "trivia-lastwinners") {
+        if (!isStreamerAndAuthorize(user, command)) return;
+		displayLastTriviaWinners();
+		displayConsoleMessage(user, `!${command} ✅`);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+    }
+	if (command.toLowerCase() === "trivia-history") {
+        if (!isStreamerAndAuthorize(user, command)) return;
+		displayTriviaHistory();
 		displayConsoleMessage(user, `!${command} ✅`);
         displayChatMessage(user, `!${command} ✅`, flags, extra, true);
     }
