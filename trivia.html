@@ -2209,7 +2209,7 @@ document.getElementById("changeSettings").addEventListener("click", function() {
     };
     localStorage.setItem("triviaClassicSettings", JSON.stringify(triviaClassicSettings));
 
-    alert("Trivia settings updated and saved!");
+    displayTriviaMessage("!!", "Entrivia Settings updated and saved.", {}, {});
 });
 document.getElementById("resetSettings").addEventListener("click", function() {
     // Default settings
@@ -2227,7 +2227,7 @@ document.getElementById("resetSettings").addEventListener("click", function() {
     document.getElementById("timeBetweenRounds").value = timebetweenRounds;
     document.getElementById("questionsPerRound").value = questionsPerRound;
 
-    alert("Settings have been reset to default!");
+    displayTriviaMessage("!!", "Entrivia Settings Reset to default.", {}, {});
 });
 // Add event listener to the button to add custom questions
 document.getElementById('submitQuestionBtn').addEventListener('click', function() {
@@ -2238,7 +2238,7 @@ document.getElementById('submitQuestionBtn').addEventListener('click', function(
 
     // Validate inputs
     if (!questionText || !correctAnswer) {
-        alert('Please fill in both the question and the answer!');
+		displayTriviaMessage("error!", "Please fill in both the question and the answer.", {}, {});
         return;
     }
 
