@@ -1692,6 +1692,59 @@ function displayTriviaHistory() {
 //displayLastWinner();
 //displayLastTriviaWinners();
 //displayTriviaHistory();
+// Function to load custom questions into the dropdown
+function loadCustomQuestions() {
+    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
+    const dropdown = document.getElementById('questionList');
+
+    // Clear current dropdown options
+    dropdown.innerHTML = '';
+
+    // Add a default option
+    let defaultOption = document.createElement('option');
+    defaultOption.text = "Select a question to delete";
+    dropdown.appendChild(defaultOption);
+
+    // Loop through round1 and round2 to add questions to the dropdown
+    customQuestions.round1.concat(customQuestions.round2).forEach((q, index) => {
+        let option = document.createElement('option');
+        option.value = index;
+        option.text = q.question;  // Display the question text in the dropdown
+        dropdown.appendChild(option);
+    });
+}
+// Function to delete the selected question
+function deleteCustomQuestion() {
+    const dropdown = document.getElementById('questionList');
+    const selectedIndex = dropdown.value;  // Get the selected question index
+
+    if (selectedIndex === '') {
+        alert("Please select a question to delete.");
+        return;
+    }
+
+    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
+    const selectedQuestion = customQuestions.round1.concat(customQuestions.round2)[selectedIndex];
+
+    if (selectedQuestion) {
+        // Confirm deletion
+        const confirmDelete = confirm(`Are you sure you want to delete the question: "${selectedQuestion.question}"?`);
+        if (confirmDelete) {
+            // Remove from the round1 or round2 based on the index
+            if (customQuestions.round1.includes(selectedQuestion)) {
+                customQuestions.round1 = customQuestions.round1.filter(q => q !== selectedQuestion);
+            } else {
+                customQuestions.round2 = customQuestions.round2.filter(q => q !== selectedQuestion);
+            }
+
+            // Save the updated custom questions to localStorage
+            localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
+
+            alert('Question deleted successfully!');
+            loadCustomQuestions();  // Reload the dropdown
+        }
+    }
+}
 
 // Load saved history when the bot starts
 loadTriviaHistory();
@@ -1845,6 +1898,7 @@ function toggleAudioSetting() {
     console.log(`Audio setting is now: ${audioSetting}`);
 	displayConsoleMessage("system", `Audio setting is now: ${audioSetting}`);
 }
+//----------------------------------------------------
 // Function to toggle audio on/off
 function toggleEntriviachatOverlay() {
     entriviachatOverlay = entriviachatOverlay === "on" ? "off" : "on";
@@ -2257,60 +2311,6 @@ document.getElementById('submitQuestionBtn').addEventListener('click', function(
     document.getElementById('questionText').value = '';
     document.getElementById('correctAnswer').value = '';
 });
-// Function to load custom questions into the dropdown
-function loadCustomQuestions() {
-    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
-    const dropdown = document.getElementById('questionList');
-
-    // Clear current dropdown options
-    dropdown.innerHTML = '';
-
-    // Add a default option
-    let defaultOption = document.createElement('option');
-    defaultOption.text = "Select a question to delete";
-    dropdown.appendChild(defaultOption);
-
-    // Loop through round1 and round2 to add questions to the dropdown
-    customQuestions.round1.concat(customQuestions.round2).forEach((q, index) => {
-        let option = document.createElement('option');
-        option.value = index;
-        option.text = q.question;  // Display the question text in the dropdown
-        dropdown.appendChild(option);
-    });
-}
-
-// Function to delete the selected question
-function deleteCustomQuestion() {
-    const dropdown = document.getElementById('questionList');
-    const selectedIndex = dropdown.value;  // Get the selected question index
-
-    if (selectedIndex === '') {
-        alert("Please select a question to delete.");
-        return;
-    }
-
-    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
-    const selectedQuestion = customQuestions.round1.concat(customQuestions.round2)[selectedIndex];
-
-    if (selectedQuestion) {
-        // Confirm deletion
-        const confirmDelete = confirm(`Are you sure you want to delete the question: "${selectedQuestion.question}"?`);
-        if (confirmDelete) {
-            // Remove from the round1 or round2 based on the index
-            if (customQuestions.round1.includes(selectedQuestion)) {
-                customQuestions.round1 = customQuestions.round1.filter(q => q !== selectedQuestion);
-            } else {
-                customQuestions.round2 = customQuestions.round2.filter(q => q !== selectedQuestion);
-            }
-
-            // Save the updated custom questions to localStorage
-            localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
-
-            alert('Question deleted successfully!');
-            loadCustomQuestions();  // Reload the dropdown
-        }
-    }
-}
 
 // Event listener to handle the delete button click
 document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCustomQuestion);
