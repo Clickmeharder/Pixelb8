@@ -380,7 +380,7 @@
 		#entriviaCmdContainer {
 			position: absolute;
 			left: 0;
-			bottom: 30%;
+			bottom: 60%;
 			width: 29%;
 		}
 		div#entriviaMessagebox {text-align: left;border:;max-height: 170px;}
@@ -1840,13 +1840,16 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		let isCorrect = checkAnswer(user, answer);  // Check if the answer is correct
 		// Display the answer in chat regardless of whether it's correct or incorrect
 		if (isCorrect) {
+			// displayTriviaMessage
 			// If the answer is correct, display the answer with a ✅ checkmark
 			displayConsoleMessage(user, `!${command} ${answer} ✅`);
+			displayTriviaMessage(user, `!${command} ${answer} ✅`, flags, extra, true);
 			displayChatMessage(user, `!${command} ${answer} ✅`, flags, extra, true);  // Show correct answer in chat
 		} else if (!answeredUsers.has(user)) {
 			// If the user hasn't answered correctly yet, display the answer with an ❌ X mark
 			displayConsoleMessage(user, `!${command} ${answer} ❌`);
-			displayChatMessage(user, `!${command} ${answer} ❌`, flags, extra, false);// Show incorrect answer in chat
+			displayTriviaMessage(user, `!${command} ${answer} ❌`, flags, extra, false);
+			displayChatMessage(user, `!${command} ${answer} ❌`, flags, extra, false);
 		} else {
 			// If the user has already answered correctly, do nothing (ignore their further answers)
 			console.log(`${user} has already answered correctly. Ignoring further answers.`);
@@ -1908,6 +1911,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		chatanswers = !chatanswers;  // Toggle chatanswers
 		// Show in the chat whether chat answers are now enabled or disabled
 		displayChatMessage(user, `Chat answers are now ${chatanswers ? "enabled" : "disabled"}.`, flags, extra, false);
+	}
+	if (command.toLowerCase() === "trivia-twitchchat") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+		toggleEntriviachatOverlay();
 	}
 	if (command.toLowerCase() === "trivia-audio") {
 		if (!isStreamerAndAuthorize(user, command)) return;
