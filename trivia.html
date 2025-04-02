@@ -1590,44 +1590,44 @@ function startTriviaAsk() {
 function displayLastWinner() {
     if (TriviaSingleAskLastWinner) {
         const message = `🎉 Congratulations to ${TriviaSingleAskLastWinner} for answering first correctly! 🎉`;
-        displayTriviaMessage("system", message);
+        displayTriviaMessage("📢", message);
     } else {
         const message = "No winner yet.";
-        displayTriviaMessage("system", message);
+        displayTriviaMessage("📢", message);
     }
 }
 // Function to display last game's winners
 function displayLastTriviaWinners() {
     if (!lastTriviaClassicWinners || lastTriviaClassicWinners.length === 0) {
-        displayTriviaMessage("Console:", "No winners from the last trivia game.", {}, {});
+        displayTriviaMessage("📢", "No winners from the last trivia game.", {}, {});
         return;
     }
 
-    displayTriviaMessage("Console:", "📢 Last Trivia Winners:", {}, {});
+    displayTriviaMessage("📢", "Last Trivia Winners:", {}, {});
 
     lastTriviaClassicWinners.forEach((winner, index) => {
         let message = `🏆 ${index + 1} - ${winner.username}: ${winner.score} points | 🎯 First: ${winner.firstAnswers} | ✅ ${winner.correctAnswers} | ❌ ${winner.incorrectAnswers}`;
-        displayTriviaMessage("Console:", message, {}, {});
+        displayTriviaMessage("📢", message, {}, {});
     });
 }
 
 // Function to display all past trivia games from history
 function displayTriviaHistory() {
     if (!TriviaClassicHistory || TriviaClassicHistory.length === 0) {
-        displayTriviaMessage("Console:", "No past trivia games recorded.", {}, {});
+        displayTriviaMessage("📢", "No past trivia games recorded.", {}, {});
         return;
     }
 
-    displayTriviaMessage("Console:", "📜 Trivia History:", {}, {});
+    displayTriviaMessage("📜", "Trivia History:", {}, {});
 
     TriviaClassicHistory.forEach((game, index) => {
         if (Array.isArray(game)) {  // Ensure game structure matches new updates
             let timestamp = game[0]?.timestamp || `Game #${index + 1}`;
-            displayTriviaMessage("Console:", `📆 ${timestamp}`, {}, {});
+            displayTriviaMessage("📆", `${timestamp}`, {}, {});
 
             game.forEach((winner, idx) => {
                 let message = `🏆 ${idx + 1} - ${winner.username}: ${winner.score} points | 🎯 First: ${winner.firstAnswers} | ✅ ${winner.correctAnswers} | ❌ ${winner.incorrectAnswers}`;
-                displayTriviaMessage("Console:", message, {}, {});
+                displayTriviaMessage("📢", message, {}, {});
             });
         }
     });
