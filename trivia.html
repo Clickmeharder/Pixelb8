@@ -814,10 +814,14 @@ function fetchTriviaQuestions() {
 // & Load previous trivia history from localStorage when the bot starts
 function loadTriviaHistory() {
     const savedHistory = localStorage.getItem("TriviaClassicHistory");
+    console.log("Loaded TriviaClassicHistory from localStorage:", savedHistory); // Debug log
+
     if (savedHistory) {
         TriviaClassicHistory = JSON.parse(savedHistory);
+        console.log("Parsed TriviaClassicHistory:", TriviaClassicHistory); // Debug parsed object
     }
 }
+
 
 function updateLastTriviaClassicWinners() {
     lastTriviaClassicWinners = [];
