@@ -2069,7 +2069,20 @@ window.onload = function () {
     if (savedStreamer) {
         setStreamer(savedStreamer); // Auto-connect
     }
+	let savedSettings = localStorage.getItem("triviaClassicSettings");
+    if (savedSettings) {
+        let settings = JSON.parse(savedSettings);
+        timetoAnswer = settings.timetoAnswer;
+        timebetweenQuestions = settings.timebetweenQuestions;
+        timebetweenRounds = settings.timebetweenRounds;
+        questionsPerRound = settings.questionsPerRound;
+        document.getElementById("timeToAnswer").value = timetoAnswer;
+        document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
+        document.getElementById("timeBetweenRounds").value = timebetweenRounds;
+        document.getElementById("questionsPerRound").value = questionsPerRound;
+    }
 };
+
 // Button event listener: first endTrivia, then setStreamer
 document.getElementById("streamersButt").addEventListener("click", function() {
     if (triviaGameState === "started") {
@@ -2099,7 +2112,16 @@ document.getElementById("changeSettings").addEventListener("click", function() {
     timebetweenRounds = parseInt(document.getElementById("timeBetweenRounds").value, 10);
     questionsPerRound = parseInt(document.getElementById("questionsPerRound").value, 10);
 
-    alert("Trivia settings updated!"); // Confirmation message
+    // Save settings in localStorage
+    let triviaClassicSettings = {
+        timetoAnswer,
+        timebetweenQuestions,
+        timebetweenRounds,
+        questionsPerRound
+    };
+    localStorage.setItem("triviaClassicSettings", JSON.stringify(triviaClassicSettings));
+
+    alert("Trivia settings updated and saved!");
 });
 
 </script>
