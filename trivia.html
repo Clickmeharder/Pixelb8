@@ -743,6 +743,7 @@ let userOverallStats = {}; // This will store the users lifetime stats ie: numbe
 let userScores = {};
 let usedQuestions = [];
 let activeQuestion = null;
+let singleActiveAsk = null;
 let answeredUsers = new Set();
 let firstAnswerUser = null;
 let hideQuestionTimer;
@@ -1466,7 +1467,7 @@ function endTrivia() {
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //- ASK SINGLE RANDOM QUESTION - TESTING CUZ NOOB
-let singleActiveAsk = null;
+
 function askSplash() {
     return showAnnouncement("Asking Question in:", 30)
         .then(() => {
