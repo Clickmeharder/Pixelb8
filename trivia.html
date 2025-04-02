@@ -1787,7 +1787,11 @@ function toggleEntriviachatOverlay() {
     console.log(`Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
 	displayConsoleMessage("system", `Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
 }
-
+function updateSingleSetting(settingKey, newValue) {
+    let savedSettings = JSON.parse(localStorage.getItem("triviaClassicSettings")) || {};
+    savedSettings[settingKey] = newValue;
+    localStorage.setItem("triviaClassicSettings", JSON.stringify(savedSettings));
+}
 
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1940,32 +1944,41 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		}
 	}
 //-------------------------------------------------------
+	// Command-based settings updates
 	if (command.toLowerCase() === "trivia-answertime") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		timetoAnswer = parseInt(message, 10); // Convert to number
+
+		timetoAnswer = parseInt(message, 10);
+		updateSingleSetting("timetoAnswer", timetoAnswer);
 	}
 
 	if (command.toLowerCase() === "trivia-questiondelay") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+
 		timebetweenQuestions = parseInt(message, 10);
+		updateSingleSetting("timebetweenQuestions", timebetweenQuestions);
 	}
 
 	if (command.toLowerCase() === "trivia-rounddelay") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+
 		timebetweenRounds = parseInt(message, 10);
+		updateSingleSetting("timebetweenRounds", timebetweenRounds);
 	}
 
 	if (command.toLowerCase() === "trivia-questioncap") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+
 		questionsPerRound = parseInt(message, 10);
+		updateSingleSetting("questionsPerRound", questionsPerRound);
 	}
 //-------------------------------------------------------
     // Only allow mods to trigger these commands:
