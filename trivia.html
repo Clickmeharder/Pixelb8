@@ -1207,8 +1207,10 @@ function updateUserOverallStats() {
 function updatePodium() {
     // Get top 5 sorted users
     const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
-	console.log("Updating Podium");
+    console.log("Updating Podium");
     console.log("Sorted users:", sortedUsers);
+    console.log("Current userStats:", userStats); // Debugging log
+
     for (let i = 0; i < 3; i++) {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
@@ -1236,26 +1238,28 @@ function updatePodium() {
             let extraStatsDiv = document.createElement("div");
             extraStatsDiv.className = "extraStats";
 
-            // Create and set stats elements
+            // Debugging logs
+            console.log(`Checking stats for ${user}:`, userStats[user]);
+
+            // Ensure userStats[user] exists before accessing properties
+            let firstAnswers = userStats[user]?.firstAnswers ?? 0;
+            let correctAnswers = userStats[user]?.correctAnswers ?? 0;
+            let incorrectAnswers = userStats[user]?.incorrectAnswers ?? 0;
+
             let firstAnswersElement = document.createElement("p");
             let correctAnswersElement = document.createElement("p");
             let incorrectAnswersElement = document.createElement("p");
 
-            let firstAnswers = userStats[user]?.firstAnswers || 0;
-            let correctAnswers = userStats[user]?.correctAnswers || 0;
-            let incorrectAnswers = userStats[user]?.incorrectAnswers || 0;
-
             firstAnswersElement.textContent = `🎯 First: ${firstAnswers}`;
             correctAnswersElement.textContent = `✅ ${correctAnswers}`;
             incorrectAnswersElement.textContent = `❌ ${incorrectAnswers}`;
-			console.log(`Checking stats for ${user}: Incorrect: ${userStats[user]?.incorrectAnswers}`);
+
             extraStatsDiv.appendChild(incorrectAnswersElement);
             extraStatsDiv.appendChild(correctAnswersElement);
             extraStatsDiv.appendChild(firstAnswersElement);
 
             // Append the extraStatsDiv next to the winner container
             winnerContainer.appendChild(extraStatsDiv);
-			
         }
     }
 
@@ -1272,9 +1276,9 @@ function updatePodium() {
             nameElement.style.color = userColor;
         }
     }
-	updateLastTriviaClassicWinners();
-}
 
+    updateLastTriviaClassicWinners();
+}
 //function to show the trivia overlay/ui display
 function showTrivia() {
 	const triviaWrapper = document.getElementById("TriviaWrapper");
