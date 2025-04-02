@@ -810,6 +810,7 @@ function fetchTriviaQuestions() {
     });
 }
 
+
 // Save trivia history to localStorage
 // & Load previous trivia history from localStorage when the bot starts
 function loadTriviaHistory() {
@@ -818,8 +819,30 @@ function loadTriviaHistory() {
         TriviaClassicHistory = JSON.parse(savedHistory);
     }
 }
-function saveTriviaHistory() {
+
+function updateLastTriviaClassicWinners() {
+    lastTriviaClassicWinners = [];
+    const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
+    for (let i = 0; i < 3; i++) {
+        const [user, score] = sortedUsers[i] || [];
+        if (user) {
+            lastTriviaClassicWinners.push({
+                username: user,
+                score: score,
+                firstAnswers: userStats[user]?.firstAnswers || 0,
+                correctAnswers: userStats[user]?.correctAnswers || 0,
+                incorrectAnswers: userStats[user]?.incorrectAnswers || 0,
+                timestamp: new Date().toLocaleString(), // Add date and time
+            });
+        }
+    }
+    // Store in TriviaClassicHistory
+    TriviaClassicHistory.push([...lastTriviaClassicWinners]); 
+    // Save to local storage
+    localStorage.setItem("lastTriviaClassicWinners", JSON.stringify(lastTriviaClassicWinners));
     localStorage.setItem("TriviaClassicHistory", JSON.stringify(TriviaClassicHistory));
+
+    console.log("Updated Last Trivia Classic Winners:", lastTriviaClassicWinners);
 }
 
 //show announcements with optional timer
@@ -1212,6 +1235,7 @@ function updatePodium() {
 
             // Append the extraStatsDiv next to the winner container
             winnerContainer.appendChild(extraStatsDiv);
+			updateLastTriviaClassicWinners();
         }
     }
 
