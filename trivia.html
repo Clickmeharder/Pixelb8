@@ -810,7 +810,6 @@ function fetchTriviaQuestions() {
     });
 }
 
-
 // Save trivia history to localStorage
 // & Load previous trivia history from localStorage when the bot starts
 function loadTriviaHistory() {
@@ -956,7 +955,6 @@ function getRandomQuestion() {
 	usedQuestions.push(question);
 	return question;
 }
-
 function nextQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
@@ -979,7 +977,6 @@ function nextQuestion() {
         }
     }, 1000);
 }
-
 //!!!!! fn currently not used:startTriviaRound()
 function startTriviaRound() {
     console.log('Round:', round);
@@ -994,7 +991,6 @@ function startTriviaRound() {
     // Set a delay before calling nextQuestion (e.g., 3 seconds)
     setTimeout(nextQuestion, 1000);
 }
-
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 function handlephaseTrivia() {
     <!-- if (questionsAsked === 0) {  -->
@@ -1013,7 +1009,6 @@ function handlephaseTrivia() {
 
     nextQuestion(); // Otherwise, just move to the next question
 }
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 function endTriviaRound() {
 	console.log('Round:', round);
 	console.log('Total Rounds:', totalRounds);
@@ -1031,7 +1026,6 @@ function endTriviaRound() {
 	questionsAsked = 0;
 	setTimeout(nextQuestion, timebetweenRounds * 1000);
 }
-
 //function to update the time remaining before the next question
 function startCountdown() {
 	let countdown = timebetweenQuestions;
@@ -1045,7 +1039,6 @@ function startCountdown() {
 		}
 	}, 1000);
 }
-
 function endQuestion() {
     clearInterval(questionTimer);
     document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
@@ -1066,7 +1059,6 @@ function endQuestion() {
         }
     }, 13000); // Delay timeout of 13 seconds to wait before checking
 }
-
 //update the countdown timer until next question
 function nextquestionTimer(seconds) {
 	const minutes = Math.floor(seconds / 60);
