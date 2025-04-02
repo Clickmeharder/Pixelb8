@@ -1140,15 +1140,14 @@ function checkAnswer(user, message) {
         updateTriviaboard();
         return true;
     } else {
+		// Normal incorrect answer logic
+		userStats[user].incorrectAnswers++;  
+		userScores[user] = (userScores[user] || 0) - 1;
+		playSound("triviawrong");
 
-    // Normal incorrect answer logic
-    userStats[user].incorrectAnswers++;  
-    userScores[user] = (userScores[user] || 0) - 1;
-    playSound("triviawrong");
-
-    return false;
+		return false;
+	}
 }
-
 
 
 //update the guestion counter
