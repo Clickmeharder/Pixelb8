@@ -524,7 +524,25 @@
 			<button id="cancelGame">End Game</button>
 		</div>
 		<div id="trivia-settings">
-			<span id="trivia-settingsheader">Settings</span>
+			<span id="trivia-settingsheader">Entrivia</span>
+			<div id="addCustomQuestionForm">
+				<h3>Add a Custom Trivia Question</h3>
+				<label for="round">Select Round:</label>
+				<select id="round">
+					<option value="round1">Round 1</option>
+					<option value="round2">Round 2</option>
+				</select>
+				<br>
+				<label for="questionText">Question:</label>
+				<input type="text" id="questionText" placeholder="Enter your question here" required>
+				<br>
+				<label for="correctAnswer">Correct Answer:</label>
+				<input type="text" id="correctAnswer" placeholder="Enter the correct answer" required>
+				<br>
+				<button id="submitQuestionBtn">Add Question</button>
+			</div>
+			<br>
+			<h3>Settings</h3>
 			<label for="timeBetweenQuestions">Seconds Between Questions:</label>
 			<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
 			<label for="timeToAnswer">Time to Answer (seconds):</label>
@@ -2211,6 +2229,27 @@ document.getElementById("resetSettings").addEventListener("click", function() {
 
     alert("Settings have been reset to default!");
 });
+// Add event listener to the button to add custom questions
+document.getElementById('submitQuestionBtn').addEventListener('click', function() {
+    // Get the values from the form inputs
+    const round = document.getElementById('round').value;
+    const questionText = document.getElementById('questionText').value;
+    const correctAnswer = document.getElementById('correctAnswer').value;
+
+    // Validate inputs
+    if (!questionText || !correctAnswer) {
+        alert('Please fill in both the question and the answer!');
+        return;
+    }
+
+    // Call the function to add the question
+    addCustomTriviaQuestion(round, questionText, correctAnswer);
+
+    // Clear the form fields
+    document.getElementById('questionText').value = '';
+    document.getElementById('correctAnswer').value = '';
+});
+
 </script>
 </body>
 </html>
