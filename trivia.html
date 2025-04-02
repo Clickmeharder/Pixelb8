@@ -1168,7 +1168,7 @@ function updatePodium() {
     for (let i = 0; i < 3; i++) {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
-            console.log(Winner ${i + 1}: ${user} - Score: ${score});
+            console.log(`Winner ${i + 1}: ${user} - Score: ${score}`);
             displayChatMessage("Console:", Winner ${i + 1}: ${user} - Score: ${score}, {}, {});
 
             let nameElement = document.getElementById(winner${i + 1}Name);
