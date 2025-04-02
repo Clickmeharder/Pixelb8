@@ -548,6 +548,9 @@
 				<select id="questionList">
 					<!-- Custom questions will be populated here dynamically -->
 				</select>
+				<div id="answerDisplay" style="margin-top: 10px;">
+					<strong>Answer:</strong> <span id="answerText">Select a question to see the answer.</span>
+				</div>
 				<button id="deleteQuestionBtn">Delete Selected Question</button>
 			</div>
 			<h3>Settings</h3>
@@ -1693,6 +1696,7 @@ function displayTriviaHistory() {
 //displayLastTriviaWinners();
 //displayTriviaHistory();
 // Function to load custom questions into the dropdown
+// Function to load custom questions into the dropdown
 function loadCustomQuestions() {
     const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
     const dropdown = document.getElementById('questionList');
@@ -1712,6 +1716,27 @@ function loadCustomQuestions() {
         option.text = q.question;  // Display the question text in the dropdown
         dropdown.appendChild(option);
     });
+}
+// Function to update the answer display based on the selected question
+function updateAnswerDisplay() {
+    const dropdown = document.getElementById('questionList');
+    const selectedIndex = dropdown.value;  // Get the selected question index
+
+    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
+
+    if (selectedIndex === '') {
+        // If no question is selected, display the default message
+        document.getElementById('answerText').innerText = "Select a question to see the answer.";
+        return;
+    }
+
+    // Get the selected question from the combined round1 and round2
+    const selectedQuestion = customQuestions.round1.concat(customQuestions.round2)[selectedIndex];
+
+    if (selectedQuestion) {
+        // Update the answer display area with the correct answer
+        document.getElementById('answerText').innerText = selectedQuestion.answer;
+    }
 }
 // Function to delete the selected question
 function deleteCustomQuestion() {
@@ -2314,6 +2339,9 @@ document.getElementById('submitQuestionBtn').addEventListener('click', function(
 
 // Event listener to handle the delete button click
 document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCustomQuestion);
+
+// Event listener for dropdown change to update the answer display
+document.getElementById('questionList').addEventListener('change', updateAnswerDisplay);
 
 // Load custom questions when the page loads
 window.addEventListener('load', loadCustomQuestions);
