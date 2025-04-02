@@ -768,6 +768,7 @@ function toggleConsoleMessages() {
 //(ask the user a random question)
 
 //Example Questions
+//!trivia-addcustomquestion round1 | What number is on the side of a Sleipnir mk1 (C,L)? | correct answer | answer1, answer2, answer3, answer4`, flags, extra, true);
 <!-- const triviaQuestions = [ -->
 <!-- { question: "Converting 100 shrapnel results in how much universal ammo?", answer: "101" }, -->
 <!-- { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" }, -->
@@ -815,7 +816,7 @@ function fetchTriviaQuestions() {
             });
     });
 }
-function addCustomTriviaQuestion(round, questionText, correctAnswer, answers) {
+function addCustomTriviaQuestion(round, questionText, correctAnswer) { 
     // Load existing custom questions or initialize a new structure
     let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
 
@@ -828,8 +829,7 @@ function addCustomTriviaQuestion(round, questionText, correctAnswer, answers) {
     // Create new question object
     let newQuestion = {
         question: questionText,
-        correct_answer: correctAnswer,
-        answers: answers
+        answer: correctAnswer // Fix: Use 'answer' instead of 'correct_answer'
     };
 
     // Add to the selected round
@@ -838,8 +838,9 @@ function addCustomTriviaQuestion(round, questionText, correctAnswer, answers) {
     // Save back to localStorage
     localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
 
-    console.log(`Added new question to ${round}:`, newQuestion);
+    console.log(`✅ Added new question to ${round}:`, newQuestion);
 }
+
 // load last trivia classic winners and trivia classic game history
 function loadTriviaHistory() {
     const savedHistory = localStorage.getItem("TriviaClassicHistory");
@@ -1916,43 +1917,28 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
 		displayTriviaHistory();
     }
-	if (command.toLowerCase() === "trivia-addcustomquestion") { 
+	if (command.toLowerCase() === "trivia-addcustomquestion") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
-		
-		// Display confirmation messages
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		
-		// Extract the message text after the command
+		// Extract message text after the command
 		let messageContent = message.trim();
 		let parts = messageContent.split("|").map(p => p.trim());
-
 		// Validate input format
-		if (parts.length < 4) {
-			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-addcustomquestion round1 | question | correct answer | answer1, answer2, answer3, answer4`, flags, extra, true);
+		if (parts.length < 3) {
+			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-addcustomquestion round1 | question | answer`, flags, extra, true);
 			return;
 		}
-
 		let round = parts[0].toLowerCase();
 		let questionText = parts[1];
 		let correctAnswer = parts[2];
-		let answers = parts[3].split(",").map(a => a.trim());
-
 		// Ensure the round is valid
 		if (round !== "round1" && round !== "round2") {
 			displayTriviaMessage(user, `⚠️ Invalid round! Use 'round1' or 'round2'.`, flags, extra, true);
 			return;
 		}
-
-		// Ensure at least 2 answers are provided
-		if (answers.length < 1) {
-			displayTriviaMessage(user, `⚠️ You must provide at least 2 answer options.`, flags, extra, true);
-			return;
-		}
-
 		// Add the custom trivia question
-		addCustomTriviaQuestion(round, questionText, correctAnswer, answers);
-
+		addCustomTriviaQuestion(round, questionText, correctAnswer);
 		// Confirm success
 		displayTriviaMessage(user, `✅ Custom question added to ${round}!`, flags, extra, true);
 	}
