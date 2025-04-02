@@ -1220,14 +1220,14 @@ function updatePodium() {
             firstAnswersElement.textContent = `🎯 First: ${firstAnswers}`;
             correctAnswersElement.textContent = `✅ ${correctAnswers}`;
             incorrectAnswersElement.textContent = `❌ ${incorrectAnswers}`;
-
+			console.log(`Checking stats for ${user}: Incorrect: ${userStats[user]?.incorrectAnswers}`);
             extraStatsDiv.appendChild(incorrectAnswersElement);
             extraStatsDiv.appendChild(correctAnswersElement);
             extraStatsDiv.appendChild(firstAnswersElement);
 
             // Append the extraStatsDiv next to the winner container
             winnerContainer.appendChild(extraStatsDiv);
-			updateLastTriviaClassicWinners();
+			
         }
     }
 
@@ -1244,6 +1244,7 @@ function updatePodium() {
             nameElement.style.color = userColor;
         }
     }
+	updateLastTriviaClassicWinners();
 }
 
 //function to show the trivia overlay/ui display
