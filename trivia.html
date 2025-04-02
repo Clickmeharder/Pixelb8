@@ -1050,7 +1050,6 @@ function endTriviaRound() {
     updateUserOverallStats();
     // Prepare for the next round
     round++;
-    userStats = {}; // Reset stats for the new round
 	questionsAsked = 0;
 	setTimeout(nextQuestion, timebetweenRounds * 1000);
 }
@@ -1279,6 +1278,7 @@ function updatePodium() {
     }
 
     updateLastTriviaClassicWinners();
+	userStats = {}; // Reset stats for the new round
 }
 //function to show the trivia overlay/ui display
 function showTrivia() {
