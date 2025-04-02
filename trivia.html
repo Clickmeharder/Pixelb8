@@ -526,15 +526,12 @@
 		<div id="trivia-settings">
 			<span id="trivia-settingsheader">Settings</span>
 			<label for="timeBetweenQuestions">Seconds Between Questions:</label>
-			<input type="number" id="timeBetweenQuestions" value="5" min="1" step="1">
+			<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
 			<label for="timeToAnswer">Time to Answer (seconds):</label>
-			<input type="number" id="timeToAnswer" value="10" min="1" step="1">
+			<input type="number" id="timeToAnswer" value="30" min="1" step="1">
 			<label for="questionsPerRound">Questions Per Round:</label>
-			<input type="number" id="questionsPerRound" value="5" min="1" step="1">
-			<label for="numberOfRounds">Number of Rounds:</label>
-			<input type="number" id="numberOfRounds" value="3" min="1" step="1">
-			<label><input type="checkbox" id="chatAnswersToggle" />Allow Chat Answers</label>
-			<button id="saveSettings">Save Settings</button>
+			<input type="number" id="questionsPerRound" value="1" min="1" step="1">
+			<button id="changeSettings">Change Settings</button>
 		</div>
 	</div>
 	<div id="triviaOverlay" style="">
@@ -653,7 +650,8 @@ let round = 1;
 let triviaQuestions = { round1: [], round2: [] };
 //_______________________________________________
 // TRIVIA OPTIONS
-let entriviachatOverlay = "on";
+let consoleMessages = false;
+let entriviachatOverlay = "off";
 let chatanswers = false;
 let timetoAnswer = 30;
 let timebetweenQuestions = 30;
@@ -729,7 +727,7 @@ function displayTriviaMessage(user, message, flags = {}, extra = {}, isCorrect =
     }
 }
 
-let consoleMessages = true;  // Flag to control whether to show console messages
+
 function displayConsoleMessage(user, message) {
     if (!consoleMessages) return;  // If consoleMessages is false, do nothing
     // Create a new console message element
@@ -1948,6 +1946,34 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		}
 	}
 //-------------------------------------------------------
+	if (command.toLowerCase() === "trivia-answertime") { 
+		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
+		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		timetoAnswer = parseInt(message, 10); // Convert to number
+	}
+
+	if (command.toLowerCase() === "trivia-questiondelay") { 
+		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
+		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		timebetweenQuestions = parseInt(message, 10);
+	}
+
+	if (command.toLowerCase() === "trivia-rounddelay") { 
+		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
+		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		timebetweenRounds = parseInt(message, 10);
+	}
+
+	if (command.toLowerCase() === "trivia-questioncap") { 
+		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
+		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		questionsPerRound = parseInt(message, 10);
+	}
+//-------------------------------------------------------
     // Only allow mods to trigger these commands:
     if (flags.mod) {
 		if (command === "triviamod-test") {
@@ -2065,6 +2091,15 @@ document.getElementById("cancelGame").addEventListener("click", function() {
     if (triviaGameState === "started") {
         endTrivia(); // Only end trivia if it's running
     }
+});
+
+document.getElementById("changeSettings").addEventListener("click", function() {
+    timetoAnswer = parseInt(document.getElementById("timeToAnswer").value, 10);
+    timebetweenQuestions = parseInt(document.getElementById("timeBetweenQuestions").value, 10);
+    timebetweenRounds = parseInt(document.getElementById("timeBetweenRounds").value, 10);
+    questionsPerRound = parseInt(document.getElementById("questionsPerRound").value, 10);
+
+    alert("Trivia settings updated!"); // Confirmation message
 });
 
 </script>
