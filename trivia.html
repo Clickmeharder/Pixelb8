@@ -531,7 +531,7 @@
 			<input type="number" id="timeToAnswer" value="30" min="1" step="1">
 			<label for="questionsPerRound">Questions Per Round:</label>
 			<input type="number" id="questionsPerRound" value="1" min="1" step="1">
-			<label for="timeBetweenRounds">Seconds Between Questions:</label>
+			<label for="timeBetweenRounds">Seconds between Rounds:</label>
 			<input type="number" id="timeBetweenRounds" value="30" min="1" step="1">
 			<button id="changeSettings">Change Settings</button>
 			<button id="resetSettings">Reset to Default</button>
@@ -617,15 +617,6 @@
 		document.getElementById("trivia-toggle").addEventListener("click", function () {
 			let container = document.getElementById("comfycontrolContainer");
 			container.classList.toggle("active");
-		});
-		
-		// Get the checkbox element
-		const chatAnswersToggle = document.getElementById('chatAnswersToggle');
-
-		// Set up an event listener to update the `chatanswers` variable when the checkbox is toggled
-		chatAnswersToggle.addEventListener('change', () => {
-			chatanswers = chatAnswersToggle.checked;  // Set chatanswers based on the checkbox
-			console.log("Chat answers are now", chatanswers ? "enabled" : "disabled");
 		});
 	</script>
     <script>
