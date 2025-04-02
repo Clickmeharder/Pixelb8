@@ -1057,31 +1057,32 @@ function checkAnswer(user, message) {
     let correctAnswer = activeQuestion.answer.toLowerCase();
     let userAnswer = message.trim().toLowerCase();
 
-    if (userAnswer === correctAnswer) {
-        // If `singleActiveAsk` is active, only allow the first correct answer
-        if (singleActiveAsk !== null) {
-            if (!firstAnswerUser) {
-                firstAnswerUser = user;
-                TriviaSingleAskLastWinner = user;  // Store the last winner
-                TriviaSingleAskWinners.push(user);  // Add to winners list
-                playSound("triviafirstcorrect");
-                return true; // First correct answer counts
-            }
-            return false; // Ignore all other correct answers
+    // If `singleActiveAsk` is active, only allow the first correct answer
+    if (singleActiveAsk !== null) {
+        if (!firstAnswerUser) {
+            firstAnswerUser = user;
+            TriviaSingleAskLastWinner = user;  // Store the last winner
+            TriviaSingleAskWinners.push(user);  // Add to winners list
+            playSound("triviafirstcorrect");
+            return true; // First correct answer counts
         }
+        playSound("triviawrong"); // Incorrect answer sound, but no tracking
+        return false;
+    }
 
-        // Normal trivia logic (multiple correct answers allowed)
-		// Initialize user stats if they don't exist
-		if (!userStats[user]) {
-			userStats[user] = {
-				correctAnswers: 0,
-				incorrectAnswers: 0,
-				firstAnswers: 0,
-			};
-		}
+    // Normal trivia logic (multiple correct answers allowed)
+    if (!userStats[user]) {
+        userStats[user] = {
+            correctAnswers: 0,
+            incorrectAnswers: 0,
+            firstAnswers: 0,
+        };
+    }
+
+    if (userAnswer === correctAnswer) {
         userStats[user].correctAnswers++;
         answeredUsers.add(user);
-        
+
         if (!firstAnswerUser) {
             firstAnswerUser = user;
             userStats[user].firstAnswers++;
@@ -1092,22 +1093,16 @@ function checkAnswer(user, message) {
             playSound("triviacorrect");
         }
 
-        updateTriviaboard();  
-        return true; 
+        updateTriviaboard();
+        return true;
     } 
-
-    // If `singleActiveAsk` is active, only play sound but don't track incorrect answers
-    if (singleActiveAsk !== null) {
-        playSound("triviawrong");
-        return false;
-    }
 
     // Normal incorrect answer logic
     userStats[user].incorrectAnswers++;  
     userScores[user] = (userScores[user] || 0) - 1;
     playSound("triviawrong");
 
-    return false;  
+    return false;
 }
 
 
