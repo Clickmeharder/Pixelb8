@@ -532,6 +532,7 @@
 			<label for="questionsPerRound">Questions Per Round:</label>
 			<input type="number" id="questionsPerRound" value="1" min="1" step="1">
 			<button id="changeSettings">Change Settings</button>
+			<button id="resetSettings">Reset to Default</button>
 		</div>
 	</div>
 	<div id="triviaOverlay" style="">
@@ -2123,7 +2124,24 @@ document.getElementById("changeSettings").addEventListener("click", function() {
 
     alert("Trivia settings updated and saved!");
 });
+document.getElementById("resetSettings").addEventListener("click", function() {
+    // Default settings
+    timetoAnswer = 30;
+    timebetweenQuestions = 30;
+    timebetweenRounds = 30;
+    questionsPerRound = 1;
 
+    // Clear saved settings
+    localStorage.removeItem("triviaClassicSettings");
+
+    // Update input fields
+    document.getElementById("timeToAnswer").value = timetoAnswer;
+    document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
+    document.getElementById("timeBetweenRounds").value = timebetweenRounds;
+    document.getElementById("questionsPerRound").value = questionsPerRound;
+
+    alert("Settings have been reset to default!");
+});
 </script>
 </body>
 </html>
