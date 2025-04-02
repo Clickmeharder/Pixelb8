@@ -1833,6 +1833,13 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         displayConsoleMessage(user, `!${command} ✅`);
         displayChatMessage(user, `!${command} ✅`, flags, extra, true);
     }
+	if (command.toLowerCase() === "trivia-nextround") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		console.log("Current Round:", round);
+		questionsAsked = 0; // Reset for the new round
+		document.getElementById("question").textContent = "Entrivia Round:"+ round;
+		setTimeout(handlephaseTrivia, 10000);
+	}
     if (command.toLowerCase() === "trivia-ask") {
         if (!isStreamerAndAuthorize(user, command)) return;
         startTriviaAsk();
@@ -1857,13 +1864,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayConsoleMessage(user, `!${command} ✅`);
         displayChatMessage(user, `!${command} ✅`, flags, extra, true);
     }
-	if (command.toLowerCase() === "trivia-nextround") {
-		if (!isStreamerAndAuthorize(user, command)) return;
-		console.log("Current Round:", round);
-		questionsAsked = 0; // Reset for the new round
-		document.getElementById("question").textContent = "Entrivia Round:"+ round;
-		setTimeout(handlephaseTrivia, 10000);
-	}
 	if (command === "chatanswers") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		chatanswers = !chatanswers;  // Toggle chatanswers
