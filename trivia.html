@@ -549,6 +549,7 @@
 					<!-- Custom questions will be populated here dynamically -->
 				</select>
 				<div id="answerDisplay" style="margin-top: 10px;">
+					<strong>Round:</strong> <span id="roundText">-</span><br>
 					<strong>Answer:</strong> <span id="answerText">Select a question to see the answer.</span>
 				</div>
 				<button id="deleteQuestionBtn">Delete Selected Question</button>
@@ -1697,6 +1698,7 @@ function displayTriviaHistory() {
 //displayTriviaHistory();
 // Function to load custom questions into the dropdown
 // Function to load custom questions into the dropdown
+// Function to load custom questions into the dropdown
 function loadCustomQuestions() {
     const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
     const dropdown = document.getElementById('questionList');
@@ -1707,70 +1709,76 @@ function loadCustomQuestions() {
     // Add a default option
     let defaultOption = document.createElement('option');
     defaultOption.text = "Select a question to delete";
+    defaultOption.value = ''; // Default value
     dropdown.appendChild(defaultOption);
 
-    // Loop through round1 and round2 to add questions to the dropdown
-    customQuestions.round1.concat(customQuestions.round2).forEach((q, index) => {
-        let option = document.createElement('option');
-        option.value = index;
-        option.text = q.question;  // Display the question text in the dropdown
-        dropdown.appendChild(option);
-    });
+    // Function to add questions to the dropdown with round information
+    function addQuestionsToDropdown(round, questions) {
+        questions.forEach((q, index) => {
+            let option = document.createElement('option');
+            option.value = `${round}-${index}`; // Store round and index in value (e.g., "round1-2")
+            option.text = `[${round}] ${q.question}`;  // Show round in dropdown
+            dropdown.appendChild(option);
+        });
+    }
+
+    // Add questions from both rounds
+    addQuestionsToDropdown("round1", customQuestions.round1);
+    addQuestionsToDropdown("round2", customQuestions.round2);
 }
+// Function to update the answer display based on the selected question
 // Function to update the answer display based on the selected question
 function updateAnswerDisplay() {
     const dropdown = document.getElementById('questionList');
-    const selectedIndex = dropdown.value;  // Get the selected question index
+    const selectedValue = dropdown.value; // Example: "round1-2"
 
-    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
-
-    if (selectedIndex === '') {
-        // If no question is selected, display the default message
+    if (!selectedValue) {
+        document.getElementById('roundText').innerText = "-";
         document.getElementById('answerText').innerText = "Select a question to see the answer.";
         return;
     }
 
-    // Get the selected question from the combined round1 and round2
-    const selectedQuestion = customQuestions.round1.concat(customQuestions.round2)[selectedIndex];
+    const [round, index] = selectedValue.split("-"); // Extract round and index
+
+    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
+
+    // Get the selected question
+    const selectedQuestion = customQuestions[round][index];
 
     if (selectedQuestion) {
-        // Update the answer display area with the correct answer
-        document.getElementById('answerText').innerText = selectedQuestion.answer;
+        document.getElementById('roundText').innerText = round; // Display the round
+        document.getElementById('answerText').innerText = selectedQuestion.answer; // Display the answer
     }
 }
 // Function to delete the selected question
+// Function to delete the selected question
 function deleteCustomQuestion() {
     const dropdown = document.getElementById('questionList');
-    const selectedIndex = dropdown.value;  // Get the selected question index
+    const selectedValue = dropdown.value; // Example: "round1-2"
 
-    if (selectedIndex === '') {
+    if (!selectedValue) {
         alert("Please select a question to delete.");
         return;
     }
 
+    const [round, index] = selectedValue.split("-"); // Extract round and index
     const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
-    const selectedQuestion = customQuestions.round1.concat(customQuestions.round2)[selectedIndex];
 
-    if (selectedQuestion) {
-        // Confirm deletion
-        const confirmDelete = confirm(`Are you sure you want to delete the question: "${selectedQuestion.question}"?`);
+    if (customQuestions[round] && customQuestions[round][index]) {
+        const confirmDelete = confirm(`Are you sure you want to delete the question: "${customQuestions[round][index].question}"?`);
         if (confirmDelete) {
-            // Remove from the round1 or round2 based on the index
-            if (customQuestions.round1.includes(selectedQuestion)) {
-                customQuestions.round1 = customQuestions.round1.filter(q => q !== selectedQuestion);
-            } else {
-                customQuestions.round2 = customQuestions.round2.filter(q => q !== selectedQuestion);
-            }
+            // Remove the question from the array
+            customQuestions[round].splice(index, 1);
 
             // Save the updated custom questions to localStorage
             localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
 
             alert('Question deleted successfully!');
             loadCustomQuestions();  // Reload the dropdown
+            updateAnswerDisplay();  // Clear answer display
         }
     }
 }
-
 // Load saved history when the bot starts
 loadTriviaHistory();
 //------------------------
@@ -2337,7 +2345,7 @@ document.getElementById('submitQuestionBtn').addEventListener('click', function(
     document.getElementById('correctAnswer').value = '';
 });
 
-// Event listener to handle the delete button click
+// Event listener for delete button
 document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCustomQuestion);
 
 // Event listener for dropdown change to update the answer display
