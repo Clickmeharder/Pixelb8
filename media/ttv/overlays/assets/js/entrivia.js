@@ -1505,7 +1505,7 @@ updateTriviaSettingsUI();
 // COMFY JS specific logic/functions
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-ComfyJS.onChat = (user, message, color, flags, extra) => {
+/* ComfyJS.onChat = (user, message, color, flags, extra) => {
     // If chat answers are enabled, check the message for answers
     if (chatanswers) {
         console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
@@ -1517,7 +1517,7 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
         // Otherwise, just display the message without checking
         displayChatMessage(user, message, flags, extra, false);
     }
-};
+}; */
 ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	console.log( "User:", user, "command:", command,);
 	displayConsoleMessage(user, `!${command}`);
