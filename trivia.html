@@ -1198,7 +1198,7 @@ function deleteCustomQuestion() {
     const selectedValue = dropdown.value;
 
     if (!selectedValue) {
-        alert("Please select a question to delete.");
+        console.log("Please select a question to delete.");
         return;
     }
 
@@ -1220,12 +1220,12 @@ function deleteCustomQuestion() {
             // Save the updated custom questions to localStorage
             localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
 
-            alert('Question deleted successfully!');
+            console.log('Question deleted successfully!');
             loadCustomQuestions();  // Reload the dropdown
             updateAnswerDisplay();  // Clear answer display
         }
     } else {
-        alert("The selected question doesn't exist.");
+        console.log("The selected question doesn't exist.");
     }
 }
 
