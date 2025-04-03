@@ -1145,7 +1145,13 @@ function loadCustomQuestions() {
         if (!questions) return;  // Skip if no questions exist in this round
         // Iterate over each category in the round
         for (const category in questions) {
-            const categoryQuestions = questions[category];  // No need for Array.isArray check, it's guaranteed to be an array
+            const categoryQuestions = questions[category];
+
+            // Ensure categoryQuestions is an array before proceeding
+            if (!Array.isArray(categoryQuestions)) {
+                console.warn(`Skipping category "${category}" because it's not an array.`, categoryQuestions);
+                continue;  // Skip this category if it's not an array
+            }
 
             if (categoryQuestions.length === 0) continue;  // Skip empty categories
 
