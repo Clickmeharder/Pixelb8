@@ -6,7 +6,7 @@
     <title>entrivia-v1.23</title>
 	<style>
 		/* Trivia Control Button */
-		#trivia-toggle {
+		#entrivia-toggle {
 			position: fixed;
 			top: 0px;
 			right: 40px;
@@ -27,7 +27,7 @@
 			opacity: 0.65;
 		}
 
-		#trivia-toggle:hover {
+		#entrivia-toggle:hover {
 			background-color: #2980b9;
 			transform: scale(1.1);
 			opacity: 1;
@@ -667,7 +667,7 @@
 		</div>
 	</div>
 	<!-- Floating Button -->
-	<button id="trivia-toggle">Ｅ</button>
+	<button id="entrivia-toggle">Ｅ</button>
 	<!-- Trivia Control Container -->
 	<div id="comfycontrolContainer">
 		<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
@@ -862,12 +862,6 @@
     <script>
 
     </script>
-	<script>//trivia options togglebutton
-		document.getElementById("trivia-toggle").addEventListener("click", function () {
-			let container = document.getElementById("comfycontrolContainer");
-			container.classList.toggle("active");
-		});
-	</script>
     <script>
 //!!!!!!!!!!!!!!!!!!!!!!!!!
 // Trivia Initialization  
@@ -2857,6 +2851,12 @@ document.getElementById("streamersButt").addEventListener("click", function() {
     let newStreamer = document.querySelector("input[name='yourTextName']").value;
 	console.log("attempting to Connect to:" + newStreamer);
     setStreamer(newStreamer); // Then, set the new streamer
+});
+
+//enentrivia-toggle button
+document.getElementById("entrivia-toggle").addEventListener("click", function () {
+	let container = document.getElementById("comfycontrolContainer");
+	container.classList.toggle("active");
 });
 // start game button
 document.getElementById("startGame").addEventListener("click", function() {
