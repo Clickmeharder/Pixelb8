@@ -586,6 +586,11 @@
 		</div>
 		<div id="trivia-settings">
 			<span id="trivia-settingsheader">Entrivia</span>
+			<h3>Trivia Settings</h3>
+			<button id="toggleDefaultQuestions">Toggle Default Questions</button>
+			<button id="toggleCustomQuestions">Toggle Custom Questions</button>
+			<p><strong>Default Questions:</strong> <span id="statusDefaultQuestions">Loading...</span></p>
+			<p><strong>Custom Questions:</strong> <span id="statusCustomQuestions">Loading...</span></p>
 			<div id="addCustomQuestionForm">
 				<h3>Add a Custom Trivia Question</h3>
 				<label for="round">Select Round:</label>
@@ -610,7 +615,6 @@
 				</div>
 				<button id="deleteQuestionBtn">Delete Selected Question</button>
 			</div>
-			<h3>Settings</h3>
 			<div class ="entriviasettings-inputRow">
 				<label for="timeBetweenQuestions">Seconds Between Questions:</label>
 				<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
@@ -738,9 +742,13 @@ let round = 1;
 let triviaQuestions = { round1: [], round2: [] };
 //_______________________________________________
 // TRIVIA OPTIONS
+
 let consoleMessages = false;
 let entriviachatOverlay = "off";
 let chatanswers = false;
+//game options
+let usedefaultquestions = true;
+let usecustomquestions = true;
 let timetoAnswer = 30;
 let timebetweenQuestions = 30;
 let timebetweenRounds = 30;
@@ -886,43 +894,50 @@ function toggleConsoleMessages() {
 //!trivia-addcustomquestion round1 | What number is on the side of a Sleipnir mk1 (C,L)? | 88
 //----------------------------
 
-//------------------------
+
 // fetch trivia questions
 function fetchTriviaQuestions() {
     return new Promise((resolve, reject) => {
         const questionsUrl = 'questions.json'; // Replace with actual path
-        fetch(questionsUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to load trivia questions');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (!data || !data.round1 || !data.round2) {
-                    throw new Error('Invalid trivia data: Missing or empty rounds.');
-                }
+        let defaultQuestions = { round1: [], round2: [] };
+        let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
 
-                // Load custom questions from localStorage
-                let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
+        let fetchDefaultQuestions = usedefaultquestions 
+            ? fetch(questionsUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to load trivia questions');
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data || !data.round1 || !data.round2) throw new Error('Invalid trivia data: Missing or empty rounds.');
+                    defaultQuestions = data;
+                })
+                .catch(error => {
+                    console.error('Error fetching default trivia questions:', error);
+                })
+            : Promise.resolve(); // Skip fetch if usedefaultquestions is false
 
-                // Merge custom questions with default ones
-                data.round1 = data.round1.concat(customQuestions.round1 || []);
-                data.round2 = data.round2.concat(customQuestions.round2 || []);
+        fetchDefaultQuestions.then(() => {
+            let finalQuestions = { round1: [], round2: [] };
 
-                // Store merged questions
-                triviaQuestions = data;
+            if (usedefaultquestions) {
+                finalQuestions.round1 = defaultQuestions.round1 || [];
+                finalQuestions.round2 = defaultQuestions.round2 || [];
+            }
 
-                console.log("📜 Trivia questions loaded with custom additions:", triviaQuestions);
+            if (usecustomquestions) {
+                finalQuestions.round1 = finalQuestions.round1.concat(customQuestions.round1 || []);
+                finalQuestions.round2 = finalQuestions.round2.concat(customQuestions.round2 || []);
+            }
 
-                resolve(data);
-            })
-            .catch(error => {
-                console.error('Error fetching trivia questions:', error);
-                reject(error);
-            });
+            triviaQuestions = finalQuestions;
+
+            console.log("📜 Trivia questions loaded:", triviaQuestions);
+            resolve(triviaQuestions);
+        });
     });
 }
+
 function addCustomTriviaQuestion(round, questionText, correctAnswer) { 
     // Load existing custom questions or initialize a new structure
     let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
@@ -944,7 +959,8 @@ function addCustomTriviaQuestion(round, questionText, correctAnswer) {
 
     // Save back to localStorage
     localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
-
+    loadCustomQuestions();  // Reload the dropdown
+    updateAnswerDisplay();  // Clear answer display
     console.log(`✅ Added new question to ${round}:`, newQuestion);
 }
 
@@ -1989,14 +2005,26 @@ function playRandomWinSound() {
     playTriviaWinSound(randomSound);
 }
 
-// Function to toggle audio on/off
+
+//----------------------------------------------------
+// Functions to toggle options
 function toggleAudioSetting() {
     audioSetting = audioSetting === "on" ? "off" : "on";
     console.log(`Audio setting is now: ${audioSetting}`);
 	displayConsoleMessage("system", `Audio setting is now: ${audioSetting}`);
 }
-//----------------------------------------------------
-// Function to toggle audio on/off
+
+
+function toggleDefaultQuestions() {
+    usedefaultquestions = !usedefaultquestions;
+    updateSingleSetting("usedefaultquestions", usedefaultquestions);
+    updateSettingsDisplay();
+}
+function toggleCustomQuestions() {
+    usecustomquestions = !usecustomquestions;
+    updateSingleSetting("usecustomquestions", usecustomquestions);
+    updateSettingsDisplay();
+}
 function toggleEntriviachatOverlay() {
     entriviachatOverlay = entriviachatOverlay === "on" ? "off" : "on";
     console.log(`Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
@@ -2008,6 +2036,54 @@ function updateSingleSetting(settingKey, newValue) {
     localStorage.setItem("triviaClassicSettings", JSON.stringify(savedSettings));
 }
 
+function saveSettings() {
+    let triviaClassicSettings = {
+        timetoAnswer,
+        timebetweenQuestions,
+        timebetweenRounds,
+        questionsPerRound,
+        usedefaultquestions,
+        usecustomquestions
+    };
+    localStorage.setItem("triviaClassicSettings", JSON.stringify(triviaClassicSettings));
+}
+
+function updateSettings() {
+    timetoAnswer = parseInt(document.getElementById("timeToAnswer").value, 10);
+    timebetweenQuestions = parseInt(document.getElementById("timeBetweenQuestions").value, 10);
+    timebetweenRounds = parseInt(document.getElementById("timeBetweenRounds").value, 10);
+    questionsPerRound = parseInt(document.getElementById("questionsPerRound").value, 10);
+    // Get the toggle states
+    usedefaultquestions = document.getElementById("useDefaultQuestions").checked;
+    usecustomquestions = document.getElementById("useCustomQuestions").checked;
+    saveSettings();
+    displayTriviaMessage("!!", "Entrivia Settings updated and saved.", {}, {});
+}
+
+function resetSettings() {
+    // Default settings
+    timetoAnswer = 30;
+    timebetweenQuestions = 30;
+    timebetweenRounds = 30;
+    questionsPerRound = 1;
+    usedefaultquestions = true;
+    usecustomquestions = true;
+
+    // Clear saved settings
+    localStorage.removeItem("triviaClassicSettings");
+
+    // Update input fields
+    document.getElementById("timeToAnswer").value = timetoAnswer;
+    document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
+    document.getElementById("timeBetweenRounds").value = timebetweenRounds;
+    document.getElementById("questionsPerRound").value = questionsPerRound;
+
+    // Update toggles
+    document.getElementById("useDefaultQuestions").checked = usedefaultquestions;
+    document.getElementById("useCustomQuestions").checked = usecustomquestions;
+
+    displayTriviaMessage("!!", "Entrivia Settings Reset to default.", {}, {});
+}
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // COMFY JS specific logic/functions
@@ -2220,6 +2296,24 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		questionsPerRound = parseInt(message, 10);
 		updateSingleSetting("questionsPerRound", questionsPerRound);
 	}
+
+	// Toggle default questions
+	if (command.toLowerCase() === "trivia-defaultquestions") {  
+		if (!isStreamerAndAuthorize(user, command)) return;
+
+		toggleDefaultQuestions(); // Uses function to update setting
+		displayConsoleMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`);
+		displayTriviaMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
+	}
+
+	// Toggle custom questions
+	if (command.toLowerCase() === "trivia-customquestions") {  
+		if (!isStreamerAndAuthorize(user, command)) return;
+
+		toggleCustomQuestions(); // Uses function to update setting
+		displayConsoleMessage(user, `!${command} ${usecustomquestions ? "Enabled ✅" : "Disabled ❌"}`);
+		displayTriviaMessage(user, `!${command} ${usecustomquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
+	}
 //-------------------------------------------------------
     // Only allow mods to trigger these commands:
     if (flags.mod) {
@@ -2316,17 +2410,25 @@ window.onload = function () {
     if (savedStreamer) {
         setStreamer(savedStreamer); // Auto-connect
     }
-	let savedSettings = localStorage.getItem("triviaClassicSettings");
+    let savedSettings = localStorage.getItem("triviaClassicSettings");
     if (savedSettings) {
         let settings = JSON.parse(savedSettings);
         timetoAnswer = settings.timetoAnswer;
         timebetweenQuestions = settings.timebetweenQuestions;
         timebetweenRounds = settings.timebetweenRounds;
         questionsPerRound = settings.questionsPerRound;
+
+        // Load new settings
+        usedefaultquestions = settings.usedefaultquestions ?? true; // Default to true if missing
+        usecustomquestions = settings.usecustomquestions ?? true; // Default to true if missing
+
+        // Update UI elements
         document.getElementById("timeToAnswer").value = timetoAnswer;
         document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
         document.getElementById("timeBetweenRounds").value = timebetweenRounds;
         document.getElementById("questionsPerRound").value = questionsPerRound;
+
+        updateSettingsDisplay(); // Reflect in UI
     }
 };
 
@@ -2353,41 +2455,17 @@ document.getElementById("cancelGame").addEventListener("click", function() {
     }
 });
 
-document.getElementById("changeSettings").addEventListener("click", function() {
-    timetoAnswer = parseInt(document.getElementById("timeToAnswer").value, 10);
-    timebetweenQuestions = parseInt(document.getElementById("timeBetweenQuestions").value, 10);
-    timebetweenRounds = parseInt(document.getElementById("timeBetweenRounds").value, 10);
-    questionsPerRound = parseInt(document.getElementById("questionsPerRound").value, 10);
+// Attach event listeners
+document.getElementById("changeSettings").addEventListener("click", updateSettings);
+document.getElementById("resetSettings").addEventListener("click", resetSettings);
 
-    // Save settings in localStorage
-    let triviaClassicSettings = {
-        timetoAnswer,
-        timebetweenQuestions,
-        timebetweenRounds,
-        questionsPerRound
-    };
-    localStorage.setItem("triviaClassicSettings", JSON.stringify(triviaClassicSettings));
+document.getElementById("toggleDefaultQuestions").addEventListener("click", toggleDefaultQuestions);
+document.getElementById("toggleCustomQuestions").addEventListener("click", toggleCustomQuestions);
 
-    displayTriviaMessage("!!", "Entrivia Settings updated and saved.", {}, {});
-});
-document.getElementById("resetSettings").addEventListener("click", function() {
-    // Default settings
-    timetoAnswer = 30;
-    timebetweenQuestions = 30;
-    timebetweenRounds = 30;
-    questionsPerRound = 1;
-
-    // Clear saved settings
-    localStorage.removeItem("triviaClassicSettings");
-
-    // Update input fields
-    document.getElementById("timeToAnswer").value = timetoAnswer;
-    document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
-    document.getElementById("timeBetweenRounds").value = timebetweenRounds;
-    document.getElementById("questionsPerRound").value = questionsPerRound;
-
-    displayTriviaMessage("!!", "Entrivia Settings Reset to default.", {}, {});
-});
+function updateSettingsDisplay() {
+    document.getElementById("statusDefaultQuestions").textContent = usedefaultquestions ? "Enabled ✅" : "Disabled ❌";
+    document.getElementById("statusCustomQuestions").textContent = usecustomquestions ? "Enabled ✅" : "Disabled ❌";
+}
 // Add event listener to the button to add custom questions
 document.getElementById('submitQuestionBtn').addEventListener('click', function() {
     // Get the values from the form inputs
@@ -2411,10 +2489,8 @@ document.getElementById('submitQuestionBtn').addEventListener('click', function(
 
 // Event listener for delete button
 document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCustomQuestion);
-
 // Event listener for dropdown change to update the answer display
 document.getElementById('questionList').addEventListener('change', updateAnswerDisplay);
-
 // Load custom questions when the page loads
 window.addEventListener('load', loadCustomQuestions);
 </script>
