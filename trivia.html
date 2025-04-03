@@ -2211,11 +2211,13 @@ function toggleElement(elementId, animationType = "fade") {
 function toggleusedefaultquestions() {
     usedefaultquestions = !usedefaultquestions;
     updateSingleSetting("usedefaultquestions", usedefaultquestions);
+	console.log("toggled usedefaultquestions", usedefaultquestions);
     updateIndicatorLights();
 }
 function toggleCustomQuestions() {
     usecustomquestions = !usecustomquestions;
     updateSingleSetting("usecustomquestions", usecustomquestions);
+	console.log("toggled customquestions", usecustomquestions);
     updateIndicatorLights();
 }
 function toggleEntriviachatOverlay() {
@@ -2355,9 +2357,6 @@ function updateTriviaSettingsUI() {
         statusIndicator.setAttribute('data-option', option);
         statusIndicator.classList.add('light-indicator');
 
-        // Set the indicator color based on settings
-        statusIndicator.style.backgroundColor = settings[option] ? 'green' : 'red';
-
         // Append elements to status wrapper
         statusWrapper.appendChild(statusLabel);
         statusWrapper.appendChild(statusIndicator);
@@ -2365,6 +2364,7 @@ function updateTriviaSettingsUI() {
         // Append button and status indicator to the parent div
         element.appendChild(button);
         element.appendChild(statusWrapper);
+		updateIndicatorLights();
     });
 }
 
