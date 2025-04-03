@@ -151,7 +151,7 @@ function toggleconsolemessages() {
 //(ask the user a random question)
 
 //Example Questions
-<!-- const triviaQuestions = [ -->
+/* <!-- const triviaQuestions = [ -->
 <!-- { question: "Converting 100 shrapnel results in how much universal ammo?", answer: "101" }, -->
 <!-- { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" }, -->
 <!-- { question: "What is 5 + 3?", answer: "8" }, -->
@@ -169,7 +169,7 @@ function toggleconsolemessages() {
 <!-- { question: "How many PED is 100 PEC worth?", answer: "1" }, -->
 <!-- { question: "How many PEC is 1 PED worth?", answer: "100" }, -->
 <!-- { question: "How many PEC is 10 PED worth?", answer: "1000" } -->
-        <!-- ]; -->
+        <!-- ]; --> */
 
 //Example add Question Command
 //!trivia-addcustomquestion round1 | What number is on the side of a Sleipnir mk1 (C,L)? | 88
@@ -1505,14 +1505,6 @@ updateTriviaSettingsUI();
 // COMFY JS specific logic/functions
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-//comfy js a simple onchat command:
-//uncomment to use (depends on desplayChatMessage(user, message, flags, extra))
-<!-- ComfyJS.onChat = (user, message, color, flags, extra) => { -->
-    <!-- console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message); -->
-    <!-- // Call the displayChatMessage function and pass flags and extra for userColor and badges -->
-    <!-- displayChatMessage(user, message, flags, extra);  // Show message in chat box -->
-    <!-- checkAnswer(user, message);         // Check if it's an answer -->
-<!-- }; -->
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     // If chat answers are enabled, check the message for answers
     if (chatanswers) {
