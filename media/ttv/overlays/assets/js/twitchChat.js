@@ -242,34 +242,17 @@ function toggleChatAudioSetting() {
 //end of chat logic --------------------|
 // ComfyJS onChat event handler
 let streamername = "jaedraze"; // Default streamer name
+function isStreamerAndAuthorize(user, command) {
+    if (user.toLowerCase() !== streamername.toLowerCase()) {
+        displayConsoleMessage(user, `❌ Unauthorized: Only ${streamername} can use !${command}`);
+        return false;
+    }
+    return true;
+}
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
     console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
     displayChatMessage(user, message, flags, extra);  // Show message in chat box
-};
-
-ComfyJS.onCommand = (user, command, message, flags, extra) => {
-    // Only allow streamer (jaedraze) or mods to trigger these commands
-    if (user.toLowerCase() === "jaedraze" || flags.mod) {
-		console.log( "User:", user, "command:", command);
-		if (command.toLowerCase() === "testsound-1") {
-				playSound(); // Play the sound when !playsound is typed in chat
-			}
-		if (command === "togglechat") {
-			togglechatElement("twitchchatContainer", "fade");
-		}
-		if (command === "chatoption1") {
-			togglechatElement("questionWrapper", "fade");
-		}
-    } else {
-        // Example commands that any user can trigger
-        if (command.toLowerCase() === "hellochat") {
-            // Custom logic to send "Hello, world!" to your overlay chat
-            const message = "Hello, world!";
-            displayChatMessage("System", message, {}, {}); // Call the function to display the message in the chat overlay
-            console.log(`Sent message to overlay: ${message}`); // Log to the console
-        }
-    }
 };
 
 
@@ -280,7 +263,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
-    const input = document.querySelector("#comfycontrolBox input[type='text']");
+    const input = document.querySelector("#entriviacontrolBox input[type='text']");
 
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
@@ -314,9 +297,15 @@ function setStreamer(newStreamer) {
         button.style.border = "1px solid #dc3545"; 
     }
 }
+function connectStreamer() {
+    const savedStreamer = localStorage.getItem("lastStreamer");
+    if (savedStreamer) {
+        setStreamer(savedStreamer); // Auto-connect
+    }
+}
 function disconnectBot() {
 	const button = document.getElementById("streamersButt");
-	const input = document.querySelector("#comfycontrolBox input[type='text']");
+	const input = document.querySelector("#entriviacontrolBox input[type='text']");
 	button.style.display = "block";
 	input.style.display = "block";
     ComfyJS.Disconnect();
@@ -336,13 +325,7 @@ function disconnectBot() {
     button.style.border = "1px solid #28a745";  
     input.style.outline = "3px outset #dc3545"; 
 }
-// Auto-reconnect on page load
-window.onload = function () {
-    const savedStreamer = localStorage.getItem("lastStreamer");
-    if (savedStreamer) {
-        setStreamer(savedStreamer); // Auto-connect
-    }
-};
+
 
 document.getElementById("controls-toggle").addEventListener("click", function () {
 	let container = document.getElementById("comfycontrolBox");
@@ -358,3 +341,6 @@ document.getElementById("streamersButt").addEventListener("click", function() {
 	console.log("attempting to Connect to:" + newStreamer);
     setStreamer(newStreamer); // Then, set the new streamer
 });
+window.onload = function () {
+	connectStreamer();
+};
