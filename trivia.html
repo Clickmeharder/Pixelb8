@@ -2603,39 +2603,40 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 };
 
-//adding commands to cmd list:
-const commands = [
-  { command: "!a / !answer", description: "Allows users to answer a trivia question. (User command)" },
-  { command: "!trivia-play", description: "Starts the trivia game. (Streamer command)" },
-  { command: "!trivia-askrandom", description: "Asks a random trivia question. (Streamer command)" },
-  { command: "!trivia-ask", description: "Asks a trivia question from a specific round and category. (Streamer command)" },
-  { command: "!trivia-lastaskwinner", description: "Displays the last trivia question's winner. (Streamer command)" },
-  { command: "!trivia-lastwinners", description: "Displays the list of last trivia winners. (Streamer command)" },
-  { command: "!trivia-history", description: "Displays trivia history. (Streamer command)" },
-  { command: "!chatanswers", description: "Toggles the chat answers on/off. (Streamer command)" },
-  { command: "!trivia-disablechat", description: "Disables trivia chat overlay. (Streamer command)" },
-  { command: "!trivia-audio", description: "Toggles trivia audio settings. (Streamer command)" },
-  { command: "!toggletriviaboard", description: "Toggles the trivia board visibility. (Streamer command)" },
-  { command: "!togglequestions", description: "Toggles the visibility of the question wrapper. (Streamer command)" },
-  { command: "!toggletrivia", description: "Toggles the visibility of the trivia wrapper. (Streamer command)" },
-  { command: "!togglechat", description: "Toggles the visibility of the Twitch chat container. (Streamer command)" },
-  { command: "!trivia-addquestion", description: "Allows the streamer to add a custom trivia question. (Streamer command)" },
-  { command: "!trivia-answertime", description: "Updates the answer time limit. (Streamer command)" },
-  { command: "!trivia-questiondelay", description: "Updates the question delay between questions. (Streamer command)" },
-  { command: "!trivia-rounddelay", description: "Updates the delay between rounds. (Streamer command)" },
-  { command: "!trivia-questioncap", description: "Sets a cap for the number of questions per round. (Streamer command)" },
-  { command: "!trivia-defaultquestions", description: "Toggles default trivia questions. (Streamer command)" },
-  { command: "!trivia-customquestions", description: "Toggles custom trivia questions. (Streamer command)" }
-];
+document.addEventListener("DOMContentLoaded", function() {
+  const commands = [
+    { command: "!a / !answer", description: "Allows users to answer a trivia question. (User command)" },
+    { command: "!trivia-play", description: "Starts the trivia game. (Streamer command)" },
+    { command: "!trivia-askrandom", description: "Asks a random trivia question. (Streamer command)" },
+    { command: "!trivia-ask", description: "Asks a trivia question from a specific round and category. (Streamer command)" },
+    { command: "!trivia-lastaskwinner", description: "Displays the last trivia question's winner. (Streamer command)" },
+    { command: "!trivia-lastwinners", description: "Displays the list of last trivia winners. (Streamer command)" },
+    { command: "!trivia-history", description: "Displays trivia history. (Streamer command)" },
+    { command: "!chatanswers", description: "Toggles the chat answers on/off. (Streamer command)" },
+    { command: "!trivia-disablechat", description: "Disables trivia chat overlay. (Streamer command)" },
+    { command: "!trivia-audio", description: "Toggles trivia audio settings. (Streamer command)" },
+    { command: "!toggletriviaboard", description: "Toggles the trivia board visibility. (Streamer command)" },
+    { command: "!togglequestions", description: "Toggles the visibility of the question wrapper. (Streamer command)" },
+    { command: "!toggletrivia", description: "Toggles the visibility of the trivia wrapper. (Streamer command)" },
+    { command: "!togglechat", description: "Toggles the visibility of the Twitch chat container. (Streamer command)" },
+    { command: "!trivia-addquestion", description: "Allows the streamer to add a custom trivia question. (Streamer command)" },
+    { command: "!trivia-answertime", description: "Updates the answer time limit. (Streamer command)" },
+    { command: "!trivia-questiondelay", description: "Updates the question delay between questions. (Streamer command)" },
+    { command: "!trivia-rounddelay", description: "Updates the delay between rounds. (Streamer command)" },
+    { command: "!trivia-questioncap", description: "Sets a cap for the number of questions per round. (Streamer command)" },
+    { command: "!trivia-defaultquestions", description: "Toggles default trivia questions. (Streamer command)" },
+    { command: "!trivia-customquestions", description: "Toggles custom trivia questions. (Streamer command)" }
+  ];
 
-const commandListElement = document.getElementById("commandList");
+  const commandListElement = document.getElementById("commandList");
 
-commands.forEach(command => {
-  const li = document.createElement("li");
-  li.innerHTML = `<strong>${command.command}</strong>: ${command.description}`;
-  commandListElement.appendChild(li);
+  commands.forEach(function(command) {
+    const li = document.createElement("li");
+    li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
+    commandListElement.appendChild(li);
+  });
 });
-// Basic ComfyJS onChat event handler
+
 <!-- ComfyJS.onChat = (user, message, color, flags, extra) => { -->
     <!-- console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message); -->
     <!-- // Call the displayChatMessage function and pass flags and extra for userColor and badges -->
