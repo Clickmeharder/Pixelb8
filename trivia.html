@@ -2985,6 +2985,7 @@ function toggleAudioSetting() {
     audioSetting = audioSetting === "on" ? "off" : "on";
     console.log(`Audio setting is now: ${audioSetting}`);
 	displayConsoleMessage("system", `Audio setting is now: ${audioSetting}`);
+	updateIndicatorLights();
 }
 //---------------------------------------------------
 
