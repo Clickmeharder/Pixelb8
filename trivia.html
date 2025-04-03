@@ -545,6 +545,15 @@
 			flex-direction: column;
 			align-items: center;
 		}
+		.statusindicatorWrapper strong {
+			color: gray;
+			background-color: black;
+			border: 2px ridge gray;
+			padding: 2px;
+			margin: 2px;
+			font-size: 11px;
+			font-family: lucida console;
+		}
 		.light-indicator {
 			display: inline-block;
 			width: 12px;
@@ -2372,18 +2381,29 @@ function updateSettingsDisplay() {
 
 function updateIndicatorLights() { 
     const settings = { usedefaultquestions, usecustomquestions, consoleMessages, entriviachatOverlay, chatanswers };
+    
     document.querySelectorAll(".light-indicator").forEach(indicator => {
         const optionName = indicator.getAttribute("data-option");
         const optionValue = settings[optionName]; // Get the value safely
         console.log(`Checking ${optionName}:`, optionValue); // Debug log
+        
         // Set light color based on value
-        indicator.style.backgroundColor = (optionValue === true || optionValue === "on") 
+        const lightColor = (optionValue === true || optionValue === "on") 
             ? "green" 
             : (optionValue === false || optionValue === "off") 
                 ? "red" 
                 : "gray"; // Fallback color
+        indicator.style.backgroundColor = lightColor;
+
+        // Find the nearest <strong> element and change text color
+        const statusText = indicator.closest('.statusindicatorWrapper').querySelector('strong');
+        if (statusText) {
+            statusText.style.color = lightColor;  // Set the text color to green/red
+            statusText.textContent = (optionValue === true || optionValue === "on") ? "Enabled" : "Disabled";
+        }
     });
 }
+
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // COMFY JS specific logic/functions
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
