@@ -1217,12 +1217,6 @@ function deleteCustomQuestion() {
             if (customQuestions[round][category].length === 0) {
                 delete customQuestions[round][category];
             }
-
-            // If round is empty (i.e., no categories left), delete the round
-            if (Object.keys(customQuestions[round]).length === 0) {
-                delete customQuestions[round];
-            }
-
             // Save the updated custom questions to localStorage
             localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
 
@@ -1240,8 +1234,9 @@ function clearAllCustomQuestions() {
     console.log("✅ All custom trivia questions have been deleted.");
 }
 // Clear existing questions
-clearAllCustomQuestions();
-// Now add a new trivia question (example usage)
+// uncomment these two commands to clear all custom questions:
+//clearAllCustomQuestions();
+// Now add a new trivia question (example usage):
 addCustomTriviaQuestion("round1", "What is the smallest Skildek support weapon?", "lancehead", "hunting");
 //_____________________________________
 //-------------------------------------
