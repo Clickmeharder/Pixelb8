@@ -1278,6 +1278,46 @@ function getRandomQuestion() {
     usedQuestions.push(question);
     return question;
 }
+function getRandomQuestionFromCategory(round, category) {
+    // Ensure round is valid
+    let currentRound = (round === 1) ? "round1" : (round === 2) ? "round2" : null;
+    if (!currentRound) {
+        console.error("❌ Invalid round. Please specify either round 1 or round 2.");
+        return null;
+    }
+
+    // Ensure category exists in triviaQuestions[currentRound]
+    if (!triviaQuestions[currentRound] || !triviaQuestions[currentRound][category]) {
+        console.error(`❌ No questions found for ${category} in ${currentRound}.`);
+        return null;
+    }
+
+    // Ensure triviaQuestions[currentRound][category] is an array
+    if (!Array.isArray(triviaQuestions[currentRound][category])) {
+        console.error(`❌ The category ${category} in ${currentRound} does not contain an array of questions.`);
+        return null;
+    }
+
+    // Filter out used questions
+    let availableQuestions = triviaQuestions[currentRound][category].filter(q => !usedQuestions.includes(q));
+
+    if (availableQuestions.length === 0) {
+        // Reset if all questions have been used
+        usedQuestions = [];
+        availableQuestions = triviaQuestions[currentRound][category];
+    }
+
+    if (availableQuestions.length === 0) {
+        console.warn("⚠️ No available questions after reset.");
+        return null;
+    }
+
+    // Pick a random question
+    let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+    usedQuestions.push(question);
+    return question;
+}
+
 function nextQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
@@ -1784,7 +1824,7 @@ function endTrivia() {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //- ASK SINGLE RANDOM QUESTION
 function askSplash() {
-    return showAnnouncement("Asking Question in:", 30)
+    return showAnnouncement("Asking Random Question in:", 30)
         .then(() => {
             showTriviaAsk();  // Show trivia after the countdown
         })
@@ -1852,6 +1892,65 @@ function AskQuestion() {
         }
     }, 1000);
 }
+function AskfromCat(round, category) {
+    clearTimeout(questionTimer); // Clear previous timer if any
+    clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
+    answeredUsers.clear();
+    firstAnswerUser = null;
+    // Use the passed round and category to get the random question
+    activeQuestion = getRandomQuestionFromCategory(round, category);
+    if (!activeQuestion) {
+        console.error("❌ No question found for the specified round and category.");
+        return;
+    }
+    updateQuestionCounter(); // Update the display
+    document.getElementById("question-counter").textContent = `First Correct Answer Wins`;
+    document.getElementById("question").textContent = activeQuestion.question;
+    document.getElementById("questionWrapper").style.visibility = "visible";
+    document.getElementById("timer").textContent = timetoAnswer;
+    document.getElementById("timeuntil-nextQ").textContent = "";
+    playRandomQuestionSound();
+    let secondsLeft = timetoAnswer;
+    questionTimer = setInterval(() => {
+        secondsLeft--;
+        document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
+        if (secondsLeft <= 0) {
+            endAsk(); // Call your function to end the question once time runs out
+        }
+    }, 1000);
+}
+function startTriviaAskfromCat(round, category) {
+    displayConsoleMessage("system", "startTriviaAskfromCat fn called");
+    if (triviaGameState === "started") {
+        displayConsoleMessage("system", "Trivia is already running! Ignoring duplicate command.");
+        console.log("Trivia is already running! Ignoring duplicate command.");
+        return; // Stop if trivia is already running
+    }
+    if (singleActiveAsk === "Active") {
+        displayConsoleMessage("system", "Trivia is already Asking a question! Ignoring duplicate command.");
+        console.log("Trivia is already running! Ignoring duplicate command.");
+        return; // Stop if trivia is already running
+    }
+    displayConsoleMessage("system", "Trivia ask continues");
+    console.log("Trivia should splash and fetch a question from a specific category.");
+
+    askSplash() // Run splash first
+        .then(() => fetchTriviaQuestions()) // Fetch questions after splash
+        .then(questions => {
+            singleActiveAsk = "Active"; // Mark trivia as started
+            window.triviaQuestions = questions;
+            console.log("singleActiveAsk = " + singleActiveAsk);
+            console.log("Trivia Questions Loaded:", questions);
+            displayConsoleMessage("system", `singleActiveAsk = ${singleActiveAsk}`);
+            // Pass the round and category to AskfromCat
+            AskfromCat(round, category);
+        })
+        .catch(error => {
+            console.error("Error loading trivia questions:", error);
+            displayConsoleMessage("system", `Error loading trivia questions: ${error}`);
+            singleActiveAsk = null; // Reset state on failure
+        });
+}
 function startTriviaAsk() {
 	displayConsoleMessage("system", "startTrivia fn called");
     if (triviaGameState === "started") {
@@ -1884,6 +1983,8 @@ function startTriviaAsk() {
         });
 
 }
+
+
 
 function displayLastWinner() {
     if (TriviaSingleAskLastWinner) {
@@ -2229,6 +2330,30 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
         startTriviaAsk();
     }
+	//example of command to ask a question from a specific round and category:
+	//!trivia-ask round1 | mining
+	if (command.toLowerCase() === "trivia-askcat") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
+		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		// Extract the round and category from the message
+		let messageContent = message.trim();
+		let parts = messageContent.split("|").map(p => p.trim());
+		// Validate input format
+		if (parts.length < 2) {
+			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-ask round | category`, flags, extra, true);
+			return;
+		}
+		let round = parts[0].toLowerCase();
+		let category = parts[1].toLowerCase();
+		// Ensure the round is valid
+		if (round !== "round1" && round !== "round2") {
+			displayTriviaMessage(user, `⚠️ Invalid round! Use 'round1' or 'round2'.`, flags, extra, true);
+			return;
+		}
+		// Call startTriviaAskfromCat with the round and category
+		startTriviaAskfromCat(round, category);
+	}
 	if (command.toLowerCase() === "trivia-lastask") {
         if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
@@ -2300,6 +2425,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 //-------------------------------------------------------
 	// Command-based settings updates
+	//example cmd to add question:
+	//!trivia-addcustomquestion round1 | mining | What is mining? | the answer goes here.
 	if (command.toLowerCase() === "trivia-addquestion") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
