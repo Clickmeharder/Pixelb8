@@ -166,7 +166,14 @@
 			align-items: center;
 			border: 2px ridge #273a4c;
 		}
-		#trivia-settings-togglebar {
+		.trivia-settings-togglebar {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+			border: 2px ridge #273a4c;
+		}
+		.trivia-settings-cmdinfo {
 			display: flex;
 			flex-direction: row;
 			justify-content: space-between;
@@ -655,17 +662,23 @@
 				<h3>Trivia Settings</h3>
 			</div>
 			<div id="trivia-settings-toggles">
-				<div id="trivia-settings-togglebar">
+				<div class="trivia-settings-togglebar">
 					<button id="toggleDefaultQuestions">Default Questions</button>
 					<p><strong>Status</strong><span id="statusDefaultQuestions">Loading...</span></p>
+				</div>
+				<div class="trivia-settings-cmdinfo">
 					<span class="command-text">CMD = !trivia-defaultquestions</span>
 					<span class="command-info" title="!trivia-defaultquestions">❓</span>
 				</div>
-				<div id="trivia-settings-togglebar">
+				<div class="trivia-settings-togglebar">
 					<button id="toggleCustomQuestions">Custom Questions</button>
 					<p><strong>Status</strong><span id="statusCustomQuestions">Loading...</span></p>
 					<span class="command-text">CMD = (!trivia-customquestions)</span>
 					<span class="command-info" title="!trivia-customquestions">❓</span>
+				</div>
+				<div class="trivia-settings-cmdinfo">
+					<span class="command-text">CMD = !trivia-defaultquestions</span>
+					<span class="command-info" title="!trivia-defaultquestions">❓</span>
 				</div>
 			</div>
 			<div id="addCustomQuestionForm">
