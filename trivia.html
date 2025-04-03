@@ -173,6 +173,15 @@
 			align-items: center;
 			border: 2px ridge #273a4c;
 		}
+		.light-indicator {
+			display: inline-block;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			background-color: red; /* Default to red */
+			margin-left: 5px;
+			box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Optional glow effect */
+		}
 		.trivia-settings-cmdinfo {
 			display: flex;
 			flex-direction: row;
@@ -664,7 +673,7 @@
 			<div id="trivia-settings-toggles">
 				<div class="trivia-settings-togglebar">
 					<button id="toggleDefaultQuestions">Default Questions</button>
-					<p><strong>Status</strong><span id="statusDefaultQuestions">Loading...</span></p>
+					<p><strong>Status:</strong> <span id="statusDefaultQuestions" class="light-indicator"></span></p>
 				</div>
 				<div class="trivia-settings-cmdinfo">
 					<span class="command-text">CMD = !trivia-defaultquestions</span>
@@ -672,7 +681,7 @@
 				</div>
 				<div class="trivia-settings-togglebar">
 					<button id="toggleCustomQuestions">Custom Questions</button>
-					<p><strong>Status</strong><span id="statusCustomQuestions">Loading...</span></p>
+					<p><strong>Status:</strong> <span id="statusCustomQuestions" class="light-indicator"></span></p>
 				</div>
 				<div class="trivia-settings-cmdinfo">
 					<span class="command-text">CMD = (!trivia-customquestions)</span>
@@ -2827,8 +2836,12 @@ document.getElementById("toggleDefaultQuestions").addEventListener("click", togg
 document.getElementById("toggleCustomQuestions").addEventListener("click", toggleCustomQuestions);
 
 function updateSettingsDisplay() {
-    document.getElementById("statusDefaultQuestions").textContent = usedefaultquestions ? "Enabled ✅" : "Disabled ❌";
-    document.getElementById("statusCustomQuestions").textContent = usecustomquestions ? "Enabled ✅" : "Disabled ❌";
+    const statusDefault = document.getElementById("statusDefaultQuestions");
+    const statusCustom = document.getElementById("statusCustomQuestions");
+
+    // Update class to show green or red light
+    statusDefault.style.backgroundColor = usedefaultquestions ? "green" : "red";
+    statusCustom.style.backgroundColor = usecustomquestions ? "green" : "red";
 }
 // Add event listener to the button to add custom questions
 document.getElementById('submitQuestionBtn').addEventListener('click', function() {
