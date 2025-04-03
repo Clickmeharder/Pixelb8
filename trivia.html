@@ -886,8 +886,8 @@ let triviaQuestions = { round1: [], round2: [] };
 //_______________________________________________
 // TRIVIA OPTIONS
 //game options
-let consoleMessages = false;
 let entriviachatOverlay = "off";
+let consoleMessages = false;
 let chatanswers = false;
 
 let usedefaultquestions = true;
@@ -2313,7 +2313,6 @@ function saveSettings() {
     };
     localStorage.setItem("triviaClassicSettings", JSON.stringify(triviaClassicSettings));
 }
-
 function updateSettings() {
     timetoAnswer = parseInt(document.getElementById("timeToAnswer").value, 10);
     timebetweenQuestions = parseInt(document.getElementById("timeBetweenQuestions").value, 10);
@@ -2325,7 +2324,6 @@ function updateSettings() {
     saveSettings();
     displayTriviaMessage("!!", "Entrivia Settings updated and saved.", {}, {});
 }
-
 function resetSettings() {
     // Default settings
     timetoAnswer = 30;
@@ -2399,6 +2397,15 @@ function isStreamerAndAuthorize(user, command) {
     }
     return true;
 }
+
+//comfy js a simple onchat command:
+//uncomment to use (depends on desplayChatMessage(user, message, flags, extra))
+<!-- ComfyJS.onChat = (user, message, color, flags, extra) => { -->
+    <!-- console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message); -->
+    <!-- // Call the displayChatMessage function and pass flags and extra for userColor and badges -->
+    <!-- displayChatMessage(user, message, flags, extra);  // Show message in chat box -->
+    <!-- checkAnswer(user, message);         // Check if it's an answer -->
+<!-- }; -->
 ComfyJS.onChat = (user, message, color, flags, extra) => {
     // If chat answers are enabled, check the message for answers
     if (chatanswers) {
@@ -2686,7 +2693,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 };
 
-document.addEventListener("DOMContentLoaded", function() { 
+function updateCommandlist() { 
   const usercommands = [
     { command: "!a / !answer", description: "Allows users to answer a trivia question.", usage: "!a / !answer" },
   ];
@@ -2761,12 +2768,6 @@ document.addEventListener("DOMContentLoaded", function() {
     broadcasterCommandList.appendChild(li);
   });
 });
-<!-- ComfyJS.onChat = (user, message, color, flags, extra) => { -->
-    <!-- console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message); -->
-    <!-- // Call the displayChatMessage function and pass flags and extra for userColor and badges -->
-    <!-- displayChatMessage(user, message, flags, extra);  // Show message in chat box -->
-    <!-- checkAnswer(user, message);         // Check if it's an answer -->
-<!-- }; -->
 
 //!!!!!!!!!!!!!!!!!!!!!!!
 // Our Comfy Connection
@@ -2900,6 +2901,7 @@ window.onload = function () {
 	connectStreamer();
 	loadCustomQuestions();
 	updateSettingsDisplay();
+	updateCommandlist();
 };
 
 // window.addEventListener('load', loadCustomQuestions);
