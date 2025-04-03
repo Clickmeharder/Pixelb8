@@ -2209,10 +2209,12 @@ function toggleusecustomquestions() {
     usecustomquestions = !usecustomquestions;
     updateSingleSetting("usecustomquestions", usecustomquestions);
 	console.log("toggled customquestions", usecustomquestions);
+	displayConsoleMessage("toggled customquestions", usecustomquestions);
     updateIndicatorLights();
 }
 function toggleEntriviachatOverlay() {
     entriviachatOverlay = entriviachatOverlay === "on" ? "off" : "on";
+	updateSingleSetting("entriviachatOverlay", entriviachatOverlay);
     console.log(`Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
 	displayConsoleMessage("system", `Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
 	updateIndicatorLights();
