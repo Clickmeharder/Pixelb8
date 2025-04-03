@@ -187,8 +187,11 @@
 		.trivia-settings-cmdinfo {
 			display: flex;
 			flex-direction: row;
-			justify-content: space-between;
+			justify-content: space-evenly;
+			text-align: center;
 			align-items: center;
+			color: gray;
+			background-color: #020307eb;
 			border: 2px ridge #273a4c;
 		}
 		#trivia-settings input {
@@ -2157,6 +2160,7 @@ function displayLastTriviaWinners() {
 
 // Function to display all past trivia games from history
 function displayTriviaHistory() {
+	loadTriviaHistory();
     if (!TriviaClassicHistory || TriviaClassicHistory.length === 0) {
         displayTriviaMessage("📢", "No past trivia games recorded.", {}, {});
         return;
@@ -2181,8 +2185,6 @@ function displayTriviaHistory() {
 //displayLastTriviaWinners();
 //displayTriviaHistory();
 
-// Load saved history when the bot starts
-loadTriviaHistory();
 //------------------------
 //---generic ui logic----|
 //-----------------------
