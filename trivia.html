@@ -472,6 +472,34 @@
 			margin-left: 5px;
 			font-size: 16px;
 		}
+		#commandListContainer {
+		  font-family: Arial, sans-serif;
+		  background-color: #f4f4f9;
+		  padding: 20px;
+		  border-radius: 8px;
+		  width: 300px;
+		  margin: 20px auto;
+		  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+
+		#commandList h2 {
+		  text-align: center;
+		  font-size: 1.5em;
+		}
+
+		#commandList {
+		  list-style-type: none;
+		  padding: 0;
+		}
+
+		#commandList li {
+		  margin: 10px 0;
+		}
+
+		#commandList li strong {
+		  color: #333;
+		  font-weight: bold;
+		}
     </style>
     <style>
 		/* ANIMATIONS */
@@ -673,6 +701,33 @@
 					<button id="resetSettings">Default</button>
 				</div>
 			</div>
+			<div id="commandListContainer">
+			  <h2>List of Commands</h2>
+			  <ul id="commandList">
+				<li><strong>!trivia-play</strong>: Starts the trivia game. (Streamer command)</li>
+				<li><strong>!trivia-askrandom</strong>: Asks a random trivia question. (Streamer command)</li>
+				<li><strong>!trivia-ask</strong>: Asks a trivia question from a specific round and category. (Streamer command)</li>
+				<li><strong>!a / !answer</strong>: Allows users to answer a trivia question. (User command)</li>
+				<li><strong>!trivia-lastaskwinner</strong>: Displays the last trivia question's winner. (Streamer command)</li>
+				<li><strong>!trivia-lastwinners</strong>: Displays the list of last trivia winners. (Streamer command)</li>
+				<li><strong>!trivia-history</strong>: Displays trivia history. (Streamer command)</li>
+				<li><strong>!chatanswers</strong>: Toggles the chat answers on/off. (Streamer command)</li>
+				<li><strong>!trivia-disablechat</strong>: Disables trivia chat overlay. (Streamer command)</li>
+				<li><strong>!trivia-audio</strong>: Toggles trivia audio settings. (Streamer command)</li>
+				<li><strong>!toggletriviaboard</strong>: Toggles the trivia board visibility. (Streamer command)</li>
+				<li><strong>!togglequestions</strong>: Toggles the visibility of the question wrapper. (Streamer command)</li>
+				<li><strong>!toggletrivia</strong>: Toggles the visibility of the trivia wrapper. (Streamer command)</li>
+				<li><strong>!togglechat</strong>: Toggles the visibility of the Twitch chat container. (Streamer command)</li>
+				<li><strong>!trivia-addquestion</strong>: Allows the streamer to add a custom trivia question. (Streamer command)</li>
+				<li><strong>!trivia-answertime</strong>: Updates the answer time limit. (Streamer command)</li>
+				<li><strong>!trivia-questiondelay</strong>: Updates the question delay between questions. (Streamer command)</li>
+				<li><strong>!trivia-rounddelay</strong>: Updates the delay between rounds. (Streamer command)</li>
+				<li><strong>!trivia-questioncap</strong>: Sets a cap for the number of questions per round. (Streamer command)</li>
+				<li><strong>!trivia-defaultquestions</strong>: Toggles default trivia questions. (Streamer command)</li>
+				<li><strong>!trivia-customquestions</strong>: Toggles custom trivia questions. (Streamer command)</li>
+			  </ul>
+			</div>
+
 		</div>
 
 	</div>
@@ -2311,12 +2366,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayConsoleMessage(user, `!${command} ✅`);
 		playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
 	}
-    if (command.toLowerCase() === "trivia-start") {
-        if (!isStreamerAndAuthorize(user, command)) return;
-        displayConsoleMessage(user, `!${command} ✅`);
-        displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		startTrivia();
-    }
 	if (command.toLowerCase() === "trivia-nextround") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		console.log("Current Round:", round);
@@ -2324,37 +2373,62 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		document.getElementById("question").textContent = "Entrivia Round:"+ round;
 		setTimeout(handlephaseTrivia, 10000);
 	}
-    if (command.toLowerCase() === "trivia-ask") {
+    if (command.toLowerCase() === "trivia-play") {
+        if (!isStreamerAndAuthorize(user, command)) return;
+        displayConsoleMessage(user, `!${command} ✅`);
+        displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		startTrivia();
+    }
+
+    if (command.toLowerCase() === "trivia-askrandom") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
         displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
         startTriviaAsk();
     }
 	//example of command to ask a question from a specific round and category:
-	//!trivia-ask round1 | mining
-	if (command.toLowerCase() === "trivia-askcat") {
+	//!trivia-ask easy/hard | mining
+	if (command.toLowerCase() === "trivia-ask") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		// Extract the round and category from the message
+		
+		// Extract the difficulty and category from the message
 		let messageContent = message.trim();
 		let parts = messageContent.split("|").map(p => p.trim());
+		
 		// Validate input format
 		if (parts.length < 2) {
-			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-ask round | category`, flags, extra, true);
+			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-ask easy/hard | category`, flags, extra, true);
 			return;
 		}
-		let round = parts[0].toLowerCase();
+		
+		let difficulty = parts[0].toLowerCase();
 		let category = parts[1].toLowerCase();
-		// Ensure the round is valid
-		if (round !== "round1" && round !== "round2") {
-			displayTriviaMessage(user, `⚠️ Invalid round! Use 'round1' or 'round2'.`, flags, extra, true);
+		
+		// Map easy to round1 and hard to round2
+		let round;
+		if (difficulty === "easy") {
+			round = "round1";
+		} else if (difficulty === "hard") {
+			round = "round2";
+		} else {
+			displayTriviaMessage(user, `⚠️ Invalid difficulty! Use 'easy' or 'hard'.`, flags, extra, true);
 			return;
 		}
+		
+		// Ensure the category is valid
+		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
+		
+		if (!validCategories.includes(category)) {
+			displayTriviaMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
+			return;
+		}
+		
 		// Call startTriviaAskfromCat with the round and category
 		startTriviaAskfromCat(round, category);
 	}
-	if (command.toLowerCase() === "trivia-lastask") {
+	if (command.toLowerCase() === "trivia-lastaskwinner") {
         if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
         displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
@@ -2380,7 +2454,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		// Show in the chat whether chat answers are now enabled or disabled
 		displayChatMessage(user, `Chat answers are now ${chatanswers ? "enabled" : "disabled"}.`, flags, extra, false);
 	}
-	if (command.toLowerCase() === "trivia-twitchchat") {
+	if (command.toLowerCase() === "trivia-disablechat") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
         displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
@@ -2408,25 +2482,15 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		toggleTrivia();
 		toggleElement("triviaWrapper", "fade");
 	}
-	if (command === "togglechat1") {
+	if (command === "togglechat") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		toggleElement("twitchchatContainer", "fade");
 	}
-	if (command.toLowerCase() === "togglechat2") {
-		if (!isStreamerAndAuthorize(user, command)) return;
-		displayConsoleMessage(user, `!${command} ✅`);
-		let chatContainer = document.getElementById("twitchchatContainer");
-		if (chatContainer.style.visibility === "hidden") {
-			chatContainer.style.visibility = "visible"; // Show the chat if it's hidden
-		} else {
-			chatContainer.style.visibility = "hidden"; // Hide the chat if it's visible
-		}
-	}
 //-------------------------------------------------------
 	// Command-based settings updates
 	//example cmd to add question:
-	//!trivia-addcustomquestion round1 | mining | What is mining? | the answer goes here.
+	//!trivia-addquestion easy/hard | economy | what does ped stand for | project entropia dollar
 	if (command.toLowerCase() === "trivia-addquestion") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
@@ -2437,24 +2501,29 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		let parts = messageContent.split("|").map(p => p.trim());
 		
 		// Validate input format
-		if (parts.length < 4) {  // Now expects 4 parts (round, category, question, answer)
-			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-addcustomquestion round1 | category | question | answer`, flags, extra, true);
+		if (parts.length < 4) {  // Now expects 4 parts (difficulty, category, question, answer)
+			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-addquestion easy/hard | category | question | answer`, flags, extra, true);
 			return;
 		}
 		
-		let round = parts[0].toLowerCase();
+		let difficulty = parts[0].toLowerCase();
 		let category = parts[1].toLowerCase(); // Extract category
 		let questionText = parts[2];
 		let correctAnswer = parts[3];
 		
-		// Ensure the round and category are valid
-		const validRounds = ["round1", "round2"];
-		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
-
-		if (!validRounds.includes(round)) {
-			displayTriviaMessage(user, `⚠️ Invalid round! Use 'round1' or 'round2'.`, flags, extra, true);
+		// Map easy to round1 and hard to round2
+		let round;
+		if (difficulty === "easy") {
+			round = "round1";
+		} else if (difficulty === "hard") {
+			round = "round2";
+		} else {
+			displayTriviaMessage(user, `⚠️ Invalid difficulty! Use 'easy' or 'hard'.`, flags, extra, true);
 			return;
 		}
+		
+		// Ensure the category is valid
+		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
 
 		if (!validCategories.includes(category)) {
 			displayTriviaMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
@@ -2467,7 +2536,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		// Confirm success
 		displayTriviaMessage(user, `✅ Custom question added to ${round} (${category})!`, flags, extra, true);
 	}
-
 	if (command.toLowerCase() === "trivia-answertime") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
@@ -2535,6 +2603,38 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 };
 
+//adding commands to cmd list:
+const commands = [
+  { command: "!trivia-play", description: "Starts the trivia game. (Streamer command)" },
+  { command: "!trivia-askrandom", description: "Asks a random trivia question. (Streamer command)" },
+  { command: "!trivia-ask", description: "Asks a trivia question from a specific round and category. (Streamer command)" },
+  { command: "!a / !answer", description: "Allows users to answer a trivia question. (User command)" },
+  { command: "!trivia-lastaskwinner", description: "Displays the last trivia question's winner. (Streamer command)" },
+  { command: "!trivia-lastwinners", description: "Displays the list of last trivia winners. (Streamer command)" },
+  { command: "!trivia-history", description: "Displays trivia history. (Streamer command)" },
+  { command: "!chatanswers", description: "Toggles the chat answers on/off. (Streamer command)" },
+  { command: "!trivia-disablechat", description: "Disables trivia chat overlay. (Streamer command)" },
+  { command: "!trivia-audio", description: "Toggles trivia audio settings. (Streamer command)" },
+  { command: "!toggletriviaboard", description: "Toggles the trivia board visibility. (Streamer command)" },
+  { command: "!togglequestions", description: "Toggles the visibility of the question wrapper. (Streamer command)" },
+  { command: "!toggletrivia", description: "Toggles the visibility of the trivia wrapper. (Streamer command)" },
+  { command: "!togglechat", description: "Toggles the visibility of the Twitch chat container. (Streamer command)" },
+  { command: "!trivia-addquestion", description: "Allows the streamer to add a custom trivia question. (Streamer command)" },
+  { command: "!trivia-answertime", description: "Updates the answer time limit. (Streamer command)" },
+  { command: "!trivia-questiondelay", description: "Updates the question delay between questions. (Streamer command)" },
+  { command: "!trivia-rounddelay", description: "Updates the delay between rounds. (Streamer command)" },
+  { command: "!trivia-questioncap", description: "Sets a cap for the number of questions per round. (Streamer command)" },
+  { command: "!trivia-defaultquestions", description: "Toggles default trivia questions. (Streamer command)" },
+  { command: "!trivia-customquestions", description: "Toggles custom trivia questions. (Streamer command)" }
+];
+
+const commandListElement = document.getElementById("commandList");
+
+commands.forEach(command => {
+  const li = document.createElement("li");
+  li.innerHTML = `<strong>${command.command}</strong>: ${command.description}`;
+  commandListElement.appendChild(li);
+});
 // Basic ComfyJS onChat event handler
 <!-- ComfyJS.onChat = (user, message, color, flags, extra) => { -->
     <!-- console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message); -->
