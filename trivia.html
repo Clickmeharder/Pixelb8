@@ -1175,7 +1175,10 @@ function updateAnswerDisplay() {
     const dropdown = document.getElementById('questionList');
     const selectedOption = dropdown.value;
 
+    // Check if the default option (first option) is selected
     if (!selectedOption) {
+        const answerDisplay = document.getElementById('answerDisplay');
+        answerDisplay.textContent = "Select a question";  // Set answer display text
         return;  // No question selected
     }
 
@@ -1190,7 +1193,6 @@ function updateAnswerDisplay() {
         answerDisplay.textContent = `Answer: ${question.answer}`;
     }
 }
-
 
 // Function to delete the selected question
 function deleteCustomQuestion() {
