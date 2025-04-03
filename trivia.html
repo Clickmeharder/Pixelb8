@@ -926,14 +926,13 @@ function toggleConsoleMessages() {
 //----------------------------
 
 
-// fetch trivia questions
 function fetchTriviaQuestions() {
     return new Promise((resolve, reject) => {
-        const questionsUrl = 'questions.json'; 
-        let defaultQuestions = { round1: [], round2: [] };
-        let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
+        const questionsUrl = 'questions.json';
+        let defaultQuestions = { round1: {}, round2: {} };
+        let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
 
-        let fetchDefaultQuestions = usedefaultquestions 
+        let fetchDefaultQuestions = usedefaultquestions
             ? fetch(questionsUrl)
                 .then(response => response.ok ? response.json() : Promise.reject('Failed to load'))
                 .then(data => {
@@ -944,16 +943,23 @@ function fetchTriviaQuestions() {
             : Promise.resolve();
 
         fetchDefaultQuestions.then(() => {
-            let finalQuestions = { round1: [], round2: [] };
+            let finalQuestions = { round1: {}, round2: {} };
+
+            function mergeQuestions(target, source) {
+                for (const category in source) {
+                    if (!target[category]) target[category] = [];
+                    target[category] = target[category].concat(source[category] || []);
+                }
+            }
 
             if (usedefaultquestions) {
-                finalQuestions.round1 = defaultQuestions.round1 || [];
-                finalQuestions.round2 = defaultQuestions.round2 || [];
+                mergeQuestions(finalQuestions.round1, defaultQuestions.round1);
+                mergeQuestions(finalQuestions.round2, defaultQuestions.round2);
             }
 
             if (usecustomquestions) {
-                finalQuestions.round1 = finalQuestions.round1.concat(customQuestions.round1 || []);
-                finalQuestions.round2 = finalQuestions.round2.concat(customQuestions.round2 || []);
+                mergeQuestions(finalQuestions.round1, customQuestions.round1);
+                mergeQuestions(finalQuestions.round2, customQuestions.round2);
             }
 
             triviaQuestions = finalQuestions;
