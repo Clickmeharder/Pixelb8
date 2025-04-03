@@ -2371,20 +2371,19 @@ function updateSettingsDisplay() {
     }
 }
 
-function updateIndicatorLights() {
+function updateIndicatorLights() { 
     document.querySelectorAll(".light-indicator").forEach(indicator => {
         const optionName = indicator.getAttribute("data-option");
-        
-        // Get the current value of the option dynamically
         const optionValue = window[optionName]; 
 
-        // Set light color based on boolean or string value
+        console.log(`Checking ${optionName}:`, optionValue); // Debug log
+
         if (optionValue === true || optionValue === "on") {
             indicator.style.backgroundColor = "green";
         } else if (optionValue === false || optionValue === "off") {
             indicator.style.backgroundColor = "red";
         } else {
-            indicator.style.backgroundColor = "gray"; // Default/fallback for unknown states
+            indicator.style.backgroundColor = "gray"; 
         }
     });
 }
