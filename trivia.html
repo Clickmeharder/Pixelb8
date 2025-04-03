@@ -1130,24 +1130,23 @@ function loadCustomQuestions() {
     const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
     const dropdown = document.getElementById('questionList');
 
+    // Clear the dropdown first
     dropdown.innerHTML = '';
 
     let defaultOption = document.createElement('option');
     defaultOption.text = "Select a question to delete";
-    defaultOption.value = '';
+    defaultOption.value = '';  // Default value
     dropdown.appendChild(defaultOption);
 
+    // Iterate over rounds and categories to populate the dropdown
     function addQuestionsToDropdown(round, questions) {
-        // Iterate over categories in the round
         for (const category in questions) {
-            // Ensure the category is an array before calling .forEach()
             const categoryQuestions = Array.isArray(questions[category]) ? questions[category] : [];
 
-            // Add each question in the category to the dropdown
             categoryQuestions.forEach((q, index) => {
                 let option = document.createElement('option');
-                option.value = `${round}-${category}-${index}`;
-                option.text = `[${category}] ${q.question}`;  // Show category
+                option.value = `${round}-${category}-${index}`;  // Format: round-category-index
+                option.text = `[${category}] ${q.question}`;  // Show category and question
                 dropdown.appendChild(option);
             });
         }
@@ -1179,16 +1178,17 @@ function updateAnswerDisplay() {
     }
 }
 // Function to delete the selected question
-function deleteCustomQuestion() { 
+function deleteCustomQuestion() {
     const dropdown = document.getElementById('questionList');
-    const selectedValue = dropdown.value; // Example: "round1-mining-2"
+    const selectedValue = dropdown.value;
 
     if (!selectedValue) {
         alert("Please select a question to delete.");
         return;
     }
 
-    const [round, category, index] = selectedValue.split("-"); // Extract round, category, and index
+    const [round, category, index] = selectedValue.split("-");
+
     let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
 
     // Ensure the category exists in the selected round
@@ -2187,121 +2187,6 @@ function toggleElement(elementId, animationType = "fade") {
     }
 }
 
-//------------------------
-//---Audio logic----|
-//-----------------------
-// Preload sounds and store them in an object
-        // Play the sound
-//       playSound("triviatimesup");
-
-let audioSetting = "on"; // Change to "off" to mute all sounds
-
-const sounds = {
-    snakedie: new Audio("/assets/sounds/snakedie_sound1.mp3"),
-    //gameshowintro: new Audio("/assets/sounds/gameshow_intro.mp3"),
-    // Add more sounds here
-};
-const triviasounds = {
-    openingtheme: new Audio("/assets/sounds/entrivia/openingtheme-entriviauniverse.mp3"),
-    openingtheme2: new Audio("/assets/sounds/entrivia/openingtheme2-entriviauniverse.mp3"),
-	openingtheme0: new Audio("/assets/sounds/entrivia/openingtheme1-entriviauniverse.mp3"),
-	openingtheme1: new Audio("/assets/sounds/entrivia/short-logo.mp3"),
-	triviafirstcorrect: new Audio("/assets/sounds/entrivia/trivia-firstcorrect.mp3"),
-	triviacorrect: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
-	triviawrong: new Audio("/assets/sounds/entrivia/trivia-wrong.mp3"),
-	triviaroundover: new Audio("/assets/sounds/entrivia/trivia-roundover.mp3"),
-	triviatimesup: new Audio("/assets/sounds/entrivia/trivia-timesup1.mp3"),	
-	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
-	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
-	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
-    // Add more sounds here
-};
-const triviaQuestionsounds = {
-	triviabloop1: new Audio("/assets/sounds/entrivia/trivia-bloop1.mp3"),
-	triviabloop2: new Audio("/assets/sounds/entrivia/trivia-bloop2.mp3"),
-}
-const triviaWinsounds = {
-	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
-	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
-	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
-	closingtheme: new Audio("/assets/sounds/entrivia/closingtheme-entriviauniverse.mp3"),
-    // Add more sounds here
-};
-
-function playSound(name) {
-    if (audioSetting === "off") return; // Stop if audio is disabled
-
-    if (triviasounds[name]) {
-        triviasounds[name].muted = false; // Unmute the sound
-        triviasounds[name].currentTime = 0; // Reset sound to start
-        triviasounds[name].play().catch(error => {
-            console.error(`Error playing ${name}:`, error);
-        });
-    } else {
-        console.error(`Sound '${name}' not found.`);
-    }
-}
-function playQuestionSound(name) {
-    if (audioSetting === "off") return; // Stop if audio is disabled
-
-    if (triviaQuestionsounds[name]) {
-        triviaQuestionsounds[name].muted = false; // Unmute the sound
-        triviaQuestionsounds[name].currentTime = 0; // Reset sound to start
-        triviaQuestionsounds[name].play().catch(error => {
-            console.error(`Error playing ${name}:`, error);
-        });
-    } else {
-        console.error(`Sound '${name}' not found.`);
-    }
-}
-function playTriviaWinSound(name) {
-    if (audioSetting === "off") return; // Stop if audio is disabled
-
-    if (triviaWinsounds[name]) {
-        triviaWinsounds[name].muted = false; // Unmute the sound
-        triviaWinsounds[name].currentTime = 0; // Reset sound to start
-        triviaWinsounds[name].play().catch(error => {
-            console.error(`Error playing ${name}:`, error);
-        });
-    } else {
-        console.error(`Sound '${name}' not found.`);
-    }
-}
-// Function to get a random key from triviaWinsounds
-function getRandomQuestionSound() {
-    const keys = Object.keys(triviaQuestionsounds);
-    return keys[Math.floor(Math.random() * keys.length)];
-}
-// Function to get a random key from triviaWinsounds
-function getRandomWinSound() {
-    const keys = Object.keys(triviaWinsounds);
-    return keys[Math.floor(Math.random() * keys.length)];
-}
-// Functions for random sounds
-function playRandomQuestionSound() {
-    if (audioSetting === "off") return; // Stop if audio is disabled
-
-    const randomSound = getRandomQuestionSound();
-    playQuestionSound(randomSound);
-}
-function playRandomWinSound() {
-    if (audioSetting === "off") return; // Stop if audio is disabled
-
-    const randomSound = getRandomWinSound();
-    playTriviaWinSound(randomSound);
-}
-function playRandomQuestionSound() {
-    const randomSound = getRandomQuestionSound();
-    playQuestionSound(randomSound);
-}
-
-//---------------------------------------------------
-// Functions to toggle options
-function toggleAudioSetting() {
-    audioSetting = audioSetting === "on" ? "off" : "on";
-    console.log(`Audio setting is now: ${audioSetting}`);
-	displayConsoleMessage("system", `Audio setting is now: ${audioSetting}`);
-}
 
 
 function toggleDefaultQuestions() {
@@ -2869,7 +2754,123 @@ function disconnectBot() {
     input.style.outline = "3px outset #dc3545"; 
 }
 
+//------------------------
+//---Audio logic----|
+//-----------------------
+// Preload sounds and store them in an object
+        // Play the sound
+//       playSound("triviatimesup");
 
+let audioSetting = "on"; // Change to "off" to mute all sounds
+//-------------------------------------
+const sounds = {
+    snakedie: new Audio("/assets/sounds/snakedie_sound1.mp3"),
+    //gameshowintro: new Audio("/assets/sounds/gameshow_intro.mp3"),
+    // Add more sounds here
+};
+const triviasounds = {
+    openingtheme: new Audio("/assets/sounds/entrivia/openingtheme-entriviauniverse.mp3"),
+    openingtheme2: new Audio("/assets/sounds/entrivia/openingtheme2-entriviauniverse.mp3"),
+	openingtheme0: new Audio("/assets/sounds/entrivia/openingtheme1-entriviauniverse.mp3"),
+	openingtheme1: new Audio("/assets/sounds/entrivia/short-logo.mp3"),
+	triviafirstcorrect: new Audio("/assets/sounds/entrivia/trivia-firstcorrect.mp3"),
+	triviacorrect: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
+	triviawrong: new Audio("/assets/sounds/entrivia/trivia-wrong.mp3"),
+	triviaroundover: new Audio("/assets/sounds/entrivia/trivia-roundover.mp3"),
+	triviatimesup: new Audio("/assets/sounds/entrivia/trivia-timesup1.mp3"),	
+	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
+	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
+	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
+    // Add more sounds here
+};
+const triviaQuestionsounds = {
+	triviabloop1: new Audio("/assets/sounds/entrivia/trivia-bloop1.mp3"),
+	triviabloop2: new Audio("/assets/sounds/entrivia/trivia-bloop2.mp3"),
+}
+const triviaWinsounds = {
+	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
+	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
+	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
+	closingtheme: new Audio("/assets/sounds/entrivia/closingtheme-entriviauniverse.mp3"),
+    // Add more sounds here
+};
+//-------------------------------------
+function playSound(name) {
+    if (audioSetting === "off") return; // Stop if audio is disabled
+
+    if (triviasounds[name]) {
+        triviasounds[name].muted = false; // Unmute the sound
+        triviasounds[name].currentTime = 0; // Reset sound to start
+        triviasounds[name].play().catch(error => {
+            console.error(`Error playing ${name}:`, error);
+        });
+    } else {
+        console.error(`Sound '${name}' not found.`);
+    }
+}
+function playQuestionSound(name) {
+    if (audioSetting === "off") return; // Stop if audio is disabled
+
+    if (triviaQuestionsounds[name]) {
+        triviaQuestionsounds[name].muted = false; // Unmute the sound
+        triviaQuestionsounds[name].currentTime = 0; // Reset sound to start
+        triviaQuestionsounds[name].play().catch(error => {
+            console.error(`Error playing ${name}:`, error);
+        });
+    } else {
+        console.error(`Sound '${name}' not found.`);
+    }
+}
+function playTriviaWinSound(name) {
+    if (audioSetting === "off") return; // Stop if audio is disabled
+
+    if (triviaWinsounds[name]) {
+        triviaWinsounds[name].muted = false; // Unmute the sound
+        triviaWinsounds[name].currentTime = 0; // Reset sound to start
+        triviaWinsounds[name].play().catch(error => {
+            console.error(`Error playing ${name}:`, error);
+        });
+    } else {
+        console.error(`Sound '${name}' not found.`);
+    }
+}
+// Function to get a random key from triviaWinsounds
+function getRandomQuestionSound() {
+    const keys = Object.keys(triviaQuestionsounds);
+    return keys[Math.floor(Math.random() * keys.length)];
+}
+// Function to get a random key from triviaWinsounds
+function getRandomWinSound() {
+    const keys = Object.keys(triviaWinsounds);
+    return keys[Math.floor(Math.random() * keys.length)];
+}
+// Functions for random sounds
+function playRandomQuestionSound() {
+    if (audioSetting === "off") return; // Stop if audio is disabled
+
+    const randomSound = getRandomQuestionSound();
+    playQuestionSound(randomSound);
+}
+function playRandomWinSound() {
+    if (audioSetting === "off") return; // Stop if audio is disabled
+
+    const randomSound = getRandomWinSound();
+    playTriviaWinSound(randomSound);
+}
+function playRandomQuestionSound() {
+    const randomSound = getRandomQuestionSound();
+    playQuestionSound(randomSound);
+}
+//---------------------------------------------------
+// Functions to toggle options
+function toggleAudioSetting() {
+    audioSetting = audioSetting === "on" ? "off" : "on";
+    console.log(`Audio setting is now: ${audioSetting}`);
+	displayConsoleMessage("system", `Audio setting is now: ${audioSetting}`);
+}
+//---------------------------------------------------
+
+//______________________________________________
 // Attach event listeners
 // Button event listener: first endTrivia, then setStreamer
 document.getElementById("streamersButt").addEventListener("click", function() {
