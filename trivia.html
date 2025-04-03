@@ -925,39 +925,40 @@ function toggleConsoleMessages() {
 //!trivia-addcustomquestion round1 | What number is on the side of a Sleipnir mk1 (C,L)? | 88
 //----------------------------
 
-
 function fetchTriviaQuestions() {
     return new Promise((resolve, reject) => {
-        const questionsUrl = 'questions.json'; // Replace with actual path
-        let defaultQuestions = { round1: [], round2: [] };
-        let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
+        const questionsUrl = 'questions.json';
+        let defaultQuestions = { round1: {}, round2: {} };
+        let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
 
-        let fetchDefaultQuestions = usedefaultquestions 
+        let fetchDefaultQuestions = usedefaultquestions
             ? fetch(questionsUrl)
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to load trivia questions');
-                    return response.json();
-                })
+                .then(response => response.ok ? response.json() : Promise.reject('Failed to load'))
                 .then(data => {
-                    if (!data || !data.round1 || !data.round2) throw new Error('Invalid trivia data: Missing or empty rounds.');
+                    if (!data.round1 || !data.round2) throw new Error('Invalid trivia data');
                     defaultQuestions = data;
                 })
-                .catch(error => {
-                    console.error('Error fetching default trivia questions:', error);
-                })
-            : Promise.resolve(); // Skip fetch if usedefaultquestions is false
+                .catch(error => console.error('Error fetching questions:', error))
+            : Promise.resolve();
 
         fetchDefaultQuestions.then(() => {
-            let finalQuestions = { round1: [], round2: [] };
+            let finalQuestions = { round1: {}, round2: {} };
+
+            function mergeQuestions(target, source) {
+                for (const category in source) {
+                    if (!target[category]) target[category] = [];
+                    target[category] = target[category].concat(source[category] || []);
+                }
+            }
 
             if (usedefaultquestions) {
-                finalQuestions.round1 = defaultQuestions.round1 || [];
-                finalQuestions.round2 = defaultQuestions.round2 || [];
+                mergeQuestions(finalQuestions.round1, defaultQuestions.round1);
+                mergeQuestions(finalQuestions.round2, defaultQuestions.round2);
             }
 
             if (usecustomquestions) {
-                finalQuestions.round1 = finalQuestions.round1.concat(customQuestions.round1 || []);
-                finalQuestions.round2 = finalQuestions.round2.concat(customQuestions.round2 || []);
+                mergeQuestions(finalQuestions.round1, customQuestions.round1);
+                mergeQuestions(finalQuestions.round2, customQuestions.round2);
             }
 
             triviaQuestions = finalQuestions;
@@ -1225,15 +1226,33 @@ function triviaNosplash() {
     });
 }
 function getRandomQuestion() {
-	let currentRound = round === 1 ? "round1" : "round2";
-	let availableQuestions = triviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
-	if (availableQuestions.length === 0) {
-		usedQuestions = []; // Reset when all questions are used
-		availableQuestions = [...triviaQuestions[currentRound]];
-	}
-	let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-	usedQuestions.push(question);
-	return question;
+    let currentRound = round === 1 ? "round1" : "round2";
+
+    // Ensure triviaQuestions[currentRound] exists and is an object
+    if (!triviaQuestions[currentRound] || typeof triviaQuestions[currentRound] !== "object") {
+        console.error(`❌ No questions found for ${currentRound}`);
+        return null;
+    }
+
+    // Flatten all category questions into a single array
+    let availableQuestions = Object.values(triviaQuestions[currentRound])
+        .flat()
+        .filter(q => !usedQuestions.includes(q)); // Filter out used questions
+
+    if (availableQuestions.length === 0) {
+        usedQuestions = []; // Reset when all questions are used
+        availableQuestions = Object.values(triviaQuestions[currentRound]).flat(); // Reload all questions
+    }
+
+    if (availableQuestions.length === 0) {
+        console.warn("⚠ No available questions after reset.");
+        return null;
+    }
+
+    // Pick a random question
+    let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+    usedQuestions.push(question);
+    return question;
 }
 function nextQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
