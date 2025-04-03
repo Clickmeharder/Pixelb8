@@ -536,13 +536,7 @@
 
     </style>
     <style>
-		.metal-background {
-			background: linear-gradient(135deg, #4f4f4f, #777, #5c5c5c, #8a8a8a);
-			background-size: 400% 400%;
-			animation: metalShine 5s infinite linear;
-			border-radius: 5px;
-			box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-		}
+		/* Global Elements/objects and Important Classes */
 		.statusindicatorWrapper {
 			display: flex;
 			background-color: #091319;
@@ -566,10 +560,8 @@
 			visibility: hidden;
 			pointer-events: none;
 		}
-		@keyframes metalShine {
-			0% { background-position: 0% 0%; }
-			100% { background-position: 100% 100%; }
-		}
+    </style>
+	<style>
 		/* ANIMATIONS */
 
 		/* Logo Drop-In */
@@ -693,7 +685,7 @@
 			<div id="trivia-settings-toggles">
 				<div class="trivia-settings-togglebar">
 					<button id="toggleDefaultQuestions">Default Questions</button>
-					<div class="statusindicatorWrapper metal-background"><strong>Status:</strong> <span id="statusDefaultQuestions" class="light-indicator"></span></div>
+					<div class="statusindicatorWrapper"><strong>Status:</strong> <span id="statusDefaultQuestions" class="light-indicator"></span></div>
 				</div>
 				<div class="trivia-settings-cmdinfo">
 					<span class="command-text">CMD = !trivia-defaultquestions</span>
@@ -701,7 +693,7 @@
 				</div>
 				<div class="trivia-settings-togglebar">
 					<button id="toggleCustomQuestions">Custom Questions</button>
-					<div class="statusindicatorWrapper metal-background"><strong>Status:</strong> <span id="statusCustomQuestions" class="light-indicator"></span></div>
+					<div class="statusindicatorWrapper"><strong>Status:</strong> <span id="statusCustomQuestions" class="light-indicator"></span></div>
 				</div>
 				<div class="trivia-settings-cmdinfo">
 					<span class="command-text">CMD = (!trivia-customquestions)</span>
