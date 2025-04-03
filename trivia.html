@@ -2300,31 +2300,47 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 //-------------------------------------------------------
 	// Command-based settings updates
-	if (command.toLowerCase() === "trivia-addcustomquestion") {  
+	if (command.toLowerCase() === "trivia-addquestion") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		
 		// Extract message text after the command
 		let messageContent = message.trim();
 		let parts = messageContent.split("|").map(p => p.trim());
+		
 		// Validate input format
-		if (parts.length < 3) {
-			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-addcustomquestion round1 | question | answer`, flags, extra, true);
+		if (parts.length < 4) {  // Now expects 4 parts (round, category, question, answer)
+			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-addcustomquestion round1 | category | question | answer`, flags, extra, true);
 			return;
 		}
+		
 		let round = parts[0].toLowerCase();
-		let questionText = parts[1];
-		let correctAnswer = parts[2];
-		// Ensure the round is valid
-		if (round !== "round1" && round !== "round2") {
+		let category = parts[1].toLowerCase(); // Extract category
+		let questionText = parts[2];
+		let correctAnswer = parts[3];
+		
+		// Ensure the round and category are valid
+		const validRounds = ["round1", "round2"];
+		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
+
+		if (!validRounds.includes(round)) {
 			displayTriviaMessage(user, `⚠️ Invalid round! Use 'round1' or 'round2'.`, flags, extra, true);
 			return;
 		}
-		// Add the custom trivia question
-		addCustomTriviaQuestion(round, questionText, correctAnswer);
+
+		if (!validCategories.includes(category)) {
+			displayTriviaMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
+			return;
+		}
+
+		// Add the custom trivia question with the selected category
+		addCustomTriviaQuestion(round, questionText, correctAnswer, category);
+		
 		// Confirm success
-		displayTriviaMessage(user, `✅ Custom question added to ${round}!`, flags, extra, true);
+		displayTriviaMessage(user, `✅ Custom question added to ${round} (${category})!`, flags, extra, true);
 	}
+
 	if (command.toLowerCase() === "trivia-answertime") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
