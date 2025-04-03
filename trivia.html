@@ -2371,19 +2371,17 @@ function updateSettingsDisplay() {
 }
 
 function updateIndicatorLights() { 
+    const settings = { usedefaultquestions, usecustomquestions, consoleMessages, entriviachatOverlay, chatanswers };
     document.querySelectorAll(".light-indicator").forEach(indicator => {
         const optionName = indicator.getAttribute("data-option");
-        const optionValue = window[optionName]; 
-
+        const optionValue = settings[optionName]; // Get the value safely
         console.log(`Checking ${optionName}:`, optionValue); // Debug log
-
-        if (optionValue === true || optionValue === "on") {
-            indicator.style.backgroundColor = "green";
-        } else if (optionValue === false || optionValue === "off") {
-            indicator.style.backgroundColor = "red";
-        } else {
-            indicator.style.backgroundColor = "gray"; 
-        }
+        // Set light color based on value
+        indicator.style.backgroundColor = (optionValue === true || optionValue === "on") 
+            ? "green" 
+            : (optionValue === false || optionValue === "off") 
+                ? "red" 
+                : "gray"; // Fallback color
     });
 }
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
