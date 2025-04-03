@@ -2598,31 +2598,31 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
 document.addEventListener("DOMContentLoaded", function() { 
   const usercommands = [
-    { command: "!a / !answer", description: "Allows users to answer a trivia question. (User command)", usage: "!a / !answer" },
+    { command: "!a / !answer", description: "Allows users to answer a trivia question.", usage: "!a / !answer" },
   ];
 
   const streamercommands = [ 
-    { command: "!a / !answer", description: "Allows users to answer a trivia question. (User command)", usage: "!a / !answer" },
-    { command: "!trivia-play", description: "Starts the trivia game. (Streamer command)", usage: "!trivia-play" },
-    { command: "!trivia-askrandom", description: "Asks a random trivia question. (Streamer command)", usage: "!trivia-askrandom" },
-    { command: "!trivia-ask", description: "Asks a trivia question from a specific round and category. (Streamer command)", usage: "!trivia-ask [round] | [category]" },
-    { command: "!trivia-lastaskwinner", description: "Displays the last trivia question's winner. (Streamer command)", usage: "!trivia-lastaskwinner" },
-    { command: "!trivia-lastwinners", description: "Displays the list of last trivia winners. (Streamer command)", usage: "!trivia-lastwinners" },
-    { command: "!trivia-history", description: "Displays trivia history. (Streamer command)", usage: "!trivia-history" },
-    { command: "!chatanswers", description: "Toggles the chat answers on/off. (Streamer command)", usage: "!chatanswers" },
-    { command: "!trivia-disablechat", description: "Disables trivia chat overlay. (Streamer command)", usage: "!trivia-disablechat" },
-    { command: "!trivia-audio", description: "Toggles trivia audio settings. (Streamer command)", usage: "!trivia-audio" },
-    { command: "!toggletriviaboard", description: "Toggles the trivia board visibility. (Streamer command)", usage: "!toggletriviaboard" },
-    { command: "!togglequestions", description: "Toggles the visibility of the question wrapper. (Streamer command)", usage: "!togglequestions" },
-    { command: "!toggletrivia", description: "Toggles the visibility of the trivia wrapper. (Streamer command)", usage: "!toggletrivia" },
-    { command: "!togglechat", description: "Toggles the visibility of the Twitch chat container. (Streamer command)", usage: "!togglechat" },
-    { command: "!trivia-addquestion", description: "Allows the streamer to add a custom trivia question. (Streamer command)", usage: "!trivia-addquestion easy/hard | economy | what does ped stand for | project entropia dollar" },
-    { command: "!trivia-answertime", description: "Updates the answer time limit. (Streamer command)", usage: "!trivia-answertime [time]" },
-    { command: "!trivia-questiondelay", description: "Updates the question delay between questions. (Streamer command)", usage: "!trivia-questiondelay [delay]" },
-    { command: "!trivia-rounddelay", description: "Updates the delay between rounds. (Streamer command)", usage: "!trivia-rounddelay [delay]" },
-    { command: "!trivia-questioncap", description: "Sets a cap for the number of questions per round. (Streamer command)", usage: "!trivia-questioncap [cap]" },
-    { command: "!trivia-defaultquestions", description: "Toggles default trivia questions. (Streamer command)", usage: "!trivia-defaultquestions" },
-    { command: "!trivia-customquestions", description: "Toggles custom trivia questions. (Streamer command)", usage: "!trivia-customquestions" }
+    { command: "!a / !answer", description: "Allows users to answer a trivia question.", usage: "!a / !answer" },
+    { command: "!trivia-play", description: "Starts the trivia game.", usage: "!trivia-play" },
+    { command: "!trivia-askrandom", description: "Asks a random trivia question.", usage: "!trivia-askrandom" },
+    { command: "!trivia-ask", description: "Asks a trivia question from a specific round and category.", usage: "!trivia-ask [round] | [category]" },
+    { command: "!trivia-lastaskwinner", description: "Displays the last trivia question's winner.", usage: "!trivia-lastaskwinner" },
+    { command: "!trivia-lastwinners", description: "Displays the list of last trivia winners.", usage: "!trivia-lastwinners" },
+    { command: "!trivia-history", description: "Displays trivia history.", usage: "!trivia-history" },
+    { command: "!chatanswers", description: "Toggles the chat answers on/off.", usage: "!chatanswers" },
+    { command: "!trivia-disablechat", description: "Disables trivia chat overlay.", usage: "!trivia-disablechat" },
+    { command: "!trivia-audio", description: "Toggles trivia audio settings.", usage: "!trivia-audio" },
+    { command: "!toggletriviaboard", description: "Toggles the trivia board visibility.", usage: "!toggletriviaboard" },
+    { command: "!togglequestions", description: "Toggles the visibility of the question wrapper.", usage: "!togglequestions" },
+    { command: "!toggletrivia", description: "Toggles the visibility of the trivia wrapper.", usage: "!toggletrivia" },
+    { command: "!togglechat", description: "Toggles the visibility of the Twitch chat container.", usage: "!togglechat" },
+    { command: "!trivia-addquestion", description: "Allows the streamer to add a custom trivia question.", usage: "!trivia-addquestion easy/hard | economy | what does ped stand for | project entropia dollar" },
+    { command: "!trivia-answertime", description: "Updates the answer time limit.", usage: "!trivia-answertime [time]" },
+    { command: "!trivia-questiondelay", description: "Updates the question delay between questions.", usage: "!trivia-questiondelay [delay]" },
+    { command: "!trivia-rounddelay", description: "Updates the delay between rounds.", usage: "!trivia-rounddelay [delay]" },
+    { command: "!trivia-questioncap", description: "Sets a cap for the number of questions per round.", usage: "!trivia-questioncap [cap]" },
+    { command: "!trivia-defaultquestions", description: "Toggles default trivia questions.", usage: "!trivia-defaultquestions" },
+    { command: "!trivia-customquestions", description: "Toggles custom trivia questions.", usage: "!trivia-customquestions" }
   ];
 
   // Get the respective <ul> elements
@@ -2655,8 +2655,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Create the usage span
     const usageSpan = document.createElement("span");
+	const usageText = "Usage: " + command.usage;
     usageSpan.classList.add("command-info");
-    usageSpan.setAttribute("title", command.usage);
+	
+    usageSpan.setAttribute("title", usageText);
     usageSpan.textContent = "❓";
 
     // Set command and description
