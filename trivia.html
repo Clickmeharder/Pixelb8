@@ -620,6 +620,16 @@
 					<option value="round1">Round 1</option>
 					<option value="round2">Round 2</option>
 				</select>
+				<select id="category">
+					<option value="Mining">mining</option>
+					<option value="hunting">hunting</option>
+					<option value="crafting">crafting</option>
+					<option value="history">history</option>
+					<option value="beauty">beauty</option>
+					<option value="economy">economy</option>
+					<option value="social">social</option>
+					<option value="misc">Miscelaneous</option>
+				</select>
 				<input type="text" id="questionText" placeholder="Enter your question here" required>
 				<input type="text" id="correctAnswer" placeholder="Enter the correct answer" required>
 				<button id="submitQuestionBtn">Add Question</button>
@@ -971,29 +981,29 @@ function fetchTriviaQuestions() {
 
 
 function addCustomTriviaQuestion(round, questionText, correctAnswer, category) { 
-    let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
-
+    let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
     if (round !== "round1" && round !== "round2") {
         console.error("Invalid round. Use 'round1' or 'round2'.");
         return;
     }
-
+    // Ensure category exists in the selected round
+    if (!customQuestions[round][category]) {
+        customQuestions[round][category] = [];
+    }
     let newQuestion = {
         question: questionText,
         answer: correctAnswer,
-        category: category  // Include category
+        category: category
     };
-
-    customQuestions[round].push(newQuestion);
-
+    customQuestions[round][category].push(newQuestion);
     localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
-    loadCustomQuestions();  
-    updateAnswerDisplay();  
+    loadCustomQuestions();
+    updateAnswerDisplay();
     console.log(`✅ Added new question to ${round} [${category}]:`, newQuestion);
 }
 // Function to load custom questions into the dropdown
 function loadCustomQuestions() {
-    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
+    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
     const dropdown = document.getElementById('questionList');
 
     dropdown.innerHTML = '';
@@ -1003,12 +1013,14 @@ function loadCustomQuestions() {
     defaultOption.value = '';
     dropdown.appendChild(defaultOption);
 
-    function addQuestionsToDropdown(round, questions) {
-        questions.forEach((q, index) => {
-            let option = document.createElement('option');
-            option.value = `${round}-${index}`;
-            option.text = `[${q.category}] ${q.question}`;  // Show category
-            dropdown.appendChild(option);
+    function addQuestionsToDropdown(round, categories) {
+        Object.keys(categories).forEach(category => {
+            categories[category].forEach((q, index) => {
+                let option = document.createElement('option');
+                option.value = `${round}-${category}-${index}`;  // Include category in value
+                option.text = `[${category}] ${q.question}`;  
+                dropdown.appendChild(option);
+            });
         });
     }
 
@@ -1026,11 +1038,11 @@ function updateAnswerDisplay() {
         return;
     }
 
-    const [round, index] = selectedValue.split("-");
+    const [round, category, index] = selectedValue.split("-");
 
-    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
+    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
 
-    const selectedQuestion = customQuestions[round][index];
+    const selectedQuestion = customQuestions[round]?.[category]?.[index];
 
     if (selectedQuestion) {
         document.getElementById('roundText').innerText = round; 
@@ -1038,7 +1050,7 @@ function updateAnswerDisplay() {
     }
 }
 // Function to delete the selected question
-function deleteCustomQuestion() {
+function deleteCustomQuestion() { 
     const dropdown = document.getElementById('questionList');
     const selectedValue = dropdown.value; // Example: "round1-mining-2"
 
@@ -1062,6 +1074,11 @@ function deleteCustomQuestion() {
                 delete customQuestions[round][category];
             }
 
+            // If round is empty (i.e., no categories left), delete the round
+            if (Object.keys(customQuestions[round]).length === 0) {
+                delete customQuestions[round];
+            }
+
             // Save the updated custom questions to localStorage
             localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
 
@@ -1069,6 +1086,8 @@ function deleteCustomQuestion() {
             loadCustomQuestions();  // Reload the dropdown
             updateAnswerDisplay();  // Clear answer display
         }
+    } else {
+        alert("The selected question doesn't exist.");
     }
 }
 //_____________________________________
@@ -2505,17 +2524,18 @@ function updateSettingsDisplay() {
 document.getElementById('submitQuestionBtn').addEventListener('click', function() {
     // Get the values from the form inputs
     const round = document.getElementById('round').value;
+    const category = document.getElementById('triviacategory').value; // Get category
     const questionText = document.getElementById('questionText').value;
     const correctAnswer = document.getElementById('correctAnswer').value;
 
     // Validate inputs
     if (!questionText || !correctAnswer) {
-		displayTriviaMessage("error!", "Please fill in both the question and the answer.", {}, {});
+        displayTriviaMessage("error!", "Please fill in both the question and the answer.", {}, {});
         return;
     }
 
     // Call the function to add the question
-    addCustomTriviaQuestion(round, questionText, correctAnswer);
+    addCustomTriviaQuestion(round, questionText, correctAnswer, category);
 
     // Clear the form fields
     document.getElementById('questionText').value = '';
