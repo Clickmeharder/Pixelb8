@@ -1235,34 +1235,14 @@ function deleteCustomQuestion() {
     }
 }
 
-function deleteOldQuestions() {
-    let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
-
-    // Iterate over rounds
-    for (let round in customQuestions) {
-        for (let category in customQuestions[round]) {
-            // Ensure category is an array before calling filter
-            if (Array.isArray(customQuestions[round][category])) {
-                // Filter out questions that don't have a valid category
-                customQuestions[round][category] = customQuestions[round][category].filter(question => question.category);
-                
-                // If a category has no questions left, remove the category
-                if (customQuestions[round][category].length === 0) {
-                    delete customQuestions[round][category];
-                }
-            }
-        }
-    }
-
-    // Save the updated data
-    localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
-
-    // Reload questions to update the UI
-    loadCustomQuestions();
-    updateAnswerDisplay();
+function clearAllCustomQuestions() {
+    localStorage.removeItem("customTriviaQuestions");
+    console.log("✅ All custom trivia questions have been deleted.");
 }
-
-deleteOldQuestions();
+// Clear existing questions
+clearAllCustomQuestions();
+// Now add a new trivia question (example usage)
+addCustomTriviaQuestion("round1", "What is the smallest Skildek support weapon?", "lancehead", "hunting");
 //_____________________________________
 //-------------------------------------
 
