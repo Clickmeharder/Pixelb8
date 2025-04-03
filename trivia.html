@@ -929,24 +929,19 @@ function toggleConsoleMessages() {
 // fetch trivia questions
 function fetchTriviaQuestions() {
     return new Promise((resolve, reject) => {
-        const questionsUrl = 'questions.json'; // Replace with actual path
+        const questionsUrl = 'questions.json'; 
         let defaultQuestions = { round1: [], round2: [] };
         let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
 
         let fetchDefaultQuestions = usedefaultquestions 
             ? fetch(questionsUrl)
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to load trivia questions');
-                    return response.json();
-                })
+                .then(response => response.ok ? response.json() : Promise.reject('Failed to load'))
                 .then(data => {
-                    if (!data || !data.round1 || !data.round2) throw new Error('Invalid trivia data: Missing or empty rounds.');
+                    if (!data.round1 || !data.round2) throw new Error('Invalid trivia data');
                     defaultQuestions = data;
                 })
-                .catch(error => {
-                    console.error('Error fetching default trivia questions:', error);
-                })
-            : Promise.resolve(); // Skip fetch if usedefaultquestions is false
+                .catch(error => console.error('Error fetching questions:', error))
+            : Promise.resolve();
 
         fetchDefaultQuestions.then(() => {
             let finalQuestions = { round1: [], round2: [] };
@@ -968,33 +963,113 @@ function fetchTriviaQuestions() {
         });
     });
 }
-
-function addCustomTriviaQuestion(round, questionText, correctAnswer) { 
-    // Load existing custom questions or initialize a new structure
+function addCustomTriviaQuestion(round, questionText, correctAnswer, category) { 
     let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
 
-    // Validate round
     if (round !== "round1" && round !== "round2") {
         console.error("Invalid round. Use 'round1' or 'round2'.");
         return;
     }
 
-    // Create new question object
     let newQuestion = {
         question: questionText,
-        answer: correctAnswer // Fix: Use 'answer' instead of 'correct_answer'
+        answer: correctAnswer,
+        category: category  // Include category
     };
 
-    // Add to the selected round
     customQuestions[round].push(newQuestion);
 
-    // Save back to localStorage
     localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
-    loadCustomQuestions();  // Reload the dropdown
-    updateAnswerDisplay();  // Clear answer display
-    console.log(`✅ Added new question to ${round}:`, newQuestion);
+    loadCustomQuestions();  
+    updateAnswerDisplay();  
+    console.log(`✅ Added new question to ${round} [${category}]:`, newQuestion);
 }
+// Function to load custom questions into the dropdown
+function loadCustomQuestions() {
+    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
+    const dropdown = document.getElementById('questionList');
 
+    dropdown.innerHTML = '';
+
+    let defaultOption = document.createElement('option');
+    defaultOption.text = "Select a question to delete";
+    defaultOption.value = '';
+    dropdown.appendChild(defaultOption);
+
+    function addQuestionsToDropdown(round, questions) {
+        questions.forEach((q, index) => {
+            let option = document.createElement('option');
+            option.value = `${round}-${index}`;
+            option.text = `[${q.category}] ${q.question}`;  // Show category
+            dropdown.appendChild(option);
+        });
+    }
+
+    addQuestionsToDropdown("round1", customQuestions.round1);
+    addQuestionsToDropdown("round2", customQuestions.round2);
+}
+// Function to update the answer display based on the selected question
+function updateAnswerDisplay() {
+    const dropdown = document.getElementById('questionList');
+    const selectedValue = dropdown.value; 
+
+    if (!selectedValue) {
+        document.getElementById('roundText').innerText = "-";
+        document.getElementById('answerText').innerText = "Select a question to see the answer.";
+        return;
+    }
+
+    const [round, index] = selectedValue.split("-");
+
+    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
+
+    const selectedQuestion = customQuestions[round][index];
+
+    if (selectedQuestion) {
+        document.getElementById('roundText').innerText = round; 
+        document.getElementById('answerText').innerText = `(${selectedQuestion.category}) ${selectedQuestion.answer}`;
+    }
+}
+// Function to delete the selected question
+function deleteCustomQuestion() {
+    const dropdown = document.getElementById('questionList');
+    const selectedValue = dropdown.value; // Example: "round1-mining-2"
+
+    if (!selectedValue) {
+        alert("Please select a question to delete.");
+        return;
+    }
+
+    const [round, category, index] = selectedValue.split("-"); // Extract round, category, and index
+    let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
+
+    // Ensure the category exists in the selected round
+    if (customQuestions[round] && customQuestions[round][category] && customQuestions[round][category][index]) {
+        const confirmDelete = confirm(`Are you sure you want to delete the question: "${customQuestions[round][category][index].question}"?`);
+        if (confirmDelete) {
+            // Remove the question from the category's array
+            customQuestions[round][category].splice(index, 1);
+
+            // If category is empty, delete it
+            if (customQuestions[round][category].length === 0) {
+                delete customQuestions[round][category];
+            }
+
+            // Save the updated custom questions to localStorage
+            localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
+
+            alert('Question deleted successfully!');
+            loadCustomQuestions();  // Reload the dropdown
+            updateAnswerDisplay();  // Clear answer display
+        }
+    }
+}
+//_____________________________________
+//-------------------------------------
+
+//
+//-----------------------------
+//      game history
 // load last trivia classic winners and trivia classic game history
 function loadTriviaHistory() {
     const savedHistory = localStorage.getItem("TriviaClassicHistory");
@@ -1013,7 +1088,6 @@ function loadTriviaHistory() {
         console.log("Parsed lastTriviaClassicWinners:", lastTriviaClassicWinners);
     }
 }
-
 // update last trivia classic winners and trivia classic game history
 function updateLastTriviaClassicWinners() {
     lastTriviaClassicWinners = [];
@@ -1039,7 +1113,11 @@ function updateLastTriviaClassicWinners() {
 
     console.log("Updated Last Trivia Classic Winners:", lastTriviaClassicWinners);
 }
-
+//___________________________________________________
+//-------------------------------
+//
+//------------------------------------------------------------
+//------------------------------------------------------------
 //show announcements with optional timer
 function showAnnouncement(message, triviaAnnouncementTime) {
     return new Promise((resolve) => {
@@ -1807,89 +1885,7 @@ function displayTriviaHistory() {
 //displayLastWinner();
 //displayLastTriviaWinners();
 //displayTriviaHistory();
-// Function to load custom questions into the dropdown
-// Function to load custom questions into the dropdown
-// Function to load custom questions into the dropdown
-function loadCustomQuestions() {
-    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
-    const dropdown = document.getElementById('questionList');
 
-    // Clear current dropdown options
-    dropdown.innerHTML = '';
-
-    // Add a default option
-    let defaultOption = document.createElement('option');
-    defaultOption.text = "Select a question to delete";
-    defaultOption.value = ''; // Default value
-    dropdown.appendChild(defaultOption);
-
-    // Function to add questions to the dropdown with round information
-    function addQuestionsToDropdown(round, questions) {
-        questions.forEach((q, index) => {
-            let option = document.createElement('option');
-            option.value = `${round}-${index}`; // Store round and index in value (e.g., "round1-2")
-            option.text = `[${round}] ${q.question}`;  // Show round in dropdown
-            dropdown.appendChild(option);
-        });
-    }
-
-    // Add questions from both rounds
-    addQuestionsToDropdown("round1", customQuestions.round1);
-    addQuestionsToDropdown("round2", customQuestions.round2);
-}
-// Function to update the answer display based on the selected question
-// Function to update the answer display based on the selected question
-function updateAnswerDisplay() {
-    const dropdown = document.getElementById('questionList');
-    const selectedValue = dropdown.value; // Example: "round1-2"
-
-    if (!selectedValue) {
-        document.getElementById('roundText').innerText = "-";
-        document.getElementById('answerText').innerText = "Select a question to see the answer.";
-        return;
-    }
-
-    const [round, index] = selectedValue.split("-"); // Extract round and index
-
-    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
-
-    // Get the selected question
-    const selectedQuestion = customQuestions[round][index];
-
-    if (selectedQuestion) {
-        document.getElementById('roundText').innerText = round; // Display the round
-        document.getElementById('answerText').innerText = selectedQuestion.answer; // Display the answer
-    }
-}
-// Function to delete the selected question
-// Function to delete the selected question
-function deleteCustomQuestion() {
-    const dropdown = document.getElementById('questionList');
-    const selectedValue = dropdown.value; // Example: "round1-2"
-
-    if (!selectedValue) {
-        alert("Please select a question to delete.");
-        return;
-    }
-
-    const [round, index] = selectedValue.split("-"); // Extract round and index
-    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: [], round2: [] };
-
-    if (customQuestions[round] && customQuestions[round][index]) {
-        const confirmDelete = confirm(`Are you sure you want to delete the question: "${customQuestions[round][index].question}"?`);
-        if (confirmDelete) {
-            // Remove the question from the array
-            customQuestions[round].splice(index, 1);
-
-            // Save the updated custom questions to localStorage
-            localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
-
-            alert('Question deleted successfully!');
-            loadCustomQuestions();  // Reload the dropdown
-            updateAnswerDisplay();  // Clear answer display
-        }
-    }
-}
 // Load saved history when the bot starts
 loadTriviaHistory();
 //------------------------
@@ -1958,8 +1954,6 @@ const triviaWinsounds = {
     // Add more sounds here
 };
 
-
-
 function playSound(name) {
     if (audioSetting === "off") return; // Stop if audio is disabled
 
@@ -1973,7 +1967,6 @@ function playSound(name) {
         console.error(`Sound '${name}' not found.`);
     }
 }
-
 function playQuestionSound(name) {
     if (audioSetting === "off") return; // Stop if audio is disabled
 
@@ -1987,7 +1980,6 @@ function playQuestionSound(name) {
         console.error(`Sound '${name}' not found.`);
     }
 }
-
 function playTriviaWinSound(name) {
     if (audioSetting === "off") return; // Stop if audio is disabled
 
@@ -2018,26 +2010,18 @@ function playRandomQuestionSound() {
     const randomSound = getRandomQuestionSound();
     playQuestionSound(randomSound);
 }
-
 function playRandomWinSound() {
     if (audioSetting === "off") return; // Stop if audio is disabled
 
     const randomSound = getRandomWinSound();
     playTriviaWinSound(randomSound);
 }
-
 function playRandomQuestionSound() {
     const randomSound = getRandomQuestionSound();
     playQuestionSound(randomSound);
 }
-// Function to play a random win sound
-function playRandomWinSound() {
-    const randomSound = getRandomWinSound();
-    playTriviaWinSound(randomSound);
-}
 
-
-//----------------------------------------------------
+//---------------------------------------------------
 // Functions to toggle options
 function toggleAudioSetting() {
     audioSetting = audioSetting === "on" ? "off" : "on";
@@ -2214,31 +2198,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
 		displayTriviaHistory();
     }
-	if (command.toLowerCase() === "trivia-addcustomquestion") {  
-		if (!isStreamerAndAuthorize(user, command)) return;
-		displayConsoleMessage(user, `!${command} ✅`);
-		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		// Extract message text after the command
-		let messageContent = message.trim();
-		let parts = messageContent.split("|").map(p => p.trim());
-		// Validate input format
-		if (parts.length < 3) {
-			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-addcustomquestion round1 | question | answer`, flags, extra, true);
-			return;
-		}
-		let round = parts[0].toLowerCase();
-		let questionText = parts[1];
-		let correctAnswer = parts[2];
-		// Ensure the round is valid
-		if (round !== "round1" && round !== "round2") {
-			displayTriviaMessage(user, `⚠️ Invalid round! Use 'round1' or 'round2'.`, flags, extra, true);
-			return;
-		}
-		// Add the custom trivia question
-		addCustomTriviaQuestion(round, questionText, correctAnswer);
-		// Confirm success
-		displayTriviaMessage(user, `✅ Custom question added to ${round}!`, flags, extra, true);
-	}
 	if (command === "chatanswers") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
@@ -2292,6 +2251,31 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 //-------------------------------------------------------
 	// Command-based settings updates
+	if (command.toLowerCase() === "trivia-addcustomquestion") {  
+		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
+		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		// Extract message text after the command
+		let messageContent = message.trim();
+		let parts = messageContent.split("|").map(p => p.trim());
+		// Validate input format
+		if (parts.length < 3) {
+			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-addcustomquestion round1 | question | answer`, flags, extra, true);
+			return;
+		}
+		let round = parts[0].toLowerCase();
+		let questionText = parts[1];
+		let correctAnswer = parts[2];
+		// Ensure the round is valid
+		if (round !== "round1" && round !== "round2") {
+			displayTriviaMessage(user, `⚠️ Invalid round! Use 'round1' or 'round2'.`, flags, extra, true);
+			return;
+		}
+		// Add the custom trivia question
+		addCustomTriviaQuestion(round, questionText, correctAnswer);
+		// Confirm success
+		displayTriviaMessage(user, `✅ Custom question added to ${round}!`, flags, extra, true);
+	}
 	if (command.toLowerCase() === "trivia-answertime") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
@@ -2300,7 +2284,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		timetoAnswer = parseInt(message, 10);
 		updateSingleSetting("timetoAnswer", timetoAnswer);
 	}
-
 	if (command.toLowerCase() === "trivia-questiondelay") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
@@ -2309,7 +2292,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		timebetweenQuestions = parseInt(message, 10);
 		updateSingleSetting("timebetweenQuestions", timebetweenQuestions);
 	}
-
 	if (command.toLowerCase() === "trivia-rounddelay") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
@@ -2318,7 +2300,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		timebetweenRounds = parseInt(message, 10);
 		updateSingleSetting("timebetweenRounds", timebetweenRounds);
 	}
-
 	if (command.toLowerCase() === "trivia-questioncap") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
@@ -2327,7 +2308,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		questionsPerRound = parseInt(message, 10);
 		updateSingleSetting("questionsPerRound", questionsPerRound);
 	}
-
 	// Toggle default questions
 	if (command.toLowerCase() === "trivia-defaultquestions") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
@@ -2336,7 +2316,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayConsoleMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`);
 		displayTriviaMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
 	}
-
 	// Toggle custom questions
 	if (command.toLowerCase() === "trivia-customquestions") {  
 		if (!isStreamerAndAuthorize(user, command)) return;

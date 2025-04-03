@@ -1,14 +1,24 @@
 {
-    "round1": [
-        { "question": "What is 5 + 3?", "answer": "8" },
-        { "question": "Who painted the Mona Lisa?", "answer": "da vinci" },
-        { "question": "What is the smallest Skildek support weapon?", "answer": "lancehead" },
-        { "question": "How many PED is 100 PEC worth?", "answer": "1" }
-    ],
-    "round2": [
-        { "question": "Converting 100 shrapnel results in how much universal ammo?", "answer": "101" },
-        { "question": "What amp drops from bots found at Orthos Oilfield?", "answer": "b101" },
-        { "question": "What is Jaedraze's avatar's middle name?", "answer": "Jimbobbityboo" },
-        { "question": "How many paint cans or textures for max success?", "answer": "323" }
-    ]
+    "round1": {
+        "general": [
+            { "question": "What is 5 + 3?", "answer": "8" },
+            { "question": "Who painted the Mona Lisa?", "answer": "da vinci" }
+        ],
+        "entropia": [
+            { "question": "What is the smallest Skildek support weapon?", "answer": "lancehead" },
+            { "question": "How many PED is 100 PEC worth?", "answer": "1" }
+        ]
+    },
+    "round2": {
+        "entropia": [
+            { "question": "Converting 100 shrapnel results in how much universal ammo?", "answer": "101" },
+            { "question": "What amp drops from bots found at Orthos Oilfield?", "answer": "b101" }
+        ],
+        "personal": [
+            { "question": "What is Jaedraze's avatar's middle name?", "answer": "Jimbobbityboo" }
+        ],
+        "crafting": [
+            { "question": "How many paint cans or textures for max success?", "answer": "323" }
+        ]
+    }
 }
