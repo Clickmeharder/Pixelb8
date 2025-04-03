@@ -34,7 +34,7 @@
 		}
 
 		/* Trivia Control Container */
-		#comfycontrolContainer {
+		#entriviacontrolBox {
 			position: fixed;
 			top: 10px;
 			left: 10px;
@@ -52,14 +52,14 @@
 		}
 
 		/* When active (visible) */
-		#comfycontrolContainer.active {
+		#entriviacontrolBox.active {
 			opacity: 0.85;
 			transform: translateY(0);
 			pointer-events: all; /* Allow interactions */
 		}
 
 		/* Trivia Input */
-		#comfycontrolContainer input[type="text"] {
+		#entriviacontrolBox input[type="text"] {
 			width: 92%;
 			font-size: larger;
 			text-align: center;
@@ -72,7 +72,7 @@
 		}
 
 		/* Trivia Buttons */
-		#comfycontrolContainer button {
+		#entriviacontrolBox button {
 			width: 100%;
 			padding: 9px;
 			margin: 5px 0;
@@ -86,11 +86,11 @@
 			transition: background 0.3s ease, color: 0.3s ease;
 		}
 
-		#comfycontrolContainer button:hover {
+		#entriviacontrolBox button:hover {
 			background: #0a2f42eb;
 			color: #0e5b75;
 		}
-		#comfycontrolContainer button#cancelGame {
+		#entriviacontrolBox button#cancelGame {
 			font-size: 15px;
 			font-weight:bold;
 			width: 20%;
@@ -101,7 +101,7 @@
 			border-color: #290606f2;
 			border-radius: 39%;
 		}
-		#comfycontrolContainer button#cancelGame:hover {
+		#entriviacontrolBox button#cancelGame:hover {
 			background: #490101eb;
 			color: #020b0e;
 		}
@@ -696,7 +696,7 @@
 	<!-- Floating Button -->
 	<button id="entrivia-toggle">Ｅ</button>
 	<!-- Trivia Control Container -->
-	<div id="comfycontrolContainer">
+	<div id="entriviacontrolBox">
 		<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
 		<button id="streamersButt">Connect</button>
 		<button id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
@@ -2825,7 +2825,7 @@ function getStreamerCommands() {
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
-    const input = document.querySelector("#comfycontrolContainer input[type='text']");
+    const input = document.querySelector("#entriviacontrolBox input[type='text']");
 
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
@@ -2867,7 +2867,7 @@ function connectStreamer() {
 }
 function disconnectBot() {
 	const button = document.getElementById("streamersButt");
-	const input = document.querySelector("#comfycontrolContainer input[type='text']");
+	const input = document.querySelector("#entriviacontrolBox input[type='text']");
 	button.style.display = "block";
 	input.style.display = "block";
     ComfyJS.Disconnect();
@@ -3021,7 +3021,7 @@ document.getElementById("streamersButt").addEventListener("click", function() {
 
 //enentrivia-toggle button
 document.getElementById("entrivia-toggle").addEventListener("click", function () {
-	let container = document.getElementById("comfycontrolContainer");
+	let container = document.getElementById("entriviacontrolBox");
 	container.classList.toggle("active");
 });
 // start game button

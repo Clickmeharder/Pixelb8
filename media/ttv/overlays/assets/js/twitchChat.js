@@ -4,7 +4,7 @@
 /* 	<!-- Floating Button -->
 	<button id="controls-toggle">⚙</button>
 	<!-- Trivia Control Container -->
-	<div id="comfycontrolContainer">
+	<div id="comfycontrolBox">
 		<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
 		<button id="streamersButt">Connect</button>
 		<button id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
@@ -279,7 +279,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
-    const input = document.querySelector("#comfycontrolContainer input[type='text']");
+    const input = document.querySelector("#comfycontrolBox input[type='text']");
 
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
@@ -315,7 +315,7 @@ function setStreamer(newStreamer) {
 }
 function disconnectBot() {
 	const button = document.getElementById("streamersButt");
-	const input = document.querySelector("#comfycontrolContainer input[type='text']");
+	const input = document.querySelector("#comfycontrolBox input[type='text']");
 	button.style.display = "block";
 	input.style.display = "block";
     ComfyJS.Disconnect();
@@ -344,7 +344,7 @@ window.onload = function () {
 };
 
 document.getElementById("controls-toggle").addEventListener("click", function () {
-	let container = document.getElementById("comfycontrolContainer");
+	let container = document.getElementById("comfycontrolBox");
 	container.classList.toggle("active");
 });
 // Button event listener: first endTrivia, then setStreamer
