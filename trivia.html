@@ -707,27 +707,15 @@
 				</div>
 			</div>
 			<div id="trivia-settings-toggles">
-				<div class="trivia-settings-togglebar">
-					<div class="statusindicatorWrapper">
-						<strong>Status</strong><span id="statusConsoleMessages" data-option="consoleMessages" class="light-indicator"></span>
-					</div>
-					<div class="statusindicatorWrapper">
-						<strong>Status</strong><span id="statusChatOverlay" data-option="entriviachatOverlay" class="light-indicator"></span>
-					</div>
-					<div class="statusindicatorWrapper">
-						<strong>Status</strong><span id="statusChatAnswers" data-option="chatanswers" class="light-indicator"></span>
-					</div>
-				</div>
+				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="consoleMessages"></div>
+				<div class="twitchcmd-info" data-option="!consoleMessages"></div>
+				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="entriviachatOverlay"></div>
+				<div class="twitchcmd-info" data-option="!entriviachatOverlay"></div>
+				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="chatanswers"></div>
+				<div class="twitchcmd-info" data-option="!chatanswers"></div>
 				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="usedefaultquestions"></div>
-<!-- 				<div class="trivia-settings-togglebar>
-					<button id="toggleusedefaultquestions">Default Questions</button>
-					<div class="statusindicatorWrapper">
-						<strong>Status</strong><span id="statusDefaultQuestions" data-option="usedefaultquestions" class="light-indicator"></span>
-					</div>
-				</div> -->
 				<div class="twitchcmd-info" data-option="!trivia-defaultquestions"></div>
 				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="usecustomquestions"></div>
-				
 				<div class="twitchcmd-info" data-option="!trivia-customquestions"></div>
 			</div>
 			<div id="addCustomQuestionForm">
@@ -765,7 +753,6 @@
 			</div>
 			<div id="trivia-settings-main">
 				<h3>Main Trivia Settings</h3>
-				
 				<div class="entriviasettings-inputRow" id="entrivia-bar-Questiondelay">
 					<label for="timeBetweenQuestions">Seconds Between Questions:</label>
 					<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
