@@ -2208,7 +2208,7 @@ function toggleusedefaultquestions() {
 	console.log("toggled usedefaultquestions", usedefaultquestions);
     updateIndicatorLights();
 }
-function toggleCustomQuestions() {
+function toggleusecustomquestions() {
     usecustomquestions = !usecustomquestions;
     updateSingleSetting("usecustomquestions", usecustomquestions);
 	console.log("toggled customquestions", usecustomquestions);
@@ -2648,7 +2648,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "trivia-customquestions") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 
-		toggleCustomQuestions(); // Uses function to update setting
+		toggleusecustomquestions(); // Uses function to update setting
 		displayConsoleMessage(user, `!${command} ${usecustomquestions ? "Enabled ✅" : "Disabled ❌"}`);
 		displayTriviaMessage(user, `!${command} ${usecustomquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
 	}
@@ -3033,7 +3033,7 @@ document.getElementById("changeSettings").addEventListener("click", updateSettin
 document.getElementById("resetSettings").addEventListener("click", resetSettings);
 //toggle inclusion of either default or custom questions
 document.getElementById("toggleusedefaultquestions").addEventListener("click", toggleusedefaultquestions);
-document.getElementById("toggleCustomQuestions").addEventListener("click", toggleCustomQuestions);
+document.getElementById("toggleusecustomquestions").addEventListener("click", toggleusecustomquestions);
 // Add event listener to the button to add custom questions
 
     // Call the function to add the question
@@ -3045,7 +3045,7 @@ document.getElementById("toggleCustomQuestions").addEventListener("click", toggl
 });
 
 document.getElementById('toggleusedefaultquestions').addEventListener('click', toggleusedefaultquestions);
-document.getElementById('toggleCustomQuestions').addEventListener('click', toggleCustomQuestions);
+document.getElementById('toggleusecustomquestions').addEventListener('click', toggleusecustomquestions);
 
 // Event listener for delete button
 document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCustomQuestion);
