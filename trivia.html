@@ -2296,10 +2296,9 @@ function updateSettingsDisplay() {
     }
 }
 
-const settings = { usedefaultquestions, usecustomquestions, consoleMessages, entriviachatOverlay, chatanswers };
-function updateIndicatorLights() { 
 
-    
+function updateIndicatorLights() { 
+	const settings = { usedefaultquestions, usecustomquestions, consoleMessages, entriviachatOverlay, chatanswers };
     document.querySelectorAll(".light-indicator").forEach(indicator => {
         const optionName = indicator.getAttribute("data-option");
         const optionValue = settings[optionName]; // Get the value safely
@@ -2324,6 +2323,7 @@ function updateIndicatorLights() {
 
 // Function to dynamically add a button and a status light indicator
 function updateTriviaSettingsUI() {
+	const settings = { usedefaultquestions, usecustomquestions, consoleMessages, entriviachatOverlay, chatanswers };
     // Select all elements with the class 'optiontoggle-entrivia'
     const toggleElements = document.querySelectorAll('.optiontoggle-entrivia');
 
