@@ -168,6 +168,13 @@
 			align-items: center;
 			border: 2px ridge #273a4c;
 		}
+		trivia-settings-togglebar {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+			border: 2px ridge #273a4c;
+		}
 		#trivia-settings input {
 			width: 28%;
 			min-width: 85px;
@@ -585,12 +592,22 @@
 			<button id="cancelGame">Terminate Game</button>
 		</div>
 		<div id="trivia-settings">
-			<span id="trivia-settingsheader">Entrivia</span>
-			<h3>Trivia Settings</h3>
-			<button id="toggleDefaultQuestions">Toggle Default Questions</button>
-			<button id="toggleCustomQuestions">Toggle Custom Questions</button>
-			<p><strong>Default Questions:</strong> <span id="statusDefaultQuestions">Loading...</span></p>
-			<p><strong>Custom Questions:</strong> <span id="statusCustomQuestions">Loading...</span></p>
+			<div id="trivia-settings-headergroup">
+				<span id="trivia-settingsheader">Entrivia</span>
+				<h3>Trivia Settings</h3>
+			</div>
+			<div id="trivia-settings-toggles">
+				<div id="trivia-settings-togglebar">
+					<button id="toggleDefaultQuestions">Toggle Default Questions</button>
+					<span class="command-text">(!trivia-defaultquestions)</span>
+					<p><strong>Default Questions:</strong><span id="statusDefaultQuestions">Loading...</span></p>
+				</div>
+				<div id="trivia-settings-togglebar">
+					<button id="toggleCustomQuestions">Toggle Custom Questions</button>
+					<span class="command-text">(!trivia-customquestions)</span>
+					<p><strong>Custom Questions:</strong><span id="statusCustomQuestions">Loading...</span></p>
+				</div>
+			</div>
 			<div id="addCustomQuestionForm">
 				<h3>Add a Custom Trivia Question</h3>
 				<label for="round">Select Round:</label>
@@ -606,34 +623,41 @@
 			<div id="manageCustomQuestions">
 				<h3>Manage Custom Trivia Questions</h3>
 				<label for="questionList">Select Question to Delete:</label>
-				<select id="questionList">
-					<!-- Custom questions will be populated here dynamically -->
-				</select>
+				<select id="questionList"></select>
 				<div id="answerDisplay" style="margin-top: 10px;">
 					<strong>Round:</strong> <span id="roundText">-</span><br>
 					<strong>Answer:</strong> <span id="answerText">Select a question to see the answer.</span>
 				</div>
 				<button id="deleteQuestionBtn">Delete Selected Question</button>
 			</div>
-			<div class ="entriviasettings-inputRow">
-				<label for="timeBetweenQuestions">Seconds Between Questions:</label>
-				<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
+			<div id="trivia-settings-main">
+				<h3>Main Trivia Settings</h3>
+				<div class="entriviasettings-inputRow">
+					<label for="timeBetweenQuestions">Seconds Between Questions:</label>
+					<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
+					<span class="command-text">(!trivia-questiondelay)</span>
+				</div>
+				<div class="entriviasettings-inputRow">
+					<label for="timeToAnswer">Time to Answer (seconds):</label>
+					<input type="number" id="timeToAnswer" value="30" min="1" step="1">
+					<span class="command-text">(!trivia-answertime)</span>
+				</div>
+				<div class="entriviasettings-inputRow">
+					<label for="questionsPerRound">Questions Per Round:</label>
+					<input type="number" id="questionsPerRound" value="1" min="1" step="1">
+					<span class="command-text">(!trivia-questioncap)</span>
+				</div>
+				<div class="entriviasettings-inputRow">
+					<label for="timeBetweenRounds">Seconds Between Rounds:</label>
+					<input type="number" id="timeBetweenRounds" value="30" min="1" step="1">
+					<span class="command-text">(!trivia-rounddelay)</span>
+				</div>
+				
+				<button id="changeSettings">Change Settings</button>
+				<button id="resetSettings">Reset to Default</button>
 			</div>
-			<div class ="entriviasettings-inputRow">
-				<label for="timeToAnswer">Time to Answer (seconds):</label>
-				<input type="number" id="timeToAnswer" value="30" min="1" step="1">
-			</div>
-			<div class ="entriviasettings-inputRow">
-				<label for="questionsPerRound">Questions Per Round:</label>
-				<input type="number" id="questionsPerRound" value="1" min="1" step="1">
-			</div>
-			<div class ="entriviasettings-inputRow">
-				<label for="timeBetweenRounds">Seconds between Rounds:</label>
-				<input type="number" id="timeBetweenRounds" value="30" min="1" step="1">
-			</div>
-			<button id="changeSettings">Change Settings</button>
-			<button id="resetSettings">Reset to Default</button>
 		</div>
+
 	</div>
 	<div id="triviaOverlay" style="">
 		<!-- Wrapper for the Trivia Splash Animation -->
