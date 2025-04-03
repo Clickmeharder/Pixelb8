@@ -684,8 +684,13 @@
 			</div>
 			<div id="trivia-settings-toggles">
 				<div class="trivia-settings-togglebar">
+					<div class="statusindicatorWrapper"><strong>Status</strong><span id="statusConsoleMessages" data-option="consoleMessages" class="light-indicator"></span></span>
+					<div class="statusindicatorWrapper"><strong>Status</strong><span id="statusChatOverlay" data-option="entriviachatOverlay" class="light-indicator"></span></span>
+					<div class="statusindicatorWrapper"><strong>Status</strong><span id="statusChatAnswers" data-option="chatanswers" class="light-indicator"></span></span>
+				</div>
+				<div class="trivia-settings-togglebar">
 					<button id="toggleDefaultQuestions">Default Questions</button>
-					<div class="statusindicatorWrapper"><strong>Status:</strong> <span id="statusDefaultQuestions" class="light-indicator"></span></div>
+					<div class="statusindicatorWrapper"><strong>Status</strong><span id="statusDefaultQuestions" data-option="usedefaultquestions" class="light-indicator"></span>
 				</div>
 				<div class="trivia-settings-cmdinfo">
 					<span class="command-text">CMD = !trivia-defaultquestions</span>
@@ -693,7 +698,7 @@
 				</div>
 				<div class="trivia-settings-togglebar">
 					<button id="toggleCustomQuestions">Custom Questions</button>
-					<div class="statusindicatorWrapper"><strong>Status:</strong> <span id="statusCustomQuestions" class="light-indicator"></span></div>
+					<div class="statusindicatorWrapper"><strong>Status</strong><span id="statusCustomQuestions" data-option="usecustomquestions" class="light-indicator"></span>
 				</div>
 				<div class="trivia-settings-cmdinfo">
 					<span class="command-text">CMD = (!trivia-customquestions)</span>
@@ -880,11 +885,11 @@ let round = 1;
 let triviaQuestions = { round1: [], round2: [] };
 //_______________________________________________
 // TRIVIA OPTIONS
-
+//game options
 let consoleMessages = false;
 let entriviachatOverlay = "off";
 let chatanswers = false;
-//game options
+
 let usedefaultquestions = true;
 let usecustomquestions = true;
 let timetoAnswer = 30;
@@ -2345,7 +2350,44 @@ function resetSettings() {
 
     displayTriviaMessage("!!", "Entrivia Settings Reset to default.", {}, {});
 }
+function updateSettingsDisplay() {
+    let savedSettings = localStorage.getItem("triviaClassicSettings");
+    if (savedSettings) {
+        let settings = JSON.parse(savedSettings);
+        timetoAnswer = settings.timetoAnswer;
+        timebetweenQuestions = settings.timebetweenQuestions;
+        timebetweenRounds = settings.timebetweenRounds;
+        questionsPerRound = settings.questionsPerRound;
+		//toggles
+        usedefaultquestions = settings.usedefaultquestions ?? true; // Default to true if missing
+        usecustomquestions = settings.usecustomquestions ?? true; // Default to true if missing
 
+        // Update UI elements
+        document.getElementById("timeToAnswer").value = timetoAnswer;
+        document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
+        document.getElementById("timeBetweenRounds").value = timebetweenRounds;
+        document.getElementById("questionsPerRound").value = questionsPerRound;
+		updateIndicatorLights();
+    }
+}
+
+function updateIndicatorLights() {
+    document.querySelectorAll(".light-indicator").forEach(indicator => {
+        const optionName = indicator.getAttribute("data-option");
+        
+        // Get the current value of the option dynamically
+        const optionValue = window[optionName]; 
+
+        // Set light color based on boolean or string value
+        if (optionValue === true || optionValue === "on") {
+            indicator.style.backgroundColor = "green";
+        } else if (optionValue === false || optionValue === "off") {
+            indicator.style.backgroundColor = "red";
+        } else {
+            indicator.style.backgroundColor = "gray"; // Default/fallback for unknown states
+        }
+    });
+}
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // COMFY JS specific logic/functions
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2767,6 +2809,12 @@ function setStreamer(newStreamer) {
         button.style.border = "1px solid #dc3545"; 
     }
 }
+function connectStreamer() {
+    const savedStreamer = localStorage.getItem("lastStreamer");
+    if (savedStreamer) {
+        setStreamer(savedStreamer); // Auto-connect
+    }
+}
 function disconnectBot() {
 	const button = document.getElementById("streamersButt");
 	const input = document.querySelector("#comfycontrolContainer input[type='text']");
@@ -2789,33 +2837,8 @@ function disconnectBot() {
     button.style.border = "1px solid #28a745";  
     input.style.outline = "3px outset #dc3545"; 
 }
-// Auto-reconnect on page load
-window.onload = function () {
-    const savedStreamer = localStorage.getItem("lastStreamer");
-    if (savedStreamer) {
-        setStreamer(savedStreamer); // Auto-connect
-    }
-    let savedSettings = localStorage.getItem("triviaClassicSettings");
-    if (savedSettings) {
-        let settings = JSON.parse(savedSettings);
-        timetoAnswer = settings.timetoAnswer;
-        timebetweenQuestions = settings.timebetweenQuestions;
-        timebetweenRounds = settings.timebetweenRounds;
-        questionsPerRound = settings.questionsPerRound;
 
-        // Load new settings
-        usedefaultquestions = settings.usedefaultquestions ?? true; // Default to true if missing
-        usecustomquestions = settings.usecustomquestions ?? true; // Default to true if missing
 
-        // Update UI elements
-        document.getElementById("timeToAnswer").value = timetoAnswer;
-        document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
-        document.getElementById("timeBetweenRounds").value = timebetweenRounds;
-        document.getElementById("questionsPerRound").value = questionsPerRound;
-
-        updateSettingsDisplay(); // Reflect in UI
-    }
-};
 
 // Button event listener: first endTrivia, then setStreamer
 document.getElementById("streamersButt").addEventListener("click", function() {
@@ -2839,7 +2862,6 @@ document.getElementById("cancelGame").addEventListener("click", function() {
         endTrivia(); // Only end trivia if it's running
     }
 });
-
 // Attach event listeners
 document.getElementById("changeSettings").addEventListener("click", updateSettings);
 document.getElementById("resetSettings").addEventListener("click", resetSettings);
@@ -2847,14 +2869,6 @@ document.getElementById("resetSettings").addEventListener("click", resetSettings
 document.getElementById("toggleDefaultQuestions").addEventListener("click", toggleDefaultQuestions);
 document.getElementById("toggleCustomQuestions").addEventListener("click", toggleCustomQuestions);
 
-function updateSettingsDisplay() {
-    const statusDefault = document.getElementById("statusDefaultQuestions");
-    const statusCustom = document.getElementById("statusCustomQuestions");
-
-    // Update class to show green or red light
-    statusDefault.style.backgroundColor = usedefaultquestions ? "green" : "red";
-    statusCustom.style.backgroundColor = usecustomquestions ? "green" : "red";
-}
 // Add event listener to the button to add custom questions
 document.getElementById('submitQuestionBtn').addEventListener('click', function() {
     // Get the values from the form inputs
@@ -2876,13 +2890,20 @@ document.getElementById('submitQuestionBtn').addEventListener('click', function(
     document.getElementById('questionText').value = '';
     document.getElementById('correctAnswer').value = '';
 });
-
+// Auto-reconnect on page load
+window.onload = function () {
+	connectStreamer();
+	loadCustomQuestions();
+	updateSettingsDisplay();
+};
 // Event listener for delete button
 document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCustomQuestion);
 // Event listener for dropdown change to update the answer display
 document.getElementById('questionList').addEventListener('change', updateAnswerDisplay);
+
+
 // Load custom questions when the page loads
-window.addEventListener('load', loadCustomQuestions);
+// window.addEventListener('load', loadCustomQuestions);
 </script>
 </body>
 </html>
