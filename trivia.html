@@ -1013,15 +1013,20 @@ function loadCustomQuestions() {
     defaultOption.value = '';
     dropdown.appendChild(defaultOption);
 
-    function addQuestionsToDropdown(round, categories) {
-        Object.keys(categories).forEach(category => {
-            categories[category].forEach((q, index) => {
+    function addQuestionsToDropdown(round, questions) {
+        // Iterate over categories in the round
+        for (const category in questions) {
+            // Ensure the category is an array before calling .forEach()
+            const categoryQuestions = Array.isArray(questions[category]) ? questions[category] : [];
+
+            // Add each question in the category to the dropdown
+            categoryQuestions.forEach((q, index) => {
                 let option = document.createElement('option');
-                option.value = `${round}-${category}-${index}`;  // Include category in value
-                option.text = `[${category}] ${q.question}`;  
+                option.value = `${round}-${category}-${index}`;
+                option.text = `[${category}] ${q.question}`;  // Show category
                 dropdown.appendChild(option);
             });
-        });
+        }
     }
 
     addQuestionsToDropdown("round1", customQuestions.round1);
