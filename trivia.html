@@ -733,17 +733,11 @@
 						<strong>Status</strong><span id="statusCustomQuestions" data-option="usecustomquestions" class="light-indicator"></span>
 					</div>
 				</div>
-				<div class="twitchcmd-info">
-					<span class="command-text">Twitch Cmd = !trivia-customquestions</span>
-					<span class="command-info" title="!trivia-customquestions">❓</span>
-				</div>
+				<div class="twitchcmd-info" data-option="!trivia-customquestions"></div>
 			</div>
 			<div id="addCustomQuestionForm">
 				<h3>Add a Custom Trivia Question</h3>
-				<div class="twitchcmd-info">
-					<span class="command-text">Twitch Cmd = !trivia-addquestion</span>
-					<span class="command-info" title="!trivia-addquestion">❓</span>
-				</div>
+				<div class="twitchcmd-info" data-option="!trivia-addquestion"></div>
 				<label for="round">Select Round:</label>
 				<select id="round">
 					<option value="round1">Round 1</option>
@@ -781,34 +775,22 @@
 					<label for="timeBetweenQuestions">Seconds Between Questions:</label>
 					<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
 				</div>
-				<div class="twitchcmd-info">
-					<span class="command-text">Twitch Cmd = !trivia-questiondelay</span>
-					<span class="command-info" title="!trivia-questiondelay">❓</span>
-				</div>
+				<div class="twitchcmd-info" data-option="!trivia-questiondelay"></div>
 				<div class="entriviasettings-inputRow" id="entrivia-bar-Answertime">
 					<label for="timeToAnswer">Time to Answer (seconds):</label>
 					<input type="number" id="timeToAnswer" value="30" min="1" step="1">
 				</div>
-				<div class="twitchcmd-info">
-					<span class="command-text">Twitch Cmd = !trivia-answertime</span>
-					<span class="command-info" title="!trivia-answertime">❓</span>
-				</div>
+				<div class="twitchcmd-info" data-option="!trivia-answertime"></div>
 				<div class="entriviasettings-inputRow" id="entrivia-bar-QuestionsperRound">
 					<label for="questionsPerRound">Questions Per Round:</label>
 					<input type="number" id="questionsPerRound" value="1" min="1" step="1">	
 				</div>
-				<div class="twitchcmd-info">
-					<span class="command-text">Twitch Cmd = !trivia-questioncap</span>
-					<span class="command-info" title="!trivia-questioncap">❓</span>
-				</div>
+				<div class="twitchcmd-info" data-option="!trivia-questioncap"></div>
 				<div class="entriviasettings-inputRow" id="entrivia-bar-rounddelay">
 					<label for="timeBetweenRounds">Seconds Between Rounds:</label>
 					<input type="number" id="timeBetweenRounds" value="30" min="1" step="1">
 				</div>
-				<div class="twitchcmd-info">
-					<span class="command-text">Twitch Cmd = !trivia-rounddelay</span>
-					<span class="command-info" title="!trivia-rounddelay">❓</span>
-				</div>
+				<div class="twitchcmd-info" data-option="!trivia-rounddelay"></div>
 				<div class="entriviasettings-inputRow" id="entrivia-bar-settingsbutts">
 					<button id="changeSettings">Set</button>
 					<button id="resetSettings">Default</button>
