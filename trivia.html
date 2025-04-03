@@ -2297,12 +2297,12 @@ function toggleAudioSetting() {
 function toggleDefaultQuestions() {
     usedefaultquestions = !usedefaultquestions;
     updateSingleSetting("usedefaultquestions", usedefaultquestions);
-    updateSettingsDisplay();
+    updateIndicatorLights();
 }
 function toggleCustomQuestions() {
     usecustomquestions = !usecustomquestions;
     updateSingleSetting("usecustomquestions", usecustomquestions);
-    updateSettingsDisplay();
+    updateIndicatorLights();
 }
 function toggleEntriviachatOverlay() {
     entriviachatOverlay = entriviachatOverlay === "on" ? "off" : "on";
@@ -2922,6 +2922,8 @@ document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCus
 // Event listener for dropdown change to update the answer display
 document.getElementById('questionList').addEventListener('change', updateAnswerDisplay);
 
+document.getElementById('toggleDefaultQuestions').addEventListener('click', toggleDefaultQuestions();
+document.getElementById('toggleCustomQuestions').addEventListener('click', toggleCustomQuestions();
 // Auto-reconnect on page load
 window.onload = function () {
 	connectStreamer();
