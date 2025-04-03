@@ -720,7 +720,7 @@
 				</div>
 				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="usedefaultquestions"></div>
 <!-- 				<div class="trivia-settings-togglebar>
-					<button id="toggleDefaultQuestions">Default Questions</button>
+					<button id="toggleusedefaultquestions">Default Questions</button>
 					<div class="statusindicatorWrapper">
 						<strong>Status</strong><span id="statusDefaultQuestions" data-option="usedefaultquestions" class="light-indicator"></span>
 					</div>
@@ -2208,7 +2208,7 @@ function toggleElement(elementId, animationType = "fade") {
 
 
 
-function toggleDefaultQuestions() {
+function toggleusedefaultquestions() {
     usedefaultquestions = !usedefaultquestions;
     updateSingleSetting("usedefaultquestions", usedefaultquestions);
     updateIndicatorLights();
@@ -2646,7 +2646,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "trivia-defaultquestions") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 
-		toggleDefaultQuestions(); // Uses function to update setting
+		toggleusedefaultquestions(); // Uses function to update setting
 		displayConsoleMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`);
 		displayTriviaMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
 	}
@@ -3038,7 +3038,7 @@ document.getElementById('submitQuestionBtn').addEventListener('click', function(
 document.getElementById("changeSettings").addEventListener("click", updateSettings);
 document.getElementById("resetSettings").addEventListener("click", resetSettings);
 //toggle inclusion of either default or custom questions
-document.getElementById("toggleDefaultQuestions").addEventListener("click", toggleDefaultQuestions);
+document.getElementById("toggleusedefaultquestions").addEventListener("click", toggleusedefaultquestions);
 document.getElementById("toggleCustomQuestions").addEventListener("click", toggleCustomQuestions);
 // Add event listener to the button to add custom questions
 
@@ -3050,7 +3050,7 @@ document.getElementById("toggleCustomQuestions").addEventListener("click", toggl
     document.getElementById('correctAnswer').value = '';
 });
 
-document.getElementById('toggleDefaultQuestions').addEventListener('click', toggleDefaultQuestions);
+document.getElementById('toggleusedefaultquestions').addEventListener('click', toggleusedefaultquestions);
 document.getElementById('toggleCustomQuestions').addEventListener('click', toggleCustomQuestions);
 
 // Event listener for delete button
