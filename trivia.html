@@ -467,7 +467,11 @@
 		.consoleMessage {padding: 10px;color: #ffffff;background-color: #333333;margin: 5px 0;border: 1px dashed #696969;opacity: 1;transition: opacity 1s ease-out;}
 		.consoleUser {font-weight: bold;color: #ff6600;}
 		.consoleMessageText {color: #ffffff;}
-
+		.command-info {
+			cursor: help;
+			margin-left: 5px;
+			font-size: 16px;
+		}
     </style>
     <style>
 		/* ANIMATIONS */
@@ -599,6 +603,7 @@
 			<div id="trivia-settings-toggles">
 				<div id="trivia-settings-togglebar">
 					<button id="toggleDefaultQuestions">Toggle Default Questions</button>
+					<span class="command-info" title="!trivia-customquestions">❓</span>
 					<span class="command-text">CMD = (!trivia-defaultquestions)</span>
 					<p><strong>Default Questions:</strong><span id="statusDefaultQuestions">Loading...</span></p>
 				</div>
