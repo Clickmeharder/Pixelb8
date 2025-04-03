@@ -1125,7 +1125,6 @@ function addCustomTriviaQuestion(round, questionText, correctAnswer, category) {
     updateAnswerDisplay();
     console.log(`✅ Added new question to ${round} [${category}]:`, newQuestion);
 }
-// Function to load custom questions into the dropdown
 function loadCustomQuestions() {
     const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
     const dropdown = document.getElementById('questionList');
@@ -1144,11 +1143,13 @@ function loadCustomQuestions() {
     // Iterate over rounds and categories to populate the dropdown
     function addQuestionsToDropdown(round, questions) {
         if (!questions) return;  // Skip if no questions exist in this round
+        // Iterate over each category in the round
         for (const category in questions) {
-            const categoryQuestions = Array.isArray(questions[category]) ? questions[category] : [];
+            const categoryQuestions = questions[category];  // No need for Array.isArray check, it's guaranteed to be an array
 
             if (categoryQuestions.length === 0) continue;  // Skip empty categories
 
+            // Add each question in the category to the dropdown
             categoryQuestions.forEach((q, index) => {
                 let option = document.createElement('option');
                 option.value = `${round}-${category}-${index}`;  // Format: round-category-index
@@ -1234,12 +1235,15 @@ function deleteOldQuestions() {
     // Iterate over rounds
     for (let round in customQuestions) {
         for (let category in customQuestions[round]) {
-            // Filter out questions that don't have a valid category
-            customQuestions[round][category] = customQuestions[round][category].filter(question => question.category);
-
-            // If a category has no questions left, remove the category
-            if (customQuestions[round][category].length === 0) {
-                delete customQuestions[round][category];
+            // Ensure category is an array before calling filter
+            if (Array.isArray(customQuestions[round][category])) {
+                // Filter out questions that don't have a valid category
+                customQuestions[round][category] = customQuestions[round][category].filter(question => question.category);
+                
+                // If a category has no questions left, remove the category
+                if (customQuestions[round][category].length === 0) {
+                    delete customQuestions[round][category];
+                }
             }
         }
     }
