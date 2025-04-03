@@ -783,12 +783,12 @@
 			</div>
 			<div id="trivia-settings-toggles">
 				<h3>Dont worry bout these</h3>
-				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="consoleMessages"></div>
-				<div class="twitchcmd-info" data-option="!consoleMessages"></div>
-				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="entriviachatOverlay"></div>
-				<div class="twitchcmd-info" data-option="!entriviachatOverlay"></div>
-				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="chatanswers"></div>
-				<div class="twitchcmd-info" data-option="!chatanswers"></div>
+				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="trivia-consolemessages"></div>
+				<div class="twitchcmd-info" data-option="!trivia-consolemessages"></div>
+				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="trivia-disablechat"></div>
+				<div class="twitchcmd-info" data-option="!trivia-disablechat"></div>
+				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="trivia-chatanswers"></div>
+				<div class="twitchcmd-info" data-option="!trivia-chatanswers"></div>
 			</div>
 		</div>
 	</div>
@@ -894,6 +894,7 @@ let triviaQuestions = { round1: [], round2: [] };
 //_______________________________________________
 // TRIVIA OPTIONS
 //game options
+let audioSetting = "on";
 let entriviachatOverlay = "off";
 let consoleMessages = false;
 let chatanswers = false;
@@ -2192,6 +2193,12 @@ function toggleElement(elementId, animationType = "fade") {
 
 
 
+function toggleTriviaconsolemessages() {
+    consoleMessages = !consoleMessages;
+    updateSingleSetting("consoleMessages", consoleMessages);
+	console.log("toggled consoleMessages", consoleMessages);
+    updateIndicatorLights();
+}
 function toggleusedefaultquestions() {
     usedefaultquestions = !usedefaultquestions;
     updateSingleSetting("usedefaultquestions", usedefaultquestions);
@@ -2208,6 +2215,7 @@ function toggleEntriviachatOverlay() {
     entriviachatOverlay = entriviachatOverlay === "on" ? "off" : "on";
     console.log(`Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
 	displayConsoleMessage("system", `Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
+	updateIndicatorLights();
 }
 function updateSingleSetting(settingKey, newValue) {
     let savedSettings = JSON.parse(localStorage.getItem("triviaClassicSettings")) || {};
@@ -2232,8 +2240,6 @@ function updateSettings() {
     timebetweenRounds = parseInt(document.getElementById("timeBetweenRounds").value, 10);
     questionsPerRound = parseInt(document.getElementById("questionsPerRound").value, 10);
     // Get the toggle states
-    usedefaultquestions = document.getElementById("useDefaultQuestions").checked;
-    usecustomquestions = document.getElementById("useCustomQuestions").checked;
     saveSettings();
     displayTriviaMessage("!!", "Entrivia Settings updated and saved.", {}, {});
 }
@@ -2282,9 +2288,8 @@ function updateSettingsDisplay() {
     }
 }
 
-
+const settings = { usedefaultquestions, usecustomquestions, consoleMessages, entriviachatOverlay, chatanswers, audioSettings };
 function updateIndicatorLights() { 
-	const settings = { usedefaultquestions, usecustomquestions, consoleMessages, entriviachatOverlay, chatanswers };
     document.querySelectorAll(".light-indicator").forEach(indicator => {
         const optionName = indicator.getAttribute("data-option");
         const optionValue = settings[optionName]; // Get the value safely
@@ -2309,7 +2314,7 @@ function updateIndicatorLights() {
 
 // Function to dynamically add a button and a status light indicator
 function updateTriviaSettingsUI() {
-	const settings = { usedefaultquestions, usecustomquestions, consoleMessages, entriviachatOverlay, chatanswers };
+
     // Select all elements with the class 'optiontoggle-entrivia'
     const toggleElements = document.querySelectorAll('.optiontoggle-entrivia');
 
@@ -2504,7 +2509,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
 		displayTriviaHistory();
     }
-	if (command === "chatanswers") {
+	if (command.toLowerCase() === "trivia-chatanswers") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
@@ -2524,12 +2529,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
 		toggleAudioSetting();
 	}
-	if (command === "toggletriviaboard") {
+	if (command.toLowerCase() === "toggletriviaboard") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		toggleElement("triviaboard", "slide");
 	}
-	if (command === "togglequestions") {
+	if (command.toLowerCase() === "togglequestions") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		toggleElement("questionWrapper", "fade");
@@ -2540,7 +2545,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		toggleTrivia();
 		toggleElement("triviaWrapper", "fade");
 	}
-	if (command === "togglechat") {
+	if (command.toLowerCase() === "togglechat") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		toggleElement("twitchchatContainer", "fade");
@@ -2627,6 +2632,13 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		updateSingleSetting("questionsPerRound", questionsPerRound);
 	}
 	// Toggle default questions
+	if (command.toLowerCase() === "trivia-consolemessages") {  
+		if (!isStreamerAndAuthorize(user, command)) return;
+
+		toggleTriviaconsolemessages(); // Uses function to update setting
+		displayConsoleMessage(user, `!${command} ${consoleMessages ? "Enabled ✅" : "Disabled ❌"}`);
+		displayTriviaMessage(user, `!${command} ${consoleMessages ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
+	}
 	if (command.toLowerCase() === "trivia-defaultquestions") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 
@@ -2674,7 +2686,8 @@ const streamercommands = [
 	{ command: "!trivia-lastaskwinner", description: "Displays the last trivia question's winner.", usage: "!trivia-lastaskwinner" },
 	{ command: "!trivia-lastwinners", description: "Displays the list of last trivia winners.", usage: "!trivia-lastwinners" },
 	{ command: "!trivia-history", description: "Displays trivia history.", usage: "!trivia-history" },
-	{ command: "!chatanswers", description: "Toggles the chat answers on/off.", usage: "!chatanswers" },
+	{ command: "!trivia-chatanswers", description: "Toggles the chat answers on/off.", usage: "!trivia-chatanswers" },
+	{ command: "!trivia-consolemessages", description: "Toggles the chat answers on/off.", usage: "!trivia-consolemessages" },
 	{ command: "!trivia-disablechat", description: "Disables trivia chat overlay.", usage: "!trivia-disablechat" },
 	{ command: "!trivia-audio", description: "Toggles trivia audio settings.", usage: "!trivia-audio" },
 	{ command: "!toggletriviaboard", description: "Toggles the trivia board visibility.", usage: "!toggletriviaboard" },
@@ -2866,7 +2879,7 @@ function disconnectBot() {
         // Play the sound
 //       playSound("triviatimesup");
 
-let audioSetting = "on"; // Change to "off" to mute all sounds
+ // Change to "off" to mute all sounds
 //-------------------------------------
 const sounds = {
     snakedie: new Audio("/assets/sounds/snakedie_sound1.mp3"),
