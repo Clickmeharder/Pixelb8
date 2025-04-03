@@ -2917,13 +2917,14 @@ document.getElementById("toggleCustomQuestions").addEventListener("click", toggl
     document.getElementById('questionText').value = '';
     document.getElementById('correctAnswer').value = '';
 });
+
+document.getElementById('toggleDefaultQuestions').addEventListener('click', toggleDefaultQuestions);
+document.getElementById('toggleCustomQuestions').addEventListener('click', toggleCustomQuestions);
 // Event listener for delete button
 document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCustomQuestion);
 // Event listener for dropdown change to update the answer display
 document.getElementById('questionList').addEventListener('change', updateAnswerDisplay);
 
-document.getElementById('toggleDefaultQuestions').addEventListener('click', toggleDefaultQuestions);
-document.getElementById('toggleCustomQuestions').addEventListener('click', toggleCustomQuestions);
 // Auto-reconnect on page load
 window.onload = function () {
 	connectStreamer();
