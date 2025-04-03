@@ -632,29 +632,31 @@
 			</div>
 			<div id="trivia-settings-main">
 				<h3>Main Trivia Settings</h3>
-				<div class="entriviasettings-inputRow">
+				
+				<div class="entriviasettings-inputRow" id="entrivia-bar-Questiondelay">
 					<label for="timeBetweenQuestions">Seconds Between Questions:</label>
 					<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
-					<span class="command-text">(!trivia-questiondelay)</span>
 				</div>
-				<div class="entriviasettings-inputRow">
+				<span class="command-text">CMD = (!trivia-questiondelay)</span>
+				<div class="entriviasettings-inputRow" id="entrivia-bar-Answertime">
 					<label for="timeToAnswer">Time to Answer (seconds):</label>
 					<input type="number" id="timeToAnswer" value="30" min="1" step="1">
-					<span class="command-text">(!trivia-answertime)</span>
 				</div>
-				<div class="entriviasettings-inputRow">
+				<span class="command-text">CMD = (!trivia-answertime)</span>
+				<div class="entriviasettings-inputRow" id="entrivia-bar-QuestionsperRound">
 					<label for="questionsPerRound">Questions Per Round:</label>
-					<input type="number" id="questionsPerRound" value="1" min="1" step="1">
-					<span class="command-text">(!trivia-questioncap)</span>
+					<input type="number" id="questionsPerRound" value="1" min="1" step="1">	
 				</div>
-				<div class="entriviasettings-inputRow">
+				<span class="command-text">CMD = (!trivia-questioncap)</span>
+				<div class="entriviasettings-inputRow" id="entrivia-bar-rounddelay">
 					<label for="timeBetweenRounds">Seconds Between Rounds:</label>
 					<input type="number" id="timeBetweenRounds" value="30" min="1" step="1">
-					<span class="command-text">(!trivia-rounddelay)</span>
 				</div>
-				
-				<button id="changeSettings">Change Settings</button>
-				<button id="resetSettings">Reset to Default</button>
+				<span class="command-text">CMD = (!trivia-rounddelay)</span>
+				<div class="entriviasettings-inputRow" id="entrivia-bar-settingsbutts">
+					<button id="changeSettings">Set</button>
+					<button id="resetSettings">Default</button>
+				</div>
 			</div>
 		</div>
 
