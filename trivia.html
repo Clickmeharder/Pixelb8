@@ -184,7 +184,7 @@
 			border: 2px ridge #273a4c;
 		}
 
-		.trivia-settings-cmdinfo {
+		.twitchcmd-info {
 			display: flex;
 			flex-direction: row;
 			justify-content: space-evenly;
@@ -724,7 +724,7 @@
 						<strong>Status</strong><span id="statusDefaultQuestions" data-option="usedefaultquestions" class="light-indicator"></span>
 					</div>
 				</div>
-				<div class="trivia-settings-cmdinfo">
+				<div class="twitchcmd-info">
 					<span class="command-text">Twitch Command = !trivia-defaultquestions</span>
 					<span class="command-info" title="!trivia-defaultquestions">❓</span>
 				</div>
@@ -734,14 +734,14 @@
 						<strong>Status</strong><span id="statusCustomQuestions" data-option="usecustomquestions" class="light-indicator"></span>
 					</div>
 				</div>
-				<div class="trivia-settings-cmdinfo">
+				<div class="twitchcmd-info">
 					<span class="command-text">Twitch Cmd = !trivia-customquestions</span>
 					<span class="command-info" title="!trivia-customquestions">❓</span>
 				</div>
 			</div>
 			<div id="addCustomQuestionForm">
 				<h3>Add a Custom Trivia Question</h3>
-				<div class="trivia-settings-cmdinfo">
+				<div class="twitchcmd-info">
 					<span class="command-text">Twitch Cmd = !trivia-addquestion</span>
 					<span class="command-info" title="!trivia-addquestion">❓</span>
 				</div>
@@ -782,7 +782,7 @@
 					<label for="timeBetweenQuestions">Seconds Between Questions:</label>
 					<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
 				</div>
-				<div class="trivia-settings-cmdinfo">
+				<div class="twitchcmd-info">
 					<span class="command-text">Twitch Cmd = !trivia-questiondelay</span>
 					<span class="command-info" title="!trivia-questiondelay">❓</span>
 				</div>
@@ -790,7 +790,7 @@
 					<label for="timeToAnswer">Time to Answer (seconds):</label>
 					<input type="number" id="timeToAnswer" value="30" min="1" step="1">
 				</div>
-				<div class="trivia-settings-cmdinfo">
+				<div class="twitchcmd-info">
 					<span class="command-text">Twitch Cmd = !trivia-answertime</span>
 					<span class="command-info" title="!trivia-answertime">❓</span>
 				</div>
@@ -798,7 +798,7 @@
 					<label for="questionsPerRound">Questions Per Round:</label>
 					<input type="number" id="questionsPerRound" value="1" min="1" step="1">	
 				</div>
-				<div class="trivia-settings-cmdinfo">
+				<div class="twitchcmd-info">
 					<span class="command-text">Twitch Cmd = !trivia-questioncap</span>
 					<span class="command-info" title="!trivia-questioncap">❓</span>
 				</div>
@@ -806,7 +806,7 @@
 					<label for="timeBetweenRounds">Seconds Between Rounds:</label>
 					<input type="number" id="timeBetweenRounds" value="30" min="1" step="1">
 				</div>
-				<div class="trivia-settings-cmdinfo">
+				<div class="twitchcmd-info">
 					<span class="command-text">Twitch Cmd = !trivia-rounddelay</span>
 					<span class="command-info" title="!trivia-rounddelay">❓</span>
 				</div>
@@ -2646,12 +2646,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 };
 
-function updateCommandlist() { 
-  const usercommands = [
+// Declare the arrays globally
+const usercommands = [
 	{ command: "!a / !answer", description: "Allows users to answer a trivia question.", usage: "!a / !answer" },
-  ];
+];
 
-  const streamercommands = [ 
+const streamercommands = [
 	{ command: "!a / !answer", description: "Allows users to answer a trivia question.", usage: "!a / !answer" },
 	{ command: "!trivia-play", description: "Starts the trivia game.", usage: "!trivia-play" },
 	{ command: "!trivia-askrandom", description: "Asks a random trivia question.", usage: "!trivia-askrandom" },
@@ -2673,54 +2673,107 @@ function updateCommandlist() {
 	{ command: "!trivia-questioncap", description: "Sets a cap for the number of questions per round.", usage: "!trivia-questioncap [cap]" },
 	{ command: "!trivia-defaultquestions", description: "Toggles default trivia questions.", usage: "!trivia-defaultquestions" },
 	{ command: "!trivia-customquestions", description: "Toggles custom trivia questions.", usage: "!trivia-customquestions" }
-  ];
+];
 
-  // Get the respective <ul> elements
-  const userCommandList = document.getElementById("usercommandList");
-  const broadcasterCommandList = document.getElementById("broadcastercommandList");
+// Function to update the command list in the UI
+function updateCommandlist() { 
+	// Get the respective <ul> elements
+	const userCommandList = document.getElementById("usercommandList");
+	const broadcasterCommandList = document.getElementById("broadcastercommandList");
 
-  // Add user commands to the user command list
-  usercommands.forEach(function(command) {
-	const li = document.createElement("li");
+	// Add user commands to the user command list
+	usercommands.forEach(function(command) {
+		const li = document.createElement("li");
 
-	// Create the usage span
-	const usageSpan = document.createElement("span");
-	usageSpan.classList.add("command-info");
-	usageSpan.setAttribute("title", command.usage);
-	usageSpan.textContent = "❓";
+		// Create the usage span
+		const usageSpan = document.createElement("span");
+		usageSpan.classList.add("command-info");
+		usageSpan.setAttribute("title", command.usage);
+		usageSpan.textContent = "❓";
 
-	// Set command and description
-	li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
+		// Set command and description
+		li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
 
-	// Append the usage span to the li
-	li.appendChild(usageSpan);
+		// Append the usage span to the li
+		li.appendChild(usageSpan);
 
-	// Append to the user command list
-	userCommandList.appendChild(li);
-  });
+		// Append to the user command list
+		userCommandList.appendChild(li);
+	});
 
-  // Add broadcaster commands to the broadcaster command list
-  streamercommands.forEach(function(command) {
-	const li = document.createElement("li");
+	// Add broadcaster commands to the broadcaster command list
+	streamercommands.forEach(function(command) {
+		const li = document.createElement("li");
 
-	// Create the usage span
-	const usageSpan = document.createElement("span");
-	const usageText = "Usage: " + command.usage;
-	usageSpan.classList.add("command-info");
-	
-	usageSpan.setAttribute("title", usageText);
-	usageSpan.textContent = "❓";
+		// Create the usage span
+		const usageSpan = document.createElement("span");
+		const usageText = "Usage: " + command.usage;
+		usageSpan.classList.add("command-info");
+		usageSpan.setAttribute("title", usageText);
+		usageSpan.textContent = "❓";
 
-	// Set command and description
-	li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
+		// Set command and description
+		li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
 
-	// Append the usage span to the li
-	li.appendChild(usageSpan);
+		// Append the usage span to the li
+		li.appendChild(usageSpan);
 
-	// Append to the broadcaster command list
-	broadcasterCommandList.appendChild(li);
-  });
+		// Append to the broadcaster command list
+		broadcasterCommandList.appendChild(li);
+	});
 }
+
+// Function to dynamically add command spans based on the `data-option`
+function updateTwitchCommandInfo() {
+    // Get all elements with the class 'twitchcmd-info'
+    const commandInfoElements = document.querySelectorAll('.twitchcmd-info');
+    
+    // Loop through each element and find the corresponding command
+    commandInfoElements.forEach(function(element) {
+        const option = element.getAttribute('data-option');  // Get the value of data-option
+        
+        // Look for the corresponding command in usercommands and streamercommands
+        let command = null;
+        
+        // Check in usercommands first
+        command = usercommands.find(cmd => cmd.command === option);
+        
+        // If not found in usercommands, check in streamercommands
+        if (!command) {
+            command = streamercommands.find(cmd => cmd.command === option);
+        }
+
+        // If a command was found, add the spans inside the element
+        if (command) {
+            // Create the command-text span
+            const commandTextSpan = document.createElement('span');
+            commandTextSpan.classList.add('command-text');
+            commandTextSpan.textContent = `Twitch Command = ${command.command}`;
+
+            // Create the command-info span
+            const commandInfoSpan = document.createElement('span');
+            commandInfoSpan.classList.add('command-info');
+            commandInfoSpan.setAttribute('title', command.usage);
+            commandInfoSpan.textContent = '❓';
+
+            // Append the spans to the current element
+            element.appendChild(commandTextSpan);
+            element.appendChild(commandInfoSpan);
+        }
+    });
+}
+
+// Call the function to update the command info on page load
+updateTwitchCommandInfo();
+// You can now use `usercommands` and `streamercommands` elsewhere
+function getUserCommands() {
+    console.log(usercommands);  // Access the usercommands array
+}
+
+function getStreamerCommands() {
+    console.log(streamercommands);  // Access the streamercommands array
+}
+
 //!!!!!!!!!!!!!!!!!!!!!!!
 // Our Comfy Connection
 //!!!!!!!!!!!!!!!!!!!!!!!
