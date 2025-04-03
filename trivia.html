@@ -2192,7 +2192,7 @@ function toggleElement(elementId, animationType = "fade") {
 }
 
 
-
+//toggles
 function toggleTriviaconsolemessages() {
     consolemessages = !consolemessages;
     updateSingleSetting("consolemessages", consolemessages);
@@ -2219,12 +2219,19 @@ function toggleEntriviachatOverlay() {
 	console.log(`Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
 	displayConsoleMessage("system", `Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
 }
+function togglechatanswers() {
+	chatanswers = !chatanswers;
+	updateSingleSetting("chatanswers", chatanswers);
+	updateIndicatorLights();
+	console.log(` Can chat answer trivia: ${entriviachatOverlay}`);
+	displayConsoleMessage("system", `Can chat answer trivia: ${entriviachatOverlay}`);
+}
+//-----------------------------------
 function updateSingleSetting(settingKey, newValue) {
     let savedSettings = JSON.parse(localStorage.getItem("triviaClassicSettings")) || {};
     savedSettings[settingKey] = newValue;
     localStorage.setItem("triviaClassicSettings", JSON.stringify(savedSettings));
 }
-
 function saveSettings() {
     let triviaClassicSettings = {
         timetoAnswer,
@@ -2519,9 +2526,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		chatanswers = !chatanswers;  // Toggle chatanswers
-		// Show in the chat whether chat answers are now enabled or disabled
-		displayChatMessage(user, `Chat answers are now ${chatanswers ? "enabled" : "disabled"}.`, flags, extra, false);
+		togglechatanswers();
 	}
 	if (command.toLowerCase() === "trivia-disablechat") {
 		if (!isStreamerAndAuthorize(user, command)) return;
@@ -3057,7 +3062,8 @@ document.getElementById("toggleusecustomquestions").addEventListener("click", to
 
 //
 document.getElementById('toggleconsolemessages').addEventListener('click', toggleTriviaconsolemessages);
-document.getElementById('togglechatanswers').addEventListener('click', toggleEntriviachatOverlay());
+document.getElementById('toggleentriviachatOverlay').addEventListener('click', toggleEntriviachatOverlay);
+document.getElementById('togglechatanswers').addEventListener('click', togglechatanswers);
 document.getElementById('toggleusedefaultquestions').addEventListener('click', toggleusedefaultquestions);
 document.getElementById('toggleusecustomquestions').addEventListener('click', toggleusecustomquestions);
 
