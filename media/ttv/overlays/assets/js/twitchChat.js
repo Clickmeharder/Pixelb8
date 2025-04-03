@@ -263,7 +263,7 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
-    const input = document.querySelector("#entriviacontrolBox input[type='text']");
+    const input = document.querySelector("#comfycontrolBox input[type='text']");
 
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
@@ -305,7 +305,7 @@ function connectStreamer() {
 }
 function disconnectBot() {
 	const button = document.getElementById("streamersButt");
-	const input = document.querySelector("#entriviacontrolBox input[type='text']");
+	const input = document.querySelector("#comfycontrolBox input[type='text']");
 	button.style.display = "block";
 	input.style.display = "block";
     ComfyJS.Disconnect();
