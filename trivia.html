@@ -2213,11 +2213,11 @@ function toggleusecustomquestions() {
     updateIndicatorLights();
 }
 function toggleEntriviachatOverlay() {
-    entriviachatOverlay = entriviachatOverlay === "on" ? "off" : "on";
+	entriviachatOverlay = !entriviachatOverlay;
 	updateSingleSetting("entriviachatOverlay", entriviachatOverlay);
-    console.log(`Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
-	displayConsoleMessage("system", `Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
 	updateIndicatorLights();
+	console.log(`Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
+	displayConsoleMessage("system", `Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
 }
 function updateSingleSetting(settingKey, newValue) {
     let savedSettings = JSON.parse(localStorage.getItem("triviaClassicSettings")) || {};
@@ -2232,7 +2232,11 @@ function saveSettings() {
         timebetweenRounds,
         questionsPerRound,
         usedefaultquestions,
-        usecustomquestions
+        usecustomquestions,
+		consolemessages,
+		entriviachatOverlay,
+		chatanswers,
+		audioSetting
     };
     localStorage.setItem("triviaClassicSettings", JSON.stringify(triviaClassicSettings));
 }
@@ -2253,7 +2257,10 @@ function resetSettings() {
     questionsPerRound = 1;
     usedefaultquestions = true;
     usecustomquestions = true;
-
+	consolemessages = false;
+	entriviachatOverlay = false;
+	chatanswers = false;
+	audioSetting = true;
     // Clear saved settings
     localStorage.removeItem("triviaClassicSettings");
 
@@ -2262,10 +2269,6 @@ function resetSettings() {
     document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
     document.getElementById("timeBetweenRounds").value = timebetweenRounds;
     document.getElementById("questionsPerRound").value = questionsPerRound;
-
-    // Update toggles
-    document.getElementById("useDefaultQuestions").checked = usedefaultquestions;
-    document.getElementById("useCustomQuestions").checked = usecustomquestions;
 
     displayTriviaMessage("!!", "Entrivia Settings Reset to default.", {}, {});
 }
