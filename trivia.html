@@ -2839,7 +2839,7 @@ function disconnectBot() {
 }
 
 
-
+// Attach event listeners
 // Button event listener: first endTrivia, then setStreamer
 document.getElementById("streamersButt").addEventListener("click", function() {
     if (triviaGameState === "started") {
@@ -2850,26 +2850,18 @@ document.getElementById("streamersButt").addEventListener("click", function() {
 	console.log("attempting to Connect to:" + newStreamer);
     setStreamer(newStreamer); // Then, set the new streamer
 });
-// Button event listener: first endTrivia, then setStreamer
+// start game button
 document.getElementById("startGame").addEventListener("click", function() {
     if (triviaGameState === null) {
 		startTrivia(); // Only start trivia if it's not running 
     }
 });
-// Button event listener: canceL AND reset game
+// CanceL/terminate and reset game
 document.getElementById("cancelGame").addEventListener("click", function() {
     if (triviaGameState === "started") {
         endTrivia(); // Only end trivia if it's running
     }
 });
-// Attach event listeners
-document.getElementById("changeSettings").addEventListener("click", updateSettings);
-document.getElementById("resetSettings").addEventListener("click", resetSettings);
-
-document.getElementById("toggleDefaultQuestions").addEventListener("click", toggleDefaultQuestions);
-document.getElementById("toggleCustomQuestions").addEventListener("click", toggleCustomQuestions);
-
-// Add event listener to the button to add custom questions
 document.getElementById('submitQuestionBtn').addEventListener('click', function() {
     // Get the values from the form inputs
     const round = document.getElementById('round').value;
@@ -2883,6 +2875,14 @@ document.getElementById('submitQuestionBtn').addEventListener('click', function(
         return;
     }
 
+//change and reset settings buttons
+document.getElementById("changeSettings").addEventListener("click", updateSettings);
+document.getElementById("resetSettings").addEventListener("click", resetSettings);
+//toggle inclusion of either default or custom questions
+document.getElementById("toggleDefaultQuestions").addEventListener("click", toggleDefaultQuestions);
+document.getElementById("toggleCustomQuestions").addEventListener("click", toggleCustomQuestions);
+// Add event listener to the button to add custom questions
+
     // Call the function to add the question
     addCustomTriviaQuestion(round, questionText, correctAnswer, category);
 
@@ -2890,19 +2890,18 @@ document.getElementById('submitQuestionBtn').addEventListener('click', function(
     document.getElementById('questionText').value = '';
     document.getElementById('correctAnswer').value = '';
 });
+// Event listener for delete button
+document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCustomQuestion);
+// Event listener for dropdown change to update the answer display
+document.getElementById('questionList').addEventListener('change', updateAnswerDisplay);
+
 // Auto-reconnect on page load
 window.onload = function () {
 	connectStreamer();
 	loadCustomQuestions();
 	updateSettingsDisplay();
 };
-// Event listener for delete button
-document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCustomQuestion);
-// Event listener for dropdown change to update the answer display
-document.getElementById('questionList').addEventListener('change', updateAnswerDisplay);
 
-
-// Load custom questions when the page loads
 // window.addEventListener('load', loadCustomQuestions);
 </script>
 </body>
