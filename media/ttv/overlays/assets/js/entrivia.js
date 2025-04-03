@@ -2049,7 +2049,7 @@ function toggleAudioSetting() {
 // Attach event listeners
 //enentrivia-toggle button
 document.getElementById("entrivia-toggle").addEventListener("click", function () {
-	let container = document.getElementById("comfycontrolContainer");
+	let container = document.getElementById("entriviacontrolBox");
 	container.classList.toggle("active");
 });
 // start game button
