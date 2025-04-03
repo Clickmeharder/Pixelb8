@@ -38,7 +38,7 @@
 			position: fixed;
 			top: 10px;
 			left: 10px;
-			width: 290px;
+			width: 348px;
 			padding: 10px;
 			background: linear-gradient(135deg, #001f1fe8, #004040eb);
 			color: white;
@@ -481,24 +481,27 @@
 			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 		}
 
-		#commandList h2 {
+		#usercommandList h2 {
 			color: #e54513;
 			text-align: center;
 			border: 3px ridge #273a4c;
 			margin: 0;
 		}
 
-		#commandList {
+		#usercommandList {
 		  list-style-type: none;
 		  padding: 0;
 		}
 
-		#commandList li {
-		  margin: 4px 0;
+		#usercommandList li {
+			color: #8d8888;
+			padding: 2px;
+			border: 2px ridge #393636;
+			margin: 4px 0;
 		}
 
-		#commandList li strong {
-		  color: #333;
+		#usercommandList li strong {
+		  color: #e09d09f7;
 		  font-weight: bold;
 		}
     </style>
@@ -703,8 +706,12 @@
 				</div>
 			</div>
 			<div id="commandListContainer">
-			  <h2>List of Commands</h2>
-			  <ul id="commandList">
+			  <h3>Entrivia Command List</h3>
+			  <h2>User Commands</h2>
+			  <ul id="usercommandList">
+			  </ul>
+			  <h2>Broadcaster Commands</h2>
+			  <ul id="broadcastercommandList">
 			  </ul>
 			</div>
 
@@ -2583,8 +2590,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 };
 
-document.addEventListener("DOMContentLoaded", function() {
-  const commands = [
+document.addEventListener("DOMContentLoaded", function() { 
+  const usercommands = [
+    { command: "!a / !answer", description: "Allows users to answer a trivia question. (User command)" },
+  ];
+
+  const streamercommands = [ 
     { command: "!a / !answer", description: "Allows users to answer a trivia question. (User command)" },
     { command: "!trivia-play", description: "Starts the trivia game. (Streamer command)" },
     { command: "!trivia-askrandom", description: "Asks a random trivia question. (Streamer command)" },
@@ -2608,15 +2619,24 @@ document.addEventListener("DOMContentLoaded", function() {
     { command: "!trivia-customquestions", description: "Toggles custom trivia questions. (Streamer command)" }
   ];
 
-  const commandListElement = document.getElementById("commandList");
+  // Get the respective <ul> elements
+  const userCommandList = document.getElementById("usercommandList");
+  const broadcasterCommandList = document.getElementById("broadcastercommandList");
 
-  commands.forEach(function(command) {
+  // Add user commands to the user command list
+  usercommands.forEach(function(command) {
     const li = document.createElement("li");
     li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
-    commandListElement.appendChild(li);
+    userCommandList.appendChild(li);
+  });
+
+  // Add broadcaster commands to the broadcaster command list
+  streamercommands.forEach(function(command) {
+    const li = document.createElement("li");
+    li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
+    broadcasterCommandList.appendChild(li);
   });
 });
-
 <!-- ComfyJS.onChat = (user, message, color, flags, extra) => { -->
     <!-- console.log( "UserColor:", extra.userColor, "User:", user, "Message:", message); -->
     <!-- // Call the displayChatMessage function and pass flags and extra for userColor and badges -->
