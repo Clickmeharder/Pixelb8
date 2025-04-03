@@ -2695,31 +2695,31 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
 function updateCommandlist() { 
   const usercommands = [
-    { command: "!a / !answer", description: "Allows users to answer a trivia question.", usage: "!a / !answer" },
+	{ command: "!a / !answer", description: "Allows users to answer a trivia question.", usage: "!a / !answer" },
   ];
 
   const streamercommands = [ 
-    { command: "!a / !answer", description: "Allows users to answer a trivia question.", usage: "!a / !answer" },
-    { command: "!trivia-play", description: "Starts the trivia game.", usage: "!trivia-play" },
-    { command: "!trivia-askrandom", description: "Asks a random trivia question.", usage: "!trivia-askrandom" },
-    { command: "!trivia-ask", description: "Asks a trivia question from a specific round and category.", usage: "!trivia-ask [round] | [category]" },
-    { command: "!trivia-lastaskwinner", description: "Displays the last trivia question's winner.", usage: "!trivia-lastaskwinner" },
-    { command: "!trivia-lastwinners", description: "Displays the list of last trivia winners.", usage: "!trivia-lastwinners" },
-    { command: "!trivia-history", description: "Displays trivia history.", usage: "!trivia-history" },
-    { command: "!chatanswers", description: "Toggles the chat answers on/off.", usage: "!chatanswers" },
-    { command: "!trivia-disablechat", description: "Disables trivia chat overlay.", usage: "!trivia-disablechat" },
-    { command: "!trivia-audio", description: "Toggles trivia audio settings.", usage: "!trivia-audio" },
-    { command: "!toggletriviaboard", description: "Toggles the trivia board visibility.", usage: "!toggletriviaboard" },
-    { command: "!togglequestions", description: "Toggles the visibility of the question wrapper.", usage: "!togglequestions" },
-    { command: "!toggletrivia", description: "Toggles the visibility of the trivia wrapper.", usage: "!toggletrivia" },
-    { command: "!togglechat", description: "Toggles the visibility of the Twitch chat container.", usage: "!togglechat" },
-    { command: "!trivia-addquestion", description: "Allows the streamer to add a custom trivia question.", usage: "!trivia-addquestion easy/hard | economy | what does ped stand for | project entropia dollar" },
-    { command: "!trivia-answertime", description: "Updates the answer time limit.", usage: "!trivia-answertime [time]" },
-    { command: "!trivia-questiondelay", description: "Updates the question delay between questions.", usage: "!trivia-questiondelay [delay]" },
-    { command: "!trivia-rounddelay", description: "Updates the delay between rounds.", usage: "!trivia-rounddelay [delay]" },
-    { command: "!trivia-questioncap", description: "Sets a cap for the number of questions per round.", usage: "!trivia-questioncap [cap]" },
-    { command: "!trivia-defaultquestions", description: "Toggles default trivia questions.", usage: "!trivia-defaultquestions" },
-    { command: "!trivia-customquestions", description: "Toggles custom trivia questions.", usage: "!trivia-customquestions" }
+	{ command: "!a / !answer", description: "Allows users to answer a trivia question.", usage: "!a / !answer" },
+	{ command: "!trivia-play", description: "Starts the trivia game.", usage: "!trivia-play" },
+	{ command: "!trivia-askrandom", description: "Asks a random trivia question.", usage: "!trivia-askrandom" },
+	{ command: "!trivia-ask", description: "Asks a trivia question from a specific round and category.", usage: "!trivia-ask [round] | [category]" },
+	{ command: "!trivia-lastaskwinner", description: "Displays the last trivia question's winner.", usage: "!trivia-lastaskwinner" },
+	{ command: "!trivia-lastwinners", description: "Displays the list of last trivia winners.", usage: "!trivia-lastwinners" },
+	{ command: "!trivia-history", description: "Displays trivia history.", usage: "!trivia-history" },
+	{ command: "!chatanswers", description: "Toggles the chat answers on/off.", usage: "!chatanswers" },
+	{ command: "!trivia-disablechat", description: "Disables trivia chat overlay.", usage: "!trivia-disablechat" },
+	{ command: "!trivia-audio", description: "Toggles trivia audio settings.", usage: "!trivia-audio" },
+	{ command: "!toggletriviaboard", description: "Toggles the trivia board visibility.", usage: "!toggletriviaboard" },
+	{ command: "!togglequestions", description: "Toggles the visibility of the question wrapper.", usage: "!togglequestions" },
+	{ command: "!toggletrivia", description: "Toggles the visibility of the trivia wrapper.", usage: "!toggletrivia" },
+	{ command: "!togglechat", description: "Toggles the visibility of the Twitch chat container.", usage: "!togglechat" },
+	{ command: "!trivia-addquestion", description: "Allows the streamer to add a custom trivia question.", usage: "!trivia-addquestion easy/hard | economy | what does ped stand for | project entropia dollar" },
+	{ command: "!trivia-answertime", description: "Updates the answer time limit.", usage: "!trivia-answertime [time]" },
+	{ command: "!trivia-questiondelay", description: "Updates the question delay between questions.", usage: "!trivia-questiondelay [delay]" },
+	{ command: "!trivia-rounddelay", description: "Updates the delay between rounds.", usage: "!trivia-rounddelay [delay]" },
+	{ command: "!trivia-questioncap", description: "Sets a cap for the number of questions per round.", usage: "!trivia-questioncap [cap]" },
+	{ command: "!trivia-defaultquestions", description: "Toggles default trivia questions.", usage: "!trivia-defaultquestions" },
+	{ command: "!trivia-customquestions", description: "Toggles custom trivia questions.", usage: "!trivia-customquestions" }
   ];
 
   // Get the respective <ul> elements
@@ -2728,47 +2728,46 @@ function updateCommandlist() {
 
   // Add user commands to the user command list
   usercommands.forEach(function(command) {
-    const li = document.createElement("li");
+	const li = document.createElement("li");
 
-    // Create the usage span
-    const usageSpan = document.createElement("span");
-    usageSpan.classList.add("command-info");
-    usageSpan.setAttribute("title", command.usage);
-    usageSpan.textContent = "❓";
+	// Create the usage span
+	const usageSpan = document.createElement("span");
+	usageSpan.classList.add("command-info");
+	usageSpan.setAttribute("title", command.usage);
+	usageSpan.textContent = "❓";
 
-    // Set command and description
-    li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
+	// Set command and description
+	li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
 
-    // Append the usage span to the li
-    li.appendChild(usageSpan);
+	// Append the usage span to the li
+	li.appendChild(usageSpan);
 
-    // Append to the user command list
-    userCommandList.appendChild(li);
+	// Append to the user command list
+	userCommandList.appendChild(li);
   });
 
   // Add broadcaster commands to the broadcaster command list
   streamercommands.forEach(function(command) {
-    const li = document.createElement("li");
+	const li = document.createElement("li");
 
-    // Create the usage span
-    const usageSpan = document.createElement("span");
+	// Create the usage span
+	const usageSpan = document.createElement("span");
 	const usageText = "Usage: " + command.usage;
-    usageSpan.classList.add("command-info");
+	usageSpan.classList.add("command-info");
 	
-    usageSpan.setAttribute("title", usageText);
-    usageSpan.textContent = "❓";
+	usageSpan.setAttribute("title", usageText);
+	usageSpan.textContent = "❓";
 
-    // Set command and description
-    li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
+	// Set command and description
+	li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
 
-    // Append the usage span to the li
-    li.appendChild(usageSpan);
+	// Append the usage span to the li
+	li.appendChild(usageSpan);
 
-    // Append to the broadcaster command list
-    broadcasterCommandList.appendChild(li);
+	// Append to the broadcaster command list
+	broadcasterCommandList.appendChild(li);
   });
-});
-
+}
 //!!!!!!!!!!!!!!!!!!!!!!!
 // Our Comfy Connection
 //!!!!!!!!!!!!!!!!!!!!!!!
