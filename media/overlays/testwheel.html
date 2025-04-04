@@ -354,7 +354,7 @@
 		canvas.width = innerWidth;
 		canvas.height = innerHeight;
 		let cx = innerWidth / 2, cy = innerHeight / 2;
-		let ctx = canvas.getContext("3d");
+		let ctx = canvas.getContext("2d");
 
 		// Get the selected section based on the current angle
 		let selected = (Math.floor((-0.2 - angle) * sections.length / (2 * Math.PI)) % sections.length);
