@@ -459,9 +459,7 @@ removeButton.addEventListener("click", () => {
 	}
 });
 
-
-//save wheel sections button
-document.getElementById("save-sectionsButt").addEventListener("click", () => {
+function savewheelSections(){
 	const name = document.getElementById("savewheelsections").value.trim();
 	if (!name) return alert("Please enter a name for your wheel.");
 
@@ -469,7 +467,12 @@ document.getElementById("save-sectionsButt").addEventListener("click", () => {
 	wheels[name] = sections.slice(); // save a copy
 	saveWheelsToStorage(wheels);
 	updateLoadDropdown();
-	alert(`Wheel "${name}" saved!`);
+	console.log(`Wheel "${name}" saved!`);
+}
+//save wheel sections button
+document.getElementById("save-sectionsButt").addEventListener("click", () => {
+	console.log(`Wheel "${name}" saved!`);
+	savewheelSections()
 });
 //load wheel sections button
 document.getElementById("load-sectionsButt").addEventListener("click", () => {
