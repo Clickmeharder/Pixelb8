@@ -697,7 +697,9 @@
 	<button id="entrivia-toggle">Ｅ</button>
 	<!-- entrivia Control Container -->
 	<div id="entriviacontrolBox">
-		<span id="entrivia-settingsheader">entrivia</span>
+		<div id="entrivia-settings-headergroup">
+			<span id="entrivia-settingsheader">entrivia</span>
+		</div>
 		<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
 		<button id="streamersButt">Connect</button>
 		<button id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
@@ -708,9 +710,7 @@
 					<button id="startGame">Start Game</button>
 				</div>
 			</div>
-			<div id="entrivia-settings-headergroup">
 				<h3>entrivia Settings</h3>
-			</div>
 			<div id="entrivia-settings-toggles">
 				<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="usedefaultquestions"></div>
 				<div class="twitchcmd-info" data-option="!entrivia-defaultquestions"></div>
