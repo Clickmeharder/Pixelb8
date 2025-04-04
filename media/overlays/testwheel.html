@@ -301,14 +301,14 @@
 					ctx.arc(cx, cy, r, a0, a1, false);
 					ctx.fillStyle = colors[i % 2];
 					ctx.fill();
-					ctx.strokeStyle = "#fff";
+					ctx.strokeStyle = "#0ea4a4e8";
 					ctx.lineWidth = 1;
 					ctx.stroke();
 
 					// Draw the text
 					ctx.save();
-					ctx.fillStyle = "#FFF";
-					ctx.font = "bold " + r / sections.length * 0.4 + "px sans-serif";
+					ctx.fillStyle = "#ff8900f5";
+					ctx.font = "bold " + r / sections.length * 0.6 + "px sans-serif";
 					ctx.textAlign = "center";
 					ctx.textBaseline = "middle";
 					ctx.translate(cx, cy);
@@ -334,7 +334,7 @@
 			
 			ctx.fillStyle = "#00ff00e0";
 			ctx.strokeStyle = "#998309ed";
-			ctx.lineWidth = 10;
+			ctx.lineWidth = 8;
 			ctx.beginPath();
 			ctx.arc(cx, cy, r / 3.5, 0, 2 * Math.PI, false);
 			ctx.fill();
