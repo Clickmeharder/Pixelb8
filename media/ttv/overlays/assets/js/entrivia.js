@@ -1,12 +1,12 @@
 //!!!!!!!!!!!!!!!!!!!!!!!!!
-// Trivia Initialization  
+// entrivia Initialization  
 //!!!!!!!!!!!!!!!!!!!!!!!!
-let TriviaSingleAskLastWinner = null;  // Store the last winner's username
-let TriviaSingleAskWinners = [];  // Store the list of winners
-let lastTriviaClassicWinners = [];
-let TriviaClassicHistory = [];
+let entriviaSingleAskLastWinner = null;  // Store the last winner's username
+let entriviaSingleAskWinners = [];  // Store the list of winners
+let lastentriviaClassicWinners = [];
+let entriviaClassicHistory = [];
 let userColors = {}; // Store user colors
-let triviaGameState = null;
+let entriviaGameState = null;
 let userStats = {}; // This will store the count of correct answers and first answers
 let userOverallStats = {}; // This will store the users lifetime stats ie: number of games played. number of games won. total correct answers total first correct answers
 let userScores = {};
@@ -19,9 +19,9 @@ let hideQuestionTimer;
 let questionTimer, countdownTimer;
 let totalRounds = 2;
 let round = 1;
-let triviaQuestions = { round1: [], round2: [] };
+let entriviaQuestions = { round1: [], round2: [] };
 //_______________________________________________
-// TRIVIA OPTIONS
+// entrivia OPTIONS
 //game options
 let audioSetting = "on";
 let entriviachatOverlay = "off";
@@ -72,7 +72,7 @@ function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = f
         chatContainer.removeChild(chatContainer.firstChild);
     }
 }
-function displayTriviaMessage(user, message, flags = {}, extra = {}, isCorrect = false) {
+function displayentriviaMessage(user, message, flags = {}, extra = {}, isCorrect = false) {
     const chatContainer = document.getElementById("entriviaMessagebox");
     // Create a new chat message element
     const entriviaMessage = document.createElement("div");
@@ -144,14 +144,14 @@ function toggleconsolemessages() {
 //________________________________/
 
 //-----------------------------
-//--------- TRIVIA -----------|
-//trivia game code starts here
+//--------- entrivia -----------|
+//entrivia game code starts here
 
 //option to allow users to do /entrivia me
 //(ask the user a random question)
 
 //Example Questions
-/* <!-- const triviaQuestions = [ -->
+/* <!-- const entriviaQuestions = [ -->
 <!-- { question: "Converting 100 shrapnel results in how much universal ammo?", answer: "101" }, -->
 <!-- { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" }, -->
 <!-- { question: "What is 5 + 3?", answer: "8" }, -->
@@ -172,20 +172,20 @@ function toggleconsolemessages() {
         <!-- ]; --> */
 
 //Example add Question Command
-//!trivia-addcustomquestion round1 | What number is on the side of a Sleipnir mk1 (C,L)? | 88
+//!entrivia-addcustomquestion round1 | What number is on the side of a Sleipnir mk1 (C,L)? | 88
 //----------------------------
 
-function fetchTriviaQuestions() {
+function fetchentriviaQuestions() {
     return new Promise((resolve, reject) => {
         const questionsUrl = 'questions.json';
         let defaultQuestions = { round1: {}, round2: {} };
-        let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
+        let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
 
         let fetchDefaultQuestions = usedefaultquestions
             ? fetch(questionsUrl)
                 .then(response => response.ok ? response.json() : Promise.reject('Failed to load'))
                 .then(data => {
-                    if (!data.round1 || !data.round2) throw new Error('Invalid trivia data');
+                    if (!data.round1 || !data.round2) throw new Error('Invalid entrivia data');
                     defaultQuestions = data;
                 })
                 .catch(error => console.error('Error fetching questions:', error))
@@ -211,16 +211,16 @@ function fetchTriviaQuestions() {
                 mergeQuestions(finalQuestions.round2, customQuestions.round2);
             }
 
-            triviaQuestions = finalQuestions;
+            entriviaQuestions = finalQuestions;
 
-            console.log("📜 Trivia questions loaded:", triviaQuestions);
-            resolve(triviaQuestions);
+            console.log("📜 entrivia questions loaded:", entriviaQuestions);
+            resolve(entriviaQuestions);
         });
     });
 }
 
-function addCustomTriviaQuestion(round, questionText, correctAnswer, category) { 
-    let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
+function addCustomentriviaQuestion(round, questionText, correctAnswer, category) { 
+    let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
     if (round !== "round1" && round !== "round2") {
         console.error("Invalid round. Use 'round1' or 'round2'.");
         return;
@@ -235,13 +235,13 @@ function addCustomTriviaQuestion(round, questionText, correctAnswer, category) {
         category: category
     };
     customQuestions[round][category].push(newQuestion);
-    localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
+    localStorage.setItem("customentriviaQuestions", JSON.stringify(customQuestions));
     loadCustomQuestions();
     updateAnswerDisplay();
     console.log(`✅ Added new question to ${round} [${category}]:`, newQuestion);
 }
 function loadCustomQuestions() {
-    const customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
+    const customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
     const dropdown = document.getElementById('questionList');
 
     // Log the data for debugging
@@ -300,7 +300,7 @@ function updateAnswerDisplay() {
     // Split the option value to get round, category, and index
     const [round, category, index] = selectedOption.split('-');
 
-    let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
+    let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
 
     if (customQuestions[round] && customQuestions[round][category]) {
         const question = customQuestions[round][category][index];
@@ -321,7 +321,7 @@ function deleteCustomQuestion() {
 
     const [round, category, index] = selectedValue.split("-");
 
-    let customQuestions = JSON.parse(localStorage.getItem("customTriviaQuestions")) || { round1: {}, round2: {} };
+    let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
 
     // Ensure the category exists in the selected round
     if (customQuestions[round] && customQuestions[round][category] && customQuestions[round][category][index]) {
@@ -335,7 +335,7 @@ function deleteCustomQuestion() {
                 delete customQuestions[round][category];
             }
             // Save the updated custom questions to localStorage
-            localStorage.setItem("customTriviaQuestions", JSON.stringify(customQuestions));
+            localStorage.setItem("customentriviaQuestions", JSON.stringify(customQuestions));
 
             console.log('Question deleted successfully!');
             loadCustomQuestions();  // Reload the dropdown
@@ -347,46 +347,46 @@ function deleteCustomQuestion() {
 }
 
 function clearAllCustomQuestions() {
-    localStorage.removeItem("customTriviaQuestions");
-    console.log("✅ All custom trivia questions have been deleted.");
+    localStorage.removeItem("customentriviaQuestions");
+    console.log("✅ All custom entrivia questions have been deleted.");
 }
 // Clear existing questions
 // uncomment these two commands to clear all custom questions:
 //clearAllCustomQuestions();
-// Now add a new trivia question (example usage):
-//addCustomTriviaQuestion("round1", "What is the smallest Skildek support weapon?", "lancehead", "hunting");
+// Now add a new entrivia question (example usage):
+//addCustomentriviaQuestion("round1", "What is the smallest Skildek support weapon?", "lancehead", "hunting");
 //_____________________________________
 //-------------------------------------
 
 //
 //-----------------------------
 //      game history
-// load last trivia classic winners and trivia classic game history
-function loadTriviaHistory() {
-    const savedHistory = localStorage.getItem("TriviaClassicHistory");
-    const savedLastWinners = localStorage.getItem("lastTriviaClassicWinners");
+// load last entrivia classic winners and entrivia classic game history
+function loadentriviaHistory() {
+    const savedHistory = localStorage.getItem("entriviaClassicHistory");
+    const savedLastWinners = localStorage.getItem("lastentriviaClassicWinners");
 
-    console.log("Loaded TriviaClassicHistory from localStorage:", savedHistory);
-    console.log("Loaded lastTriviaClassicWinners from localStorage:", savedLastWinners);
+    console.log("Loaded entriviaClassicHistory from localStorage:", savedHistory);
+    console.log("Loaded lastentriviaClassicWinners from localStorage:", savedLastWinners);
 
     if (savedHistory) {
-        TriviaClassicHistory = JSON.parse(savedHistory);
-        console.log("Parsed TriviaClassicHistory:", TriviaClassicHistory);
+        entriviaClassicHistory = JSON.parse(savedHistory);
+        console.log("Parsed entriviaClassicHistory:", entriviaClassicHistory);
     }
 
     if (savedLastWinners) {
-        lastTriviaClassicWinners = JSON.parse(savedLastWinners);
-        console.log("Parsed lastTriviaClassicWinners:", lastTriviaClassicWinners);
+        lastentriviaClassicWinners = JSON.parse(savedLastWinners);
+        console.log("Parsed lastentriviaClassicWinners:", lastentriviaClassicWinners);
     }
 }
-// update last trivia classic winners and trivia classic game history
-function updateLastTriviaClassicWinners() {
-    lastTriviaClassicWinners = [];
+// update last entrivia classic winners and entrivia classic game history
+function updateLastentriviaClassicWinners() {
+    lastentriviaClassicWinners = [];
     const sortedUsers = Object.entries(userScores).sort((a, b) => b[1] - a[1]);
     for (let i = 0; i < 3; i++) {
         const [user, score] = sortedUsers[i] || [];
         if (user) {
-            lastTriviaClassicWinners.push({
+            lastentriviaClassicWinners.push({
                 username: user,
                 score: score,
                 firstAnswers: userStats[user]?.firstAnswers || 0,
@@ -396,13 +396,13 @@ function updateLastTriviaClassicWinners() {
             });
         }
     }
-    // Store in TriviaClassicHistory
-    TriviaClassicHistory.push([...lastTriviaClassicWinners]); 
+    // Store in entriviaClassicHistory
+    entriviaClassicHistory.push([...lastentriviaClassicWinners]); 
     // Save to local storage
-    localStorage.setItem("lastTriviaClassicWinners", JSON.stringify(lastTriviaClassicWinners));
-    localStorage.setItem("TriviaClassicHistory", JSON.stringify(TriviaClassicHistory));
+    localStorage.setItem("lastentriviaClassicWinners", JSON.stringify(lastentriviaClassicWinners));
+    localStorage.setItem("entriviaClassicHistory", JSON.stringify(entriviaClassicHistory));
 
-    console.log("Updated Last Trivia Classic Winners:", lastTriviaClassicWinners);
+    console.log("Updated Last entrivia Classic Winners:", lastentriviaClassicWinners);
 }
 //___________________________________________________
 //-------------------------------
@@ -410,26 +410,26 @@ function updateLastTriviaClassicWinners() {
 //------------------------------------------------------------
 //------------------------------------------------------------
 //show announcements with optional timer
-function showAnnouncement(message, triviaAnnouncementTime) {
+function showAnnouncement(message, entriviaAnnouncementTime) {
     return new Promise((resolve) => {
-        const announcementWrapper = document.getElementById("triviaAnnouncementWrapper");
-        const triviaAnnouncement = document.getElementById("triviaAnnouncement");
+        const announcementWrapper = document.getElementById("entriviaAnnouncementWrapper");
+        const entriviaAnnouncement = document.getElementById("entriviaAnnouncement");
         const roundStartTimer = document.getElementById("roundstarttimer");
 
         // Set the announcement message
-        triviaAnnouncement.innerText = message;
+        entriviaAnnouncement.innerText = message;
 
-        // If a triviaAnnouncementTime is provided, start the countdown
-        if (triviaAnnouncementTime !== undefined) {
+        // If a entriviaAnnouncementTime is provided, start the countdown
+        if (entriviaAnnouncementTime !== undefined) {
             roundStartTimer.style.display = "block"; // Show timer
 
             const countdownInterval = setInterval(() => {
-                roundStartTimer.innerText = `${triviaAnnouncementTime} seconds`;
+                roundStartTimer.innerText = `${entriviaAnnouncementTime} seconds`;
 
-                // Decrease triviaAnnouncementTime
-                triviaAnnouncementTime--;
+                // Decrease entriviaAnnouncementTime
+                entriviaAnnouncementTime--;
 
-                if (triviaAnnouncementTime < 0) {
+                if (entriviaAnnouncementTime < 0) {
                     clearInterval(countdownInterval);  // Stop the timer
                     roundStartTimer.style.display = "none"; // Hide timer
                     resolve(); // Resolve promise when countdown ends
@@ -446,17 +446,17 @@ function showAnnouncement(message, triviaAnnouncementTime) {
         announcementWrapper.style.display = "flex";
         announcementWrapper.style.opacity = "1";
 
-        // Fade out announcement after a set time (if no countdown) or after triviaAnnouncementTime
+        // Fade out announcement after a set time (if no countdown) or after entriviaAnnouncementTime
         setTimeout(() => {
             announcementWrapper.style.transition = "opacity 2s ease-in-out";
             announcementWrapper.style.opacity = "0";
-        }, triviaAnnouncementTime !== undefined ? triviaAnnouncementTime * 1000 : 10000); // Wait for triviaAnnouncementTime or 10 seconds
+        }, entriviaAnnouncementTime !== undefined ? entriviaAnnouncementTime * 1000 : 10000); // Wait for entriviaAnnouncementTime or 10 seconds
     });
 }
 
 function splashAnimation() {
     return new Promise((resolve) => {
-        const splash = document.getElementById("triviaSplash");
+        const splash = document.getElementById("entriviaSplash");
         const logo = document.getElementById("logoContainer");
         const splashText = document.getElementById("splashText");
 
@@ -488,44 +488,44 @@ function splashAnimation() {
         }, 3000); // Keep splash visible for 3 seconds (adjust as needed)
     });
 }
-function triviaSplash() {
+function entriviaSplash() {
     return new Promise((resolve) => {
         splashAnimation()  // Show the splash animation
             .then(() => {
                 return showAnnouncement("Round starts in:", 30);  // Show announcement with a 30-second countdown
             })
             .then(() => {
-                showTrivia();  // Show trivia after the countdown ends
-                resolve();  // Resolve the promise after trivia starts
+                showentrivia();  // Show entrivia after the countdown ends
+                resolve();  // Resolve the promise after entrivia starts
             });
     });
 }
-function triviaNosplash() {
+function entriviaNosplash() {
     return new Promise((resolve) => {
         showAnnouncement("Round starts in:", 30)  // Show announcement with a 30-second countdown
             .then(() => {
-                showTrivia();  // Show trivia after the countdown ends
-                resolve();  // Resolve the promise after trivia starts
+                showentrivia();  // Show entrivia after the countdown ends
+                resolve();  // Resolve the promise after entrivia starts
             });
     });
 }
 function getRandomQuestion() {
     let currentRound = round === 1 ? "round1" : "round2";
 
-    // Ensure triviaQuestions[currentRound] exists and is an object
-    if (!triviaQuestions[currentRound] || typeof triviaQuestions[currentRound] !== "object") {
+    // Ensure entriviaQuestions[currentRound] exists and is an object
+    if (!entriviaQuestions[currentRound] || typeof entriviaQuestions[currentRound] !== "object") {
         console.error(`❌ No questions found for ${currentRound}`);
         return null;
     }
 
     // Flatten all category questions into a single array
-    let availableQuestions = Object.values(triviaQuestions[currentRound])
+    let availableQuestions = Object.values(entriviaQuestions[currentRound])
         .flat()
         .filter(q => !usedQuestions.includes(q)); // Filter out used questions
 
     if (availableQuestions.length === 0) {
         usedQuestions = []; // Reset when all questions are used
-        availableQuestions = Object.values(triviaQuestions[currentRound]).flat(); // Reload all questions
+        availableQuestions = Object.values(entriviaQuestions[currentRound]).flat(); // Reload all questions
     }
 
     if (availableQuestions.length === 0) {
@@ -546,25 +546,25 @@ function getRandomQuestionFromCategory(round, category) {
         return null;
     }
 
-    // Ensure category exists in triviaQuestions[currentRound]
-    if (!triviaQuestions[currentRound] || !triviaQuestions[currentRound][category]) {
+    // Ensure category exists in entriviaQuestions[currentRound]
+    if (!entriviaQuestions[currentRound] || !entriviaQuestions[currentRound][category]) {
         console.error(`❌ No questions found for ${category} in ${currentRound}.`);
         return null;
     }
 
-    // Ensure triviaQuestions[currentRound][category] is an array
-    if (!Array.isArray(triviaQuestions[currentRound][category])) {
+    // Ensure entriviaQuestions[currentRound][category] is an array
+    if (!Array.isArray(entriviaQuestions[currentRound][category])) {
         console.error(`❌ The category ${category} in ${currentRound} does not contain an array of questions.`);
         return null;
     }
 
     // Filter out used questions
-    let availableQuestions = triviaQuestions[currentRound][category].filter(q => !usedQuestions.includes(q));
+    let availableQuestions = entriviaQuestions[currentRound][category].filter(q => !usedQuestions.includes(q));
 
     if (availableQuestions.length === 0) {
         // Reset if all questions have been used
         usedQuestions = [];
-        availableQuestions = triviaQuestions[currentRound][category];
+        availableQuestions = entriviaQuestions[currentRound][category];
     }
 
     if (availableQuestions.length === 0) {
@@ -600,8 +600,8 @@ function nextQuestion() {
         }
     }, 1000);
 }
-//!!!!! fn currently not used:startTriviaRound()
-function startTriviaRound() {
+//!!!!! fn currently not used:startentriviaRound()
+function startentriviaRound() {
     console.log('Round:', round);
     console.log('Total Rounds:', totalRounds);
 
@@ -615,24 +615,24 @@ function startTriviaRound() {
     setTimeout(nextQuestion, 1000);
 }
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-function handlephaseTrivia() {
+function handlephaseentrivia() {
     <!-- if (questionsAsked === 0) {  -->
-        <!-- startTriviaRound(); -->
+        <!-- startentriviaRound(); -->
         <!-- return; -->
     <!-- } -->
     if (questionsAsked >= questionsPerRound) {
         if (round >= totalRounds) {
-            triviaGameFinished(); // If all rounds are completed, finish the game
+            entriviaGameFinished(); // If all rounds are completed, finish the game
             return;
         } else {
-            endTriviaRound(); // If the round is completed but not the game, end the round
+            endentriviaRound(); // If the round is completed but not the game, end the round
             return;
         }
     }
 
     nextQuestion(); // Otherwise, just move to the next question
 }
-function endTriviaRound() {
+function endentriviaRound() {
 	console.log('Round:', round);
 	console.log('Total Rounds:', totalRounds);
     document.getElementById("question").textContent = `Round ${round} Over!`;
@@ -640,7 +640,7 @@ function endTriviaRound() {
     toggleElement("questionWrapper", "fade");
     document.getElementById("timer").textContent = "";
     document.getElementById("timeuntil-nextQ").textContent = "";
-	playSound("triviaroundover");
+	playSound("entriviaroundover");
     // Store round stats in overall stats
     updateUserOverallStats();
     // Prepare for the next round
@@ -657,7 +657,7 @@ function startCountdown() {
 		nextquestionTimer(countdown);
 		if (countdown <= 0) {
 			clearInterval(countdownTimer);
-			handlephaseTrivia();
+			handlephaseentrivia();
 		}
 	}, 1000);
 }
@@ -666,14 +666,14 @@ function endQuestion() {
     document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
 	document.getElementById("timer").textContent = "";
 	activeQuestion = null;
-	playSound("triviatimesup");
+	playSound("entriviatimesup");
     hideQuestionTimer = setTimeout(() => {
         document.getElementById("questionWrapper").style.visibility = "hidden";
-        document.getElementById("triviaboard").style.visibility = "visible";
+        document.getElementById("entriviaboard").style.visibility = "visible";
         // Check if we've asked the maximum number of questions for the round
         if (questionsAsked >= questionsPerRound) {
-            // End the trivia round if we've reached the limit
-            handlephaseTrivia();
+            // End the entrivia round if we've reached the limit
+            handlephaseentrivia();
             return;
         } else {
             // Otherwise, start the countdown for the next question
@@ -707,16 +707,16 @@ function checkAnswer(user, message) {
     if (singleActiveAsk !== null) {
         if (!firstAnswerUser) {
             firstAnswerUser = user;
-            TriviaSingleAskLastWinner = user;  // Store the last winner
-            TriviaSingleAskWinners.push(user);  // Add to winners list
-            playSound("triviafirstcorrect");
+            entriviaSingleAskLastWinner = user;  // Store the last winner
+            entriviaSingleAskWinners.push(user);  // Add to winners list
+            playSound("entriviafirstcorrect");
             return true; // First correct answer counts
         }
-        playSound("triviawrong"); // Incorrect answer sound, but no tracking
+        playSound("entriviawrong"); // Incorrect answer sound, but no tracking
         return false;
     }
 
-    // Normal trivia logic (multiple correct answers allowed)
+    // Normal entrivia logic (multiple correct answers allowed)
     if (userAnswer === correctAnswer) {
         userStats[user].correctAnswers++;
         answeredUsers.add(user);
@@ -725,19 +725,19 @@ function checkAnswer(user, message) {
             firstAnswerUser = user;
             userStats[user].firstAnswers++;
             userScores[user] = (userScores[user] || 0) + 3;  // First answer gets 3 points
-            playSound("triviafirstcorrect");
+            playSound("entriviafirstcorrect");
         } else {
             userScores[user] = (userScores[user] || 0) + 1;  // Others get 1 point
-            playSound("triviacorrect");
+            playSound("entriviacorrect");
         }
 
-        updateTriviaboard();
+        updateentriviaboard();
         return true;
     } else {
 		// Normal incorrect answer logic
 		userStats[user].incorrectAnswers++;  
 		userScores[user] = (userScores[user] || 0) - 1;
-		playSound("triviawrong");
+		playSound("entriviawrong");
 
 		return false;
 	}
@@ -748,9 +748,9 @@ function checkAnswer(user, message) {
 function updateQuestionCounter() {
 	document.getElementById("question-counter").textContent = `Question: ${questionsAsked} / ${questionsPerRound}`;
 }
-function updateTriviaboard() {
-    const triviaboardElement = document.getElementById("triviaboard");
-    triviaboardElement.innerHTML = "<p>Entrivia</p>";
+function updateentriviaboard() {
+    const entriviaboardElement = document.getElementById("entriviaboard");
+    entriviaboardElement.innerHTML = "<p>entrivia</p>";
 
     Object.entries(userScores)
         .sort((a, b) => b[1] - a[1]) // Sort by score
@@ -760,7 +760,7 @@ function updateTriviaboard() {
 			const incorrectAnswers = userStats[user] ? userStats[user].incorrectAnswers : 0;
             const firstAnswers = userStats[user] ? userStats[user].firstAnswers : 0;
             li.textContent = `${user}: ${score} pts |🎯 ${firstAnswers} |✅ ${correctAnswers} |❌ ${incorrectAnswers}`;
-            triviaboardElement.appendChild(li);
+            entriviaboardElement.appendChild(li);
         });
 }
 function updateUserOverallStats() {
@@ -872,20 +872,20 @@ function updatePodium() {
         }
     }
 
-    updateLastTriviaClassicWinners();
+    updateLastentriviaClassicWinners();
 	userStats = {}; // Reset stats for the new round
 }
-//function to show the trivia overlay/ui display
-function showTrivia() {
-	const triviaWrapper = document.getElementById("TriviaWrapper");
+//function to show the entrivia overlay/ui display
+function showentrivia() {
+	const entriviaWrapper = document.getElementById("entriviaWrapper");
     const questionWrapper = document.getElementById("questionWrapper");
-    const board = document.getElementById("triviaboard");
+    const board = document.getElementById("entriviaboard");
     const timer = document.getElementById("timer");
     const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
 
     // Show elements with animations
-	triviaWrapper.style.visibility = "visible";
-	triviaWrapper.style.opacity = "1";
+	entriviaWrapper.style.visibility = "visible";
+	entriviaWrapper.style.opacity = "1";
     questionWrapper.style.visibility = "visible";
     questionWrapper.style.opacity = "1";
     questionWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
@@ -895,17 +895,17 @@ function showTrivia() {
     timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
 }
 
-function hideTrivia() {
-	const triviaWrapper = document.getElementById("TriviaWrapper");
-	const triviaPodium = document.getElementById("triviaPodium");
+function hideentrivia() {
+	const entriviaWrapper = document.getElementById("entriviaWrapper");
+	const entriviaPodium = document.getElementById("entriviaPodium");
     const questionWrapper = document.getElementById("questionWrapper");
-    const board = document.getElementById("triviaboard");
+    const board = document.getElementById("entriviaboard");
     const timer = document.getElementById("timer");
     const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
 
     // Hide elements with animations
     questionWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
-	triviaPodium.style.animation = "fadeOut 0.5s ease-in forwards";
+	entriviaPodium.style.animation = "fadeOut 0.5s ease-in forwards";
     board.style.animation = "slideOut 0.5s ease-in forwards";
     timer.style.animation = "fadeOut 0.5s ease-in forwards";
     timeUntilNextQ.style.animation = "fadeOut 0.5s ease-in forwards";
@@ -913,57 +913,57 @@ function hideTrivia() {
     setTimeout(() => {
         questionWrapper.style.visibility = "hidden";
         questionWrapper.style.opacity = "0";
-		triviaWrapper.style.visibility = "hidden";
-		triviaWrapper.style.opacity = "0";
+		entriviaWrapper.style.visibility = "hidden";
+		entriviaWrapper.style.opacity = "0";
     }, 500); // Matches the fade-out animation duration
 }
-//function to show/hide the trivia podium overlay/ui display
+//function to show/hide the entrivia podium overlay/ui display
 function showPodium() {
-	const triviaPodium = document.getElementById("triviaPodium");
-	const triviaWrapper = document.getElementById("TriviaWrapper");
-	const board = document.getElementById("triviaboard");
-    if (triviaPodium) {
+	const entriviaPodium = document.getElementById("entriviaPodium");
+	const entriviaWrapper = document.getElementById("entriviaWrapper");
+	const board = document.getElementById("entriviaboard");
+    if (entriviaPodium) {
 		// Show elements with animations
 		// ensure wrapper is visible
-		triviaPodium.style.display = "flex";
-		triviaWrapper.style.visibility = "visible";
-		triviaWrapper.style.opacity = "1";
-		// Show podium and triviaboard with animations
-		triviaPodium.style.visibility = "visible";
-		triviaPodium.style.opacity = "1";
+		entriviaPodium.style.display = "flex";
+		entriviaWrapper.style.visibility = "visible";
+		entriviaWrapper.style.opacity = "1";
+		// Show podium and entriviaboard with animations
+		entriviaPodium.style.visibility = "visible";
+		entriviaPodium.style.opacity = "1";
 		board.style.visibility = "visible";
 		board.style.opacity = "1";
-		triviaPodium.style.animation = "fadeIn 0.8s ease-out forwards";
+		entriviaPodium.style.animation = "fadeIn 0.8s ease-out forwards";
 		board.style.animation = "slideIn 0.8s ease-out forwards";
 		//log in console & display console message on screen
-        console.log("Displaying triviaPodium...");
-        displayConsoleMessage("Console:", "Displaying triviaPodium...", {}, {});
+        console.log("Displaying entriviaPodium...");
+        displayConsoleMessage("Console:", "Displaying entriviaPodium...", {}, {});
     } else {
 		//log in console & display console message on screen
-        console.log("Error: triviaPodium element not found!");
-        displayConsoleMessage("Console:", "Error: triviaPodium element not found!", {}, {});
+        console.log("Error: entriviaPodium element not found!");
+        displayConsoleMessage("Console:", "Error: entriviaPodium element not found!", {}, {});
     }
 }
 function hidePodium() {
-	const triviaPodium = document.getElementById("triviaPodium");
-    const board = document.getElementById("triviaboard");
+	const entriviaPodium = document.getElementById("entriviaPodium");
+    const board = document.getElementById("entriviaboard");
     const timer = document.getElementById("timer");
     const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
-	console.log("Hiding triviaPodium...");
+	console.log("Hiding entriviaPodium...");
     // Hide elements with animations
-	triviaPodium.style.animation = "fadeOut 0.5s ease-in forwards";
+	entriviaPodium.style.animation = "fadeOut 0.5s ease-in forwards";
     board.style.animation = "slideOut 0.5s ease-in forwards";
     timer.style.animation = "fadeOut 0.5s ease-in forwards";
     timeUntilNextQ.style.animation = "fadeOut 0.5s ease-in forwards";
     setTimeout(() => {
-        triviaPodium.style.visibility = "hidden";
-        triviaPodium.style.opacity = "0";
-		console.log("TriviaPodium hidden!...");
+        entriviaPodium.style.visibility = "hidden";
+        entriviaPodium.style.opacity = "0";
+		console.log("entriviaPodium hidden!...");
     }, 500); // Matches the fade-out animation duration
 }
-function toggleTrivia() {
+function toggleentrivia() {
     const wrapper = document.getElementById("questionWrapper");
-    const board = document.getElementById("triviaboard");
+    const board = document.getElementById("entriviaboard");
     const timer = document.getElementById("timer");
     const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
 
@@ -990,41 +990,41 @@ function toggleTrivia() {
     }
 }
 
-function startTrivia() {
-	displayConsoleMessage("system", "startTrivia fn called");
-    if (triviaGameState === "started") {
-		displayConsoleMessage("system", "Trivia is already running! Ignoring duplicate command.");
-        console.log("Trivia is already running! Ignoring duplicate command.");
-        return; // Stop if trivia is already running
+function startentrivia() {
+	displayConsoleMessage("system", "startentrivia fn called");
+    if (entriviaGameState === "started") {
+		displayConsoleMessage("system", "entrivia is already running! Ignoring duplicate command.");
+        console.log("entrivia is already running! Ignoring duplicate command.");
+        return; // Stop if entrivia is already running
     }
-	displayConsoleMessage("system", "Trivia Should splash and fetch.");
-    console.log("Trivia should splash and fetch questions");
+	displayConsoleMessage("system", "entrivia Should splash and fetch.");
+    console.log("entrivia should splash and fetch questions");
 
-    triviaSplash() // Run splash first
-        .then(() => fetchTriviaQuestions()) // Fetch questions after splash
+    entriviaSplash() // Run splash first
+        .then(() => fetchentriviaQuestions()) // Fetch questions after splash
         .then(questions => {
-		    triviaGameState = "started"; // Mark trivia as started
-            window.triviaQuestions = questions;
-			console.log("triviaGameState = " + triviaGameState);
-            console.log("Trivia Questions Loaded:", questions);
-			displayConsoleMessage("system", `triviaGameState = ${triviaGameState}`);
-			handlephaseTrivia();
+		    entriviaGameState = "started"; // Mark entrivia as started
+            window.entriviaQuestions = questions;
+			console.log("entriviaGameState = " + entriviaGameState);
+            console.log("entrivia Questions Loaded:", questions);
+			displayConsoleMessage("system", `entriviaGameState = ${entriviaGameState}`);
+			handlephaseentrivia();
 			
         })
         .catch(error => {
-            console.error("Error loading trivia questions:", error);
-			displayConsoleMessage("system", `Error loading trivia questions: ${error}`);
-            triviaGameState = null; // Reset state on failure
+            console.error("Error loading entrivia questions:", error);
+			displayConsoleMessage("system", `Error loading entrivia questions: ${error}`);
+            entriviaGameState = null; // Reset state on failure
         });
 
 }
-function resetTrivia() {
+function resetentrivia() {
 	console.log('Game Ended on Round:', round,'||Total Rounds:', totalRounds);
 	// Prepare for the next Game
     clearInterval(questionTimer);
     clearInterval(countdownTimer);
     clearTimeout(hideQuestionTimer);
-    triviaGameState = null;
+    entriviaGameState = null;
     questionsAsked = 0;
     round = 1;
     usedQuestions = [];
@@ -1034,16 +1034,16 @@ function resetTrivia() {
     firstAnswerUser = null;
     // Hide UI elements or reset text
 	//document.getElementById("question").textContent = `Round ${round}`;
-	document.getElementById("question").textContent = "Type !Trivia to play";
+	document.getElementById("question").textContent = "Type !entrivia to play";
     document.getElementById("timeuntil-nextQ").textContent = "";
     document.getElementById("timer").textContent = "";
     document.getElementById("timeuntil-nextQ").textContent = "";
     toggleElement("questionWrapper", "fade");
-	console.log('Trivia Reset - current round:', round,'||Total Rounds:', totalRounds);
+	console.log('entrivia Reset - current round:', round,'||Total Rounds:', totalRounds);
 }
 
 
-function triviaGameFinished() {
+function entriviaGameFinished() {
 	console.log('Round:', round);
 	console.log('Total Rounds:', totalRounds);
     document.getElementById("question").textContent = `Round ${round}`;
@@ -1057,16 +1057,16 @@ function triviaGameFinished() {
     updatePodium();
 	showPodium();
 	// Prepare for the next Game
-	resetTrivia();
+	resetentrivia();
 	// Hide podium after 5 minutes
     setTimeout(hidePodium, 120000);
 }
 
-function endTrivia() {
+function endentrivia() {
     clearInterval(questionTimer);
     clearInterval(countdownTimer);
     clearTimeout(hideQuestionTimer);
-    triviaGameState = null;
+    entriviaGameState = null;
     questionsAsked = 0;
     round = 1;
     usedQuestions = [];
@@ -1075,7 +1075,7 @@ function endTrivia() {
     firstAnswerUser = null;
     // Hide UI elements or reset text
     document.getElementById("timeuntil-nextQ").textContent = "";
-    hideTrivia(); // Hide the trivia UI
+    hideentrivia(); // Hide the entrivia UI
 }
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //    Game finished
@@ -1086,21 +1086,21 @@ function endTrivia() {
 function askSplash() {
     return showAnnouncement("Asking Random Question in:", 30)
         .then(() => {
-            showTriviaAsk();  // Show trivia after the countdown
+            showentriviaAsk();  // Show entrivia after the countdown
         })
         .catch(error => {
             console.error("Error in askSplash:", error);
         });
 }
-function showTriviaAsk() {
-	const triviaWrapper = document.getElementById("TriviaWrapper");
+function showentriviaAsk() {
+	const entriviaWrapper = document.getElementById("entriviaWrapper");
     const questionWrapper = document.getElementById("questionWrapper");
     const timer = document.getElementById("timer");
     const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
-	displayConsoleMessage("system", "showTriviaAsk() called");
+	displayConsoleMessage("system", "showentriviaAsk() called");
     // Show elements with animations
-	triviaWrapper.style.visibility = "visible";
-	triviaWrapper.style.opacity = "1";
+	entriviaWrapper.style.visibility = "visible";
+	entriviaWrapper.style.opacity = "1";
     questionWrapper.style.visibility = "visible";
     questionWrapper.style.opacity = "1";
     questionWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
@@ -1109,10 +1109,10 @@ function showTriviaAsk() {
 }
 function getRandomAsk() {
 	let currentRound = round === 1 ? "round1" : "round2";
-	let availableQuestions = triviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
+	let availableQuestions = entriviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
 	if (availableQuestions.length === 0) {
 		usedQuestions = []; // Reset when all questions are used
-		availableQuestions = [...triviaQuestions[currentRound]];
+		availableQuestions = [...entriviaQuestions[currentRound]];
 	}
 	let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
 	usedQuestions.push(question);
@@ -1124,10 +1124,10 @@ function endAsk() {
 	document.getElementById("timer").textContent = "";
 	activeQuestion = null;
 	singleActiveAsk = null;
-	playSound("triviatimesup");
+	playSound("entriviatimesup");
     hideQuestionTimer = setTimeout(() => {
         document.getElementById("questionWrapper").style.visibility = "hidden";
-        document.getElementById("triviaboard").style.visibility = "visible";
+        document.getElementById("entriviaboard").style.visibility = "visible";
     }, 13000); // Delay timeout of 13 seconds to wait before checking
 }
 function AskQuestion() {
@@ -1179,121 +1179,121 @@ function AskfromCat(round, category) {
         }
     }, 1000);
 }
-function startTriviaAskfromCat(round, category) {
-    displayConsoleMessage("system", "startTriviaAskfromCat fn called");
-    if (triviaGameState === "started") {
-        displayConsoleMessage("system", "Trivia is already running! Ignoring duplicate command.");
-        console.log("Trivia is already running! Ignoring duplicate command.");
-        return; // Stop if trivia is already running
+function startentriviaAskfromCat(round, category) {
+    displayConsoleMessage("system", "startentriviaAskfromCat fn called");
+    if (entriviaGameState === "started") {
+        displayConsoleMessage("system", "entrivia is already running! Ignoring duplicate command.");
+        console.log("entrivia is already running! Ignoring duplicate command.");
+        return; // Stop if entrivia is already running
     }
     if (singleActiveAsk === "Active") {
-        displayConsoleMessage("system", "Trivia is already Asking a question! Ignoring duplicate command.");
-        console.log("Trivia is already running! Ignoring duplicate command.");
-        return; // Stop if trivia is already running
+        displayConsoleMessage("system", "entrivia is already Asking a question! Ignoring duplicate command.");
+        console.log("entrivia is already running! Ignoring duplicate command.");
+        return; // Stop if entrivia is already running
     }
-    displayConsoleMessage("system", "Trivia ask continues");
-    console.log("Trivia should splash and fetch a question from a specific category.");
+    displayConsoleMessage("system", "entrivia ask continues");
+    console.log("entrivia should splash and fetch a question from a specific category.");
 
     askSplash() // Run splash first
-        .then(() => fetchTriviaQuestions()) // Fetch questions after splash
+        .then(() => fetchentriviaQuestions()) // Fetch questions after splash
         .then(questions => {
-            singleActiveAsk = "Active"; // Mark trivia as started
-            window.triviaQuestions = questions;
+            singleActiveAsk = "Active"; // Mark entrivia as started
+            window.entriviaQuestions = questions;
             console.log("singleActiveAsk = " + singleActiveAsk);
-            console.log("Trivia Questions Loaded:", questions);
+            console.log("entrivia Questions Loaded:", questions);
             displayConsoleMessage("system", `singleActiveAsk = ${singleActiveAsk}`);
             // Pass the round and category to AskfromCat
             AskfromCat(round, category);
         })
         .catch(error => {
-            console.error("Error loading trivia questions:", error);
-            displayConsoleMessage("system", `Error loading trivia questions: ${error}`);
+            console.error("Error loading entrivia questions:", error);
+            displayConsoleMessage("system", `Error loading entrivia questions: ${error}`);
             singleActiveAsk = null; // Reset state on failure
         });
 }
-function startTriviaAsk() {
-	displayConsoleMessage("system", "startTrivia fn called");
-    if (triviaGameState === "started") {
-		displayConsoleMessage("system", "Trivia is already running! Ignoring duplicate command.");
-        console.log("Trivia is already running! Ignoring duplicate command.");
-        return; // Stop if trivia is already running
+function startentriviaAsk() {
+	displayConsoleMessage("system", "startentrivia fn called");
+    if (entriviaGameState === "started") {
+		displayConsoleMessage("system", "entrivia is already running! Ignoring duplicate command.");
+        console.log("entrivia is already running! Ignoring duplicate command.");
+        return; // Stop if entrivia is already running
     }
     if (singleActiveAsk === "Active") {
-		displayConsoleMessage("system", "Trivia is already Asking a question! Ignoring duplicate command.");
-        console.log("Trivia is already running! Ignoring duplicate command.");
-        return; // Stop if trivia is already running
+		displayConsoleMessage("system", "entrivia is already Asking a question! Ignoring duplicate command.");
+        console.log("entrivia is already running! Ignoring duplicate command.");
+        return; // Stop if entrivia is already running
     }
-	displayConsoleMessage("system", "Trivia ask continues");
-    console.log("Trivia should splash and fetch questions");
+	displayConsoleMessage("system", "entrivia ask continues");
+    console.log("entrivia should splash and fetch questions");
 
     askSplash() // Run splash first
-        .then(() => fetchTriviaQuestions()) // Fetch questions after splash
+        .then(() => fetchentriviaQuestions()) // Fetch questions after splash
         .then(questions => {
-		    singleActiveAsk = "Active"; // Mark trivia as started
-            window.triviaQuestions = questions;
+		    singleActiveAsk = "Active"; // Mark entrivia as started
+            window.entriviaQuestions = questions;
 			console.log("singleActiveAsk = " + singleActiveAsk);
-            console.log("Trivia Questions Loaded:", questions);
+            console.log("entrivia Questions Loaded:", questions);
 			displayConsoleMessage("system", `singleActiveAsk = ${singleActiveAsk}`);
 			AskQuestion();
         })
         .catch(error => {
-            console.error("Error loading trivia questions:", error);
-			displayConsoleMessage("system", `Error loading trivia questions: ${error}`);
+            console.error("Error loading entrivia questions:", error);
+			displayConsoleMessage("system", `Error loading entrivia questions: ${error}`);
             singleActiveAsk = null; // Reset state on failure
         });
 
 }
 
 function displayLastWinner() {
-    if (TriviaSingleAskLastWinner) {
-        const message = `🎉 Congratulations to ${TriviaSingleAskLastWinner} for answering first correctly! 🎉`;
-        displayTriviaMessage("📢", message);
+    if (entriviaSingleAskLastWinner) {
+        const message = `🎉 Congratulations to ${entriviaSingleAskLastWinner} for answering first correctly! 🎉`;
+        displayentriviaMessage("📢", message);
     } else {
         const message = "No winner yet.";
-        displayTriviaMessage("📢", message);
+        displayentriviaMessage("📢", message);
     }
 }
 // Function to display last game's winners
-function displayLastTriviaWinners() {
-    if (!lastTriviaClassicWinners || lastTriviaClassicWinners.length === 0) {
-        displayTriviaMessage("📢", "No winners from the last trivia game.", {}, {});
+function displayLastentriviaWinners() {
+    if (!lastentriviaClassicWinners || lastentriviaClassicWinners.length === 0) {
+        displayentriviaMessage("📢", "No winners from the last entrivia game.", {}, {});
         return;
     }
 
-    displayTriviaMessage("📢", "Last Trivia Winners:", {}, {});
+    displayentriviaMessage("📢", "Last entrivia Winners:", {}, {});
 
-    lastTriviaClassicWinners.forEach((winner, index) => {
+    lastentriviaClassicWinners.forEach((winner, index) => {
         let message = `🏆 ${index + 1} - ${winner.username}: ${winner.score} points | 🎯 First: ${winner.firstAnswers} | ✅ ${winner.correctAnswers} | ❌ ${winner.incorrectAnswers}`;
-        displayTriviaMessage("📢", message, {}, {});
+        displayentriviaMessage("📢", message, {}, {});
     });
 }
 
-// Function to display all past trivia games from history
-function displayTriviaHistory() {
-	loadTriviaHistory();
-    if (!TriviaClassicHistory || TriviaClassicHistory.length === 0) {
-        displayTriviaMessage("📢", "No past trivia games recorded.", {}, {});
+// Function to display all past entrivia games from history
+function displayentriviaHistory() {
+	loadentriviaHistory();
+    if (!entriviaClassicHistory || entriviaClassicHistory.length === 0) {
+        displayentriviaMessage("📢", "No past entrivia games recorded.", {}, {});
         return;
     }
 
-    displayTriviaMessage("📜", "Trivia History:", {}, {});
+    displayentriviaMessage("📜", "entrivia History:", {}, {});
 
-    TriviaClassicHistory.forEach((game, index) => {
+    entriviaClassicHistory.forEach((game, index) => {
         if (Array.isArray(game)) {  // Ensure game structure matches new updates
             let timestamp = game[0]?.timestamp || `Game #${index + 1}`;
-            displayTriviaMessage("📆", `${timestamp}`, {}, {});
+            displayentriviaMessage("📆", `${timestamp}`, {}, {});
 
             game.forEach((winner, idx) => {
                 let message = `🏆 ${idx + 1} - ${winner.username}: ${winner.score} points | 🎯 First: ${winner.firstAnswers} | ✅ ${winner.correctAnswers} | ❌ ${winner.incorrectAnswers}`;
-                displayTriviaMessage("📢", message, {}, {});
+                displayentriviaMessage("📢", message, {}, {});
             });
         }
     });
 }
 
 //displayLastWinner();
-//displayLastTriviaWinners();
-//displayTriviaHistory();
+//displayLastentriviaWinners();
+//displayentriviaHistory();
 
 //------------------------
 //---generic ui logic----|
@@ -1322,7 +1322,7 @@ function toggleElement(elementId, animationType = "fade") {
 
 
 //toggles
-function toggleTriviaconsolemessages() {
+function toggleentriviaconsolemessages() {
     consolemessages = !consolemessages;
     updateSingleSetting("consolemessages", consolemessages);
 	console.log("toggled consolemessages", consolemessages);
@@ -1341,28 +1341,28 @@ function toggleusecustomquestions() {
 	displayConsoleMessage("toggled customquestions", usecustomquestions);
     updateIndicatorLights();
 }
-function toggleEntriviachatOverlay() {
+function toggleentriviachatOverlay() {
 	entriviachatOverlay = !entriviachatOverlay;
 	updateSingleSetting("entriviachatOverlay", entriviachatOverlay);
 	updateIndicatorLights();
-	console.log(`Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
-	displayConsoleMessage("system", `Entrivia Chat Overlay is now: ${entriviachatOverlay}`);
+	console.log(`entrivia Chat Overlay is now: ${entriviachatOverlay}`);
+	displayConsoleMessage("system", `entrivia Chat Overlay is now: ${entriviachatOverlay}`);
 }
 function togglechatanswers() {
 	chatanswers = !chatanswers;
 	updateSingleSetting("chatanswers", chatanswers);
 	updateIndicatorLights();
-	console.log(` Can chat answer trivia: ${entriviachatOverlay}`);
-	displayConsoleMessage("system", `Can chat answer trivia: ${entriviachatOverlay}`);
+	console.log(` Can chat answer entrivia: ${entriviachatOverlay}`);
+	displayConsoleMessage("system", `Can chat answer entrivia: ${entriviachatOverlay}`);
 }
 //-----------------------------------
 function updateSingleSetting(settingKey, newValue) {
-    let savedSettings = JSON.parse(localStorage.getItem("triviaClassicSettings")) || {};
+    let savedSettings = JSON.parse(localStorage.getItem("entriviaClassicSettings")) || {};
     savedSettings[settingKey] = newValue;
-    localStorage.setItem("triviaClassicSettings", JSON.stringify(savedSettings));
+    localStorage.setItem("entriviaClassicSettings", JSON.stringify(savedSettings));
 }
 function saveSettings() {
-    let triviaClassicSettings = {
+    let entriviaClassicSettings = {
         timetoAnswer,
         timebetweenQuestions,
         timebetweenRounds,
@@ -1374,7 +1374,7 @@ function saveSettings() {
 		chatanswers,
 		audioSetting
     };
-    localStorage.setItem("triviaClassicSettings", JSON.stringify(triviaClassicSettings));
+    localStorage.setItem("entriviaClassicSettings", JSON.stringify(entriviaClassicSettings));
 }
 function updateSettings() {
     timetoAnswer = parseInt(document.getElementById("timeToAnswer").value, 10);
@@ -1383,7 +1383,7 @@ function updateSettings() {
     questionsPerRound = parseInt(document.getElementById("questionsPerRound").value, 10);
     // Get the toggle states
     saveSettings();
-    displayTriviaMessage("!!", "Entrivia Settings updated and saved.", {}, {});
+    displayentriviaMessage("!!", "entrivia Settings updated and saved.", {}, {});
 }
 function resetSettings() {
     // Default settings
@@ -1398,7 +1398,7 @@ function resetSettings() {
 	chatanswers = false;
 	audioSetting = true;
     // Clear saved settings
-    localStorage.removeItem("triviaClassicSettings");
+    localStorage.removeItem("entriviaClassicSettings");
 
     // Update input fields
     document.getElementById("timeToAnswer").value = timetoAnswer;
@@ -1406,10 +1406,10 @@ function resetSettings() {
     document.getElementById("timeBetweenRounds").value = timebetweenRounds;
     document.getElementById("questionsPerRound").value = questionsPerRound;
 
-    displayTriviaMessage("!!", "Entrivia Settings Reset to default.", {}, {});
+    displayentriviaMessage("!!", "entrivia Settings Reset to default.", {}, {});
 }
 function updateSettingsDisplay() {
-    let savedSettings = localStorage.getItem("triviaClassicSettings");
+    let savedSettings = localStorage.getItem("entriviaClassicSettings");
     if (savedSettings) {
         let settings = JSON.parse(savedSettings);
         timetoAnswer = settings.timetoAnswer;
@@ -1455,7 +1455,7 @@ function updateIndicatorLights() {
 }
 
 // Function to dynamically add a button and a status light indicator
-function updateTriviaSettingsUI() {
+function updateentriviaSettingsUI() {
 	let settings = { usedefaultquestions, usecustomquestions, consolemessages, entriviachatOverlay, chatanswers, audioSetting };
     // Select all elements with the class 'optiontoggle-entrivia'
     const toggleElements = document.querySelectorAll('.optiontoggle-entrivia');
@@ -1500,7 +1500,7 @@ function updateTriviaSettingsUI() {
 }
 
 // Run the function to update the UI
-updateTriviaSettingsUI();
+updateentriviaSettingsUI();
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // COMFY JS specific logic/functions
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1530,14 +1530,14 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		let isCorrect = checkAnswer(user, answer);  // Check if the answer is correct
 		// Display the answer in chat regardless of whether it's correct or incorrect
 		if (isCorrect) {
-			// displayTriviaMessage
+			// displayentriviaMessage
 			// If the answer is correct, display the answer with a ✅ checkmark
 			displayConsoleMessage(user, `!${command} ${answer} ✅`);
-			displayTriviaMessage(user, `!${command} ${answer} ✅`, flags, extra, true);
+			displayentriviaMessage(user, `!${command} ${answer} ✅`, flags, extra, true);
 		} else if (!answeredUsers.has(user)) {
 			// If the user hasn't answered correctly yet, display the answer with an ❌ X mark
 			displayConsoleMessage(user, `!${command} ${answer} ❌`);
-			displayTriviaMessage(user, `!${command} ${answer} ❌`, flags, extra, false);
+			displayentriviaMessage(user, `!${command} ${answer} ❌`, flags, extra, false);
 		} else {
 			// If the user has already answered correctly, do nothing (ignore their further answers)
 			console.log(`${user} has already answered correctly. Ignoring further answers.`);
@@ -1545,42 +1545,42 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 	// Only allow streamer to trigger these commands:
 //-------------------------------------------------------
-	if (command.toLowerCase() === "triviatest-auth") {
+	if (command.toLowerCase() === "entriviatest-auth") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
         displayChatMessage(user, `!${command} ✅`, flags, extra, true);
     }
-	if (command.toLowerCase() === "triviatest-sounds") {
+	if (command.toLowerCase() === "entriviatest-sounds") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
 	}
-	if (command.toLowerCase() === "trivia-nextround") {
+	if (command.toLowerCase() === "entrivia-nextround") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		console.log("Current Round:", round);
 		questionsAsked = 0; // Reset for the new round
-		document.getElementById("question").textContent = "Entrivia Round:"+ round;
-		setTimeout(handlephaseTrivia, 10000);
+		document.getElementById("question").textContent = "entrivia Round:"+ round;
+		setTimeout(handlephaseentrivia, 10000);
 	}
-    if (command.toLowerCase() === "trivia-play") {
+    if (command.toLowerCase() === "entrivia-play") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
-        displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		startTrivia();
+        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		startentrivia();
     }
 
-    if (command.toLowerCase() === "trivia-askrandom") {
+    if (command.toLowerCase() === "entrivia-askrandom") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
-        displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
-        startTriviaAsk();
+        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+        startentriviaAsk();
     }
 	//example of command to ask a question from a specific round and category:
-	//!trivia-ask easy/hard | mining
-	if (command.toLowerCase() === "trivia-ask") {
+	//!entrivia-ask easy/hard | mining
+	if (command.toLowerCase() === "entrivia-ask") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
 		
 		// Extract the difficulty and category from the message
 		let messageContent = message.trim();
@@ -1588,7 +1588,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		
 		// Validate input format
 		if (parts.length < 2) {
-			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-ask easy/hard | category`, flags, extra, true);
+			displayentriviaMessage(user, `⚠️ Invalid format! Use: !entrivia-ask easy/hard | category`, flags, extra, true);
 			return;
 		}
 		
@@ -1602,7 +1602,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		} else if (difficulty === "hard") {
 			round = "round2";
 		} else {
-			displayTriviaMessage(user, `⚠️ Invalid difficulty! Use 'easy' or 'hard'.`, flags, extra, true);
+			displayentriviaMessage(user, `⚠️ Invalid difficulty! Use 'easy' or 'hard'.`, flags, extra, true);
 			return;
 		}
 		
@@ -1610,64 +1610,64 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
 		
 		if (!validCategories.includes(category)) {
-			displayTriviaMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
+			displayentriviaMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
 			return;
 		}
 		
-		// Call startTriviaAskfromCat with the round and category
-		startTriviaAskfromCat(round, category);
+		// Call startentriviaAskfromCat with the round and category
+		startentriviaAskfromCat(round, category);
 	}
-	if (command.toLowerCase() === "trivia-lastaskwinner") {
+	if (command.toLowerCase() === "entrivia-lastaskwinner") {
         if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-        displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
 		displayLastWinner();
     }
-	if (command.toLowerCase() === "trivia-lastwinners") {
+	if (command.toLowerCase() === "entrivia-lastwinners") {
         if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-        displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		displayLastTriviaWinners();
+        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayLastentriviaWinners();
     }
-	if (command.toLowerCase() === "trivia-history") {
+	if (command.toLowerCase() === "entrivia-history") {
         if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-        displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		displayTriviaHistory();
+        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayentriviaHistory();
     }
-	if (command.toLowerCase() === "trivia-chatanswers") {
+	if (command.toLowerCase() === "entrivia-chatanswers") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
 		togglechatanswers();
 	}
-	if (command.toLowerCase() === "trivia-disablechat") {
+	if (command.toLowerCase() === "entrivia-disablechat") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-        displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		toggleEntriviachatOverlay();
+        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		toggleentriviachatOverlay();
 	}
-	if (command.toLowerCase() === "trivia-audio") {
+	if (command.toLowerCase() === "entrivia-audio") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-        displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
 		toggleAudioSetting();
 	}
-	if (command.toLowerCase() === "toggletriviaboard") {
+	if (command.toLowerCase() === "toggleentriviaboard") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		toggleElement("triviaboard", "slide");
+		toggleElement("entriviaboard", "slide");
 	}
 	if (command.toLowerCase() === "togglequestions") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		toggleElement("questionWrapper", "fade");
 	}
-	if (command.toLowerCase() === "toggletrivia") {
+	if (command.toLowerCase() === "toggleentrivia") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		toggleTrivia();
-		toggleElement("triviaWrapper", "fade");
+		toggleentrivia();
+		toggleElement("entriviaWrapper", "fade");
 	}
 	if (command.toLowerCase() === "togglechat") {
 		if (!isStreamerAndAuthorize(user, command)) return;
@@ -1677,11 +1677,11 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 //-------------------------------------------------------
 	// Command-based settings updates
 	//example cmd to add question:
-	//!trivia-addquestion easy/hard | economy | what does ped stand for | project entropia dollar
-	if (command.toLowerCase() === "trivia-addquestion") {  
+	//!entrivia-addquestion easy/hard | economy | what does ped stand for | project entropia dollar
+	if (command.toLowerCase() === "entrivia-addquestion") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
 		
 		// Extract message text after the command
 		let messageContent = message.trim();
@@ -1689,7 +1689,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		
 		// Validate input format
 		if (parts.length < 4) {  // Now expects 4 parts (difficulty, category, question, answer)
-			displayTriviaMessage(user, `⚠️ Invalid format! Use: !trivia-addquestion easy/hard | category | question | answer`, flags, extra, true);
+			displayentriviaMessage(user, `⚠️ Invalid format! Use: !entrivia-addquestion easy/hard | category | question | answer`, flags, extra, true);
 			return;
 		}
 		
@@ -1705,7 +1705,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		} else if (difficulty === "hard") {
 			round = "round2";
 		} else {
-			displayTriviaMessage(user, `⚠️ Invalid difficulty! Use 'easy' or 'hard'.`, flags, extra, true);
+			displayentriviaMessage(user, `⚠️ Invalid difficulty! Use 'easy' or 'hard'.`, flags, extra, true);
 			return;
 		}
 		
@@ -1713,78 +1713,78 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
 
 		if (!validCategories.includes(category)) {
-			displayTriviaMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
+			displayentriviaMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
 			return;
 		}
 
-		// Add the custom trivia question with the selected category
-		addCustomTriviaQuestion(round, questionText, correctAnswer, category);
+		// Add the custom entrivia question with the selected category
+		addCustomentriviaQuestion(round, questionText, correctAnswer, category);
 		
 		// Confirm success
-		displayTriviaMessage(user, `✅ Custom question added to ${round} (${category})!`, flags, extra, true);
+		displayentriviaMessage(user, `✅ Custom question added to ${round} (${category})!`, flags, extra, true);
 	}
-	if (command.toLowerCase() === "trivia-answertime") { 
+	if (command.toLowerCase() === "entrivia-answertime") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
 
 		timetoAnswer = parseInt(message, 10);
 		updateSingleSetting("timetoAnswer", timetoAnswer);
 	}
-	if (command.toLowerCase() === "trivia-questiondelay") { 
+	if (command.toLowerCase() === "entrivia-questiondelay") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
 
 		timebetweenQuestions = parseInt(message, 10);
 		updateSingleSetting("timebetweenQuestions", timebetweenQuestions);
 	}
-	if (command.toLowerCase() === "trivia-rounddelay") { 
+	if (command.toLowerCase() === "entrivia-rounddelay") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
 
 		timebetweenRounds = parseInt(message, 10);
 		updateSingleSetting("timebetweenRounds", timebetweenRounds);
 	}
-	if (command.toLowerCase() === "trivia-questioncap") { 
+	if (command.toLowerCase() === "entrivia-questioncap") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
 
 		questionsPerRound = parseInt(message, 10);
 		updateSingleSetting("questionsPerRound", questionsPerRound);
 	}
 	// Toggle default questions
-	if (command.toLowerCase() === "trivia-consolemessages") {  
+	if (command.toLowerCase() === "entrivia-consolemessages") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 
-		toggleTriviaconsolemessages(); // Uses function to update setting
+		toggleentriviaconsolemessages(); // Uses function to update setting
 		displayConsoleMessage(user, `!${command} ${consolemessages ? "Enabled ✅" : "Disabled ❌"}`);
-		displayTriviaMessage(user, `!${command} ${consolemessages ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
+		displayentriviaMessage(user, `!${command} ${consolemessages ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
 	}
-	if (command.toLowerCase() === "trivia-defaultquestions") {  
+	if (command.toLowerCase() === "entrivia-defaultquestions") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 
 		toggleusedefaultquestions(); // Uses function to update setting
 		displayConsoleMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`);
-		displayTriviaMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
+		displayentriviaMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
 	}
 	// Toggle custom questions
-	if (command.toLowerCase() === "trivia-customquestions") {  
+	if (command.toLowerCase() === "entrivia-customquestions") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 
 		toggleusecustomquestions(); // Uses function to update setting
 		displayConsoleMessage(user, `!${command} ${usecustomquestions ? "Enabled ✅" : "Disabled ❌"}`);
-		displayTriviaMessage(user, `!${command} ${usecustomquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
+		displayentriviaMessage(user, `!${command} ${usecustomquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
 	}
 //-------------------------------------------------------
     // Only allow mods to trigger these commands:
     if (flags.mod) {
-		if (command === "triviamod-test") {
+		if (command === "entriviamod-test") {
 			if (!isStreamerAndAuthorize(user, command)) return;
 			displayConsoleMessage(user, `!${command} ✅`);
-			displayTriviaMessage(user, `!${command} ✅`, flags, extra, true);
+			displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
 			toggleElement("twitchchatContainer", "fade");
 		}
 	}
@@ -1799,32 +1799,32 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
 // Declare the arrays globally
 const usercommands = [
-	{ command: "!a / !answer", description: "Allows users to answer a trivia question.", usage: "!a / !answer" },
+	{ command: "!a / !answer", description: "Allows users to answer a entrivia question.", usage: "!a / !answer" },
 ];
 
 const streamercommands = [
-	{ command: "!a / !answer", description: "Allows users to answer a trivia question.", usage: "!a / !answer" },
-	{ command: "!trivia-play", description: "Starts the trivia game.", usage: "!trivia-play" },
-	{ command: "!trivia-askrandom", description: "Asks a random trivia question.", usage: "!trivia-askrandom" },
-	{ command: "!trivia-ask", description: "Asks a trivia question from a specific round and category.", usage: "!trivia-ask [round] | [category]" },
-	{ command: "!trivia-lastaskwinner", description: "Displays the last trivia question's winner.", usage: "!trivia-lastaskwinner" },
-	{ command: "!trivia-lastwinners", description: "Displays the list of last trivia winners.", usage: "!trivia-lastwinners" },
-	{ command: "!trivia-history", description: "Displays trivia history.", usage: "!trivia-history" },
-	{ command: "!trivia-chatanswers", description: "Toggles the chat answers on/off.", usage: "!trivia-chatanswers" },
-	{ command: "!trivia-consolemessages", description: "Toggles the chat answers on/off.", usage: "!trivia-consolemessages" },
-	{ command: "!trivia-disablechat", description: "Disables trivia chat overlay.", usage: "!trivia-disablechat" },
-	{ command: "!trivia-audio", description: "Toggles trivia audio settings.", usage: "!trivia-audio" },
-	{ command: "!toggletriviaboard", description: "Toggles the trivia board visibility.", usage: "!toggletriviaboard" },
+	{ command: "!a / !answer", description: "Allows users to answer a entrivia question.", usage: "!a / !answer" },
+	{ command: "!entrivia-play", description: "Starts the entrivia game.", usage: "!entrivia-play" },
+	{ command: "!entrivia-askrandom", description: "Asks a random entrivia question.", usage: "!entrivia-askrandom" },
+	{ command: "!entrivia-ask", description: "Asks a entrivia question from a specific round and category.", usage: "!entrivia-ask [round] | [category]" },
+	{ command: "!entrivia-lastaskwinner", description: "Displays the last entrivia question's winner.", usage: "!entrivia-lastaskwinner" },
+	{ command: "!entrivia-lastwinners", description: "Displays the list of last entrivia winners.", usage: "!entrivia-lastwinners" },
+	{ command: "!entrivia-history", description: "Displays entrivia history.", usage: "!entrivia-history" },
+	{ command: "!entrivia-chatanswers", description: "Toggles the chat answers on/off.", usage: "!entrivia-chatanswers" },
+	{ command: "!entrivia-consolemessages", description: "Toggles the chat answers on/off.", usage: "!entrivia-consolemessages" },
+	{ command: "!entrivia-disablechat", description: "Disables entrivia chat overlay.", usage: "!entrivia-disablechat" },
+	{ command: "!entrivia-audio", description: "Toggles entrivia audio settings.", usage: "!entrivia-audio" },
+	{ command: "!toggleentriviaboard", description: "Toggles the entrivia board visibility.", usage: "!toggleentriviaboard" },
 	{ command: "!togglequestions", description: "Toggles the visibility of the question wrapper.", usage: "!togglequestions" },
-	{ command: "!toggletrivia", description: "Toggles the visibility of the trivia wrapper.", usage: "!toggletrivia" },
+	{ command: "!toggleentrivia", description: "Toggles the visibility of the entrivia wrapper.", usage: "!toggleentrivia" },
 	{ command: "!togglechat", description: "Toggles the visibility of the Twitch chat container.", usage: "!togglechat" },
-	{ command: "!trivia-addquestion", description: "Allows the streamer to add a custom trivia question.", usage: "!trivia-addquestion easy/hard | economy | what does ped stand for | project entropia dollar" },
-	{ command: "!trivia-answertime", description: "Updates the answer time limit.", usage: "!trivia-answertime [time]" },
-	{ command: "!trivia-questiondelay", description: "Updates the question delay between questions.", usage: "!trivia-questiondelay [delay]" },
-	{ command: "!trivia-rounddelay", description: "Updates the delay between rounds.", usage: "!trivia-rounddelay [delay]" },
-	{ command: "!trivia-questioncap", description: "Sets a cap for the number of questions per round.", usage: "!trivia-questioncap [cap]" },
-	{ command: "!trivia-defaultquestions", description: "Toggles default trivia questions.", usage: "!trivia-defaultquestions" },
-	{ command: "!trivia-customquestions", description: "Toggles custom trivia questions.", usage: "!trivia-customquestions" }
+	{ command: "!entrivia-addquestion", description: "Allows the streamer to add a custom entrivia question.", usage: "!entrivia-addquestion easy/hard | economy | what does ped stand for | project entropia dollar" },
+	{ command: "!entrivia-answertime", description: "Updates the answer time limit.", usage: "!entrivia-answertime [time]" },
+	{ command: "!entrivia-questiondelay", description: "Updates the question delay between questions.", usage: "!entrivia-questiondelay [delay]" },
+	{ command: "!entrivia-rounddelay", description: "Updates the delay between rounds.", usage: "!entrivia-rounddelay [delay]" },
+	{ command: "!entrivia-questioncap", description: "Sets a cap for the number of questions per round.", usage: "!entrivia-questioncap [cap]" },
+	{ command: "!entrivia-defaultquestions", description: "Toggles default entrivia questions.", usage: "!entrivia-defaultquestions" },
+	{ command: "!entrivia-customquestions", description: "Toggles custom entrivia questions.", usage: "!entrivia-customquestions" }
 ];
 
 // Function to update the command list in the UI
@@ -1932,7 +1932,7 @@ function getStreamerCommands() {
 //-----------------------
 // Preload sounds and store them in an object
         // Play the sound
-//       playSound("triviatimesup");
+//       playSound("entriviatimesup");
 
  // Change to "off" to mute all sounds
 //-------------------------------------
@@ -1941,26 +1941,26 @@ const sounds = {
     //gameshowintro: new Audio("/assets/sounds/gameshow_intro.mp3"),
     // Add more sounds here
 };
-const triviasounds = {
+const entriviasounds = {
     openingtheme: new Audio("/assets/sounds/entrivia/openingtheme-entriviauniverse.mp3"),
     openingtheme2: new Audio("/assets/sounds/entrivia/openingtheme2-entriviauniverse.mp3"),
 	openingtheme0: new Audio("/assets/sounds/entrivia/openingtheme1-entriviauniverse.mp3"),
 	openingtheme1: new Audio("/assets/sounds/entrivia/short-logo.mp3"),
-	triviafirstcorrect: new Audio("/assets/sounds/entrivia/trivia-firstcorrect.mp3"),
-	triviacorrect: new Audio("/assets/sounds/entrivia/trivia-correct.mp3"),
-	triviawrong: new Audio("/assets/sounds/entrivia/trivia-wrong.mp3"),
-	triviaroundover: new Audio("/assets/sounds/entrivia/trivia-roundover.mp3"),
-	triviatimesup: new Audio("/assets/sounds/entrivia/trivia-timesup1.mp3"),	
+	entriviafirstcorrect: new Audio("/assets/sounds/entrivia/entrivia-firstcorrect.mp3"),
+	entriviacorrect: new Audio("/assets/sounds/entrivia/entrivia-correct.mp3"),
+	entriviawrong: new Audio("/assets/sounds/entrivia/entrivia-wrong.mp3"),
+	entriviaroundover: new Audio("/assets/sounds/entrivia/entrivia-roundover.mp3"),
+	entriviatimesup: new Audio("/assets/sounds/entrivia/entrivia-timesup1.mp3"),	
 	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
 	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
 	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
     // Add more sounds here
 };
-const triviaQuestionsounds = {
-	triviabloop1: new Audio("/assets/sounds/entrivia/trivia-bloop1.mp3"),
-	triviabloop2: new Audio("/assets/sounds/entrivia/trivia-bloop2.mp3"),
+const entriviaQuestionsounds = {
+	entriviabloop1: new Audio("/assets/sounds/entrivia/entrivia-bloop1.mp3"),
+	entriviabloop2: new Audio("/assets/sounds/entrivia/entrivia-bloop2.mp3"),
 }
-const triviaWinsounds = {
+const entriviaWinsounds = {
 	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
 	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
 	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
@@ -1971,10 +1971,10 @@ const triviaWinsounds = {
 function playSound(name) {
     if (audioSetting === "off") return; // Stop if audio is disabled
 
-    if (triviasounds[name]) {
-        triviasounds[name].muted = false; // Unmute the sound
-        triviasounds[name].currentTime = 0; // Reset sound to start
-        triviasounds[name].play().catch(error => {
+    if (entriviasounds[name]) {
+        entriviasounds[name].muted = false; // Unmute the sound
+        entriviasounds[name].currentTime = 0; // Reset sound to start
+        entriviasounds[name].play().catch(error => {
             console.error(`Error playing ${name}:`, error);
         });
     } else {
@@ -1984,37 +1984,37 @@ function playSound(name) {
 function playQuestionSound(name) {
     if (audioSetting === "off") return; // Stop if audio is disabled
 
-    if (triviaQuestionsounds[name]) {
-        triviaQuestionsounds[name].muted = false; // Unmute the sound
-        triviaQuestionsounds[name].currentTime = 0; // Reset sound to start
-        triviaQuestionsounds[name].play().catch(error => {
+    if (entriviaQuestionsounds[name]) {
+        entriviaQuestionsounds[name].muted = false; // Unmute the sound
+        entriviaQuestionsounds[name].currentTime = 0; // Reset sound to start
+        entriviaQuestionsounds[name].play().catch(error => {
             console.error(`Error playing ${name}:`, error);
         });
     } else {
         console.error(`Sound '${name}' not found.`);
     }
 }
-function playTriviaWinSound(name) {
+function playentriviaWinSound(name) {
     if (audioSetting === "off") return; // Stop if audio is disabled
 
-    if (triviaWinsounds[name]) {
-        triviaWinsounds[name].muted = false; // Unmute the sound
-        triviaWinsounds[name].currentTime = 0; // Reset sound to start
-        triviaWinsounds[name].play().catch(error => {
+    if (entriviaWinsounds[name]) {
+        entriviaWinsounds[name].muted = false; // Unmute the sound
+        entriviaWinsounds[name].currentTime = 0; // Reset sound to start
+        entriviaWinsounds[name].play().catch(error => {
             console.error(`Error playing ${name}:`, error);
         });
     } else {
         console.error(`Sound '${name}' not found.`);
     }
 }
-// Function to get a random key from triviaWinsounds
+// Function to get a random key from entriviaWinsounds
 function getRandomQuestionSound() {
-    const keys = Object.keys(triviaQuestionsounds);
+    const keys = Object.keys(entriviaQuestionsounds);
     return keys[Math.floor(Math.random() * keys.length)];
 }
-// Function to get a random key from triviaWinsounds
+// Function to get a random key from entriviaWinsounds
 function getRandomWinSound() {
-    const keys = Object.keys(triviaWinsounds);
+    const keys = Object.keys(entriviaWinsounds);
     return keys[Math.floor(Math.random() * keys.length)];
 }
 // Functions for random sounds
@@ -2028,7 +2028,7 @@ function playRandomWinSound() {
     if (audioSetting === "off") return; // Stop if audio is disabled
 
     const randomSound = getRandomWinSound();
-    playTriviaWinSound(randomSound);
+    playentriviaWinSound(randomSound);
 }
 function playRandomQuestionSound() {
     const randomSound = getRandomQuestionSound();
@@ -2054,26 +2054,26 @@ document.getElementById("entrivia-toggle").addEventListener("click", function ()
 });
 // start game button
 document.getElementById("startGame").addEventListener("click", function() {
-    if (triviaGameState === null) {
-		startTrivia(); // Only start trivia if it's not running 
+    if (entriviaGameState === null) {
+		startentrivia(); // Only start entrivia if it's not running 
     }
 });
 // CanceL/terminate and reset game
 document.getElementById("cancelGame").addEventListener("click", function() {
-    if (triviaGameState === "started") {
-        endTrivia(); // Only end trivia if it's running
+    if (entriviaGameState === "started") {
+        endentrivia(); // Only end entrivia if it's running
     }
 });
 document.getElementById('submitQuestionBtn').addEventListener('click', function() {
     // Get the values from the form inputs
     const round = document.getElementById('round').value;
-    const category = document.getElementById('triviacategory').value; // Get category
+    const category = document.getElementById('entriviacategory').value; // Get category
     const questionText = document.getElementById('questionText').value;
     const correctAnswer = document.getElementById('correctAnswer').value;
 
     // Validate inputs
     if (!questionText || !correctAnswer) {
-        displayTriviaMessage("error!", "Please fill in both the question and the answer.", {}, {});
+        displayentriviaMessage("error!", "Please fill in both the question and the answer.", {}, {});
         return;
     }
 
@@ -2086,7 +2086,7 @@ document.getElementById("toggleusecustomquestions").addEventListener("click", to
 // Add event listener to the button to add custom questions
 
     // Call the function to add the question
-    addCustomTriviaQuestion(round, questionText, correctAnswer, category);
+    addCustomentriviaQuestion(round, questionText, correctAnswer, category);
 
     // Clear the form fields
     document.getElementById('questionText').value = '';
@@ -2094,8 +2094,8 @@ document.getElementById("toggleusecustomquestions").addEventListener("click", to
 });
 
 //
-document.getElementById('toggleconsolemessages').addEventListener('click', toggleTriviaconsolemessages);
-document.getElementById('toggleentriviachatOverlay').addEventListener('click', toggleEntriviachatOverlay);
+document.getElementById('toggleconsolemessages').addEventListener('click', toggleentriviaconsolemessages);
+document.getElementById('toggleentriviachatOverlay').addEventListener('click', toggleentriviachatOverlay);
 document.getElementById('togglechatanswers').addEventListener('click', togglechatanswers);
 document.getElementById('toggleusedefaultquestions').addEventListener('click', toggleusedefaultquestions);
 document.getElementById('toggleusecustomquestions').addEventListener('click', toggleusecustomquestions);

@@ -36,7 +36,7 @@
 			opacity: 1;
 		}
 
-		/* Trivia Control Container */
+		/* entrivia Control Container */
 		#comfycontrolBox {
 			position: fixed;
 			top: 10px;
@@ -62,7 +62,7 @@
 			pointer-events: all; /* Allow interactions */
 		}
 
-		/* Trivia Input */
+		/* entrivia Input */
 		#comfycontrolBox input[type="text"] {
 			width: 92%;
 			font-size: larger;
@@ -109,7 +109,7 @@
 			max-height: 500px; /* Expands smoothly */
 			padding: 10px; /* Adds padding when expanded */
 		}
-		/* Trivia Settings Header */
+		/* entrivia Settings Header */
 		#comfy-settingsheader {
 			font-weight: bold;
 			font-size: 16px;
@@ -166,7 +166,7 @@
     </style>
 
 	<style>
-		/* Trivia Control Button */
+		/* entrivia Control Button */
 		#entrivia-toggle {
 			position: fixed;
 			top: 0px;
@@ -194,7 +194,7 @@
 			opacity: 1;
 		}
 
-		/* Trivia Control Container */
+		/* entrivia Control Container */
 		#entriviacontrolBox {
 			position: fixed;
 			top: 10px;
@@ -219,7 +219,7 @@
 			pointer-events: all; /* Allow interactions */
 		}
 
-		/* Trivia Input */
+		/* entrivia Input */
 		#entriviacontrolBox input[type="text"] {
 			width: 92%;
 			font-size: larger;
@@ -232,7 +232,7 @@
 			border-radius: 5px;
 		}
 
-		/* Trivia Buttons */
+		/* entrivia Buttons */
 		#entriviacontrolBox button {
 			width: 100%;
 			padding: 9px;
@@ -266,8 +266,8 @@
 			background: #490101eb;
 			color: #020b0e;
 		}
-		/* Trivia Settings */
-		div#trivia-settings {
+		/* entrivia Settings */
+		div#entrivia-settings {
 			text-align: start;
 			display: flex;
 			color: #00bafff0;
@@ -281,15 +281,15 @@
 			transition: max-height 0.6s ease-out, padding 0.3s ease-out;
 		}
 
-		div#trivia-settings:hover {
+		div#entrivia-settings:hover {
 			max-height: 300px;
 			padding: 10px;
 			padding-top: 4px;
 			height: 3%;
 			overflow-y: scroll;
 		}
-		/* Trivia Settings Header */
-		#trivia-settingsheader {
+		/* entrivia Settings Header */
+		#entrivia-settingsheader {
 			font-family: yatra one;
 			font-weight: bold;
 			text-align: center;
@@ -299,7 +299,7 @@
 			text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
 			border: 3px outset #273a4c;
 		}
-		div#trivia-settings label {
+		div#entrivia-settings label {
 			color: #f36402;
 			font-weight: bold;
 			padding-left: 5px;
@@ -318,11 +318,11 @@
 			text-align: center;
 			border: inherit;
 		}
-		#trivia-settings input, #trivia-settings select, select#questionList {
+		#entrivia-settings input, #entrivia-settings select, select#questionList {
 			color: #cbcbcb;
 			background-color: #25292ef7;
 		}
-		#trivia-settings input {
+		#entrivia-settings input {
 			color: #cbcbcb;
 			font-size: 16px;
 			font-weight: bold;
@@ -342,7 +342,7 @@
 			align-items: center;
 			border: 2px ridge #273a4c;
 		}
-		.trivia-settings-togglebar {
+		.entrivia-settings-togglebar {
 			display: flex;
 			flex-direction: row;
 			justify-content: space-between;
@@ -360,11 +360,11 @@
 			background-color: #020307eb;
 			border: 2px ridge #273a4c;
 		}
-		#trivia-settings input {
+		#entrivia-settings input {
 			width: 28%;
 			min-width: 85px;
 		}
-		div#trivia-settings-main {
+		div#entrivia-settings-main {
 			background-color: #080c15eb;
 			border: 2px inset #000406;
 		}
@@ -436,7 +436,7 @@
 			width: 100vw;
 			height: 100vh;
 		}
-		#triviaAnnouncementWrapper {
+		#entriviaAnnouncementWrapper {
 			display: none;
 			opacity: 1;
 			position: absolute;
@@ -451,7 +451,7 @@
 			border-radius: 12px;
 			box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
 		}
-		#triviaAnnouncement {
+		#entriviaAnnouncement {
 			font-weight: bold;
 			text-align: center;
 			color: white;
@@ -477,7 +477,7 @@
 			text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);
 		}
 
-		#currenttriviaRound {
+		#currententriviaRound {
 			position: fixed;
 			top:4px;
 			left: 4px;
@@ -488,14 +488,14 @@
 		p#question-counter {
 			margin: 0;
 		}
-		#triviaboard {
+		#entriviaboard {
 			position: absolute;
 			top: 0%;
 			font-size: 15px;
 			right: 0;
 			margin:0;
 		}
-		#triviaboard p {
+		#entriviaboard p {
 			background: #001f1f;
 			width: 155px;
 			padding: 4px;
@@ -504,7 +504,7 @@
 			border: 2px outset #095656;
 			border-radius: 0px;
 		}
-		#triviaboard li {
+		#entriviaboard li {
 			margin: -6px 0 0px 0;
 			text-align: center;
 			padding: 4px 9px;
@@ -518,8 +518,8 @@
 		#timer, #timeuntil-nextQ {font-size: 20px;font-weight: bold;color: lightblue;}
 		div#timeuntil-nextQ {position: absolute;bottom: 24%;left: 2%;}
 				
-		/* Trivia Splash Centering */
-		#triviaSplash {
+		/* entrivia Splash Centering */
+		#entriviaSplash {
 			position: fixed;
 			top: 28vh;
 			left: 0;
@@ -541,7 +541,7 @@
 		}
 
 		/* Actual Logo Scaling */
-		#triviaLogo {
+		#entriviaLogo {
 			height: auto;
 			max-width: 37vw;
 			max-height: 38vh;
@@ -565,9 +565,9 @@
 		}
 
 
-		#TriviaWrapper {height: 100vh;visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
+		#entriviaWrapper {height: 100vh;visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
 
-		#triviaPodium {
+		#entriviaPodium {
 			position: absolute;
 			bottom: 30%;
 			left: 14%;
@@ -673,7 +673,7 @@
 			gap: 50px;
 			padding: 0px;
 		}
-		div#triviarunnerups {
+		div#entriviarunnerups {
 			display: flex;
 			gap: 40px;
 		}
@@ -874,34 +874,34 @@
 		<div id="comfy-settings" style="display:none;">
 		</div>
 	</div>
-	<!-- Entrivia Control Container -->
+	<!-- entrivia Control Container -->
 	<div id="entriviacontrolBox">
-		<div id="trivia-settings">
-			<div id="trivia-settings-headergroup">
-				<span id="trivia-settingsheader">Entrivia</span>
-				<h3>Trivia Settings</h3>
+		<div id="entrivia-settings">
+			<div id="entrivia-settings-headergroup">
+				<span id="entrivia-settingsheader">entrivia</span>
+				<h3>entrivia Settings</h3>
 			</div>
-			<div id="trivia-controls">
+			<div id="entrivia-controls">
 				<div class="entriviasettings-inputRow" id="entrivia-bar-settingsbutts">
 					<button id="cancelGame">Abort Game</button>
 					<button id="startGame">Start Game</button>
 				</div>
 			</div>
-			<div id="trivia-settings-toggles">
-				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="usedefaultquestions"></div>
-				<div class="twitchcmd-info" data-option="!trivia-defaultquestions"></div>
-				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="usecustomquestions"></div>
-				<div class="twitchcmd-info" data-option="!trivia-customquestions"></div>
+			<div id="entrivia-settings-toggles">
+				<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="usedefaultquestions"></div>
+				<div class="twitchcmd-info" data-option="!entrivia-defaultquestions"></div>
+				<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="usecustomquestions"></div>
+				<div class="twitchcmd-info" data-option="!entrivia-customquestions"></div>
 			</div>
 			<div id="addCustomQuestionForm">
-				<h3>Add a Custom Trivia Question</h3>
-				<div class="twitchcmd-info" data-option="!trivia-addquestion"></div>
+				<h3>Add a Custom entrivia Question</h3>
+				<div class="twitchcmd-info" data-option="!entrivia-addquestion"></div>
 				<label for="round">Select Round:</label>
 				<select id="round">
 					<option value="round1">Round 1</option>
 					<option value="round2">Round 2</option>
 				</select>
-				<select id="triviacategory">
+				<select id="entriviacategory">
 					<option value="Mining">mining</option>
 					<option value="hunting">hunting</option>
 					<option value="crafting">crafting</option>
@@ -917,7 +917,7 @@
 			</div>
 			<br>
 			<div id="manageCustomQuestions">
-				<h3>Manage Custom Trivia Questions</h3>
+				<h3>Manage Custom entrivia Questions</h3>
 				<label for="questionList">Select Question to Delete:</label>
 				<select id="questionList"></select>
 				<div id="answerDisplay" style="margin-top: 10px;">
@@ -926,35 +926,35 @@
 				</div>
 				<button id="deleteQuestionBtn">Delete Selected Question</button>
 			</div>
-			<div id="trivia-settings-main">
-				<h3>Main Trivia Settings</h3>
+			<div id="entrivia-settings-main">
+				<h3>Main entrivia Settings</h3>
 				<div class="entriviasettings-inputRow" id="entrivia-bar-Questiondelay">
 					<label for="timeBetweenQuestions">Seconds Between Questions:</label>
 					<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
 				</div>
-				<div class="twitchcmd-info" data-option="!trivia-questiondelay"></div>
+				<div class="twitchcmd-info" data-option="!entrivia-questiondelay"></div>
 				<div class="entriviasettings-inputRow" id="entrivia-bar-Answertime">
 					<label for="timeToAnswer">Time to Answer (seconds):</label>
 					<input type="number" id="timeToAnswer" value="30" min="1" step="1">
 				</div>
-				<div class="twitchcmd-info" data-option="!trivia-answertime"></div>
+				<div class="twitchcmd-info" data-option="!entrivia-answertime"></div>
 				<div class="entriviasettings-inputRow" id="entrivia-bar-QuestionsperRound">
 					<label for="questionsPerRound">Questions Per Round:</label>
 					<input type="number" id="questionsPerRound" value="1" min="1" step="1">	
 				</div>
-				<div class="twitchcmd-info" data-option="!trivia-questioncap"></div>
+				<div class="twitchcmd-info" data-option="!entrivia-questioncap"></div>
 				<div class="entriviasettings-inputRow" id="entrivia-bar-rounddelay">
 					<label for="timeBetweenRounds">Seconds Between Rounds:</label>
 					<input type="number" id="timeBetweenRounds" value="30" min="1" step="1">
 				</div>
-				<div class="twitchcmd-info" data-option="!trivia-rounddelay"></div>
+				<div class="twitchcmd-info" data-option="!entrivia-rounddelay"></div>
 				<div class="entriviasettings-inputRow" id="entrivia-bar-settingsbutts">
 					<button id="changeSettings">Set</button>
 					<button id="resetSettings">Default</button>
 				</div>
 			</div>
 			<div id="commandListContainer">
-			  <h3>Entrivia Command List</h3>
+			  <h3>entrivia Command List</h3>
 			  <h2>User Commands</h2>
 			  <ul id="usercommandList">
 			  </ul>
@@ -962,36 +962,36 @@
 			  <ul id="broadcastercommandList">
 			  </ul>
 			</div>
-			<div id="trivia-settings-toggles">
+			<div id="entrivia-settings-toggles">
 				<h3>Dont worry bout these</h3>
-				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="consolemessages"></div>
-				<div class="twitchcmd-info" data-option="!trivia-consolemessages"></div>
-				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="entriviachatOverlay"></div>
-				<div class="twitchcmd-info" data-option="!trivia-disablechat"></div>
-				<div class="trivia-settings-togglebar optiontoggle-entrivia" data-option="chatanswers"></div>
-				<div class="twitchcmd-info" data-option="!trivia-chatanswers"></div>
+				<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="consolemessages"></div>
+				<div class="twitchcmd-info" data-option="!entrivia-consolemessages"></div>
+				<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="entriviachatOverlay"></div>
+				<div class="twitchcmd-info" data-option="!entrivia-disablechat"></div>
+				<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="chatanswers"></div>
+				<div class="twitchcmd-info" data-option="!entrivia-chatanswers"></div>
 			</div>
 		</div>
 	</div>
-	<div id="triviaOverlay" style="">
-		<!-- Wrapper for the Trivia Splash Animation -->
-		<div id="triviaSplash" style="display:none;">
+	<div id="entriviaOverlay" style="">
+		<!-- Wrapper for the entrivia Splash Animation -->
+		<div id="entriviaSplash" style="display:none;">
 			<div id="logoContainer">
-				<!-- <img src="../assets/images/logo/pixelbotfavicon.png" alt="Trivia Logo" id="triviaLogo" /> -->
-				<img src="/assets/images/jaedrazepfp.png" alt="Trivia Logo" id="triviaLogo" />
+				<!-- <img src="../assets/images/logo/pixelbotfavicon.png" alt="entrivia Logo" id="entriviaLogo" /> -->
+				<img src="/assets/images/jaedrazepfp.png" alt="entrivia Logo" id="entriviaLogo" />
 			</div>
 			<div id="susText">S.u.Stv Presents:</div>
-			<div id="splashText">Entrivia Universe</div>
+			<div id="splashText">entrivia Universe</div>
 		</div>
-		<!-- triviaAnnouncementWrapper -->
-		<div id="triviaAnnouncementWrapper">
-			<div id="triviaAnnouncement"></div>
+		<!-- entriviaAnnouncementWrapper -->
+		<div id="entriviaAnnouncementWrapper">
+			<div id="entriviaAnnouncement"></div>
 			<div id="roundstarttimer"></div>
 		</div>
-		<!-- add user trivia rank and rank badges: rank1🥇 rank2🥈 rank3🥉 rank4🏅 rank5-10?🎖️-->
+		<!-- add user entrivia rank and rank badges: rank1🥇 rank2🥈 rank3🥉 rank4🏅 rank5-10?🎖️-->
 		<div id="consoleMessagebox"></div>
-		<div id="TriviaWrapper">
-			<div id="triviaPodium" style="display: none;">
+		<div id="entriviaWrapper">
+			<div id="entriviaPodium" style="display: none;">
 				<div id="first">
 					<span class="trophy gold">🏆1st</span>
 					<div class="winner" id="winner1">
@@ -1016,7 +1016,7 @@
 					</div>
 				</div>
 				<!-- 4th and 5th place winners (smaller) -->
-				<div id="triviarunnerups">
+				<div id="entriviarunnerups">
 					<div class="winner small" id="winner4">
 						<span class="runnerup ribbon">🏅4th</span>
 						<p id="winner4Name" class="winner-name">undetermined</p>
@@ -1031,15 +1031,15 @@
 			</div>
 			<!-- time until next question -->
 			<div id="timeuntil-nextQ"></div>
-			<!-- Trivia questions wrapper -->
+			<!-- entrivia questions wrapper -->
 			<div id="questionWrapper">
 				<p id="question-counter"></p>
 				<div id="question">...</div>
 				<div id="timer"></div>
 			</div>
-			<!-- Trivia leaderboard -->
-			<ul id="triviaboard">
-				<p>Entrivia</p>
+			<!-- entrivia leaderboard -->
+			<ul id="entriviaboard">
+				<p>entrivia</p>
 			</ul>
 		</div>
 	</div>
