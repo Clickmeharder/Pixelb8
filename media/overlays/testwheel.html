@@ -429,8 +429,7 @@ function updateRemoveDropdown() {
 		removeSelect.appendChild(option);
 	});
 }
-
-addButton.addEventListener("click", () => {
+function addwheelSection() {
 	const newSection = addInput.value.trim();
 	if (newSection && !sections.includes(newSection)) {
 		sections.push(newSection);
@@ -444,9 +443,12 @@ addButton.addEventListener("click", () => {
 	} else {
 		console.log("Section name is empty or already exists.");
 	}
+}
+addButton.addEventListener("click", () => {
+	console.log("add section butt clicked!");
+	addwheelSection();
 });
-
-removeButton.addEventListener("click", () => {
+function removewheelSection() {
 	const selectedIndex = removeSelect.value;
 	if (selectedIndex !== "") {
 		sections.splice(selectedIndex, 1);
@@ -457,9 +459,12 @@ removeButton.addEventListener("click", () => {
 		frame = null;
 		repaint(angle);
 	}
+}
+removeButton.addEventListener("click", () => {
+	console.log("remove section butt clicked!");
+	removewheelSection();
 });
-
-function savewheelSections(){
+function savewheelSections() {
 	const name = document.getElementById("savewheelsections").value.trim();
 	if (!name) return alert("Please enter a name for your wheel.");
 
@@ -475,7 +480,7 @@ document.getElementById("save-sectionsButt").addEventListener("click", () => {
 	savewheelSections()
 });
 //load wheel sections button
-document.getElementById("load-sectionsButt").addEventListener("click", () => {
+function loadwheelSections() {
 	const name = document.getElementById("loadwheelsection").value;
 	const wheels = getSavedWheels();
 
@@ -486,10 +491,14 @@ document.getElementById("load-sectionsButt").addEventListener("click", () => {
 		frame = null;
 		repaint(angle);
 	} else {
-		alert("Selected wheel not found.");
+		console.log("Selected wheel not found.");
 	}
+}
+document.getElementById("load-sectionsButt").addEventListener("click", () => {
+	console.log(`Wheel "load sections butt clicked!`);
+	loadwheelSections();
 });
-document.getElementById("delete-saved-wheel").addEventListener("click", () => {
+function deletewheelSections() {
 	const select = document.getElementById("loadwheelsection");
 	const name = select.value;
 
@@ -502,7 +511,11 @@ document.getElementById("delete-saved-wheel").addEventListener("click", () => {
 	delete wheels[name];
 	saveWheelsToStorage(wheels);
 	updateLoadDropdown();
-	alert(`Wheel "${name}" deleted.`);
+	console.log(`Wheel "${name}" deleted.`);
+}
+document.getElementById("delete-saved-wheel").addEventListener("click", () => {
+	console.log(`Wheel "delete wheel butt clicked!`);
+	deletewheelSections();
 });
 //wheel-control-toggle button
 document.getElementById("wheel-control-toggle").addEventListener("click", function () {
