@@ -216,6 +216,7 @@
 		  <label class="label" for="loadwheelsections">
 			<select id="loadwheelsection"></select>
 			<button id="load-sectionsButt">Load Wheel</button>
+			<button id="delete-saved-wheel">Delete Wheel</button>
 		  </label>
 		  <!-- Remove Section -->
 		  <label class="label" for="removewheelsection">
@@ -484,6 +485,21 @@ document.getElementById("load-sectionsButt").addEventListener("click", () => {
 	} else {
 		alert("Selected wheel not found.");
 	}
+});
+document.getElementById("delete-saved-wheel").addEventListener("click", () => {
+	const select = document.getElementById("loadwheelsection");
+	const name = select.value;
+
+	if (!name) return alert("No wheel selected.");
+	const confirmed = confirm(`Are you sure you want to delete the wheel "${name}"?`);
+
+	if (!confirmed) return;
+
+	const wheels = getSavedWheels();
+	delete wheels[name];
+	saveWheelsToStorage(wheels);
+	updateLoadDropdown();
+	alert(`Wheel "${name}" deleted.`);
 });
 //wheel-control-toggle button
 document.getElementById("wheel-control-toggle").addEventListener("click", function () {
