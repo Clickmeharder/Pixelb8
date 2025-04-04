@@ -86,7 +86,9 @@
 			transform: translateY(0);
 			pointer-events: all; /* Allow interactions */
 		}
-		
+		#wheel-piedish {
+			border:3px inset gray;
+		}
 
 	</style>
 	<style>
@@ -242,6 +244,11 @@
 			<button id="load-sectionsButt">Load Wheel</button>
 			<button id="delete-saved-wheel">Delete Wheel</button>
 		  </label>
+		  <!-- save Section -->
+		  <label class="label" for="savewheelsections">
+			<input type="text" id="savewheelsections" placeholder="Name your wheel" />
+			<button id="save-sectionsButt">save current wheel</button>
+		  </label>
 		  <!-- Remove Section -->
 		  <label class="label" for="removewheelsection">
 			<select id="removewheelsection"></select>
@@ -252,11 +259,7 @@
 			<input type="text" id="addwheelsection" placeholder="New section name" />
 			<button id="add-removesectionButt">Add</button>
 		  </label>
-		  <!-- save Section -->
-		  <label class="label" for="savewheelsections">
-			<input type="text" id="savewheelsections" placeholder="Name your wheel" />
-			<button id="save-sectionsButt">save current wheel</button>
-		  </label>
+
 		</div>
 	</div>
 	<div id="wheelcanvaswrapper">
