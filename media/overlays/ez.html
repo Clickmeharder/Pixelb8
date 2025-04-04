@@ -164,6 +164,47 @@
 			pointer-events: none;
 		}
     </style>
+	<style>
+	  .switch {
+		position: relative;
+		display: inline-block;
+		width: 60px;
+		height: 34px;
+	  }
+
+	  .switch input { 
+		opacity: 0;
+		width: 0;
+		height: 0;
+	  }
+
+	  .slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0; left: 0; right: 0; bottom: 0;
+		background-color: #ccc;
+		transition: .4s;
+		border-radius: 34px;
+	  }
+
+	  .slider:before {
+		position: absolute;
+		content: "";
+		height: 26px; width: 26px;
+		left: 4px; bottom: 4px;
+		background-color: white;
+		transition: .4s;
+		border-radius: 50%;
+	  }
+
+	  input:checked + .slider {
+		background-color: #66bb6a;
+	  }
+
+	  input:checked + .slider:before {
+		transform: translateX(26px);
+	  }
+	</style>
 </head>
 <body>
 <!-- can we figure out emojis? -->
@@ -174,9 +215,14 @@
 		<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
 		<button id="streamersButt">Connect</button>
 		<button id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
-		<div id="more-controls" style="display:none;">
-			<button id="unused">do nothing</button>
-			<button id="unused">do nothing</button>
+		<div id="more-controls" style="">
+			<span id="">Simulate background</span>
+			<div id="switch-box">
+				<label class="switch">
+				  <input type="checkbox" id="simulatebackground">
+				  <span class="slider"></span>
+				</label>
+			</div>
 		</div>
 		<div id="comfy-settings" style="display:none;">
 			<span id="comfy-settingsheader">Settings</span>
@@ -197,7 +243,9 @@
 		<div id="twitchMessagebox">
 		</div>
 	</div>
+	
 	<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
+	<script src="assets/js/obsglobal.js"></script>
 	<script src="assets/js/twitchChat.js"></script>
 
 </body>
