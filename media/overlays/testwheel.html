@@ -23,6 +23,7 @@
 			width: auto;
 			height: 100%;
 			display: block;
+			border-radius: 50%;
 			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
 		}
 		#canvas1 {
@@ -302,7 +303,7 @@
 		canvas.height = wrapperBounds.height;
 
 		// Set the radius to be half of the canvas width or height (whichever is smaller)
-		let r = Math.min(canvas.width, canvas.height) * 0.9 / 2; 
+		let r = Math.min(canvas.width, canvas.height) * 0.95 / 2; 
 
 		// Ensure the wheel is centered in the middle of the canvas
 		let cx = canvas.width / 2;
