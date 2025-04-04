@@ -1943,23 +1943,23 @@ const sounds = {
     // Add more sounds here
 };
 const entriviasounds = {
-    openingtheme: new Audio("../../../assets/sounds/entrivia/openingtheme-entriviauniverse.mp3"),
-    openingtheme2: new Audio("../../../assets/sounds/entrivia/openingtheme2-entriviauniverse.mp3"),
-	openingtheme0: new Audio("../../../assets/sounds/entrivia/openingtheme1-entriviauniverse.mp3"),
-	openingtheme1: new Audio("../../../assets/sounds/entrivia/short-logo.mp3"),
-	entriviafirstcorrect: new Audio("../../../assets/sounds/entrivia/entrivia-firstcorrect.mp3"),
-	entriviacorrect: new Audio("../../../assets/sounds/entrivia/entrivia-correct.mp3"),
-	entriviawrong: new Audio("../../../assets/sounds/entrivia/entrivia-wrong.mp3"),
-	entriviaroundover: new Audio("../../../assets/sounds/entrivia/entrivia-roundover.mp3"),
-	entriviatimesup: new Audio("../../../assets/sounds/entrivia/entrivia-timesup1.mp3"),	
-	winsequence1: new Audio("../../../assets/sounds/entrivia/winsequence-1.mp3"),
-	winsequence2: new Audio("../../../assets/sounds/entrivia/winsequence-2.mp3"),
-	winsequence3: new Audio("../../../assets/sounds/entrivia/winsequence-3.mp3"),
+    openingtheme: new Audio("/assets/sounds/entrivia/openingtheme-entriviauniverse.mp3"),
+    openingtheme2: new Audio("/assets/sounds/entrivia/openingtheme2-entriviauniverse.mp3"),
+	openingtheme0: new Audio("/assets/sounds/entrivia/openingtheme1-entriviauniverse.mp3"),
+	openingtheme1: new Audio("/assets/sounds/entrivia/short-logo.mp3"),
+	entriviafirstcorrect: new Audio("/assets/sounds/entrivia/entrivia-firstcorrect.mp3"),
+	entriviacorrect: new Audio("/assets/sounds/entrivia/entrivia-correct.mp3"),
+	entriviawrong: new Audio("/assets/sounds/entrivia/entrivia-wrong.mp3"),
+	entriviaroundover: new Audio("/assets/sounds/entrivia/entrivia-roundover.mp3"),
+	entriviatimesup: new Audio("/assets/sounds/entrivia/entrivia-timesup1.mp3"),	
+	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
+	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
+	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
     // Add more sounds here
 };
 const entriviaQuestionsounds = {
-	entriviabloop1: new Audio("../../../assets/sounds/entrivia/entrivia-bloop1.mp3"),
-	entriviabloop2: new Audio("../../../assets/sounds/entrivia/entrivia-bloop2.mp3"),
+	entriviabloop1: new Audio("/assets/sounds/entrivia/entrivia-bloop1.mp3"),
+	entriviabloop2: new Audio("/assets/sounds/entrivia/entrivia-bloop2.mp3"),
 }
 const entriviaWinsounds = {
 	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
