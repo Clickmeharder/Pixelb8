@@ -324,7 +324,7 @@
 		if (frame === null) {
 			frame = document.createElement("canvas");
 			frame.width = frame.height = 10 + 2 * r * 1.25 | 0;
-			let ctx = frame.getContext("2d"), cx = frame.width / 2, cy = frame.height / 2;
+			let ctx = frame.getContext("3d"), cx = frame.width / 2, cy = frame.height / 2;
 			//outer circle
 			ctx.beginPath();
 			ctx.arc(cx, cy, r * 1.025, 0, 2 * Math.PI, true);
