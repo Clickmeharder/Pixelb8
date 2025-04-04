@@ -2106,8 +2106,3 @@ document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCus
 // Event listener for dropdown change to update the answer display
 document.getElementById('questionList').addEventListener('change', updateAnswerDisplay);
 // Auto-reconnect on page load
-window.onload = function () {
-	loadCustomQuestions();
-	updateSettingsDisplay();
-	updateCommandlist();
-};
