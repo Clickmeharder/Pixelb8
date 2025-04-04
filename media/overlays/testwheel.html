@@ -211,6 +211,18 @@
 			  <span class="slider"></span>
 			</label>
 		</div>
+		<div id="wheel-piedish">
+		  <!-- Remove Section -->
+		  <label class="label" for="removewheelsection">
+			<select id="removewheelsection"></select>
+			<button id="wheel-removesectionButt">Remove</button>
+		  </label>
+		  <!-- Add Section -->
+		  <label class="label" for="addwheelsection">
+			<input type="text" id="addwheelsection" placeholder="New section name" />
+			<button id="add-removesectionButt">Add</button>
+		  </label>
+		</div>
 	</div>
     <canvas id="canvas1"></canvas>
 
@@ -238,18 +250,54 @@
 	  });
 	</script>
 	<script>
-		//enentrivia-toggle button
-		document.getElementById("entrivia-toggle").addEventListener("click", function () {
-			let container = document.getElementById("entriviacontrolBox");
-			container.classList.toggle("active");
+
+	let canvas = document.getElementById("canvas1");
+	let sections = ["FREE Beer Ked", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "idk", "another option", "nothing"];
+	let colors = ["#001f1fe8", "#004040eb"];
+	let wheels = null;
+	let frame = null;
+	const removeSelect = document.getElementById("removewheelsection");
+	const addInput = document.getElementById("addwheelsection");
+	const addButton = document.getElementById("add-removesectionButt");
+	const removeButton = document.getElementById("wheel-removesectionButt");
+
+	function updateRemoveDropdown() {
+		removeSelect.innerHTML = ""; // Clear current options
+		sections.forEach((section, index) => {
+			const option = document.createElement("option");
+			option.value = index;
+			option.textContent = section;
+			removeSelect.appendChild(option);
 		});
-	</script>
-    <script>
-		let canvas = document.getElementById("canvas1");
-		let sections = ["FREE Beer Ked", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "idk", "another option", "nothing"];
-		let colors = ["#001f1fe8", "#004040eb"];
-		let wheels = null;
-		let frame = null;
+	}
+
+addButton.addEventListener("click", () => {
+	const newSection = addInput.value.trim();
+	if (newSection && !sections.includes(newSection)) {
+		sections.push(newSection);
+		updateRemoveDropdown();
+		addInput.value = "";
+	} else {
+		alert("Section name is empty or already exists.");
+	}
+});
+
+removeButton.addEventListener("click", () => {
+	const selectedIndex = removeSelect.value;
+	if (selectedIndex !== "") {
+	  sections.splice(selectedIndex, 1);
+	  updateRemoveDropdown();
+	}
+});
+
+	  // Initialize dropdown when page loads
+updateRemoveDropdown();
+//enentrivia-toggle button
+document.getElementById("entrivia-toggle").addEventListener("click", function () {
+	let container = document.getElementById("entriviacontrolBox");
+	container.classList.toggle("active");
+});
+
 
 		function repaint(angle) {
 			let r = Math.min(innerWidth, innerHeight) / 2.25 | 0;
