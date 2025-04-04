@@ -8,11 +8,15 @@
 		body{
 			overflow: hidden;
 		}
+		
+		#wheelcanvaswrapper {
+			position:fixed;
+			display:block;
+			height: 50%;
+			width:auto;
+		}
 		#canvas1 {
 			display: block;
-			position: absolute;
-			top: 0px;
-			right: -26%;
 			opacity: 0.85;
 			margin: 0;
 			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
@@ -71,6 +75,8 @@
 			transform: translateY(0);
 			pointer-events: all; /* Allow interactions */
 		}
+		
+
 	</style>
 	<style>
 	  .switch {
@@ -242,8 +248,9 @@
 		  </label>
 		</div>
 	</div>
-    <canvas id="canvas1"></canvas>
-
+	<div id="wheelcanvaswrapper">
+		<canvas id="canvas1"></canvas>
+	</div>
 	<script>
 		<!-- simulate background script -->
 	  const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
