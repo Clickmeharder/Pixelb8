@@ -348,5 +348,3 @@ window.onload = function () {
 	connectStreamer();
 };
 
-
-};
