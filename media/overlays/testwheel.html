@@ -12,6 +12,60 @@
         }
     </style>
 	<style>
+		/* entrivia Control Button */
+		#Wheel-control-toggle {
+			position: fixed;
+			bottom: 2px;
+			right: 30px;
+			width: 40px;
+			height: 30px;
+			border-radius: 19%;
+			background: linear-gradient(113deg, #001f1f, #004040);
+			color: #12ebeb;
+			border: none;
+			font-size: 27px;
+			padding: 0px;
+			line-height: 0.1;
+			cursor: pointer;
+			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+			transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
+			z-index: 1000;
+			opacity: 0.65;
+		}
+
+		#Wheel-control-toggle:hover {
+			background-color: #2980b9;
+			transform: scale(1.1);
+			opacity: 1;
+		}
+
+		/* entrivia Control Container */
+		#wheel-controlBox {
+			position: fixed;
+			top: 10px;
+			left: 10px;
+			width: 348px;
+			padding: 10px;
+			background: linear-gradient(135deg, #001f1fe8, #004040eb);
+			color: white;
+			border-radius: 8px;
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+			opacity: 0; /* Start hidden */
+			transform: translateY(-10px); /* Slight slide-up effect */
+			transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+			pointer-events: none; /* Prevent interaction when hidden */
+			z-index: 999;
+		}
+
+		/* When active (visible) */
+		#wheel-controlBox.active {
+			opacity: 0.85;
+			transform: translateY(0);
+			pointer-events: all; /* Allow interactions */
+		}
+	</style>
+	<style>
 	  .switch {
 		position: relative;
 		display: inline-block;
@@ -52,14 +106,114 @@
 		transform: translateX(26px);
 	  }
 	</style>
+	<style>
+		/* ANIMATIONS */
+
+		/* Logo Drop-In */
+		@keyframes logoDropIn {
+			0% {
+				opacity: 0;
+				transform: scale(0.5) rotate(-15deg);
+			}
+			50% {
+				opacity: 1;
+				transform: scale(1.2) rotate(5deg);
+			}
+			100% {
+				opacity: 1;
+				transform: scale(1) rotate(0deg);
+			}
+		}
+
+		/* Glow Pulse */
+		@keyframes glowPulse {
+			0% {
+				filter: drop-shadow(0 0 5px #0ea4a4);
+			}
+			100% {
+				filter: drop-shadow(0 0 15px #0ea4a4);
+			}
+		}
+
+		/* Text Reveal */
+		@keyframes textReveal {
+			0% {
+				opacity: 0;
+				transform: translateY(10px);
+			}
+			50% {
+				opacity: 1;
+				transform: translateY(0);
+			}
+			100% {
+				opacity: 1;
+				text-shadow: 0px 0px 10px #0ea4a4;
+			}
+		}
+
+		/* Fade In */
+		@keyframes fadeIn {
+			from { opacity: 0; transform: translateY(10px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		/* Fade Out */
+		@keyframes fadeOut {
+			from { opacity: 1; transform: translateY(0); }
+			to { opacity: 0; transform: translateY(-10px); }
+		}
+
+		/* Slide In */
+		@keyframes slideIn {
+			from { opacity: 0; transform: translateX(-50px); }
+			to { opacity: 1; transform: translateX(0); }
+		}
+
+		/* Slide Out */
+		@keyframes slideOut {
+			from { opacity: 1; transform: translateX(0); }
+			to { opacity: 0; transform: translateX(50px); }
+		}
+
+
+		@keyframes oldlogoDropIn {
+			0% {
+				opacity: 0;
+				transform: scale(0.5) rotate(-15deg);
+			}
+			50% {
+				opacity: 1;
+				transform: scale(1.2) rotate(5deg);
+			}
+			100% {
+				transform: scale(1) rotate(0deg);
+			}
+		}
+
+		@keyframes oldglowPulse {
+			0% { filter: drop-shadow(0 0 5px #0ea4a4); }
+			100% { filter: drop-shadow(0 0 15px #0ea4a4); }
+		}
+		@keyframes oldtextReveal {
+			0% { opacity: 0; transform: translateY(10px); }
+			50% { opacity: 1; transform: translateY(0px); }
+			100% { text-shadow: 0px 0px 10px #0ea4a4; }
+		}
+
+    </style>
 </head>
 <body>
+	<button id="Wheel-control-toggle">Ｅ</button>
+	<div id="wheel-controlBox">
+		<div id="switch-box">
+			<label class="switch">
+			  <input type="checkbox" id="simulatebackground">
+			  <span class="slider"></span>
+			</label>
+		</div>
+	</div>
     <canvas id="canvas1"></canvas>
-	
-	<label class="switch">
-	  <input type="checkbox" id="simulatebackground">
-	  <span class="slider"></span>
-	</label>
+
 	<script>
 		<!-- simulate background script -->
 	  const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
@@ -82,6 +236,13 @@
 		  removeBackgroundImage();
 		}
 	  });
+	</script>
+	<script>
+		//enentrivia-toggle button
+		document.getElementById("entrivia-toggle").addEventListener("click", function () {
+			let container = document.getElementById("entriviacontrolBox");
+			container.classList.toggle("active");
+		});
 	</script>
     <script>
 		let canvas = document.getElementById("canvas1");
@@ -214,6 +375,6 @@
 
 		repaint(angle);
 
-	</script> <!-- Make sure to load your wheel script here -->
+	</script>
 </body>
 </html>
