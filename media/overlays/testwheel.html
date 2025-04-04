@@ -396,24 +396,34 @@
 		});
 	}
 
-	addButton.addEventListener("click", () => {
-		const newSection = addInput.value.trim();
-		if (newSection && !sections.includes(newSection)) {
-			sections.push(newSection);
-			updateRemoveDropdown();
-			addInput.value = "";
-		} else {
-			alert("Section name is empty or already exists.");
-		}
-	});
+addButton.addEventListener("click", () => {
+	const newSection = addInput.value.trim();
+	if (newSection && !sections.includes(newSection)) {
+		sections.push(newSection);
+		updateRemoveDropdown();
+		addInput.value = "";
 
-	removeButton.addEventListener("click", () => {
-		const selectedIndex = removeSelect.value;
-		if (selectedIndex !== "") {
-		  sections.splice(selectedIndex, 1);
-		  updateRemoveDropdown();
-		}
-	});
+		// 🔁 Force redraw
+		wheels = null;
+		frame = null;
+		repaint(angle);
+	} else {
+		console.log("Section name is empty or already exists.");
+	}
+});
+
+removeButton.addEventListener("click", () => {
+	const selectedIndex = removeSelect.value;
+	if (selectedIndex !== "") {
+		sections.splice(selectedIndex, 1);
+		updateRemoveDropdown();
+
+		// 🔁 Force redraw
+		wheels = null;
+		frame = null;
+		repaint(angle);
+	}
+});
 
 		  // Initialize dropdown when page loads
 	updateRemoveDropdown();
