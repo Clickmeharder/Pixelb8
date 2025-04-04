@@ -342,9 +342,9 @@ document.getElementById("streamersButt").addEventListener("click", function() {
     setStreamer(newStreamer); // Then, set the new streamer
 });
 window.onload = function () {
-	loadCustomQuestions();
+/* 	loadCustomQuestions();
 	updateSettingsDisplay();
-	updateCommandlist();
+	updateCommandlist(); */
 	connectStreamer();
 };
 

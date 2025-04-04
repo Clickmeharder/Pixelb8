@@ -1094,7 +1094,12 @@
 	<script src="assets/js/obsglobal.js"></script>
 	<script src="assets/js/entrivia.js"></script>
 	<script src="assets/js/twitchChat.js"></script>
-	
-
+	<script>
+		window.onload = function () {
+			loadCustomQuestions();
+			updateSettingsDisplay();
+			updateCommandlist();
+		};
+	</script>
 </body>
 </html>
