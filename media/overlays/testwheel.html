@@ -287,7 +287,7 @@
 			for (let selected = 0; selected < sections.length; selected++) {
 				let canvas = document.createElement("canvas");
 				canvas.width = canvas.height = 2 * r + 10;
-				let ctx = canvas.getContext("2d");
+				let ctx = canvas.getContext("3d");
 				let cx = 5 + r, cy = 5 + r;
 
 				// Loop through and draw each section
@@ -354,7 +354,7 @@
 		canvas.width = innerWidth;
 		canvas.height = innerHeight;
 		let cx = innerWidth / 2, cy = innerHeight / 2;
-		let ctx = canvas.getContext("2d");
+		let ctx = canvas.getContext("3d");
 
 		// Get the selected section based on the current angle
 		let selected = (Math.floor((-0.2 - angle) * sections.length / (2 * Math.PI)) % sections.length);
