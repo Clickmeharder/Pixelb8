@@ -1962,10 +1962,10 @@ const entriviaQuestionsounds = {
 	entriviabloop2: new Audio("../../../assets/sounds/entrivia/entrivia-bloop2.mp3"),
 }
 const entriviaWinsounds = {
-	winsequence1: new Audio("../../../assets/sounds/entrivia/winsequence-1.mp3"),
-	winsequence2: new Audio("../../../assets/sounds/entrivia/winsequence-2.mp3"),
-	winsequence3: new Audio("../../../assets/sounds/entrivia/winsequence-3.mp3"),
-	closingtheme: new Audio("../../assets/sounds/entrivia/closingtheme-entriviauniverse.mp3"),
+	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
+	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
+	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
+	closingtheme: new Audio("/assets/sounds/entrivia/closingtheme-entriviauniverse.mp3"),
     // Add more sounds here
 };
 //-------------------------------------
