@@ -2318,7 +2318,7 @@ function updateIndicatorLights() {
     document.querySelectorAll(".light-indicator").forEach(indicator => {
         const optionName = indicator.getAttribute("data-option");
         const optionValue = settings[optionName]; // Get the value safely
-        console.log(`Checking ${optionName}:`, optionValue); // Debug log
+        //console.log(`Checking ${optionName}:`, optionValue); // Debug log
         
         // Set light color based on value
         const lightColor = (optionValue === true || optionValue === "on") 
