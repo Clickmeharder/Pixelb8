@@ -325,13 +325,13 @@
 			frame = document.createElement("canvas");
 			frame.width = frame.height = 10 + 2 * r * 1.25 | 0;
 			let ctx = frame.getContext("2d"), cx = frame.width / 2, cy = frame.height / 2;
-
+			//outer circle
 			ctx.beginPath();
 			ctx.arc(cx, cy, r * 1.025, 0, 2 * Math.PI, true);
 			ctx.arc(cx, cy, r * 0.975, 0, 2 * Math.PI, false);
-			ctx.fillStyle = "#0ff";
+			ctx.fillStyle = "#004040eb";
 			ctx.fill();
-			
+			//inner circle
 			ctx.fillStyle = "#004040eb";
 			ctx.strokeStyle = "#001f1fe8";
 			ctx.lineWidth = 8;
@@ -339,7 +339,7 @@
 			ctx.arc(cx, cy, r / 3.5, 0, 2 * Math.PI, false);
 			ctx.fill();
 			ctx.stroke();
-			
+			//pointer
 			ctx.translate(cx, cy);
 			ctx.rotate(Math.PI - 0.2);
 			ctx.beginPath();
