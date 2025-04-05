@@ -249,6 +249,8 @@ body.holo-theme .box.shadow {
 	position: absolute;
     width: 150px;
     height: 150px;
+	padding: 3px;
+	line-height: 0.1;
     transform: translate(0%, -10%);
 	pointer-events: none;
 	opacity: 0;
