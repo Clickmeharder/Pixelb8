@@ -475,18 +475,22 @@
 			t = 3 * t * t - 2 * t * t * t; // ease in out
 			angle = start_angle + t * (final_angle - start_angle);
 			repaint(angle);
-			
+
 			if (t < 1) {
 				requestAnimationFrame(frame);
 			} else {
 				running = false;
 
-				// 🏆 Determine winning section
-				let winningIndex = (Math.floor((-0.2 - final_angle) * sections.length / (2 * Math.PI)) % sections.length);
-				if (winningIndex < 0) winningIndex += sections.length;
+				// ✅ Call your animation function with correct parameters
+				// Determine winning index again (just to be sure)
+				let winningIndex = winner;
 
-				// ✨ Highlight it!
-				highlightWinningSection(winningIndex);
+				// Pass radius and canvas center
+				const cx = canvas.width / 2;
+				const cy = canvas.height / 2;
+				const radius = r; // this should already be defined in your code
+
+				animateWinningSection(winningIndex, radius, cx, cy);
 			}
 		}
 		requestAnimationFrame(frame);
