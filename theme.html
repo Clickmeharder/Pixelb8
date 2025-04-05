@@ -207,7 +207,7 @@ _____________________________  -->
 
 		  // Load saved theme on startup
 		  window.addEventListener("DOMContentLoaded", () => {
-			const preferredsaved = localStorage.getItem("theme");
+			const saved = localStorage.getItem("theme");
 			if (saved) setTheme(saved);
 		  });
 	  </script>
