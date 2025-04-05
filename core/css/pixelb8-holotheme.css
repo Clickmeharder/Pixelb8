@@ -226,15 +226,15 @@ body.holo-theme .box.shadow {
 /* Wrap around PixelButt so bubble buttons are relative */
 #bubble-wrapper {
 	position: fixed;
-	bottom: 30px;
-	right: 30px;
+	bottom: 50%;
+	right: 50%;
 	width: 60px;
 	height: 60px;
 	z-index: 1000;
 }
 
 /* Main Button */
-#thePixelButt {
+#thePixelButt2 {
 	width: 40px;
 	height: 40px;
 	border-radius: 50%;
