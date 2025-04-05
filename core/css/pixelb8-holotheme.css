@@ -179,6 +179,19 @@ body.holo-theme .box.shadow {
 /*-------------------------------------------*/
 /*     Twitch Chat Message box & emotes     */
 /*-----------------------------------------*/
+	#twitchChat {
+		color:;
+		background:;
+		border:;
+		box-shadow:;
+	}
+	.themed, .chatMessage, .panel, .controller {
+		color: var(--text-color);
+		background:var(--bg-color);
+		border:var(--border);
+		box-shadow: var(--box-glow);
+	}
+
 	.twitchEmote {
 		height: 1.5rem;
 		width: auto;
@@ -205,10 +218,7 @@ body.holo-theme .box.shadow {
 		font-size: 18px;
 		padding-left:8px;
 		padding-right:8px;
-		color: var(--text-color);
-		background:var(--bg-color);
-		border:var(--border);
-		box-shadow: var(--box-glow);
+
 	}
 
 /*----------------------*/
