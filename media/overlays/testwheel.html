@@ -306,6 +306,7 @@
 
 		</div>
 	</div>
+	<div id="wheel-result" style="margin-top: 10px; font-weight: bold; color: #ff0; font-size: 18px;"></div>
 	<div id="wheelcanvaswrapper">
 		<canvas id="canvas1"></canvas>
 	</div>
@@ -473,8 +474,25 @@
 			t = 3 * t * t - 2 * t * t * t; // ease in out
 			angle = start_angle + t * (final_angle - start_angle);
 			repaint(angle);
-			if (t < 1) requestAnimationFrame(frame); else running = false;
+			if (t < 1) {
+			requestAnimationFrame(frame);
+			} else {
+				running = false;
+
+				// 🏆 Determine the winning section
+				let winningIndex = (Math.floor((-0.2 - angle) * sections.length / (2 * Math.PI)) % sections.length);
+				if (winningIndex < 0) winningIndex += sections.length;
+				let winningSection = sections[winningIndex];
+
+				// 🔊 Log and/or display the winner
+				console.log("Winner:", winningSection);
+				const resultDisplay = document.getElementById("wheel-result");
+				if (resultDisplay) {
+					resultDisplay.textContent = `🎉 Winner: ${winningSection}`;
+				}
+			}
 		}
+
 		requestAnimationFrame(frame);
 		running = true;
 	}
