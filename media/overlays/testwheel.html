@@ -341,7 +341,14 @@
 	const addButton = document.getElementById("add-removesectionButt");
 	const removeButton = document.getElementById("wheel-removesectionButt");
 
-
+	// Font settings outside the function
+	const wheelFontConfig = {
+	  family: "Comic Sans MS",
+	  weight: "bold",
+	  minSize: 12,
+	  maxSize: 22,
+	  scaleFactor: 0.9
+	};
 
 	function repaint(angle) {
 		const wrapper = document.getElementById("wheelcanvaswrapper");
@@ -381,9 +388,13 @@
 					ctx.stroke();
 
 					// Draw the text
+					const fontSize = Math.min(
+					  Math.max(r / sections.length * wheelFontConfig.scaleFactor, wheelFontConfig.minSize),
+					  wheelFontConfig.maxSize
+					);
 					ctx.save();
 					ctx.fillStyle = "#ff8900f5";
-					ctx.font = "bold " + r / sections.length * 0.9 + "px Comic sans";
+					ctx.font = `${wheelFontConfig.weight} ${fontSize}px ${wheelFontConfig.family}`;
 					ctx.textAlign = "center";
 					ctx.textBaseline = "middle";
 					ctx.translate(r, r);
