@@ -270,7 +270,6 @@ body.holo-theme .box.shadow {
 	border-radius: 50%;
 	font-size: 18px;
 	opacity: 0;
-	transform: translate(0, 0) scale(0.5); /* ✅ Combine translate and scale */
 	transition: all 0.3s ease;
 	background: var(--button-bg, #222);
 	color: var(--button-fg, #fff);
