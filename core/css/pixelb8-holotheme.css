@@ -247,11 +247,9 @@ body.holo-theme .box.shadow {
 /* Bubble container */
 #Bubble {
 	position: absolute;
-	top: 50%;
-	left: 50%;
-	width: 150px;
-	height: 150px;
-	transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    transform: translate(0%, -10%);
 	pointer-events: none;
 	opacity: 0;
 	z-index: 999;
@@ -281,11 +279,11 @@ body.holo-theme .box.shadow {
 }
 
 /* Radial Positions */
-#comfy-Butt     { transform: translate(-60px,   0px) scale(0.5); }
-#wheel-Butt     { transform: translate(-42px, -42px) scale(0.5); }
+#comfy-Butt     { transform: translate(-40px,   -22px) scale(0.5); }
+#wheel-Butt     { transform: translate(-29px, -50px) scale(0.5); }
 #entrivia-Butt  { transform: translate(  0px, -60px) scale(0.5); }
-#theme-Butt     { transform: translate( 42px, -42px) scale(0.5); }
-#settings-Butt  { transform: translate( 60px,   0px) scale(0.5); }
+#theme-Butt     { transform: translate( 29px, -50px) scale(0.5); }
+#settings-Butt  { transform: translate( 40px, -22px) scale(0.5); }
 /* Add more for a full circle if needed */
 #more-Butt1     { transform: translate( 42px, 42px) scale(0.5); }
 #more-Butt2     { transform: translate(  0px, 60px) scale(0.5); }
