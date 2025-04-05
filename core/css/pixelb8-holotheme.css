@@ -223,10 +223,11 @@ body.holo-theme .box.shadow {
 /*       Main Button      */
 /*----------------------*/
 /* Wrap around PixelButt so bubble buttons are relative */
-#bubblewrap {
+/* Wrap around PixelButt so bubble buttons are relative */
+#bubble-wrapper {
 	position: fixed;
-	bottom: 200px;
-	right: 2000px;
+	bottom: 30px;
+	right: 30px;
 	width: 60px;
 	height: 60px;
 	z-index: 1000;
@@ -274,6 +275,24 @@ body.holo-theme .box.shadow {
 	transition: all 0.3s ease;
 	background: var(--button-bg, #222);
 	color: var(--button-fg, #fff);
+}
+
+/* On bubble open */
+#Bubble.active .Butt {
+	opacity: 1;
+	transform: scale(1);
+}
+
+/* Radial Positions */
+#comfy-Butt     { transform: translate(-50px, -50px); }
+#wheel-Butt     { transform: translate(  0px, -70px); }
+#entrivia-Butt  { transform: translate( 50px, -50px); }
+#theme-Butt     { transform: translate( 70px,   0px); }
+#settings-Butt  { transform: translate( 50px,  50px); }
+
+/* Optional hover effect */
+#Bubble .Butt:hover {
+	background: var(--button-hover, #555);
 }
 /*----------------------*/
 /*       Console      */
