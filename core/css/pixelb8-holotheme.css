@@ -41,7 +41,7 @@ body.dark-theme {
   --glow-color: rgba(0, 204, 255, 0.4);
   --console-bg: rgba(20, 20, 20, 0.7);
   --body-opacity: 1;
-  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_sabretooth.png'), auto;
+  --cursor-image: ;
 }
 
 /* 🌞 LIGHT THEME (extra bright) */
@@ -62,7 +62,7 @@ body.light-theme {
   --glow-color: rgba(60, 140, 188, 0.4);
   --console-bg: rgba(255, 255, 255, 0.85);
   --body-opacity: 1;
-  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_brush.png'), auto;
+  --cursor-image: ;
 }
 /* 🎨 CUSTOM THEME (pastel play) */
 body.custom-theme {
@@ -82,7 +82,7 @@ body.custom-theme {
   --glow-color: rgba(255, 128, 200, 0.5);
   --console-bg: rgba(255, 245, 250, 0.8);
   --body-opacity: 1;
-  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_candycane.png'), auto;
+  --cursor-image: ;
 }
 /* 🕹️ RETRO THEME (green screen vibes) */
 body.retro-theme {
@@ -102,7 +102,7 @@ body.retro-theme {
   --glow-color: rgba(0, 255, 0, 0.4);
   --console-bg: rgba(0, 0, 0, 0.85);
   --body-opacity: 1;
-  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_terminalgreen.png'), auto;
+  --cursor-image: default;
 }
 body.holo-theme {
 	/* Default Cursor */
