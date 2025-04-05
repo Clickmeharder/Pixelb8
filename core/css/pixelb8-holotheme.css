@@ -222,36 +222,47 @@ body.holo-theme .box.shadow {
 /*----------------------*/
 /*       Main Button      */
 /*----------------------*/
-#thePixelButt{
+/* Wrap around PixelButt so bubble buttons are relative */
+#bubblewrap {
 	position: fixed;
-	bottom: 220px;
-	right: 250px;
-	width: 40px;
-	height: 30px;
-	font-size: 24px;
-	padding: 3px;
-	line-height: 0.1;
-	cursor: pointer;
+	bottom: 30px;
+	right: 30px;
+	width: 60px;
+	height: 60px;
 	z-index: 1000;
 }
+
+/* Main Button */
+#thePixelButt {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	font-size: 24px;
+	cursor: pointer;
+	position: relative;
+	z-index: 1001;
+}
+
+/* Bubble container */
 #Bubble {
-	position: fixed;
-	bottom: 20px;
-	right: 30px;
+	position: absolute;
+	bottom: 0;
+	right: 0;
 	width: 0;
 	height: 0;
-	opacity: 0;
 	pointer-events: none;
+	opacity: 0;
 	z-index: 999;
 	transition: opacity 0.3s ease;
 }
 
+/* When active */
 #Bubble.active {
 	opacity: 1;
 	pointer-events: all;
 }
 
-/* Style all Bubble buttons */
+/* Shared button style */
 #Bubble .Butt {
 	position: absolute;
 	width: 36px;
@@ -263,24 +274,6 @@ body.holo-theme .box.shadow {
 	transition: all 0.3s ease;
 	background: var(--button-bg, #222);
 	color: var(--button-fg, #fff);
-}
-
-/* When Bubble is active, animate buttons outward */
-#Bubble.active .Butt {
-	opacity: 1;
-	transform: scale(1);
-}
-
-/* Now position each button with transforms */
-#comfy-Butt       { transform: translate(-60px, -60px); }
-#wheel-Butt       { transform: translate(  0px, -80px); }
-#entrivia-Butt    { transform: translate( 60px, -60px); }
-#theme-Butt       { transform: translate( 80px,   0px); }
-#settings-Butt    { transform: translate( 60px,  60px); }
-
-/* Optional hover effect */
-#Bubble .Butt:hover {
-	background: var(--button-hover, #555);
 }
 /*----------------------*/
 /*       Console      */
