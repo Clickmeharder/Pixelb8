@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin Wheel</title>
+	<link rel="icon" type="image/png" href="/assets/images/logo/pixelbotfavicon.png">
+	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <style>
+		/* ANIMATIONS */
+
+		/* Logo Drop-In */
+		@keyframes logoDropIn {
+			0% {
+				opacity: 0;
+				transform: scale(0.5) rotate(-15deg);
+			}
+			50% {
+				opacity: 1;
+				transform: scale(1.2) rotate(5deg);
+			}
+			100% {
+				opacity: 1;
+				transform: scale(1) rotate(0deg);
+			}
+		}
+
+		/* Glow Pulse */
+		@keyframes glowPulse {
+			0% {
+				filter: drop-shadow(0 0 5px #0ea4a4);
+			}
+			100% {
+				filter: drop-shadow(0 0 15px #0ea4a4);
+			}
+		}
+
+		/* Text Reveal */
+		@keyframes textReveal {
+			0% {
+				opacity: 0;
+				transform: translateY(10px);
+			}
+			50% {
+				opacity: 1;
+				transform: translateY(0);
+			}
+			100% {
+				opacity: 1;
+				text-shadow: 0px 0px 10px #0ea4a4;
+			}
+		}
+
+		/* Fade In */
+		@keyframes fadeIn {
+			from { opacity: 0; transform: translateY(10px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		/* Fade Out */
+		@keyframes fadeOut {
+			from { opacity: 1; transform: translateY(0); }
+			to { opacity: 0; transform: translateY(-10px); }
+		}
+
+		/* Slide In */
+		@keyframes slideIn {
+			from { opacity: 0; transform: translateX(-50px); }
+			to { opacity: 1; transform: translateX(0); }
+		}
+
+		/* Slide Out */
+		@keyframes slideOut {
+			from { opacity: 1; transform: translateX(0); }
+			to { opacity: 0; transform: translateX(50px); }
+		}
+
+
+		@keyframes oldlogoDropIn {
+			0% {
+				opacity: 0;
+				transform: scale(0.5) rotate(-15deg);
+			}
+			50% {
+				opacity: 1;
+				transform: scale(1.2) rotate(5deg);
+			}
+			100% {
+				transform: scale(1) rotate(0deg);
+			}
+		}
+
+		@keyframes oldglowPulse {
+			0% { filter: drop-shadow(0 0 5px #0ea4a4); }
+			100% { filter: drop-shadow(0 0 15px #0ea4a4); }
+		}
+		@keyframes oldtextReveal {
+			0% { opacity: 0; transform: translateY(10px); }
+			50% { opacity: 1; transform: translateY(0px); }
+			100% { text-shadow: 0px 0px 10px #0ea4a4; }
+		}
+
+    </style>
+	<style>
+	<style>
+	<style>
+	<!-- Section divider-->
+	<style>
+	<body>
+		<button class="" id="wheel-control-toggle"><i class="fa-regular fa-life-ring"></i></button>
+
+		<button id="load-sectionsButt"></button>
+		<button id="load-sectionsButt"></button>
+		<button id="load-sectionsButt"></button>
+		
+		<div class="" id="wheel-controlBox">
+			<div id="switch-box">
+				<label class="switch">
+				  <input type="checkbox" id="simulatebackground">
+				  <span class="slider"></span>
+				</label>
+			</div>
+			<div id="wheel-piedish">
+			  <!-- Load Section -->
+			  <label class="label" for="loadwheelsections">
+				<select id="loadwheelsection"></select>
+				<button id="load-sectionsButt">Load Wheel</button>
+				<button id="delete-saved-wheel">Delete Wheel</button>
+			  </label>
+			  <!-- save Section -->
+			  <label class="label" for="savewheelsections">
+				<input type="text" id="savewheelsections" placeholder="Name your wheel" />
+				<button id="save-sectionsButt">save current wheel</button>
+			  </label>
+			  <!-- Remove Section -->
+			  <label class="label" for="removewheelsection">
+				<select id="removewheelsection"></select>
+				<button id="wheel-removesectionButt">Remove</button>
+			  </label>
+			  <!-- Add Section -->
+			  <label class="label" for="addwheelsection">
+				<input type="text" id="addwheelsection" placeholder="New section name" />
+				<button id="add-removesectionButt">Add</button>
+			  </label>
+
+			</div>
+		</div>
+
+		<script>
+			<!-- simulate background script -->
+		  const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
+
+		  function setBackgroundImage(url) {
+			document.body.style.backgroundImage = `url('${url}')`;
+		  }
+
+		  function removeBackgroundImage() {
+			document.body.style.backgroundImage = "none";
+		  }
+
+		  document.getElementById("simulatebackground").addEventListener("change", function() {
+			if (this.checked) {
+			  setBackgroundImage(backgroundImageURL);
+			} else {
+			  removeBackgroundImage();
+			}
+		  });
+		</script>
+
+//--------------------------------------------------------------------------------------------
+	</body>
+</html>
