@@ -188,6 +188,8 @@ _____________________________  -->
 		  function setTheme(themeName) {
 			console.log("theme name:"+ themeName);
 			document.body.className = themeName;
+			// Set the theme in localStorage
+			localStorage.setItem("theme", themeName);
 			console.log("theme saved" + themeName);
 		  }
 
@@ -210,7 +212,7 @@ _____________________________  -->
 			const saved = localStorage.getItem("theme");
 			if (saved) setTheme(saved);
 		  });
-		  localStorage.removeItem("theme");
+
 	  </script>
 		<script>
 			<!-- simulate background script -->
