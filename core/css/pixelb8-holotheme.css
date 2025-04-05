@@ -224,8 +224,8 @@ body.holo-theme .box.shadow {
 /*----------------------*/
 #thePixelButt{
 	position: fixed;
-	bottom: 2px;
-	right: 30px;
+	bottom: 20px;
+	right: 50px;
 	width: 40px;
 	height: 30px;
 	font-size: 24px;
