@@ -63,15 +63,7 @@ Other Fun:
 			<button class="Butt" id="themeButt">🎨</i></button> 
             <button class="Butt" id="settingsButt">⚙</i></button>
 		</div>
-		<!--
-		theme switcher (new)
-		-->
-		<div class="theme-switcher">
-		  <button onclick="setTheme('')">🌞</button>
-		  <button onclick="setTheme('dark-theme')">🌙</button>
-		  <button onclick="setTheme('cyber-theme')">🧪</button>
-		  <button onclick="setTheme('cyber-theme')">Ᵽ</button>
-		</div>
+
 		<!--  if console messages are enabled. they are displayed inside console. 
 		console itself is a box that contains messages
 		-->
@@ -92,7 +84,16 @@ Other Fun:
 			</div>
 		</div>
 		<!-- these are containers for controls or settigns or info related to different widgets -->
-		<div class="controller active" id="bg-controller">
+		<!--
+		theme switcher (new)
+		-->
+		<div class="controller" id="theme-switcher">
+		  <button onclick="setTheme('')">🌞</button>
+		  <button onclick="setTheme('dark-theme')">🌙</button>
+		  <button onclick="setTheme('cyber-theme')">🧪</button>
+		  <button onclick="setTheme('cyber-theme')">Ᵽ</button>
+		</div>
+		<div class="controller" id="bg-controller">
 			<div id="switch-box">
 				<label class="switch">
 				  <input type="checkbox" id="simulatebackground">
@@ -124,7 +125,7 @@ Other Fun:
 
 			</div>
 		</div>
-		<div class="controller active" id="comfy-controller">
+		<div class="controller" id="comfy-controller">
 			<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
 			<button id="streamersButt">Connect</button>
 			<button id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
