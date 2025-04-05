@@ -246,7 +246,7 @@ body.holo-theme .box.shadow {
 
 /* Bubble container */
 #Bubble {
-	position: absolute;
+	position: relative;
 	bottom: 0;
 	right: 0;
 	width: 0;
