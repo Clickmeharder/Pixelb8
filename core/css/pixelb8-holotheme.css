@@ -263,15 +263,14 @@ body.holo-theme .box.shadow {
 	pointer-events: all;
 }
 
-/* Shared button style */
 #Bubble .Butt {
 	position: absolute;
 	width: 36px;
 	height: 36px;
 	border-radius: 50%;
 	font-size: 18px;
-	opacity: 1;
-	transform: scale(0.5);
+	opacity: 0;
+	transform: translate(0, 0) scale(0.5); /* ✅ Combine translate and scale */
 	transition: all 0.3s ease;
 	background: var(--button-bg, #222);
 	color: var(--button-fg, #fff);
@@ -284,11 +283,11 @@ body.holo-theme .box.shadow {
 }
 
 /* Radial Positions */
-#comfy-Butt     { transform: translate(-50px, -50px); }
-#wheel-Butt     { transform: translate(  0px, -70px); }
-#entrivia-Butt  { transform: translate( 50px, -50px); }
-#theme-Butt     { transform: translate( 70px,   0px); }
-#settings-Butt  { transform: translate( 50px,  50px); }
+#comfy-Butt     { transform: translate(-50px, -50px) scale(1); }
+#wheel-Butt     { transform: translate(  0px, -70px) scale(1); }
+#entrivia-Butt  { transform: translate( 50px, -50px) scale(1); }
+#theme-Butt     { transform: translate( 70px,   0px) scale(1); }
+#settings-Butt  { transform: translate( 50px,  50px) scale(1); }
 
 /* Optional hover effect */
 #Bubble .Butt:hover {
