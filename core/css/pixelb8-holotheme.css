@@ -10,7 +10,7 @@ Pixelb8-holotheme.css
   --text-color: #111;
   --accent-color: #007bff;
   --accent-alt: #6610f2;
-  --border-width: 1px;
+  --border-width: 0px;
   --border-style: solid;
   --border-color: #ccc;
   --border: var(--border-width) var(--border-style) var(--border-color);
