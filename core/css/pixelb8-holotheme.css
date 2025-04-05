@@ -279,7 +279,6 @@ body.holo-theme .box.shadow {
 /* On bubble open */
 #Bubble.active .Butt {
 	opacity: 1;
-	transform: scale(1); /* ❌ This erases the positioning! */
 }
 
 /* Radial Positions */
