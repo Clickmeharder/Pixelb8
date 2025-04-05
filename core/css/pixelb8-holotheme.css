@@ -1,0 +1,330 @@
+/*
+
+Pixelb8-holotheme.css
+
+*/
+	:root {
+		/*a theme*/
+		/*Body roots*/
+		--body-font:Arial, sans-serif;
+		--body-text-color: #fff;
+		--body-bg-color:;
+		--body-opacity:;
+		/* Default Cursor */
+		--cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
+		
+		/*theme roots*/
+		--holo-color: ;/*rgb(23,130, 182, 0.8);*/
+		--holo-bg :linear-gradient(135deg, #001f1ff2, #004040f0);
+		--holo-bg-2: linear-gradient(135deg, #001f1ff2, #004040f0);
+		--holo-accent: ; /*#00ffee;*/
+		/* Box shadow */
+		--holo-shadow-color: rgba(0, 255, 239, 0.65);
+		--holo-boxshadow: 0px 0px 12px var(--holo-shadow-color);
+		/* Border radius */
+		--holo-border-color: rgba(23, 130, 182, 0.8);
+		--holo-border-fullcolor: rgba(23, 130, 182, 1.0);
+		/* Border Style */
+		--holo-border-width: 0px;
+		--holo-border-style: outset;
+		--holo-border-radius: 12px;
+		/* Full Border */
+		--holo-border: var(--holo-border-width) var(--holo-border-style) var(--holo-border-color);
+		/* Opacity */
+		--holo-opacity: 0.9;
+		--solid-opacity: 1.0;
+
+		--radius-sm: 4px;
+		--radius-md: 8px;
+		--radius-lg: 16px;
+		/* Colors */
+		--color-primary: #00ffee;       /* Main accent / highlight color */
+		--color-secondary: #008888;     /* Supportive accent */
+		--color-bg: #001f1f;            /* Background base */
+		--color-bg-alt: #002a2a;        /* Slightly different background for variety */
+		--color-surface: #003636;       /* Panels, cards, buttons background */
+		--color-border: #00ffee88;      /* Subtle borders or outlines */
+		/* Font stuff */
+		--font-main: 'Orbitron', sans-serif;
+		--font-size-base: 16px;
+		--font-size-lg: 20px;
+		--font-size-xl: 28px;
+		/* Text Colors */
+		--default-txt-primary:;
+		--default-txt-color-base: #fff;        /* Main body text */
+		--default-txt-color-primary: #fff;        /* Main theme text */
+		--default-txt-color-secondary: #88cccc;      /* Subheadings / less-important info */
+		--default-txt-accent: #00ffee;         /* For buttons, links, hover text */
+		--default-txt-muted: #666f6f;  
+		--holo-txt-color-base: #fff;        /* Main body text */	
+		--holo-txt-color-primary: #e0f7f7;        /* Main body text */
+		--holo-txt-color-secondary: #88cccc;      /* Subheadings / less-important info */
+		--holo-txt-accent: #00ffee;         /* For buttons, links, hover text */
+		--holo-txt-muted: #666f6f;          /* Tooltips, disabled text */
+		/* Spacing (optional) */
+		--space-sm: 0.5rem;
+		--space-md: 1rem;
+		--space-lg: 2rem;
+		
+		/* theme? */
+		 --theme-color:;
+		 --theme-bg:;
+		 --theme-font:;
+		 --theme-border-style:;
+		 --theme-border-width:;
+		 --theme-border-color:;
+		 --theme-border-radius:;
+			/*Root OverRide VARIABLES*/
+/* try them idk what they were for
+	--fc-border-color: #1c6a7ad9;
+	--fc-today-bg-color: #0346f41c;
+*/
+
+	}
+
+	.theme {
+		color:var(--default-tc);
+		background:var(--default-bg);
+		box-shadow: var(--default-boxshadow);
+		border:var(--default-border);
+		border-radius:var(--holo-border-radius);
+	}
+	.theme {
+		color:var(--theme-tc);
+		background:var(--theme-bg);
+		box-shadow: var(--theme-boxshadow);
+		border:var(--theme-border);
+		border-radius:var(--holo-theme-radius);
+	}
+	.theme-holo{
+		color:var(--holo-txt-color-primary);
+		background:var(--holo-bg);
+		border:var(--holo-border);
+	}
+	.theme-hologlow{
+		background:var(--holo-bg);
+		box-shadow: var(--holo-boxshadow);
+		border:var(--holo-border);
+	}
+	.theme-hologreen {
+		background:linear-gradient(135deg, #001f1ff2, #004040f0);
+		box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+	}
+	.theme-holored {}
+	.theme-holopurple {}
+	.theme-holoorange {}
+	.theme-holopink {}
+
+	.chatMessage {
+		font-size: 18px;
+		padding-left:8px;
+		padding-right:8px;
+		color: var(--holo-bg);
+		background:var(--holo-bg);
+		border:var(--holo-border);
+		box-shadow: var(--holo-boxshadow);
+	}
+
+	.PixelButt{}
+	.Pixelbubble{}
+	.bubbleButt{}
+	.Butt{}
+	.Butt.press{}
+	.toggle{}
+
+	.butt.round{}
+    .panel{}
+	.controllor{}
+	.controlpanel{}
+
+/*----------------------*/
+option:disabled {
+    color: -internal-light-dark(graytext, rgb(170, 170, 170));
+}
+
+
+  
+
+/*----------------------*/
+/*      The Body        */
+/*----------------------*/
+body {
+    font-family: var(--body-font);
+    color: var(--body-color);
+    background-color: var(--body-bg-color);
+    /*background: var(--body-bg);*/
+    /*background-image: var(--body-bg-img);*/
+    /*background-image: url('../../assets/images/bg/spaace.jpg');*/
+   /*background-image: url('https://pixelb8/assets/images/bg/spaace.jpg');*/
+    cursor: var(--cursor-image);
+    opacity: var(--body-opacity);
+}
+
+/*----------------*/
+/* WEBKIT STYLES  */
+/*  [scollbar, scrollthumb,scrolltrack,] */
+::-webkit-scrollbar {
+		max-width: 6px;
+    min-height: 6px;
+    max-height: 6px;
+    background-color:var(--scrollbar-bg-color);
+    outline: 0px;
+    border: 2px inset var(--scrollbar-border-color);
+}
+::-webkit-scrollbar-corner {background-color: var(--border-color);}
+::-webkit-scrollbar-track {}
+::-webkit-scrollbar-thumb {
+    color:;
+    background-color: var(--scrollbar-thumb-bg-color);
+    border: 1px solid var(--scrollbar-thumb-border-color);
+    border-style: var(--scrollbar-thumb-border-style);
+    border-radius: var(--scrollbar-thumb-border-radius);
+}
+/*____________________*/
+
+/*____________________*/
+/*---------------------------------*/
+/*  MAIN BODY/ELEMENT/CLASS STYLES  */
+/*----------------------*/
+/*    Main Elements */
+div {}
+br {}
+hr {}
+ul {padding-inline-start: 10px;
+    margin-block-start: 0em; }
+ol {}
+li {}
+nav {}
+header {}
+footer {}
+main {}
+section {}
+article {}
+/*-------------------*/
+/*___________________*/
+
+/*___________________*/
+/*=======================*//**/
+/*    Form Elements      */
+form {}
+label {}
+textarea {}
+/*_____________________*/
+     /*INPUTS*/
+input {cursor: var(--cursor000-image);}
+input[type="text"] {}
+input[type="password"] {}
+input[type="number"] {}
+input[type="email"] {}
+input[type="checkbox"] {}
+input[type="radio"] {}
+/* more input types */
+input[type="date"] {}
+input[type="time"] {}
+input[type="datetime-local"] {}
+input[type="month"] {}
+input[type="week"] {}
+input[type="file"] {}
+input[type="range"] {}
+input[type="color"] {}
+input[type="search"] {}
+input[type="tel"] {}
+input[type="url"] {}
+input[type="submit"] {}
+input[type="reset"] {}
+input[type="image"] {}
+input[type="button"] {}
+input[type="hidden"] {}
+optgroup {}
+option {}
+fieldset {}
+legend {}
+datalist {}
+/*--------------*/
+/*Select Element*/
+select {cursor: var(--cursor000-image);}
+select option{}
+select option:checked {}
+select:focus option {}
+/* Optgroups within the dropdown list */
+select optgroup {}
+/* Dropdown arrows*/
+select::-ms-expand {}/* Internet Explorer */
+select::-webkit-select-arrow {}/* WebKit browsers */
+/* Select Scrollbar */
+/* Only WebKit browsers */
+select::-webkit-scrollbar {}
+select::-webkit-scrollbar-thumb {}
+/*----------------------*/
+/*    Button Elements */
+button {background-color:#444;cursor:var(--cursor000-image);}
+button:hover {}
+button:active {}
+button:focus {}
+button:disabled {}
+button.disabled {
+  opacity: 0.7; 
+  cursor: not-allowed;
+}
+/* button classes  */
+/*----------------*//*
+
+-singlefixedbutton
+-sliderbutton
+-pressclickbutton
+-toggleclickbutton
+-switchbutton
+-buttontype1
+-buttontype2
+-buttontype3
+*/
+
+/*----------------------*/
+/*    Text Elements */
+
+h1 {}
+h2 {}
+h3 {}
+h4 {}
+h5 {}
+h6 {}
+p {}
+.themed-footer p {
+    margin: 0px;
+}
+span {}
+strong {}
+em {} (emphasis)
+blockquote {}
+pre {} (preformatted text)
+a {} (anchor)
+
+/*----------------------*/
+/*    Table Elements */
+
+table {}
+tr {} (table row)
+td {} (table data)
+th {} (table header)
+
+/*----------------------*/
+/*    Media Elements */
+img {} (image)
+audio {}
+video {}
+figure {}
+figcaption {}
+
+/*----------------------*/
+/*    Misc Elements */
+
+/* Interactive Elements */
+details {}summary {}dialog {}menu {}menuitem {}
+/* Other Elements */
+iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code {}small {}
+
+/*----------------------*/
+/*  my stuff */
+
+/*----------------------*/
+/*   Important Classes */
