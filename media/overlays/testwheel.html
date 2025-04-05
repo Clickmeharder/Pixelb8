@@ -336,6 +336,7 @@
 	let colors = ["#001f1fe8", "#004040eb"];
 	let wheels = null;
 	let frame = null;
+	let winningSectionIndex = null;
 	const removeSelect = document.getElementById("removewheelsection");
 	const addInput = document.getElementById("addwheelsection");
 	const addButton = document.getElementById("add-removesectionButt");
@@ -462,18 +463,31 @@
 	// Spin function
 	let angle = 0, running = false;
 
+
 	function spinTo(winner, duration) {
 		let final_angle = (-0.2) - (0.5 + winner) * 2 * Math.PI / sections.length;
 		let start_angle = angle - Math.floor(angle / (2 * Math.PI)) * 2 * Math.PI - 5 * 2 * Math.PI;
-	  
 		let start = performance.now();
+
 		function frame() {
 			let now = performance.now();
 			let t = Math.min(1, (now - start) / duration);
 			t = 3 * t * t - 2 * t * t * t; // ease in out
 			angle = start_angle + t * (final_angle - start_angle);
 			repaint(angle);
-			if (t < 1) requestAnimationFrame(frame); else running = false;
+			
+			if (t < 1) {
+				requestAnimationFrame(frame);
+			} else {
+				running = false;
+
+				// 🏆 Determine winning section
+				let winningIndex = (Math.floor((-0.2 - final_angle) * sections.length / (2 * Math.PI)) % sections.length);
+				if (winningIndex < 0) winningIndex += sections.length;
+
+				// ✨ Highlight it!
+				highlightWinningSection(winningIndex);
+			}
 		}
 		requestAnimationFrame(frame);
 		running = true;
@@ -509,7 +523,76 @@ function updateLoadDropdown() {
 	}
 }
 
+function highlightWinningSection(index) {
+	let start = performance.now();
+	let duration = 1000;
+	let flashCount = 6;
 
+	function animateFlash() {
+		let now = performance.now();
+		let t = (now - start) / duration;
+		if (t > 1) return;
+
+		let localCtx = canvas.getContext("2d");
+		localCtx.save();
+		localCtx.translate(canvas.width / 2, canvas.height / 2);
+
+		let a0 = 2 * Math.PI * index / sections.length;
+		let a1 = a0 + 2 * Math.PI / sections.length;
+
+		localCtx.beginPath();
+		localCtx.moveTo(0, 0);
+		localCtx.arc(0, 0, r, a0, a1);
+		localCtx.closePath();
+
+		let intensity = Math.sin(t * flashCount * Math.PI);
+		localCtx.strokeStyle = `rgba(255, 215, 0, ${intensity})`; // gold glow
+		localCtx.lineWidth = 10;
+		localCtx.shadowBlur = 20 * intensity;
+		localCtx.shadowColor = "gold";
+		localCtx.stroke();
+
+		localCtx.restore();
+		requestAnimationFrame(animateFlash);
+	}
+	requestAnimationFrame(animateFlash);
+}
+function animateWinningSection(index, r, cx, cy) {
+	let pulseStart = performance.now();
+	let duration = 1000;
+
+	function pulseFrame() {
+		let now = performance.now();
+		let t = (now - pulseStart) / duration;
+		if (t > 1) return;
+
+		let localCanvas = canvas.getContext("2d");
+		localCanvas.save();
+		localCanvas.translate(cx, cy);
+
+		// Get the angle range of the section
+		let a0 = 2 * Math.PI * index / sections.length;
+		let a1 = a0 + 2 * Math.PI / sections.length;
+
+		// Draw glowing border
+		localCanvas.beginPath();
+		localCanvas.moveTo(0, 0);
+		localCanvas.arc(0, 0, r, a0, a1);
+		localCanvas.closePath();
+
+		// Animate the glow
+		const pulse = 5 + Math.sin(t * Math.PI * 4) * 10; // glow pulse between 5-15
+		localCanvas.strokeStyle = "#ffcc00";
+		localCanvas.lineWidth = 6;
+		localCanvas.shadowBlur = pulse;
+		localCanvas.shadowColor = "#ffcc00";
+		localCanvas.stroke();
+		localCanvas.restore();
+
+		requestAnimationFrame(pulseFrame);
+	}
+	requestAnimationFrame(pulseFrame);
+}
 function updateRemoveDropdown() {
 	removeSelect.innerHTML = ""; // Clear current options
 	sections.forEach((section, index) => {
