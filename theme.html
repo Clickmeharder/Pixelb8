@@ -254,8 +254,8 @@ _____________________________  -->
 				// Get the ID of the clicked button
 				const buttonId = event.target.id;
 
-				// Construct the corresponding controller ID by appending 'controller' to the button ID
-				const controllerId = buttonId + 'controller';
+				// Remove 'Butt' from the buttonId and construct the corresponding controller ID
+				const controllerId = buttonId.replace('Butt', '') + 'controller';
 
 				// Now, toggle the visibility of the corresponding controller element
 				toggleElement(controllerId, 'fade');
