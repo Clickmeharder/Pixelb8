@@ -211,6 +211,18 @@ body.holo-theme .box.shadow {
 		box-shadow: var(--holo-boxshadow);
 	}
 
+/*----------------------*/
+/* empty Main elements */
+/*----------------------*/
+	.PixelButt{}
+	.Bubble{}
+	.bubbleButt{}
+	.Butt{}
+	.Butt.press{}
+	.toggle{}
+
+	.butt.round{}
+    .panel{}
 
 /*----------------------*/
 /*       Main Button      */
@@ -243,18 +255,6 @@ body.holo-theme .box.shadow {
 	transform: translateY(0);
 	pointer-events: all; /* Allow interactions */
 }
-	
-	.PixelButt{}
-	.Bubble{}
-	.bubbleButt{}
-	.Butt{}
-	.Butt.press{}
-	.toggle{}
-
-	.butt.round{}
-    .panel{}
-
-
 /*----------------------*/
 /*       Console      */
 /*----------------------*/
@@ -279,7 +279,6 @@ body.holo-theme .box.shadow {
 		pointer-events: none; /* Prevent interaction when hidden */
 		z-index: 999;
 	}
-
 	/* When active (visible) */
 	.controller.active {
 		opacity: 0.85;
