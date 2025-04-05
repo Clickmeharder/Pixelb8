@@ -238,6 +238,7 @@ _____________________________  -->
 					element.style.animation = animationType === "slide" ? "slideOut 0.5s ease-in forwards" : "fadeOut 0.5s ease-in forwards";
 
 					setTimeout(() => {
+						element.classList.toggle("active");
 						element.style.visibility = "hidden";
 						element.style.opacity = "0";
 					}, 500); // Matches animation duration
