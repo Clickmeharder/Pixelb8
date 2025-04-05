@@ -88,17 +88,23 @@ Other Fun:
 		theme switcher (new)
 		-->
 		<div class="controller" id="theme-controller">
-		  <button onclick="setTheme('')">🌞</button>
-		  <button onclick="setTheme('dark-theme')">🌙</button>
-		  <button onclick="setTheme('cyber-theme')">🧪</button>
-		  <button onclick="setTheme('cyber-theme')">Ᵽ</button>
-		  <div id="switch-box">
-			<label class="switch">
-			  <input type="checkbox" id="simulatebackground">
-			  <span class="slider"></span>
-		    </label>
-		  </div>
+			<div id="controls" id="theme-controls">
+				<div class="" id="themeButtWrap">
+					<button class="Butt themeselect" id="light-themeButt">🌞</button>
+					<button class="Butt themeselect" id="dark-themeButt">🌙</button>
+					<button class="Butt themeselect" id="retro-themeButt">🧪</button>
+					<button class="Butt themeselect" id="cyber-themeButt">🧪</button>
+					<button class="Butt themeselect" id="holo-themeButt">Ᵽ</button>
+				</div>
+				<div class="switchbox" id="switch-box">
+					<label class="switch">
+					<input type="checkbox" id="simulatebackground">
+					<span class="slider"></span>
+					</label>
+				</div>
+			</div>
 		</div>
+
 		<div class="controller" id="comfy-controller">
 			<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
 			<button id="streamersButt">Connect</button>
@@ -177,18 +183,26 @@ Other Fun:
 <!--       End of body        
 _____________________________  -->
 	  <script>
-		  const themes = ["", "light-theme", "dark-theme", "retro-theme", "holo-theme"];
+		  const themes = ["", "light-theme", "dark-theme", "retro-theme", "cyber-theme", "holo-theme"];
 		  let current = 0;
 		  function setTheme(themeName) {
 			document.body.className = themeName;
 			localStorage.setItem("theme", themeName);
 		  }
 
-		  // Toggle between light and dark
-		  tthemeButton.addEventListener("click", () => {
-		    current = (current + 1) % themes.length;
-		    setTheme(themes[current]);
-		  });
+			// Add event listener to all buttons with 'themeselect' class
+			document.querySelectorAll('.themeselect').forEach(button => {
+				button.addEventListener('click', function() {
+					// Get the ID of the clicked button
+					const buttonId = this.id;
+
+					// Remove 'Butt' from the buttonId and construct the theme name
+					const theme = buttonId.replace('-Butt', ''); // e.g., "light-theme" from "light-themeButt"
+
+					// Now, call the setTheme function with the theme name
+					setTheme(theme);
+				});
+			});
 
 		  // Load saved theme on startup
 		  window.addEventListener("DOMContentLoaded", () => {
