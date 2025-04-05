@@ -295,6 +295,11 @@ body.holo-theme .box.shadow {
 	background: var(--button-hover, #555);
 	transform: scale(1);
 }
+#comfy-Butt:hover     { transform: translate(-60px,   0px) scale(1.2); }
+#wheel-Butt:hover     { transform: translate(-42px, -42px) scale(1.2); }
+#entrivia-Butt:hover  { transform: translate(  0px, -60px) scale(1.2); }
+#theme-Butt:hover     { transform: translate( 42px, -42px) scale(1.2); }
+#settings-Butt:hover  { transform: translate( 60px,   0px) scale(1.2); }
 /*----------------------*/
 /*       Console      */
 /*----------------------*/
