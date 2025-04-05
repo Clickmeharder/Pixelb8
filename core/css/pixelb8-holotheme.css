@@ -379,7 +379,13 @@ option:disabled {
     color: -internal-light-dark(graytext, rgb(170, 170, 170));
 }
 
+.inactive{
+	opacity:0.45;
+}
 
+.displaynone{
+	display:none;
+}
   
 
 /*----------------------*/
