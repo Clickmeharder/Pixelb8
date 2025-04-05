@@ -3,118 +3,162 @@
 Pixelb8-holotheme.css
 
 */
-	:root {
-		/*a theme*/
-		/*Body roots*/
-		--body-font:Arial, sans-serif;
-		--body-text-color: #fff;
-		--body-bg-color:;
-		--body-opacity:;
-		/* Default Cursor */
-		--cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
-		
-		/*theme roots*/
-		--holo-color: ;/*rgb(23,130, 182, 0.8);*/
-		--holo-bg :linear-gradient(135deg, #001f1ff2, #004040f0);
-		--holo-bg-2: linear-gradient(135deg, #001f1ff2, #004040f0);
-		--holo-accent: ; /*#00ffee;*/
-		/* Box shadow */
-		--holo-shadow-color: rgba(0, 255, 239, 0.65);
-		--holo-boxshadow: 0px 0px 12px var(--holo-shadow-color);
-		/* Border radius */
-		--holo-border-color: rgba(23, 130, 182, 0.8);
-		--holo-border-fullcolor: rgba(23, 130, 182, 1.0);
-		/* Border Style */
-		--holo-border-width: 0px;
-		--holo-border-style: outset;
-		--holo-border-radius: 12px;
-		/* Full Border */
-		--holo-border: var(--holo-border-width) var(--holo-border-style) var(--holo-border-color);
-		/* Opacity */
-		--holo-opacity: 0.9;
-		--solid-opacity: 1.0;
+:root {
+  --body-font: Arial, sans-serif;
+  --bg-color: #f0f0f0;
+  --bg-alt-color: #ffffff;
+  --text-color: #111;
+  --accent-color: #007bff;
+  --accent-alt: #6610f2;
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: #ccc;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+  --border-radius: 6px;
+  --shadow-color: rgba(0, 255, 239, 0.65);
+  --box-shadow: 0px 0px 12px var(--shadow-color);
+  --glow-color: rgba(0, 123, 255, 0.6);
+  --console-bg: rgba(255, 255, 255, 0.7);
+  --body-opacity: 1;
+  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
+}
 
-		--radius-sm: 4px;
-		--radius-md: 8px;
-		--radius-lg: 16px;
-		/* Colors */
-		--color-primary: #00ffee;       /* Main accent / highlight color */
-		--color-secondary: #008888;     /* Supportive accent */
-		--color-bg: #001f1f;            /* Background base */
-		--color-bg-alt: #002a2a;        /* Slightly different background for variety */
-		--color-surface: #003636;       /* Panels, cards, buttons background */
-		--color-border: #00ffee88;      /* Subtle borders or outlines */
-		/* Font stuff */
-		--font-main: 'Orbitron', sans-serif;
-		--font-size-base: 16px;
-		--font-size-lg: 20px;
-		--font-size-xl: 28px;
-		/* Text Colors */
-		--default-txt-primary:;
-		--default-txt-color-base: #fff;        /* Main body text */
-		--default-txt-color-primary: #fff;        /* Main theme text */
-		--default-txt-color-secondary: #88cccc;      /* Subheadings / less-important info */
-		--default-txt-accent: #00ffee;         /* For buttons, links, hover text */
-		--default-txt-muted: #666f6f;  
-		--holo-txt-color-base: #fff;        /* Main body text */	
-		--holo-txt-color-primary: #e0f7f7;        /* Main body text */
-		--holo-txt-color-secondary: #88cccc;      /* Subheadings / less-important info */
-		--holo-txt-accent: #00ffee;         /* For buttons, links, hover text */
-		--holo-txt-muted: #666f6f;          /* Tooltips, disabled text */
-		/* Spacing (optional) */
-		--space-sm: 0.5rem;
-		--space-md: 1rem;
-		--space-lg: 2rem;
-		
-		/* theme? */
-		 --theme-color:;
-		 --theme-bg:;
-		 --theme-font:;
-		 --theme-border-style:;
-		 --theme-border-width:;
-		 --theme-border-color:;
-		 --theme-border-radius:;
-			/*Root OverRide VARIABLES*/
-/* try them idk what they were for
-	--fc-border-color: #1c6a7ad9;
-	--fc-today-bg-color: #0346f41c;
-*/
+/* 🌙 DARK THEME */
+body.dark-theme {
+  --body-font: 'Segoe UI', sans-serif;
+  --text-color: #f0f0f0;
+  --bg-color: #121212;
+  --bg-alt-color: #1e1e1e;
+  --accent-color: #00ccff;
+  --accent-alt: #ff00ff;
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: #333;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+  --border-radius: 8px;
+  --shadow-color: rgba(0, 204, 255, 0.6);
+  --box-shadow: 0 0 10px var(--shadow-color);
+  --glow-color: rgba(0, 204, 255, 0.4);
+  --console-bg: rgba(20, 20, 20, 0.7);
+  --body-opacity: 1;
+  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_sabretooth.png'), auto;
+}
 
-	}
+/* 🌞 LIGHT THEME (extra bright) */
+body.light-theme {
+  --body-font: Verdana, sans-serif;
+  --text-color: #202020;
+  --bg-color: #fefefe;
+  --bg-alt-color: #e0e0e0;
+  --accent-color: #3c8dbc;
+  --accent-alt: #5bc0de;
+  --border-width: 2px;
+  --border-style: dotted;
+  --border-color: #ddd;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+  --border-radius: 5px;
+  --shadow-color: rgba(0, 0, 0, 0.15);
+  --box-shadow: 0px 0px 10px var(--shadow-color);
+  --glow-color: rgba(60, 140, 188, 0.4);
+  --console-bg: rgba(255, 255, 255, 0.85);
+  --body-opacity: 1;
+  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_brush.png'), auto;
+}
+/* 🎨 CUSTOM THEME (pastel play) */
+body.custom-theme {
+  --body-font: 'Comic Sans MS', cursive, sans-serif;
+  --text-color: #333;
+  --bg-color: #ffeefc;
+  --bg-alt-color: #ffe3f1;
+  --accent-color: #ff85c1;
+  --accent-alt: #82eefd;
+  --border-width: 3px;
+  --border-style: dashed;
+  --border-color: #ffccf9;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+  --border-radius: 10px;
+  --shadow-color: rgba(255, 136, 255, 0.6);
+  --box-shadow: 0 0 10px var(--shadow-color);
+  --glow-color: rgba(255, 128, 200, 0.5);
+  --console-bg: rgba(255, 245, 250, 0.8);
+  --body-opacity: 1;
+  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_candycane.png'), auto;
+}
+/* 🕹️ RETRO THEME (green screen vibes) */
+body.retro-theme {
+  --body-font: 'Courier New', monospace;
+  --text-color: #33ff33;
+  --bg-color: #000000;
+  --bg-alt-color: #111111;
+  --accent-color: #00ff00;
+  --accent-alt: #33cc33;
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: #00ff00;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+  --border-radius: 12px;
+  --shadow-color: rgba(0, 255, 0, 0.5);
+  --box-shadow: 0px 0px 12px var(--shadow-color);
+  --glow-color: rgba(0, 255, 0, 0.4);
+  --console-bg: rgba(0, 0, 0, 0.85);
+  --body-opacity: 1;
+  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_terminalgreen.png'), auto;
+}
+body.holo-theme {
+	/* Default Cursor */
+  --body-font:;
+  --text-color: ;
+  --default-muted: #666f6f;  /* Tooltips, disabled text */
+  --bg-color: linear-gradient(135deg, #001f1ff2, #004040f0);
+  --bg-alt-color: linear-gradient(135deg, #001f1ff2, #004040f0);
+  --accent-color:;
+  --accent-alt: ;  
+  --border-width: 0px;
+  --border-style: ;
+  --border-color: ;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+  --border-radius: 12px;
+  --shadow-color:rgba(255, 255, 255, 0.65);
+  --glow-color:rgba(0, 255, 239, 0.65);
+  --box-shadow: 2px 2px 6px var(--holo-shadow-color);
+  --box-glow: 0px 0px 12px var(--holo-glow-color);
+  --console-bg: rgba(0, 0, 0, 0.85);
+  --body-opacity:;
+  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 
-	.theme {
-		color:var(--default-tc);
-		background:var(--default-bg);
-		box-shadow: var(--default-boxshadow);
-		border:var(--default-border);
-		border-radius:var(--holo-border-radius);
-	}
-	.theme {
-		color:var(--theme-tc);
-		background:var(--theme-bg);
-		box-shadow: var(--theme-boxshadow);
-		border:var(--theme-border);
-		border-radius:var(--holo-theme-radius);
-	}
-	.theme-holo{
-		color:var(--holo-txt-color-primary);
-		background:var(--holo-bg);
-		border:var(--holo-border);
-	}
-	.theme-hologlow{
-		background:var(--holo-bg);
-		box-shadow: var(--holo-boxshadow);
-		border:var(--holo-border);
-	}
-	.theme-hologreen {
-		background:linear-gradient(135deg, #001f1ff2, #004040f0);
-		box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
-	}
-	.theme-holored {}
-	.theme-holopurple {}
-	.theme-holoorange {}
-	.theme-holopink {}
+}
+body.holo-theme .box.glow {
+  box-shadow: 0 0 12px var(--glow-color);
+}
+body.holo-theme .box.shadow {
+  box-shadow: 0 0 12px var(--shadow-color);
+}
 
+/*-------------------------------------------*/
+/*     Twitch Chat Message box & emotes     */
+/*-----------------------------------------*/
+	.twitchEmote {
+		height: 1.5rem;
+		width: auto;
+		vertical-align: middle;
+		margin: 0 2px;
+	}
+	.floatingEmote {
+		position: fixed;
+		transition: transform 10s linear, opacity 8s ease-out; /* Slower floating effect */
+		opacity: 1;
+		pointer-events: none;
+		z-index: 999;
+	}
+	#twitchchatContainer {
+		position: absolute;
+		left: 0;
+		bottom: 30%;
+		width: 30%;
+	}
+	div#twitchMessagebox {text-align: left;border:;max-height: 170px;}
+	#twitchMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
+	#username {font-weight:bold;}
 	.chatMessage {
 		font-size: 18px;
 		padding-left:8px;
@@ -125,6 +169,10 @@ Pixelb8-holotheme.css
 		box-shadow: var(--holo-boxshadow);
 	}
 
+
+/*----------------------*/
+/*       Main Button      */
+/*----------------------*/
 	.PixelButt{}
 	.Pixelbubble{}
 	.bubbleButt{}
@@ -134,10 +182,129 @@ Pixelb8-holotheme.css
 
 	.butt.round{}
     .panel{}
-	.controllor{}
+
+
+/*----------------------*/
+/*       Console      */
+/*----------------------*/
+	.console {}
+		
+/*----------------------*/
+/*  Controller containers  */
+/*----------------------*/
+	.controller {
+		position: fixed;
+		top: 10px;
+		left: 10px;
+		width: 348px;
+		padding: 10px;
+		background: linear-gradient(135deg, #001f1fe8, #004040eb);
+		color: white;
+		border-radius: 8px;
+		box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+		opacity: 0; /* Start hidden */
+		transform: translateY(-10px); /* Slight slide-up effect */
+		transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+		pointer-events: none; /* Prevent interaction when hidden */
+		z-index: 999;
+	}
+
+	/* When active (visible) */
+	.controller.active {
+		opacity: 0.85;
+		transform: translateY(0);
+		pointer-events: all; /* Allow interactions */
+	}
 	.controlpanel{}
 
 /*----------------------*/
+/*  Bg slider toggle  */
+/*----------------------*/
+.switch {
+	position: relative;
+	display: inline-block;
+	width: 60px;
+	height: 34px;
+}
+.switch input { 
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+.slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0; left: 0; right: 0; bottom: 0;
+	background-color: #ccc;
+	transition: .4s;
+	border-radius: 34px;
+}
+.slider:before {
+	position: absolute;
+	content: "";
+	height: 26px; width: 26px;
+	left: 4px; bottom: 4px;
+	background-color: white;
+	transition: .4s;
+	border-radius: 50%;
+}
+input:checked + .slider {
+	background-color: #66bb6a;
+}
+input:checked + .slider:before {
+	transform: translateX(26px);
+}
+
+/*----------------------*/
+
+/**/
+/*----------------------*/
+/*  Indicator Lights */
+/*----------------------*/
+.statusindicatorWrapper {
+	display: flex;
+	background-color: #091319;
+	border: 3px ridge #3c3939;
+	padding: 8px 0;
+	flex-direction: column;
+	align-items: center;
+}
+.statusindicatorWrapper strong {
+	color: gray;
+	background-color: black;
+	border: 2px ridge gray;
+	padding: 2px;
+	margin: 2px;
+	font-size: 11px;
+	font-family: lucida console;
+}
+.light-indicator {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background-color: red; /* Default to red */
+	margin-left: 5px;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Optional glow effect */
+}
+
+/*----------------------*/
+/*______________________*/
+
+/**/
+/*----------------------*/
+/* a new css section */
+/*----------------------*/
+/**/
+
+/**/
+/*----------------------*/
+/*______________________*/
+/**/
+
+
+
+
 option:disabled {
     color: -internal-light-dark(graytext, rgb(170, 170, 170));
 }

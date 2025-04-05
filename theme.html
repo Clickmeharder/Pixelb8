@@ -109,22 +109,88 @@
 	</style>
 	<style>
 	<!-- Section divider-->
+<!--
+🔌 🎮 🖥️ 🔧 📝 🎨 🖼️ ⚙️ 🛠️ 
+🧩 🔑 🖋️ 🌙 🎵 📦 🛋️ 💻 📱 🎬 
+🎧 🧠 📡 💡 🌟 📍 📶 🚀 🌈 ✨ 🌻 
+🌙 🔭 🧰 🍀 🍕 🌮 🧃 🕹️ 🌍 🌎 🌏
+ 🧊 💼 🏆 🏁 🏅 📅 🗺️ 📚 🍄 🔗 
+ 🪙 🧑‍💻 🎤 📺 🏙️ 👾 🎟️ 🍎 🍓 
+ 🍕 🧃 🍩 🎲 🎮 🍔 🍿 🧀
+ Tech & Tools:
+
+⚙️, 🔧, 🛠️, 🧰, 🔌, 💻, 📱, 📡, 🔭, 🧑‍💻, 🧠, 🧑‍🔧
+
+Games & Fun:
+
+🎮, 🎲, 🕹️, 👾, 🎬, 🎧, 🍔, 🍕, 🍩, 🎮, 🧃, 🎤
+Customization & Style:
+🎨, 🖼️, 🌈, ✨, 🌟, 🍄
+Settings & Control:
+📝, 🧩, 🖋️, 🔑, 🔗, 💡, 📅, 🗺️, 📚
+Nature & Weather:
+🌻, 🌍, 🌎, 🌏, 🌙, 🍀
+Travel & Exploration:
+🚀, 📍, 📡, 🧳, 🏙️, 🗺️
+Other Fun:
+🍎, 🍓, 🍕, 🍩, 🧃, 🍍, 🧀, 🧑‍💻, 📺, 🏆, 🍎
+<!--
+1️⃣ 2️⃣ 3️⃣ 🏅 🥇 🥈 🥉 🎖️ 🏆 🏁 🎗️ 🏅 🎉 🎊 🏵️ 🏆
+ 🎯 🎯 🎖️ 🏆 🥇🥈🥉 🏆 🥇 🥈 🥉 🎫 🎟️ 🏅 🏆 🏆 🎗️ 🔖 🏅 ⛳ 🎯 📈 📉 🏁 🏹 🎽
+-->
+
+
 	</style>
 	<body>
-		<button class="" id="wheel-control-toggle"><i class="fa-regular fa-life-ring"></i></button>
-
-		<button id="load-sectionsButt"></button>
-		<button id="load-sectionsButt"></button>
-		<button id="load-sectionsButt"></button>
-		
-		<div class="" id="wheel-controlBox">
+		<!-- The PixelButt is the main button everything is normally hidden by default.
+		click the pixelButt and it opens a bubble containing buttons that will widgets or controls or information boxes etc.
+		-->
+		<button class="Butt" id="thePixelButt">Ᵽ</i></button>
+		<div id="Bubble">
+			<!-- 🔌 🎮 🖥️🔧📝 🎨 🖼️-->
+            <button class="Butt" id="comfyButt">🛋️</i></button><!-- 🔌 🎮 🖥️🔧📝 🎨 🖼️-->
+			<button class="Butt" id="wheelButt"><i class="fa-regular fa-life-ring"></i></button>
+			<button class="Butt" id="entriviaButt">Ｅ</i></button>
+			<button class="Butt" id="themeButt">🎨</i></button> 
+            <button class="Butt" id="settingsButt">⚙</i></button>
+		</div>
+		<!--
+		theme switcher (new)
+		-->
+		<div class="theme-switcher">
+		  <button onclick="setTheme('')">🌞</button>
+		  <button onclick="setTheme('dark-theme')">🌙</button>
+		  <button onclick="setTheme('cyber-theme')">🧪</button>
+		  <button onclick="setTheme('cyber-theme')">Ᵽ</button>
+		</div>
+		<!--  if console messages are enabled. they are displayed inside console. 
+		console itself is a box that contains messages
+		-->
+		<div  id="console"></div>
+		<!-- this is the announcements panel. it can contain text or text and a timer or other elements -->
+		<div class="panel" id="Announcements">
+			<div class="announcement" id="announcement-panel-message"></div>
+			<div class="announcement timer" id="announcement-panel-timer"></div>
+		</div>
+		<div class="panel" id="entriviapanel">
+			<div class="message" id="entrivia-panel-message"></div>
+			<div class="Panel-timer" id="entrivia-panel-timer"></div>
+		</div>
+		<div class="spinwheel" id="wheelWrapper">
+			<div class="" id="spinwheel-result"></div>
+			<div class="" id="spinwheel-canvas-wrapper">
+				<canvas id="spinwheel-Canvas"></canvas>
+			</div>
+		</div>
+		<!-- these are containers for controls or settigns or info related to different widgets -->
+		<div class="controller active" id="bg-controller">
 			<div id="switch-box">
 				<label class="switch">
 				  <input type="checkbox" id="simulatebackground">
 				  <span class="slider"></span>
 				</label>
 			</div>
-			<div id="wheel-piedish">
+			<div class="controls"id="wheel-piedish">
 			  <!-- Load Section -->
 			  <label class="label" for="loadwheelsections">
 				<select id="loadwheelsection"></select>
@@ -149,7 +215,75 @@
 
 			</div>
 		</div>
+		<div class="controller active" id="comfy-controller">
+			<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
+			<button id="streamersButt">Connect</button>
+			<button id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
+			<div id="more-controls" style="">
+				<span id="">Simulate background</span>
+				<div id="switch-box">
+					<label class="switch">
+					  <input type="checkbox" id="simulatebackground">
+					  <span class="slider"></span>
+					</label>
+				</div>
+			</div>
+			<div id="comfy-settings" style="display:none;">
+			</div>
+		</div>
+		<!--this is the container for messages from twitch -->
+		<div id="twitchChat">
+			<div class="chatMessage">
+				<span class="username" style="color: rgb(255, 105, 180);">JaeDraze: </span>
+				<span class="twitchmessage">Hey whatsup!</span>
+			</div>
+			<div class="chatMessage">
+				<span class="username" style="color: rgb(255, 105, 180);">JaeDraze: </span>
+				<span class="twitchmessage">Wow!!!</span>
+			</div>
+			<div class="chatMessage">
+				<span class="username" style="color: rgb(255, 105, 180);">JaeDraze: </span>
+				<span class="twitchmessage">...lol</span>
+			</div>
+			<div class="chatMessage">
+				<span class="username" style="color: rgb(255, 105, 180);">JaeDraze: </span>
+				<span class="twitchmessage">Theres no way that just happened!</span>
+			</div>
+			<div class="chatMessage">
+				<span class="username" style="color: rgb(255, 105, 180);">JaeDraze: </span>
+				<span class="twitchmessage">nice! *clap *clap*</span>
+			</div>
+			<div class="chatMessage">
+				<span class="username" style="color: brown;">thatGuy117: </span>
+				<span class="twitchmessage">sometimes someone sends a super long message that ain't nobody got time to read. and nobody wants to but sometimes they do and are slightly annoyed but try to be nice about it. this is an example of one of those sentences</span>
+			</div>
+		</div>
+		<!--this is the underlay its mostly for aesthetics and sits behind everything else it might be a border or different animated elements -->
+		<div id="pageborder"></div>
+<!--------------------->
+<!--       End of body        
+_____________________________  -->
+	  <script>
+		  const themeButton = document.getElementById("themeButt");
+		  const themes = ["", "dark-theme", "cyber-theme", "fantasy-theme"];
+		  let current = 0;
+		  function setTheme(themeName) {
+			document.body.className = themeName;
+			localStorage.setItem("theme", themeName);
+		  }
 
+		  // Toggle between light and dark
+		  tthemeButton.addEventListener("click", () => {
+		    current = (current + 1) % themes.length;
+		    setTheme(themes[current]);
+		  });
+
+		  // Load saved theme on startup
+		  window.addEventListener("DOMContentLoaded", () => {
+			const saved = localStorage.getItem("theme");
+			if (saved) setTheme(saved);
+		  });
+	  </script>
 		<script>
 			<!-- simulate background script -->
 		  const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
