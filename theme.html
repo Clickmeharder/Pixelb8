@@ -247,7 +247,22 @@ _____________________________  -->
 			let container = document.getElementById("Bubble");
 			container.classList.toggle("active");
 		});
+		// Adding event listener to the parent container (#Bubble)
+		document.getElementById('Bubble').addEventListener('click', function(event) {
+			// Check if the clicked element has the 'Butt' class
+			if (event.target.classList.contains('Butt')) {
+				// Get the ID of the clicked button
+				const buttonId = event.target.id;
+
+				// Construct the corresponding controller ID by appending 'controller' to the button ID
+				const controllerId = buttonId + 'controller';
+
+				// Now, toggle the visibility of the corresponding controller element
+				toggleElement(controllerId, 'fade');
+			}
+		});
+
 		</script>
-//--------------------------------------------------------------------------------------------
+
 	</body>
 </html>
