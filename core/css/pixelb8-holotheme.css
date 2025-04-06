@@ -135,9 +135,10 @@ body.holo-theme {
   --accent-color:;
   --accent-alt: ;  
   --border-width: 0px;
-  --border-style: solid;
-  --border-color: white;
+  --border-style: ridge;
+  --border-color: #14889fbf;
   --border: var(--border-width) var(--border-style) var(--border-color);
+  --buttborder-style:outset;
   --buttborder-width:3px;
   --border-radius: 12px;
   --shadow-color:rgba(255, 255, 255, 0.65);
