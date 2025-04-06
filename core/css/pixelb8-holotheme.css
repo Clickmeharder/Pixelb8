@@ -318,7 +318,9 @@ body{
 #theme-Butt:hover     { transform: translate( 29px, -50px) scale(1); }
 #settings-Butt:hover  { transform: translate( 40px, -22px) scale(1); }
 
-
+.Butt i {
+  pointer-events: none;
+}
 /*----------------------*/
 /*       Console      */
 /*----------------------*/
