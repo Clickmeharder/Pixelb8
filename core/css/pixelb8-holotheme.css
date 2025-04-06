@@ -310,6 +310,7 @@ body{
 /* Optional hover effect */
 #Bubble .Butt:hover {
 	background: var(--button-hover, #555);
+	z-index: 1002;
 }
 #comfy-Butt:hover     { transform: translate(-40px, -22px) scale(1); }
 #wheel-Butt:hover     { transform: translate(-29px, -50px) scale(1); }
