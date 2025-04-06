@@ -129,8 +129,8 @@ body.holo-theme {
   --bubblebutt-color: #12ebebf2;
   --pixelbutt-opacity: 0.5;
   --bubblebutt-opacity: 0.5;
-  --pixelbutt-hover-opacity: 0.5;
-  --bubblebutt-hover-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-hover-opacity: 0.65;
   --default-muted: #666f6f; 
   --bg-color: linear-gradient(135deg, #001f1ff2, #004040f0);
   --bg-alt-color: linear-gradient(135deg, #001f1ff2, #004040f0);
@@ -215,6 +215,7 @@ body {
 	border:var(--border);
 	border-radius:var(--border-radius);
 	box-shadow: var(--box-glow);
+	opacity:var(--bubblebutt-opacity);
 }
 .themed, .panel, .controller {
 	color: var(--text-color);
