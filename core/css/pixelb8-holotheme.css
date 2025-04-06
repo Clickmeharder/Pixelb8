@@ -300,8 +300,8 @@ body {
 		transform: translateY(0);
 		pointer-events: all; /* Allow interactions */
 	}
-	.controls{}
-		.controls button {
+	.controlpanel{}
+		.controlpanel button {
 			margin: 5px 0;
 			border: 2px outset #14889fbf;
 			background: #305a62e8;
@@ -310,7 +310,7 @@ body {
 			font-size: large;
 			border-radius: 5px;
 		}
-		.controls input[type="text"] {
+		.controlpanel input[type="text"] {
 			font-size: large;
 			text-align: center;
 			padding: 3px;
@@ -320,7 +320,7 @@ body {
 			border: 3px inset #0f1112a6;
 			border-radius: 5px;
 		}
-		.controls select {
+		.controlpanel select {
 			font-size: large;
 			text-align: center;
 			padding: 3px;
@@ -330,6 +330,17 @@ body {
 			background-color: #25292ef7;
 			border: 3px inset #0f1112a6;
 			border-radius: 5px;
+		}
+		.controls{
+			border: 3px inset gray;
+		}
+		.controls #wheel-piedish {
+			display: flex;
+			align-items: flex-start;
+			flex-direction: column-reverse;
+		}
+		label.label {
+			width: 100%;
 		}
 /*----------------------*/
 /*  Bg slider toggle  */
