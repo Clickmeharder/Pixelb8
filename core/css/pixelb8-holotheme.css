@@ -108,8 +108,13 @@ body.holo-theme {
 	/* Default Cursor */
   --body-font:;
   --body-color:#fff;
+  --body-bg-color:;
+  --body-bg:;
+  --body-opacity:;
   --text-color: #12ebeb;
   --bubblebutt-color: #12ebebf2;
+  --pixelbutt-opacity: 0.5;
+  --bubblebutt-opacity: 0.5;
   --default-muted: #666f6f; 
   --bg-color: linear-gradient(135deg, #001f1ff2, #004040f0);
   --bg-alt-color: linear-gradient(135deg, #001f1ff2, #004040f0);
@@ -125,7 +130,7 @@ body.holo-theme {
   --box-shadow: 2px 2px 6px var(--shadow-color);
   --box-glow: 0px 0px 12px var(--glow-color);
   --console-bg: rgba(0, 0, 0, 0.85);
-  --body-opacity:;
+
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 
 }
@@ -133,10 +138,36 @@ body.holo-theme {
 /*-------------------------------------------*/
 /*     Twitch Chat Message box & emotes     */
 /*-----------------------------------------*/
-body{
-	color: var(--text-color);
-	
+/*----------------------*/
+/*      The Body        */
+/*----------------------*/
+body {
+    font-family: var(--body-font);
+    color: var(--body-color);
+    background-color: var(--body-bg-color);
+    /*background: var(--body-bg);*/
+    /*background-image: var(--body-bg-img);*/
+    /*background-image: url('../../assets/images/bg/spaace.jpg');*/
+   /*background-image: url('https://pixelb8/assets/images/bg/spaace.jpg');*/
+    cursor: var(--cursor-image);
+    opacity: var(--body-opacity);
 }
+
+/*----------------------*/
+/* empty Main elements */
+/*----------------------*/
+	#bubblewrap {}
+	.thePixelButt{}
+	#Bubble{}
+	#Bubble .Butt{}
+	.Butt{}
+	.Butt.press{}
+	.toggle{}
+	.butt.round{}
+    .panel{}
+/*----------------------*/
+
+
 	#twitchChat {
 		color:;
 		background:;
@@ -173,20 +204,9 @@ body{
 	}
 
 
-/*----------------------*/
-/* empty Main elements */
-/*----------------------*/
-	#bubblewrap {}
-	.thePixelButt{}
-	#Bubble{}
-	#Bubble .Butt{}
-	.Butt{}
-	.Butt.press{}
-	.toggle{}
-	.butt.round{}
-    .panel{}
-/*----------------------*/
-
+	#thePixelButt {
+		opacity:var(--pixelbutt-opacity);
+	}
 	#thePixelButt, .themed, .chatMessage, .panel, .controller, #Bubble .Butt {
 		background:var(--bg-color);
 		border:var(--border);
@@ -197,19 +217,6 @@ body{
 		color: var(--text-color);
 	}
 	.chatMessage{color:var(--body-color);}
-	#Bubble .Butt {
-		color: var(--bubblebutt-color);
-		width: 36px;
-		height: 36px;
-		font-size: 20px;
-	}
-	.Butt {
-		color: var(--text-color);
-		background:var(--bg-color);
-		border:var(--border);
-		border-radius:var(--border-radius);
-	}
-
 
 /*----------------------*/
 /*       Main Button      */
@@ -232,10 +239,8 @@ body{
 	font-size: 24px;
 	cursor: pointer;
 	position: relative;
-	opacity:0.50;
 	z-index: 1001;
 }
-
 
 /* Bubble container */
 #Bubble {
@@ -250,47 +255,57 @@ body{
 	z-index: 999;
 	transition: opacity 0.3s ease;
 }
-/* When active */
-#Bubble.active {
-	opacity: 1;
-	pointer-events: all;
-}
 
-#Bubble .Butt {
-	position: absolute;
-	opacity: 0;
-	transition: all 0.3s ease;
-}
+	#Bubble .Butt {
+		color: var(--bubblebutt-color);
+		position: absolute;
+		width: 36px;
+		height: 36px;
+		font-size: 20px;
+		opacity: 0;
+		transition: all 0.3s ease;
+	}
+	.Butt {
+		color: var(--text-color);
+		background:var(--bg-color);
+		border:var(--border);
+		border-radius:var(--border-radius);
+	}
 
-/* On bubble open */
-#Bubble.active .Butt {
-	opacity: 0.5;
-}
+	/* When active */
+	#Bubble.active {
+		opacity: 1;
+		pointer-events: all;
+	}
+	/* On bubble open */
+	#Bubble.active .Butt {
+		opacity:var(--bubblebutt-opacity);
+	}
+	#Bubble .Butt:hover {
+		opacity: 0.75;
+		z-index: 1002;
+	}
+	.Butt i {
+	  pointer-events: none;
+	}
+		/* Radial Positions */
+		#comfy-Butt     { transform: translate(-40px, -22px) scale(0.8); }
+		#wheel-Butt     { transform: translate(-30px, -52px) scale(0.8); }
+		#entrivia-Butt  { transform: translate(  0px, -60px) scale(0.8); }
+		#theme-Butt     { transform: translate( 30px, -52px) scale(0.8); }
+		#settings-Butt  { transform: translate( 38px, -22px) scale(0.8); }
+		/* Add more for a full circle if needed */
+		#more-Butt1     { transform: translate( 42px, 42px) scale(0.8); }
+		#more-Butt2     { transform: translate(  0px, 60px) scale(0.8); }
+		#more-Butt3     { transform: translate(-42px, 42px) scale(0.8); }
+		/* Optional hover effect */
 
-/* Radial Positions */
-#comfy-Butt     { transform: translate(-40px, -22px) scale(0.8); }
-#wheel-Butt     { transform: translate(-30px, -52px) scale(0.8); }
-#entrivia-Butt  { transform: translate(  0px, -60px) scale(0.8); }
-#theme-Butt     { transform: translate( 30px, -52px) scale(0.8); }
-#settings-Butt  { transform: translate( 38px, -22px) scale(0.8); }
-/* Add more for a full circle if needed */
-#more-Butt1     { transform: translate( 42px, 42px) scale(0.8); }
-#more-Butt2     { transform: translate(  0px, 60px) scale(0.8); }
-#more-Butt3     { transform: translate(-42px, 42px) scale(0.8); }
-/* Optional hover effect */
-#Bubble .Butt:hover {
-	opacity: 0.75;
-	z-index: 1002;
-}
-#comfy-Butt:hover     { transform: translate(-40px, -22px) scale(1); }
-#wheel-Butt:hover     { transform: translate(-30px, -52px) scale(1); }
-#entrivia-Butt:hover  { transform: translate(  0px, -60px) scale(1); }
-#theme-Butt:hover     { transform: translate( 30px, -52px) scale(1); }
-#settings-Butt:hover  { transform: translate( 38px, -22px) scale(1); }
+		#comfy-Butt:hover     { transform: translate(-40px, -22px) scale(1); }
+		#wheel-Butt:hover     { transform: translate(-30px, -52px) scale(1); }
+		#entrivia-Butt:hover  { transform: translate(  0px, -60px) scale(1); }
+		#theme-Butt:hover     { transform: translate( 30px, -52px) scale(1); }
+		#settings-Butt:hover  { transform: translate( 38px, -22px) scale(1); }
 
-.Butt i {
-  pointer-events: none;
-}
 /*----------------------*/
 /*       Console      */
 /*----------------------*/
@@ -421,20 +436,7 @@ option:disabled {
 }
   
 
-/*----------------------*/
-/*      The Body        */
-/*----------------------*/
-body {
-    font-family: var(--body-font);
-    color: var(--body-color);
-    background-color: var(--body-bg-color);
-    /*background: var(--body-bg);*/
-    /*background-image: var(--body-bg-img);*/
-    /*background-image: url('../../assets/images/bg/spaace.jpg');*/
-   /*background-image: url('https://pixelb8/assets/images/bg/spaace.jpg');*/
-    cursor: var(--cursor-image);
-    opacity: var(--body-opacity);
-}
+
 
 /*----------------*/
 /* WEBKIT STYLES  */
