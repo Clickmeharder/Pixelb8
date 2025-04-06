@@ -310,7 +310,6 @@ body{
 #more-Butt3     { transform: translate(-42px, 42px) scale(0.8); }
 /* Optional hover effect */
 #Bubble .Butt:hover {
-	background: var(--button-hover, #555);
 	opacity: 0.75;
 	z-index: 1002;
 }
