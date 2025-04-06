@@ -151,7 +151,7 @@ body.holo-theme {
 
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 
-  --controlbox-opacity: 0.5;
+  --controlbox-opacity: 0.10;
   --controlboxhover-opacity:0.65;
 
   --input-font-size:large;
