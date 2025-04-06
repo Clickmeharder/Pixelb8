@@ -107,7 +107,7 @@ body.retro-theme {
 body.holo-theme {
 	/* Default Cursor */
   --body-font:;
-  --text-color: #fff;
+  --text-color: #12ebeb;
   --bubblebutt-color: #12ebebf2;
   --default-muted: #666f6f; 
   --bg-color: linear-gradient(135deg, #001f1ff2, #004040f0);
@@ -165,6 +165,10 @@ body.holo-theme .box.shadow {
 /*-------------------------------------------*/
 /*     Twitch Chat Message box & emotes     */
 /*-----------------------------------------*/
+body{
+	color: var(--text-color);
+	
+}
 	#twitchChat {
 		color:;
 		background:;
@@ -172,7 +176,6 @@ body.holo-theme .box.shadow {
 		box-shadow:;
 	}
 	.themed, .chatMessage, .panel, .controller, .Butt {
-		color: var(--text-color);
 		background:var(--bg-color);
 		border:var(--border);
 		border-radius:var(--border-radius);
