@@ -12,9 +12,9 @@ Pixelb8-holotheme.css
   --accent-alt: #6610f2;
   --border-width: 0px;
   --border-style: solid;
-  --border-color: #ccc;
+  --border-color: #000;
   --border: var(--border-width) var(--border-style) var(--border-color);
-  --border-radius: 6px;
+  --border-radius: 8px;
   --shadow-color: rgba(0, 255, 239, 0.65);
   --box-shadow: 0px 0px 12px var(--shadow-color);
   --glow-color: rgba(0, 123, 255, 0.6);
@@ -135,9 +135,7 @@ body.holo-theme {
 
 }
 
-/*-------------------------------------------*/
-/*     Twitch Chat Message box & emotes     */
-/*-----------------------------------------*/
+
 /*----------------------*/
 /*      The Body        */
 /*----------------------*/
@@ -166,63 +164,20 @@ body {
 	.butt.round{}
     .panel{}
 /*----------------------*/
-
-
-	#twitchChat {
-		color:;
-		background:;
-		border:;
-		box-shadow:;
-	}
-	.twitchEmote {
-		height: 1.5rem;
-		width: auto;
-		vertical-align: middle;
-		margin: 0 2px;
-	}
-	.floatingEmote {
-		position: fixed;
-		transition: transform 10s linear, opacity 8s ease-out; /* Slower floating effect */
-		opacity: 1;
-		pointer-events: none;
-		z-index: 999;
-	}
-	#twitchChat {
-		position: absolute;
-		left: 0;
-		bottom: 30%;
-		width: 30%;
-	}
-	div#twitchMessagebox {text-align: left;border:;max-height: 170px;}
-	#twitchMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
-	#username {font-weight:bold;}
-	.chatMessage {
-		font-size: 18px;
-		padding-left:8px;
-		padding-right:8px;
-
-	}
-
-
-	#thePixelButt {
-		opacity:var(--pixelbutt-opacity);
-	}
-	#thePixelButt, .themed, .chatMessage, .panel, .controller, #Bubble .Butt {
-		background:var(--bg-color);
-		border:var(--border);
-		border-radius:var(--border-radius);
-		box-shadow: var(--box-glow);
-	}
-	.themed, .panel, .controller {
-		color: var(--text-color);
-	}
-	.chatMessage{color:var(--body-color);}
-
 /*----------------------*/
 /*       Main Button      */
 /*----------------------*/
 /* Wrap around PixelButt so bubble buttons are relative */
 /* Wrap around PixelButt so bubble buttons are relative */
+#thePixelButt, .themed, .chatMessage, .panel, .controller, #Bubble .Butt {
+	background:var(--bg-color);
+	border:var(--border);
+	border-radius:var(--border-radius);
+	box-shadow: var(--box-glow);
+}
+.themed, .panel, .controller {
+	color: var(--text-color);
+}
 #bubblewrap {
 	position: fixed;
 	bottom: 0px;
@@ -231,31 +186,30 @@ body {
 	height: 60px;
 	z-index: 1000;
 }
-/* Main Button */
-#thePixelButt {
-	width: 40px;
-	height: 40px;
-	border-radius: 50%;
-	font-size: 24px;
-	cursor: pointer;
-	position: relative;
-	z-index: 1001;
-}
-
-/* Bubble container */
-#Bubble {
-	position: absolute;
-    width: 150px;
-    height: 150px;
-	padding: 3px;
-	line-height: 0.1;
-    transform: translate(0%, -10%);
-	pointer-events: none;
-	opacity: 0;
-	z-index: 999;
-	transition: opacity 0.3s ease;
-}
-
+	/* Main Button */
+	#thePixelButt {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		font-size: 24px;
+		cursor: pointer;
+		position: relative;
+		z-index: 1001;
+		opacity:var(--pixelbutt-opacity);
+	}
+	/* Bubble container */
+	#Bubble {
+		position: absolute;
+		width: 150px;
+		height: 150px;
+		padding: 3px;
+		line-height: 0.1;
+		transform: translate(0%, -10%);
+		pointer-events: none;
+		opacity: 0;
+		z-index: 999;
+		transition: opacity 0.3s ease;
+	}
 	#Bubble .Butt {
 		color: var(--bubblebutt-color);
 		position: absolute;
@@ -271,7 +225,6 @@ body {
 		border:var(--border);
 		border-radius:var(--border-radius);
 	}
-
 	/* When active */
 	#Bubble.active {
 		opacity: 1;
@@ -409,18 +362,60 @@ input:checked + .slider:before {
 /*----------------------*/
 /*______________________*/
 
-/**/
-/*----------------------*/
-/* a new css section */
-/*----------------------*/
-/**/
+/*-------------------------------------------*/
+/*     Twitch Chat Message box & emotes     */
+/*-----------------------------------------*/
+	#twitchChat {
+		color:;
+		background:;
+		border:;
+		box-shadow:;
+	}
+	.twitchEmote {
+		height: 1.5rem;
+		width: auto;
+		vertical-align: middle;
+		margin: 0 2px;
+	}
+	.floatingEmote {
+		position: fixed;
+		transition: transform 10s linear, opacity 8s ease-out; /* Slower floating effect */
+		opacity: 1;
+		pointer-events: none;
+		z-index: 999;
+	}
+	#twitchChat {
+		position: absolute;
+		left: 0;
+		bottom: 30%;
+		width: 30%;
+	}
+	div#twitchMessagebox {text-align: left;border:;max-height: 170px;}
+	#twitchMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
+	#username {font-weight:bold;}
+	.chatMessage {
+		font-size: 18px;
+		padding-left:8px;
+		padding-right:8px;
+		color:var(--body-color);
+	}
 
 /**/
 /*----------------------*/
 /*______________________*/
 /**/
 
+/**/
+/*----------------------*/
+/* a new css section */
+/*----------------------*/
+/**/
 
+
+/**/
+/*----------------------*/
+/*______________________*/
+/**/
 
 
 option:disabled {
