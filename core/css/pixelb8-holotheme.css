@@ -170,7 +170,8 @@ body.holo-theme {
   --input-border-style:inset;
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
   --input-border-radius:5px;
-
+  --twitchchat-opacity:1.0;
+  --twitchmessage-opacity:0.85;
 }
 
 
@@ -482,15 +483,17 @@ input:checked + .slider:before {
 		left: 0;
 		bottom: 30%;
 		width: 30%;
+		opacity:var(--twitchchat-opacity);
 	}
 	div#twitchMessagebox {text-align: left;border:;max-height: 170px;}
-	#twitchMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
+	#twitchMessagebox .chatMessage {transition: opacity 1s ease-out;  /* Apply the fade transition */}
 	#username {font-weight:bold;}
 	.chatMessage {
 		font-size: 18px;
 		padding-left:8px;
 		padding-right:8px;
 		color:var(--body-color);
+		opacity:var(--twitchmessage-opacity);
 	}
 
 /**/
