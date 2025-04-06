@@ -22,7 +22,6 @@ Pixelb8-holotheme.css
   --body-opacity: 1;
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 }
-
 /* 🌙 DARK THEME */
 body.dark-theme {
   --body-font: 'Segoe UI', sans-serif;
@@ -47,7 +46,6 @@ body.dark-theme {
   --body-opacity: 1;
   --cursor-image: ;
 }
-
 /* 🌞 LIGHT THEME (extra bright) */
 body.light-theme {
   --body-font: Verdana, sans-serif;
@@ -302,8 +300,37 @@ body {
 		transform: translateY(0);
 		pointer-events: all; /* Allow interactions */
 	}
-	.controlpanel{}
-
+	.controls{}
+		.controls button {
+			margin: 5px 0;
+			border: 2px outset #14889fbf;
+			background: #305a62e8;
+			color: #00fff9;
+			text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
+			font-size: large;
+			border-radius: 5px;
+		}
+		.controls input[type="text"] {
+			font-size: large;
+			text-align: center;
+			padding: 3px;
+			margin: 3px 0;
+			color: #30b524;
+			background-color: #25292ef7;
+			border: 3px inset #0f1112a6;
+			border-radius: 5px;
+		}
+		.controls select {
+			font-size: large;
+			text-align: center;
+			padding: 3px;
+			margin: auto 11px 0 0;
+			color: #30b524;
+			width: 62%;
+			background-color: #25292ef7;
+			border: 3px inset #0f1112a6;
+			border-radius: 5px;
+		}
 /*----------------------*/
 /*  Bg slider toggle  */
 /*----------------------*/
