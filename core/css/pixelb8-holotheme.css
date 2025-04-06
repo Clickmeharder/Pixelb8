@@ -238,6 +238,7 @@ body {
 		color: var(--text-color);
 		background:var(--bg-color);
 		border:var(--border);
+		border-width:(--buttborder-width);
 		border-radius:var(--border-radius);
 	}
 	/* When active */
