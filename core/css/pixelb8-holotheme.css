@@ -181,6 +181,9 @@ body{
 		border-radius:var(--border-radius);
 		box-shadow: var(--box-glow);
 	}
+	.themed, .chatMessage, .panel, .controller {
+		color: var(--text-color);
+	}
 
 	#Bubble .Butt {
 		color: var(--bubblebutt-color);
