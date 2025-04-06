@@ -259,6 +259,7 @@ _____________________________  -->
 					element.style.animation = animationType === "slide" ? "slideOut 0.5s ease-in forwards" : "fadeOut 0.5s ease-in forwards";
 
 					setTimeout(() => {
+						console.log("Butt pressed" + elementId);
 						element.classList.toggle("active");
 						element.style.visibility = "hidden";
 						element.style.opacity = "0";
@@ -283,7 +284,7 @@ _____________________________  -->
 
 				// Remove 'Butt' from the buttonId and construct the corresponding controller ID
 				const controllerId = buttonId.replace('Butt', '') + 'controller';
-
+				console.log("Butt pressed" + controllerId);
 				// Now, toggle the visibility of the corresponding controller element
 				toggleElement(controllerId, 'fade');
 			}
