@@ -698,3 +698,4 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 
 /*----------------------*/
 /*   Important Classes */
+.row{display:flex;flex-direction:row;}
