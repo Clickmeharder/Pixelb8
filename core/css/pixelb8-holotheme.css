@@ -128,39 +128,6 @@ body.holo-theme {
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 
 }
-body.holo-theme #thePixelButt{
-	position: fixed;
-	bottom: 2px;
-	right: 30px;
-	width: 40px;
-	height: 30px;
-	border-radius: 19%;
-	background: linear-gradient(113deg, #001f1f, #004040);
-	color: #12ebeb;
-	border: none;
-	font-size: 24px;
-	padding: 3px;
-	line-height: 0.1;
-	cursor: pointer;
-	text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
-	box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
-	transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
-	z-index: 1000;
-	opacity: 0.65;
-}
-body.holo-theme #thePixelButt:hover {
-	background-color: #2980b9;
-	transform: scale(1.1);
-	opacity: 1;
-}
-
-
-body.holo-theme .box.glow {
-  box-shadow: 0 0 12px var(--glow-color);
-}
-body.holo-theme .box.shadow {
-  box-shadow: 0 0 12px var(--shadow-color);
-}
 
 /*-------------------------------------------*/
 /*     Twitch Chat Message box & emotes     */
@@ -175,29 +142,6 @@ body{
 		border:;
 		box-shadow:;
 	}
-	#thePixelButt, .themed, .chatMessage, .panel, .controller, #Bubble .Butt {
-		background:var(--bg-color);
-		border:var(--border);
-		border-radius:var(--border-radius);
-		box-shadow: var(--box-glow);
-	}
-	.themed, .chatMessage, .panel, .controller {
-		color: var(--text-color);
-	}
-
-	#Bubble .Butt {
-		color: var(--bubblebutt-color);
-		width: 36px;
-		height: 36px;
-		font-size: 20px;
-	}
-	.Butt {
-		color: var(--text-color);
-		background:var(--bg-color);
-		border:var(--border);
-		border-radius:var(--border-radius);
-	}
-
 	.twitchEmote {
 		height: 1.5rem;
 		width: auto;
@@ -240,6 +184,31 @@ body{
 
 	.butt.round{}
     .panel{}
+/*----------------------*/
+
+	#thePixelButt, .themed, .chatMessage, .panel, .controller, #Bubble .Butt {
+		background:var(--bg-color);
+		border:var(--border);
+		border-radius:var(--border-radius);
+		box-shadow: var(--box-glow);
+	}
+	.themed, .chatMessage, .panel, .controller {
+		color: var(--text-color);
+	}
+
+	#Bubble .Butt {
+		color: var(--bubblebutt-color);
+		width: 36px;
+		height: 36px;
+		font-size: 20px;
+	}
+	.Butt {
+		color: var(--text-color);
+		background:var(--bg-color);
+		border:var(--border);
+		border-radius:var(--border-radius);
+	}
+
 
 /*----------------------*/
 /*       Main Button      */
@@ -256,7 +225,7 @@ body{
 }
 
 /* Main Button */
-#thePixelButt2 {
+#thePixelButt {
 	width: 40px;
 	height: 40px;
 	border-radius: 50%;
