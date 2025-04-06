@@ -241,6 +241,7 @@ body {
 		border:var(--border);
 		border-width:var(--buttborder-width);
 		border-radius:var(--border-radius);
+		box-shadow: var(--box-glow);
 	}
 	/* When active */
 	#Bubble.active {
