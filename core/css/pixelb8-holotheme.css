@@ -26,6 +26,10 @@ Pixelb8-holotheme.css
 /* 🌙 DARK THEME */
 body.dark-theme {
   --body-font: 'Segoe UI', sans-serif;
+  --body-color:#f0f0f0;
+  --body-bg-color:;
+  --body-bg:;
+  --body-opacity:;
   --text-color: #f0f0f0;
   --bg-color: #121212;
   --bg-alt-color: #1e1e1e;
@@ -47,12 +51,16 @@ body.dark-theme {
 /* 🌞 LIGHT THEME (extra bright) */
 body.light-theme {
   --body-font: Verdana, sans-serif;
+  --body-color:#202020;
+  --body-bg-color:;
+  --body-bg:;
+  --body-opacity:;
   --text-color: #202020;
   --bg-color: #fefefe;
   --bg-alt-color: #e0e0e0;
   --accent-color: #3c8dbc;
   --accent-alt: #5bc0de;
-  --border-width: 2px;
+  --border-width: 1px;
   --border-style: dotted;
   --border-color: #ddd;
   --border: var(--border-width) var(--border-style) var(--border-color);
@@ -67,6 +75,10 @@ body.light-theme {
 /* 🎨 CUSTOM THEME (pastel play) */
 body.custom-theme {
   --body-font: 'Comic Sans MS', cursive, sans-serif;
+  --body-color:#333;
+  --body-bg-color:;
+  --body-bg:;
+  --body-opacity:;
   --text-color: #333;
   --bg-color: #ffeefc;
   --bg-alt-color: #ffe3f1;
@@ -87,13 +99,17 @@ body.custom-theme {
 /* 🕹️ RETRO THEME (green screen vibes) */
 body.retro-theme {
   --body-font: 'Courier New', monospace;
+  --body-color:#33ff33;
+  --body-bg-color:;
+  --body-bg:;
+  --body-opacity:;
   --text-color: #33ff33;
   --bg-color: #000000;
   --bg-alt-color: #111111;
   --accent-color: #00ff00;
   --accent-alt: #33cc33;
-  --border-width: 2px;
-  --border-style: solid;
+  --border-width: 1px;
+  --border-style: inset;
   --border-color: #00ff00;
   --border: var(--border-width) var(--border-style) var(--border-color);
   --border-radius: 12px;
@@ -107,7 +123,7 @@ body.retro-theme {
 body.holo-theme {
 	/* Default Cursor */
   --body-font:;
-  --body-color:#fff;
+  --body-color:#f0f0f0;
   --body-bg-color:;
   --body-bg:;
   --body-opacity:;
