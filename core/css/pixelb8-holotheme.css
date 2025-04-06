@@ -170,13 +170,11 @@ body {
 /*----------------------*/
 /* empty Main elements */
 /*----------------------*/
-	.PixelButtwrap{
-		
-	}
-
-	.thePixelButt{}
+	
 	#bubblewrap {}
-	#Bubble.Butt{}
+	.thePixelButt{}
+	#Bubble{}
+	#Bubble .Butt{}
 	.Butt{}
 	.Butt.press{}
 	.toggle{}
@@ -189,7 +187,8 @@ body {
 /*----------------------*/
 /* Wrap around PixelButt so bubble buttons are relative */
 /* Wrap around PixelButt so bubble buttons are relative */
-#thePixelButt, .themed, .chatMessage, .panel, .controller, #Bubble.Butt {
+
+.themed, .chatMessage, .panel, .controller, #Bubble .Butt {
 	background:var(--bg-color);
 	border:var(--border);
 	border-radius:var(--border-radius);
@@ -198,7 +197,7 @@ body {
 .themed, .panel, .controller {
 	color: var(--text-color);
 }
-#PixelButtwrap {
+#bubblewrap {
 	position: fixed;
 	bottom: 0px;
     right: 20px;
@@ -207,18 +206,22 @@ body {
 	z-index: 1000;
 }
 	/* Main Button */
-	#thePixelButt {
+	#thePixelButt{
+		position: relative;
 		width: 40px;
 		height: 40px;
 		border-radius: 50%;
 		font-size: 24px;
 		cursor: pointer;
-		position: relative;
 		z-index: 1001;
+		background:var(--bg-color);
+		border:var(--border);
+		border-radius:var(--border-radius);
+		box-shadow: var(--box-glow);
 		opacity:var(--pixelbutt-opacity);
 	}
 	/* Bubble container */
-	#bubblewrap {
+	#Bubble {
 		position: absolute;
 		width: 150px;
 		height: 150px;
@@ -230,7 +233,7 @@ body {
 		z-index: 999;
 		transition: opacity 0.3s ease;
 	}
-	#bubblewrap .Butt {
+	#Bubble .Butt {
 		color: var(--bubblebutt-color);
 		position: absolute;
 		width: 36px;
@@ -239,16 +242,17 @@ body {
 		opacity: 0;
 		transition: all 0.3s ease;
 	}
+
 	/* When active */
-	#bubblewrap.active {
+	#Bubble.active {
 		opacity: 1;
 		pointer-events: all;
 	}
 	/* On bubble open */
-	#bubblewrap.active .Butt {
+	#Bubble.active .Butt {
 		opacity:var(--bubblebutt-opacity);
 	}
-	#bubblewrap .Butt:hover {
+	#Bubble .Butt:hover {
 		opacity: 0.75;
 		z-index: 1002;
 	}
