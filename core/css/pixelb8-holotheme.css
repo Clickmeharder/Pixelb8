@@ -138,6 +138,7 @@ body.holo-theme {
   --border-style: solid;
   --border-color: white;
   --border: var(--border-width) var(--border-style) var(--border-color);
+  --buttborder-width:3px;
   --border-radius: 12px;
   --shadow-color:rgba(255, 255, 255, 0.65);
   --glow-color:rgba(0, 255, 239, 0.65);
