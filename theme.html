@@ -279,7 +279,7 @@ _____________________________  -->
 		// Adding event listener to the parent container (#Bubble)
 		document.getElementById('Bubble').addEventListener('click', function(event) {
 			// Check if the clicked element has the 'Butt' class
-			if (event.target.classList.contains('Butt')) {
+			if (event.target.id.contains('Butt')) {
 				console.log("Bubble has Butt");
 				// Get the ID of the clicked button
 				const buttonId = event.target.id;
