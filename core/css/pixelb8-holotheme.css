@@ -216,9 +216,9 @@ body {
 	border:var(--border);
 	border-radius:var(--border-radius);
 	box-shadow: var(--box-glow);
-	opacity:var(--bubblebutt-opacity);
 }
 .themed, .panel, .controller {
+	opacity:var(--controlbox-opacity);
 	color: var(--text-color);
 }
 #bubblewrap {
