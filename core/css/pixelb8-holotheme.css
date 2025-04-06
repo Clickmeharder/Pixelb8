@@ -170,10 +170,11 @@ body.holo-theme .box.shadow {
 		border:;
 		box-shadow:;
 	}
-	.themed, .chatMessage, .panel, .controller {
+	.themed, .chatMessage, .panel, .controller, .Butt {
 		color: var(--text-color);
 		background:var(--bg-color);
 		border:var(--border);
+		border-radius:var(--border-radius);
 		box-shadow: var(--box-glow);
 	}
 
@@ -205,6 +206,7 @@ body.holo-theme .box.shadow {
 		padding-right:8px;
 
 	}
+
 
 /*----------------------*/
 /* empty Main elements */
@@ -299,6 +301,8 @@ body.holo-theme .box.shadow {
 #entrivia-Butt:hover  { transform: translate(  0px, -60px) scale(1); }
 #theme-Butt:hover     { transform: translate( 29px, -50px) scale(1); }
 #settings-Butt:hover  { transform: translate( 40px, -22px) scale(1); }
+
+
 /*----------------------*/
 /*       Console      */
 /*----------------------*/
