@@ -217,7 +217,7 @@ body{
 /* Wrap around PixelButt so bubble buttons are relative */
 #bubblewrap {
 	position: fixed;
-	bottom: 10px;
+	bottom: 5px;
 	right: 25px;
 	width: 60px;
 	height: 60px;
