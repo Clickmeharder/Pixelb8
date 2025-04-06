@@ -281,24 +281,24 @@ body.holo-theme .box.shadow {
 }
 
 /* Radial Positions */
-#comfy-Butt     { transform: translate(-40px, -22px) scale(0.5); }
-#wheel-Butt     { transform: translate(-29px, -50px) scale(0.5); }
-#entrivia-Butt  { transform: translate(  0px, -60px) scale(0.5); }
-#theme-Butt     { transform: translate( 29px, -50px) scale(0.5); }
-#settings-Butt  { transform: translate( 40px, -22px) scale(0.5); }
+#comfy-Butt     { transform: translate(-40px, -22px) scale(0.8); }
+#wheel-Butt     { transform: translate(-29px, -50px) scale(0.8); }
+#entrivia-Butt  { transform: translate(  0px, -60px) scale(0.8); }
+#theme-Butt     { transform: translate( 29px, -50px) scale(0.8); }
+#settings-Butt  { transform: translate( 40px, -22px) scale(0.8); }
 /* Add more for a full circle if needed */
-#more-Butt1     { transform: translate( 42px, 42px) scale(0.5); }
-#more-Butt2     { transform: translate(  0px, 60px) scale(0.5); }
-#more-Butt3     { transform: translate(-42px, 42px) scale(0.5); }
+#more-Butt1     { transform: translate( 42px, 42px) scale(0.8); }
+#more-Butt2     { transform: translate(  0px, 60px) scale(0.8); }
+#more-Butt3     { transform: translate(-42px, 42px) scale(0.8); }
 /* Optional hover effect */
 #Bubble .Butt:hover {
 	background: var(--button-hover, #555);
 }
-#comfy-Butt:hover     { transform: translate(-40px,   -15px) scale(1.2); }
-#wheel-Butt:hover     { transform: translate(-42px, -42px) scale(1.2); }
-#entrivia-Butt:hover  { transform: translate(  0px, -60px) scale(1.2); }
-#theme-Butt:hover     { transform: translate( 42px, -42px) scale(1.2); }
-#settings-Butt:hover  { transform: translate( 60px,   0px) scale(1.2); }
+#comfy-Butt:hover     { transform: translate(-40px,   -15px) scale(1); }
+#wheel-Butt:hover     { transform: translate(-42px, -42px) scale(1); }
+#entrivia-Butt:hover  { transform: translate(  0px, -60px) scale(1); }
+#theme-Butt:hover     { transform: translate( 42px, -42px) scale(1); }
+#settings-Butt:hover  { transform: translate( 60px,   0px) scale(1); }
 /*----------------------*/
 /*       Console      */
 /*----------------------*/
