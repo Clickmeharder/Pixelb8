@@ -175,7 +175,7 @@ body{
 		border:;
 		box-shadow:;
 	}
-	#thePixelButt, .themed, .chatMessage, .panel, .controller,#Bubble .Butt {
+	#thePixelButt, .themed, .chatMessage, .panel, .controller, #Bubble .Butt {
 		background:var(--bg-color);
 		border:var(--border);
 		border-radius:var(--border-radius);
