@@ -188,7 +188,12 @@ body{
 	#Bubble .Butt {
 		color: var(--bubblebutt-color);
 	}
-	
+	.Butt {
+		color: var(--text-color);
+		background:var(--bg-color);
+		border:var(--border);
+		border-radius:var(--border-radius);
+	}
 
 	.twitchEmote {
 		height: 1.5rem;
