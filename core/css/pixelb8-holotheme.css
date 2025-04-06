@@ -294,7 +294,7 @@ body.holo-theme .box.shadow {
 #Bubble .Butt:hover {
 	background: var(--button-hover, #555);
 }
-#comfy-Butt:hover     { transform: translate(-40px, -22px) scale(0.8); }
+#comfy-Butt:hover     { transform: translate(-40px, -22px) scale(1); }
 #wheel-Butt:hover     { transform: translate(-29px, -50px) scale(1); }
 #entrivia-Butt:hover  { transform: translate(  0px, -60px) scale(1); }
 #theme-Butt:hover     { transform: translate( 29px, -50px) scale(1); }
