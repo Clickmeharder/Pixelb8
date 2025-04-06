@@ -181,6 +181,8 @@ body.holo-theme .box.shadow {
 	#Bubble.Butt {
 		color: var(--bubblebutt-color);
 	}
+	
+
 	.twitchEmote {
 		height: 1.5rem;
 		width: auto;
