@@ -60,7 +60,7 @@ body.light-theme {
   --bg-alt-color: #e0e0e0;
   --accent-color: #3c8dbc;
   --accent-alt: #5bc0de;
-  --border-width: 1px;
+  --border-width: 3px;
   --border-style: dotted;
   --border-color: #ddd;
   --border: var(--border-width) var(--border-style) var(--border-color);
