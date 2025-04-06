@@ -125,36 +125,41 @@ body.holo-theme {
   --body-bg-color:;
   --body-bg:;
   --body-opacity:;
+
   --text-color: #12ebeb;
-  --bubblebutt-color: #12ebebf2;
-  --pixelbutt-opacity: 0.5;
-  --bubblebutt-opacity: 0.5;
-  --pixelbutt-hover-opacity: 0.65;
-  --bubblebutt-hover-opacity: 0.65;
   --default-muted: #666f6f; 
   --bg-color: linear-gradient(135deg, #001f1f47, #004040de);
   --bg-alt-color: linear-gradient(135deg, #001f1ff2, #004040f0);
   --bg-alt2-color: linear-gradient(135deg, #001f1ff2, #004040f0);
   --accent-color:;
-  --accent-alt: ;  
+  --accent-alt: ;
   --border-width: 0px;
   --border-style: ridge;
   --border-color: #14889fbf;
   --border: var(--border-width) var(--border-style) var(--border-color);
-  --buttborder-style:outset;
-  --buttborder-width:2px;
   --border-radius: 12px;
   --shadow-color:rgba(255, 255, 255, 0.65);
   --glow-color:rgba(0, 255, 239, 0.65);
   --box-shadow: 2px 2px 6px var(--shadow-color);
   --box-glow: 0px 0px 12px var(--glow-color);
-  --console-bg: rgba(0, 0, 0, 0.85);
-
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
+  
+  --console-bg: rgba(0, 0, 0, 0.85);
+  --console-color:#f0f0f0;
+
 
   --controlbox-opacity: 0.10;
   --controlboxhover-opacity:0.65;
 
+  --bubblebutt-color: #12ebebf2;
+  --pixelbutt-opacity: 0.5;
+  --bubblebutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-hover-opacity: 0.65;
+  --buttborder-style:outset;
+  --buttborder-width:2px;
+  
+  
   --input-font-size:large;
   --input-font-weight:;
   --input-text-align: center;
