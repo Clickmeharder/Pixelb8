@@ -170,22 +170,26 @@ body {
 /*----------------------*/
 /* empty Main elements */
 /*----------------------*/
-	#bubblewrap {}
+	.PixelButtwrap{
+		
+	}
+
 	.thePixelButt{}
-	#Bubble{}
-	#Bubble .Butt{}
+	#bubblewrap {}
+	#Bubble.Butt{}
 	.Butt{}
 	.Butt.press{}
 	.toggle{}
 	.butt.round{}
     .panel{}
+
 /*----------------------*/
 /*----------------------*/
 /*       Main Button      */
 /*----------------------*/
 /* Wrap around PixelButt so bubble buttons are relative */
 /* Wrap around PixelButt so bubble buttons are relative */
-#thePixelButt, .themed, .chatMessage, .panel, .controller, #Bubble .Butt {
+#thePixelButt, .themed, .chatMessage, .panel, .controller, #Bubble.Butt {
 	background:var(--bg-color);
 	border:var(--border);
 	border-radius:var(--border-radius);
@@ -194,7 +198,7 @@ body {
 .themed, .panel, .controller {
 	color: var(--text-color);
 }
-#bubblewrap {
+.PixelButtwrap {
 	position: fixed;
 	bottom: 0px;
     right: 20px;
@@ -214,7 +218,7 @@ body {
 		opacity:var(--pixelbutt-opacity);
 	}
 	/* Bubble container */
-	#Bubble {
+	#bubblewrap {
 		position: absolute;
 		width: 150px;
 		height: 150px;
@@ -226,7 +230,7 @@ body {
 		z-index: 999;
 		transition: opacity 0.3s ease;
 	}
-	#Bubble .Butt {
+	#Bubble.Butt {
 		color: var(--bubblebutt-color);
 		position: absolute;
 		width: 36px;
@@ -235,6 +239,19 @@ body {
 		opacity: 0;
 		transition: all 0.3s ease;
 	}
+	/* When active */
+	#bubblewrap.active {
+		opacity: 1;
+		pointer-events: all;
+	}
+	/* On bubble open */
+	#bubblewrap.active .Butt {
+		opacity:var(--bubblebutt-opacity);
+	}
+	#bubblewrap .Butt:hover {
+		opacity: 0.75;
+		z-index: 1002;
+	}
 	.Butt {
 		color: var(--text-color);
 		background:var(--bg-color);
@@ -242,19 +259,6 @@ body {
 		border-width:var(--buttborder-width);
 		border-radius:var(--border-radius);
 		box-shadow: var(--box-glow);
-	}
-	/* When active */
-	#Bubble.active {
-		opacity: 1;
-		pointer-events: all;
-	}
-	/* On bubble open */
-	#Bubble.active .Butt {
-		opacity:var(--bubblebutt-opacity);
-	}
-	#Bubble .Butt:hover {
-		opacity: 0.75;
-		z-index: 1002;
 	}
 	.Butt i {
 	  pointer-events: none;
