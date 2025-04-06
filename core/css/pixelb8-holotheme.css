@@ -271,7 +271,7 @@ body{
 #wheel-Butt     { transform: translate(-30px, -52px) scale(0.8); }
 #entrivia-Butt  { transform: translate(  0px, -60px) scale(0.8); }
 #theme-Butt     { transform: translate( 30px, -52px) scale(0.8); }
-#settings-Butt  { transform: translate( 40px, -22px) scale(0.8); }
+#settings-Butt  { transform: translate( 38px, -22px) scale(0.8); }
 /* Add more for a full circle if needed */
 #more-Butt1     { transform: translate( 42px, 42px) scale(0.8); }
 #more-Butt2     { transform: translate(  0px, 60px) scale(0.8); }
@@ -285,7 +285,7 @@ body{
 #wheel-Butt:hover     { transform: translate(-30px, -52px) scale(1); }
 #entrivia-Butt:hover  { transform: translate(  0px, -60px) scale(1); }
 #theme-Butt:hover     { transform: translate( 30px, -52px) scale(1); }
-#settings-Butt:hover  { transform: translate( 40px, -22px) scale(1); }
+#settings-Butt:hover  { transform: translate( 38px, -22px) scale(1); }
 
 .Butt i {
   pointer-events: none;
