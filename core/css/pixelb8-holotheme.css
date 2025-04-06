@@ -149,6 +149,23 @@ body.holo-theme {
 
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 
+  --input-font-size:large;
+  --input-font-weight:;
+  --input-text-align: center;
+  --input-padding:3px;
+  --input-margin: 3px 0;
+  --select-margin: auto 11px 0 0;
+  
+  --input-color:#30b524;
+  --input-bg-color:#25292ef7;
+  --input-bg:;
+  --input-opacity:;
+  --input-border-width:3px;
+  --input-border-color:#0f1112a6;
+  --input-border-style:inset;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius:5px;
+
 }
 
 
@@ -269,7 +286,7 @@ body {
 	}
 		/* Radial Positions */
 		#comfy-Butt     { transform: translate(-40px, -22px) scale(0.8); }
-		#wheel-Butt     { transform: translate(-30px, -52px) scale(0.8); }
+		#wheel-Butt     { transform: translate(-31px, -52px) scale(0.8); }
 		#entrivia-Butt  { transform: translate(  0px, -60px) scale(0.8); }
 		#theme-Butt     { transform: translate( 30px, -52px) scale(0.8); }
 		#settings-Butt  { transform: translate( 38px, -22px) scale(0.8); }
@@ -280,7 +297,7 @@ body {
 		/* Optional hover effect */
 
 		#comfy-Butt:hover     { transform: translate(-40px, -22px) scale(1); }
-		#wheel-Butt:hover     { transform: translate(-30px, -52px) scale(1); }
+		#wheel-Butt:hover     { transform: translate(-31px, -52px) scale(1); }
 		#entrivia-Butt:hover  { transform: translate(  0px, -60px) scale(1); }
 		#theme-Butt:hover     { transform: translate( 30px, -52px) scale(1); }
 		#settings-Butt:hover  { transform: translate( 38px, -22px) scale(1); }
@@ -319,28 +336,28 @@ body {
 			font-size: large;
 		}
 		.controlpanel input[type="text"] {
-			font-size: large;
-			text-align: center;
-			padding: 3px;
-			margin: 3px 0;
-			color: #30b524;
-			background-color: #25292ef7;
-			border: 3px inset #0f1112a6;
-			border-radius: 5px;
+			font-size: var(--input-font-size);
+			text-align: var(--input-text-align);
+			padding: var(--input-padding);
+			margin:var(--input-margin);
+			color: var(--input-color);
+			background-color: var(--input-bg-color);
+			border: var(--input-border);
+			border-radius: var(--input-border-radius);
 		}
 		.controlpanel select {
-			font-size: large;
-			text-align: center;
-			padding: 3px;
-			margin: auto 11px 0 0;
-			color: #30b524;
+			font-size: var(--input-font-size);
+			text-align: var(--input-text-align);
+			padding: var(--input-padding);
+			margin:var(--select-margin);
+			color: var(--input-color);
+			background-color: var(--input-bg-color);
+			border: var(--input-border);
+			border-radius: var(--input-border-radius);
 			width: 62%;
-			background-color: #25292ef7;
-			border: 3px inset #0f1112a6;
-			border-radius: 5px;
 		}
 		.controls{
-			border: 3px inset gray;
+			border: 2px inset gray;
 		}
 		.controls #wheel-piedish {
 			display: flex;
