@@ -175,13 +175,14 @@ body{
 		border:;
 		box-shadow:;
 	}
-	.themed, .chatMessage, .panel, .controller, .Butt {
+	.themed, .chatMessage, .panel, .controller,#Bubble .Butt {
 		background:var(--bg-color);
 		border:var(--border);
 		border-radius:var(--border-radius);
 		box-shadow: var(--box-glow);
 	}
-	#Bubble.Butt {
+
+	#Bubble .Butt {
 		color: var(--bubblebutt-color);
 	}
 	
