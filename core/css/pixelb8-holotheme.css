@@ -139,7 +139,7 @@ body.holo-theme {
   --border-color: #14889fbf;
   --border: var(--border-width) var(--border-style) var(--border-color);
   --buttborder-style:outset;
-  --buttborder-width:3px;
+  --buttborder-width:2px;
   --border-radius: 12px;
   --shadow-color:rgba(255, 255, 255, 0.65);
   --glow-color:rgba(0, 255, 239, 0.65);
