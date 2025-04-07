@@ -69,6 +69,7 @@ Other Fun:
 		console itself is a box that contains messages
 		-->
 		<div  id="console"></div>
+		
 		<!-- this is the announcements panel. it can contain text or text and a timer or other elements -->
 		<div class="panel" id="Announcements">
 			<div class="announcement" id="announcement-panel-message"></div>
@@ -89,6 +90,7 @@ Other Fun:
 		theme switcher (new)
 		-->
 		<div class="controller" id="theme-controller">
+			<h2 class="controllerheader">Theme Controller</h2>
 			<div id="controls" id="theme-controls">
 				<div class="" id="themeButtWrap">
 					<button class="Butt themeselect" id="light-themeButt">🌞</button>
@@ -105,18 +107,20 @@ Other Fun:
 				</div>
 			</div>
 		</div>
-
 		<div class="controller" id="comfy-controller">
-			<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
-			<button id="streamersButt">Connect</button>
-			<button id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
-			<div id="more-controls" style="">
-				<span id="">Simulate background</span>
-				<div id="switch-box">
-					<label class="switch">
-					  <input type="checkbox" id="simulatebackground">
-					  <span class="slider"></span>
-					</label>
+			<h2 class="controllerheader">Comfy Controller</h2>
+			<div class="controlpanel">
+				<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
+				<button id="streamersButt">Connect</button>
+				<button id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
+				<div id="more-controls" style="">
+					<span id="">Simulate background</span>
+					<div id="switch-box">
+						<label class="switch">
+						  <input type="checkbox" id="simulatebackground">
+						  <span class="slider"></span>
+						</label>
+					</div>
 				</div>
 			</div>
 			<div id="comfy-settings" style="display:none;">
