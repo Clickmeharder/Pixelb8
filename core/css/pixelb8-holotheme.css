@@ -235,7 +235,7 @@ body.neonvoid-theme {
 body.biohazard-theme {
   --body-font: 'VT323', monospace;
   --body-color: #e5ffe5;
-  --body-bg-color: #0f1a0f;
+  --body-bg-color: ;
   --body-bg: radial-gradient(circle, #0f1a0f 0%, #030703 100%);
   --body-opacity: 1;
 
@@ -257,6 +257,37 @@ body.biohazard-theme {
   --shadow-color: rgba(180, 255, 160, 0.35);
 
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
+
+  /* Button Styles */
+  --button-text-color: #12ebeb;
+  --button-bg-color: #004040de;
+  --button-padding: 9px;
+  --button-margin: 3px 0;
+  --button-hover-text-color: #0e5b75;
+  --button-hover-bg-color: #0a2f42eb;
+  --button-border-color: var(--border-color);
+  --button-border-style: outset;
+  --button-border-width: 2px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 12px;
+  --button-text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
+
+  /* Input Styles */
+  --input-font-size: large;
+  --input-font-weight: ;
+  --input-text-align: center;
+  --input-padding: 3px;
+  --input-margin: 3px 0;
+  --input-color: #30b524;
+  --input-bg-color: #25292ef7;
+  --input-bg: ;
+  --input-opacity: ;
+  --input-border-width: 3px;
+  --input-border-color: #0f1112a6;
+  --input-border-style: inset;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 5px;
+  --select-margin: auto 11px 0 0;
 }
 body.holo-theme {
 	/* --body roots are set directly to the body */
