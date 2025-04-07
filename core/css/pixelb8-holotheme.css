@@ -522,6 +522,10 @@ select.b {}
 			flex-direction: column-reverse;
 		}
 
+		.controls #entrivia-settings-main {
+			background-color: #080c15eb;
+			border: 2px inset #000406;
+		}
 /*-------------------------------------------*/
 /*     Twitch Chat Message box & emotes     */
 /*-----------------------------------------*/
@@ -658,10 +662,7 @@ ul#broadcastercommandlist {
 			align-items: center;
 			border: 2px ridge #273a4c;
 		}
-		div#entrivia-settings-main {
-			background-color: #080c15eb;
-			border: 2px inset #000406;
-		}
+
 
 
 /**/
