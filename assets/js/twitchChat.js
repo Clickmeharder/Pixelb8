@@ -226,7 +226,7 @@ function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
     const input = document.querySelector("#comfy-controller input#twitchname");
-
+	console.log(`setStreamer fucntion ran: ${streamername}`);
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
 		 // Save to localStorage
@@ -264,6 +264,7 @@ function connectStreamer() {
 	console.log("last streamer:" + savedStreamer)
     if (savedStreamer) {
         setStreamer(savedStreamer); // Auto-connect
+		console.log("last streamer:" + savedStreamer)
 		console.log("attempting to autoConnect to:" + savedStreamer)
     }
 }
