@@ -164,7 +164,8 @@ body.holo-theme {
   
   --button-text-color:;
   --button-bg-color:;
-  --button-hover-color:#0a2f42eb;
+  --button-hover-text-color:#0e5b75;
+  --button-hover-bg-color:#0a2f42eb;
   --button-border-color:;
   --button-border-style:;
   --button-border-width:;
@@ -405,8 +406,8 @@ body {
 			transition: all 0.3s ease;
 		}
 		.controlpanel button:hover {
-			background: var(--button-hover-color);
-			
+			background: var(--button-hover-bg-color);
+			color: var(--button-hover-text-color);
 		}
 		.controlpanel button:active {
 		  transform: scale(0.95);
