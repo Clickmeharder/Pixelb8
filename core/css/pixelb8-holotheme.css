@@ -119,13 +119,13 @@ body.retro-theme {
   --cursor-image: default;
 }
 body.holo-theme {
-	/* Default Cursor */
+	/* --body roots are set directly to the body */
   --body-font:;
   --body-color:#f0f0f0;
   --body-bg-color:;
   --body-bg:;
   --body-opacity:;
-
+	/* these are the common roots */
   --text-color: #12ebeb;
   --text-color-alt:#00fff9;
   --default-muted: #666f6f;
@@ -145,38 +145,42 @@ body.holo-theme {
   --box-shadow: 2px 2px 6px var(--shadow-color);
   --box-glow: 0px 0px 12px var(--glow-color);
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
-  
+ 	/* --console is for the console element */
   --console-bg: rgba(0, 0, 0, 0.85);
   --console-color:#f0f0f0;
   --console-opacity: 0.85;
 
+	/* --controlpanel is for controls a div which holds things like buttons and inputs */
   --controlbox-opacity: 0.10;
   --controlboxhover-opacity:0.65;
 
+	/* button styles for the main button */
   --bubblebutt-color: #12ebebf2;
   --pixelbutt-opacity: 0.5;
-  --bubblebutt-opacity: 0.5;
   --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
   --bubblebutt-hover-opacity: 0.65;
   --buttborder-style:outset;
   --buttborder-width:2px;
   --butt-text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
   
-  --button-text-color:;
-  --button-bg-color:;
+  /* regular button styles */
+  --button-text-color:#12ebeb;
+  --button-bg-color:#004040de;
   --button-hover-text-color:#0e5b75;
   --button-hover-bg-color:#0a2f42eb;
-  --button-border-color:;
-  --button-border-style:;
-  --button-border-width:;
+  --button-border-color:var(--border-color);
+  --button-border-style:outset;
+  --button-border-width:2px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius:12px;
+  --button-text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
 
   --input-font-size:large;
   --input-font-weight:;
   --input-text-align: center;
   --input-padding:3px;
   --input-margin: 3px 0;
-  --select-margin: auto 11px 0 0;
-  
   --input-color:#30b524;
   --input-bg-color:#25292ef7;
   --input-bg:;
@@ -186,6 +190,9 @@ body.holo-theme {
   --input-border-style:inset;
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
   --input-border-radius:5px;
+  
+  --select-margin: auto 11px 0 0;
+  
   --twitchchat-opacity:1.0;
   --twitchmessage-opacity:0.85;
 }
@@ -397,11 +404,11 @@ body {
 			margin: 5px 0;
 			border-width: 2px;
 			border-style:outset;
-			border-color:var(--border-color);
-			border-radius:var(--border-radius);
-			background:var(--bg-color);
-			color: var(--text-color);
-			text-shadow: var(--text-shadow);
+			border-color:var(--button-border-color);
+			border-radius:var(--button-border-radius);
+			background:var(--button-bg-color);
+			color: var(--button-text-color);
+			text-shadow: var(--button-text-shadow);
 			cursor: pointer;
 			transition: all 0.3s ease;
 		}
