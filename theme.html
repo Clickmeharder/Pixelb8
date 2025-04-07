@@ -216,22 +216,26 @@ Other Fun:
 				<div class="controls" id="addCustomQuestionForm">
 					<h3>Add a Custom entrivia Question</h3>
 					<div class="twitchcmd-info" data-option="!entrivia-addquestion"></div>
-					<label for="round">Round:</label>
-					<select class="a" id="round">
-						<option value="round1">Round 1</option>
-						<option value="round2">Round 2</option>
-					</select>
-					<label for="entriviacategory">Category:</label>
-					<select class="a" id="entriviacategory">
-						<option value="Mining">mining</option>
-						<option value="hunting">hunting</option>
-						<option value="crafting">crafting</option>
-						<option value="history">history</option>
-						<option value="beauty">beauty</option>
-						<option value="economy">economy</option>
-						<option value="social">social</option>
-						<option value="misc">Miscelaneous</option>
-					</select>
+					<div class="inputRow" id="">
+						<label for="round">Round:</label>
+						<select class="a" id="round">
+							<option value="round1">Round 1</option>
+							<option value="round2">Round 2</option>
+						</select>
+					</div>
+					<div class="inputRow" id="">
+						<label for="entriviacategory">Category:</label>
+						<select class="a" id="entriviacategory">
+							<option value="Mining">mining</option>
+							<option value="hunting">hunting</option>
+							<option value="crafting">crafting</option>
+							<option value="history">history</option>
+							<option value="beauty">beauty</option>
+							<option value="economy">economy</option>
+							<option value="social">social</option>
+							<option value="misc">Miscelaneous</option>
+						</select>
+					</div>
 					<input class="a" type="text" id="questionText" placeholder="Enter your question here" required>
 					<input class="a" type="text" id="correctAnswer" placeholder="Enter the correct answer" required>
 					<button class="a" id="submitQuestionBtn">Add Question</button>
