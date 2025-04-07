@@ -128,7 +128,7 @@ body.holo-theme {
 
   --text-color: #12ebeb;
   --default-muted: #666f6f;
-  --bg-color: linear-gradient(135deg, #001f1fa8, #004040de);/*main bg color  linear-gradient(113deg, #001f1f, #004040)*/
+  --bg-color: linear-gradient(135deg, #001f1fed, #004040de);/*main bg color  linear-gradient(113deg, #001f1f, #004040)*/
   --bg-alt-color: linear-gradient(135deg, #001f1ff2, #004040f0);/*Secondary bg color*/
   --bg-alt2-color: linear-gradient(135deg, #001f1ff2, #004040f0);/*another bg color*/
   --bg-color-alt2: linear-gradient(135deg, #001f1fe8, #004040eb);/*was entrivia controlpanel bg color*/
@@ -264,7 +264,6 @@ body {
 	#thePixelButt:hover{
 		opacity:var(--pixelbutt-hover-opacity);
 	}
-
 	/* Bubble container */
 	#Bubble {
 		position: absolute;
