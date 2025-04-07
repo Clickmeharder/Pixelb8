@@ -160,13 +160,13 @@ body.holo-theme {
   --pixelbutt-hover-opacity: 0.65;
   --bubblebutt-opacity: 0.5;
   --bubblebutt-hover-opacity: 0.65;
-  --buttborder-style:outset;
-  --buttborder-width:2px;
-  --butt-text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
+
   
   /* regular button styles */
   --button-text-color:#12ebeb;
   --button-bg-color:#004040de;
+  --button-padding:9px;
+  --button-margin: 3px 0;
   --button-hover-text-color:#0e5b75;
   --button-hover-bg-color:#0a2f42eb;
   --button-border-color:var(--border-color);
@@ -346,13 +346,12 @@ body {
 /*       Buttons      */
 /*----------------------*/
 	.Butt {
-		color: var(--text-color);
+		color: var(--button-text-color);
 		background:var(--bg-color);
-		border:var(--border);
-		border-width:var(--buttborder-width);
-		border-radius:var(--border-radius);
+		border:var(--button-border);
+		border-radius:var(--button-border-radius);
 		box-shadow: var(--box-glow);
-		text-shadow: var(--butt-text-shadow);
+		text-shadow: var(--button-text-shadow);
 		transition: all 0.3s ease;
 	}
 	.Butt i {
@@ -360,8 +359,20 @@ body {
 	}
 
 
-
-
+button.a {
+	width: 100%;
+	padding: var(--button-padding);
+	margin: var(--button-margin);
+	border:var(--button-border);
+	border-radius:var(--button-border-radius);
+	background:var(--button-bg-color);
+	color: var(--button-text-color);
+	text-shadow: var(--button-text-shadow);
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+button.b {}
+button.c {}
 /*----------------------*/
 /*       Console      */
 /*----------------------*/
@@ -400,11 +411,9 @@ body {
 	.controlpanel{}
 		.controlpanel button {
 			width: 100%;
-			padding: 9px;
-			margin: 5px 0;
-			border-width: 2px;
-			border-style:outset;
-			border-color:var(--button-border-color);
+			padding: var(--button-padding);
+			margin: var(--button-margin);
+			border:var(--button-border);
 			border-radius:var(--button-border-radius);
 			background:var(--button-bg-color);
 			color: var(--button-text-color);
