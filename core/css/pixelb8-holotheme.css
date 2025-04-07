@@ -916,6 +916,7 @@ input:checked + .slider:before {
 /*----------------------*/
 /*  Indicator Lights */
 /*----------------------*/
+
 .statusindicatorWrapper {
 	display: flex;
 	background-color: #091319;

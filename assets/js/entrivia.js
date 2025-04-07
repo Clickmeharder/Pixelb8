@@ -1443,9 +1443,7 @@ function updateentriviaSettingsUI() {
     // Loop through each element
     toggleElements.forEach(element => {
         const option = element.getAttribute('data-option'); // Get the data-option value
-
         if (!option) return; // Skip if no data-option is set
-
         // Create a formatted ID name from the data-option
         const formattedId = option.replace(/[^a-zA-Z0-9]/g, ""); // Remove special characters
         
