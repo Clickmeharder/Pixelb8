@@ -377,8 +377,10 @@ _____________________________  -->
 				// Remove 'Butt' from the buttonId and construct the corresponding controller ID
 				const controllerId = buttonId.replace('Butt', '') + 'controller';
 				console.log("Butt pressed" + controllerId);
+				let container = document.getElementById(`controllerId`);
 				// Now, toggle the visibility of the corresponding controller element
-				controllerId.classList.toggle("active");
+				container.classList.toggle("active");
+				console.log("toggled containter" + container);
 				//toggleElement(controllerId, 'fade');
 			}
 		});
