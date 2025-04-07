@@ -236,7 +236,7 @@ body.biohazard-theme {
   --body-font: 'VT323', monospace;
   --body-color: #e5ffe5;
   --body-bg-color: ;
-  --body-bg: radial-gradient(circle, #0f1a0f 0%, #030703 100%);
+  --body-bg: ;
   --body-opacity: 1;
 
   --text-color: #64ff64;
