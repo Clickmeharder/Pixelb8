@@ -144,6 +144,59 @@ body.cyberice-theme {
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
   /* --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_iceblade.png'), auto; */
 }
+body.neonvoid-theme {
+  --body-font: 'Share Tech Mono', monospace;
+  --body-color: #e0c8ff;
+  --body-bg-color: #120018;
+  --body-bg: radial-gradient(circle, #1a0026 0%, #000000 100%);
+  --body-opacity: 1;
+
+  --text-color: #ff79ff;
+  --text-color-alt: #da66ff;
+  --h3-color: #f013b3;
+  --h2-color: #ff22e2;
+  --default-muted: #55375e;
+  --bg-color: linear-gradient(145deg, #24002e, #000010);
+  --bg-color-alt: #2a103d;
+  --bg-color-alt2: linear-gradient(135deg, #3a005e, #1a0026);
+  --bg-color-alt3: linear-gradient(135deg, #2e004e, #180030);
+
+  --accent-color: #ff22ff;
+  --accent-alt: #bb55ff;
+
+  --border-color: #cc00ff99;
+  --glow-color: rgba(255, 0, 255, 0.35);
+  --shadow-color: rgba(255, 0, 200, 0.45);
+
+  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
+/*   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_neonvoid.png'), auto; */
+}
+body.biohazard-theme {
+  --body-font: 'VT323', monospace;
+  --body-color: #e5ffe5;
+  --body-bg-color: #0f1a0f;
+  --body-bg: radial-gradient(circle, #0f1a0f 0%, #030703 100%);
+  --body-opacity: 1;
+
+  --text-color: #64ff64;
+  --text-color-alt: #1fff1f;
+  --h3-color: #aaff00;
+  --h2-color: #b2ff00;
+  --default-muted: #4a5c4a;
+  --bg-color: linear-gradient(135deg, #061306, #132513);
+  --bg-color-alt: #112011;
+  --bg-color-alt2: linear-gradient(135deg, #1c441c, #2e592e);
+  --bg-color-alt3: linear-gradient(135deg, #153515, #243e24);
+
+  --accent-color: #39ff14;
+  --accent-alt: #76ff03;
+
+  --border-color: #76ff0333;
+  --glow-color: rgba(119, 255, 68, 0.5);
+  --shadow-color: rgba(180, 255, 160, 0.35);
+
+  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
+}
 body.holo-theme {
 	/* --body roots are set directly to the body */
   --body-font:;
