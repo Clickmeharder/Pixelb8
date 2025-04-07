@@ -145,16 +145,8 @@ body.holo-theme {
   --box-shadow: 2px 2px 6px var(--shadow-color);
   --box-glow: 0px 0px 12px var(--glow-color);
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
- 	/* --console is for the console element */
-  --console-bg: rgba(0, 0, 0, 0.85);
-  --console-color:#f0f0f0;
-  --console-opacity: 0.85;
 
-	/* --controlpanel is for controls a div which holds things like buttons and inputs */
-  --controlbox-opacity: 0.10;
-  --controlboxhover-opacity:0.65;
-
-	/* button styles for the main button */
+	/* button styles for the main nav buttons */
   --bubblebutt-color: #12ebebf2;
   --pixelbutt-opacity: 0.5;
   --pixelbutt-hover-opacity: 0.65;
@@ -175,7 +167,7 @@ body.holo-theme {
   --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
   --button-border-radius:12px;
   --button-text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
-
+  /* input specific styles */
   --input-font-size:large;
   --input-font-weight:;
   --input-text-align: center;
@@ -190,9 +182,17 @@ body.holo-theme {
   --input-border-style:inset;
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
   --input-border-radius:5px;
-  
   --select-margin: auto 11px 0 0;
-  
+ 	/* --console is for the console element */
+  --console-bg: rgba(0, 0, 0, 0.85);
+  --console-color:#f0f0f0;
+  --console-opacity: 0.85;
+
+	/* --controlpanel is for controls a div which holds things like buttons and inputs */
+  --controlbox-opacity: 0.10;
+  --controlboxhover-opacity:0.65;
+
+  /* twitch chat element specific styles */
   --twitchchat-opacity:1.0;
   --twitchmessage-opacity:0.85;
 }
