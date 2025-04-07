@@ -400,6 +400,13 @@ button#cancelGame {
 button#startGame {width:78%;}
 button#startGame:hover {}
 
+.inputRow {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	border: 2px ridge #273a4c;
+}
 input.a[type="text"] {
 	font-size: var(--input-font-size);
 	text-align: var(--input-text-align);
@@ -643,13 +650,7 @@ ul#broadcastercommandlist {
 			height: 35px;
 			white-space: normal;
 		}
-		.inputRow {
-			display: flex;
-			flex-direction: row;
-			justify-content: space-between;
-			align-items: center;
-			border: 2px ridge #273a4c;
-		}
+
 		.entrivia-settings-togglebar {
 			display: flex;
 			flex-direction: row;
