@@ -472,11 +472,6 @@ body {
 /*----------------------*/
 /*______________________*/
 /**/
-
-
-
-
-
 		/* entrivia Buttons */
 		#entrivia-settings button {
 			width: 100%;
@@ -495,6 +490,7 @@ body {
 			background: #0a2f42eb;
 			color: #0e5b75;
 		}
+
 		#entrivia-settings button#cancelGame {
 			font-size: 15px;
 			font-weight:bold;
@@ -510,7 +506,7 @@ body {
 			background: #490101eb;
 			color: #020b0e;
 		}
-		/* entrivia Settings */
+		/* entrivia Settings = controlpanel i think*/
 		div#entrivia-settings {
 			text-align: start;
 			display: flex;
