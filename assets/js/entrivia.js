@@ -1355,9 +1355,11 @@ function saveSettings() {
 		audioSetting
     };
     localStorage.setItem("entriviaClassicSettings", JSON.stringify(entriviaClassicSettings));
+	console.log("settings saved.");
 }
 
 function updateSettings() {
+	console.log("update settings function ran.");
     timetoAnswer = parseInt(document.getElementById("timeToAnswer").value, 10);
     timebetweenQuestions = parseInt(document.getElementById("timeBetweenQuestions").value, 10);
     timebetweenRounds = parseInt(document.getElementById("timeBetweenRounds").value, 10);
@@ -1370,6 +1372,7 @@ function updateSettings() {
 }
 
 function resetSettings() {
+	console.log("reset settings function ran.");
     // Default settings
     timetoAnswer = 30;
     timebetweenQuestions = 30;
@@ -1482,7 +1485,16 @@ function updateentriviaSettingsUI() {
 		updateIndicatorLights();
     });
 }
+//change and reset settings buttons
+document.getElementById("changeSettings").addEventListener("click", () => {
+	console.log("Change settings button clicked");
+	updateSettings();
+});
 
+document.getElementById("resetSettings").addEventListener("click", () => {
+	console.log("Reset settings button clicked");
+	resetSettings();
+});
 // Run the function to update the UI
 updateentriviaSettingsUI();
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2075,9 +2087,7 @@ document.getElementById('submitQuestionBtn').addEventListener('click', function(
         return;
     }
 
-//change and reset settings buttons
-document.getElementById("changeSettings").addEventListener("click", updateSettings);
-document.getElementById("resetSettings").addEventListener("click", resetSettings);
+
 //toggle inclusion of either default or custom questions
 document.getElementById("toggleusedefaultquestions").addEventListener("click", toggleusedefaultquestions);
 document.getElementById("toggleusecustomquestions").addEventListener("click", toggleusecustomquestions);
