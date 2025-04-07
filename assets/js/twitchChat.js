@@ -307,6 +307,6 @@ window.onload = function () {
 /* 	loadCustomQuestions();
 	updateSettingsDisplay();
 	updateCommandlist(); */
-	connectStreamer();
+
 };
 
