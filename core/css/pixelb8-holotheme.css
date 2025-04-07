@@ -300,6 +300,7 @@ body {
 		height: 36px;
 		font-size: 20px;
 		text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
+		box-shadow: var(--box-glow);
 		opacity: 0;
 		transition: all 0.3s ease;
 	}
@@ -350,7 +351,6 @@ body {
 		background:var(--bg-color);
 		border:var(--button-border);
 		border-radius:var(--button-border-radius);
-		box-shadow: var(--box-glow);
 		text-shadow: var(--button-text-shadow);
 		transition: all 0.3s ease;
 	}
