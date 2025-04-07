@@ -397,6 +397,8 @@ button#cancelGame {
 		background: #490101eb;
 		color: #020b0e;
 	}
+button#startGame {width:78%;}
+button#startGame:hover {}
 
 input.a[type="text"] {
 	font-size: var(--input-font-size);
@@ -487,7 +489,6 @@ select.b {}
 			height: 3%;
 			overflow-y: scroll;
 		}
-	
 		.controlpanel label {
 			color: #f36402;
 			font-weight: bold;
