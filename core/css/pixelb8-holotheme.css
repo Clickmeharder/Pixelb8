@@ -130,7 +130,7 @@ body.holo-theme {
   --text-color-alt:#00fff9;
   --default-muted: #666f6f;
   --bg-color: linear-gradient(135deg, #001f1fed, #004040de);/*main bg color  linear-gradient(113deg, #001f1f, #004040)*/
-  --bg-color-alt: linear-gradient(135deg, #001f1ff2, #004040f0);/*Secondary bg color*/
+  --bg-color-alt: #07141bc7;/*Secondary bg color - used for panel interior divs with important buttons etc*/
   --bg-color-alt2: linear-gradient(135deg, #001f1ff2, #004040f0);/*another bg color*/
   --bg-color-alt3: linear-gradient(135deg, #001f1fe8, #004040eb);/*was entrivia controlpanel bg color*/
   --accent-color:;
@@ -476,7 +476,7 @@ select.b {}
 			text-align: start;
 			display: flex;
 			color: #00bafff0;
-			background-color: #07141bc7;
+			background-color: var(--bg-color-alt);
 			flex-direction: column;
 			border: 3px inset #302b2b;
 			overflow: hidden;
