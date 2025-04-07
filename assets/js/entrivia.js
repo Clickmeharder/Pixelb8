@@ -1477,7 +1477,7 @@ function updateentriviaSettingsUI() {
 		updateIndicatorLights();
     });
 }
-
+resetSettings();
 // Run the function to update the UI
 updateentriviaSettingsUI();
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
