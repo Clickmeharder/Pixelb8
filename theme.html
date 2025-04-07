@@ -161,11 +161,113 @@ Other Fun:
 		<div class="controller" id="settings-controller">
 		<div class="controlpanel">
 			<h2 class="controllerheader">Settings</h2>
-			<div class="controls"id="wheel-piedish">
+			<div class="controls" id="wheel-piedish">
 
 			</div>
 		</div>
-		<div class="controller" id="entrivia-controller">Trivia</div>
+		<div class="controller" id="entrivia-controller">
+			<div id="entrivia-settings-headergroup">
+				<h2 class="controllerheader" id="entrivia-settingsheader" stle="display:none;">Entrivia</h2>
+				<span id="entrivia-settingsheader">Entrivia</span>
+			</div>
+			<div class="controlpanel" id="entrivia-settings">
+				<div class="controls" id="entrivia-controls">
+					<div class="entriviasettings-inputRow" id="entrivia-bar-settingsbutts">
+						<button id="cancelGame">Abort Game</button>
+						<button id="startGame">Start Game</button>
+					</div>
+				</div>
+					<h3>entrivia Settings</h3>
+				<div class="controls" id="entrivia-settings-toggles">
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="usedefaultquestions"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-defaultquestions"></div>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="usecustomquestions"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-customquestions"></div>
+				</div>
+				<div class="controls" id="addCustomQuestionForm">
+					<h3>Add a Custom entrivia Question</h3>
+					<div class="twitchcmd-info" data-option="!entrivia-addquestion"></div>
+					<label for="round">Select Round:</label>
+					<select id="round">
+						<option value="round1">Round 1</option>
+						<option value="round2">Round 2</option>
+					</select>
+					<select id="entriviacategory">
+						<option value="Mining">mining</option>
+						<option value="hunting">hunting</option>
+						<option value="crafting">crafting</option>
+						<option value="history">history</option>
+						<option value="beauty">beauty</option>
+						<option value="economy">economy</option>
+						<option value="social">social</option>
+						<option value="misc">Miscelaneous</option>
+					</select>
+					<input type="text" id="questionText" placeholder="Enter your question here" required>
+					<input type="text" id="correctAnswer" placeholder="Enter the correct answer" required>
+					<button id="submitQuestionBtn">Add Question</button>
+				</div>
+				<br>
+				<div class="controls" id="manageCustomQuestions">
+					<h3>Manage Custom entrivia Questions</h3>
+					<label for="questionList">Select Question to Delete:</label>
+					<select id="questionList"></select>
+					<div id="answerDisplay" style="margin-top: 10px;">
+						<strong>Round:</strong> <span id="roundText">-</span><br>
+						<strong>Answer:</strong> <span id="answerText">Select a question to see the answer.</span>
+					</div>
+					<button id="deleteQuestionBtn">Delete Selected Question</button>
+				</div>
+				<div class="controls" id="entrivia-settings-main">
+					<h3>Main entrivia Settings</h3>
+					<div class="entriviasettings-inputRow" id="entrivia-bar-Questiondelay">
+						<label for="timeBetweenQuestions">Seconds Between Questions:</label>
+						<input type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
+					</div>
+					<div class="twitchcmd-info" data-option="!entrivia-questiondelay"></div>
+					<div class="entriviasettings-inputRow" id="entrivia-bar-Answertime">
+						<label for="timeToAnswer">Time to Answer (seconds):</label>
+						<input type="number" id="timeToAnswer" value="30" min="1" step="1">
+					</div>
+					<div class="twitchcmd-info" data-option="!entrivia-answertime"></div>
+					<div class="entriviasettings-inputRow" id="entrivia-bar-QuestionsperRound">
+						<label for="questionsPerRound">Questions Per Round:</label>
+						<input type="number" id="questionsPerRound" value="1" min="1" step="1">	
+					</div>
+					<div class="twitchcmd-info" data-option="!entrivia-questioncap"></div>
+					<div class="entriviasettings-inputRow" id="entrivia-bar-rounddelay">
+						<label for="timeBetweenRounds">Seconds Between Rounds:</label>
+						<input type="number" id="timeBetweenRounds" value="30" min="1" step="1">
+					</div>
+					<div class="twitchcmd-info" data-option="!entrivia-rounddelay"></div>
+					<div class="entriviasettings-inputRow" id="entrivia-bar-settingsbutts">
+						<button id="changeSettings">Set</button>
+						<button id="resetSettings">Default</button>
+					</div>
+				</div>
+				<div id="commandListContainer">
+				  <h3>entrivia Command List</h3>
+				  <h2>User Commands</h2>
+				  <ul id="usercommandList">
+				  </ul>
+				  <h2>Broadcaster Commands</h2>
+				  <ul id="broadcastercommandList">
+				  </ul>
+				</div>
+				<div class="togglecontrols" id="entrivia-settings-toggles">
+					<h3>Dont worry bout these</h3>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="consolemessages"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-consolemessages"></div>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="entriviachatOverlay"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-disablechat"></div>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="chatanswers"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-chatanswers"></div>
+				</div>
+			</div>
+		</div>
+
+		
+		
+		</div>
 		<div class="controller" id="unused-controller">unused</div>
 		<!--this is the container for messages from twitch -->
 		<div id="twitchChat">
