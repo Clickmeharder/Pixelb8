@@ -1838,14 +1838,16 @@ function updateCommandlist() {
 		// Create the usage span
 		const usageSpan = document.createElement("span");
 		const usageText = "Usage: " + command.usage;
+		const descriptionText = document.createElement("p");
 		usageSpan.classList.add("command-info");
 		usageSpan.setAttribute("title", usageText);
 		usageSpan.textContent = "❓";
-
+		descriptionText.textContent = command.description;
 		// Set command and description
-		li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
-
+		li.innerHTML = "<strong>" + command.command + "</strong>: ";
+		
 		// Append the usage span to the li
+		li.appendChild(descriptionText);
 		li.appendChild(usageSpan);
 
 		// Append to the broadcaster command list
