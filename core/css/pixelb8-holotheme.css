@@ -130,9 +130,9 @@ body.holo-theme {
   --text-color-alt:#00fff9;
   --default-muted: #666f6f;
   --bg-color: linear-gradient(135deg, #001f1fed, #004040de);/*main bg color  linear-gradient(113deg, #001f1f, #004040)*/
-  --bg-alt-color: linear-gradient(135deg, #001f1ff2, #004040f0);/*Secondary bg color*/
-  --bg-alt2-color: linear-gradient(135deg, #001f1ff2, #004040f0);/*another bg color*/
-  --bg-color-alt2: linear-gradient(135deg, #001f1fe8, #004040eb);/*was entrivia controlpanel bg color*/
+  --bg-color-alt: linear-gradient(135deg, #001f1ff2, #004040f0);/*Secondary bg color*/
+  --bg-color-alt2: linear-gradient(135deg, #001f1ff2, #004040f0);/*another bg color*/
+  --bg-color-alt3: linear-gradient(135deg, #001f1fe8, #004040eb);/*was entrivia controlpanel bg color*/
   --accent-color:;
   --accent-alt: ;
   --border-width: 0px;
@@ -160,8 +160,14 @@ body.holo-theme {
   --bubblebutt-hover-opacity: 0.65;
   --buttborder-style:outset;
   --buttborder-width:2px;
+  --butt-text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
   
-  
+  --button-text-color:;
+  --button-bg-color:;
+  --button-border-color:;
+  --button-border-style:;
+  --button-border-width:;
+
   --input-font-size:large;
   --input-font-weight:;
   --input-text-align: center;
@@ -337,11 +343,34 @@ body {
 		border-width:var(--buttborder-width);
 		border-radius:var(--border-radius);
 		box-shadow: var(--box-glow);
-		text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
+		text-shadow: var(--butt-text-shadow);
+		transition: all 0.3s ease;
 	}
 	.Butt i {
 	  pointer-events: none;
 	}
+
+
+	/* entrivia Buttons */
+	#entrivia-settings button {
+		width: 100%;
+		padding: 9px;
+		margin: 5px 0;
+		border-width: 2px;
+		border-style:outset;
+		border-color:var(--border-color);
+		border-radius:var(--border-radius);
+		background:var(--bg-color);
+		color: var(--text-color);
+		text-shadow: var(--text-shadow);
+		cursor: pointer;
+
+	}
+	#entrivia-settings button:hover {
+		background: #0a2f42eb;
+		color: #0e5b75;
+	}
+
 /*----------------------*/
 /*       Console      */
 /*----------------------*/
@@ -470,24 +499,7 @@ body {
 /*----------------------*/
 /*______________________*/
 /**/
-		/* entrivia Buttons */
-		#entrivia-settings button {
-			width: 100%;
-			padding: 9px;
-			margin: 5px 0;
-			border-width: 2px;
-			border-style:outset;
-			border-color:(var--border-color);
-			background:var(--bg-color);
-			color: var(--text-color-alt);
-			text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
-			cursor: pointer;
-			transition: background 0.3s ease, color: 0.3s ease;
-		}
-		#entrivia-settings button:hover {
-			background: #0a2f42eb;
-			color: #0e5b75;
-		}
+
 
 		#entrivia-settings button#cancelGame {
 			font-size: 15px;
