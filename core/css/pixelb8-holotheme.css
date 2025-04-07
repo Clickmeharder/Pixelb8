@@ -492,6 +492,13 @@ select.b {}
 			height: 3%;
 			overflow-y: scroll;
 		}
+		.controlpanel:active {
+			max-height: 300px;
+			padding: 6px;
+			padding-top: 4px;
+			height: 3%;
+			overflow-y: scroll;
+		}
 		.controlpanel label {
 			color: #f36402;
 			font-weight: bold;
