@@ -205,21 +205,20 @@ body {
 	.widgetcontrols{}
 	#Bubble{}
 	#Bubble .Butt{}
-	.Butt{}
-	.Butt.press{}
-	.toggle{}
-	.butt.round{}
+	button.Butt{}
 	#console{}
 	#TwitchChat{}
+	#twitchMessagebox{}
+	.ChatMessage
     .panel{}
 	.controller{}
+	.controlpanel{}
 	.controls{}
 
 /*----------------------*/
 /*----------------------*/
-/*       Main Button      */
+/*     Grouped Styling     */
 /*----------------------*/
-/* Wrap around PixelButt so bubble buttons are relative */
 /* Wrap around PixelButt so bubble buttons are relative */
 
 .themed, .chatMessage, .panel, .controller, #Bubble .Butt {
@@ -232,7 +231,10 @@ body {
 	opacity:var(--controlbox-opacity);
 	color: var(--text-color);
 }
-
+/*----------------------*/
+/*       Main Button      */
+/*----------------------*/
+/* Wrap around PixelButt so bubble buttons are relative */
 #bubblewrap {
 	position: fixed;
 	bottom: 0px;
@@ -294,17 +296,6 @@ body {
 		opacity: 0.75;
 		z-index: 1002;
 	}
-	.Butt {
-		color: var(--text-color);
-		background:var(--bg-color);
-		border:var(--border);
-		border-width:var(--buttborder-width);
-		border-radius:var(--border-radius);
-		box-shadow: var(--box-glow);
-	}
-	.Butt i {
-	  pointer-events: none;
-	}
 		/* Radial Positions */
 		#comfy-Butt     { transform: translate(-40px, -22px) scale(0.8); }
 		#wheel-Butt     { transform: translate(-31px, -52px) scale(0.8); }
@@ -322,7 +313,20 @@ body {
 		#entrivia-Butt:hover  { transform: translate(  0px, -60px) scale(1); }
 		#theme-Butt:hover     { transform: translate( 30px, -52px) scale(1); }
 		#settings-Butt:hover  { transform: translate( 38px, -22px) scale(1); }
-
+/*----------------------*/
+/*       Buttons      */
+/*----------------------*/
+	.Butt {
+		color: var(--text-color);
+		background:var(--bg-color);
+		border:var(--border);
+		border-width:var(--buttborder-width);
+		border-radius:var(--border-radius);
+		box-shadow: var(--box-glow);
+	}
+	.Butt i {
+	  pointer-events: none;
+	}
 /*----------------------*/
 /*       Console      */
 /*----------------------*/
@@ -436,38 +440,7 @@ input:checked + .slider:before {
 /*----------------------*/
 
 /**/
-/*----------------------*/
-/*  Indicator Lights */
-/*----------------------*/
-.statusindicatorWrapper {
-	display: flex;
-	background-color: #091319;
-	border: 3px ridge #3c3939;
-	padding: 8px 0;
-	flex-direction: column;
-	align-items: center;
-}
-.statusindicatorWrapper strong {
-	color: gray;
-	background-color: black;
-	border: 2px ridge gray;
-	padding: 2px;
-	margin: 2px;
-	font-size: 11px;
-	font-family: lucida console;
-}
-.light-indicator {
-	display: inline-block;
-	width: 12px;
-	height: 12px;
-	border-radius: 50%;
-	background-color: red; /* Default to red */
-	margin-left: 5px;
-	box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Optional glow effect */
-}
 
-/*----------------------*/
-/*______________________*/
 
 /*-------------------------------------------*/
 /*     Twitch Chat Message box & emotes     */
@@ -650,7 +623,6 @@ button.disabled {
 }
 /* button classes  */
 /*----------------*//*
-
 -singlefixedbutton
 -sliderbutton
 -pressclickbutton
@@ -707,6 +679,39 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 
 /*----------------------*/
 /*  my stuff */
+
+/*----------------------*/
+/*  Indicator Lights */
+/*----------------------*/
+.statusindicatorWrapper {
+	display: flex;
+	background-color: #091319;
+	border: 3px ridge #3c3939;
+	padding: 8px 0;
+	flex-direction: column;
+	align-items: center;
+}
+.statusindicatorWrapper strong {
+	color: gray;
+	background-color: black;
+	border: 2px ridge gray;
+	padding: 2px;
+	margin: 2px;
+	font-size: 11px;
+	font-family: lucida console;
+}
+.light-indicator {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background-color: red; /* Default to red */
+	margin-left: 5px;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Optional glow effect */
+}
+
+/*----------------------*/
+/*______________________*/
 
 /*----------------------*/
 /*   Important Classes */
