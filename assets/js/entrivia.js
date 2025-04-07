@@ -1834,20 +1834,24 @@ function updateCommandlist() {
 	// Add broadcaster commands to the broadcaster command list
 	streamercommands.forEach(function(command) {
 		const li = document.createElement("li");
-
-		// Create the usage span
 		const usageSpan = document.createElement("span");
 		const usageText = "Usage: " + command.usage;
-		const descriptionText = document.createElement("p");
 		usageSpan.classList.add("command-info");
 		usageSpan.setAttribute("title", usageText);
 		usageSpan.textContent = "❓";
-		descriptionText.textContent = command.description;
-		// Set command and description
-		li.innerHTML = "<strong>" + command.command + "</strong>: ";
-		
-		// Append the usage span to the li
-		li.appendChild(descriptionText);
+
+		// Create the <p> for description
+		const description = document.createElement("p");
+
+		// Create the <strong> element for the command name
+		const strong = document.createElement("strong");
+		strong.textContent = command.command;
+
+		// Add the strong and description text to the <p>
+		description.appendChild(strong);
+		description.append(": " + command.description); // adds text after <strong>
+
+		li.appendChild(description);
 		li.appendChild(usageSpan);
 
 		// Append to the broadcaster command list
