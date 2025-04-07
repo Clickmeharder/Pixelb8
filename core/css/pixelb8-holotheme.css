@@ -643,7 +643,7 @@ ul#broadcastercommandlist {
 			height: 35px;
 			white-space: normal;
 		}
-		.entriviasettings-inputRow {
+		.inputRow {
 			display: flex;
 			flex-direction: row;
 			justify-content: space-between;
