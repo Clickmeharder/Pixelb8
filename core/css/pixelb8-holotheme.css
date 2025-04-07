@@ -121,8 +121,8 @@ body.retro-theme {
 body.cyberice-theme {
   --body-font: 'Orbitron', sans-serif;
   --body-color: #d0f7ff;
-  --body-bg-color: #0d1b2a;
-  --body-bg: linear-gradient(145deg, #0d1b2a, #1b263b);
+  --body-bg-color: ;
+  --body-bg: ;
   --body-opacity: 1;
 
   --text-color: #aaf4ff;
@@ -141,8 +141,39 @@ body.cyberice-theme {
   --border-color: #61dafbaa;
   --glow-color: rgba(100, 255, 255, 0.45);
   --shadow-color: rgba(0, 255, 255, 0.35);
+
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
-  /* --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_iceblade.png'), auto; */
+
+  /* Button Styles */
+  --button-text-color: #12ebeb;
+  --button-bg-color: #004040de;
+  --button-padding: 9px;
+  --button-margin: 3px 0;
+  --button-hover-text-color: #0e5b75;
+  --button-hover-bg-color: #0a2f42eb;
+  --button-border-color: var(--border-color);
+  --button-border-style: outset;
+  --button-border-width: 2px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 12px;
+  --button-text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
+
+  /* Input Styles */
+  --input-font-size: large;
+  --input-font-weight: ;
+  --input-text-align: center;
+  --input-padding: 3px;
+  --input-margin: 3px 0;
+  --input-color: #30b524;
+  --input-bg-color: #25292ef7;
+  --input-bg: ;
+  --input-opacity: ;
+  --input-border-width: 3px;
+  --input-border-color: #0f1112a6;
+  --input-border-style: inset;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 5px;
+  --select-margin: auto 11px 0 0;
 }
 body.neonvoid-theme {
   --body-font: 'Share Tech Mono', monospace;
@@ -169,7 +200,37 @@ body.neonvoid-theme {
   --shadow-color: rgba(255, 0, 200, 0.45);
 
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
-/*   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_neonvoid.png'), auto; */
+
+  /* Button Styles */
+  --button-text-color: #12ebeb;
+  --button-bg-color: #004040de;
+  --button-padding: 9px;
+  --button-margin: 3px 0;
+  --button-hover-text-color: #0e5b75;
+  --button-hover-bg-color: #0a2f42eb;
+  --button-border-color: var(--border-color);
+  --button-border-style: outset;
+  --button-border-width: 2px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 12px;
+  --button-text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
+
+  /* Input Styles */
+  --input-font-size: large;
+  --input-font-weight: ;
+  --input-text-align: center;
+  --input-padding: 3px;
+  --input-margin: 3px 0;
+  --input-color: #30b524;
+  --input-bg-color: #25292ef7;
+  --input-bg: ;
+  --input-opacity: ;
+  --input-border-width: 3px;
+  --input-border-color: #0f1112a6;
+  --input-border-style: inset;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 5px;
+  --select-margin: auto 11px 0 0;
 }
 body.biohazard-theme {
   --body-font: 'VT323', monospace;
