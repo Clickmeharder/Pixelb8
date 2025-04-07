@@ -410,6 +410,9 @@ input.a[type="text"] {
 	background-color: var(--input-bg-color);
 	border: var(--input-border);
 	border-radius: var(--input-border-radius);
+}
+input.a[type="number"] {
+	width:28%;
 }		
 input.b{
 	color: #cbcbcb;
