@@ -1357,7 +1357,7 @@ function saveSettings() {
     localStorage.setItem("entriviaClassicSettings", JSON.stringify(entriviaClassicSettings));
 	console.log("settings saved.");
 }
-
+saveSettings();
 function updateSettings() {
 	console.log("update settings function ran.");
     timetoAnswer = parseInt(document.getElementById("timeToAnswer").value, 10);
@@ -1395,6 +1395,7 @@ function resetSettings() {
 	console.log("!!:", "entrivia Settings Reset to default.");
     displayentriviaMessage("!!", "entrivia Settings Reset to default.", {}, {});
 }
+resetSettings();
 function updateSettingsDisplay() {
     let savedSettings = localStorage.getItem("entriviaClassicSettings");
     if (savedSettings) {
@@ -1419,12 +1420,11 @@ function updateSettingsDisplay() {
     }
 }
 
-let settings = { usedefaultquestions, usecustomquestions, consolemessages, entriviachatOverlay, chatanswers, audioSetting };
 function updateIndicatorLights() { 
-	let settings = { usedefaultquestions, usecustomquestions, consolemessages, entriviachatOverlay, chatanswers, audioSetting };
+	let thesesettings = { usedefaultquestions, usecustomquestions, consolemessages, entriviachatOverlay, chatanswers, audioSetting };
     document.querySelectorAll(".light-indicator").forEach(indicator => {
         const optionName = indicator.getAttribute("data-option");
-        const optionValue = settings[optionName]; // Get the value safely
+        const optionValue = thesesettings[optionName]; // Get the value safely
         
         // Set light color based on value
         const lightColor = (optionValue === true || optionValue === "on") 
