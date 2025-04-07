@@ -118,6 +118,32 @@ body.retro-theme {
   --body-opacity: 1;
   --cursor-image: default;
 }
+body.cyberice-theme {
+  --body-font: 'Orbitron', sans-serif;
+  --body-color: #d0f7ff;
+  --body-bg-color: #0d1b2a;
+  --body-bg: linear-gradient(145deg, #0d1b2a, #1b263b);
+  --body-opacity: 1;
+
+  --text-color: #aaf4ff;
+  --text-color-alt: #6ae9ff;
+  --h3-color: #00e0ff;
+  --h2-color: #00baff;
+  --default-muted: #748ca4;
+  --bg-color: linear-gradient(145deg, #0d1b2a, #1b263b);
+  --bg-color-alt: #1e3a4c;
+  --bg-color-alt2: linear-gradient(135deg, #102c3e, #1f3f58);
+  --bg-color-alt3: linear-gradient(135deg, #0a1e2e, #193c53);
+
+  --accent-color: #6eeaff;
+  --accent-alt: #aad9ff;
+
+  --border-color: #61dafbaa;
+  --glow-color: rgba(100, 255, 255, 0.45);
+  --shadow-color: rgba(0, 255, 255, 0.35);
+  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
+  /* --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_iceblade.png'), auto; */
+}
 body.holo-theme {
 	/* --body roots are set directly to the body */
   --body-font:;
@@ -128,6 +154,8 @@ body.holo-theme {
 	/* these are the common roots */
   --text-color: #00bafff0;
   --text-color-alt:#00fff9;
+  --h3-color:#e54513;
+  --h2-color:;
   --default-muted: #666f6f;
   --bg-color: linear-gradient(135deg, #001f1fed, #004040de);/*main bg color  linear-gradient(113deg, #001f1f, #004040)*/
   --bg-color-alt: #07141bc7;/*Secondary bg color - used for panel interior divs with important buttons etc*/
