@@ -1357,7 +1357,6 @@ function saveSettings() {
     localStorage.setItem("entriviaClassicSettings", JSON.stringify(entriviaClassicSettings));
 	console.log("settings saved.");
 }
-saveSettings();
 function updateSettings() {
 	console.log("update settings function ran.");
     timetoAnswer = parseInt(document.getElementById("timeToAnswer").value, 10);
@@ -1395,7 +1394,6 @@ function resetSettings() {
 	console.log("!!:", "entrivia Settings Reset to default.");
     displayentriviaMessage("!!", "entrivia Settings Reset to default.", {}, {});
 }
-resetSettings();
 function updateSettingsDisplay() {
     let savedSettings = localStorage.getItem("entriviaClassicSettings");
     if (savedSettings) {
