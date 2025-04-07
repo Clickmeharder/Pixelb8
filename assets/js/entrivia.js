@@ -1403,10 +1403,10 @@ function updateSettingsDisplay() {
 		//toggles
         usedefaultquestions = settings.usedefaultquestions ?? true; // Default to true if missing
         usecustomquestions = settings.usecustomquestions ?? true; // Default to true if missing
-		console.log(`updating display:` + timetoAnswer); // Debug log
-		console.log(`updating display:` + timebetweenQuestions); // Debug log
-		console.log(`updating display:` + timebetweenRounds); // Debug log
-		console.log(`updating display:` + questionsPerRound); // Debug log
+		console.log(`updating display: time to answer: ` + timetoAnswer); // Debug log
+		console.log(`updating display: question delay: ` + timebetweenQuestions); // Debug log
+		console.log(`updating display: round delay: ` + timebetweenRounds); // Debug log
+		console.log(`updating display: questions per round: ` + questionsPerRound); // Debug log
         // Update UI elements
         document.getElementById("timeToAnswer").value = timetoAnswer;
         document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
