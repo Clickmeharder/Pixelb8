@@ -17,6 +17,269 @@
 
 	</style>
 	<style>
+		/* entrivia Control Button */
+		#entrivia-toggle {
+			position: fixed;
+			bottom: 2px;
+			right: 30px;
+			width: 40px;
+			height: 30px;
+			border-radius: 19%;
+			background: linear-gradient(113deg, #001f1f, #004040);
+			color: #12ebeb;
+			border: none;
+			font-size: 27px;
+			padding: 0px;
+			line-height: 0.1;
+			cursor: pointer;
+			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+			transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
+			z-index: 1000;
+			opacity: 0.65;
+		}
+
+		#entrivia-toggle:hover {
+			background-color: #2980b9;
+			transform: scale(1.1);
+			opacity: 1;
+		}
+
+		/* entrivia Control Container */
+		#entriviacontrolBox {
+			position: fixed;
+			top: 10px;
+			left: 10px;
+			width: 348px;
+			padding: 10px;
+			background: linear-gradient(135deg, #001f1fe8, #004040eb);
+			color: white;
+			border-radius: 8px;
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+			opacity: 0; /* Start hidden */
+			transform: translateY(-10px); /* Slight slide-up effect */
+			transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+			pointer-events: none; /* Prevent interaction when hidden */
+			z-index: 999;
+		}
+
+		/* When active (visible) */
+		#entriviacontrolBox.active {
+			opacity: 0.85;
+			transform: translateY(0);
+			pointer-events: all; /* Allow interactions */
+		}
+
+		/* entrivia Input */
+		#entriviacontrolBox input[type="text"] {
+			width: 92%;
+			font-size: larger;
+			text-align: center;
+			padding: 5px;
+			margin: 5px 0;
+			color: #30b524;
+			background-color: #25292ef7;
+			border: 3px inset #0f1112a6;
+			border-radius: 5px;
+		}
+
+		/* entrivia Buttons */
+		#entriviacontrolBox button {
+			width: 100%;
+			padding: 9px;
+			margin: 5px 0;
+			border: 2px outset #14889fbf;
+			background: #305a62e8;
+			color: #00fff9;
+			text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
+			font-size: large;
+			border-radius: 5px;
+			cursor: pointer;
+			transition: background 0.3s ease, color: 0.3s ease;
+		}
+
+		#entriviacontrolBox button:hover {
+			background: #0a2f42eb;
+			color: #0e5b75;
+		}
+		#entriviacontrolBox button#cancelGame {
+			font-size: 15px;
+			font-weight:bold;
+			width: 20%;
+			line-height: 0.8;
+			color: #655e5ef0;
+			text-shadow: none;
+			background-color: #5e0404f2;
+			border-color: #290606f2;
+			border-radius: 39%;
+		}
+		#entriviacontrolBox button#cancelGame:hover {
+			background: #490101eb;
+			color: #020b0e;
+		}
+		/* entrivia Settings */
+		div#entrivia-settings {
+			text-align: start;
+			display: flex;
+			color: #00bafff0;
+			background-color: #07141bc7;
+			flex-direction: column;
+			border: 3px inset #302b2b;
+			overflow: hidden;
+			max-height: 60px; /* Initially small */
+			padding: 0 10px; /* Horizontal padding stays */
+			padding-top: 4px;
+			transition: max-height 0.6s ease-out, padding 0.3s ease-out;
+		}
+
+		div#entrivia-settings:hover {
+			max-height: 300px;
+			padding: 10px;
+			padding-top: 4px;
+			height: 3%;
+			overflow-y: scroll;
+		}
+		/* entrivia Settings Header */
+		#entrivia-settingsheader {
+			font-family: yatra one;
+			font-weight: bold;
+			text-align: center;
+			font-size: 22px;
+			color: #00bafff0;
+			background-color: #07141bc7;
+			margin-bottom: 5px;
+			display: block;
+			text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
+			border: 3px outset #273a4c;
+		}
+		div#entrivia-settings label {
+			color: #f36402;
+			font-weight: bold;
+			padding-left: 5px;
+			text-shadow: 0px 0px 4px rgb(153 70 12 / 92%);
+		}
+		h3 {
+			color: #e54513;
+			text-align: center;
+			border: 5px ridge #273a4c;
+			margin: 0;
+		}
+		div#addCustomQuestionForm {
+			text-align: center;
+		}
+		div#manageCustomQuestions {
+			text-align: center;
+			border: inherit;
+		}
+		#entrivia-settings input, #entrivia-settings select, select#questionList {
+			color: #cbcbcb;
+			background-color: #25292ef7;
+		}
+		#entrivia-settings input {
+			color: #cbcbcb;
+			font-size: 16px;
+			font-weight: bold;
+			text-align: center;
+			width: 15%;
+		}
+		select#questionList {
+			color: #cbcbcb;
+			width: 100%;
+			height: 35px;
+			white-space: normal;
+		}
+		.entriviasettings-inputRow {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+			border: 2px ridge #273a4c;
+		}
+		.entrivia-settings-togglebar {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+			border: 2px ridge #273a4c;
+		}
+
+		.twitchcmd-info {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-evenly;
+			text-align: center;
+			align-items: center;
+			color: gray;
+			background-color: #020307eb;
+			border: 2px ridge #273a4c;
+		}
+		#entrivia-settings input {
+			width: 28%;
+			min-width: 85px;
+		}
+		div#entrivia-settings-main {
+			background-color: #080c15eb;
+			border: 2px inset #000406;
+		}
+		.command-info {
+			cursor: help;
+			margin-left: 5px;
+			font-size: 16px;
+		}
+		#commandListContainer {
+			font-family: Arial, sans-serif;
+			background-color: #080c15eb;
+			padding: 6px;
+			border: 2px inset #000406;
+			border-radius: 8px;
+			width: 300px;
+			margin: 20px auto;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+		#commandListContainer h2 {
+			color: ;
+			text-align: center;
+			border: ;
+			margin: 0;
+			font-size: large;
+		}
+		#usercommandList h2 {
+			color: ;
+			text-align: center;
+			border: ;
+			margin: 0;
+			margin-top:8px;
+		}
+		#broadcastercommandList h2 {
+			color: ;
+			text-align: center;
+			margin: 0;
+		}
+		#commandListContainer ul{
+		  list-style-type: none;
+		  padding: 0;
+		}
+		ul#usercommandList {
+		  list-style-type: none;
+		  padding: 0;
+		}
+		ul#broadcastercommandlist {
+		  list-style-type: none;
+		  padding: 0;
+		}
+		#usercommandList li, #broadcastercommandList li {
+			color: #8d8888;
+			padding: 2px;
+			border: 2px ridge #393636;
+			margin: 4px 0;
+		}
+
+		#usercommandList li strong, #broadcastercommandList li strong {
+		  color: #e09d09f7;
+		  font-weight: bold;
+		}
+	</style>
+	<style>
 	<!-- Section divider-->
 <!--
 🔌 🎮 🖥️ 🔧 📝 🎨 🖼️ ⚙️ 🛠️ 
