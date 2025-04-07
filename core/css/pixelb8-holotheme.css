@@ -381,6 +381,23 @@ button.a {
 		}
 button.b {}
 button.c {}
+
+button#cancelGame {
+	font-size: 15px;
+	font-weight:bold;
+	width: 20%;
+	line-height: 0.8;
+	color: #655e5ef0;
+	text-shadow: none;
+	background-color: #5e0404f2;
+	border-color: #290606f2;
+	border-radius: 39%;
+}
+	button#cancelGame:hover {
+		background: #490101eb;
+		color: #020b0e;
+	}
+
 input.a[type="text"] {
 	font-size: var(--input-font-size);
 	text-align: var(--input-text-align);
@@ -391,6 +408,7 @@ input.a[type="text"] {
 	border: var(--input-border);
 	border-radius: var(--input-border-radius);
 }		
+
 select.a {
 	font-size: var(--input-font-size);
 	text-align: var(--input-text-align);
@@ -500,21 +518,6 @@ select.a {
 /**/
 
 
-		#entrivia-settings button#cancelGame {
-			font-size: 15px;
-			font-weight:bold;
-			width: 20%;
-			line-height: 0.8;
-			color: #655e5ef0;
-			text-shadow: none;
-			background-color: #5e0404f2;
-			border-color: #290606f2;
-			border-radius: 39%;
-		}
-		#entrivia-settings button#cancelGame:hover {
-			background: #490101eb;
-			color: #020b0e;
-		}
 		/* entrivia Settings = controlpanel i think*/
 		div#entrivia-settings {
 			text-align: start;
