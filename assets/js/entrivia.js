@@ -1356,6 +1356,7 @@ function saveSettings() {
     };
     localStorage.setItem("entriviaClassicSettings", JSON.stringify(entriviaClassicSettings));
 }
+saveSettings();
 function updateSettings() {
     timetoAnswer = parseInt(document.getElementById("timeToAnswer").value, 10);
     timebetweenQuestions = parseInt(document.getElementById("timeBetweenQuestions").value, 10);
@@ -1367,6 +1368,7 @@ function updateSettings() {
 	console.log(`Checking ${timetoAnswer}:`, timetoAnswer); // Debug log
     displayentriviaMessage("!!", "entrivia Settings updated and saved.", {}, {});
 }
+
 function resetSettings() {
     // Default settings
     timetoAnswer = 30;
@@ -1477,7 +1479,7 @@ function updateentriviaSettingsUI() {
 		updateIndicatorLights();
     });
 }
-resetSettings();
+
 // Run the function to update the UI
 updateentriviaSettingsUI();
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
