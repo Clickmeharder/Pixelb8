@@ -128,7 +128,7 @@ body.holo-theme {
 
   --text-color: #12ebeb;
   --default-muted: #666f6f;
-  --bg-color: linear-gradient(135deg, #001f1fa8, #004040de);/*main bg color*/
+  --bg-color: linear-gradient(135deg, #001f1fa8, #004040de);/*main bg color  linear-gradient(113deg, #001f1f, #004040)*/
   --bg-alt-color: linear-gradient(135deg, #001f1ff2, #004040f0);/*Secondary bg color*/
   --bg-alt2-color: linear-gradient(135deg, #001f1ff2, #004040f0);/*another bg color*/
   --bg-color-alt2: linear-gradient(135deg, #001f1fe8, #004040eb);/*was entrivia controlpanel bg color*/
@@ -257,11 +257,17 @@ body {
 		border:var(--border);
 		border-radius:var(--border-radius);
 		box-shadow: var(--box-glow);
+		text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
+		transition: all 0.2s ease;
 		opacity:var(--pixelbutt-opacity);
 	}
 	#thePixelButt:hover{
+		background-color: #2980b9;
 		opacity:var(--pixelbutt-hover-opacity);
 	}
+		#entrivia-toggle:hover {
+			background-color: #2980b9;
+		}
 	/* Bubble container */
 	#Bubble {
 		position: absolute;
@@ -281,6 +287,7 @@ body {
 		width: 36px;
 		height: 36px;
 		font-size: 20px;
+		text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
 		opacity: 0;
 		transition: all 0.3s ease;
 	}
@@ -465,33 +472,8 @@ body {
 /*----------------------*/
 /*______________________*/
 /**/
-		/* changed entriviacontrolbox to controlpanel */
-		#entrivia-toggle {
-			position: fixed;
-			bottom: 2px;
-			right: 30px;
-			width: 40px;
-			height: 30px;
-			border-radius: 19%;
-			background: linear-gradient(113deg, #001f1f, #004040);
-			color: #12ebeb;
-			border: none;
-			font-size: 27px;
-			padding: 0px;
-			line-height: 0.1;
-			cursor: pointer;
-			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
-			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
-			transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
-			z-index: 1000;
-			opacity: 0.65;
-		}
 
-		#entrivia-toggle:hover {
-			background-color: #2980b9;
-			transform: scale(1.1);
-			opacity: 1;
-		}
+
 
 
 
