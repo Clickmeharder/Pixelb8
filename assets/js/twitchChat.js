@@ -267,7 +267,7 @@ function connectStreamer() {
 }
 function disconnectBot() {
 	const button = document.getElementById("streamersButt");
-	const input = document.querySelector("#comfycontrolBox input[type='text']");
+	const input = document.querySelector("#comfy-controller input#twitchname");
 	button.style.display = "block";
 	input.style.display = "block";
     ComfyJS.Disconnect();
@@ -294,7 +294,7 @@ document.getElementById("streamersButt").addEventListener("click", function() {
 		console.log("Ending Trivia.");
         endTrivia(); // Only end trivia if it's running
     }
-    let newStreamer = document.querySelector("input[name='yourTextName']").value;
+    let newStreamer = document.querySelector("#comfy-controller input#twitchname").value;
 	console.log("attempting to Connect to:" + newStreamer);
     setStreamer(newStreamer); // Then, set the new streamer
 });
