@@ -262,12 +262,9 @@ body {
 		opacity:var(--pixelbutt-opacity);
 	}
 	#thePixelButt:hover{
-		background-color: #2980b9;
 		opacity:var(--pixelbutt-hover-opacity);
 	}
-		#entrivia-toggle:hover {
-			background-color: #2980b9;
-		}
+
 	/* Bubble container */
 	#Bubble {
 		position: absolute;
