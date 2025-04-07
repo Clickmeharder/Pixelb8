@@ -1401,7 +1401,7 @@ function updateSettingsDisplay() {
 		//toggles
         usedefaultquestions = settings.usedefaultquestions ?? true; // Default to true if missing
         usecustomquestions = settings.usecustomquestions ?? true; // Default to true if missing
-
+		console.log(`updating display:` + settings); // Debug log
         // Update UI elements
         document.getElementById("timeToAnswer").value = timetoAnswer;
         document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
