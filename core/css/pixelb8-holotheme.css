@@ -128,9 +128,9 @@ body.holo-theme {
 
   --text-color: #12ebeb;
   --default-muted: #666f6f; 
-  --bg-color: linear-gradient(135deg, #001f1f47, #004040de);
-  --bg-alt-color: linear-gradient(135deg, #001f1ff2, #004040f0);
-  --bg-alt2-color: linear-gradient(135deg, #001f1ff2, #004040f0);
+  --bg-color: linear-gradient(135deg, #001f1f47, #004040de);/*main bg color*/
+  --bg-alt-color: linear-gradient(135deg, #001f1ff2, #004040f0);/*Secondary bg color*/
+  --bg-alt2-color: linear-gradient(135deg, #001f1ff2, #004040f0);/*another bg color*/
   --accent-color:;
   --accent-alt: ;
   --border-width: 0px;
@@ -146,7 +146,7 @@ body.holo-theme {
   
   --console-bg: rgba(0, 0, 0, 0.85);
   --console-color:#f0f0f0;
-
+  --console-opacity: 0.85;
 
   --controlbox-opacity: 0.10;
   --controlboxhover-opacity:0.65;
@@ -201,14 +201,19 @@ body {
 /*----------------------*/
 	
 	#bubblewrap {}
-	.thePixelButt{}
+	#thePixelButt{}
+	.widgetcontrols{}
 	#Bubble{}
 	#Bubble .Butt{}
 	.Butt{}
 	.Butt.press{}
 	.toggle{}
 	.butt.round{}
+	#console{}
+	#TwitchChat{}
     .panel{}
+	.controller{}
+	.controls{}
 
 /*----------------------*/
 /*----------------------*/
@@ -227,6 +232,7 @@ body {
 	opacity:var(--controlbox-opacity);
 	color: var(--text-color);
 }
+
 #bubblewrap {
 	position: fixed;
 	bottom: 0px;
