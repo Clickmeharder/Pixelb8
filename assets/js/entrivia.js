@@ -1363,6 +1363,7 @@ function updateSettings() {
     questionsPerRound = parseInt(document.getElementById("questionsPerRound").value, 10);
     // Get the toggle states
     saveSettings();
+	console.log("!!", "entrivia Settings updated and saved.");
     displayentriviaMessage("!!", "entrivia Settings updated and saved.", {}, {});
 }
 function resetSettings() {
@@ -1385,7 +1386,7 @@ function resetSettings() {
     document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
     document.getElementById("timeBetweenRounds").value = timebetweenRounds;
     document.getElementById("questionsPerRound").value = questionsPerRound;
-
+	console.log("!!:", "entrivia Settings Reset to default.");
     displayentriviaMessage("!!", "entrivia Settings Reset to default.", {}, {});
 }
 function updateSettingsDisplay() {
