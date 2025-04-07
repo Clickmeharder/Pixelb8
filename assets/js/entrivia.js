@@ -1299,27 +1299,6 @@ function displayentriviaHistory() {
 //------------------------
 //---generic ui logic----|
 //-----------------------
-//function to toggle element visibility
-function toggleElement(elementId, animationType = "fade") {
-    const element = document.getElementById(elementId);
-
-    if (!element) return;
-
-    if (element.style.visibility === "hidden" || element.style.visibility === "") {
-        // Show element with animation
-        element.style.visibility = "visible";
-        element.style.opacity = "1";
-        element.style.animation = animationType === "slide" ? "slideIn 0.8s ease-out forwards" : "fadeIn 0.8s ease-out forwards";
-    } else {
-        // Hide element with animation
-        element.style.animation = animationType === "slide" ? "slideOut 0.5s ease-in forwards" : "fadeOut 0.5s ease-in forwards";
-
-        setTimeout(() => {
-            element.style.visibility = "hidden";
-            element.style.opacity = "0";
-        }, 500); // Matches animation duration
-    }
-}
 
 
 //toggles
