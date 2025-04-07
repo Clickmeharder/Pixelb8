@@ -1356,7 +1356,7 @@ function saveSettings() {
     };
     localStorage.setItem("entriviaClassicSettings", JSON.stringify(entriviaClassicSettings));
 }
-saveSettings();
+
 function updateSettings() {
     timetoAnswer = parseInt(document.getElementById("timeToAnswer").value, 10);
     timebetweenQuestions = parseInt(document.getElementById("timeBetweenQuestions").value, 10);
@@ -1403,7 +1403,10 @@ function updateSettingsDisplay() {
 		//toggles
         usedefaultquestions = settings.usedefaultquestions ?? true; // Default to true if missing
         usecustomquestions = settings.usecustomquestions ?? true; // Default to true if missing
-		console.log(`updating display:` + settings); // Debug log
+		console.log(`updating display:` + timetoAnswer); // Debug log
+		console.log(`updating display:` + timebetweenQuestions); // Debug log
+		console.log(`updating display:` + timebetweenRounds); // Debug log
+		console.log(`updating display:` + questionsPerRound); // Debug log
         // Update UI elements
         document.getElementById("timeToAnswer").value = timetoAnswer;
         document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
