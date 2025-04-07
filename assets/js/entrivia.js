@@ -1364,6 +1364,7 @@ function updateSettings() {
     // Get the toggle states
     saveSettings();
 	console.log("!!", "entrivia Settings updated and saved.");
+	console.log(`Checking ${timetoAnswer}:`, timetoAnswer); // Debug log
     displayentriviaMessage("!!", "entrivia Settings updated and saved.", {}, {});
 }
 function resetSettings() {
@@ -1416,7 +1417,6 @@ function updateIndicatorLights() {
     document.querySelectorAll(".light-indicator").forEach(indicator => {
         const optionName = indicator.getAttribute("data-option");
         const optionValue = settings[optionName]; // Get the value safely
-        console.log(`Checking ${optionName}:`, optionValue); // Debug log
         
         // Set light color based on value
         const lightColor = (optionValue === true || optionValue === "on") 
