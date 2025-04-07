@@ -1358,20 +1358,17 @@ function saveSettings() {
 	console.log("settings saved.");
 }
 function updateSettings() {
-	console.log("update settings function ran.");
     timetoAnswer = parseInt(document.getElementById("timeToAnswer").value, 10);
     timebetweenQuestions = parseInt(document.getElementById("timeBetweenQuestions").value, 10);
     timebetweenRounds = parseInt(document.getElementById("timeBetweenRounds").value, 10);
     questionsPerRound = parseInt(document.getElementById("questionsPerRound").value, 10);
     // Get the toggle states
     saveSettings();
-	console.log("!!", "entrivia Settings updated and saved.");
-	console.log(`Checking ${timetoAnswer}:`, timetoAnswer); // Debug log
-    displayentriviaMessage("!!", "entrivia Settings updated and saved.", {}, {});
+	console.log("!! Entrivia Settings updated and saved.");
+    displayentriviaMessage("!!", "Entrivia Settings updated and saved.", {}, {});
 }
 
 function resetSettings() {
-	console.log("reset settings function ran.");
     // Default settings
     timetoAnswer = 30;
     timebetweenQuestions = 30;
@@ -1391,7 +1388,7 @@ function resetSettings() {
     document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
     document.getElementById("timeBetweenRounds").value = timebetweenRounds;
     document.getElementById("questionsPerRound").value = questionsPerRound;
-	console.log("!!:", "entrivia Settings Reset to default.");
+	console.log("!!: Entrivia Settings Reset to default.");
     displayentriviaMessage("!!", "entrivia Settings Reset to default.", {}, {});
 }
 function updateSettingsDisplay() {
