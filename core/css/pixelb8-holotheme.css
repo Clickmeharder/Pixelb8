@@ -641,10 +641,10 @@ ul#broadcastercommandlist {
 /*-------------------------------------------*/
 /*     Entrivia Specific (Trivia Game)    */
 /*-----------------------------------------*/
-		div#addCustomQuestionForm {
+		#addCustomQuestionForm {
 			text-align: center;
 		}
-		div#manageCustomQuestions {
+		#manageCustomQuestions {
 			text-align: center;
 			border: inherit;
 		}
