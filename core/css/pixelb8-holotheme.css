@@ -351,26 +351,7 @@ body {
 	}
 
 
-	/* entrivia Buttons */
-	#entrivia-settings button {
-		width: 100%;
-		padding: 9px;
-		margin: 5px 0;
-		border-width: 2px;
-		border-style:outset;
-		border-color:var(--border-color);
-		border-radius:var(--border-radius);
-		background:var(--bg-color);
-		color: var(--text-color);
-		text-shadow: var(--text-shadow);
-		cursor: pointer;
-		transition: all 0.3s ease;
 
-	}
-	#entrivia-settings button:hover {
-		background: #0a2f42eb;
-		color: #0e5b75;
-	}
 
 /*----------------------*/
 /*       Console      */
@@ -409,13 +390,24 @@ body {
 	}
 	.controlpanel{}
 		.controlpanel button {
+			width: 100%;
+			padding: 9px;
 			margin: 5px 0;
-			text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
-			font-size: large;
+			border-width: 2px;
+			border-style:outset;
+			border-color:var(--border-color);
+			border-radius:var(--border-radius);
+			background:var(--bg-color);
+			color: var(--text-color);
+			text-shadow: var(--text-shadow);
+			cursor: pointer;
+			transition: all 0.3s ease;
 		}
 
-
-
+		.controlpanel button:hover {
+			background: #0a2f42eb;
+			color: #0e5b75;
+		}
 		.controlpanel button:active {
 		  transform: scale(0.95);
 		  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) inset;
