@@ -364,6 +364,7 @@ body {
 		color: var(--text-color);
 		text-shadow: var(--text-shadow);
 		cursor: pointer;
+		transition: all 0.3s ease;
 
 	}
 	#entrivia-settings button:hover {
