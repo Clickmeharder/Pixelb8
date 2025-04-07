@@ -343,7 +343,7 @@ _____________________________  -->
 			const element = document.getElementById(elementId);
 
 			if (!element) return;
-
+			
 			if (element.style.visibility === "hidden" || element.style.visibility === "") {
 				// Show element with animation
 				element.style.visibility = "visible";
@@ -354,7 +354,7 @@ _____________________________  -->
 				element.style.animation = animationType === "slide" ? "slideOut 0.5s ease-in forwards" : "fadeOut 0.5s ease-in forwards";
 
 				setTimeout(() => {
-					console.log("Butt pressed" + elementId);
+					console.log("Butt toggled" + elementId);
 					element.classList.remove("active");
 					element.style.visibility = "hidden";
 				}, 500); // Matches animation duration
