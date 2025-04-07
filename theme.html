@@ -563,87 +563,92 @@ Other Fun:
 <!--------------------->
 <!--       End of body        
 _____________________________  -->
-	  <script>
-		  const themes = ["", "light-theme", "dark-theme", "retro-theme", "cyber-theme", "holo-theme"];
-		  let current = 0;
-		  function setTheme(themeName) {
-			console.log("theme name: "+ themeName);
-			document.body.className = themeName;
-			// Set the theme in localStorage
-			localStorage.setItem("theme", themeName);
-			console.log("theme saved: " + themeName);
-		  }
+	<!-- theme script -->
+  <script>
+	  const themes = ["", "light-theme", "dark-theme", "retro-theme", "cyber-theme", "holo-theme"];
+	  let current = 0;
+	  function setTheme(themeName) {
+		console.log("theme name: "+ themeName);
+		document.body.className = themeName;
+		// Set the theme in localStorage
+		localStorage.setItem("theme", themeName);
+		console.log("theme saved: " + themeName);
+	  }
 
-			// Add event listener to all buttons with 'themeselect' class
-			document.querySelectorAll('.themeselect').forEach(button => {
-				button.addEventListener('click', function() {
-					// Get the ID of the clicked button
-					const buttonId = this.id;
-		
-					// Remove 'Butt' from the buttonId and construct the theme name
-					const theme = buttonId.replace('Butt', ''); // e.g., "light-theme" from "light-themeButt"
-					console.log("Butt clicked: " + buttonId);
-					// Now, call the setTheme function with the theme name
-					setTheme(theme);
-				});
+		// Add event listener to all buttons with 'themeselect' class
+		document.querySelectorAll('.themeselect').forEach(button => {
+			button.addEventListener('click', function() {
+				// Get the ID of the clicked button
+				const buttonId = this.id;
+	
+				// Remove 'Butt' from the buttonId and construct the theme name
+				const theme = buttonId.replace('Butt', ''); // e.g., "light-theme" from "light-themeButt"
+				console.log("Butt clicked: " + buttonId);
+				// Now, call the setTheme function with the theme name
+				setTheme(theme);
 			});
+		});
 
-		  // Load saved theme on startup
-		  window.addEventListener("DOMContentLoaded", () => {
-			const saved = localStorage.getItem("theme");
-			if (saved) setTheme(saved);
-		  });
+	  // Load saved theme on startup
+	  window.addEventListener("DOMContentLoaded", () => {
+		const saved = localStorage.getItem("theme");
+		if (saved) setTheme(saved);
+	  });
 
-	  </script>
-		<script>
-			<!-- simulate background script -->
-		  const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
+  </script>
+  		<!-- simulate background script -->
+	<script>
 
-		  function setBackgroundImage(url) {
-			document.body.style.backgroundImage = `url('${url}')`;
-		  }
+	  const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
 
-		  function removeBackgroundImage() {
-			document.body.style.backgroundImage = "none";
-		  }
+	  function setBackgroundImage(url) {
+		document.body.style.backgroundImage = `url('${url}')`;
+	  }
 
-		  document.getElementById("simulatebackground").addEventListener("change", function() {
-			if (this.checked) {
-			  setBackgroundImage(backgroundImageURL);
+	  function removeBackgroundImage() {
+		document.body.style.backgroundImage = "none";
+	  }
+
+	  document.getElementById("simulatebackground").addEventListener("change", function() {
+		if (this.checked) {
+		  setBackgroundImage(backgroundImageURL);
+		} else {
+		  removeBackgroundImage();
+		}
+	  });
+	</script>
+		<!-- toggle element script -->
+	<script>
+		//function to toggle element visibility
+		//example usage:
+		//toggleElement("myBox"); // Uses default "fade" animation
+		//toggleElement("myBox", "slide"); // Uses slide animation
+		//<button onclick="toggleElement('myBox')">Toggle Box</button>
+		//<button onclick="toggleElement('myBox', 'slide')">Toggle Slide Box</button>
+		function toggleElement(elementId, animationType = "fade") {
+			const element = document.getElementById(elementId);
+
+			if (!element) return;
+
+			if (element.style.visibility === "hidden" || element.style.visibility === "") {
+				// Show element with animation
+				element.style.visibility = "visible";
+				element.classList.add("active");
+				element.style.animation = animationType === "slide" ? "slideIn 0.8s ease-out forwards" : "fadeIn 0.8s ease-out forwards";
 			} else {
-			  removeBackgroundImage();
+				// Hide element with animation
+				element.style.animation = animationType === "slide" ? "slideOut 0.5s ease-in forwards" : "fadeOut 0.5s ease-in forwards";
+
+				setTimeout(() => {
+					console.log("Butt pressed" + elementId);
+					element.classList.remove("active");
+					element.style.visibility = "hidden";
+				}, 500); // Matches animation duration
 			}
-		  });
-		</script>
-		<script>
-			//function to toggle element visibility
-			//example usage:
-			//toggleElement("myBox"); // Uses default "fade" animation
-			//toggleElement("myBox", "slide"); // Uses slide animation
-			//<button onclick="toggleElement('myBox')">Toggle Box</button>
-			//<button onclick="toggleElement('myBox', 'slide')">Toggle Slide Box</button>
-			function toggleElement(elementId, animationType = "fade") {
-				const element = document.getElementById(elementId);
-
-				if (!element) return;
-
-				if (element.style.visibility === "hidden" || element.style.visibility === "") {
-					// Show element with animation
-					element.style.visibility = "visible";
-					element.classList.add("active");
-					element.style.animation = animationType === "slide" ? "slideIn 0.8s ease-out forwards" : "fadeIn 0.8s ease-out forwards";
-				} else {
-					// Hide element with animation
-					element.style.animation = animationType === "slide" ? "slideOut 0.5s ease-in forwards" : "fadeOut 0.5s ease-in forwards";
-
-					setTimeout(() => {
-						console.log("Butt pressed" + elementId);
-						element.classList.remove("active");
-						element.style.visibility = "hidden";
-					}, 500); // Matches animation duration
-				}
-			}
-
+		}
+	</script>
+		<!-- main button event listeners -->
+	<script>
 		//enentrivia-toggle button
 		document.getElementById("thePixelButt").addEventListener("click", function () {
 			let container = document.getElementById("Bubble");
@@ -665,8 +670,7 @@ _____________________________  -->
 				toggleElement(controllerId, 'fade');
 			}
 		});
-
-		</script>
+	</script>
 
 	</body>
 </html>
