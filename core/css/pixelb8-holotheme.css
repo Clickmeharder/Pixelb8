@@ -640,7 +640,7 @@ ul#broadcastercommandlist {
   color: #e09d09f7;
   font-weight: bold;
 }
-
+#usercommandList p, #broadcastercommandList p { margin:0;}
 /*-------------------------------------------*/
 /*     Entrivia Specific (Trivia Game)    */
 /*-----------------------------------------*/
