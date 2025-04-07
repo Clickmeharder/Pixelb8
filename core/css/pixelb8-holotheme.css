@@ -131,6 +131,7 @@ body.holo-theme {
   --bg-color: linear-gradient(135deg, #001f1fa8, #004040de);/*main bg color*/
   --bg-alt-color: linear-gradient(135deg, #001f1ff2, #004040f0);/*Secondary bg color*/
   --bg-alt2-color: linear-gradient(135deg, #001f1ff2, #004040f0);/*another bg color*/
+  --bg-color-alt2: linear-gradient(135deg, #001f1fe8, #004040eb);/*was entrivia controlpanel bg color*/
   --accent-color:;
   --accent-alt: ;
   --border-width: 0px;
@@ -350,12 +351,16 @@ body {
 		width: 348px;
 		padding: 10px;
 		border-radius: 8px;
+		box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
 		opacity: 0; /* Start hidden */
 		transform: translateY(-10px); /* Slight slide-up effect */
 		transition: opacity 0.4s ease-out, transform 0.4s ease-out;
 		pointer-events: none; /* Prevent interaction when hidden */
 		z-index: 999;
 	}
+	
+
+
 	/* When active (visible) */
 	.controller.active {
 		opacity: var(--controlbox-opacity);
@@ -373,6 +378,9 @@ body {
 			text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
 			font-size: large;
 		}
+
+
+
 		.controlpanel button:active {
 		  transform: scale(0.95);
 		  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) inset;
@@ -387,6 +395,12 @@ body {
 			border: var(--input-border);
 			border-radius: var(--input-border-radius);
 		}
+		
+		/* entrivia Input 
+		width: 92%;
+		
+		*/
+		
 		.controlpanel select {
 			font-size: var(--input-font-size);
 			text-align: var(--input-text-align);
@@ -451,7 +465,7 @@ body {
 /*----------------------*/
 /*______________________*/
 /**/
-		/* entrivia Control Button */
+		/* changed entriviacontrolbox to controlpanel */
 		#entrivia-toggle {
 			position: fixed;
 			bottom: 2px;
@@ -479,42 +493,7 @@ body {
 			opacity: 1;
 		}
 
-		/* entrivia Control Container */
-		#entriviacontrolBox {
-			position: fixed;
-			top: 10px;
-			left: 10px;
-			width: 348px;
-			padding: 10px;
-			background: linear-gradient(135deg, #001f1fe8, #004040eb);
-			color: white;
-			border-radius: 8px;
-			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
-			opacity: 0; /* Start hidden */
-			transform: translateY(-10px); /* Slight slide-up effect */
-			transition: opacity 0.4s ease-out, transform 0.4s ease-out;
-			pointer-events: none; /* Prevent interaction when hidden */
-			z-index: 999;
-		}
-		/* When active (visible) */
-		#entriviacontrolBox.active {
-			opacity: 0.85;
-			transform: translateY(0);
-			pointer-events: all; /* Allow interactions */
-		}
 
-		/* entrivia Input */
-		#entriviacontrolBox input[type="text"] {
-			width: 92%;
-			font-size: larger;
-			text-align: center;
-			padding: 5px;
-			margin: 5px 0;
-			color: #30b524;
-			background-color: #25292ef7;
-			border: 3px inset #0f1112a6;
-			border-radius: 5px;
-		}
 
 		/* entrivia Buttons */
 		#entriviacontrolBox button {
@@ -530,7 +509,6 @@ body {
 			cursor: pointer;
 			transition: background 0.3s ease, color: 0.3s ease;
 		}
-
 		#entriviacontrolBox button:hover {
 			background: #0a2f42eb;
 			color: #0e5b75;
