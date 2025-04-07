@@ -1813,20 +1813,29 @@ function updateCommandlist() {
 
 	// Add user commands to the user command list
 	usercommands.forEach(function(command) {
-		const li = document.createElement("li");
+		const description = document.createElement("p");
+
+		// Create and set up the <strong>
+		const strong = document.createElement("strong");
+		strong.textContent = command.command;
 
 		// Create the usage span
 		const usageSpan = document.createElement("span");
 		usageSpan.classList.add("command-info");
-		usageSpan.setAttribute("title", command.usage);
+		usageSpan.setAttribute("title", "Usage: " + command.usage);
 		usageSpan.textContent = "❓";
 
-		// Set command and description
-		li.innerHTML = "<strong>" + command.command + "</strong>: " + command.description;
+		// Style it to float right
+		usageSpan.style.cssFloat = "right"; // or just use a CSS class
 
-		// Append the usage span to the li
-		li.appendChild(usageSpan);
+		// Append elements to the <p>
+		description.appendChild(usageSpan);
+		description.appendChild(strong);
+		description.append(": " + command.description);
 
+		// Create the <li> and add the description
+		const li = document.createElement("li");
+		li.appendChild(description);
 		// Append to the user command list
 		userCommandList.appendChild(li);
 	});
