@@ -126,7 +126,7 @@ body.holo-theme {
   --body-bg:;
   --body-opacity:;
 	/* these are the common roots */
-  --text-color: #12ebeb;
+  --text-color: #00bafff0;
   --text-color-alt:#00fff9;
   --default-muted: #666f6f;
   --bg-color: linear-gradient(135deg, #001f1fed, #004040de);/*main bg color  linear-gradient(113deg, #001f1f, #004040)*/
