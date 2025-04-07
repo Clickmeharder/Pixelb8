@@ -476,7 +476,6 @@ select.a {
 			padding-top: 4px;
 			transition: max-height 0.6s ease-out, padding 0.3s ease-out;
 		}
-
 		.controlpanel:hover {
 			max-height: 300px;
 			padding: 10px;
@@ -491,7 +490,17 @@ select.a {
 			padding-left: 5px;
 			text-shadow: 0px 0px 4px rgb(153 70 12 / 92%);
 		}
-		
+		.controlpanel input, .controlpanel select, select#questionList {
+			color: #cbcbcb;
+			background-color: #25292ef7;
+		}
+		.controlpanel input {
+			font-size: 16px;
+			font-weight: bold;
+			text-align: center;
+			width: 28%;
+			min-width: 85px;
+		}
 		.controls{
 			border: 2px inset gray;
 		}
@@ -541,57 +550,6 @@ select.a {
 		opacity:var(--twitchmessage-opacity);
 	}
 
-/**/
-/*----------------------*/
-/*______________________*/
-/**/
-		div#addCustomQuestionForm {
-			text-align: center;
-		}
-		div#manageCustomQuestions {
-			text-align: center;
-			border: inherit;
-		}
-		.controlpanel input, .controlpanel select, select#questionList {
-			color: #cbcbcb;
-			background-color: #25292ef7;
-		}
-		.controlpanel input {
-			font-size: 16px;
-			font-weight: bold;
-			text-align: center;
-			width: 15%;
-		}
-		select#questionList {
-			color: #cbcbcb;
-			width: 100%;
-			height: 35px;
-			white-space: normal;
-		}
-		.entriviasettings-inputRow {
-			display: flex;
-			flex-direction: row;
-			justify-content: space-between;
-			align-items: center;
-			border: 2px ridge #273a4c;
-		}
-		.entrivia-settings-togglebar {
-			display: flex;
-			flex-direction: row;
-			justify-content: space-between;
-			align-items: center;
-			border: 2px ridge #273a4c;
-		}
-		.controlpanel input {
-			width: 28%;
-			min-width: 85px;
-		}
-		div#entrivia-settings-main {
-			background-color: #080c15eb;
-			border: 2px inset #000406;
-		}
-
-/**/
 /*------------------------------*/
 /* twitch command info elements */
 /*-----------------------------*/
@@ -663,6 +621,43 @@ ul#broadcastercommandlist {
   color: #e09d09f7;
   font-weight: bold;
 }
+
+/*-------------------------------------------*/
+/*     Entrivia Specific (Trivia Game)    */
+/*-----------------------------------------*/
+		div#addCustomQuestionForm {
+			text-align: center;
+		}
+		div#manageCustomQuestions {
+			text-align: center;
+			border: inherit;
+		}
+		select#questionList {
+			color: #cbcbcb;
+			width: 100%;
+			height: 35px;
+			white-space: normal;
+		}
+		.entriviasettings-inputRow {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+			border: 2px ridge #273a4c;
+		}
+		.entrivia-settings-togglebar {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+			border: 2px ridge #273a4c;
+		}
+		div#entrivia-settings-main {
+			background-color: #080c15eb;
+			border: 2px inset #000406;
+		}
+
+
 /**/
 /*----------------------*/
 /* a new css section */
