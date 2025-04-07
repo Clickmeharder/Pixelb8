@@ -618,7 +618,11 @@ button.c {}
 			border: 2px inset #000406;
 		}
 
-
+/**/
+/*------------------------------*/
+/* twitch command info elements */
+/*-----------------------------*/
+/**/
 .twitchcmd-info {
 	display: flex;
 	flex-direction: row;
