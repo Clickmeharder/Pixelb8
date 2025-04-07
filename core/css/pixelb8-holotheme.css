@@ -458,6 +458,7 @@ select.a {
 		color: #00bafff0;
 		background-color: #07141bc7;
 		margin-bottom: 5px;
+		margin-top: 0px;
 		display: block;
 		text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
 		border: 3px outset #273a4c;
