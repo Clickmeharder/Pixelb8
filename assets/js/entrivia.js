@@ -1451,7 +1451,7 @@ function updateentriviaSettingsUI() {
         const button = document.createElement('button');
         button.id = `toggle${formattedId}`;
         button.textContent = option.split(/(?=[A-Z])/).join(" "); // Format text by splitting camelCase
-        
+        button.classList.add('a');
         // Create the status indicator wrapper
         const statusWrapper = document.createElement('div');
         statusWrapper.classList.add('statusindicatorWrapper');
