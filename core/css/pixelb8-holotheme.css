@@ -413,6 +413,7 @@ input.a[type="text"] {
 }
 input.a[type="number"] {
 	width:28%;
+	min-width: 85px;
 }		
 input.b{
 	color: #cbcbcb;
