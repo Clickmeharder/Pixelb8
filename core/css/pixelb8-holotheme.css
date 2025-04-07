@@ -321,7 +321,6 @@ body {
 /*       Console      */
 /*----------------------*/
 	.console {}
-		
 /*----------------------*/
 /*  Controller containers  */
 /*----------------------*/
@@ -355,6 +354,10 @@ body {
 			text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
 			font-size: large;
 		}
+		.controlpanel button:active {
+		  transform: scale(0.95);
+		  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) inset;
+		}
 		.controlpanel input[type="text"] {
 			font-size: var(--input-font-size);
 			text-align: var(--input-text-align);
@@ -384,10 +387,6 @@ body {
 			align-items: flex-start;
 			flex-direction: column-reverse;
 		}
-		label.label {
-			width: 100%;
-		}
-
 /*----------------------*/
 /*  Bg slider toggle  */
 /*----------------------*/
