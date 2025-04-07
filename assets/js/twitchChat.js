@@ -290,10 +290,10 @@ function disconnectBot() {
 
 // Button event listener: first endTrivia, then setStreamer
 document.getElementById("streamersButt").addEventListener("click", function() {
-    if (triviaGameState === "started") {
+/*     if (triviaGameState === "started") {
 		console.log("Ending Trivia.");
-        endTrivia(); // Only end trivia if it's running
-    }
+        endTrivia(); 
+    } */
     let newStreamer = document.querySelector("#comfy-controller input#twitchname").value;
 	console.log("attempting to Connect to:" + newStreamer);
     setStreamer(newStreamer); // Then, set the new streamer
