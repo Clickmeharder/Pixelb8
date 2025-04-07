@@ -557,7 +557,6 @@ select.a {
 			background-color: #25292ef7;
 		}
 		.controlpanel input {
-			color: #cbcbcb;
 			font-size: 16px;
 			font-weight: bold;
 			text-align: center;
@@ -583,8 +582,6 @@ select.a {
 			align-items: center;
 			border: 2px ridge #273a4c;
 		}
-
-
 		.controlpanel input {
 			width: 28%;
 			min-width: 85px;
