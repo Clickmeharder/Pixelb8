@@ -479,13 +479,13 @@ select.b {}
 			border: 3px inset #302b2b;
 			overflow: hidden;
 			max-height: 60px; /* Initially small */
-			padding: 0 10px; /* Horizontal padding stays */
+			padding: 0 4px; /* Horizontal padding stays */
 			padding-top: 4px;
 			transition: max-height 0.6s ease-out, padding 0.3s ease-out;
 		}
 		.controlpanel:hover {
 			max-height: 300px;
-			padding: 10px;
+			padding: 6px;
 			padding-top: 4px;
 			height: 3%;
 			overflow-y: scroll;
