@@ -2048,7 +2048,6 @@ function toggleAudioSetting() {
 
 //______________________________________________
 // Attach event listeners
-//enentrivia-toggle button
 // start game button
 document.getElementById("startGame").addEventListener("click", function() {
     if (entriviaGameState === null) {
