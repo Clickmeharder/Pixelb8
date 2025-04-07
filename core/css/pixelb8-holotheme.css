@@ -535,7 +535,7 @@ button.c {}
 			border-color: #290606f2;
 			border-radius: 39%;
 		}
-		.controlpanel#entrivia-settings button#cancelGame:hover {
+		#entrivia-settings button#cancelGame:hover {
 			background: #490101eb;
 			color: #020b0e;
 		}
