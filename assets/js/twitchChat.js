@@ -288,11 +288,6 @@ function disconnectBot() {
     input.style.outline = "3px outset #dc3545"; 
 }
 
-
-document.getElementById("controls-toggle").addEventListener("click", function () {
-	let container = document.getElementById("comfycontrolBox");
-	container.classList.toggle("active");
-});
 // Button event listener: first endTrivia, then setStreamer
 document.getElementById("streamersButt").addEventListener("click", function() {
     if (triviaGameState === "started") {
