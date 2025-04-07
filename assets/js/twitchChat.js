@@ -261,15 +261,12 @@ function setStreamer(newStreamer) {
 }
 function connectStreamer() {
     const savedStreamer = localStorage.getItem("lastStreamer");
-	console.log("last streamer:" + savedStreamer)
     if (savedStreamer) {
         setStreamer(savedStreamer); // Auto-connect
 		console.log("last streamer:" + savedStreamer)
 		console.log("attempting to autoConnect to:" + savedStreamer)
     }
 }
-    const thisStreamer = localStorage.getItem("lastStreamer");
-	console.log("last streamer:" + thisStreamer)
 function disconnectBot() {
 	const button = document.getElementById("streamersButt");
 	const input = document.querySelector("#comfy-controller input#twitchname");
