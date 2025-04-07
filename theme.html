@@ -201,7 +201,7 @@ Other Fun:
 			</div>
 			<div class="controlpanel" id="entrivia-settings">
 				<div class="controls" id="entrivia-controls">
-					<div class="entriviasettings-input class="a"Row" id="entrivia-bar-settingsbutts">
+					<div class="entriviasettings-input Row" id="entrivia-bar-settingsbutts">
 						<button class="a" id="cancelGame">Abort Game</button>
 						<button class="a" id="startGame">Start Game</button>
 					</div>
@@ -216,11 +216,12 @@ Other Fun:
 				<div class="controls" id="addCustomQuestionForm">
 					<h3>Add a Custom entrivia Question</h3>
 					<div class="twitchcmd-info" data-option="!entrivia-addquestion"></div>
-					<label for="round">Select Round:</label>
+					<label for="round">Round:</label>
 					<select class="a" id="round">
 						<option value="round1">Round 1</option>
 						<option value="round2">Round 2</option>
 					</select>
+					<label for="entriviacategory">Category:</label>
 					<select class="a" id="entriviacategory">
 						<option value="Mining">mining</option>
 						<option value="hunting">hunting</option>
@@ -248,27 +249,27 @@ Other Fun:
 				</div>
 				<div class="controls" id="entrivia-settings-main">
 					<h3>Main entrivia Settings</h3>
-					<div class="entriviasettings-input class="a"Row" id="entrivia-bar-Questiondelay">
+					<div class="entriviasettings-input Row" id="entrivia-bar-Questiondelay">
 						<label for="timeBetweenQuestions">Seconds Between Questions:</label>
 						<input class="a" type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
 					</div>
 					<div class="twitchcmd-info" data-option="!entrivia-questiondelay"></div>
-					<div class="entriviasettings-input class="a"Row" id="entrivia-bar-Answertime">
+					<div class="entriviasettings-input Row" id="entrivia-bar-Answertime">
 						<label for="timeToAnswer">Time to Answer (seconds):</label>
 						<input class="a" type="number" id="timeToAnswer" value="30" min="1" step="1">
 					</div>
 					<div class="twitchcmd-info" data-option="!entrivia-answertime"></div>
-					<div class="entriviasettings-input class="a"Row" id="entrivia-bar-QuestionsperRound">
+					<div class="entriviasettings-input Row" id="entrivia-bar-QuestionsperRound">
 						<label for="questionsPerRound">Questions Per Round:</label>
 						<input class="a" type="number" id="questionsPerRound" value="1" min="1" step="1">	
 					</div>
 					<div class="twitchcmd-info" data-option="!entrivia-questioncap"></div>
-					<div class="entriviasettings-input class="a"Row" id="entrivia-bar-rounddelay">
+					<div class="entriviasettings-input Row" id="entrivia-bar-rounddelay">
 						<label for="timeBetweenRounds">Seconds Between Rounds:</label>
 						<input class="a" type="number" id="timeBetweenRounds" value="30" min="1" step="1">
 					</div>
 					<div class="twitchcmd-info" data-option="!entrivia-rounddelay"></div>
-					<div class="entriviasettings-input class="a"Row" id="entrivia-bar-settingsbutts">
+					<div class="entriviasettings-input Row" id="entrivia-bar-settingsbutts">
 						<button class="a" id="changeSettings">Set</button>
 						<button class="a" id="resetSettings">Default</button>
 					</div>
