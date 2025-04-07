@@ -463,7 +463,35 @@ select.a {
 		text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
 		border: 3px outset #273a4c;
 	}
-	.controlpanel{}	
+		.controlpanel {
+			text-align: start;
+			display: flex;
+			color: #00bafff0;
+			background-color: #07141bc7;
+			flex-direction: column;
+			border: 3px inset #302b2b;
+			overflow: hidden;
+			max-height: 60px; /* Initially small */
+			padding: 0 10px; /* Horizontal padding stays */
+			padding-top: 4px;
+			transition: max-height 0.6s ease-out, padding 0.3s ease-out;
+		}
+
+		.controlpanel:hover {
+			max-height: 300px;
+			padding: 10px;
+			padding-top: 4px;
+			height: 3%;
+			overflow-y: scroll;
+		}
+	
+		.controlpanel label {
+			color: #f36402;
+			font-weight: bold;
+			padding-left: 5px;
+			text-shadow: 0px 0px 4px rgb(153 70 12 / 92%);
+		}
+		
 		.controls{
 			border: 2px inset gray;
 		}
@@ -517,38 +545,6 @@ select.a {
 /*----------------------*/
 /*______________________*/
 /**/
-
-
-		/* entrivia Settings = controlpanel i think*/
-		div#entrivia-settings {
-			text-align: start;
-			display: flex;
-			color: #00bafff0;
-			background-color: #07141bc7;
-			flex-direction: column;
-			border: 3px inset #302b2b;
-			overflow: hidden;
-			max-height: 60px; /* Initially small */
-			padding: 0 10px; /* Horizontal padding stays */
-			padding-top: 4px;
-			transition: max-height 0.6s ease-out, padding 0.3s ease-out;
-		}
-
-		div#entrivia-settings:hover {
-			max-height: 300px;
-			padding: 10px;
-			padding-top: 4px;
-			height: 3%;
-			overflow-y: scroll;
-		}
-		/* entrivia Settings Header */
-
-		div#entrivia-settings label {
-			color: #f36402;
-			font-weight: bold;
-			padding-left: 5px;
-			text-shadow: 0px 0px 4px rgb(153 70 12 / 92%);
-		}
 		div#addCustomQuestionForm {
 			text-align: center;
 		}
@@ -556,11 +552,11 @@ select.a {
 			text-align: center;
 			border: inherit;
 		}
-		#entrivia-settings input, #entrivia-settings select, select#questionList {
+		.controlpanel input, .controlpanel select, select#questionList {
 			color: #cbcbcb;
 			background-color: #25292ef7;
 		}
-		#entrivia-settings input {
+		.controlpanel input {
 			color: #cbcbcb;
 			font-size: 16px;
 			font-weight: bold;
@@ -589,7 +585,7 @@ select.a {
 		}
 
 
-		#entrivia-settings input {
+		.controlpanel input {
 			width: 28%;
 			min-width: 85px;
 		}
