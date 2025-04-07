@@ -287,11 +287,10 @@ _____________________________  -->
 	  const themes = ["", "light-theme", "dark-theme", "retro-theme", "cyber-theme", "holo-theme"];
 	  let current = 0;
 	  function setTheme(themeName) {
-		console.log("theme name: "+ themeName);
 		document.body.className = themeName;
 		// Set the theme in localStorage
 		localStorage.setItem("theme", themeName);
-		console.log("theme saved: " + themeName);
+		console.log("preferred theme: " + themeName);
 	  }
 
 		// Add event listener to all buttons with 'themeselect' class
