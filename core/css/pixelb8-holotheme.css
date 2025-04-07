@@ -496,7 +496,7 @@ body {
 
 
 		/* entrivia Buttons */
-		#entriviacontrolBox button {
+		#entrivia-settings button {
 			width: 100%;
 			padding: 9px;
 			margin: 5px 0;
@@ -509,11 +509,11 @@ body {
 			cursor: pointer;
 			transition: background 0.3s ease, color: 0.3s ease;
 		}
-		#entriviacontrolBox button:hover {
+		#entrivia-settings button:hover {
 			background: #0a2f42eb;
 			color: #0e5b75;
 		}
-		#entriviacontrolBox button#cancelGame {
+		#entrivia-settings button#cancelGame {
 			font-size: 15px;
 			font-weight:bold;
 			width: 20%;
@@ -524,7 +524,7 @@ body {
 			border-color: #290606f2;
 			border-radius: 39%;
 		}
-		#entriviacontrolBox button#cancelGame:hover {
+		.controlpanel#entrivia-settings button#cancelGame:hover {
 			background: #490101eb;
 			color: #020b0e;
 		}
