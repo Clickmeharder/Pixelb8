@@ -225,7 +225,7 @@ ComfyJS.onChat = (user, message, color, flags, extra) => {
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
-    const input = document.querySelector("#comfycontrolBox input[type='text']");
+    const input = document.querySelector("#comfy-controller input#twitchname");
 
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
