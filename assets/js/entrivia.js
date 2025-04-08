@@ -178,7 +178,7 @@ function toggleconsolemessages() {
 
 function fetchentriviaQuestions() {
     return new Promise((resolve, reject) => {
-        const questionsUrl = 'questions.json';
+        const questionsUrl = '/assets/data/eu-data/questions.json';
         let defaultQuestions = { round1: {}, round2: {} };
         let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
 
