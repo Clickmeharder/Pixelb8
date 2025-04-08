@@ -61,7 +61,7 @@ body.dark-theme {
 
   /* Input Styles */
   --input-font-size: 16px;
-  --input-font-weight: 500;
+  --input-font-weight: bold;
   --input-text-align: center;
   --input-padding: 6px;
   --input-margin: 4px 0;
@@ -788,7 +788,7 @@ input.a[type="number"] {
   border: var(--input-border);
   font-family: var(--body-font);
   font-size: var(--input-font-size);
-  font-weight: var(--input-font-weight, normal);
+  font-weight: var(--input-font-weight, bold);
   text-align: var(--input-text-align);
   padding: var(--input-padding);
   margin: var(--input-margin);
