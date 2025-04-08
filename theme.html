@@ -74,7 +74,7 @@ Other Fun:
 		<div  id="console"></div>
 		<!--this is the container for messages from twitch -->
 		<div id="twitchChat">
-			<div id="exampleMessagebox">
+			<div id="exampleMessagebox" style="display: none;">
 				<div class="exampleMessage"><span class="username" style="color: rgb(255, 105, 180);">JaeDraze: </span><span class="twitchmessage">find best viewers at ************.com</span></div>
 				<div class="exampleMessage"><span class="username" style="color: red;">cooldude420: </span><span class="twitchmessage">I just farted</span></div>
 				<div class="exampleMessage"><span class="username" style="color:;">boobs6969: </span><span class="twitchmessage">lol wow!</span></div>
@@ -333,6 +333,14 @@ _____________________________  -->
 		const saved = localStorage.getItem("theme");
 		if (saved) setTheme(saved);
 	  });
+
+  const controller = document.getElementById("theme-controller");
+  const messagebox = document.getElementById("exampleMessagebox");
+
+  controller.addEventListener("click", () => {
+    const isVisible = messagebox.style.display === "block";
+    messagebox.style.display = isVisible ? "none" : "block";
+  });
 
   </script>
   		<!-- simulate background script -->
