@@ -145,9 +145,9 @@ body.custom-theme {
   --body-opacity:;
   --text-color: #333;
   --bg-color: #ffeefc70;
-  --bg-color-alt: #fff0f5b5;
+  --bg-color-alt: #ffe3f16b;
   --bg-color-alt2: #ff85c1;
-  --bg-color-alt3: #ffe3f175; /*(darker color)*/
+  --bg-color-alt3: #ffe3f199; /*(darker color)*/
   --accent-color: #ff85c1;
   --accent-alt: #82eefd;
   --border-width: 1px;
