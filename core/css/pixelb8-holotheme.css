@@ -29,42 +29,35 @@ body.dark-theme {
   --body-bg-color: #0b0f14;
   --body-bg: linear-gradient(135deg, #0b0f14, #1a1f25);
   --body-opacity: 1;
-
   --text-color: #b0c9d2;
   --text-color-alt: #8fa8b5;
   --h3-color: #00ccff;
   --h2-color: #00aaff;
   --default-muted: #6c7b89;
-
   --bg-color: #1a1f25;
   --bg-color-alt: #242c34;
   --bg-color-alt2: #1f2a33;
   --bg-color-alt3: #1a252e;
-
   --accent-color: #33eaff;
   --accent-alt: #66ffff;
-
   --border-width: 2px;
   --border-style: solid;
-  --border-color: #4cd0ff;
+  --border-color: #1e2021;
   --border: var(--border-width) var(--border-style) var(--border-color);
-
-  --glow-color: rgba(51, 255, 255, 0.3);
-  --shadow-color: rgba(0, 255, 255, 0.2);
-
-  /* Button Styles */
-  --button-text-color: #33eaff;
-  --button-bg-color: #112733;
-  --button-padding: 10px;
-  --button-margin: 4px 0;
-  --button-hover-text-color: #0edfff;
-  --button-hover-bg-color: #1c3b49;
-  --button-border-color: #33eaff;
+  --glow-color: rgb(0 0 0 / 30%);
+  --shadow-color: rgb(31 37 37 / 70%);
+  --button-text-color: #656769;
+  --button-bg-color: #151a1d;
+  --button-padding: 18px;
+  --button-margin: 0px 0;
+  --button-hover-text-color: #b5bfc1;
+  --button-hover-bg-color: #13181a;
+  --button-border-color: #3e3f41;
   --button-border-style: outset;
   --button-border-width: 2px;
   --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
   --button-border-radius: 10px;
-  --button-text-shadow: 1px 1px 4px rgba(0, 255, 255, 0.4);
+  --button-text-shadow: 1px 1px 4px rgb(26 27 27 / 89%);
 
   /* Input Styles */
   --input-font-size: 16px;
@@ -115,8 +108,8 @@ body.light-theme {
   /* Button Styles */
   --button-text-color: #ffffff;
   --button-bg-color: #007acc;
-  --button-padding: 10px;
-  --button-margin: 4px 0;
+  --button-padding: 18px;
+  --button-margin: 0px 0;
   --button-hover-text-color: #ffffff;
   --button-hover-bg-color: #005fa3;
   --button-border-color: #005fa3;
