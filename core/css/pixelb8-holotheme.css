@@ -766,6 +766,7 @@ body.nineties-theme {
     --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
     --button-border-radius: 0;
     --button-text-shadow: none;
+	--button-outline: 2px inset var(--button-border-color);
     --input-font-size: 14px;
     --input-font-weight: normal;
     --input-text-align: left;
@@ -1210,6 +1211,7 @@ button.a {
 	margin: var(--button-margin);
 	border:var(--button-border);
 	border-radius:var(--button-border-radius);
+	outline:var(--button-outline);
 	background:var(--button-bg-color);
 	color: var(--button-text-color);
 	text-shadow: var(--button-text-shadow);
