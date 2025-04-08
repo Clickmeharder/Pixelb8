@@ -702,11 +702,11 @@ body.business-theme {
 
   /* Button Styles */
   --button-text-color: #f1f5f9;
-  --button-bg-color: #28a745;
+  --button-bg-color: #252625;
   --button-padding: 10px;
   --button-margin: 8px 0;
   --button-hover-text-color: #ffffff;
-  --button-hover-bg-color: #218838;
+  --button-hover-bg-color: #18203a;
   --button-border-color: #28a745;
   --button-border-style: solid;
   --button-border-width: 1px;
