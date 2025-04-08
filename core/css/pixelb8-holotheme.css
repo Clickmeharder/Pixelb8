@@ -147,7 +147,7 @@ body.custom-theme {
   --bg-color: #ffeefc70;
   --bg-color-alt: #ffe3f16b;
   --bg-color-alt2: #ff85c1;
-  --bg-color-alt3: #ffe3f199;
+  --bg-color-alt3: #ffe3f199; /*(darker color)*/
   --accent-color: #ff85c1;
   --accent-alt: #82eefd;
   --border-width: 1px;
@@ -159,6 +159,8 @@ body.custom-theme {
   --box-shadow: 0 0 10px var(--shadow-color);
   --glow-color: rgba(255, 128, 200, 0.5);
   
+  --button-text-color:#444;
+  --button-bg-color:var(--bg-color-alt3);
   --button-border-color:var(--border-color);
   --button-border: var(--border-width) var(--border-style) var(--border-color);
   --button-border-radius:var(--border-radius);
