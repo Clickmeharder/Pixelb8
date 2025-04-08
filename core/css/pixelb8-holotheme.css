@@ -1501,7 +1501,7 @@ ul#broadcastercommandlist {
 			flex-direction: row;
 			justify-content: space-between;
 			align-items: center;
-			border: 2px ridge #273a4c;
+			border: 2px ridge var(--bg-color-alt3);
 		}
 
 .inputRow {
