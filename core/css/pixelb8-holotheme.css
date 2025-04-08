@@ -372,8 +372,8 @@ body.biohazard-theme {
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 
   /* Button Styles */
-  --button-text-color: #12ebeb;
-  --button-bg-color: #004040de;
+  --button-text-color: #ff7f0d;
+  --button-bg-color: #093522ed;
   --button-padding: 9px;
   --button-margin: 3px 0;
   --button-hover-text-color: #0e5b75;
