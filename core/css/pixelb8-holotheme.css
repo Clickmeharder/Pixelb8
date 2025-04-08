@@ -150,7 +150,7 @@ body.custom-theme {
   --accent-alt: #82eefd;
   --border-width: 3px;
   --border-style: dashed;
-  --border-color: #ffccf9;
+  --border-color: #faa5f0;
   --border: var(--border-width) var(--border-style) var(--border-color);
   --border-radius: 10px;
   --shadow-color: rgba(255, 136, 255, 0.6);
