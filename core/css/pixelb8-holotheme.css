@@ -691,25 +691,23 @@ body.business-theme {
 
   --accent-color: #28a745;
   --accent-alt: #68e3b9;
-
+  
   --border-width: 1px;
   --border-style: solid;
   --border-color: #3c4453;
   --border: var(--border-width) var(--border-style) var(--border-color);
-
-  --glow-color: rgba(40, 167, 69, 0.3);
+  --glow-color: rgb(23 28 71 / 75%);
   --shadow-color: rgba(0, 0, 0, 0.2);
-
-  /* Button Styles */
+  
   --button-text-color: #f1f5f9;
-  --button-bg-color: #252625;
-  --button-padding: 10px;
-  --button-margin: 8px 0;
+  --button-bg-color: #292a30;
+  --button-padding: 6px;
+  --button-margin: 0px 0;
   --button-hover-text-color: #ffffff;
-  --button-hover-bg-color: #18203a;
-  --button-border-color: #28a745;
-  --button-border-style: solid;
-  --button-border-width: 1px;
+  --button-hover-bg-color: #214288;
+  --button-border-color: #4a4a4a;
+  --button-border-style: outset;
+  --button-border-width: 2px;
   --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
   --button-border-radius: 6px;
   --button-text-shadow: none;
