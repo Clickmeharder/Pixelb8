@@ -1341,6 +1341,7 @@ select.b {}
 			height: 3%;
 			overflow-y: scroll;
 		}
+.controlpanel#theme-controller {height:300px;max-height: 300px;}
 		.controlpanel label {
 			color: var(--text-color);
 			font-weight: bold;
