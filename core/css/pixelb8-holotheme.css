@@ -1225,13 +1225,13 @@ button.c {}
 .close-btn{color:var(--text-color);font-weight: bold;font-size: 24px;height: 36px;width: 36px;outline:2px inset var(--bg-color-alt3);border-width:3px;}
 .close-btn:hover {
   color:#ff0000;
-  box-shadow: 0 0 20px 5px rgba(255, 0, 0, 0.6); /* Red glowing shadow */
+  box-shadow: 0 0 10px 3px rgba(255, 0, 0, 0.6); /* Red glowing shadow */
   outline: 2px inset #ff0000; /* Red outline on hover */
 }
 .close-btn:active {
   color:#cc0000;
   background-color: #cc0000; /* Darker red when pressed */
-  box-shadow: 0 0 15px 3px rgba(255, 0, 0, 0.4); /* Less intense shadow when clicked */
+  box-shadow: 0 0 15px 5px rgba(255, 0, 0, 0.4); /* Less intense shadow when clicked */
   border-style:inset;
   outline: 2px solid #cc0000; /* Matching darker outline on press */
   transform: translateY(4px); /* Moves the button down to create a "pressed" effect */
