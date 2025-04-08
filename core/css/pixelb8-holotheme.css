@@ -1399,10 +1399,10 @@ select.b {}
 		width: 30%;
 		opacity:var(--twitchchat-opacity);
 	}
-	div#twitchMessagebox {text-align: left;border:;max-height: 170px;}
-	#twitchMessagebox .chatMessage {transition: opacity 1s ease-out;  /* Apply the fade transition */}
+	div#twitchMessagebox, div#exampleMessagebox {text-align: left;border:;max-height: 170px;}
+	#twitchMessagebox .chatMessage,#exampleMessagebox .exampleMessage {transition: opacity 1s ease-out;  /* Apply the fade transition */}
 	#username {font-weight:bold;}
-	.chatMessage {
+	.chatMessage, .exampleMessage {
 		font-size: 18px;
 		padding-left:8px;
 		padding-right:8px;
