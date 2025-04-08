@@ -1434,7 +1434,7 @@ select.b {}
 		opacity:var(--twitchchat-opacity);
 	}
 	div#twitchMessagebox, div#exampleMessagebox {text-align: left;border:;max-height: 170px;}
-	#twitchMessagebox .chatMessage,#exampleMessagebox .exampleMessage {transition: opacity 1s ease-out;  /* Apply the fade transition */}
+	#twitchMessagebox .chatMessage,#exampleMessagebox .exampleMessage {text-shadow: 1px 1px 1px #000000eb;transition: opacity 1s ease-out;  /* Apply the fade transition */}
 	#username {font-weight:bold;}
 	.chatMessage, .exampleMessage {
 		font-size: 18px;
