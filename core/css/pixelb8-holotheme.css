@@ -1222,7 +1222,7 @@ button.a {
 		}
 button.b {}
 button.c {}
-.close-btn{color:var(--text-color);font-weight: bold;font-size: 24px;height: 36px;width: 36px;outline:2px inset var(--bg-color-alt3);border-width:3px;}
+.close-btn{color:var(--text-color);font-weight: bold;font-size: 24px;height: 36px;width: 36px;outline:2px inset var(--bg-color-alt3);border-width:3px;margin: 2px;}
 .close-btn:hover {
   color:#ff0000;
   box-shadow: 0 0 10px 3px rgba(255, 0, 0, 0.6); /* Red glowing shadow */
