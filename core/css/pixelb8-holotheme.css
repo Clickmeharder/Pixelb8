@@ -1222,7 +1222,7 @@ button.a {
 		color: var(--button-hover-text-color);
 	}
 		button.a:active {
-		  transform: scale(0.95);
+		  transform: scale(0.98);
 		  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) inset;
 		}
 button.b {}
