@@ -551,7 +551,66 @@ body.synthwave-theme {
   --input-border-radius: 4px;
   --select-margin: auto 12px 0 0;
 }
+body.bubblegumpop-theme {
+  --body-font: 'Comic Neue', cursive;
+  --body-color: #ff69b4;
+  --body-bg-color: #fff0f5;
+  --body-bg: linear-gradient(145deg, #ffe6f0, #fffafc);
+  --body-opacity: 1;
 
+  --text-color: #ff69b4;
+  --text-color-alt: #ffa7c4;
+  --h3-color: #ff70a6;
+  --h2-color: #ff95b3;
+  --default-muted: #b0839f;
+
+  --bg-color: #fff0f5;
+  --bg-color-alt: #ffe6f0;
+  --bg-color-alt2: #ffcce0;
+  --bg-color-alt3: #ffd9ec;
+
+  --accent-color: #ff80bf;
+  --accent-alt: #ffb6c1;
+
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: #ffb6c1;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+
+  --glow-color: rgba(255, 182, 193, 0.5);
+  --shadow-color: rgba(255, 105, 180, 0.2);
+
+  /* Button Styles */
+  --button-text-color: #fff;
+  --button-bg-color: #ff95b3;
+  --button-padding: 10px;
+  --button-margin: 5px;
+  --button-hover-text-color: #ff69b4;
+  --button-hover-bg-color: #ffe0ec;
+  --button-border-color: #ff69b4;
+  --button-border-style: solid;
+  --button-border-width: 2px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 12px;
+  --button-text-shadow: 1px 1px 3px #ffcce0;
+
+  /* Input Styles */
+  --input-font-size: 1rem;
+  --input-font-weight: 600;
+  --input-text-align: center;
+  --input-padding: 8px;
+  --input-margin: 5px;
+  --input-color: #ff69b4;
+  --input-bg-color: #fff0f5;
+  --input-bg: ;
+  --input-opacity: 1;
+  --input-border-width: 2px;
+  --input-border-color: #ffb6c1;
+  --input-border-style: dashed;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 8px;
+  --select-margin: auto 12px 0 0;
+}
 /*----------------------*/
 /*      The Body        */
 /*----------------------*/
