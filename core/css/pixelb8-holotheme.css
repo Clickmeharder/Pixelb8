@@ -1419,7 +1419,7 @@ select.b {}
 	align-items: center;
 	color: gray;
 	background-color: var(--bg-color-alt3);/*#020307eb;*/
-	border: 2px ridge #273a4c;
+	border: 2px ridge var(--border-color);
 }
 .command-info {
 	cursor: help;
@@ -1430,7 +1430,7 @@ select.b {}
 	font-family: Arial, sans-serif;
 	background-color: var(--bg-color-alt3);/*#080c15eb;*/
 	padding: 6px;
-	border: 2px inset #000406;
+	border: 2px inset var(--border-color);
 	border-radius: 8px;
 	width: 300px;
 	margin: 20px auto;
