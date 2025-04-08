@@ -784,7 +784,7 @@ body.nineties-theme {
 /* =====================
    Lo-fi Chill Theme
    ===================== */
-body.lofi-theme {
+body.poop-theme {
   --body-font: 'Courier New', monospace;
   --body-color: #fbeacc;
   --body-bg-color: #2c1e16;
@@ -1127,9 +1127,9 @@ textarea:focus {
 	#Bubble .widgetcontrols{
 		color: var(--bubblebutt-color);
 		position: absolute;
-		width: 42px;
-		height: 42px;
-		font-size: 24px;
+		width: 64px;
+		height: 64px;
+		font-size: 28px;
 		text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
 		box-shadow: var(--box-glow);
 		opacity: 0;
