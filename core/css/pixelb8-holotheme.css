@@ -109,7 +109,7 @@ body.retro-theme {
   --h2-color: #00ffcc;
   --default-muted: #888888;
 
-  --bg-color: linear-gradient(145deg, #1a1a1a, #2b2b2b);
+  --bg-color: linear-gradient(145deg, #1a1a1a, #2b2b2b);;
   --bg-color-alt: #252525;
   --bg-color-alt2: linear-gradient(135deg, #222222, #444444);
   --bg-color-alt3: linear-gradient(135deg, #333333, #555555);
