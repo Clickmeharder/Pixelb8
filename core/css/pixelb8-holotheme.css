@@ -973,6 +973,10 @@ body {
     /*background-image: var(--body-bg-img);*/
     /*background-image: url('../../assets/images/bg/spaace.jpg');*/
    /*background-image: url('https://pixelb8/assets/images/bg/spaace.jpg');*/
+	margin: 0;
+	padding: 0;
+	width: 100vw;
+	height: 100vh;
     cursor: var(--cursor-image);
     opacity: var(--body-opacity);
 }
