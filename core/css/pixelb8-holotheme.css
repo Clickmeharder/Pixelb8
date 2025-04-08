@@ -743,14 +743,14 @@ body.nineties-theme {
     --h2-color: #000;
     --default-muted: #555;
     --bg-color: #d4d0c8;
-    --bg-color-alt: #e0e0e0;
+    --bg-color-alt: #807e7ef5;
     --bg-color-alt2: #bfbfbf;
     --bg-color-alt3: #c0c0c0;
     --accent-color: #000080;
     --accent-alt: #800000;
     --border-width: 2px;
     --border-style: outset;
-    --border-color: #fff;
+    --border-color: #b0a4a4f2;
     --border: var(--border-width) var(--border-style) #2e2c2cba;
     --glow-color: transparent;
     --shadow-color: #888;
@@ -1179,6 +1179,7 @@ textarea:focus {
 		h3 {
 			color: #e54513;
 			text-align: center;
+			background: #00000082;
 			border: 5px ridge var(--border-color);
 			border-radius:var(--border-radius);
 			margin: 0;
@@ -1521,7 +1522,6 @@ ul#broadcastercommandlist {
 			border: inherit;
 		}
 		select#questionList {
-			color: #cbcbcb;
 			width: 100%;
 			height: 35px;
 			white-space: normal;
