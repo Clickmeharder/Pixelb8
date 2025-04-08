@@ -579,6 +579,7 @@ body.bubblegumpop-theme {
   --glow-color: rgba(255, 182, 193, 0.5);
   --shadow-color: rgba(255, 105, 180, 0.2);
   --button-text-color: #097ec3;
+  --button-font-weight:bold;
   --button-bg-color: #ff95b3;
   --button-padding: 10px;
   --button-margin: 5px;
@@ -640,6 +641,7 @@ body.wastelandterminal-theme {
 
   /* Button Styles */
   --button-text-color: #00ff66;
+  --button-font-weight:;
   --button-bg-color: #0a1f0a;
   --button-padding: 8px;
   --button-margin: 5px;
