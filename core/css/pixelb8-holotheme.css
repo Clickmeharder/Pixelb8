@@ -95,6 +95,7 @@ body.custom-theme {
   --cursor-image: ;
 }
 /* 🕹️ RETRO THEME (green screen vibes) */
+
 body.retro-theme {
   --body-font: 'Press Start 2P', cursive;
   --body-color: #fdfcd3;
@@ -120,7 +121,38 @@ body.retro-theme {
   --glow-color: rgba(255, 0, 255, 0.35);
   --shadow-color: rgba(255, 255, 0, 0.25);
 
-  --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_retrobeam.png'), auto;
+  /* --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_retrobeam.png'), auto; */
+
+  /* Button Styles */
+  --button-text-color: #ffcc00;
+  --button-bg-color: #1a1a1a;
+  --button-padding: 10px 16px;
+  --button-margin: 6px 0;
+  --button-hover-text-color: #00ccff;
+  --button-hover-bg-color: #2b2b2b;
+  --button-border-color: var(--border-color);
+  --button-border-style: solid;
+  --button-border-width: 2px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 10px;
+  --button-text-shadow: 1px 1px 2px #ff00ff;
+
+  /* Input Styles */
+  --input-font-size: medium;
+  --input-font-weight: bold;
+  --input-text-align: center;
+  --input-padding: 6px;
+  --input-margin: 6px 0;
+  --input-color: #00ffff;
+  --input-bg-color: #111;
+  --input-bg: linear-gradient(135deg, #111111, #222222);
+  --input-opacity: 1;
+  --input-border-width: 2px;
+  --input-border-color: #ff00ff;
+  --input-border-style: dashed;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 6px;
+  --select-margin: auto 12px 0 0;
 }
 body.cyberice-theme {
   --body-font: 'Orbitron', sans-serif;
