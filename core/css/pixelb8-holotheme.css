@@ -1096,7 +1096,7 @@ select.b {}
 			overflow-y: scroll;
 		}
 		.controlpanel label {
-			color: #f36402;
+			color: var(--text-color);
 			font-weight: bold;
 			padding-left: 5px;
 			text-shadow: 0px 0px 4px rgb(153 70 12 / 92%);
