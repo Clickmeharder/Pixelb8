@@ -1069,7 +1069,7 @@ textarea:focus {
 /*----------------------*/
 /* Wrap around PixelButt so bubble buttons are relative */
 
-.themed, .chatMessage, .panel, .controller, #Bubble .Butt {
+.themed, .chatMessage, .exampleMessage, .panel, .controller, #Bubble .Butt {
 	background:var(--bg-color);
 	border:var(--border);
 	border-radius:var(--border-radius);
@@ -1341,7 +1341,7 @@ select.b {}
 			height: 3%;
 			overflow-y: scroll;
 		}
-.controlpanel#theme-controller {height:300px;max-height: 300px;}
+		.controlpanel#theme-controller {height:300px;max-height: 300px;}
 		.controlpanel label {
 			color: var(--text-color);
 			font-weight: bold;
