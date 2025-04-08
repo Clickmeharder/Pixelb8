@@ -671,6 +671,66 @@ body.wastelandterminal-theme {
   --input-border-radius: 2px;
   --select-margin: auto 12px 0 0;
 }
+body.business-theme {
+  --body-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --body-color: #1a1a1a;
+  --body-bg-color: #f4f6f9;
+  --body-bg: linear-gradient(135deg, #ffffff, #e7ecf3);
+  --body-opacity: 1;
+
+  --text-color: #2a2a2a;
+  --text-color-alt: #555;
+  --h3-color: #2b3e50;
+  --h2-color: #1f2937;
+  --default-muted: #8a99a9;
+
+  --bg-color: #ffffff;
+  --bg-color-alt: #f0f4f8;
+  --bg-color-alt2: linear-gradient(145deg, #f6f8fa, #dfe6ed);
+  --bg-color-alt3: linear-gradient(135deg, #e2e8f0, #d5dce4);
+
+  --accent-color: #0077cc;
+  --accent-alt: #3399ff;
+
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: #ccd6dd;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+
+  --glow-color: rgba(0, 119, 204, 0.2);
+  --shadow-color: rgba(0, 0, 0, 0.05);
+
+  /* Button Styles */
+  --button-text-color: #ffffff;
+  --button-bg-color: #0077cc;
+  --button-padding: 10px;
+  --button-margin: 8px 0;
+  --button-hover-text-color: #ffffff;
+  --button-hover-bg-color: #005fa3;
+  --button-border-color: #0077cc;
+  --button-border-style: solid;
+  --button-border-width: 1px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 6px;
+  --button-text-shadow: none;
+
+  /* Input Styles */
+  --input-font-size: 1rem;
+  --input-font-weight: 400;
+  --input-text-align: left;
+  --input-padding: 8px 12px;
+  --input-margin: 6px 0;
+  --input-color: #1f2937;
+  --input-bg-color: #ffffff;
+  --input-bg: none;
+  --input-opacity: 1;
+  --input-border-width: 1px;
+  --input-border-color: #ccd6dd;
+  --input-border-style: solid;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 4px;
+  --select-margin: auto 12px 0 0;
+}
 /*----------------------*/
 /*      The Body        */
 /*----------------------*/
