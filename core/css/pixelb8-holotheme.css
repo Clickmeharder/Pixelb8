@@ -354,8 +354,8 @@ body.biohazard-theme {
   --h3-color: #aaff00;
   --h2-color: #b2ff00;
   --default-muted: #4a5c4a;
-  --bg-color: linear-gradient(135deg, #061306, #132513);
-  --bg-color-alt: #112011;
+  --bg-color: linear-gradient(135deg, #061306ad, #132513ad);
+  --bg-color-alt: #112011ad;
   --bg-color-alt2: linear-gradient(135deg, #1c441c, #2e592e);
   --bg-color-alt3: linear-gradient(135deg, #153515, #243e24);
 
