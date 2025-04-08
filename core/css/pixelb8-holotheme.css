@@ -144,13 +144,13 @@ body.custom-theme {
   --body-bg:;
   --body-opacity:;
   --text-color: #333;
-  --bg-color: #ffeefceb;
-  --bg-color-alt: #ffe3f1;
+  --bg-color: #ffeefc70;
+  --bg-color-alt: #ffe3f16b;
   --bg-color-alt2: #ff85c1;
-  --bg-color-alt3: #ffe3f1;
+  --bg-color-alt3: #ffe3f199;
   --accent-color: #ff85c1;
   --accent-alt: #82eefd;
-  --border-width: 4px;
+  --border-width: 1px;
   --border-style: dashed;
   --border-color: #faa5f0;
   --border: var(--border-width) var(--border-style) var(--border-color);
