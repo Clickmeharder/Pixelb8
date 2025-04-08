@@ -1415,28 +1415,7 @@ function updateSettingsDisplay() {
     }
 }
 
-function updateIndicatorLights() { 
-	let thesesettings = { usedefaultquestions, usecustomquestions, consolemessages, entriviachatOverlay, chatanswers, audioSetting };
-    document.querySelectorAll(".light-indicator").forEach(indicator => {
-        const optionName = indicator.getAttribute("data-option");
-        const optionValue = thesesettings[optionName]; // Get the value safely
-        
-        // Set light color based on value
-        const lightColor = (optionValue === true || optionValue === "on") 
-            ? "green" 
-            : (optionValue === false || optionValue === "off") 
-                ? "red" 
-                : "gray"; // Fallback color
-        indicator.style.backgroundColor = lightColor;
 
-        // Find the nearest <strong> element and change text color
-        const statusText = indicator.closest('.statusindicatorWrapper').querySelector('strong');
-        if (statusText) {
-            statusText.style.color = lightColor;  // Set the text color to green/red
-            statusText.textContent = (optionValue === true || optionValue === "on") ? "Enabled" : "Disabled";
-        }
-    });
-}
 
 // Function to dynamically add a button and a status light indicator
 function updateentriviaSettingsUI() {

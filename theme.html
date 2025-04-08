@@ -392,7 +392,15 @@ _____________________________  -->
 				}, 500); // Matches animation duration
 			}
 		}
-		
+		document.querySelectorAll(".close-btn").forEach(btn => {
+		  btn.addEventListener("click", () => {
+			const parent = btn.parentElement;
+			if (parent && parent.id) {
+			  toggleElement(parent.id, "fade"); // or use "slide", etc., depending on your animations
+			}
+		  });
+		});
+
 		function updateIndicatorLights() { 
 			let thesesettings = { usedefaultquestions, usecustomquestions, consolemessages, entriviachatOverlay, chatanswers, audioSetting };
 			document.querySelectorAll(".light-indicator").forEach(indicator => {
