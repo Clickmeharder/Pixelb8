@@ -732,64 +732,55 @@ body.business-theme {
   --select-margin: auto 12px 0 0;
 }
 body.nineties-theme {
-  --body-font: 'Courier New', Courier, monospace;
-  --body-color: #000;
-  --body-bg-color: #c0c0c0;
-  --body-bg: none;
-  --body-opacity: 1;
-
-  --text-color: #000;
-  --text-color-alt: #333;
-  --h3-color: #000;
-  --h2-color: #000;
-  --default-muted: #555;
-
-  --bg-color: #d4d0c8;
-  --bg-color-alt: #e0e0e0;
-  --bg-color-alt2: #bfbfbf;
-  --bg-color-alt3: #a0a0a0;
-
-  --accent-color: #000080;
-  --accent-alt: #800000;
-
-  --border-width: 2px;
-  --border-style: outset;
-  --border-color: #fff;
-  --border: var(--border-width) var(--border-style) var(--border-color);
-
-  --glow-color: transparent;
-  --shadow-color: #888;
-
-  /* Button Styles */
-  --button-text-color: #000;
-  --button-bg-color: #d4d0c8;
-  --button-padding: 6px 12px;
-  --button-margin: 4px;
-  --button-hover-text-color: #000;
-  --button-hover-bg-color: #c0c0c0;
-  --button-border-color: #808080;
-  --button-border-style: outset;
-  --button-border-width: 2px;
-  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
-  --button-border-radius: 0;
-  --button-text-shadow: none;
-
-  /* Input Styles */
-  --input-font-size: 14px;
-  --input-font-weight: normal;
-  --input-text-align: left;
-  --input-padding: 4px 8px;
-  --input-margin: 4px;
-  --input-color: #000;
-  --input-bg-color: #ffffff;
-  --input-bg: none;
-  --input-opacity: 1;
-  --input-border-width: 2px;
-  --input-border-color: #808080;
-  --input-border-style: inset;
-  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
-  --input-border-radius: 0;
-  --select-margin: auto 12px 0 0;
+--body-font: 'Courier New', Courier, monospace;
+    --body-color: #000;
+    --body-bg-color: #c0c0c0;
+    --body-bg: none;
+    --body-opacity: 1;
+    --text-color: #000;
+    --text-color-alt: #333;
+    --h3-color: #000;
+    --h2-color: #000;
+    --default-muted: #555;
+    --bg-color: #d4d0c8;
+    --bg-color-alt: #e0e0e0;
+    --bg-color-alt2: #bfbfbf;
+    --bg-color-alt3: #4b4b4c;
+    --accent-color: #000080;
+    --accent-alt: #800000;
+    --border-width: 2px;
+    --border-style: outset;
+    --border-color: #fff;
+    --border: var(--border-width) var(--border-style) #2e2c2cba;
+    --glow-color: transparent;
+    --shadow-color: #888;
+    --button-text-color: #000;
+    --button-bg-color: #d4d0c8;
+    --button-padding: 6px 12px;
+    --button-margin: 4px;
+    --button-hover-text-color: #000;
+    --button-hover-bg-color: #c0c0c0;
+    --button-border-color: #808080;
+    --button-border-style: outset;
+    --button-border-width: 2px;
+    --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+    --button-border-radius: 0;
+    --button-text-shadow: none;
+    --input-font-size: 14px;
+    --input-font-weight: normal;
+    --input-text-align: left;
+    --input-padding: 4px 8px;
+    --input-margin: 4px;
+    --input-color: #000;
+    --input-bg-color: #ffffff;
+    --input-bg: none;
+    --input-opacity: 1;
+    --input-border-width: 2px;
+    --input-border-color: #808080;
+    --input-border-style: inset;
+    --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+    --input-border-radius: 0;
+    --select-margin: auto 12px 0 0;
 }
 /* =====================
    Lo-fi Chill Theme
