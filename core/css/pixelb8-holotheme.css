@@ -673,41 +673,41 @@ body.wastelandterminal-theme {
 }
 body.business-theme {
   --body-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  --body-color: #1a1a1a;
-  --body-bg-color: #f4f6f9;
-  --body-bg: linear-gradient(135deg, #ffffff, #e7ecf3);
+  --body-color: #e4e6eb;
+  --body-bg-color: #1c1f27;
+  --body-bg: linear-gradient(135deg, #2b2f38, #1e222d);
   --body-opacity: 1;
 
-  --text-color: #2a2a2a;
-  --text-color-alt: #555;
-  --h3-color: #2b3e50;
-  --h2-color: #1f2937;
-  --default-muted: #8a99a9;
+  --text-color: #d1d6e0;
+  --text-color-alt: #b0b7c0;
+  --h3-color: #a1aab7;
+  --h2-color: #f1f5f9;
+  --default-muted: #6e737f;
 
-  --bg-color: #ffffff;
-  --bg-color-alt: #f0f4f8;
-  --bg-color-alt2: linear-gradient(145deg, #f6f8fa, #dfe6ed);
-  --bg-color-alt3: linear-gradient(135deg, #e2e8f0, #d5dce4);
+  --bg-color: #2a2d37;
+  --bg-color-alt: #353b48;
+  --bg-color-alt2: linear-gradient(145deg, #313742, #2a2f3c);
+  --bg-color-alt3: linear-gradient(135deg, #1f242a, #282e36);
 
-  --accent-color: #0077cc;
-  --accent-alt: #3399ff;
+  --accent-color: #28a745;
+  --accent-alt: #68e3b9;
 
   --border-width: 1px;
   --border-style: solid;
-  --border-color: #ccd6dd;
+  --border-color: #3c4453;
   --border: var(--border-width) var(--border-style) var(--border-color);
 
-  --glow-color: rgba(0, 119, 204, 0.2);
-  --shadow-color: rgba(0, 0, 0, 0.05);
+  --glow-color: rgba(40, 167, 69, 0.3);
+  --shadow-color: rgba(0, 0, 0, 0.2);
 
   /* Button Styles */
-  --button-text-color: #ffffff;
-  --button-bg-color: #0077cc;
+  --button-text-color: #f1f5f9;
+  --button-bg-color: #28a745;
   --button-padding: 10px;
   --button-margin: 8px 0;
   --button-hover-text-color: #ffffff;
-  --button-hover-bg-color: #005fa3;
-  --button-border-color: #0077cc;
+  --button-hover-bg-color: #218838;
+  --button-border-color: #28a745;
   --button-border-style: solid;
   --button-border-width: 1px;
   --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
@@ -720,12 +720,12 @@ body.business-theme {
   --input-text-align: left;
   --input-padding: 8px 12px;
   --input-margin: 6px 0;
-  --input-color: #1f2937;
-  --input-bg-color: #ffffff;
+  --input-color: #d1d6e0;
+  --input-bg-color: #2a2f3b;
   --input-bg: none;
   --input-opacity: 1;
   --input-border-width: 1px;
-  --input-border-color: #ccd6dd;
+  --input-border-color: #3c4453;
   --input-border-style: solid;
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
   --input-border-radius: 4px;
