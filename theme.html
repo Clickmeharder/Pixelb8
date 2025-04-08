@@ -110,7 +110,7 @@ Other Fun:
 		-->
 		<div class="controller" id="theme-controller">
 			<button class="close-btn">×</button><h2 class="controllerheader">Theme Controller</h2>
-			<div class="controlpanel">
+			<div class="controlpanel" id="theme-controlpanel">
 				<div id="controls" id="theme-controls">
 					<div class="" id="themeButtWrap">
 						<button class="Butt themeselect" id="light-themeButt" title="light">🌞</button>
@@ -141,7 +141,7 @@ Other Fun:
 		</div>
 		<div class="controller" id="comfy-controller">
 			<button class="close-btn">×</button><h2 class="controllerheader">Get Comfy</h2>
-			<div class="controlpanel">
+			<div class="controlpanel" id="">
 				<div class="controls">
 					<input class="a" type="text" name="yourTextName" id="twitchname" placeholder="Enter Your Twitch Streamer Name">
 					<button class="a" id="streamersButt">Connect</button>
@@ -335,7 +335,7 @@ _____________________________  -->
 		if (saved) setTheme(saved);
 	  });
 
-  const controller = document.getElementById("theme-controller");
+  const controller = document.getElementById("theme-controlpanel");
   const messagebox = document.getElementById("exampleMessagebox");
 
   controller.addEventListener("click", () => {
