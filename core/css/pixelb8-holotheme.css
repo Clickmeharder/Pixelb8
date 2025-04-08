@@ -1333,7 +1333,7 @@ select.b {}
 		display: block;
 		width:300px;
 		text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
-		border: 3px outset var(--border-color);
+		border: var(--border);
 		border-radius:var(--border-radius);
 	}
 		.controlpanel {
