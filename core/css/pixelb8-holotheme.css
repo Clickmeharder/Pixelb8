@@ -1341,11 +1341,11 @@ select.b {}
 			height: 3%;
 			overflow-y: scroll;
 		}
-		#theme-controller .controlpanel {padding: 2px;height:200px;max-height: 200px;}
+		#theme-controller .controlpanel {padding: 2px;height:150px;max-height: 150px;}
 		#theme-controller .controlpanel:hover {
-			max-height: 250px;
+			max-height: 150px;
 			padding: 2px;
-			height: 200px;
+			height: 150px;
 			overflow-y: scroll;
 		}
 		.controlpanel label {
