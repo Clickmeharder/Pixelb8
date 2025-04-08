@@ -1127,9 +1127,9 @@ textarea:focus {
 	#Bubble .widgetcontrols{
 		color: var(--bubblebutt-color);
 		position: absolute;
-		width: 36px;
-		height: 36px;
-		font-size: 20px;
+		width: 42px;
+		height: 42px;
+		font-size: 24px;
 		text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
 		box-shadow: var(--box-glow);
 		opacity: 0;
