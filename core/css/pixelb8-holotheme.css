@@ -1222,7 +1222,7 @@ button.a {
 		}
 button.b {}
 button.c {}
-.close-btn{height: 32px;width: 32px;outline:2px inset var(--bg-color-alt3);}
+.close-btn{height: 32px;width: 32px;outline:2px inset var(--bg-color-alt3);border-width:3px;}
 .close-btn:hover{
 	background: red;
 	border:black;
