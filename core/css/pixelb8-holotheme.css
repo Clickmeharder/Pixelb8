@@ -160,7 +160,10 @@ body.custom-theme {
   --glow-color: rgba(255, 128, 200, 0.5);
   
   --button-text-color:#444;
+  --button-text-shadow:var(--accent-color);
   --button-bg-color:var(--bg-color-alt3);
+  --button-margin:3px;
+  --button-padding:3px;
   --button-border-color:var(--border-color);
   --button-border: var(--border-width) var(--border-style) var(--border-color);
   --button-border-radius:var(--border-radius);
