@@ -784,7 +784,7 @@ body.nineties-theme {
 /* =====================
    Lo-fi Chill Theme
    ===================== */
-body.poop-theme {
+body.lofi-theme {
   --body-font: 'Courier New', monospace;
   --body-color: #fbeacc;
   --body-bg-color: #2c1e16;
@@ -1127,9 +1127,9 @@ textarea:focus {
 	#Bubble .widgetcontrols{
 		color: var(--bubblebutt-color);
 		position: absolute;
-		width: 64px;
-		height: 64px;
-		font-size: 28px;
+		width: 36px;
+		height: 36px;
+		font-size: 20px;
 		text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
 		box-shadow: var(--box-glow);
 		opacity: 0;
@@ -1169,7 +1169,11 @@ textarea:focus {
 		#entrivia-Butt:hover  { transform: translate(  0px, -60px) scale(1); }
 		#theme-Butt:hover     { transform: translate( 30px, -52px) scale(1); }
 		#settings-Butt:hover  { transform: translate( 38px, -22px) scale(1); }
-
+	.Butt.themeselect{
+		font-size:20px;
+		width:32;
+		height:32;
+	}
 		h3 {
 			color: #e54513;
 			text-align: center;
