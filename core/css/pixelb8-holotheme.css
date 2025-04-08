@@ -491,7 +491,66 @@ body.holo-theme {
   --twitchchat-opacity:1.0;
   --twitchmessage-opacity:0.85;
 }
+body.synthwave-theme {
+  --body-font: 'Press Start 2P', monospace;
+  --body-color: #f5f5f5;
+  --body-bg-color: #1a0033;
+  --body-bg: linear-gradient(135deg, #1a0033, #330066);
+  --body-opacity: 1;
 
+  --text-color: #f5f5f5;
+  --text-color-alt: #ff66cc;
+  --h3-color: #ff66cc;
+  --h2-color: #00ffff;
+  --default-muted: #aa88cc;
+
+  --bg-color: #220044;
+  --bg-color-alt: #2a0055;
+  --bg-color-alt2: #3a0077;
+  --bg-color-alt3: #4a0099;
+
+  --accent-color: #ff00cc;
+  --accent-alt: #00ffff;
+
+  --border-width: 2px;
+  --border-style: dashed;
+  --border-color: #ff66cc;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+
+  --glow-color: rgba(255, 0, 204, 0.5);
+  --shadow-color: rgba(0, 255, 255, 0.2);
+
+  /* Button Styles */
+  --button-text-color: #ffffff;
+  --button-bg-color: #ff00cc;
+  --button-padding: 12px;
+  --button-margin: 6px 0;
+  --button-hover-text-color: #0ff;
+  --button-hover-bg-color: #330066;
+  --button-border-color: #00ffff;
+  --button-border-style: solid;
+  --button-border-width: 2px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 8px;
+  --button-text-shadow: 0 0 5px #ff00cc, 0 0 10px #00ffff;
+
+  /* Input Styles */
+  --input-font-size: 14px;
+  --input-font-weight: 700;
+  --input-text-align: center;
+  --input-padding: 10px;
+  --input-margin: 6px;
+  --input-color: #ffccff;
+  --input-bg-color: #2a0055;
+  --input-bg: ;
+  --input-opacity: 1;
+  --input-border-width: 2px;
+  --input-border-color: #ff00cc;
+  --input-border-style: dotted;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 4px;
+  --select-margin: auto 12px 0 0;
+}
 
 /*----------------------*/
 /*      The Body        */
