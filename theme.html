@@ -298,7 +298,79 @@ Other Fun:
 			</div>
 		</div>
 		<div class="controller" id="unused-controller"><button class="close-btn">×</button>unused</div>
-
+		<!--
+		Enrivia Wrapper 
+		-->
+		<div id="entriviaOverlay" style="">
+			<!-- Wrapper for the entrivia Splash Animation -->
+			<div id="entriviaSplash" style="display:none;">
+				<div id="logoContainer">
+					<!-- <img src="../assets/images/logo/pixelbotfavicon.png" alt="entrivia Logo" id="entriviaLogo" /> -->
+					<img src="/assets/images/jaedrazepfp.png" alt="entrivia Logo" id="entriviaLogo" />
+				</div>
+				<div id="susText">S.u.Stv Presents:</div>
+				<div id="splashText">entrivia Universe</div>
+			</div>
+			<!-- entriviaAnnouncementWrapper -->
+			<div id="entriviaAnnouncementWrapper">
+				<div id="entriviaAnnouncement"></div>
+				<div id="roundstarttimer"></div>
+			</div>
+			<!-- add user entrivia rank and rank badges: rank1🥇 rank2🥈 rank3🥉 rank4🏅 rank5-10?🎖️-->
+			<div id="consoleMessagebox"></div>
+			<div id="entriviaWrapper">
+				<div id="entriviaPodium" style="display: none;">
+					<div id="first">
+						<span class="trophy gold">🏆1st</span>
+						<div class="winner" id="winner1">
+							<p id="winner1Score" class="winner-score">score: 0</p>
+							<p id="winner1Name" class="winner-name">Undefined</p>
+						</div>
+					</div>
+					<div id="secondandthirdplace">
+						<div id="second">
+							<span class="trophy silver">🥈2nd</span>
+							<div class="winner" id="winner2">
+								<p id="winner2Score" class="winner-score">score: 0</p>
+								<p id="winner2Name" class="winner-name">Undefined69</p>
+							</div>
+						</div>
+						<div id="third">
+							<span class="trophy bronze">🥉3rd</span>
+							<div class="winner" id="winner3">
+								<p id="winner3Score" class="winner-score">score: 0</p>
+								<p id="winner3Name" class="winner-name">undefined420</p>
+							</div>
+						</div>
+					</div>
+					<!-- 4th and 5th place winners (smaller) -->
+					<div id="entriviarunnerups">
+						<div class="winner small" id="winner4">
+							<span class="runnerup ribbon">🏅4th</span>
+							<p id="winner4Name" class="winner-name">undetermined</p>
+							<p id="winner4Score" class="winner-score">score: 0</p>
+						</div>
+						<div class="winner small" id="winner5">
+							<span class="runnerup medal">🎖️5th</span>
+							<p id="winner5Name" class="winner-name">mrsuperlongnameguy476</p>
+							<p id="winner5Score" class="winner-score">score: 0</p>
+						</div>
+					</div>
+				</div>
+				<!-- time until next question -->
+				<div id="timeuntil-nextQ"></div>
+				<!-- entrivia questions wrapper -->
+				<div id="questionWrapper">
+					<p id="question-counter"></p>
+					<div id="question">...</div>
+					<div id="timer"></div>
+				</div>
+				<!-- entrivia leaderboard -->
+				<ul id="entriviaboard">
+					<p>entrivia</p>
+				</ul>
+			</div>
+		</div>
 		<!--this is the underlay its mostly for aesthetics and sits behind everything else it might be a border or different animated elements -->
 		<div id="pageborder"></div>
 <!--------------------->
