@@ -109,15 +109,17 @@ body.retro-theme {
   --h2-color: #00ffcc;
   --default-muted: #888888;
 
-  --bg-color: linear-gradient(145deg, #1a1a1a, #2b2b2b);;
+  --bg-color: linear-gradient(145deg, #1a1a1a, #2b2b2b);
   --bg-color-alt: #252525;
   --bg-color-alt2: linear-gradient(135deg, #222222, #444444);
   --bg-color-alt3: linear-gradient(135deg, #333333, #555555);
 
   --accent-color: #ff3399;
   --accent-alt: #00ccff;
-
+  --border-width:2px;
+  --border-style: outset;
   --border-color: #ff00ff80;
+  --border:var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgba(255, 0, 255, 0.35);
   --shadow-color: rgba(255, 255, 0, 0.25);
 
@@ -173,8 +175,11 @@ body.cyberice-theme {
 
   --accent-color: #6eeaff;
   --accent-alt: #aad9ff;
-
+  
+  --border-width:0px;
+  --border-style: outset;
   --border-color: #61dafbaa;
+  --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgba(100, 255, 255, 0.45);
   --shadow-color: rgba(0, 255, 255, 0.35);
 
@@ -231,7 +236,10 @@ body.neonvoid-theme {
   --accent-color: #ff22ff;
   --accent-alt: #bb55ff;
 
+  --border-width:2px;
+  --border-style: ridge;
   --border-color: #cc00ff99;
+  --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgba(255, 0, 255, 0.35);
   --shadow-color: rgba(255, 0, 200, 0.45);
 
@@ -288,7 +296,10 @@ body.biohazard-theme {
   --accent-color: #39ff14;
   --accent-alt: #76ff03;
 
+  --border-width:1px;
+  --border-style: solid;
   --border-color: #76ff0333;
+  --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgba(119, 255, 68, 0.5);
   --shadow-color: rgba(180, 255, 160, 0.35);
 
@@ -344,6 +355,7 @@ body.holo-theme {
   --bg-color-alt3: linear-gradient(135deg, #001f1fe8, #004040eb);/*was entrivia controlpanel bg color*/
   --accent-color:;
   --accent-alt: ;
+  
   --border-width: 0px;
   --border-style: ridge;
   --border-color: #14889fbf;
