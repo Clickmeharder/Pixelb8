@@ -606,6 +606,7 @@ body.bubblegumpop-theme {
     --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
     --input-border-radius: 8px;
   --select-margin: auto 12px 0 0;
+  --chat-text-shadow: 1px 1px 1px #000000eb;
 }
 
 body.wastelandterminal-theme {
@@ -668,7 +669,9 @@ body.wastelandterminal-theme {
   --input-border-style: solid;
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
   --input-border-radius: 2px;
+  
   --select-margin: auto 12px 0 0;
+  --chat-text-shadow: ;
 }
 body.business-theme {
   --body-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -1434,7 +1437,7 @@ select.b {}
 		opacity:var(--twitchchat-opacity);
 	}
 	div#twitchMessagebox, div#exampleMessagebox {text-align: left;border:;max-height: 170px;}
-	#twitchMessagebox .chatMessage,#exampleMessagebox .exampleMessage {text-shadow: 1px 1px 1px #000000eb;transition: opacity 1s ease-out;  /* Apply the fade transition */}
+	#twitchMessagebox .chatMessage,#exampleMessagebox .exampleMessage {text-shadow: var(--chat-text-shadow);transition: opacity 1s ease-out;  /* Apply the fade transition */}
 	#username {font-weight:bold;}
 	.chatMessage, .exampleMessage {
 		font-size: 18px;
