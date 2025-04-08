@@ -390,7 +390,7 @@ body {
     opacity: var(--body-opacity);
 }
 /* Buttons */
-button,
+button.a,
 input[type="button"],
 input[type="submit"] {
   background: var(--button-bg-color);
@@ -406,7 +406,7 @@ input[type="submit"] {
   transition: all 0.2s ease-in-out;
 }
 
-button:hover,
+button.a:hover,
 input[type="button"]:hover,
 input[type="submit"]:hover {
   background: var(--button-hover-bg-color);
