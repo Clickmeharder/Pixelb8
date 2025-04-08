@@ -578,6 +578,7 @@ body.bubblegumpop-theme {
   --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgba(255, 182, 193, 0.5);
   --shadow-color: rgba(255, 105, 180, 0.2);
+  
   --button-text-color: #097ec3;
   --button-font-weight:bold;
   --button-bg-color: #ff95b3;
@@ -1209,6 +1210,7 @@ textarea:focus {
 
 
 button.a {
+	font-weight:var(--button-font-weight);
 	width: 100%;
 	padding: var(--button-padding);
 	margin: var(--button-margin);
