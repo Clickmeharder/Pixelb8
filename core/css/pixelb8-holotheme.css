@@ -803,6 +803,7 @@ textarea:focus {
 	#bubblewrap {}
 	#thePixelButt{}
 	.widgetcontrols{}
+
 	#Bubble{}
 	#Bubble .Butt{}
 	button.Butt{}
@@ -895,6 +896,10 @@ textarea:focus {
 	/* On bubble open */
 	#Bubble.active .widgetcontrols {
 		opacity:var(--bubblebutt-opacity);
+	}
+	button.Butt:active {
+		transform: scale(0.95);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) inset;
 	}
 	#Bubble .widgetcontrols:hover {
 		opacity: 0.75;
