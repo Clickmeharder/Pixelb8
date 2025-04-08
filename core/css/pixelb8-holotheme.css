@@ -1069,11 +1069,12 @@ textarea:focus {
 /*----------------------*/
 /* Wrap around PixelButt so bubble buttons are relative */
 
-.themed, .chatMessage, .exampleMessage, .panel, .controller, #Bubble .Butt {
+.themed, .chatMessage, .exampleMessage, .panel, .controller, #Bubble .Butt, .close-btn {
 	background:var(--bg-color);
 	border:var(--border);
 	border-radius:var(--border-radius);
 	box-shadow: var(--box-glow);
+	transition: all 0.3s ease;
 }
 .themed, .panel, .controller {
 	opacity:var(--controlbox-opacity);
@@ -1221,7 +1222,26 @@ button.a {
 		}
 button.b {}
 button.c {}
+.close-btn{outline:2px inset var(--bg-color-alt3);}
+.close-btn:hover{
+	background: red;
+	border:black;
+	border-radius:var(--border-radius);
+	box-shadow: var(--box-glow);
+	transition: all 0.3s ease;
+	}
+.close-btn:hover {
+  box-shadow: 0 0 20px 5px rgba(255, 0, 0, 0.6); /* Red glowing shadow */
+  outline: 2px inset #ff0000; /* Red outline on hover */
+}
 
+.close-btn:active {
+  background-color: #cc0000; /* Darker red when pressed */
+  box-shadow: 0 0 15px 3px rgba(255, 0, 0, 0.4); /* Less intense shadow when clicked */
+  border-style:inset;
+  outline: 2px solid #cc0000; /* Matching darker outline on press */
+  transform: translateY(4px); /* Moves the button down to create a "pressed" effect */
+}
 button#cancelGame {
 	font-size: 15px;
 	font-weight:bold;
