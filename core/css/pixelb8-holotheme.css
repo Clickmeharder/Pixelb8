@@ -561,30 +561,24 @@ body.bubblegumpop-theme {
   --body-bg: linear-gradient(145deg, #ffe6f0, #fffafc);
   --body-opacity: 1;
 
-  --text-color: #ff69b4;
-  --text-color-alt: #ffa7c4;
+  --text-color: #097ec3;
+  --text-color-alt: #16aacf;
   --h3-color: #ff70a6;
   --h2-color: #ff95b3;
   --default-muted: #b0839f;
-
   --bg-color: #e28cb2e3;
   --bg-color-alt: #ffe6f0;
   --bg-color-alt2: #ffcce0;
   --bg-color-alt3: #ffd9ec;
-
   --accent-color: #ff80bf;
   --accent-alt: #ffb6c1;
-
   --border-width: 2px;
   --border-style: solid;
   --border-color: #ffb6c1;
   --border: var(--border-width) var(--border-style) var(--border-color);
-
   --glow-color: rgba(255, 182, 193, 0.5);
   --shadow-color: rgba(255, 105, 180, 0.2);
-
-  /* Button Styles */
-  --button-text-color: #fff;
+  --button-text-color: #097ec3;
   --button-bg-color: #ff95b3;
   --button-padding: 10px;
   --button-margin: 5px;
@@ -614,6 +608,7 @@ body.bubblegumpop-theme {
   --input-border-radius: 8px;
   --select-margin: auto 12px 0 0;
 }
+
 body.wastelandterminal-theme {
   --body-font: 'Share Tech Mono', monospace;
   --body-color: #9effa5;
