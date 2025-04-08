@@ -24,51 +24,125 @@ Pixelb8-holotheme.css
 }
 /* 🌙 DARK THEME */
 body.dark-theme {
-  --body-font: 'Segoe UI', sans-serif;
-  --body-color:#f0f0f0;
-  --body-bg-color:;
-  --body-bg:;
-  --body-opacity:;
-  --text-color: #f0f0f0;
-  --bg-color: #121212;
-  --bg-alt-color: #1e1e1e;
-  --accent-color: #00ccff;
-  --accent-alt: #ff00ff;
-  --border-width: 1px;
-  --border-style: solid;
-  --border-color: #333;
-  --border: var(--border-width) var(--border-style) var(--border-color);
-  --border-radius: 8px;
-  --shadow-color: rgba(0, 204, 255, 0.6);
-  --box-shadow: 0 0 10px var(--shadow-color);
-  --glow-color: rgba(0, 204, 255, 0.4);
-  --console-bg: rgba(20, 20, 20, 0.7);
+  --body-font: 'Orbitron', sans-serif;
+  --body-color: #cddbe3;
+  --body-bg-color: #0b0f14;
+  --body-bg: linear-gradient(135deg, #0b0f14, #1a1f25);
   --body-opacity: 1;
-  --cursor-image: ;
+
+  --text-color: #b0c9d2;
+  --text-color-alt: #8fa8b5;
+  --h3-color: #00ccff;
+  --h2-color: #00aaff;
+  --default-muted: #6c7b89;
+
+  --bg-color: #1a1f25;
+  --bg-color-alt: #242c34;
+  --bg-color-alt2: #1f2a33;
+  --bg-color-alt3: #1a252e;
+
+  --accent-color: #33eaff;
+  --accent-alt: #66ffff;
+
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: #4cd0ff;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+
+  --glow-color: rgba(51, 255, 255, 0.3);
+  --shadow-color: rgba(0, 255, 255, 0.2);
+
+  /* Button Styles */
+  --button-text-color: #33eaff;
+  --button-bg-color: #112733;
+  --button-padding: 10px;
+  --button-margin: 4px 0;
+  --button-hover-text-color: #0edfff;
+  --button-hover-bg-color: #1c3b49;
+  --button-border-color: #33eaff;
+  --button-border-style: outset;
+  --button-border-width: 2px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 10px;
+  --button-text-shadow: 1px 1px 4px rgba(0, 255, 255, 0.4);
+
+  /* Input Styles */
+  --input-font-size: 16px;
+  --input-font-weight: 500;
+  --input-text-align: center;
+  --input-padding: 6px;
+  --input-margin: 4px 0;
+  --input-color: #33ff77;
+  --input-bg-color: #1d1f23;
+  --input-bg: ;
+  --input-opacity: 1;
+  --input-border-width: 2px;
+  --input-border-color: #33eaff88;
+  --input-border-style: inset;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 6px;
+  --select-margin: auto 12px 0 0;
 }
 /* 🌞 LIGHT THEME (extra bright) */
 body.light-theme {
-  --body-font: Verdana, sans-serif;
-  --body-color:#202020;
-  --body-bg-color:;
-  --body-bg:;
-  --body-opacity:;
-  --text-color: #202020;
-  --bg-color: #fefefe;
-  --bg-alt-color: #e0e0e0;
-  --accent-color: #3c8dbc;
-  --accent-alt: #5bc0de;
-  --border-width: 3px;
-  --border-style: dotted;
-  --border-color: #ddd;
-  --border: var(--border-width) var(--border-style) var(--border-color);
-  --border-radius: 5px;
-  --shadow-color: rgba(0, 0, 0, 0.15);
-  --box-shadow: 0px 0px 10px var(--shadow-color);
-  --glow-color: rgba(60, 140, 188, 0.4);
-  --console-bg: rgba(255, 255, 255, 0.85);
+  --body-font: 'Segoe UI', sans-serif;
+  --body-color: #222;
+  --body-bg-color: #f9f9f9;
+  --body-bg: linear-gradient(135deg, #ffffff, #e9f0f6);
   --body-opacity: 1;
-  --cursor-image: ;
+
+  --text-color: #333;
+  --text-color-alt: #555;
+  --h3-color: #0066cc;
+  --h2-color: #004d99;
+  --default-muted: #888;
+
+  --bg-color: #ffffff;
+  --bg-color-alt: #f0f4f8;
+  --bg-color-alt2: #e0e7ef;
+  --bg-color-alt3: #d5dee8;
+
+  --accent-color: #007acc;
+  --accent-alt: #3399ff;
+
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: #ccc;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+
+  --glow-color: rgba(0, 120, 255, 0.2);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+
+  /* Button Styles */
+  --button-text-color: #ffffff;
+  --button-bg-color: #007acc;
+  --button-padding: 10px;
+  --button-margin: 4px 0;
+  --button-hover-text-color: #ffffff;
+  --button-hover-bg-color: #005fa3;
+  --button-border-color: #005fa3;
+  --button-border-style: solid;
+  --button-border-width: 2px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 6px;
+  --button-text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+
+  /* Input Styles */
+  --input-font-size: 16px;
+  --input-font-weight: 400;
+  --input-text-align: left;
+  --input-padding: 8px;
+  --input-margin: 5px 0;
+  --input-color: #222;
+  --input-bg-color: #ffffff;
+  --input-bg: ;
+  --input-opacity: 1;
+  --input-border-width: 2px;
+  --input-border-color: #ccc;
+  --input-border-style: solid;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 5px;
+  --select-margin: auto 12px 0 0;
 }
 /* 🎨 CUSTOM THEME (pastel play) */
 body.custom-theme {
