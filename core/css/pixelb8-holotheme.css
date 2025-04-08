@@ -1344,8 +1344,7 @@ select.b {}
 			text-shadow: 0px 0px 4px rgb(153 70 12 / 92%);
 		}
 		.controlpanel input, .controlpanel select, select#questionList {
-			color: #cbcbcb;
-			background-color: #25292ef7;
+
 		}
 		.controlpanel input {
 			font-size: 16px;
