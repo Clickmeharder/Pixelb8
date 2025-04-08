@@ -781,6 +781,185 @@ body.nineties-theme {
   --input-border-radius: 0;
   --select-margin: auto 12px 0 0;
 }
+/* =====================
+   Lo-fi Chill Theme
+   ===================== */
+body.lofi-theme {
+  --body-font: 'Courier New', monospace;
+  --body-color: #fbeacc;
+  --body-bg-color: #2c1e16;
+  --body-bg: linear-gradient(to bottom, #3d2b1f, #2c1e16);
+  --body-opacity: 1;
+
+  --text-color: #f2d7b6;
+  --text-color-alt: #eec9a2;
+  --h3-color: #eeb38a;
+  --h2-color: #d6976c;
+  --default-muted: #aa927c;
+
+  --bg-color: #3d2b1f;
+  --bg-color-alt: #4a3324;
+  --bg-color-alt2: #2c1e16;
+  --bg-color-alt3: #21160f;
+
+  --accent-color: #c57b57;
+  --accent-alt: #b26645;
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: #bfa48a;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+  --glow-color: rgba(255, 215, 172, 0.3);
+  --shadow-color: rgba(94, 73, 56, 0.4);
+
+  --button-text-color: #fbeacc;
+  --button-bg-color: #5a3c2f;
+  --button-padding: 10px;
+  --button-margin: 4px 0;
+  --button-hover-text-color: #2c1e16;
+  --button-hover-bg-color: #d6976c;
+  --button-border-color: #bfa48a;
+  --button-border-style: solid;
+  --button-border-width: 2px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 6px;
+  --button-text-shadow: 1px 1px 1px #00000055;
+
+  --input-font-size: medium;
+  --input-font-weight: normal;
+  --input-text-align: center;
+  --input-padding: 6px;
+  --input-margin: 5px;
+  --input-color: #eacfb8;
+  --input-bg-color: #3d2b1f;
+  --input-bg: none;
+  --input-opacity: 1;
+  --input-border-width: 2px;
+  --input-border-color: #aa927c;
+  --input-border-style: solid;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 4px;
+  --select-margin: auto 10px 0 0;
+}
+
+/* =====================
+   Game HUD Style Theme
+   ===================== */
+body.hud-theme {
+  --body-font: 'Orbitron', sans-serif;
+  --body-color: #00ffff;
+  --body-bg-color: #000000;
+  --body-bg: radial-gradient(circle, #000000, #0a0a0a);
+  --body-opacity: 1;
+
+  --text-color: #00ffff;
+  --text-color-alt: #88e0e0;
+  --h3-color: #36f7f7;
+  --h2-color: #53ffff;
+  --default-muted: #406666;
+
+  --bg-color: #0f0f0f;
+  --bg-color-alt: #1b1f24;
+  --bg-color-alt2: #14191d;
+  --bg-color-alt3: #0a0e11;
+
+  --accent-color: #00ffe1;
+  --accent-alt: #53fff5;
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: #00ffff88;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+  --glow-color: rgba(0, 255, 255, 0.4);
+  --shadow-color: rgba(0, 255, 255, 0.2);
+
+  --button-text-color: #00ffff;
+  --button-bg-color: #101820;
+  --button-padding: 10px;
+  --button-margin: 4px 0;
+  --button-hover-text-color: #000000;
+  --button-hover-bg-color: #00ffff;
+  --button-border-color: #00ffffaa;
+  --button-border-style: solid;
+  --button-border-width: 2px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 8px;
+  --button-text-shadow: 1px 1px 4px #00ffff55;
+
+  --input-font-size: medium;
+  --input-font-weight: bold;
+  --input-text-align: center;
+  --input-padding: 6px;
+  --input-margin: 4px;
+  --input-color: #00ffff;
+  --input-bg-color: #11181e;
+  --input-bg: none;
+  --input-opacity: 1;
+  --input-border-width: 2px;
+  --input-border-color: #00ffff99;
+  --input-border-style: solid;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 4px;
+  --select-margin: auto 10px 0 0;
+}
+
+/* =====================
+   Fantasy Scroll Theme
+   ===================== */
+body.scroll-theme {
+  --body-font: 'Uncial Antiqua', cursive;
+  --body-color: #3c2915;
+  --body-bg-color: #f2e6c9;
+  --body-bg: linear-gradient(to bottom, #f2e6c9, #e8d4b8);
+  --body-opacity: 1;
+
+  --text-color: #2e1c0f;
+  --text-color-alt: #5e3e21;
+  --h3-color: #9c6b34;
+  --h2-color: #a77840;
+  --default-muted: #7f6750;
+
+  --bg-color: #f2e6c9;
+  --bg-color-alt: #e8d4b8;
+  --bg-color-alt2: #d6c2a9;
+  --bg-color-alt3: #cbbca2;
+
+  --accent-color: #c98c3f;
+  --accent-alt: #b1792e;
+  --border-width: 3px;
+  --border-style: double;
+  --border-color: #b57d42;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+  --glow-color: rgba(180, 122, 50, 0.2);
+  --shadow-color: rgba(90, 65, 40, 0.3);
+
+  --button-text-color: #2e1c0f;
+  --button-bg-color: #d6b37f;
+  --button-padding: 8px;
+  --button-margin: 6px;
+  --button-hover-text-color: #fff;
+  --button-hover-bg-color: #a77840;
+  --button-border-color: #b1792e;
+  --button-border-style: solid;
+  --button-border-width: 2px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 10px;
+  --button-text-shadow: 1px 1px 2px #c4a575;
+
+  --input-font-size: large;
+  --input-font-weight: normal;
+  --input-text-align: center;
+  --input-padding: 6px;
+  --input-margin: 6px;
+  --input-color: #3c2915;
+  --input-bg-color: #f0e0c1;
+  --input-bg: none;
+  --input-opacity: 1;
+  --input-border-width: 2px;
+  --input-border-color: #b1792e;
+  --input-border-style: solid;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 5px;
+  --select-margin: auto 10px 0 0;
+}
 /*----------------------*/
 /*      The Body        */
 /*----------------------*/
