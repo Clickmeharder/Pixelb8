@@ -289,7 +289,7 @@ body.neonvoid-theme {
   --body-bg: radial-gradient(circle, #1a0026 0%, #000000 100%);
   --body-opacity: 1;
 
-  --text-color: #ff79ff;
+  --text-color: #6c12eb;
   --text-color-alt: #da66ff;
   --h3-color: #f013b3;
   --h2-color: #ff22e2;
@@ -312,7 +312,7 @@ body.neonvoid-theme {
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 
   /* Button Styles */
-  --button-text-color: #12ebeb;
+  --button-text-color: #baabbc;
   --button-bg-color: #240040e3;
   --button-padding: 9px;
   --button-margin: 3px 0;
