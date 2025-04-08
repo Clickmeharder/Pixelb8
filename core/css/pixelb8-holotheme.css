@@ -1223,18 +1223,10 @@ button.a {
 button.b {}
 button.c {}
 .close-btn{height: 32px;width: 32px;outline:2px inset var(--bg-color-alt3);border-width:3px;}
-.close-btn:hover{
-	background: red;
-	border:black;
-	border-radius:var(--border-radius);
-	box-shadow: var(--box-glow);
-	transition: all 0.3s ease;
-	}
 .close-btn:hover {
   box-shadow: 0 0 20px 5px rgba(255, 0, 0, 0.6); /* Red glowing shadow */
   outline: 2px inset #ff0000; /* Red outline on hover */
 }
-
 .close-btn:active {
   background-color: #cc0000; /* Darker red when pressed */
   box-shadow: 0 0 15px 3px rgba(255, 0, 0, 0.4); /* Less intense shadow when clicked */
