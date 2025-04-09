@@ -1633,7 +1633,7 @@ ul#broadcastercommandlist {
 			margin: -6px 0 0px 0;
 			text-align: center;
 			padding: 4px 9px;
-			background: var(--body-bg);
+			background: var(--bg-color);
 			border: var(--border);
 			border-radius: var(--border-radius);
 			color: var(--text-color);
