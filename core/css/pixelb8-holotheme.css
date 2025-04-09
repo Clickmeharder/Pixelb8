@@ -1620,6 +1620,7 @@ ul#broadcastercommandlist {
 			margin:0;
 		}
 		#entriviaboard p {
+			color:var(--text-color);
 			background: var(--bg-color);
 			width: 155px;
 			padding: 4px;
