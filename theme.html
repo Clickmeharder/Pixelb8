@@ -419,18 +419,10 @@ _____________________________  -->
 		if (saved) setTheme(saved);
 	  });
 
-const showthemeExamplesSwitch = document.getElementById("showthemeExamples"); // your new switch checkbox
-showthemeExamplesSwitch.addEventListener("change", function () {
-  const examplemessagebox = document.getElementById("exampleMessagebox");
-  const examplepanelwrapper = document.getElementById("examplepanelwrapper");
-  if (this.checked) {
-    examplemessagebox.style.display = "block";
-    examplepanelwrapper.style.display = "block";
-  } else {
-    examplemessagebox.style.display = "none";
-    examplepanelwrapper.style.display = "none";
-  }
-});
+const examplemessagebox = document.getElementById("exampleMessagebox");
+const examplepanelwrapper = document.getElementById("examplepanelwrapper");
+
+
   </script>
   		<!-- simulate background script -->
 	<script>
@@ -481,6 +473,36 @@ showthemeExamplesSwitch.addEventListener("change", function () {
 				}, 500); // Matches animation duration
 			}
 		}
+		
+		function showElement(element, animationType = "fade") {
+		  if (!element) return;
+		  element.style.visibility = "visible";
+		  element.classList.add("active");
+		  element.style.animation = animationType === "slide"
+			? "slideIn 0.8s ease-out forwards"
+			: "fadeIn 0.8s ease-out forwards";
+		}
+
+		function hideElement(element, animationType = "fade") {
+		  if (!element) return;
+		  element.style.animation = animationType === "slide"
+			? "slideOut 0.5s ease-in forwards"
+			: "fadeOut 0.5s ease-in forwards";
+		  setTimeout(() => {
+			element.classList.remove("active");
+			element.style.visibility = "hidden";
+		  }, 500); // Matches animation duration
+		}
+
+		showthemeExamplesSwitch.addEventListener("change", function () {
+		  if (this.checked) {
+			showElement(examplemessagebox, "fade");
+			showElement(examplepanelwrapper, "fade");
+		  } else {
+			hideElement(examplemessagebox, "fade");
+			hideElement(examplepanelwrapper, "fade");
+		  }
+		});
 		document.querySelectorAll(".close-btn").forEach(btn => {
 		  btn.addEventListener("click", () => {
 			const parent = btn.parentElement;
