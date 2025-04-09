@@ -1598,7 +1598,7 @@ ul#broadcastercommandlist {
 			font-weight: bold;
 			text-align: center;
 			color: var(--text-color);
-			text-shadow: var(--shadow-color);
+			text-shadow: var(--chat-text-shadow);
 		}
 
 		#currententriviaRound {
