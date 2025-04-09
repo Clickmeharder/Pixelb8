@@ -251,28 +251,6 @@ function fetchentriviaQuestions() {
         });
     });
 }
-addCustomentriviaQuestion(
-  "round1",
-  "Name something you might wear on your feet.",
-  ["Shoes", "Sandals", "Boots", "Socks"],
-  "Clothing",
-  "singlechoice"
-);
-addCustomentriviaQuestion(
-  "round2", // round
-  "What is the capital of Germany?", // question
-  "Berlin", // correct answer (single)
-  "Geography", // category
-  "multiplechoice", // type
-  ["Berlin", "Munich", "Frankfurt", "Hamburg"] // options
-);
-addCustomentriviaQuestion( 
-  "round2",
-  "What is the capital of Italy?",
-  "Rome",
-  "Geography",
-  "singlechoice"
-);
 
 function addCustomentriviaQuestion(round, questionText, correctAnswer, category, type = 'singlechoice', options = []) {
     let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
@@ -424,6 +402,29 @@ function clearAllCustomQuestions() {
     localStorage.removeItem("customentriviaQuestions");
     console.log("✅ All custom entrivia questions have been deleted.");
 }
+clearAllCustomQuestions();
+addCustomentriviaQuestion(
+  "round1",
+  "Name something you might wear on your feet.",
+  ["Shoes", "Sandals", "Boots", "Socks"],
+  "beauty",
+  "singlechoice"
+);
+addCustomentriviaQuestion(
+  "round2", // round
+  "What is the capital of Germany?", // question
+  "Berlin", // correct answer (single)
+  "misc", // category
+  "multiplechoice", // type
+  ["Berlin", "Munich", "Frankfurt", "Hamburg"] // options
+);
+addCustomentriviaQuestion( 
+  "round2",
+  "What is the capital of Italy?",
+  "Rome",
+  "misc",
+  "singlechoice"
+);
 
 // Clear existing questions
 // uncomment these two commands to clear all custom questions:
