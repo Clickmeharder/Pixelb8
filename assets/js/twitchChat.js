@@ -200,8 +200,6 @@ function toggleChatAudioSetting() {
 }
 
 
-const root = document.documentElement;
-
 
 //end of chat logic --------------------|
 // ComfyJS onChat event handler
