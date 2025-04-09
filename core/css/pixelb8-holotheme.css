@@ -5,12 +5,12 @@ Pixelb8-holotheme.css
 */
 :root {
 	
-  --twichChat-Y:;
-  --twitchChat-X:;
-  --entriviaAnnouncement-Y:;
-  --entriviaAnnouncement-X:;
-  --entriviaQuestion-Y:;
-  --entriviaQuestion-X:;
+  --twichchat-Y:30%;
+  --twitchchat-X:0%;
+  --entriviaAnnouncement-Y:71%;
+  --entriviaAnnouncement-X:2px;
+  --entriviaQuestion-Y:71%;
+  --entriviaQuestion-X:2px;
 
   --body-font: Arial, sans-serif;
   --bg-color: #f0f0f0;
@@ -1453,8 +1453,8 @@ select.b {}
 	}
 	#twitchChat {
 		position: absolute;
-		left: 0;
-		bottom: 30%;
+		left: var(--twitchchat-X);
+		bottom: var(--twichchat-Y);
 		width: 30%;
 		opacity:var(--twitchchat-opacity);
 		overflow:visible;
@@ -1594,8 +1594,8 @@ ul#broadcastercommandlist {
 			display: none;
 			opacity: 1;
 			position: absolute;
-			top: 71%;
-			left: 2px;
+			top: var(--entriviaAnnouncement-Y);
+			left:  var(--entriviaAnnouncement-X);
 			width: 25%;
 			max-width: 25%;
 			text-align: center;
@@ -1607,8 +1607,8 @@ ul#broadcastercommandlist {
 		}
 		#questionWrapper {
 			position: absolute;
-			top: 71%;
-			left: 2px;
+			top: var(--entriviaQuestion-Y);
+			left: var(--entriviaQuestion-X);
 			width: 25%;
 			max-width: 25%;
 			text-align: center;
