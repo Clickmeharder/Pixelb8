@@ -33,6 +33,7 @@ body.dark-theme {
   --text-color-alt: #8fa8b5;
   --h3-color: #00ccff;
   --h2-color: #00aaff;
+  --question-color:var(--text-color-alt);
   --default-muted: #6c7b89;
   --bg-color: #1a1f25d4;
   --bg-color-alt: #242c3400;
@@ -88,6 +89,7 @@ body.light-theme {
   --text-color-alt: #555;
   --h3-color: #0066cc;
   --h2-color: #004d99;
+  --question-color:var(--text-color-alt);
   --default-muted: #888;
 
   --bg-color: #ffffff78;
@@ -144,6 +146,7 @@ body.custom-theme {
   --body-bg:;
   --body-opacity:;
   --text-color: #333;
+  --question-color:var(--text-color);
   --bg-color: #ffeefc70;
   --bg-color-alt: #ffe3f16b;
   --bg-color-alt2: #ff85c1;
@@ -244,6 +247,7 @@ body.cyberice-theme {
   --text-color-alt: #6ae9ff;
   --h3-color: #00e0ff;
   --h2-color: #00baff;
+  --question-color:var(--text-color-alt);
   --default-muted: #748ca4;
   --bg-color: linear-gradient(145deg, #0d1b2a, #1b263b);
   --bg-color-alt: #1e3a4c;
@@ -304,6 +308,7 @@ body.neonvoid-theme {
   --text-color-alt: #da66ff;
   --h3-color: #f013b3;
   --h2-color: #ff22e2;
+  --question-color:var(--text-color-alt);
   --default-muted: #55375e;
   --bg-color: linear-gradient(145deg, #24002ed4, #000010e0);
   --bg-color-alt: #2a103d78;
@@ -364,6 +369,7 @@ body.biohazard-theme {
   --text-color-alt: #1fff1f;
   --h3-color: #aaff00;
   --h2-color: #b2ff00;
+  --question-color:var(--text-color-alt);
   --default-muted: #4a5c4a;
   --bg-color: linear-gradient(135deg, #061306ad, #132513ad);
   --bg-color-alt: #112011ad;
@@ -425,6 +431,7 @@ body.holo-theme {
   --text-color-alt:#00fff9;
   --h3-color:#e54513;
   --h2-color:;
+  --question-color:#fa8b0af0;
   --default-muted: #666f6f;
   --bg-color: linear-gradient(135deg, #001f1fed, #004040de);/*main bg color  linear-gradient(113deg, #001f1f, #004040)*/
   --bg-color-alt: #07141bc7;/*Secondary bg color - used for panel interior divs with important buttons etc*/
@@ -505,6 +512,7 @@ body.synthwave-theme {
   --text-color-alt: #ff66cc;
   --h3-color: #ff66cc;
   --h2-color: #00ffff;
+  --question-color:var(--text-color-alt);
   --default-muted: #aa88cc;
 
   --bg-color: #220044;
@@ -555,7 +563,7 @@ body.synthwave-theme {
   --select-margin: auto 12px 0 0;
 }
 body.bubblegumpop-theme {
---body-font: 'Comic Neue', cursive;
+    --body-font: 'Comic Neue', cursive;
     --body-color: #d4d6d8de;
     --body-bg-color: #fff0f5;
     --body-bg: linear-gradient(145deg, #ffe6f0, #fffafc);
@@ -564,6 +572,7 @@ body.bubblegumpop-theme {
     --text-color-alt: #ca42d8;
     --h3-color: #ff70a6;
     --h2-color: #ff95b3;
+	--question-color:var(--text-color-alt);
     --default-muted: #b0839f;
     --bg-color: #d04c9f94;
     --bg-color-alt: #00317ec7;
@@ -620,6 +629,7 @@ body.wastelandterminal-theme {
   --text-color-alt: #58ff99;
   --h3-color: #c6ffdd;
   --h2-color: #9effa5;
+  --question-color:var(--text-color-alt);
   --default-muted: #4a6b4f;
 
   --bg-color: #0f1a0f;
@@ -684,6 +694,7 @@ body.business-theme {
   --text-color-alt: #b0b7c0;
   --h3-color: #a1aab7;
   --h2-color: #f1f5f9;
+  --question-color:var(--text-color-alt);
   --default-muted: #6e737f;
 
   --bg-color: #2a2d37;
@@ -741,6 +752,7 @@ body.nineties-theme {
     --text-color-alt: #333;
     --h3-color: #000;
     --h2-color: #000;
+	--question-color:var(--text-color-alt);
     --default-muted: #555;
     --bg-color: #d4d0c8;
     --bg-color-alt: #807e7ef5;
@@ -794,6 +806,7 @@ body.poop-theme {
   --text-color-alt: #eec9a2;
   --h3-color: #eeb38a;
   --h2-color: #d6976c;
+  --question-color:var(--text-color-alt);
   --default-muted: #aa927c;
 
   --bg-color: #3d2b1f;
@@ -850,6 +863,7 @@ body.hud-theme {
   --text-color-alt: #88e0e0;
   --h3-color: #36f7f7;
   --h2-color: #53ffff;
+  --question-color:var(--text-color-alt);
   --default-muted: #406666;
 
   --bg-color: #0f0f0f;
@@ -906,6 +920,7 @@ body.scroll-theme {
   --text-color-alt: #5e3e21;
   --h3-color: #9c6b34;
   --h2-color: #a77840;
+  --question-color:var(--text-color-alt);
   --default-muted: #7f6750;
 
   --bg-color: #f2e6c9;
@@ -1597,7 +1612,7 @@ ul#broadcastercommandlist {
 		#question {
 			font-weight: bold;
 			text-align: center;
-			color: var(--text-color);
+			color: var(--question-color);
 			text-shadow: var(--chat-text-shadow);
 		}
 
