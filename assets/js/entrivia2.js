@@ -697,12 +697,35 @@ function getRandomQuestionCurrentRound(round = null, category = null, type = nul
     let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
     usedQuestions.push(question); // Mark this question as used
 
+    // Validate question fields before returning
+    if (!question.question || !question.answer || !question.type) {
+        console.error("❌ Invalid question format:", question);
+        return {
+            question: "Invalid question format.",
+            answer: "???",
+            type: "singlechoice"
+        };
+    }
+
+    // For multiple choice questions, validate the answer and options arrays
+    if (question.type === "multiplechoice") {
+        if (!Array.isArray(question.answer) || question.answer.length === 0 || !Array.isArray(question.options)) {
+            console.error("❌ Invalid multiple choice question:", question);
+            return {
+                question: "Broken multiple choice question.",
+                answer: [],
+                type: "multiplechoice",
+                options: []
+            };
+        }
+    }
+
     // Return the question in the updated format (with type and options if applicable)
-	console.log("🧠 Random question chosen:", question);
+    console.log("🧠 Random question chosen:", question);
     return {
         question: question.question,
         answer: question.answer,
-        type: question.type, // 'singlechoice' or 'multiplechoice'
+        type: question.type,
         options: question.options || [] // Options are only relevant for multiple choice
     };
 }
