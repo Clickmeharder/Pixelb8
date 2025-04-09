@@ -206,9 +206,9 @@ const sliders = [
   { id: "twitchchatY", unit: "%", variable: "--twichchat-Y" },
   { id: "twitchchatX", unit: "%", variable: "--twitchchat-X" },
   { id: "entriviaAnnouncementY", unit: "%", variable: "--entriviaAnnouncement-Y" },
-  { id: "entriviaAnnouncementX", unit: "px", variable: "--entriviaAnnouncement-X" },
+  { id: "entriviaAnnouncementX", unit: "%", variable: "--entriviaAnnouncement-X" },
   { id: "entriviaQuestionY", unit: "%", variable: "--entriviaQuestion-Y" },
-  { id: "entriviaQuestionX", unit: "px", variable: "--entriviaQuestion-X" },
+  { id: "entriviaQuestionX", unit: "%", variable: "--entriviaQuestion-X" },
 ];
 
 sliders.forEach(({ id, unit, variable }) => {
