@@ -1,7 +1,7 @@
 const root = document.documentElement;
 
 const sliders = [
-  { id: "twitchY", unit: "%", variable: "--twitch-Y", min: 0, max: 100 },
+  { id: "twitchchat-Y", unit: "%", variable: "--twitchchat-Y", min: 0, max: 100 },
   { id: "twitchchatX", unit: "%", variable: "--twitchchat-X", min: 0, max: 100 },
   { id: "entriviaAnnouncementY", unit: "%", variable: "--entriviaAnnouncement-Y", min: 0, max: 100 },
   { id: "entriviaAnnouncementX", unit: "%", variable: "--entriviaAnnouncement-X", min: 0, max: 100 },
@@ -75,7 +75,7 @@ function setTheme(themeName, saveLayout = true) {
     "--entriviaQuestion-X": getComputedStyle(document.documentElement).getPropertyValue("--entriviaQuestion-X"),
     "--entriviaAnnouncement-Y": getComputedStyle(document.documentElement).getPropertyValue("--entriviaAnnouncement-Y"),
     "--entriviaAnnouncement-X": getComputedStyle(document.documentElement).getPropertyValue("--entriviaAnnouncement-X"),
-    "--twitchY": getComputedStyle(document.documentElement).getPropertyValue("--twitch-Y"),
+    "--twitchchat-Y": getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-Y"),
     "--twitchchat-X": getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-X"),
   } : {};
 
@@ -105,4 +105,4 @@ window.addEventListener("DOMContentLoaded", () => {
     console.log("Loaded saved theme settings:", savedSettings);
   }
 });
-/* localStorage.removeItem("themeSettings"); */
+localStorage.removeItem("themeSettings");
