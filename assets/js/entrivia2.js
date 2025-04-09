@@ -175,7 +175,7 @@ function toggleconsolemessages() {
 //----------------------------
 function fetchentriviaQuestions() {
     return new Promise((resolve, reject) => {
-        const questionsUrl = '/assets/data/eu-data/questions.csv';  // Path to your CSV file
+        const questionsUrl = '/assets/data/eu-data/questions2.csv';  // Path to your CSV file
         let defaultQuestions = { round1: {}, round2: {} };
         let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
 
@@ -395,6 +395,7 @@ function clearAllCustomQuestions() {
     localStorage.removeItem("customentriviaQuestions");
     console.log("✅ All custom entrivia questions have been deleted.");
 }
+clearAllCustomQuestions();
 // Clear existing questions
 // uncomment these two commands to clear all custom questions:
 //clearAllCustomQuestions();
