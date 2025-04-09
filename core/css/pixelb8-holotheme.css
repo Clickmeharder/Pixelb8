@@ -1563,7 +1563,7 @@ ul#broadcastercommandlist {
 			padding: 15px 20px;
 			background: var(--body-bg);
 			border: var(--border);
-			border-radius: 12px;
+			border-radius: ;
 			box-shadow: var(--glow-color);
 		}
 		#entriviaAnnouncement {
@@ -1579,14 +1579,14 @@ ul#broadcastercommandlist {
 			text-align: center;
 			padding: 15px 20px;
 			background: ;
-			border: 3px solid teal;
-			border-radius: 12px;
+			border: ;
+			border-radius: ;
 			box-shadow: ;
 		}
 		#question {
 			font-weight: bold;
 			text-align: center;
-			color: white;
+			color: var(--text-color);
 			text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.5);
 		}
 
@@ -1594,7 +1594,7 @@ ul#broadcastercommandlist {
 			position: fixed;
 			top:4px;
 			left: 4px;
-			border 2px outset teal
+			border: var(--border);
 			border-radius: 50%;
 		}
 
