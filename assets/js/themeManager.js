@@ -1,4 +1,4 @@
-const root = document.documentElement;
+
 
 const sliders = [
   { id: "twitchchatY", unit: "%", variable: "--twitchchat-Y", min: 0, max: 100 },
