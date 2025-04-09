@@ -419,8 +419,7 @@ _____________________________  -->
 		if (saved) setTheme(saved);
 	  });
 
-const examplemessagebox = document.getElementById("exampleMessagebox");
-const examplepanelwrapper = document.getElementById("examplepanelwrapper");
+
 
 
   </script>
@@ -493,7 +492,9 @@ const examplepanelwrapper = document.getElementById("examplepanelwrapper");
 			element.style.visibility = "hidden";
 		  }, 500); // Matches animation duration
 		}
-
+		const showthemeExamplesSwitch = document.getElementById("showthemeExamples");
+		const examplemessagebox = document.getElementById("exampleMessagebox");
+		const examplepanelwrapper = document.getElementById("examplepanelwrapper");
 		showthemeExamplesSwitch.addEventListener("change", function () {
 		  if (this.checked) {
 			showElement(examplemessagebox, "fade");
