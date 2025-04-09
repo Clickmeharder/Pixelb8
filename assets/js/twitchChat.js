@@ -200,7 +200,27 @@ function toggleChatAudioSetting() {
 }
 
 
+const root = document.documentElement;
 
+const sliders = [
+  { id: "twitchchatY", unit: "%", variable: "--twichchat-Y" },
+  { id: "twitchchatX", unit: "%", variable: "--twitchchat-X" },
+  { id: "entriviaAnnouncementY", unit: "%", variable: "--entriviaAnnouncement-Y" },
+  { id: "entriviaAnnouncementX", unit: "px", variable: "--entriviaAnnouncement-X" },
+  { id: "entriviaQuestionY", unit: "%", variable: "--entriviaQuestion-Y" },
+  { id: "entriviaQuestionX", unit: "px", variable: "--entriviaQuestion-X" },
+];
+
+sliders.forEach(({ id, unit, variable }) => {
+  const input = document.getElementById(id);
+  const valueDisplay = document.getElementById(id + "Value");
+
+  input.addEventListener("input", () => {
+    const value = input.value + unit;
+    root.style.setProperty(variable, value);
+    valueDisplay.textContent = value;
+  });
+});
 //end of chat logic --------------------|
 // ComfyJS onChat event handler
 let streamername = "jaedraze"; // Default streamer name
