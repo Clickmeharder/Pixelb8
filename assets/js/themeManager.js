@@ -4,9 +4,9 @@ const sliders = [
   { id: "twitchchatY", unit: "%", variable: "--twitchchat-Y", min: 0, max: 100 },
   { id: "twitchchatX", unit: "%", variable: "--twitchchat-X", min: 0, max: 100 },
   { id: "entriviaAnnouncementY", unit: "%", variable: "--entriviaAnnouncement-Y", min: 0, max: 100 },
-  { id: "entriviaAnnouncementX", unit: "px", variable: "--entriviaAnnouncement-X", min: 0, max: 100 },
+  { id: "entriviaAnnouncementX", unit: "%", variable: "--entriviaAnnouncement-X", min: 0, max: 100 },
   { id: "entriviaQuestionY", unit: "%", variable: "--entriviaQuestion-Y", min: 0, max: 88 },
-  { id: "entriviaQuestionX", unit: "px", variable: "--entriviaQuestion-X", min: 0, max: 71 },
+  { id: "entriviaQuestionX", unit: "%", variable: "--entriviaQuestion-X", min: 0, max: 71 },
 ];
 
 // Slider handling
