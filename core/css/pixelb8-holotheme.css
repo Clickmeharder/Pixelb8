@@ -1637,8 +1637,8 @@ ul#broadcastercommandlist {
 			border: var(--border);
 			border-radius: var(--border-radius);
 			color: var(--text-color);
-			text-shadow: var(--shadow-color);
-			box-shadow: var(--box-color);
+			text-shadow: var(--chat-text-shadow);
+			box-shadow: var(--glow-color);
 		}
 		#timer, #timeuntil-nextQ {font-size: 20px;font-weight: bold;color: var(--text-color-alt);}
 		div#timeuntil-nextQ {position: absolute;bottom: 24%;left: 2%;}
