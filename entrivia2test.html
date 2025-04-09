@@ -1,0 +1,562 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test</title>
+	<link rel="icon" type="image/png" href="/assets/images/logo/pixelbotfavicon.png">
+	<link rel="stylesheet" href="/core/css/animations.css">
+	<link rel="stylesheet" href="/core/css/pixelb8-holotheme.css">
+	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@1,700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <style>
+
+    </style>
+	<style>
+		<!-- new testing css-->
+	.options {
+		margin-top: 10px;
+	}
+
+	.option {
+		padding: 10px;
+		background-color: #f1f1f1;
+		border: 1px solid #ddd;
+		margin-bottom: 5px;
+		cursor: pointer;
+	}
+
+	</style>
+	<style>
+
+
+	</style>
+	<body>
+		<!-- The PixelButt is the main button everything is normally hidden by default.
+		click the pixelButt and it opens a bubble containing buttons that will widgets or controls or information boxes etc.
+		-->
+		<div id="bubblewrap">
+			<button class="Butt" id="thePixelButt">Ᵽ</i></button>
+			<div id="Bubble">
+				<!-- 🔌 🎮 🖥️🔧📝 🎨 🖼️-->
+				<button class="Butt widgetcontrols" id="comfy-Butt"><i class="fab fa-twitch"></i></button><!-- 💬🔌 🎮 🖥️🔧📝 🎨 🖼️-->
+				<button class="Butt widgetcontrols" id="wheel-Butt"><i class="fa-regular fa-life-ring"></i></button>
+				<button class="Butt widgetcontrols" id="entrivia-Butt">Ｅ</button>
+				<button class="Butt widgetcontrols" id="theme-Butt"><i class="fas fa-palette"></i></button> 
+				<button class="Butt widgetcontrols" id="settings-Butt">⚙</button>
+			</div>
+		</div>
+		<!--  if console messages are enabled. they are displayed inside console. 
+		console itself is a box that contains messages
+		-->
+		<div  id="console"></div>
+		<!--this is the container for messages from twitch -->
+		<div id="twitchChat">
+			<div id="exampleMessagebox" style="display: none;">
+				<div class="exampleMessage"><span class="username" style="color: rgb(255, 105, 180);">JaeDraze: </span><span class="twitchmessage">find best viewers at ************.com</span></div>
+				<div class="exampleMessage"><span class="username" style="color: red;">cooldude420: </span><span class="twitchmessage">I just farted</span></div>
+				<div class="exampleMessage"><span class="username" style="color:;">boobs6969: </span><span class="twitchmessage">lol wow!</span></div>
+				<div class="exampleMessage"><span class="username" style="color:;">hankhilllover: </span><span class="twitchmessage">I sell propane and propane accesories</span></div>
+			</div>
+			<div id="twitchMessagebox">
+			</div>
+			
+		</div>
+
+		<div id="entriviaCmdContainer">
+			<div id="entriviaMessagebox">
+			</div>
+		</div>
+		<!-- this is the announcements panel. it can contain text or text and a timer or other elements -->
+		<div class="panel" id="Announcements" style="display:none;">
+			<div class="announcement" id="announcement-panel-message"></div>
+			<div class="announcement timer" id="announcement-panel-timer"></div>
+		</div>
+		<div class="panel" id="entriviapanel" style="display:none;">
+			<div class="message" id="entrivia-panel-message"></div>
+			<div class="Panel-timer" id="entrivia-panel-timer"></div>
+		</div>
+		<div class="spinwheel" id="wheelWrapper" style="display:none;">
+			<div class="" id="spinwheel-result"></div>
+			<div class="" id="spinwheel-canvas-wrapper">
+				<canvas id="spinwheel-Canvas"></canvas>
+			</div>
+		</div>
+		<!-- these are containers for controls or settigns or info related to different widgets -->
+		<!--
+		theme switcher (new)
+		-->
+		<div class="controller" id="theme-controller">
+			<button class="close-btn">×</button><h2 class="controllerheader">Theme Controller</h2>
+			<div class="controlpanel" id="theme-controlpanel">
+				<div id="controls" id="theme-controls">
+					<div class="" id="themeButtWrap">
+						<button class="Butt themeselect" id="light-themeButt" title="light">🌞</button>
+						<button class="Butt themeselect" id="dark-themeButt" title="dark">🌙</button>
+						<button class="Butt themeselect" id="business-themeButt" title="Business">💼</button>
+						<button class="Butt themeselect" id="retro-themeButt" title="retro">🕹️</button>
+						<button class="Butt themeselect" id="synthwave-themeButt" title="Synthwave">🕶️</button>
+						<button class="Butt themeselect" id="wastelandterminal-themeButt" title="Wasteland Terminal">🧪</button>
+						<button class="Butt themeselect" id="biohazard-themeButt" title="Biohazard">☣️</button>
+						<button class="Butt themeselect" id="neonvoid-themeButt" title="Neonvoid">🟪</button>
+						<button class="Butt themeselect" id="nineties-themeButt" title="nineties">🔳</button>
+						<button class="Butt themeselect" id="scroll-themeButt" title="scroll">🧾</button>
+						<button class="Butt themeselect" id="bubblegumpop-themeButt" title="BubbleGum Pop">🧁</button>
+						<button class="Butt themeselect" id="custom-themeButt" title="custom">🐇</button>
+						<button class="Butt themeselect" id="poop-themeButt" title="poop">💩</button>
+						<button class="Butt themeselect" id="cyberice-themeButt" title="Cyber">🧊</button>
+						<button class="Butt themeselect" id="hud-themeButt" title="hud">🟦</button>
+						<button class="Butt themeselect" id="holo-themeButt" title="Holo">💠</button>
+					</div>
+					<div class="" id="posSliders">
+						<div>
+						  <label>Twitch Chat Y:
+							<input type="range" id="twitchchatY" min="0" max="75" value="0">
+							<span id="twitchchatYValue">0%</span>
+						  </label>
+						</div>
+						<div>
+						  <label>Twitch Chat X:
+							<input type="range" id="twitchchatX" min="0" max="70" value="0">
+							<span id="twitchchatXValue">0%</span>
+						  </label>
+						</div>
+						<div>
+						  <label>Entrivia Announcement Y:
+							<input type="range" id="entriviaAnnouncementY" min="0" max="100" value="71">
+							<span id="entriviaAnnouncementYValue">71%</span>
+						  </label>
+						</div>
+						<div>
+						  <label>Entrivia Announcement X:
+							<input type="range" id="entriviaAnnouncementX" min="0" max="100" value="2">
+							<span id="entriviaAnnouncementXValue">2px</span>
+						  </label>
+						</div>
+						<div>
+						  <label>Entrivia Question Y:
+							<input type="range" id="entriviaQuestionY" min="0" max="88" value="71">
+							<span id="entriviaQuestionYValue">71%</span>
+						  </label>
+						</div>
+						<div>
+						  <label>Entrivia Question X:
+							<input type="range" id="entriviaQuestionX" min="0" max="71" value="2">
+							<span id="entriviaQuestionXValue">2px</span>
+						  </label>
+						</div>
+					</div>
+					<br>
+					<div class="switchbox" id="switch-box">
+						toggle background
+						<label class="switch">
+						<input type="checkbox" id="simulatebackground">
+						<span class="slider"></span>
+						</label>
+					</div>
+					<div class="switchbox" id="switch-box">
+						Show example panels
+						<label class="switch">
+						<input type="checkbox" id="showthemeExamples">
+						<span class="slider"></span>
+						</label>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="controller" id="comfy-controller">
+			<button class="close-btn">×</button><h2 class="controllerheader">Get Comfy</h2>
+			<div class="controlpanel" id="">
+				<div class="controls">
+					<input class="a" type="text" name="yourTextName" id="twitchname" placeholder="Enter Your Twitch Streamer Name">
+					<button class="a" id="streamersButt">Connect</button>
+					<button class="a" id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
+				</div>
+				<div id="more-controls" style="">
+				</div>
+			</div>
+			<div class="controlpanel" id="comfy-settings">
+			</div>
+		</div>		
+		<div class="controller" id="wheel-controller">
+		<button class="close-btn">×</button><h2 class="controllerheader">Spin Wheel Controls</h2>
+			<div class="controlpanel">
+				<div class="controls"id="wheel-piedish">
+				  <!-- Remove Section -->
+				  <div class="row" for="removewheelsection">
+					<select class="a" id="removewheelsection"></select>
+					<button class="a Butt remove" id="wheel-removesectionButt"><i class="fas fa-times"></i> Remove </button>
+				  </div>
+				  <!-- Add Section -->
+				  <div class="row" for="addwheelsection">
+					<input class="a" type="text" id="addwheelsection" placeholder="New section name" />
+					<button class="a Butt add" id="wheel-addsectionButt"><i class="fas fa-plus"></i> Add Slice</button>
+				  </div>
+				  <!-- save Section -->
+				  <div class="row" for="savewheelsections">
+					<input class="a" type="text" id="savewheelsections" placeholder="Name your wheel" />
+					<button class="a Butt save" id="save-sectionsButt">save wheel</button>
+				  </div>
+				  <!-- Load Section -->
+				  <div class="row" for="loadwheelsections">
+					<select class="a" id="loadwheelsection"></select>
+					<button class="a Butt load" id="load-sectionsButt">Load Wheel</button>
+					<button class="a Butt delete" id="delete-saved-wheel">Delete Wheel</button>
+				  </div>
+				</div>
+			</div>
+		</div>
+		<div class="controller" id="settings-controller">
+			<button class="close-btn">×</button><h2 class="controllerheader">Settings</h2>
+			<div class="controlpanel">
+				<div class="controls" id="main-settings-controls">
+
+				</div>
+			</div>
+		</div>
+		<div class="controller" id="entrivia-controller">
+			<button class="close-btn">×</button>
+			<div id="entrivia-settings-headergroup">
+				<h2 class="controllerheader" style="">Entrivia</h2>
+			</div>
+			<div class="controlpanel" id="entrivia-settings">
+				<div class="controls" id="entrivia-controls">
+					<div class="entriviasettings-input inputRow" id="entrivia-bar-settingsbutts">
+						<button class="a" id="cancelGame">Abort Game</button>
+						<button class="a" id="startGame">Start Game</button>
+					</div>
+				</div>
+					<h3>entrivia Settings</h3>
+				<div class="controls" id="entrivia-settings-toggles">
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="usedefaultquestions"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-defaultquestions"></div>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="usecustomquestions"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-customquestions"></div>
+				</div>
+				<div class="controls" id="addCustomQuestionForm">
+					<h3>Add a Custom entrivia Question</h3>
+					<div class="twitchcmd-info" data-option="!entrivia-addquestion"></div>
+					<div class="inputRow" id="">
+						<label for="round">Round:</label>
+						<select class="a" id="round">
+							<option value="round1">Round 1</option>
+							<option value="round2">Round 2</option>
+						</select>
+					</div>
+					<div class="inputRow" id="">
+						<label for="entriviacategory">Category:</label>
+						<select class="a" id="entriviacategory">
+							<option value="Mining">mining</option>
+							<option value="hunting">hunting</option>
+							<option value="crafting">crafting</option>
+							<option value="history">history</option>
+							<option value="beauty">beauty</option>
+							<option value="economy">economy</option>
+							<option value="social">social</option>
+							<option value="misc">Miscelaneous</option>
+						</select>
+					</div>
+					<div class="inputRow" id="">
+						<input class="a" type="text" id="questionText" placeholder="Enter your question here" required>
+					</div>
+					<div class="inputRow" id="">
+						<input class="a" type="text" id="correctAnswer" placeholder="Enter the correct answer" required>
+					</div>
+						<button class="a add" id="submitQuestionBtn">Add Question</button>
+				</div>
+				<br>
+				<div class="controls" id="manageCustomQuestions">
+					<h3>Manage Custom entrivia Questions</h3>
+					<label for="questionList">Select Question to Delete:</label>
+					<select class="a" id="questionList"></select>
+					<div id="answerDisplay" style="margin-top: 10px;">
+						<strong>Round:</strong> <span id="roundText">-</span><br>
+						<strong>Answer:</strong> <span id="answerText">Select a question to see the answer.</span>
+					</div>
+					<button class="a remove" id="deleteQuestionBtn">Delete Selected Question</button>
+				</div>
+				<div class="controls" id="entrivia-settings-main">
+					<h3>Main entrivia Settings</h3>
+					<div class="entriviasettings-input inputRow" id="entrivia-bar-Questiondelay">
+						<label for="timeBetweenQuestions">Seconds Between Questions:</label>
+						<input class="a" type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
+					</div>
+					<div class="twitchcmd-info" data-option="!entrivia-questiondelay"></div>
+					<div class="entriviasettings-input inputRow" id="entrivia-bar-Answertime">
+						<label for="timeToAnswer">Time to Answer (seconds):</label>
+						<input class="a" type="number" id="timeToAnswer" value="30" min="1" step="1">
+					</div>
+					<div class="twitchcmd-info" data-option="!entrivia-answertime"></div>
+					<div class="entriviasettings-input inputRow" id="entrivia-bar-QuestionsperRound">
+						<label for="questionsPerRound">Questions Per Round:</label>
+						<input class="a" type="number" id="questionsPerRound" value="1" min="1" step="1">	
+					</div>
+					<div class="twitchcmd-info" data-option="!entrivia-questioncap"></div>
+					<div class="entriviasettings-input inputRow" id="entrivia-bar-rounddelay">
+						<label for="timeBetweenRounds">Seconds Between Rounds:</label>
+						<input class="a" type="number" id="timeBetweenRounds" value="30" min="1" step="1">
+					</div>
+					<div class="twitchcmd-info" data-option="!entrivia-rounddelay"></div>
+					<div class="entriviasettings-input inputRow" id="entrivia-bar-settingsbutts">
+						<button class="a" id="changeSettings">Set</button>
+						<button class="a" id="resetSettings">Default</button>
+					</div>
+				</div>
+				<div id="commandListContainer">
+				  <h3>entrivia Command List</h3>
+				  <h2>User Commands</h2>
+				  <ul id="usercommandList">
+				  </ul>
+				  <h2>Broadcaster Commands</h2>
+				  <ul id="broadcastercommandList">
+				  </ul>
+				</div>
+				<div class="togglecontrols" id="entrivia-settings-toggles">
+					<h3>Dont worry bout these</h3>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="consolemessages"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-consolemessages"></div>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="entriviachatOverlay"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-disablechat"></div>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="chatanswers"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-chatanswers"></div>
+				</div>
+			</div>
+		</div>
+		<div class="controller" id="unused-controller"><button class="close-btn">×</button>unused</div>
+		<!--
+		Enrivia Wrapper 
+		-->
+		<div id="entriviaOverlay" style="">
+			<!-- Wrapper for the entrivia Splash Animation -->
+			<div id="entriviaSplash" style="display:none;">
+				<div id="logoContainer">
+					<!-- <img src="../assets/images/logo/pixelbotfavicon.png" alt="entrivia Logo" id="entriviaLogo" /> -->
+					<img src="/assets/images/jaedrazepfp.png" alt="entrivia Logo" id="entriviaLogo" />
+				</div>
+				<div id="susText">S.u.Stv Presents:</div>
+				<div id="splashText">entrivia Universe</div>
+			</div>
+			<!-- entriviaAnnouncementWrapper -->
+			<div class="panel" id="examplepanelwrapper">
+				<div id="exampleAnnouncement">Announcement text: </div>
+				<div id="exampletimer">30 seconds</div>
+			</div>
+			<div class="panel" id="entriviaAnnouncementWrapper">
+				<div id="entriviaAnnouncement"></div>
+				<div id="roundstarttimer"></div>
+			</div>
+			<!-- add user entrivia rank and rank badges: rank1🥇 rank2🥈 rank3🥉 rank4🏅 rank5-10?🎖️-->
+			<div id="consoleMessagebox"></div>
+			<div id="entriviaWrapper">
+				<div id="entriviaPodium" style="display: none; text-align:center;">
+					<div id="first">
+						<span class="trophy gold">🏆1st</span>
+						<div class="winner" id="winner1">
+							<p id="winner1Score" class="winner-score">score: 0</p>
+							<p id="winner1Name" class="winner-name">Undefined</p>
+						</div>
+					</div>
+					<div id="secondandthirdplace">
+						<div id="second">
+							<span class="trophy silver">🥈2nd</span>
+							<div class="winner" id="winner2">
+								<p id="winner2Score" class="winner-score">score: 0</p>
+								<p id="winner2Name" class="winner-name">Undefined69</p>
+							</div>
+						</div>
+						<div id="third">
+							<span class="trophy bronze">🥉3rd</span>
+							<div class="winner" id="winner3">
+								<p id="winner3Score" class="winner-score">score: 0</p>
+								<p id="winner3Name" class="winner-name">undefined420</p>
+							</div>
+						</div>
+					</div>
+					<!-- 4th and 5th place winners (smaller) -->
+					<div id="entriviarunnerups">
+						<div class="winner small" id="winner4">
+							<span class="runnerup ribbon">🏅4th</span>
+							<p id="winner4Name" class="winner-name">undetermined</p>
+							<p id="winner4Score" class="winner-score">score: 0</p>
+						</div>
+						<div class="winner small" id="winner5">
+							<span class="runnerup medal">🎖️5th</span>
+							<p id="winner5Name" class="winner-name">mrsuperlongnameguy476</p>
+							<p id="winner5Score" class="winner-score">score: 0</p>
+						</div>
+					</div>
+				</div>
+				<!-- time until next question -->
+				<div id="timeuntil-nextQ"></div>
+				<!-- entrivia questions wrapper -->
+				<div class="panel" id="questionWrapper">
+					<p id="question-counter"></p>
+					<div id="question">...</div>
+					<div id="timer"></div>
+				</div>
+				<!-- entrivia leaderboard -->
+				<ul id="entriviaboard">
+					<p>entrivia</p>
+				</ul>
+			</div>
+		</div>
+		<!--this is the underlay its mostly for aesthetics and sits behind everything else it might be a border or different animated elements -->
+		<div id="pageborder"></div>
+<!--------------------->
+<!--       End of body        
+_____________________________  -->
+	<!-- theme script -->
+  <script>
+<!-- localStorage.removeItem("theme"); -->
+
+  </script>
+  		<!-- simulate background script -->
+	<script>
+
+	  const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
+	  function setBackgroundImage(url) {
+		document.body.style.backgroundImage = `url('${url}')`;
+	  }
+	  function removeBackgroundImage() {
+		document.body.style.backgroundImage = "none";
+	  }
+	  document.getElementById("simulatebackground").addEventListener("change", function() {
+		if (this.checked) {
+		  setBackgroundImage(backgroundImageURL);
+		} else {
+		  removeBackgroundImage();
+		}
+	  });
+		<!-- toggle element script -->
+		//function to toggle element visibility
+		//example usage:
+		//toggleElement("myBox"); // Uses default "fade" animation
+		//toggleElement("myBox", "slide"); // Uses slide animation
+		//<button onclick="toggleElement('myBox')">Toggle Box</button>
+		//<button onclick="toggleElement('myBox', 'slide')">Toggle Slide Box</button>
+		function toggleElement(elementId, animationType = "fade") {
+			const element = document.getElementById(elementId);
+			if (!element) return;
+			if (element.style.visibility === "hidden" || element.style.visibility === "") {
+				// Show element with animation
+				element.style.visibility = "visible";
+				element.classList.add("active");
+				element.style.animation = animationType === "slide" ? "slideIn 0.8s ease-out forwards" : "fadeIn 0.8s ease-out forwards";
+			} else {
+				// Hide element with animation
+				element.style.animation = animationType === "slide" ? "slideOut 0.5s ease-in forwards" : "fadeOut 0.5s ease-in forwards";
+				setTimeout(() => {
+					console.log("Butt toggled" + elementId);
+					element.classList.remove("active");
+					element.style.visibility = "hidden";
+				}, 500); // Matches animation duration
+			}
+		}	
+		function showElement(element, animationType = "fade") {
+		  if (!element) return;
+		  element.style.display = "block";
+		  element.style.visibility = "visible";
+		  element.classList.add("active");
+		  element.style.animation = animationType === "slide"
+			? "slideIn 0.8s ease-out forwards"
+			: "fadeIn 0.8s ease-out forwards";
+		}
+		function hideElement(element, animationType = "fade") {
+		  if (!element) return;
+		  element.style.animation = animationType === "slide"
+			? "slideOut 0.5s ease-in forwards"
+			: "fadeOut 0.5s ease-in forwards";
+		  setTimeout(() => {
+			element.classList.remove("active");
+			element.style.display = "none";
+			element.style.visibility = "hidden";
+		  }, 500); // Matches animation duration
+		}
+
+
+		const showthemeExamplesSwitch = document.getElementById("showthemeExamples");
+		const examplemessagebox = document.getElementById("exampleMessagebox");
+		const examplepanelwrapper = document.getElementById("examplepanelwrapper");
+		showthemeExamplesSwitch.addEventListener("change", function () {
+		  if (this.checked) {
+			showElement(examplemessagebox, "fade");
+			showElement(examplepanelwrapper, "fade");
+		  } else {
+			hideElement(examplemessagebox, "fade");
+			hideElement(examplepanelwrapper, "fade");
+		  }
+		});
+		document.querySelectorAll(".close-btn").forEach(btn => {
+		  btn.addEventListener("click", () => {
+			const parent = btn.parentElement;
+			if (parent && parent.id) {
+			  toggleElement(parent.id, "fade"); // or use "slide", etc., depending on your animations
+			}
+		  });
+		});
+
+		function updateIndicatorLights() { 
+			let thesesettings = { usedefaultquestions, usecustomquestions, consolemessages, entriviachatOverlay, chatanswers, audioSetting };
+			document.querySelectorAll(".light-indicator").forEach(indicator => {
+				const optionName = indicator.getAttribute("data-option");
+				const optionValue = thesesettings[optionName]; // Get the value safely
+				
+				// Set light color based on value
+				const lightColor = (optionValue === true || optionValue === "on") 
+					? "green" 
+					: (optionValue === false || optionValue === "off") 
+						? "red" 
+						: "gray"; // Fallback color
+				indicator.style.backgroundColor = lightColor;
+
+				// Find the nearest <strong> element and change text color
+				const statusText = indicator.closest('.statusindicatorWrapper').querySelector('strong');
+				if (statusText) {
+					statusText.style.color = lightColor;  // Set the text color to green/red
+					statusText.textContent = (optionValue === true || optionValue === "on") ? "Enabled" : "Disabled";
+				}
+			});
+		}
+		<!-- main button event listeners -->
+		//enentrivia-toggle button
+		document.getElementById("thePixelButt").addEventListener("click", function () {
+			let container = document.getElementById("Bubble");
+			container.classList.toggle("active");
+			console.log("Butt clicked: thePixelButt");
+		});
+		// Adding event listener to the parent container (#Bubble)
+		document.getElementById('Bubble').addEventListener('click', function(event) {
+			// Check if the clicked element has the 'Butt' class
+			if (event.target.classList.contains('widgetcontrols')) {
+				console.log("Bubblebutt opens some widget controls");
+				// Get the ID of the clicked button
+				const buttonId = event.target.id;
+
+				// Remove 'Butt' from the buttonId and construct the corresponding controller ID
+				const controllerId = buttonId.replace('Butt', '') + 'controller';
+				console.log("Butt pressed: " + controllerId);
+				toggleElement(controllerId, 'fade');
+			}
+		});
+	</script>
+
+	<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
+	<script src="/assets/js/entrivia.js"></script>
+	<script src="/assets/js/twitchChat.js"></script>
+	<script src="/assets/js/themeManager.js"></script>
+	<script>
+		window.onload = function () {
+			loadCustomQuestions();
+			updateSettingsDisplay();
+			updateCommandlist();
+			connectStreamer();
+		};
+	</script>
+	</body>
+</html>
