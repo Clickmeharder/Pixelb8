@@ -1,7 +1,7 @@
 const root = document.documentElement;
 
 const sliders = [
-  { id: "twitchchatY", unit: "%", variable: "--twitchchat-Y", min: 0, max: 100 },
+  { id: "twitchY", unit: "%", variable: "--twitch-Y", min: 0, max: 100 },
   { id: "twitchchatX", unit: "%", variable: "--twitchchat-X", min: 0, max: 100 },
   { id: "entriviaAnnouncementY", unit: "%", variable: "--entriviaAnnouncement-Y", min: 0, max: 100 },
   { id: "entriviaAnnouncementX", unit: "%", variable: "--entriviaAnnouncement-X", min: 0, max: 100 },
@@ -75,7 +75,7 @@ function setTheme(themeName, saveLayout = true) {
     "--entriviaQuestion-X": getComputedStyle(document.documentElement).getPropertyValue("--entriviaQuestion-X"),
     "--entriviaAnnouncement-Y": getComputedStyle(document.documentElement).getPropertyValue("--entriviaAnnouncement-Y"),
     "--entriviaAnnouncement-X": getComputedStyle(document.documentElement).getPropertyValue("--entriviaAnnouncement-X"),
-    "--twitchchat-Y": getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-Y"),
+    "--twitchY": getComputedStyle(document.documentElement).getPropertyValue("--twitch-Y"),
     "--twitchchat-X": getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-X"),
   } : {};
 
