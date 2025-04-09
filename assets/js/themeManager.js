@@ -105,3 +105,4 @@ window.addEventListener("DOMContentLoaded", () => {
     console.log("Loaded saved theme settings:", savedSettings);
   }
 });
+localStorage.removeItem("themeSettings");
