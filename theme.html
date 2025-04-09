@@ -475,6 +475,7 @@ _____________________________  -->
 		
 		function showElement(element, animationType = "fade") {
 		  if (!element) return;
+		  element.style.display = "block";
 		  element.style.visibility = "visible";
 		  element.classList.add("active");
 		  element.style.animation = animationType === "slide"
@@ -489,6 +490,7 @@ _____________________________  -->
 			: "fadeOut 0.5s ease-in forwards";
 		  setTimeout(() => {
 			element.classList.remove("active");
+			element.style.display = "none";
 			element.style.visibility = "hidden";
 		  }, 500); // Matches animation duration
 		}
