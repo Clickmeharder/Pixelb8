@@ -1356,6 +1356,7 @@ select.b {}
 			height: 3%;
 			overflow-y: scroll;
 		}
+		#theme-controller {width: 385px;}
 		#theme-controller .controlpanel {padding: 2px;height:150px;max-height: 150px;}
 		#theme-controller .controlpanel:hover {
 			max-height: 150px;
