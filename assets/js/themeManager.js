@@ -28,8 +28,10 @@ const ThemeManager = {
     console.log(`[ThemeManager] Setting theme: ${themeName}`);
     // Save to localStorage
     localStorage.setItem("theme", themeName);
-    // Apply class to <html> element
-    document.documentElement.className = themeName;
+    
+    // Apply theme class to the <body> element (to control theme-related styles)
+    document.body.className = themeName; // Set theme class on the <body> tag
+    
     console.log(`[ThemeManager] Theme set to: ${themeName}`);
     console.log(`[ThemeManager] theme saved to localStorage: ${localStorage.getItem("theme")}`);
   },
@@ -42,7 +44,7 @@ const ThemeManager = {
 
   saveLayoutVariable(varName, value) {
     console.log(`[ThemeManager] Saving layout variable: ${varName} = ${value}`);
-    document.documentElement.style.setProperty(varName, value);
+    document.documentElement.style.setProperty(varName, value); // Apply positioning/layout variable to <html>
     localStorage.setItem(varName, value);
     console.log(`[ThemeManager] Layout variable saved: ${varName} = ${value}`);
   },
@@ -51,10 +53,10 @@ const ThemeManager = {
     console.log("[ThemeManager] Applying saved layout...");
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key.startsWith("--")) {
+      if (key.startsWith("--")) {  // Apply layout variables (those starting with --)
         const value = localStorage.getItem(key);
         console.log(`[ThemeManager] Applying layout variable: ${key} = ${value}`);
-        document.documentElement.style.setProperty(key, value);
+        document.documentElement.style.setProperty(key, value); // Apply to <html>
       }
     }
   },
