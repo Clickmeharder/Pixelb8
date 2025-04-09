@@ -1620,26 +1620,26 @@ ul#broadcastercommandlist {
 			margin:0;
 		}
 		#entriviaboard p {
-			background: #001f1f;
+			background: var(--bg-color);
 			width: 155px;
 			padding: 4px;
 			margin: 0px;
 			font-size: 18px;
-			border: 2px outset #095656;
-			border-radius: 0px;
+			border: var(--border);
+			border-radius: var(--border-radius);
 		}
 		#entriviaboard li {
 			margin: -6px 0 0px 0;
 			text-align: center;
 			padding: 4px 9px;
-			background: linear-gradient(135deg, #001f1ff2, #004040f0);;
-			border: 3px solid teal;
-			border-radius: 12px;
-			color: #12ebeb;
-			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
-			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+			background: var(--body-bg);
+			border: var(--border);
+			border-radius: var(--border-radius);
+			color: var(--text-color);
+			text-shadow: var(--shadow-color);
+			box-shadow: var(--box-color);
 		}
-		#timer, #timeuntil-nextQ {font-size: 20px;font-weight: bold;color: lightblue;}
+		#timer, #timeuntil-nextQ {font-size: 20px;font-weight: bold;color: var(--text-color-alt);}
 		div#timeuntil-nextQ {position: absolute;bottom: 24%;left: 2%;}
 				
 		/* entrivia Splash Centering */
@@ -1657,13 +1657,10 @@ ul#broadcastercommandlist {
 			box-sizing: border-box;
 			/*border: 5px dashed darkgrey;*/
 		}
-
-
 		/* Logo Container for Proper Scaling */
 		#logoContainer {
 			/*border: 1px dotted red;*/
 		}
-
 		/* Actual Logo Scaling */
 		#entriviaLogo {
 			height: auto;
@@ -1673,7 +1670,6 @@ ul#broadcastercommandlist {
 			transform: scale(0.5) rotate(-15deg);
 			animation: logoDropIn 2s ease-out forwards, glowPulse 3s infinite alternate 2s;
 		}
-
 		/* Splash Text Styling */
 		#splashText {
 			position: absolute;
@@ -1687,7 +1683,6 @@ ul#broadcastercommandlist {
 			opacity: 0;
 			animation: textReveal 2s ease-out 3s forwards;
 		}
-
 
 		#entriviaWrapper {height: 100vh;visibility: hidden;opacity: 0;transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;}
 
@@ -1765,8 +1760,7 @@ ul#broadcastercommandlist {
 			color: #12ebeb;
 			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
 			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
-		}
-		
+		}	
 		span.trophy.gold {
 			font-size: xx-large;
 			color: #e7a31e;
@@ -1789,8 +1783,6 @@ ul#broadcastercommandlist {
 			font-size: 22px;
 			text-shadow:-4px -1px 0 #3c3939, 1px -1px 0 #3c3939, -1px 1px 0 #3c3939, 1px 1px 0 #3c3939;
 		}
-
-
 		div#secondandthirdplace {
 			display: flex;
 			flex-direction: row;
