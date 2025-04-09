@@ -173,7 +173,6 @@ function toggleconsolemessages() {
 //Example add Question Command
 //!entrivia-addcustomquestion round1 | What number is on the side of a Sleipnir mk1 (C,L)? | 88
 //----------------------------
-
 function fetchentriviaQuestions() {
     return new Promise((resolve, reject) => {
         const questionsUrl = '/assets/data/eu-data/questions.csv';  // Path to your CSV file
@@ -253,6 +252,7 @@ function fetchentriviaQuestions() {
     });
 }
 
+
 function addCustomentriviaQuestion(round, questionText, correctAnswer, category, type = 'singlechoice', options = []) {
     let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
     if (round !== "round1" && round !== "round2") {
@@ -276,6 +276,7 @@ function addCustomentriviaQuestion(round, questionText, correctAnswer, category,
     updateAnswerDisplay();
     console.log(`✅ Added new question to ${round} [${category}]:`, newQuestion);
 }
+
 function loadCustomQuestions() {
     const customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
     const dropdown = document.getElementById('questionList');
@@ -341,7 +342,14 @@ function updateAnswerDisplay() {
     if (customQuestions[round] && customQuestions[round][category]) {
         const question = customQuestions[round][category][index];
         const answerDisplay = document.getElementById('answerDisplay');
-        answerDisplay.textContent = `Answer: ${question.answer}`;
+
+        // Show the question details
+        answerDisplay.innerHTML = `
+            <strong>Question:</strong> ${question.question} <br>
+            <strong>Answer:</strong> ${question.answer} <br>
+            <strong>Type:</strong> ${question.type} <br>
+            <strong>Options:</strong> ${question.options.join(', ')} <br>
+        `;
     }
 }
 
@@ -370,6 +378,7 @@ function deleteCustomQuestion() {
             if (customQuestions[round][category].length === 0) {
                 delete customQuestions[round][category];
             }
+
             // Save the updated custom questions to localStorage
             localStorage.setItem("customentriviaQuestions", JSON.stringify(customQuestions));
 
@@ -545,23 +554,44 @@ function entriviaNosplash() {
             });
     });
 }
-function getRandomQuestion() {
-    let currentRound = round === 1 ? "round1" : "round2";
+function getRandomQuestion(round = null, category = null, type = null) {
+    // Use the merged entriviaQuestions data from fetchentriviaQuestions
+    const currentRound = round === 1 ? "round1" : "round2";
 
-    // Ensure entriviaQuestions[currentRound] exists and is an object
-    if (!entriviaQuestions[currentRound] || typeof entriviaQuestions[currentRound] !== "object") {
+    if (!entriviaQuestions || !entriviaQuestions[currentRound]) {
         console.error(`❌ No questions found for ${currentRound}`);
         return null;
     }
 
-    // Flatten all category questions into a single array
-    let availableQuestions = Object.values(entriviaQuestions[currentRound])
-        .flat()
-        .filter(q => !usedQuestions.includes(q)); // Filter out used questions
+    let availableQuestions = [];
 
+    // If category and type are both provided, filter by round, category, and type
+    if (round && category && type) {
+        if (entriviaQuestions[currentRound][category]) {
+            availableQuestions = entriviaQuestions[currentRound][category]
+                .filter(q => q.type === type && !usedQuestions.includes(q)); // Filter by type and exclude used questions
+        }
+    }
+    // If only round and category are provided, filter by round and category
+    else if (round && category) {
+        if (entriviaQuestions[currentRound][category]) {
+            availableQuestions = entriviaQuestions[currentRound][category]
+                .filter(q => !usedQuestions.includes(q)); // Filter only by round and category
+        }
+    }
+    // If only round is provided, use all categories in the round
+    else if (round) {
+        Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
+            availableQuestions = availableQuestions.concat(categoryQuestions.filter(q => !usedQuestions.includes(q)));
+        });
+    }
+
+    // If no questions are found based on the filtering, reset the used questions and retry
     if (availableQuestions.length === 0) {
         usedQuestions = []; // Reset when all questions are used
-        availableQuestions = Object.values(entriviaQuestions[currentRound]).flat(); // Reload all questions
+        Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
+            availableQuestions = availableQuestions.concat(categoryQuestions); // Reload all questions in the round
+        });
     }
 
     if (availableQuestions.length === 0) {
@@ -571,36 +601,60 @@ function getRandomQuestion() {
 
     // Pick a random question
     let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-    usedQuestions.push(question);
-    return question;
+    usedQuestions.push(question); // Mark this question as used
+
+    // Return the question in the updated format (with type and options if applicable)
+    return {
+        question: question.question,
+        answer: question.answer,
+        type: question.type, // 'singlechoice' or 'multiplechoice'
+        options: question.options || [] // Options are only relevant for multiple choice
+    };
 }
-function getRandomQuestionFromCategory(round, category) {
-    // Ensure round is valid
-    let currentRound = (round === 1) ? "round1" : (round === 2) ? "round2" : null;
+function getRandomQuestionCurrentRound(round = null, category = null, type = null) {
+    // Determine the current round if no round is passed
+    const currentRound = round === 1 ? "round1" : round === 2 ? "round2" : (round === null ? (round === 1 ? "round1" : "round2") : null);
+
     if (!currentRound) {
         console.error("❌ Invalid round. Please specify either round 1 or round 2.");
         return null;
     }
 
-    // Ensure category exists in entriviaQuestions[currentRound]
-    if (!entriviaQuestions[currentRound] || !entriviaQuestions[currentRound][category]) {
-        console.error(`❌ No questions found for ${category} in ${currentRound}.`);
+    // Use the merged entriviaQuestions data from fetchentriviaQuestions
+    if (!entriviaQuestions || !entriviaQuestions[currentRound]) {
+        console.error(`❌ No questions found for ${currentRound}`);
         return null;
     }
 
-    // Ensure entriviaQuestions[currentRound][category] is an array
-    if (!Array.isArray(entriviaQuestions[currentRound][category])) {
-        console.error(`❌ The category ${category} in ${currentRound} does not contain an array of questions.`);
-        return null;
+    let availableQuestions = [];
+
+    // If category and type are both provided, filter by round, category, and type
+    if (category && type) {
+        if (entriviaQuestions[currentRound][category]) {
+            availableQuestions = entriviaQuestions[currentRound][category]
+                .filter(q => q.type === type && !usedQuestions.includes(q)); // Filter by type and exclude used questions
+        }
+    }
+    // If only category is provided, filter by round and category
+    else if (category) {
+        if (entriviaQuestions[currentRound][category]) {
+            availableQuestions = entriviaQuestions[currentRound][category]
+                .filter(q => !usedQuestions.includes(q)); // Filter only by round and category
+        }
+    }
+    // If no category is provided, use all categories in the round
+    else if (round) {
+        Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
+            availableQuestions = availableQuestions.concat(categoryQuestions.filter(q => !usedQuestions.includes(q)));
+        });
     }
 
-    // Filter out used questions
-    let availableQuestions = entriviaQuestions[currentRound][category].filter(q => !usedQuestions.includes(q));
-
+    // If no questions are found based on the filtering, reset the used questions and retry
     if (availableQuestions.length === 0) {
-        // Reset if all questions have been used
-        usedQuestions = [];
-        availableQuestions = entriviaQuestions[currentRound][category];
+        usedQuestions = []; // Reset when all questions are used
+        Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
+            availableQuestions = availableQuestions.concat(categoryQuestions); // Reload all questions in the round
+        });
     }
 
     if (availableQuestions.length === 0) {
@@ -610,8 +664,15 @@ function getRandomQuestionFromCategory(round, category) {
 
     // Pick a random question
     let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-    usedQuestions.push(question);
-    return question;
+    usedQuestions.push(question); // Mark this question as used
+
+    // Return the question in the updated format (with type and options if applicable)
+    return {
+        question: question.question,
+        answer: question.answer,
+        type: question.type, // 'singlechoice' or 'multiplechoice'
+        options: question.options || [] // Options are only relevant for multiple choice
+    };
 }
 
 function nextQuestion() {
@@ -619,14 +680,39 @@ function nextQuestion() {
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
     answeredUsers.clear();
     firstAnswerUser = null;
-    activeQuestion = getRandomQuestion();
+
+    // Fetch a random question based on the round and category
+    activeQuestion = getRandomQuestionCurrentRound();
     questionsAsked++;
-    updateQuestionCounter(); // Update the display
+
+    // Update the question counter (this function should be defined elsewhere)
+    updateQuestionCounter(); 
+
+    // Update the question text
     document.getElementById("question").textContent = activeQuestion.question;
+
+    // Check if the question is multiple choice
+    if (activeQuestion.type === "multiplechoice") {
+        // Create a list of options for multiple-choice questions
+        let optionsHTML = activeQuestion.options.map(option => {
+            return `<div class="option">${option}</div>`;
+        }).join("");
+
+        // Display the options
+        document.getElementById("question").innerHTML += `<div class="options">${optionsHTML}</div>`;
+    } else {
+        // For single-choice questions, ensure no options are shown
+        document.querySelector(".options")?.remove(); // Remove any previous options if they exist
+    }
+
+    // Make the question visible
     document.getElementById("questionWrapper").style.visibility = "visible";
     document.getElementById("timer").textContent = timetoAnswer;
     document.getElementById("timeuntil-nextQ").textContent = "";
-	playRandomQuestionSound();
+
+    // Play random sound for the question (this function should be defined elsewhere)
+    playRandomQuestionSound();
+
     let secondsLeft = timetoAnswer;
     questionTimer = setInterval(() => {
         secondsLeft--;
@@ -699,13 +785,26 @@ function startCountdown() {
 }
 function endQuestion() {
     clearInterval(questionTimer);
-    document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
-	document.getElementById("timer").textContent = "";
-	activeQuestion = null;
-	playSound("entriviatimesup");
+
+    // If the question is multiple choice, display all correct answers
+    if (activeQuestion.type === "multiplechoice") {
+        document.getElementById("question").textContent = "Time's up! Correct answers were: " + activeQuestion.answer.join(", ");
+    } else {
+        // For single choice, just show the single correct answer
+        document.getElementById("question").textContent = "Time's up! The correct answer was: " + activeQuestion.answer;
+    }
+
+    document.getElementById("timer").textContent = "";
+    activeQuestion = null;
+
+    // Play the "times up" sound
+    playSound("entriviatimesup");
+
+    // Hide the question and show the entrivia board after a delay
     hideQuestionTimer = setTimeout(() => {
         document.getElementById("questionWrapper").style.visibility = "hidden";
         document.getElementById("entriviaboard").style.visibility = "visible";
+
         // Check if we've asked the maximum number of questions for the round
         if (questionsAsked >= questionsPerRound) {
             // End the entrivia round if we've reached the limit
@@ -727,7 +826,7 @@ function checkAnswer(user, message) {
     if (!activeQuestion) return; // No active question, ignore answer
     if (answeredUsers.has(user)) return; // Ignore duplicate correct answers
 
-    let correctAnswer = activeQuestion.answer.toLowerCase();
+    let correctAnswers = Array.isArray(activeQuestion.answer) ? activeQuestion.answer.map(ans => ans.toLowerCase()) : [activeQuestion.answer.toLowerCase()];
     let userAnswer = message.trim().toLowerCase();
 
     // Initialize userStats[user] to prevent undefined issues
@@ -753,7 +852,7 @@ function checkAnswer(user, message) {
     }
 
     // Normal entrivia logic (multiple correct answers allowed)
-    if (userAnswer === correctAnswer) {
+    if (correctAnswers.includes(userAnswer)) {
         userStats[user].correctAnswers++;
         answeredUsers.add(user);
 
@@ -770,14 +869,15 @@ function checkAnswer(user, message) {
         updateentriviaboard();
         return true;
     } else {
-		// Normal incorrect answer logic
-		userStats[user].incorrectAnswers++;  
-		userScores[user] = (userScores[user] || 0) - 1;
-		playSound("entriviawrong");
+        // Normal incorrect answer logic
+        userStats[user].incorrectAnswers++;  
+        userScores[user] = (userScores[user] || 0) - 1;
+        playSound("entriviawrong");
 
-		return false;
-	}
+        return false;
+    }
 }
+
 
 
 //update the guestion counter
@@ -1143,69 +1243,87 @@ function showentriviaAsk() {
     timer.style.animation = "fadeIn 1s ease-in-out forwards";
     timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
 }
-function getRandomAsk() {
-	let currentRound = round === 1 ? "round1" : "round2";
-	let availableQuestions = entriviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
-	if (availableQuestions.length === 0) {
-		usedQuestions = []; // Reset when all questions are used
-		availableQuestions = [...entriviaQuestions[currentRound]];
-	}
-	let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-	usedQuestions.push(question);
-	return question;
+function getRandomAsk(type = null) {
+    let currentRound = round === 1 ? "round1" : "round2";
+    let availableQuestions = entriviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
+    
+    // Filter by type if provided
+    if (type) {
+        availableQuestions = availableQuestions.filter(q => q.type === type);
+    }
+
+    if (availableQuestions.length === 0) {
+        usedQuestions = []; // Reset when all questions are used
+        availableQuestions = [...entriviaQuestions[currentRound]];
+    }
+
+    let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+    usedQuestions.push(question);
+    return question;
 }
+
 function endAsk() {
     clearInterval(questionTimer);
-    document.getElementById("question").textContent = "Time's up! Answer was: " + activeQuestion.answer;
-	document.getElementById("timer").textContent = "";
-	activeQuestion = null;
-	singleActiveAsk = null;
-	playSound("entriviatimesup");
+    
+    // Check if the answer is an array (for multiple answers)
+    let answerText = Array.isArray(activeQuestion.answer) 
+        ? activeQuestion.answer.join(", ") // Join answers if it's an array
+        : activeQuestion.answer;          // If it's not an array, just use the single answer
+
+    // Display the correct answer(s) on the screen
+    document.getElementById("question").textContent = `Time's up! Answer was: ${answerText}`;
+    document.getElementById("timer").textContent = "";
+
+    activeQuestion = null; // Clear the active question
+    singleActiveAsk = null; // Reset the game state
+
+    // Play sound for time up
+    playSound("entriviatimesup");
+
+    // Hide the question and show the entrivia board after a timeout
     hideQuestionTimer = setTimeout(() => {
         document.getElementById("questionWrapper").style.visibility = "hidden";
         document.getElementById("entriviaboard").style.visibility = "visible";
     }, 13000); // Delay timeout of 13 seconds to wait before checking
 }
-function AskQuestion() {
+
+
+function AskQuestion(round = null, category = null, type = null) {
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
     answeredUsers.clear();
     firstAnswerUser = null;
-    activeQuestion = getRandomQuestion();
-    updateQuestionCounter(); // Update the display
-	document.getElementById("question-counter").textContent = `First Correct Answer Wins`;
-    document.getElementById("question").textContent = activeQuestion.question;
-    document.getElementById("questionWrapper").style.visibility = "visible";
-    document.getElementById("timer").textContent = timetoAnswer;
-    document.getElementById("timeuntil-nextQ").textContent = "";
-	playRandomQuestionSound();
-    let secondsLeft = timetoAnswer;
-    questionTimer = setInterval(() => {
-        secondsLeft--;
-        document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
-        if (secondsLeft <= 0) {
-            endAsk(); // Call your function to end the question once time runs out
-        }
-    }, 1000);
-}
-function AskfromCat(round, category) {
-    clearTimeout(questionTimer); // Clear previous timer if any
-    clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
-    answeredUsers.clear();
-    firstAnswerUser = null;
-    // Use the passed round and category to get the random question
-    activeQuestion = getRandomQuestionFromCategory(round, category);
+
+    // Check if all parameters are provided; otherwise, handle defaults
+    if (round && category && type) {
+        activeQuestion = getRandomQuestion(round, category, type);
+    } else if (round && category) {
+        activeQuestion = getRandomQuestion(round, category); // Type is optional
+    } else if (type) {
+        activeQuestion = getRandomAsk(type); // Use type, no round or category needed
+    } else {
+        activeQuestion = getRandomAsk(); // No parameters, fallback to random question
+    }
+
     if (!activeQuestion) {
-        console.error("❌ No question found for the specified round and category.");
+        console.error("❌ No question found for the specified round, category, or type.");
         return;
     }
+
     updateQuestionCounter(); // Update the display
     document.getElementById("question-counter").textContent = `First Correct Answer Wins`;
     document.getElementById("question").textContent = activeQuestion.question;
+
+    // If it's a multiple-choice question, display options
+    if (activeQuestion.type === "multiplechoice") {
+        displayMultipleChoiceOptions(activeQuestion.options);
+    }
+
     document.getElementById("questionWrapper").style.visibility = "visible";
     document.getElementById("timer").textContent = timetoAnswer;
     document.getElementById("timeuntil-nextQ").textContent = "";
     playRandomQuestionSound();
+
     let secondsLeft = timetoAnswer;
     questionTimer = setInterval(() => {
         secondsLeft--;
@@ -1215,20 +1333,35 @@ function AskfromCat(round, category) {
         }
     }, 1000);
 }
-function startentriviaAskfromCat(round, category) {
-    displayConsoleMessage("system", "startentriviaAskfromCat fn called");
+// Function to display multiple-choice options
+function displayMultipleChoiceOptions(options) {
+    let optionsContainer = document.getElementById("options-container"); // Ensure you have an element for options
+    optionsContainer.innerHTML = ""; // Clear previous options
+    options.forEach((option, index) => {
+        let optionElem = document.createElement("div");
+        optionElem.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+        optionsContainer.appendChild(optionElem);
+    });
+}
+
+function startentriviaAsk(round = null, category = null, type = null) {
+    displayConsoleMessage("system", "startentrivia fn called");
+
+    // Prevent starting the game if it's already running
     if (entriviaGameState === "started") {
         displayConsoleMessage("system", "entrivia is already running! Ignoring duplicate command.");
         console.log("entrivia is already running! Ignoring duplicate command.");
-        return; // Stop if entrivia is already running
+        return;
     }
+
     if (singleActiveAsk === "Active") {
         displayConsoleMessage("system", "entrivia is already Asking a question! Ignoring duplicate command.");
         console.log("entrivia is already running! Ignoring duplicate command.");
-        return; // Stop if entrivia is already running
+        return;
     }
+
     displayConsoleMessage("system", "entrivia ask continues");
-    console.log("entrivia should splash and fetch a question from a specific category.");
+    console.log("entrivia should splash and fetch questions");
 
     askSplash() // Run splash first
         .then(() => fetchentriviaQuestions()) // Fetch questions after splash
@@ -1238,8 +1371,9 @@ function startentriviaAskfromCat(round, category) {
             console.log("singleActiveAsk = " + singleActiveAsk);
             console.log("entrivia Questions Loaded:", questions);
             displayConsoleMessage("system", `singleActiveAsk = ${singleActiveAsk}`);
-            // Pass the round and category to AskfromCat
-            AskfromCat(round, category);
+
+            // Use the passed round, category, and type, or choose random if none provided
+            AskQuestion(round, category, type);  // Now directly call the new unified AskQuestion
         })
         .catch(error => {
             console.error("Error loading entrivia questions:", error);
@@ -1247,39 +1381,11 @@ function startentriviaAskfromCat(round, category) {
             singleActiveAsk = null; // Reset state on failure
         });
 }
-function startentriviaAsk() {
-	displayConsoleMessage("system", "startentrivia fn called");
-    if (entriviaGameState === "started") {
-		displayConsoleMessage("system", "entrivia is already running! Ignoring duplicate command.");
-        console.log("entrivia is already running! Ignoring duplicate command.");
-        return; // Stop if entrivia is already running
-    }
-    if (singleActiveAsk === "Active") {
-		displayConsoleMessage("system", "entrivia is already Asking a question! Ignoring duplicate command.");
-        console.log("entrivia is already running! Ignoring duplicate command.");
-        return; // Stop if entrivia is already running
-    }
-	displayConsoleMessage("system", "entrivia ask continues");
-    console.log("entrivia should splash and fetch questions");
-
-    askSplash() // Run splash first
-        .then(() => fetchentriviaQuestions()) // Fetch questions after splash
-        .then(questions => {
-		    singleActiveAsk = "Active"; // Mark entrivia as started
-            window.entriviaQuestions = questions;
-			console.log("singleActiveAsk = " + singleActiveAsk);
-            console.log("entrivia Questions Loaded:", questions);
-			displayConsoleMessage("system", `singleActiveAsk = ${singleActiveAsk}`);
-			AskQuestion();
-        })
-        .catch(error => {
-            console.error("Error loading entrivia questions:", error);
-			displayConsoleMessage("system", `Error loading entrivia questions: ${error}`);
-            singleActiveAsk = null; // Reset state on failure
-        });
-
-}
-
+//
+// startentriviaAsk("round1", "Science", "multiplechoice");
+// startentriviaAsk("round1", "General");
+// startentriviaAsk(null, null, "singlechoice");
+// startentriviaAsk();
 function displayLastWinner() {
     if (entriviaSingleAskLastWinner) {
         const message = `🎉 Congratulations to ${entriviaSingleAskLastWinner} for answering first correctly! 🎉`;
