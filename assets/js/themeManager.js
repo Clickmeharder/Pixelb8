@@ -26,9 +26,12 @@ const ThemeManager = {
 
   setTheme(themeName) {
     console.log(`[ThemeManager] Setting theme: ${themeName}`);
-    localStorage.setItem("theme", themeName); // Save to localStorage
-    document.documentElement.className = themeName; // Apply class to <html> element
+    // Save to localStorage
+    localStorage.setItem("theme", themeName);
+    // Apply class to <html> element
+    document.documentElement.className = themeName;
     console.log(`[ThemeManager] Theme set to: ${themeName}`);
+    console.log(`[ThemeManager] theme saved to localStorage: ${localStorage.getItem("theme")}`);
   },
 
   getTheme() {
