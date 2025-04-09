@@ -429,34 +429,81 @@ Other Fun:
 _____________________________  -->
 	<!-- theme script -->
   <script>
-	  const themes = ["", "light-theme", "dark-theme", "retro-theme", "cyberice-theme", "neonvoid-theme", "biohazard-theme", "holo-theme", "synthwave-theme","bubblegumpop-theme","wastelandterminal-theme","business-theme", "nineties-theme","poop-theme","hud-theme", "scroll-theme"];
-	  let current = 0;
-	  function setTheme(themeName) {
-		document.body.className = themeName;
-		// Set the theme in localStorage
-		localStorage.setItem("theme", themeName);
-		console.log("preferred theme: " + themeName);
-	  }
+localStorage.removeItem("theme");
+const ThemeManager = {
+  themeSettingsKey: "themeSettings",
+  slidersSelector: 'input[type="range"][data-var]',
 
-		// Add event listener to all buttons with 'themeselect' class
-		document.querySelectorAll('.themeselect').forEach(button => {
-			button.addEventListener('click', function() {
-				// Get the ID of the clicked button
-				const buttonId = this.id;
-	
-				// Remove 'Butt' from the buttonId and construct the theme name
-				const theme = buttonId.replace('Butt', ''); // e.g., "light-theme" from "light-themeButt"
-				console.log("Butt clicked: " + buttonId);
-				// Now, call the setTheme function with the theme name
-				setTheme(theme);
-			});
-		});
+  init() {
+    // Load saved theme and layout
+    const saved = JSON.parse(localStorage.getItem(this.themeSettingsKey));
+    if (saved) {
+      document.body.className = saved.themeName || "";
 
-	  // Load saved theme on startup
-	  window.addEventListener("DOMContentLoaded", () => {
-		const saved = localStorage.getItem("theme");
-		if (saved) setTheme(saved);
-	  });
+      if (saved.layout) {
+        for (const [varName, value] of Object.entries(saved.layout)) {
+          document.documentElement.style.setProperty(varName, value);
+        }
+      }
+    }
+
+    // Set sliders to match current values
+    this.syncSliders();
+
+    // Hook sliders to update
+    document.querySelectorAll(this.slidersSelector).forEach(slider => {
+      slider.addEventListener("input", () => {
+        const varName = slider.dataset.var;
+        const unit = varName.includes("X") || varName.includes("Y") ? "%" : "px"; // You can customize this
+        const value = slider.value + unit;
+
+        document.documentElement.style.setProperty(varName, value);
+        this.saveLayoutVariable(varName, value);
+      });
+    });
+  },
+
+  setTheme(themeName) {
+    document.body.className = themeName;
+    this.saveTheme(themeName);
+  },
+
+  saveTheme(themeName) {
+    const current = this.loadSettings() || {};
+    current.themeName = themeName;
+    localStorage.setItem(this.themeSettingsKey, JSON.stringify(current));
+  },
+
+  saveLayoutVariable(varName, value) {
+    const current = this.loadSettings() || { layout: {} };
+    current.layout = current.layout || {};
+    current.layout[varName] = value;
+    localStorage.setItem(this.themeSettingsKey, JSON.stringify(current));
+  },
+
+  loadSettings() {
+    return JSON.parse(localStorage.getItem(this.themeSettingsKey));
+  },
+
+  syncSliders() {
+    document.querySelectorAll(this.slidersSelector).forEach(slider => {
+      const varName = slider.dataset.var;
+      const current = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+      slider.value = parseInt(current);
+    });
+  }
+};
+
+// Initialize on DOM ready
+window.addEventListener("DOMContentLoaded", () => ThemeManager.init());
+
+// Optional: Hook theme buttons
+document.querySelectorAll(".themeselect").forEach(button => {
+  button.addEventListener("click", function () {
+    const theme = this.id.replace("Butt", "");
+    ThemeManager.setTheme(theme);
+  });
+});
 
 
 
