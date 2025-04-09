@@ -1357,10 +1357,11 @@ select.b {}
 			overflow-y: scroll;
 		}
 		#theme-controller {width: 385px;}
-		#theme-controller .controlpanel {padding: 2px;height:150px;max-height: 150px;}
+		#theme-controller .controlpanel {padding: 1px;height:64px;max-height: 61px;}
 		#theme-controller .controlpanel:hover {
 			max-height: 150px;
-			padding: 2px;
+			padding: 1px;
+			padding-right: 0px;
 			height: 150px;
 			overflow-y: scroll;
 		}
