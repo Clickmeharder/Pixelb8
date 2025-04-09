@@ -698,6 +698,7 @@ function getRandomQuestionCurrentRound(round = null, category = null, type = nul
     usedQuestions.push(question); // Mark this question as used
 
     // Return the question in the updated format (with type and options if applicable)
+	console.log("🧠 Random question chosen:", question);
     return {
         question: question.question,
         answer: question.answer,
@@ -707,6 +708,7 @@ function getRandomQuestionCurrentRound(round = null, category = null, type = nul
 }
 
 function nextQuestion() {
+	console.log("🔍 New question loaded:", activeQuestion);
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
     answeredUsers.clear();
