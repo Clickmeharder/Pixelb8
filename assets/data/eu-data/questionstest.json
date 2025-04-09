@@ -1,0 +1,199 @@
+{
+  "round1": {
+    "Mining": [
+      {
+        "type": "singlechoice",
+        "question": "Which Planet is the only one that Has Treasure mining?",
+        "answers": ["Arkadia"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "Where can you buy the tt finder?",
+        "answers": ["trade terminal", "TT"]
+      }
+    ],
+    "hunting": [
+      {
+        "type": "singlechoice",
+        "question": "Which weapon type is the EP-2 Proton?",
+        "answers": ["Laser Pistol"]
+      },
+      {
+        "type": "multiplechoice",
+        "question": "Which amp is commonly dropped by the bots at Orthos Oilfield?",
+        "answers": ["B101"],
+        "options": ["A103", "B101", "Omegaton 101", "B202"]
+      }
+    ],
+    "crafting": [
+      {
+        "type": "singlechoice",
+        "question": "What items are needed to craft explosive projectiles?",
+        "answers": ["nanocubes"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "What extractor is needed to craft Arkadian Hornet hide texture?",
+        "answers": ["Basic leather extractor"]
+      }
+    ],
+    "history": [
+      {
+        "type": "singlechoice",
+        "question": "Who is Club Neverdie named after?",
+        "answers": ["neverdie"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "What Company created Entropia Universe?",
+        "answers": ["MindArk"]
+      }
+    ],
+    "beauty": [
+      {
+        "type": "singlechoice",
+        "question": "How many paint cans or textures for max success chance?",
+        "answers": ["323"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "Who is the prettiest Avatar?",
+        "answers": ["Jimbobbityboo"]
+      }
+    ],
+    "economy": [
+      {
+        "type": "singlechoice",
+        "question": "What is the full name of the currency used in Entropia Universe?",
+        "answers": ["Project Entropia Dollar"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "What is the default exchange rate between Project Entropia Dollars (PED) and USD?",
+        "answers": ["1 PED = 1 USD"]
+      }
+    ],
+    "social": [
+      {
+        "type": "singlechoice",
+        "question": "Which feature allows players to communicate with each other in Entropia Universe?",
+        "answers": ["Chat", "chat window", "chat system"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "How many players can be in a team?",
+        "answers": ["12"]
+      }
+    ],
+    "misc": [
+      {
+        "type": "singlechoice",
+        "question": "What is the name of the crystal palace?",
+        "answers": ["Crystal Palace"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "What planet has fishing?",
+        "answers": ["Next Island"]
+      }
+    ]
+  },
+  "round2": {
+    "Mining": [
+      {
+        "type": "singlechoice",
+        "question": "Yes or no - is Sweetstuff an enmatter?",
+        "answers": ["yes"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "What item is used to enhance the depth of your mining finder?",
+        "answers": ["depth enhancer"]
+      }
+    ],
+    "hunting": [
+      {
+        "type": "singlechoice",
+        "question": "How much HP does a creature with 1 stamina have?",
+        "answers": ["10hp"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "What is the maximum tier a weapon can reach in Entropia Universe?",
+        "answers": ["Tier 10"]
+      }
+    ],
+    "crafting": [
+      {
+        "type": "singlechoice",
+        "question": "Which skill do many recommend unlocking through MS repair runs before crafting?",
+        "answers": ["blueprint comprehension"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "What type of terminal do you use to craft?",
+        "answers": ["construction terminal"]
+      }
+    ],
+    "history": [
+      {
+        "type": "singlechoice",
+        "question": "Which year was Entropia Universe first launched?",
+        "answers": ["2003"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "Who originally founded MindArk?",
+        "answers": ["Johan Leman"]
+      }
+    ],
+    "beauty": [
+      {
+        "type": "singlechoice",
+        "question": "What color are the default male briefs?",
+        "answers": ["blue"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "Which coloring tool can you acquire from Next Island?",
+        "answers": ["Elysian colorator"]
+      }
+    ],
+    "economy": [
+      {
+        "type": "singlechoice",
+        "question": "How many PED is 100 PEC worth?",
+        "answers": ["1"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "Where is the unofficial trading hub on Calypso?",
+        "answers": ["Twin Peaks"]
+      }
+    ],
+    "social": [
+      {
+        "type": "singlechoice",
+        "question": "The abbreviation of a Rookie troll whose name rhymes with duck",
+        "answers": ["ccr"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "What is the default key to open the Events window?",
+        "answers": ["b"]
+      }
+    ],
+    "misc": [
+      {
+        "type": "singlechoice",
+        "question": "Which is the largest planet in Entropia Universe?",
+        "answers": ["Calypso"]
+      },
+      {
+        "type": "singlechoice",
+        "question": "What is the name of Limp Bizkit's lead singer?",
+        "answers": ["fred durst"]
+      }
+    ]
+  }
+}
