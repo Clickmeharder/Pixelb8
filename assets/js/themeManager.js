@@ -1,7 +1,7 @@
 const root = document.documentElement;
 
 const sliders = [
-  { id: "twitchchat-Y", unit: "%", variable: "--twitchchat-Y", min: 0, max: 100 },
+  { id: "twitchchatY", unit: "%", variable: "--twitchchat-Y", min: 0, max: 100 },
   { id: "twitchchatX", unit: "%", variable: "--twitchchat-X", min: 0, max: 100 },
   { id: "entriviaAnnouncementY", unit: "%", variable: "--entriviaAnnouncement-Y", min: 0, max: 100 },
   { id: "entriviaAnnouncementX", unit: "%", variable: "--entriviaAnnouncement-X", min: 0, max: 100 },
