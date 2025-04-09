@@ -990,6 +990,7 @@ body {
 	padding: 0;
 	width: 99vw;
 	height: 99vh;
+	overflow: hidden;
     cursor: var(--cursor-image);
     opacity: var(--body-opacity);
 }
