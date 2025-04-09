@@ -1639,6 +1639,7 @@ ul#broadcastercommandlist {
 			width: 155px;
 			padding: 4px;
 			margin: 0px;
+			margin-left: auto;
 			font-size: 18px;
 			color:var(--text-color);
 			background: var(--bg-color);
