@@ -1421,7 +1421,8 @@ select.b {}
 		bottom: 30%;
 		width: 30%;
 		opacity:var(--twitchchat-opacity);
-		overflow: hidden;
+		overflow:visible;
+		overflow-y: hidden;
 	}
 	div#twitchMessagebox, div#exampleMessagebox {text-align: left;border:;max-height: 170px;}
 	#twitchMessagebox .chatMessage,#exampleMessagebox .exampleMessage {text-shadow: var(--chat-text-shadow);transition: opacity 1s ease-out;  /* Apply the fade transition */}
@@ -1563,10 +1564,6 @@ ul#broadcastercommandlist {
 			max-width: 25%;
 			text-align: center;
 			padding: 15px 20px;
-			background: var(--body-bg);
-			border: var(--border);
-			border-radius: ;
-			box-shadow: var(--glow-color);
 		}
 		#entriviaAnnouncement {
 			font-weight: bold;
