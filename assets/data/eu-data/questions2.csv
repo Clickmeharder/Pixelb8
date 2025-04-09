@@ -1,6 +1,6 @@
 round,category,type,question,answers,options
 round1,Mining,singlechoice,Which Planet is the only one that Has Treasure mining?,Arkadia,
-round1,Mining,singlechoice,Where can you buy the tt finder?,trade terminal;TT,auction;trade terminal;technician;TT
+round1,Mining,singlechoice,Where can you buy the tt finder?,trade terminal;TT,
 round1,hunting,singlechoice,Which weapon type is the EP-2 Proton?,Laser Pistol,
 round1,hunting,multiplechoice,Which amp is commonly dropped by the bots at Orthos Oilfield?,B101,A103;B101;Omegaton 101;B202
 round1,crafting,singlechoice,What items are needed to craft explosive projectiles?,nanocubes,
