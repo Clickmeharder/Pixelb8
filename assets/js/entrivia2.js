@@ -251,29 +251,58 @@ function fetchentriviaQuestions() {
         });
     });
 }
-
+addCustomentriviaQuestion(
+  "round1",
+  "Name something you might wear on your feet.",
+  ["Shoes", "Sandals", "Boots", "Socks"],
+  "Clothing",
+  "singlechoice"
+);
+addCustomentriviaQuestion(
+  "round2", // round
+  "What is the capital of Germany?", // question
+  "Berlin", // correct answer (single)
+  "Geography", // category
+  "multiplechoice", // type
+  ["Berlin", "Munich", "Frankfurt", "Hamburg"] // options
+);
+addCustomentriviaQuestion( 
+  "round2",
+  "What is the capital of Italy?",
+  "Rome",
+  "Geography",
+  "singlechoice"
+);
 
 function addCustomentriviaQuestion(round, questionText, correctAnswer, category, type = 'singlechoice', options = []) {
     let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
+
     if (round !== "round1" && round !== "round2") {
         console.error("Invalid round. Use 'round1' or 'round2'.");
         return;
     }
+
     // Ensure category exists in the selected round
     if (!customQuestions[round][category]) {
         customQuestions[round][category] = [];
     }
+
+    // Ensure the answer is always stored as an array
+    let formattedAnswer = Array.isArray(correctAnswer) ? correctAnswer : [correctAnswer];
+
     let newQuestion = {
         question: questionText,
-        answer: correctAnswer,
+        answer: formattedAnswer,
         category: category,
-        type: type,  // new field
-        options: options // new field, e.g., ['Option 1', 'Option 2', 'Option 3']
+        type: type,  // 'singlechoice' or 'multiplechoice'
+        options: options // optional, mostly for multiple choice
     };
+
     customQuestions[round][category].push(newQuestion);
     localStorage.setItem("customentriviaQuestions", JSON.stringify(customQuestions));
     loadCustomQuestions();
     updateAnswerDisplay();
+
     console.log(`✅ Added new question to ${round} [${category}]:`, newQuestion);
 }
 
@@ -395,12 +424,12 @@ function clearAllCustomQuestions() {
     localStorage.removeItem("customentriviaQuestions");
     console.log("✅ All custom entrivia questions have been deleted.");
 }
-clearAllCustomQuestions();
+
 // Clear existing questions
 // uncomment these two commands to clear all custom questions:
 //clearAllCustomQuestions();
 // Now add a new entrivia question (example usage):
-//addCustomentriviaQuestion("round1", "What is the smallest Skildek support weapon?", "lancehead", "hunting");
+//addCustomentriviaQuestion("round1", "What is the smallest Skildek support weapon?", "lancehead;skildeck lancehead", "hunting");
 //_____________________________________
 //-------------------------------------
 
@@ -2190,33 +2219,39 @@ document.getElementById("cancelGame").addEventListener("click", function() {
         endentrivia(); // Only end entrivia if it's running
     }
 });
-document.getElementById('submitQuestionBtn').addEventListener('click', function() {
-    // Get the values from the form inputs
+document.getElementById('submitQuestionBtn').addEventListener('click', function () {
     const round = document.getElementById('round').value;
-    const category = document.getElementById('entriviacategory').value; // Get category
+    const category = document.getElementById('entriviacategory').value;
     const questionText = document.getElementById('questionText').value;
     const correctAnswer = document.getElementById('correctAnswer').value;
+    const type = document.getElementById('questionType').value; // New type input
 
-    // Validate inputs
+    // Handle multiple choice options
+    let options = [];
+    if (type === 'multiplechoice') {
+        const optionsInput = document.getElementById('answerOptions').value;
+        options = optionsInput.split(',').map(opt => opt.trim()).filter(opt => opt);
+    }
+
     if (!questionText || !correctAnswer) {
         displayentriviaMessage("error!", "Please fill in both the question and the answer.", {}, {});
         return;
     }
 
+    addCustomentriviaQuestion(round, questionText, correctAnswer, category, type, options);
+
+    // Clear the form
+    document.getElementById('questionText').value = '';
+    document.getElementById('correctAnswer').value = '';
+    if (document.getElementById('answerOptions')) {
+        document.getElementById('answerOptions').value = '';
+    }
+});
+
 
 //toggle inclusion of either default or custom questions
 document.getElementById("toggleusedefaultquestions").addEventListener("click", toggleusedefaultquestions);
 document.getElementById("toggleusecustomquestions").addEventListener("click", toggleusecustomquestions);
-// Add event listener to the button to add custom questions
-
-    // Call the function to add the question
-    addCustomentriviaQuestion(round, questionText, correctAnswer, category);
-
-    // Clear the form fields
-    document.getElementById('questionText').value = '';
-    document.getElementById('correctAnswer').value = '';
-});
-
 //
 document.getElementById('toggleconsolemessages').addEventListener('click', toggleentriviaconsolemessages);
 document.getElementById('toggleentriviachatOverlay').addEventListener('click', toggleentriviachatOverlay);
