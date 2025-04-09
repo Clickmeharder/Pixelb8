@@ -430,112 +430,6 @@ _____________________________  -->
 	<!-- theme script -->
   <script>
 localStorage.removeItem("theme");
-const ThemeManager = {
-  key: "themeSettings",
-
-  loadSettings: function () {
-    const data = localStorage.getItem(this.key);
-    if (data) {
-      try {
-        const parsed = JSON.parse(data);
-        console.log("[ThemeManager] Loaded settings:", parsed);
-        return parsed;
-      } catch (e) {
-        console.warn("[ThemeManager] Failed to parse themeSettings:", e);
-      }
-    } else {
-      console.log("[ThemeManager] No saved settings found.");
-    }
-    return {};
-  },
-
-  saveSettings: function (settings) {
-    localStorage.setItem(this.key, JSON.stringify(settings));
-    console.log("[ThemeManager] Saved settings:", settings);
-  },
-
-  getSetting: function (name) {
-    const settings = this.loadSettings();
-    const value = settings[name];
-    console.log(`[ThemeManager] Retrieved setting: ${name} = ${value}`);
-    return value;
-  },
-
-  setSetting: function (name, value) {
-    const settings = this.loadSettings();
-    settings[name] = value;
-    this.saveSettings(settings);
-    console.log(`[ThemeManager] Set setting: ${name} = ${value}`);
-  },
-
-  setTheme: function (themeName) {
-    document.body.className = themeName;
-    this.setSetting("theme", themeName);
-    console.log(`[ThemeManager] Theme set to: ${themeName}`);
-  },
-
-  getTheme: function () {
-    return this.getSetting("theme");
-  },
-
-  saveLayoutVariable: function (varName, value) {
-    document.documentElement.style.setProperty(varName, value);
-    this.setSetting(varName, value);
-    console.log(`[ThemeManager] Layout variable saved: ${varName} = ${value}`);
-  },
-
-  applySavedLayout: function () {
-    const settings = this.loadSettings();
-    for (const [key, value] of Object.entries(settings)) {
-      if (key.startsWith("--")) {
-        document.documentElement.style.setProperty(key, value);
-        console.log(`[ThemeManager] Applied layout variable: ${key} = ${value}`);
-      }
-    }
-  }
-};
-window.addEventListener("DOMContentLoaded", () => {
-  const savedTheme = ThemeManager.getTheme();
-  if (savedTheme) {
-    ThemeManager.setTheme(savedTheme);
-    console.log("[Init] Theme loaded:", savedTheme);
-  }
-
-  ThemeManager.applySavedLayout();
-  console.log("[Init] Layout variables applied.");
-});
-document.querySelectorAll(".layout-slider").forEach(slider => {
-  slider.addEventListener("input", () => {
-    const varName = slider.dataset.var;
-    const suffix = slider.dataset.suffix || ""; // Optional unit
-    const value = slider.value + suffix;
-
-    ThemeManager.saveLayoutVariable(varName, value);
-    console.log(`[Slider] ${varName} updated to: ${value}`);
-  });
-
-  // On load: restore slider position
-  const varName = slider.dataset.var;
-  const savedValue = ThemeManager.getSetting(varName);
-  if (savedValue) {
-    slider.value = parseFloat(savedValue);
-    document.documentElement.style.setProperty(varName, savedValue);
-    console.log(`[Slider Init] ${varName} restored to: ${savedValue}`);
-  }
-});
-// Initialize on DOM ready
-window.addEventListener("DOMContentLoaded", () => ThemeManager.init());
-
-document.querySelectorAll(".themeselect").forEach(button => {
-  button.addEventListener("click", function () {
-    const theme = this.id.replace("Butt", "");
-    console.log(`[Theme Button] Theme button clicked: ${this.id} → ${theme}`);
-    ThemeManager.setTheme(theme);
-  });
-});
-
-
-
   </script>
   		<!-- simulate background script -->
 	<script>
@@ -677,8 +571,10 @@ document.querySelectorAll(".themeselect").forEach(button => {
 	<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 	<script src="/assets/js/entrivia.js"></script>
 	<script src="/assets/js/twitchChat.js"></script>
+	<script src="/assetsjs/themeManager.js"></script>
 	<script>
 		window.onload = function () {
+			ThemeManager.init();
 			loadCustomQuestions();
 			updateSettingsDisplay();
 			updateCommandlist();
