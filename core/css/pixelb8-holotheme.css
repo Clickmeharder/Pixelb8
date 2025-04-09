@@ -4,7 +4,7 @@ Pixelb8-holotheme.css
 
 */
 :root {
-	
+  --twitchchat-Y: 0%;
   --twitchchat-Y: 0%;
   --twitchchat-X: 0%;
   --entriviaAnnouncement-Y:71%;
@@ -978,6 +978,7 @@ body.scroll-theme {
 /*----------------------*/
 /*      The Body        */
 /*----------------------*/
+
 body {
     font-family: var(--body-font);
     color: var(--body-color);
