@@ -1063,7 +1063,7 @@ button.Butt{}
 /*----------------------*/
 /* Wrap around PixelButt so bubble buttons are relative */
 
-.themed, .chatMessage, .exampleMessage, .panel, #entriviaAnnouncement, .controller, #Bubble .Butt, .close-btn {
+.themed, .chatMessage, .exampleMessage, .panel, #entriviaAnnouncement, #exampleAnnouncement, .controller, #Bubble .Butt, .close-btn {
 	background:var(--bg-color);
 	border:var(--border);
 	border-radius:var(--border-radius);
@@ -1577,7 +1577,7 @@ ul#broadcastercommandlist {
 			text-align: center;
 			padding: 15px 20px;
 		}
-		#entriviaAnnouncement {
+		#entriviaAnnouncement, #exampleAnnouncement {
 			font-weight: bold;
 			text-align: center;
 		}
