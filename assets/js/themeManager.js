@@ -1,3 +1,54 @@
+const root = document.documentElement;
+
+const sliders = [
+  { id: "twitchchatY", unit: "%", variable: "--twitchchat-Y", min: 0, max: 100 },
+  { id: "twitchchatX", unit: "%", variable: "--twitchchat-X", min: 0, max: 100 },
+  { id: "entriviaAnnouncementY", unit: "%", variable: "--entriviaAnnouncement-Y", min: 0, max: 100 },
+  { id: "entriviaAnnouncementX", unit: "px", variable: "--entriviaAnnouncement-X", min: 0, max: 100 },
+  { id: "entriviaQuestionY", unit: "%", variable: "--entriviaQuestion-Y", min: 0, max: 88 },
+  { id: "entriviaQuestionX", unit: "px", variable: "--entriviaQuestion-X", min: 0, max: 71 },
+];
+
+sliders.forEach(({ id, unit, variable, min, max }) => {
+  const input = document.getElementById(id);
+  const valueDisplay = document.getElementById(id + "Value");
+
+  // Apply min/max limits to the slider
+  input.min = min;
+  input.max = max;
+
+  // Set the initial value of the slider based on the saved layout (if available)
+  const savedSettings = JSON.parse(localStorage.getItem("themeSettings"));
+  if (savedSettings && savedSettings.layout) {
+    const savedValue = savedSettings.layout[variable];
+    if (savedValue) {
+      input.value = parseFloat(savedValue);
+      valueDisplay.textContent = savedValue;
+    }
+  }
+
+  // Add event listener for input changes
+  input.addEventListener("input", () => {
+    const value = input.value + unit; // Add the correct unit (px or %)
+    root.style.setProperty(variable, value); // Update CSS variable
+    valueDisplay.textContent = value; // Update value display
+
+    // Save the updated layout to localStorage
+    const currentSettings = JSON.parse(localStorage.getItem("themeSettings")) || {};
+    const themeName = currentSettings.themeName || document.body.className || "";
+
+    const newSettings = {
+      themeName,
+      layout: {
+        ...(currentSettings.layout || {}),
+        [variable]: value
+      }
+    };
+
+    localStorage.setItem("themeSettings", JSON.stringify(newSettings));
+  });
+});
+
 function setTheme(themeName, saveLayout = true) {
   document.body.className = themeName;
 
@@ -20,6 +71,7 @@ function setTheme(themeName, saveLayout = true) {
   localStorage.setItem("themeSettings", JSON.stringify(themeSettings));
   console.log("Saved theme settings:", themeSettings);
 }
+
 window.addEventListener("DOMContentLoaded", () => {
   const savedSettings = JSON.parse(localStorage.getItem("themeSettings"));
   if (savedSettings) {
@@ -35,30 +87,3 @@ window.addEventListener("DOMContentLoaded", () => {
     console.log("Loaded saved theme settings:", savedSettings);
   }
 });
-function updateLayoutVariable(varName, value) {
-  document.documentElement.style.setProperty(varName, value);
-
-  // Save new layout only (but keep the current theme name)
-  const currentSettings = JSON.parse(localStorage.getItem("themeSettings")) || {};
-  const themeName = currentSettings.themeName || document.body.className || "";
-
-  const newSettings = {
-    themeName,
-    layout: {
-      ...(currentSettings.layout || {}),
-      [varName]: value
-    }
-  };
-
-  localStorage.setItem("themeSettings", JSON.stringify(newSettings));
-}
-slider.addEventListener("input", () => {
-  const value = slider.value + "%"; // or "px" depending on the variable
-  updateLayoutVariable("--entriviaQuestion-Y", value);
-});
-document.getElementById("entriviaQuestionY").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--entriviaQuestion-Y"));
-document.getElementById("entriviaQuestionX").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--entriviaQuestion-Y"));
-document.getElementById("entriviaAnnouncementY").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--entriviaAnnouncement-Y"));
-document.getElementById("entriviaAnnouncementX").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--entriviaAnnouncement-Y"));
-document.getElementById("twitchchatY").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-Y"));
-document.getElementById("twitchchatX").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-Y"));
