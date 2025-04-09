@@ -1,4 +1,4 @@
-
+const root = document.documentElement;
 
 const sliders = [
   { id: "twitchchatY", unit: "%", variable: "--twitchchat-Y", min: 0, max: 100 },
@@ -9,6 +9,7 @@ const sliders = [
   { id: "entriviaQuestionX", unit: "px", variable: "--entriviaQuestion-X", min: 0, max: 71 },
 ];
 
+// Slider handling
 sliders.forEach(({ id, unit, variable, min, max }) => {
   const input = document.getElementById(id);
   const valueDisplay = document.getElementById(id + "Value");
@@ -49,6 +50,22 @@ sliders.forEach(({ id, unit, variable, min, max }) => {
   });
 });
 
+// Theme selection via buttons
+document.querySelectorAll('.themeselect').forEach(button => {
+  button.addEventListener('click', function() {
+    // Get the ID of the clicked button
+    const buttonId = this.id;
+
+    // Remove 'Butt' from the buttonId and construct the theme name
+    const theme = buttonId.replace('Butt', ''); // e.g., "light-theme" from "light-themeButt"
+    console.log("Theme button clicked: " + theme);
+
+    // Now, call the setTheme function with the theme name
+    setTheme(theme);
+  });
+});
+
+// Set theme function to update the theme and save the layout
 function setTheme(themeName, saveLayout = true) {
   document.body.className = themeName;
 
@@ -72,6 +89,7 @@ function setTheme(themeName, saveLayout = true) {
   console.log("Saved theme settings:", themeSettings);
 }
 
+// On DOMContentLoaded, load saved theme and layout settings
 window.addEventListener("DOMContentLoaded", () => {
   const savedSettings = JSON.parse(localStorage.getItem("themeSettings"));
   if (savedSettings) {
