@@ -4,9 +4,12 @@ const ThemeManager = {
 
     const savedTheme = this.getTheme();
     console.log("[ThemeManager] Saved theme:", savedTheme);
+
     if (savedTheme) {
       this.setTheme(savedTheme);
       console.log("[ThemeManager] Theme applied:", savedTheme);
+    } else {
+      console.log("[ThemeManager] No saved theme found. Proceeding with default theme.");
     }
 
     this.applySavedLayout();
@@ -14,37 +17,17 @@ const ThemeManager = {
     // Handle theme button clicks
     document.querySelectorAll(".themeselect").forEach(button => {
       button.addEventListener("click", () => {
-        const theme = button.id.replace("Butt", "");
+        const theme = button.id.replace("-themeButt", "");  // Adjusting for the exact match of 'themeButt'
         console.log(`[ThemeManager] Theme button clicked: ${theme}`);
-        this.setTheme(theme);
+        this.setTheme(theme); // Call setTheme
       });
-    });
-
-    // Handle layout slider input events
-    document.querySelectorAll(".layout-slider").forEach(slider => {
-      slider.addEventListener("input", () => {
-        const varName = slider.dataset.var;
-        const suffix = slider.dataset.suffix || "";
-        const value = slider.value + suffix;
-        console.log(`[ThemeManager] Slider changed: ${varName} = ${value}`);
-        this.saveLayoutVariable(varName, value);
-      });
-
-      // Restore saved layout settings
-      const varName = slider.dataset.var;
-      const savedValue = this.getSetting(varName);
-      if (savedValue) {
-        console.log(`[ThemeManager] Restoring saved slider value for ${varName}: ${savedValue}`);
-        slider.value = parseFloat(savedValue);
-        document.documentElement.style.setProperty(varName, savedValue);
-      }
     });
   },
 
   setTheme(themeName) {
     console.log(`[ThemeManager] Setting theme: ${themeName}`);
-    localStorage.setItem("theme", themeName);
-    document.documentElement.className = themeName;
+    localStorage.setItem("theme", themeName); // Save to localStorage
+    document.documentElement.className = themeName; // Apply class to <html> element
     console.log(`[ThemeManager] Theme set to: ${themeName}`);
   },
 
