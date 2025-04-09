@@ -1618,16 +1618,19 @@ ul#broadcastercommandlist {
 			font-size: 15px;
 			right: 0;
 			margin:0;
+			text-align: center;
 		}
 		#entriviaboard p {
-			color:var(--text-color);
-			background: var(--bg-color);
 			width: 155px;
 			padding: 4px;
 			margin: 0px;
 			font-size: 18px;
+			color:var(--text-color);
+			background: var(--bg-color);
 			border: var(--border);
 			border-radius: var(--border-radius);
+			text-shadow: var(--chat-text-shadow);
+			box-shadow: var(--glow-color);
 		}
 		#entriviaboard li {
 			margin: -6px 0 0px 0;
