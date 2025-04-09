@@ -426,7 +426,7 @@ function showAnnouncement(message, entriviaAnnouncementTime) {
 
             const countdownInterval = setInterval(() => {
                 roundStartTimer.innerText = `${entriviaAnnouncementTime} seconds`;
-				console.log("announcement made: ","message", ` ${entriviaAnnouncementTime} seconds`):
+				console.log("announcement made: ","message", ` ${entriviaAnnouncementTime} seconds`);
                 // Decrease entriviaAnnouncementTime
                 entriviaAnnouncementTime--;
 
