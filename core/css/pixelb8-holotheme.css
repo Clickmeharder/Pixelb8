@@ -1551,7 +1551,7 @@ ul#broadcastercommandlist {
 		}
 /*-----------------------------------------*/
 /*-----------------------------------------*/
-		#entriviaAnnouncementWrapper {
+		#entriviaAnnouncementWrapper,#examplepanelwrapper {
 			display: none;
 			opacity: 1;
 			position: absolute;

@@ -136,6 +136,12 @@ Other Fun:
 						<span class="slider"></span>
 						</label>
 					</div>
+					<div class="switchbox" id="switch-box">
+						<label class="switch">
+						<input type="checkbox" id="showthemeExamples">
+						<span class="slider"></span>
+						</label>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -312,6 +318,10 @@ Other Fun:
 				<div id="splashText">entrivia Universe</div>
 			</div>
 			<!-- entriviaAnnouncementWrapper -->
+			<div class="panel" id="examplepanelwrapper">
+				<div id="entriviaAnnouncement">Announcement text: </div>
+				<div id="roundstarttimer">000 seconds</div>
+			</div>
 			<div class="panel" id="entriviaAnnouncementWrapper">
 				<div id="entriviaAnnouncement"></div>
 				<div id="roundstarttimer"></div>
@@ -407,14 +417,20 @@ _____________________________  -->
 		if (saved) setTheme(saved);
 	  });
 
-  const controller = document.getElementById("theme-controlpanel");
+  const themeExampleSwitch = document.getElementById("showthemeExamples");
   const messagebox = document.getElementById("exampleMessagebox");
-
+  const messagebox = document.getElementById("examplepanelwrapper");
   controller.addEventListener("click", () => {
     const isVisible = messagebox.style.display === "block";
     messagebox.style.display = isVisible ? "none" : "block";
   });
-
+  document.getElementById("").addEventListener("change", function() {
+	if (this.checked) {
+	  setBackgroundImage(backgroundImageURL);
+	} else {
+	  removeBackgroundImage();
+	}
+  });
   </script>
   		<!-- simulate background script -->
 	<script>
