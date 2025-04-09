@@ -419,20 +419,18 @@ _____________________________  -->
 		if (saved) setTheme(saved);
 	  });
 
-  const themeExampleSwitch = document.getElementById("showthemeExamples");
-  const messagebox = document.getElementById("exampleMessagebox");
-  const messagebox = document.getElementById("examplepanelwrapper");
-  controller.addEventListener("click", () => {
-    const isVisible = messagebox.style.display === "block";
-    messagebox.style.display = isVisible ? "none" : "block";
-  });
-  document.getElementById("").addEventListener("change", function() {
-	if (this.checked) {
-	  setBackgroundImage(backgroundImageURL);
-	} else {
-	  removeBackgroundImage();
-	}
-  });
+const showthemeExamplesSwitch = document.getElementById("showthemeExamples"); // your new switch checkbox
+showthemeExamplesSwitch.addEventListener("change", function () {
+  const examplemessagebox = document.getElementById("exampleMessagebox");
+  const examplepanelwrapper = document.getElementById("examplepanelwrapper");
+  if (this.checked) {
+    examplemessagebox.style.display = "block";
+    examplepanelwrapper.style.display = "block";
+  } else {
+    examplemessagebox.style.display = "none";
+    examplepanelwrapper.style.display = "none";
+  }
+});
   </script>
   		<!-- simulate background script -->
 	<script>
