@@ -435,15 +435,12 @@ localStorage.removeItem("theme");
 	<script>
 
 	  const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
-
 	  function setBackgroundImage(url) {
 		document.body.style.backgroundImage = `url('${url}')`;
 	  }
-
 	  function removeBackgroundImage() {
 		document.body.style.backgroundImage = "none";
 	  }
-
 	  document.getElementById("simulatebackground").addEventListener("change", function() {
 		if (this.checked) {
 		  setBackgroundImage(backgroundImageURL);
@@ -458,12 +455,9 @@ localStorage.removeItem("theme");
 		//toggleElement("myBox", "slide"); // Uses slide animation
 		//<button onclick="toggleElement('myBox')">Toggle Box</button>
 		//<button onclick="toggleElement('myBox', 'slide')">Toggle Slide Box</button>
-
 		function toggleElement(elementId, animationType = "fade") {
 			const element = document.getElementById(elementId);
-
 			if (!element) return;
-			
 			if (element.style.visibility === "hidden" || element.style.visibility === "") {
 				// Show element with animation
 				element.style.visibility = "visible";
@@ -472,15 +466,13 @@ localStorage.removeItem("theme");
 			} else {
 				// Hide element with animation
 				element.style.animation = animationType === "slide" ? "slideOut 0.5s ease-in forwards" : "fadeOut 0.5s ease-in forwards";
-
 				setTimeout(() => {
 					console.log("Butt toggled" + elementId);
 					element.classList.remove("active");
 					element.style.visibility = "hidden";
 				}, 500); // Matches animation duration
 			}
-		}
-		
+		}	
 		function showElement(element, animationType = "fade") {
 		  if (!element) return;
 		  element.style.display = "block";
@@ -490,7 +482,6 @@ localStorage.removeItem("theme");
 			? "slideIn 0.8s ease-out forwards"
 			: "fadeIn 0.8s ease-out forwards";
 		}
-
 		function hideElement(element, animationType = "fade") {
 		  if (!element) return;
 		  element.style.animation = animationType === "slide"
@@ -502,6 +493,8 @@ localStorage.removeItem("theme");
 			element.style.visibility = "hidden";
 		  }, 500); // Matches animation duration
 		}
+
+
 		const showthemeExamplesSwitch = document.getElementById("showthemeExamples");
 		const examplemessagebox = document.getElementById("exampleMessagebox");
 		const examplepanelwrapper = document.getElementById("examplepanelwrapper");
