@@ -1331,7 +1331,7 @@ select.b {}
 		.controlpanel {
 			text-align: start;
 			display: flex;
-			color: #00bafff0;
+			color: var(--text-color);
 			background-color: var(--bg-color-alt);
 			flex-direction: column;
 			border: 3px inset var(--border-color);
