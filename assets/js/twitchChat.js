@@ -203,17 +203,21 @@ function toggleChatAudioSetting() {
 const root = document.documentElement;
 
 const sliders = [
-  { id: "twitchchatY", unit: "%", variable: "--twichchat-Y" },
-  { id: "twitchchatX", unit: "%", variable: "--twitchchat-X" },
-  { id: "entriviaAnnouncementY", unit: "%", variable: "--entriviaAnnouncement-Y" },
-  { id: "entriviaAnnouncementX", unit: "%", variable: "--entriviaAnnouncement-X" },
-  { id: "entriviaQuestionY", unit: "%", variable: "--entriviaQuestion-Y" },
-  { id: "entriviaQuestionX", unit: "%", variable: "--entriviaQuestion-X" },
+  { id: "twitchchatY", unit: "%", variable: "--twichchat-Y", min: 0, max: 100 },
+  { id: "twitchchatX", unit: "%", variable: "--twitchchat-X", min: 0, max: 100 },
+  { id: "entriviaAnnouncementY", unit: "%", variable: "--entriviaAnnouncement-Y", min: 0, max: 100 },
+  { id: "entriviaAnnouncementX", unit: "px", variable: "--entriviaAnnouncement-X", min: 0, max: 100 },
+  { id: "entriviaQuestionY", unit: "%", variable: "--entriviaQuestion-Y", min: 0, max: 88 },
+  { id: "entriviaQuestionX", unit: "px", variable: "--entriviaQuestion-X", min: 0, max: 71 },
 ];
 
-sliders.forEach(({ id, unit, variable }) => {
+sliders.forEach(({ id, unit, variable, min, max }) => {
   const input = document.getElementById(id);
   const valueDisplay = document.getElementById(id + "Value");
+
+  // Apply min/max limits to the slider
+  input.min = min;
+  input.max = max;
 
   input.addEventListener("input", () => {
     const value = input.value + unit;
