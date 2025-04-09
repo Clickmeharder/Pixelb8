@@ -1,69 +1,64 @@
-const ThemeManager = {
-  init: function () {
-    console.log("[ThemeManager] Initializing...");
+function setTheme(themeName, saveLayout = true) {
+  document.body.className = themeName;
 
-    const savedTheme = this.getTheme();
-    console.log("[ThemeManager] Saved theme:", savedTheme);
+  // Gather layout settings
+  const layoutSettings = saveLayout ? {
+    "--entriviaQuestion-Y": getComputedStyle(document.documentElement).getPropertyValue("--entriviaQuestion-Y"),
+    "--entriviaQuestion-X": getComputedStyle(document.documentElement).getPropertyValue("--entriviaQuestion-X"),
+    "--entriviaAnnouncement-Y": getComputedStyle(document.documentElement).getPropertyValue("--entriviaAnnouncement-Y"),
+    "--entriviaAnnouncement-X": getComputedStyle(document.documentElement).getPropertyValue("--entriviaAnnouncement-X"),
+    "--twitchchat-Y": getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-Y"),
+    "--twitchchat-X": getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-X"),
+  } : {};
 
-    if (savedTheme) {
-      this.setTheme(savedTheme);
-      console.log("[ThemeManager] Theme applied:", savedTheme);
-    } else {
-      console.log("[ThemeManager] No saved theme found. Proceeding with default theme.");
-    }
+  // Save both theme and layout
+  const themeSettings = {
+    themeName,
+    layout: layoutSettings,
+  };
 
-    this.applySavedLayout();
+  localStorage.setItem("themeSettings", JSON.stringify(themeSettings));
+  console.log("Saved theme settings:", themeSettings);
+}
+window.addEventListener("DOMContentLoaded", () => {
+  const savedSettings = JSON.parse(localStorage.getItem("themeSettings"));
+  if (savedSettings) {
+    // Set the theme
+    document.body.className = savedSettings.themeName;
 
-    // Handle theme button clicks
-    document.querySelectorAll(".themeselect").forEach(button => {
-      button.addEventListener("click", () => {
-        const theme = button.id.replace("-themeButt", "");  // Adjusting for the exact match of 'themeButt'
-        console.log(`[ThemeManager] Theme button clicked: ${theme}`);
-        this.setTheme(theme); // Call setTheme
-      });
+    // Set all layout variables
+    const layout = savedSettings.layout || {};
+    Object.entries(layout).forEach(([varName, value]) => {
+      document.documentElement.style.setProperty(varName, value);
     });
-  },
 
-  setTheme(themeName) {
-    console.log(`[ThemeManager] Setting theme: ${themeName}`);
-    // Save to localStorage
-    localStorage.setItem("theme", themeName);
-    
-    // Apply theme class to the <body> element (to control theme-related styles)
-    document.body.className = themeName; // Set theme class on the <body> tag
-    
-    console.log(`[ThemeManager] Theme set to: ${themeName}`);
-    console.log(`[ThemeManager] theme saved to localStorage: ${localStorage.getItem("theme")}`);
-  },
-
-  getTheme() {
-    const theme = localStorage.getItem("theme");
-    console.log(`[ThemeManager] Retrieved theme from localStorage: ${theme}`);
-    return theme;
-  },
-
-  saveLayoutVariable(varName, value) {
-    console.log(`[ThemeManager] Saving layout variable: ${varName} = ${value}`);
-    document.documentElement.style.setProperty(varName, value); // Apply positioning/layout variable to <html>
-    localStorage.setItem(varName, value);
-    console.log(`[ThemeManager] Layout variable saved: ${varName} = ${value}`);
-  },
-
-  applySavedLayout() {
-    console.log("[ThemeManager] Applying saved layout...");
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith("--")) {  // Apply layout variables (those starting with --)
-        const value = localStorage.getItem(key);
-        console.log(`[ThemeManager] Applying layout variable: ${key} = ${value}`);
-        document.documentElement.style.setProperty(key, value); // Apply to <html>
-      }
-    }
-  },
-
-  getSetting(key) {
-    const value = localStorage.getItem(key);
-    console.log(`[ThemeManager] Retrieved setting for ${key}: ${value}`);
-    return value;
+    console.log("Loaded saved theme settings:", savedSettings);
   }
-};
+});
+function updateLayoutVariable(varName, value) {
+  document.documentElement.style.setProperty(varName, value);
+
+  // Save new layout only (but keep the current theme name)
+  const currentSettings = JSON.parse(localStorage.getItem("themeSettings")) || {};
+  const themeName = currentSettings.themeName || document.body.className || "";
+
+  const newSettings = {
+    themeName,
+    layout: {
+      ...(currentSettings.layout || {}),
+      [varName]: value
+    }
+  };
+
+  localStorage.setItem("themeSettings", JSON.stringify(newSettings));
+}
+slider.addEventListener("input", () => {
+  const value = slider.value + "%"; // or "px" depending on the variable
+  updateLayoutVariable("--entriviaQuestion-Y", value);
+});
+document.getElementById("entriviaQuestionY").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--entriviaQuestion-Y"));
+document.getElementById("entriviaQuestionX").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--entriviaQuestion-Y"));
+document.getElementById("entriviaAnnouncementY").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--entriviaAnnouncement-Y"));
+document.getElementById("entriviaAnnouncementX").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--entriviaAnnouncement-Y"));
+document.getElementById("twitchchatY").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-Y"));
+document.getElementById("twitchchatX").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-Y"));
