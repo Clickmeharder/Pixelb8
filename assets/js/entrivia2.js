@@ -1831,7 +1831,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 //-------------------------------------------------------
 	// Command-based settings updates
 	//example cmd to add question:
-	//!entrivia-addquestion easy/hard | economy | what does ped stand for | project entropia dollar
+	//!entrivia-addquestion easy | mining | What is the most valuable ore? | Platinum
 	if (command.toLowerCase() === "entrivia-addquestion") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
@@ -1882,7 +1882,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
 		// Add the custom entrivia question with the selected category and options
 		addCustomentriviaQuestion(round, questionText, correctAnswer, category, type, options);
-
 		// Confirm success
 		displayentriviaMessage(user, `✅ Custom question added to ${round} (${category})!`, flags, extra, true);
 	}
