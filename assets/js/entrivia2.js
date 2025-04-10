@@ -1831,7 +1831,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 //-------------------------------------------------------
 	// Command-based settings updates
 	//example cmd to add question:
-	//!entrivia-addquestion easy | mining | What is the most valuable ore? | Platinum
+	//!entrivia-addquestion easy | mining | What is the least valuable possible mining find? | nrf, no resources found
+	//!entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4
 	if (command.toLowerCase() === "entrivia-addquestion") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
@@ -1980,7 +1981,14 @@ const streamercommands = [
 	{ command: "!togglequestions", description: "Toggles the visibility of the question wrapper.", usage: "!togglequestions" },
 	{ command: "!toggleentrivia", description: "Toggles the visibility of the entrivia wrapper.", usage: "!toggleentrivia" },
 	{ command: "!togglechat", description: "Toggles the visibility of the Twitch chat container.", usage: "!togglechat" },
-	{ command: "!entrivia-addquestion", description: "Allows the streamer to add a custom entrivia question.", usage: "!entrivia-addquestion easy/hard | economy | what does ped stand for | project entropia dollar" },
+	{
+        command: "!entrivia-addquestion",
+        description: "Allows the streamer to add a custom entrivia question.",
+        usage: `!entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4\n
+        !entrivia-addquestion easy | mining | What is a question with only one correct answer | my answer\n
+        !entrivia-addquestion easy | mining | What is a question with multiple possible answers? | nrf, no resources found\n
+        !entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4`
+    },
 	{ command: "!entrivia-answertime", description: "Updates the answer time limit.", usage: "!entrivia-answertime [time]" },
 	{ command: "!entrivia-questiondelay", description: "Updates the question delay between questions.", usage: "!entrivia-questiondelay [delay]" },
 	{ command: "!entrivia-rounddelay", description: "Updates the delay between rounds.", usage: "!entrivia-rounddelay [delay]" },
@@ -1991,68 +1999,76 @@ const streamercommands = [
 
 // Function to update the command list in the UI
 function updateCommandlist() { 
-	// Get the respective <ul> elements
-	const userCommandList = document.getElementById("usercommandList");
-	const broadcasterCommandList = document.getElementById("broadcastercommandList");
+    // Get the respective <ul> elements
+    const userCommandList = document.getElementById("usercommandList");
+    const broadcasterCommandList = document.getElementById("broadcastercommandList");
 
-	// Add user commands to the user command list
-	usercommands.forEach(function(command) {
-		const description = document.createElement("p");
+    // Add user commands to the user command list
+    usercommands.forEach(function(command) {
+        const description = document.createElement("p");
 
-		// Create and set up the <strong>
-		const strong = document.createElement("strong");
-		strong.textContent = command.command;
+        // Create and set up the <strong>
+        const strong = document.createElement("strong");
+        strong.textContent = command.command;
 
-		// Create the usage span
-		const usageSpan = document.createElement("span");
-		usageSpan.classList.add("command-info");
-		usageSpan.setAttribute("title", "Usage: " + command.usage);
-		usageSpan.textContent = "❓";
+        // Create the usage span
+        const usageSpan = document.createElement("span");
+        usageSpan.classList.add("command-info");
+        usageSpan.setAttribute("title", "Usage: " + command.usage);
+        usageSpan.textContent = "❓";
 
-		// Style it to float right
-		usageSpan.style.cssFloat = "right"; // or just use a CSS class
+        // Style it to float right
+        usageSpan.style.cssFloat = "right"; // or just use a CSS class
 
-		// Append elements to the <p>
-		description.appendChild(usageSpan);
-		description.appendChild(strong);
-		description.append(": " + command.description);
+        // Append elements to the <p>
+        description.appendChild(usageSpan);
+        description.appendChild(strong);
+        description.append(": " + command.description);
 
-		// Create the <li> and add the description
-		const li = document.createElement("li");
-		li.appendChild(description);
-		// Append to the user command list
-		userCommandList.appendChild(li);
-	});
+        // Create the <li> and add the description
+        const li = document.createElement("li");
+        li.appendChild(description);
+        // Append to the user command list
+        userCommandList.appendChild(li);
+    });
 
-	// Add broadcaster commands to the broadcaster command list
-	streamercommands.forEach(function(command) {
-		const description = document.createElement("p");
+    // Add broadcaster commands to the broadcaster command list
+    streamercommands.forEach(function(command) {
+        const description = document.createElement("p");
 
-		// Create and set up the <strong>
-		const strong = document.createElement("strong");
-		strong.textContent = command.command;
+        // Create and set up the <strong>
+        const strong = document.createElement("strong");
+        strong.textContent = command.command;
 
-		// Create the usage span
-		const usageSpan = document.createElement("span");
-		usageSpan.classList.add("command-info");
-		usageSpan.setAttribute("title", "Usage: " + command.usage);
-		usageSpan.textContent = "❓";
+        // Create the usage span
+        const usageSpan = document.createElement("span");
+        usageSpan.classList.add("command-info");
+        usageSpan.setAttribute("title", "Usage: " + command.usage);
+        usageSpan.textContent = "❓";
 
-		// Style it to float right
-		usageSpan.style.cssFloat = "right"; // or just use a CSS class
+        // Style it to float right
+        usageSpan.style.cssFloat = "right"; // or just use a CSS class
 
-		// Append elements to the <p>
-		description.appendChild(usageSpan);
-		description.appendChild(strong);
-		description.append(": " + command.description);
+        // Append elements to the <p>
+        description.appendChild(usageSpan);
+        description.appendChild(strong);
+        description.append(": " + command.description);
 
-		// Create the <li> and add the description
-		const li = document.createElement("li");
-		li.appendChild(description);
+        // Handle multi-line usage
+        const usageLines = command.usage.split("\n");
+        usageLines.forEach(line => {
+            const usageLine = document.createElement("p");
+            usageLine.textContent = line;  // Add each line of the usage as a new paragraph
+            description.appendChild(usageLine);
+        });
 
-		// Add to the list
-		broadcasterCommandList.appendChild(li);
-	});
+        // Create the <li> and add the description
+        const li = document.createElement("li");
+        li.appendChild(description);
+
+        // Add to the list
+        broadcasterCommandList.appendChild(li);
+    });
 }
 
 // Function to dynamically add command spans based on the `data-option`
@@ -2091,6 +2107,26 @@ function updateTwitchCommandInfo() {
             // Append the spans to the current element
             element.appendChild(commandTextSpan);
             element.appendChild(commandInfoSpan);
+
+            // Check if this command has multiple usage examples
+            if (command.command === '!entrivia-addquestion') {
+                const usageExamples = [
+                    "!entrivia-addquestion easy | mining | What is a question with only one correct answer | my answer",
+                    "!entrivia-addquestion easy | mining | What is a question with multiple possible answers? | nrf, no resources found",
+                    "!entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4"
+                ];
+
+                // Add a list of usage examples below the command
+                const examplesList = document.createElement('ul');
+                usageExamples.forEach(example => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = example;
+                    examplesList.appendChild(listItem);
+                });
+
+                // Append the examples list after the command info
+                element.appendChild(examplesList);
+            }
         }
     });
 }
