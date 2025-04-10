@@ -384,13 +384,20 @@ function updateAnswerDisplay() {
         const question = customQuestions[round][category][index];
         const answerDisplay = document.getElementById('answerDisplay');
 
-        // Show the question details
-        answerDisplay.innerHTML = `
+        // Start constructing the answer display
+        let answerHtml = `
             <strong>Question:</strong> ${question.question} <br>
             <strong>Answer:</strong> ${Array.isArray(question.answer) ? question.answer.join(', ') : question.answer} <br>
             <strong>Type:</strong> ${question.type} <br>
-            <strong>Options:</strong> ${question.options.join(', ')} <br>
         `;
+
+        // Only show options if the question type is 'multiplechoice'
+        if (question.type === 'multiplechoice') {
+            answerHtml += `<strong>Options:</strong> ${question.options.join(', ')} <br>`;
+        }
+
+        // Insert the answer HTML into the display
+        answerDisplay.innerHTML = answerHtml;
     }
 }
 
