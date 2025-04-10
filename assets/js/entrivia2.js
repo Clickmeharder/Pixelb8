@@ -1424,6 +1424,7 @@ function AskQuestion2(round = null, category = null, type = null) {
 }
 
 function displayMultipleChoiceOptions(optionsArray) {
+	document.getElementById("questionWrapper").style.visibility = "visible";
     const questionElement = document.getElementById("question");
     let optionsDiv = document.querySelector(".answeroptions");
     // If it doesn't exist, create and append it
