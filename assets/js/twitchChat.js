@@ -260,9 +260,8 @@ function setStreamer(newStreamer) {
 function connectStreamer() {
     const savedStreamer = localStorage.getItem("lastStreamer");
     if (savedStreamer) {
-        setStreamer(savedStreamer); // Auto-connect
-		console.log("last streamer:" + savedStreamer)
-		console.log("attempting to autoConnect to:" + savedStreamer)
+		console.log(`Last streamer: ${savedStreamer}, Attempting to autoConnect to: ${savedStreamer}`);
+		setStreamer(savedStreamer); // Auto-connect
     }
 }
 function disconnectBot() {
