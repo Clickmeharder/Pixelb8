@@ -497,7 +497,6 @@ function showAnnouncement(message, entriviaAnnouncementTime) {
 
             const countdownInterval = setInterval(() => {
                 roundStartTimer.innerText = `${entriviaAnnouncementTime} seconds`;
-				console.log("announcement made: ","message", ` ${entriviaAnnouncementTime} seconds`);
                 // Decrease entriviaAnnouncementTime
                 entriviaAnnouncementTime--;
 
@@ -872,21 +871,23 @@ function checkAnswer(user, message) {
                 entriviaSingleAskLastWinner = user;  // Store the last winner
                 entriviaSingleAskWinners.push(user);  // Add to winners list
                 userStats[user].correctAnswers++;  // Increment correct answers for the user
-                playSound("entriviafirstcorrect");
+
 				let questionCounterElement = document.getElementById("question-counter");
 				let winnerColor = userColors[entriviaSingleAskLastWinner] || "#FFFFFF"; // Default white if not found
 				let answerText = Array.isArray(activeQuestion.answers) 
 				  ? activeQuestion.answers.join(", ") // Join answers if it's an array
 				  : activeQuestion.answers;
-				questionCounterElement.innerHTML = `Winner: <span style="color: ${winnerColor};">${entriviaSingleAskLastWinner}</span>`;
-				document.getElementById("question").textContent = ` Answer was: ${answerText}`;
-                return true; // First correct answer counts
-				// Run endAsk() 3 seconds after returning true
+				playSound("entriviafirstcorrect");
+
                 setTimeout(() => {
                     endAsk();  // Call endAsk after the delay
-					console.log("answered correctly and called endask 3 seconds after returning true");
+					questionCounterElement.innerHTML = `Winner: <span style="color: ${winnerColor};">${entriviaSingleAskLastWinner}</span>`;
+					document.getElementById("question").textContent = ` Answer was: ${answerText}`;
+					// Run endAsk() 3 seconds after returning true
+					console.log("answered correctly and called endask 3 seconds after answer");
 
                 }, 3000); // 3000 milliseconds = 3 seconds
+				return true; // First correct answer counts
 
             } else {
                 // If the answer is incorrect, play the wrong sound but don't mark as correct
