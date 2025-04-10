@@ -643,7 +643,6 @@ function getRandomQuestion() {
 			type: question.type,
 			options: []  // No options for singlechoice
 		};
-	}
     } else if (question.type === "multiplechoice") {
         // Multiplechoice: Only one correct answer, options provided
         let correctAnswer = question.answers ? question.answers.split(';')[0] : [question.answers]; // Only one correct answer
