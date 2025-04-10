@@ -1984,10 +1984,11 @@ const streamercommands = [
 	{
         command: "!entrivia-addquestion",
         description: "Allows the streamer to add a custom entrivia question.",
-        usage: `!entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4\n
-        !entrivia-addquestion easy | mining | What is a question with only one correct answer | my answer\n
-        !entrivia-addquestion easy | mining | What is a question with multiple possible answers? | nrf, no resources found\n
-        !entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4`
+        usage: `Usage Examples:
+!entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4\n
+!entrivia-addquestion easy | mining | What is a question with only one correct answer | my answer\n
+!entrivia-addquestion easy | mining | What is a question with multiple possible answers? | nrf, no resources found\n
+!entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4`
     },
 	{ command: "!entrivia-answertime", description: "Updates the answer time limit.", usage: "!entrivia-answertime [time]" },
 	{ command: "!entrivia-questiondelay", description: "Updates the question delay between questions.", usage: "!entrivia-questiondelay [delay]" },
