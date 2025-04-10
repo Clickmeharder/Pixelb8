@@ -268,12 +268,12 @@ function addCustomentriviaQuestion(round, questionText, correctAnswer, category,
         customQuestions[round][category] = [];
     }
 
-    // Ensure the answer is always stored as an array
-    let formattedAnswer = Array.isArray(correctAnswer) ? correctAnswer : [correctAnswer];
+    // Ensure the correctAnswer is always an array (even if a single answer is input)
+    let formattedAnswer = Array.isArray(correctAnswer) ? correctAnswer : correctAnswer.split(',').map(opt => opt.trim()).filter(opt => opt);
 
     let newQuestion = {
         question: questionText,
-        answer: formattedAnswer,
+        answer: formattedAnswer,  // Store the correct answer as an array
         category: category,
         type: type,  // 'singlechoice' or 'multiplechoice'
         options: options // optional, mostly for multiple choice
@@ -337,19 +337,26 @@ function submitQuestions() {
     const questionText = document.getElementById('questionText').value;
     const correctAnswer = document.getElementById('correctAnswer').value;
     const type = document.getElementById('questionType').value; // New type input
+
     // Handle multiple choice options if selected
     let options = [];
     if (type === 'multiplechoice') {
         const optionsInput = document.getElementById('answerOptions').value;
         options = optionsInput.split(',').map(opt => opt.trim()).filter(opt => opt); // Clean the options input
     }
+
+    // Ensure the correct answer is always an array, even if it's a single answer
+    let formattedCorrectAnswer = correctAnswer.split(',').map(opt => opt.trim()).filter(opt => opt);
+
     // Check if required fields are filled
-    if (!questionText || !correctAnswer) {
-        displayentriviaMessage("error!", "Please fill in both the question and the answer.", {}, {});
+    if (!questionText || formattedCorrectAnswer.length === 0) {
+        displayentriviaMessage("error!", "Please fill in both the question and at least one correct answer.", {}, {});
         return;
     }
+
     // Call function to add the custom trivia question
-    addCustomentriviaQuestion(round, questionText, correctAnswer, category, type, options);
+    addCustomentriviaQuestion(round, questionText, formattedCorrectAnswer, category, type, options);
+
     // Clear the form after submission
     document.getElementById('questionText').value = '';
     document.getElementById('correctAnswer').value = '';
