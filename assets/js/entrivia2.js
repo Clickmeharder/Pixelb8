@@ -1999,6 +1999,7 @@ const streamercommands = [
 ];
 
 // Function to update the command list in the UI
+// Function to update the command list in the UI
 function updateCommandlist() { 
     // Get the respective <ul> elements
     const userCommandList = document.getElementById("usercommandList");
@@ -2057,9 +2058,18 @@ function updateCommandlist() {
 
         // Handle multi-line usage
         const usageLines = command.usage.split("\n");
-        usageLines.forEach(line => {
+        usageLines.forEach((line, index) => {
             const usageLine = document.createElement("p");
             usageLine.textContent = line;  // Add each line of the usage as a new paragraph
+
+            // Add a divider (border) between usage lines
+            if (index !== usageLines.length - 1) {
+                const divider = document.createElement("div");
+                divider.style.borderTop = "1px solid inherit";  // Inherited border color from parent
+                divider.style.margin = "8px 0"; // Adds spacing around the divider
+                description.appendChild(divider);
+            }
+
             description.appendChild(usageLine);
         });
 
@@ -2071,6 +2081,7 @@ function updateCommandlist() {
         broadcasterCommandList.appendChild(li);
     });
 }
+
 
 // Function to dynamically add command spans based on the `data-option`
 function updateTwitchCommandInfo() {
