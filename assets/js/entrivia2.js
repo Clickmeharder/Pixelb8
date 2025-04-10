@@ -842,6 +842,7 @@ function nextquestionTimer(seconds) {
 	document.getElementById("timeuntil-nextQ").textContent = `Next question in: ${minutes}m ${remainingSeconds}s`;
 }
 function checkAnswer(user, message) {
+	console.log("activeQuestion returns as: " + activeQuestion);
     if (!activeQuestion) return; // No active question, ignore answer
     if (answeredUsers.has(user)) return; // Ignore duplicate correct answers
 	let correctAnswers;
