@@ -403,7 +403,7 @@ function clearAllCustomQuestions() {
     console.log("✅ All custom entrivia questions have been deleted.");
 }
 clearAllCustomQuestions();
-addCustomentriviaQuestion(
+/* addCustomentriviaQuestion(
   "round1",
   "Name something you might wear on your feet.",
   ["Shoes", "Sandals", "Boots", "Socks"],
@@ -425,7 +425,7 @@ addCustomentriviaQuestion(
   "misc",
   "singlechoice"
 );
-
+ */
 // Clear existing questions
 // uncomment these two commands to clear all custom questions:
 //clearAllCustomQuestions();
