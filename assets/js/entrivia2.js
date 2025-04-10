@@ -585,48 +585,62 @@ function entriviaNosplash() {
             });
     });
 }
-function getRandomQuestion() {
-    const currentRound = round === 1 ? "round1" : round === 2 ? "round2" : null;
-    if (!currentRound || !entriviaQuestions || !entriviaQuestions[currentRound]) {
-        console.error(`❌ Invalid round or no questions found for ${currentRound}`);
+function getRandomQuestionCurrentRound(round = null) {
+    // Ensure that a valid round is passed in
+    if (!round || !entriviaQuestions || !entriviaQuestions[round]) {
+        console.error("❌ Invalid round. Please specify a valid round (round1 or round2).");
         return null;
     }
-    // Gather all questions from all categories in the current round
+
+    console.log(`🔍 Fetching random question from ${round}...`);
+
+    // Get all questions for the current round
     let availableQuestions = [];
-    Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
-        availableQuestions = availableQuestions.concat(categoryQuestions.filter(q => !usedQuestions.includes(q)));
+    Object.values(entriviaQuestions[round]).forEach(categoryQuestions => {
+        availableQuestions = availableQuestions.concat(categoryQuestions);
     });
-    // If no questions are available, reset used questions and try again
+
+    // If no questions are found in the round, reset and try again
     if (availableQuestions.length === 0) {
-        usedQuestions = [];
-        Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
-            availableQuestions = availableQuestions.concat(categoryQuestions);
-        });
-    }
-    if (availableQuestions.length === 0) {
-        console.warn("⚠ No available questions after reset.");
+        console.warn("⚠️ No available questions for this round.");
         return null;
     }
-    const question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-    usedQuestions.push(question);
-    // Handle different question types
-    let parsedQuestion = {
-        question: question.question?.replace(/^"(.*)"$/, "$1"), // remove wrapping quotes
-        type: question.type
-    };
+
+    // Pick a random question
+    let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+
+    // Validate question format
+    if (!question || !question.question || !question.answers || !question.type) {
+        console.error("❌ Invalid question format:", question);
+        return null;
+    }
+
+    // Handle question answers and options based on the type
     if (question.type === "singlechoice") {
-        parsedQuestion.answer = question.answers ? question.answers.split(';').map(a => a.trim()) : [];
-        parsedQuestion.options = []; // No options shown
+        // For singlechoice, answers can be multiple correct answers (separated by semicolons)
+        let answers = question.answers ? question.answers.split(';') : [];
+        return {
+            question: question.question,
+            answer: answers, // Multiple possible correct answers
+            type: question.type,
+            options: [] // No options for singlechoice
+        };
     } else if (question.type === "multiplechoice") {
-        parsedQuestion.answer = question.answers ? question.answers.split(';')[0].trim() : null;
-        parsedQuestion.options = question.options ? question.options.split(';').map(o => o.trim()) : [];
+        // For multiplechoice, only one correct answer exists, with multiple options
+        let correctAnswer = question.answers ? question.answers.split(';')[0] : null;
+        let options = question.options ? question.options.split(';') : [];
+        return {
+            question: question.question,
+            answer: correctAnswer, // Only one correct answer
+            type: question.type,
+            options: options // Options are relevant for multiplechoice
+        };
     } else {
-        console.error("❌ Unknown question type:", question);
+        console.error("❌ Invalid question type:", question);
         return null;
     }
-    console.log("✅ Parsed question:", parsedQuestion);
-    return parsedQuestion;
 }
+
 function getRandomQuestionCurrentRound(round = null, category = null, type = null) {
     console.log("🔍 Starting getRandomQuestionCurrentRound with round =", round, "category =", category, "type =", type);
 
