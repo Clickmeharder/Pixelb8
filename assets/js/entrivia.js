@@ -191,29 +191,23 @@ function fetchentriviaQuestions() {
                 })
                 .catch(error => console.error('Error fetching questions:', error))
             : Promise.resolve();
-
         fetchDefaultQuestions.then(() => {
             let finalQuestions = { round1: {}, round2: {} };
-
             function mergeQuestions(target, source) {
                 for (const category in source) {
                     if (!target[category]) target[category] = [];
                     target[category] = target[category].concat(source[category] || []);
                 }
             }
-
             if (usedefaultquestions) {
                 mergeQuestions(finalQuestions.round1, defaultQuestions.round1);
                 mergeQuestions(finalQuestions.round2, defaultQuestions.round2);
             }
-
             if (usecustomquestions) {
                 mergeQuestions(finalQuestions.round1, customQuestions.round1);
                 mergeQuestions(finalQuestions.round2, customQuestions.round2);
             }
-
             entriviaQuestions = finalQuestions;
-
             console.log("📜 entrivia questions loaded:", entriviaQuestions);
             resolve(entriviaQuestions);
         });
@@ -1226,7 +1220,6 @@ function startentriviaAsk() {
     }
 	displayConsoleMessage("system", "entrivia ask continues");
     console.log("entrivia should splash and fetch questions");
-
     askSplash() // Run splash first
         .then(() => fetchentriviaQuestions()) // Fetch questions after splash
         .then(questions => {
