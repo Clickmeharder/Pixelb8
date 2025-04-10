@@ -443,8 +443,9 @@ function clearAllCustomQuestions() {
     localStorage.removeItem("customentriviaQuestions");
     console.log("✅ All custom entrivia questions have been deleted.");
 }
-clearAllCustomQuestions();
-/* addCustomentriviaQuestion(
+
+/* clearAllCustomQuestions();
+addCustomentriviaQuestion(
   "round1",
   "Name something you might wear on your feet.",
   ["Shoes", "Sandals", "Boots", "Socks"],
