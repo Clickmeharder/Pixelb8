@@ -2072,8 +2072,8 @@ function updateCommandlist() {
             // Add a divider after each usage example except the last one
             if (index < usageExamples.length - 1) {
                 const divider = document.createElement("div");
-                divider.style.borderTop = "1px solid inherit";  // Inherited border color from parent
-                divider.style.margin = "8px 0"; // Adds spacing around the divider
+                divider.style.borderTop = "2px ridge var(--border-color)";  // Inherited border color from parent
+                divider.style.margin = "4px 0"; // Adds spacing around the divider
                 description.appendChild(divider);
             }
         });
