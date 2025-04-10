@@ -590,21 +590,41 @@ function entriviaNosplash() {
     });
 }
 
-function getRandomQuestion(round, category) {
-    if (!entriviaQuestions || !entriviaQuestions[round] || !entriviaQuestions[round][category]) {
-        console.warn("No questions found for:", round, category);
+function getRandomQuestion() {
+    // Normalize the current round
+    const currentRound = 
+        (round === 1 || round === "round1") ? "round1" :
+        (round === 2 || round === "round2") ? "round2" :
+        (round === null || round === undefined) ? "round1" : `round${round}`;
+    // Ensure the round exists in the data
+    if (!entriviaQuestions || !entriviaQuestions[currentRound]) {
+        console.warn("No such round in questions:", currentRound);
         return null;
     }
-    const questions = entriviaQuestions[round][category];
-    if (questions.length === 0) return null;
+    // Get all categories for this round
+    const availableCategories = Object.keys(entriviaQuestions[currentRound]);
+    if (availableCategories.length === 0) {
+        console.warn("No categories in round:", currentRound);
+        return null;
+    }
+    // Pick a random category
+    const randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)];
+    const questions = entriviaQuestions[currentRound][randomCategory];
+    if (!questions || questions.length === 0) {
+        console.warn("No questions found in category:", randomCategory);
+        return null;
+    }
+    // Pick a random question
     const randomIndex = Math.floor(Math.random() * questions.length);
     const question = questions[randomIndex];
     return {
         question: question.question,
-        answers: question.answers,        // Already an array
-        rawanswer: question.rawanswer,    // Optional, if you want to display it
+        answers: question.answers,         // Already an array (from fetch parsing)
+        rawanswer: question.rawanswer || question.answers.join(';'),  // fallback if needed
         type: question.type,
-        options: question.options || []
+        options: question.options || [],
+        round: currentRound,
+        category: randomCategory
     };
 }
 fetchentriviaQuestions();
