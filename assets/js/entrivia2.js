@@ -1302,23 +1302,14 @@ function endAsk() {
     }, 13000); // Delay timeout of 13 seconds to wait before checking
 }
 
-
-function AskQuestion2(round = null, category = null, type = null) {
+function AskQuestion(round = null, category = null, type = null) {
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
     answeredUsers.clear();
     firstAnswerUser = null;
 
-    // Check if all parameters are provided; otherwise, handle defaults
-    if (round && category && type) {
-        activeQuestion = getRandomQuestion(round, category, type);
-    } else if (round && category) {
-        activeQuestion = getRandomQuestion(round, category); // Type is optional
-    } else if (type) {
-        activeQuestion = getRandomAsk(type); // Use type, no round or category needed
-    } else {
-        activeQuestion = getRandomAsk(); // No parameters, fallback to random question
-    }
+    // Use getFilteredRandomQuestion for all cases
+    activeQuestion = getFilteredRandomQuestion(round, category, type);
 
     if (!activeQuestion) {
         console.error("❌ No question found for the specified round, category, or type.");
@@ -1348,7 +1339,8 @@ function AskQuestion2(round = null, category = null, type = null) {
         }
     }, 1000);
 }
-function AskQuestion(round = null, category = null, type = null) {
+
+function AskQuestion2(round = null, category = null, type = null) {
     clearTimeout(questionTimer);
     clearTimeout(hideQuestionTimer);
     answeredUsers.clear();
@@ -1402,6 +1394,7 @@ function AskQuestion(round = null, category = null, type = null) {
         }
     }, 1000);
 }
+
 
 function displayMultipleChoiceOptions(optionsArray) {
     const questionElement = document.getElementById("question");
