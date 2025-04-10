@@ -1313,6 +1313,7 @@ function endAsk() {
     }, 13000); // Delay timeout of 13 seconds to wait before checking
 }
 function AskQuestion(round = null, category = null, type = null) {
+	console.log(" ❌❌❌❌AskQuestion❌❌❌❌");
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
     answeredUsers.clear();
@@ -1351,6 +1352,7 @@ function AskQuestion(round = null, category = null, type = null) {
 }
 
 function AskQuestion2(round = null, category = null, type = null) {
+	console.log(" ❌❌❌❌AskQuestion2❌❌❌❌");
     clearTimeout(questionTimer);
     clearTimeout(hideQuestionTimer);
     answeredUsers.clear();
