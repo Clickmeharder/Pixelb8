@@ -1373,6 +1373,7 @@ function AskQuestion2(round = null, category = null, type = null) {
 
     // If it's a multiple-choice question, show the options
     if (activeQuestion.type === "multiplechoice" && activeQuestion.options && activeQuestion.options.length > 0) {
+		const questionElement = document.getElementById("question");
         const optionsHTML = activeQuestion.options.map(option => {
             return `<div class="option">${option}</div>`;
         }).join("");
