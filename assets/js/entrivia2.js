@@ -1433,7 +1433,6 @@ function startentriviaAsk(round = null, category = null, type = null) {
         .then(questions => {
             singleActiveAsk = "Active"; // Mark entrivia as started
             window.entriviaQuestions = questions;
-            console.log("singleActiveAsk = " + singleActiveAsk);
 			console.log("parameters given =" + round + category + type);
             displayConsoleMessage("system", `singleActiveAsk = ${singleActiveAsk}`);
             // Use the passed round, category, and type, or choose random if none provided
