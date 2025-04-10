@@ -585,8 +585,9 @@ function entriviaNosplash() {
             });
     });
 }
-function getRandomQuestionCurrentRound(round = null) {
+function getRandomQuestionCurrentRound() {
     // Ensure that a valid round is passed in
+	
     if (!round || !entriviaQuestions || !entriviaQuestions[round]) {
         console.error("❌ Invalid round. Please specify a valid round (round1 or round2).");
         return null;
