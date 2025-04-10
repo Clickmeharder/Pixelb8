@@ -1708,6 +1708,10 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
     }
 	if (command === "a" || command === "answer") {
+		if (!activeQuestion) {
+			console.log("No active question. activeQuestion returns as:" + activeQuestion );
+			return;  // Exit early if no active question
+		}
 		let answer = message.trim();  // Extract the answer
 		let isCorrect = checkAnswer(user, answer);  // Check if the answer is correct
 		// Display the answer in chat regardless of whether it's correct or incorrect
