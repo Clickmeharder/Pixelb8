@@ -1377,67 +1377,6 @@ function AskQuestion(round = null, category = null, type = null) {
         }
     }, 1000);
 }
-
-function AskQuestion2(round = null, category = null, type = null) {
-	console.log(" ❌❌❌❌AskQuestion2❌❌❌❌");
-	console.log(" ❌❌❌❌AskQuestion2❌❌❌❌");
-    clearTimeout(questionTimer); // Clear previous timer if any
-    clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
-    answeredUsers.clear();
-    firstAnswerUser = null;
-
-    // Use getFilteredRandomQuestion for all cases
-    activeQuestion = getFilteredRandomQuestion(round, category, type);
-
-    if (!activeQuestion) {
-        console.error("❌ No question found for the specified round, category, or type.");
-        return;
-    }
-
-    updateQuestionCounter(); // Update the display
-    document.getElementById("question-counter").textContent = `First Correct Answer Wins`;
-    document.getElementById("question").textContent = activeQuestion.question;
-
-    // If it's a multiple-choice question, show the options
-    if (activeQuestion.type === "multiplechoice" && activeQuestion.options && activeQuestion.options.length > 0) {
-		const questionElement = document.getElementById("question");
-        const optionsHTML = activeQuestion.options.map(option => {
-            return `<div class="option">${option}</div>`;
-        }).join("");
-
-        // Append options below the question
-        questionElement.innerHTML += `<div class="options">${optionsHTML}</div>`;
-    }
-    document.getElementById("questionWrapper").style.visibility = "visible";
-    document.getElementById("timer").textContent = timetoAnswer;
-    document.getElementById("timeuntil-nextQ").textContent = "";
-    playRandomQuestionSound();
-
-    let secondsLeft = timetoAnswer;
-    questionTimer = setInterval(() => {
-        secondsLeft--;
-        document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
-        if (secondsLeft <= 0) {
-            endAsk(); // Call your function to end the question once time runs out
-        }
-    }, 1000);
-}
-
-function displayMultipleChoiceOptions(optionsArray) {
-    const questionElement = document.getElementById("question");
-    let optionsDiv = document.querySelector(".answeroptions");
-    // If it doesn't exist, create and append it
-    if (!optionsDiv) {
-        optionsDiv = document.createElement("div");
-        optionsDiv.classList.add("answeroptions");
-        questionElement.appendChild(optionsDiv);
-    }
-    // Fill it with options
-    optionsDiv.innerHTML = optionsArray.map(option => {
-        return `<div class="answeroption">${option}</div>`;
-    }).join("");
-}
-
 function startentriviaAsk(round = null, category = null, type = null) {
     displayConsoleMessage("system", "startentrivia fn called");
     // Prevent starting the game if it's already running
