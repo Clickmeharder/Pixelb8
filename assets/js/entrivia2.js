@@ -585,41 +585,51 @@ function entriviaNosplash() {
             });
     });
 }
-function getRandomQuestionCurrentRound() {
-    // Ensure that a valid round is passed in
-	
-    if (!round || !entriviaQuestions || !entriviaQuestions[round]) {
-        console.error("❌ Invalid round. Please specify a valid round (round1 or round2).");
+
+ function getRandomQuestion() {
+    // Automatically use the current round (you can modify this logic as needed)
+    const currentRound = round;  // Change to "round2" based on your logic for the current round
+
+    // Ensure entriviaQuestions is populated for the current round
+    if (!entriviaQuestions || !entriviaQuestions[currentRound]) {
+        console.error(`❌ No questions found for ${currentRound}`);
         return null;
     }
 
-    console.log(`🔍 Fetching random question from ${round}...`);
-
-    // Get all questions for the current round
     let availableQuestions = [];
-    Object.values(entriviaQuestions[round]).forEach(categoryQuestions => {
+
+    // Collect all available questions for the current round, without filtering by category/type
+    Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
         availableQuestions = availableQuestions.concat(categoryQuestions);
     });
 
-    // If no questions are found in the round, reset and try again
+    // If no questions are found based on the filtering, reset the used questions and retry
     if (availableQuestions.length === 0) {
-        console.warn("⚠️ No available questions for this round.");
+        usedQuestions = []; // Reset when all questions are used
+        Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
+            availableQuestions = availableQuestions.concat(categoryQuestions); // Reload all questions in the round
+        });
+    }
+
+    if (availableQuestions.length === 0) {
+        console.warn("⚠️ No available questions after reset.");
         return null;
     }
 
     // Pick a random question
     let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+    usedQuestions.push(question); // Mark this question as used
 
     // Validate question format
-    if (!question || !question.question || !question.answers || !question.type) {
+    if (!question.question || (question.type !== "multiplechoice" && question.type !== "singlechoice")) {
         console.error("❌ Invalid question format:", question);
         return null;
     }
 
-    // Handle question answers and options based on the type
+    // Adjust answers and options based on the question type
     if (question.type === "singlechoice") {
-        // For singlechoice, answers can be multiple correct answers (separated by semicolons)
-        let answers = question.answers ? question.answers.split(';') : [];
+        // Singlechoice can have multiple correct answers, handle it as an array of answers
+        let answers = question.answers ? question.answers.split(';') : [answers];
         return {
             question: question.question,
             answer: answers, // Multiple possible correct answers
@@ -627,9 +637,9 @@ function getRandomQuestionCurrentRound() {
             options: [] // No options for singlechoice
         };
     } else if (question.type === "multiplechoice") {
-        // For multiplechoice, only one correct answer exists, with multiple options
-        let correctAnswer = question.answers ? question.answers.split(';')[0] : null;
-        let options = question.options ? question.options.split(';') : [];
+        // Multiplechoice has one correct answer and options to choose from
+        let correctAnswer = question.answers ? question.answers.split(';')[0] : null; // Only one correct answer
+        let options = question.options ? question.options.split(';') : [options];
         return {
             question: question.question,
             answer: correctAnswer, // Only one correct answer
@@ -637,6 +647,7 @@ function getRandomQuestionCurrentRound() {
             options: options // Options are relevant for multiplechoice
         };
     } else {
+        // Invalid question type
         console.error("❌ Invalid question type:", question);
         return null;
     }
