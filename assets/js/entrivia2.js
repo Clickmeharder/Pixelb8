@@ -330,7 +330,6 @@ function loadCustomQuestions() {
     addQuestionsToDropdown("round2", customQuestions.round2);
 }
 
-
 function submitQuestions() {
     const round = document.getElementById('round').value;
     const category = document.getElementById('entriviacategory').value;
@@ -388,7 +387,7 @@ function updateAnswerDisplay() {
         // Show the question details
         answerDisplay.innerHTML = `
             <strong>Question:</strong> ${question.question} <br>
-            <strong>Answer:</strong> ${question.answer} <br>
+            <strong>Answer:</strong> ${Array.isArray(question.answer) ? question.answer.join(', ') : question.answer} <br>
             <strong>Type:</strong> ${question.type} <br>
             <strong>Options:</strong> ${question.options.join(', ')} <br>
         `;
