@@ -1266,7 +1266,7 @@ function endentrivia() {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //- ASK SINGLE RANDOM QUESTION
 function askSplash() {
-    return showAnnouncement("Asking Random Question in:", 30)
+    return showAnnouncement("Asking Random Question in:", 10)
         .then(() => {
             showentriviaAsk();  // Show entrivia after the countdown
         })
