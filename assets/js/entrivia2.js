@@ -1217,6 +1217,7 @@ function endentrivia() {
     clearInterval(countdownTimer);
     clearTimeout(hideQuestionTimer);
     entriviaGameState = null;
+	activeQuestion = null;
     questionsAsked = 0;
     round = 1;
     usedQuestions = [];
