@@ -1263,25 +1263,6 @@ function showentriviaAsk() {
     timer.style.animation = "fadeIn 1s ease-in-out forwards";
     timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
 }
-function getRandomAsk(type = null) {
-    let currentRound = round === 1 ? "round1" : "round2";
-    let availableQuestions = entriviaQuestions[currentRound].filter(q => !usedQuestions.includes(q));
-    
-    // Filter by type if provided
-    if (type) {
-        availableQuestions = availableQuestions.filter(q => q.type === type);
-    }
-
-    if (availableQuestions.length === 0) {
-        usedQuestions = []; // Reset when all questions are used
-        availableQuestions = [...entriviaQuestions[currentRound]];
-    }
-
-    let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-    usedQuestions.push(question);
-    return question;
-}
-
 function endAsk() {
     clearInterval(questionTimer);
     // Check if the answer is an array (for multiple answers)
@@ -1400,7 +1381,6 @@ function AskQuestion2(round = null, category = null, type = null) {
     }, 1000);
 }
 
-
 function displayMultipleChoiceOptions(optionsArray) {
     const questionElement = document.getElementById("question");
 
@@ -1419,7 +1399,6 @@ function displayMultipleChoiceOptions(optionsArray) {
         return `<div class="option">${option}</div>`;
     }).join("");
 }
-
 
 function startentriviaAsk(round = null, category = null, type = null) {
     displayConsoleMessage("system", "startentrivia fn called");
