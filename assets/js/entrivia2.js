@@ -646,7 +646,7 @@ function entriviaNosplash() {
         return null;
     }
 }
-
+getRandomQuestion();
 function getRandomQuestionCurrentRound(round = null, category = null, type = null) {
     console.log("🔍 Starting getRandomQuestionCurrentRound with round =", round, "category =", category, "type =", type);
 
