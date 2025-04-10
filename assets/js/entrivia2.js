@@ -864,6 +864,7 @@ function checkAnswer(user, message) {
     if (singleActiveAsk !== null) {
         if (!firstAnswerUser) {
             firstAnswerUser = user;
+			answeredUsers.add(user);
             entriviaSingleAskLastWinner = user;  // Store the last winner
             entriviaSingleAskWinners.push(user);  // Add to winners list
             playSound("entriviafirstcorrect");
@@ -1287,25 +1288,25 @@ function endAsk() {
     let answerText = Array.isArray(activeQuestion.answers) 
         ? activeQuestion.answers.join(", ") // Join answers if it's an array
         : activeQuestion.answers;          // If it's not an array, just use the single answer
-
+    // Get the color for the winner (assuming 'userColors' contains the color mapping)
+    let winnerColor = userColors[entriviaSingleAskLastWinner] || "#FFFFFF"; // Default white if not found
     // Display the correct answer(s) on the screen
+    let questionCounterElement = document.getElementById("question-counter");
+    questionCounterElement.innerHTML = `Winner: <span style="color: ${winnerColor};">${entriviaSingleAskLastWinner}</span>`;
+    // Display the time's up message with the answer
     document.getElementById("question").textContent = `Time's up! Answer was: ${answerText}`;
     document.getElementById("timer").textContent = "";
-
     activeQuestion = null; // Clear the active question
     singleActiveAsk = null; // Reset the game state
-
     // Play sound for time up
     playSound("entriviatimesup");
-
     // Hide the question and show the entrivia board after a timeout
     hideQuestionTimer = setTimeout(() => {
         document.getElementById("questionWrapper").style.visibility = "hidden";
         document.getElementById("entriviaboard").style.visibility = "visible";
-		document.querySelector(".options")?.remove();
+        document.querySelector(".options")?.remove();
     }, 13000); // Delay timeout of 13 seconds to wait before checking
 }
-
 function AskQuestion(round = null, category = null, type = null) {
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
