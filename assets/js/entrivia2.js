@@ -1278,7 +1278,6 @@ function getRandomAsk(type = null) {
 
 function endAsk() {
     clearInterval(questionTimer);
-    
     // Check if the answer is an array (for multiple answers)
     let answerText = Array.isArray(activeQuestion.answers) 
         ? activeQuestion.answers.join(", ") // Join answers if it's an array
