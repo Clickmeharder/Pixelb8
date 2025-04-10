@@ -643,101 +643,67 @@ function getRandomQuestion(round = null, category = null, type = null) {
     };
 }
 function getRandomQuestionCurrentRound(round = null, category = null, type = null) {
-    console.log(`🔍 Starting getRandomQuestionCurrentRound with round=${round}, category=${category}, type=${type}`);
+    console.log("🔍 Starting getRandomQuestionCurrentRound with round =", round, "category =", category, "type =", type);
 
-    // Determine the current round if no round is passed
-    const currentRound = 
-    round === 1 || round === "round1" ? "round1" :
-    round === 2 || round === "round2" ? "round2" :
-    round === null ? "round1" : null;
+    const currentRound = round === 1 ? "round1" : round === 2 ? "round2" : (round === null || round === "round1" || round === "round2") ? round || "round1" : null;
 
-    if (!currentRound) {
-        console.error("❌ Invalid round. Please specify either round 1 or round 2.");
-        return null;
-    }
-
-    // Ensure entriviaQuestions is populated for the current round
-    if (!entriviaQuestions || !entriviaQuestions[currentRound]) {
-        console.error(`❌ No questions found for ${currentRound}`);
+    if (!currentRound || !entriviaQuestions || !entriviaQuestions[currentRound]) {
+        console.error("❌ Invalid round or no data for round:", currentRound);
         return null;
     }
 
     let availableQuestions = [];
 
-    // If category and type are both provided, filter by round, category, and type
     if (category && type) {
-        console.log(`🔍 Filtering by category: ${category} and type: ${type}`);
         if (entriviaQuestions[currentRound][category]) {
             availableQuestions = entriviaQuestions[currentRound][category]
-                .filter(q => q.type === type && !usedQuestions.includes(q)); // Filter by type and exclude used questions
+                .filter(q => q.type === type && !usedQuestions.includes(q));
         }
-    }
-    // If only category is provided, filter by round and category
-    else if (category) {
-        console.log(`🔍 Filtering by category: ${category}`);
+    } else if (category) {
         if (entriviaQuestions[currentRound][category]) {
             availableQuestions = entriviaQuestions[currentRound][category]
-                .filter(q => !usedQuestions.includes(q)); // Filter only by round and category
+                .filter(q => !usedQuestions.includes(q));
         }
-    }
-    // If no category is provided, use all categories in the round
-    else if (round) {
-        console.log(`🔍 Using all categories in round: ${currentRound}`);
+    } else {
         Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
             availableQuestions = availableQuestions.concat(categoryQuestions.filter(q => !usedQuestions.includes(q)));
         });
     }
 
-    // If no questions are found based on the filtering, reset the used questions and retry
     if (availableQuestions.length === 0) {
-        console.log("🔄 No questions found, resetting used questions...");
-        usedQuestions = []; // Reset when all questions are used
+        console.warn("⚠️ No available questions left. Resetting usedQuestions.");
+        usedQuestions = [];
         Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
-            availableQuestions = availableQuestions.concat(categoryQuestions); // Reload all questions in the round
+            availableQuestions = availableQuestions.concat(categoryQuestions);
         });
     }
 
     if (availableQuestions.length === 0) {
-        console.warn("⚠️ No available questions after reset.");
+        console.error("❌ Still no questions available after reset.");
         return null;
     }
 
-    // Pick a random question
-    let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-    usedQuestions.push(question); // Mark this question as used
-    console.log("🔍 Selected Question:", question);
+    const question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+    usedQuestions.push(question);
 
-    // Validate question format
-    if (!question.question || (question.type !== "multiplechoice" && question.type !== "singlechoice")) {
+    if (!question.question || !question.type) {
         console.error("❌ Invalid question format:", question);
         return null;
     }
 
-    // Adjust answers and options based on the question type
-    if (question.type === "singlechoice") {
-        console.log("🔍 Handling singlechoice question");
-        let answers = question.answers ? question.answers.split(';') : [];
-        return {
-            question: question.question,
-            answer: answers, // Multiple possible correct answers
-            type: question.type,
-            options: [] // No options for singlechoice
-        };
-    } else if (question.type === "multiplechoice") {
-        console.log("🔍 Handling multiplechoice question");
-        let correctAnswer = question.answers ? question.answers.split(';')[0] : null; // Only one correct answer
-        let options = question.options ? question.options.split(';') : [];
-        return {
-            question: question.question,
-            answer: correctAnswer, // Only one correct answer
-            type: question.type,
-            options: options // Options are relevant for multiplechoice
-        };
-    } else {
-        // Invalid question type
-        console.error("❌ Invalid question type:", question);
-        return null;
-    }
+    // Parse answers/options
+    let parsedAnswers = question.answers ? question.answers.split(';').map(a => a.trim().toLowerCase()) : [];
+    let parsedOptions = question.options ? question.options.split(';').map(o => o.trim()) : [];
+
+    let result = {
+        question: question.question,
+        answer: question.type === "singlechoice" ? parsedAnswers : parsedAnswers[0], // Array for singlechoice, string for multiple
+        type: question.type,
+        options: question.type === "multiplechoice" ? parsedOptions : []
+    };
+
+    console.log("✅ Final parsed question:", result);
+    return result;
 }
 
 function nextQuestion() {
