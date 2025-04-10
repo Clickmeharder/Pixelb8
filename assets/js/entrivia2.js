@@ -204,9 +204,10 @@ function fetchentriviaQuestions() {
                     parsedData.forEach(row => {
                         let round = row.round.toLowerCase();  // round1 or round2
                         let category = row.category.toLowerCase();  // mining, hunting, etc.
-                        let question = row.question;
-                        let answers = row.answers;
+                        let question = row.question.replace(/\"/g, "").trim(); // Remove quotes and trim
+                        let answers = row.answers.replace(/\"/g, "").trim(); // Clean up answers
                         let type = row.type.toLowerCase();
+                        let options = row.options ? row.options.replace(/\"/g, "").split(';') : []; // Clean options
 
                         // Ensure the round and category exist in the object structure
                         if (!defaultQuestions[round]) defaultQuestions[round] = {};
@@ -217,7 +218,8 @@ function fetchentriviaQuestions() {
                             question: question,
                             answer: answers,
                             type: type,
-                            options: row.options ? row.options.split(';') : []  // Assuming options are separated by ";"
+                            options: options,  // Options are cleaned up
+                            category: category // Add the category to the returned object
                         });
                     });
                 })
@@ -251,6 +253,7 @@ function fetchentriviaQuestions() {
         });
     });
 }
+
 
 function addCustomentriviaQuestion(round, questionText, correctAnswer, category, type = 'singlechoice', options = []) {
     let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
