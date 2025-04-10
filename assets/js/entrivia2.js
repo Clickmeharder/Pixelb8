@@ -630,7 +630,7 @@ function entriviaNosplash() {
     // Adjust answers and options based on the question type
     if (question.type === "singlechoice") {
         // Singlechoice can have multiple correct answers, handle it as an array of answers
-        let answers = question.answers ? question.answers.split(';') : [answers];
+        let answers = question.answers ? question.answers.split(';') : [question.answers];
         return {
             question: question.question,
             answer: answers, // Multiple possible correct answers
@@ -640,7 +640,7 @@ function entriviaNosplash() {
     } else if (question.type === "multiplechoice") {
         // Multiplechoice has one correct answer and options to choose from
         let correctAnswer = question.answers ? question.answers.split(';')[0] : null; // Only one correct answer
-        let options = question.options ? question.options.split(';') : [options];
+        let options = question.options ? question.options.split(';') : [question.options];
         return {
             question: question.question,
             answer: correctAnswer, // Only one correct answer
