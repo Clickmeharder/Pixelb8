@@ -205,7 +205,7 @@ function fetchentriviaQuestions() {
                         let round = row.round.toLowerCase();  // round1 or round2
                         let category = row.category.toLowerCase();  // mining, hunting, etc.
                         let question = row.question;
-                        let answer = row.answer;
+                        let answers = row.answers;
                         let type = row.type.toLowerCase();
 
                         // Ensure the round and category exist in the object structure
@@ -215,9 +215,9 @@ function fetchentriviaQuestions() {
                         // Add the question to the appropriate round and category
                         defaultQuestions[round][category].push({
                             question: question,
-                            answer: answer,
+                            answer: answers,
                             type: type,
-                            options: row.options ? row.options.split('|') : []  // Assuming options are separated by "|"
+                            options: row.options ? row.options.split(';') : []  // Assuming options are separated by ";"
                         });
                     });
                 })
@@ -649,7 +649,6 @@ function getRandomQuestion() {
     }
 }
 fetchentriviaQuestions();
-getRandomQuestion();
 function getRandomQuestionCurrentRound(round = null, category = null, type = null) {
     console.log("🔍 Starting getRandomQuestionCurrentRound with round =", round, "category =", category, "type =", type);
 
