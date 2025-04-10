@@ -646,7 +646,10 @@ function getRandomQuestionCurrentRound(round = null, category = null, type = nul
     console.log(`🔍 Starting getRandomQuestionCurrentRound with round=${round}, category=${category}, type=${type}`);
 
     // Determine the current round if no round is passed
-    const currentRound = round === 1 ? "round1" : round === 2 ? "round2" : (round === null ? "round1" : null);
+    const currentRound = 
+    round === 1 || round === "round1" ? "round1" :
+    round === 2 || round === "round2" ? "round2" :
+    round === null ? "round1" : null;
 
     if (!currentRound) {
         console.error("❌ Invalid round. Please specify either round 1 or round 2.");
