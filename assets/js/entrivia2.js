@@ -633,7 +633,7 @@ function getRandomQuestion(round = null, category = null, type = null) {
     // Pick a random question
     let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
     usedQuestions.push(question); // Mark this question as used
-
+	console.log("✅ Parsed question:", JSON.stringify(question, null, 2));
     // Return the question in the updated format (with type and options if applicable)
     return {
         question: question.question,
@@ -838,9 +838,10 @@ function endQuestion() {
     clearInterval(questionTimer);
     // If the question is multiple choice, display all correct answers
 	if (activeQuestion.type === "singlechoice") {
-		document.getElementById("question").textContent = "Time's up! Correct answers were: " + activeQuestion.answer.join(", ");
+		const answers = Array.isArray(activeQuestion.answer) ? activeQuestion.answer : [activeQuestion.answer];
+		document.getElementById("question").textContent = "Time's up! Correct answers were: " + answers.join(", ");
 	} else {
-		document.getElementById("question").textContent = "Time's up! The correct answer was: " + activeQuestion.answer;
+		document.getElementById("question").textContent = "Time's up! The correct answer was: " + (activeQuestion.answer ?? "???");
 	}
     document.getElementById("timer").textContent = "";
     activeQuestion = null;
@@ -871,9 +872,10 @@ function checkAnswer(user, message) {
     if (!activeQuestion) return; // No active question, ignore answer
     if (answeredUsers.has(user)) return; // Ignore duplicate correct answers
 
-    let correctAnswers = Array.isArray(activeQuestion.answer) ? activeQuestion.answer.map(ans => ans.toLowerCase()) : [activeQuestion.answer.toLowerCase()];
+   let correctAnswers = Array.isArray(activeQuestion.answer)
+  ? activeQuestion.answer.map(ans => ans.toLowerCase())
+  : [activeQuestion.answer?.toLowerCase?.() || ""];
     let userAnswer = message.trim().toLowerCase();
-
     // Initialize userStats[user] to prevent undefined issues
     if (!userStats[user]) {
         userStats[user] = {
