@@ -240,8 +240,10 @@
 					<div class="twitchcmd-info" data-option="!entrivia-customquestions"></div>
 				</div>
 				<div class="controls" id="addCustomQuestionForm">
-					<h3>Add a Custom entrivia Question</h3>
+					<h3>Add a Custom Entrivia Question</h3>
 					<div class="twitchcmd-info" data-option="!entrivia-addquestion"></div>
+
+					<!-- Round Selection -->
 					<div class="inputRow" id="">
 						<label for="round">Round:</label>
 						<select class="a" id="round">
@@ -249,44 +251,55 @@
 							<option value="round2">Round 2</option>
 						</select>
 					</div>
+
+					<!-- Category Selection -->
 					<div class="inputRow" id="">
 						<label for="entriviacategory">Category:</label>
 						<select class="a" id="entriviacategory">
-							<option value="Mining">mining</option>
-							<option value="hunting">hunting</option>
-							<option value="crafting">crafting</option>
-							<option value="history">history</option>
-							<option value="beauty">beauty</option>
-							<option value="economy">economy</option>
-							<option value="social">social</option>
-							<option value="misc">Miscelaneous</option>
+							<option value="Mining">Mining</option>
+							<option value="Hunting">Hunting</option>
+							<option value="Crafting">Crafting</option>
+							<option value="History">History</option>
+							<option value="Beauty">Beauty</option>
+							<option value="Economy">Economy</option>
+							<option value="Social">Social</option>
+							<option value="Miscellaneous">Miscellaneous</option>
 						</select>
 					</div>
 
+					<!-- Question Type Selection -->
 					<div class="inputRow" id="">
 						<select id="questionType">
 							<option value="singlechoice">Single Choice</option>
 							<option value="multiplechoice">Multiple Choice</option>
 						</select>
 					</div>
-					<div class="inputRow" id="">
+
+					<!-- Input for Multiple Choice Options (will show when type is "multiplechoice") -->
+					<div class="inputRow" id="multipleChoiceOptions" style="display: none;">
 						<input class="a" type="text" id="answerOptions" placeholder="Comma-separated options e.g. Apple, Banana, Cherry">
 					</div>
-					<!-- Only needed if multiple choice -->
 
+					<!-- Question Text Input -->
 					<div class="inputRow" id="">
 						<input class="a" type="text" id="questionText" placeholder="Enter your question here" required>
 					</div>
+
+					<!-- Correct Answer Input -->
 					<div class="inputRow" id="">
 						<input class="a" type="text" id="correctAnswer" placeholder="Enter the correct answer" required>
 					</div>
-						<button class="a add" id="submitQuestionBtn">Add Question</button>
+
+					<button class="a add" id="submitQuestionBtn">Add Question</button>
 				</div>
 				<br>
+
+				<!-- Manage Questions (for deletion and viewing) -->
 				<div class="controls" id="manageCustomQuestions">
-					<h3>Manage Custom entrivia Questions</h3>
+					<h3>Manage Custom Entrivia Questions</h3>
 					<label for="questionList">Select Question to Delete:</label>
 					<select class="a" id="questionList"></select>
+
 					<div id="answerDisplay" style="margin-top: 10px;">
 						<strong>Round:</strong> <span id="roundText">-</span><br>
 						<strong>Answer:</strong> <span id="answerText">Select a question to see the answer.</span>

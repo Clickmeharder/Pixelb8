@@ -330,6 +330,33 @@ function loadCustomQuestions() {
     addQuestionsToDropdown("round2", customQuestions.round2);
 }
 
+
+function submitQuestions() {
+    const round = document.getElementById('round').value;
+    const category = document.getElementById('entriviacategory').value;
+    const questionText = document.getElementById('questionText').value;
+    const correctAnswer = document.getElementById('correctAnswer').value;
+    const type = document.getElementById('questionType').value; // New type input
+    // Handle multiple choice options if selected
+    let options = [];
+    if (type === 'multiplechoice') {
+        const optionsInput = document.getElementById('answerOptions').value;
+        options = optionsInput.split(',').map(opt => opt.trim()).filter(opt => opt); // Clean the options input
+    }
+    // Check if required fields are filled
+    if (!questionText || !correctAnswer) {
+        displayentriviaMessage("error!", "Please fill in both the question and the answer.", {}, {});
+        return;
+    }
+    // Call function to add the custom trivia question
+    addCustomentriviaQuestion(round, questionText, correctAnswer, category, type, options);
+    // Clear the form after submission
+    document.getElementById('questionText').value = '';
+    document.getElementById('correctAnswer').value = '';
+    document.getElementById('answerOptions').value = ''; // Clear the options input
+    // Optionally, hide the multiple choice options input after submission
+    document.getElementById('multipleChoiceOptions').style.display = 'none';
+}
 // Function to update the answer display based on the selected question
 function updateAnswerDisplay() {
     const dropdown = document.getElementById('questionList');
@@ -2254,35 +2281,15 @@ document.getElementById("cancelGame").addEventListener("click", function() {
         endentrivia(); // Only end entrivia if it's running
     }
 });
+//submit question event listener (adding custom questions)
 document.getElementById('submitQuestionBtn').addEventListener('click', function () {
-    const round = document.getElementById('round').value;
-    const category = document.getElementById('entriviacategory').value;
-    const questionText = document.getElementById('questionText').value;
-    const correctAnswer = document.getElementById('correctAnswer').value;
-    const type = document.getElementById('questionType').value; // New type input
-
-    // Handle multiple choice options
-    let options = [];
-    if (type === 'multiplechoice') {
-        const optionsInput = document.getElementById('answerOptions').value;
-        options = optionsInput.split(',').map(opt => opt.trim()).filter(opt => opt);
-    }
-
-    if (!questionText || !correctAnswer) {
-        displayentriviaMessage("error!", "Please fill in both the question and the answer.", {}, {});
-        return;
-    }
-
-    addCustomentriviaQuestion(round, questionText, correctAnswer, category, type, options);
-
-    // Clear the form
-    document.getElementById('questionText').value = '';
-    document.getElementById('correctAnswer').value = '';
-    if (document.getElementById('answerOptions')) {
-        document.getElementById('answerOptions').value = '';
-    }
+	submitQuestions();
 });
-
+// Show multiple choice options input when the user selects multiplechoice
+document.getElementById('questionType').addEventListener('change', function() {
+    const optionsInputDiv = document.getElementById('multipleChoiceOptions');
+    optionsInputDiv.style.display = this.value === 'multiplechoice' ? 'block' : 'none';
+});
 
 //toggle inclusion of either default or custom questions
 document.getElementById("toggleusedefaultquestions").addEventListener("click", toggleusedefaultquestions);
