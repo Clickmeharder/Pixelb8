@@ -1424,6 +1424,7 @@ function AskQuestion2(round = null, category = null, type = null) {
 }
 
 function displayMultipleChoiceOptions(optionsArray) {
+	document.getElementById("entriviaOverlay").style.visibility = "visible";
 	document.getElementById("questionWrapper").style.visibility = "visible";
     const questionElement = document.getElementById("question");
     let optionsDiv = document.querySelector(".answeroptions");
