@@ -1,7 +1,7 @@
 round,category,type,question,answers,options
-[round1,Mining,singlechoice,"Which Planet is the only one that Has Treasure mining?","Arkadia",],
-[round1,Mining,singlechoice,"Where can you buy the tt finder?", "Shoes; Sandals; Boots; Socks",],
-[round1,hunting,singlechoice,"Which weapon type is the EP-2 Proton?","Laser Pistol",],
-[round2,Mining,singlechoice,"What item is used to enhance the depth of your mining finder?","depth enhancer",],
-[round2,hunting,singlechoice,"How much HP does a creature with 1 stamina have?","10hp",],
-[round2,hunting,singlechoice,"What is the maximum tier a weapon can reach in Entropia Universe?","Tier 10",],
+round1,Mining,singlechoice,"Which Planet is the only one that Has Treasure mining?","Arkadia",
+round1,Mining,singlechoice,"Where can you buy the tt finder?","trade terminal;TT",
+round1,hunting,singlechoice,"Which weapon type is the EP-2 Proton?","Laser Pistol",
+round2,Mining,singlechoice,"What item is used to enhance the depth of your mining finder?","depth enhancer",
+round2,hunting,singlechoice,"How much HP does a creature with 1 stamina have?","10hp",
+round2,hunting,singlechoice,"What is the maximum tier a weapon can reach in Entropia Universe?","Tier 10",
