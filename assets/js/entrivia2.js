@@ -596,14 +596,11 @@ function entriviaNosplash() {
         console.error(`❌ No questions found for ${currentRound}`);
         return null;
     }
-
     let availableQuestions = [];
-
     // Collect all available questions for the current round, without filtering by category/type
     Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
         availableQuestions = availableQuestions.concat(categoryQuestions);
     });
-
     // If no questions are found based on the filtering, reset the used questions and retry
     if (availableQuestions.length === 0) {
         usedQuestions = []; // Reset when all questions are used
@@ -611,26 +608,22 @@ function entriviaNosplash() {
             availableQuestions = availableQuestions.concat(categoryQuestions); // Reload all questions in the round
         });
     }
-
     if (availableQuestions.length === 0) {
         console.warn("⚠️ No available questions after reset.");
         return null;
     }
-
     // Pick a random question
     let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
     usedQuestions.push(question); // Mark this question as used
-
     // Validate question format
     if (!question.question || (question.type !== "multiplechoice" && question.type !== "singlechoice")) {
         console.error("❌ Invalid question format:", question);
         return null;
     }
-
     // Adjust answers and options based on the question type
     if (question.type === "singlechoice") {
         // Singlechoice can have multiple correct answers, handle it as an array of answers
-        let answers = question.answers ? question.answers.split(';') : [question.answers];
+        let answers = question.answers ? question.answers.split(';') : [];
         return {
             question: question.question,
             answer: answers, // Multiple possible correct answers
