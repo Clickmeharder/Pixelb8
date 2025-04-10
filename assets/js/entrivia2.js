@@ -626,6 +626,7 @@ function entriviaNosplash() {
         let answers = question.answers ? question.answers.split(';') : [];
         return {
             question: question.question,
+			rawanswer: question.answers,
             answer: answers, // Multiple possible correct answers
             type: question.type,
             options: [] // No options for singlechoice
@@ -636,6 +637,7 @@ function entriviaNosplash() {
         let options = question.options ? question.options.split(';') : [question.options];
         return {
             question: question.question,
+			rawanswer: question.answers,
             answer: correctAnswer, // Only one correct answer
             type: question.type,
             options: options // Options are relevant for multiplechoice
