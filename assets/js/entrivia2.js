@@ -216,7 +216,7 @@ function fetchentriviaQuestions() {
                         // Add the question to the appropriate round and category
                         defaultQuestions[round][category].push({
                             question: question,
-                            answer: answers,
+                            answers: answers,
                             type: type,
                             options: options,  // Options are cleaned up
                         });
@@ -636,7 +636,7 @@ function getRandomQuestion() {
         return {
             question: question.question,
             rawanswer: question.answers,  // Keep raw answer string
-            answer: answers,  // Multiple possible correct answers (array)
+            answers: answers,  // Multiple possible correct answers (array)
             type: question.type,
             options: []  // No options for singlechoice
         };
