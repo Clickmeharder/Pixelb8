@@ -628,88 +628,6 @@ function getRandomQuestion() {
     };
 }
 fetchentriviaQuestions();
-function getRandomQuestionCurrentRound(round = null, category = null, type = null) {
-    console.log("🔍 Starting getRandomQuestionCurrentRound with round =", round, "category =", category, "type =", type);
-
-    // Normalize round input
-    const currentRound = (round === 1 || round === "round1") ? "round1"
-                       : (round === 2 || round === "round2") ? "round2"
-                       : (round === null ? "round1" : null);
-
-    if (!currentRound || !entriviaQuestions || !entriviaQuestions[currentRound]) {
-        console.error("❌ Invalid round or no data for round:", currentRound);
-        return null;
-    }
-
-    let availableQuestions = [];
-
-    // Filter based on provided criteria
-    if (category && type && entriviaQuestions[currentRound][category]) {
-        availableQuestions = entriviaQuestions[currentRound][category]
-            .filter(q => q.type === type && !usedQuestions.includes(q));
-    } else if (category && entriviaQuestions[currentRound][category]) {
-        availableQuestions = entriviaQuestions[currentRound][category]
-            .filter(q => !usedQuestions.includes(q));
-    } else {
-        Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
-            availableQuestions = availableQuestions.concat(categoryQuestions.filter(q => !usedQuestions.includes(q)));
-        });
-    }
-
-    // Reset if all questions are used
-    if (availableQuestions.length === 0) {
-        console.warn("⚠️ No available questions left. Resetting usedQuestions.");
-        usedQuestions = [];
-        Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
-            availableQuestions = availableQuestions.concat(categoryQuestions);
-        });
-    }
-
-    if (availableQuestions.length === 0) {
-        console.error("❌ Still no questions available after reset.");
-        return null;
-    }
-
-    // Pick a random question
-    const question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-    usedQuestions.push(question);
-
-    if (!question.question || !question.type) {
-        console.error("❌ Invalid question format:", question);
-        return null;
-    }
-
-    // Parse answers and options safely
-    const parsedAnswers = question.answers ? question.answers.split(';').map(a => a.trim()) : [];
-    const parsedOptions = question.options ? question.options.split(';').map(o => o.trim()) : [];
-
-    let result;
-
-    if (question.type === "singlechoice") {
-        // Multiple correct answers, no options shown
-        result = {
-            question: question.question,
-            answer: parsedAnswers, // Array of acceptable answers
-            type: question.type,
-            options: [] // No options in singlechoice
-        };
-    } else if (question.type === "multiplechoice") {
-        // One correct answer, must be one of the options
-        result = {
-            question: question.question,
-            answer: parsedAnswers[0], // Only the first is correct
-            type: question.type,
-            options: parsedOptions // Options visible to player
-        };
-    } else {
-        console.error("❌ Unknown question type:", question.type);
-        return null;
-    }
-
-    console.log("✅ Final parsed question:", result);
-    return result;
-}
-
 
 function nextQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
@@ -824,10 +742,10 @@ function endQuestion() {
     clearInterval(questionTimer);
     // If the question is multiple choice, display all correct answers
 	if (activeQuestion.type === "singlechoice") {
-		const answers = Array.isArray(activeQuestion.answer) ? activeQuestion.answer : [activeQuestion.answer];
+		const answers = Array.isArray(activeQuestion.answers) ? activeQuestion.answers : [activeQuestion.answers];
 		document.getElementById("question").textContent = "Time's up! Correct answers were: " + answers.join(", ");
 	} else {
-		document.getElementById("question").textContent = "Time's up! The correct answer was: " + (activeQuestion.answer ?? "???");
+		document.getElementById("question").textContent = "Time's up! The correct answer was: " + (activeQuestion.answers ?? "???");
 	}
     document.getElementById("timer").textContent = "";
     activeQuestion = null;
@@ -858,9 +776,9 @@ function checkAnswer(user, message) {
     if (!activeQuestion) return; // No active question, ignore answer
     if (answeredUsers.has(user)) return; // Ignore duplicate correct answers
 
-   let correctAnswers = Array.isArray(activeQuestion.answer)
-  ? activeQuestion.answer.map(ans => ans.toLowerCase())
-  : [activeQuestion.answer?.toLowerCase?.() || ""];
+   let correctAnswers = Array.isArray(activeQuestion.answers)
+  ? activeQuestion.answers.map(ans => ans.toLowerCase())
+  : [activeQuestion.answers?.toLowerCase?.() || ""];
     let userAnswer = message.trim().toLowerCase();
     // Initialize userStats[user] to prevent undefined issues
     if (!userStats[user]) {
