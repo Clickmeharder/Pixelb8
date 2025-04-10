@@ -726,7 +726,6 @@ function getRandomQuestionCurrentRound(round = null, category = null, type = nul
 
 
 function nextQuestion() {
-	console.log("🔍 New question loaded:", activeQuestion);
     clearTimeout(questionTimer); // Clear previous timer if any
     clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
     answeredUsers.clear();
@@ -734,6 +733,7 @@ function nextQuestion() {
 
     // Fetch a random question based on the round and category
     activeQuestion = getRandomQuestion();
+	console.log("🔍 New question loaded:", activeQuestion);
     questionsAsked++;
 
     // Update the question counter (this function should be defined elsewhere)
@@ -836,25 +836,20 @@ function startCountdown() {
 }
 function endQuestion() {
     clearInterval(questionTimer);
-
     // If the question is multiple choice, display all correct answers
 	if (activeQuestion.type === "singlechoice") {
 		document.getElementById("question").textContent = "Time's up! Correct answers were: " + activeQuestion.answer.join(", ");
 	} else {
 		document.getElementById("question").textContent = "Time's up! The correct answer was: " + activeQuestion.answer;
 	}
-
     document.getElementById("timer").textContent = "";
     activeQuestion = null;
-
     // Play the "times up" sound
     playSound("entriviatimesup");
-
     // Hide the question and show the entrivia board after a delay
     hideQuestionTimer = setTimeout(() => {
         document.getElementById("questionWrapper").style.visibility = "hidden";
         document.getElementById("entriviaboard").style.visibility = "visible";
-
         // Check if we've asked the maximum number of questions for the round
         if (questionsAsked >= questionsPerRound) {
             // End the entrivia round if we've reached the limit
