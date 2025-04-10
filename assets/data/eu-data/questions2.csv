@@ -1,7 +1,7 @@
 round,category,type,question,answers,options
-round1,Mining,singlechoice,"Where can you buy the tt finder?","trade terminal;TT",""
+round1,Mining,singlechoice,"Where can you buy the tt finder?","trade terminal;TT",
 round1,hunting,multiplechoice,"Which amp is commonly dropped by the bots at Orthos Oilfield?","B101","A103;B101;Omegaton 101;B202"
-round1,Mining,singlechoice,"Which Planet is the only one that Has Treasure mining?","Arkadia;Ark",""
-round2,hunting,singlechoice,"Which weapon type is the EP-2 Proton?","Laser Pistol;LP",""
-round2,hunting,singlechoice,"The abbreviation of a Rookie troll whose name rhymes with duck","chuck caly rocknroll;chuck;ccr;",""
-round2,hunting,singlechoice,"What color are the default male briefs?","White;blanc",""
+round1,Mining,singlechoice,"Which Planet is the only one that Has Treasure mining?","Arkadia;Ark",
+round2,hunting,singlechoice,"Which weapon type is the EP-2 Proton?","Laser Pistol;LP",
+round2,hunting,singlechoice,"The abbreviation of a Rookie troll whose name rhymes with duck","chuck caly rocknroll;chuck;ccr;",
+round2,hunting,singlechoice,"What color are the default male briefs?","White;blanc",
