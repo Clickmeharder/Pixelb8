@@ -255,7 +255,6 @@ function fetchentriviaQuestions() {
     });
 }
 
-
 function addCustomentriviaQuestion(round, questionText, correctAnswer, category, type = 'singlechoice', options = []) {
     let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
 
@@ -315,9 +314,7 @@ function loadCustomQuestions() {
                 console.warn(`Skipping category "${category}" because it's not an array.`, categoryQuestions);
                 continue;  // Skip this category if it's not an array
             }
-
             if (categoryQuestions.length === 0) continue;  // Skip empty categories
-
             // Add each question in the category to the dropdown
             categoryQuestions.forEach((q, index) => {
                 let option = document.createElement('option');
@@ -627,7 +624,75 @@ function getRandomQuestion() {
         category: randomCategory
     };
 }
-fetchentriviaQuestions();
+function getFilteredRandomQuestion(roundFilter = null, categoryFilter = null, typeFilter = null) {
+    if (!entriviaQuestions) {
+        console.warn("Questions data not loaded.");
+        return null;
+    }
+
+    // Step 1: Normalize round input
+    let targetRounds = [];
+
+    if (roundFilter !== null && roundFilter !== undefined) {
+        const normalized = `round${parseInt(roundFilter)}`;
+        if (entriviaQuestions[normalized]) {
+            targetRounds.push(normalized);
+        } else {
+            console.warn("Round not found:", normalized);
+            return null;
+        }
+    } else {
+        targetRounds = Object.keys(entriviaQuestions); // All rounds
+    }
+
+    // Step 2: Collect matching questions
+    let questionPool = [];
+
+    for (const roundKey of targetRounds) {
+        const roundData = entriviaQuestions[roundKey];
+        if (!roundData) continue;
+
+        const categories = categoryFilter
+            ? Object.keys(roundData).filter(cat => cat.toLowerCase() === categoryFilter.toLowerCase())
+            : Object.keys(roundData);
+
+        for (const cat of categories) {
+            const questions = roundData[cat];
+            if (!questions || questions.length === 0) continue;
+
+            const filteredQuestions = typeFilter
+                ? questions.filter(q => q.type && q.type.toLowerCase() === typeFilter.toLowerCase())
+                : questions;
+
+            for (const q of filteredQuestions) {
+                questionPool.push({
+                    round: roundKey,
+                    category: cat,
+                    question: q
+                });
+            }
+        }
+    }
+
+    // Step 3: Return random question
+    if (questionPool.length === 0) {
+        console.warn("No questions matched your filters.");
+        return null;
+    }
+
+    const picked = questionPool[Math.floor(Math.random() * questionPool.length)];
+
+    return {
+        question: picked.question.question,
+        answers: picked.question.answers,
+        rawanswer: picked.question.rawanswer || picked.question.answers.join(';'),
+        type: picked.question.type,
+        options: picked.question.options || [],
+        round: picked.round,
+        category: picked.category
+    };
+}
+
 
 function nextQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
@@ -775,7 +840,6 @@ function nextquestionTimer(seconds) {
 function checkAnswer(user, message) {
     if (!activeQuestion) return; // No active question, ignore answer
     if (answeredUsers.has(user)) return; // Ignore duplicate correct answers
-
    let correctAnswers = Array.isArray(activeQuestion.answers)
   ? activeQuestion.answers.map(ans => ans.toLowerCase())
   : [activeQuestion.answers?.toLowerCase?.() || ""];
@@ -788,7 +852,6 @@ function checkAnswer(user, message) {
             firstAnswers: 0,
         };
     }
-
     // If `singleActiveAsk` is active, only allow the first correct answer
     if (singleActiveAsk !== null) {
         if (!firstAnswerUser) {
@@ -801,7 +864,6 @@ function checkAnswer(user, message) {
         playSound("entriviawrong"); // Incorrect answer sound, but no tracking
         return false;
     }
-
     // Normal entrivia logic (multiple correct answers allowed)
     if (correctAnswers.includes(userAnswer)) {
         userStats[user].correctAnswers++;
@@ -816,7 +878,6 @@ function checkAnswer(user, message) {
             userScores[user] = (userScores[user] || 0) + 1;  // Others get 1 point
             playSound("entriviacorrect");
         }
-
         updateentriviaboard();
         return true;
     } else {
@@ -828,8 +889,6 @@ function checkAnswer(user, message) {
         return false;
     }
 }
-
-
 
 //update the guestion counter
 function updateQuestionCounter() {
