@@ -873,18 +873,19 @@ function checkAnswer(user, message) {
                 entriviaSingleAskWinners.push(user);  // Add to winners list
                 userStats[user].correctAnswers++;  // Increment correct answers for the user
                 playSound("entriviafirstcorrect");
+				let questionCounterElement = document.getElementById("question-counter");
+				let winnerColor = userColors[entriviaSingleAskLastWinner] || "#FFFFFF"; // Default white if not found
+				let answerText = Array.isArray(activeQuestion.answers) 
+				  ? activeQuestion.answers.join(", ") // Join answers if it's an array
+				  : activeQuestion.answers;
+				questionCounterElement.innerHTML = `Winner: <span style="color: ${winnerColor};">${entriviaSingleAskLastWinner}</span>`;
+				document.getElementById("question").textContent = ` Answer was: ${answerText}`;
                 return true; // First correct answer counts
 				// Run endAsk() 3 seconds after returning true
                 setTimeout(() => {
                     endAsk();  // Call endAsk after the delay
-					
-					let questionCounterElement = document.getElementById("question-counter");
-					let winnerColor = userColors[entriviaSingleAskLastWinner] || "#FFFFFF"; // Default white if not found
-					let answerText = Array.isArray(activeQuestion.answers) 
-					  ? activeQuestion.answers.join(", ") // Join answers if it's an array
-					  : activeQuestion.answers;
-					questionCounterElement.innerHTML = `Winner: <span style="color: ${winnerColor};">${entriviaSingleAskLastWinner}</span>`;
-					document.getElementById("question").textContent = ` Answer was: ${answerText}`;
+					console.log("answered correctly and called endask 3 seconds after returning true");
+
                 }, 3000); // 3000 milliseconds = 3 seconds
 
             } else {
@@ -1291,6 +1292,7 @@ function showentriviaAsk() {
 }
 function endAsk() {
     clearInterval(questionTimer);
+	console.log("end ask ran");
 	let answerText = Array.isArray(activeQuestion.answers) 
 	  ? activeQuestion.answers.join(", ") // Join answers if it's an array
 	  : activeQuestion.answers;
