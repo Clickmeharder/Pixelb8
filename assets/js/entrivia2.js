@@ -588,8 +588,9 @@ function entriviaNosplash() {
 
  function getRandomQuestion() {
     // Automatically use the current round (you can modify this logic as needed)
-    const currentRound = round;  // Change to "round2" based on your logic for the current round
-
+    const currentRound = (round === 1 || round === "round1") ? "round1"
+                       : (round === 2 || round === "round2") ? "round2"
+                       : (round === null ? "round1" : null);
     // Ensure entriviaQuestions is populated for the current round
     if (!entriviaQuestions || !entriviaQuestions[currentRound]) {
         console.error(`❌ No questions found for ${currentRound}`);
