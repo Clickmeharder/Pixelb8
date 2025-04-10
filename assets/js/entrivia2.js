@@ -1398,17 +1398,13 @@ function AskQuestion2(round = null, category = null, type = null) {
 
 function displayMultipleChoiceOptions(optionsArray) {
     const questionElement = document.getElementById("question");
-
-    // Try to find existing .options div
     let optionsDiv = document.querySelector(".answeroptions");
-
     // If it doesn't exist, create and append it
     if (!optionsDiv) {
         optionsDiv = document.createElement("div");
         optionsDiv.classList.add("answeroptions");
         questionElement.appendChild(optionsDiv);
     }
-
     // Fill it with options
     optionsDiv.innerHTML = optionsArray.map(option => {
         return `<div class="answeroption">${option}</div>`;
