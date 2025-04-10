@@ -819,12 +819,11 @@ function endQuestion() {
     clearInterval(questionTimer);
 
     // If the question is multiple choice, display all correct answers
-    if (activeQuestion.type === "multiplechoice") {
-        document.getElementById("question").textContent = "Time's up! Correct answers were: " + activeQuestion.answer.join(", ");
-    } else {
-        // For single choice, just show the single correct answer
-        document.getElementById("question").textContent = "Time's up! The correct answer was: " + activeQuestion.answer;
-    }
+	if (activeQuestion.type === "singlechoice") {
+		document.getElementById("question").textContent = "Time's up! Correct answers were: " + activeQuestion.answer.join(", ");
+	} else {
+		document.getElementById("question").textContent = "Time's up! The correct answer was: " + activeQuestion.answer;
+	}
 
     document.getElementById("timer").textContent = "";
     activeQuestion = null;
