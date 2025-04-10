@@ -1969,20 +1969,20 @@ const streamercommands = [
 	{ command: "!togglechat", description: "Toggles the visibility of the Twitch chat container.", usage: "!togglechat" },
     { 
         command: "!entrivia-ask", 
-        description: "Asks an entrivia question from a specific round, category, and optional question type (singlechoice or multiplechoice).", 
-        usage: `Usage Examples:\n
+        description: "Asks an entrivia question from a specific round, category, and optional question type.", 
+        usage: `\n
 !entrivia-ask -> asks a random question
 !entrivia-ask easy -> asks a easy question
-!entrivia-ask easy | mining -> asks a easy mining question
-!entrivia-ask hard | hunting | multiplechoice -> asks a hard multiplechoice question
-!entrivia-ask easy | history | singlechoice -> asks an easy history question
+!entrivia-ask easy | mining\n -> asks a easy mining question\n
+!entrivia-ask hard | hunting | multiplechoice\n -> asks a hard multiplechoice question\n
+!entrivia-ask easy | history | singlechoice\n -> asks an easy history question\n
 category can be one of: mining, hunting, crafting, history, beauty, economy, social, misc.
 The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
     },
 	{
         command: "!entrivia-addquestion",
         description: "Allows the streamer to add a custom entrivia question.",
-        usage: `Usage Examples:\n
+        usage: `\n
 !entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4
 !entrivia-addquestion easy | mining | What is a question with only one correct answer | my answer
 !entrivia-addquestion easy | mining | What is a question with multiple possible answers? | nrf, no resources found
