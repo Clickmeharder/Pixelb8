@@ -1703,21 +1703,30 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		
-		// Extract the difficulty and category from the message
+
+		// Extract the parameters from the message
 		let messageContent = message.trim();
 		let parts = messageContent.split("|").map(p => p.trim());
-		
-		// Validate input format
-		if (parts.length < 2) {
-			displayentriviaMessage(user, `⚠️ Invalid format! Use: !entrivia-ask easy/hard | category`, flags, extra, true);
+
+		// Check if no parameters are provided (just !entrivia-ask)
+		if (parts.length === 1 && parts[0] === "") {
+			// Call the default startentriviaAsk function
+			startentriviaAsk();
 			return;
 		}
-		
+
+		// If there are parameters, validate the format and pass them to the function
+		if (parts.length < 1 || parts.length > 3) {
+			displayentriviaMessage(user, `⚠️ Invalid format! Use: !entrivia-ask [difficulty] | [category] | [question type]`, flags, extra, true);
+			return;
+		}
+
+		// Extract difficulty, category, and question type (if provided)
 		let difficulty = parts[0].toLowerCase();
-		let category = parts[1].toLowerCase();
-		
-		// Map easy to round1 and hard to round2
+		let category = parts[1]?.toLowerCase(); // Category is optional
+		let questionType = parts[2]?.toLowerCase(); // Question type is optional
+
+		// Map difficulty to rounds
 		let round;
 		if (difficulty === "easy") {
 			round = "round1";
@@ -1727,18 +1736,25 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			displayentriviaMessage(user, `⚠️ Invalid difficulty! Use 'easy' or 'hard'.`, flags, extra, true);
 			return;
 		}
-		
-		// Ensure the category is valid
+
+		// Ensure the category is valid (if provided)
 		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
-		
-		if (!validCategories.includes(category)) {
+		if (category && !validCategories.includes(category)) {
 			displayentriviaMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
 			return;
 		}
-		
-		// Call startentriviaAskfromCat with the round and category
-		startentriviaAskfromCat(round, category);
+
+		// Ensure the question type is valid (if provided)
+		const validQuestionTypes = ["singlechoice", "multiplechoice"];
+		if (questionType && !validQuestionTypes.includes(questionType)) {
+			displayentriviaMessage(user, `⚠️ Invalid question type! Use 'singlechoice' or 'multiplechoice'.`, flags, extra, true);
+			return;
+		}
+
+		// Call the startentriviaAsk function with the parameters
+		startentriviaAsk(round, category, questionType);
 	}
+
 	if (command.toLowerCase() === "entrivia-lastaskwinner") {
         if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
@@ -1940,8 +1956,6 @@ const usercommands = [
 const streamercommands = [
 	{ command: "!a / !answer", description: "Allows users to answer a entrivia question.", usage: "!a / !answer" },
 	{ command: "!entrivia-play", description: "Starts the entrivia game.", usage: "!entrivia-play" },
-	{ command: "!entrivia-askrandom", description: "Asks a random entrivia question.", usage: "!entrivia-askrandom" },
-	{ command: "!entrivia-ask", description: "Asks a entrivia question from a specific round and category.", usage: "!entrivia-ask [round] | [category]" },
 	{ command: "!entrivia-lastaskwinner", description: "Displays the last entrivia question's winner.", usage: "!entrivia-lastaskwinner" },
 	{ command: "!entrivia-lastwinners", description: "Displays the list of last entrivia winners.", usage: "!entrivia-lastwinners" },
 	{ command: "!entrivia-history", description: "Displays entrivia history.", usage: "!entrivia-history" },
@@ -1953,6 +1967,18 @@ const streamercommands = [
 	{ command: "!togglequestions", description: "Toggles the visibility of the question wrapper.", usage: "!togglequestions" },
 	{ command: "!toggleentrivia", description: "Toggles the visibility of the entrivia wrapper.", usage: "!toggleentrivia" },
 	{ command: "!togglechat", description: "Toggles the visibility of the Twitch chat container.", usage: "!togglechat" },
+    { 
+        command: "!entrivia-ask", 
+        description: "Asks an entrivia question from a specific round, category, and optional question type (singlechoice or multiplechoice).", 
+        usage: `Usage Examples:\n
+!entrivia-ask -> asks a random question
+!entrivia-ask easy -> asks a easy question
+!entrivia-ask easy | mining -> asks a easy mining question
+!entrivia-ask hard | hunting | multiplechoice -> asks a hard multiplechoice question
+!entrivia-ask easy | history | singlechoice -> asks an easy history question
+category can be one of: mining, hunting, crafting, history, beauty, economy, social, misc.
+The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
+    },
 	{
         command: "!entrivia-addquestion",
         description: "Allows the streamer to add a custom entrivia question.",
