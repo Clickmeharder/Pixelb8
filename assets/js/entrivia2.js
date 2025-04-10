@@ -621,33 +621,30 @@ function entriviaNosplash() {
         return null;
     }
     // Adjust answers and options based on the question type
-    // Parse answers and options safely
-    const parsedAnswers = question.answers ? question.answers.split(';').map(a => a.trim()) : [];
-    const parsedOptions = question.options ? question.options.split(';').map(o => o.trim()) : [];
-    let result;
     if (question.type === "singlechoice") {
-        // Multiple correct answers, no options shown
-        result = {
+        // Singlechoice can have multiple correct answers, handle it as an array of answers
+        let answers = question.answers ? question.answers.split(';') : [];
+        return {
             question: question.question,
-            answer: parsedAnswers, // Array of acceptable answers
+            answer: answers, // Multiple possible correct answers
             type: question.type,
-            options: [] // No options in singlechoice
+            options: [] // No options for singlechoice
         };
     } else if (question.type === "multiplechoice") {
-        // One correct answer, must be one of the options
-        result = {
+        // Multiplechoice has one correct answer and options to choose from
+        let correctAnswer = question.answers ? question.answers.split(';')[0] : null; // Only one correct answer
+        let options = question.options ? question.options.split(';') : [question.options];
+        return {
             question: question.question,
-            answer: parsedAnswers[0], // Only the first is correct
+            answer: correctAnswer, // Only one correct answer
             type: question.type,
-            options: parsedOptions // Options visible to player
+            options: options // Options are relevant for multiplechoice
         };
     } else {
-        console.error("❌ Unknown question type:", question.type);
+        // Invalid question type
+        console.error("❌ Invalid question type:", question);
         return null;
     }
-
-    console.log("✅ Final parsed question:", result);
-    return result;
 }
 fetchentriviaQuestions();
 getRandomQuestion();
