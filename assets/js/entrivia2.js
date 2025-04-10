@@ -635,12 +635,14 @@ function getRandomQuestion(round = null, category = null, type = null) {
     usedQuestions.push(question); // Mark this question as used
 	console.log("✅ Parsed question:", JSON.stringify(question, null, 2));
     // Return the question in the updated format (with type and options if applicable)
-    return {
-        question: question.question,
-        answer: question.answer,
-        type: question.type, // 'singlechoice' or 'multiplechoice'
-        options: question.options || [] // Options are only relevant for multiple choice
-    };
+	return {
+		question: question.question?.replace(/^"(.*)"$/, "$1"), // Remove wrapping quotes if present
+		answer: Array.isArray(question.answer)
+			? question.answer.map(ans => ans.replace(/^"(.*)"$/, "$1")) // Handle array of answers
+			: question.answer?.replace(/^"(.*)"$/, "$1"), // Remove wrapping quotes from answer
+		type: question.type,
+		options: (question.options || []).map(opt => opt.replace(/^"(.*)"$/, "$1")) // Sanitize options too
+	};
 }
 function getRandomQuestionCurrentRound(round = null, category = null, type = null) {
     console.log("🔍 Starting getRandomQuestionCurrentRound with round =", round, "category =", category, "type =", type);
