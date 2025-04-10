@@ -41,69 +41,7 @@ let questionsPerRound = 1;
 //--------	Chat ------------------\
 // Chat message display functions  |
 
-/* function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = false) {
-	if (entriviachatOverlay === "off") return;
-    const chatContainer = document.getElementById("twitchMessagebox");
-    // Create a new chat message element
-    const chatMessage = document.createElement("div");
-    chatMessage.classList.add("chatMessage");
-    const usernameSpan = document.createElement("span");
-    usernameSpan.classList.add("username");
-    usernameSpan.innerHTML = user + ": ";
-    const userColor = extra.userColor || "#FFFFFF"; // Default to white if no color is set
-    usernameSpan.style.color = userColor; // Apply user color dynamically
-    // Create the message element
-    const messageSpan = document.createElement("span");
-    messageSpan.classList.add("twitchmessage");
-    messageSpan.innerHTML = message;
-    // Append elements to the chat message div
-    chatMessage.appendChild(usernameSpan);
-    chatMessage.appendChild(messageSpan);
-    // Add the chat message to the container
-    chatContainer.appendChild(chatMessage);
-    // Apply a fade effect after a delay
-    setTimeout(() => {
-        chatMessage.style.opacity = '0'; // Fade out after 9 seconds
-    }, 15000);
-    setTimeout(() => {
-        chatMessage.remove();
-    }, 15000); // Remove after 15 seconds
-    // Limit messages to the last 5
-    if (chatContainer.children.length > 5) {
-        chatContainer.removeChild(chatContainer.firstChild);
-    }
-} */
-function displayentriviaMessage(user, message, flags = {}, extra = {}, isCorrect = false) {
-    const chatContainer = document.getElementById("entriviaMessagebox");
-    // Create a new chat message element
-    const entriviaMessage = document.createElement("div");
-    entriviaMessage.classList.add("chatMessage");
-    const usernameSpan = document.createElement("span");
-    usernameSpan.classList.add("username");
-    usernameSpan.innerHTML = user + ": ";
-    const userColor = extra.userColor || "#FFFFFF"; // Default to white if no color is set
-    usernameSpan.style.color = userColor; // Apply user color dynamically
-    // Create the message element
-    const messageSpan = document.createElement("span");
-    messageSpan.classList.add("twitchmessage");
-    messageSpan.innerHTML = message;
-    // Append elements to the chat message div
-    entriviaMessage.appendChild(usernameSpan);
-    entriviaMessage.appendChild(messageSpan);
-    // Add the chat message to the container
-    chatContainer.appendChild(entriviaMessage);
-    // Apply a fade effect after a delay
-    setTimeout(() => {
-        entriviaMessage.style.opacity = '0'; // Fade out after 9 seconds
-    }, 15000);
-    setTimeout(() => {
-        entriviaMessage.remove();
-    }, 15000); // Remove after 15 seconds
-    // Limit messages to the last 5
-    if (chatContainer.children.length > 5) {
-        chatContainer.removeChild(chatContainer.firstChild);
-    }
-}
+
 function displayConsoleMessage(user, message) {
     if (!consolemessages) return;  // If consolemessages is false, do nothing
     // Create a new console message element
@@ -349,7 +287,7 @@ function submitQuestions() {
 
     // Check if required fields are filled
     if (!questionText || formattedCorrectAnswer.length === 0) {
-        displayentriviaMessage("error!", "Please fill in both the question and at least one correct answer.", {}, {});
+        displayChatMessage("error!", "Please fill in both the question and at least one correct answer.", {}, {});
         return;
     }
 
@@ -1430,24 +1368,24 @@ function startentriviaAsk(round = null, category = null, type = null) {
 function displayLastWinner() {
     if (entriviaSingleAskLastWinner) {
         const message = `🎉 Congratulations to ${entriviaSingleAskLastWinner} for answering first correctly! 🎉`;
-        displayentriviaMessage("📢", message);
+        displayChatMessage("📢", message);
     } else {
         const message = "No winner yet.";
-        displayentriviaMessage("📢", message);
+        displayChatMessage("📢", message);
     }
 }
 // Function to display last game's winners
 function displayLastentriviaWinners() {
     if (!lastentriviaClassicWinners || lastentriviaClassicWinners.length === 0) {
-        displayentriviaMessage("📢", "No winners from the last entrivia game.", {}, {});
+        displayChatMessage("📢", "No winners from the last entrivia game.", {}, {});
         return;
     }
 
-    displayentriviaMessage("📢", "Last entrivia Winners:", {}, {});
+    displayChatMessage("📢", "Last entrivia Winners:", {}, {});
 
     lastentriviaClassicWinners.forEach((winner, index) => {
         let message = `🏆 ${index + 1} - ${winner.username}: ${winner.score} points | 🎯 First: ${winner.firstAnswers} | ✅ ${winner.correctAnswers} | ❌ ${winner.incorrectAnswers}`;
-        displayentriviaMessage("📢", message, {}, {});
+        displayChatMessage("📢", message, {}, {});
     });
 }
 
@@ -1455,20 +1393,20 @@ function displayLastentriviaWinners() {
 function displayentriviaHistory() {
 	loadentriviaHistory();
     if (!entriviaClassicHistory || entriviaClassicHistory.length === 0) {
-        displayentriviaMessage("📢", "No past entrivia games recorded.", {}, {});
+        displayChatMessage("📢", "No past entrivia games recorded.", {}, {});
         return;
     }
 
-    displayentriviaMessage("📜", "entrivia History:", {}, {});
+    displayChatMessage("📜", "entrivia History:", {}, {});
 
     entriviaClassicHistory.forEach((game, index) => {
         if (Array.isArray(game)) {  // Ensure game structure matches new updates
             let timestamp = game[0]?.timestamp || `Game #${index + 1}`;
-            displayentriviaMessage("📆", `${timestamp}`, {}, {});
+            displayChatMessage("📆", `${timestamp}`, {}, {});
 
             game.forEach((winner, idx) => {
                 let message = `🏆 ${idx + 1} - ${winner.username}: ${winner.score} points | 🎯 First: ${winner.firstAnswers} | ✅ ${winner.correctAnswers} | ❌ ${winner.incorrectAnswers}`;
-                displayentriviaMessage("📢", message, {}, {});
+                displayChatMessage("📢", message, {}, {});
             });
         }
     });
@@ -1547,7 +1485,7 @@ function updateSettings() {
     // Get the toggle states
     saveSettings();
 	console.log("!! Entrivia Settings updated and saved.");
-    displayentriviaMessage("!!", "Entrivia Settings updated and saved.", {}, {});
+    displayChatMessage("!!", "Entrivia Settings updated and saved.", {}, {});
 }
 
 function resetSettings() {
@@ -1571,7 +1509,7 @@ function resetSettings() {
     document.getElementById("timeBetweenRounds").value = timebetweenRounds;
     document.getElementById("questionsPerRound").value = questionsPerRound;
 	console.log("!!: Entrivia Settings Reset to default.");
-    displayentriviaMessage("!!", "entrivia Settings Reset to default.", {}, {});
+    displayChatMessage("!!", "entrivia Settings Reset to default.", {}, {});
 }
 function updateSettingsDisplay() {
     let savedSettings = localStorage.getItem("entriviaClassicSettings");
@@ -1684,14 +1622,14 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		let isCorrect = checkAnswer(user, answer);  // Check if the answer is correct
 		// Display the answer in chat regardless of whether it's correct or incorrect
 		if (isCorrect) {
-			// displayentriviaMessage
+			// displayChatMessage
 			// If the answer is correct, display the answer with a ✅ checkmark
 			displayConsoleMessage(user, `!${command} ${answer} ✅`);
-			displayentriviaMessage(user, `!${command} ${answer} ✅`, flags, extra, true);
+			displayChatMessage(user, `!${command} ${answer} ✅`, flags, extra, true);
 		} else if (!answeredUsers.has(user)) {
 			// If the user hasn't answered correctly yet, display the answer with an ❌ X mark
 			displayConsoleMessage(user, `!${command} ${answer} ❌`);
-			displayentriviaMessage(user, `!${command} ${answer} ❌`, flags, extra, false);
+			displayChatMessage(user, `!${command} ${answer} ❌`, flags, extra, false);
 		} else {
 			// If the user has already answered correctly, do nothing (ignore their further answers)
 			console.log(`${user} has already answered correctly. Ignoring further answers.`);
@@ -1719,14 +1657,14 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     if (command.toLowerCase() === "entrivia-play") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
-        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 		startentrivia();
     }
 
     if (command.toLowerCase() === "entrivia-askrandom") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
-        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
         startentriviaAsk();
     }
 	//example of command to ask a question from a specific round and category:
@@ -1734,7 +1672,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "entrivia-ask") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 		
 		// Extract the difficulty and category from the message
 		let messageContent = message.trim();
@@ -1742,7 +1680,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		
 		// Validate input format
 		if (parts.length < 2) {
-			displayentriviaMessage(user, `⚠️ Invalid format! Use: !entrivia-ask easy/hard | category`, flags, extra, true);
+			displayChatMessage(user, `⚠️ Invalid format! Use: !entrivia-ask easy/hard | category`, flags, extra, true);
 			return;
 		}
 		
@@ -1756,7 +1694,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		} else if (difficulty === "hard") {
 			round = "round2";
 		} else {
-			displayentriviaMessage(user, `⚠️ Invalid difficulty! Use 'easy' or 'hard'.`, flags, extra, true);
+			displayChatMessage(user, `⚠️ Invalid difficulty! Use 'easy' or 'hard'.`, flags, extra, true);
 			return;
 		}
 		
@@ -1764,7 +1702,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
 		
 		if (!validCategories.includes(category)) {
-			displayentriviaMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
+			displayChatMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
 			return;
 		}
 		
@@ -1774,37 +1712,37 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "entrivia-lastaskwinner") {
         if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 		displayLastWinner();
     }
 	if (command.toLowerCase() === "entrivia-lastwinners") {
         if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 		displayLastentriviaWinners();
     }
 	if (command.toLowerCase() === "entrivia-history") {
         if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 		displayentriviaHistory();
     }
 	if (command.toLowerCase() === "entrivia-chatanswers") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 		togglechatanswers();
 	}
 	if (command.toLowerCase() === "entrivia-disablechat") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 		toggleentriviachatOverlay();
 	}
 	if (command.toLowerCase() === "entrivia-audio") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-        displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 		toggleAudioSetting();
 	}
 	if (command.toLowerCase() === "toggleentriviaboard") {
@@ -1836,7 +1774,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "entrivia-addquestion") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 
 		// Extract message text after the command
 		let messageContent = message.trim();
@@ -1844,7 +1782,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
 		// Validate input format
 		if (parts.length < 4) {  // Now expects 4 parts (difficulty, category, question, answer)
-			displayentriviaMessage(user, `⚠️ Invalid format! Use: !entrivia-addquestion easy/hard | category | question | answer [options]`, flags, extra, true);
+			displayChatMessage(user, `⚠️ Invalid format! Use: !entrivia-addquestion easy/hard | category | question | answer [options]`, flags, extra, true);
 			return;
 		}
 
@@ -1866,7 +1804,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		} else if (difficulty === "hard") {
 			round = "round2";
 		} else {
-			displayentriviaMessage(user, `⚠️ Invalid difficulty! Use 'easy' or 'hard'.`, flags, extra, true);
+			displayChatMessage(user, `⚠️ Invalid difficulty! Use 'easy' or 'hard'.`, flags, extra, true);
 			return;
 		}
 
@@ -1874,7 +1812,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
 
 		if (!validCategories.includes(category)) {
-			displayentriviaMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
+			displayChatMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
 			return;
 		}
 
@@ -1884,12 +1822,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		// Add the custom entrivia question with the selected category and options
 		addCustomentriviaQuestion(round, questionText, correctAnswer, category, type, options);
 		// Confirm success
-		displayentriviaMessage(user, `✅ Custom question added to ${round} (${category})!`, flags, extra, true);
+		displayChatMessage(user, `✅ Custom question added to ${round} (${category})!`, flags, extra, true);
 	}
 	if (command.toLowerCase() === "entrivia-answertime") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 
 		timetoAnswer = parseInt(message, 10);
 		updateSingleSetting("timetoAnswer", timetoAnswer);
@@ -1897,7 +1835,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "entrivia-questiondelay") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 
 		timebetweenQuestions = parseInt(message, 10);
 		updateSingleSetting("timebetweenQuestions", timebetweenQuestions);
@@ -1905,7 +1843,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "entrivia-rounddelay") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 
 		timebetweenRounds = parseInt(message, 10);
 		updateSingleSetting("timebetweenRounds", timebetweenRounds);
@@ -1913,7 +1851,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "entrivia-questioncap") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
-		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+		displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 
 		questionsPerRound = parseInt(message, 10);
 		updateSingleSetting("questionsPerRound", questionsPerRound);
@@ -1924,14 +1862,14 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
 		toggleentriviaconsolemessages(); // Uses function to update setting
 		displayConsoleMessage(user, `!${command} ${consolemessages ? "Enabled ✅" : "Disabled ❌"}`);
-		displayentriviaMessage(user, `!${command} ${consolemessages ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
+		displayChatMessage(user, `!${command} ${consolemessages ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
 	}
 	if (command.toLowerCase() === "entrivia-defaultquestions") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
 
 		toggleusedefaultquestions(); // Uses function to update setting
 		displayConsoleMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`);
-		displayentriviaMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
+		displayChatMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
 	}
 	// Toggle custom questions
 	if (command.toLowerCase() === "entrivia-customquestions") {  
@@ -1939,7 +1877,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
 		toggleusecustomquestions(); // Uses function to update setting
 		displayConsoleMessage(user, `!${command} ${usecustomquestions ? "Enabled ✅" : "Disabled ❌"}`);
-		displayentriviaMessage(user, `!${command} ${usecustomquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
+		displayChatMessage(user, `!${command} ${usecustomquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
 	}
 //-------------------------------------------------------
     // Only allow mods to trigger these commands:
@@ -1947,7 +1885,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (command === "entriviamod-test") {
 			if (!isStreamerAndAuthorize(user, command)) return;
 			displayConsoleMessage(user, `!${command} ✅`);
-			displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
+			displayChatMessage(user, `!${command} ✅`, flags, extra, true);
 			toggleElement("twitchchatContainer", "fade");
 		}
 	}
