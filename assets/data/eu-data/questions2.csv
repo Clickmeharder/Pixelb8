@@ -1,4 +1,4 @@
-round,category,type,question,answers,options
+round,category,type,question,answer,options
 round1,Mining,singlechoice,"Which Planet is the only one that Has Treasure mining?","Arkadia",
 round1,Mining,singlechoice,"Where can you buy the tt finder?","trade terminal;TT",
 round1,hunting,singlechoice,"Which weapon type is the EP-2 Proton?","Laser Pistol",
