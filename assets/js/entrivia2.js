@@ -1353,34 +1353,23 @@ function AskQuestion(round = null, category = null, type = null) {
 
 function AskQuestion2(round = null, category = null, type = null) {
 	console.log(" ❌❌❌❌AskQuestion2❌❌❌❌");
-    clearTimeout(questionTimer);
-    clearTimeout(hideQuestionTimer);
+	console.log(" ❌❌❌❌AskQuestion2❌❌❌❌");
+    clearTimeout(questionTimer); // Clear previous timer if any
+    clearTimeout(hideQuestionTimer); // Assuming hideQuestionTimer exists for hiding the question after time runs out
     answeredUsers.clear();
     firstAnswerUser = null;
 
-    // Determine which question to grab
-    if (round && category && type) {
-        activeQuestion = getFilteredRandomQuestion(round, category, type);
-    } else if (round && category) {
-        activeQuestion = getFilteredRandomQuestion(round, category);
-    } else if (type) {
-        activeQuestion = getFilteredRandomQuestion(null, null, type);
-    } else {
-        activeQuestion = getFilteredRandomQuestion();
-    }
+    // Use getFilteredRandomQuestion for all cases
+    activeQuestion = getFilteredRandomQuestion(round, category, type);
 
     if (!activeQuestion) {
         console.error("❌ No question found for the specified round, category, or type.");
         return;
     }
 
-    updateQuestionCounter();
+    updateQuestionCounter(); // Update the display
     document.getElementById("question-counter").textContent = `First Correct Answer Wins`;
-    
-    const questionElement = document.getElementById("question");
-
-    // Clear previous question and options
-    questionElement.innerHTML = `${activeQuestion.question}`;
+    document.getElementById("question").textContent = activeQuestion.question;
 
     // If it's a multiple-choice question, show the options
     if (activeQuestion.type === "multiplechoice" && activeQuestion.options && activeQuestion.options.length > 0) {
@@ -1391,7 +1380,6 @@ function AskQuestion2(round = null, category = null, type = null) {
         // Append options below the question
         questionElement.innerHTML += `<div class="options">${optionsHTML}</div>`;
     }
-
     document.getElementById("questionWrapper").style.visibility = "visible";
     document.getElementById("timer").textContent = timetoAnswer;
     document.getElementById("timeuntil-nextQ").textContent = "";
@@ -1402,7 +1390,7 @@ function AskQuestion2(round = null, category = null, type = null) {
         secondsLeft--;
         document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
         if (secondsLeft <= 0) {
-            endAsk();
+            endAsk(); // Call your function to end the question once time runs out
         }
     }, 1000);
 }
