@@ -693,6 +693,15 @@ function getFilteredRandomQuestion(roundFilter = null, categoryFilter = null, ty
     };
 }
 
+// usage examples:
+// getRandomQuestion();
+//getFilteredRandomQuestion(); // any question, any round, any category
+//getFilteredRandomQuestion(1); // any category from round1
+//getFilteredRandomQuestion("2"); // any category from round2
+//getFilteredRandomQuestion(null, "mining"); // any round, mining category
+//getFilteredRandomQuestion("1", "hunting"); // round1, hunting category
+//getFilteredRandomQuestion(null, null, "multiplechoice"); // any round/category, multiplechoice type
+//getFilteredRandomQuestion(1, null, "singlechoice"); // round1, any category, singlechoice
 
 function nextQuestion() {
     clearTimeout(questionTimer); // Clear previous timer if any
