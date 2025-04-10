@@ -434,9 +434,6 @@ addCustomentriviaQuestion(
 //addCustomentriviaQuestion("round1", "What is the smallest Skildek support weapon?", "lancehead;skildeck lancehead", "hunting");
 //_____________________________________
 //-------------------------------------
-
-//
-//-----------------------------
 //      game history
 // load last entrivia classic winners and entrivia classic game history
 function loadentriviaHistory() {
@@ -483,9 +480,7 @@ function updateLastentriviaClassicWinners() {
 }
 //___________________________________________________
 //-------------------------------
-//
-//------------------------------------------------------------
-//------------------------------------------------------------
+
 //show announcements with optional timer
 function showAnnouncement(message, entriviaAnnouncementTime) {
     return new Promise((resolve) => {
@@ -1303,6 +1298,7 @@ function endAsk() {
     hideQuestionTimer = setTimeout(() => {
         document.getElementById("questionWrapper").style.visibility = "hidden";
         document.getElementById("entriviaboard").style.visibility = "visible";
+		document.querySelector(".options")?.remove();
     }, 13000); // Delay timeout of 13 seconds to wait before checking
 }
 
@@ -1352,16 +1348,80 @@ function AskQuestion(round = null, category = null, type = null) {
         }
     }, 1000);
 }
-// Function to display multiple-choice options
-function displayMultipleChoiceOptions(options) {
-    let optionsContainer = document.getElementById("options-container"); // Ensure you have an element for options
-    optionsContainer.innerHTML = ""; // Clear previous options
-    options.forEach((option, index) => {
-        let optionElem = document.createElement("div");
-        optionElem.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
-        optionsContainer.appendChild(optionElem);
-    });
+function AskQuestion2(round = null, category = null, type = null) {
+    clearTimeout(questionTimer);
+    clearTimeout(hideQuestionTimer);
+    answeredUsers.clear();
+    firstAnswerUser = null;
+
+    // Determine which question to grab
+    if (round && category && type) {
+        activeQuestion = getFilteredRandomQuestion(round, category, type);
+    } else if (round && category) {
+        activeQuestion = getFilteredRandomQuestion(round, category);
+    } else if (type) {
+        activeQuestion = getFilteredRandomQuestion(null, null, type);
+    } else {
+        activeQuestion = getFilteredRandomQuestion();
+    }
+
+    if (!activeQuestion) {
+        console.error("❌ No question found for the specified round, category, or type.");
+        return;
+    }
+
+    updateQuestionCounter();
+    document.getElementById("question-counter").textContent = `First Correct Answer Wins`;
+    
+    const questionElement = document.getElementById("question");
+
+    // Clear previous question and options
+    questionElement.innerHTML = `${activeQuestion.question}`;
+
+    // If it's a multiple-choice question, show the options
+    if (activeQuestion.type === "multiplechoice" && activeQuestion.options && activeQuestion.options.length > 0) {
+        const optionsHTML = activeQuestion.options.map(option => {
+            return `<div class="option">${option}</div>`;
+        }).join("");
+
+        // Append options below the question
+        questionElement.innerHTML += `<div class="options">${optionsHTML}</div>`;
+    }
+
+    document.getElementById("questionWrapper").style.visibility = "visible";
+    document.getElementById("timer").textContent = timetoAnswer;
+    document.getElementById("timeuntil-nextQ").textContent = "";
+    playRandomQuestionSound();
+
+    let secondsLeft = timetoAnswer;
+    questionTimer = setInterval(() => {
+        secondsLeft--;
+        document.getElementById("timer").textContent = `Time left: ${Math.floor(secondsLeft / 60)}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
+        if (secondsLeft <= 0) {
+            endAsk();
+        }
+    }, 1000);
 }
+
+function displayMultipleChoiceOptions(optionsArray) {
+    const questionElement = document.getElementById("question");
+
+    // Try to find existing .options div
+    let optionsDiv = document.querySelector(".options");
+
+    // If it doesn't exist, create and append it
+    if (!optionsDiv) {
+        optionsDiv = document.createElement("div");
+        optionsDiv.classList.add("options");
+        questionElement.appendChild(optionsDiv);
+    }
+
+    // Fill it with options
+    optionsDiv.innerHTML = optionsArray.map(option => {
+        return `<div class="option">${option}</div>`;
+    }).join("");
+}
+
 
 function startentriviaAsk(round = null, category = null, type = null) {
     displayConsoleMessage("system", "startentrivia fn called");
