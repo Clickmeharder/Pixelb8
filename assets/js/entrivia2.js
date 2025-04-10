@@ -1418,32 +1418,27 @@ function displayMultipleChoiceOptions(optionsArray) {
 
 function startentriviaAsk(round = null, category = null, type = null) {
     displayConsoleMessage("system", "startentrivia fn called");
-
     // Prevent starting the game if it's already running
     if (entriviaGameState === "started") {
         displayConsoleMessage("system", "entrivia is already running! Ignoring duplicate command.");
         console.log("entrivia is already running! Ignoring duplicate command.");
         return;
     }
-
     if (singleActiveAsk === "Active") {
         displayConsoleMessage("system", "entrivia is already Asking a question! Ignoring duplicate command.");
         console.log("entrivia is already running! Ignoring duplicate command.");
         return;
     }
-
     displayConsoleMessage("system", "entrivia ask continues");
     console.log("entrivia should splash and fetch questions");
-
     askSplash() // Run splash first
         .then(() => fetchentriviaQuestions()) // Fetch questions after splash
         .then(questions => {
             singleActiveAsk = "Active"; // Mark entrivia as started
             window.entriviaQuestions = questions;
             console.log("singleActiveAsk = " + singleActiveAsk);
-            console.log("entrivia Questions Loaded:", questions);
+			console.log("parameters given =" + round + category + type);
             displayConsoleMessage("system", `singleActiveAsk = ${singleActiveAsk}`);
-
             // Use the passed round, category, and type, or choose random if none provided
             AskQuestion(round, category, type);  // Now directly call the new unified AskQuestion
         })
