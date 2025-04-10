@@ -226,13 +226,11 @@ function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
     const input = document.querySelector("#comfy-controller input#twitchname");
-	console.log(`setStreamer fucntion ran: ${streamername}`);
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
 		 // Save to localStorage
         localStorage.setItem("lastStreamer", streamername);
         ComfyJS.Init(streamername);
-        console.log(`Connected to Twitch chat for: ${streamername}`);
         // Update button styles
 		//hide connect button and streamer input
         button.style.display = "none";
