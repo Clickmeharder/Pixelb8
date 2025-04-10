@@ -219,7 +219,6 @@ function fetchentriviaQuestions() {
                             answer: answers,
                             type: type,
                             options: options,  // Options are cleaned up
-                            category: category // Add the category to the returned object
                         });
                     });
                 })
