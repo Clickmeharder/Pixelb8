@@ -883,9 +883,9 @@ function checkAnswer(user, message) {
                     endAsk();  // Call endAsk after the delay
 					questionCounterElement.innerHTML = `Winner: <span style="color: ${winnerColor};">${entriviaSingleAskLastWinner}</span>`;
 					document.getElementById("question").textContent = ` Answer was: ${answerText}`;
-					// Run endAsk() 3 seconds after returning true
+					// Run endAsk() 1 seconds after returning true
 					console.log("answered correctly and called endask 3 seconds after answer");
-                }, 3000); // 3000 milliseconds = 3 seconds
+                }, 1000); // 1000 milliseconds = 1 seconds
 				return true; // First correct answer counts
             } else {
                 // If the answer is incorrect, play the wrong sound but don't mark as correct
