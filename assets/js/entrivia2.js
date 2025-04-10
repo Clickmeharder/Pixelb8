@@ -842,16 +842,17 @@ function nextquestionTimer(seconds) {
 	document.getElementById("timeuntil-nextQ").textContent = `Next question in: ${minutes}m ${remainingSeconds}s`;
 }
 function checkAnswer(user, message) {
-	console.log("activeQuestion returns as: " + activeQuestion);
+    console.log("activeQuestion returns as: " + activeQuestion);
     if (!activeQuestion) return; // No active question, ignore answer
     if (answeredUsers.has(user)) return; // Ignore duplicate correct answers
-	let correctAnswers;
-	if (Array.isArray(activeQuestion.answers)) {
-		correctAnswers = activeQuestion.answers.map(ans => ans.toLowerCase());
-	} else {
-		correctAnswers = [activeQuestion.answers?.toLowerCase() || ""];
-	}
+    let correctAnswers;
+    if (Array.isArray(activeQuestion.answers)) {
+        correctAnswers = activeQuestion.answers.map(ans => ans.toLowerCase());
+    } else {
+        correctAnswers = [activeQuestion.answers?.toLowerCase() || ""];
+    }
     let userAnswer = message.trim().toLowerCase();
+    
     // Initialize userStats[user] to prevent undefined issues
     if (!userStats[user]) {
         userStats[user] = {
@@ -860,19 +861,30 @@ function checkAnswer(user, message) {
             firstAnswers: 0,
         };
     }
+    
     // If `singleActiveAsk` is active, only allow the first correct answer
     if (singleActiveAsk !== null) {
         if (!firstAnswerUser) {
-            firstAnswerUser = user;
-			answeredUsers.add(user);
-            entriviaSingleAskLastWinner = user;  // Store the last winner
-            entriviaSingleAskWinners.push(user);  // Add to winners list
-            playSound("entriviafirstcorrect");
-            return true; // First correct answer counts
+            // Check if the first answer is correct before accepting it
+            if (correctAnswers.includes(userAnswer)) {
+                firstAnswerUser = user;
+                answeredUsers.add(user);
+                entriviaSingleAskLastWinner = user;  // Store the last winner
+                entriviaSingleAskWinners.push(user);  // Add to winners list
+                userStats[user].correctAnswers++;  // Increment correct answers for the user
+                playSound("entriviafirstcorrect");
+                return true; // First correct answer counts
+            } else {
+                // If the answer is incorrect, play the wrong sound but don't mark as correct
+                playSound("entriviawrong");
+                return false;
+            }
         }
+        // If someone already answered correctly, ignore further answers
         playSound("entriviawrong"); // Incorrect answer sound, but no tracking
         return false;
     }
+
     // Normal entrivia logic (multiple correct answers allowed)
     if (correctAnswers.includes(userAnswer)) {
         userStats[user].correctAnswers++;
@@ -891,13 +903,14 @@ function checkAnswer(user, message) {
         return true;
     } else {
         // Normal incorrect answer logic
-        userStats[user].incorrectAnswers++;  
+        userStats[user].incorrectAnswers++;
         userScores[user] = (userScores[user] || 0) - 1;
         playSound("entriviawrong");
 
         return false;
     }
 }
+
 
 //update the guestion counter
 function updateQuestionCounter() {
