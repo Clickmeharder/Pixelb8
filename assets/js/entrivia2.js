@@ -874,6 +874,19 @@ function checkAnswer(user, message) {
                 userStats[user].correctAnswers++;  // Increment correct answers for the user
                 playSound("entriviafirstcorrect");
                 return true; // First correct answer counts
+				// Run endAsk() 3 seconds after returning true
+                setTimeout(() => {
+                    endAsk();  // Call endAsk after the delay
+					
+					let questionCounterElement = document.getElementById("question-counter");
+					let winnerColor = userColors[entriviaSingleAskLastWinner] || "#FFFFFF"; // Default white if not found
+					let answerText = Array.isArray(activeQuestion.answers) 
+					  ? activeQuestion.answers.join(", ") // Join answers if it's an array
+					  : activeQuestion.answers;
+					questionCounterElement.innerHTML = `Winner: <span style="color: ${winnerColor};">${entriviaSingleAskLastWinner}</span>`;
+					document.getElementById("question").textContent = ` Answer was: ${answerText}`;
+                }, 3000); // 3000 milliseconds = 3 seconds
+
             } else {
                 // If the answer is incorrect, play the wrong sound but don't mark as correct
                 playSound("entriviawrong");
@@ -1278,18 +1291,15 @@ function showentriviaAsk() {
 }
 function endAsk() {
     clearInterval(questionTimer);
+	let answerText = Array.isArray(activeQuestion.answers) 
+	  ? activeQuestion.answers.join(", ") // Join answers if it's an array
+	  : activeQuestion.answers;
+	// Display the correct answer(s) on the screen
+	// If it's not an array, just use the single answer
+	// Display the time's up message with the answer
+	document.getElementById("question").textContent = `Time's up! Answer was: ${answerText}`;
+	document.getElementById("timer").textContent = "";
     // Check if the answer is an array (for multiple answers)
-    let answerText = Array.isArray(activeQuestion.answers) 
-        ? activeQuestion.answers.join(", ") // Join answers if it's an array
-        : activeQuestion.answers;          // If it's not an array, just use the single answer
-    // Get the color for the winner (assuming 'userColors' contains the color mapping)
-    let winnerColor = userColors[entriviaSingleAskLastWinner] || "#FFFFFF"; // Default white if not found
-    // Display the correct answer(s) on the screen
-    let questionCounterElement = document.getElementById("question-counter");
-    questionCounterElement.innerHTML = `Winner: <span style="color: ${winnerColor};">${entriviaSingleAskLastWinner}</span>`;
-    // Display the time's up message with the answer
-    document.getElementById("question").textContent = `Time's up! Answer was: ${answerText}`;
-    document.getElementById("timer").textContent = "";
     activeQuestion = null; // Clear the active question
     singleActiveAsk = null; // Reset the game state
     // Play sound for time up
