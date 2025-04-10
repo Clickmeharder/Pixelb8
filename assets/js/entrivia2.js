@@ -1437,7 +1437,7 @@ function startentriviaAsk(round = null, category = null, type = null) {
 			console.log("parameters given =" + round + category + type);
             displayConsoleMessage("system", `singleActiveAsk = ${singleActiveAsk}`);
             // Use the passed round, category, and type, or choose random if none provided
-            AskQuestion(round, category, type);  // Now directly call the new unified AskQuestion
+            AskQuestion2(round, category, type);  // Now directly call the new unified AskQuestion
         })
         .catch(error => {
             console.error("Error loading entrivia questions:", error);
@@ -1446,8 +1446,8 @@ function startentriviaAsk(round = null, category = null, type = null) {
         });
 }
 //
-// startentriviaAsk("round1", "hunting", "multiplechoice");
-// startentriviaAsk("round1", "mining");
+// startentriviaAsk("1", "hunting", "multiplechoice");
+// startentriviaAsk("1", "mining");
 // startentriviaAsk(null, null, "singlechoice");
 // startentriviaAsk();
 function displayLastWinner() {
