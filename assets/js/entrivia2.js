@@ -632,10 +632,7 @@ function getRandomQuestion() {
     // Adjust answers and options based on the question type
 	if (question.type === "singlechoice") {
 		// If there is no semicolon, keep the answer as a single value
-		let answers = question.answers && question.answers.includes(';') 
-					  ? question.answers.split(';') 
-					  : [question.answers];  // If no semicolon, use the answer directly
-
+		let answers = question.answers;
 		return {
 			question: question.question,
 			rawanswer: question.answers,  // Keep raw answer string
@@ -645,12 +642,12 @@ function getRandomQuestion() {
 		};
     } else if (question.type === "multiplechoice") {
         // Multiplechoice: Only one correct answer, options provided
-        let correctAnswer = question.answers ? question.answers.split(';')[0] : [question.answers]; // Only one correct answer
+        let correctAnswer = question.answers; // Only one correct answer
         let options = question.options ? question.options.split(';') : [];
         return {
             question: question.question,
             rawanswer: question.answers,  // Keep raw answer string
-            answer: correctAnswer,  // Only one correct answer
+			answer: answers,  // Multiple possible correct answers (array)
             type: question.type,
             options: options  // Options for multiplechoice
         };
