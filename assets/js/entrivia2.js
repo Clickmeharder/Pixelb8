@@ -1836,22 +1836,28 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
 		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		
+
 		// Extract message text after the command
 		let messageContent = message.trim();
 		let parts = messageContent.split("|").map(p => p.trim());
-		
+
 		// Validate input format
 		if (parts.length < 4) {  // Now expects 4 parts (difficulty, category, question, answer)
-			displayentriviaMessage(user, `⚠️ Invalid format! Use: !entrivia-addquestion easy/hard | category | question | answer`, flags, extra, true);
+			displayentriviaMessage(user, `⚠️ Invalid format! Use: !entrivia-addquestion easy/hard | category | question | answer [options]`, flags, extra, true);
 			return;
 		}
-		
+
 		let difficulty = parts[0].toLowerCase();
 		let category = parts[1].toLowerCase(); // Extract category
 		let questionText = parts[2];
 		let correctAnswer = parts[3];
-		
+
+		// Check if there's additional option input (for multiple choice)
+		let options = [];
+		if (parts.length > 4) {
+			options = parts[4].split(",").map(option => option.trim());
+		}
+
 		// Map easy to round1 and hard to round2
 		let round;
 		if (difficulty === "easy") {
@@ -1862,7 +1868,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			displayentriviaMessage(user, `⚠️ Invalid difficulty! Use 'easy' or 'hard'.`, flags, extra, true);
 			return;
 		}
-		
+
 		// Ensure the category is valid
 		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
 
@@ -1871,9 +1877,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			return;
 		}
 
-		// Add the custom entrivia question with the selected category
-		addCustomentriviaQuestion(round, questionText, correctAnswer, category);
-		
+		// Determine the question type based on the number of options (for multiple choice)
+		let type = options.length > 0 ? 'multiplechoice' : 'singlechoice';
+
+		// Add the custom entrivia question with the selected category and options
+		addCustomentriviaQuestion(round, questionText, correctAnswer, category, type, options);
+
 		// Confirm success
 		displayentriviaMessage(user, `✅ Custom question added to ${round} (${category})!`, flags, extra, true);
 	}
