@@ -2288,7 +2288,7 @@ document.getElementById('submitQuestionBtn').addEventListener('click', function 
 // Show multiple choice options input when the user selects multiplechoice
 document.getElementById('questionType').addEventListener('change', function() {
     const optionsInputDiv = document.getElementById('multipleChoiceOptions');
-    optionsInputDiv.style.display = this.value === 'multiplechoice' ? 'block' : 'none';
+    optionsInputDiv.style.display = this.value === 'multiplechoice' ? 'flex' : 'none';
 });
 
 //toggle inclusion of either default or custom questions

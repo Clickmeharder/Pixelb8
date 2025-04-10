@@ -1283,6 +1283,7 @@ input.a[type="text"] {
 	font-size: var(--input-font-size);
 	text-align: var(--input-text-align);
 	padding: var(--input-padding);
+	padding-right: 4px;
 	margin:var(--input-margin);
 	color: var(--input-color);
 	background-color: var(--input-bg-color);
