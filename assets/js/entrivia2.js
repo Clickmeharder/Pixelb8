@@ -1433,8 +1433,8 @@ function startentriviaAsk(round = null, category = null, type = null) {
         });
 }
 //
-// startentriviaAsk("round1", "Science", "multiplechoice");
-// startentriviaAsk("round1", "General");
+// startentriviaAsk("round1", "hunting", "multiplechoice");
+// startentriviaAsk("round1", "mining");
 // startentriviaAsk(null, null, "singlechoice");
 // startentriviaAsk();
 function displayLastWinner() {
