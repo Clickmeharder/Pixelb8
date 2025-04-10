@@ -585,7 +585,7 @@ function entriviaNosplash() {
             });
     });
 }
-function getRandomQuestion(round = null) {
+function getRandomQuestion() {
     const currentRound = round === 1 ? "round1" : round === 2 ? "round2" : null;
     if (!currentRound || !entriviaQuestions || !entriviaQuestions[currentRound]) {
         console.error(`❌ Invalid round or no questions found for ${currentRound}`);
