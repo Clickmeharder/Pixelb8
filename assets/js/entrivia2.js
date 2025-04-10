@@ -2087,7 +2087,6 @@ function updateCommandlist() {
     });
 }
 
-
 // Function to dynamically add command spans based on the `data-option`
 function updateTwitchCommandInfo() {
     // Get all elements with the class 'twitchcmd-info'
