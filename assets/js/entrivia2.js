@@ -589,20 +589,23 @@ function entriviaNosplash() {
 }
 
 function getRandomQuestion() {
-    // Automatically use the current round (you can modify this logic as needed)
+    // Automatically use the current round (this should be simplified so it's not limited to 2 rounds)
     const currentRound = (round === 1 || round === "round1") ? "round1"
                        : (round === 2 || round === "round2") ? "round2"
                        : (round === null ? "round1" : null);
+
     // Ensure entriviaQuestions is populated for the current round
     if (!entriviaQuestions || !entriviaQuestions[currentRound]) {
         console.error(`❌ No questions found for ${currentRound}`);
         return null;
     }
+
     let availableQuestions = [];
     // Collect all available questions for the current round, without filtering by category/type
     Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
         availableQuestions = availableQuestions.concat(categoryQuestions);
     });
+
     // If no questions are found based on the filtering, reset the used questions and retry
     if (availableQuestions.length === 0) {
         usedQuestions = []; // Reset when all questions are used
@@ -610,39 +613,43 @@ function getRandomQuestion() {
             availableQuestions = availableQuestions.concat(categoryQuestions); // Reload all questions in the round
         });
     }
+
     if (availableQuestions.length === 0) {
         console.warn("⚠️ No available questions after reset.");
         return null;
     }
+
     // Pick a random question
     let question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
     usedQuestions.push(question); // Mark this question as used
+
     // Validate question format
     if (!question.question || (question.type !== "multiplechoice" && question.type !== "singlechoice")) {
         console.error("❌ Invalid question format:", question);
         return null;
     }
+
     // Adjust answers and options based on the question type
     if (question.type === "singlechoice") {
-        // Singlechoice can have multiple correct answers, handle it as an array of answers
+        // Singlechoice: Answers are separated by ';'
         let answers = question.answers ? question.answers.split(';') : [];
         return {
             question: question.question,
-            rawanswer: question.answers,
-            answer: answers, // Multiple possible correct answers
+            rawanswer: question.answers,  // Keep raw answer string
+            answer: answers,  // Multiple possible correct answers (array)
             type: question.type,
-            options: [] // No options for singlechoice
+            options: []  // No options for singlechoice
         };
     } else if (question.type === "multiplechoice") {
-        // Multiplechoice has one correct answer and options to choose from
+        // Multiplechoice: Only one correct answer, options provided
         let correctAnswer = question.answers ? question.answers.split(';')[0] : null; // Only one correct answer
         let options = question.options ? question.options.split(';') : [];
         return {
             question: question.question,
-            rawanswer: question.answers,
-            answer: correctAnswer, // Only one correct answer
+            rawanswer: question.answers,  // Keep raw answer string
+            answer: correctAnswer,  // Only one correct answer
             type: question.type,
-            options: options // Options are relevant for multiplechoice
+            options: options  // Options for multiplechoice
         };
     } else {
         // Invalid question type
