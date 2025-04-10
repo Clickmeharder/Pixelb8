@@ -844,9 +844,12 @@ function nextquestionTimer(seconds) {
 function checkAnswer(user, message) {
     if (!activeQuestion) return; // No active question, ignore answer
     if (answeredUsers.has(user)) return; // Ignore duplicate correct answers
-   let correctAnswers = Array.isArray(activeQuestion.answers)
-  ? activeQuestion.answers.map(ans => ans.toLowerCase())
-  : [activeQuestion.answers?.toLowerCase?.() || ""];
+	let correctAnswers;
+	if (Array.isArray(activeQuestion.answers)) {
+		correctAnswers = activeQuestion.answers.map(ans => ans.toLowerCase());
+	} else {
+		correctAnswers = [activeQuestion.answers?.toLowerCase() || ""];
+	}
     let userAnswer = message.trim().toLowerCase();
     // Initialize userStats[user] to prevent undefined issues
     if (!userStats[user]) {
