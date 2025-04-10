@@ -645,7 +645,10 @@ function getRandomQuestion(round = null, category = null, type = null) {
 function getRandomQuestionCurrentRound(round = null, category = null, type = null) {
     console.log("🔍 Starting getRandomQuestionCurrentRound with round =", round, "category =", category, "type =", type);
 
-    const currentRound = round === 1 ? "round1" : round === 2 ? "round2" : (round === null || round === "round1" || round === "round2") ? round || "round1" : null;
+    // Normalize round input
+    const currentRound = (round === 1 || round === "round1") ? "round1"
+                       : (round === 2 || round === "round2") ? "round2"
+                       : (round === null ? "round1" : null);
 
     if (!currentRound || !entriviaQuestions || !entriviaQuestions[currentRound]) {
         console.error("❌ Invalid round or no data for round:", currentRound);
@@ -654,22 +657,20 @@ function getRandomQuestionCurrentRound(round = null, category = null, type = nul
 
     let availableQuestions = [];
 
-    if (category && type) {
-        if (entriviaQuestions[currentRound][category]) {
-            availableQuestions = entriviaQuestions[currentRound][category]
-                .filter(q => q.type === type && !usedQuestions.includes(q));
-        }
-    } else if (category) {
-        if (entriviaQuestions[currentRound][category]) {
-            availableQuestions = entriviaQuestions[currentRound][category]
-                .filter(q => !usedQuestions.includes(q));
-        }
+    // Filter based on provided criteria
+    if (category && type && entriviaQuestions[currentRound][category]) {
+        availableQuestions = entriviaQuestions[currentRound][category]
+            .filter(q => q.type === type && !usedQuestions.includes(q));
+    } else if (category && entriviaQuestions[currentRound][category]) {
+        availableQuestions = entriviaQuestions[currentRound][category]
+            .filter(q => !usedQuestions.includes(q));
     } else {
         Object.values(entriviaQuestions[currentRound]).forEach(categoryQuestions => {
             availableQuestions = availableQuestions.concat(categoryQuestions.filter(q => !usedQuestions.includes(q)));
         });
     }
 
+    // Reset if all questions are used
     if (availableQuestions.length === 0) {
         console.warn("⚠️ No available questions left. Resetting usedQuestions.");
         usedQuestions = [];
@@ -683,6 +684,7 @@ function getRandomQuestionCurrentRound(round = null, category = null, type = nul
         return null;
     }
 
+    // Pick a random question
     const question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
     usedQuestions.push(question);
 
@@ -691,20 +693,37 @@ function getRandomQuestionCurrentRound(round = null, category = null, type = nul
         return null;
     }
 
-    // Parse answers/options
-    let parsedAnswers = question.answers ? question.answers.split(';').map(a => a.trim().toLowerCase()) : [];
-    let parsedOptions = question.options ? question.options.split(';').map(o => o.trim()) : [];
+    // Parse answers and options safely
+    const parsedAnswers = question.answers ? question.answers.split(';').map(a => a.trim()) : [];
+    const parsedOptions = question.options ? question.options.split(';').map(o => o.trim()) : [];
 
-    let result = {
-        question: question.question,
-        answer: question.type === "singlechoice" ? parsedAnswers : parsedAnswers[0], // Array for singlechoice, string for multiple
-        type: question.type,
-        options: question.type === "multiplechoice" ? parsedOptions : []
-    };
+    let result;
+
+    if (question.type === "singlechoice") {
+        // Multiple correct answers, no options shown
+        result = {
+            question: question.question,
+            answer: parsedAnswers, // Array of acceptable answers
+            type: question.type,
+            options: [] // No options in singlechoice
+        };
+    } else if (question.type === "multiplechoice") {
+        // One correct answer, must be one of the options
+        result = {
+            question: question.question,
+            answer: parsedAnswers[0], // Only the first is correct
+            type: question.type,
+            options: parsedOptions // Options visible to player
+        };
+    } else {
+        console.error("❌ Unknown question type:", question.type);
+        return null;
+    }
 
     console.log("✅ Final parsed question:", result);
     return result;
 }
+
 
 function nextQuestion() {
 	console.log("🔍 New question loaded:", activeQuestion);
