@@ -1984,10 +1984,10 @@ const streamercommands = [
 	{
         command: "!entrivia-addquestion",
         description: "Allows the streamer to add a custom entrivia question.",
-        usage: `Usage Examples:
-!entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4\n
-!entrivia-addquestion easy | mining | What is a question with only one correct answer | my answer\n
-!entrivia-addquestion easy | mining | What is a question with multiple possible answers? | nrf, no resources found\n
+        usage: `Usage Examples:\n
+!entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4
+!entrivia-addquestion easy | mining | What is a question with only one correct answer | my answer
+!entrivia-addquestion easy | mining | What is a question with multiple possible answers? | nrf, no resources found
 !entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4`
     },
 	{ command: "!entrivia-answertime", description: "Updates the answer time limit.", usage: "!entrivia-answertime [time]" },
@@ -1998,6 +1998,7 @@ const streamercommands = [
 	{ command: "!entrivia-customquestions", description: "Toggles custom entrivia questions.", usage: "!entrivia-customquestions" }
 ];
 
+// Function to update the command list in the UI
 // Function to update the command list in the UI
 // Function to update the command list in the UI
 function updateCommandlist() { 
@@ -2030,6 +2031,7 @@ function updateCommandlist() {
         // Create the <li> and add the description
         const li = document.createElement("li");
         li.appendChild(description);
+
         // Append to the user command list
         userCommandList.appendChild(li);
     });
@@ -2056,28 +2058,31 @@ function updateCommandlist() {
         description.appendChild(strong);
         description.append(": " + command.description);
 
-        // Handle multi-line usage
-        const usageLines = command.usage.split("\n");
-        usageLines.forEach((line, index) => {
-            const usageLine = document.createElement("p");
-            usageLine.textContent = line;  // Add each line of the usage as a new paragraph
+        // Create a new <p> for each usage example
+        const usageExamples = command.usage.split('\n').map(usage => {
+            const usageParagraph = document.createElement("p");
+            usageParagraph.textContent = usage.trim(); // Ensure no leading/trailing spaces
+            return usageParagraph;
+        });
 
-            // Add a divider (border) between usage lines
-            if (index !== usageLines.length - 1) {
+        // Add each usage example to the description
+        usageExamples.forEach((usageExample, index) => {
+            description.appendChild(usageExample);
+
+            // Add a divider after each usage example except the last one
+            if (index < usageExamples.length - 1) {
                 const divider = document.createElement("div");
-                divider.style.borderTop = "1px solid var(--border-color)";  // Inherited border color from parent
+                divider.style.borderTop = "1px solid inherit";  // Inherited border color from parent
                 divider.style.margin = "8px 0"; // Adds spacing around the divider
                 description.appendChild(divider);
             }
-
-            description.appendChild(usageLine);
         });
 
         // Create the <li> and add the description
         const li = document.createElement("li");
         li.appendChild(description);
 
-        // Add to the list
+        // Append the li to the broadcaster command list
         broadcasterCommandList.appendChild(li);
     });
 }
