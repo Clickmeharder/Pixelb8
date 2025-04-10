@@ -2107,26 +2107,6 @@ function updateTwitchCommandInfo() {
             // Append the spans to the current element
             element.appendChild(commandTextSpan);
             element.appendChild(commandInfoSpan);
-
-            // Check if this command has multiple usage examples
-            if (command.command === '!entrivia-addquestion') {
-                const usageExamples = [
-                    "!entrivia-addquestion easy | mining | What is a question with only one correct answer | my answer",
-                    "!entrivia-addquestion easy | mining | What is a question with multiple possible answers? | nrf, no resources found",
-                    "!entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4"
-                ];
-
-                // Add a list of usage examples below the command
-                const examplesList = document.createElement('ul');
-                usageExamples.forEach(example => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = example;
-                    examplesList.appendChild(listItem);
-                });
-
-                // Append the examples list after the command info
-                element.appendChild(examplesList);
-            }
         }
     });
 }
