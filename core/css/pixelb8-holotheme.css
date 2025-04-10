@@ -993,6 +993,7 @@ body {
 	overflow: hidden;
     cursor: var(--cursor-image);
     opacity: var(--body-opacity);
+	transition:all 0.3s ease-in-out;
 }
 /* Buttons */
 button.a,
@@ -1861,7 +1862,17 @@ ul#broadcastercommandlist {
 /*----------------------*/
 /*______________________*/
 /**/
-
+.answeroption {
+	padding: 10px;
+	color:var(--text-color);
+	background: var(--bg-color);
+	border: var(--border);
+	border-radius: var(--border-radius);
+	text-shadow: var(--chat-text-shadow);
+	box-shadow: var(--glow-color);
+	margin-bottom: 5px;
+	cursor: pointer;
+}
 option:disabled {
     color: -internal-light-dark(graytext, rgb(170, 170, 170));
 }
