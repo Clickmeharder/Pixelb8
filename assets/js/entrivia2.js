@@ -1998,44 +1998,80 @@ const streamercommands = [
 	{ command: "!entrivia-customquestions", description: "Toggles custom entrivia questions.", usage: "!entrivia-customquestions" }
 ];
 
-function updateTwitchCommandInfo() {
-    // Get all elements with the class 'twitchcmd-info'
-    const commandInfoElements = document.querySelectorAll('.twitchcmd-info');
-    
-    // Loop through each element and find the corresponding command
-    commandInfoElements.forEach(function(element) {
-        const option = element.getAttribute('data-option');  // Get the value of data-option
-        
-        // Look for the corresponding command in usercommands and streamercommands
-        let command = null;
-        
-        // Check in usercommands first
-        command = usercommands.find(cmd => cmd.command === option);
-        
-        // If not found in usercommands, check in streamercommands
-        if (!command) {
-            command = streamercommands.find(cmd => cmd.command === option);
-        }
+// Function to update the command list in the UI
+function updateCommandlist() { 
+    // Get the respective <ul> elements
+    const userCommandList = document.getElementById("usercommandList");
+    const broadcasterCommandList = document.getElementById("broadcastercommandList");
 
-        // If a command was found, add the spans inside the element
-        if (command) {
-            // Create the command-text span
-            const commandTextSpan = document.createElement('span');
-            commandTextSpan.classList.add('command-text');
-            commandTextSpan.textContent = Twitch Cmd = ${command.command};
+    // Add user commands to the user command list
+    usercommands.forEach(function(command) {
+        const description = document.createElement("p");
 
-            // Create the command-info span
-            const commandInfoSpan = document.createElement('span');
-            commandInfoSpan.classList.add('command-info');
-            commandInfoSpan.setAttribute('title', command.usage);
-            commandInfoSpan.textContent = '❓';
+        // Create and set up the <strong>
+        const strong = document.createElement("strong");
+        strong.textContent = command.command;
 
-            // Append the spans to the current element
-            element.appendChild(commandTextSpan);
-            element.appendChild(commandInfoSpan);
-        }
+        // Create the usage span
+        const usageSpan = document.createElement("span");
+        usageSpan.classList.add("command-info");
+        usageSpan.setAttribute("title", "Usage: " + command.usage);
+        usageSpan.textContent = "❓";
+
+        // Style it to float right
+        usageSpan.style.cssFloat = "right"; // or just use a CSS class
+
+        // Append elements to the <p>
+        description.appendChild(usageSpan);
+        description.appendChild(strong);
+        description.append(": " + command.description);
+
+        // Create the <li> and add the description
+        const li = document.createElement("li");
+        li.appendChild(description);
+        // Append to the user command list
+        userCommandList.appendChild(li);
+    });
+
+    // Add broadcaster commands to the broadcaster command list
+    streamercommands.forEach(function(command) {
+        const description = document.createElement("p");
+
+        // Create and set up the <strong>
+        const strong = document.createElement("strong");
+        strong.textContent = command.command;
+
+        // Create the usage span
+        const usageSpan = document.createElement("span");
+        usageSpan.classList.add("command-info");
+        usageSpan.setAttribute("title", "Usage: " + command.usage);
+        usageSpan.textContent = "❓";
+
+        // Style it to float right
+        usageSpan.style.cssFloat = "right"; // or just use a CSS class
+
+        // Append elements to the <p>
+        description.appendChild(usageSpan);
+        description.appendChild(strong);
+        description.append(": " + command.description);
+
+        // Handle multi-line usage
+        const usageLines = command.usage.split("\n");
+        usageLines.forEach(line => {
+            const usageLine = document.createElement("p");
+            usageLine.textContent = line;  // Add each line of the usage as a new paragraph
+            description.appendChild(usageLine);
+        });
+
+        // Create the <li> and add the description
+        const li = document.createElement("li");
+        li.appendChild(description);
+
+        // Add to the list
+        broadcasterCommandList.appendChild(li);
     });
 }
+
 // Function to dynamically add command spans based on the `data-option`
 function updateTwitchCommandInfo() {
     // Get all elements with the class 'twitchcmd-info'
