@@ -586,7 +586,7 @@ function entriviaNosplash() {
     });
 }
 
- function getRandomQuestion() {
+function getRandomQuestion() {
     // Automatically use the current round (you can modify this logic as needed)
     const currentRound = (round === 1 || round === "round1") ? "round1"
                        : (round === 2 || round === "round2") ? "round2"
@@ -626,7 +626,7 @@ function entriviaNosplash() {
         let answers = question.answers ? question.answers.split(';') : [];
         return {
             question: question.question,
-			rawanswer: question.answers,
+            rawanswer: question.answers,
             answer: answers, // Multiple possible correct answers
             type: question.type,
             options: [] // No options for singlechoice
@@ -634,10 +634,10 @@ function entriviaNosplash() {
     } else if (question.type === "multiplechoice") {
         // Multiplechoice has one correct answer and options to choose from
         let correctAnswer = question.answers ? question.answers.split(';')[0] : null; // Only one correct answer
-        let options = question.options ? question.options.split(';') : [question.options];
+        let options = question.options ? question.options.split(';') : [];
         return {
             question: question.question,
-			rawanswer: question.answers,
+            rawanswer: question.answers,
             answer: correctAnswer, // Only one correct answer
             type: question.type,
             options: options // Options are relevant for multiplechoice
