@@ -649,6 +649,7 @@ function entriviaNosplash() {
     console.log("✅ Final parsed question:", result);
     return result;
 }
+fetchentriviaQuestions();
 getRandomQuestion();
 function getRandomQuestionCurrentRound(round = null, category = null, type = null) {
     console.log("🔍 Starting getRandomQuestionCurrentRound with round =", round, "category =", category, "type =", type);
