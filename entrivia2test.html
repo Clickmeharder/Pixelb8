@@ -241,13 +241,21 @@
 				<div class="controls" id="addCustomQuestionForm">
 					<h3>Add a Custom Entrivia Question</h3>
 					<div class="twitchcmd-info" data-option="!entrivia-addquestion"></div>
+					<!-- Question Type Selection -->
+					<div class="inputRow" id="">
+						<label for="questionType">Type:</label>
+						<select class="a" id="questionType">
+							<option value="singlechoice">Single Choice</option>
+							<option value="multiplechoice">Multiple Choice</option>
+						</select>
+					</div>
 
 					<!-- Round Selection -->
 					<div class="inputRow" id="">
-						<label for="round">Round:</label>
+						<label for="round">Difficulty</label>
 						<select class="a" id="round">
-							<option value="round1">Round 1</option>
-							<option value="round2">Round 2</option>
+							<option value="round1">Easy</option>
+							<option value="round2">Hard</option>
 						</select>
 					</div>
 
@@ -266,13 +274,6 @@
 						</select>
 					</div>
 
-					<!-- Question Type Selection -->
-					<div class="inputRow" id="">
-						<select class="a" id="questionType">
-							<option value="singlechoice">Single Choice</option>
-							<option value="multiplechoice">Multiple Choice</option>
-						</select>
-					</div>
 
 					<!-- Input for Multiple Choice Options (will show when type is "multiplechoice") -->
 					<div class="inputRow" id="multipleChoiceOptions" style="display: none;">
