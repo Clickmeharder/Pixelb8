@@ -733,7 +733,7 @@ function nextQuestion() {
     firstAnswerUser = null;
 
     // Fetch a random question based on the round and category
-    activeQuestion = getRandomQuestionCurrentRound();
+    activeQuestion = getRandomQuestion();
     questionsAsked++;
 
     // Update the question counter (this function should be defined elsewhere)
