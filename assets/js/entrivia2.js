@@ -630,19 +630,23 @@ function getRandomQuestion() {
     }
 
     // Adjust answers and options based on the question type
-    if (question.type === "singlechoice") {
-        // Singlechoice: Answers are separated by ';'
-        let answers = question.answers ? question.answers.split(';') : [];
-        return {
-            question: question.question,
-            rawanswer: question.answers,  // Keep raw answer string
-            answers: answers,  // Multiple possible correct answers (array)
-            type: question.type,
-            options: []  // No options for singlechoice
-        };
+	if (question.type === "singlechoice") {
+		// If there is no semicolon, keep the answer as a single value
+		let answers = question.answers && question.answers.includes(';') 
+					  ? question.answers.split(';') 
+					  : [question.answers];  // If no semicolon, use the answer directly
+
+		return {
+			question: question.question,
+			rawanswer: question.answers,  // Keep raw answer string
+			answers: answers,  // Multiple possible correct answers (array)
+			type: question.type,
+			options: []  // No options for singlechoice
+		};
+	}
     } else if (question.type === "multiplechoice") {
         // Multiplechoice: Only one correct answer, options provided
-        let correctAnswer = question.answers ? question.answers.split(';')[0] : null; // Only one correct answer
+        let correctAnswer = question.answers ? question.answers.split(';')[0] : [question.answers]; // Only one correct answer
         let options = question.options ? question.options.split(';') : [];
         return {
             question: question.question,
