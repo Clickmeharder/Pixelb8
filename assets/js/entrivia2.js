@@ -1438,7 +1438,7 @@ function startentriviaAsk(round = null, category = null, type = null) {
 			console.log("parameters given =" + round + category + type);
             displayConsoleMessage("system", `singleActiveAsk = ${singleActiveAsk}`);
             // Use the passed round, category, and type, or choose random if none provided
-            AskQuestion2(round, category, type);  // Now directly call the new unified AskQuestion
+            AskQuestion(round, category, type);  // Now directly call the new unified AskQuestion
         })
         .catch(error => {
             console.error("Error loading entrivia questions:", error);
