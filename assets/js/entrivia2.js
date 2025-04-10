@@ -1280,9 +1280,9 @@ function endAsk() {
     clearInterval(questionTimer);
     
     // Check if the answer is an array (for multiple answers)
-    let answerText = Array.isArray(activeQuestion.answer) 
-        ? activeQuestion.answer.join(", ") // Join answers if it's an array
-        : activeQuestion.answer;          // If it's not an array, just use the single answer
+    let answerText = Array.isArray(activeQuestion.answers) 
+        ? activeQuestion.answers.join(", ") // Join answers if it's an array
+        : activeQuestion.answers;          // If it's not an array, just use the single answer
 
     // Display the correct answer(s) on the screen
     document.getElementById("question").textContent = `Time's up! Answer was: ${answerText}`;
