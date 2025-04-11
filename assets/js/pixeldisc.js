@@ -1,4 +1,4 @@
-const root = document.documentElement;
+
 		let canvas = document.getElementById("canvas1");
 		let sections = ["FREE Beer Ked", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "idk", "another option", "nothing"];
 
@@ -11,7 +11,7 @@ const root = document.documentElement;
 <!-- 		let colors = ["#001f1fe8", "#004040eb"]; -->
 
 		// Accessing the computed styles for the <body> element
-		const styles = getComputedStyle(document.body);
+		const styles = getComputedStyle(document.documentElement);
 
 		// Read your theme variables
 		const color1 = styles.getPropertyValue('--bg-color').trim();
