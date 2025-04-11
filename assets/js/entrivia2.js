@@ -1458,6 +1458,7 @@ function toggleButtonBubble() {
 	const currentState = String(hideButtonBubble).toLowerCase();
 	hideButtonBubble = !hideButtonBubble;
     updateSingleSetting("hideButtonBubble: ", hideButtonBubble);
+	updateSettings();
 	console.log("toggled hideButtonBubble: ", hideButtonBubble);
 	const bubbleWrap = document.getElementById("bubblewrap");
 	bubbleWrap.style.opacity = hideButtonBubble ? "0.00" : "1.00";
@@ -1466,18 +1467,21 @@ function toggleButtonBubble() {
 function toggleentriviaconsolemessages() {
     consolemessages = !consolemessages;
     updateSingleSetting("consolemessages: ", consolemessages);
+	updateSettings();
 	console.log("toggled consolemessages: ", consolemessages);
     updateIndicatorLights();
 }
 function toggleusedefaultquestions() {
     usedefaultquestions = !usedefaultquestions;
     updateSingleSetting("usedefaultquestions: ", usedefaultquestions);
+	updateSettings();
 	console.log("toggled usedefaultquestions: ", usedefaultquestions);
     updateIndicatorLights();
 }
 function toggleusecustomquestions() {
     usecustomquestions = !usecustomquestions;
     updateSingleSetting("usecustomquestions", usecustomquestions);
+	updateSettings();
 	console.log("toggled customquestions", usecustomquestions);
 	displayConsoleMessage("toggled customquestions", usecustomquestions);
     updateIndicatorLights();
@@ -1485,6 +1489,7 @@ function toggleusecustomquestions() {
 function toggletwitchChatOverlay() {
 	twitchChatOverlay = !twitchChatOverlay;
 	updateSingleSetting("twitchChatOverlay: ", twitchChatOverlay);
+	updateSettings();
 	updateIndicatorLights();
 	toggleElement("twitchChat");
 	console.log(`entrivia Chat Overlay is now: ${twitchChatOverlay}`);
@@ -1493,6 +1498,7 @@ function toggletwitchChatOverlay() {
 function togglechatanswers() {
 	chatanswers = !chatanswers;
 	updateSingleSetting("chatanswers: ", chatanswers);
+	updateSettings();
 	updateIndicatorLights();
 	console.log(` Can chat answer entrivia: ${twitchChatOverlay}`);
 	displayConsoleMessage("system", `Can chat answer entrivia: ${twitchChatOverlay}`);
