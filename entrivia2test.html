@@ -444,7 +444,12 @@
 <!--       End of body        
 _____________________________  -->
   <script>
-<!--empty script tag -->
+document.querySelectorAll(".rangeinput").forEach(function(input) {
+  input.addEventListener("input", function () {
+    const value = (this.value - this.min) / (this.max - this.min) * 100;
+    this.style.background = `var(--bg-color)`;
+  });
+});
   </script>
   		<!-- simulate background script -->
 	<script>
