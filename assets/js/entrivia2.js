@@ -2269,6 +2269,7 @@ function toggleAudioSetting() {
 // start game button
 document.getElementById("startGame").addEventListener("click", function() {
     if (entriviaGameState === null) {
+		toggleElement("entrivia-controller", "fade");
 		startentrivia(); // Only start entrivia if it's not running 
     }
 });
