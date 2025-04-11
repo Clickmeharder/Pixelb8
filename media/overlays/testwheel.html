@@ -14,8 +14,8 @@
 		}
 		#wheelcanvaswrapper {
 			position: absolute;
-			right: 87%;
-			top: 60%;
+			right: var(--wheel-X);
+			top: var(--wheel-Y);
 			width: min(60vw, 60vh);
 			max-width: 100vw;
 			max-height: 100vh;
@@ -139,8 +139,8 @@
 		}
 		div#wheel-result {
 			position: fixed;
-			left: 15%;
-			bottom: 0%;
+			left: var(--wheelResult-X);
+			bottom: var(--wheelResult-Y);
 			padding: 10px;
 			margin-top: 10px;
 			font-weight: bold;
@@ -325,6 +325,48 @@
 	<div class="" id="wheelcanvaswrapper">
 		<canvas id="canvas1"></canvas>
 	</div>
+  <script>
+		const root = document.documentElement;
+		const wheelSliders = [
+		  { id: "wheelY", unit: "%", variable: "--wheel-Y", min: 0, max: 75 },
+		  { id: "wheelX", unit: "%", variable: "--wheel-X", min: 0, max: 100 },
+		  { id: "wheelResultY", unit: "%", variable: "--wheelResult-Y", min: 0, max: 100 },
+		  { id: "wheelResultX", unit: "%", variable: "--wheelResult-X", min: 0, max: 100 },
+		];
+		// Slider handling
+		wheelsliders.forEach(({ id, unit, variable, min, max }) => {
+		  const input = document.getElementById(id);
+		  const valueDisplay = document.getElementById(id + "Value");
+
+		  // Apply min/max limits to the slider
+		  input.min = min;
+		  input.max = max;
+
+		  // Set the initial value of the slider based on the saved layout (if available)
+		  const savedSettings = JSON.parse(localStorage.getItem("themeSettings"));
+		  if (savedSettings && savedSettings.layout) {
+			const savedValue = savedSettings.layout[variable];
+			if (savedValue) {
+			  input.value = parseFloat(savedValue);
+			  valueDisplay.textContent = savedValue;
+			}
+		  }
+
+		  // Add event listener for input changes
+		  input.addEventListener("input", () => {
+			const value = input.value + unit; // Add the correct unit (px or %)
+			root.style.setProperty(variable, value); // Update CSS variable
+			valueDisplay.textContent = value; // Update value display
+		  });
+		});
+
+		document.querySelectorAll(".rangeinput").forEach(function(input) {
+		  input.addEventListener("input", function () {
+			const value = (this.value - this.min) / (this.max - this.min) * 100;
+			this.style.background = `var(--bg-color)`;
+		  });
+		});
+  </script>
 	<script>
 		<!-- simulate background script -->
 	  const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
