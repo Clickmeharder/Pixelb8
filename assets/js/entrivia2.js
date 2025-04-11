@@ -1997,6 +1997,7 @@ The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
 ];
 
 // Function to update the command list in the UI
+// Function to update the command list in the UI
 function updateCommandlist() {
     // Get the respective <ul> elements
     const userCommandList = document.getElementById("usercommandList");
@@ -2006,9 +2007,13 @@ function updateCommandlist() {
     usercommands.forEach(function(command) {
         const description = document.createElement("p");
 
-        // Create and set up the <strong>
+        // Create and set up the <strong> for the command
         const strong = document.createElement("strong");
         strong.textContent = command.command;
+
+        // Create a new <p> for the command description and append it below the command
+        const commandDescription = document.createElement("p");
+        commandDescription.textContent = command.description;
 
         // Create the usage span
         const usageSpan = document.createElement("span");
@@ -2018,11 +2023,6 @@ function updateCommandlist() {
 
         // Style it to float right
         usageSpan.style.cssFloat = "right"; // or just use a CSS class
-
-        // Append elements to the <p>
-        description.appendChild(usageSpan);
-        description.appendChild(strong);
-        description.append(":");
 
         // Create a new <p> for each usage example
         const usageExamples = command.usage.split('\n').map(usage => {
@@ -2036,6 +2036,11 @@ function updateCommandlist() {
         usageLabel.textContent = "Usage:";  // This will add the "Usage:" label before the examples
         description.appendChild(usageLabel);
 
+        // Append strong command, description, and usage elements in the right order
+        description.appendChild(strong);            // Add the strong command first
+        description.appendChild(commandDescription); // Add the command description
+        description.appendChild(usageSpan);          // Add the usage info icon (optional)
+
         // Add each usage example to the description
         usageExamples.forEach((usageExample, index) => {
             description.appendChild(usageExample);
@@ -2048,11 +2053,6 @@ function updateCommandlist() {
                 description.appendChild(divider);
             }
         });
-
-        // Create a new <p> for the description text and append it below the command
-        const commandDescription = document.createElement("p");
-        commandDescription.textContent = command.description;
-        description.appendChild(commandDescription);
 
         // Create the <li> and add the description
         const li = document.createElement("li");
@@ -2066,9 +2066,13 @@ function updateCommandlist() {
     streamercommands.forEach(function(command) {
         const description = document.createElement("p");
 
-        // Create and set up the <strong>
+        // Create and set up the <strong> for the command
         const strong = document.createElement("strong");
         strong.textContent = command.command;
+
+        // Create a new <p> for the command description and append it below the command
+        const commandDescription = document.createElement("p");
+        commandDescription.textContent = command.description;
 
         // Create the usage span
         const usageSpan = document.createElement("span");
@@ -2078,11 +2082,6 @@ function updateCommandlist() {
 
         // Style it to float right
         usageSpan.style.cssFloat = "right"; // or just use a CSS class
-
-        // Append elements to the <p>
-        description.appendChild(usageSpan);
-        description.appendChild(strong);
-        description.append(":");
 
         // Create a new <p> for each usage example
         const usageExamples = command.usage.split('\n').map(usage => {
@@ -2096,6 +2095,11 @@ function updateCommandlist() {
         usageLabel.textContent = "Usage:";  // This will add the "Usage:" label before the examples
         description.appendChild(usageLabel);
 
+        // Append strong command, description, and usage elements in the right order
+        description.appendChild(strong);            // Add the strong command first
+        description.appendChild(commandDescription); // Add the command description
+        description.appendChild(usageSpan);          // Add the usage info icon (optional)
+
         // Add each usage example to the description
         usageExamples.forEach((usageExample, index) => {
             description.appendChild(usageExample);
@@ -2108,11 +2112,6 @@ function updateCommandlist() {
                 description.appendChild(divider);
             }
         });
-
-        // Create a new <p> for the description text and append it below the command
-        const commandDescription = document.createElement("p");
-        commandDescription.textContent = command.description;
-        description.appendChild(commandDescription);
 
         // Create the <li> and add the description
         const li = document.createElement("li");
