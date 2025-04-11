@@ -665,14 +665,15 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 	<script>
 		let canvas = document.getElementById("canvas1");
 		let sections = ["FREE Beer Ked", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "idk", "another option", "nothing"];
-		let colors = ["#001f1fe8", "#004040eb"];
+
 		let wheels = null;
 		let frame = null;
 		const removeSelect = document.getElementById("removewheelsection");
 		const addInput = document.getElementById("addwheelsection");
 		const addButton = document.getElementById("wheel-addsectionButt");
 		const removeButton = document.getElementById("wheel-removesectionButt");
-
+<!-- 		let colors = ["#001f1fe8", "#004040eb"]; -->
+		let colors = ["red", "blue"];
 		const rootStyles = getComputedStyle(document.documentElement);
 		const resolvedFontFamily = rootStyles.getPropertyValue("--body-font").trim();
 
