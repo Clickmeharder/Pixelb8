@@ -1578,10 +1578,12 @@ function applyUserDisplaySettings() {
 	const chatBox = document.getElementById("twitchChat");
 	if (chatBox) {
 		if (twitchChatOverlay === "on" || twitchChatOverlay === true) {
+			console.log("showing twitch chat ✅");
 			chatBox.style.visibility = "visible";
 			chatBox.classList.add("active");
 			chatBox.style.animation = "fadeIn 0.8s ease-out forwards";
 		} else {
+			console.log("hiding twitch chat ❌");
 			chatBox.style.animation = "fadeOut 0.5s ease-in forwards";
 			setTimeout(() => {
 				chatBox.classList.remove("active");
@@ -1594,9 +1596,11 @@ function applyUserDisplaySettings() {
 	const bubbleWrap = document.getElementById("bubblewrap");
 	if (bubbleWrap) {
 		if (hideButtonBubble === "on" || hideButtonBubble === true) {
+			console.log("hiding bubble butt ✅");
 			bubbleWrap.style.opacity = "0.00";
 		} else {
 			bubbleWrap.style.opacity = "1.00";
+			console.log("showing bubblewrap ❌");
 		}
 	}
 
