@@ -17,6 +17,7 @@ function debugThemeStyles() {
 	color2 = styles.getPropertyValue('--wheel-color2').trim();
 	color3 = styles.getPropertyValue('--wheel-color3').trim();
 	bodyFont = styles.getPropertyValue('--body-font').trim();
+	bordercolor = styles.getPropertyValue('--border-color').trim();
 	glowColor = styles.getPropertyValue('--glow-color').trim();
 	console.log('Current Body Class:', document.body.className);
 	// Log the results
@@ -24,6 +25,7 @@ function debugThemeStyles() {
 	console.log('Color 2 (--wheel-color2):', color2);
 	console.log('Color 3 (--wheel-color3):', color3);
 	console.log('Body Font (--body-font):', bodyFont);
+	console.log('Border color (--border-color):', borderColor);
 	console.log('Glow Color (--glow-color):', bodyFont);
 	// Use resolved values in your array
 	colors = [color1, color2];
@@ -73,7 +75,7 @@ const wheelFontConfig = {
 						ctx.arc(r, r, r, a0, a1, false);
 						ctx.fillStyle = colors[i % 2];
 						ctx.fill();
-						ctx.strokeStyle = "#0ea4a4e8";//"var(--border-color)";//"#0ea4a4e8";
+						ctx.strokeStyle = borderColor;//"var(--border-color)";//"#0ea4a4e8";
 						ctx.lineWidth = 1;
 						ctx.stroke();
 
