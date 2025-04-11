@@ -9,32 +9,32 @@ const addButton = document.getElementById("wheel-addsectionButt");
 const removeButton = document.getElementById("wheel-removesectionButt");
 
 
-		function debugThemeStyles() {
-			// Accessing the computed styles for the <body> element
-			const styles = getComputedStyle(document.body);
+function debugThemeStyles() {
+	// Accessing the computed styles for the <body> element
+	const styles = getComputedStyle(document.body);
 
-			// Read your theme variables
-			const color1 = styles.getPropertyValue('--bg-color').trim();
-			const color2 = styles.getPropertyValue('--bg-color-alt').trim();
-			const color3 = styles.getPropertyValue('--text-color-alt').trim();
-			const bodyFont = styles.getPropertyValue('--body-font').trim();
-			console.log('Current Body Class:', document.body.className);
-			// Log the results
-			console.log('Color 1 (--bg-color):', color1);
-			console.log('Color 2 (--bg-color-alt):', color2);
-			console.log('Color 3 (--text-color-alt):', color3);
-			console.log('Body Font (--body-font):', bodyFont);
-			// Use resolved values in your array
-			colors = [color1, color2];
-		}
-		// Fallback if the CSS variable isn't set
-		const wheelFontConfig = {
-		  family: bodyFont || "Arial",
-		  weight: "bold",
-		  minSize: 12,
-		  maxSize: 18,
-		  scaleFactor: 0.9
-		};
+	// Read your theme variables
+	const color1 = styles.getPropertyValue('--bg-color').trim();
+	const color2 = styles.getPropertyValue('--bg-color-alt').trim();
+	const color3 = styles.getPropertyValue('--text-color-alt').trim();
+	const bodyFont = styles.getPropertyValue('--body-font').trim();
+	console.log('Current Body Class:', document.body.className);
+	// Log the results
+	console.log('Color 1 (--bg-color):', color1);
+	console.log('Color 2 (--bg-color-alt):', color2);
+	console.log('Color 3 (--text-color-alt):', color3);
+	console.log('Body Font (--body-font):', bodyFont);
+	// Use resolved values in your array
+	colors = [color1, color2];
+}
+// Fallback if the CSS variable isn't set
+const wheelFontConfig = {
+  family: bodyFont || "Arial",
+  weight: "bold",
+  minSize: 12,
+  maxSize: 18,
+  scaleFactor: 0.9
+};
 
 		function repaint(angle) {
 			const wrapper = document.getElementById("wheelcanvaswrapper");
@@ -311,9 +311,8 @@ const removeButton = document.getElementById("wheel-removesectionButt");
 		deletewheelSections();
 	});
 	document.addEventListener('DOMContentLoaded', () => {
-	  console.log('Current Body Class (after DOMContentLoaded):', document.body.className);
 	  	// Initialize dropdown when page loads
 		updateRemoveDropdown();
 		updateLoadDropdown();
-		debugThemeStyles();
+
 	});
