@@ -1954,14 +1954,14 @@ const usercommands = [
 ];
 
 const streamercommands = [
-	{ command: "!a / !answer", description: "Allows users to answer a entrivia question.", usage: "!a / !answer" },
-	{ command: "!entrivia-play", description: "Starts the entrivia game.", usage: "!entrivia-play" },
-	{ command: "!entrivia-lastaskwinner", description: "Displays the lastquestion's winner.", usage: "!entrivia-lastaskwinner" },
+	{ command: "!a / !answer", description: "Answer an Entrivia question.", usage: "!a / !answer" },
+	{ command: "!entrivia-play", description: "Starts Entrivia Classic.", usage: "!entrivia-play" },
+	{ command: "!entrivia-lastaskwinner", description: "Displays the last single question's winner.", usage: "!entrivia-lastaskwinner" },
 	{ command: "!entrivia-lastwinners", description: "Show Last Entrivia Classic winners.", usage: "!entrivia-lastwinners" },
-	{ command: "!entrivia-history", description: "Displays Entrivia Classic history.", usage: "!entrivia-history" },
+	{ command: "!entrivia-history", description: "Displays Entrivia Classic game history.", usage: "!entrivia-history" },
 	{ command: "!entrivia-chatanswers", description: "Toggles the chat answers on/off.", usage: "!entrivia-chatanswers" },
 	{ command: "!entrivia-consolemessages", description: "Toggles the chat answers on/off.", usage: "!entrivia-consolemessages" },
-	{ command: "!entrivia-disablechat", description: "Disables entrivia chat overlay.", usage: "!entrivia-disablechat" },
+	{ command: "!entrivia-disablechat", description: "Disables Entrivia chat overlay.", usage: "!entrivia-disablechat" },
 	{ command: "!entrivia-audio", description: "Toggles entrivia audio settings.", usage: "!entrivia-audio" },
 	{ command: "!toggleentriviaboard", description: "Toggles the entrivia board visibility.", usage: "!toggleentriviaboard" },
 	{ command: "!togglequestions", description: "Toggles the visibility of the question wrapper.", usage: "!togglequestions" },
