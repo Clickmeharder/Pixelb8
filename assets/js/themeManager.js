@@ -64,7 +64,15 @@ document.querySelectorAll('.themeselect').forEach(button => {
     setTheme(theme);
   });
 });
+function updateBubblewrapVisibility() {
+	const bubblewrap = document.getElementById("bubblewrap");
 
+	if (!bubblewrap) return;
+
+	const hide = hideButtonBubble === true || hideButtonBubble === "on";
+
+	bubblewrap.style.opacity = hide ? "0.00" : "1.00";
+}
 // Set theme function to update the theme and save the layout
 function setTheme(themeName, saveLayout = true) {
   document.body.className = themeName;
@@ -106,3 +114,4 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 /* localStorage.removeItem("themeSettings"); */
+updateBubblewrapVisibility();
