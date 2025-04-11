@@ -14,7 +14,7 @@ let styles = getComputedStyle(document.body);
 	color2 = styles.getPropertyValue('--wheel-color2').trim();
 	color3 = styles.getPropertyValue('--wheel-color3').trim();
 	bodyFont = styles.getPropertyValue('--body-font').trim();
-	bordercolor = styles.getPropertyValue('--border-color').trim();
+	borderColor = styles.getPropertyValue('--border-color').trim();
 	glowColor = styles.getPropertyValue('--glow-color').trim();
 	console.log('Current Body Class:', document.body.className);
 	// Log the results
@@ -23,7 +23,7 @@ let styles = getComputedStyle(document.body);
 	console.log('Color 3 (--wheel-color3):', color3);
 	console.log('Body Font (--body-font):', bodyFont);
 	console.log('Border color (--border-color):', borderColor);
-	console.log('Glow Color (--glow-color):', bodyFont);
+	console.log('Glow Color (--glow-color):', glowColor);
 	// Use resolved values in your array
 	colors = [color1, color2];
 function debugThemeStyles() {
@@ -32,7 +32,7 @@ function debugThemeStyles() {
 	color2 = styles.getPropertyValue('--wheel-color2').trim();
 	color3 = styles.getPropertyValue('--wheel-color3').trim();
 	bodyFont = styles.getPropertyValue('--body-font').trim();
-	bordercolor = styles.getPropertyValue('--border-color').trim();
+	borderColor = styles.getPropertyValue('--border-color').trim();
 	glowColor = styles.getPropertyValue('--glow-color').trim();
 	console.log('Current Body Class:', document.body.className);
 	// Log the results
@@ -41,7 +41,7 @@ function debugThemeStyles() {
 	console.log('Color 3 (--wheel-color3):', color3);
 	console.log('Body Font (--body-font):', bodyFont);
 	console.log('Border color (--border-color):', borderColor);
-	console.log('Glow Color (--glow-color):', bodyFont);
+	console.log('Glow Color (--glow-color):', glowColor);
 	// Use resolved values in your array
 	colors = [color1, color2];
 	wheels = null;
