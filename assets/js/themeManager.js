@@ -122,10 +122,9 @@ window.addEventListener("DOMContentLoaded", () => {
     Object.entries(layout).forEach(([varName, value]) => {
       document.documentElement.style.setProperty(varName, value);
     });
-
+	debugThemeStyles();
     console.log("Loaded saved theme settings:", savedSettings);
   }
 });
 /* localStorage.removeItem("themeSettings"); */
 updateBubblewrapVisibility();
-debugThemeStyles();
