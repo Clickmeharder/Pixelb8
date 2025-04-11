@@ -514,9 +514,11 @@ _____________________________  -->
 		const examplepanelwrapper = document.getElementById("examplepanelwrapper");
 		showthemeExamplesSwitch.addEventListener("change", function () {
 		  if (this.checked) {
+			showentrivia();
 			showElement(examplemessagebox, "fade");
 			showElement(examplepanelwrapper, "fade");
 		  } else {
+			hideentrivia();
 			hideElement(examplemessagebox, "fade");
 			hideElement(examplepanelwrapper, "fade");
 		  }
