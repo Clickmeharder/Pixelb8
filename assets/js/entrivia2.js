@@ -2037,7 +2037,11 @@ function updateCommandlist() {
             usageLabel.textContent = "Usage:";
             usageLabel.style.fontSize = "smaller";
             description.appendChild(usageLabel);
-
+			//usage label bottom divider
+            const dividerAfterusageLabel = document.createElement("div");
+            dividerAfterusageLabel.style.borderTop = "2px ridge var(--border-color)";
+            dividerAfterusageLabel.style.margin = "4px 0";
+            usageLabel.appendChild(dividerAfterusageLabel);
             // Split usage into lines
             const usageLines = command.usage.split('\n').map(line => line.trim()).filter(line => line !== "");
 
