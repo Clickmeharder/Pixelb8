@@ -25,7 +25,7 @@ const removeButton = document.getElementById("wheel-removesectionButt");
 		console.log('Color 3 (--text-color-alt):', color3);
 		console.log('Body Font (--body-font):', bodyFont);
 		// Use resolved values in your array
-		let colors = [color1, color2];
+		colors = [color1, color2];
 
 		// Fallback if the CSS variable isn't set
 		const wheelFontConfig = {
