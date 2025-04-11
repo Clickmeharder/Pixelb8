@@ -2075,6 +2075,17 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 input[type="range"] {
 
 }
+div#switch-box {
+    display: flex;
+    margin: auto;
+    margin-bottom: 4px;
+    width: 94%;
+    padding: 6px;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    justify-content: space-between;
+    align-items: center;
+}
 .switch {
 	position: relative;
 	display: inline-block;
@@ -2090,7 +2101,7 @@ input[type="range"] {
 	position: absolute;
 	cursor: pointer;
 	top: 0; left: 0; right: 0; bottom: 0;
-	background-color: var(--input-bg-color);
+	background-color: var(--input-border-color);
 	transition: .4s;
 	border-radius: 34px;
 }
