@@ -1,14 +1,19 @@
+let canvas = document.getElementById("canvas1");
+let sections = ["FREE Beer Ked", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "idk", "another option", "nothing"];
+let colors = ["#001f1fe8", "#004040eb"];
+let wheels = null;
+let frame = null;
+const removeSelect = document.getElementById("removewheelsection");
+const addInput = document.getElementById("addwheelsection");
+const addButton = document.getElementById("wheel-addsectionButt");
+const removeButton = document.getElementById("wheel-removesectionButt");
+	function initializeWheel() {
 
-		let canvas = document.getElementById("canvas1");
-		let sections = ["FREE Beer Ked", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "idk", "another option", "nothing"];
-
-		let wheels = null;
-		let frame = null;
 		const removeSelect = document.getElementById("removewheelsection");
 		const addInput = document.getElementById("addwheelsection");
 		const addButton = document.getElementById("wheel-addsectionButt");
 		const removeButton = document.getElementById("wheel-removesectionButt");
-<!-- 		let colors = ["#001f1fe8", "#004040eb"]; -->
+
 
 		// Accessing the computed styles for the <body> element
 		const styles = getComputedStyle(document.documentElement);
@@ -35,6 +40,8 @@
 		  maxSize: 18,
 		  scaleFactor: 0.9
 		};
+		repaint(angle);
+	}
 		function repaint(angle) {
 			const wrapper = document.getElementById("wheelcanvaswrapper");
 			const wrapperBounds = wrapper.getBoundingClientRect();
@@ -309,7 +316,10 @@
 		console.log(`Wheel "delete wheel butt clicked!`);
 		deletewheelSections();
 	});
-
+	document.addEventListener('DOMContentLoaded', () => {
+	  console.log('Current Body Class (after DOMContentLoaded):', document.body.className);
+	  initializeWheel();
+	});
 	// Initialize dropdown when page loads
 	updateRemoveDropdown();
 	updateLoadDropdown();
