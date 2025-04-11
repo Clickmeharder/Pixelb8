@@ -128,3 +128,4 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 /* localStorage.removeItem("themeSettings"); */
 updateBubblewrapVisibility();
+debugThemeStyles();

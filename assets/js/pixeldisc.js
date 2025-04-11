@@ -315,5 +315,4 @@ const wheelFontConfig = {
 	  	// Initialize dropdown when page loads
 		updateRemoveDropdown();
 		updateLoadDropdown();
-		debugThemeStyles();
 	});
