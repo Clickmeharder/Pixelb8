@@ -189,7 +189,7 @@ const removeButton = document.getElementById("wheel-removesectionButt");
 			}
 		};
 
-		repaint(angle);
+
 	window.addEventListener("resize", () => repaint(angle));
 	function getSavedWheels() {
 		return JSON.parse(localStorage.getItem("savedWheels") || "{}");
