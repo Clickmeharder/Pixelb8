@@ -2004,7 +2004,7 @@ function updateCommandlist() {
 
     function createCommandList(commandArray, targetList) {
         commandArray.forEach(function (command) {
-            const description = document.createElement("div"); // Wrap everything together
+            const description = document.createElement("div");
 
             // Create <strong> and ❓ span inside it
             const strong = document.createElement("strong");
@@ -2021,15 +2021,19 @@ function updateCommandlist() {
             // Command description
             const commandDescription = document.createElement("p");
             commandDescription.textContent = command.description;
+            commandDescription.style.fontStyle = "italic";
+            commandDescription.style.fontSize = "small";
 
             // Usage label
             const usageLabel = document.createElement("p");
             usageLabel.textContent = "Usage:";
+            usageLabel.style.fontStyle = "italic";
 
             // Usage examples
             const usageExamples = command.usage.split('\n').map(usage => {
                 const usageParagraph = document.createElement("p");
                 usageParagraph.textContent = usage.trim();
+                usageParagraph.style.fontStyle = "italic";
                 return usageParagraph;
             });
 
@@ -2057,6 +2061,7 @@ function updateCommandlist() {
     createCommandList(usercommands, userCommandList);
     createCommandList(streamercommands, broadcasterCommandList);
 }
+
 
 
 
