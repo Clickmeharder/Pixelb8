@@ -2018,24 +2018,24 @@ function updateCommandlist() {
 
             strong.appendChild(infoSpan); // ❓ goes inside <strong>
 
-            // Command description
-            const commandDescription = document.createElement("p");
-            commandDescription.textContent = command.description;
-            commandDescription.style.fontStyle = "italic";
-            commandDescription.style.fontSize = "small";
+			// Command description
+			const commandDescription = document.createElement("p");
+			commandDescription.textContent = command.description;
+			commandDescription.style.fontStyle = "italic"; // Keep italic
+			commandDescription.style.fontSize = "small";   // Still smaller font
 
-            // Usage label
-            const usageLabel = document.createElement("p");
-            usageLabel.textContent = "Usage:";
-            usageLabel.style.fontStyle = "italic";
+			// Usage label
+			const usageLabel = document.createElement("p");
+			usageLabel.textContent = "Usage:";
+			usageLabel.style.fontSize = "smaller"; // Smaller, not italic anymore
 
-            // Usage examples
-            const usageExamples = command.usage.split('\n').map(usage => {
-                const usageParagraph = document.createElement("p");
-                usageParagraph.textContent = usage.trim();
-                usageParagraph.style.fontStyle = "italic";
-                return usageParagraph;
-            });
+			// Usage examples
+			const usageExamples = command.usage.split('\n').map(usage => {
+				const usageParagraph = document.createElement("p");
+				usageParagraph.textContent = usage.trim();
+				usageParagraph.style.fontSize = "smaller"; // Smaller, not italic
+				return usageParagraph;
+			});
 
             // Append all in correct order
             description.appendChild(strong);
