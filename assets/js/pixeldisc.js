@@ -1,3 +1,4 @@
+const root = document.documentElement;
 		let canvas = document.getElementById("canvas1");
 		let sections = ["FREE Beer Ked", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "idk", "another option", "nothing"];
 
