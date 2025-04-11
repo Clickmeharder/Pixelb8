@@ -24,7 +24,7 @@ let entriviaQuestions = { round1: [], round2: [] };
 // entrivia OPTIONS
 //game options
 let audioSetting = "on";
-let TwitchChatOverlay = "off";
+let twitchChatOverlay = "off";
 let consolemessages = false;
 let chatanswers = false;
 
@@ -1471,20 +1471,20 @@ function toggleusecustomquestions() {
 	displayConsoleMessage("toggled customquestions", usecustomquestions);
     updateIndicatorLights();
 }
-function toggleTwitchChatOverlay() {
-	TwitchChatOverlay = !TwitchChatOverlay;
-	updateSingleSetting("TwitchChatOverlay", TwitchChatOverlay);
+function toggletwitchChatOverlay() {
+	twitchChatOverlay = !twitchChatOverlay;
+	updateSingleSetting("twitchChatOverlay", twitchChatOverlay);
 	updateIndicatorLights();
 	toggleElement("twitchChat");
-	console.log(`entrivia Chat Overlay is now: ${TwitchChatOverlay}`);
-	displayConsoleMessage("system", `entrivia Chat Overlay is now: ${TwitchChatOverlay}`);
+	console.log(`entrivia Chat Overlay is now: ${twitchChatOverlay}`);
+	displayConsoleMessage("system", `entrivia Chat Overlay is now: ${twitchChatOverlay}`);
 }
 function togglechatanswers() {
 	chatanswers = !chatanswers;
 	updateSingleSetting("chatanswers", chatanswers);
 	updateIndicatorLights();
-	console.log(` Can chat answer entrivia: ${TwitchChatOverlay}`);
-	displayConsoleMessage("system", `Can chat answer entrivia: ${TwitchChatOverlay}`);
+	console.log(` Can chat answer entrivia: ${twitchChatOverlay}`);
+	displayConsoleMessage("system", `Can chat answer entrivia: ${twitchChatOverlay}`);
 }
 //-----------------------------------
 function updateSingleSetting(settingKey, newValue) {
@@ -1501,7 +1501,7 @@ function saveSettings() {
         usedefaultquestions,
         usecustomquestions,
 		consolemessages,
-		TwitchChatOverlay,
+		twitchChatOverlay,
 		chatanswers,
 		audioSetting
     };
@@ -1528,7 +1528,7 @@ function resetSettings() {
     usedefaultquestions = true;
     usecustomquestions = true;
 	consolemessages = false;
-	TwitchChatOverlay = false;
+	twitchChatOverlay = false;
 	chatanswers = false;
 	audioSetting = true;
     // Clear saved settings
@@ -1568,7 +1568,7 @@ function updateSettingsDisplay() {
 
 // Function to dynamically add a button and a status light indicator
 function updateentriviaSettingsUI() {
-	let settings = { usedefaultquestions, usecustomquestions, consolemessages, TwitchChatOverlay, chatanswers, audioSetting };
+	let settings = { usedefaultquestions, usecustomquestions, consolemessages, twitchChatOverlay, chatanswers, audioSetting };
     // Select all elements with the class 'optiontoggle-entrivia'
     const toggleElements = document.querySelectorAll('.optiontoggle-entrivia');
 
@@ -1784,7 +1784,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
         displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
-		toggleTwitchChatOverlay();
+		toggletwitchChatOverlay();
 	}
 	if (command.toLowerCase() === "entrivia-audio") {
 		if (!isStreamerAndAuthorize(user, command)) return;
@@ -2295,7 +2295,7 @@ document.getElementById("toggleusedefaultquestions").addEventListener("click", t
 document.getElementById("toggleusecustomquestions").addEventListener("click", toggleusecustomquestions);
 //
 document.getElementById('toggleconsolemessages').addEventListener('click', toggleentriviaconsolemessages);
-document.getElementById('toggleTwitchChatOverlay').addEventListener('click', toggleTwitchChatOverlay);
+document.getElementById('toggletwitchChatOverlay').addEventListener('click', toggletwitchChatOverlay);
 document.getElementById('togglechatanswers').addEventListener('click', togglechatanswers);
 document.getElementById('toggleusedefaultquestions').addEventListener('click', toggleusedefaultquestions);
 document.getElementById('toggleusecustomquestions').addEventListener('click', toggleusecustomquestions);

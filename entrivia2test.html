@@ -344,7 +344,7 @@
 					<h3>Dont worry bout these</h3>
 					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="consolemessages"></div>
 					<div class="twitchcmd-info" data-option="!entrivia-consolemessages"></div>
-					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="entriviachatOverlay"></div>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="twitchChatOverlay"></div>
 					<div class="twitchcmd-info" data-option="!entrivia-disablechat"></div>
 					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="chatanswers"></div>
 					<div class="twitchcmd-info" data-option="!entrivia-chatanswers"></div>
@@ -536,7 +536,7 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 		});
 
 		function updateIndicatorLights() { 
-			let thesesettings = { usedefaultquestions, usecustomquestions, consolemessages, entriviachatOverlay, chatanswers, audioSetting };
+			let thesesettings = { usedefaultquestions, usecustomquestions, consolemessages, twitchChatOverlay, chatanswers, audioSetting };
 			document.querySelectorAll(".light-indicator").forEach(indicator => {
 				const optionName = indicator.getAttribute("data-option");
 				const optionValue = thesesettings[optionName]; // Get the value safely
