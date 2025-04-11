@@ -94,7 +94,7 @@ const wheelFontConfig = {
 						ctx.arc(r, r, r, a0, a1, false);
 						ctx.fillStyle = colors[i % 2];
 						ctx.fill();
-						ctx.strokeStyle = color3;//"var(--border-color)";//"#0ea4a4e8";
+						ctx.strokeStyle = borderColor;//"var(--border-color)";//"#0ea4a4e8";
 						ctx.lineWidth = 1;
 						ctx.stroke();
 
