@@ -1998,47 +1998,67 @@ The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
 
 // Function to update the command list in the UI
 // Function to update the command list in the UI
-function createCommandElement(command) {
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("command-wrapper");
+function updateCommandlist() {
+    const userCommandList = document.getElementById("usercommandList");
+    const broadcasterCommandList = document.getElementById("broadcastercommandList");
 
-    // Command Name <strong>
-    const strong = document.createElement("strong");
-    strong.textContent = command.command;
+    function createCommandList(commandArray, targetList) {
+        commandArray.forEach(function (command) {
+            const description = document.createElement("div"); // Wrap everything together
 
-    // Add ❓ span inside the <strong>
-    const infoSpan = document.createElement("span");
-    infoSpan.classList.add("command-info");
-    infoSpan.textContent = "❓";
-    infoSpan.setAttribute("title", "Usage: " + command.usage);
-    infoSpan.style.float = "right";  // Float it right within the strong tag
-    strong.appendChild(infoSpan);
+            // Create <strong> and ❓ span inside it
+            const strong = document.createElement("strong");
+            strong.textContent = command.command;
 
-    wrapper.appendChild(strong);
+            const infoSpan = document.createElement("span");
+            infoSpan.classList.add("command-info");
+            infoSpan.setAttribute("title", "Usage: " + command.usage);
+            infoSpan.textContent = "❓";
+            infoSpan.style.cssFloat = "right";
 
-    // Description
-    const desc = document.createElement("p");
-    desc.textContent = command.description;
-    wrapper.appendChild(desc);
+            strong.appendChild(infoSpan); // ❓ goes inside <strong>
 
-    // Usage Label
-    const usageLabel = document.createElement("p");
-    usageLabel.textContent = "usage:";
-    wrapper.appendChild(usageLabel);
+            // Command description
+            const commandDescription = document.createElement("p");
+            commandDescription.textContent = command.description;
 
-    // Usage lines
-    const usageLines = command.usage.split('\n');
-    usageLines.forEach(usage => {
-        const usageP = document.createElement("p");
-        usageP.textContent = usage.trim();
-        wrapper.appendChild(usageP);
-    });
+            // Usage label
+            const usageLabel = document.createElement("p");
+            usageLabel.textContent = "Usage:";
 
-    // Wrap everything in an <li>
-    const li = document.createElement("li");
-    li.appendChild(wrapper);
-    return li;
+            // Usage examples
+            const usageExamples = command.usage.split('\n').map(usage => {
+                const usageParagraph = document.createElement("p");
+                usageParagraph.textContent = usage.trim();
+                return usageParagraph;
+            });
+
+            // Append all in correct order
+            description.appendChild(strong);
+            description.appendChild(commandDescription);
+            description.appendChild(usageLabel);
+            usageExamples.forEach((usageExample, index) => {
+                description.appendChild(usageExample);
+
+                if (index < usageExamples.length - 1) {
+                    const divider = document.createElement("div");
+                    divider.style.borderTop = "2px ridge var(--border-color)";
+                    divider.style.margin = "4px 0";
+                    description.appendChild(divider);
+                }
+            });
+
+            const li = document.createElement("li");
+            li.appendChild(description);
+            targetList.appendChild(li);
+        });
+    }
+
+    createCommandList(usercommands, userCommandList);
+    createCommandList(streamercommands, broadcasterCommandList);
 }
+
+
 
 // Function to dynamically add command spans based on the `data-option`
 function updateTwitchCommandInfo() {
