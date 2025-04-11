@@ -82,9 +82,9 @@
 			<div class="Panel-timer" id="entrivia-panel-timer"></div>
 		</div>
 		<div class="spinwheel" id="wheelWrapper" style="display:none;">
-			<div class="" id="spinwheel-result"></div>
-			<div class="" id="spinwheel-canvas-wrapper">
-				<canvas id="spinwheel-Canvas"></canvas>
+			<div class="" id="wheel-result" style=""></div>
+			<div class="" id="wheelcanvaswrapper">
+				<canvas id="canvas1"></canvas>
 			</div>
 		</div>
 		<!-- these are containers for controls or settigns or info related to different widgets -->
@@ -211,6 +211,32 @@
 					<button class="a Butt load" id="load-sectionsButt">Load Wheel</button>
 					<button class="a Butt delete" id="delete-saved-wheel">Delete Wheel</button>
 				  </div>
+				</div>
+				<div class="" id="posSliders">
+					<div>
+					  <label>Wheel Y:
+						<input type="range" id="wheelY" min="0" max="75" value="0">
+						<span id="wheelYValue">0%</span>
+					  </label>
+					</div>
+					<div>
+					  <label>Wheel X:
+						<input type="range" id="wheelX" min="0" max="70" value="0">
+						<span id="wheelXValue">0%</span>
+					  </label>
+					</div>
+					<div>
+					  <label>Wheel Result Y:
+						<input type="range" id="wheelResultY" min="0" max="100" value="71">
+						<span id="entriviaAnnouncementYValue">71%</span>
+					  </label>
+					</div>
+					<div>
+					  <label>Wheel Result X:
+						<input type="range" id="wheelResultX" min="0" max="100" value="2">
+						<span id="entriviaAnnouncementXValue">2px</span>
+					  </label>
+					</div>
 				</div>
 			</div>
 		</div>
