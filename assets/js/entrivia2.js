@@ -24,7 +24,7 @@ let entriviaQuestions = { round1: [], round2: [] };
 // entrivia OPTIONS
 //game options
 let audioSetting = "on";
-let twitchChatOverlay = "off";
+let twitchChatOverlay = "on";
 let consolemessages = false;
 let chatanswers = false;
 
