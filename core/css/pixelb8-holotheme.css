@@ -2011,19 +2011,6 @@ ul#broadcastercommandlist {
 /*______________________*/
 /**/
 
-option:disabled {
-    color: -internal-light-dark(graytext, rgb(170, 170, 170));
-}
-
-.inactive{
-	opacity:0.45;
-}
-
-.displaynone{
-	display:none;
-}
-  
-
 
 
 /*----------------*/
@@ -2251,6 +2238,28 @@ input:checked + .slider {
 input:checked + .slider:before {
 	transform: translateX(26px);
 }
+	.options {
+		margin-top: 10px;
+	}
+	.option {
+		padding: 10px;
+		background-color: #f1f1f1;
+		border: 1px solid #ddd;
+		margin-bottom: 5px;
+		cursor: pointer;
+	}
+option:disabled {
+    color: -internal-light-dark(graytext, rgb(170, 170, 170));
+}
+
+.inactive{
+	opacity:0.45;
+}
+
+.displaynone{
+	display:none;
+}
+  
 
 /*----------------------*/
 

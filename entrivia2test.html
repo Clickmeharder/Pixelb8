@@ -18,23 +18,145 @@
     <style>
 
     </style>
-	<style>
-		<!-- new testing css-->
-	.options {
-		margin-top: 10px;
-	}
-	.option {
-		padding: 10px;
-		background-color: #f1f1f1;
-		border: 1px solid #ddd;
-		margin-bottom: 5px;
-		cursor: pointer;
-	}
+   <style>
+		body{
+			overflow: hidden;
+		}
+		#wheelcanvaswrapper {
+			position: absolute;
+			right: var(--wheel-X);
+			top: var(--wheel-Y);
+			width: min(60vw, 60vh);
+			max-width: 100vw;
+			max-height: 100vh;
+			aspect-ratio: 1 / 1;
+			margin: auto;
+			margin-right: 0;
+			margin-top: 25px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
 
-	</style>
-	<style>
+		#wheelcanvaswrapper canvas {
+			width: 100%;
+			height: 100%;
+			background:#360707f0;
+			display: block;
+			border-radius: 50%;
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+			animation: glowPulse 3s infinite alternate;
+		}
 
+		#canvas1 {
+			display: block;
+			opacity: 0.85;
+			margin: 0;
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+		}
+		/* entrivia Control Button */
+		#wheel-control-toggle {
+			position: fixed;
+			bottom: 2px;
+			right: 30px;
+			width: 40px;
+			height: 30px;
+			border-radius: 19%;
+			background: linear-gradient(113deg, #001f1f, #004040);
+			color: #12ebeb;
+			border: none;
+			font-size: 24px;
+			padding: 3px;
+			line-height: 0.1;
+			cursor: pointer;
+			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+			transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
+			z-index: 1000;
+			opacity: 0.65;
+		}
 
+		#Wheel-control-toggle:hover {
+			background-color: #2980b9;
+			transform: scale(1.1);
+			opacity: 1;
+		}
+
+		/* entrivia Control Container */
+		#wheel-controlBox {
+			position: fixed;
+			top: 10px;
+			left: 10px;
+			width: 272px;
+			padding: 10px;
+			background: linear-gradient(135deg, #001f1fe8, #004040eb);
+			color: white;
+			border-radius: 8px;
+			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
+			opacity: 0; /* Start hidden */
+			transform: translateY(-10px); /* Slight slide-up effect */
+			transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+			pointer-events: none; /* Prevent interaction when hidden */
+			z-index: 999;
+		}
+
+		/* When active (visible) */
+		#wheel-controlBox.active {
+			opacity: 0.85;
+			transform: translateY(0);
+			pointer-events: all; /* Allow interactions */
+		}
+		#wheel-controlBox button {
+			margin: 5px 0;
+			border: 2px outset #14889fbf;
+			background: #305a62e8;
+			color: #00fff9;
+			text-shadow: 1px 1px 4px rgb(18 144 148 / 92%);
+			font-size: large;
+			border-radius: 5px;
+		}
+		#wheel-controlBox input[type="text"] {
+			font-size: large;
+			text-align: center;
+			padding: 3px;
+			margin: 3px 0;
+			color: #30b524;
+			background-color: #25292ef7;
+			border: 3px inset #0f1112a6;
+			border-radius: 5px;
+		}
+		#wheel-controlBox select {
+			font-size: large;
+			text-align: center;
+			padding: 3px;
+			margin: auto 11px 0 0;
+			color: #30b524;
+			width: 62%;
+			background-color: #25292ef7;
+			border: 3px inset #0f1112a6;
+			border-radius: 5px;
+		}
+		#wheel-piedish {
+			display: flex;
+			border: 3px inset gray;
+			align-items: flex-start;
+			flex-direction: column-reverse;
+		}
+		label.label {
+			width: 100%;
+		}
+		div#wheel-result {
+			position: fixed;
+			left: var(--wheelResult-X);
+			bottom: var(--wheelResult-Y);
+			padding: 10px;
+			margin-top: 10px;
+			font-weight: bold;
+			color: #ff0;
+			background-color: black;
+			border: 2px ridge #ff0;
+			font-size: 35px;
+		}
 	</style>
 	<body>
 		<!-- The PixelButt is the main button everything is normally hidden by default.
