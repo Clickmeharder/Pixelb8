@@ -157,7 +157,7 @@ body.light-theme {
   --shadow-color: rgba(0, 0, 0, 0.1);
 /*  Wheel Styles    */
   --wheel-color:#ffffffba;
-  --wheel-color2:var(--bg-color-alt);
+  --wheel-color2:#f0f4f8ba;
   --wheel-color3:var(--bg-color-alt2);
   --wheel-text-color:var(--text-color);
   --wheel-font:var(--body-font);
