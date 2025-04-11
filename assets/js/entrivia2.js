@@ -1956,9 +1956,9 @@ const usercommands = [
 const streamercommands = [
 	{ command: "!a / !answer", description: "Allows users to answer a entrivia question.", usage: "!a / !answer" },
 	{ command: "!entrivia-play", description: "Starts the entrivia game.", usage: "!entrivia-play" },
-	{ command: "!entrivia-lastaskwinner", description: "Displays the last entrivia question's winner.", usage: "!entrivia-lastaskwinner" },
-	{ command: "!entrivia-lastwinners", description: "Displays the list of last entrivia winners.", usage: "!entrivia-lastwinners" },
-	{ command: "!entrivia-history", description: "Displays entrivia history.", usage: "!entrivia-history" },
+	{ command: "!entrivia-lastaskwinner", description: "Displays the lastquestion's winner.", usage: "!entrivia-lastaskwinner" },
+	{ command: "!entrivia-lastwinners", description: "Show Last Entrivia Classic winners.", usage: "!entrivia-lastwinners" },
+	{ command: "!entrivia-history", description: "Displays Entrivia Classic history.", usage: "!entrivia-history" },
 	{ command: "!entrivia-chatanswers", description: "Toggles the chat answers on/off.", usage: "!entrivia-chatanswers" },
 	{ command: "!entrivia-consolemessages", description: "Toggles the chat answers on/off.", usage: "!entrivia-consolemessages" },
 	{ command: "!entrivia-disablechat", description: "Disables entrivia chat overlay.", usage: "!entrivia-disablechat" },
