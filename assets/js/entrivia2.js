@@ -1456,21 +1456,23 @@ function displayentriviaHistory() {
 		// Toggle the state
 function toggleButtonBubble() {
 	const currentState = String(hideButtonBubble).toLowerCase();
-	hideButtonBubble = !(currentState === "on" || currentState === "true");
-	// Update the UI
+	hideButtonBubble = !hideButtonBubble;
+    updateSingleSetting("hideButtonBubble: ", hideButtonBubble);
+	console.log("toggled hideButtonBubble: ", hideButtonBubble);
 	const bubbleWrap = document.getElementById("bubblewrap");
 	bubbleWrap.style.opacity = hideButtonBubble ? "0.00" : "1.00";
+	updateIndicatorLights();
 }
 function toggleentriviaconsolemessages() {
     consolemessages = !consolemessages;
-    updateSingleSetting("consolemessages", consolemessages);
-	console.log("toggled consolemessages", consolemessages);
+    updateSingleSetting("consolemessages: ", consolemessages);
+	console.log("toggled consolemessages: ", consolemessages);
     updateIndicatorLights();
 }
 function toggleusedefaultquestions() {
     usedefaultquestions = !usedefaultquestions;
-    updateSingleSetting("usedefaultquestions", usedefaultquestions);
-	console.log("toggled usedefaultquestions", usedefaultquestions);
+    updateSingleSetting("usedefaultquestions: ", usedefaultquestions);
+	console.log("toggled usedefaultquestions: ", usedefaultquestions);
     updateIndicatorLights();
 }
 function toggleusecustomquestions() {
@@ -1482,7 +1484,7 @@ function toggleusecustomquestions() {
 }
 function toggletwitchChatOverlay() {
 	twitchChatOverlay = !twitchChatOverlay;
-	updateSingleSetting("twitchChatOverlay", twitchChatOverlay);
+	updateSingleSetting("twitchChatOverlay: ", twitchChatOverlay);
 	updateIndicatorLights();
 	toggleElement("twitchChat");
 	console.log(`entrivia Chat Overlay is now: ${twitchChatOverlay}`);
@@ -1490,7 +1492,7 @@ function toggletwitchChatOverlay() {
 }
 function togglechatanswers() {
 	chatanswers = !chatanswers;
-	updateSingleSetting("chatanswers", chatanswers);
+	updateSingleSetting("chatanswers: ", chatanswers);
 	updateIndicatorLights();
 	console.log(` Can chat answer entrivia: ${twitchChatOverlay}`);
 	displayConsoleMessage("system", `Can chat answer entrivia: ${twitchChatOverlay}`);
