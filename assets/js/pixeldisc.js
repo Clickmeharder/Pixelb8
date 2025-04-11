@@ -94,7 +94,7 @@ const wheelFontConfig = {
 						ctx.arc(r, r, r, a0, a1, false);
 						ctx.fillStyle = colors[i % 2];
 						ctx.fill();
-						ctx.strokeStyle = color1;//"var(--border-color)";//"#0ea4a4e8";
+						ctx.strokeStyle = color3;//"var(--border-color)";//"#0ea4a4e8";
 						ctx.lineWidth = 1;
 						ctx.stroke();
 
@@ -146,7 +146,7 @@ const wheelFontConfig = {
 				ctx.moveTo(-r * 1.1, -r * 0.05);
 				ctx.lineTo(-r * 0.9, 0);
 				ctx.lineTo(-r * 1.1, r * 0.05);
-				ctx.fillStyle = "#f00";//"var(--button-text-color)";//"#f00";
+				ctx.fillStyle = "#f00";//"var(--button-bg-color)";//"#f00";
 				ctx.fill();
 			}
 

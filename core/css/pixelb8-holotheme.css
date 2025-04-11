@@ -158,7 +158,7 @@ body.light-theme {
 /*  Wheel Styles    */
   --wheel-color:#ffffffba;
   --wheel-color2:#f0f4f8ba;
-  --wheel-color3:var(--bg-color-alt2);
+  --wheel-color3:#4d4d4dfc;
   --wheel-text-color:var(--text-color);
   --wheel-font:var(--body-font);
 /*                 */
