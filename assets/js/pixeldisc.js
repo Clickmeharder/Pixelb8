@@ -26,7 +26,7 @@ function debugThemeStyles() {
 	colors = [color1, color2];
 	wheels = null;
 	frame = null;
-	repaint(angle)
+	repaint(angle);
 }
 // Fallback if the CSS variable isn't set
 const wheelFontConfig = {
