@@ -68,7 +68,7 @@ const wheelFontConfig = {
 			canvas.height = wrapperBounds.height;
 
 			// Set the radius to be half of the canvas width or height (whichever is smaller)
-			let r = Math.min(canvas.width, canvas.height) * 0.98 / 2; 
+			let r = Math.min(canvas.width, canvas.height) * 1 / 2; 
 
 			// Ensure the wheel is centered in the middle of the canvas
 			let cx = canvas.width / 2;
