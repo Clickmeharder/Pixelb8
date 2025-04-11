@@ -83,9 +83,9 @@ body.dark-theme {
   --glow-color: rgb(0 0 0 / 30%);
   --shadow-color: rgb(31 37 37 / 70%);
   /*  Wheel Styles    */
-  --wheel-color:var(--bg-color);
-  --wheel-color2:var(--bg-color-alt);
-  --wheel-color3:var(--bg-color-alt2);
+  --wheel-color:var(--bg-color-alt2);
+  --wheel-color2:var(--bg-color-alt3);
+  --wheel-color3:var(--text-color);
 /*                 */
   /* main Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
