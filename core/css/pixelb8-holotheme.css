@@ -11,6 +11,11 @@ Pixelb8-holotheme.css
   --entriviaQuestion-Y:71%;
   --entriviaQuestion-X:2%;
 
+  --wheel-Y:60%;
+  --wheel-X:87%;
+  --wheelResult-Y:0%;
+  --wheelResult-X:15%;
+
   --body-font: Arial, sans-serif;
   --bg-color: #f0f0f0;
   --bg-alt-color: #ffffff;

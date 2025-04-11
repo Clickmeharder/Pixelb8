@@ -8,7 +8,12 @@ const sliders = [
   { id: "entriviaQuestionY", unit: "%", variable: "--entriviaQuestion-Y", min: 0, max: 88 },
   { id: "entriviaQuestionX", unit: "%", variable: "--entriviaQuestion-X", min: 0, max: 71 },
 ];
-
+const wheelSliders = [
+  { id: "wheelY", unit: "%", variable: "--wheel-Y", min: 0, max: 75 },
+  { id: "wheelX", unit: "%", variable: "--wheel-X", min: 0, max: 100 },
+  { id: "wheelResultY", unit: "%", variable: "--wheelResult-Y", min: 0, max: 100 },
+  { id: "wheelResultX", unit: "%", variable: "--wheelResult-X", min: 0, max: 100 },
+];
 // Slider handling
 sliders.forEach(({ id, unit, variable, min, max }) => {
   const input = document.getElementById(id);
@@ -85,6 +90,10 @@ function setTheme(themeName, saveLayout = true) {
     "--entriviaAnnouncement-X": getComputedStyle(document.documentElement).getPropertyValue("--entriviaAnnouncement-X"),
     "--twitchchat-Y": getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-Y"),
     "--twitchchat-X": getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-X"),
+	"--wheel-Y": getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-Y"),
+    "--wheel-X": getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-X"),
+	"--wheelResult-Y": getComputedStyle(document.documentElement).getPropertyValue("--wheelResult-Y"),
+    "--wheelResult-x": getComputedStyle(document.documentElement).getPropertyValue("--wheelResult-X"),
   } : {};
 
   // Save both theme and layout
