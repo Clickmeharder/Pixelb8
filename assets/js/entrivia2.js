@@ -2038,16 +2038,27 @@ function updateCommandlist() {
             usageLabel.style.fontSize = "smaller";
             description.appendChild(usageLabel);
 
-            // Usage examples
-            const usageExamples = command.usage.split('\n').map(usage => {
-                const usageParagraph = document.createElement("p");
-                usageParagraph.textContent = usage.trim();
-                usageParagraph.style.fontSize = "smaller";
-                return usageParagraph;
+            // Split usage into lines
+            const usageLines = command.usage.split('\n').map(line => line.trim()).filter(line => line !== "");
+
+            // Separate usage examples from notes
+            const usageExamples = [];
+            const usageNotes = [];
+
+            usageLines.forEach(line => {
+                if (line.startsWith(command.command)) {
+                    usageExamples.push(line);
+                } else {
+                    usageNotes.push(line);
+                }
             });
 
+            // Add usage examples with dividers
             usageExamples.forEach((usageExample, index) => {
-                description.appendChild(usageExample);
+                const p = document.createElement("p");
+                p.textContent = usageExample;
+                p.style.fontSize = "smaller";
+                description.appendChild(p);
 
                 if (index < usageExamples.length - 1) {
                     const usageDivider = document.createElement("div");
@@ -2055,6 +2066,14 @@ function updateCommandlist() {
                     usageDivider.style.margin = "4px 0";
                     description.appendChild(usageDivider);
                 }
+            });
+
+            // Add any notes after usage examples
+            usageNotes.forEach(note => {
+                const p = document.createElement("p");
+                p.textContent = note;
+                p.style.fontSize = "smaller";
+                description.appendChild(p);
             });
 
             // Add everything to the list item
