@@ -1,7 +1,7 @@
 let canvas = document.getElementById("canvas1");
 let sections = ["FREE Beer Ked", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "idk", "another option", "nothing"];
 let colors = ["#001f1fe8", "#004040eb"];
-let glowcolor = styles.getPropertyValue('--glow-color').trim();
+
 let wheels = null;
 let frame = null;
 const removeSelect = document.getElementById("removewheelsection");
@@ -10,7 +10,22 @@ const addButton = document.getElementById("wheel-addsectionButt");
 const removeButton = document.getElementById("wheel-removesectionButt");
 
 let styles = getComputedStyle(document.body);
-let bodyFont = styles.getPropertyValue('--body-font').trim();
+	color1 = styles.getPropertyValue('--wheel-color').trim();
+	color2 = styles.getPropertyValue('--wheel-color2').trim();
+	color3 = styles.getPropertyValue('--wheel-color3').trim();
+	bodyFont = styles.getPropertyValue('--body-font').trim();
+	bordercolor = styles.getPropertyValue('--border-color').trim();
+	glowColor = styles.getPropertyValue('--glow-color').trim();
+	console.log('Current Body Class:', document.body.className);
+	// Log the results
+	console.log('Color 1 (--wheel-color):', color1);
+	console.log('Color 2 (--wheel-color2):', color2);
+	console.log('Color 3 (--wheel-color3):', color3);
+	console.log('Body Font (--body-font):', bodyFont);
+	console.log('Border color (--border-color):', borderColor);
+	console.log('Glow Color (--glow-color):', bodyFont);
+	// Use resolved values in your array
+	colors = [color1, color2];
 function debugThemeStyles() {
 	styles = getComputedStyle(document.body);
 	color1 = styles.getPropertyValue('--wheel-color').trim();
