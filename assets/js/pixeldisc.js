@@ -11,7 +11,7 @@ const removeButton = document.getElementById("wheel-removesectionButt");
 
 
 		// Accessing the computed styles for the <body> element
-		const styles = getComputedStyle(document.body.class);
+		const styles = getComputedStyle(document.body.styles);
 
 		// Read your theme variables
 		const color1 = styles.getPropertyValue('--bg-color').trim();
