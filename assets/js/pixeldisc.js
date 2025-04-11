@@ -1,5 +1,5 @@
 let canvas = document.getElementById("canvas1");
-let sections = ["FREE Beer Ked", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "idk", "another option", "nothing"];
+let sections = ["FREE Beer Keg", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "nothing"];
 let colors = ["#001f1fe8", "#004040eb"];
 
 let wheels = null;
@@ -90,7 +90,7 @@ const wheelFontConfig = {
 						ctx.arc(r, r, r, a0, a1, false);
 						ctx.fillStyle = colors[i % 2];
 						ctx.fill();
-						ctx.strokeStyle = borderColor;//"var(--border-color)";//"#0ea4a4e8";
+						ctx.strokeStyle = color1;//"var(--border-color)";//"#0ea4a4e8";
 						ctx.lineWidth = 1;
 						ctx.stroke();
 
@@ -100,7 +100,7 @@ const wheelFontConfig = {
 						  wheelFontConfig.maxSize
 						);
 						ctx.save();
-						ctx.fillStyle = color3;//"var(--text-color-alt)";//"#ff8900f5"
+						ctx.fillStyle = color2;//"var(--text-color-alt)";//"#ff8900f5"
 						ctx.font = `${wheelFontConfig.weight} ${fontSize}px ${wheelFontConfig.family}`;
 						ctx.textAlign = "center";
 						ctx.textBaseline = "middle";
@@ -128,7 +128,7 @@ const wheelFontConfig = {
 
 				// Draw the inner circle
 				ctx.fillStyle = borderColor;//"var(--bg-color)";//"#004040eb";
-				ctx.strokeStyle = color2;//"var(--input-bg-color)";//"#001f1fe8";
+				ctx.strokeStyle = color3;//"var(--input-bg-color)";//"#001f1fe8";
 				ctx.lineWidth = 6;//was 8
 				ctx.beginPath();
 				ctx.arc(frameCx, frameCy, r / 6, 0, 2 * Math.PI, false);//was 4
