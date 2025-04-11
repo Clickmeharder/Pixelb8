@@ -1556,28 +1556,69 @@ function resetSettings() {
     displayConsoleMessage("📢", "entrivia Settings Reset to default.", {}, {});
 }
 function updateSettingsDisplay() {
-    let savedSettings = localStorage.getItem("entriviaClassicSettings");
-    if (savedSettings) {
-        let settings = JSON.parse(savedSettings);
-        timetoAnswer = settings.timetoAnswer;
-        timebetweenQuestions = settings.timebetweenQuestions;
-        timebetweenRounds = settings.timebetweenRounds;
-        questionsPerRound = settings.questionsPerRound;
-		//toggles
-        usedefaultquestions = settings.usedefaultquestions ?? true; // Default to true if missing
-        usecustomquestions = settings.usecustomquestions ?? true; // Default to true if missing
-		console.log(`Updating display: Time to answer: ${timetoAnswer}, Question delay: ${timebetweenQuestions}, Round delay: ${timebetweenRounds}, Questions per round: ${questionsPerRound}`);
+	console.log(`Updating display:
+	Time to answer: ${timetoAnswer},
+	Question delay: ${timebetweenQuestions},
+	Round delay: ${timebetweenRounds},
+	Questions per round: ${questionsPerRound}`);
 
-        // Update UI elements
-        document.getElementById("timeToAnswer").value = timetoAnswer;
-        document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
-        document.getElementById("timeBetweenRounds").value = timebetweenRounds;
-        document.getElementById("questionsPerRound").value = questionsPerRound;
-		updateIndicatorLights();
-    }
+	// Update input fields
+	document.getElementById("timeToAnswer").value = timetoAnswer;
+	document.getElementById("timeBetweenQuestions").value = timebetweenQuestions;
+	document.getElementById("timeBetweenRounds").value = timebetweenRounds;
+	document.getElementById("questionsPerRound").value = questionsPerRound;
+
+	// Apply indicator lights and toggle-based UI
+
+	applyUserDisplaySettings();
+	updateIndicatorLights();
 }
+function applyUserDisplaySettings() {
+	// twitchChatOverlay
+	const chatBox = document.getElementById("twitchChat");
+	if (chatBox) {
+		if (twitchChatOverlay === "on" || twitchChatOverlay === true) {
+			chatBox.style.visibility = "visible";
+			chatBox.classList.add("active");
+			chatBox.style.animation = "fadeIn 0.8s ease-out forwards";
+		} else {
+			chatBox.style.animation = "fadeOut 0.5s ease-in forwards";
+			setTimeout(() => {
+				chatBox.classList.remove("active");
+				chatBox.style.visibility = "hidden";
+			}, 500);
+		}
+	}
 
+	// hideButtonBubble
+	const bubbleWrap = document.getElementById("bubblewrap");
+	if (bubbleWrap) {
+		if (hideButtonBubble === "on" || hideButtonBubble === true) {
+			bubbleWrap.style.opacity = "0.00";
+		} else {
+			bubbleWrap.style.opacity = "1.00";
+		}
+	}
 
+	// consolemessages just logs itself for now
+	if (consolemessages === "on" || consolemessages === true) {
+		console.log("Console messages are enabled ✅");
+	} else {
+		console.log("Console messages are disabled ❌");
+	}
+}
+function loadSettings() {
+	const stored = localStorage.getItem("entriviaClassicSettings");
+	if (stored) {
+		const settings = JSON.parse(stored);
+		({ timetoAnswer, timebetweenQuestions, timebetweenRounds, questionsPerRound,
+			usedefaultquestions, usecustomquestions, consolemessages, twitchChatOverlay,
+			chatanswers, audioSetting, hideButtonBubble } = settings);
+		
+		// Add this line here 👇
+		updateSettingsDisplay();
+	}
+}
 
 // Function to dynamically add a button and a status light indicator
 function updateentriviaSettingsUI() {
