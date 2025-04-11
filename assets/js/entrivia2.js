@@ -24,6 +24,7 @@ let entriviaQuestions = { round1: [], round2: [] };
 // entrivia OPTIONS
 //game options
 let audioSetting = "on";
+let hideButtonBubble = "on";
 let twitchChatOverlay = "on";
 let consolemessages = false;
 let chatanswers = false;
@@ -1780,6 +1781,11 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayentriviaMessage(user, `!${command} ✅`, flags, extra, true);
 		togglechatanswers();
 	}
+	if (command.toLowerCase() === "togglechat") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
+		toggleElement("twitchchatContainer", "fade");
+	}
 	if (command.toLowerCase() === "entrivia-disablechat") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
@@ -1808,11 +1814,22 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		toggleentrivia();
 		toggleElement("entriviaWrapper", "fade");
 	}
-	if (command.toLowerCase() === "togglechat") {
+	if (command.toLowerCase() === "toggle-bubblebutt") {
 		if (!isStreamerAndAuthorize(user, command)) return;
-		displayConsoleMessage(user, `!${command} ✅`);
-		toggleElement("twitchchatContainer", "fade");
+
+		// Toggle the state
+		const currentState = String(hideButtonBubble).toLowerCase();
+		hideButtonBubble = !(currentState === "on" || currentState === "true");
+
+		// Update the UI
+		const bubbleWrap = document.getElementById("bubblewrap");
+		bubbleWrap.style.opacity = hideButtonBubble ? "0" : "1";
+
+		// Optional feedback in console
+		const stateMsg = hideButtonBubble ? "Hidden 🍑" : "Visible 🍑";
+		displayConsoleMessage(user, `!${command} ✅ ${stateMsg}`);
 	}
+
 //-------------------------------------------------------
 	// Command-based settings updates
 	//example cmd to add question:
