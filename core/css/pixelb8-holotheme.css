@@ -1281,7 +1281,7 @@ button#startGame:hover {}
     width: 95%;
 }
 #comfy-controller .controlpanel {
-    padding right: 2px;
+    padding-right: 2px;
 }
 #comfy-controller .controls {
     width: 100%;
