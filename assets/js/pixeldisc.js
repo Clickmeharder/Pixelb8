@@ -7,7 +7,6 @@ const removeSelect = document.getElementById("removewheelsection");
 const addInput = document.getElementById("addwheelsection");
 const addButton = document.getElementById("wheel-addsectionButt");
 const removeButton = document.getElementById("wheel-removesectionButt");
-	function initializeWheel() {
 
 		const removeSelect = document.getElementById("removewheelsection");
 		const addInput = document.getElementById("addwheelsection");
@@ -41,7 +40,6 @@ const removeButton = document.getElementById("wheel-removesectionButt");
 		  scaleFactor: 0.9
 		};
 
-	}
 		function repaint(angle) {
 			const wrapper = document.getElementById("wheelcanvaswrapper");
 			const wrapperBounds = wrapper.getBoundingClientRect();
@@ -318,8 +316,7 @@ const removeButton = document.getElementById("wheel-removesectionButt");
 	});
 	document.addEventListener('DOMContentLoaded', () => {
 	  console.log('Current Body Class (after DOMContentLoaded):', document.body.className);
-	  initializeWheel();
+	  	// Initialize dropdown when page loads
+		updateRemoveDropdown();
+		updateLoadDropdown();
 	});
-	// Initialize dropdown when page loads
-	updateRemoveDropdown();
-	updateLoadDropdown();
