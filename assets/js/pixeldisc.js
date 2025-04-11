@@ -100,7 +100,7 @@ const wheelFontConfig = {
 						  wheelFontConfig.maxSize
 						);
 						ctx.save();
-						ctx.fillStyle = "#ff8900f5";//"var(--text-color-alt)";//"#ff8900f5"
+						ctx.fillStyle = color3;//"var(--text-color-alt)";//"#ff8900f5"
 						ctx.font = `${wheelFontConfig.weight} ${fontSize}px ${wheelFontConfig.family}`;
 						ctx.textAlign = "center";
 						ctx.textBaseline = "middle";
@@ -123,12 +123,12 @@ const wheelFontConfig = {
 				ctx.beginPath();
 				ctx.arc(frameCx, frameCy, r * 1.025, 0, 2 * Math.PI, true);
 				ctx.arc(frameCx, frameCy, r * 0.975, 0, 2 * Math.PI, false);
-				ctx.fillStyle = "#004040eb";//"var(--bg-color)";//"#004040eb";
+				ctx.fillStyle = borderColor;//"var(--bg-color)";//"#004040eb";
 				ctx.fill();
 
 				// Draw the inner circle
-				ctx.fillStyle = "#004040eb";//"var(--bg-color)";//"#004040eb";
-				ctx.strokeStyle = "#001f1fe8";//"var(--input-bg-color)";//"#001f1fe8";
+				ctx.fillStyle = borderColor;//"var(--bg-color)";//"#004040eb";
+				ctx.strokeStyle = color2;//"var(--input-bg-color)";//"#001f1fe8";
 				ctx.lineWidth = 6;//was 8
 				ctx.beginPath();
 				ctx.arc(frameCx, frameCy, r / 6, 0, 2 * Math.PI, false);//was 4
