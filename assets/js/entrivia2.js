@@ -2006,7 +2006,7 @@ function updateCommandlist() {
         commandArray.forEach(function (command) {
             const description = document.createElement("div");
 
-            // Create <strong> and ❓ span inside it
+            // Command title with ❓ tooltip
             const strong = document.createElement("strong");
             strong.textContent = command.command;
 
@@ -2016,42 +2016,48 @@ function updateCommandlist() {
             infoSpan.textContent = "❓";
             infoSpan.style.cssFloat = "right";
 
-            strong.appendChild(infoSpan); // ❓ goes inside <strong>
-
-			// Command description
-			const commandDescription = document.createElement("p");
-			commandDescription.textContent = command.description;
-			commandDescription.style.fontStyle = "italic"; // Keep italic
-			commandDescription.style.fontSize = "small";   // Still smaller font
-
-			// Usage label
-			const usageLabel = document.createElement("p");
-			usageLabel.textContent = "Usage:";
-			usageLabel.style.fontSize = "smaller"; // Smaller, not italic anymore
-
-			// Usage examples
-			const usageExamples = command.usage.split('\n').map(usage => {
-				const usageParagraph = document.createElement("p");
-				usageParagraph.textContent = usage.trim();
-				usageParagraph.style.fontSize = "smaller"; // Smaller, not italic
-				return usageParagraph;
-			});
-
-            // Append all in correct order
+            strong.appendChild(infoSpan);
             description.appendChild(strong);
+
+            // Description
+            const commandDescription = document.createElement("p");
+            commandDescription.textContent = command.description;
+            commandDescription.style.fontStyle = "italic";
+            commandDescription.style.fontSize = "small";
             description.appendChild(commandDescription);
+
+            // Divider after description
+            const dividerAfterDescription = document.createElement("div");
+            dividerAfterDescription.style.borderTop = "2px ridge var(--border-color)";
+            dividerAfterDescription.style.margin = "4px 0";
+            description.appendChild(dividerAfterDescription);
+
+            // Usage label
+            const usageLabel = document.createElement("p");
+            usageLabel.textContent = "Usage:";
+            usageLabel.style.fontSize = "smaller";
             description.appendChild(usageLabel);
+
+            // Usage examples
+            const usageExamples = command.usage.split('\n').map(usage => {
+                const usageParagraph = document.createElement("p");
+                usageParagraph.textContent = usage.trim();
+                usageParagraph.style.fontSize = "smaller";
+                return usageParagraph;
+            });
+
             usageExamples.forEach((usageExample, index) => {
                 description.appendChild(usageExample);
 
                 if (index < usageExamples.length - 1) {
-                    const divider = document.createElement("div");
-                    divider.style.borderTop = "2px ridge var(--border-color)";
-                    divider.style.margin = "4px 0";
-                    description.appendChild(divider);
+                    const usageDivider = document.createElement("div");
+                    usageDivider.style.borderTop = "2px ridge var(--border-color)";
+                    usageDivider.style.margin = "4px 0";
+                    description.appendChild(usageDivider);
                 }
             });
 
+            // Add everything to the list item
             const li = document.createElement("li");
             li.appendChild(description);
             targetList.appendChild(li);
@@ -2061,7 +2067,6 @@ function updateCommandlist() {
     createCommandList(usercommands, userCommandList);
     createCommandList(streamercommands, broadcasterCommandList);
 }
-
 
 
 
