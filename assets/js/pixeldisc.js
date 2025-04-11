@@ -7,14 +7,13 @@ const removeSelect = document.getElementById("removewheelsection");
 const addInput = document.getElementById("addwheelsection");
 const addButton = document.getElementById("wheel-addsectionButt");
 const removeButton = document.getElementById("wheel-removesectionButt");
-	const styles = getComputedStyle(document.body);
-	// Accessing the computed styles for the <body> element
-	const styles = getComputedStyle(document.body);
+let styles = getComputedStyle(document.body);
+
 
 	// Read your theme variables
-	const color1 = styles.getPropertyValue('--bg-color').trim();
-	const color2 = styles.getPropertyValue('--bg-color-alt').trim();
-	const color3 = styles.getPropertyValue('--text-color-alt').trim();
+	let color1 = styles.getPropertyValue('--bg-color').trim();
+	let color2 = styles.getPropertyValue('--bg-color-alt').trim();
+	let color3 = styles.getPropertyValue('--text-color-alt').trim();
 	let bodyFont = styles.getPropertyValue('--body-font').trim();
 	console.log('Current Body Class:', document.body.className);
 	// Log the results
@@ -25,14 +24,11 @@ const removeButton = document.getElementById("wheel-removesectionButt");
 	// Use resolved values in your array
 	colors = [color1, color2];
 function debugThemeStyles() {
-	// Accessing the computed styles for the <body> element
-	const styles = getComputedStyle(document.body);
-
-	// Read your theme variables
-	const color1 = styles.getPropertyValue('--bg-color').trim();
-	const color2 = styles.getPropertyValue('--bg-color-alt').trim();
-	const color3 = styles.getPropertyValue('--text-color-alt').trim();
-	let bodyFont = styles.getPropertyValue('--body-font').trim();
+	styles = getComputedStyle(document.body);
+	color1 = styles.getPropertyValue('--bg-color').trim();
+	color2 = styles.getPropertyValue('--bg-color-alt').trim();
+	color3 = styles.getPropertyValue('--text-color-alt').trim();
+	bodyFont = styles.getPropertyValue('--body-font').trim();
 	console.log('Current Body Class:', document.body.className);
 	// Log the results
 	console.log('Color 1 (--bg-color):', color1);
