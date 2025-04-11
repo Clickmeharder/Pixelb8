@@ -673,15 +673,16 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 		const addButton = document.getElementById("wheel-addsectionButt");
 		const removeButton = document.getElementById("wheel-removesectionButt");
 
-		// Font settings outside the function
+		const rootStyles = getComputedStyle(document.documentElement);
+		const resolvedFontFamily = rootStyles.getPropertyValue("--body-font").trim();
+
 		const wheelFontConfig = {
-		  family: "var(--body-font)",
+		  family: resolvedFontFamily || "Arial",  // fallback
 		  weight: "bold",
 		  minSize: 12,
 		  maxSize: 18,
 		  scaleFactor: 0.9
 		};
-
 		function repaint(angle) {
 			const wrapper = document.getElementById("wheelcanvaswrapper");
 			const wrapperBounds = wrapper.getBoundingClientRect();
