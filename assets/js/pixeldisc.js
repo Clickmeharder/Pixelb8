@@ -9,6 +9,7 @@ const addButton = document.getElementById("wheel-addsectionButt");
 const removeButton = document.getElementById("wheel-removesectionButt");
 
 let styles = getComputedStyle(document.body);
+let bodyFont = styles.getPropertyValue('--body-font').trim();
 function debugThemeStyles() {
 	styles = getComputedStyle(document.body);
 	color1 = styles.getPropertyValue('--wheel-color').trim();
@@ -25,7 +26,7 @@ function debugThemeStyles() {
 	colors = [color1, color2];
 	wheels = null;
 	frame = null;
-	repaint(angle);
+
 }
 // Fallback if the CSS variable isn't set
 const wheelFontConfig = {
