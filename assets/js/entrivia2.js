@@ -1453,6 +1453,14 @@ function displayentriviaHistory() {
 
 
 //toggles
+		// Toggle the state
+function toggleButtonBubble() {
+	const currentState = String(hideButtonBubble).toLowerCase();
+	hideButtonBubble = !(currentState === "on" || currentState === "true");
+	// Update the UI
+	const bubbleWrap = document.getElementById("bubblewrap");
+	bubbleWrap.style.opacity = hideButtonBubble ? "0" : "1";
+}
 function toggleentriviaconsolemessages() {
     consolemessages = !consolemessages;
     updateSingleSetting("consolemessages", consolemessages);
@@ -1504,7 +1512,8 @@ function saveSettings() {
 		consolemessages,
 		twitchChatOverlay,
 		chatanswers,
-		audioSetting
+		audioSetting,
+		hideButtonBubble
     };
     localStorage.setItem("entriviaClassicSettings", JSON.stringify(entriviaClassicSettings));
 	console.log("settings saved.");
@@ -1532,6 +1541,7 @@ function resetSettings() {
 	twitchChatOverlay = false;
 	chatanswers = false;
 	audioSetting = true;
+	hideButtonBubble = "off";
     // Clear saved settings
     localStorage.removeItem("entriviaClassicSettings");
 
@@ -1569,7 +1579,7 @@ function updateSettingsDisplay() {
 
 // Function to dynamically add a button and a status light indicator
 function updateentriviaSettingsUI() {
-	let settings = { usedefaultquestions, usecustomquestions, consolemessages, twitchChatOverlay, chatanswers, audioSetting };
+	let settings = { usedefaultquestions, usecustomquestions, consolemessages, twitchChatOverlay, chatanswers, audioSetting, hideButtonBubble };
     // Select all elements with the class 'optiontoggle-entrivia'
     const toggleElements = document.querySelectorAll('.optiontoggle-entrivia');
 
@@ -1816,17 +1826,9 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 	if (command.toLowerCase() === "toggle-bubblebutt") {
 		if (!isStreamerAndAuthorize(user, command)) return;
-
-		// Toggle the state
-		const currentState = String(hideButtonBubble).toLowerCase();
-		hideButtonBubble = !(currentState === "on" || currentState === "true");
-
-		// Update the UI
-		const bubbleWrap = document.getElementById("bubblewrap");
-		bubbleWrap.style.opacity = hideButtonBubble ? "0" : "1";
-
 		// Optional feedback in console
 		const stateMsg = hideButtonBubble ? "Hidden 🍑" : "Visible 🍑";
+		toggleButtonBubble();
 		displayConsoleMessage(user, `!${command} ✅ ${stateMsg}`);
 	}
 
