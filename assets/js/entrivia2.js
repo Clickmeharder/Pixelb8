@@ -1956,7 +1956,7 @@ const usercommands = [
 const streamercommands = [
 	{ command: "!a / !answer", description: "Answer an Entrivia question.", usage: "!a / !answer" },
 	{ command: "!entrivia-play", description: "Starts Entrivia Classic.", usage: "!entrivia-play" },
-	{ command: "!entrivia-lastaskwinner", description: "Displays the last single question's winner.", usage: "!entrivia-lastaskwinner" },
+	{ command: "!entrivia-lastaskwinner", description: "Show the last single question's winner.", usage: "!entrivia-lastaskwinner" },
 	{ command: "!entrivia-lastwinners", description: "Show Last Entrivia Classic winners.", usage: "!entrivia-lastwinners" },
 	{ command: "!entrivia-history", description: "Displays Entrivia Classic game history.", usage: "!entrivia-history" },
 	{ command: "!entrivia-chatanswers", description: "Toggles the chat answers on/off.", usage: "!entrivia-chatanswers" },
