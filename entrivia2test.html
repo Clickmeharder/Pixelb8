@@ -716,7 +716,7 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 						ctx.arc(r, r, r, a0, a1, false);
 						ctx.fillStyle = colors[i % 2];
 						ctx.fill();
-						ctx.strokeStyle = "var(--border-color)";//"#0ea4a4e8";
+						ctx.strokeStyle = "#0ea4a4e8";//"var(--border-color)";//"#0ea4a4e8";
 						ctx.lineWidth = 1;
 						ctx.stroke();
 
@@ -726,7 +726,7 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 						  wheelFontConfig.maxSize
 						);
 						ctx.save();
-						ctx.fillStyle = "var(--text-color-alt)";//"#ff8900f5"
+						ctx.fillStyle = "#ff8900f5";//"var(--text-color-alt)";//"#ff8900f5"
 						ctx.font = `${wheelFontConfig.weight} ${fontSize}px ${wheelFontConfig.family}`;
 						ctx.textAlign = "center";
 						ctx.textBaseline = "middle";
@@ -749,12 +749,12 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 				ctx.beginPath();
 				ctx.arc(frameCx, frameCy, r * 1.025, 0, 2 * Math.PI, true);
 				ctx.arc(frameCx, frameCy, r * 0.975, 0, 2 * Math.PI, false);
-				ctx.fillStyle = "var(--bg-color)";//"#004040eb";
+				ctx.fillStyle = "#004040eb";//"var(--bg-color)";//"#004040eb";
 				ctx.fill();
 
 				// Draw the inner circle
-				ctx.fillStyle = "var(--bg-color)";//"#004040eb";
-				ctx.strokeStyle = "var(--input-bg-color)";//"#001f1fe8";
+				ctx.fillStyle = "#004040eb";//"var(--bg-color)";//"#004040eb";
+				ctx.strokeStyle = "#001f1fe8";//"var(--input-bg-color)";//"#001f1fe8";
 				ctx.lineWidth = 6;//was 8
 				ctx.beginPath();
 				ctx.arc(frameCx, frameCy, r / 6, 0, 2 * Math.PI, false);//was 4
@@ -768,7 +768,7 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 				ctx.moveTo(-r * 1.1, -r * 0.05);
 				ctx.lineTo(-r * 0.9, 0);
 				ctx.lineTo(-r * 1.1, r * 0.05);
-				ctx.fillStyle = "var(--button-text-color)";//"#f00";
+				ctx.fillStyle = "#f00";//"var(--button-text-color)";//"#f00";
 				ctx.fill();
 			}
 
