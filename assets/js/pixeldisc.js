@@ -8,10 +8,6 @@ const addInput = document.getElementById("addwheelsection");
 const addButton = document.getElementById("wheel-addsectionButt");
 const removeButton = document.getElementById("wheel-removesectionButt");
 
-		const removeSelect = document.getElementById("removewheelsection");
-		const addInput = document.getElementById("addwheelsection");
-		const addButton = document.getElementById("wheel-addsectionButt");
-		const removeButton = document.getElementById("wheel-removesectionButt");
 
 
 		// Accessing the computed styles for the <body> element
