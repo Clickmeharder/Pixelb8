@@ -1406,7 +1406,7 @@ select.b {}
 			color: var(--text-color);
 			font-weight: bold;
 			padding-left: 5px;
-			text-shadow: 0px 0px 4px rgb(153 70 12 / 92%);
+			text-shadow: var(--glow-color);
 		}
 		.controlpanel input, .controlpanel select, select#questionList {
 
@@ -2063,14 +2063,13 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 /*  Bg slider toggle  */
 /*----------------------*/
 .rangeinput {
-  background: var(--button-bg-color);
-  border: solid 1px var(--button-bg-color);
-  border-radius: 8px;
-  height: 7px;
-  width: 85%;
-  outline: none;
-  transition: background 450ms ease-in;
-  -webkit-appearance: none;
+    background: var(--button-bg-color);
+    border: solid 1px var(--button-border-color);
+    border-radius: 8px;
+    height: 9px;
+    outline: none;
+    transition: background 450ms ease-in;
+    -webkit-appearance: none;
 }
 
 input[type="range"] {
