@@ -25,6 +25,13 @@ Pixelb8-holotheme.css
   --shadow-color: rgba(0, 255, 239, 0.65);
   --box-shadow: 0px 0px 12px var(--shadow-color);
   --glow-color: rgba(0, 123, 255, 0.6);
+    /* main Button Styles */
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
+    /* regular Button Styles */
   --console-bg: rgba(255, 255, 255, 0.7);
   --body-opacity: 1;
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
@@ -66,6 +73,13 @@ body.dark-theme {
   --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgb(0 0 0 / 30%);
   --shadow-color: rgb(31 37 37 / 70%);
+  /* main Button Styles */
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
+    /* regular Button Styles */
   --button-text-color: #656769;
   --button-bg-color: #151a1d;
   --button-padding: 18px;
@@ -127,6 +141,12 @@ body.light-theme {
   --shadow-color: rgba(0, 0, 0, 0.1);
 
   /* Button Styles */
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
+  /* Button Styles */
   --button-text-color: #ffffff;
   --button-bg-color: #007acc;
   --button-padding: 18px;
@@ -180,6 +200,11 @@ body.custom-theme {
   --shadow-color: rgba(255, 136, 255, 0.6);
   --box-shadow: 0 0 10px var(--shadow-color);
   --glow-color: rgba(255, 128, 200, 0.5);
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
   
   --button-text-color:#444;
   --button-text-shadow:var(--accent-color);
@@ -225,6 +250,11 @@ body.retro-theme {
   /* --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_retrobeam.png'), auto; */
 
   /* Button Styles */
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
   --button-text-color: #ffcc00;
   --button-bg-color: #1a1a1a;
   --button-padding: 10px 16px;
@@ -283,6 +313,12 @@ body.cyberice-theme {
   --glow-color: rgba(100, 255, 255, 0.45);
   --shadow-color: rgba(0, 255, 255, 0.35);
 
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
+  
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 
   /* Button Styles */
@@ -347,6 +383,12 @@ body.neonvoid-theme {
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 
   /* Button Styles */
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
+  
   --button-text-color: #baabbc;
   --button-bg-color: #240040e3;
   --button-padding: 9px;
@@ -408,6 +450,12 @@ body.biohazard-theme {
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 
   /* Button Styles */
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
+  
   --button-text-color: #ff7f0d;
   --button-bg-color: #093522ed;
   --button-padding: 9px;
@@ -540,6 +588,11 @@ body.synthwave-theme {
   --shadow-color: rgba(0, 255, 255, 0.2);
 
   /* Button Styles */
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
   --button-text-color: #ffffff;
   --button-bg-color: #ff00cc;
   --button-padding: 12px;
@@ -594,6 +647,11 @@ body.bubblegumpop-theme {
     --border: var(--border-width) var(--border-style) var(--border-color);
     --glow-color: rgba(255, 182, 193, 0.5);
     --shadow-color: rgba(255, 105, 180, 0.2);
+/*   --bubblebutt-color: #12ebebf2; */
+    --pixelbutt-opacity: 0.5;
+    --pixelbutt-hover-opacity: 0.65;
+    --bubblebutt-opacity: 0.5;
+    --bubblebutt-hover-opacity: 0.65;
     --button-text-color: #0f97f2f0;
     --button-font-weight: bold;
     --button-text-size: large;
@@ -655,8 +713,12 @@ body.wastelandterminal-theme {
 
   --glow-color: rgba(0, 255, 102, 0.4);
   --shadow-color: rgba(0, 255, 102, 0.2);
-
   /* Button Styles */
+ /*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
   --button-text-color: #00ff66;
   --button-font-weight:;
   --button-font-size:;
@@ -719,7 +781,13 @@ body.business-theme {
   --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgb(23 28 71 / 75%);
   --shadow-color: rgba(0, 0, 0, 0.2);
-  
+	/* button styles for the main nav buttons */
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
+
   --button-text-color: #f1f5f9;
   --button-bg-color: #292a30;
   --button-padding: 6px;
@@ -774,6 +842,13 @@ body.nineties-theme {
     --border: var(--border-width) var(--border-style) #2e2c2cba;
     --glow-color: transparent;
     --shadow-color: #888;
+	/* button styles for the main nav buttons */
+/*   --bubblebutt-color: #12ebebf2; */
+    --pixelbutt-opacity: 0.5;
+    --pixelbutt-hover-opacity: 0.65;
+    --bubblebutt-opacity: 0.5;
+    --bubblebutt-hover-opacity: 0.65;
+
     --button-text-color: #000;
     --button-bg-color: #d4d0c8;
     --button-padding: 6px 12px;
@@ -830,6 +905,13 @@ body.poop-theme {
   --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgba(255, 215, 172, 0.3);
   --shadow-color: rgba(94, 73, 56, 0.4);
+
+	/* button styles for the main nav buttons */
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
 
   --button-text-color: #fbeacc;
   --button-bg-color: #5a3c2f;
@@ -888,6 +970,13 @@ body.hud-theme {
   --glow-color: rgba(0, 255, 255, 0.4);
   --shadow-color: rgba(0, 255, 255, 0.2);
 
+	/* button styles for the main nav buttons */
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
+
   --button-text-color: #00ffff;
   --button-bg-color: #101820;
   --button-padding: 10px;
@@ -944,7 +1033,13 @@ body.scroll-theme {
   --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgba(180, 122, 50, 0.2);
   --shadow-color: rgba(90, 65, 40, 0.3);
-
+	/* button styles for the main nav buttons */
+/*   --bubblebutt-color: #12ebebf2; */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.65;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.65;
+  
   --button-text-color: #2e1c0f;
   --button-bg-color: #d6b37f;
   --button-padding: 8px;
