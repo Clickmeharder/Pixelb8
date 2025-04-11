@@ -1280,6 +1280,9 @@ button#startGame:hover {}
 #comfy-controller .controlpanel {
     width: 95%;
 }
+#comfy-controller .controlpanel {
+    padding right: 2px;
+}
 #comfy-controller .controls {
     width: 100%;
     overflow: hidden;
@@ -2082,6 +2085,9 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 /*----------------------*/
 /*  Bg slider toggle  */
 /*----------------------*/
+.fullbox {
+    width: 100%;
+}
 .rangeinput {
     background: var(--button-bg-color);
     border: solid 1px var(--button-border-color);
@@ -2092,9 +2098,6 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
     -webkit-appearance: none;
 }
 
-input[type="range"] {
-
-}
 div#switch-box {
     display: flex;
     margin: auto;
