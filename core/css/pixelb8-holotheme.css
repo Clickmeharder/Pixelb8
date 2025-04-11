@@ -86,6 +86,7 @@ body.dark-theme {
   --wheel-color:var(--bg-color-alt2);
   --wheel-color2:var(--bg-color-alt3);
   --wheel-color3:var(--text-color);
+  --wheel-font:var(--text-color);
 /*                 */
   /* main Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
@@ -157,6 +158,7 @@ body.light-theme {
   --wheel-color:var(--bg-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--bg-color-alt2);
+  --wheel-font:var(--text-color);
 /*                 */
   /* Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
@@ -222,6 +224,7 @@ body.custom-theme {
   --wheel-color:var(--bg-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--bg-color-alt2);
+  --wheel-font:var(--text-color);
 /*                 */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
@@ -275,6 +278,7 @@ body.retro-theme {
   --wheel-color:var(--body-bg-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--border-color);
+  --wheel-font:var(--text-color);
 /*                 */
   /* Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
@@ -416,6 +420,7 @@ body.neonvoid-theme {
   --wheel-color:var(--text-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--border-color);
+  --wheel-font:var(--text-color);
 /*                 */
   /* Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
@@ -487,6 +492,7 @@ body.biohazard-theme {
   --wheel-color:var(--text-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--accent-alt2);
+  --wheel-font:var(--text-color);
 /*                 */
   /* Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
@@ -560,6 +566,7 @@ body.holo-theme {
   --wheel-color:var(--text-color-alt);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--border-color);
+  --wheel-font:var(--text-color);
 /*                 */
 	/* button styles for the main nav buttons */
   --bubblebutt-color: #12ebebf2;
@@ -633,6 +640,7 @@ body.synthwave-theme {
   --wheel-color:var(--bg-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--bg-color-alt2);
+  --wheel-font:var(--text-color);
 /*                 */
   /* Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
@@ -698,6 +706,7 @@ body.bubblegumpop-theme {
   --wheel-color:var(--bg-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--bg-color-alt2);
+  --wheel-font:var(--text-color);
 /*                 */
 /*   --bubblebutt-color: #12ebebf2; */
     --pixelbutt-opacity: 0.5;
@@ -769,6 +778,7 @@ body.wastelandterminal-theme {
   --wheel-color:var(--bg-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--text-color-alt);
+  --wheel-font:var(--text-color);
 /*                 */
   /* Button Styles */
  /*   --bubblebutt-color: #12ebebf2; */
@@ -842,6 +852,7 @@ body.business-theme {
   --wheel-color:var(--bg-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--border-color);
+  --wheel-font:var(--text-color);
 /*                 */
 	/* button styles for the main nav buttons */
 /*   --bubblebutt-color: #12ebebf2; */
@@ -908,6 +919,7 @@ body.nineties-theme {
   --wheel-color:var(--bg-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--bg-color-alt2);
+  --wheel-font:var(--text-color);
 /*                 */
 	/* button styles for the main nav buttons */
 /*   --bubblebutt-color: #12ebebf2; */
@@ -976,6 +988,7 @@ body.poop-theme {
   --wheel-color:var(--bg-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--bg-color-alt2);
+  --wheel-font:var(--text-color);
 /*                 */
 	/* button styles for the main nav buttons */
 /*   --bubblebutt-color: #12ebebf2; */
@@ -1044,6 +1057,7 @@ body.hud-theme {
   --wheel-color:var(--bg-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--bg-color-alt2);
+  --wheel-font:var(--text-color);
 /*                 */
 	/* button styles for the main nav buttons */
 /*   --bubblebutt-color: #12ebebf2; */

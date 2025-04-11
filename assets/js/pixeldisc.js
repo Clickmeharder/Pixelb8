@@ -13,7 +13,7 @@ let styles = getComputedStyle(document.body);
 	color1 = styles.getPropertyValue('--wheel-color').trim();
 	color2 = styles.getPropertyValue('--wheel-color2').trim();
 	color3 = styles.getPropertyValue('--wheel-color3').trim();
-	bodyFont = styles.getPropertyValue('--body-font').trim();
+	wheelFont = styles.getPropertyValue('--wheel-font').trim();
 	borderColor = styles.getPropertyValue('--border-color').trim();
 	glowColor = styles.getPropertyValue('--glow-color').trim();
 	console.log('Current Body Class:', document.body.className);
@@ -21,7 +21,7 @@ let styles = getComputedStyle(document.body);
 	console.log('Color 1 (--wheel-color):', color1);
 	console.log('Color 2 (--wheel-color2):', color2);
 	console.log('Color 3 (--wheel-color3):', color3);
-	console.log('Body Font (--body-font):', bodyFont);
+	console.log('Wheel Font (--wheel-font):', wheelFont);
 	console.log('Border color (--border-color):', borderColor);
 	console.log('Glow Color (--glow-color):', glowColor);
 	// Use resolved values in your array
@@ -31,7 +31,7 @@ function debugThemeStyles() {
 	color1 = styles.getPropertyValue('--wheel-color').trim();
 	color2 = styles.getPropertyValue('--wheel-color2').trim();
 	color3 = styles.getPropertyValue('--wheel-color3').trim();
-	bodyFont = styles.getPropertyValue('--body-font').trim();
+	wheelFont = styles.getPropertyValue('--wheel-font').trim();
 	borderColor = styles.getPropertyValue('--border-color').trim();
 	glowColor = styles.getPropertyValue('--glow-color').trim();
 	console.log('Current Body Class:', document.body.className);
@@ -39,7 +39,7 @@ function debugThemeStyles() {
 	console.log('Color 1 (--wheel-color):', color1);
 	console.log('Color 2 (--wheel-color2):', color2);
 	console.log('Color 3 (--wheel-color3):', color3);
-	console.log('Body Font (--body-font):', bodyFont);
+	console.log('Wheel Font (--wheel-font):', wheelFont);
 	console.log('Border color (--border-color):', borderColor);
 	console.log('Glow Color (--glow-color):', glowColor);
 	// Use resolved values in your array
@@ -50,7 +50,7 @@ function debugThemeStyles() {
 }
 // Fallback if the CSS variable isn't set
 const wheelFontConfig = {
-  family: bodyFont || "Arial",
+  family: wheelFont || "Arial",
   weight: "bold",
   minSize: 12,
   maxSize: 18,
