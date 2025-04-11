@@ -7,8 +7,23 @@ const removeSelect = document.getElementById("removewheelsection");
 const addInput = document.getElementById("addwheelsection");
 const addButton = document.getElementById("wheel-addsectionButt");
 const removeButton = document.getElementById("wheel-removesectionButt");
+	const styles = getComputedStyle(document.body);
+	// Accessing the computed styles for the <body> element
+	const styles = getComputedStyle(document.body);
 
-
+	// Read your theme variables
+	const color1 = styles.getPropertyValue('--bg-color').trim();
+	const color2 = styles.getPropertyValue('--bg-color-alt').trim();
+	const color3 = styles.getPropertyValue('--text-color-alt').trim();
+	let bodyFont = styles.getPropertyValue('--body-font').trim();
+	console.log('Current Body Class:', document.body.className);
+	// Log the results
+	console.log('Color 1 (--bg-color):', color1);
+	console.log('Color 2 (--bg-color-alt):', color2);
+	console.log('Color 3 (--text-color-alt):', color3);
+	console.log('Body Font (--body-font):', bodyFont);
+	// Use resolved values in your array
+	colors = [color1, color2];
 function debugThemeStyles() {
 	// Accessing the computed styles for the <body> element
 	const styles = getComputedStyle(document.body);
@@ -17,7 +32,7 @@ function debugThemeStyles() {
 	const color1 = styles.getPropertyValue('--bg-color').trim();
 	const color2 = styles.getPropertyValue('--bg-color-alt').trim();
 	const color3 = styles.getPropertyValue('--text-color-alt').trim();
-	const bodyFont = styles.getPropertyValue('--body-font').trim();
+	let bodyFont = styles.getPropertyValue('--body-font').trim();
 	console.log('Current Body Class:', document.body.className);
 	// Log the results
 	console.log('Color 1 (--bg-color):', color1);
@@ -314,5 +329,5 @@ const wheelFontConfig = {
 	  	// Initialize dropdown when page loads
 		updateRemoveDropdown();
 		updateLoadDropdown();
-
+		debugThemeStyles();
 	});
