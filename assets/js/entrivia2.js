@@ -1998,64 +1998,47 @@ The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
 
 // Function to update the command list in the UI
 // Function to update the command list in the UI
-function updateCommandlist() {
-    const userCommandList = document.getElementById("usercommandList");
-    const broadcasterCommandList = document.getElementById("broadcastercommandList");
+function createCommandElement(command) {
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("command-wrapper");
 
-    // Helper to build each command block
-    function createCommandElement(command) {
-        const wrapper = document.createElement("div");
-        wrapper.classList.add("command-wrapper");
+    // Command Name <strong>
+    const strong = document.createElement("strong");
+    strong.textContent = command.command;
 
-        // Command Name
-        const strong = document.createElement("strong");
-        strong.textContent = command.command;
-        wrapper.appendChild(strong);
+    // Add ❓ span inside the <strong>
+    const infoSpan = document.createElement("span");
+    infoSpan.classList.add("command-info");
+    infoSpan.textContent = "❓";
+    infoSpan.setAttribute("title", "Usage: " + command.usage);
+    infoSpan.style.float = "right";  // Float it right within the strong tag
+    strong.appendChild(infoSpan);
 
-        // Description
-        const desc = document.createElement("p");
-        desc.textContent = command.description;
-        wrapper.appendChild(desc);
+    wrapper.appendChild(strong);
 
-        // Usage Label
-        const usageLabel = document.createElement("p");
-        usageLabel.textContent = "usage:";
-        wrapper.appendChild(usageLabel);
+    // Description
+    const desc = document.createElement("p");
+    desc.textContent = command.description;
+    wrapper.appendChild(desc);
 
-        // Usage lines
-        const usageLines = command.usage.split('\n');
-        usageLines.forEach(usage => {
-            const usageP = document.createElement("p");
-            usageP.textContent = usage.trim();
-            wrapper.appendChild(usageP);
-        });
+    // Usage Label
+    const usageLabel = document.createElement("p");
+    usageLabel.textContent = "usage:";
+    wrapper.appendChild(usageLabel);
 
-        // Info ❓ span
-        const infoSpan = document.createElement("span");
-        infoSpan.classList.add("command-info");
-        infoSpan.textContent = "❓";
-        infoSpan.setAttribute("title", "Usage: " + command.usage);
-        wrapper.appendChild(infoSpan);
-
-        // Wrap everything in an <li>
-        const li = document.createElement("li");
-        li.appendChild(wrapper);
-        return li;
-    }
-
-    // Populate user commands
-    usercommands.forEach(command => {
-        const li = createCommandElement(command);
-        userCommandList.appendChild(li);
+    // Usage lines
+    const usageLines = command.usage.split('\n');
+    usageLines.forEach(usage => {
+        const usageP = document.createElement("p");
+        usageP.textContent = usage.trim();
+        wrapper.appendChild(usageP);
     });
 
-    // Populate broadcaster commands
-    streamercommands.forEach(command => {
-        const li = createCommandElement(command);
-        broadcasterCommandList.appendChild(li);
-    });
+    // Wrap everything in an <li>
+    const li = document.createElement("li");
+    li.appendChild(wrapper);
+    return li;
 }
-
 
 // Function to dynamically add command spans based on the `data-option`
 function updateTwitchCommandInfo() {
