@@ -676,7 +676,13 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 
 		const rootStyles = getComputedStyle(document.documentElement);
 		const resolvedFontFamily = rootStyles.getPropertyValue("--body-font").trim();
-		let colors = ['var(--bg-color)', "blue"];
+		// Resolve variables
+		const bgColor = rootStyles.getPropertyValue("--bg-color").trim();
+		const altColor = rootStyles.getPropertyValue("--alt-color").trim(); // Just an example
+
+		// Use resolved values in your array
+		let colors = [bgColor, altColor];
+
 		const wheelFontConfig = {
 		  family: resolvedFontFamily || "Arial",  // fallback
 		  weight: "bold",
