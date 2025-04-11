@@ -111,10 +111,10 @@
 /* Glow Pulse */
 @keyframes glowPulse {
 	0% {
-		filter: drop-shadow(0 0 5px #0ea4a4);
+		filter: drop-shadow(0 0 5px var(--glow-color));
 	}
 	100% {
-		filter: drop-shadow(0 0 15px #0ea4a4);
+		filter: drop-shadow(0 0 15px var(--glow-color));
 	}
 }
 
