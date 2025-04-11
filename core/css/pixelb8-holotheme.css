@@ -1206,9 +1206,6 @@ button.Butt{}
 	z-index: 1000;
 	transition:all 0.2s ease-in-out;
 }
-#bubblewrap:hover {
-	opacity:1.00;
-}
 	/* Main Button */
 	#thePixelButt{
 		position: relative;
@@ -1287,6 +1284,13 @@ button.Butt{}
 		#entrivia-Butt:hover  { transform: translate(  0px, -60px) scale(1); }
 		#theme-Butt:hover     { transform: translate( 30px, -52px) scale(1); }
 		#settings-Butt:hover  { transform: translate( 38px, -22px) scale(1); }
+
+#bubblewrap:hover,
+#thePixelButt:hover,
+#Bubble:hover,
+#Bubble .widgetcontrols:hover {
+	opacity: 1 !important;
+}
 	.Butt.themeselect{
 		font-size:20px;
 		width:32;

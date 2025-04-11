@@ -1459,7 +1459,7 @@ function toggleButtonBubble() {
 	hideButtonBubble = !(currentState === "on" || currentState === "true");
 	// Update the UI
 	const bubbleWrap = document.getElementById("bubblewrap");
-	bubbleWrap.style.opacity = hideButtonBubble ? "0" : "1";
+	bubbleWrap.style.opacity = hideButtonBubble ? "0.00" : "1.00";
 }
 function toggleentriviaconsolemessages() {
     consolemessages = !consolemessages;
@@ -1827,9 +1827,10 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "toggle-bubblebutt") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		// Optional feedback in console
-		const stateMsg = hideButtonBubble ? "Hidden 🍑" : "Visible 🍑";
 		toggleButtonBubble();
+		const stateMsg = hideButtonBubble ? "Hidden 🍑" : "Visible 🍑";
 		displayConsoleMessage(user, `!${command} ✅ ${stateMsg}`);
+		console.log(user, `!${command} ✅ ${stateMsg}`);
 	}
 
 //-------------------------------------------------------
