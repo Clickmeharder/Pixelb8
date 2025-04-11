@@ -14,14 +14,16 @@ let styles = getComputedStyle(document.body);
 	color2 = styles.getPropertyValue('--wheel-color2').trim();
 	color3 = styles.getPropertyValue('--wheel-color3').trim();
 	wheelFont = styles.getPropertyValue('--wheel-font').trim();
+	wheelTextColor = styles.getPropertyValue('--wheel-text-color').trim();
 	borderColor = styles.getPropertyValue('--border-color').trim();
 	glowColor = styles.getPropertyValue('--glow-color').trim();
 	console.log('Current Body Class:', document.body.className);
 	// Log the results
+	console.log('Wheel Font (--wheel-font):', wheelFont);
+	console.log('Wheel Text Color (--wheel-text-color):', wheelTextColor);
 	console.log('Color 1 (--wheel-color):', color1);
 	console.log('Color 2 (--wheel-color2):', color2);
 	console.log('Color 3 (--wheel-color3):', color3);
-	console.log('Wheel Font (--wheel-font):', wheelFont);
 	console.log('Border color (--border-color):', borderColor);
 	console.log('Glow Color (--glow-color):', glowColor);
 	// Use resolved values in your array
@@ -32,14 +34,16 @@ function debugThemeStyles() {
 	color2 = styles.getPropertyValue('--wheel-color2').trim();
 	color3 = styles.getPropertyValue('--wheel-color3').trim();
 	wheelFont = styles.getPropertyValue('--wheel-font').trim();
+	wheelTextColor = styles.getPropertyValue('--wheel-text-color').trim();
 	borderColor = styles.getPropertyValue('--border-color').trim();
 	glowColor = styles.getPropertyValue('--glow-color').trim();
 	console.log('Current Body Class:', document.body.className);
 	// Log the results
+	console.log('Wheel Font (--wheel-font):', wheelFont);
+	console.log('Wheel Text Color (--wheel-text-color):', wheelTextColor);
 	console.log('Color 1 (--wheel-color):', color1);
 	console.log('Color 2 (--wheel-color2):', color2);
 	console.log('Color 3 (--wheel-color3):', color3);
-	console.log('Wheel Font (--wheel-font):', wheelFont);
 	console.log('Border color (--border-color):', borderColor);
 	console.log('Glow Color (--glow-color):', glowColor);
 	// Use resolved values in your array
@@ -100,7 +104,7 @@ const wheelFontConfig = {
 						  wheelFontConfig.maxSize
 						);
 						ctx.save();
-						ctx.fillStyle = color2;//"var(--text-color-alt)";//"#ff8900f5"
+						ctx.fillStyle = wheelTextColor;//"var(--text-color-alt)";//"#ff8900f5"
 						ctx.font = `${wheelFontConfig.weight} ${fontSize}px ${wheelFontConfig.family}`;
 						ctx.textAlign = "center";
 						ctx.textBaseline = "middle";
