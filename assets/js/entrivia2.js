@@ -1999,125 +1999,59 @@ The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
 // Function to update the command list in the UI
 // Function to update the command list in the UI
 function updateCommandlist() {
-    // Get the respective <ul> elements
     const userCommandList = document.getElementById("usercommandList");
     const broadcasterCommandList = document.getElementById("broadcastercommandList");
 
-    // Add user commands to the user command list
-    usercommands.forEach(function(command) {
-        const description = document.createElement("p");
+    // Helper to build each command block
+    function createCommandElement(command) {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("command-wrapper");
 
-        // Create and set up the <strong> for the command
+        // Command Name
         const strong = document.createElement("strong");
         strong.textContent = command.command;
+        wrapper.appendChild(strong);
 
-        // Create a new <p> for the command description and append it below the command
-        const commandDescription = document.createElement("p");
-        commandDescription.textContent = command.description;
+        // Description
+        const desc = document.createElement("p");
+        desc.textContent = command.description;
+        wrapper.appendChild(desc);
 
-        // Create the usage span
-        const usageSpan = document.createElement("span");
-        usageSpan.classList.add("command-info");
-        usageSpan.setAttribute("title", "Usage: " + command.usage);
-        usageSpan.textContent = "❓";
-
-        // Style it to float right
-        usageSpan.style.cssFloat = "right"; // or just use a CSS class
-
-        // Create a new <p> for each usage example
-        const usageExamples = command.usage.split('\n').map(usage => {
-            const usageParagraph = document.createElement("p");
-            usageParagraph.textContent = usage.trim(); // Ensure no leading/trailing spaces
-            return usageParagraph;
-        });
-
-        // Add the "Usage:" label before the examples
+        // Usage Label
         const usageLabel = document.createElement("p");
-        usageLabel.textContent = "Usage:";  // This will add the "Usage:" label before the examples
-        description.appendChild(usageLabel);
+        usageLabel.textContent = "usage:";
+        wrapper.appendChild(usageLabel);
 
-        // Append strong command, description, and usage elements in the right order
-        description.appendChild(strong);            // Add the strong command first
-        description.appendChild(commandDescription); // Add the command description
-        description.appendChild(usageSpan);          // Add the usage info icon (optional)
-
-        // Add each usage example to the description
-        usageExamples.forEach((usageExample, index) => {
-            description.appendChild(usageExample);
-
-            // Add a divider after each usage example except the last one
-            if (index < usageExamples.length - 1) {
-                const divider = document.createElement("div");
-                divider.style.borderTop = "2px ridge var(--border-color)";  // Inherited border color from parent
-                divider.style.margin = "4px 0"; // Adds spacing around the divider
-                description.appendChild(divider);
-            }
+        // Usage lines
+        const usageLines = command.usage.split('\n');
+        usageLines.forEach(usage => {
+            const usageP = document.createElement("p");
+            usageP.textContent = usage.trim();
+            wrapper.appendChild(usageP);
         });
 
-        // Create the <li> and add the description
-        const li = document.createElement("li");
-        li.appendChild(description);
+        // Info ❓ span
+        const infoSpan = document.createElement("span");
+        infoSpan.classList.add("command-info");
+        infoSpan.textContent = "❓";
+        infoSpan.setAttribute("title", "Usage: " + command.usage);
+        wrapper.appendChild(infoSpan);
 
-        // Append to the user command list
+        // Wrap everything in an <li>
+        const li = document.createElement("li");
+        li.appendChild(wrapper);
+        return li;
+    }
+
+    // Populate user commands
+    usercommands.forEach(command => {
+        const li = createCommandElement(command);
         userCommandList.appendChild(li);
     });
 
-    // Add broadcaster commands to the broadcaster command list
-    streamercommands.forEach(function(command) {
-        const description = document.createElement("p");
-
-        // Create and set up the <strong> for the command
-        const strong = document.createElement("strong");
-        strong.textContent = command.command;
-
-        // Create a new <p> for the command description and append it below the command
-        const commandDescription = document.createElement("p");
-        commandDescription.textContent = command.description;
-
-        // Create the usage span
-        const usageSpan = document.createElement("span");
-        usageSpan.classList.add("command-info");
-        usageSpan.setAttribute("title", "Usage: " + command.usage);
-        usageSpan.textContent = "❓";
-
-        // Style it to float right
-        usageSpan.style.cssFloat = "right"; // or just use a CSS class
-
-        // Create a new <p> for each usage example
-        const usageExamples = command.usage.split('\n').map(usage => {
-            const usageParagraph = document.createElement("p");
-            usageParagraph.textContent = usage.trim(); // Ensure no leading/trailing spaces
-            return usageParagraph;
-        });
-
-        // Add the "Usage:" label before the examples
-        const usageLabel = document.createElement("p");
-        usageLabel.textContent = "Usage:";  // This will add the "Usage:" label before the examples
-        description.appendChild(usageLabel);
-
-        // Append strong command, description, and usage elements in the right order
-        description.appendChild(strong);            // Add the strong command first
-        description.appendChild(commandDescription); // Add the command description
-        description.appendChild(usageSpan);          // Add the usage info icon (optional)
-
-        // Add each usage example to the description
-        usageExamples.forEach((usageExample, index) => {
-            description.appendChild(usageExample);
-
-            // Add a divider after each usage example except the last one
-            if (index < usageExamples.length - 1) {
-                const divider = document.createElement("div");
-                divider.style.borderTop = "2px ridge var(--border-color)";  // Inherited border color from parent
-                divider.style.margin = "4px 0"; // Adds spacing around the divider
-                description.appendChild(divider);
-            }
-        });
-
-        // Create the <li> and add the description
-        const li = document.createElement("li");
-        li.appendChild(description);
-
-        // Append the li to the broadcaster command list
+    // Populate broadcaster commands
+    streamercommands.forEach(command => {
+        const li = createCommandElement(command);
         broadcasterCommandList.appendChild(li);
     });
 }
