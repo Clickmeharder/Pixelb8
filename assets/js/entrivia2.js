@@ -2318,7 +2318,7 @@ document.getElementById('toggletwitchChatOverlay').addEventListener('click', tog
 document.getElementById('togglechatanswers').addEventListener('click', togglechatanswers);
 document.getElementById('toggleusedefaultquestions').addEventListener('click', toggleusedefaultquestions);
 document.getElementById('toggleusecustomquestions').addEventListener('click', toggleusecustomquestions);
-
+document.getElementById('togglehideButtonBubble').addEventListener('click', toggleButtonBubble);
 // Event listener for delete button
 document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCustomQuestion);
 
