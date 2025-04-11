@@ -7,14 +7,14 @@ const sliders = [
   { id: "entriviaAnnouncementX", unit: "%", variable: "--entriviaAnnouncement-X", min: 0, max: 100 },
   { id: "entriviaQuestionY", unit: "%", variable: "--entriviaQuestion-Y", min: 0, max: 88 },
   { id: "entriviaQuestionX", unit: "%", variable: "--entriviaQuestion-X", min: 0, max: 71 },
-  { id: "wheelY", unit: "%", variable: "--wheel-Y", min: 0, max: 75 },
-  { id: "wheelX", unit: "%", variable: "--wheel-X", min: 0, max: 100 },
+  { id: "wheelY", unit: "%", variable: "--wheel-Y", min: 0, max: 66 },
+  { id: "wheelX", unit: "%", variable: "--wheel-X", min: 0, max: 90 },
   { id: "wheelResultY", unit: "%", variable: "--wheelResult-Y", min: 0, max: 100 },
   { id: "wheelResultX", unit: "%", variable: "--wheelResult-X", min: 0, max: 100 },
 ];
 const wheelSliders = [
-  { id: "wheelY", unit: "%", variable: "--wheel-Y", min: 0, max: 75 },
-  { id: "wheelX", unit: "%", variable: "--wheel-X", min: 0, max: 100 },
+  { id: "wheelY", unit: "%", variable: "--wheel-Y", min: 0, max: 66 },
+  { id: "wheelX", unit: "%", variable: "--wheel-X", min: 0, max: 90 },
   { id: "wheelResultY", unit: "%", variable: "--wheelResult-Y", min: 0, max: 100 },
   { id: "wheelResultX", unit: "%", variable: "--wheelResult-X", min: 0, max: 100 },
 ];
