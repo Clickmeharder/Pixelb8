@@ -1971,11 +1971,11 @@ const streamercommands = [
         command: "!entrivia-ask", 
         description: "Asks an entrivia question from a specific round, category, and optional question type.", 
         usage: `\n
-!entrivia-ask -> asks a random question
-!entrivia-ask easy -> asks a easy question
-!entrivia-ask easy | mining\n -> asks a easy mining question\n
-!entrivia-ask hard | hunting | multiplechoice\n -> asks a hard multiplechoice question\n
-!entrivia-ask easy | history | singlechoice\n -> asks an easy history question\n
+!entrivia-ask
+!entrivia-ask easy
+!entrivia-ask easy | mining
+!entrivia-ask hard | hunting | multiplechoice
+!entrivia-ask easy | history | singlechoice
 category can be one of: mining, hunting, crafting, history, beauty, economy, social, misc.
 The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
     },
