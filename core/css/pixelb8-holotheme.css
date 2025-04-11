@@ -15,6 +15,7 @@ Pixelb8-holotheme.css
   --wheel-X:87%;
   --wheelResult-Y:0%;
   --wheelResult-X:15%;
+  
 
   --body-font: Arial, sans-serif;
   --bg-color: #f0f0f0;
@@ -30,6 +31,9 @@ Pixelb8-holotheme.css
   --shadow-color: rgba(0, 255, 239, 0.65);
   --box-shadow: 0px 0px 12px var(--shadow-color);
   --glow-color: rgba(0, 123, 255, 0.6);
+  --wheel-color:var(--bg-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--bg-color-alt2);
     /* main Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
@@ -78,6 +82,11 @@ body.dark-theme {
   --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgb(0 0 0 / 30%);
   --shadow-color: rgb(31 37 37 / 70%);
+  /*  Wheel Styles    */
+  --wheel-color:var(--bg-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--bg-color-alt2);
+/*                 */
   /* main Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
@@ -144,7 +153,11 @@ body.light-theme {
 
   --glow-color: rgba(0, 120, 255, 0.2);
   --shadow-color: rgba(0, 0, 0, 0.1);
-
+/*  Wheel Styles    */
+  --wheel-color:var(--bg-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--bg-color-alt2);
+/*                 */
   /* Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
@@ -205,6 +218,11 @@ body.custom-theme {
   --shadow-color: rgba(255, 136, 255, 0.6);
   --box-shadow: 0 0 10px var(--shadow-color);
   --glow-color: rgba(255, 128, 200, 0.5);
+/*  Wheel Styles    */
+  --wheel-color:var(--bg-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--bg-color-alt2);
+/*                 */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
   --pixelbutt-hover-opacity: 0.85;
@@ -253,7 +271,11 @@ body.retro-theme {
   --shadow-color: rgba(255, 255, 0, 0.25);
 
   /* --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_retrobeam.png'), auto; */
-
+/*  Wheel Styles    */
+  --wheel-color:var(--body-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--border-color);
+/*                 */
   /* Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
@@ -317,7 +339,11 @@ body.cyberice-theme {
   --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgba(100, 255, 255, 0.45);
   --shadow-color: rgba(0, 255, 255, 0.35);
-
+/*  Wheel Styles    */
+  --wheel-color:var(--body-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--accent-color);
+/*                 */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
   --pixelbutt-hover-opacity: 0.85;
@@ -386,7 +412,11 @@ body.neonvoid-theme {
   --shadow-color: rgba(255, 0, 200, 0.45);
 
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
-
+/*  Wheel Styles    */
+  --wheel-color:var(--text-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--border-color);
+/*                 */
   /* Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
@@ -453,7 +483,11 @@ body.biohazard-theme {
   --shadow-color: rgba(180, 255, 160, 0.35);
 
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
-
+/*  Wheel Styles    */
+  --wheel-color:var(--text-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--accent-alt2);
+/*                 */
   /* Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
@@ -522,7 +556,11 @@ body.holo-theme {
   --box-shadow: 2px 2px 6px var(--shadow-color);
   --box-glow: 0px 0px 12px var(--glow-color);
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
-
+/*  Wheel Styles    */
+  --wheel-color:var(--text-color-alt);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--border-color);
+/*                 */
 	/* button styles for the main nav buttons */
   --bubblebutt-color: #12ebebf2;
   --pixelbutt-opacity: 0.5;
@@ -591,7 +629,11 @@ body.synthwave-theme {
 
   --glow-color: rgba(255, 0, 204, 0.5);
   --shadow-color: rgba(0, 255, 255, 0.2);
-
+/*  Wheel Styles    */
+  --wheel-color:var(--bg-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--bg-color-alt2);
+/*                 */
   /* Button Styles */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
@@ -652,6 +694,11 @@ body.bubblegumpop-theme {
     --border: var(--border-width) var(--border-style) var(--border-color);
     --glow-color: rgba(255, 182, 193, 0.5);
     --shadow-color: rgba(255, 105, 180, 0.2);
+/*  Wheel Styles    */
+  --wheel-color:var(--bg-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--bg-color-alt2);
+/*                 */
 /*   --bubblebutt-color: #12ebebf2; */
     --pixelbutt-opacity: 0.5;
     --pixelbutt-hover-opacity: 0.85;
@@ -718,6 +765,11 @@ body.wastelandterminal-theme {
 
   --glow-color: rgba(0, 255, 102, 0.4);
   --shadow-color: rgba(0, 255, 102, 0.2);
+/*  Wheel Styles    */
+  --wheel-color:var(--bg-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--text-color-alt);
+/*                 */
   /* Button Styles */
  /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
@@ -786,6 +838,11 @@ body.business-theme {
   --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgb(23 28 71 / 75%);
   --shadow-color: rgba(0, 0, 0, 0.2);
+/*  Wheel Styles    */
+  --wheel-color:var(--bg-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--border-color);
+/*                 */
 	/* button styles for the main nav buttons */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
@@ -827,7 +884,7 @@ body.nineties-theme {
 --body-font: 'Courier New', Courier, monospace;
     --body-color: #000;
     --body-bg-color: #c0c0c0;
-    --body-bg: none;
+    --body-bg: ;
     --body-opacity: 1;
     --text-color: #000;
     --text-color-alt: #333;
@@ -847,6 +904,11 @@ body.nineties-theme {
     --border: var(--border-width) var(--border-style) #2e2c2cba;
     --glow-color: transparent;
     --shadow-color: #888;
+/*  Wheel Styles    */
+  --wheel-color:var(--bg-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--bg-color-alt2);
+/*                 */
 	/* button styles for the main nav buttons */
 /*   --bubblebutt-color: #12ebebf2; */
     --pixelbutt-opacity: 0.5;
@@ -910,7 +972,11 @@ body.poop-theme {
   --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgba(255, 215, 172, 0.3);
   --shadow-color: rgba(94, 73, 56, 0.4);
-
+/*  Wheel Styles    */
+  --wheel-color:var(--bg-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--bg-color-alt2);
+/*                 */
 	/* button styles for the main nav buttons */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
@@ -974,7 +1040,11 @@ body.hud-theme {
   --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgba(0, 255, 255, 0.4);
   --shadow-color: rgba(0, 255, 255, 0.2);
-
+/*  Wheel Styles    */
+  --wheel-color:var(--bg-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--bg-color-alt2);
+/*                 */
 	/* button styles for the main nav buttons */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
@@ -1038,6 +1108,11 @@ body.scroll-theme {
   --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgba(180, 122, 50, 0.2);
   --shadow-color: rgba(90, 65, 40, 0.3);
+  /*  Wheel Styles    */
+  --wheel-color:var(--bg-color);
+  --wheel-color2:var(--bg-color-alt);
+  --wheel-color3:var(--bg-color-alt2);
+/*                 */
 	/* button styles for the main nav buttons */
 /*   --bubblebutt-color: #12ebebf2; */
   --pixelbutt-opacity: 0.5;
