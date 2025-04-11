@@ -16,7 +16,7 @@ const removeButton = document.getElementById("wheel-removesectionButt");
 
 
 		// Accessing the computed styles for the <body> element
-		const styles = getComputedStyle(document.documentElement);
+		const styles = getComputedStyle(document.body.className);
 
 		// Read your theme variables
 		const color1 = styles.getPropertyValue('--bg-color').trim();
@@ -40,7 +40,7 @@ const removeButton = document.getElementById("wheel-removesectionButt");
 		  maxSize: 18,
 		  scaleFactor: 0.9
 		};
-		repaint(angle);
+
 	}
 		function repaint(angle) {
 			const wrapper = document.getElementById("wheelcanvaswrapper");
