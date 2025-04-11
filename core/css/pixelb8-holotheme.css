@@ -2062,13 +2062,19 @@ iframe {}canvas {}svg {}blockquote {}cite {}abbr {} (abbreviation)address {}code
 /*----------------------*/
 /*  Bg slider toggle  */
 /*----------------------*/
+.rangeinput {
+  background: var(--button-bg-color);
+  border: solid 1px var(--button-bg-color);
+  border-radius: 8px;
+  height: 7px;
+  width: 85%;
+  outline: none;
+  transition: background 450ms ease-in;
+  -webkit-appearance: none;
+}
+
 input[type="range"] {
-    -webkit-appearance: none; /* Remove default styling */
-    width: 100%;
-    height: 8px;
-    background: var(--bg-color);
-    border-radius: 4px;
-    outline: none;
+
 }
 .switch {
 	position: relative;
