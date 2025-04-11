@@ -8,8 +8,6 @@ const addInput = document.getElementById("addwheelsection");
 const addButton = document.getElementById("wheel-addsectionButt");
 const removeButton = document.getElementById("wheel-removesectionButt");
 let styles = getComputedStyle(document.body);
-
-
 	// Read your theme variables
 	let color1 = styles.getPropertyValue('--bg-color').trim();
 	let color2 = styles.getPropertyValue('--bg-color-alt').trim();
@@ -37,6 +35,7 @@ function debugThemeStyles() {
 	console.log('Body Font (--body-font):', bodyFont);
 	// Use resolved values in your array
 	colors = [color1, color2];
+	repaint(angle);
 }
 // Fallback if the CSS variable isn't set
 const wheelFontConfig = {
