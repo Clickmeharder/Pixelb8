@@ -1386,7 +1386,7 @@ select.b {}
 			max-height: 60px; /* Initially small */
 			padding: 0 4px; /* Horizontal padding stays */
 			padding-top: 0px;
-			transition: max-height 0.6s ease-out, padding 0.3s ease-out;
+			transition: all 0.6s ease-in-out;
 		}
 		.controlpanel:hover {
 			max-height: 300px;
@@ -1394,6 +1394,7 @@ select.b {}
 			padding-top: 4px;
 			height: 3%;
 			overflow-y: scroll;
+			transition: all 0.6s ease-in-out;
 		}
 		.controlpanel:active {
 			max-height: 300px;
