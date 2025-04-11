@@ -97,7 +97,7 @@ function setTheme(themeName, saveLayout = true) {
 	"--wheel-Y": getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-Y"),
     "--wheel-X": getComputedStyle(document.documentElement).getPropertyValue("--twitchchat-X"),
 	"--wheelResult-Y": getComputedStyle(document.documentElement).getPropertyValue("--wheelResult-Y"),
-    "--wheelResult-x": getComputedStyle(document.documentElement).getPropertyValue("--wheelResult-X"),
+    "--wheelResult-X": getComputedStyle(document.documentElement).getPropertyValue("--wheelResult-X"),
   } : {};
 
   // Save both theme and layout
