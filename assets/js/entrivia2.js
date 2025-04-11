@@ -1997,9 +1997,7 @@ The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
 ];
 
 // Function to update the command list in the UI
-// Function to update the command list in the UI
-// Function to update the command list in the UI
-function updateCommandlist() { 
+function updateCommandlist() {
     // Get the respective <ul> elements
     const userCommandList = document.getElementById("usercommandList");
     const broadcasterCommandList = document.getElementById("broadcastercommandList");
@@ -2025,6 +2023,31 @@ function updateCommandlist() {
         description.appendChild(usageSpan);
         description.appendChild(strong);
         description.append(": " + command.description);
+
+        // Create a new <p> for each usage example
+        const usageExamples = command.usage.split('\n').map(usage => {
+            const usageParagraph = document.createElement("p");
+            usageParagraph.textContent = usage.trim(); // Ensure no leading/trailing spaces
+            return usageParagraph;
+        });
+
+        // Add the "Usage:" label before the examples
+        const usageLabel = document.createElement("p");
+        usageLabel.textContent = "Usage:";  // This will add the "Usage:" label before the examples
+        description.appendChild(usageLabel);
+
+        // Add each usage example to the description
+        usageExamples.forEach((usageExample, index) => {
+            description.appendChild(usageExample);
+
+            // Add a divider after each usage example except the last one
+            if (index < usageExamples.length - 1) {
+                const divider = document.createElement("div");
+                divider.style.borderTop = "2px ridge var(--border-color)";  // Inherited border color from parent
+                divider.style.margin = "4px 0"; // Adds spacing around the divider
+                description.appendChild(divider);
+            }
+        });
 
         // Create the <li> and add the description
         const li = document.createElement("li");
@@ -2062,6 +2085,11 @@ function updateCommandlist() {
             usageParagraph.textContent = usage.trim(); // Ensure no leading/trailing spaces
             return usageParagraph;
         });
+
+        // Add the "Usage:" label before the examples
+        const usageLabel = document.createElement("p");
+        usageLabel.textContent = "Usage:";  // This will add the "Usage:" label before the examples
+        description.appendChild(usageLabel);
 
         // Add each usage example to the description
         usageExamples.forEach((usageExample, index) => {
@@ -2115,7 +2143,7 @@ function updateTwitchCommandInfo() {
             // Create the command-info span
             const commandInfoSpan = document.createElement('span');
             commandInfoSpan.classList.add('command-info');
-            commandInfoSpan.setAttribute('title', command.usage);
+            commandInfoSpan.setAttribute("title", "Usage: " + command.usage);
             commandInfoSpan.textContent = '❓';
 
             // Append the spans to the current element
