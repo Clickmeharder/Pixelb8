@@ -57,8 +57,8 @@ const wheelFontConfig = {
   family: wheelFont || "Arial",
   weight: "bold",
   minSize: 12,
-  maxSize: 18,
-  scaleFactor: 0.9
+  maxSize: 17,
+  scaleFactor: 0.8
 };
 
 		function repaint(angle) {
