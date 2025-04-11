@@ -2028,7 +2028,7 @@ function updateCommandlist() {
 
             // Divider after description
             const dividerAfterDescription = document.createElement("div");
-            dividerAfterDescription.style.borderTop = "2px ridge var(--border-color)";
+            dividerAfterDescription.style.borderTop = "3px ridge var(--border-color)";
             dividerAfterDescription.style.margin = "4px 0";
             description.appendChild(dividerAfterDescription);
 
