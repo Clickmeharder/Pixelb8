@@ -272,7 +272,7 @@ body.retro-theme {
 
   /* --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_retrobeam.png'), auto; */
 /*  Wheel Styles    */
-  --wheel-color:var(--body-color);
+  --wheel-color:var(--body-bg-color);
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--border-color);
 /*                 */

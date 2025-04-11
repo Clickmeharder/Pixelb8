@@ -127,8 +127,8 @@ const wheelFontConfig = {
 				ctx.fill();
 
 				// Draw the inner circle
-				ctx.fillStyle = borderColor;//"var(--bg-color)";//"#004040eb";
-				ctx.strokeStyle = color3;//"var(--input-bg-color)";//"#001f1fe8";
+				ctx.fillStyle = color2;//"var(--bg-color)";//"#004040eb";
+				ctx.strokeStyle = borderColor;//"var(--input-bg-color)";//"#001f1fe8";
 				ctx.lineWidth = 6;//was 8
 				ctx.beginPath();
 				ctx.arc(frameCx, frameCy, r / 6, 0, 2 * Math.PI, false);//was 4
