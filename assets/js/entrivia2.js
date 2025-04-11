@@ -2022,7 +2022,7 @@ function updateCommandlist() {
         // Append elements to the <p>
         description.appendChild(usageSpan);
         description.appendChild(strong);
-        description.append(": " + command.description);
+        description.append(":");
 
         // Create a new <p> for each usage example
         const usageExamples = command.usage.split('\n').map(usage => {
@@ -2048,6 +2048,11 @@ function updateCommandlist() {
                 description.appendChild(divider);
             }
         });
+
+        // Create a new <p> for the description text and append it below the command
+        const commandDescription = document.createElement("p");
+        commandDescription.textContent = command.description;
+        description.appendChild(commandDescription);
 
         // Create the <li> and add the description
         const li = document.createElement("li");
@@ -2077,7 +2082,7 @@ function updateCommandlist() {
         // Append elements to the <p>
         description.appendChild(usageSpan);
         description.appendChild(strong);
-        description.append(": " + command.description);
+        description.append(":");
 
         // Create a new <p> for each usage example
         const usageExamples = command.usage.split('\n').map(usage => {
@@ -2104,6 +2109,11 @@ function updateCommandlist() {
             }
         });
 
+        // Create a new <p> for the description text and append it below the command
+        const commandDescription = document.createElement("p");
+        commandDescription.textContent = command.description;
+        description.appendChild(commandDescription);
+
         // Create the <li> and add the description
         const li = document.createElement("li");
         li.appendChild(description);
@@ -2112,6 +2122,7 @@ function updateCommandlist() {
         broadcasterCommandList.appendChild(li);
     });
 }
+
 
 // Function to dynamically add command spans based on the `data-option`
 function updateTwitchCommandInfo() {
