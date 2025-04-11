@@ -212,11 +212,11 @@ function isStreamerAndAuthorize(user, command) {
     return true;
 }
 ComfyJS.onChat = (user, message, color, flags, extra) => {
+    if (twitchChatOverlay === "off") return;
     console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
     console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
     displayChatMessage(user, message, flags, extra);  // Show message in chat box
 };
-
 
 //!!!!!!!!!!!!!!!!!!!!!!!
 // Our Comfy Connection
