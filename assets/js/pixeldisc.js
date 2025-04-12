@@ -30,8 +30,8 @@ const wheelFontConfig = {
   family: wheelFont || "Arial",
   weight: "bold",
   minSize: 11,
-  maxSize: 17,
-  scaleFactor: 0.7
+  maxSize: 18,
+  scaleFactor: 0.8
 };
 
 function debugThemeStyles() {
