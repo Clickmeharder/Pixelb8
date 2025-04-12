@@ -52,7 +52,11 @@ function debugThemeStyles() {
 	frame = null;
 	repaint(angle);
 }
-// Fallback if the CSS variable isn't set
+
+// Pointer Config
+const pointerLength = 1.2;
+const pointerWidth = 0.08;
+// Wheel configuration
 const wheelFontConfig = {
   family: wheelFont || "Arial",
   weight: "bold",
@@ -139,13 +143,19 @@ const wheelFontConfig = {
 				ctx.fill();
 				ctx.stroke();
 
-				// Draw the pointer
+
+
+
+				//
 				ctx.translate(frameCx, frameCy);
 				ctx.rotate(Math.PI - 0.2);
 				ctx.beginPath();
-				ctx.moveTo(-r * 1.1, -r * 0.05);
+				ctx.moveTo(-r * pointerLength, -r * pointerWidth);
+				ctx.lineTo(-r * 0.85, 0);
+				ctx.lineTo(-r * pointerLength, r * pointerWidth);
+/* 				ctx.moveTo(-r * 1.1, -r * 0.05);
 				ctx.lineTo(-r * 0.9, 0);
-				ctx.lineTo(-r * 1.1, r * 0.05);
+				ctx.lineTo(-r * 1.1, r * 0.05); */
 				ctx.fillStyle = "#f00";//"var(--button-bg-color)";//"#f00";
 				ctx.fill();
 			}
