@@ -510,7 +510,7 @@ body.biohazard-theme {
   --border-style: solid;
   --border-color: #76ff0333;
   --border: var(--border-width) var(--border-style) var(--border-color);
-  --glow-color: rgba(119, 255, 68, 0.5);
+  --glow-color: rgb(209 255 68 / 70%);/*rgba(119, 255, 68, 0.5);*/
   --shadow-color: rgba(180, 255, 160, 0.35);
 
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
