@@ -110,7 +110,7 @@ const wheelFontConfig = {
 						ctx.textBaseline = "middle";
 						ctx.translate(r, r);
 						ctx.rotate(a);
-						ctx.fillText(sections[i], r * 0.65, 0);
+						ctx.fillText(sections[i], r * 0.62, 0);
 						ctx.restore();
 					}
 					wheels.push(wheelCanvas);
