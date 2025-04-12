@@ -347,13 +347,13 @@ body.cyberice-theme {
   --body-bg: ;
   --body-opacity: 1;
 
-  --text-color: #44acbba3;
+  --text-color: #7de3e8e3;
   --text-color-alt: #6ae9ff;
   --h3-color: #00e0ff;
   --h2-color: #00baff;
   --question-color:var(--text-color-alt);
   --default-muted: #748ca4;
-  --bg-color: linear-gradient(135deg, #e0faff, #aaf4ff, #6ae9ff);
+  --bg-color: linear-gradient(135deg, #bcf1fbe0, #99d8e2a6, #6ae9ffd6);
   --bg-color-alt: #355960a6;
   --bg-color-alt2: linear-gradient(135deg, #102c3e, #1f3f58);
   --bg-color-alt3: linear-gradient(135deg, #0a1e2e, #193c53);
@@ -361,7 +361,7 @@ body.cyberice-theme {
   --accent-color: #6eeaff;
   --accent-alt: #aad9ff;
   
-  --border-width:0px;
+  --border-width:6px;
   --border-style: outset;
   --border-color: #61dafbaa;
   --border: var(--border-width) var(--border-style) var(--border-color);
