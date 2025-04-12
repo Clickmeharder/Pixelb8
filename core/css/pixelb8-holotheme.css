@@ -516,7 +516,7 @@ body.biohazard-theme {
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 /*  Wheel Styles    */
   --wheel-color:#132513e3;
-  --wheel-color2:var(--bg-color-alt);
+  --wheel-color2:#093522ed;
   --wheel-color3:var(--accent-alt2);
   --wheel-text-color:var(--text-color);
   --wheel-font:var(--body-font);
