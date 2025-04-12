@@ -18,14 +18,6 @@ let styles = getComputedStyle(document.body);
 	borderColor = styles.getPropertyValue('--border-color').trim();
 	glowColor = styles.getPropertyValue('--glow-color').trim();
 	console.log('Current Body Class:', document.body.className);
-	// Log the results
-	console.log('Wheel Font (--wheel-font):', wheelFont);
-	console.log('Wheel Text Color (--wheel-text-color):', wheelTextColor);
-	console.log('Color 1 (--wheel-color):', color1);
-	console.log('Color 2 (--wheel-color2):', color2);
-	console.log('Color 3 (--wheel-color3):', color3);
-	console.log('Border color (--border-color):', borderColor);
-	console.log('Glow Color (--glow-color):', glowColor);
 	// Use resolved values in your array
 	colors = [color1, color2];
 function debugThemeStyles() {
@@ -212,7 +204,7 @@ const wheelFontConfig = {
 					console.log("Winner:", winningSection);
 					const resultDisplay = document.getElementById("wheel-result");
 					if (resultDisplay) {
-						resultDisplay.textContent = `🎉 Winner: ${winningSection}`;
+						resultDisplay.textContent = `${winningSection}`;
 					}
 				}
 			}
