@@ -29,7 +29,7 @@ let pointerColor = wheelTextColor; //"#f00";
 const wheelFontConfig = {
   family: wheelFont || "Arial",
   weight: "bold",
-  minSize: 11,
+  minSize: 8,
   maxSize: 21,
   scaleFactor: 0.8
 };
