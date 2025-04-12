@@ -71,6 +71,8 @@ document.querySelectorAll('.themeselect').forEach(button => {
 
     // Now, call the setTheme function with the theme name
     setTheme(theme);
+	// if wheel script is enabled uncomment the repaintWheel function. otherwise comment it
+	repaintWheel();
   });
 });
 function updateBubblewrapVisibility() {
