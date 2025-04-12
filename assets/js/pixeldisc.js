@@ -25,6 +25,7 @@ let styles = getComputedStyle(document.body);
 const pointerLength = 1.4;//= 1.2;
 const pointerWidth = 0.10;//= 0.08;
 let pointerColor = wheelTextColor; //"#f00";
+const WIN_GLOW_COLOR = { r: 0, g: 255, b: 0 }; // Green glow
 // Wheel configuration
 const wheelFontConfig = {
   family: wheelFont || "Arial",
@@ -219,7 +220,8 @@ function repaintWheel() {
 			ctx.restore();
 
 
-						// Highlight the winning section (glow or overlay effect)
+						// Highlight/WIN Glow
+						// Highlight/WIN Glow
 			if (highlightedIndex !== null && highlightStartTime !== null) {
 				const elapsed = performance.now() - highlightStartTime;
 				if (elapsed < HIGHLIGHT_DURATION) {
@@ -236,8 +238,10 @@ function repaintWheel() {
 					ctx.arc(0, 0, r, a0, a1);
 					ctx.closePath();
 
-					ctx.fillStyle = `rgba(255, 255, 0, ${opacity * 0.3})`; // Yellow glow
-					ctx.shadowColor = `rgba(255, 255, 0, ${opacity})`;
+					// Use the WIN_GLOW_COLOR variable
+					const { r, g, b } = WIN_GLOW_COLOR;
+					ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity * 0.3})`; // fill glow
+					ctx.shadowColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;     // outer glow
 					ctx.shadowBlur = 20;
 					ctx.fill();
 
