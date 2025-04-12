@@ -220,7 +220,37 @@ function repaintWheel() {
 
 			// Draw the outer frame (pointer and ring)
 			ctx.drawImage(frame, cx - frame.width / 2, cy - frame.height / 2);
+						// Highlight the winning section (glow or overlay effect)
+			if (highlightedIndex !== null && highlightStartTime !== null) {
+				const elapsed = performance.now() - highlightStartTime;
+				if (elapsed < HIGHLIGHT_DURATION) {
+					const opacity = 1 - (elapsed / HIGHLIGHT_DURATION); // fade out
+					ctx.save();
+					ctx.translate(cx, cy);
+					ctx.rotate(angle);
+
+					// Draw highlight arc
+					const a0 = 2 * Math.PI * highlightedIndex / sections.length;
+					const a1 = a0 + 2 * Math.PI / sections.length;
+					ctx.beginPath();
+					ctx.moveTo(0, 0);
+					ctx.arc(0, 0, r, a0, a1);
+					ctx.closePath();
+
+					ctx.fillStyle = `rgba(255, 255, 0, ${opacity * 0.3})`; // Yellow glow
+					ctx.shadowColor = `rgba(255, 255, 0, ${opacity})`;
+					ctx.shadowBlur = 20;
+					ctx.fill();
+
+					ctx.restore();
+
+					requestAnimationFrame(() => repaint(angle)); // animate fade-out
+				} else {
+					highlightedIndex = null; // reset after done
+				}
+			}
 		}
+
 		// Spin function
 		let angle = 0, running = false;
 		function spinTo(winner, duration) {
