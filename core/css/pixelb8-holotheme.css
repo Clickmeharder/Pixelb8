@@ -1742,7 +1742,7 @@ select.b {}
 	justify-content: space-evenly;
 	text-align: center;
 	align-items: center;
-	color: gray;
+	color: var(--input-color);
 	background-color: var(--bg-color-alt3);/*#020307eb;*/
 	border: 2px ridge var(--border-color);
 }
@@ -1793,7 +1793,7 @@ ul#broadcastercommandlist {
   padding: 0;
 }
 #usercommandList li, #broadcastercommandList li {
-	color: #8d8888;
+	color: var(--input-color);
 	padding: 2px;
 	border: 2px ridge #393636;
 	margin: 4px 0;
