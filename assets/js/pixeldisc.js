@@ -52,7 +52,6 @@ function debugThemeStyles() {
 	console.log('Color 3 (--wheel-color3):', color3);
 	console.log('Border color (--border-color):', borderColor);
 	console.log('Glow Color (--glow-color):', glowColor);
-	// Use resolved values in your array
 	colors = [color1, color2];
 	wheels = null;
 	frame = null;
