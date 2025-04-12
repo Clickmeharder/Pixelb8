@@ -115,13 +115,28 @@ function repaintWheel() {
 						  wheelFontConfig.maxSize
 						);
 						ctx.save();
-						ctx.fillStyle = wheelTextColor;//"var(--text-color-alt)";//"#ff8900f5"
+						ctx.fillStyle = wheelTextColor;
 						ctx.font = `${wheelFontConfig.weight} ${fontSize}px ${wheelFontConfig.family}`;
-						ctx.textAlign = "center";//maybe try start it was on center
+						ctx.textAlign = "center";
 						ctx.textBaseline = "middle";
 						ctx.translate(r, r);
 						ctx.rotate(a);
-						ctx.fillText(sections[i], r * 0.56, 0);//was 0.62
+
+						// Optional: Drop shadow for depth
+						ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+						ctx.shadowOffsetX = 2;
+						ctx.shadowOffsetY = 2;
+						ctx.shadowBlur = 3;
+
+						// Fill the text (main color)
+						ctx.fillText(sections[i], r * 0.56, 0);
+
+						// Optional: Strong black stroke to make text pop
+						ctx.shadowColor = "transparent"; // Disable shadow for stroke
+						ctx.lineWidth = 3;
+						ctx.strokeStyle = "black";
+						ctx.strokeText(sections[i], r * 0.56, 0);
+
 						ctx.restore();
 					}
 					wheels.push(wheelCanvas);
