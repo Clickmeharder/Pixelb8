@@ -1,7 +1,6 @@
 let canvas = document.getElementById("canvas1");
 let sections = ["FREE Beer Keg", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "nothing"];
 let colors = ["#001f1fe8", "#004040eb"];
-
 let wheels = null;
 let frame = null;
 const removeSelect = document.getElementById("removewheelsection");
