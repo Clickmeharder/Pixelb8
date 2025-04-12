@@ -274,6 +274,7 @@ function repaintWheel() {
 					let winningSection = sections[winningIndex];
 					highlightedIndex = winningIndex;
 					highlightStartTime = performance.now();
+					repaint(angle);
 					// 🔊 Log and/or display the winner
 					console.log("Winner:", winningSection);
 					const resultDisplay = document.getElementById("wheel-result");
