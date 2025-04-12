@@ -24,7 +24,7 @@ let styles = getComputedStyle(document.body);
 // Pointer Config
 const pointerLength = 1.4;//= 1.2;
 const pointerWidth = 0.10;//= 0.08;
-let pointerColor = "#f00";
+let pointerColor = wheelTextColor; //"#f00";
 // Wheel configuration
 const wheelFontConfig = {
   family: wheelFont || "Arial",
