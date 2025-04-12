@@ -353,8 +353,8 @@ body.cyberice-theme {
   --h2-color: #00baff;
   --question-color:var(--text-color-alt);
   --default-muted: #748ca4;
-  --bg-color: linear-gradient(145deg, #0d1b2a, #1b263b);
-  --bg-color-alt: #1e3a4c;
+  --bg-color: linear-gradient(135deg, #e0faff, #aaf4ff, #6ae9ff);
+  --bg-color-alt: #355960a6;
   --bg-color-alt2: linear-gradient(135deg, #102c3e, #1f3f58);
   --bg-color-alt3: linear-gradient(135deg, #0a1e2e, #193c53);
 
@@ -369,7 +369,7 @@ body.cyberice-theme {
   --shadow-color: rgba(0, 255, 255, 0.35);
 /*  Wheel Styles    */
   --wheel-color:#bef0faa6;
-  --wheel-color2:#6eeaffa6;
+  --wheel-color2:#355960a6;
   --wheel-color3:var(--accent-color);
   --wheel-font:var(--body-font);
 /*                 */
