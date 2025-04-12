@@ -368,8 +368,8 @@ body.cyberice-theme {
   --glow-color: rgba(100, 255, 255, 0.45);
   --shadow-color: rgba(0, 255, 255, 0.35);
 /*  Wheel Styles    */
-  --wheel-color:#e0faff;
-  --wheel-color2:#6ae9ff;
+  --wheel-color:#94f0ff;
+  --wheel-color2:#94f0ff;
   --wheel-color3:var(--accent-color);
   --wheel-font:var(--body-font);
 /*                 */
