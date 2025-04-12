@@ -31,7 +31,7 @@ const wheelFontConfig = {
   weight: "bold",
   minSize: 11,
   maxSize: 20,
-  scaleFactor: 0.8
+  scaleFactor: 0.9
 };
 
 function debugThemeStyles() {
