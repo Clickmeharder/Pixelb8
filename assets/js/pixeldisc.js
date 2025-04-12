@@ -253,44 +253,61 @@ function repaintWheel() {
 		}
 
 		// Spin function
-		let angle = 0, running = false;
-		function spinTo(winner, duration) {
-			let final_angle = (-0.2) - (0.5 + winner) * 2 * Math.PI / sections.length;
-			let start_angle = angle - Math.floor(angle / (2 * Math.PI)) * 2 * Math.PI - 5 * 2 * Math.PI;
-			let start = performance.now();
-			function frame() {
-				let now = performance.now();
-				let t = Math.min(1, (now - start) / duration);
-				t = 3 * t * t - 2 * t * t * t; // ease in out
-				angle = start_angle + t * (final_angle - start_angle);
-				repaint(angle);
-				if (t < 1) {
-				requestAnimationFrame(frame);
-				} else {
-					running = false;
-					// 🏆 Determine the winning section
-					let winningIndex = (Math.floor((-0.2 - angle) * sections.length / (2 * Math.PI)) % sections.length);
-					if (winningIndex < 0) winningIndex += sections.length;
-					let winningSection = sections[winningIndex];
-					highlightedIndex = winningIndex;
-					highlightStartTime = performance.now();
-					repaint(angle);
-					// 🔊 Log and/or display the winner
-					console.log("Winner:", winningSection);
-					const resultDisplay = document.getElementById("wheel-result");
-					if (resultDisplay) {
-						resultDisplay.textContent = `${winningSection}`;
-					}
-				}
-			}
+function spinWheel() {
+	if (!running) {
+		const randomWinner = Math.floor(Math.random() * sections.length);
+		const randomDuration = 3000 + Math.random() * 2000; // 3–5 seconds
+		const randomSpins = 5 + Math.floor(Math.random() * 5); // 5–9 full spins
+		spinTo(randomWinner, randomDuration, randomSpins);
+	}
+}
+
+function spinTo(winner, duration, extraSpins = 6) {
+	let totalSections = sections.length;
+	let sectionAngle = 2 * Math.PI / totalSections;
+
+	// Final angle = multiple full spins + target section
+	let final_angle = (-0.2) - (0.5 + winner) * sectionAngle - extraSpins * 2 * Math.PI;
+
+	let start_angle = angle - Math.floor(angle / (2 * Math.PI)) * 2 * Math.PI;
+	let start = performance.now();
+
+	function easeOutQuart(t) {
+		return 1 - (--t) * t * t * t;
+	}
+
+	function frame() {
+		let now = performance.now();
+		let t = Math.min(1, (now - start) / duration);
+		let eased = easeOutQuart(t);
+
+		angle = start_angle + eased * (final_angle - start_angle);
+		repaint(angle);
+
+		if (t < 1) {
 			requestAnimationFrame(frame);
-			running = true;
-		}
-		function spinWheel() {
-				if (!running) {
-				spinTo(Math.random() * sections.length | 0, 5000);
+		} else {
+			running = false;
+
+			// 🏆 Determine the winning section
+			let winningIndex = Math.floor(((-0.2 - angle) % (2 * Math.PI)) * totalSections / (2 * Math.PI));
+			if (winningIndex < 0) winningIndex += totalSections;
+			let winningSection = sections[winningIndex];
+			highlightedIndex = winningIndex;
+			highlightStartTime = performance.now();
+			repaint(angle);
+
+			console.log("Winner:", winningSection);
+			const resultDisplay = document.getElementById("wheel-result");
+			if (resultDisplay) {
+				resultDisplay.textContent = `${winningSection}`;
 			}
 		}
+	}
+
+	requestAnimationFrame(frame);
+	running = true;
+}
 
 // Bind the spin to mouse click
 canvas.onmousedown = function() {
