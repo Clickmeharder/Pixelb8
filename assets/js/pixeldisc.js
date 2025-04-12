@@ -221,7 +221,6 @@ function repaintWheel() {
 
 
 						// Highlight/WIN Glow
-						// Highlight/WIN Glow
 			if (highlightedIndex !== null && highlightStartTime !== null) {
 				const elapsed = performance.now() - highlightStartTime;
 				if (elapsed < HIGHLIGHT_DURATION) {
@@ -238,10 +237,8 @@ function repaintWheel() {
 					ctx.arc(0, 0, r, a0, a1);
 					ctx.closePath();
 
-					// Use the WIN_GLOW_COLOR variable
-					const { r, g, b } = WIN_GLOW_COLOR;
-					ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity * 0.3})`; // fill glow
-					ctx.shadowColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;     // outer glow
+					ctx.fillStyle = `rgba(255, 255, 0, ${opacity * 0.3})`; // Yellow glow
+					ctx.shadowColor = `rgba(255, 255, 0, ${opacity})`;
 					ctx.shadowBlur = 20;
 					ctx.fill();
 
