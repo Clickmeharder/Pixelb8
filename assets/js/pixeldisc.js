@@ -261,7 +261,7 @@ function repaintWheel() {
 			// Randomize spin count a bit: 4–6 extra full rotations
 			const randomSpins = extraSpins + Math.floor(Math.random() * 3); // 5–7 total
 
-			let final_angle = (-0.2) - (0.5 + winner) * sectionAngle - randomSpins * 2 * Math.PI;
+			let final_angle = (0.2) + (0.5 + winner) * sectionAngle + randomSpins * 2 * Math.PI;
 			let start_angle = angle - Math.floor(angle / (2 * Math.PI)) * 2 * Math.PI;
 			let start = performance.now();
 
