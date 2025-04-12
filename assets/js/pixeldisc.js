@@ -415,6 +415,11 @@ window.addEventListener("resize", () => repaint(angle));
 		console.log(`Wheel "delete wheel butt clicked!`);
 		deletewheelSections();
 	});
+	
+	document.getElementById("discRotationLever").addEventListener("click", () => {
+		console.log(`Wheel done gonna spun!`);
+		spinWheel();
+	});
 	document.addEventListener('DOMContentLoaded', () => {
 	  	// Initialize dropdown when page loads
 		updateRemoveDropdown();
