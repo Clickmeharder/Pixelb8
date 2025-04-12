@@ -37,7 +37,7 @@ const wheelFontConfig = {
 
 let highlightedIndex = null;
 let highlightStartTime = null;
-const HIGHLIGHT_DURATION = 1000; // 1 second glow
+const HIGHLIGHT_DURATION = 5000; // 1 second glow
 
 function debugThemeStyles() {
 	styles = getComputedStyle(document.body);
