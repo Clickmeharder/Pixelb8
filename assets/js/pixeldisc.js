@@ -132,10 +132,10 @@ function repaintWheel() {
 						ctx.fillText(sections[i], r * 0.56, 0);
 
 						// Optional: Strong black stroke to make text pop
-						ctx.shadowColor = "transparent"; // Disable shadow for stroke
-						ctx.lineWidth = 0.8;
+/* 						ctx.shadowColor = "transparent"; 
+						ctx.lineWidth = 0.1;
 						ctx.strokeStyle = "black";
-						ctx.strokeText(sections[i], r * 0.56, 0);
+						ctx.strokeText(sections[i], r * 0.56, 0); */
 
 						ctx.restore();
 					}
