@@ -135,7 +135,7 @@ function repaintWheel() {
 						ctx.shadowColor = "transparent"; // Disable shadow for stroke
 						ctx.lineWidth = 1;
 						ctx.strokeStyle = "black";
-						ctx.strokeText(sections[i], r * 0.56, 0);
+						ctx.strokeText(sections[i], r * 0.23, 0);
 
 						ctx.restore();
 					}
