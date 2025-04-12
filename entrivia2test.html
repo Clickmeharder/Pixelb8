@@ -781,6 +781,7 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 				}
 			});
 		}
+		
 		<!-- main button event listeners -->
 		//enentrivia-toggle button
 		document.getElementById("thePixelButt").addEventListener("click", function () {
@@ -805,13 +806,13 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 		const lever = document.getElementById("lever");
 
 		lever.addEventListener("click", () => {
-		  // don't allow spin while already spinning
+		  if (running) return;
 
-		  lever.classList.add("pull"); // animate lever down
-		// run your spinwheel function
+		  lever.classList.add("pull");
+		  spinWheel();
 
 		  setTimeout(() => {
-			lever.classList.remove("pull"); // reset lever
+			lever.classList.remove("pull");
 		  }, 800);
 		});
 	</script>
