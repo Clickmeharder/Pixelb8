@@ -590,7 +590,7 @@ body.holo-theme {
   --box-glow: 0px 0px 12px var(--glow-color);
   --cursor-image: url('/assets/cursors/gif-box/eu-cursors/cursor_bukinsblade.png'), auto;
 /*  Wheel Styles    */
-  --wheel-color:var(--text-color-alt);
+  --wheel-color:#001f1fed;
   --wheel-color2:var(--bg-color-alt);
   --wheel-color3:var(--border-color);
   --wheel-text-color:var(--text-color);
