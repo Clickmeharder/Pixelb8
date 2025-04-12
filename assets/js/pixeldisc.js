@@ -218,8 +218,7 @@ function repaintWheel() {
 			ctx.drawImage(wheels[selected], 0, 0);
 			ctx.restore();
 
-			// Draw the outer frame (pointer and ring)
-			ctx.drawImage(frame, cx - frame.width / 2, cy - frame.height / 2);
+
 						// Highlight the winning section (glow or overlay effect)
 			if (highlightedIndex !== null && highlightStartTime !== null) {
 				const elapsed = performance.now() - highlightStartTime;
@@ -249,6 +248,8 @@ function repaintWheel() {
 					highlightedIndex = null; // reset after done
 				}
 			}
+					// Draw the outer frame (pointer and ring)
+		ctx.drawImage(frame, cx - frame.width / 2, cy - frame.height / 2);
 		}
 
 		// Spin function
