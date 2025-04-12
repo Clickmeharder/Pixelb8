@@ -237,8 +237,8 @@ function repaintWheel() {
 					ctx.arc(0, 0, r, a0, a1);
 					ctx.closePath();
 
-					ctx.fillStyle = `rgba(255, 255, 0, ${opacity * 0.3})`; // Yellow glow
-					ctx.shadowColor = `rgba(255, 255, 0, ${opacity})`;
+					ctx.fillStyle = `rgba(0, 255, 0, ${opacity * 0.3})`; // Yellow glow
+					ctx.shadowColor = `rgba(0, 255, 0, ${opacity})`;
 					ctx.shadowBlur = 20;
 					ctx.fill();
 
