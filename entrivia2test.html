@@ -39,7 +39,7 @@
 		}
 
 		#wheelcanvaswrapper canvas {
-			visibility: visible;
+			visibility: hidden;
 			width: 100%;
 			height: 100%;
 			background:;
@@ -635,7 +635,6 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 		document.querySelectorAll('.toggle-toggle').forEach(button => {
 		  const targetId = button.dataset.target;
 		  const animation = button.dataset.animation || "fade";
-
 		  button.addEventListener("click", () => {
 			const isVisible = toggleElement(targetId, animation);
 			button.innerHTML = isVisible
