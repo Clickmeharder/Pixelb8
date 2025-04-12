@@ -16,6 +16,84 @@
 	<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <style>
+.lever-wrapper {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  height: min-content;
+}
+
+.lever-slot {
+  position: relative;
+  transform: translateY(-1%);
+  width: 20px;
+  height: 10px;
+  background: #c2c2c2;
+  border: 2px solid #222;
+  border-radius: 10px;
+  overflow: visible;
+  box-shadow: inset 0 0 10px #000, 0 0 20px #000;
+  perspective: 800px;
+}
+
+.lever {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%) rotateX(20deg); /* Start slightly upright */
+  transform-origin: bottom center;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  cursor: pointer;
+}
+
+.lever.pull {
+  transform: translateX(-50%) rotateX(-110deg); /* Pull forward without shifting horizontally */
+
+}
+
+.lever-stick {
+  width: 12px;
+  height: 120px;
+  background: linear-gradient(to bottom, #ccc, #444);
+  margin: 0 auto;
+  border-radius: 4px;
+  /* Initial shadow on stick */
+  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.7), inset -1px -1px 3px rgba(255, 255, 255, 0.2);
+  transform: translateZ(0);
+  transition: background 0.4s ease, box-shadow 0.4s ease; /* Smooth transition for background and shadow */
+}
+
+/* Move shadow left and darken when lever is pulled */
+.lever.pull .lever-stick {
+  height: 130px;
+  box-shadow: -2px 0px 30px rgba(0, 0, 0, 0.9), inset -2px -2px 6px rgba(0, 0, 0, 0.6); /* Shadow moves left and darkens */
+}
+
+.lever-knob {
+  width: 34px;
+  height: 34px;
+  background: radial-gradient(circle at 30% 30%, #f44, #800);
+  border: 2px solid #400;
+  border-radius: 50%;
+  margin: 0 auto -10px;
+  box-shadow:
+    0 0 8px rgba(0, 0, 0, 0.6),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.3),
+    inset 2px 2px 4px rgba(0, 0, 0, 0.5);
+  transform: translateZ(10px);
+  z-index: 10000;
+  transition: all 0.4s ease; /* Smooth transition for shadow on knob */
+}
+
+/* Move shadow left and darken when lever is pulled */
+.lever.pull .lever-knob {
+  height: 44px;
+  width:44px;
+  box-shadow:
+    -4px -4px 18px rgba(0, 0, 0, 0.9), /* Shadow moves to the left and gets darker */
+    inset -2px 0px 2px rgba(255, 255, 255, 0.3),
+    inset 2px 0px 5px rgba(0, 0, 0, 0.4); /* Enhanced inner shadow */
+}
 
     </style>
    <style>
@@ -469,6 +547,15 @@
 		<div class="controller" id="unused-controller"><button class="close-btn">×</button>unused</div>
 		<div class="spinwheel" id="wheelWrapper" style="">
 			<div class="" id="wheel-result" style=""></div>
+			
+			<div class="lever-wrapper">
+			  <div class="lever-slot">
+				<div id="lever" class="lever">
+				  <div class="lever-knob"></div>
+				  <div class="lever-stick"></div>
+				</div>
+			  </div>
+			</div>
 			<div class="" id="wheelcanvaswrapper">
 				<canvas id="canvas1"></canvas>
 			</div>
@@ -714,6 +801,18 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 				console.log("Butt pressed: " + controllerId);
 				toggleElement(controllerId, 'fade');
 			}
+		});
+		const lever = document.getElementById("lever");
+
+		lever.addEventListener("click", () => {
+		  // don't allow spin while already spinning
+
+		  lever.classList.add("pull"); // animate lever down
+		// run your spinwheel function
+
+		  setTimeout(() => {
+			lever.classList.remove("pull"); // reset lever
+		  }, 800);
 		});
 	</script>
 
