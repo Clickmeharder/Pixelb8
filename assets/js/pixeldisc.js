@@ -61,15 +61,6 @@ function repaintWheel() {
 	wheelTextColor = styles.getPropertyValue('--wheel-text-color').trim();
 	borderColor = styles.getPropertyValue('--border-color').trim();
 	glowColor = styles.getPropertyValue('--glow-color').trim();
-	console.log('Current Body Class:', document.body.className);
-	// Log the results
-	console.log('Wheel Font (--wheel-font):', wheelFont);
-	console.log('Wheel Text Color (--wheel-text-color):', wheelTextColor);
-	console.log('Color 1 (--wheel-color):', color1);
-	console.log('Color 2 (--wheel-color2):', color2);
-	console.log('Color 3 (--wheel-color3):', color3);
-	console.log('Border color (--border-color):', borderColor);
-	console.log('Glow Color (--glow-color):', glowColor);
 	// Use resolved values in your array
 	colors = [color1, color2];
 	wheels = null;
@@ -165,10 +156,6 @@ const wheelFontConfig = {
 				ctx.arc(frameCx, frameCy, r / 6, 0, 2 * Math.PI, false);//was 4
 				ctx.fill();
 				ctx.stroke();
-
-
-
-
 				//
 				ctx.translate(frameCx, frameCy);
 				ctx.rotate(Math.PI - 0.2);
@@ -176,9 +163,6 @@ const wheelFontConfig = {
 				ctx.moveTo(-r * pointerLength, -r * pointerWidth);
 				ctx.lineTo(-r * 0.85, 0);
 				ctx.lineTo(-r * pointerLength, r * pointerWidth);
-/* 				ctx.moveTo(-r * 1.1, -r * 0.05);
-				ctx.lineTo(-r * 0.9, 0);
-				ctx.lineTo(-r * 1.1, r * 0.05); */
 				ctx.fillStyle = "#f00";//"var(--button-bg-color)";//"#f00";
 				ctx.fill();
 			}
@@ -209,7 +193,6 @@ const wheelFontConfig = {
 		function spinTo(winner, duration) {
 			let final_angle = (-0.2) - (0.5 + winner) * 2 * Math.PI / sections.length;
 			let start_angle = angle - Math.floor(angle / (2 * Math.PI)) * 2 * Math.PI - 5 * 2 * Math.PI;
-		  
 			let start = performance.now();
 			function frame() {
 				let now = performance.now();
@@ -221,12 +204,10 @@ const wheelFontConfig = {
 				requestAnimationFrame(frame);
 				} else {
 					running = false;
-
 					// 🏆 Determine the winning section
 					let winningIndex = (Math.floor((-0.2 - angle) * sections.length / (2 * Math.PI)) % sections.length);
 					if (winningIndex < 0) winningIndex += sections.length;
 					let winningSection = sections[winningIndex];
-
 					// 🔊 Log and/or display the winner
 					console.log("Winner:", winningSection);
 					const resultDisplay = document.getElementById("wheel-result");
@@ -235,28 +216,32 @@ const wheelFontConfig = {
 					}
 				}
 			}
-
 			requestAnimationFrame(frame);
 			running = true;
 		}
 
-		// Bind the spin to mouse click
-		canvas.onmousedown = function() {
-			if (!running) {
+		function spinWheel() {
+				if (!running) {
 				spinTo(Math.random() * sections.length | 0, 5000);
 			}
+		}
+
+		// Bind the spin to mouse click
+		canvas.onmousedown = function() {
+			spinWheel();
 		};
 
 
+//comment this function out if you want to stop the resizing
 	window.addEventListener("resize", () => repaint(angle));
+
+
 	function getSavedWheels() {
 		return JSON.parse(localStorage.getItem("savedWheels") || "{}");
 	}
-
 	function saveWheelsToStorage(wheels) {
 		localStorage.setItem("savedWheels", JSON.stringify(wheels));
 	}
-
 	function updateLoadDropdown() {
 		const loadSelect = document.getElementById("loadwheelsection");
 		loadSelect.innerHTML = "";
@@ -269,8 +254,6 @@ const wheelFontConfig = {
 			loadSelect.appendChild(option);
 		}
 	}
-
-
 	function updateRemoveDropdown() {
 		removeSelect.innerHTML = ""; // Clear current options
 		sections.forEach((section, index) => {

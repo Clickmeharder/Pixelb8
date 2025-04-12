@@ -57,44 +57,57 @@ Pixelb8-holotheme.css
   --twitchchat-opacity:1.0;
   --twitchmessage-opacity:0.85;
 }
+
+
 /* 🌙 DARK THEME */
 body.dark-theme {
-  --body-font: 'Orbitron', sans-serif;
+/*----------------------------------*/
+/*  BUBBLE BUTTS                    */
+  --pixelbutt-opacity: 0.5;
+  --pixelbutt-hover-opacity: 0.85;
+  --bubblebutt-opacity: 0.5;
+  --bubblebutt-hover-opacity: 0.85;
+/*----------------------------------*/
+/*  Main Body    */
   --body-color: #cddbe3;
   --body-bg-color: #0b0f14;
   --body-bg: linear-gradient(135deg, #0b0f14, #1a1f25);
   --body-opacity: 1;
-  --text-color: #b0c9d2;
-  --text-color-alt: #8fa8b5;
-  --h3-color: #00ccff;
-  --h2-color: #00aaff;
-  --question-color:var(--text-color-alt);
-  --default-muted: #6c7b89;
-  --bg-color: #1a1f25d4;
-  --bg-color-alt: #242c3400;
-  --bg-color-alt2: #1f2a33;
-  --bg-color-alt3: #1a252e;
-  --accent-color: #33eaff;
-  --accent-alt: #66ffff;
+/*----------------------------------*/
+/*  bg styles    */
+  --bg-color: #1a1f25d4;/*(main)*/
+  --bg-color-alt: #242c3400;/*(dark)*/ 
+  --bg-color-alt2: #1f2a33;/*(darker)*/
+  --bg-color-alt3: #1a252e;/*(idk)*/
+  --accent-color: #33eaff;/*(idk)*/
+  --accent-alt: #66ffff;/*(idk)*/
+/*----------------------------------*/
+  /*  Border Styles    */  
   --border-width: 2px;
   --border-style: solid;
   --border-color: #1e2021;
   --border: var(--border-width) var(--border-style) var(--border-color);
   --glow-color: rgb(0 0 0 / 30%);
   --shadow-color: rgb(31 37 37 / 70%);
-  /*  Wheel Styles    */
+/*----------------------------------*/
+  /*  Text Styles    */
+  --body-font: 'Orbitron', sans-serif;
+  --text-color: #b0c9d2;
+  --text-color-alt: #8fa8b5;
+  --h3-color: #00ccff;
+  --h2-color: #00aaff;
+  --default-muted: #6c7b89;
+/*----------------------------------*/
+  /*  Entrivia Styles    */  
+   --question-color:var(--text-color-alt);
+ /*----------------------------------*/
+  /*  Wheel Styles       */
   --wheel-color:var(--bg-color-alt2);
   --wheel-color2:var(--bg-color-alt3);
   --wheel-color3:var(--text-color);
   --wheel-text-color:var(--text-color);
   --wheel-font:var(--body-font);
-/*                 */
-  /* main Button Styles */
-/*   --bubblebutt-color: #12ebebf2; */
-  --pixelbutt-opacity: 0.5;
-  --pixelbutt-hover-opacity: 0.85;
-  --bubblebutt-opacity: 0.5;
-  --bubblebutt-hover-opacity: 0.85;
+/*----------------------------------*/
     /* regular Button Styles */
   --button-text-color: #656769;
   --button-bg-color: #151a1d;
@@ -108,7 +121,7 @@ body.dark-theme {
   --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
   --button-border-radius: 10px;
   --button-text-shadow: 1px 1px 4px rgb(26 27 27 / 89%);
-
+/*-------------------------------------------------------------------------*/
   /* Input Styles */
   --input-font-size: 16px;
   --input-font-weight: bold;
@@ -125,6 +138,13 @@ body.dark-theme {
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
   --input-border-radius: 6px;
   --select-margin: auto 12px 0 0;
+/*----------------------------------*/
+/* Custom Select Styles */
+/*----------------------------------*/
+
+/*----------------------------------*/
+/* end of theme                     */
+/*__________________________________*/
 }
 /* 🌞 LIGHT THEME (extra bright) */
 body.light-theme {
@@ -954,6 +974,7 @@ body.nineties-theme {
     --button-border-radius: 0;
     --button-text-shadow: none;
 	--button-outline: 2px inset var(--button-border-color);
+
     --input-font-size: 14px;
     --input-font-weight: normal;
     --input-text-align: left;
@@ -988,9 +1009,9 @@ body.poop-theme {
   --bg-color-alt: #4a3324;
   --bg-color-alt2: #2c1e16;
   --bg-color-alt3: #21160f;
-
   --accent-color: #c57b57;
   --accent-alt: #b26645;
+  
   --border-width: 2px;
   --border-style: solid;
   --border-color: #bfa48a;
