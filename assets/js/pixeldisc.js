@@ -34,6 +34,11 @@ const wheelFontConfig = {
   scaleFactor: 0.8
 };
 
+
+let highlightedIndex = null;
+let highlightStartTime = null;
+const HIGHLIGHT_DURATION = 1000; // 1 second glow
+
 function debugThemeStyles() {
 	styles = getComputedStyle(document.body);
 	color1 = styles.getPropertyValue('--wheel-color').trim();
@@ -236,6 +241,8 @@ function repaintWheel() {
 					let winningIndex = (Math.floor((-0.2 - angle) * sections.length / (2 * Math.PI)) % sections.length);
 					if (winningIndex < 0) winningIndex += sections.length;
 					let winningSection = sections[winningIndex];
+					highlightedIndex = winningIndex;
+					highlightStartTime = performance.now();
 					// 🔊 Log and/or display the winner
 					console.log("Winner:", winningSection);
 					const resultDisplay = document.getElementById("wheel-result");
