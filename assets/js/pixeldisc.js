@@ -20,6 +20,20 @@ let styles = getComputedStyle(document.body);
 	console.log('Current Body Class:', document.body.className);
 	// Use resolved values in your array
 	colors = [color1, color2];
+
+// Pointer Config
+const pointerLength = 1.4;//= 1.2;
+const pointerWidth = 0.10;//= 0.08;
+// Wheel configuration
+const wheelFontConfig = {
+  family: wheelFont || "Arial",
+  weight: "bold",
+  minSize: 11,
+  maxSize: 17,
+  scaleFactor: 0.7
+};
+
+
 function debugThemeStyles() {
 	styles = getComputedStyle(document.body);
 	color1 = styles.getPropertyValue('--wheel-color').trim();
@@ -59,18 +73,6 @@ function repaintWheel() {
 	frame = null;
 	repaint(angle);
 }
-// Pointer Config
-const pointerLength = 1.4;//= 1.2;
-const pointerWidth = 0.10;//= 0.08;
-// Wheel configuration
-const wheelFontConfig = {
-  family: wheelFont || "Arial",
-  weight: "bold",
-  minSize: 11,
-  maxSize: 17,
-  scaleFactor: 0.7
-};
-
 		function repaint(angle) {
 			const wrapper = document.getElementById("wheelcanvaswrapper");
 			const wrapperBounds = wrapper.getBoundingClientRect();
@@ -178,10 +180,8 @@ const wheelFontConfig = {
 			// Draw the outer frame (pointer and ring)
 			ctx.drawImage(frame, cx - frame.width / 2, cy - frame.height / 2);
 		}
-
 		// Spin function
 		let angle = 0, running = false;
-
 		function spinTo(winner, duration) {
 			let final_angle = (-0.2) - (0.5 + winner) * 2 * Math.PI / sections.length;
 			let start_angle = angle - Math.floor(angle / (2 * Math.PI)) * 2 * Math.PI - 5 * 2 * Math.PI;
@@ -211,21 +211,18 @@ const wheelFontConfig = {
 			requestAnimationFrame(frame);
 			running = true;
 		}
-
 		function spinWheel() {
 				if (!running) {
 				spinTo(Math.random() * sections.length | 0, 5000);
 			}
 		}
 
-		// Bind the spin to mouse click
-		canvas.onmousedown = function() {
-			spinWheel();
-		};
-
-
+// Bind the spin to mouse click
+canvas.onmousedown = function() {
+	spinWheel();
+};
 //comment this function out if you want to stop the resizing
-	window.addEventListener("resize", () => repaint(angle));
+window.addEventListener("resize", () => repaint(angle));
 
 
 	function getSavedWheels() {
