@@ -150,15 +150,44 @@ function repaintWheel() {
 				ctx.arc(frameCx, frameCy, r / 6, 0, 2 * Math.PI, false);//was 4
 				ctx.fill();
 				ctx.stroke();
-				//
-				ctx.translate(frameCx, frameCy);
+				// Draw The Pointer
+/* 				ctx.translate(frameCx, frameCy);
 				ctx.rotate(Math.PI - 0.2);
 				ctx.beginPath();
 				ctx.moveTo(-r * pointerLength, -r * pointerWidth);
 				ctx.lineTo(-r * 0.85, 0);
 				ctx.lineTo(-r * pointerLength, r * pointerWidth);
 				ctx.fillStyle = "#f00";//"var(--button-bg-color)";//"#f00";
+				ctx.fill(); */
+				// Draw The Pointer
+				ctx.save(); // Save before translate/rotate
+				ctx.translate(frameCx, frameCy);
+				ctx.rotate(Math.PI - 0.2);
+
+				// Draw Pointer Shape
+				ctx.beginPath();
+				ctx.moveTo(-r * pointerLength, -r * pointerWidth);
+				ctx.lineTo(-r * 0.85, 0);
+				ctx.lineTo(-r * pointerLength, r * pointerWidth);
+				ctx.closePath();
+
+				// Outset Border Style
+				ctx.shadowOffsetX = 2;
+				ctx.shadowOffsetY = 2;
+				ctx.shadowBlur = 4;
+				ctx.shadowColor = "rgba(0, 0, 0, 0.4)"; // Subtle dark drop shadow
+
+				// Fill (main color)
+				ctx.fillStyle = "#f00";
 				ctx.fill();
+
+				// Stroke (brighter edge on top-left for "light" side)
+				ctx.shadowColor = "transparent"; // Disable shadow for stroke
+				ctx.lineWidth = 2;
+				ctx.strokeStyle = "#ffaaaa"; // Light edge, like it's catching light
+				ctx.stroke();
+
+				ctx.restore(); // Always restore after transforming
 			}
 
 			// Set the canvas size to match the wrapper
