@@ -24,15 +24,19 @@ let styles = getComputedStyle(document.body);
 // Pointer Config
 const pointerLength = 1.4;//= 1.2;
 const pointerWidth = 0.10;//= 0.08;
+let pointerColor = "#f00"; 
 // Wheel configuration
-const wheelFontConfig = {
+const wheelConfig = {
   family: wheelFont || "Arial",
   weight: "bold",
   minSize: 11,
   maxSize: 17,
   scaleFactor: 0.7
 };
-
+const pointerConfig = {
+	color:;
+	
+}
 
 function debugThemeStyles() {
 	styles = getComputedStyle(document.body);
@@ -117,7 +121,7 @@ function repaintWheel() {
 						);
 						ctx.save();
 						ctx.fillStyle = wheelTextColor;//"var(--text-color-alt)";//"#ff8900f5"
-						ctx.font = `${wheelFontConfig.weight} ${fontSize}px ${wheelFontConfig.family}`;
+						ctx.font = `${wheelConfig.weight} ${fontSize}px ${wheelConfig.family}`;
 						ctx.textAlign = "center";//maybe try start it was on center
 						ctx.textBaseline = "middle";
 						ctx.translate(r, r);
@@ -150,15 +154,8 @@ function repaintWheel() {
 				ctx.arc(frameCx, frameCy, r / 6, 0, 2 * Math.PI, false);//was 4
 				ctx.fill();
 				ctx.stroke();
-				// Draw The Pointer
-/* 				ctx.translate(frameCx, frameCy);
-				ctx.rotate(Math.PI - 0.2);
-				ctx.beginPath();
-				ctx.moveTo(-r * pointerLength, -r * pointerWidth);
-				ctx.lineTo(-r * 0.85, 0);
-				ctx.lineTo(-r * pointerLength, r * pointerWidth);
-				ctx.fillStyle = "#f00";//"var(--button-bg-color)";//"#f00";
-				ctx.fill(); */
+
+				// -----------------
 				// Draw The Pointer
 				ctx.save(); // Save before translate/rotate
 				ctx.translate(frameCx, frameCy);
@@ -178,13 +175,13 @@ function repaintWheel() {
 				ctx.shadowColor = "rgba(0, 0, 0, 0.4)"; // Subtle dark drop shadow
 
 				// Fill (main color)
-				ctx.fillStyle = "#f00";
+				ctx.fillStyle = pointerColor;
 				ctx.fill();
 
 				// Stroke (brighter edge on top-left for "light" side)
 				ctx.shadowColor = "transparent"; // Disable shadow for stroke
 				ctx.lineWidth = 2;
-				ctx.strokeStyle = "#ffaaaa"; // Light edge, like it's catching light
+				ctx.strokeStyle = borderColor;//"#ffaaaa"; // Light edge, like it's catching light
 				ctx.stroke();
 
 				ctx.restore(); // Always restore after transforming
