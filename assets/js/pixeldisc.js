@@ -54,8 +54,8 @@ function debugThemeStyles() {
 }
 
 // Pointer Config
-const pointerLength = 1.2;
-const pointerWidth = 0.08;
+const pointerLength = 1.4;//= 1.2;
+const pointerWidth = 0.10;//= 0.08;
 // Wheel configuration
 const wheelFontConfig = {
   family: wheelFont || "Arial",
