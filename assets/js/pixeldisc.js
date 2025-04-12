@@ -252,61 +252,61 @@ function repaintWheel() {
 		ctx.drawImage(frame, cx - frame.width / 2, cy - frame.height / 2);
 		}
 
-		// Spin function
-let angle = 0, running = false;
+				// Spin function
+		let angle = 0, running = false;
 
-function spinTo(winner, duration, extraSpins = 5) {
-	const sectionAngle = 2 * Math.PI / sections.length;
+		function spinTo(winner, duration, extraSpins = 5) {
+			const sectionAngle = 2 * Math.PI / sections.length;
 
-	// Randomize spin count a bit: 4–6 extra full rotations
-	const randomSpins = extraSpins + Math.floor(Math.random() * 3); // 5–7 total
+			// Randomize spin count a bit: 4–6 extra full rotations
+			const randomSpins = extraSpins + Math.floor(Math.random() * 3); // 5–7 total
 
-	let final_angle = (-0.2) - (0.5 + winner) * sectionAngle - randomSpins * 2 * Math.PI;
-	let start_angle = angle - Math.floor(angle / (2 * Math.PI)) * 2 * Math.PI;
-	let start = performance.now();
+			let final_angle = (-0.2) - (0.5 + winner) * sectionAngle - randomSpins * 2 * Math.PI;
+			let start_angle = angle - Math.floor(angle / (2 * Math.PI)) * 2 * Math.PI;
+			let start = performance.now();
 
-	function frame() {
-		let now = performance.now();
-		let t = Math.min(1, (now - start) / duration);
+			function frame() {
+				let now = performance.now();
+				let t = Math.min(1, (now - start) / duration);
 
-		// Smooth in/out easing
-		t = 3 * t * t - 2 * t * t * t;
+				// Smooth in/out easing
+				t = 3 * t * t - 2 * t * t * t;
 
-		angle = start_angle + t * (final_angle - start_angle);
-		repaint(angle);
+				angle = start_angle + t * (final_angle - start_angle);
+				repaint(angle);
 
-		if (t < 1) {
+				if (t < 1) {
+					requestAnimationFrame(frame);
+				} else {
+					running = false;
+
+					// 🏆 Determine the winning section
+					let winningIndex = Math.floor(((-0.2 - angle) % (2 * Math.PI)) * sections.length / (2 * Math.PI));
+					if (winningIndex < 0) winningIndex += sections.length;
+					let winningSection = sections[winningIndex];
+					highlightedIndex = winningIndex;
+					highlightStartTime = performance.now();
+					repaint(angle);
+
+					console.log("Winner:", winningSection);
+					const resultDisplay = document.getElementById("wheel-result");
+					if (resultDisplay) {
+						resultDisplay.textContent = `${winningSection}`;
+					}
+				}
+			}
+
 			requestAnimationFrame(frame);
-		} else {
-			running = false;
+			running = true;
+		}
 
-			// 🏆 Determine the winning section
-			let winningIndex = Math.floor(((-0.2 - angle) % (2 * Math.PI)) * sections.length / (2 * Math.PI));
-			if (winningIndex < 0) winningIndex += sections.length;
-			let winningSection = sections[winningIndex];
-			highlightedIndex = winningIndex;
-			highlightStartTime = performance.now();
-			repaint(angle);
-
-			console.log("Winner:", winningSection);
-			const resultDisplay = document.getElementById("wheel-result");
-			if (resultDisplay) {
-				resultDisplay.textContent = `${winningSection}`;
+		function spinWheel() {
+			if (!running) {
+				const randomWinner = Math.floor(Math.random() * sections.length);
+				const randomDuration = 5000 + Math.random() * 10000; // 3–6 seconds
+				spinTo(randomWinner, randomDuration);
 			}
 		}
-	}
-
-	requestAnimationFrame(frame);
-	running = true;
-}
-
-function spinWheel() {
-	if (!running) {
-		const randomWinner = Math.floor(Math.random() * sections.length);
-		const randomDuration = 3000 + Math.random() * 3000; // 3–6 seconds
-		spinTo(randomWinner, randomDuration);
-	}
-}
 // Bind the spin to mouse click
 canvas.onmousedown = function() {
 	spinWheel();
