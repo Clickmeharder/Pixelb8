@@ -641,6 +641,7 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 		document.querySelectorAll('.toggle-toggle').forEach(button => {
 		  const targetId = button.dataset.target;
 		  const animation = button.dataset.animation || "fade";
+		  
 		  button.addEventListener("click", () => {
 			const isVisible = toggleElement(targetId, animation);
 			button.innerHTML = isVisible
@@ -648,7 +649,6 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 			  : '<i class="fas fa-eye"></i> Show';
 		  });
 		});
-
 		const showthemeExamplesSwitch = document.getElementById("showthemeExamples");
 		const examplemessagebox = document.getElementById("exampleMessagebox");
 		const examplepanelwrapper = document.getElementById("examplepanelwrapper");
