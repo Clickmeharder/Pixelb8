@@ -877,7 +877,7 @@ body.business-theme {
   --border-style: solid;
   --border-color: #3c4453;
   --border: var(--border-width) var(--border-style) var(--border-color);
-  --glow-color: rgb(23 28 71 / 75%);
+  --glow-color: transparent;
   --shadow-color: rgba(0, 0, 0, 0.2);
 /*  Wheel Styles    */
   --wheel-color:var(--bg-color);
