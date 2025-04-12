@@ -106,11 +106,11 @@ const wheelFontConfig = {
 						ctx.save();
 						ctx.fillStyle = wheelTextColor;//"var(--text-color-alt)";//"#ff8900f5"
 						ctx.font = `${wheelFontConfig.weight} ${fontSize}px ${wheelFontConfig.family}`;
-						ctx.textAlign = "center";
-						ctx.textBaseline = "left";
+						ctx.textAlign = "left";//maybe try start it was on center
+						ctx.textBaseline = "middle";
 						ctx.translate(r, r);
 						ctx.rotate(a);
-						ctx.fillText(sections[i], r * 0.62, 0);
+						ctx.fillText(sections[i], r * 0.60, 0);
 						ctx.restore();
 					}
 					wheels.push(wheelCanvas);
