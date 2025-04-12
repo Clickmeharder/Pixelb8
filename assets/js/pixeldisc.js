@@ -170,7 +170,7 @@ function repaintWheel() {
 				ctx.shadowColor = "rgba(0, 0, 0, 0.4)"; // Subtle dark drop shadow
 
 				// Fill (main color)
-				ctx.fillStyle = pointerColor;
+				ctx.fillStyle = wheelTextColor;
 				ctx.fill();
 
 				// Stroke (brighter edge on top-left for "light" side)
