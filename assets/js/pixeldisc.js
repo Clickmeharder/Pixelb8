@@ -26,7 +26,7 @@ const pointerLength = 1.4;//= 1.2;
 const pointerWidth = 0.10;//= 0.08;
 let pointerColor = "#f00";
 // Wheel configuration
-const wheelConfig = {
+const wheelFontConfig = {
   family: wheelFont || "Arial",
   weight: "bold",
   minSize: 11,
@@ -116,7 +116,7 @@ function repaintWheel() {
 						);
 						ctx.save();
 						ctx.fillStyle = wheelTextColor;//"var(--text-color-alt)";//"#ff8900f5"
-						ctx.font = `${wheelConfig.weight} ${fontSize}px ${wheelConfig.family}`;
+						ctx.font = `${wheelFontConfig.weight} ${fontSize}px ${wheelFontConfig.family}`;
 						ctx.textAlign = "center";//maybe try start it was on center
 						ctx.textBaseline = "middle";
 						ctx.translate(r, r);
