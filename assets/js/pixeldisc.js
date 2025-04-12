@@ -56,9 +56,9 @@ function debugThemeStyles() {
 const wheelFontConfig = {
   family: wheelFont || "Arial",
   weight: "bold",
-  minSize: 12,
+  minSize: 11,
   maxSize: 17,
-  scaleFactor: 0.8
+  scaleFactor: 0.7
 };
 
 		function repaint(angle) {
