@@ -21,6 +21,8 @@ const addInput = document.getElementById("addwheelsection");
 const addButton = document.getElementById("wheel-addsectionButt");
 const removeButton = document.getElementById("wheel-removesectionButt");
 const lever = document.getElementById("discRotationLever");
+const leverWrapper = document.getElementById("discRotationLeverWrapper");
+
 const wrapper = document.getElementById("wheelcanvaswrapper");
 let styles = getComputedStyle(document.body);
 	color1 = styles.getPropertyValue('--wheel-color').trim();
@@ -485,20 +487,16 @@ window.addEventListener("resize", () => repaint(angle));
 		deletewheelSections();
 	});
 function updateLeverVisibility() {
-
-  
-  if (!lever || !wrapper) return;
-
+  if (!leverWrapper || !wrapper) return;
   const mode = userPixeldiscConfig.enableLever;
-
   if (mode === "off") {
-    lever.style.display = "none";
+    leverWrapper.style.display = "none";
   } else if (mode === "always") {
-    lever.style.display = "block";
+    leverWrapper.style.display = "block";
   } else if (mode === "on") {
     // Show only if wrapper is visible
     const wrapperVisible = wrapper.offsetParent !== null;
-    lever.style.display = wrapperVisible ? "block" : "none";
+    leverWrapper.style.display = wrapperVisible ? "block" : "none";
   }
 }
 function pullDiscRotationLever() {
