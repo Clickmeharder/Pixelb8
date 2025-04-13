@@ -254,24 +254,7 @@ function rand(min, max) {
         canvas.style.display = canvas.style.display === 'none' ? 'block' : 'none';
     });
 
-    // Close (minimize) controller
-    document.querySelector('.close-btn').addEventListener('click', () => {
-        const panel = document.getElementById('pixelpen-controller');
-        panel.style.display = 'none';
-
-        const reopenBtn = document.createElement('button');
-        reopenBtn.innerText = '🎨 Open PixelPen';
-        reopenBtn.style.position = 'fixed';
-        reopenBtn.style.bottom = '10px';
-        reopenBtn.style.right = '10px';
-        reopenBtn.style.zIndex = 9999;
-        reopenBtn.onclick = () => {
-            panel.style.display = 'block';
-            reopenBtn.remove();
-        };
-        document.body.appendChild(reopenBtn);
-    });
-
+ 
     // Initialize canvas
     setCanvasSize();
     restoreDrawing();
