@@ -465,6 +465,7 @@ window.addEventListener("resize", () => repaint(angle));
 	  if (running) return;
 
 	  lever.classList.add("pull");
+	  showElement(wheelcanvaswrapper, "fade");
 	  spinWheel();
 
 	  setTimeout(() => {

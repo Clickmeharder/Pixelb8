@@ -36,7 +36,7 @@
   perspective: 800px;
 }
 
-.discRotationLever {
+.lever {
   position: absolute;
   left: 50%;
   bottom: 0;
@@ -46,7 +46,7 @@
   cursor: pointer;
 }
 
-.discRotationLever.pull {
+.lever.pull {
   transform: translateX(-50%) translateY(-5%) rotateX(-110deg); /* Pull forward without shifting horizontally */
 
 }
@@ -64,7 +64,7 @@
 }
 
 /* Move shadow left and darken when lever is pulled */
-.discRotationLever.pull .lever-stick {
+.lever.pull .lever-stick {
   height: 130px;
   box-shadow: -2px 0px 30px rgba(0, 0, 0, 0.9), inset -2px -2px 6px rgba(0, 0, 0, 0.6); /* Shadow moves left and darkens */
 }
@@ -86,7 +86,7 @@
 }
 
 /* Move shadow left and darken when lever is pulled */
-.discRotationLever.pull .lever-knob {
+.lever.pull .lever-knob {
   height: 44px;
   width:44px;
   box-shadow:
