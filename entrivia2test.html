@@ -803,21 +803,35 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 				}
 			});
 		}
-		function updateStatusIndicator(indicatorId, value) {
-			const indicator = document.getElementById(indicatorId);
-			if (!indicator) return;
+		function updateAllStatusIndicators(configObject) {
+		  const indicators = document.querySelectorAll(".status-indicator");
 
-			indicator.classList.remove("status-on", "status-off", "status-always");
+		  indicators.forEach(indicator => {
+			const variable = indicator.dataset.statusVariable;
+			const value = configObject[variable];
 
+			// Remove all known status classes first
+			indicator.classList.remove("status-on", "status-off", "status-always", "status-unknown");
+
+			// Default fallback style
+			let label = "—";
 			if (value === "on") {
-			indicator.classList.add("status-on");
+			  indicator.classList.add("status-on");
+			  label = "ON";
 			} else if (value === "always") {
-			indicator.classList.add("status-always");
+			  indicator.classList.add("status-always");
+			  label = "ALWAYS";
 			} else if (value === "off") {
-			indicator.classList.add("status-off");
+			  indicator.classList.add("status-off");
+			  label = "OFF";
 			} else {
-			indicator.style.backgroundColor = "gray";
+			  indicator.classList.add("status-unknown");
+			  label = value ?? "UNKNOWN";
 			}
+
+			// Optional: Set text inside the indicator
+			indicator.textContent = label;
+		  });
 		}
 		<!-- main button event listeners -->
 		//enentrivia-toggle button

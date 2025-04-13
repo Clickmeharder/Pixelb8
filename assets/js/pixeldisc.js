@@ -1,10 +1,15 @@
 
 
 const userPixeldiscConfig = {
-  enableLever: "on", // Options: "on", "always", "off"
-  autoFade: true,    // Toggle for auto fade
+  enableLever: "on",    // can be "on", "always", or "off"
+  autoFade: "off"       // can be "on" or "off"
   autoFadeTime: 5000 // Time in ms
 };
+const toggleOptions = {
+  enableLever: ["on", "always", "off"],
+  autoFade: ["on", "off"]
+};  // Toggle for auto fade
+
 
 let canvas = document.getElementById("canvas1");
 let sections = ["FREE Beer Keg", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "nothing"];
@@ -481,11 +486,14 @@ document.getElementById("fadeTimeInput").value = userPixeldiscConfig.autoFadeTim
 document.getElementById("leverToggle").addEventListener("change", (e) => {
   userPixeldiscConfig.enableLever = e.target.value;
   updateLeverVisibility();
+  updateAllStatusIndicators(userPixeldiscConfig);
 });
 
 document.getElementById("autoFadeToggle").addEventListener("change", (e) => {
-  userPixeldiscConfig.autoFade = e.target.checked;
+  userPixeldiscConfig.autoFade = e.target.checked ? "on" : "off";
+  updateAllStatusIndicators(userPixeldiscConfig);
 });
+
 
 document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
   userPixeldiscConfig.autoFadeTime = parseInt(e.target.value, 10) || 0;
