@@ -596,17 +596,6 @@ function pullDiscRotationLever() {
 }
 
 
-ComfyJS.onCommand = (user, command, message, flags, extra) => {
-	console.log( "User:", user, "command:", command,);
-	displayConsoleMessage(user, `!${command}`);
-    if (command.toLowerCase() === "pull-lever") {
-        if (!isStreamerAndAuthorize(user, command)) return;
-        displayConsoleMessage(user, `!${command} ✅`);
-		showWheel();
-        pullDiscRotationLever();
-    }
-};
-
 	document.getElementById("discRotationButton").addEventListener("click", () => {
 		console.log(`Wheel done gonna spun!`);
 		showElement(wheelcanvaswrapper, "fade");
