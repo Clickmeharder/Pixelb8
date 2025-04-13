@@ -77,14 +77,85 @@ function initPixelPen() {
             img.src = saved;
         }
     }
+let autoDoodleOn = false;
+let doodleInterval = null;
+let doodleVibe = 'chill';
 
+document.getElementById('doodleVibe').addEventListener('change', (e) => {
+    doodleVibe = e.target.value;
+});
+
+document.getElementById('autoDoodle').addEventListener('click', () => {
+    autoDoodleOn = !autoDoodleOn;
+
+    if (autoDoodleOn) {
+        startDoodle();
+    } else {
+        stopDoodle();
+    }
+});
+
+function startDoodle() {
+    doodleInterval = setInterval(() => {
+        switch (doodleVibe) {
+            case 'chill':
+                drawChill();
+                break;
+            case 'chaotic':
+                drawChaotic();
+                break;
+        }
+        saveDrawing(); // Optional: keep it persistent
+    }, 200);
+}
+
+function stopDoodle() {
+    clearInterval(doodleInterval);
+}
+
+// 🎵 Chill: soft wavy lines
+function drawChill() {
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+    const radius = Math.random() * 20 + 10;
+
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${rand(100,200)}, ${rand(150,255)}, ${rand(200,255)}, 0.2)`;
+    ctx.fill();
+}
+
+// 🔥 Chaotic: fast lines with intense colors
+function drawChaotic() {
+    const startX = Math.random() * canvas.width;
+    const startY = Math.random() * canvas.height;
+    const endX = startX + rand(-100, 100);
+    const endY = startY + rand(-100, 100);
+
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.strokeStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+    ctx.lineWidth = rand(5, 15);
+    ctx.stroke();
+}
+
+// Utility random
+function rand(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+}
     // ===== UI CONTROLS =====
     const controls = document.getElementById('main-settings-controls');
 	controls.innerHTML = `
+		<select id="doodleVibe">
+			<option value="chill">🎵 Chill</option>
+			<option value="chaotic">🔥 Chaotic</option>
+		</select>
+		<button id="autoDoodle">🧠 Auto Doodle</button>
 		<label>Brush Size:
 			<input type="range" min="1" max="50" value="${lineWidth}" id="brushSize">
 		</label><br>
-
+		
 		<label>Brush Type:
 			<select id="brushType">
 				<option value="round">🖊️ Round</option>
