@@ -39,6 +39,11 @@ let highlightedIndex = null;
 let highlightStartTime = null;
 const HIGHLIGHT_DURATION = 5000; // 1 second glow
 
+// Easing function: easeOutQuad (starts fast, slows down)
+function easeOutQuad(t) {
+	return t * (2 - t);
+}
+
 function debugThemeStyles() {
 	styles = getComputedStyle(document.body);
 	color1 = styles.getPropertyValue('--wheel-color').trim();
@@ -218,12 +223,16 @@ function repaintWheel() {
 			ctx.drawImage(wheels[selected], 0, 0);
 			ctx.restore();
 
-
 						// Highlight/WIN Glow
+			// Highlight/WIN Glow with Pulse
 			if (highlightedIndex !== null && highlightStartTime !== null) {
 				const elapsed = performance.now() - highlightStartTime;
 				if (elapsed < HIGHLIGHT_DURATION) {
-					const opacity = 1 - (elapsed / HIGHLIGHT_DURATION); // fade out
+					const t = elapsed / HIGHLIGHT_DURATION; // Normalize to 0–1
+					const eased = easeOutQuad(1 - t); // Reverse easing for fade-out with pulse
+					const opacity = eased * 0.3;
+					const blur = eased * 30; // More dramatic pulse blur at the start
+
 					ctx.save();
 					ctx.translate(cx, cy);
 					ctx.rotate(angle);
@@ -236,16 +245,16 @@ function repaintWheel() {
 					ctx.arc(0, 0, r, a0, a1);
 					ctx.closePath();
 
-					ctx.fillStyle = `rgba(0, 255, 0, ${opacity * 0.3})`; // Yellow glow
-					ctx.shadowColor = `rgba(0, 255, 0, ${opacity})`;
-					ctx.shadowBlur = 20;
+					ctx.fillStyle = `rgba(0, 255, 0, ${opacity})`; // Pulsing glow
+					ctx.shadowColor = `rgba(0, 255, 0, ${opacity * 3})`;
+					ctx.shadowBlur = blur;
 					ctx.fill();
 
 					ctx.restore();
 
-					requestAnimationFrame(() => repaint(angle)); // animate fade-out
+					requestAnimationFrame(() => repaint(angle)); // continue animation
 				} else {
-					highlightedIndex = null; // reset after done
+					highlightedIndex = null; // end of animation
 				}
 			}
 					// Draw the outer frame (pointer and ring)
