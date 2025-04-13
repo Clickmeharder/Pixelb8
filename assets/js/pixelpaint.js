@@ -26,16 +26,14 @@ function initPixelPen() {
         saveDrawing();
     }
 
-    function draw(e) {
-        if (!painting) return;
+	function draw(e) {
+		if (!painting || !isDrawing) return;
 
 		ctx.lineWidth = lineWidth;
 		ctx.lineCap = 'round';
 
-		if (isEraser) {
-			ctx.globalCompositeOperation = 'destination-out';
-		} else {
-			ctx.globalCompositeOperation = 'source-over';
+		ctx.globalCompositeOperation = isEraser ? 'destination-out' : 'source-over';
+		if (!isEraser) {
 			ctx.strokeStyle = color;
 		}
 
@@ -99,9 +97,11 @@ function initPixelPen() {
         isDrawing = !isDrawing;
     });
 
-    document.getElementById('eraser').addEventListener('click', () => {
-        isEraser = !isEraser;
-    });
+	const eraserBtn = document.getElementById('eraser');
+	eraserBtn.addEventListener('click', () => {
+		isEraser = !isEraser;
+		eraserBtn.classList.toggle('active', isEraser); // Optional styling
+	});
 
     document.getElementById('fill').addEventListener('click', () => {
         ctx.globalCompositeOperation = 'source-over';
