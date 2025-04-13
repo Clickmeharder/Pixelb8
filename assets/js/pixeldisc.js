@@ -526,7 +526,7 @@ function pullDiscRotationLever() {
 // Initial values from the config
 document.getElementById("discRotationLeverToggle").value = userPixeldiscConfig.enableLever;
 document.getElementById("autoFadeToggle").checked = userPixeldiscConfig.autoFade === "on";  // Checking if it's "on"
-document.getElementById("fadeTimeInput").value = userPixeldiscConfig.autoFadeTime;
+document.getElementById("fadeTimeInput").value = userPixeldiscConfig.autoFadeTime / 1000;
 
 // Event listeners to update config and status indicators
 document.getElementById("discRotationLeverToggle").addEventListener("change", (e) => {
