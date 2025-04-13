@@ -1714,6 +1714,17 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		showWheel();
         pullDiscRotationLever();
     }
+
+    if (command.toLowerCase() === "launch") {
+        if (!isStreamerAndAuthorize(user, command)) return;
+        displayConsoleMessage(user, `!${command} ✅`);
+        spawnChatterShip(user);
+    }
+    if (command.toLowerCase() === "launch-sat") {
+        if (!isStreamerAndAuthorize(user, command)) return;
+        displayConsoleMessage(user, `!${command} ✅`);
+        spawnSatellite(user);
+    }
 	if (command === "a" || command === "answer") {
 		if (!activeQuestion) {
 			console.log("No active question. activeQuestion returns as:" + activeQuestion );
