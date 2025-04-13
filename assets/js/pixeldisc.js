@@ -554,6 +554,7 @@ document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
 	  	// Initialize dropdown when page loads
 		updateRemoveDropdown();
 		updateLoadDropdown();
+		loadPixelDiscConfig();
 		updateAllStatusIndicators(userPixeldiscConfig);
 	});
 /* localStorage.removeItem("pixelDiscConfig"); */
