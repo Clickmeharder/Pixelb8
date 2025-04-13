@@ -12,13 +12,13 @@ const sliders = [
   { id: "wheelResultY", unit: "%", variable: "--wheelResult-Y", min: 0, max: 100 },
   { id: "wheelResultX", unit: "%", variable: "--wheelResult-X", min: 0, max: 100 },
   { id: "wheelLeverY", unit: "%", variable: "--wheelLever-Y", min: 0, max: 100 },
-  { id: "wheelLeverX", unit: "%", variable: "--wheelLever-X", min: 0, max: 100 },
+  { id: "wheelLeverX", unit: "%", variable: "--wheelLever-X", min: 0, max: 100 }
 ];
 const wheelSliders = [
   { id: "wheelY", unit: "%", variable: "--wheel-Y", min: 0, max: 66 },
   { id: "wheelX", unit: "%", variable: "--wheel-X", min: 0, max: 90 },
   { id: "wheelResultY", unit: "%", variable: "--wheelResult-Y", min: 0, max: 100 },
-  { id: "wheelResultX", unit: "%", variable: "--wheelResult-X", min: 0, max: 100 },
+  { id: "wheelResultX", unit: "%", variable: "--wheelResult-X", min: 0, max: 100 }
 ];
 // Slider handling
 sliders.forEach(({ id, unit, variable, min, max }) => {
