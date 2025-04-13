@@ -480,20 +480,23 @@ function updateLeverVisibility() {
   }
 }
 
+// Initial values from the config
 document.getElementById("discleverToggle").value = userPixeldiscConfig.enableLever;
-document.getElementById("autoFadeToggle").checked = userPixeldiscConfig.autoFade;
+document.getElementById("autoFadeToggle").checked = userPixeldiscConfig.autoFade === "on";  // Checking if it's "on"
 document.getElementById("fadeTimeInput").value = userPixeldiscConfig.autoFadeTime;
 
-document.getElementById("leverToggle").addEventListener("change", (e) => {
-  userPixeldiscConfig.enableLever = e.target.value;
-  updateLeverVisibility();
-  updateAllStatusIndicators(userPixeldiscConfig);
+// Event listeners to update config and status indicators
+document.getElementById("discleverToggle").addEventListener("change", (e) => {
+  userPixeldiscConfig.enableLever = e.target.value;  // Will be "on", "always", or "off"
+  updateLeverVisibility();  // Update visibility of lever
+  updateAllStatusIndicators(userPixeldiscConfig);  // Update status indicators
 });
 
 document.getElementById("autoFadeToggle").addEventListener("change", (e) => {
-  userPixeldiscConfig.autoFade = e.target.checked ? "on" : "off";
-  updateAllStatusIndicators(userPixeldiscConfig);
+  userPixeldiscConfig.autoFade = e.target.checked ? "on" : "off";  // Set to "on" or "off"
+  updateAllStatusIndicators(userPixeldiscConfig);  // Update status indicators
 });
+
 
 
 document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
