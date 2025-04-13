@@ -348,150 +348,22 @@ class Ship {
   }
 }
 
-// --- Ship Functions ---
-function moveShip(ship) {
-  if (keysPressed[ship.keys.left]) ship.angle -= 0.05;
-  if (keysPressed[ship.keys.right]) ship.angle += 0.05;
-  if (keysPressed[ship.keys.thrust]) {
-    ship.x += Math.cos(ship.angle) * 2;
-    ship.y += Math.sin(ship.angle) * 2;
-  }
-  if (ship.x < 0) ship.x = canvas.width;
-  if (ship.x > canvas.width) ship.x = 0;
-  if (ship.y < 0) ship.y = canvas.height;
-  if (ship.y > canvas.height) ship.y = canvas.height;
-}
-
-function shootBullet(ship) {
-  if (ship.player === "player1") {
-    if (ship.equipment && (ship.equipment[0] !== null || ship.equipment[1] !== null)) {
-      let shotFired = false;
-      for (let i = 0; i < ship.equipment.length; i++) {
-        let gen = ship.equipment[i];
-        if (gen && gen.ammo > 0) {
-          gen.ammo--;
-          shotFired = true;
-          break;
-        }
-      }
-      if (!shotFired) return;
-    }
-  }
-  ship.bullets.push({ x: ship.x, y: ship.y, angle: ship.angle, speed: 5 });
-}
-
-function checkShipCollision(ship) {
-  ship.bullets.forEach((bullet, bIndex) => {
-    asteroids.forEach((asteroid, aIndex) => {
-      if (Math.hypot(bullet.x - asteroid.x, bullet.y - asteroid.y) < asteroid.size) {
-        let rand = Math.random();
-        let resourceType;
-        if (rand < 0.7) resourceType = "common";
-        else if (rand < 0.9) resourceType = "lessCommon";
-        else resourceType = "uncommon";
-        ship.resources[resourceType] += 1;
-        updateResourceDisplays();
-        ship.bullets.splice(bIndex, 1);
-        asteroids.splice(aIndex, 1);
-        if (asteroid.size > 15) {
-          asteroids.push(new Asteroid(asteroid.x, asteroid.y, asteroid.size / 2));
-          asteroids.push(new Asteroid(asteroid.x, asteroid.y, asteroid.size / 2));
-        }
-      }
-    });
-  });
-}
-
-function drawShip(ship) {
-  if (!ship.alive) return;
-  ctx.save();
-  ctx.translate(ship.x, ship.y);
-  ctx.rotate(ship.angle);
-  ctx.beginPath();
-  ctx.moveTo(10, 0);
-  ctx.lineTo(-10, 7);
-  ctx.lineTo(-5, 0);
-  ctx.lineTo(-10, -7);
-  ctx.closePath();
-  ctx.strokeStyle = ship.color;
-  ctx.stroke();
-  ctx.restore();
-  ship.bullets.forEach((bullet, index) => {
-    bullet.x += Math.cos(bullet.angle) * bullet.speed;
-    bullet.y += Math.sin(bullet.angle) * bullet.speed;
-    ctx.fillStyle = "white";
-    ctx.fillRect(bullet.x, bullet.y, 3, 3);
-    if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
-      ship.bullets.splice(index, 1);
-    }
-  });
-}
-
-	function checkCollisions() {
-	  // Check for asteroid-asteroid collisions
-	  for (let i = 0; i < asteroids.length; i++) {
-		for (let j = i + 1; j < asteroids.length; j++) {
-		  let a1 = asteroids[i];
-		  let a2 = asteroids[j];
-		  let dx = a1.x - a2.x;
-		  let dy = a1.y - a2.y;
-		  let distance = Math.hypot(dx, dy);
-		  let minDistance = a1.size + a2.size;
-
-		  if (distance < minDistance) {
-			// Simple elastic collision response
-			let angle = Math.atan2(dy, dx);
-			let speed1 = Math.hypot(a1.speedX, a1.speedY);
-			let speed2 = Math.hypot(a2.speedX, a2.speedY);
-			let dir1 = Math.atan2(a1.speedY, a1.speedX);
-			let dir2 = Math.atan2(a2.speedY, a2.speedX);
-
-			// Swap speeds along the collision direction
-			a1.speedX = speed2 * Math.cos(angle);
-			a1.speedY = speed2 * Math.sin(angle);
-			a2.speedX = speed1 * Math.cos(angle + Math.PI);
-			a2.speedY = speed1 * Math.sin(angle + Math.PI);
-		  }
-		}
-	  }
-
-	  // Check for asteroid-drone collisions
-	  for (let i = 0; i < asteroids.length; i++) {
-		let asteroid = asteroids[i];
-		if (player1.deployedResearchDrone) {
-		  let drone = player1.deployedResearchDrone;
-		  let dx = asteroid.x - drone.x;
-		  let dy = asteroid.y - drone.y;
-		  let distance = Math.hypot(dx, dy);
-		  let minDistance = asteroid.size + 10; // Drone radius is 10
-
-		  if (distance < minDistance) {
-			console.log("Drone destroyed!");
-			player1.deployedResearchDrone = null; // Remove drone
-		  }
-		}
-	  }
-	}
-
-    // --- Global Variables & Key Handling ---
-    let asteroids = [];
-    const keysPressed = {};
-    window.addEventListener("keydown", (e) => {
-      keysPressed[e.key.toLowerCase()] = true;
-      if (e.key === " " && player1.alive) player1.shoot();
-    });
-    window.addEventListener("keyup", (e) => {
-      keysPressed[e.key.toLowerCase()] = false;
-    });
-
-    // Create player1
-    const player1 = new Ship(200, 300, "red", { left: "a", right: "d", thrust: "w" }, "player1");
-
-    // Initialize asteroids
-    for (let i = 0; i < 5; i++) {
-      asteroids.push(new Asteroid(Math.random() * canvas.width, Math.random() * canvas.height, 40));
+ComfyJS.onCommand = (user, command, message, flags, extra) => {
+    console.log("User:", user, "command:", command);
+    displayConsoleMessage(user, `!${command}`);
+    
+    // Store user color from extra
+    if (!userColors[user]) {
+        userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
     }
 
+    // Handle !launch command
+    if (command.toLowerCase() === "launch") {
+        if (!isStreamerAndAuthorize(user, command)) return;
+        displayConsoleMessage(user, `!${command} ✅`);
+        spawnShip(user);  // Call the spawnShip function to spawn the ship on canvas
+    }
+};
     // --- Craftable Items Definitions ---
     const craftableItems = {
       weaponGen: {
