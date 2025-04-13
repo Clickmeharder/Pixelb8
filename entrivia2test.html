@@ -733,6 +733,7 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 		  if (!element) return;
 		  element.style.display = "block";
 		  element.style.visibility = "visible";
+		  element.style.opacity = "1.00";
 		  element.classList.add("active");
 		  element.style.animation = animationType === "slide"
 			? "slideIn 0.8s ease-out forwards"

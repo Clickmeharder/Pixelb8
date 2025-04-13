@@ -314,6 +314,7 @@ function repaintWheel() {
 			  console.log("Winner:", winningSection);
 			  const resultDisplay = document.getElementById("wheel-result");
 			  if (resultDisplay) {
+				showElement(resultDisplay, "slide");
 				resultDisplay.textContent = `${winningSection}`;
 			  }
 
@@ -323,6 +324,7 @@ function repaintWheel() {
 				if (wrapper) {
 				  setTimeout(() => {
 					hideElement(wrapper, "slide");
+					hideElement(resultDisplay, "slide");
 				  }, userPixeldiscConfig.autoFadeTime); // Hide the element after the fade time
 				}
 			  }
