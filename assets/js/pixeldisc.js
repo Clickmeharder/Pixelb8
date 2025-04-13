@@ -539,6 +539,7 @@ document.getElementById("discRotationLeverToggle").addEventListener("change", (e
 document.getElementById("autoFadeToggle").addEventListener("change", (e) => {
   savePixelDiscConfig();
   userPixeldiscConfig.autoFade = e.target.checked ? "on" : "off";  // Set to "on" or "off"
+  repaintWheel();
   updateAllStatusIndicators(userPixeldiscConfig);  // Update status indicators
 });
 
@@ -547,6 +548,7 @@ document.getElementById("autoFadeToggle").addEventListener("change", (e) => {
 document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
   const seconds = parseFloat(e.target.value) || 0;
   userPixeldiscConfig.autoFadeTime = seconds * 1000;
+  repaintWheel();
   savePixelDiscConfig(); // Save *after* updating the config
 });
 
