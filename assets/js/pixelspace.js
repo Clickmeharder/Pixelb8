@@ -1,10 +1,10 @@
 // == Basic Twitch Overlay Space Game ==
 // Icons: 🚀 (chattership), 🛸 (enemy UFO), 🛰️ (satellite)
 
+// Let's add them to <div id="streamSpace"></div> instead of the body
 const chatterShips = {};
 const satellites = {};
 const enemies = [];
-
 
 function randomPosition(el) {
   const x = Math.random() * (window.innerWidth - 50);
@@ -87,7 +87,7 @@ function spawnChatterShip(user) {
     ship.dataset.user = user;
     ship.dataset.color = userColor;
 
-    document.body.appendChild(ship);
+    document.getElementById("streamSpace").appendChild(ship); // Add ship to streamSpace div
 
     moveChatterShipRandomly(ship); // Begin moving chattership randomly
     chatterShips[user] = ship;
@@ -98,7 +98,7 @@ function spawnSatellite(user) {
   sat.classList.add("entity");
   sat.innerHTML = `🛰️<span class="callSign">${user}</span>`;
   randomPosition(sat);
-  document.body.appendChild(sat);
+  document.getElementById("streamSpace").appendChild(sat); // Add satellite to streamSpace div
   satellites[user] = sat;
 
   animateEntity(sat, "satellite");
@@ -110,7 +110,7 @@ function spawnEnemyUFO() {
   ufo.innerHTML = `🛸`;
   ufo.dataset.hp = 5;
   randomPosition(ufo);
-  document.body.appendChild(ufo);
+  document.getElementById("streamSpace").appendChild(ufo); // Add UFO to streamSpace div
   enemies.push(ufo);
 
   animateEntity(ufo, "ufo");
@@ -132,7 +132,7 @@ function fireAmmoFromShip(ship) {
     ammo.style.left = ship.style.left;
     ammo.style.top = ship.style.top;
 
-    document.body.appendChild(ammo);
+    document.getElementById("streamSpace").appendChild(ammo); // Add ammo to streamSpace div
 
     moveAmmo(ammo);
 }
@@ -143,7 +143,6 @@ setInterval(() => {
   if (chance < 0.4) spawnEnemyUFO();
 }, 10000);
 
-
 // == CSS == 
 const style = document.createElement("style");
 style.textContent = `
@@ -151,6 +150,11 @@ style.textContent = `
     margin: 0;
     overflow: hidden;
     background: transparent;
+  }
+  #streamSpace {
+    position: relative;
+    width: 100%;
+    height: 100%;
   }
   .entity {
     position: fixed;
@@ -188,4 +192,3 @@ style.textContent = `
 document.head.appendChild(style);
 
 console.log("pixelspace initiated");
-
