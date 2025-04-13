@@ -508,7 +508,7 @@ function updateLeverVisibility() {
 		lever.style.visibility = "visible";
 		lever.style.animation = "fadeIn 0.8s ease-out forwards";
 	} else if (mode === "on") {
-		const wrapperVisible = wheelWrapper.offsetParent !== null;
+		const wrapperVisible = window.getComputedStyle(wheelWrapper).visibility === "visible";
 		if (wrapperVisible) {
 			console.log("lever visible (wheel shown) ✅");
 			lever.style.visibility = "visible";
