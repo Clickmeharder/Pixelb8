@@ -5,7 +5,6 @@ const chatterShips = {};
 const satellites = {};
 const enemies = [];
 
-const userColors = {};  // You can populate this with user color data based on your Twitch bot
 
 function randomPosition(el) {
   const x = Math.random() * (window.innerWidth - 50);
