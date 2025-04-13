@@ -1,7 +1,6 @@
 
   const colonistShips = {};
   const enemies = [];
-  const userColors = {};
 
   function randomPosition(el) {
     const x = Math.random() * (window.innerWidth - 50);
