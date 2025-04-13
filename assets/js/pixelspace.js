@@ -34,17 +34,36 @@ function animateEntity(el, type) {
 }
 
 function spawnChatterShip(user) {
-  if (chatterShips[user]) return; // only one per user
+    if (document.getElementById(`ship-${user}`)) return; // prevent duplicates
 
-  const ship = document.createElement("div");
-  ship.classList.add("entity");
-  ship.innerHTML = `🚀<span class="callSign">${user}</span>`;
-  ship.dataset.hp = 3;
-  randomPosition(ship);
-  document.body.appendChild(ship);
-  chatterShips[user] = ship;
+    const ship = document.createElement("div");
+    ship.classList.add("chattership");
+    ship.id = `ship-${user}`;
 
-  animateEntity(ship, "ship");
+    const userColor = userColors[user] || "orangered";
+
+    // Set ship text/icon
+    ship.textContent = "🚀";
+
+    // Apply user color to the name
+    const nameTag = document.createElement("div");
+    nameTag.classList.add("chattership-name");
+    nameTag.textContent = user;
+    nameTag.style.color = userColor;
+    ship.appendChild(nameTag);
+
+    // Apply movement, styles, etc.
+    ship.style.left = `${Math.random() * 90}vw`;
+    ship.style.top = `${Math.random() * 80}vh`;
+
+    // Save the color for use in projectiles
+    ship.dataset.user = user;
+    ship.dataset.color = userColor;
+
+    document.body.appendChild(ship);
+
+    moveChatterShipRandomly(ship);
+    chatterShips.push(ship);
 }
 
 function spawnSatellite(user) {
@@ -74,6 +93,22 @@ function spawnEnemyUFO() {
   }, 20000);
 }
 
+function fireAmmoFromShip(ship) {
+    const ammo = document.createElement("div");
+    ammo.classList.add("ammo");
+    ammo.textContent = "💥";
+
+    // Use ship's stored color
+    const color = ship.dataset.color || "white";
+    ammo.style.color = color;
+
+    ammo.style.left = ship.style.left;
+    ammo.style.top = ship.style.top;
+
+    document.body.appendChild(ammo);
+
+    moveAmmo(ammo);
+}
 
 // UFO spawns randomly
 setInterval(() => {
