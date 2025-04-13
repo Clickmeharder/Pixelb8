@@ -166,17 +166,44 @@ function drawChill() {
 }
 
 // 🔥 Chaotic: fast lines with intense colors
-function drawChaotic() {
-    const startX = Math.random() * canvas.width;
-    const startY = Math.random() * canvas.height;
-    const endX = startX + rand(-100, 100);
-    const endY = startY + rand(-100, 100);
+let chillWaveOffset = 0;
 
+function drawChaotic() {
+    const waveLength = 100; // How wide each wave hump is
+    const waveAmplitude = 20; // How tall each wave hump is
+    const speed = 0.5; // Wave movement speed
+    const step = 5; // How smooth the wave is
+    chillWaveOffset += speed;
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = `rgba(150, 200, 255, 0.05)`; // Soft blue, low opacity
     ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.strokeStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
-    ctx.lineWidth = rand(5, 15);
+
+    // Top border wave
+    for (let x = 0; x <= canvasDiv.width; x += step) {
+        const y = Math.sin((x + chillWaveOffset) / waveLength) * waveAmplitude;
+        ctx.lineTo(x, y);
+    }
+
+    // Right border wave
+    for (let y = 0; y <= canvasDiv.height; y += step) {
+        const x = canvasDiv.width + Math.sin((y + chillWaveOffset) / waveLength) * waveAmplitude;
+        ctx.lineTo(x, y);
+    }
+
+    // Bottom border wave
+    for (let x = canvasDiv.width; x >= 0; x -= step) {
+        const y = canvasDiv.height + Math.sin((x + chillWaveOffset) / waveLength) * waveAmplitude;
+        ctx.lineTo(x, y);
+    }
+
+    // Left border wave
+    for (let y = canvasDiv.height; y >= 0; y -= step) {
+        const x = Math.sin((y + chillWaveOffset) / waveLength) * waveAmplitude;
+        ctx.lineTo(x, y);
+    }
+
+    ctx.closePath();
     ctx.stroke();
 }
 
