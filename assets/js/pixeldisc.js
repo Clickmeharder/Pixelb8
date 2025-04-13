@@ -317,17 +317,6 @@ function repaintWheel() {
 				showElement(resultDisplay, "slide");
 				resultDisplay.textContent = `${winningSection}`;
 			  }
-
-			  // Auto fade the wheel if autoFade is enabled
-			  if (userPixeldiscConfig.autoFade === "on") {
-				const wrapper = document.getElementById("wheelcanvaswrapper");
-				if (wrapper) {
-				  setTimeout(() => {
-					hideElement(wrapper, "slide");
-					hideElement(resultDisplay, "slide");
-				  }, userPixeldiscConfig.autoFadeTime); // Hide the element after the fade time
-				}
-			  }
 			}
 		  }
 		  requestAnimationFrame(frame);
@@ -338,7 +327,19 @@ function repaintWheel() {
 				const randomWinner = Math.floor(Math.random() * sections.length);
 				const randomDuration = 5000 + Math.random() * 10000; // 3–6 seconds
 				spinTo(randomWinner, randomDuration);
+
+			// Auto fade after the wheel should be done spinning
+			if (userPixeldiscConfig.autoFade === "on") {
+			  const wrapper = document.getElementById("wheelcanvaswrapper");
+			  const resultDisplay = document.getElementById("wheel-result");
+
+			  setTimeout(() => {
+				if (wrapper) hideElement(wrapper, "slide");
+				if (resultDisplay) hideElement(resultDisplay, "slide");
+			  }, randomDuration + userPixeldiscConfig.autoFadeTime);
+			  // We add the fade time after the spin finishes
 			}
+		  }
 		}
 // Bind the spin to mouse click
 canvas.onmousedown = function() {
@@ -539,7 +540,6 @@ document.getElementById("discRotationLeverToggle").addEventListener("change", (e
 document.getElementById("autoFadeToggle").addEventListener("change", (e) => {
   savePixelDiscConfig();
   userPixeldiscConfig.autoFade = e.target.checked ? "on" : "off";  // Set to "on" or "off"
-  repaintWheel();
   updateAllStatusIndicators(userPixeldiscConfig);  // Update status indicators
 });
 
@@ -548,7 +548,6 @@ document.getElementById("autoFadeToggle").addEventListener("change", (e) => {
 document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
   const seconds = parseFloat(e.target.value) || 0;
   userPixeldiscConfig.autoFadeTime = seconds * 1000;
-  repaintWheel();
   savePixelDiscConfig(); // Save *after* updating the config
 });
 
