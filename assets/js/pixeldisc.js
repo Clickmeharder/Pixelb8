@@ -2,7 +2,7 @@
 
 const userPixeldiscConfig = {
   enableLever: "on",    // can be "on", "always", or "off"
-  autoFade: "off"       // can be "on" or "off"
+  autoFade: "off",    // can be "on" or "off"
   autoFadeTime: 5000 // Time in ms
 };
 const toggleOptions = {
