@@ -546,7 +546,8 @@ document.getElementById("autoFadeToggle").addEventListener("change", (e) => {
 
 document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
   savePixelDiscConfig();
-  userPixeldiscConfig.autoFadeTime = parseInt(e.target.value, 10) || 0;
+  const seconds = parseFloat(e.target.value) || 0;
+  userPixeldiscConfig.autoFadeTime = seconds * 1000;
 });
 
 	document.addEventListener('DOMContentLoaded', () => {
