@@ -495,7 +495,7 @@ function updateLeverVisibility() {
     leverWrapper.style.display = "block";
   } else if (mode === "on") {
     // Show only if wrapper is visible
-    const wrapperVisible = wrapper.offsetParent !== null;
+    const wrapperVisible = wheelcanvaswrapper.offsetParent !== null;
     leverWrapper.style.display = wrapperVisible ? "block" : "none";
   }
 }
