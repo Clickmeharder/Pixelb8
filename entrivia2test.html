@@ -36,7 +36,7 @@
   perspective: 800px;
 }
 
-.lever {
+.discRotationLever {
   position: absolute;
   left: 50%;
   bottom: 0;
@@ -64,7 +64,7 @@
 }
 
 /* Move shadow left and darken when lever is pulled */
-.lever.pull .lever-stick {
+.discRotationLever.pull .lever-stick {
   height: 130px;
   box-shadow: -2px 0px 30px rgba(0, 0, 0, 0.9), inset -2px -2px 6px rgba(0, 0, 0, 0.6); /* Shadow moves left and darkens */
 }
@@ -166,7 +166,7 @@
 			opacity: 1;
 			transform: scale(1);
 		}
-		#discRotationLever {
+		#discRotationButton {
 		  background-color: #28a745;      /* green button */
 		  color: #fff;
 		  border: none;
@@ -182,12 +182,12 @@
 		  transition: background-color 0.2s, transform 0.1s;
 		}
 
-		#discRotationLever:hover {
+		#discRotationButton:hover {
 		  background-color: #218838;
 		  transform: scale(1.05);
 		}
 
-		#discRotationLever:active {
+		#discRotationButton:active {
 		  transform: scale(0.95);
 		}
 	</style>
@@ -344,7 +344,7 @@
 						<button class="a Butt toggle-toggle" data-target="wheelcanvaswrapper" data-animation="fade">
 						  <i class="fas fa-eye"></i> Show
 						</button>
-						<button id="discRotationLever">
+						<button id="discRotationButton">
 						  <i class="fas fa-sync-alt"></i> Spin Wheel
 						</button>
 					</div>
@@ -399,10 +399,10 @@
 					  </label>
 					</div>
 				</div>
-				<div class="" id="discleverSettings">
+				<div class="" id="discRotationLeverSettings">
 				  <label>
 					Lever Visibility:
-					<select id="discleverToggle">
+					<select id="discRotationLeverToggle">
 					  <option value="on">On</option>
 					  <option value="always">Always</option>
 					  <option value="off">Off</option>
@@ -574,7 +574,7 @@
 			
 			<div class="lever-wrapper">
 			  <div class="lever-slot">
-				<div id="lever" class="lever">
+				<div id="discRotationLever" class="lever">
 				  <div class="lever-knob"></div>
 				  <div class="lever-stick"></div>
 				</div>
@@ -856,20 +856,8 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 				toggleElement(controllerId, 'fade');
 			}
 		});
-		const lever = document.getElementById("lever");
 
-		lever.addEventListener("click", () => {
-		  if (running) return;
-
-		  lever.classList.add("pull");
-		  spinWheel();
-
-		  setTimeout(() => {
-			lever.classList.remove("pull");
-		  }, 800);
-		});
 	</script>
-
 	<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 
 	<script src="/assets/js/entrivia2.js"></script>

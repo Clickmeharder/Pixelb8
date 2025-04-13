@@ -453,16 +453,29 @@ window.addEventListener("resize", () => repaint(angle));
 		deletewheelSections();
 	});
 	
-	document.getElementById("discRotationLever").addEventListener("click", () => {
+	document.getElementById("discRotationButton").addEventListener("click", () => {
 		console.log(`Wheel done gonna spun!`);
 		showElement(wheelcanvaswrapper, "fade");
 		spinWheel();
 	});
 
+	document.getElementById("discRotationLever").addEventListener("click", () => {
+		console.log(`Wheel done gonna spun!`);
+		showElement(wheelcanvaswrapper, "fade");
+		  if (running) return;
+
+		  lever.classList.add("pull");
+		  spinWheel();
+
+		  setTimeout(() => {
+			lever.classList.remove("pull");
+		  }, 800);
+		});
+	});
 
 
 function updateLeverVisibility() {
-  const lever = document.getElementById("discRotationLever");
+  const lever = document.getElementById("discRotationButton");
   const wrapper = document.getElementById("wheelcanvaswrapper");
   
   if (!lever || !wrapper) return;
@@ -481,12 +494,12 @@ function updateLeverVisibility() {
 }
 
 // Initial values from the config
-document.getElementById("discleverToggle").value = userPixeldiscConfig.enableLever;
+document.getElementById("discRotationLeverToggle").value = userPixeldiscConfig.enableLever;
 document.getElementById("autoFadeToggle").checked = userPixeldiscConfig.autoFade === "on";  // Checking if it's "on"
 document.getElementById("fadeTimeInput").value = userPixeldiscConfig.autoFadeTime;
 
 // Event listeners to update config and status indicators
-document.getElementById("discleverToggle").addEventListener("change", (e) => {
+document.getElementById("discRotationLeverToggle").addEventListener("change", (e) => {
   userPixeldiscConfig.enableLever = e.target.value;  // Will be "on", "always", or "off"
   updateLeverVisibility();  // Update visibility of lever
   updateAllStatusIndicators(userPixeldiscConfig);  // Update status indicators
