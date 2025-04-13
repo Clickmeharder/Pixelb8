@@ -1718,12 +1718,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     if (command.toLowerCase() === "launch") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
-        spawnChatterShip(user);
+        spawnColonistShip(user);
     }
     if (command.toLowerCase() === "launch-sat") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
-        spawnSatellite(user);
+        spawnColonistShip(user);
     }
 	if (command === "a" || command === "answer") {
 		if (!activeQuestion) {
