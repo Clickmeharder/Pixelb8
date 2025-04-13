@@ -1708,6 +1708,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     if (!userColors[user]) {
         userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
     }
+    if (command.toLowerCase() === "pull-lever") {
+        if (!isStreamerAndAuthorize(user, command)) return;
+        displayConsoleMessage(user, `!${command} ✅`);
+		showWheel();
+        pullDiscRotationLever();
+    }
 	if (command === "a" || command === "answer") {
 		if (!activeQuestion) {
 			console.log("No active question. activeQuestion returns as:" + activeQuestion );
