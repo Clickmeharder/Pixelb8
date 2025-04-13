@@ -493,14 +493,15 @@ window.addEventListener("resize", () => repaint(angle));
 function updateLeverVisibility() {
   if (!leverWrapper || !wrapper) return;
   const mode = userPixeldiscConfig.enableLever;
+
   if (mode === "off") {
-    leverWrapper.style.display = "none";
+    leverWrapper.classList.add("wrapper-hidden");
   } else if (mode === "always") {
-    leverWrapper.style.display = "block";
+    leverWrapper.classList.remove("wrapper-hidden");
   } else if (mode === "on") {
-    // Show only if wrapper is visible
-    const wrapperVisible = wrapper.offsetParent !== null;
-    leverWrapper.style.display = wrapperVisible ? "block" : "none";
+    // Add or remove based on whether the wheel wrapper is visible
+    const wrapperVisible = !wrapper.classList.contains("wrapper-hidden");
+    leverWrapper.classList.toggle("wrapper-hidden", !wrapperVisible);
   }
 }
 function pullDiscRotationLever() {
