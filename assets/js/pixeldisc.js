@@ -452,6 +452,24 @@ window.addEventListener("resize", () => repaint(angle));
 		console.log(`Wheel "delete wheel butt clicked!`);
 		deletewheelSections();
 	});
+function updateLeverVisibility() {
+  const lever = document.getElementById("discRotationLever");
+  const wrapper = document.getElementById("wheelcanvaswrapper");
+  
+  if (!lever || !wrapper) return;
+
+  const mode = userPixeldiscConfig.enableLever;
+
+  if (mode === "off") {
+    lever.style.display = "none";
+  } else if (mode === "always") {
+    lever.style.display = "block";
+  } else if (mode === "on") {
+    // Show only if wrapper is visible
+    const wrapperVisible = wrapper.offsetParent !== null;
+    lever.style.display = wrapperVisible ? "block" : "none";
+  }
+}
 	
 	document.getElementById("discRotationButton").addEventListener("click", () => {
 		console.log(`Wheel done gonna spun!`);
@@ -473,24 +491,6 @@ window.addEventListener("resize", () => repaint(angle));
 	  }, 800);
 	});
 
-function updateLeverVisibility() {
-  const lever = document.getElementById("discRotationButton");
-  const wrapper = document.getElementById("wheelcanvaswrapper");
-  
-  if (!lever || !wrapper) return;
-
-  const mode = userPixeldiscConfig.enableLever;
-
-  if (mode === "off") {
-    lever.style.display = "none";
-  } else if (mode === "always") {
-    lever.style.display = "block";
-  } else if (mode === "on") {
-    // Show only if wrapper is visible
-    const wrapperVisible = wrapper.offsetParent !== null;
-    lever.style.display = wrapperVisible ? "block" : "none";
-  }
-}
 
 // Initial values from the config
 document.getElementById("discRotationLeverToggle").value = userPixeldiscConfig.enableLever;
