@@ -602,6 +602,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     if (command.toLowerCase() === "pull-lever") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
+		showWheel();
         pullDiscRotationLever();
     }
 };
