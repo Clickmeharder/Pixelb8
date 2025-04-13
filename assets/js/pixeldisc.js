@@ -410,6 +410,25 @@ window.addEventListener("resize", () => repaint(angle));
 		console.log("remove section butt clicked!");
 		removewheelSection();
 	});
+	function savePixelDiscConfig() {
+	  localStorage.setItem("pixelDiscConfig", JSON.stringify(userPixeldiscConfig));
+	}
+	function applyConfigToUI() {
+	  document.getElementById("discRotationLeverToggle").value = userPixeldiscConfig.enableLever;
+	  document.getElementById("autoFadeToggle").checked = userPixeldiscConfig.autoFade === "on";
+	  document.getElementById("fadeTimeInput").value = userPixeldiscConfig.autoFadeTime;
+
+	  updateAllStatusIndicators(userPixeldiscConfig);
+	}
+	function loadPixelDiscConfig() {
+	  const savedConfig = localStorage.getItem("pixelDiscConfig");
+	  if (savedConfig) {
+		const parsedConfig = JSON.parse(savedConfig);
+		Object.assign(userPixeldiscConfig, parsedConfig);
+	  }
+	  applyConfigToUI();
+	}
+
 	function savewheelSections() {
 		const name = document.getElementById("savewheelsections").value.trim();
 		if (!name) return alert("Please enter a name for your wheel.");
@@ -512,11 +531,13 @@ document.getElementById("fadeTimeInput").value = userPixeldiscConfig.autoFadeTim
 // Event listeners to update config and status indicators
 document.getElementById("discRotationLeverToggle").addEventListener("change", (e) => {
   userPixeldiscConfig.enableLever = e.target.value;  // Will be "on", "always", or "off"
+  savePixelDiscConfig();
   updateLeverVisibility();  // Update visibility of lever
   updateAllStatusIndicators(userPixeldiscConfig);  // Update status indicators
 });
 
 document.getElementById("autoFadeToggle").addEventListener("change", (e) => {
+  savePixelDiscConfig();
   userPixeldiscConfig.autoFade = e.target.checked ? "on" : "off";  // Set to "on" or "off"
   updateAllStatusIndicators(userPixeldiscConfig);  // Update status indicators
 });
@@ -524,6 +545,7 @@ document.getElementById("autoFadeToggle").addEventListener("change", (e) => {
 
 
 document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
+  savePixelDiscConfig();
   userPixeldiscConfig.autoFadeTime = parseInt(e.target.value, 10) || 0;
 });
 
@@ -533,3 +555,4 @@ document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
 		updateLoadDropdown();
 		updateAllStatusIndicators(userPixeldiscConfig);
 	});
+/* localStorage.removeItem("pixelDiscConfig"); */
