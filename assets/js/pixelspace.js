@@ -5,6 +5,8 @@ const chatterShips = {};
 const satellites = {};
 const enemies = [];
 
+const userColors = {};  // You can populate this with user color data based on your Twitch bot
+
 function randomPosition(el) {
   const x = Math.random() * (window.innerWidth - 50);
   const y = Math.random() * (window.innerHeight - 50);
@@ -31,6 +33,32 @@ function animateEntity(el, type) {
   }, 3000);
 
   el.dataset.animInterval = interval;
+}
+
+function moveChatterShipRandomly(ship) {
+  console.log(`Moving ChatterShip: ${ship.id}`);
+
+  // Random movement interval for chatter ships
+  const movementInterval = setInterval(() => {
+    const angle = Math.random() * 360; // Random angle in radians
+    const distance = Math.random() * 100; // Random distance
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance;
+    const rect = ship.getBoundingClientRect();
+    let newX = rect.left + dx;
+    let newY = rect.top + dy;
+
+    // Stay within bounds of the screen
+    newX = Math.max(0, Math.min(window.innerWidth - 50, newX));
+    newY = Math.max(0, Math.min(window.innerHeight - 50, newY));
+
+    ship.style.left = `${newX}px`;
+    ship.style.top = `${newY}px`;
+
+    console.log(`ChatterShip (${ship.id}) new position: left=${newX}px, top=${newY}px`);
+  }, 2000); // Move every 2 seconds
+
+  ship.dataset.animInterval = movementInterval; // Store interval for potential clearing later
 }
 
 function spawnChatterShip(user) {
@@ -62,8 +90,8 @@ function spawnChatterShip(user) {
 
     document.body.appendChild(ship);
 
-    moveChatterShipRandomly(ship);
-    chatterShips.push(ship);
+    moveChatterShipRandomly(ship); // Begin moving chattership randomly
+    chatterShips[user] = ship;
 }
 
 function spawnSatellite(user) {
@@ -117,8 +145,7 @@ setInterval(() => {
 }, 10000);
 
 
-
-// == CSS ==
+// == CSS == 
 const style = document.createElement("style");
 style.textContent = `
   body {
@@ -140,6 +167,26 @@ style.textContent = `
     display: block;
     margin-top: -5px;
   }
+  .chattership-name {
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 0.8rem;
+    color: inherit;
+  }
+  .ammo {
+    position: absolute;
+    font-size: 1.5rem;
+    color: inherit;
+    transition: top 0.5s ease;
+  }
+  .ammo.move {
+    top: 100%;
+  }
 `;
 document.head.appendChild(style);
+
 console.log("pixelspace initiated");
+
