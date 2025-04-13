@@ -294,7 +294,56 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 
 
 
+function replaceAllSelects() {
+    const selects = document.querySelectorAll('select');
 
+    selects.forEach(originalSelect => {
+        const customWrapper = document.createElement('div');
+        customWrapper.classList.add('custom-dropdown');
+
+        const selectedDiv = document.createElement('div');
+        selectedDiv.classList.add('selected');
+        selectedDiv.textContent = originalSelect.options[originalSelect.selectedIndex]?.text || 'Select...';
+        customWrapper.appendChild(selectedDiv);
+
+        const optionsDiv = document.createElement('div');
+        optionsDiv.classList.add('options');
+
+        [...originalSelect.options].forEach(option => {
+            const optionDiv = document.createElement('div');
+            optionDiv.classList.add('option');
+            optionDiv.textContent = option.text;
+            optionDiv.dataset.value = option.value;
+
+            optionDiv.addEventListener('click', () => {
+                selectedDiv.textContent = option.text;
+                originalSelect.value = option.value;
+                originalSelect.dispatchEvent(new Event('change'));
+                customWrapper.classList.remove('active');
+            });
+
+            optionsDiv.appendChild(optionDiv);
+        });
+
+        customWrapper.appendChild(optionsDiv);
+
+        selectedDiv.addEventListener('click', () => {
+            customWrapper.classList.toggle('active');
+        });
+
+        originalSelect.style.display = 'none';
+        originalSelect.parentNode.insertBefore(customWrapper, originalSelect);
+    });
+
+    // Close all custom dropdowns on outside click
+    document.addEventListener('click', (e) => {
+        document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+    });
+}
 
 // On DOMContentLoaded, load saved theme and layout settings
 window.addEventListener("DOMContentLoaded", () => {
@@ -309,6 +358,7 @@ window.addEventListener("DOMContentLoaded", () => {
       document.documentElement.style.setProperty(varName, value);
     });
 	debugThemeStyles();
+	replaceAllSelects();
     console.log("Loaded saved theme settings:", savedSettings);
   }
 });
