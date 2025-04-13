@@ -480,7 +480,7 @@ function updateLeverVisibility() {
   }
 }
 
-document.getElementById("leverToggle").value = userPixeldiscConfig.enableLever;
+document.getElementById("discleverToggle").value = userPixeldiscConfig.enableLever;
 document.getElementById("autoFadeToggle").checked = userPixeldiscConfig.autoFade;
 document.getElementById("fadeTimeInput").value = userPixeldiscConfig.autoFadeTime;
 
