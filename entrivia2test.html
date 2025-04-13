@@ -15,56 +15,56 @@
 	<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@1,700&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <style>
+<style>
   #streamSpace {
     position: relative;
     width: 100%;
     height: 100%;
+    overflow: hidden;
   }
   .entity {
     position: fixed;
     font-size: 2rem;
-    transition: transform 0.3s ease;
     pointer-events: none;
     user-select: none;
     text-align: center;
   }
-.colonistship {
-  position: fixed;
-  width: min-content;
-  height: min-content;
-  pointer-events: none;
-  user-select: none;
-}
+  .colonistship {
+    position: fixed;
+    width: min-content;
+    height: min-content;
+    pointer-events: none;
+    user-select: none;
+  }
+  .ship-hitbox {
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 24px solid orangered;
+    transform: rotate(0deg);
+    transition: transform 0.3s ease;
+    margin: auto;
+  }
+  .colonistship-name {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    text-align: center;
+    font-size: 0.8rem;
+    color: white;
+  }
+  .ammo {
+    position: absolute;
+    font-size: 1.5rem;
+    color: white;
+    pointer-events: none;
+    transition: top 0.5s ease;
+  }
+</style>
 
-.ship-hitbox {
-  width: 0;
-  height: 0;
-  border-left: 12px solid transparent;
-  border-right: 12px solid transparent;
-  border-bottom: 24px solid orangered;
-  transform: rotate(0deg);
-  transition: transform 0.3s ease;
-  margin: auto;
-}
-
-.colonistship-name {
-  position: absolute;
-  bottom: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: max-content;
-  text-align: center;
-  font-size: 0.8rem;
-  color: white;
-}
-.ammo {
-  position: fixed;
-  font-size: 1.5rem;
-  transition: top 0.2s linear;
-  pointer-events: none;
-}
-    </style>
    <style>
 		body{
 			overflow: hidden;

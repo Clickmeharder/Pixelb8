@@ -1,56 +1,4 @@
-<style>
-  #streamSpace {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
-  .entity {
-    position: fixed;
-    font-size: 2rem;
-    pointer-events: none;
-    user-select: none;
-    text-align: center;
-  }
-  .colonistship {
-    position: fixed;
-    width: min-content;
-    height: min-content;
-    pointer-events: none;
-    user-select: none;
-  }
-  .ship-hitbox {
-    width: 0;
-    height: 0;
-    border-left: 12px solid transparent;
-    border-right: 12px solid transparent;
-    border-bottom: 24px solid orangered;
-    transform: rotate(0deg);
-    transition: transform 0.3s ease;
-    margin: auto;
-  }
-  .colonistship-name {
-    position: absolute;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: max-content;
-    text-align: center;
-    font-size: 0.8rem;
-    color: white;
-  }
-  .ammo {
-    position: absolute;
-    font-size: 1.5rem;
-    color: white;
-    pointer-events: none;
-    transition: top 0.5s ease;
-  }
-</style>
 
-<div id="streamSpace"></div>
-
-<script>
   const colonistShips = {};
   const enemies = [];
   const userColors = {};
@@ -226,4 +174,3 @@
   setInterval(() => {
     if (Math.random() < 0.5) spawnEnemyUFO();
   }, 8000);
-</script>
