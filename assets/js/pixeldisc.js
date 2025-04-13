@@ -491,18 +491,36 @@ window.addEventListener("resize", () => repaint(angle));
 		deletewheelSections();
 	});
 function updateLeverVisibility() {
-  if (!leverWrapper || !wrapper) return;
-  const mode = userPixeldiscConfig.enableLever;
+	const lever = document.getElementById("discRotationLeverWrapper");
+	const wheelWrapper = document.getElementById("wheelcanvaswrapper");
+	const mode = userPixeldiscConfig.enableLever;
 
-  if (mode === "off") {
-    leverWrapper.classList.add("wrapper-hidden");
-  } else if (mode === "always") {
-    leverWrapper.classList.remove("wrapper-hidden");
-  } else if (mode === "on") {
-    // Add or remove based on whether the wheel wrapper is visible
-    const wrapperVisible = !wrapper.classList.contains("wrapper-hidden");
-    leverWrapper.classList.toggle("wrapper-hidden", !wrapperVisible);
-  }
+	if (!lever || !wheelWrapper) return;
+
+	if (mode === "off") {
+		console.log("lever disabled ❌");
+		lever.style.animation = "fadeOut 0.5s ease-in forwards";
+		setTimeout(() => {
+			lever.style.visibility = "hidden";
+		}, 500);
+	} else if (mode === "always") {
+		console.log("lever always visible ✅");
+		lever.style.visibility = "visible";
+		lever.style.animation = "fadeIn 0.8s ease-out forwards";
+	} else if (mode === "on") {
+		const wrapperVisible = wheelWrapper.offsetParent !== null;
+		if (wrapperVisible) {
+			console.log("lever visible (wheel shown) ✅");
+			lever.style.visibility = "visible";
+			lever.style.animation = "fadeIn 0.8s ease-out forwards";
+		} else {
+			console.log("lever hidden (wheel not shown) ❌");
+			lever.style.animation = "fadeOut 0.5s ease-in forwards";
+			setTimeout(() => {
+				lever.style.visibility = "hidden";
+			}, 500);
+		}
+	}
 }
 function pullDiscRotationLever() {
       console.log(`Wheel done gonna spun!`);
