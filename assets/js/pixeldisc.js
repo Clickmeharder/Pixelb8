@@ -342,7 +342,6 @@ function repaintWheel() {
 			  // We add the fade time after the spin finishes
 			}
 		  }
-		}
 // Bind the spin to mouse click
 canvas.onmousedown = function() {
 	spinWheel();
