@@ -83,7 +83,7 @@ function initPixelPen() {
 	controls.innerHTML = `
 		<select id="doodleVibe">
 			<option value="chill">🎵 Chill</option>
-			<option value="chaotic">🔥 Chaotic</option>
+			<option value="chillwave">🔥 chillwave</option>
 		</select>
 		<button id="autoDoodle">🧠 Auto Doodle</button>
 		<label>Brush Size:
@@ -141,8 +141,8 @@ function startDoodle() {
             case 'chill':
                 drawChill();
                 break;
-            case 'chaotic':
-                drawChaotic();
+            case 'chillwave':
+                drawchillwave();
                 break;
         }
         saveDrawing(); // Optional: keep it persistent
@@ -165,10 +165,10 @@ function drawChill() {
     ctx.fill();
 }
 
-// 🔥 Chaotic: fast lines with intense colors
-let chillWaveOffset = 10;
+// 🔥 chillwave: fast lines with intense colors
+let chillWaveOffset = 25;
 
-function drawChaotic() {
+function drawchillwave() {
     const waveLength = 100; // How wide each wave hump is
     const waveAmplitude = 10; // How tall each wave hump is
     const speed = 0.1; // Wave movement speed
