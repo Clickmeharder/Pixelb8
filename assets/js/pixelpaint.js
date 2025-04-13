@@ -77,6 +77,46 @@ function initPixelPen() {
             img.src = saved;
         }
     }
+
+    // ===== UI CONTROLS =====
+    const controls = document.getElementById('main-settings-controls');
+	controls.innerHTML = `
+		<select id="doodleVibe">
+			<option value="chill">🎵 Chill</option>
+			<option value="chaotic">🔥 Chaotic</option>
+		</select>
+		<button id="autoDoodle">🧠 Auto Doodle</button>
+		<label>Brush Size:
+			<input type="range" min="1" max="50" value="${lineWidth}" id="brushSize">
+		</label><br>
+		
+		<label>Brush Type:
+			<select id="brushType">
+				<option value="round">🖊️ Round</option>
+				<option value="square">▣ Square</option>
+				<option value="spray">☁️ Spray</option>
+			</select>
+		</label><br>
+
+		<label>Color:
+			<input type="color" id="colorPicker" value="${color}">
+		</label><br>
+
+		<div id="quickPalette">
+			<span class="color-swatch" style="background: red" data-color="#ff0000"></span>
+			<span class="color-swatch" style="background: green" data-color="#00ff00"></span>
+			<span class="color-swatch" style="background: blue" data-color="#0000ff"></span>
+			<span class="color-swatch" style="background: yellow" data-color="#ffff00"></span>
+			<span class="color-swatch" style="background: black" data-color="#000000"></span>
+			<span class="color-swatch" style="background: white; border: 1px solid #ccc;" data-color="#ffffff"></span>
+		</div><br>
+
+		<button id="toggleDraw">🖊️ Toggle Draw</button>
+		<button id="eraser">🧽 Eraser</button>
+		<button id="fill">🪣 Fill</button>
+		<button id="clearCanvas">🗑️ Clear All</button>
+		<button id="toggleCanvas">🪟 Toggle Canvas</button>
+	`;
 let autoDoodleOn = false;
 let doodleInterval = null;
 let doodleVibe = 'chill';
@@ -144,46 +184,6 @@ function drawChaotic() {
 function rand(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
-    // ===== UI CONTROLS =====
-    const controls = document.getElementById('main-settings-controls');
-	controls.innerHTML = `
-		<select id="doodleVibe">
-			<option value="chill">🎵 Chill</option>
-			<option value="chaotic">🔥 Chaotic</option>
-		</select>
-		<button id="autoDoodle">🧠 Auto Doodle</button>
-		<label>Brush Size:
-			<input type="range" min="1" max="50" value="${lineWidth}" id="brushSize">
-		</label><br>
-		
-		<label>Brush Type:
-			<select id="brushType">
-				<option value="round">🖊️ Round</option>
-				<option value="square">▣ Square</option>
-				<option value="spray">☁️ Spray</option>
-			</select>
-		</label><br>
-
-		<label>Color:
-			<input type="color" id="colorPicker" value="${color}">
-		</label><br>
-
-		<div id="quickPalette">
-			<span class="color-swatch" style="background: red" data-color="#ff0000"></span>
-			<span class="color-swatch" style="background: green" data-color="#00ff00"></span>
-			<span class="color-swatch" style="background: blue" data-color="#0000ff"></span>
-			<span class="color-swatch" style="background: yellow" data-color="#ffff00"></span>
-			<span class="color-swatch" style="background: black" data-color="#000000"></span>
-			<span class="color-swatch" style="background: white; border: 1px solid #ccc;" data-color="#ffffff"></span>
-		</div><br>
-
-		<button id="toggleDraw">🖊️ Toggle Draw</button>
-		<button id="eraser">🧽 Eraser</button>
-		<button id="fill">🪣 Fill</button>
-		<button id="clearCanvas">🗑️ Clear All</button>
-		<button id="toggleCanvas">🪟 Toggle Canvas</button>
-	`;
-
     document.getElementById('brushSize').addEventListener('input', (e) => {
         lineWidth = parseInt(e.target.value);
     });
