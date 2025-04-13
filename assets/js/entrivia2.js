@@ -2396,3 +2396,8 @@ document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCus
 // Event listener for dropdown change to update the answer display
 document.getElementById('questionList').addEventListener('change', updateAnswerDisplay);
 // Auto-reconnect on page load
+
+// TEST commands (you can remove these in production)
+setTimeout(() => handleChatCommand("jaedraze", "!launch"), 1000);
+setTimeout(() => handleChatCommand("spacequeen", "!launch-sat"), 3000);
+setTimeout(() => handleChatCommand("neobubble", "!launch"), 5000);

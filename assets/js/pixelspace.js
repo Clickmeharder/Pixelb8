@@ -116,10 +116,7 @@ setInterval(() => {
   if (chance < 0.4) spawnEnemyUFO();
 }, 10000);
 
-// TEST commands (you can remove these in production)
-setTimeout(() => handleChatCommand("jaedraze", "!launch"), 1000);
-setTimeout(() => handleChatCommand("spacequeen", "!launch-sat"), 3000);
-setTimeout(() => handleChatCommand("neobubble", "!launch"), 5000);
+
 
 // == CSS ==
 const style = document.createElement("style");
