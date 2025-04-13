@@ -490,6 +490,58 @@ window.addEventListener("resize", () => repaint(angle));
 		console.log(`Wheel "delete wheel butt clicked!`);
 		deletewheelSections();
 	});
+	
+function showWheel() {
+	const wheelWrapper = document.getElementById("wheelcanvaswrapper");
+	const leverWrapper = document.getElementById("discRotationLeverWrapper");
+	const toggleButton = document.getElementById("showWheelButt");
+
+	if (!wheelWrapper || !leverWrapper) return;
+
+	// Toggle visibility
+	const isVisible = window.getComputedStyle(wheelWrapper).visibility === "visible";
+
+	if (isVisible) {
+		// Hide
+		wheelWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
+		setTimeout(() => {
+			wheelWrapper.style.visibility = "hidden";
+		}, 500);
+
+		// Lever logic
+		leverWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
+		setTimeout(() => {
+			leverWrapper.style.visibility = "hidden";
+		}, 500);
+
+		console.log("Wheel hidden ❌");
+
+		// Update button
+		if (toggleButton) {
+			toggleButton.innerHTML = '<i class="fas fa-eye"></i> Show';
+		}
+	} else {
+		// Show
+		wheelWrapper.style.visibility = "visible";
+		wheelWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+
+		const mode = userPixeldiscConfig.enableLever;
+		if (mode === "always" || mode === "on") {
+			leverWrapper.style.visibility = "visible";
+			leverWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+			console.log(`Lever shown (mode: ${mode}) ✅`);
+		}
+
+		console.log("Wheel shown ✅");
+
+		// Update button
+		if (toggleButton) {
+			toggleButton.innerHTML = '<i class="fas fa-eye-slash"></i> Hide';
+		}
+	}
+}
+
+document.getElementById("showWheelButt")?.addEventListener("click", showWheel);
 function updateLeverVisibility() {
 	const lever = document.getElementById("discRotationLeverWrapper");
 	const wheelWrapper = document.getElementById("wheelcanvaswrapper");
