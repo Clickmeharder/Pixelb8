@@ -293,7 +293,7 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 });
 
 
-function replaceAllSelectsWithCustom() {
+function replaceAllSelects() {
     const selects = document.querySelectorAll('select');
 
     selects.forEach(originalSelect => {
