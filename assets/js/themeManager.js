@@ -103,7 +103,7 @@ function setTheme(themeName, saveLayout = true) {
 	"--wheelResult-Y": getComputedStyle(document.documentElement).getPropertyValue("--wheelResult-Y"),
     "--wheelResult-X": getComputedStyle(document.documentElement).getPropertyValue("--wheelResult-X"),
     "--wheelLever-Y": getComputedStyle(document.documentElement).getPropertyValue("--wheelLever-Y"),
-    "--wheelLever-X": getComputedStyle(document.documentElement).getPropertyValue("--wheelLever-X"),
+    "--wheelLever-X": getComputedStyle(document.documentElement).getPropertyValue("--wheelLever-X")
   } : {};
 
   // Save both theme and layout
@@ -132,5 +132,5 @@ window.addEventListener("DOMContentLoaded", () => {
     console.log("Loaded saved theme settings:", savedSettings);
   }
 });
-localStorage.removeItem("themeSettings");
+
 updateBubblewrapVisibility();
