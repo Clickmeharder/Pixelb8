@@ -166,12 +166,12 @@ function drawChill() {
 }
 
 // 🔥 Chaotic: fast lines with intense colors
-let chillWaveOffset = 3;
+let chillWaveOffset = -3;
 
 function drawChaotic() {
     const waveLength = 100; // How wide each wave hump is
-    const waveAmplitude = 20; // How tall each wave hump is
-    const speed = 0.2; // Wave movement speed
+    const waveAmplitude = 10; // How tall each wave hump is
+    const speed = 0.1; // Wave movement speed
     const step = 5; // How smooth the wave is
     chillWaveOffset += speed;
 
