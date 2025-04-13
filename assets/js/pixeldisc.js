@@ -279,8 +279,13 @@ function repaintWheel() {
 
 				// Spin function
 		let angle = 0, running = false;
-
+		let fadeTimeout;
 		function spinTo(winner, duration, extraSpins = 5) {
+			  // 🔁 Clear any existing auto-fade timeout
+		  if (fadeTimeout) {
+			clearTimeout(fadeTimeout);
+			console.log("[AutoFade] Cleared previous fade timeout.");
+		  }
 		  const sectionAngle = 2 * Math.PI / sections.length;
 
 		  // Randomize spin count a bit: 4–6 extra full rotations
@@ -324,11 +329,11 @@ function repaintWheel() {
 			  if (userPixeldiscConfig.autoFade === "on") {
 				const wrapper = document.getElementById("wheelcanvaswrapper");
 				if (wrapper) {
-				  setTimeout(() => {
+				  fadeTimeout = setTimeout(() => {
 					console.log(`[AutoFade] Hiding elements after ${userPixeldiscConfig.autoFadeTime}ms`);
 					hideElement(wrapper, "slide");
 					hideElement(resultDisplay, "slide");
-				  }, userPixeldiscConfig.autoFadeTime); // Just fade after the time set
+				  }, userPixeldiscConfig.autoFadeTime);
 				}
 			  }
 			}
