@@ -317,6 +317,18 @@ function repaintWheel() {
 				showElement(resultDisplay, "slide");
 				resultDisplay.textContent = `${winningSection}`;
 			  }
+
+			  // 🎯 Auto fade AFTER spin completes
+			  if (userPixeldiscConfig.autoFade === "on") {
+				const wrapper = document.getElementById("wheelcanvaswrapper");
+				if (wrapper) {
+				  setTimeout(() => {
+					console.log(`[AutoFade] Hiding elements after ${userPixeldiscConfig.autoFadeTime}ms`);
+					hideElement(wrapper, "slide");
+					hideElement(resultDisplay, "slide");
+				  }, userPixeldiscConfig.autoFadeTime); // Just fade after the time set
+				}
+			  }
 			}
 		  }
 		  requestAnimationFrame(frame);
@@ -327,16 +339,6 @@ function repaintWheel() {
 				const randomWinner = Math.floor(Math.random() * sections.length);
 				const randomDuration = 5000 + Math.random() * 10000; // 3–6 seconds
 				spinTo(randomWinner, randomDuration);
-
-			// Auto fade after the wheel should be done spinning
-			if (userPixeldiscConfig.autoFade === "on") {
-			  const wrapper = document.getElementById("wheelcanvaswrapper");
-			  const resultDisplay = document.getElementById("wheel-result");
-
-			  setTimeout(() => {
-				if (wrapper) hideElement(wrapper, "slide");
-				if (resultDisplay) hideElement(resultDisplay, "slide");
-			  }, randomDuration + userPixeldiscConfig.autoFadeTime);
 			  // We add the fade time after the spin finishes
 			}
 		  }
