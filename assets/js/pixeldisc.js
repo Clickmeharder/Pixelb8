@@ -327,7 +327,6 @@ function repaintWheel() {
 
 			  // 🎯 Auto fade AFTER spin completes
 			  if (userPixeldiscConfig.autoFade === "on") {
-				const wrapper = document.getElementById("wheelcanvaswrapper");
 				if (wrapper) {
 				  fadeTimeout = setTimeout(() => {
 					console.log(`[AutoFade] Hiding elements after ${userPixeldiscConfig.autoFadeTime}ms`);
