@@ -2421,6 +2421,36 @@ button.statustoggle {}
 	box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Optional glow effect */
 }
 
+.status-indicator {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease;
+}
+
+.status-on {
+  background-color: limegreen;
+  color: black;
+}
+
+.status-always {
+  background-color: gold;
+  color: black;
+}
+
+.status-off {
+  background-color: crimson;
+  color: white;
+}
+
+.status-unknown {
+  background-color: gray;
+  color: white;
+}
 /*----------------------*/
 /*______________________*/
 

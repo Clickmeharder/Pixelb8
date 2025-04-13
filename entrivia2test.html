@@ -399,6 +399,27 @@
 					  </label>
 					</div>
 				</div>
+				<div class="" id="discleverSettings">
+				  <label>
+					Lever Visibility:
+					<select id="discleverToggle">
+					  <option value="on">On</option>
+					  <option value="always">Always</option>
+					  <option value="off">Off</option>
+					</select>
+					<span class="status-indicator" id="leverIndicator"></span>
+				  </label>
+				  <br />
+				  <label>
+					<input type="checkbox" id="autoFadeToggle" checked />
+					Enable Auto Fade
+				  </label>
+				  <br />
+				  <label>
+					Auto Fade Time (ms):
+					<input type="number" id="fadeTimeInput" value="5000" />
+				  </label>
+				</div>
 			</div>
 		</div>
 		<div class="controller" id="pixelpen-controller">
@@ -782,7 +803,22 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 				}
 			});
 		}
-		
+		function updateStatusIndicator(indicatorId, value) {
+			const indicator = document.getElementById(indicatorId);
+			if (!indicator) return;
+
+			indicator.classList.remove("status-on", "status-off", "status-always");
+
+			if (value === "on") {
+			indicator.classList.add("status-on");
+			} else if (value === "always") {
+			indicator.classList.add("status-always");
+			} else if (value === "off") {
+			indicator.classList.add("status-off");
+			} else {
+			indicator.style.backgroundColor = "gray";
+			}
+		}
 		<!-- main button event listeners -->
 		//enentrivia-toggle button
 		document.getElementById("thePixelButt").addEventListener("click", function () {

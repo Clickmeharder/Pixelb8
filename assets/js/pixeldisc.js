@@ -1,3 +1,11 @@
+
+
+const userPixeldiscConfig = {
+  enableLever: "on", // Options: "on", "always", "off"
+  autoFade: true,    // Toggle for auto fade
+  autoFadeTime: 5000 // Time in ms
+};
+
 let canvas = document.getElementById("canvas1");
 let sections = ["FREE Beer Keg", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "nothing"];
 let colors = ["#001f1fe8", "#004040eb"];
@@ -444,6 +452,45 @@ window.addEventListener("resize", () => repaint(angle));
 		console.log(`Wheel done gonna spun!`);
 		spinWheel();
 	});
+
+
+
+function updateLeverVisibility() {
+  const lever = document.getElementById("discRotationLever");
+  const wrapper = document.getElementById("wheelcanvaswrapper");
+  
+  if (!lever || !wrapper) return;
+
+  const mode = userPixeldiscConfig.enableLever;
+
+  if (mode === "off") {
+    lever.style.display = "none";
+  } else if (mode === "always") {
+    lever.style.display = "block";
+  } else if (mode === "on") {
+    // Show only if wrapper is visible
+    const wrapperVisible = wrapper.offsetParent !== null;
+    lever.style.display = wrapperVisible ? "block" : "none";
+  }
+}
+
+document.getElementById("leverToggle").value = userPixeldiscConfig.enableLever;
+document.getElementById("autoFadeToggle").checked = userPixeldiscConfig.autoFade;
+document.getElementById("fadeTimeInput").value = userPixeldiscConfig.autoFadeTime;
+
+document.getElementById("leverToggle").addEventListener("change", (e) => {
+  userPixeldiscConfig.enableLever = e.target.value;
+  updateLeverVisibility();
+});
+
+document.getElementById("autoFadeToggle").addEventListener("change", (e) => {
+  userPixeldiscConfig.autoFade = e.target.checked;
+});
+
+document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
+  userPixeldiscConfig.autoFadeTime = parseInt(e.target.value, 10) || 0;
+});
+
 	document.addEventListener('DOMContentLoaded', () => {
 	  	// Initialize dropdown when page loads
 		updateRemoveDropdown();
