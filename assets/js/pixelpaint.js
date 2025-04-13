@@ -1,4 +1,4 @@
->
+
 function initPixelPen() {
     const canvas = document.getElementById('pixelpaint');
     const ctx = canvas.getContext('2d');
