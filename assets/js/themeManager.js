@@ -293,57 +293,109 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 });
 
 
-
-function replaceAllSelects() {
+function replaceAllSelectsWithCustom() {
     const selects = document.querySelectorAll('select');
 
     selects.forEach(originalSelect => {
-        const customWrapper = document.createElement('div');
-        customWrapper.classList.add('custom-dropdown');
+        // Skip if already replaced
+        if (originalSelect.classList.contains('replaced')) return;
 
-        const selectedDiv = document.createElement('div');
-        selectedDiv.classList.add('selected');
-        selectedDiv.textContent = originalSelect.options[originalSelect.selectedIndex]?.text || 'Select...';
-        customWrapper.appendChild(selectedDiv);
+        // Get computed styles
+        const computedStyle = getComputedStyle(originalSelect);
 
-        const optionsDiv = document.createElement('div');
-        optionsDiv.classList.add('options');
+        // Create wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = 'custom-dropdown-wrapper';
+        wrapper.style.position = 'relative';
+        wrapper.style.display = 'inline-block';
 
-        [...originalSelect.options].forEach(option => {
-            const optionDiv = document.createElement('div');
-            optionDiv.classList.add('option');
-            optionDiv.textContent = option.text;
-            optionDiv.dataset.value = option.value;
+        // Create the custom dropdown container
+        const customDropdown = document.createElement('div');
+        customDropdown.className = 'custom-dropdown';
+        customDropdown.style.width = computedStyle.width;
 
-            optionDiv.addEventListener('click', () => {
-                selectedDiv.textContent = option.text;
-                originalSelect.value = option.value;
+        // Create selected display
+        const selected = document.createElement('div');
+        selected.className = 'selected';
+        selected.textContent = originalSelect.options[originalSelect.selectedIndex]?.text || 'Select...';
+        selected.style.cssText = `
+            background: ${computedStyle.backgroundColor};
+            color: ${computedStyle.color};
+            padding: ${computedStyle.padding};
+            border: ${computedStyle.border};
+            font-size: ${computedStyle.fontSize};
+            cursor: pointer;
+        `;
+
+        // Create floating options container
+        const options = document.createElement('div');
+        options.className = 'custom-options';
+        options.style.cssText = `
+            position: fixed;
+            background: ${computedStyle.backgroundColor || '#333'};
+            color: ${computedStyle.color || '#fff'};
+            border: ${computedStyle.border || '1px solid #555'};
+            display: none;
+            z-index: 9999;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        `;
+
+        // Build option items
+        [...originalSelect.options].forEach(opt => {
+            const optDiv = document.createElement('div');
+            optDiv.textContent = opt.text;
+            optDiv.className = 'custom-option';
+            optDiv.style.padding = computedStyle.padding;
+            optDiv.style.cursor = 'pointer';
+
+            optDiv.addEventListener('click', () => {
+                selected.textContent = opt.text;
+                originalSelect.value = opt.value;
                 originalSelect.dispatchEvent(new Event('change'));
-                customWrapper.classList.remove('active');
+                options.style.display = 'none';
             });
 
-            optionsDiv.appendChild(optionDiv);
+            optDiv.addEventListener('mouseover', () => {
+                optDiv.style.background = '#444';
+            });
+
+            optDiv.addEventListener('mouseout', () => {
+                optDiv.style.background = '';
+            });
+
+            options.appendChild(optDiv);
         });
 
-        customWrapper.appendChild(optionsDiv);
-
-        selectedDiv.addEventListener('click', () => {
-            customWrapper.classList.toggle('active');
+        // Show/hide logic
+        selected.addEventListener('click', (e) => {
+            const rect = selected.getBoundingClientRect();
+            options.style.left = `${rect.left}px`;
+            options.style.top = `${rect.bottom}px`;
+            options.style.width = `${rect.width}px`;
+            options.style.display = options.style.display === 'none' ? 'block' : 'none';
         });
 
+        // Insert custom dropdown into DOM
+        customDropdown.appendChild(selected);
+        wrapper.appendChild(customDropdown);
+        originalSelect.parentNode.insertBefore(wrapper, originalSelect);
         originalSelect.style.display = 'none';
-        originalSelect.parentNode.insertBefore(customWrapper, originalSelect);
-    });
+        originalSelect.classList.add('replaced');
 
-    // Close all custom dropdowns on outside click
-    document.addEventListener('click', (e) => {
-        document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
-            if (!dropdown.contains(e.target)) {
-                dropdown.classList.remove('active');
+        // Append options globally so they are fixed
+        document.body.appendChild(options);
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target) && !options.contains(e.target)) {
+                options.style.display = 'none';
             }
         });
     });
 }
+
 
 // On DOMContentLoaded, load saved theme and layout settings
 window.addEventListener("DOMContentLoaded", () => {

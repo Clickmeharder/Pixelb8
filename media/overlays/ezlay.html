@@ -44,7 +44,55 @@
 }
 
 </style>
+<style>
+.custom-dropdown {
+    position: relative;
+    display: inline-block;
+    width: 160px;
+    font-family: sans-serif;
+    z-index: 1000;
+}
 
+.custom-dropdown .selected {
+    background: #222;
+    color: white;
+    padding: 8px 10px;
+    border: 1px solid #555;
+    cursor: pointer;
+    user-select: none;
+}
+
+.custom-dropdown .options {
+    display: none;
+    position: absolute;
+    background: #333;
+    border: 1px solid #555;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.custom-dropdown .option {
+    padding: 8px 10px;
+    cursor: pointer;
+    color: white;
+}
+
+.custom-dropdown .option:hover {
+    background-color: #444;
+}
+
+.custom-dropdown.active .options {
+    display: block;
+}
+.custom-options::-webkit-scrollbar {
+    width: 8px;
+}
+.custom-options::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 4px;
+}
+</style>
 	<body>
 		<div id="streamSpace"></div>
 		
