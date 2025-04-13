@@ -2398,6 +2398,16 @@ document.getElementById('questionList').addEventListener('change', updateAnswerD
 // Auto-reconnect on page load
 
 // TEST commands (you can remove these in production)
-setTimeout(() => handleChatCommand("jaedraze", "!launch"), 1000);
-setTimeout(() => handleChatCommand("spacequeen", "!launch-sat"), 3000);
-setTimeout(() => handleChatCommand("neobubble", "!launch"), 5000);
+function handleChatCommand(user, command) {
+    console.log("Handling command for:", user, "Command:", command);
+    // Add your test logic here
+    if (command === "launch") {
+        spawnChatterShip(user);
+    }
+    if (command === "launch-sat") {
+        spawnSatellite(user);
+    }
+}
+setTimeout(() => handleChatCommand("jaedraze", "launch"), 1000);
+setTimeout(() => handleChatCommand("spacequeen", "launch-sat"), 3000);
+setTimeout(() => handleChatCommand("neobubble", "launch"), 5000);
