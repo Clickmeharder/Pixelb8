@@ -470,14 +470,7 @@ function updateLeverVisibility() {
     lever.style.display = wrapperVisible ? "block" : "none";
   }
 }
-	
-	document.getElementById("discRotationButton").addEventListener("click", () => {
-		console.log(`Wheel done gonna spun!`);
-		showElement(wheelcanvaswrapper, "fade");
-		spinWheel();
-	});
-
-	document.getElementById("discRotationLever").addEventListener("click", () => {
+function pullDiscRotationLever() {
       console.log(`Wheel done gonna spun!`);
 	  showElement(wheelcanvaswrapper, "fade");
 	  if (running) return;
@@ -489,6 +482,15 @@ function updateLeverVisibility() {
 	  setTimeout(() => {
 		lever.classList.remove("pull");
 	  }, 800);
+}
+	document.getElementById("discRotationButton").addEventListener("click", () => {
+		console.log(`Wheel done gonna spun!`);
+		showElement(wheelcanvaswrapper, "fade");
+		spinWheel();
+	});
+
+	document.getElementById("discRotationLever").addEventListener("click", () => {
+		pullDiscRotationLever();
 	});
 
 
