@@ -28,16 +28,22 @@ function initPixelPen() {
 
     function draw(e) {
         if (!painting) return;
-        ctx.lineWidth = lineWidth;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = isEraser ? 'rgba(0,0,0,0)' : color;
-        ctx.globalCompositeOperation = isEraser ? 'destination-out' : 'source-over';
 
-        ctx.lineTo(e.clientX, e.clientY);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(e.clientX, e.clientY);
-    }
+		ctx.lineWidth = lineWidth;
+		ctx.lineCap = 'round';
+
+		if (isEraser) {
+			ctx.globalCompositeOperation = 'destination-out';
+		} else {
+			ctx.globalCompositeOperation = 'source-over';
+			ctx.strokeStyle = color;
+		}
+
+		ctx.lineTo(e.clientX, e.clientY);
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.moveTo(e.clientX, e.clientY);
+	}
 
     canvas.addEventListener('mousedown', startPosition);
     canvas.addEventListener('mousemove', draw);
