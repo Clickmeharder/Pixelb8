@@ -20,7 +20,8 @@ const removeSelect = document.getElementById("removewheelsection");
 const addInput = document.getElementById("addwheelsection");
 const addButton = document.getElementById("wheel-addsectionButt");
 const removeButton = document.getElementById("wheel-removesectionButt");
-
+const lever = document.getElementById("discRotationLever");
+const wrapper = document.getElementById("wheelcanvaswrapper");
 let styles = getComputedStyle(document.body);
 	color1 = styles.getPropertyValue('--wheel-color').trim();
 	color2 = styles.getPropertyValue('--wheel-color2').trim();
@@ -453,8 +454,7 @@ window.addEventListener("resize", () => repaint(angle));
 		deletewheelSections();
 	});
 function updateLeverVisibility() {
-  const lever = document.getElementById("discRotationLever");
-  const wrapper = document.getElementById("wheelcanvaswrapper");
+
   
   if (!lever || !wrapper) return;
 
