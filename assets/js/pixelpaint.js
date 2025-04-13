@@ -6,7 +6,7 @@ function initPixelPen() {
     let color = '#000000';
     let lineWidth = 5;
     let isEraser = false;
-    let isDrawing = true;
+    let isDrawing = false;
 	let brushType = 'round';
     function setCanvasSize() {
         canvas.width = window.innerWidth;
