@@ -77,16 +77,6 @@ document.querySelectorAll('.themeselect').forEach(button => {
 	repaintWheel();
   });
 });
-function updateBubblewrapVisibility() {
-	const bubblewrap = document.getElementById("bubblewrap");
-
-	if (!bubblewrap) return;
-
-	const hide = hideButtonBubble === true || hideButtonBubble === "on";
-
-	bubblewrap.style.opacity = hide ? "0.00" : "1.00";
-}
-// Set theme function to update the theme and save the layout
 function setTheme(themeName, saveLayout = true) {
   document.body.className = themeName;
 
@@ -115,6 +105,205 @@ function setTheme(themeName, saveLayout = true) {
   localStorage.setItem("themeSettings", JSON.stringify(themeSettings));
   console.log("Saved theme settings:", themeSettings);
 }
+
+
+const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
+function setBackgroundImage(url) {
+	document.body.style.backgroundImage = `url('${url}')`;
+}
+function removeBackgroundImage() {
+	document.body.style.backgroundImage = "none";
+}
+
+// Toggle element fn 
+//function to toggle element visibility
+//example usage:
+//toggleElement("myBox"); // Uses default "fade" animation
+//toggleElement("myBox", "slide"); // Uses slide animation
+//<button onclick="toggleElement('myBox')">Toggle Box</button>
+//<button onclick="toggleElement('myBox', 'slide')">Toggle Slide Box</button>
+
+function toggleElement(elementId, animationType = "fade") {
+  const element = document.getElementById(elementId);
+  if (!element) return false;  // Return false if element doesn't exist
+
+  let isVisible = element.style.visibility === "visible";
+
+  if (isVisible) {
+	// Hide element with animation
+	element.style.animation = animationType === "slide" ? "slideOut 0.5s ease-in forwards" : "fadeOut 0.5s ease-in forwards";
+	setTimeout(() => {
+	  console.log("Butt toggled " + elementId);
+	  element.classList.remove("active");
+	  element.style.visibility = "hidden";
+	}, 500); // Matches animation duration
+  } else {
+	// Show element with animation
+	element.style.visibility = "visible";
+	element.classList.add("active");
+	element.style.animation = animationType === "slide" ? "slideIn 0.8s ease-out forwards" : "fadeIn 0.8s ease-out forwards";
+  }
+
+  // Return the new visibility state (true for visible, false for hidden)
+  return !isVisible;
+}
+function showElement(element, animationType = "fade") {
+  if (!element) return;
+  element.style.display = "block";
+  element.style.visibility = "visible";
+  element.style.opacity = "1.00";
+  element.classList.add("active");
+  element.style.animation = animationType === "slide"
+	? "slideIn 0.8s ease-out forwards"
+	: "fadeIn 0.8s ease-out forwards";
+}
+function hideElement(element, animationType = "fade") {
+  if (!element) return;
+  element.style.animation = animationType === "slide"
+	? "slideOut 0.5s ease-in forwards"
+	: "fadeOut 0.5s ease-in forwards";
+  setTimeout(() => {
+	element.classList.remove("active");
+	element.style.display = "none";
+	element.style.visibility = "hidden";
+  }, 500); // Matches animation duration
+}
+document.querySelectorAll('.toggle-toggle').forEach(button => {
+  const targetId = button.dataset.target;
+  const animation = button.dataset.animation || "fade";
+  
+  button.addEventListener("click", () => {
+	const isVisible = toggleElement(targetId, animation);
+	button.innerHTML = isVisible
+	  ? '<i class="fas fa-eye-slash"></i> Hide'
+	  : '<i class="fas fa-eye"></i> Show';
+  });
+});
+const showthemeExamplesSwitch = document.getElementById("showthemeExamples");
+const examplemessagebox = document.getElementById("exampleMessagebox");
+const examplepanelwrapper = document.getElementById("examplepanelwrapper");
+showthemeExamplesSwitch.addEventListener("change", function () {
+  if (this.checked) {
+	showentrivia();
+	showElement(examplemessagebox, "fade");
+	showElement(examplepanelwrapper, "fade");
+  } else {
+	hideentrivia();
+	hideElement(examplemessagebox, "fade");
+	hideElement(examplepanelwrapper, "fade");
+  }
+});
+document.querySelectorAll(".close-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+	const parent = btn.parentElement;
+	if (parent && parent.id) {
+	  toggleElement(parent.id, "fade"); // or use "slide", etc., depending on your animations
+	}
+  });
+});
+
+function updateIndicatorLights() { 
+	let thesesettings = { usedefaultquestions, usecustomquestions, consolemessages, twitchChatOverlay, chatanswers, audioSetting, hideButtonBubble };
+	document.querySelectorAll(".light-indicator").forEach(indicator => {
+		const optionName = indicator.getAttribute("data-option");
+		const optionValue = thesesettings[optionName]; // Get the value safely
+		
+		// Set light color based on value
+		const lightColor = (optionValue === true || optionValue === "on") 
+			? "green" 
+			: (optionValue === false || optionValue === "off") 
+				? "red" 
+				: "gray"; // Fallback color
+		indicator.style.backgroundColor = lightColor;
+
+		// Find the nearest <strong> element and change text color
+		const statusText = indicator.closest('.statusindicatorWrapper').querySelector('strong');
+		if (statusText) {
+			statusText.style.color = lightColor;  // Set the text color to green/red
+			statusText.textContent = (optionValue === true || optionValue === "on") ? "Enabled" : "Disabled";
+		}
+	});
+}
+function updateAllStatusIndicators(configObject) {
+  const indicators = document.querySelectorAll(".status-indicator");
+
+  indicators.forEach(indicator => {
+	const variable = indicator.dataset.statusVariable;
+	const value = configObject[variable];
+
+	// Remove all known status classes first
+	indicator.classList.remove("status-on", "status-off", "status-always", "status-unknown");
+
+	// Default fallback style
+	let label = "—";
+	if (value === "on") {
+	  indicator.classList.add("status-on");
+	  label = "ON";
+	} else if (value === "always") {
+	  indicator.classList.add("status-always");
+	  label = "ALWAYS";
+	} else if (value === "off") {
+	  indicator.classList.add("status-off");
+	  label = "OFF";
+	} else {
+	  indicator.classList.add("status-unknown");
+	  label = value ?? "UNKNOWN";
+	}
+
+	// Optional: Set text inside the indicator
+	indicator.textContent = label;
+  });
+}
+
+// main button event listeners
+//enentrivia-toggle button
+document.getElementById("thePixelButt").addEventListener("click", function () {
+	let container = document.getElementById("Bubble");
+	container.classList.toggle("active");
+	console.log("Butt clicked: thePixelButt");
+});
+// Adding event listener to the parent container (#Bubble)
+document.getElementById('Bubble').addEventListener('click', function(event) {
+	// Check if the clicked element has the 'Butt' class
+	if (event.target.classList.contains('widgetcontrols')) {
+		console.log("Bubblebutt opens some widget controls");
+		// Get the ID of the clicked button
+		const buttonId = event.target.id;
+
+		// Remove 'Butt' from the buttonId and construct the corresponding controller ID
+		const controllerId = buttonId.replace('Butt', '') + 'controller';
+		console.log("Butt pressed: " + controllerId);
+		toggleElement(controllerId, 'fade');
+	}
+});
+
+
+document.getElementById("simulatebackground").addEventListener("change", function() {
+  if (this.checked) {
+    setBackgroundImage(backgroundImageURL);
+  } else {
+    removeBackgroundImage();
+  }
+});
+document.querySelectorAll(".rangeinput").forEach(function(input) {
+  input.addEventListener("input", function () {
+    const value = (this.value - this.min) / (this.max - this.min) * 100;
+    this.style.background = `var(--bg-color)`;
+  });
+});
+
+function updateBubblewrapVisibility() {
+	const bubblewrap = document.getElementById("bubblewrap");
+
+	if (!bubblewrap) return;
+
+	const hide = hideButtonBubble === true || hideButtonBubble === "on";
+
+	bubblewrap.style.opacity = hide ? "0.00" : "1.00";
+}
+
+
+
 
 // On DOMContentLoaded, load saved theme and layout settings
 window.addEventListener("DOMContentLoaded", () => {

@@ -47,7 +47,8 @@
 
 	<body>
 		<div id="streamSpace"></div>
-		<canvas id="pixelpaint" style="position: absolute; top: 0; left: 0; z-index: 750; pointer-events: auto;"></canvas>
+		
+		<!--===============================================-->
 		<div id="bubblewrap">
 			<button class="Butt" id="thePixelButt">Ᵽ</i></button>
 			<div id="Bubble">
@@ -59,7 +60,9 @@
 				<button class="Butt widgetcontrols" id="theme-Butt">⚙</button> 
 			</div>
 		</div>
+		<!--===============================================-->
 		<div  id="console"></div>
+		<!--===============================================-->
 		<!--this is the container for messages from twitch -->
 		<div id="twitchChat">
 			<div id="exampleMessagebox" style="display: none;">
@@ -72,11 +75,12 @@
 			</div>
 			
 		</div>
-
+		<!--===============================================-->
 		<div id="entriviaCmdContainer">
 			<div id="entriviaMessagebox">
 			</div>
 		</div>
+		
 		<!-- this is the announcements panel. it can contain text or text and a timer or other elements -->
 		<div class="panel" id="Announcements" style="display:none;">
 			<div class="announcement" id="announcement-panel-message"></div>
@@ -528,196 +532,17 @@
 		</div>
 		<!--this is the underlay its mostly for aesthetics and sits behind everything else it might be a border or different animated elements -->
 		<div id="pageborder"></div>
+		<!--
+		PixelPaint Wrapper 
+		-->
+		<canvas id="pixelpaint" style="position: absolute; top: 0; left: 0; z-index: 750; pointer-events: auto;"></canvas>
 <!--------------------->
 <!--       End of body        
 _____________________________  -->
   <script>
-document.querySelectorAll(".rangeinput").forEach(function(input) {
-  input.addEventListener("input", function () {
-    const value = (this.value - this.min) / (this.max - this.min) * 100;
-    this.style.background = `var(--bg-color)`;
-  });
-});
+
   </script>
-  		<!-- simulate background script -->
-	<script>
-
-	  const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
-	  function setBackgroundImage(url) {
-		document.body.style.backgroundImage = `url('${url}')`;
-	  }
-	  function removeBackgroundImage() {
-		document.body.style.backgroundImage = "none";
-	  }
-	  document.getElementById("simulatebackground").addEventListener("change", function() {
-		if (this.checked) {
-		  setBackgroundImage(backgroundImageURL);
-		} else {
-		  removeBackgroundImage();
-		}
-	  });
-		<!-- toggle element script -->
-		//function to toggle element visibility
-		//example usage:
-		//toggleElement("myBox"); // Uses default "fade" animation
-		//toggleElement("myBox", "slide"); // Uses slide animation
-		//<button onclick="toggleElement('myBox')">Toggle Box</button>
-		//<button onclick="toggleElement('myBox', 'slide')">Toggle Slide Box</button>
-		function toggleElement(elementId, animationType = "fade") {
-		  const element = document.getElementById(elementId);
-		  if (!element) return false;  // Return false if element doesn't exist
-
-		  let isVisible = element.style.visibility === "visible";
-
-		  if (isVisible) {
-			// Hide element with animation
-			element.style.animation = animationType === "slide" ? "slideOut 0.5s ease-in forwards" : "fadeOut 0.5s ease-in forwards";
-			setTimeout(() => {
-			  console.log("Butt toggled " + elementId);
-			  element.classList.remove("active");
-			  element.style.visibility = "hidden";
-			}, 500); // Matches animation duration
-		  } else {
-			// Show element with animation
-			element.style.visibility = "visible";
-			element.classList.add("active");
-			element.style.animation = animationType === "slide" ? "slideIn 0.8s ease-out forwards" : "fadeIn 0.8s ease-out forwards";
-		  }
-
-		  // Return the new visibility state (true for visible, false for hidden)
-		  return !isVisible;
-		}
-		function showElement(element, animationType = "fade") {
-		  if (!element) return;
-		  element.style.display = "block";
-		  element.style.visibility = "visible";
-		  element.style.opacity = "1.00";
-		  element.classList.add("active");
-		  element.style.animation = animationType === "slide"
-			? "slideIn 0.8s ease-out forwards"
-			: "fadeIn 0.8s ease-out forwards";
-		}
-		function hideElement(element, animationType = "fade") {
-		  if (!element) return;
-		  element.style.animation = animationType === "slide"
-			? "slideOut 0.5s ease-in forwards"
-			: "fadeOut 0.5s ease-in forwards";
-		  setTimeout(() => {
-			element.classList.remove("active");
-			element.style.display = "none";
-			element.style.visibility = "hidden";
-		  }, 500); // Matches animation duration
-		}
-		document.querySelectorAll('.toggle-toggle').forEach(button => {
-		  const targetId = button.dataset.target;
-		  const animation = button.dataset.animation || "fade";
-		  
-		  button.addEventListener("click", () => {
-			const isVisible = toggleElement(targetId, animation);
-			button.innerHTML = isVisible
-			  ? '<i class="fas fa-eye-slash"></i> Hide'
-			  : '<i class="fas fa-eye"></i> Show';
-		  });
-		});
-		const showthemeExamplesSwitch = document.getElementById("showthemeExamples");
-		const examplemessagebox = document.getElementById("exampleMessagebox");
-		const examplepanelwrapper = document.getElementById("examplepanelwrapper");
-		showthemeExamplesSwitch.addEventListener("change", function () {
-		  if (this.checked) {
-			showentrivia();
-			showElement(examplemessagebox, "fade");
-			showElement(examplepanelwrapper, "fade");
-		  } else {
-			hideentrivia();
-			hideElement(examplemessagebox, "fade");
-			hideElement(examplepanelwrapper, "fade");
-		  }
-		});
-		document.querySelectorAll(".close-btn").forEach(btn => {
-		  btn.addEventListener("click", () => {
-			const parent = btn.parentElement;
-			if (parent && parent.id) {
-			  toggleElement(parent.id, "fade"); // or use "slide", etc., depending on your animations
-			}
-		  });
-		});
-
-		function updateIndicatorLights() { 
-			let thesesettings = { usedefaultquestions, usecustomquestions, consolemessages, twitchChatOverlay, chatanswers, audioSetting, hideButtonBubble };
-			document.querySelectorAll(".light-indicator").forEach(indicator => {
-				const optionName = indicator.getAttribute("data-option");
-				const optionValue = thesesettings[optionName]; // Get the value safely
-				
-				// Set light color based on value
-				const lightColor = (optionValue === true || optionValue === "on") 
-					? "green" 
-					: (optionValue === false || optionValue === "off") 
-						? "red" 
-						: "gray"; // Fallback color
-				indicator.style.backgroundColor = lightColor;
-
-				// Find the nearest <strong> element and change text color
-				const statusText = indicator.closest('.statusindicatorWrapper').querySelector('strong');
-				if (statusText) {
-					statusText.style.color = lightColor;  // Set the text color to green/red
-					statusText.textContent = (optionValue === true || optionValue === "on") ? "Enabled" : "Disabled";
-				}
-			});
-		}
-		function updateAllStatusIndicators(configObject) {
-		  const indicators = document.querySelectorAll(".status-indicator");
-
-		  indicators.forEach(indicator => {
-			const variable = indicator.dataset.statusVariable;
-			const value = configObject[variable];
-
-			// Remove all known status classes first
-			indicator.classList.remove("status-on", "status-off", "status-always", "status-unknown");
-
-			// Default fallback style
-			let label = "—";
-			if (value === "on") {
-			  indicator.classList.add("status-on");
-			  label = "ON";
-			} else if (value === "always") {
-			  indicator.classList.add("status-always");
-			  label = "ALWAYS";
-			} else if (value === "off") {
-			  indicator.classList.add("status-off");
-			  label = "OFF";
-			} else {
-			  indicator.classList.add("status-unknown");
-			  label = value ?? "UNKNOWN";
-			}
-
-			// Optional: Set text inside the indicator
-			indicator.textContent = label;
-		  });
-		}
-
-		<!-- main button event listeners -->
-		//enentrivia-toggle button
-		document.getElementById("thePixelButt").addEventListener("click", function () {
-			let container = document.getElementById("Bubble");
-			container.classList.toggle("active");
-			console.log("Butt clicked: thePixelButt");
-		});
-		// Adding event listener to the parent container (#Bubble)
-		document.getElementById('Bubble').addEventListener('click', function(event) {
-			// Check if the clicked element has the 'Butt' class
-			if (event.target.classList.contains('widgetcontrols')) {
-				console.log("Bubblebutt opens some widget controls");
-				// Get the ID of the clicked button
-				const buttonId = event.target.id;
-
-				// Remove 'Butt' from the buttonId and construct the corresponding controller ID
-				const controllerId = buttonId.replace('Butt', '') + 'controller';
-				console.log("Butt pressed: " + controllerId);
-				toggleElement(controllerId, 'fade');
-			}
-		});
-
-	</script>
+  		<!-- Load Comfy js -->
 	<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 
 	<script src="/assets/js/entrivia2.js"></script>
