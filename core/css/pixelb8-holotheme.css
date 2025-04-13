@@ -2526,6 +2526,9 @@ button.statustoggle {}
   background-color: gray;
   color: white;
 }
+.wrapper-invisible {
+  visibility: hidden !important;
+}
 /*----------------------*/
 /*______________________*/
 

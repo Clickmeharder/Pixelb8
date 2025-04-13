@@ -425,7 +425,7 @@ window.addEventListener("resize", () => repaint(angle));
 	  document.getElementById("discRotationLeverToggle").value = userPixeldiscConfig.enableLever;
 	  document.getElementById("autoFadeToggle").checked = userPixeldiscConfig.autoFade === "on";
 	  document.getElementById("fadeTimeInput").value = userPixeldiscConfig.autoFadeTime / 1000;
-
+	  updateLeverVisibility();
 	  updateAllStatusIndicators(userPixeldiscConfig);
 	}
 	function loadPixelDiscConfig() {
