@@ -460,19 +460,17 @@ window.addEventListener("resize", () => repaint(angle));
 	});
 
 	document.getElementById("discRotationLever").addEventListener("click", () => {
-		console.log(`Wheel done gonna spun!`);
-		showElement(wheelcanvaswrapper, "fade");
-		  if (running) return;
+      console.log(`Wheel done gonna spun!`);
+	  showElement(wheelcanvaswrapper, "fade");
+	  if (running) return;
 
-		  lever.classList.add("pull");
-		  spinWheel();
+	  lever.classList.add("pull");
+	  spinWheel();
 
-		  setTimeout(() => {
-			lever.classList.remove("pull");
-		  }, 800);
-		});
+	  setTimeout(() => {
+		lever.classList.remove("pull");
+	  }, 800);
 	});
-
 
 function updateLeverVisibility() {
   const lever = document.getElementById("discRotationButton");
