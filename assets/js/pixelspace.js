@@ -1,175 +1,129 @@
+    const streamSpace = document.getElementById('streamSpace');
 
-  const colonistShips = {};
-  const enemies = [];
+    // --- Global Variables ---
+    let userShip = null;
+    let colonistShips = [];
+    let satellites = [];
+    let gameOver = false;
 
-  function randomPosition(el) {
-    const x = Math.random() * (window.innerWidth - 50);
-    const y = Math.random() * (window.innerHeight - 50);
-    el.style.left = `${x}px`;
-    el.style.top = `${y}px`;
-  }
-
-  function spawnEnemyUFO() {
-    const ufo = document.createElement("div");
-    ufo.classList.add("entity");
-    ufo.innerHTML = `🛸`;
-    ufo.dataset.hp = 5;
-    ufo.dataset.type = "enemy";
-    randomPosition(ufo);
-    document.getElementById("streamSpace").appendChild(ufo);
-    enemies.push(ufo);
-    moveEnemy(ufo);
-    console.log("Enemy UFO spawned");
-
-    setTimeout(() => {
-      if (ufo.parentElement) ufo.remove();
-    }, 20000);
-  }
-
-  function moveEnemy(enemy) {
-    const interval = setInterval(() => {
-      if (!enemy.parentElement) return clearInterval(interval);
-      const angle = Math.random() * Math.PI * 2;
-      const distance = Math.random() * 50;
-      const dx = Math.cos(angle) * distance;
-      const dy = Math.sin(angle) * distance;
-
-      const rect = enemy.getBoundingClientRect();
-      let newX = rect.left + dx;
-      let newY = rect.top + dy;
-
-      newX = Math.max(0, Math.min(window.innerWidth - 50, newX));
-      newY = Math.max(0, Math.min(window.innerHeight - 50, newY));
-
-      enemy.style.left = `${newX}px`;
-      enemy.style.top = `${newY}px`;
-    }, 2000);
-  }
-
-  function moveColonistShipRandomly(ship) {
-    const interval = setInterval(() => {
-      const angle = Math.random() * 2 * Math.PI;
-      const distance = Math.random() * 100;
-      const dx = Math.cos(angle) * distance;
-      const dy = Math.sin(angle) * distance;
-
-      const rect = ship.getBoundingClientRect();
-      let newX = rect.left + dx;
-      let newY = rect.top + dy;
-
-      newX = Math.max(0, Math.min(window.innerWidth - 50, newX));
-      newY = Math.max(0, Math.min(window.innerHeight - 50, newY));
-
-      ship.style.left = `${newX}px`;
-      ship.style.top = `${newY}px`;
-
-      checkAndShoot(ship);
-    }, 2000);
-
-    ship.dataset.animInterval = interval;
-  }
-
-  function checkAndShoot(ship) {
-    const shipRect = ship.getBoundingClientRect();
-
-    enemies.forEach((enemy) => {
-      const enemyRect = enemy.getBoundingClientRect();
-      const dx = enemyRect.left - shipRect.left;
-      const dy = enemyRect.top - shipRect.top;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance < 200) {
-        shootAt(ship, enemy);
+    // --- Colonist Ship Class ---
+    class ColonistShip {
+      constructor(x, y) {
+        this.element = document.createElement('div');
+        this.element.classList.add('ship');
+        this.x = x;
+        this.y = y;
+        this.health = 100;
+        this.element.style.left = `${x}px`;
+        this.element.style.top = `${y}px`;
+        streamSpace.appendChild(this.element);
       }
-    });
-  }
+      move() {
+        // Simple idle movement for colonist ships
+        const angle = Math.random() * Math.PI * 2;  // Random direction
+        this.x += Math.cos(angle) * 2;
+        this.y += Math.sin(angle) * 2;
 
-  function shootAt(ship, enemy) {
-    const ammo = document.createElement("div");
-    ammo.classList.add("ammo");
-    ammo.textContent = "💥";
+        if (this.x < 0) this.x = streamSpace.offsetWidth;
+        if (this.x > streamSpace.offsetWidth) this.x = 0;
+        if (this.y < 0) this.y = streamSpace.offsetHeight;
+        if (this.y > streamSpace.offsetHeight) this.y = 0;
 
-    const shipRect = ship.getBoundingClientRect();
-    const enemyRect = enemy.getBoundingClientRect();
-    const dx = enemyRect.left - shipRect.left;
-    const dy = enemyRect.top - shipRect.top;
-    const angle = Math.atan2(dy, dx);
-
-    ammo.style.left = `${shipRect.left + 10}px`;
-    ammo.style.top = `${shipRect.top + 10}px`;
-    ammo.style.transform = `rotate(${angle}rad)`;
-
-    document.getElementById("streamSpace").appendChild(ammo);
-
-    const vx = Math.cos(angle) * 5;
-    const vy = Math.sin(angle) * 5;
-
-    const move = setInterval(() => {
-      const x = parseFloat(ammo.style.left);
-      const y = parseFloat(ammo.style.top);
-      ammo.style.left = `${x + vx}px`;
-      ammo.style.top = `${y + vy}px`;
-
-      const ammoRect = ammo.getBoundingClientRect();
-      const enemyRect = enemy.getBoundingClientRect();
-
-      const colliding =
-        ammoRect.left < enemyRect.right &&
-        ammoRect.right > enemyRect.left &&
-        ammoRect.top < enemyRect.bottom &&
-        ammoRect.bottom > enemyRect.top;
-
-      if (colliding) {
-        clearInterval(move);
-        ammo.remove();
-        handleDamage(enemy);
+        this.element.style.left = `${this.x}px`;
+        this.element.style.top = `${this.y}px`;
       }
-    }, 16);
-  }
-
-  function handleDamage(enemy) {
-    let hp = parseInt(enemy.dataset.hp);
-    hp -= 1;
-    enemy.dataset.hp = hp;
-    if (hp <= 0) {
-      enemy.remove();
-      console.log("Enemy destroyed!");
     }
-  }
 
-  function spawnColonistShip(user) {
-    if (document.getElementById(`ship-${user}`)) return;
+    // --- Satellite Class ---
+    class Satellite {
+      constructor(x, y) {
+        this.element = document.createElement('div');
+        this.element.classList.add('satellite');
+        this.x = x;
+        this.y = y;
+        this.element.style.left = `${x}px`;
+        this.element.style.top = `${y}px`;
+        streamSpace.appendChild(this.element);
+      }
+    }
 
-    const ship = document.createElement("div");
-    ship.classList.add("colonistship");
-    ship.id = `ship-${user}`;
+    // --- User Ship Class (Movement along border) ---
+    class UserShip {
+      constructor() {
+        this.element = document.createElement('div');
+        this.element.classList.add('ship');
+        this.x = 0;
+        this.y = 0;
+        this.direction = 'right'; // Start moving to the right
+        this.element.style.left = `${this.x}px`;
+        this.element.style.top = `${this.y}px`;
+        streamSpace.appendChild(this.element);
 
-    const shipHitbox = document.createElement("div");
-    shipHitbox.classList.add("ship-hitbox");
+        // Start moving the ship
+        this.moveAlongBorder();
+      }
 
-    const userColor = userColors[user] || "orangered";
-    shipHitbox.style.borderBottomColor = userColor;
+      moveAlongBorder() {
+        const moveInterval = setInterval(() => {
+          switch (this.direction) {
+            case 'right':
+              this.x += 2;
+              if (this.x >= streamSpace.offsetWidth - 50) this.direction = 'down'; // Change direction to down at the right edge
+              break;
+            case 'down':
+              this.y += 2;
+              if (this.y >= streamSpace.offsetHeight - 50) this.direction = 'left'; // Change direction to left at the bottom edge
+              break;
+            case 'left':
+              this.x -= 2;
+              if (this.x <= 0) this.direction = 'up'; // Change direction to up at the left edge
+              break;
+            case 'up':
+              this.y -= 2;
+              if (this.y <= 0) this.direction = 'right'; // Change direction to right at the top edge
+              break;
+          }
 
-    const nameTag = document.createElement("div");
-    nameTag.classList.add("colonistship-name");
-    nameTag.textContent = user;
-    nameTag.style.color = userColor;
+          this.element.style.left = `${this.x}px`;
+          this.element.style.top = `${this.y}px`;
 
-    ship.appendChild(shipHitbox);
-    ship.appendChild(nameTag);
+        }, 16); // Move every ~16ms for smooth movement (60fps)
+      }
+    }
 
-    ship.style.left = `${Math.random() * 90}vw`;
-    ship.style.top = `${Math.random() * 80}vh`;
+    // --- Command Handlers (Twitch) ---
+    function spawnColonistShip(user) {
+      const x = Math.random() * streamSpace.offsetWidth;
+      const y = Math.random() * streamSpace.offsetHeight;
+      const colonistShip = new ColonistShip(x, y);
+      colonistShips.push(colonistShip);
+      displayConsoleMessage(user, `Colonist ship spawned at (${x}, ${y})!`);
+    }
 
-    document.getElementById("streamSpace").appendChild(ship);
-    moveColonistShipRandomly(ship);
-    colonistShips[user] = ship;
-  }
+    function spawnSatellite(user) {
+      const x = Math.random() * streamSpace.offsetWidth;
+      const y = Math.random() * streamSpace.offsetHeight;
+      const satellite = new Satellite(x, y);
+      satellites.push(satellite);
+      displayConsoleMessage(user, `Satellite launched at (${x}, ${y})!`);
+    }
 
-  // Example spawn
-  spawnColonistShip("jaedraze");
+    function displayConsoleMessage(user, message) {
+      console.log(`${user}: ${message}`);
+    }
 
-  // Enemy UFO spawn loop
-  setInterval(() => {
-    if (Math.random() < 0.5) spawnEnemyUFO();
-  }, 8000);
+    // --- Command Trigger (Simulating Twitch Chat Commands) ---
+    function onCommandReceived(user, command) {
+      if (command.toLowerCase() === 'launch') {
+        spawnColonistShip(user);
+      } else if (command.toLowerCase() === 'launch-sat') {
+        spawnSatellite(user);
+      }
+    }
+
+    // Example commands (You can replace these with actual Twitch command handling)
+    setTimeout(() => onCommandReceived("streamer", "launch"), 1000);  // Simulate !launch command
+    setTimeout(() => onCommandReceived("streamer", "launch-sat"), 5000);  // Simulate !launch-sat command
+
+    // Create the user ship and start its movement along the border
+    userShip = new UserShip();
