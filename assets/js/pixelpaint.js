@@ -7,7 +7,7 @@ function initPixelPen() {
     let lineWidth = 5;
     let isEraser = false;
     let isDrawing = true;
-
+	let brushType = 'round';
     function setCanvasSize() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -30,17 +30,26 @@ function initPixelPen() {
 		if (!painting || !isDrawing) return;
 
 		ctx.lineWidth = lineWidth;
-		ctx.lineCap = 'round';
-
+		ctx.lineCap = brushType === 'square' ? 'butt' : 'round';
 		ctx.globalCompositeOperation = isEraser ? 'destination-out' : 'source-over';
-		if (!isEraser) {
-			ctx.strokeStyle = color;
-		}
+		if (!isEraser) ctx.strokeStyle = color;
 
-		ctx.lineTo(e.clientX, e.clientY);
-		ctx.stroke();
-		ctx.beginPath();
-		ctx.moveTo(e.clientX, e.clientY);
+		if (brushType === 'spray') {
+			const density = 10;
+			for (let i = 0; i < density; i++) {
+				const offsetX = Math.random() * lineWidth - lineWidth / 2;
+				const offsetY = Math.random() * lineWidth - lineWidth / 2;
+				ctx.beginPath();
+				ctx.arc(e.clientX + offsetX, e.clientY + offsetY, 1, 0, 2 * Math.PI);
+				ctx.fillStyle = isEraser ? 'rgba(0,0,0,1)' : color;
+				ctx.fill();
+			}
+		} else {
+			ctx.lineTo(e.clientX, e.clientY);
+			ctx.stroke();
+			ctx.beginPath();
+			ctx.moveTo(e.clientX, e.clientY);
+		}
 	}
 
     canvas.addEventListener('mousedown', startPosition);
@@ -71,19 +80,38 @@ function initPixelPen() {
 
     // ===== UI CONTROLS =====
     const controls = document.getElementById('main-settings-controls');
-    controls.innerHTML = `
-        <label>Brush Size:
-            <input type="range" min="1" max="50" value="${lineWidth}" id="brushSize">
-        </label><br>
-        <label>Color:
-            <input type="color" id="colorPicker" value="${color}">
-        </label><br>
-        <button id="toggleDraw">🖊️ Toggle Draw</button>
-        <button id="eraser">🧽 Eraser</button>
-        <button id="fill">🪣 Fill</button>
-        <button id="clearCanvas">🗑️ Clear All</button>
-        <button id="toggleCanvas">🪟 Toggle Canvas</button>
-    `;
+	controls.innerHTML = `
+		<label>Brush Size:
+			<input type="range" min="1" max="50" value="${lineWidth}" id="brushSize">
+		</label><br>
+
+		<label>Brush Type:
+			<select id="brushType">
+				<option value="round">🖊️ Round</option>
+				<option value="square">▣ Square</option>
+				<option value="spray">☁️ Spray</option>
+			</select>
+		</label><br>
+
+		<label>Color:
+			<input type="color" id="colorPicker" value="${color}">
+		</label><br>
+
+		<div id="quickPalette">
+			<span class="color-swatch" style="background: red" data-color="#ff0000"></span>
+			<span class="color-swatch" style="background: green" data-color="#00ff00"></span>
+			<span class="color-swatch" style="background: blue" data-color="#0000ff"></span>
+			<span class="color-swatch" style="background: yellow" data-color="#ffff00"></span>
+			<span class="color-swatch" style="background: black" data-color="#000000"></span>
+			<span class="color-swatch" style="background: white; border: 1px solid #ccc;" data-color="#ffffff"></span>
+		</div><br>
+
+		<button id="toggleDraw">🖊️ Toggle Draw</button>
+		<button id="eraser">🧽 Eraser</button>
+		<button id="fill">🪣 Fill</button>
+		<button id="clearCanvas">🗑️ Clear All</button>
+		<button id="toggleCanvas">🪟 Toggle Canvas</button>
+	`;
 
     document.getElementById('brushSize').addEventListener('input', (e) => {
         lineWidth = parseInt(e.target.value);
@@ -102,7 +130,16 @@ function initPixelPen() {
 		isEraser = !isEraser;
 		eraserBtn.classList.toggle('active', isEraser); // Optional styling
 	});
+	document.getElementById('brushType').addEventListener('change', (e) => {
+		brushType = e.target.value;
+	});
 
+	document.querySelectorAll('.color-swatch').forEach(swatch => {
+		swatch.addEventListener('click', (e) => {
+			color = swatch.getAttribute('data-color');
+			document.getElementById('colorPicker').value = color;
+		});
+	});
     document.getElementById('fill').addEventListener('click', () => {
         ctx.globalCompositeOperation = 'source-over';
         ctx.fillStyle = color;
