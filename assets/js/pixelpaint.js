@@ -180,25 +180,25 @@ function drawChaotic() {
     ctx.beginPath();
 
     // Top border wave
-    for (let x = 0; x <= canvasDiv.width; x += step) {
+    for (let x = 0; x <= canvas.width; x += step) {
         const y = Math.sin((x + chillWaveOffset) / waveLength) * waveAmplitude;
         ctx.lineTo(x, y);
     }
 
     // Right border wave
-    for (let y = 0; y <= canvasDiv.height; y += step) {
-        const x = canvasDiv.width + Math.sin((y + chillWaveOffset) / waveLength) * waveAmplitude;
+    for (let y = 0; y <= canvas.height; y += step) {
+        const x = canvas.width + Math.sin((y + chillWaveOffset) / waveLength) * waveAmplitude;
         ctx.lineTo(x, y);
     }
 
     // Bottom border wave
-    for (let x = canvasDiv.width; x >= 0; x -= step) {
-        const y = canvasDiv.height + Math.sin((x + chillWaveOffset) / waveLength) * waveAmplitude;
+    for (let x = canvas.width; x >= 0; x -= step) {
+        const y = canvas.height + Math.sin((x + chillWaveOffset) / waveLength) * waveAmplitude;
         ctx.lineTo(x, y);
     }
 
     // Left border wave
-    for (let y = canvasDiv.height; y >= 0; y -= step) {
+    for (let y = canvas.height; y >= 0; y -= step) {
         const x = Math.sin((y + chillWaveOffset) / waveLength) * waveAmplitude;
         ctx.lineTo(x, y);
     }
