@@ -1451,7 +1451,16 @@ function displayentriviaHistory() {
 //---generic ui logic----|
 //-----------------------
 
+function updateBubblewrapVisibility() {
+	const bubblewrap = document.getElementById("bubblewrap");
 
+	if (!bubblewrap) return;
+
+	const hide = hideButtonBubble === true || hideButtonBubble === "on";
+
+	bubblewrap.style.opacity = hide ? "0.00" : "1.00";
+}
+updateBubblewrapVisibility();
 //toggles
 		// Toggle the state
 function toggleButtonBubble() {

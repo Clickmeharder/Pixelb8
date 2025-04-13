@@ -292,15 +292,6 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
   });
 });
 
-function updateBubblewrapVisibility() {
-	const bubblewrap = document.getElementById("bubblewrap");
-
-	if (!bubblewrap) return;
-
-	const hide = hideButtonBubble === true || hideButtonBubble === "on";
-
-	bubblewrap.style.opacity = hide ? "0.00" : "1.00";
-}
 
 
 
@@ -323,4 +314,4 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 /* localStorage.removeItem("themeSettings"); */
 
-updateBubblewrapVisibility();
+
