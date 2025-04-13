@@ -1708,13 +1708,41 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     if (!userColors[user]) {
         userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
     }
+	if (command.toLowerCase() === "entriviatest-auth") {
+        if (!isStreamerAndAuthorize(user, command)) return;
+        displayConsoleMessage(user, `!${command} ✅`);
+        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
+    }
+	if (command.toLowerCase() === "entriviatest-sounds") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		displayConsoleMessage(user, `!${command} ✅`);
+		playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
+	}
+//-------------------------------------------------------
+// BubbleButts
+	if (command.toLowerCase() === "toggle-bubblebutt") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		// Optional feedback in console
+		toggleButtonBubble();
+		const stateMsg = hideButtonBubble ? "Hidden 🍑" : "Visible 🍑";
+		displayConsoleMessage(user, `!${command} ✅ ${stateMsg}`);
+		console.log(user, `!${command} ✅ ${stateMsg}`);
+	}
+//--------------------------------------------
+	// PixelDisc/SpinWheel Commands	
     if (command.toLowerCase() === "pull-lever") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
 		showWheel();
         pullDiscRotationLever();
     }
-
+    if (command.toLowerCase() === "toggle-wheel") {
+        if (!isStreamerAndAuthorize(user, command)) return;
+        displayConsoleMessage(user, `!${command} ✅`);
+		showWheel();
+    }
+//--------------------------------------------
+	//pixelspace commands
     if (command.toLowerCase() === "launch") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
@@ -1725,6 +1753,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         displayConsoleMessage(user, `!${command} ✅`);
         spawnColonistShip(user);
     }
+//--------------------------------------------
+//    Entrivia Commands
 	if (command === "a" || command === "answer") {
 		if (!activeQuestion) {
 			console.log("No active question. activeQuestion returns as:" + activeQuestion );
@@ -1749,16 +1779,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 	// Only allow streamer to trigger these commands:
 //-------------------------------------------------------
-	if (command.toLowerCase() === "entriviatest-auth") {
-        if (!isStreamerAndAuthorize(user, command)) return;
-        displayConsoleMessage(user, `!${command} ✅`);
-        displayChatMessage(user, `!${command} ✅`, flags, extra, true);
-    }
-	if (command.toLowerCase() === "entriviatest-sounds") {
-		if (!isStreamerAndAuthorize(user, command)) return;
-		displayConsoleMessage(user, `!${command} ✅`);
-		playQuestionSound(randomSound); // Play the sound when !playsound is typed in chat
-	}
+
 	if (command.toLowerCase() === "entrivia-nextround") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 		console.log("Current Round:", round);
@@ -1894,17 +1915,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		toggleentrivia();
 		toggleElement("entriviaWrapper", "fade");
 	}
-	if (command.toLowerCase() === "toggle-bubblebutt") {
-		if (!isStreamerAndAuthorize(user, command)) return;
-		// Optional feedback in console
-		toggleButtonBubble();
-		const stateMsg = hideButtonBubble ? "Hidden 🍑" : "Visible 🍑";
-		displayConsoleMessage(user, `!${command} ✅ ${stateMsg}`);
-		console.log(user, `!${command} ✅ ${stateMsg}`);
-	}
-
 //-------------------------------------------------------
-	// Command-based settings updates
 	//example cmd to add question:
 	//!entrivia-addquestion easy | mining | What is the least valuable possible mining find? | nrf, no resources found
 	//!entrivia-addquestion easy | mining | this is a multiplechoice question for testing purposes | myanswer | option 1, option 2, option 3, option 4
@@ -2021,7 +2032,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayentriviaMessage(user, `!${command} ${usecustomquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
 	}
 //-------------------------------------------------------
-    // Only allow mods to trigger these commands:
+// Mod commands:
     if (flags.mod) {
 		if (command === "entriviamod-test") {
 			if (!isStreamerAndAuthorize(user, command)) return;
@@ -2030,6 +2041,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			toggleElement("twitchchatContainer", "fade");
 		}
 	}
+//-------------------------------------------------------
+//    Commands for all Chatters:
 	if (command.toLowerCase() === "helloworld") {
 		// Custom logic to send "Hello, world!" to your overlay chat
 		const message = "Hello, world!";
