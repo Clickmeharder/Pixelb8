@@ -455,6 +455,7 @@ window.addEventListener("resize", () => repaint(angle));
 	
 	document.getElementById("discRotationLever").addEventListener("click", () => {
 		console.log(`Wheel done gonna spun!`);
+		showElement(wheelcanvaswrapper, "fade");
 		spinWheel();
 	});
 
