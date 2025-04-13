@@ -2,7 +2,7 @@
 // Icons: 🚀 (chattership), 🛸 (enemy UFO), 🛰️ (satellite)
 
 // Let's add them to <div id="streamSpace"></div> instead of the body
-const chatterShips = {};
+const colonistShips = {};
 const satellites = {};
 const enemies = [];
 
@@ -15,7 +15,7 @@ function randomPosition(el) {
 
 function animateEntity(el, type) {
   const interval = setInterval(() => {
-    const angle = Math.random() * 360;
+    const angle = Math.random() * 2 * Math.PI;
     const distance = Math.random() * 50;
     const dx = Math.cos(angle) * distance;
     const dy = Math.sin(angle) * distance;
@@ -39,7 +39,7 @@ function moveChatterShipRandomly(ship) {
 
   // Random movement interval for chatter ships
   const movementInterval = setInterval(() => {
-    const angle = Math.random() * 360; // Random angle in radians
+    const angle = Math.random() * 2 * Math.PI; 
     const distance = Math.random() * 100; // Random distance
     const dx = Math.cos(angle) * distance;
     const dy = Math.sin(angle) * distance;
@@ -60,37 +60,33 @@ function moveChatterShipRandomly(ship) {
   ship.dataset.animInterval = movementInterval; // Store interval for potential clearing later
 }
 
-function spawnChatterShip(user) {
-    if (document.getElementById(`ship-${user}`)) return; // prevent duplicates
+function spawnColonistShip(user) {
+  if (document.getElementById(`ship-${user}`)) return;
 
-    const ship = document.createElement("div");
-    ship.classList.add("chattership");
-    ship.id = `ship-${user}`;
+  const ship = document.createElement("div");
+  ship.classList.add("colonistship");
+  ship.id = `ship-${user}`;
 
-    const userColor = userColors[user] || "orangered";
+  const shipHitbox = document.createElement("div");
+  shipHitbox.classList.add("ship-hitbox");
 
-    // Set ship text/icon
-    ship.textContent = "🚀";
+  const userColor = userColors[user] || "orangered";
+  shipHitbox.style.borderBottomColor = userColor;
 
-    // Apply user color to the name
-    const nameTag = document.createElement("div");
-    nameTag.classList.add("chattership-name");
-    nameTag.textContent = user;
-    nameTag.style.color = userColor;
-    ship.appendChild(nameTag);
+  const nameTag = document.createElement("div");
+  nameTag.classList.add("colonistship-name");
+  nameTag.textContent = user;
+  nameTag.style.color = userColor;
 
-    // Apply movement, styles, etc.
-    ship.style.left = `${Math.random() * 90}vw`;
-    ship.style.top = `${Math.random() * 80}vh`;
+  ship.appendChild(shipHitbox);
+  ship.appendChild(nameTag);
 
-    // Save the color for use in projectiles
-    ship.dataset.user = user;
-    ship.dataset.color = userColor;
+  ship.style.left = `${Math.random() * 90}vw`;
+  ship.style.top = `${Math.random() * 80}vh`;
 
-    document.getElementById("streamSpace").appendChild(ship); // Add ship to streamSpace div
-
-    moveChatterShipRandomly(ship); // Begin moving chattership randomly
-    chatterShips[user] = ship;
+  document.getElementById("streamSpace").appendChild(ship);
+  moveColonistShipRandomly(ship);
+  colonistShips[user] = ship;
 }
 
 function spawnSatellite(user) {
@@ -143,52 +139,5 @@ setInterval(() => {
   if (chance < 0.4) spawnEnemyUFO();
 }, 10000);
 
-// == CSS == 
-const style = document.createElement("style");
-style.textContent = `
-  body {
-    margin: 0;
-    overflow: hidden;
-    background: transparent;
-  }
-  #streamSpace {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-  .entity {
-    position: fixed;
-    font-size: 2rem;
-    transition: transform 0.3s ease;
-    pointer-events: none;
-    user-select: none;
-    text-align: center;
-  }
-  .callSign {
-    font-size: 0.7rem;
-    color: white;
-    display: block;
-    margin-top: -5px;
-  }
-  .chattership-name {
-    position: absolute;
-    bottom: -30px;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    font-size: 0.8rem;
-    color: inherit;
-  }
-  .ammo {
-    position: absolute;
-    font-size: 1.5rem;
-    color: inherit;
-    transition: top 0.5s ease;
-  }
-  .ammo.move {
-    top: 100%;
-  }
-`;
-document.head.appendChild(style);
 
 console.log("pixelspace initiated");
