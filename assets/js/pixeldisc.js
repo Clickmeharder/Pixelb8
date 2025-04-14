@@ -372,6 +372,7 @@ window.addEventListener("resize", () => repaint(angle));
 			option.value = name;
 			option.textContent = name;
 			loadSelect.appendChild(option);
+			replaceAllSelects();
 		}
 	}
 	function updateRemoveDropdown() {
@@ -381,6 +382,7 @@ window.addEventListener("resize", () => repaint(angle));
 			option.value = index;
 			option.textContent = section;
 			removeSelect.appendChild(option);
+			replaceAllSelects();
 		});
 	}
 	function addwheelSection() {
@@ -427,6 +429,7 @@ window.addEventListener("resize", () => repaint(angle));
 	  document.getElementById("fadeTimeInput").value = userPixeldiscConfig.autoFadeTime / 1000;
 	  updateLeverVisibility();
 	  updateAllStatusIndicators(userPixeldiscConfig);
+	  replaceAllSelects();
 	}
 	function loadPixelDiscConfig() {
 	  const savedConfig = localStorage.getItem("pixelDiscConfig");
@@ -435,6 +438,7 @@ window.addEventListener("resize", () => repaint(angle));
 		Object.assign(userPixeldiscConfig, parsedConfig);
 	  }
 	  applyConfigToUI();
+	  replaceAllSelects();
 	}
 
 	function savewheelSections() {
