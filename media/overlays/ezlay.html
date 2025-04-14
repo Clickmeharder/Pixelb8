@@ -615,12 +615,23 @@ function poopAttack() {
     const poop = document.createElement("div");
     poop.textContent = "💩";
     poop.style.position = "fixed";
-    poop.style.top = "50%";
-    poop.style.left = "50%";
-    poop.style.transform = "translate(-50%, -50%)";
-    poop.style.fontSize = "5rem";
+
+    // Random position
+    const top = Math.random() * 80 + 10; // Between 10% and 90%
+    const left = Math.random() * 80 + 10; // Between 10% and 90%
+
+    // Random size (2rem - 6rem)
+    const size = Math.random() * 4 + 2;
+
+    // Random rotation (0 - 360 degrees)
+    const rotation = Math.floor(Math.random() * 360);
+
+    poop.style.top = `${top}%`;
+    poop.style.left = `${left}%`;
+    poop.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+    poop.style.fontSize = `${size}rem`;
     poop.style.opacity = "0";
-    poop.style.transition = "opacity 0.5s ease";
+    poop.style.transition = "opacity 0.4s ease";
     poop.style.zIndex = "9999";
     poop.style.pointerEvents = "none";
 
@@ -631,14 +642,15 @@ function poopAttack() {
         poop.style.opacity = "1";
     });
 
-    // Fade out after 2.5s, then remove
+    // Fade out after ~1s, then remove
     setTimeout(() => {
         poop.style.opacity = "0";
         setTimeout(() => {
             poop.remove();
-        }, 500); // Wait for fade-out transition
-    }, 2500);
+        }, 400); // Wait for fade-out transition
+    }, 1100);
 }
+
 // Check for browser support
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
