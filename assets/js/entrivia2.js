@@ -190,7 +190,7 @@ function fetchentriviaQuestions() {
 						defaultQuestions[round][category].push({
 							question: question,
 							answers: answers,  // Already split into an array
-							rawanswer: answersRaw,  // Optional, for displaying original string if needed
+							//rawanswer: answersRaw,  // Optional, for displaying original string if needed
 							type: type,
 							options: options,
 						});
