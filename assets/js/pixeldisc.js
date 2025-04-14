@@ -362,27 +362,36 @@ window.addEventListener("resize", () => repaint(angle));
 	function saveWheelsToStorage(wheels) {
 		localStorage.setItem("savedWheels", JSON.stringify(wheels));
 	}
-	function updateLoadDropdown() {
-		const loadSelect = document.getElementById("loadwheelsection");
-		loadSelect.innerHTML = "";
+function updateLoadDropdown() {
+    const loadSelect = document.getElementById("loadwheelsection");
+    loadSelect.innerHTML = "";
 
-		const wheels = getSavedWheels();
-		for (const name in wheels) {
-			const option = document.createElement("option");
-			option.value = name;
-			option.textContent = name;
-			loadSelect.appendChild(option);
-		}
-	}
-	function updateRemoveDropdown() {
-		removeSelect.innerHTML = ""; // Clear current options
-		sections.forEach((section, index) => {
-			const option = document.createElement("option");
-			option.value = index;
-			option.textContent = section;
-			removeSelect.appendChild(option);
-		});
-	}
+    const wheels = getSavedWheels();
+    for (const name in wheels) {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        loadSelect.appendChild(option);
+    }
+
+    // 🔁 Recreate the custom dropdown
+    replaceAllSelects();
+}
+function updateRemoveDropdown() {
+    const removeSelect = document.getElementById("removewheelsection");
+    removeSelect.innerHTML = "";
+
+    sections.forEach((section, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = section;
+        removeSelect.appendChild(option);
+    });
+
+    // 🔁 Recreate the custom dropdown
+    replaceAllSelects();
+}
+
 	function addwheelSection() {
 		const newSection = addInput.value.trim();
 		if (newSection && !sections.includes(newSection)) {
@@ -427,7 +436,6 @@ window.addEventListener("resize", () => repaint(angle));
 	  document.getElementById("fadeTimeInput").value = userPixeldiscConfig.autoFadeTime / 1000;
 	  updateLeverVisibility();
 	  updateAllStatusIndicators(userPixeldiscConfig);
-	  replaceAllSelects();
 	}
 	function loadPixelDiscConfig() {
 	  const savedConfig = localStorage.getItem("pixelDiscConfig");

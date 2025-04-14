@@ -297,8 +297,16 @@ function replaceAllSelects() {
     const selects = document.querySelectorAll('select');
 
     selects.forEach(originalSelect => {
-        // Skip if already replaced
-        if (originalSelect.classList.contains('replaced')) return;
+        // Cleanup: remove previous wrapper and custom options
+        if (originalSelect.classList.contains('replaced')) {
+            const existingWrapper = originalSelect.previousElementSibling;
+            if (existingWrapper?.classList.contains('custom-dropdown-wrapper')) {
+                existingWrapper.remove();
+            }
+            document.querySelectorAll('.custom-options').forEach(el => el.remove());
+            originalSelect.classList.remove('replaced');
+            originalSelect.style.display = ''; // Make it visible again for rebuilding
+        }
 
         // Get computed styles
         const computedStyle = getComputedStyle(originalSelect);
