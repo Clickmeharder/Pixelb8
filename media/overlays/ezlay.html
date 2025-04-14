@@ -678,7 +678,8 @@ if (SpeechRecognition) {
     // Your commands
     const lower = transcript.toLowerCase();
     if (lower.includes("spin wheel")) pullDiscRotationLever();
-    if (lower.includes("start trivia")) startentrivia();
+    if (lower.includes("play trivia")) startentrivia();
+	if (lower.includes("chatgpt ask a random trivia question for me please")) startentriviaAsk();
     if (lower.includes("poopy")) poopAttack();
   });
 
