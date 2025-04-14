@@ -437,7 +437,6 @@ function updateRemoveDropdown() {
 		Object.assign(userPixeldiscConfig, parsedConfig);
 	  }
 	  applyConfigToUI();
-	  replaceAllSelects();
 	}
 
 	function savewheelSections() {
