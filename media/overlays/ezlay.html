@@ -237,7 +237,8 @@
 		<div class="controller" id="wheel-controller">
 		<button class="close-btn">×</button><h2 class="controllerheader">Spin Wheel Controls</h2>
 			<div class="controlpanel">
-				<button id="voice-btn">🎙️ Speak</button>
+				<button id="startBtn">Start Listening</button>
+				<button id="stopBtn" disabled>Stop Listening</button>
 				<p id="output">Say something...</p>
 				<div class="controls"id="wheel-maincontrols">
 					<div class="row" for="wheel-spinButt">
@@ -638,46 +639,61 @@ function poopAttack() {
         }, 500); // Wait for fade-out transition
     }, 2500);
 }
-  // Check for browser support
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+// Check for browser support
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  if (SpeechRecognition) {
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+if (SpeechRecognition) {
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  recognition.continuous = true; // 🔁 Important for ongoing listening
 
-    const output = document.getElementById('output');
-    const btn = document.getElementById('voice-btn');
+  const output = document.getElementById('output');
+  const startBtn = document.getElementById('voice-btn');
+  const stopBtn = document.getElementById('stop-voice-btn');
 
-    btn.addEventListener('click', () => {
-      recognition.start();
-      output.textContent = "Listening...";
-    });
+  let isListening = false;
 
-    recognition.addEventListener('result', (event) => {
-      const transcript = event.results[0][0].transcript;
-      output.textContent = `You said: ${transcript}`;
-      
-      // Example: Do stuff based on what was said
-      if (transcript.toLowerCase().includes("spin wheel")) {
-        pullDiscRotationLever();
-      }
-      if (transcript.toLowerCase().includes("start Trivia")) {
-        startentrivia();
-      
-      if (transcript.toLowerCase().includes("poopy")) {
-        poopAttack();
-      }
-    });
+  startBtn.addEventListener('click', () => {
+    isListening = true;
+    recognition.start();
+    output.textContent = "🎙️ Listening...";
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+  });
 
-    recognition.addEventListener('end', () => {
-      console.log("Stopped listening.");
-    });
+  stopBtn.addEventListener('click', () => {
+    isListening = false;
+    recognition.stop();
+    output.textContent = "🛑 Stopped listening.";
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+  });
 
-  } else {
-    alert("Your browser doesn't support speech recognition 😢");
-  }
+  recognition.addEventListener('result', (event) => {
+    const transcript = event.results[event.results.length - 1][0].transcript.trim();
+    output.textContent = `You said: "${transcript}"`;
+
+    // Your commands
+    const lower = transcript.toLowerCase();
+    if (lower.includes("spin wheel")) pullDiscRotationLever();
+    if (lower.includes("start trivia")) startentrivia();
+    if (lower.includes("poopy")) poopAttack();
+  });
+
+  recognition.addEventListener('end', () => {
+    if (isListening) {
+      console.log("Recognition ended, restarting...");
+      recognition.start(); // 🔁 Auto-restart
+    } else {
+      console.log("Recognition stopped by user.");
+    }
+  });
+
+} else {
+  alert("Your browser doesn't support speech recognition 😢");
+}
 </script>
 	<script>
 		
