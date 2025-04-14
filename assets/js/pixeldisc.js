@@ -12,7 +12,7 @@ const toggleOptions = {
 
 
 let canvas = document.getElementById("canvas1");
-let sections = ["FREE Beer Keg", "poop", "free spin", "Recycling Scrip", "Colonist Roulette", "Merp Race", "Trivia", "Ordinance Crate", "nothing"];
+let sections = ["Beer Keg", "poop", "free spin", "Recycling Scrip", "Trivia", "Ordinance Crate", "nothing"];
 let colors = ["#001f1fe8", "#004040eb"];
 let wheels = null;
 let frame = null;
@@ -46,7 +46,7 @@ const wheelFontConfig = {
   family: wheelFont || "Arial",
   weight: "bold",
   minSize: 8,
-  maxSize: 21,
+  maxSize: 20,
   scaleFactor: 0.8
 };
 
