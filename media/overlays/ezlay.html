@@ -581,6 +581,7 @@
 			</div>
 		</div>
 		<!--this is the underlay its mostly for aesthetics and sits behind everything else it might be a border or different animated elements -->
+		<div id="underlay"></div>
 		<div id="pageborder"></div>
 		<!--
 		PixelPaint Wrapper 
@@ -609,6 +610,34 @@ _____________________________  -->
 	</script>
 
 <script>
+function poopAttack() {
+    const poop = document.createElement("div");
+    poop.textContent = "💩";
+    poop.style.position = "fixed";
+    poop.style.top = "50%";
+    poop.style.left = "50%";
+    poop.style.transform = "translate(-50%, -50%)";
+    poop.style.fontSize = "5rem";
+    poop.style.opacity = "0";
+    poop.style.transition = "opacity 0.5s ease";
+    poop.style.zIndex = "9999";
+    poop.style.pointerEvents = "none";
+
+    document.getElementById("underlay").appendChild(poop);
+
+    // Trigger fade-in
+    requestAnimationFrame(() => {
+        poop.style.opacity = "1";
+    });
+
+    // Fade out after 2.5s, then remove
+    setTimeout(() => {
+        poop.style.opacity = "0";
+        setTimeout(() => {
+            poop.remove();
+        }, 500); // Wait for fade-out transition
+    }, 2500);
+}
   // Check for browser support
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -636,6 +665,9 @@ _____________________________  -->
       }
       if (transcript.toLowerCase().includes("start Trivia")) {
         startentrivia();
+      
+      if (transcript.toLowerCase().includes("poopy")) {
+        poopAttack();
       }
     });
 
