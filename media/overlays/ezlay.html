@@ -687,13 +687,13 @@ if (SpeechRecognition) {
   recognition.addEventListener('result', (event) => {
     const transcript = event.results[event.results.length - 1][0].transcript.trim();
     output.textContent = `You said: "${transcript}"`;
-
-    // Your commands
-    const lower = transcript.toLowerCase();
 	if (closedCaptionsEnabled) {
 	  const captionsDiv = document.getElementById("captions");
 	  captionsDiv.textContent = transcript;
 	}
+    // Your commands
+    const lower = transcript.toLowerCase();
+
     if (lower.includes("spin wheel")) pullDiscRotationLever();
     if (lower.includes("play trivia")) startentrivia();
 	if (lower.includes("put a random question on the screen")) startentriviaAsk();
