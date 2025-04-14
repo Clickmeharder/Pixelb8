@@ -293,7 +293,7 @@ function loadCustomQuestions() {
                 option.value = `${round}-${category}-${index}`;  // Format: round-category-index
                 option.text = `[${category}] ${q.question}`;  // Show category and question
                 dropdown.appendChild(option);
-				replaceAllSelects();
+
             });
         }
     }
@@ -371,7 +371,7 @@ function updateAnswerDisplay() {
 
         // Insert the answer HTML into the display
         answerDisplay.innerHTML = answerHtml;
-		replaceAllSelects();
+
     }
 }
 

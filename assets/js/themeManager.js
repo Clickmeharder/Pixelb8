@@ -418,7 +418,6 @@ window.addEventListener("DOMContentLoaded", () => {
       document.documentElement.style.setProperty(varName, value);
     });
 	debugThemeStyles();
-	replaceAllSelects();
     console.log("Loaded saved theme settings:", savedSettings);
   }
 });
