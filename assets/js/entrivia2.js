@@ -624,7 +624,7 @@ function getRandomQuestion() {
     return {
         question: question.question,
         answers: question.answers,         // Already an array (from fetch parsing)
-        rawanswer: question.rawanswer || question.answers.join(';'),  // fallback if needed
+        //rawanswer: question.rawanswer || question.answers.join(';'),  // fallback if needed
         type: question.type,
         options: question.options || [],
         round: currentRound,
