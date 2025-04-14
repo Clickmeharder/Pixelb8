@@ -410,8 +410,8 @@ body.cyberice-theme {
   --input-border-color: #0f1112a6;
   --input-border-style: inset;
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
-  --input-border-radius: 5px;
-  --select-margin: auto 11px 0 0;
+  --input-border-radius: 5px;auto 0 auto 0
+  --select-margin: auto 2px 0 0;
 }
 body.neonvoid-theme {
   --body-font: 'Share Tech Mono', monospace;
@@ -484,7 +484,7 @@ body.neonvoid-theme {
   --input-border-style: inset;
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
   --input-border-radius: 5px;
-  --select-margin: auto 11px 0 0;
+  --select-margin: auto 2px 0 0;
 }
 body.biohazard-theme {
   --body-font: 'VT323', monospace;
@@ -557,7 +557,7 @@ body.biohazard-theme {
   --input-border-style: inset;
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
   --input-border-radius: 5px;
-  --select-margin: auto 11px 0 0;
+  --select-margin: auto 2px 0 0;
 }
 body.holo-theme {
 	/* --body roots are set directly to the body */
@@ -633,7 +633,7 @@ body.holo-theme {
   --input-border-style:inset;
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
   --input-border-radius:5px;
-  --select-margin: auto 11px 0 0;
+  --select-margin: auto 2px 0 0;
 
 }
 body.synthwave-theme {
@@ -1562,6 +1562,7 @@ select.a {
 	background-color: var(--input-bg-color);
 	border: var(--input-border);
 	border-radius: var(--input-border-radius);
+	min-width:150px;
 	width: 62%;
 }
 select.b {}
