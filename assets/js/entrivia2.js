@@ -2035,6 +2035,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayConsoleMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`);
 		displayentriviaMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
 	}
+	if (command.toLowerCase() === "entrivia-customquestions-clearall") {  
+		if (!isStreamerAndAuthorize(user, command)) return;
+		clearAllCustomQuestions(); // Uses function to update setting
+		displayConsoleMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`);
+		displayentriviaMessage(user, `!${command} ${usedefaultquestions ? "Enabled ✅" : "Disabled ❌"}`, flags, extra, true);
+	}
 	// Toggle custom questions
 	if (command.toLowerCase() === "entrivia-customquestions") {  
 		if (!isStreamerAndAuthorize(user, command)) return;
