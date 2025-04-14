@@ -1717,7 +1717,7 @@ select.b {}
 		position: absolute;
 		left: var(--twitchchat-X);
 		bottom: var(--twitchchat-Y);
-		width: 30%;
+		width: 26%;
 		opacity:var(--twitchchat-opacity);
 		overflow:visible;
 		overflow-y: hidden;
