@@ -2637,7 +2637,7 @@ button.statustoggle {}
 /*
 Select Enhancements (arrows)*/ 
 
-
+.select-enhanced{ margin-right:0px;}
 
 .arrow-container {
     display: flex;
