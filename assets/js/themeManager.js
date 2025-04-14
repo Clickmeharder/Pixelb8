@@ -293,51 +293,60 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 });
 
 
-function enhanceSelectWithArrowsOnce() {
-    document.querySelectorAll("select").forEach(select => {
-        if (select.parentElement.classList.contains("select-enhanced")) return; // Avoid duplicates
-
-        // Create wrapper
-        const wrapper = document.createElement("div");
-        wrapper.classList.add("select-enhanced");
-
-        // Create arrow container (stacked vertically)
-        const arrowContainer = document.createElement("div");
-        arrowContainer.classList.add("arrow-container");
-
-        // Create up and down buttons
-        const upBtn = document.createElement("button");
-        upBtn.classList.add("arrow-button", "up");
-        upBtn.innerHTML = "&#x25B2;"; // ▲
-
-        const downBtn = document.createElement("button");
-        downBtn.classList.add("arrow-button", "down");
-        downBtn.innerHTML = "&#x25BC;"; // ▼
-
-        // Insert logic for buttons
-        upBtn.addEventListener("click", () => {
-            if (select.selectedIndex > 0) {
-                select.selectedIndex--;
-                select.dispatchEvent(new Event("change"));
-            }
-        });
-
-        downBtn.addEventListener("click", () => {
-            if (select.selectedIndex < select.options.length - 1) {
-                select.selectedIndex++;
-                select.dispatchEvent(new Event("change"));
-            }
-        });
-
-        // Append everything
-        arrowContainer.appendChild(upBtn);
-        arrowContainer.appendChild(downBtn);
-
-        select.parentNode.insertBefore(wrapper, select);
-        wrapper.appendChild(select);
-        wrapper.appendChild(arrowContainer);
-    });
+.select-enhanced {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    gap: 4px;
 }
+
+.select-enhanced select {
+    padding-right: 1.5em;
+}
+
+.arrow-container {
+    display: flex;
+    flex-direction: column;
+    margin-left: 4px;
+}
+
+.arrow-button {
+    background: var(--arrow-bg, #444);
+    color: var(--arrow-color, #fff);
+    border: none;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-size: 10px;
+    line-height: 1;
+    transition: background 0.2s;
+    border-radius: 3px;
+}
+
+.arrow-button:hover {
+    background: var(--arrow-hover-bg, #666);
+}
+
+.arrow-button:active {
+    background: var(--arrow-active-bg, #888);
+}
+
+// On DOMContentLoaded, load saved theme and layout settings
+window.addEventListener("DOMContentLoaded", () => {
+  const savedSettings = JSON.parse(localStorage.getItem("themeSettings"));
+  if (savedSettings) {
+    // Set the theme
+    document.body.className = savedSettings.themeName;
+
+    // Set all layout variables
+    const layout = savedSettings.layout || {};
+    Object.entries(layout).forEach(([varName, value]) => {
+      document.documentElement.style.setProperty(varName, value);
+    });
+	debugThemeStyles();
+	enhanceSelectWithArrowsOnce();
+    console.log("Loaded saved theme settings:", savedSettings);
+  }
+});
 /* localStorage.removeItem("themeSettings"); */
 
 
