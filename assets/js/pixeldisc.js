@@ -373,9 +373,6 @@ function updateLoadDropdown() {
         option.textContent = name;
         loadSelect.appendChild(option);
     }
-
-    // 🔁 Recreate the custom dropdown
-    replaceAllSelects();
 }
 function updateRemoveDropdown() {
     const removeSelect = document.getElementById("removewheelsection");
@@ -387,9 +384,6 @@ function updateRemoveDropdown() {
         option.textContent = section;
         removeSelect.appendChild(option);
     });
-
-    // 🔁 Recreate the custom dropdown
-    replaceAllSelects();
 }
 
 	function addwheelSection() {
@@ -399,7 +393,6 @@ function updateRemoveDropdown() {
 			updateRemoveDropdown();
 			addInput.value = "";
 
-			// 🔁 Force redraw
 			wheels = null;
 			frame = null;
 			repaint(angle);

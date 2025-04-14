@@ -293,59 +293,50 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 });
 
 
-function enhanceSelectWithArrows() {
-    const selects = document.querySelectorAll('select');
-
-    selects.forEach(select => {
-        // Prevent duplicates
-        if (select.classList.contains('has-arrows')) return;
+function enhanceSelectWithArrowsOnce() {
+    document.querySelectorAll("select").forEach(select => {
+        if (select.parentElement.classList.contains("select-enhanced")) return; // Prevent double-enhancing
 
         // Create wrapper
-        const wrapper = document.createElement('div');
-        wrapper.className = 'select-with-arrows';
-        wrapper.style.display = 'flex';
-        wrapper.style.alignItems = 'center';
-        wrapper.style.gap = '4px';
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("select-enhanced");
+        wrapper.style.display = "inline-flex";
+        wrapper.style.alignItems = "center";
+        wrapper.style.gap = "4px";
 
-        // Create up arrow
-        const upBtn = document.createElement('button');
-        upBtn.textContent = '▲';
-        upBtn.className = 'arrow-button';
-        upBtn.style.cursor = 'pointer';
+        // Create up and down buttons
+        const upBtn = document.createElement("button");
+        upBtn.textContent = "▲";
+        upBtn.title = "Previous option";
+        upBtn.style.padding = "2px 6px";
+        
+        const downBtn = document.createElement("button");
+        downBtn.textContent = "▼";
+        downBtn.title = "Next option";
+        downBtn.style.padding = "2px 6px";
 
-        // Create down arrow
-        const downBtn = document.createElement('button');
-        downBtn.textContent = '▼';
-        downBtn.className = 'arrow-button';
-        downBtn.style.cursor = 'pointer';
-
-        // Move the select into the wrapper
-        const parent = select.parentNode;
-        parent.insertBefore(wrapper, select);
-        wrapper.appendChild(select);
-        wrapper.appendChild(upBtn);
-        wrapper.appendChild(downBtn);
-
-        // Style cleanup
-        select.classList.add('has-arrows');
-
-        // Arrow functionality
-        upBtn.addEventListener('click', () => {
+        // Insert logic for buttons
+        upBtn.addEventListener("click", () => {
             if (select.selectedIndex > 0) {
                 select.selectedIndex--;
-                select.dispatchEvent(new Event('change'));
+                select.dispatchEvent(new Event("change"));
             }
         });
 
-        downBtn.addEventListener('click', () => {
+        downBtn.addEventListener("click", () => {
             if (select.selectedIndex < select.options.length - 1) {
                 select.selectedIndex++;
-                select.dispatchEvent(new Event('change'));
+                select.dispatchEvent(new Event("change"));
             }
         });
+
+        // Wrap the select and insert buttons
+        select.parentNode.insertBefore(wrapper, select);
+        wrapper.appendChild(upBtn);
+        wrapper.appendChild(select);
+        wrapper.appendChild(downBtn);
     });
 }
-
 
 // On DOMContentLoaded, load saved theme and layout settings
 window.addEventListener("DOMContentLoaded", () => {
@@ -360,6 +351,7 @@ window.addEventListener("DOMContentLoaded", () => {
       document.documentElement.style.setProperty(varName, value);
     });
 	debugThemeStyles();
+	enhanceSelectWithArrowsOnce();
     console.log("Loaded saved theme settings:", savedSettings);
   }
 });
