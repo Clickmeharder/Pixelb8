@@ -304,18 +304,23 @@ function enhanceSelectWithArrowsOnce() {
         wrapper.style.alignItems = "center";
         wrapper.style.gap = "4px";
 
-        // Create up and down buttons
-        const upBtn = document.createElement("button");
-        upBtn.textContent = "▲";
-        upBtn.title = "Previous option";
-        upBtn.style.padding = "2px 6px";
-        
-        const downBtn = document.createElement("button");
-        downBtn.textContent = "▼";
-        downBtn.title = "Next option";
-        downBtn.style.padding = "2px 6px";
+        // Create arrow container
+        const arrowContainer = document.createElement("div");
+        arrowContainer.classList.add("arrow-container");
 
-        // Insert logic for buttons
+        // Create up button
+        const upBtn = document.createElement("button");
+        upBtn.classList.add("arrow-button", "up");
+        upBtn.innerHTML = "&#x25B2;"; // ▲
+        upBtn.title = "Previous option";
+
+        // Create down button
+        const downBtn = document.createElement("button");
+        downBtn.classList.add("arrow-button", "down");
+        downBtn.innerHTML = "&#x25BC;"; // ▼
+        downBtn.title = "Next option";
+
+        // Button functionality
         upBtn.addEventListener("click", () => {
             if (select.selectedIndex > 0) {
                 select.selectedIndex--;
@@ -330,13 +335,17 @@ function enhanceSelectWithArrowsOnce() {
             }
         });
 
-        // Wrap the select and insert buttons
+        // Assemble arrow container
+        arrowContainer.appendChild(upBtn);
+        arrowContainer.appendChild(downBtn);
+
+        // Insert into DOM
         select.parentNode.insertBefore(wrapper, select);
-        wrapper.appendChild(upBtn);
         wrapper.appendChild(select);
-        wrapper.appendChild(downBtn);
+        wrapper.appendChild(arrowContainer);
     });
 }
+
 
 // On DOMContentLoaded, load saved theme and layout settings
 window.addEventListener("DOMContentLoaded", () => {

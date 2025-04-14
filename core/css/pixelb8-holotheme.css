@@ -2636,16 +2636,8 @@ button.statustoggle {}
 
 /*
 Select Enhancements (arrows)*/ 
-.select-enhanced {
-    display: inline-flex;
-    align-items: center;
-    position: relative;
-    gap: 4px;
-}
 
-.select-enhanced select {
-    padding-right: 1.5em;
-}
+
 
 .arrow-container {
     display: flex;
