@@ -177,7 +177,10 @@ function fetchentriviaQuestions() {
                         let answersRaw = row.answers.replace(/\"/g, "").trim();
 						let answers = answersRaw.split(";").map(a => a.trim()).filter(Boolean);
                         let type = row.type.toLowerCase();
-                        let options = row.options ? row.options.replace(/\"/g, "").split(';') : []; // Clean options
+                        let options = row.options
+						? row.options.replace(/\"/g, "").split(/[;,]/).map(opt => opt.trim()).filter(Boolean)
+						: [];
+
 
                         // Ensure the round and category exist in the object structure
                         if (!defaultQuestions[round]) defaultQuestions[round] = {};
