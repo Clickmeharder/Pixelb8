@@ -685,39 +685,45 @@ if (SpeechRecognition) {
     stopBtn.disabled = true;
   });
 
-  recognition.addEventListener('result', (event) => {
-    const transcript = event.results[event.results.length - 1][0].transcript.trim();
-    output.textContent = `You said: "${transcript}"`;
-	if (closedCaptionsEnabled) {
-	  const captionsDiv = document.getElementById("captions");
-	  captionsDiv.textContent = transcript;
-	}
-    // Your commands
-    const lower = transcript.toLowerCase();
+	recognition.interimResults = true; // 🧠 Real-time updates
 
-    if (lower.includes("spin wheel")) pullDiscRotationLever();
-    if (lower.includes("play trivia")) startentrivia();
-	if (lower.includes("put a random question on the screen")) startentriviaAsk();
-    if (lower.includes("poopy")) {
-	  const poopCount = (lower.match(/poopy/g) || []).length;
-	  for (let i = 0; i < poopCount; i++) {
-		poopAttack();
+	recognition.addEventListener('result', (event) => {
+	  let finalTranscript = "";
+	  let interimTranscript = "";
+
+	  for (let i = event.resultIndex; i < event.results.length; ++i) {
+		const transcript = event.results[i][0].transcript.trim();
+		if (event.results[i].isFinal) {
+		  finalTranscript += transcript + " ";
+		} else {
+		  interimTranscript += transcript + " ";
+		}
 	  }
-	}
-  });
 
-  recognition.addEventListener('end', () => {
-    if (isListening) {
-      console.log("Recognition ended, restarting...");
-      recognition.start(); // 🔁 Auto-restart
-    } else {
-      console.log("Recognition stopped by user.");
-    }
-  });
+	  // Display interim results as live captions
+	  const captionsDiv = document.getElementById("captions");
+	  if (closedCaptionsEnabled && captionsDiv) {
+		captionsDiv.textContent = interimTranscript || finalTranscript;
+	  }
 
-} else {
-  alert("Your browser doesn't support speech recognition 😢");
-}
+	  // Only run commands on final speech (to avoid running "poopy" 10x mid-sentence)
+	  const finalLower = finalTranscript.toLowerCase();
+
+	  if (finalLower.includes("spin wheel")) pullDiscRotationLever();
+	  if (finalLower.includes("play trivia")) startentrivia();
+	  if (finalLower.includes("put a random question on the screen")) startentriviaAsk();
+	  if (finalLower.includes("poopy")) {
+		const poopCount = (finalLower.match(/poopy/g) || []).length;
+		for (let i = 0; i < poopCount; i++) {
+		  poopAttack();
+		}
+	  }
+
+	  // Also show what was said in output (final only)
+	  if (finalTranscript) {
+		output.textContent = `You said: "${finalTranscript.trim()}"`;
+	  }
+	});
 </script>
 	<script>
 		
