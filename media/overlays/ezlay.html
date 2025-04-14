@@ -582,6 +582,7 @@
 			</div>
 		</div>
 		<!--this is the underlay its mostly for aesthetics and sits behind everything else it might be a border or different animated elements -->
+		<div id="captions" style="position: fixed; bottom: 10px; width: 100%; text-align: center; color: white; font-size: 1.5rem;"></div>
 		<div id="underlay"></div>
 		<div id="pageborder"></div>
 		<!--
@@ -653,7 +654,7 @@ function poopAttack() {
 
 // Check for browser support
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
+let closedCaptionsEnabled = true;
 if (SpeechRecognition) {
   const recognition = new SpeechRecognition();
   recognition.lang = 'en-US';
@@ -689,10 +690,19 @@ if (SpeechRecognition) {
 
     // Your commands
     const lower = transcript.toLowerCase();
+	if (closedCaptionsEnabled) {
+	  const captionsDiv = document.getElementById("captions");
+	  captionsDiv.textContent = transcript;
+	}
     if (lower.includes("spin wheel")) pullDiscRotationLever();
     if (lower.includes("play trivia")) startentrivia();
 	if (lower.includes("put a random question on the screen")) startentriviaAsk();
-    if (lower.includes("poopy")) poopAttack();
+    if (lower.includes("poopy")) {
+	  const poopCount = (lower.match(/poopy/g) || []).length;
+	  for (let i = 0; i < poopCount; i++) {
+		poopAttack();
+	  }
+	}
   });
 
   recognition.addEventListener('end', () => {
