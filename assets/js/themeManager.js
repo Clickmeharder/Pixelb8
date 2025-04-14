@@ -293,112 +293,54 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 });
 
 
-function replaceAllSelects() {
+function enhanceSelectWithArrows() {
     const selects = document.querySelectorAll('select');
 
-    selects.forEach(originalSelect => {
-        // Cleanup: remove previous wrapper and custom options
-        if (originalSelect.classList.contains('replaced')) {
-            const existingWrapper = originalSelect.previousElementSibling;
-            if (existingWrapper?.classList.contains('custom-dropdown-wrapper')) {
-                existingWrapper.remove();
-            }
-            document.querySelectorAll('.custom-options').forEach(el => el.remove());
-            originalSelect.classList.remove('replaced');
-            originalSelect.style.display = ''; // Make it visible again for rebuilding
-        }
-
-        // Get computed styles
-        const computedStyle = getComputedStyle(originalSelect);
+    selects.forEach(select => {
+        // Prevent duplicates
+        if (select.classList.contains('has-arrows')) return;
 
         // Create wrapper
         const wrapper = document.createElement('div');
-        wrapper.className = 'custom-dropdown-wrapper';
-        wrapper.style.position = 'relative';
-        wrapper.style.display = 'inline-block';
+        wrapper.className = 'select-with-arrows';
+        wrapper.style.display = 'flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.gap = '4px';
 
-        // Create the custom dropdown container
-        const customDropdown = document.createElement('div');
-        customDropdown.className = 'custom-dropdown';
-        customDropdown.style.width = computedStyle.width;
+        // Create up arrow
+        const upBtn = document.createElement('button');
+        upBtn.textContent = '▲';
+        upBtn.className = 'arrow-button';
+        upBtn.style.cursor = 'pointer';
 
-        // Create selected display
-        const selected = document.createElement('div');
-        selected.className = 'selected';
-        selected.textContent = originalSelect.options[originalSelect.selectedIndex]?.text || 'Select...';
-        selected.style.cssText = `
-            background: ${computedStyle.backgroundColor};
-            color: ${computedStyle.color};
-            padding: ${computedStyle.padding};
-            border: ${computedStyle.border};
-            font-size: ${computedStyle.fontSize};
-            cursor: pointer;
-        `;
+        // Create down arrow
+        const downBtn = document.createElement('button');
+        downBtn.textContent = '▼';
+        downBtn.className = 'arrow-button';
+        downBtn.style.cursor = 'pointer';
 
-        // Create floating options container
-        const options = document.createElement('div');
-        options.className = 'custom-options';
-        options.style.cssText = `
-            position: fixed;
-            background: ${computedStyle.backgroundColor || '#333'};
-            color: ${computedStyle.color || '#fff'};
-            border: ${computedStyle.border || '1px solid #555'};
-            display: none;
-            z-index: 9999;
-            max-height: 200px;
-            overflow-y: auto;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        `;
+        // Move the select into the wrapper
+        const parent = select.parentNode;
+        parent.insertBefore(wrapper, select);
+        wrapper.appendChild(select);
+        wrapper.appendChild(upBtn);
+        wrapper.appendChild(downBtn);
 
-        // Build option items
-        [...originalSelect.options].forEach(opt => {
-            const optDiv = document.createElement('div');
-            optDiv.textContent = opt.text;
-            optDiv.className = 'custom-option';
-            optDiv.style.padding = computedStyle.padding;
-            optDiv.style.cursor = 'pointer';
+        // Style cleanup
+        select.classList.add('has-arrows');
 
-            optDiv.addEventListener('click', () => {
-                selected.textContent = opt.text;
-                originalSelect.value = opt.value;
-                originalSelect.dispatchEvent(new Event('change'));
-                options.style.display = 'none';
-            });
-
-            optDiv.addEventListener('mouseover', () => {
-                optDiv.style.background = '#444';
-            });
-
-            optDiv.addEventListener('mouseout', () => {
-                optDiv.style.background = '';
-            });
-
-            options.appendChild(optDiv);
+        // Arrow functionality
+        upBtn.addEventListener('click', () => {
+            if (select.selectedIndex > 0) {
+                select.selectedIndex--;
+                select.dispatchEvent(new Event('change'));
+            }
         });
 
-        // Show/hide logic
-        selected.addEventListener('click', (e) => {
-            const rect = selected.getBoundingClientRect();
-            options.style.left = `${rect.left}px`;
-            options.style.top = `${rect.bottom}px`;
-            options.style.width = `${rect.width}px`;
-            options.style.display = options.style.display === 'none' ? 'block' : 'none';
-        });
-
-        // Insert custom dropdown into DOM
-        customDropdown.appendChild(selected);
-        wrapper.appendChild(customDropdown);
-        originalSelect.parentNode.insertBefore(wrapper, originalSelect);
-        originalSelect.style.display = 'none';
-        originalSelect.classList.add('replaced');
-
-        // Append options globally so they are fixed
-        document.body.appendChild(options);
-
-        // Close on outside click
-        document.addEventListener('click', (e) => {
-            if (!wrapper.contains(e.target) && !options.contains(e.target)) {
-                options.style.display = 'none';
+        downBtn.addEventListener('click', () => {
+            if (select.selectedIndex < select.options.length - 1) {
+                select.selectedIndex++;
+                select.dispatchEvent(new Event('change'));
             }
         });
     });
