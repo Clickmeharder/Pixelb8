@@ -656,10 +656,11 @@ function poopAttack() {
 // Check for browser support
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let closedCaptionsEnabled = true;
+
 if (SpeechRecognition) {
   const recognition = new SpeechRecognition();
   recognition.lang = 'en-US';
-  recognition.interimResults = false;
+  recognition.interimResults = true; // 🧠 Real-time updates
   recognition.maxAlternatives = 1;
   recognition.continuous = true; // 🔁 Important for ongoing listening
 
@@ -685,45 +686,57 @@ if (SpeechRecognition) {
     stopBtn.disabled = true;
   });
 
-	recognition.interimResults = true; // 🧠 Real-time updates
+  recognition.addEventListener('result', (event) => {
+    let finalTranscript = "";
+    let interimTranscript = "";
 
-	recognition.addEventListener('result', (event) => {
-	  let finalTranscript = "";
-	  let interimTranscript = "";
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      const transcript = event.results[i][0].transcript.trim();
+      if (event.results[i].isFinal) {
+        finalTranscript += transcript + " ";
+      } else {
+        interimTranscript += transcript + " ";
+      }
+    }
 
-	  for (let i = event.resultIndex; i < event.results.length; ++i) {
-		const transcript = event.results[i][0].transcript.trim();
-		if (event.results[i].isFinal) {
-		  finalTranscript += transcript + " ";
-		} else {
-		  interimTranscript += transcript + " ";
-		}
-	  }
+    // Display interim results as live captions
+    const captionsDiv = document.getElementById("captions");
+    if (closedCaptionsEnabled && captionsDiv) {
+      captionsDiv.textContent = interimTranscript || finalTranscript;
+    }
 
-	  // Display interim results as live captions
-	  const captionsDiv = document.getElementById("captions");
-	  if (closedCaptionsEnabled && captionsDiv) {
-		captionsDiv.textContent = interimTranscript || finalTranscript;
-	  }
+    // Only run commands on final speech (to avoid running "poopy" 10x mid-sentence)
+    const finalLower = finalTranscript.toLowerCase();
 
-	  // Only run commands on final speech (to avoid running "poopy" 10x mid-sentence)
-	  const finalLower = finalTranscript.toLowerCase();
+    if (finalLower.includes("spin wheel")) pullDiscRotationLever();
+    if (finalLower.includes("play trivia")) startentrivia();
+    if (finalLower.includes("put a random question on the screen")) startentriviaAsk();
+    if (finalLower.includes("poopy")) {
+      const poopCount = (finalLower.match(/poopy/g) || []).length;
+      for (let i = 0; i < poopCount; i++) {
+        poopAttack();
+      }
+    }
 
-	  if (finalLower.includes("spin wheel")) pullDiscRotationLever();
-	  if (finalLower.includes("play trivia")) startentrivia();
-	  if (finalLower.includes("put a random question on the screen")) startentriviaAsk();
-	  if (finalLower.includes("poopy")) {
-		const poopCount = (finalLower.match(/poopy/g) || []).length;
-		for (let i = 0; i < poopCount; i++) {
-		  poopAttack();
-		}
-	  }
+    // Show final spoken result
+    if (finalTranscript) {
+      output.textContent = `You said: "${finalTranscript.trim()}"`;
+    }
+  });
 
-	  // Also show what was said in output (final only)
-	  if (finalTranscript) {
-		output.textContent = `You said: "${finalTranscript.trim()}"`;
-	  }
-	});
+  recognition.addEventListener('end', () => {
+    if (isListening) {
+      console.log("Recognition ended, restarting...");
+      recognition.start(); // 🔁 Auto-restart
+    } else {
+      console.log("Recognition stopped by user.");
+    }
+  });
+
+} else {
+  alert("Your browser doesn't support speech recognition 😢");
+}
+
 </script>
 	<script>
 		
