@@ -293,41 +293,49 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 });
 
 
-.select-enhanced {
-    display: inline-flex;
-    align-items: center;
-    position: relative;
-    gap: 4px;
-}
+function enhanceSelectWithArrowsOnce() {
+    document.querySelectorAll("select").forEach(select => {
+        if (select.parentElement.classList.contains("select-enhanced")) return; // Prevent double-enhancing
 
-.select-enhanced select {
-    padding-right: 1.5em;
-}
+        // Create wrapper
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("select-enhanced");
+        wrapper.style.display = "inline-flex";
+        wrapper.style.alignItems = "center";
+        wrapper.style.gap = "4px";
 
-.arrow-container {
-    display: flex;
-    flex-direction: column;
-    margin-left: 4px;
-}
+        // Create up and down buttons
+        const upBtn = document.createElement("button");
+        upBtn.textContent = "▲";
+        upBtn.title = "Previous option";
+        upBtn.style.padding = "2px 6px";
+        
+        const downBtn = document.createElement("button");
+        downBtn.textContent = "▼";
+        downBtn.title = "Next option";
+        downBtn.style.padding = "2px 6px";
 
-.arrow-button {
-    background: var(--arrow-bg, #444);
-    color: var(--arrow-color, #fff);
-    border: none;
-    padding: 2px 6px;
-    cursor: pointer;
-    font-size: 10px;
-    line-height: 1;
-    transition: background 0.2s;
-    border-radius: 3px;
-}
+        // Insert logic for buttons
+        upBtn.addEventListener("click", () => {
+            if (select.selectedIndex > 0) {
+                select.selectedIndex--;
+                select.dispatchEvent(new Event("change"));
+            }
+        });
 
-.arrow-button:hover {
-    background: var(--arrow-hover-bg, #666);
-}
+        downBtn.addEventListener("click", () => {
+            if (select.selectedIndex < select.options.length - 1) {
+                select.selectedIndex++;
+                select.dispatchEvent(new Event("change"));
+            }
+        });
 
-.arrow-button:active {
-    background: var(--arrow-active-bg, #888);
+        // Wrap the select and insert buttons
+        select.parentNode.insertBefore(wrapper, select);
+        wrapper.appendChild(upBtn);
+        wrapper.appendChild(select);
+        wrapper.appendChild(downBtn);
+    });
 }
 
 // On DOMContentLoaded, load saved theme and layout settings

@@ -2654,10 +2654,10 @@ Select Enhancements (arrows)*/
 }
 
 .arrow-button {
-    background: var(--arrow-bg, #444);
-    color: var(--arrow-color, #fff);
+    background: var(--button-bg-color, #444);
+    color: var(--button-text-color, #fff);
     border: none;
-    padding: 2px 6px;
+    padding: 2px 3px;
     cursor: pointer;
     font-size: 10px;
     line-height: 1;
@@ -2666,11 +2666,11 @@ Select Enhancements (arrows)*/
 }
 
 .arrow-button:hover {
-    background: var(--arrow-hover-bg, #666);
+    background: var(--button-hover-bg-color, #666);
 }
 
 .arrow-button:active {
-    background: var(--arrow-active-bg, #888);
+    background: var(--button-hover-bg-color, #888);
 }
 /*----------------------*/
 /*______________________*/
