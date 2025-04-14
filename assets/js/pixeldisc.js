@@ -12,7 +12,7 @@ const toggleOptions = {
 
 
 let canvas = document.getElementById("canvas1");
-let sections = ["Beer Keg", "poop", "free spin", "Recycling Scrip", "Trivia", "Ordinance Crate", "nothing"];
+let sections = ["Beer Keg", "poop", "free spin", "Recycling Scrip", "Trivia", "Solomate Rubio", "nothing"];
 let colors = ["#001f1fe8", "#004040eb"];
 let wheels = null;
 let frame = null;
