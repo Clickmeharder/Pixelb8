@@ -295,25 +295,24 @@ document.querySelectorAll(".rangeinput").forEach(function(input) {
 
 function enhanceSelectWithArrowsOnce() {
     document.querySelectorAll("select").forEach(select => {
-        if (select.parentElement.classList.contains("select-enhanced")) return; // Prevent double-enhancing
+        if (select.parentElement.classList.contains("select-enhanced")) return; // Avoid duplicates
 
         // Create wrapper
         const wrapper = document.createElement("div");
         wrapper.classList.add("select-enhanced");
-        wrapper.style.display = "inline-flex";
-        wrapper.style.alignItems = "center";
-        wrapper.style.gap = "4px";
+
+        // Create arrow container (stacked vertically)
+        const arrowContainer = document.createElement("div");
+        arrowContainer.classList.add("arrow-container");
 
         // Create up and down buttons
         const upBtn = document.createElement("button");
-        upBtn.textContent = "▲";
-        upBtn.title = "Previous option";
-        upBtn.style.padding = "2px 6px";
-        
+        upBtn.classList.add("arrow-button", "up");
+        upBtn.innerHTML = "&#x25B2;"; // ▲
+
         const downBtn = document.createElement("button");
-        downBtn.textContent = "▼";
-        downBtn.title = "Next option";
-        downBtn.style.padding = "2px 6px";
+        downBtn.classList.add("arrow-button", "down");
+        downBtn.innerHTML = "&#x25BC;"; // ▼
 
         // Insert logic for buttons
         upBtn.addEventListener("click", () => {
@@ -330,31 +329,15 @@ function enhanceSelectWithArrowsOnce() {
             }
         });
 
-        // Wrap the select and insert buttons
+        // Append everything
+        arrowContainer.appendChild(upBtn);
+        arrowContainer.appendChild(downBtn);
+
         select.parentNode.insertBefore(wrapper, select);
-        wrapper.appendChild(upBtn);
         wrapper.appendChild(select);
-        wrapper.appendChild(downBtn);
+        wrapper.appendChild(arrowContainer);
     });
 }
-
-// On DOMContentLoaded, load saved theme and layout settings
-window.addEventListener("DOMContentLoaded", () => {
-  const savedSettings = JSON.parse(localStorage.getItem("themeSettings"));
-  if (savedSettings) {
-    // Set the theme
-    document.body.className = savedSettings.themeName;
-
-    // Set all layout variables
-    const layout = savedSettings.layout || {};
-    Object.entries(layout).forEach(([varName, value]) => {
-      document.documentElement.style.setProperty(varName, value);
-    });
-	debugThemeStyles();
-	enhanceSelectWithArrowsOnce();
-    console.log("Loaded saved theme settings:", savedSettings);
-  }
-});
 /* localStorage.removeItem("themeSettings"); */
 
 
