@@ -237,6 +237,8 @@
 		<div class="controller" id="wheel-controller">
 		<button class="close-btn">×</button><h2 class="controllerheader">Spin Wheel Controls</h2>
 			<div class="controlpanel">
+				<button id="voice-btn">🎙️ Speak</button>
+				<p id="output">Say something...</p>
 				<div class="controls"id="wheel-maincontrols">
 					<div class="row" for="wheel-spinButt">
 						<button class="a Butt " id="showWheelButt" data-target="wheelcanvaswrapper" data-animation="fade">
@@ -605,8 +607,46 @@ _____________________________  -->
 	<script>
 	document.body.style.background = "unset";
 	</script>
+
+<script>
+  // Check for browser support
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    const output = document.getElementById('output');
+    const btn = document.getElementById('voice-btn');
+
+    btn.addEventListener('click', () => {
+      recognition.start();
+      output.textContent = "Listening...";
+    });
+
+    recognition.addEventListener('result', (event) => {
+      const transcript = event.results[0][0].transcript;
+      output.textContent = `You said: ${transcript}`;
+      
+      // Example: Do stuff based on what was said
+      if (transcript.toLowerCase().includes("dark mode")) {
+        document.body.classList.toggle("dark");
+      }
+    });
+
+    recognition.addEventListener('end', () => {
+      console.log("Stopped listening.");
+    });
+
+  } else {
+    alert("Your browser doesn't support speech recognition 😢");
+  }
+</script>
 	<script>
 		
+
 		window.onload = function () {
 			loadCustomQuestions();
 			loadSettings();
