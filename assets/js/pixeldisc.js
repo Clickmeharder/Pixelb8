@@ -372,7 +372,6 @@ window.addEventListener("resize", () => repaint(angle));
 			option.value = name;
 			option.textContent = name;
 			loadSelect.appendChild(option);
-			replaceAllSelects();
 		}
 	}
 	function updateRemoveDropdown() {
@@ -382,7 +381,6 @@ window.addEventListener("resize", () => repaint(angle));
 			option.value = index;
 			option.textContent = section;
 			removeSelect.appendChild(option);
-			replaceAllSelects();
 		});
 	}
 	function addwheelSection() {
