@@ -116,6 +116,36 @@ function ensureUIElements() {
     document.body.appendChild(toggleBtn);
   }
 
+  // Start Button
+  if (!document.getElementById("voice-btn")) {
+    startBtn = document.createElement("button");
+    startBtn.id = "voice-btn";
+    startBtn.textContent = "Start Voice";
+    startBtn.style.padding = "0.5rem 1rem";
+    startBtn.style.fontSize = "1rem";
+    startBtn.style.backgroundColor = "#4CAF50";
+    startBtn.style.color = "white";
+    startBtn.style.border = "none";
+    startBtn.style.borderRadius = "0.3rem";
+    startBtn.style.cursor = "pointer";
+    document.body.appendChild(startBtn);
+  }
+
+  // Stop Button
+  if (!document.getElementById("stop-voice-btn")) {
+    stopBtn = document.createElement("button");
+    stopBtn.id = "stop-voice-btn";
+    stopBtn.textContent = "Stop Voice";
+    stopBtn.style.padding = "0.5rem 1rem";
+    stopBtn.style.fontSize = "1rem";
+    stopBtn.style.backgroundColor = "#f44336";
+    stopBtn.style.color = "white";
+    stopBtn.style.border = "none";
+    stopBtn.style.borderRadius = "0.3rem";
+    stopBtn.style.cursor = "pointer";
+    document.body.appendChild(stopBtn);
+  }
+
   // Now we can safely add event listener to the reset button
   const resetButton = document.getElementById("reset-captions");
   if (resetButton) {
@@ -170,8 +200,6 @@ function ensureUIElements() {
     }, 100);
   }
 }
-
-ensureUIElements();
 
 </script>
 <script>
