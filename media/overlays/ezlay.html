@@ -668,7 +668,7 @@ if (SpeechRecognition) {
   const startBtn = document.getElementById('voice-btn');
   const stopBtn = document.getElementById('stop-voice-btn');
 
-  let isListening = false;
+  let isListening = true;
 
   startBtn.addEventListener('click', () => {
     isListening = true;
@@ -711,7 +711,7 @@ if (SpeechRecognition) {
     if (finalLower.includes("spin wheel")) pullDiscRotationLever();
     if (finalLower.includes("play trivia")) startentrivia();
     if (finalLower.includes("put a random question on the screen")) startentriviaAsk();
-    if (finalLower.includes("poopy")) poopSplat();
+    if (interimTranscript.includes("poop")) poopSplat();
 
     // Show final spoken result
     if (finalTranscript) {
