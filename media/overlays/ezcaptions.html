@@ -62,6 +62,8 @@
 	<body>
 		<div id="underlay"></div>
 	<script>
+	// Inner span for actual caption text
+let captionText = document.getElementById("caption-text");
 	// 🧱 Add missing UI elements if not already present
 	function ensureUIElements() {
 	  if (!document.getElementById("underlay")) {
@@ -239,11 +241,11 @@
 		let fadeTimeout;
 		if (closedCaptionsEnabled && captionsDiv) {
 		  captionsDiv.textContent = interimTranscript || finalTranscript;
-		  captionsDiv.classList.remove('fade-out');
+		  captionText.classList.remove('fade-out');
 
 		  clearTimeout(fadeTimeout);
 		  fadeTimeout = setTimeout(() => {
-			captionsDiv.classList.add('fade-out');
+			captionText.classList.add('fade-out');
 		  }, 4000);
 		}
 	  });
@@ -259,6 +261,7 @@
 	}
 	</script>
 <script>
+
 // Create or get element helper
 function createIfMissing(id, tag = "div") {
   let el = document.getElementById(id);
@@ -282,8 +285,7 @@ captionsDiv.style.borderRadius = "0.5rem";
 captionsDiv.style.zIndex = "10000";
 captionsDiv.style.transition = "all 0.3s ease";
 
-// Inner span for actual caption text
-let captionText = document.getElementById("caption-text");
+
 if (!captionText) {
   captionText = document.createElement("span");
   captionText.id = "caption-text";
