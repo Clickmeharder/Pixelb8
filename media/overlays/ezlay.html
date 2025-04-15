@@ -613,7 +613,7 @@ _____________________________  -->
 	</script>
 
 <script>
-function poopAttack() {
+function poopSplat() {
     const poop = document.createElement("div");
     poop.textContent = "💩";
     poop.style.position = "fixed";
@@ -711,12 +711,7 @@ if (SpeechRecognition) {
     if (finalLower.includes("spin wheel")) pullDiscRotationLever();
     if (finalLower.includes("play trivia")) startentrivia();
     if (finalLower.includes("put a random question on the screen")) startentriviaAsk();
-    if (finalLower.includes("poopy")) {
-      const poopCount = (finalLower.match(/poopy/g) || []).length;
-      for (let i = 0; i < poopCount; i++) {
-        poopAttack();
-      }
-    }
+    if (finalLower.includes("poopy")) poopSplat();
 
     // Show final spoken result
     if (finalTranscript) {
