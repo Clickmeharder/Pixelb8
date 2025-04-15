@@ -20,86 +20,83 @@
 	<body>
 		<div id="underlay"></div>
 	<script>
-	// Inner span for actual caption text
-let captionText = document.getElementById("caption-text");
-	// 🧱 Add missing UI elements if not already present
-	function ensureUIElements() {
-	  if (!document.getElementById("underlay")) {
-		const underlay = document.createElement("div");
-		underlay.id = "underlay";
-		underlay.style.position = "fixed";
-		underlay.style.top = 0;
-		underlay.style.left = 0;
-		underlay.style.width = "100%";
-		underlay.style.height = "100%";
-		underlay.style.pointerEvents = "none";
-		underlay.style.zIndex = "9998";
-		document.body.appendChild(underlay);
-	  }
+// Universal helper to create an element if missing
+function ensureElement(id, tag = "div", styles = {}, innerHTML = "") {
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement(tag);
+    el.id = id;
+    Object.assign(el.style, styles);
+    if (innerHTML) el.innerHTML = innerHTML;
+    document.body.appendChild(el);
+  }
+  return el;
+}
 
-	  if (!document.getElementById("captions")) {
-		const captions = document.createElement("div");
-		captions.id = "captions";
-		captions.style.position = "fixed";
-		captions.style.bottom = "10%";
-		captions.style.width = "100%";
-		captions.style.textAlign = "center";
-		captions.style.fontSize = "2rem";
-		captions.style.color = "white";
-		captions.style.border = "2px ridge #444";
-		captions.style.textShadow = "2px 2px 8px black";
-		captions.style.zIndex = "9999";
-		captions.style.transition = "opacity 1s ease";
-		captions.classList.add("fade-out");
-		document.body.appendChild(captions);
-	  }
+// Inject required UI
+function ensureUIElements() {
+  ensureElement("underlay", "div", {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    pointerEvents: "none",
+    zIndex: 9998,
+  });
 
-	  if (!document.getElementById("output")) {
-		const output = document.createElement("div");
-		output.id = "output";
-		output.style.position = "fixed";
-		output.style.top = "10px";
-		output.style.left = "10px";
-		output.style.fontSize = "1rem";
-		output.style.color = "white";
-		output.style.zIndex = "9999";
-		document.body.appendChild(output);
-	  }
+  const captions = ensureElement("captions", "div", {
+    position: "fixed",
+    bottom: "10%",
+    width: "100%",
+    textAlign: "center",
+    fontSize: "2rem",
+    color: "white",
+    border: "2px ridge #444",
+    textShadow: "2px 2px 8px black",
+    zIndex: 9999,
+    transition: "opacity 1s ease"
+  });
+  captions.classList.add("fade-out");
 
-	  if (!document.getElementById("voice-btn")) {
-		const btn = document.createElement("button");
-		btn.id = "voice-btn";
-		btn.textContent = "🎤 Start Voice";
-		btn.style.position = "fixed";
-		btn.style.bottom = "10px";
-		btn.style.left = "10px";
-		btn.style.zIndex = "10000";
-		document.body.appendChild(btn);
-	  }
+  ensureElement("output", "div", {
+    position: "fixed",
+    top: "10px",
+    left: "10px",
+    fontSize: "1rem",
+    color: "white",
+    zIndex: 9999
+  });
 
-	  if (!document.getElementById("stop-voice-btn")) {
-		const btn = document.createElement("button");
-		btn.id = "stop-voice-btn";
-		btn.textContent = "🛑 Stop Voice";
-		btn.style.position = "fixed";
-		btn.style.bottom = "10px";
-		btn.style.left = "130px";
-		btn.style.zIndex = "10000";
-		btn.disabled = true;
-		document.body.appendChild(btn);
-	  }
+  ensureElement("voice-btn", "button", {
+    position: "fixed",
+    bottom: "10px",
+    left: "10px",
+    zIndex: 10000
+  }).textContent = "🎤 Start Voice";
 
-	  // Optional: Basic fade-out class
-	  const style = document.createElement("style");
-	  style.textContent = `
-		.fade-out {
-		  opacity: 0;
-		}
-	  `;
-	  document.head.appendChild(style);
-	}
+  const stopBtn = ensureElement("stop-voice-btn", "button", {
+    position: "fixed",
+    bottom: "10px",
+    left: "130px",
+    zIndex: 10000
+  });
+  stopBtn.textContent = "🛑 Stop Voice";
+  stopBtn.disabled = true;
 
-	ensureUIElements();
+  // Only inject style once
+  if (!document.getElementById("fade-style")) {
+    const style = document.createElement("style");
+    style.id = "fade-style";
+    style.textContent = `
+      .fade-out {
+        opacity: 0;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
 
 	function poopSplat() {
 	  const poop = document.createElement("div");
@@ -148,6 +145,8 @@ let captionText = document.getElementById("caption-text");
 	  const output = document.getElementById('output');
 	  const startBtn = document.getElementById('voice-btn');
 	  const stopBtn = document.getElementById('stop-voice-btn');
+	  const captionsDiv = document.getElementById("captions");
+	  const captionText = document.getElementById("captionText"); // ✅ Add this
 
 	  let isListening = true;
 
