@@ -20,84 +20,103 @@
 	<body>
 		<div id="underlay"></div>
 	<script>
-// Universal helper to create an element if missing
-function ensureElement(id, tag = "div", styles = {}, innerHTML = "") {
+let captionText;
+let captionsDiv;
+
+function ensureElement(id, tag = "div", styles = {}) {
   let el = document.getElementById(id);
   if (!el) {
     el = document.createElement(tag);
     el.id = id;
-    Object.assign(el.style, styles);
-    if (innerHTML) el.innerHTML = innerHTML;
     document.body.appendChild(el);
   }
+  Object.assign(el.style, styles);
   return el;
 }
 
-// Inject required UI
 function ensureUIElements() {
-  ensureElement("underlay", "div", {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    pointerEvents: "none",
-    zIndex: 9998,
-  });
-
-  const captions = ensureElement("captions", "div", {
+  // Captions Wrapper
+  captionsDiv = ensureElement("captions", "div", {
     position: "fixed",
     bottom: "10%",
-    width: "100%",
-    textAlign: "center",
+    left: "50%",
+    transform: "translateX(-50%)",
     fontSize: "2rem",
-    color: "white",
-    border: "2px ridge #444",
-    textShadow: "2px 2px 8px black",
-    zIndex: 9999,
-    transition: "opacity 1s ease"
-  });
-  captions.classList.add("fade-out");
-
-  ensureElement("output", "div", {
-    position: "fixed",
-    top: "10px",
-    left: "10px",
-    fontSize: "1rem",
-    color: "white",
-    zIndex: 9999
+    padding: "0.5rem 1rem",
+    borderRadius: "0.5rem",
+    zIndex: "10000",
+    transition: "all 0.3s ease"
   });
 
-  ensureElement("voice-btn", "button", {
-    position: "fixed",
-    bottom: "10px",
-    left: "10px",
-    zIndex: 10000
-  }).textContent = "🎤 Start Voice";
+  // Caption Text
+  captionText = document.getElementById("caption-text");
+  if (!captionText) {
+    captionText = document.createElement("span");
+    captionText.id = "caption-text";
+    captionsDiv.appendChild(captionText);
+  }
 
-  const stopBtn = ensureElement("stop-voice-btn", "button", {
-    position: "fixed",
-    bottom: "10px",
-    left: "130px",
-    zIndex: 10000
-  });
-  stopBtn.textContent = "🛑 Stop Voice";
-  stopBtn.disabled = true;
-
-  // Only inject style once
-  if (!document.getElementById("fade-style")) {
-    const style = document.createElement("style");
-    style.id = "fade-style";
-    style.textContent = `
-      .fade-out {
-        opacity: 0;
-      }
+  // Control Panel
+  if (!document.getElementById("caption-controls")) {
+    const controls = document.createElement("div");
+    controls.id = "caption-controls";
+    controls.innerHTML = `
+      <style>
+        #caption-controls {
+          position: fixed;
+          top: 2%;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(30, 30, 30, 0.9);
+          color: white;
+          padding: 1rem;
+          border-radius: 0.5rem;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          font-size: 0.9rem;
+          z-index: 10001;
+        }
+        #caption-controls label {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        #toggle-controls {
+          position: fixed;
+          bottom: 1%;
+          right: 1%;
+          background: #444;
+          color: white;
+          border: none;
+          padding: 0.5rem 0.8rem;
+          border-radius: 0.3rem;
+          z-index: 10002;
+          cursor: pointer;
+        }
+      </style>
+      <label>Shadow Size<input type="range" id="shadow-size" min="0" max="20" step="1"></label>
+      <label>Shadow Color<input type="color" id="shadow-color"></label>
+      <label>Text Color<input type="color" id="text-color"></label>
+      <label>Background Color<input type="color" id="bg-color"></label>
+      <label>Blur Glow<input type="checkbox" id="blur-glow"></label>
+      <label>Outline<input type="checkbox" id="outline-text"></label>
+      <button id="reset-captions" style="margin-top: 0.5rem; padding: 0.3rem 0.6rem; background: #222; color: white; border: none; border-radius: 0.3rem; cursor: pointer;">Reset to Default</button>
     `;
-    document.head.appendChild(style);
+    document.body.appendChild(controls);
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.id = "toggle-controls";
+    toggleBtn.textContent = "⚙️ Captions Settings";
+    toggleBtn.addEventListener("click", () => {
+      const panel = document.getElementById("caption-controls");
+      panel.style.display = panel.style.display === "none" ? "flex" : "none";
+    });
+    document.body.appendChild(toggleBtn);
   }
 }
-
-
+	</script>
+<script>
 	function poopSplat() {
 	  const poop = document.createElement("div");
 	  poop.textContent = "💩";
@@ -220,115 +239,6 @@ function ensureUIElements() {
 	</script>
 <script>
 
-// Create or get element helper
-function createIfMissing(id, tag = "div") {
-  let el = document.getElementById(id);
-  if (!el) {
-    el = document.createElement(tag);
-    el.id = id;
-    document.body.appendChild(el);
-  }
-  return el;
-}
-
-// Inject Captions Div
-const captionsDiv = createIfMissing("captions");
-
-if (!captionText) {
-  captionText = document.createElement("span");
-  captionText.id = "caption-text";
-  captionsDiv.appendChild(captionText);
-}
-captionsDiv.style.position = "fixed";
-captionsDiv.style.bottom = "10%";
-captionsDiv.style.left = "50%";
-captionsDiv.style.transform = "translateX(-50%)";
-captionsDiv.style.fontSize = "2rem";
-captionsDiv.style.padding = "0.5rem 1rem";
-captionsDiv.style.borderRadius = "0.5rem";
-captionsDiv.style.zIndex = "10000";
-captionsDiv.style.transition = "all 0.3s ease";
-
-
-// Inject Control Panel
-if (!document.getElementById("caption-controls")) {
-  const controls = document.createElement("div");
-  controls.id = "caption-controls";
-  controls.innerHTML = `
-    <style>
-      #caption-controls {
-        position: fixed;
-        top: 2%;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(30, 30, 30, 0.9);
-        color: white;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        font-size: 0.9rem;
-        z-index: 10001;
-      }
-      #caption-controls label {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      #toggle-controls {
-        position: fixed;
-        bottom: 1%;
-        right: 1%;
-        background: #444;
-        color: white;
-        border: none;
-        padding: 0.5rem 0.8rem;
-        border-radius: 0.3rem;
-        z-index: 10002;
-        cursor: pointer;
-      }
-	  
-    </style>
-    <label>
-      Shadow Size
-      <input type="range" id="shadow-size" min="0" max="20" step="1">
-    </label>
-    <label>
-      Shadow Color
-      <input type="color" id="shadow-color">
-    </label>
-    <label>
-      Text Color
-      <input type="color" id="text-color">
-    </label>
-    <label>
-      Background Color
-      <input type="color" id="bg-color">
-    </label>
-    <label>
-      Blur Glow
-      <input type="checkbox" id="blur-glow">
-    </label>
-    <label>
-      Outline
-      <input type="checkbox" id="outline-text">
-    </label>
-    <button id="reset-captions" style="margin-top: 0.5rem; padding: 0.3rem 0.6rem; background: #222; color: white; border: none; border-radius: 0.3rem; cursor: pointer;">Reset to Default</button>
-  `;
-  document.body.appendChild(controls);
-
-  // Toggle Button
-  const toggleBtn = document.createElement("button");
-  toggleBtn.id = "toggle-controls";
-  toggleBtn.textContent = "⚙️ Captions Settings";
-  toggleBtn.addEventListener("click", () => {
-    const panel = document.getElementById("caption-controls");
-    panel.style.display = panel.style.display === "none" ? "flex" : "none";
-  });
-  document.body.appendChild(toggleBtn);
-}
-
 // === Style Handler ===
 function updateCaptionStyles() {
   const size = document.getElementById("shadow-size").value;
@@ -403,6 +313,7 @@ document.getElementById("reset-captions").addEventListener("click", () => {
 });
 
 // Run on page load
+ensureUIElements();
 loadCaptionStyles();
 </script>
 
