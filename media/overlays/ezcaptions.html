@@ -113,7 +113,7 @@ function ensureUIElements() {
   if (!document.getElementById("caption-controls")) {
     const controls = document.createElement("div");
     controls.id = "caption-controls";
-    controls.innerHTML = '
+    controls.innerHTML = `
   <label>
     Shadow Size
     <input type="range" id="shadow-size" min="0" max="10" value="4">
