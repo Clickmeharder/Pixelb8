@@ -96,6 +96,7 @@ function repaintWheel() {
 	colors = [color1, color2];
 	wheels = null;
 	frame = null;
+	console.log(`attemtping to repaint wheel`);
 	repaint(angle);
 }
 		function repaint(angle) {
