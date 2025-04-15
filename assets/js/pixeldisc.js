@@ -443,7 +443,7 @@ function updateRemoveDropdown() {
 		const name = document.getElementById("savewheelsections").value.trim();
 		if (!name) return alert("Please enter a name for your wheel.");
 
-		const wheels = getSavedWheels();
+		let wheels = getSavedWheels();
 		wheels[name] = sections.slice(); // save a copy
 		saveWheelsToStorage(wheels);
 		updateLoadDropdown();
