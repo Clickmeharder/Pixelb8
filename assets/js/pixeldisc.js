@@ -462,8 +462,6 @@ function updateRemoveDropdown() {
 		if (wheels[name]) {
 			sections = wheels[name].slice(); // copy
 			updateRemoveDropdown();
-			wheels = null;
-			frame = null;
 			repaint(angle);
 		} else {
 			console.log("Selected wheel not found.");
