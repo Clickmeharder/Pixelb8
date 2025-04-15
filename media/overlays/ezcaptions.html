@@ -182,7 +182,7 @@ let captionText = document.getElementById("caption-text");
 
 		const captionsDiv = document.getElementById("captions");
 		if (closedCaptionsEnabled && captionsDiv) {
-		  captionsDiv.textContent = interimTranscript || finalTranscript;
+		  captionText.textContent = interimTranscript || finalTranscript;
 		}
 
 		const finalLower = finalTranscript.toLowerCase();
@@ -194,7 +194,7 @@ let captionText = document.getElementById("caption-text");
 
 		if (finalTranscript) {
 		  output.textContent = `🗣️ You said: "${finalTranscript.trim()}"`;
-		  if (captionsDiv) captionsDiv.textContent = finalTranscript.trim();
+		  if (captionsDiv) captionText.textContent = finalTranscript.trim();
 		}
 
 		let fadeTimeout;
