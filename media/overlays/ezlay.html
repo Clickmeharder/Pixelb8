@@ -677,71 +677,88 @@ if (SpeechRecognition) {
     stopBtn.disabled = true;
   });
 
-  recognition.addEventListener('result', (event) => {
-    let finalTranscript = "";
-    let interimTranscript = "";
+recognition.addEventListener('result', (event) => {
+  let finalTranscript = "";
+  let interimTranscript = "";
 
-    for (let i = event.resultIndex; i < event.results.length; ++i) {
-      const transcript = event.results[i][0].transcript.trim();
-      if (event.results[i].isFinal) {
-        finalTranscript += transcript + " ";
-      } else {
-        interimTranscript += transcript + " ";
-      }
-    }
-
-    // Display interim results as live captions
-    const captionsDiv = document.getElementById("captions");
-    if (closedCaptionsEnabled && captionsDiv) {
-      captionsDiv.textContent = interimTranscript || finalTranscript;
-    }
-
-    // Only run commands on final speech (to avoid running "poopy" 10x mid-sentence)
-    const finalLower = finalTranscript.toLowerCase();
-
-    if (finalLower.includes("spin wheel")) pullDiscRotationLever();
-    if (finalLower.includes("play trivia")) startentrivia();
-    if (finalLower.includes("put a random question on the screen")) startentriviaAsk();
-    if (interimTranscript.includes("poop")) poopSplat();
-
-    // Show final spoken result
-	if (finalTranscript) {
-	  const selectedLang = langSelect.value;
-	  translateText(finalTranscript.trim(), selectedLang)
-		.then(translated => {
-		  output.textContent = `🗣️ "${translated}"`;
-		})
-		.catch(err => {
-		  console.error("Translation failed", err);
-		  output.textContent = `You said: "${finalTranscript.trim()}"`;
-		});
-	}
-	let fadeTimeout; // 🕒 hold the timeout
-
-	// Inside your recognition.addEventListener('result') block:
-	if (closedCaptionsEnabled && captionsDiv) {
-	  captionsDiv.textContent = interimTranscript || finalTranscript;
-	  captionsDiv.classList.remove('fade-out'); // Reset fade if speaking again
-
-	  clearTimeout(fadeTimeout); // Clear old fade timeout
-	  fadeTimeout = setTimeout(() => {
-		captionsDiv.classList.add('fade-out');
-	  }, 4000); // ⏳ Delay before fading (adjust if you like)
-	}
-  });
-
-  recognition.addEventListener('end', () => {
-    if (isListening) {
-      console.log("Recognition ended, restarting...");
-      recognition.start(); // 🔁 Auto-restart
+  for (let i = event.resultIndex; i < event.results.length; ++i) {
+    const transcript = event.results[i][0].transcript.trim();
+    if (event.results[i].isFinal) {
+      finalTranscript += transcript + " ";
     } else {
-      console.log("Recognition stopped by user.");
+      interimTranscript += transcript + " ";
     }
-  });
+  }
 
-} else {
-  alert("Your browser doesn't support speech recognition 😢");
-}
+  // Display interim results as live captions
+  const captionsDiv = document.getElementById("captions");
+  if (closedCaptionsEnabled && captionsDiv) {
+    captionsDiv.textContent = interimTranscript || finalTranscript;
+  }
+
+  // Only run commands on final speech (to avoid running "poopy" 10x mid-sentence)
+  const finalLower = finalTranscript.toLowerCase();
+
+  if (finalLower.includes("spin wheel")) pullDiscRotationLever();
+  if (finalLower.includes("play trivia")) startentrivia();
+  if (finalLower.includes("put a random question on the screen")) startentriviaAsk();
+  if (interimTranscript.includes("poop")) poopSplat();
+
+  // Show final spoken result and translate text in captions
+  if (finalTranscript) {
+    const selectedLang = langSelect.value;
+
+    // Translate the final transcript and update the output
+    translateText(finalTranscript.trim(), selectedLang)
+      .then(translated => {
+        // Update output text with translated caption
+        const outputDiv = document.getElementById("output");
+        outputDiv.textContent = `🗣️ "${translated}"`;
+      })
+      .catch(err => {
+        console.error("Translation failed", err);
+        const outputDiv = document.getElementById("output");
+        outputDiv.textContent = `You said: "${finalTranscript.trim()}"`;
+      });
+
+    // Translate and update the captions div text
+    translateText(finalTranscript.trim(), selectedLang)
+      .then(translated => {
+        if (captionsDiv) {
+          captionsDiv.textContent = translated;
+        }
+      })
+      .catch(err => {
+        console.error("Translation failed for captions", err);
+        if (captionsDiv) {
+          captionsDiv.textContent = finalTranscript.trim();
+        }
+      });
+  }
+
+  let fadeTimeout; // 🕒 hold the timeout
+
+  // Inside your recognition.addEventListener('result') block:
+  if (closedCaptionsEnabled && captionsDiv) {
+    captionsDiv.textContent = interimTranscript || finalTranscript;
+    captionsDiv.classList.remove('fade-out'); // Reset fade if speaking again
+
+    clearTimeout(fadeTimeout); // Clear old fade timeout
+    fadeTimeout = setTimeout(() => {
+      captionsDiv.classList.add('fade-out');
+    }, 4000); // ⏳ Delay before fading (adjust if you like)
+  }
+});
+
+recognition.addEventListener('end', () => {
+  if (isListening) {
+    console.log("Recognition ended, restarting...");
+    recognition.start(); // 🔁 Auto-restart
+  } else {
+    console.log("Recognition stopped by user.");
+  }
+});
+
 async function translateText(text, targetLang) {
   const response = await fetch("https://libretranslate.de/translate", {
     method: "POST",
@@ -761,6 +778,7 @@ async function translateText(text, targetLang) {
   const data = await response.json();
   return data.translatedText;
 }
+
 </script>
 	<script>
 		
