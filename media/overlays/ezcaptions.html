@@ -54,7 +54,7 @@
 </style>
 	<body>
 		<div id="underlay"></div>
-	<script>
+<script>
 let captionText;
 let captionsDiv;
 
@@ -91,58 +91,10 @@ function ensureUIElements() {
     captionsDiv.appendChild(captionText);
   }
 
-  // Output Element
-  let output = document.getElementById('output');
-  if (!output) {
-    output = document.createElement('div');
-    output.id = 'output';
-    output.style.position = "fixed";
-    output.style.bottom = "5%";
-    output.style.left = "50%";
-    output.style.transform = "translateX(-50%)";
-    output.style.fontSize = "1.5rem";
-    output.style.padding = "0.5rem 1rem";
-    output.style.borderRadius = "0.5rem";
-    output.style.zIndex = "10000";
-    output.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
-    output.style.color = "#fff";
-    document.body.appendChild(output);
-  }
-
-  // Control Panel
-  if (!document.getElementById("caption-controls")) {
-    const controls = document.createElement("div");
-    controls.id = "caption-controls";
-    controls.innerHTML = `
-  <label>
-    Shadow Size
-    <input type="range" id="shadow-size" min="0" max="10" value="4">
-  </label>
-  <label>
-    Shadow Color
-    <input type="color" id="shadow-color" value="#000000">
-  </label>
-  <label>
-    Text Color
-    <input type="color" id="text-color" value="#ffffff">
-  </label>
-  <label>
-    Background Color
-    <input type="color" id="bg-color" value="#000000">
-  </label>
-  <label>
-    Blur Glow
-    <input type="checkbox" id="blur-glow">
-  </label>
-  <label>
-    Outline Text
-    <input type="checkbox" id="outline-text">
-  </label>
-  <button id="reset-captions">Reset</button>
-`;
-    document.body.appendChild(controls);
-
-    const toggleBtn = document.createElement("button");
+  // Toggle Button
+  let toggleBtn = document.getElementById("toggle-controls");
+  if (!toggleBtn) {
+    toggleBtn = document.createElement("button");
     toggleBtn.id = "toggle-controls";
     toggleBtn.textContent = "⚙️ Captions Settings";
     toggleBtn.addEventListener("click", () => {
@@ -152,90 +104,109 @@ function ensureUIElements() {
     document.body.appendChild(toggleBtn);
   }
 
+  // Caption Controls Panel
+  let controls = document.getElementById("caption-controls");
+  if (!controls) {
+    controls = document.createElement("div");
+    controls.id = "caption-controls";
+    controls.style.display = "none";
+    controls.style.flexDirection = "column";
+    controls.style.gap = "0.5rem";
+    controls.style.padding = "1rem";
+    controls.style.backgroundColor = "#222";
+    controls.style.color = "#fff";
+    controls.style.position = "fixed";
+    controls.style.top = "20%";
+    controls.style.left = "50%";
+    controls.style.transform = "translateX(-50%)";
+    controls.style.borderRadius = "0.5rem";
+    controls.style.zIndex = "10001";
+
+    controls.innerHTML = `
+      <label>Shadow Size <input type="range" id="shadow-size" min="0" max="10" value="4"></label>
+      <label>Shadow Color <input type="color" id="shadow-color" value="#000000"></label>
+      <label>Text Color <input type="color" id="text-color" value="#ffffff"></label>
+      <label>Background Color <input type="color" id="bg-color" value="#000000"></label>
+      <label>Blur Glow <input type="checkbox" id="blur-glow"></label>
+      <label>Outline Text <input type="checkbox" id="outline-text"></label>
+      <button id="reset-captions">Reset</button>
+    `;
+    document.body.appendChild(controls);
+  }
+
+  // Output Element
+  let output = document.getElementById("output");
+  if (!output) {
+    output = document.createElement("div");
+    output.id = "output";
+    Object.assign(output.style, {
+      fontSize: "1.2rem",
+      padding: "0.5rem",
+      borderRadius: "0.3rem",
+      backgroundColor: "rgba(0, 0, 0, 0.7)",
+      color: "#fff"
+    });
+    controls.appendChild(output);
+  }
+
   // Start Button
   if (!document.getElementById("voice-btn")) {
-    startBtn = document.createElement("button");
+    const startBtn = document.createElement("button");
     startBtn.id = "voice-btn";
     startBtn.textContent = "Start Voice";
-    startBtn.style.padding = "0.5rem 1rem";
-    startBtn.style.fontSize = "1rem";
-    startBtn.style.backgroundColor = "#4CAF50";
-    startBtn.style.color = "white";
-    startBtn.style.border = "none";
-    startBtn.style.borderRadius = "0.3rem";
-    startBtn.style.cursor = "pointer";
-    document.body.appendChild(startBtn);
+    Object.assign(startBtn.style, {
+      padding: "0.5rem 1rem",
+      fontSize: "1rem",
+      backgroundColor: "#4CAF50",
+      color: "white",
+      border: "none",
+      borderRadius: "0.3rem",
+      cursor: "pointer"
+    });
+    controls.appendChild(startBtn);
   }
 
   // Stop Button
   if (!document.getElementById("stop-voice-btn")) {
-    stopBtn = document.createElement("button");
+    const stopBtn = document.createElement("button");
     stopBtn.id = "stop-voice-btn";
     stopBtn.textContent = "Stop Voice";
-    stopBtn.style.padding = "0.5rem 1rem";
-    stopBtn.style.fontSize = "1rem";
-    stopBtn.style.backgroundColor = "#f44336";
-    stopBtn.style.color = "white";
-    stopBtn.style.border = "none";
-    stopBtn.style.borderRadius = "0.3rem";
-    stopBtn.style.cursor = "pointer";
-    document.body.appendChild(stopBtn);
+    Object.assign(stopBtn.style, {
+      padding: "0.5rem 1rem",
+      fontSize: "1rem",
+      backgroundColor: "#f44336",
+      color: "white",
+      border: "none",
+      borderRadius: "0.3rem",
+      cursor: "pointer"
+    });
+    controls.appendChild(stopBtn);
   }
 
-  // Reset Button (already handled in your existing code)
+  // Reset Logic
   const resetButton = document.getElementById("reset-captions");
+  const applyDefaults = () => {
+    document.getElementById("shadow-size").value = 4;
+    document.getElementById("shadow-color").value = "#000000";
+    document.getElementById("text-color").value = "#ffffff";
+    document.getElementById("bg-color").value = "#000000";
+    document.getElementById("blur-glow").checked = false;
+    document.getElementById("outline-text").checked = false;
+    updateCaptionStyles();
+  };
   if (resetButton) {
-    resetButton.addEventListener("click", () => {
-      const defaults = {
-        size: 4,
-        color: "#000000",
-        text: "#ffffff",
-        bg: "#000000",
-        blur: false,
-        outline: false
-      };
-
-      // Reset the values of the controls
-      document.getElementById("shadow-size").value = defaults.size;
-      document.getElementById("shadow-color").value = defaults.color;
-      document.getElementById("text-color").value = defaults.text;
-      document.getElementById("bg-color").value = defaults.bg;
-      document.getElementById("blur-glow").checked = defaults.blur;
-      document.getElementById("outline-text").checked = defaults.outline;
-
-      updateCaptionStyles();
-    });
+    resetButton.addEventListener("click", applyDefaults);
   } else {
     setTimeout(() => {
       const resetButton = document.getElementById("reset-captions");
-      if (resetButton) {
-        resetButton.addEventListener("click", () => {
-          const defaults = {
-            size: 4,
-            color: "#000000",
-            text: "#ffffff",
-            bg: "#000000",
-            blur: false,
-            outline: false
-          };
-
-          document.getElementById("shadow-size").value = defaults.size;
-          document.getElementById("shadow-color").value = defaults.color;
-          document.getElementById("text-color").value = defaults.text;
-          document.getElementById("bg-color").value = defaults.bg;
-          document.getElementById("blur-glow").checked = defaults.blur;
-          document.getElementById("outline-text").checked = defaults.outline;
-
-          updateCaptionStyles();
-        });
-      }
+      if (resetButton) resetButton.addEventListener("click", applyDefaults);
     }, 100);
   }
 }
 
 ensureUIElements();
-
 </script>
+
 <script>
 	function poopSplat() {
 	  const poop = document.createElement("div");
