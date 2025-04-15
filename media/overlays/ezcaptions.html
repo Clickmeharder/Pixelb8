@@ -42,7 +42,7 @@
         #toggle-controls {
           position: fixed;
           bottom: 1%;
-          right: 1%;
+          left: 1%;
           background: #444;
           color: white;
           border: none;
@@ -50,7 +50,12 @@
           border-radius: 0.3rem;
           z-index: 10002;
           cursor: pointer;
+		  opacity:0.00;
+		  transition: all 0.3s ease;
         }
+		#toggle-controls:hover {
+			opacity:0.85;
+		}
 </style>
 	<body>
 		<div id="underlay"></div>
@@ -116,8 +121,8 @@ function ensureUIElements() {
     controls.style.backgroundColor = "#222";
     controls.style.color = "#fff";
     controls.style.position = "fixed";
-    controls.style.top = "20%";
-    controls.style.left = "50%";
+    controls.style.top = "2%";
+    controls.style.left = "5%";
     controls.style.transform = "translateX(-50%)";
     controls.style.borderRadius = "0.5rem";
     controls.style.zIndex = "10001";
