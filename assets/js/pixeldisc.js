@@ -470,6 +470,7 @@ function updateRemoveDropdown() {
 	document.getElementById("load-sectionsButt").addEventListener("click", () => {
 		console.log(`Wheel "load sections butt clicked!`);
 		loadwheelSections();
+		repaint(angle);
 	});
 	function deletewheelSections() {
 		const select = document.getElementById("loadwheelsection");
@@ -484,11 +485,13 @@ function updateRemoveDropdown() {
 		delete wheels[name];
 		saveWheelsToStorage(wheels);
 		updateLoadDropdown();
+		
 		console.log(`Wheel "${name}" deleted.`);
 	}
 	document.getElementById("delete-saved-wheel").addEventListener("click", () => {
 		console.log(`Wheel "delete wheel butt clicked!`);
 		deletewheelSections();
+		repaint(angle);
 	});
 	
 function showWheel() {
