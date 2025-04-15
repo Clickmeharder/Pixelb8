@@ -251,7 +251,7 @@ ensureUIElements();
 	  const startBtn = document.getElementById('voice-btn');
 	  const stopBtn = document.getElementById('stop-voice-btn');
 	  const captionsDiv = document.getElementById("captions");
-	  const captionText = document.getElementById("captionText"); // ✅ Add this
+	  const captionText = captionsDiv.querySelector("#caption-text"); // ✅ Add this
 
 	  let isListening = true;
 
@@ -285,6 +285,7 @@ ensureUIElements();
 		}
 
 		const captionsDiv = document.getElementById("captions");
+		
 		if (closedCaptionsEnabled && captionsDiv) {
 		  captionText.textContent = interimTranscript || finalTranscript;
 		}
