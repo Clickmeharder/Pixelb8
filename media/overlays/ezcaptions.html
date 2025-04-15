@@ -282,6 +282,14 @@ captionsDiv.style.borderRadius = "0.5rem";
 captionsDiv.style.zIndex = "10000";
 captionsDiv.style.transition = "all 0.3s ease";
 
+// Inner span for actual caption text
+let captionText = document.getElementById("caption-text");
+if (!captionText) {
+  captionText = document.createElement("span");
+  captionText.id = "caption-text";
+  captionsDiv.appendChild(captionText);
+}
+
 // Inject Control Panel
 if (!document.getElementById("caption-controls")) {
   const controls = document.createElement("div");
@@ -345,7 +353,7 @@ if (!document.getElementById("caption-controls")) {
       Outline
       <input type="checkbox" id="outline-text">
     </label>
-	<button id="reset-captions" style="margin-top: 0.5rem; padding: 0.3rem 0.6rem; background: #222; color: white; border: none; border-radius: 0.3rem; cursor: pointer;">Reset to Default</button>
+    <button id="reset-captions" style="margin-top: 0.5rem; padding: 0.3rem 0.6rem; background: #222; color: white; border: none; border-radius: 0.3rem; cursor: pointer;">Reset to Default</button>
   `;
   document.body.appendChild(controls);
 
@@ -375,11 +383,12 @@ function updateCaptionStyles() {
     textShadow += `, 0 0 ${size * 2}px ${color}`;
   }
 
-  // Text outline
-  captionsDiv.style.webkitTextStroke = outline ? "1px black" : "0";
+  // Apply styles to inner text
+  captionText.style.textShadow = textShadow;
+  captionText.style.color = text;
+  captionText.style.webkitTextStroke = outline ? "1px black" : "0";
 
-  captionsDiv.style.textShadow = textShadow;
-  captionsDiv.style.color = text;
+  // Apply background to outer wrapper
   captionsDiv.style.backgroundColor = bg;
 
   // Save settings
@@ -401,6 +410,7 @@ function loadCaptionStyles() {
 
   updateCaptionStyles();
 }
+
 // Reset to Default Handler
 document.getElementById("reset-captions").addEventListener("click", () => {
   const defaults = {
@@ -431,9 +441,9 @@ document.getElementById("reset-captions").addEventListener("click", () => {
   if (el) el.addEventListener("input", updateCaptionStyles);
 });
 
+// Run on page load
 loadCaptionStyles();
 </script>
-
 
 	</body>
 </html>
