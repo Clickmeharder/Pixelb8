@@ -463,7 +463,7 @@ function updateRemoveDropdown() {
 		if (wheels[name]) {
 			sections = wheels[name].slice(); // copy
 			updateRemoveDropdown();
-			repaint(angle);
+			repaintWheel();
 		} else {
 			console.log("Selected wheel not found.");
 		}
@@ -471,7 +471,7 @@ function updateRemoveDropdown() {
 	document.getElementById("load-sectionsButt").addEventListener("click", () => {
 		console.log(`Wheel "load sections butt clicked!`);
 		loadwheelSections();
-		repaint(angle);
+		repaintWheel();
 	});
 	function deletewheelSections() {
 		const select = document.getElementById("loadwheelsection");
@@ -486,20 +486,20 @@ function updateRemoveDropdown() {
 		delete wheels[name];
 		saveWheelsToStorage(wheels);
 		updateLoadDropdown();
-		
+		repaintWheel();
 		console.log(`Wheel "${name}" deleted.`);
 	}
 	document.getElementById("delete-saved-wheel").addEventListener("click", () => {
 		console.log(`Wheel "delete wheel butt clicked!`);
 		deletewheelSections();
-		repaint(angle);
+		repaintWheel();
 	});
 	
 function showWheel() {
 	const wheelWrapper = document.getElementById("wheelcanvaswrapper");
 	const leverWrapper = document.getElementById("discRotationLeverWrapper");
 	const toggleButton = document.getElementById("showWheelButt");
-
+	repaintWheel();
 	if (!wheelWrapper || !leverWrapper) return;
 
 	// Toggle visibility
