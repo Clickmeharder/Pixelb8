@@ -199,7 +199,7 @@ let captionText = document.getElementById("caption-text");
 
 		let fadeTimeout;
 		if (closedCaptionsEnabled && captionsDiv) {
-		  captionsDiv.textContent = interimTranscript || finalTranscript;
+		  captionText.textContent = interimTranscript || finalTranscript;
 		  captionText.classList.remove('fade-out');
 
 		  clearTimeout(fadeTimeout);
@@ -234,6 +234,13 @@ function createIfMissing(id, tag = "div") {
 
 // Inject Captions Div
 const captionsDiv = createIfMissing("captions");
+let captionText = document.getElementById("caption-text");
+
+if (!captionText) {
+  captionText = document.createElement("span");
+  captionText.id = "caption-text";
+  captionsDiv.appendChild(captionText);
+}
 captionsDiv.style.position = "fixed";
 captionsDiv.style.bottom = "10%";
 captionsDiv.style.left = "50%";
@@ -244,12 +251,6 @@ captionsDiv.style.borderRadius = "0.5rem";
 captionsDiv.style.zIndex = "10000";
 captionsDiv.style.transition = "all 0.3s ease";
 
-
-if (!captionText) {
-  captionText = document.createElement("span");
-  captionText.id = "caption-text";
-  captionsDiv.appendChild(captionText);
-}
 
 // Inject Control Panel
 if (!document.getElementById("caption-controls")) {
