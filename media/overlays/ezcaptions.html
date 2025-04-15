@@ -56,56 +56,31 @@ function ensureUIElements() {
     captionsDiv.appendChild(captionText);
   }
 
+  // Output Element
+  let output = document.getElementById('output');
+  if (!output) {
+    output = document.createElement('div');
+    output.id = 'output';
+    output.style.position = "fixed";
+    output.style.bottom = "5%";
+    output.style.left = "50%";
+    output.style.transform = "translateX(-50%)";
+    output.style.fontSize = "1.5rem";
+    output.style.padding = "0.5rem 1rem";
+    output.style.borderRadius = "0.5rem";
+    output.style.zIndex = "10000";
+    output.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+    output.style.color = "#fff";
+    document.body.appendChild(output);
+  }
+
   // Control Panel
   if (!document.getElementById("caption-controls")) {
     const controls = document.createElement("div");
     controls.id = "caption-controls";
-    controls.innerHTML = `
-      <style>
-        #caption-controls {
-          position: fixed;
-          top: 2%;
-          left: 50%;
-          transform: translateX(-50%);
-          background: rgba(30, 30, 30, 0.9);
-          color: white;
-          padding: 1rem;
-          border-radius: 0.5rem;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          font-size: 0.9rem;
-          z-index: 10001;
-        }
-        #caption-controls label {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-        #toggle-controls {
-          position: fixed;
-          bottom: 1%;
-          right: 1%;
-          background: #444;
-          color: white;
-          border: none;
-          padding: 0.5rem 0.8rem;
-          border-radius: 0.3rem;
-          z-index: 10002;
-          cursor: pointer;
-        }
-      </style>
-      <label>Shadow Size<input type="range" id="shadow-size" min="0" max="20" step="1"></label>
-      <label>Shadow Color<input type="color" id="shadow-color"></label>
-      <label>Text Color<input type="color" id="text-color"></label>
-      <label>Background Color<input type="color" id="bg-color"></label>
-      <label>Blur Glow<input type="checkbox" id="blur-glow"></label>
-      <label>Outline<input type="checkbox" id="outline-text"></label>
-      <button id="reset-captions" style="margin-top: 0.5rem; padding: 0.3rem 0.6rem; background: #222; color: white; border: none; border-radius: 0.3rem; cursor: pointer;">Reset to Default</button>
-    `;
+    controls.innerHTML = `...`; // Your existing control panel HTML
     document.body.appendChild(controls);
 
-    // Toggle button for showing/hiding the controls panel
     const toggleBtn = document.createElement("button");
     toggleBtn.id = "toggle-controls";
     toggleBtn.textContent = "⚙️ Captions Settings";
@@ -146,11 +121,10 @@ function ensureUIElements() {
     document.body.appendChild(stopBtn);
   }
 
-  // Now we can safely add event listener to the reset button
+  // Reset Button (already handled in your existing code)
   const resetButton = document.getElementById("reset-captions");
   if (resetButton) {
     resetButton.addEventListener("click", () => {
-      // Reset to default values
       const defaults = {
         size: 4,
         color: "#000000",
@@ -168,15 +142,13 @@ function ensureUIElements() {
       document.getElementById("blur-glow").checked = defaults.blur;
       document.getElementById("outline-text").checked = defaults.outline;
 
-      updateCaptionStyles();  // Function to update the caption styles with default settings
+      updateCaptionStyles();
     });
   } else {
-    // If the reset button is not yet available, retry after a short delay
     setTimeout(() => {
       const resetButton = document.getElementById("reset-captions");
       if (resetButton) {
         resetButton.addEventListener("click", () => {
-          // Reset to default values
           const defaults = {
             size: 4,
             color: "#000000",
@@ -186,7 +158,6 @@ function ensureUIElements() {
             outline: false
           };
 
-          // Reset the values of the controls
           document.getElementById("shadow-size").value = defaults.size;
           document.getElementById("shadow-color").value = defaults.color;
           document.getElementById("text-color").value = defaults.text;
@@ -194,13 +165,15 @@ function ensureUIElements() {
           document.getElementById("blur-glow").checked = defaults.blur;
           document.getElementById("outline-text").checked = defaults.outline;
 
-          updateCaptionStyles();  // Function to update the caption styles with default settings
+          updateCaptionStyles();
         });
       }
     }, 100);
   }
 }
+
 ensureUIElements();
+
 </script>
 <script>
 	function poopSplat() {
