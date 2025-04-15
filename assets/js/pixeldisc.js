@@ -12,7 +12,7 @@ const toggleOptions = {
 
 
 let canvas = document.getElementById("canvas1");
-let sections = ["Beer Keg", "poop", "free spin", "Recycling Scrip", "Trivia", "Solomate Rubio", "nothing"];
+let sections = ["Prize 1", "Prize 2", "Prize 3", "Prize 4", "Prize 5", "Prize 6", "Prize 7"];
 let colors = ["#001f1fe8", "#004040eb"];
 let wheels = null;
 let frame = null;
@@ -473,27 +473,29 @@ function updateRemoveDropdown() {
 		loadwheelSections();
 		repaintWheel();
 	});
-	function deletewheelSections() {
-		const select = document.getElementById("loadwheelsection");
-		const name = select.value;
+function deletewheelSections() { 
+	const select = document.getElementById("loadwheelsection");
+	const name = select.value;
 
-		if (!name) return alert("No wheel selected.");
-		const confirmed = confirm(`Are you sure you want to delete the wheel "${name}"?`);
-
-		if (!confirmed) return;
-
-		const wheels = getSavedWheels();
-		delete wheels[name];
-		saveWheelsToStorage(wheels);
-		updateLoadDropdown();
-		repaintWheel();
-		console.log(`Wheel "${name}" deleted.`);
+	if (!name) {
+		console.log("No wheel selected.");
+		return;
 	}
-	document.getElementById("delete-saved-wheel").addEventListener("click", () => {
-		console.log(`Wheel "delete wheel butt clicked!`);
-		deletewheelSections();
-		repaintWheel();
-	});
+
+	const wheels = getSavedWheels();
+	delete wheels[name];
+	saveWheelsToStorage(wheels);
+	updateLoadDropdown();
+	repaintWheel();
+	console.log(`Wheel "${name}" deleted.`);
+}
+
+document.getElementById("delete-saved-wheel").addEventListener("click", () => {
+	console.log(`Wheel "delete wheel butt clicked!"`);
+	deletewheelSections();
+	repaintWheel();
+});
+
 	
 function showWheel() {
 	const wheelWrapper = document.getElementById("wheelcanvaswrapper");
