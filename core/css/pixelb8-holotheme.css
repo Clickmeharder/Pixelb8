@@ -1647,10 +1647,10 @@ select.b {}
 		#theme-controller .controlpanel {
 			padding: 1px;
 			padding-right: 0px;
-			max-height: 72px;
+			max-height: 300px;
 		}
 		#theme-controller .controlpanel:hover {
-			max-height: 150px;
+			max-height: 300px;
 			padding: 1px;
 			padding-right: 0px;
 			height: 150px;
