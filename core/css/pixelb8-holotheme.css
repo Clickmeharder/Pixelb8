@@ -1577,7 +1577,7 @@ select.b {}
 		position: fixed;
 		top: 10px;
 		left: 10px;
-		width: 348px;
+		width: 385px;
 		padding: 10px;
 		display:flex;
 		flex-wrap: wrap;
@@ -1623,7 +1623,7 @@ select.b {}
 			border: 3px inset var(--border-color);
 			border-radius:var(--border-radius);
 			overflow: hidden;
-			max-height: 60px; /* Initially small */
+			max-height: 300px; /* Initially small */
 			padding: 0 4px; /* Horizontal padding stays */
 			padding-top: 0px;
 			transition: all 0.6s ease-in-out;
