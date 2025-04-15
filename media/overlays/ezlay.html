@@ -45,52 +45,13 @@
 
 </style>
 <style>
-.custom-dropdown {
-    position: relative;
-    display: inline-block;
-    width: 160px;
-    font-family: sans-serif;
-    z-index: 1000;
+#captions {
+  transition: opacity 1s ease-in-out;
+  opacity: 1;
 }
 
-.custom-dropdown .selected {
-    background: #222;
-    color: white;
-    padding: 8px 10px;
-    border: 1px solid #555;
-    cursor: pointer;
-    user-select: none;
-}
-
-.custom-dropdown .options {
-    display: none;
-    position: absolute;
-    background: #333;
-    border: 1px solid #555;
-    max-height: 200px;
-    overflow-y: auto;
-    width: 100%;
-}
-
-.custom-dropdown .option {
-    padding: 8px 10px;
-    cursor: pointer;
-    color: white;
-}
-
-.custom-dropdown .option:hover {
-    background-color: #444;
-}
-
-.custom-dropdown.active .options {
-    display: block;
-}
-.custom-options::-webkit-scrollbar {
-    width: 8px;
-}
-.custom-options::-webkit-scrollbar-thumb {
-    background: #666;
-    border-radius: 4px;
+#captions.fade-out {
+  opacity: 0;
 }
 </style>
 	<body>
@@ -717,6 +678,18 @@ if (SpeechRecognition) {
     if (finalTranscript) {
       output.textContent = `You said: "${finalTranscript.trim()}"`;
     }
+	let fadeTimeout; // 🕒 hold the timeout
+
+	// Inside your recognition.addEventListener('result') block:
+	if (closedCaptionsEnabled && captionsDiv) {
+	  captionsDiv.textContent = interimTranscript || finalTranscript;
+	  captionsDiv.classList.remove('fade-out'); // Reset fade if speaking again
+
+	  clearTimeout(fadeTimeout); // Clear old fade timeout
+	  fadeTimeout = setTimeout(() => {
+		captionsDiv.classList.add('fade-out');
+	  }, 4000); // ⏳ Delay before fading (adjust if you like)
+	}
   });
 
   recognition.addEventListener('end', () => {
