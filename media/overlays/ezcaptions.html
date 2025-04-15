@@ -105,6 +105,7 @@ function ensureUIElements() {
     `;
     document.body.appendChild(controls);
 
+    // Toggle button for showing/hiding the controls panel
     const toggleBtn = document.createElement("button");
     toggleBtn.id = "toggle-controls";
     toggleBtn.textContent = "⚙️ Captions Settings";
@@ -114,8 +115,65 @@ function ensureUIElements() {
     });
     document.body.appendChild(toggleBtn);
   }
+
+  // Now we can safely add event listener to the reset button
+  const resetButton = document.getElementById("reset-captions");
+  if (resetButton) {
+    resetButton.addEventListener("click", () => {
+      // Reset to default values
+      const defaults = {
+        size: 4,
+        color: "#000000",
+        text: "#ffffff",
+        bg: "#000000",
+        blur: false,
+        outline: false
+      };
+
+      // Reset the values of the controls
+      document.getElementById("shadow-size").value = defaults.size;
+      document.getElementById("shadow-color").value = defaults.color;
+      document.getElementById("text-color").value = defaults.text;
+      document.getElementById("bg-color").value = defaults.bg;
+      document.getElementById("blur-glow").checked = defaults.blur;
+      document.getElementById("outline-text").checked = defaults.outline;
+
+      updateCaptionStyles();  // Function to update the caption styles with default settings
+    });
+  } else {
+    // If the reset button is not yet available, retry after a short delay
+    setTimeout(() => {
+      const resetButton = document.getElementById("reset-captions");
+      if (resetButton) {
+        resetButton.addEventListener("click", () => {
+          // Reset to default values
+          const defaults = {
+            size: 4,
+            color: "#000000",
+            text: "#ffffff",
+            bg: "#000000",
+            blur: false,
+            outline: false
+          };
+
+          // Reset the values of the controls
+          document.getElementById("shadow-size").value = defaults.size;
+          document.getElementById("shadow-color").value = defaults.color;
+          document.getElementById("text-color").value = defaults.text;
+          document.getElementById("bg-color").value = defaults.bg;
+          document.getElementById("blur-glow").checked = defaults.blur;
+          document.getElementById("outline-text").checked = defaults.outline;
+
+          updateCaptionStyles();  // Function to update the caption styles with default settings
+        });
+      }
+    }, 100);
+  }
 }
-	</script>
+
+ensureUIElements();
+
+</script>
 <script>
 	function poopSplat() {
 	  const poop = document.createElement("div");
