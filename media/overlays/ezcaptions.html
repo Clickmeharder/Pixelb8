@@ -257,8 +257,8 @@
 	  });
 	}
 	</script>
-	<script>
-// ========== UI Injection ==========
+<script>
+// Create or get element helper
 function createIfMissing(id, tag = "div") {
   let el = document.getElementById(id);
   if (!el) {
@@ -269,7 +269,7 @@ function createIfMissing(id, tag = "div") {
   return el;
 }
 
-// Inject captions div
+// Inject Captions Div
 const captionsDiv = createIfMissing("captions");
 captionsDiv.style.position = "fixed";
 captionsDiv.style.bottom = "10%";
@@ -277,16 +277,12 @@ captionsDiv.style.left = "50%";
 captionsDiv.style.transform = "translateX(-50%)";
 captionsDiv.style.fontSize = "2rem";
 captionsDiv.style.padding = "0.5rem 1rem";
-captionsDiv.style.color = "#ffffff";
-captionsDiv.style.backgroundColor = "rgba(0, 0, 0, 0.6)";
-captionsDiv.style.textShadow = "2px 2px 4px #000000";
 captionsDiv.style.borderRadius = "0.5rem";
 captionsDiv.style.zIndex = "10000";
 captionsDiv.style.transition = "all 0.3s ease";
 
-// Inject controls container
-const existingControls = document.getElementById("caption-controls");
-if (!existingControls) {
+// Inject Control Panel
+if (!document.getElementById("caption-controls")) {
   const controls = document.createElement("div");
   controls.id = "caption-controls";
   controls.innerHTML = `
@@ -296,7 +292,7 @@ if (!existingControls) {
         bottom: 1%;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(30, 30, 30, 0.85);
+        background: rgba(30, 30, 30, 0.9);
         color: white;
         padding: 1rem;
         border-radius: 0.5rem;
@@ -311,48 +307,131 @@ if (!existingControls) {
         flex-direction: column;
         align-items: center;
       }
+      #toggle-controls {
+        position: fixed;
+        bottom: 1%;
+        right: 1%;
+        background: #444;
+        color: white;
+        border: none;
+        padding: 0.5rem 0.8rem;
+        border-radius: 0.3rem;
+        z-index: 10002;
+        cursor: pointer;
+      }
     </style>
     <label>
       Shadow Size
-      <input type="range" id="shadow-size" min="0" max="20" step="1" value="4">
+      <input type="range" id="shadow-size" min="0" max="20" step="1">
     </label>
     <label>
       Shadow Color
-      <input type="color" id="shadow-color" value="#000000">
+      <input type="color" id="shadow-color">
     </label>
     <label>
       Text Color
-      <input type="color" id="text-color" value="#ffffff">
+      <input type="color" id="text-color">
     </label>
     <label>
       Background Color
-      <input type="color" id="bg-color" value="#000000">
+      <input type="color" id="bg-color">
+    </label>
+    <label>
+      Blur Glow
+      <input type="checkbox" id="blur-glow">
+    </label>
+    <label>
+      Outline
+      <input type="checkbox" id="outline-text">
     </label>
   `;
   document.body.appendChild(controls);
+
+  // Toggle Button
+  const toggleBtn = document.createElement("button");
+  toggleBtn.id = "toggle-controls";
+  toggleBtn.textContent = "⚙️ Captions Settings";
+  toggleBtn.addEventListener("click", () => {
+    const panel = document.getElementById("caption-controls");
+    panel.style.display = panel.style.display === "none" ? "flex" : "none";
+  });
+  document.body.appendChild(toggleBtn);
 }
 
-// ========== Style Hookup ==========
+// === Style Handler ===
 function updateCaptionStyles() {
   const size = document.getElementById("shadow-size").value;
   const color = document.getElementById("shadow-color").value;
   const text = document.getElementById("text-color").value;
   const bg = document.getElementById("bg-color").value;
+  const blur = document.getElementById("blur-glow").checked;
+  const outline = document.getElementById("outline-text").checked;
 
-  captionsDiv.style.textShadow = `${size}px ${size}px ${size}px ${color}`;
+  // Text shadow
+  let textShadow = `${size}px ${size}px ${size}px ${color}`;
+  if (blur) {
+    textShadow += `, 0 0 ${size * 2}px ${color}`;
+  }
+
+  // Text outline
+  captionsDiv.style.webkitTextStroke = outline ? "1px black" : "0";
+
+  captionsDiv.style.textShadow = textShadow;
   captionsDiv.style.color = text;
   captionsDiv.style.backgroundColor = bg;
+
+  // Save settings
+  localStorage.setItem("captionPrefs", JSON.stringify({
+    size, color, text, bg, blur, outline
+  }));
 }
 
-// Hook up listeners
-["shadow-size", "shadow-color", "text-color", "bg-color"].forEach(id => {
-  const input = document.getElementById(id);
-  if (input) input.addEventListener("input", updateCaptionStyles);
+// === Load Settings on Init ===
+function loadCaptionStyles() {
+  const saved = JSON.parse(localStorage.getItem("captionPrefs") || "{}");
+
+  document.getElementById("shadow-size").value = saved.size || 4;
+  document.getElementById("shadow-color").value = saved.color || "#000000";
+  document.getElementById("text-color").value = saved.text || "#ffffff";
+  document.getElementById("bg-color").value = saved.bg || "#000000";
+  document.getElementById("blur-glow").checked = saved.blur || false;
+  document.getElementById("outline-text").checked = saved.outline || false;
+
+  updateCaptionStyles();
+}
+// Reset to Default Handler
+document.getElementById("reset-captions").addEventListener("click", () => {
+  const defaults = {
+    size: 4,
+    color: "#000000",
+    text: "#ffffff",
+    bg: "#000000",
+    blur: false,
+    outline: false
+  };
+
+  document.getElementById("shadow-size").value = defaults.size;
+  document.getElementById("shadow-color").value = defaults.color;
+  document.getElementById("text-color").value = defaults.text;
+  document.getElementById("bg-color").value = defaults.bg;
+  document.getElementById("blur-glow").checked = defaults.blur;
+  document.getElementById("outline-text").checked = defaults.outline;
+
+  updateCaptionStyles();
 });
 
-// Initialize styles
-updateCaptionStyles();
+// Hook up all input events
+[
+  "shadow-size", "shadow-color", "text-color",
+  "bg-color", "blur-glow", "outline-text"
+].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", updateCaptionStyles);
+});
+
+loadCaptionStyles();
 </script>
+
 
 	</body>
 </html>
