@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EzLay - Alphatest</title>
+	<link rel="icon" type="image/png" href="/assets/images/logo/pixelbotfavicon.png">
+	<link rel="stylesheet" href="/core/css/animations.css">
+	<link rel="stylesheet" href="/core/css/pixelb8-holotheme.css">
+	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@1,700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+</head>
+<style>
+#pixelpaint {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 750;
+    cursor: crosshair;
+    pointer-events: auto;
+}
+#eraser.active {
+    background-color: #ffaaaa;
+}
+#quickPalette {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+}
+.color-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #333;
+}
+
+</style>
+<style>
+#captions {
+  transition: opacity 1s ease-in-out;
+  opacity: 1;
+}
+
+#captions.fade-out {
+  opacity: 0;
+}
+</style>
+	<body>
+		<div id="underlay"></div>
+	<script>
+	// 🧱 Add missing UI elements if not already present
+	function ensureUIElements() {
+	  if (!document.getElementById("underlay")) {
+		const underlay = document.createElement("div");
+		underlay.id = "underlay";
+		underlay.style.position = "fixed";
+		underlay.style.top = 0;
+		underlay.style.left = 0;
+		underlay.style.width = "100%";
+		underlay.style.height = "100%";
+		underlay.style.pointerEvents = "none";
+		underlay.style.zIndex = "9998";
+		document.body.appendChild(underlay);
+	  }
+
+	  if (!document.getElementById("captions")) {
+		const captions = document.createElement("div");
+		captions.id = "captions";
+		captions.style.position = "fixed";
+		captions.style.bottom = "10%";
+		captions.style.width = "100%";
+		captions.style.textAlign = "center";
+		captions.style.fontSize = "2rem";
+		captions.style.color = "white";
+		captions.style.textShadow = "2px 2px 8px black";
+		captions.style.zIndex = "9999";
+		captions.style.transition = "opacity 1s ease";
+		captions.classList.add("fade-out");
+		document.body.appendChild(captions);
+	  }
+
+	  if (!document.getElementById("output")) {
+		const output = document.createElement("div");
+		output.id = "output";
+		output.style.position = "fixed";
+		output.style.top = "10px";
+		output.style.left = "10px";
+		output.style.fontSize = "1rem";
+		output.style.color = "white";
+		output.style.zIndex = "9999";
+		document.body.appendChild(output);
+	  }
+
+	  if (!document.getElementById("voice-btn")) {
+		const btn = document.createElement("button");
+		btn.id = "voice-btn";
+		btn.textContent = "🎤 Start Voice";
+		btn.style.position = "fixed";
+		btn.style.bottom = "10px";
+		btn.style.left = "10px";
+		btn.style.zIndex = "10000";
+		document.body.appendChild(btn);
+	  }
+
+	  if (!document.getElementById("stop-voice-btn")) {
+		const btn = document.createElement("button");
+		btn.id = "stop-voice-btn";
+		btn.textContent = "🛑 Stop Voice";
+		btn.style.position = "fixed";
+		btn.style.bottom = "10px";
+		btn.style.left = "130px";
+		btn.style.zIndex = "10000";
+		btn.disabled = true;
+		document.body.appendChild(btn);
+	  }
+
+	  // Optional: Basic fade-out class
+	  const style = document.createElement("style");
+	  style.textContent = `
+		.fade-out {
+		  opacity: 0;
+		}
+	  `;
+	  document.head.appendChild(style);
+	}
+
+	ensureUIElements();
+
+	function poopSplat() {
+	  const poop = document.createElement("div");
+	  poop.textContent = "💩";
+	  poop.style.position = "fixed";
+
+	  const top = Math.random() * 80 + 10;
+	  const left = Math.random() * 80 + 10;
+	  const size = Math.random() * 4 + 2;
+	  const rotation = Math.floor(Math.random() * 360);
+
+	  poop.style.top = `${top}%`;
+	  poop.style.left = `${left}%`;
+	  poop.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+	  poop.style.fontSize = `${size}rem`;
+	  poop.style.opacity = "0";
+	  poop.style.transition = "opacity 0.4s ease";
+	  poop.style.zIndex = "9999";
+	  poop.style.pointerEvents = "none";
+
+	  document.getElementById("underlay").appendChild(poop);
+
+	  requestAnimationFrame(() => {
+		poop.style.opacity = "1";
+	  });
+
+	  setTimeout(() => {
+		poop.style.opacity = "0";
+		setTimeout(() => {
+		  poop.remove();
+		}, 400);
+	  }, 1100);
+	}
+
+	// 🎙️ Voice Recognition Logic
+	const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+	let closedCaptionsEnabled = true;
+
+	if (SpeechRecognition) {
+	  const recognition = new SpeechRecognition();
+	  recognition.lang = 'en-US';
+	  recognition.interimResults = true;
+	  recognition.maxAlternatives = 1;
+	  recognition.continuous = true;
+
+	  const output = document.getElementById('output');
+	  const startBtn = document.getElementById('voice-btn');
+	  const stopBtn = document.getElementById('stop-voice-btn');
+
+	  let isListening = true;
+
+	  startBtn.addEventListener('click', () => {
+		isListening = true;
+		recognition.start();
+		output.textContent = "🎙️ Listening...";
+		startBtn.disabled = true;
+		stopBtn.disabled = false;
+	  });
+
+	  stopBtn.addEventListener('click', () => {
+		isListening = false;
+		recognition.stop();
+		output.textContent = "🛑 Stopped listening.";
+		startBtn.disabled = false;
+		stopBtn.disabled = true;
+	  });
+
+	  recognition.addEventListener('result', (event) => {
+		let finalTranscript = "";
+		let interimTranscript = "";
+
+		for (let i = event.resultIndex; i < event.results.length; ++i) {
+		  const transcript = event.results[i][0].transcript.trim();
+		  if (event.results[i].isFinal) {
+			finalTranscript += transcript + " ";
+		  } else {
+			interimTranscript += transcript + " ";
+		  }
+		}
+
+		const captionsDiv = document.getElementById("captions");
+		if (closedCaptionsEnabled && captionsDiv) {
+		  captionsDiv.textContent = interimTranscript || finalTranscript;
+		}
+
+		const finalLower = finalTranscript.toLowerCase();
+
+		if (finalLower.includes("spin wheel")) pullDiscRotationLever?.();
+		if (finalLower.includes("play trivia")) startentrivia?.();
+		if (finalLower.includes("put a random question on the screen")) startentriviaAsk?.();
+		if (interimTranscript.toLowerCase().includes("poop")) poopSplat();
+
+		if (finalTranscript) {
+		  output.textContent = `🗣️ You said: "${finalTranscript.trim()}"`;
+		  if (captionsDiv) captionsDiv.textContent = finalTranscript.trim();
+		}
+
+		let fadeTimeout;
+		if (closedCaptionsEnabled && captionsDiv) {
+		  captionsDiv.textContent = interimTranscript || finalTranscript;
+		  captionsDiv.classList.remove('fade-out');
+
+		  clearTimeout(fadeTimeout);
+		  fadeTimeout = setTimeout(() => {
+			captionsDiv.classList.add('fade-out');
+		  }, 4000);
+		}
+	  });
+
+	  recognition.addEventListener('end', () => {
+		if (isListening) {
+		  console.log("Recognition ended, restarting...");
+		  recognition.start();
+		} else {
+		  console.log("Recognition stopped by user.");
+		}
+	  });
+	}
+	</script>
+	</body>
+</html>
