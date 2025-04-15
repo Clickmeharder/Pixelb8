@@ -113,7 +113,33 @@ function ensureUIElements() {
   if (!document.getElementById("caption-controls")) {
     const controls = document.createElement("div");
     controls.id = "caption-controls";
-    controls.innerHTML = `...`; // Your existing control panel HTML
+    controls.innerHTML = '
+  <label>
+    Shadow Size
+    <input type="range" id="shadow-size" min="0" max="10" value="4">
+  </label>
+  <label>
+    Shadow Color
+    <input type="color" id="shadow-color" value="#000000">
+  </label>
+  <label>
+    Text Color
+    <input type="color" id="text-color" value="#ffffff">
+  </label>
+  <label>
+    Background Color
+    <input type="color" id="bg-color" value="#000000">
+  </label>
+  <label>
+    Blur Glow
+    <input type="checkbox" id="blur-glow">
+  </label>
+  <label>
+    Outline Text
+    <input type="checkbox" id="outline-text">
+  </label>
+  <button id="reset-captions">Reset</button>
+`;
     document.body.appendChild(controls);
 
     const toggleBtn = document.createElement("button");
