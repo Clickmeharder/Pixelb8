@@ -1855,7 +1855,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		}
 
 		// Ensure the category is valid (if provided)
-		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
+		const validCategories = ["mining", "hunting", "crafting", "missions", "history", "beauty", "economy", "social", "misc"];
 		if (category && !validCategories.includes(category)) {
 			displayentriviaMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
 			return;
