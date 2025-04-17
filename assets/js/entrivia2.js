@@ -118,27 +118,6 @@ function toggleconsolemessages() {
 //option to allow users to do /entrivia me
 //(ask the user a random question)
 
-//Example Questions
-/* <!-- const entriviaQuestions = [ -->
-<!-- { question: "Converting 100 shrapnel results in how much universal ammo?", answer: "101" }, -->
-<!-- { question: "What number is on the side of a Sleipnir mk1 (C,L)?", answer: "88" }, -->
-<!-- { question: "What is 5 + 3?", answer: "8" }, -->
-<!-- { question: "Who painted the Mona Lisa?", answer: "da vinci" }, -->
-<!-- { question: "What is the smallest Skildek support weapon?", answer: "lancehead" }, -->
-<!-- { question: "What amp drops from bots found at Orthos Oilfield?", answer: "b101" }, -->
-<!-- { question: "What does CDF stand for?", answer: "calypso defense force" }, -->
-<!-- { question: "What does IFN stand for?", answer: "imperial federal navy" }, -->
-<!-- { question: "What is Jaedraze's avatar's first name?", answer: "Jimmy" }, -->
-<!-- { question: "What is Jaedraze's avatar's middle name?", answer: "Jimbobbityboo" }, -->
-<!-- { question: "What year is it?", answer: "2025" }, -->
-<!-- { question: "What items are used to craft explosive projectiles?", answer: "nanocubes" }, -->
-<!-- { question: "What is the name of the starting zone on Calypso?", answer: "thule" }, -->
-<!-- { question: "How many paint cans or textures for max success?", answer: "323" }, -->
-<!-- { question: "How many PED is 100 PEC worth?", answer: "1" }, -->
-<!-- { question: "How many PEC is 1 PED worth?", answer: "100" }, -->
-<!-- { question: "How many PEC is 10 PED worth?", answer: "1000" } -->
-        <!-- ]; --> */
-
 //Example add Question Command
 //!entrivia-addcustomquestion round1 | What number is on the side of a Sleipnir mk1 (C,L)? | 88
 //----------------------------
@@ -1855,7 +1834,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		}
 
 		// Ensure the category is valid (if provided)
-		const validCategories = ["mining", "hunting", "crafting", "missions", "history", "beauty", "economy", "social", "misc"];
+		const validCategories = ["hunting", "mining", "crafting", "missions", "history", "beauty", "economy", "social", "misc"];
 		if (category && !validCategories.includes(category)) {
 			displayentriviaMessage(user, `⚠️ Invalid category! Use one of the following: ${validCategories.join(", ")}`, flags, extra, true);
 			return;
