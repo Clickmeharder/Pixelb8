@@ -1736,10 +1736,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     }
 	// Load a specific wheel by name: !load-wheel WheelName
 	// Load a specific wheel by name and spin it: !load-wheel WheelName
-	if (command.toLowerCase() === "spin-wheel") {
+	if (command.toLowerCase() === "spin") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 
-		const wheelName = parameters[0];
+		const parts = message.trim().split(" ");
+		const wheelName = parts[1]; // first parameter after command
+
 		if (!wheelName) {
 			displayConsoleMessage(user, `Please specify a wheel name to load. ❌`);
 			return;
@@ -1747,12 +1749,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
 		const wheels = getSavedWheels();
 		if (wheels[wheelName]) {
-			sections = wheels[wheelName].slice(); // Copy the wheel data
-			updateRemoveDropdown(); // Optional UI update
-			repaintWheel();         // Redraw wheel
+			sections = wheels[wheelName].slice(); // Copy wheel data
+			updateRemoveDropdown();
+			repaintWheel();
 			displayConsoleMessage(user, `Wheel "${wheelName}" loaded and spinning ✅`);
-			showWheel();            // Show the wheel
-			pullDiscRotationLever(); // Spin it!
+			showWheel();
+			pullDiscRotationLever();
 		} else {
 			displayConsoleMessage(user, `Wheel "${wheelName}" not found ❌`);
 		}
