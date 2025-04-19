@@ -1734,6 +1734,29 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         displayConsoleMessage(user, `!${command} ✅`);
 		showWheel();
     }
+	// Load a specific wheel by name: !load-wheel WheelName
+	// Load a specific wheel by name and spin it: !load-wheel WheelName
+	if (command.toLowerCase() === "spin-wheel") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+
+		const wheelName = parameters[0];
+		if (!wheelName) {
+			displayConsoleMessage(user, `Please specify a wheel name to load. ❌`);
+			return;
+		}
+
+		const wheels = getSavedWheels();
+		if (wheels[wheelName]) {
+			sections = wheels[wheelName].slice(); // Copy the wheel data
+			updateRemoveDropdown(); // Optional UI update
+			repaintWheel();         // Redraw wheel
+			displayConsoleMessage(user, `Wheel "${wheelName}" loaded and spinning ✅`);
+			showWheel();            // Show the wheel
+			pullDiscRotationLever(); // Spin it!
+		} else {
+			displayConsoleMessage(user, `Wheel "${wheelName}" not found ❌`);
+		}
+	}
 //--------------------------------------------
 	//pixelspace commands
     if (command.toLowerCase() === "launch") {
