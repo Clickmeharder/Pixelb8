@@ -1739,8 +1739,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "spin") {
 		if (!isStreamerAndAuthorize(user, command)) return;
 
-		const parts = message.trim().split(" ");
-		const wheelName = parts[1]; // first parameter after command
+		const wheelName = message; // first parameter after command
 
 		if (!wheelName) {
 			displayConsoleMessage(user, `Please specify a wheel name to load. ❌`);
