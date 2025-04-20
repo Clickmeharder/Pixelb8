@@ -515,12 +515,12 @@ document.getElementById("delete-saved-wheel").addEventListener("click", () => {
 });
 
 function addTestChatters(count = 3) {
-	const exampleUsers = ["TestUser1", "TestUser2", "TestUser3"];
+	const exampleUsers = ["catgirl01", "User420", "booblover69"];
 
 	for (let i = 0; i < count && i < exampleUsers.length; i++) {
 		const username = exampleUsers[i];
 		if (!chatterWheelsections.find(entry => entry.label === username)) {
-			chatterWheelsections.push({ label: username });
+			chatterWheelsections.push(username);
 		}
 	}
 	console.log(`✅ Added ${count} test chatters to the Chatter Wheel`, chatterWheelsections);
