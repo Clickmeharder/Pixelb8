@@ -581,31 +581,52 @@ function getRandomQuestion() {
         (round === 1 || round === "round1") ? "round1" :
         (round === 2 || round === "round2") ? "round2" :
         (round === null || round === undefined) ? "round1" : `round${round}`;
+
     // Ensure the round exists in the data
     if (!entriviaQuestions || !entriviaQuestions[currentRound]) {
         console.warn("No such round in questions:", currentRound);
         return null;
     }
+
     // Get all categories for this round
     const availableCategories = Object.keys(entriviaQuestions[currentRound]);
     if (availableCategories.length === 0) {
         console.warn("No categories in round:", currentRound);
         return null;
     }
+
     // Pick a random category
     const randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)];
-    const questions = entriviaQuestions[currentRound][randomCategory];
-    if (!questions || questions.length === 0) {
+    const allQuestions = entriviaQuestions[currentRound][randomCategory];
+
+    if (!allQuestions || allQuestions.length === 0) {
         console.warn("No questions found in category:", randomCategory);
         return null;
     }
+
+    // Filter out used questions
+    let availableQuestions = allQuestions.filter(q => !usedQuestions.includes(q));
+
+    // Reset usedQuestions if all have been used
+    if (availableQuestions.length === 0) {
+        console.log("✅ All questions used. Resetting used questions.");
+        usedQuestions = [];
+        availableQuestions = [...allQuestions];
+    }
+
+    // If still empty, something’s wrong
+    if (availableQuestions.length === 0) {
+        console.warn("⚠️ No available questions after reset.");
+        return null;
+    }
+
     // Pick a random question
-    const randomIndex = Math.floor(Math.random() * questions.length);
-    const question = questions[randomIndex];
+    const question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+    usedQuestions.push(question); // Track used question
+
     return {
         question: question.question,
-        answers: question.answers,         // Already an array (from fetch parsing)
-        //rawanswer: question.rawanswer || question.answers.join(';'),  // fallback if needed
+        answers: question.answers,
         type: question.type,
         options: question.options || [],
         round: currentRound,
