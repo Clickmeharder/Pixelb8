@@ -559,6 +559,35 @@ function showWheel() {
 	}
 }
 
+function forceShowWheel() {
+	const wheelWrapper = document.getElementById("wheelcanvaswrapper");
+	const leverWrapper = document.getElementById("discRotationLeverWrapper");
+	const toggleButton = document.getElementById("showWheelButt");
+	if (!wheelWrapper || !leverWrapper) return;
+
+	const isVisible = window.getComputedStyle(wheelWrapper).visibility === "visible";
+	const mode = userPixeldiscConfig.enableLever;
+
+	if (!isVisible) {
+		// Show wheel
+		wheelWrapper.style.visibility = "visible";
+		wheelWrapper.style.display = "flex";
+		wheelWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+
+		// Show lever if mode allows
+		if (mode === "always" || mode === "on") {
+			leverWrapper.style.visibility = "visible";
+			leverWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+		}
+
+		// Update button
+		if (toggleButton) {
+			toggleButton.innerHTML = '<i class="fas fa-eye-slash"></i> Hide';
+		}
+
+		console.log("Wheel force-shown ✅");
+	}
+}
 
 document.getElementById("showWheelButt")?.addEventListener("click", showWheel);
 function updateLeverVisibility() {

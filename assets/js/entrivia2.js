@@ -1773,7 +1773,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			updateRemoveDropdown();
 
 			displayConsoleMessage(user, `Wheel "${wheelName}" loaded and spinning ✅`);
-			showWheel();
+			forceShowWheel();
 			repaintWheel();
 			pullDiscRotationLever();
 		} else {
