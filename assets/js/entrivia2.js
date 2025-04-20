@@ -1787,7 +1787,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		const resultDisplay = document.getElementById("result-display"); // If applicable
 		const isWheelVisible = wrapper && wrapper.offsetParent !== null && !wrapper.classList.contains("fade-out");
 
-		if (action === "add") {
+		if (action === "add" || action === "join") {
 			// Anyone can add themselves to the wheel
 			addUserWheelSection(user);
 			sections = chatterWheelsections.slice();
