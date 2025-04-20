@@ -1317,9 +1317,16 @@ button.Butt{}
 /*----------------------*/
 /* Wrap around PixelButt so bubble buttons are relative */
 
-.themed, .chatMessage, .exampleMessage, .panel, #entriviaAnnouncement, #exampleAnnouncement, .controller, #Bubble .Butt, .close-btn {
+.themed, .chatMessage, .exampleMessage, .panel, .controller, #Bubble .Butt, .close-btn {
 	background:var(--bg-color);
 	border:var(--border);
+	border-radius:var(--border-radius);
+	box-shadow: var(--box-glow);
+	transition: all 0.3s ease;
+}
+#entriviaAnnouncement, #exampleAnnouncement {
+	background:var(--bg-color);
+	border:;
 	border-radius:var(--border-radius);
 	box-shadow: var(--box-glow);
 	transition: all 0.3s ease;
