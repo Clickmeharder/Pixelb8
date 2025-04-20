@@ -588,7 +588,7 @@ function pullDiscRotationLever() {
 
 	document.getElementById("discRotationButton").addEventListener("click", () => {
 		console.log(`Wheel done gonna spun!`);
-		showWheel();
+		showElement(wheelcanvaswrapper, "fade");
 		spinWheel();
 	});
 
