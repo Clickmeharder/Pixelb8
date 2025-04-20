@@ -1786,12 +1786,13 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (action === "add") {
 			// Anyone can add themselves to the wheel
 			if (!chatterWheelsections.find(entry => entry.label === user)) {
-				chatterWheelsections.push({ label: user, color: userColor });
+				const color = userColors[user] || "orangered";
+				chatterWheelsections.push({ label: user, color: color });
 				displayConsoleMessage(user, `You've been added to the Chatter Wheel ✅`);
 			} else {
 				displayConsoleMessage(user, `You're already on the Chatter Wheel ❌`);
 			}
-		} 
+		}
 		else if (action === "show") {
 			if (!isStreamerAndAuthorize(user, command)) return;
 			if (chatterWheelsections.length === 0) {
