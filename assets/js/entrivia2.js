@@ -1783,13 +1783,34 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	if (command.toLowerCase() === "chatterwheel") {
 		const action = message.toLowerCase();
 
+		const wrapper = document.getElementById("wheel-wrapper"); // Adjust if your wrapper has a different ID
+		const resultDisplay = document.getElementById("result-display"); // If applicable
+		const isWheelVisible = wrapper && wrapper.offsetParent !== null && !wrapper.classList.contains("fade-out");
+
 		if (action === "add") {
 			// Anyone can add themselves to the wheel
 			addUserWheelSection(user);
 			sections = chatterWheelsections.slice();
 			forceShowWheel();
 			repaintWheel();
-			displayConsoleMessage(user, `user added and Chatter Wheel is now visible with ${sections.length} entries ✅`);
+			displayConsoleMessage(user, `User added and Chatter Wheel is now visible with ${sections.length} entries ✅`);
+
+			// Only fade out if wheel wasn't already visible
+			if (userPixeldiscConfig.autoFade === "on" && !isWheelVisible) {
+				if (wrapper) {
+					clearTimeout(fadeTimeout); // prevent overlapping timers
+					fadeTimeout = setTimeout(() => {
+						console.log(`[AutoFade] Hiding elements after ${userPixeldiscConfig.autoFadeTime}ms`);
+						hideElement(wrapper, "slide");
+						hideElement(resultDisplay, "slide");
+
+						const toggleButton = document.getElementById("showWheelButt");
+						if (toggleButton) {
+							toggleButton.innerHTML = '<i class="fas fa-eye"></i> Show';
+						}
+					}, userPixeldiscConfig.autoFadeTime);
+				}
+			}
 		}
 		else if (action === "show") {
 			if (!isStreamerAndAuthorize(user, command)) return;
@@ -1802,7 +1823,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			forceShowWheel();
 			repaintWheel();
 			displayConsoleMessage(user, `Chatter Wheel is now visible with ${sections.length} entries ✅`);
-		} 
+		}
 		else if (action === "spin") {
 			if (!isStreamerAndAuthorize(user, command)) return;
 			if (chatterWheelsections.length === 0) {
