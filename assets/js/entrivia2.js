@@ -733,7 +733,7 @@ function nextQuestion() {
     if (activeQuestion.type === "multiplechoice") {
         // Create a list of options for multiple-choice questions
         let optionsHTML = activeQuestion.options.map(option => {
-            return `<div class="option">${option}</div>`;
+            return `<div class="option answeroption">${option}</div>`;
         }).join("");
 
         // Display the options
