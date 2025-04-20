@@ -410,7 +410,7 @@ function updateRemoveDropdown() {
 	function addUserWheelSection(user) {
 		const newSection = user.trim();
 		if (newSection && !chatterWheelsections.find(entry => entry.label === newSection)) {
-			chatterWheelsections.push({ label: newSection });
+			chatterWheelsections.push(newSection);
 			updateRemoveDropdown();
 			displayConsoleMessage(user, `You've been added to the Chatter Wheel ✅`);
 			repaintWheel(); // Ensure the wheel is updated after the section is added
