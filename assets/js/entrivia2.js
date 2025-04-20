@@ -1786,7 +1786,10 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (action === "add") {
 			// Anyone can add themselves to the wheel
 			addUserWheelSection(user);
+			sections = chatterWheelsections.slice();
+			forceShowWheel();
 			repaintWheel();
+			displayConsoleMessage(user, `user added and Chatter Wheel is now visible with ${sections.length} entries ✅`);
 		}
 		else if (action === "show") {
 			if (!isStreamerAndAuthorize(user, command)) return;
