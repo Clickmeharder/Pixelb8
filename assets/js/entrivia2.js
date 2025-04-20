@@ -1786,6 +1786,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (action === "add") {
 			// Anyone can add themselves to the wheel
 			addUserWheelSection(user);
+			repaintWheel();
 		}
 		else if (action === "show") {
 			if (!isStreamerAndAuthorize(user, command)) return;
