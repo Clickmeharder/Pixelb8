@@ -511,45 +511,32 @@ function showWheel() {
 
 	if (!wheelWrapper || !leverWrapper) return;
 
-	const isHidden = wheelWrapper.style.display === "none" || getComputedStyle(wheelWrapper).display === "none";
+	// Check if it's currently visible
+	const isVisible = wheelWrapper.style.visibility === "visible";
 
-	if (!isHidden) {
-		// Fade out, then hide
-		wheelWrapper.classList.remove("fadeIn");
-		wheelWrapper.classList.add("fadeOut");
+	if (isVisible) {
+		// Hide wheel and lever
+		hideElement(wheelWrapper, "fade");
+		if (mode === "on") hideElement(leverWrapper, "fade");
 
-		if (mode === "on") {
-			leverWrapper.classList.remove("fadeIn");
-			leverWrapper.classList.add("fadeOut");
-		}
-
-		setTimeout(() => {
-			wheelWrapper.style.display = "none";
-			if (mode === "on") leverWrapper.style.display = "none";
-			if (toggleButton) toggleButton.innerHTML = '<i class="fas fa-eye"></i> Show';
-			console.log("Wheel hidden ❌");
-		}, 500);
+		if (toggleButton) toggleButton.innerHTML = '<i class="fas fa-eye"></i> Show';
+		console.log("Wheel hidden ❌");
 	} else {
-		// Show, then fade in
-		wheelWrapper.style.display = "block";
-		wheelWrapper.classList.remove("fadeOut");
-		wheelWrapper.classList.add("fadeIn");
+		// Show wheel and lever
+		showElement(wheelWrapper, "fade");
 
 		if (mode === "always" || mode === "on") {
-			leverWrapper.style.display = "block";
-			leverWrapper.classList.remove("fadeOut");
-			leverWrapper.classList.add("fadeIn");
+			showElement(leverWrapper, "fade");
 			console.log(`Lever shown (mode: ${mode}) ✅`);
 		}
 
-		// Delay repaint slightly to make sure layout has updated
+		// Ensure layout updates before repaint
 		setTimeout(() => repaintWheel(), 10);
 
 		if (toggleButton) toggleButton.innerHTML = '<i class="fas fa-eye-slash"></i> Hide';
 		console.log("Wheel shown ✅");
 	}
 }
-
 
 document.getElementById("showWheelButt")?.addEventListener("click", showWheel);
 function updateLeverVisibility() {
@@ -601,7 +588,7 @@ function pullDiscRotationLever() {
 
 	document.getElementById("discRotationButton").addEventListener("click", () => {
 		console.log(`Wheel done gonna spun!`);
-		showElement(wheelcanvaswrapper, "fade");
+		showWheel();
 		spinWheel();
 	});
 
