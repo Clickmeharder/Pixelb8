@@ -410,17 +410,17 @@ function updateRemoveDropdown() {
 	function addUserWheelSection(username) {
 		const exampleUsers = ["catgirl01", "User420", "booblover69"];
 
-		if (chatterWheelsections.find(entry => entry.label === username)) {
+		if (chatterWheelsections.includes(username)) {
 			displayConsoleMessage(username, `You're already on the Chatter Wheel ❌`);
 			return;
 		}
 
-		const exampleIndex = chatterWheelsections.findIndex(entry => exampleUsers.includes(entry.label));
+		const exampleIndex = chatterWheelsections.findIndex(entry => exampleUsers.includes(entry));
 		if (exampleIndex !== -1) {
 			chatterWheelsections[exampleIndex] = username;
 			displayConsoleMessage(username, `You replaced a test user on the Chatter Wheel ✅`);
 		} else {
-			chatterWheelsections.push(username});
+			chatterWheelsections.push(username);
 			displayConsoleMessage(username, `You've been added to the Chatter Wheel ✅`);
 		}
 
