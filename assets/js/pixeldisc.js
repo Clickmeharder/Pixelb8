@@ -333,6 +333,11 @@ function repaintWheel() {
 					console.log(`[AutoFade] Hiding elements after ${userPixeldiscConfig.autoFadeTime}ms`);
 					hideElement(wrapper, "slide");
 					hideElement(resultDisplay, "slide");
+					      // Update toggle button after fade
+			    	const toggleButton = document.getElementById("showWheelButt");
+				    if (toggleButton) {
+					  toggleButton.innerHTML = '<i class="fas fa-eye"></i> Show';
+				    }
 				  }, userPixeldiscConfig.autoFadeTime);
 				}
 			  }
