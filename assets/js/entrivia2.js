@@ -1792,8 +1792,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			addUserWheelSection(user);
 			sections = chatterWheelsections.slice();
 			repaintWheel();
-			displayConsoleMessage(user, `User added to chatter wheel. total chatterwheel sections: with ${sections.length} entries ✅`);
-			displayentriviaMessage(user, `User added to chatter wheel. total chatterwheel sections: with ${sections.length} entries ✅`, flags, extra, true);
+			displayConsoleMessage(user, `User added to chatter wheel.-> ${sections.length} entries ✅`);
+			displayentriviaMessage(user, `User added to chatter wheel.-> ${sections.length} entries ✅`, flags, extra, true);
 		}
 		else if (action === "show") {
 			if (!isStreamerAndAuthorize(user, command)) return;
