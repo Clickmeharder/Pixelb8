@@ -503,15 +503,12 @@ document.getElementById("delete-saved-wheel").addEventListener("click", () => {
 });
 
 function addTestChatters(count = 3) {
-	const exampleUsers = [
-		{ label: "TestUser1", color: "#e91e63" },
-		{ label: "TestUser2", color: "#2196f3" },
-		{ label: "TestUser3", color: "#4caf50" },
-	];
+	const exampleUsers = ["TestUser1", "TestUser2", "TestUser3"];
 
 	for (let i = 0; i < count && i < exampleUsers.length; i++) {
-		if (!chatterWheelsections.find(entry => entry.label === exampleUsers[i].label)) {
-			chatterWheelsections.push(exampleUsers[i]);
+		const username = exampleUsers[i];
+		if (!chatterWheelsections.find(entry => entry.label === username)) {
+			chatterWheelsections.push({ label: username });
 		}
 	}
 	console.log(`✅ Added ${count} test chatters to the Chatter Wheel`, chatterWheelsections);

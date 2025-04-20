@@ -1786,8 +1786,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (action === "add") {
 			// Anyone can add themselves to the wheel
 			if (!chatterWheelsections.find(entry => entry.label === user)) {
-				const color = userColors[user] || "orangered";
-				chatterWheelsections.push({ label: user, color: color });
+				chatterWheelsections.push({ label: user });
 				displayConsoleMessage(user, `You've been added to the Chatter Wheel ✅`);
 			} else {
 				displayConsoleMessage(user, `You're already on the Chatter Wheel ❌`);
