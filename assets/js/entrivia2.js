@@ -1790,6 +1790,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		else if (action === "show") {
 			if (!isStreamerAndAuthorize(user, command)) return;
 			if (chatterWheelsections.length === 0) {
+				addTestChatters(3);
 				displayConsoleMessage(user, `No one is on the Chatter Wheel yet ❌`);
 				return;
 			}
