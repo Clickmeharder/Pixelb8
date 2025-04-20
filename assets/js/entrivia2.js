@@ -1780,6 +1780,50 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			displayConsoleMessage(user, `Wheel "${wheelName}" not found ❌`);
 		}
 	}
+	if (command.toLowerCase() === "chatterwheel") {
+		const action = message.toLowerCase();
+
+		if (action === "add") {
+			// Anyone can add themselves to the wheel
+			if (!chatterWheelsections.find(entry => entry.label === user)) {
+				chatterWheelsections.push({ label: user, color: userColor });
+				displayConsoleMessage(user, `You've been added to the Chatter Wheel ✅`);
+			} else {
+				displayConsoleMessage(user, `You're already on the Chatter Wheel ❌`);
+			}
+		} 
+		else if (action === "show") {
+			if (!isStreamerAndAuthorize(user, command)) return;
+			if (chatterWheelsections.length === 0) {
+				displayConsoleMessage(user, `No one is on the Chatter Wheel yet ❌`);
+				return;
+			}
+			sections = chatterWheelsections.slice();
+			forceShowWheel();
+			repaintWheel();
+			displayConsoleMessage(user, `Chatter Wheel is now visible with ${sections.length} entries ✅`);
+		} 
+		else if (action === "spin") {
+			if (!isStreamerAndAuthorize(user, command)) return;
+			if (chatterWheelsections.length === 0) {
+				displayConsoleMessage(user, `No chatters to spin ❌`);
+				return;
+			}
+			sections = chatterWheelsections.slice();
+			forceShowWheel();
+			repaintWheel();
+			pullDiscRotationLever();
+			displayConsoleMessage(user, `🎡 Spinning the Chatter Wheel...`);
+		}
+		else if (action === "clear") {
+			if (!isStreamerAndAuthorize(user, command)) return;
+			chatterWheelsections = [];
+			displayConsoleMessage(user, `Chatter Wheel cleared 🧹`);
+		}
+		else {
+			displayConsoleMessage(user, `Try: !chatterwheel add / show / spin / clear`);
+		}
+	}
 //--------------------------------------------
 	//pixelspace commands
     if (command.toLowerCase() === "launch") {

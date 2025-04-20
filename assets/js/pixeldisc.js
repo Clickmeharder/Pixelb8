@@ -13,6 +13,7 @@ const toggleOptions = {
 
 let canvas = document.getElementById("canvas1");
 let sections = ["Prize 1", "Prize 2", "Prize 3", "Prize 4", "Prize 5", "Prize 6", "Prize 7"];
+let chatterWheelsections = [];
 let colors = ["#001f1fe8", "#004040eb"];
 let wheels = null;
 let frame = null;
