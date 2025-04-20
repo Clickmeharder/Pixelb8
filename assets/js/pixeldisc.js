@@ -713,6 +713,7 @@ document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
 		updateLoadDropdown();
 		loadPixelDiscConfig();
 		updateAllStatusIndicators(userPixeldiscConfig);
+		addTestChatters(3);
 	});
 /*  localStorage.removeItem("pixelDiscConfig"); */
 console.log("disc1.00 side A")
