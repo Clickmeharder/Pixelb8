@@ -100,7 +100,6 @@
 						<th class="sortable" data-index="1">Winner Name</th>
 						<th class="sortable" data-index="2">Amount</th>
 						<th class="sortable" data-index="3">Prize</th>
-						<th class="sortable" data-index="4">Status</th>
 					</tr>
 				</thead>
 				<tbody style="color:rgb(165 152 152);">
@@ -111,106 +110,101 @@
 
 		<h2 id="totalAmount" style="text-align:center;color: #2775a7;background-color:rgba(0, 0, 0, 0.8); border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;">Total Amount: $0.00</h2>
 	</div>
-    <script>
-        let prizeData = [];
-        let sortDirections = [true, true, true, true, true]; // true for ascending, false for descending
+	<script>
+	let prizeData = [];
+	let sortDirections = [true, true, true, true]; // 4 columns now
 
-        function loadCSVFile() {
-			const csvPath = 'data/JaedrazeTTV-EU-viewerPrizelist.txt';  // relative path to the CSV file
-			fetch(csvPath)
-				.then(response => response.text())
-				.then(data => {
-					const rows = data.split('\n');
-					const tableBody = document.querySelector('#winnersTable tbody');
-					let totalAmount = 0;  // Initialize total amount
+	function loadCSVFile() {
+		const csvPath = 'data/JaedrazeTTV-EU-viewerPrizelist.txt';
+		fetch(csvPath)
+			.then(response => response.text())
+			.then(data => {
+				const rows = data.split('\n');
+				const tableBody = document.querySelector('#winnersTable tbody');
+				let totalAmount = 0;
 
-					rows.forEach(row => {
-						const columns = row.split(',');
-						if (columns.length === 5) { // Ensure 5 columns: Date, Winner Name, Amount, Prize, Status
-							const tableRow = document.createElement('tr');
+				rows.forEach(row => {
+					const columns = row.split(',');
+					if (columns.length >= 5) {
+						const status = columns[4].trim().toLowerCase();
+						const tableRow = document.createElement('tr');
 
-							// Apply background color to the <tr> based on the Status column
-							if (columns[4].trim().toLowerCase() === 'claimed') {
-								tableRow.style.backgroundColor = '#6e6d6d8a';  // Light green for claimed rows
-							} else if (columns[4].trim().toLowerCase() === 'unclaimed') {
-								tableRow.style.backgroundColor = '#70200a66';  // Light red for unclaimed rows
+						if (status === 'claimed') {
+							tableRow.style.backgroundColor = '#6e6d6d8a';
+						} else if (status === 'unclaimed') {
+							tableRow.style.backgroundColor = '#70200a66';
+						}
+
+						for (let index = 0; index < 4; index++) {
+							const cell = document.createElement('td');
+							cell.textContent = columns[index].trim();
+
+							if (status === 'claimed') {
+								if (index === 0 || index === 1 || index === 3) {
+									cell.style.color = 'grey';
+								} else if (index === 2) {
+									cell.style.color = 'rgb(165, 152, 152)';
+								}
+							} else if (status === 'unclaimed') {
+								cell.style.color = 'orange';
 							}
 
-							columns.forEach((column, index) => {
-								const cell = document.createElement('td');
-								cell.textContent = column.trim();
-
-								// Apply color based on the Status
-								if (columns[4].trim().toLowerCase() === 'claimed') {
-									if (index === 0 || index === 1 || index === 3) { // Date, Winner Name, Prize
-										cell.style.color = 'grey'; // Set color to grey for these cells
-									} else if (index === 2) { // Amount
-										cell.style.color = 'rgb(165, 152, 152)'; // Set claimed amount color
-									} else {
-										cell.style.color = '#444'; // Default color for Status
-									}
-								} else if (columns[4].trim().toLowerCase() === 'unclaimed') {
-									cell.style.color = index === 4 ? '#444' : 'orange';  // Darker red for "unclaimed" cells
-								}
-
-								tableRow.appendChild(cell);
-							});
-
-							// Update total amount
-							totalAmount += parseFloat(columns[2]) || 0;
-
-							tableBody.appendChild(tableRow);
-							prizeData.push({ date: columns[0], winner: columns[1], amount: parseFloat(columns[2]) || 0, prize: columns[3], status: columns[4] });
+							tableRow.appendChild(cell);
 						}
-					});
 
-					// Display total amount
-					document.getElementById('totalAmount').textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
-				})
-				.catch(error => console.error('Error loading CSV file:', error));
-		}
-        function sortTable(index) {
-            const tbody = document.querySelector('#winnersTable tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
+						totalAmount += parseFloat(columns[2]) || 0;
 
-            // Toggle sort direction
-            sortDirections[index] = !sortDirections[index];
+						tableBody.appendChild(tableRow);
+						prizeData.push({
+							date: columns[0],
+							winner: columns[1],
+							amount: parseFloat(columns[2]) || 0,
+							prize: columns[3],
+							status: columns[4]
+						});
+					}
+				});
 
-            rows.sort((a, b) => {
-                const aText = a.children[index].textContent;
-                const bText = b.children[index].textContent;
+				document.getElementById('totalAmount').textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
+			})
+			.catch(error => console.error('Error loading CSV file:', error));
+	}
 
-                if (index === 2) { // Sorting Amount
-                    return sortDirections[index] ? parseFloat(aText) - parseFloat(bText) : parseFloat(bText) - parseFloat(aText);
-                } else if (index === 0) { // Sorting Date
-                    return sortDirections[index] ? new Date(aText) - new Date(bText) : new Date(bText) - new Date(aText);
-                } else { // Sorting by string (Winner Name, Prize, Status)
-                    return sortDirections[index] ? aText.localeCompare(bText) : bText.localeCompare(aText);
-                }
-            });
+	function sortTable(index) {
+		const tbody = document.querySelector('#winnersTable tbody');
+		const rows = Array.from(tbody.querySelectorAll('tr'));
+		sortDirections[index] = !sortDirections[index];
 
-            // Append sorted rows to the tbody
-            rows.forEach(row => tbody.appendChild(row));
+		rows.sort((a, b) => {
+			const aText = a.children[index].textContent;
+			const bText = b.children[index].textContent;
 
-            // Update the header class to reflect the sort direction
-            document.querySelectorAll('.sortable').forEach((header, idx) => {
-                header.classList.remove('asc', 'desc');
-                if (idx === index) {
-                    header.classList.add(sortDirections[idx] ? 'asc' : 'desc');
-                }
-            });
-        }
+			if (index === 2) {
+				return sortDirections[index] ? parseFloat(aText) - parseFloat(bText) : parseFloat(bText) - parseFloat(aText);
+			} else if (index === 0) {
+				return sortDirections[index] ? new Date(aText) - new Date(bText) : new Date(bText) - new Date(aText);
+			} else {
+				return sortDirections[index] ? aText.localeCompare(bText) : bText.localeCompare(aText);
+			}
+		});
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadCSVFile();
-            document.querySelectorAll('.sortable').forEach(header => {
-                header.addEventListener('click', () => {
-                    const index = header.getAttribute('data-index');
-                    sortTable(index);
-                });
-            });
-        });
-    </script>
+		rows.forEach(row => tbody.appendChild(row));
+
+		document.querySelectorAll('.sortable').forEach((header, idx) => {
+			header.classList.remove('asc', 'desc');
+			if (idx === index) {
+				header.classList.add(sortDirections[idx] ? 'asc' : 'desc');
+			}
+		});
+	}
+
+	document.addEventListener('DOMContentLoaded', () => {
+		loadCSVFile();
+		document.querySelectorAll('.sortable').forEach((header, idx) => {
+			header.addEventListener('click', () => sortTable(idx));
+		});
+	});
+	</script>
 	<script src="../core/js/pixelb8-global.js"></script>
 </body>
 </html>
