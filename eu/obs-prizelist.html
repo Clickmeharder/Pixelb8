@@ -83,6 +83,8 @@
 			<p style="margin:0;font-weight:bold;">Legend:</p>
 			<p style="margin:0;padding:4px;color: orange;background-color:rgba(112, 32, 10, 0.4);">unclaimed</p>
 			<p style="margin:0;padding:4px;color: rgb(68, 68, 68);background-color:rgba(110, 109, 109, 0.54);">claimed</p>
+			<button id="toggleClaimedBtn">Hide Claimed</button>
+			<input type="text" id="usernameFilter" placeholder="Filter by username" style="margin-left: 10px; padding: 4px;">
 		</div>
 		<!-- Scrollable wrapper -->
 		<div style="max-height: 379px;width: 99vw;overflow-y: scroll;border: 3px ridge #2dabfcb8;">
@@ -112,59 +114,46 @@
 	<script>
 	let prizeData = [];
 	let sortDirections = [true, true, true, true]; // 4 columns now
+	let showClaimed = true;
 
+	document.getElementById('toggleClaimedBtn').addEventListener('click', () => {
+		showClaimed = !showClaimed;
+		document.getElementById('toggleClaimedBtn').textContent = showClaimed ? 'Hide Claimed' : 'Show Claimed';
+		filterAndRender();
+	});
+
+	document.getElementById('usernameFilter').addEventListener('input', () => {
+		filterAndRender();
+	});
 	function loadCSVFile() {
 		const csvPath = 'data/JaedrazeTTV-EU-viewerPrizelist.txt';
 		fetch(csvPath)
 			.then(response => response.text())
 			.then(data => {
 				const rows = data.split('\n');
-				const tableBody = document.querySelector('#winnersTable tbody');
 				let totalAmount = 0;
+				prizeData = []; // Clear any existing data
 
 				rows.forEach(row => {
 					const columns = row.split(',');
 					if (columns.length >= 5) {
 						const status = columns[4].trim().toLowerCase();
-						const tableRow = document.createElement('tr');
+						const amount = parseFloat(columns[2]) || 0;
 
-						if (status === 'claimed') {
-							tableRow.style.backgroundColor = '#6e6d6d8a';
-						} else if (status === 'unclaimed') {
-							tableRow.style.backgroundColor = '#70200a66';
-						}
+						totalAmount += amount;
 
-						for (let index = 0; index < 4; index++) {
-							const cell = document.createElement('td');
-							cell.textContent = columns[index].trim();
-
-							if (status === 'claimed') {
-								if (index === 0 || index === 1 || index === 3) {
-									cell.style.color = 'grey';
-								} else if (index === 2) {
-									cell.style.color = 'rgb(165, 152, 152)';
-								}
-							} else if (status === 'unclaimed') {
-								cell.style.color = 'orange';
-							}
-
-							tableRow.appendChild(cell);
-						}
-
-						totalAmount += parseFloat(columns[2]) || 0;
-
-						tableBody.appendChild(tableRow);
 						prizeData.push({
-							date: columns[0],
-							winner: columns[1],
-							amount: parseFloat(columns[2]) || 0,
-							prize: columns[3],
-							status: columns[4]
+							date: columns[0].trim(),
+							winner: columns[1].trim(),
+							amount: amount,
+							prize: columns[3].trim(),
+							status: status
 						});
 					}
 				});
 
 				document.getElementById('totalAmount').textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
+				filterAndRender(); // Call the new render function here
 			})
 			.catch(error => console.error('Error loading CSV file:', error));
 	}
@@ -196,6 +185,41 @@
 			}
 		});
 	}
+
+function filterAndRender() {
+	const tbody = document.querySelector('#winnersTable tbody');
+	tbody.innerHTML = '';
+	let totalAmount = 0;
+
+	const usernameFilterValue = document.getElementById('usernameFilter').value.toLowerCase();
+
+	prizeData.forEach(entry => {
+		const isClaimed = entry.status.trim().toLowerCase() === 'claimed';
+		if (!showClaimed && isClaimed) return;
+		if (usernameFilterValue && !entry.winner.toLowerCase().includes(usernameFilterValue)) return;
+
+		const row = document.createElement('tr');
+		row.style.backgroundColor = isClaimed ? '#6e6d6d8a' : '#70200a66';
+
+		['date', 'winner', 'amount', 'prize'].forEach((key, i) => {
+			const cell = document.createElement('td');
+			cell.textContent = key === 'amount' ? entry[key].toFixed(2) : entry[key];
+
+			if (isClaimed) {
+				cell.style.color = i === 2 ? 'rgb(165, 152, 152)' : 'grey';
+			} else {
+				cell.style.color = 'orange';
+			}
+
+			row.appendChild(cell);
+		});
+
+		tbody.appendChild(row);
+		totalAmount += entry.amount;
+	});
+
+	document.getElementById('totalAmount').textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
+}
 
 	document.addEventListener('DOMContentLoaded', () => {
 		loadCSVFile();
