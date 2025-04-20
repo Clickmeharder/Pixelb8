@@ -534,8 +534,6 @@ function showWheel() {
 	} else {
 		// Show wheel
 		wheelWrapper.style.visibility = "visible";
-		wheelWrapper.style.display = "none";
-		repaintWheel();
 		wheelWrapper.style.display = "flex";
 		wheelWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
 
@@ -545,7 +543,7 @@ function showWheel() {
 			leverWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
 			console.log(`Lever shown (mode: ${mode}) ✅`);
 		}
-
+		repaintWheel();
 		console.log("Wheel shown ✅");
 
 		// Update button
