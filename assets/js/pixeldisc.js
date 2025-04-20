@@ -501,7 +501,6 @@ function showWheel() {
 	const wheelWrapper = document.getElementById("wheelcanvaswrapper");
 	const leverWrapper = document.getElementById("discRotationLeverWrapper");
 	const toggleButton = document.getElementById("showWheelButt");
-	repaintWheel();
 	if (!wheelWrapper || !leverWrapper) return;
 
 	// Toggle visibility
@@ -535,6 +534,9 @@ function showWheel() {
 	} else {
 		// Show wheel
 		wheelWrapper.style.visibility = "visible";
+		wheelWrapper.style.display = "none";
+		repaintWheel();
+		wheelWrapper.style.display = "flex";
 		wheelWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
 
 		// Show lever only if mode is "on" or "always"
