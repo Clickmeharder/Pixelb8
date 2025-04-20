@@ -333,12 +333,6 @@ function repaintWheel() {
 					console.log(`[AutoFade] Hiding elements after ${userPixeldiscConfig.autoFadeTime}ms`);
 					hideElement(wrapper, "slide");
 					hideElement(resultDisplay, "slide");
-
-					// ⬇️ Sync toggle button after autoFade
-					const toggleButton = document.getElementById("showWheelButt");
-					if (toggleButton) {
-					  toggleButton.innerHTML = '<i class="fas fa-eye"></i> Show';
-					}
 				  }, userPixeldiscConfig.autoFadeTime);
 				}
 			  }
@@ -507,36 +501,58 @@ function showWheel() {
 	const wheelWrapper = document.getElementById("wheelcanvaswrapper");
 	const leverWrapper = document.getElementById("discRotationLeverWrapper");
 	const toggleButton = document.getElementById("showWheelButt");
-	const mode = userPixeldiscConfig.enableLever;
-
+	repaintWheel();
 	if (!wheelWrapper || !leverWrapper) return;
 
-	// Check if it's currently visible
-	const isVisible = wheelWrapper.style.visibility === "visible";
+	// Toggle visibility
+	const isVisible = window.getComputedStyle(wheelWrapper).visibility === "visible";
+	const mode = userPixeldiscConfig.enableLever;
 
 	if (isVisible) {
-		// Hide wheel and lever
-		hideElement(wheelWrapper, "fade");
-		if (mode === "on") hideElement(leverWrapper, "fade");
+		// Hide wheel
+		wheelWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
+		setTimeout(() => {
+			wheelWrapper.style.visibility = "hidden";
+		}, 500);
 
-		if (toggleButton) toggleButton.innerHTML = '<i class="fas fa-eye"></i> Show';
+		// Hide lever only if mode is "on"
+		if (mode === "on") {
+			leverWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
+			setTimeout(() => {
+				leverWrapper.style.visibility = "hidden";
+			}, 500);
+			console.log(`Lever hidden (mode: ${mode}) ❌`);
+		} else {
+			console.log(`Lever stays visible (mode: ${mode}) ✅`);
+		}
+
 		console.log("Wheel hidden ❌");
-	} else {
-		// Show wheel and lever
-		showElement(wheelWrapper, "fade");
 
+		// Update button
+		if (toggleButton) {
+			toggleButton.innerHTML = '<i class="fas fa-eye"></i> Show';
+		}
+	} else {
+		// Show wheel
+		wheelWrapper.style.visibility = "visible";
+		wheelWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+
+		// Show lever only if mode is "on" or "always"
 		if (mode === "always" || mode === "on") {
-			showElement(leverWrapper, "fade");
+			leverWrapper.style.visibility = "visible";
+			leverWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
 			console.log(`Lever shown (mode: ${mode}) ✅`);
 		}
 
-		// Ensure layout updates before repaint
-		setTimeout(() => repaintWheel(), 10);
-
-		if (toggleButton) toggleButton.innerHTML = '<i class="fas fa-eye-slash"></i> Hide';
 		console.log("Wheel shown ✅");
+
+		// Update button
+		if (toggleButton) {
+			toggleButton.innerHTML = '<i class="fas fa-eye-slash"></i> Hide';
+		}
 	}
 }
+
 
 document.getElementById("showWheelButt")?.addEventListener("click", showWheel);
 function updateLeverVisibility() {
@@ -573,7 +589,7 @@ function updateLeverVisibility() {
 }
 function pullDiscRotationLever() {
       console.log(`Wheel done gonna spun!`);
-	  showWheel();
+	  showElement(wheelcanvaswrapper, "fade");
 	  if (running) return;
 
 	  lever.classList.add("pull");
