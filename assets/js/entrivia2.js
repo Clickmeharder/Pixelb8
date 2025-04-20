@@ -733,11 +733,11 @@ function nextQuestion() {
     if (activeQuestion.type === "multiplechoice") {
         // Create a list of options for multiple-choice questions
         let optionsHTML = activeQuestion.options.map(option => {
-            return `<div class="option answeroption">${option}</div>`;
+            return `<div class="answeroption">${option}</div>`;
         }).join("");
 
         // Display the options
-        document.getElementById("question").innerHTML += `<div class="options">${optionsHTML}</div>`;
+        document.getElementById("question").innerHTML += `<div class="answeroptions">${optionsHTML}</div>`;
     } else {
         // For single-choice questions, ensure no options are shown
         document.querySelector(".options")?.remove(); // Remove any previous options if they exist
