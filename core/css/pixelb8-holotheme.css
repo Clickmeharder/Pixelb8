@@ -57,6 +57,7 @@ Pixelb8-holotheme.css
   /* twitch chat element specific styles */
   --twitchchat-opacity:1.0;
   --twitchmessage-opacity:0.85;
+  --select-margin: auto 2px 0 0;
 }
 
 
@@ -138,7 +139,7 @@ body.dark-theme {
   --input-border-style: inset;
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
   --input-border-radius: 6px;
-  --select-margin: auto 12px 0 0;
+  --select-margin: auto 2px 0 0;
 /*----------------------------------*/
 /* Custom Select Styles */
 /*----------------------------------*/
@@ -218,7 +219,7 @@ body.light-theme {
   --input-border-style: solid;
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
   --input-border-radius: 5px;
-  --select-margin: auto 12px 0 0;
+  --select-margin: auto 2px 0 0;
 }
 /* 🎨 CUSTOM THEME (pastel play) */
 body.custom-theme {
@@ -267,6 +268,7 @@ body.custom-theme {
   --console-bg: rgba(255, 245, 250, 0.8);
   --body-opacity: 1;
   --cursor-image: ;
+  --select-margin: auto 2px 0 0;
 }
 /* 🕹️ RETRO THEME (green screen vibes) */
 
@@ -339,7 +341,7 @@ body.retro-theme {
   --input-border-style: dashed;
   --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
   --input-border-radius: 6px;
-  --select-margin: auto 12px 0 0;
+  --select-margin: auto 2px 0 0;
 }
 body.cyberice-theme {
   --body-font: 'Orbitron', sans-serif;
@@ -2642,14 +2644,19 @@ button.statustoggle {}
 }
 
 /*
-Select Enhancements (arrows)*/ 
-
-.select-enhanced{ margin-right:0px;	width: auto;}
+Select Enhancements (arrows)*/
+.select-enhanced{
+    display: inline-flex;
+    align-items: center;
+    gap: 0px;
+    margin-right: 6px;
+}
+.select-enhanced{width: auto;}
 
 .arrow-container {
     display: flex;
     flex-direction: column;
-    margin-left: 4px;
+    margin-left: 1px;
 }
 
 .arrow-button {
