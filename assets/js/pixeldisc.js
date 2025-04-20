@@ -543,13 +543,14 @@ function showWheel() {
 			leverWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
 			console.log(`Lever shown (mode: ${mode}) ✅`);
 		}
-		repaintWheel();
-		console.log("Wheel shown ✅");
-
 		// Update button
 		if (toggleButton) {
 			toggleButton.innerHTML = '<i class="fas fa-eye-slash"></i> Hide';
 		}
+		repaintWheel();
+		console.log("Wheel shown ✅");
+
+
 	}
 }
 
