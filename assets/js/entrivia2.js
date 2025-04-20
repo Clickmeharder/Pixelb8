@@ -1794,7 +1794,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			forceShowWheel();
 			repaintWheel();
 			displayConsoleMessage(user, `User added and Chatter Wheel is now visible with ${sections.length} entries ✅`);
-
+			displayentriviaMessage(user, `User added and Chatter Wheel is now visible with ${sections.length} entries ✅`, flags, extra, true);
 			// Only fade out if wheel wasn't already visible
 			if (userPixeldiscConfig.autoFade === "on" && !isWheelVisible) {
 				if (wrapper) {
@@ -1816,6 +1816,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			if (!isStreamerAndAuthorize(user, command)) return;
 			if (chatterWheelsections.length === 0) {
 				displayConsoleMessage(user, `No one is on the Chatter Wheel yet ❌`);
+				displayentriviaMessage(user, `No one is on the Chatter Wheel yet ❌`, flags, extra, true);
 				console.log(user, `No one is on the Chatter Wheel yet ❌`);
 				return;
 			}
@@ -1823,11 +1824,13 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			forceShowWheel();
 			repaintWheel();
 			displayConsoleMessage(user, `Chatter Wheel is now visible with ${sections.length} entries ✅`);
+			displayentriviaMessage(user, `Chatter Wheel is now visible with ${sections.length} entries ✅`, flags, extra, true);
 		}
 		else if (action === "spin") {
 			if (!isStreamerAndAuthorize(user, command)) return;
 			if (chatterWheelsections.length === 0) {
 				displayConsoleMessage(user, `No chatters to spin ❌`);
+				displayentriviaMessage(user, `No chatters to spin ❌`, flags, extra, true);
 				return;
 			}
 			sections = chatterWheelsections.slice();
@@ -1835,14 +1838,17 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			repaintWheel();
 			pullDiscRotationLever();
 			displayConsoleMessage(user, `🎡 Spinning the Chatter Wheel...`);
+			displayentriviaMessage(user, `🎡 Spinning the Chatter Wheel...`, flags, extra, true);
 		}
 		else if (action === "clear") {
 			if (!isStreamerAndAuthorize(user, command)) return;
 			chatterWheelsections = [];
 			displayConsoleMessage(user, `Chatter Wheel cleared 🧹`);
+			displayentriviaMessage(user, `Chatter Wheel cleared 🧹`, flags, extra, true);
 		}
 		else {
 			displayConsoleMessage(user, `Try: !chatterwheel add / show / spin / clear`);
+			displayentriviaMessage(user, `Try: !chatterwheel add / show / spin / clear`, flags, extra, true);
 		}
 	}
 //--------------------------------------------
