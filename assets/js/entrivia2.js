@@ -1771,9 +1771,10 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (wheels[wheelName]) {
 			sections = wheels[wheelName].slice(); // Copy wheel data
 			updateRemoveDropdown();
-			repaintWheel();
+
 			displayConsoleMessage(user, `Wheel "${wheelName}" loaded and spinning ✅`);
 			showWheel();
+			repaintWheel();
 			pullDiscRotationLever();
 		} else {
 			displayConsoleMessage(user, `Wheel "${wheelName}" not found ❌`);
