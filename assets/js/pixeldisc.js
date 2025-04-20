@@ -407,6 +407,18 @@ function updateRemoveDropdown() {
 			console.log("Section name is empty or already exists.");
 		}
 	}
+	function addUserWheelSection(user) {
+		const newSection = user.trim();
+		if (newSection && !chatterWheelsections.find(entry => entry.label === newSection)) {
+			chatterWheelsections.push({ label: newSection });
+			updateRemoveDropdown();
+			displayConsoleMessage(user, `You've been added to the Chatter Wheel ✅`);
+			repaintWheel(); // Ensure the wheel is updated after the section is added
+		} else {
+			console.log("Chatter name is empty or already exists in the Chatter Wheel.");
+			displayConsoleMessage(user, `You're already on the Chatter Wheel ❌`);
+		}
+	}
 	addButton.addEventListener("click", () => {
 		console.log("add section butt clicked!");
 		addwheelSection();
