@@ -6,54 +6,103 @@
     <link rel="icon" type="image/png" href="../../assets/images/logo/pixelbotfavicon.png">
 	<link rel="stylesheet" href="../core/css/pixelb8-tools.css">
     <title>Prize Winners(OBS)</title>
-    <style>
-		body{background:unset;background-color:unset;}
-        .sortable:hover {
-            cursor: pointer;
-            color: #2775a7;
-        }
-        .asc::after {
-            content: " 🔼"; /* Arrow for ascending sort */
-        }
-        .desc::after {
-            content: " 🔽"; /* Arrow for descending sort */
-        }
-		.td {
-			color: rgb(165 152 152);
-		}
-		div#prizelistWrapper {
-			margin: 0;
-			display: flex;
-			justify-content: center;
-			flex-direction: column;
-			align-content: center;
-		}
-    </style>
+<style>
+	body {
+		background: unset;
+		background-color: unset;
+	}
+
+	.sortable:hover {
+		cursor: pointer;
+		color: #2775a7;
+	}
+
+	.asc::after {
+		content: " 🔼"; /* Arrow for ascending sort */
+	}
+
+	.desc::after {
+		content: " 🔽"; /* Arrow for descending sort */
+	}
+
+	/* This class was named `.td` which targets <div class="td">, not actual <td> elements.
+	   If you're styling table cells, use this instead: */
+	td {
+		color: rgb(165, 152, 152);
+	}
+
+	#prizelistWrapper {
+		margin: 0 auto;
+		display: flex;
+		justify-content: center;
+		flex-direction: column;
+		align-items: center;
+		width: 100%;
+		max-width: 1000px;
+		padding: 10px;
+	}
+
+	#winnersTable {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	#winnersTable th,
+	#winnersTable td {
+		border: 1px ridge #2dabfcb8;
+		padding: 6px;
+		text-align: center;
+	}
+
+	/* Scroll wrapper */
+	#winnersTableWrapper {
+		max-height: 500px;
+		overflow-y: auto;
+		width: 100%;
+		border: 3px ridge #2dabfcb8;
+		background-color: #000000c4;
+	}
+
+	/* Optional: sticky table header for usability */
+	#winnersTable thead th {
+		position: sticky;
+		top: 0;
+		background-color: #111;
+		z-index: 1;
+	}
+</style>
 </head>
 <body>
 	<div class="container" id="prizelistWrapper">
-		<h1 style="color: #2775a7;  border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;">C.o.S Prize Winners</h1>
-		<table id="winnersTable" border="1" style="height: 500px;overflow-y: auto;background-color: #000000c4; border-style: ridge; text-align: center; border-width: 3px;">
-		<colgroup>
-			<col style="width: 20%;">  <!-- Date -->
-			<col style="width:20%;">  <!-- Winner Name -->
-			<col style="width:10%;">  <!-- Amount -->
-			<col style="width:15%;">  <!-- Prize -->
-			<col style="width:15%;">  <!-- Status -->
-		</colgroup>
-			<thead>
-				<tr>
-					<th class="sortable" data-index="0">Date</th>
-					<th class="sortable" data-index="1">Winner Name</th>
-					<th class="sortable" data-index="2">Amount</th>
-					<th class="sortable" data-index="3">Prize</th>
-					<th class="sortable" data-index="4">Status</th>
-				</tr>
-			</thead>
-			<tbody style="color:rgb(165 152 152);">
-				<!-- Data will be inserted here -->
-			</tbody>
-		</table>
+		<h1 style="color: #2775a7; border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;">
+			C.o.S Prize Winners
+		</h1>
+
+		<!-- Scrollable wrapper -->
+		<div style="max-height: 500px; overflow-y: auto; border: 3px ridge #2dabfcb8;">
+			<table id="winnersTable" style="background-color: #000000c4; width: 100%; text-align: center;">
+				<colgroup>
+					<col style="width: 20%;">  <!-- Date -->
+					<col style="width: 20%;">  <!-- Winner Name -->
+					<col style="width: 10%;">  <!-- Amount -->
+					<col style="width: 15%;">  <!-- Prize -->
+					<col style="width: 15%;">  <!-- Status -->
+				</colgroup>
+				<thead>
+					<tr>
+						<th class="sortable" data-index="0">Date</th>
+						<th class="sortable" data-index="1">Winner Name</th>
+						<th class="sortable" data-index="2">Amount</th>
+						<th class="sortable" data-index="3">Prize</th>
+						<th class="sortable" data-index="4">Status</th>
+					</tr>
+				</thead>
+				<tbody style="color:rgb(165 152 152);">
+					<!-- Data will be inserted here -->
+				</tbody>
+			</table>
+		</div>
+
 		<h2 id="totalAmount" style="text-align:center;">Total Amount: $0.00</h2>
 	</div>
     <script>
