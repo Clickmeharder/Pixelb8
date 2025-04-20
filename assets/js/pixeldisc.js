@@ -498,60 +498,61 @@ document.getElementById("delete-saved-wheel").addEventListener("click", () => {
 
 	
 function showWheel() {
-    const outerWrapper = document.getElementById("wheelWrapper");
-    const wheelWrapper = document.getElementById("wheelcanvaswrapper");
-    const leverWrapper = document.getElementById("discRotationLeverWrapper");
-    const toggleButton = document.getElementById("showWheelButt");
-    if (!outerWrapper || !wheelWrapper || !leverWrapper) return;
+	const wheelWrapper = document.getElementById("wheelcanvaswrapper");
+	const leverWrapper = document.getElementById("discRotationLeverWrapper");
+	const toggleButton = document.getElementById("showWheelButt");
+	repaintWheel();
+	if (!wheelWrapper || !leverWrapper) return;
 
-    const mode = userPixeldiscConfig.enableLever;
+	// Toggle visibility
+	const isVisible = window.getComputedStyle(wheelWrapper).visibility === "visible";
+	const mode = userPixeldiscConfig.enableLever;
 
-    // Treat wheel as hidden if either wrapper is hidden
-    const isHidden = window.getComputedStyle(outerWrapper).visibility === "hidden" ||
-                     window.getComputedStyle(wheelWrapper).visibility === "hidden";
+	if (isVisible) {
+		// Hide wheel
+		wheelWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
+		setTimeout(() => {
+			wheelWrapper.style.visibility = "hidden";
+		}, 500);
 
-    if (isHidden) {
-        // Show wheel
-        outerWrapper.style.visibility = "visible";
-        wheelWrapper.style.visibility = "visible";
-        wheelWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+		// Hide lever only if mode is "on"
+		if (mode === "on") {
+			leverWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
+			setTimeout(() => {
+				leverWrapper.style.visibility = "hidden";
+			}, 500);
+			console.log(`Lever hidden (mode: ${mode}) ❌`);
+		} else {
+			console.log(`Lever stays visible (mode: ${mode}) ✅`);
+		}
 
-        if (mode === "always" || mode === "on") {
-            leverWrapper.style.visibility = "visible";
-            leverWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
-            console.log(`Lever shown (mode: ${mode}) ✅`);
-        }
+		console.log("Wheel hidden ❌");
 
-        console.log("Wheel shown ✅");
+		// Update button
+		if (toggleButton) {
+			toggleButton.innerHTML = '<i class="fas fa-eye"></i> Show';
+		}
+	} else {
+		// Show wheel
+		wheelWrapper.style.visibility = "visible";
+		wheelWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
 
-        if (toggleButton) {
-            toggleButton.innerHTML = '<i class="fas fa-eye-slash"></i> Hide';
-        }
-    } else {
-        // Hide wheel
-        repaintWheel();
-        wheelWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
-        setTimeout(() => {
-            wheelWrapper.style.visibility = "hidden";
-        }, 500);
+		// Show lever only if mode is "on" or "always"
+		if (mode === "always" || mode === "on") {
+			leverWrapper.style.visibility = "visible";
+			leverWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
+			console.log(`Lever shown (mode: ${mode}) ✅`);
+		}
 
-        if (mode === "on") {
-            leverWrapper.style.animation = "fadeOut 0.5s ease-in forwards";
-            setTimeout(() => {
-                leverWrapper.style.visibility = "hidden";
-            }, 500);
-            console.log(`Lever hidden (mode: ${mode}) ❌`);
-        } else {
-            console.log(`Lever stays visible (mode: ${mode}) ✅`);
-        }
+		console.log("Wheel shown ✅");
 
-        console.log("Wheel hidden ❌");
-
-        if (toggleButton) {
-            toggleButton.innerHTML = '<i class="fas fa-eye"></i> Show';
-        }
-    }
+		// Update button
+		if (toggleButton) {
+			toggleButton.innerHTML = '<i class="fas fa-eye-slash"></i> Hide';
+		}
+	}
 }
+
 
 document.getElementById("showWheelButt")?.addEventListener("click", showWheel);
 function updateLeverVisibility() {
@@ -647,4 +648,4 @@ document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
 		updateAllStatusIndicators(userPixeldiscConfig);
 	});
 /*  localStorage.removeItem("pixelDiscConfig"); */
-console.log("disc1.01 side A")
+console.log("disc1.00 side A")
