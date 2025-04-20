@@ -1791,26 +1791,9 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			// Anyone can add themselves to the wheel
 			addUserWheelSection(user);
 			sections = chatterWheelsections.slice();
-			forceShowWheel();
 			repaintWheel();
-			displayConsoleMessage(user, `User added and Chatter Wheel is now visible with ${sections.length} entries ✅`);
-			displayentriviaMessage(user, `User added and Chatter Wheel is now visible with ${sections.length} entries ✅`, flags, extra, true);
-			// Only fade out if wheel wasn't already visible
-			if (userPixeldiscConfig.autoFade === "on" && !isWheelVisible) {
-				if (wrapper) {
-					clearTimeout(fadeTimeout); // prevent overlapping timers
-					fadeTimeout = setTimeout(() => {
-						console.log(`[AutoFade] Hiding elements after ${userPixeldiscConfig.autoFadeTime}ms`);
-						hideElement(wrapper, "slide");
-						hideElement(resultDisplay, "slide");
-
-						const toggleButton = document.getElementById("showWheelButt");
-						if (toggleButton) {
-							toggleButton.innerHTML = '<i class="fas fa-eye"></i> Show';
-						}
-					}, userPixeldiscConfig.autoFadeTime);
-				}
-			}
+			displayConsoleMessage(user, `User added to chatter wheel. total chatterwheel sections: with ${sections.length} entries ✅`);
+			displayentriviaMessage(user, `User added to chatter wheel. total chatterwheel sections: with ${sections.length} entries ✅`, flags, extra, true);
 		}
 		else if (action === "show") {
 			if (!isStreamerAndAuthorize(user, command)) return;
