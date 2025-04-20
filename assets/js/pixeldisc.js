@@ -502,6 +502,21 @@ document.getElementById("delete-saved-wheel").addEventListener("click", () => {
 	repaintWheel();
 });
 
+function addTestChatters(count = 3) {
+	const exampleUsers = [
+		{ label: "TestUser1", color: "#e91e63" },
+		{ label: "TestUser2", color: "#2196f3" },
+		{ label: "TestUser3", color: "#4caf50" },
+	];
+
+	for (let i = 0; i < count && i < exampleUsers.length; i++) {
+		if (!chatterWheelsections.find(entry => entry.label === exampleUsers[i].label)) {
+			chatterWheelsections.push(exampleUsers[i]);
+		}
+	}
+	console.log(`✅ Added ${count} test chatters to the Chatter Wheel`, chatterWheelsections);
+	repaintWheel(); // Optional: update the wheel display immediately
+}
 	
 function showWheel() {
 	const wheelWrapper = document.getElementById("wheelcanvaswrapper");
