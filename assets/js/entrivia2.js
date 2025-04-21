@@ -490,26 +490,85 @@ function loadSuggestedQuestions() {
 	container.appendChild(roundSection);
   }
 }
+function loadApprovedQuestions() {
+  const approved = JSON.parse(localStorage.getItem("approvedQuestions")) || {};
+  const container = document.getElementById("approvedQuestionsContainer");
+  container.innerHTML = ""; // Clear previous content
 
-    function approveQuestion(round, difficulty, category, index) {
-      const suggestions = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {};
-      const question = suggestions[round][difficulty][category][index];
+  for (const round in approved) {
+    for (const difficulty in approved[round]) {
+      for (const category in approved[round][difficulty]) {
+        const questions = approved[round][difficulty][category];
+        questions.forEach((question, index) => {
+          const questionCard = document.createElement("div");
+          questionCard.className = "question-card";
 
-      // You can replace this with your actual addCustomentriviaQuestion or another function
-      console.log("✅ Approved:", question);
-
-      // Optionally: add to your main question bank here
-
-      // Remove from suggestions
-      suggestions[round][difficulty][category].splice(index, 1);
-      if (suggestions[round][difficulty][category].length === 0) {
-        delete suggestions[round][difficulty][category];
+          questionCard.innerHTML = `
+            <strong>Round:</strong> ${round}<br>
+            <strong>Difficulty:</strong> ${difficulty}<br>
+            <strong>Category:</strong> ${category}<br>
+            <strong>Submitted By:</strong> ${question.submittedBy}<br>
+            <strong>Type:</strong> ${question.type}<br>
+            <strong>Question:</strong> ${question.question}<br>
+            <strong>Answer:</strong> ${Array.isArray(question.answer) ? question.answer.join(", ") : question.answer}<br>
+            ${question.options && question.options.length > 0 ? `<strong>Options:</strong> ${question.options.join(", ")}` : ""}
+            <br><button onclick="removeApprovedQuestion('${round}', '${difficulty}', '${category}', ${index})">🗑️ Delete</button>
+            <hr>
+          `;
+          container.appendChild(questionCard);
+        });
       }
-
-      localStorage.setItem("chattersuggestedQuestions", JSON.stringify(suggestions));
-      loadSuggestedQuestions();
     }
+  }
+}
+	function approveQuestion(round, difficulty, category, index) {
+	  const suggestions = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {};
+	  const approved = JSON.parse(localStorage.getItem("approvedQuestions")) || {
+		round1: { easy: {}, hard: {} },
+		round2: { easy: {}, hard: {} }
+	  };
 
+	  const question = suggestions[round][difficulty][category][index];
+	  if (!question) return console.error("❌ No question found at that index.");
+
+	  // ✅ Add to approvedQuestions
+	  if (!approved[round][difficulty][category]) {
+		approved[round][difficulty][category] = [];
+	  }
+	  approved[round][difficulty][category].push(question);
+
+	  // ❌ Remove from suggestedQuestions
+	  suggestions[round][difficulty][category].splice(index, 1);
+	  if (suggestions[round][difficulty][category].length === 0) {
+		delete suggestions[round][difficulty][category];
+	  }
+
+	  // 💾 Save both to localStorage
+	  localStorage.setItem("approvedQuestions", JSON.stringify(approved));
+	  localStorage.setItem("chattersuggestedQuestions", JSON.stringify(suggestions));
+
+	  console.log("✅ Approved & moved to approvedQuestions:", question);
+	  loadSuggestedQuestions();
+	}
+	function removeApprovedQuestion(round, difficulty, category, index) {
+	  const approved = JSON.parse(localStorage.getItem("approvedQuestions")) || {};
+
+	  if (
+		approved[round] &&
+		approved[round][difficulty] &&
+		approved[round][difficulty][category] &&
+		approved[round][difficulty][category][index]
+	  ) {
+		approved[round][difficulty][category].splice(index, 1);
+		if (approved[round][difficulty][category].length === 0) {
+		  delete approved[round][difficulty][category];
+		}
+
+		localStorage.setItem("approvedQuestions", JSON.stringify(approved));
+		loadApprovedQuestions();
+		console.log("🗑️ Removed approved question.");
+	  }
+	}
 
     function denyQuestion(round, difficulty, category, index) {
       const suggestions = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {};
