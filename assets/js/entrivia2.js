@@ -692,16 +692,13 @@ function getFilteredRandomQuestion(round = null, category = null, type = null, h
         category: chosen.category
     };
 }
-fetchentriviaQuestions();
-const question = getFilteredRandomQuestion(1, null, "multiplechoice");
-console.log("Returned test Question:", question);
 
+// usage examples:
+// getRandomQuestion();
 //getFilteredRandomQuestion(); // any round/category/type
 //getFilteredRandomQuestion(1); // any category/type from round1
 //getFilteredRandomQuestion(null, "mining"); // any round, only mining questions
 //getFilteredRandomQuestion(1, null, "singlechoice"); // from round1, any category, only singlechoice type
-// usage examples:
-// getRandomQuestion();
 //getFilteredRandomQuestion(); // any question, any round, any category
 //getFilteredRandomQuestion(1); // any category from round1
 //getFilteredRandomQuestion("2"); // any category from round2
@@ -855,7 +852,12 @@ function nextquestionTimer(seconds) {
 }
 function checkAnswer(user, message) {
     console.log("activeQuestion returns as: " + activeQuestion);
-    if (!activeQuestion) return; // No active question, ignore answer
+	if (activeQuestion) {
+		console.log("✅ activeQuestion:", activeQuestion);
+	} else {
+		console.warn("⚠️ activeQuestion is null or undefined");
+		return;
+	}
     if (answeredUsers.has(user)) return; // Ignore duplicate correct answers
     let correctAnswers;
     if (Array.isArray(activeQuestion.answers)) {
