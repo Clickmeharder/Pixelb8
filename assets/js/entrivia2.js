@@ -674,22 +674,29 @@ function getFilteredRandomQuestion(roundFilter = null, categoryFilter = null, ty
                 : questions;
 
             for (const q of filteredQuestions) {
-                questionPool.push({
-                    round: roundKey,
-                    category: cat,
-                    question: q
-                });
+                // Use question text as a unique key
+                if (!usedQuestions.includes(q.question)) {
+                    questionPool.push({
+                        round: roundKey,
+                        category: cat,
+                        question: q
+                    });
+                }
             }
         }
     }
 
-    // Step 3: Return random question
+    // Step 3: Handle empty pool
     if (questionPool.length === 0) {
-        console.warn("No questions matched your filters.");
+        console.warn("No questions matched your filters or all have been used.");
         return null;
     }
 
+    // Step 4: Pick a random question
     const picked = questionPool[Math.floor(Math.random() * questionPool.length)];
+
+    // Track used question by question text
+    usedQuestions.push(picked.question.question);
 
     return {
         question: picked.question.question,
