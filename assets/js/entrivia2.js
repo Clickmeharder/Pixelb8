@@ -635,10 +635,10 @@ function getRandomQuestion() {
 }
 function getFilteredRandomQuestion(round, category, type) {
     // Normalize round input
-    round = (round === 1 || round === "round1") ? "round1" :
-            (round === 2 || round === "round2") ? "round2" :
-            (round === 3 || round === "round3") ? "round3" :
-            round;
+    round = 
+		(round === 1 || round === "round1") ? "round1" :
+        (round === 2 || round === "round2") ? "round2" :
+        (round === null || round === undefined) ? "round1" : `round${round}`;
 
     // Normalize category and type just in case
     category = (category || "").toLowerCase().trim();
@@ -651,12 +651,14 @@ function getFilteredRandomQuestion(round, category, type) {
         return null;
     }
 
-    const roundData = entriviaQuestions[round];
-    const categories = Object.keys(roundData);
-
+    const availableCategories = Object.keys(entriviaQuestions[round]);
+    if (availableCategories.length === 0) {
+        console.warn("No categories in round:", currentRound);
+        return null;
+    }
     console.log("✅ Found round. Categories available:", categories);
 
-    if (!roundData[category]) {
+    if (!round[category]) {
         console.warn("❌ Category not found:", category);
         return null;
     }
