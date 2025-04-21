@@ -72,6 +72,19 @@
 		background-color: #111;
 		z-index: 1;
 	}
+    #prizelistLegend{
+		position:fixed;
+		top:2px;
+		left:2px;
+		width: 32vw;
+		z-index:99999;
+		background-color:rgba(0, 0, 0, 0.8);
+		border: 3px ridge;
+		border-color: #2dabfcb8;
+		border-radius: 12px;
+		text-align: center;
+		padding: 4px;
+	}
 </style>
 </head>
 <body>
@@ -79,13 +92,13 @@
 		<h1 style="color: #2775a7;background-color:rgba(0, 0, 0, 0.8); border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;">
 			Prize Winners
 		</h1>
-		<div style="position:fixed;top:2px;left:2px;z-index:99999;background-color:rgba(0, 0, 0, 0.8); border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;">
+		<div id="prizelistLegend"style="">
 			<p style="margin:0;font-weight:bold;">Legend:</p>
 			<p style="margin:0;padding:4px;color: orange;background-color:rgba(112, 32, 10, 0.4);">unclaimed</p>
 			<p style="margin:0;padding:4px;color: rgb(68, 68, 68);background-color:rgba(110, 109, 109, 0.54);">claimed</p>
 			<button id="toggleClaimedBtn">Hide Claimed</button>
 			<button id="toggleDateBtn">Show Date</button>
-			<input type="text" id="usernameFilter" placeholder="Filter by username" style="margin-left: 10px; padding: 4px;">
+			<input type="text" id="usernameFilter" placeholder="Filter by username" style="margin:auto;padding: 0px;">
 		</div>
 		<!-- Scrollable wrapper -->
 		<div style="max-height: 379px;width: 99vw;overflow-y: scroll;border: 3px ridge #2dabfcb8;">
