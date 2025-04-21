@@ -641,8 +641,8 @@ function getFilteredRandomQuestion(round, category, type) {
             round;
 
     // Normalize category and type just in case
-    category = category.toLowerCase().trim();
-    type = type.toLowerCase().trim();
+    category = (category || "").toLowerCase().trim();
+    type = (type || "").toLowerCase().trim();
 
     console.log(`🎯 getFilteredRandomQuestion | Round: ${round}, Category: ${category}, Type: ${type}`);
 
@@ -663,7 +663,23 @@ function getFilteredRandomQuestion(round, category, type) {
 
     const categoryQuestions = roundData[category];
 
-    const filteredQuestions = categoryQuestions.filter(q => q.type.toLowerCase() === type);
+    if (!categoryQuestions || categoryQuestions.length === 0) {
+        console.warn(`❌ No questions found in category "${category}"`);
+        return null;
+    }
+
+    console.log(`🔍 Scanning ${categoryQuestions.length} questions in "${category}"...`);
+
+    categoryQuestions.forEach((q, i) => {
+        console.log(` - [${i}] type: "${q.type}" normalized: "${(q.type || "").toLowerCase().trim()}"`);
+    });
+
+    const filteredQuestions = categoryQuestions.filter(q => {
+        const questionType = (q.type || "").toLowerCase().trim();
+        return questionType === type;
+    });
+
+    console.log(`✅ Found ${filteredQuestions.length} questions matching type "${type}"`);
 
     if (filteredQuestions.length === 0) {
         console.warn("⚠️ No questions of type", type, "in category", category);
@@ -678,6 +694,7 @@ function getFilteredRandomQuestion(round, category, type) {
 
     return selectedQuestion;
 }
+
 const question = getFilteredRandomQuestion("round1", "hunting", "multiplechoice");
 console.log("Returned test Question:", question);
 
