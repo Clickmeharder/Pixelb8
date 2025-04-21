@@ -1280,6 +1280,7 @@ function endentrivia() {
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //- ASK SINGLE RANDOM QUESTION
+let questionAlreadyEnded = false;
 function askSplash() {
     return showAnnouncement("Asking Random Question in:", 10)
         .then(() => {
@@ -1305,6 +1306,8 @@ function showentriviaAsk() {
     timeUntilNextQ.style.animation = "fadeIn 1s ease-in-out forwards";
 }
 function endAsk() {
+	if (questionAlreadyEnded) return;
+    questionAlreadyEnded = true;
     clearInterval(questionTimer);
 	console.log("end ask ran");
 	let answerText = Array.isArray(activeQuestion.answers) 
@@ -1379,6 +1382,7 @@ function startentriviaAsk(round = null, category = null, type = null) {
         console.log("entrivia is already running! Ignoring duplicate command.");
         return;
     }
+	questionAlreadyEnded = false;
     displayConsoleMessage("system", "entrivia ask continues");
     console.log("entrivia should splash and fetch questions");
     askSplash() // Run splash first
