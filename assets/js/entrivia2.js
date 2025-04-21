@@ -633,81 +633,73 @@ function getRandomQuestion() {
         category: randomCategory
     };
 }
-function getFilteredRandomQuestion(roundFilter = null, categoryFilter = null, typeFilter = null) {
-    if (!entriviaQuestions) {
-        console.warn("Questions data not loaded.");
+function getFilteredRandomQuestion(round, category, type) {
+    // Normalize the round like getRandomQuestion
+    const currentRound = 
+        (round === 1 || round === "round1") ? "round1" :
+        (round === 2 || round === "round2") ? "round2" :
+        (round === null || round === undefined || round === "") ? "round1" :
+        (typeof round === "string" && round.toLowerCase().startsWith("round")) ? round.toLowerCase() :
+        !isNaN(parseInt(round)) ? `round${parseInt(round)}` :
+        (() => { console.warn("⚠️ Invalid round:", round); return null })();
+
+    if (!currentRound || !entriviaQuestions[currentRound]) {
+        console.warn("❌ Round not found:", currentRound);
         return null;
     }
 
-    // Step 1: Normalize round input
-    let targetRounds = [];
+    // Normalize category
+    const lowerCategory = category?.toLowerCase();
+    const availableCategories = Object.keys(entriviaQuestions[currentRound]).map(c => c.toLowerCase());
+    if (!lowerCategory || !availableCategories.includes(lowerCategory)) {
+        console.warn("❌ Category not found:", lowerCategory);
+        return null;
+    }
 
-    if (roundFilter !== null && roundFilter !== undefined) {
-        const normalized = `round${parseInt(roundFilter)}`;
-        if (entriviaQuestions[normalized]) {
-            targetRounds.push(normalized);
-        } else {
-            console.warn("Round not found:", normalized);
+    // Fetch questions
+    const allQuestions = entriviaQuestions[currentRound][lowerCategory];
+    if (!allQuestions || allQuestions.length === 0) {
+        console.warn("❌ No questions in that category.");
+        return null;
+    }
+
+    // Filter by type if provided
+    let filtered = allQuestions.filter(q => !usedQuestions.includes(q));
+    if (type) {
+        const lowerType = type.toLowerCase();
+        filtered = filtered.filter(q => q.type?.toLowerCase() === lowerType);
+    }
+
+    // Reset used if necessary
+    if (filtered.length === 0) {
+        console.log("✅ Resetting usedQuestions for filtered set.");
+        usedQuestions = [];
+        filtered = allQuestions.filter(q => !usedQuestions.includes(q));
+
+        if (type) {
+            filtered = filtered.filter(q => q.type?.toLowerCase() === type.toLowerCase());
+        }
+
+        if (filtered.length === 0) {
+            console.warn("❌ Still no available filtered questions.");
             return null;
         }
-    } else {
-        targetRounds = Object.keys(entriviaQuestions); // All rounds
     }
 
-    // Step 2: Collect matching questions
-    let questionPool = [];
-
-    for (const roundKey of targetRounds) {
-        const roundData = entriviaQuestions[roundKey];
-        if (!roundData) continue;
-
-        const categories = categoryFilter
-            ? Object.keys(roundData).filter(cat => cat.toLowerCase() === categoryFilter.toLowerCase())
-            : Object.keys(roundData);
-
-        for (const cat of categories) {
-            const questions = roundData[cat];
-            if (!questions || questions.length === 0) continue;
-
-            const filteredQuestions = typeFilter
-                ? questions.filter(q => q.type && q.type.toLowerCase() === typeFilter.toLowerCase())
-                : questions;
-
-            for (const q of filteredQuestions) {
-                // Use question text as a unique key
-                if (!usedQuestions.includes(q.question)) {
-                    questionPool.push({
-                        round: roundKey,
-                        category: cat,
-                        question: q
-                    });
-                }
-            }
-        }
-    }
-
-    // Step 3: Handle empty pool
-    if (questionPool.length === 0) {
-        console.warn("No questions matched your filters or all have been used.");
-        return null;
-    }
-
-    // Step 4: Pick a random question
-    const picked = questionPool[Math.floor(Math.random() * questionPool.length)];
-
-    // Track used question by question text
-    usedQuestions.push(picked.question.question);
+    // Pick and return random question
+    const question = filtered[Math.floor(Math.random() * filtered.length)];
+    usedQuestions.push(question);
 
     return {
-        question: picked.question.question,
-        answers: picked.question.answers,
-        rawanswer: picked.question.rawanswer || picked.question.answers.join(';'),
-        type: picked.question.type,
-        options: picked.question.options || [],
-        round: picked.round,
-        category: picked.category
+        question: question.question,
+        answers: question.answers,
+        type: question.type,
+        options: question.options || [],
+        round: currentRound,
+        category: lowerCategory
     };
 }
+
 
 // usage examples:
 // getRandomQuestion();
