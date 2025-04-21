@@ -2117,6 +2117,9 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayConsoleMessage(user, "✅ success");
 		displayentriviaMessage(user, `✅ Custom question added to ${round} (${category})!`, flags, extra, true);
 	}
+
+	//!entrivia-suggest easy | mining | What is the most common ore found on Planet Calypso? | lyst;lysterium;lysterium ore
+	//!entrivia-suggest hard | hunting | What creature drops the EWE EP-41 Military? | atrox | atrox,ambu,bibo,caudatergus
 	if (command.toLowerCase() === "entrivia-suggest") {
 		// Format: !entrivia-suggest easy/hard | category | question | answer | [options]
 		let parts = message.split("|").map(p => p.trim());
@@ -2160,7 +2163,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
 		displayentriviaMessage(user, `💡 Thanks for the suggestion! It has been saved for review.`, flags, extra, true);
 	}
-
 
 	if (command.toLowerCase() === "entrivia-answertime") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
