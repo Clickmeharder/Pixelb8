@@ -653,10 +653,10 @@ function getFilteredRandomQuestion(round, category, type) {
 
     const availableCategories = Object.keys(entriviaQuestions[round]);
     if (availableCategories.length === 0) {
-        console.warn("No categories in round:", currentRound);
+        console.warn("No categories in round:", round);
         return null;
     }
-    console.log("✅ Found round. Categories available:", categories);
+    console.log("✅ Found round. Categories available:", availablecategories);
 
     if (!round[category]) {
         console.warn("❌ Category not found:", category);
