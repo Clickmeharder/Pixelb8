@@ -663,7 +663,7 @@ function getFilteredRandomQuestion(round, category, type) {
         return null;
     }
 
-    const categoryQuestions = roundData[category];
+    const categoryQuestions = round[category];
 
     if (!categoryQuestions || categoryQuestions.length === 0) {
         console.warn(`❌ No questions found in category "${category}"`);
