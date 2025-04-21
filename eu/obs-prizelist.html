@@ -84,20 +84,21 @@
 			<p style="margin:0;padding:4px;color: orange;background-color:rgba(112, 32, 10, 0.4);">unclaimed</p>
 			<p style="margin:0;padding:4px;color: rgb(68, 68, 68);background-color:rgba(110, 109, 109, 0.54);">claimed</p>
 			<button id="toggleClaimedBtn">Hide Claimed</button>
+			<button id="toggleDateBtn">Show Date</button>
 			<input type="text" id="usernameFilter" placeholder="Filter by username" style="margin-left: 10px; padding: 4px;">
 		</div>
 		<!-- Scrollable wrapper -->
 		<div style="max-height: 379px;width: 99vw;overflow-y: scroll;border: 3px ridge #2dabfcb8;">
 			<table id="winnersTable" style="background-color: rgba(0, 0, 0, 0.8); width: 100%; text-align: center;">
 				<colgroup>
-					<col style="width: 25%;">  <!-- Date -->
+					<col id="dateCol" style="width: 25%; display: none;"> <!-- Date -->
 					<col style="width: 25%;">  <!-- Winner Name -->
 					<col style="width: 15%;">  <!-- Amount -->
 					<col style="width: 15%;">  <!-- Prize -->
 				</colgroup>
 				<thead>
 					<tr>
-						<th class="sortable" data-index="0">Date</th>
+						<th class="sortable" data-index="0" id="dateHeader" style="display: none;">Date</th>
 						<th class="sortable" data-index="1">Winner Name</th>
 						<th class="sortable" data-index="2">Amount</th>
 						<th class="sortable" data-index="3">Prize</th>
@@ -115,13 +116,18 @@
 	let prizeData = [];
 	let sortDirections = [true, true, true, true]; // 4 columns now
 	let showClaimed = true;
+	let showDate = false;
 
 	document.getElementById('toggleClaimedBtn').addEventListener('click', () => {
 		showClaimed = !showClaimed;
 		document.getElementById('toggleClaimedBtn').textContent = showClaimed ? 'Hide Claimed' : 'Show Claimed';
 		filterAndRender();
 	});
-
+	document.getElementById('toggleDateBtn').addEventListener('click', () => {
+		showDate = !showDate;
+		document.getElementById('toggleDateBtn').textContent = showDate ? 'Hide Date' : 'Show Date';
+		filterAndRender();
+	});
 	document.getElementById('usernameFilter').addEventListener('input', () => {
 		filterAndRender();
 	});
@@ -186,40 +192,44 @@
 		});
 	}
 
-function filterAndRender() {
-	const tbody = document.querySelector('#winnersTable tbody');
-	tbody.innerHTML = '';
-	let totalAmount = 0;
+	function filterAndRender() {
+		const tbody = document.querySelector('#winnersTable tbody');
+		tbody.innerHTML = '';
+		let totalAmount = 0;
 
-	const usernameFilterValue = document.getElementById('usernameFilter').value.toLowerCase();
+		const usernameFilterValue = document.getElementById('usernameFilter').value.toLowerCase();
 
-	prizeData.forEach(entry => {
-		const isClaimed = entry.status.trim().toLowerCase() === 'claimed';
-		if (!showClaimed && isClaimed) return;
-		if (usernameFilterValue && !entry.winner.toLowerCase().includes(usernameFilterValue)) return;
+		prizeData.forEach(entry => {
+			const isClaimed = entry.status.trim().toLowerCase() === 'claimed';
+			if (!showClaimed && isClaimed) return;
+			if (usernameFilterValue && !entry.winner.toLowerCase().includes(usernameFilterValue)) return;
 
-		const row = document.createElement('tr');
-		row.style.backgroundColor = isClaimed ? '#6e6d6d8a' : '#70200a66';
+			const row = document.createElement('tr');
+			row.style.backgroundColor = isClaimed ? '#6e6d6d8a' : '#70200a66';
 
-		['date', 'winner', 'amount', 'prize'].forEach((key, i) => {
-			const cell = document.createElement('td');
-			cell.textContent = key === 'amount' ? entry[key].toFixed(2) : entry[key];
+			const keysToRender = showDate ? ['date', 'winner', 'amount', 'prize'] : ['winner', 'amount', 'prize'];
 
-			if (isClaimed) {
-				cell.style.color = i === 2 ? 'rgb(165, 152, 152)' : 'grey';
-			} else {
-				cell.style.color = 'orange';
-			}
+			keysToRender.forEach((key) => {
+				const cell = document.createElement('td');
+				cell.textContent = key === 'amount' ? entry[key].toFixed(2) : entry[key];
 
-			row.appendChild(cell);
+				if (isClaimed) {
+					cell.style.color = key === 'amount' ? 'rgb(165, 152, 152)' : 'grey';
+				} else {
+					cell.style.color = 'orange';
+				}
+
+				row.appendChild(cell);
+			});
+
+			tbody.appendChild(row);
+			totalAmount += entry.amount;
 		});
 
-		tbody.appendChild(row);
-		totalAmount += entry.amount;
-	});
-
-	document.getElementById('totalAmount').textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
-}
+		document.getElementById('dateCol').style.display = showDate ? '' : 'none';
+		document.getElementById('dateHeader').style.display = showDate ? '' : 'none';
+		document.getElementById('totalAmount').textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
+	}
 
 	document.addEventListener('DOMContentLoaded', () => {
 		loadCSVFile();
