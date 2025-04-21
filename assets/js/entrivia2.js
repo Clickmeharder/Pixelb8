@@ -2249,6 +2249,17 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 // Declare the arrays globally
 const usercommands = [
 	{ command: "!a / !answer", description: "Allows users to answer a entrivia question.", usage: "!a / !answer" },
+	{
+        command: "!entrivia-addquestion",
+        description: "Allows the streamer to add a custom entrivia question.",
+        usage: `\n
+Format: !entrivia-suggest easy/hard | category | question | answer | [options]
+option paramater is...optional
+valid difficulties: easy, hard
+valid categories: mining, hunting, crafting, history, beauty, economy, social, misc
+!entrivia-suggest easy | mining | What is the most common ore found on Planet Calypso? | lyst;lysterium;lysterium ore
+!entrivia-suggest hard | hunting | What creature drops the EWE EP-41 Military? | atrox`
+    },
 ];
 
 const streamercommands = [
