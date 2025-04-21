@@ -129,7 +129,7 @@
 			</table>
 		</div>
 
-		<h2 id="totalAmount" style="text-align:center;color: #2775a7;background-color:rgba(0, 0, 0, 0.8); border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;">Total Amount: $0.00</h2>
+		<h2 id="totalAmount" style="text-align:center;color: #2775a7;background-color:rgba(0, 0, 0, 0.8); border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;">Total Value: 0.00 Ped</h2>
 	</div>
 	<script>
 	let prizeData = [];
@@ -247,7 +247,7 @@
 
 		document.getElementById('dateCol').style.display = showDate ? '' : 'none';
 		document.getElementById('dateHeader').style.display = showDate ? '' : 'none';
-		document.getElementById('totalAmount').textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
+		document.getElementById('totalAmount').textContent = `Total Value: ${totalAmount.toFixed(2)} Ped`;
 	}
 
 	document.addEventListener('DOMContentLoaded', () => {
