@@ -446,11 +446,27 @@ function addChatterSuggestedQuestion(user, round, questionText, correctAnswer, c
 }
 
 function loadSuggestedQuestions() {
-    const suggestions = JSON.parse(localStorage.getItem("chatterSuggestedQuestions")) || [];
+    const suggestions = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {};
     // Display in your admin panel, or console log for now
     console.table(suggestions);
 }
 /* clearAllCustomQuestions();
+addChatterSuggestedQuestion(
+  "debugUser",                     // user
+  "round1",                        // round
+  "What is the capital of Planet Calypso?", // questionText
+  "Zephyros",                      // correctAnswer
+  "history",                       // category
+  "singlechoice"                   // type (single choice)
+);
+addChatterSuggestedQuestion(
+  "debugUser",
+  "round1",
+  "What is the capital of Planet Calypso?",
+  "Zephyros",
+  "history",
+  "singlechoice"
+);
 addCustomentriviaQuestion(
   "round1",
   "Name something you might wear on your feet.",
@@ -479,6 +495,7 @@ addCustomentriviaQuestion(
 //clearAllCustomQuestions();
 // Now add a new entrivia question (example usage):
 //addCustomentriviaQuestion("round1", "What is the smallest Skildek support weapon?", "lancehead;skildeck lancehead", "hunting");
+//addChatterSuggestedQuestion("debugUser", "round1", "What is a dumb question that wont get approved?", "this;this one", "misc");
 //_____________________________________
 //-------------------------------------
 //      game history
