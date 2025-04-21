@@ -575,27 +575,25 @@ function entriviaNosplash() {
     });
 }
 
+let usedQuestionIds = new Set();
+
 function getRandomQuestion() {
-    // Normalize the current round
-    const currentRound = 
+    const currentRound =
         (round === 1 || round === "round1") ? "round1" :
         (round === 2 || round === "round2") ? "round2" :
         (round === null || round === undefined) ? "round1" : `round${round}`;
 
-    // Ensure the round exists in the data
     if (!entriviaQuestions || !entriviaQuestions[currentRound]) {
         console.warn("No such round in questions:", currentRound);
         return null;
     }
 
-    // Get all categories for this round
     const availableCategories = Object.keys(entriviaQuestions[currentRound]);
     if (availableCategories.length === 0) {
         console.warn("No categories in round:", currentRound);
         return null;
     }
 
-    // Pick a random category
     const randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)];
     const allQuestions = entriviaQuestions[currentRound][randomCategory];
 
@@ -604,25 +602,22 @@ function getRandomQuestion() {
         return null;
     }
 
-    // Filter out used questions
-    let availableQuestions = allQuestions.filter(q => !usedQuestions.includes(q));
+    // Filter out used questions by stringified content or ID
+    let availableQuestions = allQuestions.filter(q => !usedQuestionIds.has(q.question));
 
-    // Reset usedQuestions if all have been used
     if (availableQuestions.length === 0) {
         console.log("✅ All questions used. Resetting used questions.");
-        usedQuestions = [];
+        usedQuestionIds.clear();
         availableQuestions = [...allQuestions];
     }
 
-    // If still empty, something’s wrong
     if (availableQuestions.length === 0) {
         console.warn("⚠️ No available questions after reset.");
         return null;
     }
 
-    // Pick a random question
     const question = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-    usedQuestions.push(question); // Track used question
+    usedQuestionIds.add(question.question); // Track by question text (you can use question.id if available)
 
     return {
         question: question.question,
