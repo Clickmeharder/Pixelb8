@@ -1351,9 +1351,17 @@ function AskQuestion(round = null, category = null, type = null) {
     document.getElementById("question").textContent = activeQuestion.question;
 
     // If it's a multiple-choice question, display options
-    if (activeQuestion.type === "multiplechoice") {
-        displayMultipleChoiceOptions(activeQuestion.options);
-    }
+	if (activeQuestion.type === "multiplechoice") {
+		// Create a list of options for multiple-choice questions
+		let optionsHTML = activeQuestion.options.map(option => {
+			return `<div class="answeroption">${option}</div>`;
+		}).join("");
+
+		// Display the options
+		document.getElementById("question").innerHTML += `<div class="answeroptions">${optionsHTML}</div>`;
+	} else {
+		document.querySelector(".options")?.remove(); // Cleanup if not multiplechoice
+	}
 
     document.getElementById("questionWrapper").style.visibility = "visible";
     document.getElementById("timer").textContent = timetoAnswer;
