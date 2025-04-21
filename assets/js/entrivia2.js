@@ -450,6 +450,10 @@ function loadSuggestedQuestions() {
     // Display in your admin panel, or console log for now
     console.table(suggestions);
 }
+function clearAllSuggestedQuestions() {
+    localStorage.removeItem("chattersuggestedQuestions");
+    console.log("✅ All custom entrivia questions have been deleted.");
+}
 /* clearAllCustomQuestions();
 addChatterSuggestedQuestion(
   "debugUser",                     // user
@@ -495,7 +499,9 @@ addCustomentriviaQuestion(
 //clearAllCustomQuestions();
 // Now add a new entrivia question (example usage):
 //addCustomentriviaQuestion("round1", "What is the smallest Skildek support weapon?", "lancehead;skildeck lancehead", "hunting");
+//addCustomentriviaQuestion("round1", "True or False.  Is this a multiple choice question?", "True;Yes", "hunting", "True/yes;False/no");
 //addChatterSuggestedQuestion("debugUser", "round1", "What is a dumb question that wont get approved?", "this;this one", "misc");
+//addChatterSuggestedQuestion("debugUser", "round1", "True or False.  Is this a multiple choice question?", "True;Yes", "hunting", "multiplechoice", "True/yes;False/no");
 //_____________________________________
 //-------------------------------------
 //      game history
