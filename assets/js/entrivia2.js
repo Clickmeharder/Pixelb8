@@ -634,71 +634,51 @@ function getRandomQuestion() {
     };
 }
 function getFilteredRandomQuestion(round, category, type) {
-    // Normalize the round like getRandomQuestion
-    const currentRound = 
-        (round === 1 || round === "round1") ? "round1" :
-        (round === 2 || round === "round2") ? "round2" :
-        (round === null || round === undefined || round === "") ? "round1" :
-        (typeof round === "string" && round.toLowerCase().startsWith("round")) ? round.toLowerCase() :
-        !isNaN(parseInt(round)) ? `round${parseInt(round)}` :
-        (() => { console.warn("⚠️ Invalid round:", round); return null })();
+    // Normalize round input
+    round = (round === 1 || round === "round1") ? "round1" :
+            (round === 2 || round === "round2") ? "round2" :
+            (round === 3 || round === "round3") ? "round3" :
+            round;
 
-    if (!currentRound || !entriviaQuestions[currentRound]) {
-        console.warn("❌ Round not found:", currentRound);
+    // Normalize category and type just in case
+    category = category.toLowerCase().trim();
+    type = type.toLowerCase().trim();
+
+    console.log(`🎯 getFilteredRandomQuestion | Round: ${round}, Category: ${category}, Type: ${type}`);
+
+    if (!entriviaQuestions || !entriviaQuestions[round]) {
+        console.warn("❌ Round not found:", round);
         return null;
     }
 
-    // Normalize category
-    const lowerCategory = category?.toLowerCase();
-    const availableCategories = Object.keys(entriviaQuestions[currentRound]).map(c => c.toLowerCase());
-    if (!lowerCategory || !availableCategories.includes(lowerCategory)) {
-        console.warn("❌ Category not found:", lowerCategory);
+    const roundData = entriviaQuestions[round];
+    const categories = Object.keys(roundData);
+
+    console.log("✅ Found round. Categories available:", categories);
+
+    if (!roundData[category]) {
+        console.warn("❌ Category not found:", category);
         return null;
     }
 
-    // Fetch questions
-    const allQuestions = entriviaQuestions[currentRound][lowerCategory];
-    if (!allQuestions || allQuestions.length === 0) {
-        console.warn("❌ No questions in that category.");
+    const categoryQuestions = roundData[category];
+
+    const filteredQuestions = categoryQuestions.filter(q => q.type.toLowerCase() === type);
+
+    if (filteredQuestions.length === 0) {
+        console.warn("⚠️ No questions of type", type, "in category", category);
         return null;
     }
 
-    // Filter by type if provided
-    let filtered = allQuestions.filter(q => !usedQuestions.includes(q));
-    if (type) {
-        const lowerType = type.toLowerCase();
-        filtered = filtered.filter(q => q.type?.toLowerCase() === lowerType);
-    }
+    // Pick a random question from the filtered list
+    const randomIndex = Math.floor(Math.random() * filteredQuestions.length);
+    const selectedQuestion = filteredQuestions[randomIndex];
 
-    // Reset used if necessary
-    if (filtered.length === 0) {
-        console.log("✅ Resetting usedQuestions for filtered set.");
-        usedQuestions = [];
-        filtered = allQuestions.filter(q => !usedQuestions.includes(q));
+    console.log("🎲 Selected Question:", selectedQuestion);
 
-        if (type) {
-            filtered = filtered.filter(q => q.type?.toLowerCase() === type.toLowerCase());
-        }
-
-        if (filtered.length === 0) {
-            console.warn("❌ Still no available filtered questions.");
-            return null;
-        }
-    }
-
-    // Pick and return random question
-    const question = filtered[Math.floor(Math.random() * filtered.length)];
-    usedQuestions.push(question);
-
-    return {
-        question: question.question,
-        answers: question.answers,
-        type: question.type,
-        options: question.options || [],
-        round: currentRound,
-        category: lowerCategory
-    };
+    return selectedQuestion;
 }
+
 
 
 // usage examples:
