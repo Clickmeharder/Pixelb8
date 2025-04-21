@@ -397,6 +397,49 @@ function clearAllCustomQuestions() {
     console.log("✅ All custom entrivia questions have been deleted.");
 }
 
+function addChatterSuggestedQuestion(user, round, difficulty, questionText, correctAnswer, category, type = 'singlechoice', options = []) {
+	let suggestedQuestions = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {
+		round1: { easy: {}, hard: {} },
+		round2: { easy: {}, hard: {} }
+	};
+
+	if (!["round1", "round2"].includes(round)) {
+		console.error("❌ Invalid round. Use 'round1' or 'round2'.");
+		return;
+	}
+
+	if (!["easy", "hard"].includes(difficulty)) {
+		console.error("❌ Invalid difficulty. Use 'easy' or 'hard'.");
+		return;
+	}
+
+	if (!suggestedQuestions[round][difficulty][category]) {
+		suggestedQuestions[round][difficulty][category] = [];
+	}
+
+	let formattedAnswer = Array.isArray(correctAnswer)
+		? correctAnswer
+		: correctAnswer.split(/[,;]\s*/).map(opt => opt.trim()).filter(opt => opt);
+
+	const newSuggestedQuestion = {
+		submittedBy: user,
+		question: questionText,
+		answer: formattedAnswer,
+		category: category,
+		type: type,
+		options: options,
+		timestamp: new Date().toISOString()
+	};
+
+	suggestedQuestions[round][difficulty][category].push(newSuggestedQuestion);
+	localStorage.setItem("chattersuggestedQuestions", JSON.stringify(suggestedQuestions));
+	console.log(`💡 ${user} suggested a [${difficulty}] question in ${round} [${category}]:`, newSuggestedQuestion);
+}
+function loadSuggestedQuestions() {
+    const suggestions = JSON.parse(localStorage.getItem("chatterSuggestedQuestions")) || [];
+    // Display in your admin panel, or console log for now
+    console.table(suggestions);
+}
 /* clearAllCustomQuestions();
 addCustomentriviaQuestion(
   "round1",
@@ -2077,6 +2120,52 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayConsoleMessage(user, "✅ success");
 		displayentriviaMessage(user, `✅ Custom question added to ${round} (${category})!`, flags, extra, true);
 	}
+	if (command.toLowerCase() === "entrivia-suggest") {
+		// Format: !entrivia-suggest round | difficulty | category | question | answer | [options]
+		let parts = message.split("|").map(p => p.trim());
+
+		if (parts.length < 5) {
+			displayentriviaMessage(user, `⚠️ Invalid format! Use: !entrivia-suggest round | difficulty | category | question | answer [options]`, flags, extra, true);
+			return;
+		}
+
+		let round = parts[0].toLowerCase();
+		let difficulty = parts[1].toLowerCase();
+		let category = parts[2].toLowerCase();
+		let questionText = parts[3];
+		let correctAnswers = parts[4].split(/[,;]\s*/).map(a => a.trim());
+
+		let options = [];
+		if (parts.length > 5) {
+			options = parts[5].split(",").map(opt => opt.trim());
+		}
+
+		const validRounds = ["round1", "round2"];
+		const validDifficulties = ["easy", "hard"];
+		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
+
+		if (!validRounds.includes(round)) {
+			displayentriviaMessage(user, `⚠️ Invalid round! Use: ${validRounds.join(", ")}`, flags, extra, true);
+			return;
+		}
+
+		if (!validDifficulties.includes(difficulty)) {
+			displayentriviaMessage(user, `⚠️ Invalid difficulty! Use: easy or hard`, flags, extra, true);
+			return;
+		}
+
+		if (!validCategories.includes(category)) {
+			displayentriviaMessage(user, `⚠️ Invalid category! Use: ${validCategories.join(", ")}`, flags, extra, true);
+			return;
+		}
+
+		const type = options.length > 0 ? 'multiplechoice' : 'singlechoice';
+
+		addChatterSuggestedQuestion(user, round, difficulty, questionText, correctAnswers, category, type, options);
+
+		displayentriviaMessage(user, `💡 Thanks for the suggestion! It has been saved for review.`, flags, extra, true);
+	}
+
 	if (command.toLowerCase() === "entrivia-answertime") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
 		displayConsoleMessage(user, `!${command} ✅`);
