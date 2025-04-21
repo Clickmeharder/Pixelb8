@@ -1316,8 +1316,7 @@ function endAsk() {
 	document.getElementById("question").textContent = `Time's up! Answer was: ${answerText}`;
 	document.getElementById("timer").textContent = "";
     // Check if the answer is an array (for multiple answers)
-    activeQuestion = null; // Clear the active question
-    singleActiveAsk = null; // Reset the game state
+
     // Play sound for time up
     playSound("entriviatimesup");
     // Hide the question and show the entrivia board after a timeout
@@ -1326,6 +1325,8 @@ function endAsk() {
         document.getElementById("entriviaboard").style.visibility = "visible";
         document.querySelector(".options")?.remove();
     }, 13000); // Delay timeout of 13 seconds to wait before checking
+	activeQuestion = null; // Clear the active question
+    singleActiveAsk = null; // Reset the game state
 }
 function AskQuestion(round = null, category = null, type = null) {
 	console.log(" ❌❌❌❌AskQuestion❌❌❌❌");
