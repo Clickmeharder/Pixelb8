@@ -397,44 +397,54 @@ function clearAllCustomQuestions() {
     console.log("✅ All custom entrivia questions have been deleted.");
 }
 
-function addChatterSuggestedQuestion(user, round, difficulty, questionText, correctAnswer, category, type = 'singlechoice', options = []) {
-	let suggestedQuestions = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {
-		round1: { easy: {}, hard: {} },
-		round2: { easy: {}, hard: {} }
-	};
+function addChatterSuggestedQuestion(user, round, questionText, correctAnswer, category, type = 'singlechoice', options = []) {
+  let suggestedQuestions = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {
+    round1: { easy: {}, hard: {} },
+    round2: { easy: {}, hard: {} }
+  };
 
-	if (!["round1", "round2"].includes(round)) {
-		console.error("❌ Invalid round. Use 'round1' or 'round2'.");
-		return;
-	}
+  // Validate round
+  if (!["round1", "round2"].includes(round)) {
+    console.error("❌ Invalid round. Use 'round1' or 'round2'.");
+    return;
+  }
 
-	if (!["easy", "hard"].includes(difficulty)) {
-		console.error("❌ Invalid difficulty. Use 'easy' or 'hard'.");
-		return;
-	}
+  // Validate difficulty
+  const difficulty = 'easy';  // You can change this logic based on your needs
+  if (!["easy", "hard"].includes(difficulty)) {
+    console.error("❌ Invalid difficulty. Use 'easy' or 'hard'.");
+    return;
+  }
 
-	if (!suggestedQuestions[round][difficulty][category]) {
-		suggestedQuestions[round][difficulty][category] = [];
-	}
+  // Ensure category exists in the selected round and difficulty
+  if (!suggestedQuestions[round][difficulty][category]) {
+    suggestedQuestions[round][difficulty][category] = [];
+  }
 
-	let formattedAnswer = Array.isArray(correctAnswer)
-		? correctAnswer
-		: correctAnswer.split(/[,;]\s*/).map(opt => opt.trim()).filter(opt => opt);
+  // Ensure correctAnswer is always an array (even if a single answer is input)
+  let formattedAnswer = Array.isArray(correctAnswer) ? correctAnswer : correctAnswer.split(/[,;]\s*/).map(opt => opt.trim()).filter(opt => opt);
 
-	const newSuggestedQuestion = {
-		submittedBy: user,
-		question: questionText,
-		answer: formattedAnswer,
-		category: category,
-		type: type,
-		options: options,
-		timestamp: new Date().toISOString()
-	};
+  // Create the new suggested question
+  let newSuggestedQuestion = {
+    submittedBy: user,
+    question: questionText,
+    answer: formattedAnswer,
+    category: category,
+    type: type,  // 'singlechoice' or 'multiplechoice'
+    options: options,  // options (for multiple choice questions)
+    timestamp: new Date().toISOString()  // Save the timestamp for reference
+  };
 
-	suggestedQuestions[round][difficulty][category].push(newSuggestedQuestion);
-	localStorage.setItem("chattersuggestedQuestions", JSON.stringify(suggestedQuestions));
-	console.log(`💡 ${user} suggested a [${difficulty}] question in ${round} [${category}]:`, newSuggestedQuestion);
+  // Add the question to the appropriate category and round
+  suggestedQuestions[round][difficulty][category].push(newSuggestedQuestion);
+
+  // Save to localStorage
+  localStorage.setItem("chattersuggestedQuestions", JSON.stringify(suggestedQuestions));
+
+  // Log success and display message
+  console.log(`💡 ${user} suggested a [${difficulty}] question in ${round} [${category}]:`, newSuggestedQuestion);
 }
+
 function loadSuggestedQuestions() {
     const suggestions = JSON.parse(localStorage.getItem("chatterSuggestedQuestions")) || [];
     // Display in your admin panel, or console log for now
@@ -2161,10 +2171,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
 		const type = options.length > 0 ? 'multiplechoice' : 'singlechoice';
 
+		// Call the addChatterSuggestedQuestion function
 		addChatterSuggestedQuestion(user, round, difficulty, questionText, correctAnswers, category, type, options);
 
 		displayentriviaMessage(user, `💡 Thanks for the suggestion! It has been saved for review.`, flags, extra, true);
 	}
+
 
 	if (command.toLowerCase() === "entrivia-answertime") { 
 		if (!isStreamerAndAuthorize(user, command)) return;
