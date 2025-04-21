@@ -633,11 +633,8 @@ function getRandomQuestion() {
         category: randomCategory
     };
 }
-function getFilteredRandomQuestion(round = null, category = null, type = null) {
-    const rounds = Object.keys(entriviaQuestions);
+function getFilteredRandomQuestion(round = null, category = null, type = null, hasReset = false) {
     const validRounds = ["round1", "round2"];
-    
-    // Normalize round or include all rounds
     const selectedRounds = (round === null || round === undefined)
         ? validRounds
         : [((round === 1 || round === "round1") ? "round1" :
@@ -645,11 +642,9 @@ function getFilteredRandomQuestion(round = null, category = null, type = null) {
 
     let filteredQuestions = [];
 
-    // Loop through the selected rounds
     for (const r of selectedRounds) {
         if (!entriviaQuestions[r]) continue;
 
-        // Get categories to include
         const roundCategories = Object.keys(entriviaQuestions[r]);
         const selectedCategories = (category === null || category === undefined)
             ? roundCategories
@@ -673,18 +668,20 @@ function getFilteredRandomQuestion(round = null, category = null, type = null) {
         }
     }
 
-    // If none available, reset usedQuestions and try again once
+    // If none available, reset usedQuestions once and retry
     if (filteredQuestions.length === 0) {
-        console.log("✅ All matching questions used or none matched. Resetting used questions.");
-        usedQuestions = [];
-
-        // Try again after reset
-        return getFilteredRandomQuestion(round, category, type);
+        if (!hasReset) {
+            console.log("✅ All matching questions used or none matched. Resetting used questions.");
+            usedQuestions = [];
+            return getFilteredRandomQuestion(round, category, type, true); // retry once
+        } else {
+            console.warn("⚠️ No matching questions found even after reset.");
+            return null;
+        }
     }
 
-    // Pick one at random
     const chosen = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
-    usedQuestions.push(chosen); // Track it
+    usedQuestions.push(chosen);
 
     return {
         question: chosen.question,
