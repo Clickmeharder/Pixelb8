@@ -446,60 +446,98 @@ function addChatterSuggestedQuestion(user, round, questionText, correctAnswer, c
 }
 
 function loadSuggestedQuestions() {
+  console.log("🔄 Loading suggested questions...");
+
   const container = document.getElementById("suggestedQuestionsContainer");
+  if (!container) {
+    console.warn("⚠️ 'suggestedQuestionsContainer' element not found!");
+    return;
+  }
   container.innerHTML = '';
+
   const data = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {};
+  console.log("📦 Loaded data from localStorage:", data);
 
   for (let round in data) {
-	let roundSection = document.createElement("div");
-	roundSection.className = "section";
-	roundSection.innerHTML = `<h2>${round}</h2>`;
+    console.log(`📂 Processing round: ${round}`);
+    let roundSection = document.createElement("div");
+    roundSection.className = "section";
+    roundSection.innerHTML = `<h2>${round}</h2>`;
 
-	for (let difficulty in data[round]) {
-	  let diffSection = document.createElement("div");
-	  diffSection.className = "section";
-	  diffSection.innerHTML = `<h3>${difficulty}</h3>`;
+    for (let difficulty in data[round]) {
+      console.log(`  🧩 Difficulty: ${difficulty}`);
+      let diffSection = document.createElement("div");
+      diffSection.className = "section";
+      diffSection.innerHTML = `<h3>${difficulty}</h3>`;
 
-	  for (let category in data[round][difficulty]) {
-		let catSection = document.createElement("div");
-		catSection.className = "category";
-		catSection.innerHTML = `<h4>${category}</h4>`;
+      for (let category in data[round][difficulty]) {
+        console.log(`    🗂️ Category: ${category}`);
+        const questions = data[round][difficulty][category];
+        console.log(`      📋 ${questions.length} question(s) found`);
 
-		data[round][difficulty][category].forEach((q, index) => {
-		  const card = document.createElement("div");
-		  card.className = "question-card";
+        let catSection = document.createElement("div");
+        catSection.className = "category";
+        catSection.innerHTML = `<h4>${category}</h4>`;
 
-		  card.innerHTML = `
-			<strong>Q:</strong> ${q.question}<br>
-			<div class="answer"><strong>A:</strong> ${q.answer.join(", ")}</div>
-			<div class="options"><strong>Type:</strong> ${q.type} ${q.options?.length ? `| <strong>Options:</strong> ${q.options.join(", ")}` : ""}</div>
-			<small>Submitted by: ${q.submittedBy} | ${new Date(q.timestamp).toLocaleString()}</small><br><br>
-			<button onclick="approveQuestion('${round}', '${difficulty}', '${category}', ${index})">✅ Approve</button>
-			<button onclick="denyQuestion('${round}', '${difficulty}', '${category}', ${index})">❌ Deny</button>
-		  `;
+        questions.forEach((q, index) => {
+          console.log(`        🔎 Rendering question #${index + 1}:`, q);
 
-		  catSection.appendChild(card);
-		});
+          const card = document.createElement("div");
+          card.className = "question-card";
 
-		diffSection.appendChild(catSection);
-	  }
+          card.innerHTML = `
+            <strong>Q:</strong> ${q.question}<br>
+            <div class="answer"><strong>A:</strong> ${q.answer.join(", ")}</div>
+            <div class="options"><strong>Type:</strong> ${q.type} ${q.options?.length ? `| <strong>Options:</strong> ${q.options.join(", ")}` : ""}</div>
+            <small>Submitted by: ${q.submittedBy} | ${new Date(q.timestamp).toLocaleString()}</small><br><br>
+            <button onclick="approveQuestion('${round}', '${difficulty}', '${category}', ${index})">✅ Approve</button>
+            <button onclick="denyQuestion('${round}', '${difficulty}', '${category}', ${index})">❌ Deny</button>
+          `;
 
-	  roundSection.appendChild(diffSection);
-	}
+          catSection.appendChild(card);
+        });
 
-	container.appendChild(roundSection);
+        diffSection.appendChild(catSection);
+      }
+
+      roundSection.appendChild(diffSection);
+    }
+
+    container.appendChild(roundSection);
   }
+
+  console.log("✅ Suggested questions rendered.");
 }
+
 function loadApprovedQuestions() {
+  console.log("🔄 Loading approved questions...");
+
   const approved = JSON.parse(localStorage.getItem("approvedQuestions")) || {};
+  console.log("📦 Loaded approvedQuestions from localStorage:", approved);
+
   const container = document.getElementById("approvedQuestionsContainer");
+  if (!container) {
+    console.warn("⚠️ 'approvedQuestionsContainer' element not found!");
+    return;
+  }
+
   container.innerHTML = ""; // Clear previous content
 
   for (const round in approved) {
+    console.log(`📂 Round: ${round}`);
+
     for (const difficulty in approved[round]) {
+      console.log(`  🧩 Difficulty: ${difficulty}`);
+
       for (const category in approved[round][difficulty]) {
+        console.log(`    🗂️ Category: ${category}`);
+
         const questions = approved[round][difficulty][category];
+        console.log(`      📋 ${questions.length} approved question(s)`);
+
         questions.forEach((question, index) => {
+          console.log(`        🔎 Rendering approved question #${index + 1}:`, question);
+
           const questionCard = document.createElement("div");
           questionCard.className = "question-card";
 
@@ -515,41 +553,61 @@ function loadApprovedQuestions() {
             <br><button onclick="removeApprovedQuestion('${round}', '${difficulty}', '${category}', ${index})">🗑️ Delete</button>
             <hr>
           `;
+
           container.appendChild(questionCard);
         });
       }
     }
   }
+
+  console.log("✅ Approved questions rendered.");
 }
-	function approveQuestion(round, difficulty, category, index) {
-	  const suggestions = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {};
-	  const approved = JSON.parse(localStorage.getItem("approvedQuestions")) || {
-		round1: { easy: {}, hard: {} },
-		round2: { easy: {}, hard: {} }
-	  };
 
-	  const question = suggestions[round][difficulty][category][index];
-	  if (!question) return console.error("❌ No question found at that index.");
+function approveQuestion(round, difficulty, category, index) {
+  console.log(`🔄 Approving question at index ${index} in ${round} / ${difficulty} / ${category}`);
 
-	  // ✅ Add to approvedQuestions
-	  if (!approved[round][difficulty][category]) {
-		approved[round][difficulty][category] = [];
-	  }
-	  approved[round][difficulty][category].push(question);
+  const suggestions = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {};
+  const approved = JSON.parse(localStorage.getItem("approvedQuestions")) || {
+    round1: { easy: {}, hard: {} },
+    round2: { easy: {}, hard: {} }
+  };
 
-	  // ❌ Remove from suggestedQuestions
-	  suggestions[round][difficulty][category].splice(index, 1);
-	  if (suggestions[round][difficulty][category].length === 0) {
-		delete suggestions[round][difficulty][category];
-	  }
+  const question = suggestions[round][difficulty][category][index];
+  if (!question) {
+    console.error(`❌ No question found at index ${index} in ${round} / ${difficulty} / ${category}`);
+    return;
+  }
 
-	  // 💾 Save both to localStorage
-	  localStorage.setItem("approvedQuestions", JSON.stringify(approved));
-	  localStorage.setItem("chattersuggestedQuestions", JSON.stringify(suggestions));
+  console.log("✅ Question found:", question);
 
-	  console.log("✅ Approved & moved to approvedQuestions:", question);
-	  loadSuggestedQuestions();
-	}
+  // ✅ Add to approvedQuestions
+  if (!approved[round][difficulty][category]) {
+    approved[round][difficulty][category] = [];
+    console.log(`🗂️ Created new category ${category} in approvedQuestions.`);
+  }
+
+  approved[round][difficulty][category].push(question);
+  console.log("✅ Question added to approvedQuestions:", question);
+
+  // ❌ Remove from suggestedQuestions
+  suggestions[round][difficulty][category].splice(index, 1);
+  console.log(`❌ Removed question from suggestedQuestions at index ${index}.`);
+
+  if (suggestions[round][difficulty][category].length === 0) {
+    delete suggestions[round][difficulty][category];
+    console.log(`❌ Category ${category} empty, removed from suggestedQuestions.`);
+  }
+
+  // 💾 Save both to localStorage
+  localStorage.setItem("approvedQuestions", JSON.stringify(approved));
+  localStorage.setItem("chattersuggestedQuestions", JSON.stringify(suggestions));
+
+  console.log("💾 Saved updated approvedQuestions and suggestedQuestions to localStorage.");
+
+  loadSuggestedQuestions();
+  console.log("🔄 Suggested questions reloaded.");
+}
+
 	function removeApprovedQuestion(round, difficulty, category, index) {
 	  const approved = JSON.parse(localStorage.getItem("approvedQuestions")) || {};
 
