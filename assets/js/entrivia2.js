@@ -452,7 +452,7 @@ function loadSuggestedQuestions() {
 }
 function clearAllSuggestedQuestions() {
     localStorage.removeItem("chattersuggestedQuestions");
-    console.log("✅ All custom entrivia questions have been deleted.");
+    console.log("✅ All Suggested entrivia questions have been deleted.");
 }
 /* 
 clearAllCustomQuestions();
