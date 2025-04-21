@@ -645,30 +645,16 @@ function getFilteredRandomQuestion(round, category, type) {
         console.warn("No such round in questions:", currentRound);
         return null;
     }
-
-    // Get categories for this round
-    const categoriesToSearch = category
-        ? [category].filter(cat => entriviaQuestions[currentRound][cat])
-        : Object.keys(entriviaQuestions[currentRound]);
-
-    if (categoriesToSearch.length === 0) {
-        console.warn("No valid categories found for round:", currentRound);
-        return null;
-    }
-
     // Gather matching questions
     let matchingQuestions = [];
-
-    for (const cat of categoriesToSearch) {
-        const questions = entriviaQuestions[currentRound][cat];
-        if (questions && questions.length > 0) {
-            const filtered = questions.filter(q =>
-                (!usedQuestions.includes(q)) &&
-                (!type || q.type === type)
-            );
-            matchingQuestions.push(...filtered.map(q => ({ ...q, category: cat })));
-        }
-    }
+	const questions = entriviaQuestions[currentRound][category];
+	if (questions && questions.length > 0) {
+		const filtered = questions.filter(q =>
+			(!usedQuestions.includes(q)) &&
+			(!type || q.type === type)
+		);
+		matchingQuestions.push(...filtered.map(q => ({ ...q, category: cat })));
+	}
 
     // Reset usedQuestions if everything has been used
     if (matchingQuestions.length === 0) {
