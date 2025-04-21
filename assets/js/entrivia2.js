@@ -446,14 +446,89 @@ function addChatterSuggestedQuestion(user, round, questionText, correctAnswer, c
 }
 
 function loadSuggestedQuestions() {
-    const suggestions = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {};
-    // Display in your admin panel, or console log for now
-    console.table(suggestions);
+  const container = document.getElementById("suggestedQuestionsContainer");
+  container.innerHTML = '';
+  const data = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {};
+
+  for (let round in data) {
+	let roundSection = document.createElement("div");
+	roundSection.className = "section";
+	roundSection.innerHTML = `<h2>${round}</h2>`;
+
+	for (let difficulty in data[round]) {
+	  let diffSection = document.createElement("div");
+	  diffSection.className = "section";
+	  diffSection.innerHTML = `<h3>${difficulty}</h3>`;
+
+	  for (let category in data[round][difficulty]) {
+		let catSection = document.createElement("div");
+		catSection.className = "category";
+		catSection.innerHTML = `<h4>${category}</h4>`;
+
+		data[round][difficulty][category].forEach((q, index) => {
+		  const card = document.createElement("div");
+		  card.className = "question-card";
+
+		  card.innerHTML = `
+			<strong>Q:</strong> ${q.question}<br>
+			<div class="answer"><strong>A:</strong> ${q.answer.join(", ")}</div>
+			<div class="options"><strong>Type:</strong> ${q.type} ${q.options?.length ? `| <strong>Options:</strong> ${q.options.join(", ")}` : ""}</div>
+			<small>Submitted by: ${q.submittedBy} | ${new Date(q.timestamp).toLocaleString()}</small><br><br>
+			<button onclick="approveQuestion('${round}', '${difficulty}', '${category}', ${index})">✅ Approve</button>
+			<button onclick="denyQuestion('${round}', '${difficulty}', '${category}', ${index})">❌ Deny</button>
+		  `;
+
+		  catSection.appendChild(card);
+		});
+
+		diffSection.appendChild(catSection);
+	  }
+
+	  roundSection.appendChild(diffSection);
+	}
+
+	container.appendChild(roundSection);
+  }
 }
-function clearAllSuggestedQuestions() {
-    localStorage.removeItem("chattersuggestedQuestions");
-    console.log("✅ All Suggested entrivia questions have been deleted.");
-}
+
+    function approveQuestion(round, difficulty, category, index) {
+      const suggestions = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {};
+      const question = suggestions[round][difficulty][category][index];
+
+      // You can replace this with your actual addCustomentriviaQuestion or another function
+      console.log("✅ Approved:", question);
+
+      // Optionally: add to your main question bank here
+
+      // Remove from suggestions
+      suggestions[round][difficulty][category].splice(index, 1);
+      if (suggestions[round][difficulty][category].length === 0) {
+        delete suggestions[round][difficulty][category];
+      }
+
+      localStorage.setItem("chattersuggestedQuestions", JSON.stringify(suggestions));
+      loadSuggestedQuestions();
+    }
+
+
+    function denyQuestion(round, difficulty, category, index) {
+      const suggestions = JSON.parse(localStorage.getItem("chattersuggestedQuestions")) || {};
+      const question = suggestions[round][difficulty][category][index];
+
+      console.log("❌ Denied:", question);
+
+      suggestions[round][difficulty][category].splice(index, 1);
+      if (suggestions[round][difficulty][category].length === 0) {
+        delete suggestions[round][difficulty][category];
+      }
+
+      localStorage.setItem("chattersuggestedQuestions", JSON.stringify(suggestions));
+      loadSuggestedQuestions();
+    }
+	function clearAllSuggestedQuestions() {
+		localStorage.removeItem("chattersuggestedQuestions");
+		console.log("✅ All Suggested entrivia questions have been deleted.");
+	}
 /* 
 clearAllCustomQuestions();
 clearAllSuggestedQuestions();
