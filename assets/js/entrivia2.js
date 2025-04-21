@@ -692,7 +692,7 @@ function getFilteredRandomQuestion(round = null, category = null, type = null, h
         category: chosen.category
     };
 }
-
+fetchentriviaQuestions();
 const question = getFilteredRandomQuestion(1, null, "multiplechoice");
 console.log("Returned test Question:", question);
 
