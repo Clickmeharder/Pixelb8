@@ -704,7 +704,7 @@ function getFilteredRandomQuestion(round, category, type) {
     };
 }
 
-const question = getFilteredRandomQuestion("round1", "hunting", "multiplechoice");
+const question = getFilteredRandomQuestion("1", "hunting", "multiplechoice");
 console.log("Returned test Question:", question);
 
 
