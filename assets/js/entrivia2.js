@@ -454,45 +454,9 @@ function clearAllSuggestedQuestions() {
     localStorage.removeItem("chattersuggestedQuestions");
     console.log("✅ All custom entrivia questions have been deleted.");
 }
-/* clearAllCustomQuestions();
-addChatterSuggestedQuestion(
-  "debugUser",                     // user
-  "round1",                        // round
-  "What is the capital of Planet Calypso?", // questionText
-  "Zephyros",                      // correctAnswer
-  "history",                       // category
-  "singlechoice"                   // type (single choice)
-);
-addChatterSuggestedQuestion(
-  "debugUser",
-  "round1",
-  "What is the capital of Planet Calypso?",
-  "Zephyros",
-  "history",
-  "singlechoice"
-);
-addCustomentriviaQuestion(
-  "round1",
-  "Name something you might wear on your feet.",
-  ["Shoes", "Sandals", "Boots", "Socks"],
-  "beauty",
-  "singlechoice"
-);
-addCustomentriviaQuestion(
-  "round2", // round
-  "What is the capital of Germany?", // question
-  "Berlin", // correct answer (single)
-  "misc", // category
-  "multiplechoice", // type
-  ["Berlin", "Munich", "Frankfurt", "Hamburg"] // options
-);
-addCustomentriviaQuestion( 
-  "round2",
-  "What is the capital of Italy?",
-  "Rome",
-  "misc",
-  "singlechoice"
-);
+/* 
+clearAllCustomQuestions();
+clearAllSuggestedQuestions();
  */
 // Clear existing questions
 // uncomment these two commands to clear all custom questions:
@@ -2154,39 +2118,36 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayentriviaMessage(user, `✅ Custom question added to ${round} (${category})!`, flags, extra, true);
 	}
 	if (command.toLowerCase() === "entrivia-suggest") {
-		// Format: !entrivia-suggest round | difficulty | category | question | answer | [options]
+		// Format: !entrivia-suggest easy/hard | category | question | answer | [options]
 		let parts = message.split("|").map(p => p.trim());
 
-		if (parts.length < 5) {
-			displayentriviaMessage(user, `⚠️ Invalid format! Use: !entrivia-suggest round | difficulty | category | question | answer [options]`, flags, extra, true);
+		if (parts.length < 4) {
+			displayentriviaMessage(user, `⚠️ Invalid format! Use: !entrivia-suggest easy/hard | category | question | answer [options]`, flags, extra, true);
 			return;
 		}
 
-		let round = parts[0].toLowerCase();
-		let difficulty = parts[1].toLowerCase();
-		let category = parts[2].toLowerCase();
-		let questionText = parts[3];
-		let correctAnswers = parts[4].split(/[,;]\s*/).map(a => a.trim());
+		let difficulty = parts[0].toLowerCase();
+		let category = parts[1].toLowerCase();
+		let questionText = parts[2];
+		let correctAnswers = parts[3].split(/[,;]\s*/).map(a => a.trim());
 
 		let options = [];
-		if (parts.length > 5) {
-			options = parts[5].split(",").map(opt => opt.trim());
+		if (parts.length > 4) {
+			options = parts[4].split(",").map(opt => opt.trim());
 		}
 
-		const validRounds = ["round1", "round2"];
-		const validDifficulties = ["easy", "hard"];
-		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
-
-		if (!validRounds.includes(round)) {
-			displayentriviaMessage(user, `⚠️ Invalid round! Use: ${validRounds.join(", ")}`, flags, extra, true);
-			return;
-		}
-
-		if (!validDifficulties.includes(difficulty)) {
+		// Map difficulty to round
+		let round;
+		if (difficulty === "easy") {
+			round = "round1";
+		} else if (difficulty === "hard") {
+			round = "round2";
+		} else {
 			displayentriviaMessage(user, `⚠️ Invalid difficulty! Use: easy or hard`, flags, extra, true);
 			return;
 		}
 
+		const validCategories = ["mining", "hunting", "crafting", "history", "beauty", "economy", "social", "misc"];
 		if (!validCategories.includes(category)) {
 			displayentriviaMessage(user, `⚠️ Invalid category! Use: ${validCategories.join(", ")}`, flags, extra, true);
 			return;
@@ -2194,8 +2155,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 
 		const type = options.length > 0 ? 'multiplechoice' : 'singlechoice';
 
-		// Call the addChatterSuggestedQuestion function
-		addChatterSuggestedQuestion(user, round, difficulty, questionText, correctAnswers, category, type, options);
+		// Send the first valid answer (like the other command does)
+		addChatterSuggestedQuestion(user, round, questionText, correctAnswers[0], category, type, options);
 
 		displayentriviaMessage(user, `💡 Thanks for the suggestion! It has been saved for review.`, flags, extra, true);
 	}
