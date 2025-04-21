@@ -634,67 +634,74 @@ function getRandomQuestion() {
     };
 }
 function getFilteredRandomQuestion(round, category, type) {
-    // Normalize round input
-    round = 
-		(round === 1 || round === "round1") ? "round1" :
+    // Normalize the current round
+    const currentRound =
+        (round === 1 || round === "round1") ? "round1" :
         (round === 2 || round === "round2") ? "round2" :
         (round === null || round === undefined) ? "round1" : `round${round}`;
 
-    // Normalize category and type just in case
-    category = (category || "").toLowerCase().trim();
-    type = (type || "").toLowerCase().trim();
-
-    console.log(`🎯 getFilteredRandomQuestion | Round: ${round}, Category: ${category}, Type: ${type}`);
-
-    if (!entriviaQuestions || !entriviaQuestions[round]) {
-        console.warn("❌ Round not found:", round);
+    // Validate round
+    if (!entriviaQuestions || !entriviaQuestions[currentRound]) {
+        console.warn("No such round in questions:", currentRound);
         return null;
     }
 
-    const availableCategories = Object.keys(entriviaQuestions[round]);
-    if (availableCategories.length === 0) {
-        console.warn("No categories in round:", round);
-        return null;
-    }
-    console.log("✅ Found round. Categories available:", availablecategories);
+    // Get categories for this round
+    const categoriesToSearch = category
+        ? [category].filter(cat => entriviaQuestions[currentRound][cat])
+        : Object.keys(entriviaQuestions[currentRound]);
 
-    if (!round[category]) {
-        console.warn("❌ Category not found:", category);
-        return null;
-    }
-
-    const categoryQuestions = round[category];
-
-    if (!categoryQuestions || categoryQuestions.length === 0) {
-        console.warn(`❌ No questions found in category "${category}"`);
+    if (categoriesToSearch.length === 0) {
+        console.warn("No valid categories found for round:", currentRound);
         return null;
     }
 
-    console.log(`🔍 Scanning ${categoryQuestions.length} questions in "${category}"...`);
+    // Gather matching questions
+    let matchingQuestions = [];
 
-    categoryQuestions.forEach((q, i) => {
-        console.log(` - [${i}] type: "${q.type}" normalized: "${(q.type || "").toLowerCase().trim()}"`);
-    });
+    for (const cat of categoriesToSearch) {
+        const questions = entriviaQuestions[currentRound][cat];
+        if (questions && questions.length > 0) {
+            const filtered = questions.filter(q =>
+                (!usedQuestions.includes(q)) &&
+                (!type || q.type === type)
+            );
+            matchingQuestions.push(...filtered.map(q => ({ ...q, category: cat })));
+        }
+    }
 
-    const filteredQuestions = categoryQuestions.filter(q => {
-        const questionType = (q.type || "").toLowerCase().trim();
-        return questionType === type;
-    });
+    // Reset usedQuestions if everything has been used
+    if (matchingQuestions.length === 0) {
+        console.log("✅ All matching questions used. Resetting used questions.");
+        usedQuestions = [];
 
-    console.log(`✅ Found ${filteredQuestions.length} questions matching type "${type}"`);
+        for (const cat of categoriesToSearch) {
+            const questions = entriviaQuestions[currentRound][cat];
+            if (questions && questions.length > 0) {
+                const filtered = questions.filter(q => !type || q.type === type);
+                matchingQuestions.push(...filtered.map(q => ({ ...q, category: cat })));
+            }
+        }
+    }
 
-    if (filteredQuestions.length === 0) {
-        console.warn("⚠️ No questions of type", type, "in category", category);
+    // Still nothing?
+    if (matchingQuestions.length === 0) {
+        console.warn("⚠️ No available questions after filtering.");
         return null;
     }
 
-    // Pick a random question from the filtered list
-    const randomIndex = Math.floor(Math.random() * filteredQuestions.length);
-    const selectedQuestion = filteredQuestions[randomIndex];
+    // Pick a random question
+    const randomQuestion = matchingQuestions[Math.floor(Math.random() * matchingQuestions.length)];
+    usedQuestions.push(randomQuestion);
 
-    console.log("🎲 Selected Question:", selectedQuestion);
-
-    return selectedQuestion;
+    return {
+        question: randomQuestion.question,
+        answers: randomQuestion.answers,
+        type: randomQuestion.type,
+        options: randomQuestion.options || [],
+        round: currentRound,
+        category: randomQuestion.category
+    };
 }
 
 const question = getFilteredRandomQuestion("round1", "hunting", "multiplechoice");
