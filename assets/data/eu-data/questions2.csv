@@ -30,6 +30,7 @@ round1,mining,singlechoice,"Where can you buy the unlimited extractor known as t
 round1,mining,singlechoice,"what is sweetstuff can be refined with fruits. what does this refine into?","nutrio;nutriobar;nutriobars",""
 round1,mining,singlechoice,"mind essence is what is used to power certain mindforce chips. what enmatter is needed to refine mind essence?","force nexus",""
 round1,mining,multiplechoice,"what is lyst short for?","lysterium",""
+round1,mining,multiplechoice,"True or false. Calypso is one of the only planets that has Treasure mining?","true;yes","true/yes;false/no"
 round1,mining,multiplechoice,"Which Planet is the only one that Has Treasure mining?","Arkadia;Ark","Arkadia;Calypso;Next Island;Cyrene"
 round1,crafting,singlechoice,"What items are used to craft explosive projectiles?","nano;nanocubes",""
 round1,crafting,singlechoice,"How many nanocubes are required to click the explosive projectiles 1 blueprint","2;two",""
