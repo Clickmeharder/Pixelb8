@@ -1731,7 +1731,7 @@ select.b {}
 		overflow:visible;
 		overflow-y: hidden;
 	}
-	div#twitchMessagebox, div#exampleMessagebox {text-align: left;border:;max-height: 170px;}
+	div#twitchMessagebox, div#exampleMessagebox {text-align: left;border:;max-height:;}
 	#twitchMessagebox .chatMessage,#exampleMessagebox .exampleMessage {text-shadow: var(--chat-text-shadow);transition: opacity 1s ease-out;  /* Apply the fade transition */}
 	#username {font-weight:bold;}
 	.chatMessage, .exampleMessage {
