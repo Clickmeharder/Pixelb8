@@ -318,49 +318,50 @@ function submitQuestions() {
 
 
 function downloadCustomQuestionsCSV() {
-    // Retrieve the custom questions from localStorage
     const customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
-
-    // Prepare CSV headers (same as default CSV)
     const headers = ["round", "category", "question", "answers", "type", "options"];
-    
-    // Initialize the CSV content with headers
     let csvContent = headers.join(",") + "\n";
-    
-    // Function to convert each question to a CSV row
+
+    function sanitizeAndJoin(value) {
+        if (Array.isArray(value)) {
+            return value.join(";");
+        } else if (typeof value === "string") {
+            return value.split(",").map(s => s.trim()).join(";");
+        } else {
+            return "";
+        }
+    }
+
     function convertQuestionsToCSV(round, category, questions) {
         questions.forEach(q => {
-            let answers = q.answers.join(";");  // Join answers with semicolons
-            let options = q.options.join(";");  // Join options with semicolons (if any)
-            let questionRow = [
+            const answers = sanitizeAndJoin(q.answers);
+            const options = sanitizeAndJoin(q.options);
+            const questionRow = [
                 round,
                 category,
-                `"${q.question.replace(/\"/g, "")}"`,  // Escape quotes in questions
-                `"${answers}"`,  // Escape quotes in answers
-                q.type,
-                options ? `"${options}"` : ""  // Optional: add options if they exist
+                `"${q.question?.replace(/"/g, "") || ""}"`,
+                `"${answers}"`,
+                q.type || "",
+                options ? `"${options}"` : ""
             ];
-            csvContent += questionRow.join(",") + "\n";  // Append the row to the CSV content
+            csvContent += questionRow.join(",") + "\n";
         });
     }
-    
-    // Iterate over each round and category to add questions
+
     for (const round in customQuestions) {
         const roundData = customQuestions[round];
         for (const category in roundData) {
             convertQuestionsToCSV(round, category, roundData[category]);
         }
     }
-    
-    // Create a Blob from the CSV content and download it
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "custom_questions.csv";  // Name of the downloaded file
-    link.click();  // Trigger the download
+    link.download = "custom_questions.csv";
+    link.click();
 }
 
-// Add event listener to the download button
 document.getElementById('downloadCSVButton').addEventListener('click', downloadCustomQuestionsCSV);
 
 // Function to update the answer display based on the selected question
