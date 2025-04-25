@@ -315,6 +315,54 @@ function submitQuestions() {
     // Optionally, hide the multiple choice options input after submission
     document.getElementById('multipleChoiceOptions').style.display = 'none';
 }
+
+
+function downloadCustomQuestionsCSV() {
+    // Retrieve the custom questions from localStorage
+    const customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
+
+    // Prepare CSV headers (same as default CSV)
+    const headers = ["round", "category", "question", "answers", "type", "options"];
+    
+    // Initialize the CSV content with headers
+    let csvContent = headers.join(",") + "\n";
+    
+    // Function to convert each question to a CSV row
+    function convertQuestionsToCSV(round, category, questions) {
+        questions.forEach(q => {
+            let answers = q.answers.join(";");  // Join answers with semicolons
+            let options = q.options.join(";");  // Join options with semicolons (if any)
+            let questionRow = [
+                round,
+                category,
+                `"${q.question.replace(/\"/g, "")}"`,  // Escape quotes in questions
+                `"${answers}"`,  // Escape quotes in answers
+                q.type,
+                options ? `"${options}"` : ""  // Optional: add options if they exist
+            ];
+            csvContent += questionRow.join(",") + "\n";  // Append the row to the CSV content
+        });
+    }
+    
+    // Iterate over each round and category to add questions
+    for (const round in customQuestions) {
+        const roundData = customQuestions[round];
+        for (const category in roundData) {
+            convertQuestionsToCSV(round, category, roundData[category]);
+        }
+    }
+    
+    // Create a Blob from the CSV content and download it
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "custom_questions.csv";  // Name of the downloaded file
+    link.click();  // Trigger the download
+}
+
+// Add event listener to the download button
+document.getElementById('downloadCSVButton').addEventListener('click', downloadCustomQuestionsCSV);
+
 // Function to update the answer display based on the selected question
 function updateAnswerDisplay() {
     const dropdown = document.getElementById('questionList');
