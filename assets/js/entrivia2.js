@@ -326,18 +326,22 @@ function downloadCustomQuestionsCSV() {
         if (Array.isArray(value)) {
             return value.join(";");
         } else if (typeof value === "string") {
-            return value.split(",").map(s => s.trim()).join(";");
+            return value.split(/[,;]/).map(s => s.trim()).join(";");
         } else {
             return "";
         }
     }
 
+    function escapeCSV(value) {
+        return `"${String(value).replace(/"/g, '""')}"`;
+    }
+
     function convertQuestionsToCSV(round, category, questions) {
         questions.forEach(q => {
             const type = q.type || "";
-            const question = `"${(q.question || "").replace(/"/g, '""')}"`;
-            const answers = `"${sanitizeAndJoin(q.answers)}"`;
-            const options = `"${sanitizeAndJoin(q.options)}"`;
+            const question = escapeCSV(q.question || "");
+            const answers = escapeCSV(sanitizeAndJoin(q.answers));
+            const options = escapeCSV(sanitizeAndJoin(q.options));
 
             const questionRow = [
                 round,
