@@ -318,48 +318,35 @@ function submitQuestions() {
 
 
 function downloadCustomQuestionsCSV() {
-    const customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
-    const headers = ["round", "category", "question", "answers", "type", "options"];
-    let csvContent = headers.join(",") + "\n";
+  const csvHeader = ["round", "category", "type", "question", "answers", "options"];
+  const csvRows = [csvHeader.join(",")];
 
-    function sanitizeAndJoin(value) {
-        if (Array.isArray(value)) {
-            return value.join(";");
-        } else if (typeof value === "string") {
-            return value.split(",").map(s => s.trim()).join(";");
-        } else {
-            return "";
-        }
-    }
+  customQuestions.forEach((q) => {
+    const round = q.round || "round1";
+    const category = q.category || "";
+    const type = q.type || "singlechoice";
+    const question = `"${q.question.replace(/"/g, '""')}"`; // escape double quotes
 
-    function convertQuestionsToCSV(round, category, questions) {
-        questions.forEach(q => {
-            const answers = sanitizeAndJoin(q.answers);
-            const options = sanitizeAndJoin(q.options);
-            const questionRow = [
-                round,
-                category,
-                `"${q.question?.replace(/"/g, "") || ""}"`,
-                `"${answers}"`,
-                q.type || "",
-                options ? `"${options}"` : ""
-            ];
-            csvContent += questionRow.join(",") + "\n";
-        });
-    }
+    // Join answers and options properly
+    const answers = q.answers && q.answers.length > 0
+      ? `"${q.answers.join(";").replace(/"/g, '""')}"`
+      : "";
 
-    for (const round in customQuestions) {
-        const roundData = customQuestions[round];
-        for (const category in roundData) {
-            convertQuestionsToCSV(round, category, roundData[category]);
-        }
-    }
+    const options = q.options && q.options.length > 0
+      ? `"${q.options.join(";").replace(/"/g, '""')}"`
+      : "";
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "custom_questions.csv";
-    link.click();
+    csvRows.push([round, category, type, question, answers, options].join(","));
+  });
+
+  const csvContent = csvRows.join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute("download", "custom_questions.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 document.getElementById('downloadCSVButton').addEventListener('click', downloadCustomQuestionsCSV);
