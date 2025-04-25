@@ -318,37 +318,53 @@ function submitQuestions() {
 
 
 function downloadCustomQuestionsCSV() {
-  const csvHeader = ["round", "category", "type", "question", "answers", "options"];
-  const csvRows = [csvHeader.join(",")];
+    const customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
+    const headers = ["round", "category", "type", "question", "answers", "options"];
+    let csvContent = headers.join(",") + "\n";
 
-  customQuestions.forEach((q) => {
-    const round = q.round || "round1";
-    const category = q.category || "";
-    const type = q.type || "singlechoice";
-    const question = `"${q.question.replace(/"/g, '""')}"`; // escape double quotes
+    function sanitizeAndJoin(value) {
+        if (Array.isArray(value)) {
+            return value.join(";");
+        } else if (typeof value === "string") {
+            return value.split(",").map(s => s.trim()).join(";");
+        } else {
+            return "";
+        }
+    }
 
-    // Join answers and options properly
-    const answers = q.answers && q.answers.length > 0
-      ? `"${q.answers.join(";").replace(/"/g, '""')}"`
-      : "";
+    function convertQuestionsToCSV(round, category, questions) {
+        questions.forEach(q => {
+            const type = q.type || "";
+            const question = `"${(q.question || "").replace(/"/g, '""')}"`;
+            const answers = `"${sanitizeAndJoin(q.answers)}"`;
+            const options = `"${sanitizeAndJoin(q.options)}"`;
 
-    const options = q.options && q.options.length > 0
-      ? `"${q.options.join(";").replace(/"/g, '""')}"`
-      : "";
+            const questionRow = [
+                round,
+                category,
+                type,
+                question,
+                answers,
+                options
+            ];
 
-    csvRows.push([round, category, type, question, answers, options].join(","));
-  });
+            csvContent += questionRow.join(",") + "\n";
+        });
+    }
 
-  const csvContent = csvRows.join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.setAttribute("download", "custom_questions.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+    for (const round in customQuestions) {
+        const roundData = customQuestions[round];
+        for (const category in roundData) {
+            convertQuestionsToCSV(round, category, roundData[category]);
+        }
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "custom_questions.csv";
+    link.click();
 }
-
 document.getElementById('downloadCSVButton').addEventListener('click', downloadCustomQuestionsCSV);
 
 // Function to update the answer display based on the selected question
