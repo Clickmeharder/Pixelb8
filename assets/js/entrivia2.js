@@ -123,7 +123,7 @@ function toggleconsolemessages() {
 //----------------------------
 function fetchentriviaQuestions() {
     return new Promise((resolve, reject) => {
-        const questionsUrl = '/assets/data/eu-data/questions2.csv';  // Path to your CSV file
+        const questionsUrl = '/assets/data/eu-data/questions2.csv';
         let defaultQuestions = { round1: {}, round2: {} };
         let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
 
@@ -131,48 +131,39 @@ function fetchentriviaQuestions() {
             ? fetch(questionsUrl)
                 .then(response => response.ok ? response.text() : Promise.reject('Failed to load'))
                 .then(csvData => {
-                    // Parse CSV manually
-                    const rows = csvData.trim().split("\n");  // Split CSV into rows
-                    const headers = rows[0].split(",");  // Extract the headers (first row)
+                    const rows = csvData.trim().split("\n");
+                    const headers = rows[0].split(",");
                     let parsedData = [];
 
-                    // Loop through the remaining rows and parse them
                     rows.slice(1).forEach(row => {
                         const columns = row.split(",");
                         let questionObj = {};
-
                         headers.forEach((header, index) => {
-                            questionObj[header.trim()] = columns[index].trim();  // Match header to column
+                            questionObj[header.trim()] = columns[index].trim();
                         });
-
                         parsedData.push(questionObj);
                     });
 
-                    // Map the parsed CSV data into the correct structure
                     parsedData.forEach(row => {
-                        let round = row.round.toLowerCase();  // round1 or round2
-                        let category = row.category.toLowerCase();  // mining, hunting, etc.
-                        let question = row.question.replace(/\"/g, "").trim(); // Remove quotes and trim
+                        let round = row.round.toLowerCase();
+                        let category = row.category.toLowerCase();
+                        let question = row.question.replace(/\"/g, "").trim();
                         let answersRaw = row.answers.replace(/\"/g, "").trim();
-						let answers = answersRaw.split(";").map(a => a.trim()).filter(Boolean);
+                        let answers = answersRaw.split(";").map(a => a.trim()).filter(Boolean);
                         let type = row.type.toLowerCase();
                         let options = row.options
-						? row.options.replace(/\"/g, "").split(/[;,]/).map(opt => opt.trim()).filter(Boolean)
-						: [];
+                            ? row.options.replace(/\"/g, "").split(/[;,]/).map(opt => opt.trim()).filter(Boolean)
+                            : [];
 
-
-                        // Ensure the round and category exist in the object structure
                         if (!defaultQuestions[round]) defaultQuestions[round] = {};
                         if (!defaultQuestions[round][category]) defaultQuestions[round][category] = [];
 
-                        // Add the question to the appropriate round and category
-						defaultQuestions[round][category].push({
-							question: question,
-							answers: answers,  // Already split into an array
-							//rawanswer: answersRaw,  // Optional, for displaying original string if needed
-							type: type,
-							options: options,
-						});
+                        defaultQuestions[round][category].push({
+                            question: question,
+                            answers: answers,
+                            type: type,
+                            options: options,
+                        });
                     });
                 })
                 .catch(error => console.error('Error fetching or parsing questions CSV:', error))
@@ -183,8 +174,10 @@ function fetchentriviaQuestions() {
 
             function mergeQuestions(target, source) {
                 for (const category in source) {
-                    if (!target[category]) target[category] = [];
-                    target[category] = target[category].concat(source[category] || []);
+                    let normalizedCategory = category.toLowerCase();  // 🔥 Normalize here too
+
+                    if (!target[normalizedCategory]) target[normalizedCategory] = [];
+                    target[normalizedCategory] = target[normalizedCategory].concat(source[category] || []);
                 }
             }
 
