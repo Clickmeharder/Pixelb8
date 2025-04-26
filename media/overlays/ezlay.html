@@ -391,9 +391,14 @@
 					</div>
 					<button class="a remove" id="deleteQuestionBtn">Delete Selected Question</button>
 					<hr>
-					<button class="a" id="downloadCSVButton">Download Custom Questions CSV</button>
-					<hr>
-					<button class="a" id="downloadFullCSVButton">Download All Questions CSV</button>
+					<button class="a" id="showCSVPanelButton">📄 Show CSV Options</button>
+					<div id="csvPanel" style="display: none; margin-top: 10px;">
+						<textarea id="csvOutputText" rows="20" cols="100" readonly></textarea><br>
+						<button class="a" id="downloadCSVButton">⬇️ Download Custom CSV</button>
+						<button class="a" id="copyCustomCSVButton">📋 Copy Custom CSV</button>
+						<button class="a" id="downloadFullCSVButton">⬇️ Download All Entrivia CSV</button>
+						<button class="a" id="copyFullCSVButton">📋 Copy Full Entrivia CSV</button>
+					</div>
 				</div>
 				<div class="controls" id="entrivia-settings-main">
 					<h3>Main entrivia Settings</h3>
