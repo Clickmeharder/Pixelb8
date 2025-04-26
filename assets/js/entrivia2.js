@@ -552,20 +552,10 @@ function copyFullCSVToClipboard() {
 // Copy to Clipboard Functions
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text)
-        .then(() => alert("✅ Copied to clipboard!"))
-        .catch(err => alert("❌ Failed to copy: " + err));
+        .then(() => console.log("✅ Copied to clipboard!"))
+        .catch(err => console.log("❌ Failed to copy: " + err));
 }
-/* document.getElementById("showCSVPanelButton").addEventListener("click", () => {
-	const panel = document.getElementById("csvPanel");
-	const textarea = document.getElementById("csvOutputText"); // your textarea id
 
-	if (panel.style.display === "none") {
-		textarea.value = getCustomQuestionsCSV();
-		panel.style.display = "block";
-	} else {
-		panel.style.display = "none";
-	}
-}); */
 document.getElementById("showCSVPanelButton").addEventListener("click", () => {
 	const panel = document.getElementById("csvPanel");
 	const textarea = document.getElementById("csvOutputText");
