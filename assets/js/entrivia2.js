@@ -434,26 +434,134 @@ function downloadEntriviaQuestionsCSV(showOnly = false) {
         generateAndHandleCSV(entriviaQuestions);
     }
 }
+function getCustomQuestionsCSV() {
+    const customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
+    const headers = ["round", "category", "type", "question", "answers", "options"];
+    let csvContent = headers.join(",") + "\n";
 
+    function sanitizeAndJoin(value) {
+        if (Array.isArray(value)) {
+            return value.join(";");
+        } else if (typeof value === "string") {
+            return value.split(/[,;]/).map(s => s.trim()).join(";");
+        } else {
+            return "";
+        }
+    }
+
+    function escapeCSV(value) {
+        return `"${String(value).replace(/"/g, '""')}"`;
+    }
+
+    function convertQuestionsToCSV(round, category, questions) {
+        questions.forEach(q => {
+            const row = [
+                round,
+                category,
+                q.type || "",
+                escapeCSV(q.question || ""),
+                escapeCSV(sanitizeAndJoin(q.answer)),
+                escapeCSV(sanitizeAndJoin(q.options))
+            ];
+            csvContent += row.join(",") + "\n";
+        });
+    }
+
+    for (const round in customQuestions) {
+        for (const category in customQuestions[round]) {
+            convertQuestionsToCSV(round, category, customQuestions[round][category]);
+        }
+    }
+
+    return csvContent;
+}
+
+function getEntriviaQuestionsCSV() {
+    if (!entriviaQuestions || Object.keys(entriviaQuestions.round1 || {}).length === 0) {
+        return "No entrivia questions loaded.";
+    }
+
+    const headers = ["round", "category", "type", "question", "answers", "options"];
+    const csvRows = [headers.join(",")];
+
+    function sanitizeAndJoin(value) {
+        if (Array.isArray(value)) {
+            return value.join(";");
+        } else if (typeof value === "string") {
+            return value.split(/[,;]/).map(s => s.trim()).join(";");
+        } else {
+            return "";
+        }
+    }
+
+    function escapeCSV(value) {
+        return `"${String(value).replace(/"/g, '""')}"`;
+    }
+
+    function convertQuestionsToCSV(round, category, questions) {
+        questions.forEach(q => {
+            const row = [
+                round,
+                category,
+                q.type || "",
+                escapeCSV(q.question || ""),
+                escapeCSV(sanitizeAndJoin(q.answers)),
+                escapeCSV(sanitizeAndJoin(q.options))
+            ];
+            csvRows.push(row.join(","));
+        });
+    }
+
+    for (const round of ["round1", "round2"]) {
+        const roundData = entriviaQuestions[round];
+        if (!roundData) continue;
+
+        const sortedCategories = Object.keys(roundData).sort((a, b) => a.localeCompare(b));
+        for (const category of sortedCategories) {
+            const questions = roundData[category].slice().sort((a, b) => (a.type || "").localeCompare(b.type || ""));
+            convertQuestionsToCSV(round, category, questions);
+        }
+    }
+
+    return csvRows.join("\n");
+}
+
+function copyCustomCSVToClipboard() {
+    const text = getCustomQuestionsCSV();
+    navigator.clipboard.writeText(text).then(() => {
+        alert("✅ Custom CSV copied to clipboard!");
+    });
+}
+
+function copyFullCSVToClipboard() {
+    const text = getEntriviaQuestionsCSV();
+    navigator.clipboard.writeText(text).then(() => {
+        alert("✅ Full Entrivia CSV copied to clipboard!");
+    });
+}
 // Copy to Clipboard Functions
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text)
         .then(() => alert("✅ Copied to clipboard!"))
         .catch(err => alert("❌ Failed to copy: " + err));
 }
+document.getElementById("toggleCSVPanel").addEventListener("click", () => {
+	const panel = document.getElementById("csvPanel");
+	const textarea = document.getElementById("csvOutputText"); // your textarea id
 
+	if (panel.style.display === "none") {
+		textarea.value = getCustomQuestionsCSV();
+		panel.style.display = "block";
+	} else {
+		panel.style.display = "none";
+	}
+});
 document.getElementById("downloadCSVButton").addEventListener("click", () => downloadCustomQuestionsCSV());
 document.getElementById("downloadFullCSVButton").addEventListener("click", () => downloadEntriviaQuestionsCSV());
 
-document.getElementById("copyCustomCSVButton").addEventListener("click", () => {
-    if (!lastCustomCSV) downloadCustomQuestionsCSV(true);
-    copyToClipboard(lastCustomCSV);
-});
+document.getElementById("copyCustomCSVButton").addEventListener("click", copyCustomCSVToClipboard);
 
-document.getElementById("copyFullCSVButton").addEventListener("click", () => {
-    if (!lastEntriviaCSV) downloadEntriviaQuestionsCSV(true);
-    copyToClipboard(lastEntriviaCSV);
-});
+document.getElementById("copyFullCSVButton").addEventListener("click", copyFullCSVToClipboard);
 // Function to update the answer display based on the selected question
 function updateAnswerDisplay() {
     const dropdown = document.getElementById('questionList');
