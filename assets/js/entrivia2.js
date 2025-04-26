@@ -470,54 +470,64 @@ function getCustomQuestionsCSV() {
     return csvContent;
 }
 
-function getEntriviaQuestionsCSV() {
+function getEntriviaQuestionsCSV(callback) {
     if (!entriviaQuestions || Object.keys(entriviaQuestions.round1 || {}).length === 0) {
-        return "No entrivia questions loaded.";
+        fetchentriviaQuestions()
+            .then(data => {
+                if (!data) return console.error("❌ Failed to load questions.");
+                entriviaQuestions = data; // cache it if needed later
+                callback(generateCSV(data));
+            })
+            .catch(err => console.error("❌ Error fetching questions:", err));
+    } else {
+        callback(generateCSV(entriviaQuestions));
     }
 
-    const headers = ["round", "category", "type", "question", "answers", "options"];
-    const csvRows = [headers.join(",")];
+    function generateCSV(data) {
+        const headers = ["round", "category", "type", "question", "answers", "options"];
+        const csvRows = [headers.join(",")];
 
-    function sanitizeAndJoin(value) {
-        if (Array.isArray(value)) {
-            return value.join(";");
-        } else if (typeof value === "string") {
-            return value.split(/[,;]/).map(s => s.trim()).join(";");
-        } else {
-            return "";
+        function sanitizeAndJoin(value) {
+            if (Array.isArray(value)) {
+                return value.join(";");
+            } else if (typeof value === "string") {
+                return value.split(/[,;]/).map(s => s.trim()).join(";");
+            } else {
+                return "";
+            }
         }
-    }
 
-    function escapeCSV(value) {
-        return `"${String(value).replace(/"/g, '""')}"`;
-    }
-
-    function convertQuestionsToCSV(round, category, questions) {
-        questions.forEach(q => {
-            const row = [
-                round,
-                category,
-                q.type || "",
-                escapeCSV(q.question || ""),
-                escapeCSV(sanitizeAndJoin(q.answers)),
-                escapeCSV(sanitizeAndJoin(q.options))
-            ];
-            csvRows.push(row.join(","));
-        });
-    }
-
-    for (const round of ["round1", "round2"]) {
-        const roundData = entriviaQuestions[round];
-        if (!roundData) continue;
-
-        const sortedCategories = Object.keys(roundData).sort((a, b) => a.localeCompare(b));
-        for (const category of sortedCategories) {
-            const questions = roundData[category].slice().sort((a, b) => (a.type || "").localeCompare(b.type || ""));
-            convertQuestionsToCSV(round, category, questions);
+        function escapeCSV(value) {
+            return `"${String(value).replace(/"/g, '""')}"`;
         }
-    }
 
-    return csvRows.join("\n");
+        function convertQuestionsToCSV(round, category, questions) {
+            questions.forEach(q => {
+                const row = [
+                    round,
+                    category,
+                    q.type || "",
+                    escapeCSV(q.question || ""),
+                    escapeCSV(sanitizeAndJoin(q.answers)),
+                    escapeCSV(sanitizeAndJoin(q.options))
+                ];
+                csvRows.push(row.join(","));
+            });
+        }
+
+        for (const round of ["round1", "round2"]) {
+            const roundData = data[round];
+            if (!roundData) continue;
+
+            const sortedCategories = Object.keys(roundData).sort((a, b) => a.localeCompare(b));
+            for (const category of sortedCategories) {
+                const questions = roundData[category].slice().sort((a, b) => (a.type || "").localeCompare(b.type || ""));
+                convertQuestionsToCSV(round, category, questions);
+            }
+        }
+
+        return csvRows.join("\n");
+    }
 }
 
 function copyCustomCSVToClipboard() {
