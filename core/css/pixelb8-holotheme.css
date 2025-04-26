@@ -1250,6 +1250,15 @@ input[type="submit"]:hover {
   box-shadow: 0 0 20px var(--glow-color);
 }
 
+
+button.smol {
+    width: 93px;
+    height: 44px;
+    padding: 3px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+}
 /* Inputs & Textareas */
 input[type="text"],
 input[type="password"],
