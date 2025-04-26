@@ -340,7 +340,7 @@ function downloadCustomQuestionsCSV() {
         questions.forEach(q => {
             const type = q.type || "";
             const question = escapeCSV(q.question || "");
-            const answers = escapeCSV(sanitizeAndJoin(q.answers));
+            const answers = escapeCSV(sanitizeAndJoin(q.answer));
             const options = escapeCSV(sanitizeAndJoin(q.options));
 
             const questionRow = [
