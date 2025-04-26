@@ -1515,6 +1515,7 @@ button.smol {
   outline: 2px solid #cc0000; /* Matching darker outline on press */
   transform: translateY(4px); /* Moves the button down to create a "pressed" effect */
 }
+
 button#cancelGame {
 	font-size: 15px;
 	font-weight:bold;
@@ -1532,7 +1533,9 @@ button#cancelGame {
 	}
 button#startGame {width:78%;}
 button#startGame:hover {}
-
+button#toggleCSVSourceButton {
+    width: 97%;
+}
 #comfy-controller .controlpanel {
     width: 95%;
 }
