@@ -575,10 +575,10 @@ document.getElementById("toggleCSVSourceButton").addEventListener("click", () =>
 
 	if (showingCustom) {
 		getEntriviaQuestionsCSV(); // Don't assign return value
-		button.textContent = "🧩 Show Custom CSV";
+		button.textContent = "🧩 Show Your Questions";
 	} else {
 		textarea.value = getCustomQuestionsCSV(); // This one does return
-		button.textContent = "📚 Show Entrivia CSV";
+		button.textContent = "📚 Show All Questions";
 	}
 
 	showingCustom = !showingCustom;
