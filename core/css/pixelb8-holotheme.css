@@ -1251,14 +1251,7 @@ input[type="submit"]:hover {
 }
 
 
-button.smol {
-    width: 93px;
-    height: 44px;
-    padding: 3px;
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-}
+
 /* Inputs & Textareas */
 input[type="text"],
 input[type="password"],
@@ -1499,6 +1492,15 @@ button.a {
 		}
 button.b {}
 button.c {}
+button.smol {
+    width: 93px;
+    height: 44px;
+    padding: 3px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
 .close-btn{color:var(--text-color);font-weight: bold;font-size: 24px;height: 36px;width: 36px;outline:2px inset var(--bg-color-alt3);border-width:3px;margin: 2px;}
 .close-btn:hover {
   color:#ff0000;
@@ -1640,7 +1642,7 @@ select.b {}
 			flex-direction: column;
 			border: 3px inset var(--border-color);
 			border-radius:var(--border-radius);
-			overflow: hidden;
+			overflow: scroll;
 			max-height: 80vh; /*(was 300px) Initially small */
 			padding: 0 4px; /* Horizontal padding stays */
 			padding-top: 0px;
