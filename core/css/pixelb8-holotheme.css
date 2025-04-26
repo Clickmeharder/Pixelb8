@@ -1637,13 +1637,13 @@ select.b {}
 			padding-top: 0px;
 			transition: all 0.6s ease-in-out;
 		}
-		.controlpanel:hover {
-			/* max-height: 300px; */
+/* 		.controlpanel:hover {
+			max-height: 300px;
 			padding: 6px;
 			padding-top: 4px;
 			overflow-y: scroll;
 			transition: all 0.6s ease-in-out;
-		}
+		} */
 		.controlpanel:active {
 			max-height: 300px;
 			padding: 6px;
