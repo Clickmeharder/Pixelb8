@@ -2133,7 +2133,7 @@ ul#broadcastercommandlist {
 		#entriviaMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
 textarea#csvOutputText {
     width: 100%;
-	overflow:hidden;
+	overflow:scroll;
 	text-align:left;
 	white-space:pre;
 }
