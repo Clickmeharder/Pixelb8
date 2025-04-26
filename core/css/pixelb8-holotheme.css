@@ -1618,7 +1618,9 @@ select.b {}
 		transform: translateY(0);
 		pointer-events: all; /* Allow interactions */
 	}
-
+	div#entrivia-controller {
+		width: 420px;
+	}
 	.controllerheader {
 		font-family: yatra one;
 		font-weight: bold;
@@ -1662,6 +1664,7 @@ select.b {}
 			height: 3%;
 			overflow-y: scroll;
 		}
+
 		#theme-controller {width: 390px;}
 		#theme-controller .controlpanel {
 			padding: 1px;
