@@ -1638,10 +1638,9 @@ select.b {}
 			transition: all 0.6s ease-in-out;
 		}
 		.controlpanel:hover {
-			max-height: 300px;
+			/* max-height: 300px; */
 			padding: 6px;
 			padding-top: 4px;
-			height: 3%;
 			overflow-y: scroll;
 			transition: all 0.6s ease-in-out;
 		}
