@@ -1632,7 +1632,7 @@ select.b {}
 			border: 3px inset var(--border-color);
 			border-radius:var(--border-radius);
 			overflow: hidden;
-			max-height: 300px; /* Initially small */
+			max-height: 80vh; /*(was 300px) Initially small */
 			padding: 0 4px; /* Horizontal padding stays */
 			padding-top: 0px;
 			transition: all 0.6s ease-in-out;
@@ -2132,10 +2132,11 @@ ul#broadcastercommandlist {
 		div#entriviaMessagebox {text-align: left;border:;max-height: 170px;}
 		#entriviaMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
 textarea#csvOutputText {
-    width: 100%;
-	overflow:scroll;
-	text-align:left;
-	white-space:pre;
+    max-width: 95%;
+    height: 125px;
+    overflow: hidden;
+    text-align: left;
+    white-space: pre;
 }
 /**/
 /*----------------------*/
