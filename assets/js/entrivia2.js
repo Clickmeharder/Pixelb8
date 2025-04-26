@@ -320,12 +320,6 @@ function submitQuestions() {
 let lastCustomCSV = "";
 let lastEntriviaCSV = "";
 
-// Show/Hide Panel Toggle
-/* document.getElementById("showCSVPanelButton").addEventListener("click", () => {
-    const panel = document.getElementById("csvPanel");
-    panel.style.display = panel.style.display === "none" ? "block" : "none";
-}); */
-
 function sanitizeAndJoin(value) {
     if (Array.isArray(value)) {
         return value.join(";");
@@ -585,9 +579,7 @@ document.getElementById("toggleCSVSourceButton").addEventListener("click", () =>
 });
 document.getElementById("downloadCSVButton").addEventListener("click", () => downloadCustomQuestionsCSV());
 document.getElementById("downloadFullCSVButton").addEventListener("click", () => downloadEntriviaQuestionsCSV());
-
 document.getElementById("copyCustomCSVButton").addEventListener("click", copyCustomCSVToClipboard);
-
 document.getElementById("copyFullCSVButton").addEventListener("click", copyFullCSVToClipboard);
 // Function to update the answer display based on the selected question
 function updateAnswerDisplay() {
