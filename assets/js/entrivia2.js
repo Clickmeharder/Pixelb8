@@ -545,7 +545,7 @@ function copyToClipboard(text) {
         .then(() => alert("✅ Copied to clipboard!"))
         .catch(err => alert("❌ Failed to copy: " + err));
 }
-document.getElementById("showCSVPanelButton").addEventListener("click", () => {
+/* document.getElementById("showCSVPanelButton").addEventListener("click", () => {
 	const panel = document.getElementById("csvPanel");
 	const textarea = document.getElementById("csvOutputText"); // your textarea id
 
@@ -555,6 +555,33 @@ document.getElementById("showCSVPanelButton").addEventListener("click", () => {
 	} else {
 		panel.style.display = "none";
 	}
+}); */
+document.getElementById("showCSVPanelButton").addEventListener("click", () => {
+	const panel = document.getElementById("csvPanel");
+	const textarea = document.getElementById("csvOutputText");
+
+	if (panel.style.display === "none") {
+		textarea.value = getEntriviaQuestionsCSV(); // Default to entrivia
+		panel.style.display = "block";
+	} else {
+		panel.style.display = "none";
+	}
+});
+let showingCustom = false;
+
+document.getElementById("toggleCSVSourceButton").addEventListener("click", () => {
+	const textarea = document.getElementById("csvOutputText");
+	const button = document.getElementById("toggleCSVSourceButton");
+
+	if (showingCustom) {
+		textarea.value = getEntriviaQuestionsCSV();
+		button.textContent = "🧩 Show Custom CSV";
+	} else {
+		textarea.value = getCustomQuestionsCSV();
+		button.textContent = "📚 Show Entrivia CSV";
+	}
+
+	showingCustom = !showingCustom;
 });
 document.getElementById("downloadCSVButton").addEventListener("click", () => downloadCustomQuestionsCSV());
 document.getElementById("downloadFullCSVButton").addEventListener("click", () => downloadEntriviaQuestionsCSV());
