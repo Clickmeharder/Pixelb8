@@ -413,7 +413,10 @@ function downloadEntriviaQuestionsCSV() {
             const roundData = questionsData[round];
             if (!roundData) return;
 
-            const sortedCategories = Object.keys(roundData).sort();
+            const sortedCategories = Object.keys(roundData).sort((a, b) => 
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+
             sortedCategories.forEach(category => {
                 const questions = roundData[category].slice().sort((a, b) => {
                     const typeA = a.type?.toLowerCase() || "";
@@ -447,7 +450,6 @@ function downloadEntriviaQuestionsCSV() {
         generateAndDownloadCSV(entriviaQuestions);
     }
 }
-
 
 document.getElementById('downloadCSVButton').addEventListener('click', downloadCustomQuestionsCSV);
 document.getElementById('downloadFullCSVButton').addEventListener('click', downloadEntriviaQuestionsCSV);
