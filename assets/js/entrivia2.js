@@ -585,6 +585,10 @@ document.getElementById("toggleCSVSourceButton").addEventListener("click", () =>
 });
 document.getElementById("downloadCSVButton").addEventListener("click", () => downloadCustomQuestionsCSV());
 document.getElementById("downloadFullCSVButton").addEventListener("click", () => downloadEntriviaQuestionsCSV());
+document.getElementById("copyQtoclip").addEventListener("click", function() {
+    const text = document.getElementById("csvOutputText").textContent; // or .value if it's an input/textarea
+    copyToClipboard(text);
+});
 document.getElementById("copyCustomCSVButton").addEventListener("click", copyCustomCSVToClipboard);
 document.getElementById("copyFullCSVButton").addEventListener("click", copyFullCSVToClipboard);
 // Function to update the answer display based on the selected question
