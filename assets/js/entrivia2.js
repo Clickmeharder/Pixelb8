@@ -321,10 +321,10 @@ let lastCustomCSV = "";
 let lastEntriviaCSV = "";
 
 // Show/Hide Panel Toggle
-document.getElementById("showCSVPanelButton").addEventListener("click", () => {
+/* document.getElementById("showCSVPanelButton").addEventListener("click", () => {
     const panel = document.getElementById("csvPanel");
     panel.style.display = panel.style.display === "none" ? "block" : "none";
-});
+}); */
 
 function sanitizeAndJoin(value) {
     if (Array.isArray(value)) {
@@ -545,7 +545,7 @@ function copyToClipboard(text) {
         .then(() => alert("✅ Copied to clipboard!"))
         .catch(err => alert("❌ Failed to copy: " + err));
 }
-document.getElementById("toggleCSVPanel").addEventListener("click", () => {
+document.getElementById("showCSVPanelButton").addEventListener("click", () => {
 	const panel = document.getElementById("csvPanel");
 	const textarea = document.getElementById("csvOutputText"); // your textarea id
 
