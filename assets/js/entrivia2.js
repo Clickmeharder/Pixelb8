@@ -409,12 +409,21 @@ function downloadEntriviaQuestionsCSV() {
         const headers = ["round", "category", "type", "question", "answers", "options"];
         let csvRows = [headers.join(",")];
 
-        for (const round in questionsData) {
+        ["round1", "round2"].forEach(round => {
             const roundData = questionsData[round];
-            for (const category in roundData) {
-                convertQuestionsToCSV(round, category, roundData[category], csvRows);
-            }
-        }
+            if (!roundData) return;
+
+            const sortedCategories = Object.keys(roundData).sort();
+            sortedCategories.forEach(category => {
+                const questions = roundData[category].slice().sort((a, b) => {
+                    const typeA = a.type?.toLowerCase() || "";
+                    const typeB = b.type?.toLowerCase() || "";
+                    return typeA.localeCompare(typeB);
+                });
+
+                convertQuestionsToCSV(round, category, questions, csvRows);
+            });
+        });
 
         const csvContent = csvRows.join("\n");
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -424,7 +433,7 @@ function downloadEntriviaQuestionsCSV() {
         link.click();
     }
 
-    // If not loaded, fetch first
+    // If not loaded, fetch first then continue
     if (!entriviaQuestions || Object.keys(entriviaQuestions.round1 || {}).length === 0) {
         fetchentriviaQuestions()
             .then(data => {
