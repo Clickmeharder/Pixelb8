@@ -1,6 +1,5 @@
 round,category,type,question,answer,options
 round1,beauty,singlechoice,"How many paint cans or textures for max success rates?","323",""
-round1,beauty,singlechoice,"How many cans of paint or textures do you use to get max success?","323",""
 round1,crafting,multiplechoice,"what is the smallest explosive projectiles blueprint?","ep1;explosive projectiles 1;ep1 bp","ep1;ep2;ep3;ep4"
 round1,crafting,singlechoice,"What items are used to craft explosive projectiles?","nano;nanocubes",""
 round1,crafting,singlechoice,"How many nanocubes are required to click the explosive projectiles 1 blueprint","2;two",""
@@ -36,7 +35,7 @@ round1,hunting,singlechoice,"What is the ammo burn on a skildek Lancehead?","215
 round1,hunting,singlechoice,"Do all puny creatures have 10hp?","no;nope;negative","yes;no"
 round1,hunting,singlechoice,"What Arkadian mob closely resembles Thanksgiving dinner back on earth?","Gallard",""
 round1,hunting,singlechoice,"how much health does a Gallard have?","10;ten;10hp;10 health",""
-round1,mining,multiplechoice,"what is lyst short for?","lysterium",""
+round1,mining,multiplechoice,"what is lyst short for?","lysterium","lysterious;lysterine;lysterium;lystfull"
 round1,mining,multiplechoice,"True or false. Calypso is one of the only planets that has Treasure mining?","true;yes","true/yes;false/no"
 round1,mining,multiplechoice,"Which Planet is the only one that Has Treasure mining?","Arkadia;Ark","Arkadia;Calypso;Next Island;Cyrene"
 round1,mining,singlechoice,"Where can you buy the tt finder?","trade terminal;TT",""
