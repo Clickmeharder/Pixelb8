@@ -296,19 +296,15 @@
 		}, 8000); // Matches the animation time
 	}
 
-	// Ensure prizeData is populated before calling the function
+
+	console.log("uhmm");
 	document.addEventListener('DOMContentLoaded', () => {
-		// Only call the function after data is loaded
+		loadCSVFile();
 		if (prizeData.length > 0) {
 			displayUnclaimedPrizes();
 		} else {
 			console.log("Prize data is empty, cannot display unclaimed prizes.");
 		}
-	});
-		displayUnclaimedPrizes();
-		console.log("uhmm");
-	document.addEventListener('DOMContentLoaded', () => {
-		loadCSVFile();
 		document.querySelectorAll('.sortable').forEach((header, idx) => {
 			header.addEventListener('click', () => sortTable(idx));
 		});
