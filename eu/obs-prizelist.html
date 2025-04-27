@@ -100,7 +100,7 @@
     color: white;
     padding: 10px 20px;
     border-radius: 10px;
-    z-index: 9999;
+    z-index: 999999;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -132,7 +132,39 @@
         transform: translateX(-100%); /* End offscreen to the left */
     }
 }
+#userPrizesWrapper {
+    position: fixed;
+    top: 0; /* Position at the top of the screen */
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;  /* Allow for dynamic height based on the content */
+    overflow: hidden; /* Hide anything outside of the bar */
+    opacity: 1; /* Start fully visible */
+    transition: opacity 2s ease-out; /* Fade out over 2 seconds */
+}
 
+#userPrizeList {
+    display: flex;
+    flex-direction: column; /* Stack the items vertically */
+    align-items: center; /* Center the items horizontally */
+}
+
+.user-prize-item {
+    font-size: 16px;
+    margin-bottom: 10px;  /* Space between items */
+    padding: 5px 10px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    color: #fff;
+}
 </style>
 </head>
 <body>
@@ -339,8 +371,53 @@ function displayUnclaimedPrizes() {
     });
 }
 
-// Call the function to test
-displayUnclaimedPrizes();
+function displayUserPrizes(username) {
+    // Check if prizeData is populated
+    console.log("Prize Data:", prizeData);
+
+    // Filter the prizeData to get all prizes for the given user
+    const userPrizes = prizeData.filter(prize => prize.winner.toLowerCase() === username.toLowerCase());
+
+    // If there are no prizes for the user, exit early
+    if (userPrizes.length === 0) {
+        console.log(`${username} has no prizes.`);
+        return;
+    }
+
+    // Create the wrapper element for the user's prizes
+    const userPrizesWrapper = document.createElement('div');
+    userPrizesWrapper.id = 'userPrizesWrapper';
+
+    // Create the list container inside the wrapper
+    const userPrizeList = document.createElement('div');
+    userPrizeList.id = 'userPrizeList';
+    userPrizesWrapper.appendChild(userPrizeList);
+
+    // Add each prize to the list
+    userPrizes.forEach(prize => {
+        const prizeItem = document.createElement('div');
+        prizeItem.classList.add('user-prize-item');
+        prizeItem.textContent = `${prize.prize} (Amount: ${prize.amount})`;  // Display prize name and amount
+        userPrizeList.appendChild(prizeItem);
+    });
+
+    // Insert the wrapper at the top of the body
+    document.body.insertBefore(userPrizesWrapper, document.body.firstChild);
+
+    // Debug message to confirm element was created
+    console.log(`${username}'s prizes displayed.`);
+
+    // Fade out the wrapper after 60 seconds
+    setTimeout(() => {
+        userPrizesWrapper.style.opacity = '0'; // Make it fade out
+    }, 60000); // Fade out after 60 seconds
+
+    // Remove the wrapper after the fade out animation is complete
+    setTimeout(() => {
+        console.log(`Removing ${username}'s prizes wrapper after fade out.`);
+        document.body.removeChild(userPrizesWrapper);
+    }, 62000); // Slightly after the fade out completes
+}
 
 
 	
