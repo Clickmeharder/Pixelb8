@@ -2327,6 +2327,17 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayUserPrizes(message);
 		displayConsoleMessage(user, `!${command} ✅`);
 	}
+	if (command.toLowerCase() === "addprize") {
+		const args = message.split(' ');
+		if (args.length >= 3) {
+			const targetUser = args[0];
+			const amount = parseFloat(args[1]);
+			const prizeName = args.slice(2).join(' '); // Everything after amount is the prize name
+			addPrizeForUser(targetUser, prizeName, amount);
+		} else {
+			console.log("Invalid !addprize format. Use: !addprize username amount prize");
+		}
+	}
 	if (command.toLowerCase() === "rewardprizes") {
 		if (!isStreamerAndAuthorize(user, command)) return;
         markUserPrizesAsClaimed(message);

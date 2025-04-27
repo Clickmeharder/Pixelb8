@@ -942,6 +942,26 @@ _____________________________  -->
 		document.getElementById('totalAmount').textContent = `Total Value: ${totalAmount.toFixed(2)} Ped`;
 	}
 
+function addPrizeForUser(username, prizeName, amount) {
+    if (!username || !prizeName || isNaN(amount)) {
+        console.error("Invalid parameters to add prize.");
+        return;
+    }
+
+    const newPrize = {
+        date: new Date().toISOString().split('T')[0], // current date (YYYY-MM-DD)
+        winner: username.trim(),
+        amount: parseFloat(amount),
+        prize: prizeName.trim(),
+        status: 'unclaimed'
+    };
+
+    prizeData.push(newPrize);
+    localStorage.setItem('prizeData', JSON.stringify(prizeData));
+    console.log(`Added new prize for ${username}: ${amount} PED - ${prizeName}`);
+
+    filterAndRender(); // Re-render the updated list
+}
 function displayUnclaimedPrizes() {
     // Check if prizeData is populated
     console.log("Prize Data:", prizeData);
