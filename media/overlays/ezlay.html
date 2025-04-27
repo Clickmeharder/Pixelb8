@@ -54,6 +54,165 @@
   opacity: 0;
 }
 </style>
+<style>
+	.sortable:hover {
+		cursor: pointer;
+		color: #2775a7;
+	}
+
+	.asc::after {
+		content: " 🔼"; 
+	}
+
+	.desc::after {
+		content: " 🔽";
+	}
+
+	td {
+		color: rgb(165, 152, 152);
+	}
+
+	#prizelistWrapper {
+		margin: 0 auto;
+		display: flex;
+		justify-content: center;
+		flex-direction: column;
+		align-items: start;
+		width: 100%;
+		max-width: 1000px;
+		padding: 10px;
+	}
+
+	#winnersTable {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	#winnersTable th,
+	#winnersTable td {
+		border: 1px ridge #2dabfcb8;
+		padding: 6px;
+		text-align: center;
+	}
+
+	/* Scroll wrapper */
+	#winnersTableWrapper {
+		max-height: 500px;
+		overflow-y: auto;
+		width: 100%;
+		border: 3px ridge #2dabfcb8;
+		background-color: #000000c4;
+	}
+
+	#winnersTable thead th {
+		position: sticky;
+		top: 0;
+		background-color: #111;
+		z-index: 1;
+	}
+    #prizelistLegend{
+		position:fixed;
+		top:2px;
+		left:2px;
+		width: 32vw;
+		max-height: 46px;
+		overflow: hidden;
+		z-index:99999;
+		background-color:rgba(0, 0, 0, 0.8);
+		border: 3px ridge;
+		border-color: #2dabfcb8;
+		border-radius: 12px;
+		text-align: center;
+		padding: 4px;
+		transition:all 0.3s ease;
+	}
+	#prizelistLegend:hover{
+		max-height: 115px;
+	}
+#unclaimedPrizesWrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    z-index: 999999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px; 
+    overflow: hidden;
+}
+
+#unclaimedPrizeList {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    animation: scrollUnclaimedPrizes 90s linear infinite;
+}
+
+.unclaimed-prize-item {
+    font-size: 16px;
+    margin-right: 30px; 
+    padding: 5px 10px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    color: #fff;
+}
+
+@keyframes scrollUnclaimedPrizes {
+    0% {
+        transform: translateX(100%); 
+    }
+    100% {
+        transform: translateX(-100%); 
+    }
+}
+.username-header {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffcc00;  
+    margin-bottom: 10px; 
+}
+
+#userPrizesWrapper {
+    position: fixed;
+    top: 80%;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+	width: 170px;
+    max-width: 20%;
+    overflow: hidden;
+    opacity: 1;
+    transition: opacity 2s ease-out;
+}
+
+#userPrizeList {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.user-prize-item {
+    font-size: 16px;
+    margin-bottom: 10px;
+    padding: 5px 10px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    color: #fff;
+}
+</style>
 	<body>
 		<div id="streamSpace"></div>
 		
@@ -504,6 +663,42 @@
 				</div>
 			</div>
 		</div>
+		<div class="container" id="prizelistWrapper"style="display: none;">
+			<h1 style="color: #2775a7;background-color:rgba(0, 0, 0, 0.8); border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;margin: auto;z-index: 999999;">
+				Prize Winners
+			</h1>
+			<div id="prizelistLegend">
+				<p style="margin:0;padding:4px;color: orange;background-color:rgba(112, 32, 10, 0.4);">unclaimed</p>
+				<p style="margin:0;padding:4px;color: grey;background-color:rgba(110, 109, 109, 0.54);">claimed</p>
+				<button id="toggleClaimedBtn">Show Claimed</button>
+				<button id="toggleDateBtn">Show Date</button>
+				<input type="text" id="usernameFilter" placeholder="Filter by username" style="margin:auto;padding: 0px;">
+			</div>
+			<!-- Scrollable wrapper -->
+			<div style="max-height:75vh;width: 65vw;overflow-y: scroll;border: 3px ridge #2dabfcb8;">
+				<table id="winnersTable" style="background-color: rgba(0, 0, 0, 0.8); width: 100%; text-align: center;">
+					<colgroup>
+						<col id="dateCol" style="width: 25%; display: none;"> <!-- Date -->
+						<col style="width: 25%;">  <!-- Winner Name -->
+						<col style="width: 15%;">  <!-- Amount -->
+						<col style="width: 15%;">  <!-- Prize -->
+					</colgroup>
+					<thead>
+						<tr>
+							<th class="sortable" data-index="0" id="dateHeader" style="display: none;">Date</th>
+							<th class="sortable" data-index="1">Winner Name</th>
+							<th class="sortable" data-index="2">Amount</th>
+							<th class="sortable" data-index="3">Prize</th>
+						</tr>
+					</thead>
+					<tbody style="color:rgb(165 152 152);">
+						<!-- Data will be inserted here -->
+					</tbody>
+				</table>
+			</div>
+
+			<h2 id="totalAmount" style="text-align:center;color: #2775a7;background-color:rgba(0, 0, 0, 0.8); border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;">Total Value: 0.00 Ped</h2>
+		</div>
 		<div class="spinwheel" id="wheelWrapper" style="">
 			<div class="" id="wheel-result" style=""></div>
 			
@@ -615,6 +810,282 @@
 <!--------------------->
 <!--       End of body        
 _____________________________  -->
+	<script>
+	let prizeData = [];
+	let sortDirections = [true, true, true, true]; // 4 columns now
+	let showClaimed = false;
+	let showDate = false;
+
+	document.getElementById('toggleClaimedBtn').addEventListener('click', () => {
+		showClaimed = !showClaimed;
+		document.getElementById('toggleClaimedBtn').textContent = showClaimed ? 'Hide Claimed' : 'Show Claimed';
+		filterAndRender();
+	});
+	document.getElementById('toggleDateBtn').addEventListener('click', () => {
+		showDate = !showDate;
+		document.getElementById('toggleDateBtn').textContent = showDate ? 'Hide Date' : 'Show Date';
+		filterAndRender();
+	});
+	document.getElementById('usernameFilter').addEventListener('input', () => {
+		filterAndRender();
+	});
+	function loadCSVFile() {
+		const csvPath = 'data/JaedrazeTTV-EU-viewerPrizelist.txt';
+		fetch(csvPath)
+			.then(response => response.text())
+			.then(data => {
+				const rows = data.split('\n');
+				let totalAmount = 0;
+				prizeData = []; // Clear any existing data
+
+				rows.forEach(row => {
+					const columns = row.split(',');
+					if (columns.length >= 5) {
+						const status = columns[4].trim().toLowerCase();
+						const amount = parseFloat(columns[2]) || 0;
+
+						totalAmount += amount;
+
+						prizeData.push({
+							date: columns[0].trim(),
+							winner: columns[1].trim(),
+							amount: amount,
+							prize: columns[3].trim(),
+							status: status
+						});
+					}
+				});
+
+				document.getElementById('totalAmount').textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
+				filterAndRender(); // Call the new render function here
+			})
+			.catch(error => console.error('Error loading CSV file:', error));
+	}
+
+	function sortTable(index) {
+		const tbody = document.querySelector('#winnersTable tbody');
+		const rows = Array.from(tbody.querySelectorAll('tr'));
+		sortDirections[index] = !sortDirections[index];
+
+		rows.sort((a, b) => {
+			const aText = a.children[index].textContent;
+			const bText = b.children[index].textContent;
+
+			if (index === 2) {
+				return sortDirections[index] ? parseFloat(aText) - parseFloat(bText) : parseFloat(bText) - parseFloat(aText);
+			} else if (index === 0) {
+				return sortDirections[index] ? new Date(aText) - new Date(bText) : new Date(bText) - new Date(aText);
+			} else {
+				return sortDirections[index] ? aText.localeCompare(bText) : bText.localeCompare(aText);
+			}
+		});
+
+		rows.forEach(row => tbody.appendChild(row));
+
+		document.querySelectorAll('.sortable').forEach((header, idx) => {
+			header.classList.remove('asc', 'desc');
+			if (idx === index) {
+				header.classList.add(sortDirections[idx] ? 'asc' : 'desc');
+			}
+		});
+	}
+
+	function filterAndRender() {
+		const tbody = document.querySelector('#winnersTable tbody');
+		tbody.innerHTML = '';
+		let totalAmount = 0;
+
+		const usernameFilterValue = document.getElementById('usernameFilter').value.toLowerCase();
+
+		prizeData.forEach(entry => {
+			const isClaimed = entry.status.trim().toLowerCase() === 'claimed';
+			if (!showClaimed && isClaimed) return;
+			if (usernameFilterValue && !entry.winner.toLowerCase().includes(usernameFilterValue)) return;
+
+			const row = document.createElement('tr');
+			row.style.backgroundColor = isClaimed ? '#6e6d6d8a' : '#70200a66';
+
+			const keysToRender = showDate ? ['date', 'winner', 'amount', 'prize'] : ['winner', 'amount', 'prize'];
+
+			keysToRender.forEach((key) => {
+				const cell = document.createElement('td');
+				cell.textContent = key === 'amount' ? entry[key].toFixed(2) : entry[key];
+
+				if (isClaimed) {
+					cell.style.color = key === 'amount' ? 'rgb(165, 152, 152)' : 'grey';
+				} else {
+					cell.style.color = 'orange';
+				}
+
+				row.appendChild(cell);
+			});
+
+			tbody.appendChild(row);
+			totalAmount += entry.amount;
+		});
+
+		document.getElementById('dateCol').style.display = showDate ? '' : 'none';
+		document.getElementById('dateHeader').style.display = showDate ? '' : 'none';
+		document.getElementById('totalAmount').textContent = `Total Value: ${totalAmount.toFixed(2)} Ped`;
+	}
+
+function displayUnclaimedPrizes() {
+    // Check if prizeData is populated
+    console.log("Prize Data:", prizeData);
+
+    // Filter out the unclaimed prizes from the prizeData array
+    const unclaimedPrizes = prizeData.filter(prize => prize.status.toLowerCase() === 'unclaimed');
+
+    // If there are no unclaimed prizes, exit early
+    if (unclaimedPrizes.length === 0) {
+        console.log("No unclaimed prizes available.");
+        return;
+    }
+
+    // Create the wrapper element for the unclaimed prizes
+    const unclaimedPrizesWrapper = document.createElement('div');
+    unclaimedPrizesWrapper.id = 'unclaimedPrizesWrapper';
+
+    // Create the list container inside the wrapper
+    const unclaimedPrizeList = document.createElement('div');
+    unclaimedPrizeList.id = 'unclaimedPrizeList';
+    unclaimedPrizesWrapper.appendChild(unclaimedPrizeList);
+
+    // Add each unclaimed prize to the list
+    unclaimedPrizes.forEach(prize => {
+        const prizeItem = document.createElement('div');
+        prizeItem.classList.add('unclaimed-prize-item');
+        prizeItem.textContent = `${prize.winner} won ${prize.prize} and it is unclaimed!`;
+        unclaimedPrizeList.appendChild(prizeItem);
+    });
+
+    // Insert the wrapper at the top of the body
+    document.body.insertBefore(unclaimedPrizesWrapper, document.body.firstChild);
+
+    // Trigger the animation immediately after insertion by using a small timeout to allow DOM update
+    setTimeout(() => {
+        unclaimedPrizeList.style.animation = 'scrollUnclaimedPrizes 60s linear infinite'; // Start animation immediately
+    }, 0); // Start without delay
+
+    // Debug message to confirm element was created
+    console.log("Unclaimed prizes wrapper added to body");
+
+    // Add event listener to remove wrapper after the animation ends
+    unclaimedPrizeList.addEventListener('animationend', () => {
+        console.log("Removing unclaimed prizes wrapper after animation.");
+        document.body.removeChild(unclaimedPrizesWrapper);
+    });
+}
+
+function displayUserPrizes(username) {
+    // Check if prizeData is populated
+    console.log("Prize Data:", prizeData);
+
+    // Filter the prizeData to get only unclaimed prizes for the given user
+    const userPrizes = prizeData.filter(prize => prize.winner.toLowerCase() === username.toLowerCase() && prize.status.toLowerCase() === 'unclaimed');
+
+    // If there are no unclaimed prizes for the user, display a custom message
+    if (userPrizes.length === 0) {
+        // Create the wrapper element for the user's prizes
+        const noPrizesWrapper = document.createElement('div');
+        noPrizesWrapper.id = 'noPrizesWrapper';
+
+        // Create the message container inside the wrapper
+        const noPrizesMessage = document.createElement('div');
+        noPrizesMessage.id = 'noPrizesMessage';
+        noPrizesMessage.textContent = `${username} hasn't won jack sh*t yet.`;
+        noPrizesWrapper.appendChild(noPrizesMessage);
+
+        // Insert the wrapper at the top of the body
+        document.body.insertBefore(noPrizesWrapper, document.body.firstChild);
+
+        // Fade out the wrapper after 60 seconds
+        setTimeout(() => {
+            noPrizesWrapper.style.opacity = '0'; // Make it fade out
+        }, 60000); // Fade out after 60 seconds
+
+        // Remove the wrapper after the fade-out animation is complete
+        setTimeout(() => {
+            console.log(`Removing ${username}'s no prizes message after fade out.`);
+            document.body.removeChild(noPrizesWrapper);
+        }, 62000); // Slightly after the fade out completes
+
+        return; // Exit the function after displaying the message
+    }
+
+    // Merge the amounts for duplicate prizes
+    const mergedPrizes = userPrizes.reduce((acc, prize) => {
+        const existingPrize = acc.find(p => p.prize === prize.prize);
+        if (existingPrize) {
+            existingPrize.amount += prize.amount;  // Merge amounts for the same prize
+        } else {
+            acc.push({ ...prize });  // Add new prize
+        }
+        return acc;
+    }, []);
+
+    // Calculate the total number of unclaimed prizes (i.e., number of different unclaimed prizes)
+    const totalPrizes = mergedPrizes.length;  // Count the number of unique prizes the user has won
+
+    // Create the wrapper element for the user's prizes
+    const userPrizesWrapper = document.createElement('div');
+    userPrizesWrapper.id = 'userPrizesWrapper';
+
+    // Create the header (username) above the list
+    const usernameHeader = document.createElement('div');
+    usernameHeader.classList.add('username-header');
+    usernameHeader.textContent = `${username} has ${totalPrizes} unclaimed prize${totalPrizes !== 1 ? 's' : ''}.`;
+    userPrizesWrapper.appendChild(usernameHeader);
+
+    // Create the list container inside the wrapper
+    const userPrizeList = document.createElement('div');
+    userPrizeList.id = 'userPrizeList';
+    userPrizesWrapper.appendChild(userPrizeList);
+
+    // Add each merged prize to the list
+    mergedPrizes.forEach(prize => {
+        const prizeItem = document.createElement('div');
+        prizeItem.classList.add('user-prize-item');
+        prizeItem.textContent = `${prize.prize} (Amount: ${prize.amount})`;  // Display prize name and merged amount
+        userPrizeList.appendChild(prizeItem);
+    });
+
+    // Insert the wrapper at the top of the body
+    document.body.insertBefore(userPrizesWrapper, document.body.firstChild);
+
+    // Debug message to confirm element was created
+    console.log(`${username}'s unclaimed prizes displayed.`);
+
+    // Fade out the wrapper after 60 seconds
+    setTimeout(() => {
+        userPrizesWrapper.style.opacity = '0'; // Make it fade out
+    }, 60000); // Fade out after 60 seconds
+
+    // Remove the wrapper after the fade-out animation is complete
+    setTimeout(() => {
+        console.log(`Removing ${username}'s prizes wrapper after fade out.`);
+        document.body.removeChild(userPrizesWrapper);
+    }, 32000); // Slightly after the fade out completes
+}
+
+
+
+
+
+	
+	document.addEventListener('DOMContentLoaded', () => {
+		loadCSVFile();
+		console.log("uhm k prizes loaded");
+		document.querySelectorAll('.sortable').forEach((header, idx) => {
+			header.addEventListener('click', () => sortTable(idx));
+		});
+		if (prizeData.length > 0) {
+			displayUnclaimedPrizes();
+		} else {
+			console.log("Prize data is empty, cannot display unclaimed prizes.");
+		}
+	});
+	</script>
   <script>
 
   </script>
