@@ -968,10 +968,14 @@ function displayUnclaimedPrizes() {
     function showNextPrize() {
         const prize = mergedPrizes[currentIndex];
         
+        // Format the total amount conditionally to hide decimals if it's a whole number
+        const formattedAmount = Number(prize.totalAmount).toFixed(2);
+        const displayAmount = formattedAmount.endsWith('.00') ? formattedAmount.slice(0, -3) : formattedAmount;
+
         // Check if count is greater than 1 to show plural or singular, and use totalAmount for prize amount
         prizeDisplay.textContent = prize.count > 1
             ? `${prize.winner} has not claimed their ${prize.count} ${prize.prize} yet!`
-            : `${prize.winner} has not claimed their ${prize.totalAmount.toFixed(2)} ${prize.prize} yet!`;
+            : `${prize.winner} has not claimed their ${displayAmount} ${prize.prize} yet!`;
 
         prizeDisplay.style.opacity = '1';
 
@@ -989,15 +993,12 @@ function displayUnclaimedPrizes() {
             }, 2000); // Wait for fade out
         }, 8000); // Show each prize for 8 seconds before fading
     }
-
     // Initialize with 0 opacity
     prizeDisplay.style.transition = 'opacity 1s ease';
     prizeDisplay.style.opacity = '0';
-
     // Start showing prizes
     showNextPrize();
 }
-
 
 function displayUserPrizes(username) {
     // Check if prizeData is populated
@@ -1089,7 +1090,6 @@ function displayUserPrizes(username) {
         document.body.removeChild(userPrizesWrapper);
     }, 32000); // Slightly after the fade out completes
 }
-
 function markUserPrizesAsClaimed(username) {
     if (!prizeData || prizeData.length === 0) {
         console.error("No prize data available to update.");
