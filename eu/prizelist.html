@@ -227,6 +227,7 @@
 				document.body.removeChild(unclaimedPrizesWrapper);
 			}, 8000); // Matches the animation time
 		}
+		displayUnclaimedPrizes();
         document.addEventListener('DOMContentLoaded', () => {
             loadCSVFile();
             document.querySelectorAll('.sortable').forEach(header => {
