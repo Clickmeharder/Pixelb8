@@ -1887,7 +1887,6 @@ function endAsk() {
     // Hide the question and show the entrivia board after a timeout
     hideQuestionTimer = setTimeout(() => {
         document.getElementById("questionWrapper").style.visibility = "hidden";
-        document.getElementById("entriviaboard").style.visibility = "visible";
         document.querySelector(".options")?.remove();
     }, 13000); // Delay timeout of 13 seconds to wait before checking
 	activeQuestion = null; // Clear the active question
