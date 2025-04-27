@@ -2327,7 +2327,13 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayUserPrizes(message);
 		displayConsoleMessage(user, `!${command} ✅`);
 	}
+	if (command.toLowerCase() === "unclaimedprizes") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		displayUnclaimedPrizes();
+		displayConsoleMessage(user, `!${command} ✅`);
+	}
 	if (command.toLowerCase() === "addprize") {
+		if (!isStreamerAndAuthorize(user, command)) return;
 		const args = message.split(' ');
 		if (args.length >= 3) {
 			const targetUser = args[0];
