@@ -1908,7 +1908,7 @@ ul#broadcastercommandlist {
 	border:var(--border);
 	border-radius:var(--border-radius);
 	box-shadow: var(--box-glow);
-	transition: all 0.3s ease;
+	transition: all 3s ease;
     padding: 4px 8px;
     z-index: 999999;
     display: flex;
