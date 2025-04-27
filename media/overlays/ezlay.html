@@ -932,15 +932,21 @@ function displayUnclaimedPrizes() {
         return;
     }
 
-    // Group prizes
+    // Group prizes and sum up amounts
     const mergedPrizesMap = {};
 
     unclaimedPrizes.forEach(prize => {
         const key = `${prize.winner}||${prize.prize}`; // Unique key: winner + prize
         if (mergedPrizesMap[key]) {
             mergedPrizesMap[key].count += 1;
+            mergedPrizesMap[key].totalAmount += prize.amount || 0; // Sum the amounts if they exist
         } else {
-            mergedPrizesMap[key] = { winner: prize.winner, prize: prize.prize, count: 1 };
+            mergedPrizesMap[key] = {
+                winner: prize.winner,
+                prize: prize.prize,
+                count: 1,
+                totalAmount: prize.amount || 0 // Start with the amount for the first instance
+            };
         }
     });
 
@@ -961,9 +967,11 @@ function displayUnclaimedPrizes() {
 
     function showNextPrize() {
         const prize = mergedPrizes[currentIndex];
+        
+        // Check if count is greater than 1 to show plural or singular, and use totalAmount for prize amount
         prizeDisplay.textContent = prize.count > 1
-                ? `${prize.winner} has not claimed their ${prize.count} ${prize.prize} yet!`
-				: `${prize.winner} has not claimed their ${prize.amount} ${prize.prize} yet!`;
+            ? `${prize.winner} has not claimed their ${prize.count} ${prize.prize} yet!`
+            : `${prize.winner} has not claimed their ${prize.totalAmount.toFixed(2)} ${prize.prize} yet!`;
 
         prizeDisplay.style.opacity = '1';
 
@@ -979,15 +987,17 @@ function displayUnclaimedPrizes() {
                     document.body.removeChild(wrapper);
                 }
             }, 2000); // Wait for fade out
-        }, 8000); // Show each prize for 4 seconds before fading
+        }, 8000); // Show each prize for 8 seconds before fading
     }
 
     // Initialize with 0 opacity
     prizeDisplay.style.transition = 'opacity 1s ease';
     prizeDisplay.style.opacity = '0';
 
+    // Start showing prizes
     showNextPrize();
 }
+
 
 function displayUserPrizes(username) {
     // Check if prizeData is populated
