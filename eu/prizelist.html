@@ -228,6 +228,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadCSVFile();
+			displayUnclaimedPrizes();
             document.querySelectorAll('.sortable').forEach(header => {
                 header.addEventListener('click', () => {
                     const index = header.getAttribute('data-index');
@@ -235,6 +236,7 @@
                 });
             });
         });
+
     </script>
 	<script src="../core/js/pixelb8-global.js"></script>
 </body>
