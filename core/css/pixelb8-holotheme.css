@@ -1901,8 +1901,7 @@ ul#broadcastercommandlist {
 #unclaimedPrizesWrapper {
     position: fixed;
     top: 12px;
-    left: 0;
-    right: 0;
+    left: 45%;
     background:var(--bg-color);
 	border:var(--border);
 	border-radius:var(--border-radius);
