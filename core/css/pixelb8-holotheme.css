@@ -1778,14 +1778,15 @@ select.b {}
 	font-size: 16px;
 }
 #commandListContainer {
-	font-family: Arial, sans-serif;
-	background-color: var(--bg-color-alt3);/*#080c15eb;*/
-	padding: 6px;
-	border: 2px inset var(--border-color);
-	border-radius: 8px;
-	width: 300px;
-	margin: 20px auto;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    background-color: var(--bg-color-alt3);
+    padding: 6px;
+    border: 2px inset var(--border-color);
+    border-radius: 8px;
+    width: 95%;
+    margin: 10px auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 #commandListContainer h2 {
 	color: ;
