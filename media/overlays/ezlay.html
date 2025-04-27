@@ -986,7 +986,7 @@ function displayUnclaimedPrizes() {
 
     function showNextPrize() {
         const prize = unclaimedPrizes[currentIndex];
-        prizeDisplay.textContent = `${prize.winner} won ${prize.prize} and it is unclaimed!`;
+        prizeDisplay.textContent = `${prize.winner} has not claimed their ${prize.amount} ${prize.prize} yet!`;
 
         // Add a simple fade-in animation
         prizeDisplay.style.opacity = '1';
