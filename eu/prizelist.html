@@ -229,6 +229,7 @@ function displayUnclaimedPrizes() {
 }
         document.addEventListener('DOMContentLoaded', () => {
             loadCSVFile();
+			displayUnclaimedPrizes();
             document.querySelectorAll('.sortable').forEach(header => {
                 header.addEventListener('click', () => {
                     const index = header.getAttribute('data-index');
