@@ -1855,7 +1855,7 @@ ul#broadcastercommandlist {
 /*----------------------*/
 /**/
 .username-header {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: bold;
     color: var(--body-color);
 	text-align:center;
@@ -1863,7 +1863,7 @@ ul#broadcastercommandlist {
 
 #userPrizesWrapper {
     position: fixed;
-    bottom: 10%;
+    bottom: 15%;
     left: 0;
 	background:var(--bg-color);
 	border:var(--border);
@@ -1892,9 +1892,9 @@ ul#broadcastercommandlist {
 
 .user-prize-item {
     font-size: 16px;
+	font-weight:bold;
     margin-bottom: 10px;
     padding: 5px 10px;
-    background-color: rgba(255, 255, 255, 0.2);
     border-radius: 5px;
     color: var(--input-color);
 }
