@@ -1660,13 +1660,13 @@ select.b {}
 			overflow-y: scroll;
 			transition: all 0.6s ease-in-out;
 		} */
-		.controlpanel:active {
+/* 		.controlpanel:active {
 			max-height: 300px;
 			padding: 6px;
 			padding-top: 4px;
 			height: 3%;
 			overflow-y: scroll;
-		}
+		} */
 
 		#theme-controller {width: 390px;}
 		#theme-controller .controlpanel {
