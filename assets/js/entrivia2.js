@@ -133,6 +133,7 @@ function fetchentriviaQuestions() {
                 .then(csvData => {
                     const rows = csvData.trim().split("\n");
                     const headers = rows[0].split(",");
+
                     let parsedData = [];
 
                     rows.slice(1).forEach(row => {
@@ -179,14 +180,21 @@ function fetchentriviaQuestions() {
                     if (!target[normalizedCategory]) target[normalizedCategory] = [];
 
                     source[category].forEach(q => {
-                        // 🔥 Fix answers if wrong type
-                        if (!Array.isArray(q.answers)) {
-                            if (typeof q.answers === "string") {
-                                q.answers = q.answers.split(/[;,]/).map(a => a.trim()).filter(Boolean);
-                            } else {
-                                q.answers = [];
-                            }
+                        // 🔥 Normalize answers properly
+                        if (Array.isArray(q.answers) && q.answers.length > 0) {
+                            // Already good
+                        } else if (typeof q.answer === "string") {
+                            q.answers = q.answer.split(/[;,]/).map(a => a.trim()).filter(Boolean);
+                        } else if (Array.isArray(q.answer)) {
+                            q.answers = q.answer.map(a => a.trim()).filter(Boolean);
+                        } else if (typeof q.answers === "string") {
+                            q.answers = q.answers.split(/[;,]/).map(a => a.trim()).filter(Boolean);
+                        } else {
+                            q.answers = [];
                         }
+
+                        delete q.answer; // Clean up
+
                         target[normalizedCategory].push(q);
                     });
                 }
@@ -209,6 +217,7 @@ function fetchentriviaQuestions() {
         });
     });
 }
+
 
 function addCustomentriviaQuestion(round, questionText, correctAnswer, category, type = 'singlechoice', options = []) {
     let customQuestions = JSON.parse(localStorage.getItem("customentriviaQuestions")) || { round1: {}, round2: {} };
