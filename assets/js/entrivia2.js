@@ -148,8 +148,8 @@ function fetchentriviaQuestions() {
                         let round = row.round.toLowerCase();
                         let category = row.category.toLowerCase();
                         let question = row.question.replace(/\"/g, "").trim();
-                        let answersRaw = row.answer.replace(/\"/g, "").trim();
-                        let answers = answer.split(/[;,]/).map(a => a.trim()).filter(Boolean);
+                        let answersRaw = row.answers.replace(/\"/g, "").trim();
+                        let answers = answers.split(/[;,]/).map(a => a.trim()).filter(Boolean);
                         let type = row.type.toLowerCase();
                         let options = row.options
                             ? row.options.replace(/\"/g, "").split(/[;,]/).map(opt => opt.trim()).filter(Boolean)
