@@ -660,8 +660,42 @@ function deleteCustomQuestion() {
 
     // Ensure the category exists in the selected round
     if (customQuestions[round] && customQuestions[round][category] && customQuestions[round][category][index]) {
-        const confirmDelete = confirm(`Are you sure you want to delete the question: "${customQuestions[round][category][index].question}"?`);
-        if (confirmDelete) {
+        // Create the modal element
+        const modal = document.createElement('div');
+        modal.id = 'confirmationModal';
+        modal.className = 'confirmation-modal';
+        modal.style.display = 'flex';
+
+        // Create the modal content
+        const modalContent = document.createElement('div');
+        modalContent.className = 'confirmation-modal-content';
+
+        // Create the confirmation message
+        const confirmationMessage = document.createElement('p');
+        confirmationMessage.id = 'confirmationMessage';
+        confirmationMessage.textContent = `Are you sure you want to delete the question: "${customQuestions[round][category][index].question}"?`;
+        modalContent.appendChild(confirmationMessage);
+
+        // Create the confirm button
+        const confirmButton = document.createElement('button');
+        confirmButton.id = 'confirmDeleteButton';
+        confirmButton.textContent = 'Confirm';
+        modalContent.appendChild(confirmButton);
+
+        // Create the cancel button
+        const cancelButton = document.createElement('button');
+        cancelButton.id = 'cancelDeleteButton';
+        cancelButton.textContent = 'Cancel';
+        modalContent.appendChild(cancelButton);
+
+        // Append the modal content to the modal
+        modal.appendChild(modalContent);
+
+        // Append the modal to the body
+        document.body.appendChild(modal);
+
+        // Confirm delete button action
+        confirmButton.onclick = function() {
             // Remove the question from the category's array
             customQuestions[round][category].splice(index, 1);
 
@@ -676,7 +710,16 @@ function deleteCustomQuestion() {
             console.log('Question deleted successfully!');
             loadCustomQuestions();  // Reload the dropdown
             updateAnswerDisplay();  // Clear answer display
-        }
+
+            // Remove the modal from the DOM
+            document.body.removeChild(modal);
+        };
+
+        // Cancel delete button action
+        cancelButton.onclick = function() {
+            // Remove the modal from the DOM
+            document.body.removeChild(modal);
+        };
     } else {
         console.log("The selected question doesn't exist.");
     }
