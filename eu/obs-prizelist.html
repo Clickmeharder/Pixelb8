@@ -112,7 +112,7 @@
     display: flex;
     align-items: center;
     white-space: nowrap;
-    animation: scrollUnclaimedPrizes 60s linear infinite; /* Much slower scroll */
+    animation: scrollUnclaimedPrizes 90s linear infinite; /* Even slower scroll */
 }
 
 .unclaimed-prize-item {
@@ -326,11 +326,11 @@ function displayUnclaimedPrizes() {
     // Debug message to confirm element was created
     console.log("Unclaimed prizes wrapper added to body");
 
-    // Remove the wrapper after the animation is done (20 seconds)
-    setTimeout(() => {
-        console.log("Removing unclaimed prizes wrapper");
+    // Add event listener to remove wrapper after the animation ends
+    unclaimedPrizeList.addEventListener('animationend', () => {
+        console.log("Removing unclaimed prizes wrapper after animation.");
         document.body.removeChild(unclaimedPrizesWrapper);
-    }, 20000); // Matches the animation time (20 seconds)
+    });
 }
 
 
@@ -338,7 +338,7 @@ function displayUnclaimedPrizes() {
 displayUnclaimedPrizes();
 
 
-	console.log("uhm k");
+	console.log("uhm k lets go?");
 	document.addEventListener('DOMContentLoaded', () => {
 		loadCSVFile();
 		document.querySelectorAll('.sortable').forEach((header, idx) => {
