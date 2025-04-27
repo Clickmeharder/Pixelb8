@@ -1900,8 +1900,8 @@ ul#broadcastercommandlist {
 }
 #unclaimedPrizesWrapper {
     position: fixed;
-    top: 12px;
-    left: 45%;
+    top: 3%;
+    left: 5%;
     background:var(--bg-color);
 	border:var(--border);
 	border-radius:var(--border-radius);
