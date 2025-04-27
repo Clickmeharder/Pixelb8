@@ -1898,6 +1898,50 @@ ul#broadcastercommandlist {
     border-radius: 5px;
     color: var(--input-color);
 }
+#unclaimedPrizesWrapper {
+    position: fixed;
+    top: 12px;
+    left: 0;
+    right: 0;
+    background:var(--bg-color);
+	border:var(--border);
+	border-radius:var(--border-radius);
+	box-shadow: var(--box-glow);
+	transition: all 0.3s ease;
+    padding: 10px 20px;
+    border-radius: 10px;
+    z-index: 999999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px; 
+    overflow: hidden;
+}
+
+#unclaimedPrizeList {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    animation: scrollUnclaimedPrizes 800s linear infinite;
+}
+
+.unclaimed-prize-item {
+    font-size: 16px;
+    margin-right: 30px; 
+    padding: 5px 10px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    color:var(--body-color);
+}
+
+@keyframes scrollUnclaimedPrizes {
+    0% {
+        transform: translateX(100%); 
+    }
+    100% {
+        transform: translateX(-100%); 
+    }
+}
 /**/
 /*----------------------*/
 /* Entrivia Universe */
