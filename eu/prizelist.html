@@ -177,43 +177,7 @@
                     return sortDirections[index] ? aText.localeCompare(bText) : bText.localeCompare(aText);
                 }
             });
-		function displayUnclaimedPrizes() {
-			// Filter out the unclaimed prizes from the prizeData array
-			const unclaimedPrizes = prizeData.filter(prize => prize.status.toLowerCase() === 'unclaimed');
 
-			// If there are no unclaimed prizes, exit early
-			if (unclaimedPrizes.length === 0) {
-				return;
-			}
-
-			// Create the wrapper element for the unclaimed prizes
-			const unclaimedPrizesWrapper = document.createElement('div');
-			unclaimedPrizesWrapper.id = 'unclaimedPrizesWrapper';
-
-			// Create the list container inside the wrapper
-			const unclaimedPrizeList = document.createElement('div');
-			unclaimedPrizeList.id = 'unclaimedPrizeList';
-			unclaimedPrizesWrapper.appendChild(unclaimedPrizeList);
-
-			// Add each unclaimed prize to the list
-			unclaimedPrizes.forEach(prize => {
-				const prizeItem = document.createElement('div');
-				prizeItem.classList.add('unclaimed-prize-item');
-				prizeItem.textContent = `${prize.winner} won ${prize.prize} and it is unclaimed!`;
-				unclaimedPrizeList.appendChild(prizeItem);
-			});
-
-			// Append the wrapper to the body
-			document.body.appendChild(unclaimedPrizesWrapper);
-
-			// Start the scrolling animation
-			unclaimedPrizeList.style.animation = 'scrollUnclaimedPrizes 8s linear infinite';
-
-			// Remove the wrapper after the animation is done (8 seconds)
-			setTimeout(() => {
-				document.body.removeChild(unclaimedPrizesWrapper);
-			}, 8000); // Matches the animation time
-		}
             // Append sorted rows to the tbody
             rows.forEach(row => tbody.appendChild(row));
 
@@ -226,9 +190,45 @@
             });
         }
 
+function displayUnclaimedPrizes() {
+    // Filter out the unclaimed prizes from the prizeData array
+    const unclaimedPrizes = prizeData.filter(prize => prize.status.toLowerCase() === 'unclaimed');
+
+    // If there are no unclaimed prizes, exit early
+    if (unclaimedPrizes.length === 0) {
+        return;
+    }
+
+    // Create the wrapper element for the unclaimed prizes
+    const unclaimedPrizesWrapper = document.createElement('div');
+    unclaimedPrizesWrapper.id = 'unclaimedPrizesWrapper';
+
+    // Create the list container inside the wrapper
+    const unclaimedPrizeList = document.createElement('div');
+    unclaimedPrizeList.id = 'unclaimedPrizeList';
+    unclaimedPrizesWrapper.appendChild(unclaimedPrizeList);
+
+    // Add each unclaimed prize to the list
+    unclaimedPrizes.forEach(prize => {
+        const prizeItem = document.createElement('div');
+        prizeItem.classList.add('unclaimed-prize-item');
+        prizeItem.textContent = `${prize.winner} won ${prize.prize} and it is unclaimed!`;
+        unclaimedPrizeList.appendChild(prizeItem);
+    });
+
+    // Append the wrapper to the body
+    document.body.appendChild(unclaimedPrizesWrapper);
+
+    // Start the scrolling animation
+    unclaimedPrizeList.style.animation = 'scrollUnclaimedPrizes 8s linear infinite';
+
+    // Remove the wrapper after the animation is done (8 seconds)
+    setTimeout(() => {
+        document.body.removeChild(unclaimedPrizesWrapper);
+    }, 8000); // Matches the animation time
+}
         document.addEventListener('DOMContentLoaded', () => {
             loadCSVFile();
-			displayUnclaimedPrizes();
             document.querySelectorAll('.sortable').forEach(header => {
                 header.addEventListener('click', () => {
                     const index = header.getAttribute('data-index');
@@ -236,7 +236,6 @@
                 });
             });
         });
-
     </script>
 	<script src="../core/js/pixelb8-global.js"></script>
 </body>
