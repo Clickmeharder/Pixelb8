@@ -962,12 +962,12 @@ function displayUnclaimedPrizes() {
     header.textContent = 'Unclaimed Prizes';
     wrapper.appendChild(header);
 
-
-
+    // Create the prize display
     const prizeDisplay = document.createElement('div');
     prizeDisplay.id = 'currentUnclaimedPrize';
     wrapper.appendChild(prizeDisplay);
 
+    // Insert the wrapper at the top of the body
     document.body.insertBefore(wrapper, document.body.firstChild);
 
     let currentIndex = 0;
@@ -984,10 +984,12 @@ function displayUnclaimedPrizes() {
             ? `${prize.winner} has not claimed their ${prize.count} ${prize.prize} yet!`
             : `${prize.winner} has not claimed their ${displayAmount} ${prize.prize} yet!`;
 
-        prizeDisplay.style.opacity = '1';
+        // Fade in the entire wrapper
+        wrapper.style.opacity = '1';
 
         setTimeout(() => {
-            prizeDisplay.style.opacity = '0';
+            // Fade out the entire wrapper
+            wrapper.style.opacity = '0';
 
             setTimeout(() => {
                 currentIndex++;
@@ -1001,13 +1003,14 @@ function displayUnclaimedPrizes() {
         }, 8000); // Show each prize for 8 seconds before fading
     }
 
-    // Initialize with 0 opacity
-    prizeDisplay.style.transition = 'opacity 1s ease';
-    prizeDisplay.style.opacity = '0';
+    // Initialize with 0 opacity for the entire wrapper
+    wrapper.style.transition = 'opacity 1s ease';
+    wrapper.style.opacity = '0';
 
     // Start showing prizes
     showNextPrize();
 }
+
 
 
 
