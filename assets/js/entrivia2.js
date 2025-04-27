@@ -1859,8 +1859,8 @@ function showentriviaAsk() {
     const timeUntilNextQ = document.getElementById("timeuntil-nextQ");
 	displayConsoleMessage("system", "showentriviaAsk() called");
     // Show elements with animations
-/* 	entriviaWrapper.style.visibility = "visible";
-	entriviaWrapper.style.opacity = "1"; */
+	entriviaWrapper.style.visibility = "visible";
+	entriviaWrapper.style.opacity = "1";
     questionWrapper.style.visibility = "visible";
     questionWrapper.style.opacity = "1";
     questionWrapper.style.animation = "fadeIn 0.8s ease-out forwards";
