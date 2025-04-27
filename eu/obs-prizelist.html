@@ -249,45 +249,64 @@
 		document.getElementById('dateHeader').style.display = showDate ? '' : 'none';
 		document.getElementById('totalAmount').textContent = `Total Value: ${totalAmount.toFixed(2)} Ped`;
 	}
-		function displayUnclaimedPrizes() {
-			// Filter out the unclaimed prizes from the prizeData array
-			const unclaimedPrizes = prizeData.filter(prize => prize.status.toLowerCase() === 'unclaimed');
+	function displayUnclaimedPrizes() {
+		// Check if prizeData is populated
+		console.log("Prize Data:", prizeData);
 
-			// If there are no unclaimed prizes, exit early
-			if (unclaimedPrizes.length === 0) {
-				return;
-			}
+		// Filter out the unclaimed prizes from the prizeData array
+		const unclaimedPrizes = prizeData.filter(prize => prize.status.toLowerCase() === 'unclaimed');
 
-			// Create the wrapper element for the unclaimed prizes
-			const unclaimedPrizesWrapper = document.createElement('div');
-			unclaimedPrizesWrapper.id = 'unclaimedPrizesWrapper';
-
-			// Create the list container inside the wrapper
-			const unclaimedPrizeList = document.createElement('div');
-			unclaimedPrizeList.id = 'unclaimedPrizeList';
-			unclaimedPrizesWrapper.appendChild(unclaimedPrizeList);
-
-			// Add each unclaimed prize to the list
-			unclaimedPrizes.forEach(prize => {
-				const prizeItem = document.createElement('div');
-				prizeItem.classList.add('unclaimed-prize-item');
-				prizeItem.textContent = `${prize.winner} won ${prize.prize} and it is unclaimed!`;
-				unclaimedPrizeList.appendChild(prizeItem);
-			});
-
-			// Append the wrapper to the body
-			document.body.appendChild(unclaimedPrizesWrapper);
-
-			// Start the scrolling animation
-			unclaimedPrizeList.style.animation = 'scrollUnclaimedPrizes 8s linear infinite';
-
-			// Remove the wrapper after the animation is done (8 seconds)
-			setTimeout(() => {
-				document.body.removeChild(unclaimedPrizesWrapper);
-			}, 8000); // Matches the animation time
+		// If there are no unclaimed prizes, exit early
+		if (unclaimedPrizes.length === 0) {
+			console.log("No unclaimed prizes available.");
+			return;
 		}
+
+		// Create the wrapper element for the unclaimed prizes
+		const unclaimedPrizesWrapper = document.createElement('div');
+		unclaimedPrizesWrapper.id = 'unclaimedPrizesWrapper';
+		unclaimedPrizesWrapper.style.position = 'fixed'; // Ensure position is set dynamically
+
+		// Create the list container inside the wrapper
+		const unclaimedPrizeList = document.createElement('div');
+		unclaimedPrizeList.id = 'unclaimedPrizeList';
+		unclaimedPrizesWrapper.appendChild(unclaimedPrizeList);
+
+		// Add each unclaimed prize to the list
+		unclaimedPrizes.forEach(prize => {
+			const prizeItem = document.createElement('div');
+			prizeItem.classList.add('unclaimed-prize-item');
+			prizeItem.textContent = `${prize.winner} won ${prize.prize} and it is unclaimed!`;
+			unclaimedPrizeList.appendChild(prizeItem);
+		});
+
+		// Append the wrapper to the body
+		document.body.appendChild(unclaimedPrizesWrapper);
+
+		// Start the scrolling animation
+		unclaimedPrizeList.style.animation = 'scrollUnclaimedPrizes 8s linear infinite';
+
+		// Debug message to confirm element was created
+		console.log("Unclaimed prizes wrapper added to body");
+
+		// Remove the wrapper after the animation is done (8 seconds)
+		setTimeout(() => {
+			console.log("Removing unclaimed prizes wrapper");
+			document.body.removeChild(unclaimedPrizesWrapper);
+		}, 8000); // Matches the animation time
+	}
+
+	// Ensure prizeData is populated before calling the function
+	document.addEventListener('DOMContentLoaded', () => {
+		// Only call the function after data is loaded
+		if (prizeData.length > 0) {
+			displayUnclaimedPrizes();
+		} else {
+			console.log("Prize data is empty, cannot display unclaimed prizes.");
+		}
+	});
 		displayUnclaimedPrizes();
-		console.log("uh");
+		console.log("uhmm");
 	document.addEventListener('DOMContentLoaded', () => {
 		loadCSVFile();
 		document.querySelectorAll('.sortable').forEach((header, idx) => {
