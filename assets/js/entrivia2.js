@@ -3134,9 +3134,6 @@ document.getElementById('toggleusedefaultquestions').addEventListener('click', t
 document.getElementById('toggleusecustomquestions').addEventListener('click', toggleusecustomquestions);
 document.getElementById('togglehideButtonBubble').addEventListener('click', toggleButtonBubble);
 // Event listener for delete button
-
-
-document.head.appendChild(style);
 document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCustomQuestion);
 
 // Event listener for dropdown change to update the answer display
