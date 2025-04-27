@@ -972,7 +972,22 @@ function displayUnclaimedPrizes() {
         return;
     }
 
-    // Create wrapper for the unclaimed prize
+    // Group prizes
+    const mergedPrizesMap = {};
+
+    unclaimedPrizes.forEach(prize => {
+        const key = `${prize.winner}||${prize.prize}`; // Unique key: winner + prize
+        if (mergedPrizesMap[key]) {
+            mergedPrizesMap[key].count += 1;
+        } else {
+            mergedPrizesMap[key] = { winner: prize.winner, prize: prize.prize, count: 1 };
+        }
+    });
+
+    // Turn the map into an array
+    const mergedPrizes = Object.values(mergedPrizesMap);
+
+    // Create wrapper
     const wrapper = document.createElement('div');
     wrapper.id = 'unclaimedPrizesWrapper';
 
@@ -985,19 +1000,19 @@ function displayUnclaimedPrizes() {
     let currentIndex = 0;
 
     function showNextPrize() {
-        const prize = unclaimedPrizes[currentIndex];
-        prizeDisplay.textContent = `${prize.winner} has not claimed their ${prize.amount} ${prize.prize} yet!`;
+        const prize = mergedPrizes[currentIndex];
+        prizeDisplay.textContent = prize.count > 1
+                ? `${prize.winner} has not claimed their ${prize.count} ${prize.prize} yet!`
+				: `${prize.winner} has not claimed their ${prize.amount} ${prize.prize} yet!`;
 
-        // Add a simple fade-in animation
         prizeDisplay.style.opacity = '1';
 
         setTimeout(() => {
-            // Fade out before switching
             prizeDisplay.style.opacity = '0';
 
             setTimeout(() => {
                 currentIndex++;
-                if (currentIndex < unclaimedPrizes.length) {
+                if (currentIndex < mergedPrizes.length) {
                     showNextPrize();
                 } else {
                     console.log("Finished displaying all unclaimed prizes.");
@@ -1007,12 +1022,13 @@ function displayUnclaimedPrizes() {
         }, 4000); // Show each prize for 4 seconds before fading
     }
 
-    // Initialize with 0 opacity then start
+    // Initialize with 0 opacity
     prizeDisplay.style.transition = 'opacity 1s ease';
     prizeDisplay.style.opacity = '0';
 
     showNextPrize();
 }
+
 function displayUserPrizes(username) {
     // Check if prizeData is populated
     console.log("Prize Data:", prizeData);
