@@ -1329,7 +1329,7 @@ button.Butt{}
 	transition: all 0.3s ease;
 }
 #entriviaAnnouncement, #exampleAnnouncement {
-	background:var(--bg-color);
+	/* background:var(--bg-color); */
 	border:;
 	border-radius:var(--border-radius);
 	box-shadow: var(--box-glow);
