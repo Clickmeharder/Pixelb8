@@ -957,6 +957,11 @@ function displayUnclaimedPrizes() {
     const wrapper = document.createElement('div');
     wrapper.id = 'unclaimedPrizesWrapper';
 
+    // Create the header
+    const header = document.createElement('h2');
+    header.textContent = 'Unclaimed Prizes';
+    wrapper.appendChild(header);
+
     const prizeDisplay = document.createElement('div');
     prizeDisplay.id = 'currentUnclaimedPrize';
     wrapper.appendChild(prizeDisplay);
@@ -993,12 +998,15 @@ function displayUnclaimedPrizes() {
             }, 2000); // Wait for fade out
         }, 8000); // Show each prize for 8 seconds before fading
     }
+
     // Initialize with 0 opacity
     prizeDisplay.style.transition = 'opacity 1s ease';
     prizeDisplay.style.opacity = '0';
+
     // Start showing prizes
     showNextPrize();
 }
+
 
 function displayUserPrizes(username) {
     // Check if prizeData is populated
