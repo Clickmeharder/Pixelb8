@@ -184,6 +184,7 @@ function fetchentriviaQuestions() {
                         if (Array.isArray(q.answers) && q.answers.length > 0) {
                             // Already good
                         } else if (typeof q.answer === "string") {
+                            // Handle custom questions where 'answer' is used
                             q.answers = q.answer.split(/[;,]/).map(a => a.trim()).filter(Boolean);
                         } else if (Array.isArray(q.answer)) {
                             q.answers = q.answer.map(a => a.trim()).filter(Boolean);
@@ -193,7 +194,7 @@ function fetchentriviaQuestions() {
                             q.answers = [];
                         }
 
-                        delete q.answer; // Clean up
+                        delete q.answer; // Clean up after normalization
 
                         target[normalizedCategory].push(q);
                     });
