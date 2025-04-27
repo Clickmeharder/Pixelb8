@@ -1081,7 +1081,29 @@ function displayUserPrizes(username) {
     }, 32000); // Slightly after the fade out completes
 }
 
+function markUserPrizesAsClaimed(username) {
+    if (!prizeData || prizeData.length === 0) {
+        console.error("No prize data available to update.");
+        return;
+    }
 
+    let updated = false;
+
+    prizeData.forEach(prize => {
+        if (prize.winner.toLowerCase() === username.toLowerCase() && prize.status === 'unclaimed') {
+            prize.status = 'claimed';
+            updated = true;
+        }
+    });
+
+    if (updated) {
+        localStorage.setItem('prizeData', JSON.stringify(prizeData));
+        console.log(`Marked prizes as claimed for ${username}`);
+        filterAndRender(); // Update the table if you're showing it
+    } else {
+        console.log(`No unclaimed prizes found for ${username}`);
+    }
+}
 
 
 

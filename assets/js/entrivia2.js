@@ -2320,13 +2320,19 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 //--------------------------------------------
 //prizecommands
 	if (command.toLowerCase() === "prizes") {
-			displayUserPrizes(user);
-			displayConsoleMessage(user, `!${command} ✅`);
+		displayUserPrizes(user);
+		displayConsoleMessage(user, `!${command} ✅`);
 	}
-	if (command.toLowerCase() === "prizelist") { 
-				displayUserPrizes(message); 
-				displayConsoleMessage(user, `!${command} ✅`);
+	if (command.toLowerCase() === "prizelist") {
+		displayUserPrizes(message);
+		displayConsoleMessage(user, `!${command} ✅`);
 	}
+	if (command.toLowerCase() === "rewardprizes") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+        markUserPrizesAsClaimed(message);
+		displayUserPrizes(message);
+		displayConsoleMessage(user, `!${command} ✅`);
+    }
 	// PixelDisc/SpinWheel Commands	
     if (command.toLowerCase() === "pull-lever") {
         if (!isStreamerAndAuthorize(user, command)) return;
