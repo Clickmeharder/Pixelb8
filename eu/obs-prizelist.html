@@ -382,13 +382,36 @@ function displayUserPrizes(username) {
     // Check if prizeData is populated
     console.log("Prize Data:", prizeData);
 
-    // Filter the prizeData to get all prizes for the given user
-    const userPrizes = prizeData.filter(prize => prize.winner.toLowerCase() === username.toLowerCase());
+    // Filter the prizeData to get only unclaimed prizes for the given user
+    const userPrizes = prizeData.filter(prize => prize.winner.toLowerCase() === username.toLowerCase() && prize.status.toLowerCase() === 'unclaimed');
 
-    // If there are no prizes for the user, exit early
+    // If there are no unclaimed prizes for the user, display a custom message
     if (userPrizes.length === 0) {
-        console.log(`${username} has no prizes.`);
-        return;
+        // Create the wrapper element for the user's prizes
+        const noPrizesWrapper = document.createElement('div');
+        noPrizesWrapper.id = 'noPrizesWrapper';
+
+        // Create the message container inside the wrapper
+        const noPrizesMessage = document.createElement('div');
+        noPrizesMessage.id = 'noPrizesMessage';
+        noPrizesMessage.textContent = `${username} hasn't won jack sh*t yet.`;
+        noPrizesWrapper.appendChild(noPrizesMessage);
+
+        // Insert the wrapper at the top of the body
+        document.body.insertBefore(noPrizesWrapper, document.body.firstChild);
+
+        // Fade out the wrapper after 60 seconds
+        setTimeout(() => {
+            noPrizesWrapper.style.opacity = '0'; // Make it fade out
+        }, 60000); // Fade out after 60 seconds
+
+        // Remove the wrapper after the fade-out animation is complete
+        setTimeout(() => {
+            console.log(`Removing ${username}'s no prizes message after fade out.`);
+            document.body.removeChild(noPrizesWrapper);
+        }, 62000); // Slightly after the fade out completes
+
+        return; // Exit the function after displaying the message
     }
 
     // Merge the amounts for duplicate prizes
@@ -402,6 +425,9 @@ function displayUserPrizes(username) {
         return acc;
     }, []);
 
+    // Calculate the total number of unclaimed prizes the user has
+    const totalPrizes = mergedPrizes.reduce((total, prize) => total + prize.amount, 0);
+
     // Create the wrapper element for the user's prizes
     const userPrizesWrapper = document.createElement('div');
     userPrizesWrapper.id = 'userPrizesWrapper';
@@ -409,7 +435,7 @@ function displayUserPrizes(username) {
     // Create the header (username) above the list
     const usernameHeader = document.createElement('div');
     usernameHeader.classList.add('username-header');
-    usernameHeader.textContent = `${username}'s Prizes`;
+    usernameHeader.textContent = `${username}'s Unclaimed Prizes (Total: ${totalPrizes})`;
     userPrizesWrapper.appendChild(usernameHeader);
 
     // Create the list container inside the wrapper
@@ -429,7 +455,7 @@ function displayUserPrizes(username) {
     document.body.insertBefore(userPrizesWrapper, document.body.firstChild);
 
     // Debug message to confirm element was created
-    console.log(`${username}'s prizes displayed.`);
+    console.log(`${username}'s unclaimed prizes displayed.`);
 
     // Fade out the wrapper after 60 seconds
     setTimeout(() => {
@@ -442,6 +468,7 @@ function displayUserPrizes(username) {
         document.body.removeChild(userPrizesWrapper);
     }, 62000); // Slightly after the fade out completes
 }
+
 
 
 
