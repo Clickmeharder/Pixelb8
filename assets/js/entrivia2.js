@@ -173,27 +173,24 @@ function fetchentriviaQuestions() {
             let finalQuestions = { round1: {}, round2: {} };
 
             function mergeQuestions(target, source) {
-		for (const category in source) {
-			let normalizedCategory = category.toLowerCase();
+                for (const category in source) {
+                    let normalizedCategory = category.toLowerCase();
 
-			if (!target[normalizedCategory]) target[normalizedCategory] = [];
+                    if (!target[normalizedCategory]) target[normalizedCategory] = [];
 
-			source[category].forEach(q => {
-				// 🔥 Normalize and fix answers
-
-				if (Array.isArray(q.answers)) {
-					// ✅ Already an array, keep as-is
-				} else if (typeof q.answers === "string") {
-					q.answers = q.answers.split(/[;,]/).map(a => a.trim()).filter(Boolean);
-				} else if (typeof q.answer === "string") {
-					q.answers = q.answer.split(/[;,]/).map(a => a.trim()).filter(Boolean);
-				} else {
-					q.answers = []; // fallback
-				}
-
-				target[normalizedCategory].push(q);
-			});
-		}
+                    source[category].forEach(q => {
+                        // 🔥 Fix answers if wrong type
+                        if (!Array.isArray(q.answers)) {
+                            if (typeof q.answers === "string") {
+                                q.answers = q.answers.split(/[;,]/).map(a => a.trim()).filter(Boolean);
+                            } else {
+                                q.answers = [];
+                            }
+                        }
+                        target[normalizedCategory].push(q);
+                    });
+                }
+            }
 
             if (usedefaultquestions) {
                 mergeQuestions(finalQuestions.round1, defaultQuestions.round1);
