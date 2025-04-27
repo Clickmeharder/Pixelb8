@@ -1921,6 +1921,9 @@ ul#broadcastercommandlist {
 #unclaimedPrizesWrapper h3{
 	border:var(--border);
 }
+div#currentUnclaimedPrize {
+    font-weight: bold;
+}
 #unclaimedPrizeList {
     display: flex;
     align-items: center;
