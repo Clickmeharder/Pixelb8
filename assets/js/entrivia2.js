@@ -139,7 +139,7 @@ function fetchentriviaQuestions() {
                         const columns = row.split(",");
                         let questionObj = {};
                         headers.forEach((header, index) => {
-                            questionObj[header.trim()] = columns[index].trim();
+                            questionObj[header.trim()] = columns[index] ? columns[index].trim() : "";
                         });
                         parsedData.push(questionObj);
                     });
@@ -148,9 +148,9 @@ function fetchentriviaQuestions() {
                         let round = row.round.toLowerCase();
                         let category = row.category.toLowerCase();
                         let question = row.question.replace(/\"/g, "").trim();
-                        let answersRaw = row.answers.replace(/\"/g, "").trim();
-                        let answers = answers.split(/[;,]/).map(a => a.trim()).filter(Boolean);
-                        let type = row.type.toLowerCase();
+                        let answersRaw = (row.answers || row.answer || "").replace(/\"/g, "").trim();
+                        let answers = answersRaw.split(/[;,]/).map(a => a.trim()).filter(Boolean);
+                        let type = (row.type || "text").toLowerCase();
                         let options = row.options
                             ? row.options.replace(/\"/g, "").split(/[;,]/).map(opt => opt.trim()).filter(Boolean)
                             : [];
@@ -174,10 +174,21 @@ function fetchentriviaQuestions() {
 
             function mergeQuestions(target, source) {
                 for (const category in source) {
-                    let normalizedCategory = category.toLowerCase();  // 🔥 Normalize here too
+                    let normalizedCategory = category.toLowerCase();
 
                     if (!target[normalizedCategory]) target[normalizedCategory] = [];
-                    target[normalizedCategory] = target[normalizedCategory].concat(source[category] || []);
+
+                    source[category].forEach(q => {
+                        // 🔥 Fix answers if wrong type
+                        if (!Array.isArray(q.answers)) {
+                            if (typeof q.answers === "string") {
+                                q.answers = q.answers.split(/[;,]/).map(a => a.trim()).filter(Boolean);
+                            } else {
+                                q.answers = [];
+                            }
+                        }
+                        target[normalizedCategory].push(q);
+                    });
                 }
             }
 
