@@ -2278,6 +2278,7 @@ textarea#csvOutputText {
         position: fixed;
         top: 0;
         left: 0;
+		background:var(--bg-color-alt);
         width: 100%;
         height: 100%;
         display: flex;
@@ -2292,6 +2293,7 @@ textarea#csvOutputText {
         min-width: 300px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
+
 
 /*----------------*/
 /* WEBKIT STYLES  */
