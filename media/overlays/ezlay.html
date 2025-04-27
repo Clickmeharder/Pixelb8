@@ -774,7 +774,61 @@ _____________________________  -->
 	let sortDirections = [true, true, true, true]; // 4 columns now
 	let showClaimed = false;
 	let showDate = false;
+	function loadPrizeData() {
+		const localData = localStorage.getItem('prizeData');
+		
+		if (localData) {
+			// If local storage has data, use it
+			console.log("Loaded prize data from localStorage");
+			prizeData = JSON.parse(localData);
+			filterAndRender();
+		} else {
+			// Otherwise fetch from server and save
+			fetchAndSavePrizeData();
+		}
+	}
 
+	function fetchAndSavePrizeData() {
+		const csvPath = '/eu/data/JaedrazeTTV-EU-viewerPrizelist.txt';
+		
+		fetch(csvPath)
+			.then(response => response.text())
+			.then(data => {
+				const rows = data.split('\n');
+				let totalAmount = 0;
+				const parsedData = [];
+
+				rows.forEach(row => {
+					const columns = row.split(',');
+					if (columns.length >= 5) {
+						const status = columns[4].trim().toLowerCase();
+						const amount = parseFloat(columns[2]) || 0;
+
+						totalAmount += amount;
+
+						parsedData.push({
+							date: columns[0].trim(),
+							winner: columns[1].trim(),
+							amount: amount,
+							prize: columns[3].trim(),
+							status: status
+						});
+					}
+				});
+
+				prizeData = parsedData;
+				localStorage.setItem('prizeData', JSON.stringify(prizeData));
+				console.log("Fetched prize data and saved to localStorage");
+
+				filterAndRender();
+			})
+			.catch(error => console.error('Error fetching prize data:', error));
+	}
+
+	function clearPrizeDataCache() {
+		localStorage.removeItem('prizeData');
+		console.log("LocalStorage prizeData cleared!");
+	}
 	document.getElementById('toggleClaimedBtn').addEventListener('click', () => {
 		showClaimed = !showClaimed;
 		document.getElementById('toggleClaimedBtn').textContent = showClaimed ? 'Hide Claimed' : 'Show Claimed';
@@ -1033,11 +1087,13 @@ function displayUserPrizes(username) {
 
 	
 	document.addEventListener('DOMContentLoaded', () => {
-		loadCSVFile();
-		console.log("uhm k prizes loaded");
+		loadPrizeData();
+		console.log("Prizes loaded (maybe from cache!)");
+
 		document.querySelectorAll('.sortable').forEach((header, idx) => {
 			header.addEventListener('click', () => sortTable(idx));
 		});
+
 		if (prizeData.length > 0) {
 			displayUnclaimedPrizes();
 		} else {
