@@ -290,6 +290,7 @@
 		document.getElementById('dateHeader').style.display = showDate ? '' : 'none';
 		document.getElementById('totalAmount').textContent = `Total Value: ${totalAmount.toFixed(2)} Ped`;
 	}
+
 function displayUnclaimedPrizes() {
     // Check if prizeData is populated
     console.log("Prize Data:", prizeData);
@@ -323,6 +324,11 @@ function displayUnclaimedPrizes() {
     // Insert the wrapper at the top of the body
     document.body.insertBefore(unclaimedPrizesWrapper, document.body.firstChild);
 
+    // Trigger the animation immediately after insertion by using a small timeout to allow DOM update
+    setTimeout(() => {
+        unclaimedPrizeList.style.animation = 'scrollUnclaimedPrizes 60s linear infinite'; // Start animation immediately
+    }, 0); // Start without delay
+
     // Debug message to confirm element was created
     console.log("Unclaimed prizes wrapper added to body");
 
@@ -333,14 +339,14 @@ function displayUnclaimedPrizes() {
     });
 }
 
-
 // Call the function to test
 displayUnclaimedPrizes();
 
 
-	console.log("uhm k lets go?");
+	
 	document.addEventListener('DOMContentLoaded', () => {
 		loadCSVFile();
+		console.log("uhm k prizes loaded");
 		document.querySelectorAll('.sortable').forEach((header, idx) => {
 			header.addEventListener('click', () => sortTable(idx));
 		});
