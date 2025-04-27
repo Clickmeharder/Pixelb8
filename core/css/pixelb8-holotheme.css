@@ -77,7 +77,7 @@ body.dark-theme {
   --body-opacity: 1;
 /*----------------------------------*/
 /*  bg styles    */
-  --bg-color: #1a1f25f0;/*(main)*/
+  --bg-color: #1a1f25e0;/*(main)*/
   --bg-color-alt: #242c3400;/*(dark)*/ 
   --bg-color-alt2: #1f2a33;/*(darker)*/
   --bg-color-alt3: #1a252e;/*(idk)*/
@@ -428,7 +428,7 @@ body.neonvoid-theme {
   --h2-color: #ff22e2;
   --question-color:var(--text-color-alt);
   --default-muted: #55375e;
-  --bg-color: linear-gradient(145deg, #24002ed4, #000010e0);
+  --bg-color: linear-gradient(145deg, #24002ef0, #000010e3);
   --bg-color-alt: #2a103d78;
   --bg-color-alt2: linear-gradient(135deg, #3a005e, #1a0026);
   --bg-color-alt3: linear-gradient(135deg, #2e004e, #180030);
