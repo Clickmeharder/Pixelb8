@@ -30,6 +30,42 @@
 			flex-direction: column;
 			align-content: center;
 		}
+		#unclaimedPrizesWrapper {
+			position: fixed;
+			bottom: 10%;
+			left: 50%;
+			transform: translateX(-50%);
+			background-color: rgba(0, 0, 0, 0.7);
+			color: white;
+			padding: 15px;
+			border-radius: 10px;
+			width: 80%;
+			max-height: 200px;
+			overflow: hidden;
+		}
+
+		#unclaimedPrizeList {
+			max-height: 100%;
+			overflow-y: scroll;
+			animation: scrollUnclaimedPrizes 8s linear infinite;
+		}
+
+		.unclaimed-prize-item {
+			font-size: 18px;
+			margin-bottom: 10px;
+			padding: 10px;
+			background-color: rgba(255, 255, 255, 0.2);
+			border-radius: 5px;
+		}
+
+		@keyframes scrollUnclaimedPrizes {
+			0% {
+				transform: translateY(100%);
+			}
+			100% {
+				transform: translateY(-100%);
+			}
+		}
     </style>
 </head>
 <body>
@@ -141,7 +177,43 @@
                     return sortDirections[index] ? aText.localeCompare(bText) : bText.localeCompare(aText);
                 }
             });
+		function displayUnclaimedPrizes() {
+			// Filter out the unclaimed prizes from the prizeData array
+			const unclaimedPrizes = prizeData.filter(prize => prize.status.toLowerCase() === 'unclaimed');
 
+			// If there are no unclaimed prizes, exit early
+			if (unclaimedPrizes.length === 0) {
+				return;
+			}
+
+			// Create the wrapper element for the unclaimed prizes
+			const unclaimedPrizesWrapper = document.createElement('div');
+			unclaimedPrizesWrapper.id = 'unclaimedPrizesWrapper';
+
+			// Create the list container inside the wrapper
+			const unclaimedPrizeList = document.createElement('div');
+			unclaimedPrizeList.id = 'unclaimedPrizeList';
+			unclaimedPrizesWrapper.appendChild(unclaimedPrizeList);
+
+			// Add each unclaimed prize to the list
+			unclaimedPrizes.forEach(prize => {
+				const prizeItem = document.createElement('div');
+				prizeItem.classList.add('unclaimed-prize-item');
+				prizeItem.textContent = `${prize.winner} won ${prize.prize} and it is unclaimed!`;
+				unclaimedPrizeList.appendChild(prizeItem);
+			});
+
+			// Append the wrapper to the body
+			document.body.appendChild(unclaimedPrizesWrapper);
+
+			// Start the scrolling animation
+			unclaimedPrizeList.style.animation = 'scrollUnclaimedPrizes 8s linear infinite';
+
+			// Remove the wrapper after the animation is done (8 seconds)
+			setTimeout(() => {
+				document.body.removeChild(unclaimedPrizesWrapper);
+			}, 8000); // Matches the animation time
+		}
             // Append sorted rows to the tbody
             rows.forEach(row => tbody.appendChild(row));
 
