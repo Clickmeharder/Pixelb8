@@ -425,8 +425,8 @@ function displayUserPrizes(username) {
         return acc;
     }, []);
 
-    // Calculate the total number of unclaimed prizes the user has
-    const totalPrizes = mergedPrizes.reduce((total, prize) => total + prize.amount, 0);
+    // Calculate the total number of unclaimed prizes (i.e., number of different unclaimed prizes)
+    const totalPrizes = mergedPrizes.length;  // Count the number of unique prizes the user has won
 
     // Create the wrapper element for the user's prizes
     const userPrizesWrapper = document.createElement('div');
@@ -468,6 +468,7 @@ function displayUserPrizes(username) {
         document.body.removeChild(userPrizesWrapper);
     }, 32000); // Slightly after the fade out completes
 }
+
 
 
 
