@@ -132,9 +132,16 @@
         transform: translateX(-100%); /* End offscreen to the left */
     }
 }
+.username-header {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffcc00;  /* Gold color or any color you like */
+    margin-bottom: 10px;  /* Space between username and prize list */
+}
+
 #userPrizesWrapper {
     position: fixed;
-    top: 80%; /* Position at the top of the screen */
+    top: 0;
     left: 0;
     right: 0;
     background-color: rgba(0, 0, 0, 0.7);
@@ -143,23 +150,23 @@
     border-radius: 10px;
     z-index: 9999;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    height: auto;  /* Allow for dynamic height based on the content */
-    overflow: hidden; /* Hide anything outside of the bar */
-    opacity: 1; /* Start fully visible */
-    transition: opacity 2s ease-out; /* Fade out over 2 seconds */
+    height: auto;
+    overflow: hidden;
+    opacity: 1;
+    transition: opacity 2s ease-out;
 }
 
 #userPrizeList {
     display: flex;
-    flex-direction: column; /* Stack the items vertically */
-    align-items: center; /* Center the items horizontally */
+    flex-direction: column;
+    align-items: center;
 }
 
 .user-prize-item {
     font-size: 16px;
-    margin-bottom: 10px;  /* Space between items */
+    margin-bottom: 10px;
     padding: 5px 10px;
     background-color: rgba(255, 255, 255, 0.2);
     border-radius: 5px;
@@ -435,6 +442,7 @@ function displayUserPrizes(username) {
         document.body.removeChild(userPrizesWrapper);
     }, 62000); // Slightly after the fade out completes
 }
+
 
 
 	
