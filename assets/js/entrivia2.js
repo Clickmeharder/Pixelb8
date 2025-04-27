@@ -2318,6 +2318,11 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		console.log(user, `!${command} ✅ ${stateMsg}`);
 	}
 //--------------------------------------------
+//prizecommands
+	if (command.toLowerCase() === "prizes") {
+			displayUserPrizes(user);
+			displayConsoleMessage(user, `!${command} ✅`);
+	}
 	// PixelDisc/SpinWheel Commands	
     if (command.toLowerCase() === "pull-lever") {
         if (!isStreamerAndAuthorize(user, command)) return;
