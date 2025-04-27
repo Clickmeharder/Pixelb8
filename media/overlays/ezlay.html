@@ -963,53 +963,56 @@ function addPrizeForUser(username, prizeName, amount) {
     filterAndRender(); // Re-render the updated list
 }
 function displayUnclaimedPrizes() {
-    // Check if prizeData is populated
     console.log("Prize Data:", prizeData);
 
-    // Filter out the unclaimed prizes from the prizeData array
     const unclaimedPrizes = prizeData.filter(prize => prize.status.toLowerCase() === 'unclaimed');
 
-    // If there are no unclaimed prizes, exit early
     if (unclaimedPrizes.length === 0) {
         console.log("No unclaimed prizes available.");
         return;
     }
 
-    // Create the wrapper element for the unclaimed prizes
-    const unclaimedPrizesWrapper = document.createElement('div');
-    unclaimedPrizesWrapper.id = 'unclaimedPrizesWrapper';
+    // Create wrapper for the unclaimed prize
+    const wrapper = document.createElement('div');
+    wrapper.id = 'unclaimedPrizesWrapper';
 
-    // Create the list container inside the wrapper
-    const unclaimedPrizeList = document.createElement('div');
-    unclaimedPrizeList.id = 'unclaimedPrizeList';
-    unclaimedPrizesWrapper.appendChild(unclaimedPrizeList);
+    const prizeDisplay = document.createElement('div');
+    prizeDisplay.id = 'currentUnclaimedPrize';
+    wrapper.appendChild(prizeDisplay);
 
-    // Add each unclaimed prize to the list
-    unclaimedPrizes.forEach(prize => {
-        const prizeItem = document.createElement('div');
-        prizeItem.classList.add('unclaimed-prize-item');
-        prizeItem.textContent = `${prize.winner} won ${prize.prize} and it is unclaimed!`;
-        unclaimedPrizeList.appendChild(prizeItem);
-    });
+    document.body.insertBefore(wrapper, document.body.firstChild);
 
-    // Insert the wrapper at the top of the body
-    document.body.insertBefore(unclaimedPrizesWrapper, document.body.firstChild);
+    let currentIndex = 0;
 
-    // Trigger the animation immediately after insertion by using a small timeout to allow DOM update
-    setTimeout(() => {
-        unclaimedPrizeList.style.animation = 'scrollUnclaimedPrizes 60s linear infinite'; // Start animation immediately
-    }, 0); // Start without delay
+    function showNextPrize() {
+        const prize = unclaimedPrizes[currentIndex];
+        prizeDisplay.textContent = `${prize.winner} won ${prize.prize} and it is unclaimed!`;
 
-    // Debug message to confirm element was created
-    console.log("Unclaimed prizes wrapper added to body");
+        // Add a simple fade-in animation
+        prizeDisplay.style.opacity = '1';
 
-    // Add event listener to remove wrapper after the animation ends
-    unclaimedPrizeList.addEventListener('animationend', () => {
-        console.log("Removing unclaimed prizes wrapper after animation.");
-        document.body.removeChild(unclaimedPrizesWrapper);
-    });
+        setTimeout(() => {
+            // Fade out before switching
+            prizeDisplay.style.opacity = '0';
+
+            setTimeout(() => {
+                currentIndex++;
+                if (currentIndex < unclaimedPrizes.length) {
+                    showNextPrize();
+                } else {
+                    console.log("Finished displaying all unclaimed prizes.");
+                    document.body.removeChild(wrapper);
+                }
+            }, 1000); // Wait for fade out
+        }, 4000); // Show each prize for 4 seconds before fading
+    }
+
+    // Initialize with 0 opacity then start
+    prizeDisplay.style.transition = 'opacity 1s ease';
+    prizeDisplay.style.opacity = '0';
+
+    showNextPrize();
 }
-
 function displayUserPrizes(username) {
     // Check if prizeData is populated
     console.log("Prize Data:", prizeData);
