@@ -3134,6 +3134,36 @@ document.getElementById('toggleusedefaultquestions').addEventListener('click', t
 document.getElementById('toggleusecustomquestions').addEventListener('click', toggleusecustomquestions);
 document.getElementById('togglehideButtonBubble').addEventListener('click', toggleButtonBubble);
 // Event listener for delete button
+const style = document.createElement('style');
+style.innerHTML = `
+    .confirmation-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .confirmation-modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        text-align: center;
+        min-width: 300px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    button {
+        margin: 10px;
+        padding: 10px;
+        cursor: pointer;
+    }
+`;
+
+document.head.appendChild(style);
 document.getElementById('deleteQuestionBtn').addEventListener('click', deleteCustomQuestion);
 
 // Event listener for dropdown change to update the answer display
