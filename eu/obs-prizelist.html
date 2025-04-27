@@ -134,7 +134,7 @@
 }
 #userPrizesWrapper {
     position: fixed;
-    top: 0; /* Position at the top of the screen */
+    top: 80%; /* Position at the top of the screen */
     left: 0;
     right: 0;
     background-color: rgba(0, 0, 0, 0.7);
@@ -384,20 +384,37 @@ function displayUserPrizes(username) {
         return;
     }
 
+    // Merge the amounts for duplicate prizes
+    const mergedPrizes = userPrizes.reduce((acc, prize) => {
+        const existingPrize = acc.find(p => p.prize === prize.prize);
+        if (existingPrize) {
+            existingPrize.amount += prize.amount;  // Merge amounts for the same prize
+        } else {
+            acc.push({ ...prize });  // Add new prize
+        }
+        return acc;
+    }, []);
+
     // Create the wrapper element for the user's prizes
     const userPrizesWrapper = document.createElement('div');
     userPrizesWrapper.id = 'userPrizesWrapper';
+
+    // Create the header (username) above the list
+    const usernameHeader = document.createElement('div');
+    usernameHeader.classList.add('username-header');
+    usernameHeader.textContent = `${username}'s Prizes`;
+    userPrizesWrapper.appendChild(usernameHeader);
 
     // Create the list container inside the wrapper
     const userPrizeList = document.createElement('div');
     userPrizeList.id = 'userPrizeList';
     userPrizesWrapper.appendChild(userPrizeList);
 
-    // Add each prize to the list
-    userPrizes.forEach(prize => {
+    // Add each merged prize to the list
+    mergedPrizes.forEach(prize => {
         const prizeItem = document.createElement('div');
         prizeItem.classList.add('user-prize-item');
-        prizeItem.textContent = `${prize.prize} (Amount: ${prize.amount})`;  // Display prize name and amount
+        prizeItem.textContent = `${prize.prize} (Amount: ${prize.amount})`;  // Display prize name and merged amount
         userPrizeList.appendChild(prizeItem);
     });
 
@@ -412,7 +429,7 @@ function displayUserPrizes(username) {
         userPrizesWrapper.style.opacity = '0'; // Make it fade out
     }, 60000); // Fade out after 60 seconds
 
-    // Remove the wrapper after the fade out animation is complete
+    // Remove the wrapper after the fade-out animation is complete
     setTimeout(() => {
         console.log(`Removing ${username}'s prizes wrapper after fade out.`);
         document.body.removeChild(userPrizesWrapper);
