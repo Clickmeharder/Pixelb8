@@ -680,12 +680,14 @@ function deleteCustomQuestion() {
         const confirmButton = document.createElement('button');
         confirmButton.id = 'confirmDeleteButton';
         confirmButton.textContent = 'Confirm';
+        confirmButton.classList.add('a', 'smol');  // Add the classes .a and .smol
         modalContent.appendChild(confirmButton);
 
         // Create the cancel button
         const cancelButton = document.createElement('button');
         cancelButton.id = 'cancelDeleteButton';
         cancelButton.textContent = 'Cancel';
+        cancelButton.classList.add('a', 'smol');  // Add the classes .a and .smol
         modalContent.appendChild(cancelButton);
 
         // Append the modal content to the modal
