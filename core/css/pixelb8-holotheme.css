@@ -1442,9 +1442,9 @@ button.Butt{}
 	}
 
 		h3 {
-			color: #e54513;
+			color: var(--body-color);
 			text-align: center;
-			background: #00000082;
+			background: var(--bg-color);
 			border: 5px ridge var(--border-color);
 			border-radius:var(--border-radius);
 			margin: 0;
