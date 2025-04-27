@@ -1,4 +1,4 @@
-round,category,type,question,answers,options
+round,category,type,question,answer,options
 round1,hunting,singlechoice,"Converting 100 shrapnel results in how much universal ammo?","101;101 uni;101 universal ammo",""
 round1,hunting,singlechoice,"What is the smallest Skildek support weapon?","lancehead;skildek lancehead",""
 round1,hunting,singlechoice,"Which weapon type is the EP2 Proton?","Laser Pistol;LP",""
