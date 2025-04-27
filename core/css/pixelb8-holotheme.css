@@ -1918,7 +1918,9 @@ ul#broadcastercommandlist {
     height: auto;
 	width:auto;
 }
-
+#unclaimedPrizesWrapper h3{
+	border:var(--border);
+}
 #unclaimedPrizeList {
     display: flex;
     align-items: center;
