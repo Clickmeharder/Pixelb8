@@ -1041,7 +1041,7 @@ function displayUserPrizes(username) {
         // Create the message container inside the wrapper
         const noPrizesMessage = document.createElement('div');
         noPrizesMessage.id = 'noPrizesMessage';
-        noPrizesMessage.textContent = `${username} hasn't won jack sh*t yet.`;
+        noPrizesMessage.textContent = `${username} has no unclaimed Prizes.`;
         noPrizesWrapper.appendChild(noPrizesMessage);
 
         // Insert the wrapper at the top of the body
@@ -1094,7 +1094,7 @@ function displayUserPrizes(username) {
     mergedPrizes.forEach(prize => {
         const prizeItem = document.createElement('div');
         prizeItem.classList.add('user-prize-item');
-        prizeItem.textContent = `${prize.prize} (Amount: ${prize.amount})`;  // Display prize name and merged amount
+        prizeItem.textContent = `${prize.amount}( ${prize.prize})`;  // Display prize name and merged amount
         userPrizeList.appendChild(prizeItem);
     });
 

@@ -1900,7 +1900,7 @@ ul#broadcastercommandlist {
     border-radius: 5px;
     color: var(--input-color);
 }
-#unclaimedPrizesWrapper {
+#unclaimedPrizesWrapper, #noPrizesMessage {
     position: fixed;
     top: 3%;
     left: 5%;
