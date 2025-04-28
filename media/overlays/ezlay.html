@@ -1010,7 +1010,18 @@ function displayUnclaimedPrizes() {
     // Start showing prizes
     showNextPrize();
 }
+function deletePrizesForUser(username) {
+    // Load the existing prize data
+    let prizeData = JSON.parse(localStorage.getItem('prizeData')) || [];
 
+    // Filter out the prizes for the specified user (case-insensitive)
+    prizeData = prizeData.filter(prize => prize.winner.toLowerCase() !== username.toLowerCase());
+
+    // Save the updated prize data back into localStorage
+    localStorage.setItem('prizeData', JSON.stringify(prizeData));
+
+    console.log(`All prizes for ${username} have been deleted.`);
+}
 
 
 
