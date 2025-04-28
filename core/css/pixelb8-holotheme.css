@@ -1902,7 +1902,7 @@ ul#broadcastercommandlist {
 }
 #unclaimedPrizesWrapper, #noPrizesMessage {
     position: fixed;
-    top: 3%;
+    top: 6%;
     left: 5%;
     background:var(--bg-color);
 	border:var(--border);
