@@ -1930,7 +1930,7 @@ div#currentUnclaimedPrize {
     white-space: nowrap;
 }
 
-.unclaimed-prize-item {
+.unclaimed-prize-item, #noPrizesMessage {
     font-size: 17px;
 	font-weight:bold;
     margin-right: 30px; 
