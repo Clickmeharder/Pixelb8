@@ -1056,7 +1056,7 @@ function displayUserPrizes(username) {
         setTimeout(() => {
             console.log(`Removing ${username}'s no prizes message after fade out.`);
             document.body.removeChild(noPrizesWrapper);
-        }, 62000); // Slightly after the fade out completes
+        }, 22000); // Slightly after the fade out completes
 
         return; // Exit the function after displaying the message
     }
@@ -1094,7 +1094,7 @@ function displayUserPrizes(username) {
     mergedPrizes.forEach(prize => {
         const prizeItem = document.createElement('div');
         prizeItem.classList.add('user-prize-item');
-        prizeItem.textContent = `${prize.amount}( ${prize.prize})`;  // Display prize name and merged amount
+        prizeItem.textContent = `[${prize.amount} ${prize.prize}]`;  // Display prize name and merged amount
         userPrizeList.appendChild(prizeItem);
     });
 
