@@ -81,11 +81,6 @@
       50% { left: 100%; }
       100% { left: 100%; }
     }
-
-    @keyframes glow {
-      from { box-shadow: 0 0 8px #00ffe6; }
-      to   { box-shadow: 0 0 18px #00ffe6; }
-    }
   </style>
 </head>
 <body>
@@ -110,15 +105,35 @@
       "Playing Briefing File..."
     ];
 
+    // 👇 Easily editable spoken message
+    const spokenMessage = `
+      We've been monitoring chatter across the outer settlements.
+      Something’s been brewing—five names keep surfacing.
+      Civilian status, all of them. No formal ties. But the pattern’s there if you know where to look.
+      Start with Leia Cassidy. Fort Troy. Hunts alone. Issues field contracts without authorization.
+      No one's sure who's backing her—if anyone is.
+      Reports suggest movement anomalies in her sector. Comms blackouts. Environmental shifts.
+      Locals say she talks like the wilds talk back.
+      Your objective: locate Cassidy, make contact, assess. No engagement unless provoked.
+      You'll find her beneath the radar array. Keeps to the edge. Eyes open. Recorder on.
+      If she’s just a hunter, we walk away. If she’s something else—we need to know.
+      Good hunting.
+    `;
+
     let i = 0;
 
     function showNextLine() {
       if (i < sequence.length) {
         terminal.textContent = sequence[i];
 
-        // Stop the status bar after first message
+        // Stop progress bar after lock established
         if (i === 1) {
           statusBar.style.display = "none";
+        }
+
+        // Speak at final step
+        if (i === sequence.length - 1) {
+          speak(spokenMessage);
         }
 
         i++;
@@ -126,11 +141,20 @@
       }
     }
 
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 0.9;
+      utterance.volume = 1.0;
+      utterance.voice = speechSynthesis.getVoices().find(v => v.name.includes("Daniel") || v.name.includes("Google UK") || v.default);
+      speechSynthesis.speak(utterance);
+    }
+
     window.onload = () => {
       setTimeout(() => {
         ui.classList.add("visible");
         showNextLine();
-      }, 1000); // Delay to simulate it popping up
+      }, 1000);
     };
   </script>
 
