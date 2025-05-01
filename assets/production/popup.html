@@ -1,81 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mission Transmission</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Secure Transmission</title>
   <style>
-	body {
-	  margin: 0;
-	  background: transparent;
-	  overflow: hidden;
-	  font-family: 'Courier New', Courier, monospace;
-	}
+    @font-face {
+      font-family: 'AgencyFont';
+      src: local('OCR A Std'), local('Courier New'), monospace;
+    }
 
-	#transmission-container {
-	  position: absolute;
-	  top: 10%;
-	  left: 50%;
-	  transform: translateX(-50%);
-	  padding: 1em;
-	  background: rgba(0, 0, 0, 0.5);
-	  border: 2px solid #00ffcc;
-	  color: #00ffcc;
-	  font-size: 1.5em;
-	  width: 80%;
-	  max-width: 600px;
-	  display: none;
-	}
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      font-family: 'AgencyFont', monospace;
+      color: #00ffe6;
+      overflow: hidden;
+    }
 
-	#transmission-box {
-	  padding: 1em;
-	  background: rgba(0, 0, 0, 0.75);
-	  border-radius: 5px;
-	  text-align: center;
-	  animation: flicker 0.3s infinite alternate;
-	}
+    .transmission-ui {
+      position: absolute;
+      top: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      padding: 2rem;
+      border: 2px solid #00ffe6;
+      background: rgba(0, 0, 0, 0.6);
+      text-align: center;
+      animation: glow 1.5s ease-in-out infinite alternate;
+    }
 
-	@keyframes flicker {
-	  from { opacity: 1; }
-	  to { opacity: 0.85; }
-	}
-	</style>
+    .header,
+    .footer {
+      font-size: 0.9rem;
+      color: #ff003c;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .footer {
+      margin-top: 1.5rem;
+    }
+
+    .terminal {
+      font-size: 1.3rem;
+      line-height: 1.8rem;
+      letter-spacing: 1px;
+      min-height: 100px;
+    }
+
+    @keyframes glow {
+      from {
+        box-shadow: 0 0 8px #00ffe6;
+      }
+      to {
+        box-shadow: 0 0 20px #00ffe6;
+      }
+    }
+  </style>
 </head>
-
 <body>
-  <div id="transmission-container">
-    <div id="transmission-box">
-      <p id="transmission-text"></p>
-    </div>
+  <div class="transmission-ui">
+    <div class="header">CLASSIFIED // EYES ONLY</div>
+    <div class="terminal" id="terminalText">Initializing Secure Line...</div>
+    <div class="footer">TRACE BLOCK ACTIVE — SIGNAL MASKED</div>
   </div>
+
   <script>
-	const messages = [
-	  "Incoming Transmission...",
-	  "Transmission Received.",
-	  "Decrypting...",
-	  "Encrypted Audio File Detected.",
-	  "Playing Audio File..."
-	];
+    const terminal = document.getElementById("terminalText");
 
-	let index = 0;
-	const transmissionBox = document.getElementById('transmission-container');
-	const transmissionText = document.getElementById('transmission-text');
+    const sequence = [
+      "Incoming Secure Transmission...",
+      "Signal Acquired.",
+      "Decrypting Payload...",
+      "Encrypted File: [AUDIO MESSAGE]",
+      "Playing File: MISSION_BRIEF_47-A"
+    ];
 
-	function showNextMessage() {
-	  if (index < messages.length) {
-		transmissionText.textContent = messages[index];
-		index++;
-		setTimeout(showNextMessage, 1500); // adjust timing here
-	  } else {
-		// Trigger audio/video/doc handler here later
-	  }
-	}
+    let i = 0;
 
-	window.onload = () => {
-	  transmissionBox.style.display = 'block';
-	  showNextMessage();
-	};
+    function showNextLine() {
+      if (i < sequence.length) {
+        terminal.textContent = sequence[i];
+        i++;
+        setTimeout(showNextLine, 2000);
+      }
+    }
+
+    window.onload = showNextLine;
   </script>
 </body>
 </html>
