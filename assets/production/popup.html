@@ -2,61 +2,71 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Transmission Popup</title>
+  <title>Incoming Transmission</title>
   <style>
     body {
-      background-color: transparent;
+      background-color: black;
       margin: 0;
       overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       font-family: 'Consolas', monospace;
+    }
+
+    .transmission-box {
       color: #00ffcc;
-    }
-
-    .popup {
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.85);
       border: 2px solid #00ffcc;
-      padding: 25px 40px;
-      box-shadow: 0 0 15px #00ffcc;
+      padding: 20px 40px;
       text-align: center;
-      font-size: 1.2em;
+      font-size: 1.5em;
+      background-color: rgba(0, 0, 0, 0.85);
+      box-shadow: 0 0 15px #00ffcc;
+      min-width: 400px;
+    }
+
+    .message {
       opacity: 0;
-      animation: fadeIn 1s forwards;
+      transition: opacity 0.5s ease-in-out;
     }
 
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
-
-    .line {
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-
-    .line.visible {
+    .message.visible {
       opacity: 1;
     }
   </style>
 </head>
 <body>
-  <div class="popup">
-    <div id="line1" class="line">📡 Incoming Transmission...</div>
-    <div id="line2" class="line">✅ Transmission Received.</div>
-    <div id="line3" class="line">🧬 Decrypting...</div>
-    <div id="line4" class="line">🎧 Audio File Attached.</div>
-    <div id="line5" class="line">▶️ Playing Audio...</div>
+  <div class="transmission-box">
+    <div id="message" class="message">Initializing...</div>
   </div>
 
   <script>
-    const delays = [1000, 2500, 4000, 5500, 7000]; // Timing for each line
-    delays.forEach((delay, index) => {
+    const messages = [
+      "📡 Incoming Transmission...",
+      "✅ Transmission Received.",
+      "🧬 Decrypting...",
+      "🗂 Audio File Detected.",
+      "▶️ Playing Audio..."
+    ];
+
+    const messageBox = document.getElementById("message");
+    let index = 0;
+
+    function showNextMessage() {
+      messageBox.classList.remove("visible");
       setTimeout(() => {
-        document.getElementById(`line${index + 1}`).classList.add('visible');
-      }, delay);
-    });
+        messageBox.textContent = messages[index];
+        messageBox.classList.add("visible");
+        index++;
+        if (index < messages.length) {
+          setTimeout(showNextMessage, 2000); // Display each message for 2 seconds
+        }
+      }, 500); // Delay between fade out and next line
+    }
+
+    // Start sequence
+    setTimeout(showNextMessage, 1000);
   </script>
 </body>
 </html>
