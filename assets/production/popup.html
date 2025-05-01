@@ -1,20 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Secure Transmission</title>
+  <meta charset="UTF-8" />
+  <title>Secret Universal Services Transmission</title>
   <style>
-    @font-face {
-      font-family: 'AgencyFont';
-      src: local('OCR A Std'), local('Courier New'), monospace;
-    }
-
     body {
       margin: 0;
       background: transparent;
-      font-family: 'AgencyFont', monospace;
+      font-family: 'Courier New', Courier, monospace;
       color: #00ffe6;
-      overflow: hidden;
     }
 
     .transmission-ui {
@@ -23,12 +17,12 @@
       left: 50%;
       transform: translateX(-50%);
       width: 600px;
-      padding: 2rem;
+      padding: 1.5rem;
       border: 2px solid #00ffe6;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.65);
       text-align: center;
       opacity: 0;
-      transition: opacity 1.5s ease-in;
+      transition: opacity 1s ease-in;
       display: none;
     }
 
@@ -50,7 +44,7 @@
     }
 
     .terminal {
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       line-height: 1.8rem;
       letter-spacing: 1px;
       min-height: 100px;
@@ -69,7 +63,8 @@
     .progress-bar::before {
       content: '';
       position: absolute;
-      top: 0; left: -40%;
+      top: 0;
+      left: -40%;
       width: 40%;
       height: 100%;
       background: #00ffe6;
@@ -84,32 +79,33 @@
 
     .popup-buttons {
       margin-top: 20px;
+      display: none;
     }
 
     .popup-buttons button {
       font-size: 1rem;
       padding: 10px 20px;
-      color: #fff;
+      margin: 0 10px;
+      color: #000;
       background: #00ffe6;
       border: none;
-      border-radius: 5px;
+      border-radius: 4px;
       cursor: pointer;
     }
 
     .popup-buttons button:hover {
       background: #ff003c;
+      color: white;
     }
   </style>
 </head>
 <body>
-
   <div class="transmission-ui" id="transmissionUI">
     <div class="header">CLASSIFIED // EYES ONLY</div>
     <div class="progress-bar" id="statusBar"></div>
     <div class="terminal" id="terminalText">...</div>
     <div class="footer">SIGNAL MASKED — TRACE BLOCK ACTIVE</div>
 
-    <!-- Popup asking for user to play -->
     <div class="popup-buttons" id="popupButtons">
       <button id="yesButton">Yes, Play Audio</button>
       <button id="noButton">No, Skip</button>
@@ -119,26 +115,30 @@
   <script>
     const ui = document.getElementById("transmissionUI");
     const terminal = document.getElementById("terminalText");
-    const statusBar = document.getElementById("statusBar");
     const popupButtons = document.getElementById("popupButtons");
+    const yesButton = document.getElementById("yesButton");
+    const noButton = document.getElementById("noButton");
+    const statusBar = document.getElementById("statusBar");
 
     const sequence = [
       "Incoming Secure Transmission...",
       "Signal Lock Established.",
       "Decrypting Payload...",
       "Audio File Identified: [LEIA_CASSIDY.MP3]",
-      "Would you like to play the mission audio?"
+      "Transmission decrypted. Ready to play."
     ];
 
-    // 👇 Easily editable spoken message
     const spokenMessage = `
       We've been monitoring chatter across the outer settlements.
-      Somethings been brewing—five names keep surfacing.
-      all 5 have Civilian status, No known affiliations.
-      Start with Leia Cassidy. Fort Troy.intel says she Hunts alone, suspected of issueing field contracts without authorization.
+      Something’s been brewing—five names keep surfacing.
+      Civilian status, all of them. No formal ties. But the pattern’s there if you know where to look.
+      Start with Leia Cassidy. Fort Troy. Hunts alone. Issues field contracts without authorization.
+      No one's sure who's backing her—if anyone is.
+      Reports suggest movement anomalies in her sector. Comms blackouts. Environmental shifts.
       Locals say she talks like the wilds talk back.
-      Your objective: locate Cassidy, make contact, assess.
-      fort troy eye has her beneath the radar array
+      Your objective: locate Cassidy, make contact, assess. No engagement unless provoked.
+      You'll find her beneath the radar array. Keeps to the edge. Eyes open. Recorder on.
+      If she’s just a hunter, we walk away. If she’s something else—we need to know.
       Good hunting.
     `;
 
@@ -148,9 +148,13 @@
       if (i < sequence.length) {
         terminal.textContent = sequence[i];
 
-        // Stop progress bar after lock established
         if (i === 1) {
           statusBar.style.display = "none";
+        }
+
+        // After final line, show buttons
+        if (i === sequence.length - 1) {
+          popupButtons.style.display = "block";
         }
 
         i++;
@@ -158,36 +162,45 @@
       }
     }
 
-    // Function to trigger speech when user clicks "Yes"
-    function playAudio() {
-      const utterance = new SpeechSynthesisUtterance(spokenMessage);
-      utterance.rate = 1.0;
-      utterance.pitch = 0.9;
-      utterance.volume = 1.0;
-      utterance.voice = speechSynthesis.getVoices().find(v => v.name.includes("Daniel") || v.name.includes("Google UK") || v.default);
-      speechSynthesis.speak(utterance);
+    function speakMessage() {
+      const synth = window.speechSynthesis;
+
+      function speakNow() {
+        const utterance = new SpeechSynthesisUtterance(spokenMessage);
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        utterance.voice = synth.getVoices().find(v =>
+          v.name.includes("Daniel") || v.name.includes("Google UK") || v.default
+        );
+        synth.speak(utterance);
+        terminal.textContent = "Playing mission audio...";
+      }
+
+      // If voices aren't loaded yet
+      if (speechSynthesis.getVoices().length === 0) {
+        speechSynthesis.onvoiceschanged = speakNow;
+      } else {
+        speakNow();
+      }
     }
 
-    // Event listeners for user interaction
-    document.getElementById("yesButton").addEventListener("click", function() {
-      playAudio();
-      popupButtons.style.display = "none";  // Hide buttons after selection
+    yesButton.addEventListener("click", () => {
+      popupButtons.style.display = "none";
+      speakMessage();
     });
 
-    document.getElementById("noButton").addEventListener("click", function() {
+    noButton.addEventListener("click", () => {
       terminal.textContent = "Transmission skipped.";
-      popupButtons.style.display = "none";  // Hide buttons if no
+      popupButtons.style.display = "none";
     });
 
-    // Start sequence on load
+    // Start on load
     window.onload = () => {
       setTimeout(() => {
         ui.classList.add("visible");
         showNextLine();
       }, 1000);
     };
-
   </script>
-
 </body>
 </html>
