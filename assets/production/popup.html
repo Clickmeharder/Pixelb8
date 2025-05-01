@@ -81,6 +81,24 @@
       50% { left: 100%; }
       100% { left: 100%; }
     }
+
+    .popup-buttons {
+      margin-top: 20px;
+    }
+
+    .popup-buttons button {
+      font-size: 1rem;
+      padding: 10px 20px;
+      color: #fff;
+      background: #00ffe6;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .popup-buttons button:hover {
+      background: #ff003c;
+    }
   </style>
 </head>
 <body>
@@ -90,19 +108,26 @@
     <div class="progress-bar" id="statusBar"></div>
     <div class="terminal" id="terminalText">...</div>
     <div class="footer">SIGNAL MASKED — TRACE BLOCK ACTIVE</div>
+
+    <!-- Popup asking for user to play -->
+    <div class="popup-buttons" id="popupButtons">
+      <button id="yesButton">Yes, Play Audio</button>
+      <button id="noButton">No, Skip</button>
+    </div>
   </div>
 
   <script>
     const ui = document.getElementById("transmissionUI");
     const terminal = document.getElementById("terminalText");
     const statusBar = document.getElementById("statusBar");
+    const popupButtons = document.getElementById("popupButtons");
 
     const sequence = [
       "Incoming Secure Transmission...",
       "Signal Lock Established.",
       "Decrypting Payload...",
       "Audio File Identified: [LEIA_CASSIDY.MP3]",
-      "Playing Briefing File..."
+      "Would you like to play the mission audio?"
     ];
 
     // 👇 Easily editable spoken message
@@ -131,18 +156,14 @@
           statusBar.style.display = "none";
         }
 
-        // Speak at final step
-        if (i === sequence.length - 1) {
-          speak(spokenMessage);
-        }
-
         i++;
         setTimeout(showNextLine, 1800);
       }
     }
 
-    function speak(text) {
-      const utterance = new SpeechSynthesisUtterance(text);
+    // Function to trigger speech when user clicks "Yes"
+    function playAudio() {
+      const utterance = new SpeechSynthesisUtterance(spokenMessage);
       utterance.rate = 1.0;
       utterance.pitch = 0.9;
       utterance.volume = 1.0;
@@ -150,12 +171,25 @@
       speechSynthesis.speak(utterance);
     }
 
+    // Event listeners for user interaction
+    document.getElementById("yesButton").addEventListener("click", function() {
+      playAudio();
+      popupButtons.style.display = "none";  // Hide buttons after selection
+    });
+
+    document.getElementById("noButton").addEventListener("click", function() {
+      terminal.textContent = "Transmission skipped.";
+      popupButtons.style.display = "none";  // Hide buttons if no
+    });
+
+    // Start sequence on load
     window.onload = () => {
       setTimeout(() => {
         ui.classList.add("visible");
         showNextLine();
       }, 1000);
     };
+
   </script>
 
 </body>
