@@ -1,72 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Incoming Transmission</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mission Transmission</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
-    body {
-      background-color: black;
-      margin: 0;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-family: 'Consolas', monospace;
-    }
+	body {
+	  margin: 0;
+	  background: transparent;
+	  overflow: hidden;
+	  font-family: 'Courier New', Courier, monospace;
+	}
 
-    .transmission-box {
-      color: #00ffcc;
-      border: 2px solid #00ffcc;
-      padding: 20px 40px;
-      text-align: center;
-      font-size: 1.5em;
-      background-color: rgba(0, 0, 0, 0.85);
-      box-shadow: 0 0 15px #00ffcc;
-      min-width: 400px;
-    }
+	#transmission-container {
+	  position: absolute;
+	  top: 10%;
+	  left: 50%;
+	  transform: translateX(-50%);
+	  padding: 1em;
+	  background: rgba(0, 0, 0, 0.5);
+	  border: 2px solid #00ffcc;
+	  color: #00ffcc;
+	  font-size: 1.5em;
+	  width: 80%;
+	  max-width: 600px;
+	  display: none;
+	}
 
-    .message {
-      opacity: 0;
-      transition: opacity 0.5s ease-in-out;
-    }
+	#transmission-box {
+	  padding: 1em;
+	  background: rgba(0, 0, 0, 0.75);
+	  border-radius: 5px;
+	  text-align: center;
+	  animation: flicker 0.3s infinite alternate;
+	}
 
-    .message.visible {
-      opacity: 1;
-    }
-  </style>
+	@keyframes flicker {
+	  from { opacity: 1; }
+	  to { opacity: 0.85; }
+	}
+	</style>
 </head>
+
 <body>
-  <div class="transmission-box">
-    <div id="message" class="message">Initializing...</div>
+  <div id="transmission-container">
+    <div id="transmission-box">
+      <p id="transmission-text"></p>
+    </div>
   </div>
-
   <script>
-    const messages = [
-      "📡 Incoming Transmission...",
-      "✅ Transmission Received.",
-      "🧬 Decrypting...",
-      "🗂 Audio File Detected.",
-      "▶️ Playing Audio..."
-    ];
+	const messages = [
+	  "Incoming Transmission...",
+	  "Transmission Received.",
+	  "Decrypting...",
+	  "Encrypted Audio File Detected.",
+	  "Playing Audio File..."
+	];
 
-    const messageBox = document.getElementById("message");
-    let index = 0;
+	let index = 0;
+	const transmissionBox = document.getElementById('transmission-container');
+	const transmissionText = document.getElementById('transmission-text');
 
-    function showNextMessage() {
-      messageBox.classList.remove("visible");
-      setTimeout(() => {
-        messageBox.textContent = messages[index];
-        messageBox.classList.add("visible");
-        index++;
-        if (index < messages.length) {
-          setTimeout(showNextMessage, 2000); // Display each message for 2 seconds
-        }
-      }, 500); // Delay between fade out and next line
-    }
+	function showNextMessage() {
+	  if (index < messages.length) {
+		transmissionText.textContent = messages[index];
+		index++;
+		setTimeout(showNextMessage, 1500); // adjust timing here
+	  } else {
+		// Trigger audio/video/doc handler here later
+	  }
+	}
 
-    // Start sequence
-    setTimeout(showNextMessage, 1000);
+	window.onload = () => {
+	  transmissionBox.style.display = 'block';
+	  showNextMessage();
+	};
   </script>
 </body>
 </html>
