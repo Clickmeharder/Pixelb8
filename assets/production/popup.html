@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Incoming Message</title>
+  <title>Transmission Popup</title>
   <style>
     body {
       background-color: transparent;
       margin: 0;
+      overflow: hidden;
       font-family: 'Consolas', monospace;
+      color: #00ffcc;
     }
 
     .popup {
@@ -16,31 +18,45 @@
       left: 50%;
       transform: translate(-50%, -50%);
       background: rgba(0, 0, 0, 0.85);
-      color: #00ffcc;
       border: 2px solid #00ffcc;
-      padding: 20px 30px;
-      box-shadow: 0 0 10px #00ffcc;
-      animation: fadeIn 1s ease, pulse 2s infinite;
+      padding: 25px 40px;
+      box-shadow: 0 0 15px #00ffcc;
       text-align: center;
       font-size: 1.2em;
+      opacity: 0;
+      animation: fadeIn 1s forwards;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translate(-50%, -60%); }
-      to { opacity: 1; transform: translate(-50%, -50%); }
+      to { opacity: 1; }
     }
 
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 10px #00ffcc; }
-      50% { box-shadow: 0 0 20px #00ffcc; }
+    .line {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .line.visible {
+      opacity: 1;
     }
   </style>
 </head>
 <body>
   <div class="popup">
-    &#128421; Incoming Transmission<br>
-    <strong>Message Received</strong><br>
-    Decrypting…
+    <div id="line1" class="line">📡 Incoming Transmission...</div>
+    <div id="line2" class="line">✅ Transmission Received.</div>
+    <div id="line3" class="line">🧬 Decrypting...</div>
+    <div id="line4" class="line">🎧 Audio File Attached.</div>
+    <div id="line5" class="line">▶️ Playing Audio...</div>
   </div>
+
+  <script>
+    const delays = [1000, 2500, 4000, 5500, 7000]; // Timing for each line
+    delays.forEach((delay, index) => {
+      setTimeout(() => {
+        document.getElementById(`line${index + 1}`).classList.add('visible');
+      }, delay);
+    });
+  </script>
 </body>
 </html>
