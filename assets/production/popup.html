@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Secure Transmission</title>
+  <title>Mission Transmission</title>
   <style>
     @font-face {
       font-family: 'AgencyFont';
@@ -11,7 +11,6 @@
 
     body {
       margin: 0;
-      padding: 0;
       background: transparent;
       font-family: 'AgencyFont', monospace;
       color: #00ffe6;
@@ -20,35 +19,35 @@
 
     .transmission-ui {
       position: absolute;
-      top: 15%;
+      top: 20%;
       left: 50%;
       transform: translateX(-50%);
       width: 600px;
       padding: 2rem;
       border: 2px solid #00ffe6;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.5);
       text-align: center;
-      animation: glow 1.5s ease-in-out infinite alternate;
+      animation: glow 1s ease-in-out infinite alternate;
     }
 
-    .header,
-    .footer {
-      font-size: 0.9rem;
+    .header, .footer {
+      font-size: 0.85rem;
       color: #ff003c;
       margin-bottom: 1rem;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      letter-spacing: 1px;
     }
 
     .footer {
-      margin-top: 1.5rem;
+      margin-top: 1rem;
     }
 
     .terminal {
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       line-height: 1.8rem;
       letter-spacing: 1px;
       min-height: 100px;
+      white-space: pre-wrap;
     }
 
     @keyframes glow {
@@ -56,16 +55,16 @@
         box-shadow: 0 0 8px #00ffe6;
       }
       to {
-        box-shadow: 0 0 20px #00ffe6;
+        box-shadow: 0 0 18px #00ffe6;
       }
     }
   </style>
 </head>
 <body>
-  <div class="transmission-ui">
+  <div class="transmission-ui" id="transmissionUI">
     <div class="header">CLASSIFIED // EYES ONLY</div>
     <div class="terminal" id="terminalText">Initializing Secure Line...</div>
-    <div class="footer">TRACE BLOCK ACTIVE — SIGNAL MASKED</div>
+    <div class="footer">SIGNAL MASKED — TRACE BLOCK ACTIVE</div>
   </div>
 
   <script>
@@ -73,10 +72,10 @@
 
     const sequence = [
       "Incoming Secure Transmission...",
-      "Signal Acquired.",
+      "Signal Lock Established.",
       "Decrypting Payload...",
-      "Encrypted File: [AUDIO MESSAGE]",
-      "Playing File: MISSION_BRIEF_47-A"
+      "Audio File Identified: [LEIA_CASSIDY.MP3]",
+      "Playing Briefing File..."
     ];
 
     let i = 0;
@@ -85,7 +84,7 @@
       if (i < sequence.length) {
         terminal.textContent = sequence[i];
         i++;
-        setTimeout(showNextLine, 2000);
+        setTimeout(showNextLine, 1800);
       }
     }
 
