@@ -2319,8 +2319,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	}
 //--------------------------------------------
 //prizecommands
-	if (command.toLowerCase() === "prizes") {
+	if (command.toLowerCase() === "myprizes") {
 		displayUserPrizes(user);
+		displayConsoleMessage(user, `!${command} ✅`);
+	}
+	if (command.toLowerCase() === "donateprizes") {
+		deletePrizesForUser(user);
 		displayConsoleMessage(user, `!${command} ✅`);
 	}
 	if (command.toLowerCase() === "prizelist") {
@@ -2350,6 +2354,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayUserPrizes(message);
 		displayConsoleMessage(user, `!${command} ✅`);
     }
+	if (command.toLowerCase() === "deleteprizes") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		deletePrizesForUser(message);
+		displayUserPrizes(message);
+		displayConsoleMessage(user, `!${command} ✅`);
+	}
 	// PixelDisc/SpinWheel Commands	
     if (command.toLowerCase() === "pull-lever") {
         if (!isStreamerAndAuthorize(user, command)) return;
