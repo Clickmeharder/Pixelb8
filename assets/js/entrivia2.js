@@ -3050,6 +3050,7 @@ const entriviasounds = {
 	winsequence1: new Audio("/assets/sounds/entrivia/winsequence-1.mp3"),
 	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
 	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
+	leverpull: new Audio("assets/lever.mp3"),
     // Add more sounds here
 };
 const entriviaQuestionsounds = {

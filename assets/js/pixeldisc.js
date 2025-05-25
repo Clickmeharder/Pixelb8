@@ -675,14 +675,14 @@ function pullDiscRotationLever() {
       console.log(`Wheel done gonna spun!`);
 	  showElement(wheelcanvaswrapper, "fade");
 	  if (running) return;
-
 	  lever.classList.add("pull");
+	  playSound("leverpull");
 	  showElement(wheelcanvaswrapper, "fade");
 	  spinWheel();
 
 	  setTimeout(() => {
 		lever.classList.remove("pull");
-	  }, 800);
+	  }, 1000);
 }
 
 
