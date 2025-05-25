@@ -11,6 +11,7 @@ const toggleOptions = {
 };  // Toggle for auto fade
 let lastSoundIndex = -1;
 let canvas = document.getElementById("canvas1");
+let currentWheelName = "";
 let sections = ["Prize 1", "Prize 2", "Prize 3", "Prize 4", "Prize 5", "Prize 6", "Prize 7"];
 let chatterWheelsections = [];
 let colors = ["#001f1fe8", "#004040eb"];
@@ -343,7 +344,7 @@ function repaintWheel() {
 				showElement(resultDisplay, "slide");
 				resultDisplay.textContent = `${winningSection}`;
 			  }
-			  if (wheelName === "sicklysupply") {
+			  if (currentWheelName === "sicklysupply") {
 					playSound("commsBeep");
 					setTimeout(() => {
 						const message = `${user}, supply request received for ${winningSection}. Pickup at Howling Mine when SUS agents are on site.`;
@@ -352,7 +353,7 @@ function repaintWheel() {
 				} else {
 					playSound("commsBeep");
 					setTimeout(() => {
-						const message = `${user}, The ${wheelName} decision is ${winningSection}..`;
+						const message = `${user}, The ${currentWheelName} decision is ${winningSection}..`;
 						speakText(message);
 					}, 800);
 				}

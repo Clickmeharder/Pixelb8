@@ -2376,9 +2376,9 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 	// Load a specific wheel by name and spin it: !load-wheel WheelName
 	if (command.toLowerCase() === "spin") {
 		if (!isStreamerAndAuthorize(user, command)) return;
-
+		
 		const wheelName = message; // first parameter after command
-
+		currentWheelName = wheelName;
 		if (!wheelName) {
 			displayConsoleMessage(user, `Please specify a wheel name to load. ❌`);
 			return;
