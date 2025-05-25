@@ -328,7 +328,7 @@ function repaintWheel() {
 			  requestAnimationFrame(frame);
 			} else {
 			  running = false;
-
+			  playSound("winsequence1");
 			  // 🏆 Determine the winning section
 			  let winningIndex = Math.floor(((-0.2 - angle) % (2 * Math.PI)) * sections.length / (2 * Math.PI));
 			  if (winningIndex < 0) winningIndex += sections.length;
