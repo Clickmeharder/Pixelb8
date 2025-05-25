@@ -350,7 +350,11 @@ function repaintWheel() {
 						speakText(message);
 					}, 800);
 				} else {
-					playSound("entriviaroundover");
+					playSound("commsBeep");
+					setTimeout(() => {
+						const message = `${user}, The ${wheelName} decision is ${winningSection}..`;
+						speakText(message);
+					}, 800);
 				}
 			  // 🎯 Auto fade AFTER spin completes
 			  if (userPixeldiscConfig.autoFade === "on") {
