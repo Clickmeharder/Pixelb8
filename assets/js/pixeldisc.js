@@ -10,7 +10,7 @@ const toggleOptions = {
   autoFade: ["on", "off"]
 };  // Toggle for auto fade
 
-
+let lastSoundIndex = -1;
 let canvas = document.getElementById("canvas1");
 let sections = ["Prize 1", "Prize 2", "Prize 3", "Prize 4", "Prize 5", "Prize 6", "Prize 7"];
 let chatterWheelsections = [];
@@ -305,6 +305,23 @@ function repaintWheel() {
 			t = 3 * t * t - 2 * t * t * t;
 
 			angle = start_angle + t * (final_angle - start_angle);
+
+			// Calculate the current index of the section under the pointer
+			const currentIndex = Math.floor(((-0.2 - angle) % (2 * Math.PI)) * sections.length / (2 * Math.PI));
+			if (currentIndex < 0) currentIndex += sections.length; // ensure positive index
+
+			// Only play the tick sound when it moves to a new section
+			if (currentIndex !== lastSoundIndex) {
+				lastSoundIndex = currentIndex;
+
+				// Play tick sound
+				const tick = document.getElementById("tickSound");
+				if (tick) {
+					tick.currentTime = 0;
+					tick.play().catch(() => {}); // Avoid unhandled promise rejection on autoplay restrictions
+				}
+			}
+
 			repaint(angle);
 
 			if (t < 1) {
