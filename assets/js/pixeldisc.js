@@ -347,13 +347,13 @@ function repaintWheel() {
 			  if (currentWheelName === "sicklysupply") {
 					playSound("radiobeep");
 					setTimeout(() => {
-						const message = `${user}, supply request received for ${winningSection}. Pickup at Howling Mine when SUS agents are on site.`;
+						const message = `supply request received for ${winningSection}. Pickup at Howling Mine when SUS agents are on site.`;
 						speakText(message);
 					}, 800);
 				} else {
 					playSound("radiobeep");
 					setTimeout(() => {
-						const message = `${user}, The ${currentWheelName} decision is ${winningSection}..`;
+						const message = `The ${currentWheelName} decision is ${winningSection}..`;
 						speakText(message);
 					}, 800);
 				}
