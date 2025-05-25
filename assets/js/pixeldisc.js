@@ -391,6 +391,13 @@ canvas.onmousedown = function() {
 //comment this function out if you want to stop the resizing
 window.addEventListener("resize", () => repaint(angle));
 
+function speakText(text) {
+	const utterance = new SpeechSynthesisUtterance(text);
+	utterance.lang = 'en-US'; // or change to fit your desired accent
+	utterance.rate = 1; // speech speed
+	utterance.pitch = 1; // normal pitch
+	window.speechSynthesis.speak(utterance);
+}
 function getSupplyPickupMessage(user, prize) {
 	const messages = [
 		`${user}, supply request received. ${prize} available at Howling Mine when agents are present.`,
