@@ -9,7 +9,6 @@ const toggleOptions = {
   enableLever: ["on", "always", "off"],
   autoFade: ["on", "off"]
 };  // Toggle for auto fade
-let currentWheelName = "";
 let lastSoundIndex = -1;
 let canvas = document.getElementById("canvas1");
 let sections = ["Prize 1", "Prize 2", "Prize 3", "Prize 4", "Prize 5", "Prize 6", "Prize 7"];
@@ -344,7 +343,7 @@ function repaintWheel() {
 				showElement(resultDisplay, "slide");
 				resultDisplay.textContent = `${winningSection}`;
 			  }
-			  if (currentWheelName === "sicklysupply") {
+			  if (wheelName === "sicklysupply") {
 					playSound("commsBeep");
 					setTimeout(() => {
 						const message = `${user}, supply request received for ${winningSection}. Pickup at Howling Mine when SUS agents are on site.`;
