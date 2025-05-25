@@ -328,7 +328,6 @@ function repaintWheel() {
 			  requestAnimationFrame(frame);
 			} else {
 			  running = false;
-			  playSound("entriviaroundover");
 			  // 🏆 Determine the winning section
 			  let winningIndex = Math.floor(((-0.2 - angle) % (2 * Math.PI)) * sections.length / (2 * Math.PI));
 			  if (winningIndex < 0) winningIndex += sections.length;
@@ -351,13 +350,11 @@ function repaintWheel() {
 						speakText(message);
 					}, 800);
 				} else {
-					playSound("radiobeep");
 					setTimeout(() => {
 						const message = `The ${currentWheelName} decision is ${winningSection}..`;
 						speakText(message);
 					}, 800);
 				}
-			  playSound("radiobeep");
 			  // 🎯 Auto fade AFTER spin completes
 			  if (userPixeldiscConfig.autoFade === "on") {
 				if (wrapper) {
