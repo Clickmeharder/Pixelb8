@@ -3051,6 +3051,7 @@ const entriviasounds = {
 	winsequence2: new Audio("/assets/sounds/entrivia/winsequence-2.mp3"),
 	winsequence3: new Audio("/assets/sounds/entrivia/winsequence-3.mp3"),
 	leverpull: new Audio("assets/lever.mp3"),
+	radiobeep: new Audio("assets/radiobeep.mp3"),
     // Add more sounds here
 };
 const entriviaQuestionsounds = {
