@@ -307,7 +307,7 @@ function repaintWheel() {
 			angle = start_angle + t * (final_angle - start_angle);
 
 			// Calculate the current index of the section under the pointer
-			const currentIndex = Math.floor(((-0.2 - angle) % (2 * Math.PI)) * sections.length / (2 * Math.PI));
+			let currentIndex = Math.floor(((-0.2 - angle) % (2 * Math.PI)) * sections.length / (2 * Math.PI));
 			if (currentIndex < 0) currentIndex += sections.length; // ensure positive index
 
 			// Only play the tick sound when it moves to a new section
