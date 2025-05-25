@@ -9,7 +9,7 @@ const toggleOptions = {
   enableLever: ["on", "always", "off"],
   autoFade: ["on", "off"]
 };  // Toggle for auto fade
-
+let currentWheelName = "";
 let lastSoundIndex = -1;
 let canvas = document.getElementById("canvas1");
 let sections = ["Prize 1", "Prize 2", "Prize 3", "Prize 4", "Prize 5", "Prize 6", "Prize 7"];
@@ -339,11 +339,20 @@ function repaintWheel() {
 
 			  console.log("Winner:", winningSection);
 			  const resultDisplay = document.getElementById("wheel-result");
+
 			  if (resultDisplay) {
 				showElement(resultDisplay, "slide");
 				resultDisplay.textContent = `${winningSection}`;
 			  }
-
+			  if (currentWheelName === "sicklysupply") {
+					playSound("commsBeep");
+					setTimeout(() => {
+						const message = `${user}, supply request received for ${winningSection}. Pickup at Howling Mine when SUS agents are on site.`;
+						speakText(message);
+					}, 800);
+				} else {
+					playSound("entriviaroundover");
+				}
 			  // 🎯 Auto fade AFTER spin completes
 			  if (userPixeldiscConfig.autoFade === "on") {
 				if (wrapper) {
@@ -379,6 +388,17 @@ canvas.onmousedown = function() {
 //comment this function out if you want to stop the resizing
 window.addEventListener("resize", () => repaint(angle));
 
+function getSupplyPickupMessage(user, prize) {
+	const messages = [
+		`${user}, supply request received. ${prize} available at Howling Mine when agents are present.`,
+		`${user}, ${prize} secured. Retrieve from Howling Mine when an agent is on site.`,
+		`${user}, request confirmed. ${prize} will be at Howling Mine when SUS presence is active.`,
+		`${user}, ${prize} allocated. Pick up at Howling Mine during agent operations.`,
+		`${user}, supply drop logged. ${prize} available from any SUS agent at Howling Mine.`,
+		`${user}, ${prize} staged for pickup. Check in at Howling Mine when agents are active.`
+	];
+	return messages[Math.floor(Math.random() * messages.length)];
+}
 
 	function getSavedWheels() {
 		return JSON.parse(localStorage.getItem("savedWheels") || "{}");
@@ -503,6 +523,7 @@ function updateRemoveDropdown() {
 		const wheels = getSavedWheels();
 
 		if (wheels[name]) {
+			currentWheelName = name;  // <-- track current wheel name
 			sections = wheels[name].slice(); // copy
 			updateRemoveDropdown();
 			repaintWheel();
