@@ -1,19 +1,64 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Entropia Crafting Profit Calculator</title>
+  
+     <title>Pixelb8.LoL- Eu</title>
+    <link rel="stylesheet" href="../core/css/pixelb8-landing.css">
+	<link rel="stylesheet" href="../core/css/pixelb8-tools.css">
+	<link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
+	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7382192474927902"
+     crossorigin="anonymous"></script>
+    <style>
+		body {
+		 color:teal;
+		}
+    </style>
   <style>
     body { font-family: sans-serif; background: #1e1e1e; color: #eee; padding: 20px; }
-    input, button { margin: 5px; padding: 5px; }
-    .material { margin-bottom: 10px; }
+    input, button, select { margin: 5px; padding: 5px; }
+	label { padding: 4px; border:1px solid grey;}
+    .material { margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
     .results { margin-top: 20px; background: #2e2e2e; padding: 10px; border-radius: 8px; }
   </style>
 </head>
 <body>
+<body>
+	<div class="background-container">
+	  <div class="stars"></div>
+	  <div class="twinkling"></div>
+	</div>
+    <div class="header">PixelB8.LoL - EU</div>
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+    <div class="nav-menu" id="navMenu">
+        <a href="https://Pixelb8.lol/home">Home</a>
+		<a href="https://Pixelb8.lol/eu">Entropia</a>
+        <a href="https://Pixelb8.lol/Media">Media</a>
+		<a href="https://Pixelb8.lol/tools">Tools</a>
+		<a href="https://Pixelb8.lol/arcade">Arcade</a>
+    </div>
+	
   <h1>Entropia Crafting Profit Calculator</h1>
+
+  <label>Item Name: <input id="itemName" type="text" value="Portable TT Unit (L)"></label>
+  <label>Max TT Value (per item): <input id="maxTT" type="number" value="20"></label>
+  <label>Blueprint Type: 
+    <select id="bpType" onchange="toggleBpMuField()">
+      <option value="Limited">Limited</option>
+      <option value="Unlimited">Unlimited</option>
+    </select>
+  </label>
+  <label id="bpMuLabel">Limited BP MU %: <input id="bpMu" type="number" value="150"></label>
+
   <div id="materials"></div>
-  <button onclick="addMaterial()">Add Material</button>
+  <button onclick="addMaterial()">+ Add Material</button>
   <br>
   <label>Sell MU %: <input id="sellMu" type="number" value="150"></label>
   <label>Success Rate %: <input id="successRate" type="number" value="40"></label>
@@ -21,8 +66,11 @@
   <label>Clicks: <input id="clicks" type="number" value="100"></label>
   <br>
   <button onclick="calculate()">Calculate</button>
+  <button onclick="saveBlueprint()">💾 Save Blueprint</button>
+  <button onclick="loadBlueprints()">📂 My Blueprints</button>
 
   <div class="results" id="results"></div>
+  <div class="results" id="savedList"></div>
 
   <script>
     let materialIndex = 0;
@@ -31,15 +79,27 @@
       const container = document.getElementById('materials');
       const div = document.createElement('div');
       div.className = 'material';
+      div.id = `material_${materialIndex}`;
       div.innerHTML = `
         <strong>Material ${materialIndex + 1}</strong><br>
         Name: <input type="text" value="${name}" id="name_${materialIndex}">
         Qty: <input type="number" value="${qty}" id="qty_${materialIndex}" style="width:60px">
         TT/Unit: <input type="number" value="${tt}" id="tt_${materialIndex}" style="width:80px">
         MU%: <input type="number" value="${mu}" id="mu_${materialIndex}" style="width:60px">
+        <button onclick="removeMaterial(${materialIndex})">x Remove Material</button>
       `;
       container.appendChild(div);
       materialIndex++;
+    }
+
+    function removeMaterial(index) {
+      const element = document.getElementById(`material_${index}`);
+      if (element) element.remove();
+    }
+
+    function toggleBpMuField() {
+      const bpType = document.getElementById('bpType').value;
+      document.getElementById('bpMuLabel').style.display = bpType === 'Limited' ? 'inline-block' : 'none';
     }
 
     function calculate() {
@@ -49,8 +109,14 @@
       const sellMu = parseFloat(document.getElementById('sellMu').value) / 100;
       const successRate = parseFloat(document.getElementById('successRate').value) / 100;
       const residuePerSuccess = parseFloat(document.getElementById('residuePerSuccess').value);
+      const bpType = document.getElementById('bpType').value;
+      const bpMu = parseFloat(document.getElementById('bpMu').value) / 100;
+      const itemName = document.getElementById('itemName').value;
+      const maxTT = parseFloat(document.getElementById('maxTT').value);
 
       for (let i = 0; i < materialIndex; i++) {
+        const nameInput = document.getElementById(`name_${i}`);
+        if (!nameInput) continue;
         const qty = parseFloat(document.getElementById(`qty_${i}`).value);
         const tt = parseFloat(document.getElementById(`tt_${i}`).value);
         const mu = parseFloat(document.getElementById(`mu_${i}`).value) / 100;
@@ -60,18 +126,24 @@
         totalMU += totalMatMU;
       }
 
-      const costPerClickTT = totalTT;
-      const costPerClickMU = totalMU;
-      const totalCostTT = costPerClickTT * clicks;
-      const totalCostMU = costPerClickMU * clicks;
+      if (bpType === 'Limited') {
+        const bpTTPerClick = 0.01;
+        const bpTotalTT = bpTTPerClick * clicks;
+        const bpTotalMU = bpTotalTT * bpMu;
+        totalTT += bpTotalTT;
+        totalMU += bpTotalMU;
+      }
 
+      const totalCostTT = totalTT;
+      const totalCostMU = totalMU;
       const successfulCrafts = clicks * successRate;
-      const sellValue = successfulCrafts * 20 * sellMu; // 20 PED TT per successful unit
+      const sellValue = successfulCrafts * maxTT * sellMu;
       const residueUsed = successfulCrafts * residuePerSuccess;
       const profit = sellValue - totalCostMU;
 
       document.getElementById('results').innerHTML = `
-        <h3>Results:</h3>
+        <h3>Results for: ${itemName}</h3>
+        Blueprint Type: ${bpType}<br>
         Total TT Cost: ${totalCostTT.toFixed(2)} PED<br>
         Total MU Cost: ${totalCostMU.toFixed(2)} PED<br>
         Expected Successful Crafts: ${successfulCrafts.toFixed(1)}<br>
@@ -81,11 +153,64 @@
       `;
     }
 
+    function saveBlueprint() {
+      const blueprint = {
+        itemName: document.getElementById('itemName').value,
+        maxTT: document.getElementById('maxTT').value,
+        bpType: document.getElementById('bpType').value,
+        bpMu: document.getElementById('bpMu').value,
+        sellMu: document.getElementById('sellMu').value,
+        successRate: document.getElementById('successRate').value,
+        residuePerSuccess: document.getElementById('residuePerSuccess').value,
+        clicks: document.getElementById('clicks').value,
+        materials: []
+      };
+      for (let i = 0; i < materialIndex; i++) {
+        const nameInput = document.getElementById(`name_${i}`);
+        if (!nameInput) continue;
+        blueprint.materials.push({
+          name: nameInput.value,
+          qty: document.getElementById(`qty_${i}`).value,
+          tt: document.getElementById(`tt_${i}`).value,
+          mu: document.getElementById(`mu_${i}`).value
+        });
+      }
+      let saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
+      saved.push(blueprint);
+      localStorage.setItem('blueprints', JSON.stringify(saved));
+      alert("Blueprint saved!");
+    }
+
+    function loadBlueprints() {
+      const saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
+      const list = saved.map((bp, i) => `<button onclick="loadBlueprint(${i})">${bp.itemName}</button>`).join('<br>');
+      document.getElementById('savedList').innerHTML = `<h3>My Blueprints</h3>${list}`;
+    }
+
+    function loadBlueprint(index) {
+      const saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
+      const bp = saved[index];
+      if (!bp) return;
+      document.getElementById('itemName').value = bp.itemName;
+      document.getElementById('maxTT').value = bp.maxTT;
+      document.getElementById('bpType').value = bp.bpType;
+      document.getElementById('bpMu').value = bp.bpMu;
+      document.getElementById('sellMu').value = bp.sellMu;
+      document.getElementById('successRate').value = bp.successRate;
+      document.getElementById('residuePerSuccess').value = bp.residuePerSuccess;
+      document.getElementById('clicks').value = bp.clicks;
+
+      document.getElementById('materials').innerHTML = '';
+      materialIndex = 0;
+      bp.materials.forEach(m => addMaterial(m.name, m.qty, m.tt, m.mu));
+      toggleBpMuField();
+    }
+
     // Pre-fill with Portable TT Unit (L) example
     addMaterial('Ignisium Ingot', 1, 2.10, 125);
     addMaterial('Cumbriz Ingot', 3, 0.45, 105);
     addMaterial('Garcen Lubricant', 3, 0.20, 115);
-    addMaterial('Vibrant Sweat', 2000, 0.0001, 2000); // 2 PED per 1k = 2000% MU
+    addMaterial('Vibrant Sweat', 2000, 0.0001, 2000);
   </script>
 </body>
 </html>
