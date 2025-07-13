@@ -31,11 +31,7 @@
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
 
   body {
-    background: #121212;
-    color: #ddd;
     font-family: 'Montserrat', sans-serif;
-    margin: 0;
-    padding: 20px;
   }
 
   h1 {
@@ -56,46 +52,59 @@
   }
 
   /* Form elements */
-  label {
-    display: block;
-    margin-bottom: 10px;
+label {
+    display: flex;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    padding: 4px;
+    padding-bottom: 0px;
     font-weight: 600;
     font-size: 0.9rem;
-    color: #8bdaf0;
-  }
-
+    text-align: left;
+    flex-direction: column;
+}
   input[type="text"],
   input[type="number"],
   select {
     width: 100%;
     max-width: 250px;
-    padding: 8px 12px;
-    margin-top: 4px;
-    margin-bottom: 12px;
+    padding: 0px 12px;
+    margin-top: 0px;
+    margin-bottom: 0px;
     background: #121212;
-    border: 2px solid #32c7e9;
+    border: 1px solid #32c7e9;
     border-radius: 12px;
     color: #ddd;
     font-size: 1rem;
-    transition: border-color 0.3s ease;
+    transition: 0.3s ease;
+	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+}
+  input:hover,
+  select:hover {
+	border-width: 1px;
+	background: rgba(20, 20, 20, 0.9);
+    box-shadow: 0 0 15px cyan;
+    transform: scale(1.05);
   }
+  
 
   input[type="text"]:focus,
   input[type="number"]:focus,
-  select:focus {
-    outline: none;
-    border-color: #53e0f6;
-    box-shadow: 0 0 8px #53e0f6;
-  }
-
+  input[type="text"]:active,
+  input[type="number"]:active,
+  select:focus,
+  select:active {
+    outline: 1px solid red;
+    border-color: #ac4915;
+    box-shadow: 0 0 15px #ac4915;
+}
   /* Buttons */
-  button {
+  .eu-container button {
     background: #32c7e9;
     color: #121212;
     font-weight: 700;
     font-size: 1rem;
     border: none;
-    border-radius: 14px;
     padding: 10px 20px;
     margin: 6px 8px 12px 0;
     cursor: pointer;
@@ -108,26 +117,126 @@
   button:active {
     background: #1a9abf;
   }
+.craftingbuddyWrapper {
+    display: flex
+;
+}
+.eu-blueprint {
+    color: #ac4915;
+    background: rgba(20, 20, 20, 0.7);
+    width: 25%;
+	max-width: 25%;
+    min-width: 186px;
+    padding: 4px;
+    margin: 0px;
+    margin-left: 20px;
+    border-radius: 10px;
+    text-align: center;
+    transition: 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+}
+label#wvclabelText {
+    display: flex;
+    flex-direction: row;
+}
+ .eu-blueprint:hover {
+	background: rgba(20, 20, 20, 0.9);
+    box-shadow: 0 0 15px cyan;
+    transform: scale(1.05);
+  }
+ .eu-blueprint input[type="text"],.eu-blueprint input[type="number"],.eu-blueprint select {
+    width: 85%;
+    max-width: 200px;
+    padding: 1px 9px;
+    margin-top: 0px;
+    margin-bottom: 2px;
+    background: rgba(20, 20, 20, 0.7);
+    border-radius: 12px;
+    color: #818181;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+}
+.eu-blueprint input:hover, .eu-blueprint select:hover{
+   color: #ffffff;
+	background: rgba(20, 20, 20, 0.9);
+    box-shadow: 0 0 10px #ac4915;
+    transform: scale(1.05);
+}
 
+.eu-blueprint label{
+	border: 1px outset teal;
+    border-left-width: 2px;
+}
+button#saveBlueprintButt,button#loadBlueprintsButt {
+    font-weight: 700;
+    font-size: 0.7rem;
+    border: none;
+    padding: 2px 4px;
+    margin: 4px;
+}
+div#conditionBlock {
+    height: 62px;
+    padding: 2px;
+    border: 1px outset teal;
+    overflow: hidden;
+	transition: 0.3s ease;
+}
+div#conditionBlock:hover {
+    height: 96px;
+    padding: 2px;
+    border: 1px outset teal;
+    overflow: hidden;
+}
   /* Material cards */
+#materials {
+    width: 70%;
+    max-height: 450px;
+    padding: 4px;
+    padding-top: 12px;
+    border: 3px inset #298686db;
+    overflow-x: visible;
+    overflow-y: auto;
+}
+  #materials:hover {
+	overflow-x:overlay;
+  }
+  
   .material {
-    background: #262626;
+    background: rgba(20, 20, 20, 0.7);
     border-radius: 14px;
-    padding: 12px 16px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 8px rgba(50,199,233,0.15);
+    width: 92%;
+    padding: 4px 4px;
+    margin: auto;
+    margin-bottom: 4px;
+    border: 3px inset #263b49c2;
+    box-shadow: 0 2px 8px rgba(50, 199, 233, 0.3);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
-  }
+}
 
+ .material:hover {
+	background: rgba(20, 20, 20, 0.9);
+    box-shadow: 0 0 15px cyan;
+    transform: scale(1.05);
+  }
   .material strong {
-    flex-basis: 100%;
     font-size: 1.1rem;
     color: #32c7e9;
-  }
-
+    margin-top: -42px;
+    margin-left: 8px;
+    margin-right: -12px;
+}
+#materialInputs {
+    max-width: 80%;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    margin: auto;
+}
   .material label {
     flex: 1 1 140px;
     margin-bottom: 0;
@@ -140,16 +249,27 @@
     max-width: 100px;
     margin-top: 4px;
   }
-
-  .material button {
+.material input[type="number"] {
+    max-width: 70px;
+    padding: 0px 8px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    background: #121212;
+    border: 1px solid #32c7e9;
+    border-radius: 12px;
+    color: #ddd;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+.material button {
     background: #e94e1b;
     color: white;
     font-weight: 700;
-    padding: 6px 12px;
+    padding: 0px 12px;
     border-radius: 12px;
     max-height: 36px;
     margin-left: auto;
-  }
+}
   .material button:hover {
     background: #ff6a40;
   }
@@ -158,12 +278,29 @@
   .results {
     background: #262626;
     border-radius: 16px;
-    padding: 20px;
-    margin-top: 20px;
+    padding: 4px;
+	padding-top: 20px;
+    margin-top: -25px;
     box-shadow: 0 4px 14px rgba(50,199,233,0.25);
     font-size: 1rem;
     line-height: 1.4;
   }
+.results#savedList {
+
+}
+.results#results {
+    background: #262626;
+    border-radius: 16px;
+    padding: 4px;
+    padding-top: 20px;
+    width: 75%;
+    margin: auto;
+    margin-top: -30px;
+    box-shadow: 0 4px 14px rgba(50, 199, 233, 0.25);
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
 
   /* Responsive */
   @media (max-width: 640px) {
@@ -201,174 +338,247 @@
 		<a href="https://Pixelb8.lol/tools">Tools</a>
 		<a href="https://Pixelb8.lol/arcade">Arcade</a>
     </div>
-	<div class="eu-container">
-	  <h1>Entropia Crafting Profit Calculator</h1>
+<div class="eu-container">
+  <h1>Entropia Crafting Profit Calculator</h1>
+  <div class="craftingbuddyWrapper">
+    <div class="eu-blueprint">
+      <button onclick="loadBlueprints()" id="loadBlueprintsButt">📂 Show My Blueprints</button>
+      <div class="results" id="savedList"></div>
 
-	  <label>Item Name: <input id="itemName" type="text" value="Portable TT Unit (L)"></label>
-	  <label>Max TT Value (per item): <input id="maxTT" type="number" value="20"></label>
-	  <label>Blueprint Type: 
-		<select id="bpType" onchange="toggleBpMuField()">
-		  <option value="Limited">Limited</option>
-		  <option value="Unlimited">Unlimited</option>
-		</select>
-	  </label>
-	  <label id="bpMuLabel">Limited BP MU %: <input id="bpMu" type="number" value="150"></label>
+      <label for="itemName">Item Name:
+        <input id="itemName" type="text" value="Portable TT Unit (L)" />
+      </label>
 
-	  <div id="materials"></div>
-	  <button onclick="addMaterial()">+ Add Material</button>
-	  <br>
-	  <label>Sell MU %: <input id="sellMu" type="number" value="150"></label>
-	  <label>Success Rate %: <input id="successRate" type="number" value="40"></label>
-	  <label>Residue per Success (PED): <input id="residuePerSuccess" type="number" value="15"></label>
-	  <label>Clicks: <input id="clicks" type="number" value="100"></label>
-	  <br>
-	  <button onclick="calculate()">Calculate</button>
-	  <button onclick="saveBlueprint()">💾 Save Blueprint</button>
-	  <button onclick="loadBlueprints()">📂 My Blueprints</button>
+      <label for="maxTT">Max TT Value (per item):
+        <input id="maxTT" type="number" value="20" />
+      </label>
 
-	  <div class="results" id="results"></div>
-	  <div class="results" id="savedList"></div>
+      <label for="bpType">Blueprint Type:
+        <select id="bpType" onchange="toggleBpMuField()">
+          <option value="Limited">Limited</option>
+          <option value="Unlimited">Unlimited</option>
+        </select>
+      </label>
+
+      <label id="bpMuLabel" for="bpMu">Limited BP MU %:
+        <input id="bpMu" type="number" value="150" />
+      </label>
+
+      <label for="sellMu">Sell MU %:
+        <input id="sellMu" type="number" value="150" />
+      </label>
+
+      <input type="hidden" id="successRate" value="38">
+      <input type="hidden" id="nearSuccessRate" value="50">
+      <input type="hidden" id="failRate" value="12">
+
+      <label for="residuePerSuccess">Average Residue per Success (PED):
+        <input id="residuePerSuccess" type="number" value="15" />
+      </label>
+
+      <label for="clicks">Clicks:
+        <input id="clicks" type="number" value="100" />
+      </label>
+
+      <button onclick="saveBlueprint()" id="saveBlueprintButt">💾 add to My Blueprints</button>
+
+      <div id="conditionBlock">
+        <label for="qvsc" id="wvclabelText">Quantity⇔Condition: <span id="qvscLabel">0%</span></label>
+        <input type="range" id="qvsc" min="0" max="100" value="0" 
+               oninput="document.getElementById('qvscLabel').innerText = this.value + '%'; updateRatesFromSlider()">
+        <div style="font-size: 0.8em;
+    margin-top: 2px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 75%;">
+          <div><span id="visibleSuccess"> 38%</span>✅ Success</div>
+          <div><span id="visibleNearSuccess"> 50%</span>🔶 Near Success</div>
+          <div><span id="visibleFail">12%</span>❌ Fail</div>
+        </div>
+      </div>
+	  <!-- Checkbox to show multiplier odds -->
+	  <label><input type="checkbox" id="showMultiplier"> Show Multiplier Odds</label>
+      <button onclick="calculate()">Estimates</button>
+    </div>
+
+    <div id="materials">
+      <button onclick="addMaterial()" id="addMattButt">+ Add Material</button>
+    </div>
+  </div>
+</div>
+
+		
+
+		
+
+		<div>
+
+		  
+		  
+		</div>
+		
+		<div class="results" id="results"></div>
+		
+
 	</div>
-  <script>
-    let materialIndex = 0;
 
-    function addMaterial(name = '', qty = 1, tt = 0, mu = 100) {
-      const container = document.getElementById('materials');
-      const div = document.createElement('div');
-      div.className = 'material';
-      div.id = `material_${materialIndex}`;
-      div.innerHTML = `
-        <strong>Material ${materialIndex + 1}</strong><br>
-        Name: <input type="text" value="${name}" id="name_${materialIndex}">
-        Qty: <input type="number" value="${qty}" id="qty_${materialIndex}" style="width:60px">
-        TT/Unit: <input type="number" value="${tt}" id="tt_${materialIndex}" style="width:80px">
-        MU%: <input type="number" value="${mu}" id="mu_${materialIndex}" style="width:60px">
-        <button onclick="removeMaterial(${materialIndex})">x Remove Material</button>
-      `;
-      container.appendChild(div);
-      materialIndex++;
-    }
+<script>
+let materialIndex = 0;
 
-    function removeMaterial(index) {
-      const element = document.getElementById(`material_${index}`);
-      if (element) element.remove();
-    }
+function addMaterial(name = '', qty = '', tt = 0, mu = 100) {
+  const container = document.getElementById('materials');
+  const div = document.createElement('div');
+  div.className = 'material';
+  div.id = `material_${materialIndex}`;
+  div.innerHTML = `
+    <strong>${materialIndex + 1}</strong><br>
+    <div id="materialInputs">
+    <label for="name_${materialIndex}"> item: <input type="text" value="${name}" placeholder="item name" id="name_${materialIndex}"></label>
+    <label for="qty_${materialIndex}"> Qty:  <input type="number" value="${qty}" placeholder="amount" id="qty_${materialIndex}" style=""></label>
+    <label for="tt_${materialIndex}"> TT/Unit:  <input type="number" value="${tt}" id="tt_${materialIndex}" style="width:80px"></label>
+    <label for="mu_${materialIndex}">MU%: <input type="number" value="${mu}" id="mu_${materialIndex}" style="width:60px"></label>
+    </div>
+    <button onclick="removeMaterial(${materialIndex})" >X</button>
+  `;
+  container.appendChild(div);
+  materialIndex++;
+}
 
-    function toggleBpMuField() {
-      const bpType = document.getElementById('bpType').value;
-      document.getElementById('bpMuLabel').style.display = bpType === 'Limited' ? 'inline-block' : 'none';
-    }
+function removeMaterial(index) {
+  const element = document.getElementById(`material_${index}`);
+  if (element) element.remove();
+}
 
-    function calculate() {
-      let totalTT = 0;
-      let totalMU = 0;
-      const clicks = parseInt(document.getElementById('clicks').value);
-      const sellMu = parseFloat(document.getElementById('sellMu').value) / 100;
-      const successRate = parseFloat(document.getElementById('successRate').value) / 100;
-      const residuePerSuccess = parseFloat(document.getElementById('residuePerSuccess').value);
-      const bpType = document.getElementById('bpType').value;
-      const bpMu = parseFloat(document.getElementById('bpMu').value) / 100;
-      const itemName = document.getElementById('itemName').value;
-      const maxTT = parseFloat(document.getElementById('maxTT').value);
+function toggleBpMuField() {
+  const bpType = document.getElementById('bpType').value;
+  document.getElementById('bpMuLabel').style.display = bpType === 'Limited' ? 'inline-block' : 'none';
+}
 
-      for (let i = 0; i < materialIndex; i++) {
-        const nameInput = document.getElementById(`name_${i}`);
-        if (!nameInput) continue;
-        const qty = parseFloat(document.getElementById(`qty_${i}`).value);
-        const tt = parseFloat(document.getElementById(`tt_${i}`).value);
-        const mu = parseFloat(document.getElementById(`mu_${i}`).value) / 100;
-        const totalMatTT = qty * tt;
-        const totalMatMU = totalMatTT * mu;
-        totalTT += totalMatTT;
-        totalMU += totalMatMU;
-      }
+function updateRatesFromSlider() {
+  const slider = parseInt(document.getElementById('qvsc').value);
+  const successRate = 38 - (slider * (38 - 5) / 100);
+  const nearSuccessRate = 50 - (slider * (50 - 10) / 100);
+  const failRate = 100 - successRate - nearSuccessRate;
 
-      if (bpType === 'Limited') {
-        const bpTTPerClick = 0.01;
-        const bpTotalTT = bpTTPerClick * clicks;
-        const bpTotalMU = bpTotalTT * bpMu;
-        totalTT += bpTotalTT;
-        totalMU += bpTotalMU;
-      }
+  document.getElementById('successRate').value = successRate.toFixed(1);
+  document.getElementById('nearSuccessRate').value = nearSuccessRate.toFixed(1);
+  document.getElementById('failRate').value = failRate.toFixed(1);
 
-      const totalCostTT = totalTT;
-      const totalCostMU = totalMU;
-      const successfulCrafts = clicks * successRate;
-      const sellValue = successfulCrafts * maxTT * sellMu;
-      const residueUsed = successfulCrafts * residuePerSuccess;
-      const profit = sellValue - totalCostMU;
+  // Also update the visible percentage display
+  document.getElementById('visibleSuccess').innerText = `${successRate.toFixed(1)}%`;
+  document.getElementById('visibleNearSuccess').innerText = `${nearSuccessRate.toFixed(1)}%`;
+  document.getElementById('visibleFail').innerText = `${failRate.toFixed(1)}%`;
 
-      document.getElementById('results').innerHTML = `
-        <h3>Results for: ${itemName}</h3>
-        Blueprint Type: ${bpType}<br>
-        Total TT Cost: ${totalCostTT.toFixed(2)} PED<br>
-        Total MU Cost: ${totalCostMU.toFixed(2)} PED<br>
-        Expected Successful Crafts: ${successfulCrafts.toFixed(1)}<br>
-        Expected Return Value: ${sellValue.toFixed(2)} PED<br>
-        Estimated Residue Needed: ${residueUsed.toFixed(2)} PED<br>
-        <strong>Estimated Profit/Loss: ${profit.toFixed(2)} PED</strong>
-      `;
-    }
+  calculate();
+}
 
-    function saveBlueprint() {
-      const blueprint = {
-        itemName: document.getElementById('itemName').value,
-        maxTT: document.getElementById('maxTT').value,
-        bpType: document.getElementById('bpType').value,
-        bpMu: document.getElementById('bpMu').value,
-        sellMu: document.getElementById('sellMu').value,
-        successRate: document.getElementById('successRate').value,
-        residuePerSuccess: document.getElementById('residuePerSuccess').value,
-        clicks: document.getElementById('clicks').value,
-        materials: []
-      };
-      for (let i = 0; i < materialIndex; i++) {
-        const nameInput = document.getElementById(`name_${i}`);
-        if (!nameInput) continue;
-        blueprint.materials.push({
-          name: nameInput.value,
-          qty: document.getElementById(`qty_${i}`).value,
-          tt: document.getElementById(`tt_${i}`).value,
-          mu: document.getElementById(`mu_${i}`).value
-        });
-      }
-      let saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
-      saved.push(blueprint);
-      localStorage.setItem('blueprints', JSON.stringify(saved));
-      alert("Blueprint saved!");
-    }
+function calculate() {
+  let totalTT = 0;
+  let totalMarkup = 0;
+  const clicks = parseInt(document.getElementById('clicks').value);
+  const sellMu = parseFloat(document.getElementById('sellMu').value) / 100;
+  const successRate = parseFloat(document.getElementById('successRate').value) / 100;
+  const nearSuccessRate = parseFloat(document.getElementById('nearSuccessRate').value) / 100;
+  const residuePerSuccess = parseFloat(document.getElementById('residuePerSuccess').value);
+  const bpType = document.getElementById('bpType').value;
+  const bpMu = parseFloat(document.getElementById('bpMu').value) / 100;
+  const itemName = document.getElementById('itemName').value;
+  const maxTT = parseFloat(document.getElementById('maxTT').value);
+  const qvscSlider = parseInt(document.getElementById('qvsc').value);
 
-    function loadBlueprints() {
-      const saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
-      const list = saved.map((bp, i) => `<button onclick="loadBlueprint(${i})">${bp.itemName}</button>`).join('<br>');
-      document.getElementById('savedList').innerHTML = `<h3>My Blueprints</h3>${list}`;
-    }
+  for (let i = 0; i < materialIndex; i++) {
+    const nameInput = document.getElementById(`name_${i}`);
+    if (!nameInput) continue;
+    const qty = parseFloat(document.getElementById(`qty_${i}`).value);
+    const tt = parseFloat(document.getElementById(`tt_${i}`).value);
+    const mu = parseFloat(document.getElementById(`mu_${i}`).value) / 100;
+    const totalMatTT = qty * tt * clicks;
+    const totalMatMarkup = totalMatTT * (mu - 1);
+    totalTT += totalMatTT;
+    totalMarkup += totalMatMarkup;
+  }
 
-    function loadBlueprint(index) {
-      const saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
-      const bp = saved[index];
-      if (!bp) return;
-      document.getElementById('itemName').value = bp.itemName;
-      document.getElementById('maxTT').value = bp.maxTT;
-      document.getElementById('bpType').value = bp.bpType;
-      document.getElementById('bpMu').value = bp.bpMu;
-      document.getElementById('sellMu').value = bp.sellMu;
-      document.getElementById('successRate').value = bp.successRate;
-      document.getElementById('residuePerSuccess').value = bp.residuePerSuccess;
-      document.getElementById('clicks').value = bp.clicks;
+  if (bpType === 'Limited') {
+    const bpTTPerClick = 0.01;
+    const bpTotalTT = bpTTPerClick * clicks;
+    const bpTotalMarkup = bpTotalTT * (bpMu - 1);
+    totalTT += bpTotalTT;
+    totalMarkup += bpTotalMarkup;
+  }
 
-      document.getElementById('materials').innerHTML = '';
-      materialIndex = 0;
-      bp.materials.forEach(m => addMaterial(m.name, m.qty, m.tt, m.mu));
-      toggleBpMuField();
-    }
+  const totalCost = totalTT + totalMarkup;
+  const successfulCrafts = clicks * successRate;
+  const nearSuccessClicks = clicks * nearSuccessRate;
+  const sellValue = successfulCrafts * maxTT * sellMu;
+  const nearSuccessReturn = nearSuccessClicks * (0.55 * totalCost / clicks);
+  const residueUsed = successfulCrafts * residuePerSuccess;
+  const totalReturn = sellValue + nearSuccessReturn;
+  const profit = totalReturn - totalCost;
+  const markupPerClick = totalMarkup / clicks;
+  const roiPercent = ((totalReturn / totalCost) - 1) * 100;
 
-    // Pre-fill with Portable TT Unit (L) example
-    addMaterial('Ignisium Ingot', 1, 2.10, 125);
-    addMaterial('Cumbriz Ingot', 3, 0.45, 105);
-    addMaterial('Garcen Lubricant', 3, 0.20, 115);
-    addMaterial('Vibrant Sweat', 2000, 0.0001, 2000);
-  </script>
+  const showMultiplier = document.getElementById('showMultiplier').checked;
+  let multiplierHtml = '';
+  if (showMultiplier) {
+    // Use adjusted chance ranges per your input:
+    const multiplierChancePercent = 0.1 + (qvscSlider / 100) * 1.7;  // from 0.1% to 1.8%
+    const multiplierChance = multiplierChancePercent / 100;
+    const expectedMultipliers = clicks * multiplierChance;
+    const expectedClicksBeforeHit = multiplierChance > 0 ? (1 / multiplierChance).toFixed(0) : '∞';
+
+    // scale payout range by slider (0.5x to 1.5x)
+    const scaleFactor = 0.5 + (qvscSlider / 100);
+    const minPayout = (totalCost / clicks) * 7 * scaleFactor;
+    const maxPayout = (totalCost / clicks) * 875 * scaleFactor;
+
+    // estimated total return from multipliers range
+    const totalReturnMin = expectedMultipliers * minPayout;
+    const totalReturnMax = expectedMultipliers * maxPayout;
+
+    multiplierHtml = `
+      <br><strong>🎰 Multiplier Odds:</strong><br>
+	  <em>Note: Multipliers are rare and payouts vary widely.</em>
+      Estimated Chance per Click: ${multiplierChancePercent.toFixed(2)}%<br>
+      Expected Multiplier Hits: ${expectedMultipliers.toFixed(4)}<br>
+      Expected Clicks Before One Hit: ~${expectedClicksBeforeHit} clicks<br>
+      Estimated Payout per Hit: ${minPayout.toFixed(2)} – ${maxPayout.toFixed(2)} PED<br>
+      Estimated Total Return from Multipliers: ${totalReturnMin.toFixed(2)} – ${totalReturnMax.toFixed(2)} PED<br>
+      <br><strong>Average Expected Return (Including Multipliers): ${(totalReturn + totalReturnMin).toFixed(2)} – ${(totalReturn + totalReturnMax).toFixed(2)} PED</strong>
+    `;
+  }
+
+  document.getElementById('results').innerHTML = `
+    <h3>Results for: ${itemName}</h3>
+    Blueprint Type: ${bpType}<br>
+    Total TT Cost: ${totalTT.toFixed(2)} PED<br>
+    Total Markup: ${totalMarkup.toFixed(2)} PED<br>
+    <strong>Total Cost (TT + MU): ${totalCost.toFixed(2)} PED</strong><br>
+    Markup per Click: ${markupPerClick.toFixed(4)} PED<br>
+    Expected Successful Crafts: ${successfulCrafts.toFixed(1)}<br>
+    Expected Near-Successes: ${nearSuccessClicks.toFixed(1)}<br>
+    Expected Return from Success: ${sellValue.toFixed(2)} PED<br>
+    Expected Return from Near-Success: ${nearSuccessReturn.toFixed(2)} PED<br>
+    Total Estimated Return: ${totalReturn.toFixed(2)} PED<br>
+    Estimated Residue Needed: ${residueUsed.toFixed(2)} PED<br>
+    ROI: ${roiPercent.toFixed(2)}%<br>
+    <strong>Estimated Profit/Loss: ${profit.toFixed(2)} PED</strong>
+    ${multiplierHtml}
+  `;
+}
+
+// Pre-fill with example
+addMaterial('Ignisium Ingot', 1, 2.10, 125);
+addMaterial('Cumbriz Ingot', 3, 0.45, 105);
+addMaterial('Garcen Lubricant', 3, 0.20, 115);
+addMaterial('Vibrant Sweat', 2000, 0.0001, 2000);
+</script>
+
+
+
+
+
   <script src="../core/js/pixelb8-global.js"></script>
+
 </body>
 </html>
