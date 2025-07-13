@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Entropia Crafting Profit Calculator</title>
+  <style>
+    body { font-family: sans-serif; background: #1e1e1e; color: #eee; padding: 20px; }
+    input, button { margin: 5px; padding: 5px; }
+    .material { margin-bottom: 10px; }
+    .results { margin-top: 20px; background: #2e2e2e; padding: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Entropia Crafting Profit Calculator</h1>
+  <div id="materials"></div>
+  <button onclick="addMaterial()">Add Material</button>
+  <br>
+  <label>Sell MU %: <input id="sellMu" type="number" value="150"></label>
+  <label>Success Rate %: <input id="successRate" type="number" value="40"></label>
+  <label>Residue per Success (PED): <input id="residuePerSuccess" type="number" value="15"></label>
+  <label>Clicks: <input id="clicks" type="number" value="100"></label>
+  <br>
+  <button onclick="calculate()">Calculate</button>
+
+  <div class="results" id="results"></div>
+
+  <script>
+    let materialIndex = 0;
+
+    function addMaterial(name = '', qty = 1, tt = 0, mu = 100) {
+      const container = document.getElementById('materials');
+      const div = document.createElement('div');
+      div.className = 'material';
+      div.innerHTML = `
+        <strong>Material ${materialIndex + 1}</strong><br>
+        Name: <input type="text" value="${name}" id="name_${materialIndex}">
+        Qty: <input type="number" value="${qty}" id="qty_${materialIndex}" style="width:60px">
+        TT/Unit: <input type="number" value="${tt}" id="tt_${materialIndex}" style="width:80px">
+        MU%: <input type="number" value="${mu}" id="mu_${materialIndex}" style="width:60px">
+      `;
+      container.appendChild(div);
+      materialIndex++;
+    }
+
+    function calculate() {
+      let totalTT = 0;
+      let totalMU = 0;
+      const clicks = parseInt(document.getElementById('clicks').value);
+      const sellMu = parseFloat(document.getElementById('sellMu').value) / 100;
+      const successRate = parseFloat(document.getElementById('successRate').value) / 100;
+      const residuePerSuccess = parseFloat(document.getElementById('residuePerSuccess').value);
+
+      for (let i = 0; i < materialIndex; i++) {
+        const qty = parseFloat(document.getElementById(`qty_${i}`).value);
+        const tt = parseFloat(document.getElementById(`tt_${i}`).value);
+        const mu = parseFloat(document.getElementById(`mu_${i}`).value) / 100;
+        const totalMatTT = qty * tt;
+        const totalMatMU = totalMatTT * mu;
+        totalTT += totalMatTT;
+        totalMU += totalMatMU;
+      }
+
+      const costPerClickTT = totalTT;
+      const costPerClickMU = totalMU;
+      const totalCostTT = costPerClickTT * clicks;
+      const totalCostMU = costPerClickMU * clicks;
+
+      const successfulCrafts = clicks * successRate;
+      const sellValue = successfulCrafts * 20 * sellMu; // 20 PED TT per successful unit
+      const residueUsed = successfulCrafts * residuePerSuccess;
+      const profit = sellValue - totalCostMU;
+
+      document.getElementById('results').innerHTML = `
+        <h3>Results:</h3>
+        Total TT Cost: ${totalCostTT.toFixed(2)} PED<br>
+        Total MU Cost: ${totalCostMU.toFixed(2)} PED<br>
+        Expected Successful Crafts: ${successfulCrafts.toFixed(1)}<br>
+        Expected Return Value: ${sellValue.toFixed(2)} PED<br>
+        Estimated Residue Needed: ${residueUsed.toFixed(2)} PED<br>
+        <strong>Estimated Profit/Loss: ${profit.toFixed(2)} PED</strong>
+      `;
+    }
+
+    // Pre-fill with Portable TT Unit (L) example
+    addMaterial('Ignisium Ingot', 1, 2.10, 125);
+    addMaterial('Cumbriz Ingot', 3, 0.45, 105);
+    addMaterial('Garcen Lubricant', 3, 0.20, 115);
+    addMaterial('Vibrant Sweat', 2000, 0.0001, 2000); // 2 PED per 1k = 2000% MU
+  </script>
+</body>
+</html>
