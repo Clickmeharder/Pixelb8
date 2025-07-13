@@ -44,34 +44,34 @@
 		<a href="https://Pixelb8.lol/tools">Tools</a>
 		<a href="https://Pixelb8.lol/arcade">Arcade</a>
     </div>
-	
-  <h1>Entropia Crafting Profit Calculator</h1>
+	<div class="eu-container">
+	  <h1>Entropia Crafting Profit Calculator</h1>
 
-  <label>Item Name: <input id="itemName" type="text" value="Portable TT Unit (L)"></label>
-  <label>Max TT Value (per item): <input id="maxTT" type="number" value="20"></label>
-  <label>Blueprint Type: 
-    <select id="bpType" onchange="toggleBpMuField()">
-      <option value="Limited">Limited</option>
-      <option value="Unlimited">Unlimited</option>
-    </select>
-  </label>
-  <label id="bpMuLabel">Limited BP MU %: <input id="bpMu" type="number" value="150"></label>
+	  <label>Item Name: <input id="itemName" type="text" value="Portable TT Unit (L)"></label>
+	  <label>Max TT Value (per item): <input id="maxTT" type="number" value="20"></label>
+	  <label>Blueprint Type: 
+		<select id="bpType" onchange="toggleBpMuField()">
+		  <option value="Limited">Limited</option>
+		  <option value="Unlimited">Unlimited</option>
+		</select>
+	  </label>
+	  <label id="bpMuLabel">Limited BP MU %: <input id="bpMu" type="number" value="150"></label>
 
-  <div id="materials"></div>
-  <button onclick="addMaterial()">+ Add Material</button>
-  <br>
-  <label>Sell MU %: <input id="sellMu" type="number" value="150"></label>
-  <label>Success Rate %: <input id="successRate" type="number" value="40"></label>
-  <label>Residue per Success (PED): <input id="residuePerSuccess" type="number" value="15"></label>
-  <label>Clicks: <input id="clicks" type="number" value="100"></label>
-  <br>
-  <button onclick="calculate()">Calculate</button>
-  <button onclick="saveBlueprint()">💾 Save Blueprint</button>
-  <button onclick="loadBlueprints()">📂 My Blueprints</button>
+	  <div id="materials"></div>
+	  <button onclick="addMaterial()">+ Add Material</button>
+	  <br>
+	  <label>Sell MU %: <input id="sellMu" type="number" value="150"></label>
+	  <label>Success Rate %: <input id="successRate" type="number" value="40"></label>
+	  <label>Residue per Success (PED): <input id="residuePerSuccess" type="number" value="15"></label>
+	  <label>Clicks: <input id="clicks" type="number" value="100"></label>
+	  <br>
+	  <button onclick="calculate()">Calculate</button>
+	  <button onclick="saveBlueprint()">💾 Save Blueprint</button>
+	  <button onclick="loadBlueprints()">📂 My Blueprints</button>
 
-  <div class="results" id="results"></div>
-  <div class="results" id="savedList"></div>
-
+	  <div class="results" id="results"></div>
+	  <div class="results" id="savedList"></div>
+	</div>
   <script>
     let materialIndex = 0;
 
