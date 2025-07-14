@@ -1062,7 +1062,7 @@
   <div class="craftingbuddyWrapper">
     <div class="eu-blueprint">
       <label for="itemName">Blueprint Name:
-        <input id="itemName" type="text" value="Portable TT Unit (L)" />
+        <input id="itemName" type="text" value="Explosive Projectiles 1" />
       </label>
       <label for="bpType">Blueprint Type:
         <select id="bpType" onchange="toggleBpMuField()">
@@ -1074,10 +1074,10 @@
         <input id="bpMu" type="number" value="150" />
       </label>
       <label for="bpBook">Book comma seperated
-        <input id="bpBook" type="text" value="Limited (Vol.1) (c), Limited (vol.2) (C)" />
+        <input id="bpBook" type="text" value="Planet Calypso Components (Vol1)" />
       </label>
 	  <label for="bpLevel">Blueprint Required Level:
-	    <input id="bpLevel" type="number" value="1" min="0" max="100" />
+	    <input id="bpLevel" type="number" value="5" min="0" max="100" />
 	  </label>
 
 	  <label for="qr">Blueprint QR (0.01–1.00):
@@ -1085,16 +1085,16 @@
 	  </label>
 
       <label for="maxTT">Max TT Value (per item):
-        <input id="maxTT" type="number" value="20" />
+        <input id="maxTT" type="number" value="0.02" step="0.01"/>
       </label>
       <label for="sellMu">item MU %:
-        <input id="sellMu" type="number" value="150" />
+        <input id="sellMu" type="number" value="150"/>
       </label>
       <input type="hidden" id="successRate" value="38">
       <input type="hidden" id="nearSuccessRate" value="50">
       <input type="hidden" id="failRate" value="12">
       <label for="residuePerSuccess">Average Residue per Success (PED):
-        <input id="residuePerSuccess" type="number" value="15" />
+        <input id="residuePerSuccess" type="number" value="0" />
       </label>
       <label for="clicks">Clicks:
         <input id="clicks" type="number" value="100" />
@@ -1741,10 +1741,7 @@ document.getElementById('resetBlueprintBtn').addEventListener('click', () => {
   addMaterial();
   addMaterial();
 });
-addMaterial('Ignisium Ingot', 1, 2.10, 125);
-addMaterial('Cumbriz Ingot', 3, 0.45, 105);
-addMaterial('Garcen Lubricant', 3, 0.20, 115);
-addMaterial('Vibrant Sweat', 2000, 0.0001, 2000);
+addMaterial('Nanocube', 2, 0.00, 101);
 
 document.addEventListener('DOMContentLoaded', () => {
   toggleBpMuField();
