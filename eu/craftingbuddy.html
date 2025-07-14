@@ -3,9 +3,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Entropia Crafting Profit Calculator</title>
+  <title>Entropia Crafting Tool</title>
   
-     <title>Pixelb8.LoL- Eu</title>
+     <title>Pixelb8.LoL/Eu/Crafting Tool</title>
     <link rel="stylesheet" href="../core/css/pixelb8-landing.css">
 	<link rel="stylesheet" href="../core/css/pixelb8-tools.css">
 	<link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
@@ -20,316 +20,1024 @@
 		body {
 		 color:teal;
 		}
+		.eu-container {
+			text-align: center;
+			margin: 16px;
+			margin-right: 4px;
+			margin-top: 3%;
+			padding-bottom: 12px;
+			height: 97vh;
+			overflow: hidden;
+			border: 2px ridge #2ce01d6e;
+		}
+	    .PageFooterDisclaimer-note {
+			position: absolute;
+			bottom: -52px;
+			left: 10%;
+		}
     </style>
-  <style>
+	<style>
 
-    .material { margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; text-align: left; }
-    .results { margin-top: 20px; background: #2e2e2e; padding: 10px; border-radius: 8px; }
-  </style>
-  <style>
-  /* Base and fonts */
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+	.material { margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; text-align: left; }
+	.results { margin-top: 20px; background: #2e2e2e; padding: 10px; border-radius: 8px; }
+	</style>
+	<style>
+	/* Base and fonts */
+	@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
 
-  body {
-    font-family: 'Montserrat', sans-serif;
-  }
+	body {
+	font-family: 'Montserrat', sans-serif;
+	}
 
-  h1 {
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #32c7e9;
-    text-align: center;
-  }
+	h1 {
+	font-size: 2em;
+	font-weight: 600;
+	margin-left: 59px;
+	margin-top: -4px;
+	margin-bottom: 5px;
+	width: 29%;
+	padding: 4px;
+	color: rgba(86, 88, 92, 0.64);
+	text-shadow: 0 0 4px #32e9e2, 0 0 8px #32e9e2;
+	text-align: left;
+	border-radius: 15px;
+	outline: 4px ridge rgba(20, 20, 20, 0.9);
+	outline-offset: 3px;
+	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.34);
+	text-shadow: 1px 1px 2px #111, -1px -1px 2px #444, 2px 2px 4px rgba(0, 255, 255, 0.1);
+	transition: box-shadow 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
+	z-index: 1000;
+	}
 
-  /* Container card */
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-    background: #1e1e1e;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(50,199,233,0.3);
-    padding: 20px 30px;
-  }
+	h1:hover {
+	box-shadow: 0 4px 12px rgba(0, 255, 255, 0.7);
+	color: #32e9e2;
+	text-shadow: 0 0 4px #32e9e2, 0 0 8px #32e9e2;
+	transition: box-shadow 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
+	}
+	/* Container card */
+	.container {
+	max-width: 900px;
+	margin: 0 auto;
+	background: #1e1e1e;
+	border-radius: 16px;
+	box-shadow: 0 8px 24px rgba(50,199,233,0.3);
+	padding: 20px 30px;
+	}
 
-  /* Form elements */
-label {
-    display: flex;
-    margin-bottom: 0px;
-    margin-left: 0px;
-    padding: 4px;
-    padding-bottom: 0px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-align: left;
-    flex-direction: column;
-}
-  input[type="text"],
-  input[type="number"],
-  select {
-    width: 100%;
-    max-width: 250px;
-    padding: 0px 12px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    background: #121212;
-    border: 1px solid #32c7e9;
-    border-radius: 12px;
-    color: #ddd;
-    font-size: 1rem;
-    transition: 0.3s ease;
+	/* Form elements */
+	label {
+	display: flex;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	padding: 4px;
+	padding-top: 2px;
+	padding-bottom: 0px;
+	font-weight: 600;
+	font-size: 0.9rem;
+	text-align: left;
+	flex-direction: column;
+	}
+	input[type="text"],
+	input[type="number"],
+	select {
+	width: 100%;
+	max-width: 250px;
+	padding: 0px 12px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	background: #121212;
+	border: 1px solid #32c7e9;
+	border-radius: 12px;
+	color: #ddd;
+	font-size: 1rem;
+	transition: 0.3s ease;
 	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
-}
-  input:hover,
-  select:hover {
+	}
+	input:hover,
+	select:hover {
 	border-width: 1px;
 	background: rgba(20, 20, 20, 0.9);
-    box-shadow: 0 0 15px cyan;
-    transform: scale(1.05);
-  }
-  
+	box-shadow: 0 0 15px cyan;
+	transform: scale(1.05);
+	}
 
-  input[type="text"]:focus,
-  input[type="number"]:focus,
-  input[type="text"]:active,
-  input[type="number"]:active,
-  select:focus,
-  select:active {
-    outline: 1px solid red;
-    border-color: #ac4915;
-    box-shadow: 0 0 15px #ac4915;
-}
-  /* Buttons */
-  .eu-container button {
-    background: #32c7e9;
-    color: #121212;
-    font-weight: 700;
-    font-size: 1rem;
-    border: none;
-    padding: 10px 20px;
-    margin: 6px 8px 12px 0;
-    cursor: pointer;
-    transition: background-color 0.25s ease;
-    user-select: none;
-  }
-  button:hover {
-    background: #53e0f6;
-  }
-  button:active {
-    background: #1a9abf;
-  }
-.craftingbuddyWrapper {
-    display: flex
-;
-}
-.eu-blueprint {
-    color: #ac4915;
-    background: rgba(20, 20, 20, 0.7);
-    width: 25%;
-	max-width: 25%;
-    min-width: 186px;
-    padding: 4px;
-    margin: 0px;
-    margin-left: 20px;
-    border-radius: 10px;
-    text-align: center;
-    transition: 0.3s;
-    box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
-}
-label#wvclabelText {
-    display: flex;
-    flex-direction: row;
-}
- .eu-blueprint:hover {
-	background: rgba(20, 20, 20, 0.9);
-    box-shadow: 0 0 15px cyan;
-    transform: scale(1.05);
-  }
- .eu-blueprint input[type="text"],.eu-blueprint input[type="number"],.eu-blueprint select {
-    width: 85%;
-    max-width: 200px;
-    padding: 1px 9px;
-    margin-top: 0px;
-    margin-bottom: 2px;
-    background: rgba(20, 20, 20, 0.7);
-    border-radius: 12px;
-    color: #818181;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
-}
-.eu-blueprint input:hover, .eu-blueprint select:hover{
-   color: #ffffff;
-	background: rgba(20, 20, 20, 0.9);
-    box-shadow: 0 0 10px #ac4915;
-    transform: scale(1.05);
-}
 
-.eu-blueprint label{
-	border: 1px outset teal;
-    border-left-width: 2px;
-}
-button#saveBlueprintButt,button#loadBlueprintsButt {
-    font-weight: 700;
-    font-size: 0.7rem;
-    border: none;
-    padding: 2px 4px;
-    margin: 4px;
-}
-div#conditionBlock {
-    height: 62px;
-    padding: 2px;
-    border: 1px outset teal;
-    overflow: hidden;
+	input[type="text"]:focus,
+	input[type="number"]:focus,
+	input[type="text"]:active,
+	input[type="number"]:active,
+	select:focus,
+	select:active {
+	outline: 1px solid red;
+	border-color: #ac4915;
+	box-shadow: 0 0 15px #ac4915;
+	}
+	/* Buttons */
+	.eu-container button {
+	background: #32c7e9;
+	color: #121212;
+	font-weight: 700;
+	font-size: 0.8rem;
+	border: none;
+	padding: 1px 6px;
+	margin: 4px 4px 6px 18px;
+	cursor: pointer;
+	transition: background-color 0.25s ease;
+	user-select: none;
+	float: left;
+	}
+
+
+	#playerCraftlvlWrapper {
+	border: 2px inset #ac4915;
 	transition: 0.3s ease;
-}
-div#conditionBlock:hover {
-    height: 96px;
-    padding: 2px;
-    border: 1px outset teal;
-    overflow: hidden;
-}
-  /* Material cards */
-#materials {
-    width: 70%;
-    max-height: 450px;
-    padding: 4px;
-    padding-top: 12px;
-    border: 3px inset #298686db;
-    overflow-x: visible;
-    overflow-y: auto;
-}
-  #materials:hover {
-	overflow-x:overlay;
-  }
-  
-  .material {
-    background: rgba(20, 20, 20, 0.7);
-    border-radius: 14px;
-    width: 92%;
-    padding: 4px 4px;
-    margin: auto;
-    margin-bottom: 4px;
-    border: 3px inset #263b49c2;
-    box-shadow: 0 2px 8px rgba(50, 199, 233, 0.3);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-}
+	}
+	#playerCraftlvlWrapper:active {
+	color: #ac4915;
+	}
+	input#playerLevel {
+	width: 82%;
+	}
 
- .material:hover {
+	div#bpbuttonDiv button {
+	background: #32c7e9;
+	color: #121212;
+	font-weight: 700;
+	font-size: 0.8rem;
+	width: 18%;
+	border: none;
+	padding: 1px 6px;
+	margin: 4px 4px 4px 4px;
+	cursor: pointer;
+	transition: background-color 0.25s ease;
+	user-select: none;
+	float: left;
+	}
+	button:hover {
+	background: #53e0f6;
+	}
+	button:active {
+	background: #1a9abf;
+	}
+	.craftingbuddyWrapper {
+	display: flex;
+	flex-direction: row;
+	margin-top: 8px;
+	overflow: hidden;
+	height: 89.5%;
+	border: 3px inset rgb(6 10 15 / 97%);
+	gap: 8px;
+	}
+	.eu-blueprint {
+	color: #ac4915;
+	background: rgba(20, 20, 20, 0.7);
+	width: 25%;
+	max-width: 26%;
+	min-width: 175px;
+	padding: 2px;
+	margin: 0px;
+	margin-top: 1px;
+	margin-left: 20px;
+	border: 3px ridge #292525a8;
+	border-radius: 10px;
+	text-align: center;
+	overflow: hidden;
+	overflow-y: scroll;
+	transition: 0.3s;
+	z-index: 99;
+	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+	}
+
+	label#wvclabelText {
+	display: flex;
+	flex-direction: row;
+	}
+	.eu-blueprint:hover {
 	background: rgba(20, 20, 20, 0.9);
-    box-shadow: 0 0 15px cyan;
-    transform: scale(1.05);
-  }
-  .material strong {
-    font-size: 1.1rem;
-    color: #32c7e9;
-    margin-top: -42px;
-    margin-left: 8px;
-    margin-right: -12px;
-}
-#materialInputs {
-    max-width: 80%;
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    justify-content: space-evenly;
-    align-items: center;
-    margin: auto;
-}
-  .material label {
-    flex: 1 1 140px;
-    margin-bottom: 0;
-    font-weight: 500;
-    font-size: 0.9rem;
-    color: #8bdaf0;
-  }
+	box-shadow: 0 0 15px cyan;
+	z-index:1000;
+	margin-top:5px;
+	transform: scale(1.01);
+	}
 
-  .material input {
-    max-width: 100px;
-    margin-top: 4px;
-  }
-.material input[type="number"] {
-    max-width: 70px;
-    padding: 0px 8px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    background: #121212;
-    border: 1px solid #32c7e9;
-    border-radius: 12px;
-    color: #ddd;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-}
-.material button {
-    background: #e94e1b;
-    color: white;
-    font-weight: 700;
-    padding: 0px 12px;
-    border-radius: 12px;
-    max-height: 36px;
-    margin-left: auto;
-}
-  .material button:hover {
-    background: #ff6a40;
-  }
+	.eu-blueprint input[type="text"], .eu-blueprint input[type="number"], .eu-blueprint select {
+	width: 85%;
+	max-width: 200px;
+	padding: 0px 9px;
+	margin-top: 0px;
+	margin-bottom: 4px;
+	background: rgba(20, 20, 20, 0.7);
+	border-radius: 12px;
+	color: #818181;
+	font-size: 1rem;
+	transition: border-color 0.3s ease;
+	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+	}
+	.eu-blueprint input:hover, .eu-blueprint select:hover{
+	color: #ffffff;
+	background: rgba(20, 20, 20, 0.9);
+	box-shadow: 0 0 10px #ac4915;
+	transform: scale(1.05);
+	}
+	.eu-blueprint label{
+	border: 1px outset teal;
+	border-left-width: 2px;
+	}
+	div#bpbuttonDiv {
+	display: flex;
+	flex-direction: row;
+	}
+	div#layoutLabel {
+	padding: 0px;
+	width: 100%;
+	}
+	div#layoutToggle {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	flex-direction: row;
+	align-content: flex-start;
+	justify-content: center;
+	background: rgba(15, 15, 15, 0.8);
+	border: 1px solid #2c2c2c;
+	border-radius: 10px;
+	}
+	div#layoutOptions {
+	display: flex;
+	flex-wrap: wrap;
+	}
+	div#layoutOptions label {
+	border: 2px outset teal;
+	}
+	#blueprintFilters {
+	background-color: rgba(15, 15, 15, 0.8);
+	border: 1px solid #2c2c2c;
+	border-radius: 10px;
+	margin: auto;
+	padding: 2px 2px;
+	display: flex;
+	font-size: 0.85rem;
+	flex-direction: column;
+	flex-wrap: wrap;
+	}
 
-  /* Results & saved list */
-  .results {
-    background: #262626;
-    border-radius: 16px;
-    padding: 4px;
+	/* Label styling */
+	#blueprintFilters label {
+	color: #8bdaf0;
+	font-weight: 600;
+	width: 30%;
+	}
+	label#filterlabel {
+	width: 80%;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: flex-start;
+	align-content: flex-start;
+	}
+	/* Input and select styling */
+	#blueprintFilters input[type="text"],
+	#blueprintFilters select {
+	background-color: #121212;
+	border: 1px solid #32c7e9;
+	border-radius: 8px;
+	padding: 4px 4px;
+	color: #ddd;
+	font-size: 0.65rem;
+	transition: all 0.2s ease;
+	width: 95%;
+	max-width: 100%;
+	}
+	#blueprintFilters input:hover,
+	#blueprintFilters select:hover {
+	background-color: #1a1a1a;
+	box-shadow: 0 0 8px #32c7e9;
+	transform: scale(1.02);
+	}
+
+	/* Clear Filters button */
+	#clearBPfilterButt {
+	padding: 4px 4px;
+	margin: 0px;
+	font-size: 0.75rem;
+	font-weight: bold;
+	background-color: #2c2c2c;
+	color: #f06666;
+	border: 1px solid #444;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	}
+
+	#clearBPfilterButt:hover {
+	background-color: #3a3a3a;
+	color: #ff5a5a;
+	box-shadow: 0 0 8px rgba(255, 50, 50, 0.4);
+	}
+
+	#clearBPfilterButt:active {
+	background-color: #202020;
+	transform: scale(0.97);
+	}
+
+	button#saveBlueprintButt {
+	font-weight: 700;
+	font-size: 0.7rem;
+	border: none;
+	padding: 2px 4px;
+	margin: 4px;
+	}
+	.blueprint-list.cards-layout {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	height: 45px;
+	overflow-y: auto;
+	padding: 5px;
+	border: 1px solid #444;
+	border-radius: 6px;
+	background: #111;
+	z-index:10;
+	transition: 0.3s ease;
+	}
+	.blueprint-list.cards-layout:hover,.blueprint-list.cards-layout:focus {
+	height: 275px;
+	z-index:1000;
+	}
+	.blueprint-item {
+	background: #222;
+	padding: 3px 6px;
+	border-radius: 5px;
+	cursor: pointer;
+	width: 47%;
+	max-width: 47%;
+	box-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+	transition: background-color 0.2s ease;
+	user-select: none;
+	}
+
+
+	.blueprint-item:hover {
+	background-color: #2a8cff;
+	color: white;
+	}
+
+	.bp-name {
+	font-weight: bold;
+	font-size: 1.1em;
+	}
+
+	.bp-book {
+	font-size: 0.9em;
+	color: #88c;
+	margin-top: 2px;
+	}
+
+	.blueprint-list.list-layout {
+	max-height: 45px;
+	overflow-y: auto;
+	padding-left: 20px;
+	border: 1px solid #444;
+	border-radius: 6px;
+	background: #111;
+	list-style-type: disc;
+	transition:0.3s ease;
+	z-index:10;
+	}
+	.blueprint-list.list-layout:hover,.blueprint-list.list-layout:focus {
+	max-height: 300px;
+	z-index:1000;
+	}
+	.blueprint-list-item {
+	padding: 8px 12px;
+	cursor: pointer;
+	border-bottom: 1px solid #333;
+	transition: background-color 0.2s ease;
+	user-select: none;
+	}
+
+	.blueprint-list-item:hover {
+	background-color: #2a8cff;
+	color: white;
+	}
+	div#conditionBlock {
+	height: 108px;
+	text-align: left;
+	padding: 2px;
+	background-color: black;
+	border: 3px outset teal;
+	overflow: hidden;
+	opacity: 0.8;
+	transition: 0.3s ease;
+	}
+	div#conditionBlock:hover {
+	margin-top:-3px;
+	padding: 2px;
+	border: 1px outset teal;
+	background:black;
+	opacity:1;
+	overflow: hidden;
+	overflow-y: auto;
+	z-index:1000;
+	transform: scale(1.03);
+	}
+	input#qvsc {
+	width: 100%;
+	margin: 7px 0 2px 0;
+	outline: 3px inset rgb(23, 130, 182, 1.0);
+	background: transparent;
+	-webkit-appearance: none;
+	appearance: none;
+	}
+
+	/* WebKit browsers: Chrome, Safari */
+	input#qvsc::-webkit-slider-runnable-track {
+	height: 10px;
+	background: linear-gradient(to right, green, orange, red);
+	border-radius: 5px;
+	}
+
+	/* WebKit slider thumb */
+	input#qvsc::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	height: 16px;
+	width: 16px;
+	background: #fff;
+	border: 2px solid #8000ff;
+	border-radius: 50%;
+	margin-top: -3px;
+	cursor: pointer;
+	}
+
+	/* Firefox */
+	input#qvsc::-moz-range-track {
+	height: 10px;
+	background: linear-gradient(to right, green, orange, red);
+	border-radius: 5px;
+	}
+
+	input#qvsc::-moz-range-thumb {
+	height: 16px;
+	width: 16px;
+	background: #fff;
+	border: 2px solid #8000ff;
+	border-radius: 50%;
+	cursor: pointer;
+	}
+
+	div#eu-myBlueprintWrapper {
+	display: flex;
+	flex-direction: column;
+	border: 3px ridge #292525a8;
+	border-radius: 10px;
+	overflow: hidden;
+	overflow-y: scroll;
+	height: 86vh;
+	}
+
+	/* saved Blueprint list */
+	.eu-myBlueprintList {
+	position: fixed;
+	right: 12px;
+	top: 11px;
+	}
+
+	.eu-myBlueprintList h1 {
+	width: 98%;
+	font-size: 1.3em;
+	color: #ac4915;
+	background: rgb(30 31 33 / 92%);
+	text-align: left;
+	margin: auto;
+	margin-top: -4px;
+	margin-bottom: 2px;
+	border: 3px ridge #2a2a2a33;
+	border-radius: 15px;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	}
+
+	.eu-myBlueprintList h1:hover {
+	box-shadow: 0 4px 12px #ac4915;
+	color: #ac4915;
+	text-shadow: 0 0 4px #240f03, 0 0 8px #ad6716;
+	transition: box-shadow 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
+	}
+
+	div#filterOptionGroup {
+	display: flex;
+	flex-wrap: wrap;
+	}
+	#savedList {
+	background: rgba(20, 20, 20, 0.9);
+	border-radius: 16px;
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
+	padding: 4px;
 	padding-top: 20px;
-    margin-top: -25px;
-    box-shadow: 0 4px 14px rgba(50,199,233,0.25);
-    font-size: 1rem;
-    line-height: 1.4;
-  }
-.results#savedList {
+	margin-top: -25px;
+	box-shadow: 0 4px 14px rgba(50, 199, 233, 0.25);
+	font-size: 1rem;
+	line-height: 1.4;
+	transition: 0.3s ease;
+	}
+	#savedList:hover {
+	box-shadow: 0 0 15px #1dff00b8;
+	}
+	.results#savedList {
+	width: 97%;
+	margin: auto;
+	margin-top: 6px;
+	margin-right: 15px;
+	margin-left: -6px;
+	padding: 14px;
+	padding-right: 12px;
+	padding-top: 4px;
+	padding-bottom: 9px;
+	border: 3px ridge green;
+	box-shadow: 0 4px 14px rgba(50, 199, 233, 0.25);
+	opacity: 0.95;
+	transition: 0.3s ease;
+	}
+	.results#savedList:hover {
+	box-shadow: 0 0 15px #1dff00b8;
+	z-index: 1000;
+	}
 
-}
-.results#results {
-    background: #262626;
-    border-radius: 16px;
-    padding: 4px;
-    padding-top: 20px;
-    width: 75%;
-    margin: auto;
-    margin-top: -30px;
-    box-shadow: 0 4px 14px rgba(50, 199, 233, 0.25);
-    font-size: 1rem;
-    line-height: 1.4;
-}
 
+	/* Material cards */
+	.material {
+	position: relative;
+	background: rgba(30, 29, 29, 0.98);
+	border-radius: 12px;
+	padding: 10px 12px;
+	margin: 10px auto;
+	border: 2px inset #263b49c2;
+	outline: 1px solid gray;
+	box-shadow: 0 2px 6px rgba(50, 199, 233, 0.15);
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	flex-wrap: wrap;
+	transition: 0.3s ease;
+	}
 
-  /* Responsive */
-  @media (max-width: 640px) {
-    .material {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .material label {
-      flex: none;
-      width: 100%;
-    }
-    .material input {
-      max-width: 100%;
-    }
-    input[type="text"],
-    input[type="number"],
-    select {
-      max-width: 100%;
-    }
-  }
-</style>
+	.material:hover {
+	background: rgba(20, 20, 20, 0.95);
+	box-shadow: 0 0 15px cyan;
+	transform: scale(1.03);
+	}
+
+	/* ❌ Top right button */
+	.material-close {
+	position: absolute;
+	top: 4px;
+	right: 8px;
+	background: #911d1d;
+	color: white;
+	border: none;
+	font-size: 1rem;
+	font-weight: bold;
+	border-radius: 6px;
+	padding: 2px 8px;
+	cursor: pointer;
+	z-index: 10;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+	}
+	.material-close:hover {
+	background: #c73636;
+	}
+
+	/* Number bubble */
+	.material strong {
+	font-size: 1.4rem;
+	color: #32c7e9;
+	height: 36px;
+	min-width: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	border: 3px ridge #0b7272;
+	outline: 1px solid gray;
+	background: #000;
+	text-shadow: 1px 1px 2px black;
+	}
+
+	/* Input container: horizontal wrap */
+	div#materialInputs {
+	display: flex;
+	flex: 1;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	}
+
+	/* Each input group */
+	.material label {
+	flex: 1 1 120px;
+	display: flex;
+	flex-direction: column;
+	font-weight: 500;
+	font-size: 0.9rem;
+	color: #8bdaf0;
+	}
+
+	/* Inputs */
+	.material input[type="number"],
+	.material input[type="text"] {
+	width: 100%;
+	background: #121212;
+	border: 1px solid #32c7e9;
+	border-radius: 8px;
+	color: #ddd;
+	font-size: 1rem;
+	padding: 4px 6px;
+	transition: border-color 0.3s ease;
+	}
+	/* my blueprint panel buttons */
+	button.delete-bp {
+	background: transparent;
+	border: none;
+	color: #c33; /* soft red */
+	font-size: 1.1em;
+	cursor: pointer;
+	float: right;
+	margin-left: auto;
+	padding: 2px 5px;
+	transition: color 0.2s ease, transform 0.2s ease;
+	}
+
+	button.delete-bp:hover {
+	color: #ff4c4c;
+	transform: scale(1.2);
+	}
+
+	button.delete-bp:focus {
+	outline: none;
+	}
+
+	.results #panelControls {
+	display: flex;
+	flex-direction: row;
+	background: rgb(30 31 33 / 92%);
+	padding: 6px;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	margin: auto;
+	margin-left: -8px;
+	margin-right: -11px;
+	justify-content: space-evenly;
+	}
+	#loadBlueprintsButt {
+	background: transparent;
+	border: 2px outset #4c4c4c;
+	border-radius: 15px;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	color: #ac4915;
+	margin: 0;
+	margin-right: 3px;
+	padding: 6px;
+	padding-bottom: 0;
+	float: right;
+	cursor: pointer;
+	transition: color 0.2s ease, transform 0.2s ease, box-shadow 0.1s ease;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+	}
+
+	#closeMyBlueprintsButton:hover {
+	color: #ff6347;
+	box-shadow: 0 2px 25px rgb(155 12 12 / 82%);
+	}
+
+	#closeMyBlueprintsButton:focus {
+	outline: none;
+	}
+
+	/* 👇 Press-in effect */
+	#closeMyBlueprintsButton:active {
+	transform: scale(0.95);
+	padding:8px;
+	padding-bottom:0px;
+	margin-right: 0px;
+	box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.4);
+	border-style: inset;
+	}
+
+	.results#results {
+	background: #262626;
+	border-radius: 16px;
+	padding: 4px;
+	padding-top: 20px;
+	width: 75%;
+	margin: auto;
+	margin-top: -30px;
+	box-shadow: 0 4px 14px rgba(50, 199, 233, 0.25);
+	font-size: 1rem;
+	line-height: 1.4;
+	}
+	.results#results {
+	color: #ac4915;
+	background: rgba(20, 20, 20, 0.7);
+	width: 50%;
+	max-width: 50%;
+	min-width: 186px;
+	padding: 4px;
+	padding-left: 8px;
+	margin: 0px;
+	margin-top: -1px;
+	margin-left: ;
+	border: 2px outset teal;
+	border-radius: 10px;
+	text-align: left;
+	overflow-y: scroll;
+	transition: 0.3s;
+	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+	}
+	.result-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	background: #111;
+	padding: 10px;
+	border: 1px solid #333;
+	border-radius: 10px;
+	font-size: 0.95rem;
+	line-height: 1.5;
+	}
+
+	.result-row {
+	display: flex;
+	justify-content: space-between;
+	border-bottom: 1px dashed #333;
+	padding: 3px 0;
+	}
+
+	.result-row.total {
+	font-weight: bold;
+	color: #00c8ff;
+	}
+
+	.result-row.profit {
+	font-weight: bold;
+	}
+
+	.profit-positive {
+	color: #4caf50; /* green */
+	}
+
+	.profit-negative {
+	color: #ff4444; /* red */
+	}
+
+	.result-grid .label {
+	color: #aaa;
+	min-width: 50%;
+	}
+
+	.multiplier-odds-details {
+	white-space: nowrap;
+	background: #1a1a1a;
+	border: 1px solid #444;
+	border-radius: 8px;
+	padding: 10px 9px;
+	margin-top: -26px;
+	color: #ddd;
+	font-size: 0.9rem;
+	line-height: 1.4;
+	overflow: hidden;
+	transition: background 0.3s ease;
+	}
+
+	.multiplier-odds-details[open] {
+	background: #222;
+	box-shadow: 0 0 8px #0ff;
+	}
+	.multiplier-note {
+	color: #d6590e; /* or red */
+	font-style: normal;
+	font-weight: 600;
+	}
+	.multiplier-odds-details summary {
+	cursor: pointer;
+	font-weight: 600;
+	outline: none;
+	border: 2px inset #00e676;
+	padding: 4px;
+	list-style: none;
+	user-select: none;
+	margin-bottom: 8px;
+	font-size: 1rem;
+	color: #00e676;
+	}
+
+	.multiplier-odds-details summary::-webkit-details-marker {
+	display: none; /* remove default marker in Chrome */
+	}
+
+	.multiplier-odds-details summary::before {
+	content: '🎲 ';
+	}
+
+	.multiplier-chance,
+	.multiplier-hit,
+	.return-multiplier {
+	color: #ffc107; /* amber */
+	}
+
+	.clicks-before-hit.good {
+	color: #4caf50; /* green */
+	}
+
+	.clicks-before-hit.bad {
+	color: #f44336; /* red */
+	}
+
+	.payout-range {
+	color: #03a9f4; /* blue */
+	}
+
+	.highlight-return {
+	background: #222;
+	color: #00e676;
+	padding: 4px 8px;
+	border-radius: 6px;
+	display: inline-block;
+	margin-top: 6px;
+	}
+
+	/* Responsive */
+	@media (max-width: 640px) {
+	.material {
+	  flex-direction: column;
+	  align-items: flex-start;
+	}
+	.material label {
+	  flex: none;
+	  width: 100%;
+	}
+	.material input {
+	  max-width: 100%;
+	}
+	input[type="text"],
+	input[type="number"],
+	select {
+	  max-width: 100%;
+	}
+	}
+	</style>
+	<style>
+	/* Modal base */
+	.modal {
+	  display: none;
+	  position: fixed;
+	  z-index: 9999;
+	  padding-top: 60px;
+	  left: 0; top: 0;
+	  width: 100%;
+	  height: 100%;
+	  overflow: auto;
+	  background-color: rgba(0,0,0,0.6);
+	}
+
+	/* Modal content */
+	.modal-content {
+	  background-color: #1e1e1e;
+	  margin: auto;
+	  padding: 20px;
+	  border: 2px solid #888;
+	  width: 90%;
+	  max-width: 600px;
+	  border-radius: 8px;
+	  color: #eee;
+	}
+
+	/* Close button */
+	.close {
+	  color: #ccc;
+	  float: right;
+	  font-size: 28px;
+	  font-weight: bold;
+	  cursor: pointer;
+	}
+
+	.close:hover,
+	.close:focus {
+	  color: white;
+	}
+	</style>
+	<style>
+		/* 🛠️ Modal Base */
+
+		.modal {
+		  display: none;
+		  position: fixed;
+		  z-index: 9999;
+		  left: 0;
+		  top: 0;
+		  width: 100%;
+		  height: 100%;
+		  overflow: auto;
+		  background-color: rgba(0, 0, 0, 0.7);
+		}
+
+		.modal-content {
+		  background-color: #0d0d0d;
+		  margin: 10% auto;
+		  padding: 20px;
+		  border: 2px solid #33ffcc;
+		  width: 80%;
+		  max-width: 600px;
+		  border-radius: 12px;
+		  color: #eee;
+		  font-family: 'Orbitron', sans-serif;
+		  box-shadow: 0 0 20px #33ffcc;
+		  position: relative;
+		}
+
+		.modal-content .close {
+		  position: absolute;
+		  top: 10px;
+		  right: 20px;
+		  color: #33ffcc;
+		  font-size: 24px;
+		  cursor: pointer;
+		}
+
+		.sim-title {
+		  font-size: 20px;
+		  color: #00ffe6;
+		  text-align: center;
+		  margin-bottom: 20px;
+		}
+
+		.sim-bar-wrapper {
+		  background: #1a1a1a;
+		  border: 1px solid #00ffee;
+		  height: 20px;
+		  border-radius: 10px;
+		  overflow: hidden;
+		  margin-bottom: 20px;
+		}
+
+		.sim-progress-bar {
+		  height: 100%;
+		  width: 0%;
+		  background: linear-gradient(to right, #00ffe6, #33ffcc);
+		  transition: width 0.1s ease-in-out;
+		}
+
+		.sim-log {
+		  max-height: 250px;
+		  overflow-y: auto;
+		  background: #111;
+		  border: 1px solid #555;
+		  padding: 10px;
+		  font-size: 14px;
+		  border-radius: 8px;
+		  margin-bottom: 20px;
+		}
+
+		.sim-log p {
+		  margin: 5px 0;
+		  color: #ccc;
+		}
+
+		.sim-actions {
+		  text-align: center;
+		}
+
+		.sim-actions button {
+		  background-color: #00bfa6;
+		  border: none;
+		  color: #fff;
+		  padding: 10px 20px;
+		  margin: 0 5px;
+		  border-radius: 5px;
+		  font-family: 'Orbitron', sans-serif;
+		  font-size: 14px;
+		  cursor: pointer;
+		  transition: background 0.3s;
+		}
+
+		.sim-actions button:hover {
+		  background-color: #00d7b9;
+		}
+
+  </style>
 </head>
 <body>
-<body>
+
+<em class="PageFooterDisclaimer-note">disclaimer: This Tool is still under construction, These are very rough estimates. and should be expected to be far off from reality</em><br>
+
 	<div class="background-container">
 	  <div class="stars"></div>
 	  <div class="twinkling"></div>
 	</div>
-    <div class="header">PixelB8.LoL - EU</div>
+    <div class="header">Pixelb8.LoL/Eu/Crafting Tool</div>
     <button class="menu-button" onclick="toggleMenu()">☰</button>
     <div class="nav-menu" id="navMenu">
         <a href="https://Pixelb8.lol/home">Home</a>
@@ -339,92 +1047,211 @@ div#conditionBlock:hover {
 		<a href="https://Pixelb8.lol/arcade">Arcade</a>
     </div>
 <div class="eu-container">
-  <h1>Entropia Crafting Profit Calculator</h1>
+<!--   <h1>Entropia Crafting Tool</h1> -->
   <div class="craftingbuddyWrapper">
     <div class="eu-blueprint">
-      <button onclick="loadBlueprints()" id="loadBlueprintsButt">📂 Show My Blueprints</button>
-      <div class="results" id="savedList"></div>
-
-      <label for="itemName">Item Name:
+      <label for="itemName">Blueprint Name:
         <input id="itemName" type="text" value="Portable TT Unit (L)" />
       </label>
+      <label for="bpType">Blueprint Type:
+        <select id="bpType" onchange="toggleBpMuField()">
+		  <option value="Limited">Limited</option>
+		  <option value="Unlimited" selected>Unlimited</option>
+        </select>
+      </label>
+      <label id="bpMuLabel" for="bpMu">Limited BP MU %:
+        <input id="bpMu" type="number" value="150" />
+      </label>
+      <label for="bpBook">Book comma seperated
+        <input id="bpBook" type="text" value="Limited (Vol.1) (c), Limited (vol.2) (C)" />
+      </label>
+	  <label for="bpLevel">Blueprint Required Level:
+	    <input id="bpLevel" type="number" value="1" min="0" max="100" />
+	  </label>
+
+	  <label for="qr">Blueprint QR (0.01–1.00):
+		<input id="qr" type="number" value="1.00" min="0.01" max="1.00" step="0.01" />
+	  </label>
 
       <label for="maxTT">Max TT Value (per item):
         <input id="maxTT" type="number" value="20" />
       </label>
-
-      <label for="bpType">Blueprint Type:
-        <select id="bpType" onchange="toggleBpMuField()">
-          <option value="Limited">Limited</option>
-          <option value="Unlimited">Unlimited</option>
-        </select>
-      </label>
-
-      <label id="bpMuLabel" for="bpMu">Limited BP MU %:
-        <input id="bpMu" type="number" value="150" />
-      </label>
-
-      <label for="sellMu">Sell MU %:
+      <label for="sellMu">item MU %:
         <input id="sellMu" type="number" value="150" />
       </label>
-
       <input type="hidden" id="successRate" value="38">
       <input type="hidden" id="nearSuccessRate" value="50">
       <input type="hidden" id="failRate" value="12">
-
       <label for="residuePerSuccess">Average Residue per Success (PED):
         <input id="residuePerSuccess" type="number" value="15" />
       </label>
-
       <label for="clicks">Clicks:
         <input id="clicks" type="number" value="100" />
       </label>
-
-      <button onclick="saveBlueprint()" id="saveBlueprintButt">💾 add to My Blueprints</button>
-
       <div id="conditionBlock">
         <label for="qvsc" id="wvclabelText">Quantity⇔Condition: <span id="qvscLabel">0%</span></label>
         <input type="range" id="qvsc" min="0" max="100" value="0" 
                oninput="document.getElementById('qvscLabel').innerText = this.value + '%'; updateRatesFromSlider()">
-        <div style="font-size: 0.8em;
-    margin-top: 2px;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    width: 75%;">
+        <div style="element.style {font-size: 0.8em;margin-top: 2px;display: flex;flex-direction: row;flex-wrap: wrap;min-width: 136px;width: max-content;max-width: 202px;}">
           <div><span id="visibleSuccess"> 38%</span>✅ Success</div>
           <div><span id="visibleNearSuccess"> 50%</span>🔶 Near Success</div>
           <div><span id="visibleFail">12%</span>❌ Fail</div>
         </div>
+
+     </div>
+    </div>
+	      
+	<div id="eu-myBlueprintWrapper">    
+		<div style="display:flex;flex-direction:row;">
+		  <button onclick="addMaterial()" id="addMattButt">+ Add Material</button>
+		  <div id="bpbuttonDiv">
+			<button onclick="saveBlueprint()" id="saveBlueprintButt">💾 Save to My Blueprints</button>
+			<button id="resetBlueprintBtn">🔄 New Blueprint</button>
+			<label id="playerCraftlvlWrapper" for="playerLevel">Your Crafting Level:
+			  <input id="playerLevel" type="number" value="10" min="0" max="100" />
+		    </label>
+			<button onclick="calculate()">calculate estimates</button>
+		  </div>
+	    </div>
+      <div id="materials">
+
       </div>
-	  <!-- Checkbox to show multiplier odds -->
-	  <label><input type="checkbox" id="showMultiplier"> Show Multiplier Odds</label>
-      <button onclick="calculate()">Estimates</button>
+
+      <div class="eu-myBlueprintList">
+		<h1>My Saved Blueprints<button id="loadBlueprintsButt" onclick="toggleBlueprints()">📂 Expand</button></h1>
+		<div class="results" id="savedList" style="display: none;">
+		  
+		  <div id="panelControls" style="">
+			  <div id="blueprintFilters"></div>
+			  <div id="layoutToggle">
+				<div id="layoutLabel">Layout:</div>
+				<div id="layoutOptions">
+					<label><input type="radio" name="layout" value="cards" checked onchange="renderBlueprintList()"> Cards</label>
+					<label><input type="radio" name="layout" value="list" onchange="renderBlueprintList()"> List</label>
+				</div>
+			  </div>
+		  </div>
+		  <div id="blueprintList"></div>
+		</div>
+	 </div>
+   </div>
+	<div class="results" id="results">
+	  <h3>📊 Results for: <em>---</em></h3>
+	  <div class="result-grid">
+		<div class="result-row"><span class="label">🔖 Blueprint Type:</span> <span>---</span></div>
+		<div class="result-row"><span class="label">💸 Total TT Cost:</span> <span>0.00 PED</span></div>
+		<div class="result-row"><span class="label">📈 Total Markup:</span> <span>0.00 PED</span></div>
+		<div class="result-row total"><span class="label">🧾 Total Cost (TT + MU):</span> <span>0.00 PED</span></div>
+		<div class="result-row"><span class="label">🎯 Markup per Click:</span> <span>0.0000 PED</span></div>
+		<div class="result-row"><span class="label">✅ Expected Successful Crafts:</span> <span>0.0</span></div>
+		<div class="result-row"><span class="label">🤏 Near-Successes:</span> <span>0.0</span></div>
+		<div class="result-row"><span class="label">💰 Return from Success:</span> <span>0.00 PED</span></div>
+		<div class="result-row"><span class="label">💵 Return from Near-Success:</span> <span>0.00 PED</span></div>
+		<div class="result-row"><span class="label">💱 Total Return:</span> <span>0.00 PED</span></div>
+		<div class="result-row"><span class="label">🧪 Residue Needed:</span> <span>0.00 PED</span></div>
+		<div class="result-row"><span class="label">📊 ROI:</span> <span>0.00%</span></div>
+		<div class="result-row profit">
+		  <span class="label">💹 Estimated Profit/Loss:</span>
+		  <span>0.00 PED</span>
+		</div>
+	  </div>
+	  <!-- 🪪 Button to Open Modal -->
+	  <span class="label">Features coming soon (not finished):</span><br>
+	  <button id="openHistoryModal">🕮 Crafting History</button>
+	  <!-- 🧪 Simulation Buttons -->
+	  <button onclick="startLiveSimulation()">Default Simulation</button>
+	  <button onclick="runSimulation('historic')">Simulate Based on History</button>
+	</div>
+
+  </div>
+  
+<!-- 📜 Modal Containers -->
+<!--oOooOOOoOOOoOOoOOooOOOooOoOOo-->
+   <!-- 📜 History Modal -->
+<div id="historyModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+
+    <h2>📜 Crafting Session Logger</h2>
+
+    <label for="blueprintName">Blueprint Name:</label>
+    <input id="blueprintName" type="text" placeholder="e.g. Portable TT Unit (L)" />
+
+    <label for="planet">Planet:</label>
+    <input id="planet" type="text" placeholder="e.g. Calypso" />
+
+    <label for="playerSkillBefore">Player Skill Before:</label>
+    <input id="playerSkillBefore" type="number" step="0.01" />
+
+    <label for="playerSkillAfter">Player Skill After:</label>
+    <input id="playerSkillAfter" type="number" step="0.01" />
+
+    <label for="qrBefore">QR Before:</label>
+    <input id="qrBefore" type="number" step="0.01" min="0.00" max="1.00" />
+
+    <label for="qrAfter">QR After (optional):</label>
+    <input id="qrAfter" type="number" step="0.01" min="0.00" max="1.00" />
+
+    <label for="clickCount">Click Count:</label>
+    <input id="clickCount" type="number" />
+
+    <label for="successRate">Success Rate (0.00–1.00):</label>
+    <input id="successRate" type="number" step="0.01" min="0.00" max="1.00" />
+
+    <label for="residueReturned">Residue Returned (PED):</label>
+    <input id="residueReturned" type="number" step="0.01" />
+
+    <label for="totalReturnTT">Total Return TT:</label>
+    <input id="totalReturnTT" type="number" step="0.01" />
+
+    <label for="bigHits">Big Hits (comma-separated):</label>
+    <input id="bigHits" type="text" placeholder="e.g. 45.2, 32.8, 28.9" />
+
+    <label for="date">Date:</label>
+    <input id="date" type="date" />
+
+    <label for="time">Time (optional):</label>
+    <input id="time" type="time" />
+
+    <button onclick="saveFormSession()">💾 Save Session</button>
+
+    <hr />
+
+    <h3>📂 Load Previous Sessions</h3>
+    <label for="loadBlueprintSelect">Select Blueprint:</label>
+    <select id="loadBlueprintSelect">
+      <option value="">-- Choose --</option>
+    </select>
+    <button onclick="loadSelectedSession()">📤 Load</button>
+  </div>
+</div>
+
+<!-- 🛠️ Crafting Simulation Modal -->
+<div id="simulationModal" class="modal">
+  <div class="modal-content entropia-style">
+    <span class="close" id="closeSimulationModal">&times;</span>
+    <h2 class="sim-title">🛠️ Crafting Simulation</h2>
+
+    <div class="sim-bar-wrapper">
+      <div id="simProgressBar" class="sim-progress-bar"></div>
     </div>
 
-    <div id="materials">
-      <button onclick="addMaterial()" id="addMattButt">+ Add Material</button>
+    <div class="sim-log" id="simLog">
+      <p class="sim-message">Click "Start Simulation" to begin...</p>
+    </div>
+
+    <div class="sim-actions">
+		<button onclick="promptSimulationOptions('default')">Default Simulation</button>
+		<button onclick="promptSimulationOptions('historic')">Simulate Based on History</button>
     </div>
   </div>
 </div>
 
-		
-
-		
-
-		<div>
-
-		  
-		  
-		</div>
-		
-		<div class="results" id="results"></div>
-		
-
-	</div>
-
 <script>
 let materialIndex = 0;
+let blueprintsVisible = false;
+
+
 
 function addMaterial(name = '', qty = '', tt = 0, mu = 100) {
   const container = document.getElementById('materials');
@@ -455,24 +1282,77 @@ function toggleBpMuField() {
   document.getElementById('bpMuLabel').style.display = bpType === 'Limited' ? 'inline-block' : 'none';
 }
 
+// Core formula abstraction
+function getFormula(qr, playerLevel, bpLevel) {
+  const baseSuccessAtMax = 0.95;  // max overall success rate (95%)
+  const fullSkillNeeded = (bpLevel - 1) * 2.5 + 5; // SIB estimate
+  const skillRatio = Math.min(playerLevel / fullSkillNeeded, 1);
+
+  // Calculate overall success rate (success + near success)
+  // QR + skill contribute to overall success rate
+  const overallSuccessRate = Math.min(baseSuccessAtMax, baseSuccessAtMax * skillRatio + (qr * (baseSuccessAtMax - 0.814)));
+
+  // Baseline fixed values at max success rate (0.95)
+  const baselineTotalCraft = 0.88;  // 38% + 50%
+  const baselineSuccess = 0.38;
+  const baselineNearSuccess = 0.50;
+
+  // Calculate scaling ratio of current total craft vs baseline total craft
+  const scaleRatio = overallSuccessRate / baselineTotalCraft;
+
+  // Scale success and near success proportionally
+  const baseSuccess = baselineSuccess * scaleRatio;
+  const baseNearSuccess = baselineNearSuccess * scaleRatio;
+
+  // Fail rate is the remainder
+  const baseFail = 1 - (baseSuccess + baseNearSuccess);
+
+  return {
+    baseSuccess,
+    baseNearSuccess,
+    baseFail
+  };
+}
+
+
+function getBaseRates() {
+  const qr = parseFloat(document.getElementById('qr').value) || 1.0;
+  const playerLevel = parseFloat(document.getElementById('playerLevel').value) || 0;
+  const bpLevel = parseFloat(document.getElementById('bpLevel').value) || 1;
+
+  return getFormula(qr, playerLevel, bpLevel);
+}
+
 function updateRatesFromSlider() {
   const slider = parseInt(document.getElementById('qvsc').value);
-  const successRate = 38 - (slider * (38 - 5) / 100);
-  const nearSuccessRate = 50 - (slider * (50 - 10) / 100);
-  const failRate = 100 - successRate - nearSuccessRate;
+  const qr = parseFloat(document.getElementById('qr').value) || 1.0;
+  const bpLevel = parseInt(document.getElementById('bpLevel').value) || 1;
+  const playerLevel = parseInt(document.getElementById('playerLevel').value) || 0;
 
-  document.getElementById('successRate').value = successRate.toFixed(1);
-  document.getElementById('nearSuccessRate').value = nearSuccessRate.toFixed(1);
-  document.getElementById('failRate').value = failRate.toFixed(1);
+  const baseRates = getFormula(qr, playerLevel, bpLevel);
 
-  // Also update the visible percentage display
-  document.getElementById('visibleSuccess').innerText = `${successRate.toFixed(1)}%`;
-  document.getElementById('visibleNearSuccess').innerText = `${nearSuccessRate.toFixed(1)}%`;
-  document.getElementById('visibleFail').innerText = `${failRate.toFixed(1)}%`;
+  const baseSuccessPercent = baseRates.baseSuccess * 100;
+  const baseNearSuccessPercent = baseRates.baseNearSuccess * 100;
+
+  const conditionMod = slider / 100;
+
+  // Interpolate towards minimal realistic values when slider is at max
+  const adjustedSuccess = baseSuccessPercent - conditionMod * (baseSuccessPercent - 5);
+  const adjustedNear = baseNearSuccessPercent - conditionMod * (baseNearSuccessPercent - 10);
+  const adjustedFail = 100 - adjustedSuccess - adjustedNear;
+
+  document.getElementById('successRate').value = adjustedSuccess.toFixed(1);
+  document.getElementById('nearSuccessRate').value = adjustedNear.toFixed(1);
+  document.getElementById('failRate').value = adjustedFail.toFixed(1);
+
+  document.getElementById('visibleSuccess').innerText = `${adjustedSuccess.toFixed(1)}%`;
+  document.getElementById('visibleNearSuccess').innerText = `${adjustedNear.toFixed(1)}%`;
+  document.getElementById('visibleFail').innerText = `${adjustedFail.toFixed(1)}%`;
 
   calculate();
 }
 
+<!-- add a lock/unlock toggle that toggles the display of a round checkmark or radio inside each stat that can be checked or unchecked so that the user can decide which stats it wants to show from the calculation. while locked only checked stats will be displayed and while unlocked all stats will be shown so they can manage which ones are checked or unchecked -->
 function calculate() {
   let totalTT = 0;
   let totalMarkup = 0;
@@ -518,63 +1398,657 @@ function calculate() {
   const markupPerClick = totalMarkup / clicks;
   const roiPercent = ((totalReturn / totalCost) - 1) * 100;
 
-  const showMultiplier = document.getElementById('showMultiplier').checked;
-  let multiplierHtml = '';
-  if (showMultiplier) {
-    // Use adjusted chance ranges per your input:
-    const multiplierChancePercent = 0.1 + (qvscSlider / 100) * 1.7;  // from 0.1% to 1.8%
-    const multiplierChance = multiplierChancePercent / 100;
-    const expectedMultipliers = clicks * multiplierChance;
-    const expectedClicksBeforeHit = multiplierChance > 0 ? (1 / multiplierChance).toFixed(0) : '∞';
+  const multiplierChancePercent = 0.1 + (qvscSlider / 100) * 1.7;
+  const multiplierChance = multiplierChancePercent / 100;
+  const expectedMultipliers = clicks * multiplierChance;
+  const expectedClicksBeforeHit = multiplierChance > 0 ? (1 / multiplierChance).toFixed(0) : '∞';
 
-    // scale payout range by slider (0.5x to 1.5x)
-    const scaleFactor = 0.5 + (qvscSlider / 100);
-    const minPayout = (totalCost / clicks) * 7 * scaleFactor;
-    const maxPayout = (totalCost / clicks) * 875 * scaleFactor;
+  const scaleFactor = 0.5 + (qvscSlider / 100);
+  const minPayout = (totalCost / clicks) * 7 * scaleFactor;
+  const maxPayout = (totalCost / clicks) * 875 * scaleFactor;
+  const totalReturnMin = expectedMultipliers * minPayout;
+  const totalReturnMax = expectedMultipliers * maxPayout;
 
-    // estimated total return from multipliers range
-    const totalReturnMin = expectedMultipliers * minPayout;
-    const totalReturnMax = expectedMultipliers * maxPayout;
+  const avgReturnMin = totalReturn + totalReturnMin;
+  const avgReturnMax = totalReturn + totalReturnMax;
+  const profitRangeMin = avgReturnMin - totalCost;
+  const profitRangeMax = avgReturnMax - totalCost;
 
-    multiplierHtml = `
-      <br><strong>🎰 Multiplier Odds:</strong><br>
-	  <em>Note: Multipliers are rare and payouts vary widely.</em>
-      Estimated Chance per Click: ${multiplierChancePercent.toFixed(2)}%<br>
-      Expected Multiplier Hits: ${expectedMultipliers.toFixed(4)}<br>
-      Expected Clicks Before One Hit: ~${expectedClicksBeforeHit} clicks<br>
-      Estimated Payout per Hit: ${minPayout.toFixed(2)} – ${maxPayout.toFixed(2)} PED<br>
-      Estimated Total Return from Multipliers: ${totalReturnMin.toFixed(2)} – ${totalReturnMax.toFixed(2)} PED<br>
-      <br><strong>Average Expected Return (Including Multipliers): ${(totalReturn + totalReturnMin).toFixed(2)} – ${(totalReturn + totalReturnMax).toFixed(2)} PED</strong>
-    `;
-  }
+  const getReturnColor = (value) => {
+    const ratio = value / totalCost;
+    if (ratio >= 1.1) return 'profit-strong';
+    if (ratio >= 1.01) return 'profit-positive';
+    if (ratio >= 0.95) return 'profit-warn';
+    return 'profit-negative';
+  };
+
+  const multiplierHtml = `
+    <br>
+    <details class="multiplier-odds-details" closed>
+      <summary><strong>🎰 Multiplier Odds</strong> (click to toggle)</summary>
+      <em class="multiplier-note">Note: Multipliers are rare and payouts vary widely.</em><br>
+	  <em class="toolDisclaimer-note">disclaimer: These are very rough estimates.</em><br>
+	  <em class="toolDisclaimer-note">im terrible at math. We hope to improve our estimates</em><br>
+	  <em class="toolDisclaimer-note">over time. *for entertainment only*</em><br><br>
+      <strong>📌 Cost Summary:</strong><br>
+      • Cost per Click: ${ (totalTT / clicks).toFixed(2) } (TT) + ${ (totalMarkup / clicks).toFixed(2) } (MU) = ${(totalCost / clicks).toFixed(2)} PED<br>
+      • Number of Clicks: ${clicks}<br>
+      • Total Cost: ${totalTT.toFixed(2)} (TT) + ${totalMarkup.toFixed(2)} (MU) = ${totalCost.toFixed(2)} PED<br><br>
+
+      <strong>🎲 Multiplier Mechanics:</strong><br>
+      • Chance per Click: 📊 ${multiplierChancePercent.toFixed(2)}%<br>
+      • Expected Multiplier Hits: 🎯 ${expectedMultipliers.toFixed(4)}<br>
+      • Avg Clicks Between Hits: 📈 ~${expectedClicksBeforeHit} clicks<br>
+      • Payout per Hit: 💰 ${minPayout.toFixed(2)} – ${maxPayout.toFixed(2)} PED<br><br>
+
+      <strong>💵 Estimated Multiplier Returns:</strong><br>
+      • Return from Multipliers: <span class="${getReturnColor(totalReturnMin)}">${totalReturnMin.toFixed(2)}</span> – 
+        <span class="${getReturnColor(totalReturnMax)}">${totalReturnMax.toFixed(2)} PED</span><br>
+      • Total Cost: ${totalCost.toFixed(2)} PED<br>
+      • Profit/Loss from Multipliers: <span class="${getReturnColor(totalReturnMin)}">${(totalReturnMin - totalCost).toFixed(2)}</span> – 
+        <span class="${getReturnColor(totalReturnMax)}">${(totalReturnMax - totalCost).toFixed(2)} PED</span><br><br>
+
+      <strong>📈 Avg Return (Base + Multipliers):</strong><br>
+      • Return Range: <span class="${getReturnColor(avgReturnMin)}">${avgReturnMin.toFixed(2)}</span> – 
+        <span class="${getReturnColor(avgReturnMax)}">${avgReturnMax.toFixed(2)} PED</span><br>
+      • Total Cost: ${totalCost.toFixed(2)} PED<br>
+      • Total Profit/Loss: <span class="${getReturnColor(profitRangeMin)}">${profitRangeMin.toFixed(2)}</span> – 
+        <span class="${getReturnColor(profitRangeMax)}">${profitRangeMax.toFixed(2)} PED</span>
+    </details>
+  `;
 
   document.getElementById('results').innerHTML = `
-    <h3>Results for: ${itemName}</h3>
-    Blueprint Type: ${bpType}<br>
-    Total TT Cost: ${totalTT.toFixed(2)} PED<br>
-    Total Markup: ${totalMarkup.toFixed(2)} PED<br>
-    <strong>Total Cost (TT + MU): ${totalCost.toFixed(2)} PED</strong><br>
-    Markup per Click: ${markupPerClick.toFixed(4)} PED<br>
-    Expected Successful Crafts: ${successfulCrafts.toFixed(1)}<br>
-    Expected Near-Successes: ${nearSuccessClicks.toFixed(1)}<br>
-    Expected Return from Success: ${sellValue.toFixed(2)} PED<br>
-    Expected Return from Near-Success: ${nearSuccessReturn.toFixed(2)} PED<br>
-    Total Estimated Return: ${totalReturn.toFixed(2)} PED<br>
-    Estimated Residue Needed: ${residueUsed.toFixed(2)} PED<br>
-    ROI: ${roiPercent.toFixed(2)}%<br>
-    <strong>Estimated Profit/Loss: ${profit.toFixed(2)} PED</strong>
     ${multiplierHtml}
+    <h3>📊 Results for: <em>${itemName}</em></h3>
+    <div class="result-grid">
+      <div class="result-row"><span class="label">🔖 Blueprint Type:</span> <span>${bpType}</span></div>
+      <div class="result-row"><span class="label">💸 Total TT Cost:</span> <span>${totalTT.toFixed(2)} PED</span></div>
+      <div class="result-row"><span class="label">📈 Total Markup:</span> <span>${totalMarkup.toFixed(2)} PED</span></div>
+      <div class="result-row total"><span class="label">🧾 Total Cost (TT + MU):</span> <span>${totalCost.toFixed(2)} PED</span></div>
+      <div class="result-row"><span class="label">🎯 Markup per Click:</span> <span>${markupPerClick.toFixed(4)} PED</span></div>
+      <div class="result-row"><span class="label">✅ Expected Successful Crafts:</span> <span>${successfulCrafts.toFixed(1)}</span></div>
+      <div class="result-row"><span class="label">🤏 Near-Successes:</span> <span>${nearSuccessClicks.toFixed(1)}</span></div>
+      <div class="result-row"><span class="label">💰 Return from Success:</span> <span>${sellValue.toFixed(2)} PED</span></div>
+      <div class="result-row"><span class="label">💵 Return from Near-Success:</span> <span>${nearSuccessReturn.toFixed(2)} PED</span></div>
+      <div class="result-row"><span class="label">💱 Total Return:</span> <span>${totalReturn.toFixed(2)} PED</span></div>
+      <div class="result-row"><span class="label">🧪 Residue Needed:</span> <span>${residueUsed.toFixed(2)} PED</span></div>
+      <div class="result-row"><span class="label">📊 ROI:</span> <span>${roiPercent.toFixed(2)}%</span></div>
+      <div class="result-row profit ${profit >= 0 ? 'profit-positive' : 'profit-negative'}">
+        <span class="label">💹 Estimated Profit/Loss:</span>
+        <span>${profit.toFixed(2)} PED</span>
+      </div>
+    </div>
   `;
 }
 
-// Pre-fill with example
+// Automatically recalculate when QR is changed
+const qrInput = document.getElementById('qr');
+if (qrInput) {
+  qrInput.addEventListener('input', () => {
+    const qvscSlider = document.getElementById('qvsc');
+    qvscSlider.value = 0;
+    document.getElementById('qvscLabel').innerText = '0%';
+    updateRatesFromSlider(); // <-- this is the key addition
+  });
+}
+['playerLevel', 'bpLevel'].forEach(id => {
+  const input = document.getElementById(id);
+  if (input) {
+    input.addEventListener('input', () => {
+      updateRatesFromSlider();
+    });
+  }
+});
+function saveBlueprint() {
+  const blueprint = {
+    itemName: document.getElementById('itemName').value,
+    maxTT: document.getElementById('maxTT').value,
+    bpType: document.getElementById('bpType').value,
+    bpMu: document.getElementById('bpMu').value,
+    sellMu: document.getElementById('sellMu').value,
+    successRate: document.getElementById('successRate').value,
+    residuePerSuccess: document.getElementById('residuePerSuccess').value,
+    clicks: document.getElementById('clicks').value,
+    bpBook: document.getElementById('bpBook').value.trim(),
+    materials: []
+  };
+
+  for (let i = 0; i < materialIndex; i++) {
+    const nameInput = document.getElementById(`name_${i}`);
+    if (!nameInput) continue;
+    blueprint.materials.push({
+      name: nameInput.value,
+      qty: document.getElementById(`qty_${i}`).value,
+      tt: document.getElementById(`tt_${i}`).value,
+      mu: document.getElementById(`mu_${i}`).value
+    });
+  }
+
+  let saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
+  saved.push(blueprint);
+  localStorage.setItem('blueprints', JSON.stringify(saved));
+  alert("Blueprint saved!");
+
+  if (blueprintsVisible) {
+    renderBlueprintList();
+  }
+}
+
+function deleteBlueprint(index) {
+  const confirmed = confirm("Are you sure you want to delete this blueprint?");
+  if (!confirmed) return;
+
+  let saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
+  saved.splice(index, 1);
+  localStorage.setItem('blueprints', JSON.stringify(saved));
+  renderBlueprintList(); // refresh the UI
+}
+
+function fuzzyMatch(pattern, text) {
+  pattern = pattern.toLowerCase();
+  text = text.toLowerCase();
+
+  let patternIdx = 0;
+  let textIdx = 0;
+
+  while (patternIdx < pattern.length && textIdx < text.length) {
+    if (pattern[patternIdx] === text[textIdx]) {
+      patternIdx++;
+    }
+    textIdx++;
+  }
+
+  return patternIdx === pattern.length;
+}
+
+function toggleBlueprints() {
+  blueprintsVisible = !blueprintsVisible;
+  const button = document.getElementById('loadBlueprintsButt');
+  const container = document.getElementById('savedList');
+
+  if (blueprintsVisible) {
+    container.style.display = 'block';
+    renderBlueprintList();
+    button.innerText = 'X Collapse';
+  } else {
+    container.style.display = 'none';
+    button.innerText = '📂 Expand';
+  }
+}
+
+function clearBlueprintFilters() {
+  document.getElementById('filterName').value = '';
+  document.getElementById('filterBook').value = '';
+  document.getElementById('filterMaterial').value = '';
+  renderBlueprintList();
+}
+
+function renderBlueprintList() {
+  const saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
+  const filterContainer = document.getElementById('blueprintFilters');
+  const listContainer = document.getElementById('blueprintList');
+  const layoutToggle = document.getElementById('layoutToggle');
+
+  if (!filterContainer || !listContainer || !layoutToggle) return;
+
+  // Render filters once
+  if (!document.getElementById('filterName')) {
+    const uniqueBooks = [...new Set(saved.map(bp => bp.bpBook || '').filter(Boolean))];
+
+    filterContainer.innerHTML = `
+      <label id="filterlabel" style="width:95%;">🎛️ Filters
+        <button onclick="clearBlueprintFilters()" id="clearBPfilterButt">❌ Clear</button>
+      </label>
+      <div id="filterOptionGroup">
+        <label>
+          <input type="text" id="filterName" placeholder="🔍 Name">
+        </label>
+        <label>
+          <select id="filterBook">
+            <option value="">📘 Book</option>
+            ${uniqueBooks.map(book => `<option value="${book}">${book}</option>`).join('')}
+          </select>
+        </label>
+        <label>
+          <input type="text" id="filterMaterial" placeholder="🧪 Material">
+        </label>
+      </div>
+    `;
+
+    document.getElementById('filterName').addEventListener('input', renderBlueprintList);
+    document.getElementById('filterBook').addEventListener('change', renderBlueprintList);
+    document.getElementById('filterMaterial').addEventListener('input', renderBlueprintList);
+  }
+
+  const nameFilter = document.getElementById('filterName').value.toLowerCase();
+  const bookFilter = document.getElementById('filterBook').value.toLowerCase();
+  const matFilter = document.getElementById('filterMaterial').value.toLowerCase();
+
+  const filtered = saved.filter(bp => {
+    const nameMatch = fuzzyMatch(nameFilter, bp.itemName);
+    const bookMatch = !bookFilter || (bp.bpBook && bp.bpBook.toLowerCase() === bookFilter);
+    const matMatch = !matFilter || bp.materials.some(m => fuzzyMatch(matFilter, m.name));
+    return nameMatch && bookMatch && matMatch;
+  });
+
+  if (filtered.length === 0) {
+    listContainer.innerHTML = '<em>No matching blueprints.</em>';
+    return;
+  }
+
+  const layout = document.querySelector('input[name="layout"]:checked').value;
+
+  if (layout === 'cards') {
+    listContainer.innerHTML = `
+      <div class="blueprint-list cards-layout">
+        ${filtered.map((bp, i) => `
+          <div class="blueprint-item" title="Click to load blueprint">
+            <div onclick="loadBlueprint(${i})" class="bp-clickable">
+              <div class="bp-name">${bp.itemName}</div>
+              <div class="bp-book">${bp.bpBook || ''}</div>
+            </div>
+            <button class="delete-bp" onclick="deleteBlueprint(${i}); event.stopPropagation();" title="Delete blueprint">🗑️</button>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    listContainer.innerHTML = `
+      <ul class="blueprint-list list-layout">
+        ${filtered.map((bp, i) => `
+          <li class="blueprint-list-item" title="Click to load blueprint">
+            <span onclick="loadBlueprint(${i})">
+              <strong>${bp.itemName}</strong> ${bp.bpBook ? `- <em>${bp.bpBook}</em>` : ''}
+            </span>
+            <button class="delete-bp" onclick="deleteBlueprint(${i}); event.stopPropagation();" title="Delete blueprint">🗑️</button>
+          </li>
+        `).join('')}
+      </ul>
+    `;
+  }
+}
+
+
+
+function loadBlueprint(index) {
+  const saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
+  const bp = saved[index];
+  if (!bp) return;
+
+  document.getElementById('itemName').value = bp.itemName;
+  document.getElementById('maxTT').value = bp.maxTT;
+  document.getElementById('bpType').value = bp.bpType;
+  document.getElementById('bpMu').value = bp.bpMu;
+  document.getElementById('sellMu').value = bp.sellMu;
+  document.getElementById('successRate').value = bp.successRate;
+  document.getElementById('residuePerSuccess').value = bp.residuePerSuccess;
+  document.getElementById('clicks').value = bp.clicks;
+  document.getElementById('bpBook').value = bp.bpBook || '';
+
+  document.getElementById('materials').innerHTML = '';
+  materialIndex = 0;
+  bp.materials.forEach(m => addMaterial(m.name, m.qty, m.tt, m.mu));
+  toggleBpMuField();
+}
+
+document.getElementById('resetBlueprintBtn').addEventListener('click', () => {
+  // Clear inputs inside .eu-blueprint
+  document.querySelectorAll('.eu-blueprint input').forEach(input => {
+    if (input.type === 'number') input.value = '';
+    if (input.type === 'text') input.value = '';
+  });
+
+  // Reset select dropdowns
+  document.querySelectorAll('.eu-blueprint select').forEach(select => {
+    select.selectedIndex = 0;
+  });
+
+  // Reset hidden inputs to original values (if you want them to reset)
+  document.getElementById('successRate').value = 38;
+  document.getElementById('nearSuccessRate').value = 50;
+  document.getElementById('failRate').value = 12;
+
+  // Reset the slider (optional)
+  const qvscSlider = document.getElementById('qvsc');
+  qvscSlider.value = 0;
+  document.getElementById('qvscLabel').innerText = '0%';
+  updateRatesFromSlider();
+
+  // Clear materials
+  const materialsContainer = document.getElementById('materials');
+  materialsContainer.innerHTML = ''; // wipe it all
+
+  // Reset materialIndex (make sure this is a global or window var)
+  if (typeof materialIndex !== 'undefined') {
+    materialIndex = 0;
+  }
+  
+  
+
+
+  // Add two blank material cards
+  addMaterial();
+  addMaterial();
+});
 addMaterial('Ignisium Ingot', 1, 2.10, 125);
 addMaterial('Cumbriz Ingot', 3, 0.45, 105);
 addMaterial('Garcen Lubricant', 3, 0.20, 115);
 addMaterial('Vibrant Sweat', 2000, 0.0001, 2000);
+
+document.addEventListener('DOMContentLoaded', () => {
+  toggleBpMuField();
+});
+
+
+
+</script>
+<script>
+  const modal = document.getElementById('historyModal');
+  const openBtn = document.getElementById('openHistoryModal');
+  const closeBtn = document.querySelector('.modal .close');
+
+  openBtn.onclick = () => {
+    modal.style.display = 'block';
+  };
+
+  closeBtn.onclick = () => {
+    modal.style.display = 'none';
+  };
+
+  window.onclick = (event) => {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  };
+
+function saveCraftingSession(session) {
+  const history = JSON.parse(localStorage.getItem('craftingHistory')) || [];
+  history.push(session);
+  localStorage.setItem('craftingHistory', JSON.stringify(history));
+}
+
+function loadCraftingHistory() {
+  return JSON.parse(localStorage.getItem('craftingHistory')) || [];
+}
+
+function populateDropdown() {
+  const history = loadCraftingHistory();
+  const selector = document.getElementById('loadBlueprintSelect');
+  selector.innerHTML = '<option value="">-- Select Blueprint History --</option>';
+
+  const seen = new Set();
+  history.forEach((session, index) => {
+    if (!seen.has(session.blueprintName)) {
+      seen.add(session.blueprintName);
+      const option = document.createElement('option');
+      option.value = index;
+      option.textContent = session.blueprintName;
+      selector.appendChild(option);
+    }
+  });
+}
+
+function saveSessionFromForm() {
+  const session = {
+	blueprintName: document.getElementById('blueprintName').value,
+	planet: document.getElementById('planet').value,
+	date: document.getElementById('date').value,
+	time: document.getElementById('time').value,
+	playerSkillBefore: parseFloat(document.getElementById('playerSkillBefore').value),
+	playerSkillAfter: parseFloat(document.getElementById('playerSkillAfter').value),
+	qrBefore: parseFloat(document.getElementById('qrBefore').value),
+	qrAfter: parseFloat(document.getElementById('qrAfter').value),
+	isQrFull: false,
+	clickCount: parseInt(document.getElementById('clickCount').value),
+	successRate: parseFloat(document.getElementById('successRate').value),
+	residueReturned: parseFloat(document.getElementById('residueReturned').value),
+	totalReturnTT: parseFloat(document.getElementById('totalReturnTT').value),
+	itemReturns: [],
+	materialsUsed: [],
+	lootedBlueprints: [],
+	bigHits: []
+  };
+  saveCraftingSession(session);
+  populateDropdown();
+}
+
+function loadSessionFromDropdown() {
+  const index = document.getElementById('loadBlueprintSelect').value;
+  if (index === "") return;
+
+  const session = loadCraftingHistory()[index];
+  if (!session) return;
+
+  document.getElementById('blueprintName').value = session.blueprintName;
+  document.getElementById('planet').value = session.planet;
+  document.getElementById('date').value = session.date;
+  document.getElementById('time').value = session.time;
+  document.getElementById('playerSkillBefore').value = session.playerSkillBefore;
+  document.getElementById('playerSkillAfter').value = session.playerSkillAfter;
+  document.getElementById('qrBefore').value = session.qrBefore;
+  document.getElementById('qrAfter').value = session.qrAfter;
+  document.getElementById('clickCount').value = session.clickCount;
+  document.getElementById('successRate').value = session.successRate;
+  document.getElementById('residueReturned').value = session.residueReturned;
+  document.getElementById('totalReturnTT').value = session.totalReturnTT;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  populateDropdown();
+  document.getElementById('loadBlueprintSelect').addEventListener('change', loadSessionFromDropdown);
+});
 </script>
 
 
+<script>
+// Modal Handling
+const simModal = document.getElementById('simulationModal');
+const closeSimBtn = document.getElementById('closeSimulationModal');
+
+function openSimulationModal() {
+  simModal.style.display = 'block';
+}
+
+closeSimBtn.onclick = () => {
+  simModal.style.display = 'none';
+  document.getElementById('simLog').innerHTML = '<p class="sim-message">Click "Start Simulation" to begin...</p>';
+  document.getElementById('simProgressBar').style.width = '0%';
+}
+
+window.onclick = (event) => {
+  if (event.target === simModal) {
+    simModal.style.display = 'none';
+  }
+}
+
+</script>
+<script>
+function openSimulationModal() {
+  const simModal = document.getElementById('simulationModal');
+  if (simModal) {
+    simModal.style.display = 'block';
+    document.getElementById('simLog').innerHTML = '';
+    document.getElementById('simProgressBar').style.width = '0%';
+  }
+}
+
+function closeSimulationModal() {
+  const simModal = document.getElementById('simulationModal');
+  if (simModal) {
+    simModal.style.display = 'none';
+  }
+}
+
+function delay(ms) {
+  return new Promise(res => setTimeout(res, ms));
+}
+
+async function simulateRunFromUI(clicks, isComponent, useResidue) {
+  try {
+    openSimulationModal();
+
+    const logBox = document.getElementById('simLog');
+    const progressBar = document.getElementById('simProgressBar');
+    if (!logBox || !progressBar) {
+      throw new Error("Simulation elements missing from the DOM.");
+    }
+
+    // Get blueprint values from UI
+    const maxTT = parseFloat(document.getElementById('maxTT')?.value || '1');
+    const qr = parseFloat(document.getElementById('qr')?.value || '0');
+    const bpLevel = parseInt(document.getElementById('bpLevel')?.value || '1');
+    const playerLevel = parseInt(document.getElementById('playerLevel')?.value || bpLevel);
+    const slider = parseInt(document.getElementById('qvsc')?.value || '0');
+
+    const multiplierChance = parseFloat(document.getElementById('multiplierChance')?.value || '0.015');
+    const multiplierMin = parseFloat(document.getElementById('multiplierMin')?.value || '2');
+    const multiplierMax = parseFloat(document.getElementById('multiplierMax')?.value || '17');
+
+    const totalCost = parseFloat(document.getElementById('result-cost')?.textContent || '0');
+    const costPerClick = totalCost / (clicks || 1);
+    const skillFactor = Math.min(playerLevel / (bpLevel + 5), 1);
+
+    const getRates = () => {
+      const baseSuccess = 0.20 + (qr * 0.75) + (skillFactor * 0.05);
+      const clampedSuccess = Math.min(baseSuccess, 0.95);
+      const clampedNear = Math.max(Math.min(0.75 - (qr * 0.5), 0.85), 0.05);
+      const conditionMod = slider / 100;
+      return {
+        success: clampedSuccess - conditionMod * (clampedSuccess - 0.05),
+        nearSuccess: clampedNear - conditionMod * (clampedNear - 0.10)
+      };
+    };
+
+    // Stats
+    let successCount = 0, nearSuccessCount = 0, failCount = 0;
+    let residueUsed = 0, totalReturnTT = 0, stackReturn = 0, matReturn = 0;
+    let bpDrops = 0, gemDrops = 0, costTT = 0;
+
+    for (let i = 0; i < clicks; i++) {
+      const { success, nearSuccess } = getRates();
+      const roll = Math.random();
+      const multRoll = Math.random();
+
+      let outcome = 'Fail';
+      let clickTT = 0;
+      let extraInfo = '';
+      costTT += costPerClick;
+
+      if (roll < success) {
+        outcome = 'Success';
+        successCount++;
+
+        const multiplier = multRoll < multiplierChance
+          ? (Math.random() * (multiplierMax - multiplierMin)) + multiplierMin
+          : 1;
+
+        clickTT = Math.min(maxTT * multiplier, 1000);
+
+        if (isComponent) {
+          const stackQty = Math.ceil(clickTT / maxTT);
+          stackReturn += stackQty;
+          extraInfo += ` 🧱 x${stackQty}`;
+        } else {
+          const itemTT = Math.min(clickTT, maxTT);
+          totalReturnTT += itemTT;
+
+          if (useResidue && itemTT < maxTT) {
+            const residueFill = maxTT - itemTT;
+            residueUsed += residueFill;
+            totalReturnTT += residueFill;
+            extraInfo += ` 🧪 +${residueFill.toFixed(2)} PED`;
+          }
+
+          const overflow = clickTT > maxTT ? clickTT - maxTT : 0;
+          if (overflow > 0) {
+            matReturn += overflow;
+            extraInfo += ` 💥 +${overflow.toFixed(2)} PED`;
+          }
+        }
+
+        if (Math.random() < 0.01) {
+          bpDrops++;
+          const isLimited = Math.random() < 0.8;
+          const bpQty = isLimited ? (Math.random() * 0.99 + 0.01).toFixed(2) : '1.00';
+          extraInfo += ` 📜 ${isLimited ? `${bpQty}x (L)` : '1x UL'}`;
+        }
+
+        if (Math.random() < 0.0015) {
+          gemDrops++;
+          extraInfo += ' 💎 Rare Gem';
+        }
+
+      } else if (roll < success + nearSuccess) {
+        outcome = 'Near Success';
+        nearSuccessCount++;
+
+        const returnTT = Math.random() * (maxTT * 0.9);
+        matReturn += returnTT;
+        extraInfo += ` 💰 ${returnTT.toFixed(2)} PED`;
+
+        if (multRoll < 0.005) {
+          const bonusTT = Math.random() * 25 + 5;
+          matReturn += bonusTT;
+          extraInfo += ` ⚡ +${bonusTT.toFixed(2)} PED`;
+        }
+
+      } else {
+        failCount++;
+      }
+
+      // Log this click
+      logBox.innerHTML += `<p>🛠️ Click ${i + 1}: <strong>${outcome}</strong>${extraInfo ? ' → ' + extraInfo : ''}</p>`;
+      logBox.scrollTop = logBox.scrollHeight;
+      progressBar.style.width = `${((i + 1) / clicks) * 100}%`;
+
+      await delay(200); // Slow down to make it readable
+    }
+
+    // Summary
+    let summary = `
+      <hr>
+      <p><strong>✅ Simulation Complete</strong></p>
+      <p>🎯 Success: ${successCount}</p>
+      <p>🤏 Near Success: ${nearSuccessCount}</p>
+      <p>❌ Fail: ${failCount}</p>`;
+    if (stackReturn) summary += `<p>🧱 Stack Items: ${stackReturn}</p>`;
+    if (totalReturnTT) summary += `<p>💵 Item TT: ${totalReturnTT.toFixed(2)} PED</p>`;
+    if (residueUsed) summary += `<p>🧪 Residue Used: ${residueUsed.toFixed(2)} PED</p>`;
+    if (matReturn) summary += `<p>🔄 Materials Returned: ${matReturn.toFixed(2)} PED</p>`;
+    if (bpDrops) summary += `<p>📜 BPs: ${bpDrops}</p>`;
+    if (gemDrops) summary += `<p>💎 Gems: ${gemDrops}</p>`;
+    summary += `<p>💸 Total Cost: ${costTT.toFixed(2)} PED</p>`;
+
+    logBox.innerHTML += summary;
+
+  } catch (err) {
+    console.error("Simulation failed:", err);
+    alert("Simulation failed. Check console for details.");
+    closeSimulationModal();
+  }
+}
+
+function startLiveSimulation() {
+  const clickCount = prompt("How many clicks would you like to simulate?");
+  const clicks = parseInt(clickCount);
+  if (!clicks || clicks <= 0) {
+    alert("Invalid click count.");
+    return;
+  }
+
+  const isComponent = confirm("Is this a component blueprint?");
+  let useResidue = false;
+
+  if (!isComponent) {
+    const canUse = confirm("Can this blueprint use residue?");
+    if (canUse) {
+      useResidue = confirm("Do you want to use residue?");
+    }
+  }
+
+  simulateRunFromUI(clicks, isComponent, useResidue);
+}
+</script>
 
 
 
