@@ -46,6 +46,16 @@
 			bottom: 16px;
 			left: 10%;
 		}
+		#shittyHitCounter {
+			position: fixed;
+			left: 28px;
+			bottom: 2px;
+			background: #000000e6;
+			opacity: 0.6;
+		}
+		#shittyHitCounter a {
+			opacity: 0.9;
+		}
     </style>
 	<style>
 
@@ -1372,11 +1382,11 @@
   </div>
 </div>
 
-<div id="hitCountDisplay" style="font-size: 1rem; color: #ccc; margin-top: 10px;">
-  Visitors: loading...
+<!-- hitwebcounter Code START -->
+<div id="shittyHitCounter">
+<a href="https://www.hitwebcounter.com" target="_blank">
+<img src="https://hitwebcounter.com/counter/counter.php?page=21167729&style=0001&nbdigits=5&type=page&initCount=0" title="Counter Widget" Alt="Visit counter For Websites"   border="0" /></a>   
 </div>
-
-
 <script>
 let materialIndex = 0;
 let blueprintsVisible = false;
@@ -2343,27 +2353,7 @@ document.addEventListener('DOMContentLoaded', () => {
   populateNexusDropdown();
 });
 </script>
-<script>
-// Call this once on page load
-async function incrementHitCount() {
-  try {
-    const res = await fetch('https://api.countapi.xyz/hit/pixelb8/craftingbuddy_hits');
-    if (!res.ok) throw new Error('Network response was not ok');
-    const data = await res.json();
-    console.log('Page hits:', data.value);
-    // Optional: display on page
-    const hitDisplay = document.getElementById('hitCounterDisplay');
-    if (hitDisplay) {
-      hitDisplay.textContent = `Page views: ${data.value}`;
-    }
-  } catch (error) {
-    console.error('Hit count error:', error);
-  }
-}
 
-incrementHitCount();
-
-</script>
 
   <script src="../core/js/pixelb8-global.js"></script>
 
