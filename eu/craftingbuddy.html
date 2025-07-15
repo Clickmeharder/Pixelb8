@@ -55,6 +55,8 @@
 		margin-block-start: 0.2em;
 		margin-block-end: 0.2em;
 	}
+	
+
 	</style>
 	<style>
 	/* Base and fonts */
@@ -1070,6 +1072,20 @@
 		}
 
   </style>
+  <style>
+	 #entropianexusBPselect {
+	  background-color: #111;
+	  color: #fff;
+	  border: 1px solid #3399ff;
+	  padding: 2px 10px;
+	  border-radius: 6px;
+	  font-size: 14px;
+	}
+
+	#entropianexusBPselect::placeholder {
+	  color: #aaa; /* Light grey placeholder text */
+	}
+  </style>
 </head>
 <body>
 
@@ -1097,7 +1113,7 @@
 	  <datalist id="bpList">
 		  <!-- Options will be populated here dynamically -->
 	  </datalist>
-	  <button id="loadNexusBP">Load</button>
+	  <button id="loadNexusBP" style="display: none;">Load</button>
 
       <label for="itemName">Blueprint Name:
         <input id="itemName" type="text" value="Explosive Projectiles 1" />
@@ -1333,16 +1349,29 @@
   color: #fff;
   padding: 20px;
   border-radius: 12px;
+  border: 2px solid #3399ff;
   box-shadow: 0 0 20px rgba(0,0,0,0.6);
   z-index: 9999;
-  max-width: 320px;
+  max-width: 360px;
   text-align: center;
 ">
-  <p>🧠 <strong>Reminder:</strong><br>
+  <p style="margin-bottom: 20px;">🧠 <strong>Reminder:</strong><br>
   Adjust markup % for the crafted item and each material.<br>
   Set click count, then press <strong>Calculate Estimates</strong>.</p>
-  <button onclick="document.getElementById('markupReminderPopup').style.display='none'">OK</button>
+
+  <div style="display: flex; justify-content: center;">
+    <button onclick="document.getElementById('markupReminderPopup').style.display='none'" style="
+      background-color: #3399ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 1.1em;
+      cursor: pointer;
+    ">OK</button>
+  </div>
 </div>
+
 <script>
 let materialIndex = 0;
 let blueprintsVisible = false;
@@ -2259,16 +2288,20 @@ function showMarkupReminder() {
   }
 }
 
-document.getElementById("loadNexusBP").addEventListener("click", async () => {
+document.getElementById("entropianexusBPselect").addEventListener("input", async () => {
   const name = document.getElementById("entropianexusBPselect").value;
-  if (!name) return alert("Please select a blueprint.");
+  const datalist = document.getElementById("bpList");
+  
+  // Check if the typed value matches an actual datalist option
+  const match = Array.from(datalist.options).some(opt => opt.value === name);
+  if (!match) return; // Don't continue unless it's a valid selection
 
+  // Now it's a valid blueprint name from the list — proceed
   try {
     const res = await fetch("https://api.entropianexus.com/blueprints/" + encodeURIComponent(name));
     const bp = await res.json();
 
     resetBlueprintFieldsNoBlanks();
-
     document.getElementById("itemName").value = bp.Product?.Name || bp.Name || '';
     document.getElementById("bpBook").value = bp.Book?.Name || '';
     document.getElementById("bpLevel").value = bp.Properties?.Level || 0;
@@ -2292,13 +2325,14 @@ document.getElementById("loadNexusBP").addEventListener("click", async () => {
     });
 
     calculate();
-    showMarkupReminder(); // 🧠 Friendly popup reminder
+    showMarkupReminder();
 
   } catch (err) {
     console.error("Failed to load blueprint data:", err);
     alert("Failed to load blueprint. Please try again.");
   }
 });
+
 
 document.addEventListener('DOMContentLoaded', () => {
   populateNexusDropdown();
