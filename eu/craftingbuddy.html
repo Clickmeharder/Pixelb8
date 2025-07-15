@@ -2347,15 +2347,22 @@ document.addEventListener('DOMContentLoaded', () => {
 // Call this once on page load
 async function incrementHitCount() {
   try {
-    const res = await fetch('https://api.countapi.xyz/hit/your-namespace/your-key');
+    const res = await fetch('https://api.countapi.xyz/hit/pixelb8/craftingbuddy_hits');
+    if (!res.ok) throw new Error('Network response was not ok');
     const data = await res.json();
-    document.getElementById('hitCountDisplay').textContent = `Visitors: ${data.value}`;
-  } catch (err) {
-    console.error('Hit count error:', err);
+    console.log('Page hits:', data.value);
+    // Optional: display on page
+    const hitDisplay = document.getElementById('hitCounterDisplay');
+    if (hitDisplay) {
+      hitDisplay.textContent = `Page views: ${data.value}`;
+    }
+  } catch (error) {
+    console.error('Hit count error:', error);
   }
 }
 
-window.addEventListener('load', incrementHitCount);
+incrementHitCount();
+
 </script>
 
   <script src="../core/js/pixelb8-global.js"></script>
