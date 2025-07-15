@@ -51,6 +51,10 @@
 
 	.material { margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; text-align: left; }
 	.results { margin-top: 20px; background: #2e2e2e; padding: 10px; border-radius: 8px; }
+	.results h3 {
+		margin-block-start: 0.2em;
+		margin-block-end: 0.2em;
+	}
 	</style>
 	<style>
 	/* Base and fonts */
@@ -880,6 +884,33 @@
 	margin-top: 6px;
 	}
 
+
+.material-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.material-table th, .material-table td {
+    font-size: 0.72rem;
+    border: 3px inset #090909;
+    outline: 2px outset #56494d;
+    padding: 0px 5px;
+    text-align: center;
+}
+.material-table th {
+    background-color: #32c7e9;
+    color: black;
+    border: 2px inset #090909;
+    outline: 2px outset #56494d;
+    cursor: pointer;
+}
+.material-table tr.high-cost td {
+  background-color: #ffd1d1;
+}
+.material-table tr.med-cost td {
+  background
+
+
 	/* Responsive */
 	@media (max-width: 640px) {
 	.material {
@@ -1061,6 +1092,13 @@
 <!--   <h1>Entropia Crafting Tool</h1> -->
   <div class="craftingbuddyWrapper">
     <div class="eu-blueprint">
+	  <label for="entropianexusBPselect">Add BP from EntropiaNexus:</label>
+	  <input list="bpList" id="entropianexusBPselect" placeholder="Start typing a blueprint..." />
+	  <datalist id="bpList">
+		  <!-- Options will be populated here dynamically -->
+	  </datalist>
+	  <button id="loadNexusBP">Load</button>
+
       <label for="itemName">Blueprint Name:
         <input id="itemName" type="text" value="Explosive Projectiles 1" />
       </label>
@@ -1096,9 +1134,7 @@
       <label for="residuePerSuccess">Average Residue per Success (PED):
         <input id="residuePerSuccess" type="number" value="0" />
       </label>
-      <label for="clicks">Clicks:
-        <input id="clicks" type="number" value="100" />
-      </label>
+
       <div id="conditionBlock">
         <label for="qvsc" id="wvclabelText">Quantity⇔Condition: <span id="qvscLabel">0%</span></label>
         <input type="range" id="qvsc" min="0" max="100" value="0" 
@@ -1124,8 +1160,11 @@
 			<button onclick="calculate()">calculate estimates</button>
 		  </div>
 	    </div>
+	  <label for="clicks">Clicks:
+        <input id="clicks" type="number" value="100" />
+      </label>
       <div id="materials">
-
+	
       </div>
 
       <div class="eu-myBlueprintList">
@@ -1147,25 +1186,51 @@
 	 </div>
    </div>
 	<div class="results" id="results">
-	  <h3>📊 Results for: <em>---</em></h3>
-	  <div class="result-grid">
-		<div class="result-row"><span class="label">🔖 Blueprint Type:</span> <span>---</span></div>
-		<div class="result-row"><span class="label">💸 Total TT Cost:</span> <span>0.00 PED</span></div>
-		<div class="result-row"><span class="label">📈 Total Markup:</span> <span>0.00 PED</span></div>
-		<div class="result-row total"><span class="label">🧾 Total Cost (TT + MU):</span> <span>0.00 PED</span></div>
-		<div class="result-row"><span class="label">🎯 Markup per Click:</span> <span>0.0000 PED</span></div>
-		<div class="result-row"><span class="label">✅ Expected Successful Crafts:</span> <span>0.0</span></div>
-		<div class="result-row"><span class="label">🤏 Near-Successes:</span> <span>0.0</span></div>
-		<div class="result-row"><span class="label">💰 Return from Success:</span> <span>0.00 PED</span></div>
-		<div class="result-row"><span class="label">💵 Return from Near-Success:</span> <span>0.00 PED</span></div>
-		<div class="result-row"><span class="label">💱 Total Return:</span> <span>0.00 PED</span></div>
-		<div class="result-row"><span class="label">🧪 Residue Needed:</span> <span>0.00 PED</span></div>
-		<div class="result-row"><span class="label">📊 ROI:</span> <span>0.00%</span></div>
-		<div class="result-row profit">
-		  <span class="label">💹 Estimated Profit/Loss:</span>
-		  <span>0.00 PED</span>
+	    <h3>📊 Results for: <em>---</em></h3>
+		<div class="result-grid">
+		  <div class="result-row"><span class="label">🔖 Blueprint Type:</span> <span>---</span></div>
+		  <div class="result-row"><span class="label">💸 Total TT Cost:</span> <span>0.00 PED</span></div>
+		  <div class="result-row"><span class="label">📈 Total Markup:</span> <span>0.00 PED</span></div>
+		  <div class="result-row total"><span class="label">🧾 Total Cost (TT + MU):</span> <span>0.00 PED</span></div>
 		</div>
-	  </div>
+
+		<details class="material-breakdown" closed>
+		  <summary><strong>📦 Material Breakdown</strong> (click to expand)</summary>
+		  <table class="material-table sortable">
+			<thead>
+			  <tr>
+				<th>Name</th>
+				<th>Qty</th>
+				<th>TT/Unit</th>
+				<th>Total TT</th>
+				<th>MU %</th>
+				<th>Total MU</th>
+				<th>Total Cost</th>
+			  </tr>
+			</thead>
+			<tbody>
+			  <tr><td colspan="7" style="text-align:center;">No data yet</td></tr>
+			</tbody>
+		  </table>
+		</details>
+
+		<details class="estimation-breakdown" closed>
+		  <summary><strong>📉 Estimation Breakdown</strong> (click to expand)</summary>
+		  <div class="result-grid" style="margin-top: 10px">
+			<div class="result-row"><span class="label">🎯 Markup per Click:</span> <span>0.0000 PED</span></div>
+			<div class="result-row"><span class="label">✅ Expected Successful Crafts:</span> <span>0.0</span></div>
+			<div class="result-row"><span class="label">🤏 Near-Successes:</span> <span>0.0</span></div>
+			<div class="result-row"><span class="label">💰 Return from Success:</span> <span>0.00 PED</span></div>
+			<div class="result-row"><span class="label">💵 Return from Near-Success:</span> <span>0.00 PED</span></div>
+			<div class="result-row"><span class="label">💱 Total Return:</span> <span>0.00 PED</span></div>
+			<div class="result-row"><span class="label">🧪 Residue Needed:</span> <span>0.00 PED</span></div>
+			<div class="result-row"><span class="label">📊 ROI:</span> <span>0.00%</span></div>
+			<div class="result-row profit">
+			  <span class="label">💹 Estimated Profit/Loss:</span>
+			  <span>0.00 PED</span>
+			</div>
+		  </div>
+		</details>
 	  <!-- 🪪 Button to Open Modal -->
 	  <span class="label">Features coming soon (not finished):</span><br>
 	  <button id="openHistoryModal">🕮 Crafting History</button>
@@ -1257,7 +1322,27 @@
     </div>
   </div>
 </div>
-
+<!-- 🛠️ Reminder popup -->
+<div id="markupReminderPopup" style="
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #111;
+  color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+  z-index: 9999;
+  max-width: 320px;
+  text-align: center;
+">
+  <p>🧠 <strong>Reminder:</strong><br>
+  Adjust markup % for the crafted item and each material.<br>
+  Set click count, then press <strong>Calculate Estimates</strong>.</p>
+  <button onclick="document.getElementById('markupReminderPopup').style.display='none'">OK</button>
+</div>
 <script>
 let materialIndex = 0;
 let blueprintsVisible = false;
@@ -1378,17 +1463,65 @@ function calculate() {
   const maxTT = parseFloat(document.getElementById('maxTT').value);
   const qvscSlider = parseInt(document.getElementById('qvsc').value);
 
+  let materialBreakdownHtml = `
+    <details class="material-breakdown" closed>
+      <summary><strong>📦 Material Breakdown</strong> (click to expand)</summary>
+      <table class="material-table sortable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Qty</th>
+            <th>TT/Unit</th>
+            <th>Total TT</th>
+            <th>MU %</th>
+            <th>Total MU</th>
+            <th>Total Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
   for (let i = 0; i < materialIndex; i++) {
     const nameInput = document.getElementById(`name_${i}`);
     if (!nameInput) continue;
+
+    const name = nameInput.value || `Material ${i + 1}`;
     const qty = parseFloat(document.getElementById(`qty_${i}`).value);
     const tt = parseFloat(document.getElementById(`tt_${i}`).value);
     const mu = parseFloat(document.getElementById(`mu_${i}`).value) / 100;
-    const totalMatTT = qty * tt * clicks;
-    const totalMatMarkup = totalMatTT * (mu - 1);
+
+    const totalMatQty = qty * clicks;
+    const totalMatTT = totalMatQty * tt;
+    const totalMatMU = totalMatTT * (mu - 1);
+    const totalMatCost = totalMatTT + totalMatMU;
+
     totalTT += totalMatTT;
-    totalMarkup += totalMatMarkup;
+    totalMarkup += totalMatMU;
+
+    const muPercent = mu * 100;
+    const costClass =
+      muPercent >= 150 ? 'high-cost' :
+      muPercent >= 110 ? 'med-cost' :
+      'low-cost';
+
+    materialBreakdownHtml += `
+      <tr class="${costClass}">
+        <td>${name}</td>
+        <td>${totalMatQty.toFixed(2)}</td>
+        <td>${tt.toFixed(4)}</td>
+        <td>${totalMatTT.toFixed(2)}</td>
+        <td>${muPercent.toFixed(1)}%</td>
+        <td>${totalMatMU.toFixed(2)}</td>
+        <td>${totalMatCost.toFixed(2)}</td>
+      </tr>
+    `;
   }
+
+  materialBreakdownHtml += `
+        </tbody>
+      </table>
+    </details>
+  `;
 
   if (bpType === 'Limited') {
     const bpTTPerClick = 0.01;
@@ -1438,9 +1571,10 @@ function calculate() {
     <details class="multiplier-odds-details" closed>
       <summary><strong>🎰 Multiplier Odds</strong> (click to toggle)</summary>
       <em class="multiplier-note">Note: Multipliers are rare and payouts vary widely.</em><br>
-	  <em class="toolDisclaimer-note">disclaimer: These are very rough estimates.</em><br>
-	  <em class="toolDisclaimer-note">im terrible at math. We hope to improve our estimates</em><br>
-	  <em class="toolDisclaimer-note">over time. *for entertainment only*</em><br><br>
+      <em class="toolDisclaimer-note">disclaimer: These are very rough estimates.</em><br>
+      <em class="toolDisclaimer-note">I'm terrible at math. We hope to improve our estimates</em><br>
+      <em class="toolDisclaimer-note">over time. *for entertainment only*</em><br><br>
+
       <strong>📌 Cost Summary:</strong><br>
       • Cost per Click: ${ (totalTT / clicks).toFixed(2) } (TT) + ${ (totalMarkup / clicks).toFixed(2) } (MU) = ${(totalCost / clicks).toFixed(2)} PED<br>
       • Number of Clicks: ${clicks}<br>
@@ -1476,19 +1610,33 @@ function calculate() {
       <div class="result-row"><span class="label">💸 Total TT Cost:</span> <span>${totalTT.toFixed(2)} PED</span></div>
       <div class="result-row"><span class="label">📈 Total Markup:</span> <span>${totalMarkup.toFixed(2)} PED</span></div>
       <div class="result-row total"><span class="label">🧾 Total Cost (TT + MU):</span> <span>${totalCost.toFixed(2)} PED</span></div>
-      <div class="result-row"><span class="label">🎯 Markup per Click:</span> <span>${markupPerClick.toFixed(4)} PED</span></div>
-      <div class="result-row"><span class="label">✅ Expected Successful Crafts:</span> <span>${successfulCrafts.toFixed(1)}</span></div>
-      <div class="result-row"><span class="label">🤏 Near-Successes:</span> <span>${nearSuccessClicks.toFixed(1)}</span></div>
-      <div class="result-row"><span class="label">💰 Return from Success:</span> <span>${sellValue.toFixed(2)} PED</span></div>
-      <div class="result-row"><span class="label">💵 Return from Near-Success:</span> <span>${nearSuccessReturn.toFixed(2)} PED</span></div>
-      <div class="result-row"><span class="label">💱 Total Return:</span> <span>${totalReturn.toFixed(2)} PED</span></div>
-      <div class="result-row"><span class="label">🧪 Residue Needed:</span> <span>${residueUsed.toFixed(2)} PED</span></div>
-      <div class="result-row"><span class="label">📊 ROI:</span> <span>${roiPercent.toFixed(2)}%</span></div>
-      <div class="result-row profit ${profit >= 0 ? 'profit-positive' : 'profit-negative'}">
-        <span class="label">💹 Estimated Profit/Loss:</span>
-        <span>${profit.toFixed(2)} PED</span>
-      </div>
     </div>
+
+    ${materialBreakdownHtml}
+
+    <details class="estimation-breakdown" closed>
+      <summary><strong>📉 Estimation Breakdown</strong> (click to expand)</summary>
+      <div class="result-grid" style="margin-top: 10px">
+        <div class="result-row"><span class="label">🎯 Markup per Click:</span> <span>${markupPerClick.toFixed(4)} PED</span></div>
+        <div class="result-row"><span class="label">✅ Expected Successful Crafts:</span> <span>${successfulCrafts.toFixed(1)}</span></div>
+        <div class="result-row"><span class="label">🤏 Near-Successes:</span> <span>${nearSuccessClicks.toFixed(1)}</span></div>
+        <div class="result-row"><span class="label">💰 Return from Success:</span> <span>${sellValue.toFixed(2)} PED</span></div>
+        <div class="result-row"><span class="label">💵 Return from Near-Success:</span> <span>${nearSuccessReturn.toFixed(2)} PED</span></div>
+        <div class="result-row"><span class="label">💱 Total Return:</span> <span>${totalReturn.toFixed(2)} PED</span></div>
+        <div class="result-row"><span class="label">🧪 Residue Needed:</span> <span>${residueUsed.toFixed(2)} PED</span></div>
+        <div class="result-row"><span class="label">📊 ROI:</span> <span>${roiPercent.toFixed(2)}%</span></div>
+        <div class="result-row profit ${profit >= 0 ? 'profit-positive' : 'profit-negative'}">
+          <span class="label">💹 Estimated Profit/Loss:</span>
+          <span>${profit.toFixed(2)} PED</span>
+        </div>
+      </div>
+    </details>
+	<!-- 🪪 Button to Open Modal -->
+    <span class="label">Features coming soon (not finished):</span><br>
+    <button id="openHistoryModal">🕮 Crafting History</button>
+    <!-- 🧪 Simulation Buttons -->
+    <button onclick="startLiveSimulation()">Default Simulation</button>
+    <button onclick="runSimulation('historic')">Simulate Based on History</button>
   `;
 }
 
@@ -2056,6 +2204,105 @@ function startLiveSimulation() {
 
   simulateRunFromUI(clicks, isComponent, useResidue);
 }
+</script>
+<script>
+function resetBlueprintFieldsNoBlanks() {
+  document.querySelectorAll('.eu-blueprint input').forEach(input => {
+    if (input.type === 'number') input.value = '';
+    if (input.type === 'text') input.value = '';
+  });
+
+  document.querySelectorAll('.eu-blueprint select').forEach(select => {
+    select.selectedIndex = 0;
+  });
+
+  document.getElementById('successRate').value = 38;
+  document.getElementById('nearSuccessRate').value = 50;
+  document.getElementById('failRate').value = 12;
+
+  const qvscSlider = document.getElementById('qvsc');
+  qvscSlider.value = 0;
+  document.getElementById('qvscLabel').innerText = '0%';
+  updateRatesFromSlider();
+
+  const materialsContainer = document.getElementById('materials');
+  materialsContainer.innerHTML = '';
+
+  if (typeof materialIndex !== 'undefined') {
+    materialIndex = 0;
+  }
+}
+
+
+async function populateNexusDropdown() {
+  try {
+    const res = await fetch("https://api.entropianexus.com/blueprints");
+    const blueprints = await res.json();
+
+    const datalist = document.getElementById("bpList");
+    datalist.innerHTML = "";
+
+    blueprints.forEach(bp => {
+      const option = document.createElement("option");
+      option.value = bp.Name;
+      datalist.appendChild(option);
+    });
+  } catch (err) {
+    console.error("Failed to load blueprint list:", err);
+  }
+}
+
+function showMarkupReminder() {
+  const popup = document.getElementById("markupReminderPopup");
+  if (popup) {
+    popup.style.display = "block";
+  }
+}
+
+document.getElementById("loadNexusBP").addEventListener("click", async () => {
+  const name = document.getElementById("entropianexusBPselect").value;
+  if (!name) return alert("Please select a blueprint.");
+
+  try {
+    const res = await fetch("https://api.entropianexus.com/blueprints/" + encodeURIComponent(name));
+    const bp = await res.json();
+
+    resetBlueprintFieldsNoBlanks();
+
+    document.getElementById("itemName").value = bp.Product?.Name || bp.Name || '';
+    document.getElementById("bpBook").value = bp.Book?.Name || '';
+    document.getElementById("bpLevel").value = bp.Properties?.Level || 0;
+    document.getElementById("bpType").value = "Unlimited";
+    document.getElementById("bpMu").value = 105;
+    document.getElementById("qr").value = 1;
+    document.getElementById("sellMu").value = 101;
+
+    const totalTT = bp.Materials.reduce((sum, mat) => {
+      const unitTT = mat.Item?.Properties?.Economy?.MaxTT || 0;
+      return sum + mat.Amount * unitTT;
+    }, 0);
+    document.getElementById("maxTT").value = totalTT.toFixed(2);
+
+    bp.Materials.forEach((mat) => {
+      const name = mat.Item?.Name || "Unknown Material";
+      const qty = mat.Amount || 1;
+      const tt = mat.Item?.Properties?.Economy?.MaxTT || 0.01;
+      const mu = 101;
+      addMaterial(name, qty, tt, mu);
+    });
+
+    calculate();
+    showMarkupReminder(); // 🧠 Friendly popup reminder
+
+  } catch (err) {
+    console.error("Failed to load blueprint data:", err);
+    alert("Failed to load blueprint. Please try again.");
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  populateNexusDropdown();
+});
 </script>
 
 
