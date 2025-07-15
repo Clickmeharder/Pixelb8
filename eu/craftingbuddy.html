@@ -1372,6 +1372,11 @@
   </div>
 </div>
 
+<div id="hitCountDisplay" style="font-size: 1rem; color: #ccc; margin-top: 10px;">
+  Visitors: loading...
+</div>
+
+
 <script>
 let materialIndex = 0;
 let blueprintsVisible = false;
@@ -2338,8 +2343,20 @@ document.addEventListener('DOMContentLoaded', () => {
   populateNexusDropdown();
 });
 </script>
+<script>
+// Call this once on page load
+async function incrementHitCount() {
+  try {
+    const res = await fetch('https://api.countapi.xyz/hit/your-namespace/your-key');
+    const data = await res.json();
+    document.getElementById('hitCountDisplay').textContent = `Visitors: ${data.value}`;
+  } catch (err) {
+    console.error('Hit count error:', err);
+  }
+}
 
-
+window.addEventListener('load', incrementHitCount);
+</script>
 
   <script src="../core/js/pixelb8-global.js"></script>
 
