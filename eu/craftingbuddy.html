@@ -121,7 +121,7 @@
 	padding-top: 2px;
 	padding-bottom: 0px;
 	font-weight: 600;
-	font-size: 0.9rem;
+	font-size: 0.85rem;
 	text-align: left;
 	flex-direction: column;
 	}
@@ -257,7 +257,7 @@
 	background: rgba(20, 20, 20, 0.7);
 	border-radius: 12px;
 	color: #818181;
-	font-size: 1rem;
+	font-size: 0.875rem;
 	transition: border-color 0.3s ease;
 	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
 	}
@@ -1089,12 +1089,32 @@
 	  border: 1px solid #3399ff;
 	  padding: 2px 10px;
 	  border-radius: 6px;
-	  font-size: 14px;
+	  font-size: 0.875rem;
 	}
 
 	#entropianexusBPselect::placeholder {
 	  color: #aaa; /* Light grey placeholder text */
 	}
+  .eu-blueprint label {
+    display: block;
+  }
+
+  .eu-blueprint .label-inline {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25em;
+  }
+
+  .eu-blueprint .label-note {
+    font-size: 0.75rem;
+    color: white;
+    font-style: italic;
+  }
+
+  .eu-blueprint input {
+    display: block;
+    margin-top: 0.25em;
+  }
   </style>
 </head>
 <body>
@@ -1118,17 +1138,23 @@
 <!--   <h1>Entropia Crafting Tool</h1> -->
   <div class="craftingbuddyWrapper">
     <div class="eu-blueprint">
-	  <label for="entropianexusBPselect">Add BP from EntropiaNexus:</label>
-	  <input list="bpList" id="entropianexusBPselect" placeholder="Start typing a blueprint..." />
+	  <label for="entropianexusBPselect" title="Add Blueprints from EntropiaNexus!">Add Blueprint:</label>
+	  <!-- Options to be filtered by material -->
+	  <label for="materialFilter" title="Filter by blueprint name, material, product, book, profession, or use 'level:3'">Filter Blueprints:
+	    <input id="materialFilter" type="text" placeholder="e.g. Melchi Crystal" />
+	  </label>
+	  <div id="bpLoadingSpinner" style="display:none;">...</div>
+	  <input list="bpList" id="entropianexusBPselect" placeholder="Start typing a blueprint..." autocomplete="off" />
 	  <datalist id="bpList">
 		  <!-- Options will be populated here dynamically -->
 	  </datalist>
+	  
 	  <button id="loadNexusBP" style="display: none;">Load</button>
 
-      <label for="itemName">Blueprint Name:
+      <label for="itemName">BP Name:
         <input id="itemName" type="text" value="Explosive Projectiles 1" />
       </label>
-      <label for="bpType">Blueprint Type:
+      <label for="bpType">BP Type:
         <select id="bpType" onchange="toggleBpMuField()">
 		  <option value="Limited">Limited</option>
 		  <option value="Unlimited" selected>Unlimited</option>
@@ -1137,21 +1163,28 @@
       <label id="bpMuLabel" for="bpMu">Limited BP MU %:
         <input id="bpMu" type="number" value="150" />
       </label>
-      <label for="bpBook">Book comma seperated
-        <input id="bpBook" type="text" value="Planet Calypso Components (Vol1)" />
-      </label>
-	  <label for="bpLevel">Blueprint Required Level:
-	    <input id="bpLevel" type="number" value="5" min="0" max="100" />
+	  <label for="bpBook">
+		<span class="label-inline">Book
+		  <span class="label-note">comma separated</span>
+		</span>
+		<input id="bpBook" type="text" value="Planet Calypso Components (Vol1)" />
 	  </label>
 
-	  <label for="qr">Blueprint QR (0.01–1.00):
+	  <label for="bpLevel">Blueprint Req. Lvl:
+		<input id="bpLevel" type="number" value="5" min="0" max="100" />
+	  </label>
+
+	  <label for="qr">
+		<span class="label-inline">Quality Rating
+		  <span class="label-note">(0.01–1.00)</span>
+		</span>
 		<input id="qr" type="number" value="1.00" min="0.01" max="1.00" step="0.01" />
 	  </label>
 
-      <label for="maxTT">Max TT Value (per item):
+      <label for="maxTT">Product Max TT Val:
         <input id="maxTT" type="number" value="0.02" step="0.01"/>
       </label>
-      <label for="sellMu">item MU %:
+      <label for="sellMu">Product MU%:
         <input id="sellMu" type="number" value="150"/>
       </label>
       <input type="hidden" id="successRate" value="38">
@@ -2250,6 +2283,10 @@ function startLiveSimulation() {
 }
 </script>
 <script>
+// Add this HTML somewhere on your page:
+// <div id="bpLoadingSpinner" style="display:none;">Loading blueprints...</div>
+let cachedBlueprints = [];
+
 function resetBlueprintFieldsNoBlanks() {
   document.querySelectorAll('.eu-blueprint input').forEach(input => {
     if (input.type === 'number') input.value = '';
@@ -2278,19 +2315,51 @@ function resetBlueprintFieldsNoBlanks() {
 }
 
 
+function multiFieldFilter(query, blueprints) {
+  const lowerQuery = query.toLowerCase();
+
+  // Handle level:x input for filtering by level
+  if (lowerQuery.startsWith("level:")) {
+    const level = parseInt(lowerQuery.split(":")[1]);
+    if (!isNaN(level)) {
+      return blueprints.filter(bp => bp.Properties?.Level === level);
+    }
+  }
+
+  return blueprints.filter(bp => {
+    return (
+      bp.Name.toLowerCase().includes(lowerQuery) ||
+      (bp.Product?.Name?.toLowerCase().includes(lowerQuery)) ||
+      (bp.Properties?.Type?.toLowerCase().includes(lowerQuery)) ||
+      (bp.Profession?.Name?.toLowerCase().includes(lowerQuery)) ||
+      (bp.Book?.Name?.toLowerCase().includes(lowerQuery)) ||
+      bp.Materials?.some(mat => mat.Item.Name.toLowerCase().includes(lowerQuery))
+    );
+  });
+}
+
+function renderFilteredBlueprints(filteredList) {
+  const datalist = document.getElementById("bpList");
+  datalist.innerHTML = "";
+  filteredList.forEach(bp => {
+    const option = document.createElement("option");
+    option.value = bp.Name;
+    datalist.appendChild(option);
+  });
+}
+
 async function populateNexusDropdown() {
   try {
+    const spinner = document.getElementById("bpLoadingSpinner");
+    if (spinner) spinner.style.display = "block";
+
     const res = await fetch("https://api.entropianexus.com/blueprints");
     const blueprints = await res.json();
+    cachedBlueprints = blueprints;
 
-    const datalist = document.getElementById("bpList");
-    datalist.innerHTML = "";
+    renderFilteredBlueprints(blueprints);
 
-    blueprints.forEach(bp => {
-      const option = document.createElement("option");
-      option.value = bp.Name;
-      datalist.appendChild(option);
-    });
+    if (spinner) spinner.style.display = "none";
   } catch (err) {
     console.error("Failed to load blueprint list:", err);
   }
@@ -2303,15 +2372,13 @@ function showMarkupReminder() {
   }
 }
 
-document.getElementById("entropianexusBPselect").addEventListener("input", async () => {
+document.getElementById("entropianexusBPselect").addEventListener("change", async () => {
   const name = document.getElementById("entropianexusBPselect").value;
   const datalist = document.getElementById("bpList");
-  
-  // Check if the typed value matches an actual datalist option
-  const match = Array.from(datalist.options).some(opt => opt.value === name);
-  if (!match) return; // Don't continue unless it's a valid selection
 
-  // Now it's a valid blueprint name from the list — proceed
+  const match = Array.from(datalist.options).some(opt => opt.value === name);
+  if (!match) return;
+
   try {
     const res = await fetch("https://api.entropianexus.com/blueprints/" + encodeURIComponent(name));
     const bp = await res.json();
@@ -2348,6 +2415,22 @@ document.getElementById("entropianexusBPselect").addEventListener("input", async
   }
 });
 
+document.getElementById("materialFilter").addEventListener("input", (e) => {
+  const query = e.target.value.trim();
+  const spinner = document.getElementById("bpLoadingSpinner");
+  if (spinner) spinner.style.display = "block";
+
+  if (!query) {
+    renderFilteredBlueprints(cachedBlueprints);
+    if (spinner) spinner.style.display = "none";
+    return;
+  }
+
+  const filtered = multiFieldFilter(query, cachedBlueprints);
+  renderFilteredBlueprints(filtered);
+
+  if (spinner) spinner.style.display = "none";
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   populateNexusDropdown();
