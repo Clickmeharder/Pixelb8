@@ -1141,13 +1141,14 @@
 	  <label for="entropianexusBPselect" title="Add Blueprints from EntropiaNexus!">Add Blueprint:</label>
 	  <!-- Options to be filtered by material -->
 	  <label for="materialFilter" title="Filter by blueprint name, material, product, book, profession, or use 'level:3'">Filter Blueprints:
-	    <input id="materialFilter" type="text" placeholder="e.g. Melchi Crystal" />
+	    <input list="bpList" id="materialFilter" type="text" placeholder="e.g. Melchi Crystal" />
+		<datalist id="bpList">
+		  <!-- Options will be populated here dynamically -->
+	    </datalist>
 	  </label>
 	  <div id="bpLoadingSpinner" style="display:none;">...</div>
-	  <input list="bpList" id="entropianexusBPselect" placeholder="Start typing a blueprint..." autocomplete="off" />
-	  <datalist id="bpList">
-		  <!-- Options will be populated here dynamically -->
-	  </datalist>
+	  <input list="bpList" id="entropianexusBPselect" placeholder="Start typing a blueprint..." autocomplete="off" style="display:none;"/>
+
 	  
 	  <button id="loadNexusBP" style="display: none;">Load</button>
 
@@ -2283,8 +2284,7 @@ function startLiveSimulation() {
 }
 </script>
 <script>
-// Add this HTML somewhere on your page:
-// <div id="bpLoadingSpinner" style="display:none;">Loading blueprints...</div>
+
 let cachedBlueprints = [];
 
 function resetBlueprintFieldsNoBlanks() {
