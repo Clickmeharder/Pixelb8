@@ -2,19 +2,37 @@
 let targetPosition = null;
 let inventory = [];
 let isInventoryOpen = false;
-
+let droppedItemsByMap = {
+  house: [],
+  street: []
+};
 // Try to load from localStorage
-function loadInventory() {
+/* function loadInventory() {
   const savedInventory = localStorage.getItem('pixelb8_inventory');
   const savedDropped = localStorage.getItem('pixelb8_droppedItems');
   inventory = savedInventory ? JSON.parse(savedInventory) : [];
   droppedItems = savedDropped ? JSON.parse(savedDropped) : [];
   stackInventoryItems();
+} */
+function loadInventory() {
+  const savedInventory = localStorage.getItem('pixelb8_inventory');
+  const savedDropped = localStorage.getItem('pixelb8_droppedItemsByMap');
+
+  inventory = savedInventory ? JSON.parse(savedInventory) : [];
+
+  const defaultMapStructure = { house: [], street: [] };
+  droppedItemsByMap = savedDropped ? JSON.parse(savedDropped) : defaultMapStructure;
+
+  // Ensure all maps exist
+  for (let map in maps) {
+    if (!droppedItemsByMap[map]) droppedItemsByMap[map] = [];
+  }
 }
 // Save inventory and dropped items persistently
 function saveInventory() {
+  stackInventoryItems();
   localStorage.setItem('pixelb8_inventory', JSON.stringify(inventory));
-  localStorage.setItem('pixelb8_droppedItems', JSON.stringify(droppedItems));
+  localStorage.setItem('pixelb8_droppedItemsByMap', JSON.stringify(droppedItemsByMap));
 }
 
 function createUniqueItemId(baseName) {
@@ -62,19 +80,17 @@ function dropItem(itemId, quantity = 1) {
   const item = inventory.find(i => i.id === itemId);
   if (!item) return;
 
-  // Clamp quantity
   if (item.quantity < quantity) quantity = item.quantity;
 
   const dropX = collisionBox.x + collisionBox.width / 2;
   const dropY = collisionBox.y + collisionBox.height / 2;
   const mergeThreshold = 50;
 
-  // Drop items 1-by-1 to allow merging
+  const droppedItems = droppedItemsByMap[currentMap];
+
   for (let i = 0; i < quantity; i++) {
-    // Remove a single quantity from inventory
     removeItem(itemId, 1);
 
-    // Try to merge with nearby dropped item of same type
     const existingDropped = droppedItems.find(droppedItem => {
       const dx = droppedItem.x - dropX;
       const dy = droppedItem.y - dropY;
@@ -93,7 +109,7 @@ function dropItem(itemId, quantity = 1) {
         icon: item.icon,
         size: item.size || 'normal',
         type: item.type || 'unknown',
-		weight: item.weight || 1,
+        weight: item.weight || 1,
         quantity: 1,
         x: dropX,
         y: dropY
@@ -105,7 +121,6 @@ function dropItem(itemId, quantity = 1) {
   renderInventory();
   renderDroppedItems();
 }
-
 
 const moveThreshold = 2;
 let itemToPickUpIndex = null;
@@ -144,6 +159,7 @@ function moveToAndPickUpItem(x, y, itemId) {
 //pick up placed or dropped items
 function pickUpItem(item) { 
   // Remove from droppedItems
+  const droppedItems = droppedItemsByMap[currentMap];
   const droppedIndex = droppedItems.findIndex(d => d.id === item.id);
   if (droppedIndex !== -1) {
     droppedItems.splice(droppedIndex, 1);
@@ -163,8 +179,10 @@ function pickUpItem(item) {
   renderInventory();
 }
 
+
 function removeItemFromWorld(item) {
   // Remove from droppedItems
+  const droppedItems = droppedItemsByMap[currentMap];
   const droppedIndex = droppedItems.findIndex(d => d.id === item.id);
   if (droppedIndex !== -1) {
     droppedItems.splice(droppedIndex, 1);
@@ -194,15 +212,16 @@ function placeObjectById(id) {
   pendingObjectToPlace = item;
 }
 function placeObject(itemId) {
+  const droppedItems = droppedItemsByMap[currentMap];
   const itemIndex = droppedItems.findIndex(i => i.id === itemId);
   if (itemIndex === -1) return;
 
   const item = droppedItems[itemIndex];
 
-  // Move player to the item before placing
+  // Move to item location before placing it
   moveTo(item.x, item.y);
 
-  // Set item to be placed once player arrives
+  // Set up for placement when player arrives
   pendingObjectToPlace = item;
 }
 function placeItem(item, x, y) {
@@ -308,69 +327,7 @@ function interactWithPlacedItem(id) {
 
 
 
-function renderDroppedItems() {
-  document.querySelectorAll('.dropped-item').forEach(el => el.remove());
 
-  droppedItems.forEach((item, index) => {
-    const container = document.createElement('div');
-    container.classList.add('dropped-item');
-    container.style.position = 'absolute';
-    container.style.left = `${item.x}px`;
-    container.style.top = `${item.y}px`;
-    container.style.cursor = 'pointer';
-    container.style.userSelect = 'none';
-    container.style.textAlign = 'center';
-    container.style.zIndex = '10';
-    container.style.width = 'auto';  // Let CSS control width
-    container.style.transform = 'translate(-50%, -100%)';
-
-    // Add a data attribute for size if needed (optional)
-    if(item.size) container.dataset.size = item.size;
-
-    const iconSpan = document.createElement('span');
-    iconSpan.classList.add('dropped-item-icon');
-    iconSpan.textContent = item.icon || '❓';
-
-    const label = document.createElement('div');
-    label.classList.add('dropped-item-label');
-    label.textContent = `${item.name} x${item.quantity}`;
-
-    container.appendChild(iconSpan);
-    container.appendChild(label);
-
-    container.title = 'Click to pick up';
-    container.dataset.id = item.id;
-    container.addEventListener('click', () => pickUpItem(index));
-    gameArea.appendChild(container);
-
-  });
-}
-function renderPlacedItems(items) {
-  document.querySelectorAll(".placed-item").forEach(el => el.remove());
-
-  const playerY = player.y; // <- your in-game Y position
-
-  items.forEach(item => {
-    const el = document.createElement('div');
-    el.classList.add("placed-item");
-    el.id = item.id;
-    el.style.position = 'absolute';
-    el.style.left = `${item.x}px`;
-    el.style.top = `${item.y}px`;
-    el.style.fontSize = item.size === 'large' ? '42px' : item.size === 'small' ? '18px' : '22px';
-    el.textContent = item.icon || '?';
-    el.title = `${item.name} x${item.quantity || 1}`;
-
-    // Compare item Y with player Y to decide z-index
-    if (item.y < playerY) {
-      el.style.zIndex = '10'; // behind player
-    } else {
-      el.style.zIndex = '30'; // in front of player
-    }
-
-    gameArea.appendChild(el);
-  });
-}
 
 function stackInventoryItems() {
   const merged = {};
@@ -578,7 +535,7 @@ function createMenuOptions(target) {
   // Dropped items
   if (target.classList.contains('dropped-item')) {
     const id = target.dataset.id;
-    const droppedItem = droppedItems.find(item => item.id === id);
+    const droppedItem = droppedItemsByMap[currentMap].find(item => item.id === id);
 
     options += `<div class="menu-option" onclick="moveToAndPickUpItem(${rightClickPos.x}, ${rightClickPos.y}, '${id}')">❌ 👜 Pick Up</div>`;
 
@@ -596,7 +553,6 @@ function createMenuOptions(target) {
     const map = maps[currentMap];
 	const placedItem = map.placedItems.find(item => item.id === id);
 
-	options += `<div class="menu-option" onclick="moveToAndPickUpItem(${rightClickPos.x}, ${rightClickPos.y}, '${id}')">❌ 👜 Pick Up</div>`;
 	options += `<div class="menu-option" onclick="destroyPlacedItem('${id}')">❌ Destroy</div>`;
 	options += `<div class="menu-option" onclick="moveItemToInventory('${id}')">🎒 Store</div>`;
 	options += `<div class="menu-option" onclick="moveItemToDroppedItems('${id}')">❌ drop</div>`;

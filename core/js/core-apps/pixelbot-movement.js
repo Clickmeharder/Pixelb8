@@ -296,7 +296,7 @@ function setupMovement() {
 		  if (pendingDroppedItemToPickUpId !== null) {
 			console.log('[Pickup Check] pendingDroppedItemToPickUpId =', pendingDroppedItemToPickUpId);
 
-			const item = droppedItems.find(d => d.id === pendingDroppedItemToPickUpId);
+			const item = droppedItemsByMap[currentMap].find(d => d.id === pendingDroppedItemToPickUpId);
 
 			if (!item) {
 			  console.warn('[Pickup] Item with ID not found in droppedItems:', pendingDroppedItemToPickUpId);
@@ -316,27 +316,28 @@ function setupMovement() {
 
 		  // --- Handle Object Placement ---
 		  if (pendingObjectToPlace) {
-			const item = pendingObjectToPlace;
+			  const item = pendingObjectToPlace;
 
-			const droppedIndex = droppedItems.findIndex(d => d.id === item.id);
-			if (droppedIndex !== -1) {
-			  droppedItems.splice(droppedIndex, 1);
-			}
+			  // Make sure it's removed from dropped items
+			  const droppedItems = droppedItemsByMap[currentMap];
+			  const droppedIndex = droppedItems.findIndex(d => d.id === item.id);
+			  if (droppedIndex !== -1) {
+				droppedItems.splice(droppedIndex, 1);
+			  }
 
-			const map = maps[currentMap];
-			const placedItem = {
-			  ...item,
-			  x: collisionBox.x,
-			  y: collisionBox.y,
-			  interactable: true,
-			  placedFromDrop: true
-			};
+			  const map = maps[currentMap];
+			  const placedItem = {
+				...item,
+				x: collisionBox.x,
+				y: collisionBox.y,
+				interactable: true,
+				placedFromDrop: true
+			  };
 
-			map.placedItems.push(placedItem);
-			renderDroppedItems(droppedItems);
-			renderPlacedItems(map.placedItems);
-			console.log('Placed object:', map.placedItems);
-			pendingObjectToPlace = null;
+			  map.placedItems.push(placedItem);
+			  renderDroppedItems();
+			  renderPlacedItems(map.placedItems);
+			  pendingObjectToPlace = null;
 		  }
 
 		  // --- Cleanup ---

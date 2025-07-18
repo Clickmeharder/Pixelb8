@@ -9,19 +9,7 @@ const maps = {
       { x: 375, y: 550, width: 50, height: 50, isExit: true, direction: "down", target: "street" }
     ],
 	placedItems: [
-	  {
-		id: 'TestBox',
-		name: 'TestBox',
-		icon: "📦",
-		x: 100,
-		y: 125,
-		quantity: 1,
-		weight: 10,
-		width: 48,
-		height: 24,
-		size: 'large',
-		type: 'object'
-	  }
+
     ],
     startX: 365,
     startY: 525
@@ -53,6 +41,7 @@ function loadMap(mapName) {
 
   renderObstacles(map.obstacles);
   renderPlacedItems(map.placedItems);
+  renderDroppedItems();
   updateSpritePosition();
   updateDebugOverlay(map.obstacles);
 }
@@ -87,5 +76,67 @@ function renderObstacles(obstacles) {
     gameArea.appendChild(div);
   });
 }
+function renderDroppedItems() {
+  document.querySelectorAll('.dropped-item').forEach(el => el.remove());
+  console.log('renderDroppedItems Ran')
+  const droppedItems = droppedItemsByMap[currentMap];
 
+  droppedItems.forEach((item, index) => {
+    const container = document.createElement('div');
+    container.classList.add('dropped-item');
+    container.style.position = 'absolute';
+    container.style.left = `${item.x}px`;
+    container.style.top = `${item.y}px`;
+    container.style.cursor = 'pointer';
+    container.style.userSelect = 'none';
+    container.style.textAlign = 'center';
+    container.style.zIndex = '10';
+    container.style.transform = 'translate(-50%, -100%)';
+
+    if (item.size) container.dataset.size = item.size;
+
+    const iconSpan = document.createElement('span');
+    iconSpan.classList.add('dropped-item-icon');
+    iconSpan.textContent = item.icon || '❓';
+
+    const label = document.createElement('div');
+    label.classList.add('dropped-item-label');
+    label.textContent = `${item.name} x${item.quantity}`;
+
+    container.appendChild(iconSpan);
+    container.appendChild(label);
+
+    container.title = '${item.name} x${item.quantity}';
+    container.dataset.id = item.id;
+
+    gameArea.appendChild(container);
+  });
+}
+function renderPlacedItems(items) {
+  console.log('renderPlacedItems Ran')
+  document.querySelectorAll(".placed-item").forEach(el => el.remove());
+
+  const playerY = player.y; // <- your in-game Y position
+
+  items.forEach(item => {
+    const el = document.createElement('div');
+    el.classList.add("placed-item");
+    el.id = item.id;
+    el.style.position = 'absolute';
+    el.style.left = `${item.x}px`;
+    el.style.top = `${item.y}px`;
+    el.style.fontSize = item.size === 'large' ? '42px' : item.size === 'small' ? '18px' : '22px';
+    el.textContent = item.icon || '?';
+    el.title = `${item.name} x${item.quantity || 1}`;
+
+    // Compare item Y with player Y to decide z-index
+    if (item.y < playerY) {
+      el.style.zIndex = '10'; // behind player
+    } else {
+      el.style.zIndex = '30'; // in front of player
+    }
+
+    gameArea.appendChild(el);
+  });
+}
 
