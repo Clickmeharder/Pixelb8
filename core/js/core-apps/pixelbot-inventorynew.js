@@ -133,7 +133,10 @@ function PickupPlacedItem(id) {
   if (index === -1) return;
 
   const item = map.placedItems[index];
-
+  if (item.hasContents) {
+    alert("You can't pick up a storage box with items inside it.");
+    return;
+  }
   addItem({
     id: item.name,
     name: item.name,
@@ -161,6 +164,7 @@ function pickUpItem(item) {
   // Remove from droppedItems
   const droppedItems = droppedItemsByMap[currentMap];
   const droppedIndex = droppedItems.findIndex(d => d.id === item.id);
+
   if (droppedIndex !== -1) {
     droppedItems.splice(droppedIndex, 1);
     renderDroppedItems(droppedItems);
@@ -169,6 +173,10 @@ function pickUpItem(item) {
   // Remove from placedItems
   const map = maps[currentMap];
   const placedIndex = map.placedItems.findIndex(p => p.id === item.id);
+  if (item.hasContents) {
+    alert("You can't pick up a storage box with items inside it.");
+    return;
+  }
   if (placedIndex !== -1) {
     map.placedItems.splice(placedIndex, 1);
     renderPlacedItems(map.placedItems);
@@ -192,6 +200,10 @@ function removeItemFromWorld(item) {
   // Remove from placedItems
   const map = maps[currentMap];
   const placedIndex = map.placedItems.findIndex(p => p.id === item.id);
+  if (item.hasContents) {
+    alert("You can't pick up a storage box with items inside it.");
+    return;
+  }
   if (placedIndex !== -1) {
     map.placedItems.splice(placedIndex, 1);
     renderPlacedItems(map.placedItems);
@@ -224,47 +236,55 @@ function placeObject(itemId) {
   // Set up for placement when player arrives
   pendingObjectToPlace = item;
 }
+
 function placeItem(item, x, y) {
-  if (!item || !item.type) {
-    console.warn("Invalid item to place");
-    return;
-  }
+  if (!item || !item.type) return;
 
   const map = maps[currentMap];
-
   const width = item.width || 32;
   const height = item.height || 32;
-
-  const isBottomAnchored = item.type === 'object'; // customize as needed
-
   const placedX = x;
   const placedY = y;
 
-  map.placedItems.push({
-    id: createUniqueItemId(item.name), // ✅ use unique ID here
+  const placed = {
+    id: createUniqueItemId(item.name),
     name: item.name,
     icon: item.icon,
     type: item.type,
     size: item.size,
-	weight: item.weight,
+    weight: item.weight,
     width,
     height,
     quantity: item.quantity || 1,
     x: placedX,
     y: placedY,
     interactable: true,
-    placedFromDrop: false // this is a placed item, not from a drop
-  });
+    placedFromDrop: false
+  };
 
+  // ✅ If it's a box, initialize its inventory
+  if (item.name.toLowerCase().includes("box")) {
+    placed.storage = {
+      contents: [],
+      capacity: 8
+    };
+    placed.hasContents = false;
+  }
+
+  map.placedItems.push(placed);
   renderPlacedItems(map.placedItems);
 }
+
 
 
 function destroyPlacedItem(id) {
   const map = maps[currentMap];
   const index = map.placedItems.findIndex(item => item.id === id);
   if (index === -1) return;
-
+  if (item.hasContents) {
+    alert("You can't pick up a storage box with items inside it.");
+    return;
+  }
   map.placedItems.splice(index, 1);
   renderPlacedItems(map.placedItems);
   hideMenus();
@@ -275,6 +295,10 @@ function moveItemToInventory(id) {
   if (index === -1) return;
 
   const item = map.placedItems[index]; // get item before removing it
+  if (item.hasContents) {
+    alert("You can't pick up a storage box with items inside it.");
+    return;
+  }
   map.placedItems.splice(index, 1);    // remove from map
 
   addItem(item);                       // add to inventory
@@ -286,6 +310,10 @@ function moveItemToInventory(id) {
 function moveItemToDroppedItems(id) {
   const map = maps[currentMap];
   const index = map.placedItems.findIndex(item => item.id === id);
+  if (item.hasContents) {
+    alert("You can't pick up a storage box with items inside it.");
+    return;
+  }
   if (index === -1) return;
 
   const item = map.placedItems[index];     // get item first
@@ -315,16 +343,92 @@ function inspectPlacedItem(id) {
   alert(`Inspecting: ${item.name}\nType: ${item.type}\nQuantity: ${item.quantity || 1}`);
   hideMenus();
 }
+// 🧰 REPLACE: interactWithPlacedItem()
 function interactWithPlacedItem(id) {
   const map = maps[currentMap];
   const item = map.placedItems.find(item => item.id === id);
-  if (!item) return;
-
-  // Placeholder - expand based on type
-  alert(`Interacting with ${item.name}`);
-  hideMenus();
+  if (!item || !item.storage) return alert("This item is not interactable.");
+  openStorageUI(item);
 }
+// ✅ NEW FUNCTION
+function openStorageUI(box) {
+  let modal = document.getElementById('storage-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'storage-modal';
+    modal.style.position = 'absolute';
+    modal.style.top = '50px';
+    modal.style.left = '50px';
+    modal.style.width = '300px';
+    modal.style.background = '#001020';
+    modal.style.color = '#00e5ff';
+    modal.style.border = '2px solid #00e5ff';
+    modal.style.padding = '10px';
+    modal.style.zIndex = '10000';
+    modal.style.fontFamily = 'monospace';
 
+    const closeBtn = document.createElement('button');
+    closeBtn.innerText = "Close";
+    closeBtn.onclick = () => modal.remove();
+    modal.appendChild(closeBtn);
+
+    const container = document.createElement('div');
+    container.id = 'storage-contents';
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(4, 1fr)';
+    container.style.marginTop = '10px';
+    modal.appendChild(container);
+
+    document.body.appendChild(modal);
+  } else {
+    modal.style.display = 'block';
+  }
+
+  const contents = box.storage.contents;
+  const container = document.getElementById('storage-contents');
+  container.innerHTML = '';
+
+  for (let i = 0; i < box.storage.capacity; i++) {
+    const slot = document.createElement('div');
+    slot.style.border = '1px solid #00e5ff';
+    slot.style.height = '40px';
+    slot.style.display = 'flex';
+    slot.style.alignItems = 'center';
+    slot.style.justifyContent = 'center';
+    slot.style.fontSize = '20px';
+
+    const item = contents[i];
+    if (item) {
+      slot.textContent = item.icon || '?';
+      slot.title = `${item.name} x${item.quantity}`;
+
+      slot.onclick = () => {
+        addItem(item);
+        contents.splice(i, 1);
+        box.hasContents = contents.length > 0;
+        renderInventory();
+        openStorageUI(box);
+      };
+    } else {
+      slot.textContent = '+';
+      slot.onclick = () => {
+        const itemToStore = inventory[0];
+        if (!itemToStore) return alert("No items in inventory.");
+        if (contents.length >= box.storage.capacity) {
+          alert("Box is full!");
+          return;
+        }
+
+        contents.push({ ...itemToStore });
+        removeItem(itemToStore.id, 1);
+        box.hasContents = true;
+        renderInventory();
+        openStorageUI(box);
+      };
+    }
+    container.appendChild(slot);
+  }
+}
 
 
 
@@ -539,10 +643,10 @@ function createMenuOptions(target) {
 
     options += `<div class="menu-option" onclick="moveToAndPickUpItem(${rightClickPos.x}, ${rightClickPos.y}, '${id}')">❌ 👜 Pick Up</div>`;
 
-    if (droppedItem && droppedItem.type === 'sapling') {
+    if (droppedItem?.type === 'sapling') {
       options += `<div class="menu-option" onclick="plantSapling('${id}')">🌱 Plant</div>`;
     }
-    if (droppedItem && droppedItem.type === 'object') {
+    if (droppedItem?.type === 'object') {
       options += `<div class="menu-option" onclick="placeObject('${id}')">🧱 Place</div>`;
     }
   }
@@ -551,19 +655,29 @@ function createMenuOptions(target) {
   if (target.classList.contains('placed-item')) {
     const id = target.id;
     const map = maps[currentMap];
-	const placedItem = map.placedItems.find(item => item.id === id);
+    const placedItem = map.placedItems.find(item => item.id === id);
 
-	options += `<div class="menu-option" onclick="destroyPlacedItem('${id}')">❌ Destroy</div>`;
-	options += `<div class="menu-option" onclick="moveItemToInventory('${id}')">🎒 Store</div>`;
-	options += `<div class="menu-option" onclick="moveItemToDroppedItems('${id}')">❌ drop</div>`;
-	
-    if (placedItem && placedItem.isInteractable) {
-      options += `<div class="menu-option" onclick="interactWithPlacedItem('${id}')">🤖 Interact</div>`;
+    if (!placedItem) return options;
+
+    // 🔐 Disable pickup if box has contents
+    const canPickUp = !placedItem.hasContents;
+
+    // Interact with storage box
+    if (placedItem.name.toLowerCase().includes('box')) {
+      options += `<div class="menu-option" onclick="interactWithPlacedItem('${id}')">📦 Open Storage</div>`;
     }
 
-    // Optional: rotate or inspect
-    options += `<div class="menu-option" onclick="rotatePlacedItem('${id}')">🔄 Rotate</div>`;
     options += `<div class="menu-option" onclick="inspectPlacedItem('${id}')">🔍 Inspect</div>`;
+    options += `<div class="menu-option" onclick="rotatePlacedItem('${id}')">🔄 Rotate</div>`;
+
+    if (canPickUp) {
+      options += `<div class="menu-option" onclick="moveItemToInventory('${id}')">🎒 Store</div>`;
+      options += `<div class="menu-option" onclick="moveItemToDroppedItems('${id}')">❌ Drop</div>`;
+    } else {
+      options += `<div class="menu-option" style="color: gray;" title="Box must be empty to pick up.">🚫 Cannot Pick Up (Has Items)</div>`;
+    }
+
+    options += `<div class="menu-option" onclick="destroyPlacedItem('${id}')">❌ Destroy</div>`;
   }
 
   // Player context
@@ -578,7 +692,6 @@ function createMenuOptions(target) {
 
   return options;
 }
-
 
 function showCustomMenu(x, y, contentHTML) {
   customMenu.innerHTML = contentHTML;
