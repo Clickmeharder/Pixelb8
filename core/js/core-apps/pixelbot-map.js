@@ -108,15 +108,27 @@ function renderDroppedItems() {
 
     container.title = '${item.name} x${item.quantity}';
     container.dataset.id = item.id;
-
+    container.onclick = () => {
+      moveToAndPickUpItem(item.x, item.y, item.id);
+    };
     gameArea.appendChild(container);
   });
 }
 function renderPlacedItems(items) {
-  console.log('renderPlacedItems Ran')
+  console.log('renderPlacedItems Ran');
   document.querySelectorAll(".placed-item").forEach(el => el.remove());
 
   const playerY = player.y; // <- your in-game Y position
+
+  // Map size keywords to font sizes
+  const sizeMap = {
+    tiny: '12px',
+    small: '18px',
+    normal: '22px',
+    large: '42px',
+    huge: '64px',
+    massive: '80px'
+  };
 
   items.forEach(item => {
     const el = document.createElement('div');
@@ -125,21 +137,20 @@ function renderPlacedItems(items) {
     el.style.position = 'absolute';
     el.style.left = `${item.x}px`;
     el.style.top = `${item.y}px`;
-    el.style.fontSize = item.size === 'large' ? '42px' : item.size === 'small' ? '18px' : '22px';
+
+    // Use sizeMap or default to normal size if undefined
+    const fontSize = sizeMap[item.size] || sizeMap['normal'];
+    el.style.fontSize = fontSize;
+
     el.textContent = item.icon || '?';
     el.title = `${item.name} x${item.quantity || 1}`;
 
     // Compare item Y with player Y to decide z-index
-    if (item.y < playerY) {
-      el.style.zIndex = '10'; // behind player
-    } else {
-      el.style.zIndex = '30'; // in front of player
-    }
+    el.style.zIndex = item.y < playerY ? '10' : '30';
 
     gameArea.appendChild(el);
   });
 }
-
 
 
 

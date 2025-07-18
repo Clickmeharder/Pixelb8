@@ -328,20 +328,124 @@ function placeItem(item, x, y) {
   renderPlacedItems(map.placedItems);
 }
 
+function plantItem(itemId) {
+  const droppedItems = droppedItemsByMap[currentMap];
+  const itemIndex = droppedItems.findIndex(i => i.id === itemId);
+  if (itemIndex === -1) return;
 
+  const item = droppedItems[itemIndex];
+
+  // Move to the item before planting
+  moveTo(item.x, item.y);
+
+  // Setup for placement when player arrives
+  pendingObjectToPlace = {
+    ...item,
+    isPlant: true  // Mark as plant if needed later
+  };
+}
+function plantSapling(itemId) {
+  const droppedItems = droppedItemsByMap[currentMap];
+  const index = droppedItems.findIndex(item => item.id === itemId);
+  if (index === -1) return;
+
+  const sapling = droppedItems[index];
+  const { x, y } = sapling;
+
+  // Remove from dropped items
+  droppedItems.splice(index, 1);
+
+  // Build sapling item and place it using shared logic
+  const saplingItem = {
+    name: 'Sapling',
+    icon: '🌱',
+    type: 'object',
+    size: 'small',
+    weight: 1,         // ← Add sensible defaults
+    width: 16,
+    height: 16,
+    quantity: 1,
+    isGrowing: true
+  };
+
+  // Place using consistent item logic
+  placeItem(saplingItem, x, y);
+
+  console.log('You planted a sapling! 🌱 It will grow into a tree soon...');
+
+  // After 30 seconds, grow into a tree
+  setTimeout(() => {
+    const map = maps[currentMap];
+    const saplingIndex = map.placedItems.findIndex(i => i.name === 'Sapling' && i.x === x && i.y === y);
+    if (saplingIndex === -1) return;
+
+    const treeItem = {
+      name: 'Tree',
+      icon: '🌳',
+      type: 'object',
+      size: 'huge',
+      weight: 50,
+      width: 32,
+      height: 48,
+      quantity: 1
+    };
+
+    map.placedItems[saplingIndex] = {
+      ...treeItem,
+      id: createUniqueItemId('Tree'),
+      x,
+      y
+    };
+
+    renderPlacedItems(map.placedItems);
+    saveInventory();
+    console.log('🌳 Tree has grown!');
+  }, 30000);
+
+  renderDroppedItems(droppedItems);
+  saveInventory();
+  hideMenus();
+}
 
 function destroyPlacedItem(id) {
   const map = maps[currentMap];
   const index = map.placedItems.findIndex(item => item.id === id);
   if (index === -1) return;
+
+  const item = map.placedItems[index];
+
   if (item.hasContents) {
     alert("You can't pick up a storage box with items inside it.");
     return;
   }
-  map.placedItems.splice(index, 1);
-  renderPlacedItems(map.placedItems);
-  hideMenus();
+
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  // Prepare explosion effect
+  el.textContent = '💥';
+  el.style.fontSize = '48px';
+  el.style.transition = 'transform 0.6s ease, opacity 0.6s ease';
+  el.style.transformOrigin = '50% 50%';
+  el.style.opacity = '1';
+  el.style.transform = 'scale(1)';
+
+  // Trigger reflow to make sure the transition will run
+  void el.offsetWidth;
+
+  // Animate: scale up and fade out
+  el.style.transform = 'scale(2)';
+  el.style.opacity = '0';
+
+  setTimeout(() => {
+    // Remove item after animation
+    map.placedItems.splice(index, 1);
+    saveInventory();           // Save the updated placed items!
+    renderPlacedItems(map.placedItems);
+    hideMenus();
+  }, 600);
 }
+
 function moveItemToInventory(id) {
   const map = maps[currentMap];
   const index = map.placedItems.findIndex(item => item.id === id);
@@ -947,6 +1051,7 @@ function createMenuOptions(target) {
     if (name.includes('tree')) {
       options += `<div class="menu-option" onclick="interactWithPlacedItem('${id}')">🌳 Shake Tree</div>`;
       options += `<div class="menu-option" onclick="cutDownTree('${id}')">🪓 Cut Down</div>`;
+	  options += `<div class="menu-option" onclick="destroyPlacedItem('${id}')">❌ Destroy</div>`;
     }
 
     options += `<div class="menu-option" onclick="inspectPlacedItem('${id}')">🔍 Inspect</div>`;
@@ -1020,11 +1125,7 @@ function preventDefaultContextMenu(e) {
   if (!e.ctrlKey) e.preventDefault();
 }
 window.addEventListener('contextmenu', preventDefaultContextMenu, true);
-function plantSapling(itemId) {
-  alert(`Planting sapling with id: ${itemId}`);
-  hideMenus();
-  // Later, add your planting logic here
-}
+
 
 function deleteItemById(itemId) {
   const droppedIndex = droppedItems.findIndex(i => i.id === itemId);
@@ -1058,8 +1159,8 @@ addItem({ id: 'wrench', name: 'Item Type 4', icon: "🔧", quantity: 1, size: 'n
 
 addItem({ id: 'Apple', name: 'Apple', icon: "🍎", quantity: 3, size: 'small', type: 'food' });
 addItem({ id: 'Box', name: 'Box', icon: "📦", quantity: 1, size: 'large', type: 'object' });
-addItem({ id: 'Sapling', name: 'Sapling', icon: "🌱", quantity: 2, size: 'small', type: 'sapling' });
+addItem({ id: 'Sapling', name: 'Sapling', icon: "🌱", quantity: 2, size: 'tiny', type: 'sapling' });
 addItem({ id: 'underwearGnome', name: 'underwearGnome', icon: "🧚", quantity: 5, size: 'large', type: 'unique' });
-addItem({ id: 'wrench', name: 'wrench', icon: "🔧", quantity: 1, size: 'normal', type: 'tool' });
-addItem({ id: 'axe', name: 'axe', icon: "🪓", quantity: 1, size: 'normal', type: 'tool' });
+addItem({ id: 'wrench', name: 'wrench', icon: "🔧", quantity: 1, size: 'small', type: 'tool' });
+addItem({ id: 'axe', name: 'axe', icon: "🪓", quantity: 1, size: 'small', type: 'tool' });
 addItem({ id: 'purplepickle', name: 'purplePickle', icon: "pp", quantity: 1, size: 'normal', type: 'unique' });

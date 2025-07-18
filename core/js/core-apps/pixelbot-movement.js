@@ -318,7 +318,6 @@ function setupMovement() {
 		  if (pendingObjectToPlace) {
 			  const item = pendingObjectToPlace;
 
-			  // Remove from dropped items
 			  const droppedItems = droppedItemsByMap[currentMap];
 			  const droppedIndex = droppedItems.findIndex(d => d.id === item.id);
 			  if (droppedIndex !== -1) {
@@ -334,9 +333,14 @@ function setupMovement() {
 				placedFromDrop: true
 			  };
 
-			  // Initialize storage if it's a box
 			  if (placedItem.name.toLowerCase().includes("box")) {
-				initBoxStorage(placedItem, 8);  // <-- This adds storage and contents
+				initBoxStorage(placedItem, 8);
+			  }
+
+			  // You could add growth metadata here if it's a plant
+			  if (placedItem.isPlant) {
+				placedItem.growthStage = 0;
+				placedItem.plantedAt = Date.now();
 			  }
 
 			  map.placedItems.push(placedItem);

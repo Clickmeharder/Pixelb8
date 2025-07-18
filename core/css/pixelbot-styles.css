@@ -158,18 +158,7 @@
   pointer-events: none;
   font-family: "Press Start 2P", monospace;
 }
-Then update your slot rendering JS to add a span with class quantity-label for quantity, like:
-js
-Copy
-Edit
-if (item) {
-  slot.innerHTML = `
-    <span>${item.icon || '?'}</span>
-    <span class="quantity-label">x${item.quantity}</span>
-  `;
-  slot.title = `${item.name} x${item.quantity}`;
-  // rest of your code...
-}
+
 #gameArea {
   position: relative;
   width: 90vw;
