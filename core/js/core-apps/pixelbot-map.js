@@ -150,12 +150,24 @@ gameArea.addEventListener('dragover', (e) => {
 
 gameArea.addEventListener('drop', (e) => {
   e.preventDefault();
-  const itemId = e.dataTransfer.getData('text/plain');
-  const rect = gameArea.getBoundingClientRect();
+  const data = e.dataTransfer.getData('text/plain');
+  
+  if (!data) return;
 
+  let parsed;
+  try {
+    parsed = JSON.parse(data);
+  } catch {
+    alert('Invalid item data dropped');
+    return;
+  }
+
+  const itemId = parsed.id;
+  const quantity = parsed.quantity || 1;
+
+  const rect = gameArea.getBoundingClientRect();
   const dropX = e.clientX - rect.left;
   const dropY = e.clientY - rect.top;
 
-  // Call your drop function with coords
-  dropItemAtPosition(itemId, dropX, dropY);
+  dropItemAtPosition(itemId, quantity, dropX, dropY);
 });

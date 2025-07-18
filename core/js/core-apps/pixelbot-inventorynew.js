@@ -17,22 +17,37 @@ let droppedItemsByMap = {
 function loadInventory() {
   const savedInventory = localStorage.getItem('pixelb8_inventory');
   const savedDropped = localStorage.getItem('pixelb8_droppedItemsByMap');
+  const savedPlaced = localStorage.getItem('pixelb8_placedItemsByMap');
 
   inventory = savedInventory ? JSON.parse(savedInventory) : [];
 
   const defaultMapStructure = { house: [], street: [] };
   droppedItemsByMap = savedDropped ? JSON.parse(savedDropped) : defaultMapStructure;
 
-  // Ensure all maps exist
+  // Make sure all maps have dropped items array
   for (let map in maps) {
     if (!droppedItemsByMap[map]) droppedItemsByMap[map] = [];
   }
+
+  // Load placedItems back into the maps object
+  const placedItemsByMap = savedPlaced ? JSON.parse(savedPlaced) : defaultMapStructure;
+  for (let map in maps) {
+    maps[map].placedItems = placedItemsByMap[map] || [];
+  }
 }
+
 // Save inventory and dropped items persistently
 function saveInventory() {
   stackInventoryItems();
   localStorage.setItem('pixelb8_inventory', JSON.stringify(inventory));
   localStorage.setItem('pixelb8_droppedItemsByMap', JSON.stringify(droppedItemsByMap));
+
+  // Collect placedItems per map into an object
+  const placedItemsByMap = {};
+  for (const mapName in maps) {
+    placedItemsByMap[mapName] = maps[mapName].placedItems || [];
+  }
+  localStorage.setItem('pixelb8_placedItemsByMap', JSON.stringify(placedItemsByMap));
 }
 
 function createUniqueItemId(baseName) {
@@ -123,14 +138,16 @@ function dropItem(itemId, quantity = 1) {
 }
 
 
-function dropItemAtPosition(itemId, x, y) {
+function dropItemAtPosition(itemId, x, y, quantity = 1) {
   const item = inventory.find(i => i.id === itemId);
   if (!item) return alert("Item not found in inventory");
 
-  // Remove one quantity from inventory
-  removeItem(itemId, 1);
+  if (item.quantity < quantity) return alert("Not enough quantity to split");
 
-  // Add dropped item at position x,y for current map
+  // Remove quantity from inventory
+  removeItem(itemId, quantity);
+
+  // Add dropped item to the map
   const droppedItems = droppedItemsByMap[currentMap];
   droppedItems.push({
     id: createUniqueItemId(item.name),
@@ -138,7 +155,7 @@ function dropItemAtPosition(itemId, x, y) {
     icon: item.icon,
     size: item.size,
     type: item.type,
-    quantity: 1,
+    quantity,
     x,
     y
   });
@@ -147,6 +164,7 @@ function dropItemAtPosition(itemId, x, y) {
   renderInventory();
   renderDroppedItems();
 }
+
 
 const moveThreshold = 2;
 let itemToPickUpIndex = null;
@@ -416,15 +434,15 @@ function storeItemInBox(itemId, box) {
     return alert("Storage box is full!");
   }
 
-  // Remove item from inventory and add to storage contents
   const [item] = inventory.splice(itemIndex, 1);
   box.storage.contents.push(item);
   box.hasContents = true;
 
   saveInventory();
   renderInventory();
-  openStorageUI(box); // refresh storage UI
+  openStorageUI(box);
 }
+
 function initBoxStorage(box, capacity = 16) {
   if (!box.storage) {
     box.storage = {
@@ -434,14 +452,16 @@ function initBoxStorage(box, capacity = 16) {
     box.hasContents = false;
   }
 }
+
 function openStorageUI(box) {
   if (!box.storage) {
     console.warn("Box missing storage property");
-    return; // or handle creating storage here
+    return;
   }
   if (!Array.isArray(box.storage.contents)) {
     box.storage.contents = new Array(box.storage.capacity).fill(null);
   }
+
   let modal = document.getElementById('storage-modal');
   if (!modal) {
     modal = document.createElement('div');
@@ -461,7 +481,15 @@ function openStorageUI(box) {
     closeBtn.innerText = "Close";
     closeBtn.onclick = () => modal.remove();
     modal.appendChild(closeBtn);
-
+    // Add your header span here
+    const headerSpan = document.createElement('span');
+    headerSpan.textContent = `${box.name || 'container'} Contents`;
+    headerSpan.style.display = 'block';
+    headerSpan.style.textAlign = 'center';
+    headerSpan.style.margin = '10px 0';
+    headerSpan.style.fontWeight = 'bold';
+    headerSpan.style.fontSize = '16px';
+    modal.appendChild(headerSpan);
     const container = document.createElement('div');
     container.id = 'storage-contents';
     container.style.display = 'grid';
@@ -473,9 +501,18 @@ function openStorageUI(box) {
   } else {
     modal.style.display = 'block';
   }
+  // Also update the header text if modal is reused for another box
+  const headerSpan = modal.querySelector('span');
+  if (headerSpan) {
+    headerSpan.textContent = `${box.name || 'container'} Contents`;
+  }
+  renderStorageContents(box);
+}
 
+function renderStorageContents(box) {
   const contents = box.storage.contents;
   const container = document.getElementById('storage-contents');
+  if (!container) return;
   container.innerHTML = '';
 
   for (let i = 0; i < box.storage.capacity; i++) {
@@ -486,19 +523,33 @@ function openStorageUI(box) {
     slot.style.alignItems = 'center';
     slot.style.justifyContent = 'center';
     slot.style.fontSize = '20px';
-    slot.style.userSelect = 'none'; // Prevent text selection while dragging
+    slot.style.userSelect = 'none';
 
     const item = contents[i];
     if (item) {
-      slot.textContent = item.icon || '?';
-      slot.title = `${item.name} x${item.quantity}`;
+	  slot.innerHTML = `
+		  <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+			<span>${item.icon || '?'}</span>
+			<span style="
+			  position: absolute;
+			  bottom: 2px;
+			  right: 4px;
+			  font-size: 12px;
+			  color: #00e5ff;
+			  font-weight: bold;
+			  user-select: none;
+			  pointer-events: none;
+			">x${item.quantity}</span>
+		  </div>
+		`;
+	  slot.title = `${item.name} x${item.quantity}`;
 
       slot.onclick = () => {
-        addItem(item);
-        contents.splice(i, 1);
-        box.hasContents = contents.length > 0;
+        addItem({ ...item });
+        contents[i] = null;
+        box.hasContents = contents.some(Boolean);
         renderInventory();
-        openStorageUI(box);
+        renderStorageContents(box);
       };
     } else {
       slot.textContent = '+';
@@ -512,39 +563,48 @@ function openStorageUI(box) {
           return;
         }
 
-        contents.push({ ...itemToStore });
-        removeItem(itemToStore.id, 1);
+        contents[i] = { ...itemToStore };
+        removeItem(itemToStore.id, itemToStore.quantity);
         box.hasContents = true;
         renderInventory();
-        openStorageUI(box);
+        renderStorageContents(box);
       };
     }
 
     // Drag and drop handlers for each slot
     slot.addEventListener('dragover', (e) => {
       e.preventDefault();
-      slot.style.backgroundColor = '#003355'; // Highlight on dragover
+      slot.style.backgroundColor = '#003355';
       e.dataTransfer.dropEffect = 'move';
     });
 
     slot.addEventListener('dragleave', () => {
-      slot.style.backgroundColor = ''; // Remove highlight when leaving
+      slot.style.backgroundColor = '';
     });
 
     slot.addEventListener('drop', (e) => {
       e.preventDefault();
       slot.style.backgroundColor = '';
 
-      const itemId = e.dataTransfer.getData('text/plain');
-      if (!itemId) return;
+      const rawData = e.dataTransfer.getData('text/plain');
+      if (!rawData) return;
 
-      // Only allow drop if slot is empty
+      let dragged;
+      try {
+        dragged = JSON.parse(rawData);
+      } catch (err) {
+        alert("Invalid drag data");
+        return;
+      }
+
+      const itemId = dragged.id;
+      const quantity = dragged.quantity || 1;
+
       if (contents[i]) {
         alert("Slot already occupied!");
         return;
       }
 
-      // Find item in inventory
       const itemIndex = inventory.findIndex(invItem => invItem.id === itemId);
       if (itemIndex === -1) {
         alert("Item not found in inventory!");
@@ -553,16 +613,16 @@ function openStorageUI(box) {
 
       const itemToStore = inventory[itemIndex];
 
-      // Store the item directly at this slot index
-      contents[i] = { ...itemToStore };
+      contents[i] = {
+        ...itemToStore,
+        quantity
+      };
 
-      // Remove from inventory
-      removeItem(itemId, 1);
-
-      box.hasContents = contents.length > 0;
+      removeItem(itemId, quantity);
+      box.hasContents = contents.some(Boolean);
 
       renderInventory();
-      openStorageUI(box);
+      renderStorageContents(box);
     });
 
     container.appendChild(slot);
@@ -645,57 +705,64 @@ function stackInventoryItems() {
 
 // Render inventory UI
 function renderInventory() {
+  let invDiv = document.getElementById('inventory');
+  if (!invDiv) {
+    invDiv = document.createElement('div');
+    invDiv.id = 'inventory';
+    invDiv.style.position = 'absolute';
+    invDiv.style.right = '10px';
+    invDiv.style.top = '10px';
+    invDiv.style.width = '240px';
+    invDiv.style.maxHeight = '400px';
+    invDiv.style.overflowY = 'auto';
+    invDiv.style.background = 'rgba(0, 0, 40, 0.85)';
+    invDiv.style.color = '#00e5ff';
+    invDiv.style.padding = '12px';
+    invDiv.style.border = '2px solid #00e5ff';
+    invDiv.style.borderRadius = '8px';
+    invDiv.style.fontFamily = '"Press Start 2P", monospace';
+    invDiv.style.fontSize = '11px';
+    invDiv.style.zIndex = '10000';
+    invDiv.style.display = 'none';
+    invDiv.style.boxShadow = '0 0 12px #00e5ff';
+    invDiv.style.textShadow = '0 0 4px #00e5ff';
+    invDiv.style.transition = 'opacity 0.3s ease';
 
-	let invDiv = document.getElementById('inventory');
-	if (!invDiv) {
-		invDiv = document.createElement('div');
-		invDiv.id = 'inventory';
-		invDiv.style.position = 'absolute';
-		invDiv.style.right = '10px';
-		invDiv.style.top = '10px';
-		invDiv.style.width = '240px';
-		invDiv.style.maxHeight = '400px';
-		invDiv.style.overflowY = 'auto';
-		invDiv.style.background = 'rgba(0, 0, 40, 0.85)';
-		invDiv.style.color = '#00e5ff';
-		invDiv.style.padding = '12px';
-		invDiv.style.border = '2px solid #00e5ff';
-		invDiv.style.borderRadius = '8px';
-		invDiv.style.fontFamily = '"Press Start 2P", monospace';
-		invDiv.style.fontSize = '11px';
-		invDiv.style.zIndex = '10000';
-		invDiv.style.display = 'none';
-		invDiv.style.boxShadow = '0 0 12px #00e5ff';
-		invDiv.style.textShadow = '0 0 4px #00e5ff';
-		invDiv.style.transition = 'opacity 0.3s ease';
+    // Add inventory header
+    const header = document.createElement('div');
+    header.textContent = "Prison Wallet";
+    header.style.textAlign = 'center';
+    header.style.fontWeight = 'bold';
+    header.style.fontSize = '16px';
+    header.style.marginBottom = '8px';
+    invDiv.appendChild(header);
 
-		const gridContainer = document.createElement('div');
-		gridContainer.id = 'inventory-grid';
-		gridContainer.style.display = 'grid';
-		gridContainer.style.gridTemplateColumns = 'repeat(4, 50px)';
-		gridContainer.style.gridGap = '6px';
-		gridContainer.style.marginTop = '8px';
-		invDiv.appendChild(gridContainer);
+    const gridContainer = document.createElement('div');
+    gridContainer.id = 'inventory-grid';
+    gridContainer.style.display = 'grid';
+    gridContainer.style.gridTemplateColumns = 'repeat(4, 50px)';
+    gridContainer.style.gridGap = '6px';
+    gridContainer.style.marginTop = '8px';
+    invDiv.appendChild(gridContainer);
 
-		// Info box at bottom
-		const infoBox = document.createElement('div');
-		infoBox.id = 'inventory-info';
-		infoBox.style.marginTop = '14px';
-		infoBox.style.padding = '6px';
-		infoBox.style.borderTop = '1px solid #00e5ff';
-		infoBox.style.fontSize = '12px';
-		infoBox.style.whiteSpace = 'pre-wrap';
-		infoBox.style.minHeight = '40px';
-		infoBox.style.color = '#00e5ff';
-		invDiv.appendChild(infoBox);
+    const infoBox = document.createElement('div');
+    infoBox.id = 'inventory-info';
+    infoBox.style.marginTop = '14px';
+    infoBox.style.padding = '6px';
+    infoBox.style.borderTop = '1px solid #00e5ff';
+    infoBox.style.fontSize = '12px';
+    infoBox.style.whiteSpace = 'pre-wrap';
+    infoBox.style.minHeight = '40px';
+    infoBox.style.color = '#00e5ff';
+    invDiv.appendChild(infoBox);
 
-		document.body.appendChild(invDiv);
-	}
+    document.body.appendChild(invDiv);
+  }
 
 	const grid = document.getElementById('inventory-grid');
 	const infoBox = document.getElementById('inventory-info');
-	grid.innerHTML = ''; // Clear old items
-	infoBox.textContent = ''; // Clear info box
+	grid.innerHTML = '';
+	infoBox.textContent = '';
 
 	if (inventory.length === 0) {
 		grid.innerHTML = '<div style="grid-column: span 4;"><b>Inventory is empty</b></div>';
@@ -719,14 +786,24 @@ function renderInventory() {
 		slot.style.boxShadow = 'inset 0 0 8px #00e5ff70';
 		slot.style.cursor = 'pointer';
 
-		// Make slot draggable and set drag data
 		slot.setAttribute('draggable', 'true');
 		slot.addEventListener('dragstart', (e) => {
-			e.dataTransfer.setData('text/plain', item.id);  // Pass the item ID on drag
+			const isShift = e.shiftKey;
+			const qtyToDrag = isShift ? Math.floor(item.quantity / 2) : item.quantity;
+
+			if (qtyToDrag <= 0) {
+				e.preventDefault();
+				return alert("Can't split 1 item");
+			}
+
+			e.dataTransfer.setData('text/plain', JSON.stringify({
+				id: item.id,
+				quantity: qtyToDrag,
+				split: isShift
+			}));
 			e.dataTransfer.effectAllowed = 'move';
 		});
 
-		// Handle hover to update info box
 		slot.addEventListener('mouseenter', () => {
 			const details = Object.entries(item)
 				.map(([key, value]) => `${key}: ${value}`)
@@ -766,7 +843,6 @@ function renderInventory() {
 		slot.appendChild(dropBtn);
 		grid.appendChild(slot);
 	});
-
 }
 
 

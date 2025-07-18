@@ -77,6 +77,99 @@
 .inventory-icon {
   font-size: 16px;
 }
+.inventory-icon > div:first-child,
+.inventory-icon > div:nth-child(2) {
+  pointer-events: none;
+}
+#storage-modal {
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  width: 250px; /* match inventory width */
+  max-height: 400px; /* same as inventory */
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-family: monospace;
+  z-index: 10000;
+  border: 1px solid #00e5ff;
+  transition: box-shadow 0.2s ease;
+}
+
+#storage-modal:hover {
+  box-shadow: 0 0 8px #00e5ff;
+}
+
+#storage-modal button {
+  background: transparent;
+  border: 1px solid #00e5ff;
+  color: #00e5ff;
+  padding: 2px 6px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  margin-top: 4px;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+#storage-modal button:hover {
+  box-shadow: 0 0 8px #00e5ff;
+}
+
+#storage-contents {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px; /* add some spacing between slots */
+  margin-top: 10px;
+}
+
+#storage-contents > div {
+  border: 1px solid #00e5ff;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  user-select: none;
+  cursor: pointer;
+  transition: background 0.2s, outline 0.2s;
+  position: relative;
+  border-radius: 4px;
+  background: rgba(0, 15, 30, 0.9);
+  box-shadow: inset 0 0 8px rgba(0, 229, 255, 0.44);
+}
+
+#storage-contents > div:hover {
+  outline: 2px solid #00faff;
+  background: rgba(0, 20, 60, 0.95);
+}
+
+/* Optional: quantity label styling for storage slots */
+#storage-contents > div > span.quantity-label {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 12px;
+  color: #00e5ff;
+  font-weight: bold;
+  user-select: none;
+  pointer-events: none;
+  font-family: "Press Start 2P", monospace;
+}
+Then update your slot rendering JS to add a span with class quantity-label for quantity, like:
+js
+Copy
+Edit
+if (item) {
+  slot.innerHTML = `
+    <span>${item.icon || '?'}</span>
+    <span class="quantity-label">x${item.quantity}</span>
+  `;
+  slot.title = `${item.name} x${item.quantity}`;
+  // rest of your code...
+}
 #gameArea {
   position: relative;
   width: 90vw;
