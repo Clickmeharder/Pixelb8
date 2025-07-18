@@ -6,12 +6,91 @@
 		margin: 0;
 		background-color: #121212;
 	}
-	#gameArea {
-		position: relative;
-		width: 800px;
-		height: 600px;
+	  #customMenu {
+		position: absolute;
+		display: none;
 		background-color: #1e1e1e;
-	}
+		color: white;
+		border: 1px solid #444;
+		border-radius: 6px;
+		box-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+		z-index: 1000;
+		min-width: 160px;
+		font-family: monospace;
+		overflow: hidden;
+		user-select: none;
+	  }
+
+	  #customMenu div {
+		padding: 10px 14px;
+		border-bottom: 1px solid #333;
+		cursor: pointer;
+		transition: background 0.2s;
+	  }
+
+	  #customMenu div:last-child {
+		border-bottom: none; /* No border on the last item */
+	  }
+
+	  #customMenu div:hover {
+		background-color: #333;
+	  }
+#inventory {
+  position: absolute;
+  right: 45px;
+  top: 10px;
+  width: 250px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-family: monospace;
+  z-index: 10000;
+  display: block;
+  border: 1px solid #00e5ff;
+  transition: box-shadow 0.2s ease;
+}
+  #inventory button {
+    background: transparent;
+    border: 1px solid #00e5ff;
+    color: #00e5ff;
+    padding: 2px 6px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 10px;
+    margin-top: 4px;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease;
+  }
+
+  #inventory:hover {
+    box-shadow: 0 0 8px #00e5ff;
+  }
+  #inventory button:hover {
+    box-shadow: 0 0 8px #00e5ff;
+  }
+#inventory-grid div:hover {
+  outline: 2px solid #00faff;
+  background: rgba(0, 20, 60, 0.95);
+}
+.inventory-icon {
+  font-size: 16px;
+}
+#gameArea {
+  position: relative;
+  width: 90vw;
+  height: 600px;
+  background-color: #1e1e1e;
+  border: 8px solid #00aaff; /* Glowy tech-blue border */
+  box-shadow: 0 0 30px #00aaffaa; /* Slight outer glow */
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+}
+
 	#pixelb8 {
 		position: absolute;
 		width: 124px; /* Adjust according to your sprite size */
@@ -19,8 +98,30 @@
 		background-image: url('https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
 		background-size: cover;
 		opacity:0.8;
-		transition:0.3, smooth;
+	    image-rendering: pixelated;
+	    -webkit-backface-visibility: hidden; /* sometimes helps with flickering */
+	    backface-visibility: hidden;
+	    will-change: transform, opacity;
+		transition: transform 0.15s ease, opacity 0.2s ease;
+		z-index:20;
+
 	}
+
+.sprite {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.sprite.active {
+  opacity: 1;
+}
 	#pixelb8.batterylow {
 		position: absolute;
 		width: 124px; /* Adjust according to your sprite size */
@@ -28,7 +129,7 @@
 		background-image: url('https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
 		background-size: cover;
 		opacity: 0.8;
-		transition: all 1.9s ease 0s;
+		transition: transform 0.15s ease;
 	}
 	@keyframes move {
 		from { background-position: 0 0; }
@@ -37,3 +138,115 @@
 	.animate {
 		animation: move 1.8s steps(4) infinite; /* 4 frames per second */
 	}	
+
+	@keyframes tilt {
+	  0% { transform: rotate(0deg); }
+	  25% { transform: rotate(-4deg); }
+	  50% { transform: rotate(4deg); }
+	  75% { transform: rotate(-4deg); }
+	  100% { transform: rotate(0deg); }
+	}
+
+	.tilt-animation {
+	  animation: tilt 0.3s infinite;
+	}
+	@keyframes wobbleAnimation {
+	  0%, 100% {
+		transform: rotate(0deg);
+	  }
+	  25% {
+		transform: rotate(5deg);
+	  }
+	  75% {
+		transform: rotate(-5deg);
+	  }
+	}
+
+	.wobble {
+	  animation: wobbleAnimation 0.6s ease-in-out infinite;
+	}
+#move-indicator {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #00e5ff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff inset;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff inset;
+  }
+  50% {
+    box-shadow: 0 0 15px #00e5ff, 0 0 30px #00e5ff inset;
+  }
+  100% {
+    box-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff inset;
+  }
+}
+
+#move-indicator.pulsing {
+  animation: pulse-glow 0.8s ease-in-out;
+}
+	
+	.obstacle {
+	  position: absolute;
+	  background-color: #0066ff88;
+	  z-index: 1;
+	  pointer-events: ;
+	}
+	.storage-unit, .placed-item {
+	  position: absolute;
+	  width: 46px;
+      height: 42px;
+	  transform: ; /* center horizontally, align bottom */
+	}
+	
+.dropped-item {
+  position: absolute;
+  text-align: center;
+  cursor: pointer;
+
+  transform: translate(-50%, -100%);
+  z-index: 5000;
+  /* width can be adjusted here or based on data-size attribute */
+}
+
+.dropped-item-icon {
+  display: block;
+  font-size: 23px;
+  line-height: 0.5;
+  transition: box-shadow 0.2s ease;
+}
+.dropped-item-icon:hover {
+  font-size: 25px;
+  line-height: 1;
+  box-shadow: 0 0 8px #00e5ff;
+  animation: wobbleAnimation 0.6s ease-in-out infinite;
+}
+/* Label styling */
+.dropped-item-label {
+  font-size: 10px;
+  position: absolute;
+  color: black;
+  white-space: nowrap;
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+  margin-top: 1px;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Example: different sizes (optional) */
+.dropped-item[data-size="large"] .dropped-item-icon {
+  font-size: 40px;
+}
+
+.dropped-item[data-size="small"] .dropped-item-icon {
+  font-size: 15px;
+}
+

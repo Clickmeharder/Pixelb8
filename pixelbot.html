@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-<link rel="stylesheet" href="core/css/pixelbot-styles.css">
+  <meta charset="UTF-8">
+  <title>PixelBot</title>
+  <link rel="stylesheet" href="core/css/pixelbot-styles.css">
 </head>
 
 <body>
     <div id="gameArea">
-      <div id="pixelb8" style="opacity: 0.8;"></div>
+      <div id="pixelb8" class="player-character" style="opacity: 0.8;"></div>
     </div>
+
+<div id="customMenu" class="context-menu" style="display: none; position: absolute; z-index: 1000;"></div>
+  <script src="core/js/core-apps/pixelbot-map.js"></script>
   <script src="core/js/core-apps/pixelbot-movement.js"></script>
+  <script src="core/js/core-apps/pixelbot-inventorynew.js"></script>
+
 </body>
