@@ -122,6 +122,32 @@ function dropItem(itemId, quantity = 1) {
   renderDroppedItems();
 }
 
+
+function dropItemAtPosition(itemId, x, y) {
+  const item = inventory.find(i => i.id === itemId);
+  if (!item) return alert("Item not found in inventory");
+
+  // Remove one quantity from inventory
+  removeItem(itemId, 1);
+
+  // Add dropped item at position x,y for current map
+  const droppedItems = droppedItemsByMap[currentMap];
+  droppedItems.push({
+    id: createUniqueItemId(item.name),
+    name: item.name,
+    icon: item.icon,
+    size: item.size,
+    type: item.type,
+    quantity: 1,
+    x,
+    y
+  });
+
+  saveInventory();
+  renderInventory();
+  renderDroppedItems();
+}
+
 const moveThreshold = 2;
 let itemToPickUpIndex = null;
 let placedItemToPickUpId = null;
@@ -271,6 +297,15 @@ function placeItem(item, x, y) {
     placed.hasContents = false;
   }
 
+  // ✅ SAFETY FALLBACK — just in case
+  if (!placed.storage && placed.name.toLowerCase().includes("box")) {
+    placed.storage = {
+      contents: [],
+      capacity: 8
+    };
+    placed.hasContents = false;
+  }
+
   map.placedItems.push(placed);
   renderPlacedItems(map.placedItems);
 }
@@ -343,15 +378,70 @@ function inspectPlacedItem(id) {
   alert(`Inspecting: ${item.name}\nType: ${item.type}\nQuantity: ${item.quantity || 1}`);
   hideMenus();
 }
-// 🧰 REPLACE: interactWithPlacedItem()
+
+
+// 🧰 : interactWithPlacedItem()
 function interactWithPlacedItem(id) {
   const map = maps[currentMap];
   const item = map.placedItems.find(item => item.id === id);
-  if (!item || !item.storage) return alert("This item is not interactable.");
-  openStorageUI(item);
+  if (!item) return;
+
+  const name = item.name.toLowerCase();
+  const type = item.type.toLowerCase();
+
+  if (type === 'object') {
+    if (name.includes('box')) {
+      openStorageUI(item);
+    } else if (name.includes('tree')) {
+      interactWithTree(item);
+    } else if (name.includes('bed')) {
+      rest();
+    } else {
+      alert(`You interact with the ${item.name}, but nothing happens... yet.`);
+    }
+  } else {
+    alert(`${item.name} is not something you can interact with.`);
+  }
+
+  hideMenus();
 }
-// ✅ NEW FUNCTION
+
+
+// ✅ NEW interaction functions
+function storeItemInBox(itemId, box) {
+  const itemIndex = inventory.findIndex(i => i.id === itemId);
+  if (itemIndex === -1) return alert("Item not found in inventory");
+
+  if (box.storage.contents.length >= box.storage.capacity) {
+    return alert("Storage box is full!");
+  }
+
+  // Remove item from inventory and add to storage contents
+  const [item] = inventory.splice(itemIndex, 1);
+  box.storage.contents.push(item);
+  box.hasContents = true;
+
+  saveInventory();
+  renderInventory();
+  openStorageUI(box); // refresh storage UI
+}
+function initBoxStorage(box, capacity = 16) {
+  if (!box.storage) {
+    box.storage = {
+      contents: new Array(capacity).fill(null),
+      capacity: capacity,
+    };
+    box.hasContents = false;
+  }
+}
 function openStorageUI(box) {
+  if (!box.storage) {
+    console.warn("Box missing storage property");
+    return; // or handle creating storage here
+  }
+  if (!Array.isArray(box.storage.contents)) {
+    box.storage.contents = new Array(box.storage.capacity).fill(null);
+  }
   let modal = document.getElementById('storage-modal');
   if (!modal) {
     modal = document.createElement('div');
@@ -396,6 +486,7 @@ function openStorageUI(box) {
     slot.style.alignItems = 'center';
     slot.style.justifyContent = 'center';
     slot.style.fontSize = '20px';
+    slot.style.userSelect = 'none'; // Prevent text selection while dragging
 
     const item = contents[i];
     if (item) {
@@ -411,6 +502,8 @@ function openStorageUI(box) {
       };
     } else {
       slot.textContent = '+';
+      slot.title = 'Empty slot - drop item here';
+
       slot.onclick = () => {
         const itemToStore = inventory[0];
         if (!itemToStore) return alert("No items in inventory.");
@@ -426,13 +519,112 @@ function openStorageUI(box) {
         openStorageUI(box);
       };
     }
+
+    // Drag and drop handlers for each slot
+    slot.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      slot.style.backgroundColor = '#003355'; // Highlight on dragover
+      e.dataTransfer.dropEffect = 'move';
+    });
+
+    slot.addEventListener('dragleave', () => {
+      slot.style.backgroundColor = ''; // Remove highlight when leaving
+    });
+
+    slot.addEventListener('drop', (e) => {
+      e.preventDefault();
+      slot.style.backgroundColor = '';
+
+      const itemId = e.dataTransfer.getData('text/plain');
+      if (!itemId) return;
+
+      // Only allow drop if slot is empty
+      if (contents[i]) {
+        alert("Slot already occupied!");
+        return;
+      }
+
+      // Find item in inventory
+      const itemIndex = inventory.findIndex(invItem => invItem.id === itemId);
+      if (itemIndex === -1) {
+        alert("Item not found in inventory!");
+        return;
+      }
+
+      const itemToStore = inventory[itemIndex];
+
+      // Store the item directly at this slot index
+      contents[i] = { ...itemToStore };
+
+      // Remove from inventory
+      removeItem(itemId, 1);
+
+      box.hasContents = contents.length > 0;
+
+      renderInventory();
+      openStorageUI(box);
+    });
+
     container.appendChild(slot);
   }
 }
 
+function interactWithTree(item) {
+  const dropX = item.x + 20 + Math.random() * 30;
+  const dropY = item.y + 10 + Math.random() * 20;
 
+  const droppedItems = droppedItemsByMap[currentMap];
 
+  droppedItems.push({
+    id: createUniqueItemId('Apple'),
+    name: 'Apple',
+    icon: '🍎',
+    size: 'small',
+    weight: 1,
+    type: 'food',
+    quantity: 1,
+    x: dropX,
+    y: dropY
+  });
 
+  saveInventory();
+  renderDroppedItems(droppedItems);
+
+  alert(`${item.name} dropped an 🍎!`);
+}
+
+function cutDownTree(id) {
+  const map = maps[currentMap];
+  const item = map.placedItems.find(p => p.id === id);
+  if (!item) return;
+
+  const hasAxe = inventory.some(i => i.name.toLowerCase().includes('axe'));
+  if (!hasAxe) {
+    alert("You need an axe to cut down this tree.");
+    return;
+  }
+
+  // Optional: drop wood item
+  droppedItemsByMap[currentMap].push({
+    id: createUniqueItemId('Wood'),
+    name: 'Wood',
+    icon: '🪵',
+    size: 'normal',
+    weight: 2,
+    type: 'material',
+    quantity: 1,
+    x: item.x + 10,
+    y: item.y + 10
+  });
+
+  // Remove tree
+  map.placedItems = map.placedItems.filter(p => p.id !== id);
+  renderPlacedItems(map.placedItems);
+  renderDroppedItems(droppedItemsByMap[currentMap]);
+  saveInventory();
+}
+
+//inventory functions 
 function stackInventoryItems() {
   const merged = {};
 
@@ -526,6 +718,13 @@ function renderInventory() {
 		slot.style.position = 'relative';
 		slot.style.boxShadow = 'inset 0 0 8px #00e5ff70';
 		slot.style.cursor = 'pointer';
+
+		// Make slot draggable and set drag data
+		slot.setAttribute('draggable', 'true');
+		slot.addEventListener('dragstart', (e) => {
+			e.dataTransfer.setData('text/plain', item.id);  // Pass the item ID on drag
+			e.dataTransfer.effectAllowed = 'move';
+		});
 
 		// Handle hover to update info box
 		slot.addEventListener('mouseenter', () => {
@@ -659,12 +858,19 @@ function createMenuOptions(target) {
 
     if (!placedItem) return options;
 
-    // 🔐 Disable pickup if box has contents
+    const name = placedItem.name.toLowerCase();
+    const type = placedItem.type?.toLowerCase() || '';
     const canPickUp = !placedItem.hasContents;
 
-    // Interact with storage box
-    if (placedItem.name.toLowerCase().includes('box')) {
+    // 📦 Storage box support
+    if (name.includes('box')) {
       options += `<div class="menu-option" onclick="interactWithPlacedItem('${id}')">📦 Open Storage</div>`;
+    }
+
+    // 🌳 Tree logic
+    if (name.includes('tree')) {
+      options += `<div class="menu-option" onclick="interactWithPlacedItem('${id}')">🌳 Shake Tree</div>`;
+      options += `<div class="menu-option" onclick="cutDownTree('${id}')">🪓 Cut Down</div>`;
     }
 
     options += `<div class="menu-option" onclick="inspectPlacedItem('${id}')">🔍 Inspect</div>`;
@@ -692,7 +898,6 @@ function createMenuOptions(target) {
 
   return options;
 }
-
 function showCustomMenu(x, y, contentHTML) {
   customMenu.innerHTML = contentHTML;
   customMenu.style.top = `${y}px`;
@@ -780,4 +985,5 @@ addItem({ id: 'Box', name: 'Box', icon: "📦", quantity: 1, size: 'large', type
 addItem({ id: 'Sapling', name: 'Sapling', icon: "🌱", quantity: 2, size: 'small', type: 'sapling' });
 addItem({ id: 'underwearGnome', name: 'underwearGnome', icon: "🧚", quantity: 5, size: 'large', type: 'unique' });
 addItem({ id: 'wrench', name: 'wrench', icon: "🔧", quantity: 1, size: 'normal', type: 'tool' });
+addItem({ id: 'axe', name: 'axe', icon: "🪓", quantity: 1, size: 'normal', type: 'tool' });
 addItem({ id: 'purplepickle', name: 'purplePickle', icon: "pp", quantity: 1, size: 'normal', type: 'unique' });

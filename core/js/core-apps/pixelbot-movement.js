@@ -318,7 +318,7 @@ function setupMovement() {
 		  if (pendingObjectToPlace) {
 			  const item = pendingObjectToPlace;
 
-			  // Make sure it's removed from dropped items
+			  // Remove from dropped items
 			  const droppedItems = droppedItemsByMap[currentMap];
 			  const droppedIndex = droppedItems.findIndex(d => d.id === item.id);
 			  if (droppedIndex !== -1) {
@@ -333,6 +333,11 @@ function setupMovement() {
 				interactable: true,
 				placedFromDrop: true
 			  };
+
+			  // Initialize storage if it's a box
+			  if (placedItem.name.toLowerCase().includes("box")) {
+				initBoxStorage(placedItem, 8);  // <-- This adds storage and contents
+			  }
 
 			  map.placedItems.push(placedItem);
 			  renderDroppedItems();

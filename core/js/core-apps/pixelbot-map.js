@@ -140,3 +140,22 @@ function renderPlacedItems(items) {
   });
 }
 
+
+
+
+gameArea.addEventListener('dragover', (e) => {
+  e.preventDefault();  // Allow drop
+  e.dataTransfer.dropEffect = 'move';
+});
+
+gameArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const itemId = e.dataTransfer.getData('text/plain');
+  const rect = gameArea.getBoundingClientRect();
+
+  const dropX = e.clientX - rect.left;
+  const dropY = e.clientY - rect.top;
+
+  // Call your drop function with coords
+  dropItemAtPosition(itemId, dropX, dropY);
+});
