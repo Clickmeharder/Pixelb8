@@ -1,5 +1,6 @@
 // Basic inventory and dropped items arrays
 let targetPosition = null;
+let heldItem = null;
 let inventory = [];
 let isInventoryOpen = false;
 let droppedItemsByMap = {
@@ -736,25 +737,39 @@ function renderStorageContents(box) {
 function interactWithTree(item) {
   const dropX = item.x + 20 + Math.random() * 30;
   const dropY = item.y + 10 + Math.random() * 20;
+  const mergeThreshold = 50;
 
   const droppedItems = droppedItemsByMap[currentMap];
 
-  droppedItems.push({
-    id: createUniqueItemId('Apple'),
-    name: 'Apple',
-    icon: '🍎',
-    size: 'small',
-    weight: 1,
-    type: 'food',
-    quantity: 1,
-    x: dropX,
-    y: dropY
+  const existingDropped = droppedItems.find(droppedItem => {
+    const dx = droppedItem.x - dropX;
+    const dy = droppedItem.y - dropY;
+    return (
+      Math.sqrt(dx * dx + dy * dy) <= mergeThreshold &&
+      droppedItem.name === 'Apple'
+    );
   });
+
+  if (existingDropped) {
+    existingDropped.quantity += 1;
+  } else {
+    droppedItems.push({
+      id: createUniqueItemId('Apple'),
+      name: 'Apple',
+      icon: '🍎',
+      size: 'small',
+      weight: 1,
+      type: 'food',
+      quantity: 1,
+      x: dropX,
+      y: dropY
+    });
+  }
 
   saveInventory();
   renderDroppedItems(droppedItems);
 
-  alert(`${item.name} dropped an 🍎!`);
+  console.log(`${item.name} dropped an 🍎!`);
 }
 
 function cutDownTree(id) {
@@ -788,6 +803,120 @@ function cutDownTree(id) {
   saveInventory();
 }
 
+function throwHeldItem(targetX, targetY) {
+  if (!heldItem) return;
+
+  const playerEl = document.getElementById('pixelb8');
+  if (!playerEl) {
+    console.warn('Player element #pixelb8 not found!');
+    return;
+  }
+
+  const rect = playerEl.getBoundingClientRect();
+  const startX = rect.left + rect.width / 2;
+  const startY = rect.top + rect.height / 2;
+
+  const flyEl = document.createElement('div');
+  flyEl.classList.add('flying-item');
+  flyEl.textContent = heldItem.icon || '❓';
+  flyEl.style.position = 'fixed';
+  flyEl.style.left = `${startX}px`;
+  flyEl.style.top = `${startY}px`;
+  flyEl.style.fontSize = '28px';
+  flyEl.style.pointerEvents = 'none';
+  document.body.appendChild(flyEl);
+
+  const duration = 1000; // ms
+  const startTime = performance.now();
+
+  // Calculate horizontal and vertical distances
+  const deltaX = targetX - startX;
+  const deltaY = targetY - startY;
+
+  // Peak height for arc (adjust this for how high the arc is)
+  const arcHeight = -150; // negative to go up (because top is downward)
+
+  function animate(time) {
+    const elapsed = time - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Linear interpolation for X
+    const currentX = startX + deltaX * progress;
+
+    // Parabolic for Y: quadratic bezier curve formula for arc
+    // B(t) = (1-t)^2 * startY + 2(1-t)t * peakY + t^2 * targetY
+    // peakY = startY + arcHeight
+    const t = progress;
+    const peakY = startY + arcHeight;
+    const currentY = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * peakY + t * t * targetY;
+
+    flyEl.style.left = `${currentX}px`;
+    flyEl.style.top = `${currentY}px`;
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      // Animation done
+      let damage = 0;
+      const itemName = heldItem.name.toLowerCase();
+      if (itemName.includes('apple')) {
+        damage = Math.random();
+      } else if (itemName.includes('wrench')) {
+        damage = 1 + Math.random();
+      } else {
+        damage = 0.5;
+      }
+
+      applyDamage(damage, targetX, targetY);
+
+      flyEl.style.opacity = '0';
+      setTimeout(() => flyEl.remove(), 300);
+
+      if (heldItem.quantity > 1) {
+		  heldItem.quantity -= 1;
+		} else {
+		  heldItem = null;
+		}
+      renderInventory();
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function applyDamage(amount, x, y) {
+  // Log damage for debug
+  console.log(`Damage dealt: ${amount.toFixed(2)} at (${x}, ${y})`);
+
+  // Create a floating damage indicator
+  const damageEl = document.createElement('div');
+  damageEl.textContent = `-${amount.toFixed(0)}`;
+  damageEl.style.position = 'absolute';
+  damageEl.style.left = `${x}px`;
+  damageEl.style.top = `${y}px`;
+  damageEl.style.fontWeight = 'bold';
+  damageEl.style.color = 'red';
+  damageEl.style.pointerEvents = 'none';
+  damageEl.style.zIndex = 9999;
+  damageEl.style.transition = 'transform 0.6s ease-out, opacity 0.6s ease-out';
+  damageEl.style.transform = 'translateY(0)';
+  damageEl.style.opacity = '1';
+
+  document.body.appendChild(damageEl);
+
+  // Animate the damage text floating up and fading out
+  requestAnimationFrame(() => {
+    damageEl.style.transform = 'translateY(-30px)';
+    damageEl.style.opacity = '0';
+  });
+
+  // Remove the element after animation
+  setTimeout(() => {
+    damageEl.remove();
+  }, 600);
+
+  // TODO: Actual damage system here (e.g. check for NPCs/enemies at x,y)
+}
 //inventory functions 
 function stackInventoryItems() {
   const merged = {};
@@ -807,147 +936,155 @@ function stackInventoryItems() {
   renderInventory();
 }
 
-// Render inventory UI
+
+
 function renderInventory() {
   let invDiv = document.getElementById('inventory');
   if (!invDiv) {
     invDiv = document.createElement('div');
     invDiv.id = 'inventory';
-    invDiv.style.position = 'absolute';
-    invDiv.style.right = '10px';
-    invDiv.style.top = '10px';
-    invDiv.style.width = '240px';
-    invDiv.style.maxHeight = '400px';
-    invDiv.style.overflowY = 'auto';
-    invDiv.style.background = 'rgba(0, 0, 40, 0.85)';
-    invDiv.style.color = '#00e5ff';
-    invDiv.style.padding = '12px';
-    invDiv.style.border = '2px solid #00e5ff';
-    invDiv.style.borderRadius = '8px';
-    invDiv.style.fontFamily = '"Press Start 2P", monospace';
-    invDiv.style.fontSize = '11px';
-    invDiv.style.zIndex = '10000';
-    invDiv.style.display = 'none';
-    invDiv.style.boxShadow = '0 0 12px #00e5ff';
-    invDiv.style.textShadow = '0 0 4px #00e5ff';
-    invDiv.style.transition = 'opacity 0.3s ease';
 
-    // Add inventory header
-    const header = document.createElement('div');
-    header.textContent = "Prison Wallet";
-    header.style.textAlign = 'center';
-    header.style.fontWeight = 'bold';
-    header.style.fontSize = '16px';
-    header.style.marginBottom = '8px';
-    invDiv.appendChild(header);
-
-    const gridContainer = document.createElement('div');
-    gridContainer.id = 'inventory-grid';
-    gridContainer.style.display = 'grid';
-    gridContainer.style.gridTemplateColumns = 'repeat(4, 50px)';
-    gridContainer.style.gridGap = '6px';
-    gridContainer.style.marginTop = '8px';
-    invDiv.appendChild(gridContainer);
-
-    const infoBox = document.createElement('div');
-    infoBox.id = 'inventory-info';
-    infoBox.style.marginTop = '14px';
-    infoBox.style.padding = '6px';
-    infoBox.style.borderTop = '1px solid #00e5ff';
-    infoBox.style.fontSize = '12px';
-    infoBox.style.whiteSpace = 'pre-wrap';
-    infoBox.style.minHeight = '40px';
-    infoBox.style.color = '#00e5ff';
-    invDiv.appendChild(infoBox);
-
+    invDiv.innerHTML = `
+      <div id="inventory-header">Prison Wallet</div>
+	  <button id="close-inventory-btn" onclick="toggleInventory()"style="position: absolute; top: 5px; right: 5px; z-index: 999;">❌</button>
+      <div id="inventory-equipment">
+        <div id="held-item-slot" class="inventory-icon" title="Held Item (Click to unequip)">✋</div>
+      </div>
+      <div id="inventory-grid"></div>
+      <div id="inventory-info"></div>
+    `;
     document.body.appendChild(invDiv);
   }
 
-	const grid = document.getElementById('inventory-grid');
-	const infoBox = document.getElementById('inventory-info');
-	grid.innerHTML = '';
-	infoBox.textContent = '';
+  const grid = document.getElementById('inventory-grid');
+  const infoBox = document.getElementById('inventory-info');
+  const heldSlot = document.getElementById('held-item-slot');
 
-	if (inventory.length === 0) {
-		grid.innerHTML = '<div style="grid-column: span 4;"><b>Inventory is empty</b></div>';
-		return;
-	}
+  grid.innerHTML = '';
+  infoBox.textContent = '';
+  heldSlot.innerHTML = ''; // Clear it
 
-	inventory.forEach(item => {
-		const slot = document.createElement('div');
-		slot.classList.add("inventory-icon");
+  // Render held item if any
+  if (heldItem) {
+    heldSlot.innerHTML = `
+      <div class="icon">${heldItem.icon || '❓'}</div>
+      <div class="qty">x${heldItem.quantity}</div>
+    `;
+    heldSlot.onclick = () => {
+      // Unequip and return to inventory
+      const existing = inventory.find(i => i.id === heldItem.id);
+      if (existing) {
+        existing.quantity += heldItem.quantity;
+      } else {
+        inventory.push({ ...heldItem });
+      }
+      heldItem = null;
+      renderInventory();
+    };
+  } else {
+    heldSlot.innerHTML = `<div class="icon">✋</div>`;
+    heldSlot.onclick = null;
+  }
 
-		slot.style.width = '48px';
-		slot.style.height = '48px';
-		slot.style.border = '1px solid #00e5ff';
-		slot.style.borderRadius = '4px';
-		slot.style.background = 'rgba(0, 15, 30, 0.9)';
-		slot.style.display = 'flex';
-		slot.style.alignItems = 'center';
-		slot.style.justifyContent = 'center';
-		slot.style.flexDirection = 'column';
-		slot.style.position = 'relative';
-		slot.style.boxShadow = 'inset 0 0 8px #00e5ff70';
-		slot.style.cursor = 'pointer';
+  // Show empty message if inventory is empty
+  if (inventory.length === 0) {
+    grid.innerHTML = '<div style="grid-column: span 4;"><b>Inventory is empty</b></div>';
+    return;
+  }
 
-		slot.setAttribute('draggable', 'true');
-		slot.addEventListener('dragstart', (e) => {
-			const isShift = e.shiftKey;
-			const qtyToDrag = isShift ? Math.floor(item.quantity / 2) : item.quantity;
+  // Render each inventory item
+  inventory.forEach((item, index) => {
+	  const slot = document.createElement('div');
+	  slot.className = "inventory-icon";
+	  slot.setAttribute('draggable', 'true');
 
-			if (qtyToDrag <= 0) {
-				e.preventDefault();
-				return alert("Can't split 1 item");
+	  // Drag events unchanged...
+
+	  slot.addEventListener('mouseenter', () => {
+		const details = Object.entries(item)
+		  .map(([key, value]) => `${key}: ${value}`)
+		  .join('\n');
+		infoBox.textContent = details;
+	  });
+
+	  slot.addEventListener('mouseleave', () => {
+		infoBox.textContent = '';
+	  });
+
+	  // Left-click to equip 1 unit or add 1 unit if already equipped
+	  slot.addEventListener('click', () => {
+		if (item.type === 'tool' || item.type === 'food') {
+		  if (!heldItem) {
+			// Equip 1 unit fresh
+			heldItem = { ...item, quantity: 1 };
+			item.quantity--;
+			if (item.quantity <= 0) inventory.splice(index, 1);
+		  } else if (heldItem.id === item.id) {
+			// Same item equipped, add 1 more if available
+			if (item.quantity > 0) {
+			  heldItem.quantity++;
+			  item.quantity--;
+			  if (item.quantity <= 0) inventory.splice(index, 1);
 			}
+		  } else {
+			// Different item equipped, swap them:
+			// Return heldItem to inventory
+			const existing = inventory.find(i => i.id === heldItem.id);
+			if (existing) {
+			  existing.quantity += heldItem.quantity;
+			} else {
+			  inventory.push({ ...heldItem });
+			}
+			// Equip new item with 1 quantity
+			heldItem = { ...item, quantity: 1 };
+			item.quantity--;
+			if (item.quantity <= 0) inventory.splice(index, 1);
+		  }
+		  renderInventory();
+		}
+	  });
 
-			e.dataTransfer.setData('text/plain', JSON.stringify({
-				id: item.id,
-				quantity: qtyToDrag,
-				split: isShift
-			}));
-			e.dataTransfer.effectAllowed = 'move';
-		});
+	  // Right-click to equip all remaining quantity of this item
+	  slot.addEventListener('contextmenu', (e) => {
+		e.preventDefault();
+		if (item.type === 'tool' || item.type === 'food') {
+		  if (!heldItem || heldItem.id !== item.id) {
+			// Unequip current held item back to inventory
+			if (heldItem) {
+			  const existing = inventory.find(i => i.id === heldItem.id);
+			  if (existing) {
+				existing.quantity += heldItem.quantity;
+			  } else {
+				inventory.push({ ...heldItem });
+			  }
+			}
+			// Equip all of this item
+			heldItem = { ...item };
+			inventory.splice(index, 1);
+		  } else {
+			// Same item equipped, add all remaining quantity
+			heldItem.quantity += item.quantity;
+			inventory.splice(index, 1);
+		  }
+		  renderInventory();
+		}
+	  });
 
-		slot.addEventListener('mouseenter', () => {
-			const details = Object.entries(item)
-				.map(([key, value]) => `${key}: ${value}`)
-				.join('\n');
-			infoBox.textContent = details;
-		});
-		slot.addEventListener('mouseleave', () => {
-			infoBox.textContent = '';
-		});
+	  slot.innerHTML = `
+		<div class="icon">${item.icon || '❓'}</div>
+		<div class="qty">x${item.quantity}</div>
+		<button class="drop-btn">−</button>
+	  `;
 
-		const icon = document.createElement('div');
-		icon.textContent = item.icon || '❓';
-		icon.style.fontSize = '18px';
+	  slot.querySelector('.drop-btn').onclick = (e) => {
+		e.stopPropagation(); // prevent triggering equip when dropping
+		dropItem(item.id, 1);
+	  };
 
-		const qty = document.createElement('div');
-		qty.textContent = `x${item.quantity}`;
-		qty.style.fontSize = '9px';
-		qty.style.position = 'absolute';
-		qty.style.bottom = '2px';
-		qty.style.right = '4px';
-		qty.style.color = '#00e5ff';
-
-		const dropBtn = document.createElement('button');
-		dropBtn.textContent = '−';
-		dropBtn.style.position = 'absolute';
-		dropBtn.style.top = '0px';
-		dropBtn.style.right = '0px';
-		dropBtn.style.background = 'transparent';
-		dropBtn.style.color = '#00e5ff';
-		dropBtn.style.border = 'none';
-		dropBtn.style.cursor = 'pointer';
-		dropBtn.style.fontSize = '10px';
-		dropBtn.onclick = () => dropItem(item.id, 1);
-
-		slot.appendChild(icon);
-		slot.appendChild(qty);
-		slot.appendChild(dropBtn);
-		grid.appendChild(slot);
-	});
+	  grid.appendChild(slot);
+  });
 }
+
 
 
 let inventoryOpen = false;
@@ -1012,9 +1149,12 @@ function hideMenus() {
 function createMenuOptions(target) {
   let options = '';
 
-  // Common option: move to
+  // Common option: move to, or throw
   options += `<div class="menu-option" onclick="moveTo(${rightClickPos.x}, ${rightClickPos.y})">🧭 Move to Here</div>`;
-
+  // Only show "Throw" if an item is held
+  if (heldItem) {
+    options += `<div class="menu-option" onclick="throwHeldItem(${rightClickPos.x}, ${rightClickPos.y})">🗑️ Throw ${heldItem.name}</div>`;
+  }
   // Dropped items
   if (target.classList.contains('dropped-item')) {
     const id = target.dataset.id;
@@ -1041,7 +1181,7 @@ function createMenuOptions(target) {
     const name = placedItem.name.toLowerCase();
     const type = placedItem.type?.toLowerCase() || '';
     const canPickUp = !placedItem.hasContents;
-
+//interact with placed item logic
     // 📦 Storage box support
     if (name.includes('box')) {
       options += `<div class="menu-option" onclick="interactWithPlacedItem('${id}')">📦 Open Storage</div>`;
@@ -1126,7 +1266,12 @@ function preventDefaultContextMenu(e) {
 }
 window.addEventListener('contextmenu', preventDefaultContextMenu, true);
 
-
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'i' || e.key === 'I') {
+    e.preventDefault(); // Prevent default browser actions (like opening dev tools on some setups)
+    toggleInventory();
+  }
+});
 function deleteItemById(itemId) {
   const droppedIndex = droppedItems.findIndex(i => i.id === itemId);
   if (droppedIndex !== -1) {

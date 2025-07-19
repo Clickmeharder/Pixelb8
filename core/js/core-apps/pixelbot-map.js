@@ -77,41 +77,59 @@ function renderObstacles(obstacles) {
   });
 }
 function renderDroppedItems() {
-  document.querySelectorAll('.dropped-item').forEach(el => el.remove());
-  console.log('renderDroppedItems Ran')
+  document.querySelectorAll('.dropped-item, .dropped-item-label-wrapper').forEach(el => el.remove());
+  console.log('renderDroppedItems Ran');
   const droppedItems = droppedItemsByMap[currentMap];
 
   droppedItems.forEach((item, index) => {
-    const container = document.createElement('div');
-    container.classList.add('dropped-item');
-    container.style.position = 'absolute';
-    container.style.left = `${item.x}px`;
-    container.style.top = `${item.y}px`;
-    container.style.cursor = 'pointer';
-    container.style.userSelect = 'none';
-    container.style.textAlign = 'center';
-    container.style.zIndex = '10';
-    container.style.transform = 'translate(-50%, -100%)';
+    // Icon container
+    const iconContainer = document.createElement('div');
+    iconContainer.classList.add('dropped-item');
+    iconContainer.style.position = 'absolute';
+    iconContainer.style.left = `${item.x}px`;
+    iconContainer.style.top = `${item.y}px`;
+    iconContainer.style.cursor = 'pointer';
+    iconContainer.style.userSelect = 'none';
+    iconContainer.style.textAlign = 'center';
+    iconContainer.style.zIndex = '10';
+    iconContainer.style.transform = 'translate(-50%, -100%)';
 
-    if (item.size) container.dataset.size = item.size;
+    if (item.size) iconContainer.dataset.size = item.size;
 
     const iconSpan = document.createElement('span');
     iconSpan.classList.add('dropped-item-icon');
     iconSpan.textContent = item.icon || '❓';
 
+    iconContainer.appendChild(iconSpan);
+    iconContainer.title = `${item.name} x${item.quantity}`;
+    iconContainer.dataset.id = item.id;
+    iconContainer.onclick = () => {
+      moveToAndPickUpItem(item.x, item.y, item.id);
+    };
+    gameArea.appendChild(iconContainer);
+
+    // Label container (separate from icon)
+    const labelWrapper = document.createElement('div');
+    labelWrapper.classList.add('dropped-item-label-wrapper');
+    labelWrapper.style.position = 'absolute';
+    labelWrapper.style.left = `${item.x}px`;
+    labelWrapper.style.top = `${item.y + 5}px`; // slight offset down from icon
+    labelWrapper.style.transform = 'translate(-50%, 0)';
+    labelWrapper.style.zIndex = '50';
+    labelWrapper.style.pointerEvents = ''; // So it doesn’t interfere with clicking
+
     const label = document.createElement('div');
     label.classList.add('dropped-item-label');
     label.textContent = `${item.name} x${item.quantity}`;
 
-    container.appendChild(iconSpan);
-    container.appendChild(label);
-
-    container.title = '${item.name} x${item.quantity}';
-    container.dataset.id = item.id;
-    container.onclick = () => {
-      moveToAndPickUpItem(item.x, item.y, item.id);
-    };
-    gameArea.appendChild(container);
+    labelWrapper.appendChild(label);
+	label.addEventListener('mouseenter', () => {
+	  iconSpan.classList.add('hovered');
+	});
+	label.addEventListener('mouseleave', () => {
+	  iconSpan.classList.remove('hovered');
+	});
+    gameArea.appendChild(labelWrapper);
   });
 }
 function renderPlacedItems(items) {

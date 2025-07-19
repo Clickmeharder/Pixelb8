@@ -52,17 +52,19 @@
   border: 1px solid #00e5ff;
   transition: box-shadow 0.2s ease;
 }
-  #inventory button {
+#inventory button {
     background: transparent;
-    border: 1px solid #00e5ff;
+    border: 1px outset #00e5ff;
+    border-radius: 50%;
     color: #00e5ff;
-    padding: 2px 6px;
+    padding: 0px 3px;
     font-family: "Press Start 2P", monospace;
     font-size: 10px;
-    margin-top: 4px;
+    margin-top: 2px;
+    margin-right: 2px;
     cursor: pointer;
     transition: box-shadow 0.2s ease;
-  }
+}
 
   #inventory:hover {
     box-shadow: 0 0 8px #00e5ff;
@@ -292,37 +294,56 @@
   position: absolute;
   text-align: center;
   cursor: pointer;
-
   transform: translate(-50%, -100%);
   z-index: 5000;
-  /* width can be adjusted here or based on data-size attribute */
 }
 
+/* Base icon style */
 .dropped-item-icon {
   display: block;
   font-size: 23px;
   line-height: 0.5;
-  transition: box-shadow 0.2s ease;
+  transition: all 0.2s ease;
+  z-index:10;
 }
-.dropped-item-icon:hover {
+
+/* When you hover the whole dropped item, apply hover styles to the icon */
+.dropped-item:hover .dropped-item-icon {
   font-size: 25px;
   line-height: 1;
   box-shadow: 0 0 8px #00e5ff;
   animation: wobbleAnimation 0.6s ease-in-out infinite;
+  z-index: 30;
 }
-/* Label styling */
+
+/* Label style remains the same */
 .dropped-item-label {
   font-size: 10px;
-  position: absolute;
-  color: black;
+  position: relative;
+  color: #12a6bd;
   white-space: nowrap;
-  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+  font-family: lucida console;
+  font-weight: bold;
   margin-top: 1px;
   top: 100%;
   left: 50%;
+  z-index: 30;
   transform: translateX(-50%);
+  text-shadow: 0 0 2px black, 1px 1px 2px black; /* soft black shadow */
 }
-
+.dropped-item-label:hover {
+  line-height: 1;
+  box-shadow: 0 0 8px #00e5ff;
+  transform: translateX(-50%);
+  z-index: 30;
+}
+.dropped-item-icon.hovered {
+  font-size: 25px;
+  line-height: 1;
+  box-shadow: 0 0 8px #00e5ff;
+  animation: wobbleAnimation 0.6s ease-in-out infinite;
+  z-index: 30;
+}
 /* Example: different sizes (optional) */
 .dropped-item[data-size="large"] .dropped-item-icon {
   font-size: 40px;
@@ -332,3 +353,94 @@
   font-size: 15px;
 }
 
+/* new inventory css*/
+#inventory {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 240px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: rgba(0, 0, 40, 0.85);
+  color: #00e5ff;
+  padding: 12px;
+  border: 2px solid #00e5ff;
+  border-radius: 8px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 11px;
+  z-index: 10000;
+  display: none;
+  box-shadow: 0 0 12px #00e5ff;
+
+  transition: opacity 0.3s ease;
+}
+
+#inventory-header {
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+#inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 50px);
+  grid-gap: 6px;
+  margin-top: 8px;
+}
+
+#inventory-info {
+    margin-top: 2px;
+    padding: 2px;
+    padding-right: 6px;
+    background: #111213c4;
+    border-top: 1px solid #00e5ff;
+    font-size: 12px;
+    white-space: pre-wrap;
+    min-height: 0px;
+    color: #32c31c;
+    text-align: right;
+}
+
+.inventory-icon {
+    width: 52px;
+    height: 30px;
+    border: 1px solid #00e5ff;
+    border-radius: 8px;
+    background: rgba(0, 15, 30, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    position: relative;
+    box-shadow: inset 0 0 8px #00e5ff70;
+    cursor: pointer;
+}
+.inventory-icon .icon {
+  font-size: 18px;
+}
+
+.inventory-icon .qty {
+  font-size: 9px;
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  color: #00e5ff;
+  text-shadow: 0 0 2px black, 1px 1px 2px black;
+}
+
+.inventory-icon .drop-btn {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  background: transparent;
+  color: #00e5ff;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+}
+.flying-item {
+  pointer-events: none;
+  user-select: none;
+  z-index: 9999;
+}
