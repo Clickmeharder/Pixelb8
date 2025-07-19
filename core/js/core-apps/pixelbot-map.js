@@ -136,9 +136,6 @@ function renderPlacedItems(items) {
   console.log('renderPlacedItems Ran');
   document.querySelectorAll(".placed-item").forEach(el => el.remove());
 
-  const playerY = player.y; // <- your in-game Y position
-
-  // Map size keywords to font sizes
   const sizeMap = {
     tiny: '12px',
     small: '18px',
@@ -156,19 +153,23 @@ function renderPlacedItems(items) {
     el.style.left = `${item.x}px`;
     el.style.top = `${item.y}px`;
 
-    // Use sizeMap or default to normal size if undefined
+    if (item.id.toLowerCase().includes('tree')) {
+      el.classList.add('tree');
+    }
+
     const fontSize = sizeMap[item.size] || sizeMap['normal'];
     el.style.fontSize = fontSize;
 
     el.textContent = item.icon || '?';
     el.title = `${item.name} x${item.quantity || 1}`;
 
-    // Compare item Y with player Y to decide z-index
-    el.style.zIndex = item.y < playerY ? '10' : '30';
+    // Set fixed z-index for all placed items
+    el.style.zIndex = 19;
 
     gameArea.appendChild(el);
   });
 }
+
 
 
 

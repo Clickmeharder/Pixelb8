@@ -1,4 +1,5 @@
 // Basic inventory and dropped items arrays
+const moveThreshold = 10;
 let targetPosition = null;
 let heldItem = null;
 let inventory = [];
@@ -36,7 +37,6 @@ function loadInventory() {
     maps[map].placedItems = placedItemsByMap[map] || [];
   }
 }
-
 // Save inventory and dropped items persistently
 function saveInventory() {
   stackInventoryItems();
@@ -50,6 +50,158 @@ function saveInventory() {
   }
   localStorage.setItem('pixelb8_placedItemsByMap', JSON.stringify(placedItemsByMap));
 }
+
+function resetDroppedItems() {
+  for (const map in droppedItemsByMap) {
+    droppedItemsByMap[map] = [];
+  }
+  localStorage.setItem('pixelb8_droppedItemsByMap', JSON.stringify(droppedItemsByMap));
+  loadMap(currentMap); // Or your function to re-render the map
+}
+function resetPlacedItems() {
+  for (const map in maps) {
+    maps[map].placedItems = [];
+  }
+  const emptyPlaced = {};
+  for (const map in maps) {
+    emptyPlaced[map] = [];
+  }
+  localStorage.setItem('pixelb8_placedItemsByMap', JSON.stringify(emptyPlaced));
+  loadMap(currentMap);
+}
+function resetInventory() {
+  inventory = [];
+  localStorage.setItem('pixelb8_inventory', JSON.stringify(inventory));
+  renderInventory(); // Your function to update inventory UI
+}
+function resetEverything() {
+  resetInventory();
+  resetDroppedItems();
+  resetPlacedItems();
+  entities = []; // If you also track entities separately
+  loadMap(currentMap); // Optional if you want to refresh the scene
+}
+function loadGameData() {
+  const savedInventory = localStorage.getItem('pixelb8_inventory');
+  const savedDropped = localStorage.getItem('pixelb8_droppedItemsByMap');
+  const savedPlaced = localStorage.getItem('pixelb8_placedItemsByMap');
+  const savedNPCs = localStorage.getItem('pixelb8_npcsByMap');
+  const savedEnemies = localStorage.getItem('pixelb8_enemiesByMap');
+  const savedPets = localStorage.getItem('pixelb8_petsByMap');
+
+  const defaultMapStructure = { house: [], street: [] };
+
+  inventory = savedInventory ? JSON.parse(savedInventory) : [];
+  droppedItemsByMap = savedDropped ? JSON.parse(savedDropped) : { ...defaultMapStructure };
+  npcsByMap = savedNPCs ? JSON.parse(savedNPCs) : { ...defaultMapStructure };
+  enemiesByMap = savedEnemies ? JSON.parse(savedEnemies) : { ...defaultMapStructure };
+  petsByMap = savedPets ? JSON.parse(savedPets) : { ...defaultMapStructure };
+
+  for (let map in maps) {
+    if (!droppedItemsByMap[map]) droppedItemsByMap[map] = [];
+    if (!npcsByMap[map]) npcsByMap[map] = [];
+    if (!enemiesByMap[map]) enemiesByMap[map] = [];
+    if (!petsByMap[map]) petsByMap[map] = [];
+    maps[map].placedItems = savedPlaced ? JSON.parse(savedPlaced)[map] || [] : [];
+  }
+}
+function saveGameData() {
+  stackInventoryItems();
+  localStorage.setItem('pixelb8_inventory', JSON.stringify(inventory));
+  localStorage.setItem('pixelb8_droppedItemsByMap', JSON.stringify(droppedItemsByMap));
+
+  const placedItemsByMap = {};
+  for (const mapName in maps) {
+    placedItemsByMap[mapName] = maps[mapName].placedItems || [];
+  }
+  localStorage.setItem('pixelb8_placedItemsByMap', JSON.stringify(placedItemsByMap));
+  localStorage.setItem('pixelb8_npcsByMap', JSON.stringify(npcsByMap));
+  localStorage.setItem('pixelb8_enemiesByMap', JSON.stringify(enemiesByMap));
+  localStorage.setItem('pixelb8_petsByMap', JSON.stringify(petsByMap));
+}
+function clearDroppedItems() {
+  for (const map in droppedItemsByMap) {
+    droppedItemsByMap[map] = [];
+  }
+}
+
+function clearPlacedItems() {
+  for (const map in maps) {
+    maps[map].placedItems = [];
+  }
+}
+
+function clearNPCs() {
+  for (const map in npcsByMap) {
+    npcsByMap[map] = [];
+  }
+}
+
+function clearEnemies() {
+  for (const map in enemiesByMap) {
+    enemiesByMap[map] = [];
+  }
+}
+
+function clearPets() {
+  for (const map in petsByMap) {
+    petsByMap[map] = [];
+  }
+}
+
+function debugAddTestNPC() {
+  const npc = {
+    id: `npc_${Date.now()}`,
+    name: 'Test NPC',
+    type: 'npc',
+    x: player.x + 1,
+    y: player.y,
+    map: currentMap
+  };
+  maps[currentMap].entities.push(npc);
+  renderEntities(); // optional function to update view
+}
+
+function debugAddTestEnemy() {
+  const enemy = {
+    id: `enemy_${Date.now()}`,
+    name: 'Test Enemy',
+    type: 'enemy',
+    x: player.x + 2,
+    y: player.y,
+    map: currentMap
+  };
+  maps[currentMap].entities.push(enemy);
+  renderEntities();
+}
+
+function debugAddTestPet() {
+  const pet = {
+    id: `pet_${Date.now()}`,
+    name: 'Test Pet',
+    type: 'pet',
+    x: player.x - 1,
+    y: player.y,
+    map: currentMap
+  };
+  maps[currentMap].entities.push(pet);
+  renderEntities();
+}
+
+function clearAllGameData() {
+  clearDroppedItems();
+  clearPlacedItems();
+  clearNPCs();
+  clearEnemies();
+  clearPets();
+  inventory = [];
+  saveGameData();
+}
+
+
+
+
+
 
 function createUniqueItemId(baseName) {
   return `${baseName}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
@@ -167,7 +319,7 @@ function dropItemAtPosition(itemId, x, y, quantity = 1) {
 }
 
 
-const moveThreshold = 2;
+
 let itemToPickUpIndex = null;
 let placedItemToPickUpId = null;
 let isMovingToPickup = false;
@@ -202,6 +354,14 @@ function moveToAndPickUpItem(x, y, itemId) {
   console.log("moveToAndPickUpItem called with:", { x, y, itemId });
   moveTo(x, y);
   pendingDroppedItemToPickUpId = itemId;
+}
+
+let pendingPlacedItemToInteractId = null;
+
+function moveToAndInteractWithPlacedItem(x, y, itemId) {
+  console.log("moveToAndInteractWithPlacedItem called with:", { x, y, itemId });
+  moveTo(x, y);
+  pendingPlacedItemToInteractId = itemId;
 }
 
 //pick up placed or dropped items
@@ -498,7 +658,10 @@ function inspectPlacedItem(id) {
   const item = map.placedItems.find(item => item.id === id);
   if (!item) return;
 
-  alert(`Inspecting: ${item.name}\nType: ${item.type}\nQuantity: ${item.quantity || 1}`);
+  // Convert full object to a nicely formatted string
+  const itemData = JSON.stringify(item, null, 2);
+
+  alert(`Inspecting Item Data:\n${itemData}`);
   hideMenus();
 }
 
@@ -530,7 +693,7 @@ function interactWithPlacedItem(id) {
 }
 
 
-// ✅ NEW interaction functions
+// ✅ storage box functions
 function storeItemInBox(itemId, box) {
   const itemIndex = inventory.findIndex(i => i.id === itemId);
   if (itemIndex === -1) return alert("Item not found in inventory");
@@ -612,6 +775,7 @@ function openStorageUI(box) {
     headerSpan.textContent = `${box.name || 'container'} Contents`;
   }
   renderStorageContents(box);
+  moveTo(box.x, box.y);
 }
 
 function renderStorageContents(box) {
@@ -663,7 +827,7 @@ function renderStorageContents(box) {
       slot.onclick = () => {
         const itemToStore = inventory[0];
         if (!itemToStore) return alert("No items in inventory.");
-        if (contents.length >= box.storage.capacity) {
+        if (contents.filter(item => item !== null).length >= box.storage.capacity) {
           alert("Box is full!");
           return;
         }
@@ -735,41 +899,56 @@ function renderStorageContents(box) {
 }
 
 function interactWithTree(item) {
-  const dropX = item.x + 20 + Math.random() * 30;
-  const dropY = item.y + 10 + Math.random() * 20;
-  const mergeThreshold = 50;
+  const dropItems = droppedItemsByMap[currentMap];
+  const numberOfDrops = Math.random() < 0.2 ? 2 : 1; // 20% chance of two drops
 
-  const droppedItems = droppedItemsByMap[currentMap];
+  for (let i = 0; i < numberOfDrops; i++) {
+    const dropX = item.x + 10 + Math.random() * 70; // wider spread
+    const dropY = item.y + 5 + Math.random() * 80;
+    const mergeThreshold = 4;
 
-  const existingDropped = droppedItems.find(droppedItem => {
-    const dx = droppedItem.x - dropX;
-    const dy = droppedItem.y - dropY;
-    return (
-      Math.sqrt(dx * dx + dy * dy) <= mergeThreshold &&
-      droppedItem.name === 'Apple'
-    );
-  });
+    const isSapling = Math.random() < 0.05; // 5% chance to drop a sapling
+    const dropName = isSapling ? 'Sapling' : 'Apple';
+    const dropIcon = isSapling ? '🌱' : '🍎';
 
-  if (existingDropped) {
-    existingDropped.quantity += 1;
-  } else {
-    droppedItems.push({
-      id: createUniqueItemId('Apple'),
-      name: 'Apple',
-      icon: '🍎',
-      size: 'small',
-      weight: 1,
-      type: 'food',
-      quantity: 1,
-      x: dropX,
-      y: dropY
+    const existingDropped = dropItems.find(droppedItem => {
+      const dx = droppedItem.x - dropX;
+      const dy = droppedItem.y - dropY;
+      return (
+        Math.sqrt(dx * dx + dy * dy) <= mergeThreshold &&
+        droppedItem.name === dropName
+      );
     });
+
+    if (existingDropped) {
+      existingDropped.quantity += 1;
+    } else {
+      dropItems.push({
+        id: createUniqueItemId(dropName),
+        name: dropName,
+        icon: dropIcon,
+        size: 'small',
+        weight: 1,
+        type: isSapling ? 'plant' : 'food',
+        quantity: 1,
+        x: dropX,
+        y: dropY,
+        isNewDrop: true // for animation
+      });
+    }
+
+    console.log(`${item.name} dropped a ${dropName}!`);
   }
 
   saveInventory();
-  renderDroppedItems(droppedItems);
+  renderDroppedItems(dropItems);
 
-  console.log(`${item.name} dropped an 🍎!`);
+  // Apply wobble animation
+  const domElement = document.getElementById(item.id);
+  if (domElement) {
+    domElement.classList.add('wobble');
+    setTimeout(() => domElement.classList.remove('wobble'), 600);
+  }
 }
 
 function cutDownTree(id) {
@@ -1189,6 +1368,7 @@ function createMenuOptions(target) {
 
     // 🌳 Tree logic
     if (name.includes('tree')) {
+      options += `<div class="menu-option" onclick="moveToAndInteractWithPlacedItem(${rightClickPos.x}, ${rightClickPos.y}, '${id}')">🌳 Go Shake</div>`;
       options += `<div class="menu-option" onclick="interactWithPlacedItem('${id}')">🌳 Shake Tree</div>`;
       options += `<div class="menu-option" onclick="cutDownTree('${id}')">🪓 Cut Down</div>`;
 	  options += `<div class="menu-option" onclick="destroyPlacedItem('${id}')">❌ Destroy</div>`;
@@ -1196,7 +1376,6 @@ function createMenuOptions(target) {
 
     options += `<div class="menu-option" onclick="inspectPlacedItem('${id}')">🔍 Inspect</div>`;
     options += `<div class="menu-option" onclick="rotatePlacedItem('${id}')">🔄 Rotate</div>`;
-
     if (canPickUp) {
       options += `<div class="menu-option" onclick="moveItemToInventory('${id}')">🎒 Store</div>`;
       options += `<div class="menu-option" onclick="moveItemToDroppedItems('${id}')">❌ Drop</div>`;

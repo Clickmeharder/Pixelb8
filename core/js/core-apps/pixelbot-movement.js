@@ -103,15 +103,20 @@ function createDebugOverlay() {
     gameArea.appendChild(debugOverlay);
   }
 }
-
+function updateDebugPanelVisibility() {
+  const panel = document.getElementById('debug-panel');
+  panel.style.display = debugMode ? 'block' : 'none';
+}
 function updateDebugOverlay(obstacles, detectionRadius) {
   if (!debugMode) {
+
     if (debugOverlay) debugOverlay.remove();
     if (debugBox) debugBox.remove();
     if (detectionCircle) {
       detectionCircle.remove();
       detectionCircle = null;
     }
+
     debugOverlay = null;
     debugBox = null;
     return;
@@ -119,7 +124,8 @@ function updateDebugOverlay(obstacles, detectionRadius) {
 
   createDebugOverlay();
   debugOverlay.querySelectorAll('.debug-collision').forEach(el => el.remove());
-
+  const zcheck = debugOverlay.querySelector('.debug-zcheck');
+  if (zcheck) zcheck.remove();
   if (!debugBox) {
     debugBox = document.createElement('div');
     debugBox.classList.add('debug-collision');
@@ -308,12 +314,29 @@ function setupMovement() {
 				pickUpItem(item);
 			  } else {
 				console.log('[Pickup] Player is NOT near the item');
+				pendingDroppedItemToPickUpId = null;
 			  }
 			}
 
 			pendingDroppedItemToPickUpId = null;
 		  }
+			// --- Handle Placed Item Interact ---
+		  // --- Placed Item Interact ---
+		  if (pendingPlacedItemToInteractId !== null) {
+			console.log('[Interact Check] pendingPlacedItemToInteractId =', pendingPlacedItemToInteractId);
 
+			const map = maps[currentMap];
+			const item = map.placedItems.find(p => p.id === pendingPlacedItemToInteractId);
+
+			if (!item) {
+			  console.warn('[Interact] Placed item with ID not found:', pendingPlacedItemToInteractId);
+			} else {
+			  console.log('[Interact] Player is near enough to interact');
+			  interactWithPlacedItem(item.id);
+			}
+
+			pendingPlacedItemToInteractId = null;
+		  }
 		  // --- Handle Object Placement ---
 		  if (pendingObjectToPlace) {
 			  const item = pendingObjectToPlace;
@@ -422,7 +445,70 @@ function setupMovement() {
 		}
 		currentFacingKey = facingKey;
 	  }
+		// --- Update pixelb8 z-index based on Y compared to nearby placed items ---
+		// --- Update pixelb8 z-index based on Y compared to nearby placed items ---
+		// --- Update pixelb8 z-index based on Y compared to nearby placed items ---
+		let lowestYBelow = null;
+		let influencingItem = null;
+		const radius = 60; // Radius to consider nearby items
 
+		const placedItems = maps[currentMap]?.placedItems || [];
+
+		placedItems.forEach(placed => {
+		  const box = placed.collisionBox || placed;
+
+		  // Adjust Y position for z-index check: lowered by 1 collisionBox.height
+		  const adjustedY = box.y + (box.height || 24);
+
+		  // Calculate center positions for distance check
+		  const playerCenterX = collisionBox.x + collisionBox.width / 2;
+		  const playerCenterY = collisionBox.y + collisionBox.height / 2;
+		  const itemCenterX = box.x + (box.width || 44) / 2;
+		  const itemCenterY = adjustedY + (box.height || 24) / 2;
+
+		  const dx = itemCenterX - playerCenterX;
+		  const dy = itemCenterY - playerCenterY;
+		  const distance = Math.sqrt(dx * dx + dy * dy);
+
+		  // Only consider items within radius and below the player
+		  if (distance <= radius && adjustedY > collisionBox.y) {
+			if (lowestYBelow === null || adjustedY < lowestYBelow) {
+			  lowestYBelow = adjustedY;
+			  influencingItem = box;
+			}
+		  }
+		});
+
+		if (lowestYBelow !== null) {
+		  pixelb8.style.zIndex = 18; // Behind nearest below item
+		} else {
+		  pixelb8.style.zIndex = 20; // In front if none found below
+		}
+
+		// --- Debug highlight for z-index logic ---
+		if (debugMode && debugOverlay) {
+		  // Clear any previous zcheck boxes
+		  const existing = debugOverlay.querySelectorAll('.debug-zcheck');
+		  existing.forEach(el => el.remove());
+
+		  if (influencingItem) {
+			const zcheckBox = document.createElement('div');
+			zcheckBox.classList.add('debug-zcheck');
+			zcheckBox.style.position = 'absolute';
+			zcheckBox.style.left = `${influencingItem.x}px`;
+			// Shift debug box down by the item's height to match adjustedY logic
+			zcheckBox.style.top = `${influencingItem.y + (influencingItem.height || 24)}px`;
+			zcheckBox.style.width = `${influencingItem.width || 44}px`;
+			zcheckBox.style.height = `${influencingItem.height || 24}px`;
+			zcheckBox.style.border = '2px dashed lime';
+			zcheckBox.style.backgroundColor = 'rgba(0,255,0,0.15)';
+			zcheckBox.style.zIndex = '1015';
+			debugOverlay.appendChild(zcheckBox);
+		  }
+		}
+
+
+	  // --end of updatefunction
 	  applyTilt();
 	  resetIdleTimer();
 	}
@@ -443,6 +529,10 @@ function setupMovement() {
 
     if (key === 'p' && !keysPressed['p']) {
       keysPressed['p'] = true;
+	  const debugcontrolpanel = document.getElementById('debug-panel');
+	  if (debugcontrolpanel) {
+		debugcontrolpanel.style.display = debugMode ? 'none' : 'block';
+	  }
       debugMode = !debugMode;
       updateDebugOverlay(maps[currentMap].obstacles, detectionRadius);
       e.preventDefault();

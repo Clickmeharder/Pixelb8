@@ -191,6 +191,30 @@
 
 	}
 
+
+@keyframes robot-glow {
+  0% {
+    filter: drop-shadow(0 0 1px #fff)
+            drop-shadow(0 0 2px #00e5ff)
+            drop-shadow(0 0 3px #00e5ff);
+  }
+  50% {
+    filter: drop-shadow(0 0 2px #fff)
+            drop-shadow(0 0 4px #00e5ff)
+            drop-shadow(0 0 6px #00e5ff);
+  }
+  100% {
+    filter: drop-shadow(0 0 1px #fff)
+            drop-shadow(0 0 2px #00e5ff)
+            drop-shadow(0 0 3px #00e5ff);
+  }
+}
+
+#pixelb8:hover {
+  animation: robot-glow 1.5s ease-in-out infinite;
+  cursor: pointer;
+}
+
 .sprite {
   position: absolute;
   top: 0;
@@ -249,6 +273,23 @@
 	.wobble {
 	  animation: wobbleAnimation 0.6s ease-in-out infinite;
 	}
+@keyframes popOut {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.dropped-pop {
+  animation: popOut 0.3s ease-out;
+}
 #move-indicator {
   position: absolute;
   width: 20px;
@@ -289,7 +330,18 @@
       height: 42px;
 	  transform: ; /* center horizontally, align bottom */
 	}
-	
+
+.storage-unit:hover, .placed-item:hover {
+  text-shadow: 0 0 6px #fff, 0 0 10px #00f, 0 0 14px #0ff;
+  filter: brightness(1.2);
+  cursor: pointer;
+}
+
+.placed-item.tree {
+    margin: -5px;
+    margin-right: 2px;
+    margin-left: -16px;	
+}
 .dropped-item {
   position: absolute;
   text-align: center;
@@ -439,6 +491,11 @@
   cursor: pointer;
   font-size: 10px;
 }
+.inventory-icon[draggable="true"] {
+  cursor: grab;
+}
+
+
 .flying-item {
   pointer-events: none;
   user-select: none;
