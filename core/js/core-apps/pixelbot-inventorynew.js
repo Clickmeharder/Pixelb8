@@ -5,8 +5,26 @@ let heldItem = null;
 let inventory = [];
 let isInventoryOpen = false;
 let droppedItemsByMap = {
+  roomA: [],
   house: [],
-  street: []
+  roomB: [],
+  lake: [],
+  garden: [],
+  forest: [],
+  roomG: [],
+  cave: [],
+  town: []
+};
+const defaultMapStructure = { 
+  roomA: [],
+  house: [],
+  roomB: [],
+  lake: [],
+  garden: [],
+  forest: [],
+  roomG: [],
+  cave: [],
+  town: []
 };
 // Try to load from localStorage
 /* function loadInventory() {
@@ -22,8 +40,6 @@ function loadInventory() {
   const savedPlaced = localStorage.getItem('pixelb8_placedItemsByMap');
 
   inventory = savedInventory ? JSON.parse(savedInventory) : [];
-
-  const defaultMapStructure = { house: [], street: [] };
   droppedItemsByMap = savedDropped ? JSON.parse(savedDropped) : defaultMapStructure;
 
   // Make sure all maps have dropped items array
@@ -89,7 +105,6 @@ function loadGameData() {
   const savedEnemies = localStorage.getItem('pixelb8_enemiesByMap');
   const savedPets = localStorage.getItem('pixelb8_petsByMap');
 
-  const defaultMapStructure = { house: [], street: [] };
 
   inventory = savedInventory ? JSON.parse(savedInventory) : [];
   droppedItemsByMap = savedDropped ? JSON.parse(savedDropped) : { ...defaultMapStructure };
@@ -131,62 +146,6 @@ function clearPlacedItems() {
   }
 }
 
-function clearNPCs() {
-  for (const map in npcsByMap) {
-    npcsByMap[map] = [];
-  }
-}
-
-function clearEnemies() {
-  for (const map in enemiesByMap) {
-    enemiesByMap[map] = [];
-  }
-}
-
-function clearPets() {
-  for (const map in petsByMap) {
-    petsByMap[map] = [];
-  }
-}
-
-function debugAddTestNPC() {
-  const npc = {
-    id: `npc_${Date.now()}`,
-    name: 'Test NPC',
-    type: 'npc',
-    x: player.x + 1,
-    y: player.y,
-    map: currentMap
-  };
-  maps[currentMap].entities.push(npc);
-  renderEntities(); // optional function to update view
-}
-
-function debugAddTestEnemy() {
-  const enemy = {
-    id: `enemy_${Date.now()}`,
-    name: 'Test Enemy',
-    type: 'enemy',
-    x: player.x + 2,
-    y: player.y,
-    map: currentMap
-  };
-  maps[currentMap].entities.push(enemy);
-  renderEntities();
-}
-
-function debugAddTestPet() {
-  const pet = {
-    id: `pet_${Date.now()}`,
-    name: 'Test Pet',
-    type: 'pet',
-    x: player.x - 1,
-    y: player.y,
-    map: currentMap
-  };
-  maps[currentMap].entities.push(pet);
-  renderEntities();
-}
 
 function clearAllGameData() {
   clearDroppedItems();
@@ -390,6 +349,7 @@ function pickUpItem(item) {
   inventory.push(item);
   stackInventoryItems();
   renderInventory();
+  saveInventory();
 }
 
 
@@ -674,13 +634,14 @@ function interactWithPlacedItem(id) {
 
   const name = item.name.toLowerCase();
   const type = item.type.toLowerCase();
-
   if (type === 'object') {
     if (name.includes('box')) {
       openStorageUI(item);
     } else if (name.includes('tree')) {
       interactWithTree(item);
+	  console.log(`${item.name} interactWithTree called.`);
     } else if (name.includes('bed')) {
+	  console.log(`${item.name} interactWithTree called.`);
       rest();
     } else {
       alert(`You interact with the ${item.name}, but nothing happens... yet.`);
@@ -692,6 +653,47 @@ function interactWithPlacedItem(id) {
   hideMenus();
 }
 
+function interactWithNearestPlacedItem() {
+  const pixelb8 = document.getElementById('pixelb8');
+  const playerX = parseFloat(pixelb8.style.left);
+  const playerY = parseFloat(pixelb8.style.top);
+
+  const collisionBox = {
+    x: playerX,
+    y: playerY,
+    width: 42, // Adjust to match your sprite
+    height: 42
+  };
+
+  const placedItems = maps[currentMap]?.placedItems || [];
+  let nearestItem = null;
+  let nearestDistance = Infinity;
+  const radius = 70;
+
+  placedItems.forEach(item => {
+    const box = item.collisionBox || item;
+    const itemCenterX = box.x - (box.width || 44) / 2;
+    const itemCenterY = box.y - (box.height || 24) / 2;
+
+    const playerCenterX = collisionBox.x + collisionBox.width / 2;
+    const playerCenterY = collisionBox.y + collisionBox.height / 2;
+
+    const dx = itemCenterX - playerCenterX;
+    const dy = itemCenterY - playerCenterY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance <= radius && distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestItem = item;
+    }
+  });
+
+  if (nearestItem) {
+    interactWithPlacedItem(nearestItem.id);
+  } else {
+    console.log('No nearby item to interact with.');
+  }
+}
 
 // ✅ storage box functions
 function storeItemInBox(itemId, box) {
@@ -775,7 +777,7 @@ function openStorageUI(box) {
     headerSpan.textContent = `${box.name || 'container'} Contents`;
   }
   renderStorageContents(box);
-  moveTo(box.x, box.y);
+
 }
 
 function renderStorageContents(box) {
@@ -796,22 +798,22 @@ function renderStorageContents(box) {
 
     const item = contents[i];
     if (item) {
-	  slot.innerHTML = `
-		  <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">
-			<span>${item.icon || '?'}</span>
-			<span style="
-			  position: absolute;
-			  bottom: 2px;
-			  right: 4px;
-			  font-size: 12px;
-			  color: #00e5ff;
-			  font-weight: bold;
-			  user-select: none;
-			  pointer-events: none;
-			">x${item.quantity}</span>
-		  </div>
-		`;
-	  slot.title = `${item.name} x${item.quantity}`;
+      slot.innerHTML = `
+        <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+          <span>${item.icon || '?'}</span>
+          <span style="
+            position: absolute;
+            bottom: 2px;
+            right: 4px;
+            font-size: 12px;
+            color: #00e5ff;
+            font-weight: bold;
+            user-select: none;
+            pointer-events: none;
+          ">x${item.quantity}</span>
+        </div>
+      `;
+      slot.title = `${item.name} x${item.quantity}`;
 
       slot.onclick = () => {
         addItem({ ...item });
@@ -832,15 +834,18 @@ function renderStorageContents(box) {
           return;
         }
 
-        contents[i] = { ...itemToStore };
-        removeItem(itemToStore.id, itemToStore.quantity);
+        // ✅ Store half if sneaking
+        const storeQuantity = isSneaking ? Math.max(1, Math.floor(itemToStore.quantity / 2)) : itemToStore.quantity;
+
+        contents[i] = { ...itemToStore, quantity: storeQuantity };
+        removeItem(itemToStore.id, storeQuantity);
         box.hasContents = true;
         renderInventory();
         renderStorageContents(box);
       };
     }
 
-    // Drag and drop handlers for each slot
+    // Drag and drop handlers
     slot.addEventListener('dragover', (e) => {
       e.preventDefault();
       slot.style.backgroundColor = '#003355';
@@ -867,9 +872,8 @@ function renderStorageContents(box) {
       }
 
       const itemId = dragged.id;
-      const quantity = dragged.quantity || 1;
 
-      if (contents[i]) {
+      if (contents[i] !== null) {
         alert("Slot already occupied!");
         return;
       }
@@ -881,15 +885,14 @@ function renderStorageContents(box) {
       }
 
       const itemToStore = inventory[itemIndex];
+      const actualQuantity = itemToStore.quantity;
 
-      contents[i] = {
-        ...itemToStore,
-        quantity
-      };
+      // ✅ Correctly calculate half or full
+      const storeQuantity = isSneaking ? Math.max(1, Math.floor(actualQuantity / 2)) : actualQuantity;
 
-      removeItem(itemId, quantity);
+      contents[i] = { ...itemToStore, quantity: storeQuantity };
+      removeItem(itemId, storeQuantity);
       box.hasContents = contents.some(Boolean);
-
       renderInventory();
       renderStorageContents(box);
     });
@@ -898,15 +901,35 @@ function renderStorageContents(box) {
   }
 }
 
+function nudgeNearbyItemsAway(dropX, dropY, dropItems, minDistance = 20, pushStrength = 30) {
+  for (const item of dropItems) {
+    const dx = item.x - dropX;
+    const dy = item.y - dropY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < minDistance && distance > 1) {
+      const angle = Math.atan2(dy, dx);
+      item.x += Math.cos(angle) * pushStrength;
+      item.y += Math.sin(angle) * pushStrength;
+    }
+  }
+}
+
+
 function interactWithTree(item) {
   const dropItems = droppedItemsByMap[currentMap];
   const numberOfDrops = Math.random() < 0.2 ? 2 : 1; // 20% chance of two drops
 
   for (let i = 0; i < numberOfDrops; i++) {
-    const dropX = item.x + 10 + Math.random() * 70; // wider spread
-    const dropY = item.y + 5 + Math.random() * 80;
-    const mergeThreshold = 4;
+    // Use polar coordinates for controlled distance
+    const minDistance = 60;
+    const maxDistance = 120;
+    const angle = Math.random() * 2 * Math.PI;
+    const radius = minDistance + Math.random() * (maxDistance - minDistance);
+    const dropX = item.x + Math.cos(angle) * radius;
+    const dropY = item.y + Math.sin(angle) * radius;
 
+    const mergeThreshold = 42;
     const isSapling = Math.random() < 0.05; // 5% chance to drop a sapling
     const dropName = isSapling ? 'Sapling' : 'Apple';
     const dropIcon = isSapling ? '🌱' : '🍎';
@@ -919,6 +942,8 @@ function interactWithTree(item) {
         droppedItem.name === dropName
       );
     });
+
+    nudgeNearbyItemsAway(dropX, dropY, dropItems);
 
     if (existingDropped) {
       existingDropped.quantity += 1;
@@ -933,7 +958,7 @@ function interactWithTree(item) {
         quantity: 1,
         x: dropX,
         y: dropY,
-        isNewDrop: true // for animation
+        isNewDrop: true
       });
     }
 
@@ -943,7 +968,6 @@ function interactWithTree(item) {
   saveInventory();
   renderDroppedItems(dropItems);
 
-  // Apply wobble animation
   const domElement = document.getElementById(item.id);
   if (domElement) {
     domElement.classList.add('wobble');
@@ -951,36 +975,117 @@ function interactWithTree(item) {
   }
 }
 
+
 function cutDownTree(id) {
   const map = maps[currentMap];
   const item = map.placedItems.find(p => p.id === id);
   if (!item) return;
 
-  const hasAxe = inventory.some(i => i.name.toLowerCase().includes('axe'));
-  if (!hasAxe) {
+  // Find an axe in inventory
+  const axeIndex = inventory.findIndex(i => i.name.toLowerCase().includes('axe'));
+  if (axeIndex === -1) {
     alert("You need an axe to cut down this tree.");
     return;
   }
 
-  // Optional: drop wood item
-  droppedItemsByMap[currentMap].push({
-    id: createUniqueItemId('Wood'),
-    name: 'Wood',
-    icon: '🪵',
-    size: 'normal',
-    weight: 2,
-    type: 'material',
-    quantity: 1,
-    x: item.x + 10,
-    y: item.y + 10
-  });
+  const playerEl = document.getElementById('pixelb8');
+  if (!playerEl) return;
 
-  // Remove tree
-  map.placedItems = map.placedItems.filter(p => p.id !== id);
-  renderPlacedItems(map.placedItems);
-  renderDroppedItems(droppedItemsByMap[currentMap]);
-  saveInventory();
+  const playerRect = playerEl.getBoundingClientRect();
+  const startX = playerRect.left + playerRect.width / 2;
+  const startY = playerRect.top + playerRect.height / 2;
+
+  const targetX = item.x + (item.collisionBox?.width || 44) / 2;
+  const targetY = item.y + (item.collisionBox?.height || 24) / 2;
+
+  const flyEl = document.createElement('div');
+  flyEl.classList.add('flying-item');
+  flyEl.textContent = '🪓';
+  flyEl.style.position = 'fixed';
+  flyEl.style.left = `${startX}px`;
+  flyEl.style.top = `${startY}px`;
+  flyEl.style.fontSize = '28px';
+  flyEl.style.pointerEvents = 'none';
+  flyEl.style.zIndex = 9999;
+  document.body.appendChild(flyEl);
+
+  const duration = 800;
+  const arcHeight = -150;
+  const deltaX = targetX - startX;
+  const deltaY = targetY - startY;
+  const startTime = performance.now();
+
+  function animate(time) {
+    const t = Math.min((time - startTime) / duration, 1);
+    const currentX = startX + deltaX * t;
+    const peakY = startY + arcHeight;
+    const currentY = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * peakY + t * t * targetY;
+    const rotation = 720 * t;
+
+    flyEl.style.left = `${currentX}px`;
+    flyEl.style.top = `${currentY}px`;
+    flyEl.style.transform = `rotate(${rotation}deg)`;
+
+    if (t < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      flyEl.style.opacity = '0';
+      setTimeout(() => flyEl.remove(), 200);
+
+      applyDamage(1, targetX, targetY);
+
+      // Drop wood
+      droppedItemsByMap[currentMap].push({
+        id: createUniqueItemId('Wood'),
+        name: 'Wood',
+        icon: '📏',
+        size: 'normal',
+        weight: 2,
+        type: 'material',
+        quantity: 1,
+        x: item.x + 10,
+        y: item.y + 10
+      });
+
+      // 5% chance the axe is lost
+      const axeDrops = Math.random() > 0.05;
+
+      if (axeDrops) {
+        const axe = inventory[axeIndex];
+
+        droppedItemsByMap[currentMap].push({
+          id: createUniqueItemId(axe.name),
+          name: axe.name,
+          icon: axe.icon || '🪓',
+          size: axe.size || 'large',
+          weight: axe.weight || 1,
+          type: axe.type || 'tool',
+          quantity: 1,
+          x: item.x + 5,
+          y: item.y + 5
+        });
+      }
+
+      // Remove 1 axe from inventory
+      const axe = inventory[axeIndex];
+      if (axe.quantity > 1) {
+        axe.quantity -= 1;
+      } else {
+        inventory.splice(axeIndex, 1);
+      }
+
+      map.placedItems = map.placedItems.filter(p => p.id !== id);
+      renderPlacedItems(map.placedItems);
+      renderDroppedItems(droppedItemsByMap[currentMap]);
+      saveInventory();
+      renderInventory();
+    }
+  }
+
+  requestAnimationFrame(animate);
 }
+
+
 
 function throwHeldItem(targetX, targetY) {
   if (!heldItem) return;
@@ -1016,52 +1121,48 @@ function throwHeldItem(targetX, targetY) {
   const arcHeight = -150; // negative to go up (because top is downward)
 
   function animate(time) {
-    const elapsed = time - startTime;
-    const progress = Math.min(elapsed / duration, 1);
+	  const elapsed = time - startTime;
+	  const progress = Math.min(elapsed / duration, 1);
 
-    // Linear interpolation for X
-    const currentX = startX + deltaX * progress;
+	  const currentX = startX + deltaX * progress;
+	  const peakY = startY + arcHeight;
+	  const currentY = (1 - progress) * (1 - progress) * startY + 2 * (1 - progress) * progress * peakY + progress * progress * targetY;
 
-    // Parabolic for Y: quadratic bezier curve formula for arc
-    // B(t) = (1-t)^2 * startY + 2(1-t)t * peakY + t^2 * targetY
-    // peakY = startY + arcHeight
-    const t = progress;
-    const peakY = startY + arcHeight;
-    const currentY = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * peakY + t * t * targetY;
+	  const rotation = 720 * progress; // same spinning effect
+	  flyEl.style.left = `${currentX}px`;
+	  flyEl.style.top = `${currentY}px`;
+	  flyEl.style.transform = `rotate(${rotation}deg)`; // 💫
 
-    flyEl.style.left = `${currentX}px`;
-    flyEl.style.top = `${currentY}px`;
+	  if (progress < 1) {
+		requestAnimationFrame(animate);
+	  } else {
+		let damage = 0;
+		const itemName = heldItem.name.toLowerCase();
+		if (itemName.includes('apple')) {
+		  damage = Math.random();
+		} else if (itemName.includes('wrench')) {
+		  damage = 1 + Math.random();
+		} else {
+		  damage = 0.5;
+		}
 
-    if (progress < 1) {
-      requestAnimationFrame(animate);
-    } else {
-      // Animation done
-      let damage = 0;
-      const itemName = heldItem.name.toLowerCase();
-      if (itemName.includes('apple')) {
-        damage = Math.random();
-      } else if (itemName.includes('wrench')) {
-        damage = 1 + Math.random();
-      } else {
-        damage = 0.5;
-      }
+		applyDamage(damage, targetX, targetY);
+		flyEl.style.opacity = '0';
+		setTimeout(() => flyEl.remove(), 300);
 
-      applyDamage(damage, targetX, targetY);
-
-      flyEl.style.opacity = '0';
-      setTimeout(() => flyEl.remove(), 300);
-
-      if (heldItem.quantity > 1) {
+		if (heldItem.quantity > 1) {
 		  heldItem.quantity -= 1;
 		} else {
 		  heldItem = null;
 		}
-      renderInventory();
-    }
+
+		renderInventory();
+	  }
   }
 
   requestAnimationFrame(animate);
 }
+
 
 function applyDamage(amount, x, y) {
   // Log damage for debug
@@ -1177,7 +1278,29 @@ function renderInventory() {
 	  slot.className = "inventory-icon";
 	  slot.setAttribute('draggable', 'true');
 
-	  // Drag events unchanged...
+	  // Add drag start
+/* 	  slot.addEventListener('dragstart', (e) => {
+		e.dataTransfer.setData('text/plain', JSON.stringify({
+		  id: item.id,
+		  quantity: item.quantity
+		}));
+		e.dataTransfer.effectAllowed = 'move';
+	  }); */
+	  slot.addEventListener('dragstart', (e) => {
+		  const ghost = document.createElement('div');
+		  ghost.className = 'drag-ghost';
+		  ghost.innerText = `'📦⬅' ${item.icon || '?'} ${item.name} x${item.quantity} ${isSneaking ? '½' :'all'} `;
+		  document.body.appendChild(ghost);
+		  e.dataTransfer.setDragImage(ghost, 0, 0);
+
+		  e.dataTransfer.setData('text/plain', JSON.stringify({
+			id: item.id,
+			quantity: item.quantity
+		  }));
+		  e.dataTransfer.effectAllowed = 'move';
+
+		  setTimeout(() => document.body.removeChild(ghost), 0);
+	  });
 
 	  slot.addEventListener('mouseenter', () => {
 		const details = Object.entries(item)
@@ -1190,31 +1313,26 @@ function renderInventory() {
 		infoBox.textContent = '';
 	  });
 
-	  // Left-click to equip 1 unit or add 1 unit if already equipped
+	  // Equip logic (same as before)
 	  slot.addEventListener('click', () => {
 		if (item.type === 'tool' || item.type === 'food') {
 		  if (!heldItem) {
-			// Equip 1 unit fresh
 			heldItem = { ...item, quantity: 1 };
 			item.quantity--;
 			if (item.quantity <= 0) inventory.splice(index, 1);
 		  } else if (heldItem.id === item.id) {
-			// Same item equipped, add 1 more if available
 			if (item.quantity > 0) {
 			  heldItem.quantity++;
 			  item.quantity--;
 			  if (item.quantity <= 0) inventory.splice(index, 1);
 			}
 		  } else {
-			// Different item equipped, swap them:
-			// Return heldItem to inventory
 			const existing = inventory.find(i => i.id === heldItem.id);
 			if (existing) {
 			  existing.quantity += heldItem.quantity;
 			} else {
 			  inventory.push({ ...heldItem });
 			}
-			// Equip new item with 1 quantity
 			heldItem = { ...item, quantity: 1 };
 			item.quantity--;
 			if (item.quantity <= 0) inventory.splice(index, 1);
@@ -1223,25 +1341,18 @@ function renderInventory() {
 		}
 	  });
 
-	  // Right-click to equip all remaining quantity of this item
 	  slot.addEventListener('contextmenu', (e) => {
 		e.preventDefault();
 		if (item.type === 'tool' || item.type === 'food') {
 		  if (!heldItem || heldItem.id !== item.id) {
-			// Unequip current held item back to inventory
 			if (heldItem) {
 			  const existing = inventory.find(i => i.id === heldItem.id);
-			  if (existing) {
-				existing.quantity += heldItem.quantity;
-			  } else {
-				inventory.push({ ...heldItem });
-			  }
+			  if (existing) existing.quantity += heldItem.quantity;
+			  else inventory.push({ ...heldItem });
 			}
-			// Equip all of this item
 			heldItem = { ...item };
 			inventory.splice(index, 1);
 		  } else {
-			// Same item equipped, add all remaining quantity
 			heldItem.quantity += item.quantity;
 			inventory.splice(index, 1);
 		  }
@@ -1256,7 +1367,7 @@ function renderInventory() {
 	  `;
 
 	  slot.querySelector('.drop-btn').onclick = (e) => {
-		e.stopPropagation(); // prevent triggering equip when dropping
+		e.stopPropagation();
 		dropItem(item.id, 1);
 	  };
 
@@ -1369,7 +1480,6 @@ function createMenuOptions(target) {
     // 🌳 Tree logic
     if (name.includes('tree')) {
       options += `<div class="menu-option" onclick="moveToAndInteractWithPlacedItem(${rightClickPos.x}, ${rightClickPos.y}, '${id}')">🌳 Go Shake</div>`;
-      options += `<div class="menu-option" onclick="interactWithPlacedItem('${id}')">🌳 Shake Tree</div>`;
       options += `<div class="menu-option" onclick="cutDownTree('${id}')">🪓 Cut Down</div>`;
 	  options += `<div class="menu-option" onclick="destroyPlacedItem('${id}')">❌ Destroy</div>`;
     }
@@ -1422,6 +1532,35 @@ gameArea.addEventListener('contextmenu', (e) => {
   showCustomMenu(e.pageX, e.pageY, options);
 });
 
+
+gameArea.addEventListener('click', function(event) {
+  const rect = gameArea.getBoundingClientRect();
+  const leftClickPos = {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
+  };
+
+  // Move the character
+  moveTo(leftClickPos.x, leftClickPos.y);
+
+  // Check if a placed item (like a tree or box) was clicked
+  const placedItem = event.target.closest('.placed-item');
+  if (placedItem) {
+    const pixelb8 = document.getElementById('pixelb8');
+    const playerX = parseFloat(pixelb8.style.left);
+    const playerY = parseFloat(pixelb8.style.top);
+    const itemX = parseFloat(placedItem.style.left);
+    const itemY = parseFloat(placedItem.style.top);
+
+    const dx = playerX - itemX;
+    const dy = playerY - itemY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance <= 50) { // Adjust distance threshold as needed
+      interactWithPlacedItem(placedItem.dataset.id); // assuming item.id is stored in data-id
+    }
+  }
+});
 document.addEventListener('click', hideMenus);
 
 // Optional: Show browser menu manually
@@ -1451,30 +1590,17 @@ document.addEventListener('keydown', (e) => {
     toggleInventory();
   }
 });
-function deleteItemById(itemId) {
-  const droppedIndex = droppedItems.findIndex(i => i.id === itemId);
-  if (droppedIndex !== -1) {
-    droppedItems.splice(droppedIndex, 1);
-    renderDroppedItems();
-    return;
+document.addEventListener('keydown', function (event) {
+  if (event.key === 'f' || event.key === 'F') {
+    interactWithNearestPlacedItem();
   }
-
-  const placedIndex = placedItems.findIndex(i => i.id === itemId);
-  if (placedIndex !== -1) {
-    placedItems.splice(placedIndex, 1);
-    renderPlacedItems();
-    return;
-  }
-
-  console.warn("Item not found in dropped or placed items:", itemId);
-}
+});
 
 //onloadstuffs
 // Load inventory and dropped items on game start
-loadInventory();
-renderDroppedItems();
-renderInventory();
-closeInventory();
+ loadInventory();
+ renderDroppedItems();
+
 /* addItem({ id: 'apple', name: 'Apple', icon: "🍎", quantity: 3, size: 'small', type: 'food' });
 addItem({ id: 'storagebox', name: 'StorageBox', icon: "📦", quantity: 1, size: 'large', type: 'object' });
 addItem({ id: 'applesappling', name: 'Tree Sapling', icon: "🌱", quantity: 2, size: 'small', type: 'sapling' });
@@ -1485,6 +1611,6 @@ addItem({ id: 'Apple', name: 'Apple', icon: "🍎", quantity: 3, size: 'small', 
 addItem({ id: 'Box', name: 'Box', icon: "📦", quantity: 1, size: 'large', type: 'object' });
 addItem({ id: 'Sapling', name: 'Sapling', icon: "🌱", quantity: 2, size: 'tiny', type: 'sapling' });
 addItem({ id: 'underwearGnome', name: 'underwearGnome', icon: "🧚", quantity: 5, size: 'large', type: 'unique' });
-addItem({ id: 'wrench', name: 'wrench', icon: "🔧", quantity: 1, size: 'small', type: 'tool' });
-addItem({ id: 'axe', name: 'axe', icon: "🪓", quantity: 1, size: 'small', type: 'tool' });
-addItem({ id: 'purplepickle', name: 'purplePickle', icon: "pp", quantity: 1, size: 'normal', type: 'unique' });
+addItem({ id: 'wrench', name: 'wrench', icon: "🔧", quantity: 1, size: 'normal', type: 'tool' });
+addItem({ id: 'axe', name: 'axe', icon: "🪓", quantity: 1, size: 'large', type: 'tool' });
+addItem({ id: 'pickle', name: 'Pickle', icon: "🥒", quantity: 1, size: 'normal', type: 'food' });

@@ -14,6 +14,7 @@ let pendingPlacedItemToPickUpId = null;
 let pendingDroppedItemToPickUpId = null;
 let pendingActionAfterArrival = null;
 let currentFacingKey = null;
+let isSneaking = false;
 const baseSpeed = 2.0;
 let speedModifier = 1.0;
 const keyAliases = {
@@ -280,14 +281,35 @@ function setupMovement() {
 	  const e = keysPressed['e'];
 	  const shift = keysPressed['shift'];
 
+	  let sneakZIndexTimeout;
+
 	  if (shift) {
-		speedModifier = 0.5;
-		detectionRadius = sneakDetectionRadius;
-		pixelb8.style.opacity = '0.5';
+		  speedModifier = 0.5;
+		  detectionRadius = sneakDetectionRadius;
+		  pixelb8.style.opacity = '0.5';
+		  isSneaking = true;
+
+		// Cancel any scheduled reset
+		if (sneakZIndexTimeout) {
+			clearTimeout(sneakZIndexTimeout);
+			sneakZIndexTimeout = null;
+		}
+
+		// Raise z-index
+		document.querySelectorAll('.dropped-item').forEach(el => {
+			el.style.zIndex = '100';
+		});
 	  } else {
-		speedModifier = 1.0;
-		detectionRadius = baseDetectionRadius;
-		pixelb8.style.opacity = '1';
+		  isSneaking = false;
+		  speedModifier = 1.0;
+		  detectionRadius = baseDetectionRadius;
+		  pixelb8.style.opacity = '1';
+		  // Delay resetting z-index by 8 seconds
+		  sneakZIndexTimeout = setTimeout(() => {
+			document.querySelectorAll('.dropped-item').forEach(el => {
+			  el.style.zIndex = '8';
+			});
+		  }, 10000);
 	  }
 
 	  if (targetPosition) {
@@ -296,8 +318,6 @@ function setupMovement() {
 		const dist = Math.sqrt(distX * distX + distY * distY);
 
 		if (dist < moveThreshold) {
-		  console.log(dist + '/' + moveThreshold + ' dist is < moveThreshold');
-
 		  // --- Handle Dropped Item Pickup ---
 		  if (pendingDroppedItemToPickUpId !== null) {
 			console.log('[Pickup Check] pendingDroppedItemToPickUpId =', pendingDroppedItemToPickUpId);
@@ -336,6 +356,7 @@ function setupMovement() {
 			}
 
 			pendingPlacedItemToInteractId = null;
+			interactWithPlacedItem(item.id);
 		  }
 		  // --- Handle Object Placement ---
 		  if (pendingObjectToPlace) {

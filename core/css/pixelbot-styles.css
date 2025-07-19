@@ -338,9 +338,8 @@
 }
 
 .placed-item.tree {
-    margin: -5px;
-    margin-right: 2px;
-    margin-left: -16px;	
+    margin: -29px;
+    margin-left: -10px;
 }
 .dropped-item {
   position: absolute;
@@ -494,10 +493,181 @@
 .inventory-icon[draggable="true"] {
   cursor: grab;
 }
+.drag-ghost {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  font-size: 14px;
+  padding: 2px 6px;
+  background: #003344;
+  color: #00e5ff;
+  border: 1px solid #00e5ff;
+  border-radius: 4px;
+  pointer-events: none;
+  font-family: sans-serif;
+}
+/* Styled map display like the inventory */
+#mapDisplayContainer {
+    display: block;
+    position: absolute;
+	padding: 10px 14px;
+    background: rgba(0, 0, 40, 0.85);
+	border: 2px solid #00e5ff;
+	border-radius: 8px;
+    color: #00e5ff;
+    left: 10px;
+    top: 10px;
+    z-index: 100;
+
+}
+#mapDisplay {
+  background: rgba(0, 0, 40, 0.85);
+  color: #00e5ff;
+  padding: 10px 14px;
+  border: 2px solid #00e5ff;
+  border-radius: 8px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 11px;
+  z-index: 10000;
+  box-shadow: 0 0 12px #00e5ff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#mapDisplay:hover {
+  background: rgba(0, 0, 60, 0.95);
+}
+
+/* World Map Modal */
+#worldMapModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+}
+
+#worldMapContent {
+    background: #010122;
+    border: 2px solid #00e5ffbf;
+    border-radius: 10px;
+    padding: 8px;
+    color: #00e5ff;
+    font-family: "Press Start 2P", monospace;
+    max-width: 400px;
+    text-align: left;
+}
+
+#worldMapContent h2 {
+    margin-top: 0;
+    font-size: 1.2em;
+    margin-bottom: 0px;
+}
+#worldMapMainContent {
+    display: flex
+;
+}
+#worldMapList {
+    list-style: none;
+    padding: 8px;
+    border: 2px inset #00e5ff;
+    background: #000000b0;
+    border-radius: 8px;
+    margin: 8px;
+    font-size: 11px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#worldMapList li {
+  margin-bottom: 6px;
+}
+
+#worldMapList .current-map {
+  color: #32c31c;
+  text-shadow: 0 0 4px #32c31c;
+}
+
+#worldMapContent button {
+  margin-top: 14px;
+  font-family: inherit;
+  font-size: 11px;
+  background: #001133;
+  border: 1px solid #00e5ff;
+  color: #00e5ff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+#miniMap {
+    display: grid;
+    border: 1px inset #00faff;
+    border-radius: 8px;
+    padding: 8px;
+    grid-template-columns: repeat(3, 40px);
+    grid-template-rows: repeat(4, 40px);
+    gap: 5px;
+    margin: auto;
+    max-width: 200px;
+    position: relative;
+}
+.mini-room {
+  width: 40px;
+  height: 40px;
+  color: #00e5ff;
+  border: 1px solid #00e5ff;
+  border-radius: 8px;
+  background: rgba(0, 15, 30, 0.9);
+  text-align: center;
+  line-height: 40px;
+  font-size: 12px;
+  white-space: pre-wrap;
+  position: relative;
+}
+
+.mini-room.current {
+  background: rgb(0 0 0 / 92%);
+  color: #0eb917;
+  border: 1px solid #0eb917;  
+  font-weight: bold;
+  box-shadow: 0px 0px 3px #0eb917ed, inset 0 0 7px #0eb917ed;
+}
 
 
 .flying-item {
   pointer-events: none;
   user-select: none;
   z-index: 9999;
+}
+
+
+.entity {
+  font-size: 24px;
+  position: absolute;
+  pointer-events: auto;
+  transition: transform 0.2s ease;
+}
+
+.entity:hover {
+  transform: translate(-50%, -100%) scale(1.2);
+}
+
+.entity-npc {
+  color: #88c0d0;
+  text-shadow: 0 0 4px #5e81ac;
+}
+
+.entity-enemy {
+  color: #bf616a;
+  text-shadow: 0 0 4px #d08770;
+}
+
+.entity-pet {
+  color: #a3be8c;
+  text-shadow: 0 0 4px #8fbcbb;
 }
