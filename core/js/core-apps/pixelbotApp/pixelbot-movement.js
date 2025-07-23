@@ -33,14 +33,14 @@ function getPlayerCenter() {
 }
 
 const directions = {
-  ArrowUp: 'https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-walk-up.png',
-  ArrowDown: 'https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-walk-down.png',
-  ArrowLeft: 'https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-walk-left.png',
-  ArrowRight: 'https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-walk-right.png',
-  'ArrowUp+ArrowRight': 'https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-walk-topright.png',
-  'ArrowUp+ArrowLeft': 'https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-walk-topleft.png',
-  'ArrowDown+ArrowRight': 'https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-bottomright.png',
-  'ArrowDown+ArrowLeft': 'https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-bottomleft.png'
+  ArrowUp: 'core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-walk-up.png',
+  ArrowDown: 'core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-walk-down.png',
+  ArrowLeft: 'core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-walk-left.png',
+  ArrowRight: 'core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-walk-right.png',
+  'ArrowUp+ArrowRight': 'core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-walk-topright.png',
+  'ArrowUp+ArrowLeft': 'core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-walk-topleft.png',
+  'ArrowDown+ArrowRight': 'core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-face-bottomright.png',
+  'ArrowDown+ArrowLeft': 'core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-face-bottomleft.png'
 };
 const gameWidth = 1024;
 const gameHeight = 586;
@@ -72,7 +72,7 @@ function preloadSprites() {
   const idlePromise = new Promise(resolve => {
     const idleImg = new Image();
     idleImg.onload = resolve;
-    idleImg.src = 'https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-transform-clean.gif';
+    idleImg.src = 'core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-transform-clean.gif';
   });
 
   return Promise.all([...directionPromises, idlePromise]);
@@ -465,7 +465,7 @@ function setupMovement() {
   function resetIdleTimer() {
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
-      pixelb8.style.backgroundImage = 'url(https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-transform-clean.gif)';
+      pixelb8.style.backgroundImage = 'url(core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-transform-clean.gif)';
       pixelb8.classList.add('animate');
       pixelb8.style.transform = '';
       pixelb8.style.opacity = '1';
