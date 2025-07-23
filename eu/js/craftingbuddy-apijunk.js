@@ -335,7 +335,7 @@ document.getElementById("showAllBlueprintsBtn").addEventListener("click", () => 
   const list = document.getElementById("allBlueprintsList");
    list.classList.toggle("hidden"); 
 
-  const label = list.classList.contains("hidden") ? "Turn Off NexusHacker" : "Turn On NexusHacker";
+  const label = list.classList.contains("hidden") ? "Turn On NexusHacker" : "Turn Off NexusHacker";
   document.getElementById("showAllBlueprintsBtn").textContent = label;
 
   // show full list by default
