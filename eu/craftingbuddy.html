@@ -121,7 +121,7 @@
 	padding-top: 2px;
 	padding-bottom: 0px;
 	font-weight: 600;
-	font-size: 0.9rem;
+	font-size: 0.85rem;
 	text-align: left;
 	flex-direction: column;
 	}
@@ -1083,6 +1083,7 @@
 
   </style>
   <style>
+  /*blueprint select inputs and entropianexus api elements*/
 	 #entropianexusBPselect {
 	  background-color: #111;
 	  color: #fff;
@@ -1115,6 +1116,33 @@
     display: block;
     margin-top: 0.25em;
   }
+.blueprint-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #0ff;
+  margin-top: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  background: #001822;
+  color: #0ff;
+  font-family: monospace;
+  transition: all 0.3s ease;
+}
+
+.blueprint-list.hidden {
+  display: none;
+}
+
+.blueprint-list div {
+  padding: 5px;
+  cursor: pointer;
+  border-bottom: 1px solid #033;
+}
+
+.blueprint-list div:hover {
+  background: #033;
+}
   </style>
 </head>
 <body>
@@ -1141,15 +1169,14 @@
 	  <label for="entropianexusBPselect" title="Add Blueprints from EntropiaNexus!">Add Blueprint:</label>
 	  <!-- Options to be filtered by material -->
 	  <label for="materialFilter" title="Filter by blueprint name, material, product, book, profession, or use 'level:3'">Filter Blueprints:
-	    <input list="bpList" id="materialFilter" type="text" placeholder="e.g. Melchi Crystal" />
-		<datalist id="bpList">
-		  <!-- Options will be populated here dynamically -->
-	    </datalist>
+	    <input id="materialFilter" list="bpList" type="text" placeholder="e.g. Melchi Crystal" autocomplete="off"  />
 	  </label>
-	  <div id="bpLoadingSpinner" style="display:none;">...</div>
-	  <input list="bpList" id="entropianexusBPselect" placeholder="Start typing a blueprint..." autocomplete="off" style="display:none;"/>
+	  <div id="bpLoadingSpinner" style="display:;">...</div>
+	  <datalist id="bpList" style="display: none;"></datalist>
+	  <button id="showAllBlueprintsBtn" type="button">Show filtered Blueprints</button>
+	  <br>
+	  <div id="allBlueprintsList" class="blueprint-list hidden"></div>
 
-	  
 	  <button id="loadNexusBP" style="display: none;">Load</button>
 
       <label for="itemName">BP Name:
@@ -1903,8 +1930,24 @@ function renderBlueprintList() {
       </ul>
     `;
   }
+ renderFilteredBlueprints(filtered);
 }
 
+function renderAllBlueprintsList(filteredList) {
+  const container = document.getElementById("allBlueprintsList");
+  container.innerHTML = "";
+  filteredList.forEach(bp => {
+    const entry = document.createElement("div");
+    entry.textContent = bp.Name;
+    entry.addEventListener("click", async () => {
+      document.getElementById("materialFilter").value = bp.Name;
+      container.classList.add("hidden");
+      document.getElementById("showAllBlueprintsBtn").textContent = "Browse All Blueprints";
+      await loadBlueprintByName(bp.Name);
+    });
+    container.appendChild(entry);
+  });
+}
 
 
 function loadBlueprint(index) {
@@ -2372,8 +2415,50 @@ function showMarkupReminder() {
   }
 }
 
-document.getElementById("entropianexusBPselect").addEventListener("change", async () => {
-  const name = document.getElementById("entropianexusBPselect").value;
+async function loadBlueprintByName(name) {
+  try {
+    const res = await fetch("https://api.entropianexus.com/blueprints/" + encodeURIComponent(name));
+    const bp = await res.json();
+
+    resetBlueprintFieldsNoBlanks();
+    document.getElementById("itemName").value = bp.Product?.Name || bp.Name || '';
+    document.getElementById("bpBook").value = bp.Book?.Name || '';
+    document.getElementById("bpLevel").value = bp.Properties?.Level || 0;
+    document.getElementById("bpType").value = "Unlimited";
+    document.getElementById("bpMu").value = 105;
+    document.getElementById("qr").value = 1;
+    document.getElementById("sellMu").value = 101;
+
+    const totalTT = bp.Materials.reduce((sum, mat) => {
+      const unitTT = mat.Item?.Properties?.Economy?.MaxTT || 0;
+      return sum + mat.Amount * unitTT;
+    }, 0);
+    document.getElementById("maxTT").value = totalTT.toFixed(2);
+
+    bp.Materials.forEach((mat) => {
+      const name = mat.Item?.Name || "Unknown Material";
+      const qty = mat.Amount || 1;
+      const tt = mat.Item?.Properties?.Economy?.MaxTT || 0.01;
+      const mu = 101;
+      addMaterial(name, qty, tt, mu);
+    });
+
+    calculate();
+    showMarkupReminder();
+  } catch (err) {
+    console.error("Failed to load blueprint data:", err);
+    alert("Failed to load blueprint. Please try again.");
+  }
+}
+// New & improved change listener
+document.getElementById("materialFilter").addEventListener("change", async (e) => {
+  const name = e.target.value;
+  const match = cachedBlueprints.find(bp => bp.Name === name);
+  if (!match) return;
+  await loadBlueprintByName(name);
+});
+document.getElementById("materialFilter").addEventListener("change", async () => {
+  const name = document.getElementById("materialFilter").value;
   const datalist = document.getElementById("bpList");
 
   const match = Array.from(datalist.options).some(opt => opt.value === name);
@@ -2420,16 +2505,25 @@ document.getElementById("materialFilter").addEventListener("input", (e) => {
   const spinner = document.getElementById("bpLoadingSpinner");
   if (spinner) spinner.style.display = "block";
 
-  if (!query) {
-    renderFilteredBlueprints(cachedBlueprints);
-    if (spinner) spinner.style.display = "none";
-    return;
-  }
+  const filtered = query
+    ? multiFieldFilter(query, cachedBlueprints)
+    : cachedBlueprints;
 
-  const filtered = multiFieldFilter(query, cachedBlueprints);
   renderFilteredBlueprints(filtered);
+  renderAllBlueprintsList(filtered);
 
   if (spinner) spinner.style.display = "none";
+});
+
+
+document.getElementById("showAllBlueprintsBtn").addEventListener("click", () => {
+  const list = document.getElementById("allBlueprintsList");
+  list.classList.toggle("hidden");
+
+  const label = list.classList.contains("hidden") ? "Show filtered Blueprints" : "Hide filtered Blueprints";
+  document.getElementById("showAllBlueprintsBtn").textContent = label;
+  
+  renderAllBlueprintsList(cachedBlueprints); // show full list by default
 });
 
 document.addEventListener('DOMContentLoaded', () => {
