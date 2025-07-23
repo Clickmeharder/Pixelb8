@@ -44,7 +44,20 @@
   transform: translateY(3px);
   border-style: inset;
 }
+@keyframes fadeOutZoom {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
 
+#devOverlay.closing {
+  animation: fadeOutZoom 0.4s ease forwards;
+}
 </style>
 <body>
 

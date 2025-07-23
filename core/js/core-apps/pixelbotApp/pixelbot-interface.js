@@ -376,7 +376,12 @@ function goFullscreen() {
   }
 }
 
-
+playAnywayBtn.addEventListener('click', () => {
+  devOverlay.classList.add('closing');
+  setTimeout(() => {
+    devOverlay.style.display = 'none';
+  }, 400); // match animation duration
+});
 document.addEventListener('DOMContentLoaded', () => {
   const devOverlay = document.getElementById('devOverlay');
   const playAnywayBtn = document.getElementById('playAnywayBtn');
