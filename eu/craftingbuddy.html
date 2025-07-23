@@ -56,15 +56,31 @@ div#nexusJunk {
     z-index: 9999;
   }
   
-@media (max-width: 600px) {
+@media (max-height: 100vh) {
   .craftingbuddyWrapper {
-    flex-direction: column;
+    flex-direction: row;
+	margin-left: 241px;
+
   }
   
   .eu-blueprint, #allBlueprintsList {
     flex: 1 1 100%;
   }
 }
+
+.craftingbuddyWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.eu-blueprint, #allBlueprintsList {
+  flex: 1 1 300px; /* responsive width */
+}
+
  </style>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
