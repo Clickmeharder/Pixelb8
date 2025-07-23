@@ -64,8 +64,8 @@ const enemies = {
     damage: 5,
     spriteSet: {
       down_right: 'core/js/core-apps/pixelbotApp/images/sprites/enemies/sneakygoblin_downfaced_right.png',
-      down_left: 'core/js/core-apps/pixelbotApp/images/sprites/sneakygoblin_downfaced_left.png',
-      up: 'core/js/core-apps/pixelbotApp/images/sprites/sneakygoblin_upfaced.png'
+      down_left: 'core/js/core-apps/pixelbotApp/images/sprites/enemies/sneakygoblin_downfaced_left.png',
+      up: 'core/js/core-apps/pixelbotApp/images/sprites/enemies/sneakygoblin_upfaced.png'
     },
     visualOffsetX: 18, // offsets to align sprite correctly
     visualOffsetY: 6,
@@ -86,9 +86,9 @@ const enemies = {
     health: 60,
     damage: 10,
     spriteSet: {
-      down_right: 'core/js/core-apps/pixelbotApp/images/sprites/sneakygoblin_downfaced_right.png',
-      down_left: 'core/js/core-apps/pixelbotApp/images/sprites/sneakygoblin_downfaced_left.png',
-      up: 'core/js/core-apps/pixelbotApp/images/sprites/sneakygoblin_upfaced.png'
+      down_right: 'core/js/core-apps/pixelbotApp/images/sprites/enemies/sneakygoblin_downfaced_right.png',
+      down_left: 'core/js/core-apps/pixelbotApp/images/sprites/enemies/sneakygoblin_downfaced_left.png',
+      up: 'core/js/core-apps/pixelbotApp/images/sprites/enemies/sneakygoblin_upfaced.png'
     },
     visualOffsetX: 12, // offsets to align sprite correctly
     visualOffsetY: 6,
@@ -103,9 +103,9 @@ const enemies = {
     health: 15,
     damage: 3,
     spriteSet: {
-      down_right: 'core/js/core-apps/pixelbotApp/images/sprites/sneakygoblin_downfaced_right.png',
-      down_left: 'core/js/core-apps/pixelbotApp/images/sprites/sneakygoblin_downfaced_left.png',
-      up: 'core/js/core-apps/pixelbotApp/images/sprites/sneakygoblin_upfaced.png'
+      down_right: 'core/js/core-apps/pixelbotApp/images/sprites/enemies/sneakygoblin_downfaced_right.png',
+      down_left: 'core/js/core-apps/pixelbotApp/images/sprites/enemies/sneakygoblin_downfaced_left.png',
+      up: 'core/js/core-apps/pixelbotApp/images/sprites/enemies/sneakygoblin_upfaced.png'
     },	
     visualOffsetX: 12, // offsets to align sprite correctly
     visualOffsetY: 6,
@@ -126,9 +126,9 @@ const enemies = {
     health: 15,
     damage: 3,
     spriteSet: {
-      down_right: 'core/js/core-apps/pixelbotApp/images/sprites/sneakygoblin_downfaced_right.png',
-      down_left: 'core/js/core-apps/pixelbotApp/images/sprites/sneakygoblin_downfaced_left.png',
-      up: 'core/js/core-apps/pixelbotApp/images/sprites/sneakygoblin_upfaced.png'
+      down_right: 'core/js/core-apps/pixelbotApp/images/sprites/enemies/sneakygoblin_downfaced_right.png',
+      down_left: 'core/js/core-apps/pixelbotApp/images/sprites/enemies/sneakygoblin_downfaced_left.png',
+      up: 'core/js/core-apps/pixelbotApp/images/sprites/enemies/sneakygoblin_upfaced.png'
     },	
     visualOffsetX: 12, // offsets to align sprite correctly
     visualOffsetY: 6,
