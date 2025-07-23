@@ -7,9 +7,6 @@
 </head>
 <style>
   #devOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.85); /* optional darkening */
@@ -28,22 +25,30 @@
 </style>
 <body>
 
-<div id="devOverlay">
+<!-- <div id="devOverlay">
   <img src="assets/images/pixelbotgame-notready.png" alt="Not Ready" />
+</div> -->
+
+<div id="loadingScreen">
+  <div class="loaderBot">
+    🤖<span class="dots"><span>.</span><span>.</span><span>.</span></span>
+  </div>
 </div>
-
-
     <div id="gameArea">
       <div id="pixelb8" class="player-character" style="opacity: 0.8;"></div>
     </div>
 
-<!-- Map Display -->
+<div id="hud">
+  <span id="pixelbotHealth">Health: 100</span>
+  <span id="sneakStatus">-</span>
+</div>
+<!-- mini Map Display -->
 
 <div id="mapDisplayContainer">
   <div id="mapDisplay" onclick="toggleWorldMap()">🗺️ Map:</div>
 
 </div>
-<!-- World Map Modal -->
+<!-- World Map-->
 <div id="worldMapModal">
   <div id="worldMapContent">
     <h2>🌍 World Map</h2>
@@ -52,31 +57,150 @@
       <ul id="worldMapList"></ul>
 	  <div id="miniMap"></div>
 	</div>
-    <button onclick="toggleWorldMap()">Close</button>
+
+	<button onclick="goFullscreen()">Close</button>
+    <button onclick="toggleWorldMap()">fullscreen</button>
   </div>
   
 </div>
 
-
+<!-- right click menu -->
 <div id="customMenu" class="context-menu" style="display: none; position: absolute; z-index: 1000;"></div>
+<!-- debug-panel -->
+	<div id="debug-panel" style="display: none; position: fixed; bottom: 10px; right: 10px; background: rgba(0, 0, 40, 0.85); color: #00e5ff; padding: 10px; z-index: 9999;border: 2px solid #00e5ff; border-radius: 6px;">
+		<div><strong>Debug Controls</strong></div>
+		<div id="debug-saveORloadButts" style="margin-bottom: 8px;">
+		    <button class="debug" id="loadgameButton" onclick="loadGameData()">Load All</button>
+		    <button class="debug" id="savegameButton" onclick="saveGameData()">Save All</button>
+		</div>
+		<div id="debug-tabs" style="margin-bottom: 8px;">
+		  <button onclick="switchDebugTab('debug-main-Tab')">Main</button>
+		  <button onclick="switchDebugTab('debug-dangerzone-Tab')">Danger Zone</button>
+		  <button onclick="switchDebugTab('debug-Entity-Tab')">Entities</button>
+		  <button onclick="switchDebugTab('debug-items-Tab')">Items</button>
+		  <button onclick="switchDebugTab('debug-customitems-Tab')">Custom Items</button>
+		  <button onclick="switchDebugTab('debug-customIcons-Tab')">Custom Icons</button>
+		</div>
+		<hr>
+		<div class="debug-panel-Tab" id="debug-main-Tab" style="display:none;">
+		  <h3>Debug Notes</h3>
+		  <textarea id="debugNotesTextarea" rows="10" cols="40" placeholder="Write your debug notes here..."></textarea>
+		  <br>
+		  <button class="debug" id="savenotes" onclick="saveDebugNotes()">Save Notes</button>
+		</div>
+		<div class="debug-panel-Tab" id="debug-dangerzone-Tab">
+		  <div>
+		    <button class="debug" onclick="resetEverything()">Reset Everything</button>
+		    <button class="debug" onclick="clearAllPixelbotSaveData()">delete Pixelbot keys</button>
+		  </div>
+		  <div>
+		    <button class="debug" onclick="logsavedStuff()">log all Saved keys</button>
+		    <button class="debug" onclick="logPixelbotSaveData()">log all Pixelbot keys</button>
+		    <button class="debug" onclick="logAllEntities()">log all Enemies</button>
+		  </div>
+		  <div>
+		    <button class="debug" onclick="resetPlacedItems()">Clear Placed Items</button>
+		    <button class="debug" onclick="resetDroppedItems()">Clear Dropped Items</button>
+		    <button class="debug" onclick="resetInventory()">Clear Inventory</button>
+			<button class="debug" id="deleteAllCustomIconsBtn" onclick="syncCustomIconsFromItemLibrary()"> Sync icons</button>
+		  </div>
+	    </div>
+		<div class="debug-panel-Tab" id="debug-Entity-Tab">
+		  <button class="debug" onclick="removeEnemies()">kill Enemies</button>
+		  <button class="debug" onclick="removeEntities()">kill Entities</button>
+		  <button class="debug" onclick="removeAllEnemiesEverywhere()">kill all Enemies</button>
+		  <button class="debug" onclick="removeAllEntitiesEverywhere()">kill all Entities</button>
+		  <div id="debugEnemySpawnorKill" style="margin:auto;margin-top:15px;">
+			<select id="enemySelect" style="width: 75%;"></select>
+			<input id="enemyQuantity" type="number" min="1" value="1" style="width: 30px;">
+			<button class="debug" onclick="spawnSelectedEnemies()">Spawn</button>
+			<button class="debug" onclick="removeSelectedEnemies()">❌</button>
+		  </div>
+		  <hr>
+<!-- 		  <button class="debug" onclick="debugAddTestNPC()">Add NPC</button>
+		  <button class="debug" onclick="debugAddTestEnemy()">Add Enemy</button>
+		  <button class="debug" onclick="debugAddPatrolEnemy()">Add Enemy</button>
+		  <button class="debug" onclick="debugAddTestPet()">Add Pet</button> -->
+		  <hr>
+	  </div>
+		<div class="debug-panel-Tab" id="debug-items-Tab">
+		  <div id="getItemDiv">
+				<select id="getItem" style="width: 100px;">
+				  <option value="" selected disabled>select item</option>
+				</select>
+				<input id="quantity" type="number" min="1" value="1" style="width: 25px;">
+			    <button class="debug" onclick="getItem()">add item</button>
+			</div>
+		</div>
+		<div class="debug-panel-Tab" id="debug-customitems-Tab">
+		  <div id="createItemDiv">
+			  <h3>Create Custom Item</h3>
+			  <label><input id="customItemId" type="text" placeholder="item id *camelCase*"></label>
+			  <label><input id="customItemName" type="text" placeholder="Item name"></label>
+			  <label>
+				  Select Icon:
+				  <select id="customItemIconSelect" style="">
+				  </select>
+			  </label>
+			  <label for="customItemSize">Size:
+				  <select id="customItemSize">
+					<option value="tiny">Tiny</option>
+					<option value="small">Small</option>
+					<option value="normal" selected>Normal</option>
+					<option value="large">Large</option>
+					<option value="huge">Huge</option>
+					<option value="massive">Massive</option>
+				  </select>
+			  </label>
+			  <label>Type: <select id="customItemType">
+				<option value="object">Object</option>
+				<option value="tool">Tool</option>
+				<option value="food">Food</option>
+				<option value="building">Building</option>
+				<option value="material">Material</option>
+				<option value="junk">Junk</option>
+				<option value="unique">Unique</option></select>
+			  </label>
+			  <button class="debug" onclick="createCustomItem()">Create Custom Item</button>
+		  </div>
+		  <div id="getCustomItemDiv">
+			  <label for="getCustomItem">
+				<select id="getCustomItem">
+				  <option value="" selected disabled>item</option>
+				</select>
+				Qty:<input id="customQuantity" type="number" min="1" value="1" style="width: 30px;">
+			  </label>
+			  <button class="debug" onclick="addCustomItemToInventory()">Get Custom Item</button>
+			  <button class="debug" onclick="deleteCustomItem()">Delete Custom Item</button>
+		  </div>
+	    </div>
+		<div class="debug-panel-Tab" id="debug-customIcons-Tab">
+		  <div style="border: 3px solid #054a56; padding:3px;">
+		  	<label >insert a New Icon (emoji):
+			  <input id="customIconInput" type="text" placeholder="🧸">
+			  <button class="debug" onclick="addCustomIconToLibrary()">Add Custom Icon</button>
+			</label>
+		  </div>
+		  <div style="border: 3px solid #054a56; padding:3px; margin-top:10px;">
+			<label>Select Icon:
+				<select id="CustomIconSelect">
+				</select>
+			   <button class="debug" onclick="deleteCustomIcon()">Delete Custom Icon</button>
+			   <button class="debug" id="deleteAllCustomIconsBtn" onclick="deleteAllCustomIcons()">🗑️ Delete All Custom Icons</button>
+			</label>
+		  </div>
+		</div>
+	</div>
 
-<div id="debug-panel" style="display: none; position: fixed; top: 10px; right: 10px; background: #222; color: #fff; padding: 10px; z-index: 9999; border-radius: 6px;">
-  <div><strong>Debug Controls</strong></div>
-  <button onclick="debugAddTestNPC()">Add NPC</button>
-  <button onclick="debugAddTestEnemy()">Add Enemy</button>
-  <button onclick="debugAddPatrolEnemy()">Add Enemy</button>
-  <button onclick="debugAddTestPet()">Add Pet</button>
-  <hr>
-  <button onclick="resetPlacedItems()">Clear Placed Items</button>
-  <button onclick="resetDroppedItems()">Clear Dropped Items</button>
-  <button onclick="resetInventory()">Clear Inventory</button>
-  <button onclick="resetEverything()">Reset Everything</button>
-  <button onclick="loadGameData()">Load All</button>
-  <button onclick="saveGameData()">Save All</button>
-</div>
-  <script src="core/js/core-apps/pixelbot-entities.js"></script>
+
+  <script src="core/data/item-library.js"></script>
   <script src="core/js/core-apps/pixelbot-map.js"></script>
+
+  <script src="core/js/core-apps/pixelbot-entities.js"></script>
+  <script src="core/js/core-apps/pixelbot-interface.js"></script>
   <script src="core/js/core-apps/pixelbot-movement.js"></script>
   <script src="core/js/core-apps/pixelbot-inventorynew.js"></script>
+
+  <script src="core/js/core-apps/pixelbot-loopy.js"></script>
 
 </body>

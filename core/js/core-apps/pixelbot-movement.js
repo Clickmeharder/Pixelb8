@@ -4,10 +4,7 @@ const gameArea = document.getElementById('gameArea');
 
 //  -  - - --  -- - -
 let idleTimer;
-let debugMode = false;
-let debugBox = null;
-let debugOverlay = null;
-let detectionCircle = null;
+
 const keysPressed = {};
 let pendingObjectToPlace = null;
 let pendingPlacedItemToPickUpId = null;
@@ -15,6 +12,7 @@ let pendingDroppedItemToPickUpId = null;
 let pendingActionAfterArrival = null;
 let currentFacingKey = null;
 let isSneaking = false;
+
 const baseSpeed = 2.0;
 let speedModifier = 1.0;
 const keyAliases = {
@@ -23,9 +21,16 @@ const keyAliases = {
   ArrowLeft: 'a',
   ArrowRight: 'd'
 };
-const baseDetectionRadius = 150;
-const sneakDetectionRadius = 75;
-let detectionRadius = baseDetectionRadius;
+
+function getPlayerCenter() {
+  const playerElement = document.getElementById('pixelb8');
+  if (!playerElement) return null;
+
+  const playerX = (parseInt(playerElement.style.left, 10) || 0) + playerElement.offsetWidth / 2;
+  const playerY = (parseInt(playerElement.style.top, 10) || 0) + playerElement.offsetHeight / 2;
+
+  return { x: playerX, y: playerY };
+}
 
 const directions = {
   ArrowUp: 'https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-walk-up.png',
@@ -37,8 +42,10 @@ const directions = {
   'ArrowDown+ArrowRight': 'https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-bottomright.png',
   'ArrowDown+ArrowLeft': 'https://pixelb8.lol/assets/images/sprites/pixelbot/pixelbot-face-bottomleft.png'
 };
-const gameWidth = 800;
-const gameHeight = 600;
+const gameWidth = 1024;
+const gameHeight = 586;
+
+
 
 const collisionBox = {
   x: 350,
@@ -73,7 +80,7 @@ function preloadSprites() {
 
 
 preloadSprites().then(() => {
-  console.log("All sprites preloaded.");
+  console.log("Pixelbot has Joined the chat");
   setupMovement();
   loadMap("house");
 });
@@ -89,94 +96,7 @@ function updateSpriteDirection(facingKey) {
   }, 50);
 }
 
-function createDebugOverlay() {
-  if (!debugOverlay) {
-    debugOverlay = document.createElement('div');
-    debugOverlay.style.position = 'absolute';
-    debugOverlay.style.left = '0px';
-    debugOverlay.style.top = '0px';
-    debugOverlay.style.width = `${gameWidth}px`;
-    debugOverlay.style.height = `${gameHeight}px`;
-    debugOverlay.style.border = '2px solid lime';
-    debugOverlay.style.pointerEvents = 'none';
-    debugOverlay.style.zIndex = '1000';
-    debugOverlay.style.backgroundColor = 'rgba(0, 255, 0, 0.1)';
-    gameArea.appendChild(debugOverlay);
-  }
-}
-function updateDebugPanelVisibility() {
-  const panel = document.getElementById('debug-panel');
-  panel.style.display = debugMode ? 'block' : 'none';
-}
-function updateDebugOverlay(obstacles, detectionRadius) {
-  if (!debugMode) {
 
-    if (debugOverlay) debugOverlay.remove();
-    if (debugBox) debugBox.remove();
-    if (detectionCircle) {
-      detectionCircle.remove();
-      detectionCircle = null;
-    }
-
-    debugOverlay = null;
-    debugBox = null;
-    return;
-  }
-
-  createDebugOverlay();
-  debugOverlay.querySelectorAll('.debug-collision').forEach(el => el.remove());
-  const zcheck = debugOverlay.querySelector('.debug-zcheck');
-  if (zcheck) zcheck.remove();
-  if (!debugBox) {
-    debugBox = document.createElement('div');
-    debugBox.classList.add('debug-collision');
-    debugBox.style.position = 'absolute';
-    debugBox.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
-    debugBox.style.border = '1px solid red';
-    debugBox.style.zIndex = '1010';
-    debugOverlay.appendChild(debugBox);
-  }
-  debugBox.style.left = `${collisionBox.x}px`;
-  debugBox.style.top = `${collisionBox.y}px`;
-  debugBox.style.width = `${collisionBox.width}px`;
-  debugBox.style.height = `${collisionBox.height}px`;
-
-  obstacles.forEach(obs => {
-    const box = document.createElement('div');
-    box.classList.add('debug-collision');
-    box.style.position = 'absolute';
-    box.style.left = `${obs.x}px`;
-    box.style.top = `${obs.y}px`;
-    box.style.width = `${obs.width}px`;
-    box.style.height = `${obs.height}px`;
-    box.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
-    box.style.border = '1px solid red';
-    box.style.zIndex = '1005';
-    debugOverlay.appendChild(box);
-  });
-
-  // Create detectionCircle if it doesn't exist yet
-  if (!detectionCircle) {
-    detectionCircle = document.createElement('div');
-    detectionCircle.style.position = 'absolute';
-    detectionCircle.style.border = '2px dashed yellow';
-    detectionCircle.style.borderRadius = '50%';
-    detectionCircle.style.pointerEvents = 'none';
-    detectionCircle.style.zIndex = '1000';
-    detectionCircle.style.backgroundColor = 'rgba(255, 255, 0, 0.1)';
-    debugOverlay.appendChild(detectionCircle);
-  }
-
-  const centerX = collisionBox.x + collisionBox.width / 2;
-  const centerY = collisionBox.y + collisionBox.height / 2;
-  const diameter = detectionRadius * 2;
-  const yOffset = 50; // Adjust this value to move the circle up or down
-
-  detectionCircle.style.width = `${diameter}px`;
-  detectionCircle.style.height = `${diameter}px`;
-  detectionCircle.style.left = `${centerX - detectionRadius}px`;
-  detectionCircle.style.top = `${centerY - detectionRadius - yOffset}px`;
-}
 
 function isColliding(x1, y1, w1, h1, x2, y2, w2, h2) {
   return !(x1 + w1 <= x2 || x1 >= x2 + w2 || y1 + h1 <= y2 || y1 >= y2 + h2);
@@ -288,7 +208,7 @@ function setupMovement() {
 		  detectionRadius = sneakDetectionRadius;
 		  pixelb8.style.opacity = '0.5';
 		  isSneaking = true;
-
+		  updateSneak();
 		// Cancel any scheduled reset
 		if (sneakZIndexTimeout) {
 			clearTimeout(sneakZIndexTimeout);
@@ -303,6 +223,7 @@ function setupMovement() {
 		  isSneaking = false;
 		  speedModifier = 1.0;
 		  detectionRadius = baseDetectionRadius;
+		  updateSneak();
 		  pixelb8.style.opacity = '1';
 		  // Delay resetting z-index by 8 seconds
 		  sneakZIndexTimeout = setTimeout(() => {
@@ -536,58 +457,9 @@ function setupMovement() {
   let animationFrameId;
   function animationLoop() {
     updateMovement();
+
     animationFrameId = requestAnimationFrame(animationLoop);
   }
-
-  document.addEventListener('keydown', (e) => {
-    let key = keyAliases[e.key] || e.key.toLowerCase();
-
-    if (['w', 'a', 's', 'd', 'q', 'e', 'shift'].includes(key)) {
-      keysPressed[key] = true;
-      updateWobble();
-      e.preventDefault();
-    }
-
-    if (key === 'p' && !keysPressed['p']) {
-      keysPressed['p'] = true;
-	  const debugcontrolpanel = document.getElementById('debug-panel');
-	  if (debugcontrolpanel) {
-		debugcontrolpanel.style.display = debugMode ? 'none' : 'block';
-	  }
-      debugMode = !debugMode;
-      updateDebugOverlay(maps[currentMap].obstacles, detectionRadius);
-      e.preventDefault();
-    }
-  });
-
-  document.addEventListener('keyup', (e) => {
-    let key = keyAliases[e.key] || e.key.toLowerCase();
-
-    if (['w', 'a', 's', 'd', 'q', 'e', 'shift'].includes(key)) {
-      delete keysPressed[key];
-      updateWobble();
-
-      if (!keysPressed['q'] && !keysPressed['e']) {
-        const sneakScale = speedModifier < 1 ? 0.8 : 1;
-        pixelb8.style.transform = `rotate(0deg) scale(${sneakScale})`;
-      }
-
-      if ((key === 'a' || key === 'd') && !keysPressed['a'] && !keysPressed['d']) {
-        if (keysPressed['w']) {
-          updateSpriteDirection('ArrowUp');
-        } else {
-          updateSpriteDirection('ArrowDown');
-        }
-      }
-
-      e.preventDefault();
-    }
-
-    if (key === 'p') {
-      delete keysPressed['p'];
-    }
-  });
-
   animationLoop();
 
   function resetIdleTimer() {

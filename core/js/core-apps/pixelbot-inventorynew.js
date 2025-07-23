@@ -1,3 +1,6 @@
+const baseDetectionRadius = 125;
+const sneakDetectionRadius = 70;
+let detectionRadius = baseDetectionRadius;
 // Basic inventory and dropped items arrays
 const moveThreshold = 10;
 let targetPosition = null;
@@ -7,7 +10,7 @@ let isInventoryOpen = false;
 let droppedItemsByMap = {
   roomA: [],
   house: [],
-  roomB: [],
+  deepforest: [],
   lake: [],
   garden: [],
   forest: [],
@@ -18,7 +21,7 @@ let droppedItemsByMap = {
 const defaultMapStructure = { 
   roomA: [],
   house: [],
-  roomB: [],
+  deepforest: [],
   lake: [],
   garden: [],
   forest: [],
@@ -26,14 +29,44 @@ const defaultMapStructure = {
   cave: [],
   town: []
 };
-// Try to load from localStorage
-/* function loadInventory() {
-  const savedInventory = localStorage.getItem('pixelb8_inventory');
-  const savedDropped = localStorage.getItem('pixelb8_droppedItems');
-  inventory = savedInventory ? JSON.parse(savedInventory) : [];
-  droppedItems = savedDropped ? JSON.parse(savedDropped) : [];
-  stackInventoryItems();
-} */
+
+
+function logsavedStuff() {
+  console.log("---- Logging All LocalStorage Keys ----");
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    const value = localStorage.getItem(key);
+
+    console.log(`Key: ${key}`);
+    try {
+      console.log("Value:", JSON.parse(value));
+    } catch (e) {
+      console.log("Value (raw):", value);
+    }
+  }
+  console.log("---- End of LocalStorage ----");
+}
+function logPixelbotSaveData() {
+  console.log("---- Logging pixelb8_ LocalStorage Keys ----");
+
+  const pixelb8Keys = Object.keys(localStorage).filter(key => key.startsWith('pixelb8_'));
+
+  if (pixelb8Keys.length === 0) {
+    console.log("⚠️ No keys found starting with 'pixelb8_'.");
+  }
+
+  pixelb8Keys.forEach(key => {
+    const value = localStorage.getItem(key);
+    console.log(`Key: ${key}`);
+    try {
+      console.log("Value:", JSON.parse(value));
+    } catch (e) {
+      console.log("Value (raw):", value);
+    }
+  });
+
+  console.log(`---- End of pixelb8_ Log (${pixelb8Keys.length} keys) ----`);
+}
 function loadInventory() {
   const savedInventory = localStorage.getItem('pixelb8_inventory');
   const savedDropped = localStorage.getItem('pixelb8_droppedItemsByMap');
@@ -68,34 +101,56 @@ function saveInventory() {
 }
 
 function resetDroppedItems() {
-  for (const map in droppedItemsByMap) {
-    droppedItemsByMap[map] = [];
+  if (confirm("Are you sure you want to reset all dropped items? This action cannot be undone.")) {
+    for (const map in droppedItemsByMap) {
+      droppedItemsByMap[map] = [];
+    }
+    localStorage.setItem('pixelb8_droppedItemsByMap', JSON.stringify(droppedItemsByMap));
+    loadMap(currentMap); // Or your function to re-render the map
   }
-  localStorage.setItem('pixelb8_droppedItemsByMap', JSON.stringify(droppedItemsByMap));
-  loadMap(currentMap); // Or your function to re-render the map
+}
+
+function clearAllPixelbotSaveData() {
+  if (confirm("Are you sure you want to clear all saved data for this game? This action cannot be undone.")) {
+	const keysToDelete = Object.keys(localStorage).filter(key => key.startsWith('pixelb8_'));
+	  
+	keysToDelete.forEach(key => {
+	localStorage.removeItem(key);
+	console.log(`Removed: ${key}`);
+    });
+
+	console.log(`✅ Cleared ${keysToDelete.length} placedItems keys from localStorage.`);
+  }
 }
 function resetPlacedItems() {
-  for (const map in maps) {
-    maps[map].placedItems = [];
+  if (confirm("Are you sure you want to reset all placed items? This action cannot be undone.")) {
+	for (const map in maps) {
+		maps[map].placedItems = [];
+	}
+	const emptyPlaced = {};
+	for (const map in maps) {
+		emptyPlaced[map] = [];
+	}
+	localStorage.setItem('pixelb8_placedItemsByMap', JSON.stringify(emptyPlaced));
+	loadMap(currentMap);
   }
-  const emptyPlaced = {};
-  for (const map in maps) {
-    emptyPlaced[map] = [];
-  }
-  localStorage.setItem('pixelb8_placedItemsByMap', JSON.stringify(emptyPlaced));
-  loadMap(currentMap);
 }
 function resetInventory() {
-  inventory = [];
-  localStorage.setItem('pixelb8_inventory', JSON.stringify(inventory));
-  renderInventory(); // Your function to update inventory UI
+  if (confirm("Are you sure you want to clear your inventory? This action cannot be undone.")) {
+    inventory = [];
+    localStorage.setItem('pixelb8_inventory', JSON.stringify(inventory));
+    renderInventory(); // Your function to update inventory UI
+  }
 }
 function resetEverything() {
-  resetInventory();
-  resetDroppedItems();
-  resetPlacedItems();
-  entities = []; // If you also track entities separately
-  loadMap(currentMap); // Optional if you want to refresh the scene
+  if (confirm("Are you sure you want to reset EVERYTHING? this includes all placed items, dropped items, entitys and saved data for this page! This action cannot be undone.")) {
+    resetInventory();
+    resetDroppedItems();
+    resetPlacedItems();
+    removeAllEntitiesEverywhere();
+	clearAllPixelbotSaveData();
+    loadMap(currentMap); // Optional if you want to refresh the scene
+  }
 }
 function loadGameData() {
   const savedInventory = localStorage.getItem('pixelb8_inventory');
@@ -134,19 +189,21 @@ function saveGameData() {
   localStorage.setItem('pixelb8_enemiesByMap', JSON.stringify(enemiesByMap));
   localStorage.setItem('pixelb8_petsByMap', JSON.stringify(petsByMap));
 }
+
 function clearDroppedItems() {
   for (const map in droppedItemsByMap) {
     droppedItemsByMap[map] = [];
   }
 }
-
 function clearPlacedItems() {
-  for (const map in maps) {
-    maps[map].placedItems = [];
+  if (confirm("Are you sure you want to clear all placed items? This action cannot be undone.")) {
+    for (const map in maps) {
+      maps[map].placedItems = [];
+    }
   }
 }
 
-
+//this clear all game data function isnt currently in use we are using reset everything
 function clearAllGameData() {
   clearDroppedItems();
   clearPlacedItems();
@@ -155,15 +212,6 @@ function clearAllGameData() {
   clearPets();
   inventory = [];
   saveGameData();
-}
-
-
-
-
-
-
-function createUniqueItemId(baseName) {
-  return `${baseName}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 }
 
 //add items
@@ -248,8 +296,43 @@ function dropItem(itemId, quantity = 1) {
   renderInventory();
   renderDroppedItems();
 }
+// Drop item into the game world based on name at given lovation
+function dropItemByName(name, x, y, quantity = 1) {
+  const itemTemplate = itemLibrary.find(i => i.name === name);
+  if (!itemTemplate) return;
+
+  const dropX = x;
+  const dropY = y;
+  const mergeThreshold = 50;
+
+  const droppedItems = droppedItemsByMap[currentMap];
+
+  const existingDropped = droppedItems.find(droppedItem => {
+    const dx = droppedItem.x - dropX;
+    const dy = droppedItem.y - dropY;
+    return (
+      Math.sqrt(dx * dx + dy * dy) <= mergeThreshold &&
+      droppedItem.name === name
+    );
+  });
+
+  if (existingDropped) {
+    existingDropped.quantity += quantity;
+  } else {
+    droppedItems.push({
+      ...structuredClone(itemTemplate),
+      id: createUniqueItemId(name),
+      quantity,
+      x: dropX,
+      y: dropY,
+    });
+  }
+
+  renderDroppedItems();
+}
 
 
+// Drop specific amount of any item into the game world based on id at given lovation
 function dropItemAtPosition(itemId, x, y, quantity = 1) {
   const item = inventory.find(i => i.id === itemId);
   if (!item) return alert("Item not found in inventory");
@@ -1032,7 +1115,7 @@ function cutDownTree(id) {
       flyEl.style.opacity = '0';
       setTimeout(() => flyEl.remove(), 200);
 
-      applyDamage(1, targetX, targetY);
+      applyDamageRadius(1, targetX, targetY);
 
       // Drop wood
       droppedItemsByMap[currentMap].push({
@@ -1087,135 +1170,26 @@ function cutDownTree(id) {
 
 
 
-function throwHeldItem(targetX, targetY) {
-  if (!heldItem) return;
-
-  const playerEl = document.getElementById('pixelb8');
-  if (!playerEl) {
-    console.warn('Player element #pixelb8 not found!');
-    return;
-  }
-
-  const rect = playerEl.getBoundingClientRect();
-  const startX = rect.left + rect.width / 2;
-  const startY = rect.top + rect.height / 2;
-
-  const flyEl = document.createElement('div');
-  flyEl.classList.add('flying-item');
-  flyEl.textContent = heldItem.icon || '❓';
-  flyEl.style.position = 'fixed';
-  flyEl.style.left = `${startX}px`;
-  flyEl.style.top = `${startY}px`;
-  flyEl.style.fontSize = '28px';
-  flyEl.style.pointerEvents = 'none';
-  document.body.appendChild(flyEl);
-
-  const duration = 1000; // ms
-  const startTime = performance.now();
-
-  // Calculate horizontal and vertical distances
-  const deltaX = targetX - startX;
-  const deltaY = targetY - startY;
-
-  // Peak height for arc (adjust this for how high the arc is)
-  const arcHeight = -150; // negative to go up (because top is downward)
-
-  function animate(time) {
-	  const elapsed = time - startTime;
-	  const progress = Math.min(elapsed / duration, 1);
-
-	  const currentX = startX + deltaX * progress;
-	  const peakY = startY + arcHeight;
-	  const currentY = (1 - progress) * (1 - progress) * startY + 2 * (1 - progress) * progress * peakY + progress * progress * targetY;
-
-	  const rotation = 720 * progress; // same spinning effect
-	  flyEl.style.left = `${currentX}px`;
-	  flyEl.style.top = `${currentY}px`;
-	  flyEl.style.transform = `rotate(${rotation}deg)`; // 💫
-
-	  if (progress < 1) {
-		requestAnimationFrame(animate);
-	  } else {
-		let damage = 0;
-		const itemName = heldItem.name.toLowerCase();
-		if (itemName.includes('apple')) {
-		  damage = Math.random();
-		} else if (itemName.includes('wrench')) {
-		  damage = 1 + Math.random();
-		} else {
-		  damage = 0.5;
-		}
-
-		applyDamage(damage, targetX, targetY);
-		flyEl.style.opacity = '0';
-		setTimeout(() => flyEl.remove(), 300);
-
-		if (heldItem.quantity > 1) {
-		  heldItem.quantity -= 1;
-		} else {
-		  heldItem = null;
-		}
-
-		renderInventory();
-	  }
-  }
-
-  requestAnimationFrame(animate);
-}
-
-
-function applyDamage(amount, x, y) {
-  // Log damage for debug
-  console.log(`Damage dealt: ${amount.toFixed(2)} at (${x}, ${y})`);
-
-  // Create a floating damage indicator
-  const damageEl = document.createElement('div');
-  damageEl.textContent = `-${amount.toFixed(0)}`;
-  damageEl.style.position = 'absolute';
-  damageEl.style.left = `${x}px`;
-  damageEl.style.top = `${y}px`;
-  damageEl.style.fontWeight = 'bold';
-  damageEl.style.color = 'red';
-  damageEl.style.pointerEvents = 'none';
-  damageEl.style.zIndex = 9999;
-  damageEl.style.transition = 'transform 0.6s ease-out, opacity 0.6s ease-out';
-  damageEl.style.transform = 'translateY(0)';
-  damageEl.style.opacity = '1';
-
-  document.body.appendChild(damageEl);
-
-  // Animate the damage text floating up and fading out
-  requestAnimationFrame(() => {
-    damageEl.style.transform = 'translateY(-30px)';
-    damageEl.style.opacity = '0';
-  });
-
-  // Remove the element after animation
-  setTimeout(() => {
-    damageEl.remove();
-  }, 600);
-
-  // TODO: Actual damage system here (e.g. check for NPCs/enemies at x,y)
-}
-//inventory functions 
 function stackInventoryItems() {
   const merged = {};
 
   inventory.forEach(item => {
-    const key = item.name; // or use item.id if stacking only exact IDs
-    if (merged[key]) {
-      merged[key].quantity += item.quantity;
+    // Normalize key for stacking (ignore case + space differences)
+    const baseKey = item.name.toLowerCase().trim();
+
+    if (merged[baseKey]) {
+      merged[baseKey].quantity += item.quantity;
     } else {
-      // Clone the item to avoid modifying original references
-      merged[key] = { ...item };
+      // Clone the item and reset the ID to the name without spaces
+      const newItem = { ...item };
+      newItem.id = newItem.name.trim().replace(/\s+/g, '');
+      merged[baseKey] = newItem;
     }
   });
 
-  // Replace inventory with merged results
   inventory = Object.values(merged);
   renderInventory();
 }
-
 
 
 function renderInventory() {
@@ -1376,7 +1350,6 @@ function renderInventory() {
 }
 
 
-
 let inventoryOpen = false;
 
 function openInventory() {
@@ -1412,6 +1385,12 @@ function toggleInventory() {
 
 
 
+
+//----------------
+//menus and ui logic
+const customMenu = document.getElementById('customMenu');
+let rightClickPos = { x: 0, y: 0 };
+
 function updateContextMenuOption(emoji, newLabel) {
   const allOptions = document.querySelectorAll('.menu-option');
   allOptions.forEach(opt => {
@@ -1422,11 +1401,6 @@ function updateContextMenuOption(emoji, newLabel) {
   });
 }
 
-
-//----------------
-//menus and ui logic
-const customMenu = document.getElementById('customMenu');
-let rightClickPos = { x: 0, y: 0 };
 
 function placeholderOption2() {
   alert('Option 2 clicked!');
@@ -1596,21 +1570,39 @@ document.addEventListener('keydown', function (event) {
   }
 });
 
+
 //onloadstuffs
 // Load inventory and dropped items on game start
- loadInventory();
- renderDroppedItems();
-
+loadInventory();
+renderDroppedItems();
+saveInventory();
+  
 /* addItem({ id: 'apple', name: 'Apple', icon: "🍎", quantity: 3, size: 'small', type: 'food' });
 addItem({ id: 'storagebox', name: 'StorageBox', icon: "📦", quantity: 1, size: 'large', type: 'object' });
 addItem({ id: 'applesappling', name: 'Tree Sapling', icon: "🌱", quantity: 2, size: 'small', type: 'sapling' });
 addItem({ id: 'underwearGnome', name: 'underwearGnome', icon: "🧚", quantity: 5, size: 'large', type: 'itemtype3' });
 addItem({ id: 'wrench', name: 'Item Type 4', icon: "🔧", quantity: 1, size: 'normal', type: 'itemtype4' }); */
 
-addItem({ id: 'Apple', name: 'Apple', icon: "🍎", quantity: 3, size: 'small', type: 'food' });
+/* addItem({ id: 'Apple', name: 'Apple', icon: "🍎", quantity: 3, size: 'small', type: 'food' });
 addItem({ id: 'Box', name: 'Box', icon: "📦", quantity: 1, size: 'large', type: 'object' });
-addItem({ id: 'Sapling', name: 'Sapling', icon: "🌱", quantity: 2, size: 'tiny', type: 'sapling' });
-addItem({ id: 'underwearGnome', name: 'underwearGnome', icon: "🧚", quantity: 5, size: 'large', type: 'unique' });
-addItem({ id: 'wrench', name: 'wrench', icon: "🔧", quantity: 1, size: 'normal', type: 'tool' });
-addItem({ id: 'axe', name: 'axe', icon: "🪓", quantity: 1, size: 'large', type: 'tool' });
+addItem({ id: 'Sapling', name: 'Sapling', icon: "🌱", quantity: 1, size: 'tiny', type: 'sapling' });
+addItem({ id: 'wrench', name: 'wrench', icon: "🔧", quantity: 10, size: 'normal', type: 'tool' });
+addItem({ id: 'axe', name: 'axe', icon: "🪓", quantity: 10, size: 'large', type: 'tool' });
 addItem({ id: 'pickle', name: 'Pickle', icon: "🥒", quantity: 1, size: 'normal', type: 'food' });
+addItem({ id: 'tinyShovel', name: 'tinyShovel', icon: "🥄", quantity: 10, size: 'normal', type: 'tool' }); */
+
+//spawning enemies 
+//example usage    (block comment when finished testing)
+/* spawnEnemy('sneakyGoblin', 150, 200, currentMap);
+spawnEnemy('angryGoblin', 350, 200, currentMap);
+spawnEnemy('sleepyGoblin', 100, 300, currentMap); */
+
+
+//idk if these work anymore ------------------------------
+//these spawn top left with no movement logic or something
+//spawnEnemy() //→ spawns a random enemy at a random position.
+//→ spawns that enemy at a random spot.
+//spawnEnemy('sneakyGoblin') 
+//========================================================
+
+

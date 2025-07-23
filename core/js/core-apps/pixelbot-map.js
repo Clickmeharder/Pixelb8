@@ -1,107 +1,58 @@
 const maps = {
   roomA: {
-    name: "Room A",
+    name: "roomA",
     obstacles: [
       { x: 0, y: 0, width: 800, height: 25 },
       { x: 0, y: 575, width: 800, height: 25 },
       { x: 0, y: 0, width: 25, height: 600 },
-      { x: 775, y: 0, width: 25, height: 600 },
-      { x: 375, y: 550, width: 50, height: 50, isExit: true, direction: "down", target: "lake" }
+      { x: 1200, y: 0, width: 25, height: 600 },
+      { x: 375, y: 0, width: 50, height: 50, isExit: true, direction: "down", target: "lake" }
     ],
-    placedItems: [
-      {
-        id: 'Roomfish1',
-        name: 'Fish',
-        icon: '🐟',
-        size: 'tiny',
-        quantity: 1,
-        x: 360,
-        y: 350,
-        collisionBox: { x: 360, y: 350, width: 20, height: 20 }
-      }
-    ],
+    placedItems: [],
     startX: 100,
     startY: 300
   },
   house: {
-    name: "Pixelbot's House",
+    name: "house",
     obstacles: [
-      { x: 0, y: 0, width: 800, height: 25 },
-      { x: 0, y: 575, width: 800, height: 25 },
+      { x: 0, y: 0, width: 1024, height: 25 },
+      { x: 0, y: 575, width: 1024, height: 25 },
       { x: 0, y: 0, width: 25, height: 600 },
-      { x: 750, y: 0, width: 25, height: 600 },
-      { x: 375, y: 550, width: 50, height: 50, isExit: true, direction: "down", target: "garden" }
+      { x: 999, y: 0, width: 25, height: 600 },
+      { x: 455, y: 75, width: 100, height: 125, isExit: true, direction: "down", target: "garden" }
     ],
     placedItems: [
-      {
-        id: 'box1',
-        name: 'Box',
-        icon: '📦',
-        size: 'large',
-        quantity: 1,
-        x: 300,
-        y: 200,
-        collisionBox: { x: 300, y: 200, width: 44, height: 44 }
-      }
+      { id: 'box1', name: 'Box', icon: '📦', size: 'large', quantity: 1, x: 300, y: 200,
+	  collisionBox: { x: 300, y: 200, width: 44, height: 44 } }
 	],
     startX: 365,
     startY: 525
   },
-  roomC: {
-    name: "Whispering Room",
+  deepforest: {
+    name: "deepforest",
     obstacles: [
-      { x: 0, y: 0, width: 800, height: 25 },
-      { x: 0, y: 575, width: 800, height: 25 },
+      { x: 0, y: 0, width: 1024, height: 25 },
+      { x: 0, y: 575, width: 1024, height: 25 },
       { x: 0, y: 0, width: 25, height: 600 },
-      { x: 750, y: 0, width: 25, height: 600 },
+      { x: 1024, y: 0, width: 25, height: 600 },
       { x: 375, y: 550, width: 50, height: 50, isExit: true, direction: "down", target: "forest" }
     ],
-    placedItems: [
-      {
-        id: 'tree1',
-        name: 'Tree',
-        icon: '🌳',
-        size: 'large',
-        quantity: 1,
-        x: 300,
-        y: 200,
-        collisionBox: { x: 300, y: 200, width: 44, height: 44 }
-      },
-      {
-        id: 'tree2',
-        name: 'Tree',
-        icon: '🌲',
-        size: 'large',
-        quantity: 1,
-        x: 500,
-        y: 250,
-        collisionBox: { x: 500, y: 250, width: 44, height: 44 }
-      }
-    ],
+    placedItems: [],
     startX: 100,
     startY: 300
   },
   lake: {
-    name: "Crystal Lake",
+    name: "lake",
     obstacles: [
-      { x: 0, y: 0, width: 800, height: 25 },
-      { x: 0, y: 575, width: 800, height: 25 },
+      { x: 0, y: 0, width: 1024, height: 25 },
+      { x: 0, y: 575, width: 1024, height: 25 },
       { x: 0, y: 0, width: 25, height: 600 },
-      { x: 750, y: 0, width: 25, height: 600 },
+      { x: 1024, y: 0, width: 25, height: 600 },
 	  { x: 375, y: 0, width: 50, height: 50, isExit: true, direction: "up", target: "roomA" },
       { x: 725, y: 300, width: 50, height: 50, isExit: true, direction: "right", target: "garden" }
     ],
     placedItems: [
-      {
-        id: 'lakefish2',
-        name: 'Fish',
-        icon: '🐟',
-        size: 'tiny',
-        quantity: 1,
-        x: 360,
-        y: 350,
-        collisionBox: { x: 360, y: 350, width: 20, height: 20 }
-      }
+      { id: 'deadfish2', name: 'deadfish', icon: '🐟', size: 'tiny', quantity: 1, x: 360, y: 350, collisionBox: { x: 360, y: 350, width: 20, height: 20 }}
     ],
     startX: 100,
     startY: 300
@@ -109,100 +60,69 @@ const maps = {
   garden: {
     name: "garden",
     obstacles: [
-      { x: 0, y: 0, width: 800, height: 25 },
-      { x: 0, y: 575, width: 800, height: 25 },
+      { x: 0, y: 0, width: 1024, height: 25 },
+      { x: 0, y: 575, width: 1024, height: 25 },
       { x: 0, y: 0, width: 25, height: 600 },
-      { x: 750, y: 0, width: 25, height: 600 },
+      { x: 1024, y: 0, width: 25, height: 600 },
       { x: 375, y: 0, width: 50, height: 50, isExit: true, direction: "up", target: "house" },
       { x: 725, y: 300, width: 50, height: 50, isExit: true, direction: "right", target: "forest" },
       { x: 0, y: 300, width: 50, height: 50, isExit: true, direction: "left", target: "lake" },
       { x: 375, y: 550, width: 50, height: 50, isExit: true, direction: "down", target: "cave" }
     ],
-    placedItems: [],
+    placedItems: [
+      { id: 'tree2', name: 'Tree', icon: '🌳', size: 'large', quantity: 1,x: 300, y: 200, collisionBox: { x: 300, y: 200, width: 44, height: 44 }}
+	],
     startX: 325,
     startY: 50
   },
   forest: {
-    name: "Whispering Forest",
+    name: "Forest",
     obstacles: [
-      { x: 0, y: 0, width: 800, height: 25 },
-      { x: 0, y: 575, width: 800, height: 25 },
+      { x: 0, y: 0, width: 1024, height: 25 },
+      { x: 0, y: 575, width: 1024, height: 25 },
       { x: 0, y: 0, width: 25, height: 600 },
-      { x: 750, y: 0, width: 25, height: 600 },
-	  { x: 375, y: 0, width: 50, height: 50, isExit: true, direction: "up", target: "roomC" },
+      { x: 1024, y: 0, width: 25, height: 600 },
+	  { x: 375, y: 0, width: 50, height: 50, isExit: true, direction: "up", target: "deepforest" },
       { x: 0, y: 300, width: 50, height: 50, isExit: true, direction: "left", target: "garden" },
 	  { x: 375, y: 550, width: 50, height: 50, isExit: true, direction: "down", target: "town" }
     ],
     placedItems: [
-      {
-        id: 'tree3',
-        name: 'Tree',
-        icon: '🌳',
-        size: 'large',
-        quantity: 1,
-        x: 300,
-        y: 200,
-        collisionBox: { x: 300, y: 200, width: 44, height: 44 }
-      },
-      {
-        id: 'tree4',
-        name: 'Tree',
-        icon: '🌲',
-        size: 'large',
-        quantity: 1,
-        x: 500,
-        y: 250,
-        collisionBox: { x: 500, y: 250, width: 44, height: 44 }
-      }
+      { id: 'tree3', name: 'tree', icon: 'poop', size: 'large', quantity: 1, x: 300, y: 200},
+      { id: 'pine3', name: 'Pine', icon: 'poop', size: 'large', quantity: 1, x: 500, y: 250, collisionBox: { x: 500, y: 250, width: 44, height: 44 }},
+      { id: 'pine4', name: 'Pine', icon: 'poop', size: 'large', quantity: 1, x: 500, y: 250, collisionBox: { x: 500, y: 250, width: 44, height: 44 }},
+      { id: 'pine5', name: 'Pine', icon: 'poop', size: 'large', quantity: 1, x: 500, y: 250, collisionBox: { x: 500, y: 250, width: 44, height: 44 }}
     ],
     startX: 100,
     startY: 300
   },
   roomG: {
-    name: "unused area",
+    name: "roomG",
     obstacles: [
-      { x: 0, y: 0, width: 800, height: 25 },
-      { x: 0, y: 575, width: 800, height: 25 },
+      { x: 0, y: 0, width: 1024, height: 25 },
+      { x: 0, y: 575, width: 1024, height: 25 },
       { x: 0, y: 0, width: 25, height: 600 },
-      { x: 750, y: 0, width: 25, height: 600 },
+      { x: 1024, y: 0, width: 25, height: 600 },
       { x: 375, y: 0, width: 50, height: 50, isExit: true, direction: "up", target: "house" },
 	  { x: 725, y: 300, width: 50, height: 50, isExit: true, direction: "right", target: "cave" }
     ],
     placedItems: [
-      {
-        id: 'rock1',
-        name: 'Rock',
-        icon: '🪨',
-        size: 'normal',
-        quantity: 1,
-        x: 400,
-        y: 300,
-        collisionBox: { x: 400, y: 300, width: 32, height: 32 }
+      { id: 'rock1', name: 'Rock', icon: '🪨', size: 'normal', quantity: 1, x: 400, y: 300, collisionBox: { x: 400, y: 300, width: 32, height: 32 }
       }
     ],
     startX: 375,
     startY: 525
   },
   cave: {
-    name: "Mossy Cave",
+    name: "Cave",
     obstacles: [
-      { x: 0, y: 0, width: 800, height: 25 },
-      { x: 0, y: 575, width: 800, height: 25 },
+      { x: 0, y: 0, width: 1024, height: 25 },
+      { x: 0, y: 575, width: 1024, height: 25 },
       { x: 0, y: 0, width: 25, height: 600 },
-      { x: 750, y: 0, width: 25, height: 600 },
+      { x: 1024, y: 0, width: 25, height: 600 },
       { x: 375, y: 0, width: 50, height: 50, isExit: true, direction: "up", target: "garden" }
     ],
     placedItems: [
-      {
-        id: 'rock2',
-        name: 'Rock',
-        icon: '🪨',
-        size: 'normal',
-        quantity: 1,
-        x: 400,
-        y: 300,
-        collisionBox: { x: 400, y: 300, width: 32, height: 32 }
-      }
+      { id: 'rock2', name: 'Rock', icon: '🪨', size: 'normal', quantity: 1, x: 400, y: 300, collisionBox: { x: 400, y: 300, width: 32, height: 32 }}
     ],
     startX: 375,
     startY: 525
@@ -210,23 +130,14 @@ const maps = {
   town: {
     name: "Town",
     obstacles: [
-      { x: 0, y: 0, width: 800, height: 25 },
-      { x: 0, y: 575, width: 800, height: 25 },
+      { x: 0, y: 0, width: 1024, height: 25 },
+      { x: 0, y: 575, width: 1024, height: 25 },
       { x: 0, y: 0, width: 25, height: 600 },
-      { x: 750, y: 0, width: 25, height: 600 },
+      { x: 1000, y: 0, width: 25, height: 600 },
       { x: 375, y: 0, width: 50, height: 50, isExit: true, direction: "up", target: "forest" }
     ],
     placedItems: [
-      {
-        id: 'rock3',
-        name: 'Rock',
-        icon: '🪨',
-        size: 'normal',
-        quantity: 1,
-        x: 400,
-        y: 300,
-        collisionBox: { x: 400, y: 300, width: 32, height: 32 }
-      }
+      {id: 'rock3',name: 'Rock',icon: '🪨',size: 'normal',quantity: 1,x: 400,y: 300,collisionBox: { x: 400, y: 300, width: 32, height: 32 }}
     ],
     startX: 375,
     startY: 525
@@ -237,7 +148,7 @@ const maps = {
 const roomPositions = {
   roomA: { row: 1, col: 1 },
   house: { row: 1, col: 2 },
-  roomC: { row: 1, col: 3 },
+  deepforest: { row: 1, col: 3 },
   lake: { row: 2, col: 1 },
   garden: { row: 2, col: 2 },
   forest: { row: 2, col: 3 },
@@ -248,93 +159,47 @@ const roomPositions = {
 
 let currentMap = "house";
 let player = { x: 350, y: 300 };
-function getSavedOrDefaultPlacedItems(mapName) {
-  const key = `placedItems_${mapName}`;
-  const saved = localStorage.getItem(key);
-  const defaultItems = maps[mapName]?.placedItems || [];
-  if (saved) {
-    console.log(`[Map: ${mapName}] Loaded saved placedItems from localStorage.`);
-    return JSON.parse(saved);
-  } else {
 
-    if (!maps[mapName]) {
-      console.warn(`[Map: ${mapName}] WARNING: Map not found in maps object.`);
-    } else if (defaultItems.length === 0) {
-      console.warn(`[Map: ${mapName}] No default placedItems found.`);
-    } else {
-      console.log(`[Map: ${mapName}] No saved placedItems. Using default items from maps and saving to localStorage.`);
-      console.table(defaultItems);
-    }
+function setBackgroundForMap(mapName) {
+  const gameArea = document.getElementById("gameArea");
 
-    const clonedDefaults = JSON.parse(JSON.stringify(defaultItems)); // avoid mutation
-    localStorage.setItem(key, JSON.stringify(clonedDefaults));
-    return clonedDefaults;
+  switch (mapName) {
+    case "roomA":
+      gameArea.style.backgroundImage = "url('https://i.imgur.com/ZNoQHgE.png')";
+      break;
+    case "roomB":
+      gameArea.style.backgroundImage = "url('https://i.imgur.com/b6W0Nwb.png')";
+      break;
+    case "roomG":
+      gameArea.style.backgroundImage = "url('https://i.imgur.com/Z5VZH04.png')";
+      break;
+    case "house":
+      gameArea.style.backgroundImage = "url('https://i.imgur.com/W5E5i4U.png')";
+      break;
+    case "garden":
+      gameArea.style.backgroundImage = "url('https://pixeljoint.com/files/icons/full/background__r172093591.gif')";
+      break;
+    case "lake":
+      gameArea.style.backgroundImage = "url('https://pixeljoint.com/files/icons/full/background__r172093591.gif')";
+      break;
+    case "forest":
+      gameArea.style.backgroundImage = "url('https://pixeljoint.com/files/icons/full/background__r172093591.gif')";
+      break;
+    case "cave":
+      gameArea.style.backgroundImage = "url('https://i.imgur.com/U79MXW7.png')";
+      break;
+    default:
+      gameArea.style.backgroundImage = "url('https://pixeljoint.com/files/icons/full/background__r172093591.gif')";
+      break;
   }
+
+  // Style for clean, centered background display
+/*   gameArea.style.backgroundSize = "cover";
+  gameArea.style.backgroundRepeat = "no-repeat";
+  gameArea.style.backgroundPosition = "center"; */
 }
 
 
-// Load and setup map
-function updateMapDisplay(mapName) {
-  const mapDisplay = document.getElementById('mapDisplay');
-  mapDisplay.textContent = `Map: ${mapName}`;
-  updateWorldMapList(); // Refresh map list with current highlight
-}
-function updateMiniMap(mapName) {
-  const mapDisplay = document.getElementById('mapDisplay');
-  const miniMap = document.getElementById('miniMap');
-
-  mapDisplay.innerHTML = `🗺️ Map: ${mapName}`;
-  miniMap.innerHTML = '';
-
-  Object.entries(roomPositions).forEach(([name, pos]) => {
-    const roomDiv = document.createElement('div');
-    roomDiv.classList.add('mini-room');
-    if (name === mapName) {
-      roomDiv.classList.add('current');
-    }
-
-    roomDiv.textContent = name.slice(0, 6); // Short name
-
-    // Positioning using grid-area
-    roomDiv.style.gridRowStart = pos.row;
-    roomDiv.style.gridColumnStart = pos.col;
-
-    miniMap.appendChild(roomDiv);
-  });
-}
-function toggleWorldMap() {
-  const modal = document.getElementById('worldMapModal');
-  modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-}
-
-function updateWorldMapList() {
-  const list = document.getElementById('worldMapList');
-  list.innerHTML = '';
-
-  Object.entries(maps).forEach(([key, map]) => {
-    const li = document.createElement('li');
-    li.textContent = `${map.name || key}`;
-
-    if (key === currentMap) {
-      li.classList.add('current-map');
-      li.textContent += ' ← You are here';
-    }
-
-    list.appendChild(li);
-  });
-}
-function loadMap(mapName) {
-  const map = maps[mapName];
-  currentMap = mapName;
-  collisionBox.x = map.startX;
-  collisionBox.y = map.startY;
-  placedItems = getSavedOrDefaultPlacedItems(mapName); // <- from above
-  renderObstacles(map.obstacles);
-  renderPlacedItems(map.placedItems);
-  renderDroppedItems();
-  updateSpritePosition();
-  updateDebugOverlay(map.obstacles);
-}
 
 // Render obstacles
 function renderObstacles(obstacles) {
@@ -369,11 +234,11 @@ function renderObstacles(obstacles) {
   });
 }
 function renderDroppedItems() {
-  const mergeThreshold = 10;
+
 
   // Clear previous DOM elements
   document.querySelectorAll('.dropped-item, .dropped-item-label-wrapper').forEach(el => el.remove());
-  console.log('renderDroppedItems Ran');
+  console.log('dropping it like its hot');
 
   const originalItems = droppedItemsByMap[currentMap];
   const mergedItems = [];
@@ -454,8 +319,7 @@ function renderDroppedItems() {
     });
     gameArea.appendChild(labelWrapper);
   });
-}
-
+} 
 function renderPlacedItems(items) {
   console.log('renderPlacedItems Ran');
   document.querySelectorAll(".placed-item").forEach(el => el.remove());
@@ -494,34 +358,44 @@ function renderPlacedItems(items) {
   });
 }
 
+function showLoading() {
+  const screen = document.getElementById("loadingScreen");
+  screen.style.display = "flex";
+  screen.classList.remove("hidden"); // make sure it's visible again
+}
+
+function hideLoading() {
+  const screen = document.getElementById("loadingScreen");
+  screen.classList.add("hidden");
+
+  setTimeout(() => {
+    screen.style.display = "none";
+    screen.classList.remove("hidden"); // reset for future use
+  }, 1200); // matches the 0.5s in the CSS transition
+}
 
 
 
-gameArea.addEventListener('dragover', (e) => {
-  e.preventDefault();  // Allow drop
-  e.dataTransfer.dropEffect = 'move';
-});
+function loadMap(mapName) {
+  showLoading(); // Show loading immediately
 
-gameArea.addEventListener('drop', (e) => {
-  e.preventDefault();
-  const data = e.dataTransfer.getData('text/plain');
-  
-  if (!data) return;
+  // Begin rendering logic right away
+  const map = maps[mapName];
+  currentMap = mapName;
 
-  let parsed;
-  try {
-    parsed = JSON.parse(data);
-  } catch {
-    alert('Invalid item data dropped');
-    return;
-  }
+  setBackgroundForMap(mapName);
+  collisionBox.x = map.startX;
+  collisionBox.y = map.startY;
 
-  const itemId = parsed.id;
-  const quantity = parsed.quantity || 1;
+  renderObstacles(map.obstacles);
+  renderPlacedItems(map.placedItems);
+  updateSpritePosition();
+  renderDroppedItems();
+  spawnEnemiesForMap(mapName);
+  renderEntities();
 
-  const rect = gameArea.getBoundingClientRect();
-  const dropX = e.clientX - rect.left;
-  const dropY = e.clientY - rect.top;
-
-  dropItemAtPosition(itemId, quantity, dropX, dropY);
-});
+  // Delay hiding the loading screen so animation shows briefly
+  setTimeout(() => {
+    hideLoading();
+  }, 1200); // 600ms or whatever delay you like for effect
+}

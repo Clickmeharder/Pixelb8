@@ -1,0 +1,8 @@
+function startDebugUpdater() {
+  if (!debugMode) return;
+
+  setInterval(() => {
+    updateDebugOverlay(obstacles, detectionRadius);
+    updateEnemyDistanceDebugOverlay();
+  }, 100); // runs 10 times per second
+}
