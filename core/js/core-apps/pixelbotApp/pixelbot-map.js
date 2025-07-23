@@ -1,3 +1,4 @@
+
 const maps = {
   roomA: {
     name: "roomA",
@@ -100,7 +101,7 @@ const maps = {
     obstacles: [
       { x: 0, y: 0, width: 1024, height: 25 },
       { x: 0, y: 575, width: 1024, height: 25 },
-      { x: 0, y: 0, width: 25, height: 600 },
+      { x: 0, y: 0, width: 25, height: 600 }, 
       { x: 1024, y: 0, width: 25, height: 600 },
       { x: 375, y: 0, width: 50, height: 50, isExit: true, direction: "up", target: "house" },
 	  { x: 725, y: 300, width: 50, height: 50, isExit: true, direction: "right", target: "cave" }
