@@ -16,6 +16,45 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7382192474927902"
      crossorigin="anonymous"></script>
+<!--Messy css fixes-->
+  <style> 
+.materialCardInputRow{display:flex;flex-direction:row; gap: 12px;}	
+#addMattButt,{
+  height:42px;
+  font-size:5px;
+}
+div#nexusJunk {
+    display: flex
+;
+    width: 25%;
+    border: 12px outset #2e2b2b6e;
+    padding: 5px;
+    background: #444;
+    flex-direction: column;
+    border-bottom-width: 24px;
+    border-right-width: 15px;
+    border-radius: 56px;
+    margin-bottom: 24px;
+}
+#matfilterlabel {
+    color: #181616;
+    text-align: center;
+}
+@media screen and (orientation: portrait) {
+  body::before {
+    content: "Please rotate your device.";
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    z-index: 9999;
+  }
+ </style>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
@@ -65,7 +104,6 @@
 		margin-block-start: 0.2em;
 		margin-block-end: 0.2em;
 	}
-	
 
 	</style>
 	<style>
@@ -128,8 +166,6 @@
 	input[type="text"],
 	input[type="number"],
 	select {
-	width: 100%;
-	max-width: 250px;
 	padding: 0px 12px;
 	margin-top: 0px;
 	margin-bottom: 0px;
@@ -164,22 +200,14 @@
 	.eu-container button {
 	background: #32c7e9;
 	color: #121212;
-	font-weight: 700;
-	font-size: 0.8rem;
-	border: none;
-	padding: 1px 6px;
-	margin: 4px 4px 6px 18px;
-	cursor: pointer;
-	transition: background-color 0.25s ease;
-	user-select: none;
-	float: left;
 	}
 
 
-	#playerCraftlvlWrapper {
-	border: 2px inset #ac4915;
-	transition: 0.3s ease;
-	}
+#playerCraftlvlWrapper {
+    border: 2px inset #ac4915;
+    transition: 0.3s ease;
+    width: 50%;
+}
 	#playerCraftlvlWrapper:active {
 	color: #ac4915;
 	}
@@ -187,26 +215,54 @@
 	width: 82%;
 	}
 
-	div#bpbuttonDiv button {
-	background: #32c7e9;
-	color: #121212;
-	font-weight: 700;
-	font-size: 0.8rem;
-	width: 18%;
-	border: none;
-	padding: 1px 6px;
-	margin: 4px 4px 4px 4px;
-	cursor: pointer;
-	transition: background-color 0.25s ease;
-	user-select: none;
-	float: left;
-	}
-	button:hover {
+div#bpbuttonDiv button {
+cursor: pointer;
+    background: #4b4d4ef7;
+    outline: 3px solid #27282a;
+    border-color: #555;
+    color: #121212;
+    font-weight: 700;
+    font-size: 0.9rem;
+    height: 53px;
+    width: 45%;
+    padding: 4px;
+    margin: auto;
+    margin-left: 5px;
+}
+
+button:hover {
 	background: #53e0f6;
-	}
-	button:active {
+}
+button:active {
 	background: #1a9abf;
-	}
+}
+	
+div#bpbuttonDiv2 {
+    display: flex;
+    flex-direction: column;
+	margin-top: auto;
+    margin-bottom: 8px;
+    background: #454343;
+    border: 3px outset #2e2b2b6e;
+	border-bottom-right-radius: 31px;
+    border-bottom-left-radius: 31px;
+    padding: 13px;
+}
+div#bpbuttonDiv2 button, #showAllBlueprintsBtn {
+    background: #4b4d4ef7;
+    outline: 3px solid #27282a;
+    border-color: #555;
+    color: #121212;
+    font-weight: 700;
+    font-size: 0.9rem;
+    height: 35px;
+    width: 95%;
+    padding: 4px;
+    margin: auto;
+}
+#showAllBlueprintsBtn {
+margin-top:6px;
+}
 	.craftingbuddyWrapper {
 		display: flex;
 		flex-direction: row;
@@ -216,7 +272,10 @@
 		border: 3px inset rgb(6 10 15 / 97%);
 		gap: 8px;
 	}
-	.eu-blueprint {
+	
+
+
+.eu-blueprint {
 	color: #ac4915;
 	background: rgba(20, 20, 20, 0.7);
 	width: 25%;
@@ -225,7 +284,7 @@
 	padding: 2px;
 	margin: 0px;
 	margin-top: 1px;
-	margin-left: 20px;
+	margin-left: ;
 	border: 3px ridge #292525a8;
 	border-radius: 10px;
 	text-align: center;
@@ -248,7 +307,7 @@
 	transform: scale(1.01);
 	}
 
-	.eu-blueprint input[type="text"], .eu-blueprint input[type="number"], .eu-blueprint select {
+.eu-blueprint input[type="text"], .eu-blueprint input[type="number"], .eu-blueprint select {
 	width: 85%;
 	max-width: 200px;
 	padding: 0px 9px;
@@ -271,15 +330,18 @@
 	border: 1px outset teal;
 	border-left-width: 2px;
 	}
-	div#bpbuttonDiv {
-	display: flex;
-	flex-direction: row;
-	}
-	div#layoutLabel {
+	
+div#bpbuttonDiv {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+div#layoutLabel {
 	padding: 0px;
 	width: 100%;
-	}
-	div#layoutToggle {
+}
+
+div#layoutToggle {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: flex-start;
@@ -289,15 +351,18 @@
 	background: rgba(15, 15, 15, 0.8);
 	border: 1px solid #2c2c2c;
 	border-radius: 10px;
-	}
-	div#layoutOptions {
+}
+	
+div#layoutOptions {
 	display: flex;
 	flex-wrap: wrap;
-	}
-	div#layoutOptions label {
+}
+
+div#layoutOptions label {
 	border: 2px outset teal;
-	}
-	#blueprintFilters {
+}
+
+#blueprintFilters {
 	background-color: rgba(15, 15, 15, 0.8);
 	border: 1px solid #2c2c2c;
 	border-radius: 10px;
@@ -307,15 +372,15 @@
 	font-size: 0.85rem;
 	flex-direction: column;
 	flex-wrap: wrap;
-	}
+}
 
 	/* Label styling */
-	#blueprintFilters label {
+#blueprintFilters label {
 	color: #8bdaf0;
 	font-weight: 600;
 	width: 30%;
-	}
-	label#filterlabel {
+}
+label#filterlabel {
 	width: 80%;
 	display: flex;
 	flex-direction: row;
@@ -323,10 +388,10 @@
 	justify-content: space-between;
 	align-items: flex-start;
 	align-content: flex-start;
-	}
+}
 	/* Input and select styling */
-	#blueprintFilters input[type="text"],
-	#blueprintFilters select {
+#blueprintFilters input[type="text"],
+#blueprintFilters select {
 	background-color: #121212;
 	border: 1px solid #32c7e9;
 	border-radius: 8px;
@@ -369,13 +434,6 @@
 	transform: scale(0.97);
 	}
 
-	button#saveBlueprintButt {
-	font-weight: 700;
-	font-size: 0.7rem;
-	border: none;
-	padding: 2px 4px;
-	margin: 4px;
-	}
 	.blueprint-list.cards-layout {
 	display: flex;
 	flex-wrap: wrap;
@@ -595,21 +653,21 @@
 
 
 	/* Material cards */
-	.material {
-	position: relative;
-	background: rgba(30, 29, 29, 0.98);
-	border-radius: 12px;
-	padding: 10px 12px;
-	margin: 10px auto;
-	border: 2px inset #263b49c2;
-	outline: 1px solid gray;
-	box-shadow: 0 2px 6px rgba(50, 199, 233, 0.15);
-	display: flex;
-	align-items: flex-start;
-	gap: 12px;
-	flex-wrap: wrap;
-	transition: 0.3s ease;
-	}
+.material {
+    position: relative;
+    background: rgba(30, 29, 29, 0.98);
+    border-radius: 12px;
+    padding: 3px 4px;
+    margin: 6px auto;
+    border: 2px inset #263b49c2;
+    outline: 1px solid gray;
+    box-shadow: 0 2px 6px rgba(50, 199, 233, 0.15);
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+    flex-wrap: wrap;
+    transition: 0.3s ease;
+}
 
 	.material:hover {
 	background: rgba(20, 20, 20, 0.95);
@@ -1082,6 +1140,7 @@
 		}
 
   </style>
+<!--entropianexus bp select etc-->
   <style>
   /*blueprint select inputs and entropianexus api elements*/
 	 #entropianexusBPselect {
@@ -1117,20 +1176,22 @@
     margin-top: 0.25em;
   }
 .blueprint-list {
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid #0ff;
-  margin-top: 10px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  background: #001822;
-  color: #0ff;
-  font-family: monospace;
-  transition: all 0.3s ease;
+    height: 300px;
+    max-height: 600px;
+    overflow-y: auto;
+    border: 1px solid #2a2c2c;
+    margin-top: 2px;
+    padding: 10px;
+    display: flex
+;
+    flex-direction: column;
+    background: #001822;
+    color: #0ff;
+    font-family: monospace;
+    transition: all 0.3s ease;
 }
 
-.blueprint-list.hidden {
+.blueprint-list.hidden div {
   display: none;
 }
 
@@ -1144,6 +1205,7 @@
   background: #033;
 }
   </style>
+
 </head>
 <body>
 
@@ -1165,18 +1227,26 @@
 <div class="eu-container">
 <!--   <h1>Entropia Crafting Tool</h1> -->
   <div class="craftingbuddyWrapper">
+	<div id="nexusJunk">
+	  <label id="matfilterlabel"for="materialFilter" title="Filter by blueprint name, material, product, book, profession, or use 'level:3'">Filter Blueprints:
+	    <input id="materialFilter" list="bpList" type="text" placeholder="e.g. Melchi Crystal" autocomplete="off"  />
+	  </label>
+	  <button id="showAllBlueprintsBtn" class="nexusHax" type="button">Turn On NexusHacker</button>
+	  <br>
+	  <div id="allBlueprintsList" class="blueprint-list "></div>
+
+	  <div id="bpbuttonDiv2" style="margin-top:auto; margin-bottom:0;">
+	    <button class="bpButts" onclick="addMaterial()" id="addMattButt">+ Add Mat</button>
+	    <button class="bpButts" onclick="saveBlueprint()" id="saveBlueprintButt">💾 Save BP</button>
+	    <button class="bpButts" id="resetBlueprintBtn">🔄 Clear Bp</button>
+	  </div>
+	</div>
     <div class="eu-blueprint">
 	  <label for="entropianexusBPselect" title="Add Blueprints from EntropiaNexus!">Add Blueprint:</label>
 	  <!-- Options to be filtered by material -->
-	  <label for="materialFilter" title="Filter by blueprint name, material, product, book, profession, or use 'level:3'">Filter Blueprints:
-	    <input id="materialFilter" list="bpList" type="text" placeholder="e.g. Melchi Crystal" autocomplete="off"  />
-	  </label>
+
 	  <div id="bpLoadingSpinner" style="display:;">...</div>
 	  <datalist id="bpList" style="display: none;"></datalist>
-	  <button id="showAllBlueprintsBtn" type="button">Show filtered Blueprints</button>
-	  <br>
-	  <div id="allBlueprintsList" class="blueprint-list hidden"></div>
-
 	  <button id="loadNexusBP" style="display: none;">Load</button>
 
       <label for="itemName">BP Name:
@@ -1237,14 +1307,12 @@
 	      
 	<div id="eu-myBlueprintWrapper">    
 		<div style="display:flex;flex-direction:row;">
-		  <button onclick="addMaterial()" id="addMattButt">+ Add Material</button>
+
 		  <div id="bpbuttonDiv">
-			<button onclick="saveBlueprint()" id="saveBlueprintButt">💾 Save to My Blueprints</button>
-			<button id="resetBlueprintBtn">🔄 New Blueprint</button>
 			<label id="playerCraftlvlWrapper" for="playerLevel">Your Crafting Level:
 			  <input id="playerLevel" type="number" value="10" min="0" max="100" />
 		    </label>
-			<button onclick="calculate()">calculate estimates</button>
+			<button class="bpButts" onclick="calculate()">calculate estimates</button>
 		  </div>
 	    </div>
 	  <label for="clicks">Clicks:
@@ -1449,1091 +1517,13 @@
 <img src="https://hitwebcounter.com/counter/counter.php?page=21167729&style=0001&nbdigits=5&type=page&initCount=0" title="Counter Widget" Alt="Visit counter For Websites"   border="0" /></a>   
 </div>
 <script>
-let materialIndex = 0;
-let blueprintsVisible = false;
-
-
-
-function addMaterial(name = '', qty = '', tt = 0, mu = 100) {
-  const container = document.getElementById('materials');
-  const div = document.createElement('div');
-  div.className = 'material';
-  div.id = `material_${materialIndex}`;
-  div.innerHTML = `
-    <strong>${materialIndex + 1}</strong><br>
-    <div id="materialInputs">
-    <label for="name_${materialIndex}"> item: <input type="text" value="${name}" placeholder="item name" id="name_${materialIndex}"></label>
-    <label for="qty_${materialIndex}"> Qty:  <input type="number" value="${qty}" placeholder="amount" id="qty_${materialIndex}" style=""></label>
-    <label for="tt_${materialIndex}"> TT/Unit:  <input type="number" value="${tt}" id="tt_${materialIndex}" style="width:80px"></label>
-    <label for="mu_${materialIndex}">MU%: <input type="number" value="${mu}" id="mu_${materialIndex}" style="width:60px"></label>
-    </div>
-    <button onclick="removeMaterial(${materialIndex})" >X</button>
-  `;
-  container.appendChild(div);
-  materialIndex++;
-}
-
-function removeMaterial(index) {
-  const element = document.getElementById(`material_${index}`);
-  if (element) element.remove();
-}
-
-function toggleBpMuField() {
-  const bpType = document.getElementById('bpType').value;
-  document.getElementById('bpMuLabel').style.display = bpType === 'Limited' ? 'inline-block' : 'none';
-}
-
-// Core formula abstraction
-function getFormula(qr, playerLevel, bpLevel) {
-  const baseSuccessAtMax = 0.95;  // max overall success rate (95%)
-  const fullSkillNeeded = (bpLevel - 1) * 2.5 + 5; // SIB estimate
-  const skillRatio = Math.min(playerLevel / fullSkillNeeded, 1);
-
-  // Calculate overall success rate (success + near success)
-  // QR + skill contribute to overall success rate
-  const overallSuccessRate = Math.min(baseSuccessAtMax, baseSuccessAtMax * skillRatio + (qr * (baseSuccessAtMax - 0.814)));
-
-  // Baseline fixed values at max success rate (0.95)
-  const baselineTotalCraft = 0.88;  // 38% + 50%
-  const baselineSuccess = 0.38;
-  const baselineNearSuccess = 0.50;
-
-  // Calculate scaling ratio of current total craft vs baseline total craft
-  const scaleRatio = overallSuccessRate / baselineTotalCraft;
-
-  // Scale success and near success proportionally
-  const baseSuccess = baselineSuccess * scaleRatio;
-  const baseNearSuccess = baselineNearSuccess * scaleRatio;
-
-  // Fail rate is the remainder
-  const baseFail = 1 - (baseSuccess + baseNearSuccess);
-
-  return {
-    baseSuccess,
-    baseNearSuccess,
-    baseFail
-  };
-}
-
-
-function getBaseRates() {
-  const qr = parseFloat(document.getElementById('qr').value) || 1.0;
-  const playerLevel = parseFloat(document.getElementById('playerLevel').value) || 0;
-  const bpLevel = parseFloat(document.getElementById('bpLevel').value) || 1;
-
-  return getFormula(qr, playerLevel, bpLevel);
-}
-
-function updateRatesFromSlider() {
-  const slider = parseInt(document.getElementById('qvsc').value);
-  const qr = parseFloat(document.getElementById('qr').value) || 1.0;
-  const bpLevel = parseInt(document.getElementById('bpLevel').value) || 1;
-  const playerLevel = parseInt(document.getElementById('playerLevel').value) || 0;
-
-  const baseRates = getFormula(qr, playerLevel, bpLevel);
-
-  const baseSuccessPercent = baseRates.baseSuccess * 100;
-  const baseNearSuccessPercent = baseRates.baseNearSuccess * 100;
-
-  const conditionMod = slider / 100;
-
-  // Interpolate towards minimal realistic values when slider is at max
-  const adjustedSuccess = baseSuccessPercent - conditionMod * (baseSuccessPercent - 5);
-  const adjustedNear = baseNearSuccessPercent - conditionMod * (baseNearSuccessPercent - 10);
-  const adjustedFail = 100 - adjustedSuccess - adjustedNear;
-
-  document.getElementById('successRate').value = adjustedSuccess.toFixed(1);
-  document.getElementById('nearSuccessRate').value = adjustedNear.toFixed(1);
-  document.getElementById('failRate').value = adjustedFail.toFixed(1);
-
-  document.getElementById('visibleSuccess').innerText = `${adjustedSuccess.toFixed(1)}%`;
-  document.getElementById('visibleNearSuccess').innerText = `${adjustedNear.toFixed(1)}%`;
-  document.getElementById('visibleFail').innerText = `${adjustedFail.toFixed(1)}%`;
-
-  calculate();
-}
-
-<!-- add a lock/unlock toggle that toggles the display of a round checkmark or radio inside each stat that can be checked or unchecked so that the user can decide which stats it wants to show from the calculation. while locked only checked stats will be displayed and while unlocked all stats will be shown so they can manage which ones are checked or unchecked -->
-function calculate() {
-  let totalTT = 0;
-  let totalMarkup = 0;
-  const clicks = parseInt(document.getElementById('clicks').value);
-  const sellMu = parseFloat(document.getElementById('sellMu').value) / 100;
-  const successRate = parseFloat(document.getElementById('successRate').value) / 100;
-  const nearSuccessRate = parseFloat(document.getElementById('nearSuccessRate').value) / 100;
-  const residuePerSuccess = parseFloat(document.getElementById('residuePerSuccess').value);
-  const bpType = document.getElementById('bpType').value;
-  const bpMu = parseFloat(document.getElementById('bpMu').value) / 100;
-  const itemName = document.getElementById('itemName').value;
-  const maxTT = parseFloat(document.getElementById('maxTT').value);
-  const qvscSlider = parseInt(document.getElementById('qvsc').value);
-
-  let materialBreakdownHtml = `
-    <details class="material-breakdown" closed>
-      <summary><strong>📦 Material Breakdown</strong> (click to expand)</summary>
-      <table class="material-table sortable">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Qty</th>
-            <th>TT/Unit</th>
-            <th>Total TT</th>
-            <th>MU %</th>
-            <th>Total MU</th>
-            <th>Total Cost</th>
-          </tr>
-        </thead>
-        <tbody>
-  `;
-
-  for (let i = 0; i < materialIndex; i++) {
-    const nameInput = document.getElementById(`name_${i}`);
-    if (!nameInput) continue;
-
-    const name = nameInput.value || `Material ${i + 1}`;
-    const qty = parseFloat(document.getElementById(`qty_${i}`).value);
-    const tt = parseFloat(document.getElementById(`tt_${i}`).value);
-    const mu = parseFloat(document.getElementById(`mu_${i}`).value) / 100;
-
-    const totalMatQty = qty * clicks;
-    const totalMatTT = totalMatQty * tt;
-    const totalMatMU = totalMatTT * (mu - 1);
-    const totalMatCost = totalMatTT + totalMatMU;
-
-    totalTT += totalMatTT;
-    totalMarkup += totalMatMU;
-
-    const muPercent = mu * 100;
-    const costClass =
-      muPercent >= 150 ? 'high-cost' :
-      muPercent >= 110 ? 'med-cost' :
-      'low-cost';
-
-    materialBreakdownHtml += `
-      <tr class="${costClass}">
-        <td>${name}</td>
-        <td>${totalMatQty.toFixed(2)}</td>
-        <td>${tt.toFixed(4)}</td>
-        <td>${totalMatTT.toFixed(2)}</td>
-        <td>${muPercent.toFixed(1)}%</td>
-        <td>${totalMatMU.toFixed(2)}</td>
-        <td>${totalMatCost.toFixed(2)}</td>
-      </tr>
-    `;
-  }
-
-  materialBreakdownHtml += `
-        </tbody>
-      </table>
-    </details>
-  `;
-
-  if (bpType === 'Limited') {
-    const bpTTPerClick = 0.01;
-    const bpTotalTT = bpTTPerClick * clicks;
-    const bpTotalMarkup = bpTotalTT * (bpMu - 1);
-    totalTT += bpTotalTT;
-    totalMarkup += bpTotalMarkup;
-  }
-
-  const totalCost = totalTT + totalMarkup;
-  const successfulCrafts = clicks * successRate;
-  const nearSuccessClicks = clicks * nearSuccessRate;
-  const sellValue = successfulCrafts * maxTT * sellMu;
-  const nearSuccessReturn = nearSuccessClicks * (0.55 * totalCost / clicks);
-  const residueUsed = successfulCrafts * residuePerSuccess;
-  const totalReturn = sellValue + nearSuccessReturn;
-  const profit = totalReturn - totalCost;
-  const markupPerClick = totalMarkup / clicks;
-  const roiPercent = ((totalReturn / totalCost) - 1) * 100;
-
-  const multiplierChancePercent = 0.1 + (qvscSlider / 100) * 1.7;
-  const multiplierChance = multiplierChancePercent / 100;
-  const expectedMultipliers = clicks * multiplierChance;
-  const expectedClicksBeforeHit = multiplierChance > 0 ? (1 / multiplierChance).toFixed(0) : '∞';
-
-  const scaleFactor = 0.5 + (qvscSlider / 100);
-  const minPayout = (totalCost / clicks) * 7 * scaleFactor;
-  const maxPayout = (totalCost / clicks) * 875 * scaleFactor;
-  const totalReturnMin = expectedMultipliers * minPayout;
-  const totalReturnMax = expectedMultipliers * maxPayout;
-
-  const avgReturnMin = totalReturn + totalReturnMin;
-  const avgReturnMax = totalReturn + totalReturnMax;
-  const profitRangeMin = avgReturnMin - totalCost;
-  const profitRangeMax = avgReturnMax - totalCost;
-
-  const getReturnColor = (value) => {
-    const ratio = value / totalCost;
-    if (ratio >= 1.1) return 'profit-strong';
-    if (ratio >= 1.01) return 'profit-positive';
-    if (ratio >= 0.95) return 'profit-warn';
-    return 'profit-negative';
-  };
-
-  const multiplierHtml = `
-    <br>
-    <details class="multiplier-odds-details" closed>
-      <summary><strong>🎰 Multiplier Odds</strong> (click to toggle)</summary>
-      <em class="multiplier-note">Note: Multipliers are rare and payouts vary widely.</em><br>
-      <em class="toolDisclaimer-note">disclaimer: These are very rough estimates.</em><br>
-      <em class="toolDisclaimer-note">I'm terrible at math. We hope to improve our estimates</em><br>
-      <em class="toolDisclaimer-note">over time. *for entertainment only*</em><br><br>
-
-      <strong>📌 Cost Summary:</strong><br>
-      • Cost per Click: ${ (totalTT / clicks).toFixed(2) } (TT) + ${ (totalMarkup / clicks).toFixed(2) } (MU) = ${(totalCost / clicks).toFixed(2)} PED<br>
-      • Number of Clicks: ${clicks}<br>
-      • Total Cost: ${totalTT.toFixed(2)} (TT) + ${totalMarkup.toFixed(2)} (MU) = ${totalCost.toFixed(2)} PED<br><br>
-
-      <strong>🎲 Multiplier Mechanics:</strong><br>
-      • Chance per Click: 📊 ${multiplierChancePercent.toFixed(2)}%<br>
-      • Expected Multiplier Hits: 🎯 ${expectedMultipliers.toFixed(4)}<br>
-      • Avg Clicks Between Hits: 📈 ~${expectedClicksBeforeHit} clicks<br>
-      • Payout per Hit: 💰 ${minPayout.toFixed(2)} – ${maxPayout.toFixed(2)} PED<br><br>
-
-      <strong>💵 Estimated Multiplier Returns:</strong><br>
-      • Return from Multipliers: <span class="${getReturnColor(totalReturnMin)}">${totalReturnMin.toFixed(2)}</span> – 
-        <span class="${getReturnColor(totalReturnMax)}">${totalReturnMax.toFixed(2)} PED</span><br>
-      • Total Cost: ${totalCost.toFixed(2)} PED<br>
-      • Profit/Loss from Multipliers: <span class="${getReturnColor(totalReturnMin)}">${(totalReturnMin - totalCost).toFixed(2)}</span> – 
-        <span class="${getReturnColor(totalReturnMax)}">${(totalReturnMax - totalCost).toFixed(2)} PED</span><br><br>
-
-      <strong>📈 Avg Return (Base + Multipliers):</strong><br>
-      • Return Range: <span class="${getReturnColor(avgReturnMin)}">${avgReturnMin.toFixed(2)}</span> – 
-        <span class="${getReturnColor(avgReturnMax)}">${avgReturnMax.toFixed(2)} PED</span><br>
-      • Total Cost: ${totalCost.toFixed(2)} PED<br>
-      • Total Profit/Loss: <span class="${getReturnColor(profitRangeMin)}">${profitRangeMin.toFixed(2)}</span> – 
-        <span class="${getReturnColor(profitRangeMax)}">${profitRangeMax.toFixed(2)} PED</span>
-    </details>
-  `;
-
-  document.getElementById('results').innerHTML = `
-    ${multiplierHtml}
-    <h3>📊 Results for: <em>${itemName}</em></h3>
-    <div class="result-grid">
-      <div class="result-row"><span class="label">🔖 Blueprint Type:</span> <span>${bpType}</span></div>
-      <div class="result-row"><span class="label">💸 Total TT Cost:</span> <span>${totalTT.toFixed(2)} PED</span></div>
-      <div class="result-row"><span class="label">📈 Total Markup:</span> <span>${totalMarkup.toFixed(2)} PED</span></div>
-      <div class="result-row total"><span class="label">🧾 Total Cost (TT + MU):</span> <span>${totalCost.toFixed(2)} PED</span></div>
-    </div>
-
-    ${materialBreakdownHtml}
-
-    <details class="estimation-breakdown" closed>
-      <summary><strong>📉 Estimation Breakdown</strong> (click to expand)</summary>
-      <div class="result-grid" style="margin-top: 10px">
-        <div class="result-row"><span class="label">🎯 Markup per Click:</span> <span>${markupPerClick.toFixed(4)} PED</span></div>
-        <div class="result-row"><span class="label">✅ Expected Successful Crafts:</span> <span>${successfulCrafts.toFixed(1)}</span></div>
-        <div class="result-row"><span class="label">🤏 Near-Successes:</span> <span>${nearSuccessClicks.toFixed(1)}</span></div>
-        <div class="result-row"><span class="label">💰 Return from Success:</span> <span>${sellValue.toFixed(2)} PED</span></div>
-        <div class="result-row"><span class="label">💵 Return from Near-Success:</span> <span>${nearSuccessReturn.toFixed(2)} PED</span></div>
-        <div class="result-row"><span class="label">💱 Total Return:</span> <span>${totalReturn.toFixed(2)} PED</span></div>
-        <div class="result-row"><span class="label">🧪 Residue Needed:</span> <span>${residueUsed.toFixed(2)} PED</span></div>
-        <div class="result-row"><span class="label">📊 ROI:</span> <span>${roiPercent.toFixed(2)}%</span></div>
-        <div class="result-row profit ${profit >= 0 ? 'profit-positive' : 'profit-negative'}">
-          <span class="label">💹 Estimated Profit/Loss:</span>
-          <span>${profit.toFixed(2)} PED</span>
-        </div>
-      </div>
-    </details>
-	<!-- 🪪 Button to Open Modal -->
-    <span class="label">Features coming soon (not finished):</span><br>
-    <button id="openHistoryModal">🕮 Crafting History</button>
-    <!-- 🧪 Simulation Buttons -->
-    <button onclick="startLiveSimulation()" style="display:none;">Default Simulation</button>
-    <button onclick="runSimulation('historic')"style="display:none;">Simulate Based on History</button>
-  `;
-}
-
-// Automatically recalculate when QR is changed
-const qrInput = document.getElementById('qr');
-if (qrInput) {
-  qrInput.addEventListener('input', () => {
-    const qvscSlider = document.getElementById('qvsc');
-    qvscSlider.value = 0;
-    document.getElementById('qvscLabel').innerText = '0%';
-    updateRatesFromSlider(); // <-- this is the key addition
-  });
-}
-['playerLevel', 'bpLevel'].forEach(id => {
-  const input = document.getElementById(id);
-  if (input) {
-    input.addEventListener('input', () => {
-      updateRatesFromSlider();
-    });
-  }
-});
-function saveBlueprint() {
-  const blueprint = {
-    itemName: document.getElementById('itemName').value,
-    maxTT: document.getElementById('maxTT').value,
-    bpType: document.getElementById('bpType').value,
-    bpMu: document.getElementById('bpMu').value,
-    sellMu: document.getElementById('sellMu').value,
-    successRate: document.getElementById('successRate').value,
-    residuePerSuccess: document.getElementById('residuePerSuccess').value,
-    clicks: document.getElementById('clicks').value,
-    bpBook: document.getElementById('bpBook').value.trim(),
-    materials: []
-  };
-
-  for (let i = 0; i < materialIndex; i++) {
-    const nameInput = document.getElementById(`name_${i}`);
-    if (!nameInput) continue;
-    blueprint.materials.push({
-      name: nameInput.value,
-      qty: document.getElementById(`qty_${i}`).value,
-      tt: document.getElementById(`tt_${i}`).value,
-      mu: document.getElementById(`mu_${i}`).value
-    });
-  }
-
-  let saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
-  saved.push(blueprint);
-  localStorage.setItem('blueprints', JSON.stringify(saved));
-  alert("Blueprint saved!");
-
-  if (blueprintsVisible) {
-    renderBlueprintList();
-  }
-}
-
-function deleteBlueprint(index) {
-  const confirmed = confirm("Are you sure you want to delete this blueprint?");
-  if (!confirmed) return;
-
-  let saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
-  saved.splice(index, 1);
-  localStorage.setItem('blueprints', JSON.stringify(saved));
-  renderBlueprintList(); // refresh the UI
-}
-
-function fuzzyMatch(pattern, text) {
-  pattern = pattern.toLowerCase();
-  text = text.toLowerCase();
-
-  let patternIdx = 0;
-  let textIdx = 0;
-
-  while (patternIdx < pattern.length && textIdx < text.length) {
-    if (pattern[patternIdx] === text[textIdx]) {
-      patternIdx++;
-    }
-    textIdx++;
-  }
-
-  return patternIdx === pattern.length;
-}
-
-function toggleBlueprints() {
-  blueprintsVisible = !blueprintsVisible;
-  const button = document.getElementById('loadBlueprintsButt');
-  const container = document.getElementById('savedList');
-
-  if (blueprintsVisible) {
-    container.style.display = 'block';
-    renderBlueprintList();
-    button.innerText = 'X Collapse';
-  } else {
-    container.style.display = 'none';
-    button.innerText = '📂 Expand';
-  }
-}
-
-function clearBlueprintFilters() {
-  document.getElementById('filterName').value = '';
-  document.getElementById('filterBook').value = '';
-  document.getElementById('filterMaterial').value = '';
-  renderBlueprintList();
-}
-
-function renderBlueprintList() {
-  const saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
-  const filterContainer = document.getElementById('blueprintFilters');
-  const listContainer = document.getElementById('blueprintList');
-  const layoutToggle = document.getElementById('layoutToggle');
-
-  if (!filterContainer || !listContainer || !layoutToggle) return;
-
-  // Render filters once
-  if (!document.getElementById('filterName')) {
-    const uniqueBooks = [...new Set(saved.map(bp => bp.bpBook || '').filter(Boolean))];
-
-    filterContainer.innerHTML = `
-      <label id="filterlabel" style="width:95%;">🎛️ Filters
-        <button onclick="clearBlueprintFilters()" id="clearBPfilterButt">❌ Clear</button>
-      </label>
-      <div id="filterOptionGroup">
-        <label>
-          <input type="text" id="filterName" placeholder="🔍 Name">
-        </label>
-        <label>
-          <select id="filterBook">
-            <option value="">📘 Book</option>
-            ${uniqueBooks.map(book => `<option value="${book}">${book}</option>`).join('')}
-          </select>
-        </label>
-        <label>
-          <input type="text" id="filterMaterial" placeholder="🧪 Material">
-        </label>
-      </div>
-    `;
-
-    document.getElementById('filterName').addEventListener('input', renderBlueprintList);
-    document.getElementById('filterBook').addEventListener('change', renderBlueprintList);
-    document.getElementById('filterMaterial').addEventListener('input', renderBlueprintList);
-  }
-
-  const nameFilter = document.getElementById('filterName').value.toLowerCase();
-  const bookFilter = document.getElementById('filterBook').value.toLowerCase();
-  const matFilter = document.getElementById('filterMaterial').value.toLowerCase();
-
-  const filtered = saved.filter(bp => {
-    const nameMatch = fuzzyMatch(nameFilter, bp.itemName);
-    const bookMatch = !bookFilter || (bp.bpBook && bp.bpBook.toLowerCase() === bookFilter);
-    const matMatch = !matFilter || bp.materials.some(m => fuzzyMatch(matFilter, m.name));
-    return nameMatch && bookMatch && matMatch;
-  });
-
-  if (filtered.length === 0) {
-    listContainer.innerHTML = '<em>No matching blueprints.</em>';
-    return;
-  }
-
-  const layout = document.querySelector('input[name="layout"]:checked').value;
-
-  if (layout === 'cards') {
-    listContainer.innerHTML = `
-      <div class="blueprint-list cards-layout">
-        ${filtered.map((bp, i) => `
-          <div class="blueprint-item" title="Click to load blueprint">
-            <div onclick="loadBlueprint(${i})" class="bp-clickable">
-              <div class="bp-name">${bp.itemName}</div>
-              <div class="bp-book">${bp.bpBook || ''}</div>
-            </div>
-            <button class="delete-bp" onclick="deleteBlueprint(${i}); event.stopPropagation();" title="Delete blueprint">🗑️</button>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  } else {
-    listContainer.innerHTML = `
-      <ul class="blueprint-list list-layout">
-        ${filtered.map((bp, i) => `
-          <li class="blueprint-list-item" title="Click to load blueprint">
-            <span onclick="loadBlueprint(${i})">
-              <strong>${bp.itemName}</strong> ${bp.bpBook ? `- <em>${bp.bpBook}</em>` : ''}
-            </span>
-            <button class="delete-bp" onclick="deleteBlueprint(${i}); event.stopPropagation();" title="Delete blueprint">🗑️</button>
-          </li>
-        `).join('')}
-      </ul>
-    `;
-  }
- renderFilteredBlueprints(filtered);
-}
-
-function renderAllBlueprintsList(filteredList) {
-  const container = document.getElementById("allBlueprintsList");
-  container.innerHTML = "";
-  filteredList.forEach(bp => {
-    const entry = document.createElement("div");
-    entry.textContent = bp.Name;
-    entry.addEventListener("click", async () => {
-      document.getElementById("materialFilter").value = bp.Name;
-      container.classList.add("hidden");
-      document.getElementById("showAllBlueprintsBtn").textContent = "Browse All Blueprints";
-      await loadBlueprintByName(bp.Name);
-    });
-    container.appendChild(entry);
-  });
-}
-
-
-function loadBlueprint(index) {
-  const saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
-  const bp = saved[index];
-  if (!bp) return;
-
-  document.getElementById('itemName').value = bp.itemName;
-  document.getElementById('maxTT').value = bp.maxTT;
-  document.getElementById('bpType').value = bp.bpType;
-  document.getElementById('bpMu').value = bp.bpMu;
-  document.getElementById('sellMu').value = bp.sellMu;
-  document.getElementById('successRate').value = bp.successRate;
-  document.getElementById('residuePerSuccess').value = bp.residuePerSuccess;
-  document.getElementById('clicks').value = bp.clicks;
-  document.getElementById('bpBook').value = bp.bpBook || '';
-
-  document.getElementById('materials').innerHTML = '';
-  materialIndex = 0;
-  bp.materials.forEach(m => addMaterial(m.name, m.qty, m.tt, m.mu));
-  toggleBpMuField();
-}
-
-document.getElementById('resetBlueprintBtn').addEventListener('click', () => {
-  // Clear inputs inside .eu-blueprint
-  document.querySelectorAll('.eu-blueprint input').forEach(input => {
-    if (input.type === 'number') input.value = '';
-    if (input.type === 'text') input.value = '';
-  });
-
-  // Reset select dropdowns
-  document.querySelectorAll('.eu-blueprint select').forEach(select => {
-    select.selectedIndex = 0;
-  });
-
-  // Reset hidden inputs to original values (if you want them to reset)
-  document.getElementById('successRate').value = 38;
-  document.getElementById('nearSuccessRate').value = 50;
-  document.getElementById('failRate').value = 12;
-
-  // Reset the slider (optional)
-  const qvscSlider = document.getElementById('qvsc');
-  qvscSlider.value = 0;
-  document.getElementById('qvscLabel').innerText = '0%';
-  updateRatesFromSlider();
-
-  // Clear materials
-  const materialsContainer = document.getElementById('materials');
-  materialsContainer.innerHTML = ''; // wipe it all
-
-  // Reset materialIndex (make sure this is a global or window var)
-  if (typeof materialIndex !== 'undefined') {
-    materialIndex = 0;
-  }
-  
-  
-
-
-  // Add two blank material cards
-  addMaterial();
-  addMaterial();
-});
-addMaterial('Nanocube', 2, 0.01, 101);
-
-document.addEventListener('DOMContentLoaded', () => {
-  toggleBpMuField();
-});
 
 
 
 </script>
-<script>
-  const modal = document.getElementById('historyModal');
-  const openBtn = document.getElementById('openHistoryModal');
-  const closeBtn = document.querySelector('.modal .close');
-
-  openBtn.onclick = () => {
-    modal.style.display = 'block';
-  };
-
-  closeBtn.onclick = () => {
-    modal.style.display = 'none';
-  };
-
-  window.onclick = (event) => {
-    if (event.target === modal) {
-      modal.style.display = 'none';
-    }
-  };
-
-function saveCraftingSession(session) {
-  const history = JSON.parse(localStorage.getItem('craftingHistory')) || [];
-  history.push(session);
-  localStorage.setItem('craftingHistory', JSON.stringify(history));
-}
-
-function loadCraftingHistory() {
-  return JSON.parse(localStorage.getItem('craftingHistory')) || [];
-}
-
-function populateDropdown() {
-  const history = loadCraftingHistory();
-  const selector = document.getElementById('loadBlueprintSelect');
-  selector.innerHTML = '<option value="">-- Select Blueprint History --</option>';
-
-  const seen = new Set();
-  history.forEach((session, index) => {
-    if (!seen.has(session.blueprintName)) {
-      seen.add(session.blueprintName);
-      const option = document.createElement('option');
-      option.value = index;
-      option.textContent = session.blueprintName;
-      selector.appendChild(option);
-    }
-  });
-}
-
-function saveSessionFromForm() {
-  const session = {
-	blueprintName: document.getElementById('blueprintName').value,
-	planet: document.getElementById('planet').value,
-	date: document.getElementById('date').value,
-	time: document.getElementById('time').value,
-	playerSkillBefore: parseFloat(document.getElementById('playerSkillBefore').value),
-	playerSkillAfter: parseFloat(document.getElementById('playerSkillAfter').value),
-	qrBefore: parseFloat(document.getElementById('qrBefore').value),
-	qrAfter: parseFloat(document.getElementById('qrAfter').value),
-	isQrFull: false,
-	clickCount: parseInt(document.getElementById('clickCount').value),
-	successRate: parseFloat(document.getElementById('successRate').value),
-	residueReturned: parseFloat(document.getElementById('residueReturned').value),
-	totalReturnTT: parseFloat(document.getElementById('totalReturnTT').value),
-	itemReturns: [],
-	materialsUsed: [],
-	lootedBlueprints: [],
-	bigHits: []
-  };
-  saveCraftingSession(session);
-  populateDropdown();
-}
-
-function loadSessionFromDropdown() {
-  const index = document.getElementById('loadBlueprintSelect').value;
-  if (index === "") return;
-
-  const session = loadCraftingHistory()[index];
-  if (!session) return;
-
-  document.getElementById('blueprintName').value = session.blueprintName;
-  document.getElementById('planet').value = session.planet;
-  document.getElementById('date').value = session.date;
-  document.getElementById('time').value = session.time;
-  document.getElementById('playerSkillBefore').value = session.playerSkillBefore;
-  document.getElementById('playerSkillAfter').value = session.playerSkillAfter;
-  document.getElementById('qrBefore').value = session.qrBefore;
-  document.getElementById('qrAfter').value = session.qrAfter;
-  document.getElementById('clickCount').value = session.clickCount;
-  document.getElementById('successRate').value = session.successRate;
-  document.getElementById('residueReturned').value = session.residueReturned;
-  document.getElementById('totalReturnTT').value = session.totalReturnTT;
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  populateDropdown();
-  document.getElementById('loadBlueprintSelect').addEventListener('change', loadSessionFromDropdown);
-});
-</script>
-
-
-<script>
-// Modal Handling
-const simModal = document.getElementById('simulationModal');
-const closeSimBtn = document.getElementById('closeSimulationModal');
-
-function openSimulationModal() {
-  simModal.style.display = 'block';
-}
-
-closeSimBtn.onclick = () => {
-  simModal.style.display = 'none';
-  document.getElementById('simLog').innerHTML = '<p class="sim-message">Click "Start Simulation" to begin...</p>';
-  document.getElementById('simProgressBar').style.width = '0%';
-}
-
-window.onclick = (event) => {
-  if (event.target === simModal) {
-    simModal.style.display = 'none';
-  }
-}
-
-</script>
-<script>
-function openSimulationModal() {
-  const simModal = document.getElementById('simulationModal');
-  if (simModal) {
-    simModal.style.display = 'block';
-    document.getElementById('simLog').innerHTML = '';
-    document.getElementById('simProgressBar').style.width = '0%';
-  }
-}
-
-function closeSimulationModal() {
-  const simModal = document.getElementById('simulationModal');
-  if (simModal) {
-    simModal.style.display = 'none';
-  }
-}
-
-function delay(ms) {
-  return new Promise(res => setTimeout(res, ms));
-}
-
-async function simulateRunFromUI(clicks, isComponent, useResidue) {
-  try {
-    openSimulationModal();
-
-    const logBox = document.getElementById('simLog');
-    const progressBar = document.getElementById('simProgressBar');
-    if (!logBox || !progressBar) {
-      throw new Error("Simulation elements missing from the DOM.");
-    }
-
-    // Get blueprint values from UI
-    const maxTT = parseFloat(document.getElementById('maxTT')?.value || '1');
-    const qr = parseFloat(document.getElementById('qr')?.value || '0');
-    const bpLevel = parseInt(document.getElementById('bpLevel')?.value || '1');
-    const playerLevel = parseInt(document.getElementById('playerLevel')?.value || bpLevel);
-    const slider = parseInt(document.getElementById('qvsc')?.value || '0');
-
-    const multiplierChance = parseFloat(document.getElementById('multiplierChance')?.value || '0.015');
-    const multiplierMin = parseFloat(document.getElementById('multiplierMin')?.value || '2');
-    const multiplierMax = parseFloat(document.getElementById('multiplierMax')?.value || '17');
-
-    const totalCost = parseFloat(document.getElementById('result-cost')?.textContent || '0');
-    const costPerClick = totalCost / (clicks || 1);
-    const skillFactor = Math.min(playerLevel / (bpLevel + 5), 1);
-
-    const getRates = () => {
-      const baseSuccess = 0.20 + (qr * 0.75) + (skillFactor * 0.05);
-      const clampedSuccess = Math.min(baseSuccess, 0.95);
-      const clampedNear = Math.max(Math.min(0.75 - (qr * 0.5), 0.85), 0.05);
-      const conditionMod = slider / 100;
-      return {
-        success: clampedSuccess - conditionMod * (clampedSuccess - 0.05),
-        nearSuccess: clampedNear - conditionMod * (clampedNear - 0.10)
-      };
-    };
-
-    // Stats
-    let successCount = 0, nearSuccessCount = 0, failCount = 0;
-    let residueUsed = 0, totalReturnTT = 0, stackReturn = 0, matReturn = 0;
-    let bpDrops = 0, gemDrops = 0, costTT = 0;
-
-    for (let i = 0; i < clicks; i++) {
-      const { success, nearSuccess } = getRates();
-      const roll = Math.random();
-      const multRoll = Math.random();
-
-      let outcome = 'Fail';
-      let clickTT = 0;
-      let extraInfo = '';
-      costTT += costPerClick;
-
-      if (roll < success) {
-        outcome = 'Success';
-        successCount++;
-
-        const multiplier = multRoll < multiplierChance
-          ? (Math.random() * (multiplierMax - multiplierMin)) + multiplierMin
-          : 1;
-
-        clickTT = Math.min(maxTT * multiplier, 1000);
-
-        if (isComponent) {
-          const stackQty = Math.ceil(clickTT / maxTT);
-          stackReturn += stackQty;
-          extraInfo += ` 🧱 x${stackQty}`;
-        } else {
-          const itemTT = Math.min(clickTT, maxTT);
-          totalReturnTT += itemTT;
-
-          if (useResidue && itemTT < maxTT) {
-            const residueFill = maxTT - itemTT;
-            residueUsed += residueFill;
-            totalReturnTT += residueFill;
-            extraInfo += ` 🧪 +${residueFill.toFixed(2)} PED`;
-          }
-
-          const overflow = clickTT > maxTT ? clickTT - maxTT : 0;
-          if (overflow > 0) {
-            matReturn += overflow;
-            extraInfo += ` 💥 +${overflow.toFixed(2)} PED`;
-          }
-        }
-
-        if (Math.random() < 0.01) {
-          bpDrops++;
-          const isLimited = Math.random() < 0.8;
-          const bpQty = isLimited ? (Math.random() * 0.99 + 0.01).toFixed(2) : '1.00';
-          extraInfo += ` 📜 ${isLimited ? `${bpQty}x (L)` : '1x UL'}`;
-        }
-
-        if (Math.random() < 0.0015) {
-          gemDrops++;
-          extraInfo += ' 💎 Rare Gem';
-        }
-
-      } else if (roll < success + nearSuccess) {
-        outcome = 'Near Success';
-        nearSuccessCount++;
-
-        const returnTT = Math.random() * (maxTT * 0.9);
-        matReturn += returnTT;
-        extraInfo += ` 💰 ${returnTT.toFixed(2)} PED`;
-
-        if (multRoll < 0.005) {
-          const bonusTT = Math.random() * 25 + 5;
-          matReturn += bonusTT;
-          extraInfo += ` ⚡ +${bonusTT.toFixed(2)} PED`;
-        }
-
-      } else {
-        failCount++;
-      }
-
-      // Log this click
-      logBox.innerHTML += `<p>🛠️ Click ${i + 1}: <strong>${outcome}</strong>${extraInfo ? ' → ' + extraInfo : ''}</p>`;
-      logBox.scrollTop = logBox.scrollHeight;
-      progressBar.style.width = `${((i + 1) / clicks) * 100}%`;
-
-      await delay(200); // Slow down to make it readable
-    }
-
-    // Summary
-    let summary = `
-      <hr>
-      <p><strong>✅ Simulation Complete</strong></p>
-      <p>🎯 Success: ${successCount}</p>
-      <p>🤏 Near Success: ${nearSuccessCount}</p>
-      <p>❌ Fail: ${failCount}</p>`;
-    if (stackReturn) summary += `<p>🧱 Stack Items: ${stackReturn}</p>`;
-    if (totalReturnTT) summary += `<p>💵 Item TT: ${totalReturnTT.toFixed(2)} PED</p>`;
-    if (residueUsed) summary += `<p>🧪 Residue Used: ${residueUsed.toFixed(2)} PED</p>`;
-    if (matReturn) summary += `<p>🔄 Materials Returned: ${matReturn.toFixed(2)} PED</p>`;
-    if (bpDrops) summary += `<p>📜 BPs: ${bpDrops}</p>`;
-    if (gemDrops) summary += `<p>💎 Gems: ${gemDrops}</p>`;
-    summary += `<p>💸 Total Cost: ${costTT.toFixed(2)} PED</p>`;
-
-    logBox.innerHTML += summary;
-
-  } catch (err) {
-    console.error("Simulation failed:", err);
-    alert("Simulation failed. Check console for details.");
-    closeSimulationModal();
-  }
-}
-
-function startLiveSimulation() {
-  const clickCount = prompt("How many clicks would you like to simulate?");
-  const clicks = parseInt(clickCount);
-  if (!clicks || clicks <= 0) {
-    alert("Invalid click count.");
-    return;
-  }
-
-  const isComponent = confirm("Is this a component blueprint?");
-  let useResidue = false;
-
-  if (!isComponent) {
-    const canUse = confirm("Can this blueprint use residue?");
-    if (canUse) {
-      useResidue = confirm("Do you want to use residue?");
-    }
-  }
-
-  simulateRunFromUI(clicks, isComponent, useResidue);
-}
-</script>
-<script>
-
-let cachedBlueprints = [];
-
-function resetBlueprintFieldsNoBlanks() {
-  document.querySelectorAll('.eu-blueprint input').forEach(input => {
-    if (input.id === 'materialFilter') return; // ✅ Don't clear this input
-
-    if (input.type === 'number') input.value = '';
-    if (input.type === 'text') input.value = '';
-  });
-
-  document.querySelectorAll('.eu-blueprint select').forEach(select => {
-    select.selectedIndex = 0;
-  });
-
-  document.getElementById('successRate').value = 38;
-  document.getElementById('nearSuccessRate').value = 50;
-  document.getElementById('failRate').value = 12;
-
-  const qvscSlider = document.getElementById('qvsc');
-  qvscSlider.value = 0;
-  document.getElementById('qvscLabel').innerText = '0%';
-  updateRatesFromSlider();
-
-  const materialsContainer = document.getElementById('materials');
-  materialsContainer.innerHTML = '';
-
-  if (typeof materialIndex !== 'undefined') {
-    materialIndex = 0;
-  }
-}
-
-
-function multiFieldFilter(query, blueprints) {
-  const lowerQuery = query.toLowerCase();
-
-  // Handle level:x input for filtering by level
-  if (lowerQuery.startsWith("level:")) {
-    const level = parseInt(lowerQuery.split(":")[1]);
-    if (!isNaN(level)) {
-      return blueprints.filter(bp => bp.Properties?.Level === level);
-    }
-  }
-
-  return blueprints.filter(bp => {
-    return (
-      bp.Name.toLowerCase().includes(lowerQuery) ||
-      (bp.Product?.Name?.toLowerCase().includes(lowerQuery)) ||
-      (bp.Properties?.Type?.toLowerCase().includes(lowerQuery)) ||
-      (bp.Profession?.Name?.toLowerCase().includes(lowerQuery)) ||
-      (bp.Book?.Name?.toLowerCase().includes(lowerQuery)) ||
-      bp.Materials?.some(mat => mat.Item.Name.toLowerCase().includes(lowerQuery))
-    );
-  });
-}
-
-function renderFilteredBlueprints(filteredList) {
-  const datalist = document.getElementById("bpList");
-  datalist.innerHTML = "";
-  filteredList.forEach(bp => {
-    const option = document.createElement("option");
-    option.value = bp.Name;
-    datalist.appendChild(option);
-  });
-}
-
-async function populateNexusDropdown() {
-  try {
-    const spinner = document.getElementById("bpLoadingSpinner");
-    if (spinner) spinner.style.display = "block";
-
-    const res = await fetch("https://api.entropianexus.com/blueprints");
-    const blueprints = await res.json();
-    cachedBlueprints = blueprints;
-
-    renderFilteredBlueprints(blueprints);
-
-    if (spinner) spinner.style.display = "none";
-  } catch (err) {
-    console.error("Failed to load blueprint list:", err);
-  }
-}
-
-function showMarkupReminder() {
-  const popup = document.getElementById("markupReminderPopup");
-  if (popup) {
-    popup.style.display = "block";
-  }
-}
-
-async function loadBlueprintByName(name) {
-  try {
-    const res = await fetch("https://api.entropianexus.com/blueprints/" + encodeURIComponent(name));
-    const bp = await res.json();
-
-    resetBlueprintFieldsNoBlanks();
-    document.getElementById("itemName").value = bp.Product?.Name || bp.Name || '';
-    document.getElementById("bpBook").value = bp.Book?.Name || '';
-    document.getElementById("bpLevel").value = bp.Properties?.Level || 0;
-    document.getElementById("bpType").value = "Unlimited";
-    document.getElementById("bpMu").value = 105;
-    document.getElementById("qr").value = 1;
-    document.getElementById("sellMu").value = 101;
-
-    const totalTT = bp.Materials.reduce((sum, mat) => {
-      const unitTT = mat.Item?.Properties?.Economy?.MaxTT || 0;
-      return sum + mat.Amount * unitTT;
-    }, 0);
-    document.getElementById("maxTT").value = totalTT.toFixed(2);
-
-    bp.Materials.forEach((mat) => {
-      const name = mat.Item?.Name || "Unknown Material";
-      const qty = mat.Amount || 1;
-      const tt = mat.Item?.Properties?.Economy?.MaxTT || 0.01;
-      const mu = 101;
-      addMaterial(name, qty, tt, mu);
-    });
-
-    calculate();
-    showMarkupReminder();
-  } catch (err) {
-    console.error("Failed to load blueprint data:", err);
-    alert("Failed to load blueprint. Please try again.");
-  }
-}
-// New & improved change listener
-document.getElementById("materialFilter").addEventListener("change", async (e) => {
-  const name = e.target.value;
-  const match = cachedBlueprints.find(bp => bp.Name === name);
-  if (!match) return;
-  await loadBlueprintByName(name);
-});
-document.getElementById("materialFilter").addEventListener("change", async () => {
-  const name = document.getElementById("materialFilter").value;
-  const datalist = document.getElementById("bpList");
-
-  const match = Array.from(datalist.options).some(opt => opt.value === name);
-  if (!match) return;
-
-  try {
-    const res = await fetch("https://api.entropianexus.com/blueprints/" + encodeURIComponent(name));
-    const bp = await res.json();
-
-    resetBlueprintFieldsNoBlanks();
-    document.getElementById("itemName").value = bp.Product?.Name || bp.Name || '';
-    document.getElementById("bpBook").value = bp.Book?.Name || '';
-    document.getElementById("bpLevel").value = bp.Properties?.Level || 0;
-    document.getElementById("bpType").value = "Unlimited";
-    document.getElementById("bpMu").value = 105;
-    document.getElementById("qr").value = 1;
-    document.getElementById("sellMu").value = 101;
-
-    const totalTT = bp.Materials.reduce((sum, mat) => {
-      const unitTT = mat.Item?.Properties?.Economy?.MaxTT || 0;
-      return sum + mat.Amount * unitTT;
-    }, 0);
-    document.getElementById("maxTT").value = totalTT.toFixed(2);
-
-    bp.Materials.forEach((mat) => {
-      const name = mat.Item?.Name || "Unknown Material";
-      const qty = mat.Amount || 1;
-      const tt = mat.Item?.Properties?.Economy?.MaxTT || 0.01;
-      const mu = 101;
-      addMaterial(name, qty, tt, mu);
-    });
-
-    calculate();
-    showMarkupReminder();
-
-  } catch (err) {
-    console.error("Failed to load blueprint data:", err);
-    alert("Failed to load blueprint. Please try again.");
-  }
-});
-
-document.getElementById("materialFilter").addEventListener("input", (e) => {
-  const query = e.target.value.trim();
-  const spinner = document.getElementById("bpLoadingSpinner");
-  if (spinner) spinner.style.display = "block";
-
-  const filtered = query
-    ? multiFieldFilter(query, cachedBlueprints)
-    : cachedBlueprints;
-
-  renderFilteredBlueprints(filtered);
-  renderAllBlueprintsList(filtered);
-
-  if (spinner) spinner.style.display = "none";
-});
-
-
-document.getElementById("showAllBlueprintsBtn").addEventListener("click", () => {
-  const list = document.getElementById("allBlueprintsList");
-  list.classList.toggle("hidden");
-
-  const label = list.classList.contains("hidden") ? "Show filtered Blueprints" : "Hide filtered Blueprints";
-  document.getElementById("showAllBlueprintsBtn").textContent = label;
-  
-  renderAllBlueprintsList(cachedBlueprints); // show full list by default
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  populateNexusDropdown();
-});
-</script>
-
-
+  <script src="js/craftingbuddy-core.js"></script>
+  <script src="js/craftingbuddy-simjunk.js"></script>
+  <script src="js/craftingbuddy-apijunk.js"></script>
   <script src="../core/js/pixelb8-global.js"></script>
 
 </body>
