@@ -1509,13 +1509,21 @@ gameArea.addEventListener('contextmenu', (e) => {
 
 gameArea.addEventListener('click', function(event) {
   const rect = gameArea.getBoundingClientRect();
-  const leftClickPos = {
-    x: event.clientX - rect.left,
-    y: event.clientY - rect.top
+
+  // Get raw click position within gameArea
+  const rawX = event.clientX - rect.left;
+  const rawY = event.clientY - rect.top;
+
+  // Convert to virtual (unscaled) coordinates
+  const scaledClickPos = {
+    x: rawX / scale,
+    y: rawY / scale
   };
 
-  // Move the character
-  moveTo(leftClickPos.x, leftClickPos.y);
+  console.log("Scaled click position:", scaledClickPos);
+
+  // Move the character to the scaled position
+  moveTo(scaledClickPos.x, scaledClickPos.y);
 
   // Check if a placed item (like a tree or box) was clicked
   const placedItem = event.target.closest('.placed-item');
@@ -1530,11 +1538,12 @@ gameArea.addEventListener('click', function(event) {
     const dy = playerY - itemY;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    if (distance <= 50) { // Adjust distance threshold as needed
+    if (distance <= 50) {
       interactWithPlacedItem(placedItem.dataset.id); // assuming item.id is stored in data-id
     }
   }
 });
+
 document.addEventListener('click', hideMenus);
 
 // Optional: Show browser menu manually
