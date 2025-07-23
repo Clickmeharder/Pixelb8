@@ -107,13 +107,13 @@ function renderBlueprintList() {
 
 function renderAllBlueprintsList(filteredList) {
   const container = document.getElementById("allBlueprintsList");
-/*   container.innerHTML = ""; */
+  container.innerHTML = "";
   filteredList.forEach(bp => {
     const entry = document.createElement("div");
     entry.textContent = bp.Name;
     entry.addEventListener("click", async () => {
-      /* document.getElementById("materialFilter").value = bp.Name; */
-      /* container.classList.add("hidden"); */
+/*       document.getElementById("materialFilter").value = bp.Name; */
+/*       container.classList.add("hidden"); */
       document.getElementById("showAllBlueprintsBtn").textContent = "nexus hacker";
       await loadBlueprintByName(bp.Name);
     });
@@ -225,9 +225,24 @@ async function populateNexusDropdown() {
 
 function showMarkupReminder() {
   const popup = document.getElementById("markupReminderPopup");
-  if (popup) {
+
+  // Check if user previously disabled the popup
+  const disabled = localStorage.getItem("disableMarkupReminder");
+  if (popup && !disabled) {
     popup.style.display = "block";
   }
+}
+
+function closeReminderPopup() {
+  document.getElementById("markupReminderPopup").style.display = "none";
+}
+
+function disableReminderPopup() {
+  localStorage.setItem("disableMarkupReminder", "true");
+  closeReminderPopup();
+}
+function resetMarkupReminder() {
+  localStorage.removeItem("disableMarkupReminder");
 }
 
 async function loadBlueprintByName(name) {
@@ -271,6 +286,7 @@ document.getElementById("materialFilter").addEventListener("change", async (e) =
   const match = cachedBlueprints.find(bp => bp.Name === name);
   if (!match) return;
   await loadBlueprintByName(name);
+
 });
 document.getElementById("materialFilter").addEventListener("change", async () => {
   const name = document.getElementById("materialFilter").value;
@@ -344,5 +360,5 @@ document.getElementById("showAllBlueprintsBtn").addEventListener("click", () => 
 
 document.addEventListener('DOMContentLoaded', () => {
   populateNexusDropdown();
-  renderAllBlueprintsList(cachedBlueprints);
+
 });

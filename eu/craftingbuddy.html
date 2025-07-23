@@ -427,16 +427,18 @@ div#nexusJunk {
 }
 @media screen and (orientation: portrait) {
   body::before {
-    content: "Please rotate your device.";
+    content: "My apologies... I will try to make this site mobile friendly soon!";
     position: fixed;
+	text-align: center;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
     background: #000;
     color: #fff;
     display: flex;
     align-items: center;
+	white-space:wrap;
     justify-content: center;
-    font-size: 1.5em;
+    font-size: 1.3em;
     z-index: 9999;
   }
   
@@ -1889,15 +1891,21 @@ label#filterlabel {
   </div>
 </div>
 <!-- 🛠️ Reminder popup -->
-<div id="markupReminderPopup" style="display: none;position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);background: #111;color: #fff;padding: 20px;border-radius: 12px;border: 2px solid #3399ff;box-shadow: 0 0 20px rgba(0,0,0,0.6);z-index: 9999;max-width: 360px;text-align: center;">
+<!-- 🛠️ Reminder popup -->
+<div id="markupReminderPopup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; color: #fff; padding: 20px; border-radius: 12px; border: 2px solid #3399ff; box-shadow: 0 0 20px rgba(0,0,0,0.6); z-index: 9999; max-width: 360px; text-align: center;">
   <p style="margin-bottom: 20px;">🧠 <strong>Reminder:</strong><br>
-  Adjust markup % for the crafted item and each material.<br>
-  Set click count, then press <strong>Calculate Estimates</strong>.</p>
-
-  <div style="display: flex; justify-content: center;">
-    <button onclick="document.getElementById('markupReminderPopup').style.display='none'" style="background-color: #3399ff;color: white;border: none;border-radius: 8px;padding: 10px 24px;font-size: 1.1em;cursor: pointer;">OK</button>
+    Adjust markup % for the crafted item and each material.<br>
+    Set click count, then press <strong>Calculate Estimates</strong>.
+  </p>
+  <div style="display: flex; justify-content: center; gap: 10px;">
+    <button onclick="closeReminderPopup()" style="background-color: #3399ff; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 1.1em; cursor: pointer;">OK</button>
+    <button onclick="disableReminderPopup()" style="background-color: #555; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 1.1em; cursor: pointer;">Don't show again</button>
   </div>
 </div>
+
+
+
+
 <em class="PageFooterDisclaimer-note">disclaimer: This Tool is still under construction, These are very rough estimates. and should be expected to be far off from reality</em><br>
 <!-- hitwebcounter Code START -->
 <div id="shittyHitCounter">
@@ -1906,8 +1914,6 @@ label#filterlabel {
 </div>
 </div>
 <script>
-
-
 
 </script>
   <script src="js/craftingbuddy-core.js"></script>
