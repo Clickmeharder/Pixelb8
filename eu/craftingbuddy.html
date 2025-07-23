@@ -17,6 +17,390 @@
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7382192474927902"
      crossorigin="anonymous"></script>
 
+
+
+<!-- <style>
+/* === Reset and Base === */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(160deg, #1e1e1e, #2a2a2a);
+  color: #e6e6e6;
+  padding: 2rem;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+/* === Main Layout === */
+.craftingbuddyWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .craftingbuddyWrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === Panels / Card Boxes === */
+.eu-blueprint,
+#nexusJunk,
+#eu-myBlueprintWrapper,
+#results {
+  background: #252525;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 0 12px #0007;
+}
+
+/* === Labels and Inputs === */
+label {
+  display: block;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+.label-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label-note {
+  font-size: 0.8em;
+  color: #aaa;
+  font-style: italic;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  background: #1a1a1a;
+  color: #f0f0f0;
+  border: 1px solid #444;
+  border-radius: 6px;
+  margin-top: 0.4rem;
+  transition: border 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+  border-color: #00d4ff;
+  outline: none;
+}
+
+/* === Range Slider === */
+input[type="range"] {
+  width: 100%;
+  margin-top: 0.5rem;
+  accent-color: #00d4ff;
+}
+
+/* === Buttons === */
+button {
+  background: #00d4ff;
+  border: none;
+  color: #000;
+  font-weight: bold;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+button:hover {
+  background: #00bce1;
+  transform: scale(1.03);
+}
+
+.bpButts {
+  background: #7c4dff;
+  color: #fff;
+}
+
+.bpButts:hover {
+  background: #6933ff;
+}
+
+#openHistoryModal {
+  background: #ff4081;
+}
+
+#openHistoryModal:hover {
+  background: #f50057;
+}
+
+/* === Results Layout === */
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.result-row {
+  background: #2c2c2c;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.result-row.total {
+  background: #444;
+  font-weight: bold;
+}
+
+.result-row.profit {
+  background: #1b3c1b;
+  color: #9fff9f;
+}
+
+/* === Tables === */
+.material-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.material-table th,
+.material-table td {
+  padding: 0.6rem;
+  border: 1px solid #444;
+  text-align: left;
+}
+
+.material-table thead {
+  background: #333;
+}
+
+.material-table tbody tr:hover {
+  background: #3c3c3c;
+}
+
+/* === Details (expanders) === */
+details summary {
+  cursor: pointer;
+  padding: 0.5rem 0;
+  font-weight: bold;
+  color: #ccc;
+}
+
+details[open] summary {
+  color: #fff;
+}
+
+/* === Blueprint list scroll areas === */
+#allBlueprintsList,
+#savedList {
+  max-height: 300px;
+  overflow-y: auto;
+  background: #1c1c1c;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+/* === Toggle Layout Switcher === */
+#layoutToggle {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+  gap: 1rem;
+}
+
+input[type="radio"] {
+  transform: scale(1.2);
+  margin-right: 0.3rem;
+}
+
+/* === Header styles === */
+h1, h2, h3 {
+  color: #00d4ff;
+  margin-bottom: 0.5rem;
+}
+
+em {
+  color: #ccc;
+  font-style: italic;
+}
+</style>
+<style>
+
+@media (max-width: 768px) {
+  /* === Mobile-specific styling overrides === */
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1a1a1a;
+    color: #eee;
+    padding: 1rem;
+  }
+
+  .craftingbuddyWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 100%;
+    margin: auto;
+  }
+
+  .eu-blueprint,
+  #eu-myBlueprintWrapper,
+  #results,
+  #nexusJunk {
+    background: #2b2b2b;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #0005;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.2rem;
+    margin-bottom: 1rem;
+    background: #2c2c2c;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #fff;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+
+  button {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin: 0.2rem;
+    transition: background 0.3s ease;
+  }
+
+  button:hover {
+    background: #45a049;
+  }
+
+  .bpButts {
+    background: #2196f3;
+  }
+
+  .bpButts:hover {
+    background: #1e88e5;
+  }
+
+  .result-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem;
+    background: #333;
+    border-radius: 6px;
+  }
+
+  .result-row.total {
+    font-weight: bold;
+    background: #444;
+  }
+
+  .result-row.profit {
+    background: #1b3c1b;
+  }
+
+  .material-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .material-table th,
+  .material-table td {
+    border: 1px solid #444;
+    padding: 0.4rem;
+    text-align: left;
+  }
+
+  details summary {
+    cursor: pointer;
+    padding: 0.4rem 0;
+    font-weight: bold;
+    color: #ccc;
+  }
+
+  details[open] summary {
+    color: #fff;
+  }
+
+  input:focus,
+  select:focus,
+  button:focus {
+    outline: 2px solid #4caf50;
+  }
+
+  #allBlueprintsList,
+  #savedList {
+    max-height: 300px;
+    overflow-y: auto;
+    background: #202020;
+    padding: 0.5rem;
+    border-radius: 8px;
+  }
+
+  #layoutToggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  input[type="radio"] {
+    transform: scale(1.2);
+    margin-right: 0.4rem;
+  }
+
+  .label-note {
+    font-size: 0.8em;
+    opacity: 0.6;
+  }
+}
+</style>
+
+ -->
+
 <!--Messy css fixes-->
   <style> 
 .materialCardInputRow{display:flex;flex-direction:row; gap: 12px;}	
