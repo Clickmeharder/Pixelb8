@@ -2332,10 +2332,12 @@ let cachedBlueprints = [];
 
 function resetBlueprintFieldsNoBlanks() {
   document.querySelectorAll('.eu-blueprint input').forEach(input => {
+    if (input.id === 'materialFilter') return; // ✅ Don't clear this input
+
     if (input.type === 'number') input.value = '';
     if (input.type === 'text') input.value = '';
   });
- 
+
   document.querySelectorAll('.eu-blueprint select').forEach(select => {
     select.selectedIndex = 0;
   });
