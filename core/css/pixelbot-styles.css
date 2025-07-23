@@ -385,7 +385,7 @@ html, body {
 	
 	.obstacle {
 	  position: absolute;
-	  background-color: #0066ff88;
+	  background-color: transparent;
 	  z-index: 1;
 	  pointer-events: ;
 	}
