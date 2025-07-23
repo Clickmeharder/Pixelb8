@@ -362,25 +362,24 @@ function renderPlacedItems(items) {
 function showLoading() {
   const screen = document.getElementById("loadingScreen");
   screen.style.display = "flex";
-  screen.classList.remove("hidden"); // make sure it's visible again
+  screen.classList.remove("closing");
 }
 
 function hideLoading() {
   const screen = document.getElementById("loadingScreen");
-  screen.classList.add("hidden");
+
+  screen.classList.add("closing");
 
   setTimeout(() => {
     screen.style.display = "none";
-    screen.classList.remove("hidden"); // reset for future use
-  }, 1200); // matches the 0.5s in the CSS transition
+    screen.classList.remove("closing"); // reset for next time
+
+  }, 1600); // match the animation duration
 }
 
 
 
 function loadMap(mapName) {
-  showLoading(); // Show loading immediately
-
-  // Begin rendering logic right away
   const map = maps[mapName];
   currentMap = mapName;
 
@@ -394,9 +393,11 @@ function loadMap(mapName) {
   renderDroppedItems();
   spawnEnemiesForMap(mapName);
   renderEntities();
-
-  // Delay hiding the loading screen so animation shows briefly
-  setTimeout(() => {
-    hideLoading();
-  }, 1200); // 600ms or whatever delay you like for effect
+}
+function fadeOutAndThenLoadMap(mapName) {
+  fadeOutGameArea(() => {
+    loadMap(mapName);
+    // Now fade back in
+    fadeInGameArea();
+  });
 }

@@ -56,8 +56,30 @@
 }
 
 #devOverlay.closing {
-  animation: fadeOutZoom 0.4s ease forwards;
+  animation: fadeOutZoom 1.4s ease forwards;
 }
+@keyframes fadeOutZoom {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+
 </style>
 <body>
 
@@ -68,11 +90,13 @@
 
 <div id="loadingScreen">
   <div class="loaderBot">
-    🤖<span class="dots"><span>.</span><span>.</span><span>.</span></span>
+    <img src="core/js/core-apps/pixelbotApp/images/sprites/pixelb8character/pixelb8wave.png" alt="Loading bot" class="loaderImage" />
+    <span class="dots"><span>.</span><span>.</span><span>.</span></span>
   </div>
 </div>
+
     <div id="gameArea">
-      <div id="pixelb8" class="player-character" style="opacity: 0.8;"></div>
+      <div id="pixelb8" class="player-character" style=""></div>
     </div>
 
 <div id="hud">

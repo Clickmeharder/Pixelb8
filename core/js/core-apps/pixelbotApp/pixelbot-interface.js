@@ -375,13 +375,19 @@ function goFullscreen() {
     gameArea.requestFullscreen();
   }
 }
-
 playAnywayBtn.addEventListener('click', () => {
   devOverlay.classList.add('closing');
+
   setTimeout(() => {
     devOverlay.style.display = 'none';
-  }, 400); // match animation duration
+
+    // Show and fade in game area
+    const gameArea = document.getElementById('gameArea');
+    gameArea.style.opacity = '1';
+    gameArea.classList.add('fade-in'); // trigger CSS transition
+  }, 900); // match animation duration
 });
+
 document.addEventListener('DOMContentLoaded', () => {
   const devOverlay = document.getElementById('devOverlay');
   const playAnywayBtn = document.getElementById('playAnywayBtn');
@@ -393,9 +399,50 @@ document.addEventListener('DOMContentLoaded', () => {
     // Wait for animation to finish before hiding
     setTimeout(() => {
       devOverlay.style.display = 'none';
-    }, 400); // match the animation duration from CSS
+    }, 800); // match the animation duration from CSS
   });
 
   // Show overlay on load
   devOverlay.style.display = 'flex';
 });
+
+
+function fadeOutGameArea(callback) {
+  const gameArea = document.getElementById("gameArea");
+
+  function onFadeEnd() {
+    gameArea.removeEventListener("transitionend", onFadeEnd);
+    if (callback) callback(); // continue once fade-out completes
+  }
+
+  gameArea.addEventListener("transitionend", onFadeEnd);
+  gameArea.classList.remove("visible");
+}
+
+function fadeInGameArea() {
+  document.getElementById("gameArea").classList.add("visible");
+}
+
+
+function showLoading() {
+  const screen = document.getElementById("loadingScreen");
+  const gameArea = document.getElementById("gameArea");
+
+  // Fade out game area
+  gameArea.classList.remove("fade-in");
+  gameArea.classList.add("fade-out");
+
+
+}
+function hideLoading() {
+  const screen = document.getElementById("loadingScreen");
+  const gameArea = document.getElementById("gameArea");
+
+  setTimeout(() => {
+
+    // Fade game area back in
+    gameArea.classList.remove("fade-out");
+    gameArea.classList.add("fade-in");
+  }, 800); // match the animation duration
+}
+
