@@ -208,7 +208,7 @@ html, body {
 		position: absolute;
 		width: 124px; /* Adjust according to your sprite size */
 		height: 124px; /* Adjust according to your sprite size */
-		background-image: url('core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
+		background-image: url('https://pixelb8.lol/core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
 		background-size: cover;
 		opacity:0.8;
 	    image-rendering: pixelated;
@@ -263,7 +263,7 @@ html, body {
 		position: absolute;
 		width: 124px; /* Adjust according to your sprite size */
 		height: 124px; /* Adjust according to your sprite size */
-		background-image: url('core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
+		background-image: url('https://pixelb8.lol/core/js/core-apps/pixelbotApp/images/sprites/pixelbot/pixelbot-face-front.png'); /* Initial spritesheet */
 		background-size: cover;
 		opacity: 0.8;
 		transition: transform 0.15s ease;
