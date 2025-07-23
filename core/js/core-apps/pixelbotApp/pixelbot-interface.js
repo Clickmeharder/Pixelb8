@@ -382,8 +382,20 @@ playAnywayBtn.addEventListener('click', () => {
     devOverlay.style.display = 'none';
   }, 400); // match animation duration
 });
+document.addEventListener('DOMContentLoaded', () => {
+  const devOverlay = document.getElementById('devOverlay');
+  const playAnywayBtn = document.getElementById('playAnywayBtn');
 
+  playAnywayBtn.addEventListener('click', () => {
+    // Add animation class
+    devOverlay.classList.add('closing');
 
-  // Optional: show overlay automatically for now
+    // Wait for animation to finish before hiding
+    setTimeout(() => {
+      devOverlay.style.display = 'none';
+    }, 400); // match the animation duration from CSS
+  });
+
+  // Show overlay on load
   devOverlay.style.display = 'flex';
 });
