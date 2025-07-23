@@ -26,9 +26,9 @@
 </style>
 <body>
 
-<div id="devOverlay" style="display:none;">
-  <img src="core/js/core-apps/pixelbotApp/images/pixelbotgame-notready.png" alt="Not Ready" />
-  
+<div id="devOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:#000000ee; z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+  <img src="core/js/core-apps/pixelbotApp/images/pixelbotgame-notready.png" alt="Not Ready" style="max-width:90%; height:auto; margin-bottom:20px;" />
+  <button id="playAnywayBtn" style="padding:10px 20px; font-size:18px;">Play Anyway</button>
 </div>
 
 <div id="loadingScreen">

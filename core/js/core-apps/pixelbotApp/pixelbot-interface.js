@@ -375,3 +375,16 @@ function goFullscreen() {
     gameArea.requestFullscreen();
   }
 }
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const devOverlay = document.getElementById('devOverlay');
+  const playAnywayBtn = document.getElementById('playAnywayBtn');
+
+  playAnywayBtn.addEventListener('click', () => {
+    devOverlay.style.display = 'none';
+  });
+
+  // Optional: show overlay automatically for now
+  devOverlay.style.display = 'flex';
+});
