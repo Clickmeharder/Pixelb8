@@ -107,14 +107,14 @@ function renderBlueprintList() {
 
 function renderAllBlueprintsList(filteredList) {
   const container = document.getElementById("allBlueprintsList");
-  container.innerHTML = "";
+/*   container.innerHTML = ""; */
   filteredList.forEach(bp => {
     const entry = document.createElement("div");
     entry.textContent = bp.Name;
     entry.addEventListener("click", async () => {
       /* document.getElementById("materialFilter").value = bp.Name; */
-      container.classList.add("hidden");
-      document.getElementById("showAllBlueprintsBtn").textContent = "Browse All Blueprints";
+      /* container.classList.add("hidden"); */
+      document.getElementById("showAllBlueprintsBtn").textContent = "nexus hacker";
       await loadBlueprintByName(bp.Name);
     });
     container.appendChild(entry);
