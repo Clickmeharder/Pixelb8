@@ -106,7 +106,7 @@ function updateRatesFromSlider() {
   calculate();
 }
 
-<!-- add a lock/unlock toggle that toggles the display of a round checkmark or radio inside each stat that can be checked or unchecked so that the user can decide which stats it wants to show from the calculation. while locked only checked stats will be displayed and while unlocked all stats will be shown so they can manage which ones are checked or unchecked -->
+
 function calculate() {
   let totalTT = 0;
   let totalMarkup = 0;
@@ -122,7 +122,7 @@ function calculate() {
   const qvscSlider = parseInt(document.getElementById('qvsc').value);
 
   let materialBreakdownHtml = `
-    <details class="material-breakdown" closed>
+    <details class="material-breakdown" open>
       <summary><strong>📦 Material Breakdown</strong> (click to expand)</summary>
       <table class="material-table sortable">
         <thead>
@@ -261,7 +261,6 @@ function calculate() {
   `;
 
   document.getElementById('results').innerHTML = `
-    ${multiplierHtml}
     <h3>📊 Results for: <em>${itemName}</em></h3>
     <div class="result-grid">
       <div class="result-row"><span class="label">🔖 Blueprint Type:</span> <span>${bpType}</span></div>
@@ -288,15 +287,16 @@ function calculate() {
           <span>${profit.toFixed(2)} PED</span>
         </div>
       </div>
+      ${multiplierHtml}
     </details>
-	<!-- 🪪 Button to Open Modal -->
+
     <span class="label">Features coming soon (not finished):</span><br>
     <button id="openHistoryModal">🕮 Crafting History</button>
-    <!-- 🧪 Simulation Buttons -->
     <button onclick="startLiveSimulation()" style="display:none;">Default Simulation</button>
-    <button onclick="runSimulation('historic')"style="display:none;">Simulate Based on History</button>
+    <button onclick="runSimulation('historic')" style="display:none;">Simulate Based on History</button>
   `;
 }
+
 
 // Automatically recalculate when QR is changed
 const qrInput = document.getElementById('qr');
@@ -427,6 +427,13 @@ document.getElementById('resetBlueprintBtn').addEventListener('click', () => {
   addMaterial();
 });
 addMaterial('Nanocube', 2, 0.01, 101);
+
+
+function toggleExpand(id, btn) {
+  const content = document.getElementById(id);
+  const isExpanded = content.classList.toggle('expanded');
+  btn.textContent = `${id} ${isExpanded ? '▲' : '▼'}`;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   toggleBpMuField();

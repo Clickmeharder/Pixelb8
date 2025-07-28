@@ -427,7 +427,7 @@ div#nexusJunk {
 }
 @media screen and (orientation: portrait) {
   body::before {
-    content: "My apologies... I will try to make this site mobile friendly soon!";
+    content: "Turn Your Phone sideways!";
     position: fixed;
 	text-align: center;
     top: 0; left: 0;
@@ -486,12 +486,13 @@ div#nexusJunk {
 		.eu-container {
 			text-align: center;
 			margin: 16px;
-			margin-right: 4px;
-			margin-top: 3%;
+			margin-left: auto;
+			margin-top: 4%;
 			padding-bottom: 12px;
 			height: 98vh;
 			overflow: hidden;
 			border: 2px ridge #2ce01d6e;
+			width: 96vw;
 		}
 	    .PageFooterDisclaimer-note {
 			position: absolute;
@@ -716,8 +717,6 @@ margin-top:6px;
 	background: rgba(20, 20, 20, 0.9);
 	box-shadow: 0 0 15px cyan;
 	z-index:1000;
-	margin-top:5px;
-	transform: scale(1.01);
 	}
 
 .eu-blueprint input[type="text"], .eu-blueprint input[type="number"], .eu-blueprint select {
@@ -921,7 +920,7 @@ label#filterlabel {
 	color: white;
 	}
 	div#conditionBlock {
-	height: 108px;
+	height: 121px;
 	text-align: left;
 	padding: 2px;
 	background-color: black;
@@ -931,15 +930,9 @@ label#filterlabel {
 	transition: 0.3s ease;
 	}
 	div#conditionBlock:hover {
-	margin-top:-3px;
-	padding: 2px;
-	border: 1px outset teal;
 	background:black;
 	opacity:1;
-	overflow: hidden;
-	overflow-y: auto;
 	z-index:1000;
-	transform: scale(1.03);
 	}
 	input#qvsc {
 	width: 100%;
@@ -1130,7 +1123,7 @@ label#filterlabel {
 	flex: 1;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 10px;
+	gap: ;
 	}
 
 	/* Each input group */
@@ -1240,9 +1233,7 @@ label#filterlabel {
 	.results#results {
 	color: #ac4915;
 	background: rgba(20, 20, 20, 0.7);
-	width: 69%;
-    max-width: 69%;
-	min-width: 186px;
+	width: auto;
 	padding: 4px;
 	padding-left: 8px;
 	margin: 0px;
@@ -1617,6 +1608,22 @@ label#filterlabel {
 .blueprint-list div:hover {
   background: #033;
 }
+
+.expandable {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.expandable.expanded {
+  max-height: 500px; /* Or something big enough to show your content */
+}
+
+.ExpandableY-button {
+    width: 100%;
+    line-height: 0.6;
+    height: 14px;
+}
   </style>
 
 </head>
@@ -1661,50 +1668,12 @@ label#filterlabel {
 	  <div id="bpLoadingSpinner" style="display:;">...</div>
 	  <datalist id="bpList" style="display: none;"></datalist>
 	  <button id="loadNexusBP" style="display: none;">Load</button>
-
-      <label for="itemName">BP Name:
-        <input id="itemName" type="text" value="Explosive Projectiles 1" />
-      </label>
-      <label for="bpType">BP Type:
-        <select id="bpType" onchange="toggleBpMuField()">
-		  <option value="Limited">Limited</option>
-		  <option value="Unlimited" selected>Unlimited</option>
-        </select>
-      </label>
-      <label id="bpMuLabel" for="bpMu">Limited BP MU %:
-        <input id="bpMu" type="number" value="150" />
-      </label>
-	  <label for="bpBook">
-		<span class="label-inline">Book
-		  <span class="label-note">comma separated</span>
-		</span>
-		<input id="bpBook" type="text" value="Planet Calypso Components (Vol1)" />
+	  <label for="itemName">BP Name:
+		<input id="itemName" type="text" value="Explosive Projectiles 1" />
+	  </label> 
+	  <label for="clicks">Clicks:
+		<input id="clicks" type="number" value="100" />
 	  </label>
-
-	  <label for="bpLevel">Blueprint Req. Lvl:
-		<input id="bpLevel" type="number" value="5" min="0" max="100" />
-	  </label>
-
-	  <label for="qr">
-		<span class="label-inline">Quality Rating
-		  <span class="label-note">(0.01–1.00)</span>
-		</span>
-		<input id="qr" type="number" value="1.00" min="0.01" max="1.00" step="0.01" />
-	  </label>
-
-      <label for="maxTT">Product Max TT Val:
-        <input id="maxTT" type="number" value="0.02" step="0.01"/>
-      </label>
-      <label for="sellMu">Product MU%:
-        <input id="sellMu" type="number" value="150"/>
-      </label>
-      <input type="hidden" id="successRate" value="38">
-      <input type="hidden" id="nearSuccessRate" value="50">
-      <input type="hidden" id="failRate" value="12">
-      <label for="residuePerSuccess">Average Residue per Success (PED):
-        <input id="residuePerSuccess" type="number" value="0" />
-      </label>
-
       <div id="conditionBlock">
         <label for="qvsc" id="wvclabelText">Quantity⇔Condition: <span id="qvscLabel">0%</span></label>
         <input type="range" id="qvsc" min="0" max="100" value="0" 
@@ -1716,97 +1685,141 @@ label#filterlabel {
         </div>
 
      </div>
-    </div>
-	      
-	<div id="eu-myBlueprintWrapper">    
-		<div style="display:flex;flex-direction:row;">
+	  <button type="button" class="ExpandableY-button" onclick="toggleExpand('bpDetails', this)">bpDetails ▼</button>
+		<div id="bpDetails" class="expandable">
+		  <label for="bpType">BP Type:
+			<select id="bpType" onchange="toggleBpMuField()">
+			  <option value="Limited">Limited</option>
+			  <option value="Unlimited" selected>Unlimited</option>
+			</select>
+		  </label>
 
-		  <div id="bpbuttonDiv">
-			<label id="playerCraftlvlWrapper" for="playerLevel">Your Crafting Level:
-			  <input id="playerLevel" type="number" value="10" min="0" max="100" />
-		    </label>
-			<button class="bpButts" onclick="calculate()">calculate estimates</button>
-		  </div>
-	    </div>
-	  <label for="clicks">Clicks:
-        <input id="clicks" type="number" value="100" />
-      </label>
-      <div id="materials">
-	
-      </div>
+		  <label id="bpMuLabel" for="bpMu">Limited BP MU %:
+			<input id="bpMu" type="number" value="150" />
+		  </label>
 
-      <div class="eu-myBlueprintList">
-		<h1>My Saved Blueprints<button id="loadBlueprintsButt" onclick="toggleBlueprints()">📂 Expand</button></h1>
-		<div class="results" id="savedList" style="display: none;">
-		  
-		  <div id="panelControls" style="">
-			  <div id="blueprintFilters"></div>
-			  <div id="layoutToggle">
-				<div id="layoutLabel">Layout:</div>
-				<div id="layoutOptions">
-					<label><input type="radio" name="layout" value="cards" checked onchange="renderBlueprintList()"> Cards</label>
-					<label><input type="radio" name="layout" value="list" onchange="renderBlueprintList()"> List</label>
-				</div>
+		  <label for="bpBook">
+			<span class="label-inline">Book
+			  <span class="label-note">comma separated</span>
+			</span>
+			<input id="bpBook" type="text" value="Planet Calypso Components (Vol1)" />
+		  </label>
+
+		  <label for="bpLevel">Blueprint Req. Lvl:
+			<input id="bpLevel" type="number" value="5" min="0" max="100" />
+		  </label>
+
+		  <label for="qr">
+			<span class="label-inline">Quality Rating
+			  <span class="label-note">(0.01–1.00)</span>
+			</span>
+			<input id="qr" type="number" value="1.00" min="0.01" max="1.00" step="0.01" />
+		  </label>
+
+		  <label for="maxTT">Product Max TT Val:
+			<input id="maxTT" type="number" value="0.02" step="0.01"/>
+		  </label>
+
+		  <label for="sellMu">Product MU%:
+			<input id="sellMu" type="number" value="150"/>
+		  </label>
+
+		  <input type="hidden" id="successRate" value="38">
+		  <input type="hidden" id="nearSuccessRate" value="50">
+		  <input type="hidden" id="failRate" value="12">
+		  <label for="residuePerSuccess">Average Residue per Success (PED):
+			<input id="residuePerSuccess" type="number" value="0" />
+		  </label>
+		</div>
+
+
+	  </div>    
+		<div id="eu-myBlueprintWrapper">    
+			<div style="display:flex;flex-direction:row;">
+
+			  <div id="bpbuttonDiv">
+				<label id="playerCraftlvlWrapper" for="playerLevel">Your Crafting Level:
+				  <input id="playerLevel" type="number" value="10" min="0" max="100" />
+				</label>
+				<button class="bpButts" onclick="calculate()">calculate estimates</button>
 			  </div>
-		  </div>
-		  <div id="blueprintList"></div>
-		</div>
-	 </div>
-   </div>
-	<div class="results" id="results">
-	    <h3>📊 Results for: <em>---</em></h3>
-		<div class="result-grid">
-		  <div class="result-row"><span class="label">🔖 Blueprint Type:</span> <span>---</span></div>
-		  <div class="result-row"><span class="label">💸 Total TT Cost:</span> <span>0.00 PED</span></div>
-		  <div class="result-row"><span class="label">📈 Total Markup:</span> <span>0.00 PED</span></div>
-		  <div class="result-row total"><span class="label">🧾 Total Cost (TT + MU):</span> <span>0.00 PED</span></div>
-		</div>
-
-		<details class="material-breakdown" closed>
-		  <summary><strong>📦 Material Breakdown</strong> (click to expand)</summary>
-		  <table class="material-table sortable">
-			<thead>
-			  <tr>
-				<th>Name</th>
-				<th>Qty</th>
-				<th>TT/Unit</th>
-				<th>Total TT</th>
-				<th>MU %</th>
-				<th>Total MU</th>
-				<th>Total Cost</th>
-			  </tr>
-			</thead>
-			<tbody>
-			  <tr><td colspan="7" style="text-align:center;">No data yet</td></tr>
-			</tbody>
-		  </table>
-		</details>
-
-		<details class="estimation-breakdown" closed>
-		  <summary><strong>📉 Estimation Breakdown</strong> (click to expand)</summary>
-		  <div class="result-grid" style="margin-top: 10px">
-			<div class="result-row"><span class="label">🎯 Markup per Click:</span> <span>0.0000 PED</span></div>
-			<div class="result-row"><span class="label">✅ Expected Successful Crafts:</span> <span>0.0</span></div>
-			<div class="result-row"><span class="label">🤏 Near-Successes:</span> <span>0.0</span></div>
-			<div class="result-row"><span class="label">💰 Return from Success:</span> <span>0.00 PED</span></div>
-			<div class="result-row"><span class="label">💵 Return from Near-Success:</span> <span>0.00 PED</span></div>
-			<div class="result-row"><span class="label">💱 Total Return:</span> <span>0.00 PED</span></div>
-			<div class="result-row"><span class="label">🧪 Residue Needed:</span> <span>0.00 PED</span></div>
-			<div class="result-row"><span class="label">📊 ROI:</span> <span>0.00%</span></div>
-			<div class="result-row profit">
-			  <span class="label">💹 Estimated Profit/Loss:</span>
-			  <span>0.00 PED</span>
 			</div>
-		  </div>
-		</details>
-	  <!-- 🪪 Button to Open Modal -->
-	  <span class="label">Features coming soon (not finished):</span><br>
-	  <button id="openHistoryModal">🕮 Crafting History</button>
-	  <!-- 🧪 Simulation Buttons -->
-	  <button onclick="startLiveSimulation()" style="display:none;">Default Simulation</button>
-	  <button onclick="runSimulation('historic')" style="display:none">Simulate Based on History</button>
-	</div>
+		<div id="eu-myBlueprintWrapper-interior">
+			<button type="button" class="ExpandableY-button" onclick="toggleExpand('materials', this)">materials ▼</button>
+			<div id="materials"class="expandable"></div>
+			<div class="results" id="results">
+				<h3>📊 Results for: <em>---</em></h3>
+				<div class="result-grid">
+				  <div class="result-row"><span class="label">🔖 Blueprint Type:</span> <span>---</span></div>
+				  <div class="result-row"><span class="label">💸 Total TT Cost:</span> <span>0.00 PED</span></div>
+				  <div class="result-row"><span class="label">📈 Total Markup:</span> <span>0.00 PED</span></div>
+				  <div class="result-row total"><span class="label">🧾 Total Cost (TT + MU):</span> <span>0.00 PED</span></div>
+				</div>
 
+				<details class="material-breakdown" closed>
+				  <summary><strong>📦 Material Breakdown</strong> (click to expand)</summary>
+				  <table class="material-table sortable">
+					<thead>
+					  <tr>
+						<th>Name</th>
+						<th>Qty</th>
+						<th>TT/Unit</th>
+						<th>Total TT</th>
+						<th>MU %</th>
+						<th>Total MU</th>
+						<th>Total Cost</th>
+					  </tr>
+					</thead>
+					<tbody>
+					  <tr><td colspan="7" style="text-align:center;">No data yet</td></tr>
+					</tbody>
+				  </table>
+				</details>
+
+				<details class="estimation-breakdown" closed>
+				  <summary><strong>📉 Estimation Breakdown</strong> (click to expand)</summary>
+				  <div class="result-grid" style="margin-top: 10px">
+					<div class="result-row"><span class="label">🎯 Markup per Click:</span> <span>0.0000 PED</span></div>
+					<div class="result-row"><span class="label">✅ Expected Successful Crafts:</span> <span>0.0</span></div>
+					<div class="result-row"><span class="label">🤏 Near-Successes:</span> <span>0.0</span></div>
+					<div class="result-row"><span class="label">💰 Return from Success:</span> <span>0.00 PED</span></div>
+					<div class="result-row"><span class="label">💵 Return from Near-Success:</span> <span>0.00 PED</span></div>
+					<div class="result-row"><span class="label">💱 Total Return:</span> <span>0.00 PED</span></div>
+					<div class="result-row"><span class="label">🧪 Residue Needed:</span> <span>0.00 PED</span></div>
+					<div class="result-row"><span class="label">📊 ROI:</span> <span>0.00%</span></div>
+					<div class="result-row profit">
+					  <span class="label">💹 Estimated Profit/Loss:</span>
+					  <span>0.00 PED</span>
+					</div>
+				  </div>
+				</details>
+			  <!-- 🪪 Button to Open Modal -->
+			  <span class="label">Features coming soon (not finished):</span><br>
+			  <button id="openHistoryModal">🕮 Crafting History</button>
+			  <!-- 🧪 Simulation Buttons -->
+			  <button onclick="startLiveSimulation()" style="display:none;">Default Simulation</button>
+			  <button onclick="runSimulation('historic')" style="display:none">Simulate Based on History</button>
+			</div>
+		</div>
+		  <div class="eu-myBlueprintList">
+			<h1>My Saved Blueprints<button id="loadBlueprintsButt" onclick="toggleBlueprints()">📂 Expand</button></h1>
+			<div class="results" id="savedList" style="display: none;">
+			  
+			  <div id="panelControls" style="">
+				  <div id="blueprintFilters"></div>
+				  <div id="layoutToggle">
+					<div id="layoutLabel">Layout:</div>
+					<div id="layoutOptions">
+						<label><input type="radio" name="layout" value="cards" checked onchange="renderBlueprintList()"> Cards</label>
+						<label><input type="radio" name="layout" value="list" onchange="renderBlueprintList()"> List</label>
+					</div>
+				  </div>
+			  </div>
+			  <div id="blueprintList"></div>
+			</div>
+		 </div>
+
+	   </div>
   </div>
   
 <!-- 📜 Modal Containers -->
