@@ -261,7 +261,7 @@ function calculate() {
   `;
 
   document.getElementById('results').innerHTML = `
-    <h3>📊 Results for: <em>${itemName}</em></h3>
+    <h3>📊<em>${itemName}</em></h3>
     <div class="result-grid">
       <div class="result-row"><span class="label">🔖 Blueprint Type:</span> <span>${bpType}</span></div>
       <div class="result-row"><span class="label">💸 Total TT Cost:</span> <span>${totalTT.toFixed(2)} PED</span></div>

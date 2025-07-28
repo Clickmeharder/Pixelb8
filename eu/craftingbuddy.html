@@ -695,6 +695,7 @@ margin-top:6px;
 	width: 25%;
 	max-width: 26%;
 	min-width: 175px;
+	height: 96%;
 	padding: 2px;
 	margin: 0px;
 	margin-top: 1px;
@@ -705,7 +706,6 @@ margin-top:6px;
 	overflow: hidden;
 	overflow-y: scroll;
 	transition: 0.3s;
-	z-index: 99;
 	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
 	}
 
@@ -716,7 +716,6 @@ margin-top:6px;
 	.eu-blueprint:hover {
 	background: rgba(20, 20, 20, 0.9);
 	box-shadow: 0 0 15px cyan;
-	z-index:1000;
 	}
 
 .eu-blueprint input[type="text"], .eu-blueprint input[type="number"], .eu-blueprint select {
@@ -1610,19 +1609,25 @@ label#filterlabel {
 }
 
 .expandable {
-  max-height: 0;
+  max-height: 0vh;
   overflow: hidden;
+  overflow-y: auto;
   transition: max-height 0.3s ease;
 }
 
 .expandable.expanded {
-  max-height: 500px; /* Or something big enough to show your content */
+  max-height: 65vh; /* Or something big enough to show your content */
 }
 
 .ExpandableY-button {
+	font-weight: bold;
     width: 100%;
     line-height: 0.6;
-    height: 14px;
+    height: 20px;
+	
+}
+button.ExpandableY-button {
+	background: #322e2e;
 }
   </style>
 
@@ -1662,9 +1667,6 @@ label#filterlabel {
 	  </div>
 	</div>
     <div class="eu-blueprint">
-	  <label for="entropianexusBPselect" title="Add Blueprints from EntropiaNexus!">Add Blueprint:</label>
-	  <!-- Options to be filtered by material -->
-
 	  <div id="bpLoadingSpinner" style="display:;">...</div>
 	  <datalist id="bpList" style="display: none;"></datalist>
 	  <button id="loadNexusBP" style="display: none;">Load</button>
@@ -1748,7 +1750,7 @@ label#filterlabel {
 			<button type="button" class="ExpandableY-button" onclick="toggleExpand('materials', this)">materials ▼</button>
 			<div id="materials"class="expandable"></div>
 			<div class="results" id="results">
-				<h3>📊 Results for: <em>---</em></h3>
+				<h3>📊<em>---</em></h3>
 				<div class="result-grid">
 				  <div class="result-row"><span class="label">🔖 Blueprint Type:</span> <span>---</span></div>
 				  <div class="result-row"><span class="label">💸 Total TT Cost:</span> <span>0.00 PED</span></div>
