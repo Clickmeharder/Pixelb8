@@ -114,10 +114,11 @@ function renderAllBlueprintsList(filteredList) {
     entry.addEventListener("click", async () => {
 /*       document.getElementById("materialFilter").value = bp.Name; */
 /*       container.classList.add("hidden"); */
-      document.getElementById("showAllBlueprintsBtn").textContent = "nexus hacker";
+
       await loadBlueprintByName(bp.Name);
     });
     container.appendChild(entry);
+
   });
 }
 
@@ -349,16 +350,22 @@ document.getElementById("materialFilter").addEventListener("input", (e) => {
 
 document.getElementById("showAllBlueprintsBtn").addEventListener("click", () => {
   const list = document.getElementById("allBlueprintsList");
-   list.classList.toggle("hidden"); 
+  const btn = document.getElementById("showAllBlueprintsBtn");
 
-  const label = list.classList.contains("hidden") ? "Turn On NexusHacker" : "Turn Off NexusHacker";
-  document.getElementById("showAllBlueprintsBtn").textContent = label;
+  list.classList.toggle("hidden");
 
-  // show full list by default
-  renderAllBlueprintsList(cachedBlueprints);
+  if (!list.classList.contains("hidden")) {
+    renderAllBlueprintsList(cachedBlueprints);  // render first
+    btn.classList.add("active");                // activate after rendering
+  } else {
+    btn.classList.remove("active");             // turn off when hidden
+  }
 });
+
 
 document.addEventListener('DOMContentLoaded', () => {
   populateNexusDropdown();
-
+  const btn = document.getElementById("showAllBlueprintsBtn");
+  btn.classList.add("active");
+  btn.classList.remove("active");
 });

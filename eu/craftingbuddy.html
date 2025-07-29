@@ -410,9 +410,12 @@ em {
 }
 
 #matfilterlabel {
+    margin: auto;
+    margin-bottom: 4px;
     color: #181616;
     text-align: center;
 }
+
 @media screen and (orientation: portrait) {
   body::before {
     content: "Turn Your Phone sideways!";
@@ -477,13 +480,14 @@ em {
 			bottom: 16px;
 			left: 10%;
 		}
-		#shittyHitCounter {
-			position: fixed;
-			left: 28px;
-			bottom: 2px;
-			background: #000000e6;
-			opacity: 0.6;
-		}
+#shittyHitCounter {
+    position: fixed;
+    left: 0px;
+    bottom: -5px;
+    background: #000000e6;
+    opacity: 0.6;
+    scale: 0.7;
+}
 		#shittyHitCounter a {
 			opacity: 0.9;
 		}
@@ -569,7 +573,6 @@ input[type="text"], input[type="number"], select {
 	input:hover,
 	select:hover {
 	background: rgba(20, 20, 20, 0.9);
-	box-shadow: 0 0 5px cyan;
 	}
 
 
@@ -636,15 +639,14 @@ button:active {
 }
 	
 div#bpbuttonDiv2 {
-    display: flex;
+	display: flex;
     flex-direction: column;
-	margin-top: auto;
-    margin-bottom: 8px;
     background: #454343;
     border: 3px outset #2e2b2b6e;
-	border-bottom-right-radius: 31px;
-    border-bottom-left-radius: 31px;
-    padding: 13px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 4px;
+    padding: 2px;
+    padding-bottom: 5px;
 }
 div#bpbuttonDiv2 button, #showAllBlueprintsBtn {
     background: #4b4d4ef7;
@@ -658,12 +660,16 @@ div#bpbuttonDiv2 button, #showAllBlueprintsBtn {
     margin: auto;
 }
 #showAllBlueprintsBtn {
-margin-top:6px;
+    margin-left: 2px;
+    margin-top: 2px;
+    margin-bottom: 1px;
+    width: 25px;
+    height: 25px;
 }
 
-	
-
-
+input#materialFilter {
+    margin-top: 5px;
+}
 
 }
 div#layoutLabel {
@@ -1143,6 +1149,7 @@ input#qvsc {
 	text-align: left;
 	font-size: 1rem;
 	line-height: 1.4;
+	overflow: hidden;
 	overflow-y: auto;
 	transition: 0.3s;
 
@@ -1488,6 +1495,7 @@ input#qvsc {
     border: 1px solid #2a2c2c;
     margin-top: 2px;
     padding: 10px;
+	padding-left:4px;
     display: flex;
     flex-direction: column;
     background: #001822;
@@ -1558,7 +1566,7 @@ button.ExpandableY-button {
 .eu-container {
     text-align: center;
     margin: auto;
-    margin-top: 4%;
+    margin-top: 7%;
     padding-bottom: 12px;
     height: 98vh;
     overflow: hidden;
@@ -1569,7 +1577,7 @@ button.ExpandableY-button {
     display: flex;
     flex-direction: row;
     margin: auto;
-    margin-top: 17px;
+    margin-top: 4px;
     padding: 0px;
     height: 99.5%;
     background: #33333396;
@@ -1672,6 +1680,44 @@ div#bpbuttonDiv {
     display: flex;
     flex-direction: row;
     width: 100%;
+	}
+
+.power-btn {
+  background-color: #2f2f2f;   /* dark grey */
+  border: 3px solid #666;      /* medium grey ridge-style border */
+  border-radius: 50%;          /* round button */
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px #111 inset, -2px -2px 5px #555 inset; /* subtle inner shading */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.power-btn svg {
+  pointer-events: none; /* so clicking registers on button */
+  filter: drop-shadow(1px 1px 1px #0008); /* subtle shadow for retro feel */
+}
+
+.power-btn:hover {
+  background-color: #444; /* lighter grey on hover */
+  box-shadow: 2px 2px 8px #222 inset, -2px -2px 8px #777 inset;
+}
+
+.power-btn.active {
+  /* Example: glow effect */
+  background-color: #003333;
+  color: #00ffcc; /* if you want icon/text color to change */
+  transition: all 0.3s ease;
+}
+.power-btn.active svg {
+  filter: drop-shadow(0 0 4px #00ffcc) brightness(1.5);
+  fill: #00ffcc; /* Change icon color */
+  transition: all 0.3s ease;
+}
   </style>
 
 </head>
@@ -1696,11 +1742,17 @@ div#bpbuttonDiv {
 <!--   <h1>Entropia Crafting Tool</h1> -->
   <div class="craftingbuddyWrapper">
 	<div id="nexusJunk">
-	  <label id="matfilterlabel"for="materialFilter" title="Filter by blueprint name, material, product, book, profession, or use 'level:3'">Filter Blueprints:
-	    <input id="materialFilter" list="bpList" type="text" placeholder="e.g. Melchi Crystal" autocomplete="off"  />
-	  </label>
-	  <button id="showAllBlueprintsBtn" class="nexusHax" type="button">Turn On NexusHacker</button>
-	  <br>
+	  <div id="nexusJunk-Header" style="display:flex;flex-direction:row;">
+	    <button id="showAllBlueprintsBtn" class="nexusHax power-btn active" type="button" aria-label="Power">
+		  <svg viewBox="0 0 24 24" width="24" height="24" fill="#ccc" xmlns="http://www.w3.org/2000/svg" >
+			<path d="M13 3h-2v10h2V3zm4.83 2.17-1.42 1.42A7 7 0 1 1 7.6 6.6L6.17 5.17a9 9 0 1 0 11.66 0z"/>
+		  </svg>
+	    </button>
+	    <label id="matfilterlabel"for="materialFilter" title="Filter by blueprint name, material, product, book, profession, or use 'level:3'">n3xusH4ck3r
+	      
+	    </label>
+	  </div>
+	  <input id="materialFilter" list="bpList" type="text" placeholder="e.g. Melchi Crystal" autocomplete="off"  />
 	  <div id="allBlueprintsList" class="blueprint-list "></div>
 
 	  <div id="bpbuttonDiv2" style="margin-top:auto; margin-bottom:0;">
@@ -1726,7 +1778,7 @@ div#bpbuttonDiv {
 				   oninput="document.getElementById('qvscLabel').innerText = this.value + '%'; updateRatesFromSlider()">
 			<div style="element.style {font-size: 0.8em;margin-top: 2px;display: flex;flex-direction: row;flex-wrap: wrap;min-width: 136px;width: max-content;max-width: 202px;}">
 			  <div><span id="visibleSuccess"> 38%</span>✅ Success</div>
-			  <div><span id="visibleNearSuccess"> 50%</span>🔶 Near Success</div>
+			  <div><span id="visibleNearSuccess"> 50%</span>🔶 Near</div>
 			  <div><span id="visibleFail">12%</span>❌ Fail</div>
 			</div>
 
@@ -1849,7 +1901,7 @@ div#bpbuttonDiv {
 		</div>
 
 		<div class="eu-myBlueprintList">
-			<h1>My Saved Blueprints<button id="loadBlueprintsButt" onclick="toggleBlueprints()">📂 Expand</button></h1>
+			<h1>Your List<button id="loadBlueprintsButt" onclick="toggleBlueprints()">📂 Expand</button></h1>
 			<div class="results" id="savedList" style="display: none;">
 			  <div id="panelControls" style="">
 				  <div id="blueprintFilters"></div>
