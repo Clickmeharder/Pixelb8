@@ -471,18 +471,8 @@ em {
             color: #0b7272;
             font-family: 'Orbitron', sans-serif;
         }
-		.eu-container {
-			text-align: center;
-			margin: 16px;
-			margin-left: auto;
-			margin-top: 4%;
-			padding-bottom: 12px;
-			height: 98vh;
-			overflow: hidden;
-			border: 2px ridge #2ce01d6e;
-			width: 96vw;
-		}
 	    .PageFooterDisclaimer-note {
+			display: none;
 			position: absolute;
 			bottom: 16px;
 			left: 10%;
@@ -565,26 +555,21 @@ em {
 	text-align: left;
 	flex-direction: column;
 	}
-	input[type="text"],
-	input[type="number"],
-	select {
-	padding: 0px 12px;
-	margin-top: 0px;
-	margin-bottom: 0px;
-	background: #121212;
-	border: 1px solid #32c7e9;
-	border-radius: 12px;
-	color: #ddd;
-	font-size: 1rem;
-	transition: 0.3s ease;
-	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
-	}
+input[type="text"], input[type="number"], select {
+    padding: 0px 12px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    background: #121212eb;
+    border: 2px inset #767171;
+    border-radius: 12px;
+    color: #ddd;
+    font-size: 1rem;
+    transition: 0.3s ease;
+}
 	input:hover,
 	select:hover {
-	border-width: 1px;
 	background: rgba(20, 20, 20, 0.9);
-	box-shadow: 0 0 15px cyan;
-	transform: scale(1.05);
+	box-shadow: 0 0 5px cyan;
 	}
 
 
@@ -606,9 +591,10 @@ em {
 
 
 #playerCraftlvlWrapper {
-    border: 2px inset #ac4915;
+    border: 1px outset #505050;
+    border-radius: 5px;
+    margin: 4px;
     transition: 0.3s ease;
-    width: 50%;
 }
 	#playerCraftlvlWrapper:active {
 	color: #ac4915;
@@ -618,19 +604,29 @@ em {
 	}
 
 div#bpbuttonDiv button {
-cursor: pointer;
-    background: #4b4d4ef7;
-    outline: 3px solid #27282a;
-    border-color: #555;
-    color: #121212;
-    font-weight: 700;
-    font-size: 0.9rem;
-    height: 53px;
-    width: 45%;
+    cursor: pointer;
+    background: #680606f7;
+    outline: 1px ridge #000;
+    border-width: 4px;
+    border-color: #881717;
+    border-radius: 50%;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.75rem;
+    height: 56px;
+    width: 88px;
     padding: 4px;
     margin: auto;
-    margin-left: 5px;
+    margin-right: 4px;
+
+    /* Text outline (black stroke effect) */
+    text-shadow:
+      -1px -1px 0 #000,
+       1px -1px 0 #000,
+      -1px  1px 0 #000,
+       1px  1px 0 #000;
 }
+
 
 button:hover {
 	background: #53e0f6;
@@ -841,29 +837,30 @@ label#filterlabel {
 	background-color: #2a8cff;
 	color: white;
 	}
-	div#conditionBlock {
+div#conditionBlock {
 	height: 121px;
-	text-align: left;
-	padding: 2px;
-	background-color: black;
-	border: 3px outset teal;
-	overflow: hidden;
-	opacity: 0.8;
-	transition: 0.3s ease;
-	}
+    text-align: left;
+    margin: 2px;
+    padding: 2px;
+    background-color: black;
+    border: 3px ridge #292525a8;
+    overflow: hidden;
+    opacity: 0.8;
+    transition: 0.3s ease;
+}
 	div#conditionBlock:hover {
 	background:black;
 	opacity:1;
 	z-index:1000;
 	}
-	input#qvsc {
-	width: 100%;
-	margin: 7px 0 2px 0;
-	outline: 3px inset rgb(23, 130, 182, 1.0);
-	background: transparent;
-	-webkit-appearance: none;
-	appearance: none;
-	}
+input#qvsc {
+    width: 100%;
+    margin: 7px 0 2px 0;
+    outline: 3px inset rgb(57 55 55);
+    background: #00000000;
+    -webkit-appearance: none;
+    appearance: none;
+}
 
 	/* WebKit browsers: Chrome, Safari */
 	input#qvsc::-webkit-slider-runnable-track {
@@ -1131,33 +1128,24 @@ label#filterlabel {
 	border-style: inset;
 	}
 
-	.results#results {
-	background: #262626;
-	border-radius: 16px;
-	padding: 4px;
-	padding-top: 20px;
-	width: 75%;
-	margin: auto;
-	margin-top: -30px;
-	box-shadow: 0 4px 14px rgba(50, 199, 233, 0.25);
-	font-size: 1rem;
-	line-height: 1.4;
-	}
-	.results#results {
+.results#results {
 	color: #ac4915;
 	background: rgba(20, 20, 20, 0.7);
 	width: auto;
+	height: 99%;
 	padding: 4px;
 	padding-left: 8px;
 	margin: 0px;
 	margin-top: -1px;
 	margin-left: ;
-	border: 2px outset teal;
+	border: 2px outset #5d5d5d;
 	border-radius: 10px;
 	text-align: left;
-	overflow-y: scroll;
+	font-size: 1rem;
+	line-height: 1.4;
+	overflow-y: auto;
 	transition: 0.3s;
-	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+
 	}
 	.result-grid {
 	display: flex;
@@ -1523,7 +1511,7 @@ label#filterlabel {
 
 
 #eu-myBlueprintWrapper-interior {
-
+    height: 80%;
 }
 
 
@@ -1549,23 +1537,42 @@ label#filterlabel {
 	
 }
 button.ExpandableY-button {
-	background: #322e2e;
+    background: #4b4d4ef7;
+    outline: 2px solid #27282a;
+    border-color: #555;
+    color: #121212;
+    font-weight: 700;
+    font-size: 0.8rem;
+    width: 98%;
+    padding: 2px;
+    margin: 8px;
 }
 
 
 
+
+/*new main css*/
+.eu-container {
+    text-align: center;
+    margin: auto;
+    margin-top: 4%;
+    padding-bottom: 12px;
+    height: 98vh;
+    overflow: hidden;
+    border: 2px ridge #2ce01d6e;
+    width: 99vw;
+}
 .craftingbuddyWrapper {
     display: flex;
-	flex-direction: row;
+    flex-direction: row;
     margin: auto;
     margin-top: 17px;
     padding: 0px;
     height: 99.5%;
-    width: 98%;
-    background: #333333b5;
+    background: #33333396;
     border: 3px outset rgb(80 81 82 / 97%);
     border-radius: 15px;
-    gap: 8px;
+    gap: 4px;
 }
 div#nexusJunk {
     display: flex;
@@ -1586,12 +1593,14 @@ div#nexusJunk {
 #craftingbuddy-mainSection {
     display: flex;
     flex-direction: row;
-    height: 88%;
+    height: 87%;
+    width: 75%;
     background: rgba(20, 20, 20, 0.7);
     border: 3px inset #555;
     border-radius: 15px;
     padding: 11px;
-    margin: 10px 8px auto 0px;
+    margin: 15px 8px auto 0px;
+	gap: 4px;
 }
 
 div#eu-myBlueprintWrapper {
@@ -1600,7 +1609,7 @@ div#eu-myBlueprintWrapper {
     border: 3px ridge #292525a8;
     border-radius: 10px;
     overflow: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 98%;
 }
 .eu-blueprint {
@@ -1618,7 +1627,7 @@ div#eu-myBlueprintWrapper {
 	border-radius: 10px;
 	text-align: center;
 	overflow: hidden;
-	overflow-y: scroll;
+	overflow-y: auto;
 	transition: 0.3s;
 
 	}
@@ -1643,18 +1652,18 @@ label#wvclabelText {
 	color: #818181;
 	font-size: 0.875rem;
 	transition: border-color 0.3s ease;
-	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
 	}
 .eu-blueprint input:hover, .eu-blueprint select:hover{
 	color: #ffffff;
 	background: rgba(20, 20, 20, 0.9);
-	box-shadow: 0 0 10px #ac4915;
-	transform: scale(1.05);
+	transform: scale(1.01);
 	}
-	.eu-blueprint label{
-	border: 1px outset teal;
-	border-left-width: 2px;
-	}
+.eu-blueprint label {
+    border: 1px outset #505050;
+    border-left-width: 2px;
+    border-radius: 8px;
+    width: 95%;
+}
 	
 div#bpbuttonDiv {
     display: flex;
