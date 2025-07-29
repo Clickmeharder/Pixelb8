@@ -441,6 +441,10 @@ em {
   .header {
     display: none !important;
   }
+  /* ✅ Override hiding when menu is active */
+  body.menu-active .header {
+    display: block !important;
+  }
 }
 
 @media (max-height: 98vh) {
@@ -466,7 +470,7 @@ em {
     left: 2px;background:black;
 }
 
-
+}
  </style>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');

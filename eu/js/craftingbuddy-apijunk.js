@@ -361,7 +361,9 @@ document.getElementById("showAllBlueprintsBtn").addEventListener("click", () => 
     btn.classList.remove("active");             // turn off when hidden
   }
 });
-
+document.querySelector('.menu-button').addEventListener('click', () => {
+  document.body.classList.toggle('menu-active');
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   populateNexusDropdown();
