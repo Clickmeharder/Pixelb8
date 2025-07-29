@@ -416,47 +416,52 @@ em {
     text-align: center;
 }
 
+
 @media screen and (orientation: portrait) {
   body::before {
     content: "Turn Your Phone sideways!";
     position: fixed;
-	text-align: center;
+    text-align: center;
     top: 0; left: 0;
-    width: 100vw; height: 100vh;
+    width: 100vw;
+    height: 100vh;
     background: #000;
     color: #fff;
     display: flex;
     align-items: center;
-	white-space:wrap;
     justify-content: center;
     font-size: 1.3em;
     z-index: 9999;
+    white-space: normal; /* "wrap" isn't valid here */
   }
-  
-@media (max-height: 100vh) {
+
+  div#pixelb8Header {
+    display: none !important;
+  }
+  .header {
+    display: none !important;
+  }
+}
+
+@media (max-height: 98vh) {
   .craftingbuddyWrapper {
     flex-direction: row;
-	margin-left: 28px;
-
+    margin-left: 28px;
   }
-  
-  .eu-blueprint, #allBlueprintsList {
+
+  .eu-blueprint,
+  #allBlueprintsList {
     flex: 1 1 100%;
   }
+
+  div#pixelb8Header {
+    display: none !important;
+  }
+  .header {
+    display: none !important;
+  }
 }
 
-.craftingbuddyWrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  width: 90%;
-  max-width: 1200px;
-  margin: auto;
-}
-
-.eu-blueprint, #allBlueprintsList {
-  flex: 1 1 300px; /* responsive width */
-}
 
  </style>
     <style>
@@ -1729,7 +1734,7 @@ div#bpbuttonDiv {
 	  <div class="stars"></div>
 	  <div class="twinkling"></div>
 	</div>
-    <div class="header">Pixelb8.LoL/Eu/Crafting Tool</div>
+    <div class="header" id="pixelb8Header">Pixelb8.LoL</div>
     <button class="menu-button" onclick="toggleMenu()">☰</button>
     <div class="nav-menu" id="navMenu">
         <a href="https://Pixelb8.lol/home">Home</a>
