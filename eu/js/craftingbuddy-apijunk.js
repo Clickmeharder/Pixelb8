@@ -115,6 +115,7 @@ function renderAllBlueprintsList(filteredList) {
 /*       document.getElementById("materialFilter").value = bp.Name; */
 /*       container.classList.add("hidden"); */
 
+
       await loadBlueprintByName(bp.Name);
     });
     container.appendChild(entry);
@@ -142,6 +143,9 @@ function loadBlueprint(index) {
   materialIndex = 0;
   bp.materials.forEach(m => addMaterial(m.name, m.qty, m.tt, m.mu));
   toggleBpMuField();
+  const clicksInput = document.getElementById('clicks');
+  let clicks = parseInt(clicksInput.value);
+
 }
 
 function resetBlueprintFieldsNoBlanks() {
@@ -150,6 +154,13 @@ function resetBlueprintFieldsNoBlanks() {
 
     if (input.type === 'number') input.value = '';
     if (input.type === 'text') input.value = '';
+	const clicksInput = document.getElementById('clicks');
+	let clicks = parseInt(clicksInput.value);
+
+	if (!clicks || clicks < 1) {
+	  clicks = 1;
+	  clicksInput.value = 1; // Update the field visually
+	}
   });
 
   document.querySelectorAll('.eu-blueprint select').forEach(select => {

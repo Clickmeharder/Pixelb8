@@ -110,7 +110,7 @@ function updateRatesFromSlider() {
 function calculate() {
   let totalTT = 0;
   let totalMarkup = 0;
-  const clicks = parseInt(document.getElementById('clicks').value);
+  const clicks = parseInt(document.getElementById('clicks').value) || 1;
   const sellMu = parseFloat(document.getElementById('sellMu').value) / 100;
   const successRate = parseFloat(document.getElementById('successRate').value) / 100;
   const nearSuccessRate = parseFloat(document.getElementById('nearSuccessRate').value) / 100;

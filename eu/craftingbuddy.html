@@ -469,7 +469,12 @@ em {
     top: 2px;
     left: 2px;background:black;
 }
-
+.eu-container {
+    text-align: center;
+    margin: auto;
+    margin-top: 4%;
+    width: 99vw;
+}
 }
  </style>
     <style>
@@ -523,25 +528,24 @@ em {
 	font-family: 'Montserrat', sans-serif;
 	}
 
-	h1 {
-	font-size: 2em;
-	font-weight: 600;
-	margin-left: 59px;
-	margin-top: -4px;
-	margin-bottom: 5px;
-	width: 29%;
-	padding: 4px;
-	color: rgba(86, 88, 92, 0.64);
-	text-shadow: 0 0 4px #32e9e2, 0 0 8px #32e9e2;
-	text-align: left;
-	border-radius: 15px;
-	outline: 4px ridge rgba(20, 20, 20, 0.9);
-	outline-offset: 3px;
-	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.34);
-	text-shadow: 1px 1px 2px #111, -1px -1px 2px #444, 2px 2px 4px rgba(0, 255, 255, 0.1);
-	transition: box-shadow 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
-	z-index: 1000;
-	}
+h1 {
+    font-size: 2em;
+    font-weight: 600;
+    margin-left: 59px;
+    margin-top: -4px;
+    margin-bottom: 5px;
+    width: 29%;
+    padding: 4px;
+    color: rgba(86, 88, 92, 0.64);
+    text-shadow: 0 0 4px #32e9e2, 0 0 8px #32e9e2;
+    text-align: left;
+    border-radius: 15px;
+    outline: 3px ridge rgba(20, 20, 20, 0.9);
+    outline-offset: -3px;
+    text-shadow: 1px 1px 2px #111, -1px -1px 2px #444, 2px 2px 4px rgba(0, 255, 255, 0.1);
+    transition: box-shadow 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
+    z-index: 1000;
+}
 
 	h1:hover {
 	box-shadow: 0 4px 12px rgba(0, 255, 255, 0.7);
@@ -1307,7 +1311,7 @@ input#qvsc {
 
 
 	/* Responsive */
-	@media (max-width: 640px) {
+@media (max-width: 640px) {
 	.material {
 	  flex-direction: column;
 	  align-items: flex-start;
@@ -1569,7 +1573,7 @@ button.ExpandableY-button {
     font-size: 0.8rem;
     width: 98%;
     padding: 2px;
-    margin: 8px;
+    margin: 8px 0px;
 }
 
 
@@ -1579,7 +1583,7 @@ button.ExpandableY-button {
 .eu-container {
     text-align: center;
     margin: auto;
-    margin-top: 7%;
+    margin-top: 4%;
     padding-bottom: 12px;
     height: 98vh;
     overflow: hidden;
