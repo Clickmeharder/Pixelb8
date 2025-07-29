@@ -408,19 +408,7 @@ em {
   height:42px;
   font-size:5px;
 }
-div#nexusJunk {
-    display: flex
-;
-    width: 25%;
-    border: 12px outset #2e2b2b6e;
-    padding: 5px;
-    background: #444;
-    flex-direction: column;
-    border-bottom-width: 24px;
-    border-right-width: 15px;
-    border-radius: 56px;
-    margin-bottom: 24px;
-}
+
 #matfilterlabel {
     color: #181616;
     text-align: center;
@@ -668,84 +656,19 @@ div#bpbuttonDiv2 button, #showAllBlueprintsBtn {
     border-color: #555;
     color: #121212;
     font-weight: 700;
-    font-size: 0.9rem;
-    height: 35px;
+    font-size: 0.8rem;
     width: 95%;
-    padding: 4px;
+    padding: 2px;
     margin: auto;
 }
 #showAllBlueprintsBtn {
 margin-top:6px;
 }
-	.craftingbuddyWrapper {
-		display: flex;
-		flex-direction: row;
-		margin-top: 0px;
-		overflow: hidden;
-		height: 99.5%;
-		border: 3px inset rgb(6 10 15 / 97%);
-		gap: 8px;
-	}
+
 	
 
 
-.eu-blueprint {
-	color: #ac4915;
-	background: rgba(20, 20, 20, 0.7);
-	width: 25%;
-	max-width: 26%;
-	min-width: 175px;
-	height: 96%;
-	padding: 2px;
-	margin: 0px;
-	margin-top: 1px;
-	margin-left: ;
-	border: 3px ridge #292525a8;
-	border-radius: 10px;
-	text-align: center;
-	overflow: hidden;
-	overflow-y: scroll;
-	transition: 0.3s;
-	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
-	}
 
-	label#wvclabelText {
-	display: flex;
-	flex-direction: row;
-	}
-	.eu-blueprint:hover {
-	background: rgba(20, 20, 20, 0.9);
-	box-shadow: 0 0 15px cyan;
-	}
-
-.eu-blueprint input[type="text"], .eu-blueprint input[type="number"], .eu-blueprint select {
-	width: 85%;
-	max-width: 200px;
-	padding: 0px 9px;
-	margin-top: 0px;
-	margin-bottom: 4px;
-	background: rgba(20, 20, 20, 0.7);
-	border-radius: 12px;
-	color: #818181;
-	font-size: 0.875rem;
-	transition: border-color 0.3s ease;
-	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
-	}
-	.eu-blueprint input:hover, .eu-blueprint select:hover{
-	color: #ffffff;
-	background: rgba(20, 20, 20, 0.9);
-	box-shadow: 0 0 10px #ac4915;
-	transform: scale(1.05);
-	}
-	.eu-blueprint label{
-	border: 1px outset teal;
-	border-left-width: 2px;
-	}
-	
-div#bpbuttonDiv {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
 }
 div#layoutLabel {
 	padding: 0px;
@@ -977,15 +900,6 @@ label#filterlabel {
 	cursor: pointer;
 	}
 
-	div#eu-myBlueprintWrapper {
-	display: flex;
-	flex-direction: column;
-	border: 3px ridge #292525a8;
-	border-radius: 10px;
-	overflow: hidden;
-	overflow-y: scroll;
-	height: 86vh;
-	}
 
 	/* saved Blueprint list */
 	.eu-myBlueprintList {
@@ -1585,8 +1499,7 @@ label#filterlabel {
     border: 1px solid #2a2c2c;
     margin-top: 2px;
     padding: 10px;
-    display: flex
-;
+    display: flex;
     flex-direction: column;
     background: #001822;
     color: #0ff;
@@ -1607,6 +1520,15 @@ label#filterlabel {
 .blueprint-list div:hover {
   background: #033;
 }
+
+
+#eu-myBlueprintWrapper-interior {
+
+}
+
+
+
+
 
 .expandable {
   max-height: 0vh;
@@ -1629,6 +1551,115 @@ label#filterlabel {
 button.ExpandableY-button {
 	background: #322e2e;
 }
+
+
+
+.craftingbuddyWrapper {
+    display: flex;
+	flex-direction: row;
+    margin: auto;
+    margin-top: 17px;
+    padding: 0px;
+    height: 99.5%;
+    width: 98%;
+    background: #333333b5;
+    border: 3px outset rgb(80 81 82 / 97%);
+    border-radius: 15px;
+    gap: 8px;
+}
+div#nexusJunk {
+    display: flex;
+    width: 16%;
+    height: 90%;
+    border: 8px outset #2e2b2b6e;
+    outline: 1px ridge #000;
+    padding: 4px;
+    margin: 8px;
+    margin-top: 8px;
+	margin-right: 0px;
+    background: #444;
+    flex-direction: column;
+    border-bottom-width: 10px;
+    border-right-width: 10px;
+    border-radius: 15px;
+}
+#craftingbuddy-mainSection {
+    display: flex;
+    flex-direction: row;
+    height: 88%;
+    background: rgba(20, 20, 20, 0.7);
+    border: 3px inset #555;
+    border-radius: 15px;
+    padding: 11px;
+    margin: 10px 8px auto 0px;
+}
+
+div#eu-myBlueprintWrapper {
+    display: flex;
+    flex-direction: column;
+    border: 3px ridge #292525a8;
+    border-radius: 10px;
+    overflow: hidden;
+    overflow-y: scroll;
+    height: 98%;
+}
+.eu-blueprint {
+	color: #ac4915;
+	background: rgba(20, 20, 20, 0.7);
+	width: 25%;
+	max-width: 26%;
+	min-width: 175px;
+	height: 96%;
+	padding: 2px;
+	margin: 0px;
+	margin-top: 1px;
+	margin-left: ;
+	border: 3px ridge #292525a8;
+	border-radius: 10px;
+	text-align: center;
+	overflow: hidden;
+	overflow-y: scroll;
+	transition: 0.3s;
+
+	}
+
+label#wvclabelText {
+	display: flex;
+	flex-direction: row;
+	}
+.eu-blueprint:hover {
+	background: rgba(20, 20, 20, 0.9);
+
+	}
+
+.eu-blueprint input[type="text"], .eu-blueprint input[type="number"], .eu-blueprint select {
+	width: 85%;
+	max-width: 200px;
+	padding: 0px 9px;
+	margin-top: 0px;
+	margin-bottom: 4px;
+	background: rgba(20, 20, 20, 0.7);
+	border-radius: 12px;
+	color: #818181;
+	font-size: 0.875rem;
+	transition: border-color 0.3s ease;
+	box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+	}
+.eu-blueprint input:hover, .eu-blueprint select:hover{
+	color: #ffffff;
+	background: rgba(20, 20, 20, 0.9);
+	box-shadow: 0 0 10px #ac4915;
+	transform: scale(1.05);
+	}
+	.eu-blueprint label{
+	border: 1px outset teal;
+	border-left-width: 2px;
+	}
+	
+div#bpbuttonDiv {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
   </style>
 
 </head>
@@ -1666,76 +1697,77 @@ button.ExpandableY-button {
 	    <button class="bpButts" id="resetBlueprintBtn">🔄 New BP</button>
 	  </div>
 	</div>
-    <div class="eu-blueprint">
-	  <div id="bpLoadingSpinner" style="display:;">...</div>
-	  <datalist id="bpList" style="display: none;"></datalist>
-	  <button id="loadNexusBP" style="display: none;">Load</button>
-	  <label for="itemName">BP Name:
-		<input id="itemName" type="text" value="Explosive Projectiles 1" />
-	  </label> 
-	  <label for="clicks">Clicks:
-		<input id="clicks" type="number" value="100" />
-	  </label>
-      <div id="conditionBlock">
-        <label for="qvsc" id="wvclabelText">Quantity⇔Condition: <span id="qvscLabel">0%</span></label>
-        <input type="range" id="qvsc" min="0" max="100" value="0" 
-               oninput="document.getElementById('qvscLabel').innerText = this.value + '%'; updateRatesFromSlider()">
-        <div style="element.style {font-size: 0.8em;margin-top: 2px;display: flex;flex-direction: row;flex-wrap: wrap;min-width: 136px;width: max-content;max-width: 202px;}">
-          <div><span id="visibleSuccess"> 38%</span>✅ Success</div>
-          <div><span id="visibleNearSuccess"> 50%</span>🔶 Near Success</div>
-          <div><span id="visibleFail">12%</span>❌ Fail</div>
-        </div>
-
-     </div>
-	  <button type="button" class="ExpandableY-button" onclick="toggleExpand('bpDetails', this)">bpDetails ▼</button>
-		<div id="bpDetails" class="expandable">
-		  <label for="bpType">BP Type:
-			<select id="bpType" onchange="toggleBpMuField()">
-			  <option value="Limited">Limited</option>
-			  <option value="Unlimited" selected>Unlimited</option>
-			</select>
+	<div id="craftingbuddy-mainSection">
+		<div class="eu-blueprint">
+		  <div id="bpLoadingSpinner" style="display:;">...</div>
+		  <datalist id="bpList" style="display: none;"></datalist>
+		  <button id="loadNexusBP" style="display: none;">Load</button>
+		  <label for="itemName">BP Name:
+			<input id="itemName" type="text" value="Explosive Projectiles 1" />
+		  </label> 
+		  <label for="clicks">Clicks:
+			<input id="clicks" type="number" value="100" />
 		  </label>
+		  <div id="conditionBlock">
+			<label for="qvsc" id="wvclabelText">Quantity⇔Condition: <span id="qvscLabel">0%</span></label>
+			<input type="range" id="qvsc" min="0" max="100" value="0" 
+				   oninput="document.getElementById('qvscLabel').innerText = this.value + '%'; updateRatesFromSlider()">
+			<div style="element.style {font-size: 0.8em;margin-top: 2px;display: flex;flex-direction: row;flex-wrap: wrap;min-width: 136px;width: max-content;max-width: 202px;}">
+			  <div><span id="visibleSuccess"> 38%</span>✅ Success</div>
+			  <div><span id="visibleNearSuccess"> 50%</span>🔶 Near Success</div>
+			  <div><span id="visibleFail">12%</span>❌ Fail</div>
+			</div>
 
-		  <label id="bpMuLabel" for="bpMu">Limited BP MU %:
-			<input id="bpMu" type="number" value="150" />
-		  </label>
+		 </div>
+		  <button type="button" class="ExpandableY-button" onclick="toggleExpand('bpDetails', this)">bpDetails ▼</button>
+			<div id="bpDetails" class="expandable">
+			  <label for="bpType">BP Type:
+				<select id="bpType" onchange="toggleBpMuField()">
+				  <option value="Limited">Limited</option>
+				  <option value="Unlimited" selected>Unlimited</option>
+				</select>
+			  </label>
 
-		  <label for="bpBook">
-			<span class="label-inline">Book
-			  <span class="label-note">comma separated</span>
-			</span>
-			<input id="bpBook" type="text" value="Planet Calypso Components (Vol1)" />
-		  </label>
+			  <label id="bpMuLabel" for="bpMu">Limited BP MU %:
+				<input id="bpMu" type="number" value="150" />
+			  </label>
 
-		  <label for="bpLevel">Blueprint Req. Lvl:
-			<input id="bpLevel" type="number" value="5" min="0" max="100" />
-		  </label>
+			  <label for="bpBook">
+				<span class="label-inline">Book
+				  <span class="label-note">comma separated</span>
+				</span>
+				<input id="bpBook" type="text" value="Planet Calypso Components (Vol1)" />
+			  </label>
 
-		  <label for="qr">
-			<span class="label-inline">Quality Rating
-			  <span class="label-note">(0.01–1.00)</span>
-			</span>
-			<input id="qr" type="number" value="1.00" min="0.01" max="1.00" step="0.01" />
-		  </label>
+			  <label for="bpLevel">Blueprint Req. Lvl:
+				<input id="bpLevel" type="number" value="5" min="0" max="100" />
+			  </label>
 
-		  <label for="maxTT">Product Max TT Val:
-			<input id="maxTT" type="number" value="0.02" step="0.01"/>
-		  </label>
+			  <label for="qr">
+				<span class="label-inline">Quality Rating
+				  <span class="label-note">(0.01–1.00)</span>
+				</span>
+				<input id="qr" type="number" value="1.00" min="0.01" max="1.00" step="0.01" />
+			  </label>
 
-		  <label for="sellMu">Product MU%:
-			<input id="sellMu" type="number" value="150"/>
-		  </label>
+			  <label for="maxTT">Product Max TT Val:
+				<input id="maxTT" type="number" value="0.02" step="0.01"/>
+			  </label>
 
-		  <input type="hidden" id="successRate" value="38">
-		  <input type="hidden" id="nearSuccessRate" value="50">
-		  <input type="hidden" id="failRate" value="12">
-		  <label for="residuePerSuccess">Average Residue per Success (PED):
-			<input id="residuePerSuccess" type="number" value="0" />
-		  </label>
-		</div>
+			  <label for="sellMu">Product MU%:
+				<input id="sellMu" type="number" value="150"/>
+			  </label>
+
+			  <input type="hidden" id="successRate" value="38">
+			  <input type="hidden" id="nearSuccessRate" value="50">
+			  <input type="hidden" id="failRate" value="12">
+			  <label for="residuePerSuccess">Average Residue per Success (PED):
+				<input id="residuePerSuccess" type="number" value="0" />
+			  </label>
+			</div>
 
 
-	  </div>    
+		  </div>    
 		<div id="eu-myBlueprintWrapper">    
 			<div style="display:flex;flex-direction:row;">
 
@@ -1803,10 +1835,10 @@ button.ExpandableY-button {
 			  <button onclick="runSimulation('historic')" style="display:none">Simulate Based on History</button>
 			</div>
 		</div>
-		  <div class="eu-myBlueprintList">
+
+		<div class="eu-myBlueprintList">
 			<h1>My Saved Blueprints<button id="loadBlueprintsButt" onclick="toggleBlueprints()">📂 Expand</button></h1>
 			<div class="results" id="savedList" style="display: none;">
-			  
 			  <div id="panelControls" style="">
 				  <div id="blueprintFilters"></div>
 				  <div id="layoutToggle">
@@ -1819,9 +1851,11 @@ button.ExpandableY-button {
 			  </div>
 			  <div id="blueprintList"></div>
 			</div>
-		 </div>
+		</div>
 
 	   </div>
+
+	</div>
   </div>
   
 <!-- 📜 Modal Containers -->
