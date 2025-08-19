@@ -331,73 +331,8 @@ function displayFormulas() {
 displayFormulas(); 
 // ================= Main stats function =================
 // ===== Core calculation function (reusable) =====
-function calculateWeaponStats(weapon, hitSkillInput, dmgSkillInput, weaponMU = 1, ammoMU = 1) {
-  if (!weapon) return null;
-
-  const cleanData = getCleanWeaponData(weapon);
-  const damage = weapon.Properties.Damage || {};
-  const maxDamage = Object.values(damage).filter(v => v != null).reduce((sum, v) => sum + v, 0);
-
-  const hitSkillStart = weapon.Properties.Skill?.Hit?.LearningIntervalStart ?? 0;
-  const hitSkillEnd = weapon.Properties.Skill?.Hit?.LearningIntervalEnd ?? 100;
-  const dmgSkillStart = weapon.Properties.Skill?.Dmg?.LearningIntervalStart ?? 0;
-  const dmgSkillEnd = weapon.Properties.Skill?.Dmg?.LearningIntervalEnd ?? 100;
-  const isSIB = !!weapon.Properties.Skill?.IsSiB;
-
-  // ---- Core formulas ----
-  const HA = weaponFormulas.hitAbility(hitSkillInput, hitSkillStart, hitSkillEnd, isSIB);
-  const CA = weaponFormulas.critAbility(hitSkillInput, hitSkillStart, hitSkillEnd, isSIB);
-  const hitRate = weaponFormulas.hitRate(HA);
-  const minDamage = maxDamage * weaponFormulas.minDamagePercent(dmgSkillInput, dmgSkillStart, dmgSkillEnd);
-
-  const baseAPM = weapon.Properties.UsesPerMinute;
-  const minAPM = baseAPM * 0.45;
-  const apm = weaponFormulas.apmFromHitLvl(hitSkillInput, hitSkillStart, hitSkillEnd, baseAPM, minAPM);
-  const reloadTime = weaponFormulas.reloadTime(apm);
-
-  const critChance = weaponFormulas.critChance(CA);
-  const critDamage = weaponFormulas.critDamage();
-  const effectiveDamage = ((minDamage + maxDamage) / 2) * (1 + critChance * critDamage) * hitRate;
-  const dps = effectiveDamage / reloadTime;
-
-  // ---- Economy ----
-  const econ = weapon.Properties.Economy || {};
-  const decayPEC = econ.Decay || 0;
-  const ammoBurn = econ.AmmoBurn || 0;
-  const ammoCostPEC = ammoBurn * 0.01;
-  const costPerUsePEC = decayPEC * weaponMU + ammoCostPEC * ammoMU;
-  const costPerUsePED = costPerUsePEC * 0.01;
-  const maxTT = econ.MaxTT || 0;
-  const minTT = econ.MinTT || 0;
-  const totalUses = decayPEC > 0 ? ((maxTT - minTT) * 100) / decayPEC : 0;
-  const totalCostPED = (costPerUsePED * totalUses) + minTT;
-  const dpp = weaponFormulas.dpp(effectiveDamage, costPerUsePEC);
-
-  return {
-    cleanData,
-    maxDamage,
-    minDamage,
-    effectiveDamage,
-    hitRate,
-    HA,
-    CA,
-    apm,
-    reloadTime,
-    critChance,
-    dps,
-    econ: {
-      ...econ,
-      costPerUsePEC,
-      costPerUsePED,
-      totalUses,
-      totalCostPED,
-      dpp
-    }
-  };
-}
-
 function formatWeaponStats(weapon) {
-  if (!weapon) return "Select a weapon to view stats";
+  if (!weapon) return { display: "Select a weapon to view stats", data: null };
 
   displayFormulas(); // show formulas
 
@@ -449,7 +384,7 @@ function formatWeaponStats(weapon) {
   const totalCostPED = (costPerUsePED * totalUses) + minTT;
   const dpp = weaponFormulas.dpp(effectiveDamage, costPerUsePEC);
 
-  // ================= Display stats =================
+  // ================= Build Display String =================
   const stats = `
 ${cleanData.Name}
 ----------------------
@@ -487,7 +422,28 @@ on Equip: ${weapon.EffectsOnEquip?.length ? weapon.EffectsOnEquip.join(", ") : "
 on Use: ${weapon.EffectsOnUse?.length ? weapon.EffectsOnUse.join(", ") : "-"}
 `.trim();
 
-  return viewModes.weapon === "json" ? JSON.stringify(cleanData, null, 2) : stats;
+  // ================= Structured Data for Other Scripts =================
+  const data = {
+    name: cleanData.Name,
+    type: weapon.Properties.Type,
+    class: weapon.Properties.Class,
+    category: weapon.Properties.Category,
+    HA, CA, hitRate,
+    minDamage, maxDamage, effectiveDamage,
+    apm, reloadTime, dps,
+    critChance, critDamage,
+    econ: {
+      efficiency: econ.Efficiency,
+      decayPEC, ammoBurn,
+      costPerUsePEC, costPerUsePED,
+      totalUses, totalCostPED, dpp
+    }
+  };
+
+  return {
+    display: viewModes.weapon === "json" ? JSON.stringify(cleanData, null, 2) : stats,
+    data
+  };
 }
 
 
