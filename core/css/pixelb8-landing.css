@@ -611,5 +611,5 @@ button#Toggleaccpanelinternals-Button {
             /* Visible grey lines */
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(50, 50, 50, 0.8) 50%);
             background-size: 100% 4px;
-            animation: flicker 3.15s infinite, crt-crawl 30s infinite linear;
+            animation: flicker 30s infinite, crt-crawl 30s infinite linear;
         }
