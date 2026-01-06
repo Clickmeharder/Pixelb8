@@ -1,11 +1,11 @@
-    const ALL_PLANETS = [
-        "Earth", "Calypso", "Monria/DSEC", "Rocktropia", "Howling Mine", "Toulan", 
-        "Next Island", "Arkadia", "Arkadia Moon", "Cyrene", "Aris", "Setesh", "Foma", 
-        "Crystal Palace", "Space"
-    ];
+const ALL_PLANETS = [
+    "Earth", "Calypso", "Monria/DSEC", "Rocktropia", "Howling Mine", "Toulan", 
+    "Next Island", "Arkadia", "Arkadia Moon", "Cyrene", "Aris", "Setesh", "Foma", 
+    "Crystal Palace", "Space"
+];
 
-	let collapsedPlanets = JSON.parse(localStorage.getItem('euColl_Planets')) || {};
-    let collapsedCats = JSON.parse(localStorage.getItem('euColl_Cats')) || {};
+let collapsedPlanets = JSON.parse(localStorage.getItem('euColl_Planets')) || {};
+let collapsedCats = JSON.parse(localStorage.getItem('euColl_Cats')) || {};
 //type: "SOR"
 //type: "SOF"
     const defaultMissions = [
@@ -51,130 +51,141 @@
 		{ id: 112, planet: "Space", category: "misc", name: "Arkadia Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  }
 		
     ];
-	// NOTE: If you have already loaded the page, clear your LocalStorage or change this version key to 'euMissions_v8' to see changes
-	let missions = JSON.parse(localStorage.getItem('euMissions_v7')) || [...defaultMissions];
+let missions = JSON.parse(localStorage.getItem('euMissions_v7')) || [...defaultMissions];
 
+function addMission() {
+    missions.push({
+        id: Date.now(),
+        planet: document.getElementById('mPlanet').value,
+        category: document.getElementById('mCat').value || "General",
+        name: document.getElementById('mName').value || "Unnamed",
+        cd: parseInt(document.getElementById('mCD').value),
+        type: document.getElementById('mType').value,
+        readyAt: 0,
+        inProgress: false
+    });
+    saveAndRender();
+}
 
-	function addMission() {
-        missions.push({
-            id: Date.now(),
-            planet: document.getElementById('mPlanet').value,
-            category: document.getElementById('mCat').value || "General",
-            name: document.getElementById('mName').value || "Unnamed",
-            cd: parseInt(document.getElementById('mCD').value),
-            type: document.getElementById('mType').value,
-            readyAt: 0,
-            inProgress: false
-        });
-        saveAndRender();
-    }
-
-	function handleAction(id, action) {
-        const m = missions.find(x => x.id === id);
-        if (action === 'start') {
-            if (m.type === 'SOR' || m.type === 'start on mission recieved') {
-                m.readyAt = Date.now() + (m.cd * 60 * 60 * 1000);
-                m.inProgress = false;
-            } else {
-                m.inProgress = true;
-            }
-        } else if (action === 'finish') {
+function handleAction(id, action) {
+    const m = missions.find(x => x.id === id);
+    if (action === 'start') {
+        if (m.type === 'SOR' || m.type === 'start on mission recieved') {
             m.readyAt = Date.now() + (m.cd * 60 * 60 * 1000);
             m.inProgress = false;
-        } else if (action === 'reset') {
-            m.readyAt = 0;
-            m.inProgress = false;
+        } else {
+            m.inProgress = true;
         }
-        saveAndRender();
+    } else if (action === 'finish') {
+        m.readyAt = Date.now() + (m.cd * 60 * 60 * 1000);
+        m.inProgress = false;
+    } else if (action === 'reset') {
+        m.readyAt = 0;
+        m.inProgress = false;
     }
+    saveAndRender();
+}
 
-    function saveAndRender() {
-        localStorage.setItem('euMissions_v7', JSON.stringify(missions));
-        render();
-    }
+function saveAndRender() {
+    localStorage.setItem('euMissions_v7', JSON.stringify(missions));
+    render();
+}
 
-// --- utility ---
+function togglePlanet(p) { 
+    collapsedPlanets[p] = !collapsedPlanets[p]; 
+    localStorage.setItem('euColl_Planets', JSON.stringify(collapsedPlanets)); 
+    render(); 
+}
 
-    function togglePlanet(p) { collapsedPlanets[p] = !collapsedPlanets[p]; localStorage.setItem('euColl_Planets', JSON.stringify(collapsedPlanets)); render(); }
-    function toggleCat(p, c) { collapsedCats[p+c] = !collapsedCats[p+c]; localStorage.setItem('euColl_Cats', JSON.stringify(collapsedCats)); render(); }
-    
-    function copyWP(text) {
-        navigator.clipboard.writeText(text);
-        alert("Waypoint copied to clipboard!");
-    }
+function toggleCat(p, c) { 
+    collapsedCats[p+c] = !collapsedCats[p+c]; 
+    localStorage.setItem('euColl_Cats', JSON.stringify(collapsedCats)); 
+    render(); 
+}
+
+function copyWP(text) {
+    navigator.clipboard.writeText(text);
+    alert("Waypoint copied to clipboard!");
+}
+
+function deleteMission(id) { 
+    missions = missions.filter(m => m.id !== id); 
+    saveAndRender(); 
+}
+
+function formatTime(ms) {
+    let s = Math.floor(ms / 1000);
+    return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m ${s % 60}s`;
+}
 
 function render() {
-        const container = document.getElementById('planetList');
-        container.innerHTML = '';
+    const container = document.getElementById('planetList');
+    if (!container) return;
+    container.innerHTML = '';
 
-        ALL_PLANETS.forEach(planetName => {
-            const pMissions = missions.filter(m => m.planet === planetName);
-            const readyCount = pMissions.filter(m => (!m.readyAt || m.readyAt <= Date.now()) && !m.inProgress).length;
-            const progressPct = pMissions.length > 0 ? (readyCount / pMissions.length) * 100 : 0;
+    ALL_PLANETS.forEach(planetName => {
+        const pMissions = missions.filter(m => m.planet === planetName);
+        const readyCount = pMissions.filter(m => (!m.readyAt || m.readyAt <= Date.now()) && !m.inProgress).length;
+        const progressPct = pMissions.length > 0 ? (readyCount / pMissions.length) * 100 : 0;
 
-            const section = document.createElement('div');
-            section.className = `planet-section ${collapsedPlanets[planetName] ? 'collapsed' : ''}`;
-            
-            let html = `
-                <div class="progress-container"><div class="progress-fill" style="width: ${progressPct}%"></div></div>
-                <div class="planet-header" onclick="togglePlanet('${planetName}')">
-                    <span>${planetName}</span>
-                    <div class="header-stats">
-                        <span class="stat-ready">${readyCount} Ready</span>
-                        <i class="fa-solid ${collapsedPlanets[planetName] ? 'fa-caret-down' : 'fa-caret-up'}"></i>
-                    </div>
+        const section = document.createElement('div');
+        section.className = `planet-section ${collapsedPlanets[planetName] ? 'collapsed' : ''}`;
+        
+        let html = `
+            <div class="progress-container"><div class="progress-fill" style="width: ${progressPct}%"></div></div>
+            <div class="planet-header" onclick="togglePlanet('${planetName}')">
+                <span>${planetName}</span>
+                <div class="header-stats">
+                    <span class="stat-ready">${readyCount} Ready</span>
+                    <i class="fa-solid ${collapsedPlanets[planetName] ? 'fa-caret-down' : 'fa-caret-up'}"></i>
                 </div>
-                <div class="planet-content">`;
+            </div>
+            <div class="planet-content">`;
 
-            const categories = [...new Set(pMissions.map(m => m.category))];
-            categories.forEach(cat => {
-                const isCatColl = collapsedCats[planetName+cat];
-                html += `<div class="category-wrapper ${isCatColl ? 'collapsed' : ''}">
-                    <div class="category-header" onclick="toggleCat('${planetName}','${cat}')">
-                        <span>${cat}</span><i class="fa-solid ${isCatColl ? 'fa-plus' : 'fa-minus'}"></i>
-                    </div>
-                    <div class="category-content">`;
+        const categories = [...new Set(pMissions.map(m => m.category))];
+        categories.forEach(cat => {
+            const isCatColl = collapsedCats[planetName+cat];
+            html += `<div class="category-wrapper ${isCatColl ? 'collapsed' : ''}">
+                <div class="category-header" onclick="toggleCat('${planetName}','${cat}')">
+                    <span>${cat}</span><i class="fa-solid ${isCatColl ? 'fa-plus' : 'fa-minus'}"></i>
+                </div>
+                <div class="category-content">`;
+            
+            pMissions.filter(m => m.category === cat).forEach(m => {
+                const isCD = m.readyAt && (m.readyAt > Date.now());
+                const stateClass = m.inProgress ? 'in-progress' : (isCD ? 'on-cooldown' : '');
                 
-                pMissions.filter(m => m.category === cat).forEach(m => {
-                    const isCD = m.readyAt && (m.readyAt > Date.now());
-                    const stateClass = m.inProgress ? 'in-progress' : (isCD ? 'on-cooldown' : '');
-                    
-                    html += `
-                        <div class="mission-row ${stateClass}">
-                            <div class="mission-info">
-                                <h4>${m.name}</h4>
-                                <div class="mission-meta">
-                                    ${m.difficulty ? `<span class="diff-badge">${m.difficulty}</span>` : ''}
-                                    <span>${m.reward || ''}</span>
-                                    ${m.wp ? `<span class="wp-tag" onclick="event.stopPropagation(); copyWP('${m.wp}')">COPY WP</span>` : ''}
-                                    <span class="cd-type-tag">[${m.type === 'SOR' ? 'SOR' : 'SOF'}]</span>
-                                </div>
+                html += `
+                    <div class="mission-row ${stateClass}">
+                        <div class="mission-info">
+                            <h4>${m.name}</h4>
+                            <div class="mission-meta">
+                                ${m.difficulty ? `<span class="diff-badge">${m.difficulty}</span>` : ''}
+                                <span>${m.reward || ''}</span>
+                                ${m.wp ? `<span class="wp-tag" onclick="event.stopPropagation(); copyWP('${m.wp}')">COPY WP</span>` : ''}
+                                <span class="cd-type-tag">[${m.type === 'SOR' ? 'SOR' : 'SOF'}]</span>
                             </div>
-                            <div class="status-text">
-                                ${m.inProgress ? '<span class="status-active">MISSION ACTIVE</span>' : 
-                                  isCD ? `<span class="status-timer">${formatTime(m.readyAt - Date.now())}</span>` : 
-                                  '<span class="status-ready">READY</span>'}
-                            </div>
-                            <div class="actions">
-                                ${!m.inProgress && !isCD ? `<button class="btn-start" onclick="event.stopPropagation(); handleAction(${m.id},'start')">START</button>` : ''}
-                                ${m.inProgress ? `<button class="btn-finish" onclick="event.stopPropagation(); handleAction(${m.id},'finish')">FINISH</button>` : ''}
-                                ${isCD ? `<button onclick="event.stopPropagation(); handleAction(${m.id},'reset')">RESET</button>` : ''}
-                            </div>
-                            <button class="btn-delete" onclick="event.stopPropagation(); deleteMission(${m.id})">×</button>
-                        </div>`;
-                });
-                html += `</div></div>`;
+                        </div>
+                        <div class="status-text">
+                            ${m.inProgress ? '<span class="status-active">MISSION ACTIVE</span>' : 
+                              isCD ? `<span class="status-timer">${formatTime(m.readyAt - Date.now())}</span>` : 
+                              '<span class="status-ready">READY</span>'}
+                        </div>
+                        <div class="actions">
+                            ${!m.inProgress && !isCD ? `<button class="btn-start" onclick="event.stopPropagation(); handleAction(${m.id},'start')">START</button>` : ''}
+                            ${m.inProgress ? `<button class="btn-finish" onclick="event.stopPropagation(); handleAction(${m.id},'finish')">FINISH</button>` : ''}
+                            ${isCD ? `<button onclick="event.stopPropagation(); handleAction(${m.id},'reset')">RESET</button>` : ''}
+                        </div>
+                        <button class="btn-delete" onclick="event.stopPropagation(); deleteMission(${m.id})">×</button>
+                    </div>`;
             });
-            section.innerHTML = html + `</div>`;
-            container.appendChild(section);
+            html += `</div></div>`;
         });
-    }
+        section.innerHTML = html + `</div>`;
+        container.appendChild(section);
+    });
+}
 
-    function formatTime(ms) {
-        let s = Math.floor(ms / 1000);
-        return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m ${s % 60}s`;
-    }
-    function deleteMission(id) { missions = missions.filter(m => m.id !== id); saveAndRender(); }
-    
-    setInterval(render, 1000);
-    render();
+// Start the engine
+setInterval(render, 1000);
+render();
