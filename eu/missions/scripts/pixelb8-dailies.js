@@ -178,4 +178,3 @@ function render() {
     
     setInterval(render, 1000);
     render();
-	localStorage.clear();
