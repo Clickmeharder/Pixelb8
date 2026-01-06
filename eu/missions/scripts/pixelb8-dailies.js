@@ -77,12 +77,16 @@ function addMission() {
     const wp = document.getElementById('mWp').value;
     const reward = document.getElementById('mReward').value;
 
-    // Get the new time values (default to 0 if empty)
-    const cdRaw = document.getElementById('mCD').value; // e.g., "1d 12h"
-    const totalMinutes = parseCooldown(cdRaw);
+    // 1. Collect from your 3 individual number boxes
+    const d = parseInt(document.getElementById('mDays').value) || 0;
+    const h = parseInt(document.getElementById('mHrs').value) || 0;
+    const m = parseInt(document.getElementById('mMins').value) || 0;
+
+    // 2. Convert them to total minutes
+    const totalMinutes = (d * 1440) + (h * 60) + m;
 
     if (totalMinutes <= 0) {
-        alert("Please set a cooldown time!");
+        alert("Please set a cooldown time using the D, H, or M boxes!");
         return;
     }
 
@@ -91,7 +95,7 @@ function addMission() {
         planet: planet,
         category: cat,
         name: name || "Unnamed",
-        cd: totalMinutes, // Now storing in minutes!
+        cd: totalMinutes, 
         type: type,
         wp: wp,
         reward: reward,
@@ -99,6 +103,12 @@ function addMission() {
         inProgress: false
     });
     saveAndRender();
+    
+    // Optional: Clear the inputs after adding
+    document.getElementById('mName').value = "";
+    document.getElementById('mDays').value = "";
+    document.getElementById('mHrs').value = ""; 
+    document.getElementById('mMins').value = "";
 }
 
 function handleAction(id, action) {
