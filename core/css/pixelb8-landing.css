@@ -78,9 +78,9 @@ option:disabled {
   --staticpage-maincontent-border-radius: 8px;
   --staticpage-maincontent-border-color: #4444443d;
   --staticpage-maincontent-text-color: #333;
-  --staticpage-maincontent-bg-color: #12273a29/*#222*/;
-  --staticpage-inner-bg-color: #222;
-  --staticpage-maincontent-opacity: 0.9;
+  --staticpage-maincontent-bg-color: #222;
+  --staticpage-inner-bg-color: #222222ab;
+  --staticpage-maincontent-opacity: 0.98;
 /*----------------------------------|*/
  /*STATICPAGE control panel styles*/
   --staticpage-controlpanel-border-width: 3px;
