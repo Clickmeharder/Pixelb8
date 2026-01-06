@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" href="/assets/images/logo/pixelbotfavicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-		body {
+        body {
             margin: 0;
             height: 100vh;
             display: flex;
@@ -44,19 +44,21 @@
             background: rgba(255, 0, 255, 0.1);
         }
 
-        /* TEXT HOVER STATE - Triggered by box hover */
-        .glitch-box:hover .error-message,
-        .glitch-box:hover p {
-            color: #ac4915;
-        }
-
+        /* 404 CODE SHIFT - Blue to Pink on Box Hover */
         .error-code {
             font-size: 8rem;
             margin: 0;
+            color: #0b7272;
+            text-shadow: 0 0 5px #0b7272;
+            transition: all 0.4s ease;
+        }
+
+        .glitch-box:hover .error-code {
             color: #ff00ff;
             text-shadow: 0 0 20px #ff00ff;
         }
 
+        /* TEXT COLOR SHIFT - Orange on Box Hover */
         .error-message {
             font-size: 1.5rem;
             letter-spacing: 5px;
@@ -70,6 +72,12 @@
             transition: color 0.4s;
         }
 
+        .glitch-box:hover .error-message,
+        .glitch-box:hover p {
+            color: #ac4915;
+        }
+
+        /* LINK BUTTON - 1.4s transition per your design */
         .home-link {
             font-size: 24px;
             color: #0ff;
@@ -88,7 +96,7 @@
             color: #ff00ff;
             border-color: #ff00ff;
             box-shadow: 0 0 20px #ff00ff;
-            background: rgba(255, 255, 255, 0.1); /* Subtle highlight */
+            background: rgba(255, 255, 255, 0.1);
         }
 
         @media (max-width: 600px) {
@@ -111,6 +119,5 @@
             <a href="/home" class="home-link">Return to Base</a>
         </div>
     </div>
-
 </body>
 </html>
