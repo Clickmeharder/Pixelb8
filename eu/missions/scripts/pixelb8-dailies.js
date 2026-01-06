@@ -106,13 +106,15 @@ function handleAction(id, action) {
 // --- UI CONTROLS ---
 
 function togglePlanet(p) {
+    // Force boolean toggle
     collapsedPlanets[p] = !collapsedPlanets[p];
     localStorage.setItem('euColl_Planets', JSON.stringify(collapsedPlanets));
     render();
 }
 
 function toggleCat(p, c) {
-    collapsedCats[p + c] = !collapsedCats[p + c];
+    const key = p + c;
+    collapsedCats[key] = !collapsedCats[key];
     localStorage.setItem('euColl_Cats', JSON.stringify(collapsedCats));
     render();
 }
