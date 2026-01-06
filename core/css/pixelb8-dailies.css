@@ -1,0 +1,47 @@
+        body { background: #000; color: #eee; font-family: 'Orbitron', sans-serif; margin: 20px; }
+        .timer-container { max-width: 1050px; margin: auto; }
+        
+        /* Planet Grouping */
+        .planet-section { background: rgba(20, 20, 20, 0.9); border: 1px solid #333; border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
+        .progress-container { width: 100%; height: 4px; background: #222; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #147b1d, #0ff); transition: width 0.5s; }
+        
+        .planet-header { background: #1a1a1a; color: #ffd700; padding: 12px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .header-stats { display: flex; gap: 15px; font-size: 0.75em; color: #ccc; align-items: center; }
+        .stat-ready { color: #147b1d; font-weight: bold; }
+
+        /* Category Subheaders */
+        .category-header { background: #111; color: #0ff; font-size: 0.85em; padding: 8px 20px; cursor: pointer; display: flex; justify-content: space-between; border-top: 1px solid #222; }
+        
+        /* Collapsing Logic */
+        .planet-content, .category-content { display: block; }
+        .planet-section.collapsed .planet-content, 
+        .category-wrapper.collapsed .category-content { display: none; }
+
+        /* Mission Rows */
+        .mission-row {
+            display: grid; grid-template-columns: 2.2fr 1fr 1.3fr 0.4fr; gap: 15px;
+            align-items: center; background: #0a0a0a; padding: 10px 20px;
+            border-bottom: 1px solid #1a1a1a; border-left: 4px solid #147b1d;
+        }
+        .mission-row.in-progress { border-left-color: #ffd700; background: #161401; }
+        .mission-row.on-cooldown { border-left-color: #ac4915; opacity: 0.7; }
+
+        .mission-info h4 { margin: 0; font-size: 0.9em; color: #fff; }
+        .mission-meta { font-size: 0.7em; color: #888; }
+        .cd-type-tag { font-size: 0.85em; color: #555; font-style: italic; }
+        
+        .status-text { font-family: monospace; font-weight: bold; text-align: center; }
+        .status-ready { color: #147b1d; font-size: 0.9em; }
+        .status-active { color: #ffd700; font-size: 0.8em; }
+        .status-timer { color: #0ff; font-size: 1.1em; }
+
+        /* Buttons */
+        .actions { display: flex; gap: 5px; justify-content: center; }
+        button { cursor: pointer; background: #2d2929; color: #eee; border: 1px solid #4d4949; padding: 6px 10px; font-family: 'Orbitron'; font-size: 0.75em; }
+        .btn-start { border-color: #147b1d; }
+        .btn-finish { border-color: #ffd700; color: #ffd700; }
+        .btn-delete { color: #ff4444; border: none; background: none; font-size: 1em; }
+
+        .add-controls { background: #111; padding: 15px; border: 1px solid #0ff; margin-bottom: 25px; display: flex; gap: 8px; flex-wrap: wrap; }
+        input, select { background: #000; border: 1px solid #444; color: #0ff; padding: 6px; font-size: 0.8em; }
