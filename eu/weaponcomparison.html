@@ -621,36 +621,6 @@ flex-direction:row;
 		</div>
 	</div>
 
-<script>
-  // === Main tabs ===
-  const mainTabs = document.querySelectorAll('.tab');
-  const mainContents = document.querySelectorAll('.tab-content');
-
-  mainTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      mainTabs.forEach(t => t.classList.remove('active'));
-      mainContents.forEach(c => c.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById(tab.dataset.tab).classList.add('active');
-    });
-  });
-
-  // === Loot subtabs ===
-  const lootTabs = document.querySelectorAll('.weaponcompare-tab');
-  const lootContents = document.querySelectorAll('.weaponcompare-subtab-content');
-
-  lootTabs.forEach(tab => {
-    tab.addEventListener('click', (e) => {
-      lootTabs.forEach(t => t.classList.remove('active'));
-      lootContents.forEach(c => c.classList.remove('active'));
-      tab.classList.add('active');
-      const target = document.getElementById(tab.dataset.tab);
-      if (target) target.classList.add('active');
-    });
-  });
-</script>
-
-
   <script src="js/renderer.js"></script>
   <script src="js/nexusApi.js"></script>
   <script src="../core/js/pixelb8-global.js"></script>
