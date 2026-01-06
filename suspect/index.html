@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.U.S.P.E.C.T - PixelB8.LoL</title>
+    <title>S.U.S.P.E.C.T - AlphaBeta Release</title>
     <link rel="stylesheet" href="../core/css/pixelb8-landing.css">
     <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
@@ -21,39 +21,45 @@
             background: black;
             color: #0b7272;
             font-family: 'Orbitron', sans-serif;
+            /* Ensures the whole browser scrolls, not just one box */
+            overflow-y: auto; 
             overflow-x: hidden;
-            overflow-y: auto;
         }
 
-        /* Adjust the row to handle the long content */
         .row {
             width: 90%;
-            max-width: 1000px;
-            margin-top: 100px; /* Space for the header */
+            max-width: 900px;
+            margin-top: 40px;
             z-index: 10;
+            flex-shrink: 0; /* Prevents rows from squishing */
+        }
+
+        /* The first row needs extra margin for the fixed header */
+        .row:first-of-type {
+            margin-top: 120px;
         }
 
         .themed-main {
-            text-align: left; /* Better for reading guides */
-            margin-bottom: 50px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #0b7272;
+            padding: 30px;
+            height: auto;      /* Let box grow with text */
+            overflow: visible; /* No internal scrollbars */
+            border-radius: 4px;
         }
 
         .app-screenshot {
             width: 100%;
-            max-width: 700px;
+            max-width: 800px;
             display: block;
             margin: 20px auto;
-            border: 2px solid #0b7272;
-            border-radius: 8px;
-            box-shadow: 0 0 15px #0b7272;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
         }
 
         .download-zone {
             text-align: center;
-            background: rgba(11, 114, 114, 0.1);
-            padding: 30px;
-            border: 1px dashed #0b7272;
-            margin: 30px 0;
+            padding: 20px;
         }
 
         .dl-button {
@@ -61,29 +67,37 @@
             color: #0ff;
             padding: 15px 40px;
             border: 2px solid #0ff;
-            background: transparent;
+            background: rgba(0, 255, 255, 0.05);
             text-transform: uppercase;
             text-decoration: none;
             display: inline-block;
             transition: all 0.4s;
+            cursor: pointer;
         }
 
         .dl-button:hover {
             color: #ff00ff;
             border-color: #ff00ff;
             box-shadow: 0 0 20px #ff00ff;
+            background: rgba(255, 0, 255, 0.1);
         }
 
         .warning-box {
             border-left: 5px solid #ff00ff;
-            padding: 15px;
+            padding: 20px;
             background: rgba(255, 0, 255, 0.05);
-            margin-top: 20px;
+            margin: 20px 0;
         }
 
-        .highlight { color: #ff00ff; }
+        .highlight { color: #ff00ff; font-weight: bold; }
         
-        h1, h2, h3 { color: #0ff; text-transform: uppercase; }
+        h1, h2, h3 { color: #0ff; text-transform: uppercase; margin-top: 0; }
+
+        /* Space at the very bottom so the last row isn't touching the edge */
+        .footer-spacer {
+            height: 100px;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -104,40 +118,62 @@
     </div>
 
     <div class="row">
-        <h2 id="themed-main-title">Secret Universal Services Personal Entropia Connection Tool</h2>
-        
+        <h2 id="themed-main-title">Project: S.U.S.P.E.C.T</h2>
         <section class="themed-main">
-            <p>Welcome to the <strong>AlphaBeta</strong> release of S.U.S.P.E.C.T. This desktop application is designed to bridge the gap between your Entropia Universe logs and your gameplay data.</p>
-            
-            <img src="../assets/images/suspect_preview.png" alt="S.U.S.P.E.C.T Interface" class="app-screenshot">
+            <p>The <strong>Secret Universal Services Personal Entropia Connection Tool</strong> is a specialized desktop companion. It monitors your local game files to provide real-time data overlays and automated hunt logging.</p>
+            <p>Designed by hunters, for hunters. No more tabbing out to check your CSVs.</p>
+        </section>
+    </div>
 
-            <h3>What does it do?</h3>
-            <p>It "listens" to your local ChatLog.txt and extracts specific data in real-time. Whether you are tracking a long hunt or monitoring global events, S.U.S.P.E.C.T stays on top (literally) to keep you informed.</p>
+    <div class="row">
+        <h2 id="themed-main-title">Tactical Interface</h2>
+        <section class="themed-main">
+            <p>Keep your performance metrics in view at all times with the "Always-on-Top" HUD.</p>
+            <img src="../assets/images/suspect_preview.png" alt="S.U.S.P.E.C.T Interface Preview" class="app-screenshot">
+        </section>
+    </div>
 
+    <div class="row">
+        <h2 id="themed-main-title">Acquisition</h2>
+        <section class="themed-main">
             <div class="download-zone">
                 <a href="https://github.com/Clickmeharder/Pixelb8/releases/latest/download/suspect_setup.exe" class="dl-button">
-                    <i class="fa-solid fa-download"></i> Download v1.0.0
+                    <i class="fa-solid fa-download"></i> Download AlphaBeta v1.0.0
                 </a>
-                <p>Compatible with Windows 10/11</p>
+                <p style="margin-top: 15px;">Target OS: Windows 10/11 | Format: .EXE Installer</p>
             </div>
+        </section>
+    </div>
 
-            <h3>How to Install (The "AlphaBeta" Way)</h3>
-            <p>Since we are in early development, the installer is currently "unsigned." Windows will try to protect you from this awesome tool. To proceed:</p>
+    <div class="row">
+        <h2 id="themed-main-title">Security Protocol</h2>
+        <section class="themed-main">
+            <p>This software is currently in <strong>AlphaBeta</strong> and is unsigned. Windows SmartScreen will attempt to block the installation. This is a standard procedure for indie tools.</p>
+            
+            
             
             <div class="warning-box">
-                <p>1. Run <strong>suspect_setup.exe</strong>.</p>
-                <p>2. When the blue "Windows protected your PC" screen appears, click <span class="highlight">"More Info"</span>.</p>
-                <p>3. Click the <span class="highlight">"Run Anyway"</span> button that appears at the bottom.</p>
+                <p>1. Open <span class="highlight">suspect_setup.exe</span>.</p>
+                <p>2. On the "Windows protected your PC" screen, click <span class="highlight">"More Info"</span>.</p>
+                <p>3. Select <span class="highlight">"Run Anyway"</span> to proceed with the installation.</p>
             </div>
+        </section>
+    </div>
 
-            <h3>Setup Instructions</h3>
+    <div class="row">
+        <h2 id="themed-main-title">Configuration</h2>
+        <section class="themed-main">
+            <h3>Linking the Data Stream:</h3>
             <ul>
-                <li>Launch the app and wait for the Splash Screen to load.</li>
-                <li>Go to Settings and point the app to your <strong>Documents/Entropia Universe/ChatLog.txt</strong> folder.</li>
-                <li>Happy Hunting!</li>
+                <li>Launch S.U.S.P.E.C.T from your desktop.</li>
+                <li>Navigate to the <strong>Settings</strong> menu.</li>
+                <li>Set your <strong>ChatLog path</strong> (Usually: C:\Users\YourName\Documents\Entropia Universe\ChatLog.txt).</li>
+                <li>Ensure "Chat Logging" is enabled in your in-game Entropia options.</li>
             </ul>
         </section>
     </div>
+
+    <div class="footer-spacer"></div>
 
     <script src="../core/js/pixelb8-global.js"></script>
 </body>
