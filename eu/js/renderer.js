@@ -30,7 +30,7 @@
 function toggleSection(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
-        section.classList.toggle('collapsed');
+        section.classList.toggle('collapsedSection');
     }
 }
 
