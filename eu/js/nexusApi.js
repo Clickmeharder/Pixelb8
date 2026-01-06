@@ -292,7 +292,7 @@ function formatKeyLabel(key) {
   return key;
 }
 // ================= Display Formulas UI =================
-function displayFormulas() {
+/* function displayFormulas() {
   const formulaDiv = document.getElementById("LoadoutFormulas");
   if (!formulaDiv) return;
 
@@ -327,6 +327,19 @@ function displayFormulas() {
     });
     alert("Formulas updated!");
   });
+} */
+function displayFormulas() {
+  const formulaDiv = document.getElementById("LoadoutFormulas");
+  if (!formulaDiv) return;
+
+  formulaDiv.innerHTML = `
+    <h4>Entropia Wiki Formulas (Read-Only)</h4>
+    <ul>
+      ${Object.keys(entropiaFormulas).map(key => `
+        <li><strong>${key}:</strong><pre>${entropiaFormulas[key]}</pre></li>
+      `).join('')}
+    </ul>
+  `;
 }
 displayFormulas(); 
 // ================= Main stats function =================
