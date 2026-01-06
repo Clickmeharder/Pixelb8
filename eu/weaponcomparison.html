@@ -286,31 +286,40 @@ flex-direction:row;
   margin-bottom: 8px;
 }
 
-/* Hide stats-grid when the parent has the 'collapsedSection' class */
-.loadout-section.collapsedSection .stats-grid {
-    display: none;
+/* 1. Hide the entire section when it has this class */
+.loadout-section.collapsedSection {
+    display: none !important;
 }
 
-/* Style the header to look clickable */
-.loadout-section h3 {
+/* 2. Style the headers (since they are now separate) */
+#loadout-rightpanelB h3 {
     cursor: pointer;
+    background: #333;
+    padding: 10px;
+    margin: 5px 0 2px 0; /* Tightened bottom margin to touch the content */
+    border: 1px solid #444;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 5px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
+    color: #ffd700; /* Gold color from your previous style */
 }
 
-/* Add a small arrow indicator */
-.loadout-section h3::after {
-    content: '▼';
-    font-size: 0.7em;
-    transition: transform 0.3s;
+/* 3. Hover effect */
+#loadout-rightpanelB h3:hover {
+    background: #444;
 }
 
-.loadout-section.collapsedSection h3::after {
-    content: '▶';
+/* 4. Arrow Indicators (Using adjacent sibling selector) */
+/* This says: find the h3 that is followed by a HIDDEN section */
+#loadout-rightpanelB h3::after {
+    content: '▼'; /* Open state */
+    font-size: 0.8em;
+}
+
+/* If the DIV immediately after the H3 has collapsedSection, change arrow to side */
+h3 + .loadout-section.collapsedSection::before {
+   /* This is tricky with CSS alone when the H3 is outside. 
+      It's easier to handle the arrow in JS now. See below. */
 }
 
 /* Make right panel stack below main on small screens */

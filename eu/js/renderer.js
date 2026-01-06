@@ -31,9 +31,16 @@ function toggleSection(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
         section.classList.toggle('collapsedSection');
+        
+        // Optional: Update the arrow on the button that was clicked
+        // This looks for the H3 that triggered the event
+        const header = event.currentTarget;
+        const isCollapsed = section.classList.contains('collapsedSection');
+        
+        // You can even add a class to the header for extra styling
+        header.classList.toggle('header-closed', isCollapsed);
     }
 }
-
 // ===== Optional Voice Control (stub) =====
 function initVoiceControl() {
   if (!('webkitSpeechRecognition' in window)) {
