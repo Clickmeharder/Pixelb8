@@ -8,6 +8,34 @@
     <link rel="icon" type="image/png" href="/assets/images/logo/pixelbotfavicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* 1. THE RANDOM SYSTEM TWITCH */
+        @keyframes system-glitch {
+            0% { transform: translate(0,0) skew(0deg); }
+            2% { transform: translate(-4px, 2px) skew(-2deg); filter: contrast(1.5); }
+            4% { transform: translate(4px, -1px) skew(2deg); }
+            6% { transform: translate(0,0) skew(0deg); }
+            48% { transform: translate(0,0) skew(0deg); } /* Stability pause */
+            50% { transform: translate(-10px, 4px) scaleY(1.02); filter: hue-rotate(90deg); } /* Sudden snap */
+            52% { transform: translate(0,0) skew(0deg); }
+            100% { transform: translate(0,0) skew(0deg); }
+        }
+
+        /* 2. BACKGROUND STAR COLOR CORRUPTION */
+        @keyframes star-glitch {
+            0% { filter: brightness(1) hue-rotate(0deg); }
+            49% { filter: brightness(1) hue-rotate(0deg); }
+            50% { filter: brightness(2) hue-rotate(180deg); } /* Quick color flash */
+            51% { filter: brightness(1) hue-rotate(0deg); }
+            100% { filter: brightness(1) hue-rotate(0deg); }
+        }
+
+        /* 3. SCANLINE FLICKER */
+        @keyframes flicker {
+            0% { opacity: 0.15; }
+            50% { opacity: 0.25; }
+            100% { opacity: 0.15; }
+        }
+
         body {
             margin: 0;
             height: 100vh;
@@ -20,56 +48,57 @@
             font-family: 'Orbitron', sans-serif;
             text-align: center;
             overflow: hidden;
+            /* Entire page twitches on a 5.3s cycle */
+            animation: system-glitch 5.3s infinite linear;
         }
 
-        /* Scanline Overlay */
+        .background-container {
+            /* Stars shift color on a different 7s cycle */
+            animation: star-glitch 7s infinite;
+        }
+
         .scanlines {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
             background-size: 100% 4px;
             z-index: 5;
             pointer-events: none;
+            animation: flicker 0.1s infinite;
         }
 
         .error-container {
             width: 90%;
             max-width: 600px;
             z-index: 10;
-            transition: transform 0.1s;
-        }
-
-        @keyframes glitch-shake {
-            0% { transform: skew(0deg); }
-            10% { transform: skew(1deg) translate(-2px, 1px); }
-            20% { transform: skew(-1deg) translate(2px, -1px); }
-            30% { transform: skew(0.5deg) translate(-1px, -2px); }
-            100% { transform: skew(0deg); }
         }
 
         .glitch-box {
             padding: 30px;
             height: auto;
             border: 2px solid #0b7272;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             border-radius: 4px;
-            transition: all 2.4s;
+            transition: all 0.4s;
+            /* Box twitches on its own 3.1s cycle */
+            animation: system-glitch 3.1s infinite reverse; 
         }
 
-        /* ACTIVATE GLITCH ON HOVER */
+        /* INTENSIFY ON HOVER */
         .glitch-box:hover {
             border: 2px solid #0ff;
-            box-shadow: 0 0 20px #ff00ff;
-            background: rgba(255, 0, 255, 0.1);
-            animation: glitch-shake 0.2s infinite; /* Makes the box vibrate */
+            box-shadow: 0 0 25px #ff00ff;
+            background: rgba(255, 0, 255, 0.15);
+            animation: system-glitch 0.3s infinite; /* High speed panic */
         }
 
+        /* 404 CODE SHIFT */
         .error-code {
             font-size: 8rem;
             margin: 0;
             color: #0b7272;
             text-shadow: 0 0 5px #0b7272;
-            transition: all 2.4s ease;
+            transition: all 1.4s ease;
         }
 
         .glitch-box:hover .error-code {
@@ -77,13 +106,14 @@
             text-shadow: 0 0 20px #ff00ff;
         }
 
+        /* TEXT COLOR SHIFT */
         .error-message {
             font-size: 1.5rem;
             letter-spacing: 5px;
             text-transform: uppercase;
             margin-bottom: 30px;
             color: #0ff;
-            transition: color 2.4s;
+            transition: color 0.4s;
         }
 
         p { transition: color 0.4s; }
@@ -93,6 +123,7 @@
             color: #ac4915;
         }
 
+        /* RETURN BUTTON */
         .home-link {
             font-size: 24px;
             color: #0ff;
@@ -102,7 +133,7 @@
             text-transform: uppercase;
             text-decoration: none;
             display: inline-block;
-            transition: all 2.4s;
+            transition: all 1.4s;
             cursor: pointer;
             margin-top: 20px;
         }
@@ -124,7 +155,8 @@
     <div class="background-container">
         <div class="stars"></div>
         <div class="twinkling"></div>
-        <div class="scanlines"></div> </div>
+        <div class="scanlines"></div>
+    </div>
 
     <div class="error-container">
         <div class="glitch-box">
