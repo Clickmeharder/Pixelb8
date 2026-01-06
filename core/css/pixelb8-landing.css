@@ -604,14 +604,14 @@ button#Toggleaccpanelinternals-Button {
 			height: 100%;
 			z-index: 20;
 			pointer-events: none;
-			background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+			background: radial-gradient(circle, rgba(0,0,0,0) 75%, rgba(0,0,0,0.8) 100%);
         }
 
         .scanlines {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             /* Visible grey lines */
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(50, 50, 50, 0.8) 50%);
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(50, 50, 50, 0.6) 50%);
             background-size: 100% 4px;
-            animation: flicker 30s infinite, crt-crawl 60s infinite linear;
+            animation: flicker 60s infinite, crt-crawl 60s infinite linear;
         }
