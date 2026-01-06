@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - SIGNAL LOST</title>
+    <link rel="stylesheet" href="/core/css/pixelb8-landing.css">
+    <link rel="icon" type="image/png" href="/assets/images/logo/pixelbotfavicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: black;
+            color: #ff00ff; /* Pink for error/warning */
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+        }
+
+        .error-code {
+            font-size: 8rem;
+            margin: 0;
+            text-shadow: 0 0 20px #ff00ff;
+        }
+
+        .error-message {
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+
+        .glitch-box {
+            border: 2px solid #ff00ff;
+            padding: 20px;
+            background: rgba(255, 0, 255, 0.1);
+        }
+
+        .home-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: 1px solid #0ff;
+            color: #0ff;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+
+        .home-link:hover {
+            background: #0ff;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="stars"></div>
+        <div class="twinkling"></div>
+    </div>
+
+    <div class="glitch-box">
+        <h1 class="error-code">404</h1>
+        <p class="error-message">Connection Terminated</p>
+        <p>The coordinate you requested does not exist in this sector.</p>
+        <a href="/home" class="home-link">Return to Base</a>
+    </div>
+
+    </body>
+</html>
