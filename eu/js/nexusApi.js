@@ -291,43 +291,7 @@ function formatKeyLabel(key) {
   if (key === "reloadTime") return "Reload Time";
   return key;
 }
-// ================= Display Formulas UI =================
-/* function displayFormulas() {
-  const formulaDiv = document.getElementById("LoadoutFormulas");
-  if (!formulaDiv) return;
 
-  formulaDiv.innerHTML = `
-    <h4>Entropia Wiki Formulas (Read-Only)</h4>
-    <ul>
-      ${Object.keys(entropiaFormulas).map(key => `
-        <li><strong>${key}:</strong><pre>${entropiaFormulas[key]}</pre></li>
-      `).join('')}
-    </ul>
-
-    <h4>Editable Weapon Formulas</h4>
-    <ul>
-      ${Object.keys(weaponFormulas).map(key => `
-        <li>
-          <label>${key}:</label><br>
-          <textarea id="formula_${key}" style="width:100%;height:60px;">${weaponFormulas[key].toString()}</textarea>
-        </li>
-      `).join('')}
-    </ul>
-    <button id="applyFormulas">Apply Formulas</button>
-  `;
-
-  document.getElementById("applyFormulas").addEventListener("click", () => {
-    Object.keys(weaponFormulas).forEach(key => {
-      try {
-        weaponFormulas[key] = eval(document.getElementById(`formula_${key}`).value);
-      } catch(e) {
-        console.error(`Error applying formula ${key}:`, e);
-        alert(`Error in formula ${key}. Check console for details.`);
-      }
-    });
-    alert("Formulas updated!");
-  });
-} */
 function displayFormulas() {
   const formulaDiv = document.getElementById("LoadoutFormulas");
   if (!formulaDiv) return;
