@@ -40,3 +40,18 @@ document.querySelectorAll('.tab-btn').forEach((btn) => {
   });
 });
 //-------------------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", function() {
+    // Get the current path, removing any trailing slashes or "index.html"
+    const currentPath = window.location.pathname.replace(/\/$/, "").replace("/index.html", "");
+    const navLinks = document.querySelectorAll(".nav-menu a");
+
+    navLinks.forEach(link => {
+        // Create a URL object to easily get the pathname of the link
+        const linkPath = new URL(link.href).pathname.replace(/\/$/, "").replace("/index.html", "");
+        
+        if (linkPath === currentPath) {
+            link.classList.add("active");
+            // Optional: console.log("Matched: " + linkPath); // For debugging
+        }
+    });
+});

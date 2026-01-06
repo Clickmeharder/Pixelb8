@@ -352,6 +352,16 @@ animated twinkly stars background styles
 			border-bottom: 2px inset #ff00ff;
         }
 
+		/* This targets the link that JS identifies as the current page */
+		.nav-menu a.active {
+			color: #ff00ff !important; /* Neon Pink */
+			border-bottom: 2px inset #ff00ff !important;
+			pointer-events: none; /* Disables clicking */
+			cursor: default;
+			opacity: 0.8;
+			text-shadow: 0 0 8px #ff00ff; /* Subtle glow */
+		}
+
         .enter-button {
             font-size: 24px;
             color: #0ff;
