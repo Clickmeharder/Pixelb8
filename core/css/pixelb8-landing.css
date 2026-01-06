@@ -292,16 +292,17 @@ animated twinkly stars background styles
         }
 		
         .header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 6px;
-            text-align: center;
-            font-size: 28px;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            border-bottom: 2px solid #0b7272;
+			position: fixed;
+			top: 0;
+			width: 100%;
+			background: rgba(0, 0, 0, 0.75);
+			padding: 6px;
+			text-align: center;
+			font-size: 28px;
+			text-transform: uppercase;
+			letter-spacing: 4px;
+			border-bottom: 2px solid #0b7272;
+			z-index: 11;
         }
 
         .menu-button {
@@ -315,6 +316,7 @@ animated twinkly stars background styles
             padding: 2px 4px;
             cursor: pointer;
             transition: all 0.3s;
+			z-index: 100;
         }
 
         .menu-button:hover {
