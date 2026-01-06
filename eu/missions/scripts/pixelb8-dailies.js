@@ -31,7 +31,7 @@ let collapsedCats = JSON.parse(localStorage.getItem('euColl_Cats')) || {};
 		// SETESH
 		{ id: 101, planet: "Setesh", category: "misc", name: "Arkadia Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
 		// FOMA
-		{ id: 102, planet: "FOMA", category: "misc", name: "Arkadia Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
+		{ id: 102, planet: "Foma", category: "misc", name: "Arkadia Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
 		// CRYSTAL PALACE
 		{ id: 103, planet: "Crystal Palace", category: "misc", name: "Arkadia Placeholder 1",type: "SOR", cd: 21, reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
         // MONRIA/DSEC
@@ -198,7 +198,9 @@ const renderCategory = (planetName, cat, pMissions) => {
 };
 
 const renderPlanet = (planetName) => {
-    const pMissions = missions.filter(m => m.planet === planetName);
+    // FIX: Make filtering case-insensitive so "Foma" matches "FOMA"
+    const pMissions = missions.filter(m => m.planet.toLowerCase() === planetName.toLowerCase());
+    
     if (pMissions.length === 0) return ''; 
 
     const readyCount = pMissions.filter(m => (!m.readyAt || m.readyAt <= Date.now()) && !m.inProgress).length;

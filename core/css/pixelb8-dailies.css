@@ -17,12 +17,17 @@
         /* Ensure these rules are in your pixelb8-dailies.css */
 		/* --- Collapsing Logic --- */
 		/* Ensure the content area is visible by default */
+		/* --- Updated Collapsing Logic --- */
+
+		/* --- Corrected Collapsing Logic --- */
+
+		/* 1. Reset defaults to ensure they are visible */
 		.planet-content, 
 		.category-content {
 			display: block;
 		}
 
-		/* Hide only the content when the parent has the .collapsed class */
+		/* 2. When the parent has the .collapsed class, ONLY hide the content div */
 		.planet-section.collapsed .planet-content {
 			display: none !important;
 		}
@@ -31,11 +36,18 @@
 			display: none !important;
 		}
 
-		/* Optional: rotate caret icon when collapsed */
-		.planet-section.collapsed .fa-caret-up {
-			transform: rotate(180deg);
+		/* 3. Ensure the headers are always flex and visible */
+		.planet-header, 
+		.category-header {
+			display: flex !important;
+			cursor: pointer;
 		}
 
+		/* 4. Maintenance: Force the section to stay on screen even when empty */
+		.planet-section {
+			min-height: auto;
+			overflow: visible; /* Changed from hidden to ensure headers aren't clipped */
+		}
 		/* Optional: style for the global buttons */
 		.global-controls button {
 			background: #111;
