@@ -8,7 +8,7 @@ const ALL_PLANETS = [
 
 let collapsedPlanets = JSON.parse(localStorage.getItem('euColl_Planets')) || {};
 let collapsedCats = JSON.parse(localStorage.getItem('euColl_Cats')) || {};
-
+//
     const defaultMissions = [
 		{ id: 1, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 1", cd: 21,type: "SOR", reward: "1 Token (+20 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Easy", area: "Argus/PA/TP/etc" },
         { id: 2, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 2", cd: 21,type: "SOF", reward: "1 Token (+20 Bonus)",  wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Medium", area: "Argus/PA/TP/etc" },
