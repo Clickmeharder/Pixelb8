@@ -288,6 +288,6 @@ function render() {
 setInterval(() => {
     render();
 }, 1000);
-localStorage.clear();
+
 render();
 console.log('pixelb8-dailies.js version 1.0.2');
