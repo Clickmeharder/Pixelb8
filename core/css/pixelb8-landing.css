@@ -586,7 +586,7 @@ button#Toggleaccpanelinternals-Button {
         /* 2. CRT EFFECTS */
         @keyframes flicker {
             0% { opacity: 0.2; }
-            50% { opacity: 0.3; }
+            50% { opacity: 0.15; }
             100% { opacity: 0.2; }
         }
 
@@ -597,12 +597,14 @@ button#Toggleaccpanelinternals-Button {
 
         /* THE CRT OVERLAY (Scanlines + Vignette) */
         .crt-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 20;
-            pointer-events: none;
-            /* The Vignette: Dark corners */
-            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+			position: fixed;
+			top: 42px;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			z-index: 20;
+			pointer-events: none;
+			background: radial-gradient(circle, rgba(0,0,0,0) 76%, rgba(0,0,0,0.8) 100%);
         }
 
         .scanlines {
@@ -611,5 +613,5 @@ button#Toggleaccpanelinternals-Button {
             /* Visible grey lines */
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(50, 50, 50, 0.8) 50%);
             background-size: 100% 4px;
-            animation: flicker 30s infinite, crt-crawl 30s infinite linear;
+            animation: flicker 30s infinite, crt-crawl 60s infinite linear;
         }
