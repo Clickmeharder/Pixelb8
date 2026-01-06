@@ -287,7 +287,7 @@ function render() {
 // This keeps the timers updating every second without flickering the whole UI
 setInterval(() => {
     render();
-}, 1000);
+}, 999999);//1000);
 
 render();
 console.log('pixelb8-dailies.js version 1.0.2');
