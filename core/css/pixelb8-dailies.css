@@ -6,12 +6,12 @@
         .progress-container { width: 100%; height: 4px; background: #222; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #147b1d, #0ff); transition: width 0.5s; }
         
-        .planet-header { background: #1a1a1a; color: #ffd700; padding: 12px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .planet-header { background: #1a1a1a; color: #ffd700; padding: 4px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .header-stats { display: flex; gap: 15px; font-size: 0.75em; color: #ccc; align-items: center; }
         .stat-ready { color: #147b1d; font-weight: bold; }
 
         /* Category Subheaders */
-        .category-header { background: #111; color: #0ff; font-size: 0.85em; padding: 8px 20px; cursor: pointer; display: flex; justify-content: space-between; border-top: 1px solid #222; }
+        .category-header { background: #111; color: #0ff; font-size: 0.82em; padding: 4px 20px; cursor: pointer; display: flex; justify-content: space-between; border-top: 1px solid #222; }
         
         /* Collapsing Logic */
         /* Ensure these rules are in your pixelb8-dailies.css */
@@ -28,8 +28,8 @@
 		.category-content {
 			display: block;
 		}
-		.planet-section.collapsedSection {height: 52px;}
-		.category-wrapper.collapsedSection {height: 32px;}
+		.planet-section.collapsedSection {height: 34px;}
+		.category-wrapper.collapsedSection {height: 20px;}
 		/* 2. When the parent has the .collapsed class, ONLY hide the content div */
 		.planet-section.collapsedSection .planet-content {
 			display: none !important;
