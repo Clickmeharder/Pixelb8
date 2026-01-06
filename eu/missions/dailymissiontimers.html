@@ -48,10 +48,13 @@
 				<option value="Space">Space</option>
 			</select>
 			<input type="text" id="mWp" placeholder="[Planet Calypso, 123, 456, 000, example waypoint]">
-			<input type="text" id="mReward" placeholder="[Planet Calypso, 123, 456, 000, example waypoint]">
-			<select id="mCD">
-				<option value="21">21h</option><option value="24">24h</option><option value="16">16h</option>
-			</select>
+			<input type="text" id="mReward" placeholder="Rewards (comma seperated)">
+			<div class="cd-input-group" style="display: inline-flex; gap: 5px; align-items: center; background: #1a1a1a; padding: 5px; border-radius: 4px; border: 1px solid #333;">
+				<span style="font-size: 0.7em; color: #888; margin-right: 5px;">COOLDOWN:</span>
+				<input type="number" id="mDays" placeholder="D" min="0" style="width: 35px; text-align: center;">
+				<input type="number" id="mHrs" placeholder="H" min="0" style="width: 35px; text-align: center;" value="21">
+				<input type="number" id="mMins" placeholder="M" min="0" style="width: 35px; text-align: center;">
+			</div>
 			<select id="mType">
 				<option value="SOR">Start on Received</option>
 				<option value="SOF">Start on Finished</option>
