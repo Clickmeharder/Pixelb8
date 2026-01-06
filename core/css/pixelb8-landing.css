@@ -58,8 +58,8 @@ option:disabled {
   --staticpage-HFpanels-border-radius: 8px;
   --staticpage-HFpanels-border-color: #38567f9c;
   --staticpage-HFpanels-bg-color: #0c1c2c;
-  --staticpage-HTitle-text-color: #b14f13;/*#5f5c5c;*//*#035469;*/
-  --staticpage-HFpanels-text-color: #333;
+  --staticpage-HTitle-text-color: #5f5c5c;/*#035469;*/
+  --staticpage-HFpanels-text-color: #b14f13;/*#333;*/
   --staticpage-HFpanels-opacity: 0.9;
 
 /*----------------------------------|*/
