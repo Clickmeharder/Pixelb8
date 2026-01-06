@@ -11,7 +11,7 @@
 
         body {
 			margin: auto;
-			margin-top: 50px;
+			margin-top: 0px;
 			/* height: 100vh; */
 			display: flex;
 			flex-direction: column;
@@ -73,8 +73,15 @@
 			overflow: hidden;
 			overflow-y: auto;
 			border-radius: 4px;
+			transition: all 0.4s;
         }
-
+		.themed-main:hover {
+			color: ;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 20px #ff00ff;
+            background: rgba(255, 0, 255, 0.1);
+		}
+			
         .app-screenshot {
             width: 100%;
             max-width: 800px;
@@ -98,7 +105,7 @@
             text-transform: uppercase;
             text-decoration: none;
             display: inline-block;
-            transition: all 0.4s;
+            transition: all 1.4s;
             cursor: pointer;
         }
 
@@ -153,7 +160,7 @@
 
     <div class="row">
 		<h2 id="themed-main-title">Latest Transmission</h2>
-		<section class="themed-main" style="border-color: #ff00ff;">
+		<section class="themed-main">
             <h3 style="color: #ff00ff;">NEW TOOL RELEASE: S.U.S.P.E.C.T v1.0.0</h3>
             <p>Our flagship Entropia Universe log tracker has officially entered <strong>AlphaBeta</strong>. Track your hunts, monitor globals, and export your data with ease.</p>
             <a href="https://Pixelb8.lol/suspect" class="enter-button" style="display: inline-block; margin-top: 10px; font-size: 14px;">View Project</a>
