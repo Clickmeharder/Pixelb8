@@ -21,7 +21,6 @@
 
 		/* --- Corrected Collapsing Logic --- */
 		.collapsedSection {
-			height: 48px;
 			transition: height 0.6s ease;
 		}
 		/* 1. Reset defaults to ensure they are visible */
@@ -29,12 +28,14 @@
 		.category-content {
 			display: block;
 		}
-
+		.planet-section.collapsedSection {height: 52px;}
+		.category-wrapper.collapsedSection {height: 32px;}
 		/* 2. When the parent has the .collapsed class, ONLY hide the content div */
 		.planet-section.collapsedSection .planet-content {
 			display: none !important;
+			
 		}
-
+		
 		.category-wrapper.collapsedSection .category-content {
 			display: none !important;
 		}
