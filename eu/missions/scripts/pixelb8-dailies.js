@@ -234,4 +234,4 @@ function render() {
     container.innerHTML = ALL_PLANETS.map(renderPlanet).join('');
 }
 
-console.log('pixelb8-dailies.js version 1.0.0');
+console.log('pixelb8-dailies.js version 1.0.1');
