@@ -14,10 +14,31 @@
         .category-header { background: #111; color: #0ff; font-size: 0.85em; padding: 8px 20px; cursor: pointer; display: flex; justify-content: space-between; border-top: 1px solid #222; }
         
         /* Collapsing Logic */
-        .planet-content, .category-content { display: block; }
-        .planet-section.collapsed .planet-content, 
-        .category-wrapper.collapsed .category-content { display: none; }
+        /* Ensure these rules are in your pixelb8-dailies.css */
+		.planet-content, .category-content { 
+			display: block; 
+		}
 
+		.planet-section.collapsed .planet-content { 
+			display: none !important; 
+		}
+
+		.category-wrapper.collapsed .category-content { 
+			display: none !important; 
+		}
+
+		/* Optional: style for the global buttons */
+		.global-controls button {
+			background: #111;
+			border: 1px solid #333;
+			color: #888;
+			margin-left: 5px;
+			font-size: 0.65em;
+		}
+		.global-controls button:hover {
+			color: #0ff;
+			border-color: #0ff;
+		}
         /* Mission Rows */
         .mission-row {
             display: grid; grid-template-columns: 2.2fr 1fr 1.3fr 0.4fr; gap: 15px;
