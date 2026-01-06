@@ -159,7 +159,7 @@ function deleteMission(id) {
     }
 }
 // HELPER: Converts strings like "1d 21h" or "45m" into total minutes
-function parseToMinutes(value) {
+function parseCooldown(value) {
     if (typeof value === 'number') return value;
     if (!value) return 0;
     
