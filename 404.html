@@ -22,10 +22,29 @@
             overflow: hidden;
         }
 
+        /* Scanline Overlay */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
         .error-container {
             width: 90%;
             max-width: 600px;
             z-index: 10;
+            transition: transform 0.1s;
+        }
+
+        @keyframes glitch-shake {
+            0% { transform: skew(0deg); }
+            10% { transform: skew(1deg) translate(-2px, 1px); }
+            20% { transform: skew(-1deg) translate(2px, -1px); }
+            30% { transform: skew(0.5deg) translate(-1px, -2px); }
+            100% { transform: skew(0deg); }
         }
 
         .glitch-box {
@@ -37,14 +56,14 @@
             transition: all 0.4s;
         }
 
-        /* Box Hover State */
+        /* ACTIVATE GLITCH ON HOVER */
         .glitch-box:hover {
             border: 2px solid #0ff;
             box-shadow: 0 0 20px #ff00ff;
             background: rgba(255, 0, 255, 0.1);
+            animation: glitch-shake 0.2s infinite; /* Makes the box vibrate */
         }
 
-        /* 404 CODE SHIFT - Blue to Pink on Box Hover */
         .error-code {
             font-size: 8rem;
             margin: 0;
@@ -55,11 +74,9 @@
 
         .glitch-box:hover .error-code {
             color: #ff00ff;
-			border-color: #ff00ff;
             text-shadow: 0 0 20px #ff00ff;
         }
 
-        /* TEXT COLOR SHIFT - Orange on Box Hover */
         .error-message {
             font-size: 1.5rem;
             letter-spacing: 5px;
@@ -69,16 +86,13 @@
             transition: color 0.4s;
         }
 
-        p {
-            transition: color 0.4s;
-        }
+        p { transition: color 0.4s; }
 
         .glitch-box:hover .error-message,
         .glitch-box:hover p {
             color: #ac4915;
         }
 
-        /* LINK BUTTON - 1.4s transition per your design */
         .home-link {
             font-size: 24px;
             color: #0ff;
@@ -110,7 +124,7 @@
     <div class="background-container">
         <div class="stars"></div>
         <div class="twinkling"></div>
-    </div>
+        <div class="scanlines"></div> </div>
 
     <div class="error-container">
         <div class="glitch-box">
