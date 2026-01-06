@@ -186,7 +186,7 @@ const renderCategory = (planetName, cat, pMissions) => {
     const missionsInCat = pMissions.filter(m => m.category === cat);
     
     return `
-        <div class="category-wrapper ${isCatColl ? 'collapsed' : ''}">
+        <div class="category-wrapper ${isCatColl ? 'collapsedSection' : ''}">
             <div class="category-header" onclick="toggleCat('${planetName}','${cat}')">
                 <span>${cat}</span>
                 <i class="fa-solid ${isCatColl ? 'fa-plus' : 'fa-minus'}"></i>
@@ -209,7 +209,7 @@ const renderPlanet = (planetName) => {
     const categories = [...new Set(pMissions.map(m => m.category))];
 
     return `
-        <div class="planet-section ${isPlanetCollapsed ? 'collapsed' : ''}">
+        <div class="planet-section ${isPlanetCollapsed ? 'collapsedSection' : ''}">
             <div class="progress-container"><div class="progress-fill" style="width: ${progressPct}%"></div></div>
             <div class="planet-header" onclick="togglePlanet('${planetName}')">
                 <span><i class="fa-solid ${isPlanetCollapsed ? 'fa-square-plus' : 'fa-planet-ringed'}"></i> ${planetName}</span>

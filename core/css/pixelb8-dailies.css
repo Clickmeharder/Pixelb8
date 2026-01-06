@@ -2,7 +2,7 @@
         .timer-container { max-width: 1050px; margin: auto; }
         
         /* Planet Grouping */
-        .planet-section { background: rgba(20, 20, 20, 0.9); border: 1px solid #333; border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
+        .planet-section { background: rgba(20, 20, 20, 0.9); border: 1px solid #333; border-radius: 8px; margin-bottom: 3px; overflow: visible; }
         .progress-container { width: 100%; height: 4px; background: #222; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #147b1d, #0ff); transition: width 0.5s; }
         
@@ -20,7 +20,10 @@
 		/* --- Updated Collapsing Logic --- */
 
 		/* --- Corrected Collapsing Logic --- */
-
+		.collapsed {
+			height: 48px;
+			transition: height 0.6s ease;
+		}
 		/* 1. Reset defaults to ensure they are visible */
 		.planet-content, 
 		.category-content {
