@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" href="/assets/images/logo/pixelbotfavicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body {
+		body {
             margin: 0;
             height: 100vh;
             display: flex;
@@ -16,20 +16,18 @@
             align-items: center;
             justify-content: center;
             background: black;
-            color: #0b7272; /* Matches your site's primary text color */
+            color: #0b7272;
             font-family: 'Orbitron', sans-serif;
             text-align: center;
             overflow: hidden;
         }
 
-        /* Container to match your row width */
         .error-container {
             width: 90%;
             max-width: 600px;
             z-index: 10;
         }
 
-        /* Matches .themed-main and its hover state */
         .glitch-box {
             padding: 30px;
             height: auto;
@@ -39,11 +37,17 @@
             transition: all 0.4s;
         }
 
+        /* Box Hover State */
         .glitch-box:hover {
             border: 2px solid #0ff;
             box-shadow: 0 0 20px #ff00ff;
             background: rgba(255, 0, 255, 0.1);
-            color: #0ff;
+        }
+
+        /* TEXT HOVER STATE - Triggered by box hover */
+        .glitch-box:hover .error-message,
+        .glitch-box:hover p {
+            color: #ac4915;
         }
 
         .error-code {
@@ -59,9 +63,13 @@
             text-transform: uppercase;
             margin-bottom: 30px;
             color: #0ff;
+            transition: color 0.4s;
         }
 
-        /* Matches .dl-button and its hover state */
+        p {
+            transition: color 0.4s;
+        }
+
         .home-link {
             font-size: 24px;
             color: #0ff;
@@ -71,7 +79,7 @@
             text-transform: uppercase;
             text-decoration: none;
             display: inline-block;
-            transition: all 1.4s; /* Matches your 1.4s transition */
+            transition: all 1.4s;
             cursor: pointer;
             margin-top: 20px;
         }
@@ -80,7 +88,7 @@
             color: #ff00ff;
             border-color: #ff00ff;
             box-shadow: 0 0 20px #ff00ff;
-            background: rgba(255, 0, 255, 0.1);
+            background: rgba(255, 255, 255, 0.1); /* Subtle highlight */
         }
 
         @media (max-width: 600px) {
