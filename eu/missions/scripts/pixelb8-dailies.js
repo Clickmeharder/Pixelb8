@@ -1,44 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EU Daily Mission Tracker | PixelB8</title>
-    <link rel="stylesheet" href="https://pixelb8.lol/core/css/pixelb8-landing.css">
-	<link rel="stylesheet" href="https://pixelb8.lol/core/css/pixelb8-dailies.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-</head>
-<body>
-
-<div class="timer-container">
-    <h1 style="color: #0ff; text-align: center;">MISSION COOLDOWN TRACKER</h1>
-
-    <div class="add-controls">
-        <input type="text" id="mName" placeholder="Mission Name">
-        <input type="text" id="mCat" placeholder="Category">
-        <select id="mPlanet">
-            <option value="Calypso">Calypso</option>
-            <option value="Aris">Aris</option>
-            <option value="Arkadia">Arkadia</option>
-            <option value="Toulan">Toulan</option>
-            <option value="Cyrene">Cyrene</option>
-            <option value="Monria/DSEC">Monria/DSEC</option>
-            <option value="Space">Space</option>
-        </select>
-        <select id="mCD">
-            <option value="21">21h</option><option value="24">24h</option><option value="16">16h</option>
-        </select>
-        <select id="mType">
-            <option value="SOR">Start on Received</option>
-            <option value="SOF">Start on Finished</option>
-        </select>
-        <button onclick="addMission()">ADD MISSION</button>
-    </div>
-
-    <div id="planetList"></div>
-</div>
-<script>
     const ALL_PLANETS = [
         "Earth", "Calypso", "Monria/DSEC", "Rocktropia", "Howling Mine", "Toulan", 
         "Next Island", "Arkadia", "Arkadia Moon", "Cyrene", "Aris", "Setesh", "Foma", 
@@ -220,7 +179,3 @@ function render() {
     setInterval(render, 1000);
     render();
 	localStorage.clear();
-</script>
-<script src="https://pixelb8.lol/eu/scripts/pixelb8-dailies.js"></script>
-</body>
-</html>
