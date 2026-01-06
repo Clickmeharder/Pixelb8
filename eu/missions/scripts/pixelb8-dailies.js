@@ -78,7 +78,7 @@ function addMission() {
         cd: cd,
         type: type,
 		wp: wp,
-		reward: reward;
+		reward: reward,
         readyAt: 0,
         inProgress: false
     });
@@ -253,4 +253,4 @@ setInterval(() => {
 }, 1000);
 
 render();
-console.log('pixelb8-dailies.js version 1.0.1');
+console.log('pixelb8-dailies.js version 1.0.2');
