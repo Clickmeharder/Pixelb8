@@ -281,45 +281,40 @@ flex-direction:row;
 }
 
 /* Section headers */
-#loadout-rightpanelB h3 {
-  color: #ffd700;
-  margin-bottom: 8px;
-}
-
-/* 1. Hide the entire section when it has this class */
+/* Ensure the section stays hidden when collapsed */
 .loadout-section.collapsedSection {
     display: none !important;
 }
 
-/* 2. Style the headers (since they are now separate) */
-#loadout-rightpanelB h3 {
+/* Style for headers in both Panel A and B */
+#loadout-rightpanelA h3, #loadout-rightpanelB h3 {
     cursor: pointer;
-    background: #333;
+    background: #2d2929;
     padding: 10px;
-    margin: 5px 0 2px 0; /* Tightened bottom margin to touch the content */
-    border: 1px solid #444;
+    margin: 2px 0;
+    border: 1px solid #4d4949;
+    color: #ffd700;
+    font-size: 1rem;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    color: #ffd700; /* Gold color from your previous style */
+    transition: background 0.2s;
 }
 
-/* 3. Hover effect */
-#loadout-rightpanelB h3:hover {
-    background: #444;
+#loadout-rightpanelA h3:hover {
+    background: #413e3e;
+    color: #0ff; /* Glow cyan on hover */
 }
 
-/* 4. Arrow Indicators (Using adjacent sibling selector) */
-/* This says: find the h3 that is followed by a HIDDEN section */
-#loadout-rightpanelB h3::after {
-    content: '▼'; /* Open state */
-    font-size: 0.8em;
+/* The indicator arrow */
+#loadout-rightpanelA h3::after {
+    content: '▶';
+    font-size: 0.7em;
+    color: #147b1d;
 }
 
-/* If the DIV immediately after the H3 has collapsedSection, change arrow to side */
-h3 + .loadout-section.collapsedSection::before {
-   /* This is tricky with CSS alone when the H3 is outside. 
-      It's easier to handle the arrow in JS now. See below. */
+/* If the following section is NOT collapsed, turn the arrow down */
+h3:not(.header-closed) + .loadout-section:not(.collapsedSection) {
+    /* This target is just a helper, the actual arrow change is best via JS or a class */
 }
 
 /* Make right panel stack below main on small screens */
@@ -499,36 +494,41 @@ h3 + .loadout-section.collapsedSection::before {
 				</div>
 
 				<div class="loadout-container" id="loadout-rightpanelA">
-					  <div class="loadout-section base-stats-section" id="weapon-base-stats">
-						<h3>Weapon Base Stats</h3>
-						<button onclick="toggleView('weapon')">Toggle Weapon View</button>
+					<h3 class="panel-header" onclick="toggleSection('weapon-base-stats')">Weapon Base Stats</h3>
+					<div class="loadout-section base-stats-section collapsedSection" id="weapon-base-stats">
+						<button onclick="toggleView('weapon')">Toggle Full View</button>
 						<pre id="weapon-base-stats-content">Select a weapon to view stats</pre>
-					  </div>
-					  <div class="loadout-section base-stats-section" id="amplifier-base-stats">
-						<h3>Amplifier Base Stats</h3>
-						<button onclick="toggleView('amplifier')">Toggle Amplifier View</button>
+					</div>
+
+					<h3 class="panel-header" onclick="toggleSection('amplifier-base-stats')">Amplifier Base Stats</h3>
+					<div class="loadout-section base-stats-section collapsedSection" id="amplifier-base-stats">
+						<button onclick="toggleView('amplifier')">Toggle Full View</button>
 						<pre id="amplifier-base-stats-content">Select an amplifier to view stats</pre>
-					  </div>
-					  <div class="loadout-section base-stats-section" id="vision1-base-stats">
-						<h3>Vision Attachment 1 Stats</h3>
-						<button onclick="toggleView('vision1')">Toggle Sight 1 View</button>
+					</div>
+
+					<h3 class="panel-header" onclick="toggleSection('vision1-base-stats')">Sight 1 Stats</h3>
+					<div class="loadout-section base-stats-section collapsedSection" id="vision1-base-stats">
+						<button onclick="toggleView('vision1')">Toggle Full View</button>
 						<pre id="vision1-base-stats-content">Select a vision attachment to view stats</pre>
-					  </div>
-					  <div class="loadout-section base-stats-section" id="vision2-base-stats">
-						<h3>Vision Attachment 2 Stats</h3>
-						<button onclick="toggleView('vision2')">Toggle Sight 2 View</button>
+					</div>
+
+					<h3 class="panel-header" onclick="toggleSection('vision2-base-stats')">Sight 2 Stats</h3>
+					<div class="loadout-section base-stats-section collapsedSection" id="vision2-base-stats">
+						<button onclick="toggleView('vision2')">Toggle Full View</button>
 						<pre id="vision2-base-stats-content">Select a vision attachment to view stats</pre>
-					  </div>
-					  <div class="loadout-section base-stats-section" id="scope-base-stats">
-						<h3>Scope Stats</h3>
-						<button onclick="toggleView('scope')">Toggle Scope View</button>
+					</div>
+
+					<h3 class="panel-header" onclick="toggleSection('scope-base-stats')">Scope Stats</h3>
+					<div class="loadout-section base-stats-section collapsedSection" id="scope-base-stats">
+						<button onclick="toggleView('scope')">Toggle Full View</button>
 						<pre id="scope-base-stats-content">Select a scope to view stats</pre>
-					  </div>
-					  <div class="loadout-section base-stats-section" id="absorber-base-stats">
-						<h3>Absorber Stats</h3>
-						<button onclick="toggleView('absorber')">Toggle Scope View</button>
+					</div>
+
+					<h3 class="panel-header" onclick="toggleSection('absorber-base-stats')">Absorber Stats</h3>
+					<div class="loadout-section base-stats-section collapsedSection" id="absorber-base-stats">
+						<button onclick="toggleView('absorber')">Toggle Full View</button>
 						<pre id="absorber-base-stats-content">Select an absorber to view stats</pre>
-					  </div>
+					</div>
 				</div>
 
 				<div class="loadout-container" id="loadout-rightpanelB">
