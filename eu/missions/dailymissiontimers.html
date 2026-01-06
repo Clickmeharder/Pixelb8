@@ -8,39 +8,60 @@
 	<link rel="stylesheet" href="/core/css/pixelb8-dailies.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        body {font-family: 'Orbitron', sans-serif;}
+    </style>
 </head>
 <body>
-
-<div class="timer-container">
-    <h1 style="color: #0ff; text-align: center;">MISSION COOLDOWN TRACKER</h1>
-
-    <div class="add-controls">
-        <input type="text" id="mName" placeholder="Mission Name">
-        <input type="text" id="mCat" placeholder="Category">
-        <select id="mPlanet">
-            <option value="Calypso">Calypso</option>
-            <option value="Aris">Aris</option>
-            <option value="Arkadia">Arkadia</option>
-            <option value="Toulan">Toulan</option>
-            <option value="Cyrene">Cyrene</option>
-            <option value="Monria/DSEC">Monria/DSEC</option>
-            <option value="Space">Space</option>
-        </select>
-        <select id="mCD">
-            <option value="21">21h</option><option value="24">24h</option><option value="16">16h</option>
-        </select>
-        <select id="mType">
-            <option value="SOR">Start on Received</option>
-            <option value="SOF">Start on Finished</option>
-        </select>
-        <button onclick="addMission()">ADD MISSION</button>
-    </div>
-	<div class="global-controls" style="text-align: right; margin-bottom: 10px;">
-		<button onclick="collapseAll(true)">COLLAPSE ALL</button>
-		<button onclick="collapseAll(false)">EXPAND ALL</button>
+	<div class="background-container">
+	  <div class="stars"></div>
+	  <div class="twinkling"></div>
 	</div>
-    <div id="planetList"></div>
-</div>
+    <div class="crt-overlay">
+        <div class="scanlines"></div>
+    </div>
+    <div class="header">PixelB8.LoL - EU</div>
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+    <div class="nav-menu" id="navMenu">
+        <a href="https://Pixelb8.lol/home">Home</a>
+        <a href="https://Pixelb8.lol/pixelbot">Visit Pixelbot</a>
+		<a href="https://Pixelb8.lol/eu">Entropia</a>
+        <a href="https://Pixelb8.lol/media">Media</a>
+		<a href="https://Pixelb8.lol/tools">Tools</a>
+		<a href="https://Pixelb8.lol/arcade">Arcade</a>
+    </div>
+	
+	<div class="timer-container">
+		<h1 style="color: #0ff; text-align: center;">MISSION COOLDOWN TRACKER</h1>
+
+		<div class="add-controls">
+			<input type="text" id="mName" placeholder="Mission Name">
+			<input type="text" id="mCat" placeholder="Category">
+			<select id="mPlanet">
+				<option value="Calypso">Calypso</option>
+				<option value="Aris">Aris</option>
+				<option value="Arkadia">Arkadia</option>
+				<option value="Toulan">Toulan</option>
+				<option value="Cyrene">Cyrene</option>
+				<option value="Monria/DSEC">Monria/DSEC</option>
+				<option value="Space">Space</option>
+			</select>
+			<select id="mCD">
+				<option value="21">21h</option><option value="24">24h</option><option value="16">16h</option>
+			</select>
+			<select id="mType">
+				<option value="SOR">Start on Received</option>
+				<option value="SOF">Start on Finished</option>
+			</select>
+			<button onclick="addMission()">ADD MISSION</button>
+		</div>
+		<div class="global-controls" style="text-align: right; margin-bottom: 10px;">
+			<button onclick="collapseAll(true)">COLLAPSE ALL</button>
+			<button onclick="collapseAll(false)">EXPAND ALL</button>
+		</div>
+		<div id="planetList"></div>
+	</div>
 
 <script src="scripts/pixelb8-dailies.js"></script>
 </body>
