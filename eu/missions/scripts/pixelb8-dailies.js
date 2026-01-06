@@ -68,7 +68,8 @@ function addMission() {
     const planet = document.getElementById('mPlanet').value;
     const cd = parseInt(document.getElementById('mCD').value);
     const type = document.getElementById('mType').value;
-
+	const wp =  document.getElementById('mWp').value;
+	const reward =  document.getElementById('mReward').value;
     missions.push({
         id: Date.now(),
         planet: planet,
@@ -76,6 +77,8 @@ function addMission() {
         name: name || "Unnamed",
         cd: cd,
         type: type,
+		wp: wp,
+		reward: reward;
         readyAt: 0,
         inProgress: false
     });
