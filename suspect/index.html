@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.U.S.P.E.C.T - PixelB8.LoL</title>
+    <link rel="stylesheet" href="../core/css/pixelb8-landing.css">
+    <link rel="stylesheet" href="../core/css/pixelb8-tools.css">
+    <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: black;
+            color: #0b7272;
+            font-family: 'Orbitron', sans-serif;
+            overflow-y: auto; /* Allow scrolling for content */
+        }
+
+        .content-wrapper {
+            margin-top: 80px;
+            width: 90%;
+            max-width: 900px;
+            padding-bottom: 50px;
+            z-index: 5;
+        }
+
+        .themed-main {
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #0b7272;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(11, 114, 114, 0.3);
+        }
+
+        .app-screenshot {
+            width: 100%;
+            border: 1px solid #0ff;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .download-section {
+            text-align: center;
+            margin: 40px 0;
+            padding: 20px;
+            border-top: 1px inset #0b7272;
+        }
+
+        .dl-button {
+            font-size: 22px;
+            color: #0ff;
+            padding: 15px 30px;
+            border: 2px solid #0ff;
+            background: rgba(0, 255, 255, 0.1);
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: 0.3s;
+            display: inline-block;
+        }
+
+        .dl-button:hover {
+            color: #ff00ff;
+            border-color: #ff00ff;
+            box-shadow: 0 0 20px #ff00ff;
+        }
+
+        .install-guide {
+            background: rgba(255, 0, 255, 0.05);
+            padding: 20px;
+            border-left: 4px solid #ff00ff;
+            margin-top: 30px;
+        }
+
+        .warning-text {
+            color: #ff00ff;
+            font-weight: bold;
+        }
+
+        h2 { border-bottom: 1px solid #0b7272; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="stars"></div>
+        <div class="twinkling"></div>
+    </div>
+
+    <div class="header">S.U.S.P.E.C.T - AlphaBeta v1.0.0</div>
+    
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+    <div class="nav-menu" id="navMenu">
+        <a href="https://Pixelb8.lol/home">Home</a>
+        <a href="https://Pixelb8.lol/eu">Entropia</a>
+        <a href="https://Pixelb8.lol/tools">Tools</a>
+    </div>
+
+    <div class="content-wrapper">
+        <section class="themed-main">
+            <h1>Secret Universal Services Personal Entropia Connection Tool</h1>
+            <p>S.U.S.P.E.C.T is a specialized desktop companion designed for Entropia Universe colonists who need real-time data at their fingertips.</p>
+            
+            <img src="../assets/images/suspect_preview.png" alt="S.U.S.P.E.C.T Interface" class="app-screenshot">
+
+            <h2>Core Features</h2>
+            <ul>
+                <li><strong>Log Listener:</strong> Real-time monitoring of ChatLog.txt.</li>
+                <li><strong>Hunt Tracking:</strong> Automated loot recording and CSV exporting.</li>
+                <li><strong>Always On Top:</strong> Keep your stats visible while in-game.</li>
+                <li><strong>Zyzakus-Approved:</strong> The official AlphaBeta experience.</li>
+            </ul>
+
+            <div class="download-section">
+                <a href="https://github.com/Clickmeharder/Pixelb8/releases/latest/download/suspect_setup.exe" class="dl-button">
+                    <i class="fa-solid fa-download"></i> Download for Windows
+                </a>
+                <p style="font-size: 12px; margin-top: 10px;">Size: ~215MB | Version: 1.0.0 (AlphaBeta)</p>
+            </div>
+
+            <div class="install-guide">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> Installation Guide</h3>
+                <p>Because this is a specialized indie tool, Windows may flag it as "Unrecognized." Follow these steps to install:</p>
+                <ol>
+                    <li>Download the <strong>suspect_setup.exe</strong> above.</li>
+                    <li>Run the installer. If a blue <strong>"Windows protected your PC"</strong> box appears:
+                        <br>— Click <span class="warning-text">"More Info"</span>
+                        <br>— Click <span class="warning-text">"Run Anyway"</span>
+                    </li>
+                    <li>The S.U.S.P.E.C.T Splash Screen will appear while the app initializes.</li>
+                    <li>Set your Entropia Log folder path and you're ready to hunt!</li>
+                </ol>
+            </div>
+        </section>
+    </div>
+
+    <script src="../core/js/pixelb8-global.js"></script>
+</body>
+</html>
