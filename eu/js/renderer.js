@@ -26,6 +26,14 @@
     });
   });
 
+
+function toggleSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.classList.toggle('collapsed');
+    }
+}
+
 // ===== Optional Voice Control (stub) =====
 function initVoiceControl() {
   if (!('webkitSpeechRecognition' in window)) {
@@ -42,4 +50,4 @@ function initVoiceControl() {
   recognition.start();
 }
 
-initVoiceControl(); // Uncomment to enable early
+//initVoiceControl(); // Uncomment to enable early

@@ -286,6 +286,33 @@ flex-direction:row;
   margin-bottom: 8px;
 }
 
+/* Hide stats-grid when the parent has the 'collapsed' class */
+.loadout-section.collapsed .stats-grid {
+    display: none;
+}
+
+/* Style the header to look clickable */
+.loadout-section h3 {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+/* Add a small arrow indicator */
+.loadout-section h3::after {
+    content: '▼';
+    font-size: 0.7em;
+    transition: transform 0.3s;
+}
+
+.loadout-section.collapsed h3::after {
+    content: '▶';
+}
+
 /* Make right panel stack below main on small screens */
 @media (max-width: 900px) {
   .loadout-internalWrapper {
@@ -356,6 +383,7 @@ flex-direction:row;
 			  </div>
 			  
 			  <div class="loadout-skills">
+			  	<button class="small-btn">Reset ALL Markup</button>
 				<!-- Current Hit Skill for the weapon -->
 				<label for="hitSkill">Hit Skill</label>
 				<input id="hitSkill" type="number" value="0" min="0" max="999">
@@ -367,7 +395,7 @@ flex-direction:row;
 			  
 			  <div class="loadout-internalWrapper">
 
-				  <div class="loadout-container" id="loadout-mainpanel">
+				<div class="loadout-container" id="loadout-mainpanel">
 
 					  <div class="loadout-section">
 						<h3>Weapon</h3>
@@ -415,7 +443,7 @@ flex-direction:row;
 						  <input id="absorberMU" type="number" value="100">
 						</div>
 					  </div>
-					  <button class="small-btn">Reset ALL Markup</button>
+
 					  
 					  <div class="stats-grid">
 						<div class="stat-card">
@@ -459,9 +487,9 @@ flex-direction:row;
 						</div>
 					  </div>
 					
-				  </div>
+				</div>
 
-				  <div class="loadout-container" id="loadout-rightpanelA">
+				<div class="loadout-container" id="loadout-rightpanelA">
 					  <div class="loadout-section base-stats-section" id="weapon-base-stats">
 						<h3>Weapon Base Stats</h3>
 						<button onclick="toggleView('weapon')">Toggle Weapon View</button>
@@ -492,55 +520,56 @@ flex-direction:row;
 						<button onclick="toggleView('absorber')">Toggle Scope View</button>
 						<pre id="absorber-base-stats-content">Select an absorber to view stats</pre>
 					  </div>
-				  </div>
+				</div>
 
-				  <div class="loadout-container" id="loadout-rightpanelB">
-					<div class="loadout-section" id="rightpanel-offense">
-					  <h3>Offense</h3>
-					  <div class="stats-grid">
-						<div class="stat-card"><h4>Total Damage</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Range</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Critical Chance</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Critical Damage</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Effective Damage</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Reload</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Uses/min</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>DPS</h4><input type="number" value="0" step="0.01"></div>
-					  </div>
+				<div class="loadout-container" id="loadout-rightpanelB">
+					<div class="loadout-section collapsed" id="rightpanel-offense">
+						<h3 onclick="toggleSection('rightpanel-offense')">Offense</h3>
+						<div class="stats-grid">
+							<div class="stat-card"><h4>Total Damage</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Range</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Critical Chance</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Critical Damage</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Effective Damage</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Reload</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Uses/min</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>DPS</h4><input type="number" value="0" step="0.01"></div>
+						</div>
 					</div>
 
-					<div class="loadout-section" id="rightpanel-economy">
-					  <h3>Economy</h3>
-					  <div class="stats-grid">
-						<div class="stat-card"><h4>Efficiency</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Decay</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Ammo</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Cost</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>DPP</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Total Uses</h4><input type="number" value="0" step="0.01"></div>
-					  </div>
+					<div class="loadout-section collapsed" id="rightpanel-economy">
+						<h3 onclick="toggleSection('rightpanel-economy')">Economy</h3>
+						<div class="stats-grid">
+							<div class="stat-card"><h4>Efficiency</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Decay</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Ammo</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Cost</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>DPP</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Total Uses</h4><input type="number" value="0" step="0.01"></div>
+						</div>
 					</div>
 
-					<div class="loadout-section" id="rightpanel-defense">
-					  <h3>Defense</h3>
-					  <div class="stats-grid">
-						<div class="stat-card"><h4>Armor Defense</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Plate Defense</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Total Defense</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Block</h4><input type="number" value="0" step="0.01"></div>
-					  </div>
+					<div class="loadout-section collapsed" id="rightpanel-defense">
+						<h3 onclick="toggleSection('rightpanel-defense')">Defense</h3>
+						<div class="stats-grid">
+							<div class="stat-card"><h4>Armor Defense</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Plate Defense</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Total Defense</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Block</h4><input type="number" value="0" step="0.01"></div>
+						</div>
 					</div>
 
-					<div class="loadout-section" id="rightpanel-skill">
-					  <h3>Skill</h3>
-					  <div class="stats-grid">
-						<div class="stat-card"><h4>Hit Ability</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Crit Ability</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Skill Modification</h4><input type="number" value="0" step="0.01"></div>
-						<div class="stat-card"><h4>Skill Bonus</h4><input type="number" value="0" step="0.01"></div>
-					  </div>
+					<div class="loadout-section collapsed" id="rightpanel-skill">
+						<h3 onclick="toggleSection('rightpanel-skill')">Skill</h3>
+						<div class="stats-grid">
+							<div class="stat-card"><h4>Hit Ability</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Crit Ability</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Skill Modification</h4><input type="number" value="0" step="0.01"></div>
+							<div class="stat-card"><h4>Skill Bonus</h4><input type="number" value="0" step="0.01"></div>
+						</div>
 					</div>
-				  </div>
+				</div>
+				  
 			  </div>
 			</div>
 			
