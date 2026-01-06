@@ -106,27 +106,66 @@ function formatTime(ms) {
     return `${h}h ${m}m ${secs}s`;
 }
 
-// --- RENDER ENGINE ---
+// ------------------ RENDER ENGINE ------------------------------
 
-function render() {
-    const container = document.getElementById('planetList');
-    if (!container) return;
+// --- RENDER COMPONENTS ---
 
-    let mainHtml = '';
+const renderMission = (m) => {
+    const isCD = m.readyAt && (m.readyAt > Date.now());
+    const stateClass = m.inProgress ? 'in-progress' : (isCD ? 'on-cooldown' : '');
+    
+    return `
+        <div class="mission-row ${stateClass}">
+            <div class="mission-info">
+                <h4>${m.name}</h4>
+                <div class="mission-meta">
+                    ${m.difficulty ? `<span class="diff-badge">${m.difficulty}</span>` : ''}
+                    <span>${m.reward || ''}</span>
+                    ${m.wp ? `<span class="wp-tag" onclick="event.stopPropagation(); copyWP('${m.wp}')">COPY WP</span>` : ''}
+                </div>
+            </div>
+            <div class="status-text">
+                ${m.inProgress ? '<span class="status-active">ACTIVE</span>' : 
+                  isCD ? `<span class="status-timer">${formatTime(m.readyAt - Date.now())}</span>` : 
+                  '<span class="status-ready">READY</span>'}
+            </div>
+            <div class="actions">
+                ${!m.inProgress && !isCD ? `<button class="btn-start" onclick="event.stopPropagation(); handleAction(${m.id},'start')">START</button>` : ''}
+                ${m.inProgress ? `<button class="btn-finish" onclick="event.stopPropagation(); handleAction(${m.id},'finish')">FINISH</button>` : ''}
+                ${isCD ? `<button onclick="event.stopPropagation(); handleAction(${m.id},'reset')">RESET</button>` : ''}
+            </div>
+            <button class="btn-delete" onclick="event.stopPropagation(); deleteMission(${m.id})">×</button>
+        </div>`;
+};
 
-    ALL_PLANETS.forEach(planetName => {
-        const pMissions = missions.filter(m => m.planet === planetName);
-        if (pMissions.length === 0) return; 
+const renderCategory = (planetName, cat, pMissions) => {
+    const catKey = planetName + cat;
+    const isCatColl = collapsedCats[catKey];
+    const missionsInCat = pMissions.filter(m => m.category === cat);
+    
+    return `
+        <div class="category-wrapper ${isCatColl ? 'collapsed' : ''}">
+            <div class="category-header" onclick="toggleCat('${planetName}','${cat}')">
+                <span>${cat}</span>
+                <i class="fa-solid ${isCatColl ? 'fa-plus' : 'fa-minus'}"></i>
+            </div>
+            <div class="category-content">
+                ${missionsInCat.map(renderMission).join('')}
+            </div>
+        </div>`;
+};
 
-        const readyCount = pMissions.filter(m => (!m.readyAt || m.readyAt <= Date.now()) && !m.inProgress).length;
-        const progressPct = (readyCount / pMissions.length) * 100;
-        const isPlanetCollapsed = collapsedPlanets[planetName];
+const renderPlanet = (planetName) => {
+    const pMissions = missions.filter(m => m.planet === planetName);
+    if (pMissions.length === 0) return ''; 
 
-        // START PLANET SECTION
-        mainHtml += `<div class="planet-section ${isPlanetCollapsed ? 'collapsed' : ''}">`;
-        
-        // Progress bar and Header stay OUTSIDE the planet-content div
-        mainHtml += `
+    const readyCount = pMissions.filter(m => (!m.readyAt || m.readyAt <= Date.now()) && !m.inProgress).length;
+    const progressPct = (readyCount / pMissions.length) * 100;
+    const isPlanetCollapsed = collapsedPlanets[planetName];
+    const categories = [...new Set(pMissions.map(m => m.category))];
+
+    return `
+        <div class="planet-section ${isPlanetCollapsed ? 'collapsed' : ''}">
             <div class="progress-container"><div class="progress-fill" style="width: ${progressPct}%"></div></div>
             <div class="planet-header" onclick="togglePlanet('${planetName}')">
                 <span><i class="fa-solid ${isPlanetCollapsed ? 'fa-square-plus' : 'fa-planet-ringed'}"></i> ${planetName}</span>
@@ -134,58 +173,21 @@ function render() {
                     <span class="stat-ready">${readyCount} Ready</span>
                     <i class="fa-solid ${isPlanetCollapsed ? 'fa-caret-down' : 'fa-caret-up'}"></i>
                 </div>
-            </div>`;
+            </div>
+            <div class="planet-content">
+                ${categories.map(cat => renderCategory(planetName, cat, pMissions)).join('')}
+            </div>
+        </div>`;
+};
 
-        // Inner Content (This is what disappears)
-        mainHtml += `<div class="planet-content">`;
+// --- MAIN RENDER ENGINE ---
 
-        const categories = [...new Set(pMissions.map(m => m.category))];
-        categories.forEach(cat => {
-            const catKey = planetName + cat;
-            const isCatColl = collapsedCats[catKey];
-            
-            mainHtml += `
-                <div class="category-wrapper ${isCatColl ? 'collapsed' : ''}">
-                    <div class="category-header" onclick="toggleCat('${planetName}','${cat}')">
-                        <span>${cat}</span>
-                        <i class="fa-solid ${isCatColl ? 'fa-plus' : 'fa-minus'}"></i>
-                    </div>
-                    <div class="category-content">`;
+function render() {
+    const container = document.getElementById('planetList');
+    if (!container) return;
 
-            pMissions.filter(m => m.category === cat).forEach(m => {
-                const isCD = m.readyAt && (m.readyAt > Date.now());
-                const stateClass = m.inProgress ? 'in-progress' : (isCD ? 'on-cooldown' : '');
-                
-                mainHtml += `
-                    <div class="mission-row ${stateClass}">
-                        <div class="mission-info">
-                            <h4>${m.name}</h4>
-                            <div class="mission-meta">
-                                ${m.difficulty ? `<span class="diff-badge">${m.difficulty}</span>` : ''}
-                                <span>${m.reward || ''}</span>
-                                ${m.wp ? `<span class="wp-tag" onclick="event.stopPropagation(); copyWP('${m.wp}')">COPY WP</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="status-text">
-                            ${m.inProgress ? '<span class="status-active">ACTIVE</span>' : 
-                              isCD ? `<span class="status-timer">${formatTime(m.readyAt - Date.now())}</span>` : 
-                              '<span class="status-ready">READY</span>'}
-                        </div>
-                        <div class="actions">
-                            ${!m.inProgress && !isCD ? `<button class="btn-start" onclick="event.stopPropagation(); handleAction(${m.id},'start')">START</button>` : ''}
-                            ${m.inProgress ? `<button class="btn-finish" onclick="event.stopPropagation(); handleAction(${m.id},'finish')">FINISH</button>` : ''}
-                            ${isCD ? `<button onclick="event.stopPropagation(); handleAction(${m.id},'reset')">RESET</button>` : ''}
-                        </div>
-                        <button class="btn-delete" onclick="event.stopPropagation(); deleteMission(${m.id})">×</button>
-                    </div>`;
-            });
-            mainHtml += `</div></div>`; // Close category-content and wrapper
-        });
-        
-        mainHtml += `</div></div>`; // Close planet-content and planet-section
-    });
-
-    container.innerHTML = mainHtml;
+    // Use .map and .join to build the final HTML without messy string concatenation
+    container.innerHTML = ALL_PLANETS.map(renderPlanet).join('');
 }
 
 // Start
