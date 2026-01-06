@@ -6,154 +6,22 @@
     <title>PixelB8 Homepage</title>
 	<link rel="stylesheet" href="core/css/pixelb8-landing.css">
 	<link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
         body {
             margin: 0;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background: url('https://source.unsplash.com/1600x900/?cyberpunk,neon') no-repeat center center/cover;
-            overflow: hidden;
+            background: black;
             color: #0b7272;
             font-family: 'Orbitron', sans-serif;
-			/* Ensures the whole browser scrolls, not just one box */
+            /* Ensures the whole browser scrolls, not just one box */
             overflow-y: auto; 
             overflow-x: hidden;
         }
-		@keyframes move-background {
-		  from {
-			transform: translate3d(0px, 0px, 0px);
-		  }
-		  to { 
-			transform: translate3d(1000px, 0px, 0px);
-		  }
-		}
-
-		.background-container {
-		  background: black;
-		  position: fixed;
-		  top: 0;
-		  left: 0;
-		  bottom: 0;
-		  right: 0;
-		  z-index:-1;
-		}
-
-		.stars {
-		  background: black url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/stars.png) repeat;
-		  position: absolute;
-		  top: 0;
-		  left: 0;
-		  width: 100%;
-		  height: 100%;
-		  display: block;
-		  z-index: 0;
-		}
-
-		.twinkling {
-		  width: 10000px;
-		  height: 100%;
-		  background: transparent url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/twinkling.png") repeat;
-		  background-size: 1000px 1000px;
-		  position: absolute;
-		  right: 0;
-		  top: 0;
-		  bottom: 0;
-		  z-index: 2;
-		  animation: move-background 140s linear infinite; /* Adjust animation duration for slower rotation */
-		}
-        .header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 6px;
-            text-align: center;
-            font-size: 28px;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            border-bottom: 2px solid #0b7272;
-        }
-
-        .menu-button {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: transparent;
-            border: 2px solid #0b7272;
-            color: #0ff;
-            font-size: 20px;
-            padding: 2px 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .menu-button:hover {
-            color: #ff00ff;
-            border-color: #ff00ff;
-        }
-
-        .nav-menu {
-            position: fixed;
-            top: 50px;
-            left: -115px;
-            width: 90px;
-            height: 85%;
-            background: rgba(0, 0, 0, 0.9);
-			border-right: 2px solid #0b7272;
-            padding: 20px;
-            transition: left 0.4s;
-        }
-
-        .nav-menu a {
-            display: block;
-            color: #0ff;
-            text-decoration: none;
-			border-bottom: 2px solid #0b7272;
-            padding: 10px;
-            font-size: 18px;
-            transition: 0.3s;
-        }
-
-        .nav-menu a:hover {
-            color: #ff00ff;
-			border-bottom: 2px inset #ff00ff;
-        }
-
-        .enter-button {
-            font-size: 24px;
-            color: #0ff;
-            padding: 15px 40px;
-            border: 2px solid #0ff;
-            background: transparent;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            cursor: pointer;
-            position: relative;
-            transition: color 0.4s, border-color 0.4s;
-        }
-        .enter-button:hover {
-            color: #ff00ff;
-            border-color: #ff00ff;
-        }
-
-        @media (max-width: 600px) {
-            .header {
-                font-size: 22px;
-            }
-            .enter-button {
-                font-size: 18px;
-                padding: 12px 30px;
-            }
-        }
-    </style>
-    <style>
-
-
 
         .row {
             position: relative;
