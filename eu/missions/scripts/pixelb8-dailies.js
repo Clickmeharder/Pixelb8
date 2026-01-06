@@ -141,6 +141,7 @@ function deleteMission(id) {
 }
 
 function formatTime(ms) {
+    if (ms < 0) return "0h 0m 0s";
     let s = Math.floor(ms / 1000);
     const h = Math.floor(s / 3600);
     const m = Math.floor((s % 3600) / 60);
@@ -198,15 +199,25 @@ const renderCategory = (planetName, cat, pMissions) => {
 };
 
 const renderPlanet = (planetName) => {
-    // FIX: Make filtering case-insensitive so "Foma" matches "FOMA"
     const pMissions = missions.filter(m => m.planet.toLowerCase() === planetName.toLowerCase());
-    
     if (pMissions.length === 0) return ''; 
 
-    const readyCount = pMissions.filter(m => (!m.readyAt || m.readyAt <= Date.now()) && !m.inProgress).length;
+    const now = Date.now();
+    const readyMissions = pMissions.filter(m => (!m.readyAt || m.readyAt <= now) && !m.inProgress);
+    const cdMissions = pMissions.filter(m => m.readyAt && m.readyAt > now);
+    
+    const readyCount = readyMissions.length;
+    const cdCount = cdMissions.length;
     const progressPct = (readyCount / pMissions.length) * 100;
     const isPlanetCollapsed = collapsedPlanets[planetName];
     const categories = [...new Set(pMissions.map(m => m.category))];
+
+    // Find the mission closest to finishing its cooldown
+    let closestMissionHtml = '';
+    if (cdCount > 0) {
+        const closest = cdMissions.reduce((prev, curr) => (prev.readyAt < curr.readyAt) ? prev : curr);
+        closestMissionHtml = `<span class="closest-timer"> Next: ${closest.name} (${formatTime(closest.readyAt - now)})</span>`;
+    }
 
     return `
         <div class="planet-section ${isPlanetCollapsed ? 'collapsedSection' : ''}">
@@ -214,7 +225,9 @@ const renderPlanet = (planetName) => {
             <div class="planet-header" onclick="togglePlanet('${planetName}')">
                 <span><i class="fa-solid ${isPlanetCollapsed ? 'fa-square-plus' : 'fa-planet-ringed'}"></i> ${planetName}</span>
                 <div class="header-stats">
+                    <span class="stat-cd">${cdCount} on CD</span>
                     <span class="stat-ready">${readyCount} Ready</span>
+                    ${closestMissionHtml}
                     <i class="fa-solid ${isPlanetCollapsed ? 'fa-caret-down' : 'fa-caret-up'}"></i>
                 </div>
             </div>
@@ -229,9 +242,12 @@ const renderPlanet = (planetName) => {
 function render() {
     const container = document.getElementById('planetList');
     if (!container) return;
-
-    // Use .map and .join to build the final HTML without messy string concatenation
     container.innerHTML = ALL_PLANETS.map(renderPlanet).join('');
 }
+// This keeps the timers updating every second without flickering the whole UI
+setInterval(() => {
+    render();
+}, 1000);
 
+render();
 console.log('pixelb8-dailies.js version 1.0.1');
