@@ -16,14 +16,40 @@
             align-items: center;
             justify-content: center;
             background: black;
-            color: #ff00ff; /* Pink for error/warning */
+            color: #0b7272; /* Matches your site's primary text color */
             font-family: 'Orbitron', sans-serif;
             text-align: center;
+            overflow: hidden;
+        }
+
+        /* Container to match your row width */
+        .error-container {
+            width: 90%;
+            max-width: 600px;
+            z-index: 10;
+        }
+
+        /* Matches .themed-main and its hover state */
+        .glitch-box {
+            padding: 30px;
+            height: auto;
+            border: 2px solid #0b7272;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 4px;
+            transition: all 0.4s;
+        }
+
+        .glitch-box:hover {
+            border: 2px solid #0ff;
+            box-shadow: 0 0 20px #ff00ff;
+            background: rgba(255, 0, 255, 0.1);
+            color: #0ff;
         }
 
         .error-code {
             font-size: 8rem;
             margin: 0;
+            color: #ff00ff;
             text-shadow: 0 0 20px #ff00ff;
         }
 
@@ -32,27 +58,34 @@
             letter-spacing: 5px;
             text-transform: uppercase;
             margin-bottom: 30px;
-        }
-
-        .glitch-box {
-            border: 2px solid #ff00ff;
-            padding: 20px;
-            background: rgba(255, 0, 255, 0.1);
-        }
-
-        .home-link {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            border: 1px solid #0ff;
             color: #0ff;
-            text-decoration: none;
+        }
+
+        /* Matches .dl-button and its hover state */
+        .home-link {
+            font-size: 24px;
+            color: #0ff;
+            padding: 15px 40px;
+            border: 2px solid #0ff;
+            background: rgba(0, 255, 255, 0.05);
             text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 1.4s; /* Matches your 1.4s transition */
+            cursor: pointer;
+            margin-top: 20px;
         }
 
         .home-link:hover {
-            background: #0ff;
-            color: black;
+            color: #ff00ff;
+            border-color: #ff00ff;
+            box-shadow: 0 0 20px #ff00ff;
+            background: rgba(255, 0, 255, 0.1);
+        }
+
+        @media (max-width: 600px) {
+            .error-code { font-size: 4rem; }
+            .error-message { font-size: 1rem; }
         }
     </style>
 </head>
@@ -62,12 +95,14 @@
         <div class="twinkling"></div>
     </div>
 
-    <div class="glitch-box">
-        <h1 class="error-code">404</h1>
-        <p class="error-message">Connection Terminated</p>
-        <p>The coordinate you requested does not exist in this sector.</p>
-        <a href="/home" class="home-link">Return to Base</a>
+    <div class="error-container">
+        <div class="glitch-box">
+            <h1 class="error-code">404</h1>
+            <p class="error-message">Connection Terminated</p>
+            <p>The coordinate you requested does not exist in this sector of the PixelB8 universe.</p>
+            <a href="/home" class="home-link">Return to Base</a>
+        </div>
     </div>
 
-    </body>
+</body>
 </html>
