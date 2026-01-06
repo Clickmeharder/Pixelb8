@@ -48,16 +48,39 @@
             z-index: 0;
         }
 
-        .scanlines {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
-            background-size: 100% 8px; /* Wider lines look more retro/stable */
-            z-index: 5;
-            pointer-events: none;
-            /* Slow 4-second pulse instead of a fast flicker */
-            animation: flicker 4s infinite ease-in-out;
-        }
+	.scanlines {
+		position: fixed;
+		top: 0; 
+		left: 0; 
+		width: 100%; 
+		height: 100%;
+		/* These colors are now slightly more opaque so they are visible */
+		background: linear-gradient(
+			rgba(18, 16, 16, 0) 50%, 
+			rgba(0, 0, 0, 0.5) 50%
+		), 
+		linear-gradient(
+			90deg, 
+			rgba(255, 0, 0, 0.03), 
+			rgba(0, 255, 0, 0.01), 
+			rgba(0, 0, 255, 0.03)
+		);
+		background-size: 100% 3px, 3px 100%; /* Tiny 3px lines */
+		z-index: 5;
+		pointer-events: none;
+		animation: flicker 4s infinite ease-in-out;
+	}
+
+	/* Add this to make the lines "crawl" like a real CRT monitor */
+	@keyframes crt-crawl {
+		0% { background-position: 0 0; }
+		100% { background-position: 0 100px; }
+	}
+
+	/* Update the body or background container to use this crawl */
+	.scanlines {
+		animation: flicker 4s infinite ease-in-out, crt-crawl 20s infinite linear;
+	}
 
         .error-container {
             width: 90%;
