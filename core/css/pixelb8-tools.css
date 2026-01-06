@@ -23,7 +23,8 @@
 }
 
 .tool-card.disabled {
-	opacity: 0.8;
+	background: rgb(45 3 3 / 60%);
+    opacity: 0.3;
 }
 
 
@@ -32,7 +33,7 @@
     transform: scale(1.05);
 }
 .tool-card.disabled:hover {
-	opacity: 0.5;
+	opacity: 0.4;
     box-shadow: 0 0 15px red;
     transform: scale(1.05);
 }
