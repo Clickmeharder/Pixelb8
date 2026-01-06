@@ -286,8 +286,8 @@ flex-direction:row;
   margin-bottom: 8px;
 }
 
-/* Hide stats-grid when the parent has the 'collapsed' class */
-.loadout-section.collapsed .stats-grid {
+/* Hide stats-grid when the parent has the 'collapsedSection' class */
+.loadout-section.collapsedSection .stats-grid {
     display: none;
 }
 
@@ -309,7 +309,7 @@ flex-direction:row;
     transition: transform 0.3s;
 }
 
-.loadout-section.collapsed h3::after {
+.loadout-section.collapsedSection h3::after {
     content: '▶';
 }
 
@@ -523,7 +523,7 @@ flex-direction:row;
 				</div>
 
 				<div class="loadout-container" id="loadout-rightpanelB">
-					<div class="loadout-section collapsed" id="rightpanel-offense">
+					<div class="loadout-section collapsedSection" id="rightpanel-offense">
 						<h3 onclick="toggleSection('rightpanel-offense')">Offense</h3>
 						<div class="stats-grid">
 							<div class="stat-card"><h4>Total Damage</h4><input type="number" value="0" step="0.01"></div>
@@ -537,7 +537,7 @@ flex-direction:row;
 						</div>
 					</div>
 
-					<div class="loadout-section collapsed" id="rightpanel-economy">
+					<div class="loadout-section collapsedSection" id="rightpanel-economy">
 						<h3 onclick="toggleSection('rightpanel-economy')">Economy</h3>
 						<div class="stats-grid">
 							<div class="stat-card"><h4>Efficiency</h4><input type="number" value="0" step="0.01"></div>
@@ -549,7 +549,7 @@ flex-direction:row;
 						</div>
 					</div>
 
-					<div class="loadout-section collapsed" id="rightpanel-defense">
+					<div class="loadout-section collapsedSection" id="rightpanel-defense">
 						<h3 onclick="toggleSection('rightpanel-defense')">Defense</h3>
 						<div class="stats-grid">
 							<div class="stat-card"><h4>Armor Defense</h4><input type="number" value="0" step="0.01"></div>
@@ -559,7 +559,7 @@ flex-direction:row;
 						</div>
 					</div>
 
-					<div class="loadout-section collapsed" id="rightpanel-skill">
+					<div class="loadout-section collapsedSection" id="rightpanel-skill">
 						<h3 onclick="toggleSection('rightpanel-skill')">Skill</h3>
 						<div class="stats-grid">
 							<div class="stat-card"><h4>Hit Ability</h4><input type="number" value="0" step="0.01"></div>
