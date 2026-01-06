@@ -8,23 +8,27 @@
     <link rel="icon" type="image/png" href="/assets/images/logo/pixelbotfavicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* 1. HEAVY SYSTEM TWITCH - Slow and sporadic */
+        /* 1. SLOW SYSTEM TWITCH */
         @keyframes system-glitch {
             0% { transform: translate(0,0) skew(0deg); }
             1% { transform: translate(-2px, 1px) skew(-1deg); }
             2% { transform: translate(2px, -1px) skew(1deg); }
             3% { transform: translate(0,0) skew(0deg); }
-            /* Long pause of absolute stability */
             95% { transform: translate(0,0) skew(0deg); } 
             97% { transform: translate(-5px, 2px); }
             100% { transform: translate(0,0) skew(0deg); }
         }
 
-        /* 2. SLOW SCANLINE PULSE */
+        /* 2. CRT EFFECTS */
         @keyframes flicker {
-            0% { opacity: 0.1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 0.1; }
+            0% { opacity: 0.2; }
+            50% { opacity: 0.4; }
+            100% { opacity: 0.2; }
+        }
+
+        @keyframes crt-crawl {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
         }
 
         body {
@@ -34,53 +38,32 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: black;
+            background: #000;
             color: #0b7272;
             font-family: 'Orbitron', sans-serif;
             text-align: center;
             overflow: hidden;
-            /* Slow 10-second cycle for the whole body */
             animation: system-glitch 10s infinite linear;
         }
 
-        .background-container {
-            /* Background is stable now, just let the stars twinkle naturally */
-            z-index: 0;
+        /* THE CRT OVERLAY (Scanlines + Vignette) */
+        .crt-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 20;
+            pointer-events: none;
+            /* The Vignette: Dark corners */
+            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
         }
 
-	.scanlines {
-		position: fixed;
-		top: 0; 
-		left: 0; 
-		width: 100%; 
-		height: 100%;
-		/* These colors are now slightly more opaque so they are visible */
-		background: linear-gradient(
-			rgba(18, 16, 16, 0) 50%, 
-			rgba(0, 0, 0, 0.5) 50%
-		), 
-		linear-gradient(
-			90deg, 
-			rgba(255, 0, 0, 0.03), 
-			rgba(0, 255, 0, 0.01), 
-			rgba(0, 0, 255, 0.03)
-		);
-		background-size: 100% 3px, 3px 100%; /* Tiny 3px lines */
-		z-index: 5;
-		pointer-events: none;
-		animation: flicker 4s infinite ease-in-out;
-	}
-
-	/* Add this to make the lines "crawl" like a real CRT monitor */
-	@keyframes crt-crawl {
-		0% { background-position: 0 0; }
-		100% { background-position: 0 100px; }
-	}
-
-	/* Update the body or background container to use this crawl */
-	.scanlines {
-		animation: flicker 4s infinite ease-in-out, crt-crawl 20s infinite linear;
-	}
+        .scanlines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            /* Visible grey lines */
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(50, 50, 50, 0.2) 50%);
+            background-size: 100% 4px;
+            animation: flicker 0.15s infinite, crt-crawl 30s infinite linear;
+        }
 
         .error-container {
             width: 90%;
@@ -90,22 +73,18 @@
 
         .glitch-box {
             padding: 30px;
-            height: auto;
             border: 2px solid #0b7272;
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 4px;
+            background: rgba(0, 5, 5, 0.9);
+            border-radius: 8px;
             transition: all 1.4s;
-            /* Independent slow twitch */
             animation: system-glitch 13s infinite reverse; 
         }
 
-        /* INTENSIFY ON HOVER - Still kept slow enough to be safe */
         .glitch-box:hover {
             border: 2px solid #0ff;
             box-shadow: 0 0 25px #ff00ff;
-            background: rgba(255, 0, 255, 0.1);
-            /* 3 seconds is a slow, rhythmic shake */
-            animation: system-glitch 3s infinite; 
+            background: rgba(255, 0, 255, 0.05);
+            animation: system-glitch 4s infinite; 
         }
 
         .error-code {
@@ -168,6 +147,9 @@
     <div class="background-container">
         <div class="stars"></div>
         <div class="twinkling"></div>
+    </div>
+
+    <div class="crt-overlay">
         <div class="scanlines"></div>
     </div>
 
