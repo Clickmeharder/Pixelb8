@@ -49,7 +49,7 @@ option:disabled {
   --staticpage-panels-border-color: #38567f9c;
   --staticpage-panels-bg-color: #171726;
   --staticpage-panels-headertext-color: #888;
-  --staticpage-panels-text-color: #555;
+  --staticpage-panels-text-color: #9c9c9c;/*#555;*/
   --staticpage-panels-opacity: 1.0;
 /*STATICPAGE header/footer styles*/
   
@@ -58,7 +58,7 @@ option:disabled {
   --staticpage-HFpanels-border-radius: 8px;
   --staticpage-HFpanels-border-color: #38567f9c;
   --staticpage-HFpanels-bg-color: #0c1c2c;
-  --staticpage-HTitle-text-color: #5f5c5c;/*#035469;*/
+  --staticpage-HTitle-text-color: #b14f13;/*#5f5c5c;*//*#035469;*/
   --staticpage-HFpanels-text-color: #333;
   --staticpage-HFpanels-opacity: 0.9;
 
@@ -80,7 +80,7 @@ option:disabled {
   --staticpage-maincontent-text-color: #333;
   --staticpage-maincontent-bg-color: #222;
   --staticpage-inner-bg-color: #222222ab;
-  --staticpage-maincontent-opacity: 0.98;
+  --staticpage-maincontent-opacity: 0.9;
 /*----------------------------------|*/
  /*STATICPAGE control panel styles*/
   --staticpage-controlpanel-border-width: 3px;
@@ -433,7 +433,7 @@ div#TopRow {margin-top: 69px;}
     border-style: ridge;
     border-radius: var(--staticpage-border-radius);
     resize: none;
-	opacity: 0.7;
+	opacity: 0.85;
 }
 .themed-main.landing {
 	margin-left:0;
