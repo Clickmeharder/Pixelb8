@@ -10,46 +10,46 @@ let collapsedPlanets = JSON.parse(localStorage.getItem('euColl_Planets')) || {};
 let collapsedCats = JSON.parse(localStorage.getItem('euColl_Cats')) || {};
 //
     const defaultMissions = [
-		{ id: 1, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 1", cd: 21,type: "SOR", reward: "1 Token (+20 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Easy", area: "Argus/PA/TP/etc" },
-        { id: 2, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 2", cd: 21,type: "SOR", reward: "1 Token (+20 Bonus)",  wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Medium", area: "Argus/PA/TP/etc" },
-        { id: 3, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 3", cd: 21,type: "SOR", reward: "1 Token (+20 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Hard", area: "Argus/PA/TP/etc" },
-        { id: 4, planet: "Calypso", category: "Daily Terminal", name: "Daily Crafting", cd: 21,type: "SOR", reward: "1 Token (+10 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Easy", area: "Argus/PA/TP/etc" },
-        { id: 5, planet: "Calypso", category: "Daily Terminal", name: "Daily Mining", cd: 21,type: "SOR", reward: "1-2 Token (+20 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Easy", area: "Argus/PA/TP/etc" },
-        { id: 6, planet: "Calypso", category: "misc", name: "Feffoid Cave (Instance)", cd: 21,type: "SOF", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]" },
-        { id: 7, planet: "Calypso", category: "misc", name: "Argo Cave (Instance)", cd: 21,type: "SOF", reward: "1 Token", wp: "/wp [Calypso, 62719, 76117, 102, Waypoint]" },
-        { id: 8, planet: "Calypso", category: "misc", name: "Jinn's Minions (Shared)", cd: 21,type: "SOF", reward: "4 Tokens", wp: "/wp [Calypso, 68245, 79062, 361, Waypoint]" },
-        { id: 9, planet: "Calypso", category: "misc", name: "Bloodclaw (Contaminated)", cd: 21,type: "SOF", reward: "6 Tokens", wp: "/wp [Calypso, 79580, 87787, 243, Waypoint]" },
-        { id: 10, planet: "Calypso", category: "AI", name: "Alice Laurent", cd: 21,type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 63225, 74453, 131, Alice Laurent]", difficulty: "Very Easy" },
-        { id: 11, planet: "Calypso", category: "AI", name: "Boris", cd: 21,type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 61955, 76163, 138, Boris]", difficulty: "Easy" },
-        { id: 12, planet: "Calypso", category: "AI", name: "Lauren Ashford", cd: 21,type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 63344, 87480, 126, Lauren Ashford]", difficulty: "Medium" },
-        { id: 13, planet: "Calypso", category: "AI", name: "Leia Cassidy", cd: 21,type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 80538, 68314, 160, Leia Cassidy]", difficulty: "Hard" },
-        { id: 14, planet: "Calypso", category: "AI", name: "Hanna Hendrix", cd: 21,type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 35469, 60113, 240, Hanna Hendrix]", difficulty: "Hard" },
-        { id: 15, planet: "Calypso", category: "AI", name: "Hans Kaufman", cd: 21,type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 37054, 53560, 179, Hans Kaufman]", difficulty: "Hard" },
-        { id: 16, planet: "Calypso", category: "AI", name: "Bobby", cd: 21,type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 37021, 53551, 179, Bobby]", difficulty: "Hard" },
-        { id: 17, planet: "Calypso", category: "AI", name: "Thorleif Schtoll", cd: 21,type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 80459, 68299, 163, Thorleif Schtoll]", difficulty: "Very Hard" },
-        { id: 100, planet: "Aris", category: "misc", name: "Arkadia Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
+		{ id: 1, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 1", cd: 21, type: "SOR", reward: "1 Token (+20 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Easy" },
+        { id: 2, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 2", cd: 21, type: "SOR", reward: "1 Token (+20 Bonus)",  wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Medium" },
+        { id: 3, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 3", cd: 21, type: "SOR", reward: "1 Token (+20 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Hard" },
+        { id: 4, planet: "Calypso", category: "Daily Terminal", name: "Daily Crafting", cd: 21, type: "SOR", reward: "1 Token (+10 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Easy" },
+        { id: 5, planet: "Calypso", category: "Daily Terminal", name: "Daily Mining", cd: 21, type: "SOR", reward: "1-2 Token (+20 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Easy" },
+        { id: 6, planet: "Calypso", category: "misc", name: "Feffoid Cave (Instance)", cd: 21, type: "SOF", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]" },
+        { id: 7, planet: "Calypso", category: "misc", name: "Argo Cave (Instance)", cd: 21, type: "SOF", reward: "1 Token", wp: "/wp [Calypso, 62719, 76117, 102, Waypoint]" },
+        { id: 8, planet: "Calypso", category: "misc", name: "Jinn's Minions (Shared)", cd: 21, type: "SOF", reward: "4 Tokens", wp: "/wp [Calypso, 68245, 79062, 361, Waypoint]" },
+        { id: 9, planet: "Calypso", category: "misc", name: "Bloodclaw (Contaminated)", cd: 21, type: "SOF", reward: "6 Tokens", wp: "/wp [Calypso, 79580, 87787, 243, Waypoint]" },
+        { id: 10, planet: "Calypso", category: "AI", name: "Alice Laurent", cd: 21, type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 63225, 74453, 131, Alice Laurent]", difficulty: "Very Easy" },
+        { id: 11, planet: "Calypso", category: "AI", name: "Boris", cd: 21, type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 61955, 76163, 138, Boris]", difficulty: "Easy" },
+        { id: 12, planet: "Calypso", category: "AI", name: "Lauren Ashford", cd: 21, type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 63344, 87480, 126, Lauren Ashford]", difficulty: "Medium" },
+        { id: 13, planet: "Calypso", category: "AI", name: "Leia Cassidy", cd: 21, type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 80538, 68314, 160, Leia Cassidy]", difficulty: "Hard" },
+        { id: 14, planet: "Calypso", category: "AI", name: "Hanna Hendrix", cd: 21, type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 35469, 60113, 240, Hanna Hendrix]", difficulty: "Hard" },
+        { id: 15, planet: "Calypso", category: "AI", name: "Hans Kaufman", cd: 21, type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 37054, 53560, 179, Hans Kaufman]", difficulty: "Hard" },
+        { id: 16, planet: "Calypso", category: "AI", name: "Bobby", cd: 21, type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 37021, 53551, 179, Bobby]", difficulty: "Hard" },
+        { id: 17, planet: "Calypso", category: "AI", name: "Thorleif Schtoll", cd: 21, type: "SOR", reward: "AI Reward", wp: "/wp [Calypso, 80459, 68299, 163, Thorleif Schtoll]", difficulty: "Very Hard" },
+        { id: 100, planet: "Aris", category: "misc", name: "Arkadia Placeholder 1", cd: 21, type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
 		// SETESH
-		{ id: 101, planet: "Setesh", category: "misc", name: "Arkadia Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
+		{ id: 101, planet: "Setesh", category: "misc", name: "Arkadia Placeholder 1", cd: 21, type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
 		// FOMA
-		{ id: 102, planet: "Foma", category: "misc", name: "Arkadia Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
+		{ id: 102, planet: "Foma", category: "misc", name: "Arkadia Placeholder 1", cd: 21, type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
 		// CRYSTAL PALACE
-		{ id: 103, planet: "Crystal Palace", category: "misc", name: "Arkadia Placeholder 1",type: "SOR", cd: 21, reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
+		{ id: 103, planet: "Crystal Palace", category: "misc", name: "Arkadia Placeholder 1", type: "SOR", cd: 21, reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
         // MONRIA/DSEC
-		{ id: 104, planet: "Monria/DSEC", category: "misc", name: "Monria Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
+		{ id: 104, planet: "Monria/DSEC", category: "misc", name: "Monria Placeholder 1", cd: 21, type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
 		// ROCKTROPIA
-		{ id: 105, planet: "Rocktropia", category: "misc", name: "Arkadia Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
+		{ id: 105, planet: "Rocktropia", category: "misc", name: "Arkadia Placeholder 1", cd: 21, type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
 		// HOWLING MINE
-		{ id: 106, planet: "Howling Mine", category: "misc", name: "Arkadia Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
+		{ id: 106, planet: "Howling Mine", category: "misc", name: "Arkadia Placeholder 1", cd: 21, type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
 		// TOULAN
-        { id: 107, planet: "Toulan", category: "misc", name: "Arkadia Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
+        { id: 107, planet: "Toulan", category: "misc", name: "Arkadia Placeholder 1", cd: 21, type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
 		// NEXT ISLAND
-        { id: 108, planet: "Next Island", category: "misc", name: "Arkadia Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
+        { id: 108, planet: "Next Island", category: "misc", name: "Arkadia Placeholder 1", cd: 21, type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
 		// ARKADIA
-        { id: 109, planet: "Arkadia", category: "misc", name: "Toulan Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
+        { id: 109, planet: "Arkadia", category: "misc", name: "Toulan Placeholder 1", cd: 21, type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
 		// CYRENE
-        { id: 111, planet: "Cyrene", category: "misc", name: "Cyrene Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
+        { id: 111, planet: "Cyrene", category: "misc", name: "Cyrene Placeholder 1", cd: 21, type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  },
 		// SPACE
-		{ id: 112, planet: "Space", category: "misc", name: "Arkadia Placeholder 1", cd: 21,type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  }
+		{ id: 112, planet: "Space", category: "misc", name: "Arkadia Placeholder 1", cd: 21, type: "SOR", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]", difficulty: "Easy"  }
 		
     ];
 
