@@ -15,14 +15,14 @@
         
         /* Collapsing Logic */
         /* Ensure these rules are in your pixelb8-dailies.css */
-		.planet-content, .category-content { 
-			display: block; 
-		}
+		/* --- Collapsing Logic --- */
 
+		/* When planet is collapsed, hide the content area but KEEP the header */
 		.planet-section.collapsed .planet-content { 
 			display: none !important; 
 		}
 
+		/* When category is collapsed, hide the mission rows only */
 		.category-wrapper.collapsed .category-content { 
 			display: none !important; 
 		}

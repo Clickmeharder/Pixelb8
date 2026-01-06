@@ -116,23 +116,28 @@ function render() {
 
     ALL_PLANETS.forEach(planetName => {
         const pMissions = missions.filter(m => m.planet === planetName);
-        if (pMissions.length === 0) return; // Skip planets with no missions
+        if (pMissions.length === 0) return; 
 
         const readyCount = pMissions.filter(m => (!m.readyAt || m.readyAt <= Date.now()) && !m.inProgress).length;
         const progressPct = (readyCount / pMissions.length) * 100;
-        const isCollapsed = collapsedPlanets[planetName];
+        const isPlanetCollapsed = collapsedPlanets[planetName];
 
+        // START PLANET SECTION
+        mainHtml += `<div class="planet-section ${isPlanetCollapsed ? 'collapsed' : ''}">`;
+        
+        // Progress bar and Header stay OUTSIDE the planet-content div
         mainHtml += `
-            <div class="planet-section ${isCollapsed ? 'collapsed' : ''}">
-                <div class="progress-container"><div class="progress-fill" style="width: ${progressPct}%"></div></div>
-                <div class="planet-header" onclick="togglePlanet('${planetName}')">
-                    <span><i class="fa-solid ${isCollapsed ? 'fa-planet-ringed' : 'fa-globe'}"></i> ${planetName}</span>
-                    <div class="header-stats">
-                        <span class="stat-ready">${readyCount} Ready</span>
-                        <i class="fa-solid ${isCollapsed ? 'fa-caret-down' : 'fa-caret-up'}"></i>
-                    </div>
+            <div class="progress-container"><div class="progress-fill" style="width: ${progressPct}%"></div></div>
+            <div class="planet-header" onclick="togglePlanet('${planetName}')">
+                <span><i class="fa-solid ${isPlanetCollapsed ? 'fa-square-plus' : 'fa-planet-ringed'}"></i> ${planetName}</span>
+                <div class="header-stats">
+                    <span class="stat-ready">${readyCount} Ready</span>
+                    <i class="fa-solid ${isPlanetCollapsed ? 'fa-caret-down' : 'fa-caret-up'}"></i>
                 </div>
-                <div class="planet-content">`;
+            </div>`;
+
+        // Inner Content (This is what disappears)
+        mainHtml += `<div class="planet-content">`;
 
         const categories = [...new Set(pMissions.map(m => m.category))];
         categories.forEach(cat => {
@@ -159,11 +164,10 @@ function render() {
                                 ${m.difficulty ? `<span class="diff-badge">${m.difficulty}</span>` : ''}
                                 <span>${m.reward || ''}</span>
                                 ${m.wp ? `<span class="wp-tag" onclick="event.stopPropagation(); copyWP('${m.wp}')">COPY WP</span>` : ''}
-                                <span class="cd-type-tag">[${m.type}]</span>
                             </div>
                         </div>
                         <div class="status-text">
-                            ${m.inProgress ? '<span class="status-active">MISSION ACTIVE</span>' : 
+                            ${m.inProgress ? '<span class="status-active">ACTIVE</span>' : 
                               isCD ? `<span class="status-timer">${formatTime(m.readyAt - Date.now())}</span>` : 
                               '<span class="status-ready">READY</span>'}
                         </div>
@@ -175,9 +179,10 @@ function render() {
                         <button class="btn-delete" onclick="event.stopPropagation(); deleteMission(${m.id})">×</button>
                     </div>`;
             });
-            mainHtml += `</div></div>`;
+            mainHtml += `</div></div>`; // Close category-content and wrapper
         });
-        mainHtml += `</div></div>`;
+        
+        mainHtml += `</div></div>`; // Close planet-content and planet-section
     });
 
     container.innerHTML = mainHtml;
