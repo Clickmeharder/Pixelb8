@@ -11,10 +11,10 @@ let collapsedCats = JSON.parse(localStorage.getItem('euColl_Cats')) || {};
 //
     const defaultMissions = [
 		{ id: 1, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 1", cd: 21,type: "SOR", reward: "1 Token (+20 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Easy", area: "Argus/PA/TP/etc" },
-        { id: 2, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 2", cd: 21,type: "SOF", reward: "1 Token (+20 Bonus)",  wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Medium", area: "Argus/PA/TP/etc" },
-        { id: 3, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 3", cd: 21, reward: "1 Token (+20 Bonus)", difficulty: "Hard", area: "Argus/PA/TP/etc" },
-        { id: 4, planet: "Calypso", category: "Daily Terminal", name: "Daily Crafting", cd: 21, reward: "1 Token (+10 Bonus)", difficulty: "Easy", area: "Argus/PA/TP/etc" },
-        { id: 5, planet: "Calypso", category: "Daily Terminal", name: "Daily Mining", cd: 21, reward: "1-2 Token (+20 Bonus)", difficulty: "Easy", area: "Argus/PA/TP/etc" },
+        { id: 2, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 2", cd: 21,type: "SOR", reward: "1 Token (+20 Bonus)",  wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Medium", area: "Argus/PA/TP/etc" },
+        { id: 3, planet: "Calypso", category: "Daily Terminal", name: "Daily Hunting 3", cd: 21,type: "SOR", reward: "1 Token (+20 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Hard", area: "Argus/PA/TP/etc" },
+        { id: 4, planet: "Calypso", category: "Daily Terminal", name: "Daily Crafting", cd: 21,type: "SOR", reward: "1 Token (+10 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Easy", area: "Argus/PA/TP/etc" },
+        { id: 5, planet: "Calypso", category: "Daily Terminal", name: "Daily Mining", cd: 21,type: "SOR", reward: "1-2 Token (+20 Bonus)", wp: "/wp [Calypso, 61955, 76163, 138, Daily Mission Terminal]", difficulty: "Easy", area: "Argus/PA/TP/etc" },
         { id: 6, planet: "Calypso", category: "misc", name: "Feffoid Cave (Instance)", cd: 21,type: "SOF", reward: "1 Token", wp: "/wp [Calypso, 61327, 75263, 118, Waypoint]" },
         { id: 7, planet: "Calypso", category: "misc", name: "Argo Cave (Instance)", cd: 21,type: "SOF", reward: "1 Token", wp: "/wp [Calypso, 62719, 76117, 102, Waypoint]" },
         { id: 8, planet: "Calypso", category: "misc", name: "Jinn's Minions (Shared)", cd: 21,type: "SOF", reward: "4 Tokens", wp: "/wp [Calypso, 68245, 79062, 361, Waypoint]" },
