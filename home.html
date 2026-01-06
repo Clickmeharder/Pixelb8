@@ -148,6 +148,79 @@
             }
         }
     </style>
+    <style>
+
+
+        .row {
+            margin-top: 40px;
+            z-index: 10;
+            flex-shrink: 0; /* Prevents rows from squishing */
+        }
+
+        /* The first row needs extra margin for the fixed header */
+        .row:first-of-type {
+            margin-top: 120px;
+        }
+
+        .themed-main {
+			padding: 30px;
+			height: auto;
+			overflow: hidden;
+			overflow-y: auto;
+			border-radius: 4px;
+        }
+
+        .app-screenshot {
+            width: 100%;
+            max-width: 800px;
+            display: block;
+            margin: 20px auto;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .download-zone {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .dl-button {
+            font-size: 24px;
+            color: #0ff;
+            padding: 15px 40px;
+            border: 2px solid #0ff;
+            background: rgba(0, 255, 255, 0.05);
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.4s;
+            cursor: pointer;
+        }
+
+        .dl-button:hover {
+            color: #ff00ff;
+            border-color: #ff00ff;
+            box-shadow: 0 0 20px #ff00ff;
+            background: rgba(255, 0, 255, 0.1);
+        }
+
+        .warning-box {
+            border-left: 5px solid #ff00ff;
+            padding: 20px;
+            background: rgba(255, 0, 255, 0.05);
+            margin: 20px 0;
+        }
+
+        .highlight { color: #ff00ff; font-weight: bold; }
+        
+        h1, h2, h3 { color: #0ff; text-transform: uppercase; margin-top: 0; }
+
+        /* Space at the very bottom so the last row isn't touching the edge */
+        .footer-spacer {
+            height: 100px;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
 	<div class="background-container">
