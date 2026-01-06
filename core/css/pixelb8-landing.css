@@ -596,7 +596,7 @@ button#Toggleaccpanelinternals-Button {
         /* 2. CRT EFFECTS */
         @keyframes flicker {
             0% { opacity: 0.2; }
-            50% { opacity: 0.4; }
+            50% { opacity: 0.3; }
             100% { opacity: 0.2; }
         }
 
@@ -636,5 +636,5 @@ button#Toggleaccpanelinternals-Button {
             /* Visible grey lines */
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(50, 50, 50, 0.8) 50%);
             background-size: 100% 4px;
-            animation: flicker 0.15s infinite, crt-crawl 30s infinite linear;
+            animation: flicker 1.15s infinite, crt-crawl 30s infinite linear;
         }
