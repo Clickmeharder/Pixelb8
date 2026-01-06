@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>S.U.S.P.E.C.T - PixelB8.LoL</title>
     <link rel="stylesheet" href="../core/css/pixelb8-landing.css">
-    <link rel="stylesheet" href="../core/css/pixelb8-tools.css">
     <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
         body {
             margin: 0;
             min-height: 100vh;
@@ -20,49 +21,51 @@
             background: black;
             color: #0b7272;
             font-family: 'Orbitron', sans-serif;
-            overflow-y: auto; /* Allow scrolling for content */
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
-        .content-wrapper {
-            margin-top: 80px;
+        /* Adjust the row to handle the long content */
+        .row {
             width: 90%;
-            max-width: 900px;
-            padding-bottom: 50px;
-            z-index: 5;
+            max-width: 1000px;
+            margin-top: 100px; /* Space for the header */
+            z-index: 10;
         }
 
         .themed-main {
-            background: rgba(0, 0, 0, 0.85);
-            border: 2px solid #0b7272;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(11, 114, 114, 0.3);
+            text-align: left; /* Better for reading guides */
+            margin-bottom: 50px;
         }
 
         .app-screenshot {
             width: 100%;
-            border: 1px solid #0ff;
-            margin: 20px 0;
-            border-radius: 5px;
+            max-width: 700px;
+            display: block;
+            margin: 20px auto;
+            border: 2px solid #0b7272;
+            border-radius: 8px;
+            box-shadow: 0 0 15px #0b7272;
         }
 
-        .download-section {
+        .download-zone {
             text-align: center;
-            margin: 40px 0;
-            padding: 20px;
-            border-top: 1px inset #0b7272;
+            background: rgba(11, 114, 114, 0.1);
+            padding: 30px;
+            border: 1px dashed #0b7272;
+            margin: 30px 0;
         }
 
         .dl-button {
-            font-size: 22px;
+            font-size: 24px;
             color: #0ff;
-            padding: 15px 30px;
+            padding: 15px 40px;
             border: 2px solid #0ff;
-            background: rgba(0, 255, 255, 0.1);
+            background: transparent;
             text-transform: uppercase;
             text-decoration: none;
-            transition: 0.3s;
             display: inline-block;
+            transition: all 0.4s;
         }
 
         .dl-button:hover {
@@ -71,71 +74,68 @@
             box-shadow: 0 0 20px #ff00ff;
         }
 
-        .install-guide {
+        .warning-box {
+            border-left: 5px solid #ff00ff;
+            padding: 15px;
             background: rgba(255, 0, 255, 0.05);
-            padding: 20px;
-            border-left: 4px solid #ff00ff;
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
-        .warning-text {
-            color: #ff00ff;
-            font-weight: bold;
-        }
-
-        h2 { border-bottom: 1px solid #0b7272; padding-bottom: 10px; }
+        .highlight { color: #ff00ff; }
+        
+        h1, h2, h3 { color: #0ff; text-transform: uppercase; }
     </style>
 </head>
 <body>
     <div class="background-container">
-        <div class="stars"></div>
-        <div class="twinkling"></div>
+      <div class="stars"></div>
+      <div class="twinkling"></div>
     </div>
 
-    <div class="header">S.U.S.P.E.C.T - AlphaBeta v1.0.0</div>
+    <div class="header">PixelB8.LoL - S.U.S.P.E.C.T</div>
     
     <button class="menu-button" onclick="toggleMenu()">☰</button>
     <div class="nav-menu" id="navMenu">
         <a href="https://Pixelb8.lol/home">Home</a>
         <a href="https://Pixelb8.lol/eu">Entropia</a>
+        <a href="https://Pixelb8.lol/media">Media</a>
         <a href="https://Pixelb8.lol/tools">Tools</a>
+        <a href="https://Pixelb8.lol/arcade">Arcade</a>
     </div>
 
-    <div class="content-wrapper">
+    <div class="row">
+        <h2 id="themed-main-title">Secret Universal Services Personal Entropia Connection Tool</h2>
+        
         <section class="themed-main">
-            <h1>Secret Universal Services Personal Entropia Connection Tool</h1>
-            <p>S.U.S.P.E.C.T is a specialized desktop companion designed for Entropia Universe colonists who need real-time data at their fingertips.</p>
+            <p>Welcome to the <strong>AlphaBeta</strong> release of S.U.S.P.E.C.T. This desktop application is designed to bridge the gap between your Entropia Universe logs and your gameplay data.</p>
             
             <img src="../assets/images/suspect_preview.png" alt="S.U.S.P.E.C.T Interface" class="app-screenshot">
 
-            <h2>Core Features</h2>
-            <ul>
-                <li><strong>Log Listener:</strong> Real-time monitoring of ChatLog.txt.</li>
-                <li><strong>Hunt Tracking:</strong> Automated loot recording and CSV exporting.</li>
-                <li><strong>Always On Top:</strong> Keep your stats visible while in-game.</li>
-                <li><strong>Zyzakus-Approved:</strong> The official AlphaBeta experience.</li>
-            </ul>
+            <h3>What does it do?</h3>
+            <p>It "listens" to your local ChatLog.txt and extracts specific data in real-time. Whether you are tracking a long hunt or monitoring global events, S.U.S.P.E.C.T stays on top (literally) to keep you informed.</p>
 
-            <div class="download-section">
+            <div class="download-zone">
                 <a href="https://github.com/Clickmeharder/Pixelb8/releases/latest/download/suspect_setup.exe" class="dl-button">
-                    <i class="fa-solid fa-download"></i> Download for Windows
+                    <i class="fa-solid fa-download"></i> Download v1.0.0
                 </a>
-                <p style="font-size: 12px; margin-top: 10px;">Size: ~215MB | Version: 1.0.0 (AlphaBeta)</p>
+                <p>Compatible with Windows 10/11</p>
             </div>
 
-            <div class="install-guide">
-                <h3><i class="fa-solid fa-triangle-exclamation"></i> Installation Guide</h3>
-                <p>Because this is a specialized indie tool, Windows may flag it as "Unrecognized." Follow these steps to install:</p>
-                <ol>
-                    <li>Download the <strong>suspect_setup.exe</strong> above.</li>
-                    <li>Run the installer. If a blue <strong>"Windows protected your PC"</strong> box appears:
-                        <br>— Click <span class="warning-text">"More Info"</span>
-                        <br>— Click <span class="warning-text">"Run Anyway"</span>
-                    </li>
-                    <li>The S.U.S.P.E.C.T Splash Screen will appear while the app initializes.</li>
-                    <li>Set your Entropia Log folder path and you're ready to hunt!</li>
-                </ol>
+            <h3>How to Install (The "AlphaBeta" Way)</h3>
+            <p>Since we are in early development, the installer is currently "unsigned." Windows will try to protect you from this awesome tool. To proceed:</p>
+            
+            <div class="warning-box">
+                <p>1. Run <strong>suspect_setup.exe</strong>.</p>
+                <p>2. When the blue "Windows protected your PC" screen appears, click <span class="highlight">"More Info"</span>.</p>
+                <p>3. Click the <span class="highlight">"Run Anyway"</span> button that appears at the bottom.</p>
             </div>
+
+            <h3>Setup Instructions</h3>
+            <ul>
+                <li>Launch the app and wait for the Splash Screen to load.</li>
+                <li>Go to Settings and point the app to your <strong>Documents/Entropia Universe/ChatLog.txt</strong> folder.</li>
+                <li>Happy Hunting!</li>
+            </ul>
         </section>
     </div>
 
