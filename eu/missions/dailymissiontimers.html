@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EU Daily Mission Tracker | PixelB8</title>
     <link rel="stylesheet" href="https://pixelb8.lol/core/css/pixelb8-landing.css">
-	<link rel="stylesheet" href="https://pixelb8.lol/core/css/pixelb8-dailies.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </head>
 <body>
 
@@ -44,8 +44,7 @@
         "Crystal Palace", "Space"
     ];
 
-	// Track which planets are collapsed in memory
-    let collapsedPlanets = JSON.parse(localStorage.getItem('euColl_Planets')) || {};
+	let collapsedPlanets = JSON.parse(localStorage.getItem('euColl_Planets')) || {};
     let collapsedCats = JSON.parse(localStorage.getItem('euColl_Cats')) || {};
 //type: "SOR"
 //type: "SOF"
@@ -96,7 +95,7 @@
 	let missions = JSON.parse(localStorage.getItem('euMissions_v7')) || [...defaultMissions];
 
 
-    function addMission() {
+	function addMission() {
         missions.push({
             id: Date.now(),
             planet: document.getElementById('mPlanet').value,
@@ -111,46 +110,40 @@
     }
 
 	function handleAction(id, action) {
-		const m = missions.find(x => x.id === id);
-		if (action === 'start') {
-			// Robust check: matches 'SOR' OR the long string you had before
-			if (m.type === 'SOR' || m.type === 'start on mission recieved') {
-				m.readyAt = Date.now() + (m.cd * 60 * 60 * 1000);
-				m.inProgress = false;
-			} else {
-				m.inProgress = true;
-			}
-		} else if (action === 'finish') {
-			m.readyAt = Date.now() + (m.cd * 60 * 60 * 1000);
-			m.inProgress = false;
-		} else if (action === 'reset') {
-			m.readyAt = 0;
-			m.inProgress = false;
-		}
-		saveAndRender();
-	}
+        const m = missions.find(x => x.id === id);
+        if (action === 'start') {
+            if (m.type === 'SOR' || m.type === 'start on mission recieved') {
+                m.readyAt = Date.now() + (m.cd * 60 * 60 * 1000);
+                m.inProgress = false;
+            } else {
+                m.inProgress = true;
+            }
+        } else if (action === 'finish') {
+            m.readyAt = Date.now() + (m.cd * 60 * 60 * 1000);
+            m.inProgress = false;
+        } else if (action === 'reset') {
+            m.readyAt = 0;
+            m.inProgress = false;
+        }
+        saveAndRender();
+    }
 
     function saveAndRender() {
         localStorage.setItem('euMissions_v7', JSON.stringify(missions));
         render();
     }
 
-// --- TOGGLES ---
+// --- utility ---
 
-    function togglePlanet(p) {
-        collapsedPlanets[p] = !collapsedPlanets[p];
-        localStorage.setItem('euColl_Planets', JSON.stringify(collapsedPlanets));
-        render();
+    function togglePlanet(p) { collapsedPlanets[p] = !collapsedPlanets[p]; localStorage.setItem('euColl_Planets', JSON.stringify(collapsedPlanets)); render(); }
+    function toggleCat(p, c) { collapsedCats[p+c] = !collapsedCats[p+c]; localStorage.setItem('euColl_Cats', JSON.stringify(collapsedCats)); render(); }
+    
+    function copyWP(text) {
+        navigator.clipboard.writeText(text);
+        alert("Waypoint copied to clipboard!");
     }
 
-    function toggleCat(p, c) {
-        const key = p + c;
-        collapsedCats[key] = !collapsedCats[key];
-        localStorage.setItem('euColl_Cats', JSON.stringify(collapsedCats));
-        render();
-    }
-
-    function render() {
+function render() {
         const container = document.getElementById('planetList');
         container.innerHTML = '';
 
@@ -190,7 +183,12 @@
                         <div class="mission-row ${stateClass}">
                             <div class="mission-info">
                                 <h4>${m.name}</h4>
-                                <div class="mission-meta">${m.reward || ''} <span class="cd-type-tag">Type: ${m.type === 'SOR' ? 'Starts on Received' : 'Starts on Finished'}</span></div>
+                                <div class="mission-meta">
+                                    ${m.difficulty ? `<span class="diff-badge">${m.difficulty}</span>` : ''}
+                                    <span>${m.reward || ''}</span>
+                                    ${m.wp ? `<span class="wp-tag" onclick="event.stopPropagation(); copyWP('${m.wp}')">COPY WP</span>` : ''}
+                                    <span class="cd-type-tag">[${m.type === 'SOR' ? 'SOR' : 'SOF'}]</span>
+                                </div>
                             </div>
                             <div class="status-text">
                                 ${m.inProgress ? '<span class="status-active">MISSION ACTIVE</span>' : 
@@ -216,8 +214,6 @@
         let s = Math.floor(ms / 1000);
         return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m ${s % 60}s`;
     }
-    function togglePlanet(p) { collapsedPlanets[p] = !collapsedPlanets[p]; localStorage.setItem('euColl_Planets', JSON.stringify(collapsedPlanets)); render(); }
-    function toggleCat(p, c) { collapsedCats[p+c] = !collapsedCats[p+c]; localStorage.setItem('euColl_Cats', JSON.stringify(collapsedCats)); render(); }
     function deleteMission(id) { missions = missions.filter(m => m.id !== id); saveAndRender(); }
     
     setInterval(render, 1000);
