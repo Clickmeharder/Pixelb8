@@ -285,9 +285,9 @@ function render() {
     container.innerHTML = ALL_PLANETS.map(renderPlanet).join('');
 }
 // This keeps the timers updating every second without flickering the whole UI
-setInterval(() => {
+/* setInterval(() => {
     render();
-}, 1000);
+}, 1000); */
 
 render();
 console.log('pixelb8-dailies.js version 1.0.2');
