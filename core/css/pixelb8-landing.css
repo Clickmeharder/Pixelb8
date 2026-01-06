@@ -399,6 +399,7 @@ animated twinkly stars background styles
 
 
 .column{display: flex;flex-direction: column;}
+div#TopRow {margin-top: 69px;}
 .row{display: flex;flex-direction: row;}
 .hidden{display: none;}
 .fillheight{
