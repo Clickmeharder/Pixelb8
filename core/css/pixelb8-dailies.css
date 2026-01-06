@@ -1,13 +1,17 @@
         body { background: #000; color: #eee; font-family: 'Orbitron', sans-serif; margin: 20px; }
-        .timer-container { max-width: 1050px; margin: auto; margin-top: 24px; position:absolute; }
+        .timer-container { max-width: 96%; margin: auto; margin-top: 24px; position: absolute; left: 50%; width: 94%; transform: translateX(-50%); }
         .timer-container h1 { margin: auto;margin-top: 4px; }
         /* Planet Grouping */
 		.stat-cd { color: #ac4915; font-weight: bold; margin-right: 10px; }
 		.closest-timer { color: #0ff; font-family: monospace; font-size: 0.9em; margin: 0 15px; border-left: 1px solid #333; padding-left: 15px; }
         .planet-section { background: rgba(20, 20, 20, 0.9); border: 1px solid #333; border-radius: 8px; margin-bottom: 3px; overflow: visible; }
         .progress-container { width: 93%; height: 4px;padding-top:3px;margin:auto;border-radius:15px; background: #222;overflow:hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #147b1d, #0ff); transition: width 0.5s; }
-        
+		.progress-fill {
+			height: 100%;
+			background: linear-gradient(90deg, #147b1d, #00ffff1a);
+			transition: width 1.5s;
+			opacity: 0.8;
+		}
         .planet-header { background: #1a1a1a; color: #ffd700; padding: 4px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .header-stats { display: flex; gap: 15px; font-size: 0.75em; color: #ccc; align-items: center; }
         .stat-ready { color: #147b1d; font-weight: bold; }
@@ -96,5 +100,5 @@
         .btn-finish { border-color: #ffd700; color: #ffd700; }
         .btn-delete { color: #ff4444; border: none; background: none; font-size: 1em; }
 
-        .add-controls { background: #111; padding: 15px; border: 1px solid #0ff; margin-bottom: 25px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .add-controls { background: #3b3b3b96; padding: 15px; border: 1px solid #0ff; margin-bottom: 25px; display: flex; gap: 8px; flex-wrap: wrap; }
         input, select { background: #000; border: 1px solid #444; color: #0ff; padding: 6px; font-size: 0.8em; }
