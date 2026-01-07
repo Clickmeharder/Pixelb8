@@ -273,28 +273,64 @@ function render() {
     container.innerHTML = ALL_PLANETS.map(renderPlanet).join('');
 }
 document.addEventListener('DOMContentLoaded', () => {
-    // Menu Toggle
+    // 1. Menu Toggle
     document.getElementById('btn-menu-toggle')?.addEventListener('click', toggleMenu);
 
-    // Add Mission
+    // 2. Add Mission
     document.getElementById('btn-add-mission')?.addEventListener('click', addMission);
 
-    // Export Data
+    // 3. Export Data
     document.getElementById('btn-export')?.addEventListener('click', exportMissions);
 
-    // Import Data Trigger
+    // 4. Import Data Trigger
     const fileInput = document.getElementById('importFile');
     document.getElementById('btn-import')?.addEventListener('click', () => fileInput.click());
-
-    // File Input Change (Handle Import)
     fileInput?.addEventListener('change', (event) => handleImport(event));
 
-    // Reset Defaults
+    // 5. Reset Defaults
     document.getElementById('btn-reset')?.addEventListener('click', resetToDefaults);
 
-    // Collapse/Expand Logic
+    // 6. Global Collapse/Expand
     document.getElementById('btn-collapse')?.addEventListener('click', () => collapseAll(true));
     document.getElementById('btn-expand')?.addEventListener('click', () => collapseAll(false));
+
+    // --- NEW: THE EVENT DELEGATE FOR DYNAMIC CONTENT ---
+    // This handles all clicks inside the mission list (Planets, Categories, Buttons)
+    const planetList = document.getElementById('planetList');
+    if (planetList) {
+        planetList.addEventListener('click', (e) => {
+            // Find the closest element that has a data-action attribute
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+
+            const action = target.getAttribute('data-action');
+            const id = target.getAttribute('data-id');
+            const planet = target.getAttribute('data-planet');
+            const cat = target.getAttribute('data-cat');
+            const wp = target.getAttribute('data-wp');
+
+            // Handle the specific action
+            switch (action) {
+                case 'toggle-planet':
+                    togglePlanet(planet);
+                    break;
+                case 'toggle-cat':
+                    toggleCat(planet, cat);
+                    break;
+                case 'start':
+                case 'finish':
+                case 'reset':
+                    handleAction(parseInt(id), action);
+                    break;
+                case 'delete':
+                    deleteMission(parseInt(id));
+                    break;
+                case 'copy-wp':
+                    copyWP(wp);
+                    break;
+            }
+        });
+    }
 });
 // Start everything
 initApp();
