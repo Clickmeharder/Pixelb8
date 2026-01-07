@@ -79,7 +79,8 @@
         .mission-row.in-progress { border-left-color: #ffd700; background: #161401; }
         .mission-row.on-cooldown { border-left-color: #ac4915; opacity: 0.7; }
 
-        .mission-info h4 { margin: 0; font-size: 0.9em; color: #fff; }
+        .mission-info h4 { margin: 0; font-size: 0.9em; color:#555; transition: color 0.8s ease; }
+		.mission-info h4:hover {color: #238718; }
         .mission-meta { font-size: 0.72em; color: #888; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
         
         /* New UI Elements */
