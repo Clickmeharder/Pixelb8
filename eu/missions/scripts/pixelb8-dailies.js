@@ -223,4 +223,4 @@ function render() {
 }
 
 initApp();
-console.log('pixelb8-dailies.js version 1.0.2');
+console.log('pixelb8-dailies.js version 1.0.3');
