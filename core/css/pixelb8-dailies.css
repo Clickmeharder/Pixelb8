@@ -3,7 +3,7 @@
         .timer-container h1 { margin: auto;margin-top: 4px; }
         /* Planet Grouping */
 		.stat-cd { color: #ac4915; font-weight: bold; margin-right: 10px; }
-		.closest-timer { color: #0ff; font-family: monospace; font-size: 0.9em; margin: 0 15px; border-left: 1px solid #333; padding-left: 15px; }
+		.closest-timer { color: #0ff; font-family: monospace; font-size: 1.5em; margin: 0 15px; border-left: 1px solid #333; padding-left: 15px; }
         .planet-section { background: rgba(20, 20, 20, 0.9); border: 1px solid #333; border-radius: 8px; margin-bottom: 3px; overflow: visible; }
         .progress-container { width: 93%; height: 4px;padding-top:3px;margin:auto;border-radius:15px; background: #222;overflow:hidden; }
 		.progress-fill {
