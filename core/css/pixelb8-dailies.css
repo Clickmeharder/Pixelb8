@@ -114,7 +114,9 @@
         button { cursor: pointer; background: #2d2929; color: #eee; border: 1px solid #4d4949; padding: 6px 10px; font-family: 'Orbitron'; font-size: 0.75em; }
         .btn-start { border-color: #147b1d; }
         .btn-finish { border-color: #ffd700; color: #ffd700; }
-        .btn-delete { color: #ff4444; border: none; background: none; font-size: 1em; }
-
+        .btn-delete { color: #888; border: 1px outset #833333; background: none; font-size: 1em; transition: color 0.8s ease;}
+		.btn-delete:hover {color:#ff4444;}
+		button#btn-reset {color: #888; transition: color 0.8s ease;}
+		button#btn-reset:hover {color: #ff4444;}
         .add-controls { background: #3b3b3b96; padding: 15px; border: 1px solid #0ff; margin-bottom: 25px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;}
         input, select { background: #000; border: 1px solid #444; color: #0ff; padding: 6px; font-size: 0.8em; }
