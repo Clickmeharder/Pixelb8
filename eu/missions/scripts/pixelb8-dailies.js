@@ -1,4 +1,8 @@
-const ALL_PLANETS = ["Earth", "Calypso", "Monria/DSEC", "Rocktropia", "Howling Mine", "Toulan", "Next Island", "Arkadia", "Arkadia Moon", "Cyrene", "Aris", "Setesh", "Foma", "Crystal Palace", "Space"];
+const ALL_PLANETS = [
+    "Earth", "Calypso", "Monria/DSEC", "Rocktropia", "Howling Mine", "Toulan", 
+    "Next Island", "Arkadia", "Arkadia Moon", "Cyrene", "Aris", "Setesh", "Foma", 
+    "Crystal Palace", "Space"
+];
 
 let missions = [];
 let collapsedPlanets = JSON.parse(localStorage.getItem('euColl_Planets')) || {};
@@ -16,19 +20,23 @@ async function initApp() {
     }
 
     render();
+    // Keep timers ticking every second
     setInterval(render, 1000);
 }
 
 async function loadDefaultJSON() {
     try {
-        const response = await fetch('./assets/data/dailymissions.json'); // Make sure path is correct
+        const response = await fetch('./assets/data/dailymissions.json');
         const data = await response.json();
+        
+        // Map the JSON strings into working data
         missions = data.map(m => ({
             ...m,
             cd: parseCooldown(m.cd),
             readyAt: 0,
             inProgress: false
         }));
+        
         saveAndRender();
     } catch (err) {
         console.error("Critical Error: Could not load missions.json", err);
@@ -49,7 +57,7 @@ function addMission() {
     const m = parseInt(document.getElementById('mMins').value) || 0;
     const totalMinutes = (d * 1440) + (h * 60) + m;
 
-    if (totalMinutes <= 0) return alert("Set a cooldown time!");
+    if (totalMinutes <= 0) return alert("Please set a cooldown time!");
 
     missions.push({
         id: Date.now(),
@@ -65,7 +73,6 @@ function addMission() {
     });
 
     saveAndRender();
-    // Clear inputs
     ['mName', 'mCat', 'mWp', 'mReward', 'mDays', 'mHrs', 'mMins'].forEach(id => document.getElementById(id).value = "");
 }
 
@@ -114,14 +121,17 @@ function deleteMission(id) {
 }
 
 function resetToDefaults() {
-    if(confirm("Restore defaults? This wipes custom missions!")) {
+    if(confirm("Restore defaults? This wipes custom missions and progress!")) {
         localStorage.removeItem('euMissions_v7');
         loadDefaultJSON();
     }
 }
 
+// --- IMPORT / EXPORT ---
+
 function exportMissions() {
-    const blob = new Blob([JSON.stringify(missions, null, 2)], {type : 'application/json'});
+    const dataStr = JSON.stringify(missions, null, 2);
+    const blob = new Blob([dataStr], {type : 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -135,41 +145,52 @@ function handleImport(e) {
     const reader = new FileReader();
     reader.onload = (event) => {
         try {
-            missions = JSON.parse(event.target.result);
-            saveAndRender();
-            alert("Imported!");
-        } catch(err) { alert("Invalid File"); }
+            const importedData = JSON.parse(event.target.result);
+            if (Array.isArray(importedData)) {
+                missions = importedData;
+                saveAndRender();
+                alert("Imported successfully!");
+            }
+        } catch(err) { alert("Invalid JSON File"); }
     };
     reader.readAsText(e.target.files[0]);
+    e.target.value = '';
 }
 
-function parseCooldown(val) {
-    if (typeof val === 'number') return val;
+// --- PARSERS & FORMATTERS ---
+
+function parseCooldown(value) {
+    if (typeof value === 'number') return value;
+    if (!value) return 0;
     let total = 0;
-    const d = val.match(/(\d+)d/), h = val.match(/(\d+)h/), m = val.match(/(\d+)m/);
-    if (d) total += d[1] * 1440;
-    if (h) total += h[1] * 60;
-    if (m) total += m[1] * 1;
-    return total || parseInt(val) * 60 || 0;
+    const d = value.match(/(\d+)\s*d/), h = value.match(/(\d+)\s*h/), m = value.match(/(\d+)\s*m/);
+    if (d) total += parseInt(d[1]) * 1440;
+    if (h) total += parseInt(h[1]) * 60;
+    if (m) total += parseInt(m[1]);
+    if (total === 0 && !isNaN(value) && value !== "") total = parseInt(value) * 60;
+    return total;
 }
 
 function formatTime(ms) {
-    let s = Math.max(0, Math.floor(ms / 1000));
+    if (ms < 0) return "0h 0m 0s";
+    let s = Math.floor(ms / 1000);
     const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), secs = s % 60;
     return d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${secs}s`;
 }
 
 function copyWP(text) {
     navigator.clipboard.writeText(text);
-    alert("Copied!");
+    alert("Waypoint copied!");
 }
 
-// --- RENDER ENGINE ---
+// --- RESTORED RENDER ENGINE ---
 
 const renderMission = (m) => {
-    const isCD = m.readyAt > Date.now();
+    const isCD = m.readyAt && (m.readyAt > Date.now());
+    const stateClass = m.inProgress ? 'in-progress' : (isCD ? 'on-cooldown' : '');
+    
     return `
-        <div class="mission-row ${m.inProgress ? 'in-progress' : isCD ? 'on-cooldown' : ''}">
+        <div class="mission-row ${stateClass}">
             <div class="mission-info">
                 <h4>${m.name}</h4>
                 <div class="mission-meta">
@@ -179,48 +200,81 @@ const renderMission = (m) => {
                 </div>
             </div>
             <div class="status-text">
-                ${m.inProgress ? 'ACTIVE' : isCD ? formatTime(m.readyAt - Date.now()) : 'READY'}
+                ${m.inProgress ? '<span class="status-active">ACTIVE</span>' : 
+                  isCD ? `<span class="status-timer">${formatTime(m.readyAt - Date.now())}</span>` : 
+                  '<span class="status-ready">READY</span>'}
             </div>
             <div class="actions">
-                ${!m.inProgress && !isCD ? `<button onclick="handleAction(${m.id},'start')">START</button>` : ''}
-                ${m.inProgress ? `<button onclick="handleAction(${m.id},'finish')">FINISH</button>` : ''}
-                ${isCD ? `<button onclick="handleAction(${m.id},'reset')">RESET</button>` : ''}
+                ${!m.inProgress && !isCD ? `<button class="btn-start" onclick="event.stopPropagation(); handleAction(${m.id},'start')">START</button>` : ''}
+                ${m.inProgress ? `<button class="btn-finish" onclick="event.stopPropagation(); handleAction(${m.id},'finish')">FINISH</button>` : ''}
+                ${isCD ? `<button onclick="event.stopPropagation(); handleAction(${m.id},'reset')">RESET</button>` : ''}
             </div>
-            <button class="btn-delete" onclick="deleteMission(${m.id})">×</button>
+            <button class="btn-delete" onclick="event.stopPropagation(); deleteMission(${m.id})">×</button>
+        </div>`;
+};
+
+const renderCategory = (planetName, cat, pMissions) => {
+    const catKey = planetName + cat;
+    const isCatColl = collapsedCats[catKey];
+    const missionsInCat = pMissions.filter(m => m.category === cat);
+    
+    return `
+        <div class="category-wrapper ${isCatColl ? 'collapsedSection' : ''}">
+            <div class="category-header" onclick="toggleCat('${planetName}','${cat}')">
+                <span>${cat}</span>
+                <i class="fa-solid ${isCatColl ? 'fa-plus' : 'fa-minus'}"></i>
+            </div>
+            <div class="category-content">
+                ${missionsInCat.map(renderMission).join('')}
+            </div>
+        </div>`;
+};
+
+const renderPlanet = (planetName) => {
+    const pMissions = missions.filter(m => m.planet.toLowerCase() === planetName.toLowerCase());
+    if (pMissions.length === 0) return ''; 
+
+    const now = Date.now();
+    const readyMissions = pMissions.filter(m => (!m.readyAt || m.readyAt <= now) && !m.inProgress);
+    const cdMissions = pMissions.filter(m => m.readyAt && m.readyAt > now);
+    
+    const readyCount = readyMissions.length;
+    const cdCount = cdMissions.length;
+    const progressPct = (readyCount / pMissions.length) * 100;
+    const isPlanetCollapsed = collapsedPlanets[planetName];
+    const categories = [...new Set(pMissions.map(m => m.category))];
+
+    let closestMissionHtml = '';
+    if (cdCount > 0) {
+        const closest = cdMissions.reduce((prev, curr) => (prev.readyAt < curr.readyAt) ? prev : curr);
+        closestMissionHtml = `<span class="closest-timer"> Next: ${closest.name} (${formatTime(closest.readyAt - now)})</span>`;
+    }
+
+    return `
+        <div class="planet-section ${isPlanetCollapsed ? 'collapsedSection' : ''}">
+            <div class="progress-container"><div class="progress-fill" style="width: ${progressPct}%"></div></div>
+            <div class="planet-header" onclick="togglePlanet('${planetName}')">
+                <span><i class="fa-solid ${isPlanetCollapsed ? 'fa-square-plus' : 'fa-planet-ringed'}"></i> ${planetName}</span>
+                <div class="header-stats">
+                    <span class="stat-cd">${cdCount} on CD</span>
+                    <span class="stat-ready">${readyCount} Ready</span>
+                    ${closestMissionHtml}
+                    <i class="fa-solid ${isPlanetCollapsed ? 'fa-caret-down' : 'fa-caret-up'}"></i>
+                </div>
+            </div>
+            <div class="planet-content">
+                ${categories.map(cat => renderCategory(planetName, cat, pMissions)).join('')}
+            </div>
         </div>`;
 };
 
 function render() {
     const container = document.getElementById('planetList');
     if (!container) return;
-    container.innerHTML = ALL_PLANETS.map(pName => {
-        const pMissions = missions.filter(m => m.planet === pName);
-        if (!pMissions.length) return '';
-        const isColl = collapsedPlanets[pName];
-        const categories = [...new Set(pMissions.map(m => m.category))];
-        return `
-            <div class="planet-section ${isColl ? 'collapsedSection' : ''}">
-                <div class="planet-header" onclick="togglePlanet('${pName}')">
-                    <span>${pName}</span>
-                    <i class="fa-solid ${isColl ? 'fa-caret-down' : 'fa-caret-up'}"></i>
-                </div>
-                <div class="planet-content">
-                    ${categories.map(cat => {
-                        const isCatColl = collapsedCats[pName + cat];
-                        return `
-                            <div class="category-wrapper ${isCatColl ? 'collapsedSection' : ''}">
-                                <div class="category-header" onclick="event.stopPropagation(); toggleCat('${pName}','${cat}')">
-                                    <span>${cat}</span>
-                                </div>
-                                <div class="category-content">
-                                    ${pMissions.filter(m => m.category === cat).map(renderMission).join('')}
-                                </div>
-                            </div>`;
-                    }).join('')}
-                </div>
-            </div>`;
-    }).join('');
+    container.innerHTML = ALL_PLANETS.map(renderPlanet).join('');
 }
 
+// Start everything
 initApp();
-console.log('pixelb8-dailies.js version 1.0.3');
+console.log('pixelb8-dailies.js version 1.0.4 - JSON Integrated');
+console.log('pixelb8-dailies.js version 1.0.2');
