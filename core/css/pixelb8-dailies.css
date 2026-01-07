@@ -101,7 +101,7 @@
         /* New UI Elements */
         .wp-tag { color: #19a9a9; text-decoration: underline; cursor: pointer; font-weight: bold; }
         .wp-tag:hover { color: #6c236a; }
-        .diff-badge { color: #ffd700; font-weight: bold; text-transform: uppercase; font-size: 0.9em; }
+        .diff-badge { color: #060606; font-weight: bold; text-transform: uppercase; font-size: 0.9em; }
         .cd-type-tag { color: #555; font-style: italic; }
         
         .status-text { font-family: monospace; font-weight: bold; text-align: center; }
