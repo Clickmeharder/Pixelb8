@@ -1,4 +1,4 @@
-        body { background: #000; color: #eee; font-family: 'Orbitron', sans-serif; margin: 20px; }
+        body { background: #000; color: ; font-family: 'Orbitron', sans-serif; margin: 20px; }
         .timer-container { max-width: 96%; margin: auto; margin-top: 24px; position: absolute; left: 50%; width: 94%; transform: translateX(-50%); }
         .timer-container h1 { margin: auto;margin-top: 4px; }
         /* Planet Grouping */
