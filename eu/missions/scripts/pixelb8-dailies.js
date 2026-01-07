@@ -1,7 +1,7 @@
 const ALL_PLANETS = [
     "Earth", "Calypso", "Monria/DSEC", "Rocktropia", "Howling Mine", "Toulan", 
     "Next Island", "Arkadia", "Arkadia Moon", "Cyrene", "Aris", "Setesh", "Foma", 
-    "Crystal Palace", "Space"
+    "Crystal Palace", "Space", "Interplanetary", "private Contract", "S.U.S Contract", "Other"
 ];
 
 let missions = [];
