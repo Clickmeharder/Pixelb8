@@ -62,9 +62,15 @@
 			</select>
 			<button onclick="addMission()">ADD MISSION</button>
 		</div>
-		<div class="global-controls" style="text-align: right; margin-bottom: 10px;">
+		<div class="global-controls" style="text-align: right; margin-bottom: 10px; display: flex; gap: 10px; justify-content: flex-end;">
+			<button onclick="exportMissions()">EXPORT DATA</button>
+			<button onclick="importMissionsClick()">IMPORT DATA</button>
+			<button onclick="resetToDefaults()" style="background: #a22;">RESET DEFAULTS</button>
+			
 			<button onclick="collapseAll(true)">COLLAPSE ALL</button>
 			<button onclick="collapseAll(false)">EXPAND ALL</button>
+
+			<input type="file" id="importFile" style="display:none" accept=".json" onchange="handleImport(event)">
 		</div>
 		<div id="planetList"></div>
 	</div>

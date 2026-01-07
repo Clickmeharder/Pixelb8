@@ -168,6 +168,63 @@ function deleteMission(id) {
         saveAndRender();
     }
 }
+// --- IMPORT / EXPORT / RESET ---
+
+function resetToDefaults() {
+    if (confirm("This will delete all custom missions and progress. Reset to default list?")) {
+        // Clear storage
+        localStorage.removeItem('euMissions_v7');
+        // Re-map defaults with the parser
+        missions = defaultMissions.map(m => ({
+            ...m,
+            cd: parseCooldown(m.cd)
+        }));
+        saveAndRender();
+        alert("Reset complete!");
+    }
+}
+
+function exportMissions() {
+    const dataStr = JSON.stringify(missions, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = 'eu_missions_backup.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+}
+
+function importMissionsClick() {
+    document.getElementById('importFile').click();
+}
+
+function handleImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            if (Array.isArray(importedData)) {
+                if (confirm("Importing will overwrite your current list. Continue?")) {
+                    missions = importedData;
+                    saveAndRender();
+                    alert("Import successful!");
+                }
+            } else {
+                alert("Invalid file format.");
+            }
+        } catch (err) {
+            alert("Error reading file: " + err.message);
+        }
+    };
+    reader.readAsText(file);
+    // Reset the input so the same file can be uploaded twice if needed
+    event.target.value = '';
+}
 // HELPER: Converts strings like "1d 21h" or "45m" into total minutes
 function parseCooldown(value) {
     if (typeof value === 'number') return value;
