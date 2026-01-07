@@ -273,7 +273,30 @@ function render() {
     if (!container) return;
     container.innerHTML = ALL_PLANETS.map(renderPlanet).join('');
 }
+document.addEventListener('DOMContentLoaded', () => {
+    // Menu Toggle
+    document.getElementById('btn-menu-toggle')?.addEventListener('click', toggleMenu);
 
+    // Add Mission
+    document.getElementById('btn-add-mission')?.addEventListener('click', addMission);
+
+    // Export Data
+    document.getElementById('btn-export')?.addEventListener('click', exportMissions);
+
+    // Import Data Trigger
+    const fileInput = document.getElementById('importFile');
+    document.getElementById('btn-import')?.addEventListener('click', () => fileInput.click());
+
+    // File Input Change (Handle Import)
+    fileInput?.addEventListener('change', (event) => handleImport(event));
+
+    // Reset Defaults
+    document.getElementById('btn-reset')?.addEventListener('click', resetToDefaults);
+
+    // Collapse/Expand Logic
+    document.getElementById('btn-collapse')?.addEventListener('click', () => collapseAll(true));
+    document.getElementById('btn-expand')?.addEventListener('click', () => collapseAll(false));
+});
 // Start everything
 initApp();
 console.log('pixelb8-dailies.js version 1.0.4 - JSON Integrated');
