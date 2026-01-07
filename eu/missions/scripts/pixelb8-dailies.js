@@ -19,9 +19,10 @@ async function initDailyTimerApp() {
         await loadDefaultJSON();
     }
 
-    render();
-    // Keep timers ticking every second
-    setInterval(render, 1000);
+    render(); // Full render on load
+    
+    // Efficiency: Update only text every second, not the whole HTML
+    setInterval(updateTimers, 1000);
 }
 
 async function loadDefaultJSON() {
@@ -178,6 +179,35 @@ function formatTime(ms) {
     return d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${secs}s`;
 }
 
+function updateTimers() {
+    const now = Date.now();
+    
+    // Update individual mission timers
+    document.querySelectorAll('.timer-display').forEach(el => {
+        const readyAt = parseInt(el.dataset.ready);
+        if (readyAt <= now) {
+            render(); // Only rerender the whole UI when a timer actually finishes
+        } else {
+            el.innerText = formatTime(readyAt - now);
+        }
+    });
+
+    // Update planet header "Next:" timers
+    ALL_PLANETS.forEach(planetName => {
+        const planetSlug = planetName.replace(/[^a-z0-9]/gi, '');
+        const nextEl = document.querySelector(`.next-timer-${planetSlug}`);
+        if (!nextEl) return;
+
+        const pMissions = missions.filter(m => m.planet.toLowerCase() === planetName.toLowerCase());
+        const cdMissions = pMissions.filter(m => m.readyAt && m.readyAt > now);
+        
+        if (cdMissions.length > 0) {
+            const closest = cdMissions.reduce((prev, curr) => (prev.readyAt < curr.readyAt) ? prev : curr);
+            nextEl.innerText = ` Next: ${closest.name} (${formatTime(closest.readyAt - now)})`;
+        }
+    });
+}
+
 function copyWP(text) {
     navigator.clipboard.writeText(text);
     alert("Waypoint copied!");
@@ -201,7 +231,7 @@ const renderMission = (m) => {
             </div>
             <div class="status-text">
                 ${m.inProgress ? '<span class="status-active">ACTIVE</span>' : 
-                  isCD ? `<span class="status-timer" data-ready="${m.readyAt}">${formatTime(m.readyAt - Date.now())}</span>` : 
+                  isCD ? `<span class="status-timer timer-display" data-ready="${m.readyAt}" data-id="${m.id}">${formatTime(m.readyAt - Date.now())}</span>` : 
                   '<span class="status-ready">READY</span>'}
             </div>
             <div class="actions">
@@ -243,11 +273,12 @@ const renderPlanet = (planetName) => {
     const progressPct = (readyCount / pMissions.length) * 100;
     const isPlanetCollapsed = collapsedPlanets[planetName];
     const categories = [...new Set(pMissions.map(m => m.category))];
+    const planetSlug = planetName.replace(/[^a-z0-9]/gi, ''); // Removes spaces/slashes for safe class names
 
     let closestMissionHtml = '';
     if (cdCount > 0) {
         const closest = cdMissions.reduce((prev, curr) => (prev.readyAt < curr.readyAt) ? prev : curr);
-        closestMissionHtml = `<span class="closest-timer"> Next: ${closest.name} (${formatTime(closest.readyAt - now)})</span>`;
+        closestMissionHtml = `<span class="closest-timer next-timer-${planetSlug}"> Next: ${closest.name} (${formatTime(closest.readyAt - now)})</span>`;
     }
 
     return `
