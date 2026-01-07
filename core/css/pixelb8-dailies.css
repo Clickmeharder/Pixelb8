@@ -12,7 +12,8 @@
 			transition: width 1.5s;
 			opacity: 0.8;
 		}
-        .planet-header { background: #1a1a1a; color: #ffd700; padding: 4px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .planet-header { background: #1a1a1a; color: #85847f; padding: 4px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: color 0.8s ease;}
+		.planet-header:hover { color: #d3730d; }
         .header-stats { display: flex; gap: 15px; font-size: 0.75em; color: #ccc; align-items: center; }
         .stat-ready { color: #147b1d; font-weight: bold; }
 
