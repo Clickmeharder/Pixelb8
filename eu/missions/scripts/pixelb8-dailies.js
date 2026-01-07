@@ -219,12 +219,26 @@ const renderMission = (m) => {
     const isCD = m.readyAt && (m.readyAt > Date.now());
     const stateClass = m.inProgress ? 'in-progress' : (isCD ? 'on-cooldown' : '');
     
+    // Helper to get difficulty class
+    const getDiffClass = (diff) => {
+        if (!diff) return '';
+        const d = diff.toLowerCase();
+        if (d.includes('very easy')) return 'diff-v-easy';
+        if (d.includes('easy')) return 'diff-easy';
+        if (d.includes('medium')) return 'diff-medium';
+        if (d.includes('hard')) return 'diff-hard';
+        if (d.includes('very hard') || d.includes('extreme')) return 'diff-v-hard';
+        return '';
+    };
+
+    const diffClass = getDiffClass(m.difficulty);
+    
     return `
         <div class="mission-row ${stateClass}">
             <div class="mission-info">
                 <h4>${m.name}</h4>
                 <div class="mission-meta">
-                    ${m.difficulty ? `<span class="diff-badge">${m.difficulty}</span>` : ''}
+                    ${m.difficulty ? `<span class="diff-badge ${diffClass}">${m.difficulty}</span>` : ''}
                     <span>${m.reward || ''}</span>
                     ${m.wp ? `<span class="wp-tag" data-action="copy-wp" data-wp="${m.wp}">COPY WP</span>` : ''}
                 </div>

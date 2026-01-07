@@ -83,7 +83,21 @@
         .mission-info h4 { margin: 0; font-size: 0.9em; color:#555; transition: color 0.8s ease; }
 		.mission-info h4:hover {color: #238718; }
         .mission-meta { font-size: 0.72em; color: #888; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
-        
+        /* Difficulty Badges */
+		.diff-badge {
+			padding: 2px 6px;
+			border-radius: 4px;
+			font-size: 0.75rem;
+			font-weight: bold;
+			color: #fff;
+			text-transform: uppercase;
+		}
+
+		.diff-v-easy { background-color: #2ecc71; } /* Emerald Green */
+		.diff-easy   { background-color: #a2d149; } /* Light Green/Lime */
+		.diff-medium { background-color: #f1c40f; color: #333; } /* Yellow */
+		.diff-hard   { background-color: #e67e22; } /* Orange */
+		.diff-v-hard { background-color: #e74c3c; } /* Red */
         /* New UI Elements */
         .wp-tag { color: #19a9a9; text-decoration: underline; cursor: pointer; font-weight: bold; }
         .wp-tag:hover { color: #6c236a; }
