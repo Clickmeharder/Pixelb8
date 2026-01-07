@@ -10,7 +10,7 @@ let collapsedCats = JSON.parse(localStorage.getItem('euColl_Cats')) || {};
 
 // --- INITIALIZATION ---
 
-async function initApp() {
+async function initDailyTimerApp() {
     const saved = localStorage.getItem('euMissions_v7');
     
     if (saved) {
@@ -333,6 +333,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 // Start everything
-initApp();
+initDailyTimerApp();
 console.log('pixelb8-dailies.js version 1.0.4 - JSON Integrated');
 console.log('pixelb8-dailies.js version 1.0.2');
