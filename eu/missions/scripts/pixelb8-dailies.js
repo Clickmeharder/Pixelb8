@@ -196,20 +196,20 @@ const renderMission = (m) => {
                 <div class="mission-meta">
                     ${m.difficulty ? `<span class="diff-badge">${m.difficulty}</span>` : ''}
                     <span>${m.reward || ''}</span>
-                    ${m.wp ? `<span class="wp-tag" onclick="event.stopPropagation(); copyWP('${m.wp}')">COPY WP</span>` : ''}
+                    ${m.wp ? `<span class="wp-tag" data-action="copy-wp" data-wp="${m.wp}">COPY WP</span>` : ''}
                 </div>
             </div>
             <div class="status-text">
                 ${m.inProgress ? '<span class="status-active">ACTIVE</span>' : 
-                  isCD ? `<span class="status-timer">${formatTime(m.readyAt - Date.now())}</span>` : 
+                  isCD ? `<span class="status-timer" data-ready="${m.readyAt}">${formatTime(m.readyAt - Date.now())}</span>` : 
                   '<span class="status-ready">READY</span>'}
             </div>
             <div class="actions">
-                ${!m.inProgress && !isCD ? `<button class="btn-start" onclick="event.stopPropagation(); handleAction(${m.id},'start')">START</button>` : ''}
-                ${m.inProgress ? `<button class="btn-finish" onclick="event.stopPropagation(); handleAction(${m.id},'finish')">FINISH</button>` : ''}
-                ${isCD ? `<button onclick="event.stopPropagation(); handleAction(${m.id},'reset')">RESET</button>` : ''}
+                ${!m.inProgress && !isCD ? `<button class="btn-start" data-action="start" data-id="${m.id}">START</button>` : ''}
+                ${m.inProgress ? `<button class="btn-finish" data-action="finish" data-id="${m.id}">FINISH</button>` : ''}
+                ${isCD ? `<button class="btn-reset" data-action="reset" data-id="${m.id}">RESET</button>` : ''}
             </div>
-            <button class="btn-delete" onclick="event.stopPropagation(); deleteMission(${m.id})">×</button>
+            <button class="btn-delete" data-action="delete" data-id="${m.id}">×</button>
         </div>`;
 };
 
@@ -220,7 +220,7 @@ const renderCategory = (planetName, cat, pMissions) => {
     
     return `
         <div class="category-wrapper ${isCatColl ? 'collapsedSection' : ''}">
-            <div class="category-header" onclick="toggleCat('${planetName}','${cat}')">
+            <div class="category-header" data-action="toggle-cat" data-planet="${planetName}" data-cat="${cat}">
                 <span>${cat}</span>
                 <i class="fa-solid ${isCatColl ? 'fa-plus' : 'fa-minus'}"></i>
             </div>
@@ -253,7 +253,7 @@ const renderPlanet = (planetName) => {
     return `
         <div class="planet-section ${isPlanetCollapsed ? 'collapsedSection' : ''}">
             <div class="progress-container"><div class="progress-fill" style="width: ${progressPct}%"></div></div>
-            <div class="planet-header" onclick="togglePlanet('${planetName}')">
+            <div class="planet-header" data-action="toggle-planet" data-planet="${planetName}">
                 <span><i class="fa-solid ${isPlanetCollapsed ? 'fa-square-plus' : 'fa-planet-ringed'}"></i> ${planetName}</span>
                 <div class="header-stats">
                     <span class="stat-cd">${cdCount} on CD</span>
@@ -267,7 +267,6 @@ const renderPlanet = (planetName) => {
             </div>
         </div>`;
 };
-
 function render() {
     const container = document.getElementById('planetList');
     if (!container) return;
