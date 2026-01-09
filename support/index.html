@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelB8 - Support & Signal Reception</title>
+    <link rel="stylesheet" href="../core/css/pixelb8-landing.css">
+    <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body {
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: url('https://source.unsplash.com/1600x900/?cyberpunk,dark') no-repeat center center/cover;
+            color: #0b7272;
+            font-family: 'Orbitron', sans-serif;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .row {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 900px;
+        }
+
+        .row:first-of-type { margin-top: 120px; }
+
+        .themed-main {
+            padding: 30px;
+            border-radius: 4px;
+            transition: all 0.4s;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.1);
+        }
+
+        .themed-main:hover {
+            border: 2px solid #0ff;
+            box-shadow: 0 0 20px #ff00ff;
+            background: rgba(255, 0, 255, 0.1);
+        }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .support-card {
+            border: 1px solid #0ff;
+            padding: 20px;
+            background: rgba(0, 255, 255, 0.03);
+            text-align: center;
+        }
+
+        .support-card i {
+            font-size: 2em;
+            color: #ff00ff;
+            margin-bottom: 15px;
+        }
+
+        .status-online { color: #0f0; font-size: 0.8em; text-transform: uppercase; }
+        
+        .highlight { color: #ff00ff; font-weight: bold; }
+        h1, h2, h3 { color: #0ff; text-transform: uppercase; }
+
+        .footer-spacer { height: 100px; }
+
+        /* Custom link style for this page */
+        .support-link {
+            color: #0ff;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s;
+        }
+        .support-link:hover {
+            color: #ff00ff;
+            border-bottom: 1px solid #ff00ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+      <div class="stars"></div>
+      <div class="twinkling"></div>
+    </div>
+    <div class="crt-overlay">
+        <div class="scanlines"></div>
+    </div>
+    
+    <div class="header">PixelB8 Signal Reception</div>
+    
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+    <div class="nav-menu" id="navMenu">
+        <a href="https://Pixelb8.lol/home">Home</a>
+        <a href="https://Pixelb8.lol/suspect">S.U.S.P.E.C.T</a>
+        <a href="https://Pixelb8.lol/pixelbot">Visit Pixelbot</a>
+        <a href="https://Pixelb8.lol/media">Media</a>
+        <a href="https://Pixelb8.lol/tools">Tools</a>
+        <a href="https://Pixelb8.lol/arcade">Arcade</a>
+    </div>
+
+    <div class="row">
+        <h2 id="themed-main-title">Incoming Transmissions</h2>
+        <section class="themed-main">
+            <p>Welcome, Colonist. Whether you are experiencing technical difficulties with our tools or need to report a glitch in the arcade, use the channels below to reach the PixelB8 team.</p>
+            <p>Current Status: <span class="status-online">[ All Systems Operational ]</span></p>
+        </section>
+    </div>
+
+    <div class="row">
+        <h2 id="themed-main-title">Communication Channels</h2>
+        <section class="themed-main">
+            <div class="support-grid">
+                <div class="support-card">
+                    <i class="fa-brands fa-discord"></i>
+                    <h3>Direct Comms</h3>
+                    <p>Join our Discord for real-time help, community advice, and direct access to the developers.</p>
+                    <a href="https://discord.gg/5tSKHCCVeU" class="support-link">Open Discord Channel</a>
+                </div>
+
+                <div class="support-card">
+                    <i class="fa-brands fa-github"></i>
+                    <h3>Debug Logs</h3>
+                    <p>For technical bugs, code errors, or feature requests regarding SUSPECT or our web tools.</p>
+                    <a href="https://github.com/Clickmeharder/Pixelb8/issues" class="support-link">Open Issue Tracker</a>
+                </div>
+
+                <div class="support-card">
+                    <i class="fa-solid fa-envelope"></i>
+                    <h3>Encrypted Mail</h3>
+                    <p>For business inquiries or private matters regarding PixelB8 Media.</p>
+                    <p class="highlight">admin@pixelb8.lol</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="row">
+        <h2 id="themed-main-title">Common Protocols (FAQ)</h2>
+        <section class="themed-main">
+            <h3>S.U.S.P.E.C.T Support</h3>
+            <p><span class="highlight">Q: App is blocked by Windows.</span><br>
+            A: Check our <a href="https://Pixelb8.lol/suspect" class="support-link">Security Protocol</a> guide on the project page for installation steps.</p>
+            
+            <p><span class="highlight">Q: My logs aren't tracking.</span><br>
+            A: Ensure "Chat Logging" is checked in your in-game Entropia options and the path is set correctly in the app's Dependencies tab.</p>
+
+            <hr style="border: 0; border-top: 1px solid rgba(0, 255, 255, 0.2); margin: 20px 0;">
+
+            <h3>Arcade & Web Tools</h3>
+            <p><span class="highlight">Q: Game performance is lagging.</span><br>
+            A: Most arcade titles require Hardware Acceleration to be enabled in your browser settings.</p>
+        </section>
+    </div>
+
+    <div class="row">
+        <h2 id="themed-main-title">Legal & Operational Disclosures</h2>
+        <section class="themed-main">
+            <p>Review our official Secret Universal Services guidelines and software agreements.</p>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 10px;">
+                    <i class="fa-solid fa-file-contract" style="color: #ff00ff; margin-right: 10px;"></i>
+                    <a href="https://Pixelb8.lol/legal" class="support-link">Operational Disclosure & EULA</a>
+                </li>
+                <li>
+                    <i class="fa-solid fa-shield-halved" style="color: #ff00ff; margin-right: 10px;"></i>
+                    <a href="https://Pixelb8.lol/legal#privacy" class="support-link">Data Privacy Policy</a>
+                </li>
+            </ul>
+        </section>
+    </div>
+
+    <div class="footer-spacer"></div>
+
+    <script src="../core/js/pixelb8-global.js"></script>
+</body>
+</html>
