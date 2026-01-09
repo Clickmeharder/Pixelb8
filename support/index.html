@@ -8,8 +8,9 @@
     <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
         body {
 			margin: auto;
 			margin-top: 0px;
@@ -25,15 +26,48 @@
 			overflow-x: hidden;
 			flex-wrap: nowrap;
         }
+		
+        .enter-button {
+            font-size: 24px;
+            color: #0ff;
+            padding: 15px 40px;
+            border: 2px solid #0ff;
+            background: transparent;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.4s, border-color 0.4s;
+        }
+        .enter-button:hover {
+            color: #ff00ff;
+            border-color: #ff00ff;
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                font-size: 22px;
+            }
+            .enter-button {
+                font-size: 18px;
+                padding: 12px 30px;
+            }
+        }
+    </style>
+    <style>
+
+
 
         .row {
             position: relative;
             z-index: 10;
-            width: 90%;
-            max-width: 900px;
+            flex-shrink: 0; /* Prevents rows from squishing */
         }
 
-        .row:first-of-type { margin-top: 120px; }
+        /* The first row needs extra margin for the fixed header */
+        .row:first-of-type {
+            margin-top: 120px;
+        }
 
         .themed-main {
 			padding: 30px;
@@ -43,12 +77,42 @@
 			border-radius: 4px;
 			transition: all 0.4s;
         }
-
-        .themed-main:hover {
+		.themed-main:hover {
+			color: ;
             border: 2px solid #0ff;
             box-shadow: 0 0 20px #ff00ff;
             background: rgba(255, 0, 255, 0.1);
+		}
+			
+        .page-screenshot {
+            width: 100%;
+            max-width: 800px;
+            display: block;
+            margin: 20px auto;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
         }
+
+
+        .warning-box {
+            border-left: 5px solid #ff00ff;
+            padding: 20px;
+            background: rgba(255, 0, 255, 0.05);
+            margin: 20px 0;
+        }
+
+        .highlight { color: #ff00ff; font-weight: bold; }
+        
+        h1, h2, h3 { color: #0ff; text-transform: uppercase; margin-top: 0; }
+
+        /* Space at the very bottom so the last row isn't touching the edge */
+        .footer-spacer {
+            height: 100px;
+            width: 100%;
+        }
+    </style>
+    <style>
+
 
         .support-grid {
             display: grid;
@@ -71,11 +135,6 @@
         }
 
         .status-online { color: #0f0; font-size: 0.8em; text-transform: uppercase; }
-        
-        .highlight { color: #ff00ff; font-weight: bold; }
-        h1, h2, h3 { color: #0ff; text-transform: uppercase; }
-
-        .footer-spacer { height: 100px; }
 
         /* Custom link style for this page */
         .support-link {
