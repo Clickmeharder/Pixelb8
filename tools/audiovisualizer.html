@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixelb8 Visualizer Terminal</title>
+    <title>S.U.S.P.E.C.T. Visualizer Terminal</title>
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
     <style>
         :root {
             --bg-main: #1a1a1a;
             --bg-panel: #1e1e1e;
             --accent: #00d4ff;
+            --accent-gold: #ffb400;
             --text-dim: #888;
             --border: #2a2a2a;
         }
@@ -28,13 +30,13 @@
             z-index: 1;
         }
 
-        /* Professional Sidebar HUD */
+        /* Sidebar HUD */
         .hud-sidebar {
             position: fixed;
             top: 20px;
             left: 20px;
-            width: 260px;
-            background: rgba(30, 30, 30, 0.9);
+            width: 280px;
+            background: rgba(25, 25, 25, 0.95);
             backdrop-filter: blur(10px);
             border: 1px solid var(--border);
             border-left: 3px solid var(--accent);
@@ -42,7 +44,6 @@
             z-index: 100;
             border-radius: 4px;
             box-shadow: 10px 0 30px rgba(0,0,0,0.5);
-            transition: transform 0.3s ease;
         }
 
         h2 { 
@@ -50,7 +51,7 @@
             text-transform: uppercase; 
             letter-spacing: 2px; 
             color: var(--accent); 
-            margin-top: 0;
+            margin: 0 0 20px 0;
         }
 
         .input-group {
@@ -78,11 +79,41 @@
             text-transform: uppercase;
             transition: all 0.2s;
             border-left: 3px solid var(--accent);
-            margin-top: 10px;
+            margin-top: 5px;
+            width: 100%;
         }
 
-        button:hover { background: #222; border-color: white; }
+        button:hover:not(:disabled) { background: #222; border-color: white; }
         button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        #convertBtn {
+            border-left-color: var(--accent-gold);
+            display: none;
+            margin-top: 15px;
+        }
+
+        #statusBox {
+            font-size: 0.65rem;
+            color: var(--accent);
+            margin-top: 15px;
+            font-family: monospace;
+            text-transform: uppercase;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 2px;
+            background: #333;
+            margin-top: 10px;
+            display: none;
+        }
+
+        #progressFill {
+            width: 0%;
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
 
         #recordingStatus {
             font-size: 0.7rem;
@@ -101,7 +132,7 @@
         <h2>Visualizer Terminal</h2>
         
         <div class="input-group">
-            <label>Source Audio</label>
+            <label>Audio Source</label>
             <input type="file" id="audioFile" accept="audio/*">
         </div>
 
@@ -116,20 +147,29 @@
 
         <div class="input-group">
             <label>Accent Color</label>
-            <input type="color" id="barColor" value="#00d4ff" style="height: 40px; padding: 2px;">
+            <input type="color" id="barColor" value="#00d4ff">
         </div>
 
-        <audio id="audio" style="width: 100%; margin-top: 10px;"></audio>
+        <audio id="audio" controls style="width: 100%; margin-top: 10px; height: 30px;"></audio>
 
-        <button id="startRecording">Begin Data Capture</button>
-        <button id="stopRecording" disabled>Finalize & Download</button>
+        <button id="startRecording">Start Capture</button>
+        <button id="stopRecording" disabled>Stop Manual</button>
         
-        <div id="recordingStatus">● RECORDING IN PROGRESS</div>
+        <button id="convertBtn">Convert to MP4 (H.264)</button>
+        
+        <div id="recordingStatus">● CAPTURING STREAM...</div>
+        <div id="statusBox">System Ready</div>
+        <div class="progress-bar" id="progressWrapper">
+            <div id="progressFill"></div>
+        </div>
     </div>
 
     <canvas id="visualizer"></canvas>
 
     <script>
+        const { createFFmpeg, fetchFile } = FFmpeg;
+        const ffmpeg = createFFmpeg({ log: false });
+
         const audio = document.getElementById("audio");
         const fileInput = document.getElementById("audioFile");
         const canvas = document.getElementById("visualizer");
@@ -138,24 +178,26 @@
         const styleSelect = document.getElementById("visualizerStyle");
         const startBtn = document.getElementById("startRecording");
         const stopBtn = document.getElementById("stopRecording");
+        const convertBtn = document.getElementById("convertBtn");
+        const statusBox = document.getElementById("statusBox");
         const recStatus = document.getElementById("recordingStatus");
+        const progressFill = document.getElementById("progressFill");
 
         let audioCtx, analyser, source, bufferLength, dataArray;
         let mediaRecorder, recordedChunks = [];
+        let finalWebmBlob;
 
-        // Set high-res canvas size
         function resize() {
-            canvas.width = window.innerWidth * window.devicePixelRatio;
-            canvas.height = window.innerHeight * window.devicePixelRatio;
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
         window.addEventListener('resize', resize);
         resize();
 
-        fileInput.addEventListener("change", (e) => {
+        fileInput.onchange = (e) => {
             const file = e.target.files[0];
             if (file) audio.src = URL.createObjectURL(file);
-        });
+        };
 
         function initAudio() {
             if (audioCtx) return;
@@ -164,115 +206,143 @@
             source = audioCtx.createMediaElementSource(audio);
             source.connect(analyser);
             analyser.connect(audioCtx.destination);
-            analyser.fftSize = 512;
+            analyser.fftSize = 256;
             bufferLength = analyser.frequencyBinCount;
             dataArray = new Uint8Array(bufferLength);
-            render();
+            draw();
         }
 
-        function render() {
-            requestAnimationFrame(render);
+        function draw() {
+            requestAnimationFrame(draw);
             analyser.getByteFrequencyData(dataArray);
 
-            // Clean background
             ctx.fillStyle = '#1a1a1a';
-            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const color = barColorInput.value;
             const style = styleSelect.value;
 
-            if (style === "bars") drawBars(color);
-            else if (style === "wave") drawWave(color);
-            else if (style === "circles") drawCircles(color);
-        }
-
-        function drawBars(color) {
-            const barWidth = (window.innerWidth / bufferLength) * 2;
-            let x = 0;
-            for (let i = 0; i < bufferLength; i++) {
-                const h = (dataArray[i] / 255) * (window.innerHeight * 0.6);
-                ctx.fillStyle = color;
-                // Add a slight glow to the bars
+            if (style === "bars") {
+                const barWidth = (canvas.width / bufferLength) * 2.5;
+                let x = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    const h = (dataArray[i] / 255) * (canvas.height * 0.7);
+                    ctx.fillStyle = color;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = color;
+                    ctx.fillRect(x, canvas.height - h, barWidth - 2, h);
+                    x += barWidth;
+                }
+            } else if (style === "wave") {
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = color;
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = color;
-                ctx.fillRect(x, window.innerHeight - h, barWidth - 1, h);
-                x += barWidth;
-            }
-            ctx.shadowBlur = 0;
-        }
-
-        function drawWave(color) {
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = color;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = color;
-            ctx.beginPath();
-            const sliceWidth = window.innerWidth / bufferLength;
-            let x = 0;
-            for (let i = 0; i < bufferLength; i++) {
-                const v = dataArray[i] / 128.0;
-                const y = v * window.innerHeight / 2;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-                x += sliceWidth;
-            }
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-        }
-
-        function drawCircles(color) {
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
-            for (let i = 0; i < bufferLength; i += 4) {
-                const radius = (dataArray[i] / 255) * (window.innerHeight * 0.4);
                 ctx.beginPath();
-                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 2;
+                const sliceWidth = canvas.width / bufferLength;
+                let x = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    const v = dataArray[i] / 128.0;
+                    const y = v * canvas.height / 2;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                    x += sliceWidth;
+                }
                 ctx.stroke();
+            } else if (style === "circles") {
+                for (let i = 0; i < bufferLength; i += 4) {
+                    const r = (dataArray[i] / 255) * (canvas.height * 0.4);
+                    ctx.beginPath();
+                    ctx.arc(canvas.width/2, canvas.height/2, r, 0, Math.PI*2);
+                    ctx.strokeStyle = color;
+                    ctx.stroke();
+                }
             }
+            ctx.shadowBlur = 0;
         }
+
+        // AUTO-STOP WHEN FINISHED
+        audio.onended = () => {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                finalizeCapture();
+                statusBox.innerText = "Capture finished automatically.";
+            }
+        };
 
         startBtn.onclick = () => {
             initAudio();
             recordedChunks = [];
-            // Optimization: Capture at a fixed 60fps
-            const stream = canvas.captureStream(60); 
             
-            // Add audio track to video stream
+            const stream = canvas.captureStream(60); 
             const audioStream = audio.captureStream ? audio.captureStream() : audio.mozCaptureStream();
             audioStream.getAudioTracks().forEach(track => stream.addTrack(track));
 
             mediaRecorder = new MediaRecorder(stream, { 
                 mimeType: "video/webm;codecs=vp9",
-                videoBitsPerSecond: 5000000 // 5Mbps for high quality
+                videoBitsPerSecond: 5000000 
             });
 
-            mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            
             mediaRecorder.onstop = () => {
-                const blob = new Blob(recordedChunks, { type: "video/webm" });
+                finalWebmBlob = new Blob(recordedChunks, { type: "video/webm" });
+                convertBtn.style.display = "block";
+                statusBox.innerText = "WebM captured. Ready to convert.";
+                
+                // Safety Auto-Download of WebM
+                const url = URL.createObjectURL(finalWebmBlob);
                 const a = document.createElement("a");
-                a.href = URL.createObjectURL(blob);
-                a.download = "SUSPECT_Capture.webm";
+                a.href = url;
+                a.download = "SUSPECT_Capture_Backup.webm";
                 a.click();
             };
 
             mediaRecorder.start();
+            audio.currentTime = 0;
             audio.play();
+            
             startBtn.disabled = true;
             stopBtn.disabled = false;
             recStatus.style.display = "block";
+            statusBox.innerText = "Recording...";
         };
 
-        stopBtn.onclick = () => {
+        function finalizeCapture() {
             mediaRecorder.stop();
             audio.pause();
             startBtn.disabled = false;
             stopBtn.disabled = true;
             recStatus.style.display = "none";
+        }
+
+        stopBtn.onclick = finalizeCapture;
+
+        convertBtn.onclick = async () => {
+            convertBtn.disabled = true;
+            document.getElementById('progressWrapper').style.display = "block";
+            statusBox.innerText = "Initializing Engine...";
+
+            if (!ffmpeg.isLoaded()) await ffmpeg.load();
+
+            statusBox.innerText = "Transcoding to MP4...";
+            
+            ffmpeg.FS('writeFile', 'input.webm', await fetchFile(finalWebmBlob));
+
+            // Run FFmpeg conversion
+            await ffmpeg.run('-i', 'input.webm', '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '22', 'output.mp4');
+
+            const data = ffmpeg.FS('readFile', 'output.mp4');
+            const mp4Url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+            
+            const link = document.createElement('a');
+            link.href = mp4Url;
+            link.download = "SUSPECT_Final_Render.mp4";
+            link.click();
+
+            statusBox.innerText = "Success! MP4 Rendered.";
+            document.getElementById('progressWrapper').style.display = "none";
         };
 
-        audio.onplay = () => initAudio();
     </script>
 </body>
 </html>
