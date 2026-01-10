@@ -3,291 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="core/css/pixelb8-landing.css">
-    <title>Customizable Audio Visualizer</title>
+    <title>S.U.S.P.E.C.T. Visualizer Terminal</title>
     <style>
-        body { text-align: center; background: #222; color: white; font-family: Arial, sans-serif; margin: 0; overflow: hidden; }
-        canvas { position: absolute; top: -1%; left: 1px; width: 99%; height: 100vh; border: 3px inset yellow; }
-        .description {
-		  color: white;
-		  border: 2px ridge orange;
-		  max-height: 50px;
-		  overflow: hidden;
-		}
-        .description:hover {
-		  color: white;
-		  border: 2px ridge orange;
-		  max-height: 98px;
-		}
-		/* Container for control panel, positioned on the left */
-		.controls-container {
-		  position: fixed;
-		  top: 3%;
-		  left: 0;
-		  z-index: 100;
-		  transition: all 0.3s ease;
-		  width: 50px; /* Initial tab width */
-		  height: 26px;
-		  background-color: #333;
-		  border-radius: 0px 10px 10px 0px; /* Rounded corners on the left */
-		  padding-top: 5px;
-		}
+        :root {
+            --bg-main: #1a1a1a;
+            --bg-panel: #1e1e1e;
+            --accent: #00d4ff;
+            --text-dim: #888;
+            --border: #2a2a2a;
+        }
 
-		/* Menu icon (hamburger) */
-		.menu-icon {
-		  display: flex;
-		  flex-direction: column;
-		  justify-content: space-between;
-		  align-items: center;
-		  width: 30px;
-		  height: 20px;
-		  margin-left: 10px;
-		  cursor: pointer;
-		}
+        body { 
+            background: var(--bg-main); 
+            color: #eee; 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            margin: 0; 
+            overflow: hidden; 
+        }
 
-		.bar {
-		  background-color: white;
-		  height: 4px;
-		  width: 100%;
-		  border-radius: 2px;
-		  margin: 2px 0;
-		}
+        canvas { 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100vw; height: 100vh; 
+            z-index: 1;
+        }
 
-		/* Control panel content */
-		.controls {
-		  background: rgba(0, 0, 0, 0.8); /* Darker background */
-		  padding: 15px;
-		  border-radius: 8px;
-		  max-height: 0;
-		  opacity: 0;
-		  overflow: hidden;
-		  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, width 0.3s ease;
-		  box-shadow: 4px 0px 6px rgba(0, 0, 0, 0.5); /* Adding shadow to the right */
-		  z-index:99;
-		}
+        /* Professional Sidebar HUD */
+        .hud-sidebar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 260px;
+            background: rgba(30, 30, 30, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 20px;
+            z-index: 100;
+            border-radius: 4px;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
 
-		/* Hover effect to expand the panel and show the controls */
-		.controls-container:hover {
-		  width: 238px; /* Width when expanded */
-		  border: 2px outset #333;
-		  border-radius: 0px 8px 0px 0px;
-		}
+        h2 { 
+            font-size: 0.8rem; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            color: var(--accent); 
+            margin-top: 0;
+        }
 
-		.controls-container:hover .controls {
-		  max-height: 300px; /* Max height for control list when expanded */
-		  opacity: 1;
-		  width: 200px; /* Same width as the container when open */
-		  border: 3px inset #333;
-		  margin-top: 3px;
-		}
-		audio {
-			width: 200px;
-			height: 32px;
-		}
-		/* Button styles */
-		button {
-		  margin: 5px 0;
-		  padding: 10px;
-		  background-color: #28a745; /* Green background */
-		  color: white;
-		  border: none;
-		  cursor: pointer;
-		  border-radius: 6px;
-		  font-size: 14px;
-		  width: 100%; /* Make buttons take full width of the container */
-		  transition: background-color 0.3s, transform 0.2s ease;
-		}
+        .input-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
 
-		button:hover {
-		  background-color: #218838; /* Darker green on hover */
-		  transform: translateY(-2px); /* Subtle lift on hover */
-		}
+        label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
 
-		button:active {
-		  transform: translateY(1px); /* Button press effect */
-		}
+        input, select, button {
+            background: #111;
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            outline: none;
+        }
 
-		/* Mobile responsiveness */
-		@media (max-width: 768px) {
-		  .controls-container {
-			width: 60px; /* Smaller tab width for mobile */
-		  }
-		  .controls-container:hover {
-			width: 180px; /* Smaller expanded width on mobile */
-		  }
-		  .controls {
-			padding: 10px;
-		  }
-		  button {
-			font-size: 12px; /* Smaller buttons on mobile */
-			padding: 8px;
-		  }
-		}
+        button {
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            border-left: 3px solid var(--accent);
+            margin-top: 10px;
+        }
 
-		@media (max-width: 480px) {
-		  .controls-container {
-			width: 60px;
-		  }
-		  .controls-container:hover {
-			width: 150px; /* Even smaller expanded width */
-		  }
-		}
+        button:hover { background: #222; border-color: white; }
+        button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        #recordingStatus {
+            font-size: 0.7rem;
+            color: #ff4444;
+            margin-top: 10px;
+            display: none;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
-    <div class="background-container">
-	  <div class="stars"></div>
-	  <div class="twinkling"></div>
-	</div>
-	<div class="description">
-		<h3 id="description-header">Audio Visualizer</h3>
-		<span>a simple tool to create a simple audiovisualizer for any song. download as webm and then visit https://cloudconvert.com/webm-to-mp4 to convert to mp4, mov, avi, or mkv</span>
-	</div>
-    <div class="controls-container">
-		<div class="menu-icon">
-			<span class="bar"></span>
-			<span class="bar"></span>
-		    <span class="bar"></span>
-		</div>
-        <div class="controls">
+
+    <div class="hud-sidebar">
+        <h2>Visualizer Terminal</h2>
+        
+        <div class="input-group">
+            <label>Source Audio</label>
             <input type="file" id="audioFile" accept="audio/*">
-            <audio id="audio" controls></audio>
-            <label>Color: <input type="color" id="barColor" value="#ff0000"></label>
-            <label>Style:
-                <select id="visualizerStyle">
-                    <option value="bars">Bars</option>
-                    <option value="wave">Wave</option>
-                    <option value="circles">Circles</option>
-                </select>
-            </label>
-            <button id="startRecording">Record</button>
-            <button id="stopRecording" disabled>Stop & Download</button>
         </div>
+
+        <div class="input-group">
+            <label>Visual Style</label>
+            <select id="visualizerStyle">
+                <option value="bars">Frequency Columns</option>
+                <option value="wave">Oscilloscope</option>
+                <option value="circles">Radial Pulse</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Accent Color</label>
+            <input type="color" id="barColor" value="#00d4ff" style="height: 40px; padding: 2px;">
+        </div>
+
+        <audio id="audio" style="width: 100%; margin-top: 10px;"></audio>
+
+        <button id="startRecording">Begin Data Capture</button>
+        <button id="stopRecording" disabled>Finalize & Download</button>
+        
+        <div id="recordingStatus">● RECORDING IN PROGRESS</div>
     </div>
+
     <canvas id="visualizer"></canvas>
 
     <script>
         const audio = document.getElementById("audio");
         const fileInput = document.getElementById("audioFile");
         const canvas = document.getElementById("visualizer");
-        const ctx = canvas.getContext("2d", { alpha: true });
+        const ctx = canvas.getContext("2d");
         const barColorInput = document.getElementById("barColor");
-        const visualizerStyle = document.getElementById("visualizerStyle");
-        const startRecordingBtn = document.getElementById("startRecording");
-        const stopRecordingBtn = document.getElementById("stopRecording");
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const styleSelect = document.getElementById("visualizerStyle");
+        const startBtn = document.getElementById("startRecording");
+        const stopBtn = document.getElementById("stopRecording");
+        const recStatus = document.getElementById("recordingStatus");
 
         let audioCtx, analyser, source, bufferLength, dataArray;
-        let isAudioSetup = false;
         let mediaRecorder, recordedChunks = [];
 
-        fileInput.addEventListener("change", function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const objectURL = URL.createObjectURL(file);
-                audio.src = objectURL;
-                audio.load();
-            }
+        // Set high-res canvas size
+        function resize() {
+            canvas.width = window.innerWidth * window.devicePixelRatio;
+            canvas.height = window.innerHeight * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        fileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) audio.src = URL.createObjectURL(file);
         });
 
-        function setupAudioContext() {
-            if (isAudioSetup) return;
+        function initAudio() {
+            if (audioCtx) return;
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioCtx.createAnalyser();
             source = audioCtx.createMediaElementSource(audio);
             source.connect(analyser);
             analyser.connect(audioCtx.destination);
-            analyser.fftSize = 256;
+            analyser.fftSize = 512;
             bufferLength = analyser.frequencyBinCount;
             dataArray = new Uint8Array(bufferLength);
-            isAudioSetup = true;
-            drawVisualizer();
+            render();
         }
 
-        function drawVisualizer() {
-            requestAnimationFrame(drawVisualizer);
+        function render() {
+            requestAnimationFrame(render);
             analyser.getByteFrequencyData(dataArray);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = barColorInput.value;
-            
-            const style = visualizerStyle.value;
-            if (style === "bars") drawBars();
-            else if (style === "wave") drawWave();
-            else if (style === "circles") drawCircles();
+
+            // Clean background
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+            const color = barColorInput.value;
+            const style = styleSelect.value;
+
+            if (style === "bars") drawBars(color);
+            else if (style === "wave") drawWave(color);
+            else if (style === "circles") drawCircles(color);
         }
 
-        function drawBars() {
-            let barWidth = (canvas.width / bufferLength) * 2.5;
-            let barHeight;
+        function drawBars(color) {
+            const barWidth = (window.innerWidth / bufferLength) * 2;
             let x = 0;
             for (let i = 0; i < bufferLength; i++) {
-                barHeight = dataArray[i];
-                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-                x += barWidth + 2;
+                const h = (dataArray[i] / 255) * (window.innerHeight * 0.6);
+                ctx.fillStyle = color;
+                // Add a slight glow to the bars
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = color;
+                ctx.fillRect(x, window.innerHeight - h, barWidth - 1, h);
+                x += barWidth;
             }
+            ctx.shadowBlur = 0;
         }
 
-        function drawWave() {
+        function drawWave(color) {
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = color;
             ctx.beginPath();
-            ctx.moveTo(0, canvas.height / 2);
+            const sliceWidth = window.innerWidth / bufferLength;
+            let x = 0;
             for (let i = 0; i < bufferLength; i++) {
-                let y = canvas.height / 2 + dataArray[i] - 128;
-                ctx.lineTo(i * (canvas.width / bufferLength), y);
+                const v = dataArray[i] / 128.0;
+                const y = v * window.innerHeight / 2;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+                x += sliceWidth;
             }
-            ctx.strokeStyle = barColorInput.value;
             ctx.stroke();
+            ctx.shadowBlur = 0;
         }
 
-        function drawCircles() {
-            for (let i = 0; i < bufferLength; i += 5) {
-                let radius = dataArray[i] / 3;
+        function drawCircles(color) {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            for (let i = 0; i < bufferLength; i += 4) {
+                const radius = (dataArray[i] / 255) * (window.innerHeight * 0.4);
                 ctx.beginPath();
-                ctx.arc(canvas.width / 2, canvas.height / 2, radius, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
             }
         }
 
-        function startRecording() {
+        startBtn.onclick = () => {
+            initAudio();
             recordedChunks = [];
-            let stream = canvas.captureStream();
-            mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
-            mediaRecorder.ondataavailable = event => recordedChunks.push(event.data);
-            mediaRecorder.onstop = saveRecording;
+            // Optimization: Capture at a fixed 60fps
+            const stream = canvas.captureStream(60); 
+            
+            // Add audio track to video stream
+            const audioStream = audio.captureStream ? audio.captureStream() : audio.mozCaptureStream();
+            audioStream.getAudioTracks().forEach(track => stream.addTrack(track));
+
+            mediaRecorder = new MediaRecorder(stream, { 
+                mimeType: "video/webm;codecs=vp9",
+                videoBitsPerSecond: 5000000 // 5Mbps for high quality
+            });
+
+            mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: "video/webm" });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = "SUSPECT_Capture.webm";
+                a.click();
+            };
+
             mediaRecorder.start();
-            startRecordingBtn.disabled = true;
-            stopRecordingBtn.disabled = false;
-        }
+            audio.play();
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            recStatus.style.display = "block";
+        };
 
-        function stopRecording() {
+        stopBtn.onclick = () => {
             mediaRecorder.stop();
-            startRecordingBtn.disabled = false;
-            stopRecordingBtn.disabled = true;
-        }
+            audio.pause();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            recStatus.style.display = "none";
+        };
 
-        function saveRecording() {
-            const blob = new Blob(recordedChunks, { type: "video/webm" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "visualizer.webm";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        startRecordingBtn.addEventListener("click", startRecording);
-        stopRecordingBtn.addEventListener("click", stopRecording);
-
-        audio.addEventListener("play", () => {
-            if (audioCtx && audioCtx.state === "suspended") {
-                audioCtx.resume();
-            }
-            setupAudioContext();
-        });
+        audio.onplay = () => initAudio();
     </script>
 </body>
 </html>
