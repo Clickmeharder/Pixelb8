@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropia Log Splitter</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 20px; background: #f4f4f9; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        #status { margin-top: 20px; padding: 10px; border-left: 4px solid #2196F3; background: #e3f2fd; display: none; }
+        progress { width: 100%; height: 20px; margin-top: 10px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:disabled { background: #ccc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Entropia Log Splitter</h2>
+        <p>This tool reads your 3GB log file line-by-line. It won't crash your browser because it doesn't load the whole file into memory.</p>
+        
+        <input type="file" id="logInput" accept=".log,.txt">
+        <br><br>
+        <button id="processBtn">Split by Year (or every 500k lines)</button>
+
+        <div id="status">
+            <div id="msg">Ready...</div>
+            <progress id="pBar" value="0" max="100"></progress>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('processBtn').onclick = async () => {
+            const fileInput = document.getElementById('logInput');
+            if (!fileInput.files.length) return alert("Select a file first!");
+
+            const file = fileInput.files[0];
+            const statusDiv = document.getElementById('status');
+            const msg = document.getElementById('msg');
+            const pBar = document.getElementById('pBar');
+            
+            statusDiv.style.display = 'block';
+            const stream = file.stream();
+            const reader = stream.getReader();
+            const decoder = new TextDecoder();
+            
+            let partialLine = '';
+            let lineCount = 0;
+            let fileIndex = 1;
+            let currentChunkContent = '';
+            const CHUNK_SIZE_LIMIT = 500000; // Lines per split file
+
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const text = decoder.decode(value, { stream: true });
+                    const lines = (partialLine + text).split(/\r?\n/);
+                    partialLine = lines.pop();
+
+                    for (const line of lines) {
+                        currentChunkContent += line + '\n';
+                        lineCount++;
+
+                        if (lineCount >= CHUNK_SIZE_LIMIT) {
+                            saveFile(currentChunkContent, `chat_part_${fileIndex}.txt`);
+                            currentChunkContent = '';
+                            lineCount = 0;
+                            fileIndex++;
+                        }
+                    }
+                    
+                    // Update progress (approximate)
+                    msg.innerText = `Processing... Found ${fileIndex} segments so far.`;
+                }
+
+                if (currentChunkContent || partialLine) {
+                    saveFile(currentChunkContent + partialLine, `chat_part_${fileIndex}.txt`);
+                }
+
+                msg.innerText = "Done! Check your downloads folder.";
+            } catch (e) {
+                msg.innerText = "Error: " + e.message;
+            }
+        };
+
+        function saveFile(content, fileName) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+    </script>
+</body>
+</html>
