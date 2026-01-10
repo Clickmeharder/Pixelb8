@@ -2,83 +2,84 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Entropia Log Manager</title>
+    <title>Entropia Log Manager Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #eee; max-width: 700px; margin: 50px auto; }
+        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #eee; max-width: 800px; margin: 40px auto; padding: 0 20px; }
         .box { background: #1e1e1e; padding: 30px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h2 { color: #00aaff; margin-top: 0; text-align: center; }
+        h2 { color: #00aaff; text-align: center; }
         .setting-group { background: #252525; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #444; }
-        label { display: block; margin-bottom: 10px; font-weight: bold; color: #00aaff; }
-        select, input[type="number"] { background: #333; color: white; border: 1px solid #555; padding: 8px; border-radius: 4px; width: 100%; box-sizing: border-box; }
-        #status { margin-top: 25px; display: none; background: #252525; padding: 15px; border-radius: 8px; border-left: 5px solid #00aaff; }
-        button { background: #00aaff; color: #fff; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 1.1em; font-weight: bold; width: 100%; transition: 0.2s; }
-        button:hover { background: #0088cc; }
+        label { display: block; margin-bottom: 8px; color: #00aaff; font-weight: bold; }
+        select, input[type="number"], input[type="file"] { background: #333; color: white; border: 1px solid #555; padding: 10px; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        
+        #fileList { margin-top: 20px; background: #252525; border-radius: 8px; max-height: 300px; overflow-y: auto; display: none; padding: 10px; border: 1px solid #444; }
+        .file-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #333; font-size: 0.9em; }
+        .file-item:last-child { border: none; }
+        
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+        button { flex: 1; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; transition: 0.2s; }
+        #processBtn { background: #00aaff; color: white; }
+        #zipBtn { background: #28a745; color: white; display: none; }
+        #individualBtn { background: #6c757d; color: white; display: none; }
+        button:hover { opacity: 0.9; }
         button:disabled { background: #444; cursor: not-allowed; }
-        .info-text { font-size: 0.85em; color: #888; margin-top: 5px; }
+        
+        #status { margin-top: 20px; color: #00aaff; font-weight: bold; text-align: center; }
     </style>
 </head>
 <body>
     <div class="box">
-        <h2>Entropia Log Toolkit</h2>
+        <h2>Entropia Log Manager Pro</h2>
         
-        <label>1. Select your 3GB chat.log</label>
-        <input type="file" id="logInput" accept=".log,.txt" style="margin-bottom:20px;">
+        <label>1. Select chat.log</label>
+        <input type="file" id="logInput" accept=".log,.txt">
 
         <div class="setting-group">
-            <label for="splitMode">2. How should we split it?</label>
+            <label>2. Split Strategy</label>
             <select id="splitMode">
-                <option value="year">By Year (Best for organization)</option>
-                <option value="month">By Month (Best for 3GB+ files)</option>
-                <option value="lines">By Line Count (Custom size)</option>
+                <option value="year">Split by Year</option>
+                <option value="month">Split by Month</option>
             </select>
-            
-            <div id="lineLimitContainer" style="display:none; margin-top:15px;">
-                <label>Lines per file:</label>
-                <input type="number" id="lineLimit" value="1000000">
-                <p class="info-text">1 million lines is roughly 100-150MB.</p>
-            </div>
         </div>
 
-        <button id="processBtn">Process & Download</button>
+        <button id="processBtn">Step 1: Process Log File</button>
+        <div id="status"></div>
 
-        <div id="status">
-            <div id="msg" style="font-weight:bold;">Ready to scan...</div>
-            <div id="stats" style="font-size: 0.9em; margin-top: 10px; color: #bbb;"></div>
+        <div id="fileList"></div>
+
+        <div class="btn-row">
+            <button id="zipBtn">Download All as ZIP (.zip)</button>
+            <button id="individualBtn">Download Files Individually</button>
         </div>
     </div>
 
     <script>
-        const splitMode = document.getElementById('splitMode');
-        const lineLimitContainer = document.getElementById('lineLimitContainer');
-
-        // Show/Hide the line count input
-        splitMode.onchange = () => {
-            lineLimitContainer.style.display = splitMode.value === 'lines' ? 'block' : 'none';
-        };
+        let processedFiles = {}; // Stores filename: content
 
         document.getElementById('processBtn').onclick = async () => {
             const fileInput = document.getElementById('logInput');
-            if (!fileInput.files.length) return alert("Select a file first!");
+            if (!fileInput.files.length) return alert("Select a file!");
 
             const file = fileInput.files[0];
-            const btn = document.getElementById('processBtn');
-            const msg = document.getElementById('msg');
-            const stats = document.getElementById('stats');
-            const mode = splitMode.value;
-            const customLimit = parseInt(document.getElementById('lineLimit').value);
+            const status = document.getElementById('status');
+            const listDiv = document.getElementById('fileList');
+            const mode = document.getElementById('splitMode').value;
             
-            btn.disabled = true;
-            document.getElementById('status').style.display = 'block';
-
+            // UI Reset
+            processedFiles = {};
+            listDiv.innerHTML = '';
+            listDiv.style.display = 'none';
+            document.getElementById('zipBtn').style.display = 'none';
+            document.getElementById('individualBtn').style.display = 'none';
+            
             const stream = file.stream();
             const reader = stream.getReader();
             const decoder = new TextDecoder();
-            
             let partialLine = '';
-            let currentKey = null; 
-            let currentBuffer = [];
-            let totalLines = 0;
-            let fileCounter = 1;
+            let currentKey = "Unknown";
+            let lineCount = 0;
+
+            status.innerText = "Processing... this may take a minute for 3GB.";
 
             try {
                 while (true) {
@@ -90,62 +91,67 @@
                     partialLine = lines.pop();
 
                     for (const line of lines) {
-                        totalLines++;
-                        let foundKey = null;
-
-                        if (mode === 'year') {
-                            const m = line.match(/^(\d{4})/);
-                            if (m) foundKey = m[0];
-                        } else if (mode === 'month') {
-                            const m = line.match(/^(\d{4}-\d{2})/);
-                            if (m) foundKey = m[0];
-                        } else if (mode === 'lines') {
-                            if (totalLines % customLimit === 0) foundKey = `part_${fileCounter++}`;
-                        }
-
-                        // If the key changed (new year/month/chunk), save the buffer
-                        if (foundKey && currentKey !== null && foundKey !== currentKey) {
-                            await saveFile(currentBuffer.join('\n'), `entropia_${currentKey}.txt`);
-                            currentBuffer = [];
-                        }
+                        lineCount++;
+                        const regex = mode === 'year' ? /^(\d{4})/ : /^(\d{4}-\d{2})/;
+                        const match = line.match(regex);
                         
-                        if (foundKey) currentKey = foundKey;
-                        currentBuffer.push(line);
+                        if (match) currentKey = match[0];
+                        
+                        const fileName = `entropia_${currentKey}.txt`;
+                        if (!processedFiles[fileName]) processedFiles[fileName] = "";
+                        processedFiles[fileName] += line + "\n";
                     }
-                    msg.innerText = `Current Segment: ${currentKey || 'Scanning...'}`;
-                    stats.innerText = `Processed ${totalLines.toLocaleString()} lines...`;
+                    if(lineCount % 500000 === 0) status.innerText = `Reading: ${lineCount.toLocaleString()} lines...`;
                 }
 
-                // Final save
-                if (currentBuffer.length > 0) {
-                    await saveFile(currentBuffer.join('\n'), `entropia_${currentKey || 'final'}.txt`);
+                // Show Results
+                status.innerText = "Processing Complete! Review files below:";
+                listDiv.style.display = 'block';
+                for (let name in processedFiles) {
+                    const size = (new Blob([processedFiles[name]]).size / 1024 / 1024).toFixed(2);
+                    listDiv.innerHTML += `<div class="file-item"><span>${name}</span><span>${size} MB</span></div>`;
                 }
 
-                msg.innerHTML = "<span style='color: #4CAF50;'>Done! All files ready.</span>";
-                btn.disabled = false;
+                document.getElementById('zipBtn').style.display = 'block';
+                document.getElementById('individualBtn').style.display = 'block';
 
             } catch (e) {
-                msg.innerText = "Error!";
-                stats.innerText = e.message;
-                btn.disabled = false;
+                status.innerText = "Error: " + e.message;
             }
         };
 
-        function saveFile(content, fileName) {
-            return new Promise((resolve) => {
-                const blob = new Blob([content], { type: 'text/plain' });
+        // ZIP Download
+        document.getElementById('zipBtn').onclick = async () => {
+            const zip = new JSZip();
+            const status = document.getElementById('status');
+            status.innerText = "Zipping files... please wait.";
+            
+            for (let name in processedFiles) {
+                zip.file(name, processedFiles[name]);
+            }
+            
+            const content = await zip.generateAsync({type:"blob", compression: "DEFLATE"});
+            const url = window.URL.createObjectURL(content);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "Entropia_Logs_Archived.zip";
+            a.click();
+            status.innerText = "ZIP Downloaded!";
+        };
+
+        // Individual Downloads
+        document.getElementById('individualBtn').onclick = () => {
+            if(!confirm("This will trigger multiple downloads. Are you sure?")) return;
+            for (let name in processedFiles) {
+                const blob = new Blob([processedFiles[name]], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = fileName;
-                document.body.appendChild(a);
+                a.href = url;
+                a.download = name;
                 a.click();
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(a.href);
-                    resolve();
-                }, 250); // Pause to ensure browser downloads don't crash
-            });
-        }
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }
+        };
     </script>
 </body>
 </html>
