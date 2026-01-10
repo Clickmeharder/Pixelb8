@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Entropia Yearly Splitter</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #eee; max-width: 600px; margin: 50px auto; text-align: center; }
+        .box { background: #1e1e1e; padding: 40px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: #00aaff; }
+        #status { margin-top: 25px; display: none; text-align: left; background: #252525; padding: 15px; border-radius: 8px; }
+        .count { color: #00aaff; font-weight: bold; }
+        button { background: #00aaff; color: #fff; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 1.1em; font-weight: bold; }
+        button:hover { background: #0088cc; }
+        button:disabled { background: #444; cursor: not-allowed; }
+        input[type="file"] { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Entropia Log Splitter</h2>
+        <p>Splitting by <b>Year</b> (Safe for 3GB+ Files)</p>
+        
+        <input type="file" id="logInput" accept=".log,.txt"><br>
+        <button id="processBtn">Start Processing</button>
+
+        <div id="status">
+            <div id="msg">Scanning file...</div>
+            <div id="stats" style="font-size: 0.9em; margin-top: 10px; color: #bbb;"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('processBtn').onclick = async () => {
+            const fileInput = document.getElementById('logInput');
+            if (!fileInput.files.length) return alert("Select chat.log first!");
+
+            const file = fileInput.files[0];
+            const btn = document.getElementById('processBtn');
+            const msg = document.getElementById('msg');
+            const stats = document.getElementById('stats');
+            
+            btn.disabled = true;
+            document.getElementById('status').style.display = 'block';
+
+            const stream = file.stream();
+            const reader = stream.getReader();
+            const decoder = new TextDecoder();
+            
+            let partialLine = '';
+            let currentYear = null;
+            let currentBuffer = []; // Using an array for better memory handling
+            let totalLines = 0;
+
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const text = decoder.decode(value, { stream: true });
+                    const lines = (partialLine + text).split(/\r?\n/);
+                    partialLine = lines.pop();
+
+                    for (const line of lines) {
+                        totalLines++;
+                        const match = line.match(/^(\d{4})/);
+                        
+                        if (match) {
+                            const foundYear = match[0];
+                            if (currentYear !== null && foundYear !== currentYear) {
+                                await saveFile(currentBuffer.join('\n'), `entropia_${currentYear}.txt`);
+                                currentBuffer = [];
+                            }
+                            currentYear = foundYear;
+                        }
+                        currentBuffer.push(line);
+                        
+                        // Periodic UI update
+                        if (totalLines % 100000 === 0) {
+                            stats.innerText = `Processed ${totalLines.toLocaleString()} lines... Current Year: ${currentYear}`;
+                        }
+                    }
+                }
+
+                if (currentBuffer.length > 0) {
+                    await saveFile(currentBuffer.join('\n'), `entropia_${currentYear}.txt`);
+                }
+
+                msg.innerHTML = "<b style='color: #4CAF50;'>Processing Complete!</b>";
+                stats.innerText = `Successfully split ${totalLines.toLocaleString()} lines.`;
+                btn.disabled = false;
+
+            } catch (e) {
+                msg.innerText = "Error!";
+                stats.innerText = e.message;
+                btn.disabled = false;
+            }
+        };
+
+        function saveFile(content, fileName) {
+            return new Promise((resolve) => {
+                const blob = new Blob([content], { type: 'text/plain' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(a.href);
+                    resolve();
+                }, 200); // 200ms pause to let the browser breathe
+            });
+        }
+    </script>
+</body>
+</html>
