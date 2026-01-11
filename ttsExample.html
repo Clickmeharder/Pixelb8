@@ -2,85 +2,142 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>HUD | ARIA UPLINK</title>
+    <title>ENTROPIA | TACTICAL VOICE COMMAND</title>
     <style>
-        :root { --amber: #ffb300; --bg: #050505; }
+        :root { --amber: #ffb300; --bg: #050505; --dim: #443300; }
         body { background: var(--bg); color: var(--amber); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .terminal { border: 1px solid var(--amber); padding: 25px; width: 500px; box-shadow: 0 0 15px rgba(255,179,0,0.2); position: relative; }
-        .glitch-text { animation: blink 1s infinite; color: #ff4444; }
-        @keyframes blink { 50% { opacity: 0; } }
-        button { background: transparent; color: var(--amber); border: 1px solid var(--amber); padding: 10px; cursor: pointer; margin-top: 10px; width: 100%; text-transform: uppercase; }
+        
+        .terminal { 
+            width: 600px; border: 2px solid var(--amber); padding: 20px; 
+            background: rgba(255, 179, 0, 0.02); box-shadow: 0 0 20px rgba(255, 179, 0, 0.2); 
+        }
+
+        .header { border-bottom: 2px solid var(--amber); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; font-weight: bold; }
+        
+        select, button { 
+            width: 100%; background: #111; color: var(--amber); border: 1px solid var(--amber); 
+            padding: 12px; margin-top: 10px; cursor: pointer; font-family: inherit;
+        }
+
         button:hover { background: var(--amber); color: #000; }
-        #log { margin-top: 15px; font-size: 0.8em; border-top: 1px dashed var(--amber); padding-top: 10px; color: #aa8800; }
+        
+        .debug-panel { 
+            margin-top: 20px; border: 1px solid var(--dim); padding: 10px; font-size: 0.8em; background: rgba(0,0,0,0.5);
+        }
+
+        .status-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .ok { color: #00ff00; }
+        .fail { color: #ff4444; }
+        .log { color: #888; font-size: 0.75em; height: 40px; overflow-y: auto; border-top: 1px solid var(--dim); margin-top: 10px; padding-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="terminal">
-    <div style="display: flex; justify-content: space-between; font-size: 0.7em;">
-        <span>STATUS: <span id="sync-status" class="glitch-text">OFFLINE</span></span>
-        <span>ID: ARIA_NET_01</span>
+    <div class="header">
+        <span>▶ SYSTEM UPLINK</span>
+        <span id="conn-type">OFFLINE</span>
     </div>
-    <h2 style="border-bottom: 1px solid var(--amber); padding-bottom: 10px;">Mission TTS Engine</h2>
-    
-    <button onclick="forceSync()">[ 1. FORCE SYNC ARIA ]</button>
-    <button onclick="testSpeak()">[ 2. TEST MISSION SIGNAL ]</button>
 
-    <div id="log">> Awaiting manual sync...</div>
+    <label>1. SELECT VOICE CHANNEL:</label>
+    <select id="voice-select" onchange="testVoiceChange()"><option>LOADING CHANNELS...</option></select>
+
+    <button onclick="initEngine()" style="background: rgba(255,179,0,0.1)">[ INITIALIZE AUDIO ENGINE ]</button>
+    <button onclick="triggerMission('M-1')">SIMULATE MISSION COMPLETE</button>
+
+    <div class="debug-panel">
+        <div style="font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid var(--dim);">DEBUG MATRIX</div>
+        <div class="status-row"><span>Browser Engine:</span> <span id="db-engine" class="fail">LOCKED</span></div>
+        <div class="status-row"><span>Voices Indexed:</span> <span id="db-count" class="fail">0</span></div>
+        <div class="status-row"><span>Aria Detected:</span> <span id="db-aria" class="fail">NO</span></div>
+        <div id="debug-log" class="log">> Standby for initialization...</div>
+    </div>
 </div>
 
 <script>
-    let ariaVoice = null;
-
-    // The mission database you mentioned
-    const missionData = {
-        "M-1": "Silent Ghost Infiltration",
-        "M-2": "Hyperion Core Recovery"
-    };
-
-    function findAria() {
-        const voices = window.speechSynthesis.getVoices();
-        // Specifically hunting for the Microsoft Online version
-        const target = voices.find(v => v.name.includes("Aria") && v.name.includes("Online")) || 
-                     voices.find(v => v.name.includes("Aria"));
-        
-        if (target) {
-            ariaVoice = target;
-            document.getElementById('sync-status').innerText = "ONLINE";
-            document.getElementById('sync-status').className = "";
-            document.getElementById('sync-status').style.color = "#00ff00";
-            document.getElementById('log').innerText = `> LINK ESTABLISHED: ${target.name}`;
-        }
-    }
-
-    // Attempt sync on load and on voice change
-    window.speechSynthesis.onvoiceschanged = findAria;
+    const synth = window.speechSynthesis;
+    const missionData = { "M-1": "Operation Iron Sights", "M-2": "Extraction Point Alpha" };
     
-    function forceSync() {
-        findAria();
-        if (!ariaVoice) {
-            // If still not found, speak a blank string to "wake up" the engine
-            const wakeUp = new SpeechSynthesisUtterance("");
-            window.speechSynthesis.speak(wakeUp);
-            document.getElementById('log').innerText = "> Sending wake-up signal to Microsoft servers...";
-            setTimeout(findAria, 1000); // Try again in 1 second
-        }
+    // --- DEBUG LOGGING ---
+    function log(msg) {
+        const d = document.getElementById('debug-log');
+        d.innerHTML = `> ${msg}<br>` + d.innerHTML;
     }
 
-    function testSpeak() {
-        if (!ariaVoice) {
-            alert("Aria not synced! Try 'Force Sync' first.");
-            return;
-        }
-
-        const msg = new SpeechSynthesisUtterance("Mission complete. Silent Ghost Infiltration.");
-        msg.voice = ariaVoice;
-        msg.rate = 1.0;
-        msg.pitch = 1.0;
+    // --- VOICE LOGIC ---
+    function updateHUD() {
+        const voices = synth.getVoices();
+        const select = document.getElementById('voice-select');
+        const dbCount = document.getElementById('db-count');
+        const dbAria = document.getElementById('db-aria');
         
-        document.getElementById('log').innerText = "> Broadasting via Aria Online...";
-        window.speechSynthesis.speak(msg);
+        if (voices.length === 0) return;
+
+        select.innerHTML = '';
+        let ariaFound = false;
+
+        voices.forEach((v, i) => {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = `${v.name} (${v.lang})`;
+            if (v.name.includes("Aria")) {
+                opt.selected = true;
+                ariaFound = true;
+            }
+            select.appendChild(opt);
+        });
+
+        dbCount.textContent = voices.length;
+        dbCount.className = 'ok';
+        
+        if (ariaFound) {
+            dbAria.textContent = "YES (ONLINE)";
+            dbAria.className = "ok";
+            document.getElementById('conn-type').textContent = "ARIA STABLE";
+            document.getElementById('conn-type').style.color = "#00ff00";
+        }
+
+        log(`Scan complete. ${voices.length} voices found.`);
     }
+
+    // Handle Chrome's lazy loading
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = updateHUD;
+    }
+
+    function initEngine() {
+        const ut = new SpeechSynthesisUtterance("System online.");
+        const voices = synth.getVoices();
+        const select = document.getElementById('voice-select');
+        
+        ut.voice = voices[select.value] || voices[0];
+        synth.speak(ut);
+
+        document.getElementById('db-engine').textContent = "UNLOCKED";
+        document.getElementById('db-engine').className = "ok";
+        log("Audio context unlocked by user.");
+    }
+
+    function triggerMission(id) {
+        const voices = synth.getVoices();
+        const select = document.getElementById('voice-select');
+        const name = missionData[id] || "Unknown Objective";
+        
+        const utter = new SpeechSynthesisUtterance(`Mission complete. ${name}.`);
+        utter.voice = voices[select.value];
+        utter.rate = 1.0;
+
+        log(`Executing: ${name}`);
+        synth.cancel(); // Clears queue so it speaks IMMEDIATELY
+        synth.speak(utter);
+    }
+
+    // Check for internet (Aria Online requires it)
+    window.addEventListener('online', () => { log("Network restored."); updateHUD(); });
+    window.addEventListener('offline', () => { log("Network lost. Aria may fail."); });
+
+    // Startup
+    setTimeout(updateHUD, 500);
 </script>
 
 </body>
