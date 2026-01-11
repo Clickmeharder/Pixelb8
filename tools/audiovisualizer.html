@@ -3,52 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.U.S.P.E.C.T. v3.2</title>
-    <style>
-        :root { --bg: #0a0a0a; --accent: #00d4ff; --border: #222; --gold: #ffb400; --red: #ff4444; }
-        body { background: var(--bg); color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
-        canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; background: #000; }
+    <title>PixelB8 - S.U.S.P.E.C.T. v3.2</title>
+    <link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
+    <link rel="stylesheet" href="../core/css/pixelb8-landing.css">
+    <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-        .hud-sidebar {
-            position: fixed; top: 10px; left: 10px; width: 310px; height: 95vh; overflow-y: auto;
-            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(15px);
-            border: 1px solid var(--border); border-left: 3px solid var(--accent);
-            padding: 15px; z-index: 100; border-radius: 4px; scrollbar-width: none;
+    <style>
+        :root { 
+            --bg: #0a0a0a; 
+            --accent: #00d4ff; 
+            --border: #222; 
+            --gold: #ffb400; 
+            --red: #ff4444; 
+            --pink: #ff00ff;
         }
 
-        h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin-bottom: 10px; border-bottom: 1px solid var(--border); }
-        label { font-size: 0.55rem; color: #888; text-transform: uppercase; display: block; margin: 8px 0 2px 0; }
-        input, select, button { background: #111; border: 1px solid var(--border); color: white; padding: 6px; border-radius: 3px; font-size: 0.75rem; width: 100%; margin-bottom: 6px; outline: none; }
+        body {
+            margin: 0;
+            background: #000;
+            color: #eee;
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden; /* Visualizer requires fixed viewport */
+        }
+
+        /* --- VISUALIZER CANVAS --- */
+        #visualizer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* --- PIXELB8 HUD OVERLAY --- */
+        .hud-sidebar {
+            position: fixed;
+            top: 80px; /* Offset for Header */
+            left: 20px;
+            width: 310px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 20px;
+            z-index: 100;
+            border-radius: 4px;
+            scrollbar-width: thin;
+			overflow: hidden;
+			overflow-y: auto;
+			resize: both;
+        }
+
+        .hud-sidebar h2 { 
+            font-size: 0.8rem; 
+            color: var(--accent); 
+            border-bottom: 1px solid var(--border); 
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+
+        label { font-size: 0.6rem; color: #888; text-transform: uppercase; display: block; margin: 10px 0 4px 0; }
         
+        input, select, .hud-btn { 
+            background: #111; 
+            border: 1px solid var(--border); 
+            color: white; 
+            padding: 8px; 
+            border-radius: 3px; 
+            font-size: 0.75rem; 
+            width: 100%; 
+            margin-bottom: 8px; 
+            outline: none;
+            font-family: 'Orbitron', sans-serif;
+        }
+
         .row { display: flex; gap: 5px; }
-        .toggle-group { display: flex; align-items: center; gap: 8px; font-size: 0.6rem; color: var(--gold); margin: 3px 0; }
+        .toggle-group { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; color: var(--gold); margin: 5px 0; }
         .toggle-group input { width: auto; margin: 0; }
 
-        .memory-tag { font-size: 0.5rem; padding: 2px 5px; border-radius: 3px; float: right; text-transform: uppercase; }
+        .memory-tag { font-size: 0.5rem; padding: 2px 5px; border-radius: 3px; float: right; }
         .tag-on { background: var(--accent); color: #000; }
         .tag-off { background: var(--red); color: #fff; }
 
-        button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-left: 3px solid var(--accent); transition: 0.2s; }
-        button:hover { background: #1a1a1a; border-color: white; }
+        .hud-btn { 
+            cursor: pointer; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            border-left: 3px solid var(--accent); 
+            transition: 0.3s;
+            text-align: center;
+        }
+        .hud-btn:hover { background: rgba(0, 212, 255, 0.2); border-color: white; }
+        
         #renderBtn { border-left-color: var(--gold); }
+        #renderBtn:disabled { opacity: 0.3; cursor: not-allowed; }
         #downloadWebmBtn { border-left-color: #28a745; display: none; }
-        #renderOverlay { position: fixed; bottom: 20px; right: 20px; z-index: 1000; background: rgba(0,0,0,0.9); padding: 15px; border: 1px solid var(--accent); display: none; font-family: monospace; }
+        
+        #renderOverlay { 
+            position: fixed; 
+            bottom: 20px; 
+            right: 20px; 
+            z-index: 1000; 
+            background: rgba(0,0,0,0.95); 
+            padding: 15px; 
+            border: 1px solid var(--accent); 
+            display: none; 
+            font-family: monospace; 
+            color: var(--accent);
+        }
+
+        /* --- SITE HEADER MODS --- */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 150;
+            background: rgba(0,0,0,0.8);
+            border-bottom: 1px solid var(--accent);
+            padding: 15px 0;
+            text-align: center;
+            letter-spacing: 5px;
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent);
+        }
+
+        .menu-button { z-index: 160; }
+        .nav-menu { z-index: 155; }
+
     </style>
 </head>
 <body>
 
-    <div id="renderOverlay">MASTER RENDER: <span id="overlayPct">0%</span></div>
+    <div class="header">PixelB8 Signal Reception</div>
+    
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+    <div class="nav-menu" id="navMenu">
+        <a href="https://Pixelb8.lol/home">Home</a>
+        <a href="https://Pixelb8.lol/pixelbot">Visit Pixelbot</a>
+        <a href="https://Pixelb8.lol/media">Media</a>
+        <a href="https://Pixelb8.lol/tools">Tools</a>
+        <a href="https://Pixelb8.lol/suspect">Suspect</a>
+        <a href="https://Pixelb8.lol/arcade">Arcade</a>
+    </div>
+
+    <div id="renderOverlay">SYSTEM RENDER: <span id="overlayPct">0%</span></div>
 
     <div class="hud-sidebar" id="sidebar">
-        <h2>S.U.S.P.E.C.T. v3.2</h2>
+        <h2>S.U.S.P.E.C.T. TERMINAL</h2>
         
-        <label>Audio <span id="audioStatus" class="memory-tag tag-off">Missing</span></label>
+        <label>Transmission <span id="audioStatus" class="memory-tag tag-off">Missing</span></label>
         <input type="file" id="audioFile" accept="audio/*">
         
-        <label>Background <span id="bgStatus" class="memory-tag tag-off">Empty</span></label>
+        <label>Static Plate <span id="bgStatus" class="memory-tag tag-off">Empty</span></label>
         <input type="file" id="bgFile" accept="image/*">
         
-        <label>Logo <span id="logoStatus" class="memory-tag tag-off">Empty</span></label>
+        <label>Ident Mask <span id="logoStatus" class="memory-tag tag-off">Empty</span></label>
         <input type="file" id="logoFile" accept="image/*">
 
         <label>Chroma Profile</label>
@@ -89,15 +203,18 @@
             <label for="logoPulse">LOGO AUDIO REACTIVE</label>
         </div>
 
-        <audio id="audio" controls style="height: 30px; margin-top: 10px;"></audio>
-        <button id="previewBtn">Live Preview</button>
-        <button id="renderBtn" disabled>Render Compatible WebM</button>
-        <button id="downloadWebmBtn">Download Master</button>
-        <button onclick="localStorage.clear(); location.reload();" style="border-left-color: var(--red); margin-top: 20px; font-size: 0.6rem;">Clear Memory</button>
+        <audio id="audio" controls style="height: 30px; margin-top: 10px; width: 100%;"></audio>
+        
+        <div class="hud-btn" id="previewBtn" style="margin-top: 15px;">Live Preview</div>
+        <div class="hud-btn" id="renderBtn">Render Compatible WebM</div>
+        <div class="hud-btn" id="downloadWebmBtn">Download Master</div>
+        
+        <div class="hud-btn" onclick="localStorage.clear(); location.reload();" style="border-left-color: var(--red); margin-top: 20px; font-size: 0.6rem;">Purge Memory</div>
     </div>
 
     <canvas id="visualizer"></canvas>
 
+    <script src="../core/js/pixelb8-global.js"></script>
     <script>
         const audio = document.getElementById("audio");
         const canvas = document.getElementById("visualizer");
@@ -111,12 +228,17 @@
         let particles = [];
         let rotationAngle = 0;
 
-        canvas.width = 1280; canvas.height = 720;
+        // Dynamic Resize
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.onresize = resize;
+        resize();
+
         for(let i=0; i<50; i++) particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2+1 });
 
-        // --- LOCAL STORAGE LOGIC ---
-        function saveImage(key, base64) { try { localStorage.setItem(key, base64); } catch(e) { console.log("Memory Full"); } }
-        
+        // Storage Recovery
         window.onload = () => {
             const savedBg = localStorage.getItem("lastBg");
             const savedLogo = localStorage.getItem("lastLogo");
@@ -132,15 +254,17 @@
             }
         };
 
+        function saveImage(key, base64) { try { localStorage.setItem(key, base64); } catch(e) { console.log("Storage Limit Exceeded"); } }
         function fileToBase64(file, callback) {
             const reader = new FileReader();
             reader.onload = (e) => callback(e.target.result);
             reader.readAsDataURL(file);
         }
 
+        // File Input Listeners
         document.getElementById("audioFile").onchange = (e) => { 
             audio.src = URL.createObjectURL(e.target.files[0]); 
-            document.getElementById("renderBtn").disabled = false; 
+            document.getElementById("renderBtn").removeAttribute('disabled');
             document.getElementById("audioStatus").innerText = "Ready";
             document.getElementById("audioStatus").className = "memory-tag tag-on";
         };
@@ -160,7 +284,6 @@
             document.getElementById("logoStatus").innerText = "Loaded";
             document.getElementById("logoStatus").className = "memory-tag tag-on";
         };
-        // --- END STORAGE LOGIC ---
 
         function setupAudio() {
             if (audioCtx) return;
@@ -252,7 +375,7 @@
 
             // Vignette
             const v = document.getElementById("vignetteSlider").value;
-            const vigGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 100, canvas.width/2, canvas.height/2, canvas.width*0.8);
+            const vigGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 100, canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height)*0.8);
             vigGrad.addColorStop(0, "rgba(0,0,0,0)"); vigGrad.addColorStop(1, `rgba(0,0,0,${v})`);
             ctx.fillStyle = vigGrad; ctx.setTransform(1,0,0,1,0,0); ctx.fillRect(0, 0, canvas.width, canvas.height);
 
