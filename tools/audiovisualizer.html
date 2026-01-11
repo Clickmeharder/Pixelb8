@@ -67,10 +67,9 @@
         const progBar = document.getElementById("progBar");
         const progFill = document.getElementById("progressFill");
 
-        let audioCtx, analyser, source, bufferLength, dataArray;
+        let audioCtx, analyser, source, gainNode, bufferLength, dataArray;
         let isPreviewing = false;
 
-        // Set HD resolution
         canvas.width = 1280; canvas.height = 720;
 
         document.getElementById("audioFile").onchange = (e) => {
@@ -85,9 +84,17 @@
             if (audioCtx) return;
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioCtx.createAnalyser();
+            gainNode = audioCtx.createGain(); // The "Silent Render" knob
+            
             source = audioCtx.createMediaElementSource(audio);
+            
+            // Connect Source -> Analyser (For visual data)
             source.connect(analyser);
-            analyser.connect(audioCtx.destination);
+            // Connect Analyser -> Gain (For hearing/muting)
+            analyser.connect(gainNode);
+            // Connect Gain -> Speakers
+            gainNode.connect(audioCtx.destination);
+
             analyser.fftSize = 256;
             bufferLength = analyser.frequencyBinCount;
             dataArray = new Uint8Array(bufferLength);
@@ -134,7 +141,7 @@
         document.getElementById("previewBtn").onclick = () => {
             setupAudio();
             isPreviewing = true;
-            audio.muted = false;
+            gainNode.gain.value = 1; // Unmute
             audio.play();
             drawFrame();
             status.innerText = "PREVIEWING...";
@@ -148,46 +155,41 @@
             progBar.style.display = "block";
             
             audio.currentTime = 0;
-            audio.muted = true;
+            gainNode.gain.value = 0; // MUTE SPEAKERS BUT KEEP DATA FLOWING
 
-            // Capture stream at a locked 30fps
             const stream = canvas.captureStream(30);
-            
-            // Modern Audio Track Extraction
             const audioDest = audioCtx.createMediaStreamDestination();
-            source.connect(audioDest);
+            
+            // Connect the analyser to the recorder so the video has sound
+            analyser.connect(audioDest);
             stream.addTrack(audioDest.stream.getAudioTracks()[0]);
 
             const recorder = new MediaRecorder(stream, { 
                 mimeType: 'video/webm;codecs=vp8,opus', 
-                videoBitsPerSecond: 8000000 
+                videoBitsPerSecond: 10000000 
             });
 
             const chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             
             recorder.onstop = () => {
-                status.innerText = "FINALIZING CONTAINER...";
-                // Small timeout ensures the Blob construction has all chunks
+                status.innerText = "FINALIZING...";
                 setTimeout(() => {
                     const blob = new Blob(chunks, { type: 'video/webm' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a");
                     a.href = url;
-                    a.download = `Visualizer_${Date.now()}.webm`;
-                    document.body.appendChild(a);
+                    a.download = `S_U_S_P_E_C_T_Render.webm`;
                     a.click();
-                    document.body.removeChild(a);
                     
                     status.innerText = "DOWNLOAD READY.";
                     progBar.style.display = "none";
                     renderBtn.disabled = false;
                     window.isRendering = false;
+                    gainNode.gain.value = 1; // Reset volume for user
                 }, 500);
             };
 
-            // Start drawing and recording
-            status.innerText = "INITIALIZING ENCODER...";
             recorder.start();
             audio.play();
 
@@ -200,9 +202,8 @@
                 if (audio.ended) {
                     clearInterval(renderLoop);
                     recorder.stop();
-                    audio.muted = false;
                 }
-            }, 1000 / 30); // Draw at 30fps exactly
+            }, 1000 / 30);
         };
     </script>
 </body>
