@@ -3,94 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.U.S.P.E.C.T. Terminal v2.6</title>
+    <title>S.U.S.P.E.C.T. v2.7</title>
     <style>
-        :root { --bg: #0d0d0d; --accent: #00d4ff; --border: #2a2a2a; --gold: #ffb400; --green: #28a745; }
+        :root { --bg: #0a0a0a; --accent: #00d4ff; --border: #222; --gold: #ffb400; }
         body { background: var(--bg); color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
-        
         canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; background: #000; }
 
         .hud-sidebar {
             position: fixed; top: 20px; left: 20px; width: 300px; height: 90vh; overflow-y: auto;
-            background: rgba(10, 10, 10, 0.92); backdrop-filter: blur(15px);
+            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(15px);
             border: 1px solid var(--border); border-left: 3px solid var(--accent);
-            padding: 20px; z-index: 100; border-radius: 4px; transition: 0.5s;
-            scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
+            padding: 20px; z-index: 100; border-radius: 4px; scrollbar-width: none;
         }
 
         .hud-hidden { opacity: 0; transform: translateX(-380px); pointer-events: none; }
-
-        h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin: 0 0 15px 0; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+        h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin: 0 0 15px 0; border-bottom: 1px solid var(--border); }
         label { font-size: 0.6rem; color: #888; text-transform: uppercase; display: block; margin: 10px 0 4px 0; }
         input, select, button { background: #111; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 3px; font-size: 0.8rem; width: 100%; margin-bottom: 8px; outline: none; }
         
-        .row { display: flex; gap: 8px; }
         .toggle-group { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; color: var(--gold); margin: 5px 0; }
         .toggle-group input { width: auto; margin: 0; }
 
-        button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-left: 3px solid var(--accent); }
-        button:hover:not(:disabled) { background: #1a1a1a; border-color: white; }
-        #renderBtn { border-left-color: var(--gold); margin-top: 10px; }
-        #downloadWebmBtn { border-left-color: var(--green); display: none; }
-        
-        #renderOverlay {
-            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
-            background: rgba(0,0,0,0.9); padding: 15px; border-radius: 4px;
-            border: 1px solid var(--accent); display: none; font-family: monospace; font-size: 0.8rem;
-        }
+        button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-left: 3px solid var(--accent); transition: 0.2s; }
+        button:hover { background: #222; }
+        #renderBtn { border-left-color: var(--gold); }
+        #downloadWebmBtn { border-left-color: #28a745; display: none; }
+        #renderOverlay { position: fixed; bottom: 20px; right: 20px; z-index: 1000; background: rgba(0,0,0,0.9); padding: 15px; border: 1px solid var(--accent); display: none; font-family: monospace; }
     </style>
 </head>
 <body>
 
-    <div id="renderOverlay">SYSTEM RENDERING: <span id="overlayPct">0%</span></div>
+    <div id="renderOverlay">STABILIZED RENDER: <span id="overlayPct">0%</span></div>
 
     <div class="hud-sidebar" id="sidebar">
-        <h2>S.U.S.P.E.C.T. v2.6</h2>
+        <h2>S.U.S.P.E.C.T. v2.7</h2>
         
-        <label>Media Input</label>
+        <label>Files</label>
         <input type="file" id="audioFile" accept="audio/*">
-        <input type="file" id="bgFile" accept="image/*" placeholder="BG">
+        <input type="file" id="bgFile" accept="image/*">
         <input type="file" id="logoFile" accept="image/*">
 
-        <label>Chroma Profile</label>
-        <div class="row">
-            <input type="color" id="color1" value="#00d4ff" title="Top Color">
-            <input type="color" id="color2" value="#ff00ff" title="Bottom Color">
+        <label>Chroma</label>
+        <div style="display:flex; gap:5px;">
+            <input type="color" id="color1" value="#00d4ff">
+            <input type="color" id="color2" value="#ff00ff">
         </div>
 
-        <label>Visual Algorithm</label>
-        <select id="visualizerStyle">
-            <option value="bars">Digital Columns</option>
-            <option value="wave">Oscilloscope</option>
-            <option value="circles">Radial Engine</option>
-        </select>
-        
         <label>Wonk & Logo Scale</label>
-        <div class="row">
+        <div style="display:flex; gap:5px;">
             <input type="range" id="wonkSlider" min="0.5" max="4.0" step="0.1" value="1.0">
             <input type="range" id="logoSize" min="50" max="500" value="200">
         </div>
 
         <div class="toggle-group">
-            <input type="checkbox" id="logoPulse" checked>
-            <label for="logoPulse">LOGO AUDIO REACTIVE</label>
+            <input type="checkbox" id="bassShake" checked>
+            <label for="bassShake">CAMERA BASS SHAKE</label>
         </div>
 
         <div class="toggle-group">
-            <input type="checkbox" id="glitchToggle">
-            <label for="glitchToggle">GLITCH PEAKS</label>
+            <input type="checkbox" id="logoPulse" checked>
+            <label for="logoPulse">LOGO PULSE</label>
         </div>
 
         <div class="toggle-group">
             <input type="checkbox" id="hiPerfToggle" checked>
-            <label for="hiPerfToggle">DEEP RENDER (HIDE HUD)</label>
+            <label for="hiPerfToggle">DEEP RENDER (FAST CONVERT)</label>
         </div>
 
         <audio id="audio" controls style="height: 30px; margin-top: 10px;"></audio>
-
-        <button id="previewBtn">Live Preview</button>
-        <button id="renderBtn" disabled>Finalize & Render</button>
-        <button id="downloadWebmBtn">Download Master WebM</button>
+        <button id="previewBtn">Preview</button>
+        <button id="renderBtn" disabled>Render Compatible WebM</button>
+        <button id="downloadWebmBtn">Download Ready File</button>
     </div>
 
     <canvas id="visualizer"></canvas>
@@ -106,12 +89,9 @@
         let bgImg = new Image();
         let logoImg = new Image();
 
-        canvas.width = 1920; canvas.height = 1080;
+        canvas.width = 1280; canvas.height = 720; // 720p is the "Sweet Spot" for CloudConvert speed
 
-        document.getElementById("audioFile").onchange = (e) => {
-            audio.src = URL.createObjectURL(e.target.files[0]);
-            document.getElementById("renderBtn").disabled = false;
-        };
+        document.getElementById("audioFile").onchange = (e) => { audio.src = URL.createObjectURL(e.target.files[0]); document.getElementById("renderBtn").disabled = false; };
         document.getElementById("bgFile").onchange = (e) => { bgImg.src = URL.createObjectURL(e.target.files[0]); };
         document.getElementById("logoFile").onchange = (e) => { logoImg.src = URL.createObjectURL(e.target.files[0]); };
 
@@ -131,97 +111,73 @@
         function drawFrame() {
             analyser.getByteFrequencyData(dataArray);
             
-            // Background
+            let sum = 0;
+            for(let i=0; i<15; i++) sum += dataArray[i];
+            let bass = sum / 15 / 255; // 0 to 1
+
+            ctx.save();
+            
+            // Bass Shake Logic
+            if (document.getElementById("bassShake").checked && bass > 0.6) {
+                let intensity = (bass - 0.6) * 20;
+                ctx.translate(Math.random()*intensity - intensity/2, Math.random()*intensity - intensity/2);
+            }
+
             if (bgImg.src) {
                 ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = "rgba(0,0,0,0.7)"; 
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "rgba(0,0,0,0.7)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
             } else {
-                ctx.fillStyle = '#050505';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
             const c1 = document.getElementById("color1").value;
             const c2 = document.getElementById("color2").value;
             const wonk = parseFloat(document.getElementById("wonkSlider").value);
-            const glitch = document.getElementById("glitchToggle").checked;
-            const pulse = document.getElementById("logoPulse").checked;
-
-            // Create Visualizer Gradient
             const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
-            gradient.addColorStop(0, c1);
-            gradient.addColorStop(1, c2);
+            gradient.addColorStop(0, c1); gradient.addColorStop(1, c2);
 
-            ctx.fillStyle = gradient; 
-            ctx.strokeStyle = gradient; 
-            ctx.lineWidth = 6;
-            ctx.shadowBlur = 15; 
-            ctx.shadowColor = c1;
+            ctx.fillStyle = gradient; ctx.strokeStyle = gradient; ctx.lineWidth = 6;
 
             const bufferLength = dataArray.length;
-            const style = document.getElementById("visualizerStyle").value;
-            
-            // Calculate Average for Pulse
-            let sum = 0;
-            for(let i=0; i<20; i++) sum += dataArray[i];
-            let avg = sum / 20 / 255; // Bass average 0 to 1
-
-            if (style === "bars") {
-                const bw = canvas.width / (bufferLength / 2);
-                for (let i = 0; i < bufferLength / 2; i++) {
-                    let val = Math.pow(dataArray[i] / 255, wonk);
-                    const h = val * canvas.height * 0.8;
-                    if (glitch && val > 0.85 && Math.random() > 0.9) ctx.fillStyle = "#fff"; 
-                    else ctx.fillStyle = gradient;
-                    ctx.fillRect(i * bw, canvas.height - h, bw - 2, h);
-                }
-            } else if (style === "wave") {
-                ctx.beginPath();
-                const sw = canvas.width / bufferLength;
-                for (let i = 0; i < bufferLength; i++) {
-                    let val = Math.pow(dataArray[i] / 255, wonk);
-                    const y = (canvas.height / 2) + (val * canvas.height / 2) * (i % 2 === 0 ? 1 : -1);
-                    if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * sw, y);
-                }
-                ctx.stroke();
-            } else if (style === "circles") {
-                ctx.translate(canvas.width/2, canvas.height/2);
-                for (let i = 0; i < bufferLength; i += 4) {
-                    let val = Math.pow(dataArray[i] / 255, wonk);
-                    const r = val * (canvas.height / 2);
-                    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2); ctx.stroke();
-                }
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
+            const bw = canvas.width / (bufferLength / 2);
+            for (let i = 0; i < bufferLength / 2; i++) {
+                let val = Math.pow(dataArray[i] / 255, wonk);
+                const h = val * canvas.height * 0.8;
+                ctx.fillRect(i * bw, canvas.height - h, bw - 2, h);
             }
 
-            // Pulse Logo Logic
             if (logoImg.src) {
                 const baseSize = parseInt(document.getElementById("logoSize").value);
-                const pulseBoost = pulse ? (avg * (baseSize * 0.2)) : 0;
-                const finalSize = baseSize + pulseBoost;
+                const finalSize = baseSize + (document.getElementById("logoPulse").checked ? (bass * 40) : 0);
                 ctx.globalAlpha = 0.9;
                 ctx.drawImage(logoImg, canvas.width/2 - finalSize/2, canvas.height/2 - finalSize/2, finalSize, finalSize);
                 ctx.globalAlpha = 1.0;
             }
-            ctx.shadowBlur = 0;
+            
+            ctx.restore();
         }
 
         function previewLoop() { if (isPreviewing) { drawFrame(); requestAnimationFrame(previewLoop); } }
 
-        document.getElementById("previewBtn").onclick = () => {
-            setupAudio(); isPreviewing = true; gainNode.gain.value = 1; audio.play(); previewLoop();
-        };
+        document.getElementById("previewBtn").onclick = () => { setupAudio(); isPreviewing = true; gainNode.gain.value = 1; audio.play(); previewLoop(); };
 
         document.getElementById("renderBtn").onclick = async () => {
             setupAudio(); isPreviewing = false;
             if (document.getElementById("hiPerfToggle").checked) document.getElementById("sidebar").classList.add("hud-hidden");
             document.getElementById("renderOverlay").style.display = "block";
             audio.currentTime = 0; gainNode.gain.value = 0;
+
             const stream = canvas.captureStream(30);
             const audioDest = audioCtx.createMediaStreamDestination();
             analyser.connect(audioDest);
             stream.addTrack(audioDest.stream.getAudioTracks()[0]);
-            const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8,opus', videoBitsPerSecond: 35000000 });
+
+            // V2.7 COMPATIBILITY SETTINGS
+            const recorder = new MediaRecorder(stream, { 
+                mimeType: 'video/webm;codecs=vp8,opus', 
+                videoBitsPerSecond: 12000000 // Optimized for CloudConvert speed
+            });
+
             const chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
@@ -231,7 +187,10 @@
                 document.getElementById("downloadWebmBtn").style.display = "block";
                 gainNode.gain.value = 1;
             };
-            recorder.start(); audio.play();
+
+            recorder.start(1000); // Record in 1-second slices to force indexing
+            audio.play();
+
             const renderLoop = setInterval(() => {
                 drawFrame();
                 const pct = Math.round((audio.currentTime / audio.duration) * 100);
@@ -242,7 +201,7 @@
 
         document.getElementById("downloadWebmBtn").onclick = () => {
             const a = document.createElement("a"); a.href = finalBlobUrl;
-            a.download = `SUSPECT_v2.6_CHROMA.webm`; a.click();
+            a.download = `READY_FOR_AVIDEMUX.webm`; a.click();
         };
     </script>
 </body>
