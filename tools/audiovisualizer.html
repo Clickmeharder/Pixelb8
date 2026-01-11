@@ -13,7 +13,7 @@
             position: fixed; top: 20px; left: 20px; width: 280px;
             background: rgba(25, 25, 25, 0.95); backdrop-filter: blur(10px);
             border: 1px solid var(--border); border-left: 3px solid var(--accent);
-            padding: 20px; z-index: 100; border-radius: 4px;
+            padding: 20px; z-index: 100; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
         h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin: 0 0 15px 0; }
@@ -24,9 +24,9 @@
         button:hover:not(:disabled) { background: #222; border-color: white; }
         button:disabled { opacity: 0.3; cursor: not-allowed; }
         
-        #statusBox { font-size: 0.7rem; color: var(--accent); font-family: monospace; margin-top: 10px; }
+        #statusBox { font-size: 0.7rem; color: var(--accent); font-family: monospace; margin-top: 10px; min-height: 1.2em; }
         .progress-bar { width: 100%; height: 4px; background: #333; display: none; margin-top: 10px; border-radius: 2px; overflow: hidden; }
-        #progressFill { width: 0%; height: 100%; background: var(--accent); transition: width 0.1s; }
+        #progressFill { width: 0%; height: 100%; background: var(--accent); }
     </style>
 </head>
 <body>
@@ -34,7 +34,7 @@
     <div class="hud-sidebar">
         <h2>S.U.S.P.E.C.T. Terminal</h2>
         
-        <label>Audio Data</label>
+        <label>Audio Source</label>
         <input type="file" id="audioFile" accept="audio/*">
 
         <label>Visual Algorithm</label>
@@ -44,7 +44,7 @@
             <option value="circles">Radial Pulse</option>
         </select>
 
-        <label>HUD Accent</label>
+        <label>Accent Color</label>
         <input type="color" id="barColor" value="#00d4ff">
 
         <audio id="audio" controls style="height: 30px; margin-bottom: 15px;"></audio>
@@ -70,14 +70,14 @@
         let audioCtx, analyser, source, bufferLength, dataArray;
         let isPreviewing = false;
 
-        // Optimized Resolution for WebM -> MP4 Conversion
+        // Set HD resolution
         canvas.width = 1280; canvas.height = 720;
 
         document.getElementById("audioFile").onchange = (e) => {
             if (e.target.files[0]) {
                 audio.src = URL.createObjectURL(e.target.files[0]);
                 renderBtn.disabled = false;
-                status.innerText = "DATA LOADED. READY.";
+                status.innerText = "DATA LOADED.";
             }
         };
 
@@ -93,38 +93,38 @@
             dataArray = new Uint8Array(bufferLength);
         }
 
-        function drawPreview() {
-            if (!isPreviewing) return;
-            requestAnimationFrame(drawPreview);
+        function drawFrame() {
+            if (!isPreviewing && !window.isRendering) return;
+            if (isPreviewing) requestAnimationFrame(drawFrame);
+            
             analyser.getByteFrequencyData(dataArray);
-            renderCanvas(dataArray);
-        }
-
-        function renderCanvas(data) {
+            
             ctx.fillStyle = '#1a1a1a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
             const color = document.getElementById("barColor").value;
             const style = document.getElementById("visualizerStyle").value;
+            
             ctx.fillStyle = color; ctx.strokeStyle = color; ctx.lineWidth = 4;
-            ctx.shadowBlur = 8; ctx.shadowColor = color;
+            ctx.shadowBlur = 10; ctx.shadowColor = color;
 
             if (style === "bars") {
                 const bw = canvas.width / bufferLength;
                 for (let i = 0; i < bufferLength; i++) {
-                    const h = (data[i] / 255) * canvas.height;
+                    const h = (dataArray[i] / 255) * canvas.height;
                     ctx.fillRect(i * bw, canvas.height - h, bw - 1, h);
                 }
             } else if (style === "wave") {
                 ctx.beginPath();
                 const sw = canvas.width / bufferLength;
                 for (let i = 0; i < bufferLength; i++) {
-                    const y = (data[i] / 255) * canvas.height;
+                    const y = (dataArray[i] / 255) * canvas.height;
                     if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * sw, y);
                 }
                 ctx.stroke();
             } else if (style === "circles") {
                 for (let i = 0; i < bufferLength; i += 4) {
-                    const r = (data[i] / 255) * (canvas.height / 2.5);
+                    const r = (dataArray[i] / 255) * (canvas.height / 2.5);
                     ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, r, 0, Math.PI*2); ctx.stroke();
                 }
             }
@@ -134,64 +134,75 @@
         document.getElementById("previewBtn").onclick = () => {
             setupAudio();
             isPreviewing = true;
+            audio.muted = false;
             audio.play();
-            drawPreview();
-            status.innerText = "PREVIEW MODE ACTIVE";
+            drawFrame();
+            status.innerText = "PREVIEWING...";
         };
 
-        // --- HIGH PRECISION RENDERER ---
         renderBtn.onclick = async () => {
-            audio.pause();
+            setupAudio();
             isPreviewing = false;
+            window.isRendering = true;
             renderBtn.disabled = true;
             progBar.style.display = "block";
-            status.innerText = "CALCULATING RENDERTREE...";
-
-            // 1. Prepare Silent Offline Context
-            const file = document.getElementById("audioFile").files[0];
-            const arrayBuffer = await file.arrayBuffer();
-            const offlineCtx = new OfflineAudioContext(2, 44100 * 600, 44100); 
-            const decodedData = await offlineCtx.decodeAudioData(arrayBuffer);
             
-            // 2. Setup Recording Stream
-            const stream = canvas.captureStream(30); // Capture at steady 30fps
+            audio.currentTime = 0;
+            audio.muted = true;
+
+            // Capture stream at a locked 30fps
+            const stream = canvas.captureStream(30);
+            
+            // Modern Audio Track Extraction
+            const audioDest = audioCtx.createMediaStreamDestination();
+            source.connect(audioDest);
+            stream.addTrack(audioDest.stream.getAudioTracks()[0]);
+
             const recorder = new MediaRecorder(stream, { 
-                mimeType: 'video/webm;codecs=vp8', 
-                videoBitsPerSecond: 12000000 // High 12Mbps bitrate
+                mimeType: 'video/webm;codecs=vp8,opus', 
+                videoBitsPerSecond: 8000000 
             });
+
             const chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
+            
             recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                const a = document.createElement("a");
-                a.href = URL.createObjectURL(blob);
-                a.download = "SUSPECT_HD_RENDER.webm";
-                a.click();
-                status.innerText = "RENDER COMPLETE.";
-                renderBtn.disabled = false;
+                status.innerText = "FINALIZING CONTAINER...";
+                // Small timeout ensures the Blob construction has all chunks
+                setTimeout(() => {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `Visualizer_${Date.now()}.webm`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    status.innerText = "DOWNLOAD READY.";
+                    progBar.style.display = "none";
+                    renderBtn.disabled = false;
+                    window.isRendering = false;
+                }, 500);
             };
 
+            // Start drawing and recording
+            status.innerText = "INITIALIZING ENCODER...";
             recorder.start();
-            audio.muted = true;
-            audio.playbackRate = 1.0; // Keep it at 1.0 for perfect frame timing
-            audio.currentTime = 0;
-            
-            status.innerText = "STABILIZING STREAM...";
-            
-            // Start the actual "Recording" sequence
             audio.play();
-            
-            const renderInterval = setInterval(() => {
+
+            const renderLoop = setInterval(() => {
+                drawFrame();
                 const pct = (audio.currentTime / audio.duration) * 100;
                 progFill.style.width = pct + "%";
                 status.innerText = `ENCODING: ${Math.round(pct)}%`;
 
-                if (audio.ended || audio.currentTime >= audio.duration) {
-                    clearInterval(renderInterval);
+                if (audio.ended) {
+                    clearInterval(renderLoop);
                     recorder.stop();
                     audio.muted = false;
                 }
-            }, 100);
+            }, 1000 / 30); // Draw at 30fps exactly
         };
     </script>
 </body>
