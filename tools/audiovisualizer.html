@@ -3,29 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.U.S.P.E.C.T. v2.9</title>
+    <title>S.U.S.P.E.C.T. v3.2</title>
     <style>
-        :root { --bg: #0a0a0a; --accent: #00d4ff; --border: #222; --gold: #ffb400; }
+        :root { --bg: #0a0a0a; --accent: #00d4ff; --border: #222; --gold: #ffb400; --red: #ff4444; }
         body { background: var(--bg); color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
         canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; background: #000; }
 
         .hud-sidebar {
-            position: fixed; top: 20px; left: 20px; width: 300px; height: 90vh; overflow-y: auto;
+            position: fixed; top: 10px; left: 10px; width: 310px; height: 95vh; overflow-y: auto;
             background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(15px);
             border: 1px solid var(--border); border-left: 3px solid var(--accent);
-            padding: 20px; z-index: 100; border-radius: 4px; scrollbar-width: none;
+            padding: 15px; z-index: 100; border-radius: 4px; scrollbar-width: none;
         }
 
-        .hud-hidden { opacity: 0; transform: translateX(-380px); pointer-events: none; }
-        h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin: 0 0 15px 0; border-bottom: 1px solid var(--border); }
-        label { font-size: 0.6rem; color: #888; text-transform: uppercase; display: block; margin: 10px 0 4px 0; }
-        input, select, button { background: #111; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 3px; font-size: 0.8rem; width: 100%; margin-bottom: 8px; outline: none; }
+        h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin-bottom: 10px; border-bottom: 1px solid var(--border); }
+        label { font-size: 0.55rem; color: #888; text-transform: uppercase; display: block; margin: 8px 0 2px 0; }
+        input, select, button { background: #111; border: 1px solid var(--border); color: white; padding: 6px; border-radius: 3px; font-size: 0.75rem; width: 100%; margin-bottom: 6px; outline: none; }
         
-        .toggle-group { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; color: var(--gold); margin: 5px 0; }
+        .row { display: flex; gap: 5px; }
+        .toggle-group { display: flex; align-items: center; gap: 8px; font-size: 0.6rem; color: var(--gold); margin: 3px 0; }
         .toggle-group input { width: auto; margin: 0; }
 
+        .memory-tag { font-size: 0.5rem; padding: 2px 5px; border-radius: 3px; float: right; text-transform: uppercase; }
+        .tag-on { background: var(--accent); color: #000; }
+        .tag-off { background: var(--red); color: #fff; }
+
         button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-left: 3px solid var(--accent); transition: 0.2s; }
-        button:hover { background: #222; }
+        button:hover { background: #1a1a1a; border-color: white; }
         #renderBtn { border-left-color: var(--gold); }
         #downloadWebmBtn { border-left-color: #28a745; display: none; }
         #renderOverlay { position: fixed; bottom: 20px; right: 20px; z-index: 1000; background: rgba(0,0,0,0.9); padding: 15px; border: 1px solid var(--accent); display: none; font-family: monospace; }
@@ -33,34 +37,44 @@
 </head>
 <body>
 
-    <div id="renderOverlay">KINETIC RENDER: <span id="overlayPct">0%</span></div>
+    <div id="renderOverlay">MASTER RENDER: <span id="overlayPct">0%</span></div>
 
     <div class="hud-sidebar" id="sidebar">
-        <h2>S.U.S.P.E.C.T. v2.9</h2>
+        <h2>S.U.S.P.E.C.T. v3.2</h2>
         
-        <label>Media</label>
+        <label>Audio <span id="audioStatus" class="memory-tag tag-off">Missing</span></label>
         <input type="file" id="audioFile" accept="audio/*">
+        
+        <label>Background <span id="bgStatus" class="memory-tag tag-off">Empty</span></label>
         <input type="file" id="bgFile" accept="image/*">
+        
+        <label>Logo <span id="logoStatus" class="memory-tag tag-off">Empty</span></label>
         <input type="file" id="logoFile" accept="image/*">
+
+        <label>Chroma Profile</label>
+        <div class="row">
+            <input type="color" id="color1" value="#00d4ff">
+            <input type="color" id="color2" value="#ff00ff">
+        </div>
 
         <label>Algorithm Selection</label>
         <select id="visualizerStyle">
+            <option value="spin">Rotational Data Spin</option>
             <option value="bars">Digital Columns</option>
             <option value="waveLines">Kinetic Wave Lines</option>
-            <option value="spin">Rotational Data Spin</option>
             <option value="circles">Radial Engine</option>
             <option value="symmetry">Symmetry Bars</option>
             <option value="particles">Floating Particles</option>
         </select>
 
-        <label>Chroma Profile</label>
-        <div style="display:flex; gap:5px;">
-            <input type="color" id="color1" value="#00d4ff">
-            <input type="color" id="color2" value="#ff00ff">
+        <label>Spin Speed & Vignette</label>
+        <div class="row">
+            <input type="range" id="spinBase" min="0" max="0.05" step="0.001" value="0.005">
+            <input type="range" id="vignetteSlider" min="0" max="1" step="0.1" value="0.5">
         </div>
 
         <label>Wonk & Logo Scale</label>
-        <div style="display:flex; gap:5px;">
+        <div class="row">
             <input type="range" id="wonkSlider" min="0.5" max="4.0" step="0.1" value="1.0">
             <input type="range" id="logoSize" min="50" max="500" value="200">
         </div>
@@ -72,18 +86,14 @@
 
         <div class="toggle-group">
             <input type="checkbox" id="logoPulse" checked>
-            <label for="logoPulse">LOGO PULSE</label>
-        </div>
-
-        <div class="toggle-group">
-            <input type="checkbox" id="hiPerfToggle" checked>
-            <label for="hiPerfToggle">DEEP RENDER (FAST CONVERT)</label>
+            <label for="logoPulse">LOGO AUDIO REACTIVE</label>
         </div>
 
         <audio id="audio" controls style="height: 30px; margin-top: 10px;"></audio>
-        <button id="previewBtn">Preview</button>
+        <button id="previewBtn">Live Preview</button>
         <button id="renderBtn" disabled>Render Compatible WebM</button>
         <button id="downloadWebmBtn">Download Master</button>
+        <button onclick="localStorage.clear(); location.reload();" style="border-left-color: var(--red); margin-top: 20px; font-size: 0.6rem;">Clear Memory</button>
     </div>
 
     <canvas id="visualizer"></canvas>
@@ -102,12 +112,55 @@
         let rotationAngle = 0;
 
         canvas.width = 1280; canvas.height = 720;
-
         for(let i=0; i<50; i++) particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2+1 });
 
-        document.getElementById("audioFile").onchange = (e) => { audio.src = URL.createObjectURL(e.target.files[0]); document.getElementById("renderBtn").disabled = false; };
-        document.getElementById("bgFile").onchange = (e) => { bgImg.src = URL.createObjectURL(e.target.files[0]); };
-        document.getElementById("logoFile").onchange = (e) => { logoImg.src = URL.createObjectURL(e.target.files[0]); };
+        // --- LOCAL STORAGE LOGIC ---
+        function saveImage(key, base64) { try { localStorage.setItem(key, base64); } catch(e) { console.log("Memory Full"); } }
+        
+        window.onload = () => {
+            const savedBg = localStorage.getItem("lastBg");
+            const savedLogo = localStorage.getItem("lastLogo");
+            if(savedBg) { 
+                bgImg.src = savedBg; 
+                document.getElementById("bgStatus").innerText = "Restored";
+                document.getElementById("bgStatus").className = "memory-tag tag-on";
+            }
+            if(savedLogo) { 
+                logoImg.src = savedLogo; 
+                document.getElementById("logoStatus").innerText = "Restored";
+                document.getElementById("logoStatus").className = "memory-tag tag-on";
+            }
+        };
+
+        function fileToBase64(file, callback) {
+            const reader = new FileReader();
+            reader.onload = (e) => callback(e.target.result);
+            reader.readAsDataURL(file);
+        }
+
+        document.getElementById("audioFile").onchange = (e) => { 
+            audio.src = URL.createObjectURL(e.target.files[0]); 
+            document.getElementById("renderBtn").disabled = false; 
+            document.getElementById("audioStatus").innerText = "Ready";
+            document.getElementById("audioStatus").className = "memory-tag tag-on";
+        };
+
+        document.getElementById("bgFile").onchange = (e) => { 
+            const file = e.target.files[0];
+            bgImg.src = URL.createObjectURL(file);
+            fileToBase64(file, (base64) => saveImage("lastBg", base64));
+            document.getElementById("bgStatus").innerText = "Loaded";
+            document.getElementById("bgStatus").className = "memory-tag tag-on";
+        };
+
+        document.getElementById("logoFile").onchange = (e) => { 
+            const file = e.target.files[0];
+            logoImg.src = URL.createObjectURL(file);
+            fileToBase64(file, (base64) => saveImage("lastLogo", base64));
+            document.getElementById("logoStatus").innerText = "Loaded";
+            document.getElementById("logoStatus").className = "memory-tag tag-on";
+        };
+        // --- END STORAGE LOGIC ---
 
         function setupAudio() {
             if (audioCtx) return;
@@ -124,10 +177,11 @@
 
         function drawFrame() {
             analyser.getByteFrequencyData(dataArray);
-            let sum = 0;
-            for(let i=0; i<15; i++) sum += dataArray[i];
+            let sum = 0; for(let i=0; i<15; i++) sum += dataArray[i];
             let bass = sum / 15 / 255;
             const wonk = parseFloat(document.getElementById("wonkSlider").value);
+            const c1 = document.getElementById("color1").value;
+            const c2 = document.getElementById("color2").value;
 
             ctx.save();
             if (document.getElementById("bassShake").checked && bass > 0.6) {
@@ -142,8 +196,6 @@
                 ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
-            const c1 = document.getElementById("color1").value;
-            const c2 = document.getElementById("color2").value;
             const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
             gradient.addColorStop(0, c1); gradient.addColorStop(1, c2);
             ctx.fillStyle = gradient; ctx.strokeStyle = gradient; ctx.lineWidth = 4;
@@ -151,7 +203,17 @@
             const style = document.getElementById("visualizerStyle").value;
             const bufferLength = dataArray.length;
 
-            if (style === "bars") {
+            if (style === "spin") {
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                rotationAngle += parseFloat(document.getElementById("spinBase").value) + (bass * 0.05);
+                ctx.rotate(rotationAngle);
+                for (let i = 0; i < bufferLength / 2; i++) {
+                    let val = Math.pow(dataArray[i] / 255, wonk);
+                    ctx.rotate((Math.PI * 2) / (bufferLength / 2));
+                    ctx.fillRect(120, 0, val * 300, 4);
+                }
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+            } else if (style === "bars") {
                 const bw = canvas.width / (bufferLength / 2);
                 for (let i = 0; i < bufferLength / 2; i++) {
                     let val = Math.pow(dataArray[i] / 255, wonk);
@@ -166,18 +228,6 @@
                     if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * sw, y);
                 }
                 ctx.stroke();
-            } else if (style === "spin") {
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                rotationAngle += 0.01 + (bass * 0.1); // Spin velocity synced to bass
-                ctx.rotate(rotationAngle);
-                const bw = 4;
-                for (let i = 0; i < bufferLength / 2; i++) {
-                    let val = Math.pow(dataArray[i] / 255, wonk);
-                    ctx.rotate((Math.PI * 2) / (bufferLength / 2));
-                    ctx.fillRect(120, 0, val * 300, bw);
-                }
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
-                ctx.translate(canvas.width / 2, canvas.height / 2); // Re-center for logo
             } else if (style === "circles") {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 for (let i = 0; i < bufferLength; i += 6) {
@@ -188,65 +238,54 @@
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 const bw = (canvas.width / 2) / (bufferLength / 4);
                 for (let i = 0; i < bufferLength / 4; i++) {
-                    let val = Math.pow(dataArray[i] / 255, wonk);
-                    let h = val * canvas.height * 0.4;
+                    let h = Math.pow(dataArray[i] / 255, wonk) * canvas.height * 0.4;
                     ctx.fillRect(i * bw, 0, bw - 2, h); ctx.fillRect(i * bw, 0, bw - 2, -h);
                     ctx.fillRect(-i * bw, 0, bw - 2, h); ctx.fillRect(-i * bw, 0, bw - 2, -h);
                 }
             } else if (style === "particles") {
                 particles.forEach((p, i) => {
                     let val = Math.pow(dataArray[i % bufferLength] / 255, wonk);
-                    p.y -= p.s + (val * 10);
-                    if(p.y < 0) p.y = canvas.height;
+                    p.y -= p.s + (val * 10); if(p.y < 0) p.y = canvas.height;
                     ctx.beginPath(); ctx.arc(p.x, p.y, 2 + (val * 10), 0, Math.PI*2); ctx.fill();
                 });
             }
 
-            // Restore/Center for Logo
-            if (style !== "spin" && style !== "circles" && style !== "symmetry") {
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-            }
-            
+            // Vignette
+            const v = document.getElementById("vignetteSlider").value;
+            const vigGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 100, canvas.width/2, canvas.height/2, canvas.width*0.8);
+            vigGrad.addColorStop(0, "rgba(0,0,0,0)"); vigGrad.addColorStop(1, `rgba(0,0,0,${v})`);
+            ctx.fillStyle = vigGrad; ctx.setTransform(1,0,0,1,0,0); ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Logo
             if (logoImg.src) {
                 const baseSize = parseInt(document.getElementById("logoSize").value);
                 const finalSize = baseSize + (document.getElementById("logoPulse").checked ? (bass * 50) : 0);
-                ctx.globalAlpha = 0.9;
-                ctx.drawImage(logoImg, -finalSize/2, -finalSize/2, finalSize, finalSize);
-                ctx.globalAlpha = 1.0;
+                ctx.drawImage(logoImg, canvas.width/2 - finalSize/2, canvas.height/2 - finalSize/2, finalSize, finalSize);
             }
             ctx.restore();
         }
 
         function previewLoop() { if (isPreviewing) { drawFrame(); requestAnimationFrame(previewLoop); } }
-
         document.getElementById("previewBtn").onclick = () => { setupAudio(); isPreviewing = true; gainNode.gain.value = 1; audio.play(); previewLoop(); };
 
         document.getElementById("renderBtn").onclick = async () => {
             setupAudio(); isPreviewing = false;
-            if (document.getElementById("hiPerfToggle").checked) document.getElementById("sidebar").classList.add("hud-hidden");
             document.getElementById("renderOverlay").style.display = "block";
             audio.currentTime = 0; gainNode.gain.value = 0;
             const stream = canvas.captureStream(30);
             const audioDest = audioCtx.createMediaStreamDestination();
             analyser.connect(audioDest);
             stream.addTrack(audioDest.stream.getAudioTracks()[0]);
-
-            const recorder = new MediaRecorder(stream, { 
-                mimeType: 'video/webm;codecs=vp8,opus', 
-                videoBitsPerSecond: 12000000 
-            });
-
+            const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8,opus', videoBitsPerSecond: 12000000 });
             const chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
                 finalBlobUrl = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }));
-                document.getElementById("sidebar").classList.remove("hud-hidden");
                 document.getElementById("renderOverlay").style.display = "none";
                 document.getElementById("downloadWebmBtn").style.display = "block";
                 gainNode.gain.value = 1;
             };
-            recorder.start(1000); 
-            audio.play();
+            recorder.start(1000); audio.play();
             const renderLoop = setInterval(() => {
                 drawFrame();
                 const pct = Math.round((audio.currentTime / audio.duration) * 100);
@@ -257,7 +296,7 @@
 
         document.getElementById("downloadWebmBtn").onclick = () => {
             const a = document.createElement("a"); a.href = finalBlobUrl;
-            a.download = `SUSPECT_v2.9_KINETIC.webm`; a.click();
+            a.download = `SUSPECT_v3.2_MASTER.webm`; a.click();
         };
     </script>
 </body>
