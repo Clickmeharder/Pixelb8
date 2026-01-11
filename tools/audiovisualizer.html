@@ -3,96 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.U.S.P.E.C.T. Precision Renderer</title>
+    <title>S.U.S.P.E.C.T. Terminal v2.6</title>
     <style>
-        :root { --bg: #1a1a1a; --accent: #00d4ff; --border: #2a2a2a; --gold: #ffb400; --green: #28a745; }
+        :root { --bg: #0d0d0d; --accent: #00d4ff; --border: #2a2a2a; --gold: #ffb400; --green: #28a745; }
         body { background: var(--bg); color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
         
-        canvas { 
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; 
-            background: #1a1a1a; transform: translateZ(0); backface-visibility: hidden;
-        }
+        canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; background: #000; }
 
         .hud-sidebar {
-            position: fixed; top: 20px; left: 20px; width: 280px;
-            background: rgba(25, 25, 25, 0.95); backdrop-filter: blur(10px);
+            position: fixed; top: 20px; left: 20px; width: 300px; height: 90vh; overflow-y: auto;
+            background: rgba(10, 10, 10, 0.92); backdrop-filter: blur(15px);
             border: 1px solid var(--border); border-left: 3px solid var(--accent);
-            padding: 20px; z-index: 100; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            transition: opacity 0.5s, transform 0.5s;
+            padding: 20px; z-index: 100; border-radius: 4px; transition: 0.5s;
+            scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
         }
 
-        /* High Performance Hiding */
-        .hud-hidden { opacity: 0; transform: translateX(-320px); pointer-events: none; }
+        .hud-hidden { opacity: 0; transform: translateX(-380px); pointer-events: none; }
 
-        h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin: 0 0 15px 0; }
-        label { font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin: 8px 0 4px 0; }
-        input, select, button { background: #111; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 3px; font-size: 0.85rem; width: 100%; margin-bottom: 10px; outline: none; }
+        h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin: 0 0 15px 0; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+        label { font-size: 0.6rem; color: #888; text-transform: uppercase; display: block; margin: 10px 0 4px 0; }
+        input, select, button { background: #111; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 3px; font-size: 0.8rem; width: 100%; margin-bottom: 8px; outline: none; }
         
-        .toggle-group { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.7rem; }
-        .toggle-group input { width: auto; margin: 0; cursor: pointer; }
-        
-        .slider-label { display: flex; justify-content: space-between; align-items: center; }
-        #wonkVal { color: var(--gold); font-weight: bold; }
+        .row { display: flex; gap: 8px; }
+        .toggle-group { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; color: var(--gold); margin: 5px 0; }
+        .toggle-group input { width: auto; margin: 0; }
 
-        button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-left: 3px solid var(--accent); transition: 0.2s; }
-        button:hover:not(:disabled) { background: #222; border-color: white; }
-        button:disabled { opacity: 0.3; cursor: not-allowed; }
-        
-        #renderBtn { border-left-color: var(--gold); }
+        button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-left: 3px solid var(--accent); }
+        button:hover:not(:disabled) { background: #1a1a1a; border-color: white; }
+        #renderBtn { border-left-color: var(--gold); margin-top: 10px; }
         #downloadWebmBtn { border-left-color: var(--green); display: none; }
         
-        #statusBox { font-size: 0.7rem; color: var(--accent); font-family: monospace; margin-top: 10px; }
-        .progress-bar { width: 100%; height: 4px; background: #333; display: none; margin-top: 10px; border-radius: 2px; overflow: hidden; }
-        #progressFill { width: 0%; height: 100%; background: var(--accent); }
-
         #renderOverlay {
             position: fixed; bottom: 20px; right: 20px; z-index: 1000;
-            background: rgba(0,0,0,0.8); padding: 10px 20px; border-radius: 5px;
-            border: 1px solid var(--accent); display: none; font-family: monospace;
+            background: rgba(0,0,0,0.9); padding: 15px; border-radius: 4px;
+            border: 1px solid var(--accent); display: none; font-family: monospace; font-size: 0.8rem;
         }
     </style>
 </head>
 <body>
 
-    <div id="renderOverlay">DEEP RENDER ACTIVE: <span id="overlayPct">0%</span></div>
+    <div id="renderOverlay">SYSTEM RENDERING: <span id="overlayPct">0%</span></div>
 
     <div class="hud-sidebar" id="sidebar">
-        <h2>S.U.S.P.E.C.T. Terminal V3</h2>
+        <h2>S.U.S.P.E.C.T. v2.6</h2>
         
-        <label>Audio Source</label>
+        <label>Media Input</label>
         <input type="file" id="audioFile" accept="audio/*">
+        <input type="file" id="bgFile" accept="image/*" placeholder="BG">
+        <input type="file" id="logoFile" accept="image/*">
 
-        <label class="slider-label">WONK FACTOR <span id="wonkVal">1.0</span></label>
-        <input type="range" id="wonkSlider" min="0.5" max="3.5" step="0.1" value="1.0">
+        <label>Chroma Profile</label>
+        <div class="row">
+            <input type="color" id="color1" value="#00d4ff" title="Top Color">
+            <input type="color" id="color2" value="#ff00ff" title="Bottom Color">
+        </div>
 
         <label>Visual Algorithm</label>
         <select id="visualizerStyle">
-            <option value="bars">Frequency Columns</option>
+            <option value="bars">Digital Columns</option>
             <option value="wave">Oscilloscope</option>
-            <option value="circles">Radial Pulse</option>
+            <option value="circles">Radial Engine</option>
         </select>
+        
+        <label>Wonk & Logo Scale</label>
+        <div class="row">
+            <input type="range" id="wonkSlider" min="0.5" max="4.0" step="0.1" value="1.0">
+            <input type="range" id="logoSize" min="50" max="500" value="200">
+        </div>
 
         <div class="toggle-group">
-            <input type="checkbox" id="gpuToggle" checked>
-            <label for="gpuToggle">GPU ACCELERATION</label>
+            <input type="checkbox" id="logoPulse" checked>
+            <label for="logoPulse">LOGO AUDIO REACTIVE</label>
+        </div>
+
+        <div class="toggle-group">
+            <input type="checkbox" id="glitchToggle">
+            <label for="glitchToggle">GLITCH PEAKS</label>
         </div>
 
         <div class="toggle-group">
             <input type="checkbox" id="hiPerfToggle" checked>
-            <label for="hiPerfToggle">HIGH PERFORMANCE (HIDE HUD)</label>
+            <label for="hiPerfToggle">DEEP RENDER (HIDE HUD)</label>
         </div>
 
-        <label>Accent Color</label>
-        <input type="color" id="barColor" value="#00d4ff">
-
-        <audio id="audio" controls style="height: 30px; margin-bottom: 15px;"></audio>
+        <audio id="audio" controls style="height: 30px; margin-top: 10px;"></audio>
 
         <button id="previewBtn">Live Preview</button>
-        <button id="renderBtn" disabled>Finalize & Render WebM</button>
-        <button id="downloadWebmBtn">Download WebM File</button>
-
-        <div id="statusBox">SYSTEM READY</div>
-        <div class="progress-bar" id="progBar"><div id="progressFill"></div></div>
+        <button id="renderBtn" disabled>Finalize & Render</button>
+        <button id="downloadWebmBtn">Download Master WebM</button>
     </div>
 
     <canvas id="visualizer"></canvas>
@@ -100,43 +98,22 @@
     <script>
         const audio = document.getElementById("audio");
         const canvas = document.getElementById("visualizer");
-        const status = document.getElementById("statusBox");
-        const renderBtn = document.getElementById("renderBtn");
-        const downloadWebmBtn = document.getElementById("downloadWebmBtn");
-        const progBar = document.getElementById("progBar");
-        const progFill = document.getElementById("progressFill");
+        const ctx = canvas.getContext("2d", { alpha: false });
         
-        const wonkSlider = document.getElementById("wonkSlider");
-        const wonkVal = document.getElementById("wonkVal");
-        const sidebar = document.getElementById("sidebar");
-        const renderOverlay = document.getElementById("renderOverlay");
-        const overlayPct = document.getElementById("overlayPct");
-
-        let ctx, audioCtx, analyser, source, gainNode, bufferLength, dataArray;
+        let audioCtx, analyser, source, gainNode, dataArray;
         let isPreviewing = false;
         let finalBlobUrl = null;
+        let bgImg = new Image();
+        let logoImg = new Image();
 
-        canvas.width = 1280; canvas.height = 720;
-
-        wonkSlider.oninput = () => wonkVal.innerText = wonkSlider.value;
-
-        function initCanvas() {
-            ctx = canvas.getContext("2d", { 
-                alpha: false, 
-                desynchronized: document.getElementById("gpuToggle").checked,
-                willReadFrequently: false 
-            });
-        }
-        initCanvas();
+        canvas.width = 1920; canvas.height = 1080;
 
         document.getElementById("audioFile").onchange = (e) => {
-            if (e.target.files[0]) {
-                audio.src = URL.createObjectURL(e.target.files[0]);
-                renderBtn.disabled = false;
-                downloadWebmBtn.style.display = "none";
-                status.innerText = "DATA LOADED.";
-            }
+            audio.src = URL.createObjectURL(e.target.files[0]);
+            document.getElementById("renderBtn").disabled = false;
         };
+        document.getElementById("bgFile").onchange = (e) => { bgImg.src = URL.createObjectURL(e.target.files[0]); };
+        document.getElementById("logoFile").onchange = (e) => { logoImg.src = URL.createObjectURL(e.target.files[0]); };
 
         function setupAudio() {
             if (audioCtx) return;
@@ -147,143 +124,125 @@
             source.connect(analyser);
             analyser.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-            analyser.fftSize = 256;
-            bufferLength = analyser.frequencyBinCount;
-            dataArray = new Uint8Array(bufferLength);
+            analyser.fftSize = 512;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
         }
 
         function drawFrame() {
             analyser.getByteFrequencyData(dataArray);
-            ctx.fillStyle = '#1a1a1a';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            const color = document.getElementById("barColor").value;
-            const style = document.getElementById("visualizerStyle").value;
-            const wonk = parseFloat(wonkSlider.value);
-            
-            ctx.fillStyle = color; ctx.strokeStyle = color; ctx.lineWidth = 4;
-            if (document.getElementById("gpuToggle").checked) {
-                ctx.shadowBlur = 12; ctx.shadowColor = color;
+            // Background
+            if (bgImg.src) {
+                ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "rgba(0,0,0,0.7)"; 
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = '#050505';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
+            const c1 = document.getElementById("color1").value;
+            const c2 = document.getElementById("color2").value;
+            const wonk = parseFloat(document.getElementById("wonkSlider").value);
+            const glitch = document.getElementById("glitchToggle").checked;
+            const pulse = document.getElementById("logoPulse").checked;
+
+            // Create Visualizer Gradient
+            const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
+            gradient.addColorStop(0, c1);
+            gradient.addColorStop(1, c2);
+
+            ctx.fillStyle = gradient; 
+            ctx.strokeStyle = gradient; 
+            ctx.lineWidth = 6;
+            ctx.shadowBlur = 15; 
+            ctx.shadowColor = c1;
+
+            const bufferLength = dataArray.length;
+            const style = document.getElementById("visualizerStyle").value;
+            
+            // Calculate Average for Pulse
+            let sum = 0;
+            for(let i=0; i<20; i++) sum += dataArray[i];
+            let avg = sum / 20 / 255; // Bass average 0 to 1
+
             if (style === "bars") {
-                const bw = canvas.width / bufferLength;
-                for (let i = 0; i < bufferLength; i++) {
-                    // Apply WONK Factor: Normalized (0-1) raised to the power of Wonk
-                    let val = dataArray[i] / 255;
-                    val = Math.pow(val, wonk);
-                    const h = val * canvas.height;
-                    ctx.fillRect(i * bw, canvas.height - h, bw - 1, h);
+                const bw = canvas.width / (bufferLength / 2);
+                for (let i = 0; i < bufferLength / 2; i++) {
+                    let val = Math.pow(dataArray[i] / 255, wonk);
+                    const h = val * canvas.height * 0.8;
+                    if (glitch && val > 0.85 && Math.random() > 0.9) ctx.fillStyle = "#fff"; 
+                    else ctx.fillStyle = gradient;
+                    ctx.fillRect(i * bw, canvas.height - h, bw - 2, h);
                 }
             } else if (style === "wave") {
                 ctx.beginPath();
                 const sw = canvas.width / bufferLength;
                 for (let i = 0; i < bufferLength; i++) {
-                    let val = dataArray[i] / 255;
-                    val = Math.pow(val, wonk);
-                    const y = val * canvas.height;
+                    let val = Math.pow(dataArray[i] / 255, wonk);
+                    const y = (canvas.height / 2) + (val * canvas.height / 2) * (i % 2 === 0 ? 1 : -1);
                     if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * sw, y);
                 }
                 ctx.stroke();
             } else if (style === "circles") {
+                ctx.translate(canvas.width/2, canvas.height/2);
                 for (let i = 0; i < bufferLength; i += 4) {
-                    let val = dataArray[i] / 255;
-                    val = Math.pow(val, wonk);
+                    let val = Math.pow(dataArray[i] / 255, wonk);
                     const r = val * (canvas.height / 2);
-                    ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, r, 0, Math.PI*2); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2); ctx.stroke();
                 }
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+            }
+
+            // Pulse Logo Logic
+            if (logoImg.src) {
+                const baseSize = parseInt(document.getElementById("logoSize").value);
+                const pulseBoost = pulse ? (avg * (baseSize * 0.2)) : 0;
+                const finalSize = baseSize + pulseBoost;
+                ctx.globalAlpha = 0.9;
+                ctx.drawImage(logoImg, canvas.width/2 - finalSize/2, canvas.height/2 - finalSize/2, finalSize, finalSize);
+                ctx.globalAlpha = 1.0;
             }
             ctx.shadowBlur = 0;
         }
 
-        function previewLoop() {
-            if (!isPreviewing) return;
-            drawFrame();
-            requestAnimationFrame(previewLoop);
-        }
+        function previewLoop() { if (isPreviewing) { drawFrame(); requestAnimationFrame(previewLoop); } }
 
         document.getElementById("previewBtn").onclick = () => {
-            setupAudio();
-            initCanvas();
-            isPreviewing = true;
-            gainNode.gain.value = 1;
-            audio.play();
-            previewLoop();
-            status.innerText = "PREVIEWING...";
+            setupAudio(); isPreviewing = true; gainNode.gain.value = 1; audio.play(); previewLoop();
         };
 
-        renderBtn.onclick = async () => {
-            setupAudio();
-            initCanvas();
-            isPreviewing = false;
-            window.isRendering = true;
-            
-            // High Performance Mode Logic
-            if (document.getElementById("hiPerfToggle").checked) {
-                sidebar.classList.add("hud-hidden");
-                renderOverlay.style.display = "block";
-            }
-
-            renderBtn.disabled = true;
-            downloadWebmBtn.style.display = "none";
-            progBar.style.display = "block";
-            
-            audio.currentTime = 0;
-            gainNode.gain.value = 0;
-
+        document.getElementById("renderBtn").onclick = async () => {
+            setupAudio(); isPreviewing = false;
+            if (document.getElementById("hiPerfToggle").checked) document.getElementById("sidebar").classList.add("hud-hidden");
+            document.getElementById("renderOverlay").style.display = "block";
+            audio.currentTime = 0; gainNode.gain.value = 0;
             const stream = canvas.captureStream(30);
             const audioDest = audioCtx.createMediaStreamDestination();
             analyser.connect(audioDest);
             stream.addTrack(audioDest.stream.getAudioTracks()[0]);
-
-            const recorder = new MediaRecorder(stream, { 
-                mimeType: 'video/webm;codecs=vp8,opus', 
-                videoBitsPerSecond: 25000000 
-            });
-
+            const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8,opus', videoBitsPerSecond: 35000000 });
             const chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
-            
             recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                finalBlobUrl = URL.createObjectURL(blob);
-                
-                // Restore HUD
-                sidebar.classList.remove("hud-hidden");
-                renderOverlay.style.display = "none";
-                
-                status.innerText = "RENDER FINISHED.";
-                progBar.style.display = "none";
-                renderBtn.disabled = false;
-                downloadWebmBtn.style.display = "block";
-                window.isRendering = false;
+                finalBlobUrl = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }));
+                document.getElementById("sidebar").classList.remove("hud-hidden");
+                document.getElementById("renderOverlay").style.display = "none";
+                document.getElementById("downloadWebmBtn").style.display = "block";
                 gainNode.gain.value = 1;
             };
-
-            recorder.start();
-            audio.play();
-
+            recorder.start(); audio.play();
             const renderLoop = setInterval(() => {
                 drawFrame();
-                const pct = (audio.currentTime / audio.duration) * 100;
-                const pctClean = Math.round(pct);
-                progFill.style.width = pct + "%";
-                overlayPct.innerText = pctClean + "%";
-                status.innerText = `ENCODING: ${pctClean}%`;
-
-                if (audio.ended) {
-                    clearInterval(renderLoop);
-                    recorder.stop();
-                }
+                const pct = Math.round((audio.currentTime / audio.duration) * 100);
+                document.getElementById("overlayPct").innerText = pct + "%";
+                if (audio.ended) { clearInterval(renderLoop); recorder.stop(); }
             }, 1000 / 30);
         };
 
-        downloadWebmBtn.onclick = () => {
-            if (!finalBlobUrl) return;
-            const a = document.createElement("a");
-            a.href = finalBlobUrl;
-            a.download = `WONK_RENDER_${Date.now()}.webm`;
-            a.click();
+        document.getElementById("downloadWebmBtn").onclick = () => {
+            const a = document.createElement("a"); a.href = finalBlobUrl;
+            a.download = `SUSPECT_v2.6_CHROMA.webm`; a.click();
         };
     </script>
 </body>
