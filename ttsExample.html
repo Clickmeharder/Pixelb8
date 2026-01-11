@@ -2,137 +2,162 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ENTROPIA | DEEP SCAN HUD</title>
+    <title>ENTROPIA // VOICE_VOODOO_v9</title>
     <style>
-        :root { --amber: #ffb300; --bg: #050505; --dim: #221a00; }
-        body { background: var(--bg); color: var(--amber); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .terminal { width: 650px; border: 2px solid var(--amber); padding: 25px; box-shadow: 0 0 20px rgba(255,179,0,0.3); background: rgba(0,0,0,0.9); }
-        .header { border-bottom: 2px solid var(--amber); margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2em; }
+        :root { --amber: #ffb300; --bg: #030303; --dim: #221a00; --red: #ff3333; }
+        body { background: var(--bg); color: var(--amber); font-family: 'Consolas', 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
         
-        /* THE DROPDOWN - STYLED FOR PROS */
-        select { 
-            width: 100%; background: #111; color: var(--amber); border: 1px solid var(--amber); 
-            padding: 12px; font-family: inherit; font-size: 1.1em; cursor: pointer; outline: none;
+        /* THE HUD FRAME */
+        .hud-interface {
+            width: 750px; border: 1px solid var(--amber); padding: 30px;
+            background: radial-gradient(circle, rgba(255,179,0,0.05) 0%, rgba(0,0,0,1) 100%);
+            box-shadow: 0 0 40px rgba(0,0,0,1), inset 0 0 20px var(--dim);
+            position: relative;
         }
-        select option { background: #000; padding: 10px; }
 
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        button { 
-            background: rgba(255, 179, 0, 0.1); color: var(--amber); border: 1px solid var(--amber); 
-            padding: 15px; cursor: pointer; text-transform: uppercase; font-weight: bold;
-        }
-        button:hover { background: var(--amber); color: #000; }
+        .header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--amber); padding-bottom: 10px; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
         
-        .matrix { margin-top: 15px; font-size: 0.8em; border: 1px solid var(--dim); padding: 10px; }
-        .stat { display: flex; justify-content: space-between; padding: 2px 0; }
-        .val { color: #fff; text-shadow: 0 0 5px var(--amber); }
-        #log { font-size: 0.7em; color: #665500; height: 45px; overflow-y: hidden; border-top: 1px solid var(--dim); margin-top: 10px; padding-top: 5px; }
+        /* PRO DROP-DOWN */
+        .selector-box { background: #000; border: 1px solid var(--amber); position: relative; margin-bottom: 20px; }
+        select { 
+            width: 100%; background: transparent; color: var(--amber); border: none; padding: 15px; 
+            font-size: 1.1em; cursor: pointer; outline: none; appearance: none;
+        }
+        select option { background: #080808; color: var(--amber); }
+
+        /* TACTICAL GRID */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button { 
+            background: var(--dim); color: var(--amber); border: 1px solid var(--amber); 
+            padding: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase;
+            transition: 0.1s;
+        }
+        button:hover { background: var(--amber); color: #000; box-shadow: 0 0 15px var(--amber); }
+
+        /* REAL-TIME MATRIX LOG */
+        .matrix-log { 
+            margin-top: 25px; border-top: 1px dashed var(--amber); padding-top: 15px; 
+            font-size: 0.75em; height: 150px; overflow-y: hidden; color: #886600;
+        }
+        .matrix-row { display: flex; justify-content: space-between; border-bottom: 1px solid #111; padding: 3px 0; }
+        .val { color: #fff; }
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
 
-<div class="terminal">
+<div class="hud-interface">
     <div class="header">
-        <span>[ DEEP_SCAN_ACTIVE ]</span>
-        <span id="clock">00:00:00</span>
+        <span>X-COMM // NEURAL_LINK</span>
+        <span id="os-tag" class="blink">SCANNING...</span>
     </div>
 
-    <label>SELECT HIGH-FIDELITY CHANNEL:</label>
-    <select id="voice-select">
-        <option>BOOTING SYSTEM...</option>
-    </select>
-
-    <div class="btn-grid">
-        <button onclick="unlock()">Initialize Comms</button>
-        <button onclick="speakMission()">Test Mission TTS</button>
+    <div class="selector-box">
+        <select id="voice-master" onchange="manualLock()">
+            <option>AWAITING VOICE INJECTION...</option>
+        </select>
     </div>
 
-    <div class="matrix">
-        <div class="stat"><span>UPLINKS DETECTED:</span> <span id="count" class="val">0</span></div>
-        <div class="stat"><span>ARIA STATUS:</span> <span id="aria-stat" class="val">SEARCHING...</span></div>
-        <div class="stat"><span>NEURAL ENGINE:</span> <span id="engine-stat" class="val">WAITING</span></div>
-        <div id="log">> Initializing scan...</div>
+    <div class="grid">
+        <button onclick="engage()">[ 1. ENGAGE UPLINK ]</button>
+        <button onclick="executeMission()">[ 2. EXECUTE SIGNAL ]</button>
+    </div>
+
+    <div class="matrix-log" id="matrix">
+        <div class="matrix-row"><span>METHOD:</span> <span class="val" id="m-method">FORCE_INDEX_RECON</span></div>
+        <div class="matrix-row"><span>UPLINK_STRENGTH:</span> <span class="val" id="m-count">0</span></div>
+        <div class="matrix-row"><span>PERSISTENCE_LOCK:</span> <span class="val" id="m-lock">OFF</span></div>
+        <div class="matrix-row"><span>CLOUD_SYNC:</span> <span class="val" id="m-cloud">WAITING</span></div>
+        <hr style="border: none; border-top: 1px solid var(--dim); margin: 10px 0;">
+        <div id="status-stream">> CORE INITIALIZED. AWAITING USER INPUT...</div>
     </div>
 </div>
 
 <script>
     const synth = window.speechSynthesis;
-    const select = document.getElementById('voice-select');
-    let voices = [];
+    const voiceSelect = document.getElementById('voice-master');
+    const stream = document.getElementById('status-stream');
+    let lockedIndex = -1;
 
-    function updateClock() {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+    // WEB VOODOO 1: The Multi-Pass Scanner
+    function deepScan() {
+        let voices = synth.getVoices();
+        if (voices.length === 0) return;
+
+        // Sort: Neural/Natural first, then Cloud, then Local
+        voices.sort((a, b) => {
+            const priority = (name) => (name.includes('Online') || name.includes('Natural') || name.includes('Aria')) ? 2 : (name.includes('Google') ? 1 : 0);
+            return priority(b.name) - priority(a.name);
+        });
+
+        voiceSelect.innerHTML = '';
+        voices.forEach((v, i) => {
+            const opt = document.createElement('option');
+            opt.value = i;
+            const isNeural = (v.name.includes('Online') || v.name.includes('Natural')) ? '◆ NEURAL' : '◇ LOCAL';
+            opt.textContent = `${isNeural} | ${v.name}`;
+            voiceSelect.appendChild(opt);
+        });
+
+        document.getElementById('m-count').innerText = voices.length + " CHANNELS";
+        document.getElementById('m-cloud').innerText = voices.some(v => v.name.includes('Online')) ? "SYNCED" : "OFFLINE";
+        document.getElementById('os-tag').innerText = "SYSTEM READY";
+        document.getElementById('os-tag').style.color = "#00ff00";
     }
-    setInterval(updateClock, 1000);
 
-    function scanVoices() {
-        voices = synth.getVoices();
+    // WEB VOODOO 2: Anti-Reset Override
+    function manualLock() {
+        lockedIndex = voiceSelect.value;
+        const voices = synth.getVoices();
+        document.getElementById('m-lock').innerText = "LOCKED: " + voices[lockedIndex].name;
+        pushStream(`LOCKING TO: ${voices[lockedIndex].name}`);
+    }
+
+    // WEB VOODOO 3: Buffer Clearing Logic
+    function pushStream(msg) {
+        stream.innerHTML = `> ${msg}<br>` + stream.innerHTML;
+    }
+
+    function engage() {
+        // We speak a tiny silent character to 'pop' the browser's security bubble
+        const pock = new SpeechSynthesisUtterance("Uplink Engaged");
+        pock.volume = 0; 
+        synth.speak(pock);
+        deepScan();
+        pushStream("NEURAL LINK ESTABLISHED.");
+    }
+
+    function executeMission() {
+        const voices = synth.getVoices();
+        const utter = new SpeechSynthesisUtterance("Mission complete. Sector clear. Return to base.");
         
-        if (voices.length > 0) {
-            // Sort them so the best ones (Aria, Natural, Google) are at the TOP
-            voices.sort((a, b) => {
-                const aName = a.name.toLowerCase();
-                const bName = b.name.toLowerCase();
-                if (aName.includes('aria')) return -1;
-                if (aName.includes('natural')) return -1;
-                if (aName.includes('google')) return -1;
-                return 0;
-            });
-
-            const currentSelection = select.value;
-            select.innerHTML = '';
-            
-            voices.forEach((v, i) => {
-                const opt = document.createElement('option');
-                opt.value = i;
-                // Add a "PRO" tag to high-quality online voices
-                const tag = (v.name.includes('Online') || v.name.includes('Natural')) ? '[NEURAL]' : '[LOCAL]';
-                opt.textContent = `${tag} ${v.name}`;
-                select.appendChild(opt);
-            });
-
-            document.getElementById('count').innerText = voices.length;
-            
-            const aria = voices.find(v => v.name.includes("Aria"));
-            const ariaStat = document.getElementById('aria-stat');
-            if (aria) {
-                ariaStat.innerText = "LOCKED ON";
-                ariaStat.style.color = "#00ff00";
-            } else {
-                ariaStat.innerText = "NOT IN RANGE";
-            }
+        // FORCED SELECTION LOGIC: bypasses the "jumping" bug by re-assigning at the micro-second of execution
+        const targetVoice = voices[voiceSelect.value];
+        if (!targetVoice) {
+            pushStream("ERROR: VOICE INDEX INVALID");
+            return;
         }
-    }
 
-    // THE BRUTE FORCE: Scan every 500ms until voices load
-    const scanInterval = setInterval(() => {
-        scanVoices();
-        if (voices.length > 10) {
-            document.getElementById('log').innerText = "> EXTENDED UPLINK ESTABLISHED.";
-            document.getElementById('engine-stat').innerText = "HIGH-FIDELITY";
-            // We stop the aggressive scan once we have a real list
-            clearInterval(scanInterval);
+        utter.voice = targetVoice;
+        utter.rate = 0.95;
+        utter.pitch = 1.0;
+
+        // Safety: If the engine is currently talking, kill it to prevent queue-jumping
+        if (synth.speaking) {
+            pushStream("CLEARING BUFFER...");
+            synth.cancel();
+            setTimeout(() => synth.speak(utter), 100);
+        } else {
+            synth.speak(utter);
         }
-    }, 500);
 
-    // Also trigger on the standard event
-    synth.onvoiceschanged = scanVoices;
-
-    function unlock() {
-        const u = new SpeechSynthesisUtterance("Uplink successful. Aria standing by.");
-        if (voices[select.value]) u.voice = voices[select.value];
-        synth.speak(u);
-        document.getElementById('log').innerText = "> COMMS CHANNEL OPEN.";
+        pushStream(`EXECUTING SIGNAL VIA [${targetVoice.name}]`);
     }
 
-    function speakMission() {
-        const u = new SpeechSynthesisUtterance("Mission complete. Operation Ghost Protocol successful.");
-        u.voice = voices[select.value];
-        u.rate = 0.9;
-        synth.cancel();
-        synth.speak(u);
-        document.getElementById('log').innerText = `> EXECUTING VIA: ${u.voice.name}`;
-    }
+    // Initialize & Listen
+    window.speechSynthesis.onvoiceschanged = deepScan;
+    setInterval(deepScan, 2000); // Constant background scanning to catch late-loading Cloud voices
 </script>
 
 </body>
