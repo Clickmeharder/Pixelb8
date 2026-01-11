@@ -2,142 +2,137 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ENTROPIA | TACTICAL VOICE COMMAND</title>
+    <title>ENTROPIA | DEEP SCAN HUD</title>
     <style>
-        :root { --amber: #ffb300; --bg: #050505; --dim: #443300; }
+        :root { --amber: #ffb300; --bg: #050505; --dim: #221a00; }
         body { background: var(--bg); color: var(--amber); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .terminal { width: 650px; border: 2px solid var(--amber); padding: 25px; box-shadow: 0 0 20px rgba(255,179,0,0.3); background: rgba(0,0,0,0.9); }
+        .header { border-bottom: 2px solid var(--amber); margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2em; }
         
-        .terminal { 
-            width: 600px; border: 2px solid var(--amber); padding: 20px; 
-            background: rgba(255, 179, 0, 0.02); box-shadow: 0 0 20px rgba(255, 179, 0, 0.2); 
-        }
-
-        .header { border-bottom: 2px solid var(--amber); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; font-weight: bold; }
-        
-        select, button { 
+        /* THE DROPDOWN - STYLED FOR PROS */
+        select { 
             width: 100%; background: #111; color: var(--amber); border: 1px solid var(--amber); 
-            padding: 12px; margin-top: 10px; cursor: pointer; font-family: inherit;
+            padding: 12px; font-family: inherit; font-size: 1.1em; cursor: pointer; outline: none;
         }
+        select option { background: #000; padding: 10px; }
 
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        button { 
+            background: rgba(255, 179, 0, 0.1); color: var(--amber); border: 1px solid var(--amber); 
+            padding: 15px; cursor: pointer; text-transform: uppercase; font-weight: bold;
+        }
         button:hover { background: var(--amber); color: #000; }
         
-        .debug-panel { 
-            margin-top: 20px; border: 1px solid var(--dim); padding: 10px; font-size: 0.8em; background: rgba(0,0,0,0.5);
-        }
-
-        .status-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .ok { color: #00ff00; }
-        .fail { color: #ff4444; }
-        .log { color: #888; font-size: 0.75em; height: 40px; overflow-y: auto; border-top: 1px solid var(--dim); margin-top: 10px; padding-top: 5px; }
+        .matrix { margin-top: 15px; font-size: 0.8em; border: 1px solid var(--dim); padding: 10px; }
+        .stat { display: flex; justify-content: space-between; padding: 2px 0; }
+        .val { color: #fff; text-shadow: 0 0 5px var(--amber); }
+        #log { font-size: 0.7em; color: #665500; height: 45px; overflow-y: hidden; border-top: 1px solid var(--dim); margin-top: 10px; padding-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="terminal">
     <div class="header">
-        <span>▶ SYSTEM UPLINK</span>
-        <span id="conn-type">OFFLINE</span>
+        <span>[ DEEP_SCAN_ACTIVE ]</span>
+        <span id="clock">00:00:00</span>
     </div>
 
-    <label>1. SELECT VOICE CHANNEL:</label>
-    <select id="voice-select" onchange="testVoiceChange()"><option>LOADING CHANNELS...</option></select>
+    <label>SELECT HIGH-FIDELITY CHANNEL:</label>
+    <select id="voice-select">
+        <option>BOOTING SYSTEM...</option>
+    </select>
 
-    <button onclick="initEngine()" style="background: rgba(255,179,0,0.1)">[ INITIALIZE AUDIO ENGINE ]</button>
-    <button onclick="triggerMission('M-1')">SIMULATE MISSION COMPLETE</button>
+    <div class="btn-grid">
+        <button onclick="unlock()">Initialize Comms</button>
+        <button onclick="speakMission()">Test Mission TTS</button>
+    </div>
 
-    <div class="debug-panel">
-        <div style="font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid var(--dim);">DEBUG MATRIX</div>
-        <div class="status-row"><span>Browser Engine:</span> <span id="db-engine" class="fail">LOCKED</span></div>
-        <div class="status-row"><span>Voices Indexed:</span> <span id="db-count" class="fail">0</span></div>
-        <div class="status-row"><span>Aria Detected:</span> <span id="db-aria" class="fail">NO</span></div>
-        <div id="debug-log" class="log">> Standby for initialization...</div>
+    <div class="matrix">
+        <div class="stat"><span>UPLINKS DETECTED:</span> <span id="count" class="val">0</span></div>
+        <div class="stat"><span>ARIA STATUS:</span> <span id="aria-stat" class="val">SEARCHING...</span></div>
+        <div class="stat"><span>NEURAL ENGINE:</span> <span id="engine-stat" class="val">WAITING</span></div>
+        <div id="log">> Initializing scan...</div>
     </div>
 </div>
 
 <script>
     const synth = window.speechSynthesis;
-    const missionData = { "M-1": "Operation Iron Sights", "M-2": "Extraction Point Alpha" };
-    
-    // --- DEBUG LOGGING ---
-    function log(msg) {
-        const d = document.getElementById('debug-log');
-        d.innerHTML = `> ${msg}<br>` + d.innerHTML;
+    const select = document.getElementById('voice-select');
+    let voices = [];
+
+    function updateClock() {
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
     }
+    setInterval(updateClock, 1000);
 
-    // --- VOICE LOGIC ---
-    function updateHUD() {
-        const voices = synth.getVoices();
-        const select = document.getElementById('voice-select');
-        const dbCount = document.getElementById('db-count');
-        const dbAria = document.getElementById('db-aria');
+    function scanVoices() {
+        voices = synth.getVoices();
         
-        if (voices.length === 0) return;
+        if (voices.length > 0) {
+            // Sort them so the best ones (Aria, Natural, Google) are at the TOP
+            voices.sort((a, b) => {
+                const aName = a.name.toLowerCase();
+                const bName = b.name.toLowerCase();
+                if (aName.includes('aria')) return -1;
+                if (aName.includes('natural')) return -1;
+                if (aName.includes('google')) return -1;
+                return 0;
+            });
 
-        select.innerHTML = '';
-        let ariaFound = false;
+            const currentSelection = select.value;
+            select.innerHTML = '';
+            
+            voices.forEach((v, i) => {
+                const opt = document.createElement('option');
+                opt.value = i;
+                // Add a "PRO" tag to high-quality online voices
+                const tag = (v.name.includes('Online') || v.name.includes('Natural')) ? '[NEURAL]' : '[LOCAL]';
+                opt.textContent = `${tag} ${v.name}`;
+                select.appendChild(opt);
+            });
 
-        voices.forEach((v, i) => {
-            const opt = document.createElement('option');
-            opt.value = i;
-            opt.textContent = `${v.name} (${v.lang})`;
-            if (v.name.includes("Aria")) {
-                opt.selected = true;
-                ariaFound = true;
+            document.getElementById('count').innerText = voices.length;
+            
+            const aria = voices.find(v => v.name.includes("Aria"));
+            const ariaStat = document.getElementById('aria-stat');
+            if (aria) {
+                ariaStat.innerText = "LOCKED ON";
+                ariaStat.style.color = "#00ff00";
+            } else {
+                ariaStat.innerText = "NOT IN RANGE";
             }
-            select.appendChild(opt);
-        });
-
-        dbCount.textContent = voices.length;
-        dbCount.className = 'ok';
-        
-        if (ariaFound) {
-            dbAria.textContent = "YES (ONLINE)";
-            dbAria.className = "ok";
-            document.getElementById('conn-type').textContent = "ARIA STABLE";
-            document.getElementById('conn-type').style.color = "#00ff00";
         }
-
-        log(`Scan complete. ${voices.length} voices found.`);
     }
 
-    // Handle Chrome's lazy loading
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = updateHUD;
+    // THE BRUTE FORCE: Scan every 500ms until voices load
+    const scanInterval = setInterval(() => {
+        scanVoices();
+        if (voices.length > 10) {
+            document.getElementById('log').innerText = "> EXTENDED UPLINK ESTABLISHED.";
+            document.getElementById('engine-stat').innerText = "HIGH-FIDELITY";
+            // We stop the aggressive scan once we have a real list
+            clearInterval(scanInterval);
+        }
+    }, 500);
+
+    // Also trigger on the standard event
+    synth.onvoiceschanged = scanVoices;
+
+    function unlock() {
+        const u = new SpeechSynthesisUtterance("Uplink successful. Aria standing by.");
+        if (voices[select.value]) u.voice = voices[select.value];
+        synth.speak(u);
+        document.getElementById('log').innerText = "> COMMS CHANNEL OPEN.";
     }
 
-    function initEngine() {
-        const ut = new SpeechSynthesisUtterance("System online.");
-        const voices = synth.getVoices();
-        const select = document.getElementById('voice-select');
-        
-        ut.voice = voices[select.value] || voices[0];
-        synth.speak(ut);
-
-        document.getElementById('db-engine').textContent = "UNLOCKED";
-        document.getElementById('db-engine').className = "ok";
-        log("Audio context unlocked by user.");
+    function speakMission() {
+        const u = new SpeechSynthesisUtterance("Mission complete. Operation Ghost Protocol successful.");
+        u.voice = voices[select.value];
+        u.rate = 0.9;
+        synth.cancel();
+        synth.speak(u);
+        document.getElementById('log').innerText = `> EXECUTING VIA: ${u.voice.name}`;
     }
-
-    function triggerMission(id) {
-        const voices = synth.getVoices();
-        const select = document.getElementById('voice-select');
-        const name = missionData[id] || "Unknown Objective";
-        
-        const utter = new SpeechSynthesisUtterance(`Mission complete. ${name}.`);
-        utter.voice = voices[select.value];
-        utter.rate = 1.0;
-
-        log(`Executing: ${name}`);
-        synth.cancel(); // Clears queue so it speaks IMMEDIATELY
-        synth.speak(utter);
-    }
-
-    // Check for internet (Aria Online requires it)
-    window.addEventListener('online', () => { log("Network restored."); updateHUD(); });
-    window.addEventListener('offline', () => { log("Network lost. Aria may fail."); });
-
-    // Startup
-    setTimeout(updateHUD, 500);
 </script>
 
 </body>
