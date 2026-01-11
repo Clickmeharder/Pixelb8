@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.U.S.P.E.C.T. v2.7</title>
+    <title>S.U.S.P.E.C.T. v2.9</title>
     <style>
         :root { --bg: #0a0a0a; --accent: #00d4ff; --border: #222; --gold: #ffb400; }
         body { background: var(--bg); color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
@@ -33,17 +33,27 @@
 </head>
 <body>
 
-    <div id="renderOverlay">STABILIZED RENDER: <span id="overlayPct">0%</span></div>
+    <div id="renderOverlay">KINETIC RENDER: <span id="overlayPct">0%</span></div>
 
     <div class="hud-sidebar" id="sidebar">
-        <h2>S.U.S.P.E.C.T. v2.7</h2>
+        <h2>S.U.S.P.E.C.T. v2.9</h2>
         
-        <label>Files</label>
+        <label>Media</label>
         <input type="file" id="audioFile" accept="audio/*">
         <input type="file" id="bgFile" accept="image/*">
         <input type="file" id="logoFile" accept="image/*">
 
-        <label>Chroma</label>
+        <label>Algorithm Selection</label>
+        <select id="visualizerStyle">
+            <option value="bars">Digital Columns</option>
+            <option value="waveLines">Kinetic Wave Lines</option>
+            <option value="spin">Rotational Data Spin</option>
+            <option value="circles">Radial Engine</option>
+            <option value="symmetry">Symmetry Bars</option>
+            <option value="particles">Floating Particles</option>
+        </select>
+
+        <label>Chroma Profile</label>
         <div style="display:flex; gap:5px;">
             <input type="color" id="color1" value="#00d4ff">
             <input type="color" id="color2" value="#ff00ff">
@@ -73,7 +83,7 @@
         <audio id="audio" controls style="height: 30px; margin-top: 10px;"></audio>
         <button id="previewBtn">Preview</button>
         <button id="renderBtn" disabled>Render Compatible WebM</button>
-        <button id="downloadWebmBtn">Download Ready File</button>
+        <button id="downloadWebmBtn">Download Master</button>
     </div>
 
     <canvas id="visualizer"></canvas>
@@ -88,8 +98,12 @@
         let finalBlobUrl = null;
         let bgImg = new Image();
         let logoImg = new Image();
+        let particles = [];
+        let rotationAngle = 0;
 
-        canvas.width = 1280; canvas.height = 720; // 720p is the "Sweet Spot" for CloudConvert speed
+        canvas.width = 1280; canvas.height = 720;
+
+        for(let i=0; i<50; i++) particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2+1 });
 
         document.getElementById("audioFile").onchange = (e) => { audio.src = URL.createObjectURL(e.target.files[0]); document.getElementById("renderBtn").disabled = false; };
         document.getElementById("bgFile").onchange = (e) => { bgImg.src = URL.createObjectURL(e.target.files[0]); };
@@ -110,14 +124,12 @@
 
         function drawFrame() {
             analyser.getByteFrequencyData(dataArray);
-            
             let sum = 0;
             for(let i=0; i<15; i++) sum += dataArray[i];
-            let bass = sum / 15 / 255; // 0 to 1
+            let bass = sum / 15 / 255;
+            const wonk = parseFloat(document.getElementById("wonkSlider").value);
 
             ctx.save();
-            
-            // Bass Shake Logic
             if (document.getElementById("bassShake").checked && bass > 0.6) {
                 let intensity = (bass - 0.6) * 20;
                 ctx.translate(Math.random()*intensity - intensity/2, Math.random()*intensity - intensity/2);
@@ -132,28 +144,76 @@
 
             const c1 = document.getElementById("color1").value;
             const c2 = document.getElementById("color2").value;
-            const wonk = parseFloat(document.getElementById("wonkSlider").value);
             const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
             gradient.addColorStop(0, c1); gradient.addColorStop(1, c2);
+            ctx.fillStyle = gradient; ctx.strokeStyle = gradient; ctx.lineWidth = 4;
 
-            ctx.fillStyle = gradient; ctx.strokeStyle = gradient; ctx.lineWidth = 6;
-
+            const style = document.getElementById("visualizerStyle").value;
             const bufferLength = dataArray.length;
-            const bw = canvas.width / (bufferLength / 2);
-            for (let i = 0; i < bufferLength / 2; i++) {
-                let val = Math.pow(dataArray[i] / 255, wonk);
-                const h = val * canvas.height * 0.8;
-                ctx.fillRect(i * bw, canvas.height - h, bw - 2, h);
+
+            if (style === "bars") {
+                const bw = canvas.width / (bufferLength / 2);
+                for (let i = 0; i < bufferLength / 2; i++) {
+                    let val = Math.pow(dataArray[i] / 255, wonk);
+                    ctx.fillRect(i * bw, canvas.height, bw - 2, -val * canvas.height * 0.8);
+                }
+            } else if (style === "waveLines") {
+                ctx.beginPath();
+                const sw = canvas.width / (bufferLength / 2);
+                for (let i = 0; i < bufferLength / 2; i++) {
+                    let val = Math.pow(dataArray[i] / 255, wonk);
+                    let y = (canvas.height / 2) + (val * 300 * (i % 2 === 0 ? 1 : -1));
+                    if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * sw, y);
+                }
+                ctx.stroke();
+            } else if (style === "spin") {
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                rotationAngle += 0.01 + (bass * 0.1); // Spin velocity synced to bass
+                ctx.rotate(rotationAngle);
+                const bw = 4;
+                for (let i = 0; i < bufferLength / 2; i++) {
+                    let val = Math.pow(dataArray[i] / 255, wonk);
+                    ctx.rotate((Math.PI * 2) / (bufferLength / 2));
+                    ctx.fillRect(120, 0, val * 300, bw);
+                }
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.translate(canvas.width / 2, canvas.height / 2); // Re-center for logo
+            } else if (style === "circles") {
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                for (let i = 0; i < bufferLength; i += 6) {
+                    let val = Math.pow(dataArray[i] / 255, wonk);
+                    ctx.beginPath(); ctx.arc(0, 0, val * 400, 0, Math.PI*2); ctx.stroke();
+                }
+            } else if (style === "symmetry") {
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                const bw = (canvas.width / 2) / (bufferLength / 4);
+                for (let i = 0; i < bufferLength / 4; i++) {
+                    let val = Math.pow(dataArray[i] / 255, wonk);
+                    let h = val * canvas.height * 0.4;
+                    ctx.fillRect(i * bw, 0, bw - 2, h); ctx.fillRect(i * bw, 0, bw - 2, -h);
+                    ctx.fillRect(-i * bw, 0, bw - 2, h); ctx.fillRect(-i * bw, 0, bw - 2, -h);
+                }
+            } else if (style === "particles") {
+                particles.forEach((p, i) => {
+                    let val = Math.pow(dataArray[i % bufferLength] / 255, wonk);
+                    p.y -= p.s + (val * 10);
+                    if(p.y < 0) p.y = canvas.height;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 2 + (val * 10), 0, Math.PI*2); ctx.fill();
+                });
             }
 
-            if (logoImg.src) {
-                const baseSize = parseInt(document.getElementById("logoSize").value);
-                const finalSize = baseSize + (document.getElementById("logoPulse").checked ? (bass * 40) : 0);
-                ctx.globalAlpha = 0.9;
-                ctx.drawImage(logoImg, canvas.width/2 - finalSize/2, canvas.height/2 - finalSize/2, finalSize, finalSize);
-                ctx.globalAlpha = 1.0;
+            // Restore/Center for Logo
+            if (style !== "spin" && style !== "circles" && style !== "symmetry") {
+                ctx.translate(canvas.width / 2, canvas.height / 2);
             }
             
+            if (logoImg.src) {
+                const baseSize = parseInt(document.getElementById("logoSize").value);
+                const finalSize = baseSize + (document.getElementById("logoPulse").checked ? (bass * 50) : 0);
+                ctx.globalAlpha = 0.9;
+                ctx.drawImage(logoImg, -finalSize/2, -finalSize/2, finalSize, finalSize);
+                ctx.globalAlpha = 1.0;
+            }
             ctx.restore();
         }
 
@@ -166,16 +226,14 @@
             if (document.getElementById("hiPerfToggle").checked) document.getElementById("sidebar").classList.add("hud-hidden");
             document.getElementById("renderOverlay").style.display = "block";
             audio.currentTime = 0; gainNode.gain.value = 0;
-
             const stream = canvas.captureStream(30);
             const audioDest = audioCtx.createMediaStreamDestination();
             analyser.connect(audioDest);
             stream.addTrack(audioDest.stream.getAudioTracks()[0]);
 
-            // V2.7 COMPATIBILITY SETTINGS
             const recorder = new MediaRecorder(stream, { 
                 mimeType: 'video/webm;codecs=vp8,opus', 
-                videoBitsPerSecond: 12000000 // Optimized for CloudConvert speed
+                videoBitsPerSecond: 12000000 
             });
 
             const chunks = [];
@@ -187,10 +245,8 @@
                 document.getElementById("downloadWebmBtn").style.display = "block";
                 gainNode.gain.value = 1;
             };
-
-            recorder.start(1000); // Record in 1-second slices to force indexing
+            recorder.start(1000); 
             audio.play();
-
             const renderLoop = setInterval(() => {
                 drawFrame();
                 const pct = Math.round((audio.currentTime / audio.duration) * 100);
@@ -201,7 +257,7 @@
 
         document.getElementById("downloadWebmBtn").onclick = () => {
             const a = document.createElement("a"); a.href = finalBlobUrl;
-            a.download = `READY_FOR_AVIDEMUX.webm`; a.click();
+            a.download = `SUSPECT_v2.9_KINETIC.webm`; a.click();
         };
     </script>
 </body>
