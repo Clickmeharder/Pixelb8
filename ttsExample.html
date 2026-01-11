@@ -2,162 +2,157 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ENTROPIA // VOICE_VOODOO_v9</title>
+    <title>ENTROPIA // COMMAND_CORE_v11</title>
     <style>
-        :root { --amber: #ffb300; --bg: #030303; --dim: #221a00; --red: #ff3333; }
-        body { background: var(--bg); color: var(--amber); font-family: 'Consolas', 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        :root { --a: #ffb300; --bg: #030303; --dim: #1a1500; --glow: rgba(255, 179, 0, 0.25); }
+        body { background: var(--bg); color: var(--a); font-family: 'Consolas', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; text-transform: uppercase; }
         
-        /* THE HUD FRAME */
-        .hud-interface {
-            width: 750px; border: 1px solid var(--amber); padding: 30px;
-            background: radial-gradient(circle, rgba(255,179,0,0.05) 0%, rgba(0,0,0,1) 100%);
-            box-shadow: 0 0 40px rgba(0,0,0,1), inset 0 0 20px var(--dim);
-            position: relative;
+        .hud-frame { 
+            width: 550px; border: 1px solid var(--a); padding: 30px; 
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+            box-shadow: 0 0 50px #000, inset 0 0 20px var(--dim);
         }
 
-        .header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--amber); padding-bottom: 10px; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
+        .header { border-bottom: 2px solid var(--a); padding-bottom: 10px; margin-bottom: 20px; font-weight: 900; display: flex; justify-content: space-between; letter-spacing: 2px; }
+
+        /* THE FUZZY SEARCH & CUSTOM INPUTS */
+        .input-group { margin-bottom: 15px; position: relative; }
+        label { font-size: 10px; display: block; margin-bottom: 5px; color: #860; }
         
-        /* PRO DROP-DOWN */
-        .selector-box { background: #000; border: 1px solid var(--amber); position: relative; margin-bottom: 20px; }
-        select { 
-            width: 100%; background: transparent; color: var(--amber); border: none; padding: 15px; 
-            font-size: 1.1em; cursor: pointer; outline: none; appearance: none;
+        input[type="text"], textarea {
+            width: 100%; background: #000; color: var(--a); border: 1px solid var(--a);
+            padding: 12px; box-sizing: border-box; font-family: inherit; font-size: 13px;
+            outline: none; box-shadow: inset 0 0 8px #000;
         }
-        select option { background: #080808; color: var(--amber); }
+        textarea { height: 80px; resize: none; border-color: #443300; }
+        input:focus, textarea:focus { border-color: #fff; box-shadow: 0 0 10px var(--glow); }
 
-        /* TACTICAL GRID */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        button { 
-            background: var(--dim); color: var(--amber); border: 1px solid var(--amber); 
-            padding: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase;
-            transition: 0.1s;
+        /* FUZZY DROPDOWN */
+        .v-drop {
+            position: absolute; width: 100%; max-height: 200px; overflow-y: auto;
+            background: #080808; border: 1px solid var(--a); border-top: none;
+            z-index: 100; display: none;
         }
-        button:hover { background: var(--amber); color: #000; box-shadow: 0 0 15px var(--amber); }
+        .v-drop.active { display: block; }
+        .v-opt { padding: 8px 12px; border-bottom: 1px solid var(--dim); cursor: pointer; font-size: 11px; display: flex; justify-content: space-between; }
+        .v-opt:hover { background: var(--a); color: #000; }
 
-        /* REAL-TIME MATRIX LOG */
-        .matrix-log { 
-            margin-top: 25px; border-top: 1px dashed var(--amber); padding-top: 15px; 
-            font-size: 0.75em; height: 150px; overflow-y: hidden; color: #886600;
+        .btn-fire { 
+            width: 100%; background: var(--a); color: #000; border: none; 
+            padding: 18px; cursor: pointer; font-weight: 900; font-size: 1.1em;
+            margin-top: 10px; transition: 0.2s;
         }
-        .matrix-row { display: flex; justify-content: space-between; border-bottom: 1px solid #111; padding: 3px 0; }
-        .val { color: #fff; }
-        .blink { animation: blinker 1s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
+        .btn-fire:hover { background: #fff; box-shadow: 0 0 20px #fff; }
+
+        .matrix-debug { 
+            margin-top: 20px; font-size: 10px; border-top: 1px dashed var(--a); 
+            padding-top: 15px; color: #650; display: grid; grid-template-columns: 1fr 1fr;
+        }
+        .stat-val { color: #fff; text-shadow: 0 0 5px var(--a); }
+        .blink { animation: b 1s infinite; }
+        @keyframes b { 50% { opacity: 0.2; } }
     </style>
 </head>
 <body>
 
-<div class="hud-interface">
+<div class="hud-frame">
     <div class="header">
-        <span>X-COMM // NEURAL_LINK</span>
-        <span id="os-tag" class="blink">SCANNING...</span>
+        <span>[ BROADCAST_NODE_TX ]</span>
+        <span class="blink" style="color:#0f0">LINK_LIVE</span>
     </div>
 
-    <div class="selector-box">
-        <select id="voice-master" onchange="manualLock()">
-            <option>AWAITING VOICE INJECTION...</option>
-        </select>
+    <div class="input-group">
+        <label>01 // SELECT NEURAL VOICE (TYPE TO FILTER)</label>
+        <input type="text" id="v-search" autocomplete="off" placeholder="SEARCH: ARIA, GOOGLE, NEURAL...">
+        <div class="v-drop" id="v-drop"></div>
     </div>
 
-    <div class="grid">
-        <button onclick="engage()">[ 1. ENGAGE UPLINK ]</button>
-        <button onclick="executeMission()">[ 2. EXECUTE SIGNAL ]</button>
+    <div class="input-group">
+        <label>02 // COMMAND BUFFER (MANUAL OVERRIDE)</label>
+        <textarea id="v-text" placeholder="ENTER MISSION PARAMETERS OR DIALOGUE...">MISSION COMPLETE. SECTOR 7 IS SECURE. RETURNING TO BASE FOR REFUELING.</textarea>
     </div>
 
-    <div class="matrix-log" id="matrix">
-        <div class="matrix-row"><span>METHOD:</span> <span class="val" id="m-method">FORCE_INDEX_RECON</span></div>
-        <div class="matrix-row"><span>UPLINK_STRENGTH:</span> <span class="val" id="m-count">0</span></div>
-        <div class="matrix-row"><span>PERSISTENCE_LOCK:</span> <span class="val" id="m-lock">OFF</span></div>
-        <div class="matrix-row"><span>CLOUD_SYNC:</span> <span class="val" id="m-cloud">WAITING</span></div>
-        <hr style="border: none; border-top: 1px solid var(--dim); margin: 10px 0;">
-        <div id="status-stream">> CORE INITIALIZED. AWAITING USER INPUT...</div>
+    <button class="btn-fire" onclick="executeVoice()">[ EXECUTE BROADCAST ]</button>
+
+    <div class="matrix-debug">
+        <div>CHANNELS: <span class="stat-val" id="st-count">0</span></div>
+        <div>ACTIVE: <span class="stat-val" id="st-active">NONE</span></div>
+        <div>ENCODING: <span class="stat-val">PCM_RAW</span></div>
+        <div>BUFFER: <span class="stat-val">READY</span></div>
     </div>
 </div>
 
 <script>
     const synth = window.speechSynthesis;
-    const voiceSelect = document.getElementById('voice-master');
-    const stream = document.getElementById('status-stream');
-    let lockedIndex = -1;
+    const searchInput = document.getElementById('v-search');
+    const dropMenu = document.getElementById('v-drop');
+    const textInput = document.getElementById('v-text');
+    
+    let allVoices = [];
+    let selectedVoice = null;
 
-    // WEB VOODOO 1: The Multi-Pass Scanner
-    function deepScan() {
-        let voices = synth.getVoices();
-        if (voices.length === 0) return;
+    function initVoices() {
+        allVoices = synth.getVoices().sort((a,b) => b.name.includes('Online') - a.name.includes('Online'));
+        document.getElementById('st-count').innerText = allVoices.length;
+        renderList("");
+    }
 
-        // Sort: Neural/Natural first, then Cloud, then Local
-        voices.sort((a, b) => {
-            const priority = (name) => (name.includes('Online') || name.includes('Natural') || name.includes('Aria')) ? 2 : (name.includes('Google') ? 1 : 0);
-            return priority(b.name) - priority(a.name);
+    function renderList(filter) {
+        const query = filter.toLowerCase();
+        dropMenu.innerHTML = '';
+        const filtered = allVoices.filter(v => v.name.toLowerCase().includes(query));
+
+        filtered.forEach(v => {
+            const div = document.createElement('div');
+            div.className = 'v-opt';
+            const tag = v.name.includes('Online') ? '◆' : '◇';
+            div.innerHTML = `<span>${tag} ${v.name}</span> <span style="opacity:0.4">${v.lang}</span>`;
+            div.onclick = () => {
+                selectedVoice = v;
+                searchInput.value = v.name;
+                document.getElementById('st-active').innerText = v.name.split(' ')[0];
+                dropMenu.classList.remove('active');
+            };
+            dropMenu.appendChild(div);
         });
-
-        voiceSelect.innerHTML = '';
-        voices.forEach((v, i) => {
-            const opt = document.createElement('option');
-            opt.value = i;
-            const isNeural = (v.name.includes('Online') || v.name.includes('Natural')) ? '◆ NEURAL' : '◇ LOCAL';
-            opt.textContent = `${isNeural} | ${v.name}`;
-            voiceSelect.appendChild(opt);
-        });
-
-        document.getElementById('m-count').innerText = voices.length + " CHANNELS";
-        document.getElementById('m-cloud').innerText = voices.some(v => v.name.includes('Online')) ? "SYNCED" : "OFFLINE";
-        document.getElementById('os-tag').innerText = "SYSTEM READY";
-        document.getElementById('os-tag').style.color = "#00ff00";
     }
 
-    // WEB VOODOO 2: Anti-Reset Override
-    function manualLock() {
-        lockedIndex = voiceSelect.value;
-        const voices = synth.getVoices();
-        document.getElementById('m-lock').innerText = "LOCKED: " + voices[lockedIndex].name;
-        pushStream(`LOCKING TO: ${voices[lockedIndex].name}`);
-    }
+    searchInput.onfocus = () => {
+        if (!allVoices.length) initVoices();
+        dropMenu.classList.add('active');
+    };
+    searchInput.oninput = (e) => renderList(e.target.value);
 
-    // WEB VOODOO 3: Buffer Clearing Logic
-    function pushStream(msg) {
-        stream.innerHTML = `> ${msg}<br>` + stream.innerHTML;
-    }
+    // Close on blur
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.input-group')) dropMenu.classList.remove('active');
+    });
 
-    function engage() {
-        // We speak a tiny silent character to 'pop' the browser's security bubble
-        const pock = new SpeechSynthesisUtterance("Uplink Engaged");
-        pock.volume = 0; 
-        synth.speak(pock);
-        deepScan();
-        pushStream("NEURAL LINK ESTABLISHED.");
-    }
+    function executeVoice() {
+        if (!selectedVoice) {
+            // Auto-pick first neural voice if none selected
+            selectedVoice = allVoices.find(v => v.name.includes('Online')) || allVoices[0];
+            searchInput.value = selectedVoice.name;
+        }
 
-    function executeMission() {
-        const voices = synth.getVoices();
-        const utter = new SpeechSynthesisUtterance("Mission complete. Sector clear. Return to base.");
+        const utter = new SpeechSynthesisUtterance(textInput.value);
+        utter.voice = selectedVoice;
+        utter.rate = 0.9;
         
-        // FORCED SELECTION LOGIC: bypasses the "jumping" bug by re-assigning at the micro-second of execution
-        const targetVoice = voices[voiceSelect.value];
-        if (!targetVoice) {
-            pushStream("ERROR: VOICE INDEX INVALID");
-            return;
-        }
-
-        utter.voice = targetVoice;
-        utter.rate = 0.95;
-        utter.pitch = 1.0;
-
-        // Safety: If the engine is currently talking, kill it to prevent queue-jumping
-        if (synth.speaking) {
-            pushStream("CLEARING BUFFER...");
-            synth.cancel();
-            setTimeout(() => synth.speak(utter), 100);
-        } else {
-            synth.speak(utter);
-        }
-
-        pushStream(`EXECUTING SIGNAL VIA [${targetVoice.name}]`);
+        synth.cancel(); // Critical: Clears previous audio "hangs"
+        synth.speak(utter);
     }
 
-    // Initialize & Listen
-    window.speechSynthesis.onvoiceschanged = deepScan;
-    setInterval(deepScan, 2000); // Constant background scanning to catch late-loading Cloud voices
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = initVoices;
+    }
+    
+    // Wake up the engine immediately
+    window.onload = () => {
+        const silent = new SpeechSynthesisUtterance("");
+        synth.speak(silent);
+        initVoices();
+    };
 </script>
 
 </body>
