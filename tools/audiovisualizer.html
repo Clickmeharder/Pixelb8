@@ -8,13 +8,9 @@
         :root { --bg: #1a1a1a; --accent: #00d4ff; --border: #2a2a2a; --gold: #ffb400; --green: #28a745; }
         body { background: var(--bg); color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
         
-        /* GPU ACCELERATION CSS HACK: Forces the browser to create a new compositor layer */
         canvas { 
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; 
-            background: #1a1a1a;
-            transform: translateZ(0);
-            backface-visibility: hidden;
-            perspective: 1000;
+            background: #1a1a1a; transform: translateZ(0); backface-visibility: hidden;
         }
 
         .hud-sidebar {
@@ -22,15 +18,21 @@
             background: rgba(25, 25, 25, 0.95); backdrop-filter: blur(10px);
             border: 1px solid var(--border); border-left: 3px solid var(--accent);
             padding: 20px; z-index: 100; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            transition: opacity 0.5s, transform 0.5s;
         }
+
+        /* High Performance Hiding */
+        .hud-hidden { opacity: 0; transform: translateX(-320px); pointer-events: none; }
 
         h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin: 0 0 15px 0; }
         label { font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin: 8px 0 4px 0; }
         input, select, button { background: #111; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 3px; font-size: 0.85rem; width: 100%; margin-bottom: 10px; outline: none; }
         
-        .toggle-group { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .toggle-group { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.7rem; }
         .toggle-group input { width: auto; margin: 0; cursor: pointer; }
-        .toggle-group label { margin: 0; cursor: pointer; color: var(--gold); font-weight: bold; }
+        
+        .slider-label { display: flex; justify-content: space-between; align-items: center; }
+        #wonkVal { color: var(--gold); font-weight: bold; }
 
         button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-left: 3px solid var(--accent); transition: 0.2s; }
         button:hover:not(:disabled) { background: #222; border-color: white; }
@@ -39,18 +41,29 @@
         #renderBtn { border-left-color: var(--gold); }
         #downloadWebmBtn { border-left-color: var(--green); display: none; }
         
-        #statusBox { font-size: 0.7rem; color: var(--accent); font-family: monospace; margin-top: 10px; min-height: 1.2em; }
+        #statusBox { font-size: 0.7rem; color: var(--accent); font-family: monospace; margin-top: 10px; }
         .progress-bar { width: 100%; height: 4px; background: #333; display: none; margin-top: 10px; border-radius: 2px; overflow: hidden; }
         #progressFill { width: 0%; height: 100%; background: var(--accent); }
+
+        #renderOverlay {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+            background: rgba(0,0,0,0.8); padding: 10px 20px; border-radius: 5px;
+            border: 1px solid var(--accent); display: none; font-family: monospace;
+        }
     </style>
 </head>
 <body>
 
-    <div class="hud-sidebar">
-        <h2>S.U.S.P.E.C.T. Terminal</h2>
+    <div id="renderOverlay">DEEP RENDER ACTIVE: <span id="overlayPct">0%</span></div>
+
+    <div class="hud-sidebar" id="sidebar">
+        <h2>S.U.S.P.E.C.T. Terminal V3</h2>
         
         <label>Audio Source</label>
         <input type="file" id="audioFile" accept="audio/*">
+
+        <label class="slider-label">WONK FACTOR <span id="wonkVal">1.0</span></label>
+        <input type="range" id="wonkSlider" min="0.5" max="3.5" step="0.1" value="1.0">
 
         <label>Visual Algorithm</label>
         <select id="visualizerStyle">
@@ -61,7 +74,12 @@
 
         <div class="toggle-group">
             <input type="checkbox" id="gpuToggle" checked>
-            <label for="gpuToggle">GPU ACCELERATION BS</label>
+            <label for="gpuToggle">GPU ACCELERATION</label>
+        </div>
+
+        <div class="toggle-group">
+            <input type="checkbox" id="hiPerfToggle" checked>
+            <label for="hiPerfToggle">HIGH PERFORMANCE (HIDE HUD)</label>
         </div>
 
         <label>Accent Color</label>
@@ -87,23 +105,25 @@
         const downloadWebmBtn = document.getElementById("downloadWebmBtn");
         const progBar = document.getElementById("progBar");
         const progFill = document.getElementById("progressFill");
-        const gpuToggle = document.getElementById("gpuToggle");
+        
+        const wonkSlider = document.getElementById("wonkSlider");
+        const wonkVal = document.getElementById("wonkVal");
+        const sidebar = document.getElementById("sidebar");
+        const renderOverlay = document.getElementById("renderOverlay");
+        const overlayPct = document.getElementById("overlayPct");
 
-        let ctx;
-        let audioCtx, analyser, source, gainNode, bufferLength, dataArray;
+        let ctx, audioCtx, analyser, source, gainNode, bufferLength, dataArray;
         let isPreviewing = false;
         let finalBlobUrl = null;
 
         canvas.width = 1280; canvas.height = 720;
 
-        // Initialize Canvas with GPU Hints
+        wonkSlider.oninput = () => wonkVal.innerText = wonkSlider.value;
+
         function initCanvas() {
-            const useGPU = gpuToggle.checked;
-            // 'desynchronized' reduces latency by skipping the double-buffer wait
-            // 'willReadFrequently' is set to false to keep the data on the GPU
             ctx = canvas.getContext("2d", { 
                 alpha: false, 
-                desynchronized: useGPU,
+                desynchronized: document.getElementById("gpuToggle").checked,
                 willReadFrequently: false 
             });
         }
@@ -134,37 +154,42 @@
 
         function drawFrame() {
             analyser.getByteFrequencyData(dataArray);
-            
             ctx.fillStyle = '#1a1a1a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             const color = document.getElementById("barColor").value;
             const style = document.getElementById("visualizerStyle").value;
+            const wonk = parseFloat(wonkSlider.value);
             
             ctx.fillStyle = color; ctx.strokeStyle = color; ctx.lineWidth = 4;
-            
-            // Only add Glow if GPU is on (it's heavy on CPU)
-            if (gpuToggle.checked) {
+            if (document.getElementById("gpuToggle").checked) {
                 ctx.shadowBlur = 12; ctx.shadowColor = color;
             }
 
             if (style === "bars") {
                 const bw = canvas.width / bufferLength;
                 for (let i = 0; i < bufferLength; i++) {
-                    const h = (dataArray[i] / 255) * canvas.height;
+                    // Apply WONK Factor: Normalized (0-1) raised to the power of Wonk
+                    let val = dataArray[i] / 255;
+                    val = Math.pow(val, wonk);
+                    const h = val * canvas.height;
                     ctx.fillRect(i * bw, canvas.height - h, bw - 1, h);
                 }
             } else if (style === "wave") {
                 ctx.beginPath();
                 const sw = canvas.width / bufferLength;
                 for (let i = 0; i < bufferLength; i++) {
-                    const y = (dataArray[i] / 255) * canvas.height;
+                    let val = dataArray[i] / 255;
+                    val = Math.pow(val, wonk);
+                    const y = val * canvas.height;
                     if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * sw, y);
                 }
                 ctx.stroke();
             } else if (style === "circles") {
                 for (let i = 0; i < bufferLength; i += 4) {
-                    const r = (dataArray[i] / 255) * (canvas.height / 2.5);
+                    let val = dataArray[i] / 255;
+                    val = Math.pow(val, wonk);
+                    const r = val * (canvas.height / 2);
                     ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, r, 0, Math.PI*2); ctx.stroke();
                 }
             }
@@ -179,7 +204,7 @@
 
         document.getElementById("previewBtn").onclick = () => {
             setupAudio();
-            initCanvas(); // Re-init in case toggle changed
+            initCanvas();
             isPreviewing = true;
             gainNode.gain.value = 1;
             audio.play();
@@ -192,6 +217,13 @@
             initCanvas();
             isPreviewing = false;
             window.isRendering = true;
+            
+            // High Performance Mode Logic
+            if (document.getElementById("hiPerfToggle").checked) {
+                sidebar.classList.add("hud-hidden");
+                renderOverlay.style.display = "block";
+            }
+
             renderBtn.disabled = true;
             downloadWebmBtn.style.display = "none";
             progBar.style.display = "block";
@@ -206,7 +238,7 @@
 
             const recorder = new MediaRecorder(stream, { 
                 mimeType: 'video/webm;codecs=vp8,opus', 
-                videoBitsPerSecond: 20000000 // 20Mbps for extreme clarity
+                videoBitsPerSecond: 25000000 
             });
 
             const chunks = [];
@@ -215,7 +247,12 @@
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'video/webm' });
                 finalBlobUrl = URL.createObjectURL(blob);
-                status.innerText = "RENDER COMPLETE. GPU STABILIZED.";
+                
+                // Restore HUD
+                sidebar.classList.remove("hud-hidden");
+                renderOverlay.style.display = "none";
+                
+                status.innerText = "RENDER FINISHED.";
                 progBar.style.display = "none";
                 renderBtn.disabled = false;
                 downloadWebmBtn.style.display = "block";
@@ -229,8 +266,10 @@
             const renderLoop = setInterval(() => {
                 drawFrame();
                 const pct = (audio.currentTime / audio.duration) * 100;
+                const pctClean = Math.round(pct);
                 progFill.style.width = pct + "%";
-                status.innerText = `GPU ENCODING: ${Math.round(pct)}%`;
+                overlayPct.innerText = pctClean + "%";
+                status.innerText = `ENCODING: ${pctClean}%`;
 
                 if (audio.ended) {
                     clearInterval(renderLoop);
@@ -243,7 +282,7 @@
             if (!finalBlobUrl) return;
             const a = document.createElement("a");
             a.href = finalBlobUrl;
-            a.download = `SUSPECT_GPU_Render_${Date.now()}.webm`;
+            a.download = `WONK_RENDER_${Date.now()}.webm`;
             a.click();
         };
     </script>
