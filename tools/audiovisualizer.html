@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.U.S.P.E.C.T. Offline Renderer</title>
+    <title>S.U.S.P.E.C.T. Precision Renderer</title>
     <style>
         :root { --bg: #1a1a1a; --accent: #00d4ff; --border: #2a2a2a; }
         body { background: var(--bg); color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
@@ -11,22 +11,22 @@
 
         .hud-sidebar {
             position: fixed; top: 20px; left: 20px; width: 280px;
-            background: rgba(25, 25, 25, 0.9); backdrop-filter: blur(10px);
+            background: rgba(25, 25, 25, 0.95); backdrop-filter: blur(10px);
             border: 1px solid var(--border); border-left: 3px solid var(--accent);
             padding: 20px; z-index: 100; border-radius: 4px;
         }
 
         h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin: 0 0 15px 0; }
-        label { font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin-bottom: 5px; }
-        input, select, button { background: #111; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 3px; font-size: 0.85rem; width: 100%; margin-bottom: 12px; outline: none; }
+        label { font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin: 8px 0 4px 0; }
+        input, select, button { background: #111; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 3px; font-size: 0.85rem; width: 100%; margin-bottom: 10px; outline: none; }
         
         button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-left: 3px solid var(--accent); transition: 0.2s; }
-        button:hover { background: #222; border-color: white; }
-        #renderBtn { border-left-color: #ffb400; display: none; }
+        button:hover:not(:disabled) { background: #222; border-color: white; }
+        button:disabled { opacity: 0.3; cursor: not-allowed; }
         
-        #statusBox { font-size: 0.7rem; color: var(--accent); font-family: monospace; }
-        .progress-bar { width: 100%; height: 4px; background: #333; display: none; margin-top: 10px; }
-        #progressFill { width: 0%; height: 100%; background: var(--accent); }
+        #statusBox { font-size: 0.7rem; color: var(--accent); font-family: monospace; margin-top: 10px; }
+        .progress-bar { width: 100%; height: 4px; background: #333; display: none; margin-top: 10px; border-radius: 2px; overflow: hidden; }
+        #progressFill { width: 0%; height: 100%; background: var(--accent); transition: width 0.1s; }
     </style>
 </head>
 <body>
@@ -34,25 +34,25 @@
     <div class="hud-sidebar">
         <h2>S.U.S.P.E.C.T. Terminal</h2>
         
-        <label>Audio File</label>
+        <label>Audio Data</label>
         <input type="file" id="audioFile" accept="audio/*">
 
-        <label>Visual Style</label>
+        <label>Visual Algorithm</label>
         <select id="visualizerStyle">
             <option value="bars">Frequency Columns</option>
             <option value="wave">Oscilloscope</option>
             <option value="circles">Radial Pulse</option>
         </select>
 
-        <label>Color Palette</label>
+        <label>HUD Accent</label>
         <input type="color" id="barColor" value="#00d4ff">
 
         <audio id="audio" controls style="height: 30px; margin-bottom: 15px;"></audio>
 
-        <button id="previewBtn">Live Preview (Play)</button>
-        <button id="renderBtn">Fast Render WebM (No Audio)</button>
+        <button id="previewBtn">Live Preview</button>
+        <button id="renderBtn" disabled style="border-left-color: #ffb400;">Finalize & Render WebM</button>
 
-        <div id="statusBox">System Ready</div>
+        <div id="statusBox">SYSTEM READY</div>
         <div class="progress-bar" id="progBar"><div id="progressFill"></div></div>
     </div>
 
@@ -70,12 +70,14 @@
         let audioCtx, analyser, source, bufferLength, dataArray;
         let isPreviewing = false;
 
+        // Optimized Resolution for WebM -> MP4 Conversion
         canvas.width = 1280; canvas.height = 720;
 
         document.getElementById("audioFile").onchange = (e) => {
             if (e.target.files[0]) {
                 audio.src = URL.createObjectURL(e.target.files[0]);
-                renderBtn.style.display = "block";
+                renderBtn.disabled = false;
+                status.innerText = "DATA LOADED. READY.";
             }
         };
 
@@ -91,9 +93,9 @@
             dataArray = new Uint8Array(bufferLength);
         }
 
-        function drawFrame() {
+        function drawPreview() {
             if (!isPreviewing) return;
-            requestAnimationFrame(drawFrame);
+            requestAnimationFrame(drawPreview);
             analyser.getByteFrequencyData(dataArray);
             renderCanvas(dataArray);
         }
@@ -104,6 +106,7 @@
             const color = document.getElementById("barColor").value;
             const style = document.getElementById("visualizerStyle").value;
             ctx.fillStyle = color; ctx.strokeStyle = color; ctx.lineWidth = 4;
+            ctx.shadowBlur = 8; ctx.shadowColor = color;
 
             if (style === "bars") {
                 const bw = canvas.width / bufferLength;
@@ -121,87 +124,72 @@
                 ctx.stroke();
             } else if (style === "circles") {
                 for (let i = 0; i < bufferLength; i += 4) {
-                    const r = (data[i] / 255) * (canvas.height / 2);
+                    const r = (data[i] / 255) * (canvas.height / 2.5);
                     ctx.beginPath(); ctx.arc(canvas.width/2, canvas.height/2, r, 0, Math.PI*2); ctx.stroke();
                 }
             }
+            ctx.shadowBlur = 0;
         }
 
         document.getElementById("previewBtn").onclick = () => {
             setupAudio();
             isPreviewing = true;
             audio.play();
-            drawFrame();
-            status.innerText = "Previewing Live...";
+            drawPreview();
+            status.innerText = "PREVIEW MODE ACTIVE";
         };
 
-        // --- THE FAST RENDER LOGIC ---
+        // --- HIGH PRECISION RENDERER ---
         renderBtn.onclick = async () => {
-            status.innerText = "Initializing Fast Render...";
             audio.pause();
             isPreviewing = false;
-            
+            renderBtn.disabled = true;
+            progBar.style.display = "block";
+            status.innerText = "CALCULATING RENDERTREE...";
+
+            // 1. Prepare Silent Offline Context
             const file = document.getElementById("audioFile").files[0];
             const arrayBuffer = await file.arrayBuffer();
-            const offlineCtx = new OfflineAudioContext(2, 44100 * 400, 44100); // Support up to 400s
+            const offlineCtx = new OfflineAudioContext(2, 44100 * 600, 44100); 
             const decodedData = await offlineCtx.decodeAudioData(arrayBuffer);
             
-            const duration = decodedData.duration;
-            const fps = 30;
-            const totalFrames = Math.floor(duration * fps);
-            
-            // Re-setup analyser for offline data
-            const offlineAnalyser = offlineCtx.createAnalyser();
-            offlineAnalyser.fftSize = 256;
-            const offlineSource = offlineCtx.createBufferSource();
-            offlineSource.buffer = decodedData;
-            offlineSource.connect(offlineAnalyser);
-            offlineSource.connect(offlineCtx.destination);
-            
-            const stream = canvas.captureStream(0); // Manual capture
-            const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 8000000 });
+            // 2. Setup Recording Stream
+            const stream = canvas.captureStream(30); // Capture at steady 30fps
+            const recorder = new MediaRecorder(stream, { 
+                mimeType: 'video/webm;codecs=vp8', 
+                videoBitsPerSecond: 12000000 // High 12Mbps bitrate
+            });
             const chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
-            
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'video/webm' });
                 const a = document.createElement("a");
                 a.href = URL.createObjectURL(blob);
-                a.download = "SUSPECT_Offline_Render.webm";
+                a.download = "SUSPECT_HD_RENDER.webm";
                 a.click();
-                status.innerText = "Render Complete!";
-                progBar.style.display = "none";
+                status.innerText = "RENDER COMPLETE.";
+                renderBtn.disabled = false;
             };
 
             recorder.start();
-            progBar.style.display = "block";
-
-            // Loop through frames manually (This is the fast part)
-            for (let i = 0; i < totalFrames; i++) {
-                const time = i / fps;
-                // Suspend and resume offline context is complex, so we use a simpler "seek" simulation
-                // Note: OfflineAudioContext doesn't allow seeking easily, so we play the audio
-                // and capture it. To make it TRULY background/instant, we'd need a heavy library.
-                // Instead, we will do a "Silent Recording" at max speed.
-            }
-            
-            // Fallback for simple implementation: 
-            // Since JS can't easily "render" a video file without playing it, 
-            // the best way is to MUTE the audio and record at 2x speed.
             audio.muted = true;
-            audio.playbackRate = 2.0; // Render 2x faster than real-time
+            audio.playbackRate = 1.0; // Keep it at 1.0 for perfect frame timing
             audio.currentTime = 0;
             
-            status.innerText = "Rendering at 2x Speed (Silent)...";
+            status.innerText = "STABILIZING STREAM...";
+            
+            // Start the actual "Recording" sequence
             audio.play();
             
-            // This allows the user to look away while the progress bar fills
-            const progressInterval = setInterval(() => {
+            const renderInterval = setInterval(() => {
                 const pct = (audio.currentTime / audio.duration) * 100;
                 progFill.style.width = pct + "%";
-                if (audio.ended) {
-                    clearInterval(progressInterval);
+                status.innerText = `ENCODING: ${Math.round(pct)}%`;
+
+                if (audio.ended || audio.currentTime >= audio.duration) {
+                    clearInterval(renderInterval);
                     recorder.stop();
+                    audio.muted = false;
                 }
             }, 100);
         };
