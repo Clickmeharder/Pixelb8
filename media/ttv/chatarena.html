@@ -176,24 +176,25 @@ function canAct(u){
 }
 
 /* ================= CHAT ================= */
-ComfyJS.onChat=(user,msg,color)=>{
+ComfyJS.onChat = (user, msg, flags, extra) => {
+    const userColor = extra?.userColor || "#ffffff";
     msg=msg.toLowerCase();
     if(!canAct(user)) return;
-    let p=getPlayer(user,color);
+    let p = getPlayer(user, userColor);
 
-    if(msg==="!attack"){
+    if(msg==="attack"){
         let dmg=Math.floor(Math.random()*30+20);
         if(boost) dmg*=2;
         boss.hp=Math.max(0,boss.hp-dmg);
         p.action="attack"; p.timer=20;
     }
 
-    if(msg==="!heal"){
+    if(msg==="heal"){
         p.action="heal"; p.timer=20;
         chatHP.hp=Math.min(chatHP.max,chatHP.hp+60);
     }
 
-    if(msg==="!boost"){
+    if(msg==="boost"){
         boost=true;
         document.getElementById("boost").style.display="block";
         setTimeout(()=>{
