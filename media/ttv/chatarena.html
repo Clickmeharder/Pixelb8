@@ -2,7 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Twitch HUD RPG</title>
+	<link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
+    <title>StickenFall</title>
     <!--<script src="https://unpkg.com/comfy.js/dist/comfy.min.js"></script>-->
     <style>
         body { margin:0; background:transparent; font-family:monospace; overflow:hidden; }
@@ -24,7 +25,7 @@
 <div id="enemyUI"></div>
 <div id="systemUI"></div>
 <div id="tooltip"></div>
-<div id="areaDisplay">StickenFallv2.1.8- VIEWING: HOME</div>
+<div id="areaDisplay">StickenFallv2.1.9- VIEWING: HOME</div>
 
 <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 <script>
@@ -178,13 +179,21 @@ function movePlayer(p, targetArea) {
         return;
     }
     p.area = targetArea;
-    p.x = Math.random() * 700 + 100;
-    p.y = 400 + Math.random() * 100;
-    p.activeTask = null; // Clear tasks when moving manually
+
+    if (targetArea === "fishingpond") {
+        // Shore is 0 to 250. We keep them between 50 and 200 so they aren't off-screen 
+        // or touching the very edge of the water.
+        p.x = Math.random() * 150 + 50; 
+        p.y = 450 + Math.random() * 20; // Keep them on a flat line along the shore
+    } else {
+        p.x = Math.random() * 700 + 100;
+        p.y = 400 + Math.random() * 100;
+    }
+
+    p.activeTask = null; 
     if (targetArea !== "dungeon") dungeonQueue = dungeonQueue.filter(n => n !== p.name);
     systemMessage(`${p.name} traveled to ${targetArea}`);
 }
-
 /* ================= HOVER LOGIC ================= */
 c.addEventListener('mousemove', (e) => {
     const rect = c.getBoundingClientRect();
@@ -361,7 +370,7 @@ function joinDungeonQueue(p) {
             // --- AUTO-SWITCH VIEW (30 seconds before start) ---
             if (dungeonSecondsLeft === 30) {
                 viewArea = "dungeon";
-                document.getElementById("areaDisplay").textContent = "StickenFallv2.1.8 - VIEWING: DUNGEON (PREPARING)";
+                document.getElementById("areaDisplay").textContent = "StickenFallv2.1.9 - VIEWING: DUNGEON (PREPARING)";
                 systemMessage("System: Switching view to Dungeon for upcoming raid...");
             }
 
@@ -380,7 +389,7 @@ function startDungeon() {
     
     // Ensure the view is definitely on the dungeon
     viewArea = "dungeon"; 
-    document.getElementById("areaDisplay").textContent = "StickenFallv2.1.8 - VIEWING: DUNGEON (ACTIVE)";
+    document.getElementById("areaDisplay").textContent = "StickenFallv2.1.9 - VIEWING: DUNGEON (ACTIVE)";
 
     dungeonQueue.forEach(name => {
         let p = players[name];
@@ -486,35 +495,50 @@ function handleLoot(p, target) {
 }
 function drawEquipment(ctx, p, now, bodyY, armMove) {
     if (p.dead) return;
-    const isAttacking = p.activeTask === "attacking";
-    // Simplified check to ensure it triggers
     const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
-    const pWeapon = p.stats.equippedWeapon;
     const lean = p.lean || 0;
 
-    // --- 1. THE PERFECT FISHING ROD (Restored Math) ---
     if (isFishing) {
         ctx.save();
         ctx.setLineDash([]); 
         
         ctx.strokeStyle = "#8B4513"; 
         ctx.lineWidth = 2;
-        // Use the bobbing math you liked
         let bob = Math.sin(now / 300) * 0.1;
         
+        // --- 1. THE ROD ---
+        // We draw the rod pointing toward the right (the water)
+        const rodStartX = p.x + 10 + (lean * 20);
+        const rodStartY = p.y - 10 + bodyY;
+        const rodTipX = p.x + 60 + (lean * 20); // Rod is 50px long
+        const rodTipY = p.y - 40 + (bob * 20) + bodyY;
+
         ctx.beginPath();
-        // Added + (lean*20) and + bodyY to your original p.x + 10, p.y - 10
-        ctx.moveTo(p.x + 10 + (lean * 20), p.y - 10 + bodyY); 
-        ctx.lineTo(p.x + 40 + (lean * 20), p.y - 40 + (bob * 20) + bodyY); 
+        ctx.moveTo(rodStartX, rodStartY); 
+        ctx.lineTo(rodTipX, rodTipY); 
         ctx.stroke();
 
-        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        // --- 2. THE LINE ---
+        ctx.strokeStyle = "rgba(255,255,255,0.6)";
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(p.x + 40 + (lean * 20), p.y - 40 + (bob * 20) + bodyY);
-        // The curve you liked, adjusted for movement
-        ctx.quadraticCurveTo(p.x + 50 + (lean * 20), p.y + bodyY, p.x + 60 + (lean * 20), p.y + 20 + bodyY);
+        ctx.moveTo(rodTipX, rodTipY);
+        
+        // TARGET: The water starts at X=250. 
+        // We want the hook to land at X=280+ to be clearly in the water.
+        const waterX = Math.max(rodTipX + 40, 280); 
+        const waterY = 510 + (Math.sin(now/500) * 5); // Bobbing in water
+
+        // Curve the line from the tip down into the pond
+        ctx.quadraticCurveTo(rodTipX + 20, rodTipY + 40, waterX, waterY);
         ctx.stroke();
+
+        // Optional: Small Bobber
+        ctx.fillStyle = "#ff4444";
+        ctx.beginPath();
+        ctx.arc(waterX, waterY, 3, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.restore();
     }
 
@@ -1031,11 +1055,20 @@ function cmdHeal(p, args) {
 }
 
 function cmdFish(p, user) {
-    if (p.area !== "fishingpond") { systemMessage(`${user}: Go to fishingpond first.`); return; }
-    if (p.activeTask === "fishing") { systemMessage(`${user}: Already fishing.`); return; }
+    if (p.area !== "fishingpond") { 
+        systemMessage(`${user}: Go to fishingpond first.`); 
+        return; 
+    }
+    if (p.activeTask === "fishing") { 
+        systemMessage(`${user}: Already fishing.`); 
+        return; 
+    }
+    
+    // Move them to the edge of the shore (X=200) facing the water
+    p.targetX = 200; 
     p.activeTask = "fishing";
-    p.taskEndTime = Date.now() + TASK_DURATION;
-    systemMessage(`${user} started fishing (15m idle)`);
+    p.taskEndTime = Date.now() + (15 * 60 * 1000);
+    systemMessage(`${user} started fishing!`);
 }
 // --- SOCIAL ---
 function cmdMingle(p, user, args) {
@@ -1299,9 +1332,9 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
 
     // Admin Controls
     if (flags.broadcaster || flags.mod) {
-        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.8 - VIEWING: HOME"; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.8 - VIEWING: DUNGEON"; }
-        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.8 - VIEWING: FISHING POND"; }
+        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.9 - VIEWING: HOME"; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.9 - VIEWING: DUNGEON"; }
+        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.9 - VIEWING: FISHING POND"; }
     }
 };
 setInterval(() => {
