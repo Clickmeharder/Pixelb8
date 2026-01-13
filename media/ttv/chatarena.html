@@ -117,18 +117,29 @@ function saveStats(p) {
     localStorage.setItem("rpg_" + p.name, JSON.stringify(p.stats));
 }
 const ITEM_DB = {
-    "Rusty Dagger":     { type: "weapon", power: 5, color: "#777" },
-    "Iron Sword":       { type: "weapon", power: 12, color: "#eee" },
-    "shitty shortbow":  { type: "weapon", power: 5, color: "#eee" },
-    "decent shortbow":  { type: "weapon", power: 8, color: "#eee" },
-    "Fishing Rod":      { type: "tool",   power: 0, color: "#8B4513" },
-    "Leather Tunic":    { type: "armor",  def: 2,   color: "#5c4033" },
-    "Paper Bag":        { type: "armor",  def: 1,   color: "#5c4033" },
-    "wig":              { type: "helmet", def: 1,   color: "yellow" },
-    "Iron Plate":       { type: "armor",  def: 5,   color: "#aaa" },
-    "Iron helmet":      { type: "helmet", def: 5,   color: "#aaa" },
-    "leather Boots":    { type: "armor",  def: 1,   color: "#5c4033" },
-    "leather Booties":    { type: "boots",  def: 1,   color: "#5c4033" }
+    // --- WEAPONS ---
+	"Rusty Dagger":     { type: "weapon", power: 5,  speed: 400,  value: 40,   color: "#777" },
+    "Iron Sword":       { type: "weapon", power: 12, speed: 700,  value: 200,  color: "#eee" },
+    "shitty shortbow":  { type: "weapon", power: 5,  speed: 1200, value: 30,   color: "#eee" },
+    "decent shortbow":  { type: "weapon", power: 8,  speed: 1000, value: 100,  color: "#eee" },
+    // --- TOOLS ---
+    "Fishing Rod":      { type: "tool",   power: 0,               value: 1,   color: "#8B4513" },
+    
+    // --- ARMOR ---
+    "Leather Tunic":    { type: "armor",  def: 2,                 value: 60,   color: "#5c4033" },
+    "Iron Plate":       { type: "armor",  def: 5,                 value: 300,  color: "#aaa" },
+    
+    // --- HELMETS ---
+    "Paper Bag":        { type: "helmet", def: 1,                 value: 5,    color: "#d2b48c" },
+    "wig":              { type: "helmet", def: 1,                 value: 5000, color: "yellow" }, // Legendary!
+    "Iron helmet":      { type: "helmet", def: 3,                 value: 150,  color: "#aaa" },
+    
+    // --- BOOTS ---
+    "leather Boots":    { type: "boots",  def: 1,                 value: 30,   color: "#5c4033" },
+    "leather Booties":  { type: "boots",  def: 1,                 value: 35,   color: "#5c4033" },
+
+    // --- MATERIALS ---
+    "Leather scrap":    { type: "material",                       value: 15,   color: "#a88d6d" }
 };
 
 function getPlayer(name, color) {
@@ -212,6 +223,61 @@ setInterval(() => {
 }, 3000);
 
 // --- COMBAT ---
+function performAttack(p) {
+    if (p.dead) return;
+
+    // 1. Identify Target
+    let target = null;
+    if (p.area === "dungeon") {
+        target = enemies.find(e => !e.dead) || boss;
+    } else if (p.area === "home") {
+        target = Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name);
+    }
+    if (!target || target.dead) return;
+
+    // 2. Determine Range and Position
+    const isBow = p.stats.equippedWeapon?.toLowerCase().includes("shortbow");
+    const rangeNeeded = isBow ? 200 : 50;
+    
+    // Set movement target: Bow users stay back, Melee users go close
+    p.targetX = target.x - (isBow ? 150 : 30);
+
+    // 3. Range Check & Combat Execution
+    if (Math.abs(p.x - target.x) <= rangeNeeded) {
+        let weapon = ITEM_DB[p.stats.equippedWeapon];
+        let dmg = 5 + (p.stats.attackLevel * 2) + (weapon ? weapon.power : 0);
+        
+        // Visuals
+        if (isBow) {
+            spawnArrow(p.x + 10, p.y - 10, target.x, target.y);
+        }
+        
+        target.hp -= dmg;
+        spawnFloater(`-${dmg}`, target.x, target.y - 40, "#ff4444");
+
+        // 4. Kill Logic & Looting
+        if (target.hp <= 0) {
+            target.hp = 0;
+            target.dead = true;
+            systemMessage(`${target.name || "Enemy"} slain by ${p.name}!`);
+
+            if (p.area === "dungeon") {
+                handleLoot(p, target); // Cleaned up loot into its own check
+                checkDungeonProgress();
+            }
+        }
+
+        // 5. XP and Progress
+        p.stats.attackXP += 10;
+        if (p.stats.attackXP >= xpNeeded(p.stats.attackLevel)) {
+            p.stats.attackLevel++;
+            p.stats.attackXP = 0;
+            systemMessage(`${p.name} ATK UP (Lv ${p.stats.attackLevel})`);
+        }
+        updateCombatLevel(p);
+        saveStats(p);
+    }
+}
 
 // --- FISHING ---
 function performFish(p) {
@@ -220,26 +286,39 @@ function performFish(p) {
     let roll = Math.random();
     let resultText = "";
     
-    if (roll > 0.09) { // 1% chance
+    // --- 1 IN 1000 RARITY LOGIC ---
+    if (roll < 0.001) { // 0.1% chance (1 in 1000)
         p.stats.inventory.push("wig");
         resultText = "THE LEGENDARY WIG!";
-    } else if (roll > 0.1) {
+        systemMessage(`[!] MYTHIC CATCH: ${p.name} found a Legendary Wig!`);
+    } 
+    else if (roll < 0.015) { // Next 1.4% (Approx 1.5% total for boots)
         p.stats.inventory.push("leather Booties");
         resultText = "leather Boots!";
-    } else if (roll > 0.25) { 
+    } 
+    else if (roll < 0.065) { // Next 5% (0.015 + 0.05 = 0.065)
         p.stats.inventory.push("Leather scrap");
         resultText = "Leather scrap";
-    } else {
+    } 
+    else { // 93.5% chance for standard fish
         const weight = (Math.random() * 20 + 0.5).toFixed(1);
-        p.stats.inventory.push(`Fish (${weight}kg)`);
-        resultText = `Fish (${weight}kg)`;
+        const fishItem = `${weight}kg Bass`; 
+        p.stats.inventory.push(fishItem);
+        resultText = fishItem;
     }
 
-    spawnFloater(`🎣 ${resultText}`, p.x, p.y - 60, "#44ccff");
+    // Color coding based on the Old HUD style
+    let floaterColor = "#44ccff"; // Default Blue
+    if (resultText.includes("WIG")) floaterColor = "#FFD700"; // Gold
+    if (resultText.includes("scrap")) floaterColor = "#a88d6d"; // Brownish
+
+    spawnFloater(`🎣 ${resultText}`, p.x, p.y - 60, floaterColor);
     
+    // XP and Save logic
     p.stats.fishXP += 10;
     if (p.stats.fishXP >= xpNeeded(p.stats.fishLevel) * 2) {
-        p.stats.fishLevel++; p.stats.fishXP = 0;
+        p.stats.fishLevel++; 
+        p.stats.fishXP = 0;
         systemMessage(`${p.name} FISH UP! (Lv ${p.stats.fishLevel})`);
     }
     updateCombatLevel(p);
@@ -367,61 +446,6 @@ function updateArrows(ctx) {
 }
 /* ================= DRAWING ================= */
 
-function performAttack(p) {
-    if (p.dead) return;
-
-    // 1. Identify Target
-    let target = null;
-    if (p.area === "dungeon") {
-        target = enemies.find(e => !e.dead) || boss;
-    } else if (p.area === "home") {
-        target = Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name);
-    }
-    if (!target || target.dead) return;
-
-    // 2. Determine Range and Position
-    const isBow = p.stats.equippedWeapon?.toLowerCase().includes("shortbow");
-    const rangeNeeded = isBow ? 200 : 50;
-    
-    // Set movement target: Bow users stay back, Melee users go close
-    p.targetX = target.x - (isBow ? 150 : 30);
-
-    // 3. Range Check & Combat Execution
-    if (Math.abs(p.x - target.x) <= rangeNeeded) {
-        let weapon = ITEM_DB[p.stats.equippedWeapon];
-        let dmg = 5 + (p.stats.attackLevel * 2) + (weapon ? weapon.power : 0);
-        
-        // Visuals
-        if (isBow) {
-            spawnArrow(p.x + 10, p.y - 10, target.x, target.y);
-        }
-        
-        target.hp -= dmg;
-        spawnFloater(`-${dmg}`, target.x, target.y - 40, "#ff4444");
-
-        // 4. Kill Logic & Looting
-        if (target.hp <= 0) {
-            target.hp = 0;
-            target.dead = true;
-            systemMessage(`${target.name || "Enemy"} slain by ${p.name}!`);
-
-            if (p.area === "dungeon") {
-                handleLoot(p, target); // Cleaned up loot into its own check
-                checkDungeonProgress();
-            }
-        }
-
-        // 5. XP and Progress
-        p.stats.attackXP += 10;
-        if (p.stats.attackXP >= xpNeeded(p.stats.attackLevel)) {
-            p.stats.attackLevel++;
-            p.stats.attackXP = 0;
-            systemMessage(`${p.name} ATK UP (Lv ${p.stats.attackLevel})`);
-        }
-        updateCombatLevel(p);
-        saveStats(p);
-    }
-}
 
 // Helper to keep performAttack clean
 function handleLoot(p, target) {
@@ -511,27 +535,11 @@ function drawEquipment(ctx, p, now) {
     // --- 4. ARMOR & HELMET ---
     if (p.stats.equippedArmor) drawArmor(ctx, p);
     
-    // ADJUSTED WIG LOGIC INSIDE DRAWHELMET
+    // This now handles Wigs, Bags, and Iron Helmets correctly
     if (p.stats.equippedHelmet) {
-        const item = ITEM_DB[p.stats.equippedHelmet];
-        const hX = p.x + (lean * 20);
-        const hY = p.y - 30;
-        
-        ctx.save();
-        if (p.stats.equippedHelmet === "wig") {
-            ctx.fillStyle = item.color;
-            ctx.beginPath();
-            // Moved Wig Y up by 8 pixels so it doesn't cover eyes
-            ctx.arc(hX, hY - 12, 14, Math.PI, 0);
-            ctx.arc(hX - 8, hY - 7, 8, 0, Math.PI * 2);
-            ctx.arc(hX + 8, hY - 7, 8, 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            drawHelmet(ctx, p); // Calls your original helmet drawing for other items
-        }
-        ctx.restore();
+        drawHelmet(ctx, p);
     }
-// NEW: Add Boots
+
     if (p.stats.equippedBoots) {
         drawBoots(ctx, p);
     }
@@ -616,38 +624,46 @@ function drawHelmet(ctx, p) {
     ctx.save();
     ctx.lineWidth = 2;
 
-    if (p.stats.equippedHelmet === "Paper Bag") {
+    // Convert to lowercase for the check to prevent "Paper Bag" vs "paper bag" bugs
+    const helmetName = p.stats.equippedHelmet.toLowerCase();
+
+    if (helmetName === "paper bag") {
         ctx.fillStyle = "#d2b48c"; // Tan paper color
-        ctx.strokeStyle = "#a88d6d";
-        ctx.fillRect(hX - 12, hY - 12, 24, 24);
-        ctx.strokeRect(hX - 12, hY - 12, 24, 24);
+        ctx.strokeStyle = "#000";   // Solid black for Retro HUD style
+        ctx.fillRect(hX - 12, hY - 14, 24, 26);
+        ctx.strokeRect(hX - 12, hY - 14, 24, 26);
+        
         // Eye holes
         ctx.fillStyle = "#111";
-        ctx.fillRect(hX - 6, hY - 2, 4, 4);
-        ctx.fillRect(hX + 2, hY - 2, 4, 4);
+        ctx.fillRect(hX - 7, hY - 4, 5, 5);
+        ctx.fillRect(hX + 2, hY - 4, 5, 5);
+        
+        // Crinkle lines
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+        ctx.beginPath(); ctx.moveTo(hX - 12, hY + 5); ctx.lineTo(hX + 12, hY + 8); ctx.stroke();
     } 
-    else if (p.stats.equippedHelmet === "wig") {
-        ctx.fillStyle = item.color; // Yellow
+    else if (helmetName === "wig") {
+        ctx.fillStyle = item.color || "#ffff00";
         ctx.beginPath();
-        // Poofy wig shape
         ctx.arc(hX, hY - 5, 14, Math.PI, 0);
         ctx.arc(hX - 8, hY, 8, 0, Math.PI * 2);
         ctx.arc(hX + 8, hY, 8, 0, Math.PI * 2);
         ctx.fill();
     }
-    else if (p.stats.equippedHelmet === "Iron helmet") {
+    else if (helmetName === "iron helmet") {
         ctx.fillStyle = "#aaa";
-        ctx.strokeStyle = "#444";
+        ctx.strokeStyle = "#000";
         ctx.beginPath();
-        ctx.arc(hX, hY, 12, Math.PI, 0); // Top dome
-        ctx.lineTo(hX + 12, hY + 8);
-        ctx.lineTo(hX - 12, hY + 8);
+        ctx.arc(hX, hY, 12, Math.PI, 0); 
+        ctx.lineTo(hX + 12, hY + 10);
+        ctx.lineTo(hX - 12, hY + 10);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
+        
         // Visor slit
         ctx.strokeStyle = "#222";
-        ctx.beginPath(); ctx.moveTo(hX - 8, hY + 2); ctx.lineTo(hX + 8, hY + 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(hX - 8, hY + 4); ctx.lineTo(hX + 8, hY + 4); ctx.stroke();
     }
 
     ctx.restore();
