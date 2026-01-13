@@ -10,8 +10,11 @@ body {
     margin:0;
     background:transparent;
     font-family:monospace;
+    overflow:hidden;
 }
 canvas { display:block; margin:auto; }
+
+/* Enemy HP list */
 #enemyUI {
     position:absolute;
     top:10px;
@@ -19,6 +22,31 @@ canvas { display:block; margin:auto; }
     color:#fff;
     font-size:13px;
     text-align:right;
+    background:rgba(0,0,0,0.35);
+    padding:6px 8px;
+    border-radius:6px;
+}
+
+/* System messages */
+#systemUI {
+    position:absolute;
+    top:10px;
+    left:10px;
+    width:320px;
+    font-size:13px;
+}
+.sysMsg {
+    background:rgba(0,0,0,0.5);
+    color:#9ff;
+    padding:4px 6px;
+    margin-bottom:4px;
+    border-radius:4px;
+    animation: fadeout 6s forwards;
+}
+@keyframes fadeout {
+    0% { opacity:1; }
+    70% { opacity:1; }
+    100% { opacity:0; }
 }
 </style>
 </head>
@@ -27,19 +55,40 @@ canvas { display:block; margin:auto; }
 
 <canvas id="c" width="900" height="500"></canvas>
 <div id="enemyUI"></div>
+<div id="systemUI"></div>
 
 <script>
 const c = document.getElementById("c");
 const ctx = c.getContext("2d");
-ctx.textAlign="center";
 
-/* ================= GAME STATE ================= */
+/* ================= STATE ================= */
 
 let area = 1;
 let enemies = [];
 let boss = null;
 let players = {};
+let floaters = [];
 let enemyUI = document.getElementById("enemyUI");
+let systemUI = document.getElementById("systemUI");
+
+/* ================= SYSTEM UI ================= */
+
+function systemMessage(text){
+    const div = document.createElement("div");
+    div.className = "sysMsg";
+    div.textContent = text;
+    systemUI.appendChild(div);
+    setTimeout(()=>div.remove(),6000);
+}
+
+/* ================= FLOATING TEXT ================= */
+
+function spawnFloater(text,x,y,color){
+    floaters.push({
+        text,x,y,color,
+        life:60
+    });
+}
 
 /* ================= PERSISTENCE ================= */
 
@@ -53,59 +102,49 @@ function loadStats(name){
 function saveStats(name){
     localStorage.setItem("stats_"+name, JSON.stringify(players[name].stats));
 }
-
-/* ================= HELPERS ================= */
-
-function xpNeeded(level){
-    return Math.floor(40 * Math.pow(1.5, level));
-}
+function xpNeeded(lvl){ return Math.floor(40*Math.pow(1.5,lvl)); }
 
 /* ================= WAVES ================= */
 
 function spawnWave(){
-    enemies = [];
-    boss = null;
-
-    let count = Math.min(3 + area, 6);
+    enemies=[]; boss=null;
+    let count = Math.min(3+area,6);
     for(let i=0;i<count;i++){
         enemies.push({
-            id:i,
-            hp: 20 + area*5,
-            max:20 + area*5,
-            x:500+i*45,
+            hp:20+area*5,
+            max:20+area*5,
+            x:520+i*45,
             y:360,
             dead:false
         });
     }
+    systemMessage(`🌍 Area ${area} – enemies approach`);
 }
 
 function spawnBoss(){
-    boss = {
-        hp:120 + area*80,
-        max:120 + area*80,
-        x:720,
-        y:250,
-        dead:false
+    boss={
+        hp:120+area*80,
+        max:120+area*80,
+        x:720,y:250,dead:false
     };
+    systemMessage("👹 BOSS APPEARS");
 }
 
 /* ================= PLAYERS ================= */
 
 function getPlayer(name,color){
     if(players[name]) return players[name];
-
     let stats = loadStats(name);
-
-    players[name] = {
+    players[name]={
         name,
-        color: color || "#fff",
-        x:120+Object.keys(players).length*65,
+        color:color||"#fff",
+        x:120+Object.keys(players).length*70,
         y:360,
-        hp:100,
-        maxHp:100,
+        hp:100,maxHp:100,
         dead:false,
         stats
     };
+    systemMessage(`${name} joined the fight`);
     return players[name];
 }
 
@@ -127,36 +166,40 @@ function drawStickman(p){
         return;
     }
 
-    // HP bar
-    drawHPBar(p.x,p.y-55,40,6,p.hp/p.maxHp,"#44ff88");
+    drawHPBar(p.x,p.y-60,44,6,p.hp/p.maxHp,"#44ff88");
 
     ctx.lineWidth=6;
-    ctx.strokeStyle="#000"; // outline
+    ctx.strokeStyle="#000";
     stickmanPath(p);
 
     ctx.lineWidth=3;
     ctx.strokeStyle=p.color;
     stickmanPath(p);
 
+    ctx.font="16px monospace";
+    ctx.textAlign="center";
+    ctx.textBaseline="top";
+
+    ctx.fillStyle="#000";
+    ctx.fillText(p.name,p.x,p.y+60);
     ctx.fillStyle=p.color;
-    ctx.font="15px monospace";
     ctx.fillText(p.name,p.x,p.y+58);
 }
 
 function stickmanPath(p){
-    ctx.beginPath(); ctx.arc(p.x,p.y-35,10,0,Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(p.x,p.y-25); ctx.lineTo(p.x,p.y+15); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(p.x-15,p.y-5); ctx.lineTo(p.x+15,p.y-5); ctx.stroke();
+    ctx.beginPath(); ctx.arc(p.x,p.y-35,11,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(p.x,p.y-24); ctx.lineTo(p.x,p.y+18); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(p.x-16,p.y-5); ctx.lineTo(p.x+16,p.y-5); ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(p.x,p.y+15); ctx.lineTo(p.x-15,p.y+35);
-    ctx.moveTo(p.x,p.y+15); ctx.lineTo(p.x+15,p.y+35);
+    ctx.moveTo(p.x,p.y+18); ctx.lineTo(p.x-16,p.y+38);
+    ctx.moveTo(p.x,p.y+18); ctx.lineTo(p.x+16,p.y+38);
     ctx.stroke();
 }
 
 function drawEnemies(){
     enemies.forEach(e=>{
         if(e.dead) return;
-        drawHPBar(e.x,e.y-40,30,5,e.hp/e.max,"#ff5555");
+        drawHPBar(e.x,e.y-40,32,5,e.hp/e.max,"#ff5555");
         ctx.fillStyle="#aaa";
         ctx.beginPath();
         ctx.arc(e.x,e.y-20,14,0,Math.PI*2);
@@ -165,23 +208,34 @@ function drawEnemies(){
 }
 
 function drawBoss(){
-    if(!boss || boss.dead) return;
-    drawHPBar(boss.x,boss.y-75,80,8,boss.hp/boss.max,"#ff3333");
+    if(!boss||boss.dead) return;
+    drawHPBar(boss.x,boss.y-80,90,8,boss.hp/boss.max,"#ff3333");
     ctx.fillStyle="#f33";
     ctx.beginPath();
     ctx.arc(boss.x,boss.y,60,0,Math.PI*2);
     ctx.fill();
 }
 
-function updateEnemyUI(){
-    let txt = "";
-    enemies.forEach((e,i)=>{
-        if(!e.dead) txt += `Minion ${i+1}: ${e.hp}/${e.max}<br>`;
+function drawFloaters(){
+    floaters.forEach(f=>{
+        ctx.globalAlpha=f.life/60;
+        ctx.fillStyle=f.color;
+        ctx.font="14px monospace";
+        ctx.fillText(f.text,f.x,f.y);
+        f.y-=0.6;
+        f.life--;
     });
-    if(boss && !boss.dead){
-        txt += `<b>Boss:</b> ${boss.hp}/${boss.max}`;
-    }
-    enemyUI.innerHTML = txt;
+    ctx.globalAlpha=1;
+    floaters = floaters.filter(f=>f.life>0);
+}
+
+function updateEnemyUI(){
+    let t="";
+    enemies.forEach((e,i)=>{
+        if(!e.dead) t+=`Minion ${i+1}: ${e.hp}/${e.max}<br>`;
+    });
+    if(boss&&!boss.dead) t+=`<b>Boss:</b> ${boss.hp}/${boss.max}`;
+    enemyUI.innerHTML=t;
 }
 
 function loop(){
@@ -189,6 +243,7 @@ function loop(){
     drawEnemies();
     drawBoss();
     Object.values(players).forEach(drawStickman);
+    drawFloaters();
     updateEnemyUI();
     requestAnimationFrame(loop);
 }
@@ -197,41 +252,42 @@ loop();
 /* ================= COMBAT ================= */
 
 function levelCheck(p,type){
-    let lvl = type==="combat" ? p.stats.combatLevel : p.stats.healLevel;
-    let xp = type==="combat" ? p.stats.combatXP : p.stats.healXP;
-    if(xp >= xpNeeded(lvl)){
+    let lvl = type==="combat"?p.stats.combatLevel:p.stats.healLevel;
+    let xp = type==="combat"?p.stats.combatXP:p.stats.healXP;
+    if(xp>=xpNeeded(lvl)){
         if(type==="combat") p.stats.combatLevel++;
         else p.stats.healLevel++;
+        systemMessage(`${p.name} leveled ${type}!`);
     }
 }
 
 function attackTarget(p){
     if(p.dead) return;
-
-    let dmg = 6 + p.stats.combatLevel*2 + p.stats.loot.dmg;
-    let target = enemies.find(e=>!e.dead) || (boss && !boss.dead && boss);
-
+    let dmg = 6 + p.stats.combatLevel*2;
+    let target = enemies.find(e=>!e.dead)||(boss&&!boss.dead&&boss);
     if(!target) return;
-    target.hp -= dmg;
-    p.stats.combatXP += 8;
+
+    target.hp-=dmg;
+    spawnFloater(`-${dmg}`,target.x,target.y-30,"#ff5555");
+    p.stats.combatXP+=8;
+    spawnFloater(`+8 XP`,p.x,p.y-80,"#55ffff");
 
     if(target.hp<=0){
         target.dead=true;
-        if(enemies.every(e=>e.dead) && !boss) spawnBoss();
-        if(target===boss){
-            area++;
-            spawnWave();
-        }
+        if(enemies.every(e=>e.dead)&&!boss) spawnBoss();
+        if(target===boss){ area++; spawnWave(); }
     }
     levelCheck(p,"combat");
     saveStats(p.name);
 }
 
-function healTarget(p,target){
-    if(p.dead || target.dead) return;
-    let heal = 10 + p.stats.healLevel*3 + p.stats.loot.heal;
-    target.hp = Math.min(target.maxHp,target.hp+heal);
-    p.stats.healXP += 8;
+function healTarget(p,t){
+    if(p.dead||t.dead) return;
+    let h=10+p.stats.healLevel*3;
+    t.hp=Math.min(t.maxHp,t.hp+h);
+    spawnFloater(`+${h}`,t.x,t.y-40,"#44ff88");
+    p.stats.healXP+=8;
+    spawnFloater(`+8 XP`,p.x,p.y-80,"#55ffff");
     levelCheck(p,"heal");
     saveStats(p.name);
 }
@@ -239,31 +295,28 @@ function healTarget(p,target){
 /* ================= ENEMY ATTACK ================= */
 
 setInterval(()=>{
-    let alive = Object.values(players).filter(p=>!p.dead);
+    let alive=Object.values(players).filter(p=>!p.dead);
     if(!alive.length) return;
-
-    let target = alive[Math.floor(Math.random()*alive.length)];
-    let dmg = 6 + area*2;
-    target.hp -= dmg;
-
-    if(target.hp<=0){
-        target.hp=0;
-        target.dead=true;
+    let t=alive[Math.floor(Math.random()*alive.length)];
+    let dmg=6+area*2;
+    t.hp-=dmg;
+    spawnFloater(`-${dmg}`,t.x,t.y-40,"#ff3333");
+    if(t.hp<=0){
+        t.hp=0; t.dead=true;
+        systemMessage(`${t.name} has fallen`);
     }
 },3500);
 
 /* ================= CHAT ================= */
 
-ComfyJS.onChat = (user,msg,flags,extra)=>{
-    let p = getPlayer(user,extra?.userColor);
-    msg = msg.toLowerCase();
-
+ComfyJS.onChat=(user,msg,flags,extra)=>{
+    let p=getPlayer(user,extra?.userColor);
+    msg=msg.toLowerCase();
     if(msg==="attack") attackTarget(p);
-
     if(msg.startsWith("heal")){
-        let parts = msg.split(" ");
-        let t = players[parts[1]] ||
-                Object.values(players).filter(x=>x.name!==user && !x.dead)[0];
+        let name=msg.split(" ")[1];
+        let t=players[name]||
+              Object.values(players).filter(x=>!x.dead&&x.name!==user)[0];
         if(t) healTarget(p,t);
     }
 };
