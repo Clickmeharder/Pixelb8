@@ -95,12 +95,27 @@ function loadStats(name) {
     };
 
     // --- SAFETY CHECKS FOR OLD SAVES ---
-    // If a returning player doesn't have these new features, give them defaults:
-    if (!stats.inventory) stats.inventory = ["Fishing Rod"];
+    
+    // 1. Ensure Inventory exists as an array
+    if (!stats.inventory || !Array.isArray(stats.inventory)) {
+        stats.inventory = ["Fishing Rod"];
+    }
+
+    // 2. Ensure they actually have a Fishing Rod to progress
+    if (!stats.inventory.includes("Fishing Rod")) {
+        stats.inventory.push("Fishing Rod");
+    }
+
+    // 3. Patch missing currency and equipment slots
     if (stats.gold === undefined) stats.gold = 0;
     if (stats.equippedWeapon === undefined) stats.equippedWeapon = null;
     if (stats.equippedArmor === undefined) stats.equippedArmor = null;
     if (stats.equippedHelmet === undefined) stats.equippedHelmet = null;
+
+    // Optional: Log legacy patches in HUD green color
+    if (!saved) {
+        console.log(`%c [HUD] New profile created for ${name}`, "color: #00ff00");
+    }
 
     return stats;
 }
