@@ -12,18 +12,26 @@ body {
     font-family:monospace;
 }
 canvas { display:block; margin:auto; }
+#enemyUI {
+    position:absolute;
+    top:10px;
+    right:10px;
+    color:#fff;
+    font-size:13px;
+    text-align:right;
+}
 </style>
 </head>
 
 <body>
+
 <canvas id="c" width="900" height="500"></canvas>
+<div id="enemyUI"></div>
 
 <script>
 const c = document.getElementById("c");
 const ctx = c.getContext("2d");
-
-ctx.font = "14px monospace";
-ctx.textAlign = "center";
+ctx.textAlign="center";
 
 /* ================= GAME STATE ================= */
 
@@ -31,6 +39,7 @@ let area = 1;
 let enemies = [];
 let boss = null;
 let players = {};
+let enemyUI = document.getElementById("enemyUI");
 
 /* ================= PERSISTENCE ================= */
 
@@ -41,7 +50,6 @@ function loadStats(name){
         loot:{ dmg:0, heal:0 }
     };
 }
-
 function saveStats(name){
     localStorage.setItem("stats_"+name, JSON.stringify(players[name].stats));
 }
@@ -49,18 +57,23 @@ function saveStats(name){
 /* ================= HELPERS ================= */
 
 function xpNeeded(level){
-    return Math.floor(50 * Math.pow(1.6, level));
+    return Math.floor(40 * Math.pow(1.5, level));
 }
+
+/* ================= WAVES ================= */
 
 function spawnWave(){
     enemies = [];
     boss = null;
 
-    for(let i=0;i<3+area;i++){
+    let count = Math.min(3 + area, 6);
+    for(let i=0;i<count;i++){
         enemies.push({
-            x:500+i*40, y:360,
-            hp:40+area*10,
-            max:40+area*10,
+            id:i,
+            hp: 20 + area*5,
+            max:20 + area*5,
+            x:500+i*45,
+            y:360,
             dead:false
         });
     }
@@ -68,9 +81,10 @@ function spawnWave(){
 
 function spawnBoss(){
     boss = {
-        x:720, y:250,
-        hp:200 + area*120,
-        max:200 + area*120,
+        hp:120 + area*80,
+        max:120 + area*80,
+        x:720,
+        y:250,
         dead:false
     };
 }
@@ -85,20 +99,24 @@ function getPlayer(name,color){
     players[name] = {
         name,
         color: color || "#fff",
-        x:120+Object.keys(players).length*60,
-        baseX:null,
+        x:120+Object.keys(players).length*65,
         y:360,
         hp:100,
         maxHp:100,
         dead:false,
-        blood:false,
         stats
     };
-    players[name].baseX = players[name].x;
     return players[name];
 }
 
 /* ================= DRAW ================= */
+
+function drawHPBar(x,y,w,h,pct,color){
+    ctx.fillStyle="#000";
+    ctx.fillRect(x-w/2-1,y-1,w+2,h+2);
+    ctx.fillStyle=color;
+    ctx.fillRect(x-w/2,y,w*pct,h);
+}
 
 function drawStickman(p){
     if(p.dead){
@@ -109,9 +127,23 @@ function drawStickman(p){
         return;
     }
 
-    ctx.strokeStyle=p.color;
-    ctx.lineWidth=4;
+    // HP bar
+    drawHPBar(p.x,p.y-55,40,6,p.hp/p.maxHp,"#44ff88");
 
+    ctx.lineWidth=6;
+    ctx.strokeStyle="#000"; // outline
+    stickmanPath(p);
+
+    ctx.lineWidth=3;
+    ctx.strokeStyle=p.color;
+    stickmanPath(p);
+
+    ctx.fillStyle=p.color;
+    ctx.font="15px monospace";
+    ctx.fillText(p.name,p.x,p.y+58);
+}
+
+function stickmanPath(p){
     ctx.beginPath(); ctx.arc(p.x,p.y-35,10,0,Math.PI*2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(p.x,p.y-25); ctx.lineTo(p.x,p.y+15); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(p.x-15,p.y-5); ctx.lineTo(p.x+15,p.y-5); ctx.stroke();
@@ -119,130 +151,120 @@ function drawStickman(p){
     ctx.moveTo(p.x,p.y+15); ctx.lineTo(p.x-15,p.y+35);
     ctx.moveTo(p.x,p.y+15); ctx.lineTo(p.x+15,p.y+35);
     ctx.stroke();
-
-    ctx.fillStyle=p.color;
-    ctx.fillText(p.name,p.x,p.y+55);
 }
 
 function drawEnemies(){
     enemies.forEach(e=>{
         if(e.dead) return;
-        ctx.fillStyle="#888";
+        drawHPBar(e.x,e.y-40,30,5,e.hp/e.max,"#ff5555");
+        ctx.fillStyle="#aaa";
         ctx.beginPath();
-        ctx.arc(e.x,e.y-20,15,0,Math.PI*2);
+        ctx.arc(e.x,e.y-20,14,0,Math.PI*2);
         ctx.fill();
     });
 }
 
 function drawBoss(){
     if(!boss || boss.dead) return;
+    drawHPBar(boss.x,boss.y-75,80,8,boss.hp/boss.max,"#ff3333");
     ctx.fillStyle="#f33";
     ctx.beginPath();
     ctx.arc(boss.x,boss.y,60,0,Math.PI*2);
     ctx.fill();
 }
 
+function updateEnemyUI(){
+    let txt = "";
+    enemies.forEach((e,i)=>{
+        if(!e.dead) txt += `Minion ${i+1}: ${e.hp}/${e.max}<br>`;
+    });
+    if(boss && !boss.dead){
+        txt += `<b>Boss:</b> ${boss.hp}/${boss.max}`;
+    }
+    enemyUI.innerHTML = txt;
+}
+
 function loop(){
     ctx.clearRect(0,0,c.width,c.height);
-
     drawEnemies();
     drawBoss();
-
     Object.values(players).forEach(drawStickman);
+    updateEnemyUI();
     requestAnimationFrame(loop);
 }
 loop();
 
 /* ================= COMBAT ================= */
 
-function attackTarget(p){
-    if(p.dead) return;
-
-    let dmg = 10 + p.stats.combatLevel*3 + p.stats.loot.dmg;
-
-    let target = enemies.find(e=>!e.dead);
-    if(!target && boss && !boss.dead) target = boss;
-    if(!target) return;
-
-    target.hp -= dmg;
-    p.stats.combatXP += 10;
-
-    if(target.hp <= 0){
-        target.dead = true;
-        if(target === boss){
-            dropLoot();
-            area++;
-            spawnWave();
-        } else if(enemies.every(e=>e.dead)){
-            spawnBoss();
-        }
-    }
-
-    levelCheck(p,"combat");
-    saveStats(p.name);
-}
-
-function healTarget(p,target){
-    if(p.dead || target.dead) return;
-
-    let heal = 15 + p.stats.healLevel*4 + p.stats.loot.heal;
-    target.hp = Math.min(target.maxHp, target.hp + heal);
-
-    p.stats.healXP += 10;
-    levelCheck(p,"heal");
-    saveStats(p.name);
-}
-
 function levelCheck(p,type){
     let lvl = type==="combat" ? p.stats.combatLevel : p.stats.healLevel;
     let xp = type==="combat" ? p.stats.combatXP : p.stats.healXP;
-
     if(xp >= xpNeeded(lvl)){
         if(type==="combat") p.stats.combatLevel++;
         else p.stats.healLevel++;
     }
 }
 
-/* ================= BOSS ATTACK ================= */
+function attackTarget(p){
+    if(p.dead) return;
+
+    let dmg = 6 + p.stats.combatLevel*2 + p.stats.loot.dmg;
+    let target = enemies.find(e=>!e.dead) || (boss && !boss.dead && boss);
+
+    if(!target) return;
+    target.hp -= dmg;
+    p.stats.combatXP += 8;
+
+    if(target.hp<=0){
+        target.dead=true;
+        if(enemies.every(e=>e.dead) && !boss) spawnBoss();
+        if(target===boss){
+            area++;
+            spawnWave();
+        }
+    }
+    levelCheck(p,"combat");
+    saveStats(p.name);
+}
+
+function healTarget(p,target){
+    if(p.dead || target.dead) return;
+    let heal = 10 + p.stats.healLevel*3 + p.stats.loot.heal;
+    target.hp = Math.min(target.maxHp,target.hp+heal);
+    p.stats.healXP += 8;
+    levelCheck(p,"heal");
+    saveStats(p.name);
+}
+
+/* ================= ENEMY ATTACK ================= */
 
 setInterval(()=>{
     let alive = Object.values(players).filter(p=>!p.dead);
     if(!alive.length) return;
 
-    let t = alive[Math.floor(Math.random()*alive.length)];
-    t.hp -= 20+area*5;
+    let target = alive[Math.floor(Math.random()*alive.length)];
+    let dmg = 6 + area*2;
+    target.hp -= dmg;
 
-    if(t.hp<=0){
-        t.hp=0;
-        t.dead=true;
+    if(target.hp<=0){
+        target.hp=0;
+        target.dead=true;
     }
-},3000);
-
-/* ================= LOOT ================= */
-
-function dropLoot(){
-    let alive = Object.values(players);
-    if(!alive.length) return;
-
-    let winner = alive[Math.floor(Math.random()*alive.length)];
-    if(Math.random()<0.5) winner.stats.loot.dmg+=2;
-    else winner.stats.loot.heal+=2;
-
-    saveStats(winner.name);
-}
+},3500);
 
 /* ================= CHAT ================= */
 
 ComfyJS.onChat = (user,msg,flags,extra)=>{
     let p = getPlayer(user,extra?.userColor);
-    msg=msg.toLowerCase();
+    msg = msg.toLowerCase();
 
     if(msg==="attack") attackTarget(p);
 
     if(msg.startsWith("heal")){
         let parts = msg.split(" ");
-        let target = players[parts[1]] || Object.values(players).find(x=>x.name!==user && !x.dead);
-        if(target) healTarget(p,target);
+        let t = players[parts[1]] ||
+                Object.values(players).filter(x=>x.name!==user && !x.dead)[0];
+        if(t) healTarget(p,t);
     }
 };
 
