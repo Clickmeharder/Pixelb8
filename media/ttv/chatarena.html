@@ -86,6 +86,18 @@ canvas { display:block; margin:auto; }
     border-radius:4px;
     cursor:pointer;
 }
+areaDisplay{
+    position:absolute;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    color:#fff;
+    font-size:16px;
+    background:rgba(0,0,0,0.5);
+    padding:4px 8px;
+    border-radius:6px;
+}
+
 @keyframes fadeout {
     0% { opacity:1; }
     70% { opacity:1; }
@@ -100,6 +112,7 @@ canvas { display:block; margin:auto; }
 <div id="enemyUI"></div>
 <div id="systemUI"></div>
 <div id="tooltip"></div>
+<div id="areaDisplay"></div>
 
 <!-- Player stats overlay -->
 <div id="playerStatsWindow">
@@ -114,6 +127,7 @@ const ctx = c.getContext("2d");
 
 /* ================= STATE ================= */
 let area = 1;
+const areaDisplay = document.getElementById("areaDisplay");
 let enemies = [];
 let boss = null;
 let players = {};
@@ -212,10 +226,14 @@ function joinDungeonQueue(p){
 function startDungeon(){
     currentArea = "dungeon";
     systemMessage("Dungeon starts now!");
-    spawnWave(); // you can adjust spawnWave() to spawn stronger dungeon enemies
+    spawnWave();
+    startDungeonEnemyAttack();
 }
 
-
+//================= levels ========================== */
+function updateAreaDisplay() {
+    areaDisplay.textContent = `Current Area: ${currentArea.toUpperCase()}`;
+}
 function spawnWave(){
     enemies=[]; boss=null;
     let count = Math.min(3+area,6);
@@ -342,14 +360,18 @@ function loop(){
     // Draw background
     ctx.fillStyle = backgrounds[currentArea] || "#000";
     ctx.fillRect(0,0,c.width,c.height);
-	
-	//game
-    ctx.clearRect(0,0,c.width,c.height);
+
+    // Draw game objects
     drawEnemies(); drawBoss();
     Object.values(players).forEach(drawStickman);
     drawFloaters(); updateEnemyUI();
+
+    // Update area display
+    updateAreaDisplay();
+
     requestAnimationFrame(loop);
 }
+
 loop();
 
 /* ================= COMBAT ================= */
@@ -432,6 +454,37 @@ function scheduleRespawn(p){
 }
 
 /* ================= ENEMY ATTACK ================= */
+let dungeonEnemyAttackInterval = null;
+
+function startDungeonEnemyAttack() {
+    if(dungeonEnemyAttackInterval) return; // already running
+
+    dungeonEnemyAttackInterval = setInterval(()=>{
+        if(currentArea !== "dungeon") return; // safety check
+
+        let alive = Object.values(players).filter(p => !p.dead);
+        if(!alive.length) return;
+
+        let target = alive[Math.floor(Math.random() * alive.length)];
+        let dmg = 6 + area*2;
+        target.hp -= dmg;
+        spawnFloater(`-${dmg}`, target.x, target.y-40, "#ff3333");
+
+        if(target.hp <= 0){
+            target.hp = 0;
+            target.dead = true;
+            systemMessage(`${target.name} has fallen`);
+        }
+    }, 3500);
+}
+
+function stopDungeonEnemyAttack() {
+    if(dungeonEnemyAttackInterval) {
+        clearInterval(dungeonEnemyAttackInterval);
+        dungeonEnemyAttackInterval = null;
+    }
+}
+
 setInterval(()=>{
     let alive=Object.values(players).filter(p=>!p.dead);
     if(!alive.length) return;
@@ -477,18 +530,19 @@ ComfyJS.onChat = (user,msg,flags,extra)=>{
         }
         systemMessage("All player stats cleared!");
 	    // New chat command to clear all player stats
-		if(msg === "clearstats") {
-			for (let key in localStorage) {
-				if (key.startsWith("stats_")) localStorage.removeItem(key);
+	   if(msg === "clearstats") {
+			for(let key in localStorage){
+				if(key.startsWith("stats_")) localStorage.removeItem(key);
 			}
-			systemMessage("All player stats cleared!");
+			systemMessage("All saved stats cleared!");
 		}
 	};
+
+
+    if(msg === "t" || msg === "revive" || msg === "respawn") scheduleRespawn(p);
 	if(msg === "dungeon") joinDungeonQueue(p);
     if(msg==="stats") showPlayerStats();
-	
-	localStorage.clear();
-	systemMessage("All saved stats cleared!");
+
 }
 /* ================= INIT ================= */
 
