@@ -485,15 +485,7 @@ function stopDungeonEnemyAttack() {
     }
 }
 
-setInterval(()=>{
-    let alive=Object.values(players).filter(p=>!p.dead);
-    if(!alive.length) return;
-    let t=alive[Math.floor(Math.random()*alive.length)];
-    let dmg=6+area*2;
-    t.hp-=dmg;
-    spawnFloater(`-${dmg}`,t.x,t.y-40,"#ff3333");
-    if(t.hp<=0){ t.hp=0; t.dead=true; systemMessage(`${t.name} has fallen`); }
-},3500);
+
 
 /* ================= PLAYER STATS WINDOW ================= */
 function showPlayerStats(){
@@ -529,16 +521,7 @@ ComfyJS.onChat = (user,msg,flags,extra)=>{
             if (key.startsWith("stats_")) localStorage.removeItem(key);
         }
         systemMessage("All player stats cleared!");
-	    // New chat command to clear all player stats
-	   if(msg === "clearstats") {
-			for(let key in localStorage){
-				if(key.startsWith("stats_")) localStorage.removeItem(key);
-			}
-			systemMessage("All saved stats cleared!");
-		}
 	};
-
-
     if(msg === "t" || msg === "revive" || msg === "respawn") scheduleRespawn(p);
 	if(msg === "dungeon") joinDungeonQueue(p);
     if(msg==="stats") showPlayerStats();
