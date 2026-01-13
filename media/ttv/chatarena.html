@@ -268,15 +268,26 @@ function attackTarget(p){
     if(!target) return;
 
     target.hp-=dmg;
+
+    // Spawn floating damage number
     spawnFloater(`-${dmg}`,target.x,target.y-30,"#ff5555");
-    p.stats.combatXP+=8;
-    spawnFloater(`+8 XP`,p.x,p.y-80,"#55ffff");
+
+    // Spawn XP floating text for attacker
+    let xpGain = 8;
+    p.stats.combatXP+=xpGain;
+    spawnFloater(`+${xpGain} XP`,p.x,p.y-80,"#55ffff");
+
+    // System message for XP gain
+    systemMessage(`${p.name} dealt ${dmg} damage to ${target===boss?"BOSS":"Minion"} and gained ${xpGain} XP`);
 
     if(target.hp<=0){
         target.dead=true;
+        spawnFloater(`DEAD!`,target.x,target.y-30,"#ff0000");
+        systemMessage(`${target===boss?"Boss":"Minion"} was defeated!`);
         if(enemies.every(e=>e.dead)&&!boss) spawnBoss();
         if(target===boss){ area++; spawnWave(); }
     }
+
     levelCheck(p,"combat");
     saveStats(p.name);
 }
@@ -285,12 +296,22 @@ function healTarget(p,t){
     if(p.dead||t.dead) return;
     let h=10+p.stats.healLevel*3;
     t.hp=Math.min(t.maxHp,t.hp+h);
+
+    // Floating heal
     spawnFloater(`+${h}`,t.x,t.y-40,"#44ff88");
-    p.stats.healXP+=8;
-    spawnFloater(`+8 XP`,p.x,p.y-80,"#55ffff");
+
+    // XP gain floating
+    let xpGain = 8;
+    p.stats.healXP+=xpGain;
+    spawnFloater(`+${xpGain} XP`,p.x,p.y-80,"#55ffff");
+
+    // System messages
+    systemMessage(`${p.name} healed ${t.name} for ${h} HP and gained ${xpGain} XP`);
+
     levelCheck(p,"heal");
     saveStats(p.name);
 }
+
 
 /* ================= ENEMY ATTACK ================= */
 
