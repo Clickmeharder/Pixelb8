@@ -395,115 +395,127 @@ function updateBuyerNPC() {
 function drawBuyer(ctx) {
     if (!buyerActive || viewArea !== "fishingpond") return;
     
-    const bx = 220; 
+    const bx = 110; 
     const by = 475; 
     const now = Date.now();
     
-    // Slow, mysterious breathing/floating animation
-    let floatY = Math.sin(now / 600) * 8;
-    let staffGlow = Math.abs(Math.sin(now / 400));
+    // Smooth levitation and cloak sway
+    let floatY = Math.sin(now / 800) * 6;
+    let sway = Math.sin(now / 400) * 3;
+    let gemPulse = 5 + Math.abs(Math.sin(now / 500)) * 10;
 
     ctx.save();
     ctx.translate(bx, by + floatY);
 
-    // --- 1. THE STAFF (The source of his power/wealth) ---
-    ctx.strokeStyle = "#5C4033"; // Wooden staff
+    // --- 1. THE TRAILING CAPE (Behind her, blowing slightly) ---
+    ctx.fillStyle = "#2a1233"; // Very dark shadow purple
+    ctx.beginPath();
+    ctx.moveTo(0, -30);
+    ctx.quadraticCurveTo(-25 + sway, 0, -15 + sway, 35);
+    ctx.lineTo(5, 30);
+    ctx.fill();
+
+    // --- 2. THE LEGS ---
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-3, 10); ctx.lineTo(-5, 30);
+    ctx.moveTo(3, 10); ctx.lineTo(5, 30);
+    ctx.stroke();
+
+    // --- 3. STRUCTURED CLOAK (Facing Right/Pond) ---
+    // Main Cloak Body
+    ctx.fillStyle = "#4B0082"; 
+    ctx.beginPath();
+    ctx.moveTo(0, -35); // Neck
+    ctx.bezierCurveTo(-15, -20, -18, 10, -12, 25); // Back curve
+    ctx.lineTo(15, 25); // Bottom front
+    ctx.bezierCurveTo(8, 10, 12, -20, 0, -35); // Front curve (facing pond)
+    ctx.fill();
+
+    // Gold Trim on Cloak
+    ctx.strokeStyle = "#FFD700";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // --- 4. THE ARMS & STAFF (Staff is on the Pond side) ---
+    ctx.strokeStyle = "#ffdbac"; // Hands
+    ctx.lineWidth = 2.5;
+    
+    // Arm resting on staff (Right arm, facing pond)
+    ctx.beginPath();
+    ctx.moveTo(8, -15);
+    ctx.lineTo(18, -5); 
+    ctx.stroke();
+
+    // The Mystic Staff
+    ctx.strokeStyle = "#3e2723"; // Dark wood
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.moveTo(-18, 15);
-    ctx.lineTo(-18, -45);
+    ctx.moveTo(20, 30);
+    ctx.lineTo(20, -50);
     ctx.stroke();
 
-    // Staff Gem Glow
-    ctx.shadowBlur = 15 * staffGlow;
+    // Staff Gem (Glow effect)
+    ctx.shadowBlur = gemPulse;
     ctx.shadowColor = "#00ffff";
+    ctx.fillStyle = "#e0ffff";
+    ctx.beginPath();
+    ctx.arc(20, -55, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // --- 5. THE HEAD & DEEP HOOD ---
+    // Inner Hood
+    ctx.fillStyle = "#0a0a0a";
+    ctx.beginPath();
+    ctx.ellipse(2, -45, 9, 11, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Glowing Eyes (Facing the pond)
     ctx.fillStyle = "#00ffff";
     ctx.beginPath();
-    ctx.arc(-18, -48, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0; // Reset shadow
-
-    // --- 2. THE LEGS (Stick figure style but dark) ---
-    ctx.strokeStyle = "#222";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(-5, 10); ctx.lineTo(-8, 25); // Left Leg
-    ctx.moveTo(5, 10); ctx.lineTo(8, 25);  // Right Leg
-    ctx.stroke();
-
-    // --- 3. THE CLOAK (Mysterious Layered Robes) ---
-    // Back Layer
-    ctx.fillStyle = "#301934"; // Darker purple
-    ctx.beginPath();
-    ctx.moveTo(0, -25);
-    ctx.lineTo(-20, 15);
-    ctx.lineTo(20, 15);
+    ctx.arc(6, -46, 1.5, 0, Math.PI * 2);
+    ctx.arc(10, -46, 1.5, 0, Math.PI * 2);
     ctx.fill();
 
-    // Front Layer / Tabard
-    ctx.fillStyle = "#4B0082"; // Indigo
+    // Structured Hood Outer
+    ctx.fillStyle = "#4B0082";
     ctx.beginPath();
-    ctx.moveTo(0, -25);
-    ctx.lineTo(-12, 12);
-    ctx.lineTo(12, 12);
+    ctx.moveTo(-8, -40);
+    ctx.quadraticCurveTo(0, -65, 15, -40);
+    ctx.quadraticCurveTo(18, -30, 10, -35);
+    ctx.lineTo(-8, -35);
     ctx.fill();
 
-    // --- 4. THE ARMS ---
-    ctx.strokeStyle = "#ffdbac"; // Skin tone hands
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(-8, -10); ctx.lineTo(-18, -10); // Hand holding staff
-    ctx.moveTo(8, -10); ctx.lineTo(15, 5);    // Hand resting at side
-    ctx.stroke();
-
-    // --- 5. THE FACE & DEEP HOOD ---
-    // Deep Hood Interior (Darkness)
-    ctx.fillStyle = "#111";
-    ctx.beginPath();
-    ctx.arc(0, -35, 10, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Mysterious Glowing Eyes
-    ctx.fillStyle = "#00ffff";
-    ctx.fillRect(-4, -37, 2, 2);
-    ctx.fillRect(2, -37, 2, 2);
-
-    // The Hood Edge (Thick Purple)
-    ctx.strokeStyle = "#4B0082";
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.arc(0, -35, 11, Math.PI * 0.8, Math.PI * 2.2);
-    ctx.stroke();
-
-    // --- 6. SPARKLES & PARTICLES ---
-    if (Math.random() > 0.8) {
-        ctx.fillStyle = Math.random() > 0.5 ? "#FFD700" : "#00ffff";
-        let rx = (Math.random() - 0.5) * 40;
-        let ry = (Math.random() - 0.5) * 60;
-        ctx.globalAlpha = 0.6;
-        ctx.fillRect(rx, ry, 3, 3);
-        ctx.globalAlpha = 1.0;
+    // --- 6. MAGICAL PARTICLES ---
+    if (Math.random() > 0.85) {
+        ctx.fillStyle = "#FFD700";
+        let px = Math.random() * 30 - 15;
+        let py = Math.random() * 50 - 25;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+        ctx.fill();
     }
 
-    // --- 7. HUD STYLE TEXT ---
+    // --- 7. HUD LABELS ---
+    ctx.restore();
     ctx.textAlign = "center";
-    ctx.font = "bold 14px monospace";
+    ctx.font = "bold 13px monospace";
     
-    // Shadow for text scannability
+    // Label follows the float
+    let textY = by + floatY - 75;
+    
     ctx.fillStyle = "black";
-    ctx.fillText("FISH MERCHANT", 1, -64);
-    
-    // Main Yellow Text
+    ctx.fillText("MYSTERIOUS MERCHANT", bx + 1, textY + 1);
     ctx.fillStyle = "#ffff00";
-    ctx.fillText("FISH MERCHANT", 0, -65);
+    ctx.fillText("MYSTERIOUS MERCHANT", bx, textY);
     
     ctx.font = "11px monospace";
     ctx.fillStyle = "#00ffff";
-    ctx.fillText("[2X GOLD ACTIVE]", 0, -52);
-
-    ctx.restore();
+    ctx.fillText("✦ 2X GOLD RATE ✦", bx, textY + 14);
 }
-
 // --- DUNGEON ---
 function joinDungeonQueue(p) {
     if (p.dead) return;
