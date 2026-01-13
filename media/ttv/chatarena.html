@@ -369,11 +369,10 @@ function performFish(p) {
     updateCombatLevel(p);
     saveStats(p);
 }
-
+//fish merchant----------------
 let forceBuyer = null;
 let buyerActive = false;
 let buyerTimer = 0;
-
 function updateBuyerNPC() {
     const now = Date.now();
     let cycle = Math.floor(now / 60000) % 7; 
@@ -397,54 +396,114 @@ function drawBuyer(ctx) {
     if (!buyerActive || viewArea !== "fishingpond") return;
     
     const bx = 220; 
-    const by = 470; // Adjusted slightly for floor height
+    const by = 475; 
     const now = Date.now();
-    let bounce = Math.sin(now/300) * 4;
+    
+    // Slow, mysterious breathing/floating animation
+    let floatY = Math.sin(now / 600) * 8;
+    let staffGlow = Math.abs(Math.sin(now / 400));
 
-    // --- 1. THE CLOAK (Body) ---
-    ctx.fillStyle = "#4B0082"; // Deep Indigo/Purple
-    ctx.beginPath();
-    ctx.moveTo(bx, by - 20 + bounce); // Neck area
-    ctx.lineTo(bx - 15, by + 15 + bounce); // Bottom left
-    ctx.lineTo(bx + 15, by + 15 + bounce); // Bottom right
-    ctx.fill();
+    ctx.save();
+    ctx.translate(bx, by + floatY);
 
-    // --- 2. THE STICK ARMS (Tucked in) ---
-    ctx.strokeStyle = "#4B0082";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(bx - 5, by + bounce); 
-    ctx.lineTo(bx - 12, by + 10 + bounce); // Tucked arm
-    ctx.moveTo(bx + 5, by + bounce);
-    ctx.lineTo(bx + 12, by + 10 + bounce); // Tucked arm
-    ctx.stroke();
-
-    // --- 3. THE FACE & HOOD ---
-    // Face (Skin tone)
-    ctx.fillStyle = "#ffdbac";
-    ctx.beginPath(); 
-    ctx.arc(bx, by - 25 + bounce, 7, 0, Math.PI * 2); 
-    ctx.fill();
-
-    // The Hood (Purple arc over the head)
-    ctx.strokeStyle = "#4B0082";
+    // --- 1. THE STAFF (The source of his power/wealth) ---
+    ctx.strokeStyle = "#5C4033"; // Wooden staff
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(bx, by - 25 + bounce, 9, Math.PI, 0); // Draws a half-circle "hood"
+    ctx.moveTo(-18, 15);
+    ctx.lineTo(-18, -45);
     ctx.stroke();
 
-    // --- 4. FLOATING TEXT ---
-    ctx.fillStyle = "#ffff00";
-    ctx.font = "bold 13px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("FISH BUYER [2X]", bx, by - 45 + bounce);
-    
-    // Optional: Little gold sparkles around him
-    if (Math.random() > 0.9) {
-        ctx.fillStyle = "#FFD700";
-        ctx.fillRect(bx + (Math.random()*40-20), by + (Math.random()*40-20), 2, 2);
+    // Staff Gem Glow
+    ctx.shadowBlur = 15 * staffGlow;
+    ctx.shadowColor = "#00ffff";
+    ctx.fillStyle = "#00ffff";
+    ctx.beginPath();
+    ctx.arc(-18, -48, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0; // Reset shadow
+
+    // --- 2. THE LEGS (Stick figure style but dark) ---
+    ctx.strokeStyle = "#222";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-5, 10); ctx.lineTo(-8, 25); // Left Leg
+    ctx.moveTo(5, 10); ctx.lineTo(8, 25);  // Right Leg
+    ctx.stroke();
+
+    // --- 3. THE CLOAK (Mysterious Layered Robes) ---
+    // Back Layer
+    ctx.fillStyle = "#301934"; // Darker purple
+    ctx.beginPath();
+    ctx.moveTo(0, -25);
+    ctx.lineTo(-20, 15);
+    ctx.lineTo(20, 15);
+    ctx.fill();
+
+    // Front Layer / Tabard
+    ctx.fillStyle = "#4B0082"; // Indigo
+    ctx.beginPath();
+    ctx.moveTo(0, -25);
+    ctx.lineTo(-12, 12);
+    ctx.lineTo(12, 12);
+    ctx.fill();
+
+    // --- 4. THE ARMS ---
+    ctx.strokeStyle = "#ffdbac"; // Skin tone hands
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-8, -10); ctx.lineTo(-18, -10); // Hand holding staff
+    ctx.moveTo(8, -10); ctx.lineTo(15, 5);    // Hand resting at side
+    ctx.stroke();
+
+    // --- 5. THE FACE & DEEP HOOD ---
+    // Deep Hood Interior (Darkness)
+    ctx.fillStyle = "#111";
+    ctx.beginPath();
+    ctx.arc(0, -35, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mysterious Glowing Eyes
+    ctx.fillStyle = "#00ffff";
+    ctx.fillRect(-4, -37, 2, 2);
+    ctx.fillRect(2, -37, 2, 2);
+
+    // The Hood Edge (Thick Purple)
+    ctx.strokeStyle = "#4B0082";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(0, -35, 11, Math.PI * 0.8, Math.PI * 2.2);
+    ctx.stroke();
+
+    // --- 6. SPARKLES & PARTICLES ---
+    if (Math.random() > 0.8) {
+        ctx.fillStyle = Math.random() > 0.5 ? "#FFD700" : "#00ffff";
+        let rx = (Math.random() - 0.5) * 40;
+        let ry = (Math.random() - 0.5) * 60;
+        ctx.globalAlpha = 0.6;
+        ctx.fillRect(rx, ry, 3, 3);
+        ctx.globalAlpha = 1.0;
     }
+
+    // --- 7. HUD STYLE TEXT ---
+    ctx.textAlign = "center";
+    ctx.font = "bold 14px monospace";
+    
+    // Shadow for text scannability
+    ctx.fillStyle = "black";
+    ctx.fillText("FISH MERCHANT", 1, -64);
+    
+    // Main Yellow Text
+    ctx.fillStyle = "#ffff00";
+    ctx.fillText("FISH MERCHANT", 0, -65);
+    
+    ctx.font = "11px monospace";
+    ctx.fillStyle = "#00ffff";
+    ctx.fillText("[2X GOLD ACTIVE]", 0, -52);
+
+    ctx.restore();
 }
+
 // --- DUNGEON ---
 function joinDungeonQueue(p) {
     if (p.dead) return;
