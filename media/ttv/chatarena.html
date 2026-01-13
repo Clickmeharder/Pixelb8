@@ -148,6 +148,38 @@ function systemMessage(text){
     systemUI.appendChild(div);
     setTimeout(()=>div.remove(),6000);
 }
+//=========== GAME OVERLAY ===================== */
+// Game-over overlay
+let gameOverOverlay = null;
+function showGameOver(){
+    if(gameOverOverlay) return;
+    gameOverOverlay = document.createElement("div");
+    gameOverOverlay.style.position = "absolute";
+    gameOverOverlay.style.top = 0;
+    gameOverOverlay.style.left = 0;
+    gameOverOverlay.style.width = "100%";
+    gameOverOverlay.style.height = "100%";
+    gameOverOverlay.style.background = "rgba(0,0,0,0.85)";
+    gameOverOverlay.style.color = "#ff4444";
+    gameOverOverlay.style.fontSize = "48px";
+    gameOverOverlay.style.display = "flex";
+    gameOverOverlay.style.justifyContent = "center";
+    gameOverOverlay.style.alignItems = "center";
+    gameOverOverlay.style.zIndex = 999;
+    gameOverOverlay.textContent = "GAME OVER!";
+    document.body.appendChild(gameOverOverlay);
+
+    setTimeout(()=>{
+        if(gameOverOverlay){
+            gameOverOverlay.remove();
+            gameOverOverlay = null;
+            currentArea="home";
+        }
+    },40000);
+}
+
+
+
 /* ================= PLAYER STATS WINDOW ================= */
 function showPlayerStats(){
     const container = document.getElementById("playerStatsContent");
@@ -423,9 +455,20 @@ function xpNeeded(lvl){ return Math.floor(40*Math.pow(1.5,lvl)); }
 
 /* ================= WAVES ================= */
 
+l/* ================= DUNGEON SYSTEM ================= */
+/* ================= DUNGEON SYSTEM ================= */
+
 let dungeonQueue = [];
 let dungeonCountdown = null;
+let dungeonEnemyAttackInterval = null;
+
+// Player joins dungeon queue
 function joinDungeonQueue(p){
+    if(p.dead){
+        systemMessage(`${p.name} cannot join the dungeon while dead!`);
+        return;
+    }
+
     if(!dungeonQueue.includes(p.name)) {
         dungeonQueue.push(p.name);
         systemMessage(`${p.name} joined the dungeon queue (${dungeonQueue.length} players)`);
@@ -439,46 +482,111 @@ function joinDungeonQueue(p){
         systemMessage("Dungeon will start in 60 seconds!");
     }
 }
+
+// Start dungeon: move queued players into dungeon
 function startDungeon(){
-    currentArea = "dungeon";
     systemMessage("Dungeon starts now!");
+    
+    dungeonQueue.forEach(name => {
+        let p = players[name];
+        if(p && !p.dead){
+            p.area = "dungeon";
+            p.x = 200 + Math.random()*400;
+            p.y = 300;
+            systemMessage(`${p.name} enters the dungeon!`);
+        }
+    });
+
+    dungeonQueue = []; // clear queue after start
     spawnWave();
     startDungeonEnemyAttack();
 }
+
+// Spawn normal enemies
 function spawnWave(){
-    enemies=[]; boss=null;
-    let count = Math.min(3+area,6);
-    for(let i=0;i<count;i++){
+    enemies = [];
+    boss = null;
+    let count = Math.min(3 + area, 6);
+    for(let i=0; i<count; i++){
         enemies.push({
-            hp:20+area*5,
-            max:20+area*5,
-            x:520+i*45,
-            y:360,
-            dead:false
+            hp: 20 + area*5,
+            max: 20 + area*5,
+            x: 520 + i*45,
+            y: 360,
+            dead: false
         });
     }
     systemMessage(`🌍 Area ${area} – enemies approach`);
 }
+
+// Spawn boss
 function spawnBoss(){
-    boss={
-        hp:120+area*80,
-        max:120+area*80,
-        x:720,y:250,dead:false
+    boss = {
+        hp: 120 + area*80,
+        max: 120 + area*80,
+        x: 720, y: 250,
+        dead: false
     };
     systemMessage("👹 BOSS APPEARS");
 }
-function drawEnemies(){
-    enemies.forEach(e=>{
-        if(e.dead) return;
-        drawHPBar(e.x,e.y-40,32,5,e.hp/e.max,"#ff5555");
-        ctx.fillStyle="#aaa"; ctx.beginPath(); ctx.arc(e.x,e.y-20,14,0,Math.PI*2); ctx.fill();
-    });
+
+// Start enemy attacks inside dungeon
+function startDungeonEnemyAttack() {
+    if(dungeonEnemyAttackInterval) return; // already running
+
+    dungeonEnemyAttackInterval = setInterval(() => {
+        // Get alive players **in dungeon only**
+        let alive = Object.values(players).filter(p => !p.dead && p.area === "dungeon");
+        if(alive.length === 0) return;
+
+        let target = alive[Math.floor(Math.random() * alive.length)];
+        let dmg = 6 + area*2;
+
+        target.hp -= dmg;
+        spawnFloater(`-${dmg}`, target.x, target.y-40, "#ff3333");
+
+        if(target.hp <= 0){
+            target.hp = 0;
+            target.dead = true;
+            systemMessage(`${target.name} has fallen!`);
+            checkDungeonGameOver();
+        }
+    }, 3500);
 }
-function drawBoss(){
-    if(!boss||boss.dead) return;
-    drawHPBar(boss.x,boss.y-80,90,8,boss.hp/boss.max,"#ff3333");
-    ctx.fillStyle="#f33"; ctx.beginPath(); ctx.arc(boss.x,boss.y,60,0,Math.PI*2); ctx.fill();
+
+// Stop dungeon enemy attacks
+function stopDungeonEnemyAttack() {
+    if(dungeonEnemyAttackInterval) {
+        clearInterval(dungeonEnemyAttackInterval);
+        dungeonEnemyAttackInterval = null;
+    }
 }
+
+// Check if all dungeon players are dead
+function checkDungeonGameOver(){
+    let aliveInDungeon = Object.values(players).filter(p => !p.dead && p.area === "dungeon");
+    if(aliveInDungeon.length === 0 && enemies.length > 0){
+        showGameOver();
+        enemies = [];
+        boss = null;
+        dungeonQueue = [];
+        stopDungeonEnemyAttack();
+    }
+}
+
+// Player retreats from dungeon (called via movePlayer)
+function retreatFromDungeon(p){
+    if(p.area === "dungeon"){
+        p.area = "home";
+        p.x = 120 + Object.keys(players).indexOf(p.name)*70 || 120;
+        p.y = 360;
+        dungeonQueue = dungeonQueue.filter(n => n !== p.name);
+        systemMessage(`${p.name} retreated to home.`);
+        checkDungeonGameOver();
+    }
+}
+
+
 function drawFloaters(){
     floaters.forEach(f=>{
         ctx.globalAlpha=f.life/60;
@@ -495,48 +603,6 @@ function updateEnemyUI(){
     enemies.forEach((e,i)=>{ if(!e.dead) t+=`Minion ${i+1}: ${e.hp}/${e.max}<br>`; });
     if(boss&&!boss.dead) t+=`<b>Boss:</b> ${boss.hp}/${boss.max}`;
     enemyUI.innerHTML=t;
-}
-/* ================= ENEMY ATTACK ================= */
-let dungeonEnemyAttackInterval = null;
-
-function startDungeonEnemyAttack() {
-    if(dungeonEnemyAttackInterval) return; // already running
-
-    dungeonEnemyAttackInterval = setInterval(()=>{
-        if(currentArea !== "dungeon") return; // safety check
-
-        let alive = Object.values(players).filter(p => !p.dead);
-        if(!alive.length) return;
-
-        let target = alive[Math.floor(Math.random() * alive.length)];
-        let dmg = 6 + area*2;
-        target.hp -= dmg;
-        spawnFloater(`-${dmg}`, target.x, target.y-40, "#ff3333");
-
-        if(target.hp <= 0){
-            target.hp = 0;
-            target.dead = true;
-            systemMessage(`${target.name} has fallen`);
-        }
-    }, 3500);
-}
-function stopDungeonEnemyAttack() {
-    if(dungeonEnemyAttackInterval) {
-        clearInterval(dungeonEnemyAttackInterval);
-        dungeonEnemyAttackInterval = null;
-    }
-}
-// Check game-over in dungeon
-function checkDungeonGameOver(){
-    if(currentArea!=="dungeon") return;
-    let alive = Object.values(players).filter(p=>!p.dead);
-    if(alive.length===0){
-        showGameOver();
-        enemies=[];
-        boss=null;
-        dungeonQueue=[];
-        stopDungeonEnemyAttack();
-    }
 }
 
 
@@ -564,37 +630,6 @@ function loop(){
 loop();
 
 
-
-
-//=========== GAME OVERLAY ===================== */
-// Game-over overlay
-let gameOverOverlay = null;
-function showGameOver(){
-    if(gameOverOverlay) return;
-    gameOverOverlay = document.createElement("div");
-    gameOverOverlay.style.position = "absolute";
-    gameOverOverlay.style.top = 0;
-    gameOverOverlay.style.left = 0;
-    gameOverOverlay.style.width = "100%";
-    gameOverOverlay.style.height = "100%";
-    gameOverOverlay.style.background = "rgba(0,0,0,0.85)";
-    gameOverOverlay.style.color = "#ff4444";
-    gameOverOverlay.style.fontSize = "48px";
-    gameOverOverlay.style.display = "flex";
-    gameOverOverlay.style.justifyContent = "center";
-    gameOverOverlay.style.alignItems = "center";
-    gameOverOverlay.style.zIndex = 999;
-    gameOverOverlay.textContent = "GAME OVER!";
-    document.body.appendChild(gameOverOverlay);
-
-    setTimeout(()=>{
-        if(gameOverOverlay){
-            gameOverOverlay.remove();
-            gameOverOverlay = null;
-            currentArea="home";
-        }
-    },40000);
-}
 
 
 
@@ -641,6 +676,7 @@ ComfyJS.onChat = (user,msg,flags,extra)=>{
 
 ComfyJS.Init("jaedraze");
 </script>
+
 </body>
 
 </html>
