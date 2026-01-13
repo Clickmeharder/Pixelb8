@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Chat Arena – Stickmen</title>
+<title>Chat Arena – Stickmen (No Prefix)</title>
 <script src="https://unpkg.com/comfy.js/dist/comfy.min.js"></script>
 <style>
 body {
@@ -39,6 +39,9 @@ canvas { display:block; margin:auto; }
     CHAT HP
     <div class="bar"><div id="chatHP" class="fill chat"></div></div>
     <div id="boost">⚡ BOOST ACTIVE ⚡</div>
+    <div style="margin-top:6px;font-size:12px;opacity:.8;">
+        Commands: <b>attack</b> <b>heal</b> <b>boost</b>
+    </div>
 </div>
 
 <script>
@@ -50,32 +53,47 @@ let boss = {
     hp:1200, max:1200,
     horns: Math.random()>0.5,
     spikes: Math.floor(Math.random()*3)+1,
-    eyes: Math.floor(Math.random()*3)+1
+    eyes: Math.floor(Math.random()*3)+1,
+    flash:0
 };
+
 let chatHP = { hp:900, max:900 };
 let players = {};
 let boost = false;
 let cooldowns = {};
 
 /* ================= UI ================= */
+const bossHP = document.getElementById("bossHP");
+const chatHPdiv = document.getElementById("chatHP");
+
 function updateBars(){
     bossHP.style.width = (boss.hp/boss.max*100)+"%";
     chatHPdiv.style.width = (chatHP.hp/chatHP.max*100)+"%";
 }
-const bossHP = document.getElementById("bossHP");
-const chatHPdiv = document.getElementById("chatHP");
 updateBars();
+
+/* ================= HELPERS ================= */
+function normalizeColor(c){
+    return (typeof c === "string" && c.startsWith("#")) ? c : "#ffffff";
+}
+
+function cleanMessage(msg){
+    return msg.toLowerCase().replace(/[^a-z]/g,"");
+}
 
 /* ================= ENTITIES ================= */
 function getPlayer(user,color){
+    color = normalizeColor(color);
     if(!players[user]){
         players[user] = {
-            x:120+Object.keys(players).length*40,
+            x:120 + Object.keys(players).length * 45,
             y:360,
-            color:color||"#fff",
+            color,
             action:null,
             timer:0
         };
+    } else {
+        players[user].color = color;
     }
     return players[user];
 }
@@ -84,12 +102,12 @@ function getPlayer(user,color){
 function drawBoss(){
     ctx.save();
     ctx.translate(650,250);
-    ctx.fillStyle = boost ? "#ff0" : "#f33";
+
+    ctx.fillStyle = boss.flash>0 ? "#fff" : (boost ? "#ff0" : "#f33");
     ctx.beginPath();
     ctx.arc(0,0,60,0,Math.PI*2);
     ctx.fill();
 
-    // eyes
     ctx.fillStyle="#000";
     for(let i=0;i<boss.eyes;i++){
         ctx.beginPath();
@@ -97,7 +115,6 @@ function drawBoss(){
         ctx.fill();
     }
 
-    // horns
     if(boss.horns){
         ctx.strokeStyle="#fff";
         ctx.beginPath();
@@ -106,7 +123,6 @@ function drawBoss(){
         ctx.stroke();
     }
 
-    // spikes
     ctx.strokeStyle="#fff";
     for(let i=0;i<boss.spikes;i++){
         ctx.beginPath();
@@ -118,32 +134,34 @@ function drawBoss(){
 }
 
 function drawStickman(p,name){
-    ctx.strokeStyle=p.color;
     ctx.lineWidth=3;
+    ctx.shadowColor="#000";
+    ctx.shadowBlur=4;
 
     let x=p.x, y=p.y;
 
-    // attack animation
-    if(p.action==="attack"){
-        x+=20;
+    if(p.action==="attack") x+=20;
+
+    if(p.action==="heal"){
+        ctx.strokeStyle="#44ff88";
+        ctx.beginPath();
+        ctx.arc(x,y-10,30-p.timer,0,Math.PI*2);
+        ctx.stroke();
     }
 
-    ctx.beginPath(); // head
-    ctx.arc(x,y-30,8,0,Math.PI*2); ctx.stroke();
+    ctx.strokeStyle=p.color;
 
-    ctx.beginPath(); // body
-    ctx.moveTo(x,y-22); ctx.lineTo(x,y+10); ctx.stroke();
-
-    ctx.beginPath(); // arms
-    ctx.moveTo(x-10,y-10); ctx.lineTo(x+10,y-10); ctx.stroke();
-
-    ctx.beginPath(); // legs
+    ctx.beginPath(); ctx.arc(x,y-30,8,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,y-22); ctx.lineTo(x,y+10); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-10,y-10); ctx.lineTo(x+10,y-10); ctx.stroke();
+    ctx.beginPath();
     ctx.moveTo(x,y+10); ctx.lineTo(x-10,y+25);
     ctx.moveTo(x,y+10); ctx.lineTo(x+10,y+25);
     ctx.stroke();
 
+    ctx.shadowBlur=0;
     ctx.fillStyle=p.color;
-    ctx.fillText(name,x-15,y+40);
+    ctx.fillText(name,x-18,y+42);
 }
 
 function draw(){
@@ -151,11 +169,13 @@ function draw(){
     drawBoss();
 
     for(let u in players){
-        drawStickman(players[u],u);
-        if(players[u].timer>0) players[u].timer--;
-        else players[u].action=null;
+        let p=players[u];
+        drawStickman(p,u);
+        if(p.timer>0) p.timer--;
+        else p.action=null;
     }
 
+    if(boss.flash>0) boss.flash--;
     requestAnimationFrame(draw);
 }
 draw();
@@ -170,31 +190,36 @@ setInterval(()=>{
 
 function canAct(u){
     let t=Date.now();
-    if(!cooldowns[u]||t-cooldowns[u]>3000){
-        cooldowns[u]=t; return true;
+    if(!cooldowns[u]||t-cooldowns[u]>2500){
+        cooldowns[u]=t;
+        return true;
     }
+    return false;
 }
 
 /* ================= CHAT ================= */
 ComfyJS.onChat = (user, msg, flags, extra) => {
-    const userColor = extra?.userColor || "#ffffff";
-    msg=msg.toLowerCase();
+    const userColor = normalizeColor(extra?.userColor);
+    const cmd = cleanMessage(msg);
+
     if(!canAct(user)) return;
-    let p = getPlayer(user, userColor);
 
-    if(msg==="attack"){
-        let dmg=Math.floor(Math.random()*30+20);
+    let p = getPlayer(user,userColor);
+
+    if(cmd === "attack"){
+        let dmg = Math.floor(Math.random()*30+20);
         if(boost) dmg*=2;
-        boss.hp=Math.max(0,boss.hp-dmg);
-        p.action="attack"; p.timer=20;
+        boss.hp = Math.max(0,boss.hp-dmg);
+        boss.flash = 6;
+        p.action="attack"; p.timer=15;
     }
 
-    if(msg==="heal"){
+    if(cmd === "heal"){
         p.action="heal"; p.timer=20;
-        chatHP.hp=Math.min(chatHP.max,chatHP.hp+60);
+        chatHP.hp = Math.min(chatHP.max, chatHP.hp + 80);
     }
 
-    if(msg==="boost"){
+    if(cmd === "boost"){
         boost=true;
         document.getElementById("boost").style.display="block";
         setTimeout(()=>{
@@ -202,6 +227,7 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
             document.getElementById("boost").style.display="none";
         },6000);
     }
+
     updateBars();
 };
 
@@ -209,3 +235,4 @@ ComfyJS.Init("jaedraze");
 </script>
 </body>
 </html>
+
