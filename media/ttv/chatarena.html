@@ -314,9 +314,9 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
 
-    if (cmd === "!attack") performAttack(p);
+    if (cmd === "attack") performAttack(p);
     
-    if (cmd === "!heal") {
+    if (cmd === "heal") {
         let targetName = args[1];
         let target = players[targetName];
         if (target && target.area === p.area && !target.dead) {
@@ -332,17 +332,17 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
         }
     }
 
-    if (cmd === "!travel") movePlayer(p, args[1]);
-    if (cmd === "!home" || cmd === "!retreat") movePlayer(p, "home");
-    if (cmd === "!dungeon") movePlayer(p, "dungeon");
-    if (cmd === "!fish") performFish(p);
-    if (cmd === "!join") joinDungeonQueue(p);
+    if (cmd === "travel") movePlayer(p, args[1]);
+    if (cmd === "home" || cmd === "!retreat") movePlayer(p, "home");
+    if (cmd === "dungeon") movePlayer(p, "dungeon");
+    if (cmd === "fish") performFish(p);
+    if (cmd === "join") joinDungeonQueue(p);
 
-    if (cmd === "!inventory" || cmd === "!inv") {
+    if (cmd === "inventory" || cmd === "!inv") {
         systemMessage(`${user}'s items: ${p.stats.inventory.slice(-5).join(", ")}...`);
     }
 
-    if (cmd === "!mingle") {
+    if (cmd === "mingle") {
         if (p.area !== "home") return;
         let targetName = args[1];
         let target = players[targetName] || Object.values(players).find(pl => pl.name !== user && pl.area === "home" && !pl.dead);
@@ -353,16 +353,16 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
         }
     }
 
-    if (cmd === "!respawn" && p.dead) {
+    if (cmd === "respawn" && p.dead) {
         p.dead = false; p.hp = p.maxHp;
         systemMessage(`${p.name} returned to life!`);
     }
 
     // Streamer Controls
     if (flags.broadcaster || flags.mod) {
-        if (cmd === "!showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "VIEWING: HOME"; }
-        if (cmd === "!showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "VIEWING: DUNGEON"; }
-        if (cmd === "!showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "VIEWING: FISHING POND"; }
+        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "VIEWING: HOME"; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "VIEWING: DUNGEON"; }
+        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "VIEWING: FISHING POND"; }
     }
 };
 
