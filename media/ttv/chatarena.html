@@ -24,7 +24,7 @@
 <div id="enemyUI"></div>
 <div id="systemUI"></div>
 <div id="tooltip"></div>
-<div id="areaDisplay">StickenFallv2.1.5- VIEWING: HOME</div>
+<div id="areaDisplay">StickenFallv2.1.6- VIEWING: HOME</div>
 
 <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 <script>
@@ -126,9 +126,9 @@ function saveStats(p) {
 }
 const ITEM_DB = {
     // --- WEAPONS ---
-	"Rusty Dagger":     { type: "weapon", power: 5,  speed: 400,  value: 40,   color: "#777" },
-    "Iron Sword":       { type: "weapon", power: 12, speed: 700,  value: 200,  color: "#eee" },
-    "shitty shortbow":  { type: "weapon", power: 5,  speed: 1200, value: 30,   color: "#eee" },
+	"Rusty Dagger":     { type: "weapon", power: 5,  speed: 2000,  value: 40,   color: "#777" },
+    "Iron Sword":       { type: "weapon", power: 12, speed: 2500,  value: 200,  color: "#eee" },
+    "shitty shortbow":  { type: "weapon", power: 5,  speed: 1250, value: 30,   color: "#eee" },
     "decent shortbow":  { type: "weapon", power: 8,  speed: 1000, value: 100,  color: "#eee" },
     // --- TOOLS ---
     "Fishing Rod":      { type: "tool",   power: 0,               value: 1,   color: "#8B4513" },
@@ -360,7 +360,7 @@ function joinDungeonQueue(p) {
             // --- AUTO-SWITCH VIEW (30 seconds before start) ---
             if (dungeonSecondsLeft === 30) {
                 viewArea = "dungeon";
-                document.getElementById("areaDisplay").textContent = "StickenFallv2.1.5 - VIEWING: DUNGEON (PREPARING)";
+                document.getElementById("areaDisplay").textContent = "StickenFallv2.1.6 - VIEWING: DUNGEON (PREPARING)";
                 systemMessage("System: Switching view to Dungeon for upcoming raid...");
             }
 
@@ -379,7 +379,7 @@ function startDungeon() {
     
     // Ensure the view is definitely on the dungeon
     viewArea = "dungeon"; 
-    document.getElementById("areaDisplay").textContent = "StickenFallv2.1.5 - VIEWING: DUNGEON (ACTIVE)";
+    document.getElementById("areaDisplay").textContent = "StickenFallv2.1.6 - VIEWING: DUNGEON (ACTIVE)";
 
     dungeonQueue.forEach(name => {
         let p = players[name];
@@ -512,74 +512,7 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
     if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY);
 }
 
-function drawStickman(ctx, p) {
-    if (p.area !== viewArea) return;
-    updatePhysics(p); 
-    const now = Date.now();
-    let lean = p.lean || 0;
 
-    if (p.dead) {
-        ctx.fillStyle = "rgba(200, 0, 0, 0.6)";
-        ctx.beginPath(); ctx.ellipse(p.x, p.y + 20, 25, 10, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.textAlign = "center"; ctx.fillStyle = "#555";
-        ctx.fillText("CORPSE", p.x, p.y + 10);
-        return;
-    }
-
-    let bodyY = 0;
-    let armMove = 0;
-    const isDancing = p.activeTask === "dancing";
-    if (isDancing) {
-        if (p.danceStyle === 1) bodyY = Math.sin(now / 100) * 8;
-        if (p.danceStyle === 2) armMove = Math.sin(now / 50) * 20;
-        if (p.danceStyle === 3) lean = Math.sin(now / 200) * 0.6;
-    }
-
-    ctx.strokeStyle = p.color; ctx.lineWidth = 3;
-    const headX = p.x + (lean * 20);
-    const headY = p.y - 30 + bodyY;
-
-    // 1. Head & Face
-    ctx.beginPath(); ctx.arc(headX, headY, 10, 0, Math.PI * 2); ctx.stroke();
-    ctx.fillStyle = p.color;
-    ctx.fillRect(headX + 2, headY - 3, 2, 2);
-    ctx.fillRect(headX + 6, headY - 3, 2, 2);
-    ctx.beginPath(); ctx.arc(headX + 4, headY + 2, 3, 0, Math.PI); ctx.stroke();
-    
-    // 2. Torso
-    ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
-
-    // 3. ARMS (FIXED: Now draws even if weapon is equipped)
-    const isAttacking = p.activeTask === "attacking";
-    const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
-
-    if (!isAttacking && !isFishing) {
-        ctx.beginPath(); 
-        ctx.moveTo(headX, headY + 15); 
-        ctx.lineTo(p.x - 18 + (lean * 10), p.y + 3 + bodyY + armMove); 
-        ctx.moveTo(headX, headY + 15); 
-        ctx.lineTo(p.x + 18 + (lean * 30), p.y + 3 + bodyY - armMove); 
-        ctx.stroke();
-    }
-
-    // 4. Legs
-    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-    ctx.beginPath(); 
-    ctx.moveTo(p.x, p.y + 10 + bodyY); 
-    ctx.lineTo(p.x - 10 - walk, p.y + 25); 
-    ctx.moveTo(p.x, p.y + 10 + bodyY); 
-    ctx.lineTo(p.x + 10 + walk, p.y + 25); 
-    ctx.stroke();
-
-    // 5. Equipment (Pass bodyY and armMove)
-    drawEquipment(ctx, p, now, bodyY, armMove);
-
-    // HP Bar & Name
-    ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55 + bodyY, 40, 4);
-    ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55 + bodyY, 40 * (p.hp / p.maxHp), 4);
-    ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
-    ctx.fillText(p.name, p.x, p.y + 40 + bodyY);
-}
 
 function drawBoots(ctx, p, bodyY = 0) {
     const item = ITEM_DB[p.stats.equippedBoots];
@@ -903,7 +836,7 @@ function gameLoop() {
 		// 3.1 ATTACK TIMING LOGIC (Original)
 		if (p.activeTask === "attacking" && !p.dead) {
 			let weapon = ITEM_DB[p.stats.equippedWeapon];
-			let attackSpeed = weapon?.speed || 700; 
+			let attackSpeed = weapon?.speed || 2500; 
 			if (!p.lastAttackTime) p.lastAttackTime = 0;
 			if (now - p.lastAttackTime > attackSpeed) {
 				performAttack(p);
@@ -1301,9 +1234,9 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
 
     // Admin Controls
     if (flags.broadcaster || flags.mod) {
-        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.5 - VIEWING: HOME"; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.5 - VIEWING: DUNGEON"; }
-        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.5 - VIEWING: FISHING POND"; }
+        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.6 - VIEWING: HOME"; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.6 - VIEWING: DUNGEON"; }
+        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.6 - VIEWING: FISHING POND"; }
     }
 };
 setInterval(() => {
