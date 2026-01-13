@@ -2,24 +2,32 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Chat Arena – Stickmen (No Prefix)</title>
+<title>Chat Arena – Stickmen</title>
 <script src="https://unpkg.com/comfy.js/dist/comfy.min.js"></script>
+
 <style>
 body {
     margin:0;
-    background:none;
+    background:transparent;
     color:#e0f7ff;
     font-family:monospace;
     overflow:hidden;
 }
 canvas { display:block; margin:auto; }
+
 #ui {
     position:absolute;
     top:10px; left:10px;
 }
-.bar { width:300px; height:18px; background:#222; margin-bottom:6px; }
+.bar {
+    width:320px;
+    height:18px;
+    background:#222;
+    margin-bottom:6px;
+}
 .fill { height:100%; background:#ff4444; }
 .chat { background:#44ffcc; }
+
 #boost {
     margin-top:6px;
     color:#ff0;
@@ -39,9 +47,6 @@ canvas { display:block; margin:auto; }
     CHAT HP
     <div class="bar"><div id="chatHP" class="fill chat"></div></div>
     <div id="boost">⚡ BOOST ACTIVE ⚡</div>
-    <div style="margin-top:6px;font-size:12px;opacity:.8;">
-        Commands: <b>attack</b> <b>heal</b> <b>boost</b>
-    </div>
 </div>
 
 <script>
@@ -49,183 +54,234 @@ const c = document.getElementById("c");
 const ctx = c.getContext("2d");
 
 /* ================= STATE ================= */
+
 let boss = {
-    hp:1200, max:1200,
-    horns: Math.random()>0.5,
-    spikes: Math.floor(Math.random()*3)+1,
-    eyes: Math.floor(Math.random()*3)+1,
-    flash:0
+    x: 720,
+    y: 250,
+    hp: 1200,
+    max: 1200,
+    attackTimer: 0,
+    attacking: false,
+    target: null
 };
 
-let chatHP = { hp:900, max:900 };
 let players = {};
 let boost = false;
 let cooldowns = {};
 
 /* ================= UI ================= */
+
 const bossHP = document.getElementById("bossHP");
 const chatHPdiv = document.getElementById("chatHP");
 
 function updateBars(){
-    bossHP.style.width = (boss.hp/boss.max*100)+"%";
-    chatHPdiv.style.width = (chatHP.hp/chatHP.max*100)+"%";
+    bossHP.style.width = (boss.hp / boss.max * 100) + "%";
+
+    let total = 0;
+    let max = 0;
+    for (let p of Object.values(players)) {
+        total += p.hp;
+        max += p.maxHp;
+    }
+    chatHPdiv.style.width = max ? (total / max * 100) + "%" : "0%";
 }
-updateBars();
 
 /* ================= HELPERS ================= */
+
 function normalizeColor(c){
-    return (typeof c === "string" && c.startsWith("#")) ? c : "#ffffff";
+    if(!c) return "#ffffff";
+    if(!c.startsWith("#")) return "#" + c;
+    return c;
 }
 
-function cleanMessage(msg){
-    return msg.toLowerCase().replace(/[^a-z]/g,"");
-}
-
-/* ================= ENTITIES ================= */
-function getPlayer(user,color){
-    color = normalizeColor(color);
+function getPlayer(user, color){
     if(!players[user]){
         players[user] = {
-            x:120 + Object.keys(players).length * 45,
-            y:360,
-            color,
-            action:null,
-            timer:0
+            name: user,
+            color: normalizeColor(color),
+            x: 120 + Object.keys(players).length * 60,
+            y: 360,
+            baseX: null,
+            hp: 100,
+            maxHp: 100,
+            action: null,
+            timer: 0,
+            hitFlash: 0
         };
-    } else {
-        players[user].color = color;
+        players[user].baseX = players[user].x;
+        updateBars();
     }
     return players[user];
 }
 
+function canAct(u){
+    let t = Date.now();
+    if(!cooldowns[u] || t - cooldowns[u] > 2500){
+        cooldowns[u] = t;
+        return true;
+    }
+}
+
 /* ================= DRAW ================= */
+
+ctx.font = "14px monospace";
+ctx.textAlign = "center";
+
 function drawBoss(){
     ctx.save();
-    ctx.translate(650,250);
+    ctx.translate(boss.x, boss.y);
 
-    ctx.fillStyle = boss.flash>0 ? "#fff" : (boost ? "#ff0" : "#f33");
+    ctx.fillStyle = boss.attacking ? "#ff0" : "#f33";
     ctx.beginPath();
     ctx.arc(0,0,60,0,Math.PI*2);
     ctx.fill();
 
     ctx.fillStyle="#000";
-    for(let i=0;i<boss.eyes;i++){
-        ctx.beginPath();
-        ctx.arc(-15+i*15,-10,6,0,Math.PI*2);
-        ctx.fill();
-    }
+    ctx.beginPath();
+    ctx.arc(-15,-10,6,0,Math.PI*2);
+    ctx.arc(15,-10,6,0,Math.PI*2);
+    ctx.fill();
 
-    if(boss.horns){
-        ctx.strokeStyle="#fff";
-        ctx.beginPath();
-        ctx.moveTo(-30,-40); ctx.lineTo(-60,-80);
-        ctx.moveTo(30,-40); ctx.lineTo(60,-80);
-        ctx.stroke();
-    }
-
-    ctx.strokeStyle="#fff";
-    for(let i=0;i<boss.spikes;i++){
-        ctx.beginPath();
-        ctx.moveTo(-40+i*40,40);
-        ctx.lineTo(-20+i*40,80);
-        ctx.stroke();
-    }
     ctx.restore();
 }
 
-function drawStickman(p,name){
-    ctx.lineWidth=3;
-    ctx.shadowColor="#000";
-    ctx.shadowBlur=4;
+function drawStickman(p){
+    let x = p.x;
+    let y = p.y;
 
-    let x=p.x, y=p.y;
-
-    if(p.action==="attack") x+=20;
-
-    if(p.action==="heal"){
-        ctx.strokeStyle="#44ff88";
-        ctx.beginPath();
-        ctx.arc(x,y-10,30-p.timer,0,Math.PI*2);
-        ctx.stroke();
+    if(p.hitFlash > 0){
+        ctx.strokeStyle = "#ff0000";
+        p.hitFlash--;
+    } else {
+        ctx.strokeStyle = p.color;
     }
 
-    ctx.strokeStyle=p.color;
+    ctx.lineWidth = 4;
 
-    ctx.beginPath(); ctx.arc(x,y-30,8,0,Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x,y-22); ctx.lineTo(x,y+10); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x-10,y-10); ctx.lineTo(x+10,y-10); ctx.stroke();
+    // head
     ctx.beginPath();
-    ctx.moveTo(x,y+10); ctx.lineTo(x-10,y+25);
-    ctx.moveTo(x,y+10); ctx.lineTo(x+10,y+25);
+    ctx.arc(x, y-35, 10, 0, Math.PI*2);
     ctx.stroke();
 
-    ctx.shadowBlur=0;
-    ctx.fillStyle=p.color;
-    ctx.fillText(name,x-18,y+42);
+    // body
+    ctx.beginPath();
+    ctx.moveTo(x, y-25);
+    ctx.lineTo(x, y+15);
+    ctx.stroke();
+
+    // arms
+    ctx.beginPath();
+    ctx.moveTo(x-15, y-5);
+    ctx.lineTo(x+15, y-5);
+    ctx.stroke();
+
+    // legs
+    ctx.beginPath();
+    ctx.moveTo(x, y+15);
+    ctx.lineTo(x-15, y+35);
+    ctx.moveTo(x, y+15);
+    ctx.lineTo(x+15, y+35);
+    ctx.stroke();
+
+    // name
+    ctx.fillStyle = p.color;
+    ctx.fillText(p.name, x, y+55);
+
+    // hp bar
+    ctx.fillStyle="#000";
+    ctx.fillRect(x-20, y+62, 40, 5);
+    ctx.fillStyle="#44ff44";
+    ctx.fillRect(x-20, y+62, 40 * (p.hp / p.maxHp), 5);
 }
 
 function draw(){
     ctx.clearRect(0,0,c.width,c.height);
+
     drawBoss();
 
-    for(let u in players){
-        let p=players[u];
-        drawStickman(p,u);
-        if(p.timer>0) p.timer--;
-        else p.action=null;
+    for(let p of Object.values(players)){
+        drawStickman(p);
+
+        if(p.action === "attack"){
+            p.x += (boss.x - 120 - p.x) * 0.25;
+            if(Math.abs(p.x - (boss.x - 120)) < 5){
+                p.action = "return";
+            }
+        } else if(p.action === "return"){
+            p.x += (p.baseX - p.x) * 0.25;
+            if(Math.abs(p.x - p.baseX) < 2){
+                p.x = p.baseX;
+                p.action = null;
+            }
+        }
     }
 
-    if(boss.flash>0) boss.flash--;
     requestAnimationFrame(draw);
 }
 draw();
 
-/* ================= GAME LOGIC ================= */
-setInterval(()=>{
-    if(boss.hp<=0 || chatHP.hp<=0) return;
-    let dmg=Math.floor(Math.random()*25+15);
-    chatHP.hp=Math.max(0,chatHP.hp-dmg);
-    updateBars();
-},3000);
+/* ================= BOSS ATTACK ================= */
 
-function canAct(u){
-    let t=Date.now();
-    if(!cooldowns[u]||t-cooldowns[u]>2500){
-        cooldowns[u]=t;
-        return true;
-    }
-    return false;
-}
+setInterval(()=>{
+    let alive = Object.values(players).filter(p => p.hp > 0);
+    if(alive.length === 0 || boss.hp <= 0) return;
+
+    let target = alive[Math.floor(Math.random()*alive.length)];
+    boss.attacking = true;
+    boss.target = target;
+
+    setTimeout(()=>{
+        let dmg = Math.floor(Math.random()*20 + 15);
+        target.hp = Math.max(0, target.hp - dmg);
+        target.hitFlash = 15;
+        updateBars();
+    },400);
+
+    setTimeout(()=>{
+        boss.attacking = false;
+        boss.target = null;
+    },800);
+
+}, 3000);
 
 /* ================= CHAT ================= */
-ComfyJS.onChat = (user, msg, flags, extra) => {
-    const userColor = normalizeColor(extra?.userColor);
-    const cmd = cleanMessage(msg);
 
+ComfyJS.onChat = (user, msg, flags, extra) => {
+    msg = msg.toLowerCase();
+    const p = getPlayer(user, extra?.userColor);
     if(!canAct(user)) return;
 
-    let p = getPlayer(user,userColor);
-
-    if(cmd === "attack"){
-        let dmg = Math.floor(Math.random()*30+20);
-        if(boost) dmg*=2;
-        boss.hp = Math.max(0,boss.hp-dmg);
-        boss.flash = 6;
-        p.action="attack"; p.timer=15;
+    if(msg === "attack"){
+        let dmg = Math.floor(Math.random()*30 + 20);
+        if(boost) dmg *= 2;
+        boss.hp = Math.max(0, boss.hp - dmg);
+        p.action = "attack";
     }
 
-    if(cmd === "heal"){
-        p.action="heal"; p.timer=20;
-        chatHP.hp = Math.min(chatHP.max, chatHP.hp + 80);
+    if(msg.startsWith("heal")){
+        let parts = msg.split(" ");
+        let target;
+
+        if(parts[1] && players[parts[1]] && parts[1] !== user){
+            target = players[parts[1]];
+        } else {
+            let others = Object.values(players).filter(x => x.name !== user && x.hp > 0);
+            if(others.length) target = others[Math.floor(Math.random()*others.length)];
+        }
+
+        if(target){
+            target.hp = Math.min(target.maxHp, target.hp + 35);
+            target.hitFlash = 10;
+        }
     }
 
-    if(cmd === "boost"){
-        boost=true;
-        document.getElementById("boost").style.display="block";
+    if(msg === "boost"){
+        boost = true;
+        document.getElementById("boost").style.display = "block";
         setTimeout(()=>{
-            boost=false;
-            document.getElementById("boost").style.display="none";
-        },6000);
+            boost = false;
+            document.getElementById("boost").style.display = "none";
+        }, 6000);
     }
 
     updateBars();
@@ -235,4 +291,3 @@ ComfyJS.Init("jaedraze");
 </script>
 </body>
 </html>
-
