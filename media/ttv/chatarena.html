@@ -477,19 +477,19 @@ ComfyJS.onChat = (user,msg,flags,extra)=>{
         }
         systemMessage("All player stats cleared!");
 	    // New chat command to clear all player stats
-    if(msg === "clearstats") {
-        for (let key in localStorage) {
-            if (key.startsWith("stats_")) localStorage.removeItem(key);
-        }
-        systemMessage("All player stats cleared!");
-    }
+		if(msg === "clearstats") {
+			for (let key in localStorage) {
+				if (key.startsWith("stats_")) localStorage.removeItem(key);
+			}
+			systemMessage("All player stats cleared!");
+		}
+	};
 	if(msg === "dungeon") joinDungeonQueue(p);
     if(msg==="stats") showPlayerStats();
 	
 	localStorage.clear();
-systemMessage("All saved stats cleared!");
-};
-
+	systemMessage("All saved stats cleared!");
+}
 /* ================= INIT ================= */
 
 ComfyJS.Init("jaedraze");
