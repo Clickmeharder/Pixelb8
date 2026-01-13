@@ -495,22 +495,24 @@ function handleLoot(p, target) {
 }
 function drawEquipment(ctx, p, now, bodyY, armMove) {
     if (p.dead) return;
+
+    // --- Variables ---
+    const pWeapon = p.stats.equippedWeapon; 
+    const isAttacking = p.activeTask === "attacking";
     const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
     const lean = p.lean || 0;
 
+    // --- 1. THE FISHING ROD ---
     if (isFishing) {
         ctx.save();
         ctx.setLineDash([]); 
-        
         ctx.strokeStyle = "#8B4513"; 
         ctx.lineWidth = 2;
         let bob = Math.sin(now / 300) * 0.1;
         
-        // --- 1. THE ROD ---
-        // We draw the rod pointing toward the right (the water)
         const rodStartX = p.x + 10 + (lean * 20);
         const rodStartY = p.y - 10 + bodyY;
-        const rodTipX = p.x + 60 + (lean * 20); // Rod is 50px long
+        const rodTipX = p.x + 50 + (lean * 20);
         const rodTipY = p.y - 40 + (bob * 20) + bodyY;
 
         ctx.beginPath();
@@ -518,31 +520,23 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
         ctx.lineTo(rodTipX, rodTipY); 
         ctx.stroke();
 
-        // --- 2. THE LINE ---
-        ctx.strokeStyle = "rgba(255,255,255,0.6)";
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(rodTipX, rodTipY);
         
-        // TARGET: The water starts at X=250. 
-        // We want the hook to land at X=280+ to be clearly in the water.
-        const waterX = Math.max(rodTipX + 40, 280); 
-        const waterY = 510 + (Math.sin(now/500) * 5); // Bobbing in water
+        const waterX = Math.max(rodTipX + 40, 280);
+        const waterY = 510 + (Math.sin(now/500) * 5);
 
-        // Curve the line from the tip down into the pond
         ctx.quadraticCurveTo(rodTipX + 20, rodTipY + 40, waterX, waterY);
         ctx.stroke();
 
-        // Optional: Small Bobber
         ctx.fillStyle = "#ff4444";
-        ctx.beginPath();
-        ctx.arc(waterX, waterY, 3, 0, Math.PI * 2);
-        ctx.fill();
-
+        ctx.beginPath(); ctx.arc(waterX, waterY, 3, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
     }
 
-    // --- 2. WEAPON (Bows vs Swords) ---
+    // --- 2. WEAPON (Restored Attack Level Colors) ---
     if (pWeapon && ITEM_DB[pWeapon] && !isFishing) {
         const w = ITEM_DB[pWeapon];
         const isBow = pWeapon.toLowerCase().includes("bow");
@@ -552,13 +546,17 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
             ctx.translate(p.x + 12, p.y - 10 + bodyY);
             let swing = Math.sin(now / 150) * 0.8;
             ctx.rotate(swing);
-            ctx.strokeStyle = w.color || "#ccc";
+            
+            // Restore: Original Level-based Color Logic
+            ctx.strokeStyle = p.stats.attackLevel > 10 ? "#0ff" : (w.color || "#ccc");
             ctx.lineWidth = 3;
             ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(25, -5); ctx.stroke();
+            
+            // Crossguard
             ctx.strokeStyle = "#aa8800";
             ctx.beginPath(); ctx.moveTo(5, -8); ctx.lineTo(5, 8); ctx.stroke();
         } else {
-            // SHEATHED
+            // SHEATHED logic remains the same
             if (isBow) {
                 ctx.translate(p.x - 2, p.y - 5 + bodyY);
                 ctx.rotate(Math.PI / 4);
@@ -580,7 +578,7 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
         ctx.restore();
     }
 
-    // --- 3. OTHER GEAR ---
+    // --- 3. GEAR (Armor, Helmet, Boots) ---
     if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY);
     if (p.stats.equippedHelmet) drawHelmet(ctx, p, bodyY);
     if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY);
@@ -740,34 +738,34 @@ function drawStickman(ctx, p) {
     const headX = p.x + (lean * 20);
     const headY = p.y - 30 + bodyY;
 
-    // Head/Face/Torso
+    // 1. Head & Face (RESTORED)
     ctx.beginPath(); ctx.arc(headX, headY, 10, 0, Math.PI * 2); ctx.stroke();
     ctx.fillStyle = p.color;
-    ctx.fillRect(headX + 2, headY - 3, 2, 2);
-    ctx.fillRect(headX + 6, headY - 3, 2, 2);
-    ctx.beginPath(); ctx.arc(headX + 4, headY + 2, 3, 0, Math.PI); ctx.stroke();
+    ctx.fillRect(headX + 2, headY - 3, 2, 2); // Eye 1
+    ctx.fillRect(headX + 6, headY - 3, 2, 2); // Eye 2
+    ctx.beginPath(); ctx.arc(headX + 4, headY + 2, 3, 0, Math.PI); ctx.stroke(); // Smile
+    
+    // 2. Torso
     ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
 
-    // Arms
+    // 3. Arms
     const isAttacking = p.activeTask === "attacking";
     if (!isAttacking) {
         ctx.beginPath();
         ctx.strokeStyle = p.color;
-        // Left Arm
         ctx.moveTo(headX, headY + 15);
-        ctx.lineTo(p.x - 18 + (lean * 10), p.y + 3 + bodyY + armMove);
-        // Right Arm
+        ctx.lineTo(p.x - 18 + (lean * 10), p.y + 2 + bodyY + armMove); // Left
+        
         ctx.moveTo(headX, headY + 15);
         if (isFishing) {
-            // Anchor hand exactly to the rod start point (p.x+10, p.y-10)
-            ctx.lineTo(p.x + 10 + (lean * 20), p.y - 10 + bodyY);
+            ctx.lineTo(p.x + 10 + (lean * 20), p.y - 10 + bodyY); // Right (Rod Anchor)
         } else {
-            ctx.lineTo(p.x + 18 + (lean * 30), p.y + 3 + bodyY - armMove);
+            ctx.lineTo(p.x + 18 + (lean * 30), p.y + 2 + bodyY - armMove); // Right (Swing)
         }
         ctx.stroke();
     }
 
-    // Legs
+    // 4. Legs
     let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
     ctx.beginPath(); 
     ctx.moveTo(p.x, p.y + 10 + bodyY); 
@@ -776,10 +774,9 @@ function drawStickman(ctx, p) {
     ctx.lineTo(p.x + 10 + walk, p.y + 25); 
     ctx.stroke();
 
-    // Equipment (Passes now, bodyY, armMove)
     drawEquipment(ctx, p, now, bodyY, armMove);
 
-    // UI
+    // HP & Name
     ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
     ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
     ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
