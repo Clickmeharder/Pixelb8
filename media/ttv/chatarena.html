@@ -1,185 +1,210 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Chat Arena</title>
+<title>Chat Arena – Stickmen</title>
 <script src="https://unpkg.com/comfy.js/dist/comfy.min.js"></script>
 <style>
 body {
-    margin: 0;
-    background: #0b0f14;
-    color: #e0f7ff;
-    font-family: monospace;
-    overflow: hidden;
+    margin:0;
+    background:#0b0f14;
+    color:#e0f7ff;
+    font-family:monospace;
+    overflow:hidden;
 }
-#game {
-    display: block;
-    margin: auto;
-    background: radial-gradient(#111 30%, #050709);
+canvas { display:block; margin:auto; }
+#ui {
+    position:absolute;
+    top:10px; left:10px;
 }
-#overlay {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 14px;
-}
-.bar {
-    width: 300px;
-    height: 20px;
-    background: #222;
-    margin-bottom: 6px;
-}
-.fill {
-    height: 100%;
-    background: linear-gradient(90deg, #ff4444, #ff0000);
-}
-.chatFill {
-    background: linear-gradient(90deg, #44ffcc, #00ffaa);
-}
-.float {
-    position: absolute;
-    pointer-events: none;
-    font-weight: bold;
-    animation: floatUp 1.5s ease-out forwards;
-}
-@keyframes floatUp {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(-40px); }
+.bar { width:300px; height:18px; background:#222; margin-bottom:6px; }
+.fill { height:100%; background:#ff4444; }
+.chat { background:#44ffcc; }
+#boost {
+    margin-top:6px;
+    color:#ff0;
+    font-weight:bold;
+    display:none;
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="game" width="800" height="450"></canvas>
+<canvas id="c" width="900" height="500"></canvas>
 
-<div id="overlay">
-    <div>👾 BOSS HP</div>
+<div id="ui">
+    BOSS HP
     <div class="bar"><div id="bossHP" class="fill"></div></div>
-    <div>💬 CHAT HP</div>
-    <div class="bar"><div id="chatHP" class="fill chatFill"></div></div>
-    <div style="margin-top:8px;">
-        Commands: <b>!attack</b> <b>!heal</b> <b>!boost</b>
-    </div>
+    CHAT HP
+    <div class="bar"><div id="chatHP" class="fill chat"></div></div>
+    <div id="boost">⚡ BOOST ACTIVE ⚡</div>
 </div>
 
 <script>
-/* ======================
-   GAME STATE
-====================== */
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+const c = document.getElementById("c");
+const ctx = c.getContext("2d");
 
-let boss = { hp: 1000, max: 1000 };
-let chat = { hp: 800, max: 800 };
+/* ================= STATE ================= */
+let boss = {
+    hp:1200, max:1200,
+    horns: Math.random()>0.5,
+    spikes: Math.floor(Math.random()*3)+1,
+    eyes: Math.floor(Math.random()*3)+1
+};
+let chatHP = { hp:900, max:900 };
+let players = {};
+let boost = false;
 let cooldowns = {};
-let boostActive = false;
 
-/* ======================
-   UI HELPERS
-====================== */
-function updateBars() {
-    document.getElementById("bossHP").style.width =
-        (boss.hp / boss.max * 100) + "%";
-    document.getElementById("chatHP").style.width =
-        (chat.hp / chat.max * 100) + "%";
+/* ================= UI ================= */
+function updateBars(){
+    bossHP.style.width = (boss.hp/boss.max*100)+"%";
+    chatHPdiv.style.width = (chatHP.hp/chatHP.max*100)+"%";
+}
+const bossHP = document.getElementById("bossHP");
+const chatHPdiv = document.getElementById("chatHP");
+updateBars();
+
+/* ================= ENTITIES ================= */
+function getPlayer(user,color){
+    if(!players[user]){
+        players[user] = {
+            x:120+Object.keys(players).length*40,
+            y:360,
+            color:color||"#fff",
+            action:null,
+            timer:0
+        };
+    }
+    return players[user];
 }
 
-function floatText(text, x, y, color="#fff") {
-    const el = document.createElement("div");
-    el.className = "float";
-    el.textContent = text;
-    el.style.left = x + "px";
-    el.style.top = y + "px";
-    el.style.color = color;
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 1500);
+/* ================= DRAW ================= */
+function drawBoss(){
+    ctx.save();
+    ctx.translate(650,250);
+    ctx.fillStyle = boost ? "#ff0" : "#f33";
+    ctx.beginPath();
+    ctx.arc(0,0,60,0,Math.PI*2);
+    ctx.fill();
+
+    // eyes
+    ctx.fillStyle="#000";
+    for(let i=0;i<boss.eyes;i++){
+        ctx.beginPath();
+        ctx.arc(-15+i*15,-10,6,0,Math.PI*2);
+        ctx.fill();
+    }
+
+    // horns
+    if(boss.horns){
+        ctx.strokeStyle="#fff";
+        ctx.beginPath();
+        ctx.moveTo(-30,-40); ctx.lineTo(-60,-80);
+        ctx.moveTo(30,-40); ctx.lineTo(60,-80);
+        ctx.stroke();
+    }
+
+    // spikes
+    ctx.strokeStyle="#fff";
+    for(let i=0;i<boss.spikes;i++){
+        ctx.beginPath();
+        ctx.moveTo(-40+i*40,40);
+        ctx.lineTo(-20+i*40,80);
+        ctx.stroke();
+    }
+    ctx.restore();
 }
 
-/* ======================
-   GAME LOOP
-====================== */
-function draw() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+function drawStickman(p,name){
+    ctx.strokeStyle=p.color;
+    ctx.lineWidth=3;
 
-    // Boss
-    ctx.fillStyle = "#ff3333";
-    ctx.beginPath();
-    ctx.arc(550,225,60,0,Math.PI*2);
-    ctx.fill();
+    let x=p.x, y=p.y;
 
-    ctx.fillStyle = "#fff";
-    ctx.fillText("BOSS", 530, 230);
+    // attack animation
+    if(p.action==="attack"){
+        x+=20;
+    }
 
-    // Chat blob
-    ctx.fillStyle = "#33ffcc";
-    ctx.beginPath();
-    ctx.arc(250,225,50,0,Math.PI*2);
-    ctx.fill();
+    ctx.beginPath(); // head
+    ctx.arc(x,y-30,8,0,Math.PI*2); ctx.stroke();
 
-    ctx.fillStyle = "#000";
-    ctx.fillText("CHAT", 230, 230);
+    ctx.beginPath(); // body
+    ctx.moveTo(x,y-22); ctx.lineTo(x,y+10); ctx.stroke();
+
+    ctx.beginPath(); // arms
+    ctx.moveTo(x-10,y-10); ctx.lineTo(x+10,y-10); ctx.stroke();
+
+    ctx.beginPath(); // legs
+    ctx.moveTo(x,y+10); ctx.lineTo(x-10,y+25);
+    ctx.moveTo(x,y+10); ctx.lineTo(x+10,y+25);
+    ctx.stroke();
+
+    ctx.fillStyle=p.color;
+    ctx.fillText(name,x-15,y+40);
+}
+
+function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    drawBoss();
+
+    for(let u in players){
+        drawStickman(players[u],u);
+        if(players[u].timer>0) players[u].timer--;
+        else players[u].action=null;
+    }
 
     requestAnimationFrame(draw);
 }
 draw();
 
-/* ======================
-   BOSS ATTACK
-====================== */
-setInterval(() => {
-    if (boss.hp <= 0 || chat.hp <= 0) return;
-    let dmg = Math.floor(Math.random()*20+10);
-    chat.hp = Math.max(0, chat.hp - dmg);
+/* ================= GAME LOGIC ================= */
+setInterval(()=>{
+    if(boss.hp<=0 || chatHP.hp<=0) return;
+    let dmg=Math.floor(Math.random()*25+15);
+    chatHP.hp=Math.max(0,chatHP.hp-dmg);
     updateBars();
-    floatText("-"+dmg, 250, 180, "#ff6666");
-}, 3000);
+},3000);
 
-/* ======================
-   CHAT COMMANDS
-====================== */
-function canAct(user) {
-    const now = Date.now();
-    if (!cooldowns[user] || now - cooldowns[user] > 3000) {
-        cooldowns[user] = now;
-        return true;
+function canAct(u){
+    let t=Date.now();
+    if(!cooldowns[u]||t-cooldowns[u]>3000){
+        cooldowns[u]=t; return true;
     }
-    return false;
 }
 
-ComfyJS.onChat = (user, message) => {
-    message = message.toLowerCase();
+/* ================= CHAT ================= */
+ComfyJS.onChat=(user,msg,color)=>{
+    msg=msg.toLowerCase();
+    if(!canAct(user)) return;
+    let p=getPlayer(user,color);
 
-    if (!canAct(user)) return;
-
-    if (message === "attack" && boss.hp > 0) {
-        let dmg = Math.floor(Math.random()*25+15);
-        if (boostActive) dmg *= 2;
-        boss.hp = Math.max(0, boss.hp - dmg);
-        floatText("-"+dmg, 520, 180, "#ff4444");
+    if(msg==="!attack"){
+        let dmg=Math.floor(Math.random()*30+20);
+        if(boost) dmg*=2;
+        boss.hp=Math.max(0,boss.hp-dmg);
+        p.action="attack"; p.timer=20;
     }
 
-    if (message === "heal") {
-        let heal = Math.floor(Math.random()*20+10);
-        chat.hp = Math.min(chat.max, chat.hp + heal);
-        floatText("+"+heal, 250, 180, "#44ff88");
+    if(msg==="!heal"){
+        p.action="heal"; p.timer=20;
+        chatHP.hp=Math.min(chatHP.max,chatHP.hp+60);
     }
 
-    if (message === "boost") {
-        boostActive = true;
-        floatText("BOOST!", 400, 120, "#ffff44");
-        setTimeout(() => boostActive = false, 5000);
+    if(msg==="!boost"){
+        boost=true;
+        document.getElementById("boost").style.display="block";
+        setTimeout(()=>{
+            boost=false;
+            document.getElementById("boost").style.display="none";
+        },6000);
     }
-
     updateBars();
 };
 
-/* ======================
-   CONNECT
-====================== */
 ComfyJS.Init("jaedraze");
-updateBars();
 </script>
-
 </body>
 </html>
