@@ -493,37 +493,44 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
     // --- 1. FISHING ROD (Restored & Fixed) ---
 // Inside your drawEquipment function...
 
-	if (isFishing) {
-		ctx.save();
-		// 1. Calculate hand position based on lean and dance offsets
-		const handX = p.x + 18 + (p.lean * 30);
-		const handY = p.y + 3 + bodyY - armMove;
-		
-		// 2. The Rod (Brown Wood)
-		ctx.strokeStyle = "#8B4513"; 
-		ctx.lineWidth = 3;
-		let bob = Math.sin(now / 300) * 0.1;
+// --- 1. FISHING ROD (Robust Version) ---
+    if (isFishing) {
+        ctx.save();
+        ctx.setLineDash([]); // Ensure line isn't dashed from another effect
+        
+        // Use a simpler anchor: The torso-arm joint
+        const anchorX = p.x + (p.lean * 20);
+        const anchorY = p.y - 15 + bodyY; 
+        
+        // Hand position for the tip
+        const handX = p.x + 18 + (p.lean * 30);
+        const handY = p.y + 3 + bodyY - armMove;
 
-		ctx.beginPath();
-		ctx.moveTo(handX, handY); 
-		// Rod tip moves with the 'bob' animation
-		ctx.lineTo(handX + 35, handY - 35 + (bob * 25)); 
-		ctx.stroke();
+        const now = Date.now();
+        let bob = Math.sin(now / 300) * 15; // Bobbing in pixels
 
-		// 3. The Line (Silk/White)
-		ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
-		ctx.lineWidth = 1;
-		ctx.beginPath();
-		ctx.moveTo(handX + 35, handY - 35 + (bob * 25));
-		
-		// Use the Quadratic Curve you liked to make it dip into the water
-		// We target a point further out (X+60) and lower down (Y+40)
-		ctx.quadraticCurveTo(handX + 45, handY, handX + 60, handY + 40);
-		ctx.stroke();
-		
-		ctx.restore();
-	}
+        // 1. Draw the Wood Rod
+        ctx.strokeStyle = "#8B4513"; 
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(anchorX, anchorY); 
+        ctx.lineTo(handX + 25, handY - 25 + bob); // Rod extends past the hand
+        ctx.stroke();
 
+        // 2. Draw the Line (The Quadratic Curve you liked)
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(handX + 25, handY - 25 + bob);
+        
+        // This curves the line from the tip down to the "water" level
+        // Control point is handX+35, Y+10 | End point is handX+50, Y+40
+        ctx.quadraticCurveTo(handX + 35, handY + 10, handX + 50, handY + 45);
+        ctx.stroke();
+        
+        ctx.restore();
+    }
     // --- 2. WEAPON (Bows vs Swords) ---
     // Added !isFishing so weapon stays hidden while rod is out
     if (pWeapon && ITEM_DB[pWeapon] && !isFishing) {
@@ -735,23 +742,29 @@ function drawStickman(ctx, p) {
     // 2. Torso
     ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
 
-	// --- 3. ARMS (Fixed & Restored) ---
+// --- 3. ARMS (Fixed for Fishing) ---
     const isAttacking = p.activeTask === "attacking";
-    const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
+    const isFishing = p.activeTask === "fishing"; // Removed area check so it's more reliable
 
-    // We draw arms in all states EXCEPT when the attacking animation takes over
     if (!isAttacking) {
         ctx.beginPath();
         ctx.strokeStyle = p.color;
         ctx.lineWidth = 3;
 
-        // Left Arm (Connects to head/torso joint)
+        // Left Arm
         ctx.moveTo(headX, headY + 15);
         ctx.lineTo(p.x - 18 + (lean * 10), p.y + 3 + bodyY + armMove);
 
-        // Right Arm
+        // Right Arm 
         ctx.moveTo(headX, headY + 15);
-        ctx.lineTo(p.x + 18 + (lean * 30), p.y + 3 + bodyY - armMove);
+        
+        if (isFishing) {
+            // FORCE ARM INTO FISHING POSITION (Pointing out)
+            ctx.lineTo(p.x + 25 + (lean * 30), p.y - 5 + bodyY);
+        } else {
+            // Normal arm position
+            ctx.lineTo(p.x + 18 + (lean * 30), p.y + 3 + bodyY - armMove);
+        }
         ctx.stroke();
     }
 
