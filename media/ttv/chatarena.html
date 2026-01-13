@@ -2,291 +2,251 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Chat Arena – Stickmen</title>
+<title>Chat Arena RPG</title>
 <script src="https://unpkg.com/comfy.js/dist/comfy.min.js"></script>
 
 <style>
 body {
     margin:0;
     background:transparent;
-    color:#e0f7ff;
     font-family:monospace;
-    overflow:hidden;
 }
 canvas { display:block; margin:auto; }
-
-#ui {
-    position:absolute;
-    top:10px; left:10px;
-}
-.bar {
-    width:320px;
-    height:18px;
-    background:#222;
-    margin-bottom:6px;
-}
-.fill { height:100%; background:#ff4444; }
-.chat { background:#44ffcc; }
-
-#boost {
-    margin-top:6px;
-    color:#ff0;
-    font-weight:bold;
-    display:none;
-}
 </style>
 </head>
 
 <body>
-
 <canvas id="c" width="900" height="500"></canvas>
-
-<div id="ui">
-    BOSS HP
-    <div class="bar"><div id="bossHP" class="fill"></div></div>
-    CHAT HP
-    <div class="bar"><div id="chatHP" class="fill chat"></div></div>
-    <div id="boost">⚡ BOOST ACTIVE ⚡</div>
-</div>
 
 <script>
 const c = document.getElementById("c");
 const ctx = c.getContext("2d");
 
-/* ================= STATE ================= */
+ctx.font = "14px monospace";
+ctx.textAlign = "center";
 
-let boss = {
-    x: 720,
-    y: 250,
-    hp: 1200,
-    max: 1200,
-    attackTimer: 0,
-    attacking: false,
-    target: null
-};
+/* ================= GAME STATE ================= */
 
+let area = 1;
+let enemies = [];
+let boss = null;
 let players = {};
-let boost = false;
-let cooldowns = {};
 
-/* ================= UI ================= */
+/* ================= PERSISTENCE ================= */
 
-const bossHP = document.getElementById("bossHP");
-const chatHPdiv = document.getElementById("chatHP");
+function loadStats(name){
+    return JSON.parse(localStorage.getItem("stats_"+name)) || {
+        combatLevel:1, combatXP:0,
+        healLevel:1, healXP:0,
+        loot:{ dmg:0, heal:0 }
+    };
+}
 
-function updateBars(){
-    bossHP.style.width = (boss.hp / boss.max * 100) + "%";
-
-    let total = 0;
-    let max = 0;
-    for (let p of Object.values(players)) {
-        total += p.hp;
-        max += p.maxHp;
-    }
-    chatHPdiv.style.width = max ? (total / max * 100) + "%" : "0%";
+function saveStats(name){
+    localStorage.setItem("stats_"+name, JSON.stringify(players[name].stats));
 }
 
 /* ================= HELPERS ================= */
 
-function normalizeColor(c){
-    if(!c) return "#ffffff";
-    if(!c.startsWith("#")) return "#" + c;
-    return c;
+function xpNeeded(level){
+    return Math.floor(50 * Math.pow(1.6, level));
 }
 
-function getPlayer(user, color){
-    if(!players[user]){
-        players[user] = {
-            name: user,
-            color: normalizeColor(color),
-            x: 120 + Object.keys(players).length * 60,
-            y: 360,
-            baseX: null,
-            hp: 100,
-            maxHp: 100,
-            action: null,
-            timer: 0,
-            hitFlash: 0
-        };
-        players[user].baseX = players[user].x;
-        updateBars();
+function spawnWave(){
+    enemies = [];
+    boss = null;
+
+    for(let i=0;i<3+area;i++){
+        enemies.push({
+            x:500+i*40, y:360,
+            hp:40+area*10,
+            max:40+area*10,
+            dead:false
+        });
     }
-    return players[user];
 }
 
-function canAct(u){
-    let t = Date.now();
-    if(!cooldowns[u] || t - cooldowns[u] > 2500){
-        cooldowns[u] = t;
-        return true;
-    }
+function spawnBoss(){
+    boss = {
+        x:720, y:250,
+        hp:200 + area*120,
+        max:200 + area*120,
+        dead:false
+    };
+}
+
+/* ================= PLAYERS ================= */
+
+function getPlayer(name,color){
+    if(players[name]) return players[name];
+
+    let stats = loadStats(name);
+
+    players[name] = {
+        name,
+        color: color || "#fff",
+        x:120+Object.keys(players).length*60,
+        baseX:null,
+        y:360,
+        hp:100,
+        maxHp:100,
+        dead:false,
+        blood:false,
+        stats
+    };
+    players[name].baseX = players[name].x;
+    return players[name];
 }
 
 /* ================= DRAW ================= */
 
-ctx.font = "14px monospace";
-ctx.textAlign = "center";
-
-function drawBoss(){
-    ctx.save();
-    ctx.translate(boss.x, boss.y);
-
-    ctx.fillStyle = boss.attacking ? "#ff0" : "#f33";
-    ctx.beginPath();
-    ctx.arc(0,0,60,0,Math.PI*2);
-    ctx.fill();
-
-    ctx.fillStyle="#000";
-    ctx.beginPath();
-    ctx.arc(-15,-10,6,0,Math.PI*2);
-    ctx.arc(15,-10,6,0,Math.PI*2);
-    ctx.fill();
-
-    ctx.restore();
-}
-
 function drawStickman(p){
-    let x = p.x;
-    let y = p.y;
-
-    if(p.hitFlash > 0){
-        ctx.strokeStyle = "#ff0000";
-        p.hitFlash--;
-    } else {
-        ctx.strokeStyle = p.color;
+    if(p.dead){
+        ctx.fillStyle="darkred";
+        ctx.beginPath();
+        ctx.arc(p.x,p.y+30,18,0,Math.PI*2);
+        ctx.fill();
+        return;
     }
 
-    ctx.lineWidth = 4;
+    ctx.strokeStyle=p.color;
+    ctx.lineWidth=4;
 
-    // head
+    ctx.beginPath(); ctx.arc(p.x,p.y-35,10,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(p.x,p.y-25); ctx.lineTo(p.x,p.y+15); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(p.x-15,p.y-5); ctx.lineTo(p.x+15,p.y-5); ctx.stroke();
     ctx.beginPath();
-    ctx.arc(x, y-35, 10, 0, Math.PI*2);
+    ctx.moveTo(p.x,p.y+15); ctx.lineTo(p.x-15,p.y+35);
+    ctx.moveTo(p.x,p.y+15); ctx.lineTo(p.x+15,p.y+35);
     ctx.stroke();
 
-    // body
-    ctx.beginPath();
-    ctx.moveTo(x, y-25);
-    ctx.lineTo(x, y+15);
-    ctx.stroke();
-
-    // arms
-    ctx.beginPath();
-    ctx.moveTo(x-15, y-5);
-    ctx.lineTo(x+15, y-5);
-    ctx.stroke();
-
-    // legs
-    ctx.beginPath();
-    ctx.moveTo(x, y+15);
-    ctx.lineTo(x-15, y+35);
-    ctx.moveTo(x, y+15);
-    ctx.lineTo(x+15, y+35);
-    ctx.stroke();
-
-    // name
-    ctx.fillStyle = p.color;
-    ctx.fillText(p.name, x, y+55);
-
-    // hp bar
-    ctx.fillStyle="#000";
-    ctx.fillRect(x-20, y+62, 40, 5);
-    ctx.fillStyle="#44ff44";
-    ctx.fillRect(x-20, y+62, 40 * (p.hp / p.maxHp), 5);
+    ctx.fillStyle=p.color;
+    ctx.fillText(p.name,p.x,p.y+55);
 }
 
-function draw(){
+function drawEnemies(){
+    enemies.forEach(e=>{
+        if(e.dead) return;
+        ctx.fillStyle="#888";
+        ctx.beginPath();
+        ctx.arc(e.x,e.y-20,15,0,Math.PI*2);
+        ctx.fill();
+    });
+}
+
+function drawBoss(){
+    if(!boss || boss.dead) return;
+    ctx.fillStyle="#f33";
+    ctx.beginPath();
+    ctx.arc(boss.x,boss.y,60,0,Math.PI*2);
+    ctx.fill();
+}
+
+function loop(){
     ctx.clearRect(0,0,c.width,c.height);
 
+    drawEnemies();
     drawBoss();
 
-    for(let p of Object.values(players)){
-        drawStickman(p);
+    Object.values(players).forEach(drawStickman);
+    requestAnimationFrame(loop);
+}
+loop();
 
-        if(p.action === "attack"){
-            p.x += (boss.x - 120 - p.x) * 0.25;
-            if(Math.abs(p.x - (boss.x - 120)) < 5){
-                p.action = "return";
-            }
-        } else if(p.action === "return"){
-            p.x += (p.baseX - p.x) * 0.25;
-            if(Math.abs(p.x - p.baseX) < 2){
-                p.x = p.baseX;
-                p.action = null;
-            }
+/* ================= COMBAT ================= */
+
+function attackTarget(p){
+    if(p.dead) return;
+
+    let dmg = 10 + p.stats.combatLevel*3 + p.stats.loot.dmg;
+
+    let target = enemies.find(e=>!e.dead);
+    if(!target && boss && !boss.dead) target = boss;
+    if(!target) return;
+
+    target.hp -= dmg;
+    p.stats.combatXP += 10;
+
+    if(target.hp <= 0){
+        target.dead = true;
+        if(target === boss){
+            dropLoot();
+            area++;
+            spawnWave();
+        } else if(enemies.every(e=>e.dead)){
+            spawnBoss();
         }
     }
 
-    requestAnimationFrame(draw);
+    levelCheck(p,"combat");
+    saveStats(p.name);
 }
-draw();
+
+function healTarget(p,target){
+    if(p.dead || target.dead) return;
+
+    let heal = 15 + p.stats.healLevel*4 + p.stats.loot.heal;
+    target.hp = Math.min(target.maxHp, target.hp + heal);
+
+    p.stats.healXP += 10;
+    levelCheck(p,"heal");
+    saveStats(p.name);
+}
+
+function levelCheck(p,type){
+    let lvl = type==="combat" ? p.stats.combatLevel : p.stats.healLevel;
+    let xp = type==="combat" ? p.stats.combatXP : p.stats.healXP;
+
+    if(xp >= xpNeeded(lvl)){
+        if(type==="combat") p.stats.combatLevel++;
+        else p.stats.healLevel++;
+    }
+}
 
 /* ================= BOSS ATTACK ================= */
 
 setInterval(()=>{
-    let alive = Object.values(players).filter(p => p.hp > 0);
-    if(alive.length === 0 || boss.hp <= 0) return;
+    let alive = Object.values(players).filter(p=>!p.dead);
+    if(!alive.length) return;
 
-    let target = alive[Math.floor(Math.random()*alive.length)];
-    boss.attacking = true;
-    boss.target = target;
+    let t = alive[Math.floor(Math.random()*alive.length)];
+    t.hp -= 20+area*5;
 
-    setTimeout(()=>{
-        let dmg = Math.floor(Math.random()*20 + 15);
-        target.hp = Math.max(0, target.hp - dmg);
-        target.hitFlash = 15;
-        updateBars();
-    },400);
+    if(t.hp<=0){
+        t.hp=0;
+        t.dead=true;
+    }
+},3000);
 
-    setTimeout(()=>{
-        boss.attacking = false;
-        boss.target = null;
-    },800);
+/* ================= LOOT ================= */
 
-}, 3000);
+function dropLoot(){
+    let alive = Object.values(players);
+    if(!alive.length) return;
+
+    let winner = alive[Math.floor(Math.random()*alive.length)];
+    if(Math.random()<0.5) winner.stats.loot.dmg+=2;
+    else winner.stats.loot.heal+=2;
+
+    saveStats(winner.name);
+}
 
 /* ================= CHAT ================= */
 
-ComfyJS.onChat = (user, msg, flags, extra) => {
-    msg = msg.toLowerCase();
-    const p = getPlayer(user, extra?.userColor);
-    if(!canAct(user)) return;
+ComfyJS.onChat = (user,msg,flags,extra)=>{
+    let p = getPlayer(user,extra?.userColor);
+    msg=msg.toLowerCase();
 
-    if(msg === "attack"){
-        let dmg = Math.floor(Math.random()*30 + 20);
-        if(boost) dmg *= 2;
-        boss.hp = Math.max(0, boss.hp - dmg);
-        p.action = "attack";
-    }
+    if(msg==="attack") attackTarget(p);
 
     if(msg.startsWith("heal")){
         let parts = msg.split(" ");
-        let target;
-
-        if(parts[1] && players[parts[1]] && parts[1] !== user){
-            target = players[parts[1]];
-        } else {
-            let others = Object.values(players).filter(x => x.name !== user && x.hp > 0);
-            if(others.length) target = others[Math.floor(Math.random()*others.length)];
-        }
-
-        if(target){
-            target.hp = Math.min(target.maxHp, target.hp + 35);
-            target.hitFlash = 10;
-        }
+        let target = players[parts[1]] || Object.values(players).find(x=>x.name!==user && !x.dead);
+        if(target) healTarget(p,target);
     }
-
-    if(msg === "boost"){
-        boost = true;
-        document.getElementById("boost").style.display = "block";
-        setTimeout(()=>{
-            boost = false;
-            document.getElementById("boost").style.display = "none";
-        }, 6000);
-    }
-
-    updateBars();
 };
 
+spawnWave();
 ComfyJS.Init("jaedraze");
 </script>
 </body>
