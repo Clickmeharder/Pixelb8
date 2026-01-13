@@ -140,6 +140,7 @@ function getPlayer(name, color) {
         hp: 100, maxHp: 100, dead: false,
         area: "home", activeTask: null,
         stats: loadStats(name)
+		p.danceStyle = 0;
     };
     return players[name];
 }
@@ -657,6 +658,7 @@ function drawStickman(ctx, p) {
     const now = Date.now();
     let lean = p.lean || 0;
 
+    // Death handling (Original)
     if (p.dead) {
         ctx.fillStyle = "rgba(200, 0, 0, 0.6)";
         ctx.beginPath(); ctx.ellipse(p.x, p.y + 20, 25, 10, 0, 0, Math.PI * 2); ctx.fill();
@@ -665,46 +667,63 @@ function drawStickman(ctx, p) {
         return;
     }
 
+    // --- DANCE ANIMATION OFFSETS ---
+    let bodyY = 0;
+    let armMove = 0;
+    let legMove = 0;
+    const isDancing = p.activeTask === "dancing";
+
+    if (isDancing) {
+        if (p.danceStyle === 1) bodyY = Math.sin(now / 100) * 8; // The Squat
+        if (p.danceStyle === 2) armMove = Math.sin(now / 50) * 20; // The Flail
+        if (p.danceStyle === 3) lean = Math.sin(now / 200) * 0.6; // The Lean
+    }
+
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
     
     // 1. Head
     const headX = p.x + (lean * 20);
-    const headY = p.y - 30;
+    const headY = p.y - 30 + bodyY;
     ctx.beginPath(); ctx.arc(headX, headY, 10, 0, Math.PI * 2); ctx.stroke();
 
-    // --- FACE ---
+    // Face (Original)
     ctx.fillStyle = p.color;
-    // Eyes (dots)
     ctx.fillRect(headX + 2, headY - 3, 2, 2);
     ctx.fillRect(headX + 6, headY - 3, 2, 2);
-    // Smile
     ctx.beginPath(); ctx.arc(headX + 4, headY + 2, 3, 0, Math.PI); ctx.stroke();
     
     // 2. Torso
-    ctx.beginPath(); ctx.moveTo(headX, p.y - 20); ctx.lineTo(p.x, p.y + 10); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
 
-    // 3. DEFAULT ARMS (Hidden if attacking or fishing to prevent "3 arms")
+    // 3. ARMS
     const isAttacking = p.activeTask === "attacking";
     const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
 
+    // Draw idle/dance arms if not attacking/fishing
     if (!isAttacking && !isFishing && !p.stats.equippedWeapon) {
         ctx.beginPath(); 
-        ctx.moveTo(headX, p.y - 15); 
-        ctx.lineTo(p.x - 18 + (lean * 10), p.y + 3); 
-        ctx.moveTo(headX, p.y - 15); 
-        ctx.lineTo(p.x + 18 + (lean * 30), p.y + 3); 
+        // Left Arm
+        ctx.moveTo(headX, headY + 15); 
+        ctx.lineTo(p.x - 18 + (lean * 10), p.y + 3 + bodyY + armMove); 
+        // Right Arm
+        ctx.moveTo(headX, headY + 15); 
+        ctx.lineTo(p.x + 18 + (lean * 30), p.y + 3 + bodyY - armMove); 
         ctx.stroke();
     }
 
     // 4. Legs
     let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-    ctx.beginPath(); ctx.moveTo(p.x, p.y + 10); ctx.lineTo(p.x - 10 - walk, p.y + 25); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(p.x, p.y + 10); ctx.lineTo(p.x + 10 + walk, p.y + 25); ctx.stroke();
+    ctx.beginPath(); 
+    ctx.moveTo(p.x, p.y + 10 + bodyY); 
+    ctx.lineTo(p.x - 10 - walk, p.y + 25); 
+    ctx.moveTo(p.x, p.y + 10 + bodyY); 
+    ctx.lineTo(p.x + 10 + walk, p.y + 25); 
+    ctx.stroke();
 
     // 5. Equipment
     drawEquipment(ctx, p, now);
 
-    // HP Bar & Name
+    // HP Bar & Name (Original)
     ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
     ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
     ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
@@ -723,41 +742,45 @@ function gameLoop() {
     }
     document.getElementById("enemyUI").innerHTML = enemyText;
 
-// 3. Update and Draw Players
-    const now = Date.now(); // Get current time once for the whole loop
+	// --- Inside Section 3 of your gameLoop ---
+	const now = Date.now(); 
 
-    Object.values(players).forEach(p => {
-        // --- MOVEMENT LOGIC ---
-        if (p.targetX !== null && p.targetX !== undefined) {
-            let dx = p.targetX - p.x;
-            if (Math.abs(dx) > 5) {
-                p.x += dx * 0.1;
-                p.lean = dx > 0 ? 0.2 : -0.2;
-            } else {
-                p.lean = 0;
-                if (p.activeTask !== "attacking") p.targetX = null;
-            }
-        }
+	Object.values(players).forEach(p => {
+		// 1. TIMEOUT CHECK (Universal for all tasks)
+		if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
+			systemMessage(`${p.name} stopped ${p.activeTask} (Idle timeout).`);
+			p.activeTask = null;
+			p.targetX = null;
+			p.danceStyle = 0; // Reset dance
+		}
 
-        // --- ATTACK TIMING LOGIC ---
-        if (p.activeTask === "attacking" && !p.dead) {
-            // Check if player has a weapon speed, otherwise default to 700ms (Fast)
-            let weapon = ITEM_DB[p.stats.equippedWeapon];
-            let attackSpeed = weapon?.speed || 700; 
+		// 2. MOVEMENT LOGIC (Original)
+		if (p.targetX !== null && p.targetX !== undefined) {
+			let dx = p.targetX - p.x;
+			if (Math.abs(dx) > 5) {
+				p.x += dx * 0.1;
+				p.lean = dx > 0 ? 0.2 : -0.2;
+			} else {
+				p.lean = 0;
+				if (p.activeTask !== "attacking") p.targetX = null;
+			}
+		}
 
-            // Initialize lastAttackTime if it doesn't exist
-            if (!p.lastAttackTime) p.lastAttackTime = 0;
+		// 3. ATTACK TIMING LOGIC (Original)
+		if (p.activeTask === "attacking" && !p.dead) {
+			let weapon = ITEM_DB[p.stats.equippedWeapon];
+			let attackSpeed = weapon?.speed || 700; 
+			if (!p.lastAttackTime) p.lastAttackTime = 0;
+			if (now - p.lastAttackTime > attackSpeed) {
+				performAttack(p);
+				p.lastAttackTime = now;
+			}
+		}
 
-            // If enough time has passed, HIT!
-            if (now - p.lastAttackTime > attackSpeed) {
-                performAttack(p);
-                p.lastAttackTime = now;
-            }
-        }
-
-        drawStickman(ctx, p);
-    });
-    updateArrows(ctx);
+		// 4. DRAW
+		drawStickman(ctx, p);
+	});
+	updateArrows(ctx);
 
     // 4. Draw Dungeon Entities
     if (viewArea === "dungeon") {
@@ -789,7 +812,13 @@ function gameLoop() {
 
 /* ================= CHAT COMMANDS ================= */
 /* ================= COMMAND FUNCTIONS ================= */
-
+function cmdDance(p, user) {
+    if (p.dead) return;
+    p.activeTask = "dancing";
+    p.danceStyle = Math.floor(Math.random() * 3) + 1; // Pick dance 1, 2, or 3
+    p.taskEndTime = Date.now() + (15 * 60 * 1000); // 15m duration
+    systemMessage(`${user} is busting a move! (Dance Style ${p.danceStyle})`);
+}
 // --- COMBAT & TASKS ---
 function cmdAttack(p, user) {
     if (p.activeTask === "attacking") { 
@@ -1059,7 +1088,7 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
     if (cmd === "home")    movePlayer(p, "home");
     if (cmd === "dungeon") movePlayer(p, "dungeon");
     if (cmd === "join")    joinDungeonQueue(p);
-    
+    if (cmd === "dance") cmdDance(p, user);
     // Stats & Inventory
     if (cmd === "stats")    cmdShowStats(user, args);
     if (cmd === "topstats") cmdTopStats();
