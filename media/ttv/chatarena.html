@@ -490,38 +490,48 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
     const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
     const pWeapon = p.stats.equippedWeapon;
 
-    // --- 1. FISHING ROD ---
-    if (isFishing) {
-        ctx.save();
-        ctx.strokeStyle = "#8B4513";
-        ctx.lineWidth = 3;
-        // Attach rod to the right hand position
-        const handX = p.x + 18 + (p.lean * 30);
-        const handY = p.y + 3 + bodyY - armMove;
-        
-        ctx.beginPath();
-        ctx.moveTo(handX, handY);
-        ctx.lineTo(handX + 20, handY - 20); // The rod tip
-        ctx.stroke();
-        
-        // The Line
-        ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(handX + 20, handY - 20);
-        ctx.lineTo(handX + 20, handY + 20 + Math.sin(now/500)*5);
-        ctx.stroke();
-        ctx.restore();
-    }
+    // --- 1. FISHING ROD (Restored & Fixed) ---
+// Inside your drawEquipment function...
+
+	if (isFishing) {
+		ctx.save();
+		// 1. Calculate hand position based on lean and dance offsets
+		const handX = p.x + 18 + (p.lean * 30);
+		const handY = p.y + 3 + bodyY - armMove;
+		
+		// 2. The Rod (Brown Wood)
+		ctx.strokeStyle = "#8B4513"; 
+		ctx.lineWidth = 3;
+		let bob = Math.sin(now / 300) * 0.1;
+
+		ctx.beginPath();
+		ctx.moveTo(handX, handY); 
+		// Rod tip moves with the 'bob' animation
+		ctx.lineTo(handX + 35, handY - 35 + (bob * 25)); 
+		ctx.stroke();
+
+		// 3. The Line (Silk/White)
+		ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+		ctx.lineWidth = 1;
+		ctx.beginPath();
+		ctx.moveTo(handX + 35, handY - 35 + (bob * 25));
+		
+		// Use the Quadratic Curve you liked to make it dip into the water
+		// We target a point further out (X+60) and lower down (Y+40)
+		ctx.quadraticCurveTo(handX + 45, handY, handX + 60, handY + 40);
+		ctx.stroke();
+		
+		ctx.restore();
+	}
 
     // --- 2. WEAPON (Bows vs Swords) ---
+    // Added !isFishing so weapon stays hidden while rod is out
     if (pWeapon && ITEM_DB[pWeapon] && !isFishing) {
         const w = ITEM_DB[pWeapon];
         const isBow = pWeapon.toLowerCase().includes("bow");
         
         ctx.save();
         if (isAttacking) {
-            // Weapon in hand during attack
             ctx.translate(p.x + 10, p.y - 10 + bodyY);
             ctx.strokeStyle = w.color;
             ctx.lineWidth = 3;
@@ -533,11 +543,9 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
                 ctx.rotate(Math.PI / 4);
                 ctx.strokeStyle = "#8B4513";
                 ctx.lineWidth = 2;
-                // Curved bow limb
                 ctx.beginPath();
                 ctx.arc(0, 0, 15, -Math.PI/2, Math.PI/2);
                 ctx.stroke();
-                // String
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
                 ctx.lineWidth = 1;
                 ctx.beginPath(); ctx.moveTo(0, -15); ctx.lineTo(0, 15); ctx.stroke();
@@ -547,7 +555,6 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
                 ctx.strokeStyle = w.color;
                 ctx.lineWidth = 2;
                 ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(20, 0); ctx.stroke();
-                // Crossguard
                 ctx.moveTo(5, -3); ctx.lineTo(5, 3); ctx.stroke();
             }
         }
@@ -559,7 +566,6 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
     if (p.stats.equippedHelmet) drawHelmet(ctx, p, bodyY);
     if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY);
 }
-
 function drawBoots(ctx, p, bodyY = 0) {
     const item = ITEM_DB[p.stats.equippedBoots];
     if (!item) return;
@@ -1285,7 +1291,7 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
     if (cmd === "dungeon") movePlayer(p, "dungeon");
     if (cmd === "join")    joinDungeonQueue(p);
     if (cmd === "dance") {cmdDance(p, user, args);}
-	if (cmd === "Listdances") {cmdListDances(p);}
+	if (cmd === "listdances") {cmdListDances(p);}
     // Stats & Inventory
     if (cmd === "stats")    cmdShowStats(user, args);
     if (cmd === "topstats") cmdTopStats();
