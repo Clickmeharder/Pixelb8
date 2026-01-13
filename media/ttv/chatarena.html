@@ -43,6 +43,8 @@ canvas { display:block; margin:auto; }
     border-radius:4px;
     animation: fadeout 6s forwards;
 }
+
+/* Tooltip hover */
 #tooltip {
     position: absolute;
     pointer-events: none;
@@ -56,6 +58,34 @@ canvas { display:block; margin:auto; }
     white-space: nowrap;
 }
 
+/* Player stats overlay */
+#playerStatsWindow {
+    position:absolute;
+    top:50px;
+    left:50%;
+    transform:translateX(-50%);
+    width:400px;
+    max-height:400px;
+    overflow:auto;
+    background:rgba(0,0,0,0.85);
+    color:#fff;
+    font-family:monospace;
+    font-size:13px;
+    padding:10px;
+    border-radius:8px;
+    display:none;
+    z-index:10;
+}
+#playerStatsWindow h3 {
+    margin-top:0;
+}
+#playerStatsWindow button {
+    margin-top:8px;
+    padding:4px 6px;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+}
 @keyframes fadeout {
     0% { opacity:1; }
     70% { opacity:1; }
@@ -71,12 +101,18 @@ canvas { display:block; margin:auto; }
 <div id="systemUI"></div>
 <div id="tooltip"></div>
 
+<!-- Player stats overlay -->
+<div id="playerStatsWindow">
+    <h3>Players</h3>
+    <div id="playerStatsContent"></div>
+    <button onclick="document.getElementById('playerStatsWindow').style.display='none'">Close</button>
+</div>
+
 <script>
 const c = document.getElementById("c");
 const ctx = c.getContext("2d");
 
 /* ================= STATE ================= */
-
 let area = 1;
 let enemies = [];
 let boss = null;
@@ -86,7 +122,6 @@ let enemyUI = document.getElementById("enemyUI");
 let systemUI = document.getElementById("systemUI");
 
 /* ================= SYSTEM UI ================= */
-
 function systemMessage(text){
     const div = document.createElement("div");
     div.className = "sysMsg";
@@ -95,6 +130,7 @@ function systemMessage(text){
     setTimeout(()=>div.remove(),6000);
 }
 
+/* ================= TOOLTIP HOVER ================= */
 const tooltip = document.getElementById("tooltip");
 let mouse = {x:0,y:0};
 
@@ -106,7 +142,6 @@ c.addEventListener("mousemove", e=>{
     let hoverPlayer = null;
     for(let p of Object.values(players)){
         if(p.dead) continue;
-        // simple distance check to head/body
         let dx = mouse.x - p.x;
         let dy = mouse.y - p.y;
         if(Math.sqrt(dx*dx + dy*dy) < 30){
@@ -122,8 +157,9 @@ c.addEventListener("mousemove", e=>{
         tooltip.innerHTML = `
             <b>${hoverPlayer.name}</b><br>
             HP: ${hoverPlayer.hp}/${hoverPlayer.maxHp}<br>
-            Combat Lv: ${hoverPlayer.stats.combatLevel} (${hoverPlayer.stats.combatXP} XP)<br>
-            Heal Lv: ${hoverPlayer.stats.healLevel} (${hoverPlayer.stats.healXP} XP)
+            Attack Lv: ${hoverPlayer.stats.attackLevel} (${hoverPlayer.stats.attackXP} XP)<br>
+            Heal Lv: ${hoverPlayer.stats.healLevel} (${hoverPlayer.stats.healXP} XP)<br>
+            Combat Lv: ${hoverPlayer.stats.combatLevel}
         `;
     } else {
         tooltip.style.display = "none";
@@ -131,20 +167,16 @@ c.addEventListener("mousemove", e=>{
 });
 
 /* ================= FLOATING TEXT ================= */
-
 function spawnFloater(text,x,y,color){
-    floaters.push({
-        text,x,y,color,
-        life:60
-    });
+    floaters.push({text,x,y,color,life:60});
 }
 
 /* ================= PERSISTENCE ================= */
-
 function loadStats(name){
     return JSON.parse(localStorage.getItem("stats_"+name)) || {
-        combatLevel:1, combatXP:0,
+        attackLevel:1, attackXP:0,
         healLevel:1, healXP:0,
+        combatLevel:1,
         loot:{ dmg:0, heal:0 }
     };
 }
@@ -154,7 +186,6 @@ function saveStats(name){
 function xpNeeded(lvl){ return Math.floor(40*Math.pow(1.5,lvl)); }
 
 /* ================= WAVES ================= */
-
 function spawnWave(){
     enemies=[]; boss=null;
     let count = Math.min(3+area,6);
@@ -169,7 +200,6 @@ function spawnWave(){
     }
     systemMessage(`🌍 Area ${area} – enemies approach`);
 }
-
 function spawnBoss(){
     boss={
         hp:120+area*80,
@@ -180,7 +210,6 @@ function spawnBoss(){
 }
 
 /* ================= PLAYERS ================= */
-
 function getPlayer(name,color){
     if(players[name]) return players[name];
     let stats = loadStats(name);
@@ -197,8 +226,7 @@ function getPlayer(name,color){
     return players[name];
 }
 
-/* ================= DRAW ================= */
-
+/* ================= DRAW FUNCTIONS ================= */
 function drawHPBar(x,y,w,h,pct,color){
     ctx.fillStyle="#000";
     ctx.fillRect(x-w/2-1,y-1,w+2,h+2);
@@ -226,7 +254,7 @@ function drawStickman(p){
     // Draw HP bar
     drawHPBar(p.x,p.y-60,44,6,p.hp/p.maxHp,"#44ff88");
 
-    // Draw outline/glow if hovered
+    // Outline/glow if hovered
     if(hovered){
         ctx.lineWidth=8;
         ctx.strokeStyle="yellow";
@@ -234,22 +262,13 @@ function drawStickman(p){
     }
 
     // Normal stickman
-    ctx.lineWidth=6;
-    ctx.strokeStyle="#000";
-    stickmanPath(p);
-    ctx.lineWidth=3;
-    ctx.strokeStyle=p.color;
-    stickmanPath(p);
+    ctx.lineWidth=6; ctx.strokeStyle="#000"; stickmanPath(p);
+    ctx.lineWidth=3; ctx.strokeStyle=p.color; stickmanPath(p);
 
-    // Draw name
-    ctx.font="16px monospace";
-    ctx.textAlign="center";
-    ctx.textBaseline="top";
-
-    ctx.fillStyle="#000";
-    ctx.fillText(p.name,p.x,p.y+60);
-    ctx.fillStyle=p.color;
-    ctx.fillText(p.name,p.x,p.y+58);
+    // Name
+    ctx.font="16px monospace"; ctx.textAlign="center"; ctx.textBaseline="top";
+    ctx.fillStyle="#000"; ctx.fillText(p.name,p.x,p.y+60);
+    ctx.fillStyle=p.color; ctx.fillText(p.name,p.x,p.y+58);
 }
 function stickmanPath(p){
     ctx.beginPath(); ctx.arc(p.x,p.y-35,11,0,Math.PI*2); ctx.stroke();
@@ -257,92 +276,73 @@ function stickmanPath(p){
     ctx.beginPath(); ctx.moveTo(p.x-16,p.y-5); ctx.lineTo(p.x+16,p.y-5); ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(p.x,p.y+18); ctx.lineTo(p.x-16,p.y+38);
-    ctx.moveTo(p.x,p.y+18); ctx.lineTo(p.x+16,p.y+38);
-    ctx.stroke();
+    ctx.moveTo(p.x,p.y+18); ctx.lineTo(p.x+16,p.y+38); ctx.stroke();
 }
 
 function drawEnemies(){
     enemies.forEach(e=>{
         if(e.dead) return;
         drawHPBar(e.x,e.y-40,32,5,e.hp/e.max,"#ff5555");
-        ctx.fillStyle="#aaa";
-        ctx.beginPath();
-        ctx.arc(e.x,e.y-20,14,0,Math.PI*2);
-        ctx.fill();
+        ctx.fillStyle="#aaa"; ctx.beginPath(); ctx.arc(e.x,e.y-20,14,0,Math.PI*2); ctx.fill();
     });
 }
-
 function drawBoss(){
     if(!boss||boss.dead) return;
     drawHPBar(boss.x,boss.y-80,90,8,boss.hp/boss.max,"#ff3333");
-    ctx.fillStyle="#f33";
-    ctx.beginPath();
-    ctx.arc(boss.x,boss.y,60,0,Math.PI*2);
-    ctx.fill();
+    ctx.fillStyle="#f33"; ctx.beginPath(); ctx.arc(boss.x,boss.y,60,0,Math.PI*2); ctx.fill();
 }
-
 function drawFloaters(){
     floaters.forEach(f=>{
         ctx.globalAlpha=f.life/60;
         ctx.fillStyle=f.color;
         ctx.font="14px monospace";
         ctx.fillText(f.text,f.x,f.y);
-        f.y-=0.6;
-        f.life--;
+        f.y-=0.6; f.life--;
     });
     ctx.globalAlpha=1;
     floaters = floaters.filter(f=>f.life>0);
 }
-
 function updateEnemyUI(){
     let t="";
-    enemies.forEach((e,i)=>{
-        if(!e.dead) t+=`Minion ${i+1}: ${e.hp}/${e.max}<br>`;
-    });
+    enemies.forEach((e,i)=>{ if(!e.dead) t+=`Minion ${i+1}: ${e.hp}/${e.max}<br>`; });
     if(boss&&!boss.dead) t+=`<b>Boss:</b> ${boss.hp}/${boss.max}`;
     enemyUI.innerHTML=t;
 }
-
 function loop(){
     ctx.clearRect(0,0,c.width,c.height);
-    drawEnemies();
-    drawBoss();
+    drawEnemies(); drawBoss();
     Object.values(players).forEach(drawStickman);
-    drawFloaters();
-    updateEnemyUI();
+    drawFloaters(); updateEnemyUI();
     requestAnimationFrame(loop);
 }
 loop();
 
 /* ================= COMBAT ================= */
-
 function levelCheck(p,type){
-    let lvl = type==="combat"?p.stats.combatLevel:p.stats.healLevel;
-    let xp = type==="combat"?p.stats.combatXP:p.stats.healXP;
+    let lvl = type==="attack"?p.stats.attackLevel:p.stats.healLevel;
+    let xp = type==="attack"?p.stats.attackXP:p.stats.healXP;
     if(xp>=xpNeeded(lvl)){
-        if(type==="combat") p.stats.combatLevel++;
+        if(type==="attack") p.stats.attackLevel++;
         else p.stats.healLevel++;
+
+        // Update combat level (25% per attack/heal)
+        p.stats.combatLevel = Math.floor((p.stats.attackLevel + p.stats.healLevel) * 0.25);
+
         systemMessage(`${p.name} leveled ${type}!`);
     }
 }
 
 function attackTarget(p){
     if(p.dead) return;
-    let dmg = 6 + p.stats.combatLevel*2;
+    let dmg = 6 + p.stats.attackLevel*2;
     let target = enemies.find(e=>!e.dead)||(boss&&!boss.dead&&boss);
     if(!target) return;
 
     target.hp-=dmg;
-
-    // Spawn floating damage number
     spawnFloater(`-${dmg}`,target.x,target.y-30,"#ff5555");
 
-    // Spawn XP floating text for attacker
-    let xpGain = 8;
-    p.stats.combatXP+=xpGain;
+    let xpGain=8; p.stats.attackXP+=xpGain;
     spawnFloater(`+${xpGain} XP`,p.x,p.y-80,"#55ffff");
-
-    // System message for XP gain
     systemMessage(`${p.name} dealt ${dmg} damage to ${target===boss?"BOSS":"Minion"} and gained ${xpGain} XP`);
 
     if(target.hp<=0){
@@ -353,8 +353,7 @@ function attackTarget(p){
         if(target===boss){ area++; spawnWave(); }
     }
 
-    levelCheck(p,"combat");
-    saveStats(p.name);
+    levelCheck(p,"attack"); saveStats(p.name);
 }
 
 function healTarget(p,t){
@@ -362,24 +361,16 @@ function healTarget(p,t){
     let h=10+p.stats.healLevel*3;
     t.hp=Math.min(t.maxHp,t.hp+h);
 
-    // Floating heal
     spawnFloater(`+${h}`,t.x,t.y-40,"#44ff88");
 
-    // XP gain floating
-    let xpGain = 8;
-    p.stats.healXP+=xpGain;
+    let xpGain=8; p.stats.healXP+=xpGain;
     spawnFloater(`+${xpGain} XP`,p.x,p.y-80,"#55ffff");
-
-    // System messages
     systemMessage(`${p.name} healed ${t.name} for ${h} HP and gained ${xpGain} XP`);
 
-    levelCheck(p,"heal");
-    saveStats(p.name);
+    levelCheck(p,"heal"); saveStats(p.name);
 }
 
-
 /* ================= ENEMY ATTACK ================= */
-
 setInterval(()=>{
     let alive=Object.values(players).filter(p=>!p.dead);
     if(!alive.length) return;
@@ -387,26 +378,41 @@ setInterval(()=>{
     let dmg=6+area*2;
     t.hp-=dmg;
     spawnFloater(`-${dmg}`,t.x,t.y-40,"#ff3333");
-    if(t.hp<=0){
-        t.hp=0; t.dead=true;
-        systemMessage(`${t.name} has fallen`);
-    }
+    if(t.hp<=0){ t.hp=0; t.dead=true; systemMessage(`${t.name} has fallen`); }
 },3500);
 
-/* ================= CHAT ================= */
+/* ================= PLAYER STATS WINDOW ================= */
+function showPlayerStats(){
+    const container = document.getElementById("playerStatsContent");
+    container.innerHTML = "";
+    Object.values(players).forEach(p=>{
+        container.innerHTML += `
+            <b>${p.name}</b><br>
+            HP: ${p.hp}/${p.maxHp}<br>
+            Attack Lv: ${p.stats.attackLevel} (${p.stats.attackXP} XP)<br>
+            Heal Lv: ${p.stats.healLevel} (${p.stats.healXP} XP)<br>
+            Combat Lv: ${p.stats.combatLevel}<br>
+            <hr>
+        `;
+    });
+    document.getElementById("playerStatsWindow").style.display = "block";
+}
 
-ComfyJS.onChat=(user,msg,flags,extra)=>{
+/* ================= CHAT ================= */
+ComfyJS.onChat = (user,msg,flags,extra)=>{
     let p=getPlayer(user,extra?.userColor);
-    msg=msg.toLowerCase();
+    msg = msg.toLowerCase();
+
     if(msg==="attack") attackTarget(p);
     if(msg.startsWith("heal")){
         let name=msg.split(" ")[1];
-        let t=players[name]||
-              Object.values(players).filter(x=>!x.dead&&x.name!==user)[0];
+        let t=players[name]||Object.values(players).filter(x=>!x.dead && x.name!==user)[0];
         if(t) healTarget(p,t);
     }
+    if(msg==="stats") showPlayerStats();
 };
 
+/* ================= INIT ================= */
 spawnWave();
 ComfyJS.Init("jaedraze");
 </script>
