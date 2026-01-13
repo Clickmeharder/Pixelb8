@@ -261,124 +261,270 @@ function checkDungeonProgress() {
 }
 
 /* ================= DRAWING ================= */
+/* ================= DRAWING UTILS ================= */
+/* ================= DRAWING ================= */
+
+function drawEquipment(ctx, p, now) {
+    if (p.dead) return;
+
+    // --- FISHING ROD ---
+    if (p.activeTask === "fishing" && p.area === "fishingpond") {
+        ctx.strokeStyle = "#8B4513"; 
+        ctx.lineWidth = 2;
+        let bob = Math.sin(now / 300) * 0.1;
+        
+        ctx.beginPath();
+        ctx.moveTo(p.x + 10, p.y - 10); 
+        ctx.lineTo(p.x + 40, p.y - 40 + (bob * 20)); 
+        ctx.stroke();
+
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(p.x + 40, p.y - 40 + (bob * 20));
+        ctx.quadraticCurveTo(p.x + 50, p.y, p.x + 60, p.y + 20);
+        ctx.stroke();
+    }
+
+    // --- WEAPON (Sword/Axe) ---
+    if (p.activeTask === "attacking") {
+        // Change color based on level
+        ctx.strokeStyle = p.stats.attackLevel > 10 ? "#0ff" : "#ccc"; 
+        ctx.lineWidth = 3;
+        
+        let swing = Math.sin(now / 150) * 0.8;
+        
+        ctx.save();
+        ctx.translate(p.x + 12, p.y - 10);
+        ctx.rotate(swing);
+        
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(25, -5); 
+        ctx.stroke();
+        
+        // Hilt
+        ctx.strokeStyle = "#aa8800";
+        ctx.beginPath(); ctx.moveTo(5, -8); ctx.lineTo(5, 8); ctx.stroke();
+        
+        ctx.restore();
+    }
+}
+
 function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
+    const now = Date.now();
+
     if (p.dead) {
         ctx.fillStyle = "rgba(200, 0, 0, 0.6)";
         ctx.beginPath(); ctx.ellipse(p.x, p.y + 20, 25, 10, 0, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = "#555"; ctx.font = "10px monospace";
+        ctx.textAlign = "center";
         ctx.fillText("CORPSE", p.x, p.y + 10);
         return;
     }
+
+    // Draw the rod or sword
+    drawEquipment(ctx, p, now);
+
     if (p.mingleTarget) {
         ctx.strokeStyle = "rgba(255, 100, 255, 0.3)"; ctx.setLineDash([5, 5]);
         ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.mingleTarget.x, p.mingleTarget.y); ctx.stroke();
         ctx.setLineDash([]);
     }
+
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
+    // Head
     ctx.beginPath(); ctx.arc(p.x, p.y - 30, 10, 0, Math.PI * 2); ctx.stroke();
+    // Body
     ctx.beginPath(); ctx.moveTo(p.x, p.y - 20); ctx.lineTo(p.x, p.y + 10); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(p.x - 15, p.y - 10); ctx.lineTo(p.x + 15, p.y - 10); ctx.stroke();
+    // Arms (Bent if fishing)
+    if(p.activeTask === "fishing") {
+        ctx.beginPath(); ctx.moveTo(p.x - 15, p.y - 10); ctx.lineTo(p.x, p.y - 15); 
+        ctx.lineTo(p.x + 12, p.y - 10); ctx.stroke();
+    } else {
+        ctx.beginPath(); ctx.moveTo(p.x - 15, p.y - 10); ctx.lineTo(p.x + 15, p.y - 10); ctx.stroke();
+    }
+    // Legs
     ctx.beginPath(); ctx.moveTo(p.x, p.y + 10); ctx.lineTo(p.x - 10, p.y + 25); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(p.x, p.y + 10); ctx.lineTo(p.x + 10, p.y + 25); ctx.stroke();
+
+    // Bars
     ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 50, 40, 5);
     ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 50, 40 * (p.hp / p.maxHp), 5);
+    
+    // Label
     ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
     ctx.fillText(`${p.name} (Lv${p.stats.combatLevel})`, p.x, p.y + 45);
 }
 
 function gameLoop() {
+    // 1. Background
     ctx.fillStyle = backgrounds[viewArea];
     ctx.fillRect(0, 0, c.width, c.height);
+
+    // 2. Enemy UI Updates
     let enemyText = "";
     if (viewArea === "dungeon") {
         enemies.forEach(e => { if(!e.dead) enemyText += `Enemy: ${e.hp}hp<br>`; });
         if (boss && !boss.dead) enemyText += `<b>BOSS: ${boss.hp}hp</b>`;
     }
     document.getElementById("enemyUI").innerHTML = enemyText;
+
+    // 3. Draw Players
     Object.values(players).forEach(p => drawStickman(ctx, p));
+
+    // 4. Draw Dungeon Entities
     if (viewArea === "dungeon") {
         enemies.forEach(e => {
             if (!e.dead) {
                 ctx.fillStyle = "#f00"; ctx.fillRect(e.x, e.y, 20, 20);
-                ctx.fillStyle = "#fff"; ctx.fillText(e.hp, e.x + 10, e.y - 5);
+                ctx.fillStyle = "#fff"; ctx.textAlign = "center";
+                ctx.fillText(e.hp, e.x + 10, e.y - 5);
             }
         });
-        if (boss && !boss.dead) { ctx.fillStyle = "#ff00ff"; ctx.fillRect(boss.x, boss.y, 50, 50); }
+        if (boss && !boss.dead) { 
+            ctx.fillStyle = "#ff00ff"; ctx.fillRect(boss.x, boss.y, 50, 50); 
+            ctx.fillStyle = "#fff"; ctx.fillText(boss.hp, boss.x + 25, boss.y - 5);
+        }
     }
+
+    // 5. Draw Floating Text
     floaters.forEach((f, i) => {
         ctx.fillStyle = f.color; ctx.globalAlpha = f.life / 100;
+        ctx.textAlign = "center";
         ctx.fillText(f.text, f.x, f.y); f.y -= 1; f.life--;
         if (f.life <= 0) floaters.splice(i, 1);
     });
     ctx.globalAlpha = 1;
+
+    // 6. Systems Logic
     handleTooltips();
     requestAnimationFrame(gameLoop);
 }
 
 /* ================= CHAT COMMANDS ================= */
+/* ================= COMMAND FUNCTIONS ================= */
+
+// --- COMBAT & TASKS ---
+function cmdAttack(p, user) {
+    if (p.activeTask === "attacking") { systemMessage(`${user}: Already attacking.`); return; }
+    p.activeTask = "attacking";
+    p.taskEndTime = Date.now() + TASK_DURATION;
+    systemMessage(`${user} started attacking (15m idle)`);
+}
+
+function cmdHeal(p, args) {
+    let target = players[args[1]];
+    if (target && target.area === p.area && !target.dead) {
+        let amt = 10 + (p.stats.healLevel * 5);
+        target.hp = Math.min(target.maxHp, target.hp + amt);
+        spawnFloater(`+${amt} HP`, target.x, target.y - 40, "#0f0");
+        p.stats.healXP += 15;
+        if (p.stats.healXP >= xpNeeded(p.stats.healLevel)) {
+            p.stats.healLevel++; p.stats.healXP = 0; 
+            systemMessage(`${p.name} HEAL UP! (Lv ${p.stats.healLevel})`);
+        }
+        saveStats(p);
+    }
+}
+
+function cmdFish(p, user) {
+    if (p.area !== "fishingpond") { systemMessage(`${user}: Go to fishingpond first.`); return; }
+    if (p.activeTask === "fishing") { systemMessage(`${user}: Already fishing.`); return; }
+    p.activeTask = "fishing";
+    p.taskEndTime = Date.now() + TASK_DURATION;
+    systemMessage(`${user} started fishing (15m idle)`);
+}
+
+// --- STATS & INFO ---
+function cmdShowStats(user, args) {
+    let targetName = args[1] ? args[1].toLowerCase() : user.toLowerCase();
+    let targetData = null;
+    let finalName = "";
+
+    let onlinePlayer = Object.values(players).find(pl => pl.name.toLowerCase() === targetName);
+    if (onlinePlayer) {
+        targetData = onlinePlayer.stats;
+        finalName = onlinePlayer.name;
+    } else {
+        let saved = localStorage.getItem("rpg_" + targetName);
+        if (saved) {
+            targetData = JSON.parse(saved);
+            finalName = targetName;
+        }
+    }
+
+    if (targetData) {
+        systemMessage(`${finalName} - CB: ${targetData.combatLevel} | ATK: ${targetData.attackLevel} | FISH: ${targetData.fishLevel} | HEAL: ${targetData.healLevel}`);
+    } else {
+        systemMessage(`System: Could not find stats for ${targetName}`);
+    }
+}
+
+function cmdTopStats() {
+    let allStats = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        let key = localStorage.key(i);
+        if (key.startsWith("rpg_")) {
+            let name = key.replace("rpg_", "");
+            try {
+                let data = JSON.parse(localStorage.getItem(key));
+                allStats.push({ name, cb: data.combatLevel || 1 });
+            } catch(e) {}
+        }
+    }
+    allStats.sort((a, b) => b.cb - a.cb);
+    let top5 = allStats.slice(0, 5).map((s, i) => `#${i+1} ${s.name}(Lv${s.cb})`).join(" | ");
+    systemMessage(`TOP PLAYERS: ${top5}`);
+}
+
+// --- SOCIAL ---
+function cmdMingle(p, user, args) {
+    if (p.area !== "home") return;
+    let target = players[args[1]] || Object.values(players).find(pl => pl.name !== user && pl.area === "home" && !pl.dead);
+    if (target) { 
+        p.mingleTarget = target; 
+        setTimeout(() => { p.mingleTarget = null; }, 5000); 
+    }
+}
+
+/* ================= THE COMFY ROUTER ================= */
 ComfyJS.onChat = (user, msg, flags, extra) => {
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
 
-    if (cmd === "attack") {
-        if (p.activeTask === "attacking") { systemMessage(`${user}: Already attacking.`); return; }
-        p.activeTask = "attacking";
-        p.taskEndTime = Date.now() + TASK_DURATION;
-        systemMessage(`${user} started attacking (15m idle)`);
-    }
+    // Combat & Tasks
+    if (cmd === "attack") cmdAttack(p, user);
+    if (cmd === "fish")   cmdFish(p, user);
+    if (cmd === "heal")   cmdHeal(p, args);
     
-    if (cmd === "heal") {
-        let target = players[args[1]];
-        if (target && target.area === p.area && !target.dead) {
-            let amt = 10 + (p.stats.healLevel * 5);
-            target.hp = Math.min(target.maxHp, target.hp + amt);
-            spawnFloater(`+${amt} HP`, target.x, target.y - 40, "#0f0");
-            p.stats.healXP += 15;
-            if (p.stats.healXP >= xpNeeded(p.stats.healLevel)) {
-                p.stats.healLevel++; p.stats.healXP = 0; systemMessage(`${p.name} HEAL UP!`);
-            }
-            saveStats(p);
-        }
-    }
-
-    if (cmd === "travel") movePlayer(p, args[1]);
-    if (cmd === "home") movePlayer(p, "home");
+    // Movement
+    if (cmd === "travel")  movePlayer(p, args[1]);
+    if (cmd === "home")    movePlayer(p, "home");
     if (cmd === "dungeon") movePlayer(p, "dungeon");
-    if (cmd === "join") joinDungeonQueue(p);
+    if (cmd === "join")    joinDungeonQueue(p);
     
-    if (cmd === "fish") {
-        if (p.area !== "fishingpond") { systemMessage(`${user}: Go to fishingpond first.`); return; }
-        if (p.activeTask === "fishing") { systemMessage(`${user}: Already fishing.`); return; }
-        p.activeTask = "fishing";
-        p.taskEndTime = Date.now() + TASK_DURATION;
-        systemMessage(`${user} started fishing (15m idle)`);
+    // Stats & Inventory
+    if (cmd === "stats")    cmdShowStats(user, args);
+    if (cmd === "topstats") cmdTopStats();
+    if (cmd === "inventory") systemMessage(`${user}'s items: ${p.stats.inventory.slice(-3).join(", ")}...`);
+
+    // Status
+    if (cmd === "mingle") cmdMingle(p, user, args);
+    if (cmd === "respawn" && p.dead) { 
+        p.dead = false; p.hp = p.maxHp; 
+        systemMessage(`${p.name} returned to life!`); 
     }
 
-    if (cmd === "stats") {
-        systemMessage(`${user} - CB: ${p.stats.combatLevel} | ATK: ${p.stats.attackLevel} | FISH: ${p.stats.fishLevel} | HEAL: ${p.stats.healLevel}`);
-    }
-
-    if (cmd === "inventory") {
-        systemMessage(`${user}'s items: ${p.stats.inventory.slice(-3).join(", ")}...`);
-    }
-
-    if (cmd === "mingle") {
-        if (p.area !== "home") return;
-        let target = players[args[1]] || Object.values(players).find(pl => pl.name !== user && pl.area === "home" && !pl.dead);
-        if (target) { p.mingleTarget = target; setTimeout(() => { p.mingleTarget = null; }, 5000); }
-    }
-
-    if (cmd === "respawn" && p.dead) { p.dead = false; p.hp = p.maxHp; systemMessage(`${p.name} returned to life!`); }
-
+    // Admin Controls
     if (flags.broadcaster || flags.mod) {
         if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "VIEWING: HOME"; }
         if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "VIEWING: DUNGEON"; }
         if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "VIEWING: FISHING POND"; }
     }
 };
-
 setInterval(() => {
     if (!dungeonActive) return;
     let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
