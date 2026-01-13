@@ -24,7 +24,7 @@
 <div id="enemyUI"></div>
 <div id="systemUI"></div>
 <div id="tooltip"></div>
-<div id="areaDisplay">StickenFallv2.0.3- VIEWING: HOME</div>
+<div id="areaDisplay">StickenFallv2.1.3- VIEWING: HOME</div>
 
 <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 <script>
@@ -352,7 +352,7 @@ function joinDungeonQueue(p) {
             // --- AUTO-SWITCH VIEW (30 seconds before start) ---
             if (dungeonSecondsLeft === 30) {
                 viewArea = "dungeon";
-                document.getElementById("areaDisplay").textContent = "StickenFallv2.0.3 - VIEWING: DUNGEON (PREPARING)";
+                document.getElementById("areaDisplay").textContent = "StickenFallv2.1.3 - VIEWING: DUNGEON (PREPARING)";
                 systemMessage("System: Switching view to Dungeon for upcoming raid...");
             }
 
@@ -371,7 +371,7 @@ function startDungeon() {
     
     // Ensure the view is definitely on the dungeon
     viewArea = "dungeon"; 
-    document.getElementById("areaDisplay").textContent = "StickenFallv2.0.3 - VIEWING: DUNGEON (ACTIVE)";
+    document.getElementById("areaDisplay").textContent = "StickenFallv2.1.3 - VIEWING: DUNGEON (ACTIVE)";
 
     dungeonQueue.forEach(name => {
         let p = players[name];
@@ -752,10 +752,66 @@ function drawStickman(ctx, p) {
     ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
     ctx.fillText(p.name, p.x, p.y + 40);
 }
+function drawScenery(ctx) {
+    const now = Date.now();
+
+    if (viewArea === "home") {
+        // --- CHILL HOME VIBES ---
+        // Draw a simple Floor/Ground
+        ctx.fillStyle = "#252545";
+        ctx.fillRect(0, 475, c.width, 125);
+
+        // Draw some "Stars" or "Dust" in the air
+        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+        for(let i=0; i<10; i++) {
+            let x = (i * 100 + (now/50)) % c.width;
+            ctx.fillRect(x, 100 + (i*20), 2, 2);
+        }
+
+    } else if (viewArea === "fishingpond") {
+        // --- LAKE / WATER VIBES ---
+        // The Shore
+        ctx.fillStyle = "#1a2e1a";
+        ctx.fillRect(0, 475, 250, 125); // Land on the left
+
+        // The Water
+        ctx.fillStyle = "#0a2e3a";
+        ctx.fillRect(250, 485, c.width - 250, 115);
+
+        // Water Ripples
+        ctx.strokeStyle = "rgba(255,255,255,0.1)";
+        ctx.lineWidth = 2;
+        for(let i=0; i<5; i++) {
+            let rx = 300 + (i * 120);
+            let ry = 520 + (Math.sin(now/500 + i) * 10);
+            ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + 40, ry); ctx.stroke();
+        }
+
+    } else if (viewArea === "dungeon") {
+        // --- GRITTY DUNGEON VIBES ---
+        // Floor
+        ctx.fillStyle = "#110505";
+        ctx.fillRect(0, 475, c.width, 125);
+
+        // Cracks in the wall/back
+        ctx.strokeStyle = "#2a1010";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(100, 0); ctx.lineTo(120, 100); ctx.lineTo(80, 200);
+        ctx.moveTo(600, 0); ctx.lineTo(580, 150); ctx.lineTo(620, 300);
+        ctx.stroke();
+
+        // Spikes/Pillars
+        ctx.fillStyle = "#1d0a0a";
+        ctx.beginPath(); ctx.moveTo(200, 475); ctx.lineTo(225, 300); ctx.lineTo(250, 475); ctx.fill();
+    }
+}
 function gameLoop() {
     // 1. Background
     ctx.fillStyle = backgrounds[viewArea];
     ctx.fillRect(0, 0, c.width, c.height);
+    // 1.5 NEW: Draw Area Props
+    drawScenery(ctx);
 
     // 2. Enemy UI Updates
     let enemyText = "";
@@ -1128,9 +1184,9 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
 
     // Admin Controls
     if (flags.broadcaster || flags.mod) {
-        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickenFallv2.0.3 - VIEWING: HOME"; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickenFallv2.0.3 - VIEWING: DUNGEON"; }
-        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickenFallv2.0.3 - VIEWING: FISHING POND"; }
+        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.3 - VIEWING: HOME"; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.3 - VIEWING: DUNGEON"; }
+        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.3 - VIEWING: FISHING POND"; }
     }
 };
 setInterval(() => {
