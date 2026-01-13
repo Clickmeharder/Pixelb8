@@ -93,7 +93,11 @@ function loadStats(name) {
     };
 
     // --- SAFETY CHECKS FOR OLD SAVES ---
-    
+	//0. Ensure nan gold gets reset to 0
+	if (isNaN(stats.gold) || stats.gold === null || stats.gold === undefined) {
+        console.log(`%c [SYSTEM] Repaired broken gold for ${name}`, "color: #ff0000");
+        stats.gold = 0; 
+    }
     // 1. Ensure Inventory exists as an array
     if (!stats.inventory || !Array.isArray(stats.inventory)) {
         stats.inventory = ["Fishing Rod"];
@@ -148,7 +152,10 @@ const ITEM_DB = {
     "leather Booties":  { type: "boots",  def: 1,                 value: 35,   color: "#5c4033" },
 
     // --- MATERIALS ---
-    "Leather scrap":    { type: "material",                       value: 15,   color: "#a88d6d" }
+    "Leather scrap":    { type: "material",                       value: 15,   color: "#a88d6d" },
+	//======== special items =======
+	// --- special fish ---
+	"Golden Bass": { type: "fish", value: 100, color: "#FFD700" },
 };
 
 function getPlayer(name, color) {
@@ -307,39 +314,52 @@ function performAttack(p) {
 // --- FISHING ---
 function performFish(p) {
     if (p.area !== "fishingpond" || p.dead) return;
-    
+    if (p.stats.fishCaught === undefined) p.stats.fishCaught = 0;
+
     let roll = Math.random();
     let resultText = "";
-    
-    // --- 1 IN 1000 RARITY LOGIC ---
-    if (roll < 0.001) { // 0.1% chance (1 in 1000)
+    let isFish = false;
+    let floaterColor = "#44ccff"; // Default Blue
+
+    // 1. Check for Buyer-Only Golden Fish (5% chance)
+    if (buyerActive && Math.random() < 0.05) {
+        p.stats.inventory.push("Golden Bass");
+        resultText = "GOLDEN BASS!";
+        floaterColor = "#FFD700"; // Gold color
+        isFish = true;
+        systemMessage(`✨ ${p.name} landed a rare GOLDEN BASS!`);
+    } 
+    // 2. Original Rarity Logic
+    else if (roll < 0.001) {
         p.stats.inventory.push("wig");
         resultText = "THE LEGENDARY WIG!";
+        floaterColor = "#FFD700";
         systemMessage(`[!] MYTHIC CATCH: ${p.name} found a Legendary Wig!`);
     } 
-    else if (roll < 0.015) { // Next 1.4% (Approx 1.5% total for boots)
+    else if (roll < 0.015) {
         p.stats.inventory.push("leather Booties");
         resultText = "leather Boots!";
     } 
-    else if (roll < 0.065) { // Next 5% (0.015 + 0.05 = 0.065)
+    else if (roll < 0.065) {
         p.stats.inventory.push("Leather scrap");
         resultText = "Leather scrap";
+        floaterColor = "#a88d6d";
     } 
-    else { // 93.5% chance for standard fish
+    else {
         const weight = (Math.random() * 20 + 0.5).toFixed(1);
         const fishItem = `${weight}kg Bass`; 
         p.stats.inventory.push(fishItem);
         resultText = fishItem;
+        isFish = true;
+        p.stats.fishCaught++;
     }
 
-    // Color coding based on the Old HUD style
-    let floaterColor = "#44ccff"; // Default Blue
-    if (resultText.includes("WIG")) floaterColor = "#FFD700"; // Gold
-    if (resultText.includes("scrap")) floaterColor = "#a88d6d"; // Brownish
+    let displayMsg = `🎣 ${resultText}`;
+    if (isFish && resultText !== "GOLDEN BASS!") displayMsg += ` (#${p.stats.fishCaught})`;
 
-    spawnFloater(`🎣 ${resultText}`, p.x, p.y - 60, floaterColor);
+    spawnFloater(displayMsg, p.x, p.y - 60, floaterColor);
     
-    // XP and Save logic
+    // XP Logic
     p.stats.fishXP += 10;
     if (p.stats.fishXP >= xpNeeded(p.stats.fishLevel) * 2) {
         p.stats.fishLevel++; 
@@ -348,6 +368,75 @@ function performFish(p) {
     }
     updateCombatLevel(p);
     saveStats(p);
+}
+let buyerActive = false;
+let buyerTimer = 0;
+
+function updateBuyerNPC() {
+    const now = Date.now();
+    // Toggle buyer every 5 minutes for a 2-minute duration
+    let cycle = Math.floor(now / 60000) % 7; // 7 minute cycle
+    let wasActive = buyerActive;
+    buyerActive = (cycle === 0 || cycle === 1); // Active during minute 0 and 1
+
+    if (buyerActive && !wasActive) {
+        systemMessage("--- [NPC] THE FISH MERCHANT HAS ARRIVED AT THE POND (2X GOLD)! ---");
+    } else if (!buyerActive && wasActive) {
+        systemMessage("--- [NPC] THE FISH MERCHANT HAS LEFT THE AREA. ---");
+    }
+}
+// Add this to your drawScenery function under the fishingpond section:
+function drawBuyer(ctx) {
+    if (!buyerActive || viewArea !== "fishingpond") return;
+    
+    const bx = 220; 
+    const by = 470; // Adjusted slightly for floor height
+    const now = Date.now();
+    let bounce = Math.sin(now/300) * 4;
+
+    // --- 1. THE CLOAK (Body) ---
+    ctx.fillStyle = "#4B0082"; // Deep Indigo/Purple
+    ctx.beginPath();
+    ctx.moveTo(bx, by - 20 + bounce); // Neck area
+    ctx.lineTo(bx - 15, by + 15 + bounce); // Bottom left
+    ctx.lineTo(bx + 15, by + 15 + bounce); // Bottom right
+    ctx.fill();
+
+    // --- 2. THE STICK ARMS (Tucked in) ---
+    ctx.strokeStyle = "#4B0082";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(bx - 5, by + bounce); 
+    ctx.lineTo(bx - 12, by + 10 + bounce); // Tucked arm
+    ctx.moveTo(bx + 5, by + bounce);
+    ctx.lineTo(bx + 12, by + 10 + bounce); // Tucked arm
+    ctx.stroke();
+
+    // --- 3. THE FACE & HOOD ---
+    // Face (Skin tone)
+    ctx.fillStyle = "#ffdbac";
+    ctx.beginPath(); 
+    ctx.arc(bx, by - 25 + bounce, 7, 0, Math.PI * 2); 
+    ctx.fill();
+
+    // The Hood (Purple arc over the head)
+    ctx.strokeStyle = "#4B0082";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(bx, by - 25 + bounce, 9, Math.PI, 0); // Draws a half-circle "hood"
+    ctx.stroke();
+
+    // --- 4. FLOATING TEXT ---
+    ctx.fillStyle = "#ffff00";
+    ctx.font = "bold 13px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("FISH BUYER [2X]", bx, by - 45 + bounce);
+    
+    // Optional: Little gold sparkles around him
+    if (Math.random() > 0.9) {
+        ctx.fillStyle = "#FFD700";
+        ctx.fillRect(bx + (Math.random()*40-20), by + (Math.random()*40-20), 2, 2);
+    }
 }
 // --- DUNGEON ---
 function joinDungeonQueue(p) {
@@ -816,7 +905,7 @@ function drawScenery(ctx) {
             let ry = 520 + (Math.sin(now/500 + i) * 10);
             ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + 40, ry); ctx.stroke();
         }
-
+		drawBuyer(ctx);
     } else if (viewArea === "dungeon") {
         // --- GRITTY DUNGEON VIBES ---
         // Floor
@@ -1207,40 +1296,78 @@ function cmdSell(p, args) {
     let target = args.slice(1).join(" ").toLowerCase();
     let totalGold = 0;
     let itemsRemoved = 0;
+    
+    // Update the Buyer status before calculating
+    updateBuyerNPC(); 
+    let multiplier = buyerActive ? 2 : 1;
 
     if (target === "fish") {
-        // Sell all fish
         p.stats.inventory = p.stats.inventory.filter(item => {
-            if (item.includes("kg")) {
-                let weight = parseFloat(item.split("kg")[0]);
-                totalGold += Math.floor(weight * 10); // 10 gold per kg
+            // 1. Handle Regular weight-based fish (e.g., "10.5kg Bass")
+            if (item.toLowerCase().includes("kg")) {
+                let weightStr = item.split("kg")[0].replace(/[^0-9.]/g, '');
+                let weight = parseFloat(weightStr);
+                
+                if (!isNaN(weight)) {
+                    // 1 gold per kg * multiplier
+                    totalGold += Math.floor(weight * 1 * multiplier);
+                    itemsRemoved++;
+                    return false; // Remove from inventory
+                }
+            }
+            
+            // 2. Handle Golden Bass specifically within the fish command
+            if (item === "Golden Bass") {
+                let baseValue = ITEM_DB["Golden Bass"]?.value || 100;
+                // We apply the multiplier here too since the Merchant loves rare fish!
+                totalGold += (baseValue * multiplier);
                 itemsRemoved++;
                 return false; // Remove from inventory
             }
-            return true; // Keep in inventory
+
+            return true; // Keep everything else (weapons, etc)
         });
     } else {
-        // Sell specific item
+        // Handle selling a specific single item by name
         let index = p.stats.inventory.findIndex(i => i.toLowerCase() === target);
         if (index !== -1) {
             let itemName = p.stats.inventory[index];
             let itemData = ITEM_DB[itemName];
             
-            // Default price 50g for gear, or use a .value property if it exists
-            totalGold = itemData?.value || 50; 
+            let price = itemData?.value || 50;
+            
+            // If selling Golden Bass by name while Merchant is active, give bonus
+            if (itemName === "Golden Bass") {
+                totalGold = price * multiplier;
+            } else {
+                totalGold = price;
+            }
+
             p.stats.inventory.splice(index, 1);
             itemsRemoved = 1;
         }
     }
 
     if (itemsRemoved > 0) {
+        // Final sanity check to prevent NaN from corrupting the save
+        if (isNaN(totalGold)) totalGold = 0;
+        
         p.stats.gold = (p.stats.gold || 0) + totalGold;
-        systemMessage(`${p.name} sold ${itemsRemoved} item(s) for ${totalGold} gold!`);
+        
+        let msg = `${p.name} sold ${itemsRemoved} item(s) for ${totalGold.toFixed(2)} gold!`;
+        
+        // Add a special flair message if they sold to the Merchant
+        if (buyerActive) {
+            msg += " 💰 [MERCHANT SPECIAL RATE]";
+        }
+        
+        systemMessage(msg);
         saveStats(p);
     } else {
-        systemMessage(`${p.name}: Could not find "${target}" to sell. Try "!sell fish" or "!sell [item name]".`);
+        systemMessage(`${p.name}: Could not find "${target}" to sell. Try "!sell fish".`);
     }
 }
+
 function cmdBalance(p) {
     // Formatting gold to 2 decimal places as requested
     const displayGold = (p.stats.gold || 0).toFixed(2);
@@ -1248,6 +1375,7 @@ function cmdBalance(p) {
     // Using your specific prison wallet phrasing
     systemMessage(`${p.name} has ${displayGold} coins stuffed in their prison wallet`);
 }
+
 // --- STATS & INFO ---
 function cmdShowStats(user, args) {
     // If user types "!stats playername", args[1] is the name. Otherwise, look up the caller.
@@ -1291,6 +1419,7 @@ function cmdTopStats() {
     let top5 = allStats.slice(0, 5).map((s, i) => `#${i+1} ${s.name}(Lv${s.cb})`).join(" | ");
     systemMessage(`TOP PLAYERS: ${top5}`);
 }
+
 /* ================= THE COMFY ROUTER ================= */
 ComfyJS.onChat = (user, msg, flags, extra) => {
     let p = getPlayer(user, extra.userColor);
