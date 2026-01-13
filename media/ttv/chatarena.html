@@ -489,19 +489,52 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
     const pWeapon = p.stats.equippedWeapon;
 
     // --- WEAPON ---
-    if (pWeapon && ITEM_DB[pWeapon]) {
+	if (pWeapon && ITEM_DB[pWeapon]) {
         const w = ITEM_DB[pWeapon];
+        const isBow = pWeapon.toLowerCase().includes("bow");
+        
         ctx.save();
         if (isAttacking) {
-            // Your existing attack logic...
-            ctx.translate(p.x + 10, p.y - 10 + bodyY); // Sync attack start point
-            // ... (rest of attack draw)
+            ctx.translate(p.x + 10, p.y - 10 + bodyY);
+            // ... (your existing attack draw)
         } else {
-            // SHEATHED POSITION (Now syncs with bodyY)
-            ctx.translate(p.x - 5, p.y - 5 + bodyY); 
-            ctx.rotate(Math.PI / 1.2);
-            ctx.strokeStyle = w.color; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(20, 0); ctx.stroke();
+            // SHEATHED POSITION
+            if (isBow) {
+                // Draw Bow on Back
+                ctx.translate(p.x, p.y - 5 + bodyY); 
+                ctx.rotate(Math.PI / 4); // Angle it across the back
+                
+                ctx.strokeStyle = "#8B4513"; // Wood color
+                ctx.lineWidth = 2;
+                
+                // Draw the curved bow limb
+                ctx.beginPath();
+                ctx.arc(0, 0, 15, -Math.PI/2, Math.PI/2); 
+                ctx.stroke();
+                
+                // Draw the bowstring (thin white/grey line)
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, -15);
+                ctx.lineTo(0, 15);
+                ctx.stroke();
+            } else {
+                // Draw Sword/Dagger (Straight Line)
+                ctx.translate(p.x - 5, p.y - 5 + bodyY); 
+                ctx.rotate(Math.PI / 1.2);
+                ctx.strokeStyle = w.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(20, 0);
+                ctx.stroke();
+                
+                // Add a small crossguard for the sword
+                ctx.moveTo(5, -3);
+                ctx.lineTo(5, 3);
+                ctx.stroke();
+            }
         }
         ctx.restore();
     }
@@ -1203,8 +1236,8 @@ function cmdTopStats() {
 ComfyJS.onChat = (user, msg, flags, extra) => {
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
-	const cmd = args.shift().toLowerCase();
-    //let cmd = args[0].toLowerCase();
+	//const cmd = args.shift().toLowerCase();
+    let cmd = args[0].toLowerCase();
 
     // Combat & Tasks
     if (cmd === "attack") cmdAttack(p, user);
