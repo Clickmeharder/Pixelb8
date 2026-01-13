@@ -409,7 +409,23 @@ ComfyJS.onChat = (user,msg,flags,extra)=>{
         let t=players[name]||Object.values(players).filter(x=>!x.dead && x.name!==user)[0];
         if(t) healTarget(p,t);
     }
+	    // New chat command to clear all player stats
+    if(msg === "clearstats") {
+        for (let key in localStorage) {
+            if (key.startsWith("stats_")) localStorage.removeItem(key);
+        }
+        systemMessage("All player stats cleared!");
+	    // New chat command to clear all player stats
+    if(msg === "clearstats") {
+        for (let key in localStorage) {
+            if (key.startsWith("stats_")) localStorage.removeItem(key);
+        }
+        systemMessage("All player stats cleared!");
+    }
     if(msg==="stats") showPlayerStats();
+	
+	localStorage.clear();
+systemMessage("All saved stats cleared!");
 };
 
 /* ================= INIT ================= */
