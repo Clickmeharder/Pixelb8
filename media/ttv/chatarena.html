@@ -24,7 +24,7 @@
 <div id="enemyUI"></div>
 <div id="systemUI"></div>
 <div id="tooltip"></div>
-<div id="areaDisplay">StickenFallv2.1.3- VIEWING: HOME</div>
+<div id="areaDisplay">StickenFallv2.1.5- VIEWING: HOME</div>
 
 <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 <script>
@@ -73,19 +73,22 @@ function updateCombatLevel(p) {
 
 /* ================= DATA PERSISTENCE ================= */
 /* ================= DATA PERSISTENCE ================= */
+/* ================= DATA PERSISTENCE ================= */
 function loadStats(name) {
     const saved = localStorage.getItem("rpg_" + name);
     let stats = saved ? JSON.parse(saved) : {
         attackLevel: 1, attackXP: 0,
         healLevel: 1, healXP: 0,
         fishLevel: 1, fishXP: 0,
+		danceLevel: 1, danceXP: 0,
         combatLevel: 1,
         gold: 0,
         inventory: ["Fishing Rod"],
         equippedWeapon: null,
         equippedArmor: null,
         equippedHelmet: null,
-		equippedBoots: null,
+        equippedBoots: null,
+        wigColor: null // 1. Set default for NEW players
     };
 
     // --- SAFETY CHECKS FOR OLD SAVES ---
@@ -99,12 +102,17 @@ function loadStats(name) {
     if (!stats.inventory.includes("Fishing Rod")) {
         stats.inventory.push("Fishing Rod");
     }
-
+	
     // 3. Patch missing currency and equipment slots
     if (stats.gold === undefined) stats.gold = 0;
     if (stats.equippedWeapon === undefined) stats.equippedWeapon = null;
     if (stats.equippedArmor === undefined) stats.equippedArmor = null;
     if (stats.equippedHelmet === undefined) stats.equippedHelmet = null;
+    if (stats.equippedBoots === undefined) stats.equippedBoots = null;
+	if (stats.danceLevel === undefined) stats.danceLevel = 1;
+	if (stats.danceXP === undefined) stats.danceXP = 0;
+    // 2. Patch missing wigColor for OLD players
+    if (stats.wigColor === undefined) stats.wigColor = null;
 
     // Optional: Log legacy patches in HUD green color
     if (!saved) {
@@ -352,7 +360,7 @@ function joinDungeonQueue(p) {
             // --- AUTO-SWITCH VIEW (30 seconds before start) ---
             if (dungeonSecondsLeft === 30) {
                 viewArea = "dungeon";
-                document.getElementById("areaDisplay").textContent = "StickenFallv2.1.3 - VIEWING: DUNGEON (PREPARING)";
+                document.getElementById("areaDisplay").textContent = "StickenFallv2.1.5 - VIEWING: DUNGEON (PREPARING)";
                 systemMessage("System: Switching view to Dungeon for upcoming raid...");
             }
 
@@ -371,7 +379,7 @@ function startDungeon() {
     
     // Ensure the view is definitely on the dungeon
     viewArea = "dungeon"; 
-    document.getElementById("areaDisplay").textContent = "StickenFallv2.1.3 - VIEWING: DUNGEON (ACTIVE)";
+    document.getElementById("areaDisplay").textContent = "StickenFallv2.1.5 - VIEWING: DUNGEON (ACTIVE)";
 
     dungeonQueue.forEach(name => {
         let p = players[name];
@@ -475,89 +483,109 @@ function handleLoot(p, target) {
         systemMessage(`✨ ${p.name} looted: ${drop}!`);
     }
 }
-function drawEquipment(ctx, p, now) {
+function drawEquipment(ctx, p, now, bodyY, armMove) {
     if (p.dead) return;
     const isAttacking = p.activeTask === "attacking";
-    const swing = Math.sin(now / 80) * 0.8;
     const pWeapon = p.stats.equippedWeapon;
-    const lean = p.lean || 0;
 
-    // --- 1. FISHING ROD & ARMS ---
-    if (p.activeTask === "fishing" && p.area === "fishingpond") {
-        let bob = Math.sin(now / 300) * 0.1;
-        ctx.strokeStyle = p.color; ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(p.x + (lean * 20), p.y - 15); 
-        ctx.lineTo(p.x + 15, p.y - 10); 
-        ctx.stroke();
-        ctx.strokeStyle = "#8B4513"; ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(p.x + 12, p.y - 10);  
-        ctx.lineTo(p.x + 50, p.y - 45 + (bob * 20)); 
-        ctx.stroke();
-        ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(p.x + 50, p.y - 45 + (bob * 20));
-        ctx.quadraticCurveTo(p.x + 60, p.y, p.x + 70, p.y + 25);
-        ctx.stroke();
-        // Removed return so armor draws!
-    }
-
-    // --- 2. WEAPON (Equipped) ---
+    // --- WEAPON ---
     if (pWeapon && ITEM_DB[pWeapon]) {
         const w = ITEM_DB[pWeapon];
-        const isBow = pWeapon.toLowerCase().includes("shortbow");
         ctx.save();
         if (isAttacking) {
-            ctx.translate(p.x + 10, p.y - 10);
-            if (isBow) {
-                ctx.strokeStyle = "#8B4513"; ctx.lineWidth = 2;
-                let pull = Math.abs(Math.sin(now / 200)) * 10;
-                ctx.beginPath(); ctx.arc(5, 0, 15, -Math.PI/2, Math.PI/2); ctx.stroke();
-                ctx.strokeStyle = "#eee"; ctx.lineWidth = 1;
-                ctx.beginPath(); ctx.moveTo(5, -15); ctx.lineTo(5 - pull, 0); ctx.lineTo(5, 15); ctx.stroke();
-            } else {
-                ctx.rotate(swing);
-                ctx.strokeStyle = w.color; ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(25, -5); ctx.stroke();
-            }
+            // Your existing attack logic...
+            ctx.translate(p.x + 10, p.y - 10 + bodyY); // Sync attack start point
+            // ... (rest of attack draw)
         } else {
-            ctx.translate(p.x - 5, p.y - 5);
+            // SHEATHED POSITION (Now syncs with bodyY)
+            ctx.translate(p.x - 5, p.y - 5 + bodyY); 
             ctx.rotate(Math.PI / 1.2);
             ctx.strokeStyle = w.color; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(20, 0); ctx.stroke();
         }
         ctx.restore();
     }
-    // --- 3. BARE HANDED PUNCH ---
-    else if (isAttacking) {
-        ctx.strokeStyle = p.color; ctx.lineWidth = 3;
-        ctx.beginPath();
-        let punchX = p.x + (Math.sin(now / 40) > 0 ? 22 : 12);
-        ctx.moveTo(p.x + (lean * 20), p.y - 15);
-        ctx.lineTo(punchX, p.y - 12);
+
+    // --- OTHER GEAR ---
+    if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY);
+    if (p.stats.equippedHelmet) drawHelmet(ctx, p, bodyY);
+    if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY);
+}
+
+function drawStickman(ctx, p) {
+    if (p.area !== viewArea) return;
+    updatePhysics(p); 
+    const now = Date.now();
+    let lean = p.lean || 0;
+
+    if (p.dead) {
+        ctx.fillStyle = "rgba(200, 0, 0, 0.6)";
+        ctx.beginPath(); ctx.ellipse(p.x, p.y + 20, 25, 10, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.textAlign = "center"; ctx.fillStyle = "#555";
+        ctx.fillText("CORPSE", p.x, p.y + 10);
+        return;
+    }
+
+    let bodyY = 0;
+    let armMove = 0;
+    const isDancing = p.activeTask === "dancing";
+    if (isDancing) {
+        if (p.danceStyle === 1) bodyY = Math.sin(now / 100) * 8;
+        if (p.danceStyle === 2) armMove = Math.sin(now / 50) * 20;
+        if (p.danceStyle === 3) lean = Math.sin(now / 200) * 0.6;
+    }
+
+    ctx.strokeStyle = p.color; ctx.lineWidth = 3;
+    const headX = p.x + (lean * 20);
+    const headY = p.y - 30 + bodyY;
+
+    // 1. Head & Face
+    ctx.beginPath(); ctx.arc(headX, headY, 10, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = p.color;
+    ctx.fillRect(headX + 2, headY - 3, 2, 2);
+    ctx.fillRect(headX + 6, headY - 3, 2, 2);
+    ctx.beginPath(); ctx.arc(headX + 4, headY + 2, 3, 0, Math.PI); ctx.stroke();
+    
+    // 2. Torso
+    ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
+
+    // 3. ARMS (FIXED: Now draws even if weapon is equipped)
+    const isAttacking = p.activeTask === "attacking";
+    const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
+
+    if (!isAttacking && !isFishing) {
+        ctx.beginPath(); 
+        ctx.moveTo(headX, headY + 15); 
+        ctx.lineTo(p.x - 18 + (lean * 10), p.y + 3 + bodyY + armMove); 
+        ctx.moveTo(headX, headY + 15); 
+        ctx.lineTo(p.x + 18 + (lean * 30), p.y + 3 + bodyY - armMove); 
         ctx.stroke();
     }
 
-    // --- 4. ARMOR & HELMET ---
-    if (p.stats.equippedArmor) drawArmor(ctx, p);
-    
-    // This now handles Wigs, Bags, and Iron Helmets correctly
-    if (p.stats.equippedHelmet) {
-        drawHelmet(ctx, p);
-    }
+    // 4. Legs
+    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+    ctx.beginPath(); 
+    ctx.moveTo(p.x, p.y + 10 + bodyY); 
+    ctx.lineTo(p.x - 10 - walk, p.y + 25); 
+    ctx.moveTo(p.x, p.y + 10 + bodyY); 
+    ctx.lineTo(p.x + 10 + walk, p.y + 25); 
+    ctx.stroke();
 
-    if (p.stats.equippedBoots) {
-        drawBoots(ctx, p);
-    }
+    // 5. Equipment (Pass bodyY and armMove)
+    drawEquipment(ctx, p, now, bodyY, armMove);
+
+    // HP Bar & Name
+    ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55 + bodyY, 40, 4);
+    ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55 + bodyY, 40 * (p.hp / p.maxHp), 4);
+    ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
+    ctx.fillText(p.name, p.x, p.y + 40 + bodyY);
 }
 
-function drawBoots(ctx, p) {
+function drawBoots(ctx, p, bodyY = 0) {
     const item = ITEM_DB[p.stats.equippedBoots];
     if (!item) return;
 
     const now = Date.now();
-    // Re-calculate the walk offset so boots match the leg position
     let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
 
     ctx.save();
@@ -567,10 +595,10 @@ function drawBoots(ctx, p) {
 
     // Left Boot
     const leftFootX = p.x - 10 - walk;
-    const footY = p.y + 25;
-    ctx.fillRect(leftFootX - 4, footY - 2, 8, 5); // Foot base
+    const footY = p.y + 25; // Feet stay on ground, but we could add bodyY/4 for "bounce"
+    ctx.fillRect(leftFootX - 4, footY - 2, 8, 5); 
     ctx.strokeRect(leftFootX - 4, footY - 2, 8, 5);
-    ctx.fillRect(leftFootX - 2, footY - 6, 4, 5); // Ankle part
+    ctx.fillRect(leftFootX - 2, footY - 6, 4, 5); 
     
     // Right Boot
     const rightFootX = p.x + 10 + walk;
@@ -580,7 +608,7 @@ function drawBoots(ctx, p) {
 
     ctx.restore();
 }
-function drawArmor(ctx, p) {
+function drawArmor(ctx, p, bodyY = 0) {
     const item = ITEM_DB[p.stats.equippedArmor];
     if (!item) return;
 
@@ -588,73 +616,79 @@ function drawArmor(ctx, p) {
     const headX = p.x + (lean * 20);
 
     ctx.save();
-    
-    // 1. Setup Path for the "Vest"
     ctx.beginPath();
-    ctx.moveTo(headX - 7, p.y - 18); // Shoulder left
-    ctx.lineTo(headX + 7, p.y - 18); // Shoulder right
-    ctx.lineTo(p.x + 7, p.y + 8);    // Waist right
-    ctx.lineTo(p.x - 7, p.y + 8);    // Waist left
+    // All Y values now include bodyY
+    ctx.moveTo(headX - 7, p.y - 18 + bodyY); 
+    ctx.lineTo(headX + 7, p.y - 18 + bodyY); 
+    ctx.lineTo(p.x + 7, p.y + 8 + bodyY);    
+    ctx.lineTo(p.x - 7, p.y + 8 + bodyY);    
     ctx.closePath();
 
-    // 2. FILL the armor (Solid Color)
     ctx.fillStyle = item.color;
-    ctx.globalAlpha = 0.8; // Slight transparency so it looks "worn"
+    ctx.globalAlpha = 0.8;
     ctx.fill();
 
-    // 3. STROKE the armor (Dark Border for definition)
     ctx.globalAlpha = 1.0;
-    ctx.strokeStyle = "#000"; // Black outline
+    ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // 4. SHINY HIGHLIGHT (If it's high tier)
     if (item.color === "#eee" || item.color === "#aaa") {
         ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
         ctx.lineWidth = 2;
         ctx.beginPath(); 
-        ctx.moveTo(headX - 3, p.y - 15); 
-        ctx.lineTo(p.x - 3, p.y + 2); 
+        ctx.moveTo(headX - 3, p.y - 15 + bodyY); 
+        ctx.lineTo(p.x - 3, p.y + 2 + bodyY); 
         ctx.stroke();
     }
-
     ctx.restore();
 }
-function drawHelmet(ctx, p) {
+function drawHelmet(ctx, p, bodyY = 0) {
     const item = ITEM_DB[p.stats.equippedHelmet];
     if (!item) return;
 
     const leanOffset = (p.lean || 0) * 20;
     const hX = p.x + leanOffset;
-    const hY = p.y - 30; // Center of head
+    const hY = p.y - 30 + bodyY; // Sync with head height
 
     ctx.save();
     ctx.lineWidth = 2;
-
-    // Convert to lowercase for the check to prevent "Paper Bag" vs "paper bag" bugs
     const helmetName = p.stats.equippedHelmet.toLowerCase();
 
     if (helmetName === "paper bag") {
-        ctx.fillStyle = "#d2b48c"; // Tan paper color
-        ctx.strokeStyle = "#000";   // Solid black for Retro HUD style
+        ctx.fillStyle = "#d2b48c";
+        ctx.strokeStyle = "#000";   
         ctx.fillRect(hX - 12, hY - 14, 24, 26);
         ctx.strokeRect(hX - 12, hY - 14, 24, 26);
-        
-        // Eye holes
         ctx.fillStyle = "#111";
         ctx.fillRect(hX - 7, hY - 4, 5, 5);
         ctx.fillRect(hX + 2, hY - 4, 5, 5);
-        
-        // Crinkle lines
         ctx.strokeStyle = "rgba(0,0,0,0.2)";
         ctx.beginPath(); ctx.moveTo(hX - 12, hY + 5); ctx.lineTo(hX + 12, hY + 8); ctx.stroke();
     } 
-    else if (helmetName === "wig") {
-        ctx.fillStyle = item.color || "#ffff00";
+	else if (helmetName === "wig") {
+        // Use custom wigColor if it exists, otherwise use the DB color (Yellow)
+        ctx.fillStyle = p.stats.wigColor || item.color || "#ffff00";
+        
+        // --- Flowing Hair Styles ---
+        // Back hair (behind the head)
         ctx.beginPath();
-        ctx.arc(hX, hY - 5, 14, Math.PI, 0);
-        ctx.arc(hX - 8, hY, 8, 0, Math.PI * 2);
-        ctx.arc(hX + 8, hY, 8, 0, Math.PI * 2);
+        ctx.arc(hX, hY, 13, 0, Math.PI * 2); 
+        ctx.fill();
+
+        // Side bangs (framing the face)
+        ctx.beginPath();
+        ctx.moveTo(hX - 10, hY);
+        ctx.quadraticCurveTo(hX - 15, hY + 15, hX - 10, hY + 20); // Left lock
+        ctx.moveTo(hX + 10, hY);
+        ctx.quadraticCurveTo(hX + 15, hY + 15, hX + 10, hY + 20); // Right lock
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.stroke();
+
+        // Top volume
+        ctx.beginPath();
+        ctx.arc(hX, hY - 6, 11, Math.PI, 0);
         ctx.fill();
     }
     else if (helmetName === "iron helmet") {
@@ -667,12 +701,9 @@ function drawHelmet(ctx, p) {
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        
-        // Visor slit
         ctx.strokeStyle = "#222";
         ctx.beginPath(); ctx.moveTo(hX - 8, hY + 4); ctx.lineTo(hX + 8, hY + 4); ctx.stroke();
     }
-
     ctx.restore();
 }
 function drawStickman(ctx, p) {
@@ -832,7 +863,7 @@ function gameLoop() {
 			p.targetX = null;
 			p.danceStyle = 0; // Reset dance
 		}
-
+		
 		// 2. MOVEMENT LOGIC (Original)
 		if (p.targetX !== null && p.targetX !== undefined) {
 			let dx = p.targetX - p.x;
@@ -844,8 +875,32 @@ function gameLoop() {
 				if (p.activeTask !== "attacking") p.targetX = null;
 			}
 		}
+		// 3.0 dance timing logic
+		if (p.activeTask === "dancing" && !p.dead) {
+			if (!p.lastDanceXP) p.lastDanceXP = 0;
+			
+			if (now - p.lastDanceXP > 5000) { // Every 5 seconds
+				// Give slightly more XP for harder dances
+				let xpGain = 5 + (p.danceStyle * 2); 
+				p.stats.danceXP += xpGain;
+				p.lastDanceXP = now;
 
-		// 3. ATTACK TIMING LOGIC (Original)
+				// Level Up Logic
+				let nextLevelXP = p.stats.danceLevel * 100;
+				if (p.stats.danceXP >= nextLevelXP) {
+					p.stats.danceLevel++;
+					p.stats.danceXP = 0;
+					spawnFloater(p.x, p.y - 40, `DANCE LEVEL ${p.stats.danceLevel}!`, "#ff00ff");
+					
+					// Notification for unlocks
+					if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
+					if (p.stats.danceLevel === 10) systemMessage(`${p.name} unlocked Dance Style 3: The Lean!`);
+					
+					saveStats(p);
+				}
+			}
+		}
+		// 3.1 ATTACK TIMING LOGIC (Original)
 		if (p.activeTask === "attacking" && !p.dead) {
 			let weapon = ITEM_DB[p.stats.equippedWeapon];
 			let attackSpeed = weapon?.speed || 700; 
@@ -891,12 +946,72 @@ function gameLoop() {
 
 /* ================= CHAT COMMANDS ================= */
 /* ================= COMMAND FUNCTIONS ================= */
-function cmdDance(p, user) {
+function cmdDance(p, user, args) {
     if (p.dead) return;
+
+    const level = p.stats.danceLevel || 1;
+    let chosenStyle = parseInt(args[0]); // Check if they typed "!dance 2"
+
+    // Define the Level Requirements
+    const UNLOCKS = {
+        1: { name: "The Squat", minLvl: 1 },
+        2: { name: "The Flail", minLvl: 5 },
+        3: { name: "The Lean",  minLvl: 10 }
+    };
+
+    // Determine which style to use
+    if (!isNaN(chosenStyle)) {
+        // Player tried to pick a specific dance
+        if (!UNLOCKS[chosenStyle]) {
+            systemMessage(`${user}, that dance style doesn't exist! Try 1, 2, or 3.`);
+            return;
+        }
+        if (level < UNLOCKS[chosenStyle].minLvl) {
+            systemMessage(`${user}, you need Dance Lvl ${UNLOCKS[chosenStyle].minLvl} for that move!`);
+            return;
+        }
+        p.danceStyle = chosenStyle;
+    } else {
+        // Player just typed "!dance", give them a random unlocked one
+        let unlockedStyles = [];
+        if (level >= 1) unlockedStyles.push(1);
+        if (level >= 5) unlockedStyles.push(2);
+        if (level >= 10) unlockedStyles.push(3);
+        
+        p.danceStyle = unlockedStyles[Math.floor(Math.random() * unlockedStyles.length)];
+    }
+
     p.activeTask = "dancing";
-    p.danceStyle = Math.floor(Math.random() * 3) + 1; // Pick dance 1, 2, or 3
-    p.taskEndTime = Date.now() + (15 * 60 * 1000); // 15m duration
-    systemMessage(`${user} is busting a move! (Dance Style ${p.danceStyle})`);
+    p.taskEndTime = Date.now() + (15 * 60 * 1000); // 15 mins
+    
+    let styleName = UNLOCKS[p.danceStyle].name;
+    systemMessage(`${user} is performing ${styleName}! (Lvl ${level} Dancer)`);
+    saveStats(p);
+}
+function cmdListDances(p) {
+    const lvl = p.stats.danceLevel;
+    let msg = `Your Dance Lvl: ${lvl}. Unlocks: [1] The Squat (Lvl 1) `;
+    msg += lvl >= 5 ? `[2] The Flail (Lvl 5) ` : `[2] LOCKED (Lvl 5) `;
+    msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
+    systemMessage(msg);
+}
+function cmdWigColor(p, colorArg) {
+    if (!p.stats.equippedHelmet || p.stats.equippedHelmet.toLowerCase() !== "wig") {
+        systemMessage(`${p.name}, you need to be wearing a wig to change its color!`);
+        return;
+    }
+
+    // Basic regex to check if it's a valid hex color or a simple color name
+    const isHex = /^#([0-9A-F]{3}){1,2}$/i.test(colorArg);
+    const safeColors = ["red", "blue", "green", "pink", "purple", "orange", "white", "black", "cyan", "magenta"];
+
+    if (isHex || safeColors.includes(colorArg.toLowerCase())) {
+        p.stats.wigColor = colorArg;
+        saveStats(p);
+        systemMessage(`${p.name}'s wig is now ${colorArg}!`);
+    } else {
+        systemMessage(`Invalid color! Use a hex code like #ff00ff or names like 'pink'.`);
+    }
 }
 // --- COMBAT & TASKS ---
 function cmdAttack(p, user) {
@@ -1155,7 +1270,8 @@ function cmdTopStats() {
 ComfyJS.onChat = (user, msg, flags, extra) => {
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
-    let cmd = args[0].toLowerCase();
+	const cmd = args.shift().toLowerCase();
+    //let cmd = args[0].toLowerCase();
 
     // Combat & Tasks
     if (cmd === "attack") cmdAttack(p, user);
@@ -1167,7 +1283,8 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
     if (cmd === "home")    movePlayer(p, "home");
     if (cmd === "dungeon") movePlayer(p, "dungeon");
     if (cmd === "join")    joinDungeonQueue(p);
-    if (cmd === "dance") cmdDance(p, user);
+    if (cmd === "!dance") {cmdDance(p, user, args);}
+	if (cmd === "!dances") {cmdListDances(p);}
     // Stats & Inventory
     if (cmd === "stats")    cmdShowStats(user, args);
     if (cmd === "topstats") cmdTopStats();
@@ -1184,9 +1301,9 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
 
     // Admin Controls
     if (flags.broadcaster || flags.mod) {
-        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.3 - VIEWING: HOME"; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.3 - VIEWING: DUNGEON"; }
-        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.3 - VIEWING: FISHING POND"; }
+        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.5 - VIEWING: HOME"; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.5 - VIEWING: DUNGEON"; }
+        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.5 - VIEWING: FISHING POND"; }
     }
 };
 setInterval(() => {
