@@ -120,7 +120,11 @@ let players = {};
 let floaters = [];
 let enemyUI = document.getElementById("enemyUI");
 let systemUI = document.getElementById("systemUI");
-
+const backgrounds = {
+    home: "rgba(20,20,40,1)", // simple Home area color
+    dungeon: "rgba(50,30,10,1)" // cave/dungeon color
+};
+let currentArea = "home"; // can be 'home', 'dungeon', etc.
 /* ================= SYSTEM UI ================= */
 function systemMessage(text){
     const div = document.createElement("div");
@@ -186,6 +190,32 @@ function saveStats(name){
 function xpNeeded(lvl){ return Math.floor(40*Math.pow(1.5,lvl)); }
 
 /* ================= WAVES ================= */
+
+let dungeonQueue = [];
+let dungeonCountdown = null;
+
+function joinDungeonQueue(p){
+    if(!dungeonQueue.includes(p.name)) {
+        dungeonQueue.push(p.name);
+        systemMessage(`${p.name} joined the dungeon queue (${dungeonQueue.length} players)`);
+    }
+    
+    if(!dungeonCountdown){
+        dungeonCountdown = setTimeout(() => {
+            startDungeon();
+            dungeonCountdown = null;
+        }, 60000); // 60 seconds
+        systemMessage("Dungeon will start in 60 seconds!");
+    }
+}
+
+function startDungeon(){
+    currentArea = "dungeon";
+    systemMessage("Dungeon starts now!");
+    spawnWave(); // you can adjust spawnWave() to spawn stronger dungeon enemies
+}
+
+
 function spawnWave(){
     enemies=[]; boss=null;
     let count = Math.min(3+area,6);
@@ -309,6 +339,11 @@ function updateEnemyUI(){
     enemyUI.innerHTML=t;
 }
 function loop(){
+    // Draw background
+    ctx.fillStyle = backgrounds[currentArea] || "#000";
+    ctx.fillRect(0,0,c.width,c.height);
+	
+	//game
     ctx.clearRect(0,0,c.width,c.height);
     drawEnemies(); drawBoss();
     Object.values(players).forEach(drawStickman);
@@ -334,27 +369,43 @@ function levelCheck(p,type){
 
 function attackTarget(p){
     if(p.dead) return;
+
     let dmg = 6 + p.stats.attackLevel*2;
-    let target = enemies.find(e=>!e.dead)||(boss&&!boss.dead&&boss);
-    if(!target) return;
+    let target = null;
 
-    target.hp-=dmg;
-    spawnFloater(`-${dmg}`,target.x,target.y-30,"#ff5555");
-
-    let xpGain=8; p.stats.attackXP+=xpGain;
-    spawnFloater(`+${xpGain} XP`,p.x,p.y-80,"#55ffff");
-    systemMessage(`${p.name} dealt ${dmg} damage to ${target===boss?"BOSS":"Minion"} and gained ${xpGain} XP`);
-
-    if(target.hp<=0){
-        target.dead=true;
-        spawnFloater(`DEAD!`,target.x,target.y-30,"#ff0000");
-        systemMessage(`${target===boss?"Boss":"Minion"} was defeated!`);
-        if(enemies.every(e=>e.dead)&&!boss) spawnBoss();
-        if(target===boss){ area++; spawnWave(); }
+    if(currentArea === "home"){
+        // Home PvP: target nearest alive player that isn't self
+        let playersAlive = Object.values(players).filter(pl => !pl.dead && pl.name !== p.name);
+        if(playersAlive.length) {
+            target = playersAlive[Math.floor(Math.random() * playersAlive.length)];
+        }
+    } else {
+        // Normal enemies/boss
+        target = enemies.find(e=>!e.dead) || (boss && !boss.dead && boss);
     }
 
-    levelCheck(p,"attack"); saveStats(p.name);
+    if(!target) return;
+
+    target.hp -= dmg;
+    spawnFloater(`-${dmg}`, target.x, target.y-30, "#ff5555");
+
+    let xpGain = 8;
+    p.stats.attackXP += xpGain;
+    spawnFloater(`+${xpGain} XP`, p.x, p.y-80, "#55ffff");
+
+    if(target.hp <= 0){
+        target.hp = 0;
+        target.dead = true;
+        spawnFloater(`DEAD!`, target.x, target.y-30, "#ff0000");
+        systemMessage(`${target.name} has been defeated by ${p.name}!`);
+
+        // Optional: prevent PvP death XP in Home, or add special XP
+    }
+
+    levelCheck(p,"attack"); 
+    saveStats(p.name);
 }
+
 
 function healTarget(p,t){
     if(p.dead||t.dead) return;
@@ -368,6 +419,16 @@ function healTarget(p,t){
     systemMessage(`${p.name} healed ${t.name} for ${h} HP and gained ${xpGain} XP`);
 
     levelCheck(p,"heal"); saveStats(p.name);
+}
+/* ================= SELF RESPAWN ================= */
+function scheduleRespawn(p){
+    if(!p.dead) return;
+    systemMessage(`${p.name} will respawn in 60 seconds...`);
+    setTimeout(() => {
+        p.dead = false;
+        p.hp = p.maxHp;
+        systemMessage(`${p.name} has respawned!`);
+    }, 60000);
 }
 
 /* ================= ENEMY ATTACK ================= */
@@ -403,11 +464,11 @@ ComfyJS.onChat = (user,msg,flags,extra)=>{
     let p=getPlayer(user,extra?.userColor);
     msg = msg.toLowerCase();
 
-    if(msg==="attack") attackTarget(p);
+    if(msg === "attack") attackTarget(p);
     if(msg.startsWith("heal")){
-        let name=msg.split(" ")[1];
-        let t=players[name]||Object.values(players).filter(x=>!x.dead && x.name!==user)[0];
-        if(t) healTarget(p,t);
+        let name = msg.split(" ")[1];
+        let t = players[name] || Object.values(players).filter(x=>!x.dead && x.name!==user)[0];
+        if(t) healTarget(p, t);
     }
 	    // New chat command to clear all player stats
     if(msg === "clearstats") {
@@ -422,6 +483,7 @@ ComfyJS.onChat = (user,msg,flags,extra)=>{
         }
         systemMessage("All player stats cleared!");
     }
+	if(msg === "dungeon") joinDungeonQueue(p);
     if(msg==="stats") showPlayerStats();
 	
 	localStorage.clear();
@@ -429,8 +491,9 @@ systemMessage("All saved stats cleared!");
 };
 
 /* ================= INIT ================= */
-spawnWave();
+
 ComfyJS.Init("jaedraze");
 </script>
 </body>
+
 </html>
