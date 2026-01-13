@@ -643,7 +643,7 @@ function drawHelmet(ctx, p) {
 }
 function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
-    updatePhysics(p); // Process movement
+    updatePhysics(p); 
     const now = Date.now();
     let lean = p.lean || 0;
 
@@ -656,23 +656,40 @@ function drawStickman(ctx, p) {
     }
 
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
-    // Head (Leans with body)
+    
+    // 1. Head (Leans with body)
     ctx.beginPath(); ctx.arc(p.x + (lean * 20), p.y - 30, 10, 0, Math.PI * 2); ctx.stroke();
-    // Torso
+    
+    // 2. Torso
     ctx.beginPath(); ctx.moveTo(p.x + (lean * 20), p.y - 20); ctx.lineTo(p.x, p.y + 10); ctx.stroke();
-    // Legs (Simple walking toggle)
+
+    // 3. DEFAULT ARMS (Added these back!)
+    // Only draw default arms if they aren't currently fishing or swinging a weapon
+    if (p.activeTask !== "fishing" && !p.stats.equippedWeapon) {
+        ctx.beginPath(); 
+        // Left Arm
+        ctx.moveTo(p.x + (lean * 20), p.y - 15); 
+        ctx.lineTo(p.x - 12 + (lean * 10), p.y - 5); 
+        // Right Arm
+        ctx.moveTo(p.x + (lean * 20), p.y - 15); 
+        ctx.lineTo(p.x + 12 + (lean * 30), p.y - 5); 
+        ctx.stroke();
+    }
+
+    // 4. Legs
     let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
     ctx.beginPath(); ctx.moveTo(p.x, p.y + 10); ctx.lineTo(p.x - 10 - walk, p.y + 25); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(p.x, p.y + 10); ctx.lineTo(p.x + 10 + walk, p.y + 25); ctx.stroke();
-	// 2. Then draw equipment (Weapon, Armor, Helmet) on top
-	drawEquipment(ctx, p, now);
+
+    // 5. Equipment (Draws over the body)
+    drawEquipment(ctx, p, now);
+
     // HP Bar & Name
     ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
     ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
     ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
     ctx.fillText(p.name, p.x, p.y + 40);
 }
-
 function gameLoop() {
     // 1. Background
     ctx.fillStyle = backgrounds[viewArea];
