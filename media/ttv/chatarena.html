@@ -10,7 +10,17 @@
 
         #enemyUI { position:absolute; top:10px; right:10px; color:#ff4444; font-size:14px; text-align:right; background:rgba(0,0,0,0.6); padding:8px; border-radius:6px; border: 1px solid #444; }
         #systemUI { position:absolute; top:10px; left:10px; width:300px; font-size:13px; pointer-events:none; }
-        .sysMsg { background:rgba(0,0,0,0.7); color:#0f0; padding:5px; margin-bottom:4px; border-radius:4px; border-left: 3px solid #0f0; animation: fadeout 8s forwards; }
+
+		.sysMsg {
+    background: rgba(0, 20, 0, 0.8);
+    color: #00ff00; /* Classic Terminal Green */
+    font-family: 'Courier New', monospace;
+    border-left: 3px solid #00ff00;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-size: 12px;
+}
         #tooltip { position: absolute; pointer-events: none; background: rgba(0,0,0,0.9); color: #fff; padding: 8px; border-radius: 4px; border: 1px solid #0ff; font-size: 13px; display: none; z-index: 100; }
         #areaDisplay { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); color:#0ff; font-size:18px; background:rgba(0,0,0,0.8); padding:5px 15px; border: 1px solid #0ff; text-transform: uppercase; }
 
@@ -69,38 +79,57 @@ function updateCombatLevel(p) {
 }
 
 /* ================= DATA PERSISTENCE ================= */
+/* ================= DATA PERSISTENCE ================= */
 function loadStats(name) {
     const saved = localStorage.getItem("rpg_" + name);
-    if (saved) return JSON.parse(saved);
-    return {
+    let stats = saved ? JSON.parse(saved) : {
         attackLevel: 1, attackXP: 0,
         healLevel: 1, healXP: 0,
         fishLevel: 1, fishXP: 0,
         combatLevel: 1,
-        inventory: []
+        gold: 0,
+        inventory: ["Fishing Rod"],
+        equippedWeapon: null,
+        equippedArmor: null,
+        equippedHelmet: null
     };
-}
 
+    // --- SAFETY CHECKS FOR OLD SAVES ---
+    // If a returning player doesn't have these new features, give them defaults:
+    if (!stats.inventory) stats.inventory = ["Fishing Rod"];
+    if (stats.gold === undefined) stats.gold = 0;
+    if (stats.equippedWeapon === undefined) stats.equippedWeapon = null;
+    if (stats.equippedArmor === undefined) stats.equippedArmor = null;
+    if (stats.equippedHelmet === undefined) stats.equippedHelmet = null;
+
+    return stats;
+}
 function saveStats(p) {
     localStorage.setItem("rpg_" + p.name, JSON.stringify(p.stats));
 }
+const ITEM_DB = {
+    "Rusty Dagger":     { type: "weapon", power: 5, color: "#777" },
+    "Iron Sword":       { type: "weapon", power: 12, color: "#eee" },
+    "shitty shortbow":  { type: "weapon", power: 5, color: "#eee" },
+    "decent shortbow":  { type: "weapon", power: 8, color: "#eee" },
+    "Fishing Rod":      { type: "tool",   power: 0, color: "#8B4513" },
+    "Leather Tunic":    { type: "armor",  def: 2,   color: "#5c4033" },
+    "Paper Bag":        { type: "armor",  def: 1,   color: "#5c4033" },
+    "wig":              { type: "helmet", def: 1,   color: "yellow" },
+    "Iron Plate":       { type: "armor",  def: 5,   color: "#aaa" },
+    "Iron helmet":      { type: "helmet", def: 5,   color: "#aaa" },
+    "leather Boots":    { type: "armor",  def: 1,   color: "#5c4033" }
+};
 
-/* ================= PLAYER LOGIC ================= */
 function getPlayer(name, color) {
     if (players[name]) return players[name];
     players[name] = {
-        name,
-        color: color || "#00ffff",
-        x: Math.random() * 800 + 100,
-        y: 450,
-        hp: 100,
-        maxHp: 100,
-        dead: false,
-        area: "home",
-        mingleTarget: null,
-        stats: loadStats(name),
-        activeTask: null, // 'fishing' or 'attacking'
-        taskEndTime: 0
+        name, color: color || "#00ffff",
+        x: Math.random() * 800 + 100, y: 450,
+        targetX: null, // For walking to enemies
+        hp: 100, maxHp: 100, dead: false,
+        area: "home", activeTask: null,
+        stats: loadStats(name)
     };
     return players[name];
 }
@@ -174,7 +203,6 @@ setInterval(() => {
 // --- COMBAT ---
 function performAttack(p) {
     if (p.dead) return;
-    let dmg = 5 + (p.stats.attackLevel * 2);
     let target = null;
 
     if (p.area === "home") {
@@ -185,42 +213,87 @@ function performAttack(p) {
     }
 
     if (!target || target.dead) return;
-    target.hp -= dmg;
-    spawnFloater(`-${dmg}`, target.x, target.y - 40, "#ff4444");
-    p.stats.attackXP += 10;
-    if (p.stats.attackXP >= xpNeeded(p.stats.attackLevel)) {
-        p.stats.attackLevel++; p.stats.attackXP = 0;
-        systemMessage(`${p.name} ATK UP! (Lv ${p.stats.attackLevel})`);
-    }
-    updateCombatLevel(p);
-    saveStats(p);
 
-    if (target.hp <= 0) {
-        target.hp = 0; target.dead = true;
-        systemMessage(`${target.name || "Enemy"} slain by ${p.name}!`);
-        if (p.area === "dungeon") {
-            p.stats.inventory.push("Bone Fragment");
-            checkDungeonProgress();
+    // Move to target
+    p.targetX = target.x - 30;
+
+    // Only hit if within range
+    if (Math.abs(p.x - target.x) < 50) {
+        let weapon = ITEM_DB[p.stats.equippedWeapon];
+        let dmg = 5 + (p.stats.attackLevel * 2) + (weapon ? weapon.power : 0);
+        
+        target.hp -= dmg;
+        spawnFloater(`-${dmg}`, target.x, target.y - 40, "#ff4444");
+
+        if (target.hp <= 0) {
+            target.hp = 0; target.dead = true;
+            systemMessage(`${target.name || "Enemy"} slain by ${p.name}!`);
+
+            // --- LOOT LOGIC ---
+            let roll = Math.random();
+            if (p.area === "dungeon") {
+                if (target === boss) {
+                    // BOSS DROPS (High Tier)
+                    let bossDrops = ["Iron Sword", "Iron Plate", "Iron helmet"];
+                    let item = bossDrops[Math.floor(Math.random() * bossDrops.length)];
+                    let gold = Math.floor(Math.random() * 100) + 100;
+                    p.stats.inventory.push(item);
+                    p.stats.gold = (p.stats.gold || 0) + gold;
+                    systemMessage(`🌟 BOSS LOOT: ${p.name} found ${item} and ${gold} coins!`);
+                } else {
+                    // MINION DROPS (Mid Tier)
+                    p.stats.inventory.push("Bone Fragment");
+                    p.stats.gold = (p.stats.gold || 0) + 10;
+                    
+                    if (roll > 0.95) p.stats.inventory.push("decent shortbow");
+                    else if (roll > 0.85) p.stats.inventory.push("shitty shortbow");
+                    else if (roll > 0.75) p.stats.inventory.push("Paper Bag");
+                }
+                checkDungeonProgress();
+            }
         }
+
+        p.stats.attackXP += 10;
+        if (p.stats.attackXP >= xpNeeded(p.stats.attackLevel)) {
+            p.stats.attackLevel++; p.stats.attackXP = 0;
+            systemMessage(`${p.name} ATK UP! (Lv ${p.stats.attackLevel})`);
+        }
+        updateCombatLevel(p);
+        saveStats(p);
     }
 }
-
 // --- FISHING ---
 function performFish(p) {
     if (p.area !== "fishingpond" || p.dead) return;
-    const weights = [1.2, 5.5, 10.2, 0.5, 22.1];
-    const weight = weights[Math.floor(Math.random() * weights.length)];
-    spawnFloater(`🎣 ${weight}kg`, p.x, p.y - 60, "#44ccff");
+    
+    let roll = Math.random();
+    let resultText = "";
+    
+    if (roll > 0.99) { // 1% chance
+        p.stats.inventory.push("wig");
+        resultText = "THE LEGENDARY WIG!";
+    } else if (roll > 0.95) { // 4% chance
+        p.stats.inventory.push("leather Boots");
+        resultText = "leather Boots!";
+    } else if (roll > 0.80) { // 15% chance
+        p.stats.inventory.push("Leather scrap");
+        resultText = "Leather scrap";
+    } else {
+        const weight = (Math.random() * 20 + 0.5).toFixed(1);
+        p.stats.inventory.push(`Fish (${weight}kg)`);
+        resultText = `Fish (${weight}kg)`;
+    }
+
+    spawnFloater(`🎣 ${resultText}`, p.x, p.y - 60, "#44ccff");
+    
     p.stats.fishXP += 10;
     if (p.stats.fishXP >= xpNeeded(p.stats.fishLevel) * 2) {
         p.stats.fishLevel++; p.stats.fishXP = 0;
         systemMessage(`${p.name} FISH UP! (Lv ${p.stats.fishLevel})`);
     }
-    p.stats.inventory.push(`Fish (${weight}kg)`);
     updateCombatLevel(p);
     saveStats(p);
 }
-
 // --- DUNGEON ---
 function joinDungeonQueue(p) {
     if (p.dead) return;
@@ -235,14 +308,41 @@ function joinDungeonQueue(p) {
 }
 
 function startDungeon() {
-    dungeonTimer = null; dungeonActive = true;
+    dungeonTimer = null; 
+    dungeonActive = true;
     dungeonQueue.forEach(name => {
         let p = players[name];
-        if (p && !p.dead) p.area = "dungeon";
+        if (p && !p.dead) {
+            p.area = "dungeon";
+            p.x = Math.random() * 400 + 50; // Left side of screen
+            p.y = -50; // Start off-screen (above)
+            p.targetY = 450; // Destination floor
+        }
     });
     spawnWave();
 }
 
+function updatePhysics(p) {
+    // Vertical Fall (Dungeon Entrance)
+    if (p.targetY !== undefined && p.y < p.targetY) {
+        p.y += 10; 
+        if (p.y >= p.targetY) { p.y = p.targetY; delete p.targetY; }
+    }
+
+    // Horizontal Walk (Attacking/Moving)
+    if (p.targetX !== null && p.targetX !== undefined) {
+        let dx = p.targetX - p.x;
+        if (Math.abs(dx) > 5) {
+            p.x += dx * 0.1; // Smooth slide toward target
+            // Cheeky "Leaning" effect while running
+            p.lean = dx > 0 ? 0.2 : -0.2;
+        } else {
+            p.lean = 0;
+            // If they were running to attack but target is gone, return to idle
+            if (p.activeTask !== "attacking") p.targetX = null;
+        }
+    }
+}
 function spawnWave() {
     enemies = [];
     for (let i = 0; i < 3; i++) {
@@ -262,100 +362,300 @@ function checkDungeonProgress() {
 
 /* ================= DRAWING ================= */
 /* ================= DRAWING UTILS ================= */
-/* ================= DRAWING ================= */
+const arrows = [];
 
-function drawEquipment(ctx, p, now) {
+function spawnArrow(startX, startY, endX, endY) {
+    arrows.push({ x: startX, y: startY, tx: endX, ty: endY, life: 30 });
+}
+
+// Add this into your gameLoop() to draw the flying arrows:
+function updateArrows(ctx) {
+    arrows.forEach((a, i) => {
+        let dx = a.tx - a.x;
+        let dy = a.ty - a.y;
+        a.x += dx * 0.2;
+        a.y += dy * 0.2;
+        
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(a.x + 10, a.y);
+        ctx.stroke();
+
+        a.life--;
+        if (a.life <= 0 || Math.abs(dx) < 5) arrows.splice(i, 1);
+    });
+}
+/* ================= DRAWING ================= */
+function performAttack(p) {
     if (p.dead) return;
 
-    // --- FISHING ROD ---
-    if (p.activeTask === "fishing" && p.area === "fishingpond") {
-        ctx.strokeStyle = "#8B4513"; 
-        ctx.lineWidth = 2;
-        let bob = Math.sin(now / 300) * 0.1;
+    // 1. Identify Target
+    let target = null;
+    if (p.area === "dungeon") {
+        target = enemies.find(e => !e.dead) || boss;
+    } else if (p.area === "home") {
+        target = Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name);
+    }
+    if (!target || target.dead) return;
+
+    // 2. Determine Range and Position
+    const isBow = p.stats.equippedWeapon?.toLowerCase().includes("shortbow");
+    const rangeNeeded = isBow ? 200 : 50;
+    
+    // Set movement target: Bow users stay back, Melee users go close
+    p.targetX = target.x - (isBow ? 150 : 30);
+
+    // 3. Range Check & Combat Execution
+    if (Math.abs(p.x - target.x) <= rangeNeeded) {
+        let weapon = ITEM_DB[p.stats.equippedWeapon];
+        let dmg = 5 + (p.stats.attackLevel * 2) + (weapon ? weapon.power : 0);
         
+        // Visuals
+        if (isBow) {
+            spawnArrow(p.x + 10, p.y - 10, target.x, target.y);
+        }
+        
+        target.hp -= dmg;
+        spawnFloater(`-${dmg}`, target.x, target.y - 40, "#ff4444");
+
+        // 4. Kill Logic & Looting
+        if (target.hp <= 0) {
+            target.hp = 0;
+            target.dead = true;
+            systemMessage(`${target.name || "Enemy"} slain by ${p.name}!`);
+
+            if (p.area === "dungeon") {
+                handleLoot(p, target); // Cleaned up loot into its own check
+                checkDungeonProgress();
+            }
+        }
+
+        // 5. XP and Progress
+        p.stats.attackXP += 10;
+        if (p.stats.attackXP >= xpNeeded(p.stats.attackLevel)) {
+            p.stats.attackLevel++;
+            p.stats.attackXP = 0;
+            systemMessage(`${p.name} ATK UP (Lv ${p.stats.attackLevel})`);
+        }
+        updateCombatLevel(p);
+        saveStats(p);
+    }
+}
+
+// Helper to keep performAttack clean
+function handleLoot(p, target) {
+    let roll = Math.random();
+    let drop = null;
+
+    if (target === boss) {
+        // Boss guaranteed high-tier
+        drop = roll > 0.5 ? "Iron Plate" : "Iron Sword";
+    } else {
+        // Minion rare drops
+        if (roll > 0.98) drop = "Iron helmet";
+        else if (roll > 0.90) drop = "shitty shortbow";
+        else if (roll > 0.85) drop = "Leather Tunic";
+        else if (roll > 0.70) drop = "Paper Bag";
+    }
+
+    if (drop) {
+        p.stats.inventory.push(drop);
+        systemMessage(`✨ ${p.name} looted: ${drop}!`);
+    }
+}
+function drawEquipment(ctx, p, now) {
+    if (p.dead) return;
+    const isAttacking = p.activeTask === "attacking";
+    const swing = Math.sin(now / 150) * 0.8;
+	const pWeapon = p.stats.equippedWeapon;
+    // --- 1. FISHING ROD ---
+    if (p.activeTask === "fishing" && p.area === "fishingpond") {
+        ctx.strokeStyle = "#8B4513"; ctx.lineWidth = 2;
+        let bob = Math.sin(now / 300) * 0.1;
         ctx.beginPath();
         ctx.moveTo(p.x + 10, p.y - 10); 
         ctx.lineTo(p.x + 40, p.y - 40 + (bob * 20)); 
         ctx.stroke();
-
-        ctx.strokeStyle = "rgba(255,255,255,0.5)";
-        ctx.lineWidth = 1;
+        
+        ctx.strokeStyle = "rgba(255,255,255,0.5)"; ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(p.x + 40, p.y - 40 + (bob * 20));
         ctx.quadraticCurveTo(p.x + 50, p.y, p.x + 60, p.y + 20);
         ctx.stroke();
+        return; 
     }
 
-    // --- WEAPON (Sword/Axe) ---
-    if (p.activeTask === "attacking") {
-        // Change color based on level
-        ctx.strokeStyle = p.stats.attackLevel > 10 ? "#0ff" : "#ccc"; 
-        ctx.lineWidth = 3;
-        
-        let swing = Math.sin(now / 150) * 0.8;
+    // --- 2. WEAPON (Equipped) ---
+	if (pWeapon && ITEM_DB[pWeapon]) {
+        const w = ITEM_DB[pWeapon];
+        const isBow = pWeapon.toLowerCase().includes("shortbow");
         
         ctx.save();
-        ctx.translate(p.x + 12, p.y - 10);
-        ctx.rotate(swing);
-        
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(25, -5); 
-        ctx.stroke();
-        
-        // Hilt
-        ctx.strokeStyle = "#aa8800";
-        ctx.beginPath(); ctx.moveTo(5, -8); ctx.lineTo(5, 8); ctx.stroke();
-        
+        if (isAttacking) {
+            ctx.translate(p.x + 10, p.y - 10);
+            if (isBow) {
+                // --- DRAW BOW ---
+                ctx.strokeStyle = "#8B4513"; ctx.lineWidth = 2;
+                let pull = Math.abs(Math.sin(now / 200)) * 10; // Pulling back the string
+                
+                // The Bow Curve
+                ctx.beginPath();
+                ctx.arc(5, 0, 15, -Math.PI/2, Math.PI/2);
+                ctx.stroke();
+                
+                // The String
+                ctx.strokeStyle = "#eee"; ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(5, -15);
+                ctx.lineTo(5 - pull, 0); // String pulls back
+                ctx.lineTo(5, 15);
+                ctx.stroke();
+
+                // The Arrow (While pulling)
+                if (pull > 5) {
+                    ctx.strokeStyle = "#fff";
+                    ctx.beginPath(); ctx.moveTo(-pull, 0); ctx.lineTo(15 - pull, 0); ctx.stroke();
+                }
+            } else {
+                // --- DRAW MELEE (Your existing swing logic) ---
+                ctx.rotate(swing);
+                ctx.strokeStyle = w.color; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(25, -5); ctx.stroke();
+                ctx.strokeStyle = "#850"; ctx.beginPath(); ctx.moveTo(5,-5); ctx.lineTo(5,5); ctx.stroke();
+            }
+        } else {
+            // --- SHEATHED (Same as before) ---
+            ctx.translate(p.x - 5, p.y - 5);
+            ctx.rotate(Math.PI / 1.2);
+            ctx.strokeStyle = "rgba(0,0,0,0.4)"; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(20, 0); ctx.stroke();
+            ctx.strokeStyle = w.color; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(20, 0); ctx.stroke();
+            ctx.strokeStyle = "#850"; ctx.beginPath(); ctx.moveTo(0, -4); ctx.lineTo(0, 4); ctx.stroke();
+        }
         ctx.restore();
     }
-}
+    // --- 3. BARE HANDED PUNCH ---
+    else if (isAttacking) {
+        ctx.strokeStyle = p.color; ctx.lineWidth = 2;
+        ctx.beginPath();
+        let punchX = p.x + (Math.sin(now/100) > 0 ? 20 : 10);
+        ctx.moveTo(p.x + 5, p.y - 10);
+        ctx.lineTo(punchX + (swing * 10), p.y - 15);
+        ctx.stroke();
+    }
 
+    // --- 4. ARMOR (Next Step) ---
+// --- 4. ARMOR & HELMET ---
+    if (p.stats.equippedArmor) {
+        drawArmor(ctx, p);
+    }
+    if (p.stats.equippedHelmet) {
+        drawHelmet(ctx, p);
+    }
+}
+function drawArmor(ctx, p) {
+    const item = ITEM_DB[p.stats.equippedArmor];
+    if (!item) return;
+
+    ctx.strokeStyle = item.color;
+    ctx.lineWidth = 4; // Thicker lines for armor
+    
+    // Draw a "Vest" over the stickman body
+    ctx.beginPath();
+    ctx.moveTo(p.x - 5, p.y - 20); // Shoulder left
+    ctx.lineTo(p.x + 5, p.y - 20); // Shoulder right
+    ctx.lineTo(p.x + 5, p.y + 5);  // Waist right
+    ctx.lineTo(p.x - 5, p.y + 5);  // Waist left
+    ctx.closePath();
+    ctx.stroke();
+    
+    // Add a little highlight for "Shiny" armor
+    if (item.color === "#eee" || item.color === "#0ff") {
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(p.x - 2, p.y - 18); ctx.lineTo(p.x - 2, p.y - 10); ctx.stroke();
+    }
+}
+function drawHelmet(ctx, p) {
+    const item = ITEM_DB[p.stats.equippedHelmet];
+    if (!item) return;
+
+    const leanOffset = (p.lean || 0) * 20;
+    const hX = p.x + leanOffset;
+    const hY = p.y - 30; // Center of head
+
+    ctx.save();
+    ctx.lineWidth = 2;
+
+    if (p.stats.equippedHelmet === "Paper Bag") {
+        ctx.fillStyle = "#d2b48c"; // Tan paper color
+        ctx.strokeStyle = "#a88d6d";
+        ctx.fillRect(hX - 12, hY - 12, 24, 24);
+        ctx.strokeRect(hX - 12, hY - 12, 24, 24);
+        // Eye holes
+        ctx.fillStyle = "#111";
+        ctx.fillRect(hX - 6, hY - 2, 4, 4);
+        ctx.fillRect(hX + 2, hY - 2, 4, 4);
+    } 
+    else if (p.stats.equippedHelmet === "wig") {
+        ctx.fillStyle = item.color; // Yellow
+        ctx.beginPath();
+        // Poofy wig shape
+        ctx.arc(hX, hY - 5, 14, Math.PI, 0);
+        ctx.arc(hX - 8, hY, 8, 0, Math.PI * 2);
+        ctx.arc(hX + 8, hY, 8, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    else if (p.stats.equippedHelmet === "Iron helmet") {
+        ctx.fillStyle = "#aaa";
+        ctx.strokeStyle = "#444";
+        ctx.beginPath();
+        ctx.arc(hX, hY, 12, Math.PI, 0); // Top dome
+        ctx.lineTo(hX + 12, hY + 8);
+        ctx.lineTo(hX - 12, hY + 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Visor slit
+        ctx.strokeStyle = "#222";
+        ctx.beginPath(); ctx.moveTo(hX - 8, hY + 2); ctx.lineTo(hX + 8, hY + 2); ctx.stroke();
+    }
+
+    ctx.restore();
+}
 function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
+    updatePhysics(p); // Process movement
     const now = Date.now();
+    let lean = p.lean || 0;
 
     if (p.dead) {
         ctx.fillStyle = "rgba(200, 0, 0, 0.6)";
         ctx.beginPath(); ctx.ellipse(p.x, p.y + 20, 25, 10, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#555"; ctx.font = "10px monospace";
-        ctx.textAlign = "center";
+        ctx.textAlign = "center"; ctx.fillStyle = "#555";
         ctx.fillText("CORPSE", p.x, p.y + 10);
         return;
     }
 
-    // Draw the rod or sword
-    drawEquipment(ctx, p, now);
-
-    if (p.mingleTarget) {
-        ctx.strokeStyle = "rgba(255, 100, 255, 0.3)"; ctx.setLineDash([5, 5]);
-        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.mingleTarget.x, p.mingleTarget.y); ctx.stroke();
-        ctx.setLineDash([]);
-    }
-
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
-    // Head
-    ctx.beginPath(); ctx.arc(p.x, p.y - 30, 10, 0, Math.PI * 2); ctx.stroke();
-    // Body
-    ctx.beginPath(); ctx.moveTo(p.x, p.y - 20); ctx.lineTo(p.x, p.y + 10); ctx.stroke();
-    // Arms (Bent if fishing)
-    if(p.activeTask === "fishing") {
-        ctx.beginPath(); ctx.moveTo(p.x - 15, p.y - 10); ctx.lineTo(p.x, p.y - 15); 
-        ctx.lineTo(p.x + 12, p.y - 10); ctx.stroke();
-    } else {
-        ctx.beginPath(); ctx.moveTo(p.x - 15, p.y - 10); ctx.lineTo(p.x + 15, p.y - 10); ctx.stroke();
-    }
-    // Legs
-    ctx.beginPath(); ctx.moveTo(p.x, p.y + 10); ctx.lineTo(p.x - 10, p.y + 25); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(p.x, p.y + 10); ctx.lineTo(p.x + 10, p.y + 25); ctx.stroke();
-
-    // Bars
-    ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 50, 40, 5);
-    ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 50, 40 * (p.hp / p.maxHp), 5);
-    
-    // Label
+    // Head (Leans with body)
+    ctx.beginPath(); ctx.arc(p.x + (lean * 20), p.y - 30, 10, 0, Math.PI * 2); ctx.stroke();
+    // Torso
+    ctx.beginPath(); ctx.moveTo(p.x + (lean * 20), p.y - 20); ctx.lineTo(p.x, p.y + 10); ctx.stroke();
+    // Legs (Simple walking toggle)
+    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+    ctx.beginPath(); ctx.moveTo(p.x, p.y + 10); ctx.lineTo(p.x - 10 - walk, p.y + 25); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(p.x, p.y + 10); ctx.lineTo(p.x + 10 + walk, p.y + 25); ctx.stroke();
+	// 2. Then draw equipment (Weapon, Armor, Helmet) on top
+	drawEquipment(ctx, p, now);
+    // HP Bar & Name
+    ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
+    ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
     ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
-    ctx.fillText(`${p.name} (Lv${p.stats.combatLevel})`, p.x, p.y + 45);
+    ctx.fillText(p.name, p.x, p.y + 40);
 }
 
 function gameLoop() {
@@ -371,8 +671,22 @@ function gameLoop() {
     }
     document.getElementById("enemyUI").innerHTML = enemyText;
 
-    // 3. Draw Players
-    Object.values(players).forEach(p => drawStickman(ctx, p));
+    // 3. Update and Draw Players (Only call this ONCE)
+    Object.values(players).forEach(p => {
+        // Handle horizontal movement for attacking
+        if (p.targetX !== null && p.targetX !== undefined) {
+            let dx = p.targetX - p.x;
+            if (Math.abs(dx) > 5) {
+                p.x += dx * 0.1;
+                p.lean = dx > 0 ? 0.2 : -0.2;
+            } else {
+                p.lean = 0;
+                if (p.activeTask !== "attacking") p.targetX = null;
+            }
+        }
+        drawStickman(ctx, p);
+		updateArrows(ctx);
+    });
 
     // 4. Draw Dungeon Entities
     if (viewArea === "dungeon") {
@@ -398,11 +712,9 @@ function gameLoop() {
     });
     ctx.globalAlpha = 1;
 
-    // 6. Systems Logic
     handleTooltips();
     requestAnimationFrame(gameLoop);
 }
-
 /* ================= CHAT COMMANDS ================= */
 /* ================= COMMAND FUNCTIONS ================= */
 
@@ -436,7 +748,70 @@ function cmdFish(p, user) {
     p.taskEndTime = Date.now() + TASK_DURATION;
     systemMessage(`${user} started fishing (15m idle)`);
 }
+// --- SOCIAL ---
+function cmdMingle(p, user, args) {
+    if (p.area !== "home") return;
+    let target = players[args[1]] || Object.values(players).find(pl => pl.name !== user && pl.area === "home" && !pl.dead);
+    if (target) { 
+        p.mingleTarget = target; 
+        setTimeout(() => { p.mingleTarget = null; }, 5000); 
+    }
+}
 
+
+function cmdEquip(p, args) {
+    // 1. Join args and normalize to lowercase for easy searching
+    let inputName = args.slice(1).join(" ").toLowerCase();
+    
+    // 2. Find the item in the inventory (case-insensitive)
+    let invItem = p.stats.inventory.find(i => i.toLowerCase() === inputName);
+    
+    if (!invItem) {
+        systemMessage(`${p.name}: You don't have "${args.slice(1).join(" ")}" in your inventory.`);
+        return;
+    }
+
+    // 3. Find the item in the ITEM_DB to get its stats
+    // We search the DB keys to match the inventory item
+    let dbKey = Object.keys(ITEM_DB).find(k => k.toLowerCase() === invItem.toLowerCase());
+    let itemData = ITEM_DB[dbKey];
+
+    if (!itemData) {
+        systemMessage(`System Error: ${invItem} has no stats in ITEM_DB.`);
+        return;
+    }
+
+    // 4. Equip based on type
+	if (itemData.type === "weapon") {
+		p.stats.equippedWeapon = dbKey;
+		systemMessage(`${p.name} equipped ${dbKey}!`);
+	} else if (itemData.type === "armor") {
+		p.stats.equippedArmor = dbKey;
+		systemMessage(`${p.name} put on ${dbKey}!`);
+	} else if (itemData.type === "helmet") {
+		p.stats.equippedHelmet = dbKey; // New slot!
+		systemMessage(`${p.name} is wearing ${dbKey}!`);
+	}
+
+    saveStats(p);
+}
+
+function cmdInventory(p, user, args) {
+    let filter = args[1] ? args[1].toLowerCase() : "all";
+    let items = p.stats.inventory;
+    let result = [];
+
+    if (filter === "weapons") result = items.filter(i => ITEM_DB[i]?.type === "weapon");
+    else if (filter === "armour" || filter === "armor") result = items.filter(i => ITEM_DB[i]?.type === "armor");
+    else if (filter === "fish") result = items.filter(i => i.includes("kg"));
+    else if (filter === "tools") result = items.filter(i => ITEM_DB[i]?.type === "tool" || i === "Fishing Rod");
+    else result = items;
+
+    let display = result.length > 0 ? result.slice(-5).join(", ") : "None";
+    if (result.length > 5) display += ` (+${result.length - 5} more)`;
+    
+    systemMessage(`${user}'s ${filter}: ${display}`);
+}
 // --- STATS & INFO ---
 function cmdShowStats(user, args) {
     let targetName = args[1] ? args[1].toLowerCase() : user.toLowerCase();
@@ -478,17 +853,6 @@ function cmdTopStats() {
     let top5 = allStats.slice(0, 5).map((s, i) => `#${i+1} ${s.name}(Lv${s.cb})`).join(" | ");
     systemMessage(`TOP PLAYERS: ${top5}`);
 }
-
-// --- SOCIAL ---
-function cmdMingle(p, user, args) {
-    if (p.area !== "home") return;
-    let target = players[args[1]] || Object.values(players).find(pl => pl.name !== user && pl.area === "home" && !pl.dead);
-    if (target) { 
-        p.mingleTarget = target; 
-        setTimeout(() => { p.mingleTarget = null; }, 5000); 
-    }
-}
-
 /* ================= THE COMFY ROUTER ================= */
 ComfyJS.onChat = (user, msg, flags, extra) => {
     let p = getPlayer(user, extra.userColor);
@@ -509,8 +873,14 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
     // Stats & Inventory
     if (cmd === "stats")    cmdShowStats(user, args);
     if (cmd === "topstats") cmdTopStats();
-    if (cmd === "inventory") systemMessage(`${user}'s items: ${p.stats.inventory.slice(-3).join(", ")}...`);
-
+	if (cmd === "equip") cmdEquip(p, args);
+    if (cmd === "inventory") cmdInventory(p, user, args);
+    if (cmd === "unequip") {
+        p.stats.equippedWeapon = null;
+        p.stats.equippedArmor = null;
+        systemMessage(`${user} unequipped items.`);
+        saveStats(p);
+    }
     // Status
     if (cmd === "mingle") cmdMingle(p, user, args);
     if (cmd === "respawn" && p.dead) { 
@@ -540,5 +910,52 @@ setInterval(() => {
 ComfyJS.Init("jaedraze");
 gameLoop();
 </script>
+
+
+<!-- function drawEquipment(ctx, p, now) {
+    if (p.dead) return;
+
+    if (p.activeTask === "fishing" && p.area === "fishingpond") {
+        ctx.strokeStyle = "#8B4513"; 
+        ctx.lineWidth = 2;
+        let bob = Math.sin(now / 300) * 0.1;
+        
+        ctx.beginPath();
+        ctx.moveTo(p.x + 10, p.y - 10); 
+        ctx.lineTo(p.x + 40, p.y - 40 + (bob * 20)); 
+        ctx.stroke();
+
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(p.x + 40, p.y - 40 + (bob * 20));
+        ctx.quadraticCurveTo(p.x + 50, p.y, p.x + 60, p.y + 20);
+        ctx.stroke();
+    }
+
+    if (p.activeTask === "attacking") {
+
+        ctx.strokeStyle = p.stats.attackLevel > 10 ? "#0ff" : "#ccc"; 
+        ctx.lineWidth = 3;
+        
+        let swing = Math.sin(now / 150) * 0.8;
+        
+        ctx.save();
+        ctx.translate(p.x + 12, p.y - 10);
+        ctx.rotate(swing);
+        
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(25, -5); 
+        ctx.stroke();
+
+        ctx.strokeStyle = "#aa8800";
+        ctx.beginPath(); ctx.moveTo(5, -8); ctx.lineTo(5, 8); ctx.stroke();
+        
+        ctx.restore();
+    }
+}
+ -->
+
 </body>
 </html>
