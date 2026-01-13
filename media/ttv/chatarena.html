@@ -165,6 +165,7 @@ function getPlayer(name, color) {
         area: "home", 
         activeTask: null,
         danceStyle: 0, // <--- Correct way to add it! s
+		lastDanceXP: 0,
         stats: loadStats(name)
     };
     
@@ -621,6 +622,7 @@ function drawArmor(ctx, p, bodyY = 0) {
     }
     ctx.restore();
 }
+
 function drawHelmet(ctx, p, bodyY = 0) {
     const item = ITEM_DB[p.stats.equippedHelmet];
     if (!item) return;
@@ -979,15 +981,21 @@ function cmdListDances(p) {
     msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
     systemMessage(msg);
 }
-function cmdWigColor(p, colorArg) {
+function cmdWigColor(p, args) {
     if (!p.stats.equippedHelmet || p.stats.equippedHelmet.toLowerCase() !== "wig") {
         systemMessage(`${p.name}, you need to be wearing a wig to change its color!`);
         return;
     }
 
-    // Basic regex to check if it's a valid hex color or a simple color name
+    // args[0] is "wigcolor", so the color is args[1]
+    const colorArg = args[1]; 
+    if (!colorArg) {
+        systemMessage(`Usage: !wigcolor [color/hex]`);
+        return;
+    }
+
     const isHex = /^#([0-9A-F]{3}){1,2}$/i.test(colorArg);
-    const safeColors = ["red", "blue", "green", "pink", "purple", "orange", "white", "black", "cyan", "magenta"];
+    const safeColors = ["red", "blue", "green", "pink", "purple", "orange", "white", "black", "cyan", "magenta", "yellow"];
 
     if (isHex || safeColors.includes(colorArg.toLowerCase())) {
         p.stats.wigColor = colorArg;
@@ -1218,11 +1226,13 @@ function cmdBalance(p) {
 }
 // --- STATS & INFO ---
 function cmdShowStats(user, args) {
+    // If user types "!stats playername", args[1] is the name. Otherwise, look up the caller.
     let targetName = args[1] ? args[1].toLowerCase() : user.toLowerCase();
     let targetData = null;
     let finalName = "";
 
     let onlinePlayer = Object.values(players).find(pl => pl.name.toLowerCase() === targetName);
+    
     if (onlinePlayer) {
         targetData = onlinePlayer.stats;
         finalName = onlinePlayer.name;
@@ -1235,12 +1245,12 @@ function cmdShowStats(user, args) {
     }
 
     if (targetData) {
-        systemMessage(`${finalName} - CB: ${targetData.combatLevel} | ATK: ${targetData.attackLevel} | FISH: ${targetData.fishLevel} | HEAL: ${targetData.healLevel}`);
+        // We added DANCE: here. We use || 1 as a fallback just in case of an old save.
+        systemMessage(`${finalName} - CB: ${targetData.combatLevel} | ATK: ${targetData.attackLevel} | FISH: ${targetData.fishLevel} | DANCE: ${targetData.danceLevel || 1} | HEAL: ${targetData.healLevel}`);
     } else {
         systemMessage(`System: Could not find stats for ${targetName}`);
     }
 }
-
 function cmdTopStats() {
     let allStats = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -1284,6 +1294,8 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
     if (cmd === "inventory") cmdInventory(p, user, args);
 	if (cmd === "sell") cmdSell(p, args);
 	if (cmd === "bal" || cmd === "!wallet" || cmd === "!money") {cmdBalance(p);}
+	//special
+	if (cmd === "wigcolor") { cmdWigColor(p, args); }
     // Status
     if (cmd === "mingle") cmdMingle(p, user, args);
     if (cmd === "respawn" && p.dead) { 
