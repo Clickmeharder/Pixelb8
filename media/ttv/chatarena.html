@@ -33,7 +33,7 @@
 <div id="enemyUI"></div>
 <div id="systemUI"></div>
 <div id="tooltip"></div>
-<div id="areaDisplay">VIEWING: HOMEv2</div>
+<div id="areaDisplay">StickenFallv2.0.0 - VIEWING: HOMEv2</div>
 
 <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 <script>
@@ -982,9 +982,9 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
 
     // Admin Controls
     if (flags.broadcaster || flags.mod) {
-        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "VIEWING: HOME"; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "VIEWING: DUNGEON"; }
-        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "VIEWING: FISHING POND"; }
+        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickenFallv2.0.0 - VIEWING: HOME"; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickenFallv2.0.0 - VIEWING: DUNGEON"; }
+        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickenFallv2.0.0 - VIEWING: FISHING POND"; }
     }
 };
 setInterval(() => {
