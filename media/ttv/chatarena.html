@@ -489,50 +489,41 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
     const isAttacking = p.activeTask === "attacking";
     const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
     const pWeapon = p.stats.equippedWeapon;
+    const lean = p.lean || 0;
 
-    // --- 1. FISHING ROD (Restored & Fixed) ---
-// Inside your drawEquipment function...
-
-// --- 1. FISHING ROD (Robust Version) ---
+    // --- 1. FISHING ROD ---
     if (isFishing) {
         ctx.save();
-        ctx.setLineDash([]); // Ensure line isn't dashed from another effect
+        ctx.setLineDash([]);
         
-        // Use a simpler anchor: The torso-arm joint
-        const anchorX = p.x + (p.lean * 20);
-        const anchorY = p.y - 15 + bodyY; 
-        
-        // Hand position for the tip
-        const handX = p.x + 18 + (p.lean * 30);
-        const handY = p.y + 3 + bodyY - armMove;
+        // Match the Right Arm position from drawStickman exactly
+        const handX = p.x + 25 + (lean * 30);
+        const handY = p.y - 5 + bodyY;
 
-        const now = Date.now();
-        let bob = Math.sin(now / 300) * 15; // Bobbing in pixels
+        let bob = Math.sin(now / 300) * 15; 
 
-        // 1. Draw the Wood Rod
+        // Draw Rod (Brown)
         ctx.strokeStyle = "#8B4513"; 
         ctx.lineWidth = 3;
         ctx.lineCap = "round";
         ctx.beginPath();
-        ctx.moveTo(anchorX, anchorY); 
-        ctx.lineTo(handX + 25, handY - 25 + bob); // Rod extends past the hand
+        ctx.moveTo(p.x + (lean * 20), p.y - 15 + bodyY); // Anchor at shoulder
+        ctx.lineTo(handX + 25, handY - 25 + bob);      // Tip past the hand
         ctx.stroke();
 
-        // 2. Draw the Line (The Quadratic Curve you liked)
+        // Draw Line (White/Quadratic Curve)
         ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(handX + 25, handY - 25 + bob);
-        
-        // This curves the line from the tip down to the "water" level
-        // Control point is handX+35, Y+10 | End point is handX+50, Y+40
         ctx.quadraticCurveTo(handX + 35, handY + 10, handX + 50, handY + 45);
         ctx.stroke();
         
         ctx.restore();
     }
+
     // --- 2. WEAPON (Bows vs Swords) ---
-    // Added !isFishing so weapon stays hidden while rod is out
+    // Hidden while fishing
     if (pWeapon && ITEM_DB[pWeapon] && !isFishing) {
         const w = ITEM_DB[pWeapon];
         const isBow = pWeapon.toLowerCase().includes("bow");
@@ -705,7 +696,7 @@ function drawStickman(ctx, p) {
     const now = Date.now();
     let lean = p.lean || 0;
 
-    // Death handling (Original)
+    // Death handling
     if (p.dead) {
         ctx.fillStyle = "rgba(200, 0, 0, 0.6)";
         ctx.beginPath(); ctx.ellipse(p.x, p.y + 20, 25, 10, 0, 0, Math.PI * 2); ctx.fill();
@@ -717,13 +708,13 @@ function drawStickman(ctx, p) {
     // --- DANCE ANIMATION OFFSETS ---
     let bodyY = 0;
     let armMove = 0;
-    let legMove = 0;
     const isDancing = p.activeTask === "dancing";
+    const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
 
     if (isDancing) {
-        if (p.danceStyle === 1) bodyY = Math.sin(now / 100) * 8; // The Squat
-        if (p.danceStyle === 2) armMove = Math.sin(now / 50) * 20; // The Flail
-        if (p.danceStyle === 3) lean = Math.sin(now / 200) * 0.6; // The Lean
+        if (p.danceStyle === 1) bodyY = Math.sin(now / 100) * 8;
+        if (p.danceStyle === 2) armMove = Math.sin(now / 50) * 20;
+        if (p.danceStyle === 3) lean = Math.sin(now / 200) * 0.6;
     }
 
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
@@ -733,7 +724,7 @@ function drawStickman(ctx, p) {
     const headY = p.y - 30 + bodyY;
     ctx.beginPath(); ctx.arc(headX, headY, 10, 0, Math.PI * 2); ctx.stroke();
 
-    // Face (Original)
+    // Face
     ctx.fillStyle = p.color;
     ctx.fillRect(headX + 2, headY - 3, 2, 2);
     ctx.fillRect(headX + 6, headY - 3, 2, 2);
@@ -742,27 +733,24 @@ function drawStickman(ctx, p) {
     // 2. Torso
     ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
 
-// --- 3. ARMS (Fixed for Fishing) ---
+    // 3. ARMS
     const isAttacking = p.activeTask === "attacking";
-    const isFishing = p.activeTask === "fishing"; // Removed area check so it's more reliable
 
     if (!isAttacking) {
         ctx.beginPath();
         ctx.strokeStyle = p.color;
         ctx.lineWidth = 3;
 
-        // Left Arm
+        // Left Arm (Standard)
         ctx.moveTo(headX, headY + 15);
         ctx.lineTo(p.x - 18 + (lean * 10), p.y + 3 + bodyY + armMove);
 
-        // Right Arm 
+        // Right Arm (Fishing vs Normal)
         ctx.moveTo(headX, headY + 15);
-        
         if (isFishing) {
-            // FORCE ARM INTO FISHING POSITION (Pointing out)
+            // Force arm into fishing position
             ctx.lineTo(p.x + 25 + (lean * 30), p.y - 5 + bodyY);
         } else {
-            // Normal arm position
             ctx.lineTo(p.x + 18 + (lean * 30), p.y + 3 + bodyY - armMove);
         }
         ctx.stroke();
@@ -780,7 +768,7 @@ function drawStickman(ctx, p) {
     // 5. Equipment
     drawEquipment(ctx, p, now, bodyY, armMove);
 
-    // HP Bar & Name (Original)
+    // HP Bar & Name
     ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
     ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
     ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
