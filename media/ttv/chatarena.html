@@ -24,7 +24,7 @@
 <div id="enemyUI"></div>
 <div id="systemUI"></div>
 <div id="tooltip"></div>
-<div id="areaDisplay">StickenFallv2.1.6- VIEWING: HOME</div>
+<div id="areaDisplay">StickenFallv2.1.7- VIEWING: HOME</div>
 
 <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 <script>
@@ -360,7 +360,7 @@ function joinDungeonQueue(p) {
             // --- AUTO-SWITCH VIEW (30 seconds before start) ---
             if (dungeonSecondsLeft === 30) {
                 viewArea = "dungeon";
-                document.getElementById("areaDisplay").textContent = "StickenFallv2.1.6 - VIEWING: DUNGEON (PREPARING)";
+                document.getElementById("areaDisplay").textContent = "StickenFallv2.1.7 - VIEWING: DUNGEON (PREPARING)";
                 systemMessage("System: Switching view to Dungeon for upcoming raid...");
             }
 
@@ -379,7 +379,7 @@ function startDungeon() {
     
     // Ensure the view is definitely on the dungeon
     viewArea = "dungeon"; 
-    document.getElementById("areaDisplay").textContent = "StickenFallv2.1.6 - VIEWING: DUNGEON (ACTIVE)";
+    document.getElementById("areaDisplay").textContent = "StickenFallv2.1.7 - VIEWING: DUNGEON (ACTIVE)";
 
     dungeonQueue.forEach(name => {
         let p = players[name];
@@ -486,66 +486,78 @@ function handleLoot(p, target) {
 function drawEquipment(ctx, p, now, bodyY, armMove) {
     if (p.dead) return;
     const isAttacking = p.activeTask === "attacking";
+    const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
     const pWeapon = p.stats.equippedWeapon;
 
-    // --- WEAPON ---
-	if (pWeapon && ITEM_DB[pWeapon]) {
+    // --- 1. FISHING ROD ---
+    if (isFishing) {
+        ctx.save();
+        ctx.strokeStyle = "#8B4513";
+        ctx.lineWidth = 3;
+        // Attach rod to the right hand position
+        const handX = p.x + 18 + (p.lean * 30);
+        const handY = p.y + 3 + bodyY - armMove;
+        
+        ctx.beginPath();
+        ctx.moveTo(handX, handY);
+        ctx.lineTo(handX + 20, handY - 20); // The rod tip
+        ctx.stroke();
+        
+        // The Line
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(handX + 20, handY - 20);
+        ctx.lineTo(handX + 20, handY + 20 + Math.sin(now/500)*5);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    // --- 2. WEAPON (Bows vs Swords) ---
+    if (pWeapon && ITEM_DB[pWeapon] && !isFishing) {
         const w = ITEM_DB[pWeapon];
         const isBow = pWeapon.toLowerCase().includes("bow");
         
         ctx.save();
         if (isAttacking) {
+            // Weapon in hand during attack
             ctx.translate(p.x + 10, p.y - 10 + bodyY);
-            // ... (your existing attack draw)
+            ctx.strokeStyle = w.color;
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(15, -15); ctx.stroke();
         } else {
-            // SHEATHED POSITION
+            // SHEATHED ON BACK
             if (isBow) {
-                // Draw Bow on Back
-                ctx.translate(p.x, p.y - 5 + bodyY); 
-                ctx.rotate(Math.PI / 4); // Angle it across the back
-                
-                ctx.strokeStyle = "#8B4513"; // Wood color
+                ctx.translate(p.x - 2, p.y - 5 + bodyY);
+                ctx.rotate(Math.PI / 4);
+                ctx.strokeStyle = "#8B4513";
                 ctx.lineWidth = 2;
-                
-                // Draw the curved bow limb
+                // Curved bow limb
                 ctx.beginPath();
-                ctx.arc(0, 0, 15, -Math.PI/2, Math.PI/2); 
+                ctx.arc(0, 0, 15, -Math.PI/2, Math.PI/2);
                 ctx.stroke();
-                
-                // Draw the bowstring (thin white/grey line)
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                // String
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
                 ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(0, -15);
-                ctx.lineTo(0, 15);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, -15); ctx.lineTo(0, 15); ctx.stroke();
             } else {
-                // Draw Sword/Dagger (Straight Line)
-                ctx.translate(p.x - 5, p.y - 5 + bodyY); 
+                ctx.translate(p.x - 5, p.y - 5 + bodyY);
                 ctx.rotate(Math.PI / 1.2);
                 ctx.strokeStyle = w.color;
                 ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.lineTo(20, 0);
-                ctx.stroke();
-                
-                // Add a small crossguard for the sword
-                ctx.moveTo(5, -3);
-                ctx.lineTo(5, 3);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(20, 0); ctx.stroke();
+                // Crossguard
+                ctx.moveTo(5, -3); ctx.lineTo(5, 3); ctx.stroke();
             }
         }
         ctx.restore();
     }
 
-    // --- OTHER GEAR ---
+    // --- 3. OTHER GEAR ---
     if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY);
     if (p.stats.equippedHelmet) drawHelmet(ctx, p, bodyY);
     if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY);
 }
-
-
 
 function drawBoots(ctx, p, bodyY = 0) {
     const item = ITEM_DB[p.stats.equippedBoots];
@@ -715,19 +727,23 @@ function drawStickman(ctx, p) {
     // 2. Torso
     ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
 
-    // 3. ARMS
+	// --- 3. ARMS (Fixed & Restored) ---
     const isAttacking = p.activeTask === "attacking";
     const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
 
-    // Draw idle/dance arms if not attacking/fishing
-    if (!isAttacking && !isFishing && !p.stats.equippedWeapon) {
-        ctx.beginPath(); 
-        // Left Arm
-        ctx.moveTo(headX, headY + 15); 
-        ctx.lineTo(p.x - 18 + (lean * 10), p.y + 3 + bodyY + armMove); 
+    // We draw arms in all states EXCEPT when the attacking animation takes over
+    if (!isAttacking) {
+        ctx.beginPath();
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = 3;
+
+        // Left Arm (Connects to head/torso joint)
+        ctx.moveTo(headX, headY + 15);
+        ctx.lineTo(p.x - 18 + (lean * 10), p.y + 3 + bodyY + armMove);
+
         // Right Arm
-        ctx.moveTo(headX, headY + 15); 
-        ctx.lineTo(p.x + 18 + (lean * 30), p.y + 3 + bodyY - armMove); 
+        ctx.moveTo(headX, headY + 15);
+        ctx.lineTo(p.x + 18 + (lean * 30), p.y + 3 + bodyY - armMove);
         ctx.stroke();
     }
 
@@ -741,7 +757,7 @@ function drawStickman(ctx, p) {
     ctx.stroke();
 
     // 5. Equipment
-    drawEquipment(ctx, p, now);
+    drawEquipment(ctx, p, now, bodyY, armMove);
 
     // HP Bar & Name (Original)
     ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
@@ -916,7 +932,9 @@ function cmdDance(p, user, args) {
     if (p.dead) return;
 
     const level = p.stats.danceLevel || 1;
-    let chosenStyle = parseInt(args[0]); // Check if they typed "!dance 2"
+    
+    // Logic changed here: We look at args[1] because args[0] is the command string
+    let chosenStyle = parseInt(args[1]); 
 
     // Define the Level Requirements
     const UNLOCKS = {
@@ -1191,6 +1209,13 @@ function cmdSell(p, args) {
         systemMessage(`${p.name}: Could not find "${target}" to sell. Try "!sell fish" or "!sell [item name]".`);
     }
 }
+function cmdBalance(p) {
+    // Formatting gold to 2 decimal places as requested
+    const displayGold = (p.stats.gold || 0).toFixed(2);
+    
+    // Using your specific prison wallet phrasing
+    systemMessage(`${p.name} has ${displayGold} coins stuffed in their prison wallet`);
+}
 // --- STATS & INFO ---
 function cmdShowStats(user, args) {
     let targetName = args[1] ? args[1].toLowerCase() : user.toLowerCase();
@@ -1249,8 +1274,8 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
     if (cmd === "home")    movePlayer(p, "home");
     if (cmd === "dungeon") movePlayer(p, "dungeon");
     if (cmd === "join")    joinDungeonQueue(p);
-    if (cmd === "!dance") {cmdDance(p, user, args);}
-	if (cmd === "!dances") {cmdListDances(p);}
+    if (cmd === "dance") {cmdDance(p, user, args);}
+	if (cmd === "Listdances") {cmdListDances(p);}
     // Stats & Inventory
     if (cmd === "stats")    cmdShowStats(user, args);
     if (cmd === "topstats") cmdTopStats();
@@ -1258,6 +1283,7 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
 	if (cmd === "unequip") cmdUnequip(p, args);
     if (cmd === "inventory") cmdInventory(p, user, args);
 	if (cmd === "sell") cmdSell(p, args);
+	if (cmd === "bal" || cmd === "!wallet" || cmd === "!money") {cmdBalance(p);}
     // Status
     if (cmd === "mingle") cmdMingle(p, user, args);
     if (cmd === "respawn" && p.dead) { 
@@ -1267,9 +1293,9 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
 
     // Admin Controls
     if (flags.broadcaster || flags.mod) {
-        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.6 - VIEWING: HOME"; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.6 - VIEWING: DUNGEON"; }
-        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.6 - VIEWING: FISHING POND"; }
+        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.7 - VIEWING: HOME"; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.7 - VIEWING: DUNGEON"; }
+        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.7 - VIEWING: FISHING POND"; }
     }
 };
 setInterval(() => {
