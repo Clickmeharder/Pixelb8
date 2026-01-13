@@ -43,6 +43,19 @@ canvas { display:block; margin:auto; }
     border-radius:4px;
     animation: fadeout 6s forwards;
 }
+#tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 13px;
+    display: none;
+    white-space: nowrap;
+}
+
 @keyframes fadeout {
     0% { opacity:1; }
     70% { opacity:1; }
@@ -56,6 +69,7 @@ canvas { display:block; margin:auto; }
 <canvas id="c" width="900" height="500"></canvas>
 <div id="enemyUI"></div>
 <div id="systemUI"></div>
+<div id="tooltip"></div>
 
 <script>
 const c = document.getElementById("c");
@@ -80,6 +94,41 @@ function systemMessage(text){
     systemUI.appendChild(div);
     setTimeout(()=>div.remove(),6000);
 }
+
+const tooltip = document.getElementById("tooltip");
+let mouse = {x:0,y:0};
+
+c.addEventListener("mousemove", e=>{
+    const rect = c.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+    
+    let hoverPlayer = null;
+    for(let p of Object.values(players)){
+        if(p.dead) continue;
+        // simple distance check to head/body
+        let dx = mouse.x - p.x;
+        let dy = mouse.y - p.y;
+        if(Math.sqrt(dx*dx + dy*dy) < 30){
+            hoverPlayer = p;
+            break;
+        }
+    }
+
+    if(hoverPlayer){
+        tooltip.style.left = (e.clientX + 15) + "px";
+        tooltip.style.top = (e.clientY + 15) + "px";
+        tooltip.style.display = "block";
+        tooltip.innerHTML = `
+            <b>${hoverPlayer.name}</b><br>
+            HP: ${hoverPlayer.hp}/${hoverPlayer.maxHp}<br>
+            Combat Lv: ${hoverPlayer.stats.combatLevel} (${hoverPlayer.stats.combatXP} XP)<br>
+            Heal Lv: ${hoverPlayer.stats.healLevel} (${hoverPlayer.stats.healXP} XP)
+        `;
+    } else {
+        tooltip.style.display = "none";
+    }
+});
 
 /* ================= FLOATING TEXT ================= */
 
@@ -166,16 +215,33 @@ function drawStickman(p){
         return;
     }
 
+    // Check if hovered
+    let hovered = false;
+    if(mouse.x && mouse.y){
+        let dx = mouse.x - p.x;
+        let dy = mouse.y - p.y;
+        if(Math.sqrt(dx*dx + dy*dy) < 30) hovered = true;
+    }
+
+    // Draw HP bar
     drawHPBar(p.x,p.y-60,44,6,p.hp/p.maxHp,"#44ff88");
 
+    // Draw outline/glow if hovered
+    if(hovered){
+        ctx.lineWidth=8;
+        ctx.strokeStyle="yellow";
+        stickmanPath(p);
+    }
+
+    // Normal stickman
     ctx.lineWidth=6;
     ctx.strokeStyle="#000";
     stickmanPath(p);
-
     ctx.lineWidth=3;
     ctx.strokeStyle=p.color;
     stickmanPath(p);
 
+    // Draw name
     ctx.font="16px monospace";
     ctx.textAlign="center";
     ctx.textBaseline="top";
@@ -185,7 +251,6 @@ function drawStickman(p){
     ctx.fillStyle=p.color;
     ctx.fillText(p.name,p.x,p.y+58);
 }
-
 function stickmanPath(p){
     ctx.beginPath(); ctx.arc(p.x,p.y-35,11,0,Math.PI*2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(p.x,p.y-24); ctx.lineTo(p.x,p.y+18); ctx.stroke();
