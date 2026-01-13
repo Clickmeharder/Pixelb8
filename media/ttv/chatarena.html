@@ -144,15 +144,22 @@ const ITEM_DB = {
 
 function getPlayer(name, color) {
     if (players[name]) return players[name];
+    
     players[name] = {
-        name, color: color || "#00ffff",
-        x: Math.random() * 800 + 100, y: 450,
-        targetX: null, // For walking to enemies
-        hp: 100, maxHp: 100, dead: false,
-        area: "home", activeTask: null,
+        name, 
+        color: color || "#00ffff",
+        x: Math.random() * 800 + 100, 
+        y: 450,
+        targetX: null,
+        hp: 100, 
+        maxHp: 100, 
+        dead: false,
+        area: "home", 
+        activeTask: null,
+        danceStyle: 0, // <--- Correct way to add it!
         stats: loadStats(name)
-		p.danceStyle = 0;
     };
+    
     return players[name];
 }
 
