@@ -484,26 +484,38 @@ function drawEquipment(ctx, p, now) {
     if (p.dead) return;
     const isAttacking = p.activeTask === "attacking";
     const swing = Math.sin(now / 150) * 0.8;
-	const pWeapon = p.stats.equippedWeapon;
-    // --- 1. FISHING ROD ---
+    const pWeapon = p.stats.equippedWeapon;
+    const lean = p.lean || 0;
+
+    // --- 1. FISHING ROD & ARMS ---
     if (p.activeTask === "fishing" && p.area === "fishingpond") {
-        ctx.strokeStyle = "#8B4513"; ctx.lineWidth = 2;
         let bob = Math.sin(now / 300) * 0.1;
+        
+        // Draw Arms reaching out to the rod
+        ctx.strokeStyle = p.color; ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(p.x + 10, p.y - 10); 
-        ctx.lineTo(p.x + 40, p.y - 40 + (bob * 20)); 
+        ctx.moveTo(p.x + (lean * 20), p.y - 15); // Shoulder
+        ctx.lineTo(p.x + 15, p.y - 10);          // Reaching to rod handle
+        ctx.stroke();
+
+        // Draw the Wood Rod
+        ctx.strokeStyle = "#8B4513"; ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(p.x + 12, p.y - 10);  
+        ctx.lineTo(p.x + 50, p.y - 45 + (bob * 20)); 
         ctx.stroke();
         
-        ctx.strokeStyle = "rgba(255,255,255,0.5)"; ctx.lineWidth = 1;
+        // Draw the Fishing Line
+        ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(p.x + 40, p.y - 40 + (bob * 20));
-        ctx.quadraticCurveTo(p.x + 50, p.y, p.x + 60, p.y + 20);
+        ctx.moveTo(p.x + 50, p.y - 45 + (bob * 20));
+        ctx.quadraticCurveTo(p.x + 60, p.y, p.x + 70, p.y + 25);
         ctx.stroke();
         return; 
     }
 
     // --- 2. WEAPON (Equipped) ---
-	if (pWeapon && ITEM_DB[pWeapon]) {
+    if (pWeapon && ITEM_DB[pWeapon]) {
         const w = ITEM_DB[pWeapon];
         const isBow = pWeapon.toLowerCase().includes("shortbow");
         
@@ -511,37 +523,31 @@ function drawEquipment(ctx, p, now) {
         if (isAttacking) {
             ctx.translate(p.x + 10, p.y - 10);
             if (isBow) {
-                // --- DRAW BOW ---
+                // DRAW BOW
                 ctx.strokeStyle = "#8B4513"; ctx.lineWidth = 2;
-                let pull = Math.abs(Math.sin(now / 200)) * 10; // Pulling back the string
-                
-                // The Bow Curve
+                let pull = Math.abs(Math.sin(now / 200)) * 10;
                 ctx.beginPath();
                 ctx.arc(5, 0, 15, -Math.PI/2, Math.PI/2);
                 ctx.stroke();
-                
-                // The String
                 ctx.strokeStyle = "#eee"; ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(5, -15);
-                ctx.lineTo(5 - pull, 0); // String pulls back
+                ctx.lineTo(5 - pull, 0);
                 ctx.lineTo(5, 15);
                 ctx.stroke();
-
-                // The Arrow (While pulling)
                 if (pull > 5) {
                     ctx.strokeStyle = "#fff";
                     ctx.beginPath(); ctx.moveTo(-pull, 0); ctx.lineTo(15 - pull, 0); ctx.stroke();
                 }
             } else {
-                // --- DRAW MELEE (Your existing swing logic) ---
+                // DRAW MELEE
                 ctx.rotate(swing);
                 ctx.strokeStyle = w.color; ctx.lineWidth = 3;
                 ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(25, -5); ctx.stroke();
                 ctx.strokeStyle = "#850"; ctx.beginPath(); ctx.moveTo(5,-5); ctx.lineTo(5,5); ctx.stroke();
             }
         } else {
-            // --- SHEATHED (Same as before) ---
+            // SHEATHED
             ctx.translate(p.x - 5, p.y - 5);
             ctx.rotate(Math.PI / 1.2);
             ctx.strokeStyle = "rgba(0,0,0,0.4)"; ctx.lineWidth = 4;
@@ -562,14 +568,9 @@ function drawEquipment(ctx, p, now) {
         ctx.stroke();
     }
 
-    // --- 4. ARMOR (Next Step) ---
-// --- 4. ARMOR & HELMET ---
-    if (p.stats.equippedArmor) {
-        drawArmor(ctx, p);
-    }
-    if (p.stats.equippedHelmet) {
-        drawHelmet(ctx, p);
-    }
+    // --- 4. ARMOR & HELMET ---
+    if (p.stats.equippedArmor) drawArmor(ctx, p);
+    if (p.stats.equippedHelmet) drawHelmet(ctx, p);
 }
 function drawArmor(ctx, p) {
     const item = ITEM_DB[p.stats.equippedArmor];
@@ -657,22 +658,21 @@ function drawStickman(ctx, p) {
 
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
     
-    // 1. Head (Leans with body)
+    // 1. Head
     ctx.beginPath(); ctx.arc(p.x + (lean * 20), p.y - 30, 10, 0, Math.PI * 2); ctx.stroke();
     
     // 2. Torso
     ctx.beginPath(); ctx.moveTo(p.x + (lean * 20), p.y - 20); ctx.lineTo(p.x, p.y + 10); ctx.stroke();
 
-    // 3. DEFAULT ARMS (Added these back!)
-    // Only draw default arms if they aren't currently fishing or swinging a weapon
+    // 3. DEFAULT ARMS (Longer & Adjusted)
     if (p.activeTask !== "fishing" && !p.stats.equippedWeapon) {
         ctx.beginPath(); 
-        // Left Arm
+        // Left Arm (Longer reaching down)
         ctx.moveTo(p.x + (lean * 20), p.y - 15); 
-        ctx.lineTo(p.x - 12 + (lean * 10), p.y - 5); 
-        // Right Arm
+        ctx.lineTo(p.x - 18 + (lean * 10), p.y + 5); 
+        // Right Arm (Longer reaching down)
         ctx.moveTo(p.x + (lean * 20), p.y - 15); 
-        ctx.lineTo(p.x + 12 + (lean * 30), p.y - 5); 
+        ctx.lineTo(p.x + 18 + (lean * 30), p.y + 5); 
         ctx.stroke();
     }
 
@@ -681,7 +681,7 @@ function drawStickman(ctx, p) {
     ctx.beginPath(); ctx.moveTo(p.x, p.y + 10); ctx.lineTo(p.x - 10 - walk, p.y + 25); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(p.x, p.y + 10); ctx.lineTo(p.x + 10 + walk, p.y + 25); ctx.stroke();
 
-    // 5. Equipment (Draws over the body)
+    // 5. Equipment
     drawEquipment(ctx, p, now);
 
     // HP Bar & Name
