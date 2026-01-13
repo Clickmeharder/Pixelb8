@@ -219,13 +219,13 @@ function performFish(p) {
     let roll = Math.random();
     let resultText = "";
     
-    if (roll > 0.99) { // 1% chance
+    if (roll > 0.09) { // 1% chance
         p.stats.inventory.push("wig");
         resultText = "THE LEGENDARY WIG!";
-    } else if (roll > 0.95) { // 4% chance
+    } else if (roll > 0.1) {
         p.stats.inventory.push("leather Booties");
         resultText = "leather Boots!";
-    } else if (roll > 0.80) { // 15% chance
+    } else if (roll > 0.25) { 
         p.stats.inventory.push("Leather scrap");
         resultText = "Leather scrap";
     } else {
