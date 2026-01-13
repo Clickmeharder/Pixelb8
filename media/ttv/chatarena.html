@@ -446,7 +446,7 @@ function handleLoot(p, target) {
 function drawEquipment(ctx, p, now) {
     if (p.dead) return;
     const isAttacking = p.activeTask === "attacking";
-    const swing = Math.sin(now / 150) * 0.8;
+    const swing = Math.sin(now / 80) * 0.8;
     const pWeapon = p.stats.equippedWeapon;
     const lean = p.lean || 0;
 
@@ -501,7 +501,7 @@ function drawEquipment(ctx, p, now) {
     else if (isAttacking) {
         ctx.strokeStyle = p.color; ctx.lineWidth = 3;
         ctx.beginPath();
-        let punchX = p.x + (Math.sin(now/100) > 0 ? 22 : 12);
+        let punchX = p.x + (Math.sin(now / 40) > 0 ? 22 : 12);
         ctx.moveTo(p.x + (lean * 20), p.y - 15);
         ctx.lineTo(punchX, p.y - 12);
         ctx.stroke();
@@ -535,6 +535,7 @@ function drawEquipment(ctx, p, now) {
         drawBoots(ctx, p);
     }
 }
+
 function drawBoots(ctx, p) {
     const item = ITEM_DB[p.stats.equippedBoots];
     if (!item) return;
@@ -722,9 +723,11 @@ function gameLoop() {
     }
     document.getElementById("enemyUI").innerHTML = enemyText;
 
-    // 3. Update and Draw Players (Only call this ONCE)
+// 3. Update and Draw Players
+    const now = Date.now(); // Get current time once for the whole loop
+
     Object.values(players).forEach(p => {
-        // Handle horizontal movement for attacking
+        // --- MOVEMENT LOGIC ---
         if (p.targetX !== null && p.targetX !== undefined) {
             let dx = p.targetX - p.x;
             if (Math.abs(dx) > 5) {
@@ -735,9 +738,26 @@ function gameLoop() {
                 if (p.activeTask !== "attacking") p.targetX = null;
             }
         }
+
+        // --- ATTACK TIMING LOGIC ---
+        if (p.activeTask === "attacking" && !p.dead) {
+            // Check if player has a weapon speed, otherwise default to 700ms (Fast)
+            let weapon = ITEM_DB[p.stats.equippedWeapon];
+            let attackSpeed = weapon?.speed || 700; 
+
+            // Initialize lastAttackTime if it doesn't exist
+            if (!p.lastAttackTime) p.lastAttackTime = 0;
+
+            // If enough time has passed, HIT!
+            if (now - p.lastAttackTime > attackSpeed) {
+                performAttack(p);
+                p.lastAttackTime = now;
+            }
+        }
+
         drawStickman(ctx, p);
-		updateArrows(ctx);
     });
+    updateArrows(ctx);
 
     // 4. Draw Dungeon Entities
     if (viewArea === "dungeon") {
@@ -766,14 +786,23 @@ function gameLoop() {
     handleTooltips();
     requestAnimationFrame(gameLoop);
 }
+
 /* ================= CHAT COMMANDS ================= */
 /* ================= COMMAND FUNCTIONS ================= */
 
 // --- COMBAT & TASKS ---
 function cmdAttack(p, user) {
-    if (p.activeTask === "attacking") { systemMessage(`${user}: Already attacking.`); return; }
+    if (p.activeTask === "attacking") { 
+        systemMessage(`${user}: Already attacking.`); 
+        return; 
+    }
+    
     p.activeTask = "attacking";
-    p.taskEndTime = Date.now() + TASK_DURATION;
+    // Keep your 15-minute timer logic
+    p.taskEndTime = Date.now() + (15 * 60 * 1000); 
+    // Reset attack cooldown so they hit immediately
+    p.lastAttackTime = 0; 
+    
     systemMessage(`${user} started attacking (15m idle)`);
 }
 
