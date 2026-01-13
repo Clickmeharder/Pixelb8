@@ -91,7 +91,8 @@ function loadStats(name) {
         inventory: ["Fishing Rod"],
         equippedWeapon: null,
         equippedArmor: null,
-        equippedHelmet: null
+        equippedHelmet: null,
+		equippedBoots: null,
     };
 
     // --- SAFETY CHECKS FOR OLD SAVES ---
@@ -133,7 +134,8 @@ const ITEM_DB = {
     "wig":              { type: "helmet", def: 1,   color: "yellow" },
     "Iron Plate":       { type: "armor",  def: 5,   color: "#aaa" },
     "Iron helmet":      { type: "helmet", def: 5,   color: "#aaa" },
-    "leather Boots":    { type: "armor",  def: 1,   color: "#5c4033" }
+    "leather Boots":    { type: "armor",  def: 1,   color: "#5c4033" },
+    "leather Booties":    { type: "boots",  def: 1,   color: "#5c4033" }
 };
 
 function getPlayer(name, color) {
@@ -288,7 +290,7 @@ function performFish(p) {
         p.stats.inventory.push("wig");
         resultText = "THE LEGENDARY WIG!";
     } else if (roll > 0.95) { // 4% chance
-        p.stats.inventory.push("leather Boots");
+        p.stats.inventory.push("leather Booties");
         resultText = "leather Boots!";
     } else if (roll > 0.80) { // 15% chance
         p.stats.inventory.push("Leather scrap");
@@ -490,110 +492,155 @@ function drawEquipment(ctx, p, now) {
     // --- 1. FISHING ROD & ARMS ---
     if (p.activeTask === "fishing" && p.area === "fishingpond") {
         let bob = Math.sin(now / 300) * 0.1;
-        
-        // Draw Arms reaching out to the rod
         ctx.strokeStyle = p.color; ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(p.x + (lean * 20), p.y - 15); // Shoulder
-        ctx.lineTo(p.x + 15, p.y - 10);          // Reaching to rod handle
+        ctx.moveTo(p.x + (lean * 20), p.y - 15); 
+        ctx.lineTo(p.x + 15, p.y - 10); 
         ctx.stroke();
-
-        // Draw the Wood Rod
         ctx.strokeStyle = "#8B4513"; ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(p.x + 12, p.y - 10);  
         ctx.lineTo(p.x + 50, p.y - 45 + (bob * 20)); 
         ctx.stroke();
-        
-        // Draw the Fishing Line
         ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(p.x + 50, p.y - 45 + (bob * 20));
         ctx.quadraticCurveTo(p.x + 60, p.y, p.x + 70, p.y + 25);
         ctx.stroke();
-        return; 
+        // Removed return so armor draws!
     }
 
     // --- 2. WEAPON (Equipped) ---
     if (pWeapon && ITEM_DB[pWeapon]) {
         const w = ITEM_DB[pWeapon];
         const isBow = pWeapon.toLowerCase().includes("shortbow");
-        
         ctx.save();
         if (isAttacking) {
             ctx.translate(p.x + 10, p.y - 10);
             if (isBow) {
-                // DRAW BOW
                 ctx.strokeStyle = "#8B4513"; ctx.lineWidth = 2;
                 let pull = Math.abs(Math.sin(now / 200)) * 10;
-                ctx.beginPath();
-                ctx.arc(5, 0, 15, -Math.PI/2, Math.PI/2);
-                ctx.stroke();
+                ctx.beginPath(); ctx.arc(5, 0, 15, -Math.PI/2, Math.PI/2); ctx.stroke();
                 ctx.strokeStyle = "#eee"; ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(5, -15);
-                ctx.lineTo(5 - pull, 0);
-                ctx.lineTo(5, 15);
-                ctx.stroke();
-                if (pull > 5) {
-                    ctx.strokeStyle = "#fff";
-                    ctx.beginPath(); ctx.moveTo(-pull, 0); ctx.lineTo(15 - pull, 0); ctx.stroke();
-                }
+                ctx.beginPath(); ctx.moveTo(5, -15); ctx.lineTo(5 - pull, 0); ctx.lineTo(5, 15); ctx.stroke();
             } else {
-                // DRAW MELEE
                 ctx.rotate(swing);
                 ctx.strokeStyle = w.color; ctx.lineWidth = 3;
                 ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(25, -5); ctx.stroke();
-                ctx.strokeStyle = "#850"; ctx.beginPath(); ctx.moveTo(5,-5); ctx.lineTo(5,5); ctx.stroke();
             }
         } else {
-            // SHEATHED
             ctx.translate(p.x - 5, p.y - 5);
             ctx.rotate(Math.PI / 1.2);
-            ctx.strokeStyle = "rgba(0,0,0,0.4)"; ctx.lineWidth = 4;
-            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(20, 0); ctx.stroke();
             ctx.strokeStyle = w.color; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(20, 0); ctx.stroke();
-            ctx.strokeStyle = "#850"; ctx.beginPath(); ctx.moveTo(0, -4); ctx.lineTo(0, 4); ctx.stroke();
         }
         ctx.restore();
     }
     // --- 3. BARE HANDED PUNCH ---
     else if (isAttacking) {
-        ctx.strokeStyle = p.color; ctx.lineWidth = 2;
+        ctx.strokeStyle = p.color; ctx.lineWidth = 3;
         ctx.beginPath();
-        let punchX = p.x + (Math.sin(now/100) > 0 ? 20 : 10);
-        ctx.moveTo(p.x + 5, p.y - 10);
-        ctx.lineTo(punchX + (swing * 10), p.y - 15);
+        let punchX = p.x + (Math.sin(now/100) > 0 ? 22 : 12);
+        ctx.moveTo(p.x + (lean * 20), p.y - 15);
+        ctx.lineTo(punchX, p.y - 12);
         ctx.stroke();
     }
 
     // --- 4. ARMOR & HELMET ---
     if (p.stats.equippedArmor) drawArmor(ctx, p);
-    if (p.stats.equippedHelmet) drawHelmet(ctx, p);
+    
+    // ADJUSTED WIG LOGIC INSIDE DRAWHELMET
+    if (p.stats.equippedHelmet) {
+        const item = ITEM_DB[p.stats.equippedHelmet];
+        const hX = p.x + (lean * 20);
+        const hY = p.y - 30;
+        
+        ctx.save();
+        if (p.stats.equippedHelmet === "wig") {
+            ctx.fillStyle = item.color;
+            ctx.beginPath();
+            // Moved Wig Y up by 8 pixels so it doesn't cover eyes
+            ctx.arc(hX, hY - 12, 14, Math.PI, 0);
+            ctx.arc(hX - 8, hY - 7, 8, 0, Math.PI * 2);
+            ctx.arc(hX + 8, hY - 7, 8, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            drawHelmet(ctx, p); // Calls your original helmet drawing for other items
+        }
+        ctx.restore();
+    }
+// NEW: Add Boots
+    if (p.stats.equippedBoots) {
+        drawBoots(ctx, p);
+    }
+}
+function drawBoots(ctx, p) {
+    const item = ITEM_DB[p.stats.equippedBoots];
+    if (!item) return;
+
+    const now = Date.now();
+    // Re-calculate the walk offset so boots match the leg position
+    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+
+    ctx.save();
+    ctx.fillStyle = item.color;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+
+    // Left Boot
+    const leftFootX = p.x - 10 - walk;
+    const footY = p.y + 25;
+    ctx.fillRect(leftFootX - 4, footY - 2, 8, 5); // Foot base
+    ctx.strokeRect(leftFootX - 4, footY - 2, 8, 5);
+    ctx.fillRect(leftFootX - 2, footY - 6, 4, 5); // Ankle part
+    
+    // Right Boot
+    const rightFootX = p.x + 10 + walk;
+    ctx.fillRect(rightFootX - 4, footY - 2, 8, 5);
+    ctx.strokeRect(rightFootX - 4, footY - 2, 8, 5);
+    ctx.fillRect(rightFootX - 2, footY - 6, 4, 5);
+
+    ctx.restore();
 }
 function drawArmor(ctx, p) {
     const item = ITEM_DB[p.stats.equippedArmor];
     if (!item) return;
 
-    ctx.strokeStyle = item.color;
-    ctx.lineWidth = 4; // Thicker lines for armor
+    const lean = p.lean || 0;
+    const headX = p.x + (lean * 20);
+
+    ctx.save();
     
-    // Draw a "Vest" over the stickman body
+    // 1. Setup Path for the "Vest"
     ctx.beginPath();
-    ctx.moveTo(p.x - 5, p.y - 20); // Shoulder left
-    ctx.lineTo(p.x + 5, p.y - 20); // Shoulder right
-    ctx.lineTo(p.x + 5, p.y + 5);  // Waist right
-    ctx.lineTo(p.x - 5, p.y + 5);  // Waist left
+    ctx.moveTo(headX - 7, p.y - 18); // Shoulder left
+    ctx.lineTo(headX + 7, p.y - 18); // Shoulder right
+    ctx.lineTo(p.x + 7, p.y + 8);    // Waist right
+    ctx.lineTo(p.x - 7, p.y + 8);    // Waist left
     ctx.closePath();
+
+    // 2. FILL the armor (Solid Color)
+    ctx.fillStyle = item.color;
+    ctx.globalAlpha = 0.8; // Slight transparency so it looks "worn"
+    ctx.fill();
+
+    // 3. STROKE the armor (Dark Border for definition)
+    ctx.globalAlpha = 1.0;
+    ctx.strokeStyle = "#000"; // Black outline
+    ctx.lineWidth = 1;
     ctx.stroke();
-    
-    // Add a little highlight for "Shiny" armor
-    if (item.color === "#eee" || item.color === "#0ff") {
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(p.x - 2, p.y - 18); ctx.lineTo(p.x - 2, p.y - 10); ctx.stroke();
+
+    // 4. SHINY HIGHLIGHT (If it's high tier)
+    if (item.color === "#eee" || item.color === "#aaa") {
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+        ctx.lineWidth = 2;
+        ctx.beginPath(); 
+        ctx.moveTo(headX - 3, p.y - 15); 
+        ctx.lineTo(p.x - 3, p.y + 2); 
+        ctx.stroke();
     }
+
+    ctx.restore();
 }
 function drawHelmet(ctx, p) {
     const item = ITEM_DB[p.stats.equippedHelmet];
@@ -659,19 +706,30 @@ function drawStickman(ctx, p) {
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
     
     // 1. Head
-    ctx.beginPath(); ctx.arc(p.x + (lean * 20), p.y - 30, 10, 0, Math.PI * 2); ctx.stroke();
+    const headX = p.x + (lean * 20);
+    const headY = p.y - 30;
+    ctx.beginPath(); ctx.arc(headX, headY, 10, 0, Math.PI * 2); ctx.stroke();
+
+    // --- FACE ---
+    ctx.fillStyle = p.color;
+    // Eyes (dots)
+    ctx.fillRect(headX + 2, headY - 3, 2, 2);
+    ctx.fillRect(headX + 6, headY - 3, 2, 2);
+    // Smile
+    ctx.beginPath(); ctx.arc(headX + 4, headY + 2, 3, 0, Math.PI); ctx.stroke();
     
     // 2. Torso
-    ctx.beginPath(); ctx.moveTo(p.x + (lean * 20), p.y - 20); ctx.lineTo(p.x, p.y + 10); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(headX, p.y - 20); ctx.lineTo(p.x, p.y + 10); ctx.stroke();
 
-    // 3. DEFAULT ARMS (Longer & Adjusted)
-    if (p.activeTask !== "fishing" && !p.stats.equippedWeapon) {
+    // 3. DEFAULT ARMS (Hidden if attacking or fishing to prevent "3 arms")
+    const isAttacking = p.activeTask === "attacking";
+    const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
+
+    if (!isAttacking && !isFishing && !p.stats.equippedWeapon) {
         ctx.beginPath(); 
-        // Left Arm (Longer reaching down)
-        ctx.moveTo(p.x + (lean * 20), p.y - 15); 
+        ctx.moveTo(headX, p.y - 15); 
         ctx.lineTo(p.x - 18 + (lean * 10), p.y + 3); 
-        // Right Arm (Longer reaching down)
-        ctx.moveTo(p.x + (lean * 20), p.y - 15); 
+        ctx.moveTo(headX, p.y - 15); 
         ctx.lineTo(p.x + 18 + (lean * 30), p.y + 3); 
         ctx.stroke();
     }
@@ -823,8 +881,10 @@ function cmdEquip(p, args) {
 	} else if (itemData.type === "helmet") {
 		p.stats.equippedHelmet = dbKey; // New slot!
 		systemMessage(`${p.name} is wearing ${dbKey}!`);
-	}
-
+	} else if (itemData.type === "boots") { // <--- ADD THIS
+        p.stats.equippedBoots = dbKey;
+        systemMessage(`${p.name} laced up ${dbKey}!`);
+    }
     saveStats(p);
 }
 
