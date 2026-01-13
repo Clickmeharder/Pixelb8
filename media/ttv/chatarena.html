@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
 	<link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
-    <title>StickenFall</title>
+    <title>StickmenFall</title>
     <!--<script src="https://unpkg.com/comfy.js/dist/comfy.min.js"></script>-->
     <style>
         body { margin:0; background:transparent; font-family:monospace; overflow:hidden; }
@@ -25,7 +25,7 @@
 <div id="enemyUI"></div>
 <div id="systemUI"></div>
 <div id="tooltip"></div>
-<div id="areaDisplay">StickenFallv2.1.9- VIEWING: HOME</div>
+<div id="areaDisplay">StickmenFallv2.1.9- VIEWING: HOME</div>
 
 <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 <script>
@@ -369,18 +369,25 @@ function performFish(p) {
     updateCombatLevel(p);
     saveStats(p);
 }
+
+let forceBuyer = null;
 let buyerActive = false;
 let buyerTimer = 0;
 
 function updateBuyerNPC() {
     const now = Date.now();
-    // Toggle buyer every 5 minutes for a 2-minute duration
-    let cycle = Math.floor(now / 60000) % 7; // 7 minute cycle
+    let cycle = Math.floor(now / 60000) % 7; 
     let wasActive = buyerActive;
-    buyerActive = (cycle === 0 || cycle === 1); // Active during minute 0 and 1
+
+    // Use the force variable if it's set, otherwise use the 7-min clock
+    if (forceBuyer !== null) {
+        buyerActive = forceBuyer;
+    } else {
+        buyerActive = (cycle === 0 || cycle === 1); 
+    }
 
     if (buyerActive && !wasActive) {
-        systemMessage("--- [NPC] THE FISH MERCHANT HAS ARRIVED AT THE POND (2X GOLD)! ---");
+        systemMessage("--- [NPC] THE FISH MERCHANT HAS ARRIVED (2X GOLD)! ---");
     } else if (!buyerActive && wasActive) {
         systemMessage("--- [NPC] THE FISH MERCHANT HAS LEFT THE AREA. ---");
     }
@@ -459,7 +466,7 @@ function joinDungeonQueue(p) {
             // --- AUTO-SWITCH VIEW (30 seconds before start) ---
             if (dungeonSecondsLeft === 30) {
                 viewArea = "dungeon";
-                document.getElementById("areaDisplay").textContent = "StickenFallv2.1.9 - VIEWING: DUNGEON (PREPARING)";
+                document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: DUNGEON (PREPARING)";
                 systemMessage("System: Switching view to Dungeon for upcoming raid...");
             }
 
@@ -478,7 +485,7 @@ function startDungeon() {
     
     // Ensure the view is definitely on the dungeon
     viewArea = "dungeon"; 
-    document.getElementById("areaDisplay").textContent = "StickenFallv2.1.9 - VIEWING: DUNGEON (ACTIVE)";
+    document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: DUNGEON (ACTIVE)";
 
     dungeonQueue.forEach(name => {
         let p = players[name];
@@ -924,14 +931,16 @@ function drawScenery(ctx) {
         ctx.fillStyle = "#1d0a0a";
         ctx.beginPath(); ctx.moveTo(200, 475); ctx.lineTo(225, 300); ctx.lineTo(250, 475); ctx.fill();
     }
+	
 }
 function gameLoop() {
+	updateBuyerNPC();
     // 1. Background
     ctx.fillStyle = backgrounds[viewArea];
     ctx.fillRect(0, 0, c.width, c.height);
     // 1.5 NEW: Draw Area Props
     drawScenery(ctx);
-
+	
     // 2. Enemy UI Updates
     let enemyText = "";
     if (viewArea === "dungeon") {
@@ -1458,9 +1467,14 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
 
     // Admin Controls
     if (flags.broadcaster || flags.mod) {
-        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.9 - VIEWING: HOME"; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.9 - VIEWING: DUNGEON"; }
-        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickenFallv2.1.9 - VIEWING: FISHING POND"; }
+        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: HOME"; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: DUNGEON"; }
+        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: FISHING POND"; }
+		// --- Manual Merchant Controls ---
+		if (cmd === "spawnmerchant") {forceBuyer = true;updateBuyerNPC();systemMessage("[ADMIN] Merchant forced to spawn.");}
+		if (cmd === "despawnmerchant") {forceBuyer = false;updateBuyerNPC();systemMessage("[ADMIN] Merchant forced to leave.");}
+		// reset puts him back on the 7-minute automatic timer
+		if (cmd === "resetmerchant") {forceBuyer = null; updateBuyerNPC();systemMessage("[ADMIN] Merchant returned to automatic schedule.");}
     }
 };
 setInterval(() => {
