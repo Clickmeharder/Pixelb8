@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chat Arena</title>
+<script src="https://unpkg.com/comfy.js/dist/comfy.min.js"></script>
+<style>
+body {
+    margin: 0;
+    background: #0b0f14;
+    color: #e0f7ff;
+    font-family: monospace;
+    overflow: hidden;
+}
+#game {
+    display: block;
+    margin: auto;
+    background: radial-gradient(#111 30%, #050709);
+}
+#overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 14px;
+}
+.bar {
+    width: 300px;
+    height: 20px;
+    background: #222;
+    margin-bottom: 6px;
+}
+.fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff4444, #ff0000);
+}
+.chatFill {
+    background: linear-gradient(90deg, #44ffcc, #00ffaa);
+}
+.float {
+    position: absolute;
+    pointer-events: none;
+    font-weight: bold;
+    animation: floatUp 1.5s ease-out forwards;
+}
+@keyframes floatUp {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-40px); }
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="game" width="800" height="450"></canvas>
+
+<div id="overlay">
+    <div>👾 BOSS HP</div>
+    <div class="bar"><div id="bossHP" class="fill"></div></div>
+    <div>💬 CHAT HP</div>
+    <div class="bar"><div id="chatHP" class="fill chatFill"></div></div>
+    <div style="margin-top:8px;">
+        Commands: <b>!attack</b> <b>!heal</b> <b>!boost</b>
+    </div>
+</div>
+
+<script>
+/* ======================
+   GAME STATE
+====================== */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let boss = { hp: 1000, max: 1000 };
+let chat = { hp: 800, max: 800 };
+let cooldowns = {};
+let boostActive = false;
+
+/* ======================
+   UI HELPERS
+====================== */
+function updateBars() {
+    document.getElementById("bossHP").style.width =
+        (boss.hp / boss.max * 100) + "%";
+    document.getElementById("chatHP").style.width =
+        (chat.hp / chat.max * 100) + "%";
+}
+
+function floatText(text, x, y, color="#fff") {
+    const el = document.createElement("div");
+    el.className = "float";
+    el.textContent = text;
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+    el.style.color = color;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1500);
+}
+
+/* ======================
+   GAME LOOP
+====================== */
+function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // Boss
+    ctx.fillStyle = "#ff3333";
+    ctx.beginPath();
+    ctx.arc(550,225,60,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = "#fff";
+    ctx.fillText("BOSS", 530, 230);
+
+    // Chat blob
+    ctx.fillStyle = "#33ffcc";
+    ctx.beginPath();
+    ctx.arc(250,225,50,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = "#000";
+    ctx.fillText("CHAT", 230, 230);
+
+    requestAnimationFrame(draw);
+}
+draw();
+
+/* ======================
+   BOSS ATTACK
+====================== */
+setInterval(() => {
+    if (boss.hp <= 0 || chat.hp <= 0) return;
+    let dmg = Math.floor(Math.random()*20+10);
+    chat.hp = Math.max(0, chat.hp - dmg);
+    updateBars();
+    floatText("-"+dmg, 250, 180, "#ff6666");
+}, 3000);
+
+/* ======================
+   CHAT COMMANDS
+====================== */
+function canAct(user) {
+    const now = Date.now();
+    if (!cooldowns[user] || now - cooldowns[user] > 3000) {
+        cooldowns[user] = now;
+        return true;
+    }
+    return false;
+}
+
+ComfyJS.onChat = (user, message) => {
+    message = message.toLowerCase();
+
+    if (!canAct(user)) return;
+
+    if (message === "attack" && boss.hp > 0) {
+        let dmg = Math.floor(Math.random()*25+15);
+        if (boostActive) dmg *= 2;
+        boss.hp = Math.max(0, boss.hp - dmg);
+        floatText("-"+dmg, 520, 180, "#ff4444");
+    }
+
+    if (message === "heal") {
+        let heal = Math.floor(Math.random()*20+10);
+        chat.hp = Math.min(chat.max, chat.hp + heal);
+        floatText("+"+heal, 250, 180, "#44ff88");
+    }
+
+    if (message === "boost") {
+        boostActive = true;
+        floatText("BOOST!", 400, 120, "#ffff44");
+        setTimeout(() => boostActive = false, 5000);
+    }
+
+    updateBars();
+};
+
+/* ======================
+   CONNECT
+====================== */
+ComfyJS.Init("jaedraze");
+updateBars();
+</script>
+
+</body>
+</html>
