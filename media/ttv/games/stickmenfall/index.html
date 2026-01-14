@@ -376,6 +376,191 @@
 	</div>
 </div>	
 
+		<!--=====THEME CONTROLLER=========-->
+		<div class="controller" id="theme-controller">
+			<button class="close-btn">×</button>
+			<div id="entrivia-settings-headergroup">
+				<h2 class="controllerheader" style="">Settings</h2>
+			</div>
+			<div class="controlpanel" id="theme-controlpanel">
+				<div id="controls" id="theme-controls">
+					<h3>Theme Settings</h3>
+					<div class="" id="themeButtWrap">
+						<button class="Butt themeselect" id="light-themeButt" title="light">🌞</button>
+						<button class="Butt themeselect" id="dark-themeButt" title="dark">🌙</button>
+						<button class="Butt themeselect" id="business-themeButt" title="Business">💼</button>
+						<button class="Butt themeselect" id="retro-themeButt" title="retro">🕹️</button>
+						<button class="Butt themeselect" id="synthwave-themeButt" title="Synthwave">🕶️</button>
+						<button class="Butt themeselect" id="wastelandterminal-themeButt" title="Wasteland Terminal">🧪</button>
+						<button class="Butt themeselect" id="biohazard-themeButt" title="Biohazard">☣️</button>
+						<button class="Butt themeselect" id="neonvoid-themeButt" title="Neonvoid">🟪</button>
+						<button class="Butt themeselect" id="nineties-themeButt" title="nineties">🔳</button>
+						<button class="Butt themeselect" id="scroll-themeButt" title="scroll">🧾</button>
+						<button class="Butt themeselect" id="bubblegumpop-themeButt" title="BubbleGum Pop">🧁</button>
+						<button class="Butt themeselect" id="custom-themeButt" title="custom">🐇</button>
+						<button class="Butt themeselect" id="poop-themeButt" title="poop">💩</button>
+						<button class="Butt themeselect" id="cyberice-themeButt" title="Cyber">🧊</button>
+						<button class="Butt themeselect" id="hud-themeButt" title="hud">🟦</button>
+						<button class="Butt themeselect" id="holo-themeButt" title="Holo">💠</button>
+					</div>
+					<div class="" id="posSliders">
+						<h3>Layout Settings</h3>
+						<div>
+						  <label>Twitch Chat Y:
+							<input class="rangeinput" type="range" id="twitchchatY" min="0" max="75" value="0">
+							<span id="twitchchatYValue">0%</span>
+						  </label>
+						</div>
+						<div>
+						  <label>Twitch Chat X:
+							<input class="rangeinput" type="range" id="twitchchatX" min="0" max="70" value="0">
+							<span id="twitchchatXValue">0%</span>
+						  </label>
+						</div>
+						<div>
+						  <label>Entrivia Announcement Y:
+							<input class="rangeinput" type="range" id="entriviaAnnouncementY" min="0" max="100" value="71">
+							<span id="entriviaAnnouncementYValue">71%</span>
+						  </label>
+						</div>
+						<div>
+						  <label>Entrivia Announcement X:
+							<input class="rangeinput" type="range" id="entriviaAnnouncementX" min="0" max="100" value="2">
+							<span id="entriviaAnnouncementXValue">2px</span>
+						  </label>
+						</div>
+						<div>
+						  <label>Entrivia Question Y:
+							<input class="rangeinput" type="range" id="entriviaQuestionY" min="0" max="88" value="71">
+							<span id="entriviaQuestionYValue">71%</span>
+						  </label>
+						</div>
+						<div>
+						  <label>Entrivia Question X:
+							<input class="rangeinput" type="range" id="entriviaQuestionX" min="0" max="71" value="2">
+							<span id="entriviaQuestionXValue">2px</span>
+						  </label>
+						</div>
+					</div>
+					<br>
+					<div class="switchbox" id="switch-box">
+						toggle background
+						<label class="switch">
+						<input type="checkbox" id="simulatebackground">
+						<span class="slider"></span>
+						</label>
+					</div>
+					<div class="switchbox" id="switch-box">
+						Show example panels
+						<label class="switch">
+						<input type="checkbox" id="showthemeExamples">
+						<span class="slider"></span>
+						</label>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--=====SPINWHEEL CONTROLLER=========-->
+		<div class="controller" id="wheel-controller">
+		<button class="close-btn">×</button><h2 class="controllerheader">Spin Wheel Controls</h2>
+			<div class="controlpanel">
+				<div class="controls"id="wheel-maincontrols">
+					<div class="row" for="wheel-spinButt">
+						<button class="a Butt" id="showWheelButt" data-target="wheelcanvaswrapper" data-animation="fade">
+						  <i class="fas fa-eye"></i> Show
+						</button>
+						<button id="discRotationButton">
+						  <i class="fas fa-sync-alt"></i> Spin Wheel
+						</button>
+					</div>
+				</div>
+				<div class="controls"id="wheel-piedish">
+				
+				  <!-- Remove Section -->
+				  <div class="row" for="removewheelsection">
+					<select class="a" id="removewheelsection"></select>
+					<button class="a Butt remove" id="wheel-removesectionButt"><i class="fas fa-times"></i> Remove </button>
+				  </div>
+				  <!-- Add Section -->
+				  <div class="row" for="addwheelsection">
+					<input class="a" type="text" id="addwheelsection" placeholder="New section name" />
+					<button class="a Butt add" id="wheel-addsectionButt"><i class="fas fa-plus"></i> Add Slice</button>
+				  </div>
+				  <!-- save Section -->
+				  <div class="row" for="savewheelsections">
+					<input class="a" type="text" id="savewheelsections" placeholder="Name your wheel" />
+					<button class="a Butt save" id="save-sectionsButt">save wheel</button>
+				  </div>
+				  <!-- Load Section -->
+				  <div class="row" for="loadwheelsections">
+					<select class="a" id="loadwheelsection"></select>
+					<button class="a Butt load" id="load-sectionsButt">Load Wheel</button>
+					<button class="a Butt delete" id="delete-saved-wheel">Delete Wheel</button>
+				  </div>
+				</div>
+				<div class="" id="wheelposSliders">
+					<div>
+					  <label>Wheel Y:
+						<input class="rangeinput" type="range" id="wheelY" min="0" max="66" value="60">
+						<span id="wheelYValue">0%</span>
+					  </label>
+					</div>
+					<div>
+					  <label>Wheel X:
+						<input class="rangeinput" type="range" id="wheelX" min="0" max="90" value="87">
+						<span id="wheelXValue">0%</span>
+					  </label>
+					</div>
+					<div>
+					  <label>Wheel Result Y:
+						<input class="rangeinput" type="range" id="wheelResultY" min="0" max="100" value="0">
+						<span id="wheelResultYValue">71%</span>
+					  </label>
+					</div>
+					<div>
+					  <label>Wheel Result X:
+						<input class="rangeinput" type="range" id="wheelResultX" min="0" max="100" value="15">
+						<span id="wheelResultXValue">2%</span>
+					  </label>
+					</div>
+					<div>
+					  <label>Wheel Lever Y:
+						<input class="rangeinput" type="range" id="wheelLeverY" min="0" max="100" value="45">
+						<span id="wheelLeverYValue">45%</span>
+					  </label>
+					</div>
+					<div>
+				  <label>Wheel Lever X:
+					<input class="rangeinput" type="range" id="wheelLeverX" min="0" max="100" value="95%">
+					<span id="wheelLeverXValue">2px</span>
+				  </label>
+					</div>
+				</div>
+				<div class="" id="discRotationLeverSettings">
+				  <label>
+					Lever Visibility:
+					<select id="discRotationLeverToggle">
+					  <option value="on">On</option>
+					  <option value="always">Always</option>
+					  <option value="off">Off</option>
+					</select>
+					<div id="enableLeverIndicator" class="status-indicator" data-status-variable="enableLever"></div>
+
+				  </label>
+				  <br />
+				  <label>
+					<input type="checkbox" id="autoFadeToggle" checked />
+					Enable Auto Fade
+				  </label>
+				  <br />
+				  <label>
+					Auto Fade Time (ms):
+					<input type="number" id="fadeTimeInput" value="5" step="1" min="0" />
+				  </label>
+				  <div id="autoFadeIndicator" class="status-indicator" data-status-variable="autoFade"></div>
+				</div>
+			</div>
+		</div>
 
 	<!-- Chat Control Container -->
 
