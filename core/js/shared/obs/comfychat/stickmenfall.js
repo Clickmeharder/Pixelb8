@@ -1657,10 +1657,18 @@ function stickmenCommandHandler(user, msg, flags, extra) {
 }
 
 window.initStickmenFall = function() {
+    // 1. Try to find the canvas
+    c = document.getElementById("c");
+    
+    // 2. If it's missing, wait a tiny bit and try again
+    if (!c) {
+        console.warn("StickmenFall: Canvas 'c' not found, retrying in 50ms...");
+        setTimeout(window.initStickmenFall, 50);
+        return; 
+    }
+
     try {
         console.log("Initializing StickmenFall Plugin...");
-        c = document.getElementById("c");
-        if (!c) throw new Error("Canvas 'c' not found in HTML");
         ctx = c.getContext("2d");
 
         // Attach Mouse Move only after 'c' is found
@@ -1670,6 +1678,7 @@ window.initStickmenFall = function() {
             mouse.y = e.clientY - rect.top;
         });
 
+        // Define lists locally so they are fresh
         const userList = [];
         const adminList = [];
         Object.keys(STICKMEN_COMMANDS).forEach(key => {
@@ -1689,9 +1698,8 @@ window.initStickmenFall = function() {
 
         if (typeof gameLoop === "function") {
             gameLoop();
-        } else {
-            console.warn("StickmenFall: gameLoop function missing.");
         }
+        
         console.log("StickmenFall Plugin initialized successfully.");
     } catch (error) {
         console.error("StickmenFall failed to load:", error.message);
