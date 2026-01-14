@@ -343,14 +343,18 @@
 <!-- 	<script src="https://pixelb8.lol/core/js/shared/obs/obsglobal.js"></script>
 	<script src="https://pixelb8.lol/core/js/shared/obs/comfychat.js"></script> -->
 		<script>
-		
-
-		window.onload = function () {
-			updateSettingsDisplay();
-			updateCommandlist(); 
-			connectStreamer();
-
-		};
+	window.onload = function () {
+        // 1. Setup the basic UI settings
+        updateSettingsDisplay();
+        // 2. Initialize your plugins first 
+        // (This fills the 'usercommands' and 'streamercommands' arrays)
+        initStickmenFall();
+        //initMyNewGame();
+        // 3. Now that the arrays are full, build the command list UI
+        updateCommandlist(); 
+        // 4. Finally, connect to Twitch
+        connectStreamer();
+    };
 	</script>
 <!--=====END OF SCRIPTS=========-->
 </body>
