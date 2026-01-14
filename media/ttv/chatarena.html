@@ -547,51 +547,73 @@ const cmdHandlers = {
         systemMessage(msg);
     },
 
-    // --- Equipment & Inventory ---
+// --- Equipment & Inventory ---
     equip: (p, args) => {
+        // 1. Join args and normalize for searching
         let inputName = args.slice(1).join(" ").toLowerCase();
+        
+        // 2. Find the item in the inventory (case-insensitive search)
         let invItem = p.stats.inventory.find(i => i.toLowerCase() === inputName);
-        if (!invItem) return systemMessage(`${p.name}: You don't have "${args.slice(1).join(" ")}" in your inventory.`);
+        
+        if (!invItem) {
+            return systemMessage(`${p.name}: You don't have "${args.slice(1).join(" ")}" in your inventory.`);
+        }
 
+        // 3. Find the EXACT original key from ITEM_DB (e.g., "Iron Helmet" vs "iron helmet")
         let dbKey = Object.keys(ITEM_DB).find(k => k.toLowerCase() === invItem.toLowerCase());
         let itemData = ITEM_DB[dbKey];
-        if (!itemData) return systemMessage(`System Error: ${invItem} has no stats in ITEM_DB.`);
 
-        const msgs = { weapon: "equipped", armor: "put on", helmet: "is wearing", boots: "laced up" };
-        const slotMap = { weapon: "equippedWeapon", armor: "equippedArmor", helmet: "equippedHelmet", boots: "equippedBoots" };
-
-        if (slotMap[itemData.type]) {
-            p.stats[slotMap[itemData.type]] = dbKey;
-            systemMessage(`${p.name} ${msgs[itemData.type]} ${dbKey}!`);
-            saveStats(p);
+        if (!itemData) {
+            return systemMessage(`System Error: ${invItem} has no stats in ITEM_DB.`);
         }
+
+        // 4. Use your original slot assignment logic to ensure drawing functions work
+        if (itemData.type === "weapon") {
+            p.stats.equippedWeapon = dbKey;
+            systemMessage(`${p.name} equipped ${dbKey}!`);
+        } else if (itemData.type === "armor") {
+            p.stats.equippedArmor = dbKey;
+            systemMessage(`${p.name} put on ${dbKey}!`);
+        } else if (itemData.type === "helmet") {
+            p.stats.equippedHelmet = dbKey; 
+            systemMessage(`${p.name} is wearing ${dbKey}!`);
+        } else if (itemData.type === "boots") {
+            p.stats.equippedBoots = dbKey;
+            systemMessage(`${p.name} laced up ${dbKey}!`);
+        }
+
+        saveStats(p);
     },
 
     unequip: (p, args) => {
         const target = args[1] ? args[1].toLowerCase() : "all";
-        let changed = false;
-        const slots = [
-            { key: "equippedWeapon", match: ["weapon"] },
-            { key: "equippedArmor", match: ["armor", "armour"] },
-            { key: "equippedHelmet", match: ["helmet"] },
-            { key: "equippedBoots", match: ["boots"] }
-        ];
+        let message = "";
 
-        slots.forEach(slot => {
-            if (target === "all" || slot.match.includes(target)) {
-                p.stats[slot.key] = null;
-                changed = true;
-            }
-        });
+        // Reverting to your exact logic flow for unequip
+        if (target === "weapon" || target === "all") {
+            p.stats.equippedWeapon = null;
+            message = "weapon";
+        }
+        if (target === "armor" || target === "armour" || target === "all") {
+            p.stats.equippedArmor = null;
+            message = message ? "items" : "armor";
+        }
+        if (target === "helmet" || target === "all") {
+            p.stats.equippedHelmet = null;
+            message = message ? "items" : "helmet";
+        }
+        if (target === "boots" || target === "all") {
+            p.stats.equippedBoots = null;
+            message = message ? "items" : "boots";
+        }
 
-        if (changed) {
+        if (message) {
             systemMessage(`${p.name} unequipped ${target === "all" ? "everything" : "their " + target}.`);
             saveStats(p);
         } else {
             systemMessage(`${p.name}: Invalid slot. Use !unequip (weapon/armor/helmet/boots/all)`);
         }
     },
-
     inventory: (p, args, user) => {
         let filter = args[1]?.toLowerCase() || "all";
         let items = p.stats.inventory;

@@ -1315,6 +1315,7 @@ function cmdUnequip(p, args) {
         systemMessage(`${p.name}: Invalid slot. Use !unequip (weapon/armor/helmet/boots/all)`);
     }
 }
+
 function cmdInventory(p, user, args) {
     let filter = args[1] ? args[1].toLowerCase() : "all";
     let items = p.stats.inventory;
