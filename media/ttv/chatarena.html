@@ -443,6 +443,7 @@ const COMMANDS = {
     travel: (p, args) => movePlayer(p, args[1]),
     home: (p) => movePlayer(p, "home"),
     dungeon: (p) => movePlayer(p, "dungeon"),
+	pond: (p) => movePlayer(p, "fishingpond"),
     join: (p) => {
         if (p.dead || dungeonQueue.includes(p.name)) return;
         dungeonQueue.push(p.name);
@@ -603,6 +604,7 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
         if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); }
         if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); }
         if (cmd === "showhome") { viewArea = "home"; areaDisplay.textContent = "StickmenFall - HOME"; }
+		if (cmd === "showfishing") { viewArea = "fishingpond"; areaDisplay.textContent = "StickmenFall - Pond"; }
         if (cmd === "showdungeon") { viewArea = "dungeon"; areaDisplay.textContent = "StickmenFall - DUNGEON"; }
     }
 };
