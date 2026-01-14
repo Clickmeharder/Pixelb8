@@ -725,10 +725,10 @@ document.getElementById("resetSettings").addEventListener("click", () => {
 //=================================
 // - must run onload -
 //=================================
-/* window.onload = function () {
- 	loadCustomQuestions();
+window.onload = function () {
+ 	//loadCustomQuestions();
 	updateSettingsDisplay();
 	updateCommandlist(); 
 	//connectStreamer();
-}; */
+};
 
