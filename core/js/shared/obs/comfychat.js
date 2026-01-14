@@ -727,8 +727,8 @@ document.getElementById("resetSettings").addEventListener("click", () => {
 //=================================
 window.onload = function () {
  	//loadCustomQuestions();
-	updateSettingsDisplay();
-	updateCommandlist(); 
+	//updateSettingsDisplay();
+	//updateCommandlist(); 
 	//connectStreamer();
 };
 
