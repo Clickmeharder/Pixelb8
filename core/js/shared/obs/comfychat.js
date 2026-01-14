@@ -532,7 +532,7 @@ The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
 	{ command: "!entrivia-customquestions", description: "Toggles custom entrivia questions.", usage: "!entrivia-customquestions" }
 ];
  */
-const usercommands = [
+let usercommands = [
 	{ command: "attack / attack", description: "Start attacking (stickmenfall).", usage: "attack / !fish" },
 	{ command: "fish / !fish", description: "Start fishing (stickmenfallpond).", usage: "fish / !fish" },
 	{ command: "heal / !heal", description: "Start healing (stickmenfallpond).", usage: "heal / !heal" },
@@ -548,7 +548,7 @@ valid categories: mining, hunting, crafting, history, beauty, economy, social, m
 !entrivia-suggest home | thecategory | the relevent string or paramater | arg-option2`
     },
 ];
-const streamercommands = [
+let streamercommands = [
 	{ command: "!showhomw", description: "show the main stickmenfall area.", usage: "!showhome" },
 	{ command: "!showfishing", description: "show the stickmenfall fishing area.", usage: "!showfishing" },
 	{ command: "!showdungeon", description: "show the stickmenfall dungeon area.", usage: "!showdungeon" },

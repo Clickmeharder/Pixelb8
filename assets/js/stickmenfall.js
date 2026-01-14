@@ -1606,8 +1606,8 @@ function stickmenCommandHandler(user, msg, command, color, flags, extra) {
 };
 
 // REGISTER the command metadata//
-registerPluginCommands(STICKMEN_USER_CMDS, false);
-registerPluginCommands(STICKMEN_ADMIN_CMDS, true);
+/* registerPluginCommands(STICKMEN_USER_CMDS, false);
+registerPluginCommands(STICKMEN_ADMIN_CMDS, true); */
 // REGISTER the game with the comfychat.js//
 registerChatPlugin(stickmenCommandHandler);
 
