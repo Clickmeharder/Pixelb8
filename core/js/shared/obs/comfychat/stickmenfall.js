@@ -175,6 +175,7 @@ function movePlayer(p, targetArea) {
 
 function handleTooltips() {
     const tt = document.getElementById("tooltip");
+	if (!tt) return;
     let hover = null;
 
     // Check Players in view
