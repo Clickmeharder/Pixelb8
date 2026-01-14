@@ -1682,7 +1682,7 @@ Object.keys(STICKMEN_COMMANDS).forEach(key => {
     else userList.push(entry);
 });
 
-function initStickmenFall() {
+window. initStickmenFall = function() {
     try {
         console.log("Initializing StickmenFall Plugin...");
 
