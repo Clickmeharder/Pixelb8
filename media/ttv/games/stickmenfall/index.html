@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+	<link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
+    <title>StickmenFall ALPHA TEST</title>
+	<link rel="stylesheet" href="/core/css/animations.css">
+	<link rel="stylesheet" href="/core/css/pixelb8-holotheme.css">
+	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@1,700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!--<script src="https://unpkg.com/comfy.js/dist/comfy.min.js"></script>-->
+    <style>
+        body { margin:0; background:transparent; font-family:monospace; overflow:hidden; }
+        canvas { display:block; margin:auto; background: #111; }
+
+        #enemyUI { position:absolute; top:10px; right:10px; color:#ff4444; font-size:14px; text-align:right; background:rgba(0,0,0,0.6); padding:8px; border-radius:6px; border: 1px solid #444; }
+        #systemUI { position:absolute; top:10px; left:10px; width:300px; font-size:13px; pointer-events:none; }
+
+		.sysMsg { background:rgba(0,0,0,0.7); color:#0f0; padding:5px; margin-bottom:4px; border-radius:4px; border-left: 3px solid #0f0; animation: fadeout 8s forwards; }
+        #tooltip { position: absolute; pointer-events: none; background: rgba(0,0,0,0.9); color: #fff; padding: 8px; border-radius: 4px; border: 1px solid #0ff; font-size: 13px; display: none; z-index: 100; }
+        #areaDisplay { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); color:#0ff; font-size:18px; background:rgba(0,0,0,0.8); padding:5px 15px; border: 1px solid #0ff; text-transform: uppercase; }
+
+        @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
+    </style>
+</head>
+<body>
+	<div id="streamSpace"></div>
+	
+	<!--===============================================-->
+	<div id="bubblewrap">
+		<!--<button class="Butt" id="thePixelButt">Ᵽ</i></button>-->
+		<button class="Butt" id="thePixelButt">Ᵽ</button>
+		<div id="Bubble">
+			<!-- 🔌 🎮 🖥️🔧📝 🎨 🖼️-->
+			<button class="Butt widgetcontrols" id="comfy-Butt"><i class="fab fa-twitch"></i></button><!-- 💬🔌 🎮 🖥️🔧📝 🎨 🖼️-->
+			<button class="Butt widgetcontrols" id="wheel-Butt"><i class="fa-regular fa-life-ring"></i></button>
+			<button class="Butt widgetcontrols" id="entrivia-Butt">Ｅ</button>
+			<button class="Butt widgetcontrols" id="pixelpen-Butt"><i class="fas fa-palette"></i></button>
+			<button class="Butt widgetcontrols" id="theme-Butt">⚙</button> 
+		</div>
+	</div>
+	<!--===============================================-->
+	<div  id="console"></div>
+	<!--===============================================-->
+	<!--this is the container for messages from twitch -->
+	<div id="twitchChat">
+		<div id="exampleMessagebox" style="display: none;">
+			<div class="exampleMessage"><span class="username" style="color: rgb(255, 105, 180);">JaeDraze: </span><span class="twitchmessage">find best viewers at ************.com</span></div>
+			<div class="exampleMessage"><span class="username" style="color: red;">cooldude420: </span><span class="twitchmessage">I just farted</span></div>
+			<div class="exampleMessage"><span class="username" style="color:blue;">boobs6969: </span><span class="twitchmessage">lol wow!</span></div>
+			<div class="exampleMessage"><span class="username" style="color:brown;">hankhilllover: </span><span class="twitchmessage">I sell propane and propane accesories</span></div>
+		</div>
+		<div id="twitchMessagebox">
+		</div>
+		
+	</div>
+	<!--===============================================-->
+	<!--=====COMFY CONTROLLER=========-->
+	<div class="controller" id="comfy-controller">
+		<button class="close-btn">×</button><h2 class="controllerheader">Get Comfy</h2>
+		<div class="controlpanel" id="">
+			<div class="controls">
+				<input class="a" type="text" name="yourTextName" id="twitchname" placeholder="Enter Your Twitch Streamer Name">
+				<button class="a" id="streamersButt">Connect</button>
+				<button class="a" id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
+			</div>
+			<div id="more-controls" style="">
+			</div>
+		</div>
+	</div>	
+	<!--===============================================-->
+	<!--this is the underlay its mostly for aesthetics and sits behind everything else it might be a border or different animated elements -->		
+	<div id="underlay"></div>
+	<div id="pageborder"></div>
+	
+	<!--============== -== STICKMENFALL --== =====================-->
+	<canvas id="c" width="1000" height="600"></canvas>
+	<div id="enemyUI"></div>
+	<div id="systemUI"></div>
+	<div id="tooltip"></div>
+	<div id="areaDisplay">StickmenFallv2.1.9- VIEWING: HOME</div>
+	<!--=============-------------------------====================-->
+
+	<script src="/assets/js/stickmenfall.js"></script>
+	<script src="/assets/js/twitchChat.js"></script>
+</body>
+</html>

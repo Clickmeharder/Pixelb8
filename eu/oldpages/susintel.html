@@ -1,0 +1,703 @@
+<!-- EU page ( Entropian Pixelb8-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixelb8.LoL Entropia</title>
+    <link rel="stylesheet" href="../core/css/pixelb8-default.css">
+	<link rel="stylesheet" href="../Modules/SuSOS/core/css/SuSOS-default.css">
+	<link href="https://fonts.googleapis.com/css2?family=Yatra+One&amp;display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+	<style type="text/css" id="operaUserStyle"></style>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
+</head>
+
+<div class="background-container">
+  <div class="stars"></div>
+  <div class="twinkling"></div>
+</div>
+
+<!--Style Tuner and HUD Main Power Button-->
+<div>
+  <input id="powercheckbox" type="checkbox"  style="display:none;"/>
+	  <label class="powerswitch" for="powercheckbox" style="display:none;">
+		<svg viewBox="0 0 512 512" class="slider">
+			<path
+				d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V256c0 17.7 14.3 32 32 32s32-14.3 32-32V32zM143.5 120.6c13.6-11.3 15.4-31.5 4.1-45.1s-31.5-15.4-45.1-4.1C49.7 115.4 16 181.8 16 256c0 132.5 107.5 240 240 240s240-107.5 240-240c0-74.2-33.8-140.6-86.6-184.6c-13.6-11.3-33.8-9.4-45.1 4.1s-9.4 33.8 4.1 45.1c38.9 32.3 63.5 81 63.5 135.4c0 97.2-78.8 176-176 176s-176-78.8-176-176c0-54.4 24.7-103.1 63.5-135.4z"
+			></path>
+		</svg>
+	  </label>
+  <!--Style Tunner-->
+  <div id="ST-wrapper">
+    <div class=".max-height-control" id="styletuner">
+      <div id="ST-header">
+        <div class="ST-box">
+          <div id="ST-headertext"class="ST-box">Style Tuner</div>
+          <div class="ST-box STborder" id="st-subheader">Choose a Style:</div>
+        </div>
+      </div>
+      <!--Style Control Panel-->
+      <div id="ST-scrollbox" class="STborder2">
+        <!--Main Body Styles-Main Body Transparancy - Bg color & text color-->
+        <div class="ST-box">
+          <!--Main Body -Text color-->
+          <div>
+            <label for="mainbody-text-color"><h1 id="ST-MainBody-label">Main Body</h1></label>
+            <input type="radio" id="mainbody-text-color" name="ST-styleRadio" value="mainbody-text-color">
+            <label for="mainbody-text-color"disabled>text color</label>
+          </div>
+          <!--Main Body -BG color & Transparency-->
+          <div>
+            <input type="radio" id="mainbody-bg-color" name="ST-styleRadio" value="mainbody-bg-color">
+            <label for="mainbody-bg-color"disabled>bg color</label>
+            <input type="radio" id="mainbody-transparency" name="ST-styleRadio" value="mainbody-transparency">
+            <label for="mainbody-transparency"disabled>transparency</label>
+          </div>
+          <!--SCROLLBAR STYLES-->
+			<!--SCROLLBAR STYLES -BG and Border color-->
+          <div>
+            <label for="scrollbar-bg-color"><h2 id="ST-scrollbars-label">Scrollbars</h2></label>
+            <input type="radio" id="scrollbar-bg-color" name="ST-styleRadio" value="scrollbar-bg-color">
+            <label for="scrollbar-bg-color"disabled>bg color</label>
+            <input type="radio" id="scrollbar-border-color" name="ST-styleRadio" value="scrollbar-border-color">
+            <label for="scrollbar-border-color"disabled>border color</label>
+          </div>
+			<!--SCROLLBAR STYLES -Scrollbar Thumb Border color-->
+          <div>
+            <label for="scrollbar-thumb-border-color">Scrollbar Thumb</label><br>
+            <input type="radio" id="scrollbar-thumb-border-color" name="ST-styleRadio" value="scrollbar-thumb-border-color">
+            <label for="scrollbar-thumb-border-color"disabled>border color</label>
+          </div>
+        </div>
+        <!--Hud Overlay Style Controls-->
+        <div class="ST-box">
+          <!--Hud Overlay- Text Color & Transparancy-->
+          <div>
+            <label for="HUD-text-color"><h1 id="ST-HudOverlay-label">Hud Overlay</h1></label>
+            <input type="radio" id="HUD-text-color" name="ST-styleRadio" value="HUD-text-color">
+            <label for="HUD-text-color"disabled>text color</label>
+            <input type="radio" id="hudoverlay-transparency" name="ST-styleRadio" value="hudoverlay-transparency">
+            <label for="hudoverlay-transparency"disabled>transparency</label>
+          </div>
+          <!--Hud Overlay- bg color & border color-->
+          <div>
+            <input type="radio" id="hudoverlay-bg-color" name="ST-styleRadio" value="hudoverlay-bg-color">
+            <label for="hudoverlay-bg-color"disabled>bg color</label>
+            <input type="radio" id="hudoverlay-border-color" name="ST-styleRadio" value="hudoverlay-border-color">
+            <label for="hudoverlay-border-color"disabled>Border color</label>
+          </div>
+          <!----Main HUD-Styles-->
+  <!-- --------------------------------------------------- -->
+          <div>
+            <label for="HUD-text-color"><h2 id="ST-HudOverlaySecondary-label">Secondary</h2></label>
+            <input type="radio" id="HUD-bg-color" name="ST-styleRadio" value="HUD-bg-color">
+            <label for="HUD-bg-color"disabled>bg color #2</label>
+            <input type="radio" id="HUD-applet-border-color" name="ST-styleRadio" value="HUD-applet-border-color">
+            <label for="HUD-applet-border-color"disabled>Inner border color</label>
+          </div>        
+          <!---->
+          <div>
+            <input type="radio" id="HUD-border-color" name="ST-styleRadio" value="HUD-border-color">
+            <label for="HUD-border-color"disabled>border color #2</label>
+            <input type="radio" id="HUD-windows-bg-color" name="ST-styleRadio" value="HUD-windows-bg-color">
+            <label for="HUD-windows-bg-color"disabled>Applet Bg color</label>
+            <input type="radio" id="HUD-active-border-color" name="ST-styleRadio" value="HUD-active-border-color">
+            <label for="HUD-active-border-color"disabled>Active color</label>
+          </div>        
+          <!---->
+        </div>
+        <!--Static Main Wrapper Style Controls-->
+        <div class="ST-box">
+            <div>
+              <label for="staticpage-text-color"><h1 id="ST-StaticPage-label">Static Page</h1></label>
+              <input type="radio" id="staticpage-text-color" name="ST-styleRadio" value="staticpage-text-color">
+              <label for="staticpage-text-color"disabled>text color</label>
+            </div>
+            <div>
+              <input type="radio" id="staticpage-border-color" name="ST-styleRadio" value="staticpage-border-color">
+              <label for="staticpage-border-color"disabled>Border color</label>
+            </div>
+            <div>
+              <input type="radio" id="staticpage-bg-color" name="ST-styleRadio" value="staticpage-bg-color">
+              <label for="staticpage-bg-color"disabled>bg color</label>
+            </div>
+            <div>
+              <input type="radio" id="staticpage-transparency" name="ST-styleRadio" value="staticpage-transparency">
+              <label for="staticpage-transparency"disabled>transparency</label>
+            </div>
+          </div>
+        <!--Header and Footer Panels Style Controls-->
+        <div class= "ST-box">
+            <div>
+              <label for="staticpage-HFpanels-text-color"><h2 id="ST-StatcPage-HF-label">Header & Footer</h2></label>
+              <input type="radio" id="staticpage-HFpanels-text-color" name="ST-styleRadio" value="staticpage-HFpanels-text-color">
+              <label for="staticpage-HFpanels-text-color">text-color</label>
+            </div>
+            <div>
+              <input type="radio" id="staticpage-HFpanels-bg-color" name="ST-styleRadio" value="staticpage-HFpanels-bg-color">
+              <label for="staticpage-HFpanels-bg-color">bg color</label>
+            </div>
+            <div>
+              <input type="radio" id="staticpage-HFpanels-border-color" name="ST-styleRadio" value="staticpage-HFpanels-border-color">
+              <label for="staticpage-HFpanels-border-color">border color</label>
+            </div>
+          </div>
+        <!--Staticpage Maincontent Style Controls-->
+        <div class= "ST-box">
+          <div>
+            <label for="staticpage-maincontent-text-color"><h2 id="ST-StaticPage-MainContent-label">Main content</h2></label>
+            <input type="radio" id="staticpage-maincontent-text-color" name="ST-styleRadio" value="staticpage-maincontent-text-color">
+            <label for="staticpage-maincontent-text-color">text-color</label>
+          </div>
+          <div>
+            <input type="radio" id="staticpage-maincontent-bg-color" name="ST-styleRadio" value="staticpage-maincontent-bg-color">
+            <label for="staticpage-maincontent-bg-color">bg color</label>
+          </div>
+          <div>
+              <input type="radio" id="staticpage-maincontent-border-color" name="ST-styleRadio" value="staticpage-maincontent-border-color">
+              <label for="staticpage-maincontent-border-color">border color</label>
+          </div>
+          <div>
+              <input type="radio" id="staticpage-inner-bg-color" name="ST-styleRadio" value="staticpage-inner-bg-color">
+              <label for="staticpage-inner-bg-color">inner bg color</label>
+          </div>
+        </div>
+        <!--Side Panels Style Controls-->
+        <div class= "ST-box">
+            <div>
+              <label for="staticpage-sidepanels-text-color"><h2 id="ST-StaticPage-SidePanels-label">Side Panels</h2></label>
+              <input type="radio" id="staticpage-sidepanels-text-color" name="ST-styleRadio" value="staticpage-sidepanels-text-color">
+              <label for="staticpage-sidepanels-text-color">text-color</label>
+            </div>
+            <div>
+              <input type="radio" id="staticpage-sidepanels-bg-color" name="ST-styleRadio" value="staticpage-sidepanels-bg-color">
+              <label for="staticpage-sidepanels-bg-color">bg color</label>
+            </div>
+            <div>
+              <input type="radio" id="staticpage-sidepanels-border-color" name="ST-styleRadio" value="staticpage-sidepanels-border-color">
+              <label for="staticpage-sidepanels-border-color">border color</label>
+            </div>
+        </div>
+        <!--Panels Style Controls-->
+        <div class="ST-box">
+          <div>
+            <label for="staticpage-panels-border-color"><h2 id="ST-StaticPage-InnerPanels-label">inner Panels</h2></label><br>
+            <input type="radio" id="staticpage-panels-border-color" name="ST-styleRadio" value="staticpage-panels-border-color">
+            <label for="staticpage-panels-border-color">Border Color</label>
+          </div>
+          <div>
+            <input type="radio" id="panels-bg-color" name="ST-styleRadio" value="staticpage-panels-bg-color">
+            <label for="panels-bg-color">Bg Color</label>
+          </div>
+          <div>
+            <input type="radio" id="staticpage-panels-headertext-color" name="ST-styleRadio" value="staticpage-panels-headertext-color">
+            <label for="staticpage-panels-headertext-color">Header Text Color</label>
+          </div>
+          <div>
+            <input type="radio" id="staticpage-panels-text-color" name="ST-styleRadio" value="staticpage-panels-text-color">
+            <label for="staticpage-panels-text-color">Text Color</label>
+          </div>
+        </div>
+  <!--Ex. for root vars & newradiobutton Style Controls-->
+        <div class="ST-box">
+          <div>
+            <input type="radio" id="newradiobutton1" name="ST-styleRadio" value="newradiobutton1">
+            <label for="newradiobutton1"disabled>new root variable 1</label>
+          </div>
+          <div>
+            <input type="radio" id="newradiobutton2" name="ST-styleRadio" value="newradiobutton2">
+            <label for="newradiobutton2"disabled>new root variable 2</label>
+          </div>
+        </div>
+	</div>    
+      <div id="ST-footer">
+	  </div>
+    </div>
+    <div id="ST-currentcolorbox">
+      <label>Current Color:</label>
+      <div id="ST-CurrentColor">
+        <span></span>    </div>        
+      <input type="color" id="ST-colorPicker" name="ST-colorPicker" >
+
+</div>
+    <!-- Opacity Slider -->
+    <div class="slider-container">
+        <label for="opacity-slider" class="slider-label">Opacity:</label>
+        <input type="range" min="0" max="1" step="0.01" value="1" class="slider-input" id="opacity-slider">
+	</div>
+  </div>
+</div>
+
+<!--HUD MONITOR POWER BUTTON-->
+<div class="hudMonitorPower" style="display:hidden;">
+
+</div>
+<div id="statusMessage" style="font-weight:bold;color: #1782b6cc;border: 2px solid #1782b6cc;text-align: center;"></div>
+<div class="boxcontent" id="susIntelwindow">
+  <div class="Container generic" id="Hud-susIntel-Displaypanel">
+	<div class="Innercontainer scrollheight windowcontentblock" id="susIntelWindow-Interior">
+	  <div class="Innerinfobox" id="ValueA">
+		<div class="column minheight98" id="">
+			<div id="inputContainer">
+				<div class="textbawxA column" id="susIntel-toolinfobawx">
+					<label for="susIntel-toolinfo">Instructions:</label>
+					<textarea id="susIntel-toolinfo" placeholder="Step #1: Locate your Entropia Universe Chat .log file, it should be found within your entropia game files...wow! Step #2: Once your file has been located and selected, choose your preferred filters.. Step #3: Click the Analyze Button Or, simply Click 'Analyze' to update the table with the example item list contained."></textarea>
+				</div>
+				<div class="textbawx" style="max-height:206px;color: #25bb9c;padding-left:35px;">
+					<input type="file" id="susIntel-fileInput">
+					<div id="filtersContainer">
+						<strong>Channels</strong>
+						<div class="flexrow sifi">
+							<div class="label-check-wrap">
+								<label for="susIntel-systemLog">System</label>
+								<input type="checkbox" id="susIntel-systemLog" name="logType" value="[system]" checked>
+							</div>
+							<div class="label-check-wrap">
+								<label for="susIntel-rookieLog">Rookie</label>
+								<input type="checkbox" id="susIntel-rookieLog" name="logType" value="[Rookie]" checked>
+							</div>
+							<div class="label-check-wrap">
+								<label for="susIntel-tradeLog">Trade</label>
+								<input type="checkbox" id="susIntel-tradeLog" name="logType" value="[Trade]" checked>
+							</div>
+							<div class="label-check-wrap">
+								<label for="susIntel-tradeLog">#CalyTrade</label>
+								<input type="checkbox" id="susIntel-tradeLog" name="logType" value="[#calytrade]" checked>
+							</div>
+							<div class="label-check-wrap">
+								<label for="susIntel-tradeLog">#arktrade</label>
+								<input type="checkbox" id="susIntel-tradeLog" name="logType" value="[#arktrade]" checked>
+							</div>
+						</div>
+						<br>
+						<div class="flexrow sifi">
+							<div class="label-check-wrap">
+								<label for="susIntel-tradeLog">#monriatrade</label>
+								<input type="checkbox" id="susIntel-tradeLog" name="logType" value="[#monriatrade]" checked>
+							</div>
+							<div class="label-check-wrap">
+								<label for="susIntel-tradeLog">#toulan_trade</label>
+								<input type="checkbox" id="susIntel-tradeLog" name="logType" value="[#toulan_trade]" checked>
+							</div>
+							<div class="label-check-wrap">
+								<label for="susIntel-tradeLog">#nitrade</label>
+								<input type="checkbox" id="susIntel-tradeLog" name="logType" value="[#nitrade]" checked>
+							</div>
+							<div class="label-check-wrap">
+								<label for="susIntel-tradeLog">#cyrenetrade</label>
+								<input type="checkbox" id="susIntel-tradeLog" name="logType" value="[#cyrenetrade]" checked>
+							</div>
+							<div class="label-check-wrap">
+								<label for="susIntel-tradeLog">#rocktrading</label>
+								<input type="checkbox" id="susIntel-tradeLog" name="logType" value="[#rocktrading]" checked>
+							</div>
+						</div>
+						<strong>Time</strong>
+						<div class="flexrow row">
+							<label for="resultsolderthanXdays" style="margin:auto;margin-left:0;margin-right:0;">hide logs older than:</label>
+							<div class="custom-number-input">
+								<input type="number" id="resultsolderthanXdays" placeholder="7">
+								<div class="spin-button up" onclick="document.getElementById('resultsolderthanXdays').stepUp()">▲</div>
+								<div class="spin-button down" onclick="document.getElementById('resultsolderthanXdays').stepDown()">▼</div>
+							</div>
+							<label for="daystext" style="margin:auto;margin-left:4px;margin-right:0;">Days</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="buttbox" id="susintelbuttbox">
+				<textarea id="susIntel-keyword" style="color:#444;"placeholder="Enter, keywords, separated, by, comma"></textarea>
+				<label for="susIntel-keyword">ex: 2017-08-13, Lysterium </label>
+				<button class="processeuitemlistbutt" id="susIntel-searchButton">Analyze</button>
+			</div>
+			<div id="inventorySortingMenu">
+				<div class="selectbox">
+					<button id="cleanpopupButton" style="margin-left: auto;">Delete old Logs</button>
+				</div>
+				<hr>
+				<div class="valuebox column">
+					<span id="ListedValue"></span>
+					<span id="" style="color:green;max-height:22px;text-align:center;overflow:auto;">01101110 01101111 01101111 01100010</span>
+				</div>
+			</div>
+			<select id="sortOrder" style="background-color: #2f2f2f;">
+				<option value="newest">Newest First</option>
+				<option value="oldest">Oldest First</option>
+			</select>
+			<button id="sortresultsButton">Sort</button>
+		</div>
+		<div id="susIntel-results"></div>
+	</div>
+	</div>
+  </div>
+</div>
+
+<!-- end of new SuS Intel Tool window (.log file search window) -->
+<!-- 
+staticPage BLOCK 
+-->
+<div id="navigation" style="display: none;">
+    <button onclick="loadPage('https://clickmeharder.github.io/sus-eu/')">Load Main Page</button>
+    <button onclick="loadPage('https://clickplace.tebex.io')" disabled>Load Other Page</button>
+</div>
+
+<!--  
+--><!--static page Line 402-474 -->
+<div class="staticPage" id="Mainpage">
+  <header class="staticpage-header">
+      <h1 id="editableTitle" class="title" contenteditable="true" data-placeholder="Your page title">Pixelb8.LoL/eu</h1>
+      <nav class="main-nav">
+          <ul>
+              <li><a href="https://Pixelb8.lol/home">Home</a></li>
+            <li><a href="#">About</a></li>
+              <li><a href="#">Contact</a></li>
+          </ul>
+      </nav>
+  </header>
+  <!-- New Main Content Area -->
+  <main class="main-content">
+      <!-- Left Panel -->
+      <div class="panel left-panel">
+		<h2 class="panel-title" style="line-height:0.65;margin-top:0px;margin-bottom:8px;">Internal Spelunking</h2>
+			<a href="https://Pixelb8.lol/eu/maps">
+				<button class="leftcheek" value="entropiamaps" >Arkadia Map</button>
+			</a>
+			<a href="https://pixelb8.lol/eu/arksatnav">
+				<button class="leftcheek" value="arkadiasatnav" >📡 Arkadia SatNav(beta)</button>
+			</a>
+			<a href="https://pixelb8.lol/eu/susintel">
+				<button class="leftcheek" value="susintel" disabled>📡 SuS Intel Tool(beta)</button>
+			</a>
+	  </div>
+<!-- Empty Content Panel -->
+		<div class="window panel draggable-menu eucontent-panel" data-draggable="true">
+			<div class="staticwindowcontrolbar row">
+				<h4 class="draggable-header eucontent-header" style="margin:auto;">Readme.txt</h4><button class="xbutt staticxbutt butthovred" id="CloseWindow" style="width:25px;">X</button>
+			</div>
+			<div class="eucontent-interior border-test" contenteditable="true" style="cursor:text;">
+				<h2 class="panel-title">Entropia related content</h2>
+				<div id="staticpage-content-contentpanelB" contenteditable="true" style="margin-bottom:26px cursor:text;">
+					<p>Hello! Here you will find access to all of our tools and other content related to Entropia Universe. As it is right now Most of our tools are within a shitty Javascript O.S. i have thrown together, You can click the power button on the top right of this page to turn it on.</p>
+					<strong>Entropia Maps page:</strong>
+					<p> -still under development, its kinda works.. enjoy!.</p>
+					<strong>Arkadia Satnav System:</strong>
+					<p> -there is currently no plans to update or improve this. we have directed our focus to other stuff like picking our nose however; this may change at a later date. </p>
+					<hr style="border-color:#1f1f1f;">
+					<p>Play around with things a little and I'm you will figure it out fairly quickly. </p><br>
+					<p></p>
+					<p style="font-weight:bold;margin-left:33px;margin-block-end:0;">your friendly Arkadian noob,</p>
+					<strong style="margin:0;margin-left:205px;">   ~ Jimbobbityboo</strong>
+				</div>
+				<div>
+					<button style="width:fit-content;margin-left:70%;margin-right:0;margin-top:26px;margin-bottom:12px;"class="xbutt butthovred" >Close window</button>
+				</div>
+			</div>
+		</div>
+		<div class="panel ad-panel" id="adpanelfix1" style="z-index:-1;">
+			<div class="static-slideshowpromoter" id="ad-slide">
+			<!-- Add your slideshow content here  remove the syle with zindex in a bit its already in css-->
+			</div>
+		</div>
+		  <!-- Right Panel -->
+		<div class="panel content-panel" style="box-shadow: none;border: none;">
+			<div id="main-content" style="position: relative;z-index: 0;">
+				<h2>Account Details</h2>
+				<p>Laudate Lootium Divitiasque Celebremus.</p>
+				<!-- Login Form -->
+				<div class="logged-in disabled hidden" id="innercontent-loggedin" style="padding:4px; border:1px solid #222;">
+					<form id="loginForm">
+<!-- 						<ul id="nav-mobile" class="hide-on-med-and-down">
+							<li class="logged-in">
+								<a href="#" class="modal-trigger" id="userAccount-modalTrigger" data-target="modal-useraccount">My Account</a>
+							</li>
+							<li class="logged-in">
+								<a href="#" class="modal-trigger" id="userProfile-editTrigger" data-target="modal-edit">Public Profile</a>
+							</li>
+						</ul> -->
+						<ul id="accountdetails" class="">
+						</ul>
+					</form>
+					<div class="row">
+						<button class="logged-in modal-trigger" id="editprofilebutt" type="button" data-target="modal-editProfile">Edit Profile</button>
+						<button class="logged-in" id="logoutbutt" type="button">Logout</button>
+					</div>
+				</div>
+				<div class="logged-out" id="innercontent-loggedout" style="padding:4px; border:1px solid #222;">
+					<button class="logged-out modal-trigger" id="createaccountbutt" type="button" data-target="modal-usersignup">Create Account</button>
+					<p>Or...</p>
+					<button class="logged-out" id="loginbutt" type="button">Login with GitHub</button>
+				</div>
+			</div>
+					  <!-- Right Panel -->
+			<div class="panel right-panel">
+				<div id="websiteStatContainer">
+					<h2 class="panel-title" id="sitestats">Site Stats</h2>
+					<p>Registered&gt; Lots</p>
+					<p>Online&gt; everyone</p>
+				</div>
+				<div id="userInfoContainer">
+					<P id="username">StrangerDanger</p>
+					<P id="profileusername">-</p>
+					<img id="profilephoto" src="../assets/images/logo/pixelb8logo1.png" alt="Profile Photo">
+					<p id="Userpixelcount" class="hidden">0px</p>
+					<p id="loginStatus">Status: offline</p>
+					<ul>
+						<li>Auth Provided by: <span id="userauthProvider" class="hidden"></span></li>
+						<li id="userinfolist-email" class="hidden">Email: <span id="email" ></span></li>
+						<span id="emailVerified" class="hidden">►</span>
+						<li><a href="#" id="profileLink" class="disabled hidden">My Profile</a></li>
+						
+					</ul>
+				</div>
+				<div id="expandaccpaneldiv"class="single-round-button">
+					<button class="accpanelinternals-expand-button" id="Toggleaccpanelinternals-Button" title="Account panel Toggle" onclick="accpanelTogglebutt(this)">
+						<img src="../assets/images/icons/expandtoggle.png" alt="Account panel Toggle">
+					</button>
+				</div>
+			</div>
+		</div>
+	 </main>
+<!-- Content Panels -->
+	<!-- Content Panel A -->
+  <div class="row"style="position: relative;z-index: 0;">
+
+	<div class="row" id="webtp-pullout">
+		<div class="panel control-panel column">
+			<div class="row" id="webtpHeader">
+				<h2 class="panel-title" id="WebPortalControls-Title">WebPortal Controls</h2>
+				<Button class="roundbutt-webtp" id="Openwebportal" style="" onclick="Togglewebportal(this)">Activate</button>
+			</div>
+			<div id="static-content-panel-controls">
+
+				<!--(webportal) Entropia Websites -->
+				<div class="">
+					<div class="webtpfilteroptions-container">
+						<div class="webtpfilters-option">
+							<label for="filter1" title="Official Mindark Websites" alt="Official Mindark Websites" >Official M.A & PP</label>
+							<input type="checkbox" id="filter1" value="Official Filter">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter2" title="" alt="Planet Partner websites" >Planet Partners</label>
+							<input type="checkbox" id="filter2" value="PP Filter">
+						</div>
+						<div class="webtpfilters-option" style="display: none;">
+							<label for="filter3" title="Planetary Websites" alt="Planetary Websites">Planetary</label>
+							<input type="checkbox" id="filter3" value="Planetary Filter">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter4" title="" alt="" >Forums</label>
+							<input type="checkbox" id="filter4" value="Forum Filter">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter5" title="" alt="">Entropia Maps</label>
+							<input type="checkbox" id="filter5" value="Maps Filter">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter6" title="" alt="">Entropia Tools</label>
+							<input type="checkbox" id="filter6" value="Tools Filter">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter7" title="" alt="">Info & Data</label>
+							<input type="checkbox" id="filter7" value="Information andData">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter8" title="" alt="">Societies</label>
+							<input type="checkbox" id="filter8" value="Societies">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter9" title="" alt="">Miscelaneous 3rd Party</label>
+							<input type="checkbox" id="filter9" value="Misc 3rdparty">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter10" title="" alt="">Colonist Services & Content</label>
+							<input type="checkbox" id="filter10" value="Colonist Services">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter11" title="" alt="">Entropian Creators</label>
+							<input type="checkbox" id="filter11" value="Entropian Creators">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter12" title="" alt="">My Favourites</label>
+							<input type="checkbox" id="filter12" value="My Favourites">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter13" title="" alt="">My Portals</label>
+							<input type="checkbox" id="filter13" value="My Portals">
+						</div>
+						<div class="webtpfilters-option">
+							<label for="filter14" >All</label>
+							<input type="checkbox" id="filter14" value="All Options">
+						</div>
+					</div>
+					<div class="webtpfilters-selected row" onclick="togglewebtpfilterOptions(this)">
+						<p class="panel-title" id="WebPortalControls-EuTitle">Entropia</p>
+						<div class="single-round-button">
+							<button class="webtpfilters-expand-button" id="ToggleWebtpfilterbox-Button" title="Filterbox Toggle" onclick="webtpTogglebuttstyle(this)">
+								<img src="../assets/images/icons/expandtoggle.png" alt="Filterbox Toggle">
+							</button>
+						</div>
+					</div>
+				</div>
+				<select class="webtp" id="webtpoptions">
+					<option value="option0" selected disabled>Destination</option>
+
+				</select>
+				<Button class="flex" id="buttportaldetails" onclick="toggledestinationdetails(this)">《《   S.U.S   》》</button>
+			</div>
+		</div>	
+		<div class="panel" id="webtp">
+			<div class="panel portal-panel" id="thewebportal">
+				<h2 class="panel-title" id="portalLinktitle" style="">Entropia Partners</h2>
+				<a href="https://www.entropiapartners.com/?r=94031" target="_blank">
+					<div id="webportal-image" title="Jump in" alt="Jump in" style=""></div> <!-- Move the image inside the .portal-panel -->
+				</a>
+			</div>
+		</div>
+		<div id="portaldestinationDetails"></div>
+	</div>
+
+<!-- Advertisement Panel -->
+	<div class="panel ad-panel">
+		<h2 class="panel-title"></h2>
+		<div id="staticpage-adpanel-contentwrapper">
+			<div class="static-videopanel">
+				<iframe
+					id="video1"
+					width="225"
+					height="148"
+					src="https://www.youtube.com/embed/videoseries?list=PL1o56KF-RJwybHfromYguW0Vk9R0In7Ss&index=284&enablejsapi=1&autoplay=0&rel=0&html5=1&showinfo=0&controls=0" frameborder="0"
+					title="YouTube video player"
+					frameborder="0"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					allowfullscreen
+					style="max-height: 180px; width: 100%;"
+				></iframe>
+			</div>
+			<div id="progressBar">
+				<div id="progbarinner">
+					<span class="val currentprogress"></span>s / <span class="val duration"></span>s Total<br>
+					<!-- <span class="val ytvideotitle-label">Title:</span><span class="val" id="ytvideoTitle">err: testing</span><br> -->
+					<div id="mastervolumewrapper">
+						<span class="val ytvideotitle-label">Volume:</span><span class="val" id="masterVolume">45</span>
+					</div>
+				</div>
+			</div>
+			<div class="row mediaplaypause" id="mediacontrols">
+				<div class="button buttpress" id="previous-button">◄◄</div>
+				<div class="button buttpress" id="play-button">►</div>
+				<div class="button buttpress" id="pause-button">❚❚</div>
+				<div class="button buttpress" id="next-button">►►</div>
+				<div class="button buttpress" id="shuffle-button">SHUFFLE</div>
+			</div>
+		</div>
+	</div>
+  </div>
+  <!-- Footer -->
+  <footer class="themed-footer">
+      <p>Pixelb8 &copy; 2023-2027 - All rights reserved.</p>
+	  <p>Entropia Universe® are copyright or registered trademark of Mindark PE AB.</p>
+	  <p>We are in no way endorsed or affiliated with Mindark PE AB - no infringement intended</p>
+  </footer>
+<!--end mainpage -->
+</div>
+<!--end mainpage -->
+<!-- Modal for Signup -->
+<div class="modal fade hidden" id="modal-usersignup" tabindex="-1" role="dialog" aria-labelledby="modal-usersignup-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-signup-label">Create Account</h5>
+        <button type="button" class="close close-modal-btn" data-dismiss="modal-usersignup" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+      </div>
+      <div class="modal-body">
+        <!-- Your signup form goes here -->
+        <form id="signup-form">
+          <div class="form-group input-field">
+            <label for="signup-username">Username</label>
+            <input type="signup-username" class="form-control" id="signup-username" aria-describedby="usernameHelp">
+          </div>
+          <div class="form-group input-field">
+            <label for="signup-email">Email address</label>
+            <input type="signup-email" class="form-control" id="signup-email" aria-describedby="emailHelp" required />
+          </div>
+          <div class="form-group input-field">
+            <label for="signup-password">Enter Password</label>
+            <input type="signup-password" class="form-control" id="signup-password" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Edit Profile -->
+<div class="modal fade hidden" id="modal-editProfile" tabindex="-1" role="dialog" aria-labelledby="modal-editProfile-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-editProfile-label">Edit Profile</h5>
+        <button type="button" class="close close-modal-btn" data-dismiss="modal-editProfile" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Your profile update form goes here -->
+        <form id="update-profile-form">
+          <div class="form-group input-field">
+            <label for="update-username">Username</label>
+            <input type="text" class="form-control" id="update-username" aria-describedby="usernameHelp">
+          </div>
+          <div class="form-group input-field">
+            <label for="update-photoURL">Profile Photo URL</label>
+            <input type="text" class="form-control" id="update-photoURL" aria-describedby="photoURLHelp">
+          </div>
+          <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="staticPage" id="pageContainer"></div>
+<div class="staticPage" id="SuSnet"></div>
+<div id="currentgifcursordiv" style="left: 1059px; top: 162px; background-image: none;"></div>
+<div id="currentgifdiv" style="background-image: none; background-color: black;"></div>	
+<div id="popupContainer" class="popup" style="display:none;">
+	<div class="popup-content">
+		<label for="olderthanXdays">Delete logs older than:</label>
+		<input type="number" id="olderthanXdays" placeholder="7">
+		<label for="daystext">Days</label>
+		<div class="row">
+			<button id="susIntel-downloadButton">Download trimmed Log</button>
+			<button id="closepopup">Cancel</button>
+			<label for="downloadsize"></label>
+		</div>
+	</div>
+</div>
+<!-- -------------------------------------------
+	          SOUNDS
+-------------------------------------------- -->
+	
+	<script src="../Modules/StyleTuner/core/js/STuner-core.js"></script>
+	<!-- Enabled SuSOS Applet Skripts-->
+	<!-- Enabled SuSOS EU Applet Skripts 
+	path= Modules/SuSOS/apps/
+	-->
+	<!-- <script src="js/susIntel.js"></script> -->
+	<script src="js/main.js"></script>
+
+	<!--FIREBASE AUTHENTICATION SKRIPTS-->
+	<script src="../core/js/index.js"></script>
+	<script type="module" src="../core/js/firebase/auth.js"></script>
+	</body>
+</html>
+<!--______________________________________________________________ -->
+<!-- end of html                                                   --><!---->

@@ -1,34 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-	<link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
-    <title>StickmenFall</title>
-    <!--<script src="https://unpkg.com/comfy.js/dist/comfy.min.js"></script>-->
-    <style>
-        body { margin:0; background:transparent; font-family:monospace; overflow:hidden; }
-        canvas { display:block; margin:auto; background: #111; }
 
-        #enemyUI { position:absolute; top:10px; right:10px; color:#ff4444; font-size:14px; text-align:right; background:rgba(0,0,0,0.6); padding:8px; border-radius:6px; border: 1px solid #444; }
-        #systemUI { position:absolute; top:10px; left:10px; width:300px; font-size:13px; pointer-events:none; }
-
-		.sysMsg { background:rgba(0,0,0,0.7); color:#0f0; padding:5px; margin-bottom:4px; border-radius:4px; border-left: 3px solid #0f0; animation: fadeout 8s forwards; }
-        #tooltip { position: absolute; pointer-events: none; background: rgba(0,0,0,0.9); color: #fff; padding: 8px; border-radius: 4px; border: 1px solid #0ff; font-size: 13px; display: none; z-index: 100; }
-        #areaDisplay { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); color:#0ff; font-size:18px; background:rgba(0,0,0,0.8); padding:5px 15px; border: 1px solid #0ff; text-transform: uppercase; }
-
-        @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
-    </style>
-</head>
-<body>
-
-<canvas id="c" width="1000" height="600"></canvas>
-<div id="enemyUI"></div>
-<div id="systemUI"></div>
-<div id="tooltip"></div>
-<div id="areaDisplay">StickmenFallv2.1.9- VIEWING: HOME</div>
-
-<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
-<script>
 const c = document.getElementById("c");
 const ctx = c.getContext("2d");
 
@@ -1193,6 +1163,28 @@ function cmdDance(p, user, args) {
     systemMessage(`${user} is performing ${DANCE_UNLOCKS[p.danceStyle].name}!`);
     saveStats(p);
 }
+function cmdTestDance(p, user, args, flags) {
+    // Only allow the streamer (broadcaster) or moderators to use this
+    if (!flags.broadcaster && !flags.mod) {
+        systemMessage(`${user}, only the host can force-test animations!`);
+        return;
+    }
+
+    let chosenStyle = parseInt(args[0]); // Using args[0] assuming "!testdance 4"
+
+    if (isNaN(chosenStyle) || !DANCE_UNLOCKS[chosenStyle]) {
+        const available = Object.keys(DANCE_UNLOCKS).join(", ");
+        systemMessage(`Streamer, pick a style to force: ${available}`);
+        return;
+    }
+
+    // Bypass level check entirely
+    p.danceStyle = chosenStyle;
+    p.activeTask = "dancing";
+    p.taskEndTime = Date.now() + (5 * 60 * 1000); // Shorter duration for testing
+    
+    systemMessage(`[TEST MODE] ${user} is force-playing: ${DANCE_UNLOCKS[chosenStyle].name}`);
+}
 function cmdListDances(p) {
     const lvl = p.stats.danceLevel;
     let msg = `Your Dance Lvl: ${lvl}. Available Dances: [1] The Squat (Lvl 1) `;
@@ -1537,7 +1529,11 @@ function cmdTopStats() {
 }
 
 /* ================= THE COMFY ROUTER ================= */
-ComfyJS.onChat = (user, msg, flags, extra) => {
+//ComfyJS.onChat = (user, command, message, flags, extra) => {
+ComfyJS.onChat = (user, msg, color, flags, extra) => {
+//    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
+//    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
+//    displayChatMessage(user, message, flags, extra);  // Show message in chat box
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
 	//const cmd = args.shift().toLowerCase();
@@ -1582,6 +1578,7 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
 		if (cmd === "despawnmerchant") {forceBuyer = false;updateBuyerNPC();systemMessage("[ADMIN] Merchant forced to leave.");}
 		// reset puts him back on the 7-minute automatic timer
 		if (cmd === "resetmerchant") {forceBuyer = null; updateBuyerNPC();systemMessage("[ADMIN] Merchant returned to automatic schedule.");}
+		if (cmd === "testdance") {cmdTestDance(p, user, args.slice(1), flags);}
     }
 };
 
@@ -1589,7 +1586,4 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
 
 ComfyJS.Init("jaedraze");
 gameLoop();
-</script>
 
-</body>
-</html>
