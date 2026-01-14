@@ -733,26 +733,27 @@ function drawBoots(ctx, p, bodyY = 0, lean = 0) { // Added lean to signature
 
     const now = Date.now();
     let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-
+	let legSpread = (p.danceStyle === 4) ? 15 : 10; // Match the leg spread
     ctx.save();
     ctx.fillStyle = item.color;
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
-
-    // We add a fraction of bodyY so the boots "hop" slightly during the horse dance
-    const jumpOffset = bodyY * 0.3; 
-    const footY = p.y + 25 + jumpOffset; 
-
-    // Left Boot
-    const leftFootX = p.x - 10 - walk;
+    // Use the SAME bodyY used for the legs
+    const footY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
+	// --- Left Boot ---
+    const leftFootX = p.x - legSpread - walk;
+    // 1. The Base
     ctx.fillRect(leftFootX - 4, footY - 2, 8, 5); 
     ctx.strokeRect(leftFootX - 4, footY - 2, 8, 5);
+    // 2. The Ankle (The line I accidentally removed!)
     ctx.fillRect(leftFootX - 2, footY - 6, 4, 5); 
-    
-    // Right Boot
-    const rightFootX = p.x + 10 + walk;
+
+    // --- Right Boot ---
+    const rightFootX = p.x + legSpread + walk;
+    // 1. The Base
     ctx.fillRect(rightFootX - 4, footY - 2, 8, 5);
     ctx.strokeRect(rightFootX - 4, footY - 2, 8, 5);
+    // 2. The Ankle (Restored here too)
     ctx.fillRect(rightFootX - 2, footY - 6, 4, 5);
 
     ctx.restore();
@@ -920,16 +921,16 @@ function drawStickman(ctx, p) {
     }
 
 	// 4. Legs
-    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-    
-    // Add "Gallop" leg spread for Dance 4
-    let legSpread = (p.danceStyle === 4) ? 15 : 10;
-
+	let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+	// Add "Gallop" leg spread for Dance 4
+	let legSpread = (p.danceStyle === 4) ? 15 : 10;
+	// NEW: Define the floor level including the jump
+	const currentFloorY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
     ctx.beginPath(); 
     ctx.moveTo(p.x, p.y + 10 + bodyY); 
-    ctx.lineTo(p.x - legSpread - walk, p.y + 25); 
+    ctx.lineTo(p.x - legSpread - walk, currentFloorY);
     ctx.moveTo(p.x, p.y + 10 + bodyY); 
-    ctx.lineTo(p.x + legSpread + walk, p.y + 25); 
+    ctx.lineTo(p.x + legSpread + walk, currentFloorY); 
     ctx.stroke();
 
     drawEquipment(ctx, p, now, bodyY, armMove, lean);
@@ -1051,13 +1052,11 @@ function updatePlayerMovement(p) {
 function handleDancing(p, now) {
     if (!p.lastDanceXP) p.lastDanceXP = 0;
     
-    if (now - p.lastDanceXP > 5000) { // Every 5 seconds
-        // Give slightly more XP for harder dances
+    if (now - p.lastDanceXP > 5000) {
         let xpGain = 5 + (p.danceStyle * 2); 
         p.stats.danceXP += xpGain;
         p.lastDanceXP = now;
 
-        // Level Up Logic
         let nextLevelXP = p.stats.danceLevel * 100;
         if (p.stats.danceXP >= nextLevelXP) {
             p.stats.danceLevel++;
@@ -1067,6 +1066,7 @@ function handleDancing(p, now) {
             // Notification for unlocks
             if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
             if (p.stats.danceLevel === 10) systemMessage(`${p.name} unlocked Dance Style 3: The Lean!`);
+            if (p.stats.danceLevel === 20) systemMessage(`${p.name} unlocked Dance Style 4: The Op-Pa!`);
             
             saveStats(p);
         }
@@ -1154,145 +1154,6 @@ function gameLoop() {
     handleTooltips();
     requestAnimationFrame(gameLoop);
 }
-function oldgameLoop() {
-    updateBuyerNPC();
-    
-    // 1. Background
-    ctx.fillStyle = backgrounds[viewArea];
-    ctx.fillRect(0, 0, c.width, c.height);
-    
-    // 1.5 NEW: Draw Area Props
-    drawScenery(ctx);
-    
-    // 2. Enemy UI Updates
-    let enemyText = "";
-    if (viewArea === "dungeon") {
-        enemies.forEach(e => { if(!e.dead) enemyText += `Enemy: ${e.hp}hp<br>`; });
-        if (boss && !boss.dead) enemyText += `<b>BOSS: ${boss.hp}hp</b>`;
-    }
-    document.getElementById("enemyUI").innerHTML = enemyText;
-
-    const now = Date.now(); 
-
-    // 3. Player Logic Loop
-    Object.values(players).forEach(p => {
-        // 1. TIMEOUT CHECK
-        if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
-            systemMessage(`${p.name} stopped ${p.activeTask} (Idle timeout).`);
-            p.activeTask = null;
-            p.targetX = null;
-            p.danceStyle = 0;
-        }
-        
-        // 2. MOVEMENT LOGIC
-        if (p.targetX !== null && p.targetX !== undefined) {
-            let dx = p.targetX - p.x;
-            if (Math.abs(dx) > 5) {
-                p.x += dx * 0.1;
-                p.lean = dx > 0 ? 0.2 : -0.2;
-            } else {
-                p.lean = 0;
-                if (p.activeTask !== "attacking") p.targetX = null;
-            }
-        }
-
-        // 3.0 DANCE TIMING
-        if (p.activeTask === "dancing" && !p.dead) {
-            if (!p.lastDanceXP) p.lastDanceXP = 0;
-            if (now - p.lastDanceXP > 5000) {
-                let xpGain = 5 + (p.danceStyle * 2); 
-                p.stats.danceXP += xpGain;
-                p.lastDanceXP = now;
-                
-                let nextLevelXP = p.stats.danceLevel * 100;
-                if (p.stats.danceXP >= nextLevelXP) {
-                    p.stats.danceLevel++;
-                    p.stats.danceXP = 0;
-                    spawnFloater(p.x, p.y - 40, `DANCE LEVEL ${p.stats.danceLevel}!`, "#ff00ff");
-                    if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
-                    if (p.stats.danceLevel === 10) systemMessage(`${p.name} unlocked Dance Style 3: The Lean!`);
-                    saveStats(p);
-                }
-            }
-        }
-
-        // 3.1 ATTACK TIMING (Uses Weapon Speed)
-        if (p.activeTask === "attacking" && !p.dead) {
-            let weapon = ITEM_DB[p.stats.equippedWeapon];
-            let attackSpeed = weapon?.speed || 2500; 
-            if (!p.lastAttackTime) p.lastAttackTime = 0;
-            if (now - p.lastAttackTime > attackSpeed) {
-                performAttack(p);
-                p.lastAttackTime = now;
-            }
-        }
-
-        // 4. DRAW PLAYER
-        drawStickman(ctx, p);
-    });
-
-    // === NEW: SYSTEM TICKERS (Replaces setIntervals) ===
-
-    // Global Systems Tick (Every 3 seconds)
-    if (now - systemTimers.lastGlobalTick > systemTimers.globalInterval) {
-        Object.values(players).forEach(p => {
-            if (p.dead || !p.activeTask) return;
-            
-            // Fishing logic
-            if (p.activeTask === "fishing" && p.area === "fishingpond") {
-                if (Math.random() > 0.8) performFish(p);
-            }
-        });
-        systemTimers.lastGlobalTick = now;
-    }
-
-    // Enemy Systems Tick (Every 4 seconds)
-    if (now - systemTimers.lastEnemyTick > systemTimers.enemyInterval) {
-        if (dungeonActive) {
-            let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
-            if (dwellers.length > 0) {
-                enemies.forEach(e => {
-                    if (e.dead) return;
-                    let target = dwellers[Math.floor(Math.random() * dwellers.length)];
-                    target.hp -= 5; 
-                    spawnFloater(`-5`, target.x, target.y - 40, "#f00");
-                    if (target.hp <= 0) { target.hp = 0; target.dead = true; }
-                });
-            }
-        }
-        systemTimers.lastEnemyTick = now;
-    }
-
-    updateArrows(ctx);
-
-    // 4. Draw Dungeon Entities
-    if (viewArea === "dungeon") {
-        enemies.forEach(e => {
-            if (!e.dead) {
-                ctx.fillStyle = "#f00"; ctx.fillRect(e.x, e.y, 20, 20);
-                ctx.fillStyle = "#fff"; ctx.textAlign = "center";
-                ctx.fillText(e.hp, e.x + 10, e.y - 5);
-            }
-        });
-        if (boss && !boss.dead) { 
-            ctx.fillStyle = "#ff00ff"; ctx.fillRect(boss.x, boss.y, 50, 50); 
-            ctx.fillStyle = "#fff"; ctx.fillText(boss.hp, boss.x + 25, boss.y - 5);
-        }
-    }
-
-    // 5. Draw Floating Text
-    floaters.forEach((f, i) => {
-        ctx.fillStyle = f.color; ctx.globalAlpha = f.life / 100;
-        ctx.textAlign = "center";
-        ctx.fillText(f.text, f.x, f.y); f.y -= 1; f.life--;
-        if (f.life <= 0) floaters.splice(i, 1);
-    });
-    ctx.globalAlpha = 1;
-
-    handleTooltips();
-    requestAnimationFrame(gameLoop);
-}
-
 
 /* ================= CHAT COMMANDS ================= */
 /* ================= COMMAND FUNCTIONS ================= */
