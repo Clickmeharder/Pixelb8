@@ -208,7 +208,16 @@ function updateBubblewrapVisibility() {
 }
 updateBubblewrapVisibility();
 //update this event listener line so if it doesnt exist script doesnt fail
-
+function toggleButtonBubble() {
+	const currentState = String(hideButtonBubble).toLowerCase();
+	hideButtonBubble = !hideButtonBubble;
+    updateSingleSetting("hideButtonBubble: ", hideButtonBubble);
+	updateSettings();
+	console.log("toggled hideButtonBubble: ", hideButtonBubble);
+	const bubbleWrap = document.getElementById("bubblewrap");
+	bubbleWrap.style.opacity = hideButtonBubble ? "0.00" : "1.00";
+	updateIndicatorLights();
+}
 function toggleConsoleMessages() {
     consoleMessages = !consoleMessages;  // Toggle the boolean value
     console.log(`Console messages are now ${consoleMessages ? "enabled" : "disabled"}`);
