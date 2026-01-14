@@ -1048,7 +1048,30 @@ function updatePlayerMovement(p) {
         }
     }
 }
+function handleDancing(p, now) {
+    if (!p.lastDanceXP) p.lastDanceXP = 0;
+    
+    if (now - p.lastDanceXP > 5000) { // Every 5 seconds
+        // Give slightly more XP for harder dances
+        let xpGain = 5 + (p.danceStyle * 2); 
+        p.stats.danceXP += xpGain;
+        p.lastDanceXP = now;
 
+        // Level Up Logic
+        let nextLevelXP = p.stats.danceLevel * 100;
+        if (p.stats.danceXP >= nextLevelXP) {
+            p.stats.danceLevel++;
+            p.stats.danceXP = 0;
+            spawnFloater(p.x, p.y - 40, `DANCE LEVEL ${p.stats.danceLevel}!`, "#ff00ff");
+            
+            // Notification for unlocks
+            if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
+            if (p.stats.danceLevel === 10) systemMessage(`${p.name} unlocked Dance Style 3: The Lean!`);
+            
+            saveStats(p);
+        }
+    }
+}
 function updatePlayerActions(p, now) {
     if (p.dead) return;
 
