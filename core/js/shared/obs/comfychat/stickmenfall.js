@@ -1,8 +1,8 @@
+let c, ctx;
+//const c = document.getElementById("c");
+//const ctx = c.getContext("2d");
 
-const c = document.getElementById("c");
-const ctx = c.getContext("2d");
-
-/* ====grr============= CONFIG & STATE ================= */
+/* ====grr============= CONFIG & STATE ==========:======= */
 let viewArea = "home"; 
 let players = {};
 let enemies = [];
@@ -1682,10 +1682,12 @@ Object.keys(STICKMEN_COMMANDS).forEach(key => {
     else userList.push(entry);
 });
 
-function initStickmenFall() {
+window.initStickmenFall = function() {
     try {
         console.log("Initializing StickmenFall Plugin...");
-
+		c = document.getElementById("c");
+        if (!c) throw new Error("Canvas 'c' not found in HTML");
+        ctx = c.getContext("2d");
         // 1. Verify requirements exist before calling them
         // This prevents errors if twitchChat.js failed to load
         if (typeof registerPluginCommands !== "function" || typeof registerChatPlugin !== "function") {
