@@ -207,13 +207,15 @@ function updateBubblewrapVisibility() {
 	bubblewrap.style.opacity = hide ? "0.00" : "1.00";
 }
 updateBubblewrapVisibility();
-//document.getElementById('togglehideButtonBubble').addEventListener('click', toggleButtonBubble);
+//update this event listener line so if it doesnt exist script doesnt fail
+document.getElementById('togglehideButtonBubble').addEventListener('click', toggleButtonBubble);
 
 function toggleConsoleMessages() {
     consoleMessages = !consoleMessages;  // Toggle the boolean value
     console.log(`Console messages are now ${consoleMessages ? "enabled" : "disabled"}`);
 }
-//document.getElementById('toggleconsolemessages').addEventListener('click', toggleconsolemessages);
+//update this event listener line so if it doesnt exist script doesnt fail
+document.getElementById('toggleconsolemessages').addEventListener('click', toggleconsolemessages);
 
 function toggletwitchChatOverlay() {
 	twitchChatOverlay = !twitchChatOverlay;
@@ -224,7 +226,8 @@ function toggletwitchChatOverlay() {
 	console.log(` Chat Overlay is now: ${twitchChatOverlay}`);
 	displayConsoleMessage("system", `entrivia Chat Overlay is now: ${twitchChatOverlay}`);
 }
-//document.getElementById('toggletwitchChatOverlay').addEventListener('click', toggletwitchChatOverlay);
+//update this event listener line so if it doesnt exist script doesnt fail
+document.getElementById('toggletwitchChatOverlay').addEventListener('click', toggletwitchChatOverlay);
 
 
 //--------------------------------------------------

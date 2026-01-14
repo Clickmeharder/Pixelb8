@@ -1546,7 +1546,7 @@ button#toggleCSVSourceButton {
 }
 #comfy-controller .controls {
     width: 100%;
-    overflow: hidden;
+    overflow: ;
 }
 input#twitchname {
     width: 90%;
