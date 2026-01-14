@@ -1007,6 +1007,26 @@ const systemTimers = {
 };
 
 //--GAME LOOP HELPERS
+function updateUI() {
+    // 2. Enemy UI Updates
+    let enemyText = "";
+    if (viewArea === "dungeon") {
+        // We look at the global 'enemies' array and 'boss' object
+        enemies.forEach(e => { 
+            if(!e.dead) enemyText += `Enemy: ${e.hp}hp<br>`; 
+        });
+        
+        if (boss && !boss.dead) {
+            enemyText += `<b>BOSS: ${boss.hp}hp</b>`;
+        }
+    }
+    
+    // Update the HTML element on your page
+    const uiElement = document.getElementById("enemyUI");
+    if (uiElement) {
+        uiElement.innerHTML = enemyText;
+    }
+}
 function updatePlayerStatus(p, now) {
     if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
         systemMessage(`${p.name} stopped ${p.activeTask} (Idle timeout).`);
