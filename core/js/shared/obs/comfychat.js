@@ -467,7 +467,7 @@ function isStreamerAndAuthorize(user, command) {
     }
     return true;
 }
-ComfyJS.onChat = (user, message, command, color, flags, extra) => {
+ComfyJS.onCommand = (user, message, command, color, flags, extra) => {
     if (!userColors[user]) {
         userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
     }
