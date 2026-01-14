@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
-    <title>StickmenFall | HUD v2.2.0</title>
+    <title>StickmenFall | HUD v2.2.1</title>
     <style>
         body { margin:0; background:transparent; font-family: 'Courier New', monospace; overflow:hidden; }
         canvas { display:block; margin:auto; background: #050505; border: 2px solid #333; }
@@ -11,7 +11,7 @@
         #enemyUI { position:absolute; top:10px; right:10px; color:#ff4444; font-size:14px; text-align:right; background:rgba(0,0,0,0.8); padding:10px; border-radius:4px; border: 1px solid #444; box-shadow: 0 0 10px rgba(255,0,0,0.2); }
         #systemUI { position:absolute; top:10px; left:10px; width:320px; font-size:13px; pointer-events:none; }
 
-        .sysMsg { background:rgba(0,0,0,0.85); color:#0f0; padding:6px; margin-bottom:6px; border-radius:2px; border-left: 4px solid #0f0; animation: fadeout 8s forwards; text-shadow: 1px 1px 1px #000; }
+        .sysMsg { background:rgba(0,0,0,0.85); color:#0f0; padding:6px; margin-bottom:6px; border-radius:2px; border-left: 4px solid #0f0; animation: fadeout 8s forwards; text-shadow: 1px 1px 1px #000; white-space: pre-wrap; }
         #tooltip { position: absolute; pointer-events: none; background: rgba(0,0,0,0.95); color: #fff; padding: 8px; border-radius: 4px; border: 1px solid #0ff; font-size: 13px; display: none; z-index: 100; box-shadow: 0 0 15px rgba(0,255,255,0.3); }
         #areaDisplay { position:absolute; bottom:15px; left:50%; transform:translateX(-50%); color:#0ff; font-size:16px; background:rgba(0,0,0,0.9); padding:6px 20px; border: 1px solid #0ff; text-transform: uppercase; letter-spacing: 2px; }
 
@@ -24,13 +24,13 @@
 <div id="enemyUI"></div>
 <div id="systemUI"></div>
 <div id="tooltip"></div>
-<div id="areaDisplay">StickmenFallv3.0.0- VIEWING: HOME</div>
+<div id="areaDisplay">StickmenFallv2.2.1 - VIEWING: HOME</div>
 
 <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 <script>
 /**
  * STICKMEN FALL - REFACTORED CORE
- * V2.2.0 - Performance Optimized
+ * V2.2.1 - Full Legacy Logic Restoration
  */
 
 const c = document.getElementById("c");
@@ -76,7 +76,6 @@ let dungeonSecondsLeft = 0;
 let dungeonCountdownInterval = null;
 let buyerActive = false;
 let forceBuyer = null;
-let mouse = { x: 0, y: 0 };
 
 /* ================= UTILITIES ================= */
 const sysMsgUI = document.getElementById("systemUI");
@@ -115,15 +114,11 @@ function loadStats(name) {
         equippedBoots: null, wigColor: null
     };
     
-    // Patching & Repairs
+    // Safety Patch
     if (isNaN(s.gold) || s.gold === null) s.gold = 0;
     if (!Array.isArray(s.inventory)) s.inventory = ["Fishing Rod"];
-    if (!s.inventory.includes("Fishing Rod")) s.inventory.push("Fishing Rod");
-    
-    // Defaults for missing keys
-    const defaults = { danceLevel:1, danceXP:0, gold:0, wigColor:null, equippedWeapon:null, equippedArmor:null, equippedHelmet:null, equippedBoots:null };
+    const defaults = { danceLevel:1, danceXP:0, gold:0, wigColor:null };
     Object.keys(defaults).forEach(key => { if (s[key] === undefined) s[key] = defaults[key]; });
-
     return s;
 }
 
@@ -134,12 +129,11 @@ function saveStats(p) {
 /* ================= PLAYER LOGIC ================= */
 function getPlayer(name, color) {
     if (players[name]) return players[name];
-    
     players[name] = {
-        name, color: color || "#00ffff", x: Math.random() * 800 + 100, y: 450,
+        name, color: color || "#0ff", x: Math.random() * 800 + 100, y: 450,
         targetX: null, hp: 100, maxHp: 100, dead: false, area: "home", 
         activeTask: null, danceStyle: 0, lastDanceXP: 0, lastAttackTime: 0,
-        stats: loadStats(name), lean: 0
+        stats: loadStats(name), lean: 0, mingleTarget: null
     };
     return players[name];
 }
@@ -163,9 +157,8 @@ function movePlayer(p, targetArea) {
 function handleLoot(p, target) {
     let roll = Math.random();
     let drop = null;
-    if (target === boss) {
-        drop = roll > 0.5 ? "Iron Plate" : "Iron Sword";
-    } else {
+    if (target === boss) { drop = roll > 0.5 ? "Iron Plate" : "Iron Sword"; }
+    else {
         if (roll > 0.98) drop = "Iron helmet";
         else if (roll > 0.90) drop = "shitty shortbow";
         else if (roll > 0.85) drop = "Leather Tunic";
@@ -180,16 +173,13 @@ function handleLoot(p, target) {
 function performAttack(p) {
     if (p.dead) return;
     let target = null;
-    if (p.area === "dungeon") {
-        target = enemies.find(e => !e.dead) || boss;
-    } else if (p.area === "home") {
-        target = Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name);
-    }
+    if (p.area === "dungeon") { target = enemies.find(e => !e.dead) || boss; }
+    else if (p.area === "home") { target = Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name); }
     if (!target || target.dead) return;
 
     const isBow = p.stats.equippedWeapon?.toLowerCase().includes("shortbow");
-    const rangeNeeded = isBow ? 200 : 50;
-    p.targetX = target.x - (isBow ? 150 : 30);
+    const rangeNeeded = isBow ? 250 : 60;
+    p.targetX = target.x - (isBow ? 180 : 40);
 
     if (Math.abs(p.x - target.x) <= rangeNeeded) {
         let weapon = ITEM_DB[p.stats.equippedWeapon];
@@ -215,16 +205,13 @@ function performAttack(p) {
 
 function performFish(p) {
     if (p.area !== "fishingpond" || p.dead) return;
-    if (p.stats.fishCaught === undefined) p.stats.fishCaught = 0;
-
     let roll = Math.random();
     let resultText = "";
-    let isFish = false;
     let floaterColor = "#44ccff";
 
     if (buyerActive && Math.random() < 0.05) {
         p.stats.inventory.push("Golden Bass");
-        resultText = "GOLDEN BASS!"; floaterColor = "#FFD700"; isFish = true;
+        resultText = "GOLDEN BASS!"; floaterColor = "#FFD700";
         systemMessage(`✨ ${p.name} landed a rare GOLDEN BASS!`);
     } else if (roll < 0.001) {
         p.stats.inventory.push("wig");
@@ -236,9 +223,9 @@ function performFish(p) {
         p.stats.inventory.push("Leather scrap"); resultText = "Leather scrap"; floaterColor = "#a88d6d";
     } else {
         const weight = (Math.random() * 20 + 0.5).toFixed(1);
-        const fishItem = `${weight}kg Bass`; 
-        p.stats.inventory.push(fishItem);
-        resultText = fishItem; isFish = true; p.stats.fishCaught++;
+        resultText = `${weight}kg Bass`; 
+        p.stats.inventory.push(resultText);
+        p.stats.fishCaught = (p.stats.fishCaught || 0) + 1;
     }
 
     spawnFloater(`🎣 ${resultText}`, p.x, p.y - 60, floaterColor);
@@ -265,25 +252,16 @@ function updateBuyerNPC() {
 function drawScenery(ctx) {
     const now = Date.now();
     if (viewArea === "home") {
+        ctx.fillStyle = "#1a1a2e"; ctx.fillRect(0, 0, c.width, c.height);
         ctx.fillStyle = "#252545"; ctx.fillRect(0, 475, c.width, 125);
-        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-        for(let i=0; i<10; i++) ctx.fillRect((i * 100 + (now/50)) % c.width, 100 + (i*20), 2, 2);
     } else if (viewArea === "fishingpond") {
+        ctx.fillStyle = "#0a1612"; ctx.fillRect(0, 0, c.width, c.height);
         ctx.fillStyle = "#1a2e1a"; ctx.fillRect(0, 475, 250, 125);
         ctx.fillStyle = "#0a2e3a"; ctx.fillRect(250, 485, c.width - 250, 115);
-        ctx.strokeStyle = "rgba(255,255,255,0.1)";
-        for(let i=0; i<5; i++) {
-            let rx = 300 + (i * 120), ry = 520 + (Math.sin(now/500 + i) * 10);
-            ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + 40, ry); ctx.stroke();
-        }
         drawBuyer(ctx);
     } else if (viewArea === "dungeon") {
+        ctx.fillStyle = "#160a0a"; ctx.fillRect(0, 0, c.width, c.height);
         ctx.fillStyle = "#110505"; ctx.fillRect(0, 475, c.width, 125);
-        ctx.strokeStyle = "#2a1010"; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(100, 0); ctx.lineTo(120, 100); ctx.lineTo(80, 200);
-        ctx.moveTo(600, 0); ctx.lineTo(580, 150); ctx.lineTo(620, 300); ctx.stroke();
-        ctx.fillStyle = "#1d0a0a";
-        ctx.beginPath(); ctx.moveTo(200, 475); ctx.lineTo(225, 300); ctx.lineTo(250, 475); ctx.fill();
     }
 }
 
@@ -294,21 +272,14 @@ function drawBuyer(ctx) {
     ctx.save();
     ctx.translate(bx, by + floatY);
     ctx.fillStyle = "#2a1233"; ctx.beginPath(); ctx.moveTo(0, -30); ctx.quadraticCurveTo(-25 + sway, 0, -15 + sway, 35); ctx.lineTo(5, 30); ctx.fill();
-    ctx.strokeStyle = "#111"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-3, 10); ctx.lineTo(-5, 30); ctx.moveTo(3, 10); ctx.lineTo(5, 30); ctx.stroke();
-    ctx.fillStyle = "#4B0082"; ctx.beginPath(); ctx.moveTo(0, -35); ctx.bezierCurveTo(-15, -20, -18, 10, -12, 25); ctx.lineTo(15, 25); ctx.bezierCurveTo(8, 10, 12, -20, 0, -35); ctx.fill();
-    ctx.strokeStyle = "#FFD700"; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.strokeStyle = "#ffdbac"; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(8, -15); ctx.lineTo(18, -5); ctx.stroke();
+    ctx.fillStyle = "#4B0082"; ctx.beginPath(); ctx.moveTo(0, -35); ctx.bezierCurveTo(-15, -20, -18, 10, -12, 25); ctx.lineTo(15, 25); ctx.fill();
     ctx.strokeStyle = "#3e2723"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(20, 30); ctx.lineTo(20, -50); ctx.stroke();
-    ctx.shadowBlur = gemPulse; ctx.shadowColor = "#00ffff"; ctx.fillStyle = "#e0ffff"; ctx.beginPath(); ctx.arc(20, -55, 6, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
-    ctx.fillStyle = "#0a0a0a"; ctx.beginPath(); ctx.ellipse(2, -45, 9, 11, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = gemPulse; ctx.shadowColor = "#0ff"; ctx.fillStyle = "#e0ffff"; ctx.beginPath(); ctx.arc(20, -55, 6, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
     ctx.fillStyle = "#00ffff"; ctx.beginPath(); ctx.arc(6, -46, 1.5, 0, Math.PI * 2); ctx.arc(10, -46, 1.5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#4B0082"; ctx.beginPath(); ctx.moveTo(-8, -40); ctx.quadraticCurveTo(0, -65, 15, -40); ctx.quadraticCurveTo(18, -30, 10, -35); ctx.lineTo(-8, -35); ctx.fill();
     ctx.restore();
     ctx.textAlign = "center"; ctx.font = "bold 13px monospace";
-    let textY = by + floatY - 75;
-    ctx.fillStyle = "black"; ctx.fillText("MYSTERIOUS MERCHANT", bx + 1, textY + 1);
-    ctx.fillStyle = "#ffff00"; ctx.fillText("MYSTERIOUS MERCHANT", bx, textY);
-    ctx.font = "11px monospace"; ctx.fillStyle = "#00ffff"; ctx.fillText("✦ 2X GOLD RATE ✦", bx, textY + 14);
+    ctx.fillStyle = "#ffff00"; ctx.fillText("MYSTERIOUS MERCHANT", bx, by + floatY - 75);
+    ctx.font = "11px monospace"; ctx.fillStyle = "#0f0"; ctx.fillText("✦ 2X GOLD RATE ✦", bx, by + floatY - 61);
 }
 
 function drawStickman(ctx, p) {
@@ -332,99 +303,53 @@ function drawStickman(ctx, p) {
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
     const hX = p.x + (lean * 20), hY = p.y - 30 + bodyY;
     ctx.beginPath(); ctx.arc(hX, hY, 10, 0, Math.PI * 2); ctx.stroke();
-    ctx.fillStyle = p.color; ctx.fillRect(hX + 2, hY - 3, 2, 2); ctx.fillRect(hX + 6, hY - 3, 2, 2);
-    ctx.beginPath(); ctx.arc(hX + 4, hY + 2, 3, 0, Math.PI); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(hX, hY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
 
-    if (p.activeTask !== "attacking") {
-        ctx.beginPath();
-        if (p.danceStyle === 4) {
-            ctx.moveTo(hX, hY + 15); ctx.lineTo(hX - 10, hY + 25);
-            ctx.moveTo(hX, hY + 15); ctx.lineTo(hX + 10, hY + 25);
-        } else {
-            ctx.moveTo(hX, hY + 15); ctx.lineTo(p.x - 18 + (lean * 10), p.y + 2 + bodyY + armMove);
-            ctx.moveTo(hX, hY + 15);
-            if (p.activeTask === "fishing") ctx.lineTo(p.x + 10 + (lean * 20), p.y - 10 + bodyY);
-            else ctx.lineTo(p.x + 18 + (lean * 30), p.y + 2 + bodyY - armMove);
-        }
-        ctx.stroke();
+    // Arms
+    ctx.beginPath();
+    if (p.danceStyle === 4) { ctx.moveTo(hX, hY + 15); ctx.lineTo(hX - 10, hY + 25); ctx.moveTo(hX, hY + 15); ctx.lineTo(hX + 10, hY + 25); }
+    else { 
+        ctx.moveTo(hX, hY + 15); ctx.lineTo(p.x - 18, p.y + 2 + bodyY + armMove); 
+        ctx.moveTo(hX, hY + 15); ctx.lineTo(p.x + 18, p.y + 2 + bodyY - armMove); 
     }
+    ctx.stroke();
 
+    // Legs
     let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-    let legSpread = (p.danceStyle === 4) ? 15 : 10;
-    ctx.beginPath(); ctx.moveTo(p.x, p.y + 10 + bodyY); ctx.lineTo(p.x - legSpread - walk, p.y + 25);
-    ctx.moveTo(p.x, p.y + 10 + bodyY); ctx.lineTo(p.x + legSpread + walk, p.y + 25); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(p.x, p.y + 10 + bodyY); ctx.lineTo(p.x - 10 - walk, p.y + 25);
+    ctx.moveTo(p.x, p.y + 10 + bodyY); ctx.lineTo(p.x + 10 + walk, p.y + 25); ctx.stroke();
 
     drawEquipment(ctx, p, now, bodyY, armMove, lean);
+    
+    // HUD
     ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
     ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
     ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center"; ctx.fillText(p.name, p.x, p.y + 40);
 }
 
 function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
-    const isAttacking = p.activeTask === "attacking";
-    const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
-
-    if (isFishing) {
+    if (p.activeTask === "fishing" && p.area === "fishingpond") {
         ctx.save(); ctx.strokeStyle = "#8B4513"; ctx.lineWidth = 2;
         let bob = Math.sin(now / 300) * 0.1;
-        const rSX = p.x + 10 + (lean * 20), rSY = p.y - 10 + bodyY;
-        const rTX = p.x + 50 + (lean * 20), rTY = p.y - 40 + (bob * 20) + bodyY;
+        const rSX = p.x + 18, rSY = p.y + bodyY;
+        const rTX = p.x + 50, rTY = p.y - 40 + (bob * 20) + bodyY;
         ctx.beginPath(); ctx.moveTo(rSX, rSY); ctx.lineTo(rTX, rTY); ctx.stroke();
         ctx.strokeStyle = "rgba(255,255,255,0.5)"; ctx.beginPath(); ctx.moveTo(rTX, rTY);
-        const wX = Math.max(rTX + 40, 280), wY = 510 + (Math.sin(now/500) * 5);
-        ctx.quadraticCurveTo(rTX + 20, rTY + 40, wX, wY); ctx.stroke();
-        ctx.fillStyle = "#ff4444"; ctx.beginPath(); ctx.arc(wX, wY, 3, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        ctx.quadraticCurveTo(rTX + 20, rTY + 40, Math.max(rTX + 40, 280), 510); ctx.stroke(); ctx.restore();
     }
 
-    if (p.stats.equippedWeapon && !isFishing) {
-        const w = ITEM_DB[p.stats.equippedWeapon], isBow = p.stats.equippedWeapon.toLowerCase().includes("bow");
-        ctx.save();
-        if (isAttacking) {
-            ctx.translate(p.x + (lean * 20) + 12, p.y - 10 + bodyY); ctx.rotate(Math.sin(now / 150) * 0.8);
-            ctx.strokeStyle = p.stats.attackLevel > 10 ? "#0ff" : (w.color || "#ccc"); ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(25, -5); ctx.stroke();
-            ctx.strokeStyle = "#aa8800"; ctx.beginPath(); ctx.moveTo(5, -8); ctx.lineTo(5, 8); ctx.stroke();
-        } else {
-            ctx.translate(p.x + (lean * 20) + (isBow ? -2 : -5), p.y - 5 + bodyY); ctx.rotate(isBow ? Math.PI/4 : Math.PI/1.2);
-            ctx.strokeStyle = isBow ? "#8B4513" : w.color; ctx.lineWidth = 2;
-            ctx.beginPath(); 
-            if (isBow) ctx.arc(0, 0, 15, -Math.PI/2, Math.PI/2);
-            else { ctx.moveTo(0,0); ctx.lineTo(20, 0); ctx.moveTo(5, -3); ctx.lineTo(5, 3); }
-            ctx.stroke();
-        }
-        ctx.restore();
+    if (p.stats.equippedWeapon && p.activeTask !== "fishing") {
+        const w = ITEM_DB[p.stats.equippedWeapon];
+        ctx.save(); ctx.translate(p.x + 12, p.y - 10 + bodyY); ctx.rotate(Math.sin(now/150)*0.5);
+        ctx.strokeStyle = w.color || "#ccc"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(25,-5); ctx.stroke(); ctx.restore();
     }
 
-    ["equippedArmor", "equippedHelmet", "equippedBoots"].forEach(slot => {
-        const item = ITEM_DB[p.stats[slot]];
-        if (!item) return;
-        ctx.save();
-        if (slot === "equippedArmor") {
-            const hX = p.x + (lean * 20), hipX = p.x + (lean * 5);
-            ctx.beginPath(); ctx.moveTo(hX - 7, p.y - 18 + bodyY); ctx.lineTo(hX + 7, p.y - 18 + bodyY);
-            ctx.lineTo(hipX + 7, p.y + 8 + bodyY); ctx.lineTo(hipX - 7, p.y + 8 + bodyY); ctx.closePath();
-            ctx.fillStyle = item.color; ctx.globalAlpha = 0.8; ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = "#000"; ctx.stroke();
+    if (p.stats.equippedHelmet) {
+        const hX = p.x + (lean * 20), hY = p.y - 30 + bodyY;
+        if (p.stats.equippedHelmet.toLowerCase() === "wig") {
+            ctx.fillStyle = p.stats.wigColor || "yellow"; ctx.beginPath(); ctx.arc(hX, hY-2, 11, Math.PI, 0); ctx.fill();
         }
-        if (slot === "equippedBoots") {
-            let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-            ctx.fillStyle = item.color; ctx.strokeStyle = "#000";
-            const fY = p.y + 25 + (bodyY * 0.3);
-            ctx.fillRect(p.x - 10 - walk - 4, fY - 2, 8, 5); ctx.strokeRect(p.x - 10 - walk - 4, fY - 2, 8, 5);
-            ctx.fillRect(p.x + 10 + walk - 4, fY - 2, 8, 5); ctx.strokeRect(p.x + 10 + walk - 4, fY - 2, 8, 5);
-        }
-        if (slot === "equippedHelmet") {
-            const hX = p.x + (lean * 20), hY = p.y - 30 + bodyY;
-            const name = p.stats.equippedHelmet.toLowerCase();
-            if (name === "paper bag") { ctx.fillStyle = "#d2b48c"; ctx.fillRect(hX - 12, hY - 14, 24, 26); ctx.strokeRect(hX - 12, hY - 14, 24, 26); }
-            else if (name === "wig") {
-                ctx.fillStyle = p.stats.wigColor || item.color || "#ffff00"; ctx.strokeStyle = ctx.fillStyle;
-                ctx.beginPath(); ctx.arc(hX, hY, 13, 0.1 * Math.PI, 0.9 * Math.PI); ctx.lineWidth = 6; ctx.stroke();
-                ctx.beginPath(); ctx.arc(hX, hY - 2, 11, Math.PI, 0); ctx.fill();
-            }
-        }
-        ctx.restore();
-    });
+    }
 }
 
 /* ================= DUNGEON SYSTEM ================= */
@@ -443,7 +368,7 @@ const COMMANDS = {
     travel: (p, args) => movePlayer(p, args[1]),
     home: (p) => movePlayer(p, "home"),
     dungeon: (p) => movePlayer(p, "dungeon"),
-	pond: (p) => movePlayer(p, "fishingpond"),
+    pond: (p) => movePlayer(p, "fishingpond"),
     join: (p) => {
         if (p.dead || dungeonQueue.includes(p.name)) return;
         dungeonQueue.push(p.name);
@@ -461,20 +386,50 @@ const COMMANDS = {
         const lvl = p.stats.danceLevel || 1;
         let style = parseInt(args[1]);
         if (!isNaN(style)) {
-            if (!DANCE_UNLOCKS[style] || lvl < DANCE_UNLOCKS[style].minLvl) return systemMessage(`LOCKED or Invalid Style.`);
+            if (!DANCE_UNLOCKS[style] || lvl < DANCE_UNLOCKS[style].minLvl) return systemMessage(`${user}, you need Dance Lvl ${DANCE_UNLOCKS[style]?.minLvl} for that!`);
             p.danceStyle = style;
-        } else p.danceStyle = 1;
+        } else {
+            let unlocked = Object.keys(DANCE_UNLOCKS).filter(k => lvl >= DANCE_UNLOCKS[k].minLvl);
+            p.danceStyle = parseInt(unlocked[Math.floor(Math.random() * unlocked.length)]);
+        }
         p.activeTask = "dancing"; p.taskEndTime = Date.now() + TASK_DURATION;
         systemMessage(`${user} is performing ${DANCE_UNLOCKS[p.danceStyle].name}!`);
     },
+    listdances: (p) => {
+        const lvl = p.stats.danceLevel;
+        let msg = `Your Dance Lvl: ${lvl}. Unlocks: [1] The Squat (Lvl 1) `;
+        msg += lvl >= 5 ? `[2] The Flail (Lvl 5) ` : `[2] LOCKED (Lvl 5) `;
+        msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
+        systemMessage(msg);
+    },
     fish: (p, user) => {
-        if (p.area !== "fishingpond") return systemMessage(`Go to fishingpond first.`);
+        if (p.area !== "fishingpond") return systemMessage(`${user}: Go to fishingpond first.`);
         p.targetX = 200; p.activeTask = "fishing"; p.taskEndTime = Date.now() + TASK_DURATION;
         systemMessage(`${user} started fishing!`);
     },
     attack: (p, user) => {
         p.activeTask = "attacking"; p.taskEndTime = Date.now() + TASK_DURATION;
         p.lastAttackTime = 0; systemMessage(`${user} started attacking!`);
+    },
+    heal: (p, args) => {
+        let target = players[args[1]];
+        if (target && target.area === p.area && !target.dead) {
+            let amt = 10 + (p.stats.healLevel * 5);
+            target.hp = Math.min(target.maxHp, target.hp + amt);
+            spawnFloater(`+${amt} HP`, target.x, target.y - 40, "#0f0");
+            p.stats.healXP += 15;
+            if (p.stats.healXP >= getXPNeeded(p.stats.healLevel)) {
+                p.stats.healLevel++; p.stats.healXP = 0; systemMessage(`${p.name} HEAL UP! (Lv ${p.stats.healLevel})`);
+            }
+            saveStats(p);
+        }
+    },
+    wigcolor: (p, args) => {
+        if (!p.stats.equippedHelmet || p.stats.equippedHelmet.toLowerCase() !== "wig") return systemMessage(`${p.name}, you need to wear a wig!`);
+        const color = args[1];
+        if (/^#([0-9A-F]{3}){1,2}$/i.test(color) || ["red","blue","green","pink","purple","orange","white","black","cyan","magenta","yellow"].includes(color?.toLowerCase())) {
+            p.stats.wigColor = color; saveStats(p); systemMessage(`${p.name}'s wig is now ${color}!`);
+        } else systemMessage(`Usage: !wigcolor [color/hex]`);
     },
     bal: (p) => systemMessage(`${p.name} has ${(p.stats.gold || 0).toFixed(2)} coins stuffed in their prison wallet`),
     wallet: (p) => COMMANDS.bal(p),
@@ -483,6 +438,18 @@ const COMMANDS = {
         let target = args[1] ? args[1].toLowerCase() : user.toLowerCase();
         let data = players[target] ? players[target].stats : JSON.parse(localStorage.getItem("rpg_" + target));
         if (data) systemMessage(`${target.toUpperCase()} - CB: ${data.combatLevel} | ATK: ${data.attackLevel} | FISH: ${data.fishLevel} | DANCE: ${data.danceLevel || 1} | HEAL: ${data.healLevel}`);
+    },
+    topstats: () => {
+        let all = [];
+        for (let i=0; i<localStorage.length; i++) {
+            let key = localStorage.key(i);
+            if (key.startsWith("rpg_")) {
+                let d = JSON.parse(localStorage.getItem(key));
+                all.push({ name: key.replace("rpg_", ""), cb: d.combatLevel || 1 });
+            }
+        }
+        all.sort((a,b) => b.cb - a.cb);
+        systemMessage(`TOP PLAYERS: ` + all.slice(0,5).map((s,i) => `#${i+1} ${s.name}(Lv${s.cb})`).join(" | "));
     },
     inventory: (p, args, user) => {
         let filter = args[1]?.toLowerCase() || "all";
@@ -498,11 +465,15 @@ const COMMANDS = {
     },
     sell: (p, args) => {
         let target = args.slice(1).join(" ").toLowerCase();
-        let gold = 0; let mult = buyerActive ? 2 : 1;
+        let gold = 0; let itemsRemoved = 0; let mult = buyerActive ? 2 : 1;
         if (target === "fish") {
             p.stats.inventory = p.stats.inventory.filter(item => {
-                if (item.includes("kg")) { gold += Math.floor(parseFloat(item) * mult); return false; }
-                if (item === "Golden Bass") { gold += (ITEM_DB["Golden Bass"].value * mult); return false; }
+                if (item.includes("kg")) { 
+                    gold += Math.floor(parseFloat(item) * mult); itemsRemoved++; return false; 
+                }
+                if (item === "Golden Bass") { 
+                    gold += (ITEM_DB["Golden Bass"].value * mult); itemsRemoved++; return false; 
+                }
                 return true;
             });
         } else {
@@ -510,11 +481,11 @@ const COMMANDS = {
             if (idx !== -1) { 
                 let item = p.stats.inventory[idx];
                 gold = (ITEM_DB[item]?.value || 50) * (item === "Golden Bass" ? mult : 1);
-                p.stats.inventory.splice(idx, 1);
+                p.stats.inventory.splice(idx, 1); itemsRemoved = 1;
             }
         }
         p.stats.gold += gold; saveStats(p);
-        systemMessage(`${p.name} sold items for ${gold.toFixed(2)} gold! ${buyerActive ? "💰 [BONUS]" : ""}`);
+        systemMessage(`${p.name} sold ${itemsRemoved} items for ${gold.toFixed(2)} gold! ${buyerActive ? "💰 [BONUS]" : ""}`);
     },
     equip: (p, args) => {
         let input = args.slice(1).join(" ").toLowerCase();
@@ -522,10 +493,26 @@ const COMMANDS = {
         if (!item) return systemMessage(`You don't have that.`);
         let data = ITEM_DB[item];
         if (data.type === "weapon") p.stats.equippedWeapon = item;
-        if (data.type === "armor") p.stats.equippedArmor = item;
-        if (data.type === "helmet") p.stats.equippedHelmet = item;
-        if (data.type === "boots") p.stats.equippedBoots = item;
+        else if (data.type === "armor") p.stats.equippedArmor = item;
+        else if (data.type === "helmet") p.stats.equippedHelmet = item;
+        else if (data.type === "boots") p.stats.equippedBoots = item;
         saveStats(p); systemMessage(`${p.name} equipped ${item}!`);
+    },
+    unequip: (p, args) => {
+        const slot = args[1]?.toLowerCase() || "all";
+        if (slot === "weapon" || slot === "all") p.stats.equippedWeapon = null;
+        if (slot === "armor" || slot === "all") p.stats.equippedArmor = null;
+        if (slot === "helmet" || slot === "all") p.stats.equippedHelmet = null;
+        if (slot === "boots" || slot === "all") p.stats.equippedBoots = null;
+        saveStats(p); systemMessage(`${p.name} unequipped ${slot}.`);
+    },
+    mingle: (p, args, user) => {
+        if (p.area !== "home") return;
+        let target = players[args[1]] || Object.values(players).find(pl => pl.name !== user && pl.area === "home" && !pl.dead);
+        if (target) { p.mingleTarget = target; setTimeout(() => { p.mingleTarget = null; }, 5000); }
+    },
+    respawn: (p) => {
+        if (p.dead) { p.dead = false; p.hp = p.maxHp; systemMessage(`${p.name} returned to life!`); }
     }
 };
 
@@ -542,55 +529,37 @@ function startDungeon() {
 function tick() {
     const now = Date.now();
     updateBuyerNPC();
-    
-    // Physics & Task Timers
     Object.values(players).forEach(p => {
-        if (p.activeTask && now > p.taskEndTime) { p.activeTask = null; p.targetX = null; }
+        if (p.activeTask && now > p.taskEndTime) { p.activeTask = null; }
         if (p.targetX !== null) {
             let dx = p.targetX - p.x;
             if (Math.abs(dx) > 5) { p.x += dx * 0.1; p.lean = dx > 0 ? 0.2 : -0.2; }
             else { p.lean = 0; if (p.activeTask !== "attacking") p.targetX = null; }
         }
-        if (p.targetY !== undefined && p.y < p.targetY) { p.y += 10; if (p.y >= p.targetY) delete p.targetY; }
-        
-        // Interval Tasks
+        if (p.targetY && p.y < p.targetY) { p.y += 10; if (p.y >= p.targetY) delete p.targetY; }
         if (!p.dead && p.activeTask === "dancing" && now - p.lastDanceXP > 5000) {
             p.stats.danceXP += (5 + p.danceStyle * 2); p.lastDanceXP = now;
             if (p.stats.danceXP >= p.stats.danceLevel * 100) { p.stats.danceLevel++; p.stats.danceXP = 0; saveStats(p); }
         }
-        if (!p.dead && p.activeTask === "attacking") {
-            let speed = ITEM_DB[p.stats.equippedWeapon]?.speed || 2500;
-            if (now - p.lastAttackTime > speed) { performAttack(p); p.lastAttackTime = now; }
+        if (!p.dead && p.activeTask === "attacking" && now - p.lastAttackTime > (ITEM_DB[p.stats.equippedWeapon]?.speed || 2500)) {
+            performAttack(p); p.lastAttackTime = now;
         }
     });
-
-    // Arrow Physics
-    for (let i = arrows.length - 1; i >= 0; i--) {
-        let a = arrows[i]; a.x += (a.tx - a.x) * 0.2; a.y += (a.ty - a.y) * 0.2; a.life--;
-        if (a.life <= 0 || Math.abs(a.tx - a.x) < 5) arrows.splice(i, 1);
-    }
 }
 
 function render() {
-    ctx.fillStyle = (viewArea === "home" ? "#1a1a2e" : (viewArea === "dungeon" ? "#160a0a" : "#0a1612"));
-    ctx.fillRect(0, 0, c.width, c.height);
     drawScenery(ctx);
-    
     Object.values(players).forEach(p => drawStickman(ctx, p));
-    
-    arrows.forEach(a => { ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(a.x + 10, a.y); ctx.stroke(); });
-    
     if (viewArea === "dungeon") {
         enemies.forEach(e => { if(!e.dead){ ctx.fillStyle = "#f00"; ctx.fillRect(e.x, e.y, 20, 20); }});
-        if (boss && !boss.dead) { ctx.fillStyle = "#ff00ff"; ctx.fillRect(boss.x, boss.y, 50, 50); }
+        if (boss && !boss.dead) { ctx.fillStyle = "#f0f"; ctx.fillRect(boss.x, boss.y, 50, 50); }
     }
-
     for (let i = floaters.length - 1; i >= 0; i--) {
         let f = floaters[i]; ctx.fillStyle = f.color; ctx.globalAlpha = f.life / 100;
         ctx.fillText(f.text, f.x, f.y); f.y--; f.life--; if (f.life <= 0) floaters.splice(i, 1);
     }
     ctx.globalAlpha = 1;
-    requestAnimationFrame(() => { tick(); render(); });
+    requestAnimationFrame(render);
 }
 
 /* ================= EVENTS ================= */
@@ -604,27 +573,17 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
         if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); }
         if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); }
         if (cmd === "showhome") { viewArea = "home"; areaDisplay.textContent = "StickmenFall - HOME"; }
-		if (cmd === "showfishing") { viewArea = "fishingpond"; areaDisplay.textContent = "StickmenFall - Pond"; }
+        if (cmd === "showfishing") { viewArea = "fishingpond"; areaDisplay.textContent = "StickmenFall - POND"; }
         if (cmd === "showdungeon") { viewArea = "dungeon"; areaDisplay.textContent = "StickmenFall - DUNGEON"; }
     }
 };
 
-// Start Engine
 ComfyJS.Init("jaedraze");
-tick();
+setInterval(tick, 1000/30);
 render();
 
-// Interval task for Fishing and Passive NPC Damage
 setInterval(() => {
     Object.values(players).forEach(p => { if (p.activeTask === "fishing") performFish(p); });
-    if (dungeonActive) {
-        let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
-        if (dwellers.length > 0) enemies.forEach(e => {
-            if (e.dead) return;
-            let t = dwellers[Math.floor(Math.random() * dwellers.length)];
-            t.hp -= 5; spawnFloater("-5", t.x, t.y-40, "#f00"); if (t.hp <= 0) t.dead = true;
-        });
-    }
 }, 3000);
 
 </script>
