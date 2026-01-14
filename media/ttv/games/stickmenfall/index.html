@@ -71,6 +71,91 @@
 		</div>
 	</div>	
 	<!--===============================================-->
+	<!--=====THEME CONTROLLER=========-->
+	<div class="controller" id="theme-controller">
+		<button class="close-btn">×</button>
+		<div id="entrivia-settings-headergroup">
+			<h2 class="controllerheader" style="">Settings</h2>
+		</div>
+		<div class="controlpanel" id="theme-controlpanel">
+			<div id="controls" id="theme-controls">
+				<h3>Theme Settings</h3>
+				<div class="" id="themeButtWrap">
+					<button class="Butt themeselect" id="light-themeButt" title="light">🌞</button>
+					<button class="Butt themeselect" id="dark-themeButt" title="dark">🌙</button>
+					<button class="Butt themeselect" id="business-themeButt" title="Business">💼</button>
+					<button class="Butt themeselect" id="retro-themeButt" title="retro">🕹️</button>
+					<button class="Butt themeselect" id="synthwave-themeButt" title="Synthwave">🕶️</button>
+					<button class="Butt themeselect" id="wastelandterminal-themeButt" title="Wasteland Terminal">🧪</button>
+					<button class="Butt themeselect" id="biohazard-themeButt" title="Biohazard">☣️</button>
+					<button class="Butt themeselect" id="neonvoid-themeButt" title="Neonvoid">🟪</button>
+					<button class="Butt themeselect" id="nineties-themeButt" title="nineties">🔳</button>
+					<button class="Butt themeselect" id="scroll-themeButt" title="scroll">🧾</button>
+					<button class="Butt themeselect" id="bubblegumpop-themeButt" title="BubbleGum Pop">🧁</button>
+					<button class="Butt themeselect" id="custom-themeButt" title="custom">🐇</button>
+					<button class="Butt themeselect" id="poop-themeButt" title="poop">💩</button>
+					<button class="Butt themeselect" id="cyberice-themeButt" title="Cyber">🧊</button>
+					<button class="Butt themeselect" id="hud-themeButt" title="hud">🟦</button>
+					<button class="Butt themeselect" id="holo-themeButt" title="Holo">💠</button>
+				</div>
+				<div class="" id="posSliders">
+					<h3>Layout Settings</h3>
+					<div>
+					  <label>Twitch Chat Y:
+						<input class="rangeinput" type="range" id="twitchchatY" min="0" max="75" value="0">
+						<span id="twitchchatYValue">0%</span>
+					  </label>
+					</div>
+					<div>
+					  <label>Twitch Chat X:
+						<input class="rangeinput" type="range" id="twitchchatX" min="0" max="70" value="0">
+						<span id="twitchchatXValue">0%</span>
+					  </label>
+					</div>
+					<div>
+					  <label>Entrivia Announcement Y:
+						<input class="rangeinput" type="range" id="entriviaAnnouncementY" min="0" max="100" value="71">
+						<span id="entriviaAnnouncementYValue">71%</span>
+					  </label>
+					</div>
+					<div>
+					  <label>Entrivia Announcement X:
+						<input class="rangeinput" type="range" id="entriviaAnnouncementX" min="0" max="100" value="2">
+						<span id="entriviaAnnouncementXValue">2px</span>
+					  </label>
+					</div>
+					<div>
+					  <label>Entrivia Question Y:
+						<input class="rangeinput" type="range" id="entriviaQuestionY" min="0" max="88" value="71">
+						<span id="entriviaQuestionYValue">71%</span>
+					  </label>
+					</div>
+					<div>
+					  <label>Entrivia Question X:
+						<input class="rangeinput" type="range" id="entriviaQuestionX" min="0" max="71" value="2">
+						<span id="entriviaQuestionXValue">2px</span>
+					  </label>
+					</div>
+				</div>
+				<br>
+				<div class="switchbox" id="switch-box">
+					toggle background
+					<label class="switch">
+					<input type="checkbox" id="simulatebackground">
+					<span class="slider"></span>
+					</label>
+				</div>
+				<div class="switchbox" id="switch-box">
+					Show example panels
+					<label class="switch">
+					<input type="checkbox" id="showthemeExamples">
+					<span class="slider"></span>
+					</label>
+				</div>
+			</div>
+		</div>
+	</div>
+<!--==================================================================-->
 	<!--this is the underlay its mostly for aesthetics and sits behind everything else it might be a border or different animated elements -->		
 	<div id="underlay"></div>
 	<div id="pageborder"></div>
