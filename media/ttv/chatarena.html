@@ -1010,114 +1010,129 @@ function drawScenery(ctx) {
     }
 	
 }
+
+
+// Sub-helpers for clarity:
+function handleTaskTimeout(p) {
+    systemMessage(`${p.name} stopped ${p.activeTask} (Idle timeout).`);
+    p.activeTask = null;
+    p.targetX = null;
+    p.danceStyle = 0;
+}
+
+function updatePlayerMovement(p) {
+    if (p.targetX === null || p.targetX === undefined) return;
+    let dx = p.targetX - p.x;
+    if (Math.abs(dx) > 5) {
+        p.x += dx * 0.1;
+        p.lean = dx > 0 ? 0.2 : -0.2;
+    } else {
+        p.lean = 0;
+        if (p.activeTask !== "attacking") p.targetX = null;
+    }
+}
+
 function gameLoop() {
-	updateBuyerNPC();
-    // 1. Background
-    ctx.fillStyle = backgrounds[viewArea];
+    const now = Date.now();
+
+    // -- A. Logic Updates --
+    updateBuyerNPC();
+    updateEntities(now); 
+    
+    // -- B. Rendering --
+    renderWorld(ctx, now);
+
+    // -- C. UI Updates --
+    updateHUDText();
+    handleTooltips();
+
+    requestAnimationFrame(gameLoop);
+}
+/* ================= 2. LOGIC MODULES (The Brains) ================= */
+function updateEntities(now) {
+    Object.values(players).forEach(p => {
+        // 1. Universal Task Timeout
+        if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
+            systemMessage(`${p.name} stopped ${p.activeTask} (Idle timeout).`);
+            p.activeTask = null;
+            p.targetX = null;
+            p.danceStyle = 0;
+        }
+
+        // 2. Physics & Movement
+        updatePhysics(p);
+
+        // 3. Specialized Task Logic
+        if (!p.dead) {
+            if (p.activeTask === "dancing") updateDanceXP(p, now);
+            if (p.activeTask === "attacking") updateCombatTick(p, now);
+        }
+    });
+
+    updateArrows(ctx);
+    updateFloatersLogic();
+}
+function updateDanceXP(p, now) {
+    if (now - (p.lastDanceXP || 0) > 5000) {
+        let xpGain = 5 + (p.danceStyle * 2);
+        p.stats.danceXP += xpGain;
+        p.lastDanceXP = now;
+
+        let nextLevelXP = p.stats.danceLevel * 100;
+        if (p.stats.danceXP >= nextLevelXP) {
+            p.stats.danceLevel++;
+            p.stats.danceXP = 0;
+            spawnFloater(`DANCE LEVEL ${p.stats.danceLevel}!`, p.x, p.y - 40, "#ff00ff");
+            saveStats(p);
+        }
+    }
+}
+/* ================= 3. RENDER MODULES (The Eyes) ================= */
+function renderWorld(ctx, now) {
+    // Clear Screen
+    ctx.fillStyle = backgrounds[viewArea] || "#000";
     ctx.fillRect(0, 0, c.width, c.height);
-    // 1.5 NEW: Draw Area Props
+
+    // Draw Background Props
     drawScenery(ctx);
-	
-    // 2. Enemy UI Updates
+
+    // Draw Players
+    Object.values(players).forEach(p => {
+        if (p.area === viewArea) drawStickman(ctx, p);
+    });
+
+    // Draw Dungeon Mobs
+    if (viewArea === "dungeon") {
+        renderDungeonEntities(ctx);
+    }
+
+    // Draw Global Effects
+    renderFloaters(ctx);
+}
+
+function updateHUDText() {
     let enemyText = "";
     if (viewArea === "dungeon") {
         enemies.forEach(e => { if(!e.dead) enemyText += `Enemy: ${e.hp}hp<br>`; });
         if (boss && !boss.dead) enemyText += `<b>BOSS: ${boss.hp}hp</b>`;
     }
     document.getElementById("enemyUI").innerHTML = enemyText;
-
-	// --- Inside Section 3 of your gameLoop ---
-	const now = Date.now(); 
-
-	Object.values(players).forEach(p => {
-		// 1. TIMEOUT CHECK (Universal for all tasks)
-		if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
-			systemMessage(`${p.name} stopped ${p.activeTask} (Idle timeout).`);
-			p.activeTask = null;
-			p.targetX = null;
-			p.danceStyle = 0; // Reset dance
-		}
-		
-		// 2. MOVEMENT LOGIC (Original)
-		if (p.targetX !== null && p.targetX !== undefined) {
-			let dx = p.targetX - p.x;
-			if (Math.abs(dx) > 5) {
-				p.x += dx * 0.1;
-				p.lean = dx > 0 ? 0.2 : -0.2;
-			} else {
-				p.lean = 0;
-				if (p.activeTask !== "attacking") p.targetX = null;
-			}
-		}
-		// 3.0 dance timing logic
-		if (p.activeTask === "dancing" && !p.dead) {
-			if (!p.lastDanceXP) p.lastDanceXP = 0;
-			
-			if (now - p.lastDanceXP > 5000) { // Every 5 seconds
-				// Give slightly more XP for harder dances
-				let xpGain = 5 + (p.danceStyle * 2); 
-				p.stats.danceXP += xpGain;
-				p.lastDanceXP = now;
-
-				// Level Up Logic
-				let nextLevelXP = p.stats.danceLevel * 100;
-				if (p.stats.danceXP >= nextLevelXP) {
-					p.stats.danceLevel++;
-					p.stats.danceXP = 0;
-					spawnFloater(p.x, p.y - 40, `DANCE LEVEL ${p.stats.danceLevel}!`, "#ff00ff");
-					
-					// Notification for unlocks
-					if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
-					if (p.stats.danceLevel === 10) systemMessage(`${p.name} unlocked Dance Style 3: The Lean!`);
-					
-					saveStats(p);
-				}
-			}
-		}
-		// 3.1 ATTACK TIMING LOGIC (Original)
-		if (p.activeTask === "attacking" && !p.dead) {
-			let weapon = ITEM_DB[p.stats.equippedWeapon];
-			let attackSpeed = weapon?.speed || 2500; 
-			if (!p.lastAttackTime) p.lastAttackTime = 0;
-			if (now - p.lastAttackTime > attackSpeed) {
-				performAttack(p);
-				p.lastAttackTime = now;
-			}
-		}
-
-		// 4. DRAW
-		drawStickman(ctx, p);
-	});
-	updateArrows(ctx);
-
-    // 4. Draw Dungeon Entities
-    if (viewArea === "dungeon") {
-        enemies.forEach(e => {
-            if (!e.dead) {
-                ctx.fillStyle = "#f00"; ctx.fillRect(e.x, e.y, 20, 20);
-                ctx.fillStyle = "#fff"; ctx.textAlign = "center";
-                ctx.fillText(e.hp, e.x + 10, e.y - 5);
-            }
-        });
-        if (boss && !boss.dead) { 
-            ctx.fillStyle = "#ff00ff"; ctx.fillRect(boss.x, boss.y, 50, 50); 
-            ctx.fillStyle = "#fff"; ctx.fillText(boss.hp, boss.x + 25, boss.y - 5);
-        }
-    }
-
-    // 5. Draw Floating Text
-    floaters.forEach((f, i) => {
-        ctx.fillStyle = f.color; ctx.globalAlpha = f.life / 100;
-        ctx.textAlign = "center";
-        ctx.fillText(f.text, f.x, f.y); f.y -= 1; f.life--;
-        if (f.life <= 0) floaters.splice(i, 1);
-    });
-    ctx.globalAlpha = 1;
-
-    handleTooltips();
-    requestAnimationFrame(gameLoop);
 }
 
+// Helper to keep the loop clean
+function renderDungeonEntities(ctx) {
+    enemies.forEach(e => {
+        if (!e.dead) {
+            ctx.fillStyle = "#f00"; ctx.fillRect(e.x, e.y, 20, 20);
+            ctx.fillStyle = "#fff"; ctx.textAlign = "center";
+            ctx.fillText(e.hp, e.x + 10, e.y - 5);
+        }
+    });
+    if (boss && !boss.dead) {
+        ctx.fillStyle = "#ff00ff"; ctx.fillRect(boss.x, boss.y, 50, 50);
+        ctx.fillStyle = "#fff"; ctx.fillText(boss.hp, boss.x + 25, boss.y - 5);
+    }
+}
 /* ================= CHAT COMMANDS ================= */
 /* ================= COMMAND FUNCTIONS ================= */
 function cmdDance(p, user, args) {
