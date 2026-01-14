@@ -897,28 +897,30 @@ function drawStickman(ctx, p) {
     // 2. Torso
     ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
 
- // 3. Arms
-    if (!isAttacking) {
-        ctx.beginPath();
-        if (p.danceStyle === 4) {
-            // Crossed Arms "Horse Riding" Style
-            ctx.moveTo(headX, headY + 15);
-            ctx.lineTo(headX - 10, headY + 25); // Left arm tucked
-            ctx.moveTo(headX, headY + 15);
-            ctx.lineTo(headX + 10, headY + 25); // Right arm tucked
-        } else {
-            // ... your existing arm logic for 1, 2, 3 and Fishing ...
-            ctx.moveTo(headX, headY + 15);
-            ctx.lineTo(p.x - 18 + (lean * 10), p.y + 2 + bodyY + armMove);
-            ctx.moveTo(headX, headY + 15);
-            if (isFishing) {
-                ctx.lineTo(p.x + 10 + (lean * 20), p.y - 10 + bodyY);
-            } else {
-                ctx.lineTo(p.x + 18 + (lean * 30), p.y + 2 + bodyY - armMove);
-            }
-        }
-        ctx.stroke();
-    }
+    // 3. Arms
+	if (!isAttacking) {
+		ctx.beginPath();
+		if (p.danceStyle === 4) {
+			// Crossed Arms "Horse Riding" Style - now with bounce!
+			// We use bodyY * 0.5 so the arms bounce slightly less than the body for a natural look
+			ctx.moveTo(headX, headY + 15);
+			ctx.lineTo(headX - 12, headY + 22 + (bodyY * 0.2)); 
+			
+			ctx.moveTo(headX, headY + 15);
+			ctx.lineTo(headX + 12, headY + 22 + (bodyY * 0.2));
+		} else {
+			// ... your existing arm logic ...
+			ctx.moveTo(headX, headY + 15);
+			ctx.lineTo(p.x - 18 + (lean * 10), p.y + 2 + bodyY + armMove);
+			ctx.moveTo(headX, headY + 15);
+			if (isFishing) {
+				ctx.lineTo(p.x + 10 + (lean * 20), p.y - 10 + bodyY);
+			} else {
+				ctx.lineTo(p.x + 18 + (lean * 30), p.y + 2 + bodyY - armMove);
+			}
+		}
+		ctx.stroke();
+	}
 
 	// 4. Legs
 	let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
@@ -1157,25 +1159,24 @@ function gameLoop() {
 
 /* ================= CHAT COMMANDS ================= */
 /* ================= COMMAND FUNCTIONS ================= */
+const DANCE_UNLOCKS = {
+    1: { name: "The Squat", minLvl: 1 },
+    2: { name: "The Flail", minLvl: 5 },
+    3: { name: "The Lean",  minLvl: 10 },
+    4: { name: "The Op-Pa", minLvl: 20 } // Fixed to 20 to match your level-up logic
+};
 function cmdDance(p, user, args) {
     if (p.dead) return;
     const level = p.stats.danceLevel || 1;
     let chosenStyle = parseInt(args[1]); 
 
-    const UNLOCKS = {
-        1: { name: "The Squat", minLvl: 1 },
-        2: { name: "The Flail", minLvl: 5 },
-        3: { name: "The Lean",  minLvl: 10 },
-        4: { name: "The Op-Pa", minLvl: 2 } // New Style!
-    };
-
     if (!isNaN(chosenStyle)) {
-        if (!UNLOCKS[chosenStyle]) {
+        if (!DANCE_UNLOCKS[chosenStyle]) {
             systemMessage(`${user}, try styles 1, 2, 3, or 4!`);
             return;
         }
-        if (level < UNLOCKS[chosenStyle].minLvl) {
-            systemMessage(`${user}, you need Dance Lvl ${UNLOCKS[chosenStyle].minLvl} for that!`);
+        if (level < DANCE_UNLOCKS[chosenStyle].minLvl) {
+            systemMessage(`${user}, you need Dance Lvl ${DANCE_UNLOCKS[chosenStyle].minLvl} for that!`);
             return;
         }
         p.danceStyle = chosenStyle;
@@ -1189,12 +1190,12 @@ function cmdDance(p, user, args) {
 
     p.activeTask = "dancing";
     p.taskEndTime = Date.now() + (15 * 60 * 1000);
-    systemMessage(`${user} is performing ${UNLOCKS[p.danceStyle].name}!`);
+    systemMessage(`${user} is performing ${DANCE_UNLOCKS[p.danceStyle].name}!`);
     saveStats(p);
 }
 function cmdListDances(p) {
     const lvl = p.stats.danceLevel;
-    let msg = `Your Dance Lvl: ${lvl}. Unlocks: [1] The Squat (Lvl 1) `;
+    let msg = `Your Dance Lvl: ${lvl}. Available Dances: [1] The Squat (Lvl 1) `;
     msg += lvl >= 5 ? `[2] The Flail (Lvl 5) ` : `[2] LOCKED (Lvl 5) `;
     msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
     systemMessage(msg);
