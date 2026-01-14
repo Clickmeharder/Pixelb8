@@ -430,11 +430,41 @@ function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
             const hX = p.x + (lean * 20), hY = p.y - 30 + bodyY;
             const name = p.stats.equippedHelmet.toLowerCase();
             if (name === "paper bag") { ctx.fillStyle = "#d2b48c"; ctx.fillRect(hX - 12, hY - 14, 24, 26); ctx.strokeRect(hX - 12, hY - 14, 24, 26); }
-            else if (name === "wig") {
-                ctx.fillStyle = p.stats.wigColor || item.color || "#ffff00"; ctx.strokeStyle = ctx.fillStyle;
-                ctx.beginPath(); ctx.arc(hX, hY, 13, 0.1 * Math.PI, 0.9 * Math.PI); ctx.lineWidth = 6; ctx.stroke();
-                ctx.beginPath(); ctx.arc(hX, hY - 2, 11, Math.PI, 0); ctx.fill();
-            }
+            else if (helmetName === "wig") {
+				ctx.fillStyle = p.stats.wigColor || item.color || "#ffff00";
+				ctx.strokeStyle = ctx.fillStyle;
+				
+				// 1. Back Hair (The "U" shape behind the head)
+				// We draw from 0.2 PI to 0.8 PI (the bottom half) so it looks like it's behind the neck
+				ctx.beginPath();
+				ctx.arc(hX, hY, 13, 0.1 * Math.PI, 0.9 * Math.PI); 
+				ctx.lineWidth = 6;
+				ctx.stroke();
+
+				// 2. Top Volume (The "Hat" of hair)
+				// This draws from 1.0 PI to 2.0 PI (the top half circle only)
+				ctx.beginPath();
+				ctx.arc(hX, hY - 2, 11, Math.PI, 0); 
+				ctx.fill();
+
+				// 3. Side Locks (Draping down the sides)
+				ctx.lineWidth = 5;
+				ctx.beginPath();
+				// Left side lock
+				ctx.moveTo(hX - 10, hY - 2);
+				ctx.quadraticCurveTo(hX - 14, hY + 10, hX - 11, hY + 18);
+				// Right side lock
+				ctx.moveTo(hX + 10, hY - 2);
+				ctx.quadraticCurveTo(hX + 14, hY + 10, hX + 11, hY + 18);
+				ctx.stroke();
+
+				// 4. Little Bangs (Optional: Tiny bits on the forehead that don't cover eyes)
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(hX - 8, hY - 8); ctx.lineTo(hX - 4, hY - 10);
+				ctx.moveTo(hX + 8, hY - 8); ctx.lineTo(hX + 4, hY - 10);
+				ctx.stroke();
+			}
         }
         ctx.restore();
     });
@@ -452,207 +482,236 @@ function checkDungeonProgress() {
 }
 
 /* ================= CHAT COMMANDS ================= */
-function cmdSell(p, args) {
-    if (p.stats.inventory.length === 0) return systemMessage(`${p.name}: Your inventory is empty.`);
-    
-    let target = args.slice(1).join(" ").toLowerCase();
-    let totalGold = 0;
-    let itemsRemoved = 0;
-    let multiplier = buyerActive ? 2 : 1;
+const cmdHandlers = {
+    // --- Combat & Tasks ---
+    attack: (p, args, user) => {
+        if (p.activeTask === "attacking") return systemMessage(`${user}: Already attacking.`);
+        p.activeTask = "attacking";
+        p.taskEndTime = Date.now() + TASK_DURATION;
+        p.lastAttackTime = 0;
+        systemMessage(`${user} started attacking (15m idle)`);
+    },
 
-    if (target === "fish") {
-        p.stats.inventory = p.stats.inventory.filter(item => {
-            if (item.includes("kg")) { 
-                totalGold += Math.floor(parseFloat(item) * multiplier);
-                itemsRemoved++;
-                return false; 
+    fish: (p, args, user) => {
+        if (p.area !== "fishingpond") return systemMessage(`${user}: Go to fishingpond first.`);
+        if (p.activeTask === "fishing") return systemMessage(`${user}: Already fishing.`);
+        p.targetX = 200;
+        p.activeTask = "fishing";
+        p.taskEndTime = Date.now() + TASK_DURATION;
+        systemMessage(`${user} started fishing!`);
+    },
+
+    heal: (p, args) => {
+        let target = players[args[1]];
+        if (target && target.area === p.area && !target.dead) {
+            let amt = 10 + (p.stats.healLevel * 5);
+            target.hp = Math.min(target.maxHp, target.hp + amt);
+            spawnFloater(`+${amt} HP`, target.x, target.y - 40, "#0f0");
+            p.stats.healXP += 15;
+            if (p.stats.healXP >= xpNeeded(p.stats.healLevel)) {
+                p.stats.healLevel++; p.stats.healXP = 0;
+                systemMessage(`${p.name} HEAL UP! (Lv ${p.stats.healLevel})`);
             }
-            if (item === "Golden Bass") {
-                totalGold += (ITEM_DB["Golden Bass"].value * multiplier);
-                itemsRemoved++;
-                return false;
-            }
-            return true;
-        });
-    } else {
-        let idx = p.stats.inventory.findIndex(i => i.toLowerCase() === target);
-        if (idx !== -1) { 
-            let item = p.stats.inventory[idx];
-            totalGold = (ITEM_DB[item]?.value || 50) * (item === "Golden Bass" ? multiplier : 1);
-            p.stats.inventory.splice(idx, 1);
-            itemsRemoved = 1;
+            saveStats(p);
         }
-    }
+    },
 
-    if (itemsRemoved > 0) {
-        p.stats.gold += totalGold;
-        saveStats(p);
-        systemMessage(`${p.name} sold ${itemsRemoved} items for ${totalGold.toFixed(2)} gold! ${buyerActive ? "💰 [MERCHANT BONUS]" : ""}`);
-    } else {
-        systemMessage(`${p.name}: Could not find "${target}" to sell.`);
-    }
-}
+    dance: (p, args, user) => {
+        if (p.dead) return;
+        const level = p.stats.danceLevel || 1;
+        let chosenStyle = parseInt(args[1]);
 
-function cmdInventory(p, args, user) {
-    let filter = args[1]?.toLowerCase() || "all";
-    let counts = {}; 
-    let fishWeight = 0; 
-    let fishCount = 0;
-
-    // Filter and count items
-    p.stats.inventory.forEach(item => {
-        if (item.includes("kg")) { 
-            fishWeight += parseFloat(item) || 0; 
-            fishCount++; 
+        if (!isNaN(chosenStyle)) {
+            if (!DANCE_UNLOCKS[chosenStyle]) return systemMessage(`${user}, try styles 1, 2, 3, or 4!`);
+            if (level < DANCE_UNLOCKS[chosenStyle].minLvl) return systemMessage(`${user}, you need Dance Lvl ${DANCE_UNLOCKS[chosenStyle].minLvl} for that!`);
+            p.danceStyle = chosenStyle;
         } else {
-            counts[item] = (counts[item] || 0) + 1;
+            let unlockedStyles = [1];
+            if (level >= 5) unlockedStyles.push(2);
+            if (level >= 10) unlockedStyles.push(3);
+            if (level >= 20) unlockedStyles.push(4); // Keep the '20' logic for randoms
+            p.danceStyle = unlockedStyles[Math.floor(Math.random() * unlockedStyles.length)];
         }
-    });
 
-    // Mimic the Old HUD color themes
-    let output = `\n[ ${user.toUpperCase()}'S ${filter.toUpperCase()} ]`;
-    if (fishCount > 0) output += `\n> Fish x${fishCount} (${fishWeight.toFixed(2)}kg)`;
-    for (let [name, qty] of Object.entries(counts)) {
-        output += `\n> ${name} ${qty > 1 ? "x" + qty : ""}`;
-    }
-    systemMessage(output);
-}
-
-function cmdStats(args, user) {
-    let target = args[1] ? args[1].toLowerCase() : user.toLowerCase();
-    // Check online players first, then local storage
-    let data = players[target] ? players[target].stats : JSON.parse(localStorage.getItem("rpg_" + target));
-    
-    if (data) {
-        systemMessage(`${target.toUpperCase()} - CB: ${data.combatLevel} | ATK: ${data.attackLevel} | FISH: ${data.fishLevel} | DANCE: ${data.danceLevel || 1} | HEAL: ${data.healLevel}`);
-    } else {
-        systemMessage(`System: Could not find stats for ${target}`);
-    }
-}
-
-function cmdDance(p, args, user) {
-    const lvl = p.stats.danceLevel || 1;
-    let style = parseInt(args[1]);
-
-    if (!isNaN(style)) {
-        if (!DANCE_UNLOCKS[style] || lvl < DANCE_UNLOCKS[style].minLvl) {
-            return systemMessage(`${user}, you need Dance Lvl ${DANCE_UNLOCKS[style]?.minLvl || '??'} for that!`);
-        }
-        p.danceStyle = style;
-    } else {
-        let unlocked = Object.keys(DANCE_UNLOCKS).filter(k => lvl >= DANCE_UNLOCKS[k].minLvl);
-        p.danceStyle = parseInt(unlocked[Math.floor(Math.random() * unlocked.length)]);
-    }
-
-    p.activeTask = "dancing"; 
-    p.taskEndTime = Date.now() + TASK_DURATION;
-    systemMessage(`${user} is performing ${DANCE_UNLOCKS[p.danceStyle].name}!`);
-}
-function cmdJoinDungeon(p) {
-    if (p.dead || dungeonQueue.includes(p.name)) return;
-    
-    dungeonQueue.push(p.name);
-    systemMessage(`${p.name} joined queue (${dungeonQueue.length})`);
-    
-    if (!dungeonCountdownInterval) {
-        dungeonSecondsLeft = 60;
-        dungeonCountdownInterval = setInterval(() => {
-            dungeonSecondsLeft--;
-            if (dungeonSecondsLeft === 30) viewArea = "dungeon";
-            if (dungeonSecondsLeft <= 0) { 
-                clearInterval(dungeonCountdownInterval); 
-                dungeonCountdownInterval = null; 
-                startDungeon(); 
-            }
-        }, 1000);
-    }
-}
-
-function cmdEquip(p, args) {
-    let input = args.slice(1).join(" ").toLowerCase();
-    let item = p.stats.inventory.find(i => i.toLowerCase() === input);
-    if (!item) return systemMessage(`You don't have that.`);
-    
-    let data = ITEM_DB[item];
-    if (data.type === "weapon") p.stats.equippedWeapon = item;
-    else if (data.type === "armor") p.stats.equippedArmor = item;
-    else if (data.type === "helmet") p.stats.equippedHelmet = item;
-    else if (data.type === "boots") p.stats.equippedBoots = item;
-    
-    saveStats(p); 
-    systemMessage(`${p.name} equipped ${item}!`);
-}
-
-function cmdHeal(p, args) {
-    let target = players[args[1]];
-    if (target && target.area === p.area && !target.dead) {
-        let amt = 10 + (p.stats.healLevel * 5);
-        target.hp = Math.min(target.maxHp, target.hp + amt);
-        spawnFloater(`+${amt} HP`, target.x, target.y - 40, "#0f0");
-        p.stats.healXP += 15;
-        if (p.stats.healXP >= getXPNeeded(p.stats.healLevel)) {
-            p.stats.healLevel++; p.stats.healXP = 0; 
-            systemMessage(`${p.name} HEAL UP! (Lv ${p.stats.healLevel})`);
-        }
+        p.activeTask = "dancing";
+        p.taskEndTime = Date.now() + TASK_DURATION;
+        systemMessage(`${user} is performing ${DANCE_UNLOCKS[p.danceStyle].name}!`);
         saveStats(p);
-    }
-}
-function cmdListDances(p) {
-    const lvl = p.stats.danceLevel || 1;
-    let msg = `Your Dance Lvl: ${lvl}. Unlocks: [1] The Squat (Lvl 1) `;
-    msg += lvl >= 5 ? `[2] The Flail (Lvl 5) ` : `[2] LOCKED (Lvl 5) `;
-    msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
-    systemMessage(msg);
-}
+    },
 
-function cmdTopStats() {
-    let all = [];
-    for (let i = 0; i < localStorage.length; i++) {
-        let key = localStorage.key(i);
-        if (key.startsWith("rpg_")) {
-            let d = JSON.parse(localStorage.getItem(key));
-            all.push({ name: key.replace("rpg_", ""), cb: d.combatLevel || 1 });
+    listdances: (p) => {
+        const lvl = p.stats.danceLevel;
+        let msg = `Your Dance Lvl: ${lvl}. Unlocks: [1] The Squat (Lvl 1) `;
+        msg += lvl >= 5 ? `[2] The Flail (Lvl 5) ` : `[2] LOCKED (Lvl 5) `;
+        msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
+        systemMessage(msg);
+    },
+
+    // --- Equipment & Inventory ---
+    equip: (p, args) => {
+        let inputName = args.slice(1).join(" ").toLowerCase();
+        let invItem = p.stats.inventory.find(i => i.toLowerCase() === inputName);
+        if (!invItem) return systemMessage(`${p.name}: You don't have "${args.slice(1).join(" ")}" in your inventory.`);
+
+        let dbKey = Object.keys(ITEM_DB).find(k => k.toLowerCase() === invItem.toLowerCase());
+        let itemData = ITEM_DB[dbKey];
+        if (!itemData) return systemMessage(`System Error: ${invItem} has no stats in ITEM_DB.`);
+
+        const msgs = { weapon: "equipped", armor: "put on", helmet: "is wearing", boots: "laced up" };
+        const slotMap = { weapon: "equippedWeapon", armor: "equippedArmor", helmet: "equippedHelmet", boots: "equippedBoots" };
+
+        if (slotMap[itemData.type]) {
+            p.stats[slotMap[itemData.type]] = dbKey;
+            systemMessage(`${p.name} ${msgs[itemData.type]} ${dbKey}!`);
+            saveStats(p);
         }
-    }
-    all.sort((a, b) => b.cb - a.cb);
-    systemMessage(`TOP PLAYERS: ` + all.slice(0, 5).map((s, i) => `#${i + 1} ${s.name}(Lv${s.cb})`).join(" | "));
-}
+    },
 
-function cmdUnequip(p, args) {
-    const slot = args[1]?.toLowerCase() || "all";
-    if (slot === "weapon" || slot === "all") p.stats.equippedWeapon = null;
-    if (slot === "armor" || slot === "all") p.stats.equippedArmor = null;
-    if (slot === "helmet" || slot === "all") p.stats.equippedHelmet = null;
-    if (slot === "boots" || slot === "all") p.stats.equippedBoots = null;
-    saveStats(p); 
-    systemMessage(`${p.name} unequipped ${slot}.`);
-}
+    unequip: (p, args) => {
+        const target = args[1] ? args[1].toLowerCase() : "all";
+        let changed = false;
+        const slots = [
+            { key: "equippedWeapon", match: ["weapon"] },
+            { key: "equippedArmor", match: ["armor", "armour"] },
+            { key: "equippedHelmet", match: ["helmet"] },
+            { key: "equippedBoots", match: ["boots"] }
+        ];
 
-function cmdWigColor(p, args) {
-    if (!p.stats.equippedHelmet || p.stats.equippedHelmet.toLowerCase() !== "wig") {
-        return systemMessage(`${p.name}, you need to wear a wig!`);
-    }
-    const color = args[1];
-    const validColors = ["red","blue","green","pink","purple","orange","white","black","cyan","magenta","yellow"];
-    
-    if (/^#([0-9A-F]{3}){1,2}$/i.test(color) || validColors.includes(color?.toLowerCase())) {
-        p.stats.wigColor = color; 
-        saveStats(p); 
-        systemMessage(`${p.name}'s wig is now ${color}!`);
-    } else {
-        systemMessage(`Usage: !wigcolor [color/hex]`);
-    }
-}
+        slots.forEach(slot => {
+            if (target === "all" || slot.match.includes(target)) {
+                p.stats[slot.key] = null;
+                changed = true;
+            }
+        });
 
-function cmdMingle(p, args, user) {
-    if (p.area !== "home") return;
-    // Find target by name or just pick the first person at home
-    let target = players[args[1]] || Object.values(players).find(pl => pl.name !== user && pl.area === "home" && !pl.dead);
-    if (target) { 
-        p.mingleTarget = target; 
-        setTimeout(() => { p.mingleTarget = null; }, 5000); 
+        if (changed) {
+            systemMessage(`${p.name} unequipped ${target === "all" ? "everything" : "their " + target}.`);
+            saveStats(p);
+        } else {
+            systemMessage(`${p.name}: Invalid slot. Use !unequip (weapon/armor/helmet/boots/all)`);
+        }
+    },
+
+    inventory: (p, args, user) => {
+        let filter = args[1]?.toLowerCase() || "all";
+        let items = p.stats.inventory;
+        let result = items;
+
+        if (filter === "weapons") result = items.filter(i => ITEM_DB[i]?.type === "weapon");
+        else if (filter === "armor" || filter === "armour") result = items.filter(i => ["armor", "helmet", "boots"].includes(ITEM_DB[i]?.type));
+        else if (filter === "boots") result = items.filter(i => ITEM_DB[i]?.type === "boots");
+        else if (filter === "helmets") result = items.filter(i => ITEM_DB[i]?.type === "helmet");
+        else if (filter === "fish") result = items.filter(i => i.includes("kg"));
+        else if (filter === "tools") result = items.filter(i => ITEM_DB[i]?.type === "tool" || i === "Fishing Rod");
+
+        if (result.length === 0) return systemMessage(`${user}'s ${filter} inventory is empty.`);
+
+        let counts = {}, fishWeight = 0, fishCount = 0;
+        result.forEach(item => {
+            if (item.includes("kg")) {
+                fishWeight += parseFloat(item.split("kg")[0]) || 0;
+                fishCount++;
+            } else counts[item] = (counts[item] || 0) + 1;
+        });
+
+        let output = `\n[ ${user.toUpperCase()}'S ${filter.toUpperCase()} ]`; // Old HUD Mimic
+        if (fishCount > 0) output += `\n> Fish x${fishCount} (Total: ${fishWeight.toFixed(2)}kg)`;
+        for (let [name, qty] of Object.entries(counts)) output += `\n> ${name} ${qty > 1 ? "x" + qty : ""}`;
+        systemMessage(output);
+    },
+
+    // --- Economy ---
+    sell: (p, args) => {
+        if (p.stats.inventory.length === 0) return systemMessage(`${p.name}: Your inventory is empty.`);
+        let target = args.slice(1).join(" ").toLowerCase();
+        let totalGold = 0, itemsRemoved = 0;
+        updateBuyerNPC();
+        let multiplier = buyerActive ? 2 : 1;
+
+        if (target === "fish") {
+            p.stats.inventory = p.stats.inventory.filter(item => {
+                if (item.toLowerCase().includes("kg")) {
+                    let weight = parseFloat(item.split("kg")[0].replace(/[^0-9.]/g, ''));
+                    if (!isNaN(weight)) {
+                        totalGold += Math.floor(weight * 1 * multiplier);
+                        itemsRemoved++; return false;
+                    }
+                }
+                if (item === "Golden Bass") {
+                    totalGold += ((ITEM_DB["Golden Bass"]?.value || 100) * multiplier);
+                    itemsRemoved++; return false;
+                }
+                return true;
+            });
+        } else {
+            let idx = p.stats.inventory.findIndex(i => i.toLowerCase() === target);
+            if (idx !== -1) {
+                let itemName = p.stats.inventory[idx];
+                let price = ITEM_DB[itemName]?.value || 50;
+                totalGold = (itemName === "Golden Bass") ? price * multiplier : price;
+                p.stats.inventory.splice(idx, 1);
+                itemsRemoved = 1;
+            }
+        }
+
+        if (itemsRemoved > 0) {
+            p.stats.gold = (p.stats.gold || 0) + (isNaN(totalGold) ? 0 : totalGold);
+            let msg = `${p.name} sold ${itemsRemoved} item(s) for ${totalGold.toFixed(2)} gold!`;
+            if (buyerActive) msg += " 💰 [MERCHANT SPECIAL RATE]";
+            systemMessage(msg);
+            saveStats(p);
+        } else systemMessage(`${p.name}: Could not find "${target}" to sell. Try "!sell fish".`);
+    },
+
+    bal: (p) => {
+        systemMessage(`${p.name} has ${(p.stats.gold || 0).toFixed(2)} coins stuffed in their prison wallet`);
+    },
+
+    // --- Stats & Social ---
+    stats: (p, args, user) => {
+        let targetName = args[1]?.toLowerCase() || user.toLowerCase();
+        let onlinePlayer = Object.values(players).find(pl => pl.name.toLowerCase() === targetName);
+        let data = onlinePlayer ? onlinePlayer.stats : JSON.parse(localStorage.getItem("rpg_" + targetName));
+        let finalName = onlinePlayer ? onlinePlayer.name : targetName;
+
+        if (data) {
+            systemMessage(`${finalName.toUpperCase()} - CB: ${data.combatLevel} | ATK: ${data.attackLevel} | FISH: ${data.fishLevel} | DANCE: ${data.danceLevel || 1} | HEAL: ${data.healLevel}`);
+        } else systemMessage(`System: Could not find stats for ${targetName}`);
+    },
+
+    topstats: () => {
+        let all = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+            if (key.startsWith("rpg_")) {
+                try {
+                    let d = JSON.parse(localStorage.getItem(key));
+                    all.push({ name: key.replace("rpg_", ""), cb: d.combatLevel || 1 });
+                } catch(e) {}
+            }
+        }
+        all.sort((a, b) => b.cb - a.cb);
+        systemMessage(`TOP PLAYERS: ` + all.slice(0, 5).map((s, i) => `#${i+1} ${s.name}(Lv${s.cb})`).join(" | "));
+    },
+
+    wigcolor: (p, args) => {
+        if (!p.stats.equippedHelmet || p.stats.equippedHelmet.toLowerCase() !== "wig") return systemMessage(`${p.name}, you need to be wearing a wig to change its color!`);
+        const colorArg = args[1];
+        if (!colorArg) return systemMessage(`Usage: !wigcolor [color/hex]`);
+        const isHex = /^#([0-9A-F]{3}){1,2}$/i.test(colorArg);
+        if (isHex || SAFE_COLORS.includes(colorArg.toLowerCase())) {
+            p.stats.wigColor = colorArg;
+            saveStats(p);
+            systemMessage(`${p.name}'s wig is now ${colorArg}!`);
+        } else systemMessage(`Invalid color! Use a hex code like #ff00ff or names like 'pink'.`);
+    },
+
+    mingle: (p, args, user) => {
+        if (p.area !== "home") return;
+        let target = players[args[1]] || Object.values(players).find(pl => pl.name !== user && pl.area === "home" && !pl.dead);
+        if (target) { p.mingleTarget = target; setTimeout(() => { p.mingleTarget = null; }, 5000); }
     }
-}
+};
 const COMMANDS = {
     // --- Movement ---
     travel:  (p, args) => movePlayer(p, args[1]),
@@ -676,7 +735,7 @@ const COMMANDS = {
     heal:    cmdHeal,
 
     // --- Info & Economy ---
-    stats:      (p, args, user) => cmdStats(args, user),
+    stats:      (p, args, user) => cmdShowStats(user, args),
     topstats:   cmdTopStats,
 	listdances: cmdListDances,
     inventory:  cmdInventory,
@@ -916,14 +975,34 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
-    if (COMMANDS[cmd]) COMMANDS[cmd](p, args, user);
-    
+
+    // Map specific aliases to handlers
+    if (cmdHandlers[cmd]) {
+        cmdHandlers[cmd](p, args, user);
+    } else if (cmd === "wallet" || cmd === "bal") {
+        cmdHandlers.bal(p);
+    } else {
+        // Handle Movement & Queue (preserved logic)
+        if (cmd === "travel")  movePlayer(p, args[1]);
+        if (cmd === "home")    movePlayer(p, "home");
+        if (cmd === "dungeon") movePlayer(p, "dungeon");
+        if (cmd === "join")    joinDungeonQueue(p);
+        if (cmd === "respawn" && p.dead) { 
+            p.dead = false; p.hp = p.maxHp; 
+            systemMessage(`${p.name} returned to life!`); 
+        }
+    }
+
+    // Admin Controls
     if (flags.broadcaster || flags.mod) {
-        if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); }
-        if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); }
-        if (cmd === "showhome") { viewArea = "home"; areaDisplay.textContent = "StickmenFall - HOME"; }
-		if (cmd === "showfishing") { viewArea = "fishingpond"; areaDisplay.textContent = "StickmenFall - Pond"; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; areaDisplay.textContent = "StickmenFall - DUNGEON"; }
+        const adminViews = { showhome: "home", showdungeon: "dungeon", showfishing: "fishingpond" };
+        if (adminViews[cmd]) {
+            viewArea = adminViews[cmd];
+            document.getElementById("areaDisplay").textContent = `StickmenFallv2.1.9 - VIEWING: ${viewArea.toUpperCase()}`;
+        }
+        if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[ADMIN] Merchant forced to spawn."); }
+        if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[ADMIN] Merchant forced to leave."); }
+        if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); systemMessage("[ADMIN] Merchant returned to automatic schedule."); }
     }
 };
 
