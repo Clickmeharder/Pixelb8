@@ -287,6 +287,7 @@ function resetSettings() {
 	console.log("📢: Entrivia Settings Reset to default.");
     displayConsoleMessage("📢", "entrivia Settings Reset to default.", {}, {});
 }
+
 function updateSettingsDisplay() {
 	console.log(`Updating display:
 	Time to answer: ${timetoAnswer},
@@ -356,7 +357,49 @@ function loadSettings() {
 	}
 }
 
+// Function to dynamically add a button and a status light indicator
+function updatePlugginSettingsUI() {
+	let settings = { usedefaultquestions, usecustomquestions, consolemessages, twitchChatOverlay, chatanswers, audioSetting, hideButtonBubble };
+    // Select all elements with the class 'optiontoggle-entrivia'
+    const toggleElements = document.querySelectorAll('.optiontoggle-entrivia');
 
+    // Loop through each element
+    toggleElements.forEach(element => {
+        const option = element.getAttribute('data-option'); // Get the data-option value
+        if (!option) return; // Skip if no data-option is set
+        // Create a formatted ID name from the data-option
+        const formattedId = option.replace(/[^a-zA-Z0-9]/g, ""); // Remove special characters
+        
+        // Create the button
+        const button = document.createElement('button');
+        button.id = `toggle${formattedId}`;
+        button.textContent = option.split(/(?=[A-Z])/).join(" "); // Format text by splitting camelCase
+        button.classList.add('a');
+        // Create the status indicator wrapper
+        const statusWrapper = document.createElement('div');
+        statusWrapper.classList.add('statusindicatorWrapper');
+
+        // Create the status label
+        const statusLabel = document.createElement('strong');
+        statusLabel.textContent = 'Status';
+
+        // Create the status indicator
+        const statusIndicator = document.createElement('span');
+        statusIndicator.id = `status${formattedId}`;
+        statusIndicator.setAttribute('data-option', option);
+        statusIndicator.classList.add('light-indicator');
+
+        // Append elements to status wrapper
+        statusWrapper.appendChild(statusLabel);
+        statusWrapper.appendChild(statusIndicator);
+
+        // Append button and status indicator to the parent div
+        element.appendChild(button);
+        element.appendChild(statusWrapper);
+		updateIndicatorLights();
+    });
+}
+updatePlugginSettingsUI();
 //=================================
 // - comfy Audio -
 //=================================
