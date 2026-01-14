@@ -1683,15 +1683,35 @@ Object.keys(STICKMEN_COMMANDS).forEach(key => {
 });
 
 function initStickmenFall() {
-    console.log("Initializing StickmenFall Plugin...");
-    // 1. Register the UI help commands
-    registerPluginCommands(userList, false, "StickmenFall");
-    registerPluginCommands(adminList, true, "StickmenFall");
-    // 2. Register the chat logic
-    registerChatPlugin(stickmenCommandHandler);
-    // 3. Start the actual game engine
-    gameLoop();
-}
+    try {
+        console.log("Initializing StickmenFall Plugin...");
 
-// Fire it off!
-initStickmenFall();
+        // 1. Verify requirements exist before calling them
+        // This prevents errors if twitchChat.js failed to load
+        if (typeof registerPluginCommands !== "function" || typeof registerChatPlugin !== "function") {
+            throw new Error("Required TwitchChat engine functions not found.");
+        }
+        // 2. Register UI commands
+        registerPluginCommands(userList, false, "StickmenFall");
+        registerPluginCommands(adminList, true, "StickmenFall");
+        // 3. Register chat logic
+        registerChatPlugin(stickmenCommandHandler);
+        // 4. Start the game engine
+        // We check if gameLoop exists just in case
+        if (typeof gameLoop === "function") {
+            gameLoop();
+        } else {
+            console.warn("StickmenFall: gameLoop function missing.");
+        }
+        console.log("StickmenFall Plugin initialized successfully.");
+    } catch (error) {
+        // This catches the error so the rest of your site keeps working
+        console.error("StickmenFall failed to load, but the show goes on:", error.message);
+        // Optional: Clean up or hide the game canvas if it failed
+        const canvas = document.getElementById("c");
+        if (canvas) canvas.style.display = "none";
+        return; // Graceful exit
+    }
+}
+// put this after the comfychat init or after connectstreamer inside the script in the bottom of the html!
+//initStickmenFall();
