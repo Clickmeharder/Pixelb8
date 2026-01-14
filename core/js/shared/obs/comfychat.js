@@ -467,10 +467,11 @@ ComfyJS.onChat = (user, message, command, color, flags, extra) => {
     displayChatMessage(user, message, flags, extra);  // Show message in chat box
 };
 
-const usercommands = [];
-const streamercommands = [];
 
 // Declare the arrays globally
+
+/*these commented out commands are HARDCODED version of pluggin commands*/
+/* STICKMEFALL COMMANDS*/
 /* const usercommands = [
 	{ command: "!a / !answer", description: "Allows users to answer a entrivia question.", usage: "!a / !answer" },
 	{
@@ -530,100 +531,175 @@ The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
 ];
  */
 
+/* STICKMEFALL COMMANDS*/
+/* const usercommands = [
+	{ command: "attack / attack", description: "Start attacking (stickmenfall).", usage: "attack / !fish" },
+	{ command: "fish / !fish", description: "Start fishing (stickmenfallpond).", usage: "fish / !fish" },
+	{ command: "heal / !heal", description: "Start healing (stickmenfallpond).", usage: "heal / !heal" },
+	{
+        command: "example / !example",
+        description: "example description (stickmenfallpond).",
+        usage: `\n
+Format: !entrivia-suggest easy/hard | category | question | answer | [options]
+option paramater is...optional
+valid area or paramaters: easy, hard
+valid categories: mining, hunting, crafting, history, beauty, economy, social, misc
+!example home;fishingpond;dungeon | category | string | arg-option1;arg-option2;arg-option3
+!entrivia-suggest home | thecategory | the relevent string or paramater | arg-option2`
+    },
+];
+const streamercommands = [
+	{ command: "!showhomw", description: "show the main stickmenfall area.", usage: "!showhome" },
+	{ command: "!showfishing", description: "show the stickmenfall fishing area.", usage: "!showfishing" },
+	{ command: "!showdungeon", description: "show the stickmenfall dungeon area.", usage: "!showdungeon" },
+];
+ */
+
+// twitchChat.js
+let usercommands = [];
+let streamercommands = [];
+
+/**
+ * @param {Array} cmds - The commands
+ * @param {Boolean} isStreamer - Admin list or User list
+ * @param {String} pluginName - The name of the game/module (e.g., "StickmenFall")
+ */
+function registerPluginCommands(cmds, isStreamer = false, pluginName = "General") {
+    // We attach the plugin name to each command so the UI knows where to put it
+    const cmdsWithSource = cmds.map(c => ({ ...c, source: pluginName }));
+
+    if (isStreamer) {
+        streamercommands.push(...cmdsWithSource);
+    } else {
+        usercommands.push(...cmdsWithSource);
+    }
+    
+    setTimeout(() => {
+        updateCommandlist(); 
+    }, 100);
+}
 // Function to update the command list in the UI
+// Function to update the command list in the UI with Plugin Grouping
 function updateCommandlist() {
     const userCommandList = document.getElementById("usercommandList");
     const broadcasterCommandList = document.getElementById("broadcastercommandList");
 
-    function createCommandList(commandArray, targetList) {
-        commandArray.forEach(function (command) {
-            const description = document.createElement("div");
+    // Clear existing content to avoid doubling up
+    userCommandList.innerHTML = "";
+    broadcasterCommandList.innerHTML = "";
 
-            // Command title with ❓ tooltip
-            const strong = document.createElement("strong");
-            strong.textContent = command.command;
+    function createGroupedCommandList(commandArray, targetList) {
+        // 1. Group commands by their source plugin
+        const groups = {};
+        commandArray.forEach(cmd => {
+            const source = cmd.source || "General";
+            if (!groups[source]) groups[source] = [];
+            groups[source].push(cmd);
+        });
 
-            const infoSpan = document.createElement("span");
-            infoSpan.classList.add("command-info");
-            infoSpan.setAttribute("title", "Usage: " + command.usage);
-            infoSpan.textContent = "❓";
-            infoSpan.style.cssFloat = "right";
+        // 2. Loop through each group to create headers and commands
+        Object.keys(groups).forEach(pluginName => {
+            // Create a styled Header for the Plugin
+            const headerLi = document.createElement("li");
+            headerLi.innerHTML = `
+                <div style="color:var(--accent-color, #00ffcc); font-weight:bold; border-bottom:1px dashed var(--accent-color, #00ffcc); 
+                margin:15px 0 8px 0; text-transform:uppercase; letter-spacing:2px; font-size:0.85em; text-align:center;">
+                    -- ${pluginName} --
+                </div>`;
+            targetList.appendChild(headerLi);
 
-            strong.appendChild(infoSpan);
-            description.appendChild(strong);
+            // 3. Create the individual commands within this group
+            groups[pluginName].forEach(function (command) {
+                const li = document.createElement("li");
+                const description = document.createElement("div");
 
-            // Description
-            const commandDescription = document.createElement("p");
-            commandDescription.textContent = command.description;
-            commandDescription.style.fontStyle = "italic";
-            commandDescription.style.fontSize = "small";
-            description.appendChild(commandDescription);
+                // Command title with ❓ tooltip
+                const strong = document.createElement("strong");
+                strong.textContent = command.command;
 
-            // Divider after description
-            const dividerAfterDescription = document.createElement("div");
-            dividerAfterDescription.style.borderTop = "3px ridge var(--border-color)";
-            dividerAfterDescription.style.margin = "4px 0";
-            description.appendChild(dividerAfterDescription);
+                const infoSpan = document.createElement("span");
+                infoSpan.classList.add("command-info");
+                infoSpan.setAttribute("title", "Usage: " + command.usage);
+                infoSpan.textContent = "❓";
+                infoSpan.style.cssFloat = "right";
 
-            // Usage label
-            const usageLabel = document.createElement("p");
-            usageLabel.textContent = "Usage:";
-            usageLabel.style.fontSize = "smaller";
-            description.appendChild(usageLabel);
-			//usage label bottom divider
-            const dividerAfterusageLabel = document.createElement("div");
-            dividerAfterusageLabel.style.borderTop = "2px ridge var(--border-color)";
-            dividerAfterusageLabel.style.margin = "4px 0";
-            usageLabel.appendChild(dividerAfterusageLabel);
-            // Split usage into lines
-            const usageLines = command.usage.split('\n').map(line => line.trim()).filter(line => line !== "");
+                strong.appendChild(infoSpan);
+                description.appendChild(strong);
 
-            // Separate usage examples from notes
-            const usageExamples = [];
-            const usageNotes = [];
+                // Description
+                const commandDescription = document.createElement("p");
+                commandDescription.textContent = command.description;
+                commandDescription.style.fontStyle = "italic";
+                commandDescription.style.fontSize = "small";
+                description.appendChild(commandDescription);
 
-            usageLines.forEach(line => {
-                if (line.startsWith(command.command)) {
-                    usageExamples.push(line);
-                } else {
-                    usageNotes.push(line);
-                }
+                // Divider after description
+                const dividerAfterDescription = document.createElement("div");
+                dividerAfterDescription.style.borderTop = "3px ridge var(--border-color)";
+                dividerAfterDescription.style.margin = "4px 0";
+                description.appendChild(dividerAfterDescription);
+
+                // Usage label
+                const usageLabel = document.createElement("p");
+                usageLabel.textContent = "Usage:";
+                usageLabel.style.fontSize = "smaller";
+                description.appendChild(usageLabel);
+
+                // Usage label bottom divider
+                const dividerAfterusageLabel = document.createElement("div");
+                dividerAfterusageLabel.style.borderTop = "2px ridge var(--border-color)";
+                dividerAfterusageLabel.style.margin = "4px 0";
+                usageLabel.appendChild(dividerAfterusageLabel);
+
+                // Split usage into lines
+                const usageLines = command.usage.split('\n').map(line => line.trim()).filter(line => line !== "");
+
+                // Separate usage examples from notes
+                const usageExamples = [];
+                const usageNotes = [];
+
+                usageLines.forEach(line => {
+                    // Check if line starts with the command name (ignoring potential aliases like !fish vs fish)
+                    const cleanCmd = command.command.split(' / ')[0].replace('!', '');
+                    if (line.toLowerCase().includes(cleanCmd.toLowerCase())) {
+                        usageExamples.push(line);
+                    } else {
+                        usageNotes.push(line);
+                    }
+                });
+
+                // Add usage examples with dividers
+                usageExamples.forEach((usageExample, index) => {
+                    const p = document.createElement("p");
+                    p.textContent = usageExample;
+                    p.style.fontSize = "smaller";
+                    description.appendChild(p);
+
+                    if (index < usageExamples.length - 1) {
+                        const usageDivider = document.createElement("div");
+                        usageDivider.style.borderTop = "2px ridge var(--border-color)";
+                        usageDivider.style.margin = "4px 0";
+                        description.appendChild(usageDivider);
+                    }
+                });
+
+                // Add any notes after usage examples
+                usageNotes.forEach(note => {
+                    const p = document.createElement("p");
+                    p.textContent = note;
+                    p.style.fontSize = "smaller";
+                    description.appendChild(p);
+                });
+
+                li.appendChild(description);
+                targetList.appendChild(li);
             });
-
-            // Add usage examples with dividers
-            usageExamples.forEach((usageExample, index) => {
-                const p = document.createElement("p");
-                p.textContent = usageExample;
-                p.style.fontSize = "smaller";
-                description.appendChild(p);
-
-                if (index < usageExamples.length - 1) {
-                    const usageDivider = document.createElement("div");
-                    usageDivider.style.borderTop = "2px ridge var(--border-color)";
-                    usageDivider.style.margin = "4px 0";
-                    description.appendChild(usageDivider);
-                }
-            });
-
-            // Add any notes after usage examples
-            usageNotes.forEach(note => {
-                const p = document.createElement("p");
-                p.textContent = note;
-                p.style.fontSize = "smaller";
-                description.appendChild(p);
-            });
-
-            // Add everything to the list item
-            const li = document.createElement("li");
-            li.appendChild(description);
-            targetList.appendChild(li);
         });
     }
 
-    createCommandList(usercommands, userCommandList);
-    createCommandList(streamercommands, broadcasterCommandList);
+    createGroupedCommandList(usercommands, userCommandList);
+    createGroupedCommandList(streamercommands, broadcasterCommandList);
 }
-
 // Function to dynamically add command spans based on the `data-option`
 function updateTwitchCommandInfo() {
     // Get all elements with the class 'twitchcmd-info'

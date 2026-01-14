@@ -1532,29 +1532,49 @@ function cmdTopStats() {
 
 /* maybe we can turn this comfyjsonchat into a function that the twitchchat script can call to run ommands from here? */
 
-//ComfyJS.onChat = (user, command, msg, color, flags, extra) => {
+//--------------
+/* 
+
+const STICKMEN_USER_CMDS = [
+    { command: "attack", description: "Engage in combat at the dungeon.", usage: "attack" },
+    { command: "fish", description: "Start fishing at the pond.", usage: "fish" },
+    { command: "dance", description: "Perform a dance (Style 1-4).", usage: "dance [style#]" },
+    { command: "bal", description: "Check your gold balance.", usage: "bal" },
+    { command: "equip", description: "Equip an item from inventory.", usage: "equip [item name]" }
+];
+
+const STICKMEN_ADMIN_CMDS = [
+    { command: "showfishing", description: "Switch view to Fishing Pond.", usage: "showfishing" },
+    { command: "spawnmerchant", description: "Force the merchant to appear.", usage: "spawnmerchant" },
+    { command: "testdance", description: "Test an animation regardless of level.", usage: "testdance [style#]" }
+];
+
+
+
+
+//ComfyJS.onChat = (user, command, msg, color, flags, extra) => {//
 function stickmenCommandHandler(user, msg, command, color, flags, extra) {
-//    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
-//    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
-//    displayChatMessage(user, message, flags, extra);  // Show message in chat box
+//    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);//
+//    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected//
+//    displayChatMessage(user, message, flags, extra);  // Show message in chat box//
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
-	//const cmd = args.shift().toLowerCase();
+	//const cmd = args.shift().toLowerCase();//
     let cmd = args[0].toLowerCase();
 
-    // Combat & Tasks
+    // Combat & Tasks//
     if (cmd === "attack") cmdAttack(p, user);
     if (cmd === "fish")   cmdFish(p, user);
     if (cmd === "heal")   cmdHeal(p, args);
     
-    // Movement
+    // Movement//
     if (cmd === "travel")  movePlayer(p, args[1]);
     if (cmd === "home")    movePlayer(p, "home");
     if (cmd === "dungeon") movePlayer(p, "dungeon");
     if (cmd === "join")    joinDungeonQueue(p);
     if (cmd === "dance") {cmdDance(p, user, args);}
 	if (cmd === "listdances") {cmdListDances(p);}
-    // Stats & Inventory
+    // Stats & Inventory//
     if (cmd === "stats")    cmdShowStats(user, args);
     if (cmd === "topstats") cmdTopStats();
 	if (cmd === "equip") cmdEquip(p, args);
@@ -1562,32 +1582,116 @@ function stickmenCommandHandler(user, msg, command, color, flags, extra) {
     if (cmd === "inventory") cmdInventory(p, user, args);
 	if (cmd === "sell") cmdSell(p, args);
 	if (cmd === "bal" || cmd === "!wallet" || cmd === "!money") {cmdBalance(p);}
-	//special
+	//special//
 	if (cmd === "wigcolor") { cmdWigColor(p, args); }
-    // Status
+    // Status//
     if (cmd === "mingle") cmdMingle(p, user, args);
     if (cmd === "respawn" && p.dead) { 
         p.dead = false; p.hp = p.maxHp; 
         systemMessage(`${p.name} returned to life!`); 
     }
 
-    // Admin Controls
+    // Admin Controls//
     if (flags.broadcaster || flags.mod) {
         if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: HOME"; }
         if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: DUNGEON"; }
         if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: FISHING POND"; }
-		// --- Manual Merchant Controls ---
+		// --- Manual Merchant Controls ---//
 		if (cmd === "spawnmerchant") {forceBuyer = true;updateBuyerNPC();systemMessage("[ADMIN] Merchant forced to spawn.");}
 		if (cmd === "despawnmerchant") {forceBuyer = false;updateBuyerNPC();systemMessage("[ADMIN] Merchant forced to leave.");}
-		// reset puts him back on the 7-minute automatic timer
+		// reset puts him back on the 7-minute automatic timer//
 		if (cmd === "resetmerchant") {forceBuyer = null; updateBuyerNPC();systemMessage("[ADMIN] Merchant returned to automatic schedule.");}
 		if (cmd === "testdance") {cmdTestDance(p, user, args.slice(1), flags);}
     }
 };
-// REGISTER the game with the comfychat.js
+
+// REGISTER the command metadata//
+registerPluginCommands(STICKMEN_USER_CMDS, false);
+registerPluginCommands(STICKMEN_ADMIN_CMDS, true);
+// REGISTER the game with the comfychat.js//
 registerChatPlugin(stickmenCommandHandler);
-/* ================= SYSTEMS TICKER (IDLE TASKS) ================= */
 
-//ComfyJS.Init("jaedraze");
-gameLoop();
+ */
 
+//---
+
+//___________________________________________________________
+/* ================= SMART COMMAND SYSTEM ================= */
+
+const STICKMEN_COMMANDS = {
+    // Combat & Tasks
+    "attack": { admin: false, desc: "Start attacking (dungeon).", usage: "attack", action: (p, user) => cmdAttack(p, user) },
+    "fish":   { admin: false, desc: "Start fishing (pond).", usage: "fish", action: (p, user) => cmdFish(p, user) },
+    "heal":   { admin: false, desc: "Start healing.", usage: "heal", action: (p, user, args) => cmdHeal(p, args) },
+    "stop":   { admin: false, desc: "Stop current task.", usage: "stop", action: (p, user) => { p.activeTask = null; p.targetX = null; p.danceStyle = 0; systemMessage(`${user} stopped.`); }},
+    
+    // Movement
+    "travel":  { admin: false, desc: "Travel to a specific area.", usage: "travel [area]", action: (p, user, args) => movePlayer(p, args[1]) },
+    "home":    { admin: false, desc: "Go back home.", usage: "home", action: (p) => movePlayer(p, "home") },
+    "dungeon": { admin: false, desc: "Go to the dungeon.", usage: "dungeon", action: (p) => movePlayer(p, "dungeon") },
+    "join":    { admin: false, desc: "Join the dungeon queue.", usage: "join", action: (p) => joinDungeonQueue(p) },
+    "dance":   { admin: false, desc: "Perform a dance style.", usage: "dance [1-4]", action: (p, user, args) => cmdDance(p, user, args) },
+    "listdances": { admin: false, desc: "Show your dance levels.", usage: "listdances", action: (p) => cmdListDances(p) },
+
+    // Stats & Inventory
+    "stats":     { admin: false, desc: "View player stats.", usage: "stats [user]", action: (p, user, args) => cmdShowStats(user, args) },
+    "topstats":  { admin: false, desc: "View the leaderboard.", usage: "topstats", action: () => cmdTopStats() },
+    "equip":     { admin: false, desc: "Equip gear from inventory.", usage: "equip [item]", action: (p, user, args) => cmdEquip(p, args) },
+    "unequip":   { admin: false, desc: "Unequip gear.", usage: "unequip [item]", action: (p, user, args) => cmdUnequip(p, args) },
+    "inventory": { admin: false, desc: "Check your items.", usage: "inventory", action: (p, user, args) => cmdInventory(p, user, args) },
+    "sell":      { admin: false, desc: "Sell items to merchant.", usage: "sell [item]", action: (p, user, args) => cmdSell(p, args) },
+    "bal":       { admin: false, desc: "Check gold balance.", usage: "bal", action: (p) => cmdBalance(p) },
+
+    // Special & Status
+    "wigcolor": { admin: false, desc: "Change your wig color.", usage: "wigcolor [color]", action: (p, user, args) => cmdWigColor(p, args) },
+    "mingle":   { admin: false, desc: "Mingle with others.", usage: "mingle", action: (p, user, args) => cmdMingle(p, user, args) },
+    "respawn":  { admin: false, desc: "Return to life if dead.", usage: "respawn", action: (p) => { 
+        if(p.dead) { p.dead = false; p.hp = p.maxHp; systemMessage(`${p.name} returned to life!`); }
+    }},
+
+    // Admin Controls
+    "showhome":    { admin: true, desc: "View Home area.", usage: "showhome", action: () => { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickmenFall - VIEWING: HOME"; }},
+    "showdungeon": { admin: true, desc: "View Dungeon area.", usage: "showdungeon", action: () => { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickmenFall - VIEWING: DUNGEON"; }},
+    "showfishing": { admin: true, desc: "View Fishing Pond.", usage: "showfishing", action: () => { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickmenFall - VIEWING: FISHING POND"; }},
+    "spawnmerchant": { admin: true, desc: "Force merchant spawn.", usage: "spawnmerchant", action: () => { forceBuyer = true; updateBuyerNPC(); systemMessage("[ADMIN] Merchant forced to spawn."); }},
+    "despawnmerchant": { admin: true, desc: "Force merchant leave.", usage: "despawnmerchant", action: () => { forceBuyer = false; updateBuyerNPC(); systemMessage("[ADMIN] Merchant forced to leave."); }},
+    "resetmerchant": { admin: true, desc: "Auto merchant schedule.", usage: "resetmerchant", action: () => { forceBuyer = null; updateBuyerNPC(); systemMessage("[ADMIN] Merchant returned to schedule."); }},
+    "testdance":   { admin: true, desc: "Test animations.", usage: "testdance [1-4]", action: (p, user, args, flags) => cmdTestDance(p, user, args.slice(1), flags) }
+};
+
+// The logic handler
+function stickmenCommandHandler(user, msg, flags, extra) {
+    let p = getPlayer(user, extra.userColor);
+    let args = msg.split(" ");
+    let cmd = args[0].toLowerCase().replace('!', ''); // Handle !command or command
+
+    const cmdData = STICKMEN_COMMANDS[cmd];
+    if (cmdData) {
+        if (cmdData.admin && !flags.broadcaster && !flags.mod) return;
+        cmdData.action(p, user, args, flags);
+    }
+}
+
+// REGISTER EVERYTHING
+const userList = [];
+const adminList = [];
+Object.keys(STICKMEN_COMMANDS).forEach(key => {
+    const c = STICKMEN_COMMANDS[key];
+    const entry = { command: key, description: c.desc, usage: c.usage };
+    if (c.admin) adminList.push(entry);
+    else userList.push(entry);
+});
+
+function initStickmenFall() {
+    console.log("Initializing StickmenFall Plugin...");
+    // 1. Register the UI help commands
+    registerPluginCommands(userList, false, "StickmenFall");
+    registerPluginCommands(adminList, true, "StickmenFall");
+    // 2. Register the chat logic
+    registerChatPlugin(stickmenCommandHandler);
+    // 3. Start the actual game engine
+    gameLoop();
+}
+
+// Fire it off!
+initStickmenFall();
