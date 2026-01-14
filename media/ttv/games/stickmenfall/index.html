@@ -228,44 +228,163 @@
     </style>
 </head>
 <body>
-	<button id="controls-toggle">⚙</button>
-	<!-- Chat Control Container -->
-	<div id="comfycontrolBox">
-		<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
-		<button id="streamersButt">Connect</button>
-		<button id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
-		<div id="more-controls" style="">
-			<span id="">Simulate background</span>
-			<div id="switch-box">
-				<label class="switch">
-				  <input type="checkbox" id="simulatebackground">
-				  <span class="slider"></span>
-				</label>
-			</div>
-		</div>
-		<div id="comfy-settings" style="display:none;">
-			<span id="comfy-settingsheader">Settings</span>
-			<label for="timeBetweenQuestions">Seconds Between Questions:</label>
-			<input type="number" id="timeBetweenQuestions" value="5" min="1" step="1">
-			<label for="timeToAnswer">Time to Answer (seconds):</label>
-			<input type="number" id="timeToAnswer" value="10" min="1" step="1">
-			<label for="questionsPerRound">Questions Per Round:</label>
-			<input type="number" id="questionsPerRound" value="5" min="1" step="1">
-			<label for="numberOfRounds">Number of Rounds:</label>
-			<input type="number" id="numberOfRounds" value="3" min="1" step="1">
-			<label><input type="checkbox" id="chatAnswersToggle" />Allow Chat Answers</label>
-			<button id="saveSettings">Save Settings</button>
+<!--====================main bubble butt nav ==========================-->
+	<!--==these should be dynamically added by comfychat.js to keep page clean===-->
+	<div id="bubblewrap">
+		<!--<button class="Butt" id="thePixelButt">Ᵽ</i></button>-->
+		<button class="Butt" id="thePixelButt">Ᵽ</button>
+		<div id="Bubble">
+			<!-- 🔌 🎮 🖥️🔧📝 🎨 🖼️-->
+			<button class="Butt widgetcontrols" id="comfy-Butt"><i class="fab fa-twitch"></i></button><!-- 💬🔌 🎮 🖥️🔧📝 🎨 🖼️-->
+<!-- 
+			<button class="Butt widgetcontrols" id="wheel-Butt"><i class="fa-regular fa-life-ring"></i></button>
+			<button class="Butt widgetcontrols" id="entrivia-Butt">Ｅ</button>
+			<button class="Butt widgetcontrols" id="pixelpen-Butt"><i class="fas fa-palette"></i></button>
+			<button class="Butt widgetcontrols" id="theme-Butt">⚙</button>
+
+-->
 		</div>
 	</div>
+	<!--===================straight to twitch comfy connection controls thing============================-->
+	<button id="controls-toggle">⚙</button>
+	
+<!--=====================================================================================================-->
+<!--================page body starts========================----------------------------------------------->
+	
+<!--====================MAIN HTML===========================-->
+<!--==these should also be dynamically added by comfychat.js to keep page clean===-->
+	<div  id="console"></div>
+		<!--this is the container for messages from twitch -->
+	<div id="twitchChat">
+		<div id="exampleMessagebox" style="display: none;">
+			<div class="exampleMessage"><span class="username" style="color: rgb(255, 105, 180);">JaeDraze: </span><span class="twitchmessage">find best viewers at ************.com</span></div>
+			<div class="exampleMessage"><span class="username" style="color: red;">cooldude420: </span><span class="twitchmessage">I just farted</span></div>
+			<div class="exampleMessage"><span class="username" style="color:blue;">boobs6969: </span><span class="twitchmessage">lol wow!</span></div>
+			<div class="exampleMessage"><span class="username" style="color:brown;">hankhilllover: </span><span class="twitchmessage">I sell propane and propane accesories</span></div>
+		</div>
+		<div id="twitchMessagebox">
+		</div>
+		
+	</div>
+<!--==we have an extra twitchMessagebox for osme reason===-->
 	<div id="consoleMessagebox"></div>
 	<div id="twitchchatContainer">
 		<div id="twitchMessagebox">
 		</div>
 	</div>
+
+
+<!--=====COMFY CONTROLLER=========-->
+<div class="controller" id="comfy-controller">
+	<button class="close-btn">×</button><h2 class="controllerheader">Get Comfy</h2>
+	<div class="controlpanel" id="">
+		<div class="controls">
+			<input class="a" type="text" name="yourTextName" id="twitchname" placeholder="Enter Your Twitch Streamer Name">
+			<button class="a" id="streamersButt">Connect</button>
+			<button class="a" id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
+		</div>
+		<div id="more-controls" style="">
+
+			<div id="comfycontrolBox">
+				<input type="text" name="yourTextName" placeholder="Enter Your Twitch Streamer Name">
+				<button id="streamersButt">Connect</button>
+				<button id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
+				<div id="more-controls" style="">
+					<span id="">Simulate background</span>
+					<div id="switch-box">
+						<label class="switch">
+						  <input type="checkbox" id="simulatebackground">
+						  <span class="slider"></span>
+						</label>
+					</div>
+				</div>
+				<div class="controls" id="entrivia-settings-toggles">
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="usedefaultquestions"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-defaultquestions"></div>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="usecustomquestions"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-customquestions"></div>
+				</div>
+				<div class="controls" id="comfychat-settings-main">
+					<h3>Main Settings</h3>
+					
+
+					<div class="entriviasettings-input inputRow" id="entrivia-bar-Questiondelay">
+						<label for="timeBetweenQuestions">Seconds Between Questions:</label>
+						<input class="a" type="number" id="timeBetweenQuestions" value="30" min="1" step="1">
+					</div>
+					<div class="twitchcmd-info" data-option="!entrivia-questiondelay"></div>
+					<div class="entriviasettings-input inputRow" id="entrivia-bar-Answertime">
+						<label for="timeToAnswer">Time to Answer (seconds):</label>
+						<input class="a" type="number" id="timeToAnswer" value="30" min="1" step="1">
+					</div>
+					<div class="twitchcmd-info" data-option="!entrivia-answertime"></div>
+					<div class="entriviasettings-input inputRow" id="entrivia-bar-QuestionsperRound">
+						<label for="questionsPerRound">Questions Per Round:</label>
+						<input class="a" type="number" id="questionsPerRound" value="1" min="1" step="1">	
+					</div>
+					<div class="twitchcmd-info" data-option="!entrivia-questioncap"></div>
+					<div class="entriviasettings-input inputRow" id="entrivia-bar-rounddelay">
+						<label for="timeBetweenRounds">Seconds Between Rounds:</label>
+						<input class="a" type="number" id="timeBetweenRounds" value="30" min="1" step="1">
+					</div>
+					<div class="twitchcmd-info" data-option="!entrivia-rounddelay"></div>
+					<div class="entriviasettings-input inputRow" id="entrivia-bar-settingsbutts">
+						<button class="a" id="changeSettings">Set</button>
+						<button class="a" id="resetSettings">Default</button>
+					</div>
+					
+					
+				</div>
+				<div id="commandListContainer">
+				  <h3>Command List</h3>
+				  <h2>User Commands</h2>
+				  <ul id="usercommandList">
+				  </ul>
+				  <h2>Broadcaster Commands</h2>
+				  <ul id="broadcastercommandList">
+				  </ul>
+				</div>
+				<div class="togglecontrols" id="entrivia-settings-toggles">
+					<h3>Dont worry bout these</h3>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="hideButtonBubble"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-hideButtonBubble"></div>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="consolemessages"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-consolemessages"></div>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="twitchChatOverlay"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-disablechat"></div>
+					<div class="entrivia-settings-togglebar optiontoggle-entrivia" data-option="chatanswers"></div>
+					<div class="twitchcmd-info" data-option="!entrivia-chatanswers"></div>
+				</div>
+				<div class="controls" id="entrivia-admincontrols">
+					<div class="entriviasettings-input" id="entrivia-bar-adminbutts">
+						<h3>Entrivia Suggested Questions Admin</h3>
+						<button class="a" onclick="loadSuggestedQuestions()">📦 Load Suggested Questions</button>
+						<div id="suggestedQuestionsContainer"></div>
+						<hr>
+						<button class="a" onclick="loadApprovedQuestions()">📋 Load Approved Questions</button>
+						<div id="approvedQuestionsContainer"></div>
+					</div>
+				</div>
+				<div id="comfy-settings" style="">
+					<span id="comfy-settingsheader">Settings</span>
+					<label><input type="checkbox" id="chatAnswersToggle" />Allow Chat Answers</label>
+					<button id="saveSettings">Save Settings</button>
+				</div>
+
+			</div>
+
+		</div>
+	</div>
+</div>	
+
+
+	<!-- Chat Control Container -->
+
 <!--==================================================================-->
 	<!--this is the underlay its mostly for aesthetics and sits behind everything else it might be a border or different animated elements -->		
 
-	
+<!--================PLUGINS ELEMENTS========================----------------------------------------------->
+<!------- THESE should be dynamically added by each individual plugin so we can keep html clean -------->
 	<!--============== -== STICKMENFALL --== =====================-->
 	<canvas id="c" width="1000" height="600"></canvas>
 	<div id="enemyUI"></div>
@@ -277,7 +396,7 @@
 	<script src="/assets/js/stickmenfall.js"></script>
 	<script src="../../../overlays/assets/js/obsglobal.js"></script>
 	<!-- <script src="../../../overlays/assets/js/twitchChat.js"></script> -->
-	<script src="../../../overlays/assets/js/comfychat.js"></script>
+	<script src="/core/js/shared/obs/comfychat.js"></script>
 	<script>
 		
 
