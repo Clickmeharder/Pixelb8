@@ -577,25 +577,20 @@
 	<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 	<script src="/core/js/shared/obs/obsglobal.js"></script>
 	<script src="/core/js/shared/obs/comfychat.js"></script>
-	<script src="/core/js/shared/obs/comfychat/stickmenfall.js"></script>
+	<script src="/assets/js/stickmenfall.js"></script>
 
 	<!-- <script src="../../../overlays/assets/js/twitchChat.js"></script> -->
 
 	<script>
 		
 
-	window.onload = function () {
-        // 1. Setup the basic UI settings
-        updateSettingsDisplay();
-        // 2. Initialize your plugins first 
-        // (This fills the 'usercommands' and 'streamercommands' arrays)
-        initStickmenFall();
-        //initMyNewGame();
-        // 3. Now that the arrays are full, build the command list UI
-        updateCommandlist(); 
-        // 4. Finally, connect to Twitch
-        connectStreamer();
-    };
+		window.onload = function () {
+			updateSettingsDisplay();
+			updateCommandlist(); 
+			connectStreamer();
+			initStickmenFall();
+			
+		};
 	</script>
 </body>
 </html>
