@@ -1529,8 +1529,11 @@ function cmdTopStats() {
 }
 
 /* ================= THE COMFY ROUTER ================= */
-//ComfyJS.onChat = (user, command, message, flags, extra) => {
-ComfyJS.onChat = (user, msg, color, flags, extra) => {
+
+/* maybe we can turn this comfyjsonchat into a function that the twitchchat script can call to run ommands from here? */
+
+//ComfyJS.onChat = (user, command, msg, color, flags, extra) => {
+function stickmenCommandHandler(user, msg, command, color, flags, extra) {
 //    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
 //    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
 //    displayChatMessage(user, message, flags, extra);  // Show message in chat box
@@ -1581,7 +1584,8 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
 		if (cmd === "testdance") {cmdTestDance(p, user, args.slice(1), flags);}
     }
 };
-
+// REGISTER the game with the comfychat.js
+registerChatPlugin(stickmenCommandHandler);
 /* ================= SYSTEMS TICKER (IDLE TASKS) ================= */
 
 //ComfyJS.Init("jaedraze");
