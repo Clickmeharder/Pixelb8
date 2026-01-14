@@ -2,7 +2,7 @@ let c, ctx;
 //const c = document.getElementById("c");
 //const ctx = c.getContext("2d");
 
-/* ====grr============= CONFIG & STATE ================= */
+/* ====grr============= CONFIG & STATE ==========:======= */
 let viewArea = "home"; 
 let players = {};
 let enemies = [];
