@@ -17,7 +17,7 @@ let audioSetting = "on";
 let hideButtonBubble = "on";
 let twitchChatOverlay = "on";
 let consolemessages = false;
-
+let usercommands = [];
 window.chatPlugins = [];
 
 
@@ -208,14 +208,12 @@ function updateBubblewrapVisibility() {
 }
 updateBubblewrapVisibility();
 //update this event listener line so if it doesnt exist script doesnt fail
-document.getElementById('togglehideButtonBubble').addEventListener('click', toggleButtonBubble);
 
 function toggleConsoleMessages() {
     consoleMessages = !consoleMessages;  // Toggle the boolean value
     console.log(`Console messages are now ${consoleMessages ? "enabled" : "disabled"}`);
 }
 //update this event listener line so if it doesnt exist script doesnt fail
-document.getElementById('toggleconsolemessages').addEventListener('click', toggleconsolemessages);
 
 function toggletwitchChatOverlay() {
 	twitchChatOverlay = !twitchChatOverlay;
@@ -227,9 +225,16 @@ function toggletwitchChatOverlay() {
 	displayConsoleMessage("system", `entrivia Chat Overlay is now: ${twitchChatOverlay}`);
 }
 //update this event listener line so if it doesnt exist script doesnt fail
-document.getElementById('toggletwitchChatOverlay').addEventListener('click', toggletwitchChatOverlay);
+document.addEventListener('DOMContentLoaded', () => {
+    const bubbleBtn = document.getElementById('togglehideButtonBubble');
+    if (bubbleBtn) bubbleBtn.addEventListener('click', toggleButtonBubble);
 
+    const consoleBtn = document.getElementById('toggleconsolemessages');
+    if (consoleBtn) consoleBtn.addEventListener('click', toggleConsoleMessages);
 
+    const chatBtn = document.getElementById('toggletwitchChatOverlay');
+    if (chatBtn) chatBtn.addEventListener('click', toggletwitchChatOverlay);
+});
 //--------------------------------------------------
 //---Persistent Settings Logic (Local Storage) -----|
 //--------------------------------------------------
