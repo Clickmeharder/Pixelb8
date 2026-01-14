@@ -171,12 +171,7 @@ function movePlayer(p, targetArea) {
     if (targetArea !== "dungeon") dungeonQueue = dungeonQueue.filter(n => n !== p.name);
     systemMessage(`${p.name} traveled to ${targetArea}`);
 }
-/* ================= HOVER LOGIC ================= */
-c.addEventListener('mousemove', (e) => {
-    const rect = c.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
-});
+
 
 function handleTooltips() {
     const tt = document.getElementById("tooltip");
@@ -1673,14 +1668,6 @@ function stickmenCommandHandler(user, msg, flags, extra) {
 }
 
 // REGISTER EVERYTHING
-const userList = [];
-const adminList = [];
-Object.keys(STICKMEN_COMMANDS).forEach(key => {
-    const c = STICKMEN_COMMANDS[key];
-    const entry = { command: key, description: c.desc, usage: c.usage };
-    if (c.admin) adminList.push(entry);
-    else userList.push(entry);
-});
 
 window.initStickmenFall = function() {
     try {
@@ -1688,6 +1675,22 @@ window.initStickmenFall = function() {
 		c = document.getElementById("c");
         if (!c) throw new Error("Canvas 'c' not found in HTML");
         ctx = c.getContext("2d");
+		/* ================= HOVER LOGIC ================= */
+		c.addEventListener('mousemove', (e) => {
+			const rect = c.getBoundingClientRect();
+			mouse.x = e.clientX - rect.left;
+			mouse.y = e.clientY - rect.top;
+		});
+		const userList = [];
+		const adminList = [];
+
+		Object.keys(STICKMEN_COMMANDS).forEach(key => {
+			const c = STICKMEN_COMMANDS[key];
+			const entry = { command: key, description: c.desc, usage: c.usage };
+			if (c.admin) adminList.push(entry);
+			else userList.push(entry);
+		});
+
         // 1. Verify requirements exist before calling them
         // This prevents errors if twitchChat.js failed to load
         if (typeof registerPluginCommands !== "function" || typeof registerChatPlugin !== "function") {
