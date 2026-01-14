@@ -660,14 +660,13 @@ function handleLoot(p, target) {
         systemMessage(`✨ ${p.name} looted: ${drop}!`);
     }
 }
-function drawEquipment(ctx, p, now, bodyY, armMove) {
+// Add 'lean' as the last parameter here
+function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
     if (p.dead) return;
 
-    // --- Variables ---
     const pWeapon = p.stats.equippedWeapon; 
     const isAttacking = p.activeTask === "attacking";
     const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
-    const lean = p.lean || 0;
 
     // --- 1. THE FISHING ROD ---
     if (isFishing) {
@@ -677,6 +676,7 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
         ctx.lineWidth = 2;
         let bob = Math.sin(now / 300) * 0.1;
         
+        // Use the passed lean
         const rodStartX = p.x + 10 + (lean * 20);
         const rodStartY = p.y - 10 + bodyY;
         const rodTipX = p.x + 50 + (lean * 20);
@@ -703,38 +703,33 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
         ctx.restore();
     }
 
-    // --- 2. WEAPON (Restored Attack Level Colors) ---
+    // --- 2. WEAPON ---
     if (pWeapon && ITEM_DB[pWeapon] && !isFishing) {
         const w = ITEM_DB[pWeapon];
         const isBow = pWeapon.toLowerCase().includes("bow");
         
         ctx.save();
+        // Weapon positioning needs to account for lean
+        let weaponX = p.x + (lean * 20); 
+        
         if (isAttacking) {
-            ctx.translate(p.x + 12, p.y - 10 + bodyY);
+            ctx.translate(weaponX + 12, p.y - 10 + bodyY);
             let swing = Math.sin(now / 150) * 0.8;
             ctx.rotate(swing);
-            
-            // Restore: Original Level-based Color Logic
             ctx.strokeStyle = p.stats.attackLevel > 10 ? "#0ff" : (w.color || "#ccc");
             ctx.lineWidth = 3;
             ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(25, -5); ctx.stroke();
-            
-            // Crossguard
             ctx.strokeStyle = "#aa8800";
             ctx.beginPath(); ctx.moveTo(5, -8); ctx.lineTo(5, 8); ctx.stroke();
         } else {
-            // SHEATHED logic remains the same
             if (isBow) {
-                ctx.translate(p.x - 2, p.y - 5 + bodyY);
+                ctx.translate(weaponX - 2, p.y - 5 + bodyY);
                 ctx.rotate(Math.PI / 4);
                 ctx.strokeStyle = "#8B4513";
                 ctx.lineWidth = 2;
                 ctx.beginPath(); ctx.arc(0, 0, 15, -Math.PI/2, Math.PI/2); ctx.stroke();
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
-                ctx.lineWidth = 1;
-                ctx.beginPath(); ctx.moveTo(0, -15); ctx.lineTo(0, 15); ctx.stroke();
             } else {
-                ctx.translate(p.x - 5, p.y - 5 + bodyY);
+                ctx.translate(weaponX - 5, p.y - 5 + bodyY);
                 ctx.rotate(Math.PI / 1.2);
                 ctx.strokeStyle = w.color;
                 ctx.lineWidth = 2;
@@ -745,12 +740,12 @@ function drawEquipment(ctx, p, now, bodyY, armMove) {
         ctx.restore();
     }
 
-    // --- 3. GEAR (Armor, Helmet, Boots) ---
-    if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY);
-    if (p.stats.equippedHelmet) drawHelmet(ctx, p, bodyY);
-    if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY);
+    // --- 3. GEAR (Pass the lean to these functions too) ---
+    if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean);
+    if (p.stats.equippedHelmet) drawHelmet(ctx, p, bodyY, lean);
+    if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY, lean);
 }
-function drawBoots(ctx, p, bodyY = 0) {
+function drawBoots(ctx, p, bodyY = 0, lean = 0) { // Added lean to signature
     const item = ITEM_DB[p.stats.equippedBoots];
     if (!item) return;
 
@@ -762,9 +757,12 @@ function drawBoots(ctx, p, bodyY = 0) {
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
 
+    // We add a fraction of bodyY so the boots "hop" slightly during the horse dance
+    const jumpOffset = bodyY * 0.3; 
+    const footY = p.y + 25 + jumpOffset; 
+
     // Left Boot
     const leftFootX = p.x - 10 - walk;
-    const footY = p.y + 25; // Feet stay on ground, but we could add bodyY/4 for "bounce"
     ctx.fillRect(leftFootX - 4, footY - 2, 8, 5); 
     ctx.strokeRect(leftFootX - 4, footY - 2, 8, 5);
     ctx.fillRect(leftFootX - 2, footY - 6, 4, 5); 
@@ -777,20 +775,19 @@ function drawBoots(ctx, p, bodyY = 0) {
 
     ctx.restore();
 }
-function drawArmor(ctx, p, bodyY = 0) {
+function drawArmor(ctx, p, bodyY = 0, lean = 0) {
     const item = ITEM_DB[p.stats.equippedArmor];
     if (!item) return;
 
-    const lean = p.lean || 0;
-    const headX = p.x + (lean * 20);
+    const headX = p.x + (lean * 20); 
+    const hipX = p.x + (lean * 5); // Added this so the armor bottom follows the lean slightly
 
     ctx.save();
     ctx.beginPath();
-    // All Y values now include bodyY
     ctx.moveTo(headX - 7, p.y - 18 + bodyY); 
     ctx.lineTo(headX + 7, p.y - 18 + bodyY); 
-    ctx.lineTo(p.x + 7, p.y + 8 + bodyY);    
-    ctx.lineTo(p.x - 7, p.y + 8 + bodyY);    
+    ctx.lineTo(hipX + 7, p.y + 8 + bodyY);    
+    ctx.lineTo(hipX - 7, p.y + 8 + bodyY);    
     ctx.closePath();
 
     ctx.fillStyle = item.color;
@@ -801,66 +798,59 @@ function drawArmor(ctx, p, bodyY = 0) {
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
     ctx.stroke();
-
-    if (item.color === "#eee" || item.color === "#aaa") {
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-        ctx.lineWidth = 2;
-        ctx.beginPath(); 
-        ctx.moveTo(headX - 3, p.y - 15 + bodyY); 
-        ctx.lineTo(p.x - 3, p.y + 2 + bodyY); 
-        ctx.stroke();
-    }
     ctx.restore();
 }
 
-function drawHelmet(ctx, p, bodyY = 0) {
+function drawHelmet(ctx, p, bodyY = 0, lean = 0) {
     const item = ITEM_DB[p.stats.equippedHelmet];
     if (!item) return;
 
-    const leanOffset = (p.lean || 0) * 20;
-    const hX = p.x + leanOffset;
-    const hY = p.y - 30 + bodyY; // Sync with head height
+    const hX = p.x + (lean * 20); // Uses passed lean
+    const hY = p.y - 30 + bodyY; 
 
     ctx.save();
-    ctx.lineWidth = 2;
     const helmetName = p.stats.equippedHelmet.toLowerCase();
-
     if (helmetName === "paper bag") {
         ctx.fillStyle = "#d2b48c";
         ctx.strokeStyle = "#000";   
         ctx.fillRect(hX - 12, hY - 14, 24, 26);
         ctx.strokeRect(hX - 12, hY - 14, 24, 26);
-        ctx.fillStyle = "#111";
-        ctx.fillRect(hX - 7, hY - 4, 5, 5);
-        ctx.fillRect(hX + 2, hY - 4, 5, 5);
-        ctx.strokeStyle = "rgba(0,0,0,0.2)";
-        ctx.beginPath(); ctx.moveTo(hX - 12, hY + 5); ctx.lineTo(hX + 12, hY + 8); ctx.stroke();
-    } 
-	else if (helmetName === "wig") {
-        // Use custom wigColor if it exists, otherwise use the DB color (Yellow)
-        ctx.fillStyle = p.stats.wigColor || item.color || "#ffff00";
-        
-        // --- Flowing Hair Styles ---
-        // Back hair (behind the head)
-        ctx.beginPath();
-        ctx.arc(hX, hY, 13, 0, Math.PI * 2); 
-        ctx.fill();
-
-        // Side bangs (framing the face)
-        ctx.beginPath();
-        ctx.moveTo(hX - 10, hY);
-        ctx.quadraticCurveTo(hX - 15, hY + 15, hX - 10, hY + 20); // Left lock
-        ctx.moveTo(hX + 10, hY);
-        ctx.quadraticCurveTo(hX + 15, hY + 15, hX + 10, hY + 20); // Right lock
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = ctx.fillStyle;
-        ctx.stroke();
-
-        // Top volume
-        ctx.beginPath();
-        ctx.arc(hX, hY - 6, 11, Math.PI, 0);
-        ctx.fill();
     }
+	else if (helmetName === "wig") {
+		ctx.fillStyle = p.stats.wigColor || item.color || "#ffff00";
+		ctx.strokeStyle = ctx.fillStyle;
+		
+		// 1. Back Hair (The "U" shape behind the head)
+		// We draw from 0.2 PI to 0.8 PI (the bottom half) so it looks like it's behind the neck
+		ctx.beginPath();
+		ctx.arc(hX, hY, 13, 0.1 * Math.PI, 0.9 * Math.PI); 
+		ctx.lineWidth = 6;
+		ctx.stroke();
+
+		// 2. Top Volume (The "Hat" of hair)
+		// This draws from 1.0 PI to 2.0 PI (the top half circle only)
+		ctx.beginPath();
+		ctx.arc(hX, hY - 2, 11, Math.PI, 0); 
+		ctx.fill();
+
+		// 3. Side Locks (Draping down the sides)
+		ctx.lineWidth = 5;
+		ctx.beginPath();
+		// Left side lock
+		ctx.moveTo(hX - 10, hY - 2);
+		ctx.quadraticCurveTo(hX - 14, hY + 10, hX - 11, hY + 18);
+		// Right side lock
+		ctx.moveTo(hX + 10, hY - 2);
+		ctx.quadraticCurveTo(hX + 14, hY + 10, hX + 11, hY + 18);
+		ctx.stroke();
+
+		// 4. Little Bangs (Optional: Tiny bits on the forehead that don't cover eyes)
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.moveTo(hX - 8, hY - 8); ctx.lineTo(hX - 4, hY - 10);
+		ctx.moveTo(hX + 8, hY - 8); ctx.lineTo(hX + 4, hY - 10);
+		ctx.stroke();
+	}
     else if (helmetName === "iron helmet") {
         ctx.fillStyle = "#aaa";
         ctx.strokeStyle = "#000";
@@ -894,11 +884,20 @@ function drawStickman(ctx, p) {
     let armMove = 0;
     const isDancing = p.activeTask === "dancing";
     const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
+    // --- Variables ---
+    const pWeapon = p.stats.equippedWeapon; 
+    const isAttacking = p.activeTask === "attacking";
 
-    if (isDancing) {
+	if (isDancing) {
         if (p.danceStyle === 1) bodyY = Math.sin(now / 100) * 8;
         if (p.danceStyle === 2) armMove = Math.sin(now / 50) * 20;
         if (p.danceStyle === 3) lean = Math.sin(now / 200) * 0.6;
+        
+        // STYLE 4: The Horse Gallop
+        if (p.danceStyle === 4) {
+            bodyY = Math.abs(Math.sin(now / 150)) * -15; // Jumpy gallop
+            armMove = Math.sin(now / 150) * 5;           // Slight arm bounce
+        }
     }
 
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
@@ -915,33 +914,43 @@ function drawStickman(ctx, p) {
     // 2. Torso
     ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
 
-    // 3. Arms
-    const isAttacking = p.activeTask === "attacking";
+ // 3. Arms
     if (!isAttacking) {
         ctx.beginPath();
-        ctx.strokeStyle = p.color;
-        ctx.moveTo(headX, headY + 15);
-        ctx.lineTo(p.x - 18 + (lean * 10), p.y + 2 + bodyY + armMove); // Left
-        
-        ctx.moveTo(headX, headY + 15);
-        if (isFishing) {
-            ctx.lineTo(p.x + 10 + (lean * 20), p.y - 10 + bodyY); // Right (Rod Anchor)
+        if (p.danceStyle === 4) {
+            // Crossed Arms "Horse Riding" Style
+            ctx.moveTo(headX, headY + 15);
+            ctx.lineTo(headX - 10, headY + 25); // Left arm tucked
+            ctx.moveTo(headX, headY + 15);
+            ctx.lineTo(headX + 10, headY + 25); // Right arm tucked
         } else {
-            ctx.lineTo(p.x + 18 + (lean * 30), p.y + 2 + bodyY - armMove); // Right (Swing)
+            // ... your existing arm logic for 1, 2, 3 and Fishing ...
+            ctx.moveTo(headX, headY + 15);
+            ctx.lineTo(p.x - 18 + (lean * 10), p.y + 2 + bodyY + armMove);
+            ctx.moveTo(headX, headY + 15);
+            if (isFishing) {
+                ctx.lineTo(p.x + 10 + (lean * 20), p.y - 10 + bodyY);
+            } else {
+                ctx.lineTo(p.x + 18 + (lean * 30), p.y + 2 + bodyY - armMove);
+            }
         }
         ctx.stroke();
     }
 
-    // 4. Legs
+	// 4. Legs
     let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+    
+    // Add "Gallop" leg spread for Dance 4
+    let legSpread = (p.danceStyle === 4) ? 15 : 10;
+
     ctx.beginPath(); 
     ctx.moveTo(p.x, p.y + 10 + bodyY); 
-    ctx.lineTo(p.x - 10 - walk, p.y + 25); 
+    ctx.lineTo(p.x - legSpread - walk, p.y + 25); 
     ctx.moveTo(p.x, p.y + 10 + bodyY); 
-    ctx.lineTo(p.x + 10 + walk, p.y + 25); 
+    ctx.lineTo(p.x + legSpread + walk, p.y + 25); 
     ctx.stroke();
 
-    drawEquipment(ctx, p, now, bodyY, armMove);
+    drawEquipment(ctx, p, now, bodyY, armMove, lean);
 
     // HP & Name
     ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
@@ -1004,6 +1013,8 @@ function drawScenery(ctx) {
     }
 	
 }
+
+
 function gameLoop() {
 	updateBuyerNPC();
     // 1. Background
@@ -1116,46 +1127,37 @@ function gameLoop() {
 /* ================= COMMAND FUNCTIONS ================= */
 function cmdDance(p, user, args) {
     if (p.dead) return;
-
     const level = p.stats.danceLevel || 1;
-    
-    // Logic changed here: We look at args[1] because args[0] is the command string
     let chosenStyle = parseInt(args[1]); 
 
-    // Define the Level Requirements
     const UNLOCKS = {
         1: { name: "The Squat", minLvl: 1 },
         2: { name: "The Flail", minLvl: 5 },
-        3: { name: "The Lean",  minLvl: 10 }
+        3: { name: "The Lean",  minLvl: 10 },
+        4: { name: "The Op-Pa", minLvl: 2 } // New Style!
     };
 
-    // Determine which style to use
     if (!isNaN(chosenStyle)) {
-        // Player tried to pick a specific dance
         if (!UNLOCKS[chosenStyle]) {
-            systemMessage(`${user}, that dance style doesn't exist! Try 1, 2, or 3.`);
+            systemMessage(`${user}, try styles 1, 2, 3, or 4!`);
             return;
         }
         if (level < UNLOCKS[chosenStyle].minLvl) {
-            systemMessage(`${user}, you need Dance Lvl ${UNLOCKS[chosenStyle].minLvl} for that move!`);
+            systemMessage(`${user}, you need Dance Lvl ${UNLOCKS[chosenStyle].minLvl} for that!`);
             return;
         }
         p.danceStyle = chosenStyle;
     } else {
-        // Player just typed "!dance", give them a random unlocked one
-        let unlockedStyles = [];
-        if (level >= 1) unlockedStyles.push(1);
+        let unlockedStyles = [1];
         if (level >= 5) unlockedStyles.push(2);
         if (level >= 10) unlockedStyles.push(3);
-        
+        if (level >= 20) unlockedStyles.push(4);
         p.danceStyle = unlockedStyles[Math.floor(Math.random() * unlockedStyles.length)];
     }
 
     p.activeTask = "dancing";
-    p.taskEndTime = Date.now() + (15 * 60 * 1000); // 15 mins
-    
-    let styleName = UNLOCKS[p.danceStyle].name;
-    systemMessage(`${user} is performing ${styleName}! (Lvl ${level} Dancer)`);
+    p.taskEndTime = Date.now() + (15 * 60 * 1000);
+    systemMessage(`${user} is performing ${UNLOCKS[p.danceStyle].name}!`);
     saveStats(p);
 }
 function cmdListDances(p) {
