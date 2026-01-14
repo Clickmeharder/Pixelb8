@@ -996,14 +996,23 @@ function drawScenery(ctx) {
 	
 }
 
+const systemTimers = {
+    lastGlobalTick: Date.now(),
+    lastEnemyTick: Date.now(),
+    globalInterval: 3000, // 3 seconds (Fishing, etc.)
+    enemyInterval: 4000   // 4 seconds (Enemy Attacks)
+};
+
 function gameLoop() {
-	updateBuyerNPC();
+    updateBuyerNPC();
+    
     // 1. Background
     ctx.fillStyle = backgrounds[viewArea];
     ctx.fillRect(0, 0, c.width, c.height);
+    
     // 1.5 NEW: Draw Area Props
     drawScenery(ctx);
-	
+    
     // 2. Enemy UI Updates
     let enemyText = "";
     if (viewArea === "dungeon") {
@@ -1012,69 +1021,98 @@ function gameLoop() {
     }
     document.getElementById("enemyUI").innerHTML = enemyText;
 
-	// --- Inside Section 3 of your gameLoop ---
-	const now = Date.now(); 
+    const now = Date.now(); 
 
-	Object.values(players).forEach(p => {
-		// 1. TIMEOUT CHECK (Universal for all tasks)
-		if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
-			systemMessage(`${p.name} stopped ${p.activeTask} (Idle timeout).`);
-			p.activeTask = null;
-			p.targetX = null;
-			p.danceStyle = 0; // Reset dance
-		}
-		
-		// 2. MOVEMENT LOGIC (Original)
-		if (p.targetX !== null && p.targetX !== undefined) {
-			let dx = p.targetX - p.x;
-			if (Math.abs(dx) > 5) {
-				p.x += dx * 0.1;
-				p.lean = dx > 0 ? 0.2 : -0.2;
-			} else {
-				p.lean = 0;
-				if (p.activeTask !== "attacking") p.targetX = null;
-			}
-		}
-		// 3.0 dance timing logic
-		if (p.activeTask === "dancing" && !p.dead) {
-			if (!p.lastDanceXP) p.lastDanceXP = 0;
-			
-			if (now - p.lastDanceXP > 5000) { // Every 5 seconds
-				// Give slightly more XP for harder dances
-				let xpGain = 5 + (p.danceStyle * 2); 
-				p.stats.danceXP += xpGain;
-				p.lastDanceXP = now;
+    // 3. Player Logic Loop
+    Object.values(players).forEach(p => {
+        // 1. TIMEOUT CHECK
+        if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
+            systemMessage(`${p.name} stopped ${p.activeTask} (Idle timeout).`);
+            p.activeTask = null;
+            p.targetX = null;
+            p.danceStyle = 0;
+        }
+        
+        // 2. MOVEMENT LOGIC
+        if (p.targetX !== null && p.targetX !== undefined) {
+            let dx = p.targetX - p.x;
+            if (Math.abs(dx) > 5) {
+                p.x += dx * 0.1;
+                p.lean = dx > 0 ? 0.2 : -0.2;
+            } else {
+                p.lean = 0;
+                if (p.activeTask !== "attacking") p.targetX = null;
+            }
+        }
 
-				// Level Up Logic
-				let nextLevelXP = p.stats.danceLevel * 100;
-				if (p.stats.danceXP >= nextLevelXP) {
-					p.stats.danceLevel++;
-					p.stats.danceXP = 0;
-					spawnFloater(p.x, p.y - 40, `DANCE LEVEL ${p.stats.danceLevel}!`, "#ff00ff");
-					
-					// Notification for unlocks
-					if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
-					if (p.stats.danceLevel === 10) systemMessage(`${p.name} unlocked Dance Style 3: The Lean!`);
-					
-					saveStats(p);
-				}
-			}
-		}
-		// 3.1 ATTACK TIMING LOGIC (Original)
-		if (p.activeTask === "attacking" && !p.dead) {
-			let weapon = ITEM_DB[p.stats.equippedWeapon];
-			let attackSpeed = weapon?.speed || 2500; 
-			if (!p.lastAttackTime) p.lastAttackTime = 0;
-			if (now - p.lastAttackTime > attackSpeed) {
-				performAttack(p);
-				p.lastAttackTime = now;
-			}
-		}
+        // 3.0 DANCE TIMING
+        if (p.activeTask === "dancing" && !p.dead) {
+            if (!p.lastDanceXP) p.lastDanceXP = 0;
+            if (now - p.lastDanceXP > 5000) {
+                let xpGain = 5 + (p.danceStyle * 2); 
+                p.stats.danceXP += xpGain;
+                p.lastDanceXP = now;
+                
+                let nextLevelXP = p.stats.danceLevel * 100;
+                if (p.stats.danceXP >= nextLevelXP) {
+                    p.stats.danceLevel++;
+                    p.stats.danceXP = 0;
+                    spawnFloater(p.x, p.y - 40, `DANCE LEVEL ${p.stats.danceLevel}!`, "#ff00ff");
+                    if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
+                    if (p.stats.danceLevel === 10) systemMessage(`${p.name} unlocked Dance Style 3: The Lean!`);
+                    saveStats(p);
+                }
+            }
+        }
 
-		// 4. DRAW
-		drawStickman(ctx, p);
-	});
-	updateArrows(ctx);
+        // 3.1 ATTACK TIMING (Uses Weapon Speed)
+        if (p.activeTask === "attacking" && !p.dead) {
+            let weapon = ITEM_DB[p.stats.equippedWeapon];
+            let attackSpeed = weapon?.speed || 2500; 
+            if (!p.lastAttackTime) p.lastAttackTime = 0;
+            if (now - p.lastAttackTime > attackSpeed) {
+                performAttack(p);
+                p.lastAttackTime = now;
+            }
+        }
+
+        // 4. DRAW PLAYER
+        drawStickman(ctx, p);
+    });
+
+    // === NEW: SYSTEM TICKERS (Replaces setIntervals) ===
+
+    // Global Systems Tick (Every 3 seconds)
+    if (now - systemTimers.lastGlobalTick > systemTimers.globalInterval) {
+        Object.values(players).forEach(p => {
+            if (p.dead || !p.activeTask) return;
+            
+            // Fishing logic
+            if (p.activeTask === "fishing" && p.area === "fishingpond") {
+                if (Math.random() > 0.8) performFish(p);
+            }
+        });
+        systemTimers.lastGlobalTick = now;
+    }
+
+    // Enemy Systems Tick (Every 4 seconds)
+    if (now - systemTimers.lastEnemyTick > systemTimers.enemyInterval) {
+        if (dungeonActive) {
+            let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
+            if (dwellers.length > 0) {
+                enemies.forEach(e => {
+                    if (e.dead) return;
+                    let target = dwellers[Math.floor(Math.random() * dwellers.length)];
+                    target.hp -= 5; 
+                    spawnFloater(`-5`, target.x, target.y - 40, "#f00");
+                    if (target.hp <= 0) { target.hp = 0; target.dead = true; }
+                });
+            }
+        }
+        systemTimers.lastEnemyTick = now;
+    }
+
+    updateArrows(ctx);
 
     // 4. Draw Dungeon Entities
     if (viewArea === "dungeon") {
@@ -1535,35 +1573,6 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
 };
 
 /* ================= SYSTEMS TICKER (IDLE TASKS) ================= */
-setInterval(() => {
-    const now = Date.now();
-    Object.values(players).forEach(p => {
-        if (p.dead || !p.activeTask) return;
-        if (now > p.taskEndTime) {
-            systemMessage(`${p.name} stopped ${p.activeTask} (15m expired)`);
-            p.activeTask = null; return;
-        }
-
-        if (p.activeTask === "fishing" && p.area === "fishingpond") {
-            if (Math.random() > 0.8) performFish(p);
-        }
-        if (p.activeTask === "attacking") {
-            if (Math.random() > 0.7) performAttack(p);
-        }
-    });
-}, 3000);
-
-setInterval(() => {
-    if (!dungeonActive) return;
-    let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
-    if (dwellers.length === 0) return;
-    enemies.forEach(e => {
-        if (e.dead) return;
-        let target = dwellers[Math.floor(Math.random() * dwellers.length)];
-        target.hp -= 5; spawnFloater(`-5`, target.x, target.y - 40, "#f00");
-        if (target.hp <= 0) { target.hp = 0; target.dead = true; }
-    });
-}, 4000);
 
 ComfyJS.Init("jaedraze");
 gameLoop();
