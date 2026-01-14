@@ -295,10 +295,13 @@ document.getElementById("controls-toggle").addEventListener("click", function ()
 });
 // Button event listener: first endTrivia, then setStreamer
 document.getElementById("streamersButt").addEventListener("click", function() {
-    if (triviaGameState === "started") {
-		console.log("Ending Trivia.");
-        endTrivia(); // Only end trivia if it's running
-    }
+	if (
+		typeof triviaGameState !== "undefined" &&
+		triviaGameState === "started" &&
+		typeof endTrivia === "function"
+	) {
+		endTrivia();
+	}
     let newStreamer = document.querySelector("input[name='yourTextName']").value;
 	console.log("attempting to Connect to:" + newStreamer);
     setStreamer(newStreamer); // Then, set the new streamer
