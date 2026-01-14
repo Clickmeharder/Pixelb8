@@ -17,7 +17,7 @@ let audioSetting = "on";
 let hideButtonBubble = "on";
 let twitchChatOverlay = "on";
 let consolemessages = false;
-let usercommands = [];
+
 window.chatPlugins = [];
 
 
@@ -532,7 +532,7 @@ The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
 	{ command: "!entrivia-customquestions", description: "Toggles custom entrivia questions.", usage: "!entrivia-customquestions" }
 ];
  */
-let usercommands = [
+const usercommands = [
 	{ command: "attack / attack", description: "Start attacking (stickmenfall).", usage: "attack / !fish" },
 	{ command: "fish / !fish", description: "Start fishing (stickmenfallpond).", usage: "fish / !fish" },
 	{ command: "heal / !heal", description: "Start healing (stickmenfallpond).", usage: "heal / !heal" },
@@ -548,7 +548,7 @@ valid categories: mining, hunting, crafting, history, beauty, economy, social, m
 !entrivia-suggest home | thecategory | the relevent string or paramater | arg-option2`
     },
 ];
-let streamercommands = [
+const streamercommands = [
 	{ command: "!showhomw", description: "show the main stickmenfall area.", usage: "!showhome" },
 	{ command: "!showfishing", description: "show the stickmenfall fishing area.", usage: "!showfishing" },
 	{ command: "!showdungeon", description: "show the stickmenfall dungeon area.", usage: "!showdungeon" },
