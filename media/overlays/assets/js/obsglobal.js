@@ -5,7 +5,7 @@
 //
 //
 //<!-- simulate background script -->
-const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
+const OBSbackgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; // Replace with your image
 
 function setBackgroundImage(url) {
 	document.body.style.backgroundImage = `url('${url}')`;
@@ -17,7 +17,7 @@ function removeBackgroundImage() {
 
 document.getElementById("simulatebackground").addEventListener("change", function() {
 	if (this.checked) {
-		setBackgroundImage(backgroundImageURL);
+		setBackgroundImage(OBSbackgroundImageURL);
 	} else {
 		removeBackgroundImage();
 	}

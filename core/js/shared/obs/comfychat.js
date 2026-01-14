@@ -629,7 +629,7 @@ function getStreamerCommands() {
 function setStreamer(newStreamer) {
     const twitchdisconnectbutton = document.getElementById("twitchdisconnectButt");
     const button = document.getElementById("streamersButt"); 
-    const input = document.querySelector("#comfycontrolBox input[type='text']");
+    const input = document.querySelector("#comfychat-twitchname-input");
 
     if (newStreamer && newStreamer.trim() !== "") {
         streamername = newStreamer.trim();
