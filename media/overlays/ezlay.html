@@ -137,6 +137,7 @@
 		
 		<!--===============================================-->
 		<div id="bubblewrap">
+			<!--<button class="Butt" id="thePixelButt">Ᵽ</i></button>-->
 			<button class="Butt" id="thePixelButt">Ᵽ</button>
 			<div id="Bubble">
 				<!-- 🔌 🎮 🖥️🔧📝 🎨 🖼️-->
@@ -178,6 +179,20 @@
 			<div class="Panel-timer" id="entrivia-panel-timer"></div>
 		</div>
 
+		<!--=====COMFY CONTROLLER=========-->
+		<div class="controller" id="comfy-controller">
+			<button class="close-btn">×</button><h2 class="controllerheader">Get Comfy</h2>
+			<div class="controlpanel" id="">
+				<div class="controls">
+					<input class="a" type="text" name="yourTextName" id="twitchname" placeholder="Enter Your Twitch Streamer Name">
+					<button class="a" id="streamersButt">Connect</button>
+					<button class="a" id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
+				</div>
+				<div id="more-controls" style="">
+				</div>
+			</div>
+		</div>	
+		<!--=====THEME CONTROLLER=========-->
 		<div class="controller" id="theme-controller">
 			<button class="close-btn">×</button>
 			<div id="entrivia-settings-headergroup">
@@ -261,18 +276,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="controller" id="comfy-controller">
-			<button class="close-btn">×</button><h2 class="controllerheader">Get Comfy</h2>
-			<div class="controlpanel" id="">
-				<div class="controls">
-					<input class="a" type="text" name="yourTextName" id="twitchname" placeholder="Enter Your Twitch Streamer Name">
-					<button class="a" id="streamersButt">Connect</button>
-					<button class="a" id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
-				</div>
-				<div id="more-controls" style="">
-				</div>
-			</div>
-		</div>		
+		<!--=====SPINWHEEL CONTROLLER=========-->
 		<div class="controller" id="wheel-controller">
 		<button class="close-btn">×</button><h2 class="controllerheader">Spin Wheel Controls</h2>
 			<div class="controlpanel">
@@ -373,6 +377,7 @@
 				</div>
 			</div>
 		</div>
+		<!--=====PIXELPEN CONTROLLER=========-->
 		<div class="controller" id="pixelpen-controller">
 			<button class="close-btn">×</button><h2 class="controllerheader">pixelpen</h2>
 			<div class="controlpanel">
@@ -381,6 +386,7 @@
 				</div>
 			</div>
 		</div>
+		<!--=====ENTRIVIA CONTROLLER=========-->
 		<div class="controller" id="entrivia-controller">
 			<button class="close-btn">×</button>
 			<div id="entrivia-settings-headergroup">
@@ -542,6 +548,7 @@
 				</div>
 			</div>
 		</div>
+		<!--=====CAPTION CONTROLLER=========-->
 		<div class="controller" id="caption-controller"><button class="close-btn">×</button>
 			<h2 class="controllerheader" style="">Captions</h2>
 			<div class="controlpanel" id="caption-settings">
@@ -582,6 +589,7 @@
 				</div>
 			</div>
 		</div>
+		<!--=====PRIZELIST CONTROLLER=========-->
 		<div class="container" id="prizelistWrapper"style="display: none;">
 			<h1 style="color: #2775a7;background-color:rgba(0, 0, 0, 0.8); border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;margin: auto;z-index: 999999;">
 				Prize Winners
@@ -618,6 +626,8 @@
 
 			<h2 id="totalAmount" style="text-align:center;color: #2775a7;background-color:rgba(0, 0, 0, 0.8); border: 3px ridge; border-color: #2dabfcb8; border-radius: 12px; text-align: center; padding: 4px;">Total Value: 0.00 Ped</h2>
 		</div>
+
+		<!--=====THE SPIN WHEEL=========-->
 		<div class="spinwheel" id="wheelWrapper" style="">
 			<div class="" id="wheel-result" style=""></div>
 			
@@ -633,10 +643,9 @@
 				<canvas id="canvas1"></canvas>
 			</div>
 		</div>
+		<!--===== THE LIVE CAPTIONS =========-->
 		<div id="captions" style="position: fixed; bottom: 10px; width: 100%;z-index:99999; text-align: center; color: var(--text-color); font-size: 1.5rem;"></div>
-		<!--
-		Enrivia Wrapper 
-		-->
+		<!--=====ENTRIVIA GAME OVERLAY=========-->
 		<div id="entriviaOverlay" style="">
 			<!-- Wrapper for the entrivia Splash Animation -->
 			<div id="entriviaSplash" style="display:none;">
@@ -718,18 +727,28 @@
 				</ul>
 			</div>
 		</div>
-		<!--this is the underlay its mostly for aesthetics and sits behind everything else it might be a border or different animated elements -->
-		
+
+
+		<!--this is the underlay its mostly for aesthetics and sits behind everything else it might be a border or different animated elements -->		
 		<div id="underlay"></div>
 		<div id="pageborder"></div>
-		<!--
-		PixelPaint Wrapper 
-		-->
+		<!--=====PIXEL PAINT (PIXELPEN CANVAS)=========-->
 		<canvas id="pixelpaint" style="position: absolute; top: 0; left: 0; z-index: 750; pointer-events: auto;"></canvas>
+
+<!-- ========= new stickmen fall divs  =========-->
+<!-- 
+	<div class="stickmenfall" id="stickmenfallWrapper" style="">
+		<canvas id="c" width="1000" height="600"></canvas>
+		<div id="enemyUI"></div>
+		<div id="systemUI"></div>
+		<div id="tooltip"></div>
+		<div id="areaDisplay">StickmenFallv2.1.9- VIEWING: HOME</div>
+	</div>
+	-->
 <!--------------------->
 <!--       End of body        
 _____________________________  -->
-	 <audio id="tickSound" src="assets/tick.mp3" preload="auto"></audio>
+	<audio id="tickSound" src="assets/tick.mp3" preload="auto"></audio>
 	<script>
 	let prizeData = [];
 	let sortDirections = [true, true, true, true]; // 4 columns now
@@ -1023,6 +1042,7 @@ function deletePrizesForUser(username) {
 
     console.log(`All prizes for ${username} have been deleted.`);
 }
+<!-- example usage for deletePrizesForUser(); function-->
 <!-- deletePrizesForUser('JaeDraze'); -->
 <!-- deletePrizesForUser('testuser'); -->
 
@@ -1140,9 +1160,6 @@ function markUserPrizesAsClaimed(username) {
     }
 }
 
-
-
-	
 	document.addEventListener('DOMContentLoaded', () => {
 		loadPrizeData();
 		console.log("Prizes loaded (maybe from cache!)");
@@ -1167,6 +1184,7 @@ function markUserPrizesAsClaimed(username) {
 	<script src="/assets/js/entrivia2.js"></script>
 	<script src="/assets/js/pixeldisc.js"></script>
 	<script src="/assets/js/pixelpaint.js"></script>
+	<!-- <script src="/assets/js/stickmenfall.js"></script> -->
 	<!-- <script src="/assets/js/pixelspace.js"></script> -->
 
 	<script src="/assets/js/twitchChat.js"></script>

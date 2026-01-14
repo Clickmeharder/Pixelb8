@@ -1584,6 +1584,6 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
 
 /* ================= SYSTEMS TICKER (IDLE TASKS) ================= */
 
-ComfyJS.Init("jaedraze");
+//ComfyJS.Init("jaedraze");
 gameLoop();
 
