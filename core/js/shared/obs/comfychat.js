@@ -18,6 +18,9 @@ let hideButtonBubble = "on";
 let twitchChatOverlay = "on";
 let consolemessages = false;
 
+// twitchChat.js
+let usercommands = [];
+let streamercommands = [];
 window.chatPlugins = [];
 
 
@@ -208,16 +211,21 @@ function updateBubblewrapVisibility() {
 }
 updateBubblewrapVisibility();
 //update this event listener line so if it doesnt exist script doesnt fail
-document.getElementById('togglehideButtonBubble').addEventListener('click', toggleButtonBubble);
+// To this safer version:
+const togglehideBtnbubble = document.getElementById('togglehideButtonBubble');
+if (togglehideBtnbubble) togglehideBtnbubble.addEventListener('click', toggleButtonBubble);
 
-function toggleConsoleMessages() {
+const toggleConsoleMessages = document.getElementById('toggleconsolemessages');
+function handletoggleConsoleMessages() {
     consoleMessages = !consoleMessages;  // Toggle the boolean value
     console.log(`Console messages are now ${consoleMessages ? "enabled" : "disabled"}`);
 }
 //update this event listener line so if it doesnt exist script doesnt fail
-document.getElementById('toggleconsolemessages').addEventListener('click', toggleconsolemessages);
+if (toggleConsoleMessages) toggleConsoleMessages.addEventListener('click', handletoggleConsoleMessages);
 
-function toggletwitchChatOverlay() {
+const toggletwitchChatOverlay = document.getElementById('toggletwitchChatOverlay');
+
+function handletoggleTwitchChatOverlay() {
 	twitchChatOverlay = !twitchChatOverlay;
 	updateSingleSetting("twitchChatOverlay: ", twitchChatOverlay);
 	updateSettings();
@@ -226,8 +234,9 @@ function toggletwitchChatOverlay() {
 	console.log(` Chat Overlay is now: ${twitchChatOverlay}`);
 	displayConsoleMessage("system", `entrivia Chat Overlay is now: ${twitchChatOverlay}`);
 }
+if (toggletwitchChatOverlay) toggletwitchChatOverlay.addEventListener('click', handletoggleTwitchChatOverlay);
 //update this event listener line so if it doesnt exist script doesnt fail
-document.getElementById('toggletwitchChatOverlay').addEventListener('click', toggletwitchChatOverlay);
+//document.getElementById('toggletwitchChatOverlay').addEventListener('click', toggletwitchChatOverlay);
 
 
 //--------------------------------------------------
@@ -555,9 +564,7 @@ const streamercommands = [
 ];
  */
 
-// twitchChat.js
-let usercommands = [];
-let streamercommands = [];
+
 
 /**
  * @param {Array} cmds - The commands
