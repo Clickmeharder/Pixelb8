@@ -213,7 +213,7 @@ function toggleConsoleMessages() {
     consoleMessages = !consoleMessages;  // Toggle the boolean value
     console.log(`Console messages are now ${consoleMessages ? "enabled" : "disabled"}`);
 }
-document.getElementById('toggleconsolemessages').addEventListener('click', toggleconsolemessages);
+//document.getElementById('toggleconsolemessages').addEventListener('click', toggleconsolemessages);
 
 function toggletwitchChatOverlay() {
 	twitchChatOverlay = !twitchChatOverlay;
@@ -224,7 +224,7 @@ function toggletwitchChatOverlay() {
 	console.log(` Chat Overlay is now: ${twitchChatOverlay}`);
 	displayConsoleMessage("system", `entrivia Chat Overlay is now: ${twitchChatOverlay}`);
 }
-document.getElementById('toggletwitchChatOverlay').addEventListener('click', toggletwitchChatOverlay);
+//document.getElementById('toggletwitchChatOverlay').addEventListener('click', toggletwitchChatOverlay);
 
 
 //--------------------------------------------------
