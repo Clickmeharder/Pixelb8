@@ -235,24 +235,6 @@ function handleTooltips() {
     } else { tt.style.display = "none"; }
 }
 
-/* ================= SYSTEMS TICKER (IDLE TASKS) ================= */
-setInterval(() => {
-    const now = Date.now();
-    Object.values(players).forEach(p => {
-        if (p.dead || !p.activeTask) return;
-        if (now > p.taskEndTime) {
-            systemMessage(`${p.name} stopped ${p.activeTask} (15m expired)`);
-            p.activeTask = null; return;
-        }
-
-        if (p.activeTask === "fishing" && p.area === "fishingpond") {
-            if (Math.random() > 0.8) performFish(p);
-        }
-        if (p.activeTask === "attacking") {
-            if (Math.random() > 0.7) performAttack(p);
-        }
-    });
-}, 3000);
 
 // --- COMBAT ---
 function performAttack(p) {
@@ -1014,7 +996,6 @@ function drawScenery(ctx) {
 	
 }
 
-
 function gameLoop() {
 	updateBuyerNPC();
     // 1. Background
@@ -1122,6 +1103,7 @@ function gameLoop() {
     handleTooltips();
     requestAnimationFrame(gameLoop);
 }
+
 
 /* ================= CHAT COMMANDS ================= */
 /* ================= COMMAND FUNCTIONS ================= */
@@ -1551,6 +1533,26 @@ ComfyJS.onChat = (user, msg, flags, extra) => {
 		if (cmd === "resetmerchant") {forceBuyer = null; updateBuyerNPC();systemMessage("[ADMIN] Merchant returned to automatic schedule.");}
     }
 };
+
+/* ================= SYSTEMS TICKER (IDLE TASKS) ================= */
+setInterval(() => {
+    const now = Date.now();
+    Object.values(players).forEach(p => {
+        if (p.dead || !p.activeTask) return;
+        if (now > p.taskEndTime) {
+            systemMessage(`${p.name} stopped ${p.activeTask} (15m expired)`);
+            p.activeTask = null; return;
+        }
+
+        if (p.activeTask === "fishing" && p.area === "fishingpond") {
+            if (Math.random() > 0.8) performFish(p);
+        }
+        if (p.activeTask === "attacking") {
+            if (Math.random() > 0.7) performAttack(p);
+        }
+    });
+}, 3000);
+
 setInterval(() => {
     if (!dungeonActive) return;
     let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
@@ -1566,52 +1568,6 @@ setInterval(() => {
 ComfyJS.Init("jaedraze");
 gameLoop();
 </script>
-
-
-<!-- function drawEquipment(ctx, p, now) {
-    if (p.dead) return;
-
-    if (p.activeTask === "fishing" && p.area === "fishingpond") {
-        ctx.strokeStyle = "#8B4513"; 
-        ctx.lineWidth = 2;
-        let bob = Math.sin(now / 300) * 0.1;
-        
-        ctx.beginPath();
-        ctx.moveTo(p.x + 10, p.y - 10); 
-        ctx.lineTo(p.x + 40, p.y - 40 + (bob * 20)); 
-        ctx.stroke();
-
-        ctx.strokeStyle = "rgba(255,255,255,0.5)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(p.x + 40, p.y - 40 + (bob * 20));
-        ctx.quadraticCurveTo(p.x + 50, p.y, p.x + 60, p.y + 20);
-        ctx.stroke();
-    }
-
-    if (p.activeTask === "attacking") {
-
-        ctx.strokeStyle = p.stats.attackLevel > 10 ? "#0ff" : "#ccc"; 
-        ctx.lineWidth = 3;
-        
-        let swing = Math.sin(now / 150) * 0.8;
-        
-        ctx.save();
-        ctx.translate(p.x + 12, p.y - 10);
-        ctx.rotate(swing);
-        
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(25, -5); 
-        ctx.stroke();
-
-        ctx.strokeStyle = "#aa8800";
-        ctx.beginPath(); ctx.moveTo(5, -8); ctx.lineTo(5, 8); ctx.stroke();
-        
-        ctx.restore();
-    }
-}
- -->
 
 </body>
 </html>
