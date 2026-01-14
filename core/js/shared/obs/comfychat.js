@@ -207,7 +207,7 @@ function updateBubblewrapVisibility() {
 	bubblewrap.style.opacity = hide ? "0.00" : "1.00";
 }
 updateBubblewrapVisibility();
-document.getElementById('togglehideButtonBubble').addEventListener('click', toggleButtonBubble);
+//document.getElementById('togglehideButtonBubble').addEventListener('click', toggleButtonBubble);
 
 function toggleConsoleMessages() {
     consoleMessages = !consoleMessages;  // Toggle the boolean value
