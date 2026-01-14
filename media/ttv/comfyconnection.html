@@ -11,229 +11,6 @@
 	<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@1,700&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-	<!--unused styles-->
-<!--     <style>
-		/* A comfy Control Button */
-		#controls-toggle {
-			position: fixed;
-			bottom: 2px;
-			right: 0px;
-			width: 30px;
-			height: 30px;
-			border-radius: 19%;
-			background: linear-gradient(113deg, #001f1f, #004040);
-			color: #12ebeb;
-			border: none;
-			font-size: 27px;
-			padding: 0px;
-			line-height: 0.1;
-			cursor: pointer;
-			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
-			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
-			transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
-			z-index: 1000;
-			opacity: 0.65;
-			overflow:hidden;
-			overflow-y:auto;
-		}
-
-		#controls-toggle:hover {
-			background-color: #2980b9;
-			transform: scale(1.1);
-			opacity: 1;
-		}
-
-		/* Trivia Control Container */
-		#comfycontrolBox {
-			position: fixed;
-			top: 10px;
-			left: 10px;
-			width: 350px;
-			padding: 10px;
-			background: linear-gradient(135deg, #001f1fe8, #004040eb);
-			color: white;
-			border-radius: 8px;
-			text-shadow: 1px 1px 4px rgb(0 255 239 / 65%);
-			box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);
-			opacity: 0; /* Start hidden */
-			transform: translateY(-10px); /* Slight slide-up effect */
-			transition: opacity 0.4s ease-out, transform 0.4s ease-out;
-			pointer-events: none; /* Prevent interaction when hidden */
-			z-index: 999;
-		}
-
-		/* When active (visible) */
-		#comfycontrolBox.active {
-			opacity: 0.85;
-			transform: translateY(0);
-			pointer-events: all; /* Allow interactions */
-		}
-
-		/* Trivia Input */
-		#comfycontrolBox input[type="text"] {
-			width: 92%;
-			font-size: larger;
-			text-align: center;
-			padding: 5px;
-			margin: 5px 0;
-			color: #30b524;
-			background-color: #25292ef7;
-			border: 3px inset #ccc;
-			border-radius: 5px;
-		}
-
-		/* Comfy Buttons */
-		#comfycontrolBox button {
-			width: 100%;
-			padding: 9px;
-			margin: 5px 0;
-			border: 2px ridge #1f9fb8;
-			background: #305a62ed;
-			color: #00fff9;
-			font-size: x-large;
-			border-radius: 5px;
-			cursor: pointer;
-			transition: background 0.3s ease, color: 0.3s ease;
-		}
-
-		#comfycontrolBox button:hover {
-			background: #27ae60;
-			color: #0e5b75;
-		}
-		/* Comfy Settings */
-		div#comfy-settings {
-			text-align: start;
-			display: flex;
-			flex-direction: column;
-			border: 3px inset #8b8585;
-			overflow: hidden;
-			max-height: ;/*20px;  Initially small */
-			padding: 0 10px; /* Horizontal padding stays */
-			transition: max-height 0.6s ease-out, padding 0.3s ease-out;
-		}
-
-		div#Comfy-settings:hover {
-		/* 	max-height: 500px; Expands smoothly */
-		/*	padding: 10px;  Adds padding when expanded */
-		}
-		/* Trivia Settings Header */
-		#comfy-settingsheader {
-			font-weight: bold;
-			font-size: 16px;
-			margin-bottom: 5px;
-			display: block;
-		}
-	</style>
-
- -->
-	<!--Comfy styles-->
-<!--     <style>
-
-		.twitchEmote {
-			height: 1.5rem;
-			width: auto;
-			vertical-align: middle;
-			margin: 0 2px;
-		}
-
-		.floatingEmote {
-			position: fixed;
-			transition: transform 10s linear, opacity 8s ease-out; /* Slower floating effect */
-			opacity: 1;
-			pointer-events: none;
-			z-index: 999;
-		}
-		#twitchchatContainer {
-			position: absolute;
-			left: 0;
-			bottom: 30%;
-			width: 30%;
-		}
-		div#twitchMessagebox {text-align: left;border:;max-height: 170px;}
-		#twitchMessagebox .chatMessage {opacity: 1;transition: opacity 1s ease-out;  /* Apply the fade transition */}
-		#username {font-weight:bold;}
-		.chatMessage {font-size: 18px;padding-left:8px;padding-right:8px;color: white;background: linear-gradient(135deg, #001f1ff2, #004040f0);border:;border-radius:12px;box-shadow: 0px 0px 12px rgb(0 255 239 / 65%);}
-
-		.consoleMessage {
-			padding: 10px;
-			color: #ffffff;
-			background-color: #333333;
-			margin: 5px 0;
-			border: 1px dashed #696969;
-			opacity: 1;
-			transition: opacity 1s ease-out;
-		}
-		.consoleUser {
-			font-weight: bold;
-			color: #ff6600; /* Example color */
-		}
-
-		.consoleMessageText {
-			color: #ffffff; /* White for the message */
-		}
-		/* Hidden state */
-		.hidden {
-			opacity: 0;
-			visibility: hidden;
-			pointer-events: none;
-		}
-    </style> -->
-	<!--comfy slider & input styles-->
-<!-- 	<style>
-	  .switch {
-		position: relative;
-		display: inline-block;
-		width: 60px;
-		height: 34px;
-	  }
-
-	  .switch input { 
-		opacity: 0;
-		width: 0;
-		height: 0;
-	  }
-
-	  .slider {
-		position: absolute;
-		cursor: pointer;
-		top: 0; left: 0; right: 0; bottom: 0;
-		background-color: #ccc;
-		transition: .4s;
-		border-radius: 34px;
-	  }
-
-	  .slider:before {
-		position: absolute;
-		content: "";
-		height: 26px; width: 26px;
-		left: 4px; bottom: 4px;
-		background-color: white;
-		transition: .4s;
-		border-radius: 50%;
-	  }
-
-	  input:checked + .slider {
-		background-color: #66bb6a;
-	  }
-
-	  input:checked + .slider:before {
-		transform: translateX(26px);
-	  }
-	</style> -->
-	<!--StickmenFall Styles-->
-    <style>
-        body { margin:0; background:transparent; font-family:monospace; overflow:hidden; }
-        canvas { display:block; margin:auto; background: #111; }
-
-        #enemyUI { position:absolute; top:10px; right:10px; color:#ff4444; font-size:14px; text-align:right; background:rgba(0,0,0,0.6); padding:8px; border-radius:6px; border: 1px solid #444; }
-        #systemUI { position:absolute; top:10px; left:10px; width:300px; font-size:13px; pointer-events:none; }
-
-		.sysMsg { background:rgba(0,0,0,0.7); color:#0f0; padding:5px; margin-bottom:4px; border-radius:4px; border-left: 3px solid #0f0; animation: fadeout 8s forwards; }
-        #tooltip { position: absolute; pointer-events: none; background: rgba(0,0,0,0.9); color: #fff; padding: 8px; border-radius: 4px; border: 1px solid #0ff; font-size: 13px; display: none; z-index: 100; }
-        #areaDisplay { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); color:#0ff; font-size:18px; background:rgba(0,0,0,0.8); padding:5px 15px; border: 1px solid #0ff; text-transform: uppercase; }
-
-        @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
-    </style>
 </head>
 <body>
 <!--====================main bubble butt nav ==========================-->
@@ -250,16 +27,12 @@
 			<button class="Butt widgetcontrols" id="entrivia-Butt">Ｅ</button>
 			<button class="Butt widgetcontrols" id="pixelpen-Butt"><i class="fas fa-palette"></i></button>
 			<button class="Butt widgetcontrols" id="theme-Butt">⚙</button>
-
 -->
 		</div>
 	</div>
-	<!--===================straight to twitch comfy connection controls thing============================-->
-	<!-- <button id="controls-toggle">⚙</button> -->
-	
-<!--=====================================================================================================-->
-<!--================page body starts========================----------------------------------------------->
-	
+<!--====================main bubble butt nav ==========================-->
+
+
 <!--====================MAIN HTML===========================-->
 <!--==these should also be dynamically added by comfychat.js to keep page clean===-->
 	<div  id="console"></div>
@@ -283,6 +56,7 @@
 	</div>
 
 
+<!--=====COMFY CONTROLLER=========-->
 <!--=====COMFY CONTROLLER=========-->
 <div class="controller" id="comfy-controller">
 	<button class="close-btn">×</button><h2 class="controllerheader">Get Comfy</h2>
@@ -569,28 +343,13 @@
 			</div>
 		</div>
 
-	<!-- Chat Control Container -->
+<!--=====END OF HTML=========-->
 
-<!--==================================================================-->
-	<!--this is the underlay its mostly for aesthetics and sits behind everything else it might be a border or different animated elements -->		
-
-<!--================PLUGINS ELEMENTS========================----------------------------------------------->
-<!------- THESE should be dynamically added by each individual plugin so we can keep html clean -------->
-	<!--============== -== STICKMENFALL --== =====================-->
-	<canvas id="c" width="1000" height="600"></canvas>
-	<div id="enemyUI"></div>
-	<div id="systemUI"></div>
-	<div id="tooltip"></div>
-	<div id="areaDisplay">StickmenFallv2.1.9- VIEWING: HOME</div>
-	<!--=============-------------------------====================-->
+<!--=====BRAINS (Scripts)=========-->
 	<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.js"></script>
 	<script src="/core/js/shared/obs/obsglobal.js"></script>
 	<script src="/core/js/shared/obs/comfychat.js"></script>
-	<script src="/assets/js/stickmenfall.js"></script>
-
-	<!-- <script src="../../../overlays/assets/js/twitchChat.js"></script> -->
-
-	<script>
+		<script>
 		
 
 		window.onload = function () {
@@ -599,5 +358,7 @@
 
 		};
 	</script>
+<!--=====END OF SCRIPTS=========-->
 </body>
 </html>
+<!--=====THATS ALL FOLKS=========-->
