@@ -1599,7 +1599,7 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
         systemMessage(`${p.name} returned to life!`); 
     }
 
-    // Admin Controls//
+/*     // Admin Controls//
     if (flags.broadcaster || flags.mod) {
         if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: HOME"; }
         if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: DUNGEON"; }
@@ -1610,6 +1610,55 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
 		// reset puts him back on the 7-minute automatic timer//
 		if (cmd === "resetmerchant") {forceBuyer = null; updateBuyerNPC();systemMessage("[ADMIN] Merchant returned to automatic schedule.");}
 		if (cmd === "testdance") {cmdTestDance(p, user, args.slice(1), flags);}
+    } */
+// Admin & Streamer Controls
+    // We check if the command exists first, then verify authorization
+    const adminCommands = ["showhome", "showdungeon", "showfishing", "spawnmerchant", "despawnmerchant", "resetmerchant"];
+    
+    if (adminCommands.includes(cmd)) {
+        if (!isStreamerAndAuthorize(user, cmd)) return;
+
+        if (cmd === "showhome") { 
+            viewArea = "home"; 
+            document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: HOME"; 
+        }
+        if (cmd === "showdungeon") { 
+            viewArea = "dungeon"; 
+            document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: DUNGEON"; 
+        }
+        if (cmd === "showfishing") { 
+            viewArea = "fishingpond"; 
+            document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: FISHING POND"; 
+        }
+        
+        // --- Manual Merchant Controls ---
+        if (cmd === "spawnmerchant") {
+            forceBuyer = true;
+            updateBuyerNPC();
+            systemMessage("[ADMIN] Merchant forced to spawn.");
+        }
+        if (cmd === "despawnmerchant") {
+            forceBuyer = false;
+            updateBuyerNPC();
+            systemMessage("[ADMIN] Merchant forced to leave.");
+        }
+        if (cmd === "resetmerchant") {
+            forceBuyer = null; 
+            updateBuyerNPC();
+            systemMessage("[ADMIN] Merchant returned to automatic schedule.");
+        }
+        if (cmd === "testdance") {
+            forceBuyer = null; 
+             cmdTestDance(p, user, args.slice(1), flags);
+            systemMessage("[ADMIN] testing a dance.");
+        }
+    }
+
+    // Special case for testdance (often allowed for mods too)
+    if (cmd === "testdance") {
+        if (flags.broadcaster || flags.mod) {
+            cmdTestDance(p, user, args.slice(1), flags);
+        }
     }
 };
 
