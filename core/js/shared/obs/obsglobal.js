@@ -366,7 +366,7 @@ window.addEventListener("DOMContentLoaded", () => {
     Object.entries(layout).forEach(([varName, value]) => {
       document.documentElement.style.setProperty(varName, value);
     });
-	debugThemeStyles();
+	//debugThemeStyles();
 	enhanceSelectWithArrowsOnce();
     console.log("Loaded saved theme settings:", savedSettings);
   }
