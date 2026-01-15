@@ -1150,29 +1150,29 @@ const DANCE_STYLES = {
     9: (now) => ({ // The Starjump
         bodyY: Math.abs(Math.sin(now / 150)) * -25,
         armMove: Math.sin(now / 150) * 5,
-        Pose: "star" 
+        pose: "star" 
     }),
     10: (now) => ({ // The Leap
         bodyY: Math.sin(now / 200) * -40,
         lean: Math.sin(now / 200) * 0.2,
-        Pose: "action"
+        pose: "action"
     })
 };
 const POSE_LIBRARY = {
     "head_hands": (head) => ({
-        leftHand: { x: head.x - 12, y: head.y + 5 },
-        rightHand: { x: head.x + 12, y: head.y + 5 }
+        left: { x: head.x - 12, y: head.y + 5 },
+        right: { x: head.x + 12, y: head.y + 5 }
     }),
     "star": (head) => ({
-        leftHand: { x: head.x - 25, y: head.y - 10 },
-        rightHand: { x: head.x + 25, y: head.y - 10 }
+        left: { x: head.x - 25, y: head.y - 10 },
+        right: { x: head.x + 25, y: head.y - 10 }
     }),
     "action": (p, anim) => ({
         // Only affects right hand, left hand stays default
-        rightHand: { x: p.x + 15 + (anim.lean * 30), y: p.y - 12 + anim.bodyY }
+        right: { x: p.x + 15 + (anim.lean * 30), y: p.y - 12 + anim.bodyY }
     }),
     "fishing": (p, anim) => ({
-        rightHand: { x: p.x + 25 + (anim.lean * 20), y: p.y - 5 + anim.bodyY }
+        right: { x: p.x + 25 + (anim.lean * 20), y: p.y - 5 + anim.bodyY }
     })
 };
 const BODY_PARTS = {
@@ -1186,8 +1186,13 @@ const BODY_PARTS = {
             ctx.beginPath(); ctx.arc(x + 4, y + 2, 3, 0, Math.PI); ctx.stroke();
         },
         torso: (ctx, hX, hY, bX, bY) => {
-            ctx.beginPath(); ctx.moveTo(hX, hY + 10); ctx.lineTo(bX, bY + 10); ctx.stroke();
-        },
+			// hY is head center, we start spine at neck (hY + 10)
+			// bY is the hip position. We stop exactly there.
+			ctx.beginPath(); 
+			ctx.moveTo(hX, hY + 10); 
+			ctx.lineTo(bX, bY); // REMOVED the extra +10 here
+			ctx.stroke();
+		},
         limbs: (ctx, startX, startY, endX, endY) => {
             ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
         }
@@ -1233,11 +1238,16 @@ function drawStickman(ctx, p) {
     }
 
     // 4. Foot Anchors (Keeps Boots/Pants attached)
-    const walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-    const legSpread = (activePose === "star" || activePose === "head_hands") ? 18 : 10;
-    const footY = p.y + 25 + anim.bodyY;
-    const leftFoot = { x: p.x - legSpread - walk, y: footY };
-    const rightFoot = { x: p.x + legSpread + walk, y: footY };
+	const walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+	const legSpread = (activePose === "star" || activePose === "head_hands") ? 18 : 10;
+
+	// NEW: If bodyY is negative (jumping), feet only move up 20% as much to look like a tuck-jump
+	// If bodyY is 0 (grounded), feet are at p.y + 25
+	let footLift = anim.bodyY < 0 ? anim.bodyY * 0.2 : anim.bodyY;
+	const footY = p.y + 25 + footLift; 
+
+	const leftFoot = { x: p.x - legSpread - walk, y: footY };
+	const rightFoot = { x: p.x + legSpread + walk, y: footY };
 
     // 5. Drawing
     const style = BODY_PARTS["stick"]; 
