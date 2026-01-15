@@ -405,14 +405,16 @@ function performFish(p) {
 //fish merchant----------------
 function updateBuyerNPC() {
     const now = Date.now();
-    let cycle = Math.floor(now / 60000) % 7; 
+    
+    // We use the settings here
+    let cycle = Math.floor(now / 60000) % merchantSettings.cycleTotal; 
     let wasActive = buyerActive;
 
-    // Use the force variable if it's set, otherwise use the 7-min clock
     if (forceBuyer !== null) {
         buyerActive = forceBuyer;
     } else {
-        buyerActive = (cycle === 0 || cycle === 1); 
+        // If stayMinutes is 2, she is active during minute 0 and 1
+        buyerActive = (cycle < merchantSettings.stayMinutes); 
     }
 
     if (buyerActive && !wasActive) {

@@ -46,6 +46,8 @@ function systemMessage(text) {
     document.getElementById("systemUI").appendChild(div);
     setTimeout(() => div.remove(), 8000);
 }
+
+//splash text
 let floaters = [];
 function spawnFloater(text, x, y, color, area) {
     // If for some reason area isn't passed, fall back to 'home'
@@ -67,8 +69,9 @@ function spawnFloater(text, x, y, color, area) {
     });
 }
 
-function xpNeeded(lvl) { return Math.floor(50 * Math.pow(1.3, lvl)); }
 
+//lvl up and xp
+function xpNeeded(lvl) { return Math.floor(50 * Math.pow(1.3, lvl)); }
 function updateCombatLevel(p) {
     p.stats.combatLevel = Math.floor((p.stats.attackLevel + p.stats.healLevel + (p.stats.fishLevel * 0.5)) / 2);
 }
@@ -377,14 +380,16 @@ function performFish(p) {
 //fish merchant----------------
 function updateBuyerNPC() {
     const now = Date.now();
-    let cycle = Math.floor(now / 60000) % 7; 
+    
+    // We use the settings here
+    let cycle = Math.floor(now / 60000) % merchantSettings.cycleTotal; 
     let wasActive = buyerActive;
 
-    // Use the force variable if it's set, otherwise use the 7-min clock
     if (forceBuyer !== null) {
         buyerActive = forceBuyer;
     } else {
-        buyerActive = (cycle === 0 || cycle === 1); 
+        // If stayMinutes is 2, she is active during minute 0 and 1
+        buyerActive = (cycle < merchantSettings.stayMinutes); 
     }
 
     if (buyerActive && !wasActive) {
