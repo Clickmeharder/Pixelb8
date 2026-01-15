@@ -15,12 +15,6 @@ const merchantSettings = {
 let forceBuyer = null;
 let buyerActive = false;
 
-const DANCE_UNLOCKS = {
-    1: { name: "The Squat", minLvl: 1 },
-    2: { name: "The Flail", minLvl: 5 },
-    3: { name: "The Lean",  minLvl: 10 },
-    4: { name: "The Op-Pa", minLvl: 20 } // Fixed to 20 to match your level-up logic
-};
 
 let viewArea = "home"; 
 let players = {};
@@ -943,16 +937,7 @@ function drawBoots(ctx, p, bodyY = 0, lean = 0) { // Added lean to signature
     ctx.restore();
 }
 // --- 6. GLOVES (Drawn on hands) ---
-function drawGlovesItem(ctx, handX, handY, item) {
-    ctx.fillStyle = item.color || "#fff";
-    ctx.beginPath();
-    ctx.arc(handX, handY, 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.stroke();
-}
 
-
-/* ================= EXTENDED ITEM LIBRARY ================= */
 /* ================= EXTENDED ITEM LIBRARY ================= */
 const HAND_STYLES = {
     "sword": (ctx, item, isAttacking, now) => {
@@ -985,38 +970,31 @@ const HAND_STYLES = {
         ctx.beginPath(); ctx.arc(0, -50, 6, 0, Math.PI * 2); ctx.fill();
         ctx.shadowBlur = 0;
     },
-
+	
 	"fishing_rod": (ctx, item, isAttacking, now, p, bodyY, lean) => {
-        // We check if the player is ACTUALLY in the fishing state
-        const isActuallyFishing = p.activeTask === "fishing" && p.area === "fishingpond";
+        const isActuallyFishing = p.activeTask === "fishing";
+        
+        ctx.strokeStyle = item.color || "#8B4513";
+        ctx.lineWidth = 2;
 
         if (isActuallyFishing) {
-            let bob = Math.sin(now / 300) * 0.1;
-            ctx.strokeStyle = item.color || "#8B4513";
-            ctx.lineWidth = 2;
-            const tipX = 40;
-            const tipY = -30 + (bob * 20);
-            
-            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(tipX, tipY); ctx.stroke();
-
-            // Line & Bobber
-            ctx.strokeStyle = "rgba(255,255,255,0.5)";
-            ctx.lineWidth = 1;
+            let bob = Math.sin(now / 300) * 5;
+            // Rod points out and up
             ctx.beginPath();
-            ctx.moveTo(tipX, tipY);
-            const waterX = Math.max(tipX + 40, 280 - (p.x + (lean * 30))); 
-            const waterY = 510 - (p.y + bodyY);
-            ctx.quadraticCurveTo(tipX + 20, tipY + 40, waterX, waterY);
+            ctx.moveTo(0, 0);
+            ctx.lineTo(35, -25 + bob); 
             ctx.stroke();
 
-            ctx.fillStyle = "#ff4444";
-            ctx.beginPath(); ctx.arc(waterX, waterY, 3, 0, Math.PI * 2); ctx.fill();
+            // Line goes from tip down to water
+            ctx.strokeStyle = "rgba(255,255,255,0.4)";
+            ctx.beginPath();
+            ctx.moveTo(35, -25 + bob);
+            ctx.lineTo(60, 40 - bodyY); // Aiming for the water surface
+            ctx.stroke();
         } else {
-            // IDLE STYLE: Carry it like a staff over the shoulder
-            ctx.rotate(Math.PI / 4); 
-            ctx.strokeStyle = item.color || "#8B4513";
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(0, 15); ctx.lineTo(0, -35); ctx.stroke();
+            // Idle/Walking: Carry it upright
+            ctx.rotate(-Math.PI / 8);
+            ctx.beginPath(); ctx.moveTo(0, 5); ctx.lineTo(0, -45); ctx.stroke();
         }
     },
 	"axe": (ctx, item, isAttacking, now) => {
@@ -1053,6 +1031,13 @@ const HAND_STYLES = {
     }
 };
 
+function drawGlovesItem(ctx, handX, handY, item) {
+    ctx.fillStyle = item.color || "#fff";
+    ctx.beginPath();
+    ctx.arc(handX, handY, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.stroke();
+}
 
 function drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, hX, hY) {
     let weaponName = p.stats.equippedWeapon;
@@ -1074,150 +1059,200 @@ function drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, hX,
     drawFn(ctx, item, isActionActive, now, p, bodyY, lean);
     ctx.restore();
 }
-function drawSheathedWeapon(ctx, p, bodyY, lean, item) {
-    ctx.save();
-    // Position on the back
-    ctx.translate(p.x - (lean * 5), p.y - 5 + bodyY);
-    ctx.rotate(Math.PI / 1.1); // Angled across the back
-    ctx.globalAlpha = 0.7; // Slightly faded
-    
-    const style = item.style || item.type || "sword";
-    const drawFn = HAND_STYLES[style] || HAND_STYLES["sword"];
-    drawFn(ctx, item, false, 0); // false = not attacking
-    ctx.restore();
-}
 
-function drawEquipment(ctx, p, now, bodyY, armMove, lean, leftHand, rightHand, hasMatchingTool) {
+function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, isActionActive, isFishing) {
     if (p.dead) return;
 
-    // --- LAYER 1: BACK ---
-    if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
+    // --- Layer 1: Back (Cape) ---
+    if (p.stats.equippedCape) {
+        drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
+    }
 
-    // --- LAYER 2: BODY/PANTS ---
+    // --- Layer 2: Body (Armor/Pants) ---
     if (p.stats.equippedPants) drawPantsItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedPants]);
     if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean); 
 
-    // --- LAYER 3: GLOVES ---
+    // --- Layer 3: Gloves (Using calculated anchors) ---
     if (p.stats.equippedGloves) {
         const gloveItem = ITEM_DB[p.stats.equippedGloves];
         drawGlovesItem(ctx, leftHand.x, leftHand.y, gloveItem);
         drawGlovesItem(ctx, rightHand.x, rightHand.y, gloveItem);
     }
 
-    // --- LAYER 4: WEAPON ---
-    // Pass hasMatchingTool: if false, drawWeaponItem will only draw virtual tools (like the fishing rod)
-    drawWeaponItem(ctx, p, now, bodyY, lean, rightHand.x, rightHand.y, hasMatchingTool);
+    // --- Layer 4: Weapon (Using rightHand anchor) ---
+    // If we aren't sheathed, draw the weapon in the active hand
+    if (!p.manualSheath || isActionActive || isFishing) {
+        drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, rightHand.x, rightHand.y);
+    }
 
-    // --- LAYER 5: HEAD/BOOTS ---
+    // --- Layer 5: Head ---
     const hX = p.x + (lean * 20);
     const hY = p.y - 30 + bodyY;
     if (p.stats.equippedHair) drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
     if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
     if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY, lean);
 }
+
+const DANCE_UNLOCKS = {
+    1: { name: "The Squat", minLvl: 1 },
+    2: { name: "The Flail", minLvl: 5 },
+    3: { name: "The Lean",  minLvl: 1 },
+    4: { name: "The Op-Pa", minLvl: 1 },
+	5: { name: "The 99", minLvl: 1 },// Fixed to 20 to match your level-up logic
+    6: { name: "The sixthdance", minLvl: 1 },
+    7: { name: "The seventhdance", minLvl: 1 },
+    8: { name: "The eigthdance",  minLvl: 1 },
+    9: { name: "The ninthdance", minLvl: 1 },
+	10: { name: "The tenthdance", minLvl: 1 }
+};
+const DANCE_STYLES = {
+    1: (now) => ({ bodyY: Math.sin(now / 100) * 8 }), // The Squat
+    2: (now) => ({ armMove: Math.sin(now / 50) * 20 }), // The Flail
+    3: (now) => ({ lean: Math.sin(now / 200) * 0.6 }), // The Lean
+    4: (now) => ({ // The Op-Pa
+        bodyY: Math.abs(Math.sin(now / 150)) * -15,
+        armMove: Math.sin(now / 150) * 5,
+        pose: "head_hands" 
+    }),
+    5: (now, p) => { // The Leap & Slam
+        let bY = Math.sin(now / 200) * -40;
+        // Trigger shockwaves at the bottom of the jump
+        if (bY > 38) {
+            spawnArrow(p.x, p.y + 20, p.x + 100, p.y + 20);
+            spawnArrow(p.x, p.y + 20, p.x - 100, p.y + 20);
+        }
+        return { bodyY: bY, lean: Math.sin(now / 200) * 0.2, pose: "action" };
+    },
+    6: (now) => ({ bodyY: Math.sin(now / 75) * 4 }), // The Bop
+    7: (now) => ({ armMove: Math.sin(now / 50) * 50 }), // The Wave
+    8: (now) => ({ lean: Math.sin(now / 200) * 0.1 }), // The Sway
+    9: (now) => ({ // The Starjump
+        bodyY: Math.abs(Math.sin(now / 150)) * -25,
+        armMove: Math.sin(now / 150) * 5,
+        specialPose: "star" 
+    }),
+    10: (now) => ({ // The Leap
+        bodyY: Math.sin(now / 200) * -40,
+        lean: Math.sin(now / 200) * 0.2,
+        specialPose: "action"
+    })
+};
+const BODY_PARTS = {
+    "stick": {
+        head: (ctx, x, y, p) => {
+            ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.stroke();
+            // Face
+            ctx.fillStyle = p.color;
+            ctx.fillRect(x + 2, y - 3, 2, 2); 
+            ctx.fillRect(x + 6, y - 3, 2, 2); 
+            ctx.beginPath(); ctx.arc(x + 4, y + 2, 3, 0, Math.PI); ctx.stroke();
+        },
+        torso: (ctx, hX, hY, bX, bY) => {
+            ctx.beginPath(); ctx.moveTo(hX, hY + 10); ctx.lineTo(bX, bY + 10); ctx.stroke();
+        },
+        limbs: (ctx, startX, startY, endX, endY) => {
+            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
+        }
+    }
+    // You could add "chibi" or "armored" styles here later!
+};
+
 function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
     updatePhysics(p); 
     const now = Date.now();
-    let lean = p.lean || 0;
+    
+    if (p.dead) { /* Draw Corpse Logic */ return; }
 
-    if (p.dead) {
-        // ... (Dead logic remains the same)
-        return;
-    }
-
-    let bodyY = 0;
-    let armMove = 0;
+    // --- 1. Get Animation State from Registry ---
+    let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     const isDancing = p.activeTask === "dancing";
+    
+    if (isDancing && DANCE_STYLES[p.danceStyle]) {
+        // We pass 'p' as well so Dance 5 can spawn arrows
+        anim = { ...anim, ...DANCE_STYLES[p.danceStyle](now, p) };
+    }
+
+    // --- 2. Calculate Shared Anchors ---
     const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
-    const isAttacking = p.activeTask === "attacking";
-    const isChopping = p.activeTask === "woodcutting";
-    const isMining = p.activeTask === "mining";
+    const isAction = p.activeTask === "attacking" || p.activeTask === "woodcutting" || p.activeTask === "mining";
     
-    // Logic: Is the weapon actually in use?
-    const weaponName = p.stats.equippedWeapon;
-    const weaponItem = ITEM_DB[weaponName];
-    const hasMatchingTool = (isChopping && weaponItem?.type === "axe") || 
-                            (isMining && weaponItem?.type === "pickaxe") ||
-                            (isAttacking && weaponItem?.type === "sword") ||
-                            (isFishing && weaponItem?.type === "fishing_rod");
+    const head = { x: p.x + (anim.lean * 20), y: p.y - 30 + anim.bodyY };
+    const shoulder = { x: head.x, y: head.y + 15 };
+    
+    // Default dynamic hand positions
+    let leftHand = { x: p.x - 18 + (anim.lean * 10), y: p.y + 2 + anim.bodyY + anim.armMove };
+    let rightHand = { x: p.x + 18 + (anim.lean * 30), y: p.y + 2 + anim.bodyY - anim.armMove };
 
-    const isActionActive = isAttacking || isChopping || isMining;
-
-    // --- DANCE LOGIC ---
-    if (isDancing) {
-        if (p.danceStyle === 1) bodyY = Math.sin(now / 100) * 8;
-        if (p.danceStyle === 2) armMove = Math.sin(now / 50) * 20;
-        if (p.danceStyle === 3) lean = Math.sin(now / 200) * 0.6;
-        if (p.danceStyle === 4) { bodyY = Math.abs(Math.sin(now / 150)) * -15; armMove = Math.sin(now / 150) * 5; }
-        if (p.danceStyle === 5) {
-            bodyY = Math.sin(now / 200) * -40;
-            lean = Math.sin(now / 200) * 0.2;
-            if (bodyY > 38) { spawnArrow(p.x, p.y + 20, p.x + 100, p.y + 20); spawnArrow(p.x, p.y + 20, p.x - 100, p.y + 20); }
-        }
+    // Apply specific Poses (Matches the 'pose' or 'specialPose' in your DANCE_STYLES)
+    if (anim.pose === "head_hands" || anim.specialPose === "star") {
+        leftHand = { x: head.x - 18, y: head.y + 10 + (anim.bodyY * 0.5) };
+        rightHand = { x: head.x + 18, y: head.y + 10 + (anim.bodyY * 0.5) };
+    } else if (isFishing) {
+        rightHand = { x: p.x + 25 + (anim.lean * 20), y: p.y - 5 + anim.bodyY };
+    } else if (isAction || anim.pose === "action" || anim.specialPose === "action") {
+        rightHand = { x: p.x + 15 + (anim.lean * 30), y: p.y - 12 + anim.bodyY };
     }
 
-    // --- UNIVERSAL HAND ANCHORS (The fix for disappearing arms) ---
-    const leftHand = {
-        x: p.x - 18 + (lean * 10),
-        y: p.y + 2 + bodyY + armMove
-    };
-    
-    // Right hand reaches forward/up if doing an action or specific dance
-    const inActionPose = isActionActive || (isDancing && p.danceStyle === 5);
-    const rightHand = {
-        x: p.x + (inActionPose ? 12 : 18) + (lean * 30),
-        y: p.y + (inActionPose ? -10 : 2) + bodyY - armMove
-    };
-    
-    // Fishing override for hand
-    if (isFishing) {
-        rightHand.x = p.x + 10 + (lean * 20);
-        rightHand.y = p.y - 10 + bodyY;
-    }
-
+    // --- 3. Build the Body ---
+    const style = BODY_PARTS["stick"]; 
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
-    const headX = p.x + (lean * 20);
-    const headY = p.y - 30 + bodyY;
 
-    // 1. Head & Body
-    ctx.beginPath(); ctx.arc(headX, headY, 10, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
+    style.head(ctx, head.x, head.y, p);
+    style.torso(ctx, head.x, head.y, p.x, p.y + anim.bodyY);
+    
+    // Arms (Shoulder to Hands)
+    style.limbs(ctx, shoulder.x, shoulder.y, leftHand.x, leftHand.y);
+    style.limbs(ctx, shoulder.x, shoulder.y, rightHand.x, rightHand.y);
+    
+    // Legs
+    const walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+    const isWide = anim.pose === "head_hands" || anim.specialPose === "star";
+    const legSpread = isWide ? 15 : 10;
+    const floorY = p.y + 25 + (isWide ? anim.bodyY : 0);
+    style.limbs(ctx, p.x, p.y + 10 + anim.bodyY, p.x - legSpread - walk, floorY);
+    style.limbs(ctx, p.x, p.y + 10 + anim.bodyY, p.x + legSpread + walk, floorY);
 
-    // 2. Arms (Now perfectly synced to hand anchors)
-    ctx.beginPath();
-    if (p.danceStyle === 4) {
-        ctx.moveTo(headX, headY + 15); ctx.lineTo(headX - 12, headY + 22 + (bodyY * 0.2)); 
-        ctx.moveTo(headX, headY + 15); ctx.lineTo(headX + 12, headY + 22 + (bodyY * 0.2));
-    } else {
-        ctx.moveTo(headX, headY + 15); ctx.lineTo(leftHand.x, leftHand.y);
-        ctx.moveTo(headX, headY + 15); ctx.lineTo(rightHand.x, rightHand.y);
-    }
-    ctx.stroke();
+    // --- 4. Equipment Layer ---
+    renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, isAction, isFishing);
 
-    // 3. Legs
-    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-    let legSpread = (p.danceStyle === 4) ? 15 : 10;
-    const currentFloorY = p.y + 25 + (p.danceStyle === 4 || p.danceStyle === 5 ? bodyY : 0);
-    ctx.beginPath(); 
-    ctx.moveTo(p.x, p.y + 10 + bodyY); ctx.lineTo(p.x - legSpread - walk, currentFloorY);
-    ctx.moveTo(p.x, p.y + 10 + bodyY); ctx.lineTo(p.x + legSpread + walk, currentFloorY); 
-    ctx.stroke();
-
-    // 4. Equipment & Sheath Logic
-    // Draw sheathed weapon first (if not in use)
-    if (weaponItem && !hasMatchingTool && !isFishing && p.activeTask !== "dancing") {
-        drawSheathedWeapon(ctx, p, bodyY, lean, weaponItem);
-    }
-
-    drawEquipment(ctx, p, now, bodyY, armMove, lean, leftHand, rightHand, hasMatchingTool);
-
-    // HP & Name
+    // Name Tag
     ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
     ctx.fillText(p.name, p.x, p.y + 40);
 }
+function renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, isAction, isFishing) {
+    const weaponItem = ITEM_DB[p.stats.equippedWeapon];
+    const isDancing = p.activeTask === "dancing";
+    
+    // A tool is "in use" if the task matches or if we are forced by a dance (like Dance 5)
+    const isUsingWeapon = isAction || isFishing || (isDancing && p.danceStyle === 5);
 
+    // Draw Sheathed on Back if:
+    // 1. Manual sheath is ON 
+    // 2. OR we have a weapon but aren't currently using it (and aren't dancing)
+    if (weaponItem && (p.manualSheath || (!isUsingWeapon && !isDancing))) {
+        drawSheathedWeapon(ctx, p, anim.bodyY, anim.lean, weaponItem);
+    }
 
+    // Draw everything else (Gloves, Armor, Active Weapons)
+    drawEquipment(ctx, p, now, anim.bodyY, anim.lean, leftHand, rightHand, isAction, isFishing);
+}
+
+function drawSheathedWeapon(ctx, p, bodyY, lean, item) {
+    ctx.save();
+    // Offset slightly to the left of the spine
+    ctx.translate(p.x - 5 - (lean * 5), p.y - 5 + bodyY);
+    ctx.rotate(Math.PI / 1.2); // Diagonal across back
+    ctx.globalAlpha = 0.6; // Ghostly look while sheathed
+    
+    const style = item.style || item.type || "sword";
+    const drawFn = HAND_STYLES[style] || HAND_STYLES["sword"];
+    
+    // Draw smaller on the back
+    ctx.scale(0.8, 0.8);
+    drawFn(ctx, item, false, 0); 
+    ctx.restore();
+}
 
 //-------------------------------------------
 
@@ -1834,69 +1869,52 @@ function cmdFish(p, user) {
     p.taskEndTime = Date.now() + (15 * 60 * 1000);
     systemMessage(`${user} started fishing!`);
 }
-// --- SOCIAL ---
-function cmdMingle(p, user, args) {
-    if (p.area !== "home") return;
-    let target = players[args[1]] || Object.values(players).find(pl => pl.name !== user && pl.area === "home" && !pl.dead);
-    if (target) { 
-        p.mingleTarget = target; 
-        setTimeout(() => { p.mingleTarget = null; }, 5000); 
-    }
-}
 
 function cmdEquip(p, args) {
     let inputName = args.slice(1).join(" ").toLowerCase();
     let invItem = p.stats.inventory.find(i => i.toLowerCase() === inputName);
     
     if (!invItem) {
-        systemMessage(`${p.name}: You don't have "${args.slice(1).join(" ")}" in your inventory.`);
+        systemMessage(`${p.name}: You don't have "${args.slice(1).join(" ")}".`);
         return;
     }
 
     let dbKey = Object.keys(ITEM_DB).find(k => k.toLowerCase() === invItem.toLowerCase());
     let itemData = ITEM_DB[dbKey];
-
-    if (!itemData) {
-        systemMessage(`System Error: ${invItem} has no stats in ITEM_DB.`);
-        return;
-    }
-
-    // --- ENHANCED EQUIP LOGIC ---
     const type = itemData.type;
     let msg = "";
 
-    if (type === "weapon" || type === "staff") {
+    // Added tool/fishing_rod check
+    if (type === "weapon" || type === "staff" || type === "tool" || type === "fishing_rod") {
         p.stats.equippedWeapon = dbKey;
         msg = `wielded the ${dbKey}`;
     } else if (type === "armor") {
         p.stats.equippedArmor = dbKey;
         msg = `put on the ${dbKey}`;
-    } else if (type === "helmet" || type === "hood") {
-        p.stats.equippedHelmet = dbKey;
-        msg = `is now wearing the ${dbKey}`;
+    } else if (type === "helmet" || type === "hood" || type === "hair") {
+        p.stats.equippedHelmet = dbKey; // Helmets/Hairs share a slot usually
+        msg = `is wearing ${dbKey}`;
     } else if (type === "boots") {
         p.stats.equippedBoots = dbKey;
-        msg = `laced up some ${dbKey}`;
+        msg = `laced up ${dbKey}`;
     } else if (type === "pants") {
         p.stats.equippedPants = dbKey;
         msg = `put on ${dbKey}`;
-    } else if (type === "cape") {
-        p.stats.equippedCape = dbKey;
-        msg = `is rocking a ${dbKey}`;
     } else if (type === "gloves") {
         p.stats.equippedGloves = dbKey;
         msg = `put on ${dbKey}`;
-    } else if (type === "hair") {
-        p.stats.equippedHair = dbKey;
-        msg = `changed their hair to ${dbKey}`;
     }
 
     if (msg) {
         systemMessage(`${p.name} ${msg}!`);
         saveStats(p);
-    } else {
-        systemMessage(`${p.name}: This item type (${type}) cannot be equipped.`);
     }
+}
+function cmdSheath(p, user) {
+    p.manualSheath = !p.manualSheath;
+    const status = p.manualSheath ? "put away" : "drawn";
+    systemMessage(`${p.name} has ${status} their weapon.`);
+    saveStats(p);
 }
 function cmdUnequip(p, args) {
     const target = args[1] ? args[1].toLowerCase() : "all";
@@ -2133,6 +2151,15 @@ function cmdTopStats() {
     allStats.sort((a, b) => b.cb - a.cb);
     let top5 = allStats.slice(0, 5).map((s, i) => `#${i+1} ${s.name}(Lv${s.cb})`).join(" | ");
     systemMessage(`TOP PLAYERS: ${top5}`);
+}
+// --- SOCIAL ---
+function cmdMingle(p, user, args) {
+    if (p.area !== "home") return;
+    let target = players[args[1]] || Object.values(players).find(pl => pl.name !== user && pl.area === "home" && !pl.dead);
+    if (target) { 
+        p.mingleTarget = target; 
+        setTimeout(() => { p.mingleTarget = null; }, 5000); 
+    }
 }
 
 /* ================= THE COMFY ROUTER ================= */
