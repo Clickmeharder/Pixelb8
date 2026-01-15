@@ -207,7 +207,8 @@ const ITEM_DB = {
     "Paper Bag":        { type: "helmet", def: 1,                 value: 5,    color: "#d2b48c" },
     "wig":              { type: "helmet", def: 1,                 value: 5000, color: "yellow" }, // Legendary!
     "Iron helmet":      { type: "helmet", def: 3,                 value: 150,  color: "#aaa" },
-    
+    "Assassin Hood": { type: "hood", color: "#222" },
+    "Spiky Hair": { type: "hair", color: "#ffff00" }
     // --- BOOTS ---
     "leather Boots":    { type: "boots",  def: 1,                 value: 30,   color: "#5c4033" },
     "leather Booties":  { type: "boots",  def: 1,                 value: 35,   color: "#5c4033" },
@@ -217,8 +218,43 @@ const ITEM_DB = {
 	//======== special items =======
 	// --- special fish ---
 	"Golden Bass": { type: "fish", value: 100, color: "#FFD700" },
-};
+	
+	"Wooden Staff": { type: "staff", color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40,  },
+    "Royal Cape": { type: "cape", color: "#880000", value: 10000 },
+    "Leather Pants": { type: "pants", def :2, value: ,color: "#3e2723" },
+    "White Gloves": { type: "gloves", color: "#ffffff" },
 
+};
+function addItemToPlayer(playerName, itemName) {
+    const p = players[playerName];
+    // Add this inside addItemToPlayer if you want them to wear it immediately:
+const type = ITEM_DB[itemName].type;
+if (type === "helmet" || type === "hood") p.stats.equippedHelmet = itemName;
+if (type === "staff" || type === "weapon") p.stats.equippedWeapon = itemName;
+if (type === "cape") p.stats.equippedCape = itemName;
+if (type === "pants") p.stats.equippedPants = itemName;
+    // 1. Check if player exists
+    if (!p) {
+        console.error("Player not found!");
+        return;
+    }
+
+    // 2. Check if item exists in Database
+    if (!ITEM_DB[itemName]) {
+        systemMessage(`[ERROR] Item "${itemName}" does not exist in ITEM_DB.`, "#ff4444");
+        return;
+    }
+
+    // 3. Initialize inventory if it doesn't exist
+    if (!p.inventory) p.inventory = [];
+
+    // 4. Add the item
+    p.inventory.push(itemName);
+
+    // 5. Notify the player/UI
+    idleActionMsg(`${p.name} obtained: ${itemName}`, ITEM_DB[itemName].color || "#fff");
+    systemMessage(`${p.name} added [${itemName}] to inventory.`);
+}
 function getPlayer(name, color) {
     if (players[name]) return players[name];
     
@@ -875,35 +911,160 @@ function drawArmor(ctx, p, bodyY = 0, lean = 0) {
     ctx.stroke();
     ctx.restore();
 }
+/* ================= EXTENDED ITEM LIBRARY ================= */
+
+// --- 1. CAPES (Drawn behind the stickman) ---
+function drawCapeItem(ctx, p, bodyY, lean, item) {
+    const headX = p.x + (lean * 20);
+    const centerX = p.x + (lean * 10);
+    ctx.fillStyle = item.color || "#550055";
+    ctx.beginPath();
+    ctx.moveTo(headX, p.y - 15 + bodyY); // Neck
+    // Cape flares out behind
+    ctx.quadraticCurveTo(headX - 25, p.y + 10 + bodyY, centerX - 15, p.y + 40 + bodyY);
+    ctx.lineTo(centerX + 15, p.y + 40 + bodyY);
+    ctx.quadraticCurveTo(headX + 25, p.y + 10 + bodyY, headX, p.y - 15 + bodyY);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(0,0,0,0.3)";
+    ctx.stroke();
+}
+
+// --- 2. PANTS (Drawn over the legs) ---
+function drawPantsItem(ctx, p, bodyY, lean, item) {
+    const now = Date.now();
+    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+    let legSpread = (p.danceStyle === 4) ? 15 : 10;
+    const currentFloorY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
+    
+    ctx.strokeStyle = item.color || "#333";
+    ctx.lineWidth = 5; // Thicker than the stick legs
+    ctx.lineCap = "round";
+
+    // Left Leg Pant
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y + 10 + bodyY);
+    ctx.lineTo(p.x - legSpread - walk, currentFloorY - 2);
+    ctx.stroke();
+
+    // Right Leg Pant
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y + 10 + bodyY);
+    ctx.lineTo(p.x + legSpread + walk, currentFloorY - 2);
+    ctx.stroke();
+    ctx.lineWidth = 3; // Reset
+}
+
+// --- 3. STAVES (Weapon Type) ---
+function drawStaffItem(ctx, x, y, item, isAttacking, now) {
+    ctx.save();
+    ctx.translate(x, y);
+    if (isAttacking) ctx.rotate(Math.sin(now / 150) * 0.5);
+    
+    // Staff Pole
+    ctx.strokeStyle = item.poleColor || "#4e342e";
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(0, 20); ctx.lineTo(0, -45); ctx.stroke();
+
+    // Staff Head/Gem
+    let pulse = Math.sin(now/400) * 5;
+    ctx.fillStyle = item.color || "#00ffff";
+    ctx.shadowBlur = 10 + pulse;
+    ctx.shadowColor = item.color || "#00ffff";
+    ctx.beginPath(); ctx.arc(0, -50, 6, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+}
+
+// --- 4. GLOVES (Drawn on hands) ---
+function drawGlovesItem(ctx, handX, handY, item) {
+    ctx.fillStyle = item.color || "#fff";
+    ctx.beginPath();
+    ctx.arc(handX, handY, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.stroke();
+}
+
+// --- 5. HAIR & HOODS (Head Layers) ---
+function drawHeadLayer(ctx, hX, hY, item, p) {
+    const type = item.type;
+    ctx.fillStyle = item.color || "#614126";
+    
+    if (type === "hair") {
+        ctx.beginPath();
+        ctx.arc(hX, hY - 3, 11, Math.PI, 0); // Top skull hair
+        ctx.fill();
+        // Back of hair
+        ctx.fillRect(hX - 11, hY - 3, 22, 10);
+    } else if (type === "hood") {
+        ctx.beginPath();
+        ctx.moveTo(hX - 13, hY + 8);
+        ctx.quadraticCurveTo(hX - 15, hY - 20, hX, hY - 20);
+        ctx.quadraticCurveTo(hX + 15, hY - 20, hX + 13, hY + 8);
+        ctx.fill();
+        // Inner shadow
+        ctx.fillStyle = "rgba(0,0,0,0.4)";
+        ctx.beginPath(); ctx.arc(hX, hY, 8, 0, Math.PI*2); ctx.fill();
+    }
+}
 
 function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
     if (p.dead) return;
 
+    // --- LAYER 1: BACK ITEMS ---
+    if (p.stats.equippedCape) {
+        drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
+    }
+
+    // --- LAYER 2: BODY/LEGS (Logic shared with stickman positions) ---
+    if (p.stats.equippedPants) {
+        drawPantsItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedPants]);
+    }
+    if (p.stats.equippedArmor) {
+        drawArmor(ctx, p, bodyY, lean); // Your original Armor function
+    }
+
+    // --- LAYER 3: HANDS & WEAPONS ---
+    const isAttacking = p.activeTask === "attacking";
     const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
 
-    // 1. Hand Items
+    // Calculate Hand Positions (to place gloves/weapons correctly)
+    const leftHandX = p.x - 18 + (lean * 10);
+    const leftHandY = p.y + 2 + bodyY + armMove;
+    const rightHandX = p.x + (isAttacking ? 12 : 18) + (lean * 30);
+    const rightHandY = p.y + (isAttacking ? -10 : 2) + bodyY - armMove;
+
+    if (p.stats.equippedGloves) {
+        const gloveItem = ITEM_DB[p.stats.equippedGloves];
+        drawGlovesItem(ctx, leftHandX, leftHandY, gloveItem);
+        drawGlovesItem(ctx, rightHandX, rightHandY, gloveItem);
+    }
+
     if (isFishing) {
         drawFishingRod(ctx, p, now, bodyY, lean);
-    } else if (p.stats.equippedWeapon && ITEM_DB[p.stats.equippedWeapon]) {
-        drawWeaponItem(ctx, p, now, bodyY, lean);
+    } else if (p.stats.equippedWeapon) {
+        const weapon = ITEM_DB[p.stats.equippedWeapon];
+        if (weapon.type === "staff") {
+            drawStaffItem(ctx, rightHandX, rightHandY, weapon, isAttacking, now);
+        } else {
+            drawWeaponItem(ctx, p, now, bodyY, lean); // Original Sword/Bow logic
+        }
     }
 
-    // 2. Armor (Body)
-    if (p.stats.equippedArmor && ITEM_DB[p.stats.equippedArmor]) {
-        drawArmor(ctx, p, bodyY, lean); // Keeps your original drawArmor function
+    // --- LAYER 4: HEAD (Hair -> Hood -> Helmet) ---
+    const hX = p.x + (lean * 20);
+    const hY = p.y - 30 + bodyY;
+
+    if (p.stats.equippedHair) {
+        drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
+    }
+    if (p.stats.equippedHelmet) {
+        // This handles both Helmets and Hoods depending on type
+        const headItem = ITEM_DB[p.stats.equippedHelmet];
+        if (headItem.type === "hood") drawHeadLayer(ctx, hX, hY, headItem, p);
+        else drawHelmetItem(ctx, p, bodyY, lean); 
     }
 
-    // 3. Helmets (Head)
-    if (p.stats.equippedHelmet && ITEM_DB[p.stats.equippedHelmet]) {
-        drawHelmetItem(ctx, p, bodyY, lean);
-    }
-
-    // 4. Boots (Feet)
-    if (p.stats.equippedBoots && ITEM_DB[p.stats.equippedBoots]) {
-        drawBoots(ctx, p, bodyY, lean); // Keeps your original drawBoots function
-    }
+    if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY, lean);
 }
-
 
 function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
@@ -1388,7 +1549,20 @@ function updatePlayerActions(p, now) {
     }
 }
 
+function handleChatCommand(input) {
+    if (!input.startsWith("!")) return;
 
+    const args = input.slice(1).split(" "); // Remove "!" and split
+    const command = args[0].toLowerCase();
+    const targetItem = args.slice(1).join(" "); // Rejoin the rest for names with spaces
+
+    if (command === "add" || command === "give") {
+        // For this example, we'll give it to the first player found 
+        // or a specific 'currentPlayer' variable if you have one.
+        const firstPlayer = Object.keys(players)[0]; 
+        addItemToPlayer(firstPlayer, targetItem);
+    }
+}
 function updateSystemTicks(now) {
     // 3s Global Tick
     if (now - systemTimers.lastGlobalTick > systemTimers.globalInterval) {
@@ -1595,12 +1769,8 @@ function cmdMingle(p, user, args) {
     }
 }
 
-
 function cmdEquip(p, args) {
-    // 1. Join args and normalize to lowercase for easy searching
     let inputName = args.slice(1).join(" ").toLowerCase();
-    
-    // 2. Find the item in the inventory (case-insensitive)
     let invItem = p.stats.inventory.find(i => i.toLowerCase() === inputName);
     
     if (!invItem) {
@@ -1608,8 +1778,6 @@ function cmdEquip(p, args) {
         return;
     }
 
-    // 3. Find the item in the ITEM_DB to get its stats
-    // We search the DB keys to match the inventory item
     let dbKey = Object.keys(ITEM_DB).find(k => k.toLowerCase() === invItem.toLowerCase());
     let itemData = ITEM_DB[dbKey];
 
@@ -1618,63 +1786,89 @@ function cmdEquip(p, args) {
         return;
     }
 
-    // 4. Equip based on type
-	if (itemData.type === "weapon") {
-		p.stats.equippedWeapon = dbKey;
-		systemMessage(`${p.name} equipped ${dbKey}!`);
-	} else if (itemData.type === "armor") {
-		p.stats.equippedArmor = dbKey;
-		systemMessage(`${p.name} put on ${dbKey}!`);
-	} else if (itemData.type === "helmet") {
-		p.stats.equippedHelmet = dbKey; // New slot!
-		systemMessage(`${p.name} is wearing ${dbKey}!`);
-	} else if (itemData.type === "boots") { // <--- ADD THIS
+    // --- ENHANCED EQUIP LOGIC ---
+    const type = itemData.type;
+    let msg = "";
+
+    if (type === "weapon" || type === "staff") {
+        p.stats.equippedWeapon = dbKey;
+        msg = `wielded the ${dbKey}`;
+    } else if (type === "armor") {
+        p.stats.equippedArmor = dbKey;
+        msg = `put on the ${dbKey}`;
+    } else if (type === "helmet" || type === "hood") {
+        p.stats.equippedHelmet = dbKey;
+        msg = `is now wearing the ${dbKey}`;
+    } else if (type === "boots") {
         p.stats.equippedBoots = dbKey;
-        systemMessage(`${p.name} laced up ${dbKey}!`);
+        msg = `laced up some ${dbKey}`;
+    } else if (type === "pants") {
+        p.stats.equippedPants = dbKey;
+        msg = `put on ${dbKey}`;
+    } else if (type === "cape") {
+        p.stats.equippedCape = dbKey;
+        msg = `is rocking a ${dbKey}`;
+    } else if (type === "gloves") {
+        p.stats.equippedGloves = dbKey;
+        msg = `put on ${dbKey}`;
+    } else if (type === "hair") {
+        p.stats.equippedHair = dbKey;
+        msg = `changed their hair to ${dbKey}`;
     }
-    saveStats(p);
+
+    if (msg) {
+        systemMessage(`${p.name} ${msg}!`);
+        saveStats(p);
+    } else {
+        systemMessage(`${p.name}: This item type (${type}) cannot be equipped.`);
+    }
 }
 function cmdUnequip(p, args) {
     const target = args[1] ? args[1].toLowerCase() : "all";
-    let message = "";
+    let found = false;
 
-    if (target === "weapon" || target === "all") {
-        p.stats.equippedWeapon = null;
-        message = "weapon";
-    }
-    if (target === "armor" || target === "armour" || target === "all") {
-        p.stats.equippedArmor = null;
-        message = message ? "items" : "armor";
-    }
-    if (target === "helmet" || target === "all") {
-        p.stats.equippedHelmet = null;
-        message = message ? "items" : "helmet";
-    }
-    if (target === "boots" || target === "all") {
-        p.stats.equippedBoots = null;
-        message = message ? "items" : "boots";
+    const slots = {
+        weapon: "equippedWeapon",
+        staff: "equippedWeapon",
+        armor: "equippedArmor",
+        helmet: "equippedHelmet",
+        hood: "equippedHelmet",
+        boots: "equippedBoots",
+        pants: "equippedPants",
+        cape: "equippedCape",
+        gloves: "equippedGloves",
+        hair: "equippedHair"
+    };
+
+    if (target === "all") {
+        Object.values(slots).forEach(s => p.stats[s] = null);
+        found = true;
+    } else if (slots[target]) {
+        p.stats[slots[target]] = null;
+        found = true;
     }
 
-    if (message) {
-        systemMessage(`${p.name} unequipped ${target === "all" ? "everything" : "their " + target}.`);
+    if (found) {
+        systemMessage(`${p.name} unequipped ${target === "all" ? "everything" : target}.`);
         saveStats(p);
     } else {
-        systemMessage(`${p.name}: Invalid slot. Use !unequip (weapon/armor/helmet/boots/all)`);
+        systemMessage(`${p.name}: Invalid slot. (weapon/armor/helmet/boots/pants/cape/gloves/hair/all)`);
     }
 }
-
 function cmdInventory(p, user, args) {
     let filter = args[1] ? args[1].toLowerCase() : "all";
     let items = p.stats.inventory;
     let result = [];
 
     // --- 1. ORIGINAL FILTER LOGIC ---
-    if (filter === "weapons") result = items.filter(i => ITEM_DB[i]?.type === "weapon");
-    else if (filter === "armor" || filter === "armour") {
-        result = items.filter(i => ["armor", "helmet", "boots"].includes(ITEM_DB[i]?.type));
-    } 
-    else if (filter === "boots") result = items.filter(i => ITEM_DB[i]?.type === "boots");
-    else if (filter === "helmets") result = items.filter(i => ITEM_DB[i]?.type === "helmet");
+    if (filter === "weapons") {
+		result = items.filter(i => ["weapon", "staff"].includes(ITEM_DB[i]?.type));
+	} else if (filter === "armor" || filter === "gear") {
+		// Gear shows everything wearable
+		result = items.filter(i => ["armor", "helmet", "boots", "pants", "cape", "gloves", "hood"].includes(ITEM_DB[i]?.type));
+	} else if (filter === "cosmetics") {
+		result = items.filter(i => ["hair", "wig"].includes(ITEM_DB[i]?.type));
+	}
     else if (filter === "fish") result = items.filter(i => i.includes("kg"));
     else if (filter === "tools") result = items.filter(i => ITEM_DB[i]?.type === "tool" || i === "Fishing Rod");
     else result = items;
@@ -1805,7 +1999,24 @@ function cmdBalance(p) {
     // Using your specific prison wallet phrasing
     systemMessage(`${p.name} has ${displayGold} coins stuffed in their prison wallet`);
 }
+function cmdGive(caller, args, flags) {
+    if (!flags.broadcaster && !flags.mod) return;
 
+    // Syntax: !give [player] [item name]
+    let targetName = args[1];
+    let itemName = args.slice(2).join(" ");
+    
+    let p = Object.values(players).find(pl => pl.name.toLowerCase() === targetName.toLowerCase());
+    
+    if (p && ITEM_DB[itemName]) {
+        if (!p.stats.inventory) p.stats.inventory = [];
+        p.stats.inventory.push(itemName);
+        systemMessage(`[ADMIN] Gave ${itemName} to ${p.name}.`);
+        saveStats(p);
+    } else {
+        systemMessage(`System: Could not find player ${targetName} or item ${itemName}.`);
+    }
+}
 // --- STATS & INFO ---
 function cmdShowStats(user, args) {
     // If user types "!stats playername", args[1] is the name. Otherwise, look up the caller.
