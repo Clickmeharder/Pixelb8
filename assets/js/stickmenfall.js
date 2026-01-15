@@ -7,7 +7,7 @@ let viewArea = "home";
 let players = {};
 let enemies = [];
 let boss = null;
-let floaters = [];
+
 let dungeonQueue = [];
 let dungeonTimer = null;
 let dungeonActive = false;
@@ -31,11 +31,23 @@ function systemMessage(text) {
     document.getElementById("systemUI").appendChild(div);
     setTimeout(() => div.remove(), 8000);
 }
-
+let floaters = [];
 function spawnFloater(text, x, y, color) {
-    floaters.push({ text, x, y, color, life: 100 });
-	console.log(`%c[FLOATER SPAWNED] Text: "${text}" at (${x}, ${y})`, `color: ${color}; font-weight: bold; background: #000;`);
-    console.trace("Floater Source:"); // This shows you exactly what function called spawnFloater
+    // Capture the current area so it only shows when looking at that area
+    let area = viewArea;
+
+    // Console log showing what triggered the floater and where
+    console.log(`%c [FLOATER] "${text}" spawned in [${area}]`, `color: ${color}; font-weight: bold; background: #000;`);
+    console.trace("Triggered by:");
+
+    floaters.push({ 
+        text, 
+        x, 
+        y, 
+        color, 
+        life: 100,
+        area: area // Store the area here
+    });
 }
 
 function xpNeeded(lvl) { return Math.floor(50 * Math.pow(1.3, lvl)); }
@@ -590,9 +602,31 @@ function updateArrows(ctx) {
         if (a.life <= 0 || Math.abs(dx) < 5) arrows.splice(i, 1);
     });
 }
+function updateSplashText(ctx) {
+    for (let i = floaters.length - 1; i >= 0; i--) {
+        let f = floaters[i];
+        
+        // --- AREA CHECK ---
+        // Only render if the floater belongs to the current viewArea
+        if (f.area !== viewArea) continue;
+
+        ctx.save();
+        ctx.fillStyle = f.color;
+        ctx.font = "bold 14px monospace";
+        ctx.globalAlpha = f.life / 100;
+        
+        ctx.fillText(f.text, f.x, f.y);
+        
+        // Physics
+        f.y -= 1;     
+        f.life -= 2;  
+
+        if (f.life <= 0) floaters.splice(i, 1);
+        ctx.restore();
+    }
+    ctx.globalAlpha = 1.0;
+}
 /* ================= DRAWING ================= */
-
-
 // Helper to keep performAttack clean
 function handleLoot(p, target) {
     let roll = Math.random();
@@ -1124,39 +1158,7 @@ function gameLoop() {
     // 4. World Systems (The Timers)
     updateSystemTicks(now);
     updateArrows(ctx);
-/* // --- ADD THIS SECTION START ---
-    // Save the current canvas state before changing alpha/fonts
-	ctx.save(); 
-
-	for (let i = floaters.length - 1; i >= 0; i--) {
-		let f = floaters[i];
-		
-		// 1. Smooth Fade Out: Calculate opacity based on remaining life
-		// Life starts at 100, so life/100 gives a 1.0 to 0.0 range
-		ctx.globalAlpha = f.life / 100; 
-
-		// 2. High-Quality Styling: Add a small shadow/outline for readability
-		ctx.fillStyle = f.color || "#ffffff";
-		ctx.font = "bold 18px 'Share Tech Mono', monospace"; // Using your loaded fonts
-		ctx.textAlign = "center";
-		ctx.strokeStyle = "black";
-		ctx.lineWidth = 3;
-		
-		// Draw outline then text
-		ctx.strokeText(f.text, f.x, f.y);
-		ctx.fillText(f.text, f.x, f.y);
-
-		// 3. Movement: Slower float up (0.5 instead of 1)
-		f.y -= 0.5; 
-		
-		// 4. Aging: Slower life drain (1 instead of 2 makes it last twice as long)
-		f.life -= 1.2; 
-
-		if (f.life <= 0) floaters.splice(i, 1);
-	}
-
-	// Restore canvas state (resets alpha to 1.0 for the rest of the game)
-	ctx.restore(); */
+	updateSplashText(ctx);
     handleTooltips();
     requestAnimationFrame(gameLoop);
 }
