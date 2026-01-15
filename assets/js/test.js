@@ -901,6 +901,7 @@ function drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, item) {
 }
 
 // --- 5. draw Bootes
+// --- 5. draw Boots (Corrected Signature) ---
 function drawBoots(ctx, p, leftFoot, rightFoot) {
     const item = ITEM_DB[p.stats.equippedBoots];
     if (!item) return;
@@ -910,20 +911,53 @@ function drawBoots(ctx, p, leftFoot, rightFoot) {
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
 
-    // Left Boot
+    // Left Boot (using the leftFoot anchor)
     ctx.fillRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5); 
     ctx.strokeRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5);
-    ctx.fillRect(leftFoot.x - 2, leftFoot.y - 6, 4, 5); // Ankle
+    ctx.fillRect(leftFoot.x - 2, leftFoot.y - 6, 4, 5); 
 
-    // Right Boot
+    // Right Boot (using the rightFoot anchor)
     ctx.fillRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
     ctx.strokeRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
-    ctx.fillRect(rightFoot.x - 2, rightFoot.y - 6, 4, 5); // Ankle
+    ctx.fillRect(rightFoot.x - 2, rightFoot.y - 6, 4, 5);
 
     ctx.restore();
 }
-// --- 6. GLOVES (Drawn on hands) ---
 
+// --- drawEquipment (Updated to call drawBoots correctly) ---
+function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, rightFoot, isActionActive, isFishing) {
+    if (p.dead) return;
+
+    // Layer 1: Back
+    if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
+
+    // Layer 2: Body
+    if (p.stats.equippedPants) drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
+    if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean); 
+
+    // Layer 3: Gloves
+    if (p.stats.equippedGloves) {
+        const gloveItem = ITEM_DB[p.stats.equippedGloves];
+        drawGlovesItem(ctx, leftHand.x, leftHand.y, gloveItem);
+        drawGlovesItem(ctx, rightHand.x, rightHand.y, gloveItem);
+    }
+
+    // Layer 4: Weapon
+    if (!p.manualSheath || isActionActive || isFishing) {
+        drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, rightHand.x, rightHand.y);
+    }
+
+    // Layer 5: Head
+    const hX = p.x + (lean * 20);
+    const hY = p.y - 30 + bodyY;
+    if (p.stats.equippedHair) drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
+    if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
+    
+    // FIXED: Changed drawBootsItem -> drawBoots and passing (ctx, p, leftFoot, rightFoot)
+    if (p.stats.equippedBoots) {
+        drawBoots(ctx, p, leftFoot, rightFoot);
+    }
+}
 /* ================= EXTENDED ITEM LIBRARY ================= */
 const HAND_STYLES = {
     "sword": (ctx, item, isAttacking, now) => {
@@ -1046,13 +1080,14 @@ function drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, hX,
     ctx.restore();
 }
 
+// --- drawEquipment (Updated to call drawBoots correctly) ---
 function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, rightFoot, isActionActive, isFishing) {
     if (p.dead) return;
 
     // Layer 1: Back
     if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
 
-    // Layer 2: Body (Pass foot anchors to pants)
+    // Layer 2: Body
     if (p.stats.equippedPants) drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
     if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean); 
 
@@ -1068,16 +1103,15 @@ function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, 
         drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, rightHand.x, rightHand.y);
     }
 
-    // Layer 5: Head & Boots
+    // Layer 5: Head
     const hX = p.x + (lean * 20);
     const hY = p.y - 30 + bodyY;
     if (p.stats.equippedHair) drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
     if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
     
-    // Boots now use the foot anchors specifically
+    // FIXED: Changed drawBootsItem -> drawBoots and passing (ctx, p, leftFoot, rightFoot)
     if (p.stats.equippedBoots) {
-        drawBootsItem(ctx, leftFoot.x, leftFoot.y, ITEM_DB[p.stats.equippedBoots]);
-        drawBootsItem(ctx, rightFoot.x, rightFoot.y, ITEM_DB[p.stats.equippedBoots]);
+        drawBoots(ctx, p, leftFoot, rightFoot);
     }
 }
 const DANCE_UNLOCKS = {
