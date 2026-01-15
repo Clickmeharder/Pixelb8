@@ -467,19 +467,17 @@ function isStreamerAndAuthorize(user, command) {
     }
     return true;
 }
-ComfyJS.onCommand = (user, command, message, color, flags, extra) => {
+/* ComfyJS.onCommand = (user, command, message, color, flags, extra) => {
     if (!userColors[user]) {
         userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
     }
     console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
     console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
-    // 2. Tell every registered plugin that a message arrived
-
 	if (twitchChatOverlay === "off") return;
     displayChatMessage(user, message, flags, extra);  // Show message in chat box
 };
 
-
+ */
 // Declare the arrays globally
 /* const usercommands = [
 	{ command: "!a / !answer", description: "Allows users to answer a entrivia question.", usage: "!a / !answer" },

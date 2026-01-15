@@ -1557,7 +1557,7 @@ const STICKMEN_ADMIN_CMDS = [
 //    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);//
 //    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected//
 //    displayChatMessage(user, message, flags, extra);  // Show message in chat box//
-ComfyJS.onCommand = (user, command, message, flags, extra) => {
+ComfyJS.onChat = (user, msg, color, flags, extra) => {
 	console.log( "User:", user, "command:", command,);
 	displayConsoleMessage(user, `!${command}`);
     // Store user color from extra	
