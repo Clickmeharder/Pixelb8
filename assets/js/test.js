@@ -1127,33 +1127,28 @@ const DANCE_UNLOCKS = {
 	10: { name: "The tenthdance", minLvl: 1 }
 };
 const DANCE_STYLES = {
-    1: (now) => ({ bodyY: Math.sin(now / 100) * 8 }), // The Squat
-    2: (now) => ({ armMove: Math.sin(now / 50) * 20 }), // The Flail
-    3: (now) => ({ lean: Math.sin(now / 200) * 0.6 }), // The Lean
-    4: (now) => ({ // The Op-Pa
-        bodyY: Math.abs(Math.sin(now / 150)) * -15,
-        armMove: Math.sin(now / 150) * 5,
-        pose: "head_hands" 
-    }),
-    5: (now, p) => { // The Leap & Slam
-        let bY = Math.sin(now / 200) * -40;
-        // Trigger shockwaves at the bottom of the jump
-        if (bY > 38) {
-            spawnArrow(p.x, p.y + 20, p.x + 100, p.y + 20);
-            spawnArrow(p.x, p.y + 20, p.x - 100, p.y + 20);
+    // ... dances 1-4 ...
+    5: (now, p) => { 
+        // Use Math.min(0, ...) so he NEVER goes below his starting feet line
+        let bY = Math.min(0, Math.sin(now / 200) * -50); 
+        
+        // Shockwave triggers when bY returns to 0 (the landing)
+        if (bY > -1 && p.wasInAir) {
+            spawnArrow(p.x, p.y + 25, p.x + 60, p.y + 25);
+            spawnArrow(p.x, p.y + 25, p.x - 60, p.y + 25);
+            p.wasInAir = false;
         }
-        return { bodyY: bY, lean: Math.sin(now / 200) * 0.2, pose: "action" };
+        if (bY < -5) p.wasInAir = true;
+
+        return { bodyY: bY, lean: 0, pose: "action" };
     },
-    6: (now) => ({ bodyY: Math.sin(now / 75) * 4 }), // The Bop
-    7: (now) => ({ armMove: Math.sin(now / 50) * 50 }), // The Wave
-    8: (now) => ({ lean: Math.sin(now / 200) * 0.1 }), // The Sway
-    9: (now) => ({ // The Starjump
-        bodyY: Math.abs(Math.sin(now / 150)) * -25,
+    9: (now) => ({ 
+        bodyY: Math.min(0, Math.sin(now / 150) * -25), // Force jump only
         armMove: Math.sin(now / 150) * 5,
         pose: "star" 
     }),
-    10: (now) => ({ // The Leap
-        bodyY: Math.sin(now / 200) * -40,
+    10: (now) => ({ 
+        bodyY: Math.min(0, Math.sin(now / 200) * -40), // Force jump only
         lean: Math.sin(now / 200) * 0.2,
         pose: "action"
     })
@@ -1238,13 +1233,21 @@ function drawStickman(ctx, p) {
     }
 
     // 4. Foot Anchors (Keeps Boots/Pants attached)
-	const walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+	// 4. Foot Anchors (Simplified: Always attached, no stretching)
+	const walk = (p.targetX !== null) ? Math.sin(now / 100) * 10 : 0;
 	const legSpread = (activePose === "star" || activePose === "head_hands") ? 18 : 10;
 
-	// NEW: If bodyY is negative (jumping), feet only move up 20% as much to look like a tuck-jump
-	// If bodyY is 0 (grounded), feet are at p.y + 25
-	let footLift = anim.bodyY < 0 ? anim.bodyY * 0.2 : anim.bodyY;
-	const footY = p.y + 25 + footLift; 
+	// The feet now move 100% with the bodyY. 
+	// For squats, we'll handle the knee-bend by NOT moving the feet.
+	let footYOffset = anim.bodyY; 
+
+	// If squatting (bodyY > 0), keep feet pinned to ground (p.y + 25)
+	// If jumping (bodyY < 0), feet follow the body up.
+	if (anim.bodyY > 0) {
+		footYOffset = 0; 
+	}
+
+	const footY = p.y + 25 + footYOffset; 
 
 	const leftFoot = { x: p.x - legSpread - walk, y: footY };
 	const rightFoot = { x: p.x + legSpread + walk, y: footY };
@@ -1782,7 +1785,41 @@ function gameLoop() {
 
 /* ================= CHAT COMMANDS ================= */
 /* ================= COMMAND FUNCTIONS ================= */
+// Manually set a static pose from the POSE_LIBRARY
+function cmdStop(p, user) {
+    p.activeTask = null;
+    p.taskEndTime = null;
+    p.danceStyle = 0;
+    p.forcedPose = null; // Clear manual poses
+    p.targetX = null;    // Stop movement
+    systemMessage(`${user} stopped their current action.`);
+}
+function cmdSetPose(p, user, args) {
+    if (p.dead) return;
+    let chosenPose = args[1]?.toLowerCase();
 
+    if (!chosenPose || chosenPose === "none" || chosenPose === "off") {
+        p.forcedPose = null;
+        systemMessage(`${user} cleared their pose.`);
+        return;
+    }
+
+    if (POSE_LIBRARY[chosenPose]) {
+        p.forcedPose = chosenPose;
+
+        // --- NEW: CANCEL DANCING ---
+        if (p.activeTask === "dancing") {
+            p.activeTask = null;
+            p.danceStyle = 0;
+        }
+        // ---------------------------
+
+        systemMessage(`${user} set pose to: ${chosenPose}`);
+    } else {
+        const available = Object.keys(POSE_LIBRARY).join(", ");
+        systemMessage(`Unknown pose. Available: ${available}`);
+    }
+}
 function cmdDance(p, user, args) {
     if (p.dead) return;
     const level = p.stats.danceLevel || 1;
@@ -2245,12 +2282,16 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     let args = msg.split(" ");
 	//const cmd = args.shift().toLowerCase();//
     let cmd = args[0].toLowerCase();
-
+	if (cmd === "stop" || cmd === "idle" || cmd === "!reset") {
+			cmdStop(p, user);
+		}
     // Combat & Tasks//
     if (cmd === "attack") cmdAttack(p, user);
     if (cmd === "fish")   cmdFish(p, user);
     if (cmd === "heal")   cmdHeal(p, args);
-    
+    if (cmd === "!pose" || cmd === "!setpose") {
+        cmdSetPose(p, user, args);
+    }
     // Movement//
     if (cmd === "travel")  movePlayer(p, args[1]);
     if (cmd === "home")    movePlayer(p, "home");
@@ -2265,7 +2306,7 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
 	if (cmd === "unequip") cmdUnequip(p, args);
     if (cmd === "inventory") cmdInventory(p, user, args);
 	if (cmd === "sell") cmdSell(p, args);
-	if (cmd === "bal" || cmd === "!wallet" || cmd === "!money") {cmdBalance(p);}
+	if (cmd === "bal" || cmd === "wallet" || cmd === "money") {cmdBalance(p);}
 	//special//
 	if (cmd === "wigcolor") { cmdWigColor(p, args); }
     // Status//
