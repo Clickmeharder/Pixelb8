@@ -694,24 +694,23 @@ function spawnArrow(startX, startY, endX, endY) {
 }
 
 function updateArrows(ctx) {
-    arrows.forEach((a, i) => {
-        let dx = a.tx - a.x;
-        let dy = a.ty - a.y;
-        a.x += dx * 0.2;
-        a.y += dy * 0.2;
+    for (let i = arrows.length - 1; i >= 0; i--) {
+        let a = arrows[i];
+        // Move towards target
+        a.x += (a.tx - a.x) * 0.15;
+        a.y += (a.ty - a.y) * 0.15;
         
-        ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${a.life / 30})`; // Fade out
+        ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
-        ctx.lineTo(a.x + 10, a.y);
+        ctx.lineTo(a.x + (a.tx > a.x ? 15 : -15), a.y); // Pointing direction
         ctx.stroke();
 
         a.life--;
-        if (a.life <= 0 || Math.abs(dx) < 5) arrows.splice(i, 1);
-    });
+        if (a.life <= 0) arrows.splice(i, 1);
+    }
 }
-
 function updateSplashText(ctx) {
     for (let i = floaters.length - 1; i >= 0; i--) {
         let f = floaters[i];
@@ -880,59 +879,46 @@ function drawArmor(ctx, p, bodyY = 0, lean = 0) {
     ctx.restore();
 }
 // --- 4. PANTS (Drawn over the legs) ---
-function drawPantsItem(ctx, p, bodyY, lean, item) {
-    const now = Date.now();
-    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-    let legSpread = (p.danceStyle === 4) ? 15 : 10;
-    const currentFloorY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
-    
+function drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, item) {
     ctx.strokeStyle = item.color || "#333";
-    ctx.lineWidth = 5; // Thicker than the stick legs
+    ctx.lineWidth = 5; 
     ctx.lineCap = "round";
 
-    // Left Leg Pant
+    const hipX = p.x;
+    const hipY = p.y + 10 + bodyY;
+
+    // Draw left pant leg to the left foot anchor
     ctx.beginPath();
-    ctx.moveTo(p.x, p.y + 10 + bodyY);
-    ctx.lineTo(p.x - legSpread - walk, currentFloorY - 2);
+    ctx.moveTo(hipX, hipY);
+    ctx.lineTo(leftFoot.x, leftFoot.y);
     ctx.stroke();
 
-    // Right Leg Pant
+    // Draw right pant leg to the right foot anchor
     ctx.beginPath();
-    ctx.moveTo(p.x, p.y + 10 + bodyY);
-    ctx.lineTo(p.x + legSpread + walk, currentFloorY - 2);
+    ctx.moveTo(hipX, hipY);
+    ctx.lineTo(rightFoot.x, rightFoot.y);
     ctx.stroke();
-    ctx.lineWidth = 3; // Reset
 }
 
 // --- 5. draw Bootes
-function drawBoots(ctx, p, bodyY = 0, lean = 0) { // Added lean to signature
+function drawBoots(ctx, p, leftFoot, rightFoot) {
     const item = ITEM_DB[p.stats.equippedBoots];
     if (!item) return;
 
-    const now = Date.now();
-    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-	let legSpread = (p.danceStyle === 4) ? 15 : 10; // Match the leg spread
     ctx.save();
-    ctx.fillStyle = item.color;
+    ctx.fillStyle = item.color || "#444";
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
-    // Use the SAME bodyY used for the legs
-    const footY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
-	// --- Left Boot ---
-    const leftFootX = p.x - legSpread - walk;
-    // 1. The Base
-    ctx.fillRect(leftFootX - 4, footY - 2, 8, 5); 
-    ctx.strokeRect(leftFootX - 4, footY - 2, 8, 5);
-    // 2. The Ankle (The line I accidentally removed!)
-    ctx.fillRect(leftFootX - 2, footY - 6, 4, 5); 
 
-    // --- Right Boot ---
-    const rightFootX = p.x + legSpread + walk;
-    // 1. The Base
-    ctx.fillRect(rightFootX - 4, footY - 2, 8, 5);
-    ctx.strokeRect(rightFootX - 4, footY - 2, 8, 5);
-    // 2. The Ankle (Restored here too)
-    ctx.fillRect(rightFootX - 2, footY - 6, 4, 5);
+    // Left Boot
+    ctx.fillRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5); 
+    ctx.strokeRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5);
+    ctx.fillRect(leftFoot.x - 2, leftFoot.y - 6, 4, 5); // Ankle
+
+    // Right Boot
+    ctx.fillRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
+    ctx.strokeRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
+    ctx.fillRect(rightFoot.x - 2, rightFoot.y - 6, 4, 5); // Ankle
 
     ctx.restore();
 }
@@ -1060,39 +1046,40 @@ function drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, hX,
     ctx.restore();
 }
 
-function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, isActionActive, isFishing) {
+function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, rightFoot, isActionActive, isFishing) {
     if (p.dead) return;
 
-    // --- Layer 1: Back (Cape) ---
-    if (p.stats.equippedCape) {
-        drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
-    }
+    // Layer 1: Back
+    if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
 
-    // --- Layer 2: Body (Armor/Pants) ---
-    if (p.stats.equippedPants) drawPantsItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedPants]);
+    // Layer 2: Body (Pass foot anchors to pants)
+    if (p.stats.equippedPants) drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
     if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean); 
 
-    // --- Layer 3: Gloves (Using calculated anchors) ---
+    // Layer 3: Gloves
     if (p.stats.equippedGloves) {
         const gloveItem = ITEM_DB[p.stats.equippedGloves];
         drawGlovesItem(ctx, leftHand.x, leftHand.y, gloveItem);
         drawGlovesItem(ctx, rightHand.x, rightHand.y, gloveItem);
     }
 
-    // --- Layer 4: Weapon (Using rightHand anchor) ---
-    // If we aren't sheathed, draw the weapon in the active hand
+    // Layer 4: Weapon
     if (!p.manualSheath || isActionActive || isFishing) {
         drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, rightHand.x, rightHand.y);
     }
 
-    // --- Layer 5: Head ---
+    // Layer 5: Head & Boots
     const hX = p.x + (lean * 20);
     const hY = p.y - 30 + bodyY;
     if (p.stats.equippedHair) drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
     if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
-    if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY, lean);
+    
+    // Boots now use the foot anchors specifically
+    if (p.stats.equippedBoots) {
+        drawBootsItem(ctx, leftFoot.x, leftFoot.y, ITEM_DB[p.stats.equippedBoots]);
+        drawBootsItem(ctx, rightFoot.x, rightFoot.y, ITEM_DB[p.stats.equippedBoots]);
+    }
 }
-
 const DANCE_UNLOCKS = {
     1: { name: "The Squat", minLvl: 1 },
     2: { name: "The Flail", minLvl: 5 },
@@ -1129,12 +1116,29 @@ const DANCE_STYLES = {
     9: (now) => ({ // The Starjump
         bodyY: Math.abs(Math.sin(now / 150)) * -25,
         armMove: Math.sin(now / 150) * 5,
-        specialPose: "star" 
+        Pose: "star" 
     }),
     10: (now) => ({ // The Leap
         bodyY: Math.sin(now / 200) * -40,
         lean: Math.sin(now / 200) * 0.2,
-        specialPose: "action"
+        Pose: "action"
+    })
+};
+const POSE_LIBRARY = {
+    "head_hands": (head) => ({
+        leftHand: { x: head.x - 12, y: head.y + 5 },
+        rightHand: { x: head.x + 12, y: head.y + 5 }
+    }),
+    "star": (head) => ({
+        leftHand: { x: head.x - 25, y: head.y - 10 },
+        rightHand: { x: head.x + 25, y: head.y - 10 }
+    }),
+    "action": (p, anim) => ({
+        // Only affects right hand, left hand stays default
+        rightHand: { x: p.x + 15 + (anim.lean * 30), y: p.y - 12 + anim.bodyY }
+    }),
+    "fishing": (p, anim) => ({
+        rightHand: { x: p.x + 25 + (anim.lean * 20), y: p.y - 5 + anim.bodyY }
     })
 };
 const BODY_PARTS = {
@@ -1161,81 +1165,75 @@ function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
     updatePhysics(p); 
     const now = Date.now();
-    
-    if (p.dead) { /* Draw Corpse Logic */ return; }
+    if (p.dead) return;
 
-    // --- 1. Get Animation State from Registry ---
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     const isDancing = p.activeTask === "dancing";
-    
     if (isDancing && DANCE_STYLES[p.danceStyle]) {
-        // We pass 'p' as well so Dance 5 can spawn arrows
         anim = { ...anim, ...DANCE_STYLES[p.danceStyle](now, p) };
     }
 
-    // --- 2. Calculate Shared Anchors ---
-    const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
+    const isFishing = p.activeTask === "fishing";
     const isAction = p.activeTask === "attacking" || p.activeTask === "woodcutting" || p.activeTask === "mining";
     
+    // 1. Core Positions
     const head = { x: p.x + (anim.lean * 20), y: p.y - 30 + anim.bodyY };
-    const shoulder = { x: head.x, y: head.y + 15 };
-    
-    // Default dynamic hand positions
+    const shoulderY = head.y + 15;
+    const hipY = p.y + 10 + anim.bodyY;
+
+    // 2. Default Hand Positions (Idle/Walking)
     let leftHand = { x: p.x - 18 + (anim.lean * 10), y: p.y + 2 + anim.bodyY + anim.armMove };
     let rightHand = { x: p.x + 18 + (anim.lean * 30), y: p.y + 2 + anim.bodyY - anim.armMove };
 
-    // Apply specific Poses (Matches the 'pose' or 'specialPose' in your DANCE_STYLES)
-    if (anim.pose === "head_hands" || anim.specialPose === "star") {
-        leftHand = { x: head.x - 18, y: head.y + 10 + (anim.bodyY * 0.5) };
-        rightHand = { x: head.x + 18, y: head.y + 10 + (anim.bodyY * 0.5) };
-    } else if (isFishing) {
-        rightHand = { x: p.x + 25 + (anim.lean * 20), y: p.y - 5 + anim.bodyY };
-    } else if (isAction || anim.pose === "action" || anim.specialPose === "action") {
-        rightHand = { x: p.x + 15 + (anim.lean * 30), y: p.y - 12 + anim.bodyY };
+    // 3. Apply Predefined Pose Overrides
+    let activePose = anim.pose;
+    if (!activePose) {
+        if (isFishing) activePose = "fishing";
+        else if (isAction) activePose = "action";
     }
 
-    // --- 3. Build the Body ---
+    if (activePose && POSE_LIBRARY[activePose]) {
+        const overrides = POSE_LIBRARY[activePose](head, p, anim);
+        if (overrides.left) leftHand = overrides.left;
+        if (overrides.right) rightHand = overrides.right;
+    }
+
+    // 4. Foot Anchors (Keeps Boots/Pants attached)
+    const walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+    const legSpread = (activePose === "star" || activePose === "head_hands") ? 18 : 10;
+    const footY = p.y + 25 + anim.bodyY;
+    const leftFoot = { x: p.x - legSpread - walk, y: footY };
+    const rightFoot = { x: p.x + legSpread + walk, y: footY };
+
+    // 5. Drawing
     const style = BODY_PARTS["stick"]; 
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
-
-    style.head(ctx, head.x, head.y, p);
-    style.torso(ctx, head.x, head.y, p.x, p.y + anim.bodyY);
     
-    // Arms (Shoulder to Hands)
-    style.limbs(ctx, shoulder.x, shoulder.y, leftHand.x, leftHand.y);
-    style.limbs(ctx, shoulder.x, shoulder.y, rightHand.x, rightHand.y);
+    style.head(ctx, head.x, head.y, p);
+    style.torso(ctx, head.x, head.y, p.x, hipY);
+    
+    // Arms (FIXED: using head.x for shoulder horizontal)
+    style.limbs(ctx, head.x, shoulderY, leftHand.x, leftHand.y); 
+    style.limbs(ctx, head.x, shoulderY, rightHand.x, rightHand.y);
     
     // Legs
-    const walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-    const isWide = anim.pose === "head_hands" || anim.specialPose === "star";
-    const legSpread = isWide ? 15 : 10;
-    const floorY = p.y + 25 + (isWide ? anim.bodyY : 0);
-    style.limbs(ctx, p.x, p.y + 10 + anim.bodyY, p.x - legSpread - walk, floorY);
-    style.limbs(ctx, p.x, p.y + 10 + anim.bodyY, p.x + legSpread + walk, floorY);
+    style.limbs(ctx, p.x, hipY, leftFoot.x, leftFoot.y); 
+    style.limbs(ctx, p.x, hipY, rightFoot.x, rightFoot.y);
 
-    // --- 4. Equipment Layer ---
-    renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, isAction, isFishing);
-
-    // Name Tag
-    ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
-    ctx.fillText(p.name, p.x, p.y + 40);
+    renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing);
 }
-function renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, isAction, isFishing) {
+
+function renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing) {
     const weaponItem = ITEM_DB[p.stats.equippedWeapon];
     const isDancing = p.activeTask === "dancing";
-    
-    // A tool is "in use" if the task matches or if we are forced by a dance (like Dance 5)
     const isUsingWeapon = isAction || isFishing || (isDancing && p.danceStyle === 5);
 
-    // Draw Sheathed on Back if:
-    // 1. Manual sheath is ON 
-    // 2. OR we have a weapon but aren't currently using it (and aren't dancing)
     if (weaponItem && (p.manualSheath || (!isUsingWeapon && !isDancing))) {
         drawSheathedWeapon(ctx, p, anim.bodyY, anim.lean, weaponItem);
     }
 
-    // Draw everything else (Gloves, Armor, Active Weapons)
-    drawEquipment(ctx, p, now, anim.bodyY, anim.lean, leftHand, rightHand, isAction, isFishing);
+    // Pass the foot anchors into drawEquipment
+    drawEquipment(ctx, p, now, anim.bodyY, anim.lean, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing);
 }
 
 function drawSheathedWeapon(ctx, p, bodyY, lean, item) {
