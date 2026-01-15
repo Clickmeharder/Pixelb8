@@ -3,6 +3,21 @@ const c = document.getElementById("c");
 const ctx = c.getContext("2d");
 
 /* ====grr============= CONFIG & STATE ================= */
+
+const merchantSettings = {
+    stayMinutes: 2,    // How many minutes she stays
+    cycleTotal: 7,     // Total minutes in one full loop (Stay + Away)
+};
+let forceBuyer = null;
+let buyerActive = false;
+
+const DANCE_UNLOCKS = {
+    1: { name: "The Squat", minLvl: 1 },
+    2: { name: "The Flail", minLvl: 5 },
+    3: { name: "The Lean",  minLvl: 10 },
+    4: { name: "The Op-Pa", minLvl: 20 } // Fixed to 20 to match your level-up logic
+};
+
 let viewArea = "home"; 
 let players = {};
 let enemies = [];
@@ -338,9 +353,7 @@ function performFish(p) {
     saveStats(p);
 }
 //fish merchant----------------
-let forceBuyer = null;
-let buyerActive = false;
-let buyerTimer = 0;
+
 function updateBuyerNPC() {
     const now = Date.now();
     let cycle = Math.floor(now / 60000) % 7; 
@@ -1096,6 +1109,8 @@ function updatePlayerActions(p, now) {
         }
     }
 }
+
+
 function updateSystemTicks(now) {
     // 3s Global Tick
     if (now - systemTimers.lastGlobalTick > systemTimers.globalInterval) {
@@ -1112,6 +1127,7 @@ function updateSystemTicks(now) {
         if (dungeonActive) handleEnemyAttacks();
         systemTimers.lastEnemyTick = now;
     }
+	updateBuyerNPC();
 }
 
 function handleEnemyAttacks() {
@@ -1162,12 +1178,7 @@ function gameLoop() {
 
 /* ================= CHAT COMMANDS ================= */
 /* ================= COMMAND FUNCTIONS ================= */
-const DANCE_UNLOCKS = {
-    1: { name: "The Squat", minLvl: 1 },
-    2: { name: "The Flail", minLvl: 5 },
-    3: { name: "The Lean",  minLvl: 10 },
-    4: { name: "The Op-Pa", minLvl: 20 } // Fixed to 20 to match your level-up logic
-};
+
 function cmdDance(p, user, args) {
     if (p.dead) return;
     const level = p.stats.danceLevel || 1;
