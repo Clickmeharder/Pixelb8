@@ -2146,11 +2146,14 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     } */
 // Admin & Streamer Controls
     // We check if the command exists first, then verify authorization
-    const adminCommands = ["showhome", "showdungeon", "showfishing", "spawnmerchant", "despawnmerchant", "resetmerchant"];
+    const adminCommands = ["showhome", "showdungeon", "showfishing", "spawnmerchant", "despawnmerchant", "resetmerchant", "give", "additem"];
     
     if (adminCommands.includes(cmd)) {
         if (!isStreamerAndAuthorize(user, cmd)) return;
-
+		// Inside the Admin Controls section of your router:
+		if (cmd === "give" || cmd === "additem") {
+			cmdGive(user, args, flags);
+		}
         if (cmd === "showhome") { 
             viewArea = "home"; 
             document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: HOME"; 
