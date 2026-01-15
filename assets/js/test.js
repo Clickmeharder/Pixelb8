@@ -1185,12 +1185,13 @@ const POSE_LIBRARY = {
         left: { x: head.x - 25, y: head.y - 10 },
         right: { x: head.x + 25, y: head.y - 10 }
     }),
-    "action": (p, anim) => ({
-        // Only affects right hand, left hand stays default
-        right: { x: p.x + 15 + (anim.lean * 30), y: p.y - 12 + anim.bodyY }
+    "action": (head, p, anim) => ({
+        // Use head.x and head.y so the hand stays attached to the shoulder
+        right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
     }),
-    "fishing": (p, anim) => ({
-        right: { right: { x: head.x + 22, y: head.y + 15 }
+    "fishing": (head, p, anim) => ({
+        // Fixed the double "right" and the missing parameter
+        right: { x: head.x + 22, y: head.y + 15 }
     })
 };
 const BODY_PARTS = {
