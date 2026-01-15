@@ -1554,9 +1554,10 @@ const STICKMEN_ADMIN_CMDS = [
 
 ComfyJS.onChat = (user, command, msg, color, flags, extra) => {
 //function stickmenCommandHandler(user, msg, command, color, flags, extra) {//
-//    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);//
+    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);//
 //    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected//
 //    displayChatMessage(user, message, flags, extra);  // Show message in chat box//
+	const userColor = extra.userColor || "#00ffff";
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
 	//const cmd = args.shift().toLowerCase();//
