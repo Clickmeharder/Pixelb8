@@ -207,8 +207,8 @@ const ITEM_DB = {
     "Paper Bag":        { type: "helmet", def: 1,                 value: 5,    color: "#d2b48c" },
     "wig":              { type: "helmet", def: 1,                 value: 5000, color: "yellow" }, // Legendary!
     "Iron helmet":      { type: "helmet", def: 3,                 value: 150,  color: "#aaa" },
-    "Assassin Hood": { type: "hood", color: "#222" },
-    "Spiky Hair": { type: "hair", color: "#ffff00" },
+    "Assassin Hood": { type: "hood", value: 100, color: "#222" },
+    "Spiky Hair": { type: "hair", value: 100, color: "#ffff00" },
     // --- BOOTS ---
     "leather Boots":    { type: "boots",  def: 1,                 value: 30,   color: "#5c4033" },
     "leather Booties":  { type: "boots",  def: 1,                 value: 35,   color: "#5c4033" },
@@ -221,8 +221,8 @@ const ITEM_DB = {
 	
 	"Wooden Staff": { type: "staff", color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40,  },
     "Royal Cape": { type: "cape", color: "#880000", value: 10000 },
-    "Leather Pants": { type: "pants", def :2, value: ,color: "#3e2723" },
-    "White Gloves": { type: "gloves", color: "#ffffff" },
+    "Leather Pants": { type: "pants", def :2, value: 100,color: "#3e2723" },
+    "White Gloves": { type: "gloves", value: 100, color: "#ffffff" },
 
 };
 function addItemToPlayer(playerName, itemName) {
