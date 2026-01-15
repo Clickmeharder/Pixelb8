@@ -267,7 +267,7 @@ function handleTooltips() {
 }
 
 
-// --- COMBAT ---
+// --- COMBAT ------------------------
 function performAttack(p) {
     if (p.dead) return;
 
@@ -322,7 +322,28 @@ function performAttack(p) {
         saveStats(p);
     }
 }
+// Helper to keep performAttack clean
+function handleLoot(p, target) {
+    let roll = Math.random();
+    let drop = null;
 
+    if (target === boss) {
+        // Boss guaranteed high-tier
+        drop = roll > 0.5 ? "Iron Plate" : "Iron Sword";
+    } else {
+        // Minion rare drops
+        if (roll > 0.98) drop = "Iron helmet";
+        else if (roll > 0.90) drop = "shitty shortbow";
+        else if (roll > 0.85) drop = "Leather Tunic";
+        else if (roll > 0.70) drop = "Paper Bag";
+    }
+
+    if (drop) {
+        p.stats.inventory.push(drop);
+        systemMessage(`✨ ${p.name} looted: ${drop}!`);
+    }
+}
+//------------------------------------
 // --- FISHING ---
 function performFish(p) {
     if (p.area !== "fishingpond" || p.dead) return;
@@ -382,7 +403,6 @@ function performFish(p) {
     saveStats(p);
 }
 //fish merchant----------------
-
 function updateBuyerNPC() {
     const now = Date.now();
     let cycle = Math.floor(now / 60000) % 7; 
@@ -526,7 +546,9 @@ function drawBuyer(ctx) {
     ctx.fillStyle = "#00ffff";
     ctx.fillText("✦ 2X GOLD RATE ✦", bx, textY + 14);
 }
-// --- DUNGEON ---
+
+
+// --- DUNGEON -------------------
 function joinDungeonQueue(p) {
     if (p.dead) return;
     
@@ -667,28 +689,6 @@ function updateSplashText(ctx) {
 }
 /* ================= DRAWING ================= */
 
-
-// Helper to keep performAttack clean
-function handleLoot(p, target) {
-    let roll = Math.random();
-    let drop = null;
-
-    if (target === boss) {
-        // Boss guaranteed high-tier
-        drop = roll > 0.5 ? "Iron Plate" : "Iron Sword";
-    } else {
-        // Minion rare drops
-        if (roll > 0.98) drop = "Iron helmet";
-        else if (roll > 0.90) drop = "shitty shortbow";
-        else if (roll > 0.85) drop = "Leather Tunic";
-        else if (roll > 0.70) drop = "Paper Bag";
-    }
-
-    if (drop) {
-        p.stats.inventory.push(drop);
-        systemMessage(`✨ ${p.name} looted: ${drop}!`);
-    }
-}
 // Add 'lean' as the last parameter here
 function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
     if (p.dead) return;
