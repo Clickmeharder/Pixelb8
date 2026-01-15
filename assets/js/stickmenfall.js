@@ -34,6 +34,8 @@ function systemMessage(text) {
 
 function spawnFloater(text, x, y, color) {
     floaters.push({ text, x, y, color, life: 100 });
+	console.log(`%c[FLOATER SPAWNED] Text: "${text}" at (${x}, ${y})`, `color: ${color}; font-weight: bold; background: #000;`);
+    console.trace("Floater Source:"); // This shows you exactly what function called spawnFloater
 }
 
 function xpNeeded(lvl) { return Math.floor(50 * Math.pow(1.3, lvl)); }
@@ -1122,18 +1124,39 @@ function gameLoop() {
     // 4. World Systems (The Timers)
     updateSystemTicks(now);
     updateArrows(ctx);
-// --- ADD THIS SECTION START ---
-    for (let i = floaters.length - 1; i >= 0; i--) {
-        let f = floaters[i];
-        ctx.fillStyle = f.color || "#ffffff";
-        ctx.font = "bold 16px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(f.text, f.x, f.y);
+/* // --- ADD THIS SECTION START ---
+    // Save the current canvas state before changing alpha/fonts
+	ctx.save(); 
 
-        f.y -= 1;    // Make it float up
-        f.life -= 2; // Make it fade out
-        if (f.life <= 0) floaters.splice(i, 1); // Remove when dead
-    }
+	for (let i = floaters.length - 1; i >= 0; i--) {
+		let f = floaters[i];
+		
+		// 1. Smooth Fade Out: Calculate opacity based on remaining life
+		// Life starts at 100, so life/100 gives a 1.0 to 0.0 range
+		ctx.globalAlpha = f.life / 100; 
+
+		// 2. High-Quality Styling: Add a small shadow/outline for readability
+		ctx.fillStyle = f.color || "#ffffff";
+		ctx.font = "bold 18px 'Share Tech Mono', monospace"; // Using your loaded fonts
+		ctx.textAlign = "center";
+		ctx.strokeStyle = "black";
+		ctx.lineWidth = 3;
+		
+		// Draw outline then text
+		ctx.strokeText(f.text, f.x, f.y);
+		ctx.fillText(f.text, f.x, f.y);
+
+		// 3. Movement: Slower float up (0.5 instead of 1)
+		f.y -= 0.5; 
+		
+		// 4. Aging: Slower life drain (1 instead of 2 makes it last twice as long)
+		f.life -= 1.2; 
+
+		if (f.life <= 0) floaters.splice(i, 1);
+	}
+
+	// Restore canvas state (resets alpha to 1.0 for the rest of the game)
+	ctx.restore(); */
     handleTooltips();
     requestAnimationFrame(gameLoop);
 }
@@ -1176,10 +1199,10 @@ function cmdDance(p, user, args) {
 }
 function cmdTestDance(p, user, args, flags) {
     // Only allow the streamer (broadcaster) or moderators to use this
-    if (!flags.broadcaster && !flags.mod) {
+/*     if (!flags.broadcaster && !flags.mod) {
         systemMessage(`${user}, only the host can force-test animations!`);
         return;
-    }
+    } */
 
     let chosenStyle = parseInt(args[0]); // Using args[0] assuming "!testdance 4"
 

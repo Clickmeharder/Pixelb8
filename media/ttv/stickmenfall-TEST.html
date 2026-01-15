@@ -65,6 +65,8 @@ function systemMessage(text) {
 
 function spawnFloater(text, x, y, color) {
     floaters.push({ text, x, y, color, life: 100 });
+	console.log(`%c[FLOATER SPAWNED] Text: "${text}" at (${x}, ${y})`, `color: ${color}; font-weight: bold; background: #000;`);
+    console.trace("Floater Source:"); // This shows you exactly what function called spawnFloater
 }
 
 function xpNeeded(lvl) { return Math.floor(50 * Math.pow(1.3, lvl)); }
@@ -1064,7 +1066,7 @@ function handleDancing(p, now) {
         if (p.stats.danceXP >= nextLevelXP) {
             p.stats.danceLevel++;
             p.stats.danceXP = 0;
-            spawnFloater(p.x, p.y - 40, `DANCE LEVEL ${p.stats.danceLevel}!`, "#ff00ff");
+            spawnFloater(`DANCE LEVEL ${p.stats.danceLevel}!`, p.x, p.y - 40, "#ff00ff");
             
             // Notification for unlocks
             if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
