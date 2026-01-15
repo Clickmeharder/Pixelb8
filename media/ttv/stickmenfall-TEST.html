@@ -63,13 +63,15 @@ function systemMessage(text) {
     setTimeout(() => div.remove(), 8000);
 }
 let floaters = [];
-function spawnFloater(text, x, y, color) {
-    // Capture the current area so it only shows when looking at that area
-    let area = viewArea;
+function spawnFloater(text, x, y, color, area) {
+    // If for some reason area isn't passed, fall back to 'home'
+    const spawnArea = area || "home";
 
-    // Console log showing what triggered the floater and where
-    console.log(`%c [FLOATER] "${text}" spawned in [${area}]`, `color: ${color}; font-weight: bold; background: #000;`);
-    console.trace("Triggered by:");
+    // 1. Console Log with the text and location
+    console.log(`%c[FLOATER] "${text}" spawned in [${spawnArea}]`, `color: ${color}; font-weight: bold; background: #000;`);
+    
+    // 2. Trace to see what called this (performFish, handleEnemyAttacks, etc)
+    console.trace("Trigger Source:");
 
     floaters.push({ 
         text, 
@@ -77,7 +79,7 @@ function spawnFloater(text, x, y, color) {
         y, 
         color, 
         life: 100,
-        area: area // Store the area here
+        area: spawnArea // Crucial: This tags the text to its specific room
     });
 }
 
@@ -282,8 +284,7 @@ function performAttack(p) {
         }
         
         target.hp -= dmg;
-        spawnFloater(`-${dmg}`, target.x, target.y - 40, "#ff4444");
-
+		spawnFloater(`-${dmg}`, target.x, target.y - 40, "#ff4444", target.area);
         // 4. Kill Logic & Looting
         if (target.hp <= 0) {
             target.hp = 0;
@@ -354,7 +355,7 @@ function performFish(p) {
     let displayMsg = `🎣 ${resultText}`;
     if (isFish && resultText !== "GOLDEN BASS!") displayMsg += ` (#${p.stats.fishCaught})`;
 
-    spawnFloater(displayMsg, p.x, p.y - 60, floaterColor);
+    spawnFloater(displayMsg, p.x, p.y - 60, floaterColor, p.area);
     
     // XP Logic
     p.stats.fishXP += 10;
@@ -637,25 +638,20 @@ function updateSplashText(ctx) {
     for (let i = floaters.length - 1; i >= 0; i--) {
         let f = floaters[i];
         
-        // --- AREA CHECK ---
-        // Only render if the floater belongs to the current viewArea
-        if (f.area !== viewArea) continue;
+        // This is the "Fix": If we aren't looking at the zone, don't draw it!
+        if (f.area !== viewArea) continue; 
 
         ctx.save();
+        ctx.globalAlpha = f.life / 100;
         ctx.fillStyle = f.color;
         ctx.font = "bold 14px monospace";
-        ctx.globalAlpha = f.life / 100;
-        
         ctx.fillText(f.text, f.x, f.y);
         
-        // Physics
-        f.y -= 1;     
-        f.life -= 2;  
-
+        f.y -= 1;     // Movement
+        f.life -= 2;  // Fade speed
         if (f.life <= 0) floaters.splice(i, 1);
         ctx.restore();
     }
-    ctx.globalAlpha = 1.0;
 }
 /* ================= DRAWING ================= */
 
@@ -1102,7 +1098,7 @@ function handleDancing(p, now) {
         if (p.stats.danceXP >= nextLevelXP) {
             p.stats.danceLevel++;
             p.stats.danceXP = 0;
-            spawnFloater(`DANCE LEVEL ${p.stats.danceLevel}!`, p.x, p.y - 40, "#ff00ff");
+            spawnFloater(`DANCE LEVEL ${p.stats.danceLevel}!`, p.x, p.y - 40, "#ff00ff", p.area);
             
             // Notification for unlocks
             if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
@@ -1158,7 +1154,7 @@ function handleEnemyAttacks() {
         if (e.dead) return;
         let target = dwellers[Math.floor(Math.random() * dwellers.length)];
         target.hp -= 5;
-        spawnFloater(`-5`, target.x, target.y - 40, "#f00");
+        spawnFloater(`-5`, target.x, target.y - 40, "#f00", target.area);
         if (target.hp <= 0) { target.hp = 0; target.dead = true; }
     });
 }
@@ -1306,7 +1302,7 @@ function cmdHeal(p, args) {
     if (target && target.area === p.area && !target.dead) {
         let amt = 10 + (p.stats.healLevel * 5);
         target.hp = Math.min(target.maxHp, target.hp + amt);
-        spawnFloater(`+${amt} HP`, target.x, target.y - 40, "#0f0");
+        spawnFloater(`+${amt} HP`, target.x, target.y - 40, "#0f0", target.area);
         p.stats.healXP += 15;
         if (p.stats.healXP >= xpNeeded(p.stats.healLevel)) {
             p.stats.healLevel++; p.stats.healXP = 0; 
