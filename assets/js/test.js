@@ -1127,28 +1127,34 @@ const DANCE_UNLOCKS = {
 	10: { name: "The tenthdance", minLvl: 1 }
 };
 const DANCE_STYLES = {
-    // ... dances 1-4 ...
+    1: (now) => ({ bodyY: Math.sin(now / 100) * 8 }), // The Squat
+    2: (now) => ({ armMove: Math.sin(now / 50) * 20 }), // The Flail
+    3: (now) => ({ lean: Math.sin(now / 200) * 0.6 }), // The Lean
+    4: (now) => ({ 
+        bodyY: Math.abs(Math.sin(now / 150)) * -15,
+        armMove: Math.sin(now / 150) * 5,
+        pose: "head_hands" 
+    }),
     5: (now, p) => { 
-        // Use Math.min(0, ...) so he NEVER goes below his starting feet line
         let bY = Math.min(0, Math.sin(now / 200) * -50); 
-        
-        // Shockwave triggers when bY returns to 0 (the landing)
         if (bY > -1 && p.wasInAir) {
             spawnArrow(p.x, p.y + 25, p.x + 60, p.y + 25);
             spawnArrow(p.x, p.y + 25, p.x - 60, p.y + 25);
             p.wasInAir = false;
         }
         if (bY < -5) p.wasInAir = true;
-
         return { bodyY: bY, lean: 0, pose: "action" };
     },
+    6: (now) => ({ bodyY: Math.sin(now / 75) * 4 }), // The Bop
+    7: (now) => ({ armMove: Math.sin(now / 50) * 50 }), // The Wave
+    8: (now) => ({ lean: Math.sin(now / 200) * 0.1 }), // The Sway
     9: (now) => ({ 
-        bodyY: Math.min(0, Math.sin(now / 150) * -25), // Force jump only
+        bodyY: Math.min(0, Math.sin(now / 150) * -25),
         armMove: Math.sin(now / 150) * 5,
         pose: "star" 
     }),
     10: (now) => ({ 
-        bodyY: Math.min(0, Math.sin(now / 200) * -40), // Force jump only
+        bodyY: Math.min(0, Math.sin(now / 200) * -40),
         lean: Math.sin(now / 200) * 0.2,
         pose: "action"
     })
@@ -1201,6 +1207,7 @@ function drawStickman(ctx, p) {
     const now = Date.now();
     if (p.dead) return;
 
+    // Calculate Body Animation
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     const isDancing = p.activeTask === "dancing";
     if (isDancing && DANCE_STYLES[p.danceStyle]) {
@@ -1208,19 +1215,19 @@ function drawStickman(ctx, p) {
     }
 
     const isFishing = p.activeTask === "fishing";
-    const isAction = p.activeTask === "attacking" || p.activeTask === "woodcutting" || p.activeTask === "mining";
+    const isAction = ["attacking", "woodcutting", "mining"].includes(p.activeTask);
     
-    // 1. Core Positions
+    // --- ANCHOR POINTS ---
     const head = { x: p.x + (anim.lean * 20), y: p.y - 30 + anim.bodyY };
-    const shoulderY = head.y + 15;
-    const hipY = p.y + 10 + anim.bodyY;
+    const shoulderY = head.y + 12; // Arms start here
+    const hipY = p.y + 10 + anim.bodyY; // Legs start here
 
-    // 2. Default Hand Positions (Idle/Walking)
-    let leftHand = { x: p.x - 18 + (anim.lean * 10), y: p.y + 2 + anim.bodyY + anim.armMove };
-    let rightHand = { x: p.x + 18 + (anim.lean * 30), y: p.y + 2 + anim.bodyY - anim.armMove };
+    // --- HAND POSITIONS (Relative to Shoulders) ---
+    let leftHand = { x: head.x - 18, y: shoulderY + 10 + anim.armMove };
+    let rightHand = { x: head.x + 18, y: shoulderY + 10 - anim.armMove };
 
-    // 3. Apply Predefined Pose Overrides
-    let activePose = anim.pose;
+    // Apply Poses (Must use 'head' or 'shoulderY' to stay attached)
+    let activePose = anim.pose || p.forcedPose;
     if (!activePose) {
         if (isFishing) activePose = "fishing";
         else if (isAction) activePose = "action";
@@ -1232,44 +1239,33 @@ function drawStickman(ctx, p) {
         if (overrides.right) rightHand = overrides.right;
     }
 
-    // 4. Foot Anchors (Keeps Boots/Pants attached)
-	// 4. Foot Anchors (Simplified: Always attached, no stretching)
-	const walk = (p.targetX !== null) ? Math.sin(now / 100) * 10 : 0;
-	const legSpread = (activePose === "star" || activePose === "head_hands") ? 18 : 10;
+    // --- FOOT POSITIONS (Relative to Hips) ---
+    const walk = (p.targetX !== null) ? Math.sin(now / 100) * 10 : 0;
+    const legSpread = (activePose === "star") ? 18 : 10;
+    
+    // Knees bend if bodyY > 0 (Squat), otherwise feet follow body (Jump)
+    let footY = p.y + 25 + (anim.bodyY > 0 ? 0 : anim.bodyY);
+    const leftFoot = { x: p.x - legSpread - walk, y: footY };
+    const rightFoot = { x: p.x + legSpread + walk, y: footY };
 
-	// The feet now move 100% with the bodyY. 
-	// For squats, we'll handle the knee-bend by NOT moving the feet.
-	let footYOffset = anim.bodyY; 
-
-	// If squatting (bodyY > 0), keep feet pinned to ground (p.y + 25)
-	// If jumping (bodyY < 0), feet follow the body up.
-	if (anim.bodyY > 0) {
-		footYOffset = 0; 
-	}
-
-	const footY = p.y + 25 + footYOffset; 
-
-	const leftFoot = { x: p.x - legSpread - walk, y: footY };
-	const rightFoot = { x: p.x + legSpread + walk, y: footY };
-
-    // 5. Drawing
+    // --- DRAWING ---
     const style = BODY_PARTS["stick"]; 
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
     
     style.head(ctx, head.x, head.y, p);
-    style.torso(ctx, head.x, head.y, p.x, hipY);
+    style.torso(ctx, head.x, head.y, p.x, hipY); // Spine connects Head to Hips
     
-    // Arms (FIXED: using head.x for shoulder horizontal)
+    // Arms: Anchor (ShoulderY) -> Hand
     style.limbs(ctx, head.x, shoulderY, leftHand.x, leftHand.y); 
     style.limbs(ctx, head.x, shoulderY, rightHand.x, rightHand.y);
     
-    // Legs
+    // Legs: Anchor (HipY) -> Foot
     style.limbs(ctx, p.x, hipY, leftFoot.x, leftFoot.y); 
     style.limbs(ctx, p.x, hipY, rightFoot.x, rightFoot.y);
 
+    // Weapon Anchor: Hand positions are passed in here
     renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing);
 }
-
 function renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing) {
     const weaponItem = ITEM_DB[p.stats.equippedWeapon];
     const isDancing = p.activeTask === "dancing";
