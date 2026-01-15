@@ -992,31 +992,48 @@ const HAND_STYLES = {
     },
 	
 	"fishing_rod": (ctx, item, isAttacking, now, p, bodyY, lean) => {
-        const isActuallyFishing = p.activeTask === "fishing";
-        
-        ctx.strokeStyle = item.color || "#8B4513";
-        ctx.lineWidth = 2;
+		const isActuallyFishing = p.activeTask === "fishing";
+		
+		ctx.strokeStyle = item.color || "#8B4513";
+		ctx.lineWidth = 2;
 
-        if (isActuallyFishing) {
-            let bob = Math.sin(now / 300) * 5;
-            // Rod points out and up
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(35, -25 + bob); 
-            ctx.stroke();
+		if (isActuallyFishing) {
+			let bob = Math.sin(now / 300) * 5;
+			
+			// 1. Draw the Rod (Starting at 0,0 which is the Hand)
+			ctx.beginPath();
+			ctx.moveTo(0, 0); 
+			// Tip is 40px right and 30px up from the hand
+			const tipX = 40;
+			const tipY = -30 + bob;
+			ctx.lineTo(tipX, tipY);
+			ctx.stroke();
 
-            // Line goes from tip down to water
-            ctx.strokeStyle = "rgba(255,255,255,0.4)";
-            ctx.beginPath();
-            ctx.moveTo(35, -25 + bob);
-            ctx.lineTo(60, 40 - bodyY); // Aiming for the water surface
-            ctx.stroke();
-        } else {
-            // Idle/Walking: Carry it upright
-            ctx.rotate(-Math.PI / 8);
-            ctx.beginPath(); ctx.moveTo(0, 5); ctx.lineTo(0, -45); ctx.stroke();
-        }
-    },
+			// 2. Draw the Line
+			ctx.strokeStyle = "rgba(255,255,255,0.5)";
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.moveTo(tipX, tipY);
+			
+			// This targets the water relative to the player
+			// We subtract the current hand position to find the water in "local" space
+			const waterX = 80; 
+			const waterY = 60 - bodyY; 
+
+			ctx.quadraticCurveTo(tipX + 10, tipY + 30, waterX, waterY);
+			ctx.stroke();
+
+			// 3. Draw the Bobber
+			ctx.fillStyle = "#ff4444";
+			ctx.beginPath(); 
+			ctx.arc(waterX, waterY, 3, 0, Math.PI * 2); 
+			ctx.fill();
+		} else {
+			// Idle/Walking: Carry it upright
+			ctx.rotate(-Math.PI / 8);
+			ctx.beginPath(); ctx.moveTo(0, 5); ctx.lineTo(0, -45); ctx.stroke();
+		}
+	},
 	"axe": (ctx, item, isAttacking, now) => {
         // CHOPPING ANIMATION: A sharp, heavy downward tilt
         let chop = isAttacking ? Math.sin(now / 100) * 1.2 : Math.PI / 1.2;
@@ -1173,7 +1190,7 @@ const POSE_LIBRARY = {
         right: { x: p.x + 15 + (anim.lean * 30), y: p.y - 12 + anim.bodyY }
     }),
     "fishing": (p, anim) => ({
-        right: { x: p.x + 25 + (anim.lean * 20), y: p.y - 5 + anim.bodyY }
+        right: { right: { x: head.x + 22, y: head.y + 15 }
     })
 };
 const BODY_PARTS = {
