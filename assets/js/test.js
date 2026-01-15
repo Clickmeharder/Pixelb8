@@ -202,11 +202,8 @@ const ITEM_DB = {
     // --- ARMOR ---
     "Leather Tunic":    { type: "armor",  def: 2,                 value: 60,   color: "#5c4033" },
     "Iron Plate":       { type: "armor",  def: 5,                 value: 300,  color: "#aaa" },
-    
     // --- HELMETS ---
-    "Paper Bag":        { type: "helmet", def: 1,                 value: 5,    color: "#d2b48c" },
-    "wig":              { type: "helmet", def: 1,                 value: 5000, color: "yellow" }, // Legendary!
-    "Iron helmet":      { type: "helmet", def: 3,                 value: 150,  color: "#aaa" },
+    "wig":              { type: "helmet", def: 1,style: "wig", value: 5000, color: "yellow" }, // Legendary!
     "Assassin Hood": { type: "hood", value: 100, color: "#222" },
     "Spiky Hair": { type: "hair", value: 100, color: "#ffff00" },
     // --- BOOTS ---
@@ -223,6 +220,22 @@ const ITEM_DB = {
     "Royal Cape": { type: "cape", color: "#880000", value: 10000 },
     "Leather Pants": { type: "pants", def :2, value: 100,color: "#3e2723" },
     "White Gloves": { type: "gloves", value: 100, color: "#ffffff" },
+// --- HELMETS ---
+    "Viking Helm":    { type: "helmet", style: "viking", def: 4,  value: 400,  color: "#888" },
+    "Great Horns":    { type: "helmet", style: "viking", def: 6,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
+    
+    "Apprentice Hat": { type: "helmet", style: "wizard", def: 1,  value: 150,  color: "#303f9f" },
+    "Archmage Point": { type: "helmet", style: "wizard", def: 3,  value: 5000, color: "#4a148c" },
+
+    "Royal Crown":    { type: "helmet", style: "crown",  def: 2,  value: 10000, color: "#ffcc00" },
+    
+    // --- SPECIALS ---
+    "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
+    "Spiky Hair":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
+    
+    // Legacy support (still works without a style property)
+    "Paper Bag":      { type: "helmet", def: 1, value: 5, color: "#d2b48c" }, 
+    "Iron helmet":    { type: "helmet", def: 5, value: 150, color: "#aaa" }
 
 };
 function addItemToPlayer(playerName, itemName) {
@@ -753,6 +766,222 @@ function updateSplashText(ctx) {
 }
 /* ================= DRAWING ================= */
 /* ================= ITEM DRAWING LIBRARY ================= */
+const HEAD_STYLES = {
+    "box": (ctx, hX, hY, color) => { // Paper Bag Style
+        ctx.fillStyle = color;
+        ctx.fillRect(hX - 12, hY - 14, 24, 26);
+        ctx.strokeRect(hX - 12, hY - 14, 24, 26);
+    },
+    "wig": (ctx, hX, hY, color) => { // Legendary Wig Style
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+        ctx.beginPath(); ctx.arc(hX, hY, 13, 0.1 * Math.PI, 0.9 * Math.PI); ctx.lineWidth = 6; ctx.stroke();
+        ctx.beginPath(); ctx.arc(hX, hY - 2, 11, Math.PI, 0); ctx.fill();
+        ctx.lineWidth = 5; ctx.beginPath();
+        ctx.moveTo(hX - 10, hY - 2); ctx.quadraticCurveTo(hX - 14, hY + 10, hX - 11, hY + 18);
+        ctx.moveTo(hX + 10, hY - 2); ctx.quadraticCurveTo(hX + 14, hY + 10, hX + 11, hY + 18); ctx.stroke();
+    },
+    "knight": (ctx, hX, hY, color) => { // Standard Helmet Style
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(hX, hY, 12, Math.PI, 0); 
+        ctx.lineTo(hX + 12, hY + 10); ctx.lineTo(hX - 12, hY + 10); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+    },
+    "hood": (ctx, hX, hY, color) => { // Assassin/Hoodie Style
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(hX - 13, hY + 8);
+        ctx.quadraticCurveTo(hX - 15, hY - 20, hX, hY - 20);
+        ctx.quadraticCurveTo(hX + 15, hY - 20, hX + 13, hY + 8);
+        ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,0.4)"; // Face shadow
+        ctx.beginPath(); ctx.arc(hX, hY, 8, 0, Math.PI*2); ctx.fill();
+    },
+    "hair": (ctx, hX, hY, color) => { // Basic Spiky/Hair Style
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(hX, hY - 3, 11, Math.PI, 0); ctx.fill();
+        ctx.fillRect(hX - 11, hY - 3, 22, 10);
+    }
+"viking": (ctx, hX, hY, color) => {
+        // Helmet Base
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(hX, hY, 11, Math.PI, 0); ctx.fill(); ctx.stroke();
+        // Horns (White/Bone color)
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.moveTo(hX - 8, hY - 5); ctx.quadraticCurveTo(hX - 20, hY - 15, hX - 15, hY + 2);
+        ctx.lineTo(hX - 8, hY - 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(hX + 8, hY - 5); ctx.quadraticCurveTo(hX + 20, hY - 15, hX + 15, hY + 2);
+        ctx.lineTo(hX + 8, hY - 2); ctx.fill(); ctx.stroke();
+    },
+
+    "wizard": (ctx, hX, hY, color) => {
+        // The Brim
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.ellipse(hX, hY - 2, 18, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // The Tall Cone
+        ctx.beginPath();
+        ctx.moveTo(hX - 10, hY - 4);
+        ctx.lineTo(hX, hY - 35); // The tip
+        ctx.lineTo(hX + 10, hY - 4);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+    },
+
+    "crown": (ctx, hX, hY, color) => {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(hX - 12, hY);
+        ctx.lineTo(hX - 12, hY - 12); ctx.lineTo(hX - 6, hY - 6); // Point 1
+        ctx.lineTo(hX, hY - 15); ctx.lineTo(hX + 6, hY - 6);      // Point 2 (Center)
+        ctx.lineTo(hX + 12, hY - 12); ctx.lineTo(hX + 12, hY);   // Point 3
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Little "Jewel" dots
+        ctx.fillStyle = "#ff0000"; ctx.beginPath(); ctx.arc(hX, hY - 8, 2, 0, Math.PI*2); ctx.fill();
+    },
+
+    "halo": (ctx, hX, hY, color) => {
+        ctx.strokeStyle = "rgba(255, 255, 0, 0.8)";
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 10; ctx.shadowColor = "yellow";
+        ctx.beginPath(); ctx.ellipse(hX, hY - 20, 12, 4, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.shadowBlur = 0; // Reset shadow for other items
+    }
+};
+// --- 1. HAIR & HOODS (Head Layers) ---
+function drawHeadLayer(ctx, hX, hY, item, p) {
+    if (!item) return;
+    const style = item.style || item.type || "hair";
+    // 2. Resolve Color
+    const finalColor = (style === "wig" && p.stats.wigColor) ? p.stats.wigColor : (item.color || "#614126");
+    // 3. Draw: Pull from the HEAD_STYLES library
+    ctx.save();
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    const drawFn = HEAD_STYLES[style] || HEAD_STYLES["hair"];
+    drawFn(ctx, hX, hY, finalColor);
+    ctx.restore();
+}estore();
+}
+function drawHelmetItem(ctx, p, bodyY, lean) {
+    const item = ITEM_DB[p.stats.equippedHelmet];
+    if (!item) return;
+    const hX = p.x + (lean * 20);
+    const hY = p.y - 30 + bodyY; 
+    // Simply delegate to the smart head layer
+    drawHeadLayer(ctx, hX, hY, item, p);
+}
+
+// --- 2. CAPES (Drawn behind the stickman) ---
+function drawCapeItem(ctx, p, bodyY, lean, item) {
+    const headX = p.x + (lean * 20);
+    const centerX = p.x + (lean * 10);
+    ctx.fillStyle = item.color || "#550055";
+    ctx.beginPath();
+    ctx.moveTo(headX, p.y - 15 + bodyY); // Neck
+    // Cape flares out behind
+    ctx.quadraticCurveTo(headX - 25, p.y + 10 + bodyY, centerX - 15, p.y + 40 + bodyY);
+    ctx.lineTo(centerX + 15, p.y + 40 + bodyY);
+    ctx.quadraticCurveTo(headX + 25, p.y + 10 + bodyY, headX, p.y - 15 + bodyY);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(0,0,0,0.3)";
+    ctx.stroke();
+}
+
+// --- 3. armor drawn over body
+function drawArmor(ctx, p, bodyY = 0, lean = 0) {
+    const item = ITEM_DB[p.stats.equippedArmor];
+    if (!item) return;
+
+    const headX = p.x + (lean * 20); 
+    const hipX = p.x + (lean * 5); // Added this so the armor bottom follows the lean slightly
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(headX - 7, p.y - 18 + bodyY); 
+    ctx.lineTo(headX + 7, p.y - 18 + bodyY); 
+    ctx.lineTo(hipX + 7, p.y + 8 + bodyY);    
+    ctx.lineTo(hipX - 7, p.y + 8 + bodyY);    
+    ctx.closePath();
+
+    ctx.fillStyle = item.color;
+    ctx.globalAlpha = 0.8;
+    ctx.fill();
+
+    ctx.globalAlpha = 1.0;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+}
+// --- 4. PANTS (Drawn over the legs) ---
+function drawPantsItem(ctx, p, bodyY, lean, item) {
+    const now = Date.now();
+    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+    let legSpread = (p.danceStyle === 4) ? 15 : 10;
+    const currentFloorY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
+    
+    ctx.strokeStyle = item.color || "#333";
+    ctx.lineWidth = 5; // Thicker than the stick legs
+    ctx.lineCap = "round";
+
+    // Left Leg Pant
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y + 10 + bodyY);
+    ctx.lineTo(p.x - legSpread - walk, currentFloorY - 2);
+    ctx.stroke();
+
+    // Right Leg Pant
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y + 10 + bodyY);
+    ctx.lineTo(p.x + legSpread + walk, currentFloorY - 2);
+    ctx.stroke();
+    ctx.lineWidth = 3; // Reset
+}
+
+// --- 5. draw Bootes
+function drawBoots(ctx, p, bodyY = 0, lean = 0) { // Added lean to signature
+    const item = ITEM_DB[p.stats.equippedBoots];
+    if (!item) return;
+
+    const now = Date.now();
+    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+	let legSpread = (p.danceStyle === 4) ? 15 : 10; // Match the leg spread
+    ctx.save();
+    ctx.fillStyle = item.color;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    // Use the SAME bodyY used for the legs
+    const footY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
+	// --- Left Boot ---
+    const leftFootX = p.x - legSpread - walk;
+    // 1. The Base
+    ctx.fillRect(leftFootX - 4, footY - 2, 8, 5); 
+    ctx.strokeRect(leftFootX - 4, footY - 2, 8, 5);
+    // 2. The Ankle (The line I accidentally removed!)
+    ctx.fillRect(leftFootX - 2, footY - 6, 4, 5); 
+
+    // --- Right Boot ---
+    const rightFootX = p.x + legSpread + walk;
+    // 1. The Base
+    ctx.fillRect(rightFootX - 4, footY - 2, 8, 5);
+    ctx.strokeRect(rightFootX - 4, footY - 2, 8, 5);
+    // 2. The Ankle (Restored here too)
+    ctx.fillRect(rightFootX - 2, footY - 6, 4, 5);
+
+    ctx.restore();
+}
+// --- 6. GLOVES (Drawn on hands) ---
+function drawGlovesItem(ctx, handX, handY, item) {
+    ctx.fillStyle = item.color || "#fff";
+    ctx.beginPath();
+    ctx.arc(handX, handY, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.stroke();
+}
+
+
+/* ================= EXTENDED ITEM LIBRARY ================= */
 
 function drawFishingRod(ctx, p, now, bodyY, lean) {
     ctx.save();
@@ -824,132 +1053,6 @@ function drawWeaponItem(ctx, p, now, bodyY, lean) {
     ctx.restore();
 }
 
-function drawHelmetItem(ctx, p, bodyY, lean) {
-    const item = ITEM_DB[p.stats.equippedHelmet];
-    const hX = p.x + (lean * 20);
-    const hY = p.y - 30 + bodyY; 
-    const name = p.stats.equippedHelmet.toLowerCase();
-
-    ctx.save();
-    if (name === "paper bag") {
-        ctx.fillStyle = "#d2b48c"; ctx.strokeStyle = "#000";   
-        ctx.fillRect(hX - 12, hY - 14, 24, 26);
-        ctx.strokeRect(hX - 12, hY - 14, 24, 26);
-    } else if (name === "wig") {
-        ctx.fillStyle = p.stats.wigColor || item.color || "#ffff00";
-        ctx.strokeStyle = ctx.fillStyle;
-        ctx.beginPath(); ctx.arc(hX, hY, 13, 0.1 * Math.PI, 0.9 * Math.PI); ctx.lineWidth = 6; ctx.stroke(); // Back
-        ctx.beginPath(); ctx.arc(hX, hY - 2, 11, Math.PI, 0); ctx.fill(); // Top
-        ctx.lineWidth = 5; ctx.beginPath(); // Side Locks
-        ctx.moveTo(hX - 10, hY - 2); ctx.quadraticCurveTo(hX - 14, hY + 10, hX - 11, hY + 18);
-        ctx.moveTo(hX + 10, hY - 2); ctx.quadraticCurveTo(hX + 14, hY + 10, hX + 11, hY + 18); ctx.stroke();
-    } else if (name === "iron helmet") {
-        ctx.fillStyle = "#aaa"; ctx.strokeStyle = "#000";
-        ctx.beginPath(); ctx.arc(hX, hY, 12, Math.PI, 0); 
-        ctx.lineTo(hX + 12, hY + 10); ctx.lineTo(hX - 12, hY + 10); ctx.closePath();
-        ctx.fill(); ctx.stroke();
-    }
-    ctx.restore();
-}
-function drawBoots(ctx, p, bodyY = 0, lean = 0) { // Added lean to signature
-    const item = ITEM_DB[p.stats.equippedBoots];
-    if (!item) return;
-
-    const now = Date.now();
-    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-	let legSpread = (p.danceStyle === 4) ? 15 : 10; // Match the leg spread
-    ctx.save();
-    ctx.fillStyle = item.color;
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-    // Use the SAME bodyY used for the legs
-    const footY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
-	// --- Left Boot ---
-    const leftFootX = p.x - legSpread - walk;
-    // 1. The Base
-    ctx.fillRect(leftFootX - 4, footY - 2, 8, 5); 
-    ctx.strokeRect(leftFootX - 4, footY - 2, 8, 5);
-    // 2. The Ankle (The line I accidentally removed!)
-    ctx.fillRect(leftFootX - 2, footY - 6, 4, 5); 
-
-    // --- Right Boot ---
-    const rightFootX = p.x + legSpread + walk;
-    // 1. The Base
-    ctx.fillRect(rightFootX - 4, footY - 2, 8, 5);
-    ctx.strokeRect(rightFootX - 4, footY - 2, 8, 5);
-    // 2. The Ankle (Restored here too)
-    ctx.fillRect(rightFootX - 2, footY - 6, 4, 5);
-
-    ctx.restore();
-}
-function drawArmor(ctx, p, bodyY = 0, lean = 0) {
-    const item = ITEM_DB[p.stats.equippedArmor];
-    if (!item) return;
-
-    const headX = p.x + (lean * 20); 
-    const hipX = p.x + (lean * 5); // Added this so the armor bottom follows the lean slightly
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(headX - 7, p.y - 18 + bodyY); 
-    ctx.lineTo(headX + 7, p.y - 18 + bodyY); 
-    ctx.lineTo(hipX + 7, p.y + 8 + bodyY);    
-    ctx.lineTo(hipX - 7, p.y + 8 + bodyY);    
-    ctx.closePath();
-
-    ctx.fillStyle = item.color;
-    ctx.globalAlpha = 0.8;
-    ctx.fill();
-
-    ctx.globalAlpha = 1.0;
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.restore();
-}
-/* ================= EXTENDED ITEM LIBRARY ================= */
-
-// --- 1. CAPES (Drawn behind the stickman) ---
-function drawCapeItem(ctx, p, bodyY, lean, item) {
-    const headX = p.x + (lean * 20);
-    const centerX = p.x + (lean * 10);
-    ctx.fillStyle = item.color || "#550055";
-    ctx.beginPath();
-    ctx.moveTo(headX, p.y - 15 + bodyY); // Neck
-    // Cape flares out behind
-    ctx.quadraticCurveTo(headX - 25, p.y + 10 + bodyY, centerX - 15, p.y + 40 + bodyY);
-    ctx.lineTo(centerX + 15, p.y + 40 + bodyY);
-    ctx.quadraticCurveTo(headX + 25, p.y + 10 + bodyY, headX, p.y - 15 + bodyY);
-    ctx.fill();
-    ctx.strokeStyle = "rgba(0,0,0,0.3)";
-    ctx.stroke();
-}
-
-// --- 2. PANTS (Drawn over the legs) ---
-function drawPantsItem(ctx, p, bodyY, lean, item) {
-    const now = Date.now();
-    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-    let legSpread = (p.danceStyle === 4) ? 15 : 10;
-    const currentFloorY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
-    
-    ctx.strokeStyle = item.color || "#333";
-    ctx.lineWidth = 5; // Thicker than the stick legs
-    ctx.lineCap = "round";
-
-    // Left Leg Pant
-    ctx.beginPath();
-    ctx.moveTo(p.x, p.y + 10 + bodyY);
-    ctx.lineTo(p.x - legSpread - walk, currentFloorY - 2);
-    ctx.stroke();
-
-    // Right Leg Pant
-    ctx.beginPath();
-    ctx.moveTo(p.x, p.y + 10 + bodyY);
-    ctx.lineTo(p.x + legSpread + walk, currentFloorY - 2);
-    ctx.stroke();
-    ctx.lineWidth = 3; // Reset
-}
-
 // --- 3. STAVES (Weapon Type) ---
 function drawStaffItem(ctx, x, y, item, isAttacking, now) {
     ctx.save();
@@ -970,37 +1073,6 @@ function drawStaffItem(ctx, x, y, item, isAttacking, now) {
     ctx.restore();
 }
 
-// --- 4. GLOVES (Drawn on hands) ---
-function drawGlovesItem(ctx, handX, handY, item) {
-    ctx.fillStyle = item.color || "#fff";
-    ctx.beginPath();
-    ctx.arc(handX, handY, 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.stroke();
-}
-
-// --- 5. HAIR & HOODS (Head Layers) ---
-function drawHeadLayer(ctx, hX, hY, item, p) {
-    const type = item.type;
-    ctx.fillStyle = item.color || "#614126";
-    
-    if (type === "hair") {
-        ctx.beginPath();
-        ctx.arc(hX, hY - 3, 11, Math.PI, 0); // Top skull hair
-        ctx.fill();
-        // Back of hair
-        ctx.fillRect(hX - 11, hY - 3, 22, 10);
-    } else if (type === "hood") {
-        ctx.beginPath();
-        ctx.moveTo(hX - 13, hY + 8);
-        ctx.quadraticCurveTo(hX - 15, hY - 20, hX, hY - 20);
-        ctx.quadraticCurveTo(hX + 15, hY - 20, hX + 13, hY + 8);
-        ctx.fill();
-        // Inner shadow
-        ctx.fillStyle = "rgba(0,0,0,0.4)";
-        ctx.beginPath(); ctx.arc(hX, hY, 8, 0, Math.PI*2); ctx.fill();
-    }
-}
 
 function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
     if (p.dead) return;
@@ -1015,7 +1087,7 @@ function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
         drawPantsItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedPants]);
     }
     if (p.stats.equippedArmor) {
-        drawArmor(ctx, p, bodyY, lean); // Your original Armor function
+        drawArmor(ctx, p, bodyY, lean); 
     }
 
     // --- LAYER 3: HANDS & WEAPONS ---
@@ -1041,7 +1113,7 @@ function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
         if (weapon.type === "staff") {
             drawStaffItem(ctx, rightHandX, rightHandY, weapon, isAttacking, now);
         } else {
-            drawWeaponItem(ctx, p, now, bodyY, lean); // Original Sword/Bow logic
+            drawWeaponItem(ctx, p, now, bodyY, lean); 
         }
     }
 
@@ -1053,10 +1125,13 @@ function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
         drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
     }
     if (p.stats.equippedHelmet) {
-        // This handles both Helmets and Hoods depending on type
         const headItem = ITEM_DB[p.stats.equippedHelmet];
-        if (headItem.type === "hood") drawHeadLayer(ctx, hX, hY, headItem, p);
-        else drawHelmetItem(ctx, p, bodyY, lean); 
+        // Hoods are drawn using the HeadLayer logic, others use the Helmet logic
+        if (headItem.type === "hood") {
+            drawHeadLayer(ctx, hX, hY, headItem, p);
+        } else {
+            drawHelmetItem(ctx, p, bodyY, lean); 
+        }
     }
 
     if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY, lean);
