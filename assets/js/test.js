@@ -1018,7 +1018,7 @@ const HAND_STYLES = {
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(0, 15); ctx.lineTo(0, -35); ctx.stroke();
         }
-    }
+    },
 	"axe": (ctx, item, isAttacking, now) => {
         // CHOPPING ANIMATION: A sharp, heavy downward tilt
         let chop = isAttacking ? Math.sin(now / 100) * 1.2 : Math.PI / 1.2;
