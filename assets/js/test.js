@@ -683,7 +683,6 @@ function spawnArrow(startX, startY, endX, endY) {
     arrows.push({ x: startX, y: startY, tx: endX, ty: endY, life: 30 });
 }
 
-// Add this into your gameLoop() to draw the flying arrows:
 function updateArrows(ctx) {
     arrows.forEach((a, i) => {
         let dx = a.tx - a.x;
@@ -702,11 +701,10 @@ function updateArrows(ctx) {
         if (a.life <= 0 || Math.abs(dx) < 5) arrows.splice(i, 1);
     });
 }
+
 function updateSplashText(ctx) {
     for (let i = floaters.length - 1; i >= 0; i--) {
         let f = floaters[i];
-        
-        // This is the "Fix": If we aren't looking at the zone, don't draw it!
         if (f.area !== viewArea) continue; 
 
         ctx.save();
@@ -715,14 +713,284 @@ function updateSplashText(ctx) {
         ctx.font = "bold 14px monospace";
         ctx.fillText(f.text, f.x, f.y);
         
-        f.y -= 1;     // Movement
-        f.life -= 2;  // Fade speed
+        f.y -= 1;
+        f.life -= 2;
         if (f.life <= 0) floaters.splice(i, 1);
         ctx.restore();
     }
 }
 /* ================= DRAWING ================= */
+/* ================= ITEM DRAWING LIBRARY ================= */
 
+function drawFishingRod(ctx, p, now, bodyY, lean) {
+    ctx.save();
+    ctx.setLineDash([]); 
+    ctx.strokeStyle = "#8B4513"; 
+    ctx.lineWidth = 2;
+    let bob = Math.sin(now / 300) * 0.1;
+    
+    const rodStartX = p.x + 10 + (lean * 20);
+    const rodStartY = p.y - 10 + bodyY;
+    const rodTipX = p.x + 50 + (lean * 20);
+    const rodTipY = p.y - 40 + (bob * 20) + bodyY;
+
+    ctx.beginPath();
+    ctx.moveTo(rodStartX, rodStartY); 
+    ctx.lineTo(rodTipX, rodTipY); 
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(255,255,255,0.5)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(rodTipX, rodTipY);
+    
+    const waterX = Math.max(rodTipX + 40, 280);
+    const waterY = 510 + (Math.sin(now/500) * 5);
+
+    ctx.quadraticCurveTo(rodTipX + 20, rodTipY + 40, waterX, waterY);
+    ctx.stroke();
+
+    ctx.fillStyle = "#ff4444";
+    ctx.beginPath(); ctx.arc(waterX, waterY, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+}
+
+function drawWeaponItem(ctx, p, now, bodyY, lean) {
+    const pWeapon = p.stats.equippedWeapon;
+    const w = ITEM_DB[pWeapon];
+    const isAttacking = p.activeTask === "attacking";
+    const isBow = pWeapon.toLowerCase().includes("bow");
+    
+    ctx.save();
+    let weaponX = p.x + (lean * 20); 
+    
+    if (isAttacking) {
+        ctx.translate(weaponX + 12, p.y - 10 + bodyY);
+        let swing = Math.sin(now / 150) * 0.8;
+        ctx.rotate(swing);
+        ctx.strokeStyle = p.stats.attackLevel > 10 ? "#0ff" : (w.color || "#ccc");
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(25, -5); ctx.stroke();
+        ctx.strokeStyle = "#aa8800";
+        ctx.beginPath(); ctx.moveTo(5, -8); ctx.lineTo(5, 8); ctx.stroke();
+    } else {
+        if (isBow) {
+            ctx.translate(weaponX - 2, p.y - 5 + bodyY);
+            ctx.rotate(Math.PI / 4);
+            ctx.strokeStyle = "#8B4513";
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(0, 0, 15, -Math.PI/2, Math.PI/2); ctx.stroke();
+        } else {
+            ctx.translate(weaponX - 5, p.y - 5 + bodyY);
+            ctx.rotate(Math.PI / 1.2);
+            ctx.strokeStyle = w.color;
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(20, 0); ctx.stroke();
+            ctx.moveTo(5, -3); ctx.lineTo(5, 3); ctx.stroke();
+        }
+    }
+    ctx.restore();
+}
+
+function drawHelmetItem(ctx, p, bodyY, lean) {
+    const item = ITEM_DB[p.stats.equippedHelmet];
+    const hX = p.x + (lean * 20);
+    const hY = p.y - 30 + bodyY; 
+    const name = p.stats.equippedHelmet.toLowerCase();
+
+    ctx.save();
+    if (name === "paper bag") {
+        ctx.fillStyle = "#d2b48c"; ctx.strokeStyle = "#000";   
+        ctx.fillRect(hX - 12, hY - 14, 24, 26);
+        ctx.strokeRect(hX - 12, hY - 14, 24, 26);
+    } else if (name === "wig") {
+        ctx.fillStyle = p.stats.wigColor || item.color || "#ffff00";
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.beginPath(); ctx.arc(hX, hY, 13, 0.1 * Math.PI, 0.9 * Math.PI); ctx.lineWidth = 6; ctx.stroke(); // Back
+        ctx.beginPath(); ctx.arc(hX, hY - 2, 11, Math.PI, 0); ctx.fill(); // Top
+        ctx.lineWidth = 5; ctx.beginPath(); // Side Locks
+        ctx.moveTo(hX - 10, hY - 2); ctx.quadraticCurveTo(hX - 14, hY + 10, hX - 11, hY + 18);
+        ctx.moveTo(hX + 10, hY - 2); ctx.quadraticCurveTo(hX + 14, hY + 10, hX + 11, hY + 18); ctx.stroke();
+    } else if (name === "iron helmet") {
+        ctx.fillStyle = "#aaa"; ctx.strokeStyle = "#000";
+        ctx.beginPath(); ctx.arc(hX, hY, 12, Math.PI, 0); 
+        ctx.lineTo(hX + 12, hY + 10); ctx.lineTo(hX - 12, hY + 10); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+    }
+    ctx.restore();
+}
+function drawBoots(ctx, p, bodyY = 0, lean = 0) { // Added lean to signature
+    const item = ITEM_DB[p.stats.equippedBoots];
+    if (!item) return;
+
+    const now = Date.now();
+    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+	let legSpread = (p.danceStyle === 4) ? 15 : 10; // Match the leg spread
+    ctx.save();
+    ctx.fillStyle = item.color;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    // Use the SAME bodyY used for the legs
+    const footY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
+	// --- Left Boot ---
+    const leftFootX = p.x - legSpread - walk;
+    // 1. The Base
+    ctx.fillRect(leftFootX - 4, footY - 2, 8, 5); 
+    ctx.strokeRect(leftFootX - 4, footY - 2, 8, 5);
+    // 2. The Ankle (The line I accidentally removed!)
+    ctx.fillRect(leftFootX - 2, footY - 6, 4, 5); 
+
+    // --- Right Boot ---
+    const rightFootX = p.x + legSpread + walk;
+    // 1. The Base
+    ctx.fillRect(rightFootX - 4, footY - 2, 8, 5);
+    ctx.strokeRect(rightFootX - 4, footY - 2, 8, 5);
+    // 2. The Ankle (Restored here too)
+    ctx.fillRect(rightFootX - 2, footY - 6, 4, 5);
+
+    ctx.restore();
+}
+function drawArmor(ctx, p, bodyY = 0, lean = 0) {
+    const item = ITEM_DB[p.stats.equippedArmor];
+    if (!item) return;
+
+    const headX = p.x + (lean * 20); 
+    const hipX = p.x + (lean * 5); // Added this so the armor bottom follows the lean slightly
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(headX - 7, p.y - 18 + bodyY); 
+    ctx.lineTo(headX + 7, p.y - 18 + bodyY); 
+    ctx.lineTo(hipX + 7, p.y + 8 + bodyY);    
+    ctx.lineTo(hipX - 7, p.y + 8 + bodyY);    
+    ctx.closePath();
+
+    ctx.fillStyle = item.color;
+    ctx.globalAlpha = 0.8;
+    ctx.fill();
+
+    ctx.globalAlpha = 1.0;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+}
+
+function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
+    if (p.dead) return;
+
+    const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
+
+    // 1. Hand Items
+    if (isFishing) {
+        drawFishingRod(ctx, p, now, bodyY, lean);
+    } else if (p.stats.equippedWeapon && ITEM_DB[p.stats.equippedWeapon]) {
+        drawWeaponItem(ctx, p, now, bodyY, lean);
+    }
+
+    // 2. Armor (Body)
+    if (p.stats.equippedArmor && ITEM_DB[p.stats.equippedArmor]) {
+        drawArmor(ctx, p, bodyY, lean); // Keeps your original drawArmor function
+    }
+
+    // 3. Helmets (Head)
+    if (p.stats.equippedHelmet && ITEM_DB[p.stats.equippedHelmet]) {
+        drawHelmetItem(ctx, p, bodyY, lean);
+    }
+
+    // 4. Boots (Feet)
+    if (p.stats.equippedBoots && ITEM_DB[p.stats.equippedBoots]) {
+        drawBoots(ctx, p, bodyY, lean); // Keeps your original drawBoots function
+    }
+}
+
+
+function drawStickman(ctx, p) {
+    if (p.area !== viewArea) return;
+    updatePhysics(p); 
+    const now = Date.now();
+    let lean = p.lean || 0;
+
+    if (p.dead) {
+        ctx.fillStyle = "rgba(200, 0, 0, 0.6)";
+        ctx.beginPath(); ctx.ellipse(p.x, p.y + 20, 25, 10, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.textAlign = "center"; ctx.fillStyle = "#555";
+        ctx.fillText("CORPSE", p.x, p.y + 10);
+        return;
+    }
+
+    let bodyY = 0;
+    let armMove = 0;
+    const isDancing = p.activeTask === "dancing";
+    const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
+    const isAttacking = p.activeTask === "attacking";
+
+    if (isDancing) {
+        if (p.danceStyle === 1) bodyY = Math.sin(now / 100) * 8;
+        if (p.danceStyle === 2) armMove = Math.sin(now / 50) * 20;
+        if (p.danceStyle === 3) lean = Math.sin(now / 200) * 0.6;
+        if (p.danceStyle === 4) {
+            bodyY = Math.abs(Math.sin(now / 150)) * -15;
+            armMove = Math.sin(now / 150) * 5;
+        }
+    }
+
+    ctx.strokeStyle = p.color; ctx.lineWidth = 3;
+    const headX = p.x + (lean * 20);
+    const headY = p.y - 30 + bodyY;
+
+    // 1. Head & Body
+    ctx.beginPath(); ctx.arc(headX, headY, 10, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = p.color;
+    ctx.fillRect(headX + 2, headY - 3, 2, 2); 
+    ctx.fillRect(headX + 6, headY - 3, 2, 2); 
+    ctx.beginPath(); ctx.arc(headX + 4, headY + 2, 3, 0, Math.PI); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
+
+    // 2. Arms (Logic preserved)
+    if (!isAttacking) {
+        ctx.beginPath();
+        if (p.danceStyle === 4) {
+            ctx.moveTo(headX, headY + 15);
+            ctx.lineTo(headX - 12, headY + 22 + (bodyY * 0.2)); 
+            ctx.moveTo(headX, headY + 15);
+            ctx.lineTo(headX + 12, headY + 22 + (bodyY * 0.2));
+        } else {
+            ctx.moveTo(headX, headY + 15);
+            ctx.lineTo(p.x - 18 + (lean * 10), p.y + 2 + bodyY + armMove);
+            ctx.moveTo(headX, headY + 15);
+            if (isFishing) {
+                ctx.lineTo(p.x + 10 + (lean * 20), p.y - 10 + bodyY);
+            } else {
+                ctx.lineTo(p.x + 18 + (lean * 30), p.y + 2 + bodyY - armMove);
+            }
+        }
+        ctx.stroke();
+    }
+
+    // 3. Legs
+    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
+    let legSpread = (p.danceStyle === 4) ? 15 : 10;
+    const currentFloorY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
+    ctx.beginPath(); 
+    ctx.moveTo(p.x, p.y + 10 + bodyY); 
+    ctx.lineTo(p.x - legSpread - walk, currentFloorY);
+    ctx.moveTo(p.x, p.y + 10 + bodyY); 
+    ctx.lineTo(p.x + legSpread + walk, currentFloorY); 
+    ctx.stroke();
+
+    // 4. Equipment Layer
+    drawEquipment(ctx, p, now, bodyY, armMove, lean);
+
+    // HP & Name
+    ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
+    ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
+    ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
+    ctx.fillText(p.name, p.x, p.y + 40);
+}
+// OLD-------------------------------------------
+
+/* 
 // Add 'lean' as the last parameter here
 function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
     if (p.dead) return;
@@ -808,62 +1076,6 @@ function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
     if (p.stats.equippedHelmet) drawHelmet(ctx, p, bodyY, lean);
     if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY, lean);
 }
-function drawBoots(ctx, p, bodyY = 0, lean = 0) { // Added lean to signature
-    const item = ITEM_DB[p.stats.equippedBoots];
-    if (!item) return;
-
-    const now = Date.now();
-    let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-	let legSpread = (p.danceStyle === 4) ? 15 : 10; // Match the leg spread
-    ctx.save();
-    ctx.fillStyle = item.color;
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-    // Use the SAME bodyY used for the legs
-    const footY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
-	// --- Left Boot ---
-    const leftFootX = p.x - legSpread - walk;
-    // 1. The Base
-    ctx.fillRect(leftFootX - 4, footY - 2, 8, 5); 
-    ctx.strokeRect(leftFootX - 4, footY - 2, 8, 5);
-    // 2. The Ankle (The line I accidentally removed!)
-    ctx.fillRect(leftFootX - 2, footY - 6, 4, 5); 
-
-    // --- Right Boot ---
-    const rightFootX = p.x + legSpread + walk;
-    // 1. The Base
-    ctx.fillRect(rightFootX - 4, footY - 2, 8, 5);
-    ctx.strokeRect(rightFootX - 4, footY - 2, 8, 5);
-    // 2. The Ankle (Restored here too)
-    ctx.fillRect(rightFootX - 2, footY - 6, 4, 5);
-
-    ctx.restore();
-}
-function drawArmor(ctx, p, bodyY = 0, lean = 0) {
-    const item = ITEM_DB[p.stats.equippedArmor];
-    if (!item) return;
-
-    const headX = p.x + (lean * 20); 
-    const hipX = p.x + (lean * 5); // Added this so the armor bottom follows the lean slightly
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(headX - 7, p.y - 18 + bodyY); 
-    ctx.lineTo(headX + 7, p.y - 18 + bodyY); 
-    ctx.lineTo(hipX + 7, p.y + 8 + bodyY);    
-    ctx.lineTo(hipX - 7, p.y + 8 + bodyY);    
-    ctx.closePath();
-
-    ctx.fillStyle = item.color;
-    ctx.globalAlpha = 0.8;
-    ctx.fill();
-
-    ctx.globalAlpha = 1.0;
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.restore();
-}
 
 function drawHelmet(ctx, p, bodyY = 0, lean = 0) {
     const item = ITEM_DB[p.stats.equippedHelmet];
@@ -928,6 +1140,7 @@ function drawHelmet(ctx, p, bodyY = 0, lean = 0) {
     }
     ctx.restore();
 }
+
 function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
     updatePhysics(p); 
@@ -1022,6 +1235,8 @@ function drawStickman(ctx, p) {
     ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
     ctx.fillText(p.name, p.x, p.y + 40);
 }
+ */
+
 function drawScenery(ctx) {
     const now = Date.now();
 
