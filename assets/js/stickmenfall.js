@@ -1033,7 +1033,7 @@ function handleDancing(p, now) {
         if (p.stats.danceXP >= nextLevelXP) {
             p.stats.danceLevel++;
             p.stats.danceXP = 0;
-            spawnFloater(p.x, p.y - 40, `DANCE LEVEL ${p.stats.danceLevel}!`, "#ff00ff");
+            spawnFloater(`DANCE LEVEL ${p.stats.danceLevel}!`, p.x, p.y - 40, "#ff00ff");
             
             // Notification for unlocks
             if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
@@ -1122,7 +1122,18 @@ function gameLoop() {
     // 4. World Systems (The Timers)
     updateSystemTicks(now);
     updateArrows(ctx);
+// --- ADD THIS SECTION START ---
+    for (let i = floaters.length - 1; i >= 0; i--) {
+        let f = floaters[i];
+        ctx.fillStyle = f.color || "#ffffff";
+        ctx.font = "bold 16px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(f.text, f.x, f.y);
 
+        f.y -= 1;    // Make it float up
+        f.life -= 2; // Make it fade out
+        if (f.life <= 0) floaters.splice(i, 1); // Remove when dead
+    }
     handleTooltips();
     requestAnimationFrame(gameLoop);
 }
