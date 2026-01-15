@@ -832,8 +832,8 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
     const drawFn = HEAD_STYLES[style] || HEAD_STYLES["hair"];
     drawFn(ctx, hX, hY, finalColor);
     ctx.restore();
-}estore();
 }
+
 function drawHelmetItem(ctx, p, bodyY, lean) {
     const item = ITEM_DB[p.stats.equippedHelmet];
     if (!item) return;
