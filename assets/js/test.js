@@ -142,7 +142,7 @@ function loadStats(name) {
         attackLevel: 1, attackXP: 0,
         healLevel: 1, healXP: 0,
         fishLevel: 1, fishXP: 0,
-		danceLevel: 1, danceXP: 0,
+        danceLevel: 1, danceXP: 0,
         combatLevel: 1,
         gold: 0,
         inventory: ["Fishing Rod"],
@@ -150,40 +150,40 @@ function loadStats(name) {
         equippedArmor: null,
         equippedHelmet: null,
         equippedBoots: null,
-        wigColor: null // 1. Set default for NEW players
+        // --- NEW SLOTS FOR NEW PLAYERS ---
+        equippedPants: null,
+        equippedCape: null,
+        equippedGloves: null,
+        equippedHair: null,
+        wigColor: null 
     };
 
     // --- SAFETY CHECKS FOR OLD SAVES ---
-	//0. Ensure nan gold gets reset to 0
-	if (isNaN(stats.gold) || stats.gold === null || stats.gold === undefined) {
-        console.log(`%c [SYSTEM] Repaired broken gold for ${name}`, "color: #ff0000");
-        stats.gold = 0; 
-    }
-    // 1. Ensure Inventory exists as an array
+    if (isNaN(stats.gold) || stats.gold === null) stats.gold = 0;
+    
     if (!stats.inventory || !Array.isArray(stats.inventory)) {
         stats.inventory = ["Fishing Rod"];
     }
 
-    // 2. Ensure they actually have a Fishing Rod to progress
     if (!stats.inventory.includes("Fishing Rod")) {
         stats.inventory.push("Fishing Rod");
     }
-	
-    // 3. Patch missing currency and equipment slots
-    if (stats.gold === undefined) stats.gold = 0;
+    
+    // --- PATCH MISSING SLOTS FOR OLD PLAYERS ---
     if (stats.equippedWeapon === undefined) stats.equippedWeapon = null;
     if (stats.equippedArmor === undefined) stats.equippedArmor = null;
     if (stats.equippedHelmet === undefined) stats.equippedHelmet = null;
     if (stats.equippedBoots === undefined) stats.equippedBoots = null;
-	if (stats.danceLevel === undefined) stats.danceLevel = 1;
-	if (stats.danceXP === undefined) stats.danceXP = 0;
-    // 2. Patch missing wigColor for OLD players
-    if (stats.wigColor === undefined) stats.wigColor = null;
+    
+    // New patches for the new items!
+    if (stats.equippedPants === undefined) stats.equippedPants = null;
+    if (stats.equippedCape === undefined) stats.equippedCape = null;
+    if (stats.equippedGloves === undefined) stats.equippedGloves = null;
+    if (stats.equippedHair === undefined) stats.equippedHair = null;
 
-    // Optional: Log legacy patches in HUD green color
-    if (!saved) {
-        console.log(`%c [HUD] New profile created for ${name}`, "color: #00ff00");
-    }
+    if (stats.danceLevel === undefined) stats.danceLevel = 1;
+    if (stats.danceXP === undefined) stats.danceXP = 0;
+    if (stats.wigColor === undefined) stats.wigColor = null;
 
     return stats;
 }
@@ -227,33 +227,29 @@ const ITEM_DB = {
 };
 function addItemToPlayer(playerName, itemName) {
     const p = players[playerName];
-    // Add this inside addItemToPlayer if you want them to wear it immediately:
-const type = ITEM_DB[itemName].type;
-if (type === "helmet" || type === "hood") p.stats.equippedHelmet = itemName;
-if (type === "staff" || type === "weapon") p.stats.equippedWeapon = itemName;
-if (type === "cape") p.stats.equippedCape = itemName;
-if (type === "pants") p.stats.equippedPants = itemName;
-    // 1. Check if player exists
-    if (!p) {
-        console.error("Player not found!");
-        return;
-    }
+    if (!p) return;
+    if (!ITEM_DB[itemName]) return;
 
-    // 2. Check if item exists in Database
-    if (!ITEM_DB[itemName]) {
-        systemMessage(`[ERROR] Item "${itemName}" does not exist in ITEM_DB.`, "#ff4444");
-        return;
-    }
+    // 1. Initialize inventory inside STATS (where loadStats puts it)
+    if (!p.stats.inventory) p.stats.inventory = [];
 
-    // 3. Initialize inventory if it doesn't exist
-    if (!p.inventory) p.inventory = [];
+    // 2. Add the item to the persistent array
+    p.stats.inventory.push(itemName);
 
-    // 4. Add the item
-    p.inventory.push(itemName);
+    // 3. Auto-Equip Logic (Updated for all slots)
+    const type = ITEM_DB[itemName].type;
+    if (type === "helmet" || type === "hood") p.stats.equippedHelmet = itemName;
+    if (type === "staff" || type === "weapon") p.stats.equippedWeapon = itemName;
+    if (type === "cape") p.stats.equippedCape = itemName;
+    if (type === "pants") p.stats.equippedPants = itemName;
+    if (type === "boots") p.stats.equippedBoots = itemName;
+    if (type === "gloves") p.stats.equippedGloves = itemName;
+    if (type === "hair") p.stats.equippedHair = itemName;
 
-    // 5. Notify the player/UI
+    // 4. Feedback & Save
     idleActionMsg(`${p.name} obtained: ${itemName}`, ITEM_DB[itemName].color || "#fff");
     systemMessage(`${p.name} added [${itemName}] to inventory.`);
+    saveStats(p); // Important: Save the new item immediately!
 }
 function getPlayer(name, color) {
     if (players[name]) return players[name];
@@ -2000,7 +1996,6 @@ function cmdBalance(p) {
     systemMessage(`${p.name} has ${displayGold} coins stuffed in their prison wallet`);
 }
 function cmdGive(caller, args, flags) {
-    if (!flags.broadcaster && !flags.mod) return;
 
     // Syntax: !give [player] [item name]
     let targetName = args[1];
