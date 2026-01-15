@@ -474,9 +474,7 @@ ComfyJS.onCommand = (user, message, command, color, flags, extra) => {
     console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);
     console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
     // 2. Tell every registered plugin that a message arrived
-    window.chatPlugins.forEach(plugin => {
-        plugin(user, msg, flags, extra);
-    });
+
 	if (twitchChatOverlay === "off") return;
     displayChatMessage(user, message, flags, extra);  // Show message in chat box
 };
