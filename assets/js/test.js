@@ -1,30 +1,6 @@
 // creation tool. make a pen u can draw with, 
 //choose if its a player body, an enemy, a weapon, an armour, a helmet, a bow, a staff or a graffiti or npc, or projectile or face or  and save data 
-//so we can add new items or objects or player bodys
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
 //
 //
 const c = document.getElementById("c");
@@ -60,11 +36,6 @@ let dungeonCountdownInterval = null; // To track the interval
 let mouse = { x: 0, y: 0 };
 const TASK_DURATION = 15 * 60 * 1000; // 15 Minutes
 
-const backgrounds = {
-    home: "#1a1a2e",
-    dungeon: "#160a0a",
-    fishingpond: "#0a1612"
-};
 
 /* ================= UTILS ================= */
 function systemMessage(text) {
@@ -801,8 +772,8 @@ const HEAD_STYLES = {
         ctx.fillStyle = color;
         ctx.beginPath(); ctx.arc(hX, hY - 3, 11, Math.PI, 0); ctx.fill();
         ctx.fillRect(hX - 11, hY - 3, 22, 10);
-    }
-"viking": (ctx, hX, hY, color) => {
+    },
+	"viking": (ctx, hX, hY, color) => {
         // Helmet Base
         ctx.fillStyle = color;
         ctx.beginPath(); ctx.arc(hX, hY, 11, Math.PI, 0); ctx.fill(); ctx.stroke();
@@ -982,158 +953,169 @@ function drawGlovesItem(ctx, handX, handY, item) {
 
 
 /* ================= EXTENDED ITEM LIBRARY ================= */
-
-function drawFishingRod(ctx, p, now, bodyY, lean) {
-    ctx.save();
-    ctx.setLineDash([]); 
-    ctx.strokeStyle = "#8B4513"; 
-    ctx.lineWidth = 2;
-    let bob = Math.sin(now / 300) * 0.1;
-    
-    const rodStartX = p.x + 10 + (lean * 20);
-    const rodStartY = p.y - 10 + bodyY;
-    const rodTipX = p.x + 50 + (lean * 20);
-    const rodTipY = p.y - 40 + (bob * 20) + bodyY;
-
-    ctx.beginPath();
-    ctx.moveTo(rodStartX, rodStartY); 
-    ctx.lineTo(rodTipX, rodTipY); 
-    ctx.stroke();
-
-    ctx.strokeStyle = "rgba(255,255,255,0.5)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(rodTipX, rodTipY);
-    
-    const waterX = Math.max(rodTipX + 40, 280);
-    const waterY = 510 + (Math.sin(now/500) * 5);
-
-    ctx.quadraticCurveTo(rodTipX + 20, rodTipY + 40, waterX, waterY);
-    ctx.stroke();
-
-    ctx.fillStyle = "#ff4444";
-    ctx.beginPath(); ctx.arc(waterX, waterY, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-}
-
-function drawWeaponItem(ctx, p, now, bodyY, lean) {
-    const pWeapon = p.stats.equippedWeapon;
-    const w = ITEM_DB[pWeapon];
-    const isAttacking = p.activeTask === "attacking";
-    const isBow = pWeapon.toLowerCase().includes("bow");
-    
-    ctx.save();
-    let weaponX = p.x + (lean * 20); 
-    
-    if (isAttacking) {
-        ctx.translate(weaponX + 12, p.y - 10 + bodyY);
-        let swing = Math.sin(now / 150) * 0.8;
+/* ================= EXTENDED ITEM LIBRARY ================= */
+const HAND_STYLES = {
+    "sword": (ctx, item, isAttacking, now) => {
+        let swing = isAttacking ? Math.sin(now / 150) * 0.8 : Math.PI / 1.2;
         ctx.rotate(swing);
-        ctx.strokeStyle = p.stats.attackLevel > 10 ? "#0ff" : (w.color || "#ccc");
+        ctx.strokeStyle = item.color || "#ccc";
         ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(25, -5); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(25, -2); ctx.stroke();
         ctx.strokeStyle = "#aa8800";
-        ctx.beginPath(); ctx.moveTo(5, -8); ctx.lineTo(5, 8); ctx.stroke();
-    } else {
-        if (isBow) {
-            ctx.translate(weaponX - 2, p.y - 5 + bodyY);
-            ctx.rotate(Math.PI / 4);
-            ctx.strokeStyle = "#8B4513";
+        ctx.beginPath(); ctx.moveTo(5, -6); ctx.lineTo(5, 6); ctx.stroke();
+    },
+
+    "bow": (ctx, item, isAttacking, now) => {
+        ctx.rotate(isAttacking ? -0.2 : Math.PI / 4);
+        ctx.strokeStyle = item.color || "#8B4513";
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(0, 0, 15, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.beginPath(); ctx.moveTo(0, -15); ctx.lineTo(isAttacking ? -8 : 0, 0); ctx.lineTo(0, 15); ctx.stroke();
+    },
+
+    "staff": (ctx, item, isAttacking, now) => {
+        if (isAttacking) ctx.rotate(Math.sin(now / 150) * 0.5);
+        ctx.strokeStyle = item.poleColor || "#4e342e";
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(0, 20); ctx.lineTo(0, -45); ctx.stroke();
+        let pulse = Math.sin(now / 400) * 5;
+        ctx.fillStyle = item.color || "#00ffff";
+        ctx.shadowBlur = 10 + pulse; ctx.shadowColor = ctx.fillStyle;
+        ctx.beginPath(); ctx.arc(0, -50, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+    },
+
+	"fishing_rod": (ctx, item, isAttacking, now, p, bodyY, lean) => {
+        // We check if the player is ACTUALLY in the fishing state
+        const isActuallyFishing = p.activeTask === "fishing" && p.area === "fishingpond";
+
+        if (isActuallyFishing) {
+            let bob = Math.sin(now / 300) * 0.1;
+            ctx.strokeStyle = item.color || "#8B4513";
             ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.arc(0, 0, 15, -Math.PI/2, Math.PI/2); ctx.stroke();
+            const tipX = 40;
+            const tipY = -30 + (bob * 20);
+            
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(tipX, tipY); ctx.stroke();
+
+            // Line & Bobber
+            ctx.strokeStyle = "rgba(255,255,255,0.5)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(tipX, tipY);
+            const waterX = Math.max(tipX + 40, 280 - (p.x + (lean * 30))); 
+            const waterY = 510 - (p.y + bodyY);
+            ctx.quadraticCurveTo(tipX + 20, tipY + 40, waterX, waterY);
+            ctx.stroke();
+
+            ctx.fillStyle = "#ff4444";
+            ctx.beginPath(); ctx.arc(waterX, waterY, 3, 0, Math.PI * 2); ctx.fill();
         } else {
-            ctx.translate(weaponX - 5, p.y - 5 + bodyY);
-            ctx.rotate(Math.PI / 1.2);
-            ctx.strokeStyle = w.color;
+            // IDLE STYLE: Carry it like a staff over the shoulder
+            ctx.rotate(Math.PI / 4); 
+            ctx.strokeStyle = item.color || "#8B4513";
             ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(20, 0); ctx.stroke();
-            ctx.moveTo(5, -3); ctx.lineTo(5, 3); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, 15); ctx.lineTo(0, -35); ctx.stroke();
         }
     }
-    ctx.restore();
-}
+	"axe": (ctx, item, isAttacking, now) => {
+        // CHOPPING ANIMATION: A sharp, heavy downward tilt
+        let chop = isAttacking ? Math.sin(now / 100) * 1.2 : Math.PI / 1.2;
+        ctx.rotate(chop);
+        
+        // Handle
+        ctx.strokeStyle = "#5d4037"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(22, 0); ctx.stroke();
+        
+        // Axe Head
+        ctx.fillStyle = item.color || "#999";
+        ctx.beginPath();
+        ctx.moveTo(15, -5); ctx.lineTo(25, -8); ctx.lineTo(25, 8); ctx.lineTo(15, 5);
+        ctx.fill(); ctx.stroke();
+    },
 
-// --- 3. STAVES (Weapon Type) ---
-function drawStaffItem(ctx, x, y, item, isAttacking, now) {
+    "pickaxe": (ctx, item, isAttacking, now) => {
+        // MINING ANIMATION: Similar to axe but with a "rebound" feel
+        let swing = isAttacking ? Math.sin(now / 120) * 1.4 : Math.PI / 1.2;
+        ctx.rotate(swing);
+
+        // Handle
+        ctx.strokeStyle = "#4e342e"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(22, 0); ctx.stroke();
+
+        // Pickaxe Head (The double-pointed arc)
+        ctx.strokeStyle = item.color || "#aaa";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(22, 0, 12, Math.PI * 0.7, Math.PI * 1.3);
+        ctx.stroke();
+    }
+};
+
+
+function drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, hX, hY) {
+    let weaponName = p.stats.equippedWeapon;
+    let item = ITEM_DB[weaponName];
+    // Virtual item assignment
+    if (p.activeTask === "woodcutting" && !item) item = { type: "axe", style: "axe" };
+    if (p.activeTask === "mining" && !item) item = { type: "pickaxe", style: "pickaxe" };
+    if (isFishing) item = item || { style: "fishing_rod" };
+    if (!item) return;
     ctx.save();
-    ctx.translate(x, y);
-    if (isAttacking) ctx.rotate(Math.sin(now / 150) * 0.5);
-    
-    // Staff Pole
-    ctx.strokeStyle = item.poleColor || "#4e342e";
-    ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(0, 20); ctx.lineTo(0, -45); ctx.stroke();
-
-    // Staff Head/Gem
-    let pulse = Math.sin(now/400) * 5;
-    ctx.fillStyle = item.color || "#00ffff";
-    ctx.shadowBlur = 10 + pulse;
-    ctx.shadowColor = item.color || "#00ffff";
-    ctx.beginPath(); ctx.arc(0, -50, 6, 0, Math.PI*2); ctx.fill();
+    ctx.translate(hX, hY);
+    // SPECIAL: If dancing style 5, override everything with a spin!
+    if (p.activeTask === "dancing" && p.danceStyle === 5) {
+        ctx.rotate(now / 50); // Fast spinning
+    }
+    const style = item.style || item.type || "sword";
+    const drawFn = HAND_STYLES[style] || HAND_STYLES["sword"];
+    // Pass isActionActive so tools use their chopping/mining animations
+    drawFn(ctx, item, isActionActive, now, p, bodyY, lean);
     ctx.restore();
 }
-
-
 function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
     if (p.dead) return;
 
-    // --- LAYER 1: BACK ITEMS ---
-    if (p.stats.equippedCape) {
-        drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
-    }
-
-    // --- LAYER 2: BODY/LEGS (Logic shared with stickman positions) ---
-    if (p.stats.equippedPants) {
-        drawPantsItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedPants]);
-    }
-    if (p.stats.equippedArmor) {
-        drawArmor(ctx, p, bodyY, lean); 
-    }
-
-    // --- LAYER 3: HANDS & WEAPONS ---
+    // 1. SHARED MATH: Determine if we are in an "Action" state
     const isAttacking = p.activeTask === "attacking";
+    const isChopping = p.activeTask === "woodcutting";
+    const isMining = p.activeTask === "mining";
     const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
 
-    // Calculate Hand Positions (to place gloves/weapons correctly)
+    // This flag tells the gloves and weapons to move to the "active" position
+    const isActionActive = isAttacking || isChopping || isMining;
+
+    // 2. HAND POSITIONS: Calculate once so gloves and weapons are perfectly synced
     const leftHandX = p.x - 18 + (lean * 10);
     const leftHandY = p.y + 2 + bodyY + armMove;
-    const rightHandX = p.x + (isAttacking ? 12 : 18) + (lean * 30);
-    const rightHandY = p.y + (isAttacking ? -10 : 2) + bodyY - armMove;
+    
+    // Right hand position changes if they are swinging/attacking
+    const rightHandX = p.x + (isActionActive ? 12 : 18) + (lean * 30);
+    const rightHandY = p.y + (isActionActive ? -10 : 2) + bodyY - armMove;
 
+    // --- LAYER 1: BACK ---
+    if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
+
+    // --- LAYER 2: BODY ---
+    if (p.stats.equippedPants) drawPantsItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedPants]);
+    if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean); 
+
+    // --- LAYER 3: HANDS ---
     if (p.stats.equippedGloves) {
         const gloveItem = ITEM_DB[p.stats.equippedGloves];
         drawGlovesItem(ctx, leftHandX, leftHandY, gloveItem);
         drawGlovesItem(ctx, rightHandX, rightHandY, gloveItem);
     }
 
-    if (isFishing) {
-        drawFishingRod(ctx, p, now, bodyY, lean);
-    } else if (p.stats.equippedWeapon) {
-        const weapon = ITEM_DB[p.stats.equippedWeapon];
-        if (weapon.type === "staff") {
-            drawStaffItem(ctx, rightHandX, rightHandY, weapon, isAttacking, now);
-        } else {
-            drawWeaponItem(ctx, p, now, bodyY, lean); 
-        }
-    }
+    // DRAW WEAPON: We pass isActionActive so the library knows to play the animation
+    drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, rightHandX, rightHandY);
 
-    // --- LAYER 4: HEAD (Hair -> Hood -> Helmet) ---
+    // --- LAYER 4: HEAD ---
     const hX = p.x + (lean * 20);
     const hY = p.y - 30 + bodyY;
-
-    if (p.stats.equippedHair) {
-        drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
-    }
-    if (p.stats.equippedHelmet) {
-        const headItem = ITEM_DB[p.stats.equippedHelmet];
-        // Hoods are drawn using the HeadLayer logic, others use the Helmet logic
-        if (headItem.type === "hood") {
-            drawHeadLayer(ctx, hX, hY, headItem, p);
-        } else {
-            drawHelmetItem(ctx, p, bodyY, lean); 
-        }
-    }
-
+    if (p.stats.equippedHair) drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
+    if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
     if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY, lean);
 }
 
@@ -1156,7 +1138,11 @@ function drawStickman(ctx, p) {
     const isDancing = p.activeTask === "dancing";
     const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
     const isAttacking = p.activeTask === "attacking";
+    const isChopping = p.activeTask === "woodcutting";
+    const isMining = p.activeTask === "mining";
+    const isActionActive = isAttacking || isChopping || isMining;
 
+    // --- YOUR 5 DANCES ---
     if (isDancing) {
         if (p.danceStyle === 1) bodyY = Math.sin(now / 100) * 8;
         if (p.danceStyle === 2) armMove = Math.sin(now / 50) * 20;
@@ -1164,6 +1150,16 @@ function drawStickman(ctx, p) {
         if (p.danceStyle === 4) {
             bodyY = Math.abs(Math.sin(now / 150)) * -15;
             armMove = Math.sin(now / 150) * 5;
+        }
+        if (p.danceStyle === 5) {
+            // DANCE 5: The Leap & Slam
+            bodyY = Math.sin(now / 200) * -40; // High Jump
+            lean = Math.sin(now / 200) * 0.2;
+            // Spawn "Shockwave" arrows when hitting the bottom of the jump
+            if (bodyY > 38) { 
+                spawnArrow(p.x, p.y + 20, p.x + 100, p.y + 20);
+                spawnArrow(p.x, p.y + 20, p.x - 100, p.y + 20);
+            }
         }
     }
 
@@ -1179,31 +1175,34 @@ function drawStickman(ctx, p) {
     ctx.beginPath(); ctx.arc(headX + 4, headY + 2, 3, 0, Math.PI); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
 
-    // 2. Arms (Logic preserved)
-    if (!isAttacking) {
-        ctx.beginPath();
-        if (p.danceStyle === 4) {
-            ctx.moveTo(headX, headY + 15);
-            ctx.lineTo(headX - 12, headY + 22 + (bodyY * 0.2)); 
-            ctx.moveTo(headX, headY + 15);
-            ctx.lineTo(headX + 12, headY + 22 + (bodyY * 0.2));
+    // 2. Arms (Logic fixed to use Action Anchor)
+    ctx.beginPath();
+    if (p.danceStyle === 4) {
+        ctx.moveTo(headX, headY + 15);
+        ctx.lineTo(headX - 12, headY + 22 + (bodyY * 0.2)); 
+        ctx.moveTo(headX, headY + 15);
+        ctx.lineTo(headX + 12, headY + 22 + (bodyY * 0.2));
+    } else {
+        // Left Arm
+        ctx.moveTo(headX, headY + 15);
+        ctx.lineTo(p.x - 18 + (lean * 10), p.y + 2 + bodyY + armMove);
+        
+        // Right Arm (Connects to weapon anchor)
+        ctx.moveTo(headX, headY + 15);
+        if (isActionActive || (isDancing && p.danceStyle === 5)) {
+            ctx.lineTo(p.x + 12 + (lean * 30), p.y - 10 + bodyY - armMove);
+        } else if (isFishing) {
+            ctx.lineTo(p.x + 10 + (lean * 20), p.y - 10 + bodyY);
         } else {
-            ctx.moveTo(headX, headY + 15);
-            ctx.lineTo(p.x - 18 + (lean * 10), p.y + 2 + bodyY + armMove);
-            ctx.moveTo(headX, headY + 15);
-            if (isFishing) {
-                ctx.lineTo(p.x + 10 + (lean * 20), p.y - 10 + bodyY);
-            } else {
-                ctx.lineTo(p.x + 18 + (lean * 30), p.y + 2 + bodyY - armMove);
-            }
+            ctx.lineTo(p.x + 18 + (lean * 30), p.y + 2 + bodyY - armMove);
         }
-        ctx.stroke();
     }
+    ctx.stroke();
 
     // 3. Legs
     let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
     let legSpread = (p.danceStyle === 4) ? 15 : 10;
-    const currentFloorY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
+    const currentFloorY = p.y + 25 + (p.danceStyle === 4 || p.danceStyle === 5 ? bodyY : 0);
     ctx.beginPath(); 
     ctx.moveTo(p.x, p.y + 10 + bodyY); 
     ctx.lineTo(p.x - legSpread - walk, currentFloorY);
@@ -1215,14 +1214,12 @@ function drawStickman(ctx, p) {
     drawEquipment(ctx, p, now, bodyY, armMove, lean);
 
     // HP & Name
-    ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
-    ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
     ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
     ctx.fillText(p.name, p.x, p.y + 40);
 }
-// OLD-------------------------------------------
+//-------------------------------------------
 
-/* 
+/* the old stuff --
 // Add 'lean' as the last parameter here
 function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
     if (p.dead) return;
@@ -1469,6 +1466,11 @@ function drawStickman(ctx, p) {
 }
  */
 
+const backgrounds = {
+    home: "#1a1a2e",
+    dungeon: "#160a0a",
+    fishingpond: "#0a1612"
+};
 function drawScenery(ctx) {
     const now = Date.now();
 
