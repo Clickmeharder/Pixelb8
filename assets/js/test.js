@@ -208,7 +208,7 @@ const ITEM_DB = {
     "wig":              { type: "helmet", def: 1,                 value: 5000, color: "yellow" }, // Legendary!
     "Iron helmet":      { type: "helmet", def: 3,                 value: 150,  color: "#aaa" },
     "Assassin Hood": { type: "hood", color: "#222" },
-    "Spiky Hair": { type: "hair", color: "#ffff00" }
+    "Spiky Hair": { type: "hair", color: "#ffff00" },
     // --- BOOTS ---
     "leather Boots":    { type: "boots",  def: 1,                 value: 30,   color: "#5c4033" },
     "leather Booties":  { type: "boots",  def: 1,                 value: 35,   color: "#5c4033" },
