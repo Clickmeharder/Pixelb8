@@ -1552,12 +1552,19 @@ const STICKMEN_ADMIN_CMDS = [
 
 
 
-ComfyJS.onChat = (user, msg, color, flags, extra) => {
+//ComfyJS.onChat = (user, msg, color, flags, extra) => {
 //function stickmenCommandHandler(user, msg, command, color, flags, extra) {//
 //    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);//
 //    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected//
 //    displayChatMessage(user, message, flags, extra);  // Show message in chat box//
-	const userColor = extra.userColor || "#00ffff";
+ComfyJS.onCommand = (user, command, message, flags, extra) => {
+	console.log( "User:", user, "command:", command,);
+	displayConsoleMessage(user, `!${command}`);
+    // Store user color from extra	
+    if (!userColors[user]) {
+        userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
+    }
+
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
 	//const cmd = args.shift().toLowerCase();//
