@@ -10,7 +10,7 @@ let players = {};
 //
 
 
-/* ====grr============= CONFIG & STATE ================= */
+/* ====grr============= CONFIG & STATE ================== */
 // we can change these [ basically options ] 
 let viewArea = "home"; 
 const TASK_DURATION = 15 * 60 * 1000; // 15 Minutes
