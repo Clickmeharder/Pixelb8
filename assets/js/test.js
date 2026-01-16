@@ -240,54 +240,6 @@ function updateCombatLevel(p) {
 //===================================================================
 
 
-const ITEM_DB = {
-    // --- WEAPONS ---
-	"Rusty Dagger":     { type: "weapon", power: 5,  speed: 2000,  value: 40,   color: "#777" },
-    "Iron Sword":       { type: "weapon", power: 12, speed: 2500,  value: 200,  color: "#eee" },
-    "shitty shortbow":  { type: "weapon", power: 5,  speed: 1250, value: 30,   color: "#eee" },
-    "decent shortbow":  { type: "weapon", power: 8,  speed: 1000, value: 100,  color: "#eee" },
-    // --- TOOLS ---
-    "Fishing Rod":      { type: "tool",   power: 0,               value: 1,   color: "#8B4513" },
-    
-    // --- ARMOR ---
-    "Leather Tunic":    { type: "armor",  def: 2,                 value: 60,   color: "#5c4033" },
-    "Iron Plate":       { type: "armor",  def: 5,                 value: 300,  color: "#aaa" },
-    // --- HELMETS ---
-    "wig":              { type: "helmet", def: 1,style: "wig", value: 5000, color: "yellow" }, // Legendary!
-    "Assassin Hood": { type: "hood", value: 100, color: "#222" },
-    "Spiky Hair": { type: "hair", value: 100, color: "#ffff00" },
-    // --- BOOTS ---
-    "leather Boots":    { type: "boots",  def: 1,                 value: 30,   color: "#5c4033" },
-    "leather Booties":  { type: "boots",  def: 1,                 value: 35,   color: "#5c4033" },
-
-    // --- MATERIALS ---
-    "Leather scrap":    { type: "material",                       value: 15,   color: "#a88d6d" },
-	//======== special items =======
-	// --- special fish ---
-	"Golden Bass": { type: "fish", value: 100, color: "#FFD700" },
-	
-	"Wooden Staff": { type: "staff", color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40,  },
-    "Royal Cape": { type: "cape", color: "#880000", value: 10000 },
-    "Leather Pants": { type: "pants", def :2, value: 100,color: "#3e2723" },
-    "White Gloves": { type: "gloves", value: 100, color: "#ffffff" },
-// --- HELMETS ---
-    "Viking Helm":    { type: "helmet", style: "viking", def: 4,  value: 400,  color: "#888" },
-    "Great Horns":    { type: "helmet", style: "viking", def: 6,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
-    
-    "Apprentice Hat": { type: "helmet", style: "wizard", def: 1,  value: 150,  color: "#303f9f" },
-    "Archmage Point": { type: "helmet", style: "wizard", def: 3,  value: 5000, color: "#4a148c" },
-
-    "Royal Crown":    { type: "helmet", style: "crown",  def: 2,  value: 10000, color: "#ffcc00" },
-    
-    // --- SPECIALS ---
-    "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
-    "Spiky Hair":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
-    
-    // Legacy support (still works without a style property)
-    "Paper Bag":      { type: "helmet", def: 1, value: 5, color: "#d2b48c" }, 
-    "Iron Helmet":    { type: "helmet", def: 5, value: 150, color: "#aaa" }
-
-};
 function addItemToPlayer(playerName, itemName) {
     const p = players[playerName];
     if (!p) return;
@@ -741,6 +693,77 @@ function handleEnemyAttacks() {
 //=============================================================
 
 //=============================================================
+/* ================= ITEM LIBRARY =========================== */
+const ITEM_DB = {
+    // --- WEAPONS -----------------------------------------------------------------------------------
+	// swords (melee)
+	"Rusty Dagger":   { type: "weapon", style: "dagger", power: 5,  speed: 1000,  value: 40,   color: "#777" },
+    "Iron Sword":     { type: "weapon", style: "sword", power: 12, speed: 2500,  value: 200,  color: "#eee" },
+	// Bows (archery)
+    "shitty shortbow":{ type: "weapon", style: "bow", power: 5,  speed: 1250,  value: 30,   color: "#eee" },
+    "decent shortbow":{ type: "weapon", style: "bow", power: 8,  speed: 1000,  value: 100,  color: "#eee" },
+	//Stalves (magic)
+	"Wooden Staff":   { type: "staff", style:, color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40,  },
+// -------------------------- TOOLS --------------------------------------------------------------------
+    "Fishing Rod":    { type: "tool", style:, power: 0, speed 0,         value: 1,   color: "#8B4513" },
+// ------------------------- Helmets and Hats ----------------------------------------------------------
+	// --- Helmets     ---
+    "Viking Helm":    { type: "helmet", style: "viking", def: 4,  value: 400,  color: "#888" },
+    "Great Horns":    { type: "helmet", style: "viking", def: 6,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
+	"Steel Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#eee" }
+	"Iron Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#aaa" }
+	//---Wizard Hats   ---
+    "Apprentice Hat": { type: "helmet", style: "wizard", def: 1,  value: 150,  color: "#303f9f" },
+    "Archmage Point": { type: "helmet", style: "wizard", def: 3,  value: 5000, color: "#4a148c" },
+	//--- Lurker Hoods ---
+	"Lurker Hood":  { type: "hood", style: "hood",                            value: 100, color: "#555" },
+    "Assassin Hood":  { type: "hood", style: "hood",                            value: 100, color: "#222" },
+//------------------------------------------------------------------------------------------------------
+// --------------------------- ARMOR/SHIRT -------------------------------------------------------------
+	// --- archer
+    "Leather Tunic":  { type: "armor", style:,  def: 2,                  value: 60,   color: "#5c4033" },
+	// --- melee
+	"Iron Plate":     { type: "armor", style:,  def: 5,                  value: 300,  color: "#aaa" },
+	// --- magic
+	// --- fisher
+	// --- lumberjack
+	// --- miner 
+	//
+//------------------------------------------------------------------------------------------------------
+// ------------------------------PANTS------------------------------------------------------------------
+	// --- archer
+    "Leather Pants":  { type: "pants", style:, def :2, value: 100,color: "#3e2723" },
+	// --- archer
+//------------------------------------------------------------------------------------------------------
+// ------------------------------Boots------------------------------------------------------------------
+    "leather Boots":  { type: "boots", style:, def: 1,                 value: 30,   color: "#5c4033" },
+    "leather Booties":{ type: "boots", style:, def: 1,                 value: 35,   color: "#5c4033" },
+//------------------------------------------------------------------------------------------------------
+
+// ------------------------------Gloves------------------------------------------------------------------
+    "White Gloves":   { type: "gloves", style:, value: 100, color: "#ffffff" },
+	"leather Gloves":   { type: "gloves", style:, value: 100, color: "#5c4033" },
+    // --- SPECIALS ---
+// special head
+	"Paper Bag":      { type: "helmet", style "box" def: 1, value: 5, color: "#d2b48c" },
+	"wig":            { type: "helmet", style:, def: 1,style: "wig",     value: 5000, color: "yellow" },
+    "Royal Crown":    { type: "helmet", style: "crown",  def: 2,  value: 10000, color: "#ffcc00" },
+// special capes
+    "Royal Cape":     { type: "cape", style:, color: "#880000", value: 10000 },
+    "Cloak":     { type: "cloak", style:, color: "#880000", value: 10000 },
+    "Ball gown":     { type: "ballgown", style:, color: "#880000", value: 10000 },
+    "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
+    "Spiky Hair":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
+// special weapon/tool
+//    "Paint Brush":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
+    // Legacy support (still works without a style property - just defaults to type)
+// ---------------------------basic items----------------------------------------------------------------
+	// --- unique fish ---
+	"Golden Bass":    { type: "fish", value: 100, color: "#FFD700" },
+    // --- MATERIALS ---
+    "Leather scrap":  { type: "material", value: 15,   color: "#a88d6d" },
+//-------------------------------------------------------------------------------------------------------
+};
 /* ================= EXTENDED ITEM LIBRARY ================= */
 const DANCE_UNLOCKS = {
     1: { name: "The Squat", minLvl: 1 },
@@ -754,7 +777,7 @@ const DANCE_UNLOCKS = {
     9: { name: "The ninthdance", minLvl: 1 },
 	10: { name: "The tenthdance", minLvl: 1 }
 };
-const DANCE_STYLES = {
+const DANCE_LIBRARY = {
     1: (now) => ({ bodyY: Math.sin(now / 100) * 8 }), // The Squat
     2: (now) => ({ armMove: Math.sin(now / 50) * 20 }), // The Flail
     3: (now) => ({ lean: Math.sin(now / 200) * 0.6 }), // The Lean
@@ -789,7 +812,7 @@ const DANCE_STYLES = {
 };
 /* ================= ITEM DRAWING LIBRARY ================= */
 // headstyles are helmets or different head slot item styles
-const HEAD_STYLES = {
+const HAT_STYLES = {
     "box": (ctx, hX, hY, color) => { // Paper Bag Style
         ctx.fillStyle = color;
         ctx.fillRect(hX - 12, hY - 14, 24, 26);
@@ -871,7 +894,50 @@ const HEAD_STYLES = {
         ctx.shadowBlur = 0; // Reset shadow for other items
     }
 };
-
+const CAPE_STYLES = {
+    "cape": (ctx, p, bodyY, lean, item) => { // Paper Bag Style
+		const headX = p.x + (lean * 20);
+		const centerX = p.x + (lean * 10);
+		ctx.fillStyle = item.color || "#550055";
+		ctx.beginPath();
+		ctx.moveTo(headX, p.y - 15 + bodyY); // Neck
+		// Cape flares out behind
+		ctx.quadraticCurveTo(headX - 25, p.y + 10 + bodyY, centerX - 15, p.y + 40 + bodyY);
+		ctx.lineTo(centerX + 15, p.y + 40 + bodyY);
+		ctx.quadraticCurveTo(headX + 25, p.y + 10 + bodyY, headX, p.y - 15 + bodyY);
+		ctx.fill();
+		ctx.strokeStyle = "rgba(0,0,0,0.3)";
+		ctx.stroke();
+    },
+    "cloak": (ctx, p, bodyY, lean, item) => {// Paper Bag Style
+		const headX = p.x + (lean * 20);
+		const centerX = p.x + (lean * 10);
+		ctx.fillStyle = item.color || "#550055";
+		ctx.beginPath();
+		ctx.moveTo(headX, p.y - 15 + bodyY); // Neck
+		// Cape flares out behind
+		ctx.quadraticCurveTo(headX - 25, p.y + 10 + bodyY, centerX - 15, p.y + 40 + bodyY);
+		ctx.lineTo(centerX + 15, p.y + 40 + bodyY);
+		ctx.quadraticCurveTo(headX + 25, p.y + 10 + bodyY, headX, p.y - 15 + bodyY);
+		ctx.fill();
+		ctx.strokeStyle = "rgba(0,0,0,0.3)";
+		ctx.stroke();
+	},
+    "ballgown": (ctx, p, bodyY, lean, item) => {
+		const headX = p.x + (lean * 20);
+		const centerX = p.x + (lean * 10);
+		ctx.fillStyle = item.color || "#550055";
+		ctx.beginPath();
+		ctx.moveTo(headX, p.y - 15 + bodyY); // Neck
+		// Cape flares out behind
+		ctx.quadraticCurveTo(headX - 25, p.y + 10 + bodyY, centerX - 15, p.y + 40 + bodyY);
+		ctx.lineTo(centerX + 15, p.y + 40 + bodyY);
+		ctx.quadraticCurveTo(headX + 25, p.y + 10 + bodyY, headX, p.y - 15 + bodyY);
+		ctx.fill();
+		ctx.strokeStyle = "rgba(0,0,0,0.3)";
+		ctx.stroke();
+	}
+}
 const BODY_PARTS = {
     "stick": {
         head: (ctx, x, y, p) => {
@@ -914,7 +980,7 @@ const POSE_LIBRARY = {
         right: { x: head.x + 22, y: head.y + 15 }
     })
 };
-const HAND_STYLES = {
+const WEAPON_STYLES = {
     "sword": (ctx, item, isAttacking, now) => {
         let swing = isAttacking ? Math.sin(now / 150) * 0.8 : Math.PI / 1.2;
         ctx.rotate(swing);
@@ -1086,11 +1152,11 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
     const style = item.style || item.type || "hair";
     // 2. Resolve Color
     const finalColor = (style === "wig" && p.stats.wigColor) ? p.stats.wigColor : (item.color || "#614126");
-    // 3. Draw: Pull from the HEAD_STYLES library
+    // 3. Draw: Pull from the HAT_STYLES library
     ctx.save();
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
-    const drawFn = HEAD_STYLES[style] || HEAD_STYLES["hair"];
+    const drawFn = HAT_STYLES[style] || HAT_STYLES["hair"];
     drawFn(ctx, hX, hY, finalColor);
     ctx.restore();
 }
@@ -1248,20 +1314,15 @@ function drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, hX,
     // Virtual item assignment for tasks
     if (p.activeTask === "woodcutting" && !item) item = { type: "axe", style: "axe" };
     if (p.activeTask === "mining" && !item) item = { type: "pickaxe", style: "pickaxe" };
-    if (isFishing) item = item || { type: "fishing_rod", style: "fishing_rod" }; // Added type for safety
-    
+    if (isFishing) item = item || { type: "fishing_rod", style: "fishing_rod" }; // Added type for safety   
     if (!item) return;
-
     ctx.save();
     ctx.translate(hX, hY);
-
     if (p.activeTask === "dancing" && p.danceStyle === 5) {
         ctx.rotate(now / 50); 
     }
-
     const style = item.style || item.type || "sword";
-    const drawFn = HAND_STYLES[style] || HAND_STYLES["sword"];
-    
+    const drawFn = WEAPON_STYLES[style] || WEAPON_STYLES["sword"];
     // FIXED: Ensure all necessary parameters are passed to the style library
     drawFn(ctx, item, isActionActive, now, p, bodyY, lean);
     ctx.restore();
@@ -1302,8 +1363,8 @@ function drawStickman(ctx, p) {
     // Calculate Body Animation
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     const isDancing = p.activeTask === "dancing";
-    if (isDancing && DANCE_STYLES[p.danceStyle]) {
-        anim = { ...anim, ...DANCE_STYLES[p.danceStyle](now, p) };
+    if (isDancing && DANCE_LIBRARY[p.danceStyle]) {
+        anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
     }
 
     const isFishing = p.activeTask === "fishing";
@@ -1398,7 +1459,7 @@ function drawSheathedWeapon(ctx, p, bodyY, lean, item) {
     ctx.globalAlpha = 0.6; // Ghostly look while sheathed
     
     const style = item.style || item.type || "sword";
-    const drawFn = HAND_STYLES[style] || HAND_STYLES["sword"];
+    const drawFn = WEAPON_STYLES[style] || WEAPON_STYLES["sword"];
     
     // Draw smaller on the back
     ctx.scale(0.8, 0.8);
