@@ -705,9 +705,10 @@ const ITEM_DB = {
     "Wooden Shortbow":{ type: "bow", style: "bow", power: 5,  speed: 1250,  value: 30,   color: "#eee" },
     "Oak Shortbow":{ type: "bow", style: "bow", power: 8,  speed: 1000,  value: 100,  color: "#eee" },
 	//Stalves (magic)
-	"Wooden Staff":   { type: "staff", style:, color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40  },
+	"Wooden Staff":   { type: "staff",color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40  },
+	"Wooden Staff":   { type: "staff", style:"staff", color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40  },
 // -------------------------- TOOLS --------------------------------------------------------------------
-    "Fishing Rod":    { type: "tool", style:, power: 0, speed 0,         value: 1,   color: "#8B4513" },
+    "Fishing Rod":    { type: "tool", style:"", power: 0, speed 0,         value: 1,   color: "#8B4513" },
 // ------------------------- Helmets and Hats ----------------------------------------------------------
 	// --- Helmets     ---
     "Viking Helm":    { type: "helmet", style: "viking", def: 4,  value: 400,  color: "#888" },
@@ -723,9 +724,9 @@ const ITEM_DB = {
 //------------------------------------------------------------------------------------------------------
 // --------------------------- ARMOR/SHIRT -------------------------------------------------------------
 	// --- archer
-    "Leather Tunic":  { type: "armor", style:,  def: 2,                  value: 60,   color: "#5c4033" },
+    "Leather Tunic":  { type: "armor", style:"",  def: 2,                  value: 60,   color: "#5c4033" },
 	// --- melee
-	"Iron Plate":     { type: "armor", style:,  def: 5,                  value: 300,  color: "#aaa" },
+	"Iron Plate":     { type: "armor", style:"",  def: 5,                  value: 300,  color: "#aaa" },
 	// --- magic
 	// --- fisher
 	// --- lumberjack
@@ -734,26 +735,26 @@ const ITEM_DB = {
 //------------------------------------------------------------------------------------------------------
 // ------------------------------PANTS------------------------------------------------------------------
 	// --- archer
-    "Leather Pants":  { type: "pants", style:, def :2, value: 100,color: "#3e2723" },
+    "Leather Pants":  { type: "pants", style:"", def :2, value: 100,color: "#3e2723" },
 	// --- archer
 //------------------------------------------------------------------------------------------------------
 // ------------------------------Boots------------------------------------------------------------------
-    "leather Boots":  { type: "boots", style:, def: 1,                 value: 30,   color: "#5c4033" },
-    "leather Booties":{ type: "boots", style:, def: 1,                 value: 35,   color: "#5c4033" },
+    "leather Boots":  { type: "boots", style:"", def: 1,                 value: 30,   color: "#5c4033" },
+    "leather Booties":{ type: "boots", style:"", def: 1,                 value: 35,   color: "#5c4033" },
 //------------------------------------------------------------------------------------------------------
 
 // ------------------------------Gloves------------------------------------------------------------------
-    "White Gloves":   { type: "gloves", style:, value: 100, color: "#ffffff" },
-	"leather Gloves":   { type: "gloves", style:, value: 100, color: "#5c4033" },
+    "White Gloves":   { type: "gloves", style:"", value: 100, color: "#ffffff" },
+	"leather Gloves":   { type: "gloves", style:"", value: 100, color: "#5c4033" },
     // --- SPECIALS ---
 // special head
 	"Paper Bag":      { type: "helmet", style "box" def: 1, value: 5, color: "#d2b48c" },
-	"wig":            { type: "helmet", style:, def: 1,style: "wig",     value: 5000, color: "yellow" },
+	"wig":            { type: "helmet", style:"", def: 1,style: "wig",     value: 5000, color: "yellow" },
     "Royal Crown":    { type: "helmet", style: "crown",  def: 2,  value: 10000, color: "#ffcc00" },
 // special capes
-    "Royal Cape":     { type: "cape", style:, color: "#880000", value: 10000 },
-    "Cloak":     { type: "cloak", style:, color: "#880000", value: 10000 },
-    "Ball gown":     { type: "ballgown", style:, color: "#880000", value: 10000 },
+    "Royal Cape":     { type: "cape", style:"", color: "#880000", value: 10000 },
+    "Cloak":     { type: "cape", style:"", color: "#880000", value: 10000 },
+    "Ball gown":     { type: "cape", style:"", color: "#880000", value: 10000 },
     "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
     "Spiky Hair":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
 // special weapon/tool
