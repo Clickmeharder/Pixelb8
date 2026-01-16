@@ -705,7 +705,7 @@ const ITEM_DB = {
     "Wooden Shortbow":{ type: "bow", style: "bow", power: 5,  speed: 1250,  value: 30,   color: "#eee" },
     "Oak Shortbow":{ type: "bow", style: "bow", power: 8,  speed: 1000,  value: 100,  color: "#eee" },
 	//Stalves (magic)
-	"Wooden Staff":   { type: "staff", style:, color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40,  },
+	"Wooden Staff":   { type: "staff", style:, color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40  },
 // -------------------------- TOOLS --------------------------------------------------------------------
     "Fishing Rod":    { type: "tool", style:, power: 0, speed 0,         value: 1,   color: "#8B4513" },
 // ------------------------- Helmets and Hats ----------------------------------------------------------
