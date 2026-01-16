@@ -708,7 +708,7 @@ const ITEM_DB = {
 	"Wooden Staff":   { type: "staff",color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40  },
 	"Wooden Staff":   { type: "staff", style:"staff", color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40  },
 // -------------------------- TOOLS --------------------------------------------------------------------
-    "Fishing Rod":    { type: "tool", style:"", power: 0, speed 0,         value: 1,   color: "#8B4513" },
+    "Fishing Rod":    { type: "tool", style:"", power: 0, value: 1,   color: "#8B4513" },
 // ------------------------- Helmets and Hats ----------------------------------------------------------
 	// --- Helmets     ---
     "Viking Helm":    { type: "helmet", style: "viking", def: 4,  value: 400,  color: "#888" },
