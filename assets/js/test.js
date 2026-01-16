@@ -1027,9 +1027,6 @@ const HAND_STYLES = {
 //=========================================================================
 /* ======================== DRAWING ======================================= */
 
-
-/* ================= DRAWING UTILS ================= */
-
 // ---PROJECTILES ----
 /*-------- Arrows ------------------------------*/
 const arrows = [];
@@ -1055,7 +1052,6 @@ function updateArrows(ctx) {
     }
 }
 /*----------------------------------------------*/
-
 
 // stickmen physics
 function updatePhysics(p) {
@@ -1898,12 +1894,21 @@ function handleChatCommand(input) {
 }
 /* ================= COMMAND FUNCTIONS ================= */
 function cmdStop(p, user) {
+    // RESTORE WEAPON
+    if (p.stats.lastWeapon) {
+        p.stats.equippedWeapon = p.stats.lastWeapon;
+        systemMessage(`${p.name} drew their ${p.stats.equippedWeapon} again.`);
+        p.stats.lastWeapon = null; // Clear the memory so it doesn't double-equip later
+    }
+
     p.activeTask = null;
     p.taskEndTime = null;
     p.danceStyle = 0;
-    p.forcedPose = null; // Clear manual poses
-    p.targetX = null;    // Stop movement
+    p.forcedPose = null; 
+    p.targetX = null;    
+    
     systemMessage(`${user} stopped their current action.`);
+    saveStats(p);
 }
 function cmdSetPose(p, user, args) {
     if (p.dead) return;
@@ -1933,9 +1938,14 @@ function cmdSetPose(p, user, args) {
 }
 function cmdDance(p, user, args) {
     if (p.dead) return;
-    const level = p.stats.danceLevel || 1;
-    let chosenStyle = parseInt(args[1]); 
+	// Store weapon before dancing
+    if (p.stats.equippedWeapon) {
+        p.stats.lastWeapon = p.stats.equippedWeapon;
+        p.stats.equippedWeapon = null;
+    }
 
+    const level = p.stats.danceLevel || 1;
+    let chosenStyle = parseInt(args[1]);
     if (!isNaN(chosenStyle)) {
         if (!DANCE_UNLOCKS[chosenStyle]) {
             systemMessage(`${user}, try styles 1, 2, 3, or 4!`);
@@ -2052,38 +2062,12 @@ function cmdFish(p, user) {
         systemMessage(`${user}: Already fishing.`); 
         return; 
     }
-    // AUTO-UNEQUIP WEAPON
-    // If they have a weapon in their hand or on their back, take it off
+
+    // REMEMBER AND UNEQUIP
     if (p.stats.equippedWeapon) {
-        const oldWeapon = p.stats.equippedWeapon;
+        p.stats.lastWeapon = p.stats.equippedWeapon; // Store it!
         p.stats.equippedWeapon = null;
-        systemMessage(`${p.name} put away their ${oldWeapon} to focus on fishing.`);
-        // Note: We don't need to add it to inventory because it's already there
-    }
-
-    // Move them to the edge of the shore (X=200) facing the water
-    p.targetX = 200; 
-    p.activeTask = "fishing";
-    p.taskEndTime = Date.now() + (15 * 60 * 1000);
-    
-    systemMessage(`${user} started fishing!`);
-    saveStats(p); // Make sure the unequip is saved to the DB
-}
-// just sheath version of fish cmd
-function cmdFish2(p, user) {
-    if (p.area !== "fishingpond") { 
-        systemMessage(`${user}: Go to fishingpond first.`); 
-        return; 
-    }
-    if (p.activeTask === "fishing") { 
-        systemMessage(`${user}: Already fishing.`); 
-        return; 
-    }
-    
-    // AUTO-SHEATH: Move weapon to back if they have one
-    if (p.stats.equippedWeapon) {
-        p.manualSheath = true; 
-        systemMessage(`${p.name} slung their ${p.stats.equippedWeapon} over their shoulder and grabbed a rod.`);
+        systemMessage(`${p.name} put away their ${p.stats.lastWeapon} to fish.`);
     }
 
     p.targetX = 200; 
@@ -2091,7 +2075,7 @@ function cmdFish2(p, user) {
     p.taskEndTime = Date.now() + (15 * 60 * 1000);
     
     systemMessage(`${user} started fishing!`);
-    saveStats(p); 
+    saveStats(p);
 }
 function cmdEquip(p, args) {
     // 1. BLOCK EQUIPPING DURING TASKS
@@ -2439,7 +2423,6 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     // Combat & Tasks//
     if (cmd === "attack") cmdAttack(p, user);
     if (cmd === "fish")   cmdFish(p, user);
-	if (cmd === "fish2")   cmdFish2(p, user);
     if (cmd === "heal")   cmdHeal(p, args);
     if (cmd === "pose" || cmd === "setpose") {
         cmdSetPose(p, user, args);
