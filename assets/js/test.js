@@ -200,7 +200,7 @@ const ITEM_DB = {
     
     // Legacy support (still works without a style property)
     "Paper Bag":      { type: "helmet", def: 1, value: 5, color: "#d2b48c" }, 
-    "Iron helmet":    { type: "helmet", def: 5, value: 150, color: "#aaa" }
+    "Iron Helmet":    { type: "helmet", def: 5, value: 150, color: "#aaa" }
 
 };
 function addItemToPlayer(playerName, itemName) {
@@ -1977,6 +1977,13 @@ function cmdFish(p, user) {
 }
 
 function cmdEquip(p, args) {
+    // 1. BLOCK EQUIPPING DURING TASKS
+    // Checks if the player is busy doing something (fishing, mining, attacking, etc.)
+    if (p.activeTask && p.activeTask !== "none") {
+        systemMessage(`${p.name}: You are too busy ${p.activeTask} to change gear right now! Stop what you are doing first.`);
+        return;
+    }
+
     let inputName = args.slice(1).join(" ").toLowerCase();
     let invItem = p.stats.inventory.find(i => i.toLowerCase() === inputName);
     
@@ -1989,13 +1996,15 @@ function cmdEquip(p, args) {
     let itemData = ITEM_DB[dbKey];
     const type = itemData.type;
 
-    // BLOCK TOOLS: Tools are used automatically by tasks, not equipped
+    // 2. BLOCK TOOLS: Tools are used automatically by tasks, not equipped
     if (type === "tool" || type === "fishing_rod" || type === "pickaxe" || type === "axe") {
         systemMessage(`${p.name}: You don't need to equip tools. Just start the task!`);
         return;
     }
 
     let msg = "";
+
+    // 3. EQUIP LOGIC
     if (type === "weapon" || type === "staff") {
         p.stats.equippedWeapon = dbKey;
         msg = `slung the ${dbKey} over their shoulder`;
