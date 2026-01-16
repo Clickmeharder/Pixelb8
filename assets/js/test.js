@@ -1101,35 +1101,28 @@ function drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, hX,
 function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, rightFoot, isActionActive, isFishing) {
     if (p.dead) return;
 
-    // Layer 1: Back
+// Layer 1-3: Cape, Pants, Armor, Gloves... (Existing code)
     if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
-
-    // Layer 2: Body
     if (p.stats.equippedPants) drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
     if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean); 
 
-    // Layer 3: Gloves
     if (p.stats.equippedGloves) {
         const gloveItem = ITEM_DB[p.stats.equippedGloves];
         drawGlovesItem(ctx, leftHand.x, leftHand.y, gloveItem);
         drawGlovesItem(ctx, rightHand.x, rightHand.y, gloveItem);
     }
 
-    // Layer 4: Weapon
-    if (!p.manualSheath || isActionActive || isFishing) {
-        drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, rightHand.x, rightHand.y);
+    // Layer 4: Weapon (The Fixed Part)
+    if (shouldHoldWeapon) {
+        drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isAction, rightHand.x, rightHand.y);
     }
 
     // Layer 5: Head
-    const hX = p.x + (lean * 20);
+	const hX = p.x + (lean * 20);
     const hY = p.y - 30 + bodyY;
     if (p.stats.equippedHair) drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
     if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
-    
-    // FIXED: Changed drawBootsItem -> drawBoots and passing (ctx, p, leftFoot, rightFoot)
-    if (p.stats.equippedBoots) {
-        drawBoots(ctx, p, leftFoot, rightFoot);
-    }
+    if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
 }
 const DANCE_UNLOCKS = {
     1: { name: "The Squat", minLvl: 1 },
@@ -1284,19 +1277,27 @@ function drawStickman(ctx, p) {
     // Weapon Anchor: Hand positions are passed in here
     renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing);
 }
+
 function renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing) {
     const weaponItem = ITEM_DB[p.stats.equippedWeapon];
     const isDancing = p.activeTask === "dancing";
-    const isUsingWeapon = isAction || isFishing || (isDancing && p.danceStyle === 5);
+    const inCombatZone = (p.area === "dungeon"); 
+    
+    // Task-based tools (Axe, Rod, Pickaxe) always force the "held" state
+    const isPerformingTask = isAction || isFishing || (isDancing && p.danceStyle === 5);
 
-    if (weaponItem && (p.manualSheath || (!isUsingWeapon && !isDancing))) {
+    // SHOULD HOLD WEAPON logic:
+    // Hold it if performing a task OR (in a combat zone AND NOT manually sheathed)
+    const shouldHoldWeapon = isPerformingTask || (inCombatZone && !p.manualSheath);
+
+    // If we have a weapon and the logic says "put it away", draw it on the back
+    if (weaponItem && !shouldHoldWeapon) {
         drawSheathedWeapon(ctx, p, anim.bodyY, anim.lean, weaponItem);
     }
-
-    // Pass the foot anchors into drawEquipment
-    drawEquipment(ctx, p, now, anim.bodyY, anim.lean, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing);
+    
+    // Pass everything to the final draw call
+    drawEquipment(ctx, p, now, anim.bodyY, anim.lean, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing, shouldHoldWeapon);
 }
-
 function drawSheathedWeapon(ctx, p, bodyY, lean, item) {
     ctx.save();
     // Offset slightly to the left of the spine
@@ -1975,17 +1976,25 @@ function cmdEquip(p, args) {
     let dbKey = Object.keys(ITEM_DB).find(k => k.toLowerCase() === invItem.toLowerCase());
     let itemData = ITEM_DB[dbKey];
     const type = itemData.type;
+
+    // 1. BLOCK FISHING RODS (They are handled automatically by the !fish task)
+    if (type === "fishing_rod") {
+        systemMessage(`${p.name}: You don't need to equip that! Just go to the pond and type !fish.`);
+        return;
+    }
+
     let msg = "";
 
-    // Added tool/fishing_rod check
-    if (type === "weapon" || type === "staff" || type === "tool" || type === "fishing_rod") {
+    // 2. EQUIP LOGIC
+    if (type === "weapon" || type === "staff" || type === "tool") {
         p.stats.equippedWeapon = dbKey;
+        // The drawing logic will now decide if this is on the back or in-hand
         msg = `wielded the ${dbKey}`;
     } else if (type === "armor") {
         p.stats.equippedArmor = dbKey;
         msg = `put on the ${dbKey}`;
-    } else if (type === "helmet" || type === "hood" || type === "hair") {
-        p.stats.equippedHelmet = dbKey; // Helmets/Hairs share a slot usually
+    } else if (type === "helmet" || type === "hood" || type === "hair" || type === "viking" || type === "wizard" || type === "crown") {
+        p.stats.equippedHelmet = dbKey; 
         msg = `is wearing ${dbKey}`;
     } else if (type === "boots") {
         p.stats.equippedBoots = dbKey;
@@ -1996,6 +2005,9 @@ function cmdEquip(p, args) {
     } else if (type === "gloves") {
         p.stats.equippedGloves = dbKey;
         msg = `put on ${dbKey}`;
+    } else if (type === "cape") {
+        p.stats.equippedCape = dbKey;
+        msg = `donned the ${dbKey}`;
     }
 
     if (msg) {
@@ -2303,7 +2315,7 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     if (cmd === "attack") cmdAttack(p, user);
     if (cmd === "fish")   cmdFish(p, user);
     if (cmd === "heal")   cmdHeal(p, args);
-    if (cmd === "!pose" || cmd === "!setpose") {
+    if (cmd === "pose" || cmd === "setpose") {
         cmdSetPose(p, user, args);
     }
     // Movement//
@@ -2317,6 +2329,7 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     if (cmd === "stats")    cmdShowStats(user, args);
     if (cmd === "topstats") cmdTopStats();
 	if (cmd === "equip") cmdEquip(p, args);
+	if (cmd === "sheath") cmdSheath(p, args);
 	if (cmd === "unequip") cmdUnequip(p, args);
     if (cmd === "inventory") cmdInventory(p, user, args);
 	if (cmd === "sell") cmdSell(p, args);
