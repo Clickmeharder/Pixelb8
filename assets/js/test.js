@@ -713,8 +713,8 @@ const ITEM_DB = {
 	// --- Helmets     ---
     "Viking Helm":    { type: "helmet", style: "viking", def: 4,  value: 400,  color: "#888" },
     "Great Horns":    { type: "helmet", style: "viking", def: 6,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
-	"Steel Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#eee" }
-	"Iron Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#aaa" }
+	"Steel Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#eee" },
+	"Iron Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#aaa" },
 	//---Wizard Hats   ---
     "Apprentice Hat": { type: "helmet", style: "wizard", def: 1,  value: 150,  color: "#303f9f" },
     "Archmage Point": { type: "helmet", style: "wizard", def: 3,  value: 5000, color: "#4a148c" },
