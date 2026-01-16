@@ -705,8 +705,8 @@ const ITEM_DB = {
     "Wooden Shortbow":{ type: "bow", style: "bow", power: 5,  speed: 1250,  value: 30,   color: "#eee" },
     "Oak Shortbow":{ type: "bow", style: "bow", power: 8,  speed: 1000,  value: 100,  color: "#eee" },
 	//Stalves (magic)
-	"Wooden Staff":   { type: "staff",color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40  },
-	"Wooden Staff":   { type: "staff", style:"staff", color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40  },
+	"Wooden Staff":   { type: "staff", color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40  },
+	"Styled Staff":   { type: "staff", style:"staff", color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40  },
 // -------------------------- TOOLS --------------------------------------------------------------------
     "Fishing Rod":    { type: "tool", style:"", power: 0, value: 1,   color: "#8B4513" },
 // ------------------------- Helmets and Hats ----------------------------------------------------------
@@ -1275,63 +1275,40 @@ function drawGlovesItem(ctx, handX, handY, item) {
 }
 
 // ---
-// --- drawEquipment (Updated to call drawBoots correctly) ---
-function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, rightFoot, isActionActive, isFishing, shouldHoldWeapon) {
-    if (p.dead) return;
-
-    // Layer 1: Back
-    if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
-
-    // Layer 2: Body
-    if (p.stats.equippedPants) drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
-    if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean); 
-
-    // Layer 3: Gloves
-    if (p.stats.equippedGloves) {
-        const gloveItem = ITEM_DB[p.stats.equippedGloves];
-        drawGlovesItem(ctx, leftHand.x, leftHand.y, gloveItem);
-        drawGlovesItem(ctx, rightHand.x, rightHand.y, gloveItem);
-    }
-
-    // Layer 4: Weapon/Tool
-    // Logic: Hold it if we are attacking (shouldHoldWeapon), or if we are doing a task (Action/Fishing)
-    if (shouldHoldWeapon || isActionActive || isFishing) {
-        drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, rightHand.x, rightHand.y);
-    }
-
-    // Layer 5: Head & Feet
-    const hX = p.x + (lean * 20);
-    const hY = p.y - 30 + bodyY;
-    if (p.stats.equippedHair) drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
-    if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
-    if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
-}
 
 // ---
 // ---
 // --- Draw weapons ---
-function drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, hX, hY) {
+function drawWeaponItem(ctx, p, now, bodyY, lean, hX, hY) {
     let weaponName = p.stats.equippedWeapon;
     let item = ITEM_DB[weaponName];
     
-    // Virtual item assignment for tasks
+    // Virtual tools for tasks
     if (p.activeTask === "woodcutting" && !item) item = { type: "axe", style: "axe" };
     if (p.activeTask === "mining" && !item) item = { type: "pickaxe", style: "pickaxe" };
-    if (isFishing) item = item || { type: "fishing_rod", style: "fishing_rod" }; // Added type for safety   
+    if (p.activeTask === "fishing") item = item || { type: "fishing_rod", style: "fishing_rod" };   
+    
     if (!item) return;
+
     ctx.save();
     ctx.translate(hX, hY);
-    if (p.activeTask === "dancing" && p.danceStyle === 5) {
-        ctx.rotate(now / 50); 
-    }
+
     const style = item.style || item.type || "sword";
     const drawFn = WEAPON_STYLES[style] || WEAPON_STYLES["sword"];
-    // FIXED: Ensure all necessary parameters are passed to the style library
-    drawFn(ctx, item, isActionActive, now, p, bodyY, lean);
+
+    // COMBAT/ACTION CHECK: 
+    // Weapons animate if attacking. Tools animate if woodcutting/mining.
+    const isAttacking = (p.activeTask === "attacking");
+    const isWorking = ["woodcutting", "mining"].includes(p.activeTask);
+    const isFishing = (p.activeTask === "fishing");
+	const isDancing = (p.activeTask === "dancing");
+    const useActiveAnim = isAttacking || isWorking || isFishing;
+
+    drawFn(ctx, item, useActiveAnim, now, p, bodyY, lean);
     ctx.restore();
 }
 // --- drawEquipment (Updated to call drawBoots correctly) ---
-function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, rightFoot, isActionActive, isFishing, shouldHoldWeapon) {
+function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon) {
     if (p.dead) return;
 
     if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
@@ -1346,8 +1323,10 @@ function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, 
 
     // DRAW WEAPON OR TOOL
     // We draw if we shouldHoldWeapon (Combat/Idle) OR if it's a task tool (Axe/Rod)
-    if (shouldHoldWeapon || isActionActive || isFishing) {
-        drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, rightHand.x, rightHand.y);
+	const isTask = ["woodcutting", "mining", "fishing"].includes(p.activeTask);
+    
+    if (shouldHoldWeapon || isTask) {
+        drawWeaponItem(ctx, p, now, bodyY, lean, rightHand.x, rightHand.y);
     }
 
     const hX = p.x + (lean * 20);
@@ -1423,36 +1402,27 @@ function drawStickman(ctx, p) {
     renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing);
 }
 
-function renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing) {
+function renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, leftFoot, rightFoot) {
     const weaponItem = ITEM_DB[p.stats.equippedWeapon];
-    
-    // 1. Determine if we are currently in combat
-    const isAttacking = p.activeTask === "attacking";
-    
-    // 2. Determine if we are doing ANY other task (Fishing, Mining, etc.)
-    const isWorking = (p.activeTask && p.activeTask !== "attacking" && p.activeTask !== "none");
+    const task = p.activeTask || "none";
 
-    // 3. LOGIC: 
-    // - If attacking: Hold the weapon.
-    // - If working: Put weapon on back (Hand will hold the tool instead).
-    // - If idle: Hold weapon ONLY if NOT manualSheath.
+    // 1. Logic for holding vs sheathing
     let shouldHoldWeapon = false;
-
-    if (isAttacking) {
+    if (task === "attacking") {
         shouldHoldWeapon = true;
-    } else if (isWorking) {
-        shouldHoldWeapon = false; // Always on back while working
+    } else if (task === "none") {
+        shouldHoldWeapon = !p.manualSheath; // Follow manual toggle only when idle
     } else {
-        shouldHoldWeapon = !p.manualSheath; // Follow manual toggle when idle
+        shouldHoldWeapon = false; // Putting it on back for Fishing/Mining/Dancing
     }
 
-    // Draw on back if equipped but NOT being held in hand
+    // 2. Draw Sheathed if needed
     if (weaponItem && !shouldHoldWeapon) {
         drawSheathedWeapon(ctx, p, anim.bodyY, anim.lean, weaponItem);
     }
     
-    // drawEquipment handles the actual hand-drawing
-    drawEquipment(ctx, p, now, anim.bodyY, anim.lean, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing, shouldHoldWeapon);
+    // 3. Draw the rest of the gear
+    drawEquipment(ctx, p, now, anim.bodyY, anim.lean, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon);
 }
 function drawSheathedWeapon(ctx, p, bodyY, lean, item) {
     ctx.save();
