@@ -1,104 +1,19 @@
 // creation tool. make a pen u can draw with, 
-//choose if its a player body, an enemy, a weapon, an armour, a helmet, a bow, a staff or a graffiti or npc, or projectile or face or  and save data 
+//choose if its a player body, an enemy, a weapon, an armour, a helmet, a bow, a staff or a graffiti or npc, or projectile or face or  and save data
 
-//
-//
+//dont Constants and important things
 const c = document.getElementById("c");
 const ctx = c.getContext("2d");
-
-/* ====grr============= CONFIG & STATE ================= */
-
-const merchantSettings = {
-    stayMinutes: 2,    // How many minutes she stays
-    cycleTotal: 28,     // Total minutes in one full loop (Stay + Away)
-};
-let forceBuyer = null;
-let buyerActive = false;
-
-
-let viewArea = "home"; 
-let players = {};
-let enemies = [];
-let boss = null;
-
-let dungeonQueue = [];
-let dungeonTimer = null;
-let dungeonActive = false;
-let dungeonWave = 1;
-let dungeonSecondsLeft = 0;
-let dungeonCountdownInterval = null; // To track the interval
 let mouse = { x: 0, y: 0 };
-const TASK_DURATION = 15 * 60 * 1000; // 15 Minutes
-
-
-/* ================= UTILS ================= */
-function systemMessage(text) {
-    const div = document.createElement("div");
-    div.className = "sysMsg";
-    div.textContent = text;
-    document.getElementById("stickmenfall-systemMsgBox").appendChild(div);
-    setTimeout(() => div.remove(), 8000);
-}
-
-//------------------------------------------------
-//        IDLE ACTION MESSAGES
-function idleActionMsg(text, color = "#0f0") {
-    const box = document.getElementById("idleActionsBox");
-    if (!box) return;
-
-    const entry = document.createElement("div");
-    entry.style.color = color;
-    entry.style.marginBottom = "2px";
-    entry.style.borderLeft = `2px solid ${color}`;
-    entry.style.paddingLeft = "5px";
-    
-    // Add a timestamp so you can see when it happened
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    entry.innerHTML = `<span style="color:#555;">[${time}]</span> ${text}`;
-
-    box.appendChild(entry);
-
-    // Auto-scroll to the bottom
-    box.scrollTop = box.scrollHeight;
-
-    // Optional: Limit the number of messages so the page doesn't lag
-    if (box.childNodes.length > 50) {
-        box.removeChild(box.firstChild);
-    }
-}
+let players = {};
+//
 //
 
-//------------------------------------------------
-//            SPLASH TEXT
-let floaters = [];
-function spawnFloater(text, x, y, color, area) {
-    // If for some reason area isn't passed, fall back to 'home'
-    const spawnArea = area || "home";
-    console.log(`%c[FLOATER] "${text}" spawned in [${spawnArea}]`, `color: ${color}; font-weight: bold; background: #000;`);
-	// 2. Idle Actions Box (HTML)
-    // We send a cleaner version of the text to the UI box
-    idleActionMsg(`[${spawnArea}] ${text}`, color);
-    // 3. (OPTIONAL DEBUG) Trace to see what called this (performFish, handleEnemyAttacks, etc)
-    //console.trace("Trigger Source:");
-	//4. push to the array
-    floaters.push({ 
-        text, 
-        x, 
-        y, 
-        color, 
-        life: 150,
-        area: spawnArea // Crucial: This tags the text to its specific room
-    });
-}
 
-
-//lvl up and xp
-function xpNeeded(lvl) { return Math.floor(50 * Math.pow(1.3, lvl)); }
-function updateCombatLevel(p) {
-    p.stats.combatLevel = Math.floor((p.stats.attackLevel + p.stats.healLevel + (p.stats.fishLevel * 0.5)) / 2);
-}
-
-/* ================= DATA PERSISTENCE ================= */
+/* ====grr============= CONFIG & STATE ================= */
+// we can change these [ basically options ] 
+let viewArea = "home"; 
+const TASK_DURATION = 15 * 60 * 1000; // 15 Minutes
 /* ================= DATA PERSISTENCE ================= */
 /* ================= DATA PERSISTENCE ================= */
 function loadStats(name) {
@@ -155,6 +70,176 @@ function loadStats(name) {
 function saveStats(p) {
     localStorage.setItem("rpg_" + p.name, JSON.stringify(p.stats));
 }
+/* ================= PLAYER SETUP ================= */
+function getPlayer(name, color) {
+    if (players[name]) return players[name];
+    
+    players[name] = {
+        name, 
+        color: color || "#00ffff",
+        x: Math.random() * 800 + 100, 
+        y: 450,
+        targetX: null,
+        hp: 100, 
+        maxHp: 100, 
+        dead: false,
+        area: "home", 
+        activeTask: null,
+        danceStyle: 0, // <--- Correct way to add it! s
+		lastDanceXP: 0,
+        stats: loadStats(name)
+    };
+    
+    return players[name];
+}
+function movePlayer(p, targetArea) {
+    if (p.dead) {
+        systemMessage(`${p.name} is a corpse and cannot travel!`);
+        return;
+    }
+    p.area = targetArea;
+
+    if (targetArea === "fishingpond") {
+        // Shore is 0 to 250. We keep them between 50 and 200 so they aren't off-screen 
+        // or touching the very edge of the water.
+        p.x = Math.random() * 150 + 50; 
+        p.y = 450 + Math.random() * 20; // Keep them on a flat line along the shore
+    } else {
+        p.x = Math.random() * 700 + 100;
+        p.y = 400 + Math.random() * 100;
+    }
+
+    p.activeTask = null; 
+    if (targetArea !== "dungeon") dungeonQueue = dungeonQueue.filter(n => n !== p.name);
+    systemMessage(`${p.name} traveled to ${targetArea}`);
+}
+
+// =================================================
+/* ================= PLAYER TOOLTIPS =============== */
+// catch mouse over/hover event of the stickmen on screen
+c.addEventListener('mousemove', (e) => {
+    const rect = c.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+});
+// now we draw tool tip for the player we are hovering to show the stats etc of that player
+function handleTooltips() {
+    const tt = document.getElementById("tooltip");
+    let hover = null;
+
+    // Check Players in view
+    Object.values(players).forEach(p => {
+        if (p.area === viewArea && Math.hypot(p.x - mouse.x, p.y - mouse.y) < 30) hover = p;
+    });
+
+    // Check Enemies/Boss in view
+    if (viewArea === "dungeon") {
+        enemies.forEach(e => { if(!e.dead && Math.hypot(e.x - mouse.x, e.y - mouse.y) < 20) hover = e; });
+        if (boss && !boss.dead && Math.hypot(boss.x - mouse.x, boss.y - mouse.y) < 40) hover = boss;
+    }
+
+    if (hover) {
+        tt.style.display = "block";
+        tt.style.left = (mouse.x + 15) + "px";
+        tt.style.top = (mouse.y + 15) + "px";
+        if (hover.name === "Minion" || hover.name === "DUNGEON OVERLORD") {
+            tt.innerHTML = `<b style="color:#ff4444">${hover.name}</b><br>HP: ${hover.hp}/${hover.maxHp}`;
+        } else {
+            tt.innerHTML = `<b>${hover.name}</b> [Lv ${hover.stats.combatLevel}]<br>HP: ${hover.hp}/${hover.maxHp}<br>Task: ${hover.activeTask || 'Idle'}`;
+        }
+    } else { tt.style.display = "none"; }
+}
+//===============================================
+/* ================= UTILS ================= */
+// --- on screen message boxes-------------------
+// (top left system messages)
+function systemMessage(text) {
+    const div = document.createElement("div");
+    div.className = "sysMsg";
+    div.textContent = text;
+    document.getElementById("stickmenfall-systemMsgBox").appendChild(div);
+    setTimeout(() => div.remove(), 8000);
+}
+//        IDLE ACTION MESSAGES
+// ( big bottom right ext box )
+function idleActionMsg(text, color = "#0f0") {
+    const box = document.getElementById("idleActionsBox");
+    if (!box) return;
+
+    const entry = document.createElement("div");
+    entry.style.color = color;
+    entry.style.marginBottom = "2px";
+    entry.style.borderLeft = `2px solid ${color}`;
+    entry.style.paddingLeft = "5px";
+    
+    // Add a timestamp so you can see when it happened
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    entry.innerHTML = `<span style="color:#555;">[${time}]</span> ${text}`;
+
+    box.appendChild(entry);
+
+    // Auto-scroll to the bottom
+    box.scrollTop = box.scrollHeight;
+
+    // Optional: Limit the number of messages so the page doesn't lag
+    if (box.childNodes.length > 50) {
+        box.removeChild(box.firstChild);
+    }
+}
+//------------------------------------------------
+
+//------------------------------------------------
+//            SPLASH TEXT
+let floaters = [];
+function spawnFloater(text, x, y, color, area) {
+    // If for some reason area isn't passed, fall back to 'home'
+    const spawnArea = area || "home";
+    console.log(`%c[FLOATER] "${text}" spawned in [${spawnArea}]`, `color: ${color}; font-weight: bold; background: #000;`);
+	// 2. Idle Actions Box (HTML)
+    // We send a cleaner version of the text to the UI box
+    idleActionMsg(`[${spawnArea}] ${text}`, color);
+    // 3. (OPTIONAL DEBUG) Trace to see what called this (performFish, handleEnemyAttacks, etc)
+    //console.trace("Trigger Source:");
+	//4. push to the array
+    floaters.push({ 
+        text, 
+        x, 
+        y, 
+        color, 
+        life: 150,
+        area: spawnArea // Crucial: This tags the text to its specific room
+    });
+}
+function updateSplashText(ctx) {
+    for (let i = floaters.length - 1; i >= 0; i--) {
+        let f = floaters[i];
+        if (f.area !== viewArea) continue; 
+
+        ctx.save();
+        ctx.globalAlpha = f.life / 100;
+        ctx.fillStyle = f.color;
+        ctx.font = "bold 14px monospace";
+        ctx.fillText(f.text, f.x, f.y);
+        
+        f.y -= 1;
+        f.life -= 2;
+        if (f.life <= 0) floaters.splice(i, 1);
+        ctx.restore();
+    }
+}
+//---------------------------------------------------
+
+//==================================================================
+// ---- skill system ---
+//lvl up and xp
+function xpNeeded(lvl) { return Math.floor(50 * Math.pow(1.3, lvl)); }
+function updateCombatLevel(p) {
+    p.stats.combatLevel = Math.floor((p.stats.attackLevel + p.stats.healLevel + (p.stats.fishLevel * 0.5)) / 2);
+}
+//-------------------------------------------------------------------
+//===================================================================
+
+
 const ITEM_DB = {
     // --- WEAPONS ---
 	"Rusty Dagger":     { type: "weapon", power: 5,  speed: 2000,  value: 40,   color: "#777" },
@@ -229,84 +314,8 @@ function addItemToPlayer(playerName, itemName) {
     systemMessage(`${p.name} added [${itemName}] to inventory.`);
     saveStats(p); // Important: Save the new item immediately!
 }
-function getPlayer(name, color) {
-    if (players[name]) return players[name];
-    
-    players[name] = {
-        name, 
-        color: color || "#00ffff",
-        x: Math.random() * 800 + 100, 
-        y: 450,
-        targetX: null,
-        hp: 100, 
-        maxHp: 100, 
-        dead: false,
-        area: "home", 
-        activeTask: null,
-        danceStyle: 0, // <--- Correct way to add it! s
-		lastDanceXP: 0,
-        stats: loadStats(name)
-    };
-    
-    return players[name];
-}
 
-function movePlayer(p, targetArea) {
-    if (p.dead) {
-        systemMessage(`${p.name} is a corpse and cannot travel!`);
-        return;
-    }
-    p.area = targetArea;
-
-    if (targetArea === "fishingpond") {
-        // Shore is 0 to 250. We keep them between 50 and 200 so they aren't off-screen 
-        // or touching the very edge of the water.
-        p.x = Math.random() * 150 + 50; 
-        p.y = 450 + Math.random() * 20; // Keep them on a flat line along the shore
-    } else {
-        p.x = Math.random() * 700 + 100;
-        p.y = 400 + Math.random() * 100;
-    }
-
-    p.activeTask = null; 
-    if (targetArea !== "dungeon") dungeonQueue = dungeonQueue.filter(n => n !== p.name);
-    systemMessage(`${p.name} traveled to ${targetArea}`);
-}
-/* ================= HOVER LOGIC ================= */
-c.addEventListener('mousemove', (e) => {
-    const rect = c.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
-});
-
-function handleTooltips() {
-    const tt = document.getElementById("tooltip");
-    let hover = null;
-
-    // Check Players in view
-    Object.values(players).forEach(p => {
-        if (p.area === viewArea && Math.hypot(p.x - mouse.x, p.y - mouse.y) < 30) hover = p;
-    });
-
-    // Check Enemies/Boss in view
-    if (viewArea === "dungeon") {
-        enemies.forEach(e => { if(!e.dead && Math.hypot(e.x - mouse.x, e.y - mouse.y) < 20) hover = e; });
-        if (boss && !boss.dead && Math.hypot(boss.x - mouse.x, boss.y - mouse.y) < 40) hover = boss;
-    }
-
-    if (hover) {
-        tt.style.display = "block";
-        tt.style.left = (mouse.x + 15) + "px";
-        tt.style.top = (mouse.y + 15) + "px";
-        if (hover.name === "Minion" || hover.name === "DUNGEON OVERLORD") {
-            tt.innerHTML = `<b style="color:#ff4444">${hover.name}</b><br>HP: ${hover.hp}/${hover.maxHp}`;
-        } else {
-            tt.innerHTML = `<b>${hover.name}</b> [Lv ${hover.stats.combatLevel}]<br>HP: ${hover.hp}/${hover.maxHp}<br>Task: ${hover.activeTask || 'Idle'}`;
-        }
-    } else { tt.style.display = "none"; }
-}
-
-
+//================== COMBAT ==============================
 // --- COMBAT -----------------------
 function performAttack(p) {
     if (p.dead) return;
@@ -363,7 +372,7 @@ function performAttack(p) {
         saveStats(p);
     }
 }
-// Helper to keep performAttack clean
+// Loot Helper to keep performAttack clean
 function handleLoot(p, target) {
     let roll = Math.random();
     let drop = null;
@@ -386,64 +395,15 @@ function handleLoot(p, target) {
 }
 //------------------------------------
 
-// --- FISHING -----------------------
-function performFish(p) {
-    if (p.area !== "fishingpond" || p.dead) return;
-    if (p.stats.fishCaught === undefined) p.stats.fishCaught = 0;
-
-    let roll = Math.random();
-    let resultText = "";
-    let isFish = false;
-    let floaterColor = "#44ccff"; // Default Blue
-
-    // 1. Check for Buyer-Only Golden Fish (5% chance)
-    if (buyerActive && Math.random() < 0.05) {
-        p.stats.inventory.push("Golden Bass");
-        resultText = "GOLDEN BASS!";
-        floaterColor = "#FFD700"; // Gold color
-        isFish = true;
-        systemMessage(`✨ ${p.name} landed a rare GOLDEN BASS!`);
-    } 
-    // 2. Original Rarity Logic
-    else if (roll < 0.001) {
-        p.stats.inventory.push("wig");
-        resultText = "THE LEGENDARY WIG!";
-        floaterColor = "#FFD700";
-        systemMessage(`[!] MYTHIC CATCH: ${p.name} found a Legendary Wig!`);
-    } 
-    else if (roll < 0.015) {
-        p.stats.inventory.push("leather Booties");
-        resultText = "leather Boots!";
-    } 
-    else if (roll < 0.065) {
-        p.stats.inventory.push("Leather scrap");
-        resultText = "Leather scrap";
-        floaterColor = "#a88d6d";
-    } 
-    else {
-        const weight = (Math.random() * 20 + 0.5).toFixed(1);
-        const fishItem = `${weight}kg Bass`; 
-        p.stats.inventory.push(fishItem);
-        resultText = fishItem;
-        isFish = true;
-        p.stats.fishCaught++;
-    }
-
-    let displayMsg = `🎣 ${resultText}`;
-    if (isFish && resultText !== "GOLDEN BASS!") displayMsg += ` (#${p.stats.fishCaught})`;
-
-    spawnFloater(displayMsg, p.x, p.y - 60, floaterColor, p.area);
-    
-    // XP Logic
-    p.stats.fishXP += 10;
-    if (p.stats.fishXP >= xpNeeded(p.stats.fishLevel) * 2) {
-        p.stats.fishLevel++; 
-        p.stats.fishXP = 0;
-        systemMessage(`${p.name} FISH UP! (Lv ${p.stats.fishLevel})`);
-    }
-    updateCombatLevel(p);
-    saveStats(p);
-}
+//============================================================
+// ============== 	FISHING STUFF ============================
+// --- Fishing Merchant --------------------------------------
+const merchantSettings = {
+    stayMinutes: 2,    // How many minutes she stays
+    cycleTotal: 28,     // Total minutes in one full loop (Stay + Away)
+};
+let forceBuyer = null;
+let buyerActive = false;
 //fish merchant----------------
 function updateBuyerNPC() {
     const now = Date.now();
@@ -465,7 +425,7 @@ function updateBuyerNPC() {
         systemMessage("--- [NPC] THE FISH MERCHANT HAS LEFT THE AREA. ---");
     }
 }
-// Add this to your drawScenery function under the fishingpond section:
+// called inside drawScenery function under the fishingpond section to update time she stays away and time she stays properly:
 function drawBuyer(ctx) {
     if (!buyerActive || viewArea !== "fishingpond") return;
     
@@ -590,9 +550,109 @@ function drawBuyer(ctx) {
     ctx.fillStyle = "#00ffff";
     ctx.fillText("✦ 2X GOLD RATE ✦", bx, textY + 14);
 }
+// fishing task :
+function performFish(p) {
+    if (p.area !== "fishingpond" || p.dead) return;
+    if (p.stats.fishCaught === undefined) p.stats.fishCaught = 0;
 
+    let roll = Math.random();
+    let resultText = "";
+    let isFish = false;
+    let floaterColor = "#44ccff"; // Default Blue
 
-// --- DUNGEON -----------------------
+    // 1. Check for Buyer-Only Golden Fish (5% chance)
+    if (buyerActive && Math.random() < 0.05) {
+        p.stats.inventory.push("Golden Bass");
+        resultText = "GOLDEN BASS!";
+        floaterColor = "#FFD700"; // Gold color
+        isFish = true;
+        systemMessage(`✨ ${p.name} landed a rare GOLDEN BASS!`);
+    } 
+    // 2. Original Rarity Logic
+    else if (roll < 0.001) {
+        p.stats.inventory.push("wig");
+        resultText = "THE LEGENDARY WIG!";
+        floaterColor = "#FFD700";
+        systemMessage(`[!] MYTHIC CATCH: ${p.name} found a Legendary Wig!`);
+    } 
+    else if (roll < 0.015) {
+        p.stats.inventory.push("leather Booties");
+        resultText = "leather Boots!";
+    } 
+    else if (roll < 0.065) {
+        p.stats.inventory.push("Leather scrap");
+        resultText = "Leather scrap";
+        floaterColor = "#a88d6d";
+    } 
+    else {
+        const weight = (Math.random() * 20 + 0.5).toFixed(1);
+        const fishItem = `${weight}kg Bass`; 
+        p.stats.inventory.push(fishItem);
+        resultText = fishItem;
+        isFish = true;
+        p.stats.fishCaught++;
+    }
+
+    let displayMsg = `🎣 ${resultText}`;
+    if (isFish && resultText !== "GOLDEN BASS!") displayMsg += ` (#${p.stats.fishCaught})`;
+
+    spawnFloater(displayMsg, p.x, p.y - 60, floaterColor, p.area);
+    
+    // XP Logic
+    p.stats.fishXP += 10;
+    if (p.stats.fishXP >= xpNeeded(p.stats.fishLevel) * 2) {
+        p.stats.fishLevel++; 
+        p.stats.fishXP = 0;
+        systemMessage(`${p.name} FISH UP! (Lv ${p.stats.fishLevel})`);
+    }
+    updateCombatLevel(p);
+    saveStats(p);
+}
+//============================================================
+//future swim and boat function sections
+//goSwimming(){};
+//------------------------------------------------------------
+
+// ( *if at fishingpond & if on shore -> get in boat, and float,
+// else if at fishing pond and in water->float to shore and get off boat
+//rideBoat(){}; 
+//add boating skill too ( helps fishing ) 
+
+//------------------------------------------------------------
+//============================================================
+
+//============================================================
+//future woodcutting/mining function sections
+//chopTrees(){};
+//------------------------------------------------------------
+//mineRocks(){};
+//------------------------------------------------------------
+//buildStuff(){};
+//============================================================
+
+//============================================================
+//future Lurking action function section
+//goSwimming(){}
+//------------------------------------------------------------
+//rideBoat(){}
+//dockBoat(){}
+//------------------------------------------------------------
+//============================================================
+
+//============================================================
+//======================= DUNGEON AREA =======================
+// --- DUNGEON variables -------------------------------------
+let enemies = [];
+let boss = null;
+
+let dungeonQueue = [];
+let dungeonTimer = null;
+let dungeonActive = false;
+let dungeonWave = 1;
+let dungeonSecondsLeft = 0;
+let dungeonCountdownInterval = null; // To track the interval
+//-----------------------------------------------------------
+//-- MAIN DUNGEON STUFF --
 function joinDungeonQueue(p) {
     if (p.dead) return;
     
@@ -647,27 +707,7 @@ function startDungeon() {
     systemMessage("The Dungeon Gates have opened!");
     spawnWave();
 }
-function updatePhysics(p) {
-    // Vertical Fall (Dungeon Entrance)
-    if (p.targetY !== undefined && p.y < p.targetY) {
-        p.y += 10; 
-        if (p.y >= p.targetY) { p.y = p.targetY; delete p.targetY; }
-    }
 
-    // Horizontal Walk (Attacking/Moving)
-    if (p.targetX !== null && p.targetX !== undefined) {
-        let dx = p.targetX - p.x;
-        if (Math.abs(dx) > 5) {
-            p.x += dx * 0.1; // Smooth slide toward target
-            // Cheeky "Leaning" effect while running
-            p.lean = dx > 0 ? 0.2 : -0.2;
-        } else {
-            p.lean = 0;
-            // If they were running to attack but target is gone, return to idle
-            if (p.activeTask !== "attacking") p.targetX = null;
-        }
-    }
-}
 function spawnWave() {
     enemies = [];
     for (let i = 0; i < 3; i++) {
@@ -684,52 +724,71 @@ function checkDungeonProgress() {
         dungeonWave++; spawnWave();
     }
 }
-
-/* ================= DRAWING ================= */
-/* ================= DRAWING UTILS ================= */
-const arrows = [];
-
-function spawnArrow(startX, startY, endX, endY) {
-    arrows.push({ x: startX, y: startY, tx: endX, ty: endY, life: 30 });
+// enemy logic
+function handleEnemyAttacks() {
+    let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
+    if (dwellers.length === 0) return;
+    
+    enemies.forEach(e => {
+        if (e.dead) return;
+        let target = dwellers[Math.floor(Math.random() * dwellers.length)];
+        target.hp -= 5;
+        spawnFloater(`-5`, target.x, target.y - 40, "#f00", target.area);
+        if (target.hp <= 0) { target.hp = 0; target.dead = true; }
+    });
 }
+/*------------------------------------------------------------*/
+//=============================================================
 
-function updateArrows(ctx) {
-    for (let i = arrows.length - 1; i >= 0; i--) {
-        let a = arrows[i];
-        // Move towards target
-        a.x += (a.tx - a.x) * 0.15;
-        a.y += (a.ty - a.y) * 0.15;
-        
-        ctx.strokeStyle = `rgba(255, 255, 255, ${a.life / 30})`; // Fade out
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(a.x + (a.tx > a.x ? 15 : -15), a.y); // Pointing direction
-        ctx.stroke();
-
-        a.life--;
-        if (a.life <= 0) arrows.splice(i, 1);
-    }
-}
-function updateSplashText(ctx) {
-    for (let i = floaters.length - 1; i >= 0; i--) {
-        let f = floaters[i];
-        if (f.area !== viewArea) continue; 
-
-        ctx.save();
-        ctx.globalAlpha = f.life / 100;
-        ctx.fillStyle = f.color;
-        ctx.font = "bold 14px monospace";
-        ctx.fillText(f.text, f.x, f.y);
-        
-        f.y -= 1;
-        f.life -= 2;
-        if (f.life <= 0) floaters.splice(i, 1);
-        ctx.restore();
-    }
-}
-/* ================= DRAWING ================= */
+//=============================================================
+/* ================= EXTENDED ITEM LIBRARY ================= */
+const DANCE_UNLOCKS = {
+    1: { name: "The Squat", minLvl: 1 },
+    2: { name: "The Flail", minLvl: 5 },
+    3: { name: "The Lean",  minLvl: 1 },
+    4: { name: "The Op-Pa", minLvl: 1 },
+	5: { name: "The 99", minLvl: 1 },// Fixed to 20 to match your level-up logic
+    6: { name: "The sixthdance", minLvl: 1 },
+    7: { name: "The seventhdance", minLvl: 1 },
+    8: { name: "The eigthdance",  minLvl: 1 },
+    9: { name: "The ninthdance", minLvl: 1 },
+	10: { name: "The tenthdance", minLvl: 1 }
+};
+const DANCE_STYLES = {
+    1: (now) => ({ bodyY: Math.sin(now / 100) * 8 }), // The Squat
+    2: (now) => ({ armMove: Math.sin(now / 50) * 20 }), // The Flail
+    3: (now) => ({ lean: Math.sin(now / 200) * 0.6 }), // The Lean
+    4: (now) => ({ 
+        bodyY: Math.abs(Math.sin(now / 150)) * -15,
+        armMove: Math.sin(now / 150) * 5,
+        pose: "head_hands" 
+    }),
+    5: (now, p) => { 
+        let bY = Math.min(0, Math.sin(now / 200) * -50); 
+        if (bY > -1 && p.wasInAir) {
+            spawnArrow(p.x, p.y + 25, p.x + 60, p.y + 25);
+            spawnArrow(p.x, p.y + 25, p.x - 60, p.y + 25);
+            p.wasInAir = false;
+        }
+        if (bY < -5) p.wasInAir = true;
+        return { bodyY: bY, lean: 0, pose: "action" };
+    },
+    6: (now) => ({ bodyY: Math.sin(now / 75) * 4 }), // The Bop
+    7: (now) => ({ armMove: Math.sin(now / 50) * 50 }), // The Wave
+    8: (now) => ({ lean: Math.sin(now / 200) * 0.1 }), // The Sway
+    9: (now) => ({ 
+        bodyY: Math.min(0, Math.sin(now / 150) * -25),
+        armMove: Math.sin(now / 150) * 5,
+        pose: "star" 
+    }),
+    10: (now) => ({ 
+        bodyY: Math.min(0, Math.sin(now / 200) * -40),
+        lean: Math.sin(now / 200) * 0.2,
+        pose: "action"
+    })
+};
 /* ================= ITEM DRAWING LIBRARY ================= */
+// headstyles are helmets or different head slot item styles
 const HEAD_STYLES = {
     "box": (ctx, hX, hY, color) => { // Paper Bag Style
         ctx.fillStyle = color;
@@ -812,150 +871,49 @@ const HEAD_STYLES = {
         ctx.shadowBlur = 0; // Reset shadow for other items
     }
 };
-// --- 1. HAIR & HOODS (Head Layers) ---
-function drawHeadLayer(ctx, hX, hY, item, p) {
-    if (!item) return;
-    const style = item.style || item.type || "hair";
-    // 2. Resolve Color
-    const finalColor = (style === "wig" && p.stats.wigColor) ? p.stats.wigColor : (item.color || "#614126");
-    // 3. Draw: Pull from the HEAD_STYLES library
-    ctx.save();
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-    const drawFn = HEAD_STYLES[style] || HEAD_STYLES["hair"];
-    drawFn(ctx, hX, hY, finalColor);
-    ctx.restore();
-}
 
-function drawHelmetItem(ctx, p, bodyY, lean) {
-    const item = ITEM_DB[p.stats.equippedHelmet];
-    if (!item) return;
-    const hX = p.x + (lean * 20);
-    const hY = p.y - 30 + bodyY; 
-    // Simply delegate to the smart head layer
-    drawHeadLayer(ctx, hX, hY, item, p);
-}
-
-// --- 2. CAPES (Drawn behind the stickman) ---
-function drawCapeItem(ctx, p, bodyY, lean, item) {
-    const headX = p.x + (lean * 20);
-    const centerX = p.x + (lean * 10);
-    ctx.fillStyle = item.color || "#550055";
-    ctx.beginPath();
-    ctx.moveTo(headX, p.y - 15 + bodyY); // Neck
-    // Cape flares out behind
-    ctx.quadraticCurveTo(headX - 25, p.y + 10 + bodyY, centerX - 15, p.y + 40 + bodyY);
-    ctx.lineTo(centerX + 15, p.y + 40 + bodyY);
-    ctx.quadraticCurveTo(headX + 25, p.y + 10 + bodyY, headX, p.y - 15 + bodyY);
-    ctx.fill();
-    ctx.strokeStyle = "rgba(0,0,0,0.3)";
-    ctx.stroke();
-}
-
-// --- 3. armor drawn over body
-function drawArmor(ctx, p, bodyY = 0, lean = 0) {
-    const item = ITEM_DB[p.stats.equippedArmor];
-    if (!item) return;
-
-    const headX = p.x + (lean * 20); 
-    const hipX = p.x + (lean * 5); // Added this so the armor bottom follows the lean slightly
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(headX - 7, p.y - 18 + bodyY); 
-    ctx.lineTo(headX + 7, p.y - 18 + bodyY); 
-    ctx.lineTo(hipX + 7, p.y + 8 + bodyY);    
-    ctx.lineTo(hipX - 7, p.y + 8 + bodyY);    
-    ctx.closePath();
-
-    ctx.fillStyle = item.color;
-    ctx.globalAlpha = 0.8;
-    ctx.fill();
-
-    ctx.globalAlpha = 1.0;
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.restore();
-}
-// --- 4. PANTS (Drawn over the legs) ---
-function drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, item) {
-    ctx.strokeStyle = item.color || "#333";
-    ctx.lineWidth = 5; 
-    ctx.lineCap = "round";
-
-    const hipX = p.x;
-    const hipY = p.y + 10 + bodyY;
-
-    // Draw left pant leg to the left foot anchor
-    ctx.beginPath();
-    ctx.moveTo(hipX, hipY);
-    ctx.lineTo(leftFoot.x, leftFoot.y);
-    ctx.stroke();
-
-    // Draw right pant leg to the right foot anchor
-    ctx.beginPath();
-    ctx.moveTo(hipX, hipY);
-    ctx.lineTo(rightFoot.x, rightFoot.y);
-    ctx.stroke();
-}
-
-// --- 5. draw Bootes
-// --- 5. draw Boots (Corrected Signature) ---
-function drawBoots(ctx, p, leftFoot, rightFoot) {
-    const item = ITEM_DB[p.stats.equippedBoots];
-    if (!item) return;
-
-    ctx.save();
-    ctx.fillStyle = item.color || "#444";
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-
-    // Left Boot (using the leftFoot anchor)
-    ctx.fillRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5); 
-    ctx.strokeRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5);
-    ctx.fillRect(leftFoot.x - 2, leftFoot.y - 6, 4, 5); 
-
-    // Right Boot (using the rightFoot anchor)
-    ctx.fillRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
-    ctx.strokeRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
-    ctx.fillRect(rightFoot.x - 2, rightFoot.y - 6, 4, 5);
-
-    ctx.restore();
-}
-
-// --- drawEquipment (Updated to call drawBoots correctly) ---
-function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, rightFoot, isActionActive, isFishing, shouldHoldWeapon) {
-    if (p.dead) return;
-
-    // Layer 1: Back
-    if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
-
-    // Layer 2: Body
-    if (p.stats.equippedPants) drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
-    if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean); 
-
-    // Layer 3: Gloves
-    if (p.stats.equippedGloves) {
-        const gloveItem = ITEM_DB[p.stats.equippedGloves];
-        drawGlovesItem(ctx, leftHand.x, leftHand.y, gloveItem);
-        drawGlovesItem(ctx, rightHand.x, rightHand.y, gloveItem);
+const BODY_PARTS = {
+    "stick": {
+        head: (ctx, x, y, p) => {
+            ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.stroke();
+            // Face
+            ctx.fillStyle = p.color;
+            ctx.fillRect(x + 2, y - 3, 2, 2); 
+            ctx.fillRect(x + 6, y - 3, 2, 2); 
+            ctx.beginPath(); ctx.arc(x + 4, y + 2, 3, 0, Math.PI); ctx.stroke();
+        },
+        torso: (ctx, hX, hY, bX, bY) => {
+			// hY is head center, we start spine at neck (hY + 10)
+			// bY is the hip position. We stop exactly there.
+			ctx.beginPath(); 
+			ctx.moveTo(hX, hY + 10); 
+			ctx.lineTo(bX, bY); // REMOVED the extra +10 here
+			ctx.stroke();
+		},
+        limbs: (ctx, startX, startY, endX, endY) => {
+            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
+        }
     }
-
-    // Layer 4: Weapon/Tool
-    // Logic: Hold it if we are attacking (shouldHoldWeapon), or if we are doing a task (Action/Fishing)
-    if (shouldHoldWeapon || isActionActive || isFishing) {
-        drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, rightHand.x, rightHand.y);
-    }
-
-    // Layer 5: Head & Feet
-    const hX = p.x + (lean * 20);
-    const hY = p.y - 30 + bodyY;
-    if (p.stats.equippedHair) drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
-    if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
-    if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
-}
-/* ================= EXTENDED ITEM LIBRARY ================= */
+    // You could add "chibi" or "armored" styles here later!
+};
+const POSE_LIBRARY = {
+    "head_hands": (head) => ({
+        left: { x: head.x - 12, y: head.y + 5 },
+        right: { x: head.x + 12, y: head.y + 5 }
+    }),
+    "star": (head) => ({
+        left: { x: head.x - 25, y: head.y - 10 },
+        right: { x: head.x + 25, y: head.y - 10 }
+    }),
+    "action": (head, p, anim) => ({
+        // Use head.x and head.y so the hand stays attached to the shoulder
+        right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
+    }),
+    "fishing": (head, p, anim) => ({
+        // Fixed the double "right" and the missing parameter
+        right: { x: head.x + 22, y: head.y + 15 }
+    })
+};
 const HAND_STYLES = {
     "sword": (ctx, item, isAttacking, now) => {
         let swing = isAttacking ? Math.sin(now / 150) * 0.8 : Math.PI / 1.2;
@@ -1064,7 +1022,185 @@ const HAND_STYLES = {
         ctx.stroke();
     }
 };
+//=============================================================
 
+//=========================================================================
+/* ======================== DRAWING ======================================= */
+
+
+/* ================= DRAWING UTILS ================= */
+
+// ---PROJECTILES ----
+/*-------- Arrows ------------------------------*/
+const arrows = [];
+function spawnArrow(startX, startY, endX, endY) {
+    arrows.push({ x: startX, y: startY, tx: endX, ty: endY, life: 30 });
+}
+function updateArrows(ctx) {
+    for (let i = arrows.length - 1; i >= 0; i--) {
+        let a = arrows[i];
+        // Move towards target
+        a.x += (a.tx - a.x) * 0.15;
+        a.y += (a.ty - a.y) * 0.15;
+        
+        ctx.strokeStyle = `rgba(255, 255, 255, ${a.life / 30})`; // Fade out
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(a.x + (a.tx > a.x ? 15 : -15), a.y); // Pointing direction
+        ctx.stroke();
+
+        a.life--;
+        if (a.life <= 0) arrows.splice(i, 1);
+    }
+}
+/*----------------------------------------------*/
+
+
+// stickmen physics
+function updatePhysics(p) {
+    // Vertical Fall (Dungeon Entrance)
+    if (p.targetY !== undefined && p.y < p.targetY) {
+        p.y += 10; 
+        if (p.y >= p.targetY) { p.y = p.targetY; delete p.targetY; }
+    }
+
+    // Horizontal Walk (Attacking/Moving)
+    if (p.targetX !== null && p.targetX !== undefined) {
+        let dx = p.targetX - p.x;
+        if (Math.abs(dx) > 5) {
+            p.x += dx * 0.1; // Smooth slide toward target
+            // Cheeky "Leaning" effect while running
+            p.lean = dx > 0 ? 0.2 : -0.2;
+        } else {
+            p.lean = 0;
+            // If they were running to attack but target is gone, return to idle
+            if (p.activeTask !== "attacking") p.targetX = null;
+        }
+    }
+}
+
+// ==============================================
+// =-===--===-- DRRAW STICKMEN ---===---===---===-=
+// ----------------------------------------------
+/* Draw Equipment functions */
+// --- 1. HAIR & HOODS (Head Layers) ---
+function drawHeadLayer(ctx, hX, hY, item, p) {
+    if (!item) return;
+    const style = item.style || item.type || "hair";
+    // 2. Resolve Color
+    const finalColor = (style === "wig" && p.stats.wigColor) ? p.stats.wigColor : (item.color || "#614126");
+    // 3. Draw: Pull from the HEAD_STYLES library
+    ctx.save();
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    const drawFn = HEAD_STYLES[style] || HEAD_STYLES["hair"];
+    drawFn(ctx, hX, hY, finalColor);
+    ctx.restore();
+}
+function drawHelmetItem(ctx, p, bodyY, lean) {
+    const item = ITEM_DB[p.stats.equippedHelmet];
+    if (!item) return;
+    const hX = p.x + (lean * 20);
+    const hY = p.y - 30 + bodyY; 
+    // Simply delegate to the smart head layer
+    drawHeadLayer(ctx, hX, hY, item, p);
+}
+// ---
+
+// --- 2. CAPES (Drawn behind the stickman) ---
+function drawCapeItem(ctx, p, bodyY, lean, item) {
+    const headX = p.x + (lean * 20);
+    const centerX = p.x + (lean * 10);
+    ctx.fillStyle = item.color || "#550055";
+    ctx.beginPath();
+    ctx.moveTo(headX, p.y - 15 + bodyY); // Neck
+    // Cape flares out behind
+    ctx.quadraticCurveTo(headX - 25, p.y + 10 + bodyY, centerX - 15, p.y + 40 + bodyY);
+    ctx.lineTo(centerX + 15, p.y + 40 + bodyY);
+    ctx.quadraticCurveTo(headX + 25, p.y + 10 + bodyY, headX, p.y - 15 + bodyY);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(0,0,0,0.3)";
+    ctx.stroke();
+}
+// ---
+
+// --- 3. armor drawn over body ---
+function drawArmor(ctx, p, bodyY = 0, lean = 0) {
+    const item = ITEM_DB[p.stats.equippedArmor];
+    if (!item) return;
+
+    const headX = p.x + (lean * 20); 
+    const hipX = p.x + (lean * 5); // Added this so the armor bottom follows the lean slightly
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(headX - 7, p.y - 18 + bodyY); 
+    ctx.lineTo(headX + 7, p.y - 18 + bodyY); 
+    ctx.lineTo(hipX + 7, p.y + 8 + bodyY);    
+    ctx.lineTo(hipX - 7, p.y + 8 + bodyY);    
+    ctx.closePath();
+
+    ctx.fillStyle = item.color;
+    ctx.globalAlpha = 0.8;
+    ctx.fill();
+
+    ctx.globalAlpha = 1.0;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+}
+// ---
+
+// --- 4. PANTS (Drawn over the legs) ---
+function drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, item) {
+    ctx.strokeStyle = item.color || "#333";
+    ctx.lineWidth = 5; 
+    ctx.lineCap = "round";
+
+    const hipX = p.x;
+    const hipY = p.y + 10 + bodyY;
+
+    // Draw left pant leg to the left foot anchor
+    ctx.beginPath();
+    ctx.moveTo(hipX, hipY);
+    ctx.lineTo(leftFoot.x, leftFoot.y);
+    ctx.stroke();
+
+    // Draw right pant leg to the right foot anchor
+    ctx.beginPath();
+    ctx.moveTo(hipX, hipY);
+    ctx.lineTo(rightFoot.x, rightFoot.y);
+    ctx.stroke();
+}
+// ---
+
+// --- 5. draw Bootes ---
+function drawBoots(ctx, p, leftFoot, rightFoot) {
+    const item = ITEM_DB[p.stats.equippedBoots];
+    if (!item) return;
+
+    ctx.save();
+    ctx.fillStyle = item.color || "#444";
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+
+    // Left Boot (using the leftFoot anchor)
+    ctx.fillRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5); 
+    ctx.strokeRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5);
+    ctx.fillRect(leftFoot.x - 2, leftFoot.y - 6, 4, 5); 
+
+    // Right Boot (using the rightFoot anchor)
+    ctx.fillRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
+    ctx.strokeRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
+    ctx.fillRect(rightFoot.x - 2, rightFoot.y - 6, 4, 5);
+
+    ctx.restore();
+}
+
+// ---
+// --- draw gloves ---
 function drawGlovesItem(ctx, handX, handY, item) {
     ctx.fillStyle = item.color || "#fff";
     ctx.beginPath();
@@ -1073,7 +1209,42 @@ function drawGlovesItem(ctx, handX, handY, item) {
     ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.stroke();
 }
 
+// ---
+// --- drawEquipment (Updated to call drawBoots correctly) ---
+function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, rightFoot, isActionActive, isFishing, shouldHoldWeapon) {
+    if (p.dead) return;
 
+    // Layer 1: Back
+    if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
+
+    // Layer 2: Body
+    if (p.stats.equippedPants) drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
+    if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean); 
+
+    // Layer 3: Gloves
+    if (p.stats.equippedGloves) {
+        const gloveItem = ITEM_DB[p.stats.equippedGloves];
+        drawGlovesItem(ctx, leftHand.x, leftHand.y, gloveItem);
+        drawGlovesItem(ctx, rightHand.x, rightHand.y, gloveItem);
+    }
+
+    // Layer 4: Weapon/Tool
+    // Logic: Hold it if we are attacking (shouldHoldWeapon), or if we are doing a task (Action/Fishing)
+    if (shouldHoldWeapon || isActionActive || isFishing) {
+        drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, rightHand.x, rightHand.y);
+    }
+
+    // Layer 5: Head & Feet
+    const hX = p.x + (lean * 20);
+    const hY = p.y - 30 + bodyY;
+    if (p.stats.equippedHair) drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
+    if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
+    if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
+}
+
+// ---
+// ---
+// --- Draw weapons ---
 function drawWeaponItem(ctx, p, now, bodyY, lean, isFishing, isActionActive, hX, hY) {
     let weaponName = p.stats.equippedWeapon;
     let item = ITEM_DB[weaponName];
@@ -1125,93 +1296,6 @@ function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, 
     if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
     if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
 }
-const DANCE_UNLOCKS = {
-    1: { name: "The Squat", minLvl: 1 },
-    2: { name: "The Flail", minLvl: 5 },
-    3: { name: "The Lean",  minLvl: 1 },
-    4: { name: "The Op-Pa", minLvl: 1 },
-	5: { name: "The 99", minLvl: 1 },// Fixed to 20 to match your level-up logic
-    6: { name: "The sixthdance", minLvl: 1 },
-    7: { name: "The seventhdance", minLvl: 1 },
-    8: { name: "The eigthdance",  minLvl: 1 },
-    9: { name: "The ninthdance", minLvl: 1 },
-	10: { name: "The tenthdance", minLvl: 1 }
-};
-const DANCE_STYLES = {
-    1: (now) => ({ bodyY: Math.sin(now / 100) * 8 }), // The Squat
-    2: (now) => ({ armMove: Math.sin(now / 50) * 20 }), // The Flail
-    3: (now) => ({ lean: Math.sin(now / 200) * 0.6 }), // The Lean
-    4: (now) => ({ 
-        bodyY: Math.abs(Math.sin(now / 150)) * -15,
-        armMove: Math.sin(now / 150) * 5,
-        pose: "head_hands" 
-    }),
-    5: (now, p) => { 
-        let bY = Math.min(0, Math.sin(now / 200) * -50); 
-        if (bY > -1 && p.wasInAir) {
-            spawnArrow(p.x, p.y + 25, p.x + 60, p.y + 25);
-            spawnArrow(p.x, p.y + 25, p.x - 60, p.y + 25);
-            p.wasInAir = false;
-        }
-        if (bY < -5) p.wasInAir = true;
-        return { bodyY: bY, lean: 0, pose: "action" };
-    },
-    6: (now) => ({ bodyY: Math.sin(now / 75) * 4 }), // The Bop
-    7: (now) => ({ armMove: Math.sin(now / 50) * 50 }), // The Wave
-    8: (now) => ({ lean: Math.sin(now / 200) * 0.1 }), // The Sway
-    9: (now) => ({ 
-        bodyY: Math.min(0, Math.sin(now / 150) * -25),
-        armMove: Math.sin(now / 150) * 5,
-        pose: "star" 
-    }),
-    10: (now) => ({ 
-        bodyY: Math.min(0, Math.sin(now / 200) * -40),
-        lean: Math.sin(now / 200) * 0.2,
-        pose: "action"
-    })
-};
-const POSE_LIBRARY = {
-    "head_hands": (head) => ({
-        left: { x: head.x - 12, y: head.y + 5 },
-        right: { x: head.x + 12, y: head.y + 5 }
-    }),
-    "star": (head) => ({
-        left: { x: head.x - 25, y: head.y - 10 },
-        right: { x: head.x + 25, y: head.y - 10 }
-    }),
-    "action": (head, p, anim) => ({
-        // Use head.x and head.y so the hand stays attached to the shoulder
-        right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
-    }),
-    "fishing": (head, p, anim) => ({
-        // Fixed the double "right" and the missing parameter
-        right: { x: head.x + 22, y: head.y + 15 }
-    })
-};
-const BODY_PARTS = {
-    "stick": {
-        head: (ctx, x, y, p) => {
-            ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.stroke();
-            // Face
-            ctx.fillStyle = p.color;
-            ctx.fillRect(x + 2, y - 3, 2, 2); 
-            ctx.fillRect(x + 6, y - 3, 2, 2); 
-            ctx.beginPath(); ctx.arc(x + 4, y + 2, 3, 0, Math.PI); ctx.stroke();
-        },
-        torso: (ctx, hX, hY, bX, bY) => {
-			// hY is head center, we start spine at neck (hY + 10)
-			// bY is the hip position. We stop exactly there.
-			ctx.beginPath(); 
-			ctx.moveTo(hX, hY + 10); 
-			ctx.lineTo(bX, bY); // REMOVED the extra +10 here
-			ctx.stroke();
-		},
-        limbs: (ctx, startX, startY, endX, endY) => {
-            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
-        }
-    }
-    // You could add "chibi" or "armored" styles here later!
-};
 
 function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
@@ -1325,10 +1409,12 @@ function drawSheathedWeapon(ctx, p, bodyY, lean, item) {
     drawFn(ctx, item, false, 0); 
     ctx.restore();
 }
-
+//===========================================================================================================================================
 //-------------------------------------------
 
-/* the old stuff --
+//===============================================================================
+// ================= DRAWING THE SCENERY AND AREAS ===========
+/* Scenes/ Areas --
 // Add 'lean' as the last parameter here
 function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
     if (p.dead) return;
@@ -1635,38 +1721,10 @@ function drawScenery(ctx) {
     }
 	
 }
+//================================================================================
 
-
-
+//================================================================================
 //-----=======------=======---GAME LOOP STUFF--=======-----========----
-const systemTimers = {
-    lastGlobalTick: Date.now(),
-    lastEnemyTick: Date.now(),
-    globalInterval: 3000, // 3 seconds (Fishing, etc.)
-    enemyInterval: 4000   // 4 seconds (Enemy Attacks)
-};
-
-//--GAME LOOP HELPERS
-function updateUI() {
-    // 2. Enemy UI Updates
-    let enemyText = "";
-    if (viewArea === "dungeon") {
-        // We look at the global 'enemies' array and 'boss' object
-        enemies.forEach(e => { 
-            if(!e.dead) enemyText += `Enemy: ${e.hp}hp<br>`; 
-        });
-        
-        if (boss && !boss.dead) {
-            enemyText += `<b>BOSS: ${boss.hp}hp</b>`;
-        }
-    }
-    
-    // Update the HTML element on your page
-    const uiElement = document.getElementById("enemyUI");
-    if (uiElement) {
-        uiElement.innerHTML = enemyText;
-    }
-}
 function updatePlayerStatus(p, now) {
     if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
         systemMessage(`${p.name} stopped ${p.activeTask} (Idle timeout).`);
@@ -1711,6 +1769,7 @@ function handleDancing(p, now) {
         }
     }
 }
+
 function updatePlayerActions(p, now) {
     if (p.dead) return;
 
@@ -1731,20 +1790,27 @@ function updatePlayerActions(p, now) {
     }
 }
 
-function handleChatCommand(input) {
-    if (!input.startsWith("!")) return;
 
-    const args = input.slice(1).split(" "); // Remove "!" and split
-    const command = args[0].toLowerCase();
-    const targetItem = args.slice(1).join(" "); // Rejoin the rest for names with spaces
+// This wrapper function just organizes the "Background" layer
+function renderScene() {
+    // 1. Draw the base sky/wall color
+    ctx.fillStyle = backgrounds[viewArea];
+    ctx.fillRect(0, 0, c.width, c.height);
 
-    if (command === "add" || command === "give") {
-        // For this example, we'll give it to the first player found 
-        // or a specific 'currentPlayer' variable if you have one.
-        const firstPlayer = Object.keys(players)[0]; 
-        addItemToPlayer(firstPlayer, targetItem);
-    }
+    // 2. Draw the specific props you wrote (Floor, Ripples, Cracks)
+    drawScenery(ctx);
 }
+
+
+/* ================= GAME LOOP ================= */
+/* ================= GAME LOOP ================= */
+//--GAME LOOP HELPERS
+const systemTimers = {
+    lastGlobalTick: Date.now(),
+    lastEnemyTick: Date.now(),
+    globalInterval: 3000, // 3 seconds (Fishing, etc.)
+    enemyInterval: 4000   // 4 seconds (Enemy Attacks)
+};
 function updateSystemTicks(now) {
     // 3s Global Tick
     if (now - systemTimers.lastGlobalTick > systemTimers.globalInterval) {
@@ -1763,28 +1829,27 @@ function updateSystemTicks(now) {
     }
 	updateBuyerNPC();
 }
-
-function handleEnemyAttacks() {
-    let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
-    if (dwellers.length === 0) return;
+function updateUI() {
+    // 2. Enemy UI Updates
+    let enemyText = "";
+    if (viewArea === "dungeon") {
+        // We look at the global 'enemies' array and 'boss' object
+        enemies.forEach(e => { 
+            if(!e.dead) enemyText += `Enemy: ${e.hp}hp<br>`; 
+        });
+        
+        if (boss && !boss.dead) {
+            enemyText += `<b>BOSS: ${boss.hp}hp</b>`;
+        }
+    }
     
-    enemies.forEach(e => {
-        if (e.dead) return;
-        let target = dwellers[Math.floor(Math.random() * dwellers.length)];
-        target.hp -= 5;
-        spawnFloater(`-5`, target.x, target.y - 40, "#f00", target.area);
-        if (target.hp <= 0) { target.hp = 0; target.dead = true; }
-    });
+    // Update the HTML element on your page
+    const uiElement = document.getElementById("enemyUI");
+    if (uiElement) {
+        uiElement.innerHTML = enemyText;
+    }
 }
-// This wrapper function just organizes the "Background" layer
-function renderScene() {
-    // 1. Draw the base sky/wall color
-    ctx.fillStyle = backgrounds[viewArea];
-    ctx.fillRect(0, 0, c.width, c.height);
-
-    // 2. Draw the specific props you wrote (Floor, Ripples, Cracks)
-    drawScenery(ctx);
-}
+/* ================= GAME LOOP ================= */
 function gameLoop() {
     const now = Date.now();
     
@@ -1809,10 +1874,29 @@ function gameLoop() {
     handleTooltips();
     requestAnimationFrame(gameLoop);
 }
+/* ================= GAME LOOP ================= */
+/* ================= GAME LOOP ================= */
+/* ================= GAME LOOP ================= */
 
-/* ================= CHAT COMMANDS ================= */
+
+/* ======================================================= */
+/* ================= CHAT COMMAND SYSTEM ================= */
+/* --- Handle Chat Commands ---*/
+function handleChatCommand(input) {
+    if (!input.startsWith("!")) return;
+
+    const args = input.slice(1).split(" "); // Remove "!" and split
+    const command = args[0].toLowerCase();
+    const targetItem = args.slice(1).join(" "); // Rejoin the rest for names with spaces
+
+    if (command === "add" || command === "give") {
+        // For this example, we'll give it to the first player found 
+        // or a specific 'currentPlayer' variable if you have one.
+        const firstPlayer = Object.keys(players)[0]; 
+        addItemToPlayer(firstPlayer, targetItem);
+    }
+}
 /* ================= COMMAND FUNCTIONS ================= */
-// Manually set a static pose from the POSE_LIBRARY
 function cmdStop(p, user) {
     p.activeTask = null;
     p.taskEndTime = null;
@@ -2319,12 +2403,7 @@ function cmdMingle(p, user, args) {
 }
 
 /* ================= THE COMFY ROUTER ================= */
-
 /* maybe we can turn this comfyjsonchat into a function that the twitchchat script can call to run ommands from here? */
-
-
-
-
 const STICKMEN_USER_CMDS = [
     { command: "attack", description: "Engage in combat at the dungeon.", usage: "attack" },
     { command: "fish", description: "Start fishing at the pond.", usage: "fish" },
@@ -2332,16 +2411,11 @@ const STICKMEN_USER_CMDS = [
     { command: "bal", description: "Check your gold balance.", usage: "bal" },
     { command: "equip", description: "Equip an item from inventory.", usage: "equip [item name]" }
 ];
-
 const STICKMEN_ADMIN_CMDS = [
     { command: "showfishing", description: "Switch view to Fishing Pond.", usage: "showfishing" },
     { command: "spawnmerchant", description: "Force the merchant to appear.", usage: "spawnmerchant" },
     { command: "testdance", description: "Test an animation regardless of level.", usage: "testdance [style#]" }
 ];
-
-
-
-
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
 //function stickmenCommandHandler(user, msg, command, color, flags, extra) {//
 //    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);//
