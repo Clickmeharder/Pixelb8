@@ -748,7 +748,7 @@ const ITEM_DB = {
 	"leather Gloves":   { type: "gloves", style:"", value: 100, color: "#5c4033" },
     // --- SPECIALS ---
 // special head
-	"Paper Bag":      { type: "helmet", style: "box" def: 1, value: 5, color: "#d2b48c" },
+	"Paper Bag":      { type: "helmet", style: "box", def: 1, value: 5, color: "#d2b48c" },
 	"wig":            { type: "helmet", style:"", def: 1,style: "wig",     value: 5000, color: "yellow" },
     "Royal Crown":    { type: "helmet", style: "crown",  def: 2,  value: 10000, color: "#ffcc00" },
 // special capes
