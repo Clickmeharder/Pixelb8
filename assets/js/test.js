@@ -1959,7 +1959,7 @@ function cmdHeal(p, args) {
     }
 }
 //auto unequip version of fish cmd
-/* function cmdFish(p, user) {
+function cmdFish(p, user) {
     if (p.area !== "fishingpond") { 
         systemMessage(`${user}: Go to fishingpond first.`); 
         return; 
@@ -1984,9 +1984,9 @@ function cmdHeal(p, args) {
     
     systemMessage(`${user} started fishing!`);
     saveStats(p); // Make sure the unequip is saved to the DB
-} */
+}
 // just sheath version of fish cmd
-function cmdFish(p, user) {
+function cmdFish2(p, user) {
     if (p.area !== "fishingpond") { 
         systemMessage(`${user}: Go to fishingpond first.`); 
         return; 
@@ -2365,6 +2365,7 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     // Combat & Tasks//
     if (cmd === "attack") cmdAttack(p, user);
     if (cmd === "fish")   cmdFish(p, user);
+	if (cmd === "fish2")   cmdFish2(p, user);
     if (cmd === "heal")   cmdHeal(p, args);
     if (cmd === "pose" || cmd === "setpose") {
         cmdSetPose(p, user, args);
