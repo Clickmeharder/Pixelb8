@@ -2140,7 +2140,7 @@ function cmdEquip(p, args) {
     let msg = "";
 
     // 3. EQUIP LOGIC
-    if (type === "weapon" || type === "staff") {
+    if (type === "weapon" || type === "staff" || type === "bow") {
         p.stats.equippedWeapon = dbKey;
         msg = `slung the ${dbKey} over their shoulder`;
     } else if (type === "armor") {
