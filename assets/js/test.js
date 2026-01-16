@@ -700,8 +700,10 @@ const ITEM_DB = {
 	"Rusty Dagger":   { type: "weapon", style: "dagger", power: 5,  speed: 1000,  value: 40,   color: "#777" },
     "Iron Sword":     { type: "weapon", style: "sword", power: 12, speed: 2500,  value: 200,  color: "#eee" },
 	// Bows (archery)
-    "shitty shortbow":{ type: "weapon", style: "bow", power: 5,  speed: 1250,  value: 30,   color: "#eee" },
-    "decent shortbow":{ type: "weapon", style: "bow", power: 8,  speed: 1000,  value: 100,  color: "#eee" },
+	"shortbow":{ type: "weapon", style: "bow", power: 5,  speed: 1250,  value: 30,   color: "#eee" },
+    "Shitty Shortbow":{ type: "bow", style: "bow", power: 8,  speed: 1000,  value: 100,  color: "#eee" },
+    "Wooden Shortbow":{ type: "bow", style: "bow", power: 5,  speed: 1250,  value: 30,   color: "#eee" },
+    "Oak Shortbow":{ type: "bow", style: "bow", power: 8,  speed: 1000,  value: 100,  color: "#eee" },
 	//Stalves (magic)
 	"Wooden Staff":   { type: "staff", style:, color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40,  },
 // -------------------------- TOOLS --------------------------------------------------------------------
