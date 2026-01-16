@@ -1958,7 +1958,34 @@ function cmdHeal(p, args) {
         saveStats(p);
     }
 }
+//auto unequip version of fish cmd
+/* function cmdFish(p, user) {
+    if (p.area !== "fishingpond") { 
+        systemMessage(`${user}: Go to fishingpond first.`); 
+        return; 
+    }
+    if (p.activeTask === "fishing") { 
+        systemMessage(`${user}: Already fishing.`); 
+        return; 
+    }
+    // AUTO-UNEQUIP WEAPON
+    // If they have a weapon in their hand or on their back, take it off
+    if (p.stats.equippedWeapon) {
+        const oldWeapon = p.stats.equippedWeapon;
+        p.stats.equippedWeapon = null;
+        systemMessage(`${p.name} put away their ${oldWeapon} to focus on fishing.`);
+        // Note: We don't need to add it to inventory because it's already there
+    }
 
+    // Move them to the edge of the shore (X=200) facing the water
+    p.targetX = 200; 
+    p.activeTask = "fishing";
+    p.taskEndTime = Date.now() + (15 * 60 * 1000);
+    
+    systemMessage(`${user} started fishing!`);
+    saveStats(p); // Make sure the unequip is saved to the DB
+} */
+// just sheath version of fish cmd
 function cmdFish(p, user) {
     if (p.area !== "fishingpond") { 
         systemMessage(`${user}: Go to fishingpond first.`); 
@@ -1969,13 +1996,19 @@ function cmdFish(p, user) {
         return; 
     }
     
-    // Move them to the edge of the shore (X=200) facing the water
+    // AUTO-SHEATH: Move weapon to back if they have one
+    if (p.stats.equippedWeapon) {
+        p.manualSheath = true; 
+        systemMessage(`${p.name} slung their ${p.stats.equippedWeapon} over their shoulder and grabbed a rod.`);
+    }
+
     p.targetX = 200; 
     p.activeTask = "fishing";
     p.taskEndTime = Date.now() + (15 * 60 * 1000);
+    
     systemMessage(`${user} started fishing!`);
+    saveStats(p); 
 }
-
 function cmdEquip(p, args) {
     // 1. BLOCK EQUIPPING DURING TASKS
     // Checks if the player is busy doing something (fishing, mining, attacking, etc.)
