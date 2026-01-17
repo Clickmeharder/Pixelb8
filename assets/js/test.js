@@ -237,6 +237,22 @@ function updateCombatLevel(p) {
     p.stats.combatLevel = Math.floor((p.stats.attackLevel + p.stats.healLevel + (p.stats.fishLevel * 0.5)) / 2);
 }
 //-------------------------------------------------------------------
+function applyDamage(target, amount, color = "#f00") {
+    if (target.dead) return;
+
+    target.hp -= amount;
+    spawnFloater(`-${amount}`, target.x, target.y - 40, color, target.area);
+
+    if (target.hp <= 0) {
+        target.hp = 0;
+        target.dead = true;
+        target.activeTask = "none"; // Stop whatever they were doing
+        target.deathTime = Date.now();
+        target.deathStyle = Math.random() > 0.5 ? "faceplant" : "backflip";
+        
+        systemMessage(`${target.name || 'A player'} has fallen!`);
+    }
+}
 //===================================================================
 
 
@@ -684,9 +700,9 @@ function handleEnemyAttacks() {
     enemies.forEach(e => {
         if (e.dead) return;
         let target = dwellers[Math.floor(Math.random() * dwellers.length)];
-        target.hp -= 5;
-        spawnFloater(`-5`, target.x, target.y - 40, "#f00", target.area);
-        if (target.hp <= 0) { target.hp = 0; target.dead = true; }
+        
+        // Use the new function!
+        applyDamage(target, 5); 
     });
 }
 /*------------------------------------------------------------*/
@@ -1376,7 +1392,27 @@ function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
     updatePhysics(p); 
     const now = Date.now();
-    if (p.dead) return;
+// --- DEATH RENDERER ---
+    if (p.dead) {
+        const timeSinceDeath = now - p.deathTime;
+        const fallDuration = 800; // How long the "falling" animation lasts
+
+        if (timeSinceDeath < fallDuration) {
+            // 1. FALLING ANIMATION
+            let progress = timeSinceDeath / fallDuration;
+            ctx.save();
+            ctx.translate(p.x, p.y + (progress * 15)); // Sink slightly into ground
+            let rot = p.deathStyle === "faceplant" ? (Math.PI / 2) * progress : (-Math.PI / 2) * progress;
+            ctx.rotate(rot);
+            BODY_PARTS["stick"].head(ctx, 0, -30, p);
+            BODY_PARTS["stick"].torso(ctx, 0, -30, 0, 10);
+            ctx.restore();
+        } else {
+            // 2. PERMANENT CORPSE & BLOOD
+            drawCorpse(ctx, p);
+        }
+        return; // Important: Stop the rest of the function (no gear, no walking)
+    }
 
     // Calculate Body Animation
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
@@ -1473,6 +1509,30 @@ function drawSheathedWeapon(ctx, p, bodyY, lean, item) {
     // Draw smaller on the back
     ctx.scale(0.8, 0.8);
     drawFn(ctx, item, false, 0); 
+    ctx.restore();
+}
+//-----player deaths
+function drawCorpse(ctx, p) {
+    ctx.save();
+    // Blood Pool
+    ctx.fillStyle = "rgba(150, 0, 0, 0.5)";
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y + 25, 25, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Position the lying body
+    ctx.translate(p.x, p.y + 22);
+    ctx.rotate(p.deathStyle === "faceplant" ? Math.PI/2 : -Math.PI/2);
+    
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = 3;
+    // Head with X eyes
+    ctx.beginPath(); ctx.arc(0, -30, 10, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-3, -33); ctx.lineTo(3, -27); ctx.stroke(); // X
+    ctx.beginPath(); ctx.moveTo(3, -33); ctx.lineTo(-3, -27); ctx.stroke(); // X
+    
+    // Torso and stiff limbs
+    ctx.beginPath(); ctx.moveTo(0, -20); ctx.lineTo(0, 10); ctx.stroke();
     ctx.restore();
 }
 //===========================================================================================================================================
