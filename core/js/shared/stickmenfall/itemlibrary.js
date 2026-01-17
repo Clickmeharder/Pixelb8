@@ -72,10 +72,12 @@ const ITEM_DB = {
 	"hair1": { type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
 	"hair2": { type: "hair", style: "pigtails", color: "#4b3621" },// pigtails hair
 	"hair3": { type: "hair", style: "scribble",   color: "#ffeb3b" }, // yellow child scribble
-	"hair4": { type: "hair", style: "braids",    color: "#f3e5ab" }, // thick blonde braids
-    "hair5": { type: "hair", style: "messy",      color: "#614126" }, // messy 
+	"hair4": { type: "hair", style: "messy",      color: "#614126" }, // messy 
+	"hair5": { type: "hair", style: "braids",    color: "#f3e5ab" }, // thick blonde braids
     "hair6": { type: "hair", style: "girly",  color: "#222222" }, // girly braids
-
+	"hair7": { type: "hair", style: "pomp",       color: "#614126" }, // Forward spiky pomp
+    "hair8": { type: "hair", style: "twinspikes", color: "#ff0000" }, // Red double spikes
+	"hair11": { type: "hair", style: "drills", color: "#f3e5ab" }, // spiral chunky drills 
 	"oldman beard": { name: "Wizard Beard", type: "hair", style: "wizardbeard", color: "#ffffff" },
 	"wizard beard": { name: "Dark Mage Beard", type: "hair", style: "wizardbeard", color: "#333333" },
 // special weapon/tool
@@ -484,11 +486,16 @@ const HAT_STYLES = {
         ctx.beginPath(); ctx.arc(hX + 3, top - 2, 2.5, 0, Math.PI * 2); ctx.stroke();
     },
 	"girly": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
         const offset = -8;
-        const top = hY + offset;
+        const bThick = 5;        // Thickness of the braids
+        const bLen = 22;         // Length of the braids
         const slowBounce = Math.sin(Date.now() / 1000) * 1.5;
+        // ----------------
+        const top = hY + offset;
         ctx.fillStyle = color;
         ctx.strokeStyle = "rgba(0,0,0,0.15)";
+        ctx.lineWidth = 1;
 
         // Scalp with a "parting" line
         ctx.beginPath(); ctx.arc(hX, top + 3, 11, Math.PI, 0); ctx.fill();
@@ -496,18 +503,100 @@ const HAT_STYLES = {
 
         [-10, 10].forEach(side => {
             ctx.beginPath();
-            ctx.moveTo(hX + side, top + 2);
+            ctx.moveTo(hX + side - (bThick/2), top + 2);
+            
+            // Draw the clumpy braid segments
             for(let i=0; i<4; i++) {
                 let y = top + 5 + (i * 4);
-                let xOff = (i % 2 === 0 ? 3 : -3) + (side > 0 ? slowBounce : -slowBounce);
+                let xOff = (i % 2 === 0 ? bThick : -bThick) + (side > 0 ? slowBounce : -slowBounce);
                 ctx.lineTo(hX + side + xOff, y);
-                // Detail line inside the braid
+                
+                // Internal strand lines for "hairy" texture
                 ctx.moveTo(hX + side, y - 2);
-                ctx.lineTo(hX + side + (xOff/2), y + 2);
+                ctx.lineTo(hX + side + (xOff/3), y + 2);
             }
-            ctx.lineTo(hX + side + (side > 0 ? slowBounce : -slowBounce), top + 22);
+            
+            // The pointy bottom tuft
+            ctx.lineTo(hX + side + (side > 0 ? slowBounce : -slowBounce), top + bLen);
+            ctx.lineTo(hX + side - (side > 0 ? bThick : -bThick), top + 15);
             ctx.fill(); ctx.stroke();
         });
+    },
+	"drills": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -7;
+        const dSize = 7;         // Width of the spiral
+        const dLen = 20;         // Length of the drill
+        const sway = Math.sin(Date.now() / 800) * 2;
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+
+        // Scalp
+        ctx.beginPath(); ctx.arc(hX, top + 2, 11, Math.PI, 0); ctx.fill();
+
+        [-11, 11].forEach(side => {
+            ctx.beginPath();
+            ctx.moveTo(hX + side, top + 2);
+            
+            // Spiral loop logic
+            for(let i=0; i<dLen; i+=4) {
+                let y = top + 2 + i;
+                let xOff = Math.sin(i + Date.now()/500) * dSize; // The spiral curve
+                ctx.quadraticCurveTo(hX + side + xOff + sway, y, hX + side + sway, y + 4);
+            }
+            
+            // Jagged end of the drill
+            ctx.lineTo(hX + side + sway, top + dLen + 5);
+            ctx.fill(); ctx.stroke();
+        });
+    },
+	"pomp": (ctx, hX, hY, color) => {
+        const offset = -7;
+        const top = hY + offset;
+        const numSpikes = 6;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+
+        ctx.beginPath();
+        ctx.moveTo(hX + 10, top + 5); // Start at back
+        for (let i = 0; i <= numSpikes; i++) {
+            let pct = i / numSpikes;
+            // Angle shifted to lean forward
+            let angle = Math.PI + (pct * (Math.PI * 0.8)); 
+            let tx = hX + Math.cos(angle) * 15;
+            let ty = top + Math.sin(angle) * 15;
+            ctx.lineTo(tx, ty);
+            ctx.lineTo(tx + 2, top + 2);
+        }
+        ctx.fill();
+        // Texture lines
+        for(let i=1; i<numSpikes; i++) {
+            ctx.beginPath();
+            ctx.moveTo(hX, top);
+            ctx.lineTo(hX - 10, top - 5);
+            ctx.stroke();
+        }
+    },
+	"twinspikes": (ctx, hX, hY, color) => {
+        const offset = -8;
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+
+        [-5, 5].forEach(side => {
+            ctx.beginPath();
+            ctx.moveTo(hX + side - 4, top + 5);
+            for(let i=0; i<3; i++) {
+                let x = hX + side - 4 + (i * 4);
+                ctx.lineTo(x, top - 12);
+                ctx.lineTo(x + 2, top + 5);
+            }
+            ctx.fill();
+        });
+        // Scalp connection
+        ctx.beginPath(); ctx.arc(hX, top + 5, 8, Math.PI, 0); ctx.fill();
     },
 	"wizardbeard": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
