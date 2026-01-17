@@ -768,12 +768,13 @@ const ITEM_DB = {
 	"Paper Bag":      { type: "helmet", style: "box", def: 1, value: 5, color: "#d2b48c" },
 	"wig":            { type: "helmet", style:"", def: 1,style: "wig",     value: 5000, color: "yellow" },
     "Royal Crown":    { type: "helmet", style: "crown",  def: 2,  value: 10000, color: "#ffcc00" },
+	"uknown":    { type: "helmet", style: "Centurian",  def: 2,  value: 10000, color: "#ffcc00" },
 // special capes
     "Royal Cape":     { type: "cape", style:"", color: "#880000", value: 10000 },
     "Cloak":     { type: "cape", style:"", color: "#880000", value: 10000 },
     "Ball gown":     { type: "cape", style:"", color: "#880000", value: 10000 },
     "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
-    "Spiky Hair":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
+    "Spiky Hair":     { type: "helmet",   style: "hair",   value: 5, color: "#ffff00" },
 // special weapon/tool
 //    "Paint Brush":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
     // Legacy support (still works without a style property - just defaults to type)
@@ -1031,7 +1032,43 @@ const HAT_STYLES = {
         ctx.shadowBlur = 10; ctx.shadowColor = "yellow";
         ctx.beginPath(); ctx.ellipse(hX, hY - 25, 12, 4, 0, 0, Math.PI * 2); ctx.stroke();
         ctx.shadowBlur = 0; 
+    },
+	"centurion": (ctx, hX, hY, color) => {
+        // --- SETTINGS BOX (Change these numbers!) ---
+        const yOffset   = -8;   // Move whole hat: -10 is up, 0 is down
+        const helmSize  = 12;   // How wide the helmet is
+        const plumeTall = 15;   // How high the red crest goes
+        const plumeWide = 18;   // How long the red crest is
+        const faceGap   = 10;   // How much of the face shows (lower = more covered)
+        // ---------------------------------------------
+
+        const top = hY + yOffset;
+
+        // 1. THE CREST (The red fuzzy part)
+        ctx.fillStyle = "#ff0000"; 
+        ctx.beginPath();
+        // Drawing an arc for the plume
+        ctx.ellipse(hX, top - 8, plumeWide, plumeTall, 0, Math.PI, 0);
+        ctx.fill();
+        ctx.stroke();
+
+        // 2. THE HELMET BASE (The metal part)
+        ctx.fillStyle = color; // Usually gold or silver
+        ctx.beginPath();
+        ctx.arc(hX, top, helmSize, Math.PI, 0); // Top curve
+        ctx.lineTo(hX + helmSize, top + faceGap); // Right side
+        ctx.lineTo(hX - helmSize, top + faceGap); // Left side
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // 3. THE NOSE GUARD
+        ctx.beginPath();
+        ctx.moveTo(hX, top);
+        ctx.lineTo(hX, top + faceGap + 2);
+        ctx.stroke();
     }
+};
 };
 const CAPE_STYLES = {
     "cape": (ctx, p, bodyY, lean, item) => { // Paper Bag Style
