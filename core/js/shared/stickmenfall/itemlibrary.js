@@ -449,8 +449,8 @@ const HAT_STYLES = {
         ctx.lineTo(hX + tiePos - tThick - bounce, top + tLen);
         ctx.quadraticCurveTo(hX + tiePos - 2 - bounce, top + 6, hX + tiePos - 2, top + 2);
         ctx.fill();
-    }
-};
+    },
+
 // ----------------------------------------------------------------
 // HOOD STYLES-----------------------------------------------------
     "hood": (ctx, hX, hY, color) => {
