@@ -71,11 +71,12 @@ const ITEM_DB = {
     "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
 	"hair1": { type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
 	"hair2": { type: "hair", style: "pigtails", color: "#4b3621" },// pigtails hair
-	"hair3": { type: "hair", style: "wisp",  color: "#f3e5ab" }, // // fine thin messy hair
-    "hair4": { type: "hair", style: "spacebuns",  color: "#222222" }, // black space buns
-    "hair5": { type: "hair", style: "shaggy",       color: "#614126" }, // chunky brown shaggy hair
-    "hair6": { type: "hair", style: "fade",       color: "#4b3621" }, // dark clean fade
-    "hair7": { type: "hair", style: "scribble",   color: "#ffeb3b" }, // yellow child scribble
+	"hair3": { type: "hair", style: "scribble",   color: "#ffeb3b" }, // yellow child scribble
+	"hair4": { type: "hair", style: "fringe",    color: "#4b3621" }, // chunky boy fringe
+	"hair7": { type: "hair", style: "braids",    color: "#f3e5ab" }, // thick blonde braids
+    "hair5": { type: "hair", style: "wolf",      color: "#614126" }, // messy wolf cut
+    "hair6": { type: "hair", style: "wildbuns",  color: "#222222" }, // clumpy messy buns
+
 	"oldman beard": { name: "Wizard Beard", type: "hair", style: "wizardbeard", color: "#ffffff" },
 	"wizard beard": { name: "Dark Mage Beard", type: "hair", style: "wizardbeard", color: "#333333" },
 // special weapon/tool
@@ -407,101 +408,6 @@ const HAT_STYLES = {
             ctx.fillStyle = color;
         });
     },
-	"wisp": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = -6;
-        const detail = 18;      // More strands because they are thin
-        const spread = 12;
-        // ----------------
-        const top = hY + offset;
-        ctx.lineCap = "round";
-        
-        // Very subtle fill just for the scalp
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = color;
-        ctx.beginPath(); ctx.arc(hX, top + 2, 8, Math.PI, 0); ctx.fill();
-
-        // Draw fine strands
-        ctx.globalAlpha = 0.8;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.2;
-        
-        for (let i = 0; i < detail; i++) {
-            let xPos = hX - spread + (i * (spread * 2 / detail));
-            let height = 5 + (Math.random() * 6);
-            
-            ctx.beginPath();
-            ctx.moveTo(xPos, top + 2);
-            ctx.lineTo(xPos + (Math.random() - 0.5) * 4, top - height);
-            ctx.stroke();
-        }
-        ctx.globalAlpha = 1.0; // Reset alpha
-    },
-    "spacebuns": (ctx, hX, hY, color) => {
-        const offset = -9;
-        const top = hY + offset;
-        const bounce = Math.sin(Date.now() / 400) * 1.5;
-        ctx.fillStyle = color;
-        // Main scalp
-        ctx.beginPath(); ctx.arc(hX, top + 3, 11, Math.PI, 0); ctx.fill();
-        // The Buns
-        [-8, 8].forEach(side => {
-            ctx.beginPath();
-            ctx.arc(hX + side, top - 2 + bounce, 6, 0, Math.PI * 2);
-            ctx.fill();
-            // Loose strands
-            ctx.strokeStyle = color;
-            ctx.beginPath();
-            ctx.moveTo(hX + side + (side > 0 ? 4 : -4), top);
-            ctx.lineTo(hX + side + (side > 0 ? 8 : -8), top + 8);
-            ctx.stroke();
-        });
-    },
-	"shaggy": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = -8;
-        const strandCount = 10;
-        const length = 14;
-        const thickness = 3;    // Chunkier strands
-        // ----------------
-        const top = hY + offset;
-        ctx.strokeStyle = color;
-        ctx.lineCap = "round";
-        
-        for (let i = 0; i <= strandCount; i++) {
-            ctx.lineWidth = thickness - (Math.random() * 1.5); // Vary thickness
-            let angle = Math.PI + (i / strandCount) * Math.PI;
-            
-            ctx.beginPath();
-            // Start at the top of the head
-            ctx.moveTo(hX + Math.cos(angle) * 5, top + 5); 
-            // Draw strand falling down
-            ctx.quadraticCurveTo(
-                hX + Math.cos(angle) * 12, top - 2, // Control point
-                hX + Math.cos(angle) * length, top + length // End point
-            );
-            ctx.stroke();
-        }
-    },
-    "fade": (ctx, hX, hY, color) => {
-        const offset = -7;
-        const top = hY + offset;
-        ctx.fillStyle = color;
-        // Small fringe spikes
-        ctx.beginPath();
-        ctx.moveTo(hX - 10, top + 2);
-        for(let i = 0; i < 4; i++) {
-            ctx.lineTo(hX - 6 + (i * 5), top - 4);
-            ctx.lineTo(hX - 2 + (i * 5), top + 1);
-        }
-        ctx.fill();
-        // Textured buzz look (dots)
-        for(let i = 0; i < 8; i++) {
-            ctx.globalAlpha = 0.5;
-            ctx.fillRect(hX - 8 + (i*2), top - 2, 2, 2);
-        }
-        ctx.globalAlpha = 1.0;
-    },
 	"scribble": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
         const offset = -8;      // Lowered to sit tighter on the head
@@ -530,6 +436,107 @@ const HAT_STYLES = {
         ctx.beginPath();
         ctx.arc(hX + 2, top - 1, 2, 0, Math.PI * 2);
         ctx.stroke();
+    },
+	"fringe": (ctx, hX, hY, color) => {
+        const offset = -7;
+        const top = hY + offset;
+        const strands = 6;
+        const sLen = 10;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+        
+        ctx.beginPath();
+        ctx.moveTo(hX - 11, top + 2);
+        for (let i = 0; i <= strands; i++) {
+            let x = hX - 11 + (i * (22 / strands));
+            // Jagged bottom edge - no straight lines
+            let y = top + (i % 2 === 0 ? sLen : sLen - 4);
+            ctx.lineTo(x, y);
+            // Internal strand point
+            if (i < strands) ctx.lineTo(x + 2, top + 2);
+        }
+        ctx.fill();
+
+        // Thick strand lines
+        for (let i = 1; i < strands; i++) {
+            ctx.beginPath();
+            let x = hX - 11 + (i * (22 / strands));
+            ctx.moveTo(x, top - 2);
+            ctx.lineTo(x, top + 6);
+            ctx.stroke();
+        }
+    },
+	"wolf": (ctx, hX, hY, color) => {
+        const offset = -8;
+        const top = hY + offset;
+        const sway = Math.sin(Date.now() / 1000) * 1.5;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "rgba(0,0,0,0.15)";
+
+        // 1. Back Tuft (The jagged "tail")
+        ctx.beginPath();
+        ctx.moveTo(hX - 8, top + 5);
+        ctx.lineTo(hX - 10 + sway, top + 18);
+        ctx.lineTo(hX, top + 14);
+        ctx.lineTo(hX + 10 + sway, top + 18);
+        ctx.lineTo(hX + 8, top + 5);
+        ctx.fill();
+
+        // 2. Top Fan (Jagged clumps)
+        ctx.beginPath();
+        ctx.moveTo(hX - 12, top + 4);
+        for(let i=0; i<5; i++) {
+            let x = hX - 12 + (i * 6);
+            ctx.lineTo(x + 3, top - 6);
+            ctx.lineTo(x + 6, top + 4);
+        }
+        ctx.fill();
+    },
+	"wildbuns": (ctx, hX, hY, color) => {
+        const offset = -9;
+        const top = hY + offset;
+        const slowSway = Math.sin(Date.now() / 1200) * 2;
+        ctx.fillStyle = color;
+
+        // Scalp base
+        ctx.beginPath(); ctx.arc(hX, top + 4, 11, Math.PI, 0); ctx.fill();
+
+        // Messy Fans
+        [-8, 8].forEach(side => {
+            ctx.beginPath();
+            ctx.moveTo(hX + side - 4, top + 2);
+            // Three chunky spikes per bun
+            for(let i=0; i<3; i++) {
+                let sX = hX + side - 4 + (i * 4) + (side > 0 ? slowSway : -slowSway);
+                ctx.lineTo(sX, top - 8);
+                ctx.lineTo(sX + 2, top + 2);
+            }
+            ctx.fill();
+        });
+    },
+	"braids": (ctx, hX, hY, color) => {
+        const offset = -8;
+        const top = hY + offset;
+        const slowBounce = Math.sin(Date.now() / 1000) * 1.5;
+        ctx.fillStyle = color;
+
+        // Scalp
+        ctx.beginPath(); ctx.arc(hX, top + 3, 11, Math.PI, 0); ctx.fill();
+
+        // Chunky Braids
+        [-10, 10].forEach(side => {
+            ctx.beginPath();
+            ctx.moveTo(hX + side, top + 2);
+            // Zig-zag braid body
+            for(let i=0; i<4; i++) {
+                let y = top + 5 + (i * 4);
+                let xOff = (i % 2 === 0 ? 3 : -3) + (side > 0 ? slowBounce : -slowBounce);
+                ctx.lineTo(hX + side + xOff, y);
+            }
+            // Pointy bottom tuft
+            ctx.lineTo(hX + side + (side > 0 ? slowBounce : -slowBounce), top + 22);
+            ctx.fill();
+        });
     },
 	"wizardbeard": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
