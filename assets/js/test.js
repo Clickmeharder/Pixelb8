@@ -832,7 +832,7 @@ const DANCE_LIBRARY = {
 };
 /* ================= ITEM DRAWING LIBRARY ================= */
 // headstyles are helmets or different head slot item styles
-const HAT_STYLES = {
+/* const HAT_STYLES = {
     "box": (ctx, hX, hY, color) => { // Paper Bag Style
         ctx.fillStyle = color;
         ctx.fillRect(hX - 12, hY - 14, 24, 26);
@@ -930,6 +930,107 @@ const HAT_STYLES = {
         ctx.shadowBlur = 10; ctx.shadowColor = "yellow";
         ctx.beginPath(); ctx.ellipse(hX, hY - 20, 12, 4, 0, 0, Math.PI * 2); ctx.stroke();
         ctx.shadowBlur = 0; // Reset shadow for other items
+    }
+};
+ */
+const HAT_STYLES = {
+    "box": (ctx, hX, hY, color) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(hX - 12, hY - 14, 24, 26);
+        ctx.strokeRect(hX - 12, hY - 14, 24, 26);
+    },
+    "wig": (ctx, hX, hY, color) => {
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+        ctx.beginPath(); ctx.arc(hX, hY, 13, 0.1 * Math.PI, 0.9 * Math.PI); ctx.lineWidth = 6; ctx.stroke();
+        ctx.beginPath(); ctx.arc(hX, hY - 2, 11, Math.PI, 0); ctx.fill();
+        ctx.lineWidth = 5; ctx.beginPath();
+        ctx.moveTo(hX - 10, hY - 2); ctx.quadraticCurveTo(hX - 14, hY + 10, hX - 11, hY + 18);
+        ctx.moveTo(hX + 10, hY - 2); ctx.quadraticCurveTo(hX + 14, hY + 10, hX + 11, hY + 18); ctx.stroke();
+    },
+    "knight": (ctx, hX, hY, color) => {
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(hX, hY, 12, Math.PI, 0); 
+        ctx.lineTo(hX + 12, hY + 10); ctx.lineTo(hX - 12, hY + 10); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+    },
+    "hood": (ctx, hX, hY, color) => {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(hX - 13, hY + 8);
+        ctx.quadraticCurveTo(hX - 15, hY - 20, hX, hY - 20);
+        ctx.quadraticCurveTo(hX + 15, hY - 20, hX + 13, hY + 8);
+        ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,0.4)";
+        ctx.beginPath(); ctx.arc(hX, hY, 8, 0, Math.PI*2); ctx.fill();
+    },
+    "hair": (ctx, hX, hY, color) => {
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(hX, hY - 3, 11, Math.PI, 0); ctx.fill();
+        ctx.fillRect(hX - 11, hY - 3, 22, 10);
+    },
+	"viking2": (ctx, hX, hY, color) => {
+        const offset = -6; // CHANGE THIS: -10 is higher, 0 is lower
+        const top = hY + offset;
+
+        ctx.fillStyle = color;
+        ctx.beginPath(); 
+        ctx.arc(hX, top, 11, Math.PI, 0); 
+        ctx.lineTo(hX + 11, top + 5); 
+        ctx.lineTo(hX - 11, top + 5); 
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        
+        // Horns automatically follow the top
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.moveTo(hX - 8, top - 3); ctx.quadraticCurveTo(hX - 20, top - 13, hX - 15, top + 4);
+        ctx.lineTo(hX - 8, top + 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(hX + 8, top - 3); ctx.quadraticCurveTo(hX + 20, top - 13, hX + 15, top + 4);
+        ctx.lineTo(hX + 8, top + 2); ctx.fill(); ctx.stroke();
+    },
+	"viking": (ctx, hX, hY, color) => {
+        // Helmet Base
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(hX, hY, 11, Math.PI, 0); ctx.fill(); ctx.stroke();
+        // Horns (White/Bone color)
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.moveTo(hX - 8, hY - 5); ctx.quadraticCurveTo(hX - 20, hY - 15, hX - 15, hY + 2);
+        ctx.lineTo(hX - 8, hY - 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(hX + 8, hY - 5); ctx.quadraticCurveTo(hX + 20, hY - 15, hX + 15, hY + 2);
+        ctx.lineTo(hX + 8, hY - 2); ctx.fill(); ctx.stroke();
+    },
+    "wizard": (ctx, hX, hY, color) => {
+        const brimY = hY - 8; // Raised brim
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.ellipse(hX, brimY, 18, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(hX - 10, brimY - 2);
+        ctx.lineTo(hX, brimY - 35); 
+        ctx.lineTo(hX + 10, brimY - 2);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+    },
+    "crown": (ctx, hX, hY, color) => {
+        const base = hY - 6; // Sit on top of the head
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(hX - 12, base);
+        ctx.lineTo(hX - 12, base - 12); ctx.lineTo(hX - 6, base - 6); 
+        ctx.lineTo(hX, base - 15); ctx.lineTo(hX + 6, base - 6);      
+        ctx.lineTo(hX + 12, base - 12); ctx.lineTo(hX + 12, base);   
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        
+        ctx.fillStyle = "#ff0000"; ctx.beginPath(); ctx.arc(hX, base - 8, 2, 0, Math.PI*2); ctx.fill();
+    },
+    "halo": (ctx, hX, hY, color) => {
+        ctx.strokeStyle = "rgba(255, 255, 0, 0.8)";
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 10; ctx.shadowColor = "yellow";
+        ctx.beginPath(); ctx.ellipse(hX, hY - 25, 12, 4, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.shadowBlur = 0; 
     }
 };
 const CAPE_STYLES = {
