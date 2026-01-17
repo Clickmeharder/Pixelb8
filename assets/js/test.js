@@ -772,17 +772,22 @@ function updatePhysics(p) {
 // --- 1. HAIR & HOODS (Head Layers) ---
 
 // 1. The Hair Coordinator
-function drawHair(ctx, p, anchors) {
+// 1. The Hair Coordinator
+function drawHair(ctx, p, bodyY, lean) {
     const item = ITEM_DB[p.stats.equippedHair];
     if (!item) return;
-    drawHeadLayer(ctx, anchors.headX, anchors.headY, item, p);
+    const hX = p.x + (lean * 20);
+    const hY = p.y - 30 + bodyY;
+    drawHeadLayer(ctx, hX, hY, item, p);
 }
 
 // 2. The Helmet Coordinator
-function drawHelmetItem(ctx, p, anchors) {
+function drawHelmetItem(ctx, p, bodyY, lean) {
     const item = ITEM_DB[p.stats.equippedHelmet];
     if (!item) return;
-    drawHeadLayer(ctx, anchors.headX, anchors.headY, item, p);
+    const hX = p.x + (lean * 20);
+    const hY = p.y - 30 + bodyY; 
+    drawHeadLayer(ctx, hX, hY, item, p);
 }
 
 // 3. The Painter (Logic & Style)
@@ -792,7 +797,6 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
     const style = item.style || "hair";
     const helmetName = p.stats.equippedHelmet ? p.stats.equippedHelmet.toLowerCase() : "";
 
-    // Check if we use the custom wig color
     const finalColor = (p.stats.wigColor && (item.type === "hair" || helmetName === "wig")) 
         ? p.stats.wigColor 
         : (item.color || "#614126");
@@ -804,35 +808,30 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
 }
 
 // --- 2. CAPES (Drawn behind the stickman) ---
+// --- 2. CAPES ---
 function drawCapeItem(ctx, p, anchors, item) {
     const headX = anchors.headX;
     const centerX = p.x + (anchors.lean * 10);
     
+    ctx.save(); // Protect line thickness
     ctx.fillStyle = item.color || "#550055";
     ctx.beginPath();
-    
-    // Start at neck (Higher up than before)
     ctx.moveTo(headX, p.y - 40 + anchors.bodyY); 
-    
-    // Left side of cape
     ctx.quadraticCurveTo(headX - 25, p.y + 10 + anchors.bodyY, centerX - 18, p.y + 22 + anchors.bodyY);
-    // Bottom edge
     ctx.lineTo(centerX + 10, p.y + 30 + anchors.bodyY);
-    // Right side of cape back to neck
     ctx.quadraticCurveTo(headX + 25, p.y + 10 + anchors.bodyY, headX, p.y - 10 + anchors.bodyY);
-    
     ctx.fill();
-    ctx.strokeStyle = "rgba(0,0,0,0.2)"; // Softer outline for capes
+    ctx.strokeStyle = "rgba(0,0,0,0.2)";
     ctx.stroke();
+    ctx.restore();
 }
-
 // --- 3. armor drawn over body ---
+// --- 3. ARMOR ---
 function drawArmor(ctx, p, anchors) {
     const item = ITEM_DB[p.stats.equippedArmor];
     if (!item) return;
-
     const headX = anchors.headX;
-    const hipX = p.x + (anchors.lean * 5); // Added this so the armor bottom follows the lean slightly
+    const hipX = p.x + (anchors.lean * 5);
 
     ctx.save();
     ctx.beginPath();
@@ -841,11 +840,9 @@ function drawArmor(ctx, p, anchors) {
     ctx.lineTo(hipX + 7, p.y + 8 + anchors.bodyY);    
     ctx.lineTo(hipX - 7, p.y + 8 + anchors.bodyY);    
     ctx.closePath();
-
     ctx.fillStyle = item.color;
     ctx.globalAlpha = 0.8;
     ctx.fill();
-
     ctx.globalAlpha = 1.0;
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
@@ -854,58 +851,53 @@ function drawArmor(ctx, p, anchors) {
 }
 
 // --- 4. PANTS (Drawn over the legs) ---
+// --- 4. PANTS ---
 function drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, item) {
+    ctx.save();
     ctx.strokeStyle = item.color || "#333";
     ctx.lineWidth = 5; 
     ctx.lineCap = "round";
-
-    const hipX = p.x;
-    const hipY = anchors.hipY;
-
-    // Draw left pant leg to the left foot anchor
     ctx.beginPath();
-    ctx.moveTo(hipX, hipY);
+    ctx.moveTo(p.x, anchors.hipY);
     ctx.lineTo(leftFoot.x, leftFoot.y);
     ctx.stroke();
-
-    // Draw right pant leg to the right foot anchor
     ctx.beginPath();
-    ctx.moveTo(hipX, hipY);
+    ctx.moveTo(p.x, anchors.hipY);
     ctx.lineTo(rightFoot.x, rightFoot.y);
     ctx.stroke();
-}
-
-// --- 5. draw Boots ---
-function drawBoots(ctx, p, leftFoot, rightFoot) {
-    const item = ITEM_DB[p.stats.equippedBoots];
-    if (!item) return;
-
-    ctx.save();
-    ctx.fillStyle = item.color || "#444";
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-
-    // Left Boot (using the leftFoot anchor)
-    ctx.fillRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5); 
-    ctx.strokeRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5);
-    ctx.fillRect(leftFoot.x - 2, leftFoot.y - 6, 4, 5); 
-
-    // Right Boot (using the rightFoot anchor)
-    ctx.fillRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
-    ctx.strokeRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
-    ctx.fillRect(rightFoot.x - 2, rightFoot.y - 6, 4, 5);
-
     ctx.restore();
 }
 
-// --- draw gloves ---
+// --- 5. BOOTS ---
+function drawBoots(ctx, p, leftFoot, rightFoot) {
+    const item = ITEM_DB[p.stats.equippedBoots];
+    if (!item) return;
+    ctx.save();
+    ctx.fillStyle = item.color || "#444";
+    ctx.strokeStyle = "#000"; 
+    ctx.lineWidth = 1;
+    ctx.fillRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5); 
+    ctx.strokeRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5);
+    ctx.fillRect(leftFoot.x - 2, leftFoot.y - 6, 4, 5); 
+    ctx.fillRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
+    ctx.strokeRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
+    ctx.fillRect(rightFoot.x - 2, rightFoot.y - 6, 4, 5);
+    ctx.restore();
+}
+
+// --- 6. GLOVES (Fixed: Save/Restore prevents lineWidth leakage) ---
 function drawGlovesItem(ctx, handX, handY, item) {
+    ctx.save();
     ctx.fillStyle = item.color || "#fff";
+    ctx.lineWidth = 1; 
     ctx.beginPath();
     ctx.arc(handX, handY, 4, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.strokeStyle = "#000"; 
+    ctx.stroke();
+    ctx.restore();
 }
+
 
 // --- Draw weapons ---
 function drawWeaponItem(ctx, p, now, anchors, hX, hY) {
@@ -953,17 +945,18 @@ function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, righ
         drawWeaponItem(ctx, p, now, anchors, rightHand.x, rightHand.y);
     }
 
-    // 3. Draw Head Layers
-    if (p.stats.equippedHair) drawHair(ctx, p, anchors);
-    if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, anchors);
+    // 3. Draw Head Layers (Original coordinator logic)
+    if (p.stats.equippedHair) drawHair(ctx, p, anchors.bodyY, anchors.lean);
+    if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, anchors.bodyY, anchors.lean);
 
     // 4. Draw Feet
     if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
 }
+
+// --- HELPERS ---
 function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
-    const isDancing = p.activeTask === "dancing";
-    if (isDancing && DANCE_LIBRARY[p.danceStyle]) {
+    if (p.activeTask === "dancing" && DANCE_LIBRARY[p.danceStyle]) {
         anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
     }
     return anim;
@@ -983,12 +976,9 @@ function getAnchorPoints(p, anim) {
 function getLimbPositions(p, anchors, anim, now) {
     const isFishing = p.activeTask === "fishing";
     const isAction = ["attacking", "woodcutting", "mining", "swimming", "lurking"].includes(p.activeTask);
-    
-    // Default Hand Positions
     let leftHand = { x: anchors.headX - 18, y: anchors.shoulderY + 10 + anim.armMove };
     let rightHand = { x: anchors.headX + 18, y: anchors.shoulderY + 10 - anim.armMove };
 
-    // Apply Poses
     let activePose = anim.pose || p.forcedPose || (isFishing ? "fishing" : (isAction ? "action" : null));
     if (activePose && POSE_LIBRARY[activePose]) {
         const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim);
@@ -996,223 +986,99 @@ function getLimbPositions(p, anchors, anim, now) {
         if (overrides.right) rightHand = overrides.right;
     }
 
-    // Foot Positions
     const walk = (p.targetX !== null) ? Math.sin(now / 100) * 10 : 0;
     const legSpread = (activePose === "star") ? 18 : 10;
     const footY = p.y + 25 + (anchors.bodyY > 0 ? 0 : anchors.bodyY);
 
     return {
-        leftHand,
-        rightHand,
+        leftHand, rightHand,
         leftFoot: { x: p.x - legSpread - walk, y: footY },
-        rightFoot: { x: p.x + legSpread + walk, y: footY },
-        activePose
+        rightFoot: { x: p.x + legSpread + walk, y: footY }
     };
 }
+
 function drawStickmanBody(ctx, p, anchors, limbs) {
     const style = BODY_PARTS["stick"]; 
+    ctx.save();
     ctx.strokeStyle = p.color; 
-    ctx.lineWidth = 3;
-    
+    ctx.lineWidth = 3; // Standard stickman thickness
     style.head(ctx, anchors.headX, anchors.headY, p);
     style.torso(ctx, anchors.headX, anchors.headY, p.x, anchors.hipY); 
-    
-    // Arms
     style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.leftHand.x, limbs.leftHand.y); 
     style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.rightHand.x, limbs.rightHand.y);
-    
-    // Legs
     style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y); 
     style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y);
+    ctx.restore();
 }
+
+// --- MAIN FUNCTIONS ---
 function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
     updatePhysics(p); 
     const now = Date.now();
-    
     if (p.dead) return drawCorpse(ctx, p, now);
 
     const anim = getAnimationState(p, now);
     const anchors = getAnchorPoints(p, anim);
     const limbs = getLimbPositions(p, anchors, anim, now);
 
-    // 1. Draw Cape (Behind)
-    if (p.stats.equippedCape) {
-        drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
-    }
-
-    // 2. Draw Body
+    if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
     drawStickmanBody(ctx, p, anchors, limbs);
-    
-    // 3. Draw Equipment
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
 }
 
-/* function drawStickman(ctx, p) {
-    if (p.area !== viewArea) return;
-    updatePhysics(p); 
-    const now = Date.now();
-    
-    // --- DEATH RENDERER ---
-    if (p.dead) {
-        drawCorpse(ctx, p, now);
-        return; 
-    }
-
-    // 1. Calculate Body Animation
-    let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
-    const isDancing = p.activeTask === "dancing";
-    if (isDancing && DANCE_LIBRARY[p.danceStyle]) {
-        anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
-    }
-
-    // --- 2. ANCHOR POINTS ATLAS ---
-    const anchors = {
-        headX: p.x + (anim.lean * 20),
-        headY: p.y - 30 + anim.bodyY,
-        get shoulderY() { return this.headY + 15; },
-        hipY: p.y + 0 + anim.bodyY,
-        lean: anim.lean,
-        bodyY: anim.bodyY
-    };
-
-    // --- 3. DRAW CAPE FIRST (Layered behind everything) ---
-    if (p.stats.equippedCape) {
-        drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
-    }
-
-    const isFishing = p.activeTask === "fishing";
-    const isAction = ["attacking", "woodcutting", "mining", "swimming", "lurking" ].includes(p.activeTask);
-    
-    // --- 4. HAND POSITIONS ---
-    let leftHand = { x: anchors.headX - 18, y: anchors.shoulderY + 10 + anim.armMove };
-    let rightHand = { x: anchors.headX + 18, y: anchors.shoulderY + 10 - anim.armMove };
-
-    let activePose = anim.pose || p.forcedPose;
-    if (!activePose) {
-        if (isFishing) activePose = "fishing";
-        else if (isAction) activePose = "action";
-    }
-
-    if (activePose && POSE_LIBRARY[activePose]) {
-        const headObj = { x: anchors.headX, y: anchors.headY };
-        const overrides = POSE_LIBRARY[activePose](headObj, p, anim);
-        if (overrides.left) leftHand = overrides.left;
-        if (overrides.right) rightHand = overrides.right;
-    }
-
-    // --- 5. FOOT POSITIONS ---
-    const walk = (p.targetX !== null) ? Math.sin(now / 100) * 10 : 0;
-    const legSpread = (activePose === "star") ? 18 : 10;
-    let footY = p.y + 25 + (anchors.bodyY > 0 ? 0 : anchors.bodyY);
-    const leftFoot = { x: p.x - legSpread - walk, y: footY };
-    const rightFoot = { x: p.x + legSpread + walk, y: footY };
-
-    // --- 6. DRAW BODY (Layered on top of Cape) ---
-    const style = BODY_PARTS["stick"]; 
-    ctx.strokeStyle = p.color; ctx.lineWidth = 3;
-    
-    style.head(ctx, anchors.headX, anchors.headY, p);
-    style.torso(ctx, anchors.headX, anchors.headY, p.x, anchors.hipY); 
-    
-    style.limbs(ctx, anchors.headX, anchors.shoulderY, leftHand.x, leftHand.y); 
-    style.limbs(ctx, anchors.headX, anchors.shoulderY, rightHand.x, rightHand.y);
-    
-    style.limbs(ctx, p.x, anchors.hipY, leftFoot.x, leftFoot.y); 
-    style.limbs(ctx, p.x, anchors.hipY, rightFoot.x, rightFoot.y);
-
-    // --- 7. DRAW EQUIPMENT LAYER ---
-    renderEquipmentLayer(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot);
-}
- */
 function renderEquipmentLayer(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot) {
     const weaponItem = ITEM_DB[p.stats.equippedWeapon];
     const task = p.activeTask || "none";
+    let shouldHoldWeapon = (task === "attacking") || (["none", "lurking"].includes(task) && !p.manualSheath);
 
-    // 1. Logic for holding vs sheathing
-    let shouldHoldWeapon = false;
-    
-    if (task === "attacking") {
-        shouldHoldWeapon = true;
-    } else if (task === "none" || task === "lurking") {
-        shouldHoldWeapon = !p.manualSheath; 
-    } else {
-        shouldHoldWeapon = false; 
-    }
-
-    // 2. Draw Sheathed on back if not held
     if (weaponItem && !shouldHoldWeapon) {
         drawSheathedWeapon(ctx, p, anchors, weaponItem);
     }
-    
-    // 3. Draw the rest of the gear
     drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon);
 }
 
 function drawSheathedWeapon(ctx, p, anchors, item) {
     ctx.save();
-    // Offset slightly to the left of the spine
     ctx.translate(p.x - 5 - (anchors.lean * 5), p.y - 5 + anchors.bodyY);
-    ctx.rotate(Math.PI / 1.2); // Diagonal across back
-    ctx.globalAlpha = 0.6; // Ghostly look while sheathed
-    
+    ctx.rotate(Math.PI / 1.2);
+    ctx.globalAlpha = 0.6;
     const style = item.style || item.type || "sword";
     const drawFn = WEAPON_STYLES[style] || WEAPON_STYLES["sword"];
-    
-    // Draw smaller on the back
     ctx.scale(0.8, 0.8);
     drawFn(ctx, item, false, 0); 
     ctx.restore();
 }
 
-//-----player deaths
 function drawCorpse(ctx, p, now) {
     const timeSinceDeath = now - p.deathTime;
-    const progress = Math.min(1, timeSinceDeath / 800); // 800ms fall duration
-    
+    const progress = Math.min(1, timeSinceDeath / 800);
     ctx.save();
-    
-    // 1. Draw Blood Pool
     ctx.fillStyle = "rgba(180, 0, 0, 0.6)";
     const poolSize = progress * 25;
     ctx.beginPath();
     ctx.ellipse(p.x, p.y + 25, poolSize, poolSize / 3, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // 2. Transformation (Falling and Rotating)
     ctx.translate(p.x, p.y + (progress * 20));
     let rot = p.deathStyle === "faceplant" ? (Math.PI / 2) * progress : (-Math.PI / 2) * progress;
     ctx.rotate(rot);
 
-    // 3. Define Dead Skeleton (Static local coordinates)
-    const deadAnim = { bodyY: 0, armMove: 0, lean: 0, pose: "star" };
-    // Create local anchors (x=0 because of translate)
-    const deadAnchors = {
-        headX: 0, headY: -30,
-        shoulderY: -15, hipY: 10,
-        lean: 0, bodyY: 0
-    };
-    
-    const deadLimbs = {
-        leftHand: { x: -18, y: 0 }, rightHand: { x: 18, y: 0 },
-        leftFoot: { x: -10, y: 25 }, rightFoot: { x: 10, y: 25 }
-    };
+    const deadAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
+    const deadLimbs = { leftHand: { x: -18, y: 0 }, rightHand: { x: 18, y: 0 }, leftFoot: { x: -10, y: 25 }, rightFoot: { x: 10, y: 25 } };
 
-    // 4. Draw Body & Dead Eyes
     const corpseActor = { ...p, x: 0, y: 0 }; 
     drawStickmanBody(ctx, corpseActor, deadAnchors, deadLimbs);
 
+    ctx.save();
     ctx.strokeStyle = "#000000"; ctx.lineWidth = 2.5;
-    // Left X
     ctx.beginPath(); ctx.moveTo(-6, -33); ctx.lineTo(-2, -27); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(-2, -33); ctx.lineTo(-6, -27); ctx.stroke();
-    // Right X
     ctx.beginPath(); ctx.moveTo(2, -33); ctx.lineTo(6, -27); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(6, -33); ctx.lineTo(2, -27); ctx.stroke();
+    ctx.restore();
 
-    // 5. Draw Equipment (on local 0,0)
     renderEquipmentLayer(ctx, corpseActor, now, deadAnchors, deadLimbs.leftHand, deadLimbs.rightHand, deadLimbs.leftFoot, deadLimbs.rightFoot);
-    
     ctx.restore();
 }
 //-------------------------------------------
