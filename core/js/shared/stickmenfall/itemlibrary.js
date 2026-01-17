@@ -293,7 +293,7 @@ const HAT_STYLES = {
         ctx.fillRect(hX - w/2, top - h/2, w, h);
         ctx.strokeRect(hX - w/2, top - h/2, w, h);
     },
-
+	// WIG IS SPECIAL ITS A HELMET NOT HAIR AND CAN BE COLORED BY ANY USER WITH A COMMAND
     "wig": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
         const offset = 0;
@@ -309,36 +309,7 @@ const HAT_STYLES = {
         ctx.moveTo(hX - 10, top - 2); ctx.quadraticCurveTo(hX - 14, top + 10, hX - 11, top + length);
         ctx.moveTo(hX + 10, top - 2); ctx.quadraticCurveTo(hX + 14, top + 10, hX + 11, top + length); ctx.stroke();
     },
-
-    "knight": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = 0;
-        const faceVisible = 10; // Depth of the side guards
-        // ----------------
-        const top = hY + offset;
-        ctx.fillStyle = color;
-        ctx.beginPath(); ctx.arc(hX, top, 12, Math.PI, 0); 
-        ctx.lineTo(hX + 12, top + faceVisible); ctx.lineTo(hX - 12, top + faceVisible); ctx.closePath();
-        ctx.fill(); ctx.stroke();
-    },
-
-    "hood": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = 0;
-        const depth = 10;     // How low the hood drapes
-        const shadowSize = 8; // Size of the dark interior
-        // ----------------
-        const top = hY + offset;
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.moveTo(hX - 13, top + depth);
-        ctx.quadraticCurveTo(hX - 15, top - 20, hX, top - 20);
-        ctx.quadraticCurveTo(hX + 15, top - 20, hX + 13, top + depth);
-        ctx.fill();
-        ctx.fillStyle = "rgba(0,0,0,0.4)";
-        ctx.beginPath(); ctx.arc(hX, top, shadowSize, 0, Math.PI*2); ctx.fill();
-    },
-
+// HAIR STYLES-----------------------------------------------------
 	"hair": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
         const offset = -5;      // Lifted slightly higher
@@ -490,6 +461,38 @@ const HAT_STYLES = {
         ctx.fillRect(hX - width - 1, top + 1, 3, 3);
         ctx.fillRect(hX + width - 2, top + 1, 3, 3);
     },
+// ----------------------------------------------------------------
+// HOOD STYLES-----------------------------------------------------
+    "hood": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = 0;
+        const depth = 10;     // How low the hood drapes
+        const shadowSize = 8; // Size of the dark interior
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(hX - 13, top + depth);
+        ctx.quadraticCurveTo(hX - 15, top - 20, hX, top - 20);
+        ctx.quadraticCurveTo(hX + 15, top - 20, hX + 13, top + depth);
+        ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,0.4)";
+        ctx.beginPath(); ctx.arc(hX, top, shadowSize, 0, Math.PI*2); ctx.fill();
+    },
+
+// HELMET STYLES-----------------------------------------------------
+    "knight": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = 0;
+        const faceVisible = 10; // Depth of the side guards
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(hX, top, 12, Math.PI, 0); 
+        ctx.lineTo(hX + 12, top + faceVisible); ctx.lineTo(hX - 12, top + faceVisible); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+    },
+
     "horns": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
         const offset = -6; 
@@ -534,54 +537,6 @@ const HAT_STYLES = {
         ctx.lineTo(hX + 8, top - 2); ctx.fill(); ctx.stroke();
     },
 
-    "wizard": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = -10;
-        const brimWidth = 18;
-        const hatHeight = 35;
-        // ----------------
-        const top = hY + offset;
-        ctx.fillStyle = color;
-        ctx.beginPath(); ctx.ellipse(hX, top, brimWidth, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(hX - 10, top - 2);
-        ctx.lineTo(hX, top - hatHeight); 
-        ctx.lineTo(hX + 10, top - 2);
-        ctx.closePath(); ctx.fill(); ctx.stroke();
-    },
-
-    "crown": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = -7;
-        const spikes = 12; // Spike height
-        const jewelColor = color;
-        // ----------------
-        const base = hY + offset;
-        ctx.fillStyle = "#ffcc00";
-        ctx.beginPath();
-        ctx.moveTo(hX - 12, base);
-        ctx.lineTo(hX - 12, base - spikes); ctx.lineTo(hX - 6, base - 6); 
-        ctx.lineTo(hX, base - (spikes + 3)); ctx.lineTo(hX + 6, base - 6);      
-        ctx.lineTo(hX + 12, base - spikes); ctx.lineTo(hX + 12, base);   
-        ctx.closePath(); ctx.fill(); ctx.stroke();
-        
-        ctx.fillStyle = jewelColor; ctx.beginPath(); ctx.arc(hX, base - 8, 2, 0, Math.PI*2); ctx.fill();
-    },
-
-    "halo": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = -25;
-        const glowSize = 10;
-        const haloColor = "yellow";
-        // ----------------
-        const top = hY + offset;
-        ctx.strokeStyle = "rgba(255, 255, 0, 0.8)";
-        ctx.lineWidth = 3;
-        ctx.shadowBlur = glowSize; ctx.shadowColor = haloColor;
-        ctx.beginPath(); ctx.ellipse(hX, top, 12, 4, 0, 0, Math.PI * 2); ctx.stroke();
-        ctx.shadowBlur = 0; 
-    },
-
     "centurion": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
         const offset = -5;   
@@ -607,6 +562,151 @@ const HAT_STYLES = {
 
         ctx.beginPath(); ctx.moveTo(hX, top); ctx.lineTo(hX, top + faceGap + 2); ctx.stroke();
     },
+
+	"samurai": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -6;
+        const helmSize = 13;
+        const crestSize = 15;   // The "V" or "Horn" horns on front
+        const sideGuard = 12;   // How far down the neck guards go
+        const highlight = "gold"; 
+        // ----------------
+        const top = hY + offset;
+
+        // 1. The Side Guards (Behind the head)
+        ctx.fillStyle = "#111"; // Usually black lacquered wood
+        ctx.beginPath();
+        ctx.moveTo(hX - helmSize, top);
+        ctx.lineTo(hX - helmSize - 5, top + sideGuard);
+        ctx.lineTo(hX + helmSize + 5, top + sideGuard);
+        ctx.lineTo(hX + helmSize, top);
+        ctx.fill(); ctx.stroke();
+
+        // 2. The Main Helmet Bowl
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(hX, top, helmSize, Math.PI, 0);
+        ctx.fill(); ctx.stroke();
+
+        // 3. The Golden Crest (The "V" shape)
+        ctx.strokeStyle = highlight;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(hX, top - 2);
+        ctx.lineTo(hX - crestSize, top - crestSize); // Left horn
+        ctx.moveTo(hX, top - 2);
+        ctx.lineTo(hX + crestSize, top - crestSize); // Right horn
+        ctx.stroke();
+        ctx.lineWidth = 1; // Reset line width
+    },
+	"menpo": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -6;
+        const helmSize = 13;
+        const crestSize = 15;
+        const sideGuard = 12;
+        const highlight = "gold"; 
+        
+        // NEW COLOR LOGIC
+        const helmColor = "#333";    // The helmet is now always Dark Iron
+        const maskColor = color;      // The MASK now uses the color from ITEM_DB
+        
+        const mustacheColor = "rgba(255,255,255,0.5)"; 
+        // ----------------
+        const top = hY + offset;
+
+        // 1. Side Guards (Matches the mask color)
+        ctx.fillStyle = maskColor;
+        ctx.beginPath();
+        ctx.moveTo(hX - helmSize, top);
+        ctx.lineTo(hX - helmSize - 5, top + sideGuard);
+        ctx.lineTo(hX + helmSize + 5, top + sideGuard);
+        ctx.lineTo(hX + helmSize, top);
+        ctx.fill(); ctx.stroke();
+
+        // 2. The Face Mask (Menpo) - Uses the Item Color
+        ctx.fillStyle = maskColor;
+        ctx.beginPath();
+        ctx.arc(hX, hY + 2, 9, 0, Math.PI); 
+        ctx.fill(); ctx.stroke();
+        
+        // Mustache detail
+        ctx.strokeStyle = mustacheColor;
+        ctx.beginPath();
+        ctx.moveTo(hX - 4, hY + 3); ctx.lineTo(hX - 2, hY + 4);
+        ctx.moveTo(hX + 4, hY + 3); ctx.lineTo(hX + 2, hY + 4);
+        ctx.stroke();
+
+        // 3. The Main Helmet Bowl - Uses the Hard-coded Helm Color
+        ctx.fillStyle = helmColor;
+        ctx.strokeStyle = "#000";
+        ctx.beginPath();
+        ctx.arc(hX, top, helmSize, Math.PI, 0);
+        ctx.fill(); ctx.stroke();
+
+        // 4. The Golden Crest
+        ctx.strokeStyle = highlight;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(hX, top - 2);
+        ctx.lineTo(hX - crestSize, top - crestSize);
+        ctx.moveTo(hX, top - 2);
+        ctx.lineTo(hX + crestSize, top - crestSize);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+    },
+// ----------------------------------------------------------------
+// ---MAGIC HATS-----------------------------------------------------
+    "wizard": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -10;
+        const brimWidth = 18;
+        const hatHeight = 35;
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.ellipse(hX, top, brimWidth, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(hX - 10, top - 2);
+        ctx.lineTo(hX, top - hatHeight); 
+        ctx.lineTo(hX + 10, top - 2);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+    },
+// ----------------------------------------------------------------
+// -------SPECIAL HATS---------------------------------------------
+    "crown": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -7;
+        const spikes = 12; // Spike height
+        const jewelColor = color;
+        // ----------------
+        const base = hY + offset;
+        ctx.fillStyle = "#ffcc00";
+        ctx.beginPath();
+        ctx.moveTo(hX - 12, base);
+        ctx.lineTo(hX - 12, base - spikes); ctx.lineTo(hX - 6, base - 6); 
+        ctx.lineTo(hX, base - (spikes + 3)); ctx.lineTo(hX + 6, base - 6);      
+        ctx.lineTo(hX + 12, base - spikes); ctx.lineTo(hX + 12, base);   
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        
+        ctx.fillStyle = jewelColor; ctx.beginPath(); ctx.arc(hX, base - 8, 2, 0, Math.PI*2); ctx.fill();
+    },
+    "halo": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -25;
+        const glowSize = 10;
+        const haloColor = "yellow";
+        // ----------------
+        const top = hY + offset;
+        ctx.strokeStyle = "rgba(255, 255, 0, 0.8)";
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = glowSize; ctx.shadowColor = haloColor;
+        ctx.beginPath(); ctx.ellipse(hX, top, 12, 4, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.shadowBlur = 0; 
+    },
+
+// ----------------------------------------------------------------
+// ------FUN HATS--------------------------------------------------
 	"pirate": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
         const offset = -8;      // Up/Down
@@ -700,98 +800,7 @@ const HAT_STYLES = {
         ctx.fillStyle = ribbonColor;
         ctx.fillRect(hX - hatWide, base - 6, hatWide * 2, 5);
     },
-	"samurai": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = -6;
-        const helmSize = 13;
-        const crestSize = 15;   // The "V" or "Horn" horns on front
-        const sideGuard = 12;   // How far down the neck guards go
-        const highlight = "gold"; 
-        // ----------------
-        const top = hY + offset;
-
-        // 1. The Side Guards (Behind the head)
-        ctx.fillStyle = "#111"; // Usually black lacquered wood
-        ctx.beginPath();
-        ctx.moveTo(hX - helmSize, top);
-        ctx.lineTo(hX - helmSize - 5, top + sideGuard);
-        ctx.lineTo(hX + helmSize + 5, top + sideGuard);
-        ctx.lineTo(hX + helmSize, top);
-        ctx.fill(); ctx.stroke();
-
-        // 2. The Main Helmet Bowl
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(hX, top, helmSize, Math.PI, 0);
-        ctx.fill(); ctx.stroke();
-
-        // 3. The Golden Crest (The "V" shape)
-        ctx.strokeStyle = highlight;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(hX, top - 2);
-        ctx.lineTo(hX - crestSize, top - crestSize); // Left horn
-        ctx.moveTo(hX, top - 2);
-        ctx.lineTo(hX + crestSize, top - crestSize); // Right horn
-        ctx.stroke();
-        ctx.lineWidth = 1; // Reset line width
-    },
-	"menpo": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = -6;
-        const helmSize = 13;
-        const crestSize = 15;
-        const sideGuard = 12;
-        const highlight = "gold"; 
-        
-        // NEW COLOR LOGIC
-        const helmColor = "#333";    // The helmet is now always Dark Iron
-        const maskColor = color;      // The MASK now uses the color from ITEM_DB
-        
-        const mustacheColor = "rgba(255,255,255,0.5)"; 
-        // ----------------
-        const top = hY + offset;
-
-        // 1. Side Guards (Matches the mask color)
-        ctx.fillStyle = maskColor;
-        ctx.beginPath();
-        ctx.moveTo(hX - helmSize, top);
-        ctx.lineTo(hX - helmSize - 5, top + sideGuard);
-        ctx.lineTo(hX + helmSize + 5, top + sideGuard);
-        ctx.lineTo(hX + helmSize, top);
-        ctx.fill(); ctx.stroke();
-
-        // 2. The Face Mask (Menpo) - Uses the Item Color
-        ctx.fillStyle = maskColor;
-        ctx.beginPath();
-        ctx.arc(hX, hY + 2, 9, 0, Math.PI); 
-        ctx.fill(); ctx.stroke();
-        
-        // Mustache detail
-        ctx.strokeStyle = mustacheColor;
-        ctx.beginPath();
-        ctx.moveTo(hX - 4, hY + 3); ctx.lineTo(hX - 2, hY + 4);
-        ctx.moveTo(hX + 4, hY + 3); ctx.lineTo(hX + 2, hY + 4);
-        ctx.stroke();
-
-        // 3. The Main Helmet Bowl - Uses the Hard-coded Helm Color
-        ctx.fillStyle = helmColor;
-        ctx.strokeStyle = "#000";
-        ctx.beginPath();
-        ctx.arc(hX, top, helmSize, Math.PI, 0);
-        ctx.fill(); ctx.stroke();
-
-        // 4. The Golden Crest
-        ctx.strokeStyle = highlight;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(hX, top - 2);
-        ctx.lineTo(hX - crestSize, top - crestSize);
-        ctx.moveTo(hX, top - 2);
-        ctx.lineTo(hX + crestSize, top - crestSize);
-        ctx.stroke();
-        ctx.lineWidth = 1;
-    }
+// ----------------------------------------------------------------
 };
 const CAPE_STYLES = {
     "cape": (ctx, p, bodyY, lean, item) => { // Paper Bag Style
