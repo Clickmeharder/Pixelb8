@@ -997,7 +997,7 @@ const WEAPON_STYLES = {
 
     "bow": (ctx, item, isAttacking, now) => {
 		// 1. Rotation: Tilt the bow
-		ctx.rotate(isAttacking ? -0.3 : Math.PI / 7);
+		ctx.rotate(isAttacking ? -0.6 : Math.PI / 7);
 
 		// 2. The Bow Body (The Wood)
 		ctx.strokeStyle = item.color || "#8B4513";
