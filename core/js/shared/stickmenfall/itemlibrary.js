@@ -74,6 +74,7 @@ const ITEM_DB = {
 	"hair3": { name: "Pink Mohawk", type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
 	"hair4": { name: "Warrior Ponytail", type: "hair", style: "ponytail", color: "#222222" },// ponytail
 	"hair5": { name: "Brown Bob", type: "hair", style: "bob", color: "#4b3621" },// bob hair
+	"hair6": { name: "Brown Bob", type: "hair", style: "pigtails", color: "#4b3621" },// pigtails hair
 // special weapon/tool
 //    "Paint Brush":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
     // Legacy support (still works without a style property - just defaults to type)
