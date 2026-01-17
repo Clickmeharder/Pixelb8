@@ -1069,7 +1069,6 @@ const HAT_STYLES = {
         ctx.stroke();
     }
 };
-};
 const CAPE_STYLES = {
     "cape": (ctx, p, bodyY, lean, item) => { // Paper Bag Style
 		const headX = p.x + (lean * 20);
