@@ -540,7 +540,7 @@ const HAT_STYLES = {
     },
 	"wizardbeard": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
-        const offset = 3;       // Move up/down (Negative is up)
+        const offset = 4;       // Move up/down (Negative is up)
         const beardLen = 26;    // Length of the beard
         const beardWidth = 11;  // Width of the fan
         const sway = Math.sin(Date.now() / 1000) * 2;
@@ -564,7 +564,6 @@ const HAT_STYLES = {
         ctx.lineTo(hX + 9, base - 1);
         ctx.fill();
         ctx.stroke();
-
         // 2. The Mustache (Curved and clumpy)
         ctx.strokeStyle = "rgba(0,0,0,0.2)";
         ctx.lineWidth = 2;
@@ -576,7 +575,6 @@ const HAT_STYLES = {
         ctx.moveTo(hX + 2, base - 3); 
         ctx.quadraticCurveTo(hX + 8, base - 2, hX + 10, base + 2);
         ctx.stroke();
-
         // 3. Texture Strands (Mohawk-style internal lines)
         ctx.lineWidth = 1;
         ctx.beginPath();
