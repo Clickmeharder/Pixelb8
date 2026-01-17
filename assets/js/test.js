@@ -768,7 +768,7 @@ const ITEM_DB = {
 	"Paper Bag":      { type: "helmet", style: "box", def: 1, value: 5, color: "#d2b48c" },
 	"wig":            { type: "helmet", style:"", def: 1,style: "wig",     value: 5000, color: "yellow" },
     "Royal Crown":    { type: "helmet", style: "crown",  def: 2,  value: 10000, color: "#ffcc00" },
-	"uknown":    { type: "helmet", style: "centurian",  def: 2,  value: 10000, color: "#ffcc00" },
+	"uknown":    { type: "helmet", style: "centurion",  def: 2,  value: 10000, color: "#ffcc00" },
 // special capes
     "Royal Cape":     { type: "cape", style:"", color: "#880000", value: 10000 },
     "Cloak":     { type: "cape", style:"", color: "#880000", value: 10000 },
