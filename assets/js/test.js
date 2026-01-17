@@ -996,41 +996,48 @@ const WEAPON_STYLES = {
     },
 
     "bow": (ctx, item, isAttacking, now) => {
-		// 1. Rotation: Tilt the bow.
-        ctx.rotate(isAttacking ? -0.2 : Math.PI / 4);
+		// 1. Rotation: Tilt the bow
+		ctx.rotate(isAttacking ? -0.2 : Math.PI / 4);
 
-        // 2. The Bow Body (The Wood)
-        // We move the arc 10 pixels forward so the hand holds the middle of the wood
-        ctx.strokeStyle = item.color || "#8B4513";
-        ctx.lineWidth = 3;
-        ctx.beginPath(); 
-        // We center the arc at x: 10, y: 0
-        ctx.arc(10, 0, 15, -Math.PI / 2, Math.PI / 2); 
-        ctx.stroke();
+		// 2. The Bow Body (The Wood)
+		ctx.strokeStyle = item.color || "#8B4513";
+		ctx.lineWidth = 3;
+		ctx.beginPath(); 
+		/* We center the arc at (-15, 0) with a radius of 15.
+		   This means the right-most edge of the arc is exactly at (0, 0).
+		   Now the hand (0,0) is holding the wooden belly!
+		*/
+		ctx.arc(-15, 0, 15, -Math.PI / 2, Math.PI / 2, false); 
+		ctx.stroke();
 
-        // 3. The Grip (Small detail where the hand is)
-        ctx.strokeStyle = "#5d4037";
-        ctx.beginPath(); ctx.moveTo(8, -3); ctx.lineTo(8, 3); ctx.stroke();
+		// 3. The Grip (Drawn right on the hand at 0,0)
+		ctx.strokeStyle = "#5d4037";
+		ctx.lineWidth = 4;
+		ctx.beginPath(); 
+		ctx.moveTo(0, -3); 
+		ctx.lineTo(0, 3); 
+		ctx.stroke();
 
-        // 4. The Bowstring
-        // The string connects the tips of the arc. 
-        // If attacking, the middle of the string (pullback) moves back towards the player.
-        ctx.strokeStyle = "rgba(255,255,255,0.6)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(10, -15); // Top tip
-        
-        if (isAttacking) {
-            // Pull the string back to the hand (0,0) or even further back (-5)
-            ctx.lineTo(-5, 0); 
-        } else {
-            // String is straight (resting)
-            ctx.lineTo(10, 0); 
-        }
-        
-        ctx.lineTo(10, 15); // Bottom tip
-        ctx.stroke();
-    },
+		// 4. The Bowstring
+		ctx.strokeStyle = "rgba(255,255,255,0.7)";
+		ctx.lineWidth = 1;
+		ctx.beginPath();
+		
+		// The string tips are at the ends of the arc (x: -15, y: +/-15)
+		ctx.moveTo(-15, -15); 
+
+		if (isAttacking) {
+			// Pull the string back AWAY from the wood
+			// Since wood is at -15, pulling to -25 or -30 looks like a heavy draw
+			ctx.lineTo(-30, 0); 
+		} else {
+			// String is resting straight between the tips
+			ctx.lineTo(-15, 0); 
+		}
+		
+		ctx.lineTo(-15, 15); 
+		ctx.stroke();
+	},
 
     "staff": (ctx, item, isAttacking, now) => {
         if (isAttacking) ctx.rotate(Math.sin(now / 150) * 0.5);
