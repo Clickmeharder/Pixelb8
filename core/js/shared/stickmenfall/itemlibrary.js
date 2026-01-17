@@ -77,7 +77,7 @@ const ITEM_DB = {
     "hair6": { type: "hair", style: "fade",       color: "#4b3621" }, // dark clean fade
     "hair7": { type: "hair", style: "scribble",   color: "#ffeb3b" }, // yellow child scribble
 	"oldman beard": { name: "Wizard Beard", type: "hair", style: "wizardbeard", color: "#ffffff" },
-	"wizard beard": { name: "Dark Mage Beard", type: "hair", style: "wizardbeard", color: "#333333" }
+	"wizard beard": { name: "Dark Mage Beard", type: "hair", style: "wizardbeard", color: "#333333" },
 // special weapon/tool
 //    "Paint Brush":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
     // Legacy support (still works without a style property - just defaults to type)
