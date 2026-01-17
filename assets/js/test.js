@@ -981,31 +981,38 @@ function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
     updatePhysics(p); 
     const now = Date.now();
-	// --- DEATH RENDERER ---
-	if (p.dead) {
-			drawCorpse(ctx, p, now);
-			return; 
-		}
-    // Calculate Body Animation
+    
+    // --- DEATH RENDERER ---
+    if (p.dead) {
+        drawCorpse(ctx, p, now);
+        return; 
+    }
+
+    // 1. Calculate Body Animation (Creates the 'anim' object)
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     const isDancing = p.activeTask === "dancing";
     if (isDancing && DANCE_LIBRARY[p.danceStyle]) {
         anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
     }
-    if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
+
+    // --- 2. DRAW CAPE FIRST (Layered behind everything) ---
+    // Fixed: Using anim.bodyY and anim.lean
+    if (p.stats.equippedCape) {
+        drawCapeItem(ctx, p, anim.bodyY, anim.lean, ITEM_DB[p.stats.equippedCape]);
+    }
+
     const isFishing = p.activeTask === "fishing";
     const isAction = ["attacking", "woodcutting", "mining", "swimming", "lurking" ].includes(p.activeTask);
     
-    // --- ANCHOR POINTS ---
+    // --- 3. ANCHOR POINTS ---
     const head = { x: p.x + (anim.lean * 20), y: p.y - 30 + anim.bodyY };
-    const shoulderY = head.y + 15; // Arms start here  (higher is lower shoulders & lower raises the shoulders
-    const hipY = p.y + 10 + anim.bodyY; // Legs start here
+    const shoulderY = head.y + 15; 
+    const hipY = p.y + 10 + anim.bodyY;
 
-    // --- HAND POSITIONS (Relative to Shoulders) ---
+    // --- 4. HAND POSITIONS ---
     let leftHand = { x: head.x - 18, y: shoulderY + 10 + anim.armMove };
     let rightHand = { x: head.x + 18, y: shoulderY + 10 - anim.armMove };
 
-    // Apply Poses (Must use 'head' or 'shoulderY' to stay attached)
     let activePose = anim.pose || p.forcedPose;
     if (!activePose) {
         if (isFishing) activePose = "fishing";
@@ -1018,31 +1025,27 @@ function drawStickman(ctx, p) {
         if (overrides.right) rightHand = overrides.right;
     }
 
-    // --- FOOT POSITIONS (Relative to Hips) ---
+    // --- 5. FOOT POSITIONS ---
     const walk = (p.targetX !== null) ? Math.sin(now / 100) * 10 : 0;
     const legSpread = (activePose === "star") ? 18 : 10;
-    
-    // Knees bend if bodyY > 0 (Squat), otherwise feet follow body (Jump)
     let footY = p.y + 25 + (anim.bodyY > 0 ? 0 : anim.bodyY);
     const leftFoot = { x: p.x - legSpread - walk, y: footY };
     const rightFoot = { x: p.x + legSpread + walk, y: footY };
 
-    // --- DRAWING ---
+    // --- 6. DRAW BODY (Layered on top of Cape) ---
     const style = BODY_PARTS["stick"]; 
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
     
     style.head(ctx, head.x, head.y, p);
-    style.torso(ctx, head.x, head.y, p.x, hipY); // Spine connects Head to Hips
+    style.torso(ctx, head.x, head.y, p.x, hipY); 
     
-    // Arms: Anchor (ShoulderY) -> Hand
     style.limbs(ctx, head.x, shoulderY, leftHand.x, leftHand.y); 
     style.limbs(ctx, head.x, shoulderY, rightHand.x, rightHand.y);
     
-    // Legs: Anchor (HipY) -> Foot
     style.limbs(ctx, p.x, hipY, leftFoot.x, leftFoot.y); 
     style.limbs(ctx, p.x, hipY, rightFoot.x, rightFoot.y);
 
-    // Weapon Anchor: Hand positions are passed in here
+    // --- 7. DRAW EQUIPMENT LAYER ---
     renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, leftFoot, rightFoot, isAction, isFishing);
 }
 
