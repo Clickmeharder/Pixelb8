@@ -60,7 +60,7 @@ const ITEM_DB = {
     "Royal Crown":    { type: "helmet", style: "crown",  def: 2,  value: 10000, color: "#ff0000" },
 	"uknown":    { type: "helmet", style: "centurion",  def: 2,  value: 10000, color: "#ffcc00" },
 	"Pirate Hat":    { type: "helmet", style: "pirate",  def: 2,  value: 10000, color: "#222222" },
-	"gentleman hat":    { type: "helmet", style: "gentlemen",  def: 2,  value: 10000, color: "#333333" },
+	"gentleman hat":    { type: "helmet", style: "gentleman",  def: 2,  value: 10000, color: "#333333" },
 	"fun hat":    { type: "helmet", style: "funhat",  def: 2,  value: 10000, color: "white" },
 	"kabuto":    { type: "helmet", style: "samurai",  def: 2,  value: 10000, color: "#8B0000" },
 	"stickmenpo":    { type: "helmet", style: "menpo",  def: 2,  value: 10000, color: "#8B0000" },
@@ -69,7 +69,11 @@ const ITEM_DB = {
     "Cloak":     { type: "cape", style:"", color: "#880000", value: 10000 },
     "Ball gown":     { type: "cape", style:"", color: "#880000", value: 10000 },
     "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
-    "Spiky Hair":     { type: "helmet",   style: "hair",   value: 5, color: "#ffff00" },
+    "hair1":     { type: "helmet",   style: "hair",   value: 5, color: "#ffff00" },//spiky hair
+	"hair2": { name: "Spiky Blonde Hair", type: "hair", style: "spiky", color: "#f3e5ab" },//"spiky blonde hair"
+	"hair3": { name: "Pink Mohawk", type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
+	"hair4": { name: "Warrior Ponytail", type: "hair", style: "ponytail", color: "#222222" },// ponytail
+	"hair5": { name: "Brown Bob", type: "hair", style: "bob", color: "#4b3621" },// bob hair
 // special weapon/tool
 //    "Paint Brush":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
     // Legacy support (still works without a style property - just defaults to type)
@@ -93,6 +97,7 @@ const DANCE_UNLOCKS = {
     9: { name: "The ninthdance", minLvl: 1 },
 	10: { name: "The tenthdance", minLvl: 1 }
 };
+
 const DANCE_LIBRARY = {
     1: (now) => ({ bodyY: Math.sin(now / 100) * 8 }), // The Squat
     2: (now) => ({ armMove: Math.sin(now / 50) * 20 }), // The Flail
@@ -132,6 +137,150 @@ const DANCE_LIBRARY = {
 /* To make a Cowboy Hat: Take the pirate style, set foldHeight to 5, and make brimWidth much larger (like 25).
 To make a Sombrero: Take the gentleman style, set brimSize to 30 and hatTall to 15, then change the color to yellow.
 To make a Tiny Fancy Hat: Take the gentleman style, move the hX (horizontal) in the settings to hX + 8 so it sits tilted on the side of the head, and make all the sizes smaller. */
+const WEAPON_STYLES = {
+    "sword": (ctx, item, isAttacking, now) => {
+        let swing = isAttacking ? Math.sin(now / 150) * 0.8 : Math.PI / 1.2;
+        ctx.rotate(swing);
+        ctx.strokeStyle = item.color || "#ccc";
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(25, -2); ctx.stroke();
+        ctx.strokeStyle = "#aa8800";
+        ctx.beginPath(); ctx.moveTo(5, -6); ctx.lineTo(5, 6); ctx.stroke();
+    },
+
+    "bow": (ctx, item, isAttacking, now) => {
+		// 1. Rotation: Tilt the bow
+		ctx.rotate(isAttacking ? -0.6 : Math.PI / 7);
+
+		// 2. The Bow Body (The Wood)
+		ctx.strokeStyle = item.color || "#8B4513";
+		ctx.lineWidth = 3;
+		ctx.beginPath(); 
+		/* We center the arc at (-15, 0) with a radius of 15.
+		   This means the right-most edge of the arc is exactly at (0, 0).
+		   Now the hand (0,0) is holding the wooden belly!
+		*/
+		ctx.arc(-15, 0, 15, -Math.PI / 2, Math.PI / 2, false); 
+		ctx.stroke();
+
+		// 3. The Grip (Drawn right on the hand at 0,0)
+		ctx.strokeStyle = "#5d4037";
+		ctx.lineWidth = 4;
+		ctx.beginPath(); 
+		ctx.moveTo(0, -3); 
+		ctx.lineTo(0, 3); 
+		ctx.stroke();
+
+		// 4. The Bowstring
+		ctx.strokeStyle = "rgba(255,255,255,0.7)";
+		ctx.lineWidth = 1;
+		ctx.beginPath();
+		
+		// The string tips are at the ends of the arc (x: -15, y: +/-15)
+		ctx.moveTo(-15, -15); 
+
+		if (isAttacking) {
+			// Pull the string back AWAY from the wood
+			// Since wood is at -15, pulling to -25 or -30 looks like a heavy draw
+			ctx.lineTo(-30, 0); 
+		} else {
+			// String is resting straight between the tips
+			ctx.lineTo(-15, 0); 
+		}
+		
+		ctx.lineTo(-15, 15); 
+		ctx.stroke();
+	},
+
+    "staff": (ctx, item, isAttacking, now) => {
+        if (isAttacking) ctx.rotate(Math.sin(now / 150) * 0.5);
+        ctx.strokeStyle = item.poleColor || "#4e342e";
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(0, 20); ctx.lineTo(0, -45); ctx.stroke();
+        let pulse = Math.sin(now / 400) * 5;
+        ctx.fillStyle = item.color || "#00ffff";
+        ctx.shadowBlur = 10 + pulse; ctx.shadowColor = ctx.fillStyle;
+        ctx.beginPath(); ctx.arc(0, -50, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+    },
+	
+	"fishing_rod": (ctx, item, isAttacking, now, p, bodyY, lean) => {
+		const isActuallyFishing = p.activeTask === "fishing";
+		
+		ctx.strokeStyle = item.color || "#8B4513";
+		ctx.lineWidth = 2;
+
+		if (isActuallyFishing) {
+			let bob = Math.sin(now / 300) * 5;
+			
+			// 1. Draw the Rod (Starting at 0,0 which is the Hand)
+			ctx.beginPath();
+			ctx.moveTo(0, 0); 
+			// Tip is 40px right and 30px up from the hand
+			const tipX = 40;
+			const tipY = -30 + bob;
+			ctx.lineTo(tipX, tipY);
+			ctx.stroke();
+
+			// 2. Draw the Line
+			ctx.strokeStyle = "rgba(255,255,255,0.5)";
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.moveTo(tipX, tipY);
+			
+			// This targets the water relative to the player
+			// We subtract the current hand position to find the water in "local" space
+			const waterX = 80; 
+			const waterY = 60 - bodyY; 
+
+			ctx.quadraticCurveTo(tipX + 10, tipY + 30, waterX, waterY);
+			ctx.stroke();
+
+			// 3. Draw the Bobber
+			ctx.fillStyle = "#ff4444";
+			ctx.beginPath(); 
+			ctx.arc(waterX, waterY, 3, 0, Math.PI * 2); 
+			ctx.fill();
+		} else {
+			// Idle/Walking: Carry it upright
+			ctx.rotate(-Math.PI / 8);
+			ctx.beginPath(); ctx.moveTo(0, 5); ctx.lineTo(0, -45); ctx.stroke();
+		}
+	},
+	"axe": (ctx, item, isAttacking, now) => {
+        // CHOPPING ANIMATION: A sharp, heavy downward tilt
+        let chop = isAttacking ? Math.sin(now / 100) * 1.2 : Math.PI / 1.2;
+        ctx.rotate(chop);
+        
+        // Handle
+        ctx.strokeStyle = "#5d4037"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(22, 0); ctx.stroke();
+        
+        // Axe Head
+        ctx.fillStyle = item.color || "#999";
+        ctx.beginPath();
+        ctx.moveTo(15, -5); ctx.lineTo(25, -8); ctx.lineTo(25, 8); ctx.lineTo(15, 5);
+        ctx.fill(); ctx.stroke();
+    },
+
+    "pickaxe": (ctx, item, isAttacking, now) => {
+        // MINING ANIMATION: Similar to axe but with a "rebound" feel
+        let swing = isAttacking ? Math.sin(now / 120) * 1.4 : Math.PI / 1.2;
+        ctx.rotate(swing);
+
+        // Handle
+        ctx.strokeStyle = "#4e342e"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(22, 0); ctx.stroke();
+
+        // Pickaxe Head (The double-pointed arc)
+        ctx.strokeStyle = item.color || "#aaa";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(22, 0, 12, Math.PI * 0.7, Math.PI * 1.3);
+        ctx.stroke();
+    }
+};
+
 const HAT_STYLES = {
     "box": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
@@ -189,17 +338,157 @@ const HAT_STYLES = {
         ctx.beginPath(); ctx.arc(hX, top, shadowSize, 0, Math.PI*2); ctx.fill();
     },
 
-    "hair": (ctx, hX, hY, color) => {
+	"hair": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
-        const offset = -3;
-        const fluff = 10; // Height of the hair block
+        const offset = -5;      // Lifted slightly higher
+        const hairSize = 12;    // How wide it is
+        const spikes = 5;       // Number of hair spikes
+        const spikeHeight = 6;  // How tall the spikes are
+        const fullness = 8;     // How far down the sides it goes
         // ----------------
         const top = hY + offset;
         ctx.fillStyle = color;
-        ctx.beginPath(); ctx.arc(hX, top, 11, Math.PI, 0); ctx.fill();
-        ctx.fillRect(hX - 11, top, 22, fluff);
-    },
+        ctx.beginPath();
 
+        // 1. Draw the "Top" with spikes
+        ctx.moveTo(hX - hairSize, top);
+        for (let i = 0; i <= spikes; i++) {
+            let x = hX - hairSize + (i * (hairSize * 2 / spikes));
+            let y = top - (i % 2 === 0 ? spikeHeight : 2); // Zig-zag pattern
+            ctx.lineTo(x, y);
+        }
+
+        // 2. Draw the sides/back
+        ctx.lineTo(hX + hairSize, top + fullness);
+        ctx.lineTo(hX - hairSize, top + fullness);
+        ctx.closePath();
+        
+        ctx.fill();
+        // Hair usually looks better without a thick black outline, 
+        // but we'll add a subtle one
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+        ctx.stroke();
+    },
+	"spiky": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -6;      
+        const width = 11;       
+        const spikeCount = 6;   
+        const spikeHeight = 7;  
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(hX - width, top + 5);
+        
+        // Create the jagged top
+        for (let i = 0; i <= spikeCount; i++) {
+            let x = hX - width + (i * (width * 2 / spikeCount));
+            // Every other point is higher/lower for a messy look
+            let y = top - (i % 2 === 0 ? spikeHeight : 2); 
+            ctx.lineTo(x, y);
+        }
+        
+        ctx.lineTo(hX + width, top + 5);
+        ctx.closePath();
+        ctx.fill();
+    },
+	"mohawk": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -8;
+        const hawkWidth = 5;
+        const hawkHeight = 12;
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        
+        ctx.beginPath();
+        // The "Fan" of the hawk
+        ctx.ellipse(hX, top + 2, hawkWidth, hawkHeight, 0, Math.PI, 0);
+        ctx.lineTo(hX + hawkWidth, top + 5);
+        ctx.lineTo(hX - hawkWidth, top + 5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+    },
+	"ponytail": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -4;
+        const hairLength = 18;
+        const swing = Math.sin(Date.now() / 200) * 3; // Gently sways!
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = color;
+
+        // 1. The Scalp
+        ctx.beginPath();
+        ctx.arc(hX, top, 11, Math.PI, 0);
+        ctx.fill();
+
+        // 2. The Tail (Drawn at the back)
+        ctx.beginPath();
+        ctx.moveTo(hX - 8, top + 2);
+        // The quadraticCurveTo adds the "swing"
+        ctx.quadraticCurveTo(hX - 15 + swing, top + 10, hX - 10 + swing, top + hairLength);
+        ctx.lineTo(hX - 5 + swing, top + hairLength);
+        ctx.quadraticCurveTo(hX - 8 + swing, top + 10, hX, top + 5);
+        ctx.fill();
+    },
+	"bob": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -4;
+        const sideLength = 12; // How far it drops past the "ears"
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = color;
+
+        ctx.beginPath();
+        ctx.arc(hX, top, 12, Math.PI, 0); // Top dome
+        ctx.lineTo(hX + 12, top + sideLength);
+        ctx.lineTo(hX + 7, top + sideLength - 3); // Inward notch
+        ctx.lineTo(hX - 7, top + sideLength - 3); // Face gap
+        ctx.lineTo(hX - 12, top + sideLength);
+        ctx.closePath();
+        ctx.fill();
+    },
+	"pigtails": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -5;      
+        const width = 11;        // How far apart they are
+        const tailLength = 15;   // How long they hang
+        const thickness = 5;     // How thick the hair is
+        const bounce = Math.sin(Date.now() / 150) * 4; // Automatic movement!
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = color;
+
+        // 1. The Main Scalp
+        ctx.beginPath();
+        ctx.arc(hX, top, width, Math.PI, 0);
+        ctx.fill();
+
+        // 2. Left Pigtail
+        ctx.beginPath();
+        ctx.moveTo(hX - width, top + 2);
+        // This curve makes it look like it's tied with a hair tie
+        ctx.quadraticCurveTo(hX - width - 8 + bounce, top + 5, hX - width - 2 + bounce, top + tailLength);
+        ctx.lineTo(hX - width + thickness + bounce, top + tailLength);
+        ctx.quadraticCurveTo(hX - width + 2 + bounce, top + 5, hX - width + 2, top + 2);
+        ctx.fill();
+
+        // 3. Right Pigtail
+        ctx.beginPath();
+        ctx.moveTo(hX + width, top + 2);
+        ctx.quadraticCurveTo(hX + width + 8 - bounce, top + 5, hX + width + 2 - bounce, top + tailLength);
+        ctx.lineTo(hX + width - thickness - bounce, top + tailLength);
+        ctx.quadraticCurveTo(hX + width - 2 - bounce, top + 5, hX + width - 2, top + 2);
+        ctx.fill();
+
+        // Optional: Hair Ties (Small dots)
+        ctx.fillStyle = "#ff0000"; // Red hair ties
+        ctx.fillRect(hX - width - 1, top + 1, 3, 3);
+        ctx.fillRect(hX + width - 2, top + 1, 3, 3);
+    },
     "horns": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
         const offset = -6; 
@@ -588,147 +877,4 @@ const POSE_LIBRARY = {
         // Fixed the double "right" and the missing parameter
         right: { x: head.x + 22, y: head.y + 15 }
     })
-};
-const WEAPON_STYLES = {
-    "sword": (ctx, item, isAttacking, now) => {
-        let swing = isAttacking ? Math.sin(now / 150) * 0.8 : Math.PI / 1.2;
-        ctx.rotate(swing);
-        ctx.strokeStyle = item.color || "#ccc";
-        ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(25, -2); ctx.stroke();
-        ctx.strokeStyle = "#aa8800";
-        ctx.beginPath(); ctx.moveTo(5, -6); ctx.lineTo(5, 6); ctx.stroke();
-    },
-
-    "bow": (ctx, item, isAttacking, now) => {
-		// 1. Rotation: Tilt the bow
-		ctx.rotate(isAttacking ? -0.6 : Math.PI / 7);
-
-		// 2. The Bow Body (The Wood)
-		ctx.strokeStyle = item.color || "#8B4513";
-		ctx.lineWidth = 3;
-		ctx.beginPath(); 
-		/* We center the arc at (-15, 0) with a radius of 15.
-		   This means the right-most edge of the arc is exactly at (0, 0).
-		   Now the hand (0,0) is holding the wooden belly!
-		*/
-		ctx.arc(-15, 0, 15, -Math.PI / 2, Math.PI / 2, false); 
-		ctx.stroke();
-
-		// 3. The Grip (Drawn right on the hand at 0,0)
-		ctx.strokeStyle = "#5d4037";
-		ctx.lineWidth = 4;
-		ctx.beginPath(); 
-		ctx.moveTo(0, -3); 
-		ctx.lineTo(0, 3); 
-		ctx.stroke();
-
-		// 4. The Bowstring
-		ctx.strokeStyle = "rgba(255,255,255,0.7)";
-		ctx.lineWidth = 1;
-		ctx.beginPath();
-		
-		// The string tips are at the ends of the arc (x: -15, y: +/-15)
-		ctx.moveTo(-15, -15); 
-
-		if (isAttacking) {
-			// Pull the string back AWAY from the wood
-			// Since wood is at -15, pulling to -25 or -30 looks like a heavy draw
-			ctx.lineTo(-30, 0); 
-		} else {
-			// String is resting straight between the tips
-			ctx.lineTo(-15, 0); 
-		}
-		
-		ctx.lineTo(-15, 15); 
-		ctx.stroke();
-	},
-
-    "staff": (ctx, item, isAttacking, now) => {
-        if (isAttacking) ctx.rotate(Math.sin(now / 150) * 0.5);
-        ctx.strokeStyle = item.poleColor || "#4e342e";
-        ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(0, 20); ctx.lineTo(0, -45); ctx.stroke();
-        let pulse = Math.sin(now / 400) * 5;
-        ctx.fillStyle = item.color || "#00ffff";
-        ctx.shadowBlur = 10 + pulse; ctx.shadowColor = ctx.fillStyle;
-        ctx.beginPath(); ctx.arc(0, -50, 6, 0, Math.PI * 2); ctx.fill();
-        ctx.shadowBlur = 0;
-    },
-	
-	"fishing_rod": (ctx, item, isAttacking, now, p, bodyY, lean) => {
-		const isActuallyFishing = p.activeTask === "fishing";
-		
-		ctx.strokeStyle = item.color || "#8B4513";
-		ctx.lineWidth = 2;
-
-		if (isActuallyFishing) {
-			let bob = Math.sin(now / 300) * 5;
-			
-			// 1. Draw the Rod (Starting at 0,0 which is the Hand)
-			ctx.beginPath();
-			ctx.moveTo(0, 0); 
-			// Tip is 40px right and 30px up from the hand
-			const tipX = 40;
-			const tipY = -30 + bob;
-			ctx.lineTo(tipX, tipY);
-			ctx.stroke();
-
-			// 2. Draw the Line
-			ctx.strokeStyle = "rgba(255,255,255,0.5)";
-			ctx.lineWidth = 1;
-			ctx.beginPath();
-			ctx.moveTo(tipX, tipY);
-			
-			// This targets the water relative to the player
-			// We subtract the current hand position to find the water in "local" space
-			const waterX = 80; 
-			const waterY = 60 - bodyY; 
-
-			ctx.quadraticCurveTo(tipX + 10, tipY + 30, waterX, waterY);
-			ctx.stroke();
-
-			// 3. Draw the Bobber
-			ctx.fillStyle = "#ff4444";
-			ctx.beginPath(); 
-			ctx.arc(waterX, waterY, 3, 0, Math.PI * 2); 
-			ctx.fill();
-		} else {
-			// Idle/Walking: Carry it upright
-			ctx.rotate(-Math.PI / 8);
-			ctx.beginPath(); ctx.moveTo(0, 5); ctx.lineTo(0, -45); ctx.stroke();
-		}
-	},
-	"axe": (ctx, item, isAttacking, now) => {
-        // CHOPPING ANIMATION: A sharp, heavy downward tilt
-        let chop = isAttacking ? Math.sin(now / 100) * 1.2 : Math.PI / 1.2;
-        ctx.rotate(chop);
-        
-        // Handle
-        ctx.strokeStyle = "#5d4037"; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(22, 0); ctx.stroke();
-        
-        // Axe Head
-        ctx.fillStyle = item.color || "#999";
-        ctx.beginPath();
-        ctx.moveTo(15, -5); ctx.lineTo(25, -8); ctx.lineTo(25, 8); ctx.lineTo(15, 5);
-        ctx.fill(); ctx.stroke();
-    },
-
-    "pickaxe": (ctx, item, isAttacking, now) => {
-        // MINING ANIMATION: Similar to axe but with a "rebound" feel
-        let swing = isAttacking ? Math.sin(now / 120) * 1.4 : Math.PI / 1.2;
-        ctx.rotate(swing);
-
-        // Handle
-        ctx.strokeStyle = "#4e342e"; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(22, 0); ctx.stroke();
-
-        // Pickaxe Head (The double-pointed arc)
-        ctx.strokeStyle = item.color || "#aaa";
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.arc(22, 0, 12, Math.PI * 0.7, Math.PI * 1.3);
-        ctx.stroke();
-    }
 };
