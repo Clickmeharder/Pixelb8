@@ -72,10 +72,9 @@ const ITEM_DB = {
 	"hair1": { type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
 	"hair2": { type: "hair", style: "pigtails", color: "#4b3621" },// pigtails hair
 	"hair3": { type: "hair", style: "scribble",   color: "#ffeb3b" }, // yellow child scribble
-	"hair4": { type: "hair", style: "fringe",    color: "#4b3621" }, // chunky boy fringe
-	"hair7": { type: "hair", style: "braids",    color: "#f3e5ab" }, // thick blonde braids
-    "hair5": { type: "hair", style: "wolf",      color: "#614126" }, // messy wolf cut
-    "hair6": { type: "hair", style: "wildbuns",  color: "#222222" }, // clumpy messy buns
+	"hair4": { type: "hair", style: "braids",    color: "#f3e5ab" }, // thick blonde braids
+    "hair5": { type: "hair", style: "messy",      color: "#614126" }, // messy 
+    "hair6": { type: "hair", style: "girly",  color: "#222222" }, // girly braids
 
 	"oldman beard": { name: "Wizard Beard", type: "hair", style: "wizardbeard", color: "#ffffff" },
 	"wizard beard": { name: "Dark Mage Beard", type: "hair", style: "wizardbeard", color: "#333333" },
@@ -437,83 +436,6 @@ const HAT_STYLES = {
         ctx.arc(hX + 2, top - 1, 2, 0, Math.PI * 2);
         ctx.stroke();
     },
-	"fringe": (ctx, hX, hY, color) => {
-        const offset = -7;
-        const top = hY + offset;
-        const strands = 6;
-        const sLen = 10;
-        ctx.fillStyle = color;
-        ctx.strokeStyle = "rgba(0,0,0,0.2)";
-        
-        ctx.beginPath();
-        ctx.moveTo(hX - 11, top + 2);
-        for (let i = 0; i <= strands; i++) {
-            let x = hX - 11 + (i * (22 / strands));
-            // Jagged bottom edge - no straight lines
-            let y = top + (i % 2 === 0 ? sLen : sLen - 4);
-            ctx.lineTo(x, y);
-            // Internal strand point
-            if (i < strands) ctx.lineTo(x + 2, top + 2);
-        }
-        ctx.fill();
-
-        // Thick strand lines
-        for (let i = 1; i < strands; i++) {
-            ctx.beginPath();
-            let x = hX - 11 + (i * (22 / strands));
-            ctx.moveTo(x, top - 2);
-            ctx.lineTo(x, top + 6);
-            ctx.stroke();
-        }
-    },
-	"wolf": (ctx, hX, hY, color) => {
-        const offset = -8;
-        const top = hY + offset;
-        const sway = Math.sin(Date.now() / 1000) * 1.5;
-        ctx.fillStyle = color;
-        ctx.strokeStyle = "rgba(0,0,0,0.15)";
-
-        // 1. Back Tuft (The jagged "tail")
-        ctx.beginPath();
-        ctx.moveTo(hX - 8, top + 5);
-        ctx.lineTo(hX - 10 + sway, top + 18);
-        ctx.lineTo(hX, top + 14);
-        ctx.lineTo(hX + 10 + sway, top + 18);
-        ctx.lineTo(hX + 8, top + 5);
-        ctx.fill();
-
-        // 2. Top Fan (Jagged clumps)
-        ctx.beginPath();
-        ctx.moveTo(hX - 12, top + 4);
-        for(let i=0; i<5; i++) {
-            let x = hX - 12 + (i * 6);
-            ctx.lineTo(x + 3, top - 6);
-            ctx.lineTo(x + 6, top + 4);
-        }
-        ctx.fill();
-    },
-	"wildbuns": (ctx, hX, hY, color) => {
-        const offset = -9;
-        const top = hY + offset;
-        const slowSway = Math.sin(Date.now() / 1200) * 2;
-        ctx.fillStyle = color;
-
-        // Scalp base
-        ctx.beginPath(); ctx.arc(hX, top + 4, 11, Math.PI, 0); ctx.fill();
-
-        // Messy Fans
-        [-8, 8].forEach(side => {
-            ctx.beginPath();
-            ctx.moveTo(hX + side - 4, top + 2);
-            // Three chunky spikes per bun
-            for(let i=0; i<3; i++) {
-                let sX = hX + side - 4 + (i * 4) + (side > 0 ? slowSway : -slowSway);
-                ctx.lineTo(sX, top - 8);
-                ctx.lineTo(sX + 2, top + 2);
-            }
-            ctx.fill();
-        });
-    },
 	"braids": (ctx, hX, hY, color) => {
         const offset = -8;
         const top = hY + offset;
@@ -536,6 +458,55 @@ const HAT_STYLES = {
             // Pointy bottom tuft
             ctx.lineTo(hX + side + (side > 0 ? slowBounce : -slowBounce), top + 22);
             ctx.fill();
+        });
+    },
+	"messy": (ctx, hX, hY, color) => {
+        const offset = -8;
+        const height = 5;
+        const width = 11;
+        const top = hY + offset;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        
+        // Extra messy base scribble to break the half-circle
+        for(let j=0; j<3; j++) {
+            ctx.beginPath();
+            ctx.moveTo(hX - width, top + j);
+            for(let i = 0; i < 10; i++) {
+                let x = hX - width + (i * 2.2);
+                let y = top + j - (i % 2 === 0 ? height - j : 1);
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+        // The loose loop
+        ctx.beginPath(); ctx.arc(hX + 3, top - 2, 2.5, 0, Math.PI * 2); ctx.stroke();
+    },
+	"girly": (ctx, hX, hY, color) => {
+        const offset = -8;
+        const top = hY + offset;
+        const slowBounce = Math.sin(Date.now() / 1000) * 1.5;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "rgba(0,0,0,0.15)";
+
+        // Scalp with a "parting" line
+        ctx.beginPath(); ctx.arc(hX, top + 3, 11, Math.PI, 0); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(hX, top - 8); ctx.lineTo(hX, top + 3); ctx.stroke();
+
+        [-10, 10].forEach(side => {
+            ctx.beginPath();
+            ctx.moveTo(hX + side, top + 2);
+            for(let i=0; i<4; i++) {
+                let y = top + 5 + (i * 4);
+                let xOff = (i % 2 === 0 ? 3 : -3) + (side > 0 ? slowBounce : -slowBounce);
+                ctx.lineTo(hX + side + xOff, y);
+                // Detail line inside the braid
+                ctx.moveTo(hX + side, y - 2);
+                ctx.lineTo(hX + side + (xOff/2), y + 2);
+            }
+            ctx.lineTo(hX + side + (side > 0 ? slowBounce : -slowBounce), top + 22);
+            ctx.fill(); ctx.stroke();
         });
     },
 	"wizardbeard": (ctx, hX, hY, color) => {
