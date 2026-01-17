@@ -767,7 +767,7 @@ const ITEM_DB = {
 // special head
 	"Paper Bag":      { type: "helmet", style: "box", def: 1, value: 5, color: "#d2b48c" },
 	"wig":            { type: "helmet", style:"", def: 1,style: "wig",     value: 5000, color: "yellow" },
-    "Royal Crown":    { type: "helmet", style: "crown",  def: 2,  value: 10000, color: "#ffcc00" },
+    "Royal Crown":    { type: "helmet", style: "crown",  def: 2,  value: 10000, color: "#ff0000" },
 	"uknown":    { type: "helmet", style: "centurion",  def: 2,  value: 10000, color: "#ffcc00" },
 // special capes
     "Royal Cape":     { type: "cape", style:"", color: "#880000", value: 10000 },
@@ -936,137 +936,188 @@ const DANCE_LIBRARY = {
  */
 const HAT_STYLES = {
     "box": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -1;  // Vertical shift
+        const w = 24, h = 26;
+        // ----------------
+        const top = hY + offset;
         ctx.fillStyle = color;
-        ctx.fillRect(hX - 12, hY - 14, 24, 26);
-        ctx.strokeRect(hX - 12, hY - 14, 24, 26);
+        ctx.fillRect(hX - w/2, top - h/2, w, h);
+        ctx.strokeRect(hX - w/2, top - h/2, w, h);
     },
+
     "wig": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = 0;
+        const thickness = 6;
+        const length = 18;
+        // ----------------
+        const top = hY + offset;
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
-        ctx.beginPath(); ctx.arc(hX, hY, 13, 0.1 * Math.PI, 0.9 * Math.PI); ctx.lineWidth = 6; ctx.stroke();
-        ctx.beginPath(); ctx.arc(hX, hY - 2, 11, Math.PI, 0); ctx.fill();
+        ctx.beginPath(); ctx.arc(hX, top, 13, 0.1 * Math.PI, 0.9 * Math.PI); ctx.lineWidth = thickness; ctx.stroke();
+        ctx.beginPath(); ctx.arc(hX, top - 2, 11, Math.PI, 0); ctx.fill();
         ctx.lineWidth = 5; ctx.beginPath();
-        ctx.moveTo(hX - 10, hY - 2); ctx.quadraticCurveTo(hX - 14, hY + 10, hX - 11, hY + 18);
-        ctx.moveTo(hX + 10, hY - 2); ctx.quadraticCurveTo(hX + 14, hY + 10, hX + 11, hY + 18); ctx.stroke();
+        ctx.moveTo(hX - 10, top - 2); ctx.quadraticCurveTo(hX - 14, top + 10, hX - 11, top + length);
+        ctx.moveTo(hX + 10, top - 2); ctx.quadraticCurveTo(hX + 14, top + 10, hX + 11, top + length); ctx.stroke();
     },
+
     "knight": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = 0;
+        const faceVisible = 10; // Depth of the side guards
+        // ----------------
+        const top = hY + offset;
         ctx.fillStyle = color;
-        ctx.beginPath(); ctx.arc(hX, hY, 12, Math.PI, 0); 
-        ctx.lineTo(hX + 12, hY + 10); ctx.lineTo(hX - 12, hY + 10); ctx.closePath();
+        ctx.beginPath(); ctx.arc(hX, top, 12, Math.PI, 0); 
+        ctx.lineTo(hX + 12, top + faceVisible); ctx.lineTo(hX - 12, top + faceVisible); ctx.closePath();
         ctx.fill(); ctx.stroke();
     },
+
     "hood": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = 0;
+        const depth = 10;     // How low the hood drapes
+        const shadowSize = 8; // Size of the dark interior
+        // ----------------
+        const top = hY + offset;
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.moveTo(hX - 13, hY + 10); //was hy + 8
-        ctx.quadraticCurveTo(hX - 15, hY - 20, hX, hY - 20);
-        ctx.quadraticCurveTo(hX + 15, hY - 20, hX + 13, hY + 8);
+        ctx.moveTo(hX - 13, top + depth);
+        ctx.quadraticCurveTo(hX - 15, top - 20, hX, top - 20);
+        ctx.quadraticCurveTo(hX + 15, top - 20, hX + 13, top + depth);
         ctx.fill();
         ctx.fillStyle = "rgba(0,0,0,0.4)";
-        ctx.beginPath(); ctx.arc(hX, hY, 8, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(hX, top, shadowSize, 0, Math.PI*2); ctx.fill();
     },
-    "hair": (ctx, hX, hY, color) => {
-        ctx.fillStyle = color;
-        ctx.beginPath(); ctx.arc(hX, hY - 3, 11, Math.PI, 0); ctx.fill();
-        ctx.fillRect(hX - 11, hY - 3, 22, 10);
-    },
-	"horns": (ctx, hX, hY, color) => {
-        const offset = -10; // CHANGE THIS: -10 is higher, 0 is lower
-        const top = hY + offset;
 
+    "hair": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -3;
+        const fluff = 10; // Height of the hair block
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(hX, top, 11, Math.PI, 0); ctx.fill();
+        ctx.fillRect(hX - 11, top, 22, fluff);
+    },
+
+    "horns": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -6; 
+        const rimDepth = 5;
+        const hornLength = 10; // Curve distance
+        // ----------------
+        const top = hY + offset;
         ctx.fillStyle = color;
         ctx.beginPath(); 
         ctx.arc(hX, top, 11, Math.PI, 0); 
-        ctx.lineTo(hX + 11, top + 5); 
-        ctx.lineTo(hX - 11, top + 5); 
+        ctx.lineTo(hX + 11, top + rimDepth); 
+        ctx.lineTo(hX - 11, top + rimDepth); 
         ctx.closePath();
         ctx.fill(); ctx.stroke();
         
-        // Horns automatically follow the top
         ctx.fillStyle = "#fff";
         ctx.beginPath();
-        ctx.moveTo(hX - 8, top - 3); ctx.quadraticCurveTo(hX - 20, top - 13, hX - 15, top + 4);
+        ctx.moveTo(hX - 8, top - 3); ctx.quadraticCurveTo(hX - 20, top - 3 - hornLength, hX - 15, top + 4);
         ctx.lineTo(hX - 8, top + 2); ctx.fill(); ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(hX + 8, top - 3); ctx.quadraticCurveTo(hX + 20, top - 13, hX + 15, top + 4);
+        ctx.moveTo(hX + 8, top - 3); ctx.quadraticCurveTo(hX + 20, top - 3 - hornLength, hX + 15, top + 4);
         ctx.lineTo(hX + 8, top + 2); ctx.fill(); ctx.stroke();
     },
-	"viking": (ctx, hX, hY, color) => {
-        // Helmet Base
+
+    "viking": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -5; // Moved up to clear eyes
+        const rim = 3;
+        // ----------------
+        const top = hY + offset;
         ctx.fillStyle = color;
-        ctx.beginPath(); ctx.arc(hX, hY, 11, Math.PI, 0); ctx.fill(); ctx.stroke();
-        // Horns (White/Bone color)
+        ctx.beginPath(); ctx.arc(hX, top, 11, Math.PI, 0); 
+        ctx.lineTo(hX + 11, top + rim); ctx.lineTo(hX - 11, top + rim); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
         ctx.fillStyle = "#fff";
         ctx.beginPath();
-        ctx.moveTo(hX - 8, hY - 5); ctx.quadraticCurveTo(hX - 20, hY - 15, hX - 15, hY + 2);
-        ctx.lineTo(hX - 8, hY - 2); ctx.fill(); ctx.stroke();
+        ctx.moveTo(hX - 8, top - 5); ctx.quadraticCurveTo(hX - 20, top - 15, hX - 15, top + 2);
+        ctx.lineTo(hX - 8, top - 2); ctx.fill(); ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(hX + 8, hY - 5); ctx.quadraticCurveTo(hX + 20, hY - 15, hX + 15, hY + 2);
-        ctx.lineTo(hX + 8, hY - 2); ctx.fill(); ctx.stroke();
+        ctx.moveTo(hX + 8, top - 5); ctx.quadraticCurveTo(hX + 20, top - 15, hX + 15, top + 2);
+        ctx.lineTo(hX + 8, top - 2); ctx.fill(); ctx.stroke();
     },
+
     "wizard": (ctx, hX, hY, color) => {
-        const brimY = hY - 8; // Raised brim
+        // --- SETTINGS ---
+        const offset = -10;
+        const brimWidth = 18;
+        const hatHeight = 35;
+        // ----------------
+        const top = hY + offset;
         ctx.fillStyle = color;
-        ctx.beginPath(); ctx.ellipse(hX, brimY, 18, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(hX, top, brimWidth, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(hX - 10, brimY - 2);
-        ctx.lineTo(hX, brimY - 35); 
-        ctx.lineTo(hX + 10, brimY - 2);
+        ctx.moveTo(hX - 10, top - 2);
+        ctx.lineTo(hX, top - hatHeight); 
+        ctx.lineTo(hX + 10, top - 2);
         ctx.closePath(); ctx.fill(); ctx.stroke();
     },
+
     "crown": (ctx, hX, hY, color) => {
-        const base = hY - 6; // Sit on top of the head
-        ctx.fillStyle = color;
+        // --- SETTINGS ---
+        const offset = -7;
+        const spikes = 12; // Spike height
+        const jewelColor = color;
+        // ----------------
+        const base = hY + offset;
+        ctx.fillStyle = "#ffcc00";
         ctx.beginPath();
         ctx.moveTo(hX - 12, base);
-        ctx.lineTo(hX - 12, base - 12); ctx.lineTo(hX - 6, base - 6); 
-        ctx.lineTo(hX, base - 15); ctx.lineTo(hX + 6, base - 6);      
-        ctx.lineTo(hX + 12, base - 12); ctx.lineTo(hX + 12, base);   
+        ctx.lineTo(hX - 12, base - spikes); ctx.lineTo(hX - 6, base - 6); 
+        ctx.lineTo(hX, base - (spikes + 3)); ctx.lineTo(hX + 6, base - 6);      
+        ctx.lineTo(hX + 12, base - spikes); ctx.lineTo(hX + 12, base);   
         ctx.closePath(); ctx.fill(); ctx.stroke();
         
-        ctx.fillStyle = "#ff0000"; ctx.beginPath(); ctx.arc(hX, base - 8, 2, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = jewelColor; ctx.beginPath(); ctx.arc(hX, base - 8, 2, 0, Math.PI*2); ctx.fill();
     },
+
     "halo": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -25;
+        const glowSize = 10;
+        const haloColor = "yellow";
+        // ----------------
+        const top = hY + offset;
         ctx.strokeStyle = "rgba(255, 255, 0, 0.8)";
         ctx.lineWidth = 3;
-        ctx.shadowBlur = 10; ctx.shadowColor = "yellow";
-        ctx.beginPath(); ctx.ellipse(hX, hY - 25, 12, 4, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.shadowBlur = glowSize; ctx.shadowColor = haloColor;
+        ctx.beginPath(); ctx.ellipse(hX, top, 12, 4, 0, 0, Math.PI * 2); ctx.stroke();
         ctx.shadowBlur = 0; 
     },
-	"centurion": (ctx, hX, hY, color) => {
-        // --- SETTINGS BOX (Change these numbers!) ---
-        const yOffset   = -8;   // Move whole hat: -10 is up, 0 is down
-        const helmSize  = 12;   // How wide the helmet is
-        const plumeTall = 15;   // How high the red crest goes
-        const plumeWide = 18;   // How long the red crest is
-        const faceGap   = 10;   // How much of the face shows (lower = more covered)
-        // ---------------------------------------------
 
-        const top = hY + yOffset;
-
-        // 1. THE CREST (The red fuzzy part)
-        ctx.fillStyle = "#ff0000"; 
+    "centurion": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -8;   
+        const helmSize = 12;   
+        const plumeTall = 15;   
+        const plumeWide = 18;   
+        const faceGap = 10;   
+        const plumeColor = "#ff0000";
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = plumeColor; 
         ctx.beginPath();
-        // Drawing an arc for the plume
         ctx.ellipse(hX, top - 8, plumeWide, plumeTall, 0, Math.PI, 0);
-        ctx.fill();
-        ctx.stroke();
+        ctx.fill(); ctx.stroke();
 
-        // 2. THE HELMET BASE (The metal part)
-        ctx.fillStyle = color; // Usually gold or silver
+        ctx.fillStyle = color; 
         ctx.beginPath();
-        ctx.arc(hX, top, helmSize, Math.PI, 0); // Top curve
-        ctx.lineTo(hX + helmSize, top + faceGap); // Right side
-        ctx.lineTo(hX - helmSize, top + faceGap); // Left side
+        ctx.arc(hX, top, helmSize, Math.PI, 0); 
+        ctx.lineTo(hX + helmSize, top + faceGap); 
+        ctx.lineTo(hX - helmSize, top + faceGap); 
         ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
+        ctx.fill(); ctx.stroke();
 
-        // 3. THE NOSE GUARD
-        ctx.beginPath();
-        ctx.moveTo(hX, top);
-        ctx.lineTo(hX, top + faceGap + 2);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(hX, top); ctx.lineTo(hX, top + faceGap + 2); ctx.stroke();
     }
 };
 const CAPE_STYLES = {
