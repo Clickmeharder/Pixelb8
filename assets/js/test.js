@@ -729,7 +729,7 @@ const ITEM_DB = {
 // ------------------------- Helmets and Hats ----------------------------------------------------------
 	// --- Helmets     ---
     "Viking Helm":    { type: "helmet", style: "viking", def: 4,  value: 400,  color: "#888" },
-    "Great Horns":    { type: "helmet", style: "viking2", def: 6,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
+    "Great Horns":    { type: "helmet", style: "horns", def: 6,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
 	"Steel Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#eee" },
 	"Iron Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#aaa" },
 	//---Wizard Hats   ---
@@ -958,7 +958,7 @@ const HAT_STYLES = {
     "hood": (ctx, hX, hY, color) => {
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.moveTo(hX - 13, hY + 8);
+        ctx.moveTo(hX - 13, hY + 10); //was hy + 8
         ctx.quadraticCurveTo(hX - 15, hY - 20, hX, hY - 20);
         ctx.quadraticCurveTo(hX + 15, hY - 20, hX + 13, hY + 8);
         ctx.fill();
@@ -970,7 +970,7 @@ const HAT_STYLES = {
         ctx.beginPath(); ctx.arc(hX, hY - 3, 11, Math.PI, 0); ctx.fill();
         ctx.fillRect(hX - 11, hY - 3, 22, 10);
     },
-	"viking2": (ctx, hX, hY, color) => {
+	"horns": (ctx, hX, hY, color) => {
         const offset = -10; // CHANGE THIS: -10 is higher, 0 is lower
         const top = hY + offset;
 
