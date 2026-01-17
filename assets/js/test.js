@@ -1498,65 +1498,54 @@ function drawSheathedWeapon(ctx, p, bodyY, lean, item) {
 function drawCorpse(ctx, p, now) {
     const timeSinceDeath = now - p.deathTime;
     const fallDuration = 800;
-    const isStillFalling = timeSinceDeath < fallDuration;
     const progress = Math.min(1, timeSinceDeath / fallDuration);
 
     ctx.save();
     
-    // 1. DRAW BLOOD
-    // A pool that grows with time
+    // 1. Draw Blood (Remains at global coordinates, so draw this BEFORE translate)
     ctx.fillStyle = "rgba(180, 0, 0, 0.6)";
     const poolSize = progress * 25;
     ctx.beginPath();
     ctx.ellipse(p.x, p.y + 25, poolSize, poolSize / 3, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Splatters (Only visible right after hitting the ground)
-    if (timeSinceDeath > fallDuration - 200) {
-        ctx.fillStyle = "rgba(150, 0, 0, 0.4)";
-        for(let i=0; i<5; i++) {
-            ctx.beginPath();
-            ctx.arc(p.x + Math.sin(i) * 30, p.y + 25 + Math.cos(i) * 5, 3, 0, Math.PI*2);
-            ctx.fill();
-        }
-    }
-
-    // 2. POSITION THE ENTIRE BODY
+    // 2. Position the entire body context
+    // We move to the player's position and tilt the whole world for this stickman
     ctx.translate(p.x, p.y + (progress * 20));
     let rot = p.deathStyle === "faceplant" ? (Math.PI / 2) * progress : (-Math.PI / 2) * progress;
     ctx.rotate(rot);
 
-    // 3. DRAW THE ACTUAL STICKMAN (With Gear)
-    // We create a "fake" animation object so the gear draws in a stiff, dead pose
-    const deadAnim = { bodyY: 0, armMove: 0, lean: 0, pose: "star" }; // "Star" makes limbs stiff
+    // 3. Define "Dead Pose" coordinates (Relative to 0,0)
+    const deadAnim = { bodyY: 0, armMove: 0, lean: 0, pose: "star" }; 
     const head = { x: 0, y: -30 };
     const shoulderY = -18;
     const hipY = 10;
     
-    // Dead hands and feet positions
-    const lH = { x: -15, y: 0 }, rH = { x: 15, y: 0 };
+    const lH = { x: -18, y: 0 }, rH = { x: 18, y: 0 };
     const lF = { x: -10, y: 25 }, rF = { x: 10, y: 25 };
 
-    // Draw the body parts
+    // 4. Draw the Stickman Body
+    const style = BODY_PARTS["stick"];
     ctx.strokeStyle = p.color; ctx.lineWidth = 3;
-    BODY_PARTS["stick"].head(ctx, head.x, head.y, p);
-    
-    // OVERWRITE EYES WITH X X
+    style.head(ctx, head.x, head.y, p);
+    style.torso(ctx, head.x, head.y, 0, hipY);
+    style.limbs(ctx, 0, shoulderY, lH.x, lH.y); // Arms
+    style.limbs(ctx, 0, shoulderY, rH.x, rH.y);
+    style.limbs(ctx, 0, hipY, lF.x, lF.y);     // Legs
+    style.limbs(ctx, 0, hipY, rF.x, rF.y);
+
+    // 5. Draw the "X" eyes
     ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(-3, -33); ctx.lineTo(3, -27); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(3, -33); ctx.lineTo(-3, -27); ctx.stroke();
-    ctx.strokeStyle = p.color; ctx.lineWidth = 3; // Reset
 
-    BODY_PARTS["stick"].torso(ctx, head.x, head.y, 0, hipY);
-    BODY_PARTS["stick"].limbs(ctx, 0, shoulderY, lH.x, lH.y);
-    BODY_PARTS["stick"].limbs(ctx, 0, shoulderY, rH.x, rH.y);
-    BODY_PARTS["stick"].limbs(ctx, 0, hipY, lF.x, lF.y);
-    BODY_PARTS["stick"].limbs(ctx, 0, hipY, rF.x, rF.y);
-
-    // 4. DRAW THE EQUIPMENT (This is the magic part!)
-    // We pass 0 for x and y because we already translated the context
-    const fakeP = { ...p, x: 0, y: 0 }; 
-    renderEquipmentLayer(ctx, fakeP, now, deadAnim, lH, rH, lF, rF);
+    // 6. THE FIX: Render Equipment using local (0,0) coordinates
+    // We create a temporary object so we don't break the real player's data
+    const corpseActor = { ...p, x: 0, y: 0 }; 
+    
+    // We call your existing equipment function
+    // isAction and isFishing are false because ghosts/corpses don't work!
+    renderEquipmentLayer(ctx, corpseActor, now, deadAnim, lH, rH, lF, rF, false, false);
 
     ctx.restore();
 }
