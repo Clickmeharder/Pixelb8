@@ -810,20 +810,24 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
 // --- 2. CAPES (Drawn behind the stickman) ---
 // --- 2. CAPES ---
 function drawCapeItem(ctx, p, anchors, item) {
+
     const headX = anchors.headX;
+
     const centerX = p.x + (anchors.lean * 10);
-    
-    ctx.save(); // Protect line thickness
     ctx.fillStyle = item.color || "#550055";
     ctx.beginPath();
+    // Start at neck (Higher up than before)
     ctx.moveTo(headX, p.y - 40 + anchors.bodyY); 
+    // Left side of cape
     ctx.quadraticCurveTo(headX - 25, p.y + 10 + anchors.bodyY, centerX - 18, p.y + 22 + anchors.bodyY);
-    ctx.lineTo(centerX + 10, p.y + 30 + anchors.bodyY);
+    // Bottom edge
+    ctx.lineTo(centerX + 10, p.y + 15 + anchors.bodyY);
+    // Right side of cape back to neck
     ctx.quadraticCurveTo(headX + 25, p.y + 10 + anchors.bodyY, headX, p.y - 10 + anchors.bodyY);
     ctx.fill();
-    ctx.strokeStyle = "rgba(0,0,0,0.2)";
+    ctx.strokeStyle = "rgba(0,0,0,0.2)"; // Softer outline for capes
     ctx.stroke();
-    ctx.restore();
+
 }
 // --- 3. armor drawn over body ---
 // --- 3. ARMOR ---
