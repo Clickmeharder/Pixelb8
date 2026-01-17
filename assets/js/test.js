@@ -990,7 +990,7 @@ function drawStickman(ctx, p) {
     
     // --- ANCHOR POINTS ---
     const head = { x: p.x + (anim.lean * 20), y: p.y - 30 + anim.bodyY };
-    const shoulderY = head.y + 12; // Arms start here
+    const shoulderY = head.y + 15; // Arms start here  (higher is lower shoulders & lower raises the shoulders
     const hipY = p.y + 10 + anim.bodyY; // Legs start here
 
     // --- HAND POSITIONS (Relative to Shoulders) ---
