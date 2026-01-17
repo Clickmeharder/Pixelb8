@@ -1036,7 +1036,7 @@ const BODY_PARTS = {
             
             // 1. Fill the head with a faint version of p.color
             // This creates the "surface" for the eyes/mouth to sit on
-            ctx.globalAlpha = 0.3; // 30% opacity
+            ctx.globalAlpha = 0.9; // 30% opacity
             ctx.fillStyle = p.color;
             ctx.beginPath(); 
             ctx.arc(x, y, 10, 0, Math.PI * 2); 
