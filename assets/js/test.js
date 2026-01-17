@@ -961,19 +961,10 @@ function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, 
         drawWeaponItem(ctx, p, now, bodyY, lean, rightHand.x, rightHand.y);
     }
 
-    // 3. Draw Head Layers (Hair and Helmets)
-    const hX = p.x + (lean * 20);
-    const hY = p.y - 30 + bodyY;
-
-    // Draw Hair Slot
-    if (p.stats.equippedHair) {
-        drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
-    }
-
-    // Draw Helmet Slot (replaces your old drawHelmetItem call)
-    if (p.stats.equippedHelmet) {
-        drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHelmet], p);
-    }
+    // 3. Draw Head Layers using our new helpers
+    // Hair draws first (underneath), then Helmet (on top)
+    if (p.stats.equippedHair) drawHair(ctx, p, bodyY, lean);
+    if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
 
     // 4. Draw Feet
     if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
