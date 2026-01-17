@@ -69,12 +69,12 @@ const ITEM_DB = {
     "Cloak":     { type: "cape", style:"", color: "#880000", value: 10000 },
     "Ball gown":     { type: "cape", style:"", color: "#880000", value: 10000 },
     "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
-    "hair1":     { type: "helmet",   style: "hair",   value: 5, color: "#ffff00" },//spiky hair
-	"hair2": { name: "Spiky Blonde Hair", type: "hair", style: "spiky", color: "#f3e5ab" },//"spiky blonde hair"
-	"hair3": { name: "Pink Mohawk", type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
-	"hair4": { name: "Warrior Ponytail", type: "hair", style: "ponytail", color: "#222222" },// ponytail
-	"hair5": { name: "Brown Bob", type: "hair", style: "bob", color: "#4b3621" },// bob hair
-	"hair6": { name: "Brown Bob", type: "hair", style: "pigtails", color: "#4b3621" },// pigtails hair
+    "hair1":     { type: "hair", style: "hair",   value: 5, color: "#ffff00" },//spiky hair
+	"hair2": { type: "hair", style: "spiky", color: "#f3e5ab" },//"spiky blonde hair"
+	"hair3": { type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
+	"hair4": { type: "hair", style: "ponytail", color: "#222222" },// ponytail
+	"hair5": { type: "hair", style: "bob", color: "#4b3621" },// bob hair
+	"hair6": { type: "hair", style: "pigtails", color: "#4b3621" },// pigtails hair
 // special weapon/tool
 //    "Paint Brush":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
     // Legacy support (still works without a style property - just defaults to type)
