@@ -808,19 +808,27 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
 
 // ---
 
-// --- 2. CAPES (Drawn behind the stickman) ---
+// --- 2.// CAPES (Drawn behind the stickman) ---
+// Updated Cape Logic
 function drawCapeItem(ctx, p, bodyY, lean, item) {
     const headX = p.x + (lean * 20);
     const centerX = p.x + (lean * 10);
+    
     ctx.fillStyle = item.color || "#550055";
     ctx.beginPath();
-    ctx.moveTo(headX, p.y - 15 + bodyY); // Neck
-    // Cape flares out behind
-    ctx.quadraticCurveTo(headX - 25, p.y + 10 + bodyY, centerX - 15, p.y + 40 + bodyY);
-    ctx.lineTo(centerX + 15, p.y + 40 + bodyY);
-    ctx.quadraticCurveTo(headX + 25, p.y + 10 + bodyY, headX, p.y - 15 + bodyY);
+    
+    // Start at neck (Higher up than before)
+    ctx.moveTo(headX, p.y - 20 + bodyY); 
+    
+    // Left side of cape
+    ctx.quadraticCurveTo(headX - 25, p.y + 10 + bodyY, centerX - 18, p.y + 42 + bodyY);
+    // Bottom edge
+    ctx.lineTo(centerX + 18, p.y + 42 + bodyY);
+    // Right side of cape back to neck
+    ctx.quadraticCurveTo(headX + 25, p.y + 10 + bodyY, headX, p.y - 20 + bodyY);
+    
     ctx.fill();
-    ctx.strokeStyle = "rgba(0,0,0,0.3)";
+    ctx.strokeStyle = "rgba(0,0,0,0.2)"; // Softer outline for capes
     ctx.stroke();
 }
 // ---
@@ -945,7 +953,7 @@ function drawWeaponItem(ctx, p, now, bodyY, lean, hX, hY) {
 // --- drawEquipment (Updated to call drawBoots correctly) ---
 function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon) {
     // 1. Draw items behind/on body
-    if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
+
     if (p.stats.equippedPants) drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
     if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean); 
 
@@ -984,7 +992,7 @@ function drawStickman(ctx, p) {
     if (isDancing && DANCE_LIBRARY[p.danceStyle]) {
         anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
     }
-
+    if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
     const isFishing = p.activeTask === "fishing";
     const isAction = ["attacking", "woodcutting", "mining", "swimming", "lurking" ].includes(p.activeTask);
     
