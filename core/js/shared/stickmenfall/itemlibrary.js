@@ -294,163 +294,220 @@ const HAT_STYLES = {
         ctx.strokeRect(hX - w/2, top - h/2, w, h);
     },
 	// WIG IS SPECIAL ITS A HELMET NOT HAIR AND CAN BE COLORED BY ANY USER WITH A COMMAND
-    "wig": (ctx, hX, hY, color) => {
+	"wig": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
-        const offset = 0;
-        const thickness = 6;
-        const length = 18;
+        const offset = -4;
+        const length = 20;
+        const thickness = 5;
         // ----------------
         const top = hY + offset;
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
-        ctx.beginPath(); ctx.arc(hX, top, 13, 0.1 * Math.PI, 0.9 * Math.PI); ctx.lineWidth = thickness; ctx.stroke();
-        ctx.beginPath(); ctx.arc(hX, top - 2, 11, Math.PI, 0); ctx.fill();
-        ctx.lineWidth = 5; ctx.beginPath();
-        ctx.moveTo(hX - 10, top - 2); ctx.quadraticCurveTo(hX - 14, top + 10, hX - 11, top + length);
-        ctx.moveTo(hX + 10, top - 2); ctx.quadraticCurveTo(hX + 14, top + 10, hX + 11, top + length); ctx.stroke();
-    },
-// HAIR STYLES-----------------------------------------------------
-"hair": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = -6;      // Up/Down
-        const width = 12;       // Scalp width
-        const spikeCount = 5;   
-        const spikeH = 6;       // Height of hair spikes
-        const sideDrop = 6;     // How far hair comes down the ears
-        // ----------------
-        const top = hY + offset;
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.moveTo(hX - width, top + sideDrop);
-        for (let i = 0; i <= spikeCount; i++) {
-            let x = hX - width + (i * (width * 2 / spikeCount));
-            let y = top - (i % 2 === 0 ? spikeH : 2);
-            ctx.lineTo(x, y);
-        }
-        ctx.lineTo(hX + width, top + sideDrop);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = "rgba(0,0,0,0.15)"; ctx.stroke();
-    },
+        ctx.lineWidth = thickness;
+        ctx.lineCap = "round";
 
-    // 2. LIBERTY SPIKES (Wilder/Sharper)
-    "spiky": (ctx, hX, hY, color) => {
+        // 1. Scalp Top
+        ctx.beginPath(); ctx.arc(hX, top, 12, Math.PI, 0); ctx.fill();
+
+        // 2. Left and Right Side Strands (No chin connection)
+        ctx.beginPath();
+        // Left Strand
+        ctx.moveTo(hX - 11, top); 
+        ctx.quadraticCurveTo(hX - 15, top + 10, hX - 12, top + length);
+        // Right Strand
+        ctx.moveTo(hX + 11, top); 
+        ctx.quadraticCurveTo(hX + 15, top + 10, hX + 12, top + length);
+        ctx.stroke();
+
+        // 3. Subtle Strand Details
+        ctx.strokeStyle = "rgba(0,0,0,0.1)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(hX - 5, top - 10); ctx.lineTo(hX - 5, top - 2);
+        ctx.moveTo(hX + 5, top - 10); ctx.lineTo(hX + 5, top - 2);
+        ctx.stroke();
+    },
+	"hair": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
         const offset = -7;
-        const width = 13;
-        const numSpikes = 7;
-        const spikeH = 10;
+        const width = 12;
+        const strandCount = 8;
+        const spikeH = 7;
         // ----------------
         const top = hY + offset;
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.moveTo(hX - width, top + 4);
-        for (let i = 0; i <= numSpikes; i++) {
-            let x = hX - width + (i * (width * 2 / numSpikes));
-            let y = top - spikeH;
+        ctx.moveTo(hX - width, top + 5);
+        // Jagged top for "strandy" look
+        for (let i = 0; i <= strandCount; i++) {
+            let x = hX - width + (i * (width * 2 / strandCount));
+            let y = top - (i % 2 === 0 ? spikeH : spikeH - 3);
             ctx.lineTo(x, y);
-            if(i < numSpikes) ctx.lineTo(x + (width/numSpikes), top - 2);
         }
-        ctx.lineTo(hX + width, top + 4);
+        ctx.lineTo(hX + width, top + 8);
+        ctx.lineTo(hX - width, top + 8);
         ctx.fill();
-        ctx.strokeStyle = "rgba(0,0,0,0.2)"; ctx.stroke();
+
+        // Internal Strand Lines
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+        for (let i = 1; i < strandCount; i++) {
+            let x = hX - width + (i * (width * 2 / strandCount));
+            ctx.beginPath();
+            ctx.moveTo(x, top);
+            ctx.lineTo(x, top + 6);
+            ctx.stroke();
+        }
     },
 
-    // 3. MOHAWK
-    "mohawk": (ctx, hX, hY, color) => {
+    "spiky": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
-        const offset = -9;
-        const mWidth = 6;       // Thickness of the hawk
-        const mHeight = 14;      // Height of the hawk
-        const lean = 2;         // Tilted back slightly
+        const offset = -8;
+        const width = 13;
+        const spikes = 6;
+        const spikeH = 12;
         // ----------------
         const top = hY + offset;
         ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.ellipse(hX - lean, top + 3, mWidth, mHeight, 0, Math.PI, 0);
-        ctx.lineTo(hX + mWidth, top + 5);
-        ctx.lineTo(hX - mWidth, top + 5);
-        ctx.closePath();
-        ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = "rgba(0,0,0,0.3)";
+        
+        // Draw individual triangle strands instead of one big block
+        for (let i = 0; i < spikes; i++) {
+            ctx.beginPath();
+            let x = hX - width + (i * (width * 2 / (spikes - 1)));
+            ctx.moveTo(x, top + 5);
+            ctx.lineTo(x + (Math.random() - 0.5) * 5, top - spikeH); // Random slight tilt
+            ctx.lineTo(x + 4, top + 5);
+            ctx.fill(); ctx.stroke();
+        }
     },
 
-    // 4. PONYTAIL (With Natural Sway)
     "ponytail": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
         const offset = -5;
-        const pLen = 22;        // Length of tail
-        const pThick = 6;       // Thickness of tail
-        // Natural swaying math (Slowed down from 200 to 450)
-        const sway = Math.sin(Date.now() / 450) * 2.5; 
+        const pLen = 22;
+        const sway = Math.sin(Date.now() / 450) * 2;
         // ----------------
         const top = hY + offset;
         ctx.fillStyle = color;
 
-        // Scalp
-        ctx.beginPath(); ctx.arc(hX, top, 11, Math.PI, 0); ctx.fill();
-
-        // The Tail
+        // 1. Draw Tail FIRST (puts it behind the head)
         ctx.beginPath();
-        ctx.moveTo(hX - 6, top + 2);
-        ctx.quadraticCurveTo(hX - 12 + sway, top + 10, hX - 8 + (sway * 1.5), top + pLen);
-        ctx.lineTo(hX - 8 + pThick + (sway * 1.5), top + pLen);
-        ctx.quadraticCurveTo(hX - 8 + sway, top + 10, hX, top + 4);
+        ctx.moveTo(hX, top); 
+        ctx.quadraticCurveTo(hX + 15 + sway, top + 5, hX + 5 + sway, top + pLen);
+        ctx.lineTo(hX + sway, top + pLen);
+        ctx.quadraticCurveTo(hX + 10 + sway, top + 5, hX, top + 2);
         ctx.fill();
+
+        // 2. Draw Scalp (covers the start of the tail)
+        ctx.beginPath(); ctx.arc(hX, top, 11, Math.PI, 0); ctx.fill();
+        
+        // Strand details on scalp
+        ctx.strokeStyle = "rgba(0,0,0,0.1)";
+        ctx.beginPath(); ctx.arc(hX, top, 8, Math.PI, 0); ctx.stroke();
     },
 
-    // 5. BOB HAIR
     "bob": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
         const offset = -4;
-        const bWidth = 13;      // Volume of the bob
-        const bLength = 14;     // How far down it goes
+        const bWidth = 13;
+        const bLength = 15;
         // ----------------
         const top = hY + offset;
         ctx.fillStyle = color;
+        
+        // Main Shape
         ctx.beginPath();
         ctx.arc(hX, top, bWidth, Math.PI, 0);
         ctx.lineTo(hX + bWidth, top + bLength);
-        ctx.lineTo(hX + 6, top + bLength - 4); // Face cutout
-        ctx.lineTo(hX - 6, top + bLength - 4); 
         ctx.lineTo(hX - bWidth, top + bLength);
+        ctx.fill();
+
+        // STRAND LINES (This fixes the "half circle" look)
+        ctx.strokeStyle = "rgba(0,0,0,0.15)";
+        ctx.beginPath();
+        for(let i = -bWidth + 4; i < bWidth; i += 4) {
+            ctx.moveTo(hX + i, top - 5);
+            ctx.lineTo(hX + i, top + bLength - 2);
+        }
+        ctx.stroke();
+    },
+	"mohawk": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -8;
+        const hawkHeight = 15;   // How tall the spikes are
+        const hawkWidth = 14;    // How far the hawk spreads front-to-back
+        const numSpikes = 8;     // More spikes = more "strandy" look
+        const strandColor = "rgba(0,0,0,0.2)";
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = strandColor;
+        ctx.lineWidth = 1;
+
+        // 1. Draw the spikes in a fan shape
+        ctx.beginPath();
+        ctx.moveTo(hX - hawkWidth/2, top + 5);
+        
+        for (let i = 0; i <= numSpikes; i++) {
+            // Calculate position along the curve of the head
+            let pct = i / numSpikes;
+            let angle = Math.PI + (pct * Math.PI); // Half circle arc
+            
+            // The tip of each hair clump
+            let tx = hX + Math.cos(angle) * (hawkWidth);
+            let ty = top + Math.sin(angle) * (hawkHeight);
+            
+            // The "valley" between spikes
+            let vx = hX + Math.cos(angle + 0.1) * (hawkWidth - 4);
+            let vy = top + Math.sin(angle + 0.1) * (hawkHeight - 4);
+
+            ctx.lineTo(tx, ty);
+            if (i < numSpikes) ctx.lineTo(vx, vy);
+        }
+
+        ctx.lineTo(hX + hawkWidth/2, top + 5);
         ctx.closePath();
         ctx.fill();
-        ctx.strokeStyle = "rgba(0,0,0,0.1)"; ctx.stroke();
-    },
 
-    // 6. PIGTAILS (Subtle Bounce)
+        // 2. Add internal strand lines for texture
+        for (let i = 1; i < numSpikes; i++) {
+            let pct = i / numSpikes;
+            let angle = Math.PI + (pct * Math.PI);
+            ctx.beginPath();
+            ctx.moveTo(hX + Math.cos(angle) * 5, top + Math.sin(angle) * 2);
+            ctx.lineTo(hX + Math.cos(angle) * (hawkWidth - 2), top + Math.sin(angle) * (hawkHeight - 2));
+            ctx.stroke();
+        }
+    },
     "pigtails": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
-        const offset = -5;
-        const tiePos = 11;      // Distance from center
-        const tLen = 16;        // Tail length
-        const tThick = 5;       // Tail thickness
-        // Subtle bounce math (Slowed down from 150 to 500)
+        const offset = -8;     // Lifted higher to attach to top-sides
+        const tieX = 10;       // Width out from center
+        const tLen = 18;
         const bounce = Math.sin(Date.now() / 500) * 2;
         // ----------------
         const top = hY + offset;
         ctx.fillStyle = color;
 
-        // Scalp
-        ctx.beginPath(); ctx.arc(hX, top, tiePos, Math.PI, 0); ctx.fill();
+        // Scalp base
+        ctx.beginPath(); ctx.arc(hX, top + 3, 11, Math.PI, 0); ctx.fill();
 
-        // Left Tail
-        ctx.beginPath();
-        ctx.moveTo(hX - tiePos, top + 2);
-        ctx.quadraticCurveTo(hX - tiePos - 6 + bounce, top + 6, hX - tiePos + bounce, top + tLen);
-        ctx.lineTo(hX - tiePos + tThick + bounce, top + tLen);
-        ctx.quadraticCurveTo(hX - tiePos + 2 + bounce, top + 6, hX - tiePos + 2, top + 2);
-        ctx.fill();
-
-        // Right Tail
-        ctx.beginPath();
-        ctx.moveTo(hX + tiePos, top + 2);
-        ctx.quadraticCurveTo(hX + tiePos + 6 - bounce, top + 6, hX + tiePos - bounce, top + tLen);
-        ctx.lineTo(hX + tiePos - tThick - bounce, top + tLen);
-        ctx.quadraticCurveTo(hX + tiePos - 2 - bounce, top + 6, hX + tiePos - 2, top + 2);
-        ctx.fill();
+        // Tails attached to the upper sides
+        [ -tieX, tieX ].forEach(side => {
+            ctx.beginPath();
+            ctx.moveTo(hX + side, top + 2);
+            let targetX = hX + side + (side > 0 ? 8 : -8) + (side > 0 ? -bounce : bounce);
+            ctx.quadraticCurveTo(targetX, top + 10, hX + side + (side > 0 ? 2 : -2), top + tLen);
+            ctx.lineTo(hX + side + (side > 0 ? -3 : 3), top + tLen);
+            ctx.quadraticCurveTo(targetX - (side > 0 ? 4 : -4), top + 10, hX + side, top + 4);
+            ctx.fill();
+            
+            // Tiny hair ties
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            ctx.fillRect(hX + side - 2, top + 1, 4, 2);
+            ctx.fillStyle = color;
+        });
     },
-
 // ----------------------------------------------------------------
 // HOOD STYLES-----------------------------------------------------
     "hood": (ctx, hX, hY, color) => {
