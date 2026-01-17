@@ -481,26 +481,32 @@ const HAT_STYLES = {
         ctx.globalAlpha = 1.0;
     },
 	"scribble": (ctx, hX, hY, color) => {
-        const offset = -6;
+        // --- SETTINGS ---
+        const offset = -4;      // Lowered to sit tighter on the head
+        const height = 4;       // Max height of the "scrawl"
+        const width = 10;       // How far it spreads
+        // ----------------
         const top = hY + offset;
         ctx.strokeStyle = color;
         ctx.lineWidth = 2;
         ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(hX - 10, top);
         
-        // Loop to create "chaotic" peaks
-        for(let i = 0; i < 15; i++) {
-            let x = hX - 10 + (i * 1.5);
-            let y = top - 2 - (i % 3 === 0 ? 8 : 4);
+        ctx.beginPath();
+        ctx.moveTo(hX - width, top);
+        
+        // Loop to create "chaotic" low-profile peaks
+        for(let i = 0; i < 12; i++) {
+            let x = hX - width + (i * 1.8);
+            // Height toggles between 2 and 'height' for a messy look
+            let y = top - (i % 2 === 0 ? height : 2);
             ctx.lineTo(x, y);
-            ctx.lineTo(x + 1, y + 5);
+            ctx.lineTo(x + 1, top + 1); // Return back toward the scalp
         }
         ctx.stroke();
         
-        // Add a few "loose" scribble loops
+        // A single tiny "messy loop" closer to the hair line
         ctx.beginPath();
-        ctx.arc(hX - 4, top - 4, 3, 0, Math.PI * 2);
+        ctx.arc(hX + 2, top - 1, 2, 0, Math.PI * 2);
         ctx.stroke();
     },
 // ----------------------------------------------------------------
