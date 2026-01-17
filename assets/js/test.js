@@ -729,7 +729,7 @@ const ITEM_DB = {
 // ------------------------- Helmets and Hats ----------------------------------------------------------
 	// --- Helmets     ---
     "Viking Helm":    { type: "helmet", style: "viking", def: 4,  value: 400,  color: "#888" },
-    "Great Horns":    { type: "helmet", style: "viking", def: 6,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
+    "Great Horns":    { type: "helmet", style: "viking2", def: 6,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
 	"Steel Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#eee" },
 	"Iron Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#aaa" },
 	//---Wizard Hats   ---
@@ -881,7 +881,25 @@ const HAT_STYLES = {
         ctx.moveTo(hX + 8, hY - 5); ctx.quadraticCurveTo(hX + 20, hY - 15, hX + 15, hY + 2);
         ctx.lineTo(hX + 8, hY - 2); ctx.fill(); ctx.stroke();
     },
-
+	"viking2": (ctx, hX, hY, color) => {
+        // Tweak: Moved base up to hY - 4 so eyes (hY - 3) are visible
+        ctx.fillStyle = color;
+        ctx.beginPath(); 
+        ctx.arc(hX, hY - 4, 11, Math.PI, 0); // Raised slightly
+        ctx.lineTo(hX + 11, hY + 2); 
+        ctx.lineTo(hX - 11, hY + 2); 
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        
+        // Horns adjusted to follow the raised base
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.moveTo(hX - 8, hY - 9); ctx.quadraticCurveTo(hX - 20, hY - 19, hX - 15, hY - 2);
+        ctx.lineTo(hX - 8, hY - 6); ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(hX + 8, hY - 9); ctx.quadraticCurveTo(hX + 20, hY - 19, hX + 15, hY - 2);
+        ctx.lineTo(hX + 8, hY - 6); ctx.fill(); ctx.stroke();
+    },
     "wizard": (ctx, hX, hY, color) => {
         // The Brim
         ctx.fillStyle = color;
