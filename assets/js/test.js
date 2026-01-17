@@ -694,6 +694,7 @@ function handleEnemyAttacks() {
 
 //=============================================================
 /* ================= ITEM LIBRARY =========================== */
+// fixes needed: bow currently looks like is held by the string. we want it to look like the player is holding the bow part.
 const ITEM_DB = {
     // --- WEAPONS -----------------------------------------------------------------------------------
 	// swords (melee)
@@ -995,12 +996,40 @@ const WEAPON_STYLES = {
     },
 
     "bow": (ctx, item, isAttacking, now) => {
+		// 1. Rotation: Tilt the bow.
         ctx.rotate(isAttacking ? -0.2 : Math.PI / 4);
+
+        // 2. The Bow Body (The Wood)
+        // We move the arc 10 pixels forward so the hand holds the middle of the wood
         ctx.strokeStyle = item.color || "#8B4513";
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(0, 0, 15, -Math.PI / 2, Math.PI / 2); ctx.stroke();
-        ctx.strokeStyle = "rgba(255,255,255,0.5)";
-        ctx.beginPath(); ctx.moveTo(0, -15); ctx.lineTo(isAttacking ? -8 : 0, 0); ctx.lineTo(0, 15); ctx.stroke();
+        ctx.lineWidth = 3;
+        ctx.beginPath(); 
+        // We center the arc at x: 10, y: 0
+        ctx.arc(10, 0, 15, -Math.PI / 2, Math.PI / 2); 
+        ctx.stroke();
+
+        // 3. The Grip (Small detail where the hand is)
+        ctx.strokeStyle = "#5d4037";
+        ctx.beginPath(); ctx.moveTo(8, -3); ctx.lineTo(8, 3); ctx.stroke();
+
+        // 4. The Bowstring
+        // The string connects the tips of the arc. 
+        // If attacking, the middle of the string (pullback) moves back towards the player.
+        ctx.strokeStyle = "rgba(255,255,255,0.6)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(10, -15); // Top tip
+        
+        if (isAttacking) {
+            // Pull the string back to the hand (0,0) or even further back (-5)
+            ctx.lineTo(-5, 0); 
+        } else {
+            // String is straight (resting)
+            ctx.lineTo(10, 0); 
+        }
+        
+        ctx.lineTo(10, 15); // Bottom tip
+        ctx.stroke();
     },
 
     "staff": (ctx, item, isAttacking, now) => {
