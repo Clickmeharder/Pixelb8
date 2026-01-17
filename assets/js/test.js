@@ -1392,28 +1392,11 @@ function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
     updatePhysics(p); 
     const now = Date.now();
-// --- DEATH RENDERER ---
-    if (p.dead) {
-        const timeSinceDeath = now - p.deathTime;
-        const fallDuration = 800; // How long the "falling" animation lasts
-
-        if (timeSinceDeath < fallDuration) {
-            // 1. FALLING ANIMATION
-            let progress = timeSinceDeath / fallDuration;
-            ctx.save();
-            ctx.translate(p.x, p.y + (progress * 15)); // Sink slightly into ground
-            let rot = p.deathStyle === "faceplant" ? (Math.PI / 2) * progress : (-Math.PI / 2) * progress;
-            ctx.rotate(rot);
-            BODY_PARTS["stick"].head(ctx, 0, -30, p);
-            BODY_PARTS["stick"].torso(ctx, 0, -30, 0, 10);
-            ctx.restore();
-        } else {
-            // 2. PERMANENT CORPSE & BLOOD
-            drawCorpse(ctx, p);
-        }
-        return; // Important: Stop the rest of the function (no gear, no walking)
-    }
-
+	// --- DEATH RENDERER ---
+	if (p.dead) {
+			drawCorpse(ctx, p, now);
+			return; 
+		}
     // Calculate Body Animation
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     const isDancing = p.activeTask === "dancing";
@@ -1512,27 +1495,69 @@ function drawSheathedWeapon(ctx, p, bodyY, lean, item) {
     ctx.restore();
 }
 //-----player deaths
-function drawCorpse(ctx, p) {
+function drawCorpse(ctx, p, now) {
+    const timeSinceDeath = now - p.deathTime;
+    const fallDuration = 800;
+    const isStillFalling = timeSinceDeath < fallDuration;
+    const progress = Math.min(1, timeSinceDeath / fallDuration);
+
     ctx.save();
-    // Blood Pool
-    ctx.fillStyle = "rgba(150, 0, 0, 0.5)";
+    
+    // 1. DRAW BLOOD
+    // A pool that grows with time
+    ctx.fillStyle = "rgba(180, 0, 0, 0.6)";
+    const poolSize = progress * 25;
     ctx.beginPath();
-    ctx.ellipse(p.x, p.y + 25, 25, 8, 0, 0, Math.PI * 2);
+    ctx.ellipse(p.x, p.y + 25, poolSize, poolSize / 3, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Position the lying body
-    ctx.translate(p.x, p.y + 22);
-    ctx.rotate(p.deathStyle === "faceplant" ? Math.PI/2 : -Math.PI/2);
+    // Splatters (Only visible right after hitting the ground)
+    if (timeSinceDeath > fallDuration - 200) {
+        ctx.fillStyle = "rgba(150, 0, 0, 0.4)";
+        for(let i=0; i<5; i++) {
+            ctx.beginPath();
+            ctx.arc(p.x + Math.sin(i) * 30, p.y + 25 + Math.cos(i) * 5, 3, 0, Math.PI*2);
+            ctx.fill();
+        }
+    }
+
+    // 2. POSITION THE ENTIRE BODY
+    ctx.translate(p.x, p.y + (progress * 20));
+    let rot = p.deathStyle === "faceplant" ? (Math.PI / 2) * progress : (-Math.PI / 2) * progress;
+    ctx.rotate(rot);
+
+    // 3. DRAW THE ACTUAL STICKMAN (With Gear)
+    // We create a "fake" animation object so the gear draws in a stiff, dead pose
+    const deadAnim = { bodyY: 0, armMove: 0, lean: 0, pose: "star" }; // "Star" makes limbs stiff
+    const head = { x: 0, y: -30 };
+    const shoulderY = -18;
+    const hipY = 10;
     
-    ctx.strokeStyle = p.color;
-    ctx.lineWidth = 3;
-    // Head with X eyes
-    ctx.beginPath(); ctx.arc(0, -30, 10, 0, Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-3, -33); ctx.lineTo(3, -27); ctx.stroke(); // X
-    ctx.beginPath(); ctx.moveTo(3, -33); ctx.lineTo(-3, -27); ctx.stroke(); // X
+    // Dead hands and feet positions
+    const lH = { x: -15, y: 0 }, rH = { x: 15, y: 0 };
+    const lF = { x: -10, y: 25 }, rF = { x: 10, y: 25 };
+
+    // Draw the body parts
+    ctx.strokeStyle = p.color; ctx.lineWidth = 3;
+    BODY_PARTS["stick"].head(ctx, head.x, head.y, p);
     
-    // Torso and stiff limbs
-    ctx.beginPath(); ctx.moveTo(0, -20); ctx.lineTo(0, 10); ctx.stroke();
+    // OVERWRITE EYES WITH X X
+    ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(-3, -33); ctx.lineTo(3, -27); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(3, -33); ctx.lineTo(-3, -27); ctx.stroke();
+    ctx.strokeStyle = p.color; ctx.lineWidth = 3; // Reset
+
+    BODY_PARTS["stick"].torso(ctx, head.x, head.y, 0, hipY);
+    BODY_PARTS["stick"].limbs(ctx, 0, shoulderY, lH.x, lH.y);
+    BODY_PARTS["stick"].limbs(ctx, 0, shoulderY, rH.x, rH.y);
+    BODY_PARTS["stick"].limbs(ctx, 0, hipY, lF.x, lF.y);
+    BODY_PARTS["stick"].limbs(ctx, 0, hipY, rF.x, rF.y);
+
+    // 4. DRAW THE EQUIPMENT (This is the magic part!)
+    // We pass 0 for x and y because we already translated the context
+    const fakeP = { ...p, x: 0, y: 0 }; 
+    renderEquipmentLayer(ctx, fakeP, now, deadAnim, lH, rH, lF, rF);
+
     ctx.restore();
 }
 //===========================================================================================================================================
