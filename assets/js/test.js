@@ -815,9 +815,9 @@ function drawCapeItem(ctx, p, anchors, item) {
     ctx.moveTo(headX, p.y - 40 + anchors.bodyY); 
     
     // Left side of cape
-    ctx.quadraticCurveTo(headX - 25, p.y + 10 + anchors.bodyY, centerX - 18, p.y + 42 + anchors.bodyY);
+    ctx.quadraticCurveTo(headX - 25, p.y + 10 + anchors.bodyY, centerX - 18, p.y + 32 + anchors.bodyY);
     // Bottom edge
-    ctx.lineTo(centerX + 18, p.y + 30 + anchors.bodyY);
+    ctx.lineTo(centerX + 10, p.y + 30 + anchors.bodyY);
     // Right side of cape back to neck
     ctx.quadraticCurveTo(headX + 25, p.y + 10 + anchors.bodyY, headX, p.y - 20 + anchors.bodyY);
     

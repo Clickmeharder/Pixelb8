@@ -991,7 +991,7 @@ const CAPE_STYLES = {
 		const centerX = p.x + (lean * 10);
 		ctx.fillStyle = item.color || "#550055";
 		ctx.beginPath();
-		ctx.moveTo(headX, p.y - 15 + bodyY); // Neck
+		ctx.moveTo(headX, p.y - 20 + bodyY); // Neck
 		// Cape flares out behind
 		ctx.quadraticCurveTo(headX - 25, p.y + 10 + bodyY, centerX - 15, p.y + 40 + bodyY);
 		ctx.lineTo(centerX + 15, p.y + 40 + bodyY);
