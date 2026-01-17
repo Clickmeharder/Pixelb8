@@ -65,9 +65,9 @@ const ITEM_DB = {
 	"kabuto":    { type: "helmet", style: "samurai",  def: 2,  value: 10000, color: "#8B0000" },
 	"stickmenpo":    { type: "helmet", style: "menpo",  def: 2,  value: 10000, color: "#8B0000" },
 // special capes
-    "Royal Cape":     { type: "cape", style:"", color: "#880000", value: 10000 },
-    "Cloak":     { type: "cape", style:"", color: "#880000", value: 10000 },
-    "Ball gown":     { type: "cape", style:"", color: "#880000", value: 10000 },
+    "Royal Cape":     { type: "cape", style:"cape", color: "#880000", value: 10000 },
+    "Cloak":     { type: "cape", style:"cloak", color: "#333", value: 10000 },
+    "Ball gown":     { type: "cape", style:"ballgown", color: "purple", value: 10000 },
     "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
 	"hair1": { type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
 	"hair2": { type: "hair", style: "pigtails", color: "#4b3621" },// pigtails hair
