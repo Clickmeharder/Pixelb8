@@ -10,7 +10,46 @@ let mouse = { x: 0, y: 0 };
 let players = {};
 //
 //
+//=======utility we culd probably group in a shared globaljs
+function getRandomHex() {
+    return "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+}
+/* ================= UTILS ================= */
+// --- on screen message boxes-------------------
+// (top left system messages)
+function systemMessage(text) {
+    const div = document.createElement("div");
+    div.className = "sysMsg";
+    div.textContent = text;
+    document.getElementById("stickmenfall-systemMsgBox").appendChild(div);
+    setTimeout(() => div.remove(), 8000);
+}
+//        IDLE ACTION MESSAGES
+// ( big bottom right ext box )
+function idleActionMsg(text, color = "#0f0") {
+    const box = document.getElementById("idleActionsBox");
+    if (!box) return;
 
+    const entry = document.createElement("div");
+    entry.style.color = color;
+    entry.style.marginBottom = "2px";
+    entry.style.borderLeft = `2px solid ${color}`;
+    entry.style.paddingLeft = "5px";
+    
+    // Add a timestamp so you can see when it happened
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    entry.innerHTML = `<span style="color:#555;">[${time}]</span> ${text}`;
+
+    box.appendChild(entry);
+
+    // Auto-scroll to the bottom
+    box.scrollTop = box.scrollHeight;
+
+    // Optional: Limit the number of messages so the page doesn't lag
+    if (box.childNodes.length > 50) {
+        box.removeChild(box.firstChild);
+    }
+}
 
 /* ====grr============= CONFIG & STATE ================== */
 // we can change these [ basically options ] 
@@ -152,42 +191,7 @@ function handleTooltips() {
     } else { tt.style.display = "none"; }
 }
 //===============================================
-/* ================= UTILS ================= */
-// --- on screen message boxes-------------------
-// (top left system messages)
-function systemMessage(text) {
-    const div = document.createElement("div");
-    div.className = "sysMsg";
-    div.textContent = text;
-    document.getElementById("stickmenfall-systemMsgBox").appendChild(div);
-    setTimeout(() => div.remove(), 8000);
-}
-//        IDLE ACTION MESSAGES
-// ( big bottom right ext box )
-function idleActionMsg(text, color = "#0f0") {
-    const box = document.getElementById("idleActionsBox");
-    if (!box) return;
 
-    const entry = document.createElement("div");
-    entry.style.color = color;
-    entry.style.marginBottom = "2px";
-    entry.style.borderLeft = `2px solid ${color}`;
-    entry.style.paddingLeft = "5px";
-    
-    // Add a timestamp so you can see when it happened
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    entry.innerHTML = `<span style="color:#555;">[${time}]</span> ${text}`;
-
-    box.appendChild(entry);
-
-    // Auto-scroll to the bottom
-    box.scrollTop = box.scrollHeight;
-
-    // Optional: Limit the number of messages so the page doesn't lag
-    if (box.childNodes.length > 50) {
-        box.removeChild(box.firstChild);
-    }
-}
 //------------------------------------------------
 
 //------------------------------------------------
@@ -708,10 +712,6 @@ function handleEnemyAttacks() {
     });
 }
 /*------------------------------------------------------------*/
-//=============================================================
-
-// OLD ITEM LIBRARY SPOT
-//=============================================================
 
 //=========================================================================
 /* ======================== DRAWING ======================================= */
@@ -770,27 +770,42 @@ function updatePhysics(p) {
 // ----------------------------------------------
 /* Draw Equipment functions */
 // --- 1. HAIR & HOODS (Head Layers) ---
-function drawHeadLayer(ctx, hX, hY, item, p) {
+
+// 1. The Hair Coordinator
+function drawHair(ctx, p, bodyY, lean) {
+    const item = ITEM_DB[p.stats.equippedHair];
     if (!item) return;
-    const style = item.style || item.type || "hair";
-    // 2. Resolve Color
-    const finalColor = (style === "wig" && p.stats.wigColor) ? p.stats.wigColor : (item.color || "#614126");
-    // 3. Draw: Pull from the HAT_STYLES library
-    ctx.save();
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-    const drawFn = HAT_STYLES[style] || HAT_STYLES["hair"];
-    drawFn(ctx, hX, hY, finalColor);
-    ctx.restore();
+    const hX = p.x + (lean * 20);
+    const hY = p.y - 30 + bodyY;
+    drawHeadLayer(ctx, hX, hY, item, p);
 }
+
+// 2. The Helmet Coordinator
 function drawHelmetItem(ctx, p, bodyY, lean) {
     const item = ITEM_DB[p.stats.equippedHelmet];
     if (!item) return;
     const hX = p.x + (lean * 20);
     const hY = p.y - 30 + bodyY; 
-    // Simply delegate to the smart head layer
     drawHeadLayer(ctx, hX, hY, item, p);
 }
+// 3. The Painter (Logic & Style)
+function drawHeadLayer(ctx, hX, hY, item, p) {
+    if (!item) return;
+    
+    const style = item.style || "hair";
+    const helmetName = p.stats.equippedHelmet ? p.stats.equippedHelmet.toLowerCase() : "";
+
+    // Check if we use the custom wig color
+    const finalColor = (p.stats.wigColor && (item.type === "hair" || helmetName === "wig")) 
+        ? p.stats.wigColor 
+        : (item.color || "#614126");
+
+    ctx.save();
+    const drawFn = HAT_STYLES[style] || HAT_STYLES["hair"];
+    drawFn(ctx, hX, hY, finalColor);
+    ctx.restore();
+}
+
 // ---
 
 // --- 2. CAPES (Drawn behind the stickman) ---
@@ -929,9 +944,7 @@ function drawWeaponItem(ctx, p, now, bodyY, lean, hX, hY) {
 }
 // --- drawEquipment (Updated to call drawBoots correctly) ---
 function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon) {
-	//remove below commented line if u want ot stop rendering equipment when players are dead
-    //if (p.dead) return;
-
+    // 1. Draw items behind/on body
     if (p.stats.equippedCape) drawCapeItem(ctx, p, bodyY, lean, ITEM_DB[p.stats.equippedCape]);
     if (p.stats.equippedPants) drawPantsItem(ctx, p, bodyY, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
     if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean); 
@@ -942,18 +955,27 @@ function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, 
         drawGlovesItem(ctx, rightHand.x, rightHand.y, gloveItem);
     }
 
-    // DRAW WEAPON OR TOOL
-    // We draw if we shouldHoldWeapon (Combat/Idle) OR if it's a task tool (Axe/Rod)
-	const isTask = ["woodcutting", "mining", "fishing"].includes(p.activeTask);
-    
+    // 2. Draw Weapon/Tool
+    const isTask = ["woodcutting", "mining", "fishing"].includes(p.activeTask);
     if (shouldHoldWeapon || isTask) {
         drawWeaponItem(ctx, p, now, bodyY, lean, rightHand.x, rightHand.y);
     }
 
+    // 3. Draw Head Layers (Hair and Helmets)
     const hX = p.x + (lean * 20);
     const hY = p.y - 30 + bodyY;
-    if (p.stats.equippedHair) drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
-    if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
+
+    // Draw Hair Slot
+    if (p.stats.equippedHair) {
+        drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHair], p);
+    }
+
+    // Draw Helmet Slot (replaces your old drawHelmetItem call)
+    if (p.stats.equippedHelmet) {
+        drawHeadLayer(ctx, hX, hY, ITEM_DB[p.stats.equippedHelmet], p);
+    }
+
+    // 4. Draw Feet
     if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
 }
 
@@ -1702,28 +1724,44 @@ function cmdListDances(p) {
     systemMessage(msg);
 }
 function cmdWigColor(p, args) {
-    if (!p.stats.equippedHelmet || p.stats.equippedHelmet.toLowerCase() !== "wig") {
-        systemMessage(`${p.name}, you need to be wearing a wig to change its color!`);
+    const equippedId = p.stats.equippedHelmet;
+    const itemData = ITEM_DB[equippedId];
+
+    // 1. Requirement Check
+    if (!equippedId || (equippedId.toLowerCase() !== "wig" && (!itemData || itemData.type !== "hair"))) {
+        systemMessage(`${p.name}, you need to be wearing a wig or hair to change its color!`);
         return;
     }
 
-    // args[0] is "wigcolor", so the color is args[1]
-    const colorArg = args[1]; 
+    const colorArg = args[1]; // Get the word after !wigcolor
+    let finalColor;
+
+    // 2. Logic for Color Selection
     if (!colorArg) {
-        systemMessage(`Usage: !wigcolor [color/hex]`);
-        return;
-    }
-
-    const isHex = /^#([0-9A-F]{3}){1,2}$/i.test(colorArg);
-    const safeColors = ["red", "blue", "green", "pink", "purple", "orange", "white", "black", "cyan", "magenta", "yellow"];
-
-    if (isHex || safeColors.includes(colorArg.toLowerCase())) {
-        p.stats.wigColor = colorArg;
-        saveStats(p);
-        systemMessage(`${p.name}'s wig is now ${colorArg}!`);
+        // No color provided? Use the player's body color
+        finalColor = p.color;
+        systemMessage(`${p.name}'s hair now matches their body!`);
+    } else if (colorArg.toLowerCase() === "random") {
+        // User typed "random"? Pick a random hex
+        finalColor = getRandomHex();
+        systemMessage(`${p.name} rolled a random hair color!`);
     } else {
-        systemMessage(`Invalid color! Use a hex code like #ff00ff or names like 'pink'.`);
+        // User typed a specific color? Validate it
+        const isHex = /^#([0-9A-F]{3}){1,2}$/i.test(colorArg);
+        const safeColors = ["red", "blue", "green", "pink", "purple", "orange", "white", "black", "cyan", "magenta", "yellow", "brown"];
+        
+        if (isHex || safeColors.includes(colorArg.toLowerCase())) {
+            finalColor = colorArg;
+            systemMessage(`${p.name}'s hair/wig is now ${colorArg}!`);
+        } else {
+            systemMessage(`Invalid color! Use a hex, a name, or 'random'.`);
+            return; // Exit if input is garbage
+        }
     }
+
+    // 3. Save and Apply
+    p.stats.wigColor = finalColor;
+    saveStats(p);
 }
 // --- COMBAT & TASKS ---
 function cmdAttack(p, user) {

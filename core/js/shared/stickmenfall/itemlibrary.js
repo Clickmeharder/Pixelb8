@@ -74,7 +74,7 @@ const ITEM_DB = {
 	"hair3": { type: "hair", style: "scribble",   color: "#ffeb3b" }, // yellow child scribble
 	"hair4": { type: "hair", style: "messy",      color: "#614126" }, // messy 
 	"hair5": { type: "hair", style: "braids",    color: "#f3e5ab" }, // thick blonde braids
-    "hair6": { type: "hair", style: "girly",  color: "#222222" }, // girly braids
+    "hair6": { type: "hair", style: "girly",  color: "#f3e5ab" }, // girly braids
 	"hair7": { type: "hair", style: "pomp",       color: "#614126" }, // Forward spiky pomp
     "hair8": { type: "hair", style: "twinspikes", color: "#ff0000" }, // Red double spikes
 	"hair11": { type: "hair", style: "drills", color: "#f3e5ab" }, // spiral chunky drills 
