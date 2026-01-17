@@ -956,13 +956,12 @@ function drawEquipment(ctx, p, now, bodyY, lean, leftHand, rightHand, leftFoot, 
     }
 
     // 2. Draw Weapon/Tool
-    const isTask = ["woodcutting", "mining", "fishing"].includes(p.activeTask);
+    const isTask = ["woodcutting", "mining", "fishing", "swimming", "lurking"].includes(p.activeTask);
     if (shouldHoldWeapon || isTask) {
         drawWeaponItem(ctx, p, now, bodyY, lean, rightHand.x, rightHand.y);
     }
 
-    // 3. Draw Head Layers using our new helpers
-    // Hair draws first (underneath), then Helmet (on top)
+    // 3. Draw Head Layers (Coordinators handle the positioning math)
     if (p.stats.equippedHair) drawHair(ctx, p, bodyY, lean);
     if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, bodyY, lean);
 
@@ -987,7 +986,7 @@ function drawStickman(ctx, p) {
     }
 
     const isFishing = p.activeTask === "fishing";
-    const isAction = ["attacking", "woodcutting", "mining"].includes(p.activeTask);
+    const isAction = ["attacking", "woodcutting", "mining", "swimming", "lurking" ].includes(p.activeTask);
     
     // --- ANCHOR POINTS ---
     const head = { x: p.x + (anim.lean * 20), y: p.y - 30 + anim.bodyY };
@@ -1045,15 +1044,18 @@ function renderEquipmentLayer(ctx, p, now, anim, leftHand, rightHand, leftFoot, 
 
     // 1. Logic for holding vs sheathing
     let shouldHoldWeapon = false;
+    
     if (task === "attacking") {
         shouldHoldWeapon = true;
-    } else if (task === "none") {
-        shouldHoldWeapon = !p.manualSheath; // Follow manual toggle only when idle
+    } else if (task === "none" || task === "lurking") {
+        // Hold weapon if idle or stealth-lurking, unless manually sheathed
+        shouldHoldWeapon = !p.manualSheath; 
     } else {
-        shouldHoldWeapon = false; // Putting it on back for Fishing/Mining/Dancing
+        // Auto-sheathe for: woodcutting, mining, fishing, swimming, dancing
+        shouldHoldWeapon = false; 
     }
 
-    // 2. Draw Sheathed if needed
+    // 2. Draw Sheathed on back if not held
     if (weaponItem && !shouldHoldWeapon) {
         drawSheathedWeapon(ctx, p, anim.bodyY, anim.lean, weaponItem);
     }
@@ -1081,47 +1083,56 @@ function drawCorpse(ctx, p, now) {
     const timeSinceDeath = now - p.deathTime;
     const fallDuration = 800;
     const progress = Math.min(1, timeSinceDeath / fallDuration);
+    
     ctx.save();
-    // 1. Draw Blood (Remains at global coordinates, so draw this BEFORE translate)
+    
+    // 1. Draw Blood
     ctx.fillStyle = "rgba(180, 0, 0, 0.6)";
     const poolSize = progress * 25;
     ctx.beginPath();
     ctx.ellipse(p.x, p.y + 25, poolSize, poolSize / 3, 0, 0, Math.PI * 2);
     ctx.fill();
+
     // 2. Position the entire body context
-    // We move to the player's position and tilt the whole world for this stickman
     ctx.translate(p.x, p.y + (progress * 20));
     let rot = p.deathStyle === "faceplant" ? (Math.PI / 2) * progress : (-Math.PI / 2) * progress;
     ctx.rotate(rot);
-    // 3. Define "Dead Pose" coordinates (Relative to 0,0)
+
+    // 3. Define "Dead Pose" coordinates
     const deadAnim = { bodyY: 0, armMove: 0, lean: 0, pose: "star" }; 
     const head = { x: 0, y: -30 };
     const shoulderY = -18;
     const hipY = 10;
     const lH = { x: -18, y: 0 }, rH = { x: 18, y: 0 };
     const lF = { x: -10, y: 25 }, rF = { x: 10, y: 25 };
-    // 4. Draw the Stickman Body
+
+    // 4. Draw the Stickman Body (This now uses your new filled-head logic)
     const style = BODY_PARTS["stick"];
-    ctx.strokeStyle = p.color; ctx.lineWidth = 3;
+    ctx.strokeStyle = p.color; 
+    ctx.lineWidth = 3;
     style.head(ctx, head.x, head.y, p);
     style.torso(ctx, head.x, head.y, 0, hipY);
-    style.limbs(ctx, 0, shoulderY, lH.x, lH.y); // Arms
+    style.limbs(ctx, 0, shoulderY, lH.x, lH.y);
     style.limbs(ctx, 0, shoulderY, rH.x, rH.y);
-    style.limbs(ctx, 0, hipY, lF.x, lF.y);     // Legs
+    style.limbs(ctx, 0, hipY, lF.x, lF.y);
     style.limbs(ctx, 0, hipY, rF.x, rF.y);
-    // 5. Draw the "X" eyes
-    ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(-3, -33); ctx.lineTo(3, -27); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(3, -33); ctx.lineTo(-3, -27); ctx.stroke();
-    // 6. THE FIX: Render Equipment using local (0,0) coordinates
-    // We create a temporary object so we don't break the real player's data
+
+    // 5. Draw the "X" eyes in Solid Black for contrast
+    ctx.strokeStyle = "#000000"; 
+    ctx.lineWidth = 2.5;
+    // Left X
+    ctx.beginPath(); ctx.moveTo(-6, -33); ctx.lineTo(-2, -27); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-2, -33); ctx.lineTo(-6, -27); ctx.stroke();
+    // Right X
+    ctx.beginPath(); ctx.moveTo(2, -33); ctx.lineTo(6, -27); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(6, -33); ctx.lineTo(2, -27); ctx.stroke();
+
+    // 6. Render Equipment using local (0,0) coordinates
     const corpseActor = { ...p, x: 0, y: 0 }; 
-    // We call your existing equipment function
-    // isAction and isFishing are false because ghosts/corpses don't work!
-    renderEquipmentLayer(ctx, corpseActor, now, deadAnim, lH, rH, lF, rF, false, false);
+    renderEquipmentLayer(ctx, corpseActor, now, deadAnim, lH, rH, lF, rF);
+    
     ctx.restore();
-}
-//===========================================================================================================================================
+}//===========================================================================================================================================
 //-------------------------------------------
 
 //===============================================================================

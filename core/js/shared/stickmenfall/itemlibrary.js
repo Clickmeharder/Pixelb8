@@ -1030,7 +1030,55 @@ const CAPE_STYLES = {
 	}
 }
 const BODY_PARTS = {
-    "stick": {
+	     "stick": {
+		head: (ctx, x, y, p) => {
+            ctx.save();
+            
+            // 1. Fill the head with a faint version of p.color
+            // This creates the "surface" for the eyes/mouth to sit on
+            ctx.globalAlpha = 0.3; // 30% opacity
+            ctx.fillStyle = p.color;
+            ctx.beginPath(); 
+            ctx.arc(x, y, 10, 0, Math.PI * 2); 
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+
+            // 2. Draw the head outline (Stickman color)
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = 3;
+            ctx.beginPath(); 
+            ctx.arc(x, y, 10, 0, Math.PI * 2); 
+            ctx.stroke();
+
+            // 3. Draw the Face features in Solid Black
+            ctx.fillStyle = "#000000";
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 1; // Thinner lines for the smile
+
+            // Eyes (Using your fillRect style)
+            ctx.fillRect(x - 4, y - 3, 2, 2); // Left Eye
+            ctx.fillRect(x + 2, y - 3, 2, 2); // Right Eye
+
+            // Smile (Using your arc style)
+            ctx.beginPath(); 
+            ctx.arc(x, y + 2, 3, 0.1 * Math.PI, 0.9 * Math.PI); 
+            ctx.stroke();
+
+            ctx.restore();
+        },
+        torso: (ctx, hX, hY, bX, bY) => {
+			// hY is head center, we start spine at neck (hY + 10)
+			// bY is the hip position. We stop exactly there.
+			ctx.beginPath(); 
+			ctx.moveTo(hX, hY + 10); 
+			ctx.lineTo(bX, bY); // REMOVED the extra +10 here
+			ctx.stroke();
+		},
+        limbs: (ctx, startX, startY, endX, endY) => {
+            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
+        }
+    } 
+/*     "stick": {
         head: (ctx, x, y, p) => {
             ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.stroke();
             // Face
@@ -1050,7 +1098,7 @@ const BODY_PARTS = {
         limbs: (ctx, startX, startY, endX, endY) => {
             ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
         }
-    }
+    } */
     // You could add "chibi" or "armored" styles here later!
 };
 const POSE_LIBRARY = {
