@@ -540,37 +540,50 @@ const HAT_STYLES = {
     },
 	"wizardbeard": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
-        const offset = -4;
-        const beardLen = 25;    // How long the beard is
-        const beardWidth = 10;  // How wide the beard is
-        const sway = Math.sin(Date.now() / 600) * 2; // Very slow majestic sway
+        const offset = 3;       // Move up/down (Negative is up)
+        const beardLen = 26;    // Length of the beard
+        const beardWidth = 11;  // Width of the fan
+        const sway = Math.sin(Date.now() / 1000) * 2;
         // ----------------
-        const top = hY + offset;
+        const base = hY + offset;
         ctx.fillStyle = color;
         ctx.strokeStyle = "rgba(0,0,0,0.15)";
+        ctx.lineWidth = 1;
 
-        // 1. Short Hair Top (The "Buzz Cut")
+        // 1. The Main Beard (Jagged clumpy edges)
         ctx.beginPath();
-        ctx.arc(hX, top, 11, Math.PI, 0);
-        ctx.fill(); ctx.stroke();
-
-        // 2. The Massive Beard (Drawn from the chin)
-        ctx.beginPath();
-        ctx.moveTo(hX - 8, hY - 2); // Start at left cheek
-        ctx.quadraticCurveTo(hX - beardWidth + sway, hY + 10, hX + sway, hY + beardLen); // Left side to point
-        ctx.quadraticCurveTo(hX + beardWidth + sway, hY + 10, hX + 8, hY - 2); // Point to right cheek
-        ctx.fill(); ctx.stroke();
-
-        // 3. The Mustache
-        ctx.strokeStyle = "rgba(0,0,0,0.2)";
-        ctx.beginPath();
-        ctx.moveTo(hX - 4, hY - 3); ctx.lineTo(hX - 8, hY + 1);
-        ctx.moveTo(hX + 4, hY - 3); ctx.lineTo(hX + 8, hY + 1);
+        ctx.moveTo(hX - 9, base - 1); 
+        
+        // Jagged tufts on the sides
+        ctx.lineTo(hX - beardWidth + sway, base + 12);
+        // The Pointy Tip
+        ctx.lineTo(hX + sway, base + beardLen);
+        // Right jagged tuft
+        ctx.lineTo(hX + beardWidth + sway, base + 12);
+        
+        ctx.lineTo(hX + 9, base - 1);
+        ctx.fill();
         ctx.stroke();
 
-        // 4. Beard Strands (Texture)
+        // 2. The Mustache (Curved and clumpy)
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(hX, hY + 5); ctx.lineTo(hX + sway, hY + beardLen - 5);
+        // Left Mustache
+        ctx.moveTo(hX - 2, base - 3); 
+        ctx.quadraticCurveTo(hX - 8, base - 2, hX - 10, base + 2);
+        // Right Mustache
+        ctx.moveTo(hX + 2, base - 3); 
+        ctx.quadraticCurveTo(hX + 8, base - 2, hX + 10, base + 2);
+        ctx.stroke();
+
+        // 3. Texture Strands (Mohawk-style internal lines)
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(hX - 4, base + 5);
+        ctx.lineTo(hX - 3 + sway, base + beardLen - 8);
+        ctx.moveTo(hX + 4, base + 5);
+        ctx.lineTo(hX + 3 + sway, base + beardLen - 8);
         ctx.stroke();
     },
 // ----------------------------------------------------------------
