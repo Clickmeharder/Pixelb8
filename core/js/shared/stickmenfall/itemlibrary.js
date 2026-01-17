@@ -71,11 +71,13 @@ const ITEM_DB = {
     "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
 	"hair1": { type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
 	"hair2": { type: "hair", style: "pigtails", color: "#4b3621" },// pigtails hair
-	"hair3": { type: "hair", style: "sidesweep",  color: "#f3e5ab" }, // blonde side-sweep
+	"hair3": { type: "hair", style: "wisp",  color: "#f3e5ab" }, // // fine thin messy hair
     "hair4": { type: "hair", style: "spacebuns",  color: "#222222" }, // black space buns
-    "hair5": { type: "hair", style: "flow",       color: "#614126" }, // brown surfer flow
+    "hair5": { type: "hair", style: "shaggy",       color: "#614126" }, // chunky brown shaggy hair
     "hair6": { type: "hair", style: "fade",       color: "#4b3621" }, // dark clean fade
     "hair7": { type: "hair", style: "scribble",   color: "#ffeb3b" }, // yellow child scribble
+	"oldman beard": { name: "Wizard Beard", type: "hair", style: "wizardbeard", color: "#ffffff" },
+	"wizard beard": { name: "Dark Mage Beard", type: "hair", style: "wizardbeard", color: "#333333" }
 // special weapon/tool
 //    "Paint Brush":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
     // Legacy support (still works without a style property - just defaults to type)
@@ -405,27 +407,36 @@ const HAT_STYLES = {
             ctx.fillStyle = color;
         });
     },
-	"sidesweep": (ctx, hX, hY, color) => {
+	"wisp": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
         const offset = -6;
+        const detail = 18;      // More strands because they are thin
+        const spread = 12;
+        // ----------------
         const top = hY + offset;
+        ctx.lineCap = "round";
+        
+        // Very subtle fill just for the scalp
+        ctx.globalAlpha = 0.3;
         ctx.fillStyle = color;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        // The long sweeping bang
-        ctx.beginPath();
-        ctx.moveTo(hX - 10, top + 2);
-        ctx.quadraticCurveTo(hX, top - 12, hX + 14, top + 15);
-        ctx.lineTo(hX + 8, top + 15);
-        ctx.quadraticCurveTo(hX, top - 2, hX - 10, top + 5);
-        ctx.fill();
-        // The back hair
-        ctx.beginPath();
-        ctx.arc(hX, top, 11, Math.PI, 0);
-        ctx.lineTo(hX + 11, top + 18);
-        ctx.quadraticCurveTo(hX, top + 12, hX - 11, top + 18);
-        ctx.fill();
-    },
+        ctx.beginPath(); ctx.arc(hX, top + 2, 8, Math.PI, 0); ctx.fill();
 
+        // Draw fine strands
+        ctx.globalAlpha = 0.8;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.2;
+        
+        for (let i = 0; i < detail; i++) {
+            let xPos = hX - spread + (i * (spread * 2 / detail));
+            let height = 5 + (Math.random() * 6);
+            
+            ctx.beginPath();
+            ctx.moveTo(xPos, top + 2);
+            ctx.lineTo(xPos + (Math.random() - 0.5) * 4, top - height);
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1.0; // Reset alpha
+    },
     "spacebuns": (ctx, hX, hY, color) => {
         const offset = -9;
         const top = hY + offset;
@@ -446,21 +457,32 @@ const HAT_STYLES = {
             ctx.stroke();
         });
     },
-	"flow": (ctx, hX, hY, color) => {
-        const offset = -7;
+	"shaggy": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -8;
+        const strandCount = 10;
+        const length = 14;
+        const thickness = 3;    // Chunkier strands
+        // ----------------
         const top = hY + offset;
-        ctx.fillStyle = color;
-        // Layered sweeps
-        for(let i = 0; i < 3; i++) {
+        ctx.strokeStyle = color;
+        ctx.lineCap = "round";
+        
+        for (let i = 0; i <= strandCount; i++) {
+            ctx.lineWidth = thickness - (Math.random() * 1.5); // Vary thickness
+            let angle = Math.PI + (i / strandCount) * Math.PI;
+            
             ctx.beginPath();
-            ctx.moveTo(hX - 12 + (i*4), top + 2);
-            ctx.quadraticCurveTo(hX + 5, top - 10 - i, hX + 12, top + 4 + i);
-            ctx.lineTo(hX + 10, top + 8);
-            ctx.fill();
+            // Start at the top of the head
+            ctx.moveTo(hX + Math.cos(angle) * 5, top + 5); 
+            // Draw strand falling down
+            ctx.quadraticCurveTo(
+                hX + Math.cos(angle) * 12, top - 2, // Control point
+                hX + Math.cos(angle) * length, top + length // End point
+            );
+            ctx.stroke();
         }
-        ctx.beginPath(); ctx.arc(hX, top + 2, 10, Math.PI, 0); ctx.fill();
     },
-
     "fade": (ctx, hX, hY, color) => {
         const offset = -7;
         const top = hY + offset;
@@ -482,7 +504,7 @@ const HAT_STYLES = {
     },
 	"scribble": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
-        const offset = -4;      // Lowered to sit tighter on the head
+        const offset = -8;      // Lowered to sit tighter on the head
         const height = 4;       // Max height of the "scrawl"
         const width = 10;       // How far it spreads
         // ----------------
@@ -507,6 +529,41 @@ const HAT_STYLES = {
         // A single tiny "messy loop" closer to the hair line
         ctx.beginPath();
         ctx.arc(hX + 2, top - 1, 2, 0, Math.PI * 2);
+        ctx.stroke();
+    },
+	"wizardbeard": (ctx, hX, hY, color) => {
+        // --- SETTINGS ---
+        const offset = -4;
+        const beardLen = 25;    // How long the beard is
+        const beardWidth = 10;  // How wide the beard is
+        const sway = Math.sin(Date.now() / 600) * 2; // Very slow majestic sway
+        // ----------------
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "rgba(0,0,0,0.15)";
+
+        // 1. Short Hair Top (The "Buzz Cut")
+        ctx.beginPath();
+        ctx.arc(hX, top, 11, Math.PI, 0);
+        ctx.fill(); ctx.stroke();
+
+        // 2. The Massive Beard (Drawn from the chin)
+        ctx.beginPath();
+        ctx.moveTo(hX - 8, hY - 2); // Start at left cheek
+        ctx.quadraticCurveTo(hX - beardWidth + sway, hY + 10, hX + sway, hY + beardLen); // Left side to point
+        ctx.quadraticCurveTo(hX + beardWidth + sway, hY + 10, hX + 8, hY - 2); // Point to right cheek
+        ctx.fill(); ctx.stroke();
+
+        // 3. The Mustache
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+        ctx.beginPath();
+        ctx.moveTo(hX - 4, hY - 3); ctx.lineTo(hX - 8, hY + 1);
+        ctx.moveTo(hX + 4, hY - 3); ctx.lineTo(hX + 8, hY + 1);
+        ctx.stroke();
+
+        // 4. Beard Strands (Texture)
+        ctx.beginPath();
+        ctx.moveTo(hX, hY + 5); ctx.lineTo(hX + sway, hY + beardLen - 5);
         ctx.stroke();
     },
 // ----------------------------------------------------------------
