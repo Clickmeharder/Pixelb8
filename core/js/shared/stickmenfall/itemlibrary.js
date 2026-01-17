@@ -69,12 +69,13 @@ const ITEM_DB = {
     "Cloak":     { type: "cape", style:"", color: "#880000", value: 10000 },
     "Ball gown":     { type: "cape", style:"", color: "#880000", value: 10000 },
     "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
-    "hair1":     { type: "hair", style: "hair",   value: 5, color: "#ffff00" },//spiky hair
-	"hair2": { type: "hair", style: "spiky", color: "#f3e5ab" },//"spiky blonde hair"
-	"hair3": { type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
-	"hair4": { type: "hair", style: "ponytail", color: "#222222" },// ponytail
-	"hair5": { type: "hair", style: "bob", color: "#4b3621" },// bob hair
-	"hair6": { type: "hair", style: "pigtails", color: "#4b3621" },// pigtails hair
+	"hair1": { type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
+	"hair2": { type: "hair", style: "pigtails", color: "#4b3621" },// pigtails hair
+	"hair3": { type: "hair", style: "sidesweep",  color: "#f3e5ab" }, // blonde side-sweep
+    "hair4": { type: "hair", style: "spacebuns",  color: "#222222" }, // black space buns
+    "hair5": { type: "hair", style: "flow",       color: "#614126" }, // brown surfer flow
+    "hair6": { type: "hair", style: "fade",       color: "#4b3621" }, // dark clean fade
+    "hair7": { type: "hair", style: "scribble",   color: "#ffeb3b" }, // yellow child scribble
 // special weapon/tool
 //    "Paint Brush":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
     // Legacy support (still works without a style property - just defaults to type)
@@ -327,110 +328,6 @@ const HAT_STYLES = {
         ctx.moveTo(hX + 5, top - 10); ctx.lineTo(hX + 5, top - 2);
         ctx.stroke();
     },
-	"hair": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = -7;
-        const width = 12;
-        const strandCount = 8;
-        const spikeH = 7;
-        // ----------------
-        const top = hY + offset;
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.moveTo(hX - width, top + 5);
-        // Jagged top for "strandy" look
-        for (let i = 0; i <= strandCount; i++) {
-            let x = hX - width + (i * (width * 2 / strandCount));
-            let y = top - (i % 2 === 0 ? spikeH : spikeH - 3);
-            ctx.lineTo(x, y);
-        }
-        ctx.lineTo(hX + width, top + 8);
-        ctx.lineTo(hX - width, top + 8);
-        ctx.fill();
-
-        // Internal Strand Lines
-        ctx.strokeStyle = "rgba(0,0,0,0.2)";
-        for (let i = 1; i < strandCount; i++) {
-            let x = hX - width + (i * (width * 2 / strandCount));
-            ctx.beginPath();
-            ctx.moveTo(x, top);
-            ctx.lineTo(x, top + 6);
-            ctx.stroke();
-        }
-    },
-
-    "spiky": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = -8;
-        const width = 13;
-        const spikes = 6;
-        const spikeH = 12;
-        // ----------------
-        const top = hY + offset;
-        ctx.fillStyle = color;
-        ctx.strokeStyle = "rgba(0,0,0,0.3)";
-        
-        // Draw individual triangle strands instead of one big block
-        for (let i = 0; i < spikes; i++) {
-            ctx.beginPath();
-            let x = hX - width + (i * (width * 2 / (spikes - 1)));
-            ctx.moveTo(x, top + 5);
-            ctx.lineTo(x + (Math.random() - 0.5) * 5, top - spikeH); // Random slight tilt
-            ctx.lineTo(x + 4, top + 5);
-            ctx.fill(); ctx.stroke();
-        }
-    },
-
-    "ponytail": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = -5;
-        const pLen = 22;
-        const sway = Math.sin(Date.now() / 450) * 2;
-        // ----------------
-        const top = hY + offset;
-        ctx.fillStyle = color;
-
-        // 1. Draw Tail FIRST (puts it behind the head)
-        ctx.beginPath();
-        ctx.moveTo(hX, top); 
-        ctx.quadraticCurveTo(hX + 15 + sway, top + 5, hX + 5 + sway, top + pLen);
-        ctx.lineTo(hX + sway, top + pLen);
-        ctx.quadraticCurveTo(hX + 10 + sway, top + 5, hX, top + 2);
-        ctx.fill();
-
-        // 2. Draw Scalp (covers the start of the tail)
-        ctx.beginPath(); ctx.arc(hX, top, 11, Math.PI, 0); ctx.fill();
-        
-        // Strand details on scalp
-        ctx.strokeStyle = "rgba(0,0,0,0.1)";
-        ctx.beginPath(); ctx.arc(hX, top, 8, Math.PI, 0); ctx.stroke();
-    },
-
-    "bob": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = -4;
-        const bWidth = 13;
-        const bLength = 15;
-        // ----------------
-        const top = hY + offset;
-        ctx.fillStyle = color;
-        
-        // Main Shape
-        ctx.beginPath();
-        ctx.arc(hX, top, bWidth, Math.PI, 0);
-        ctx.lineTo(hX + bWidth, top + bLength);
-        ctx.lineTo(hX - bWidth, top + bLength);
-        ctx.fill();
-
-        // STRAND LINES (This fixes the "half circle" look)
-        ctx.strokeStyle = "rgba(0,0,0,0.15)";
-        ctx.beginPath();
-        for(let i = -bWidth + 4; i < bWidth; i += 4) {
-            ctx.moveTo(hX + i, top - 5);
-            ctx.lineTo(hX + i, top + bLength - 2);
-        }
-        ctx.stroke();
-    },
 	"mohawk": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
         const offset = -8;
@@ -507,6 +404,104 @@ const HAT_STYLES = {
             ctx.fillRect(hX + side - 2, top + 1, 4, 2);
             ctx.fillStyle = color;
         });
+    },
+	"sidesweep": (ctx, hX, hY, color) => {
+        const offset = -6;
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        // The long sweeping bang
+        ctx.beginPath();
+        ctx.moveTo(hX - 10, top + 2);
+        ctx.quadraticCurveTo(hX, top - 12, hX + 14, top + 15);
+        ctx.lineTo(hX + 8, top + 15);
+        ctx.quadraticCurveTo(hX, top - 2, hX - 10, top + 5);
+        ctx.fill();
+        // The back hair
+        ctx.beginPath();
+        ctx.arc(hX, top, 11, Math.PI, 0);
+        ctx.lineTo(hX + 11, top + 18);
+        ctx.quadraticCurveTo(hX, top + 12, hX - 11, top + 18);
+        ctx.fill();
+    },
+
+    "spacebuns": (ctx, hX, hY, color) => {
+        const offset = -9;
+        const top = hY + offset;
+        const bounce = Math.sin(Date.now() / 400) * 1.5;
+        ctx.fillStyle = color;
+        // Main scalp
+        ctx.beginPath(); ctx.arc(hX, top + 3, 11, Math.PI, 0); ctx.fill();
+        // The Buns
+        [-8, 8].forEach(side => {
+            ctx.beginPath();
+            ctx.arc(hX + side, top - 2 + bounce, 6, 0, Math.PI * 2);
+            ctx.fill();
+            // Loose strands
+            ctx.strokeStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(hX + side + (side > 0 ? 4 : -4), top);
+            ctx.lineTo(hX + side + (side > 0 ? 8 : -8), top + 8);
+            ctx.stroke();
+        });
+    },
+	"flow": (ctx, hX, hY, color) => {
+        const offset = -7;
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        // Layered sweeps
+        for(let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.moveTo(hX - 12 + (i*4), top + 2);
+            ctx.quadraticCurveTo(hX + 5, top - 10 - i, hX + 12, top + 4 + i);
+            ctx.lineTo(hX + 10, top + 8);
+            ctx.fill();
+        }
+        ctx.beginPath(); ctx.arc(hX, top + 2, 10, Math.PI, 0); ctx.fill();
+    },
+
+    "fade": (ctx, hX, hY, color) => {
+        const offset = -7;
+        const top = hY + offset;
+        ctx.fillStyle = color;
+        // Small fringe spikes
+        ctx.beginPath();
+        ctx.moveTo(hX - 10, top + 2);
+        for(let i = 0; i < 4; i++) {
+            ctx.lineTo(hX - 6 + (i * 5), top - 4);
+            ctx.lineTo(hX - 2 + (i * 5), top + 1);
+        }
+        ctx.fill();
+        // Textured buzz look (dots)
+        for(let i = 0; i < 8; i++) {
+            ctx.globalAlpha = 0.5;
+            ctx.fillRect(hX - 8 + (i*2), top - 2, 2, 2);
+        }
+        ctx.globalAlpha = 1.0;
+    },
+	"scribble": (ctx, hX, hY, color) => {
+        const offset = -6;
+        const top = hY + offset;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(hX - 10, top);
+        
+        // Loop to create "chaotic" peaks
+        for(let i = 0; i < 15; i++) {
+            let x = hX - 10 + (i * 1.5);
+            let y = top - 2 - (i % 3 === 0 ? 8 : 4);
+            ctx.lineTo(x, y);
+            ctx.lineTo(x + 1, y + 5);
+        }
+        ctx.stroke();
+        
+        // Add a few "loose" scribble loops
+        ctx.beginPath();
+        ctx.arc(hX - 4, top - 4, 3, 0, Math.PI * 2);
+        ctx.stroke();
     },
 // ----------------------------------------------------------------
 // HOOD STYLES-----------------------------------------------------
