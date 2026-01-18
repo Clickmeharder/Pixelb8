@@ -1014,8 +1014,10 @@ function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     
     // Sink the character if they are in the water at the pond
-    if (p.activeTask === "swimming" && p.area === "pond" && p.x > 250) {
-        anim.bodyY = 60; // Lower the whole body by 15 pixels
+	if (p.activeTask === "swimming" && p.area === "pond" && p.x > 250) {
+        // 60 is the depth, Math.sin creates a 5-pixel bobbing motion
+        const bobbing = Math.sin(now / 400) * 5; 
+        anim.bodyY = 60 + bobbing; 
     }
 
     if (p.activeTask === "dancing" && DANCE_LIBRARY[p.danceStyle]) {
