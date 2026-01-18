@@ -137,7 +137,7 @@ function getPlayer(name, color) {
     
     return players[name];
 }
-/* function movePlayer(p, targetArea) {
+function movePlayer(p, targetArea) {
     if (p.dead) {
         systemMessage(`${p.name} is a corpse and cannot travel!`);
         return;
@@ -157,8 +157,8 @@ function getPlayer(name, color) {
     p.activeTask = null; 
     if (targetArea !== "dungeon") dungeonQueue = dungeonQueue.filter(n => n !== p.name);
     systemMessage(`${p.name} traveled to ${targetArea}`);
-} */
-function movePlayer(p, targetArea) {
+}
+/* function movePlayer(p, targetArea) {
     if (p.dead) {
         systemMessage(`${p.name} is a corpse and cannot travel!`);
         return;
@@ -183,6 +183,7 @@ function movePlayer(p, targetArea) {
     if (targetArea !== "dungeon") dungeonQueue = dungeonQueue.filter(n => n !== p.name);
     systemMessage(`${p.name} traveled to ${targetArea}`);
 }
+ */
 // =================================================
 /* ================= PLAYER TOOLTIPS =============== */
 // catch mouse over/hover event of the stickmen on screen
