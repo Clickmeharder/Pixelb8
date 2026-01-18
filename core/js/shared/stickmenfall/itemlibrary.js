@@ -96,11 +96,10 @@ const DANCE_UNLOCKS = {
     2: { name: "The paddle", minLvl: 5 },
     3: { name: "The Lean",  minLvl: 1 },
     4: { name: "The groupy", minLvl: 1 },
+	5: { name: "The Sway", minLvl: 1 },
     6: { name: "The sixthdance", minLvl: 1 },
-    7: { name: "The seventhdance", minLvl: 1 },
-    8: { name: "The eigthdance",  minLvl: 1 },
-    9: { name: "The ninthdance", minLvl: 1 },
-	10: { name: "The tenthdance", minLvl: 1 },
+    7: { name: "The ninthdance", minLvl: 1 },
+
 	99: { name: "The 99", minLvl: 99 }
 };
 
@@ -113,7 +112,15 @@ const DANCE_LIBRARY = {
         armMove: Math.sin(now / 150) * 5,
         pose: "head_hands" 
     }),
-    5: (now, p) => { 
+    5: (now) => ({ lean: Math.sin(now / 200) * 0.6 }), // The Lean
+    6: (now) => ({ bodyY: Math.sin(now / 175) * 4 }), // The Bop
+ 
+    7: (now) => ({ 
+        bodyY: Math.min(0, Math.sin(now / 200) * -40),
+        lean: Math.sin(now / 200) * 0.2,
+        pose: "action"
+    })
+    99: (now, p) => { 
         let bY = Math.min(0, Math.sin(now / 200) * -50); 
         if (bY > -1 && p.wasInAir) {
             spawnArrow(p.x, p.y + 25, p.x + 60, p.y + 25);
@@ -123,19 +130,6 @@ const DANCE_LIBRARY = {
         if (bY < -5) p.wasInAir = true;
         return { bodyY: bY, lean: 0, pose: "action" };
     },
-    6: (now) => ({ bodyY: Math.sin(now / 175) * 4 }), // The Bop
-    7: (now) => ({ lean: Math.sin(now / 200) * 0.6 }), // The Lean
-
-    8: (now) => ({ 
-        bodyY: Math.min(0, Math.sin(now / 150) * -25),
-        armMove: Math.sin(now / 150) * 5,
-        pose: "star" 
-    }),
-    9: (now) => ({ 
-        bodyY: Math.min(0, Math.sin(now / 200) * -40),
-        lean: Math.sin(now / 200) * 0.2,
-        pose: "action"
-    })
 };
 /* ================= ITEM DRAWING LIBRARY ================= */
 // headstyles are helmets or different head slot item styles

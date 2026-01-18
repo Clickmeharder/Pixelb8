@@ -56,10 +56,10 @@ const ITEM_DB = {
 };
 
 const DANCE_UNLOCKS = {
-    1: { name: "The Squat", minLvl: 1 },
+    1: { name: "The Hop", minLvl: 1 },
     2: { name: "The Flail", minLvl: 5 },
     3: { name: "The Lean",  minLvl: 10 },
-    4: { name: "The Op-Pa", minLvl: 2 }
+    4: { name: "The groupy", minLvl: 2 }
 };
 
 /* ================= GAME STATE ================= */
@@ -541,7 +541,7 @@ const cmdHandlers = {
 
     listdances: (p) => {
         const lvl = p.stats.danceLevel;
-        let msg = `Your Dance Lvl: ${lvl}. Unlocks: [1] The Squat (Lvl 1) `;
+        let msg = `Your Dance Lvl: ${lvl}. Unlocks: [1] The Hop (Lvl 1) `;
         msg += lvl >= 5 ? `[2] The Flail (Lvl 5) ` : `[2] LOCKED (Lvl 5) `;
         msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
         systemMessage(msg);
