@@ -842,23 +842,22 @@ function handleEnemyAttacks() {
 }
 /*------------------------------------------------------------*/
 function generateRandomLoadout() {
-    // 1. Define possible item pools based on your ITEM_DB keys
-    const hats = ["Iron Helmet", "Viking Helm", "Wizard Hat", "Cool Hood", "fun hat", "stickmenpo", null];
-    const weapons = ["Rusty Dagger", "Iron Sword", "shortbow", "Wooden Staff", "Wooden Shortbow", "Styled Staff"];
-    const armor = ["Leather Tunic", "Iron Plate", null];
+    // Helper to get random item by type from your ITEM_DB
+    const getItemsByType = (type) => Object.keys(ITEM_DB).filter(key => ITEM_DB[key].type === type);
 
-    // 2. Randomly select items
-    const selectedWeapon = weapons[Math.floor(Math.random() * weapons.length)];
-    const selectedHat = hats[Math.floor(Math.random() * hats.length)];
-    const selectedArmor = armor[Math.floor(Math.random() * armor.length)];
+    const weaponPool = getItemsByType("sword").concat(getItemsByType("bow"), getItemsByType("staff"));
+    const headPool = getItemsByType("helmet").concat(getItemsByType("hair"));
+    const armorPool = getItemsByType("armor");
+    const legPool = getItemsByType("pants");
+    const glovePool = getItemsByType("gloves");
 
-    // 3. Return an object formatted for the enemy 'equipped' property
     return {
-        weapon: selectedWeapon,
-        helmet: selectedHat,
-        armor: selectedArmor,
-        // You can add more slots here as you expand your DB!
-        pants: Math.random() > 0.5 ? "Leather Pants" : null 
+        weapon: weaponPool[Math.floor(Math.random() * weaponPool.length)],
+        helmet: headPool[Math.floor(Math.random() * headPool.length)],
+        // 70% chance to have these parts
+        armor: Math.random() < 0.7 ? armorPool[Math.floor(Math.random() * armorPool.length)] : null,
+        pants: Math.random() < 0.7 ? legPool[Math.floor(Math.random() * legPool.length)] : null,
+        gloves: Math.random() < 0.5 ? glovePool[Math.floor(Math.random() * glovePool.length)] : null
     };
 }
 // Loot Helper to keep performAttack clean
@@ -1290,47 +1289,50 @@ function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
 
-    const anim = { bodyY: Math.sin(now / 200) * 2, armMove: 0, lean: 0 };
+    const anim = { bodyY: Math.sin(now / 200) * 2, armMove: 0, lean: -0.2 }; 
     const anchors = getAnchorPoints(e, anim); 
     const limbs = getLimbPositions(e, anchors, anim, now);
 
     ctx.save();
     
-    // Set Enemy Styling
+    // 1. Flip Logic
+    ctx.translate(e.x, 0); 
+    ctx.scale(-1, 1); 
+    ctx.translate(-e.x, 0); 
+
+    // 2. Enemy Base Style
     ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
     ctx.lineWidth = 3;
 
-    if (e.name === "VoidWalker") {
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = "purple";
-        ctx.globalAlpha = 0.6;
+    // 3. Draw Body
+    drawStickmanBody(ctx, e, anchors, limbs);
+
+    // 4. Draw Equipment Layers
+    if (e.equipped) {
+        // Render Headgear (Helmet or Hair)
+        if (e.equipped.helmet) {
+            drawHelmetItem(ctx, e, anchors.bodyY, anchors.lean, ITEM_DB[e.equipped.helmet]);
+        }
+
+        // Render Armor/Gloves/Pants using your equipment layer system
+        // Note: We pass the limb positions so the gloves/boots stick to the hands/feet
+        renderEnemyEquipment(ctx, e, now, anchors, limbs);
+
+        // Render Weapon
+        if (e.equipped.weapon) {
+            let weapon = ITEM_DB[e.equipped.weapon];
+            ctx.save();
+            ctx.translate(limbs.rightHand.x, limbs.rightHand.y);
+            const drawFn = WEAPON_STYLES[weapon.style || weapon.type] || WEAPON_STYLES["sword"];
+            drawFn(ctx, weapon, true, now, e, anchors.bodyY, anchors.lean);
+            ctx.restore();
+        }
     }
 
-    // Draw Body
-    const style = BODY_PARTS["stick"];
-    style.head(ctx, anchors.headX, anchors.headY, e);
-    style.torso(ctx, anchors.headX, anchors.headY, e.x, anchors.hipY);
-    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.leftHand.x, limbs.leftHand.y);
-    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.rightHand.x, limbs.rightHand.y);
-    style.limbs(ctx, e.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y);
-    style.limbs(ctx, e.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y);
-
-    // Draw Equipment
-    if (e.equipped?.weapon && ITEM_DB[e.equipped.weapon]) {
-        let weapon = ITEM_DB[e.equipped.weapon];
-        ctx.save();
-        ctx.translate(limbs.rightHand.x, limbs.rightHand.y);
-        const drawFn = WEAPON_STYLES[weapon.style || weapon.type] || WEAPON_STYLES["sword"];
-        drawFn(ctx, weapon, true, now, e, anchors.bodyY, anchors.lean);
-        ctx.restore();
-    }
-    
-    if (e.equipped?.helmet && ITEM_DB[e.equipped.helmet]) {
-        drawHelmetItem(ctx, e, anchors.bodyY, anchors.lean, ITEM_DB[e.equipped.helmet]);
-    }
-
-    ctx.restore(); // IMPORTANT: This resets the purple/red colors so the player isn't affected
+    ctx.restore(); 
 }
+
+
 function drawMonster(ctx, m) {
     if (m.dead) return;
     ctx.save();
@@ -1387,6 +1389,23 @@ function drawMonster(ctx, m) {
     ctx.restore(); // Restore alpha for everything else drawn later
 }
  */
+ // A simplified equipment renderer for enemies
+function renderEnemyEquipment(ctx, e, now, anchors, limbs) {
+    const eq = e.equipped;
+    if (!eq) return;
+
+    // Draw Armor (Torso)
+    if (eq.armor) drawArmorItem(ctx, e, anchors, ITEM_DB[eq.armor]);
+    
+    // Draw Pants
+    if (eq.pants) drawPantsItem(ctx, e, limbs.leftFoot, limbs.rightFoot, ITEM_DB[eq.pants]);
+
+    // Draw Gloves (on hands)
+    if (eq.gloves) {
+        drawGloveItem(ctx, limbs.leftHand, ITEM_DB[eq.gloves]);
+        drawGloveItem(ctx, limbs.rightHand, ITEM_DB[eq.gloves]);
+    }
+}
 function renderEquipmentLayer(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot) {
     const weaponItem = ITEM_DB[p.stats.equippedWeapon];
     const task = p.activeTask || "none";
