@@ -377,16 +377,14 @@ function performAttack(p) {
         
         applyDamage(target, actualDmg);
 		// CHECK FOR DEATH & LOOT
-        if (target.hp <= 0 && !target.dead) {
-            target.dead = true;
-            target.deathTime = Date.now();
-            
-            // If it's a dungeon enemy, give loot to the player (p)
-            if (target.isEnemy || target.isBoss) {
-                handleLoot(p, target);
-                systemMessage(`${p.name} defeated ${target.name}!`);
-            }
-        }
+        if (target.hp <= 0) { // If they just died from that hit
+			// Only drop loot if they weren't already marked as 'looted'
+			if ((target.isEnemy || target.isBoss) && !target.looted) {
+				target.looted = true; // Prevent double-looting
+				handleLoot(p, target);
+				systemMessage(`${p.name} defeated ${target.name}!`);
+			}
+		}
         // 4. Award XP to the correct skill
         p.stats[skillType + "XP"] += 10;
         if (p.stats[skillType + "XP"] >= xpNeeded(p.stats[skillType + "Level"])) {
@@ -1680,31 +1678,52 @@ function updateSystemTicks(now) {
 	updateBuyerNPC();
 }
 function updateUI() {
-    let enemyText = "";
-    
-    if (viewArea === "dungeon") {
-        // Wave Header
-        enemyText += `<div style="color: #ff4444; font-weight: bold; border-bottom: 1px solid #555; margin-bottom: 5px;">`;
-        enemyText += `RAID WAVE: ${dungeonWave} | TIER: ${Math.floor(dungeonWave/5) + 1}`;
-        enemyText += `</div>`;
+    let uiHTML = "";
 
-        // Boss Info
+    // --- 1. COUNTDOWN SECTION ---
+    if (dungeonCountdownInterval && dungeonSecondsLeft > 0) {
+        uiHTML += `
+            <div style="background: rgba(0,0,0,0.7); padding: 10px; border: 2px solid #ffcc00; text-align: center; margin-bottom: 10px; border-radius: 5px;">
+                <b style="color: #ffcc00; font-size: 16px;">DUNGEON STARTING IN: ${dungeonSecondsLeft}s</b><br>
+                <small style="color: #fff;">Prepare your gear!</small>
+            </div>`;
+    }
+
+    // --- 2. PLAYER STATUS SECTION (Visible in Dungeon) ---
+    if (viewArea === "dungeon") {
+        uiHTML += `<div style="background: rgba(0,0,0,0.5); padding: 5px; border: 1px solid #00ffff; margin-bottom: 10px;">`;
+        uiHTML += `<b style="color: #00ffff;">PARTY STATUS:</b><br>`;
+        Object.values(players).filter(p => p.area === "dungeon").forEach(p => {
+            const hpPct = Math.floor((p.hp / p.maxHp) * 100);
+            const color = p.dead ? "#ff0000" : (hpPct < 30 ? "#ffaa00" : "#00ff00");
+            uiHTML += `<div style="font-size: 12px; color: ${color};">
+                ${p.name}: ${p.hp}/${p.maxHp} HP [${hpPct}%] ${p.dead ? '💀' : ''}
+            </div>`;
+        });
+        uiHTML += `</div>`;
+    }
+
+    // --- 3. ENEMY & BOSS SECTION ---
+    if (viewArea === "dungeon" && dungeonActive) {
+        uiHTML += `<div style="color: #ff4444; font-weight: bold; border-bottom: 1px solid #555; margin-bottom: 5px;">`;
+        uiHTML += `RAID WAVE: ${dungeonWave} | TIER: ${Math.floor(dungeonWave/5) + 1}`;
+        uiHTML += `</div>`;
+
         if (boss && !boss.dead) {
             const bPct = Math.floor((boss.hp / boss.maxHp) * 100);
-            enemyText += `<b style="color: gold;">BOSS: ${boss.hp} HP (${bPct}%)</b><br>`;
+            uiHTML += `<b style="color: gold;">BOSS: ${boss.hp} HP (${bPct}%)</b><br>`;
         }
 
-        // Minion Info
         enemies.forEach(e => { 
             if(!e.dead) {
                 const hpPercent = Math.floor((e.hp / e.maxHp) * 100);
-                enemyText += `<span style="color: #ddd;">${e.name}:</span> ${e.hp} HP (${hpPercent}%)<br>`; 
+                uiHTML += `<span style="color: #ddd;">${e.name}:</span> ${e.hp} HP (${hpPercent}%)<br>`; 
             }
         });
     }
 
     const uiElement = document.getElementById("enemyUI");
-    if (uiElement) uiElement.innerHTML = enemyText;
+    if (uiElement) uiElement.innerHTML = uiHTML;
 }
 /* ================= GAME LOOP ================= */
 function gameLoop() {
