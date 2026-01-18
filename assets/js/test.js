@@ -852,6 +852,26 @@ function handleEnemyAttacks() {
     });
 }
 /*------------------------------------------------------------*/
+function generateRandomLoadout() {
+    // 1. Define possible item pools based on your ITEM_DB keys
+    const hats = ["Iron Helmet", "Viking Helm", "Wizard Hat", "Cool Hood", "fun hat", "stickmenpo", null];
+    const weapons = ["Rusty Dagger", "Iron Sword", "shortbow", "Wooden Staff", "Wooden Shortbow", "Styled Staff"];
+    const armor = ["Leather Tunic", "Iron Plate", null];
+
+    // 2. Randomly select items
+    const selectedWeapon = weapons[Math.floor(Math.random() * weapons.length)];
+    const selectedHat = hats[Math.floor(Math.random() * hats.length)];
+    const selectedArmor = armor[Math.floor(Math.random() * armor.length)];
+
+    // 3. Return an object formatted for the enemy 'equipped' property
+    return {
+        weapon: selectedWeapon,
+        helmet: selectedHat,
+        armor: selectedArmor,
+        // You can add more slots here as you expand your DB!
+        pants: Math.random() > 0.5 ? "Leather Pants" : null 
+    };
+}
 // Loot Helper to keep performAttack clean
 function handleLoot(p, target) {
     let lootFound = [];
