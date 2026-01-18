@@ -119,7 +119,7 @@ const DANCE_LIBRARY = {
         bodyY: Math.min(0, Math.sin(now / 200) * -40),
         lean: Math.sin(now / 200) * 0.2,
         pose: "action"
-    })
+    }),
     99: (now, p) => { 
         let bY = Math.min(0, Math.sin(now / 200) * -50); 
         if (bY > -1 && p.wasInAir) {
