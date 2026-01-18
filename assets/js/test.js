@@ -706,7 +706,7 @@ function joinDungeonQueue(p) {
             // --- AUTO-SWITCH VIEW (30 seconds before start) ---
             if (dungeonSecondsLeft === 30) {
                 viewArea = "dungeon";
-                document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: DUNGEON (PREPARING)";
+                document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON (Pixel8ing)";
                 systemMessage("System: Switching view to Dungeon for upcoming raid...");
             }
 
@@ -725,7 +725,7 @@ function startDungeon() {
     
     // Ensure the view is definitely on the dungeon
     viewArea = "dungeon"; 
-    document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: DUNGEON (ACTIVE)";
+    document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON (ACTIVE)";
 
     dungeonQueue.forEach(name => {
         let p = players[name];
@@ -1683,7 +1683,7 @@ function cmdSwim(p, user) {
         systemMessage(`${p.name} stripped off their gear to go for a dip.`);
     }
     // Move the player INTO the water (x > 250)
-    p.targetX = 350 + (Math.random() * 150);
+    p.targetX = 400 + (Math.random() * 250);
 	
     p.activeTask = "swimming";
     p.taskEndTime = Date.now() + (15 * 60 * 1000); // 15 mins
@@ -2069,18 +2069,7 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
         systemMessage(`${p.name} returned to life!`); 
     }
 
-/*     // Admin Controls//
-    if (flags.broadcaster || flags.mod) {
-        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: HOME"; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: DUNGEON"; }
-        if (cmd === "showfishing") { viewArea = "pond"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: FISHING POND"; }
-		// --- Manual Merchant Controls ---//
-		if (cmd === "spawnmerchant") {forceBuyer = true;updateBuyerNPC();systemMessage("[ADMIN] Merchant forced to spawn.");}
-		if (cmd === "despawnmerchant") {forceBuyer = false;updateBuyerNPC();systemMessage("[ADMIN] Merchant forced to leave.");}
-		// reset puts him back on the 7-minute automatic timer//
-		if (cmd === "resetmerchant") {forceBuyer = null; updateBuyerNPC();systemMessage("[ADMIN] Merchant returned to automatic schedule.");}
-		if (cmd === "testdance") {cmdTestDance(p, user, args.slice(1), flags);}
-    } */
+
 // Admin & Streamer Controls
     // We check if the command exists first, then verify authorization
     const adminCommands = ["showhome", "showdungeon", "showpond", "spawnmerchant", "despawnmerchant", "resetmerchant", "give", "additem"];
@@ -2093,15 +2082,15 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
 		}
         if (cmd === "showhome") { 
             viewArea = "home"; 
-            document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: HOME"; 
+            document.getElementById("areaDisplay").textContent = "StickmenFall: HOME"; 
         }
         if (cmd === "showdungeon") { 
             viewArea = "dungeon"; 
-            document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: DUNGEON"; 
+            document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON"; 
         }
         if (cmd === "showpond") { 
             viewArea = "pond"; 
-            document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: FISHING POND"; 
+            document.getElementById("areaDisplay").textContent = "StickmenFall: FISHING POND"; 
         }
         
         // --- Manual Merchant Controls ---
