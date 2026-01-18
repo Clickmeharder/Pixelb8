@@ -376,7 +376,17 @@ function performAttack(p) {
         if (weapon.type === "bow") spawnArrow(p.x, p.y - 10, target.x, target.y);
         
         applyDamage(target, actualDmg);
-
+		// CHECK FOR DEATH & LOOT
+        if (target.hp <= 0 && !target.dead) {
+            target.dead = true;
+            target.deathTime = Date.now();
+            
+            // If it's a dungeon enemy, give loot to the player (p)
+            if (target.isEnemy || target.isBoss) {
+                handleLoot(p, target);
+                systemMessage(`${p.name} defeated ${target.name}!`);
+            }
+        }
         // 4. Award XP to the correct skill
         p.stats[skillType + "XP"] += 10;
         if (p.stats[skillType + "XP"] >= xpNeeded(p.stats[skillType + "Level"])) {
@@ -798,27 +808,52 @@ function startDungeon() {
 
 function spawnWave() {
     enemies = [];
+    // Every 5th wave is a Boss Wave
+    const isBossWave = (dungeonWave % 5 === 0);
+    const waveSize = isBossWave ? 2 : 3; // Fewer minions if there is a boss
+
     const types = ["Slime", "StickmanHunter", "Grumble", "VoidWalker"];
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < waveSize; i++) {
         let type = types[Math.floor(Math.random() * types.length)];
         let isStickman = (type === "StickmanHunter" || type === "VoidWalker");
         
+        // Balanced HP scaling: 50 + (25 per wave)
+        let enemyHp = 50 + (dungeonWave * 25);
+
         enemies.push({ 
             name: type, 
-            area: "dungeon", // Crucial for drawEnemyStickman
-            hp: 50 * dungeonWave, 
-            maxHp: 50 * dungeonWave, 
+            area: "dungeon",
+            hp: enemyHp, 
+            maxHp: enemyHp, 
             x: 500 + (i * 100), 
             y: 450, 
             dead: false,
             isEnemy: true,
             isStickman: isStickman,
-            stats: { lurkLevel: 0 }, // Prevents errors in limb helpers
+            stats: { lurkLevel: 0 },
             equipped: isStickman ? generateRandomLoadout() : {} 
         });
     }
-    // ... rest of boss logic
+
+    // SPAWN BOSS
+    if (isBossWave) {
+        boss = {
+            name: "DUNGEON OVERLORD",
+            area: "dungeon",
+            hp: 500 + (dungeonWave * 50),
+            maxHp: 500 + (dungeonWave * 50),
+            x: 800,
+            y: 450,
+            dead: false,
+            isBoss: true,
+            isMonster: true, // Uses drawMonster
+            color: "#ff0000"
+        };
+        systemMessage("⚠️ A BOSS HAS APPEARED!");
+    } else {
+        boss = null;
+    }
 }
 function checkDungeonProgress() {
     let aliveEnemies = enemies.filter(e => !e.dead).length;
@@ -831,12 +866,18 @@ function handleEnemyAttacks() {
     let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
     if (dwellers.length === 0) return;
     
-    enemies.forEach(e => {
+    // Include the boss in the attack loop
+    let allAttackers = [...enemies];
+    if (boss && !boss.dead) allAttackers.push(boss);
+
+    allAttackers.forEach(e => {
         if (e.dead) return;
         let target = dwellers[Math.floor(Math.random() * dwellers.length)];
         
-        // Damage scales slightly with the wave
-        let dmg = 5 + (dungeonWave * 2);
+        // NEW BALANCED DAMAGE: Base 3 + 1 per wave
+        let dmg = 3 + Math.floor(dungeonWave * 1.2); 
+        if (e.isBoss) dmg *= 2; // Boss hits harder
+        
         applyDamage(target, dmg); 
     });
 }
@@ -1641,71 +1682,84 @@ function updateSystemTicks(now) {
 function updateUI() {
     let enemyText = "";
     
-    // 1. Show Dungeon Countdown if timer is active
-    if (dungeonCountdownInterval && dungeonSecondsLeft > 0) {
-        enemyText += `<div style="color: #ffcc00; font-weight: bold;">Raid starting in: ${dungeonSecondsLeft}s</div><hr>`;
-    }
-
-    // 2. Enemy UI Updates
     if (viewArea === "dungeon") {
+        // Wave Header
+        enemyText += `<div style="color: #ff4444; font-weight: bold; border-bottom: 1px solid #555; margin-bottom: 5px;">`;
+        enemyText += `RAID WAVE: ${dungeonWave} | TIER: ${Math.floor(dungeonWave/5) + 1}`;
+        enemyText += `</div>`;
+
+        // Boss Info
+        if (boss && !boss.dead) {
+            const bPct = Math.floor((boss.hp / boss.maxHp) * 100);
+            enemyText += `<b style="color: gold;">BOSS: ${boss.hp} HP (${bPct}%)</b><br>`;
+        }
+
+        // Minion Info
         enemies.forEach(e => { 
             if(!e.dead) {
                 const hpPercent = Math.floor((e.hp / e.maxHp) * 100);
-                enemyText += `${e.name}: ${e.hp} HP (${hpPercent}%)<br>`; 
+                enemyText += `<span style="color: #ddd;">${e.name}:</span> ${e.hp} HP (${hpPercent}%)<br>`; 
             }
         });
-        
-        if (boss && !boss.dead) {
-            const bossPercent = Math.floor((boss.hp / boss.maxHp) * 100);
-            enemyText += `<b style="color: #ff4444;">BOSS: ${boss.hp} HP (${bossPercent}%)</b>`;
-        }
     }
-    
+
     const uiElement = document.getElementById("enemyUI");
-    if (uiElement) {
-        uiElement.innerHTML = enemyText;
-    }
+    if (uiElement) uiElement.innerHTML = enemyText;
 }
 /* ================= GAME LOOP ================= */
 function gameLoop() {
     const now = Date.now();
     
-    // 1. Rendering (The Visuals)
+    // 1. Rendering (The Visuals - Background Layer)
     renderScene();
     
     // 2. Interface (The Text/UI)
+    // This now shows the wave, difficulty, and enemy HP
     updateUI();
-	// 3. Draw Dungeon Entities FIRST (So players are always on top)
-	if (viewArea === "dungeon") {
-		// Draw Boss
-		if (boss && !boss.dead) {
-			drawMonster(ctx, boss);
-		}
-		// Draw Enemies
-		enemies.forEach(e => {
-			if (!e.dead) {
-				if (e.isStickman) drawEnemyStickman(ctx, e);
-				else drawMonster(ctx, e);
-			}
-		});
-	}
-    // 3. Entity Logic (The Players)
-	Object.values(players).forEach(p => {
-        updatePlayerStatus(p, now);   // Handles timeouts & stats
-        updatePlayerMovement(p);     // Handles walking/leaning
-        updatePlayerActions(p, now); // Handles dancing/attacking
-        drawStickman(ctx, p);        // YOUR ORIGINAL UNTOUCHED FUNCTION
+
+    // 3. Entity Logic & Progress (Calculations)
+    if (dungeonActive) {
+        // Checks if wave is cleared and handles Boss/Minion spawning
+        checkDungeonProgress();
+    }
+
+    // 4. Draw Dungeon Entities (Mid-Layer)
+    if (viewArea === "dungeon") {
+        // Draw Boss first if alive
+        if (boss && !boss.dead) {
+            drawMonster(ctx, boss);
+        }
+        // Draw Minions
+        enemies.forEach(e => {
+            if (!e.dead) {
+                if (e.isStickman) {
+                    drawEnemyStickman(ctx, e);
+                } else {
+                    drawMonster(ctx, e);
+                }
+            }
+        });
+    }
+
+    // 5. Player Logic & Drawing (Top-Layer)
+    Object.values(players).forEach(p => {
+        // Skip players in other areas
+        if (p.area !== viewArea) return;
+
+        updatePlayerStatus(p, now);   // Timeouts & idle logic
+        updatePlayerMovement(p);     // Walking & physics
+        updatePlayerActions(p, now); // Combat & loot triggers are inside here
+        drawStickman(ctx, p);        // Visual rendering
     });
 
-	// 5. World Systems (The Timers)
-    updateSystemTicks(now);
-    updateArrows(ctx);
-    updateSplashText(ctx);
+    // 6. World Systems (Effects & Timers)
+    updateSystemTicks(now); // Handles enemy AI attacks and global intervals
+    updateArrows(ctx);      // Renders projectiles
+    updateSplashText(ctx);  // Renders "Level Up" and damage floaters
     handleTooltips();
+
+    // 7. Next Frame
     requestAnimationFrame(gameLoop);
-	if (dungeonActive) {
-		checkDungeonProgress();
-	}
 }
 /* ================= GAME LOOP ================= */
 /* ================= GAME LOOP ================= */
