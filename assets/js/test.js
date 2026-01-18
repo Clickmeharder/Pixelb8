@@ -808,12 +808,12 @@ function spawnWave() {
             name: type, 
             hp: 50 * dungeonWave, 
             maxHp: 50 * dungeonWave, 
-            x: 600 + (i * 80), 
-            y: 450, 
+            // Spread them out on the right side of the screen
+            x: 500 + (i * 100), 
+            y: 450, // Ensure this matches your ground level
             dead: false,
             isEnemy: true,
             isStickman: isStickman,
-            // Give stickman enemies random gear
             equipped: isStickman ? generateRandomLoadout() : null 
         });
     }
@@ -823,11 +823,15 @@ function spawnWave() {
             name: "DUNGEON OVERLORD", 
             hp: 500 * (dungeonWave / 3), 
             maxHp: 500 * (dungeonWave / 3), 
-            x: 850, y: 450, 
+            x: 800, 
+            y: 450, 
             dead: false,
             isEnemy: true,
-            isBoss: true 
+            isBoss: true,
+            isStickman: false // Boss uses drawMonster
         };
+    } else {
+        boss = null; // Clear boss if not a boss wave
     }
 }
 
