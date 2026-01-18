@@ -40,10 +40,10 @@ let forceBuyer = null;
 let buyerActive = false;
 
 const DANCE_UNLOCKS = {
-    1: { name: "The Squat", minLvl: 1 },
+    1: { name: "The Hop", minLvl: 1 },
     2: { name: "The Flail", minLvl: 5 },
     3: { name: "The Lean",  minLvl: 10 },
-    4: { name: "The Op-Pa", minLvl: 20 } // Fixed to 20 to match your level-up logic
+    4: { name: "The groupy", minLvl: 20 } // Fixed to 20 to match your level-up logic
 };
 
 let viewArea = "home"; 
@@ -1147,7 +1147,7 @@ function handleDancing(p, now) {
             // Notification for unlocks
             if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
             if (p.stats.danceLevel === 10) systemMessage(`${p.name} unlocked Dance Style 3: The Lean!`);
-            if (p.stats.danceLevel === 20) systemMessage(`${p.name} unlocked Dance Style 4: The Op-Pa!`);
+            if (p.stats.danceLevel === 20) systemMessage(`${p.name} unlocked Dance Style 4: The groupy!`);
             
             saveStats(p);
         }
@@ -1294,7 +1294,7 @@ function cmdTestDance(p, user, args, flags) {
 }
 function cmdListDances(p) {
     const lvl = p.stats.danceLevel;
-    let msg = `Your Dance Lvl: ${lvl}. Available Dances: [1] The Squat (Lvl 1) `;
+    let msg = `Your Dance Lvl: ${lvl}. Available Dances: [1] The Hop (Lvl 1) `;
     msg += lvl >= 5 ? `[2] The Flail (Lvl 5) ` : `[2] LOCKED (Lvl 5) `;
     msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
     systemMessage(msg);

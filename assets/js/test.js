@@ -1317,7 +1317,7 @@ function handleDancing(p, now) {
             // Notification for unlocks
             if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
             if (p.stats.danceLevel === 10) systemMessage(`${p.name} unlocked Dance Style 3: The Lean!`);
-            if (p.stats.danceLevel === 20) systemMessage(`${p.name} unlocked Dance Style 4: The Op-Pa!`);
+            if (p.stats.danceLevel === 20) systemMessage(`${p.name} unlocked Dance Style 4: The groupy!`);
             
             saveStats(p);
         }
@@ -1567,7 +1567,7 @@ function cmdTestDance(p, user, args, flags) {
 }
 function cmdListDances(p) {
     const lvl = p.stats.danceLevel;
-    let msg = `Your Dance Lvl: ${lvl}. Available Dances: [1] The Squat (Lvl 1) `;
+    let msg = `Your Dance Lvl: ${lvl}. Available Dances: [1] The Hop (Lvl 1) `;
     msg += lvl >= 5 ? `[2] The Flail (Lvl 5) ` : `[2] LOCKED (Lvl 5) `;
     msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
     systemMessage(msg);

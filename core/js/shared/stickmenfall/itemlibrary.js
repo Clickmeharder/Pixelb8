@@ -92,21 +92,21 @@ const ITEM_DB = {
 };
 /* ================= EXTENDED ITEM LIBRARY ================= */
 const DANCE_UNLOCKS = {
-    1: { name: "The Squat", minLvl: 1 },
-    2: { name: "The Flail", minLvl: 5 },
+    1: { name: "The Hop", minLvl: 1 },
+    2: { name: "The paddle", minLvl: 5 },
     3: { name: "The Lean",  minLvl: 1 },
-    4: { name: "The Op-Pa", minLvl: 1 },
-	5: { name: "The 99", minLvl: 1 },// Fixed to 20 to match your level-up logic
+    4: { name: "The groupy", minLvl: 1 },
     6: { name: "The sixthdance", minLvl: 1 },
     7: { name: "The seventhdance", minLvl: 1 },
     8: { name: "The eigthdance",  minLvl: 1 },
     9: { name: "The ninthdance", minLvl: 1 },
 	10: { name: "The tenthdance", minLvl: 1 }
+	99: { name: "The 99", minLvl: 99 },// Fixed to 20 to match your level-up logic
 };
 
 const DANCE_LIBRARY = {
-    1: (now) => ({ bodyY: Math.sin(now / 100) * 8 }), // The Squat
-    2: (now) => ({ armMove: Math.sin(now / 200) * 20 }), // The Flail
+    1: (now) => ({ bodyY: Math.sin(now / 100) * 8 }), // The Hop
+    2: (now) => ({ armMove: Math.sin(now / 200) * 20 }), // The paddle
     3: (now) => ({ lean: Math.sin(now / 200) * 0.1 }), // The Sway
     4: (now) => ({ 
         bodyY: Math.abs(Math.sin(now / 150)) * -15,
