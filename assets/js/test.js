@@ -62,6 +62,8 @@ function loadStats(name) {
     const saved = localStorage.getItem("rpg_" + name);
     let stats = saved ? JSON.parse(saved) : {
         attackLevel: 1, attackXP: 0,
+		archerLevel: 1, archerXP: 0,
+		magicLevel: 1, magicXP: 0,
         healLevel: 1, healXP: 0,
         fishLevel: 1, fishXP: 0,
         danceLevel: 1, danceXP: 0,
@@ -83,6 +85,10 @@ function loadStats(name) {
         wigColor: null 
     };
 	// Inside the initial stats object and the safety checks
+	if (stats.archerLevel === undefined) stats.archerLevel = 1;
+	if (stats.archerXP === undefined) stats.archerXP = 0;
+	if (stats.magicLevel === undefined) stats.magicLevel = 1;
+	if (stats.magicXP === undefined) stats.magicXP = 0;
 	if (stats.lurkLevel === undefined) stats.lurkLevel = 1;
 	if (stats.lurkXP === undefined) stats.lurkXP = 0;
 	if (stats.swimLevel === undefined) stats.swimLevel = 1;
@@ -253,11 +259,36 @@ function updateSplashText(ctx) {
 //lvl up and xp
 function xpNeeded(lvl) { return Math.floor(50 * Math.pow(1.3, lvl)); }
 function updateCombatLevel(p) {
-    p.stats.combatLevel = Math.floor((p.stats.attackLevel + p.stats.healLevel + (p.stats.fishLevel * 0.5)) / 2);
+    const s = p.stats;
+    // Get the highest offensive skill
+    const highOffense = Math.max(s.attackLevel, s.archerLevel, s.magicLevel);
+    
+    // Combat Level = (HighSkill + Heal + Lurk + Fish/2) / 2
+    // This rewards specialized builds and high-utility players
+    p.stats.combatLevel = Math.floor((highOffense + s.healLevel + s.lurkLevel + (s.fishLevel * 0.5)) / 2);
 }
-//-------------------------------------------------------------------
+
 function applyDamage(target, amount, color = "#f00") {
     if (target.dead) return;
+
+    // --- EVASION CHECK ---
+    // If the target is a player with a lurkLevel, give them a chance to dodge
+    if (target.stats && target.stats.lurkLevel) {
+        // 5% base + 1% per lurk level (capped at 50%)
+        let dodgeChance = Math.min(0.50, 0.05 + (target.stats.lurkLevel * 0.01));
+        if (Math.random() < dodgeChance) {
+            spawnFloater(target, "MISS", "#fff");
+            // Give a tiny bit of Lurk XP for successful dodging
+            target.stats.lurkXP += 5;
+            if (target.stats.lurkXP >= xpNeeded(target.stats.lurkLevel)) {
+                target.stats.lurkLevel++;
+                target.stats.lurkXP = 0;
+                spawnFloater(target, "LURK UP!", "#FFD700");
+                updateCombatLevel(target);
+            }
+            return; // Exit function, no damage taken
+        }
+    }
 
     target.hp -= amount;
     spawnFloater(target, `-${amount}`, color);
@@ -265,10 +296,9 @@ function applyDamage(target, amount, color = "#f00") {
     if (target.hp <= 0) {
         target.hp = 0;
         target.dead = true;
-        target.activeTask = "none"; // Stop whatever they were doing
+        target.activeTask = "none";
         target.deathTime = Date.now();
         target.deathStyle = Math.random() > 0.5 ? "faceplant" : "backflip";
-        
         systemMessage(`${target.name || 'A player'} has fallen!`);
     }
 }
@@ -308,53 +338,53 @@ function performAttack(p) {
     if (p.dead) return;
 
     // 1. Identify Target
-    let target = null;
-    if (p.area === "dungeon") {
-        target = enemies.find(e => !e.dead) || boss;
-    } else if (p.area === "home") {
-        target = Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name);
-    }
+    let target = (p.area === "dungeon") 
+        ? (enemies.find(e => !e.dead) || (boss && !boss.dead ? boss : null))
+        : Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name);
+
     if (!target || target.dead) return;
 
-    // 2. Determine Range and Position
-    const isBow = p.stats.equippedWeapon?.toLowerCase().includes("shortbow");
-    const rangeNeeded = isBow ? 200 : 50;
+    // 2. Weapon & Skill Type Check
+    const weapon = ITEM_DB[p.stats.equippedWeapon] || { power: 0, type: "melee" };
     
-    // Set movement target: Bow users stay back, Melee users go close
-    p.targetX = target.x - (isBow ? 150 : 30);
+    let skillType = "attack"; // Default Melee
+    if (weapon.type === "bow") skillType = "archer";
+    if (weapon.type === "staff") skillType = "magic";
 
-    // 3. Range Check & Combat Execution
+    const isRanged = (skillType !== "attack");
+    const rangeNeeded = isRanged ? 250 : 60;
+    p.targetX = target.x - (isRanged ? 180 : 40);
+
+    // 3. Execution
     if (Math.abs(p.x - target.x) <= rangeNeeded) {
-        let weapon = ITEM_DB[p.stats.equippedWeapon];
-        let dmg = 5 + (p.stats.attackLevel * 2) + (weapon ? weapon.power : 0);
+        // Calculate Defense
+        let targetDef = 0;
+        let gearSource = target.stats || target.equipped; 
+        if (gearSource) {
+             const slots = target.stats ? ["equippedHelmet", "equippedArmor", "equippedPants", "equippedBoots"] : ["helmet", "armor", "pants", "boots"];
+             slots.forEach(s => {
+                 let item = ITEM_DB[target.stats ? target.stats[s] : target.equipped[s]];
+                 if (item) targetDef += (item.def || 0);
+             });
+        }
+
+        // Damage calculation using the specific skill level
+        let skillLvl = p.stats[skillType + "Level"];
+        let baseDmg = 5 + (skillLvl * 2) + (weapon.power || 0);
+        let actualDmg = Math.max(1, baseDmg - targetDef);
+
+        if (weapon.type === "bow") spawnArrow(p.x, p.y - 10, target.x, target.y);
         
-        // Visuals
-        if (isBow) {
-            spawnArrow(p.x + 10, p.y - 10, target.x, target.y);
-        }
-        
-        target.hp -= dmg;
-        spawnFloater(target, `-${dmg}`, "#ff4444");
+        applyDamage(target, actualDmg);
 
-        // 4. Kill Logic & Looting
-        if (target.hp <= 0) {
-            target.hp = 0;
-            target.dead = true;
-            systemMessage(`${target.name || "Enemy"} slain by ${p.name}!`);
-
-            if (p.area === "dungeon") {
-                handleLoot(p, target); // Cleaned up loot into its own check
-                checkDungeonProgress();
-            }
+        // 4. Award XP to the correct skill
+        p.stats[skillType + "XP"] += 10;
+        if (p.stats[skillType + "XP"] >= xpNeeded(p.stats[skillType + "Level"])) {
+            p.stats[skillType + "Level"]++;
+            p.stats[skillType + "XP"] = 0;
+            spawnFloater(p, `${skillType.toUpperCase()} UP!`, "#FFD700");
         }
 
-        // 5. XP and Progress
-        p.stats.attackXP += 10;
-        if (p.stats.attackXP >= xpNeeded(p.stats.attackLevel)) {
-            p.stats.attackLevel++;
-            p.stats.attackXP = 0;
-            systemMessage(`${p.name} ATK UP (Lv ${p.stats.attackLevel})`);
-        }
         updateCombatLevel(p);
         saveStats(p);
     }
@@ -768,11 +798,36 @@ function startDungeon() {
 
 function spawnWave() {
     enemies = [];
+    const types = ["Slime", "StickmanHunter", "Grumble", "VoidWalker"];
+
     for (let i = 0; i < 3; i++) {
-        enemies.push({ name: "Minion", hp: 50 * dungeonWave, maxHp: 50 * dungeonWave, x: 600 + (i * 50), y: 400, dead: false });
+        let type = types[Math.floor(Math.random() * types.length)];
+        let isStickman = (type === "StickmanHunter" || type === "VoidWalker");
+        
+        enemies.push({ 
+            name: type, 
+            hp: 50 * dungeonWave, 
+            maxHp: 50 * dungeonWave, 
+            x: 600 + (i * 80), 
+            y: 450, 
+            dead: false,
+            isEnemy: true,
+            isStickman: isStickman,
+            // Give stickman enemies random gear
+            equipped: isStickman ? generateRandomLoadout() : null 
+        });
     }
+
     if (dungeonWave % 3 === 0) {
-        boss = { name: "DUNGEON OVERLORD", hp: 500, maxHp: 500, x: 800, y: 350, dead: false };
+        boss = { 
+            name: "DUNGEON OVERLORD", 
+            hp: 500 * (dungeonWave / 3), 
+            maxHp: 500 * (dungeonWave / 3), 
+            x: 850, y: 450, 
+            dead: false,
+            isEnemy: true,
+            isBoss: true 
+        };
     }
 }
 
@@ -791,31 +846,43 @@ function handleEnemyAttacks() {
         if (e.dead) return;
         let target = dwellers[Math.floor(Math.random() * dwellers.length)];
         
-        // Use the new function!
-        applyDamage(target, 5); 
+        // Damage scales slightly with the wave
+        let dmg = 5 + (dungeonWave * 2);
+        applyDamage(target, dmg); 
     });
 }
 /*------------------------------------------------------------*/
 // Loot Helper to keep performAttack clean
 function handleLoot(p, target) {
+    let lootFound = [];
     let roll = Math.random();
-    let drop = null;
 
-    if (target === boss) {
-        // Boss guaranteed high-tier
-        drop = roll > 0.5 ? "Iron Plate" : "Iron Sword";
+    // 1. Drop-the-Gear Logic (15% chance to drop their weapon/helmet)
+    if (target.equipped) {
+        Object.values(target.equipped).forEach(itemName => {
+            if (Math.random() < 0.15) lootFound.push(itemName);
+        });
+    }
+
+    // 2. Boss/Minion Specifics
+    if (target.isBoss) {
+        p.stats.gold += 500;
+        lootFound.push("Royal Cape");
     } else {
-        // Minion rare drops
-        if (roll > 0.98) drop = "Iron helmet";
-        else if (roll > 0.90) drop = "shitty shortbow";
-        else if (roll > 0.85) drop = "Leather Tunic";
-        else if (roll > 0.70) drop = "Paper Bag";
+        p.stats.gold += 10;
+        if (roll > 0.95) lootFound.push("Leather scrap");
     }
 
-    if (drop) {
-        p.stats.inventory.push(drop);
-        systemMessage(`✨ ${p.name} looted: ${drop}!`);
-    }
+    // 3. Process the loot
+    lootFound.forEach(item => {
+        if (!p.stats.inventory.includes(item)) {
+            p.stats.inventory.push(item);
+            spawnFloater(p, `✨ ${item}!`, "#FFD700");
+            systemMessage(`${p.name} looted: ${item}`);
+        }
+    });
+    
+    saveStats(p);
 }
 //------------------------------------
 
@@ -1208,6 +1275,72 @@ function drawStickman(ctx, p) {
 
     ctx.restore(); // Stop being transparent for the next player or background
 }
+function drawEnemyStickman(ctx, e) {
+    if (e.area !== viewArea || e.dead) return;
+    const now = Date.now();
+
+    // Enemies don't need complex physics, just basic bobbing
+    const anim = { bodyY: Math.sin(now / 200) * 2, armMove: 0, lean: 0 };
+    const anchors = getAnchorPoints(e, anim); 
+    
+    // Simple "Action" pose for limbs
+    const limbs = getLimbPositions(e, anchors, anim, now);
+
+    ctx.save();
+    
+    // 1. Draw Cape
+    if (e.equipped?.cape) drawCapeItem(ctx, e, anchors, ITEM_DB[e.equipped.cape]);
+
+    // 2. Draw Body (Using your original Body style)
+    const style = BODY_PARTS["stick"];
+    style.head(ctx, anchors.headX, anchors.headY, e);
+    style.torso(ctx, anchors.headX, anchors.headY, e.x, anchors.hipY);
+    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.leftHand.x, limbs.leftHand.y);
+    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.rightHand.x, limbs.rightHand.y);
+    style.limbs(ctx, e.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y);
+    style.limbs(ctx, e.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y);
+
+    // 3. Draw Equipment (Directly from e.equipped)
+    if (e.equipped?.weapon) {
+        let weapon = ITEM_DB[e.equipped.weapon];
+        ctx.save();
+        ctx.translate(limbs.rightHand.x, limbs.rightHand.y);
+        const drawFn = WEAPON_STYLES[weapon.style || weapon.type] || WEAPON_STYLES["sword"];
+        drawFn(ctx, weapon, true, now, e, anchors.bodyY, anchors.lean);
+        ctx.restore();
+    }
+    
+    if (e.equipped?.helmet) drawHelmetItem(ctx, e, anchors.bodyY, anchors.lean, ITEM_DB[e.equipped.helmet]);
+
+    ctx.restore();
+}
+
+function drawMonster(ctx, m) {
+    if (m.dead) return;
+    ctx.save();
+    const bob = Math.sin(Date.now() / 200) * 5;
+    const scale = m.isBoss ? 2.5 : 1;
+
+    ctx.translate(m.x, m.y + bob);
+    ctx.scale(scale, scale);
+
+    // Simple Slime/Blob Body
+    ctx.fillStyle = m.color || "#00ff00";
+    ctx.beginPath();
+    ctx.arc(0, 0, 20, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Aggressive Eyes
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(-7, -5, 5, 0, Math.PI * 2); ctx.arc(7, -5, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "black";
+    ctx.fillRect(-9, -6, 4, 4); ctx.fillRect(5, -6, 4, 4);
+
+    ctx.restore();
+}
 /* function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
     updatePhysics(p); 
@@ -1452,20 +1585,28 @@ function updateSystemTicks(now) {
 	updateBuyerNPC();
 }
 function updateUI() {
-    // 2. Enemy UI Updates
     let enemyText = "";
+    
+    // 1. Show Dungeon Countdown if timer is active
+    if (dungeonCountdownInterval && dungeonSecondsLeft > 0) {
+        enemyText += `<div style="color: #ffcc00; font-weight: bold;">Raid starting in: ${dungeonSecondsLeft}s</div><hr>`;
+    }
+
+    // 2. Enemy UI Updates
     if (viewArea === "dungeon") {
-        // We look at the global 'enemies' array and 'boss' object
         enemies.forEach(e => { 
-            if(!e.dead) enemyText += `Enemy: ${e.hp}hp<br>`; 
+            if(!e.dead) {
+                const hpPercent = Math.floor((e.hp / e.maxHp) * 100);
+                enemyText += `${e.name}: ${e.hp} HP (${hpPercent}%)<br>`; 
+            }
         });
         
         if (boss && !boss.dead) {
-            enemyText += `<b>BOSS: ${boss.hp}hp</b>`;
+            const bossPercent = Math.floor((boss.hp / boss.maxHp) * 100);
+            enemyText += `<b style="color: #ff4444;">BOSS: ${boss.hp} HP (${bossPercent}%)</b>`;
         }
     }
     
-    // Update the HTML element on your page
     const uiElement = document.getElementById("enemyUI");
     if (uiElement) {
         uiElement.innerHTML = enemyText;
@@ -1482,21 +1623,37 @@ function gameLoop() {
     updateUI();
 
     // 3. Entity Logic (The Players)
-    Object.values(players).forEach(p => {
-        updatePlayerStatus(p, now); // Handles timeouts & stats
-        updatePlayerMovement(p);   // Handles walking/leaning
+	Object.values(players).forEach(p => {
+        updatePlayerStatus(p, now);   // Handles timeouts & stats
+        updatePlayerMovement(p);     // Handles walking/leaning
         updatePlayerActions(p, now); // Handles dancing/attacking
-        drawStickman(ctx, p);
+        drawStickman(ctx, p);        // YOUR ORIGINAL UNTOUCHED FUNCTION
     });
+	// 4. Dungeon Entity Logic (Enemies & Boss)
+    if (viewArea === "dungeon") {
+        enemies.forEach(e => {
+            if (!e.dead) {
+                // Determine if it uses stickman parts or monster parts
+                if (e.isStickman) {
+                    drawEnemyStickman(ctx, e); 
+                } else {
+                    drawMonster(ctx, e);
+                }
+            }
+        });
 
-    // 4. World Systems (The Timers)
+        if (boss && !boss.dead) {
+            drawMonster(ctx, boss); // Bosses are typically monster style
+        }
+    }
+
+	// 5. World Systems (The Timers)
     updateSystemTicks(now);
     updateArrows(ctx);
-	updateSplashText(ctx);
+    updateSplashText(ctx);
     handleTooltips();
     requestAnimationFrame(gameLoop);
 }
-/* ================= GAME LOOP ================= */
 /* ================= GAME LOOP ================= */
 /* ================= GAME LOOP ================= */
 
