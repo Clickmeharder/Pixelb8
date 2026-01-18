@@ -62,6 +62,8 @@ function loadStats(name) {
     const saved = localStorage.getItem("rpg_" + name);
     let stats = saved ? JSON.parse(saved) : {
         attackLevel: 1, attackXP: 0,
+		archerLevel: 1, archerXP: 0,
+		magicLevel: 1, magicXP: 0,
         healLevel: 1, healXP: 0,
         fishLevel: 1, fishXP: 0,
         danceLevel: 1, danceXP: 0,
@@ -83,6 +85,10 @@ function loadStats(name) {
         wigColor: null 
     };
 	// Inside the initial stats object and the safety checks
+	if (stats.arcjerLevel === undefined) stats.archerLevel = 1;
+	if (stats.archerXP === undefined) stats.archerXP = 0;
+	if (stats.magicLevel === undefined) stats.magicLevel = 1;
+	if (stats.magicXP === undefined) stats.magicXP = 0;
 	if (stats.lurkLevel === undefined) stats.lurkLevel = 1;
 	if (stats.lurkXP === undefined) stats.lurkXP = 0;
 	if (stats.swimLevel === undefined) stats.swimLevel = 1;
@@ -253,7 +259,15 @@ function updateSplashText(ctx) {
 //lvl up and xp
 function xpNeeded(lvl) { return Math.floor(50 * Math.pow(1.3, lvl)); }
 function updateCombatLevel(p) {
-    p.stats.combatLevel = Math.floor((p.stats.attackLevel + p.stats.healLevel + (p.stats.fishLevel * 0.5)) / 2);
+    const s = p.stats;
+    // Determine the highest combat style
+    const mainCombat = Math.max(s.attackLevel, s.archerLevel, s.magicLevel);
+    
+    // Combat Level = (Main Style + (Heal + Lurk + Fish)*0.5) / 1.5
+    // This makes sure diverse builds still feel powerful!
+    p.stats.combatLevel = Math.floor(
+        (mainCombat + (s.healLevel * 0.4) + (s.lurkLevel * 0.3) + (s.fishLevel * 0.1)) / 1.2
+    );
 }
 //-------------------------------------------------------------------
 function applyDamage(target, amount, color = "#f00") {
@@ -307,75 +321,65 @@ function addItemToPlayer(playerName, itemName) {
 function performAttack(p) {
     if (p.dead) return;
 
-    // 1. Identify Target
-    let target = null;
-    if (p.area === "dungeon") {
-        // Target first alive enemy, or the boss if all enemies are dead
-        target = enemies.find(e => !e.dead) || (boss && !boss.dead ? boss : null);
-    } else if (p.area === "home") {
-        target = Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name);
-    }
+    // 1. Target Identification
+    let target = (p.area === "dungeon") 
+        ? (enemies.find(e => !e.dead) || (boss && !boss.dead ? boss : null))
+        : Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name);
 
     if (!target || target.dead) return;
 
-    // 2. Weapon & Range Data
+    // 2. Weapon Data & Skill Determination
     const weapon = ITEM_DB[p.stats.equippedWeapon] || { power: 0, type: "melee", speed: 2500 };
-    const isRanged = weapon.type === "bow" || weapon.type === "staff";
-    const rangeNeeded = isRanged ? 250 : 60;
     
-    // Set movement target: Ranged stays back, Melee gets in close
+    // Map weapon types to skills
+    let skillKey = "attack"; // Default melee
+    if (weapon.type === "bow") skillKey = "archer";
+    if (weapon.type === "staff") skillKey = "magic";
+
+    const isRanged = (skillKey !== "attack");
+    const rangeNeeded = isRanged ? 250 : 60;
     p.targetX = target.x - (isRanged ? 180 : 40);
 
-    // 3. Range Check & Combat Execution
+    // 3. Combat Execution
     if (Math.abs(p.x - target.x) <= rangeNeeded) {
-        
-        // --- DEFENSE CALCULATION ---
-        // Sum up defense from the target's equipped items (if they are a stickman/boss)
+        // Defense check
         let targetDef = 0;
         if (target.equipped) {
-            Object.values(target.equipped).forEach(itemName => {
-                if (ITEM_DB[itemName]) targetDef += (ITEM_DB[itemName].def || 0);
-            });
-        } else if (target.stats) { // If target is another player
-            const gear = ["equippedHelmet", "equippedArmor", "equippedPants", "equippedBoots"];
-            gear.forEach(slot => {
-                let item = ITEM_DB[target.stats[slot]];
-                if (item) targetDef += (item.def || 0);
+            Object.values(target.equipped).forEach(item => targetDef += (ITEM_DB[item]?.def || 0));
+        } else if (target.stats) {
+            ["equippedHelmet", "equippedArmor", "equippedPants", "equippedBoots"].forEach(slot => {
+                targetDef += (ITEM_DB[target.stats[slot]]?.def || 0);
             });
         }
 
-        // --- DAMAGE CALCULATION ---
-        let baseDmg = 5 + (p.stats.attackLevel * 2) + weapon.power;
-        let actualDmg = Math.max(1, baseDmg - targetDef); // Always do at least 1 dmg
-        
-        // 4. Visuals (Arrows/Magic)
-        if (weapon.type === "bow") {
-            spawnArrow(p.x + 10, p.y - 10, target.x, target.y);
-        } else if (weapon.type === "staff") {
-            // Optional: spawnMagic(p.x, p.y, target.x, target.y, weapon.color);
-        }
-        
-        // 5. Apply Damage (using our helper for floaters/death checks)
+        // Damage Calculation (Uses the specific level for that weapon type)
+        let currentSkillLevel = p.stats[skillKey + "Level"];
+        let baseDmg = 5 + (currentSkillLevel * 2) + weapon.power;
+        let actualDmg = Math.max(1, baseDmg - targetDef);
+
+        // Visuals
+        if (weapon.type === "bow") spawnArrow(p.x + 10, p.y - 10, target.x, target.y);
+
         applyDamage(target, actualDmg, "#ff4444");
 
-        // 6. Kill Logic & Looting
+        // 4. Kill Logic
         if (target.dead) {
-            systemMessage(`${target.name || "Enemy"} slain by ${p.name}!`);
-
+            systemMessage(`${target.name} slain by ${p.name}!`);
             if (p.area === "dungeon") {
-                handleLoot(p, target); 
+                handleLoot(p, target);
                 checkDungeonProgress();
             }
         }
 
-        // 7. XP and Progress
-        p.stats.attackXP += 10;
-        let nextLevelXP = xpNeeded(p.stats.attackLevel);
-        if (p.stats.attackXP >= nextLevelXP) {
-            p.stats.attackLevel++;
-            p.stats.attackXP = 0;
-            // Use our new clean floater for level ups!
-            spawnFloater(p, `ATK UP (Lv ${p.stats.attackLevel})`, "#FFD700");
+        // 5. XP Awarding (Dynamic Skill)
+        const xpKey = skillKey + "XP";
+        const lvlKey = skillKey + "Level";
+        
+        p.stats[xpKey] += 10;
+        if (p.stats[xpKey] >= xpNeeded(p.stats[lvlKey])) {
+            p.stats[lvlKey]++;
+            p.stats[xpKey] = 0;
+            spawnFloater(p, `${skillKey.toUpperCase()} UP (Lv ${p.stats[lvlKey]})`, "#FFD700");
         }
         
         updateCombatLevel(p);
@@ -849,8 +853,19 @@ function handleEnemyAttacks() {
         if (e.dead) return;
         let target = dwellers[Math.floor(Math.random() * dwellers.length)];
         
-        // Use the new function!
-        applyDamage(target, 5); 
+        // --- EVASION CHECK ---
+        // Base 5% dodge + 1% per Lurker Level (Cap at 50%)
+        let dodgeChance = Math.min(0.50, 0.05 + (target.stats.lurkLevel * 0.01));
+        
+        if (Math.random() < dodgeChance) {
+            spawnFloater(target, "MISS", "#ffffff");
+            // Small XP reward for dodging!
+            target.stats.lurkXP += 2; 
+        } else {
+            // Apply damage if they didn't dodge
+            let damage = 5 + (dungeonWave * 2);
+            applyDamage(target, damage); 
+        }
     });
 }
 /*------------------------------------------------------------*/
