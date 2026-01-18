@@ -106,8 +106,8 @@ const DANCE_UNLOCKS = {
 
 const DANCE_LIBRARY = {
     1: (now) => ({ bodyY: Math.sin(now / 100) * 8 }), // The Squat
-    2: (now) => ({ armMove: Math.sin(now / 50) * 20 }), // The Flail
-    3: (now) => ({ lean: Math.sin(now / 200) * 0.6 }), // The Lean
+    2: (now) => ({ armMove: Math.sin(now / 200) * 20 }), // The Flail
+    3: (now) => ({ lean: Math.sin(now / 200) * 0.1 }), // The Sway
     4: (now) => ({ 
         bodyY: Math.abs(Math.sin(now / 150)) * -15,
         armMove: Math.sin(now / 150) * 5,
@@ -123,15 +123,15 @@ const DANCE_LIBRARY = {
         if (bY < -5) p.wasInAir = true;
         return { bodyY: bY, lean: 0, pose: "action" };
     },
-    6: (now) => ({ bodyY: Math.sin(now / 75) * 4 }), // The Bop
-    7: (now) => ({ armMove: Math.sin(now / 50) * 50 }), // The Wave
-    8: (now) => ({ lean: Math.sin(now / 200) * 0.1 }), // The Sway
-    9: (now) => ({ 
+    6: (now) => ({ bodyY: Math.sin(now / 175) * 4 }), // The Bop
+    7: (now) => ({ lean: Math.sin(now / 200) * 0.6 }), // The Lean
+
+    8: (now) => ({ 
         bodyY: Math.min(0, Math.sin(now / 150) * -25),
         armMove: Math.sin(now / 150) * 5,
         pose: "star" 
     }),
-    10: (now) => ({ 
+    9: (now) => ({ 
         bodyY: Math.min(0, Math.sin(now / 200) * -40),
         lean: Math.sin(now / 200) * 0.2,
         pose: "action"
