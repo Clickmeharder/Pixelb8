@@ -902,32 +902,49 @@ function generateRandomLoadout() {
 // Loot Helper to keep performAttack clean
 function handleLoot(p, target) {
     let lootFound = [];
+    let goldGained = 0;
     let roll = Math.random();
 
-    // 1. Drop-the-Gear Logic (15% chance to drop their weapon/helmet)
+    // 1. Drop-the-Gear Logic (Check for valid items)
     if (target.equipped) {
         Object.values(target.equipped).forEach(itemName => {
-            if (Math.random() < 0.15) lootFound.push(itemName);
+            // itemName must exist and pass the 15% drop rate
+            if (itemName && Math.random() < 0.15) {
+                lootFound.push(itemName);
+            }
         });
     }
 
     // 2. Boss/Minion Specifics
     if (target.isBoss) {
-        p.stats.gold += 500;
+        goldGained = 500;
         lootFound.push("Royal Cape");
     } else {
-        p.stats.gold += 10;
+        goldGained = 10;
         if (roll > 0.95) lootFound.push("Leather scrap");
     }
 
-    // 3. Process the loot
-    lootFound.forEach(item => {
-        if (!p.stats.inventory.includes(item)) {
-            p.stats.inventory.push(item);
-            spawnFloater(p, `✨ ${item}!`, "#FFD700");
-            systemMessage(`${p.name} looted: ${item}`);
-        }
-    });
+    // Apply Gold
+    p.stats.gold += goldGained;
+
+    // 3. Process the loot and show messages
+    if (lootFound.length > 0) {
+        lootFound.forEach(item => {
+            // Final safety check: ensure item isn't null and exists in DB
+            if (item && ITEM_DB[item]) {
+                if (!p.stats.inventory.includes(item)) {
+                    p.stats.inventory.push(item);
+                    spawnFloater(p, `✨ ${item}!`, "#FFD700");
+                    systemMessage(`${p.name} looted: ${item}`);
+                }
+            }
+        });
+    } else {
+        // --- NEW FEEDBACK MESSAGE ---
+        // If no items were found in the roll
+        systemMessage(`${p.name}: That creature did not carry any loot.`);
+        spawnFloater(p, "No loot", "#888");
+    }
     
     saveStats(p);
 }
