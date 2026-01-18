@@ -137,7 +137,7 @@ function getPlayer(name, color) {
     
     return players[name];
 }
-function movePlayer(p, targetArea) {
+/* function movePlayer(p, targetArea) {
     if (p.dead) {
         systemMessage(`${p.name} is a corpse and cannot travel!`);
         return;
@@ -157,8 +157,32 @@ function movePlayer(p, targetArea) {
     p.activeTask = null; 
     if (targetArea !== "dungeon") dungeonQueue = dungeonQueue.filter(n => n !== p.name);
     systemMessage(`${p.name} traveled to ${targetArea}`);
-}
+} */
+function movePlayer(p, targetArea) {
+    if (p.dead) {
+        systemMessage(`${p.name} is a corpse and cannot travel!`);
+        return;
+    }
+    // 1. If they are already there, don't reset their task!
+    if (p.area === targetArea) return;
 
+    // 2. Changing areas: Now we reset tasks
+    p.area = targetArea;
+    p.activeTask = null; 
+    p.targetX = null;
+
+    if (targetArea === "fishingpond" || targetArea === "pond") {
+        p.area = "fishingpond"; // Standardize the name
+        p.x = Math.random() * 100 + 50; // Arrival point on the shore
+        p.y = 450; 
+    } else {
+        p.x = Math.random() * 700 + 100;
+        p.y = 400 + Math.random() * 100;
+    }
+
+    if (targetArea !== "dungeon") dungeonQueue = dungeonQueue.filter(n => n !== p.name);
+    systemMessage(`${p.name} traveled to ${targetArea}`);
+}
 // =================================================
 /* ================= PLAYER TOOLTIPS =============== */
 // catch mouse over/hover event of the stickmen on screen
@@ -587,7 +611,7 @@ function performFish(p) {
     saveStats(p);
 }
 //============================================================
-//future swim and boat function sections
+// === NEW SWIMMING STUFF (LIKE FISHING THIS CAN ONLY CURRENTLY BE DONE IN THE POND AREA
 function performSwim(p) {
     if (p.area !== "pond" || p.dead) return;
     if (p.stats.swimDistance === undefined) p.stats.swimDistance = 0;
@@ -1050,12 +1074,19 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
     ctx.save();
     ctx.strokeStyle = p.color; 
     ctx.lineWidth = 3; // Standard stickman thickness
+// If they are swimming in the water (x > 250), we submerge them
+    const isDeep = (p.area === "fishingpond" && p.x > 125);
     style.head(ctx, anchors.headX, anchors.headY, p);
     style.torso(ctx, anchors.headX, anchors.headY, p.x, anchors.hipY); 
+	//arms
     style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.leftHand.x, limbs.leftHand.y); 
     style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.rightHand.x, limbs.rightHand.y);
+	//legs
     style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y); 
     style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y);
+	if (isDeep) {
+        ctx.globalAlpha = 0.3; // Make legs "underwater"
+    }
     ctx.restore();
 }
 
@@ -1133,253 +1164,6 @@ function drawCorpse(ctx, p, now) {
 
 //===============================================================================
 // ================= DRAWING THE SCENERY AND AREAS ===========
-/* Scenes/ Areas --
-// Add 'lean' as the last parameter here
-function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
-    if (p.dead) return;
-
-    const pWeapon = p.stats.equippedWeapon; 
-    const isAttacking = p.activeTask === "attacking";
-    const isFishing = p.activeTask === "fishing" && p.area === "pond";
-
-    // --- 1. THE FISHING ROD ---
-    if (isFishing) {
-        ctx.save();
-        ctx.setLineDash([]); 
-        ctx.strokeStyle = "#8B4513"; 
-        ctx.lineWidth = 2;
-        let bob = Math.sin(now / 300) * 0.1;
-        
-        // Use the passed lean
-        const rodStartX = p.x + 10 + (lean * 20);
-        const rodStartY = p.y - 10 + bodyY;
-        const rodTipX = p.x + 50 + (lean * 20);
-        const rodTipY = p.y - 40 + (bob * 20) + bodyY;
-
-        ctx.beginPath();
-        ctx.moveTo(rodStartX, rodStartY); 
-        ctx.lineTo(rodTipX, rodTipY); 
-        ctx.stroke();
-
-        ctx.strokeStyle = "rgba(255,255,255,0.5)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(rodTipX, rodTipY);
-        
-        const waterX = Math.max(rodTipX + 40, 280);
-        const waterY = 510 + (Math.sin(now/500) * 5);
-
-        ctx.quadraticCurveTo(rodTipX + 20, rodTipY + 40, waterX, waterY);
-        ctx.stroke();
-
-        ctx.fillStyle = "#ff4444";
-        ctx.beginPath(); ctx.arc(waterX, waterY, 3, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-    }
-
-    // --- 2. WEAPON ---
-    if (pWeapon && ITEM_DB[pWeapon] && !isFishing) {
-        const w = ITEM_DB[pWeapon];
-        const isBow = pWeapon.toLowerCase().includes("bow");
-        
-        ctx.save();
-        // Weapon positioning needs to account for lean
-        let weaponX = p.x + (lean * 20); 
-        
-        if (isAttacking) {
-            ctx.translate(weaponX + 12, p.y - 10 + bodyY);
-            let swing = Math.sin(now / 150) * 0.8;
-            ctx.rotate(swing);
-            ctx.strokeStyle = p.stats.attackLevel > 10 ? "#0ff" : (w.color || "#ccc");
-            ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(25, -5); ctx.stroke();
-            ctx.strokeStyle = "#aa8800";
-            ctx.beginPath(); ctx.moveTo(5, -8); ctx.lineTo(5, 8); ctx.stroke();
-        } else {
-            if (isBow) {
-                ctx.translate(weaponX - 2, p.y - 5 + bodyY);
-                ctx.rotate(Math.PI / 4);
-                ctx.strokeStyle = "#8B4513";
-                ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.arc(0, 0, 15, -Math.PI/2, Math.PI/2); ctx.stroke();
-            } else {
-                ctx.translate(weaponX - 5, p.y - 5 + bodyY);
-                ctx.rotate(Math.PI / 1.2);
-                ctx.strokeStyle = w.color;
-                ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(20, 0); ctx.stroke();
-                ctx.moveTo(5, -3); ctx.lineTo(5, 3); ctx.stroke();
-            }
-        }
-        ctx.restore();
-    }
-
-    // --- 3. GEAR (Pass the lean to these functions too) ---
-    if (p.stats.equippedArmor) drawArmor(ctx, p, bodyY, lean);
-    if (p.stats.equippedHelmet) drawHelmet(ctx, p, bodyY, lean);
-    if (p.stats.equippedBoots) drawBoots(ctx, p, bodyY, lean);
-}
-
-function drawHelmet(ctx, p, bodyY = 0, lean = 0) {
-    const item = ITEM_DB[p.stats.equippedHelmet];
-    if (!item) return;
-    const hX = p.x + (lean * 20); // Uses passed lean
-    const hY = p.y - 30 + bodyY; 
-    ctx.save();
-    const helmetName = p.stats.equippedHelmet.toLowerCase();
-    if (helmetName === "paper bag") {
-        ctx.fillStyle = "#d2b48c";
-        ctx.strokeStyle = "#000";   
-        ctx.fillRect(hX - 12, hY - 14, 24, 26);
-        ctx.strokeRect(hX - 12, hY - 14, 24, 26);
-    }
-	else if (helmetName === "wig") {
-		ctx.fillStyle = p.stats.wigColor || item.color || "#ffff00";
-		ctx.strokeStyle = ctx.fillStyle;
-		
-		// 1. Back Hair (The "U" shape behind the head)
-		// We draw from 0.2 PI to 0.8 PI (the bottom half) so it looks like it's behind the neck
-		ctx.beginPath();
-		ctx.arc(hX, hY, 13, 0.1 * Math.PI, 0.9 * Math.PI); 
-		ctx.lineWidth = 6;
-		ctx.stroke();
-
-		// 2. Top Volume (The "Hat" of hair)
-		// This draws from 1.0 PI to 2.0 PI (the top half circle only)
-		ctx.beginPath();
-		ctx.arc(hX, hY - 2, 11, Math.PI, 0); 
-		ctx.fill();
-
-		// 3. Side Locks (Draping down the sides)
-		ctx.lineWidth = 5;
-		ctx.beginPath();
-		// Left side lock
-		ctx.moveTo(hX - 10, hY - 2);
-		ctx.quadraticCurveTo(hX - 14, hY + 10, hX - 11, hY + 18);
-		// Right side lock
-		ctx.moveTo(hX + 10, hY - 2);
-		ctx.quadraticCurveTo(hX + 14, hY + 10, hX + 11, hY + 18);
-		ctx.stroke();
-
-		// 4. Little Bangs (Optional: Tiny bits on the forehead that don't cover eyes)
-		ctx.lineWidth = 2;
-		ctx.beginPath();
-		ctx.moveTo(hX - 8, hY - 8); ctx.lineTo(hX - 4, hY - 10);
-		ctx.moveTo(hX + 8, hY - 8); ctx.lineTo(hX + 4, hY - 10);
-		ctx.stroke();
-	}
-    else if (helmetName === "iron helmet") {
-        ctx.fillStyle = "#aaa";
-        ctx.strokeStyle = "#000";
-        ctx.beginPath();
-        ctx.arc(hX, hY, 12, Math.PI, 0); 
-        ctx.lineTo(hX + 12, hY + 10);
-        ctx.lineTo(hX - 12, hY + 10);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.strokeStyle = "#222";
-        ctx.beginPath(); ctx.moveTo(hX - 8, hY + 4); ctx.lineTo(hX + 8, hY + 4); ctx.stroke();
-    }
-    ctx.restore();
-}
-
-function drawStickman(ctx, p) {
-    if (p.area !== viewArea) return;
-    updatePhysics(p); 
-    const now = Date.now();
-    let lean = p.lean || 0;
-
-    if (p.dead) {
-        ctx.fillStyle = "rgba(200, 0, 0, 0.6)";
-        ctx.beginPath(); ctx.ellipse(p.x, p.y + 20, 25, 10, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.textAlign = "center"; ctx.fillStyle = "#555";
-        ctx.fillText("CORPSE", p.x, p.y + 10);
-        return;
-    }
-
-    let bodyY = 0;
-    let armMove = 0;
-    const isDancing = p.activeTask === "dancing";
-    const isFishing = p.activeTask === "fishing" && p.area === "pond";
-    // --- Variables ---
-    const pWeapon = p.stats.equippedWeapon; 
-    const isAttacking = p.activeTask === "attacking";
-
-	if (isDancing) {
-        if (p.danceStyle === 1) bodyY = Math.sin(now / 100) * 8;
-        if (p.danceStyle === 2) armMove = Math.sin(now / 50) * 20;
-        if (p.danceStyle === 3) lean = Math.sin(now / 200) * 0.6;
-        
-        // STYLE 4: The Horse Gallop
-        if (p.danceStyle === 4) {
-            bodyY = Math.abs(Math.sin(now / 150)) * -15; // Jumpy gallop
-            armMove = Math.sin(now / 150) * 5;           // Slight arm bounce
-        }
-    }
-
-    ctx.strokeStyle = p.color; ctx.lineWidth = 3;
-    const headX = p.x + (lean * 20);
-    const headY = p.y - 30 + bodyY;
-
-    // 1. Head & Face (RESTORED)
-    ctx.beginPath(); ctx.arc(headX, headY, 10, 0, Math.PI * 2); ctx.stroke();
-    ctx.fillStyle = p.color;
-    ctx.fillRect(headX + 2, headY - 3, 2, 2); // Eye 1
-    ctx.fillRect(headX + 6, headY - 3, 2, 2); // Eye 2
-    ctx.beginPath(); ctx.arc(headX + 4, headY + 2, 3, 0, Math.PI); ctx.stroke(); // Smile
-    
-    // 2. Torso
-    ctx.beginPath(); ctx.moveTo(headX, headY + 10); ctx.lineTo(p.x, p.y + 10 + bodyY); ctx.stroke();
-
-    // 3. Arms
-	if (!isAttacking) {
-		ctx.beginPath();
-		if (p.danceStyle === 4) {
-			// Crossed Arms "Horse Riding" Style - now with bounce!
-			// We use bodyY * 0.5 so the arms bounce slightly less than the body for a natural look
-			ctx.moveTo(headX, headY + 15);
-			ctx.lineTo(headX - 12, headY + 22 + (bodyY * 0.2)); 
-			
-			ctx.moveTo(headX, headY + 15);
-			ctx.lineTo(headX + 12, headY + 22 + (bodyY * 0.2));
-		} else {
-			// ... your existing arm logic ...
-			ctx.moveTo(headX, headY + 15);
-			ctx.lineTo(p.x - 18 + (lean * 10), p.y + 2 + bodyY + armMove);
-			ctx.moveTo(headX, headY + 15);
-			if (isFishing) {
-				ctx.lineTo(p.x + 10 + (lean * 20), p.y - 10 + bodyY);
-			} else {
-				ctx.lineTo(p.x + 18 + (lean * 30), p.y + 2 + bodyY - armMove);
-			}
-		}
-		ctx.stroke();
-	}
-
-	// 4. Legs
-	let walk = (p.targetX !== null) ? Math.sin(now/100) * 10 : 0;
-	// Add "Gallop" leg spread for Dance 4
-	let legSpread = (p.danceStyle === 4) ? 15 : 10;
-	// NEW: Define the floor level including the jump
-	const currentFloorY = p.y + 25 + (p.danceStyle === 4 ? bodyY : 0);
-    ctx.beginPath(); 
-    ctx.moveTo(p.x, p.y + 10 + bodyY); 
-    ctx.lineTo(p.x - legSpread - walk, currentFloorY);
-    ctx.moveTo(p.x, p.y + 10 + bodyY); 
-    ctx.lineTo(p.x + legSpread + walk, currentFloorY); 
-    ctx.stroke();
-
-    drawEquipment(ctx, p, now, bodyY, armMove, lean);
-
-    // HP & Name
-    ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
-    ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
-    ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
-    ctx.fillText(p.name, p.x, p.y + 40);
-}
- */
-
 const backgrounds = {
     home: "#1a1a2e",
     dungeon: "#160a0a",
@@ -1845,6 +1629,30 @@ function cmdSwim(p, user) {
     p.taskEndTime = Date.now() + (10 * 60 * 1000); // 10 minute session
     
     systemMessage(`${user} jumped into the water!`);
+    saveStats(p);
+}
+function cmdSwim(p, user) {
+    if (p.area !== "pond") {
+        systemMessage(`${user}: The water is at the pond.`);
+        return;
+    }
+    if (p.activeTask === "swimming") { 
+        systemMessage(`${user}: Already swimming.`); 
+        return; 
+    }
+    // Auto-Unequip Weapon
+    if (p.stats.equippedWeapon) {
+        p.stats.lastWeapon = p.stats.equippedWeapon;
+        p.stats.equippedWeapon = null;
+        systemMessage(`${p.name} stripped off their gear to go for a dip.`);
+    }
+    // Move the player INTO the water (x > 250)
+    p.targetX = 350 + (Math.random() * 150);
+	
+    p.activeTask = "swimming";
+    p.taskEndTime = Date.now() + (15 * 60 * 1000); // 15 mins
+
+    systemMessage(`${p.name} jumped into the water!`);
     saveStats(p);
 }
 function cmdEquip(p, args) {
