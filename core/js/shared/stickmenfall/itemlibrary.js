@@ -36,15 +36,23 @@ const ITEM_DB = {
 	// --- melee
 	"Iron Plate":     { type: "armor", style:"",  def: 5,                  value: 300,  color: "#aaa" },
 	// --- magic
-	// --- fisher
+	"Wizard Robe":  { type: "armor", style:"",  def: 2,                  value: 60,   color: "blue" },
+	// --- lurker
+	"Lurker Robe":  { type: "armor", style:"",  def: 2,                  value: 60,   color: "#222" },
 	// --- lumberjack
 	// --- miner 
 	//
 //------------------------------------------------------------------------------------------------------
 // ------------------------------PANTS------------------------------------------------------------------
+	//melee
+	"Iron Pants":  { type: "pants", style:"", def :2, value: 100,color: "#aaa" },
 	// --- archer
     "Leather Pants":  { type: "pants", style:"", def :2, value: 100,color: "#3e2723" },
-	// --- archer
+	// --- wizard
+	"Wizard Pants":  { type: "pants", style:"", def :2, value: 100,color: "blue" },
+	// --- lurker
+	"Lurker Pants":  { type: "pants", style:"", def :2, value: 100,color: "#222" },
+	
 //------------------------------------------------------------------------------------------------------
 // ------------------------------Boots------------------------------------------------------------------
     "leather Boots":  { type: "boots", style:"", def: 1,                 value: 30,   color: "#5c4033" },
@@ -83,14 +91,16 @@ const ITEM_DB = {
 	"hair11": { type: "hair", style: "drills", color: "#f3e5ab" }, // spiral chunky drills 
 	"oldman beard": { name: "Wizard Beard", type: "hair", style: "wizardbeard", color: "#ffffff" },
 	"wizard beard": { name: "Dark Mage Beard", type: "hair", style: "wizardbeard", color: "#333333" },
-// special weapon/tool
-//    "Paint Brush":     { type: "hair",   style: "hair",   value: 5, color: "#ffff00" },
-    // Legacy support (still works without a style property - just defaults to type)
+
 // ---------------------------basic items----------------------------------------------------------------
 	// --- unique fish ---
 	"Golden Bass":    { type: "fish", value: 100, color: "#FFD700" },
+	// --- unique swimming find ---
+	"Pearl":    { type: "fish", value: 100, color: "white" },
     // --- MATERIALS ---
     "Leather scrap":  { type: "material", value: 15,   color: "#a88d6d" },
+	"Sea Shell":  { type: "material", value: 15,   color: "#a88d6d" },
+	"Leather scrap":  { type: "material", value: 15,   color: "#a88d6d" },
 //-------------------------------------------------------------------------------------------------------
 };
 /* ================= EXTENDED ITEM LIBRARY ================= */
