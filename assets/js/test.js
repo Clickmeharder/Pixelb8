@@ -806,7 +806,7 @@ function spawnWave() {
         
         enemies.push({ 
             name: type, 
-            area: "dungeon", // <--- ADD THIS LINE
+            area: "dungeon", // Crucial for drawEnemyStickman
             hp: 50 * dungeonWave, 
             maxHp: 50 * dungeonWave, 
             x: 500 + (i * 100), 
@@ -814,22 +814,12 @@ function spawnWave() {
             dead: false,
             isEnemy: true,
             isStickman: isStickman,
-            color: isStickman ? "#ff4444" : "#00ff00", // Give them an enemy color
-            equipped: isStickman ? generateRandomLoadout() : null 
+            stats: { lurkLevel: 0 }, // Prevents errors in limb helpers
+            equipped: isStickman ? generateRandomLoadout() : {} 
         });
     }
-    // Do the same for the boss if needed
-    if (dungeonWave % 3 === 0) {
-        boss = { 
-            name: "DUNGEON OVERLORD", 
-            area: "dungeon", // <--- AND HERE
-            hp: 500 * (dungeonWave / 3), 
-            maxHp: 500 * (dungeonWave / 3), 
-            x: 800, y: 450, dead: false, isEnemy: true, isBoss: true, isStickman: false 
-        };
-    }
+    // ... rest of boss logic
 }
-
 function checkDungeonProgress() {
     let aliveEnemies = enemies.filter(e => !e.dead).length;
     if (aliveEnemies === 0 && (!boss || boss.dead)) {
@@ -1223,13 +1213,14 @@ function getAnchorPoints(p, anim) {
 function getLimbPositions(p, anchors, anim, now) {
     // Explicitly check for swimming first so it doesn't default to "action"
     let activePose = anim.pose || p.forcedPose;
-    
+
+// If it's an enemy, it's usually in "action" pose if near a player
     if (!activePose) {
-        if (p.activeTask === "swimming") activePose = "swimming";
+        if (p.isEnemy) activePose = "action"; 
+        else if (p.activeTask === "swimming") activePose = "swimming";
         else if (p.activeTask === "fishing") activePose = "fishing";
         else if (["attacking", "woodcutting", "mining"].includes(p.activeTask)) activePose = "action";
     }
-
     let leftHand = { x: anchors.headX - 18, y: anchors.shoulderY + 10 + anim.armMove };
     let rightHand = { x: anchors.headX + 18, y: anchors.shoulderY + 10 - anim.armMove };
 
@@ -1249,6 +1240,7 @@ function getLimbPositions(p, anchors, anim, now) {
         rightFoot: { x: p.x + 10 + walk, y: footY }
     };
 }
+
 function drawStickmanBody(ctx, p, anchors, limbs) {
     const style = BODY_PARTS["stick"]; 
     ctx.save();
@@ -1298,19 +1290,23 @@ function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
 
-    // Enemies don't need complex physics, just basic bobbing
     const anim = { bodyY: Math.sin(now / 200) * 2, armMove: 0, lean: 0 };
     const anchors = getAnchorPoints(e, anim); 
-    
-    // Simple "Action" pose for limbs
     const limbs = getLimbPositions(e, anchors, anim, now);
 
     ctx.save();
     
-    // 1. Draw Cape
-    if (e.equipped?.cape) drawCapeItem(ctx, e, anchors, ITEM_DB[e.equipped.cape]);
+    // Set Enemy Styling
+    ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
+    ctx.lineWidth = 3;
 
-    // 2. Draw Body (Using your original Body style)
+    if (e.name === "VoidWalker") {
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "purple";
+        ctx.globalAlpha = 0.6;
+    }
+
+    // Draw Body
     const style = BODY_PARTS["stick"];
     style.head(ctx, anchors.headX, anchors.headY, e);
     style.torso(ctx, anchors.headX, anchors.headY, e.x, anchors.hipY);
@@ -1319,8 +1315,8 @@ function drawEnemyStickman(ctx, e) {
     style.limbs(ctx, e.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y);
     style.limbs(ctx, e.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y);
 
-    // 3. Draw Equipment (Directly from e.equipped)
-    if (e.equipped?.weapon) {
+    // Draw Equipment
+    if (e.equipped?.weapon && ITEM_DB[e.equipped.weapon]) {
         let weapon = ITEM_DB[e.equipped.weapon];
         ctx.save();
         ctx.translate(limbs.rightHand.x, limbs.rightHand.y);
@@ -1329,11 +1325,12 @@ function drawEnemyStickman(ctx, e) {
         ctx.restore();
     }
     
-    if (e.equipped?.helmet) drawHelmetItem(ctx, e, anchors.bodyY, anchors.lean, ITEM_DB[e.equipped.helmet]);
+    if (e.equipped?.helmet && ITEM_DB[e.equipped.helmet]) {
+        drawHelmetItem(ctx, e, anchors.bodyY, anchors.lean, ITEM_DB[e.equipped.helmet]);
+    }
 
-    ctx.restore();
+    ctx.restore(); // IMPORTANT: This resets the purple/red colors so the player isn't affected
 }
-
 function drawMonster(ctx, m) {
     if (m.dead) return;
     ctx.save();
