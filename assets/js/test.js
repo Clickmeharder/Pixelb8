@@ -64,6 +64,8 @@ function loadStats(name) {
         healLevel: 1, healXP: 0,
         fishLevel: 1, fishXP: 0,
         danceLevel: 1, danceXP: 0,
+		swimLevel: 1, swimXP: 0, 
+        swimDistance: 0,
         combatLevel: 1,
         gold: 0,
         inventory: ["Fishing Rod"],
@@ -78,7 +80,9 @@ function loadStats(name) {
         equippedHair: null,
         wigColor: null 
     };
-
+	if (stats.swimLevel === undefined) stats.swimLevel = 1;
+    if (stats.swimXP === undefined) stats.swimXP = 0;
+    if (stats.swimDistance === undefined) stats.swimDistance = 0;
     // --- SAFETY CHECKS FOR OLD SAVES ---
     if (isNaN(stats.gold) || stats.gold === null) stats.gold = 0;
     
@@ -140,7 +144,7 @@ function movePlayer(p, targetArea) {
     }
     p.area = targetArea;
 
-    if (targetArea === "fishingpond") {
+    if (targetArea === "pond") {
         // Shore is 0 to 250. We keep them between 50 and 200 so they aren't off-screen 
         // or touching the very edge of the water.
         p.x = Math.random() * 150 + 50; 
@@ -399,9 +403,9 @@ function updateBuyerNPC() {
         systemMessage("--- [NPC] THE FISH MERCHANT HAS LEFT THE AREA. ---");
     }
 }
-// called inside drawScenery function under the fishingpond section to update time she stays away and time she stays properly:
+// called inside drawScenery function under the pond section to update time she stays away and time she stays properly:
 function drawBuyer(ctx) {
-    if (!buyerActive || viewArea !== "fishingpond") return;
+    if (!buyerActive || viewArea !== "pond") return;
     
     const bx = 115; 
     const by = 500; 
@@ -526,7 +530,7 @@ function drawBuyer(ctx) {
 }
 // fishing task :
 function performFish(p) {
-    if (p.area !== "fishingpond" || p.dead) return;
+    if (p.area !== "pond" || p.dead) return;
     if (p.stats.fishCaught === undefined) p.stats.fishCaught = 0;
 
     let roll = Math.random();
@@ -584,10 +588,53 @@ function performFish(p) {
 }
 //============================================================
 //future swim and boat function sections
-//goSwimming(){};
+function performSwim(p) {
+    if (p.area !== "pond" || p.dead) return;
+    if (p.stats.swimDistance === undefined) p.stats.swimDistance = 0;
+
+    let roll = Math.random();
+    let resultText = "";
+    let floaterColor = "#00ffff"; // Cyan for swimming
+    let foundItem = false;
+
+    // 1. Rarity Logic for Diving
+    if (roll < 0.005) {
+        p.stats.inventory.push("Pearl");
+        resultText = "found a SHINING PEARL!";
+        floaterColor = "#fff5e6";
+        foundItem = true;
+        systemMessage(`✨ ${p.name} dove deep and surfaced with a Rare Pearl!`);
+    } 
+    else if (roll < 0.05) {
+        p.stats.inventory.push("Sea Shell");
+        resultText = "found a pretty Sea Shell";
+        foundItem = true;
+    }
+    else {
+        // Just distance gain
+        const meters = Math.floor(Math.random() * 5 + 1);
+        p.stats.swimDistance += meters;
+        resultText = `swam ${meters}m...`;
+    }
+
+    let displayMsg = `🏊 ${resultText}`;
+    if (!foundItem) displayMsg += ` (Total: ${p.stats.swimDistance}m)`;
+
+    spawnFloater(displayMsg, p.x, p.y - 60, floaterColor, p.area);
+    
+    // XP Logic
+    p.stats.swimXP = (p.stats.swimXP || 0) + 12;
+    if (p.stats.swimXP >= xpNeeded(p.stats.swimLevel || 1) * 2) {
+        p.stats.swimLevel = (p.stats.swimLevel || 1) + 1; 
+        p.stats.swimXP = 0;
+        systemMessage(`${p.name} SWIM UP! (Lv ${p.stats.swimLevel})`);
+    }
+    updateCombatLevel(p);
+    saveStats(p);
+}
 //------------------------------------------------------------
 
-// ( *if at fishingpond & if on shore -> get in boat, and float,
+// ( *if at pond & if on shore -> get in boat, and float,
 // else if at fishing pond and in water->float to shore and get off boat
 //rideBoat(){}; 
 //add boating skill too ( helps fishing ) 
@@ -808,7 +855,6 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
 }
 
 // --- 2. CAPES (Drawn behind the stickman) ---
-// --- 2. CAPES ---
 function drawCapeItem(ctx, p, anchors, item) {
 
     const headX = anchors.headX;
@@ -830,7 +876,6 @@ function drawCapeItem(ctx, p, anchors, item) {
 
 }
 // --- 3. armor drawn over body ---
-// --- 3. ARMOR ---
 function drawArmor(ctx, p, anchors) {
     const item = ITEM_DB[p.stats.equippedArmor];
     if (!item) return;
@@ -855,7 +900,6 @@ function drawArmor(ctx, p, anchors) {
 }
 
 // --- 4. PANTS (Drawn over the legs) ---
-// --- 4. PANTS ---
 function drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, item) {
     ctx.save();
     ctx.strokeStyle = item.color || "#333";
@@ -1096,7 +1140,7 @@ function drawEquipment(ctx, p, now, bodyY, armMove, lean) {
 
     const pWeapon = p.stats.equippedWeapon; 
     const isAttacking = p.activeTask === "attacking";
-    const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
+    const isFishing = p.activeTask === "fishing" && p.area === "pond";
 
     // --- 1. THE FISHING ROD ---
     if (isFishing) {
@@ -1257,7 +1301,7 @@ function drawStickman(ctx, p) {
     let bodyY = 0;
     let armMove = 0;
     const isDancing = p.activeTask === "dancing";
-    const isFishing = p.activeTask === "fishing" && p.area === "fishingpond";
+    const isFishing = p.activeTask === "fishing" && p.area === "pond";
     // --- Variables ---
     const pWeapon = p.stats.equippedWeapon; 
     const isAttacking = p.activeTask === "attacking";
@@ -1339,7 +1383,7 @@ function drawStickman(ctx, p) {
 const backgrounds = {
     home: "#1a1a2e",
     dungeon: "#160a0a",
-    fishingpond: "#0a1612"
+    pond: "#0a1612"
 };
 function drawScenery(ctx) {
     const now = Date.now();
@@ -1357,7 +1401,7 @@ function drawScenery(ctx) {
             ctx.fillRect(x, 100 + (i*20), 2, 2);
         }
 
-    } else if (viewArea === "fishingpond") {
+    } else if (viewArea === "pond") {
         // --- LAKE / WATER VIBES ---
         // The Shore
         ctx.fillStyle = "#1a2e1a";
@@ -1490,13 +1534,20 @@ function updateSystemTicks(now) {
     // 3s Global Tick
     if (now - systemTimers.lastGlobalTick > systemTimers.globalInterval) {
         Object.values(players).forEach(p => {
-            if (!p.dead && p.activeTask === "fishing" && p.area === "fishingpond") {
+            if (p.dead || p.area !== "pond") return;
+
+            // Existing Fishing logic
+            if (p.activeTask === "fishing") {
                 if (Math.random() > 0.8) performFish(p);
+            }
+            
+            // NEW: Swimming logic
+            if (p.activeTask === "swimming") {
+                if (Math.random() > 0.7) performSwim(p);
             }
         });
         systemTimers.lastGlobalTick = now;
     }
-
     // 4s Enemy Tick
     if (now - systemTimers.lastEnemyTick > systemTimers.enemyInterval) {
         if (dungeonActive) handleEnemyAttacks();
@@ -1749,8 +1800,8 @@ function cmdHeal(p, args) {
 }
 //auto unequip version of fish cmd
 function cmdFish(p, user) {
-    if (p.area !== "fishingpond") { 
-        systemMessage(`${user}: Go to fishingpond first.`); 
+    if (p.area !== "pond") { 
+        systemMessage(`${user}: Go to pond first.`); 
         return; 
     }
     if (p.activeTask === "fishing") { 
@@ -1770,6 +1821,30 @@ function cmdFish(p, user) {
     p.taskEndTime = Date.now() + (15 * 60 * 1000);
     
     systemMessage(`${user} started fishing!`);
+    saveStats(p);
+}
+function cmdSwim(p, user) {
+    if (p.area !== "pond") { 
+        systemMessage(`${user}: The water is at the pond.`); 
+        return; 
+    }
+    if (p.activeTask === "swimming") { 
+        systemMessage(`${user}: Already swimming.`); 
+        return; 
+    }
+
+    // Auto-Unequip Weapon
+    if (p.stats.equippedWeapon) {
+        p.stats.lastWeapon = p.stats.equippedWeapon;
+        p.stats.equippedWeapon = null;
+        systemMessage(`${p.name} stripped off their gear to go for a dip.`);
+    }
+
+    p.targetX = 250; // Swim a bit further out than fishing
+    p.activeTask = "swimming";
+    p.taskEndTime = Date.now() + (10 * 60 * 1000); // 10 minute session
+    
+    systemMessage(`${user} jumped into the water!`);
     saveStats(p);
 }
 function cmdEquip(p, args) {
@@ -2030,7 +2105,6 @@ function cmdGive(caller, args, flags) {
 }
 // --- STATS & INFO ---
 function cmdShowStats(user, args) {
-    // If user types "!stats playername", args[1] is the name. Otherwise, look up the caller.
     let targetName = args[1] ? args[1].toLowerCase() : user.toLowerCase();
     let targetData = null;
     let finalName = "";
@@ -2049,8 +2123,11 @@ function cmdShowStats(user, args) {
     }
 
     if (targetData) {
-        // We added DANCE: here. We use || 1 as a fallback just in case of an old save.
-        systemMessage(`${finalName} - CB: ${targetData.combatLevel} | ATK: ${targetData.attackLevel} | FISH: ${targetData.fishLevel} | DANCE: ${targetData.danceLevel || 1} | HEAL: ${targetData.healLevel}`);
+        // Updated to include SWIM and SWIM DISTANCE
+        const swimStr = `SWIM: ${targetData.swimLevel || 1} (${targetData.swimDistance || 0}m)`;
+        const danceStr = `DANCE: ${targetData.danceLevel || 1}`;
+        
+        systemMessage(`${finalName} - CB: ${targetData.combatLevel} | ATK: ${targetData.attackLevel} | FISH: ${targetData.fishLevel} | ${swimStr} | ${danceStr} | HEAL: ${targetData.healLevel}`);
     } else {
         systemMessage(`System: Could not find stats for ${targetName}`);
     }
@@ -2118,6 +2195,7 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     // Combat & Tasks//
     if (cmd === "attack") cmdAttack(p, user);
     if (cmd === "fish")   cmdFish(p, user);
+	if (cmd === "swim") cmdSwim(p, user);
     if (cmd === "heal")   cmdHeal(p, args);
     if (cmd === "pose" || cmd === "setpose") {
         cmdSetPose(p, user, args);
@@ -2151,7 +2229,7 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     if (flags.broadcaster || flags.mod) {
         if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: HOME"; }
         if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: DUNGEON"; }
-        if (cmd === "showfishing") { viewArea = "fishingpond"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: FISHING POND"; }
+        if (cmd === "showfishing") { viewArea = "pond"; document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: FISHING POND"; }
 		// --- Manual Merchant Controls ---//
 		if (cmd === "spawnmerchant") {forceBuyer = true;updateBuyerNPC();systemMessage("[ADMIN] Merchant forced to spawn.");}
 		if (cmd === "despawnmerchant") {forceBuyer = false;updateBuyerNPC();systemMessage("[ADMIN] Merchant forced to leave.");}
@@ -2161,7 +2239,7 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     } */
 // Admin & Streamer Controls
     // We check if the command exists first, then verify authorization
-    const adminCommands = ["showhome", "showdungeon", "showfishing", "spawnmerchant", "despawnmerchant", "resetmerchant", "give", "additem"];
+    const adminCommands = ["showhome", "showdungeon", "showpond", "spawnmerchant", "despawnmerchant", "resetmerchant", "give", "additem"];
     
     if (adminCommands.includes(cmd)) {
         if (!isStreamerAndAuthorize(user, cmd)) return;
@@ -2177,8 +2255,8 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
             viewArea = "dungeon"; 
             document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: DUNGEON"; 
         }
-        if (cmd === "showfishing") { 
-            viewArea = "fishingpond"; 
+        if (cmd === "showpond") { 
+            viewArea = "pond"; 
             document.getElementById("areaDisplay").textContent = "StickmenFallv2.1.9 - VIEWING: FISHING POND"; 
         }
         

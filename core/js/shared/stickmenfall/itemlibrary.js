@@ -1117,5 +1117,19 @@ const POSE_LIBRARY = {
     "fishing": (head, p, anim) => ({
         // Fixed the double "right" and the missing parameter
         right: { x: head.x + 22, y: head.y + 15 }
-    })
+    }),
+	// NEW: Dynamic Swimming Pose
+    "swimming": (head) => {
+        const time = Date.now() / 200; // Speed of the stroke
+        return {
+            left: { 
+                x: head.x - 15 + Math.cos(time) * 15, 
+                y: head.y + 20 + Math.sin(time) * 10 
+            },
+            right: { 
+                x: head.x + 15 + Math.cos(time + Math.PI) * 15, 
+                y: head.y + 20 + Math.sin(time + Math.PI) * 10 
+            }
+        };
+    }
 };
