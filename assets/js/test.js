@@ -1142,8 +1142,24 @@ function drawStickman(ctx, p) {
     updatePhysics(p); 
     const now = Date.now();
     if (p.dead) return drawCorpse(ctx, p, now);
-	// --- LURKING TRANSPARENCY LOGIC ---
-	ctx.save(); // Save context before applying transparency
+
+    const anim = getAnimationState(p, now);
+    const anchors = getAnchorPoints(p, anim);
+    const limbs = getLimbPositions(p, anchors, anim, now);
+
+    if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
+    drawStickmanBody(ctx, p, anchors, limbs);
+    renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
+}
+/* function drawStickman(ctx, p) {
+    if (p.area !== viewArea) return;
+    updatePhysics(p); 
+    const now = Date.now();
+    if (p.dead) return drawCorpse(ctx, p, now);
+
+    ctx.save(); // Save context before applying transparency
+
+    // --- LURKING TRANSPARENCY LOGIC ---
     if (p.activeTask === "lurking") {
         // Higher level = Lower Alpha (more invisible)
         // Level 1 = 0.6 Alpha, Level 50+ = ~0.1 Alpha
@@ -1164,7 +1180,7 @@ function drawStickman(ctx, p) {
 
     ctx.restore(); // Restore alpha for everything else drawn later
 }
-
+ */
 function renderEquipmentLayer(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot) {
     const weaponItem = ITEM_DB[p.stats.equippedWeapon];
     const task = p.activeTask || "none";
@@ -2094,7 +2110,6 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     if (cmd === "home")    movePlayer(p, "home");
     if (cmd === "dungeon") movePlayer(p, "dungeon");
     if (cmd === "join")    joinDungeonQueue(p);
-	if (cmd === "lurk") {cmdDance(p, user);}
     if (cmd === "dance") {cmdDance(p, user, args);}
 	if (cmd === "listdances") {cmdListDances(p);}
     // Stats & Inventory//
