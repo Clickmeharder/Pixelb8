@@ -61,7 +61,7 @@ const ITEM_DB = {
 
 // ------------------------------Gloves------------------------------------------------------------------
     "White Gloves":   { type: "gloves", style:"", value: 100, color: "#ffffff" },
-	"leather Gloves":   { type: "gloves", style:"", value: 100, color: "#5c4033" },
+	"Leather Gloves":   { type: "gloves", style:"", value: 100, color: "#5c4033" },
     // --- SPECIALS ---
 // special head
 	"Paper Bag":      { type: "helmet", style: "box", def: 1, value: 5, color: "#d2b48c" },
