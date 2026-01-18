@@ -1673,6 +1673,9 @@ function gameLoop() {
     updateSplashText(ctx);
     handleTooltips();
     requestAnimationFrame(gameLoop);
+	if (dungeonActive) {
+		checkDungeonProgress();
+	}
 }
 /* ================= GAME LOOP ================= */
 /* ================= GAME LOOP ================= */
