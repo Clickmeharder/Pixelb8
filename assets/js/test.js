@@ -797,20 +797,31 @@ function updatePhysics(p) {
         if (p.y >= p.targetY) { p.y = p.targetY; delete p.targetY; }
     }
 
-    // Horizontal Walk (Attacking/Moving)
-    if (p.targetX !== null && p.targetX !== undefined) {
-        let dx = p.targetX - p.x;
-        if (Math.abs(dx) > 5) {
-            p.x += dx * 0.1; // Smooth slide toward target
-            // Cheeky "Leaning" effect while running
-            p.lean = dx > 0 ? 0.2 : -0.2;
-        } else {
-            p.lean = 0;
-            // If they were running to attack but target is gone, return to idle
-            if (p.activeTask !== "attacking") p.targetX = null;
-        }
-    }
+	if (p.targetX !== null && p.targetX !== undefined) {
+		let oldX = p.x;
+		let dx = p.targetX - p.x;
+		
+		if (Math.abs(dx) > 5) {
+			p.x += dx * 0.1;
+			p.lean = dx > 0 ? 0.2 : -0.2;
+
+			// --- SPLASH DETECTION ---
+			// If we move from shore ( < 250) to water ( > 250)
+			if (oldX <= 250 && p.x > 250 && p.area === "pond") {
+				triggerSplash(250, p.y + 25);
+			}
+			// If we move from water back to shore
+			if (oldX > 250 && p.x <= 250 && p.area === "pond") {
+				triggerSplash(250, p.y + 25);
+			}
+
+		} else {
+			p.lean = 0;
+			if (p.activeTask !== "attacking") p.targetX = null;
+		}
+	}
 }
+
 
 // ==============================================
 // =-===--===-- DRRAW STICKMEN ---===---===---===-=
@@ -1010,6 +1021,14 @@ function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, righ
     return anim;
 } */
 // --- 1. Update Animation State to handle Swimming Y-offset ---
+function triggerSplash(x, y) {
+    // This assumes you have a floater or particle system
+    // We can reuse your spawnFloater for a quick text-based splash
+    spawnFloater("💦 SPLASH!", x, y, "#44ccff", "pond");
+    
+    // If you have a sound system:
+    // playSound("splash"); 
+}
 function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     
