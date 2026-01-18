@@ -806,32 +806,27 @@ function spawnWave() {
         
         enemies.push({ 
             name: type, 
+            area: "dungeon", // <--- ADD THIS LINE
             hp: 50 * dungeonWave, 
             maxHp: 50 * dungeonWave, 
-            // Spread them out on the right side of the screen
             x: 500 + (i * 100), 
-            y: 450, // Ensure this matches your ground level
-            dead: false,
-            isEnemy: true,
-            isStickman: isStickman,
-            equipped: isStickman ? generateRandomLoadout() : null 
-        });
-    }
-
-    if (dungeonWave % 3 === 0) {
-        boss = { 
-            name: "DUNGEON OVERLORD", 
-            hp: 500 * (dungeonWave / 3), 
-            maxHp: 500 * (dungeonWave / 3), 
-            x: 800, 
             y: 450, 
             dead: false,
             isEnemy: true,
-            isBoss: true,
-            isStickman: false // Boss uses drawMonster
+            isStickman: isStickman,
+            color: isStickman ? "#ff4444" : "#00ff00", // Give them an enemy color
+            equipped: isStickman ? generateRandomLoadout() : null 
+        });
+    }
+    // Do the same for the boss if needed
+    if (dungeonWave % 3 === 0) {
+        boss = { 
+            name: "DUNGEON OVERLORD", 
+            area: "dungeon", // <--- AND HERE
+            hp: 500 * (dungeonWave / 3), 
+            maxHp: 500 * (dungeonWave / 3), 
+            x: 800, y: 450, dead: false, isEnemy: true, isBoss: true, isStickman: false 
         };
-    } else {
-        boss = null; // Clear boss if not a boss wave
     }
 }
 
