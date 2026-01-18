@@ -979,23 +979,12 @@ function drawHair(ctx, p, bodyY, lean) {
 }
 
 // 2. The Helmet Coordinator
-function drawHelmetItem(ctx, p, bodyY, lean, enemyItem = null) {
-    // If enemyItem is passed directly (from drawEnemyStickman), use it. 
-    // Otherwise, look in player stats.
-    const item = enemyItem || (p.stats ? ITEM_DB[p.stats.equippedHelmet] : null);
+function drawHelmetItem(ctx, p, bodyY, lean) {
+    const item = ITEM_DB[p.stats.equippedHelmet];
     if (!item) return;
-    
     const hX = p.x + (lean * 20);
     const hY = p.y - 30 + bodyY; 
-    
-    // Call your existing drawHeadLayer
-    const style = item.style || "hair";
-    const finalColor = item.color || "#614126";
-
-    ctx.save();
-    const drawFn = HAT_STYLES[style] || HAT_STYLES["hair"];
-    drawFn(ctx, hX, hY, finalColor);
-    ctx.restore();
+    drawHeadLayer(ctx, hX, hY, item, p);
 }
 
 // 3. The Painter (Logic & Style)
@@ -1037,11 +1026,10 @@ function drawCapeItem(ctx, p, anchors, item) {
 
 }
 // --- 3. armor drawn over body ---
-// Updated Armor: Works for both Players and Enemies
-function drawArmorItem(ctx, p, anchors, item) {
+function drawArmor(ctx, p, anchors) {
+    const item = ITEM_DB[p.stats.equippedArmor];
     if (!item) return;
     const headX = anchors.headX;
-    // Enemy support: check p.x (base) or p.x directly
     const hipX = p.x + (anchors.lean * 5);
 
     ctx.save();
@@ -1051,8 +1039,7 @@ function drawArmorItem(ctx, p, anchors, item) {
     ctx.lineTo(hipX + 7, p.y + 8 + anchors.bodyY);    
     ctx.lineTo(hipX - 7, p.y + 8 + anchors.bodyY);    
     ctx.closePath();
-    
-    ctx.fillStyle = item.color || "#777";
+    ctx.fillStyle = item.color;
     ctx.globalAlpha = 0.8;
     ctx.fill();
     ctx.globalAlpha = 1.0;
@@ -1063,21 +1050,15 @@ function drawArmorItem(ctx, p, anchors, item) {
 }
 
 // --- 4. PANTS (Drawn over the legs) ---
-// Updated Pants: Uses the limb positions directly
 function drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, item) {
-    if (!item) return;
     ctx.save();
     ctx.strokeStyle = item.color || "#333";
     ctx.lineWidth = 5; 
     ctx.lineCap = "round";
-    
-    // Leg 1
     ctx.beginPath();
     ctx.moveTo(p.x, anchors.hipY);
     ctx.lineTo(leftFoot.x, leftFoot.y);
     ctx.stroke();
-    
-    // Leg 2
     ctx.beginPath();
     ctx.moveTo(p.x, anchors.hipY);
     ctx.lineTo(rightFoot.x, rightFoot.y);
@@ -1308,49 +1289,53 @@ function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
 
+    // 1. Setup Animation (Force a slight forward lean toward the player)
     const anim = { bodyY: Math.sin(now / 200) * 2, armMove: 0, lean: -0.2 }; 
     const anchors = getAnchorPoints(e, anim); 
     const limbs = getLimbPositions(e, anchors, anim, now);
 
     ctx.save();
     
-    // 1. Flip Logic
-    ctx.translate(e.x, 0); 
-    ctx.scale(-1, 1); 
-    ctx.translate(-e.x, 0); 
-
-    // 2. Enemy Base Style
+    // 2. Set Enemy Styling
     ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
     ctx.lineWidth = 3;
 
-    // 3. Draw Body
-    drawStickmanBody(ctx, e, anchors, limbs);
+    // 3. FLIP LOGIC: Move to enemy position, then flip the X axis
+    ctx.translate(e.x, 0); 
+    ctx.scale(-1, 1); // Mirror horizontally
+    ctx.translate(-e.x, 0); // Move back
 
-    // 4. Draw Equipment Layers
-    if (e.equipped) {
-        // Render Headgear (Helmet or Hair)
-        if (e.equipped.helmet) {
-            drawHelmetItem(ctx, e, anchors.bodyY, anchors.lean, ITEM_DB[e.equipped.helmet]);
-        }
+    if (e.name === "VoidWalker") {
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "purple";
+    }
 
-        // Render Armor/Gloves/Pants using your equipment layer system
-        // Note: We pass the limb positions so the gloves/boots stick to the hands/feet
-        renderEnemyEquipment(ctx, e, now, anchors, limbs);
+    // 4. Draw Body
+    const style = BODY_PARTS["stick"];
+    style.head(ctx, anchors.headX, anchors.headY, e);
+    style.torso(ctx, anchors.headX, anchors.headY, e.x, anchors.hipY);
+    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.leftHand.x, limbs.leftHand.y);
+    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.rightHand.x, limbs.rightHand.y);
+    style.limbs(ctx, e.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y);
+    style.limbs(ctx, e.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y);
 
-        // Render Weapon
-        if (e.equipped.weapon) {
-            let weapon = ITEM_DB[e.equipped.weapon];
-            ctx.save();
-            ctx.translate(limbs.rightHand.x, limbs.rightHand.y);
-            const drawFn = WEAPON_STYLES[weapon.style || weapon.type] || WEAPON_STYLES["sword"];
-            drawFn(ctx, weapon, true, now, e, anchors.bodyY, anchors.lean);
-            ctx.restore();
-        }
+    // 5. Draw Equipment (With ID Check)
+    // We check ITEM_DB to ensure the random item actually exists
+    if (e.equipped?.weapon && ITEM_DB[e.equipped.weapon]) {
+        let weapon = ITEM_DB[e.equipped.weapon];
+        ctx.save();
+        ctx.translate(limbs.rightHand.x, limbs.rightHand.y);
+        const drawFn = WEAPON_STYLES[weapon.style || weapon.type] || WEAPON_STYLES["sword"];
+        drawFn(ctx, weapon, true, now, e, anchors.bodyY, anchors.lean);
+        ctx.restore();
+    }
+    
+    if (e.equipped?.helmet && ITEM_DB[e.equipped.helmet]) {
+        drawHelmetItem(ctx, e, anchors.bodyY, anchors.lean, ITEM_DB[e.equipped.helmet]);
     }
 
     ctx.restore(); 
 }
-
 
 function drawMonster(ctx, m) {
     if (m.dead) return;
@@ -1378,35 +1363,36 @@ function drawMonster(ctx, m) {
 
     ctx.restore();
 }
+/* function drawStickman(ctx, p) {
+    if (p.area !== viewArea) return;
+    updatePhysics(p); 
+    const now = Date.now();
+    if (p.dead) return drawCorpse(ctx, p, now);
 
- // A simplified equipment renderer for enemies
-function renderEnemyEquipment(ctx, e, now, anchors, limbs) {
-    const eq = e.equipped;
-    if (!eq) return;
+    ctx.save(); // Save context before applying transparency
 
-    // Draw Armor (Torso)
-    if (eq.armor && ITEM_DB[eq.armor]) {
-        drawArmorItem(ctx, e, anchors, ITEM_DB[eq.armor]);
-    }
-    
-    // Draw Pants
-    if (eq.pants && ITEM_DB[eq.pants]) {
-        drawPantsItem(ctx, e, anchors, limbs.leftFoot, limbs.rightFoot, ITEM_DB[eq.pants]);
+    // --- LURKING TRANSPARENCY LOGIC ---
+    if (p.activeTask === "lurking") {
+        // Higher level = Lower Alpha (more invisible)
+        // Level 1 = 0.6 Alpha, Level 50+ = ~0.1 Alpha
+        let alpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
+        ctx.globalAlpha = alpha;
+        
+        // Add a slight "shimmer" effect
+        ctx.globalAlpha += Math.sin(now / 500) * 0.05;
     }
 
-    // Draw Gloves
-    if (eq.gloves && ITEM_DB[eq.gloves]) {
-        drawGlovesItem(ctx, limbs.leftHand.x, limbs.leftHand.y, ITEM_DB[eq.gloves]);
-        drawGlovesItem(ctx, limbs.rightHand.x, limbs.rightHand.y, ITEM_DB[eq.gloves]);
-    }
-    
-    // Draw Boots
-    if (eq.boots && ITEM_DB[eq.boots]) {
-        // We can reuse your existing drawBoots by creating a temporary 'stats' object
-        const tempActor = { ...e, stats: { equippedBoots: eq.boots } };
-        drawBoots(ctx, tempActor, limbs.leftFoot, limbs.rightFoot);
-    }
+    const anim = getAnimationState(p, now);
+    const anchors = getAnchorPoints(p, anim);
+    const limbs = getLimbPositions(p, anchors, anim, now);
+
+    if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
+    drawStickmanBody(ctx, p, anchors, limbs);
+    renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
+
+    ctx.restore(); // Restore alpha for everything else drawn later
 }
+ */
 function renderEquipmentLayer(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot) {
     const weaponItem = ITEM_DB[p.stats.equippedWeapon];
     const task = p.activeTask || "none";
