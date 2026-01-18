@@ -76,7 +76,8 @@ function loadStats(name) {
         healLevel: 1, healXP: 0,
         fishLevel: 1, fishXP: 0,
         danceLevel: 1, danceXP: 0,
-		swimLevel: 1, swimXP: 0, 
+		lurkLevel: 1, lurkXP: 0,
+		swimLevel: 1, swimXP: 0,
         swimDistance: 0,
         combatLevel: 1,
         gold: 0,
@@ -92,6 +93,9 @@ function loadStats(name) {
         equippedHair: null,
         wigColor: null 
     };
+	// Inside the initial stats object and the safety checks
+	if (stats.lurkLevel === undefined) stats.lurkLevel = 1;
+	if (stats.lurkXP === undefined) stats.lurkXP = 0;
 	if (stats.swimLevel === undefined) stats.swimLevel = 1;
     if (stats.swimXP === undefined) stats.swimXP = 0;
     if (stats.swimDistance === undefined) stats.swimDistance = 0;
@@ -159,7 +163,7 @@ function movePlayer(p, targetArea) {
     if (targetArea === "pond") {
         // Shore is 0 to 250. We keep them between 50 and 200 so they aren't off-screen 
         // or touching the very edge of the water.
-        p.x = Math.random() * 250 + 100; 
+        p.x = Math.random() * 200 + 75; 
         p.y = 450 + Math.random() * 20; // Keep them on a flat line along the shore
     } else {
         p.x = Math.random() * 700 + 100;
@@ -631,7 +635,6 @@ function performSwim(p) {
 
     let displayMsg = `🏊 ${resultText}`;
     if (!foundItem) displayMsg += ` (Total: ${p.stats.swimDistance}m)`;
-
     spawnFloater(displayMsg, p.x, p.y - 60, floaterColor, p.area);
     
     // XP Logic
@@ -640,10 +643,12 @@ function performSwim(p) {
         p.stats.swimLevel = (p.stats.swimLevel || 1) + 1; 
         p.stats.swimXP = 0;
         systemMessage(`${p.name} SWIM UP! (Lv ${p.stats.swimLevel})`);
+		spawnFloater(`${p.name} SWIM UP! (Lv ${p.stats.swimLevel})`, p.x, p.y - 60, floaterColor, p.area);
     }
     updateCombatLevel(p);
     saveStats(p);
 }
+
 //------------------------------------------------------------
 
 // ( *if at pond & if on shore -> get in boat, and float,
@@ -665,7 +670,7 @@ function performSwim(p) {
 
 //============================================================
 //future Lurking action function section
-//goSwimming(){}
+//goLurking(){}
 //------------------------------------------------------------
 //rideBoat(){}
 //dockBoat(){}
@@ -849,7 +854,6 @@ function triggerSplash(x, y) {
 // --- 1. HAIR & HOODS (Head Layers) ---
 
 // 1. The Hair Coordinator
-// 1. The Hair Coordinator
 function drawHair(ctx, p, bodyY, lean) {
     const item = ITEM_DB[p.stats.equippedHair];
     if (!item) return;
@@ -1032,15 +1036,6 @@ function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, righ
 }
 
 // --- HELPERS ---
-/* function getAnimationState(p, now) {
-    let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
-    if (p.activeTask === "dancing" && DANCE_LIBRARY[p.danceStyle]) {
-        anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
-    }
-    return anim;
-} */
-// --- 1. Update Animation State to handle Swimming Y-offset ---
-
 function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     
@@ -1147,6 +1142,17 @@ function drawStickman(ctx, p) {
     updatePhysics(p); 
     const now = Date.now();
     if (p.dead) return drawCorpse(ctx, p, now);
+	// --- LURKING TRANSPARENCY LOGIC ---
+	ctx.save(); // Save context before applying transparency
+    if (p.activeTask === "lurking") {
+        // Higher level = Lower Alpha (more invisible)
+        // Level 1 = 0.6 Alpha, Level 50+ = ~0.1 Alpha
+        let alpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
+        ctx.globalAlpha = alpha;
+        
+        // Add a slight "shimmer" effect
+        ctx.globalAlpha += Math.sin(now / 500) * 0.05;
+    }
 
     const anim = getAnimationState(p, now);
     const anchors = getAnchorPoints(p, anim);
@@ -1155,6 +1161,8 @@ function drawStickman(ctx, p) {
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
     drawStickmanBody(ctx, p, anchors, limbs);
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
+
+    ctx.restore(); // Restore alpha for everything else drawn later
 }
 
 function renderEquipmentLayer(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot) {
@@ -1323,10 +1331,29 @@ function handleDancing(p, now) {
         }
     }
 }
+function handleLurking(p, now) {
+    if (!p.lastLurkXP) p.lastLurkXP = 0;
+    
+    // Give XP every 5 seconds
+    if (now - p.lastLurkXP > 5000) {
+        let xpGain = 8; 
+        p.stats.lurkXP += xpGain;
+        p.lastLurkXP = now;
 
+        let nextLevelXP = xpNeeded(p.stats.lurkLevel);
+        if (p.stats.lurkXP >= nextLevelXP) {
+            p.stats.lurkLevel++;
+            p.stats.lurkXP = 0;
+            spawnFloater(`LURK LEVEL ${p.stats.lurkLevel}!`, p.x, p.y - 40, "#555555", p.area, p.name);
+            saveStats(p);
+        }
+    }
+}
 function updatePlayerActions(p, now) {
     if (p.dead) return;
-
+	if (p.activeTask === "lurking") {
+		handleLurking(p, now);
+	}
     // Handle Dancing
     if (p.activeTask === "dancing") {
         handleDancing(p, now);
@@ -1643,6 +1670,24 @@ function cmdHeal(p, args) {
     }
 }
 //auto unequip version of fish cmd
+function cmdLurk(p, user) {
+    if (p.dead) return;
+    if (p.activeTask === "lurking") {
+        systemMessage(`${user} is already lurking in the shadows...`);
+        return;
+    }
+
+    p.activeTask = "lurking";
+    p.taskEndTime = Date.now() + (15 * 60 * 1000); // 15 mins
+    
+    // Optional: Hide the weapon when lurking
+    if (p.stats.equippedWeapon) {
+        p.manualSheath = true; 
+    }
+
+    spawnFloater("vanished into shadows...", p.x, p.y - 60, "#555555", p.area, p.name);
+    saveStats(p);
+}
 function cmdFish(p, user) {
     if (p.area !== "pond") { 
         systemMessage(`${user}: Go to pond first.`); 

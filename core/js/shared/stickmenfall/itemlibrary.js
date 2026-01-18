@@ -23,11 +23,11 @@ const ITEM_DB = {
 	"Steel Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#eee" },
 	"Iron Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#aaa" },
 	//---Wizard Hats   ---
-    "Apprentice Hat": { type: "helmet", style: "wizard", def: 1,  value: 150,  color: "#303f9f" },
-    "Archmage Point": { type: "helmet", style: "wizard", def: 3,  value: 5000, color: "#4a148c" },
+    "Cool Hat": { type: "helmet", style: "wizard", def: 1,  value: 150,  color: "#303f9f" },
+    "Wizard Hat": { type: "helmet", style: "wizard", def: 3,  value: 5000, color: "#4a148c" },
 	//--- Lurker Hoods ---
-	"Lurker Hood":  { type: "hood", style: "hood",                            value: 100, color: "#555" },
-    "Assassin Hood":  { type: "hood", style: "hood",                            value: 100, color: "#222" },
+	"Cool Hood":  { type: "hood", style: "hood",                            value: 100, color: "#555" },
+    "Lurker Hood":  { type: "hood", style: "hood",                            value: 100, color: "#222" },
 //------------------------------------------------------------------------------------------------------
 // --------------------------- ARMOR/SHIRT -------------------------------------------------------------
 	// --- archer
@@ -65,10 +65,11 @@ const ITEM_DB = {
 	"kabuto":    { type: "helmet", style: "samurai",  def: 2,  value: 10000, color: "#8B0000" },
 	"stickmenpo":    { type: "helmet", style: "menpo",  def: 2,  value: 10000, color: "#8B0000" },
 // special capes
-    "Royal Cape":     { type: "cape", style:"cape", color: "#880000", value: 10000 },
+    "99 Cape":     { type: "cape", style:"cape", color: "#880000", value: 10000 },
     "Cloak":     { type: "cape", style:"cloak", color: "#333", value: 10000 },
     "Ball gown":     { type: "cape", style:"ballgown", color: "purple", value: 10000 },
     "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
+// hair
 	"hair1": { type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
 	"hair2": { type: "hair", style: "pigtails", color: "#4b3621" },// pigtails hair
 	"hair3": { type: "hair", style: "scribble",   color: "#ffeb3b" }, // yellow child scribble
@@ -1132,6 +1133,17 @@ const POSE_LIBRARY = {
 				x: head.x + 15 - (swing * 15), 
 				y: head.y + 25 + (Math.abs(swing) * 5)
 			}
+		};
+	},
+	"lurking": (head, p, anim) => {
+    // A low, hunched-over posture
+		const breathe = Math.sin(Date.now() / 1000) * 3;
+		anim.bodyY = 10 + breathe; // Hunched down
+		anim.lean = 0.4; // Leaning forward
+		
+		return {
+			left:  { x: head.x - 10, y: head.y + 35 },
+			right: { x: head.x + 5,  y: head.y + 30 }
 		};
 	}
 };
