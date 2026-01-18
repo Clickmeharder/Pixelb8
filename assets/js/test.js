@@ -1645,7 +1645,20 @@ function gameLoop() {
     
     // 2. Interface (The Text/UI)
     updateUI();
-
+	// 3. Draw Dungeon Entities FIRST (So players are always on top)
+	if (viewArea === "dungeon") {
+		// Draw Boss
+		if (boss && !boss.dead) {
+			drawMonster(ctx, boss);
+		}
+		// Draw Enemies
+		enemies.forEach(e => {
+			if (!e.dead) {
+				if (e.isStickman) drawEnemyStickman(ctx, e);
+				else drawMonster(ctx, e);
+			}
+		});
+	}
     // 3. Entity Logic (The Players)
 	Object.values(players).forEach(p => {
         updatePlayerStatus(p, now);   // Handles timeouts & stats
@@ -1653,23 +1666,6 @@ function gameLoop() {
         updatePlayerActions(p, now); // Handles dancing/attacking
         drawStickman(ctx, p);        // YOUR ORIGINAL UNTOUCHED FUNCTION
     });
-	// 4. Dungeon Entity Logic (Enemies & Boss)
-    if (viewArea === "dungeon") {
-        enemies.forEach(e => {
-            if (!e.dead) {
-                // Determine if it uses stickman parts or monster parts
-                if (e.isStickman) {
-                    drawEnemyStickman(ctx, e); 
-                } else {
-                    drawMonster(ctx, e);
-                }
-            }
-        });
-
-        if (boss && !boss.dead) {
-            drawMonster(ctx, boss); // Bosses are typically monster style
-        }
-    }
 
 	// 5. World Systems (The Timers)
     updateSystemTicks(now);
