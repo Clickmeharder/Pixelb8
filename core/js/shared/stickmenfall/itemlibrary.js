@@ -23,6 +23,7 @@ const ITEM_DB = {
 	"Steel Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#eee" },
 	"Iron Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#aaa" },
 	//---Wizard Hats   ---
+	"Archmage Point": { type: "helmet", style: "wizard", def: 1,  value: 150,  color: "#303f9f" },
     "Cool Hat": { type: "helmet", style: "wizard", def: 1,  value: 150,  color: "#303f9f" },
     "Wizard Hat": { type: "helmet", style: "wizard", def: 3,  value: 5000, color: "#4a148c" },
 	//--- Lurker Hoods ---
@@ -65,6 +66,7 @@ const ITEM_DB = {
 	"kabuto":    { type: "helmet", style: "samurai",  def: 2,  value: 10000, color: "#8B0000" },
 	"stickmenpo":    { type: "helmet", style: "menpo",  def: 2,  value: 10000, color: "#8B0000" },
 // special capes
+    "Royal Cape":     { type: "cape", style:"cape", color: "#880000", value: 10000 },
     "99 Cape":     { type: "cape", style:"cape", color: "#880000", value: 10000 },
     "Cloak":     { type: "cape", style:"cloak", color: "#333", value: 10000 },
     "Ball gown":     { type: "cape", style:"ballgown", color: "purple", value: 10000 },
