@@ -1039,16 +1039,23 @@ function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, righ
 function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     
-    // Sink the character if they are in the water at the pond
-	if (p.activeTask === "swimming" && p.area === "pond" && p.x > 250) {
-        // 60 is the depth, Math.sin creates a 5-pixel bobbing motion
+    // Swimming Depth
+    if (p.activeTask === "swimming" && p.area === "pond" && p.x > 250) {
         const bobbing = Math.sin(now / 400) * 5; 
         anim.bodyY = 60 + bobbing; 
+    }
+
+    // Lurking Pose (The Crouch)
+    if (p.activeTask === "lurking") {
+        const breathe = Math.sin(now / 1000) * 3;
+        anim.bodyY = 15 + breathe; // Sit lower to the ground
+        anim.lean = 0.3; // Lean forward slightly
     }
 
     if (p.activeTask === "dancing" && DANCE_LIBRARY[p.danceStyle]) {
         anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
     }
+
     return anim;
 }
 function getAnchorPoints(p, anim) {
@@ -1142,14 +1149,23 @@ function drawStickman(ctx, p) {
     updatePhysics(p); 
     const now = Date.now();
     if (p.dead) return drawCorpse(ctx, p, now);
+	ctx.save(); 
 
+    if (p.activeTask === "lurking") {
+        // Apply transparency to everything drawn until ctx.restore()
+        let alpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
+        ctx.globalAlpha = alpha + (Math.sin(now / 500) * 0.05);
+    }
     const anim = getAnimationState(p, now);
     const anchors = getAnchorPoints(p, anim);
     const limbs = getLimbPositions(p, anchors, anim, now);
 
+	// Everything inside here (Cape, Body, Items) will now be transparent!
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
     drawStickmanBody(ctx, p, anchors, limbs);
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
+
+    ctx.restore(); // Stop being transparent for the next player or background
 }
 /* function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
