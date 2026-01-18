@@ -26,31 +26,43 @@ function systemMessage(text) {
 }
 //        IDLE ACTION MESSAGES
 // ( big bottom right ext box )
-function idleActionMsg(text, color = "#0f0") {
+function idleActionMsg(playerName, text, color = "#0f0") {
     const box = document.getElementById("idleActionsBox");
     if (!box) return;
 
     const entry = document.createElement("div");
-    entry.style.color = color;
-    entry.style.marginBottom = "2px";
-    entry.style.borderLeft = `2px solid ${color}`;
-    entry.style.paddingLeft = "5px";
     
-    // Add a timestamp so you can see when it happened
+    // Style the container
+    entry.style.marginBottom = "3px";
+    entry.style.borderLeft = `3px solid ${color}`; // Use player/event color for the side bar
+    entry.style.paddingLeft = "8px";
+    entry.style.fontSize = "13px";
+    entry.style.fontFamily = "monospace";
+    entry.style.backgroundColor = "rgba(255, 255, 255, 0.03)"; // Slight tint for row separation
+    
+    // Get the current time
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    entry.innerHTML = `<span style="color:#555;">[${time}]</span> ${text}`;
+
+    /**
+     * Structure:
+     * [Time] Name: [Area] ActionText
+     */
+    entry.innerHTML = `
+        <span style="color: #666; font-size: 11px;">[${time}]</span> 
+        <strong style="color: ${color};">${playerName}:</strong> 
+        <span style="color: #bbb;">${text}</span>
+    `;
 
     box.appendChild(entry);
 
-    // Auto-scroll to the bottom
+    // Auto-scroll logic
     box.scrollTop = box.scrollHeight;
 
-    // Optional: Limit the number of messages so the page doesn't lag
+    // Keep the DOM light: remove oldest if over 50 entries
     if (box.childNodes.length > 50) {
         box.removeChild(box.firstChild);
     }
 }
-
 /* ====grr============= CONFIG & STATE ================== */
 // we can change these [ basically options ] 
 let viewArea = "home"; 
@@ -147,7 +159,7 @@ function movePlayer(p, targetArea) {
     if (targetArea === "pond") {
         // Shore is 0 to 250. We keep them between 50 and 200 so they aren't off-screen 
         // or touching the very edge of the water.
-        p.x = Math.random() * 150 + 50; 
+        p.x = Math.random() * 250 + 100; 
         p.y = 450 + Math.random() * 20; // Keep them on a flat line along the shore
     } else {
         p.x = Math.random() * 700 + 100;
@@ -808,7 +820,7 @@ function updatePhysics(p) {
 			// --- SPLASH DETECTION ---
 			// If we move from shore ( < 250) to water ( > 250)
 			if (oldX <= 250 && p.x > 250 && p.area === "pond") {
-				triggerSplash(250, p.y + 25);
+				triggerSplash(365, p.y + 25);
 			}
 			// If we move from water back to shore
 			if (oldX > 250 && p.x <= 250 && p.area === "pond") {
@@ -822,7 +834,14 @@ function updatePhysics(p) {
 	}
 }
 
-
+function triggerSplash(x, y) {
+    // This assumes you have a floater or particle system
+    // We can reuse your spawnFloater for a quick text-based splash
+    spawnFloater("💦 SPLASH!", x, y, "#44ccff", "pond");
+    
+    // If you have a sound system:
+    // playSound("splash"); 
+}
 // ==============================================
 // =-===--===-- DRRAW STICKMEN ---===---===---===-=
 // ----------------------------------------------
@@ -1021,14 +1040,7 @@ function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, righ
     return anim;
 } */
 // --- 1. Update Animation State to handle Swimming Y-offset ---
-function triggerSplash(x, y) {
-    // This assumes you have a floater or particle system
-    // We can reuse your spawnFloater for a quick text-based splash
-    spawnFloater("💦 SPLASH!", x, y, "#44ccff", "pond");
-    
-    // If you have a sound system:
-    // playSound("splash"); 
-}
+
 function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     

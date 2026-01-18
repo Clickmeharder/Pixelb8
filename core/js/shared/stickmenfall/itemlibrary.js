@@ -1119,17 +1119,25 @@ const POSE_LIBRARY = {
         right: { x: head.x + 22, y: head.y + 15 }
     }),
 	// NEW: Dynamic Swimming Pose
-    "swimming": (head) => {
-        const time = Date.now() / 200; // Speed of the stroke
-        return {
-            left: { 
-                x: head.x - 15 + Math.cos(time) * 15, 
-                y: head.y + 20 + Math.sin(time) * 10 
-            },
-            right: { 
-                x: head.x + 15 + Math.cos(time + Math.PI) * 15, 
-                y: head.y + 20 + Math.sin(time + Math.PI) * 10 
-            }
-        };
-    }
+	"swimming": (head) => {
+		// 1. Slower timing (divided by 600 instead of 200)
+		const time = Date.now() / 600; 
+		
+		// 2. The 'swing' factor: goes from -1 to 1 and back
+		const swing = Math.sin(time); 
+
+		return {
+			left: { 
+				// Moves from head.x-30 to head.x (halfway)
+				x: head.x - 15 + (swing * 15), 
+				// Dips slightly as it strokes
+				y: head.y + 25 + (Math.abs(swing) * 5) 
+			},
+			right: { 
+				// Moves from head.x to head.x+30 (halfway)
+				x: head.x + 15 - (swing * 15), 
+				y: head.y + 25 + (Math.abs(swing) * 5)
+			}
+		};
+	}
 };
