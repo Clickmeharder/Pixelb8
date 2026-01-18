@@ -158,32 +158,7 @@ function movePlayer(p, targetArea) {
     if (targetArea !== "dungeon") dungeonQueue = dungeonQueue.filter(n => n !== p.name);
     systemMessage(`${p.name} traveled to ${targetArea}`);
 }
-/* function movePlayer(p, targetArea) {
-    if (p.dead) {
-        systemMessage(`${p.name} is a corpse and cannot travel!`);
-        return;
-    }
-    // 1. If they are already there, don't reset their task!
-    if (p.area === targetArea) return;
 
-    // 2. Changing areas: Now we reset tasks
-    p.area = targetArea;
-    p.activeTask = null; 
-    p.targetX = null;
-
-    if (targetArea === "fishingpond" || targetArea === "pond") {
-        p.area = "fishingpond"; // Standardize the name
-        p.x = Math.random() * 100 + 50; // Arrival point on the shore
-        p.y = 450; 
-    } else {
-        p.x = Math.random() * 700 + 100;
-        p.y = 400 + Math.random() * 100;
-    }
-
-    if (targetArea !== "dungeon") dungeonQueue = dungeonQueue.filter(n => n !== p.name);
-    systemMessage(`${p.name} traveled to ${targetArea}`);
-}
- */
 // =================================================
 /* ================= PLAYER TOOLTIPS =============== */
 // catch mouse over/hover event of the stickmen on screen
@@ -1027,14 +1002,27 @@ function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, righ
 }
 
 // --- HELPERS ---
-function getAnimationState(p, now) {
+/* function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     if (p.activeTask === "dancing" && DANCE_LIBRARY[p.danceStyle]) {
         anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
     }
     return anim;
-}
+} */
+// --- 1. Update Animation State to handle Swimming Y-offset ---
+function getAnimationState(p, now) {
+    let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
+    
+    // Sink the character if they are in the water at the pond
+    if (p.activeTask === "swimming" && p.area === "pond" && p.x > 250) {
+        anim.bodyY = 15; // Lower the whole body by 15 pixels
+    }
 
+    if (p.activeTask === "dancing" && DANCE_LIBRARY[p.danceStyle]) {
+        anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
+    }
+    return anim;
+}
 function getAnchorPoints(p, anim) {
     return {
         headX: p.x + (anim.lean * 20),
@@ -1046,7 +1034,7 @@ function getAnchorPoints(p, anim) {
     };
 }
 
-function getLimbPositions(p, anchors, anim, now) {
+/* function getLimbPositions(p, anchors, anim, now) {
     const isFishing = p.activeTask === "fishing";
     const isAction = ["attacking", "woodcutting", "mining", "swimming", "lurking"].includes(p.activeTask);
     let leftHand = { x: anchors.headX - 18, y: anchors.shoulderY + 10 + anim.armMove };
@@ -1069,14 +1057,43 @@ function getLimbPositions(p, anchors, anim, now) {
         rightFoot: { x: p.x + legSpread + walk, y: footY }
     };
 }
+ */
+function getLimbPositions(p, anchors, anim, now) {
+    // Explicitly check for swimming first so it doesn't default to "action"
+    let activePose = anim.pose || p.forcedPose;
+    
+    if (!activePose) {
+        if (p.activeTask === "swimming") activePose = "swimming";
+        else if (p.activeTask === "fishing") activePose = "fishing";
+        else if (["attacking", "woodcutting", "mining"].includes(p.activeTask)) activePose = "action";
+    }
 
+    let leftHand = { x: anchors.headX - 18, y: anchors.shoulderY + 10 + anim.armMove };
+    let rightHand = { x: anchors.headX + 18, y: anchors.shoulderY + 10 - anim.armMove };
+
+    // Apply the Pose Overrides (This makes the circular arm motion work)
+    if (activePose && POSE_LIBRARY[activePose]) {
+        const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim);
+        if (overrides.left) leftHand = overrides.left;
+        if (overrides.right) rightHand = overrides.right;
+    }
+
+    const walk = (p.targetX !== null) ? Math.sin(now / 100) * 10 : 0;
+    const footY = p.y + 25 + anim.bodyY; // Keep feet attached to the sunken body
+
+    return {
+        leftHand, rightHand,
+        leftFoot: { x: p.x - 10 - walk, y: footY },
+        rightFoot: { x: p.x + 10 + walk, y: footY }
+    };
+}
 function drawStickmanBody(ctx, p, anchors, limbs) {
     const style = BODY_PARTS["stick"]; 
     ctx.save();
     ctx.strokeStyle = p.color; 
     ctx.lineWidth = 3; // Standard stickman thickness
 // If they are swimming in the water (x > 250), we submerge them
-    const isDeep = (p.area === "fishingpond" && p.x > 125);
+    const isDeep = (p.area === "pond" && p.x > 250);
     style.head(ctx, anchors.headX, anchors.headY, p);
     style.torso(ctx, anchors.headX, anchors.headY, p.x, anchors.hipY); 
 	//arms
@@ -1408,19 +1425,28 @@ function handleChatCommand(input) {
     }
 }
 /* ================= COMMAND FUNCTIONS ================= */
+
 function cmdStop(p, user) {
-    // RESTORE WEAPON
+    // 1. Restore weapon if it was put away
     if (p.stats.lastWeapon) {
         p.stats.equippedWeapon = p.stats.lastWeapon;
         systemMessage(`${p.name} drew their ${p.stats.equippedWeapon} again.`);
-        p.stats.lastWeapon = null; // Clear the memory so it doesn't double-equip later
+        p.stats.lastWeapon = null;
     }
 
+    // 2. Clear Tasks
     p.activeTask = null;
     p.taskEndTime = null;
     p.danceStyle = 0;
     p.forcedPose = null; 
-    p.targetX = null;    
+
+    // 3. Return to Shore logic
+    if (p.area === "pond" && p.x > 200) {
+        systemMessage(`${user} is heading back to the shore.`);
+        p.targetX = 100 + (Math.random() * 80); // Walk back to a random spot on the sand
+    } else {
+        p.targetX = null; // Just stop where you are if on land
+    }
     
     systemMessage(`${user} stopped their current action.`);
     saveStats(p);
@@ -1606,30 +1632,6 @@ function cmdFish(p, user) {
     p.taskEndTime = Date.now() + (15 * 60 * 1000);
     
     systemMessage(`${user} started fishing!`);
-    saveStats(p);
-}
-function cmdSwim(p, user) {
-    if (p.area !== "pond") { 
-        systemMessage(`${user}: The water is at the pond.`); 
-        return; 
-    }
-    if (p.activeTask === "swimming") { 
-        systemMessage(`${user}: Already swimming.`); 
-        return; 
-    }
-
-    // Auto-Unequip Weapon
-    if (p.stats.equippedWeapon) {
-        p.stats.lastWeapon = p.stats.equippedWeapon;
-        p.stats.equippedWeapon = null;
-        systemMessage(`${p.name} stripped off their gear to go for a dip.`);
-    }
-
-    p.targetX = 250; // Swim a bit further out than fishing
-    p.activeTask = "swimming";
-    p.taskEndTime = Date.now() + (10 * 60 * 1000); // 10 minute session
-    
-    systemMessage(`${user} jumped into the water!`);
     saveStats(p);
 }
 function cmdSwim(p, user) {
