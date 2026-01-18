@@ -2127,6 +2127,7 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     if (cmd === "dungeon") movePlayer(p, "dungeon");
     if (cmd === "join")    joinDungeonQueue(p);
     if (cmd === "dance") {cmdDance(p, user, args);}
+	if (cmd === "lurk") {cmdLurk(p, user);}
 	if (cmd === "listdances") {cmdListDances(p);}
     // Stats & Inventory//
     if (cmd === "stats")    cmdShowStats(user, args);
