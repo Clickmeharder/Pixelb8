@@ -1015,7 +1015,7 @@ function getAnimationState(p, now) {
     
     // Sink the character if they are in the water at the pond
     if (p.activeTask === "swimming" && p.area === "pond" && p.x > 250) {
-        anim.bodyY = 50; // Lower the whole body by 15 pixels
+        anim.bodyY = 60; // Lower the whole body by 15 pixels
     }
 
     if (p.activeTask === "dancing" && DANCE_LIBRARY[p.danceStyle]) {
