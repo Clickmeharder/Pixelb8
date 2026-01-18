@@ -100,8 +100,8 @@ const DANCE_UNLOCKS = {
     7: { name: "The seventhdance", minLvl: 1 },
     8: { name: "The eigthdance",  minLvl: 1 },
     9: { name: "The ninthdance", minLvl: 1 },
-	10: { name: "The tenthdance", minLvl: 1 }
-	99: { name: "The 99", minLvl: 99 },// Fixed to 20 to match your level-up logic
+	10: { name: "The tenthdance", minLvl: 1 },
+	99: { name: "The 99", minLvl: 99 }
 };
 
 const DANCE_LIBRARY = {
