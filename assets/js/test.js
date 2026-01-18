@@ -31,22 +31,14 @@ function idleActionMsg(playerName, text, color = "#0f0") {
     if (!box) return;
 
     const entry = document.createElement("div");
-    
-    // Style the container
     entry.style.marginBottom = "3px";
-    entry.style.borderLeft = `3px solid ${color}`; // Use player/event color for the side bar
+    entry.style.borderLeft = `3px solid ${color}`; // Color is used for the line
     entry.style.paddingLeft = "8px";
-    entry.style.fontSize = "13px";
     entry.style.fontFamily = "monospace";
-    entry.style.backgroundColor = "rgba(255, 255, 255, 0.03)"; // Slight tint for row separation
     
-    // Get the current time
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-    /**
-     * Structure:
-     * [Time] Name: [Area] ActionText
-     */
+    // The color variable is only used inside the style attribute here
     entry.innerHTML = `
         <span style="color: #666; font-size: 11px;">[${time}]</span> 
         <strong style="color: ${color};">${playerName}:</strong> 
@@ -54,11 +46,8 @@ function idleActionMsg(playerName, text, color = "#0f0") {
     `;
 
     box.appendChild(entry);
-
-    // Auto-scroll logic
     box.scrollTop = box.scrollHeight;
 
-    // Keep the DOM light: remove oldest if over 50 entries
     if (box.childNodes.length > 50) {
         box.removeChild(box.firstChild);
     }
@@ -217,23 +206,27 @@ function handleTooltips() {
 //------------------------------------------------
 //            SPLASH TEXT
 let floaters = [];
-function spawnFloater(text, x, y, color, area) {
-    // If for some reason area isn't passed, fall back to 'home'
-    const spawnArea = area || "home";
-    console.log(`%c[FLOATER] "${text}" spawned in [${spawnArea}]`, `color: ${color}; font-weight: bold; background: #000;`);
-	// 2. Idle Actions Box (HTML)
-    // We send a cleaner version of the text to the UI box
-    idleActionMsg(`[${spawnArea}] ${text}`, color);
-    // 3. (OPTIONAL DEBUG) Trace to see what called this (performFish, handleEnemyAttacks, etc)
-    //console.trace("Trigger Source:");
-	//4. push to the array
+// We set color to null by default so the function knows to use p.color
+function spawnFloater(p, text, color = null) {
+    const name = p.name || "System";
+    const area = p.area || "home";
+    const x = p.x || 400;
+    const y = p.y ? p.y - 60 : 300;
+
+    // If no specific color was passed, use the player's own color
+    const finalColor = color || p.color || "#0f0";
+
+    // 1. Send to the log box
+    idleActionMsg(name, `[${area.toUpperCase()}] ${text}`, finalColor);
+
+    // 2. Push to the visual floating text
     floaters.push({ 
         text, 
         x, 
         y, 
-        color, 
+        color: finalColor, 
         life: 150,
-        area: spawnArea // Crucial: This tags the text to its specific room
+        area: area 
     });
 }
 function updateSplashText(ctx) {
@@ -267,7 +260,7 @@ function applyDamage(target, amount, color = "#f00") {
     if (target.dead) return;
 
     target.hp -= amount;
-    spawnFloater(`-${amount}`, target.x, target.y - 40, color, target.area);
+    spawnFloater(target, `-${amount}`, color);
 
     if (target.hp <= 0) {
         target.hp = 0;
@@ -341,7 +334,7 @@ function performAttack(p) {
         }
         
         target.hp -= dmg;
-        spawnFloater(`-${dmg}`, target.x, target.y - 40, "#ff4444", target.area);
+        spawnFloater(target, `-${dmg}`, "#ff4444");
 
         // 4. Kill Logic & Looting
         if (target.hp <= 0) {
@@ -590,8 +583,9 @@ function performFish(p) {
     let displayMsg = `🎣 ${resultText}`;
     if (isFish && resultText !== "GOLDEN BASS!") displayMsg += ` (#${p.stats.fishCaught})`;
 
-    spawnFloater(displayMsg, p.x, p.y - 60, floaterColor, p.area);
-    
+    // Updated clean call
+    spawnFloater(p, displayMsg, floaterColor);
+
     // XP Logic
     p.stats.fishXP += 10;
     if (p.stats.fishXP >= xpNeeded(p.stats.fishLevel) * 2) {
@@ -602,8 +596,6 @@ function performFish(p) {
     updateCombatLevel(p);
     saveStats(p);
 }
-//============================================================
-// === NEW SWIMMING STUFF (LIKE FISHING THIS CAN ONLY CURRENTLY BE DONE IN THE POND AREA
 function performSwim(p) {
     if (p.area !== "pond" || p.dead) return;
     if (p.stats.swimDistance === undefined) p.stats.swimDistance = 0;
@@ -627,7 +619,6 @@ function performSwim(p) {
         foundItem = true;
     }
     else {
-        // Just distance gain
         const meters = Math.floor(Math.random() * 5 + 1);
         p.stats.swimDistance += meters;
         resultText = `swam ${meters}m...`;
@@ -635,7 +626,9 @@ function performSwim(p) {
 
     let displayMsg = `🏊 ${resultText}`;
     if (!foundItem) displayMsg += ` (Total: ${p.stats.swimDistance}m)`;
-    spawnFloater(displayMsg, p.x, p.y - 60, floaterColor, p.area);
+    
+    // Updated clean call
+    spawnFloater(p, displayMsg, floaterColor);
     
     // XP Logic
     p.stats.swimXP = (p.stats.swimXP || 0) + 12;
@@ -643,12 +636,13 @@ function performSwim(p) {
         p.stats.swimLevel = (p.stats.swimLevel || 1) + 1; 
         p.stats.swimXP = 0;
         systemMessage(`${p.name} SWIM UP! (Lv ${p.stats.swimLevel})`);
-		spawnFloater(`${p.name} SWIM UP! (Lv ${p.stats.swimLevel})`, p.x, p.y - 60, floaterColor, p.area);
+        
+        // Fixed the level-up floater here too!
+        spawnFloater(p, `SWIM UP! (Lv ${p.stats.swimLevel})`, "#FFD700");
     }
     updateCombatLevel(p);
     saveStats(p);
 }
-
 //------------------------------------------------------------
 
 // ( *if at pond & if on shore -> get in boat, and float,
@@ -825,11 +819,11 @@ function updatePhysics(p) {
 			// --- SPLASH DETECTION ---
 			// If we move from shore ( < 250) to water ( > 250)
 			if (oldX <= 250 && p.x > 250 && p.area === "pond") {
-				triggerSplash(365, p.y + 25);
+				triggerSplash(p);
 			}
 			// If we move from water back to shore
 			if (oldX > 250 && p.x <= 250 && p.area === "pond") {
-				triggerSplash(250, p.y + 25);
+				triggerSplash(p);
 			}
 
 		} else {
@@ -839,12 +833,11 @@ function updatePhysics(p) {
 	}
 }
 
-function triggerSplash(x, y) {
-    // This assumes you have a floater or particle system
-    // We can reuse your spawnFloater for a quick text-based splash
-    spawnFloater("💦 SPLASH!", x, y, "#44ccff", "pond");
+function triggerSplash(p) {
+    // We pass 'p' so the floater knows the name, area, and position
+    spawnFloater(p, "💦 SPLASH!", "#44ccff");
     
-    // If you have a sound system:
+    // If you have sound:
     // playSound("splash"); 
 }
 // ==============================================
@@ -1322,6 +1315,7 @@ function drawScenery(ctx) {
 function updatePlayerStatus(p, now) {
     if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
         systemMessage(`${p.name} stopped ${p.activeTask} (Idle timeout).`);
+		spawnFloater(p, `stopped ${p.activeTask} (Idle timeout)`, "#ff4444");
         p.activeTask = null;
         p.targetX = null;
         p.danceStyle = 0;
@@ -1348,16 +1342,18 @@ function handleDancing(p, now) {
         p.stats.danceXP += xpGain;
         p.lastDanceXP = now;
 
-        let nextLevelXP = p.stats.danceLevel * 100;
+        // Using your xpNeeded function for consistency
+        let nextLevelXP = xpNeeded(p.stats.danceLevel); 
         if (p.stats.danceXP >= nextLevelXP) {
             p.stats.danceLevel++;
             p.stats.danceXP = 0;
-            spawnFloater(`DANCE LEVEL ${p.stats.danceLevel}!`, p.x, p.y - 40, "#ff00ff", p.area);
             
-            // Notification for unlocks
-            if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Dance Style 2: The Flail!`);
-            if (p.stats.danceLevel === 10) systemMessage(`${p.name} unlocked Dance Style 3: The Lean!`);
-            if (p.stats.danceLevel === 20) systemMessage(`${p.name} unlocked Dance Style 4: The groupy!`);
+            // CLEAN CALL: Purple color for dancing
+            spawnFloater(p, `DANCE LEVEL ${p.stats.danceLevel}!`, "#ff00ff");
+            
+            if (p.stats.danceLevel === 5) systemMessage(`${p.name} unlocked Style 2: The Flail!`);
+            if (p.stats.danceLevel === 10) systemMessage(`${p.name} unlocked Style 3: The Lean!`);
+            if (p.stats.danceLevel === 20) systemMessage(`${p.name} unlocked Style 4: The Groupy!`);
             
             saveStats(p);
         }
@@ -1366,7 +1362,6 @@ function handleDancing(p, now) {
 function handleLurking(p, now) {
     if (!p.lastLurkXP) p.lastLurkXP = 0;
     
-    // Give XP every 5 seconds
     if (now - p.lastLurkXP > 5000) {
         let xpGain = 8; 
         p.stats.lurkXP += xpGain;
@@ -1376,7 +1371,9 @@ function handleLurking(p, now) {
         if (p.stats.lurkXP >= nextLevelXP) {
             p.stats.lurkLevel++;
             p.stats.lurkXP = 0;
-            spawnFloater(`LURK LEVEL ${p.stats.lurkLevel}!`, p.x, p.y - 40, "#555555", p.area, p.name);
+            
+            // CLEAN CALL: Dark gray for lurking
+            spawnFloater(p, `LURK LEVEL ${p.stats.lurkLevel}!`, "#555555");
             saveStats(p);
         }
     }
