@@ -1838,7 +1838,8 @@ function gameLoop() {
     updateArrows(ctx);      // Renders projectiles
     updateSplashText(ctx);  // Renders "Level Up" and damage floaters
     handleTooltips();
-
+	// INITIAL RUN
+	refreshProfileUI();
     // 7. Next Frame
     requestAnimationFrame(gameLoop);
 }
@@ -2595,8 +2596,7 @@ colorPicker.addEventListener("input", (e) => {
     updateBrowserProfile(null, e.target.value);
 });
 
-// INITIAL RUN
-refreshProfileUI();
+
 /* ComfyJS.onChat = (user, msg, color, flags, extra) => {
 //	console.log( "User:", user, "command:", command,);
 //	displayConsoleMessage(user, `!${command}`);
