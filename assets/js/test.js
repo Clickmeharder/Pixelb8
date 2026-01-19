@@ -2088,9 +2088,9 @@ function cmdLurk(p, user) {
     p.taskEndTime = Date.now() + (15 * 60 * 1000); // 15 mins
     
     // Optional: Hide the weapon when lurking
-    if (p.stats.equippedWeapon) {
+/*     if (p.stats.equippedWeapon) {
         p.manualSheath = true; 
-    }
+    } */
 
     spawnFloater("vanished into shadows...", p.x, p.y - 60, "#555555", p.area, p.name);
     saveStats(p);
