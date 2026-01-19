@@ -1851,7 +1851,9 @@ function gameLoop() {
 /* ================= CHAT COMMAND SYSTEM ================= */
 /* --- Handle Chat Commands ---*/
 // Example of how you would handle a future Browser Input field
-    let chatInput = document.getElementById("browserChatInput");
+const chatInput = document.getElementById("browserChatInput");
+const profileSelector = document.getElementById("profileSelector");
+const colorPicker = document.getElementById("browserColorPicker");
 function handleBrowserInput() {
 
     let text = chatInput.value;
