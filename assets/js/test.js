@@ -933,29 +933,29 @@ function joinDungeonQueue(p) {
     }
 }
 function startDungeon() {
-    dungeonSecondsLeft = 0; // Clear the counter
+    dungeonSecondsLeft = 0;
     dungeonActive = true;
-    
-    // Ensure the view is definitely on the dungeon
     viewArea = "dungeon"; 
+    
+    // Update the dropdown UI to match the forced view change
+    const selector = document.getElementById("view-area-selector");
+    if (selector) selector.value = "dungeon";
+
     document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON (ACTIVE)";
 
     dungeonQueue.forEach(name => {
         let p = players[name];
         if (p && !p.dead) {
             p.area = "dungeon";
-			p.y = -100; // Start higher up
+            p.y = -200;                  // Start way up
             p.x = Math.random() * 400 + 50;
-            p.targetY = 450; // The Ground
-			
-			p.targetX = 200; // Where they should walk to AFTER landing
-			// Clear these so they don't "slide" mid-air
-            p.targetX = null; 
-            p.activeTask = "attacking";
-  
+            p.targetY = 450;             // The floor
+            p.targetX = null;            // Don't walk until we land
+            p.activeTask = "attacking";  // Ready for combat
         }
     });
 
+    dungeonQueue = []; // Empty the queue for the next raid!
     systemMessage("The Dungeon Gates have opened!");
     spawnWave();
 }
@@ -1154,11 +1154,11 @@ function drawProjectiles(ctx) {
 
 function updatePhysics(p) {
     // --- STATE 1: FALLING (Dungeon Entry) ---
-    if (p.targetY !== undefined) {
+if (p.targetY !== undefined) {
         if (p.y < p.targetY) {
-            p.y += 12; // Falling speed
-            p.lean = 0.1; 
-            return; // EXIT: Don't walk or collide while in the air
+            p.y += 12; 
+            p.lean = 0.1;
+            return; // STOP HERE. Do not run horizontal logic.
         } else {
             p.y = p.targetY;
             delete p.targetY;
@@ -1975,11 +1975,17 @@ function updateUI() {
 /* ================= GAME LOOP ================= */
 function gameLoop() {
     const now = Date.now();
+    
+    // 1. BACKGROUND & UI
     renderScene();
     updateUI();
 	
-    if (dungeonActive) checkDungeonProgress();
+    // 2. DUNGEON LOGIC
+    if (dungeonActive) {
+        checkDungeonProgress();
+    }
 
+    // 3. DRAW ENEMIES (Only if looking at Dungeon)
     if (viewArea === "dungeon") {
         if (boss && !boss.dead) drawMonster(ctx, boss);
         enemies.forEach(e => {
@@ -1990,26 +1996,32 @@ function gameLoop() {
         });
     }
 
-    // Process Players
+    // 4. PLAYER PROCESSING
     Object.values(players).forEach(p => {
-        // 1. Logic & Status
-        
+        // --- LOGIC SECTION (Always run for all players) ---
+        // We run physics/status for everyone so they can finish falls 
+        // or walk between areas even if the camera isn't on them.
+        if (!p.dead) {
+            updatePhysics(p);         // Handles Falling, Walking, and Crowding
+            updatePlayerStatus(p, now); // Handles Idle timeouts
+            updatePlayerActions(p, now); // Handles Combat/Fishing/Dancing
+        }
 
-        // 2. Combined Physics (Movement + Falling + Separation)
-        // We use one function to handle all X and Y changes
-        if (p.area !== viewArea) return;
-		updatePhysics(p); 
-		updatePlayerStatus(p, now);
-        updatePlayerActions(p, now); 
-        drawStickman(ctx, p);
+        // --- RENDERING SECTION (Area specific) ---
+        // Only draw the stickman if they are in the current camera view
+        if (p.area === viewArea) {
+            drawStickman(ctx, p);
+        }
     });
 
+    // 5. WORLD SYSTEMS
     updateAreaPlayerCounts();
     updateSystemTicks(now); 
     drawProjectiles(ctx);      
     updateSplashText(ctx);  
     handleTooltips();
 	
+    // 6. NEXT FRAME
     requestAnimationFrame(gameLoop);
 }
 /* ================= GAME LOOP ================= */
