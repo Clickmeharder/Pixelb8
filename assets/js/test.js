@@ -2504,12 +2504,24 @@ const STICKMEN_ADMIN_CMDS = [
 
 
 // --- 1. DATA PERSISTENCE ---
-let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [
-    { name: "Player1", color: "#00ffff" },
-    { name: streamername, color: userColors[streamername] || "#6441a5" }
-];
-let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
+if (typeof userColors === 'undefined') var userColors = {};
 
+// Initialize profiles with a safe check for streamername
+let profiles = JSON.parse(localStorage.getItem("allProfiles"));
+
+if (!profiles) {
+    profiles = [
+        { name: "Player1", color: "#00ffff" }
+    ];
+    // Only add streamer if the variable is actually set
+    if (typeof streamername !== 'undefined' && streamername) {
+        profiles.push({ name: streamername, color: "#6441a5" });
+    }
+}
+
+let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
+// Safety: if index is out of bounds after a clear/edit
+if (activeProfileIndex >= profiles.length) activeProfileIndex = 0;
 // --- 2. UI REFERENCES ---
 const chatInput = document.getElementById("browserChatInput");
 const profileSelector = document.getElementById("profileSelector");
@@ -2535,7 +2547,10 @@ function refreshProfileUI() {
         if (index === activeProfileIndex) opt.selected = true;
         profileSelector.appendChild(opt);
     });
-    if (colorPicker) colorPicker.value = getActiveProfile().color;
+	let activeColor = getActiveProfile().color; 
+    // If the saved color is an object, fix it on the fly
+    if (typeof activeColor === 'object') activeColor = activeColor.userColor || "#00ffff";
+    if (colorPicker) colorPicker.value = activeColor;
 }
 
 function updateBrowserProfile(newName, newColor) {
@@ -2576,22 +2591,34 @@ function updateBrowserProfile(newName, newColor) {
 }
 // Function to update profile via commands
 function processGameCommand(user, msg, flags = {}, extra = {}) {
-    // 1. getPlayer handles the case-sensitivity and applies the color to the stickman
-    let p = getPlayer(user, extra.userColor); 
+    // 1. FORCE COLOR TO STRING: Ensure we aren't passing an object to getPlayer
+    let validColor = "orangered"; // Fallback
+    if (extra && extra.userColor) {
+        validColor = (typeof extra.userColor === 'object') ? (extra.userColor.userColor || "orangered") : extra.userColor;
+    }
 
-    // SYNC LOGIC: If the user is the active browser profile, sync the profile color to Twitch
+    // 2. Initialize Player
+    let p = getPlayer(user, validColor); 
+
+    // 3. SYNC LOGIC: If the user is the active browser profile, sync the profile color to Twitch
     const current = getActiveProfile();
-    if (user.toLowerCase() === current.name.toLowerCase() && extra.userColor) {
-        if (current.color !== extra.userColor) {
-            current.color = extra.userColor;
-            p.color = extra.userColor; // Ensure stickman matches immediately
-            if (colorPicker) colorPicker.value = extra.userColor; // Sync the UI picker
+    if (user.toLowerCase() === current.name.toLowerCase()) {
+        // Use the validated string color
+        if (validColor && current.color !== validColor) {
+            current.color = validColor;
+            p.color = validColor; // Ensure stickman matches immediately
+            
+            // Update UI picker if it exists
+            if (colorPicker) {
+                colorPicker.value = validColor; 
+            }
+            
             saveAllProfiles();
-            console.log(`[Sync] Updated Browser Profile color to match Twitch: ${extra.userColor}`);
+            console.log(`[Sync] Updated Browser Profile color to match Twitch: ${validColor}`);
         }
     }
 
-    // 2. Parse command
+    // 4. Parse command
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
 
@@ -2603,7 +2630,8 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     ];
 
     if (adminCommands.includes(cmd)) {
-        let isAuthorized = flags.developer || isStreamerAndAuthorize(p.name, cmd);
+        // Authorization check
+        let isAuthorized = flags.developer || (typeof isStreamerAndAuthorize === "function" && isStreamerAndAuthorize(p.name, cmd));
         if (!isAuthorized) return;
 
         if (cmd === "/newprofile") {
@@ -2619,7 +2647,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         }
 
         if (cmd === "name" || cmd === "/name") {
-            updateBrowserProfile(args[1], null);
+            if (args[1]) updateBrowserProfile(args[1], null);
             return;
         }
 
@@ -2678,29 +2706,25 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     console.log(`[RPG Engine] Executed: ${cmd} | User: ${user} | Color: ${p.color}`);
 }
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    // 1. YOUR ORIGINAL LOGIC (Keeps userColors tracker safe)
-    if (!userColors[user]) {
-        userColors[user] = (extra && extra.userColor) || "orangered";
+    // 1. Get the color string immediately
+    let assignedColor = color || (extra && extra.userColor) || "orangered";
+    
+    // 2. Ensure it is NOT an object (The [object Object] killer)
+    if (typeof assignedColor === 'object') {
+        assignedColor = assignedColor.userColor || "orangered";
     }
 
-    // 2. EXTRACTION (Get the string, not the object)
-    // We use the same priority: Twitch param -> Extra tag -> Tracker -> Fallback
-    let assignedColor = color || (extra && extra.userColor) || userColors[user] || "orangered";
+    // 3. Update the global tracker
+    userColors[user] = assignedColor;
 
-    // 3. LOG (Should now show the hex code, NOT [object Object])
-    console.log(`[Twitch Input] ${user}: ${msg} | Color: ${assignedColor}`);
-
-    // 4. SETTINGS GATE
+    // 4. Standard Logic
     if (typeof twitchChatOverlay !== 'undefined' && twitchChatOverlay === "off") return;
-
-    // 5. EXECUTION
     if (typeof displayChatMessage === "function") {
         displayChatMessage(user, msg, flags, extra);
     }
     
-    // IMPORTANT: We pass { userColor: assignedColor } so processGameCommand 
-    // receives a STRING inside that object, not another nested object.
-    processGameCommand(user, msg, flags, { ...extra, userColor: assignedColor });
+    // 5. PASSING: Send ONLY the string to processGameCommand
+    processGameCommand(user, msg, flags, { userColor: assignedColor });
 };
 // 1. Browser Chat Input (KEEP THIS - IT IS PERFECT)
 chatInput.addEventListener("keypress", (e) => {
