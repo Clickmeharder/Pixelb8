@@ -2564,11 +2564,12 @@ function updateBrowserProfile(newName, newColor) {
         systemMessage(`Character renamed: ${oldName} is now ${newName}`);
     }
 
-    if (newColor) {
-        current.color = newColor;
-        const p = players[current.name.toLowerCase()];
-        if (p) p.color = newColor;
-    }
+	if (newColor) {
+		current.color = newColor;
+		const p = players[current.name.toLowerCase()];
+		if (p) p.color = newColor; 
+		// If 'p' doesn't exist, it's fine, it'll get created with newColor next time you type.
+	}
     
     saveAllProfiles();
     refreshProfileUI();
@@ -2677,24 +2678,28 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     console.log(`[RPG Engine] Executed: ${cmd} | User: ${user} | Color: ${p.color}`);
 }
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    // 1. Grab color from Twitch parameter, then extra, then fallback
-    let assignedColor = color || (extra && extra.userColor) || "orangered";
+    // 1. YOUR ORIGINAL LOGIC (Keeps userColors tracker safe)
+    if (!userColors[user]) {
+        userColors[user] = (extra && extra.userColor) || "orangered";
+    }
 
-    // 2. Update the global tracker for the Chat UI
-    userColors[user] = assignedColor;
+    // 2. EXTRACTION (Get the string, not the object)
+    // We use the same priority: Twitch param -> Extra tag -> Tracker -> Fallback
+    let assignedColor = color || (extra && extra.userColor) || userColors[user] || "orangered";
 
-    // 3. Log Twitch activity
+    // 3. LOG (Should now show the hex code, NOT [object Object])
     console.log(`[Twitch Input] ${user}: ${msg} | Color: ${assignedColor}`);
 
-    // 4. Overlay Gate
+    // 4. SETTINGS GATE
     if (typeof twitchChatOverlay !== 'undefined' && twitchChatOverlay === "off") return;
 
-    // 5. Execution
+    // 5. EXECUTION
     if (typeof displayChatMessage === "function") {
         displayChatMessage(user, msg, flags, extra);
     }
     
-    // Pass the assignedColor as userColor so processGameCommand can find it
+    // IMPORTANT: We pass { userColor: assignedColor } so processGameCommand 
+    // receives a STRING inside that object, not another nested object.
     processGameCommand(user, msg, flags, { ...extra, userColor: assignedColor });
 };
 // 1. Browser Chat Input (KEEP THIS - IT IS PERFECT)
