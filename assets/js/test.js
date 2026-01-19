@@ -224,6 +224,63 @@ function handleTooltips() {
         }
     } else { tt.style.display = "none"; }
 }
+let selectedPlayerForBubble = null;
+
+c.addEventListener('click', (e) => {
+    const bubble = document.getElementById("player-context-bubble");
+    let clickedPlayer = null;
+
+    // Check who we clicked
+    Object.values(players).forEach(p => {
+        if (p.area === viewArea && Math.hypot(p.x - mouse.x, p.y - mouse.y) < 30) {
+            clickedPlayer = p;
+        }
+    });
+
+    if (clickedPlayer) {
+        selectedPlayerForBubble = clickedPlayer;
+        showContextBubble(clickedPlayer);
+    } else {
+        // Hide if clicking empty ground
+        bubble.classList.add('hidden');
+    }
+});
+
+function showContextBubble(p) {
+    const bubble = document.getElementById("player-context-bubble");
+    const rect = c.getBoundingClientRect();
+
+    bubble.classList.remove('hidden');
+    document.getElementById('bubble-name').textContent = p.name;
+
+    // Position bubble above player's head
+    // We use rect.left/top to handle page scrolling
+    bubble.style.left = (rect.left + p.x - (bubble.offsetWidth / 2)) + "px";
+    bubble.style.top = (rect.top + p.y - 100) + "px";
+}
+
+// Wire up the bubble buttons
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('bubble-bag-btn').addEventListener('click', () => {
+        if (selectedPlayerForBubble) {
+            // Set the profile selector to this player so our existing UI logic works
+            const selector = document.getElementById('profileSelector');
+            selector.value = selectedPlayerForBubble.name;
+            
+            // Trigger your existing inventory toggle
+            toggleInventory(); 
+            
+            document.getElementById("player-context-bubble").classList.add('hidden');
+        }
+    });
+
+    document.getElementById('bubble-respawn-btn').addEventListener('click', () => {
+        if (selectedPlayerForBubble) {
+            processGameCommand(selectedPlayerForBubble.name, "respawn");
+            document.getElementById("player-context-bubble").classList.add('hidden');
+        }
+    });
+});
 //===============================================
 
 //------------------------------------------------
@@ -287,40 +344,7 @@ function updateCombatLevel(p) {
     p.stats.combatLevel = Math.floor((highOffense + s.healLevel + s.lurkLevel + (s.fishLevel * 0.5)) / 2);
 }
 
-function applyDamage(target, amount, color = "#f00") {
-    if (target.dead) return;
 
-    // --- EVASION CHECK ---
-    // If the target is a player with a lurkLevel, give them a chance to dodge
-    if (target.stats && target.stats.lurkLevel) {
-        // 5% base + 1% per lurk level (capped at 50%)
-        let dodgeChance = Math.min(0.50, 0.05 + (target.stats.lurkLevel * 0.01));
-        if (Math.random() < dodgeChance) {
-            spawnFloater(target, "MISS", "#fff");
-            // Give a tiny bit of Lurk XP for successful dodging
-            target.stats.lurkXP += 5;
-            if (target.stats.lurkXP >= xpNeeded(target.stats.lurkLevel)) {
-                target.stats.lurkLevel++;
-                target.stats.lurkXP = 0;
-                spawnFloater(target, "LURK UP!", "#FFD700");
-                updateCombatLevel(target);
-            }
-            return; // Exit function, no damage taken
-        }
-    }
-
-    target.hp -= amount;
-    spawnFloater(target, `-${amount}`, color);
-
-    if (target.hp <= 0) {
-        target.hp = 0;
-        target.dead = true;
-        target.activeTask = "none";
-        target.deathTime = Date.now();
-        target.deathStyle = Math.random() > 0.5 ? "faceplant" : "backflip";
-        systemMessage(`${target.name || 'A player'} has fallen!`);
-    }
-}
 //===================================================================
 
 
@@ -459,6 +483,40 @@ function performAttack(p) {
 
         updateCombatLevel(p);
         saveStats(p);
+    }
+}
+function applyDamage(target, amount, color = "#f00") {
+    if (target.dead) return;
+
+    // --- EVASION CHECK ---
+    // If the target is a player with a lurkLevel, give them a chance to dodge
+    if (target.stats && target.stats.lurkLevel) {
+        // 5% base + 1% per lurk level (capped at 50%)
+        let dodgeChance = Math.min(0.50, 0.05 + (target.stats.lurkLevel * 0.01));
+        if (Math.random() < dodgeChance) {
+            spawnFloater(target, "MISS", "#fff");
+            // Give a tiny bit of Lurk XP for successful dodging
+            target.stats.lurkXP += 5;
+            if (target.stats.lurkXP >= xpNeeded(target.stats.lurkLevel)) {
+                target.stats.lurkLevel++;
+                target.stats.lurkXP = 0;
+                spawnFloater(target, "LURK UP!", "#FFD700");
+                updateCombatLevel(target);
+            }
+            return; // Exit function, no damage taken
+        }
+    }
+
+    target.hp -= amount;
+    spawnFloater(target, `-${amount}`, color);
+
+    if (target.hp <= 0) {
+        target.hp = 0;
+        target.dead = true;
+        target.activeTask = "none";
+        target.deathTime = Date.now();
+        target.deathStyle = Math.random() > 0.5 ? "faceplant" : "backflip";
+        systemMessage(`${target.name || 'A player'} has fallen!`);
     }
 }
 

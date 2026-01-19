@@ -234,170 +234,85 @@
 
         #tooltip { position: absolute; pointer-events: none; background: rgba(0,0,0,0.9); color: #fff; padding: 8px; border-radius: 4px; border: 1px solid #0ff; font-size: 13px; display: none; z-index: 100; }		
         #areaDisplay { position:absolute; bottom:0px; left:5%; transform:translateX(-5%); color:#0ff; font-size:18px; background:rgba(0,0,0,0.8); padding:5px 15px; border: 1px solid #0ff; text-transform: uppercase; }
-		#input-wrapper {
-			position: absolute;
-			bottom: 45%;
-			left: 3%;
-			display: flex;
-			width: 272px;
-			flex-direction: column;
-			flex-wrap: wrap;
-			align-items: flex-start;
-			opacity:0.0;
-			transition: opacity 3s ease-out;
-		}
+		#input-wrapper {position: absolute;bottom: 45%;left: 3%;display: flex;width: 272px;flex-direction: column;flex-wrap: wrap;align-items: flex-start;opacity:0.0;transition: opacity 3s ease-out;}
 		#input-wrapper:hover { opacity:0.98;transition: opacity 8s ease-out}
 		#stickmencmdInput {display: flex;flex-direction:row;}
-		input#browserColorPicker {
-			width: 15px;
-		}
-		#action-bar {
-			display: flex;
-			gap: 3px;
-			background: rgba(0, 0, 0, 0.8);
-			padding: 3px;
-			border-radius: 12px;
-			border: 2px solid #444;
-			z-index: 1000;
-			flex-wrap: wrap;
-		}
+		input#browserColorPicker {width: 15px;}
+		#action-bar {display: flex;gap: 3px;background: rgba(0, 0, 0, 0.8);padding: 3px;border-radius: 12px;border: 2px solid #444;z-index: 1000;flex-wrap: wrap;}
 
 
-		#action-bar button {
-			background: #333;
-			color: white;
-			border: 1px solid #555;
-			padding: 1px 1px;
-			cursor: pointer;
-			border-radius: 6px;
-			font-size: 10px;
-			font-family: monospace;
-			transition: all 0.2s;
-		}
+		#action-bar button {background: #333;color: white;border: 1px solid #555;padding: 1px 1px;cursor: pointer;border-radius: 6px;font-size: 10px;font-family: monospace;transition: all 0.2s;}
 
-		#action-bar button:hover {
-			background: #555;
-			border-color: #00ffff;
-		}
+		#action-bar button:hover {background: #555;border-color: #00ffff;}
 
-		#action-bar button.danger {
-			color: #ff4444;
-		}
+		#action-bar button.danger {color: #ff4444;}
 
-		#action-bar .separator {
-			width: 2px;
-			background: #555;
-			margin: 0 5px;
-		}
+		#action-bar .separator {width: 2px;background: #555;margin: 0 5px;}
 
-		#inventory-modal {
-			position: absolute;
-			top: 39px;
-			left: 41px;
-			/* width: 39%; */
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			z-index: 2000;
-		}
+		#inventory-modal {position: absolute;top: 39px;left: 41px;/* width: 39%; */display: flex;justify-content: center;align-items: center;z-index: 2000;}
 		.hidden { display: none !important; }
 
-		.modal-content {
-			background: #222; border: 2px solid #555;
-			width: 470px;padding: 3px; border-radius: 10px;
-			font-family: monospace; color: white;
-			color: #fafffead;
-		}
-		.modal-header {
-			display: flex;
-			justify-content: space-between;
-			border-bottom: 1px solid #444;
-			margin-bottom: 3px;
-		}
-		h2#inv-player-name {
-			margin: 0;
-		}
-		.inventory-layout {
-			display: grid;
-			grid-template-columns: 2fr 4fr;
-			gap: 4px;
-		}
+		.modal-content {background: #222; border: 2px solid #555;width: 470px;padding: 3px; border-radius: 10px;font-family: monospace; color: white;color: #fafffead;}
+		.modal-header {display: flex;justify-content: space-between;border-bottom: 1px solid #444;margin-bottom: 3px;}
+		h2#inv-player-name {margin: 0;}
+		.inventory-layout {display: grid;grid-template-columns: 2fr 4fr;gap: 4px;}
 
 		/* Grid Styling */
-		#backpack-grid, #equipped-grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-			gap: 3px;
-			background: #111;
-			padding: 4px;
-			border-radius: 5px;
-			height: 60%;
-			overflow: hidden;
-			overflow-y: auto;
-		}
+		#backpack-grid, #equipped-grid {display: grid;grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+			gap: 3px;background: #111;padding: 4px;border-radius: 5px;height: 60%;overflow: hidden;overflow-y: auto;}
 
-		.inv-slot {
-			width: 64px;
-			height: 32px;
-			background: #333;
-			border: 1px solid #555;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			font-size: 8px;
-			cursor: pointer;
-			position: relative;
-			text-align: center;
-			overflow: hidden;
-		}
+		.inv-slot {width: 64px;height: 32px;background: #333;border: 1px solid #555;display: flex;flex-direction:
+			column;align-items: center;justify-content: center;font-size: 8px;cursor: pointer;position: relative;text-align: center;overflow: hidden;}
 		.inv-slot:hover { border-color: #00ffff; background: #444; }
 		.inv-slot.empty { opacity: 0.3; cursor: default; }
 
 		.slot-label { font-size: 8px; color: #888; position: absolute; bottom: 2px; }
 
-		.item-actions {
-			position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-			background: rgba(0,0,0,0.9); display: none;
-			flex-direction: column; justify-content: center;
-		}
+		.item-actions {position: absolute; top: 0; left: 0; width: 100%; height: 100%;background: rgba(0,0,0,0.9); display: none;flex-direction: column; justify-content: center;}
 		.inv-slot:hover .item-actions { display: flex; }
 		#piexels-display {margin:auto;margin-left:6px;}
 		.btn-sell { background: #600; color: white; border: none; font-size: 9px; cursor: pointer; margin-top: 2px; }
 		.btn-sell:hover { background: #a00; }
 		
-		#inventoryClosebtn {
-			height: 23px;
-			padding-top: 0px;
-			margin: 0px;
-			width: 25px;
-			text-align: center;
-		}
-		.filter-btn {
-			background: #333;
-			border: 1px solid #555;
-			color: #eee;
-			padding: 3px 8px;
-			font-size: 10px;
-			cursor: pointer;
-			border-radius: 4px;
+		#inventoryClosebtn {height: 23px;padding-top: 0px;margin: 0px;width: 25px;text-align: center;}
+		.filter-btn {background: #333;border: 1px solid #555;color: #eee;padding: 3px 8px;font-size: 10px;cursor: pointer;border-radius: 4px;}
+
+		.filter-btn:hover {background: #444;border-color: #ceae33;}
+
+		.filter-btn.active {background: #ceae33;color: #000;border-color: #fff;font-weight: bold;}
+
+		#inventory-filters input[type="checkbox"] {margin-right: 5px;cursor: pointer;}
+		
+		#player-context-bubble {
+			position: absolute;
+			background: #222;
+			border: 2px solid #ceae33;
+			border-radius: 8px;
+			padding: 10px;
+			z-index: 3000;
+			box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+			pointer-events: auto; /* Important: this lets us click the buttons */
 		}
 
-		.filter-btn:hover {
-			background: #444;
-			border-color: #ceae33;
+		.bubble-content h4 { margin: 0 0 8px 0; color: #ceae33; font-size: 14px; text-align: center; }
+
+		.bubble-buttons { display: flex; flex-direction: column; gap: 5px; }
+
+		.bubble-buttons button {
+			background: #333; color: white; border: 1px solid #555;
+			padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;
 		}
 
-		.filter-btn.active {
-			background: #ceae33;
-			color: #000;
-			border-color: #fff;
-			font-weight: bold;
-		}
+		.bubble-buttons button:hover { background: #444; border-color: #ceae33; }
 
-		#inventory-filters input[type="checkbox"] {
-			margin-right: 5px;
-			cursor: pointer;
+		.bubble-buttons button.danger:hover { background: #600; border-color: #f44; }
+
+		/* The little arrow pointing down */
+		.bubble-arrow {
+			position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+			width: 0; height: 0; 
+			border-left: 8px solid transparent; border-right: 8px solid transparent;
+			border-top: 8px solid #ceae33;
 		}
         @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
     </style>
@@ -772,7 +687,18 @@
 			</div>
 		</div>
 	</div>
-	
+
+<div id="player-context-bubble" class="hidden">
+    <div class="bubble-arrow"></div>
+    <div class="bubble-content">
+        <h4 id="bubble-name">Player</h4>
+        <div class="bubble-buttons">
+            <button id="bubble-bag-btn">🎒View Bag</button>
+            <button id="bubble-respawn-btn" class="danger">💀Respawn</button>
+        </div>
+    </div>
+</div>
+
 <div id="inventory-modal" class="hidden">
     <div class="modal-content">
         <div class="modal-header">
