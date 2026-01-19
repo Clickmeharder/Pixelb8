@@ -2506,7 +2506,7 @@ const STICKMEN_ADMIN_CMDS = [
 // --- 1. DATA PERSISTENCE ---
 let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [
     { name: "Player1", color: "#00ffff" },
-    { name: streamername, color: "" }
+    { name: streamername, color: userColors[streamername] || "#6441a5" }
 ];
 let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
 
@@ -2575,18 +2575,22 @@ function updateBrowserProfile(newName, newColor) {
 }
 // Function to update profile via commands
 function processGameCommand(user, msg, flags = {}, extra = {}) {
-    // getPlayer now handles the case-sensitivity for us
-	let p = getPlayer(user, extra.userColor); 
-	const current = getActiveProfile();
+    // 1. getPlayer handles the case-sensitivity and applies the color to the stickman
+    let p = getPlayer(user, extra.userColor); 
+
+    // SYNC LOGIC: If the user is the active browser profile, sync the profile color to Twitch
+    const current = getActiveProfile();
     if (user.toLowerCase() === current.name.toLowerCase() && extra.userColor) {
         if (current.color !== extra.userColor) {
             current.color = extra.userColor;
-            p.color = extra.userColor; // Update stickman immediately
-            if (colorPicker) colorPicker.value = extra.userColor; // Update UI
+            p.color = extra.userColor; // Ensure stickman matches immediately
+            if (colorPicker) colorPicker.value = extra.userColor; // Sync the UI picker
             saveAllProfiles();
+            console.log(`[Sync] Updated Browser Profile color to match Twitch: ${extra.userColor}`);
         }
     }
-    // 2. Logic to log and process commands...
+
+    // 2. Parse command
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
 
@@ -2598,7 +2602,6 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     ];
 
     if (adminCommands.includes(cmd)) {
-        // Use p.name for the authorization check to ensure it matches the streamer identity
         let isAuthorized = flags.developer || isStreamerAndAuthorize(p.name, cmd);
         if (!isAuthorized) return;
 
@@ -2626,7 +2629,6 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
             return;
         }
 
-        // World Admin
         if (cmd === "scrub") { scrubAllInventories(); return; }
         if (cmd === "give" || cmd === "additem") {
             addItemToPlayer(args[1], args.slice(2).join(" "));
@@ -2636,64 +2638,55 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         if (cmd === "showpond") { viewArea = "pond"; document.getElementById("areaDisplay").textContent = "Pond"; return; }
         if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "Dungeon"; return; }
         
-        // Merchant Admin
         if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); return; }
         if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); return; }
         if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
     }
 
     // --- STANDARD PLAYER COMMANDS ---
-    // Note: We use p (the object) or p.name (the string) for all these
-    if (cmd === "stop" || cmd === "idle" || cmd === "!reset") { cmdStop(p, p.name); return; }
-    if (cmd === "attack") { cmdAttack(p, p.name); return; }
-    if (cmd === "fish")   { cmdFish(p, p.name); return; }
-    if (cmd === "swim")   { cmdSwim(p, p.name); return; }
-    if (cmd === "heal")   { cmdHeal(p, args); return; }
-    if (cmd === "lurk")   { cmdLurk(p, p.name); return; }
-    if (cmd === "dance")  { cmdDance(p, p.name, args); return; }
-    if (cmd === "mingle") { cmdMingle(p, p.name, args); return; }
-    if (cmd === "pose" || cmd === "setpose") { cmdSetPose(p, p.name, args); return; }
-    
-    if (cmd === "travel") { movePlayer(p, args[1]); return; }
-    if (cmd === "home")   { movePlayer(p, "home"); return; }
-    if (cmd === "dungeon"){ movePlayer(p, "dungeon"); return; }
-    if (cmd === "join")   { joinDungeonQueue(p); return; }
-    
-    if (cmd === "inventory") { cmdInventory(p, p.name, args); return; }
-    if (cmd === "equip")     { cmdEquip(p, args); return; }
-    if (cmd === "unequip")   { cmdUnequip(p, args); return; }
-    if (cmd === "sheath")    { cmdSheath(p, args); return; }
-    if (cmd === "wigcolor")  { cmdWigColor(p, args); return; }
-    
-    if (cmd === "sell")      { cmdSell(p, args); return; }
-    if (cmd === "bal" || cmd === "money") { cmdBalance(p); return; }
-    if (cmd === "stats")     { cmdShowStats(p.name, args); return; }
-    if (cmd === "topstats")  { cmdTopStats(); return; }
-    
-    if (cmd === "clear" || cmd === "!clear") { clearPlayerInventory(p.name); return; }
-    
-    if (cmd === "respawn" && p.dead) { 
+    if (cmd === "stop" || cmd === "idle" || cmd === "!reset") { cmdStop(p, p.name); }
+    else if (cmd === "attack") { cmdAttack(p, p.name); }
+    else if (cmd === "fish")   { cmdFish(p, p.name); }
+    else if (cmd === "swim")   { cmdSwim(p, p.name); }
+    else if (cmd === "heal")   { cmdHeal(p, args); }
+    else if (cmd === "lurk")   { cmdLurk(p, p.name); }
+    else if (cmd === "dance")  { cmdDance(p, p.name, args); }
+    else if (cmd === "mingle") { cmdMingle(p, p.name, args); }
+    else if (cmd === "pose" || cmd === "setpose") { cmdSetPose(p, p.name, args); }
+    else if (cmd === "travel") { movePlayer(p, args[1]); }
+    else if (cmd === "home")   { movePlayer(p, "home"); }
+    else if (cmd === "dungeon"){ movePlayer(p, "dungeon"); }
+    else if (cmd === "join")   { joinDungeonQueue(p); }
+    else if (cmd === "inventory") { cmdInventory(p, p.name, args); }
+    else if (cmd === "equip")     { cmdEquip(p, args); }
+    else if (cmd === "unequip")   { cmdUnequip(p, args); }
+    else if (cmd === "sheath")    { cmdSheath(p, args); }
+    else if (cmd === "wigcolor")  { cmdWigColor(p, args); }
+    else if (cmd === "sell")      { cmdSell(p, args); }
+    else if (cmd === "bal" || cmd === "money") { cmdBalance(p); }
+    else if (cmd === "stats")     { cmdShowStats(p.name, args); }
+    else if (cmd === "topstats")  { cmdTopStats(); }
+    else if (cmd === "clear" || cmd === "!clear") { clearPlayerInventory(p.name); }
+    else if (cmd === "respawn" && p.dead) { 
         p.dead = false; 
         p.hp = p.maxHp; 
         systemMessage(`${p.name} returned to life!`); 
-        return; 
     }
-}
 
-//ComfyJS.onChat = (user, msg, color, flags, extra) => {
-// Twitch Input
+    // FINAL DEBUG LOG
+    console.log(`[RPG Engine] Executed: ${cmd} | User: ${user} | Color: ${p.color}`);
+}
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    // 1. Grab the color from wherever it exists
+    // 1. Grab color from Twitch parameter, then extra, then fallback
     let assignedColor = color || (extra && extra.userColor) || "orangered";
 
-    // 2. Force update the tracker
+    // 2. Update the global tracker for the Chat UI
     userColors[user] = assignedColor;
 
-    // 3. Debug Logs (Fixed variable names)
-    console.log(`Color Check -> User: ${user} | Hex: ${assignedColor}`);
-    console.log("[Twitch Input]", user, ":", msg, "| Color:", assignedColor);
+    // 3. Log Twitch activity
+    console.log(`[Twitch Input] ${user}: ${msg} | Color: ${assignedColor}`);
 
-    // 4. Settings Gate
+    // 4. Overlay Gate
     if (typeof twitchChatOverlay !== 'undefined' && twitchChatOverlay === "off") return;
 
     // 5. Execution
@@ -2701,10 +2694,9 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
         displayChatMessage(user, msg, flags, extra);
     }
     
-    // Pass the assignedColor inside the object so processGameCommand can find it
-    processGameCommand(user, msg, flags, { userColor: assignedColor });
+    // Pass the assignedColor as userColor so processGameCommand can find it
+    processGameCommand(user, msg, flags, { ...extra, userColor: assignedColor });
 };
-
 // Browser Chat Input
 chatInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
