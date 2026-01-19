@@ -1852,8 +1852,8 @@ function gameLoop() {
 /* --- Handle Chat Commands ---*/
 // Example of how you would handle a future Browser Input field
 function handleBrowserInput() {
-    let input = document.getElementById("browserChatInput");
-    let text = input.value;
+    let chatInput = document.getElementById("browserChatInput");
+    let text = chatInput.value;
     let p = players[localPlayerName]; 
 
     // Use the exact same router!
