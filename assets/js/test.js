@@ -2449,26 +2449,42 @@ const STICKMEN_ADMIN_CMDS = [
     { command: "testdance", description: "Test an animation regardless of level.", usage: "testdance [style#]" }
 ];
 
-// Initialize from LocalStorage or defaults
-const defaultStreamer = (typeof streamername !== 'undefined' && streamername) ? streamername : "Jaedraze";
-const defaultColor = (typeof streamerColor !== 'undefined' && streamerColor) ? streamerColor : "#6441a5";
-
-let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [
-    { name: "Player1", color: "#00ffff" },
-    { name: defaultStreamer, color: defaultColor } 
-];
-let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
-
-// Function to save everything
+// 1. First, define the utility functions so they are ready
 function saveAllProfiles() {
     localStorage.setItem("allProfiles", JSON.stringify(profiles));
     localStorage.setItem("activeProfileIndex", activeProfileIndex);
 }
 
-// Function to get current active data
 function getActiveProfile() {
     return profiles[activeProfileIndex];
 }
+
+// 2. Setup defaults (using your variables)
+const defaultStreamer = (typeof streamername !== 'undefined' && streamername) ? streamername : "Jaedraze";
+const defaultColor = (typeof streamerColor !== 'undefined' && streamerColor) ? streamerColor : "#6441a5";
+
+// 3. Load and Force Sync
+let profiles = JSON.parse(localStorage.getItem("allProfiles"));
+let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
+
+if (!profiles || profiles.length === 0) {
+    profiles = [
+        { name: "Player1", color: "#00ffff" },
+        { name: defaultStreamer, color: defaultColor }
+    ];
+} else {
+    let sIndex = profiles.findIndex(pr => pr.name.toLowerCase() === defaultStreamer.toLowerCase());
+    if (sIndex === -1) {
+        profiles.push({ name: defaultStreamer, color: defaultColor });
+    } else {
+        // This is what fixes the "Purple Bug"
+        profiles[sIndex].name = defaultStreamer; 
+        profiles[sIndex].color = defaultColor; 
+    }
+}
+
+// 4. Save the synced data
+saveAllProfiles();
 // THE MASTER COMMAND TRIGGER
 chatInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
@@ -2557,6 +2573,23 @@ profileSelector.addEventListener("change", (e) => {
     systemMessage(`Active Player: ${current.name}`);
 });
 function processGameCommand(user, msg, flags = {}, extra = {}) {
+	const current = getActiveProfile();
+    if (current && user.toLowerCase() === current.name.toLowerCase()) {
+        let twitchColor = (typeof extra.userColor === 'string') ? extra.userColor : null;
+        
+        // If Twitch sends a valid color, and it's different from our current profile color
+        if (twitchColor && current.color !== twitchColor) {
+            console.log(`Syncing ${user}'s color to Twitch: ${twitchColor}`);
+            current.color = twitchColor;
+            
+            // Update the actual player stickman immediately
+            let pObj = players[user.toLowerCase()];
+            if (pObj) pObj.color = twitchColor;
+
+            saveAllProfiles();
+            refreshProfileUI();
+        }
+    }
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
@@ -2637,6 +2670,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "swim")   { cmdSwim(p, user); return; }
     if (cmd === "heal")   { cmdHeal(p, args); return; }
     if (cmd === "dance")  { cmdDance(p, user, args); return; }
+	if (cmd === "lurk")   { cmdLurk(p, user); return; }
     if (cmd === "travel") { movePlayer(p, args[1]); return; }
     if (cmd === "home")   { movePlayer(p, "home"); return; }
     if (cmd === "dungeon"){ movePlayer(p, "dungeon"); return; }
@@ -2646,11 +2680,14 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "unequip")   { cmdUnequip(p, args); return; }
     if (cmd === "sell")      { cmdSell(p, args); return; }
     if (cmd === "bal" || cmd === "money") { cmdBalance(p); return; }
+	if (cmd === "wigcolor")  { cmdWigColor(p, args); return; } // Added back
+	if (cmd === "listdances") { cmdListDances(p); return; }
     if (cmd === "respawn" && p.dead) {
         p.dead = false; p.hp = p.maxHp;
         systemMessage(`${p.name} returned to life!`);
         return;
     }
+	
 }
 
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
