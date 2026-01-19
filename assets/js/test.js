@@ -2437,16 +2437,48 @@ const STICKMEN_ADMIN_CMDS = [
     { command: "spawnmerchant", description: "Force the merchant to appear.", usage: "spawnmerchant" },
     { command: "testdance", description: "Test an animation regardless of level.", usage: "testdance [style#]" }
 ];
-//ComfyJS.onChat = (user, msg, color, flags, extra) => {
-//function stickmenCommandHandler(user, msg, command, color, flags, extra) {//
-//    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);//
-//    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected//
-//    displayChatMessage(user, message, flags, extra);  // Show message in chat box//
-let browserProfile = JSON.parse(localStorage.getItem("browserProfile")) || {
-    name: "Admin",
-    color: "#00ffff"
-};
 
+// Initialize from LocalStorage or defaults
+let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [
+    { name: "Player1", color: "#00ffff" },
+    { name: "Jaedraze", color: "#6441a5" } // Example Streamer Profile
+];
+
+let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
+
+// Function to save everything
+function saveAllProfiles() {
+    localStorage.setItem("allProfiles", JSON.stringify(profiles));
+    localStorage.setItem("activeProfileIndex", activeProfileIndex);
+}
+
+// Function to get current active data
+function getActiveProfile() {
+    return profiles[activeProfileIndex];
+}
+// THE MASTER COMMAND TRIGGER
+chatInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        const msg = chatInput.value.trim();
+        if (!msg) return;
+
+        const current = getActiveProfile();
+        
+        // CHECK: Are we currently pretending to be the streamer?
+        // If our profile name matches the Twitch streamer name, we are 'broadcaster'
+        const isStreamerIdentity = (current.name.toLowerCase() === streamername.toLowerCase());
+
+        const flags = { 
+            developer: true, // Local browser always has dev access
+            broadcaster: isStreamerIdentity, // Gain streamer powers if name matches
+            mod: isStreamerIdentity 
+        };
+
+        processGameCommand(current.name, msg, flags, { userColor: current.color });
+
+        chatInput.value = ""; 
+    }
+});
 // Function to update profile via commands
 function updateBrowserProfile(newName, newColor) {
     if (newName) {
@@ -2484,7 +2516,20 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
             console.warn(`Unauthorized admin attempt: ${user} tried ${cmd}`);
             return; 
         }
-
+		// Add these to processGameCommand
+		if (cmd === "/newprofile") {
+			if (flags.developer) {
+				let newName = args[1];
+				if (newName) {
+					profiles.push({ name: newName, color: "#ffffff" });
+					activeProfileIndex = profiles.length - 1;
+					saveAllProfiles();
+					refreshProfileUI();
+					systemMessage(`Created and switched to profile: ${newName}`);
+				}
+			}
+			return;
+		}
         // Admin Logic Execution
         if (cmd === "scrub") { scrubAllInventories(); return; }
         if (cmd === "give" || cmd === "additem") {
@@ -2548,40 +2593,9 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         return;
     }
 }
-// Example: Listening to a browser text input
-// Reference the new elements
-const nameInput = document.getElementById("browserNameInput");
-const colorPicker = document.getElementById("browserColorPicker");
-const chatInput = document.getElementById("browserChatInput");
 
-// 1. Load saved profile into the HTML elements on startup
-nameInput.value = browserProfile.name;
-colorPicker.value = browserProfile.color;
+//ComfyJS.onChat = (user, msg, color, flags, extra) => {
 
-// 2. Listen for changes to Name or Color
-nameInput.addEventListener("change", () => {
-    updateBrowserProfile(nameInput.value, null);
-});
-
-colorPicker.addEventListener("input", () => {
-    updateBrowserProfile(null, colorPicker.value);
-    // Optional: Immediately update current stickman color if player exists
-    let p = players[browserProfile.name];
-    if (p) userColors[p.name] = colorPicker.value;
-});
-
-// 3. Updated Chat Listener
-chatInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-        const msg = chatInput.value.trim();
-        if (!msg) return;
-
-        // Use the LIVE values from the inputs
-        processGameCommand(nameInput.value, msg, { developer: true }, { userColor: colorPicker.value });
-
-        chatInput.value = ""; 
-    }
-});
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
     // Keep track of colors
     if (!userColors[user]) {
@@ -2703,13 +2717,6 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     }
 };
  */
-// REGISTER the command metadata//
-/* registerPluginCommands(STICKMEN_USER_CMDS, false);
-registerPluginCommands(STICKMEN_ADMIN_CMDS, true); */
-// REGISTER the game with the comfychat.js//
-//registerChatPlugin(stickmenCommandHandler);
-
-
 
 gameLoop();
 
