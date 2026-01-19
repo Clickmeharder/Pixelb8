@@ -2005,18 +2005,17 @@ function renderInventoryUI() {
     let filteredInv = playerObj.stats.inventory.filter(item => {
         // A. Filter Hide Equipped
         if (hideEquipped && equippedItems.includes(item)) return false;
-
         // B. Category Filters
         const data = ITEM_DB[item] || {};
         const type = data.type || "";
-
         if (currentInventoryFilter === "all") return true;
-        if (currentInventoryFilter === "fish") return item.includes("kg") || item === "Golden Bass";
         if (currentInventoryFilter === "gear") {
             return ["weapon", "armor", "helmet", "pants", "gloves", "boots", "cape", "staff", "bow"].includes(type);
         }
-        if (currentInventoryFilter === "tools") return ["tool", "fishing_rod", "pickaxe"].includes(type) || item === "Fishing Rod";
-        
+        if (currentInventoryFilter === "tools") return type === "tool";
+		if (currentInventoryFilter === "fish") return type === "fish";
+        // Added the material check here
+        if (currentInventoryFilter === "materials") return type === "material";
         return true;
     });
 
