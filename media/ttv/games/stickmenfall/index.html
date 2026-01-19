@@ -248,18 +248,32 @@
 		#action-bar button.danger {color: #ff4444;}
 
 		#action-bar .separator {width: 2px;background: #555;margin: 0 5px;}
+		#view-area-selector {
+			background: #333;
+			color: #ceae33;
+			border: 1px solid #555;
+			padding: 5px;
+			border-radius: 4px;
+			font-family: monospace;
+			cursor: pointer;
+			outline: none;
+		}
 
+		#view-area-selector option {
+			background: #222;
+			color: white;
+		}
 		#inventory-modal {position: absolute;top: 39px;left: 41px;/* width: 39%; */display: flex;justify-content: center;align-items: center;z-index: 2000;}
 		.hidden { display: none !important; }
 
 		.modal-content {background: #222; border: 2px solid #555;width: 470px;padding: 3px; border-radius: 10px;font-family: monospace; color: white;color: #fafffead;}
 		.modal-header {display: flex;justify-content: space-between;border-bottom: 1px solid #444;margin-bottom: 3px;}
 		h2#inv-player-name {margin: 0;}
-		.inventory-layout {display: grid;grid-template-columns: 2fr 4fr;gap: 4px;}
-
+		.inventory-layout {display: grid;grid-template-columns:2fr 3fr;gap: 4px;}
+		div#backpack-grid {height: 54%;}
 		/* Grid Styling */
 		#backpack-grid, #equipped-grid {display: grid;grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-			gap: 3px;background: #111;padding: 4px;border-radius: 5px;height: 60%;overflow: hidden;overflow-y: auto;}
+			gap: 3px;background: #111;padding: 4px;border-radius: 5px;height: ;overflow: hidden;overflow-y: auto;}
 
 		.inv-slot {width: 64px;height: 32px;background: #333;border: 1px solid #555;display: flex;flex-direction:
 			column;align-items: center;justify-content: center;font-size: 8px;cursor: pointer;position: relative;text-align: center;overflow: hidden;}
@@ -314,6 +328,7 @@
 			border-left: 8px solid transparent; border-right: 8px solid transparent;
 			border-top: 8px solid #ceae33;
 		}
+		
         @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
     </style>
 </head>
@@ -672,18 +687,26 @@
 				<input type="text" id="browserChatInput" placeholder="Type a command..." autocomplete="off">
 			</div>
 			<div id="action-bar">
-				<button data-action="travel dungeon">⚔️Dungeon</button>
-				<button data-action="travel pond">🎣Pond</button>
-				<button data-action="travel home">🏠Home</button>
-				<button data-action="attack">💥Attack</button>
-				<button data-action="fish">🐟Fish</button>
-				<button data-action="lurk">👤Lurk</button>
-				<button data-action="dance">💃Dance</button>
-				<button data-action="stop">🛑Stop</button>
+				<button data-action="join">✨ Join</button>
+				<button data-action="travel dungeon">⚔️ Dungeon</button>
+				<button data-action="travel pond">🎣 Pond</button>
+				<button data-action="travel home">🏠 Home</button>
+				
 				<div class="separator"></div>
-				<button data-action="inventory">🎒Bag</button>
-				<button data-action="respawn" class="danger">💀Respawn</button>
-			</div>
+				
+				<select id="view-area-selector" title="View Area">
+					<option value="home">🏠 Home (0)</option>
+					<option value="pond">🎣 Pond (0)</option>
+					<option value="dungeon">💀 Dungeon (0)</option>
+				</select>
+				<button data-action="attack">💥 Attack</button>
+				<button data-action="fish">🐟 Fish</button>
+				<button data-action="lurk">👤 Lurk</button>
+				<button data-action="dance">💃 Dance</button>
+				<div class="separator"></div>
+				<button data-action="stop">🛑 Stop</button>
+				<button data-action="inventory">🎒 Bag</button>
+				<button data-action="respawn" class="danger">💀 Respawn</button>
 			</div>
 		</div>
 	</div>

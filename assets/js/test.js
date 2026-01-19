@@ -1801,7 +1801,25 @@ function renderScene() {
     drawScenery(ctx);
 }
 
+function updateAreaPlayerCounts() {
+    const counts = { home: 0, pond: 0, dungeon: 0 };
+    
+    // Count players in each area
+    Object.values(players).forEach(p => {
+        if (counts[p.area] !== undefined) counts[p.area]++;
+    });
 
+    // Update the dropdown options text
+    const selector = document.getElementById("view-area-selector");
+    if (selector) {
+        selector.options[0].text = `🏠 Home (${counts.home})`;
+        selector.options[1].text = `🎣 Pond (${counts.pond})`;
+        selector.options[2].text = `💀 Dungeon (${counts.dungeon})`;
+    }
+}
+
+// Call this inside your requestAnimationFrame or a 1-second interval
+//setInterval(updateAreaPlayerCounts, 1000);
 /* ================= GAME LOOP ================= */
 /* ================= GAME LOOP ================= */
 //--GAME LOOP HELPERS
@@ -1894,7 +1912,7 @@ function gameLoop() {
     // 2. Interface (The Text/UI)
     // This now shows the wave, difficulty, and enemy HP
     updateUI();
-
+	
     // 3. Entity Logic & Progress (Calculations)
     if (dungeonActive) {
         // Checks if wave is cleared and handles Boss/Minion spawning
@@ -1929,16 +1947,16 @@ function gameLoop() {
         updatePlayerActions(p, now); // Combat & loot triggers are inside here
         drawStickman(ctx, p);        // Visual rendering
     });
-
+	updateAreaPlayerCounts();
     // 6. World Systems (Effects & Timers)
     updateSystemTicks(now); // Handles enemy AI attacks and global intervals
     updateArrows(ctx);      // Renders projectiles
     updateSplashText(ctx);  // Renders "Level Up" and damage floaters
     handleTooltips();
-
+	
     // 7. Next Frame
     requestAnimationFrame(gameLoop);
-}
+}	
 /* ================= GAME LOOP ================= */
 /* ================= GAME LOOP ================= */
 
@@ -2126,6 +2144,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         });
+		const viewSelector = document.getElementById("view-area-selector");
+		if (viewSelector) {
+			viewSelector.addEventListener("change", (e) => {
+				// This assumes your global variable for what the camera sees is called 'viewArea'
+				viewArea = e.target.value; 
+				console.log(`Camera moved to: ${viewArea}`);
+				
+				// Optional: If you have a specific function to handle area switching logic
+				// sendAction(`view ${viewArea}`); 
+			});
+		}
     }
 });
 /* ================= COMMAND FUNCTIONS ================= */
