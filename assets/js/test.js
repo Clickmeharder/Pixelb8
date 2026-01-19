@@ -1848,18 +1848,6 @@ function gameLoop() {
 
 /* ======================================================= */
 /* ================= CHAT COMMAND SYSTEM ================= */
-/* --- Handle Chat Commands ---*/
-// Example of how you would handle a future Browser Input field
-function handleBrowserInput() {
-    let input = document.getElementById("browserChatInput");
-    let text = input.value;
-    let p = players[localPlayerName]; 
-
-    // Use the exact same router!
-    centralCommandRouter(p, p.name, text, { developer: true });
-
-    input.value = "";
-}
 /* ================= COMMAND FUNCTIONS ================= */
 
 function cmdStop(p, user) {
@@ -2439,148 +2427,113 @@ const STICKMEN_ADMIN_CMDS = [
 ];
 
 
-// Link JS to the HTML elements
+// --- 1. DATA PERSISTENCE ---
+let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [
+    { name: "Player1", color: "#00ffff" },
+    { name: "Jaedraze", color: "#6441a5" }
+];
+let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
+
+// --- 2. UI REFERENCES ---
 const chatInput = document.getElementById("browserChatInput");
 const profileSelector = document.getElementById("profileSelector");
 const colorPicker = document.getElementById("browserColorPicker");
 
-// Safety check: if these aren't in your HTML yet, console will warn you
-if (!chatInput || !profileSelector || !colorPicker) {
-    console.error("Browser UI elements missing! Check your HTML IDs.");
-}
-// Initialize from LocalStorage or defaults
-let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [
-    { name: "Player1", color: "#00ffff" },
-    { name: "Jaedraze", color: "#6441a5" } // Example Streamer Profile
-];
-
-let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
-
-// Function to save everything
+// --- 3. CORE FUNCTIONS ---
 function saveAllProfiles() {
     localStorage.setItem("allProfiles", JSON.stringify(profiles));
     localStorage.setItem("activeProfileIndex", activeProfileIndex);
 }
 
-// Function to get current active data
 function getActiveProfile() {
     return profiles[activeProfileIndex];
 }
-// THE MASTER COMMAND TRIGGER
-chatInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-        const msg = chatInput.value.trim();
-        if (!msg) return;
 
-        const current = getActiveProfile();
-        
-        // CHECK: Are we currently pretending to be the streamer?
-        // If our profile name matches the Twitch streamer name, we are 'broadcaster'
-        const isStreamerIdentity = (current.name.toLowerCase() === streamername.toLowerCase());
+function refreshProfileUI() {
+    if (!profileSelector) return;
+    profileSelector.innerHTML = "";
+    profiles.forEach((p, index) => {
+        let opt = document.createElement("option");
+        opt.value = index;
+        opt.textContent = p.name;
+        if (index === activeProfileIndex) opt.selected = true;
+        profileSelector.appendChild(opt);
+    });
+    if (colorPicker) colorPicker.value = getActiveProfile().color;
+}
 
-        const flags = { 
-            developer: true, // Local browser always has dev access
-            broadcaster: isStreamerIdentity, // Gain streamer powers if name matches
-            mod: isStreamerIdentity 
-        };
-
-        processGameCommand(current.name, msg, flags, { userColor: current.color });
-
-        chatInput.value = ""; 
-    }
-});
-// Function to update profile via commands
 function updateBrowserProfile(newName, newColor) {
-    if (newName) {
-        browserProfile.name = newName;
-        if(document.getElementById("browserNameInput")) {
-            document.getElementById("browserNameInput").value = newName;
-        }
-    }
+    const current = getActiveProfile();
+    
+    if (newName) current.name = newName;
     if (newColor) {
-        browserProfile.color = newColor;
-        if(document.getElementById("browserColorPicker")) {
-            document.getElementById("browserColorPicker").value = newColor;
+        current.color = newColor;
+        // UPDATE THE LIVE PLAYER COLOR
+        if (players[current.name]) {
+            players[current.name].color = newColor;
         }
     }
     
-    localStorage.setItem("browserProfile", JSON.stringify(browserProfile));
-    systemMessage(`Profile updated: ${browserProfile.name}`);
+    saveAllProfiles();
+    refreshProfileUI();
 }
+// Function to update profile via commands
 function processGameCommand(user, msg, flags = {}, extra = {}) {
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
 
-    // --- 1. ADMIN & AUTHORIZATION CHECK ---
-	const adminCommands = [
-			"showhome", "showdungeon", "showpond", "spawnmerchant", 
-			"despawnmerchant", "resetmerchant", "give", "additem", "scrub",
-			"name", "/name", "color", "/color" // Added these here
-	];
+    // --- ADMIN & SYSTEM COMMANDS ---
+    const adminCommands = [
+        "showhome", "showdungeon", "showpond", "spawnmerchant", 
+        "despawnmerchant", "resetmerchant", "give", "additem", "scrub",
+        "name", "/name", "color", "/color", "/newprofile"
+    ];
+
     if (adminCommands.includes(cmd)) {
-        // If it's the browser (developer) OR passes your Twitch streamer check
         let isAuthorized = flags.developer || isStreamerAndAuthorize(user, cmd);
-        
-        if (!isAuthorized) {
-            console.warn(`Unauthorized admin attempt: ${user} tried ${cmd}`);
-            return; 
-        }
-		// Add these to processGameCommand
-		if (cmd === "/newprofile") {
-			if (flags.developer) {
-				let newName = args[1];
-				if (newName) {
-					profiles.push({ name: newName, color: "#ffffff" });
-					activeProfileIndex = profiles.length - 1;
-					saveAllProfiles();
-					refreshProfileUI();
-					systemMessage(`Created and switched to profile: ${newName}`);
-				}
-			}
-			return;
-		}
-        // Admin Logic Execution
-        if (cmd === "scrub") { scrubAllInventories(); return; }
-        if (cmd === "give" || cmd === "additem") {
-            let target = args[1];
-            let item = args.slice(2).join(" ");
-            addItemToPlayer(target, item);
+        if (!isAuthorized) return;
+
+        if (cmd === "/newprofile") {
+            let newName = args[1];
+            if (newName) {
+                profiles.push({ name: newName, color: "#ffffff" });
+                activeProfileIndex = profiles.length - 1;
+                saveAllProfiles();
+                refreshProfileUI();
+                systemMessage(`Created profile: ${newName}`);
+            }
             return;
         }
-        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickmenFall: HOME"; return; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON"; return; }
-        if (cmd === "showpond") { viewArea = "pond"; document.getElementById("areaDisplay").textContent = "StickmenFall: FISHING POND"; return; }
-        
-        if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[ADMIN] Merchant spawned."); return; }
-        if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[ADMIN] Merchant removed."); return; }
-        if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
-		// COMMAND: /name [NewName]
-		if (cmd === "name" || cmd === "/name") {
-			if (flags.developer) {
-				let newName = args[1];
-				if (newName) {
-					updateBrowserProfile(newName, null);
-				}
-			}
-			return;
-		}
 
-		// COMMAND: /color [HexCode]
-		if (cmd === "color" || cmd === "/color") {
-			if (flags.developer) {
-				let newColor = args[1]; // e.g., #ff0000
-				if (newColor && newColor.startsWith("#")) {
-					updateBrowserProfile(null, newColor);
-				} else {
-					systemMessage("Usage: /color #ff0000");
-				}
-			}
-			return;
-		}
+        if (cmd === "name" || cmd === "/name") {
+            updateBrowserProfile(args[1], null);
+            return;
+        }
+
+        if (cmd === "color" || cmd === "/color") {
+            if (args[1] && args[1].startsWith("#")) {
+                updateBrowserProfile(null, args[1]);
+            }
+            return;
+        }
+
+        // World Admin
+        if (cmd === "scrub") { scrubAllInventories(); return; }
+        if (cmd === "give" || cmd === "additem") {
+            addItemToPlayer(args[1], args.slice(2).join(" "));
+            return;
+        }
+        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "HOME"; return; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "DUNGEON"; return; }
+        
+        // Merchant Admin
+        if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); return; }
+        if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); return; }
+        if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
     }
 
-    // --- 2. STANDARD PLAYER COMMANDS (Everyone) ---
+    // --- STANDARD PLAYER COMMANDS ---
     if (cmd === "clear" || cmd === "!clear") { clearPlayerInventory(p.name); return; }
     if (cmd === "stop" || cmd === "idle" || cmd === "!reset") { cmdStop(p, user); return; }
     if (cmd === "attack") { cmdAttack(p, user); return; }
@@ -2603,18 +2556,47 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         return;
     }
 }
-
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
-
+// Twitch Input
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    // Keep track of colors
-    if (!userColors[user]) {
-        userColors[user] = extra.userColor || "orangered";
-    }
-
-    // Pass everything to the Master Router
+    if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
     processGameCommand(user, msg, flags, extra);
 };
+
+// Browser Chat Input
+chatInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        const msg = chatInput.value.trim();
+        if (!msg) return;
+
+        const current = getActiveProfile();
+        // Check if current profile name matches the connected streamer name
+        const isStreamerIdentity = (current.name.toLowerCase() === (streamername || "").toLowerCase());
+
+        processGameCommand(current.name, msg, { 
+            developer: true, 
+            broadcaster: isStreamerIdentity, 
+            mod: isStreamerIdentity 
+        }, { userColor: current.color });
+
+        chatInput.value = ""; 
+    }
+});
+// Profile Selection Dropdown
+profileSelector.addEventListener("change", (e) => {
+    activeProfileIndex = parseInt(e.target.value);
+    saveAllProfiles();
+    refreshProfileUI();
+    systemMessage(`Now playing as: ${getActiveProfile().name}`);
+});
+
+// Color Picker
+colorPicker.addEventListener("input", (e) => {
+    updateBrowserProfile(null, e.target.value);
+});
+
+// INITIAL RUN
+refreshProfileUI();
 /* ComfyJS.onChat = (user, msg, color, flags, extra) => {
 //	console.log( "User:", user, "command:", command,);
 //	displayConsoleMessage(user, `!${command}`);
