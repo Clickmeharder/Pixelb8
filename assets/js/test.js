@@ -1928,14 +1928,20 @@ function renderInventoryUI() {
     // 1. Render Equipped Slots
     const eqGrid = document.getElementById('equipped-grid');
     eqGrid.innerHTML = "";
-    const slots = [
-        { key: 'equippedWeapon', label: 'WEAPON' },
-        { key: 'equippedArmor', label: 'BODY' },
-        { key: 'equippedHelmet', label: 'HEAD' },
-        { key: 'equippedPants', label: 'LEGS' },
-        { key: 'equippedGloves', label: 'HANDS' },
-        { key: 'equippedCape', label: 'BACK' }
-    ];
+// Add this inside renderInventoryUI for the equipment section
+	const slots = [
+		{ key: 'equippedHelmet', label: 'Head', icon: '🪖' },
+		{ key: 'equippedWeapon', label: 'Weapon', icon: '⚔️' },
+		{ key: 'equippedArmor', label: 'Body', icon: '🛡️' },
+		{ key: 'equippedCape', label: 'Back', icon: '🧥' },
+		{ key: 'equippedPants', label: 'Legs', icon: '👖' },
+		{ key: 'equippedGloves', label: 'Hands', icon: '🧤' }
+	];
+
+// In the loop where you create slots:
+div.innerHTML = itemName ? 
+    `<span style="font-size:20px">${getItemIcon(itemName)}</span><span class="slot-label">${itemName}</span>` : 
+    `<span style="font-size:20px; opacity:0.3">${slot.icon}</span><span class="slot-label">${slot.label}</span>`;
 
     slots.forEach(slot => {
         const itemName = playerObj.stats[slot.key];
