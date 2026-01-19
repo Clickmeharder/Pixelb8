@@ -316,7 +316,6 @@
 		}
 		h2#inv-player-name {
 			margin: 0;
-			background:#444;
 		}
 		.inventory-layout {
 			display: grid;
@@ -332,6 +331,9 @@
 			background: #111;
 			padding: 4px;
 			border-radius: 5px;
+			height: 60%;
+			overflow: hidden;
+			overflow-y: auto;
 		}
 
 		.inv-slot {
@@ -360,7 +362,7 @@
 			flex-direction: column; justify-content: center;
 		}
 		.inv-slot:hover .item-actions { display: flex; }
-
+		#piexels-display {margin:auto;margin-left:6px;}
 		.btn-sell { background: #600; color: white; border: none; font-size: 9px; cursor: pointer; margin-top: 2px; }
 		.btn-sell:hover { background: #a00; }
 		
@@ -755,7 +757,7 @@
         
         <div class="inventory-layout">
             <div class="equipped-section">
-                <h3>Equipped</h3>
+                <h3 style="background: #4444;">Equipped</h3>
                 <div id="equipped-grid">
                     </div>
                 <div class="piexels-display">
@@ -764,7 +766,7 @@
             </div>
 
             <div class="backpack-section">
-                <h3>Backpack</h3>
+                <h3 style="background: #4444;">Backpack</h3>
                 <div id="backpack-grid">
                     </div>
             </div>
