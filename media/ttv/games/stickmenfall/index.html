@@ -243,7 +243,10 @@
 			flex-direction: column;
 			flex-wrap: wrap;
 			align-items: flex-start;
+			opacity:0.0;
 		}
+		#input-wrapper:hover { opacity:0.8;}
+		#stickmencdmInput {display: flex;flex-direction:row;}
 		input#browserColorPicker {
 			width: 15px;
 		}
@@ -331,6 +334,8 @@
 
 		.btn-sell { background: #600; color: white; border: none; font-size: 9px; cursor: pointer; margin-top: 2px; }
 		.btn-sell:hover { background: #a00; }
+		
+
         @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
     </style>
 </head>
@@ -683,7 +688,7 @@
 		<div id="enemyUI"></div>
 
 		<div id="input-wrapper">
-			<div style="display flex;flex-direction:row;">
+			<div id="stickmencmdInput" style="">
 				<select id="profileSelector" title="Switch Profile"></select>
 				<input type="color" id="browserColorPicker" title="Choose color">
 				<input type="text" id="browserChatInput" placeholder="Type a command..." autocomplete="off">
