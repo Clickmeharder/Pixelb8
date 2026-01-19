@@ -1798,7 +1798,7 @@ function gameLoop() {
     // 2. Interface (The Text/UI)
     // This now shows the wave, difficulty, and enemy HP
     updateUI();
-
+	
     // 3. Entity Logic & Progress (Calculations)
     if (dungeonActive) {
         // Checks if wave is cleared and handles Boss/Minion spawning
@@ -1839,8 +1839,10 @@ function gameLoop() {
     updateArrows(ctx);      // Renders projectiles
     updateSplashText(ctx);  // Renders "Level Up" and damage floaters
     handleTooltips();
+
     // 7. Next Frame
     requestAnimationFrame(gameLoop);
+	refreshProfileUI();
 }
 /* ================= GAME LOOP ================= */
 /* ================= GAME LOOP ================= */
@@ -2260,7 +2262,7 @@ function cmdSell(p, args) {
     let target = args.slice(1).join(" ").toLowerCase();
     let totalGold = 0;
     let itemsRemoved = 0;
-    
+	
     // Update the Buyer status before calculating
     updateBuyerNPC(); 
     let multiplier = buyerActive ? 2 : 1;
