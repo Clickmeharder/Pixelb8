@@ -304,7 +304,7 @@
 
 		.modal-content {
 			background: #222; border: 2px solid #555;
-			width: 600px; padding: 20px; border-radius: 10px;
+			width: 470px;padding: 3px; border-radius: 10px;
 			font-family: monospace; color: white;
 		}
 		.modal-header { display: flex; justify-content: space-between; border-bottom: 1px solid #444; margin-bottom: 15px; }
@@ -339,6 +339,13 @@
 		.btn-sell { background: #600; color: white; border: none; font-size: 9px; cursor: pointer; margin-top: 2px; }
 		.btn-sell:hover { background: #a00; }
 		
+		#inventoryClosebtn {
+			height: 23px;
+			padding-top: 0px;
+			margin: 0px;
+			width: 25px;
+			text-align: center;
+		}
 
         @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
     </style>
@@ -718,7 +725,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2 id="inv-player-name">Inventory</h2>
-            <button onclick="toggleInventory()" class="close-btn">×</button>
+            <button onclick="toggleInventory()" id="inventoryClosebtn"class="close-btn">×</button>
         </div>
         
         <div class="inventory-layout">
