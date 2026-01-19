@@ -24,7 +24,7 @@ window.chatPlugins = [];
 
 
 function displayChatMessage(user, msg, flags = {}, extra = {}, isCorrect = false) {
-	let message = msgl
+	let message = msg;
     const chatContainer = document.getElementById("twitchMessagebox");
 
     // Create a new chat message element
