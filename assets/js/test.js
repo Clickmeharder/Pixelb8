@@ -2577,7 +2577,15 @@ function updateBrowserProfile(newName, newColor) {
 function processGameCommand(user, msg, flags = {}, extra = {}) {
     // getPlayer now handles the case-sensitivity for us
 	let p = getPlayer(user, extra.userColor); 
-
+	const current = getActiveProfile();
+    if (user.toLowerCase() === current.name.toLowerCase() && extra.userColor) {
+        if (current.color !== extra.userColor) {
+            current.color = extra.userColor;
+            p.color = extra.userColor; // Update stickman immediately
+            if (colorPicker) colorPicker.value = extra.userColor; // Update UI
+            saveAllProfiles();
+        }
+    }
     // 2. Logic to log and process commands...
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
