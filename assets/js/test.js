@@ -1445,10 +1445,10 @@ function drawStickman(ctx, p) {
     updatePhysics(p); 
     const now = Date.now();
     if (p.dead) return drawCorpse(ctx, p, now);
-	ctx.save(); 
+
+    ctx.save(); // Start Save
 
     if (p.activeTask === "lurking") {
-        // Apply transparency to everything drawn until ctx.restore()
         let alpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
         ctx.globalAlpha = alpha + (Math.sin(now / 500) * 0.05);
     }
@@ -1456,12 +1456,33 @@ function drawStickman(ctx, p) {
     const anchors = getAnchorPoints(p, anim);
     const limbs = getLimbPositions(p, anchors, anim, now);
 
-	// Everything inside here (Cape, Body, Items) will now be transparent!
+    // Draw Character (Transparent if lurking)
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
     drawStickmanBody(ctx, p, anchors, limbs);
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
 
-    ctx.restore(); // Stop being transparent for the next player or background
+	ctx.restore(); // End Character transparency (if you want UI solid)
+
+    // 1. HP Bar (Placed below the feet)
+    const barWidth = 40;
+    const barHeight = 4;
+    const barX = p.x - (barWidth / 2);
+    const barY = p.y + 15; // 15 pixels below the feet
+
+    ctx.fillStyle = "#444"; 
+    ctx.fillRect(barX, barY, barWidth, barHeight); // Background
+    
+    ctx.fillStyle = "#0f0"; 
+    ctx.fillRect(barX, barY, barWidth * (p.hp / p.maxHp), barHeight); // Green fill
+
+    // 2. Name & Combat Level (Placed below the HP bar)
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 12px monospace";
+    ctx.textAlign = "center";
+    
+    // Format: Name (Lvl 10)
+    const combatLvl = p.stats.combatLevel || 1;
+    ctx.fillText(`${p.name} (Lvl ${combatLvl})`, p.x, barY + 15);
 }
 
 function drawEnemyStickman(ctx, e) {
