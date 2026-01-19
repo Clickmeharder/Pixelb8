@@ -2057,7 +2057,7 @@ function gameLoop() {
 	updateAreaPlayerCounts();
     // 6. World Systems (Effects & Timers)
     updateSystemTicks(now); // Handles enemy AI attacks and global intervals
-    updateArrows(ctx);      // Renders projectiles
+    drawProjectiles(ctx);      // Renders projectiles
     updateSplashText(ctx);  // Renders "Level Up" and damage floaters
     handleTooltips();
 	
