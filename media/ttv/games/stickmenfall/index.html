@@ -718,54 +718,51 @@
 		<div id="enemyUI"></div>
 
 		<div id="input-wrapper">
-			<select id="profileSelector" title="Switch Profile"></select>
-
-			
-			<input type="color" id="browserColorPicker" title="Choose color">
-			
-			<input type="text" id="browserChatInput" placeholder="Type a command..." autocomplete="off">
 			<div id="action-bar">
-				<button onclick="sendAction('travel dungeon')">⚔️ Dungeon</button>
-				<button onclick="sendAction('travel pond')">🎣 Pond</button>
-				<button onclick="sendAction('travel home')">🏠 Home</button>
+				<button data-cmd="travel dungeon">⚔️ Dungeon</button>
+				<button data-cmd="travel pond">🎣 Pond</button>
+				<button data-cmd="travel home">🏠 Home</button>
 				<div class="separator"></div>
-				<button onclick="sendAction('attack')">💥 Attack</button>
-				<button onclick="sendAction('fish')">🐟 Fish</button>
-				<button onclick="sendAction('lurk')">👤 Lurk</button>
-				<button onclick="sendAction('dance')">💃 Dance</button>
-				<button onclick="sendAction('stop')">🛑 Stop</button>
+				<button data-cmd="attack">💥 Attack</button>
+				<button data-cmd="fish">🐟 Fish</button>
+				<button data-cmd="lurk">👤 Lurk</button>
+				<button data-cmd="dance">💃 Dance</button>
+				<button data-cmd="stop">🛑 Stop</button>
 				<div class="separator"></div>
-				<button onclick="sendAction('inventory')">🎒 Bag</button>
-				<button onclick="sendAction('respawn')" class="danger">💀 Respawn</button>
+				<button data-cmd="inventory">🎒 Bag</button>
+				<button data-cmd="respawn" class="danger">💀 Respawn</button>
+			</div>
+			<select id="profileSelector" title="Switch Profile"></select>
+			<input type="color" id="browserColorPicker" title="Choose color">
+			<input type="text" id="browserChatInput" placeholder="Type a command..." autocomplete="off">
+		</div>
+		
+		
+		<div id="inventory-modal" class="hidden">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 id="inv-player-name">Adventurer's Satchel</h2>
+					<button class="close-btn" id="close-inventory">×</button>
+				</div>
+				<div class="inventory-layout">
+					<div class="equipped-section">
+						<h3>EQUIPPED</h3>
+						<div id="equipped-grid"></div>
+						<div class="gold-display">💰 <span id="inv-gold-val">0.00</span> Gold</div>
+					</div>
+					<div class="backpack-section">
+						<h3>BACKPACK</h3>
+						<div id="backpack-grid"></div>
+					</div>
+				</div>
 			</div>
 		</div>
+
 	</div>
 	
-<div id="inventory-modal" class="hidden">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 id="inv-player-name">Adventurer's Satchel</h2>
-            <button onclick="toggleInventory()" class="close-btn">×</button>
-        </div>
-        
-        <div class="inventory-layout">
-            <div class="equipped-section">
-                <h3 style="text-align:center; color:#ceae33; margin-top:0;">EQUIPPED</h3>
-                <div id="equipped-grid">
-                    </div>
-                <div class="gold-display">
-                    💰 <span id="inv-gold-val">0.00</span> Gold
-                </div>
-            </div>
 
-            <div class="backpack-section">
-                <h3 style="margin-top:0;">BACKPACK</h3>
-                <div id="backpack-grid">
-                    </div>
-            </div>
-        </div>
-    </div>
-</div>
+
+
 <!---->
 <!---->	
 <!---->
