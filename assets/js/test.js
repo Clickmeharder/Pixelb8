@@ -144,33 +144,23 @@ function saveStats(p) {
     localStorage.setItem(saveKey, JSON.stringify(p.stats));
 }/* ================= PLAYER SETUP ================= */
 function getPlayer(name, color) {
-    // 1. Create a lowercase key for internal storage
+    if (!name) return null;
     const lowName = name.toLowerCase();
 
-    // 2. Check if the player exists using that lowercase key
-    if (players[lowName]) {
-        // Update color if the browser profile color changed
-        if (color) players[lowName].color = color;
-        return players[lowName];
+    if (!players[lowName]) {
+        console.log(`Creating new player object for: ${lowName}`);
+        players[lowName] = {
+            name: name, // Display name
+            color: color || "#00ffff",
+            x: Math.random() * 800 + 100,
+            y: 450,
+            hp: 100,
+            maxHp: 100,
+            dead: false,
+            area: "home",
+            stats: loadStats(name) 
+        };
     }
-    
-    // 3. If they don't exist, create them
-    players[lowName] = {
-        name: name, // Keep original casing (like JaeDraze) for the visual label
-        color: color || "#00ffff",
-        x: Math.random() * 800 + 100, 
-        y: 450,
-        targetX: null,
-        hp: 100, 
-        maxHp: 100, 
-        dead: false,
-        area: "home", 
-        activeTask: null,
-        danceStyle: 0,
-        lastDanceXP: 0,
-        stats: loadStats(name) // loadStats is case-insensitive usually
-    };
-    
     return players[lowName];
 }
 function movePlayer(p, targetArea) {
@@ -2628,19 +2618,25 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 // Twitch Input
 // Replace your ComfyJS.onChat in stickmentest.js with this:
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    // 1. Safe Color Handling
-    const userColor = color || (extra && extra.userColor) || "#00ffff";
-    if (!userColors[user]) userColors[user] = userColor;
-    // 2. Overlay Check
-    if (typeof twitchChatOverlay !== 'undefined' && twitchChatOverlay === "off") return;
-    // 3. UI Display (Ensure displayChatMessage exists in comfychat.js)
-    if (typeof displayChatMessage === "function") {
-        displayChatMessage(user, msg, flags, extra);
-    }
-    // 4. Process the command
-    processGameCommand(user, msg, flags, { userColor: userColor });
-};
+    try {
+        console.log(`[Twitch Incoming] User: ${user} | Msg: ${msg}`);
+        
+        // Ensure extra exists
+        const safeExtra = extra || {};
+        const safeColor = color || safeExtra.userColor || "#00ffff";
 
+        // 1. Show message in chat box (from comfychat.js)
+        if (typeof displayChatMessage === "function") {
+            displayChatMessage(user, msg, flags, safeExtra);
+        }
+
+        // 2. Run the game command
+        processGameCommand(user, msg, flags, { userColor: safeColor });
+
+    } catch (err) {
+        console.error("CRITICAL ERROR IN ONCHAT:", err);
+    }
+};
 // Browser Chat Input
 chatInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
