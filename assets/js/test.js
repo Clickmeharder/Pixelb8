@@ -944,12 +944,14 @@ function startDungeon() {
         let p = players[name];
         if (p && !p.dead) {
             p.area = "dungeon";
+			p.y = -100; // Start higher up
             p.x = Math.random() * 400 + 50;
-            p.y = -100; // Start higher up
-            p.targetY = 450; 
+            p.targetY = 450; // The Ground
+			p.targetX = 200; // Where they should walk to AFTER landing
+  
         }
     });
-    
+
     systemMessage("The Dungeon Gates have opened!");
     spawnWave();
 }
@@ -1168,39 +1170,58 @@ function updateArrows(ctx) {
  */
 /*----------------------------------------------*/
 
-// stickmen physics
 function updatePhysics(p) {
-    // Vertical Fall (Dungeon Entrance)
-    if (p.targetY !== undefined && p.y < p.targetY) {
-        p.y += 10; 
-        if (p.y >= p.targetY) { p.y = p.targetY; delete p.targetY; }
+    // --- STATE 1: FALLING (Dungeon Entry) ---
+    if (p.targetY !== undefined) {
+        if (p.y < p.targetY) {
+            p.y += 12; // Falling speed
+            p.lean = 0.1; 
+            return; // EXIT: Don't walk or collide while in the air
+        } else {
+            p.y = p.targetY;
+            delete p.targetY;
+            spawnFloater(p, "LANDED!", "#fff");
+        }
     }
 
-	if (p.targetX !== null && p.targetX !== undefined) {
-		let oldX = p.x;
-		let dx = p.targetX - p.x;
-		
-		if (Math.abs(dx) > 5) {
-			p.x += dx * 0.1;
-			p.lean = dx > 0 ? 0.2 : -0.2;
+    // --- STATE 2: WALKING (Horizontal) ---
+    if (p.targetX !== null && p.targetX !== undefined) {
+        let oldX = p.x;
+        let dx = p.targetX - p.x;
+        
+        if (Math.abs(dx) > 5) {
+            p.x += dx * 0.1;
+            p.lean = dx > 0 ? 0.2 : -0.2;
 
-			// --- SPLASH DETECTION ---
-			// If we move from shore ( < 250) to water ( > 250)
-			if (oldX <= 250 && p.x > 250 && p.area === "pond") {
-				triggerSplash(p);
-			}
-			// If we move from water back to shore
-			if (oldX > 250 && p.x <= 250 && p.area === "pond") {
-				triggerSplash(p);
-			}
+            if (p.area === "pond") {
+                if (oldX <= 250 && p.x > 250) triggerSplash(p);
+                if (oldX > 250 && p.x <= 250) triggerSplash(p);
+            }
+        } else {
+            p.lean = 0;
+            // Only stop seeking target if not attacking
+            if (p.activeTask !== "attacking") p.targetX = null;
+        }
+    }
 
-		} else {
-			p.lean = 0;
-			if (p.activeTask !== "attacking") p.targetX = null;
-		}
-	}
+    // --- STATE 3: SEPARATION (Crowd Control) ---
+    // This runs for everyone on the ground to prevent overlapping
+    resolveCrowding(p);
 }
 
+function resolveCrowding(p) {
+    const bubble = 30; // Personal space
+    Object.values(players).forEach(other => {
+        if (other === p || other.area !== p.area || other.dead || other.targetY !== undefined) return;
+
+        let dx = p.x - other.x;
+        if (Math.abs(dx) < bubble) {
+            // Gently nudge X to the side
+            let force = (bubble - Math.abs(dx)) * 0.1;
+            p.x += dx > 0 ? force : -force;
+        }
+    });
+}
 function triggerSplash(p) {
     // We pass 'p' so the floater knows the name, area, and position
     spawnFloater(p, "💦 SPLASH!", "#44ccff");
@@ -1745,47 +1766,7 @@ function drawCorpse(ctx, p, now) {
     ctx.restore();
 }
 //-------------------------------------------
-function applySeparationPhysics() {
-    const playersList = Object.values(players);
-    const minDistance = 35; // The personal bubble radius
-    const pushStrength = 1.5; // how fast they nudge apart
 
-    for (let i = 0; i < playersList.length; i++) {
-        let p1 = playersList[i];
-        if (p1.area !== viewArea || p1.dead) continue;
-
-        for (let j = i + 1; j < playersList.length; j++) {
-            let p2 = playersList[j];
-            if (p2.area !== viewArea || p2.dead || p1.area !== p2.area) continue;
-
-            // Calculate distance between p1 and p2
-            let dx = p1.x - p2.x;
-            let dy = p1.y - p2.y;
-            let distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < minDistance) {
-                // Too close! Calculate push vector
-                // If they are exactly on top of each other, use a random direction
-                if (distance === 0) {
-                    p1.x += Math.random() - 0.5;
-                    continue;
-                }
-
-                let force = (minDistance - distance) / distance * pushStrength;
-                let pushX = dx * force;
-                let pushY = dy * force;
-
-                // Nudge them away from each other
-                p1.x += pushX;
-                p2.x -= pushX;
-                
-                // Slightly nudge Y so they don't form a perfect horizontal line
-                p1.y += pushY * 0.5;
-                p2.y -= pushY * 0.5;
-            }
-        }
-    }
-}
 //===============================================================================
 // ================= DRAWING THE SCENERY AND AREAS ===========
 const backgrounds = {
@@ -2012,58 +1993,45 @@ function updateUI() {
 /* ================= GAME LOOP ================= */
 function gameLoop() {
     const now = Date.now();
-    
-    // 1. Rendering (The Visuals - Background Layer)
     renderScene();
-    
-    // 2. Interface (The Text/UI)
-    // This now shows the wave, difficulty, and enemy HP
     updateUI();
 	
-    // 3. Entity Logic & Progress (Calculations)
-    if (dungeonActive) {
-        // Checks if wave is cleared and handles Boss/Minion spawning
-        checkDungeonProgress();
-    }
+    if (dungeonActive) checkDungeonProgress();
 
-    // 4. Draw Dungeon Entities (Mid-Layer)
     if (viewArea === "dungeon") {
-        // Draw Boss first if alive
-        if (boss && !boss.dead) {
-            drawMonster(ctx, boss);
-        }
-        // Draw Minions
+        if (boss && !boss.dead) drawMonster(ctx, boss);
         enemies.forEach(e => {
             if (!e.dead) {
-                if (e.isStickman) {
-                    drawEnemyStickman(ctx, e);
-                } else {
-                    drawMonster(ctx, e);
-                }
+                if (e.isStickman) drawEnemyStickman(ctx, e);
+                else drawMonster(ctx, e);
             }
         });
     }
-	applySeparationPhysics();
-    // 5. Player Logic & Drawing (Top-Layer)
-    Object.values(players).forEach(p => {
-        // Skip players in other areas
-        if (p.area !== viewArea) return;
 
-        updatePlayerStatus(p, now);   // Timeouts & idle logic
-        updatePlayerMovement(p);     // Walking & physics
-        updatePlayerActions(p, now); // Combat & loot triggers are inside here
-        drawStickman(ctx, p);        // Visual rendering
+    // Process Players
+    Object.values(players).forEach(p => {
+        // 1. Logic & Status
+        updatePlayerStatus(p, now);
+
+        // 2. Combined Physics (Movement + Falling + Separation)
+        // We use one function to handle all X and Y changes
+        if (p.area === viewArea) {
+            updatePhysics(p); 
+        }
+
+        // 3. Actions & Visuals
+        updatePlayerActions(p, now); 
+        drawStickman(ctx, p);
     });
-	updateAreaPlayerCounts();
-    // 6. World Systems (Effects & Timers)
-    updateSystemTicks(now); // Handles enemy AI attacks and global intervals
-    drawProjectiles(ctx);      // Renders projectiles
-    updateSplashText(ctx);  // Renders "Level Up" and damage floaters
+
+    updateAreaPlayerCounts();
+    updateSystemTicks(now); 
+    drawProjectiles(ctx);      
+    updateSplashText(ctx);  
     handleTooltips();
 	
-    // 7. Next Frame
     requestAnimationFrame(gameLoop);
-}	
+}
 /* ================= GAME LOOP ================= */
 /* ================= GAME LOOP ================= */
 
