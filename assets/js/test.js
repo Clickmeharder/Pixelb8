@@ -2443,17 +2443,27 @@ const STICKMEN_ADMIN_CMDS = [
 //    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected//
 //    displayChatMessage(user, message, flags, extra);  // Show message in chat box//
 let browserProfile = JSON.parse(localStorage.getItem("browserProfile")) || {
-    name: "Player1",
+    name: "Admin",
     color: "#00ffff"
 };
 
 // Function to update profile via commands
 function updateBrowserProfile(newName, newColor) {
-    if (newName) browserProfile.name = newName;
-    if (newColor) browserProfile.color = newColor;
+    if (newName) {
+        browserProfile.name = newName;
+        if(document.getElementById("browserNameInput")) {
+            document.getElementById("browserNameInput").value = newName;
+        }
+    }
+    if (newColor) {
+        browserProfile.color = newColor;
+        if(document.getElementById("browserColorPicker")) {
+            document.getElementById("browserColorPicker").value = newColor;
+        }
+    }
     
     localStorage.setItem("browserProfile", JSON.stringify(browserProfile));
-    systemMessage(`Profile updated: ${browserProfile.name} (${browserProfile.color})`);
+    systemMessage(`Profile updated: ${browserProfile.name}`);
 }
 function processGameCommand(user, msg, flags = {}, extra = {}) {
     let p = getPlayer(user, extra.userColor);
@@ -2461,8 +2471,11 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     let cmd = args[0].toLowerCase();
 
     // --- 1. ADMIN & AUTHORIZATION CHECK ---
-    const adminCommands = ["showhome", "showdungeon", "showpond", "spawnmerchant", "despawnmerchant", "resetmerchant", "give", "additem", "scrub"];
-    
+	const adminCommands = [
+			"showhome", "showdungeon", "showpond", "spawnmerchant", 
+			"despawnmerchant", "resetmerchant", "give", "additem", "scrub",
+			"name", "/name", "color", "/color" // Added these here
+	];
     if (adminCommands.includes(cmd)) {
         // If it's the browser (developer) OR passes your Twitch streamer check
         let isAuthorized = flags.developer || isStreamerAndAuthorize(user, cmd);
@@ -2536,21 +2549,37 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     }
 }
 // Example: Listening to a browser text input
-const myInput = document.getElementById("browserChatInput");
+// Reference the new elements
+const nameInput = document.getElementById("browserNameInput");
+const colorPicker = document.getElementById("browserColorPicker");
+const chatInput = document.getElementById("browserChatInput");
 
-myInput.addEventListener("keypress", (e) => {
+// 1. Load saved profile into the HTML elements on startup
+nameInput.value = browserProfile.name;
+colorPicker.value = browserProfile.color;
+
+// 2. Listen for changes to Name or Color
+nameInput.addEventListener("change", () => {
+    updateBrowserProfile(nameInput.value, null);
+});
+
+colorPicker.addEventListener("input", () => {
+    updateBrowserProfile(null, colorPicker.value);
+    // Optional: Immediately update current stickman color if player exists
+    let p = players[browserProfile.name];
+    if (p) userColors[p.name] = colorPicker.value;
+});
+
+// 3. Updated Chat Listener
+chatInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
-        const msg = myInput.value.trim();
+        const msg = chatInput.value.trim();
         if (!msg) return;
 
-        // Use the saved profile details
-        const user = browserProfile.name;
-        const extra = { userColor: browserProfile.color };
-        const flags = { developer: true }; // Always admin from browser
+        // Use the LIVE values from the inputs
+        processGameCommand(nameInput.value, msg, { developer: true }, { userColor: colorPicker.value });
 
-        processGameCommand(user, msg, flags, extra);
-
-        myInput.value = ""; 
+        chatInput.value = ""; 
     }
 });
 ComfyJS.onChat = (user, msg, color, flags, extra) => {

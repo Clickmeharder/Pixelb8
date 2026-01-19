@@ -234,6 +234,37 @@
         #tooltip { position: absolute; pointer-events: none; background: rgba(0,0,0,0.9); color: #fff; padding: 8px; border-radius: 4px; border: 1px solid #0ff; font-size: 13px; display: none; z-index: 100; }		
         #areaDisplay { position:absolute; bottom:0px; left:5%; transform:translateX(-5%); color:#0ff; font-size:18px; background:rgba(0,0,0,0.8); padding:5px 15px; border: 1px solid #0ff; text-transform: uppercase; }
 		
+		#input-wrapper {
+			position: absolute;
+			bottom: 20px;
+			left: 50%;
+			transform: translateX(-50%);
+			display: flex; /* Lines them up horizontally */
+			gap: 10px;
+			background: rgba(0, 0, 0, 0.7);
+			padding: 10px;
+			border-radius: 8px;
+			border: 1px solid #444;
+		}
+
+		#browserColorPicker {
+			width: 40px;
+			height: 40px;
+			padding: 0;
+			border: none;
+			background: none;
+			cursor: pointer;
+		}
+
+		#browserNameInput {
+			background: #222;
+			color: white;
+			border: 1px solid #555;
+			padding: 5px;
+			text-align: center;
+		}
+		
+		
         @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
     </style>
 </head>
@@ -586,6 +617,9 @@
 		<div id="enemyUI"></div>
 
 		<div id="input-wrapper">
+			<input type="text" id="browserNameInput" placeholder="Name" style="width: 80px;">
+			<input type="color" id="browserColorPicker" title="Choose your color">
+			
 			<input type="text" id="browserChatInput" placeholder="Type a command (e.g. fish, stats, join)..." autocomplete="off">
 		</div>
 	</div>
