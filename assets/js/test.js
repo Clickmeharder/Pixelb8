@@ -160,18 +160,18 @@ function getPlayer(name, color) {
     // 2. Check if the player exists
     if (players[lowName]) {
         if (color) {
-            // Force the color to be a string
+            // Force the color to be a string before applying it
             players[lowName].color = (typeof color === 'object') ? (color.userColor || "orangered") : color;
         }
         return players[lowName];
     }
     
     // 3. If they don't exist, create them
-    // Kill the object bug right here for new players too
+    // Ensure the color is a string for new players as well
     const finalColor = (typeof color === 'object') ? (color.userColor || "#00ffff") : (color || "#00ffff");
 
     players[lowName] = {
-        name: name, 
+        name: name, // Keep original casing (like JaeDraze)
         color: finalColor,
         x: Math.random() * 800 + 100, 
         y: 450,
@@ -188,7 +188,6 @@ function getPlayer(name, color) {
     
     return players[lowName];
 }
-
 function movePlayer(p, targetArea) {
     if (p.dead) {
         systemMessage(`${p.name} is a corpse and cannot travel!`);
@@ -2522,16 +2521,8 @@ const STICKMEN_ADMIN_CMDS = [
 // --- 1. DATA PERSISTENCE ---
 
 
-
-
-let profiles = JSON.parse(localStorage.getItem("allProfiles"));
-if (!profiles) {
-    profiles = [{ name: "Player1", color: "#00ffff" }];
-    if (typeof streamername !== 'undefined' && streamername) {
-        profiles.push({ name: streamername, color: "#6441a5" });
-    }
-}
-
+// --- 1. PROFILES & PERSISTENCE ---
+let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [{ name: "Player1", color: "#00ffff" }];
 let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
 if (activeProfileIndex >= profiles.length) activeProfileIndex = 0;
 
@@ -2555,53 +2546,36 @@ function refreshProfileUI() {
         let opt = document.createElement("option");
         opt.value = index;
         opt.textContent = p.name;
-        if (index === activeProfileIndex) opt.selected = true;
+        opt.selected = (index === activeProfileIndex);
         profileSelector.appendChild(opt);
     });
-
-    const current = getActiveProfile();
-    if (current && colorPicker) {
-        let activeColor = current.color; 
-        if (typeof activeColor === 'object') activeColor = activeColor.userColor || "#00ffff";
-        colorPicker.value = activeColor;
-    }
+    if (colorPicker) colorPicker.value = getActiveProfile().color;
 }
 function updateBrowserProfile(newName, newColor) {
     const current = getActiveProfile();
-    if (!current) return;
-
-    if (newName && newName !== current.name) {
+    if (newName) {
         const oldKey = "rpg_" + current.name.toLowerCase();
         const newKey = "rpg_" + newName.toLowerCase();
         const data = localStorage.getItem(oldKey);
-        if (data) {
-            localStorage.setItem(newKey, data);
-            localStorage.removeItem(oldKey);
-        }
-        if (players[current.name.toLowerCase()]) delete players[current.name.toLowerCase()];
+        if (data) { localStorage.setItem(newKey, data); localStorage.removeItem(oldKey); }
+        delete players[current.name.toLowerCase()];
         current.name = newName;
     }
-
-    if (newColor) {
-        current.color = (typeof newColor === 'object') ? (newColor.userColor || "orangered") : newColor;
-        const p = players[current.name.toLowerCase()];
-        if (p) p.color = current.color;
-    }
-    
+    if (newColor) current.color = newColor;
     saveAllProfiles();
     refreshProfileUI();
 }
 // Function to update profile via commands
 function processGameCommand(user, msg, flags = {}, extra = {}) {
-    // Ensure color is a string string
-    let rawColor = extra.userColor || userColors[user] || "orangered";
+    // 1. Ensure color is a string (Kills the [object Object] bug)
+    let rawColor = extra.userColor || (typeof userColors !== 'undefined' ? userColors[user] : "orangered");
     let assignedColor = (typeof rawColor === 'object') ? (rawColor.userColor || "orangered") : rawColor;
 
     let p = getPlayer(user, assignedColor); 
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
 
-    // Admin & Profile Commands
+    // --- Admin & Profile Commands ---
     const adminCommands = ["showhome", "showdungeon", "showpond", "spawnmerchant", "despawnmerchant", "resetmerchant", "give", "additem", "scrub", "name", "/name", "color", "/color", "/newprofile"];
 
     if (adminCommands.includes(cmd)) {
@@ -2631,7 +2605,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
     }
 
-    // Standard Commands
+    // --- Standard Commands ---
     if (cmd === "stop" || cmd === "idle" || cmd === "!reset") cmdStop(p, p.name);
     else if (cmd === "attack") cmdAttack(p, p.name);
     else if (cmd === "fish")   cmdFish(p, p.name);
@@ -2656,63 +2630,39 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     else if (cmd === "topstats")  cmdTopStats();
     else if (cmd === "clear" || cmd === "!clear") clearPlayerInventory(p.name);
     else if (cmd === "respawn" && p.dead) { 
-        p.dead = false; p.hp = p.maxHp; systemMessage(`${p.name} returned to life!`); 
+        p.dead = false; 
+        p.hp = p.maxHp; 
+        systemMessage(`${p.name} returned to life!`); 
     }
 }
+// --- 2. THE TWITCH CONNECTION (Back to basics) ---
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    // Basic original color logic
-    if (!userColors[user]) {
-        userColors[user] = (extra && extra.userColor) || "orangered"; 
-    }
+    // Just store the color exactly like we used to
+    userColors[user] = color || extra.userColor || "orangered";
 
     if (typeof twitchChatOverlay !== 'undefined' && twitchChatOverlay === "off") return;
-    if (typeof displayChatMessage === "function") {
-        displayChatMessage(user, msg, flags, extra);
-    }
+    if (typeof displayChatMessage === "function") displayChatMessage(user, msg, flags, extra);
 
-    // Pass everything to the engine
-    processGameCommand(user, msg, flags, extra);
+    // Pass ONLY the raw strings to the engine
+    processGameCommand(user, msg, flags, { userColor: userColors[user] });
 };
-// 1. Browser Chat Input (KEEP THIS - IT IS PERFECT)
+// --- 5. EVENT LISTENERS ---
 chatInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
-        const msg = chatInput.value.trim();
-        if (!msg) return;
-
         const current = getActiveProfile();
-        const isStreamerIdentity = streamername && 
-            current.name.toLowerCase() === streamername.toLowerCase();
-
-        processGameCommand(current.name, msg, { 
-            developer: true, 
-            broadcaster: isStreamerIdentity, 
-            mod: isStreamerIdentity 
-        }, { userColor: current.color });
-
-        chatInput.value = ""; 
+        processGameCommand(current.name, chatInput.value, { developer: true }, { userColor: current.color });
+        chatInput.value = "";
     }
 });
 
-// 2. Profile Selection Dropdown (UPDATED)
 profileSelector.addEventListener("change", (e) => {
     activeProfileIndex = parseInt(e.target.value);
-    saveAllProfiles();
-    refreshProfileUI();
-    
-    const current = getActiveProfile();
-    // Force the stickman to load/appear immediately when switching
-    getPlayer(current.name, current.color);
-    
-    systemMessage(`Now playing as: ${current.name}`);
+    saveAllProfiles(); refreshProfileUI();
 });
 
-// 3. Color Picker (UPDATED TO 'change')
-colorPicker.addEventListener("change", (e) => {
-    // Using 'change' instead of 'input' prevents LocalStorage from 
-    // being spammed 100 times per second while dragging the slider.
-    updateBrowserProfile(null, e.target.value);
-});
+colorPicker.addEventListener("change", (e) => updateBrowserProfile(null, e.target.value));
 
+//window.addEventListener("DOMContentLoaded", refreshProfileUI);
 /* ComfyJS.onChat = (user, msg, color, flags, extra) => {
 //	console.log( "User:", user, "command:", command,);
 //	displayConsoleMessage(user, `!${command}`);
