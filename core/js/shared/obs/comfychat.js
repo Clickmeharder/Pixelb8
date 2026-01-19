@@ -747,7 +747,7 @@ function connectStreamer() {
 }
 function disconnectBot() {
 	const button = document.getElementById("streamersButt");
-	const input = document.querySelector("#comfycontrolBox input[type='text']");
+	const input = document.querySelector("#comfychat-twitchname-input");
 	button.style.display = "block";
 	input.style.display = "block";
     ComfyJS.Disconnect();
@@ -783,7 +783,7 @@ document.getElementById("streamersButt").addEventListener("click", function() {
 	) {
 		endTrivia();
 	}
-    let newStreamer = document.querySelector("input[name='yourTextName']").value;
+    let newStreamer = document.querySelector("#comfychat-twitchname-input").value;
 	console.log("attempting to Connect to:" + newStreamer);
     setStreamer(newStreamer); // Then, set the new streamer
 });
