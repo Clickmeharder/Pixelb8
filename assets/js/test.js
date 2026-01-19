@@ -72,7 +72,7 @@ function loadStats(name) {
 		swimLevel: 1, swimXP: 0,
         swimDistance: 0,
         combatLevel: 1,
-        gold: 0,
+        pixels: 0,
         inventory: ["Fishing Rod"],
         equippedWeapon: null,
         equippedArmor: null,
@@ -85,6 +85,17 @@ function loadStats(name) {
         equippedHair: null,
         wigColor: null 
     };
+	// --- MIGRATION: GOLD TO PIXELS ---
+    if (stats.gold !== undefined) {
+        // If they had pixels already, add gold to it, otherwise just set it
+        stats.pixels = (stats.pixels || 0) + stats.gold;
+        // Remove the old gold key so we don't migrate it again
+        delete stats.gold; 
+        console.log(`Migrated ${name}'s gold to pixels.`);
+    }
+
+    // --- SAFETY CHECKS FOR OLD SAVES ---
+    if (isNaN(stats.pixels) || stats.pixels === null) stats.pixels = 0;
 	// Inside the initial stats object and the safety checks
 	if (stats.archerLevel === undefined) stats.archerLevel = 1;
 	if (stats.archerXP === undefined) stats.archerXP = 0;
@@ -96,7 +107,7 @@ function loadStats(name) {
     if (stats.swimXP === undefined) stats.swimXP = 0;
     if (stats.swimDistance === undefined) stats.swimDistance = 0;
     // --- SAFETY CHECKS FOR OLD SAVES ---
-    if (isNaN(stats.gold) || stats.gold === null) stats.gold = 0;
+    if (isNaN(stats.pixels) || stats.pixels === null) stats.pixels = 0;
     
     if (!stats.inventory || !Array.isArray(stats.inventory)) {
         stats.inventory = ["Fishing Rod"];
@@ -359,8 +370,8 @@ function clearPlayerInventory(playerName) {
     p.stats.equippedGloves = null;
     p.stats.equippedHair = null;
 
-    // 3. Optional: Reset gold if you want a total wipe
-    // p.stats.gold = 0;
+    // 3. Optional: Reset pixels if you want a total wipe
+    // p.stats.pixels = 0;
 
     // 4. Save and Feedback
     saveStats(p);
@@ -476,7 +487,7 @@ function updateBuyerNPC() {
     }
 
     if (buyerActive && !wasActive) {
-        systemMessage("--- [NPC] THE FISH MERCHANT HAS ARRIVED (2X GOLD)! ---");
+        systemMessage("--- [NPC] THE FISH MERCHANT HAS ARRIVED (2X pixels)! ---");
     } else if (!buyerActive && wasActive) {
         systemMessage("--- [NPC] THE FISH MERCHANT HAS LEFT THE AREA. ---");
     }
@@ -523,7 +534,7 @@ function drawBuyer(ctx) {
     ctx.bezierCurveTo(8, 10, 12, -20, 0, -35); // Front curve (facing pond)
     ctx.fill();
 
-    // Gold Trim on Cloak
+    // pixels Trim on Cloak
     ctx.strokeStyle = "#FFD700";
     ctx.lineWidth = 1.5;
     ctx.stroke();
@@ -604,7 +615,7 @@ function drawBuyer(ctx) {
     
     ctx.font = "11px monospace";
     ctx.fillStyle = "#00ffff";
-    ctx.fillText("✦ 2X GOLD RATE ✦", bx, textY + 14);
+    ctx.fillText("✦ 2X pixels RATE ✦", bx, textY + 14);
 }
 
 
@@ -620,13 +631,13 @@ function performFish(p) {
     let isFish = false;
     let floaterColor = "#44ccff"; // Default Blue
 
-    // 1. Check for Buyer-Only Golden Fish (5% chance)
+    // 1. Check for Buyer-Only pixelsen Fish (5% chance)
     if (buyerActive && Math.random() < 0.05) {
-        p.stats.inventory.push("Golden Bass");
-        resultText = "GOLDEN BASS!";
-        floaterColor = "#FFD700"; // Gold color
+        p.stats.inventory.push("pixelsen Bass");
+        resultText = "pixelsEN BASS!";
+        floaterColor = "#FFD700"; // pixels color
         isFish = true;
-        systemMessage(`✨ ${p.name} landed a rare GOLDEN BASS!`);
+        systemMessage(`✨ ${p.name} landed a rare pixelsEN BASS!`);
     } 
     // 2. Original Rarity Logic
     else if (roll < 0.001) {
@@ -654,7 +665,7 @@ function performFish(p) {
     }
 
     let displayMsg = `🎣 ${resultText}`;
-    if (isFish && resultText !== "GOLDEN BASS!") displayMsg += ` (#${p.stats.fishCaught})`;
+    if (isFish && resultText !== "pixelsEN BASS!") displayMsg += ` (#${p.stats.fishCaught})`;
 
     // Updated clean call
     spawnFloater(p, displayMsg, floaterColor);
@@ -955,7 +966,7 @@ function generateRandomLoadout() {
 // Loot Helper to keep performAttack clean
 function handleLoot(p, target) {
     let lootFound = [];
-    let goldGained = 0;
+    let pixelsGained = 0;
     let roll = Math.random();
 
     // 1. Drop-the-Gear Logic (Check for valid items)
@@ -970,15 +981,15 @@ function handleLoot(p, target) {
 
     // 2. Boss/Minion Specifics
     if (target.isBoss) {
-        goldGained = 500;
+        pixelsGained = 500;
         lootFound.push("Royal Cape");
     } else {
-        goldGained = 10;
+        pixelsGained = 10;
         if (roll > 0.95) lootFound.push("Leather scrap");
     }
 
-    // Apply Gold
-    p.stats.gold += goldGained;
+    // Apply pixels
+    p.stats.pixels += pixelsGained;
 
     // 3. Process the loot and show messages
     if (lootFound.length > 0) {
@@ -1801,7 +1812,7 @@ function updateUI() {
 
         if (boss && !boss.dead) {
             const bPct = Math.floor((boss.hp / boss.maxHp) * 100);
-            uiHTML += `<b style="color: gold;">BOSS: ${boss.hp} HP (${bPct}%)</b><br>`;
+            uiHTML += `<b style="color: pixels;">BOSS: ${boss.hp} HP (${bPct}%)</b><br>`;
         }
 
         enemies.forEach(e => { 
@@ -1923,7 +1934,7 @@ function renderInventoryUI() {
     if (!playerObj) return;
 
     document.getElementById('inv-player-name').textContent = p.name.toUpperCase();
-    document.getElementById('inv-gold-val').textContent = (playerObj.stats.gold || 0).toFixed(2);
+    document.getElementById('inv-pixels-val').textContent = (playerObj.stats.pixels || 0).toFixed(2);
 
     // 1. Render Equipped Slots
     const eqGrid = document.getElementById('equipped-grid');
@@ -2406,7 +2417,7 @@ function cmdSell(p, args) {
     }
 
     let target = args.slice(1).join(" ").toLowerCase();
-    let totalGold = 0;
+    let totalpixels = 0;
     let itemsRemoved = 0;
     
     // Update the Buyer status before calculating
@@ -2421,18 +2432,18 @@ function cmdSell(p, args) {
                 let weight = parseFloat(weightStr);
                 
                 if (!isNaN(weight)) {
-                    // 1 gold per kg * multiplier
-                    totalGold += Math.floor(weight * 1 * multiplier);
+                    // 1 pixels per kg * multiplier
+                    totalpixels += Math.floor(weight * 1 * multiplier);
                     itemsRemoved++;
                     return false; // Remove from inventory
                 }
             }
             
-            // 2. Handle Golden Bass specifically within the fish command
-            if (item === "Golden Bass") {
-                let baseValue = ITEM_DB["Golden Bass"]?.value || 100;
+            // 2. Handle pixelsen Bass specifically within the fish command
+            if (item === "pixelsen Bass") {
+                let baseValue = ITEM_DB["pixelsen Bass"]?.value || 100;
                 // We apply the multiplier here too since the Merchant loves rare fish!
-                totalGold += (baseValue * multiplier);
+                totalpixels += (baseValue * multiplier);
                 itemsRemoved++;
                 return false; // Remove from inventory
             }
@@ -2448,11 +2459,11 @@ function cmdSell(p, args) {
             
             let price = itemData?.value || 50;
             
-            // If selling Golden Bass by name while Merchant is active, give bonus
-            if (itemName === "Golden Bass") {
-                totalGold = price * multiplier;
+            // If selling pixelsen Bass by name while Merchant is active, give bonus
+            if (itemName === "pixelsen Bass") {
+                totalpixels = price * multiplier;
             } else {
-                totalGold = price;
+                totalpixels = price;
             }
 
             p.stats.inventory.splice(index, 1);
@@ -2462,11 +2473,11 @@ function cmdSell(p, args) {
 
     if (itemsRemoved > 0) {
         // Final sanity check to prevent NaN from corrupting the save
-        if (isNaN(totalGold)) totalGold = 0;
+        if (isNaN(totalpixels)) totalpixels = 0;
         
-        p.stats.gold = (p.stats.gold || 0) + totalGold;
+        p.stats.pixels = (p.stats.pixels || 0) + totalpixels;
         
-        let msg = `${p.name} sold ${itemsRemoved} item(s) for ${totalGold.toFixed(2)} gold!`;
+        let msg = `${p.name} sold ${itemsRemoved} item(s) for ${totalpixels.toFixed(2)} pixels!`;
         
         // Add a special flair message if they sold to the Merchant
         if (buyerActive) {
@@ -2481,11 +2492,11 @@ function cmdSell(p, args) {
 }
 
 function cmdBalance(p) {
-    // Formatting gold to 2 decimal places as requested
-    const displayGold = (p.stats.gold || 0).toFixed(2);
+    // Formatting pixels to 2 decimal places as requested
+    const displaypixels = (p.stats.pixels || 0).toFixed(2);
     
     // Using your specific prison wallet phrasing
-    systemMessage(`${p.name} has ${displayGold} coins stuffed in their prison wallet`);
+    systemMessage(`${p.name} has ${displaypixels} coins stuffed in their prison wallet`);
 }
 function cmdGive(caller, args, flags) {
 
@@ -2565,7 +2576,7 @@ const STICKMEN_USER_CMDS = [
     { command: "attack", description: "Engage in combat at the dungeon.", usage: "attack" },
     { command: "fish", description: "Start fishing at the pond.", usage: "fish" },
     { command: "dance", description: "Perform a dance (Style 1-4).", usage: "dance [style#]" },
-    { command: "bal", description: "Check your gold balance.", usage: "bal" },
+    { command: "bal", description: "Check your pixels balance.", usage: "bal" },
     { command: "equip", description: "Equip an item from inventory.", usage: "equip [item name]" }
 ];
 const STICKMEN_ADMIN_CMDS = [

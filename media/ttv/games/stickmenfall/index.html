@@ -291,10 +291,13 @@
 		}
 
 		#inventory-modal {
-			position: fixed;
-			top: 0; left: 0; width: 100%; height: 100%;
-			background: rgba(0,0,0,0.85);
-			display: flex; justify-content: center; align-items: center;
+			position: absolute;
+			top: 39px;
+			left: 41px;
+			/* width: 39%; */
+			display: flex;
+			justify-content: center;
+			align-items: center;
 			z-index: 2000;
 		}
 		.hidden { display: none !important; }
@@ -723,8 +726,8 @@
                 <h3>Equipped</h3>
                 <div id="equipped-grid">
                     </div>
-                <div class="gold-display">
-                    Gold: <span id="inv-gold-val">0.00</span>
+                <div class="piexels-display">
+                    pixels: <span id="inv-pixels-val">0.00</span>
                 </div>
             </div>
 
