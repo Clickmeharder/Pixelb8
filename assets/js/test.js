@@ -129,10 +129,19 @@ function saveStats(p) {
 }
 /* ================= PLAYER SETUP ================= */
 function getPlayer(name, color) {
-    if (players[name]) return players[name];
+    // 1. Create a lowercase key for internal storage
+    const lowName = name.toLowerCase();
+
+    // 2. Check if the player exists using that lowercase key
+    if (players[lowName]) {
+        // Update color if the browser profile color changed
+        if (color) players[lowName].color = color;
+        return players[lowName];
+    }
     
-    players[name] = {
-        name, 
+    // 3. If they don't exist, create them
+    players[lowName] = {
+        name: name, // Keep original casing (like JaeDraze) for the visual label
         color: color || "#00ffff",
         x: Math.random() * 800 + 100, 
         y: 450,
@@ -142,12 +151,12 @@ function getPlayer(name, color) {
         dead: false,
         area: "home", 
         activeTask: null,
-        danceStyle: 0, // <--- Correct way to add it! s
-		lastDanceXP: 0,
-        stats: loadStats(name)
+        danceStyle: 0,
+        lastDanceXP: 0,
+        stats: loadStats(name) // loadStats is case-insensitive usually
     };
     
-    return players[name];
+    return players[lowName];
 }
 function movePlayer(p, targetArea) {
     if (p.dead) {
@@ -1798,7 +1807,7 @@ function gameLoop() {
     // 2. Interface (The Text/UI)
     // This now shows the wave, difficulty, and enemy HP
     updateUI();
-	
+
     // 3. Entity Logic & Progress (Calculations)
     if (dungeonActive) {
         // Checks if wave is cleared and handles Boss/Minion spawning
@@ -1839,10 +1848,8 @@ function gameLoop() {
     updateArrows(ctx);      // Renders projectiles
     updateSplashText(ctx);  // Renders "Level Up" and damage floaters
     handleTooltips();
-
     // 7. Next Frame
     requestAnimationFrame(gameLoop);
-	refreshProfileUI();
 }
 /* ================= GAME LOOP ================= */
 /* ================= GAME LOOP ================= */
@@ -2262,7 +2269,7 @@ function cmdSell(p, args) {
     let target = args.slice(1).join(" ").toLowerCase();
     let totalGold = 0;
     let itemsRemoved = 0;
-	
+    
     // Update the Buyer status before calculating
     updateBuyerNPC(); 
     let multiplier = buyerActive ? 2 : 1;
@@ -2481,6 +2488,7 @@ function updateBrowserProfile(newName, newColor) {
 }
 // Function to update profile via commands
 function processGameCommand(user, msg, flags = {}, extra = {}) {
+    // getPlayer now handles the case-sensitivity for us
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
@@ -2493,7 +2501,8 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     ];
 
     if (adminCommands.includes(cmd)) {
-        let isAuthorized = flags.developer || isStreamerAndAuthorize(user, cmd);
+        // Use p.name for the authorization check to ensure it matches the streamer identity
+        let isAuthorized = flags.developer || isStreamerAndAuthorize(p.name, cmd);
         if (!isAuthorized) return;
 
         if (cmd === "/newprofile") {
@@ -2527,7 +2536,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
             return;
         }
         if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "Home"; return; }
-		if (cmd === "showpond") { viewArea = "pond"; document.getElementById("areaDisplay").textContent = "Pond"; return; }
+        if (cmd === "showpond") { viewArea = "pond"; document.getElementById("areaDisplay").textContent = "Pond"; return; }
         if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "Dungeon"; return; }
         
         // Merchant Admin
@@ -2537,33 +2546,43 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     }
 
     // --- STANDARD PLAYER COMMANDS ---
-    if (cmd === "stop" || cmd === "idle" || cmd === "!reset") { cmdStop(p, user); return; }
-    if (cmd === "attack") { cmdAttack(p, user); return; }
-    if (cmd === "fish")   { cmdFish(p, user); return; }
-    if (cmd === "swim")   { cmdSwim(p, user); return; }
+    // Note: We use p (the object) or p.name (the string) for all these
+    if (cmd === "stop" || cmd === "idle" || cmd === "!reset") { cmdStop(p, p.name); return; }
+    if (cmd === "attack") { cmdAttack(p, p.name); return; }
+    if (cmd === "fish")   { cmdFish(p, p.name); return; }
+    if (cmd === "swim")   { cmdSwim(p, p.name); return; }
     if (cmd === "heal")   { cmdHeal(p, args); return; }
-	if (cmd === "lurk")   {cmdLurk(p, user); return; }
-    if (cmd === "dance")  { cmdDance(p, user, args); return; }
-	if (cmd === "mingle") { cmdMingle(p, user, args); return; }
-    if (cmd === "pose" || cmd === "setpose") { cmdSetPose(p, user, args); return; }
-	
+    if (cmd === "lurk")   { cmdLurk(p, p.name); return; }
+    if (cmd === "dance")  { cmdDance(p, p.name, args); return; }
+    if (cmd === "mingle") { cmdMingle(p, p.name, args); return; }
+    if (cmd === "pose" || cmd === "setpose") { cmdSetPose(p, p.name, args); return; }
+    
     if (cmd === "travel") { movePlayer(p, args[1]); return; }
     if (cmd === "home")   { movePlayer(p, "home"); return; }
     if (cmd === "dungeon"){ movePlayer(p, "dungeon"); return; }
     if (cmd === "join")   { joinDungeonQueue(p); return; }
-    if (cmd === "inventory") { cmdInventory(p, user, args); return; }
+    
+    if (cmd === "inventory") { cmdInventory(p, p.name, args); return; }
     if (cmd === "equip")     { cmdEquip(p, args); return; }
     if (cmd === "unequip")   { cmdUnequip(p, args); return; }
-	if (cmd === "sheath") { cmdSheath(p, args); return; }
-	if (cmd === "wigcolor") { cmdWigColor(p, args); return; }
-    // Status//
+    if (cmd === "sheath")    { cmdSheath(p, args); return; }
+    if (cmd === "wigcolor")  { cmdWigColor(p, args); return; }
+    
     if (cmd === "sell")      { cmdSell(p, args); return; }
     if (cmd === "bal" || cmd === "money") { cmdBalance(p); return; }
-	if (cmd === "stats")    { cmdShowStats(user, args); return; };
-    if (cmd === "topstats") { cmdTopStats();  return; }
-	if (cmd === "clear" || cmd === "!clear") { clearPlayerInventory(p.name); return; }
-    if (cmd === "respawn" && p.dead) { p.dead = false; p.hp = p.maxHp; systemMessage(`${p.name} returned to life!`);return; }
+    if (cmd === "stats")     { cmdShowStats(p.name, args); return; }
+    if (cmd === "topstats")  { cmdTopStats(); return; }
+    
+    if (cmd === "clear" || cmd === "!clear") { clearPlayerInventory(p.name); return; }
+    
+    if (cmd === "respawn" && p.dead) { 
+        p.dead = false; 
+        p.hp = p.maxHp; 
+        systemMessage(`${p.name} returned to life!`); 
+        return; 
+    }
 }
+
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
 // Twitch Input
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
@@ -2582,12 +2601,11 @@ chatInput.addEventListener("keypress", (e) => {
 
         const current = getActiveProfile();
         
-        // Use a very safe check for the streamer identity
+        // Robust case-insensitive check
         const isStreamerIdentity = streamername && 
             current.name.toLowerCase() === streamername.toLowerCase();
 
-        console.log(`Controlling: ${current.name}, IsBroadcaster: ${isStreamerIdentity}`);
-
+        // Use the name from the profile
         processGameCommand(current.name, msg, { 
             developer: true, 
             broadcaster: isStreamerIdentity, 
