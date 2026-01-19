@@ -2525,8 +2525,9 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
             addItemToPlayer(args[1], args.slice(2).join(" "));
             return;
         }
-        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "HOME"; return; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "DUNGEON"; return; }
+        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "Home"; return; }
+		if (cmd === "showpond") { viewArea = "pond"; document.getElementById("areaDisplay").textContent = "Pond"; return; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "Dungeon"; return; }
         
         // Merchant Admin
         if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); return; }
