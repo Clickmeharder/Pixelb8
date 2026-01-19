@@ -425,64 +425,92 @@ function scrubAllInventories() {
 function performAttack(p) {
     if (p.dead) return;
 
-    // 1. Identify Target
+    // 1. Identify Target (Dungeon prioritizes Enemies -> Boss; Home targets other players)
     let target = (p.area === "dungeon") 
         ? (enemies.find(e => !e.dead) || (boss && !boss.dead ? boss : null))
         : Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name);
 
-    if (!target || target.dead) return;
+    if (!target || target.dead) {
+        p.activeTask = null; // Reset if no targets left
+        return;
+    }
 
-    // 2. Weapon & Skill Type Check
-    const weapon = ITEM_DB[p.stats.equippedWeapon] || { power: 0, type: "melee" };
+    // 2. Determine Weapon Stats & Range
+    const weapon = ITEM_DB[p.stats.equippedWeapon] || { power: 0, type: "melee", speed: 2000 };
     
-    let skillType = "attack"; // Default Melee
+    let skillType = "attack"; // Default Melee (Strength/Attack)
     if (weapon.type === "bow") skillType = "archer";
     if (weapon.type === "staff") skillType = "magic";
 
     const isRanged = (skillType !== "attack");
-    const rangeNeeded = isRanged ? 250 : 60;
-    p.targetX = target.x - (isRanged ? 180 : 40);
+    const rangeNeeded = isRanged ? 250 : 60; // Distance to stop at
+    const attackSpeed = weapon.speed || 2000;
 
-    // 3. Execution
-    if (Math.abs(p.x - target.x) <= rangeNeeded) {
-        // Calculate Defense
-        let targetDef = 0;
-        let gearSource = target.stats || target.equipped; 
-        if (gearSource) {
-             const slots = target.stats ? ["equippedHelmet", "equippedArmor", "equippedPants", "equippedBoots"] : ["helmet", "armor", "pants", "boots"];
-             slots.forEach(s => {
-                 let item = ITEM_DB[target.stats ? target.stats[s] : target.equipped[s]];
-                 if (item) targetDef += (item.def || 0);
-             });
+    // --- POSITIONING LOGIC ---
+    // Calculate distance to target
+    const dist = Math.abs(p.x - target.x);
+
+    if (dist > rangeNeeded) {
+        // We are too far away. Move toward the target.
+        // We set targetX to be 'rangeNeeded' pixels away from the target
+        const offset = p.x < target.x ? -rangeNeeded + 20 : rangeNeeded - 20;
+        p.targetX = target.x + offset;
+    } else {
+        // We are within range! Stop moving so we can focus on attacking.
+        p.targetX = null; 
+        p.lean = 0;
+
+        // --- ATTACK EXECUTION ---
+        const now = Date.now();
+        if (!p.lastAttackTime) p.lastAttackTime = 0;
+
+        if (now - p.lastAttackTime > attackSpeed) {
+            // A. Calculate Defense
+            let targetDef = 0;
+            let gearSource = target.stats || target.equipped; 
+            if (gearSource) {
+                const slots = target.stats ? ["equippedHelmet", "equippedArmor", "equippedPants", "equippedBoots"] : ["helmet", "armor", "pants", "boots"];
+                slots.forEach(s => {
+                    let itemName = target.stats ? target.stats[s] : target.equipped[s];
+                    let item = ITEM_DB[itemName];
+                    if (item) targetDef += (item.def || 0);
+                });
+            }
+
+            // B. Damage calculation
+            let skillLvl = p.stats[skillType + "Level"] || 1;
+            let baseDmg = 5 + (skillLvl * 2) + (weapon.power || 0);
+            let actualDmg = Math.max(1, baseDmg - targetDef);
+
+            // C. Visual Projectiles
+            if (weapon.type === "bow") {
+                spawnProjectile(p.x, p.y - 15, target.x, target.y - 15, "#fff", "arrow");
+            } else if (weapon.type === "staff") {
+                spawnProjectile(p.x, p.y - 15, target.x, target.y - 15, weapon.color || "#00ffff", "magic");
+            }
+
+            // D. Apply Damage
+            applyDamage(target, actualDmg);
+            p.lastAttackTime = now;
+
+            // E. Handle Loot if target died
+            if (target.hp <= 0 && (target.isEnemy || target.isBoss) && !target.looted) {
+                target.looted = true;
+                handleLoot(p, target);
+                systemMessage(`${p.name} defeated ${target.name}!`);
+            }
+
+            // F. Award XP
+            p.stats[skillType + "XP"] = (p.stats[skillType + "XP"] || 0) + 10;
+            if (p.stats[skillType + "XP"] >= xpNeeded(p.stats[skillType + "Level"])) {
+                p.stats[skillType + "Level"]++;
+                p.stats[skillType + "XP"] = 0;
+                spawnFloater(p, `${skillType.toUpperCase()} UP!`, "#FFD700");
+                updateCombatLevel(p);
+            }
+            
+            saveStats(p);
         }
-
-        // Damage calculation using the specific skill level
-        let skillLvl = p.stats[skillType + "Level"];
-        let baseDmg = 5 + (skillLvl * 2) + (weapon.power || 0);
-        let actualDmg = Math.max(1, baseDmg - targetDef);
-
-        if (weapon.type === "bow") spawnArrow(p.x, p.y - 10, target.x, target.y);
-        
-        applyDamage(target, actualDmg);
-		// CHECK FOR DEATH & LOOT
-        if (target.hp <= 0) { // If they just died from that hit
-			// Only drop loot if they weren't already marked as 'looted'
-			if ((target.isEnemy || target.isBoss) && !target.looted) {
-				target.looted = true; // Prevent double-looting
-				handleLoot(p, target);
-				systemMessage(`${p.name} defeated ${target.name}!`);
-			}
-		}
-        // 4. Award XP to the correct skill
-        p.stats[skillType + "XP"] += 10;
-        if (p.stats[skillType + "XP"] >= xpNeeded(p.stats[skillType + "Level"])) {
-            p.stats[skillType + "Level"]++;
-            p.stats[skillType + "XP"] = 0;
-            spawnFloater(p, `${skillType.toUpperCase()} UP!`, "#FFD700");
-        }
-
-        updateCombatLevel(p);
-        saveStats(p);
     }
 }
 function applyDamage(target, amount, color = "#f00") {
@@ -1077,7 +1105,45 @@ function handleLoot(p, target) {
 
 // ---PROJECTILES ----
 /*-------- Arrows ------------------------------*/
-const arrows = [];
+
+const projectiles = []; // Rename from arrows
+
+function spawnProjectile(startX, startY, endX, endY, color, type) {
+    projectiles.push({ x: startX, y: startY, tx: endX, ty: endY, life: 30, color, type });
+}
+
+function drawProjectiles(ctx) {
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+        let prj = projectiles[i];
+        prj.x += (prj.tx - prj.x) * 0.15;
+        prj.y += (prj.ty - prj.y) * 0.15;
+        
+        ctx.save();
+        ctx.strokeStyle = prj.color;
+        ctx.globalAlpha = prj.life / 30;
+        
+        if (prj.type === "arrow") {
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(prj.x, prj.y);
+            ctx.lineTo(prj.x + (prj.tx > prj.x ? 15 : -15), prj.y);
+            ctx.stroke();
+        } else {
+            // Magic Bolt
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = prj.color;
+            ctx.fillStyle = prj.color;
+            ctx.beginPath();
+            ctx.arc(prj.x, prj.y, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+
+        prj.life--;
+        if (prj.life <= 0) projectiles.splice(i, 1);
+    }
+}
+/* const arrows = [];
 function spawnArrow(startX, startY, endX, endY) {
     arrows.push({ x: startX, y: startY, tx: endX, ty: endY, life: 30 });
 }
@@ -1099,6 +1165,7 @@ function updateArrows(ctx) {
         if (a.life <= 0) arrows.splice(i, 1);
     }
 }
+ */
 /*----------------------------------------------*/
 
 // stickmen physics
@@ -2419,6 +2486,8 @@ function cmdFish(p, user) {
     }
 
     p.targetX = 200; 
+	p.targetX = 180 + (Math.random() * 40 - 20);
+	p.targetY = 25 + (Math.random() * 40 - 20);
     p.activeTask = "fishing";
     p.taskEndTime = Date.now() + (15 * 60 * 1000);
     

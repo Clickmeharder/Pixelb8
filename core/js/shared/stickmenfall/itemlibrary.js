@@ -161,46 +161,31 @@ const WEAPON_STYLES = {
         ctx.beginPath(); ctx.moveTo(5, -6); ctx.lineTo(5, 6); ctx.stroke();
     },
 
-    "bow": (ctx, item, isAttacking, now) => {
-		// 1. Rotation: Tilt the bow
+	"bow": (ctx, item, isAttacking, now, p) => {
 		ctx.rotate(isAttacking ? -0.6 : Math.PI / 7);
 
-		// 2. The Bow Body (The Wood)
+		// Calculate "Draw Amount" based on attack speed
+		let weaponData = ITEM_DB[p.stats.equippedWeapon];
+		let speed = weaponData?.speed || 2500;
+		let timeSinceLast = now - (p.lastAttackTime || 0);
+		
+		// String pulls back as we get closer to the next attack
+		let drawProgress = Math.min(1, timeSinceLast / speed);
+		let pull = isAttacking ? (drawProgress * 15) : 0;
+
+		// Bow Wood
 		ctx.strokeStyle = item.color || "#8B4513";
 		ctx.lineWidth = 3;
 		ctx.beginPath(); 
-		/* We center the arc at (-15, 0) with a radius of 15.
-		   This means the right-most edge of the arc is exactly at (0, 0).
-		   Now the hand (0,0) is holding the wooden belly!
-		*/
 		ctx.arc(-15, 0, 15, -Math.PI / 2, Math.PI / 2, false); 
 		ctx.stroke();
 
-		// 3. The Grip (Drawn right on the hand at 0,0)
-		ctx.strokeStyle = "#5d4037";
-		ctx.lineWidth = 4;
-		ctx.beginPath(); 
-		ctx.moveTo(0, -3); 
-		ctx.lineTo(0, 3); 
-		ctx.stroke();
-
-		// 4. The Bowstring
+		// Bowstring
 		ctx.strokeStyle = "rgba(255,255,255,0.7)";
 		ctx.lineWidth = 1;
 		ctx.beginPath();
-		
-		// The string tips are at the ends of the arc (x: -15, y: +/-15)
 		ctx.moveTo(-15, -15); 
-
-		if (isAttacking) {
-			// Pull the string back AWAY from the wood
-			// Since wood is at -15, pulling to -25 or -30 looks like a heavy draw
-			ctx.lineTo(-30, 0); 
-		} else {
-			// String is resting straight between the tips
-			ctx.lineTo(-15, 0); 
-		}
-		
+		ctx.lineTo(-15 - pull, 0); // Pulls back based on attack timer
 		ctx.lineTo(-15, 15); 
 		ctx.stroke();
 	},
