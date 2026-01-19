@@ -129,11 +129,18 @@ function saveStats(p) {
 }
 /* ================= PLAYER SETUP ================= */
 function getPlayer(name, color) {
-    if (players[name]) return players[name];
+    const lowName = name.toLowerCase();
     
-    players[name] = {
-        name, 
-        color: color || "#00ffff",
+    // 1. Check if player exists (using lowercase key)
+    if (players[lowName]) {
+        if (color) players[lowName].color = (typeof color === 'object') ? (color.userColor || "orangered") : color;
+        return players[lowName];
+    }
+    
+    // 2. Create new player
+    players[lowName] = {
+        name: name, // Original casing for display
+        color: (typeof color === 'object') ? (color.userColor || "#00ffff") : (color || "#00ffff"),
         x: Math.random() * 800 + 100, 
         y: 450,
         targetX: null,
@@ -142,12 +149,12 @@ function getPlayer(name, color) {
         dead: false,
         area: "home", 
         activeTask: null,
-        danceStyle: 0, // <--- Correct way to add it! s
-		lastDanceXP: 0,
+        danceStyle: 0,
+        lastDanceXP: 0,
         stats: loadStats(name)
     };
     
-    return players[name];
+    return players[lowName];
 }
 function movePlayer(p, targetArea) {
     if (p.dead) {
@@ -2485,21 +2492,31 @@ chatInput.addEventListener("keypress", (e) => {
 });
 // Function to update profile via commands
 function updateBrowserProfile(newName, newColor) {
-    if (newName) {
-        browserProfile.name = newName;
-        if(document.getElementById("browserNameInput")) {
-            document.getElementById("browserNameInput").value = newName;
+    const current = getActiveProfile();
+    if (!current) return;
+
+    if (newName && newName !== current.name) {
+        // Migrate stats to the new name in LocalStorage
+        const oldKey = "rpg_" + current.name.toLowerCase();
+        const newKey = "rpg_" + newName.toLowerCase();
+        const data = localStorage.getItem(oldKey);
+        if (data) {
+            localStorage.setItem(newKey, data);
+            localStorage.removeItem(oldKey);
         }
+        // Remove the old player object so it recreates with the new name
+        if (players[current.name.toLowerCase()]) delete players[current.name.toLowerCase()];
+        current.name = newName;
     }
+
     if (newColor) {
-        browserProfile.color = newColor;
-        if(document.getElementById("browserColorPicker")) {
-            document.getElementById("browserColorPicker").value = newColor;
-        }
+        current.color = newColor;
+        const p = players[current.name.toLowerCase()];
+        if (p) p.color = newColor;
     }
     
-    localStorage.setItem("browserProfile", JSON.stringify(browserProfile));
-    systemMessage(`Profile updated: ${browserProfile.name}`);
+    saveAllProfiles();
+    refreshProfileUI();
 }
 // --- 2. THE REFRESH FUNCTION ---
 function refreshProfileUI() {
@@ -2526,6 +2543,17 @@ function refreshProfileUI() {
         colorPicker.value = activeColor;
     }
 }
+profileSelector.addEventListener("change", (e) => {
+    activeProfileIndex = parseInt(e.target.value);
+    saveAllProfiles();
+    refreshProfileUI();
+    
+    const current = getActiveProfile();
+    // This forces the stickman to appear immediately
+    getPlayer(current.name, current.color);
+    
+    systemMessage(`Active Player: ${current.name}`);
+});
 function processGameCommand(user, msg, flags = {}, extra = {}) {
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
