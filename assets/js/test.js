@@ -2536,13 +2536,16 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     }
 
     // --- STANDARD PLAYER COMMANDS ---
-    if (cmd === "clear" || cmd === "!clear") { clearPlayerInventory(p.name); return; }
     if (cmd === "stop" || cmd === "idle" || cmd === "!reset") { cmdStop(p, user); return; }
     if (cmd === "attack") { cmdAttack(p, user); return; }
     if (cmd === "fish")   { cmdFish(p, user); return; }
     if (cmd === "swim")   { cmdSwim(p, user); return; }
     if (cmd === "heal")   { cmdHeal(p, args); return; }
+	if (cmd === "lurk")   {cmdLurk(p, user); return; }
     if (cmd === "dance")  { cmdDance(p, user, args); return; }
+	if (cmd === "mingle") { cmdMingle(p, user, args); return; }
+    if (cmd === "pose" || cmd === "setpose") { cmdSetPose(p, user, args); return; }
+	
     if (cmd === "travel") { movePlayer(p, args[1]); return; }
     if (cmd === "home")   { movePlayer(p, "home"); return; }
     if (cmd === "dungeon"){ movePlayer(p, "dungeon"); return; }
@@ -2550,13 +2553,15 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "inventory") { cmdInventory(p, user, args); return; }
     if (cmd === "equip")     { cmdEquip(p, args); return; }
     if (cmd === "unequip")   { cmdUnequip(p, args); return; }
+	if (cmd === "sheath") { cmdSheath(p, args); return; }
+	if (cmd === "wigcolor") { cmdWigColor(p, args); return; }
+    // Status//
     if (cmd === "sell")      { cmdSell(p, args); return; }
     if (cmd === "bal" || cmd === "money") { cmdBalance(p); return; }
-    if (cmd === "respawn" && p.dead) {
-        p.dead = false; p.hp = p.maxHp;
-        systemMessage(`${p.name} returned to life!`);
-        return;
-    }
+	if (cmd === "stats")    { cmdShowStats(user, args); return; };
+    if (cmd === "topstats") { cmdTopStats();  return; }
+	if (cmd === "clear" || cmd === "!clear") { clearPlayerInventory(p.name); return; }
+    if (cmd === "respawn" && p.dead) { p.dead = false; p.hp = p.maxHp; systemMessage(`${p.name} returned to life!`);return; }
 }
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
 // Twitch Input
