@@ -23,7 +23,8 @@ window.chatPlugins = [];
 
 
 
-function displayChatMessage(user, message, flags = {}, extra = {}, isCorrect = false) {
+function displayChatMessage(user, msg, flags = {}, extra = {}, isCorrect = false) {
+	let message = msg;
     const chatContainer = document.getElementById("twitchMessagebox");
 
     // Create a new chat message element
@@ -461,6 +462,7 @@ function registerChatPlugin(fn) {
 // ComfyJS onChat event handler
 let streamername = "jaedraze"; // Default streamer name
 function isStreamerAndAuthorize(user, command) {
+    // Force both to lowercase before comparing
     if (user.toLowerCase() !== streamername.toLowerCase()) {
         displayConsoleMessage(user, `❌ Unauthorized: Only ${streamername} can use !${command}`);
         return false;
