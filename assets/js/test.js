@@ -1460,7 +1460,11 @@ function drawStickman(ctx, p) {
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
     drawStickmanBody(ctx, p, anchors, limbs);
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
-
+    // HP & Name
+    ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
+    ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
+    ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
+    ctx.fillText(p.name, p.x, p.y + 40);
     ctx.restore(); // Stop being transparent for the next player or background
 }
 
