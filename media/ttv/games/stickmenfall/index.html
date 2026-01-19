@@ -279,93 +279,48 @@
 		#inventory-modal {
 			position: fixed;
 			top: 0; left: 0; width: 100%; height: 100%;
-			background: rgba(0, 0, 0, 0.9); /* Darker backdrop */
+			background: rgba(0,0,0,0.85);
 			display: flex; justify-content: center; align-items: center;
 			z-index: 2000;
-			backdrop-filter: blur(4px); /* Blur the game background */
 		}
+		.hidden { display: none !important; }
 
 		.modal-content {
-			background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-			border: 2px solid #ceae33; /* Gold border */
-			box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(206, 174, 51, 0.2);
-			width: 700px; padding: 25px; border-radius: 15px;
-			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-			color: #e0e0e0;
+			background: #222; border: 2px solid #555;
+			width: 600px; padding: 20px; border-radius: 10px;
+			font-family: monospace; color: white;
 		}
+		.modal-header { display: flex; justify-content: space-between; border-bottom: 1px solid #444; margin-bottom: 15px; }
 
-		.modal-header { 
-			display: flex; justify-content: space-between; 
-			border-bottom: 2px solid #ceae33; 
-			margin-bottom: 20px; padding-bottom: 10px;
-		}
+		.inventory-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
 
-		.modal-header h2 { margin: 0; color: #ceae33; text-transform: uppercase; letter-spacing: 2px; }
-
-		.close-btn {
-			background: none; border: none; color: #ceae33; 
-			font-size: 28px; cursor: pointer; transition: 0.2s;
-		}
-		.close-btn:hover { color: #fff; transform: scale(1.1); }
-
-		/* Layout Adjustments */
-		.inventory-layout { display: grid; grid-template-columns: 220px 1fr; gap: 30px; }
-
-		/* Slot Styling */
+		/* Grid Styling */
 		#backpack-grid, #equipped-grid {
-			display: grid; 
-			gap: 10px; background: rgba(0,0,0,0.3); 
-			padding: 15px; border-radius: 8px;
-			border: 1px solid #444;
+			display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+			gap: 8px; background: #111; padding: 10px; border-radius: 5px;
 		}
-
-		#backpack-grid { grid-template-columns: repeat(5, 1fr); height: 350px; overflow-y: auto; align-content: start; }
-		#equipped-grid { grid-template-columns: repeat(2, 1fr); }
 
 		.inv-slot {
-			width: 70px; height: 70px; background: #252525;
-			border: 2px solid #444; border-radius: 6px;
-			display: flex; flex-direction: column; align-items: center; justify-content: center;
-			font-size: 11px; cursor: pointer; position: relative;
-			transition: all 0.2s ease; box-shadow: inset 0 0 5px #000;
+			width: 60px; height: 60px; background: #333;
+			border: 1px solid #555; display: flex; flex-direction: column;
+			align-items: center; justify-content: center;
+			font-size: 10px; cursor: pointer; position: relative;
+			text-align: center; overflow: hidden;
 		}
+		.inv-slot:hover { border-color: #00ffff; background: #444; }
+		.inv-slot.empty { opacity: 0.3; cursor: default; }
 
-		.inv-slot:not(.empty):hover {
-			border-color: #ceae33;
-			box-shadow: 0 0 10px rgba(206, 174, 51, 0.5);
-			transform: translateY(-2px);
-		}
+		.slot-label { font-size: 8px; color: #888; position: absolute; bottom: 2px; }
 
-		.inv-slot.empty { border-style: dashed; opacity: 0.5; }
-
-		/* Item Labels & Icons */
-		.slot-label { font-size: 9px; color: #666; font-weight: bold; text-transform: uppercase; margin-top: 5px; }
-
-		/* Action Buttons (Hover) */
 		.item-actions {
 			position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-			background: rgba(0,0,0,0.85); display: none;
-			flex-direction: column; justify-content: center; align-items: center;
-			border-radius: 4px; z-index: 10;
+			background: rgba(0,0,0,0.9); display: none;
+			flex-direction: column; justify-content: center;
 		}
 		.inv-slot:hover .item-actions { display: flex; }
 
-		.item-actions button {
-			width: 80%; margin: 2px 0; padding: 4px;
-			font-size: 10px; font-weight: bold; cursor: pointer;
-			border-radius: 3px; border: 1px solid #ceae33;
-			background: #1a1a1a; color: #ceae33;
-		}
-		.item-actions button:hover { background: #ceae33; color: #000; }
-		.item-actions .btn-sell { border-color: #ff4444; color: #ff4444; }
-		.item-actions .btn-sell:hover { background: #ff4444; color: #fff; }
-
-		/* Gold Display */
-		.gold-display {
-			margin-top: 15px; background: #111; padding: 10px;
-			border-radius: 5px; border-left: 4px solid #ceae33;
-			font-weight: bold; color: #ffd700; text-align: center;
-		}
+		.btn-sell { background: #600; color: white; border: none; font-size: 9px; cursor: pointer; margin-top: 2px; }
+		.btn-sell:hover { background: #a00; }
         @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
     </style>
 </head>
@@ -718,51 +673,54 @@
 		<div id="enemyUI"></div>
 
 		<div id="input-wrapper">
-			<div id="action-bar">
-				<button data-cmd="travel dungeon">⚔️ Dungeon</button>
-				<button data-cmd="travel pond">🎣 Pond</button>
-				<button data-cmd="travel home">🏠 Home</button>
-				<div class="separator"></div>
-				<button data-cmd="attack">💥 Attack</button>
-				<button data-cmd="fish">🐟 Fish</button>
-				<button data-cmd="lurk">👤 Lurk</button>
-				<button data-cmd="dance">💃 Dance</button>
-				<button data-cmd="stop">🛑 Stop</button>
-				<div class="separator"></div>
-				<button data-cmd="inventory">🎒 Bag</button>
-				<button data-cmd="respawn" class="danger">💀 Respawn</button>
-			</div>
 			<select id="profileSelector" title="Switch Profile"></select>
+
+			
 			<input type="color" id="browserColorPicker" title="Choose color">
+			
 			<input type="text" id="browserChatInput" placeholder="Type a command..." autocomplete="off">
-		</div>
-		
-		
-		<div id="inventory-modal" class="hidden">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h2 id="inv-player-name">Adventurer's Satchel</h2>
-					<button class="close-btn" id="close-inventory">×</button>
-				</div>
-				<div class="inventory-layout">
-					<div class="equipped-section">
-						<h3>EQUIPPED</h3>
-						<div id="equipped-grid"></div>
-						<div class="gold-display">💰 <span id="inv-gold-val">0.00</span> Gold</div>
-					</div>
-					<div class="backpack-section">
-						<h3>BACKPACK</h3>
-						<div id="backpack-grid"></div>
-					</div>
-				</div>
+			<div id="action-bar">
+				<button onclick="sendAction('travel dungeon')">⚔️ Dungeon</button>
+				<button onclick="sendAction('travel pond')">🎣 Pond</button>
+				<button onclick="sendAction('travel home')">🏠 Home</button>
+				<div class="separator"></div>
+				<button onclick="sendAction('attack')">💥 Attack</button>
+				<button onclick="sendAction('fish')">🐟 Fish</button>
+				<button onclick="sendAction('lurk')">👤 Lurk</button>
+				<button onclick="sendAction('dance')">💃 Dance</button>
+				<button onclick="sendAction('stop')">🛑 Stop</button>
+				<div class="separator"></div>
+				<button onclick="sendAction('inventory')">🎒 Bag</button>
+				<button onclick="sendAction('respawn')" class="danger">💀 Respawn</button>
 			</div>
 		</div>
-
 	</div>
 	
+<div id="inventory-modal" class="hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="inv-player-name">Inventory</h2>
+            <button onclick="toggleInventory()" class="close-btn">×</button>
+        </div>
+        
+        <div class="inventory-layout">
+            <div class="equipped-section">
+                <h3>Equipped</h3>
+                <div id="equipped-grid">
+                    </div>
+                <div class="gold-display">
+                    Gold: <span id="inv-gold-val">0.00</span>
+                </div>
+            </div>
 
-
-
+            <div class="backpack-section">
+                <h3>Backpack</h3>
+                <div id="backpack-grid">
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
 <!---->
 <!---->	
 <!---->

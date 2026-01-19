@@ -1909,33 +1909,12 @@ function sendAction(commandStr) {
     processGameCommand(current.name, commandStr, flags, { userColor: current.color });
     console.log(`Action Bar: ${commandStr} sent for ${current.name}`);
 }
-// --- INITIALIZATION & LISTENERS ---
-document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById('inventory-modal');
-    const closeBtn = document.getElementById('close-inventory');
-    const actionBar = document.getElementById('action-bar');
-
-    // 1. Action Bar Listener (using delegation)
-    actionBar.addEventListener("click", (e) => {
-        const cmd = e.target.getAttribute('data-cmd');
-        if (cmd) sendAction(cmd);
-    });
-
-    // 2. Modal Close Listener
-    closeBtn.addEventListener("click", () => {
-        modal.classList.add('hidden');
-    });
-
-    // 3. Close on clicking outside the box
-    window.addEventListener("click", (e) => {
-        if (e.target === modal) modal.classList.add('hidden');
-    });
-});
-
 function toggleInventory() {
     const modal = document.getElementById('inventory-modal');
-    const isOpening = modal.classList.toggle('hidden') === false;
-    if (isOpening) renderInventoryUI();
+    modal.classList.toggle('hidden');
+    if (!modal.classList.contains('hidden')) {
+        renderInventoryUI();
+    }
 }
 
 function renderInventoryUI() {
@@ -1946,33 +1925,29 @@ function renderInventoryUI() {
     document.getElementById('inv-player-name').textContent = p.name.toUpperCase();
     document.getElementById('inv-gold-val').textContent = (playerObj.stats.gold || 0).toFixed(2);
 
-    // 1. Render Equipped
+    // 1. Render Equipped Slots
     const eqGrid = document.getElementById('equipped-grid');
     eqGrid.innerHTML = "";
     const slots = [
-        { key: 'equippedHelmet', label: 'Head', icon: '🪖' },
-        { key: 'equippedWeapon', label: 'Weapon', icon: '⚔️' },
-        { key: 'equippedArmor', label: 'Body', icon: '🛡️' },
-        { key: 'equippedCape', label: 'Back', icon: '🧥' },
-        { key: 'equippedPants', label: 'Legs', icon: '👖' },
-        { key: 'equippedGloves', label: 'Hands', icon: '🧤' }
+        { key: 'equippedWeapon', label: 'WEAPON' },
+        { key: 'equippedArmor', label: 'BODY' },
+        { key: 'equippedHelmet', label: 'HEAD' },
+        { key: 'equippedPants', label: 'LEGS' },
+        { key: 'equippedGloves', label: 'HANDS' },
+        { key: 'equippedCape', label: 'BACK' }
     ];
 
     slots.forEach(slot => {
         const itemName = playerObj.stats[slot.key];
         const div = document.createElement('div');
         div.className = `inv-slot ${!itemName ? 'empty' : ''}`;
-        
-        div.innerHTML = itemName ? 
-            `<span style="font-size:20px">📦</span><span class="slot-label">${itemName}</span>` : 
-            `<span style="font-size:20px; opacity:0.3">${slot.icon}</span><span class="slot-label">${slot.label}</span>`;
-
+        div.innerHTML = itemName ? `<span>${itemName}</span>` : `<span class="slot-label">${slot.label}</span>`;
         if (itemName) {
-            div.addEventListener("click", () => {
+            div.onclick = () => {
                 const type = ITEM_DB[itemName]?.type || slot.key.replace('equipped', '').toLowerCase();
                 processGameCommand(p.name, `unequip ${type}`);
                 renderInventoryUI();
-            });
+            };
         }
         eqGrid.appendChild(div);
     });
@@ -1980,28 +1955,16 @@ function renderInventoryUI() {
     // 2. Render Backpack
     const bpGrid = document.getElementById('backpack-grid');
     bpGrid.innerHTML = "";
-    playerObj.stats.inventory.forEach((item) => {
+    playerObj.stats.inventory.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = "inv-slot";
         div.innerHTML = `
             <span style="padding:2px">${item}</span>
             <div class="item-actions">
-                <button class="btn-equip">EQUIP</button>
-                <button class="btn-sell">SELL</button>
+                <button onclick="uiAction('equip', '${item}')">EQUIP</button>
+                <button class="btn-sell" onclick="uiAction('sell', '${item}')">SELL</button>
             </div>
         `;
-        
-        // Use class-based listeners inside the grid
-        div.querySelector('.btn-equip').addEventListener("click", (e) => {
-            e.stopPropagation();
-            uiAction('equip', item);
-        });
-        
-        div.querySelector('.btn-sell').addEventListener("click", (e) => {
-            e.stopPropagation();
-            uiAction('sell', item);
-        });
-
         bpGrid.appendChild(div);
     });
 }
