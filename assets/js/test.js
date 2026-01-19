@@ -1542,7 +1542,24 @@ function drawEnemyStickman(ctx, e) {
         }
     }
 
-    ctx.restore(); 
+	ctx.restore(); // <--- WE MUST RESTORE HERE so text isn't flipped
+
+    // --- ENEMY UI (Below feet) ---
+    const barWidth = 40;
+    const barY = e.y + 15;
+
+    // HP Bar
+    ctx.fillStyle = "#444";
+    ctx.fillRect(e.x - barWidth/2, barY, barWidth, 4);
+    ctx.fillStyle = "#ff4444"; // Red for enemies
+    ctx.fillRect(e.x - barWidth/2, barY, barWidth * (e.hp / e.maxHp), 4);
+
+    // Name & Lvl
+    ctx.fillStyle = "#ff4444";
+    ctx.font = "bold 11px monospace";
+    ctx.textAlign = "center";
+    const lvl = e.level || e.stats?.combatLevel || 1;
+    ctx.fillText(`${e.name} (Lvl ${lvl})`, e.x, barY + 15);
 }
 
 function drawMonster(ctx, m) {
@@ -1568,8 +1585,22 @@ function drawMonster(ctx, m) {
     ctx.fill();
     ctx.fillStyle = "black";
     ctx.fillRect(-9, -6, 4, 4); ctx.fillRect(5, -6, 4, 4);
+	// --- MONSTER UI (Calculated based on scale) ---
+    // If it's a boss, we make the bar wider
+    const barWidth = m.isBoss ? 100 : 40;
+    const barY = m.y + (25 * scale) + 10; // Position below the blob
 
-    ctx.restore();
+    // HP Bar
+    ctx.fillStyle = "#444";
+    ctx.fillRect(m.x - barWidth/2, barY, barWidth, 5);
+    ctx.fillStyle = m.isBoss ? "#ff00ff" : "#ff4444"; // Bosses get a purple bar
+    ctx.fillRect(m.x - barWidth/2, barY, barWidth * (m.hp / m.maxHp), 5);
+
+    // Name
+    ctx.fillStyle = "#fff";
+    ctx.font = m.isBoss ? "bold 16px monospace" : "12px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(m.name, m.x, barY + (m.isBoss ? 20 : 15));
 }
 
 function renderEquipmentLayer(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot) {
