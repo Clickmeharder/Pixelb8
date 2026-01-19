@@ -1838,8 +1838,6 @@ function gameLoop() {
     updateArrows(ctx);      // Renders projectiles
     updateSplashText(ctx);  // Renders "Level Up" and damage floaters
     handleTooltips();
-	// INITIAL RUN
-	refreshProfileUI();
     // 7. Next Frame
     requestAnimationFrame(gameLoop);
 }
@@ -2567,6 +2565,9 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 // Twitch Input
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
     if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
+    if (twitchChatOverlay === "off") return;
+    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
+    displayChatMessage(user, msg, flags, extra);  // Show message in chat box
     processGameCommand(user, msg, flags, extra);
 };
 
@@ -2577,8 +2578,12 @@ chatInput.addEventListener("keypress", (e) => {
         if (!msg) return;
 
         const current = getActiveProfile();
-        // Check if current profile name matches the connected streamer name
-        const isStreamerIdentity = (current.name.toLowerCase() === (streamername || "").toLowerCase());
+        
+        // Use a very safe check for the streamer identity
+        const isStreamerIdentity = streamername && 
+            current.name.toLowerCase() === streamername.toLowerCase();
+
+        console.log(`Controlling: ${current.name}, IsBroadcaster: ${isStreamerIdentity}`);
 
         processGameCommand(current.name, msg, { 
             developer: true, 
