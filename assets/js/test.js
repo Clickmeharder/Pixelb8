@@ -2576,7 +2576,9 @@ function updateBrowserProfile(newName, newColor) {
 // Function to update profile via commands
 function processGameCommand(user, msg, flags = {}, extra = {}) {
     // getPlayer now handles the case-sensitivity for us
-    let p = getPlayer(user, extra.userColor);
+	let p = getPlayer(user, extra.userColor); 
+
+    // 2. Logic to log and process commands...
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
 
