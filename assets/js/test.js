@@ -1678,7 +1678,47 @@ function drawCorpse(ctx, p, now) {
     ctx.restore();
 }
 //-------------------------------------------
+function applySeparationPhysics() {
+    const playersList = Object.values(players);
+    const minDistance = 35; // The personal bubble radius
+    const pushStrength = 1.5; // how fast they nudge apart
 
+    for (let i = 0; i < playersList.length; i++) {
+        let p1 = playersList[i];
+        if (p1.area !== viewArea || p1.dead) continue;
+
+        for (let j = i + 1; j < playersList.length; j++) {
+            let p2 = playersList[j];
+            if (p2.area !== viewArea || p2.dead || p1.area !== p2.area) continue;
+
+            // Calculate distance between p1 and p2
+            let dx = p1.x - p2.x;
+            let dy = p1.y - p2.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < minDistance) {
+                // Too close! Calculate push vector
+                // If they are exactly on top of each other, use a random direction
+                if (distance === 0) {
+                    p1.x += Math.random() - 0.5;
+                    continue;
+                }
+
+                let force = (minDistance - distance) / distance * pushStrength;
+                let pushX = dx * force;
+                let pushY = dy * force;
+
+                // Nudge them away from each other
+                p1.x += pushX;
+                p2.x -= pushX;
+                
+                // Slightly nudge Y so they don't form a perfect horizontal line
+                p1.y += pushY * 0.5;
+                p2.y -= pushY * 0.5;
+            }
+        }
+    }
+}
 //===============================================================================
 // ================= DRAWING THE SCENERY AND AREAS ===========
 const backgrounds = {
@@ -1936,7 +1976,7 @@ function gameLoop() {
             }
         });
     }
-
+	applySeparationPhysics();
     // 5. Player Logic & Drawing (Top-Layer)
     Object.values(players).forEach(p => {
         // Skip players in other areas
