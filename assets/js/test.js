@@ -2673,30 +2673,26 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
 // Twitch Input
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    // 1. Get the color using a simple chain
-    let finalColor = "orangered"; // Default fallback
-    if (color) {
-        finalColor = color;
-    } else if (extra && extra.userColor) {
-        finalColor = extra.userColor;
-    }
+    // 1. Grab the color from wherever it exists
+    let assignedColor = color || (extra && extra.userColor) || "orangered";
 
-    // 2. Track color for the chat UI
-    userColors[user] = finalColor;
+    // 2. Force update the tracker
+    userColors[user] = assignedColor;
 
-    // 3. Simple Debug Log
-    console.log("[Twitch Input]", user, ":", msg, "| Color:", finalColor);
+    // 3. Debug Logs (Fixed variable names)
+    console.log(`Color Check -> User: ${user} | Hex: ${assignedColor}`);
+    console.log("[Twitch Input]", user, ":", msg, "| Color:", assignedColor);
 
     // 4. Settings Gate
     if (typeof twitchChatOverlay !== 'undefined' && twitchChatOverlay === "off") return;
 
-    // 5. Execution - Pass color directly to avoid 'extra' object issues
+    // 5. Execution
     if (typeof displayChatMessage === "function") {
         displayChatMessage(user, msg, flags, extra);
     }
     
-    // We pass the color explicitly as the last argument
-    processGameCommand(user, msg, flags, { userColor: finalColor });
+    // Pass the assignedColor inside the object so processGameCommand can find it
+    processGameCommand(user, msg, flags, { userColor: assignedColor });
 };
 
 // Browser Chat Input
