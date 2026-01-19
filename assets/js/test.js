@@ -2438,94 +2438,165 @@ const STICKMEN_ADMIN_CMDS = [
     { command: "spawnmerchant", description: "Force the merchant to appear.", usage: "spawnmerchant" },
     { command: "testdance", description: "Test an animation regardless of level.", usage: "testdance [style#]" }
 ];
-//ComfyJS.onChat = (user, msg, color, flags, extra) => {
-//function stickmenCommandHandler(user, msg, command, color, flags, extra) {//
-//    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);//
-//    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected//
-//    displayChatMessage(user, message, flags, extra);  // Show message in chat box//
+
+// Initialize from LocalStorage or defaults
+let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [
+    { name: "Player1", color: "#00ffff" },
+    { name: "Jaedraze", color: "#6441a5" } // Example Streamer Profile
+];
+
+let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
+
+// Function to save everything
+function saveAllProfiles() {
+    localStorage.setItem("allProfiles", JSON.stringify(profiles));
+    localStorage.setItem("activeProfileIndex", activeProfileIndex);
+}
+
+// Function to get current active data
+function getActiveProfile() {
+    return profiles[activeProfileIndex];
+}
+// THE MASTER COMMAND TRIGGER
+chatInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        const msg = chatInput.value.trim();
+        if (!msg) return;
+
+        const current = getActiveProfile();
+        
+        // CHECK: Are we currently pretending to be the streamer?
+        // If our profile name matches the Twitch streamer name, we are 'broadcaster'
+        const isStreamerIdentity = (current.name.toLowerCase() === streamername.toLowerCase());
+
+        const flags = { 
+            developer: true, // Local browser always has dev access
+            broadcaster: isStreamerIdentity, // Gain streamer powers if name matches
+            mod: isStreamerIdentity 
+        };
+
+        processGameCommand(current.name, msg, flags, { userColor: current.color });
+
+        chatInput.value = ""; 
+    }
+});
+// Function to update profile via commands
+function updateBrowserProfile(newName, newColor) {
+    if (newName) {
+        browserProfile.name = newName;
+        if(document.getElementById("browserNameInput")) {
+            document.getElementById("browserNameInput").value = newName;
+        }
+    }
+    if (newColor) {
+        browserProfile.color = newColor;
+        if(document.getElementById("browserColorPicker")) {
+            document.getElementById("browserColorPicker").value = newColor;
+        }
+    }
+    
+    localStorage.setItem("browserProfile", JSON.stringify(browserProfile));
+    systemMessage(`Profile updated: ${browserProfile.name}`);
+}
 function processGameCommand(user, msg, flags = {}, extra = {}) {
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
 
-    // 1. Check Central/Admin Commands First
-    if (cmd === "scrub" || cmd === "!scrub") {
-        if (flags.broadcaster || flags.developer) {
-            scrubAllInventories();
-            systemMessage("System: Scrubbing all inventories...");
+    // --- 1. ADMIN & AUTHORIZATION CHECK ---
+	const adminCommands = [
+			"showhome", "showdungeon", "showpond", "spawnmerchant", 
+			"despawnmerchant", "resetmerchant", "give", "additem", "scrub",
+			"name", "/name", "color", "/color" // Added these here
+	];
+    if (adminCommands.includes(cmd)) {
+        // If it's the browser (developer) OR passes your Twitch streamer check
+        let isAuthorized = flags.developer || isStreamerAndAuthorize(user, cmd);
+        
+        if (!isAuthorized) {
+            console.warn(`Unauthorized admin attempt: ${user} tried ${cmd}`);
+            return; 
+        }
+		// Add these to processGameCommand
+		if (cmd === "/newprofile") {
+			if (flags.developer) {
+				let newName = args[1];
+				if (newName) {
+					profiles.push({ name: newName, color: "#ffffff" });
+					activeProfileIndex = profiles.length - 1;
+					saveAllProfiles();
+					refreshProfileUI();
+					systemMessage(`Created and switched to profile: ${newName}`);
+				}
+			}
+			return;
+		}
+        // Admin Logic Execution
+        if (cmd === "scrub") { scrubAllInventories(); return; }
+        if (cmd === "give" || cmd === "additem") {
+            let target = args[1];
+            let item = args.slice(2).join(" ");
+            addItemToPlayer(target, item);
             return;
         }
-    }
-    if (cmd === "clear" || cmd === "!clear") {
-        clearPlayerInventory(p.name);
-        return;
+        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickmenFall: HOME"; return; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON"; return; }
+        if (cmd === "showpond") { viewArea = "pond"; document.getElementById("areaDisplay").textContent = "StickmenFall: FISHING POND"; return; }
+        
+        if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[ADMIN] Merchant spawned."); return; }
+        if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[ADMIN] Merchant removed."); return; }
+        if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
+		// COMMAND: /name [NewName]
+		if (cmd === "name" || cmd === "/name") {
+			if (flags.developer) {
+				let newName = args[1];
+				if (newName) {
+					updateBrowserProfile(newName, null);
+				}
+			}
+			return;
+		}
+
+		// COMMAND: /color [HexCode]
+		if (cmd === "color" || cmd === "/color") {
+			if (flags.developer) {
+				let newColor = args[1]; // e.g., #ff0000
+				if (newColor && newColor.startsWith("#")) {
+					updateBrowserProfile(null, newColor);
+				} else {
+					systemMessage("Usage: /color #ff0000");
+				}
+			}
+			return;
+		}
     }
 
-    // 2. Task & Combat Logic
+    // --- 2. STANDARD PLAYER COMMANDS (Everyone) ---
+    if (cmd === "clear" || cmd === "!clear") { clearPlayerInventory(p.name); return; }
     if (cmd === "stop" || cmd === "idle" || cmd === "!reset") { cmdStop(p, user); return; }
     if (cmd === "attack") { cmdAttack(p, user); return; }
     if (cmd === "fish")   { cmdFish(p, user); return; }
     if (cmd === "swim")   { cmdSwim(p, user); return; }
     if (cmd === "heal")   { cmdHeal(p, args); return; }
-    if (cmd === "lurk")   { cmdLurk(p, user); return; }
     if (cmd === "dance")  { cmdDance(p, user, args); return; }
-    
-    // 3. Movement
-    if (cmd === "travel")  { movePlayer(p, args[1]); return; }
-    if (cmd === "home")    { movePlayer(p, "home"); return; }
-    if (cmd === "dungeon") { movePlayer(p, "dungeon"); return; }
-    if (cmd === "join")    { joinDungeonQueue(p); return; }
-
-    // 4. Items & Economy
+    if (cmd === "travel") { movePlayer(p, args[1]); return; }
+    if (cmd === "home")   { movePlayer(p, "home"); return; }
+    if (cmd === "dungeon"){ movePlayer(p, "dungeon"); return; }
+    if (cmd === "join")   { joinDungeonQueue(p); return; }
     if (cmd === "inventory") { cmdInventory(p, user, args); return; }
     if (cmd === "equip")     { cmdEquip(p, args); return; }
     if (cmd === "unequip")   { cmdUnequip(p, args); return; }
     if (cmd === "sell")      { cmdSell(p, args); return; }
     if (cmd === "bal" || cmd === "money") { cmdBalance(p); return; }
-
-    // 5. Admin World Controls
-    const adminWorldCmds = ["showhome", "showdungeon", "showpond", "spawnmerchant", "despawnmerchant"];
-    if (adminWorldCmds.includes(cmd)) {
-        if (!(flags.broadcaster || flags.developer)) return;
-        
-        if (cmd === "showhome") { viewArea = "home"; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; }
-        if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); }
-        systemMessage(`[ADMIN] World Updated: ${cmd}`);
-        return;
-    }
-    
-    // 6. Give/AddItem
-    if (cmd === "give" || cmd === "additem") {
-        if (flags.broadcaster || flags.mod || flags.developer) {
-            let target = args[1];
-            let item = args.slice(2).join(" ");
-            addItemToPlayer(target, item);
-        }
-        return;
-    }
-
-    // 7. Respawn
     if (cmd === "respawn" && p.dead) {
         p.dead = false; p.hp = p.maxHp;
         systemMessage(`${p.name} returned to life!`);
         return;
     }
 }
-// Example: Listening to a browser text input
-const myInput = document.getElementById("browserChatInput");
 
-myInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-        const msg = myInput.value;
-        const localUser = "AdminPlayer"; // Or whoever is logged in
+//ComfyJS.onChat = (user, msg, color, flags, extra) => {
 
-        // Pass to the same Master Router!
-        processGameCommand(localUser, msg, { developer: true }, { userColor: "#00ffff" });
-
-        myInput.value = ""; // Clear box
-    }
-});
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
     // Keep track of colors
     if (!userColors[user]) {
@@ -2647,13 +2718,5 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     }
 };
  */
-// REGISTER the command metadata//
-/* registerPluginCommands(STICKMEN_USER_CMDS, false);
-registerPluginCommands(STICKMEN_ADMIN_CMDS, true); */
-// REGISTER the game with the comfychat.js//
-//registerChatPlugin(stickmenCommandHandler);
-
-
 
 gameLoop();
-
