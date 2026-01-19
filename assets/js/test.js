@@ -59,17 +59,35 @@ let viewArea = "home";
 const TASK_DURATION = 15 * 60 * 1000; // 15 Minutes
 /* ================= DATA PERSISTENCE ================= */
 /* ================= DATA PERSISTENCE ================= */
+/* ================= DATA PERSISTENCE (FIXED) ================= */
 function loadStats(name) {
-    const saved = localStorage.getItem("rpg_" + name);
+    const lowerName = name.toLowerCase();
+    const newKey = "rpg_" + lowerName;
+    const oldKey = "rpg_" + name; // For migration check
+
+    // 1. MIGRATION LOGIC: Check if an old case-sensitive save exists
+    let saved = localStorage.getItem(newKey);
+    
+    if (!saved && name !== lowerName) {
+        let oldSaved = localStorage.getItem(oldKey);
+        if (oldSaved) {
+            console.log(`Migrating old save for: ${name} -> ${lowerName}`);
+            localStorage.setItem(newKey, oldSaved); // Move to new lowercase key
+            localStorage.removeItem(oldKey); // Clean up old key
+            saved = oldSaved;
+        }
+    }
+
+    // 2. INITIALIZE STATS
     let stats = saved ? JSON.parse(saved) : {
         attackLevel: 1, attackXP: 0,
-		archerLevel: 1, archerXP: 0,
-		magicLevel: 1, magicXP: 0,
+        archerLevel: 1, archerXP: 0,
+        magicLevel: 1, magicXP: 0,
         healLevel: 1, healXP: 0,
         fishLevel: 1, fishXP: 0,
         danceLevel: 1, danceXP: 0,
-		lurkLevel: 1, lurkXP: 0,
-		swimLevel: 1, swimXP: 0,
+        lurkLevel: 1, lurkXP: 0,
+        swimLevel: 1, swimXP: 0,
         swimDistance: 0,
         combatLevel: 1,
         gold: 0,
@@ -78,41 +96,37 @@ function loadStats(name) {
         equippedArmor: null,
         equippedHelmet: null,
         equippedBoots: null,
-        // --- NEW SLOTS FOR NEW PLAYERS ---
         equippedPants: null,
         equippedCape: null,
         equippedGloves: null,
         equippedHair: null,
         wigColor: null 
     };
-	// Inside the initial stats object and the safety checks
-	if (stats.archerLevel === undefined) stats.archerLevel = 1;
-	if (stats.archerXP === undefined) stats.archerXP = 0;
-	if (stats.magicLevel === undefined) stats.magicLevel = 1;
-	if (stats.magicXP === undefined) stats.magicXP = 0;
-	if (stats.lurkLevel === undefined) stats.lurkLevel = 1;
-	if (stats.lurkXP === undefined) stats.lurkXP = 0;
-	if (stats.swimLevel === undefined) stats.swimLevel = 1;
+
+    // --- 3. SAFETY CHECKS & PATCHES ---
+    if (stats.archerLevel === undefined) stats.archerLevel = 1;
+    if (stats.archerXP === undefined) stats.archerXP = 0;
+    if (stats.magicLevel === undefined) stats.magicLevel = 1;
+    if (stats.magicXP === undefined) stats.magicXP = 0;
+    if (stats.lurkLevel === undefined) stats.lurkLevel = 1;
+    if (stats.lurkXP === undefined) stats.lurkXP = 0;
+    if (stats.swimLevel === undefined) stats.swimLevel = 1;
     if (stats.swimXP === undefined) stats.swimXP = 0;
     if (stats.swimDistance === undefined) stats.swimDistance = 0;
-    // --- SAFETY CHECKS FOR OLD SAVES ---
+    
     if (isNaN(stats.gold) || stats.gold === null) stats.gold = 0;
     
     if (!stats.inventory || !Array.isArray(stats.inventory)) {
         stats.inventory = ["Fishing Rod"];
     }
-
     if (!stats.inventory.includes("Fishing Rod")) {
         stats.inventory.push("Fishing Rod");
     }
     
-    // --- PATCH MISSING SLOTS FOR OLD PLAYERS ---
     if (stats.equippedWeapon === undefined) stats.equippedWeapon = null;
     if (stats.equippedArmor === undefined) stats.equippedArmor = null;
     if (stats.equippedHelmet === undefined) stats.equippedHelmet = null;
     if (stats.equippedBoots === undefined) stats.equippedBoots = null;
-    
-    // New patches for the new items!
     if (stats.equippedPants === undefined) stats.equippedPants = null;
     if (stats.equippedCape === undefined) stats.equippedCape = null;
     if (stats.equippedGloves === undefined) stats.equippedGloves = null;
@@ -124,10 +138,12 @@ function loadStats(name) {
 
     return stats;
 }
+
 function saveStats(p) {
-    localStorage.setItem("rpg_" + p.name, JSON.stringify(p.stats));
-}
-/* ================= PLAYER SETUP ================= */
+    // Always save to the lowercase key to prevent duplicates
+    const saveKey = "rpg_" + p.name.toLowerCase();
+    localStorage.setItem(saveKey, JSON.stringify(p.stats));
+}/* ================= PLAYER SETUP ================= */
 function getPlayer(name, color) {
     // 1. Create a lowercase key for internal storage
     const lowName = name.toLowerCase();
@@ -1445,7 +1461,11 @@ function drawStickman(ctx, p) {
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
     drawStickmanBody(ctx, p, anchors, limbs);
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
-
+    // HP & Name
+    ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
+    ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
+    ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
+    ctx.fillText(p.name, p.x, p.y + 40);
     ctx.restore(); // Stop being transparent for the next player or background
 }
 
@@ -2473,14 +2493,34 @@ function refreshProfileUI() {
 
 function updateBrowserProfile(newName, newColor) {
     const current = getActiveProfile();
-    
-    if (newName) current.name = newName;
+    const oldName = current.name;
+
+    if (newName && newName !== oldName) {
+        const oldKey = "rpg_" + oldName.toLowerCase();
+        const newKey = "rpg_" + newName.toLowerCase();
+
+        // 1. Rename the Stats in LocalStorage
+        const existingData = localStorage.getItem(oldKey);
+        if (existingData) {
+            localStorage.setItem(newKey, existingData); // Copy stats to new name
+            localStorage.removeItem(oldKey); // Delete old name stats
+            console.log(`Stats migrated from ${oldName} to ${newName}`);
+        }
+
+        // 2. Remove the old stickman from the screen
+        if (players[oldName.toLowerCase()]) {
+            delete players[oldName.toLowerCase()];
+        }
+
+        // 3. Update the profile name
+        current.name = newName;
+        systemMessage(`Character renamed: ${oldName} is now ${newName}`);
+    }
+
     if (newColor) {
         current.color = newColor;
-        // UPDATE THE LIVE PLAYER COLOR
-        if (players[current.name]) {
-            players[current.name].color = newColor;
-        }
+        const p = players[current.name.toLowerCase()];
+        if (p) p.color = newColor;
     }
     
     saveAllProfiles();
@@ -2502,7 +2542,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 
     if (adminCommands.includes(cmd)) {
         // Use p.name for the authorization check to ensure it matches the streamer identity
-        let isAuthorized = flags.developer || isStreamerAndAuthorize(p.name, cmd);
+		let isAuthorized = flags.developer || flags.broadcaster || isStreamerAndAuthorize(user, cmd);
         if (!isAuthorized) return;
 
         if (cmd === "/newprofile") {
@@ -2581,16 +2621,25 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         systemMessage(`${p.name} returned to life!`); 
         return; 
     }
+	// --- FINAL CONSOLE LOG ---
+    console.log(`[RPG Command] User: ${user} | Message: ${msg} | Processed as: ${cmd}`);
 }
 
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
 // Twitch Input
+// Replace your ComfyJS.onChat in stickmentest.js with this:
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
-    if (twitchChatOverlay === "off") return;
-    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
-    displayChatMessage(user, msg, flags, extra);  // Show message in chat box
-    processGameCommand(user, msg, flags, extra);
+    // 1. Safe Color Handling
+    const userColor = color || (extra && extra.userColor) || "#00ffff";
+    if (!userColors[user]) userColors[user] = userColor;
+    // 2. Overlay Check
+    if (typeof twitchChatOverlay !== 'undefined' && twitchChatOverlay === "off") return;
+    // 3. UI Display (Ensure displayChatMessage exists in comfychat.js)
+    if (typeof displayChatMessage === "function") {
+        displayChatMessage(user, msg, flags, extra);
+    }
+    // 4. Process the command
+    processGameCommand(user, msg, flags, { userColor: userColor });
 };
 
 // Browser Chat Input
