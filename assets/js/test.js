@@ -2522,8 +2522,7 @@ const STICKMEN_ADMIN_CMDS = [
 // --- 1. DATA PERSISTENCE ---
 
 
-// Initialize profiles with a safe check for streamername
-if (typeof userColors === 'undefined') var userColors = {};
+
 
 let profiles = JSON.parse(localStorage.getItem("allProfiles"));
 if (!profiles) {
