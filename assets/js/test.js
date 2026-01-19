@@ -2537,7 +2537,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 
     if (adminCommands.includes(cmd)) {
         // Use p.name for the authorization check to ensure it matches the streamer identity
-        let isAuthorized = flags.developer || isStreamerAndAuthorize(p.name, cmd);
+		let isAuthorized = flags.developer || flags.broadcaster || isStreamerAndAuthorize(user, cmd);
         if (!isAuthorized) return;
 
         if (cmd === "/newprofile") {
@@ -2616,16 +2616,25 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         systemMessage(`${p.name} returned to life!`); 
         return; 
     }
+	// --- FINAL CONSOLE LOG ---
+    console.log(`[RPG Command] User: ${user} | Message: ${msg} | Processed as: ${cmd}`);
 }
 
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
 // Twitch Input
+// Replace your ComfyJS.onChat in stickmentest.js with this:
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
-    if (twitchChatOverlay === "off") return;
-    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
-    displayChatMessage(user, msg, flags, extra);  // Show message in chat box
-    processGameCommand(user, msg, flags, extra);
+    // 1. Safe Color Handling
+    const userColor = color || (extra && extra.userColor) || "#00ffff";
+    if (!userColors[user]) userColors[user] = userColor;
+    // 2. Overlay Check
+    if (typeof twitchChatOverlay !== 'undefined' && twitchChatOverlay === "off") return;
+    // 3. UI Display (Ensure displayChatMessage exists in comfychat.js)
+    if (typeof displayChatMessage === "function") {
+        displayChatMessage(user, msg, flags, extra);
+    }
+    // 4. Process the command
+    processGameCommand(user, msg, flags, { userColor: userColor });
 };
 
 // Browser Chat Input
