@@ -331,7 +331,52 @@ function addItemToPlayer(playerName, itemName) {
     systemMessage(`${p.name} added [${itemName}] to inventory.`);
     saveStats(p); // Important: Save the new item immediately!
 }
+function clearPlayerInventory(playerName) {
+    const p = players[playerName];
+    if (!p) {
+        console.error("Player not found!");
+        return;
+    }
 
+    // 1. Reset Inventory (Always keep the Fishing Rod)
+    p.stats.inventory = ["Fishing Rod"];
+
+    // 2. Un-equip everything
+    p.stats.equippedWeapon = null;
+    p.stats.equippedArmor = null;
+    p.stats.equippedHelmet = null;
+    p.stats.equippedBoots = null;
+    p.stats.equippedPants = null;
+    p.stats.equippedCape = null;
+    p.stats.equippedGloves = null;
+    p.stats.equippedHair = null;
+
+    // 3. Optional: Reset gold if you want a total wipe
+    // p.stats.gold = 0;
+
+    // 4. Save and Feedback
+    saveStats(p);
+    systemMessage(`System: ${playerName}'s inventory has been cleared.`);
+    spawnFloater(p, "Inventory Reset", "#ff0000");
+    
+    // Refresh UI if needed
+    if (typeof updateUI === "function") updateUI();
+}
+function scrubAllInventories() {
+    Object.values(players).forEach(p => {
+        if (p.stats && p.stats.inventory) {
+            // Filter out anything that is null, undefined, or not in the ITEM_DB
+            p.stats.inventory = p.stats.inventory.filter(item => item !== null && ITEM_DB[item]);
+            
+            // Ensure they still have a rod
+            if (!p.stats.inventory.includes("Fishing Rod")) {
+                p.stats.inventory.push("Fishing Rod");
+            }
+            saveStats(p);
+        }
+    });
+    console.log("All inventories scrubbed of null items!");
+}
 //================== COMBAT ==============================
 // --- COMBAT -----------------------
 function performAttack(p) {
@@ -1804,19 +1849,16 @@ function gameLoop() {
 /* ======================================================= */
 /* ================= CHAT COMMAND SYSTEM ================= */
 /* --- Handle Chat Commands ---*/
-function handleChatCommand(input) {
-    if (!input.startsWith("!")) return;
+// Example of how you would handle a future Browser Input field
+function handleBrowserInput() {
+    let input = document.getElementById("browserChatInput");
+    let text = input.value;
+    let p = players[localPlayerName]; 
 
-    const args = input.slice(1).split(" "); // Remove "!" and split
-    const command = args[0].toLowerCase();
-    const targetItem = args.slice(1).join(" "); // Rejoin the rest for names with spaces
+    // Use the exact same router!
+    centralCommandRouter(p, p.name, text, { developer: true });
 
-    if (command === "add" || command === "give") {
-        // For this example, we'll give it to the first player found 
-        // or a specific 'currentPlayer' variable if you have one.
-        const firstPlayer = Object.keys(players)[0]; 
-        addItemToPlayer(firstPlayer, targetItem);
-    }
+    input.value = "";
 }
 /* ================= COMMAND FUNCTIONS ================= */
 
@@ -2400,7 +2442,99 @@ const STICKMEN_ADMIN_CMDS = [
 //    console.log("UserColor:", extra.userColor, "User:", user, "Message:", message);//
 //    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected//
 //    displayChatMessage(user, message, flags, extra);  // Show message in chat box//
+function processGameCommand(user, msg, flags = {}, extra = {}) {
+    let p = getPlayer(user, extra.userColor);
+    let args = msg.split(" ");
+    let cmd = args[0].toLowerCase();
+
+    // 1. Check Central/Admin Commands First
+    if (cmd === "scrub" || cmd === "!scrub") {
+        if (flags.broadcaster || flags.developer) {
+            scrubAllInventories();
+            systemMessage("System: Scrubbing all inventories...");
+            return;
+        }
+    }
+    if (cmd === "clear" || cmd === "!clear") {
+        clearPlayerInventory(p.name);
+        return;
+    }
+
+    // 2. Task & Combat Logic
+    if (cmd === "stop" || cmd === "idle" || cmd === "!reset") { cmdStop(p, user); return; }
+    if (cmd === "attack") { cmdAttack(p, user); return; }
+    if (cmd === "fish")   { cmdFish(p, user); return; }
+    if (cmd === "swim")   { cmdSwim(p, user); return; }
+    if (cmd === "heal")   { cmdHeal(p, args); return; }
+    if (cmd === "lurk")   { cmdLurk(p, user); return; }
+    if (cmd === "dance")  { cmdDance(p, user, args); return; }
+    
+    // 3. Movement
+    if (cmd === "travel")  { movePlayer(p, args[1]); return; }
+    if (cmd === "home")    { movePlayer(p, "home"); return; }
+    if (cmd === "dungeon") { movePlayer(p, "dungeon"); return; }
+    if (cmd === "join")    { joinDungeonQueue(p); return; }
+
+    // 4. Items & Economy
+    if (cmd === "inventory") { cmdInventory(p, user, args); return; }
+    if (cmd === "equip")     { cmdEquip(p, args); return; }
+    if (cmd === "unequip")   { cmdUnequip(p, args); return; }
+    if (cmd === "sell")      { cmdSell(p, args); return; }
+    if (cmd === "bal" || cmd === "money") { cmdBalance(p); return; }
+
+    // 5. Admin World Controls
+    const adminWorldCmds = ["showhome", "showdungeon", "showpond", "spawnmerchant", "despawnmerchant"];
+    if (adminWorldCmds.includes(cmd)) {
+        if (!(flags.broadcaster || flags.developer)) return;
+        
+        if (cmd === "showhome") { viewArea = "home"; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; }
+        if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); }
+        systemMessage(`[ADMIN] World Updated: ${cmd}`);
+        return;
+    }
+    
+    // 6. Give/AddItem
+    if (cmd === "give" || cmd === "additem") {
+        if (flags.broadcaster || flags.mod || flags.developer) {
+            let target = args[1];
+            let item = args.slice(2).join(" ");
+            addItemToPlayer(target, item);
+        }
+        return;
+    }
+
+    // 7. Respawn
+    if (cmd === "respawn" && p.dead) {
+        p.dead = false; p.hp = p.maxHp;
+        systemMessage(`${p.name} returned to life!`);
+        return;
+    }
+}
+// Example: Listening to a browser text input
+const myInput = document.getElementById("browserChatInput");
+
+myInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        const msg = myInput.value;
+        const localUser = "AdminPlayer"; // Or whoever is logged in
+
+        // Pass to the same Master Router!
+        processGameCommand(localUser, msg, { developer: true }, { userColor: "#00ffff" });
+
+        myInput.value = ""; // Clear box
+    }
+});
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
+    // Keep track of colors
+    if (!userColors[user]) {
+        userColors[user] = extra.userColor || "orangered";
+    }
+
+    // Pass everything to the Master Router
+    processGameCommand(user, msg, flags, extra);
+};
+/* ComfyJS.onChat = (user, msg, color, flags, extra) => {
 //	console.log( "User:", user, "command:", command,);
 //	displayConsoleMessage(user, `!${command}`);
     // Store user color from extra	
@@ -2410,6 +2544,14 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
 
     let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
+// 1. Try the Central Router first (for clear/scrub/future browser commands)
+    // We pass 'developer: true' if we want to bypass Twitch flags for local testing
+    let wasCentralCmd = centralCommandRouter(p, user, msg, { 
+        broadcaster: flags.broadcaster, 
+        mod: flags.mod,
+        developer: false // Change to true if testing locally without Twitch
+    });
+	if (wasCentralCmd) return; // Stop here if it was handled
 	//const cmd = args.shift().toLowerCase();//
     let cmd = args[0].toLowerCase();
 	if (cmd === "stop" || cmd === "idle" || cmd === "!reset") {
@@ -2503,7 +2645,7 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
         }
     }
 };
-
+ */
 // REGISTER the command metadata//
 /* registerPluginCommands(STICKMEN_USER_CMDS, false);
 registerPluginCommands(STICKMEN_ADMIN_CMDS, true); */
