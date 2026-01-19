@@ -2621,11 +2621,28 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
 // Twitch Input
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
-    if (twitchChatOverlay === "off") return;
-    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
-    displayChatMessage(user, msg, flags, extra);  // Show message in chat box
-    processGameCommand(user, msg, flags, extra);
+    // 1. Priority Color Selection
+    // 'color' is the direct hex from Twitch. 
+    // If that's null, check 'extra.userColor'.
+    // If that's null, use 'orangered'.
+    const finalColor = color || (extra && extra.userColor) || "orangered";
+    
+    // 2. Store it in your global tracker
+    if (!userColors[user]) {
+        userColors[user] = finalColor;
+    }
+
+    // 3. Settings Gate
+    if (typeof twitchChatOverlay !== 'undefined' && twitchChatOverlay === "off") return;
+
+    // 4. Execution
+    console.log(`[Twitch] ${user} (${finalColor}): ${msg}`);
+    
+    // We pass the finalColor into the extra object so processGameCommand can find it easily
+    const updatedExtra = { ...extra, userColor: finalColor };
+
+    displayChatMessage(user, msg, flags, updatedExtra);
+    processGameCommand(user, msg, flags, updatedExtra);
 };
 
 // Browser Chat Input
