@@ -306,23 +306,48 @@
 			background: #222; border: 2px solid #555;
 			width: 470px;padding: 3px; border-radius: 10px;
 			font-family: monospace; color: white;
+			color: #fafffead;
 		}
-		.modal-header { display: flex; justify-content: space-between; border-bottom: 1px solid #444; margin-bottom: 15px; }
-
-		.inventory-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+		.modal-header {
+			display: flex;
+			justify-content: space-between;
+			border-bottom: 1px solid #444;
+			margin-bottom: 3px;
+		}
+		h2#inv-player-name {
+			margin: 0;
+			background:#444;
+		}
+		.inventory-layout {
+			display: grid;
+			grid-template-columns: 2fr 4fr;
+			gap: 4px;
+		}
 
 		/* Grid Styling */
 		#backpack-grid, #equipped-grid {
-			display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-			gap: 8px; background: #111; padding: 10px; border-radius: 5px;
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+			gap: 3px;
+			background: #111;
+			padding: 4px;
+			border-radius: 5px;
 		}
 
 		.inv-slot {
-			width: 60px; height: 60px; background: #333;
-			border: 1px solid #555; display: flex; flex-direction: column;
-			align-items: center; justify-content: center;
-			font-size: 10px; cursor: pointer; position: relative;
-			text-align: center; overflow: hidden;
+			width: 64px;
+			height: 32px;
+			background: #333;
+			border: 1px solid #555;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			font-size: 8px;
+			cursor: pointer;
+			position: relative;
+			text-align: center;
+			overflow: hidden;
 		}
 		.inv-slot:hover { border-color: #00ffff; background: #444; }
 		.inv-slot.empty { opacity: 0.3; cursor: default; }
