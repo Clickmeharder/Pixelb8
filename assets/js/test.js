@@ -2450,11 +2450,13 @@ const STICKMEN_ADMIN_CMDS = [
 ];
 
 // Initialize from LocalStorage or defaults
+const defaultStreamer = (typeof streamername !== 'undefined' && streamername) ? streamername : "Jaedraze";
+const defaultColor = (typeof streamerColor !== 'undefined' && streamerColor) ? streamerColor : "#6441a5";
+
 let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [
     { name: "Player1", color: "#00ffff" },
-    { name: "Jaedraze", color: "#6441a5" } // Example Streamer Profile
+    { name: defaultStreamer, color: defaultColor } 
 ];
-
 let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
 
 // Function to save everything
