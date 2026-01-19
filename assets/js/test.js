@@ -2501,41 +2501,30 @@ function updateBrowserProfile(newName, newColor) {
     localStorage.setItem("browserProfile", JSON.stringify(browserProfile));
     systemMessage(`Profile updated: ${browserProfile.name}`);
 }
+// --- 2. THE REFRESH FUNCTION ---
 function refreshProfileUI() {
-    // 1. Safety Check: If the HTML elements don't exist yet, don't crash
-    if (!profileSelector) return;
+    // Safety check: stop if elements are missing
+    if (!profileSelector) {
+        console.warn("UI Error: profileSelector element not found in HTML.");
+        return;
+    }
 
-    // 2. Clear the existing dropdown options
     profileSelector.innerHTML = "";
-
-    // 3. Rebuild the dropdown from the current profiles array
     profiles.forEach((p, index) => {
         let opt = document.createElement("option");
         opt.value = index;
         opt.textContent = p.name;
-        
-        // Make sure the dropdown shows the correct active character
-        if (index === activeProfileIndex) {
-            opt.selected = true;
-        }
+        if (index === activeProfileIndex) opt.selected = true;
         profileSelector.appendChild(opt);
     });
 
-    // 4. Update the Color Picker to match the active character
     const current = getActiveProfile();
     if (current && colorPicker) {
         let activeColor = current.color; 
-        
-        // Final shield against the [object Object] bug 
-        // if it somehow got saved into the profiles array
-        if (typeof activeColor === 'object') {
-            activeColor = activeColor.userColor || "#00ffff";
-        }
-        
+        // Force string conversion in case of object contamination
+        if (typeof activeColor === 'object') activeColor = activeColor.userColor || "#00ffff";
         colorPicker.value = activeColor;
     }
-    
-    console.log("UI Refreshed: Active profile is", current ? current.name : "None");
 }
 function processGameCommand(user, msg, flags = {}, extra = {}) {
     let p = getPlayer(user, extra.userColor);
