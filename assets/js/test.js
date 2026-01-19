@@ -1891,6 +1891,90 @@ function handleBrowserInput() {
 
     input.value = "";
 }
+function sendAction(commandStr) {
+    const current = getActiveProfile();
+    
+    // We simulate the "flags" as the developer/streamer
+    const flags = { 
+        developer: true, 
+        broadcaster: (current.name.toLowerCase() === streamername.toLowerCase()) 
+    };
+
+    // Trigger the master command router
+    processGameCommand(current.name, commandStr, flags, { userColor: current.color });
+    
+    // Optional: add a small sound or visual feedback here
+    console.log(`Action Bar: ${commandStr} sent for ${current.name}`);
+}
+function toggleInventory() {
+    const modal = document.getElementById('inventory-modal');
+    modal.classList.toggle('hidden');
+    if (!modal.classList.contains('hidden')) {
+        renderInventoryUI();
+    }
+}
+
+function renderInventoryUI() {
+    const p = getActiveProfile();
+    const playerObj = players[p.name.toLowerCase()];
+    if (!playerObj) return;
+
+    document.getElementById('inv-player-name').textContent = p.name.toUpperCase();
+    document.getElementById('inv-gold-val').textContent = (playerObj.stats.gold || 0).toFixed(2);
+
+    // 1. Render Equipped Slots
+    const eqGrid = document.getElementById('equipped-grid');
+    eqGrid.innerHTML = "";
+    const slots = [
+        { key: 'equippedWeapon', label: 'WEAPON' },
+        { key: 'equippedArmor', label: 'BODY' },
+        { key: 'equippedHelmet', label: 'HEAD' },
+        { key: 'equippedPants', label: 'LEGS' },
+        { key: 'equippedGloves', label: 'HANDS' },
+        { key: 'equippedCape', label: 'BACK' }
+    ];
+
+    slots.forEach(slot => {
+        const itemName = playerObj.stats[slot.key];
+        const div = document.createElement('div');
+        div.className = `inv-slot ${!itemName ? 'empty' : ''}`;
+        div.innerHTML = itemName ? `<span>${itemName}</span>` : `<span class="slot-label">${slot.label}</span>`;
+        if (itemName) {
+            div.onclick = () => {
+                const type = ITEM_DB[itemName]?.type || slot.key.replace('equipped', '').toLowerCase();
+                processGameCommand(p.name, `unequip ${type}`);
+                renderInventoryUI();
+            };
+        }
+        eqGrid.appendChild(div);
+    });
+
+    // 2. Render Backpack
+    const bpGrid = document.getElementById('backpack-grid');
+    bpGrid.innerHTML = "";
+    playerObj.stats.inventory.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = "inv-slot";
+        div.innerHTML = `
+            <span style="padding:2px">${item}</span>
+            <div class="item-actions">
+                <button onclick="uiAction('equip', '${item}')">EQUIP</button>
+                <button class="btn-sell" onclick="uiAction('sell', '${item}')">SELL</button>
+            </div>
+        `;
+        bpGrid.appendChild(div);
+    });
+}
+
+// Helper to bridge UI clicks to game commands
+function uiAction(cmd, itemName) {
+    const p = getActiveProfile();
+    // Use the specific item name for equip/sell
+    processGameCommand(p.name, `${cmd} ${itemName}`);
+    
+    // Refresh the UI after a short delay to let stats update
+    setTimeout(renderInventoryUI, 50);
+}
 /* ================= COMMAND FUNCTIONS ================= */
 
 function cmdStop(p, user) {

@@ -234,8 +234,92 @@
 
         #tooltip { position: absolute; pointer-events: none; background: rgba(0,0,0,0.9); color: #fff; padding: 8px; border-radius: 4px; border: 1px solid #0ff; font-size: 13px; display: none; z-index: 100; }		
         #areaDisplay { position:absolute; bottom:0px; left:5%; transform:translateX(-5%); color:#0ff; font-size:18px; background:rgba(0,0,0,0.8); padding:5px 15px; border: 1px solid #0ff; text-transform: uppercase; }
-		#input-wrapper { position: absolute; bottom: 0px; left: 40%;
-}
+		#input-wrapper { position: absolute; bottom: 0px; left: 40%;}
+		#action-bar {
+			position: fixed;
+			bottom: 20px;
+			left: 50%;
+			transform: translateX(-50%);
+			display: flex;
+			gap: 8px;
+			background: rgba(0, 0, 0, 0.8);
+			padding: 10px;
+			border-radius: 12px;
+			border: 2px solid #444;
+			z-index: 1000;
+		}
+
+		#action-bar button {
+			background: #333;
+			color: white;
+			border: 1px solid #555;
+			padding: 8px 12px;
+			cursor: pointer;
+			border-radius: 6px;
+			font-family: monospace;
+			transition: all 0.2s;
+		}
+
+		#action-bar button:hover {
+			background: #555;
+			border-color: #00ffff;
+		}
+
+		#action-bar button.danger {
+			color: #ff4444;
+		}
+
+		#action-bar .separator {
+			width: 2px;
+			background: #555;
+			margin: 0 5px;
+		}
+
+		#inventory-modal {
+			position: fixed;
+			top: 0; left: 0; width: 100%; height: 100%;
+			background: rgba(0,0,0,0.85);
+			display: flex; justify-content: center; align-items: center;
+			z-index: 2000;
+		}
+		.hidden { display: none !important; }
+
+		.modal-content {
+			background: #222; border: 2px solid #555;
+			width: 600px; padding: 20px; border-radius: 10px;
+			font-family: monospace; color: white;
+		}
+		.modal-header { display: flex; justify-content: space-between; border-bottom: 1px solid #444; margin-bottom: 15px; }
+
+		.inventory-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+
+		/* Grid Styling */
+		#backpack-grid, #equipped-grid {
+			display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+			gap: 8px; background: #111; padding: 10px; border-radius: 5px;
+		}
+
+		.inv-slot {
+			width: 60px; height: 60px; background: #333;
+			border: 1px solid #555; display: flex; flex-direction: column;
+			align-items: center; justify-content: center;
+			font-size: 10px; cursor: pointer; position: relative;
+			text-align: center; overflow: hidden;
+		}
+		.inv-slot:hover { border-color: #00ffff; background: #444; }
+		.inv-slot.empty { opacity: 0.3; cursor: default; }
+
+		.slot-label { font-size: 8px; color: #888; position: absolute; bottom: 2px; }
+
+		.item-actions {
+			position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+			background: rgba(0,0,0,0.9); display: none;
+			flex-direction: column; justify-content: center;
+		}
+		.inv-slot:hover .item-actions { display: flex; }
+
+		.btn-sell { background: #600; color: white; border: none; font-size: 9px; cursor: pointer; margin-top: 2px; }
+		.btn-sell:hover { background: #a00; }
         @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
     </style>
 </head>
@@ -594,8 +678,48 @@
 			<input type="color" id="browserColorPicker" title="Choose color">
 			
 			<input type="text" id="browserChatInput" placeholder="Type a command..." autocomplete="off">
+			<div id="action-bar">
+				<button onclick="sendAction('travel dungeon')">⚔️ Dungeon</button>
+				<button onclick="sendAction('travel pond')">🎣 Pond</button>
+				<button onclick="sendAction('travel home')">🏠 Home</button>
+				<div class="separator"></div>
+				<button onclick="sendAction('attack')">💥 Attack</button>
+				<button onclick="sendAction('fish')">🐟 Fish</button>
+				<button onclick="sendAction('lurk')">👤 Lurk</button>
+				<button onclick="sendAction('dance')">💃 Dance</button>
+				<button onclick="sendAction('stop')">🛑 Stop</button>
+				<div class="separator"></div>
+				<button onclick="sendAction('inventory')">🎒 Bag</button>
+				<button onclick="sendAction('respawn')" class="danger">💀 Respawn</button>
+			</div>
 		</div>
 	</div>
+	
+<div id="inventory-modal" class="hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="inv-player-name">Inventory</h2>
+            <button onclick="toggleInventory()" class="close-btn">×</button>
+        </div>
+        
+        <div class="inventory-layout">
+            <div class="equipped-section">
+                <h3>Equipped</h3>
+                <div id="equipped-grid">
+                    </div>
+                <div class="gold-display">
+                    Gold: <span id="inv-gold-val">0.00</span>
+                </div>
+            </div>
+
+            <div class="backpack-section">
+                <h3>Backpack</h3>
+                <div id="backpack-grid">
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
 <!---->
 <!---->	
 <!---->
