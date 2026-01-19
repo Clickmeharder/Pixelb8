@@ -1928,6 +1928,30 @@ function toggleInventory() {
     }
 }
 
+// Track filter state
+let currentInventoryFilter = "all";
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Existing Action Bar logic...
+    
+    // Inventory Filter Listeners
+    const filterContainer = document.getElementById("inventory-filters");
+    if (filterContainer) {
+        filterContainer.addEventListener("click", (e) => {
+            if (e.target.classList.contains("filter-btn")) {
+                // Update active button UI
+                document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+                e.target.classList.add("active");
+                
+                currentInventoryFilter = e.target.getAttribute("data-filter");
+                renderInventoryUI();
+            }
+        });
+
+        document.getElementById("filter-hide-equipped").addEventListener("change", renderInventoryUI);
+    }
+});
+
 function renderInventoryUI() {
     const p = getActiveProfile();
     const playerObj = players[p.name.toLowerCase()];
@@ -1936,7 +1960,15 @@ function renderInventoryUI() {
     document.getElementById('inv-player-name').textContent = p.name.toUpperCase();
     document.getElementById('inv-pixels-val').textContent = (playerObj.stats.pixels || 0).toFixed(2);
 
-    // 1. Render Equipped Slots
+    // 1. Get List of Equipped Items to hide them if needed
+    const equippedItems = [
+        playerObj.stats.equippedWeapon, playerObj.stats.equippedArmor,
+        playerObj.stats.equippedHelmet, playerObj.stats.equippedPants,
+        playerObj.stats.equippedGloves, playerObj.stats.equippedBoots,
+        playerObj.stats.equippedCape
+    ].filter(Boolean); // Remove nulls
+
+    // 2. Render Equipped Slots (Same as your current logic)
     const eqGrid = document.getElementById('equipped-grid');
     eqGrid.innerHTML = "";
     const slots = [
@@ -1945,7 +1977,7 @@ function renderInventoryUI() {
         { key: 'equippedHelmet', label: 'HEAD' },
         { key: 'equippedPants', label: 'LEGS' },
         { key: 'equippedGloves', label: 'HANDS' },
-		{ key: 'equippedBoots', label: 'BOOTS' },
+        { key: 'equippedBoots', label: 'BOOTS' },
         { key: 'equippedCape', label: 'BACK' }
     ];
 
@@ -1955,32 +1987,63 @@ function renderInventoryUI() {
         div.className = `inv-slot ${!itemName ? 'empty' : ''}`;
         div.innerHTML = itemName ? `<span>${itemName}</span>` : `<span class="slot-label">${slot.label}</span>`;
         if (itemName) {
-            div.onclick = () => {
+            div.addEventListener('click', () => {
                 const type = ITEM_DB[itemName]?.type || slot.key.replace('equipped', '').toLowerCase();
                 processGameCommand(p.name, `unequip ${type}`);
                 renderInventoryUI();
-            };
+            });
         }
         eqGrid.appendChild(div);
     });
 
-    // 2. Render Backpack
+    // 3. Filter and Render Backpack
     const bpGrid = document.getElementById('backpack-grid');
     bpGrid.innerHTML = "";
-    playerObj.stats.inventory.forEach((item, index) => {
+    
+    const hideEquipped = document.getElementById("filter-hide-equipped").checked;
+
+    let filteredInv = playerObj.stats.inventory.filter(item => {
+        // A. Filter Hide Equipped
+        if (hideEquipped && equippedItems.includes(item)) return false;
+
+        // B. Category Filters
+        const data = ITEM_DB[item] || {};
+        const type = data.type || "";
+
+        if (currentInventoryFilter === "all") return true;
+        if (currentInventoryFilter === "fish") return item.includes("kg") || item === "Golden Bass";
+        if (currentInventoryFilter === "gear") {
+            return ["weapon", "armor", "helmet", "pants", "gloves", "boots", "cape", "staff", "bow"].includes(type);
+        }
+        if (currentInventoryFilter === "tools") return ["tool", "fishing_rod", "pickaxe"].includes(type) || item === "Fishing Rod";
+        
+        return true;
+    });
+
+    filteredInv.forEach((item) => {
         const div = document.createElement('div');
         div.className = "inv-slot";
         div.innerHTML = `
-            <span style="padding:2px">${item}</span>
+            <span style="padding:2px; font-size:10px;">${item}</span>
             <div class="item-actions">
-                <button onclick="uiAction('equip', '${item}')">EQUIP</button>
-                <button class="btn-sell" onclick="uiAction('sell', '${item}')">SELL</button>
+                <button class="ui-equip-btn">EQUIP</button>
+                <button class="btn-sell">SELL</button>
             </div>
         `;
+
+        // Use event listeners instead of onclick strings for the buttons
+        div.querySelector('.ui-equip-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            uiAction('equip', item);
+        });
+        div.querySelector('.btn-sell').addEventListener('click', (e) => {
+            e.stopPropagation();
+            uiAction('sell', item);
+        });
+
         bpGrid.appendChild(div);
     });
 }
-
 // Helper to bridge UI clicks to game commands
 function uiAction(cmd, itemName) {
     const p = getActiveProfile();

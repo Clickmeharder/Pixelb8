@@ -373,7 +373,32 @@
 			width: 25px;
 			text-align: center;
 		}
+		.filter-btn {
+			background: #333;
+			border: 1px solid #555;
+			color: #eee;
+			padding: 3px 8px;
+			font-size: 10px;
+			cursor: pointer;
+			border-radius: 4px;
+		}
 
+		.filter-btn:hover {
+			background: #444;
+			border-color: #ceae33;
+		}
+
+		.filter-btn.active {
+			background: #ceae33;
+			color: #000;
+			border-color: #fff;
+			font-weight: bold;
+		}
+
+		#inventory-filters input[type="checkbox"] {
+			margin-right: 5px;
+			cursor: pointer;
+		}
         @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
     </style>
 </head>
@@ -765,11 +790,21 @@
                 </div>
             </div>
 
-            <div class="backpack-section">
-                <h3 style="background: #4444;">Backpack</h3>
-                <div id="backpack-grid">
-                    </div>
-            </div>
+			<div class="backpack-section">
+				<h3 style="background: #4444; margin-bottom: 5px;">Backpack</h3>
+				
+				<div id="inventory-filters" style="display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap;">
+					<label style="font-size: 10px; display: flex; align-items: center; color: #aaa;">
+						<input type="checkbox" id="filter-hide-equipped" checked> Hide Equipped
+					</label>
+					<button class="filter-btn active" data-filter="all">All</button>
+					<button class="filter-btn" data-filter="gear">Gear</button>
+					<button class="filter-btn" data-filter="fish">Fish</button>
+					<button class="filter-btn" data-filter="tools">Tools</button>
+				</div>
+
+				<div id="backpack-grid"></div>
+			</div>
         </div>
     </div>
 </div>
