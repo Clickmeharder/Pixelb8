@@ -1445,33 +1445,25 @@ function drawStickman(ctx, p) {
     updatePhysics(p); 
     const now = Date.now();
     if (p.dead) return drawCorpse(ctx, p, now);
+	ctx.save(); 
 
-    ctx.save(); 
     if (p.activeTask === "lurking") {
+        // Apply transparency to everything drawn until ctx.restore()
         let alpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
         ctx.globalAlpha = alpha + (Math.sin(now / 500) * 0.05);
     }
     const anim = getAnimationState(p, now);
     const anchors = getAnchorPoints(p, anim);
     const limbs = getLimbPositions(p, anchors, anim, now);
-    // Draw layers affected by transparency
+
+	// Everything inside here (Cape, Body, Items) will now be transparent!
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
     drawStickmanBody(ctx, p, anchors, limbs);
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
-    ctx.restore(); // Transparency ends here
-    // --- HP & NAME UI (Always Opaque) ---
-    // Background of HP bar
-    ctx.fillStyle = "#444"; 
-    ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
-    // Green HP bar
-    ctx.fillStyle = "#0f0"; 
-    ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
-    // Name Label
-    ctx.fillStyle = "#fff"; 
-    ctx.font = "12px monospace"; 
-    ctx.textAlign = "center";
-    ctx.fillText(p.name, p.x, p.y + 40);
+
+    ctx.restore(); // Stop being transparent for the next player or background
 }
+
 function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
