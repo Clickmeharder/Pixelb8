@@ -695,17 +695,18 @@
 				<input type="text" id="browserChatInput" placeholder="Type a command..." autocomplete="off">
 			</div>
 			<div id="action-bar">
-				<button onclick="sendAction('travel dungeon')">⚔️ Dungeon</button>
-				<button onclick="sendAction('travel pond')">🎣 Pond</button>
-				<button onclick="sendAction('travel home')">🏠 Home</button>
-				<button onclick="sendAction('attack')">💥 Attack</button>
-				<button onclick="sendAction('fish')">🐟 Fish</button>
-				<button onclick="sendAction('lurk')">👤 Lurk</button>
-				<button onclick="sendAction('dance')">💃 Dance</button>
-				<button onclick="sendAction('stop')">🛑 Stop</button>
+				<button data-action="travel dungeon">⚔️Dungeon</button>
+				<button data-action="travel pond">🎣Pond</button>
+				<button data-action="travel home">🏠Home</button>
+				<button data-action="attack">💥Attack</button>
+				<button data-action="fish">🐟Fish</button>
+				<button data-action="lurk">👤Lurk</button>
+				<button data-action="dance">💃Dance</button>
+				<button data-action="stop">🛑Stop</button>
 				<div class="separator"></div>
-				<button onclick="sendAction('inventory')">🎒 Bag</button>
-				<button onclick="sendAction('respawn')" class="danger">💀 Respawn</button>
+				<button data-action="inventory">🎒Bag</button>
+				<button data-action="respawn" class="danger">💀Respawn</button>
+			</div>
 			</div>
 		</div>
 	</div>

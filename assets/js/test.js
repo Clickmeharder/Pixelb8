@@ -1978,6 +1978,24 @@ function uiAction(cmd, itemName) {
     // Refresh the UI after a short delay to let stats update
     setTimeout(renderInventoryUI, 50);
 }
+// Wait for the DOM to load to ensure the action bar exists
+document.addEventListener("DOMContentLoaded", () => {
+    const actionBar = document.getElementById("action-bar");
+
+    if (actionBar) {
+        actionBar.addEventListener("click", (event) => {
+            // Find the closest button element to the click (in case they click the emoji)
+            const btn = event.target.closest("button");
+            
+            if (btn) {
+                const action = btn.getAttribute("data-action");
+                if (action) {
+                    sendAction(action);
+                }
+            }
+        });
+    }
+});
 /* ================= COMMAND FUNCTIONS ================= */
 
 function cmdStop(p, user) {
