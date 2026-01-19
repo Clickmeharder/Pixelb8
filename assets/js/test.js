@@ -1894,16 +1894,19 @@ function handleBrowserInput() {
 function sendAction(commandStr) {
     const current = getActiveProfile();
     
-    // We simulate the "flags" as the developer/streamer
+    // 1. Intercept the Inventory button
+    if (commandStr === "inventory") {
+        toggleInventory(); // Call your new UI function instead of the text command
+        return; 
+    }
+
+    // 2. Normal command logic for everything else
     const flags = { 
         developer: true, 
         broadcaster: (current.name.toLowerCase() === streamername.toLowerCase()) 
     };
 
-    // Trigger the master command router
     processGameCommand(current.name, commandStr, flags, { userColor: current.color });
-    
-    // Optional: add a small sound or visual feedback here
     console.log(`Action Bar: ${commandStr} sent for ${current.name}`);
 }
 function toggleInventory() {
