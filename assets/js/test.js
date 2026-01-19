@@ -58,17 +58,35 @@ let viewArea = "home";
 const TASK_DURATION = 15 * 60 * 1000; // 15 Minutes
 /* ================= DATA PERSISTENCE ================= */
 /* ================= DATA PERSISTENCE ================= */
+/* ================= DATA PERSISTENCE (FIXED) ================= */
 function loadStats(name) {
-    const saved = localStorage.getItem("rpg_" + name);
+    const lowerName = name.toLowerCase();
+    const newKey = "rpg_" + lowerName;
+    const oldKey = "rpg_" + name; // For migration check
+
+    // 1. MIGRATION LOGIC: Check if an old case-sensitive save exists
+    let saved = localStorage.getItem(newKey);
+    
+    if (!saved && name !== lowerName) {
+        let oldSaved = localStorage.getItem(oldKey);
+        if (oldSaved) {
+            console.log(`Migrating old save for: ${name} -> ${lowerName}`);
+            localStorage.setItem(newKey, oldSaved); // Move to new lowercase key
+            localStorage.removeItem(oldKey); // Clean up old key
+            saved = oldSaved;
+        }
+    }
+
+    // 2. INITIALIZE STATS
     let stats = saved ? JSON.parse(saved) : {
         attackLevel: 1, attackXP: 0,
-		archerLevel: 1, archerXP: 0,
-		magicLevel: 1, magicXP: 0,
+        archerLevel: 1, archerXP: 0,
+        magicLevel: 1, magicXP: 0,
         healLevel: 1, healXP: 0,
         fishLevel: 1, fishXP: 0,
         danceLevel: 1, danceXP: 0,
-		lurkLevel: 1, lurkXP: 0,
-		swimLevel: 1, swimXP: 0,
+        lurkLevel: 1, lurkXP: 0,
+        swimLevel: 1, swimXP: 0,
         swimDistance: 0,
         combatLevel: 1,
         gold: 0,
@@ -77,41 +95,37 @@ function loadStats(name) {
         equippedArmor: null,
         equippedHelmet: null,
         equippedBoots: null,
-        // --- NEW SLOTS FOR NEW PLAYERS ---
         equippedPants: null,
         equippedCape: null,
         equippedGloves: null,
         equippedHair: null,
         wigColor: null 
     };
-	// Inside the initial stats object and the safety checks
-	if (stats.archerLevel === undefined) stats.archerLevel = 1;
-	if (stats.archerXP === undefined) stats.archerXP = 0;
-	if (stats.magicLevel === undefined) stats.magicLevel = 1;
-	if (stats.magicXP === undefined) stats.magicXP = 0;
-	if (stats.lurkLevel === undefined) stats.lurkLevel = 1;
-	if (stats.lurkXP === undefined) stats.lurkXP = 0;
-	if (stats.swimLevel === undefined) stats.swimLevel = 1;
+
+    // --- 3. SAFETY CHECKS & PATCHES ---
+    if (stats.archerLevel === undefined) stats.archerLevel = 1;
+    if (stats.archerXP === undefined) stats.archerXP = 0;
+    if (stats.magicLevel === undefined) stats.magicLevel = 1;
+    if (stats.magicXP === undefined) stats.magicXP = 0;
+    if (stats.lurkLevel === undefined) stats.lurkLevel = 1;
+    if (stats.lurkXP === undefined) stats.lurkXP = 0;
+    if (stats.swimLevel === undefined) stats.swimLevel = 1;
     if (stats.swimXP === undefined) stats.swimXP = 0;
     if (stats.swimDistance === undefined) stats.swimDistance = 0;
-    // --- SAFETY CHECKS FOR OLD SAVES ---
+    
     if (isNaN(stats.gold) || stats.gold === null) stats.gold = 0;
     
     if (!stats.inventory || !Array.isArray(stats.inventory)) {
         stats.inventory = ["Fishing Rod"];
     }
-
     if (!stats.inventory.includes("Fishing Rod")) {
         stats.inventory.push("Fishing Rod");
     }
     
-    // --- PATCH MISSING SLOTS FOR OLD PLAYERS ---
     if (stats.equippedWeapon === undefined) stats.equippedWeapon = null;
     if (stats.equippedArmor === undefined) stats.equippedArmor = null;
     if (stats.equippedHelmet === undefined) stats.equippedHelmet = null;
     if (stats.equippedBoots === undefined) stats.equippedBoots = null;
-    
-    // New patches for the new items!
     if (stats.equippedPants === undefined) stats.equippedPants = null;
     if (stats.equippedCape === undefined) stats.equippedCape = null;
     if (stats.equippedGloves === undefined) stats.equippedGloves = null;
@@ -123,10 +137,12 @@ function loadStats(name) {
 
     return stats;
 }
+
 function saveStats(p) {
-    localStorage.setItem("rpg_" + p.name, JSON.stringify(p.stats));
-}
-/* ================= PLAYER SETUP ================= */
+    // Always save to the lowercase key to prevent duplicates
+    const saveKey = "rpg_" + p.name.toLowerCase();
+    localStorage.setItem(saveKey, JSON.stringify(p.stats));
+}/* ================= PLAYER SETUP ================= */
 function getPlayer(name, color) {
     // 1. Create a lowercase key for internal storage
     const lowName = name.toLowerCase();
