@@ -1,3 +1,4 @@
+@ -1,2715 +1,2722 @@
 // offshoot game called stickmenpo - samurai ninja game?
 
 // creation tool. make a pen u can draw with, 
@@ -58,84 +59,60 @@ let viewArea = "home";
 const TASK_DURATION = 15 * 60 * 1000; // 15 Minutes
 /* ================= DATA PERSISTENCE ================= */
 /* ================= DATA PERSISTENCE ================= */
-/* ================= DATA PERSISTENCE (FIXED) ================= */
 function loadStats(name) {
-    const lowerName = name.toLowerCase();
-    const newKey = "rpg_" + lowerName;
-    const oldKey = "rpg_" + name; // For migration check
-
-    // 1. MIGRATION LOGIC: Check if an old case-sensitive save exists
-    let saved = localStorage.getItem(newKey);
-    
-    if (!saved && name !== lowerName) {
-        let oldSaved = localStorage.getItem(oldKey);
-        if (oldSaved) {
-            console.log(`Migrating old save for: ${name} -> ${lowerName}`);
-            localStorage.setItem(newKey, oldSaved); // Move to new lowercase key
-            localStorage.removeItem(oldKey); // Clean up old key
-            saved = oldSaved;
-        }
-    }
-
-    // 2. INITIALIZE STATS (With Parse Safety)
-    let stats;
-    try {
-        stats = saved ? JSON.parse(saved) : null;
-    } catch (e) {
-        console.error("Critical: Saved data corrupted for " + name);
-        stats = null; 
-    }
-
-    if (!stats) {
-        stats = {
-            attackLevel: 1, attackXP: 0,
-            archerLevel: 1, archerXP: 0,
-            magicLevel: 1, magicXP: 0,
-            healLevel: 1, healXP: 0,
-            fishLevel: 1, fishXP: 0,
-            danceLevel: 1, danceXP: 0,
-            lurkLevel: 1, lurkXP: 0,
-            swimLevel: 1, swimXP: 0,
-            swimDistance: 0,
-            combatLevel: 1,
-            gold: 0,
-            inventory: ["Fishing Rod"],
-            equippedWeapon: null,
-            equippedArmor: null,
-            equippedHelmet: null,
-            equippedBoots: null,
-            equippedPants: null,
-            equippedCape: null,
-            equippedGloves: null,
-            equippedHair: null,
-            wigColor: null 
-        };
-    }
-
-    // --- 3. SAFETY CHECKS & PATCHES (Exactly as yours) ---
-    if (stats.archerLevel === undefined) stats.archerLevel = 1;
-    if (stats.archerXP === undefined) stats.archerXP = 0;
-    if (stats.magicLevel === undefined) stats.magicLevel = 1;
-    if (stats.magicXP === undefined) stats.magicXP = 0;
-    if (stats.lurkLevel === undefined) stats.lurkLevel = 1;
-    if (stats.lurkXP === undefined) stats.lurkXP = 0;
-    if (stats.swimLevel === undefined) stats.swimLevel = 1;
+    const saved = localStorage.getItem("rpg_" + name);
+    let stats = saved ? JSON.parse(saved) : {
+        attackLevel: 1, attackXP: 0,
+		archerLevel: 1, archerXP: 0,
+		magicLevel: 1, magicXP: 0,
+        healLevel: 1, healXP: 0,
+        fishLevel: 1, fishXP: 0,
+        danceLevel: 1, danceXP: 0,
+		lurkLevel: 1, lurkXP: 0,
+		swimLevel: 1, swimXP: 0,
+        swimDistance: 0,
+        combatLevel: 1,
+        gold: 0,
+        inventory: ["Fishing Rod"],
+        equippedWeapon: null,
+        equippedArmor: null,
+        equippedHelmet: null,
+        equippedBoots: null,
+        // --- NEW SLOTS FOR NEW PLAYERS ---
+        equippedPants: null,
+        equippedCape: null,
+        equippedGloves: null,
+        equippedHair: null,
+        wigColor: null 
+    };
+	// Inside the initial stats object and the safety checks
+	if (stats.archerLevel === undefined) stats.archerLevel = 1;
+	if (stats.archerXP === undefined) stats.archerXP = 0;
+	if (stats.magicLevel === undefined) stats.magicLevel = 1;
+	if (stats.magicXP === undefined) stats.magicXP = 0;
+	if (stats.lurkLevel === undefined) stats.lurkLevel = 1;
+	if (stats.lurkXP === undefined) stats.lurkXP = 0;
+	if (stats.swimLevel === undefined) stats.swimLevel = 1;
     if (stats.swimXP === undefined) stats.swimXP = 0;
     if (stats.swimDistance === undefined) stats.swimDistance = 0;
-    
+    // --- SAFETY CHECKS FOR OLD SAVES ---
     if (isNaN(stats.gold) || stats.gold === null) stats.gold = 0;
     
     if (!stats.inventory || !Array.isArray(stats.inventory)) {
         stats.inventory = ["Fishing Rod"];
     }
+
     if (!stats.inventory.includes("Fishing Rod")) {
         stats.inventory.push("Fishing Rod");
     }
     
+    // --- PATCH MISSING SLOTS FOR OLD PLAYERS ---
     if (stats.equippedWeapon === undefined) stats.equippedWeapon = null;
     if (stats.equippedArmor === undefined) stats.equippedArmor = null;
     if (stats.equippedHelmet === undefined) stats.equippedHelmet = null;
     if (stats.equippedBoots === undefined) stats.equippedBoots = null;
+    
+    // New patches for the new items!
     if (stats.equippedPants === undefined) stats.equippedPants = null;
     if (stats.equippedCape === undefined) stats.equippedCape = null;
     if (stats.equippedGloves === undefined) stats.equippedGloves = null;
@@ -148,31 +125,15 @@ function loadStats(name) {
     return stats;
 }
 function saveStats(p) {
-    // Always save to the lowercase key to prevent duplicates
-    const saveKey = "rpg_" + p.name.toLowerCase();
-    localStorage.setItem(saveKey, JSON.stringify(p.stats));
+    localStorage.setItem("rpg_" + p.name, JSON.stringify(p.stats));
 }
 /* ================= PLAYER SETUP ================= */
 function getPlayer(name, color) {
-    // 1. Create a lowercase key for internal storage
-    const lowName = name.toLowerCase();
-
-    // 2. Check if the player exists
-    if (players[lowName]) {
-        if (color) {
-            // Force the color to be a string before applying it
-            players[lowName].color = (typeof color === 'object') ? (color.userColor || "orangered") : color;
-        }
-        return players[lowName];
-    }
+    if (players[name]) return players[name];
     
-    // 3. If they don't exist, create them
-    // Ensure the color is a string for new players as well
-    const finalColor = (typeof color === 'object') ? (color.userColor || "#00ffff") : (color || "#00ffff");
-
-    players[lowName] = {
-        name: name, // Keep original casing (like JaeDraze)
-        color: finalColor,
+    players[name] = {
+        name, 
+        color: color || "#00ffff",
         x: Math.random() * 800 + 100, 
         y: 450,
         targetX: null,
@@ -181,12 +142,12 @@ function getPlayer(name, color) {
         dead: false,
         area: "home", 
         activeTask: null,
-        danceStyle: 0,
-        lastDanceXP: 0,
+        danceStyle: 0, // <--- Correct way to add it! s
+		lastDanceXP: 0,
         stats: loadStats(name)
     };
     
-    return players[lowName];
+    return players[name];
 }
 function movePlayer(p, targetArea) {
     if (p.dead) {
@@ -1460,10 +1421,10 @@ function drawStickman(ctx, p) {
     updatePhysics(p); 
     const now = Date.now();
     if (p.dead) return drawCorpse(ctx, p, now);
-
-    ctx.save(); // Start Save
+	ctx.save(); 
 
     if (p.activeTask === "lurking") {
+        // Apply transparency to everything drawn until ctx.restore()
         let alpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
         ctx.globalAlpha = alpha + (Math.sin(now / 500) * 0.05);
     }
@@ -1471,33 +1432,12 @@ function drawStickman(ctx, p) {
     const anchors = getAnchorPoints(p, anim);
     const limbs = getLimbPositions(p, anchors, anim, now);
 
-    // Draw Character (Transparent if lurking)
+	// Everything inside here (Cape, Body, Items) will now be transparent!
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
     drawStickmanBody(ctx, p, anchors, limbs);
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
 
-	ctx.restore(); // End Character transparency (if you want UI solid)
-
-    // 1. HP Bar (Placed below the feet)
-    const barWidth = 40;
-    const barHeight = 4;
-    const barX = p.x - (barWidth / 2);
-    const barY = p.y + 15; // 15 pixels below the feet
-
-    ctx.fillStyle = "#444"; 
-    ctx.fillRect(barX, barY, barWidth, barHeight); // Background
-    
-    ctx.fillStyle = "#0f0"; 
-    ctx.fillRect(barX, barY, barWidth * (p.hp / p.maxHp), barHeight); // Green fill
-
-    // 2. Name & Combat Level (Placed below the HP bar)
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 12px monospace";
-    ctx.textAlign = "center";
-    
-    // Format: Name (Lvl 10)
-    const combatLvl = p.stats.combatLevel || 1;
-    ctx.fillText(`${p.name} (Lvl ${combatLvl})`, p.x, barY + 15);
+    ctx.restore(); // Stop being transparent for the next player or background
 }
 
 function drawEnemyStickman(ctx, e) {
@@ -1557,24 +1497,7 @@ function drawEnemyStickman(ctx, e) {
         }
     }
 
-	ctx.restore(); // <--- WE MUST RESTORE HERE so text isn't flipped
-
-    // --- ENEMY UI (Below feet) ---
-    const barWidth = 40;
-    const barY = e.y + 15;
-
-    // HP Bar
-    ctx.fillStyle = "#444";
-    ctx.fillRect(e.x - barWidth/2, barY, barWidth, 4);
-    ctx.fillStyle = "#ff4444"; // Red for enemies
-    ctx.fillRect(e.x - barWidth/2, barY, barWidth * (e.hp / e.maxHp), 4);
-
-    // Name & Lvl
-    ctx.fillStyle = "#ff4444";
-    ctx.font = "bold 11px monospace";
-    ctx.textAlign = "center";
-    const lvl = e.level || e.stats?.combatLevel || 1;
-    ctx.fillText(`${e.name} (Lvl ${lvl})`, e.x, barY + 15);
+    ctx.restore(); 
 }
 
 function drawMonster(ctx, m) {
@@ -1600,22 +1523,8 @@ function drawMonster(ctx, m) {
     ctx.fill();
     ctx.fillStyle = "black";
     ctx.fillRect(-9, -6, 4, 4); ctx.fillRect(5, -6, 4, 4);
-	// --- MONSTER UI (Calculated based on scale) ---
-    // If it's a boss, we make the bar wider
-    const barWidth = m.isBoss ? 100 : 40;
-    const barY = m.y + (25 * scale) + 10; // Position below the blob
 
-    // HP Bar
-    ctx.fillStyle = "#444";
-    ctx.fillRect(m.x - barWidth/2, barY, barWidth, 5);
-    ctx.fillStyle = m.isBoss ? "#ff00ff" : "#ff4444"; // Bosses get a purple bar
-    ctx.fillRect(m.x - barWidth/2, barY, barWidth * (m.hp / m.maxHp), 5);
-
-    // Name
-    ctx.fillStyle = "#fff";
-    ctx.font = m.isBoss ? "bold 16px monospace" : "12px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText(m.name, m.x, barY + (m.isBoss ? 20 : 15));
+    ctx.restore();
 }
 
 function renderEquipmentLayer(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot) {
@@ -1930,6 +1839,7 @@ function gameLoop() {
     updateArrows(ctx);      // Renders projectiles
     updateSplashText(ctx);  // Renders "Level Up" and damage floaters
     handleTooltips();
+
     // 7. Next Frame
     requestAnimationFrame(gameLoop);
 }
@@ -1939,6 +1849,18 @@ function gameLoop() {
 
 /* ======================================================= */
 /* ================= CHAT COMMAND SYSTEM ================= */
+/* --- Handle Chat Commands ---*/
+// Example of how you would handle a future Browser Input field
+function handleBrowserInput() {
+    let input = document.getElementById("browserChatInput");
+    let text = input.value;
+    let p = players[localPlayerName]; 
+
+    // Use the exact same router!
+    centralCommandRouter(p, p.name, text, { developer: true });
+
+    input.value = "";
+}
 /* ================= COMMAND FUNCTIONS ================= */
 
 function cmdStop(p, user) {
@@ -2517,152 +2439,173 @@ const STICKMEN_ADMIN_CMDS = [
     { command: "testdance", description: "Test an animation regardless of level.", usage: "testdance [style#]" }
 ];
 
+// Initialize from LocalStorage or defaults
+let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [
+    { name: "Player1", color: "#00ffff" },
+    { name: "Jaedraze", color: "#6441a5" } // Example Streamer Profile
+];
 
-// --- 1. DATA PERSISTENCE ---
-
-
-// --- 1. PROFILES & PERSISTENCE ---
-let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [{ name: "Player1", color: "#00ffff" }];
 let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
-if (activeProfileIndex >= profiles.length) activeProfileIndex = 0;
 
-const chatInput = document.getElementById("browserChatInput");
-const profileSelector = document.getElementById("profileSelector");
-const colorPicker = document.getElementById("browserColorPicker");
-
+// Function to save everything
 function saveAllProfiles() {
     localStorage.setItem("allProfiles", JSON.stringify(profiles));
     localStorage.setItem("activeProfileIndex", activeProfileIndex);
 }
 
+// Function to get current active data
 function getActiveProfile() {
     return profiles[activeProfileIndex];
 }
+// THE MASTER COMMAND TRIGGER
+chatInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        const msg = chatInput.value.trim();
+        if (!msg) return;
 
-function refreshProfileUI() {
-    if (!profileSelector) return;
-    profileSelector.innerHTML = "";
-    profiles.forEach((p, index) => {
-        let opt = document.createElement("option");
-        opt.value = index;
-        opt.textContent = p.name;
-        opt.selected = (index === activeProfileIndex);
-        profileSelector.appendChild(opt);
-    });
-    if (colorPicker) colorPicker.value = getActiveProfile().color;
-}
-function updateBrowserProfile(newName, newColor) {
-    const current = getActiveProfile();
-    if (newName) {
-        const oldKey = "rpg_" + current.name.toLowerCase();
-        const newKey = "rpg_" + newName.toLowerCase();
-        const data = localStorage.getItem(oldKey);
-        if (data) { localStorage.setItem(newKey, data); localStorage.removeItem(oldKey); }
-        delete players[current.name.toLowerCase()];
-        current.name = newName;
+        const current = getActiveProfile();
+        
+        // CHECK: Are we currently pretending to be the streamer?
+        // If our profile name matches the Twitch streamer name, we are 'broadcaster'
+        const isStreamerIdentity = (current.name.toLowerCase() === streamername.toLowerCase());
+
+        const flags = { 
+            developer: true, // Local browser always has dev access
+            broadcaster: isStreamerIdentity, // Gain streamer powers if name matches
+            mod: isStreamerIdentity 
+        };
+
+        processGameCommand(current.name, msg, flags, { userColor: current.color });
+
+        chatInput.value = ""; 
     }
-    if (newColor) current.color = newColor;
-    saveAllProfiles();
-    refreshProfileUI();
-}
+});
 // Function to update profile via commands
+function updateBrowserProfile(newName, newColor) {
+    if (newName) {
+        browserProfile.name = newName;
+        if(document.getElementById("browserNameInput")) {
+            document.getElementById("browserNameInput").value = newName;
+        }
+    }
+    if (newColor) {
+        browserProfile.color = newColor;
+        if(document.getElementById("browserColorPicker")) {
+            document.getElementById("browserColorPicker").value = newColor;
+        }
+    }
+    
+    localStorage.setItem("browserProfile", JSON.stringify(browserProfile));
+    systemMessage(`Profile updated: ${browserProfile.name}`);
+}
 function processGameCommand(user, msg, flags = {}, extra = {}) {
-    // 1. Ensure color is a string (Kills the [object Object] bug)
-    let rawColor = extra.userColor || (typeof userColors !== 'undefined' ? userColors[user] : "orangered");
-    let assignedColor = (typeof rawColor === 'object') ? (rawColor.userColor || "orangered") : rawColor;
-
-    let p = getPlayer(user, assignedColor); 
+    let p = getPlayer(user, extra.userColor);
     let args = msg.split(" ");
     let cmd = args[0].toLowerCase();
 
-    // --- Admin & Profile Commands ---
-    const adminCommands = ["showhome", "showdungeon", "showpond", "spawnmerchant", "despawnmerchant", "resetmerchant", "give", "additem", "scrub", "name", "/name", "color", "/color", "/newprofile"];
-
+    // --- 1. ADMIN & AUTHORIZATION CHECK ---
+	const adminCommands = [
+			"showhome", "showdungeon", "showpond", "spawnmerchant", 
+			"despawnmerchant", "resetmerchant", "give", "additem", "scrub",
+			"name", "/name", "color", "/color" // Added these here
+	];
     if (adminCommands.includes(cmd)) {
-        let isAuthorized = flags.developer || (typeof isStreamerAndAuthorize === "function" && isStreamerAndAuthorize(p.name, cmd));
-        if (!isAuthorized) return;
-
-        if (cmd === "/newprofile") {
-            let newName = args[1];
-            if (newName) {
-                profiles.push({ name: newName, color: "#ffffff" });
-                activeProfileIndex = profiles.length - 1;
-                saveAllProfiles();
-                refreshProfileUI();
-                systemMessage(`Created profile: ${newName}`);
-            }
+        // If it's the browser (developer) OR passes your Twitch streamer check
+        let isAuthorized = flags.developer || isStreamerAndAuthorize(user, cmd);
+        
+        if (!isAuthorized) {
+            console.warn(`Unauthorized admin attempt: ${user} tried ${cmd}`);
+            return; 
+        }
+		// Add these to processGameCommand
+		if (cmd === "/newprofile") {
+			if (flags.developer) {
+				let newName = args[1];
+				if (newName) {
+					profiles.push({ name: newName, color: "#ffffff" });
+					activeProfileIndex = profiles.length - 1;
+					saveAllProfiles();
+					refreshProfileUI();
+					systemMessage(`Created and switched to profile: ${newName}`);
+				}
+			}
+			return;
+		}
+        // Admin Logic Execution
+        if (cmd === "scrub") { scrubAllInventories(); return; }
+        if (cmd === "give" || cmd === "additem") {
+            let target = args[1];
+            let item = args.slice(2).join(" ");
+            addItemToPlayer(target, item);
             return;
         }
-        if (cmd === "name" || cmd === "/name") { updateBrowserProfile(args[1], null); return; }
-        if (cmd === "color" || cmd === "/color") { if (args[1]?.startsWith("#")) updateBrowserProfile(null, args[1]); return; }
-        if (cmd === "scrub") { scrubAllInventories(); return; }
-        if (cmd === "give" || cmd === "additem") { addItemToPlayer(args[1], args.slice(2).join(" ")); return; }
-        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "Home"; return; }
-        if (cmd === "showpond") { viewArea = "pond"; document.getElementById("areaDisplay").textContent = "Pond"; return; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "Dungeon"; return; }
-        if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); return; }
-        if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); return; }
+        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickmenFall: HOME"; return; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON"; return; }
+        if (cmd === "showpond") { viewArea = "pond"; document.getElementById("areaDisplay").textContent = "StickmenFall: FISHING POND"; return; }
+        
+        if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[ADMIN] Merchant spawned."); return; }
+        if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[ADMIN] Merchant removed."); return; }
         if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
+		// COMMAND: /name [NewName]
+		if (cmd === "name" || cmd === "/name") {
+			if (flags.developer) {
+				let newName = args[1];
+				if (newName) {
+					updateBrowserProfile(newName, null);
+				}
+			}
+			return;
+		}
+
+		// COMMAND: /color [HexCode]
+		if (cmd === "color" || cmd === "/color") {
+			if (flags.developer) {
+				let newColor = args[1]; // e.g., #ff0000
+				if (newColor && newColor.startsWith("#")) {
+					updateBrowserProfile(null, newColor);
+				} else {
+					systemMessage("Usage: /color #ff0000");
+				}
+			}
+			return;
+		}
     }
 
-    // --- Standard Commands ---
-    if (cmd === "stop" || cmd === "idle" || cmd === "!reset") cmdStop(p, p.name);
-    else if (cmd === "attack") cmdAttack(p, p.name);
-    else if (cmd === "fish")   cmdFish(p, p.name);
-    else if (cmd === "swim")   cmdSwim(p, p.name);
-    else if (cmd === "heal")   cmdHeal(p, args);
-    else if (cmd === "lurk")   cmdLurk(p, p.name);
-    else if (cmd === "dance")  cmdDance(p, p.name, args);
-    else if (cmd === "mingle") cmdMingle(p, p.name, args);
-    else if (cmd === "pose" || cmd === "setpose") cmdSetPose(p, p.name, args);
-    else if (cmd === "travel") movePlayer(p, args[1]);
-    else if (cmd === "home")   movePlayer(p, "home");
-    else if (cmd === "dungeon") movePlayer(p, "dungeon");
-    else if (cmd === "join")   joinDungeonQueue(p);
-    else if (cmd === "inventory") cmdInventory(p, p.name, args);
-    else if (cmd === "equip")     cmdEquip(p, args);
-    else if (cmd === "unequip")   cmdUnequip(p, args);
-    else if (cmd === "sheath")    cmdSheath(p, args);
-    else if (cmd === "wigcolor")  cmdWigColor(p, args);
-    else if (cmd === "sell")      cmdSell(p, args);
-    else if (cmd === "bal" || cmd === "money") cmdBalance(p);
-    else if (cmd === "stats")     cmdShowStats(p.name, args);
-    else if (cmd === "topstats")  cmdTopStats();
-    else if (cmd === "clear" || cmd === "!clear") clearPlayerInventory(p.name);
-    else if (cmd === "respawn" && p.dead) { 
-        p.dead = false; 
-        p.hp = p.maxHp; 
-        systemMessage(`${p.name} returned to life!`); 
+    // --- 2. STANDARD PLAYER COMMANDS (Everyone) ---
+    if (cmd === "clear" || cmd === "!clear") { clearPlayerInventory(p.name); return; }
+    if (cmd === "stop" || cmd === "idle" || cmd === "!reset") { cmdStop(p, user); return; }
+    if (cmd === "attack") { cmdAttack(p, user); return; }
+    if (cmd === "fish")   { cmdFish(p, user); return; }
+    if (cmd === "swim")   { cmdSwim(p, user); return; }
+    if (cmd === "heal")   { cmdHeal(p, args); return; }
+    if (cmd === "dance")  { cmdDance(p, user, args); return; }
+    if (cmd === "travel") { movePlayer(p, args[1]); return; }
+    if (cmd === "home")   { movePlayer(p, "home"); return; }
+    if (cmd === "dungeon"){ movePlayer(p, "dungeon"); return; }
+    if (cmd === "join")   { joinDungeonQueue(p); return; }
+    if (cmd === "inventory") { cmdInventory(p, user, args); return; }
+    if (cmd === "equip")     { cmdEquip(p, args); return; }
+    if (cmd === "unequip")   { cmdUnequip(p, args); return; }
+    if (cmd === "sell")      { cmdSell(p, args); return; }
+    if (cmd === "bal" || cmd === "money") { cmdBalance(p); return; }
+    if (cmd === "respawn" && p.dead) {
+        p.dead = false; p.hp = p.maxHp;
+        systemMessage(`${p.name} returned to life!`);
+        return;
     }
 }
-// --- 2. THE TWITCH CONNECTION (Back to basics) ---
+
+//ComfyJS.onChat = (user, msg, color, flags, extra) => {
+
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    // Just store the color exactly like we used to
-    userColors[user] = color || extra.userColor || "orangered";
-
-    if (typeof twitchChatOverlay !== 'undefined' && twitchChatOverlay === "off") return;
-    if (typeof displayChatMessage === "function") displayChatMessage(user, msg, flags, extra);
-
-    // Pass ONLY the raw strings to the engine
-    processGameCommand(user, msg, flags, { userColor: userColors[user] });
-};
-// --- 5. EVENT LISTENERS ---
-chatInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-        const current = getActiveProfile();
-        processGameCommand(current.name, chatInput.value, { developer: true }, { userColor: current.color });
-        chatInput.value = "";
+    // Keep track of colors
+    if (!userColors[user]) {
+        userColors[user] = extra.userColor || "orangered";
     }
-});
 
-profileSelector.addEventListener("change", (e) => {
-    activeProfileIndex = parseInt(e.target.value);
-    saveAllProfiles(); refreshProfileUI();
-});
-
-colorPicker.addEventListener("change", (e) => updateBrowserProfile(null, e.target.value));
-
-//window.addEventListener("DOMContentLoaded", refreshProfileUI);
+    // Pass everything to the Master Router
+    processGameCommand(user, msg, flags, extra);
+};
 /* ComfyJS.onChat = (user, msg, color, flags, extra) => {
 //	console.log( "User:", user, "command:", command,);
 //	displayConsoleMessage(user, `!${command}`);
@@ -2777,4 +2720,3 @@ colorPicker.addEventListener("change", (e) => updateBrowserProfile(null, e.targe
  */
 
 gameLoop();
-
