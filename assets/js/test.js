@@ -2438,6 +2438,16 @@ const STICKMEN_ADMIN_CMDS = [
     { command: "testdance", description: "Test an animation regardless of level.", usage: "testdance [style#]" }
 ];
 
+
+// Link JS to the HTML elements
+const chatInput = document.getElementById("browserChatInput");
+const profileSelector = document.getElementById("profileSelector");
+const colorPicker = document.getElementById("browserColorPicker");
+
+// Safety check: if these aren't in your HTML yet, console will warn you
+if (!chatInput || !profileSelector || !colorPicker) {
+    console.error("Browser UI elements missing! Check your HTML IDs.");
+}
 // Initialize from LocalStorage or defaults
 let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [
     { name: "Player1", color: "#00ffff" },
