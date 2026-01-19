@@ -1,4 +1,4 @@
-@ -1,2721 +1,2726 @@
+
 // offshoot game called stickmenpo - samurai ninja game?
 
 // creation tool. make a pen u can draw with, 
