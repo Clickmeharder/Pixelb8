@@ -1443,61 +1443,51 @@ function drawStickman(ctx, p) {
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
     drawStickmanBody(ctx, p, anchors, limbs);
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
-    // HP & Name
-    ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
-    ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
-    ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
+// --- HP & NAME ---
+    ctx.textAlign = "center";
+    
+    // 1. Draw Name (stays at p.y + 40)
+    ctx.fillStyle = "#fff"; 
+    ctx.font = "12px monospace"; 
     ctx.fillText(p.name, p.x, p.y + 40);
-    ctx.restore(); // Stop being transparent for the next player or background
+
+    // 2. Draw HP Bar Background (Moved to p.y + 48)
+    ctx.fillStyle = "#444"; 
+    ctx.fillRect(p.x - 20, p.y + 48, 40, 4);
+
+    // 3. Draw HP Bar Fill (Moved to p.y + 48)
+    ctx.fillStyle = "#0f0"; 
+    ctx.fillRect(p.x - 20, p.y + 48, 40 * (p.hp / p.maxHp), 4);
+
+    ctx.restore(); // Stop being transparent
 }
 
 function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
 
-    // Setup positions
     const anim = { bodyY: Math.sin(now / 200) * 2, armMove: 0, lean: -0.2 }; 
     const anchors = getAnchorPoints(e, anim); 
     const limbs = getLimbPositions(e, anchors, anim, now);
 
     ctx.save();
-    
-    // Flip Logic: Mirror the enemy so they face the players
+    // Flip Logic: Mirroring the body
     ctx.translate(e.x, 0); 
     ctx.scale(-1, 1); 
     ctx.translate(-e.x, 0); 
 
-    // Enemy Style
     ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
     ctx.lineWidth = 3;
-
-    // 1. Draw the base stickman body
     drawStickmanBody(ctx, e, anchors, limbs);
 
-    // 2. Draw Equipment Layers
     if (e.equipped) {
-        // Pants (Drawn first so they are "under" the armor)
-        if (e.equipped.pants) {
-            drawEnemyPants(ctx, e, anchors, limbs.leftFoot, limbs.rightFoot, ITEM_DB[e.equipped.pants]);
-        }
-
-        // Armor
-        if (e.equipped.armor) {
-            drawEnemyArmor(ctx, e, anchors, ITEM_DB[e.equipped.armor]);
-        }
-
-        // Headgear (Helmet or Hair)
-        if (e.equipped.helmet) {
-            drawEnemyHeadgear(ctx, e, anchors, ITEM_DB[e.equipped.helmet]);
-        }
-
-        // Gloves
+        if (e.equipped.pants) drawEnemyPants(ctx, e, anchors, limbs.leftFoot, limbs.rightFoot, ITEM_DB[e.equipped.pants]);
+        if (e.equipped.armor) drawEnemyArmor(ctx, e, anchors, ITEM_DB[e.equipped.armor]);
+        if (e.equipped.helmet) drawEnemyHeadgear(ctx, e, anchors, ITEM_DB[e.equipped.helmet]);
         if (e.equipped.gloves) {
             drawGlovesItem(ctx, limbs.leftHand.x, limbs.leftHand.y, ITEM_DB[e.equipped.gloves]);
             drawGlovesItem(ctx, limbs.rightHand.x, limbs.rightHand.y, ITEM_DB[e.equipped.gloves]);
         }
-        
-        // Weapon (Handled by your existing WEAPON_STYLES)
         if (e.equipped.weapon) {
             let weapon = ITEM_DB[e.equipped.weapon];
             ctx.save();
@@ -1507,8 +1497,19 @@ function drawEnemyStickman(ctx, e) {
             ctx.restore();
         }
     }
+    ctx.restore(); // Exit mirroring before drawing text!
 
-    ctx.restore(); 
+    // --- ENEMY NAME & HP BAR ---
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#ff4444"; // Reddish name for enemies
+    ctx.font = "bold 12px monospace";
+    ctx.fillText(e.name, e.x, e.y + 40);
+
+    // HP Bar
+    ctx.fillStyle = "#444"; 
+    ctx.fillRect(e.x - 20, e.y + 48, 40, 4);
+    ctx.fillStyle = "#f00"; // Red fill for enemies
+    ctx.fillRect(e.x - 20, e.y + 48, 40 * (e.hp / e.maxHp), 4);
 }
 
 function drawMonster(ctx, m) {
@@ -1535,7 +1536,22 @@ function drawMonster(ctx, m) {
     ctx.fillStyle = "black";
     ctx.fillRect(-9, -6, 4, 4); ctx.fillRect(5, -6, 4, 4);
 
-    ctx.restore();
+    ctx.restore(); // Restore before text so scale doesn't mess up font size
+
+    // --- MONSTER NAME & HP BAR ---
+    ctx.textAlign = "center";
+    ctx.fillStyle = m.isBoss ? "#ff00ff" : "#fff"; // Bosses get a special color name
+    ctx.font = m.isBoss ? "bold 14px monospace" : "12px monospace";
+    
+    // Position text slightly lower if it's a big boss
+    const textYOffset = m.isBoss ? 60 : 35;
+    ctx.fillText(m.name, m.x, m.y + textYOffset);
+
+    // HP Bar
+    ctx.fillStyle = "#444";
+    ctx.fillRect(m.x - 25, m.y + textYOffset + 8, 50, 5);
+    ctx.fillStyle = "#ff0000";
+    ctx.fillRect(m.x - 25, m.y + textYOffset + 8, 50 * (m.hp / m.maxHp), 5);
 }
 
 function renderEquipmentLayer(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot) {
