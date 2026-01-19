@@ -1945,6 +1945,7 @@ function renderInventoryUI() {
         { key: 'equippedHelmet', label: 'HEAD' },
         { key: 'equippedPants', label: 'LEGS' },
         { key: 'equippedGloves', label: 'HANDS' },
+		{ key: 'equippedBoots', label: 'BOOTS' },
         { key: 'equippedCape', label: 'BACK' }
     ];
 
