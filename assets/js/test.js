@@ -2697,19 +2697,16 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     // Pass the assignedColor as userColor so processGameCommand can find it
     processGameCommand(user, msg, flags, { ...extra, userColor: assignedColor });
 };
-// Browser Chat Input
+// 1. Browser Chat Input (KEEP THIS - IT IS PERFECT)
 chatInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
         const msg = chatInput.value.trim();
         if (!msg) return;
 
         const current = getActiveProfile();
-        
-        // Robust case-insensitive check
         const isStreamerIdentity = streamername && 
             current.name.toLowerCase() === streamername.toLowerCase();
 
-        // Use the name from the profile
         processGameCommand(current.name, msg, { 
             developer: true, 
             broadcaster: isStreamerIdentity, 
@@ -2719,19 +2716,26 @@ chatInput.addEventListener("keypress", (e) => {
         chatInput.value = ""; 
     }
 });
-// Profile Selection Dropdown
+
+// 2. Profile Selection Dropdown (UPDATED)
 profileSelector.addEventListener("change", (e) => {
     activeProfileIndex = parseInt(e.target.value);
     saveAllProfiles();
     refreshProfileUI();
-    systemMessage(`Now playing as: ${getActiveProfile().name}`);
+    
+    const current = getActiveProfile();
+    // Force the stickman to load/appear immediately when switching
+    getPlayer(current.name, current.color);
+    
+    systemMessage(`Now playing as: ${current.name}`);
 });
 
-// Color Picker
-colorPicker.addEventListener("input", (e) => {
+// 3. Color Picker (UPDATED TO 'change')
+colorPicker.addEventListener("change", (e) => {
+    // Using 'change' instead of 'input' prevents LocalStorage from 
+    // being spammed 100 times per second while dragging the slider.
     updateBrowserProfile(null, e.target.value);
 });
-
 
 /* ComfyJS.onChat = (user, msg, color, flags, extra) => {
 //	console.log( "User:", user, "command:", command,);
