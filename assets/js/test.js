@@ -947,7 +947,11 @@ function startDungeon() {
 			p.y = -100; // Start higher up
             p.x = Math.random() * 400 + 50;
             p.targetY = 450; // The Ground
+			
 			p.targetX = 200; // Where they should walk to AFTER landing
+			// Clear these so they don't "slide" mid-air
+            p.targetX = null; 
+            p.activeTask = "attacking";
   
         }
     });
@@ -1145,29 +1149,7 @@ function drawProjectiles(ctx) {
         if (prj.life <= 0) projectiles.splice(i, 1);
     }
 }
-/* const arrows = [];
-function spawnArrow(startX, startY, endX, endY) {
-    arrows.push({ x: startX, y: startY, tx: endX, ty: endY, life: 30 });
-}
-function updateArrows(ctx) {
-    for (let i = arrows.length - 1; i >= 0; i--) {
-        let a = arrows[i];
-        // Move towards target
-        a.x += (a.tx - a.x) * 0.15;
-        a.y += (a.ty - a.y) * 0.15;
-        
-        ctx.strokeStyle = `rgba(255, 255, 255, ${a.life / 30})`; // Fade out
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(a.x + (a.tx > a.x ? 15 : -15), a.y); // Pointing direction
-        ctx.stroke();
 
-        a.life--;
-        if (a.life <= 0) arrows.splice(i, 1);
-    }
-}
- */
 /*----------------------------------------------*/
 
 function updatePhysics(p) {
@@ -1582,7 +1564,7 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
 // --- MAIN FUNCTIONS ---
 function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
-    updatePhysics(p); 
+    //updatePhysics(p); 
     const now = Date.now();
     if (p.dead) return drawCorpse(ctx, p, now);
 	ctx.save(); 
@@ -1843,7 +1825,7 @@ function updatePlayerStatus(p, now) {
     }
 }
 
-function updatePlayerMovement(p) {
+/* function updatePlayerMovement(p) {
     if (p.targetX !== null && p.targetX !== undefined) {
         let dx = p.targetX - p.x;
         if (Math.abs(dx) > 5) {
@@ -1854,7 +1836,7 @@ function updatePlayerMovement(p) {
             if (p.activeTask !== "attacking") p.targetX = null;
         }
     }
-}
+} */
 
 function updatePlayerActions(p, now) {
     if (p.dead) return;
@@ -2011,15 +1993,13 @@ function gameLoop() {
     // Process Players
     Object.values(players).forEach(p => {
         // 1. Logic & Status
-        updatePlayerStatus(p, now);
+        
 
         // 2. Combined Physics (Movement + Falling + Separation)
         // We use one function to handle all X and Y changes
-        if (p.area === viewArea) {
-            updatePhysics(p); 
-        }
-
-        // 3. Actions & Visuals
+        if (p.area !== viewArea) return;
+		updatePhysics(p); 
+		updatePlayerStatus(p, now);
         updatePlayerActions(p, now); 
         drawStickman(ctx, p);
     });
