@@ -1460,11 +1460,7 @@ function drawStickman(ctx, p) {
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
     drawStickmanBody(ctx, p, anchors, limbs);
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
-    // HP & Name
-    ctx.fillStyle = "#444"; ctx.fillRect(p.x - 20, p.y - 55, 40, 4);
-    ctx.fillStyle = "#0f0"; ctx.fillRect(p.x - 20, p.y - 55, 40 * (p.hp / p.maxHp), 4);
-    ctx.fillStyle = "#fff"; ctx.font = "12px monospace"; ctx.textAlign = "center";
-    ctx.fillText(p.name, p.x, p.y + 40);
+
     ctx.restore(); // Stop being transparent for the next player or background
 }
 
@@ -2458,7 +2454,7 @@ const STICKMEN_ADMIN_CMDS = [
 // --- 1. DATA PERSISTENCE ---
 let profiles = JSON.parse(localStorage.getItem("allProfiles")) || [
     { name: "Player1", color: "#00ffff" },
-    { name: "Jaedraze", color: "#6441a5" }
+    { name: streamername, color: "" }
 ];
 let activeProfileIndex = parseInt(localStorage.getItem("activeProfileIndex")) || 0;
 
@@ -2541,7 +2537,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 
     if (adminCommands.includes(cmd)) {
         // Use p.name for the authorization check to ensure it matches the streamer identity
-		let isAuthorized = flags.developer || flags.broadcaster || isStreamerAndAuthorize(user, cmd);
+        let isAuthorized = flags.developer || isStreamerAndAuthorize(p.name, cmd);
         if (!isAuthorized) return;
 
         if (cmd === "/newprofile") {
@@ -2620,25 +2616,16 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         systemMessage(`${p.name} returned to life!`); 
         return; 
     }
-	// --- FINAL CONSOLE LOG ---
-    console.log(`[RPG Command] User: ${user} | Message: ${msg} | Processed as: ${cmd}`);
 }
 
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
 // Twitch Input
-// Replace your ComfyJS.onChat in stickmentest.js with this:
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    // 1. Safe Color Handling
-    const userColor = color || (extra && extra.userColor) || "#00ffff";
-    if (!userColors[user]) userColors[user] = userColor;
-    // 2. Overlay Check
-    if (typeof twitchChatOverlay !== 'undefined' && twitchChatOverlay === "off") return;
-    // 3. UI Display (Ensure displayChatMessage exists in comfychat.js)
-    if (typeof displayChatMessage === "function") {
-        displayChatMessage(user, msg, flags, extra);
-    }
-    // 4. Process the command
-    processGameCommand(user, msg, flags, { userColor: userColor });
+    if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
+    if (twitchChatOverlay === "off") return;
+    console.log("Emotes:", extra.messageEmotes); // Debugging: Check if emotes are detected
+    displayChatMessage(user, msg, flags, extra);  // Show message in chat box
+    processGameCommand(user, msg, flags, extra);
 };
 
 // Browser Chat Input
