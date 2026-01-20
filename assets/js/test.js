@@ -2563,7 +2563,7 @@ function cmdFish(p, user) {
 
     p.targetX = 200; 
 	p.targetX = 180 + (Math.random() * 40 - 20);
-	p.targetY = 25 + (Math.random() * 40 - 20);
+	//p.targetY = 25 + (Math.random() * 40 - 20);
     p.activeTask = "fishing";
     p.taskEndTime = Date.now() + (15 * 60 * 1000);
     
