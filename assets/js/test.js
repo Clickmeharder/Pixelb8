@@ -2606,18 +2606,20 @@ function cmdAttack(p, user) {
 function cmdHeal(p, user, args) {
     if (p.dead) return;
 
-    // 1. Target Detection
-    let targetArg = players[args[1]];
+    // 1. Safety Check: If args doesn't exist, make it an empty array
+    const safeArgs = args || [];
+    // Get the word after !heal (e.g., "all" or "Gemini")
+    let targetName = safeArgs[1] ? safeArgs[1].toLowerCase() : null;
 
     // SCENARIO A: !heal all (Manual AOE)
-    if (targetArg === "all") {
+    if (targetName === "all") {
         performHeal(p, "all");
         return;
     }
 
     // SCENARIO B: !heal [name] (Manual Focus)
-    if (targetArg && players[targetArg]) {
-        let target = players[targetArg];
+    if (targetName && players[targetName]) {
+        let target = players[targetName];
         if (target.area === p.area && !target.dead) {
             performHeal(p, "focus", target);
             return;
@@ -2628,7 +2630,8 @@ function cmdHeal(p, user, args) {
     }
 
     // SCENARIO C: !heal (Start Auto-Idle Mode)
-    if (!targetArg) {
+    // Runs if targetName is null OR if they typed a name that doesn't exist
+    if (!targetName || !players[targetName]) {
         if (p.activeTask === "healing") {
             systemMessage(`${user}: You are already in auto-healing mode.`);
         } else {
@@ -2636,6 +2639,7 @@ function cmdHeal(p, user, args) {
             p.taskEndTime = Date.now() + (15 * 60 * 1000);
             systemMessage(`${user} started auto-healing the party (15m idle).`);
         }
+        saveStats(p);
         return;
     }
 }
@@ -3267,7 +3271,8 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "attack") { cmdAttack(p, user); return; }
     if (cmd === "fish")   { cmdFish(p, user); return; }
     if (cmd === "swim")   { cmdSwim(p, user); return; }
-    if (cmd === "heal")   { cmdHeal(p, args); return; }
+    // Add 'user' so the function gets: (player object, name string, arguments array)
+	if (cmd === "heal") { cmdHeal(p, user, args); return; }
     if (cmd === "dance")  { cmdDance(p, user, args); return; }
 	if (cmd === "lurk")   { cmdLurk(p, user); return; }
     if (cmd === "travel") { movePlayer(p, args[1]); return; }
