@@ -1133,14 +1133,18 @@ function handleLoot(p, target) {
 
     // 3. APPLY LOOT
     lootFound.forEach(finalItem => {
-        if (!p.stats.inventory.includes(finalItem)) {
-            p.stats.inventory.push(finalItem);
-            
-            // Map 0-13 rarity to colors (Grey -> White -> Green -> Blue -> Purple -> Gold -> Red)
-            const hue = Math.min(300, (ITEM_DB[finalItem].rarity || 0) * 25);
-            spawnFloater(p, `✨ ${finalItem}!`, `hsl(${hue}, 80%, 60%)`);
-            systemMessage(`${p.name} found: ${finalItem} (Rarity ${ITEM_DB[finalItem].rarity})`);
-        } else {
+		if (!p.stats.inventory.includes(finalItem)) {
+			p.stats.inventory.push(finalItem);
+			
+			const rarity = ITEM_DB[finalItem].rarity || 0;
+			const hue = Math.min(300, rarity * 25);
+			
+			spawnFloater(p, `✨ ${finalItem}!`, `hsl(${hue}, 80%, 60%)`);
+			systemMessage(`${p.name} found: ${finalItem} (Rarity ${rarity})`);
+			
+			// TRIGGER THE BEAM HERE!
+			spawnLootBeam(p, rarity);
+		} else {
             let scrapValue = Math.floor((ITEM_DB[finalItem].value || 50) * 0.2);
             p.stats.pixels += scrapValue;
             spawnFloater(p, `+${scrapValue}px (Duplicate)`, "#888");
@@ -1149,6 +1153,41 @@ function handleLoot(p, target) {
 
     p.stats.pixels += (10 * currentTier);
     saveStats(p);
+}
+let lootBeams = [];
+
+function spawnLootBeam(p, rarity) {
+    // Only show beams for rarity 8 and above
+    if (rarity < 8) return;
+
+    const hue = Math.min(300, rarity * 25);
+    lootBeams.push({
+        x: p.x,
+        y: p.y + 40, // Base of the player
+        alpha: 1.0,
+        color: `hsla(${hue}, 100%, 50%, `, // We leave the alpha open
+        width: 10 + (rarity * 2)
+    });
+}
+
+function drawLootBeams(ctx) {
+    for (let i = lootBeams.length - 1; i >= 0; i--) {
+        let b = lootBeams[i];
+        
+        // Draw the main vertical beam
+        let grad = ctx.createLinearGradient(b.x, b.y, b.x, b.y - 600);
+        grad.addColorStop(0, b.color + b.alpha + ")");
+        grad.addColorStop(1, b.color + "0)");
+
+        ctx.fillStyle = grad;
+        ctx.globalCompositeOperation = "lighter"; // Makes it "glow"
+        ctx.fillRect(b.x - b.width/2, b.y - 600, b.width, 600);
+        ctx.globalCompositeOperation = "source-over";
+
+        // Fade out
+        b.alpha -= 0.02;
+        if (b.alpha <= 0) lootBeams.splice(i, 1);
+    }
 }
 //------------------------------------
 
@@ -2030,20 +2069,36 @@ function updateUI() {
     if (uiElement) uiElement.innerHTML = uiHTML;
 }
 /* ================= GAME LOOP ================= */
+/* ================= GAME LOOP ================= */
 function gameLoop() {
     const now = Date.now();
     
-    // 1. BACKGROUND & UI
-    renderScene();
-    updateUI();
-	
-    // 2. DUNGEON LOGIC
-    if (dungeonActive) {
-        checkDungeonProgress();
+    // 1. SCREEN SHAKE (Optional: only if you added the shake variable)
+    ctx.save();
+    if (window.shakeAmount > 0) {
+        let sx = (Math.random() - 0.5) * window.shakeAmount;
+        let sy = (Math.random() - 0.5) * window.shakeAmount;
+        ctx.translate(sx, sy);
+        window.shakeAmount *= 0.9; // Decay shake over time
+        if (window.shakeAmount < 0.1) window.shakeAmount = 0;
     }
 
-    // 3. DRAW ENEMIES (Only if looking at Dungeon)
+    // 2. BACKGROUND & UI
+    renderScene(); // Draw the floor and walls
+    updateUI();    // Refresh HP bars and wave counts
+
+    // 3. DUNGEON LOGIC
+    if (dungeonActive) {
+        checkDungeonProgress(); // Check if all enemies are dead
+    }
+
+    // 4. DRAW DUNGEON-SPECIFIC ELEMENTS
     if (viewArea === "dungeon") {
+        // --- DRAW LOOT BEAMS ---
+        // We draw these behind enemies but in front of the background
+        drawLootBeams(ctx); 
+
+        // --- DRAW ENEMIES & BOSSES ---
         if (boss && !boss.dead) drawMonster(ctx, boss);
         enemies.forEach(e => {
             if (!e.dead) {
@@ -2053,30 +2108,31 @@ function gameLoop() {
         });
     }
 
-    // 4. PLAYER PROCESSING
+    // 5. PLAYER PROCESSING
     Object.values(players).forEach(p => {
-        // --- LOGIC SECTION (Always run for all players) ---
+        // --- LOGIC (Always runs for all players) ---
         if (!p.dead) {
-            updatePhysics(p);         // Handles Falling, Walking, and Crowding
-            updatePlayerStatus(p, now); // Handles Idle timeouts
-            updatePlayerActions(p, now); // Handles Combat/Fishing/Dancing
+            updatePhysics(p);         
+            updatePlayerStatus(p, now); 
+            updatePlayerActions(p, now); 
         }
 
-        // --- RENDERING SECTION (Area specific) ---
-        // Only draw the stickman if they are in the current camera view
+        // --- RENDERING (Only if visible) ---
         if (p.area === viewArea) {
             drawStickman(ctx, p);
         }
     });
 
-    // 5. WORLD SYSTEMS
+    // 6. WORLD SYSTEMS & OVERLAYS
     updateAreaPlayerCounts();
-    updateSystemTicks(now); 
-    drawProjectiles(ctx);      
-    updateSplashText(ctx);  
-    handleTooltips();
-	
-    // 6. NEXT FRAME
+    updateSystemTicks(now);  // Handles enemy attack timers
+    drawProjectiles(ctx);    // Arrows and Magic bolts
+    updateSplashText(ctx);   // Floaters (+Pixels, Loot names)
+    handleTooltips();        // Mouse-over info
+
+    ctx.restore(); // Finish Screen Shake
+
+    // 7. NEXT FRAME
     requestAnimationFrame(gameLoop);
 }
 /* ================= GAME LOOP ================= */

@@ -5,122 +5,133 @@ const ITEM_DB = {
     // --- WEAPONS -----------------------------------------------------------------------------------
 	// swords (melee)
 	"Rusty Dagger":   { type: "weapon", style: "dagger", tier: 1, rarity: 0, power: 5,  speed: 1000,  value: 40,   color: "#777"},
-    "Iron Sword":     { type: "weapon", style: "sword", tier: 1, rarity: 0, power: 12, speed: 1200,  value: 200,  color: "#eee" },
-	"Steel Sword":     { type: "weapon", style: "sword", tier: 1, rarity: 0, power: 15, speed: 1500,  value: 2000,  color: "#777" },
-	"Golden Sword":     { type: "weapon", style: "sword", tier: 1, rarity: 0, power: 30, speed: 1750,  value: 20000,  color: "#eee"},
+    "Iron Sword":     { type: "weapon", style: "sword", tier: 2, rarity: 0, power: 12, speed: 1200,  value: 200,  color: "#eee" },
+	"Steel Sword":     { type: "weapon", style: "sword", tier: 3, rarity: 0, power: 15, speed: 1500,  value: 2000,  color: "#777" },
+	"Golden Sword":     { type: "weapon", style: "sword", tier: 5, rarity: 0, power: 30, speed: 1750,  value: 20000,  color: "#eee"},
 	// Bows (archery)
-	"Shitty Shortbow":{ type: "bow", style: "bow", tier: 1, rarity: 0, power: 5, speed: 1000,  value: 40,  color: "#eee" },
-	"shortbow":{ type: "weapon", style: "bow", tier: 1, rarity: 0, power: 8, speed: 1250,  value: 200,   color: "#eee" },
-    "Wooden Shortbow":{ type: "bow", style: "bow", tier: 1, rarity: 0, power: 10, speed: 1500,  value: 2000,   color: "#d2b48c" },
-    "Oak Shortbow":{ type: "bow", style: "bow", tier: 1, rarity: 0, power: 15, speed: 1750,  value: 20000,  color: "#d2b48c" },
+	"Shitty Shortbow":{ type: "bow", style: "bow", tier: 1, rarity: 1, power: 5, speed: 1000,  value: 40,  color: "#eee" },
+	"shortbow":{ type: "weapon", style: "bow", tier: 2, rarity: 2, power: 8, speed: 1250,  value: 200,   color: "#eee" },
+    "Wooden Shortbow":{ type: "bow", style: "bow", tier: 3, rarity: 3, power: 10, speed: 1500,  value: 2000,   color: "#d2b48c" },
+    "Oak Shortbow":{ type: "bow", style: "bow", tier: 4, rarity: 4, power: 15, speed: 1750,  value: 20000,  color: "#d2b48c" },
 	//Stalves (magic)
-	"Wooden Staff":   { type: "staff", style:"", tier: 1, rarity: 0, power: 10, speed: 500,  value: 40, color: "#00ffcc", poleColor: "#5d4037"  },
-	"Styled Staff":   { type: "staff", style:"staff", tier: 1, rarity: 0, power: 15, speed: 750,  value: 40, color: "#00ffcc", poleColor: "#5d4037"  },
+	"Wooden Staff":   { type: "staff", style:"", tier: 3, rarity: 2, power: 10, speed: 500,  value: 40, color: "white", poleColor: "#5d4037"  },
+	"Styled Staff":   { type: "staff", style:"staff", tier: 5, rarity: 3, power: 15, speed: 750,  value: 40, color: "#00ffcc", poleColor: "#5d4037"  },
 // -------------------------- TOOLS --------------------------------------------------------------------
-    "Fishing Rod":    { type: "tool", style:"", tier: 1, rarity: 0, power: 0, value: 1,   color: "#8B4513" },
+    "Fishing Rod":    { type: "tool", style:"", tier: 100, rarity: 13, power: 0, value: 100,   color: "#8B4513" },
 // ------------------------- Helmets and Hats ----------------------------------------------------------
 	// --- Helmets     ---
-	"Iron Helmet":    { type: "helmet",style: "knight", tier: 1, rarity: 0, def: 5, value: 150, color: "#aaa" },
-	"Viking Helm":    { type: "helmet", style: "viking", tier: 1, rarity: 0, def: 6,  value: 400,  color: "#888" },
-	"Steel Helmet":    { type: "helmet",style: "knight", tier: 1, rarity: 0, def: 7, value: 150, color: "#eee" },
-	"Great Horns":    { type: "helmet", style: "horns", tier: 1, rarity: 0, def: 8,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
+	"Iron Helmet":    { type: "helmet",style: "knight", tier: 3, rarity: 2, def: 5, value: 150, color: "#aaa" },
+	"Viking Helm":    { type: "helmet", style: "viking", tier: 4, rarity: 4, def: 6,  value: 400,  color: "#888" },
+	"Steel Helmet":    { type: "helmet",style: "knight", tier: 5, rarity: 5, def: 7, value: 150, color: "#eee" },
+	"Great Horns":    { type: "helmet", style: "horns", tier: 6, rarity: 6, def: 8,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
 	//---Wizard Hats   ---
-    "Cool Hat": { type: "helmet", style: "wizard", tier: 1, rarity: 0, def: 1,  value: 150,  color: "#303f9f" },
-	"Magic Hat": { type: "helmet", style: "wizard", tier: 1, rarity: 0, def: 3,  value: 150,  color: "#303f9f" },
-    "Wizard Hat": { type: "helmet", style: "wizard", tier: 1, rarity: 0, def: 4,  value: 5000, color: "#4a148c" },
-	"Archmage Point": { type: "helmet", style: "wizard", tier: 1, rarity: 0, def: 5,  value: 150,  color: "#303f9f" },
+    "Cool Hat": { type: "helmet", style: "wizard", tier: 2, rarity: 3, def: 1,  value: 150,  color: "#303f9f" },
+	"Magic Hat": { type: "helmet", style: "wizard", tier: 3, rarity: 4, def: 3,  value: 150,  color: "#303f9f" },
+    "Wizard Hat": { type: "helmet", style: "wizard", tier: 4, rarity: 5, def: 4,  value: 5000, color: "#4a148c" },
+	"Archmage Point": { type: "helmet", style: "wizard", tier: 5, rarity: 10, def: 5,  value: 150,  color: "#303f9f" },
 	//--- Lurker Hoods ---
-	"Cool Hood":  { type: "hood", style: "hood", tier: 1, rarity: 0, def:1;                           value: 100, color: "#555" },
-    "Lurker Hood":  { type: "hood", style: "hood", tier: 1, rarity: 0, def:2;                            value: 100, color: "#222" },
-	"Cool Hood":  { type: "hood", style: "hood", tier: 1, rarity: 0, def:3;                           value: 100, color: "#555" },
-	"Dark Hood":  { type: "hood", style: "hood", tier: 1, rarity: 0, def:5;                           value: 100, color: "#555" },
+	"Cool Hood":  { type: "hood", style: "hood", tier: 5, rarity: 5, def:3,                           value: 100, color: "#777" },
+	"Cool Hood":  { type: "hood", style: "hood", tier: 6, rarity: 3, def:4,                           value: 100, color: "#555" },
+	"Dark Hood":  { type: "hood", style: "hood", tier: 7, rarity: 7, def:5,                           value: 100, color: "#333" },
+	"Lurker Hood":  { type: "hood", style: "hood", tier: 8, rarity: 10, def:6,                            value: 100, color: "#222" },
 //------------------------------------------------------------------------------------------------------
 // --------------------------- ARMOR/SHIRT -------------------------------------------------------------
 	// --- shirts
-    "Red Shirt":  { type: "armor", style:"", tier: 1, rarity: 0,  def: 0,                  value: 60,   color: "red" },
-	"Orange Shirt":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "orange" },
-	"Yellow Shirt":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "yellow" },
-	"Green Shirt":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "green" },
-	"Blue Shirt":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "blue" },
-	"Brown Shirt" { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "brown" },
-	"Indigo Shirt" { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "indigo" },
-	"Violet Shirt" { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "violet" },
+	"Black Shirt":  { type: "armor", style:"", tier: 10, rarity: 1,  def: 0,                  value: 200,   color: "red" },
+    "Red Shirt":  { type: "armor", style:"", tier: 9, rarity: 1,  def: 0,                  value: 90,   color: "red" },
+	"Pink Shirt":  { type: "armor", style:"", tier: 8, rarity: 1,  def: 0,                  value: 80,   color: "pink" },
+	"Orange Shirt":  { type: "armor", style:"", tier: 7, rarity: 1, def: 0,                  value: 70,   color: "orange" },
+	"Yellow Shirt":  { type: "armor", style:"", tier: 6, rarity: 1, def: 0,                  value: 60,   color: "yellow" },
+	"Green Shirt":  { type: "armor", style:"", tier: 5, rarity: 1, def: 0,                  value: 50,   color: "green" },
+	"Blue Shirt":  { type: "armor", style:"", tier: 4, rarity: 1, def: 0,                  value: 40,   color: "blue" },
+	"Brown Shirt" { type: "armor", style:"", tier: 3, rarity: 1, def: 0,                  value: 30,   color: "brown" },
+	"Indigo Shirt" { type: "armor", style:"", tier: 2, rarity: 1, def: 0,                  value: 20,   color: "indigo" },
+	"Violet Shirt" { type: "armor", style:"", tier: 1, rarity: 1, def: 0,                  value: 10,   color: "violet" },
 	// --- archer
-    "Leather Tunic":  { type: "armor", style:"", tier: 1, rarity: 0, def: 3,                  value: 60,   color: "#5c4033" },
+    "Leather Tunic":  { type: "armor", style:"", tier: 1, rarity: 2, def: 3,                  value: 60,   color: "#5c4033" },
+	"Hardleather Tunic":  { type: "armor", style:"", tier: 4, rarity: 4, def: 5,                  value: 600,   color: "#5c4033" },
 	// --- melee
-	"Iron Plate":     { type: "armor", style:"", tier: 1, rarity: 0, def: 4,                  value: 300,  color: "#aaa" },
+	"Iron Plate":     { type: "armor", style:"", tier: 1, rarity: 5, def: 4,                  value: 300,  color: "#aaa" },
+	"Steel Plate":     { type: "armor", style:"", tier: 3, rarity: 5, def: 4,                  value: 600,  color: "#eee" },
 	// --- magic
-	"Wizard Robe":  { type: "armor", style:"", tier: 1, rarity: 0, def: 3,                  value: 60,   color: "blue" },
+	"Wizard Robe":  { type: "armor", style:"", tier: 4, rarity: 3, def: 3,                  value: 60,   color: "blue" },
 	// --- lurker
-	"Lurker Robe":  { type: "armor", style:"", tier: 1, rarity: 0, def: 2,                  value: 60,   color: "#222" },
+	"Lurker Robe":  { type: "armor", style:"", tier: 6, rarity: 6, def: 2,                  value: 60,   color: "#222" },
 	// --- lumberjack
 	// --- miner 
 	//
 //------------------------------------------------------------------------------------------------------
 // ------------------------------PANTS------------------------------------------------------------------
 	//basic pants
-	"blue pants":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "teal" },
-	"gray pants":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "gray" },
-	"pink pants":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "pink" },
-	"Blue Shirt":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "blue" },
+	"Black Pants":  { type: "Pants", style:"", tier: 10, rarity: 1,  def: 0,                  value: 60,   color: "red" },
+    "Red Pants":  { type: "Pants", style:"", tier: 9, rarity: 1,  def: 0,                  value: 60,   color: "red" },
+	"Pink Pants":  { type: "Pants", style:"", tier: 8, rarity: 1,  def: 0,                  value: 60,   color: "pink" },
+	"Orange Pants":  { type: "Pants", style:"", tier: 7, rarity: 1, def: 0,                  value: 60,   color: "orange" },
+	"Yellow Pants":  { type: "Pants", style:"", tier: 6, rarity: 1, def: 0,                  value: 60,   color: "yellow" },
+	"Green Pants":  { type: "Pants", style:"", tier: 5, rarity: 1, def: 0,                  value: 60,   color: "green" },
+	"Blue Pants":  { type: "Pants", style:"", tier: 4, rarity: 1, def: 0,                  value: 60,   color: "blue" },
+	"Brown Pants" { type: "Pants", style:"", tier: 3, rarity: 1, def: 0,                  value: 60,   color: "brown" },
+	"Indigo Pants" { type: "Pants", style:"", tier: 2, rarity: 1, def: 0,                  value: 60,   color: "indigo" },
+	"Violet Pants" { type: "Pants", style:"", tier: 1, rarity: 1, def: 0,                  value: 60,   color: "violet" },
 	//melee
-	"Iron Pants":  { type: "pants", style:"", tier: 1, rarity: 0, def :4, value: 100,color: "#aaa" },
+	"Iron Pants":  { type: "pants", style:"", tier: 2, rarity: 2, def :4, value: 100,color: "#aaa" },
+	"Steel Pants":  { type: "pants", style:"", tier: 3, rarity: 3, def :4, value: 100,color: "#aaa" },
 	// --- archer
-    "Leather Pants":  { type: "pants", style:"", tier: 1, rarity: 0, def :3, value: 100,color: "#3e2723" },
+    "Leather Pants":  { type: "pants", style:"", tier: 1, rarity: 1, def :3, value: 100,color: "#3e2723" },
 	// --- wizard
-	"Wizard Pants":  { type: "pants", style:"", tier: 1, rarity: 0, def :3, value: 100,color: "blue" },
+	"Wizard Pants":  { type: "pants", style:"", tier: 4, rarity: 4, def :3, value: 100,color: "blue" },
 	// --- lurker
-	"Lurker Pants":  { type: "pants", style:"", tier: 1, rarity: 0, def :2, value: 100,color: "#222" },
+	"Lurker Pants":  { type: "pants", style:"", tier: 6, rarity: 6, def :2, value: 100,color: "#222" },
 	
 //------------------------------------------------------------------------------------------------------
 // ------------------------------Boots------------------------------------------------------------------
-    "leather Boots":  { type: "boots", style:"", tier: 1, rarity: 0, def: 1,                 value: 30,   color: "#5c4033" },
-    "leather Booties":{ type: "boots", style:"", tier: 1, rarity: 0, def: 1,                 value: 35,   color: "#5c4033" },
+    "leather Boots":  { type: "boots", style:"", tier: 2, rarity: 0, def: 1,                 value: 30,   color: "#5c4033" },
+    "leather Booties":{ type: "boots", style:"", tier: 5, rarity: 5, def: 3,                 value: 35,   color: "#5c2033" },
 //------------------------------------------------------------------------------------------------------
 
 // ------------------------------Gloves------------------------------------------------------------------
-    "White Gloves":   { type: "gloves", style:"", tier: 1, rarity: 0, value: 100, color: "#ffffff" },
-	"Leather Gloves":   { type: "gloves", style:"", tier: 1, rarity: 0, value: 100, color: "#5c4033" },
+    "White Gloves":   { type: "gloves", style:"", tier: 5, rarity: 0, value: 100, color: "#ffffff" },
+	"Leather Gloves":   { type: "gloves", style:"", tier: 2, rarity: 0, value: 100, color: "#5c4033" },
     // --- SPECIALS ---
 // special head
-	"box":      { type: "helmet", style: "box", tier: 1, rarity: 0, def: 1, value: 5, color: "#d2b48c" },
-	"Paper Bag":      { type: "helmet", style: "paperbag", tier: 1, rarity: 0, def: 1, value: 5, color: "#d2b48c" },
-	"tv":      { type: "helmet", style: "tv", tier: 1, rarity: 0, def: 1, value: 5, color: "#d2b48c" },
-	"wig":            { type: "helmet", style:"", tier: 1, rarity: 0, def: 1,style: "wig",     value: 5000, color: "yellow" },
-    "Royal Crown":    { type: "helmet", style: "crown", tier: 1, rarity: 0, def: 2,  value: 10000, color: "#ff0000" },
-	"uknown":    { type: "helmet", style: "centurion", tier: 1, rarity: 0, def: 2,  value: 10000, color: "#ffcc00" },
-	"Pirate Hat":    { type: "helmet", style: "pirate", tier: 1, rarity: 0, def: 2,  value: 10000, color: "#222222" },
-	"gentleman hat":    { type: "helmet", style: "gentleman", tier: 1, rarity: 0,  def: 2,  value: 10000, color: "#333333" },
-	"fun hat":    { type: "helmet", style: "funhat", tier: 1, rarity: 0, def: 2,  value: 10000, color: "white" },
-	"kabuto":    { type: "helmet", style: "samurai", tier: 1, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
-	"stickmenpo":    { type: "helmet", style: "menpo", tier: 1, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
+	"box":      { type: "helmet", style: "box", tier: 1, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
+	"Paper Bag":      { type: "helmet", style: "paperbag", tier: 2, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
+	"wig":            { type: "helmet", style:"", tier: 3, rarity: 0, def: 1,style: "wig",     value: 5000, color: "yellow" },
+	"centurion":    { type: "helmet", style: "centurion", tier: 4, rarity: 0, def: 2,  value: 10000, color: "#ffcc00" },
+	"tv":      { type: "helmet", style: "tv", tier: 5, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
+	"Pirate Hat":    { type: "helmet", style: "pirate", tier: 5, rarity: 0, def: 2,  value: 10000, color: "#222222" },
+	"gentleman hat":    { type: "helmet", style: "gentleman", tier: 6, rarity: 0,  def: 2,  value: 10000, color: "#333333" },
+	"fun hat":    { type: "helmet", style: "funhat", tier: 7, rarity: 0, def: 2,  value: 10000, color: "white" },
+	"kabuto":    { type: "helmet", style: "samurai", tier: 8, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
+	"stickmenpo":    { type: "helmet", style: "menpo", tier: 9, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
+	"Royal Crown":    { type: "helmet", style: "crown", tier: 10, rarity: 0, def: 2,  value: 10000, color: "#ff0000" },
+	"Angelic Ring":   { type: "helmet", style: "halo", tier: 11, rarity: 13, def: 0,  value: 9999, color: "yellow" },
 // special capes
-    "Royal Cape":     { type: "cape", style:"cape", tier: 1, rarity: 0, value: 10000, color: "#880000" },
-    "99 Cape":     { type: "cape", style:"cape", tier: 1, rarity: 0, value: 10000, color: "#880000" },
-    "Cloak":     { type: "cape", style:"cloak", tier: 1, rarity: 0, value: 10000, color: "#333" },
-    "Ball gown":     { type: "cape", style:"ballgown", tier: 1, rarity: 0, value: 10000, color: "purple" },
-    "Angelic Ring":   { type: "helmet", style: "halo", tier: 1, rarity: 0, def: 0,  value: 9999, color: "yellow" },
+    "Royal Cape":     { type: "cape", style:"cape", tier: 10, rarity: 10, value: 10000, color: "#880000" },
+    "99 Cape":     { type: "cape", style:"cape", tier: 11, rarity: 0, value: 10000, color: "#880000" },
+    "Cloak":     { type: "cape", style:"cloak", tier: 5, rarity: 10, value: 10000, color: "#333" },
+
 // hair
-	"hair1": { type: "hair", style: "mohawk", tier: 1, rarity: 0, color: "#ff69b4" },// pink mohawk
-	"hair2": { type: "hair", style: "pigtails", tier: 1, rarity: 0, color: "#4b3621" },// pigtails hair
-	"hair3": { type: "hair", style: "scribble", tier: 1, rarity: 0,   color: "#ffeb3b" }, // yellow child scribble
-	"hair4": { type: "hair", style: "messy", tier: 1, rarity: 0,      color: "#614126" }, // messy 
-	"hair5": { type: "hair", style: "braids", tier: 1, rarity: 0,    color: "#f3e5ab" }, // thick blonde braids
-    "hair6": { type: "hair", style: "girly", tier: 1, rarity: 0,  color: "#f3e5ab" }, // girly braids
-	"hair7": { type: "hair", style: "pomp", tier: 1, rarity: 0, color: "#614126" }, // Forward spiky pomp
-    "hair8": { type: "hair", style: "twinspikes", tier: 1, rarity: 0, color: "#ff0000" }, // Red double spikes
-	"hair11": { type: "hair", style: "drills", tier: 1, rarity: 0, color: "#f3e5ab" }, // spiral chunky drills 
-	"oldman beard": { name: "Wizard Beard", tier: 1, rarity: 0, type: "hair", style: "wizardbeard", color: "#ffffff" },
-	"wizard beard": { name: "Dark Mage Beard", tier: 1, rarity: 0, type: "hair", style: "wizardbeard", color: "#333333" },
+	"hair1": { type: "hair", style: "mohawk", tier: 9, rarity: 1, color: "#ff69b4" },// pink mohawk
+	"hair2": { type: "hair", style: "pigtails", tier: 8, rarity: 2, color: "#4b3621" },// pigtails hair
+	"hair3": { type: "hair", style: "scribble", tier: 7, rarity: 3,   color: "#ffeb3b" }, // yellow child scribble
+	"hair4": { type: "hair", style: "messy", tier: 6, rarity: 4,      color: "#614126" }, // messy 
+	"hair5": { type: "hair", style: "braids", tier: 5, rarity: 5,    color: "#f3e5ab" }, // thick blonde braids
+    "hair6": { type: "hair", style: "girly", tier: 4, rarity: 6,  color: "#f3e5ab" }, // girly braids
+	"hair7": { type: "hair", style: "pomp", tier: 3, rarity: 7, color: "#614126" }, // Forward spiky pomp
+    "hair8": { type: "hair", style: "twinspikes", tier: 2, rarity: 9, color: "#ff0000" }, // Red double spikes
+	"hair11": { type: "hair", style: "drills", tier: 1, rarity: 8, color: "#f3e5ab" }, // spiral chunky drills 
+	"oldman beard": { name: "Wizard Beard", tier: 10, rarity: 7, type: "hair", style: "wizardbeard", color: "#ffffff" },
+	"wizard beard": { name: "Dark Mage Beard", tier: 8, rarity: 5, type: "hair", style: "wizardbeard", color: "#333333" },
 
 // ---------------------------basic items----------------------------------------------------------------
 	// --- unique fish ---
-	"Golden Bass":    { type: "fish", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
+	"Golden Bass":    { type: "fish", tier: 10, rarity: 0, value: 100, color: "#FFD700" },
 	// --- unique swimming find ---
-	"Pearl":    { type: "fish", tier: 1, rarity: 0, value: 100, color: "white" },
+	"Pearl":    { type: "fish", tier: 11, rarity: 0, value: 100, color: "white" },
     // --- MATERIALS ---
     "Leather scrap":  { type: "material", tier: 1, rarity: 0, value: 15,   color: "#a88d6d" },
-	"Sea Shell":  { type: "material", tier: 1, rarity: 0, value: 15,   color: "#a88d6d" },
+	"Sea Shell":  { type: "material", tier: 8, rarity: 0, value: 15,   color: "#a88d6d" },
 	"Leather scrap":  { type: "material", tier: 1, rarity: 0, value: 15,   color: "#a88d6d" },
 	// other basic materials will go here
 //-------------------------------------------------------------------------------------------------------
