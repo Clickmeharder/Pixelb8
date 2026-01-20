@@ -203,6 +203,11 @@ function movePlayer(p, targetArea) {
     if (targetArea !== "dungeon") {
         dungeonQueue = dungeonQueue.filter(n => n !== p.name.toLowerCase());
     }
+	if (targetArea === "arena" && p.activeTask !== "pvp") {
+		// Force spectators to the left or right bleacher areas
+		const side = Math.random() > 0.5 ? 1 : 0;
+		p.x = side === 1 ? (Math.random() * 100 + 50) : (Math.random() * 100 + 650);
+	}
 	areaDisplayDiv.textContent = "StickmenFall:" + viewArea;
     systemMessage(`${p.name} traveled to ${targetArea}`);
 }
@@ -985,19 +990,22 @@ const ARENA_CONFIG = {
 };
 function joinArenaQueue(p) {
     if (p.dead) return;
+    if (arenaActive) {
+        systemMessage("⚔️ Match in progress. You will be a spectator until it ends.");
+        return;
+    }
+
     const nameKey = p.name.toLowerCase();
     if (!arenaQueue.includes(nameKey)) {
         arenaQueue.push(nameKey);
-        systemMessage(`⚔️ ${p.name} joined the Arena queue (${arenaQueue.length}/${ARENA_CONFIG.minPlayers})`);
+        systemMessage(`⚔️ ${p.name} joined the queue (${arenaQueue.length}/${ARENA_CONFIG.minPlayers})`);
     }
 
     if (!arenaMatchInterval) {
         arenaTimer = ARENA_CONFIG.queueTime;
         arenaMatchInterval = setInterval(() => {
             arenaTimer--;
-            
             if (arenaTimer === 10) systemMessage("⚔️ ARENA: Match starting in 10 seconds!");
-
             if (arenaTimer <= 0) {
                 clearInterval(arenaMatchInterval);
                 arenaMatchInterval = null;
@@ -1014,44 +1022,76 @@ function processArenaStart() {
         return;
     }
 
-    // Determine Mode based on player count
+    // Determine Mode
     if (arenaQueue.length === 2) arenaMode = "1v1";
     else if (arenaQueue.length % 2 === 0 && arenaQueue.length <= 6) arenaMode = "teams";
     else arenaMode = "ffa";
 
     systemMessage(`⚔️ ARENA START: ${arenaMode.toUpperCase()} MODE!`);
-    
     arenaActive = true;
     
+    // Only players in the queue get to fight
     arenaQueue.forEach(name => {
-        let p = players[name];
+        let p = players[name.toLowerCase()];
         if (p) {
             p.area = "arena";
             p.y = 450;
-            p.hp = p.maxHp; // Refill for the fight
-            p.activeTask = "pvp";
-            // Randomly position on the arena floor
+            p.hp = p.maxHp; 
+            p.dead = false;
+            p.activeTask = "pvp"; // This activates their combat AI
             p.x = 200 + Math.random() * 400;
         }
     });
 
-    // If teams, assign team colors/ids
     if (arenaMode === "teams") {
         arenaQueue.sort((a, b) => players[a].stats.combatLevel - players[b].stats.combatLevel);
         arenaQueue.forEach((name, i) => {
-            players[name].team = (i % 2 === 0) ? "Red" : "Blue";
+            if(players[name]) players[name].team = (i % 2 === 0) ? "Red" : "Blue";
         });
     }
 
-    arenaQueue = []; // Clear queue for next match
+    arenaQueue = []; // Reset queue for next game
+}
+function handlePvPLogic(p, now) {
+    if (p.dead || !arenaActive) return;
+
+    // 1. Find targets who are ALSO in the PvP task (Excludes spectators)
+    let targets = Object.values(players).filter(t => 
+        t.area === "arena" && 
+        !t.dead && 
+        t.activeTask === "pvp" && 
+        t.name !== p.name
+    );
+
+    if (arenaMode === "teams") {
+        targets = targets.filter(t => t.team !== p.team);
+    }
+
+    if (targets.length === 0) return;
+
+    // 2. Find closest target
+    targets.sort((a, b) => Math.abs(a.x - p.x) - Math.abs(b.x - p.x));
+    let target = targets[0];
+
+    // 3. Movement vs Attack
+    let dist = Math.abs(target.x - p.x);
+    let range = 60; // Melee range
+
+    if (dist > range) {
+        p.targetX = target.x; // Move toward them
+    } else {
+        p.targetX = null; // Stay still to attack
+        // Attack logic is handled by updatePlayerActions calling performPvPAttack
+    }
 }
 function performPvPAttack(p) {
     // Find a target in the Arena
-    let targets = Object.values(players).filter(target => 
-        target.area === "arena" && 
-        !target.dead && 
-        target.name !== p.name
-    );
+	let targets = Object.values(players).filter(target => 
+		target.area === "arena" && 
+		!target.dead && 
+		target.activeTask === "pvp" && // CRITICAL: Only hit other fighters
+		target.name !== p.name
+	);
 
     // Team check
     if (arenaMode === "teams") {
@@ -1084,29 +1124,40 @@ function performPvPAttack(p) {
     }
 }
 function checkArenaVictory() {
-    const alive = Object.values(players).filter(p => p.area === "arena" && !p.dead);
+    if (!arenaActive) return;
+
+    // Only count people who were actually FIGHTING (activeTask: pvp)
+    const fighters = Object.values(players).filter(p => p.area === "arena" && p.activeTask === "pvp");
+    const alive = fighters.filter(p => !p.dead);
     
     let winner = null;
+
     if (arenaMode === "teams") {
-        const redAlive = alive.some(p => p.team === "Red");
-        const blueAlive = alive.some(p => p.team === "Blue");
-        if (!redAlive) winner = "Blue Team";
-        if (!blueAlive) winner = "Red Team";
-    } else if (alive.length === 1) {
-        winner = alive[0].name;
+        const redAlive = alive.filter(p => p.team === "Red");
+        const blueAlive = alive.filter(p => p.team === "Blue");
+        if (redAlive.length > 0 && blueAlive.length === 0) winner = "Red Team";
+        if (blueAlive.length > 0 && redAlive.length === 0) winner = "Blue Team";
+    } else {
+        if (alive.length === 1) winner = alive[0].name;
     }
 
     if (winner) {
-        systemMessage(`🏆 ARENA VICTORY: ${winner} WINS!`);
-        if (arenaMode !== "teams") updatePvPRank(winner, 0, 1); // +1 win
-        
         arenaActive = false;
+        systemMessage(`🏆 ARENA VICTORY: ${winner} WINS!`);
+        
+        // Award winner
+        if (arenaMode !== "teams") updatePvPRank(winner, 0, 1);
+
+        // Teleport everyone out and clean up states
         setTimeout(() => {
-            alive.forEach(p => movePlayer(p, "town"));
+            fighters.forEach(p => {
+                p.activeTask = "none";
+                p.team = null; 
+                movePlayer(p, "town");
+            });
         }, 3000);
     }
 }
-
 function updatePvPRank(name, kill, win) {
     if (!pvpRankings[name]) pvpRankings[name] = { kills: 0, wins: 0, rating: 1000 };
     pvpRankings[name].kills += kill;
@@ -2291,6 +2342,11 @@ function drawScenery(ctx) {
         ctx.fillStyle = (now % 200 < 100) ? "#ff9f43" : "#ee5253";
         ctx.beginPath(); ctx.arc(100, 250, 5, 0, 7); ctx.fill();
         ctx.beginPath(); ctx.arc(700, 250, 5, 0, 7); ctx.fill();
+		// Inside drawScenery for the Arena section
+		ctx.fillStyle = "#2c3e50";
+		ctx.fillRect(300, 420, 200, 55); // Pedestal for the winner
+		ctx.fillStyle = "#f1c40f"; // Gold trim
+		ctx.fillRect(300, 420, 200, 5);
 
     } else if (viewArea === "pond") {
         ctx.fillStyle = "#1a2e1a";
@@ -2461,7 +2517,7 @@ function updateUI() {
                 <small style="color: #fff;">Prepare your gear!</small>
             </div>`;
     }
-
+	updateArenaUI();
     // --- 2. PLAYER STATUS SECTION (Visible in Dungeon) ---
     if (viewArea === "dungeon") {
         uiHTML += `<div style="background: rgba(0,0,0,0.5); padding: 5px; border: 1px solid #00ffff; margin-bottom: 10px;">`;
@@ -2497,6 +2553,46 @@ function updateUI() {
 	
     const uiElement = document.getElementById("enemyUI");
     if (uiElement) uiElement.innerHTML = uiHTML;
+}
+function updateArenaUI() {
+    let arenaHTML = "";
+    
+    // Only show the leaderboard if we are looking at the Arena
+    if (viewArea === "arena") {
+        arenaHTML += `<div style="background: rgba(0,0,0,0.7); padding: 10px; border: 1px solid #ff4444; color: #fff; font-family: monospace;">`;
+        arenaHTML += `<b style="color: #ff4444; font-size: 16px;">🏆 ARENA RANKINGS</b><hr style="border: 0.5px solid #444">`;
+        
+        // Sort players by Rating (highest first)
+        const sorted = Object.entries(pvpRankings)
+            .sort(([,a], [,b]) => b.rating - a.rating)
+            .slice(0, 5); // Top 5 only
+
+        if (sorted.length === 0) {
+            arenaHTML += `<div style="font-size: 12px; color: #888;">No battles fought yet...</div>`;
+        } else {
+            arenaHTML += `<table style="width: 100%; font-size: 12px; text-align: left;">
+                <tr style="color: #aaa;"><th>Name</th><th>W/K</th><th>Rating</th></tr>`;
+            sorted.forEach(([name, stats]) => {
+                arenaHTML += `<tr>
+                    <td style="color: #00ffff;">${name.toUpperCase()}</td>
+                    <td>${stats.wins}/${stats.kills}</td>
+                    <td style="color: #ffcc00;">${stats.rating}</td>
+                </tr>`;
+            });
+            arenaHTML += `</table>`;
+        }
+        
+        // Add Arena Status Info
+        arenaHTML += `<hr style="border: 0.5px solid #444">`;
+        arenaHTML += `<div style="font-size: 11px;">`;
+        arenaHTML += arenaActive ? `<span style="color: #ff0000;">● MATCH IN PROGRESS</span>` : `<span style="color: #00ff00;">● ARENA OPEN</span>`;
+        arenaHTML += `<br>Players in Arena: ${Object.values(players).filter(p => p.area === "arena").length}`;
+        arenaHTML += `</div></div>`;
+    }
+
+    // You can either create a new div for this or append it to enemyUI
+    const arenaElement = document.getElementById("arenaUI"); // Make sure this div exists in your HTML
+    if (arenaElement) arenaElement.innerHTML = arenaHTML;
 }
 /* ================= GAME LOOP ================= */
 /* ================= GAME LOOP ================= */
