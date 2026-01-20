@@ -1564,7 +1564,7 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
 // --- MAIN FUNCTIONS ---
 function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
-    //updatePhysics(p); 
+    updatePhysics(p); 
     const now = Date.now();
     if (p.dead) return drawCorpse(ctx, p, now);
 	ctx.save(); 
