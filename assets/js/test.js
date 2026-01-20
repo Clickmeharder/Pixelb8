@@ -919,25 +919,31 @@ function joinDungeonQueue(p) {
             if (dungeonSecondsLeft === 30) {
                 viewArea = "dungeon";
                 
-                // Sync the UI dropdown
                 const selector = document.getElementById("view-area-selector");
                 if (selector) selector.value = "dungeon";
                 
                 document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON (Inbound!)";
-                systemMessage("System: Sending players to the dungeon floor...");
+                systemMessage("System: Sending vanguard to the dungeon floor...");
 
-                // Send players in early so they can fall and land
                 dungeonQueue.forEach(name => {
                     let player = players[name.toLowerCase()];
                     if (player && !player.dead) {
                         player.area = "dungeon";
                         player.y = -200;                // Start sky-high
-                        player.x = 100 + Math.random() * 600; 
-                        player.targetY = 450;           // Set the floor target
-                        player.targetX = null;          // Stop walking
-                        player.activeTask = "attacking"; // Get ready
+                        // Drop them on the left half initially
+                        player.x = 50 + Math.random() * 250; 
+                        player.targetY = 450;           // Floor
+                        player.targetX = null;          // Wait to land before walking
+                        player.activeTask = "attacking"; 
                     }
                 });
+
+                // --- TACTICAL REPOSITIONING ---
+                // Wait 1.5 seconds for them to fall/land, then organize ranks
+                setTimeout(() => {
+                    organizeDungeonRanks();
+                    systemMessage("System: Squad is forming ranks!");
+                }, 1500);
             }
 
             // --- 0 SECONDS: START COMBAT ---
@@ -949,64 +955,85 @@ function joinDungeonQueue(p) {
         }, 1000);
     }
 }
+
+function organizeDungeonRanks() {
+    Object.values(players).forEach(p => {
+        // Only move players who are actually in the dungeon and alive
+        if (p.area !== "dungeon" || p.dead) return;
+
+        const weapon = ITEM_DB[p.stats.equippedWeapon] || { type: "melee" };
+        const isRanged = (weapon.type === "bow" || weapon.type === "staff");
+
+        if (isRanged) {
+            // RANGED: Backline (Far Left)
+            p.targetX = 40 + Math.random() * 60; 
+        } else {
+            // MELEE: Frontline (Shield Wall position)
+            p.targetX = 160 + Math.random() * 90;
+        }
+    });
+}
+
 function startDungeon() {
     dungeonActive = true;
-    dungeonWave = 1; // Reset to wave 1
-    // Final UI update
+    dungeonWave = 1; 
+    
     document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON (ACTIVE)";
     systemMessage("The Dungeon Gates have opened! The monsters are here!");
 
-    // Important: Clear the queue so the NEXT raid starts fresh
     dungeonQueue = []; 
-
     spawnWave();
 }
-
 function spawnWave() {
     enemies = [];
-    // Every 5th wave is a Boss Wave
+    // Count live players in the dungeon to scale difficulty
+    const partySize = Object.values(players).filter(p => p.area === "dungeon" && !p.dead).length || 1;
+    
     const isBossWave = (dungeonWave % 5 === 0);
-    const waveSize = isBossWave ? 2 : 3; // Fewer minions if there is a boss
-
+    
+    // Scale wave size: Base 2 + (1 per 2 waves) + (1 per extra player)
+    const waveSize = Math.floor(2 + (dungeonWave / 2) + (partySize - 1));
+	
     const types = ["Slime", "StickmanHunter", "Grumble", "VoidWalker"];
 
     for (let i = 0; i < waveSize; i++) {
         let type = types[Math.floor(Math.random() * types.length)];
         let isStickman = (type === "StickmanHunter" || type === "VoidWalker");
-        
-        // Balanced HP scaling: 50 + (25 per wave)
-        let enemyHp = 50 + (dungeonWave * 25);
+        const currentTier = Math.floor((dungeonWave - 1) / 5) + 1;
+        // HP SCALING: Scaled by Wave AND Party Size
+        let enemyHp = (40 + (dungeonWave * 20)) * (1 + (partySize * 0.2));
 
         enemies.push({ 
             name: type, 
             area: "dungeon",
             hp: enemyHp, 
             maxHp: enemyHp, 
-            x: 500 + (i * 100), 
+            x: 500 + (i * 60), // Tightened spacing
             y: 450, 
             dead: false,
             isEnemy: true,
             isStickman: isStickman,
             stats: { lurkLevel: 0 },
-            equipped: isStickman ? generateRandomLoadout() : {} 
+            equipped: isStickman ? generateRandomLoadout(currentTier) : {}
         });
     }
 
-    // SPAWN BOSS
     if (isBossWave) {
+        // Boss HP scales heavily with party size
+        let bossHp = (400 + (dungeonWave * 100)) * partySize;
         boss = {
             name: "DUNGEON OVERLORD",
             area: "dungeon",
-            hp: 500 + (dungeonWave * 50),
-            maxHp: 500 + (dungeonWave * 50),
+            hp: bossHp,
+            maxHp: bossHp,
             x: 800,
             y: 450,
             dead: false,
             isBoss: true,
-            isMonster: true, // Uses drawMonster
+            isMonster: true,
             color: "#ff0000"
         };
-        systemMessage("⚠️ A BOSS HAS APPEARED!");
+        systemMessage(`⚠️ BOSS WAVE! Scaling for ${partySize} hero(es)!`);
     } else {
         boss = null;
     }
@@ -1038,72 +1065,89 @@ function handleEnemyAttacks() {
     });
 }
 /*------------------------------------------------------------*/
-function generateRandomLoadout() {
-    // Helper to get random item by type from your ITEM_DB
-    const getItemsByType = (type) => Object.keys(ITEM_DB).filter(key => ITEM_DB[key].type === type);
+function getBestAvailableTier(type, desiredTier) {
+    const allItemsOfType = Object.values(ITEM_DB).filter(i => i.type === type);
+    if (allItemsOfType.length === 0) return [];
 
-    const weaponPool = getItemsByType("sword").concat(getItemsByType("bow"), getItemsByType("staff"));
-    const headPool = getItemsByType("helmet").concat(getItemsByType("hair"));
-    const armorPool = getItemsByType("armor");
-    const legPool = getItemsByType("pants");
-    const glovePool = getItemsByType("gloves");
+    // Find the highest tier actually existing in the DB for this type
+    const maxExistingTier = Math.max(...allItemsOfType.map(i => i.tier || 1));
+    // Use the desired tier, but cap it at the max available
+    const targetTier = Math.min(desiredTier, maxExistingTier);
+
+    return Object.keys(ITEM_DB).filter(key => {
+        const item = ITEM_DB[key];
+        return item.type === type && item.tier === targetTier;
+    });
+}
+function generateRandomLoadout(tier) {
+    // We try to get items from the current tier
+    const weaponPool = getBestAvailableTier("weapon", tier);
+    const headPool   = getBestAvailableTier("helmet", tier);
+    const armorPool  = getBestAvailableTier("armor", tier);
+    const legPool    = getBestAvailableTier("pants", tier);
+
+    const pick = (pool) => pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : null;
 
     return {
-        weapon: weaponPool[Math.floor(Math.random() * weaponPool.length)],
-        helmet: headPool[Math.floor(Math.random() * headPool.length)],
-        // 70% chance to have these parts
-        armor: Math.random() < 0.7 ? armorPool[Math.floor(Math.random() * armorPool.length)] : null,
-        pants: Math.random() < 0.7 ? legPool[Math.floor(Math.random() * legPool.length)] : null,
-        gloves: Math.random() < 0.5 ? glovePool[Math.floor(Math.random() * glovePool.length)] : null
+        weapon: pick(weaponPool),
+        helmet: pick(headPool),
+        armor:  Math.random() < 0.7 ? pick(armorPool) : null,
+        pants:  Math.random() < 0.7 ? pick(legPool) : null
     };
 }
 // Loot Helper to keep performAttack clean
 function handleLoot(p, target) {
+    const currentTier = Math.floor((dungeonWave - 1) / 5) + 1;
     let lootFound = [];
-    let pixelsGained = 0;
-    let roll = Math.random();
 
-    // 1. Drop-the-Gear Logic (Check for valid items)
+    // 1. CHANCE TO STEAL GEAR (10% per slot)
     if (target.equipped) {
         Object.values(target.equipped).forEach(itemName => {
-            // itemName must exist and pass the 15% drop rate
-            if (itemName && Math.random() < 0.15) {
-                lootFound.push(itemName);
-            }
+            if (itemName && Math.random() < 0.10) lootFound.push(itemName);
         });
     }
 
-    // 2. Boss/Minion Specifics
-    if (target.isBoss) {
-        pixelsGained = 500;
-        lootFound.push("Royal Cape");
-    } else {
-        pixelsGained = 10;
-        if (roll > 0.95) lootFound.push("Leather scrap");
-    }
+    // 2. TIERED RARITY ROLL (0-13)
+    if (lootFound.length === 0) {
+        // We use a weighted random: higher numbers are much harder to get
+        // This math makes 0-5 common, 6-9 rare, 10-13 legendary
+        let roll = Math.random();
+        let selectedRarity = Math.floor(Math.pow(roll, 4) * 14); 
+        if (target.isBoss) selectedRarity = Math.min(13, selectedRarity + 3); // Bosses boost rarity
 
-    // Apply pixels
-    p.stats.pixels += pixelsGained;
-
-    // 3. Process the loot and show messages
-    if (lootFound.length > 0) {
-        lootFound.forEach(item => {
-            // Final safety check: ensure item isn't null and exists in DB
-            if (item && ITEM_DB[item]) {
-                if (!p.stats.inventory.includes(item)) {
-                    p.stats.inventory.push(item);
-                    spawnFloater(p, `✨ ${item}!`, "#FFD700");
-                    systemMessage(`${p.name} looted: ${item}`);
-                }
-            }
+        // Find items that match Tier (or highest available) and Rarity
+        let possibleLoot = Object.keys(ITEM_DB).filter(key => {
+            const item = ITEM_DB[key];
+            return item.tier <= currentTier && item.rarity == selectedRarity;
         });
-    } else {
-        // --- NEW FEEDBACK MESSAGE ---
-        // If no items were found in the roll
-        systemMessage(`${p.name}: That creature did not carry any loot.`);
-        spawnFloater(p, "No loot", "#888");
+
+        // If specific rarity doesn't exist in this tier, drop to lower rarity in same tier
+        if (possibleLoot.length === 0) {
+            possibleLoot = Object.keys(ITEM_DB).filter(key => item.tier <= currentTier && item.rarity < selectedRarity);
+        }
+
+        if (possibleLoot.length > 0) {
+            lootFound.push(possibleLoot[Math.floor(Math.random() * possibleLoot.length)]);
+        }
     }
-    
+
+    // 3. APPLY LOOT
+    lootFound.forEach(finalItem => {
+        if (!p.stats.inventory.includes(finalItem)) {
+            p.stats.inventory.push(finalItem);
+            
+            // Map 0-13 rarity to colors (Grey -> White -> Green -> Blue -> Purple -> Gold -> Red)
+            const hue = Math.min(300, (ITEM_DB[finalItem].rarity || 0) * 25);
+            spawnFloater(p, `✨ ${finalItem}!`, `hsl(${hue}, 80%, 60%)`);
+            systemMessage(`${p.name} found: ${finalItem} (Rarity ${ITEM_DB[finalItem].rarity})`);
+        } else {
+            let scrapValue = Math.floor((ITEM_DB[finalItem].value || 50) * 0.2);
+            p.stats.pixels += scrapValue;
+            spawnFloater(p, `+${scrapValue}px (Duplicate)`, "#888");
+        }
+    });
+
+    p.stats.pixels += (10 * currentTier);
     saveStats(p);
 }
 //------------------------------------
@@ -1194,15 +1238,26 @@ if (p.targetY !== undefined) {
 }
 
 function resolveCrowding(p) {
-    const bubble = 30; // Personal space
+    const bubble = 35; // Increased slightly for clarity
     Object.values(players).forEach(other => {
         if (other === p || other.area !== p.area || other.dead || other.targetY !== undefined) return;
 
         let dx = p.x - other.x;
         if (Math.abs(dx) < bubble) {
-            // Gently nudge X to the side
-            let force = (bubble - Math.abs(dx)) * 0.1;
-            p.x += dx > 0 ? force : -force;
+            let force = (bubble - Math.abs(dx)) * 0.15;
+            
+            // TACTICAL AWARENESS: 
+            // If p is Melee and other is Ranged, Melee has "priority" 
+            // and will push the Ranged unit backward more easily.
+            const pWeapon = ITEM_DB[p.stats.equippedWeapon] || { type: "melee" };
+            const oWeapon = ITEM_DB[other.stats.equippedWeapon] || { type: "melee" };
+            
+            if (pWeapon.type === "melee" && (oWeapon.type === "bow" || oWeapon.type === "staff")) {
+                p.x += dx > 0 ? force * 0.5 : -force * 0.5; // Melee moves less
+                other.x += dx > 0 ? -force * 1.5 : force * 1.5; // Ranged gets pushed more
+            } else {
+                p.x += dx > 0 ? force : -force;
+            }
         }
     });
 }
@@ -1618,7 +1673,7 @@ function drawEnemyStickman(ctx, e) {
     ctx.translate(-e.x, 0); 
 
     ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 1;
     drawStickmanBody(ctx, e, anchors, limbs);
 
     if (e.equipped) {

@@ -4,103 +4,125 @@
 const ITEM_DB = {
     // --- WEAPONS -----------------------------------------------------------------------------------
 	// swords (melee)
-	"Rusty Dagger":   { type: "weapon", style: "dagger", power: 5,  speed: 1000,  value: 40,   color: "#777" },
-    "Iron Sword":     { type: "weapon", style: "sword", power: 12, speed: 2500,  value: 200,  color: "#eee" },
+	"Rusty Dagger":   { type: "weapon", style: "dagger", tier: 1, rarity: 0, power: 5,  speed: 1000,  value: 40,   color: "#777"},
+    "Iron Sword":     { type: "weapon", style: "sword", tier: 1, rarity: 0, power: 12, speed: 1200,  value: 200,  color: "#eee" },
+	"Steel Sword":     { type: "weapon", style: "sword", tier: 1, rarity: 0, power: 15, speed: 1500,  value: 2000,  color: "#777" },
+	"Golden Sword":     { type: "weapon", style: "sword", tier: 1, rarity: 0, power: 30, speed: 1750,  value: 20000,  color: "#eee"},
 	// Bows (archery)
-	"shortbow":{ type: "weapon", style: "bow", power: 5,  speed: 1250,  value: 30,   color: "#eee" },
-    "Shitty Shortbow":{ type: "bow", style: "bow", power: 8,  speed: 1000,  value: 100,  color: "#eee" },
-    "Wooden Shortbow":{ type: "bow", style: "bow", power: 5,  speed: 1250,  value: 30,   color: "#d2b48c" },
-    "Oak Shortbow":{ type: "bow", style: "bow", power: 8,  speed: 1000,  value: 100,  color: "#d2b48c" },
+	"Shitty Shortbow":{ type: "bow", style: "bow", tier: 1, rarity: 0, power: 5, speed: 1000,  value: 40,  color: "#eee" },
+	"shortbow":{ type: "weapon", style: "bow", tier: 1, rarity: 0, power: 8, speed: 1250,  value: 200,   color: "#eee" },
+    "Wooden Shortbow":{ type: "bow", style: "bow", tier: 1, rarity: 0, power: 10, speed: 1500,  value: 2000,   color: "#d2b48c" },
+    "Oak Shortbow":{ type: "bow", style: "bow", tier: 1, rarity: 0, power: 15, speed: 1750,  value: 20000,  color: "#d2b48c" },
 	//Stalves (magic)
-	"Wooden Staff":   { type: "staff", color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40  },
-	"Styled Staff":   { type: "staff", style:"staff", color: "#00ffcc", poleColor: "#5d4037", power: 5, speed: 2000,  value: 40  },
+	"Wooden Staff":   { type: "staff", style:"", tier: 1, rarity: 0, power: 10, speed: 500,  value: 40, color: "#00ffcc", poleColor: "#5d4037"  },
+	"Styled Staff":   { type: "staff", style:"staff", tier: 1, rarity: 0, power: 15, speed: 750,  value: 40, color: "#00ffcc", poleColor: "#5d4037"  },
 // -------------------------- TOOLS --------------------------------------------------------------------
-    "Fishing Rod":    { type: "tool", style:"", power: 0, value: 1,   color: "#8B4513" },
+    "Fishing Rod":    { type: "tool", style:"", tier: 1, rarity: 0, power: 0, value: 1,   color: "#8B4513" },
 // ------------------------- Helmets and Hats ----------------------------------------------------------
 	// --- Helmets     ---
-    "Viking Helm":    { type: "helmet", style: "viking", def: 4,  value: 400,  color: "#888" },
-    "Great Horns":    { type: "helmet", style: "horns", def: 6,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
-	"Steel Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#eee" },
-	"Iron Helmet":    { type: "helmet",style: "knight", def: 5, value: 150, color: "#aaa" },
+	"Iron Helmet":    { type: "helmet",style: "knight", tier: 1, rarity: 0, def: 5, value: 150, color: "#aaa" },
+	"Viking Helm":    { type: "helmet", style: "viking", tier: 1, rarity: 0, def: 6,  value: 400,  color: "#888" },
+	"Steel Helmet":    { type: "helmet",style: "knight", tier: 1, rarity: 0, def: 7, value: 150, color: "#eee" },
+	"Great Horns":    { type: "helmet", style: "horns", tier: 1, rarity: 0, def: 8,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
 	//---Wizard Hats   ---
-	"Archmage Point": { type: "helmet", style: "wizard", def: 1,  value: 150,  color: "#303f9f" },
-    "Cool Hat": { type: "helmet", style: "wizard", def: 1,  value: 150,  color: "#303f9f" },
-    "Wizard Hat": { type: "helmet", style: "wizard", def: 3,  value: 5000, color: "#4a148c" },
+    "Cool Hat": { type: "helmet", style: "wizard", tier: 1, rarity: 0, def: 1,  value: 150,  color: "#303f9f" },
+	"Magic Hat": { type: "helmet", style: "wizard", tier: 1, rarity: 0, def: 3,  value: 150,  color: "#303f9f" },
+    "Wizard Hat": { type: "helmet", style: "wizard", tier: 1, rarity: 0, def: 4,  value: 5000, color: "#4a148c" },
+	"Archmage Point": { type: "helmet", style: "wizard", tier: 1, rarity: 0, def: 5,  value: 150,  color: "#303f9f" },
 	//--- Lurker Hoods ---
-	"Cool Hood":  { type: "hood", style: "hood",                            value: 100, color: "#555" },
-    "Lurker Hood":  { type: "hood", style: "hood",                            value: 100, color: "#222" },
+	"Cool Hood":  { type: "hood", style: "hood", tier: 1, rarity: 0, def:1;                           value: 100, color: "#555" },
+    "Lurker Hood":  { type: "hood", style: "hood", tier: 1, rarity: 0, def:2;                            value: 100, color: "#222" },
+	"Cool Hood":  { type: "hood", style: "hood", tier: 1, rarity: 0, def:3;                           value: 100, color: "#555" },
+	"Dark Hood":  { type: "hood", style: "hood", tier: 1, rarity: 0, def:5;                           value: 100, color: "#555" },
 //------------------------------------------------------------------------------------------------------
 // --------------------------- ARMOR/SHIRT -------------------------------------------------------------
+	// --- shirts
+    "Red Shirt":  { type: "armor", style:"", tier: 1, rarity: 0,  def: 0,                  value: 60,   color: "red" },
+	"Orange Shirt":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "orange" },
+	"Yellow Shirt":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "yellow" },
+	"Green Shirt":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "green" },
+	"Blue Shirt":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "blue" },
+	"Brown Shirt" { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "brown" },
+	"Indigo Shirt" { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "indigo" },
+	"Violet Shirt" { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "violet" },
 	// --- archer
-    "Leather Tunic":  { type: "armor", style:"",  def: 2,                  value: 60,   color: "#5c4033" },
+    "Leather Tunic":  { type: "armor", style:"", tier: 1, rarity: 0, def: 3,                  value: 60,   color: "#5c4033" },
 	// --- melee
-	"Iron Plate":     { type: "armor", style:"",  def: 5,                  value: 300,  color: "#aaa" },
+	"Iron Plate":     { type: "armor", style:"", tier: 1, rarity: 0, def: 4,                  value: 300,  color: "#aaa" },
 	// --- magic
-	"Wizard Robe":  { type: "armor", style:"",  def: 2,                  value: 60,   color: "blue" },
+	"Wizard Robe":  { type: "armor", style:"", tier: 1, rarity: 0, def: 3,                  value: 60,   color: "blue" },
 	// --- lurker
-	"Lurker Robe":  { type: "armor", style:"",  def: 2,                  value: 60,   color: "#222" },
+	"Lurker Robe":  { type: "armor", style:"", tier: 1, rarity: 0, def: 2,                  value: 60,   color: "#222" },
 	// --- lumberjack
 	// --- miner 
 	//
 //------------------------------------------------------------------------------------------------------
 // ------------------------------PANTS------------------------------------------------------------------
+	//basic pants
+	"blue pants":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "teal" },
+	"gray pants":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "gray" },
+	"pink pants":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "pink" },
+	"Blue Shirt":  { type: "armor", style:"", tier: 1, rarity: 0, def: 0,                  value: 60,   color: "blue" },
 	//melee
-	"Iron Pants":  { type: "pants", style:"", def :2, value: 100,color: "#aaa" },
+	"Iron Pants":  { type: "pants", style:"", tier: 1, rarity: 0, def :4, value: 100,color: "#aaa" },
 	// --- archer
-    "Leather Pants":  { type: "pants", style:"", def :2, value: 100,color: "#3e2723" },
+    "Leather Pants":  { type: "pants", style:"", tier: 1, rarity: 0, def :3, value: 100,color: "#3e2723" },
 	// --- wizard
-	"Wizard Pants":  { type: "pants", style:"", def :2, value: 100,color: "blue" },
+	"Wizard Pants":  { type: "pants", style:"", tier: 1, rarity: 0, def :3, value: 100,color: "blue" },
 	// --- lurker
-	"Lurker Pants":  { type: "pants", style:"", def :2, value: 100,color: "#222" },
+	"Lurker Pants":  { type: "pants", style:"", tier: 1, rarity: 0, def :2, value: 100,color: "#222" },
 	
 //------------------------------------------------------------------------------------------------------
 // ------------------------------Boots------------------------------------------------------------------
-    "leather Boots":  { type: "boots", style:"", def: 1,                 value: 30,   color: "#5c4033" },
-    "leather Booties":{ type: "boots", style:"", def: 1,                 value: 35,   color: "#5c4033" },
+    "leather Boots":  { type: "boots", style:"", tier: 1, rarity: 0, def: 1,                 value: 30,   color: "#5c4033" },
+    "leather Booties":{ type: "boots", style:"", tier: 1, rarity: 0, def: 1,                 value: 35,   color: "#5c4033" },
 //------------------------------------------------------------------------------------------------------
 
 // ------------------------------Gloves------------------------------------------------------------------
-    "White Gloves":   { type: "gloves", style:"", value: 100, color: "#ffffff" },
-	"Leather Gloves":   { type: "gloves", style:"", value: 100, color: "#5c4033" },
+    "White Gloves":   { type: "gloves", style:"", tier: 1, rarity: 0, value: 100, color: "#ffffff" },
+	"Leather Gloves":   { type: "gloves", style:"", tier: 1, rarity: 0, value: 100, color: "#5c4033" },
     // --- SPECIALS ---
 // special head
-	"Paper Bag":      { type: "helmet", style: "box", def: 1, value: 5, color: "#d2b48c" },
-	"wig":            { type: "helmet", style:"", def: 1,style: "wig",     value: 5000, color: "yellow" },
-    "Royal Crown":    { type: "helmet", style: "crown",  def: 2,  value: 10000, color: "#ff0000" },
-	"uknown":    { type: "helmet", style: "centurion",  def: 2,  value: 10000, color: "#ffcc00" },
-	"Pirate Hat":    { type: "helmet", style: "pirate",  def: 2,  value: 10000, color: "#222222" },
-	"gentleman hat":    { type: "helmet", style: "gentleman",  def: 2,  value: 10000, color: "#333333" },
-	"fun hat":    { type: "helmet", style: "funhat",  def: 2,  value: 10000, color: "white" },
-	"kabuto":    { type: "helmet", style: "samurai",  def: 2,  value: 10000, color: "#8B0000" },
-	"stickmenpo":    { type: "helmet", style: "menpo",  def: 2,  value: 10000, color: "#8B0000" },
+	"box":      { type: "helmet", style: "box", tier: 1, rarity: 0, def: 1, value: 5, color: "#d2b48c" },
+	"Paper Bag":      { type: "helmet", style: "paperbag", tier: 1, rarity: 0, def: 1, value: 5, color: "#d2b48c" },
+	"tv":      { type: "helmet", style: "tv", tier: 1, rarity: 0, def: 1, value: 5, color: "#d2b48c" },
+	"wig":            { type: "helmet", style:"", tier: 1, rarity: 0, def: 1,style: "wig",     value: 5000, color: "yellow" },
+    "Royal Crown":    { type: "helmet", style: "crown", tier: 1, rarity: 0, def: 2,  value: 10000, color: "#ff0000" },
+	"uknown":    { type: "helmet", style: "centurion", tier: 1, rarity: 0, def: 2,  value: 10000, color: "#ffcc00" },
+	"Pirate Hat":    { type: "helmet", style: "pirate", tier: 1, rarity: 0, def: 2,  value: 10000, color: "#222222" },
+	"gentleman hat":    { type: "helmet", style: "gentleman", tier: 1, rarity: 0,  def: 2,  value: 10000, color: "#333333" },
+	"fun hat":    { type: "helmet", style: "funhat", tier: 1, rarity: 0, def: 2,  value: 10000, color: "white" },
+	"kabuto":    { type: "helmet", style: "samurai", tier: 1, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
+	"stickmenpo":    { type: "helmet", style: "menpo", tier: 1, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
 // special capes
-    "Royal Cape":     { type: "cape", style:"cape", color: "#880000", value: 10000 },
-    "99 Cape":     { type: "cape", style:"cape", color: "#880000", value: 10000 },
-    "Cloak":     { type: "cape", style:"cloak", color: "#333", value: 10000 },
-    "Ball gown":     { type: "cape", style:"ballgown", color: "purple", value: 10000 },
-    "Angelic Ring":   { type: "helmet", style: "halo",   def: 0,  value: 9999, color: "yellow" },
+    "Royal Cape":     { type: "cape", style:"cape", tier: 1, rarity: 0, value: 10000, color: "#880000" },
+    "99 Cape":     { type: "cape", style:"cape", tier: 1, rarity: 0, value: 10000, color: "#880000" },
+    "Cloak":     { type: "cape", style:"cloak", tier: 1, rarity: 0, value: 10000, color: "#333" },
+    "Ball gown":     { type: "cape", style:"ballgown", tier: 1, rarity: 0, value: 10000, color: "purple" },
+    "Angelic Ring":   { type: "helmet", style: "halo", tier: 1, rarity: 0, def: 0,  value: 9999, color: "yellow" },
 // hair
-	"hair1": { type: "hair", style: "mohawk", color: "#ff69b4" },// pink mohawk
-	"hair2": { type: "hair", style: "pigtails", color: "#4b3621" },// pigtails hair
-	"hair3": { type: "hair", style: "scribble",   color: "#ffeb3b" }, // yellow child scribble
-	"hair4": { type: "hair", style: "messy",      color: "#614126" }, // messy 
-	"hair5": { type: "hair", style: "braids",    color: "#f3e5ab" }, // thick blonde braids
-    "hair6": { type: "hair", style: "girly",  color: "#f3e5ab" }, // girly braids
-	"hair7": { type: "hair", style: "pomp",       color: "#614126" }, // Forward spiky pomp
-    "hair8": { type: "hair", style: "twinspikes", color: "#ff0000" }, // Red double spikes
-	"hair11": { type: "hair", style: "drills", color: "#f3e5ab" }, // spiral chunky drills 
-	"oldman beard": { name: "Wizard Beard", type: "hair", style: "wizardbeard", color: "#ffffff" },
-	"wizard beard": { name: "Dark Mage Beard", type: "hair", style: "wizardbeard", color: "#333333" },
+	"hair1": { type: "hair", style: "mohawk", tier: 1, rarity: 0, color: "#ff69b4" },// pink mohawk
+	"hair2": { type: "hair", style: "pigtails", tier: 1, rarity: 0, color: "#4b3621" },// pigtails hair
+	"hair3": { type: "hair", style: "scribble", tier: 1, rarity: 0,   color: "#ffeb3b" }, // yellow child scribble
+	"hair4": { type: "hair", style: "messy", tier: 1, rarity: 0,      color: "#614126" }, // messy 
+	"hair5": { type: "hair", style: "braids", tier: 1, rarity: 0,    color: "#f3e5ab" }, // thick blonde braids
+    "hair6": { type: "hair", style: "girly", tier: 1, rarity: 0,  color: "#f3e5ab" }, // girly braids
+	"hair7": { type: "hair", style: "pomp", tier: 1, rarity: 0, color: "#614126" }, // Forward spiky pomp
+    "hair8": { type: "hair", style: "twinspikes", tier: 1, rarity: 0, color: "#ff0000" }, // Red double spikes
+	"hair11": { type: "hair", style: "drills", tier: 1, rarity: 0, color: "#f3e5ab" }, // spiral chunky drills 
+	"oldman beard": { name: "Wizard Beard", tier: 1, rarity: 0, type: "hair", style: "wizardbeard", color: "#ffffff" },
+	"wizard beard": { name: "Dark Mage Beard", tier: 1, rarity: 0, type: "hair", style: "wizardbeard", color: "#333333" },
 
 // ---------------------------basic items----------------------------------------------------------------
 	// --- unique fish ---
-	"Golden Bass":    { type: "fish", value: 100, color: "#FFD700" },
+	"Golden Bass":    { type: "fish", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
 	// --- unique swimming find ---
-	"Pearl":    { type: "fish", value: 100, color: "white" },
+	"Pearl":    { type: "fish", tier: 1, rarity: 0, value: 100, color: "white" },
     // --- MATERIALS ---
-    "Leather scrap":  { type: "material", value: 15,   color: "#a88d6d" },
-	"Sea Shell":  { type: "material", value: 15,   color: "#a88d6d" },
-	"Leather scrap":  { type: "material", value: 15,   color: "#a88d6d" },
+    "Leather scrap":  { type: "material", tier: 1, rarity: 0, value: 15,   color: "#a88d6d" },
+	"Sea Shell":  { type: "material", tier: 1, rarity: 0, value: 15,   color: "#a88d6d" },
+	"Leather scrap":  { type: "material", tier: 1, rarity: 0, value: 15,   color: "#a88d6d" },
+	// other basic materials will go here
 //-------------------------------------------------------------------------------------------------------
 };
 /* ================= EXTENDED ITEM LIBRARY ================= */
@@ -290,6 +312,141 @@ const HAT_STYLES = {
         ctx.fillRect(hX - w/2, top - h/2, w, h);
         ctx.strokeRect(hX - w/2, top - h/2, w, h);
     },
+	"paperbag": (ctx, hX, hY, color) => {
+		// --- SETTINGS ---
+		const offset = -2;  // Shifted slightly for a better "fit"
+		const w = 26, h = 28;
+		const top = hY + offset;
+		const boxX = hX - w/2;
+		const boxY = top - h/2;
+
+		// 1. DRAW THE BAG
+		ctx.fillStyle = color || "#c2b280"; // Default to a brown paper color
+		ctx.fillRect(boxX, boxY, w, h);
+		ctx.strokeStyle = "#000";
+		ctx.lineWidth = 1.5;
+		ctx.strokeRect(boxX, boxY, w, h);
+
+		// 2. DRAW EYE HOLES
+		ctx.fillStyle = "#1a1a1a"; // Dark inside
+		// Left Eye
+		ctx.beginPath();
+		ctx.arc(hX - 6, top - 2, 3, 0, Math.PI * 2);
+		ctx.fill();
+		// Right Eye
+		ctx.beginPath();
+		ctx.arc(hX + 6, top - 2, 3, 0, Math.PI * 2);
+		ctx.fill();
+
+		// 3. OPTIONAL: CRINKLE DETAILS
+		ctx.strokeStyle = "rgba(0,0,0,0.1)"; // Very faint lines
+		ctx.beginPath();
+		ctx.moveTo(boxX + 4, boxY + 5);
+		ctx.lineTo(boxX + 10, boxY + 12);
+		ctx.stroke();
+
+		// 4. JAGGED BOTTOM (Optional visual flair)
+		ctx.strokeStyle = "#000";
+		ctx.beginPath();
+		ctx.moveTo(boxX, boxY + h);
+		for (let i = 0; i <= w; i += 4) {
+			ctx.lineTo(boxX + i, boxY + h + (i % 8 === 0 ? 2 : -2));
+		}
+		ctx.stroke();
+	},
+	"tv": (ctx, hX, hY, color) => {
+		// --- SETTINGS ---
+		const offset = -2;
+		const w = 28, h = 24;
+		const top = hY + offset;
+		const boxX = hX - w/2;
+		const boxY = top - h/2;
+
+		// 1. DRAW THE CASING (The Plastic Shell)
+		ctx.fillStyle = "#333"; // Dark grey plastic
+		ctx.fillRect(boxX, boxY, w, h);
+		ctx.strokeStyle = "#000";
+		ctx.lineWidth = 2;
+		ctx.strokeRect(boxX, boxY, w, h);
+
+		// 2. DRAW THE SCREEN (The "Glass")
+		const margin = 4;
+		ctx.fillStyle = "#1a1a1a"; // Off-black screen
+		ctx.fillRect(boxX + margin, boxY + margin, w - (margin * 2), h - (margin * 2.5));
+		
+		// 3. DRAW THE FACE (Glowing Eyes/Smile)
+		ctx.fillStyle = "#00ff00"; // Classic Retro Green
+		ctx.shadowBlur = 5;
+		ctx.shadowColor = "#00ff00";
+		
+		// Left Eye pixel
+		ctx.fillRect(hX - 6, top - 2, 3, 3);
+		// Right Eye pixel
+		ctx.fillRect(hX + 3, top - 2, 3, 3);
+		// Small smile pixel
+		ctx.fillRect(hX - 3, top + 4, 6, 2);
+		
+		ctx.shadowBlur = 0; // Reset shadow so it doesn't bleed into other parts
+
+		// 4. DRAW ANTENNAE
+		ctx.strokeStyle = "#555";
+		ctx.lineWidth = 1.5;
+		// Left Antenna
+		ctx.beginPath();
+		ctx.moveTo(hX - 4, boxY);
+		ctx.lineTo(hX - 10, boxY - 8);
+		ctx.stroke();
+		// Right Antenna
+		ctx.beginPath();
+		ctx.moveTo(hX + 4, boxY);
+		ctx.lineTo(hX + 10, boxY - 8);
+		ctx.stroke();
+
+		// Small knobs on top of antennae
+		ctx.fillStyle = "#ff0000";
+		ctx.beginPath();
+		ctx.arc(hX - 10, boxY - 8, 2, 0, Math.PI * 2);
+		ctx.arc(hX + 10, boxY - 8, 2, 0, Math.PI * 2);
+		ctx.fill();
+	},
+	"fishhat": (ctx, hX, hY, color) => {
+		// --- SETTINGS ---
+		const w = 28, h = 18;
+		const top = hY - 4; // Sits slightly higher
+		
+		// 1. FISH BODY
+		ctx.fillStyle = color || "#ff8c00"; // Default orange (Clownfish)
+		ctx.beginPath();
+		ctx.ellipse(hX, top, w/2, h/2, 0, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.stroke();
+
+		// 2. THE TAIL (Triangular back)
+		ctx.beginPath();
+		ctx.moveTo(hX - 10, top);
+		ctx.lineTo(hX - 22, top - 8);
+		ctx.lineTo(hX - 22, top + 8);
+		ctx.closePath();
+		ctx.fill();
+		ctx.stroke();
+
+		// 3. THE EYE (Staring blankly)
+		ctx.fillStyle = "#fff";
+		ctx.beginPath();
+		ctx.arc(hX + 8, top - 2, 4, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.stroke();
+		ctx.fillStyle = "#000";
+		ctx.beginPath();
+		ctx.arc(hX + 9, top - 2, 1.5, 0, Math.PI * 2);
+		ctx.fill();
+
+		// 4. THE MOUTH (O-shaped)
+		ctx.beginPath();
+		ctx.arc(hX + 13, top + 2, 2, 0, Math.PI * 2);
+		ctx.stroke();
+	},
+	//HAIR
 	// WIG IS SPECIAL ITS A HELMET NOT HAIR AND CAN BE COLORED BY ANY USER WITH A COMMAND
 	"wig": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
@@ -656,18 +813,83 @@ const HAT_STYLES = {
     },
 
 // HELMET STYLES-----------------------------------------------------
-    "knight": (ctx, hX, hY, color) => {
-        // --- SETTINGS ---
-        const offset = 0;
-        const faceVisible = 10; // Depth of the side guards
-        // ----------------
-        const top = hY + offset;
-        ctx.fillStyle = color;
-        ctx.beginPath(); ctx.arc(hX, top, 12, Math.PI, 0); 
-        ctx.lineTo(hX + 12, top + faceVisible); ctx.lineTo(hX - 12, top + faceVisible); ctx.closePath();
-        ctx.fill(); ctx.stroke();
-    },
+	"knight": (ctx, hX, hY, color) => {
+		// --- SETTINGS ---
+		const offset = -2;
+		const faceVisible = 14;
+		const helmetSize = 13;
 
+		// --- EYE SLIT SETTINGS ---
+		const slitW = 18;      // Width of the gap
+		const slitH = 3;       // Height of the gap (thickness)
+		const slitY = 2;       // Vertical position relative to 'top'
+		const slitColor = "#1a1a1a"; 
+		// ------------------------
+
+		const top = hY + offset;
+
+		// 1. MAIN HELMET SHAPE
+		ctx.fillStyle = color;
+		ctx.strokeStyle = "#000";
+		ctx.lineWidth = 1.5;
+
+		ctx.beginPath(); 
+		ctx.arc(hX, top, helmetSize, Math.PI, 0); 
+		ctx.lineTo(hX + helmetSize, top + faceVisible); 
+		ctx.lineTo(hX, top + faceVisible + 4); // The "chin" point
+		ctx.lineTo(hX - helmetSize, top + faceVisible); 
+		ctx.closePath();
+		
+		ctx.fill(); 
+		ctx.stroke();
+
+		// 2. THE EYE SLIT
+		ctx.fillStyle = slitColor;
+		// Centers the slit horizontally and places it at slitY
+		ctx.fillRect(hX - slitW / 2, top + slitY, slitW, slitH);
+
+		// 3. OPTIONAL: HELMET CREST (The line on top)
+		ctx.beginPath();
+		ctx.moveTo(hX, top - helmetSize);
+		ctx.lineTo(hX, top - helmetSize - 4);
+		ctx.stroke();
+	},
+	"spacehelmet": (ctx, hX, hY, color) => {
+		// --- SETTINGS ---
+		const radius = 16;
+		const top = hY - 2;
+		
+		// 1. THE NECK RING (The base of the helmet)
+		ctx.fillStyle = "#ddd";
+		ctx.lineWidth = 2;
+		ctx.strokeRect(hX - 14, top + 8, 28, 5);
+		ctx.fillRect(hX - 14, top + 8, 28, 5);
+
+		// 2. THE GLASS DOME
+		ctx.save();
+		ctx.globalAlpha = 0.4; // Make it see-through
+		ctx.fillStyle = "#add8e6"; // Light blue glass
+		ctx.beginPath();
+		ctx.arc(hX, top, radius, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.restore();
+
+		// 3. THE OUTLINE & REFLECTION
+		ctx.strokeStyle = "#fff"; // White shine
+		ctx.beginPath();
+		ctx.arc(hX, top, radius, 0, Math.PI * 2);
+		ctx.stroke();
+
+		// Shine highlight (that little 'glint' on glass)
+		ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+		ctx.beginPath();
+		ctx.arc(hX, top, radius - 4, Math.PI * 1.2, Math.PI * 1.4);
+		ctx.stroke();
+
+		// 4. SIDE COMM-PIECE (Antenna)
+		ctx.fillStyle = "#999";
+		ctx.fillRect(hX + 14, top - 4, 4, 8);
+	},
     "horns": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
         const offset = -6; 
