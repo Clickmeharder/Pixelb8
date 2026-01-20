@@ -2607,7 +2607,7 @@ function cmdHeal(p, user, args) {
     if (p.dead) return;
 
     // 1. Target Detection
-    let targetArg = args[1]?.toLowerCase();
+    let targetArg = players[args[1]];
 
     // SCENARIO A: !heal all (Manual AOE)
     if (targetArg === "all") {
