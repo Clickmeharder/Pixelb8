@@ -3710,7 +3710,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         if (cmd === "showdungeon") { viewArea = "dungeon"; areaDisplayDiv.textContent = "StickmenFall: Dungeon"; return; }
         if (cmd === "showpond") { viewArea = "pond"; areaDisplayDiv.textContent = "StickmenFall: Pond"; return; }
         if (cmd === "showarena") { viewArea = "arena"; areaDisplayDiv.textContent = "StickmenFall: Arena"; return; }
-		if (cmd === "showtown") { viewArea = "town"; areaDisplayDiv.textContent = "StickmenFall: Arena"; return; }
+		if (cmd === "showtown") { viewArea = "town"; areaDisplayDiv.textContent = "StickmenFall: Town"; return; }
         if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[ADMIN] Merchant spawned."); return; }
         if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[ADMIN] Merchant removed."); return; }
         if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
