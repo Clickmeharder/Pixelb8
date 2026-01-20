@@ -901,30 +901,46 @@ let dungeonCountdownInterval = null; // To track the interval
 //-- MAIN DUNGEON STUFF --
 function joinDungeonQueue(p) {
     if (p.dead) return;
-    
-	const nameKey = p.name.toLowerCase();
+
+    const nameKey = p.name.toLowerCase();
     if (!dungeonQueue.includes(nameKey)) {
         dungeonQueue.push(nameKey);
         systemMessage(`${p.name} joined the queue (${dungeonQueue.length} total)`);
     }
 
-    // If the timer isn't already running, start it
     if (!dungeonCountdownInterval) {
         dungeonSecondsLeft = 60;
-        
         systemMessage("Dungeon timer started!");
 
         dungeonCountdownInterval = setInterval(() => {
             dungeonSecondsLeft--;
 
-            // --- AUTO-SWITCH VIEW (30 seconds before start) ---
+            // --- 30 SECONDS: TELEPORT & FALL ---
             if (dungeonSecondsLeft === 30) {
                 viewArea = "dungeon";
-                document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON (Pixel8ing)";
-                systemMessage("System: Switching view to Dungeon for upcoming raid...");
+                
+                // Sync the UI dropdown
+                const selector = document.getElementById("view-area-selector");
+                if (selector) selector.value = "dungeon";
+                
+                document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON (Inbound!)";
+                systemMessage("System: Sending players to the dungeon floor...");
+
+                // Send players in early so they can fall and land
+                dungeonQueue.forEach(name => {
+                    let player = players[name.toLowerCase()];
+                    if (player && !player.dead) {
+                        player.area = "dungeon";
+                        player.y = -200;                // Start sky-high
+                        player.x = 100 + Math.random() * 600; 
+                        player.targetY = 450;           // Set the floor target
+                        player.targetX = null;          // Stop walking
+                        player.activeTask = "attacking"; // Get ready
+                    }
+                });
             }
 
-            // --- START DUNGEON (At 0 seconds) ---
+            // --- 0 SECONDS: START COMBAT ---
             if (dungeonSecondsLeft <= 0) {
                 clearInterval(dungeonCountdownInterval);
                 dungeonCountdownInterval = null;
@@ -934,29 +950,15 @@ function joinDungeonQueue(p) {
     }
 }
 function startDungeon() {
-    dungeonSecondsLeft = 0;
     dungeonActive = true;
-    viewArea = "dungeon"; 
-    
-    const selector = document.getElementById("view-area-selector");
-    if (selector) selector.value = "dungeon";
-
+    dungeonWave = 1; // Reset to wave 1
+    // Final UI update
     document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON (ACTIVE)";
+    systemMessage("The Dungeon Gates have opened! The monsters are here!");
 
-    dungeonQueue.forEach(name => {
-        let p = players[name.toLowerCase()]; // Ensure lowercase lookup
-        if (p && !p.dead) {
-            p.area = "dungeon";
-            p.y = -200;                  // High in the sky
-            p.x = 100 + Math.random() * 600; 
-            p.targetY = 450;             // The floor
-            p.targetX = null;            // STOP any horizontal walking
-            p.activeTask = "attacking";  
-        }
-    });
-
+    // Important: Clear the queue so the NEXT raid starts fresh
     dungeonQueue = []; 
-    systemMessage("The Dungeon Gates have opened!");
+
     spawnWave();
 }
 
