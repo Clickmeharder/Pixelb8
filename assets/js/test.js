@@ -174,28 +174,28 @@ function movePlayer(p, targetArea) {
     }
     p.area = targetArea;
 
-    // Floor Y is roughly 475. Player height is usually ~40-50px.
-    // So p.y = 450 puts their feet exactly on the floor.
-    const floorY = 450; 
+	// FIX: Set this to match your drawScenery floor (475)
+    // 450 allows for the height of the stickman so they stand ON the line.
+    const groundLevel = 450; 
 
     if (targetArea === "pond") {
-        p.x = Math.random() * 150 + 50; // Force them on the grass
-        p.y = floorY; 
+        p.x = Math.random() * 150 + 50;
+        p.y = groundLevel; 
     } else if (targetArea === "arena") {
-        p.x = Math.random() * 400 + 200; // Centered in arena
-        p.y = floorY;
-    } else if (targetArea === "town") {
-        p.x = Math.random() * 600 + 100;
-        p.y = floorY;
+        p.x = Math.random() * 400 + 200;
+        p.y = groundLevel;
     } else {
-        // Home or Dungeon
         p.x = Math.random() * 600 + 100;
-        p.y = floorY;
+        p.y = groundLevel;
     }
 
-    p.targetX = null; // Stop any current walking
-    p.targetY = null;
-    p.activeTask = "none"; 
+    // This triggers your "falling" logic in updatePhysics
+    // If you want them to drop from the sky when they change areas:
+    p.y = -50; // Start above screen
+    p.targetY = groundLevel; // Fall down to the ground
+
+    p.targetX = null; 
+    p.activeTask = "none";
 
     if (targetArea !== "dungeon") {
         dungeonQueue = dungeonQueue.filter(n => n !== p.name.toLowerCase());
@@ -1614,44 +1614,66 @@ function drawProjectiles(ctx) {
 /*----------------------------------------------*/
 
 function updatePhysics(p) {
-    // --- STATE 1: FALLING (Dungeon Entry) ---
-if (p.targetY !== undefined) {
+    const groundLevel = 450; // Feet will touch the 475 floor line
+
+    // --- STATE 1: FALLING (Area Entry) ---
+    // This handles the 'drop-in' effect when traveling
+    if (p.targetY !== undefined && p.targetY !== null) {
         if (p.y < p.targetY) {
-            p.y += 12; 
-            p.lean = 0.1;
-            return; // STOP HERE. Do not run horizontal logic.
+            p.y += 12; // Falling speed
+            p.lean = 0.1; 
+            return; // STOP: Don't allow horizontal movement while in mid-air
         } else {
             p.y = p.targetY;
-            delete p.targetY;
+            p.targetY = null; // Successfully landed
             spawnFloater(p, "LANDED!", "#fff");
+            if (window.shakeAmount !== undefined) window.shakeAmount = 5; // Tiny landing thud
         }
     }
 
-    // --- STATE 2: WALKING (Horizontal) ---
+    // --- STATE 2: EMERGENCY FLOOR CHECK ---
+    // If a player somehow ends up at y=150 (the old bug), 
+    // this will pull them down to the actual floor.
+    if (!p.targetY && p.y < groundLevel) {
+        p.y += 5; 
+        if (p.y > groundLevel) p.y = groundLevel;
+    }
+
+    // --- STATE 3: WALKING (Horizontal) ---
     if (p.targetX !== null && p.targetX !== undefined) {
         let oldX = p.x;
         let dx = p.targetX - p.x;
         
+        // Use a small buffer (5px) to prevent "shaking" at the destination
         if (Math.abs(dx) > 5) {
-            p.x += dx * 0.1;
-            p.lean = dx > 0 ? 0.2 : -0.2;
+            p.x += dx * 0.1; // Smooth easing
+            p.lean = dx > 0 ? 0.2 : -0.2; // Lean into the movement
 
+            // Pond Water Interactions
             if (p.area === "pond") {
-                if (oldX <= 250 && p.x > 250) triggerSplash(p);
-                if (oldX > 250 && p.x <= 250) triggerSplash(p);
+                // Trigger splash when crossing the shore line (x=250)
+                if ((oldX <= 250 && p.x > 250) || (oldX > 250 && p.x <= 250)) {
+                    if (typeof triggerSplash === "function") triggerSplash(p);
+                }
             }
         } else {
+            p.x = p.targetX; // Snap exactly to target
             p.lean = 0;
-            // Only stop seeking target if not attacking
-            if (p.activeTask !== "attacking") p.targetX = null;
+            
+            // Logic: Only clear targetX if we aren't currently in a combat task
+            // This prevents AI from "forgetting" their target during Arena/Dungeon fights
+            if (p.activeTask !== "attacking" && p.activeTask !== "pvp") {
+                p.targetX = null;
+            }
         }
     }
 
-    // --- STATE 3: SEPARATION (Crowd Control) ---
-    // This runs for everyone on the ground to prevent overlapping
-    resolveCrowding(p);
+    // --- STATE 4: SEPARATION (Crowd Control) ---
+    // Only resolve crowding if the player is actually on the ground
+    if (p.y >= groundLevel) {
+        resolveCrowding(p);
+    }
 }
-
 function resolveCrowding(p) {
     const bubble = 35; // Increased slightly for clarity
     Object.values(players).forEach(other => {
@@ -2036,7 +2058,6 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
 // --- MAIN FUNCTIONS ---
 function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
-    //updatePhysics(p); 
     const now = Date.now();
     if (p.dead) return drawCorpse(ctx, p, now);
 	ctx.save(); 
