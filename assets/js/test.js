@@ -2458,9 +2458,9 @@ function updateAreaPlayerCounts() {
 
         selector.options[0].text = `🏠 Home (${counts.home})`;
         selector.options[1].text = `🏙️ Town (${counts.town})`;
-		selector.options[4].text = `🏟️ Arena (${counts.arena})`;
-        selector.options[2].text = `🎣 Pond (${counts.pond})`;
-        selector.options[3].text = `${dungeonIcon} ${dungeonLabel} (${counts.dungeon})`;
+		selector.options[2].text = `🏟️ Arena (${counts.arena})`;
+        selector.options[3].text = `🎣 Pond (${counts.pond})`;
+        selector.options[4].text = `👾 Dungeon (${counts.dungeon})`;
         
     }
 }
@@ -3122,13 +3122,7 @@ function cmdRespawn(p) {
     p.targetX = null;
     p.targetY = null;
 
-    // 3. Update UI for the player
-    if (p.name.toLowerCase() === playerName.toLowerCase()) {
-        viewArea = "town";
-        const selector = document.getElementById("view-area-selector");
-        if (selector) selector.value = "town";
-        areaDisplayDiv.textContent = "StickmenFall: Town";
-    }
+
 
     systemMessage(`${p.name} has respawned in Town.`);
     saveStats(p);
