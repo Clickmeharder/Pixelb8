@@ -241,8 +241,9 @@ const ITEM_DB = {
 	"centurion":    { type: "helmet", style: "centurion", tier: 4, rarity: 0, def: 2,  value: 10000, color: "#ffcc00" },
 	"tv":      { type: "helmet", style: "tv", tier: 5, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
 	"Pirate Hat":    { type: "helmet", style: "pirate", tier: 5, rarity: 0, def: 2,  value: 10000, color: "#222222" },
+	"Space Helmet":      { type: "helmet", style: "spacehelmet", tier: 5, rarity: 10, def: 4, value: 500000, color: "#d2b48c" },
 	"gentleman hat":    { type: "helmet", style: "gentleman", tier: 6, rarity: 0,  def: 2,  value: 10000, color: "#333333" },
-	"fun hat":    { type: "helmet", style: "funhat", tier: 7, rarity: 0, def: 2,  value: 10000, color: "white" },
+	"fun hat":    { type: "helmet", style: "funhat", tier: 7, rarity: 0, def: 2,  value: 10000, color: "white" }, 
 	"kabuto":    { type: "helmet", style: "samurai", tier: 8, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
 	"stickmenpo":    { type: "helmet", style: "menpo", tier: 9, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
 	"Royal Crown":    { type: "helmet", style: "crown", tier: 10, rarity: 0, def: 2,  value: 10000, color: "#ff0000" },
@@ -267,17 +268,20 @@ const ITEM_DB = {
 
 // ---------------------------basic items----------------------------------------------------------------
 	// --- normal fish ----
-	"Bass":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
-	"Trout":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
-	"Salmon":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
-	"Tuna":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
-	"Shark":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
-	"Lobster":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 1000, color: "#FFD700" },
-	// --- unique fish ---
 	
+	"Bass":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
+	"Trout":    { type: "fish", weight:"0.1kg", tier: 2, rarity: 0, value: 100, color: "#FFD700" },
+	"Salmon":    { type: "fish", weight:"0.1kg", tier: 3, rarity: 0, value: 100, color: "#FFD700" },
+	"Tuna":    { type: "fish", weight:"0.1kg", tier: 4, rarity: 0, value: 100, color: "#FFD700" },
+	"Shark":    { type: "fish", weight:"0.1kg", tier: 5, rarity: 0, value: 100, color: "#FFD700" },
+	"Lobster":    { type: "fish", weight:"0.1kg", tier: 6, rarity: 0, value: 1000, color: "#FFD700" },
+	
+	// --- unique fish ---
 	"Golden Bass":    { type: "fish", tier: 10, rarity: 0, value: 100, color: "#FFD700" },
 	// --- unique swimming find ---
 	"Pearl":    { type: "fish", tier: 11, rarity: 0, value: 100, color: "white" },
+	//rare fishing finds
+	"fishhat":      { type: "helmet", style: "fishhat", tier: 99, rarity: 13, def: 1, value: 500000, color: "#d2b48c" },
     // --- MATERIALS ---
     "Leather scrap":  { type: "material", tier: 1, rarity: 0, value: 15,   color: "#a88d6d" },
 	"Sea Shell":  { type: "material", tier: 8, rarity: 0, value: 15,   color: "#a88d6d" },
