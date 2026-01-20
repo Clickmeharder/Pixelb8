@@ -3,27 +3,16 @@
 // fixes needed: bow currently looks like is held by the string. we want it to look like the player is holding the bow part.
 const ITEM_DB = {
     // --- WEAPONS -----------------------------------------------------------------------------------
-	// swords (melee)
-	"Rusty Dagger":   { type: "weapon", style: "dagger", tier: 1, rarity: 0, power: 5,  speed: 1000,  value: 40,   color: "#777"},
-    "Iron Sword":     { type: "weapon", style: "sword", tier: 2, rarity: 0, power: 12, speed: 1200,  value: 200,  color: "#eee" },
-	"Steel Sword":     { type: "weapon", style: "sword", tier: 3, rarity: 0, power: 15, speed: 1500,  value: 2000,  color: "#777" },
-	"Golden Sword":     { type: "weapon", style: "sword", tier: 5, rarity: 0, power: 30, speed: 1750,  value: 20000,  color: "#eee"},
-	// Bows (archery)
-	"Shitty Shortbow":{ type: "bow", style: "bow", tier: 1, rarity: 1, power: 5, speed: 1000,  value: 40,  color: "#eee" },
-	"shortbow":{ type: "weapon", style: "bow", tier: 2, rarity: 2, power: 8, speed: 1250,  value: 200,   color: "#eee" },
-    "Wooden Shortbow":{ type: "bow", style: "bow", tier: 3, rarity: 3, power: 10, speed: 1500,  value: 2000,   color: "#d2b48c" },
-    "Oak Shortbow":{ type: "bow", style: "bow", tier: 4, rarity: 4, power: 15, speed: 1750,  value: 20000,  color: "#d2b48c" },
-	//Stalves (magic)
-	"Wooden Staff":   { type: "staff", style:"", tier: 3, rarity: 2, power: 10, speed: 500,  value: 40, color: "white", poleColor: "#5d4037"  },
-	"Styled Staff":   { type: "staff", style:"staff", tier: 5, rarity: 3, power: 15, speed: 750,  value: 40, color: "#00ffcc", poleColor: "#5d4037"  },
+
 // -------------------------- TOOLS --------------------------------------------------------------------
     "Fishing Rod":    { type: "tool", style:"", tier: 100, rarity: 13, power: 0, value: 100,   color: "#8B4513" },
 // ------------------------- Helmets and Hats ----------------------------------------------------------
 	// --- Helmets     ---
-	"Iron Helmet":    { type: "helmet",style: "knight", tier: 3, rarity: 2, def: 5, value: 150, color: "#aaa" },
-	"Viking Helm":    { type: "helmet", style: "viking", tier: 4, rarity: 4, def: 6,  value: 400,  color: "#888" },
-	"Steel Helmet":    { type: "helmet",style: "knight", tier: 5, rarity: 5, def: 7, value: 150, color: "#eee" },
-	"Great Horns":    { type: "helmet", style: "horns", tier: 6, rarity: 6, def: 8,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
+	"Iron Helmet":    { type: "helmet", skill:"attack", style: "knight", tier: 3, rarity: 2, def: 5, value: 150, color: "#aaa" },
+	"Viking Helm":    { type: "helmet", skill:"attack", style: "viking", tier: 4, rarity: 4, def: 6,  value: 400,  color: "#888" },
+	"Steel Helmet":    { type: "helmet", skill:"attack", style: "knight", tier: 5, rarity: 5, def: 7, value: 150, color: "#eee" },
+	"Dark Helmet":    { type: "helmet", skill:"attack", style: "knight", tier: 5, rarity: 5, def: 7, value: 150, color: "#333" },
+	"Great Horns":    { type: "helmet", skill:"attack", style: "horns", tier: 6, rarity: 6, def: 8,  value: 1200, color: "#FFD700" }, // Gold Viking horns!
 	//---Wizard Hats   ---
     "Cool Hat": { type: "helmet", style: "wizard", tier: 2, rarity: 3, def: 1,  value: 150,  color: "#303f9f" },
 	"Magic Hat": { type: "helmet", style: "wizard", tier: 3, rarity: 4, def: 3,  value: 150,  color: "#303f9f" },
@@ -37,22 +26,24 @@ const ITEM_DB = {
 //------------------------------------------------------------------------------------------------------
 // --------------------------- ARMOR/SHIRT -------------------------------------------------------------
 	// --- shirts
-	"Black Shirt":  { type: "armor", style:"", tier: 10, rarity: 1,  def: 0,                  value: 200,   color: "red" },
-    "Red Shirt":  { type: "armor", style:"", tier: 9, rarity: 1,  def: 0,                  value: 90,   color: "red" },
-	"Pink Shirt":  { type: "armor", style:"", tier: 8, rarity: 1,  def: 0,                  value: 80,   color: "pink" },
-	"Orange Shirt":  { type: "armor", style:"", tier: 7, rarity: 1, def: 0,                  value: 70,   color: "orange" },
-	"Yellow Shirt":  { type: "armor", style:"", tier: 6, rarity: 1, def: 0,                  value: 60,   color: "yellow" },
-	"Green Shirt":  { type: "armor", style:"", tier: 5, rarity: 1, def: 0,                  value: 50,   color: "green" },
-	"Blue Shirt":  { type: "armor", style:"", tier: 4, rarity: 1, def: 0,                  value: 40,   color: "blue" },
-	"Brown Shirt" { type: "armor", style:"", tier: 3, rarity: 1, def: 0,                  value: 30,   color: "brown" },
-	"Indigo Shirt" { type: "armor", style:"", tier: 2, rarity: 1, def: 0,                  value: 20,   color: "indigo" },
-	"Violet Shirt" { type: "armor", style:"", tier: 1, rarity: 1, def: 0,                  value: 10,   color: "violet" },
+	"White Shirt":  { type: "armor", style:"", tier: 11, rarity: 1,  def: 5,                  value: 200,   color: "red" },
+	"Black Shirt":  { type: "armor", style:"", tier: 10, rarity: 1,  def: 5,                  value: 200,   color: "red" },
+    "Red Shirt":  { type: "armor", style:"", tier: 9, rarity: 1,  def: 5,                  value: 90,   color: "red" },
+	"Pink Shirt":  { type: "armor", style:"", tier: 8, rarity: 1,  def: 4,                  value: 80,   color: "pink" },
+	"Brown Shirt": { type: "armor", style:"", tier: 7, rarity: 1, def: 1,                  value: 30,   color: "brown" },
+	"Green Shirt":  { type: "armor", style:"", tier: 6, rarity: 1, def: 1,                  value: 50,   color: "green" },
+	"Orange Shirt":  { type: "armor", style:"", tier: 5, rarity: 1, def: 0,                  value: 70,   color: "orange" },
+	"Yellow Shirt":  { type: "armor", style:"", tier: 4, rarity: 1, def: 0,                  value: 60,   color: "yellow" },
+	"Blue Shirt":  { type: "armor", style:"", tier: 3, rarity: 1, def: 0,                  value: 40,   color: "blue" },
+	"Indigo Shirt": { type: "armor", style:"", tier: 2, rarity: 1, def: 0,                  value: 20,   color: "indigo" },
+	"Violet Shirt": { type: "armor", style:"", tier: 1, rarity: 1, def: 0,                  value: 10,   color: "violet" },
 	// --- archer
     "Leather Tunic":  { type: "armor", style:"", tier: 1, rarity: 2, def: 3,                  value: 60,   color: "#5c4033" },
 	"Hardleather Tunic":  { type: "armor", style:"", tier: 4, rarity: 4, def: 5,                  value: 600,   color: "#5c4033" },
 	// --- melee
 	"Iron Plate":     { type: "armor", style:"", tier: 1, rarity: 5, def: 4,                  value: 300,  color: "#aaa" },
 	"Steel Plate":     { type: "armor", style:"", tier: 3, rarity: 5, def: 4,                  value: 600,  color: "#eee" },
+	"Dark Plate":    { type: "armor",style: "", tier: 5, rarity: 5, def: 7, value: 150, color: "#333" },
 	// --- magic
 	"Wizard Robe":  { type: "armor", style:"", tier: 4, rarity: 3, def: 3,                  value: 60,   color: "blue" },
 	// --- lurker
@@ -62,17 +53,18 @@ const ITEM_DB = {
 	//
 //------------------------------------------------------------------------------------------------------
 // ------------------------------PANTS------------------------------------------------------------------
-	//basic pants
-	"Black Pants":  { type: "Pants", style:"", tier: 10, rarity: 1,  def: 0,                  value: 60,   color: "red" },
-    "Red Pants":  { type: "Pants", style:"", tier: 9, rarity: 1,  def: 0,                  value: 60,   color: "red" },
-	"Pink Pants":  { type: "Pants", style:"", tier: 8, rarity: 1,  def: 0,                  value: 60,   color: "pink" },
-	"Orange Pants":  { type: "Pants", style:"", tier: 7, rarity: 1, def: 0,                  value: 60,   color: "orange" },
-	"Yellow Pants":  { type: "Pants", style:"", tier: 6, rarity: 1, def: 0,                  value: 60,   color: "yellow" },
-	"Green Pants":  { type: "Pants", style:"", tier: 5, rarity: 1, def: 0,                  value: 60,   color: "green" },
-	"Blue Pants":  { type: "Pants", style:"", tier: 4, rarity: 1, def: 0,                  value: 60,   color: "blue" },
-	"Brown Pants" { type: "Pants", style:"", tier: 3, rarity: 1, def: 0,                  value: 60,   color: "brown" },
-	"Indigo Pants" { type: "Pants", style:"", tier: 2, rarity: 1, def: 0,                  value: 60,   color: "indigo" },
-	"Violet Pants" { type: "Pants", style:"", tier: 1, rarity: 1, def: 0,                  value: 60,   color: "violet" },
+	// --- Pants
+	"White Shirt":  { type: "pants", style:"", tier: 11, rarity: 1,  def: 5,                  value: 200,   color: "red" },
+	"Black Shirt":  { type: "pants", style:"", tier: 10, rarity: 1,  def: 5,                  value: 200,   color: "red" },
+    "Red Shirt":  { type: "pants", style:"", tier: 9, rarity: 1,  def: 5,                  value: 90,   color: "red" },
+	"Pink Shirt":  { type: "pants", style:"", tier: 8, rarity: 1,  def: 4,                  value: 80,   color: "pink" },
+	"Brown Shirt": { type: "pants", style:"", tier: 7, rarity: 1, def: 1,                  value: 30,   color: "brown" },
+	"Green Shirt":  { type: "pants", style:"", tier: 6, rarity: 1, def: 1,                  value: 50,   color: "green" },
+	"Orange Shirt":  { type: "pants", style:"", tier: 5, rarity: 1, def: 0,                  value: 70,   color: "orange" },
+	"Yellow Shirt":  { type: "pants", style:"", tier: 4, rarity: 1, def: 0,                  value: 60,   color: "yellow" },
+	"Blue Shirt":  { type: "pants", style:"", tier: 3, rarity: 1, def: 0,                  value: 40,   color: "blue" },
+	"Indigo Shirt": { type: "pants", style:"", tier: 2, rarity: 1, def: 0,                  value: 20,   color: "indigo" },
+	"Violet Shirt": { type: "pants", style:"", tier: 1, rarity: 1, def: 0,                  value: 10,   color: "violet" },
 	//melee
 	"Iron Pants":  { type: "pants", style:"", tier: 2, rarity: 2, def :4, value: 100,color: "#aaa" },
 	"Steel Pants":  { type: "pants", style:"", tier: 3, rarity: 3, def :4, value: 100,color: "#aaa" },
@@ -82,7 +74,160 @@ const ITEM_DB = {
 	"Wizard Pants":  { type: "pants", style:"", tier: 4, rarity: 4, def :3, value: 100,color: "blue" },
 	// --- lurker
 	"Lurker Pants":  { type: "pants", style:"", tier: 6, rarity: 6, def :2, value: 100,color: "#222" },
-	
+
+
+
+//
+//
+	// swords (melee)
+	"Rusty Dagger":   { type: "weapon", style: "dagger", tier: 1, rarity: 0, power: 5,  speed: 1000,  value: 40,   color: "#777"},
+    "Iron Sword":     { type: "weapon", style: "sword", tier: 2, rarity: 0, power: 12, speed: 1200,  value: 200,  color: "#eee" },
+	"Steel Sword":     { type: "weapon", style: "sword", tier: 3, rarity: 0, power: 15, speed: 1500,  value: 2000,  color: "#777" },
+	"Golden Sword":     { type: "weapon", style: "sword", tier: 5, rarity: 0, power: 30, speed: 1750,  value: 20000,  color: "#eee"},
+	// Bows (archery)
+	"Shitty Shortbow":{ type: "bow", style: "bow", tier: 1, rarity: 1, power: 5, speed: 1000,  value: 40,  color: "#eee" },
+	"shortbow":{ type: "weapon", style: "bow", tier: 2, rarity: 2, power: 8, speed: 1250,  value: 200,   color: "#eee" },
+    "Wooden Shortbow":{ type: "bow", style: "bow", tier: 3, rarity: 3, power: 10, speed: 1500,  value: 2000,   color: "#d2b48c" },
+    "Oak Shortbow":{ type: "bow", style: "bow", tier: 4, rarity: 4, power: 15, speed: 1750,  value: 20000,  color: "#d2b48c" },
+	//Stalves (magic)
+	"Wooden Staff":   { type: "staff", style:"", tier: 3, rarity: 2, power: 10, speed: 500,  value: 40, color: "white", poleColor: "#5d4037"  },
+	"Styled Staff":   { type: "staff", style:"staff", tier: 5, rarity: 3, power: 15, speed: 750,  value: 40, color: "#00ffcc", poleColor: "#5d4037"  },
+// weapons (11 tiers) ---
+// --- SWORDS (MELEE) ---
+"Rusty Dagger":      { type: "weapon", style: "dagger", tier: 1,  rarity: 0,  power: 5,   speed: 1000, value: 40,     color: "#777" },
+"Iron Sword":        { type: "weapon", style: "dagger", tier: 2,  rarity: 1,  power: 12,  speed: 1200, value: 200,    color: "#eee" },
+"Steel Sword":       { type: "weapon", style: "sword", tier: 3,  rarity: 2,  power: 18,  speed: 1300, value: 800,    color: "#999" },
+"Flanged Mace":      { type: "weapon", style: "sword", tier: 4,  rarity: 4,  power: 25,  speed: 1500, value: 2500,   color: "#bbb" },
+"Golden Sword":      { type: "weapon", style: "sword", tier: 5,  rarity: 5,  power: 35,  speed: 1400, value: 10000,  color: "#ffd700" },
+"Great-Axe":         { type: "weapon", style: "sword", tier: 6,  rarity: 7,  power: 50,  speed: 1800, value: 25000,  color: "#888" },
+"Cobalt Claymore":   { type: "weapon", style: "sword", tier: 7,  rarity: 8,  power: 65,  speed: 1600, value: 50000,  color: "#1976d2" },
+"Mythril Blade":     { type: "weapon", style: "sword", tier: 8,  rarity: 10, power: 85,  speed: 1400, value: 100000, color: "#4fc3f7" },
+"Dragon-Bone Smasher":{ type: "weapon", style: "sword", tier: 9, rarity: 11, power: 120, speed: 2000, value: 250000, color: "#fff9c4" },
+"World-Eater Blade": { type: "weapon", style: "sword", tier: 10, rarity: 12, power: 180, speed: 1700, value: 500000, color: "#ff1744" },
+"Infinity Edge":     { type: "weapon", style: "sword", tier: 11, rarity: 13, power: 250, speed: 1200, value: 1000000,color: "#ffffff" },
+// --- BOWS (ARCHERY) ---
+"Shitty Shortbow":   { type: "bow", style: "bow", tier: 1,  rarity: 0,  power: 4,   speed: 800,  value: 40,     color: "#a1887f" },
+"Recurve Bow":       { type: "bow", style: "bow", tier: 2,  rarity: 1,  power: 10,  speed: 1000, value: 250,    color: "#8d6e63" },
+"Oak Longbow":       { type: "bow", style: "bow", tier: 3,  rarity: 2,  power: 16,  speed: 1200, value: 900,    color: "#d2b48c" },
+"Hunter's Crossbow": { type: "bow", style: "bow", tier: 4,  rarity: 4,  power: 24,  speed: 1500, value: 3000,   color: "#795548" },
+"Elven Windbow":     { type: "bow", style: "bow", tier: 5,  rarity: 6,  power: 32,  speed: 900,  value: 12000,  color: "#8bc34a" },
+"Eagle-Eye Bow":     { type: "bow", style: "bow", tier: 6,  rarity: 7,  power: 45,  speed: 1100, value: 28000,  color: "#fff176" },
+"Shadow-String":     { type: "bow", style: "bow", tier: 7,  rarity: 9,  power: 60,  speed: 1000, value: 55000,  color: "#4a148c" },
+"Crystal Piercer":   { type: "bow", style: "bow", tier: 8,  rarity: 10, power: 80,  speed: 900,  value: 110000, color: "#00e5ff" },
+"Dragon-Breath Bow": { type: "bow", style: "bow", tier: 9,  rarity: 11, power: 110, speed: 1300, value: 280000, color: "#ff5722" },
+"Void-Reaver Bow":   { type: "bow", style: "bow", tier: 10, rarity: 12, power: 160, speed: 1100, value: 550000, color: "#aa00ff" },
+"Apollo's Will":     { type: "bow", style: "bow", tier: 11, rarity: 13, power: 220, speed: 800,  value: 1200000,color: "#ffd600" },
+// --- STAVES (MAGIC) ---
+"Twisted Branch":    { type: "staff", style:"staff",  tier: 1,  rarity: 0,  power: 6,   speed: 1200, heal: 0, value: 50,    color: "#fff", poleColor: "#5d4037" },
+"Apprentice Wand":   { type: "staff", style:"staff",  tier: 2,  rarity: 1,  power: 14,  speed: 1000, heal: 0, value: 300,   color: "#90caf9", poleColor: "#8d6e63" },
+"Wooden Staff":      { type: "staff", style:"staff",  tier: 3,  rarity: 2,  power: 6,  speed: 1400, heal: 5, value: 1000,  color: "#fff", poleColor: "#5d4037" },
+"Acolyte's Pillar":  { type: "staff", style:"staff",  tier: 4,  rarity: 4,  power: 30,  speed: 1600, heal: 5, value: 3500,  color: "#9c27b0", poleColor: "#4a148c" },
+"Styled Staff":      { type: "staff", style:"staff", tier: 5,  rarity: 6,  power: 42,  speed: 1300, heal: 5, value: 15000, color: "#00ffcc", poleColor: "#004d40" },
+"Volcano Scepter":   { type: "staff", style:"staff", tier: 6,  rarity: 7,  power: 60,  speed: 1800, heal: 6, value: 32000, color: "#ff1744", poleColor: "#3e2723" },
+"Glacial Spike":     { type: "staff", style:"staff", tier: 7,  rarity: 9,  power: 75,  speed: 1500, heal: 7, value: 65000, color: "#80d8ff", poleColor: "#01579b" },
+"Staff of Ruin":     { type: "staff", style:"staff", tier: 8,  rarity: 10, power: 100, speed: 1400, heal: 8, value: 130000,color: "#673ab7", poleColor: "#212121" },
+"Celestial Pole":    { type: "staff", style:"staff", tier: 9,  rarity: 11, power: 140, speed: 1200, heal: 9, value: 300000,color: "#e1f5fe", poleColor: "#b3e5fc" },
+"Abyssal Eye":       { type: "staff", style:"staff", tier: 10, rarity: 12, power: 200, speed: 1100, heal: 10, value: 600000,color: "#ff00ff", poleColor: "#000" },
+"The Origin Point":  { type: "staff", style:"staff", tier: 11, rarity: 13, power: 300, speed: 900, heal: 15, value: 1500000,color: "#fff", poleColor: "#ffd600" },
+
+// --- ARCHER GEAR (11 TIERS) ---
+"Leather Vest":       { type: "armor", skill:"archer", tier: 1,  rarity: 1,  def: 2,  value: 60,    color: "#5c4033" },
+"Leather Pants":      { type: "pants", skill:"archer", tier: 1,  rarity: 1,  def: 1,  value: 40,    color: "#3e2723" },
+"Studded Vest":       { type: "armor", skill:"archer", tier: 2,  rarity: 2,  def: 4,  value: 200,   color: "#795548" },
+"Studded Pants":      { type: "pants", skill:"archer", tier: 2,  rarity: 2,  def: 2,  value: 150,   color: "#5d4037" },
+"Hunter Tunic":       { type: "armor", skill:"archer", tier: 3,  rarity: 3,  def: 6,  value: 500,   color: "#2e7d32" },
+"Hunter Pants":       { type: "pants", skill:"archer", tier: 3,  rarity: 3,  def: 4,  value: 400,   color: "#1b5e20" },
+"Hardleather Vest":   { type: "armor", skill:"archer", tier: 4,  rarity: 4,  def: 8,  value: 1000,  color: "#a1887f" },
+"Hardleather Pants":  { type: "pants", skill:"archer", tier: 4,  rarity: 4,  def: 6,  value: 800,   color: "#8d6e63" },
+"Ranger Tunic":       { type: "armor", skill:"archer", tier: 5,  rarity: 5,  def: 11, value: 2500,  color: "#4caf50" },
+"Ranger Pants":       { type: "pants", skill:"archer", tier: 5,  rarity: 5,  def: 8,  value: 2000,  color: "#388e3c" },
+"Wild Tunic":         { type: "armor", skill:"archer", tier: 6,  rarity: 6,  def: 15, value: 5000,  color: "#8bc34a" },
+"Wild Pants":         { type: "pants", skill:"archer", tier: 6,  rarity: 6,  def: 11, value: 4000,  color: "#689f38" },
+"Sky-Stalker Tunic":  { type: "armor", skill:"archer", tier: 7,  rarity: 8,  def: 20, value: 12000, color: "#80deea" },
+"Sky-Stalker Pants":  { type: "pants", skill:"archer", tier: 7,  rarity: 8,  def: 15, value: 9000,  color: "#4dd0e1" },
+"Wind-Reaver Tunic":  { type: "armor", skill:"archer", tier: 8,  rarity: 10, def: 26, value: 25000, color: "#00e5ff" },
+"Wind-Reaver Pants":  { type: "pants", skill:"archer", tier: 8,  rarity: 10, def: 20, value: 20000, color: "#00b8d4" },
+"DragonScale Tunic":  { type: "armor", skill:"archer", tier: 9,  rarity: 11, def: 35, value: 50000, color: "#ffab40" },
+"DragonScale Pants":  { type: "pants", skill:"archer", tier: 9,  rarity: 11, def: 28, value: 45000, color: "#ff9100" },
+"Nature Tunic":       { type: "armor", skill:"archer", tier: 10, rarity: 12, def: 45, value: 90000, color: "#00c853" },
+"Nature Pants":       { type: "pants", skill:"archer", tier: 10, rarity: 12, def: 38, value: 80000, color: "#1b5e20" },
+"Celestial Vest":     { type: "armor", skill:"archer", tier: 11, rarity: 13, def: 60, value: 200000,color: "#b2ff59" },
+"Celestial Pants":    { type: "pants", skill:"archer", tier: 11, rarity: 13, def: 52, value: 180000,color: "#76ff03" },
+//
+// --- MELEE GEAR (11 TIERS) ---
+"Iron Plate":         { type: "armor", skill:"attack", tier: 1,  rarity: 1,  def: 4,  value: 300,   color: "#aaa" },
+"Iron Pants":         { type: "pants", skill:"attack", tier: 1,  rarity: 1,  def: 3,  value: 200,   color: "#999" },
+"Steel Plate":        { type: "armor", skill:"attack", tier: 2,  rarity: 2,  def: 7,  value: 800,   color: "#eee" },
+"Steel Pants":        { type: "pants", skill:"attack", tier: 2,  rarity: 2,  def: 5,  value: 600,   color: "#ddd" },
+"Heavy Steel":        { type: "armor", skill:"attack", tier: 3,  rarity: 4,  def: 10, value: 2000,  color: "#cfd8dc" },
+"Heavy Pants":        { type: "pants", skill:"attack", tier: 3,  rarity: 4,  def: 8,  value: 1500,  color: "#b0bec5" },
+"Darksteel Plate":   { type: "armor", skill:"attack", tier: 4,  rarity: 5,  def: 14, value: 5000,  color: "#455a64" },
+"DarkSteel Pants":    { type: "pants", skill:"attack", tier: 4,  rarity: 5,  def: 11, value: 4000,  color: "#37474f" },
+"Cobalt Plate": { type: "armor", skill:"attack", tier: 5,  rarity: 6,  def: 19, value: 10000, color: "#1976d2" },
+"Cobalt Pants":    { type: "pants", skill:"attack", tier: 5,  rarity: 6,  def: 15, value: 8000,  color: "#1565c0" },
+"Mithril Plate":      { type: "armor", skill:"attack", tier: 6,  rarity: 7,  def: 25, value: 20000, color: "#4fc3f7" },
+"Mithril Pants":      { type: "pants", skill:"attack", tier: 6,  rarity: 7,  def: 20, value: 18000, color: "#29b6f6" },
+"Adamantite Plate":   { type: "armor", skill:"attack", tier: 7,  rarity: 9,  def: 32, value: 40000, color: "#d32f2f" },
+"Adamantite Pants": { type: "pants", skill:"attack", tier: 7,  rarity: 9,  def: 26, value: 35000, color: "#b71c1c" },
+"Obsidian Plate":  { type: "armor", skill:"attack", tier: 8,  rarity: 10, def: 42, value: 75000, color: "#212121" },
+"Obsidian Pants":   { type: "pants", skill:"attack", tier: 8,  rarity: 10, def: 35, value: 65000, color: "#000000" },
+"Paladin Plate": { type: "armor", skill:"attack", tier: 9,  rarity: 11, def: 55, value: 150000,color: "#ffeb3b" },
+"Paladin Pants":  { type: "pants", skill:"attack", tier: 9,  rarity: 11, def: 48, value: 130000,color: "#fdd835" },
+"Titan Plate":{ type: "armor", skill:"attack", tier: 10, rarity: 12, def: 75, value: 300000,color: "#7e57c2" },
+"Titan Pants": { type: "pants", skill:"attack", tier: 10, rarity: 12, def: 65, value: 250000,color: "#5e35b1" },
+"Dreadnought Plate":   { type: "armor", skill:"attack", tier: 11, rarity: 13, def: 100,value: 500000,color: "#ff1744" },
+"Dreadnought Pants":{ type: "pants", skill:"attack", tier: 11, rarity: 13, def: 90, value: 450000,color: "#d50000" },
+//
+// --- MAGIC GEAR (11 TIERS) ---
+"Apprentice Robe":    { type: "armor", skill:"magic", tier: 1,  rarity: 1,  def: 1,  value: 100,   color: "#90caf9" },
+"Apprentice Pants":   { type: "pants", skill:"magic", tier: 1,  rarity: 1,  def: 0,  value: 80,    color: "#64b5f6" },
+"Wizard Robe":        { type: "armor", skill:"magic", tier: 2,  rarity: 2,  def: 3,  value: 400,   color: "#2196f3" },
+"Wizard Pants":       { type: "pants", skill:"magic", tier: 2,  rarity: 2,  def: 2,  value: 300,   color: "#1e88e5" },
+"Mystic Robe":        { type: "armor", skill:"magic", tier: 3,  rarity: 4,  def: 5,  value: 1200,  color: "#9c27b0" },
+"Mystic Pants":       { type: "pants", skill:"magic", tier: 3,  rarity: 4,  def: 4,  value: 1000,  color: "#8e24aa" },
+"Sorcerer's Robe":   { type: "armor", skill:"magic", tier: 4,  rarity: 5,  def: 8,  value: 3000,  color: "#673ab7" },
+"Sorcerer's Pants":  { type: "pants", skill:"magic", tier: 4,  rarity: 5,  def: 6,  value: 2500,  color: "#5e35b1" },
+"Elementalist Robe":  { type: "armor", skill:"magic", tier: 5,  rarity: 6,  def: 12, value: 7000,  color: "#f44336" },
+"Elementalist Pants":  { type: "pants", skill:"magic", tier: 5,  rarity: 6,  def: 9,  value: 6000,  color: "#e53935" },
+"Archmage Robe":  { type: "armor", skill:"magic", tier: 6,  rarity: 8,  def: 18, value: 15000, color: "#3f51b5" },
+"Archmage Pants":  { type: "pants", skill:"magic", tier: 6,  rarity: 8,  def: 14, value: 12000, color: "#3949ab" },
+"Void Robe":  { type: "armor", skill:"magic", tier: 7,  rarity: 9,  def: 25, value: 35000, color: "#311b92" },
+"Void Pants": { type: "pants", skill:"magic", tier: 7,  rarity: 9,  def: 20, value: 30000, color: "#1a237e" },
+"Star Robe":   { type: "armor", skill:"magic", tier: 8,  rarity: 10, def: 35, value: 80000, color: "#00bcd4" },
+"Star Pants":  { type: "pants", skill:"magic", tier: 8,  rarity: 10, def: 28, value: 70000, color: "#00acc1" },
+"Reality Robe":     { type: "armor", skill:"magic", tier: 9,  rarity: 11, def: 48, value: 160000,color: "#e91e63" },
+"Reality Pants":    { type: "pants", skill:"magic", tier: 9,  rarity: 11, def: 40, value: 140000,color: "#c2185b" },
+"Mage Robe":    { type: "armor", skill:"magic", tier: 10, rarity: 12, def: 65, value: 350000,color: "#ffd600" },
+"Mage Pants":  { type: "pants", skill:"magic", tier: 10, rarity: 12, def: 55, value: 300000,color: "#ffab00" },
+"Astral Robe":     { type: "armor", skill:"magic", tier: 11, rarity: 10, def: 80, value: 550000,color: "#b3e5fc" },
+"Astral Pants":     { type: "pants", skill:"magic", tier: 11, rarity: 10, def: 80, value: 550000,color: "#b3e5fc" },
+"Omniscience":        { type: "armor", skill:"magic", tier: 11, rarity: 13, def: 90, value: 600000,color: "#ffffff" },
+//
+// --- LURKER GEAR (11 TIERS) ---
+"Lurker Robe":        { type: "armor", skill:"lurker", tier: 1,  rarity: 1,  def: 1,  value: 120,   color: "#424242" },
+"Lurker Pants":       { type: "pants", skill:"lurker", tier: 1,  rarity: 1,  def: 1,  value: 100,   color: "#212121" },
+"Shadow Robe":        { type: "armor", skill:"lurker", tier: 2,  rarity: 3,  def: 3,  value: 500,   color: "#37474f" },
+"Shadow Pants":    { type: "pants", skill:"lurker", tier: 2,  rarity: 3,  def: 2,  value: 400,   color: "#263238" },
+"Night-Stalker Robe": { type: "armor", skill:"lurker", tier: 3,  rarity: 5,  def: 6,  value: 1500,  color: "#4a148c" },
+"Night-Stalker Pants": { type: "pants", skill:"lurker", tier: 3,  rarity: 5,  def: 4,  value: 1200,  color: "#311b92" },
+"Phantom Robe":       { type: "armor", skill:"lurker", tier: 4,  rarity: 6,  def: 10, value: 4000,  color: "#78909c" },
+"Phantom Pants":      { type: "pants", skill:"lurker", tier: 4,  rarity: 6,  def: 7,  value: 3000,  color: "#607d8b" },
+"Assassin Robe":    { type: "armor", skill:"lurker", tier: 5,  rarity: 7,  def: 14, value: 9000,  color: "#b71c1c" },
+"Assassin Pants":   { type: "pants", skill:"lurker", tier: 5,  rarity: 7,  def: 11, value: 7500,  color: "#880e4f" },
+"Specter Robe":   { type: "armor", skill:"lurker", tier: 6,  rarity: 8,  def: 20, value: 18000, color: "#9e9e9e" },
+"Specter Pants": { type: "pants", skill:"lurker", tier: 6,  rarity: 8,  def: 16, value: 15000, color: "#757575" },
+"Venomscale Robe":  { type: "armor", skill:"lurker", tier: 7,  rarity: 9,  def: 28, value: 38000, color: "#00c853" },
+"Venomscale Pants":  { type: "pants", skill:"lurker", tier: 7,  rarity: 9,  def: 22, value: 32000, color: "#00e676" },
+"Abyssal Robe":    { type: "armor", skill:"lurker", tier: 8,  rarity: 10, def: 38, value: 85000, color: "#121212" },
+"Abyssal Pants":      { type: "pants", skill:"lurker", tier: 8,  rarity: 10, def: 30, value: 75000, color: "#000000" },
+"Eclipse Robe":      { type: "armor", skill:"lurker", tier: 9,  rarity: 11, def: 52, value: 170000,color: "#304ffe" },
+"Eclipse Pants":   { type: "pants", skill:"lurker", tier: 9,  rarity: 11, def: 42, value: 150000,color: "#1a237e" },
+"Soul-Reaper Robe": { type: "armor", skill:"lurker", tier: 10, rarity: 12, def: 70, value: 380000,color: "#6200ea" },
+"Soul-Reaper Pants":  { type: "pants", skill:"lurker", tier: 10, rarity: 12, def: 60, value: 320000,color: "#4a148c" },
+"Ghost in the Shell": { type: "armor", skill:"lurker", tier: 11, rarity: 13, def: 95, value: 650000,color: "#cfd8dc" },
+"Ghostly Echoes":     { type: "pants", skill:"lurker", tier: 11, rarity: 13, def: 85, value: 580000,color: "#eceff1" },
+//
+//
 //------------------------------------------------------------------------------------------------------
 // ------------------------------Boots------------------------------------------------------------------
     "leather Boots":  { type: "boots", style:"", tier: 2, rarity: 0, def: 1,                 value: 30,   color: "#5c4033" },
@@ -90,8 +235,19 @@ const ITEM_DB = {
 //------------------------------------------------------------------------------------------------------
 
 // ------------------------------Gloves------------------------------------------------------------------
-    "White Gloves":   { type: "gloves", style:"", tier: 5, rarity: 0, value: 100, color: "#ffffff" },
-	"Leather Gloves":   { type: "gloves", style:"", tier: 2, rarity: 0, value: 100, color: "#5c4033" },
+	// --- Gloves
+	"White Gloves":  { type: "gloves", style:"", tier: 11, rarity: 1,  def: 5,                  value: 200,   color: "red" },
+	"Black Gloves":  { type: "gloves", style:"", tier: 10, rarity: 1,  def: 5,                  value: 200,   color: "red" },
+    "Red Gloves":  { type: "gloves", style:"", tier: 9, rarity: 1,  def: 5,                  value: 90,   color: "red" },
+	"Pink Gloves":  { type: "gloves", style:"", tier: 8, rarity: 1,  def: 4,                  value: 80,   color: "pink" },
+	"Brown Gloves": { type: "gloves", style:"", tier: 7, rarity: 1, def: 1,                  value: 30,   color: "brown" },
+	"Green Gloves":  { type: "gloves", style:"", tier: 6, rarity: 1, def: 1,                  value: 50,   color: "green" },
+	"Orange Gloves":  { type: "gloves", style:"", tier: 5, rarity: 1, def: 0,                  value: 70,   color: "orange" },
+	"Yellow Gloves":  { type: "gloves", style:"", tier: 4, rarity: 1, def: 0,                  value: 60,   color: "yellow" },
+	"Blue Gloves":  { type: "gloves", style:"", tier: 3, rarity: 1, def: 0,                  value: 40,   color: "blue" },
+	"Indigo Gloves": { type: "gloves", style:"", tier: 2, rarity: 1, def: 0,                  value: 20,   color: "indigo" },
+	"Violet Gloves": { type: "gloves", style:"", tier: 1, rarity: 1, def: 0,                  value: 10,   color: "violet" },
+	"Leather Gloves":   { type: "gloves", style:"", tier: 2, rarity: 0, def: 1, value: 100, color: "#5c4033" },
     // --- SPECIALS ---
 // special head
 	"box":      { type: "helmet", style: "box", tier: 1, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
