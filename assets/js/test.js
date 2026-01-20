@@ -425,82 +425,63 @@ function scrubAllInventories() {
 function performAttack(p) {
     if (p.dead) return;
 
-    // 1. Identify Target (Dungeon prioritizes Enemies -> Boss; Home targets other players)
+    // 1. Identify Target
     let target = (p.area === "dungeon") 
         ? (enemies.find(e => !e.dead) || (boss && !boss.dead ? boss : null))
         : Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name);
 
     if (!target || target.dead) {
-        p.activeTask = null; // Reset if no targets left
+        p.activeTask = null;
         return;
     }
 
-    // 2. Determine Weapon Stats & Range
+    // 2. Determine Weapon Stats
     const weapon = ITEM_DB[p.stats.equippedWeapon] || { power: 0, type: "melee", speed: 2000 };
     
-    let skillType = "attack"; // Default Melee (Strength/Attack)
+    let skillType = "attack"; 
     if (weapon.type === "bow") skillType = "archer";
     if (weapon.type === "staff") skillType = "magic";
 
     const isRanged = (skillType !== "attack");
-    const rangeNeeded = isRanged ? 250 : 60; // Distance to stop at
+    const rangeNeeded = isRanged ? 250 : 60; 
     const attackSpeed = weapon.speed || 2000;
 
-    // --- POSITIONING LOGIC ---
-    // Calculate distance to target
+    // 3. Positioning Logic
     const dist = Math.abs(p.x - target.x);
-
     if (dist > rangeNeeded) {
-        // We are too far away. Move toward the target.
-        // We set targetX to be 'rangeNeeded' pixels away from the target
         const offset = p.x < target.x ? -rangeNeeded + 20 : rangeNeeded - 20;
         p.targetX = target.x + offset;
     } else {
-        // We are within range! Stop moving so we can focus on attacking.
         p.targetX = null; 
         p.lean = 0;
 
-        // --- ATTACK EXECUTION ---
+        // 4. Attack Execution
         const now = Date.now();
         if (!p.lastAttackTime) p.lastAttackTime = 0;
 
         if (now - p.lastAttackTime > attackSpeed) {
-            // A. Calculate Defense
-            let targetDef = 0;
-            let gearSource = target.stats || target.equipped; 
-            if (gearSource) {
-                const slots = target.stats ? ["equippedHelmet", "equippedArmor", "equippedPants", "equippedBoots"] : ["helmet", "armor", "pants", "boots"];
-                slots.forEach(s => {
-                    let itemName = target.stats ? target.stats[s] : target.equipped[s];
-                    let item = ITEM_DB[itemName];
-                    if (item) targetDef += (item.def || 0);
-                });
-            }
-
-            // B. Damage calculation
+            // Calculate Raw Damage (Defense is handled in applyDamage)
             let skillLvl = p.stats[skillType + "Level"] || 1;
-            let baseDmg = 5 + (skillLvl * 2) + (weapon.power || 0);
-            let actualDmg = Math.max(1, baseDmg - targetDef);
+            let rawDmg = 5 + (skillLvl * 2) + (weapon.power || 0);
 
-            // C. Visual Projectiles
+            // Visual Projectiles
             if (weapon.type === "bow") {
                 spawnProjectile(p.x, p.y - 15, target.x, target.y - 15, "#fff", "arrow");
             } else if (weapon.type === "staff") {
                 spawnProjectile(p.x, p.y - 15, target.x, target.y - 15, weapon.color || "#00ffff", "magic");
             }
 
-            // D. Apply Damage
-            applyDamage(target, actualDmg);
+            // Apply Damage
+            applyDamage(target, rawDmg);
             p.lastAttackTime = now;
 
-            // E. Handle Loot if target died
+            // 5. Handle Loot (Only for Dungeon Enemies)
             if (target.hp <= 0 && (target.isEnemy || target.isBoss) && !target.looted) {
                 target.looted = true;
                 handleLoot(p, target);
-                systemMessage(`${p.name} defeated ${target.name}!`);
             }
 
-            // F. Award XP
+            // 6. Award XP
             p.stats[skillType + "XP"] = (p.stats[skillType + "XP"] || 0) + 10;
             if (p.stats[skillType + "XP"] >= xpNeeded(p.stats[skillType + "Level"])) {
                 p.stats[skillType + "Level"]++;
@@ -513,41 +494,124 @@ function performAttack(p) {
         }
     }
 }
-function applyDamage(target, amount, color = "#f00") {
+function applyDamage(target, rawAmount, color = "#f00") {
     if (target.dead) return;
 
-    // --- EVASION CHECK ---
-    // If the target is a player with a lurkLevel, give them a chance to dodge
+    // --- 1. DEFENSE CALCULATION ---
+    let totalDef = 0;
+    // Check if target is a player (stats) or an enemy (equipped)
+    let gearSource = target.stats || target.equipped; 
+    if (gearSource) {
+        // Map slots based on whether it's a Player object or Enemy object
+        const slots = target.stats 
+            ? ["equippedHelmet", "equippedArmor", "equippedPants", "equippedBoots"] 
+            : ["helmet", "armor", "pants", "boots"];
+            
+        slots.forEach(s => {
+            let itemName = target.stats ? target.stats[s] : target.equipped[s];
+            let item = ITEM_DB[itemName];
+            if (item) totalDef += (item.def || 0);
+        });
+    }
+
+    // --- 2. EVASION CHECK (LURK) ---
     if (target.stats && target.stats.lurkLevel) {
-        // 5% base + 1% per lurk level (capped at 50%)
+        // 5% base + 1% per level, capped at 50%
         let dodgeChance = Math.min(0.50, 0.05 + (target.stats.lurkLevel * 0.01));
         if (Math.random() < dodgeChance) {
             spawnFloater(target, "MISS", "#fff");
-            // Give a tiny bit of Lurk XP for successful dodging
-            target.stats.lurkXP += 5;
+            
+            // Award Lurk XP for dodging
+            target.stats.lurkXP = (target.stats.lurkXP || 0) + 5;
             if (target.stats.lurkXP >= xpNeeded(target.stats.lurkLevel)) {
                 target.stats.lurkLevel++;
                 target.stats.lurkXP = 0;
                 spawnFloater(target, "LURK UP!", "#FFD700");
                 updateCombatLevel(target);
             }
-            return; // Exit function, no damage taken
+            return; // Attack missed, exit function
         }
     }
 
-    target.hp -= amount;
-    spawnFloater(target, `-${amount}`, color);
+    // --- 3. FINAL DAMAGE ---
+    // Subtract defense from raw amount, but ensure at least 1 damage is dealt
+    let finalAmount = Math.max(1, rawAmount - totalDef);
 
+    target.hp -= finalAmount;
+    spawnFloater(target, `-${finalAmount}`, color);
+
+    // --- 4. DEATH HANDLING ---
     if (target.hp <= 0) {
         target.hp = 0;
         target.dead = true;
         target.activeTask = "none";
         target.deathTime = Date.now();
         target.deathStyle = Math.random() > 0.5 ? "faceplant" : "backflip";
-        systemMessage(`${target.name || 'A player'} has fallen!`);
+        
+        const deathMsg = target.isEnemy || target.isBoss 
+            ? `${target.name} has been slain!` 
+            : `${target.name} has fallen!`;
+        systemMessage(deathMsg);
+    }
+}
+//
+// HEALINF
+function performHeal(p, mode = "auto", target = null) {
+    const healLvl = p.stats.healLevel || 1;
+    const now = Date.now();
+
+    // Cooldown check for manual commands (prevents spamming)
+    if (mode !== "auto" && p.lastManualHeal && now - p.lastManualHeal < 2000) return;
+    if (mode !== "auto") p.lastManualHeal = now;
+
+    let allies = Object.values(players).filter(pl => pl.area === p.area && !pl.dead);
+    
+    // --- 1. CALCULATE POWER ---
+    let baseAmt = 10 + (healLvl * 5); 
+
+    if (mode === "focus" && target) {
+        // STRONG SINGLE HEAL
+        applyHealEffect(p, target, baseAmt, "focus");
+    } 
+    else if (mode === "all") {
+        // WEAK TEAM HEAL
+        let aoeAmt = Math.floor(baseAmt * 0.4); 
+        allies.forEach(a => applyHealEffect(p, a, aoeAmt, "all"));
+    } 
+    else if (mode === "auto") {
+        // MEDIUM AUTO HEAL (Targets lowest HP)
+        let needyAllies = allies.filter(a => a.hp < a.maxHp);
+        if (needyAllies.length === 0) return;
+        
+        needyAllies.sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp));
+        let autoTarget = needyAllies[0];
+        
+        let autoAmt = Math.floor(baseAmt * 0.7);
+        applyHealEffect(p, autoTarget, autoAmt, "auto");
     }
 }
 
+// Helper to handle the actual HP gain, XP, and Visuals
+function applyHealEffect(p, target, amount, mode) {
+    if (target.hp >= target.maxHp && mode !== "all") return;
+
+    target.hp = Math.min(target.maxHp, target.hp + amount);
+    
+    // Visual Projectile from Healer to Target
+    spawnProjectile(p.x, p.y - 20, target.x, target.y - 20, "#00ff88", "magic");
+    spawnFloater(target, `+${amount} HP`, "#0f0");
+
+    // XP Award
+    let xpGain = mode === "focus" ? 20 : (mode === "all" ? 10 : 15);
+    p.stats.healXP += xpGain;
+
+    if (p.stats.healXP >= xpNeeded(p.stats.healLevel)) {
+        p.stats.healLevel++;
+        p.stats.healXP = 0;
+        spawnFloater(p, `HEAL LEVEL UP! (${p.stats.healLevel})`, "#FFD700");
+        updateCombatLevel(p);
+    }
+}
 //============================================================
 // ============== 	FISHING STUFF ============================
 // --- Fishing Merchant --------------------------------------
@@ -1049,19 +1113,33 @@ function handleEnemyAttacks() {
     let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
     if (dwellers.length === 0) return;
     
-    // Include the boss in the attack loop
+    const partySize = dwellers.length;
+    // Damage scales 10% higher for every player beyond the first
+    const partyScaling = 1 + (partySize - 1) * 0.1;
+
     let allAttackers = [...enemies];
     if (boss && !boss.dead) allAttackers.push(boss);
 
     allAttackers.forEach(e => {
         if (e.dead) return;
-        let target = dwellers[Math.floor(Math.random() * dwellers.length)];
+
+        // Calculate Base Damage
+        let dmg = (3 + Math.floor(dungeonWave * 1.5)) * partyScaling;
         
-        // NEW BALANCED DAMAGE: Base 3 + 1 per wave
-        let dmg = 3 + Math.floor(dungeonWave * 1.2); 
-        if (e.isBoss) dmg *= 2; // Boss hits harder
-        
-        applyDamage(target, dmg); 
+        if (e.isBoss) {
+            dmg *= 2.5; // Bosses are significantly more dangerous
+            
+            // BOSS SPECIAL: If party is large, boss hits 2 random players at once!
+            let targetsToHit = (partySize > 3) ? 2 : 1;
+            for (let i = 0; i < targetsToHit; i++) {
+                let target = dwellers[Math.floor(Math.random() * dwellers.length)];
+                applyDamage(target, Math.floor(dmg));
+            }
+        } else {
+            // Normal enemy hits one random target
+            let target = dwellers[Math.floor(Math.random() * dwellers.length)];
+            applyDamage(target, Math.floor(dmg)); 
+        }
     });
 }
 /*------------------------------------------------------------*/
@@ -1080,16 +1158,22 @@ function getBestAvailableTier(type, desiredTier) {
     });
 }
 function generateRandomLoadout(tier) {
-    // We try to get items from the current tier
-    const weaponPool = getBestAvailableTier("weapon", tier);
-    const headPool   = getBestAvailableTier("helmet", tier);
-    const armorPool  = getBestAvailableTier("armor", tier);
-    const legPool    = getBestAvailableTier("pants", tier);
+    // Collect ALL weapon categories into one pool
+    const weaponPool = Object.keys(ITEM_DB).filter(key => {
+        const i = ITEM_DB[key];
+        const isWeaponType = (i.type === "weapon" || i.type === "bow" || i.type === "staff");
+        return isWeaponType && i.tier === tier;
+    });
+
+    const headPool  = getBestAvailableTier("helmet", tier);
+    const armorPool = getBestAvailableTier("armor", tier);
+    const legPool   = getBestAvailableTier("pants", tier);
 
     const pick = (pool) => {
-		if (!pool || pool.length === 0) return null;
-		return pool[Math.floor(Math.random() * pool.length)];
-	};
+        if (!pool || pool.length === 0) return null;
+        return pool[Math.floor(Math.random() * pool.length)];
+    };
+
     return {
         weapon: pick(weaponPool),
         helmet: pick(headPool),
@@ -1948,7 +2032,16 @@ function updatePlayerActions(p, now) {
     if (p.activeTask === "dancing") {
         handleDancing(p, now);
     }
-    
+	if (p.activeTask === "healing") {
+		let weapon = ITEM_DB[p.stats.equippedWeapon];
+		let healSpeed = weapon?.speed || 2500;
+		
+		if (!p.lastHealTime) p.lastHealTime = 0;
+		if (now - p.lastHealTime > healSpeed) {
+			performHeal(p, "auto"); // Runs the auto logic
+			p.lastHealTime = now;
+		}
+	}
     // Handle Attacking
     if (p.activeTask === "attacking") {
         let weapon = ITEM_DB[p.stats.equippedWeapon];
@@ -2510,8 +2603,43 @@ function cmdAttack(p, user) {
     
     systemMessage(`${user} started attacking (15m idle)`);
 }
+function cmdHeal(p, user, args) {
+    if (p.dead) return;
 
-function cmdHeal(p, args) {
+    // 1. Target Detection
+    let targetArg = args[1]?.toLowerCase();
+
+    // SCENARIO A: !heal all (Manual AOE)
+    if (targetArg === "all") {
+        performHeal(p, "all");
+        return;
+    }
+
+    // SCENARIO B: !heal [name] (Manual Focus)
+    if (targetArg && players[targetArg]) {
+        let target = players[targetArg];
+        if (target.area === p.area && !target.dead) {
+            performHeal(p, "focus", target);
+            return;
+        } else {
+            systemMessage(`${user}: Target is not in your area or is dead.`);
+            return;
+        }
+    }
+
+    // SCENARIO C: !heal (Start Auto-Idle Mode)
+    if (!targetArg) {
+        if (p.activeTask === "healing") {
+            systemMessage(`${user}: You are already in auto-healing mode.`);
+        } else {
+            p.activeTask = "healing";
+            p.taskEndTime = Date.now() + (15 * 60 * 1000);
+            systemMessage(`${user} started auto-healing the party (15m idle).`);
+        }
+        return;
+    }
+}
+/* function cmdHeal(p, args) {
     let target = players[args[1]];
     if (target && target.area === p.area && !target.dead) {
         let amt = 10 + (p.stats.healLevel * 5);
@@ -2524,7 +2652,7 @@ function cmdHeal(p, args) {
         }
         saveStats(p);
     }
-}
+} */
 //auto unequip version of fish cmd
 function cmdLurk(p, user) {
     if (p.dead) return;
