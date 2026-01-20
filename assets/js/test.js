@@ -174,18 +174,33 @@ function movePlayer(p, targetArea) {
     }
     p.area = targetArea;
 
+    // Floor Y is roughly 475. Player height is usually ~40-50px.
+    // So p.y = 450 puts their feet exactly on the floor.
+    const floorY = 450; 
+
     if (targetArea === "pond") {
-        // Shore is 0 to 250. We keep them between 50 and 200 so they aren't off-screen 
-        // or touching the very edge of the water.
-        p.x = Math.random() * 200 + 75; 
-        p.y = 450 + Math.random() * 20; // Keep them on a flat line along the shore
+        p.x = Math.random() * 150 + 50; // Force them on the grass
+        p.y = floorY; 
+    } else if (targetArea === "arena") {
+        p.x = Math.random() * 400 + 200; // Centered in arena
+        p.y = floorY;
+    } else if (targetArea === "town") {
+        p.x = Math.random() * 600 + 100;
+        p.y = floorY;
     } else {
-        p.x = Math.random() * 700 + 100;
-        p.y = 400 + Math.random() * 100;
+        // Home or Dungeon
+        p.x = Math.random() * 600 + 100;
+        p.y = floorY;
     }
 
-    p.activeTask = null; 
-    if (targetArea !== "dungeon") dungeonQueue = dungeonQueue.filter(n => n !== p.name);
+    p.targetX = null; // Stop any current walking
+    p.targetY = null;
+    p.activeTask = "none"; 
+
+    if (targetArea !== "dungeon") {
+        dungeonQueue = dungeonQueue.filter(n => n !== p.name.toLowerCase());
+    }
+    
     systemMessage(`${p.name} traveled to ${targetArea}`);
 }
 
@@ -949,6 +964,155 @@ function handleLurking(p, now) {
 //dockBoat(){}
 //------------------------------------------------------------
 //============================================================
+
+//============================================================
+//======================= ARENA AREA =======================
+// --- ARENA variables ---
+let arenaActive = false;
+let arenaMode = "ffa"; // "1v1", "teams", "ffa"
+let arenaQueue = [];
+let arenaTimer = 0;
+let arenaMatchInterval = null;
+let pvpRankings = {}; // {playerName: {wins: 0, kills: 0, rating: 1000}}
+
+const ARENA_CONFIG = {
+    minPlayers: 2,
+    queueTime: 45, // seconds
+    modes: ["1v1", "teams", "ffa"]
+};
+function joinArenaQueue(p) {
+    if (p.dead) return;
+    const nameKey = p.name.toLowerCase();
+    if (!arenaQueue.includes(nameKey)) {
+        arenaQueue.push(nameKey);
+        systemMessage(`⚔️ ${p.name} joined the Arena queue (${arenaQueue.length}/${ARENA_CONFIG.minPlayers})`);
+    }
+
+    if (!arenaMatchInterval) {
+        arenaTimer = ARENA_CONFIG.queueTime;
+        arenaMatchInterval = setInterval(() => {
+            arenaTimer--;
+            
+            if (arenaTimer === 10) systemMessage("⚔️ ARENA: Match starting in 10 seconds!");
+
+            if (arenaTimer <= 0) {
+                clearInterval(arenaMatchInterval);
+                arenaMatchInterval = null;
+                processArenaStart();
+            }
+        }, 1000);
+    }
+}
+
+function processArenaStart() {
+    if (arenaQueue.length < ARENA_CONFIG.minPlayers) {
+        systemMessage("⚔️ Arena match cancelled: Not enough players.");
+        arenaQueue = [];
+        return;
+    }
+
+    // Determine Mode based on player count
+    if (arenaQueue.length === 2) arenaMode = "1v1";
+    else if (arenaQueue.length % 2 === 0 && arenaQueue.length <= 6) arenaMode = "teams";
+    else arenaMode = "ffa";
+
+    systemMessage(`⚔️ ARENA START: ${arenaMode.toUpperCase()} MODE!`);
+    
+    arenaActive = true;
+    
+    arenaQueue.forEach(name => {
+        let p = players[name];
+        if (p) {
+            p.area = "arena";
+            p.y = 450;
+            p.hp = p.maxHp; // Refill for the fight
+            p.activeTask = "pvp";
+            // Randomly position on the arena floor
+            p.x = 200 + Math.random() * 400;
+        }
+    });
+
+    // If teams, assign team colors/ids
+    if (arenaMode === "teams") {
+        arenaQueue.sort((a, b) => players[a].stats.combatLevel - players[b].stats.combatLevel);
+        arenaQueue.forEach((name, i) => {
+            players[name].team = (i % 2 === 0) ? "Red" : "Blue";
+        });
+    }
+
+    arenaQueue = []; // Clear queue for next match
+}
+function performPvPAttack(p) {
+    // Find a target in the Arena
+    let targets = Object.values(players).filter(target => 
+        target.area === "arena" && 
+        !target.dead && 
+        target.name !== p.name
+    );
+
+    // Team check
+    if (arenaMode === "teams") {
+        targets = targets.filter(t => t.team !== p.team);
+    }
+
+    if (targets.length === 0) {
+        checkArenaVictory();
+        return;
+    }
+
+    // Fairness Logic: Target the player closest to your own combat level
+    targets.sort((a, b) => {
+        let diffA = Math.abs(a.stats.combatLevel - p.stats.combatLevel);
+        let diffB = Math.abs(b.stats.combatLevel - p.stats.combatLevel);
+        return diffA - diffB;
+    });
+
+    let target = targets[0];
+    
+    // Calculate Damage
+    let dmg = Math.floor(5 + (p.stats.combatLevel * 1.5));
+    applyDamage(target, dmg);
+    spawnFloater(target, `-${dmg}`, "#ff4444");
+
+    if (target.dead) {
+        systemMessage(`⚔️ ${p.name} eliminated ${target.name}!`);
+        updatePvPRank(p.name, 1, 0); // +1 kill
+        checkArenaVictory();
+    }
+}
+function checkArenaVictory() {
+    const alive = Object.values(players).filter(p => p.area === "arena" && !p.dead);
+    
+    let winner = null;
+    if (arenaMode === "teams") {
+        const redAlive = alive.some(p => p.team === "Red");
+        const blueAlive = alive.some(p => p.team === "Blue");
+        if (!redAlive) winner = "Blue Team";
+        if (!blueAlive) winner = "Red Team";
+    } else if (alive.length === 1) {
+        winner = alive[0].name;
+    }
+
+    if (winner) {
+        systemMessage(`🏆 ARENA VICTORY: ${winner} WINS!`);
+        if (arenaMode !== "teams") updatePvPRank(winner, 0, 1); // +1 win
+        
+        arenaActive = false;
+        setTimeout(() => {
+            alive.forEach(p => movePlayer(p, "town"));
+        }, 3000);
+    }
+}
+
+function updatePvPRank(name, kill, win) {
+    if (!pvpRankings[name]) pvpRankings[name] = { kills: 0, wins: 0, rating: 1000 };
+    pvpRankings[name].kills += kill;
+    pvpRankings[name].wins += win;
+    pvpRankings[name].rating += (win * 25) + (kill * 5);
+    // Save to localStorage
+    localStorage.setItem("pvp_rankings", JSON.stringify(pvpRankings));
+}
+
 
 //============================================================
 //======================= DUNGEON AREA =======================
@@ -2061,66 +2225,76 @@ function drawCorpse(ctx, p, now) {
 // ================= DRAWING THE SCENERY AND AREAS ===========
 const backgrounds = {
     home: "#1a1a2e",
+    town: "#1e272e",
     dungeon: "#160a0a",
+    arena: "#000000",
     pond: "#0a1612"
 };
+
 function drawScenery(ctx) {
     const now = Date.now();
 
     if (viewArea === "home") {
-        // --- CHILL HOME VIBES ---
-        // Draw a simple Floor/Ground
         ctx.fillStyle = "#252545";
         ctx.fillRect(0, 475, c.width, 125);
-
-        // Draw some "Stars" or "Dust" in the air
         ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
         for(let i=0; i<10; i++) {
             let x = (i * 100 + (now/50)) % c.width;
             ctx.fillRect(x, 100 + (i*20), 2, 2);
         }
 
-    } else if (viewArea === "pond") {
-        // --- LAKE / WATER VIBES ---
-        // The Shore
-        ctx.fillStyle = "#1a2e1a";
-        ctx.fillRect(0, 475, 250, 125); // Land on the left
+    } else if (viewArea === "town") {
+        // --- TOWN SQUARE ---
+        ctx.fillStyle = "#2f3542"; // Paved stones
+        ctx.fillRect(0, 475, c.width, 125);
+        // Stone details
+        ctx.strokeStyle = "#3e4451";
+        for(let i=0; i<c.width; i+=100) {
+            ctx.strokeRect(i, 475, 100, 50);
+        }
+        // Central Monument Base
+        ctx.fillStyle = "#57606f";
+        ctx.fillRect(350, 420, 100, 55);
 
-        // The Water
+    } else if (viewArea === "arena") {
+        // --- BATTLE ARENA ---
+        ctx.fillStyle = "#3d2b1f"; // Dirt/Sand floor
+        ctx.fillRect(0, 475, c.width, 125);
+        // Background stadium walls
+        ctx.fillStyle = "#1e1e1e";
+        ctx.fillRect(0, 200, c.width, 275);
+        // Torch flickers
+        ctx.fillStyle = (now % 200 < 100) ? "#ff9f43" : "#ee5253";
+        ctx.beginPath(); ctx.arc(100, 250, 5, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.arc(700, 250, 5, 0, 7); ctx.fill();
+
+    } else if (viewArea === "pond") {
+        ctx.fillStyle = "#1a2e1a";
+        ctx.fillRect(0, 475, 250, 125); 
         ctx.fillStyle = "#0a2e3a";
         ctx.fillRect(250, 485, c.width - 250, 115);
+        drawBuyer(ctx);
 
-        // Water Ripples
-        ctx.strokeStyle = "rgba(255,255,255,0.1)";
-        ctx.lineWidth = 2;
-        for(let i=0; i<5; i++) {
-            let rx = 300 + (i * 120);
-            let ry = 520 + (Math.sin(now/500 + i) * 10);
-            ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + 40, ry); ctx.stroke();
-        }
-		drawBuyer(ctx);
     } else if (viewArea === "dungeon") {
-        // --- GRITTY DUNGEON VIBES ---
-        // Floor
         ctx.fillStyle = "#110505";
         ctx.fillRect(0, 475, c.width, 125);
-
-        // Cracks in the wall/back
         ctx.strokeStyle = "#2a1010";
         ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.moveTo(100, 0); ctx.lineTo(120, 100); ctx.lineTo(80, 200);
-        ctx.moveTo(600, 0); ctx.lineTo(580, 150); ctx.lineTo(620, 300);
         ctx.stroke();
-
-        // Spikes/Pillars
-        ctx.fillStyle = "#1d0a0a";
-        ctx.beginPath(); ctx.moveTo(200, 475); ctx.lineTo(225, 300); ctx.lineTo(250, 475); ctx.fill();
     }
-	
 }
 //================================================================================
+// This wrapper function just organizes the "Background" layer
+function renderScene() {
+    // 1. Draw the base sky/wall color
+    ctx.fillStyle = backgrounds[viewArea];
+    ctx.fillRect(0, 0, c.width, c.height);
 
+    // 2. Draw the specific props you wrote (Floor, Ripples, Cracks)
+    drawScenery(ctx);
+}
 //================================================================================
 //-----=======------=======---GAME LOOP STUFF--=======-----========----
 function updatePlayerStatus(p, now) {
@@ -2175,36 +2349,40 @@ function updatePlayerActions(p, now) {
             p.lastAttackTime = now;
         }
     }
+	if (p.activeTask === "pvp") {
+		let weapon = ITEM_DB[p.stats.equippedWeapon] || { speed: 2000 };
+		if (!p.lastAttackTime) p.lastAttackTime = 0;
+		
+		if (now - p.lastAttackTime > (weapon.speed || 2000)) {
+			performPvPAttack(p);
+			p.lastAttackTime = now;
+		}
+	}
 }
 
 
-// This wrapper function just organizes the "Background" layer
-function renderScene() {
-    // 1. Draw the base sky/wall color
-    ctx.fillStyle = backgrounds[viewArea];
-    ctx.fillRect(0, 0, c.width, c.height);
 
-    // 2. Draw the specific props you wrote (Floor, Ripples, Cracks)
-    drawScenery(ctx);
-}
 
 function updateAreaPlayerCounts() {
-    const counts = { home: 0, pond: 0, dungeon: 0 };
+    const counts = { home: 0, town: 0, pond: 0, dungeon: 0, arena: 0 };
     
-    // Count players in each area
     Object.values(players).forEach(p => {
         if (counts[p.area] !== undefined) counts[p.area]++;
     });
 
-    // Update the dropdown options text
     const selector = document.getElementById("view-area-selector");
     if (selector) {
+        // Change the dungeon icon based on activity
+        const dungeonIcon = dungeonActive ? "👹" : "👾";
+        const dungeonLabel = dungeonActive ? "RAID ACTIVE" : "Dungeon";
+
         selector.options[0].text = `🏠 Home (${counts.home})`;
-        selector.options[1].text = `🎣 Pond (${counts.pond})`;
-        selector.options[2].text = `💀 Dungeon (${counts.dungeon})`;
+        selector.options[1].text = `🏙️ Town (${counts.town})`;
+        selector.options[2].text = `🎣 Pond (${counts.pond})`;
+        selector.options[3].text = `${dungeonIcon} ${dungeonLabel} (${counts.dungeon})`;
+        selector.options[4].text = `⚔️ Arena (${counts.arena})`;
     }
 }
-
 // Call this inside your requestAnimationFrame or a 1-second interval
 //setInterval(updateAreaPlayerCounts, 1000);
 /* ================= GAME LOOP ================= */
@@ -2243,7 +2421,14 @@ function updateSystemTicks(now) {
 }
 function updateUI() {
     let uiHTML = "";
-
+	// --- ARENA COUNTDOWN ---
+    if (arenaMatchInterval && arenaTimer > 0) {
+        uiHTML += `
+            <div style="background: rgba(0,0,50,0.8); padding: 10px; border: 2px solid #00ffff; text-align: center; margin-bottom: 10px; border-radius: 5px;">
+                <b style="color: #00ffff; font-size: 16px;">⚔️ ARENA STARTING: ${arenaTimer}s</b><br>
+                <small style="color: #fff;">Mode: ${arenaQueue.length >= 4 ? 'Teams/FFA' : '1v1'}</small>
+            </div>`;
+    }
     // --- 1. COUNTDOWN SECTION ---
     if (dungeonCountdownInterval && dungeonSecondsLeft > 0) {
         uiHTML += `
@@ -2309,27 +2494,24 @@ function gameLoop() {
     updateUI();    
 
     // 3. DUNGEON LOGIC (GLOBAL SYSTEM)
-    // We run these even if you aren't looking at the dungeon so the raid can fail/progress
     if (dungeonActive) {
-        checkDungeonProgress(); // Handles wave spawning
-        checkDungeonFailure();  // Handles the 60s empty/dead countdown
+        checkDungeonProgress(); 
+        checkDungeonFailure();  
     } else {
-        // Only run idle training if SOMEONE is physically in the dungeon area
         const anyoneInDungeon = Object.values(players).some(p => p.area === "dungeon");
-        if (anyoneInDungeon) {
-            updateDungeonIdleTraining();
-        }
+        if (anyoneInDungeon) updateDungeonIdleTraining();
     }
 
-    // 4. DRAW DUNGEON-SPECIFIC ELEMENTS (VIEW ONLY)
-    if (viewArea === "dungeon") {
-        // Draw Loot Beams behind monsters
-        drawLootBeams(ctx); 
+    // 3.5 ARENA LOGIC (GLOBAL SYSTEM)
+    // Always check for match completion even if not looking at Arena
+    if (arenaActive) {
+        checkArenaVictory();
+    }
 
-        // Draw Boss
+    // 4. DRAW AREA-SPECIFIC ELEMENTS (VIEW ONLY)
+    if (viewArea === "dungeon") {
+        drawLootBeams(ctx); 
         if (boss && !boss.dead) drawMonster(ctx, boss);
-        
-        // Draw Enemies/Training Mobs
         enemies.forEach(e => {
             if (!e.dead) {
                 if (e.isStickman) drawEnemyStickman(ctx, e);
@@ -2340,16 +2522,30 @@ function gameLoop() {
 
     // 5. PLAYER PROCESSING
     Object.values(players).forEach(p => {
-        // LOGIC: Always runs for everyone (so they move and take damage in background)
+        // LOGIC: Always runs for everyone (Movement, Combat, PvP)
         if (!p.dead) {
             updatePhysics(p);         
             updatePlayerStatus(p, now); 
-            updatePlayerActions(p, now); 
+            
+            // Handle PvP specifically if they are in the Arena task
+            if (p.activeTask === "pvp") {
+                handlePvPLogic(p, now);
+            } else {
+                updatePlayerActions(p, now); 
+            }
         }
 
         // RENDERING: Only draw players who are in your current view
         if (p.area === viewArea) {
             drawStickman(ctx, p);
+            
+            // Visual flair for Arena: Draw Team color under feet if in Teams mode
+            if (viewArea === "arena" && arenaMode === "teams" && p.team) {
+                ctx.fillStyle = p.team === "Red" ? "rgba(255,0,0,0.3)" : "rgba(0,0,255,0.3)";
+                ctx.beginPath();
+                ctx.ellipse(p.x, p.y + 5, 20, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
     });
 
