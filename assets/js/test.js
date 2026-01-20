@@ -774,60 +774,61 @@ function drawBuyer(ctx) {
 // fishing task :
 function performFish(p) {
     if (p.area !== "pond" || p.dead) return;
-    if (p.stats.fishCaught === undefined) p.stats.fishCaught = 0;
+    
+    // 1. COST TO FISH (Bait)
+    const baitCost = 15; 
+    if ((p.stats.pixels || 0) < baitCost) {
+        systemMessage(`${p.name} ran out of pixels for bait! (Cost: ${baitCost})`);
+        p.activeTask = "none"; 
+        return;
+    }
+    p.stats.pixels -= baitCost;
 
+    const fishLevel = p.stats.fishLevel || 1;
     let roll = Math.random();
-    let resultText = "";
-    let isFish = false;
-    let floaterColor = "#44ccff"; // Default Blue
-
-    // 1. Check for Buyer-Only pixelsen Fish (5% chance)
-    if (buyerActive && Math.random() < 0.05) {
-        p.stats.inventory.push("pixelsen Bass");
-        resultText = "pixelsEN BASS!";
-        floaterColor = "#FFD700"; // pixels color
-        isFish = true;
-        systemMessage(`✨ ${p.name} landed a rare pixelsEN BASS!`);
-    } 
-    // 2. Original Rarity Logic
-    else if (roll < 0.001) {
-        p.stats.inventory.push("wig");
-        resultText = "THE LEGENDARY WIG!";
-        floaterColor = "#FFD700";
-        systemMessage(`[!] MYTHIC CATCH: ${p.name} found a Legendary Wig!`);
-    } 
-    else if (roll < 0.015) {
-        p.stats.inventory.push("leather Booties");
-        resultText = "leather Boots!";
-    } 
-    else if (roll < 0.065) {
-        p.stats.inventory.push("Leather scrap");
-        resultText = "Leather scrap";
-        floaterColor = "#a88d6d";
-    } 
-    else {
-        const weight = (Math.random() * 20 + 0.5).toFixed(1);
-        const fishItem = `${weight}kg Bass`; 
-        p.stats.inventory.push(fishItem);
-        resultText = fishItem;
-        isFish = true;
-        p.stats.fishCaught++;
+    
+    // 2. ESCAPE CHANCE (Decreases as you level up)
+    // Starts at 40% chance to lose catch, drops to 10% at high levels
+    let escapeChance = Math.max(0.10, 0.40 - (fishLevel * 0.01)); 
+    if (roll < escapeChance) {
+        spawnFloater(p, "LOST IT! (Bait gone)", "#ff6666");
+        return; 
     }
 
-    let displayMsg = `🎣 ${resultText}`;
-    if (isFish && resultText !== "pixelsEN BASS!") displayMsg += ` (#${p.stats.fishCaught})`;
+    // 3. LOOT TABLE SELECTION
+    let fishType = "Bass"; 
+    let lootRoll = Math.random();
 
-    // Updated clean call
-    spawnFloater(p, displayMsg, floaterColor);
+    if (lootRoll < 0.005) fishType = "fishhat"; // Super Rare
+    else if (lootRoll < 0.02) fishType = "Golden Bass";
+    else if (fishLevel >= 30 && lootRoll < 0.10) fishType = "Lobster";
+    else if (fishLevel >= 20 && lootRoll < 0.20) fishType = "Shark";
+    else if (fishLevel >= 15 && lootRoll < 0.35) fishType = "Tuna";
+    else if (fishLevel >= 10 && lootRoll < 0.55) fishType = "Salmon";
+    else if (fishLevel >= 5  && lootRoll < 0.75) fishType = "Trout";
 
-    // XP Logic
-    p.stats.fishXP += 10;
-    if (p.stats.fishXP >= xpNeeded(p.stats.fishLevel) * 2) {
-        p.stats.fishLevel++; 
+    const itemData = ITEM_DB[fishType];
+
+    // 4. WEIGHT CALCULATION (Based on Tier + Fish Level)
+    // Higher fishing level = heavier fish = more pixels!
+    let baseWeight = itemData.tier || 1;
+    let weightBonus = Math.random() * (fishLevel / 5);
+    let finalWeight = (baseWeight + weightBonus).toFixed(2);
+
+    // If it's a wearable item like the fishhat, don't add weight
+    let inventoryItem = itemData.type === "fish" ? `${finalWeight}kg ${fishType}` : fishType;
+    p.stats.inventory.push(inventoryItem);
+    
+    // 5. REWARDS
+    spawnFloater(p, `🎣 Caught: ${inventoryItem}!`, itemData.color || "#44ccff");
+    
+    p.stats.fishXP = (p.stats.fishXP || 0) + 15;
+    if (p.stats.fishXP >= xpNeeded(fishLevel) * 2) {
+        p.stats.fishLevel++;
         p.stats.fishXP = 0;
-        systemMessage(`${p.name} FISH UP! (Lv ${p.stats.fishLevel})`);
+        systemMessage(`[LEVEL UP] ${p.name} is now a Lvl ${p.stats.fishLevel} Fisher!`);
+        spawnFloater(p, "FISHING UP!", "#FFD700");
     }
-    updateCombatLevel(p);
     saveStats(p);
 }
 function performSwim(p) {
@@ -961,7 +962,10 @@ let dungeonActive = false;
 let dungeonWave = 1;
 let dungeonSecondsLeft = 0;
 let dungeonCountdownInterval = null; // To track the interval
+let dungeonEmptyTimer = null; // To track the 60s shutdown
+let dungeonEmptySeconds = 0;
 //-----------------------------------------------------------
+
 //-- MAIN DUNGEON STUFF --
 function joinDungeonQueue(p) {
     if (p.dead) return;
@@ -1103,10 +1107,78 @@ function spawnWave() {
     }
 }
 function checkDungeonProgress() {
+	if (!dungeonActive) return;
     let aliveEnemies = enemies.filter(e => !e.dead).length;
     if (aliveEnemies === 0 && (!boss || boss.dead)) {
         dungeonWave++; spawnWave();
     }
+}
+function checkDungeonFailure() {
+    if (!dungeonActive) return;
+
+    // Check if there are ANY players who are both IN the dungeon AND ALIVE
+    const winners = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
+    
+    if (winners.length === 0) {
+        // The dungeon is full of corpses or empty
+        if (!dungeonEmptyTimer) {
+            console.log("Dungeon empty/dead. Starting 60s shutdown...");
+            dungeonEmptySeconds = 60;
+            systemMessage("⚠️ ALL HEROES HAVE FALLEN! Dungeon closing in 60s unless someone respawns and returns!");
+
+            // Use window.dungeonEmptyTimer to ensure it's globally accessible
+            dungeonEmptyTimer = setInterval(() => {
+                dungeonEmptySeconds--;
+
+                // Optional: Sound an alarm or screen flash here
+                if (dungeonEmptySeconds % 10 === 0 && dungeonEmptySeconds > 0) {
+                    systemMessage(`⚠️ DUNGEON COLLAPSE: ${dungeonEmptySeconds}s remaining!`);
+                }
+
+                if (dungeonEmptySeconds <= 0) {
+                    clearInterval(dungeonEmptyTimer);
+                    dungeonEmptyTimer = null;
+                    closeDungeon("FAILURE");
+                }
+            }, 1000);
+        }
+    } else {
+        // Someone is alive in there!
+        if (dungeonEmptyTimer) {
+            console.log("Hero detected. Aborting shutdown.");
+            systemMessage("🛡️ A hero is standing! Dungeon collapse aborted.");
+            clearInterval(dungeonEmptyTimer);
+            dungeonEmptyTimer = null;
+        }
+    }
+}
+function closeDungeon(reason) {
+    dungeonActive = false;
+    enemies = [];
+    boss = null;
+    
+    if (dungeonEmptyTimer) {
+        clearInterval(dungeonEmptyTimer);
+        dungeonEmptyTimer = null;
+    }
+
+    systemMessage(reason === "FAILURE" ? "❌ DUNGEON FAILED: The darkness has reclaimed the halls." : "✅ DUNGEON CLEARED!");
+
+    // Kick everyone back to town
+    Object.values(players).forEach(p => {
+        if (p.area === "dungeon") {
+            p.area = "town";
+            p.x = 400;
+            p.y = 450;
+            p.activeTask = "none";
+        }
+    });
+
+    // Reset UI
+    viewArea = "town";
+    document.getElementById("areaDisplay").textContent = "StickmenFall: TOWN";
+    const selector = document.getElementById("view-area-selector");
+    if (selector) selector.value = "town";
 }
 // enemy logic
 function handleEnemyAttacks() {
@@ -1125,7 +1197,10 @@ function handleEnemyAttacks() {
 
         // Calculate Base Damage
         let dmg = (3 + Math.floor(dungeonWave * 1.5)) * partyScaling;
-        
+        // --- ADD THIS ---
+		if (e.isTrainingMob) {
+			dmg = 1 + (Math.random() * 2); // Only 1-3 damage per hit
+		}
         if (e.isBoss) {
             dmg *= 2.5; // Bosses are significantly more dangerous
             
@@ -1185,7 +1260,12 @@ function generateRandomLoadout(tier) {
 function handleLoot(p, target) {
     const currentTier = Math.floor((dungeonWave - 1) / 5) + 1;
     let lootFound = [];
-
+	if (target.isTrainingMob) {
+		p.stats.pixels += 5; // Tiny pixel reward
+		spawnFloater(p, "+5px (Training)", "#888");
+		saveStats(p);
+		return; // Skip the gear/rarity rolls entirely
+	}
     // 1. CHANCE TO STEAL GEAR (10% per slot)
     if (target.equipped) {
         Object.values(target.equipped).forEach(itemName => {
@@ -1278,8 +1358,51 @@ function drawLootBeams(ctx) {
         if (b.alpha <= 0) lootBeams.splice(i, 1);
     }
 }
-//------------------------------------
 
+//------------------------------------
+function updateDungeonIdleTraining() {
+    // Only run if a Raid is NOT active
+    if (dungeonActive) return;
+
+    const dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
+    if (dwellers.length === 0) {
+        enemies = []; // Clear enemies if nobody is there
+        return;
+    }
+
+    // Only spawn if all current enemies are dead
+    let aliveEnemies = enemies.filter(e => !e.dead).length;
+    if (aliveEnemies === 0) {
+        
+        // 1. Calculate Average Combat Level
+        const avgCombat = dwellers.reduce((sum, p) => sum + (p.stats.combatLevel || 1), 0) / dwellers.length;
+        
+        // 2. Spawn 1-3 training mobs
+        const count = Math.floor(Math.random() * 3) + 1;
+        for (let i = 0; i < count; i++) {
+            
+            // Training Mob Stats: 
+            // - High HP: (Avg Level * 50)
+            // - Low Damage: handled in handleEnemyAttacks
+            let trainingHp = 100 + (avgCombat * 50);
+
+            enemies.push({
+                name: "Dungeon Stray",
+                area: "dungeon",
+                hp: trainingHp,
+                maxHp: trainingHp,
+                x: 500 + (i * 80),
+                y: 450,
+                dead: false,
+                isEnemy: true,
+                isTrainingMob: true, // Special flag
+                stats: { lurkLevel: 0 },
+                equipped: {} 
+            });
+        }
+        systemMessage(`🛡️ Training Mobs spawned (Scaled to Avg Lvl ${Math.floor(avgCombat)})`);
+    }
+}
 //=========================================================================
 /* ======================== DRAWING ======================================= */
 
@@ -2171,33 +2294,42 @@ function updateUI() {
 function gameLoop() {
     const now = Date.now();
     
-    // 1. SCREEN SHAKE (Optional: only if you added the shake variable)
+    // 1. SCREEN SHAKE
     ctx.save();
     if (window.shakeAmount > 0) {
         let sx = (Math.random() - 0.5) * window.shakeAmount;
         let sy = (Math.random() - 0.5) * window.shakeAmount;
         ctx.translate(sx, sy);
-        window.shakeAmount *= 0.9; // Decay shake over time
+        window.shakeAmount *= 0.9; 
         if (window.shakeAmount < 0.1) window.shakeAmount = 0;
     }
 
     // 2. BACKGROUND & UI
-    renderScene(); // Draw the floor and walls
-    updateUI();    // Refresh HP bars and wave counts
+    renderScene(); 
+    updateUI();    
 
-    // 3. DUNGEON LOGIC
+    // 3. DUNGEON LOGIC (GLOBAL SYSTEM)
+    // We run these even if you aren't looking at the dungeon so the raid can fail/progress
     if (dungeonActive) {
-        checkDungeonProgress(); // Check if all enemies are dead
+        checkDungeonProgress(); // Handles wave spawning
+        checkDungeonFailure();  // Handles the 60s empty/dead countdown
+    } else {
+        // Only run idle training if SOMEONE is physically in the dungeon area
+        const anyoneInDungeon = Object.values(players).some(p => p.area === "dungeon");
+        if (anyoneInDungeon) {
+            updateDungeonIdleTraining();
+        }
     }
 
-    // 4. DRAW DUNGEON-SPECIFIC ELEMENTS
+    // 4. DRAW DUNGEON-SPECIFIC ELEMENTS (VIEW ONLY)
     if (viewArea === "dungeon") {
-        // --- DRAW LOOT BEAMS ---
-        // We draw these behind enemies but in front of the background
+        // Draw Loot Beams behind monsters
         drawLootBeams(ctx); 
 
-        // --- DRAW ENEMIES & BOSSES ---
+        // Draw Boss
         if (boss && !boss.dead) drawMonster(ctx, boss);
+        
+        // Draw Enemies/Training Mobs
         enemies.forEach(e => {
             if (!e.dead) {
                 if (e.isStickman) drawEnemyStickman(ctx, e);
@@ -2208,14 +2340,14 @@ function gameLoop() {
 
     // 5. PLAYER PROCESSING
     Object.values(players).forEach(p => {
-        // --- LOGIC (Always runs for all players) ---
+        // LOGIC: Always runs for everyone (so they move and take damage in background)
         if (!p.dead) {
             updatePhysics(p);         
             updatePlayerStatus(p, now); 
             updatePlayerActions(p, now); 
         }
 
-        // --- RENDERING (Only if visible) ---
+        // RENDERING: Only draw players who are in your current view
         if (p.area === viewArea) {
             drawStickman(ctx, p);
         }
@@ -2223,12 +2355,12 @@ function gameLoop() {
 
     // 6. WORLD SYSTEMS & OVERLAYS
     updateAreaPlayerCounts();
-    updateSystemTicks(now);  // Handles enemy attack timers
-    drawProjectiles(ctx);    // Arrows and Magic bolts
-    updateSplashText(ctx);   // Floaters (+Pixels, Loot names)
-    handleTooltips();        // Mouse-over info
+    updateSystemTicks(now);  
+    drawProjectiles(ctx);    
+    updateSplashText(ctx);   
+    handleTooltips();        
 
-    ctx.restore(); // Finish Screen Shake
+    ctx.restore(); 
 
     // 7. NEXT FRAME
     requestAnimationFrame(gameLoop);
@@ -2658,6 +2790,35 @@ function cmdHeal(p, user, args) {
     }
 } */
 //auto unequip version of fish cmd
+function cmdRespawn(p) {
+    if (!p.dead) {
+        systemMessage(`${p.name}, you aren't even dead!`);
+        return;
+    }
+
+    // 1. Reset Stats
+    p.dead = false;
+    p.hp = p.maxHp;
+    p.activeTask = "none";
+
+    // 2. Move to Town
+    p.area = "town";
+    p.x = 400; // Town center
+    p.y = 450;
+    p.targetX = null;
+    p.targetY = null;
+
+    // 3. Update UI for the player
+    if (p.name.toLowerCase() === playerName.toLowerCase()) {
+        viewArea = "town";
+        const selector = document.getElementById("view-area-selector");
+        if (selector) selector.value = "town";
+        document.getElementById("areaDisplay").textContent = "StickmenFall: TOWN";
+    }
+
+    systemMessage(`${p.name} has respawned in Town.`);
+    saveStats(p);
+}
 function cmdLurk(p, user) {
     if (p.dead) return;
     if (p.activeTask === "lurking") {
@@ -2678,28 +2839,37 @@ function cmdLurk(p, user) {
 }
 function cmdFish(p, user) {
     if (p.area !== "pond") { 
-        systemMessage(`${user}: Go to pond first.`); 
+        systemMessage(`${user}: Go to the pond first.`); 
         return; 
     }
     if (p.activeTask === "fishing") { 
-        systemMessage(`${user}: Already fishing.`); 
+        systemMessage(`${user}: You are already fishing.`); 
         return; 
     }
 
-    // REMEMBER AND UNEQUIP
+    // --- NEW: INITIAL BAIT CHECK ---
+    const baitCost = 15;
+    if ((p.stats.pixels || 0) < baitCost) {
+        systemMessage(`${user}: You need at least ${baitCost} pixels to buy bait!`);
+        return;
+    }
+
+    // REMEMBER AND UNEQUIP WEAPON
     if (p.stats.equippedWeapon) {
-        p.stats.lastWeapon = p.stats.equippedWeapon; // Store it!
+        p.stats.lastWeapon = p.stats.equippedWeapon;
         p.stats.equippedWeapon = null;
         systemMessage(`${p.name} put away their ${p.stats.lastWeapon} to fish.`);
     }
 
-    p.targetX = 200; 
-	p.targetX = 180 + (Math.random() * 40 - 20);
-	//p.targetY = 25 + (Math.random() * 40 - 20);
-    p.activeTask = "fishing";
-    p.taskEndTime = Date.now() + (15 * 60 * 1000);
+    // POSITIONING
+    // Walk to the edge of the pond
+    p.targetX = 180 + (Math.random() * 40 - 20);
     
-    systemMessage(`${user} started fishing!`);
+    // START TASK
+    p.activeTask = "fishing";
+    p.taskEndTime = Date.now() + (15 * 60 * 1000); // 15-minute idle timer
+    
+    systemMessage(`${user} started fishing! (Costs ${baitCost} pixels per cast)`);
     saveStats(p);
 }
 function cmdSwim(p, user) {
@@ -2877,87 +3047,77 @@ function cmdInventory(p, user, args) {
 
     systemMessage(output);
 }
-function cmdSell(p, args) {
+function cmdSell(p, user, args) {
+    if (p.dead) return;
     if (p.stats.inventory.length === 0) {
-        systemMessage(`${p.name}: Your inventory is empty.`);
+        systemMessage(`${user}: Your inventory is empty.`);
         return;
     }
 
-    let target = args.slice(1).join(" ").toLowerCase();
-    let totalpixels = 0;
+    let target = args[1] ? args[1].toLowerCase() : "";
+    let totalPixels = 0;
     let itemsRemoved = 0;
     
-    // Update the Buyer status before calculating
     updateBuyerNPC(); 
     let multiplier = buyerActive ? 2 : 1;
 
     if (target === "fish") {
         p.stats.inventory = p.stats.inventory.filter(item => {
-            // 1. Handle Regular weight-based fish (e.g., "10.5kg Bass")
-            if (item.toLowerCase().includes("kg")) {
-                let weightStr = item.split("kg")[0].replace(/[^0-9.]/g, '');
-                let weight = parseFloat(weightStr);
-                
-                if (!isNaN(weight)) {
-                    // 1 pixels per kg * multiplier
-                    totalpixels += Math.floor(weight * 1 * multiplier);
+            // Check for weight-based string: "5.23kg Salmon"
+            if (item.includes("kg ")) {
+                let parts = item.split("kg ");
+                let weight = parseFloat(parts[0]);
+                let fishName = parts[1]; // e.g. "Salmon"
+                let itemData = ITEM_DB[fishName];
+
+                if (itemData) {
+                    // Value = (Base Item Value * Weight) * Merchant Multiplier
+                    totalPixels += Math.floor((itemData.value * weight) * multiplier);
                     itemsRemoved++;
                     return false; // Remove from inventory
                 }
             }
             
-            // 2. Handle pixelsen Bass specifically within the fish command
-            if (item === "pixelsen Bass") {
-                let baseValue = ITEM_DB["pixelsen Bass"]?.value || 100;
-                // We apply the multiplier here too since the Merchant loves rare fish!
-                totalpixels += (baseValue * multiplier);
+            // Check for unique non-weight fish (Golden Bass, Pearl)
+            if (item === "Golden Bass" || item === "Pearl") {
+                let itemData = ITEM_DB[item];
+                totalPixels += (itemData.value || 100) * multiplier;
                 itemsRemoved++;
-                return false; // Remove from inventory
+                return false;
             }
 
-            return true; // Keep everything else (weapons, etc)
+            return true; // Keep everything else
         });
     } else {
-        // Handle selling a specific single item by name
+        // Selling a specific item by name (like "fishhat" or "Leather scrap")
         let index = p.stats.inventory.findIndex(i => i.toLowerCase() === target);
         if (index !== -1) {
             let itemName = p.stats.inventory[index];
             let itemData = ITEM_DB[itemName];
-            
             let price = itemData?.value || 50;
             
-            // If selling pixelsen Bass by name while Merchant is active, give bonus
-            if (itemName === "pixelsen Bass") {
-                totalpixels = price * multiplier;
-            } else {
-                totalpixels = price;
+            // Apply merchant bonus if applicable to the item
+            if (buyerActive && (itemData.type === "fish" || itemData.type === "material")) {
+                price *= 2;
             }
 
+            totalPixels = price;
             p.stats.inventory.splice(index, 1);
             itemsRemoved = 1;
         }
     }
 
     if (itemsRemoved > 0) {
-        // Final sanity check to prevent NaN from corrupting the save
-        if (isNaN(totalpixels)) totalpixels = 0;
-        
-        p.stats.pixels = (p.stats.pixels || 0) + totalpixels;
-        
-        let msg = `${p.name} sold ${itemsRemoved} item(s) for ${totalpixels.toFixed(2)} pixels!`;
-        
-        // Add a special flair message if they sold to the Merchant
-        if (buyerActive) {
-            msg += " 💰 [MERCHANT SPECIAL RATE]";
-        }
-        
+        p.stats.pixels = (p.stats.pixels || 0) + totalPixels;
+        let msg = `${user} sold ${itemsRemoved} items for ${totalPixels} pixels!`;
+        if (buyerActive) msg += " 💰 [MERCHANT BONUS]";
         systemMessage(msg);
+        spawnFloater(p, `+$${totalPixels}`, "#44ff44");
         saveStats(p);
     } else {
-        systemMessage(`${p.name}: Could not find "${target}" to sell. Try "!sell fish".`);
+        systemMessage(`${user}: Could not find "${target}" to sell. Try "!sell fish".`);
     }
 }
-
 function cmdBalance(p) {
     // Formatting pixels to 2 decimal places as requested
     const displaypixels = (p.stats.pixels || 0).toFixed(2);
@@ -3286,11 +3446,10 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "bal" || cmd === "money") { cmdBalance(p); return; }
 	if (cmd === "wigcolor")  { cmdWigColor(p, args); return; } // Added back
 	if (cmd === "listdances") { cmdListDances(p); return; }
-    if (cmd === "respawn" && p.dead) {
-        p.dead = false; p.hp = p.maxHp;
-        systemMessage(`${p.name} returned to life!`);
-        return;
-    }
+    if (cmd === "respawn") { 
+		cmdRespawn(p); 
+		return; 
+	}
 	
 }
 
