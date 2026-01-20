@@ -266,7 +266,15 @@ const ITEM_DB = {
 	"wizard beard": { name: "Dark Mage Beard", tier: 8, rarity: 5, type: "hair", style: "wizardbeard", color: "#333333" },
 
 // ---------------------------basic items----------------------------------------------------------------
+	// --- normal fish ----
+	"Bass":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
+	"Trout":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
+	"Salmon":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
+	"Tuna":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
+	"Shark":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
+	"Lobster":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 1000, color: "#FFD700" },
 	// --- unique fish ---
+	
 	"Golden Bass":    { type: "fish", tier: 10, rarity: 0, value: 100, color: "#FFD700" },
 	// --- unique swimming find ---
 	"Pearl":    { type: "fish", tier: 11, rarity: 0, value: 100, color: "white" },
