@@ -1086,8 +1086,10 @@ function generateRandomLoadout(tier) {
     const armorPool  = getBestAvailableTier("armor", tier);
     const legPool    = getBestAvailableTier("pants", tier);
 
-    const pick = (pool) => pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : null;
-
+    const pick = (pool) => {
+		if (!pool || pool.length === 0) return null;
+		return pool[Math.floor(Math.random() * pool.length)];
+	};
     return {
         weapon: pick(weaponPool),
         helmet: pick(headPool),
@@ -1121,9 +1123,12 @@ function handleLoot(p, target) {
             return item.tier <= currentTier && item.rarity == selectedRarity;
         });
 
-        // If specific rarity doesn't exist in this tier, drop to lower rarity in same tier
+        // FIX: The fallback filter was missing the 'item' definition
         if (possibleLoot.length === 0) {
-            possibleLoot = Object.keys(ITEM_DB).filter(key => item.tier <= currentTier && item.rarity < selectedRarity);
+            possibleLoot = Object.keys(ITEM_DB).filter(key => {
+                const item = ITEM_DB[key]; // This was missing!
+                return item.tier <= currentTier && item.rarity < selectedRarity;
+            });
         }
 
         if (possibleLoot.length > 0) {
