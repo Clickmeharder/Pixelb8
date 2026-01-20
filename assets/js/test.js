@@ -2458,9 +2458,10 @@ function updateAreaPlayerCounts() {
 
         selector.options[0].text = `🏠 Home (${counts.home})`;
         selector.options[1].text = `🏙️ Town (${counts.town})`;
+		selector.options[4].text = `🏟️ Arena (${counts.arena})`;
         selector.options[2].text = `🎣 Pond (${counts.pond})`;
         selector.options[3].text = `${dungeonIcon} ${dungeonLabel} (${counts.dungeon})`;
-        selector.options[4].text = `🏟️ Arena (${counts.arena})`;
+        
     }
 }
 // Call this inside your requestAnimationFrame or a 1-second interval
