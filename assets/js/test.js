@@ -2404,7 +2404,7 @@ function updateAreaPlayerCounts() {
         selector.options[1].text = `🏙️ Town (${counts.town})`;
         selector.options[2].text = `🎣 Pond (${counts.pond})`;
         selector.options[3].text = `${dungeonIcon} ${dungeonLabel} (${counts.dungeon})`;
-        selector.options[4].text = `⚔️ Arena (${counts.arena})`;
+        selector.options[4].text = `🏟️ Arena (${counts.arena})`;
     }
 }
 // Call this inside your requestAnimationFrame or a 1-second interval
@@ -2632,29 +2632,7 @@ function toggleInventory() {
     }
 }
 
-// Track filter state
-let currentInventoryFilter = "all";
 
-document.addEventListener("DOMContentLoaded", () => {
-    // Existing Action Bar logic...
-    
-    // Inventory Filter Listeners
-    const filterContainer = document.getElementById("inventory-filters");
-    if (filterContainer) {
-        filterContainer.addEventListener("click", (e) => {
-            if (e.target.classList.contains("filter-btn")) {
-                // Update active button UI
-                document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-                e.target.classList.add("active");
-                
-                currentInventoryFilter = e.target.getAttribute("data-filter");
-                renderInventoryUI();
-            }
-        });
-
-        document.getElementById("filter-hide-equipped").addEventListener("change", renderInventoryUI);
-    }
-});
 
 function renderInventoryUI() {
     const p = getActiveProfile();
@@ -2757,6 +2735,8 @@ function uiAction(cmd, itemName) {
     setTimeout(renderInventoryUI, 50);
 }
 // Wait for the DOM to load to ensure the action bar exists
+// Track filter state
+let currentInventoryFilter = "all";
 document.addEventListener("DOMContentLoaded", () => {
     const actionBar = document.getElementById("action-bar");
 
@@ -2784,7 +2764,24 @@ document.addEventListener("DOMContentLoaded", () => {
 			});
 		}
     }
+    // Inventory Filter Listeners
+    const filterContainer = document.getElementById("inventory-filters");
+    if (filterContainer) {
+        filterContainer.addEventListener("click", (e) => {
+            if (e.target.classList.contains("filter-btn")) {
+                // Update active button UI
+                document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+                e.target.classList.add("active");
+                
+                currentInventoryFilter = e.target.getAttribute("data-filter");
+                renderInventoryUI();
+            }
+        });
+
+        document.getElementById("filter-hide-equipped").addEventListener("change", renderInventoryUI);
+    }
 });
+
 /* ================= COMMAND FUNCTIONS ================= */
 
 function cmdStop(p, user) {
@@ -3660,6 +3657,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "home")   { movePlayer(p, "home"); return; }
     if (cmd === "dungeon"){ movePlayer(p, "dungeon"); return; }
     if (cmd === "join")   { joinDungeonQueue(p); return; }
+	if (cmd === "pvp")   { joinArenaQueue(p); return; }
     if (cmd === "inventory") { cmdInventory(p, user, args); return; }
     if (cmd === "equip")     { cmdEquip(p, args); return; }
     if (cmd === "unequip")   { cmdUnequip(p, args); return; }
