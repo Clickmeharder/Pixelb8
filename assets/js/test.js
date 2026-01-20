@@ -6,6 +6,7 @@
 
 //dont Constants and important things
 const c = document.getElementById("c");
+const areaDisplayDiv = document.getElementById("areaDisplay");
 const ctx = c.getContext("2d");
 let mouse = { x: 0, y: 0 };
 let players = {};
@@ -57,6 +58,7 @@ function idleActionMsg(playerName, text, color = "#0f0") {
 // we can change these [ basically options ] 
 let viewArea = "home"; 
 const TASK_DURATION = 15 * 60 * 1000; // 15 Minutes
+
 /* ================= DATA PERSISTENCE ================= */
 /* ================= DATA PERSISTENCE ================= */
 function loadStats(name) {
@@ -181,6 +183,7 @@ function movePlayer(p, targetArea) {
     if (targetArea === "pond") {
         p.x = Math.random() * 150 + 50;
         p.y = groundLevel; 
+		
     } else if (targetArea === "arena") {
         p.x = Math.random() * 400 + 200;
         p.y = groundLevel;
@@ -200,7 +203,7 @@ function movePlayer(p, targetArea) {
     if (targetArea !== "dungeon") {
         dungeonQueue = dungeonQueue.filter(n => n !== p.name.toLowerCase());
     }
-    
+	areaDisplayDiv.textContent = "StickmenFall:" + viewArea;
     systemMessage(`${p.name} traveled to ${targetArea}`);
 }
 
@@ -1154,7 +1157,7 @@ function joinDungeonQueue(p) {
                 const selector = document.getElementById("view-area-selector");
                 if (selector) selector.value = "dungeon";
                 
-                document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON (Inbound!)";
+                areaDisplayDiv.textContent = "StickmenFall: Dungeon (starting!)";
                 systemMessage("System: Sending vanguard to the dungeon floor...");
 
                 dungeonQueue.forEach(name => {
@@ -1210,7 +1213,7 @@ function startDungeon() {
     dungeonActive = true;
     dungeonWave = 1; 
     
-    document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON (ACTIVE)";
+    areaDisplayDiv.textContent = "StickmenFall: Dungeon (ACTIVE)";
     systemMessage("The Dungeon Gates have opened! The monsters are here!");
 
     dungeonQueue = []; 
@@ -1340,7 +1343,7 @@ function closeDungeon(reason) {
 
     // Reset UI
     viewArea = "town";
-    document.getElementById("areaDisplay").textContent = "StickmenFall: TOWN";
+    areaDisplayDiv.textContent = "StickmenFall: Town";
     const selector = document.getElementById("view-area-selector");
     if (selector) selector.value = "town";
 }
@@ -2491,7 +2494,7 @@ function updateUI() {
             }
         });
     }
-
+	
     const uiElement = document.getElementById("enemyUI");
     if (uiElement) uiElement.innerHTML = uiHTML;
 }
@@ -3030,7 +3033,7 @@ function cmdRespawn(p) {
         viewArea = "town";
         const selector = document.getElementById("view-area-selector");
         if (selector) selector.value = "town";
-        document.getElementById("areaDisplay").textContent = "StickmenFall: TOWN";
+        areaDisplayDiv.textContent = "StickmenFall: Town";
     }
 
     systemMessage(`${p.name} has respawned in Town.`);
@@ -3610,10 +3613,11 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
             addItemToPlayer(target, item);
             return;
         }
-        if (cmd === "showhome") { viewArea = "home"; document.getElementById("areaDisplay").textContent = "StickmenFall: HOME"; return; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON"; return; }
-        if (cmd === "showpond") { viewArea = "pond"; document.getElementById("areaDisplay").textContent = "StickmenFall: FISHING POND"; return; }
-        
+        if (cmd === "showhome") { viewArea = "home"; areaDisplayDiv.textContent = "StickmenFall: Home"; return; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; areaDisplayDiv.textContent = "StickmenFall: Dungeon"; return; }
+        if (cmd === "showpond") { viewArea = "pond"; areaDisplayDiv.textContent = "StickmenFall: Pond"; return; }
+        if (cmd === "showarena") { viewArea = "arena"; areaDisplayDiv.textContent = "StickmenFall: Arena"; return; }
+		if (cmd === "showtown") { viewArea = "town"; areaDisplayDiv.textContent = "StickmenFall: Arena"; return; }
         if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[ADMIN] Merchant spawned."); return; }
         if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[ADMIN] Merchant removed."); return; }
         if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
