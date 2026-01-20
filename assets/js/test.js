@@ -902,8 +902,9 @@ let dungeonCountdownInterval = null; // To track the interval
 function joinDungeonQueue(p) {
     if (p.dead) return;
     
-    if (!dungeonQueue.includes(p.name)) {
-        dungeonQueue.push(p.name);
+	const nameKey = p.name.toLowerCase();
+    if (!dungeonQueue.includes(nameKey)) {
+        dungeonQueue.push(nameKey);
         systemMessage(`${p.name} joined the queue (${dungeonQueue.length} total)`);
     }
 
@@ -937,25 +938,24 @@ function startDungeon() {
     dungeonActive = true;
     viewArea = "dungeon"; 
     
-    // Update the dropdown UI to match the forced view change
     const selector = document.getElementById("view-area-selector");
     if (selector) selector.value = "dungeon";
 
     document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON (ACTIVE)";
 
     dungeonQueue.forEach(name => {
-        let p = players[name];
+        let p = players[name.toLowerCase()]; // Ensure lowercase lookup
         if (p && !p.dead) {
             p.area = "dungeon";
-            p.y = -200;                  // Start way up
-            p.x = Math.random() * 400 + 50;
+            p.y = -200;                  // High in the sky
+            p.x = 100 + Math.random() * 600; 
             p.targetY = 450;             // The floor
-            p.targetX = null;            // Don't walk until we land
-            p.activeTask = "attacking";  // Ready for combat
+            p.targetX = null;            // STOP any horizontal walking
+            p.activeTask = "attacking";  
         }
     });
 
-    dungeonQueue = []; // Empty the queue for the next raid!
+    dungeonQueue = []; 
     systemMessage("The Dungeon Gates have opened!");
     spawnWave();
 }
@@ -1110,7 +1110,7 @@ function handleLoot(p, target) {
 /* ======================== DRAWING ======================================= */
 
 // ---PROJECTILES ----
-/*-------- Arrows ------------------------------*/
+
 
 const projectiles = []; // Rename from arrows
 
@@ -1564,7 +1564,7 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
 // --- MAIN FUNCTIONS ---
 function drawStickman(ctx, p) {
     if (p.area !== viewArea) return;
-    updatePhysics(p); 
+    //updatePhysics(p); 
     const now = Date.now();
     if (p.dead) return drawCorpse(ctx, p, now);
 	ctx.save(); 
@@ -1999,8 +1999,6 @@ function gameLoop() {
     // 4. PLAYER PROCESSING
     Object.values(players).forEach(p => {
         // --- LOGIC SECTION (Always run for all players) ---
-        // We run physics/status for everyone so they can finish falls 
-        // or walk between areas even if the camera isn't on them.
         if (!p.dead) {
             updatePhysics(p);         // Handles Falling, Walking, and Crowding
             updatePlayerStatus(p, now); // Handles Idle timeouts
