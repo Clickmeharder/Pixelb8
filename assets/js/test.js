@@ -3006,7 +3006,7 @@ function renderItemsView(playerObj, bpGrid) {
                 <span class="item-price">${isUnsellable ? 'BOUND' : '$'+(itemData.value || 0)}</span>
                 <div class="item-actions">
                     <button onclick="uiAction('equip', '${item}')">USE</button>
-                    ${isUnsellable ? '' : `<button class="btn-sell" onclick="uiAction('sell', '${item}')">SELL</button>`}
+                    ${isUnsellable ? '' : `<button class="btn-sell" onclick="uiAction('sell' + ' ${item}')">SELL</button>`}
                 </div>
             </div>
         `;

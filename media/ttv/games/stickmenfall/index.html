@@ -815,7 +815,11 @@
 					<button class="filter-btn active" data-filter="all">ALL</button>
 					<button class="filter-btn" data-filter="gear">GEAR</button>
 					<button class="filter-btn" data-filter="fish">FISH</button>
-					
+					<div id="inventory-tabs">
+						<button class="tab-btn active-tab" data-view="items" id="btn-view-items">ITEMS</button>
+						<button class="tab-btn" data-view="stats" id="btn-view-stats">STATS</button>
+						<button class="tab-btn" data-view="achievements" id="btn-view-achievements">ACHIEVEMENTS</button>
+					</div>
 					<select id="inv-sort-mode">
 						<option value="tier">Sort by Tier</option>
 						<option value="value">Sort by Value</option>
@@ -823,11 +827,7 @@
 						<option value="name">Sort by Name</option>
 					</select>
 					
-					<div id="inventory-view-controls">
-						<button class="tab-btn active-tab" data-view="items" id="btn-view-items">ITEMS</button>
-						<button class="tab-btn" data-view="stats" id="btn-view-stats">STATS</button>
-						<button class="tab-btn" data-view="achievements" id="btn-view-achievements">ACHIEVEMENTS</button>
-					</div>
+
 				</div>
 
 				<div id="backpack-grid"></div>
