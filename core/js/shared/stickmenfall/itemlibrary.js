@@ -27,7 +27,7 @@ const ITEM_DB = {
     // --- WEAPONS -----------------------------------------------------------------------------------
 
 // -------------------------- TOOLS --------------------------------------------------------------------
-    "Fishing Rod":    { type: "tool", style:"", tier: 100, rarity: 13, power: 0, value: 100,   color: "#8B4513" },
+    
 // ------------------------- Helmets and Hats ----------------------------------------------------------
 
 // --- HEAVY HELMETS (KNIGHT/VIKING) ---
@@ -106,7 +106,7 @@ const ITEM_DB = {
 	"Steel Sword":       { type: "weapon", style: "sword", tier: 3,  rarity: 2,  power: 18,  speed: 1300, value: 800,    color: "#999" },
 	"Flanged Mace":      { type: "weapon", style: "sword", tier: 4,  rarity: 4,  power: 25,  speed: 1500, value: 2500,   color: "#bbb" },
 	"Golden Sword":      { type: "weapon", style: "sword", tier: 5,  rarity: 5,  power: 35,  speed: 1400, value: 10000,  color: "#ffd700" },
-	"Great-Axe":         { type: "weapon", style: "sword", tier: 6,  rarity: 7,  power: 50,  speed: 1800, value: 25000,  color: "#888" },
+	"Great Sword":         { type: "weapon", style: "sword", tier: 6,  rarity: 7,  power: 50,  speed: 1800, value: 25000,  color: "#888" },
 	"Cobalt Claymore":   { type: "weapon", style: "sword", tier: 7,  rarity: 8,  power: 65,  speed: 1600, value: 50000,  color: "#1976d2" },
 	"Mythril Blade":     { type: "weapon", style: "sword", tier: 8,  rarity: 10, power: 85,  speed: 1400, value: 100000, color: "#4fc3f7" },
 	"Dragon-Bone Smasher":{ type: "weapon", style: "sword", tier: 9, rarity: 11, power: 120, speed: 2000, value: 250000, color: "#fff9c4" },
@@ -257,49 +257,54 @@ const ITEM_DB = {
 	"Leather Gloves":   { type: "gloves", style:"", sources:"dungeon", tier: 2, rarity: 0, def: 1, value: 100, color: "#5c4033" },
     // --- SPECIALS ---
 // special head
-	"box":      { type: "helmet", style: "box", sources:"dungeon", tier: 1, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
+	"box":            { type: "helmet", style: "box", sources:"dungeon", tier: 1, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
 	"Paper Bag":      { type: "helmet", style: "paperbag", sources:"dungeon", tier: 2, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
 	"wig":            { type: "helmet", style:"", sources:"dungeon", tier: 3, rarity: 0, def: 1,style: "wig",     value: 5000, color: "yellow" },
-	"centurion":    { type: "helmet", style: "centurion", sources:"dungeon", tier: 4, rarity: 0, def: 2,  value: 10000, color: "#ffcc00" },
-	"tv":      { type: "helmet", style: "tv", sources:"dungeon", tier: 5, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
-	"Pirate Hat":    { type: "helmet", style: "pirate", sources:"dungeon", tier: 5, rarity: 0, def: 2,  value: 10000, color: "#222222" },
-	"Space Helmet":      { type: "helmet", style: "spacehelmet", sources:"dungeon", tier: 5, rarity: 10, def: 4, value: 500000, color: "#d2b48c" },
-	"gentleman hat":    { type: "helmet", style: "gentleman", sources:"dungeon", tier: 6, rarity: 0,  def: 2,  value: 10000, color: "#333333" },
-	"fun hat":    { type: "helmet", style: "funhat", sources:"dungeon", tier: 7, rarity: 0, def: 2,  value: 10000, color: "white" }, 
-	"kabuto":    { type: "helmet", style: "samurai", sources:"dungeon", tier: 8, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
-	"stickmenpo":    { type: "helmet", style: "menpo", sources:"dungeon", tier: 9, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
+	"centurion":      { type: "helmet", style: "centurion", sources:"dungeon", tier: 4, rarity: 0, def: 2,  value: 10000, color: "#ffcc00" },
+	"tv":             { type: "helmet", style: "tv", sources:"dungeon", tier: 5, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
+	"Pirate Hat":     { type: "helmet", style: "pirate", sources:"dungeon", tier: 5, rarity: 0, def: 2,  value: 10000, color: "#222222" },
+	"Space Helmet":   { type: "helmet", style: "spacehelmet", sources:"dungeon", tier: 5, rarity: 10, def: 4, value: 500000, color: "#d2b48c" },
+	"gentleman hat":  { type: "helmet", style: "gentleman", sources:"dungeon", tier: 6, rarity: 0,  def: 2,  value: 10000, color: "#333333" },
+	"fun hat":        { type: "helmet", style: "funhat", sources:"dungeon", tier: 7, rarity: 0, def: 2,  value: 10000, color: "white" }, 
+	"kabuto":         { type: "helmet", style: "samurai", sources:"dungeon", tier: 8, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
+	"stickmenpo":     { type: "helmet", style: "menpo", sources:"dungeon", tier: 9, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
 	"Royal Crown":    { type: "helmet", style: "crown", sources:"dungeon", tier: 10, rarity: 0, def: 2,  value: 10000, color: "#ff0000" },
 	"Angelic Ring":   { type: "helmet", style: "halo", sources:"dungeon", tier: 11, rarity: 13, def: 0,  value: 9999, color: "yellow" },
+// --- ACHIEVEMENT REWARDS ---
+	"Fishing Rod":          { type: "tool", style:"",sources:"achievement", tier: 100, rarity: 13, power: 0, value: 100,   color: "#8B4513" },
+	"PvP Boots":            { type:"boots",style:"",sources:"achievement",  tier: 99, rarity: 1, value: 10000, color: "#7a231a" },
+	"Great Axe":            { type: "weapon", style: "axe",sources:"achievement" tier: 6,  rarity: 7,  power: 50,  speed: 1800, value: 25000,  color: "#888" },
 // special capes
-    "Nuber Cape":           { type: "cape", style:"cape",sources:"achievement",  tier: 10, rarity: 13, value: 10000, color: "#333" },
-	"Warrior Cape":         { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#555" },
-    "Wizard Cape":          { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "blue" },
-	"Archer Cape":          { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "olive" },
-	"Lurker Cape":          { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#424242" },
-	"Healer Cape":          { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "white" },
-	"Fishing Cape":         { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "teal" },
-	"Swimmer Cape":         { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "red" },
-    "Uber Cape":            { type: "cape", style:"cape",sources:"achievement",  tier: 10, rarity: 13, value: 10000, color: "black" },
-    "Skilled Wizard Cape":  { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#1c1c1d" },
-	"Skilled Archer Cape":  { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#1e1e1e" },
-	"Skilled Lurker Cape":  { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#2d2d2d" },
-	"Skilled Fishing Cape": { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#4a4a4a" },
-	"Skilled Swimmer Cape": { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#3b3b3b" },
-	"99 Tier Cape":         { type: "cape", style:"cape",sources:"dungeon",  tier: 99, rarity: 1, value: 10000, color: "#ffd700" },
-    "Cloak":     { type: "cape", style:"cloak",sources:"dungeon",  tier: 5, rarity: 10, value: 10000, color: "gray" },
-
+    "Nuber Cape":           { type:"cape",style:"cape",sources:"achievement",  tier: 10, rarity: 13, value: 10000, color: "#333" },
+	"Warrior Cape":         { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#555" },
+    "Wizard Cape":          { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "blue" },
+	"Archer Cape":          { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "olive" },
+	"Lurker Cape":          { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#424242" },
+	"Healer Cape":          { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "white" },
+	"Fishing Cape":         { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "teal" },
+	"Swimmer Cape":         { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "red" },
+    "Uber Cape":            { type:"cape",style:"cape",sources:"achievement",  tier: 10, rarity: 13, value: 10000, color: "black" },
+	"Skilled Warrior Cape":  { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#2a2a2a" },
+    "Skilled Wizard Cape":  { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#1c1c1d" },
+	"Skilled Archer Cape":  { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#1e1e1e" },
+	"Skilled Lurker Cape":  { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#2d2d2d" },
+	"Skilled Fishing Cape": { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#4a4a4a" },
+	"Skilled Swimmer Cape": { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#3b3b3b" },
+	"99 Tier Cape":         { type:"cape",style:"cape",sources:"achievement",  tier: 99, rarity: 1, value: 10000, color: "#ffd700" },
+    "Cloak":                { type:"cape",style:"cloak",sources:"dungeon",     tier: 5, rarity: 10, value: 10000, color: "gray" },
+	
 // hair
-	"hair1": { type: "hair", style: "mohawk",sources:"dungeon",  tier: 9, rarity: 1, color: "#ff69b4" },// pink mohawk
-	"hair2": { type: "hair", style: "pigtails",sources:"dungeon",  tier: 8, rarity: 2, color: "#4b3621" },// pigtails hair
-	"hair3": { type: "hair", style: "scribble",sources:"dungeon",  tier: 7, rarity: 3,   color: "#ffeb3b" }, // yellow child scribble
-	"hair4": { type: "hair", style: "messy",sources:"dungeon",  tier: 6, rarity: 4,      color: "#614126" }, // messy 
-	"hair5": { type: "hair", style: "braids", sources:"dungeon",  tier: 5, rarity: 5,    color: "#f3e5ab" }, // thick blonde braids
-    "hair6": { type: "hair", style: "girly", sources:"dungeon",  tier: 4, rarity: 6,  color: "#f3e5ab" }, // girly braids
-	"hair7": { type: "hair", style: "pomp", sources:"dungeon",  tier: 3, rarity: 7, color: "#614126" }, // Forward spiky pomp
-    "hair8": { type: "hair", style: "twinspikes", sources:"dungeon",  tier: 2, rarity: 9, color: "#ff0000" }, // Red double spikes
-	"hair11": { type: "hair", style: "drills", sources:"dungeon",  tier: 1, rarity: 8, color: "#f3e5ab" }, // spiral chunky drills 
-	"oldman beard": { name: "Wizard Beard", sources:"dungeon",  tier: 10, rarity: 7, type: "hair", style: "wizardbeard", color: "#ffffff" },
-	"wizard beard": { name: "Dark Mage Beard", sources:"dungeon",  tier: 8, rarity: 5, type: "hair", style: "wizardbeard", color: "#333333" },
+	"hair1": { type: "hair", style: "mohawk",      sources:"dungeon",  tier: 9, rarity: 1, color: "#ff69b4" },// pink mohawk
+	"hair2": { type: "hair", style: "pigtails",    sources:"dungeon",  tier: 8, rarity: 2, color: "#4b3621" },// pigtails hair
+	"hair3": { type: "hair", style: "scribble",    sources:"dungeon",  tier: 7, rarity: 3,   color: "#ffeb3b" }, // yellow child scribble
+	"hair4": { type: "hair", style: "messy",       sources:"dungeon",  tier: 6, rarity: 4,      color: "#614126" }, // messy 
+	"hair5": { type: "hair", style: "braids",      sources:"dungeon",  tier: 5, rarity: 5,    color: "#f3e5ab" }, // thick blonde braids
+    "hair6": { type: "hair", style: "girly",       sources:"dungeon",  tier: 4, rarity: 6,  color: "#f3e5ab" }, // girly braids
+	"hair7": { type: "hair", style: "pomp",        sources:"dungeon",  tier: 3, rarity: 7, color: "#614126" }, // Forward spiky pomp
+    "hair8": { type: "hair", style: "twinspikes",  sources:"dungeon",  tier: 2, rarity: 9, color: "#ff0000" }, // Red double spikes
+	"hair11": { type: "hair", style: "drills",     sources:"dungeon",  tier: 1, rarity: 8, color: "#f3e5ab" }, // spiral chunky drills 
+	"oldman beard": { name: "Wizard Beard",        sources:"dungeon",  tier: 10, rarity: 7, type: "hair", style: "wizardbeard", color: "#ffffff" },
+	"wizard beard": { name: "Dark Mage Beard",     sources:"dungeon",  tier: 8, rarity: 5, type: "hair", style: "wizardbeard", color: "#333333" },
 
 // ---------------------------basic items----------------------------------------------------------------
 	// --- normal fish ----
@@ -335,6 +340,8 @@ const ITEM_DB = {
     "Leather scrap":  { type: "material", sources:"fishing",  tier: 1, rarity: 0, value: 15,   color: "#a88d6d" },
 	"Sea Shell":  { type: "material", sources:"fishing swimming",  tier: 8, rarity: 0, value: 15,   color: "#a88d6d" },
 	"a Rock":  { type: "material", sources:"swimming",  tier: 8, rarity: 0, value: 15,   color: "#a88d6d" },
+	// --- treasure ---
+	"Trophy":         { type:"treasure",style:"", sources:"treasure",  tier: 99, rarity: 13, value: 10000, color: "#ffd700" },
 	// other basic materials will go here
 //-------------------------------------------------------------------------------------------------------
 };

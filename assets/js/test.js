@@ -91,7 +91,18 @@ function loadStats(name) {
         equippedHair: null,
         wigColor: null,
         activeTask: null,
+// --- ORGANIZED AREA STATS ---
+        dungeon: { highestTier: 0, kills: 0, bossKills: 0, achievements: 0 },
+        pond:    { visited: false, fishCaught: 0, deepDives: 0, achievements: 0 },
+        arena:   { wins: 0, winStreak: 0, totalMatches: 0, achievements:0 },
+        story:   { chapter: 0, progress: 0, achievements:0 }
     };
+
+    // --- SAFETY CHECKS (Ensure objects exist for old saves) ---
+    if (!stats.dungeon) stats.dungeon = { highestTier: 0, kills: 0, bossKills: 0, achievements:0 };
+    if (!stats.pond)    stats.pond = { visited: false, fishCaught: 0, deepDives: 0, achievements:0 };
+    if (!stats.arena)   stats.arena = { wins: 0, winStreak: 0, totalMatches: 0, achievements:0 };
+    if (!stats.story)   stats.story = { chapter: 0, progress: 0, achievements:0 };
 	// --- SAFETY CHECKS FOR PERSISTENCE ---
     if (stats.lastX === undefined) stats.lastX = 400;
     if (stats.lastY === undefined) stats.lastY = 450;
@@ -296,32 +307,53 @@ function saveStats(p) {
         }
     }
 } */
+
+
 function checkAchievements(p) {
     const s = p.stats;
     let unlockedAny = false;
 
-    // Define requirements mapping
     const requirements = {
-        "Nuber Cape":    () => s.combatLevel >= 5,
-        "Warrior Cape":  () => s.attackLevel >= 11,
-        "Wizard Cape":   () => s.magicLevel >= 11,
-        "Archer Cape":   () => s.archerLevel >= 11,
-        "Healer Cape":   () => s.healLevel >= 11,
-        "Lurker Cape":   () => s.lurkLevel >= 11,
-        "Fishing Cape":  () => s.fishLevel >= 11,
-        "Swimmer Cape":  () => s.swimLevel >= 11
+        // Dungeon Achievements
+        "99 Tier Cape":     () => s.dungeon.highestTier >= 99,
+        //"Viking Helmet":    () => s.dungeon.kills >= 1000,
+
+        // Pond Achievements
+        "Fishing Rod":      () => s.pond.visited === true,
+        //"Master Angler":    () => s.pond.fishCaught >= 500,
+
+        // Arena Achievements
+        "Great Axe":  () => s.arena.wins >= 50,
+        "PvP Cape":  () => s.arena.winStreak >= 10,
+		"PvP Boots":  () => s.arena.totalMatches >= 3,
+        // Mixed / Story Achievements
+        //"Hero's Badge":     () => s.story.chapter >= 1 && s.dungeon.highestTier >= 10
+		// Skill capes
+		"Warrior Cape":  () => s.attackLevel >= 50,
+        "Wizard Cape":   () => s.magicLevel >= 50,
+        "Archer Cape":   () => s.archerLevel >= 50,
+		"Lurker Cape":   () => s.lurkLevel >= 50,
+        "Healer Cape":   () => s.healLevel >= 50,
+        "Fishing Cape":  () => s.fishLevel >= 50,
+        "Swimmer Cape":  () => s.swimLevel >= 50,
+		"Nuber Cape":    () => s.combatLevel >= 50,
+		"Skilled Warrior Cape":  () => s.attackLevel >= 50,
+        "Skilled Wizard Cape":   () => s.magicLevel >= 50,
+        "Skilled Archer Cape":   () => s.archerLevel >= 50,
+		"Skilled Lurker Cape":   () => s.lurkLevel >= 50,
+        "Skilled Healer Cape":   () => s.healLevel >= 50,
+        "Skilled Fishing Cape":  () => s.fishLevel >= 50,
+        "Skilled Swimmer Cape":  () => s.swimLevel >= 50,
+		"Uber Cape":  () => s.combatLevel >= 99,
     };
 
-    Object.keys(requirements).forEach(capeName => {
-        // If they meet the requirement and DON'T already have it
-        if (requirements[capeName]() && !s.inventory.includes(capeName)) {
-            s.inventory.push(capeName);
+    Object.keys(requirements).forEach(itemName => {
+        if (requirements[itemName]() && !s.inventory.includes(itemName)) {
+            s.inventory.push(itemName);
             unlockedAny = true;
-            
-            // Visual Flair
-            spawnFloater(p, `🏆 UNLOCKED: ${capeName}`, "#ffcc00");
-            systemMessage(`🎊 ACHIEVEMENT: ${p.name} earned the ${capeName}!`);
-            spawnLootBeam(p, 13); // Maximum rarity beam
+            spawnFloater(p, `🏆 UNLOCKED: ${itemName}`, "#ffcc00");
+            systemMessage(`🎊 ACHIEVEMENT: ${p.name} earned the ${itemName}!`);
+            spawnLootBeam(p, 13);
         }
     });
 
@@ -405,41 +437,70 @@ function movePlayer(p, targetArea) {
         systemMessage(`${p.name} is a corpse and cannot travel!`);
         return;
     }
-    p.area = targetArea;
 
-	// FIX: Set this to match your drawScenery floor (475)
-    // 450 allows for the height of the stickman so they stand ON the line.
+    // 1. Set the new area
+    p.area = targetArea;
     const groundLevel = 450; 
 
+    // 2. Area-Specific Logic & Discovery Stats
     if (targetArea === "pond") {
+        // Set Spawn Location
         p.x = Math.random() * 150 + 50;
-        p.y = groundLevel; 
-		
-    } else if (targetArea === "arena") {
-        p.x = Math.random() * 400 + 200;
-        p.y = groundLevel;
-    } else {
+        
+        // Initialize stats if missing (Safety for old saves)
+        if (!p.stats.pond) p.stats.pond = { visited: false, fishCaught: 0, deepDives: 0 };
+        
+        // Discovery Trigger (Grants Fishing Rod via checkAchievements)
+        if (!p.stats.pond.visited) {
+            p.stats.pond.visited = true;
+            spawnFloater(p, "📍 DISCOVERED: THE POND", "#00ffff");
+            systemMessage(`🌟 ${p.name} found the Mystic Pond!`);
+        }
+    } 
+    else if (targetArea === "arena") {
+        // Initialize Arena stats if missing
+        if (!p.stats.arena) p.stats.arena = { wins: 0, winStreak: 0, totalMatches: 0 };
+        
+        // Positioning: Spectators go to the bleacher sides
+        if (p.activeTask !== "pvp") {
+            const side = Math.random() > 0.5 ? 1 : 0;
+            p.x = side === 1 ? (Math.random() * 100 + 50) : (Math.random() * 100 + 650);
+        } else {
+            p.x = 400; // Fighters start center
+        }
+    } 
+    else if (targetArea === "dungeon") {
+        p.x = 400;
+        // Initialize Dungeon stats if missing
+        if (!p.stats.dungeon) p.stats.dungeon = { highestTier: 0, kills: 0, bossKills: 0 };
+        
+        if (p.stats.dungeon.highestTier === 0) {
+            spawnFloater(p, "🏰 ENTERED THE DUNGEON", "#ff4444");
+        }
+    } 
+    else {
+        // Default spawn (Home or other areas)
         p.x = Math.random() * 600 + 100;
-        p.y = groundLevel;
     }
 
-    // This triggers your "falling" logic in updatePhysics
-    // If you want them to drop from the sky when they change areas:
-    p.y = -50; // Start above screen
-    p.targetY = groundLevel; // Fall down to the ground
-
+    // 3. Physics & Visual Transition
+    // Start slightly above the ground to trigger the "drop-in" effect
+    p.y = -50; 
+    p.targetY = groundLevel;
     p.targetX = null; 
-    p.activeTask = "none";
+    p.activeTask = "none"; // Stop current task upon travel
 
+    // 4. Global Queue Management
     if (targetArea !== "dungeon") {
-        dungeonQueue = dungeonQueue.filter(n => n !== p.name.toLowerCase());
+        // Remove from dungeon queue if they leave
+        if (typeof dungeonQueue !== 'undefined') {
+            dungeonQueue = dungeonQueue.filter(n => n !== p.name.toLowerCase());
+        }
     }
-	if (targetArea === "arena" && p.activeTask !== "pvp") {
-		// Force spectators to the left or right bleacher areas
-		const side = Math.random() > 0.5 ? 1 : 0;
-		p.x = side === 1 ? (Math.random() * 100 + 50) : (Math.random() * 100 + 650);
-	}
 
+    // 5. Finalize State
+    // saveStats triggers checkAchievements, which checks p.stats.pond.visited
+    saveStats(p); 
     systemMessage(`${p.name} traveled to ${targetArea}`);
 }
 
@@ -759,6 +820,18 @@ function performAttack(p) {
             // 5. Handle Loot (Only for Dungeon Enemies)
             if (target.hp <= 0 && (target.isEnemy || target.isBoss) && !target.looted) {
                 target.looted = true;
+				// --- NEW: INCREMENT DUNGEON STATS ---
+				if (!p.stats.dungeon) p.stats.dungeon = { highestTier: 0, kills: 0, bossKills: 0 };
+				
+				p.stats.dungeon.kills++;
+				if (target.isBoss) p.stats.dungeon.bossKills++;
+				
+				// Update highest tier reached
+				if (dungeonWave > p.stats.dungeon.highestTier) {
+					p.stats.dungeon.highestTier = dungeonWave;
+				}
+				// ------------------------------------
+			
                 handleLoot(p, target);
             }
 
@@ -1126,6 +1199,11 @@ function performFish(p) {
 
         // Give the item (CLEAN STRING)
         p.stats.inventory.push(fishName);
+		// --- INCREMENT POND STATS ---
+		if (!p.stats.pond) p.stats.pond = { visited: true, fishCaught: 0, deepDives: 0 };
+		p.stats.pond.fishCaught++; 
+		p.stats.pond.visited = true; // Safety update
+		// ----------------------------
         
         spawnFloater(p, `🎣 Caught: ${fishName}!`, itemData.color || "#44ccff");
         if (itemData.rarity >= 8) spawnLootBeam(p, itemData.rarity);
@@ -1155,10 +1233,12 @@ function performSwim(p) {
     let resultText = "";
     let floaterColor = "#00ffff"; // Cyan for swimming
     let foundItem = false;
-
+	if (!p.stats.pond) p.stats.pond = { visited: true, fishCaught: 0, deepDives: 0 };
+    p.stats.pond.visited = true;
     // 1. Rarity Logic for Diving
     if (roll < 0.005) {
         p.stats.inventory.push("Pearl");
+		p.stats.pond.deepDives++; // INCREMENT
         resultText = "found a SHINING PEARL!";
         floaterColor = "#fff5e6";
         foundItem = true;
@@ -1166,6 +1246,7 @@ function performSwim(p) {
     } 
     else if (roll < 0.05) {
         p.stats.inventory.push("Sea Shell");
+		p.stats.pond.deepDives++; // INCREMENT
         resultText = "found a pretty Sea Shell";
         foundItem = true;
     }
@@ -1413,42 +1494,86 @@ function performPvPAttack(p) {
     if (target.dead) {
         systemMessage(`⚔️ ${p.name} eliminated ${target.name}!`);
         updatePvPRank(p.name, 1, 0); // +1 kill
+		// --- NEW: INCREMENT PERSONAL ARENA STATS ---
+		if (!p.stats.arena) p.stats.arena = { wins: 0, winStreak: 0, totalMatches: 0 };
+		// We can't track "kills" in the arena object yet, so let's add it or use wins
+		saveStats(p);
         checkArenaVictory();
     }
 }
+
+
+
 function checkArenaVictory() {
     if (!arenaActive) return;
 
-    // Only count people who were actually FIGHTING (activeTask: pvp)
+    // 1. Identify all fighters (excluding spectators)
     const fighters = Object.values(players).filter(p => p.area === "arena" && p.activeTask === "pvp");
     const alive = fighters.filter(p => !p.dead);
     
     let winner = null;
+    let winningTeam = null;
 
+    // 2. Determine if the match is over
     if (arenaMode === "teams") {
         const redAlive = alive.filter(p => p.team === "Red");
         const blueAlive = alive.filter(p => p.team === "Blue");
-        if (redAlive.length > 0 && blueAlive.length === 0) winner = "Red Team";
-        if (blueAlive.length > 0 && redAlive.length === 0) winner = "Blue Team";
+        
+        if (redAlive.length > 0 && blueAlive.length === 0) winningTeam = "Red";
+        if (blueAlive.length > 0 && redAlive.length === 0) winningTeam = "Blue";
+        
+        if (winningTeam) winner = winningTeam + " Team";
     } else {
+        // In FFA or 1v1, game ends when only 1 player remains
         if (alive.length === 1) winner = alive[0].name;
     }
 
+    // 3. Process Victory Logic
     if (winner) {
         arenaActive = false;
         systemMessage(`🏆 ARENA VICTORY: ${winner} WINS!`);
         
-        // Award winner
-        if (arenaMode !== "teams") updatePvPRank(winner, 0, 1);
+        // 4. Update Stats for Everyone Involved
+        fighters.forEach(p => {
+            // Ensure the arena stats object exists
+            if (!p.stats.arena) p.stats.arena = { wins: 0, winStreak: 0, totalMatches: 0 };
+            
+            p.stats.arena.totalMatches++;
 
-        // Teleport everyone out and clean up states
+            const isWinner = (arenaMode === "teams") ? (p.team === winningTeam) : (p.name === winner);
+
+            if (isWinner) {
+                // Winner Logic
+                p.stats.arena.wins++;
+                p.stats.arena.winStreak++;
+                
+                // Update Global Rankings (Existing logic)
+                if (arenaMode !== "teams") {
+                    updatePvPRank(p.name, 0, 1);
+                }
+                
+                spawnFloater(p, "WINNER! 🔥", "#FFD700");
+            } else {
+                // Loser Logic
+                p.stats.arena.winStreak = 0; // Reset streak on loss
+            }
+
+            // Sync and check achievements (Capes, etc)
+            saveStats(p); 
+        });
+
+        // 5. Cleanup and Teleportation
         setTimeout(() => {
             fighters.forEach(p => {
                 p.activeTask = "none";
                 p.team = null; 
-                movePlayer(p, "town");
+                // Return them to town or their previous area
+                movePlayer(p, "town"); 
             });
-        }, 3000);
+            
+            // Visual reset for the area
+            systemMessage("⚔️ Arena has been cleared for the next match.");
+        }, 5000); // 5 second delay to let winners celebrate
     }
 }
 function updatePvPRank(name, kill, win) {
