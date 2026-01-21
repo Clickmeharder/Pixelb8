@@ -1952,8 +1952,9 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
 }
 
 // --- 2. CAPES (Drawn behind the stickman) ---
-function drawCapeItem(ctx, p, anchors, item) {
-
+function drawCapeItem(ctx, p, anchors) {
+	const item = ITEM_DB[p.stats.equippedCape];
+	if (!item) return;
     const headX = anchors.headX;
 
     const centerX = p.x + (anchors.lean * 10);
@@ -2277,7 +2278,10 @@ function drawStickman(ctx, p) {
     const limbs = getLimbPositions(p, anchors, anim, now);
 
 	// Everything inside here (Cape, Body, Items) will now be transparent!
-    if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors, ITEM_DB[p.stats.equippedCape]);
+    if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors);
+	
+
+	
     drawStickmanBody(ctx, p, anchors, limbs);
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
 // --- HP & NAME ---
