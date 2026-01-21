@@ -236,8 +236,25 @@
 
         #tooltip { position: absolute; pointer-events: none; background: rgba(0,0,0,0.9); color: #fff; padding: 8px; border-radius: 4px; border: 1px solid #0ff; font-size: 13px; display: none; z-index: 100; }		
         #areaDisplay { position:absolute; bottom:0px; left:5%; transform:translateX(-5%); color:#0ff; font-size:18px; background:rgba(0,0,0,0.8); padding:5px 15px; border: 1px solid #0ff; text-transform: uppercase; }
-		#input-wrapper {position: absolute;bottom: 45%;left: 3%;display: flex;width: 272px;flex-direction: column;flex-wrap: wrap;align-items: flex-start;opacity:0.0;transition: opacity 3s ease-out;}
-		#input-wrapper:hover { opacity:0.98;transition: opacity 8s ease-out}
+		#input-wrapper {
+			position: absolute;
+			top: 1%;
+			left: 15%;
+			transform: translateX(30%);
+			display: flex;
+			width: 500px;
+			flex-direction: column;
+			flex-wrap: wrap;
+			align-items: flex-start;
+			opacity: 0.0;
+			transition: opacity 3s 
+			ease-out;
+		}
+		#input-wrapper:hover { opacity:0.98;transition: opacity 0.8s ease-out}
+		/* When any input/select inside the wrapper is clicked or typed in */
+		#input-wrapper:focus-within {
+			opacity: 0.8 !important;
+		}
 		#stickmencmdInput {display: flex;flex-direction:row;}
 		input#browserColorPicker {width: 15px;}
 		#action-bar {display: flex;gap: 3px;background: rgba(0, 0, 0, 0.8);padding: 3px;border-radius: 12px;border: 2px solid #444;z-index: 1000;flex-wrap: wrap;}

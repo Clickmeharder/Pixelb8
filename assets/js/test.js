@@ -315,7 +315,7 @@ function checkAchievements(p) {
 
     const requirements = {
         // Dungeon Achievements
-        "99 Tier Cape":     () => s.dungeon.highestTier >= 99,
+        "Tier 99 Cape":     () => s.dungeon.highestTier >= 99,
         //"Viking Helmet":    () => s.dungeon.kills >= 1000,
 
         // Pond Achievements
