@@ -208,7 +208,7 @@ function movePlayer(p, targetArea) {
 		const side = Math.random() > 0.5 ? 1 : 0;
 		p.x = side === 1 ? (Math.random() * 100 + 50) : (Math.random() * 100 + 650);
 	}
-	areaDisplayDiv.textContent = "StickmenFall:" + viewArea;
+
     systemMessage(`${p.name} traveled to ${targetArea}`);
 }
 
@@ -1394,7 +1394,7 @@ function closeDungeon(reason) {
 
     // Reset UI
     viewArea = "town";
-    areaDisplayDiv.textContent = "StickmenFall: Town";
+    
     const selector = document.getElementById("view-area-selector");
     if (selector) selector.value = "town";
 }
@@ -2551,7 +2551,7 @@ function updateUI() {
             }
         });
     }
-	
+	areaDisplayDiv.textContent = "StickmenFall:" + viewArea;
     const uiElement = document.getElementById("enemyUI");
     if (uiElement) uiElement.innerHTML = uiHTML;
 }
@@ -3706,8 +3706,8 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         if (cmd === "showpond") { viewArea = "pond"; areaDisplayDiv.textContent = "StickmenFall: Pond"; return; }
         if (cmd === "showarena") { viewArea = "arena"; areaDisplayDiv.textContent = "StickmenFall: Arena"; return; }
 		if (cmd === "showtown") { viewArea = "town"; areaDisplayDiv.textContent = "StickmenFall: Town"; return; }
-        if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[ADMIN] Merchant spawned."); return; }
-        if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[ADMIN] Merchant removed."); return; }
+        if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[Pond] Merchant spawned."); return; }
+        if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[Pond] Merchant removed."); return; }
         if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
 		// COMMAND: /name [NewName]
 		if (cmd === "name" || cmd === "/name") {
@@ -3746,6 +3746,9 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 	if (cmd === "lurk")   { cmdLurk(p, user); return; }
     if (cmd === "travel") { movePlayer(p, args[1]); return; }
     if (cmd === "home")   { movePlayer(p, "home"); return; }
+	if (cmd === "pond")   { movePlayer(p, "pond"); return; }
+	if (cmd === "town")   { movePlayer(p, "town"); return; }
+	if (cmd === "arena")   { movePlayer(p, "arena"); return; }
     if (cmd === "dungeon"){ movePlayer(p, "dungeon"); return; }
     if (cmd === "join")   { joinDungeonQueue(p); return; }
 	if (cmd === "pvp")   { joinArenaQueue(p); return; }
