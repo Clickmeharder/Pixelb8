@@ -271,7 +271,7 @@ const ITEM_DB = {
 	"Royal Crown":    { type: "helmet", style: "crown", sources:"dungeon", tier: 10, rarity: 0, def: 2,  value: 10000, color: "#ff0000" },
 	"Angelic Ring":   { type: "helmet", style: "halo", sources:"dungeon", tier: 11, rarity: 13, def: 0,  value: 9999, color: "yellow" },
 // special capes
-    "Nuber Cape":           { type: "cape", style:"cape",sources:"achievement",  tier: 10, rarity: 13, value: 10000, color: "#880000" },
+    "Nuber Cape":           { type: "cape", style:"cape",sources:"achievement",  tier: 10, rarity: 13, value: null, color: "#880000" },
 	"Warrior Cape":         { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
     "Wizard Cape":          { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
 	"Archer Cape":          { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
