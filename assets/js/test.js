@@ -3105,7 +3105,6 @@ function renderStatRow(name, level, xp, color) {
 
 function renderAchievements(playerObj) {
     const achGrid = document.getElementById('achievements-grid');
-    achGrid.innerHTML = '<h3 id="achievementsh3">ACHIEVEMENTS</h3>';
     const achItems = Object.keys(ITEM_DB).filter(key => ITEM_DB[key].sources?.includes("achievement"));
     
     achItems.forEach(achName => {
