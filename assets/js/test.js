@@ -1264,7 +1264,7 @@ function startDungeon() {
     dungeonActive = true;
     dungeonWave = 1; 
     
-    areaDisplayDiv.textContent = "StickmenFall: Dungeon (ACTIVE)";
+    areaDisplayDiv.textContent = "StickmenFall:Dungeon" + dungeonWave;
     systemMessage("The Dungeon Gates have opened! The monsters are here!");
 
     dungeonQueue = []; 
@@ -3701,11 +3701,11 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
             addItemToPlayer(target, item);
             return;
         }
-        if (cmd === "showhome") { viewArea = "home"; areaDisplayDiv.textContent = "StickmenFall: Home"; return; }
-        if (cmd === "showdungeon") { viewArea = "dungeon"; areaDisplayDiv.textContent = "StickmenFall: Dungeon"; return; }
-        if (cmd === "showpond") { viewArea = "pond"; areaDisplayDiv.textContent = "StickmenFall: Pond"; return; }
-        if (cmd === "showarena") { viewArea = "arena"; areaDisplayDiv.textContent = "StickmenFall: Arena"; return; }
-		if (cmd === "showtown") { viewArea = "town"; areaDisplayDiv.textContent = "StickmenFall: Town"; return; }
+        if (cmd === "showhome") { viewArea = "home"; return; }
+        if (cmd === "showdungeon") { viewArea = "dungeon"; return; }
+        if (cmd === "showpond") { viewArea = "pond"; return; }
+        if (cmd === "showarena") { viewArea = "arena"; return; }
+		if (cmd === "showtown") { viewArea = "town"; return; }
         if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[Pond] Merchant spawned."); return; }
         if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[Pond] Merchant removed."); return; }
         if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
