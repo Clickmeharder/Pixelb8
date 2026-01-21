@@ -798,55 +798,93 @@ function drawBuyer(ctx) {
 function performFish(p) {
     if (p.area !== "pond" || p.dead) return;
     
-    // 1. COST TO FISH (Bait)
+    // 1. COST TO FISH
     const baitCost = 15; 
     if ((p.stats.pixels || 0) < baitCost) {
-        systemMessage(`${p.name} ran out of pixels for bait! (Cost: ${baitCost})`);
+        systemMessage(`${p.name} ran out of pixels for bait!`);
         p.activeTask = "none"; 
         return;
     }
     p.stats.pixels -= baitCost;
 
     const fishLevel = p.stats.fishLevel || 1;
-    let roll = Math.random();
     
-    // 2. ESCAPE CHANCE (Decreases as you level up)
-    // Starts at 40% chance to lose catch, drops to 10% at high levels
+    // 2. ESCAPE CHANCE
     let escapeChance = Math.max(0.10, 0.40 - (fishLevel * 0.01)); 
-    if (roll < escapeChance) {
-        spawnFloater(p, "LOST IT! (Bait gone)", "#ff6666");
+    if (Math.random() < escapeChance) {
+        spawnFloater(p, "LOST IT!", "#ff6666");
         return; 
     }
 
-    // 3. LOOT TABLE SELECTION
-    let fishType = "Bass"; 
-    let lootRoll = Math.random();
+    // 3. DETERMINE FISHING TIER
+    // Lvl 0-10: T1, 10-20: T2, 20-30: T3, 30-40: T4, 40-75: T5, 75+: T6
+    let currentTier = 1;
+    if (fishLevel >= 75) currentTier = 6;
+    else if (fishLevel >= 40) currentTier = 5;
+    else if (fishLevel >= 30) currentTier = 4;
+    else if (fishLevel >= 20) currentTier = 3;
+    else if (fishLevel >= 10) currentTier = 2;
 
-    if (lootRoll < 0.005) fishType = "fishhat"; // Super Rare
-    else if (lootRoll < 0.02) fishType = "Golden Bass";
-    else if (fishLevel >= 30 && lootRoll < 0.10) fishType = "Lobster";
-    else if (fishLevel >= 20 && lootRoll < 0.20) fishType = "Shark";
-    else if (fishLevel >= 15 && lootRoll < 0.35) fishType = "Tuna";
-    else if (fishLevel >= 10 && lootRoll < 0.55) fishType = "Salmon";
-    else if (fishLevel >= 5  && lootRoll < 0.75) fishType = "Trout";
+    let lootFound = [];
 
-    const itemData = ITEM_DB[fishType];
+    // 4. THE RARITY ROLL (Same logic as Dungeon)
+    // 0-13 scale, weighted towards lower numbers
+    let roll = Math.random();
+    let selectedRarity = Math.floor(Math.pow(roll, 4) * 14); 
 
-    // 4. WEIGHT CALCULATION (Based on Tier + Fish Level)
-    // Higher fishing level = heavier fish = more pixels!
-    let baseWeight = itemData.tier || 1;
-    let weightBonus = Math.random() * (fishLevel / 5);
-    let finalWeight = (baseWeight + weightBonus).toFixed(2);
+    // Find items that match Type: Fish, Tier <= current, and Rarity
+    let possibleFish = Object.keys(ITEM_DB).filter(key => {
+        const item = ITEM_DB[key];
+        return item.type === "fish" && item.tier <= currentTier && item.rarity == selectedRarity;
+    });
 
-    // If it's a wearable item like the fishhat, don't add weight
-    let inventoryItem = itemData.type === "fish" ? `${finalWeight}kg ${fishType}` : fishType;
-    p.stats.inventory.push(inventoryItem);
-    
-    // 5. REWARDS
-    spawnFloater(p, `🎣 Caught: ${inventoryItem}!`, itemData.color || "#44ccff");
-    
+    // Fallback if no specific rarity match
+    if (possibleFish.length === 0) {
+        possibleFish = Object.keys(ITEM_DB).filter(key => {
+            const item = ITEM_DB[key];
+            return item.type === "fish" && item.tier <= currentTier && item.rarity < selectedRarity;
+        });
+    }
+
+    if (possibleFish.length > 0) {
+        lootFound.push(possibleFish[Math.floor(Math.random() * possibleFish.length)]);
+    }
+
+    // 5. SPECIAL ROLLS (Pearl & Fishhat)
+    // Pearl: Tier 5+ check
+    if (currentTier >= 5 && Math.random() < 0.05) lootFound.push("Pearl");
+    // Fishhat: Extremely rare global chance (0.5%)
+    if (Math.random() < 0.005) lootFound.push("fishhat");
+    // Material: Random chance for a Sea Shell or scrap (10%)
+    if (Math.random() < 0.10) {
+        const mats = ["Sea Shell", "Leather scrap"];
+        lootFound.push(mats[Math.floor(Math.random() * mats.length)]);
+    }
+
+    // 6. APPLY LOOT & CALCULATE WEIGHT
+    lootFound.forEach(itemName => {
+        const itemData = ITEM_DB[itemName];
+        let inventoryName = itemName;
+
+        if (itemData.type === "fish") {
+            let baseWeight = itemData.tier || 1;
+            let weightBonus = Math.random() * (fishLevel / 5);
+            let finalWeight = (baseWeight + weightBonus).toFixed(2);
+            inventoryName = `${finalWeight}kg ${itemName}`;
+        }
+
+        p.stats.inventory.push(inventoryName);
+        
+        // Visuals
+        const rarity = itemData.rarity || 0;
+        spawnFloater(p, `🎣 Caught: ${inventoryName}!`, itemData.color || "#44ccff");
+        if (rarity >= 8) spawnLootBeam(p, rarity);
+    });
+
+    // 7. XP & LEVEL UP
     p.stats.fishXP = (p.stats.fishXP || 0) + 15;
-    if (p.stats.fishXP >= xpNeeded(fishLevel) * 2) {
+    const req = typeof xpNeeded === "function" ? xpNeeded(fishLevel) : 100;
+    if (p.stats.fishXP >= req * 2) {
         p.stats.fishLevel++;
         p.stats.fishXP = 0;
         systemMessage(`[LEVEL UP] ${p.name} is now a Lvl ${p.stats.fishLevel} Fisher!`);
@@ -3777,117 +3815,6 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     // Pass everything to the Master Router
     processGameCommand(user, msg, flags, extra);
 };
-/* ComfyJS.onChat = (user, msg, color, flags, extra) => {
-//	console.log( "User:", user, "command:", command,);
-//	displayConsoleMessage(user, `!${command}`);
-    // Store user color from extra	
-    if (!userColors[user]) {
-        userColors[user] = extra.userColor || "orangered"; // Default to white if no color is provided
-    }
 
-    let p = getPlayer(user, extra.userColor);
-    let args = msg.split(" ");
-// 1. Try the Central Router first (for clear/scrub/future browser commands)
-    // We pass 'developer: true' if we want to bypass Twitch flags for local testing
-    let wasCentralCmd = centralCommandRouter(p, user, msg, { 
-        broadcaster: flags.broadcaster, 
-        mod: flags.mod,
-        developer: false // Change to true if testing locally without Twitch
-    });
-	if (wasCentralCmd) return; // Stop here if it was handled
-	//const cmd = args.shift().toLowerCase();//
-    let cmd = args[0].toLowerCase();
-	if (cmd === "stop" || cmd === "idle" || cmd === "!reset") {
-			cmdStop(p, user);
-		}
-    // Combat & Tasks//
-    if (cmd === "attack") cmdAttack(p, user);
-    if (cmd === "fish")   cmdFish(p, user);
-	if (cmd === "swim") cmdSwim(p, user);
-    if (cmd === "heal")   cmdHeal(p, args);
-    if (cmd === "pose" || cmd === "setpose") {
-        cmdSetPose(p, user, args);
-    }
-    // Movement//
-    if (cmd === "travel")  movePlayer(p, args[1]);
-    if (cmd === "home")    movePlayer(p, "home");
-    if (cmd === "dungeon") movePlayer(p, "dungeon");
-    if (cmd === "join")    joinDungeonQueue(p);
-    if (cmd === "dance") {cmdDance(p, user, args);}
-	if (cmd === "lurk") {cmdLurk(p, user);}
-	if (cmd === "listdances") {cmdListDances(p);}
-    // Stats & Inventory//
-    if (cmd === "stats")    cmdShowStats(user, args);
-    if (cmd === "topstats") cmdTopStats();
-	if (cmd === "equip") cmdEquip(p, args);
-	if (cmd === "sheath") cmdSheath(p, args);
-	if (cmd === "unequip") cmdUnequip(p, args);
-    if (cmd === "inventory") cmdInventory(p, user, args);
-	if (cmd === "sell") cmdSell(p, args);
-	if (cmd === "bal" || cmd === "wallet" || cmd === "money") {cmdBalance(p);}
-	//special//
-	if (cmd === "wigcolor") { cmdWigColor(p, args); }
-    // Status//
-    if (cmd === "mingle") cmdMingle(p, user, args);
-    if (cmd === "respawn" && p.dead) { 
-        p.dead = false; p.hp = p.maxHp; 
-        systemMessage(`${p.name} returned to life!`); 
-    }
-
-
-// Admin & Streamer Controls
-    // We check if the command exists first, then verify authorization
-    const adminCommands = ["showhome", "showdungeon", "showpond", "spawnmerchant", "despawnmerchant", "resetmerchant", "give", "additem"];
-    
-    if (adminCommands.includes(cmd)) {
-        if (!isStreamerAndAuthorize(user, cmd)) return;
-		// Inside the Admin Controls section of your router:
-		if (cmd === "give" || cmd === "additem") {
-			cmdGive(user, args, flags);
-		}
-        if (cmd === "showhome") { 
-            viewArea = "home"; 
-            document.getElementById("areaDisplay").textContent = "StickmenFall: HOME"; 
-        }
-        if (cmd === "showdungeon") { 
-            viewArea = "dungeon"; 
-            document.getElementById("areaDisplay").textContent = "StickmenFall: DUNGEON"; 
-        }
-        if (cmd === "showpond") { 
-            viewArea = "pond"; 
-            document.getElementById("areaDisplay").textContent = "StickmenFall: FISHING POND"; 
-        }
-        
-        // --- Manual Merchant Controls ---
-        if (cmd === "spawnmerchant") {
-            forceBuyer = true;
-            updateBuyerNPC();
-            systemMessage("[ADMIN] Merchant forced to spawn.");
-        }
-        if (cmd === "despawnmerchant") {
-            forceBuyer = false;
-            updateBuyerNPC();
-            systemMessage("[ADMIN] Merchant forced to leave.");
-        }
-        if (cmd === "resetmerchant") {
-            forceBuyer = null; 
-            updateBuyerNPC();
-            systemMessage("[ADMIN] Merchant returned to automatic schedule.");
-        }
-        if (cmd === "testdance") {
-            forceBuyer = null; 
-             cmdTestDance(p, user, args.slice(1), flags);
-            systemMessage("[ADMIN] testing a dance.");
-        }
-    }
-
-    // Special case for testdance (often allowed for mods too)
-    if (cmd === "testdance") {
-        if (flags.broadcaster || flags.mod) {
-            cmdTestDance(p, user, args.slice(1), flags);
-        }
-    }
-};
- */
 
 gameLoop();
