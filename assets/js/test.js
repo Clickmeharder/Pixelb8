@@ -1957,7 +1957,7 @@ function drawCapeItem(ctx, p, anchors, item) {
     const headX = anchors.headX;
 
     const centerX = p.x + (anchors.lean * 10);
-    ctx.fillStyle = item.color || "#550055";
+    ctx.fillStyle = item.color || "#666";
     ctx.beginPath();
     // Start at neck (Higher up than before)
     ctx.moveTo(headX, p.y - 40 + anchors.bodyY); 
