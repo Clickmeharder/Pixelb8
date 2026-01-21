@@ -265,16 +265,17 @@
 			background: #222;
 			color: white;
 		}
-		#inventory-modal {position: absolute;top: 10%;left: 41px;width: 47vw;height: 348px;max-height: 67vh;display: flex;justify-content: center;align-items: center;z-index: 2000;}
+		#inventory-modal { display: flex; position: absolute;top: 10%;left: 41px;width: 200px;height: 300px;padding: 6px;
+			flex-direction: column;flex-wrap: wrap;z-index: 2000;}
 		#inventory-modal h3{ background: #4444;}
 		.hidden { display: none !important; }
 
-		.modal-content {background: #222; border: 2px solid #555;width:;height: 98%;padding: 3px; border-radius: 10px;font-family: monospace; color: white;color: #fafffead;}
+		.modal-content { background: #222;border: 2px solid #555;border-radius: 10px;padding: 3px;font-family: monospace;color: #fafffead; }
 		.modal-header {display: flex;justify-content: space-between;border-bottom: 1px solid #444;margin-bottom: 3px;}
 		h2#inv-player-name {margin: 0;}
 
 
-		.inventory-layout {display: grid;grid-template-columns:2fr 3fr;gap: 4px;height: 92%;}
+		.inventory-layout { display: grid;grid-template-columns: 2fr 3fr;gap: 4px;height: 85%;width: 97%;overflow: hidden;resize: both;padding: 4px;}
 		
 		/* Ensure the tab containers fill the space */
 		#backpack-Tab, #achievements-tab, #stats-tab {
@@ -301,17 +302,26 @@
 			align-items: center;
 		}
 
-		.backpack-section{
-			max-height: 93%;
-		}
 		/* Grid Styling */
 		#backpack-grid, #equipped-grid {display: grid;grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
 			gap: 3px;background: #111;padding: 4px;border-radius: 5px;height: ;overflow: hidden;overflow-y: auto;}
 		#backpack-grid {
 			/*height: ;*/
 		}
-		.inv-slot {width: 64px;height: 32px;background: #333;border: 1px solid #555;display: flex;flex-direction:
-			column;align-items: center;justify-content: center;font-size: 8px;cursor: pointer;position: relative;text-align: center;overflow: hidden;}
+		.inv-slot {
+			height: 38px;
+			background: #333;
+			border: 1px solid #555;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			font-size: 10px;
+			cursor: pointer;
+			position: relative;
+			text-align: center;
+			overflow: hidden;
+		}
 		.inv-slot:hover { border-color: #00ffff; background: #444; }
 		.inv-slot.empty { opacity: 0.3; cursor: default; }
 
