@@ -227,6 +227,7 @@ function getPlayer(name, color) {
         lastDanceXP: 0,
         stats: loadStats(name)
     };
+    players[lowName].hp = players[lowName].maxHp;
     updateCombatLevel(players[lowName]);
     return players[lowName];
 }
@@ -2977,29 +2978,53 @@ function renderItemsView(playerObj, bpGrid) {
     // 2. Filter logic
     let itemsToRender = playerObj.stats.inventory.filter(item => {
         if (hideEquipped && equippedItems.includes(item)) return false;
+        
         const data = ITEM_DB[item] || {};
+        const type = data.type || "";
+
         if (currentInventoryFilter === "all") return true;
-        if (currentInventoryFilter === "gear") {
-            return ["weapon", "armor", "helmet", "pants", "gloves", "boots", "cape", "staff", "bow"].includes(data.type);
+
+        // NEW: Hats filter (Covers all headgear types)
+        if (currentInventoryFilter === "helmet") {
+            return ["helmet", "hood", "viking", "wizard", "crown", "hair"].includes(type);
         }
-        return data.type === currentInventoryFilter;
+
+        // GEAR filter (Everything wearable except hats, which now have their own button)
+        if (currentInventoryFilter === "gear") {
+            return ["weapon", "armor", "pants", "gloves", "boots", "cape", "staff", "bow"].includes(type);
+        }
+
+        // MISC/Material filter
+        if (currentInventoryFilter === "material") {
+            return type === "material" || type === "tool" || type === "consumable";
+        }
+
+        // FISH or specific direct matches
+        return type === currentInventoryFilter;
     });
 
     // 3. Sort logic
     itemsToRender.sort((a, b) => {
         const dataA = ITEM_DB[a] || {};
         const dataB = ITEM_DB[b] || {};
+
         if (currentSortMode === "tier") return (dataB.tier || 0) - (dataA.tier || 0);
         if (currentSortMode === "value") return (dataB.value || 0) - (dataA.value || 0);
         if (currentSortMode === "rarity") return (dataB.rarity || 0) - (dataA.rarity || 0);
         if (currentSortMode === "name") return a.localeCompare(b);
+        
+        // NEW: Sort by Type (Alphabetical)
+        if (currentSortMode === "type") {
+            const typeA = dataA.type || "";
+            const typeB = dataB.type || "";
+            return typeA.localeCompare(typeB);
+        }
+
         return 0;
     });
 
-    // 4. Clear and Render
+    // 4. Render
     bpGrid.innerHTML = "";
-    
-    // Safety check: Ensure the grid itself isn't hidden if the Tab is visible
     bpGrid.classList.remove('hidden'); 
 
     itemsToRender.forEach((item) => {
@@ -3021,7 +3046,7 @@ function renderItemsView(playerObj, bpGrid) {
         `;
 
         div.querySelector('.btn-use').addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent modal weirdness
+            e.stopPropagation();
             uiAction('equip', item);
         });
         
