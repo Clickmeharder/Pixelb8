@@ -2901,7 +2901,7 @@ function renderInventoryUI() {
 
     // Safety hide all
     [bpGrid, achGrid, statsGrid].forEach(el => el?.classList.add('hidden'));
-
+	renderEquippedSection(playerObj);
     if (currentInventoryView === "achievements") {
         if (achGrid) {
             achGrid.classList.remove('hidden');
@@ -2921,8 +2921,40 @@ function renderInventoryUI() {
             renderItemsView(playerObj, bpGrid);
         }
     }
+	
 }
+function renderEquippedSection(playerObj) {
+    const equipGrid = document.getElementById('equipped-grid');
+    if (!equipGrid) return;
 
+    // Define the slots we want to display
+    const slots = [
+        { label: "Weapon", key: "equippedWeapon" },
+        { label: "Helmet", key: "equippedHelmet" },
+        { label: "Armor", key: "equippedArmor" },
+        { label: "Pants", key: "equippedPants" },
+        { label: "Boots", key: "equippedBoots" },
+        { label: "Cape", key: "equippedCape" },
+        { label: "Gloves", key: "equippedGloves" }
+    ];
+
+    equipGrid.innerHTML = "";
+    slots.forEach(slot => {
+        const itemName = playerObj.stats[slot.key];
+        const itemData = ITEM_DB[itemName] || null;
+        
+        const div = document.createElement('div');
+        div.className = "equip-slot";
+        div.innerHTML = `
+            <small class="slot-label">${slot.label}</small>
+            <div class="slot-item" style="color: ${itemData ? itemData.color : '#666'}">
+                ${itemName || "Empty"}
+            </div>
+            ${itemName ? `<button class="btn-unequip" onclick="uiAction('unequip', '${itemName}')">×</button>` : ''}
+        `;
+        equipGrid.appendChild(div);
+    });
+}
 function renderItemsView(playerObj, bpGrid) {
     const equippedItems = [
         playerObj.stats.equippedWeapon, playerObj.stats.equippedArmor,
