@@ -60,8 +60,109 @@ let viewArea = "home";
 const TASK_DURATION = 15 * 60 * 1000; // 15 Minutes
 
 /* ================= DATA PERSISTENCE ================= */
-/* ================= DATA PERSISTENCE ================= */
 function loadStats(name) {
+    const saved = localStorage.getItem("rpg_" + name);
+    let stats = saved ? JSON.parse(saved) : {
+		lastArea: "home",
+		maxhp:100,
+		currentHp: 100,
+		pixels: 1500,
+		lastX: 400,
+        lastY: 450,
+        attackLevel: 1, attackXP: 0,
+		archerLevel: 1, archerXP: 0,
+		magicLevel: 1, magicXP: 0,
+        healLevel: 1, healXP: 0,
+        fishLevel: 1, fishXP: 0,
+        danceLevel: 1, danceXP: 0,
+		lurkLevel: 1, lurkXP: 0,
+		swimLevel: 1, swimXP: 0,
+        swimDistance: 0,
+		combatLevel: 1,
+        inventory: ["Fishing Rod"],
+        equippedWeapon: null,
+        equippedArmor: null,
+        equippedHelmet: null,
+        equippedBoots: null,
+        // --- NEW SLOTS FOR NEW PLAYERS ---
+        equippedPants: null,
+        equippedCape: null,
+        equippedGloves: null,
+        equippedHair: null,
+        wigColor: null,
+        activeTask: null,
+    };
+	// --- SAFETY CHECKS FOR PERSISTENCE ---
+    if (stats.lastX === undefined) stats.lastX = 400;
+    if (stats.lastY === undefined) stats.lastY = 450;
+    if (stats.lastArea === undefined) stats.lastArea = "home";
+    if (stats.activeTask === undefined) stats.activeTask = null;
+    if (stats.currentHp === undefined) stats.currentHp = stats.maxhp;
+	// --- MIGRATION: STRIP WEIGHT FROM NAMES ---
+	if (stats.inventory && Array.isArray(stats.inventory)) {
+		stats.inventory = stats.inventory.map(item => {
+			if (typeof item === 'string') {
+				// This replaces things like "1.41kg Bass" or "0.5kb Bass" with just "Bass"
+				// It looks for digits, dots, and 'kg' or 'kb' followed by a space
+				return item.replace(/^\d+(\.\d+)?k[gb]\s+/, "");
+			}
+			return item;
+		});
+	}
+	// --- MIGRATION: GOLD TO PIXELS ---
+    if (stats.gold !== undefined) {
+        // If they had pixels already, add gold to it, otherwise just set it
+        stats.pixels = (stats.pixels || 0) + stats.gold;
+        // Remove the old gold key so we don't migrate it again
+        delete stats.gold; 
+        console.log(`Migrated ${name}'s gold to pixels.`);
+    }
+	
+    // --- SAFETY CHECKS FOR OLD SAVES ---
+    if (isNaN(stats.pixels) || stats.pixels === null) stats.pixels = 0;
+	// Inside the initial stats object and the safety checks
+	if (stats.maxhp === undefined) stats.maxhp = 100;
+	if (stats.archerLevel === undefined) stats.archerLevel = 1;
+	if (stats.archerXP === undefined) stats.archerXP = 0;
+	if (stats.magicLevel === undefined) stats.magicLevel = 1;
+	if (stats.magicXP === undefined) stats.magicXP = 0;
+	if (stats.lurkLevel === undefined) stats.lurkLevel = 1;
+	if (stats.lurkXP === undefined) stats.lurkXP = 0;
+	if (stats.swimLevel === undefined) stats.swimLevel = 1;
+    if (stats.swimXP === undefined) stats.swimXP = 0;
+    if (stats.swimDistance === undefined) stats.swimDistance = 0;
+	
+    // --- SAFETY CHECKS FOR OLD SAVES ---
+    if (isNaN(stats.pixels) || stats.pixels === null) stats.pixels = 0;
+    
+    if (!stats.inventory || !Array.isArray(stats.inventory)) {
+        stats.inventory = ["Fishing Rod"];
+    }
+
+    if (!stats.inventory.includes("Fishing Rod")) {
+        stats.inventory.push("Fishing Rod");
+    }
+    
+    // --- PATCH MISSING SLOTS FOR OLD PLAYERS ---
+    if (stats.equippedWeapon === undefined) stats.equippedWeapon = null;
+    if (stats.equippedArmor === undefined) stats.equippedArmor = null;
+    if (stats.equippedHelmet === undefined) stats.equippedHelmet = null;
+    if (stats.equippedBoots === undefined) stats.equippedBoots = null;
+    
+    // New patches for the new items!
+    if (stats.equippedPants === undefined) stats.equippedPants = null;
+    if (stats.equippedCape === undefined) stats.equippedCape = null;
+    if (stats.equippedGloves === undefined) stats.equippedGloves = null;
+    if (stats.equippedHair === undefined) stats.equippedHair = null;
+
+    if (stats.danceLevel === undefined) stats.danceLevel = 1;
+    if (stats.danceXP === undefined) stats.danceXP = 0;
+    if (stats.wigColor === undefined) stats.wigColor = null;
+
+    return stats;
+}
+/* ================= DATA PERSISTENCE ================= */
+/* function loadStats(name) {
     const saved = localStorage.getItem("rpg_" + name);
     let stats = saved ? JSON.parse(saved) : {
         attackLevel: 1, attackXP: 0,
@@ -150,11 +251,34 @@ function loadStats(name) {
     if (stats.wigColor === undefined) stats.wigColor = null;
 
     return stats;
-}
+} */
 /* function saveStats(p) {
     localStorage.setItem("rpg_" + p.name, JSON.stringify(p.stats));
 } */
 function saveStats(p) {
+    // 0. Update the stats object with live data before saving
+    p.stats.lastX = p.x;
+    p.stats.lastY = p.y;
+    p.stats.lastArea = p.area;
+    p.stats.activeTask = p.activeTask;
+    p.stats.currentHp = p.hp;
+
+    // 1. Run the achievement check
+    checkAchievements(p);
+
+    // 2. Commit to localStorage
+    localStorage.setItem("rpg_" + p.name, JSON.stringify(p.stats));
+
+    // 3. UI RE-RENDER (Keep your existing UI trigger logic here)
+    const localProfile = getActiveProfile();
+    if (localProfile && p.name.toLowerCase() === localProfile.name.toLowerCase()) {
+        const modal = document.getElementById('inventory-modal');
+        if (modal && !modal.classList.contains('hidden')) {
+            renderInventoryUI();
+        }
+    }
+}
+/* function saveStats(p) {
     // 1. Run the achievement check before saving
     const newAchievement = checkAchievements(p);
 
@@ -171,7 +295,7 @@ function saveStats(p) {
             renderInventoryUI();
         }
     }
-}
+} */
 function checkAchievements(p) {
     const s = p.stats;
     let unlockedAny = false;
@@ -207,15 +331,48 @@ function checkAchievements(p) {
 function getPlayer(name, color) {
     const lowName = name.toLowerCase();
     
-    // 1. Check if player exists (using lowercase key)
     if (players[lowName]) {
         if (color) players[lowName].color = (typeof color === 'object') ? (color.userColor || "orangered") : color;
         return players[lowName];
     }
     
-    // 2. Create new player
+    const loadedStats = loadStats(name);
+
     players[lowName] = {
-        name: name, // Original casing for display
+        name: name,
+        color: (typeof color === 'object') ? (color.userColor || "#00ffff") : (color || "#00ffff"),
+        // --- LOAD FROM PERSISTENCE ---
+        x: loadedStats.lastX,
+        y: loadedStats.lastY,
+        area: loadedStats.lastArea,
+        activeTask: loadedStats.activeTask,
+        // -----------------------------
+        targetX: null,
+        dead: false,
+        danceStyle: 0,
+        lastDanceXP: 0,
+        stats: loadedStats
+    };
+
+    updateCombatLevel(players[lowName]);
+    
+    // Set HP from persistence or 25% floor
+    players[lowName].hp = loadedStats.currentHp || Math.floor(players[lowName].maxHp * 0.25);
+
+    return players[lowName];
+}
+/* function getPlayer(name, color) {
+    const lowName = name.toLowerCase();
+    
+    // 1. Check if player exists in the current session
+    if (players[lowName]) {
+        if (color) players[lowName].color = (typeof color === 'object') ? (color.userColor || "orangered") : color;
+        return players[lowName];
+    }
+    
+    // 2. Create new player object
+    const p = {
+        name: name,
         color: (typeof color === 'object') ? (color.userColor || "#00ffff") : (color || "#00ffff"),
         x: Math.random() * 800 + 100, 
         y: 450,
@@ -227,10 +384,22 @@ function getPlayer(name, color) {
         lastDanceXP: 0,
         stats: loadStats(name)
     };
-    players[lowName].hp = players[lowName].maxHp;
-    updateCombatLevel(players[lowName]);
-    return players[lowName];
-}
+
+    // Calculate maxHp first so we have a number to work with
+    updateCombatLevel(p);
+
+    // 3. HP PERSISTENCE LOGIC
+    // Check if stats already has a saved HP, otherwise give them 25% of max
+    if (p.stats.currentHp !== undefined && p.stats.currentHp !== null) {
+        p.hp = p.stats.currentHp;
+    } else {
+        // New player or first time login since update: Start at 25%
+        p.hp = Math.floor(p.maxHp * 0.25);
+    }
+
+    players[lowName] = p;
+    return p;
+} */
 function movePlayer(p, targetArea) {
     if (p.dead) {
         systemMessage(`${p.name} is a corpse and cannot travel!`);
@@ -422,9 +591,11 @@ function xpNeeded(lvl) { return Math.floor(50 * Math.pow(1.3, lvl)); }
 function updateCombatLevel(p) {
     const s = p.stats;
     const highOffense = Math.max(s.attackLevel, s.archerLevel, s.magicLevel);
+    
+    // 1. Calculate Combat Level
     s.combatLevel = Math.floor((highOffense + s.healLevel + s.lurkLevel + (s.fishLevel * 0.5)) / 2);
 
-    // Calculate scaling HP
+    // 2. Calculate scaling HP
     const baseHP = 100;
     const hpBonus = (s.attackLevel * 4) + 
                     (Math.max(s.archerLevel, s.magicLevel) * 3) + 
@@ -433,13 +604,27 @@ function updateCombatLevel(p) {
 
     const newMax = baseHP + hpBonus;
 
-    // Update both the active player property and the stats object
-    p.maxHp = newMax;       // Used for current game logic/drawing
-    p.stats.maxhp = newMax; // Saved to localStorage
+    // 3. Update Max HP
+    p.maxHp = newMax;       
+    p.stats.maxhp = newMax; 
 
+    // 4. HP SYNC & SAFETY (The New Part)
+    // If the player somehow has no HP (new player), set to 25% floor
+    if (p.hp === undefined || p.hp === null) {
+        p.hp = Math.floor(newMax * 0.25);
+    }
+
+    // Ensure current HP never exceeds the new Max HP (important for level ups)
+    if (p.hp > p.maxHp) {
+        p.hp = p.maxHp;
+    }
+
+    // Push the live HP into the stats object so saveStats() writes it to LocalStorage
+    p.stats.currentHp = p.hp;
+
+    // 5. Final Save
     saveStats(p);
 }
-
 
 //===================================================================
 
@@ -634,11 +819,15 @@ function applyDamage(target, rawAmount, color = "#f00") {
     let finalAmount = Math.max(1, rawAmount - totalDef);
 
     target.hp -= finalAmount;
+	if (target.stats) {
+        target.stats.currentHp = target.hp;
+    }
     spawnFloater(target, `-${finalAmount}`, color);
 
     // --- 4. DEATH HANDLING ---
     if (target.hp <= 0) {
         target.hp = 0;
+		if (target.stats) target.stats.currentHp = 0; // Sync death
         target.dead = true;
         target.activeTask = "none";
         target.deathTime = Date.now();
@@ -692,14 +881,16 @@ function applyHealEffect(p, target, amount, mode) {
     if (target.hp >= target.maxHp && mode !== "all") return;
 
     target.hp = Math.min(target.maxHp, target.hp + amount);
-    
-    // Visual Projectile from Healer to Target
-	spawnProjectile(p.x, p.y - 20, target.x, target.y - 20, weapon.color || "#00ffff", "magic", p.area);
+// SYNC: Update stats so health gain persists
+    if (target.stats) {
+        target.stats.currentHp = target.hp;
+    }
+    const healerWeapon = ITEM_DB[p.stats.equippedWeapon] || {};
+    spawnProjectile(p.x, p.y - 20, target.x, target.y - 20, healerWeapon.color || "#00ffff", "magic", p.area);
     spawnFloater(target, `+${amount} HP`, "#0f0");
 
     // XP Award
-    let xpGain = mode === "focus" ? 20 : (mode === "all" ? 10 : 15);
-    p.stats.healXP += xpGain;
+    p.stats.healXP = (p.stats.healXP || 0) + (mode === "focus" ? 20 : (mode === "all" ? 10 : 15));
 
     if (p.stats.healXP >= xpNeeded(p.stats.healLevel)) {
         p.stats.healLevel++;
