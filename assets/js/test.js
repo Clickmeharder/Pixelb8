@@ -2888,31 +2888,38 @@ function renderInventoryUI() {
     if (!playerObj) return;
 
     // 1. Update Header
-    document.getElementById('inv-player-name').textContent = p.name.toUpperCase();
-    document.getElementById('inv-pixels-val').textContent = (playerObj.stats.pixels || 0).toFixed(0);
+    const nameEl = document.getElementById('inv-player-name');
+    const pixelEl = document.getElementById('inv-pixels-val');
+    if (nameEl) nameEl.textContent = p.name.toUpperCase();
+    if (pixelEl) pixelEl.textContent = (playerObj.stats.pixels || 0).toFixed(0);
     
     // 2. Container Routing
     const bpGrid = document.getElementById('backpack-grid');
     const achGrid = document.getElementById('achievements-grid');
     const statsGrid = document.getElementById('stats-grid');
-    const filters = document.getElementById('inventory-filters-container'); // Wrap your filters in this ID
+    const filters = document.getElementById('inventory-filters-container');
 
-    // Hide all containers initially
-    [bpGrid, achGrid, statsGrid, filters].forEach(el => el?.classList.add('hidden'));
+    // Safety hide all
+    [bpGrid, achGrid, statsGrid].forEach(el => el?.classList.add('hidden'));
 
     if (currentInventoryView === "achievements") {
-        achGrid.classList.remove('hidden');
-        renderAchievements(playerObj);
+        if (achGrid) {
+            achGrid.classList.remove('hidden');
+            renderAchievements(playerObj);
+        }
     } 
     else if (currentInventoryView === "stats") {
-        statsGrid.classList.remove('hidden');
-        renderStatsView(playerObj);
+        if (statsGrid) {
+            statsGrid.classList.remove('hidden');
+            renderStatsView(playerObj);
+        }
     } 
     else {
-        // Show Items View
-        bpGrid.classList.remove('hidden');
-        if (filters) filters.classList.remove('hidden');
-        renderItemsView(playerObj, bpGrid);
+        // Items View
+        if (bpGrid) {
+            bpGrid.classList.remove('hidden');
+            renderItemsView(playerObj, bpGrid);
+        }
     }
 }
 
@@ -2924,7 +2931,8 @@ function renderItemsView(playerObj, bpGrid) {
         playerObj.stats.equippedCape
     ].filter(Boolean);
 
-    const hideEquipped = document.getElementById("filter-hide-equipped").checked;
+    const hideEquippedEl = document.getElementById("filter-hide-equipped");
+    const hideEquipped = hideEquippedEl ? hideEquippedEl.checked : false;
 
     let itemsToRender = playerObj.stats.inventory.filter(item => {
         if (hideEquipped && equippedItems.includes(item)) return false;
