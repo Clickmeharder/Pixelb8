@@ -306,7 +306,9 @@
 			height: 85%;
 			width: 97%;
 			min-width: 350px;
+			max-width: 732px;
 			min-height: 236px;
+			max-height: 342px;
 			overflow: hidden;
 			resize: both;
 			padding: 4px;
@@ -316,7 +318,7 @@
 		#backpack-Tab, #achievements-tab, #stats-tab {
 			display: flex;
 			flex-direction: column;
-			height: 95%;
+			height: 70%;
 			background: #333;
 		}
 		.equipped-section {
@@ -342,18 +344,19 @@
 
 		/* Grid Styling */
 		#backpack-grid, #equipped-grid {
-			display: grid
-		;
+			display: grid;
 			grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
-			gap: 3px;
+			gap: 1px;
 			background: #111;
-			padding: 4px;
+			padding: 2px;
 			border-radius: 5px;
 			height: auto;
 			overflow: hidden;
 			overflow-y: auto;}
 		#backpack-grid {
 			/*height: ;*/
+			align-content: center;
+			justify-items: stretch;
 		}
 		.inv-slot {
 			width: 67px;
@@ -455,8 +458,8 @@
 			background: #111;
 			padding: 6px;
 			border-radius: 5px;
-			height: 48%; 
-			max-height: 48%;
+			height: ; 
+			max-height: ;
 			overflow-y: auto;
 		}
 
@@ -488,8 +491,8 @@
 			background: #111;
 			padding: 10px;
 			border-radius: 5px;
-			height: 48%;
-			max-height: 48%;
+			height: ;
+			max-height: ;
 			overflow-y: auto;
 		}
 
