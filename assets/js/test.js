@@ -2576,7 +2576,7 @@ function updateUI() {
         });
     }
 	areaDisplayDiv.textContent = "StickmenFall:" + viewArea;
-    const uiElement = document.getElementById("enemyUI");
+    const uiElement = document.getElementById("areaUI");
     if (uiElement) uiElement.innerHTML = uiHTML;
 }
 function updateArenaUI() {
@@ -2616,7 +2616,7 @@ function updateArenaUI() {
     }
 
     // You can either create a new div for this or append it to enemyUI
-    const arenaElement = document.getElementById("arenaUI"); // Make sure this div exists in your HTML
+    const arenaElement = document.getElementById("areaUI"); // Make sure this div exists in your HTML
     if (arenaElement) arenaElement.innerHTML = arenaHTML;
 }
 /* ================= GAME LOOP ================= */

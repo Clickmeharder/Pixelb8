@@ -226,6 +226,7 @@
         body { margin:0; background:transparent; font-family:monospace; overflow:hidden; }
         canvas { display:block; margin:auto; background: #111; }
 
+		#areaUI { position:absolute; top:10px; right:10px; color:#ff4444; font-size:14px; text-align:right; background:rgba(0,0,0,0.6); padding:8px; border-radius:6px; border: 1px solid #444; }
         #enemyUI { position:absolute; top:10px; right:10px; color:#ff4444; font-size:14px; text-align:right; background:rgba(0,0,0,0.6); padding:8px; border-radius:6px; border: 1px solid #444; }
 		#arenaUI { position:absolute; top:5px; left:45%; transform:translateX(-45%); color:#ff4444; font-size:14px; text-align:right; background:rgba(0,0,0,0.6); padding:8px; border-radius:6px; border: 1px solid #444; }
         #stickmenfall-systemMsgBox { position:absolute; top:10px; left:10px; width:300px; font-size:13px; pointer-events:none; }
@@ -679,8 +680,9 @@
 
 		<div id="idleActionsBox"></div>
 
-		<div id="enemyUI"></div>
-		<div id="arenaUI"></div>
+		<!-- <div id="enemyUI"></div> -->
+		<!-- <div id="arenaUI"></div> -->
+		<div id="areaUI"></div>
 		<div id="input-wrapper">
 			<div id="stickmencmdInput" style="">
 				<select id="profileSelector" title="Switch Profile"></select>
