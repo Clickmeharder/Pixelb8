@@ -2887,47 +2887,47 @@ function renderInventoryUI() {
     const playerObj = players[p.name.toLowerCase()];
     if (!playerObj) return;
 
-    // 1. Update Header
+    // 1. Update Header & Pixels
     const nameEl = document.getElementById('inv-player-name');
     const pixelEl = document.getElementById('inv-pixels-val');
     if (nameEl) nameEl.textContent = p.name.toUpperCase();
     if (pixelEl) pixelEl.textContent = (playerObj.stats.pixels || 0).toFixed(0);
     
-    // 2. Container Routing
+    // 2. Section Routing
+    const backpackTab = document.getElementById('backpack-Tab');
+    const achTab = document.getElementById('achievements-tab');
+    const statsTab = document.getElementById('stats-tab');
+
+    // Grids for rendering
     const bpGrid = document.getElementById('backpack-grid');
     const achGrid = document.getElementById('achievements-grid');
     const statsGrid = document.getElementById('stats-grid');
-    const filters = document.getElementById('inventory-filters-container');
 
-    // Safety hide all
-    [bpGrid, achGrid, statsGrid].forEach(el => el?.classList.add('hidden'));
-	renderEquippedSection(playerObj);
+    // Hide all tab containers first
+    [backpackTab, achTab, statsTab].forEach(el => el?.classList.add('hidden'));
+    
+    // Always render equipped section
+    renderEquippedSection(playerObj);
+
+    // Show active tab and trigger specific render
     if (currentInventoryView === "achievements") {
-        if (achGrid) {
-            achGrid.classList.remove('hidden');
-            renderAchievements(playerObj);
-        }
+        achTab?.classList.remove('hidden');
+        renderAchievements(playerObj);
     } 
     else if (currentInventoryView === "stats") {
-        if (statsGrid) {
-            statsGrid.classList.remove('hidden');
-            renderStatsView(playerObj);
-        }
+        statsTab?.classList.remove('hidden');
+        renderStatsView(playerObj);
     } 
     else {
-        // Items View
-        if (bpGrid) {
-            bpGrid.classList.remove('hidden');
-            renderItemsView(playerObj, bpGrid);
-        }
+        // Default to Items/Backpack
+        backpackTab?.classList.remove('hidden');
+        renderItemsView(playerObj, bpGrid);
     }
-	
 }
 function renderEquippedSection(playerObj) {
     const equipGrid = document.getElementById('equipped-grid');
     if (!equipGrid) return;
 
-    // Mapping the stat keys to the command names for processGameCommand
     const slots = [
         { label: "Weapon", key: "equippedWeapon", cmd: "weapon" },
         { label: "Helmet", key: "equippedHelmet", cmd: "helmet" },
@@ -2944,10 +2944,9 @@ function renderEquippedSection(playerObj) {
         const itemData = ITEM_DB[itemName] || null;
         
         const div = document.createElement('div');
-        // Add 'clickable' class only if there is an item to unequip
         div.className = `equip-slot ${itemName ? 'has-item' : 'is-empty'}`;
         
-        // If an item exists, clicking the whole div runs: unequip [type]
+        // Use the sanitized uiAction
         if (itemName) {
             div.onclick = () => uiAction('unequip', slot.cmd);
         }
@@ -2962,7 +2961,9 @@ function renderEquippedSection(playerObj) {
         equipGrid.appendChild(div);
     });
 }
+
 function renderItemsView(playerObj, bpGrid) {
+    // 1. Get IDs of currently equipped items
     const equippedItems = [
         playerObj.stats.equippedWeapon, playerObj.stats.equippedArmor,
         playerObj.stats.equippedHelmet, playerObj.stats.equippedPants,
@@ -2973,7 +2974,7 @@ function renderItemsView(playerObj, bpGrid) {
     const hideEquippedEl = document.getElementById("filter-hide-equipped");
     const hideEquipped = hideEquippedEl ? hideEquippedEl.checked : false;
 
-    // 1. Filter and Sort
+    // 2. Filter logic
     let itemsToRender = playerObj.stats.inventory.filter(item => {
         if (hideEquipped && equippedItems.includes(item)) return false;
         const data = ITEM_DB[item] || {};
@@ -2984,6 +2985,7 @@ function renderItemsView(playerObj, bpGrid) {
         return data.type === currentInventoryFilter;
     });
 
+    // 3. Sort logic
     itemsToRender.sort((a, b) => {
         const dataA = ITEM_DB[a] || {};
         const dataB = ITEM_DB[b] || {};
@@ -2994,8 +2996,12 @@ function renderItemsView(playerObj, bpGrid) {
         return 0;
     });
 
-    // 2. Clear and Render
+    // 4. Clear and Render
     bpGrid.innerHTML = "";
+    
+    // Safety check: Ensure the grid itself isn't hidden if the Tab is visible
+    bpGrid.classList.remove('hidden'); 
+
     itemsToRender.forEach((item) => {
         const itemData = ITEM_DB[item] || {};
         const isUnsellable = itemData.type === "tool" || (itemData.sources?.includes("achievement"));
@@ -3008,18 +3014,23 @@ function renderItemsView(playerObj, bpGrid) {
                 <span class="slot-item-name" style="color:${itemData.color || '#fff'};">${item}</span>
                 <span class="item-price">${isUnsellable ? 'BOUND' : '$' + (itemData.value || 0)}</span>
                 <div class="item-actions">
-                    <button class="btn-use" data-item="${item}">USE</button>
-                    ${isUnsellable ? '' : `<button class="btn-sell" data-item="${item}">SELL</button>`}
+                    <button class="btn-use">USE</button>
+                    ${isUnsellable ? '' : `<button class="btn-sell">SELL</button>`}
                 </div>
             </div>
         `;
 
-        // 3. Add Event Listeners instead of onclick
-        div.querySelector('.btn-use').addEventListener('click', () => uiAction('equip', item));
+        div.querySelector('.btn-use').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent modal weirdness
+            uiAction('equip', item);
+        });
         
         const sellBtn = div.querySelector('.btn-sell');
         if (sellBtn) {
-            sellBtn.addEventListener('click', () => uiAction('sell', item));
+            sellBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                uiAction('sell', item);
+            });
         }
 
         bpGrid.appendChild(div);

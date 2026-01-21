@@ -271,8 +271,38 @@
 		.modal-content {background: #222; border: 2px solid #555;width: 470px;padding: 3px; border-radius: 10px;font-family: monospace; color: white;color: #fafffead;}
 		.modal-header {display: flex;justify-content: space-between;border-bottom: 1px solid #444;margin-bottom: 3px;}
 		h2#inv-player-name {margin: 0;}
+
+
 		.inventory-layout {display: grid;grid-template-columns:2fr 3fr;gap: 4px;}
-		div#backpack-grid {height: 48%;max-height:48%;}
+		
+		/* Ensure the tab containers fill the space */
+		#backpack-Tab, #achievements-tab, #stats-tab {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+		}
+
+		/* Specific filter styling inside the backpack tab */
+		#inventory-filters {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 8px;
+			background: rgba(0,0,0,0.3);
+			padding: 8px;
+			margin-bottom: 5px;
+			border-radius: 4px;
+		}
+
+		#backpack-grid {
+			flex-grow: 1; /* Grid takes up remaining space */
+			min-height: 200px; /* Adjust based on your modal height */
+		}
+
+		/* Hide utility class */
+		.hidden {
+			display: none !important;
+		}		
 		/* Grid Styling */
 		#backpack-grid, #equipped-grid {display: grid;grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
 			gap: 3px;background: #111;padding: 4px;border-radius: 5px;height: ;overflow: hidden;overflow-y: auto;}
@@ -946,29 +976,28 @@
 					<button class="tab-btn" data-view="stats" id="btn-view-stats">STATS</button>
 					<button class="tab-btn" data-view="achievements" id="btn-view-achievements">ACHIEVEMENTS</button>
 				</div>
-				<div id="inventory-filters">
-					<label style="color: white; font-size: 0.8em; margin-left: 10px;">
-                        <input type="checkbox" id="filter-hide-equipped"> Hide Equipped
-                    </label>
-					<button class="filter-btn active" data-filter="all">ALL</button>
-					<button class="filter-btn" data-filter="gear">GEAR</button>
-					<button class="filter-btn" data-filter="fish">FISH</button>
+				<div id="backpack-Tab">
+					<div id="inventory-filters">
+						<label style="color: white; font-size: 0.8em; margin-left: 10px;">
+							<input type="checkbox" id="filter-hide-equipped"> Hide Equipped
+						</label>
+						<button class="filter-btn active" data-filter="all">ALL</button>
+						<button class="filter-btn" data-filter="gear">GEAR</button>
+						<button class="filter-btn" data-filter="fish">FISH</button>
+						<select id="inv-sort-mode">
+							<option value="tier">Sort by Tier</option>
+							<option value="value">Sort by Value</option>
+							<option value="rarity">Sort by Rarity</option>
+							<option value="name">Sort by Name</option>
+						</select>
+					</div>
 
+					<div id="backpack-grid">
 
-					
-
+					</div>
 				</div>
-				<select id="inv-sort-mode">
-					<option value="tier">Sort by Tier</option>
-					<option value="value">Sort by Value</option>
-					<option value="rarity">Sort by Rarity</option>
-					<option value="name">Sort by Name</option>
-				</select>
-				<div id="backpack-grid">
-
-				</div>
-				<div id="achievements-grid" class="hidden"></div>
-				<div id="stats-grid" class="hidden"></div>
+				<div id="achievements-tab" class="hidden"><div id="achievements-grid"></div></div>
+				<div id="stats-tab" class="hidden"><div id="stats-grid"></div></div>
 			</div>
         </div>
     </div>
