@@ -3642,6 +3642,11 @@ function cmdInventory(p, user, args) {
 function cmdSell(p, user, args) {
     if (p.dead) return;
     
+
+    if (p.stats.inventory.length === 0) {
+        systemMessage(`${user}: Your inventory is empty.`);
+        return;
+    }
 	// Safety check for args
     if (!args || args.length < 2) {
         systemMessage(`${user}: Try "!sell fish" or click an item.`);
@@ -3649,14 +3654,6 @@ function cmdSell(p, user, args) {
     }
 
     // Join all arguments after "sell", lowercase them, and strip quotes
-    let target = args.slice(1).join(" ").toLowerCase().replace(/"/g, "");
-    if (p.stats.inventory.length === 0) {
-        systemMessage(`${user}: Your inventory is empty.`);
-        return;
-    }
-
-    // --- FIX HERE ---
-    // Join args, lowercase them, and remove any double quotes sent by the UI
     let target = args.slice(1).join(" ").toLowerCase().replace(/"/g, "");
     // ----------------
     
