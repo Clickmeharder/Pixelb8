@@ -3090,10 +3090,13 @@ function renderAchievements(playerObj) {
 // Helper to bridge UI clicks to game commands
 function uiAction(cmd, itemName) {
     const p = getActiveProfile();
-    // Use the specific item name for equip/sell
-    processGameCommand(p.name, `${cmd} ${itemName}`);
+    if (!p) return;
+
+    // Wrapping in quotes handles items with spaces like "Leather Scrap"
+    const fullCommand = `${cmd} "${itemName}"`;
     
-    // Refresh the UI after a short delay to let stats update
+    processGameCommand(p.name, fullCommand);
+    
     setTimeout(renderInventoryUI, 50);
 }
 // Wait for the DOM to load to ensure the action bar exists
@@ -3639,11 +3642,14 @@ function cmdInventory(p, user, args) {
 function cmdSell(p, user, args) {
     if (p.dead) return;
     
+	// Safety check for args
     if (!args || args.length < 2) {
-        systemMessage(`${user}: Use "!sell fish" or click an item in your inventory.`);
+        systemMessage(`${user}: Try "!sell fish" or click an item.`);
         return;
     }
 
+    // Join all arguments after "sell", lowercase them, and strip quotes
+    let target = args.slice(1).join(" ").toLowerCase().replace(/"/g, "");
     if (p.stats.inventory.length === 0) {
         systemMessage(`${user}: Your inventory is empty.`);
         return;
@@ -4055,7 +4061,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "inventory") { cmdInventory(p, user, args); return; }
     if (cmd === "equip")     { cmdEquip(p, args); return; }
     if (cmd === "unequip")   { cmdUnequip(p, args); return; }
-    if (cmd === "sell")      { cmdSell(p, args); return; }
+    if (cmd === "sell")      { cmdSell(p, user, args); return; }
     if (cmd === "bal" || cmd === "money") { cmdBalance(p); return; }
 	if (cmd === "wigcolor")  { cmdWigColor(p, args); return; } // Added back
 	if (cmd === "listdances") { cmdListDances(p); return; }
