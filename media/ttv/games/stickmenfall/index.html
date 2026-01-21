@@ -341,14 +341,6 @@
 			font-weight: bold;
 			overflow: hidden;
 			text-overflow: ellipsis;
-			/* This creates a thin white outline */
-			text-shadow: 
-				-1px -1px 0 #fff,  
-				 1px -1px 0 #fff,
-				-1px  1px 0 #fff,
-				 1px  1px 0 #fff;
-			/* Optional: If the text is white, use a black outline instead */
-			/* text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; */
 		}
 		#inventoryClosebtn {height: 23px;padding-top: 0px;margin: 0px;width: 25px;text-align: center;}
 		.filter-btn {background: #333;border: 1px solid #555;color: #eee;padding: 3px 8px;font-size: 10px;cursor: pointer;border-radius: 4px;}
@@ -807,7 +799,11 @@
 
 			<div class="backpack-section">
 				<h3 style="background: #4444; margin-bottom: 5px;">Backpack</h3>
-				
+				<div id="inventory-tabs">
+					<button class="tab-btn active-tab" data-view="items" id="btn-view-items">ITEMS</button>
+					<button class="tab-btn" data-view="stats" id="btn-view-stats">STATS</button>
+					<button class="tab-btn" data-view="achievements" id="btn-view-achievements">ACHIEVEMENTS</button>
+				</div>
 				<div id="inventory-filters">
 					<label style="color: white; font-size: 0.8em; margin-left: 10px;">
                         <input type="checkbox" id="filter-hide-equipped"> Hide Equipped
@@ -815,22 +811,20 @@
 					<button class="filter-btn active" data-filter="all">ALL</button>
 					<button class="filter-btn" data-filter="gear">GEAR</button>
 					<button class="filter-btn" data-filter="fish">FISH</button>
-					<div id="inventory-tabs">
-						<button class="tab-btn active-tab" data-view="items" id="btn-view-items">ITEMS</button>
-						<button class="tab-btn" data-view="stats" id="btn-view-stats">STATS</button>
-						<button class="tab-btn" data-view="achievements" id="btn-view-achievements">ACHIEVEMENTS</button>
-					</div>
-					<select id="inv-sort-mode">
-						<option value="tier">Sort by Tier</option>
-						<option value="value">Sort by Value</option>
-						<option value="rarity">Sort by Rarity</option>
-						<option value="name">Sort by Name</option>
-					</select>
+
+
 					
 
 				</div>
+				<select id="inv-sort-mode">
+					<option value="tier">Sort by Tier</option>
+					<option value="value">Sort by Value</option>
+					<option value="rarity">Sort by Rarity</option>
+					<option value="name">Sort by Name</option>
+				</select>
+				<div id="backpack-grid">
 
-				<div id="backpack-grid"></div>
+				</div>
 				<div id="achievements-grid" class="hidden"></div>
 				<div id="stats-grid" class="hidden"></div>
 			</div>

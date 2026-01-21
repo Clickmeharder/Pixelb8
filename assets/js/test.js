@@ -2973,6 +2973,7 @@ function renderItemsView(playerObj, bpGrid) {
     const hideEquippedEl = document.getElementById("filter-hide-equipped");
     const hideEquipped = hideEquippedEl ? hideEquippedEl.checked : false;
 
+    // 1. Filter and Sort
     let itemsToRender = playerObj.stats.inventory.filter(item => {
         if (hideEquipped && equippedItems.includes(item)) return false;
         const data = ITEM_DB[item] || {};
@@ -2993,27 +2994,37 @@ function renderItemsView(playerObj, bpGrid) {
         return 0;
     });
 
+    // 2. Clear and Render
     bpGrid.innerHTML = "";
     itemsToRender.forEach((item) => {
         const itemData = ITEM_DB[item] || {};
         const isUnsellable = itemData.type === "tool" || (itemData.sources?.includes("achievement"));
+        
         const div = document.createElement('div');
         div.className = "inv-slot";
         div.innerHTML = `
             <div class="slot-content">
                 <span class="item-tier">T${itemData.tier || 1}</span>
-                <span style="color:${itemData.color || '#fff'}; font-weight:bold;">${item}</span>
-                <span class="item-price">${isUnsellable ? 'BOUND' : '$'+(itemData.value || 0)}</span>
+                <span class="slot-item-name" style="color:${itemData.color || '#fff'};">${item}</span>
+                <span class="item-price">${isUnsellable ? 'BOUND' : '$' + (itemData.value || 0)}</span>
                 <div class="item-actions">
-                    <button onclick="uiAction('equip', '${item}')">USE</button>
-                    ${isUnsellable ? '' : `<button class="btn-sell" onclick="uiAction('sell' + ' ${item}')">SELL</button>`}
+                    <button class="btn-use" data-item="${item}">USE</button>
+                    ${isUnsellable ? '' : `<button class="btn-sell" data-item="${item}">SELL</button>`}
                 </div>
             </div>
         `;
+
+        // 3. Add Event Listeners instead of onclick
+        div.querySelector('.btn-use').addEventListener('click', () => uiAction('equip', item));
+        
+        const sellBtn = div.querySelector('.btn-sell');
+        if (sellBtn) {
+            sellBtn.addEventListener('click', () => uiAction('sell', item));
+        }
+
         bpGrid.appendChild(div);
     });
 }
-
 function renderStatsView(playerObj) {
     const statsGrid = document.getElementById('stats-grid');
     const s = playerObj.stats;
@@ -3079,10 +3090,15 @@ function renderAchievements(playerObj) {
 // Helper to bridge UI clicks to game commands
 function uiAction(cmd, itemName) {
     const p = getActiveProfile();
-    // Use the specific item name for equip/sell
-    processGameCommand(p.name, `${cmd} ${itemName}`);
+    if (!p) return;
+
+    // Wrap itemName in quotes so the command parser sees it as a single argument
+    // Example: sell "Iron Sword"
+    const fullCommand = `${cmd} "${itemName}"`;
     
-    // Refresh the UI after a short delay to let stats update
+    processGameCommand(p.name, fullCommand);
+    
+    // Refresh UI to show item was removed/equipped
     setTimeout(renderInventoryUI, 50);
 }
 // Wait for the DOM to load to ensure the action bar exists
