@@ -3489,41 +3489,40 @@ function cmdSwim(p, user) {
     saveStats(p);
 }
 function cmdEquip(p, args) {
-    // 1. BLOCK EQUIPPING DURING TASKS
-    // Checks if the player is busy doing something (fishing, mining, attacking, etc.)
     if (p.activeTask && p.activeTask !== "none") {
         systemMessage(`${p.name}: You are too busy ${p.activeTask} to change gear right now! Stop what you are doing first.`);
         return;
     }
 
-    let inputName = args.slice(1).join(" ").toLowerCase();
+    // SANITIZATION: Join all args and strip quotes
+    let inputName = args.slice(1).join(" ").toLowerCase().replace(/"/g, "");
+    
+    // Find the item using the sanitized name
     let invItem = p.stats.inventory.find(i => i.toLowerCase() === inputName);
     
     if (!invItem) {
-        systemMessage(`${p.name}: You don't have "${args.slice(1).join(" ")}".`);
+        systemMessage(`${p.name}: You don't have "${inputName}".`);
         return;
     }
 
+    // Get the exact casing from the DB
     let dbKey = Object.keys(ITEM_DB).find(k => k.toLowerCase() === invItem.toLowerCase());
     let itemData = ITEM_DB[dbKey];
     const type = itemData.type;
 
-    // 2. BLOCK TOOLS: Tools are used automatically by tasks, not equipped
     if (type === "tool" || type === "fishing_rod" || type === "pickaxe" || type === "axe") {
         systemMessage(`${p.name}: You don't need to equip tools. Just start the task!`);
         return;
     }
 
     let msg = "";
-
-    // 3. EQUIP LOGIC
-    if (type === "weapon" || type === "staff" || type === "bow") {
+    if (["weapon", "staff", "bow"].includes(type)) {
         p.stats.equippedWeapon = dbKey;
         msg = `slung the ${dbKey} over their shoulder`;
     } else if (type === "armor") {
         p.stats.equippedArmor = dbKey;
         msg = `put on the ${dbKey}`;
-    } else if (type === "helmet" || type === "hood" || type === "hair" || type === "viking" || type === "wizard" || type === "crown") {
+    } else if (["helmet", "hood", "hair", "viking", "wizard", "crown"].includes(type)) {
         p.stats.equippedHelmet = dbKey; 
         msg = `is wearing ${dbKey}`;
     } else if (type === "boots") {
@@ -3552,20 +3551,18 @@ function cmdSheath(p, user) {
     saveStats(p);
 }
 function cmdUnequip(p, args) {
-    const target = args[1] ? args[1].toLowerCase() : "all";
+    // SANITIZATION: join and strip quotes
+    const target = args[1] ? args.slice(1).join(" ").toLowerCase().replace(/"/g, "") : "all";
     let found = false;
 
     const slots = {
-        weapon: "equippedWeapon",
-        staff: "equippedWeapon",
+        weapon: "equippedWeapon", staff: "equippedWeapon", bow: "equippedWeapon",
         armor: "equippedArmor",
-        helmet: "equippedHelmet",
-        hood: "equippedHelmet",
+        helmet: "equippedHelmet", hood: "equippedHelmet", hair: "equippedHair",
         boots: "equippedBoots",
         pants: "equippedPants",
         cape: "equippedCape",
-        gloves: "equippedGloves",
-        hair: "equippedHair"
+        gloves: "equippedGloves"
     };
 
     if (target === "all") {
@@ -3580,7 +3577,7 @@ function cmdUnequip(p, args) {
         systemMessage(`${p.name} unequipped ${target === "all" ? "everything" : target}.`);
         saveStats(p);
     } else {
-        systemMessage(`${p.name}: Invalid slot. (weapon/armor/helmet/boots/pants/cape/gloves/hair/all)`);
+        systemMessage(`${p.name}: Invalid slot "${target}". (weapon/armor/helmet/boots/pants/cape/gloves/all)`);
     }
 }
 function cmdInventory(p, user, args) {
@@ -3641,35 +3638,28 @@ function cmdInventory(p, user, args) {
 }
 function cmdSell(p, user, args) {
     if (p.dead) return;
-    
-
     if (p.stats.inventory.length === 0) {
         systemMessage(`${user}: Your inventory is empty.`);
         return;
     }
-	// Safety check for args
     if (!args || args.length < 2) {
         systemMessage(`${user}: Try "!sell fish" or click an item.`);
         return;
     }
 
-    // Join all arguments after "sell", lowercase them, and strip quotes
+    // SANITIZATION: join and strip quotes
     let target = args.slice(1).join(" ").toLowerCase().replace(/"/g, "");
-    // ----------------
     
     let totalPixels = 0;
     let itemsRemoved = 0;
-    
     updateBuyerNPC(); 
 
     const isAtPond = (p.area === "pond");
     const isAtTown = (p.area === "town");
     
-    // Calculate Multiplier based on Buyer presence and player count at Pond
     let multiplier = 1;
     if (buyerActive && isAtPond) {
         const fishersCount = Object.values(players).filter(player => player.area === "pond").length;
-        // Base 2x bonus + 0.1x per player at the pond
         multiplier = 2 + (fishersCount * 0.1); 
     }
 
@@ -3678,10 +3668,9 @@ function cmdSell(p, user, args) {
         return;
     }
 
-	if (target === "fish") {
+    if (target === "fish") {
         p.stats.inventory = p.stats.inventory.filter(item => {
             const itemData = ITEM_DB[item];
-            // Only sell if it is a fish AND NOT an achievement fish (if you ever add one)
             if (itemData && itemData.type === "fish" && !itemData.sources?.includes("achievement")) {
                 totalPixels += Math.floor(itemData.value * multiplier);
                 itemsRemoved++;
@@ -3696,15 +3685,10 @@ function cmdSell(p, user, args) {
             let itemData = ITEM_DB[itemName];
             
             if (itemData) {
-                // --- PROTECTION CHECK ---
-                const isAchievement = itemData.sources?.includes("achievement");
-                const isTool = itemData.type === "tool";
-
-                if (isAchievement || isTool || itemData.value === 0 || itemData.value == null) {
+                if (itemData.sources?.includes("achievement") || itemData.type === "tool" || !itemData.value) {
                     systemMessage(`${user}: You cannot sell ${itemName}! It is a soulbound item.`);
                     return; 
                 }
-                // --- END PROTECTION ---
 
                 let price = itemData.value || 0;
                 if (buyerActive && isAtPond && (itemData.type === "fish" || itemData.type === "material")) {
