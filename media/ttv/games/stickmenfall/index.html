@@ -266,12 +266,13 @@
 			color: white;
 		}
 		#inventory-modal {position: absolute;top: 39px;left: 41px;width: 47vw; display: flex;justify-content: center;align-items: center;z-index: 2000;}
+		#inventory-modal h3{ background: #4444;}
 		.hidden { display: none !important; }
 
 		.modal-content {background: #222; border: 2px solid #555;width:;padding: 3px; border-radius: 10px;font-family: monospace; color: white;color: #fafffead;}
 		.modal-header {display: flex;justify-content: space-between;border-bottom: 1px solid #444;margin-bottom: 3px;}
 		h2#inv-player-name {margin: 0;}
-		#inventory-modal h3{ background: #4444;}
+
 
 		.inventory-layout {display: grid;grid-template-columns:2fr 3fr;gap: 4px;}
 		
@@ -301,6 +302,15 @@
 		#backpack-grid {
 			/*height: ;*/
 		}
+		.inv-slot {width: 64px;height: 32px;background: #333;border: 1px solid #555;display: flex;flex-direction:
+			column;align-items: center;justify-content: center;font-size: 8px;cursor: pointer;position: relative;text-align: center;overflow: hidden;}
+		.inv-slot:hover { border-color: #00ffff; background: #444; }
+		.inv-slot.empty { opacity: 0.3; cursor: default; }
+
+		.slot-label { font-size: 8px; color: #888; position: absolute; bottom: 2px; }
+
+		.item-actions {position: absolute; top: 0; left: 0; width: 100%; height: 100%;background: rgba(0,0,0,0.9); display: none;flex-direction: column; justify-content: center;}
+		.inv-slot:hover .item-actions { display: flex; }
 		#pixels-display {margin:auto;margin-left:6px;}
 		.btn-sell { background: #600; color: white; border: none; font-size: 9px; cursor: pointer; margin-top: 2px; }
 		.btn-sell:hover { background: #a00; }
