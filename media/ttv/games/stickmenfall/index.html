@@ -360,6 +360,37 @@
 			align-content: center;
 			justify-items: stretch;
 		}
+		/* 1. Define the width and behavior of the scrollbar area */
+		#backpack-grid::-webkit-scrollbar, 
+		#achievements-grid::-webkit-scrollbar,
+		#stats-grid::-webkit-scrollbar {
+			width: 8px;               /* Width of the vertical scrollbar */
+			display: block;           /* Ensures it stays visible */
+		}
+
+		/* 2. Style the background track (the part the thumb slides on) */
+		#backpack-grid::-webkit-scrollbar-track,
+		#achievements-grid::-webkit-scrollbar-track,
+		#stats-grid::-webkit-scrollbar-track {
+			background: #050505;      /* Slightly darker than your grid background */
+			border-radius: 5px;
+		}
+
+		/* 3. Style the "Thumb" (the part the user drags) */
+		#backpack-grid::-webkit-scrollbar-thumb,
+		#achievements-grid::-webkit-scrollbar-thumb,
+		#stats-grid::-webkit-scrollbar-thumb {
+			background: #444;         /* Grey thumb */
+			border: 2px solid #111;   /* Creates a gap effect around the thumb */
+			border-radius: 10px;
+		}
+
+		/* 4. Thumb Hover state */
+		#backpack-grid::-webkit-scrollbar-thumb:hover,
+		#achievements-grid::-webkit-scrollbar-thumb:hover,
+		#stats-grid::-webkit-scrollbar-thumb:hover {
+			background: #ffcc00;      /* Gold color on hover to match your active tabs */
+		}
 		.inv-slot {
 			width: 67px;
 			height: 39px;
