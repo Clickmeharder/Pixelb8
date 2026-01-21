@@ -350,7 +350,149 @@
 		.filter-btn.active {background: #ceae33;color: #000;border-color: #fff;font-weight: bold;}
 
 		#inventory-filters input[type="checkbox"] {margin-right: 5px;cursor: pointer;}
-		
+		/* Shared Grid styling for Achievements */
+		#achievements-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Slightly wider for titles */
+			gap: 5px;
+			background: #111;
+			padding: 6px;
+			border-radius: 5px;
+			height: 48%; 
+			max-height: 48%;
+			overflow-y: auto;
+		}
+
+		/* Achievement Rows */
+		.ach-row {
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid #333;
+			border-radius: 4px;
+			padding: 6px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+			transition: all 0.3s ease;
+		}
+
+		.ach-row.unlocked {
+			background: rgba(255, 215, 0, 0.1);
+			border-color: #ffd700;
+		}
+
+		.ach-row.locked {
+			opacity: 0.6;
+			filter: grayscale(1);
+		}
+
+		/* Stats View Layout */
+		#stats-grid {
+			background: #111;
+			padding: 10px;
+			border-radius: 5px;
+			height: 48%;
+			max-height: 48%;
+			overflow-y: auto;
+		}
+
+		.stats-container {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.stat-main {
+			display: flex;
+			justify-content: space-between;
+			background: rgba(255, 255, 255, 0.05);
+			padding: 8px;
+			border-left: 3px solid #ff4444; /* Combat Red */
+			margin-bottom: 5px;
+		}
+
+		.stat-row {
+			margin-bottom: 10px;
+		}
+
+		.stat-info {
+			display: flex;
+			justify-content: space-between;
+			font-size: 0.85em;
+			margin-bottom: 2px;
+			font-weight: bold;
+		}
+
+		/* Progress Bar Styling */
+		.stat-bar-bg {
+			background: #222;
+			height: 8px;
+			border-radius: 4px;
+			overflow: hidden;
+			border: 1px solid #444;
+		}
+
+		.stat-bar-fill {
+			height: 100%;
+			transition: width 0.5s ease-out;
+		}
+
+		.stat-row small {
+			display: block;
+			text-align: right;
+			font-size: 0.65em;
+			color: #888;
+			margin-top: 2px;
+		}
+/* Tab Container */
+#inventory-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 5px;
+}
+
+/* Tab Buttons */
+.tab-btn {
+    flex: 1;
+    background: #222;
+    color: #888;
+    border: 1px solid #444;
+    padding: 8px 5px;
+    font-size: 0.75em;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+    background: #333;
+    color: #ccc;
+}
+
+.tab-btn.active-tab {
+    background: #444;
+    color: #fff;
+    border-bottom: 2px solid #ffcc00; /* Gold highlight for active view */
+}
+
+/* Sort Select Styling */
+#inv-sort-mode {
+    background: #222;
+    color: #eee;
+    border: 1px solid #444;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    outline: none;
+    cursor: pointer;
+}
+
+#inv-sort-mode:hover {
+    border-color: #666;
+}
 		#player-context-bubble {
 			position: absolute;
 			background: #222;
