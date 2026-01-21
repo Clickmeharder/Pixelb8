@@ -3090,15 +3090,10 @@ function renderAchievements(playerObj) {
 // Helper to bridge UI clicks to game commands
 function uiAction(cmd, itemName) {
     const p = getActiveProfile();
-    if (!p) return;
-
-    // Wrap itemName in quotes so the command parser sees it as a single argument
-    // Example: sell "Iron Sword"
-    const fullCommand = `${cmd} "${itemName}"`;
+    // Use the specific item name for equip/sell
+    processGameCommand(p.name, `${cmd} ${itemName}`);
     
-    processGameCommand(p.name, fullCommand);
-    
-    // Refresh UI to show item was removed/equipped
+    // Refresh the UI after a short delay to let stats update
     setTimeout(renderInventoryUI, 50);
 }
 // Wait for the DOM to load to ensure the action bar exists
@@ -3654,7 +3649,11 @@ function cmdSell(p, user, args) {
         return;
     }
 
-    let target = args.slice(1).join(" ").toLowerCase();
+    // --- FIX HERE ---
+    // Join args, lowercase them, and remove any double quotes sent by the UI
+    let target = args.slice(1).join(" ").toLowerCase().replace(/"/g, "");
+    // ----------------
+    
     let totalPixels = 0;
     let itemsRemoved = 0;
     
