@@ -2927,15 +2927,15 @@ function renderEquippedSection(playerObj) {
     const equipGrid = document.getElementById('equipped-grid');
     if (!equipGrid) return;
 
-    // Define the slots we want to display
+    // Mapping the stat keys to the command names for processGameCommand
     const slots = [
-        { label: "Weapon", key: "equippedWeapon" },
-        { label: "Helmet", key: "equippedHelmet" },
-        { label: "Armor", key: "equippedArmor" },
-        { label: "Pants", key: "equippedPants" },
-        { label: "Boots", key: "equippedBoots" },
-        { label: "Cape", key: "equippedCape" },
-        { label: "Gloves", key: "equippedGloves" }
+        { label: "Weapon", key: "equippedWeapon", cmd: "weapon" },
+        { label: "Helmet", key: "equippedHelmet", cmd: "helmet" },
+        { label: "Armor", key: "equippedArmor", cmd: "armor" },
+        { label: "Pants", key: "equippedPants", cmd: "pants" },
+        { label: "Boots", key: "equippedBoots", cmd: "boots" },
+        { label: "Cape", key: "equippedCape", cmd: "cape" },
+        { label: "Gloves", key: "equippedGloves", cmd: "gloves" }
     ];
 
     equipGrid.innerHTML = "";
@@ -2944,13 +2944,20 @@ function renderEquippedSection(playerObj) {
         const itemData = ITEM_DB[itemName] || null;
         
         const div = document.createElement('div');
-        div.className = "equip-slot";
+        // Add 'clickable' class only if there is an item to unequip
+        div.className = `equip-slot ${itemName ? 'has-item' : 'is-empty'}`;
+        
+        // If an item exists, clicking the whole div runs: unequip [type]
+        if (itemName) {
+            div.onclick = () => uiAction('unequip', slot.cmd);
+        }
+
         div.innerHTML = `
             <small class="slot-label">${slot.label}</small>
-            <div class="slot-item" style="color: ${itemData ? itemData.color : '#666'}">
-                ${itemName || "Empty"}
+            <div class="slot-item" style="color: ${itemData ? itemData.color : '#555'}">
+                ${itemName || "---"}
             </div>
-            ${itemName ? `<button class="btn-unequip" onclick="uiAction('unequip', '${itemName}')">×</button>` : ''}
+            ${itemName ? `<div class="unequip-hint">Click to Remove</div>` : ''}
         `;
         equipGrid.appendChild(div);
     });
