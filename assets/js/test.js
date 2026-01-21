@@ -87,6 +87,17 @@ function loadStats(name) {
         equippedHair: null,
         wigColor: null 
     };
+	// --- MIGRATION: STRIP WEIGHT FROM NAMES ---
+	if (stats.inventory && Array.isArray(stats.inventory)) {
+		stats.inventory = stats.inventory.map(item => {
+			if (typeof item === 'string') {
+				// This replaces things like "1.41kg Bass" or "0.5kb Bass" with just "Bass"
+				// It looks for digits, dots, and 'kg' or 'kb' followed by a space
+				return item.replace(/^\d+(\.\d+)?k[gb]\s+/, "");
+			}
+			return item;
+		});
+	}
 	// --- MIGRATION: GOLD TO PIXELS ---
     if (stats.gold !== undefined) {
         // If they had pixels already, add gold to it, otherwise just set it
@@ -798,10 +809,9 @@ function drawBuyer(ctx) {
 function performFish(p) {
     if (p.area !== "pond" || p.dead) return;
     
-    // 1. COST TO FISH
     const baitCost = 15; 
     if ((p.stats.pixels || 0) < baitCost) {
-        systemMessage(`${p.name} ran out of pixels for bait!`);
+        systemMessage(`${p.name} needs more pixels for bait!`);
         p.activeTask = "none"; 
         return;
     }
@@ -809,86 +819,62 @@ function performFish(p) {
 
     const fishLevel = p.stats.fishLevel || 1;
     
-    // 2. ESCAPE CHANCE
-    let escapeChance = Math.max(0.10, 0.40 - (fishLevel * 0.01)); 
-    if (Math.random() < escapeChance) {
+    // Escape Chance
+    if (Math.random() < Math.max(0.10, 0.40 - (fishLevel * 0.01))) {
         spawnFloater(p, "LOST IT!", "#ff6666");
         return; 
     }
 
-    // 3. DETERMINE FISHING TIER
-    // Lvl 0-10: T1, 10-20: T2, 20-30: T3, 30-40: T4, 40-75: T5, 75+: T6
+    // Tier Mapping based on your requirements
     let currentTier = 1;
     if (fishLevel >= 75) currentTier = 6;
-    else if (fishLevel >= 40) currentTier = 5;
-    else if (fishLevel >= 30) currentTier = 4;
-    else if (fishLevel >= 20) currentTier = 3;
-    else if (fishLevel >= 10) currentTier = 2;
+    else if (fishLevel >= 40) currentTier = 5; // Start getting Sharks
+    else if (fishLevel >= 30) currentTier = 4; // Start getting Tuna
+    else if (fishLevel >= 20) currentTier = 3; // Start getting Salmon
+    else if (fishLevel >= 10) currentTier = 2; // Start getting Trout
 
-    let lootFound = [];
-
-    // 4. THE RARITY ROLL (Same logic as Dungeon)
-    // 0-13 scale, weighted towards lower numbers
+    // Rarity Roll (0-13)
     let roll = Math.random();
     let selectedRarity = Math.floor(Math.pow(roll, 4) * 14); 
 
-    // Find items that match Type: Fish, Tier <= current, and Rarity
+    // Find Clean Names from ITEM_DB
     let possibleFish = Object.keys(ITEM_DB).filter(key => {
         const item = ITEM_DB[key];
         return item.type === "fish" && item.tier <= currentTier && item.rarity == selectedRarity;
     });
 
-    // Fallback if no specific rarity match
+    // Fallback if rarity roll is too high for current tier
     if (possibleFish.length === 0) {
         possibleFish = Object.keys(ITEM_DB).filter(key => {
             const item = ITEM_DB[key];
-            return item.type === "fish" && item.tier <= currentTier && item.rarity < selectedRarity;
+            return item.type === "fish" && item.tier <= currentTier;
         });
     }
 
     if (possibleFish.length > 0) {
-        lootFound.push(possibleFish[Math.floor(Math.random() * possibleFish.length)]);
-    }
+        const fishName = possibleFish[Math.floor(Math.random() * possibleFish.length)];
+        const itemData = ITEM_DB[fishName];
 
-    // 5. SPECIAL ROLLS (Pearl & Fishhat)
-    // Pearl: Tier 5+ check
-    if (currentTier >= 5 && Math.random() < 0.05) lootFound.push("Pearl");
-    // Fishhat: Extremely rare global chance (0.5%)
-    if (Math.random() < 0.005) lootFound.push("fishhat");
-    // Material: Random chance for a Sea Shell or scrap (10%)
-    if (Math.random() < 0.10) {
-        const mats = ["Sea Shell", "Leather scrap"];
-        lootFound.push(mats[Math.floor(Math.random() * mats.length)]);
-    }
-
-    // 6. APPLY LOOT & CALCULATE WEIGHT
-    lootFound.forEach(itemName => {
-        const itemData = ITEM_DB[itemName];
-        let inventoryName = itemName;
-
-        if (itemData.type === "fish") {
-            let baseWeight = itemData.tier || 1;
-            let weightBonus = Math.random() * (fishLevel / 5);
-            let finalWeight = (baseWeight + weightBonus).toFixed(2);
-            inventoryName = `${finalWeight}kg ${itemName}`;
-        }
-
-        p.stats.inventory.push(inventoryName);
+        // Give the item (CLEAN STRING)
+        p.stats.inventory.push(fishName);
         
-        // Visuals
-        const rarity = itemData.rarity || 0;
-        spawnFloater(p, `🎣 Caught: ${inventoryName}!`, itemData.color || "#44ccff");
-        if (rarity >= 8) spawnLootBeam(p, rarity);
-    });
+        spawnFloater(p, `🎣 Caught: ${fishName}!`, itemData.color || "#44ccff");
+        if (itemData.rarity >= 8) spawnLootBeam(p, itemData.rarity);
+    }
 
-    // 7. XP & LEVEL UP
+    // Rare Global Chances
+    if (Math.random() < 0.005) { // 0.5% chance for hat
+         p.stats.inventory.push("fishhat");
+         spawnFloater(p, "✨ FOUND A FISH HAT!", "#d2b48c");
+         spawnLootBeam(p, 13);
+    }
+
+    // XP Logic...
     p.stats.fishXP = (p.stats.fishXP || 0) + 15;
-    const req = typeof xpNeeded === "function" ? xpNeeded(fishLevel) : 100;
-    if (p.stats.fishXP >= req * 2) {
+    if (p.stats.fishXP >= xpNeeded(fishLevel) * 2) {
         p.stats.fishLevel++;
         p.stats.fishXP = 0;
-        systemMessage(`[LEVEL UP] ${p.name} is now a Lvl ${p.stats.fishLevel} Fisher!`);
-        spawnFloater(p, "FISHING UP!", "#FFD700");
+        systemMessage(`[LEVEL UP] ${p.name} Fisher Lvl ${p.stats.fishLevel}!`);
     }
     saveStats(p);
 }
@@ -3405,58 +3391,68 @@ function cmdSell(p, user, args) {
     let itemsRemoved = 0;
     
     updateBuyerNPC(); 
-    let multiplier = buyerActive ? 2 : 1;
+
+    // 1. LOCATION & MULTIPLIER LOGIC
+    const isAtPond = (p.area === "pond");
+    const isAtTown = (p.area === "town");
+    
+    let multiplier = 1;
+    if (buyerActive && isAtPond) {
+        // Count how many people are currently at the pond (the "Hype" bonus)
+        const fishersCount = Object.values(players).filter(player => player.area === "pond").length;
+        // Base 2x bonus + 0.1x for every extra person there
+        multiplier = 2 + (fishersCount * 0.1); 
+    }
+
+    // 2. RESTRICTION CHECK
+    if (!isAtPond && !isAtTown) {
+        systemMessage(`${user}: You can only sell fish at the Pond or other items in Town!`);
+        return;
+    }
 
     if (target === "fish") {
         p.stats.inventory = p.stats.inventory.filter(item => {
-            // Check for weight-based string: "5.23kg Salmon"
-            if (item.includes("kg ")) {
-                let parts = item.split("kg ");
-                let weight = parseFloat(parts[0]);
-                let fishName = parts[1]; // e.g. "Salmon"
-                let itemData = ITEM_DB[fishName];
-
-                if (itemData) {
-                    // Value = (Base Item Value * Weight) * Merchant Multiplier
-                    totalPixels += Math.floor((itemData.value * weight) * multiplier);
-                    itemsRemoved++;
-                    return false; // Remove from inventory
-                }
-            }
+            const itemData = ITEM_DB[item];
             
-            // Check for unique non-weight fish (Golden Bass, Pearl)
-            if (item === "Golden Bass" || item === "Pearl") {
-                let itemData = ITEM_DB[item];
-                totalPixels += (itemData.value || 100) * multiplier;
+            // Only sell if it's type "fish" (this handles Bass, Shark, Pearl, etc.)
+            if (itemData && itemData.type === "fish") {
+                // Calculation: Base Value * weight (from DB) * multiplier
+                // Use parseFloat to handle strings like "0.1kg" if you kept the 'kg' in the DB value
+                let weight = parseFloat(itemData.weight) || 1;
+                totalPixels += Math.floor((itemData.value * weight) * multiplier);
                 itemsRemoved++;
-                return false;
+                return false; // Remove from inventory
             }
-
-            return true; // Keep everything else
+            return true; // Keep non-fish
         });
     } else {
-        // Selling a specific item by name (like "fishhat" or "Leather scrap")
+        // Selling a specific item by name (e.g., "!sell fishhat")
         let index = p.stats.inventory.findIndex(i => i.toLowerCase() === target);
         if (index !== -1) {
             let itemName = p.stats.inventory[index];
             let itemData = ITEM_DB[itemName];
-            let price = itemData?.value || 50;
             
-            // Apply merchant bonus if applicable to the item
-            if (buyerActive && (itemData.type === "fish" || itemData.type === "material")) {
-                price *= 2;
-            }
+            if (itemData) {
+                let weight = parseFloat(itemData.weight) || 1;
+                let price = (itemData.value * weight);
 
-            totalPixels = price;
-            p.stats.inventory.splice(index, 1);
-            itemsRemoved = 1;
+                // Only apply Merchant Multiplier if at Pond and item is fish/material
+                if (buyerActive && isAtPond && (itemData.type === "fish" || itemData.type === "material")) {
+                    price *= multiplier;
+                }
+
+                totalPixels = Math.floor(price);
+                p.stats.inventory.splice(index, 1);
+                itemsRemoved = 1;
+            }
         }
     }
 
+    // 3. FINALIZE
     if (itemsRemoved > 0) {
         p.stats.pixels = (p.stats.pixels || 0) + totalPixels;
-        let msg = `${user} sold ${itemsRemoved} items for ${totalPixels} pixels!`;
-        if (buyerActive) msg += " 💰 [MERCHANT BONUS]";
+        let msg = `${user} sold ${itemsRemoved} items for ${totalPixels.toFixed(0)} pixels!`;
+        if (buyerActive && isAtPond) msg += ` 💰 [MERCHANT BONUS x${multiplier.toFixed(1)}]`;
         systemMessage(msg);
         spawnFloater(p, `+$${totalPixels}`, "#44ff44");
         saveStats(p);
