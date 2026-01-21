@@ -74,6 +74,7 @@ function loadStats(name) {
 		swimLevel: 1, swimXP: 0,
         swimDistance: 0,
         combatLevel: 1,
+		maxhp:100,
         pixels: 0,
         inventory: ["Fishing Rod"],
         equippedWeapon: null,
@@ -106,10 +107,11 @@ function loadStats(name) {
         delete stats.gold; 
         console.log(`Migrated ${name}'s gold to pixels.`);
     }
-
+	
     // --- SAFETY CHECKS FOR OLD SAVES ---
     if (isNaN(stats.pixels) || stats.pixels === null) stats.pixels = 0;
 	// Inside the initial stats object and the safety checks
+	if (stats.maxhp === undefined) stats.maxhp = 100;
 	if (stats.archerLevel === undefined) stats.archerLevel = 1;
 	if (stats.archerXP === undefined) stats.archerXP = 0;
 	if (stats.magicLevel === undefined) stats.magicLevel = 1;
@@ -119,6 +121,7 @@ function loadStats(name) {
 	if (stats.swimLevel === undefined) stats.swimLevel = 1;
     if (stats.swimXP === undefined) stats.swimXP = 0;
     if (stats.swimDistance === undefined) stats.swimDistance = 0;
+	
     // --- SAFETY CHECKS FOR OLD SAVES ---
     if (isNaN(stats.pixels) || stats.pixels === null) stats.pixels = 0;
     
@@ -148,8 +151,57 @@ function loadStats(name) {
 
     return stats;
 }
-function saveStats(p) {
+/* function saveStats(p) {
     localStorage.setItem("rpg_" + p.name, JSON.stringify(p.stats));
+} */
+function saveStats(p) {
+    // 1. Run the achievement check before saving
+    const newAchievement = checkAchievements(p);
+
+    // 2. Commit to localStorage
+    localStorage.setItem("rpg_" + p.name, JSON.stringify(p.stats));
+
+    // 3. UI RE-RENDER TRIGGER
+    // Check if the player being saved is the one the local user is looking at
+    const localProfile = getActiveProfile();
+    if (localProfile && p.name.toLowerCase() === localProfile.name.toLowerCase()) {
+        const modal = document.getElementById('inventory-modal');
+        // Only trigger a heavy DOM refresh if the modal is visible
+        if (modal && !modal.classList.contains('hidden')) {
+            renderInventoryUI();
+        }
+    }
+}
+function checkAchievements(p) {
+    const s = p.stats;
+    let unlockedAny = false;
+
+    // Define requirements mapping
+    const requirements = {
+        "Nuber Cape":    () => s.combatLevel >= 5,
+        "Warrior Cape":  () => s.attackLevel >= 11,
+        "Wizard Cape":   () => s.magicLevel >= 11,
+        "Archer Cape":   () => s.archerLevel >= 11,
+        "Healer Cape":   () => s.healLevel >= 11,
+        "Lurker Cape":   () => s.lurkLevel >= 11,
+        "Fishing Cape":  () => s.fishLevel >= 11,
+        "Swimmer Cape":  () => s.swimLevel >= 11
+    };
+
+    Object.keys(requirements).forEach(capeName => {
+        // If they meet the requirement and DON'T already have it
+        if (requirements[capeName]() && !s.inventory.includes(capeName)) {
+            s.inventory.push(capeName);
+            unlockedAny = true;
+            
+            // Visual Flair
+            spawnFloater(p, `🏆 UNLOCKED: ${capeName}`, "#ffcc00");
+            systemMessage(`🎊 ACHIEVEMENT: ${p.name} earned the ${capeName}!`);
+            spawnLootBeam(p, 13); // Maximum rarity beam
+        }
+    });
+
+    return unlockedAny;
 }
 /* ================= PLAYER SETUP ================= */
 function getPlayer(name, color) {
@@ -168,8 +220,6 @@ function getPlayer(name, color) {
         x: Math.random() * 800 + 100, 
         y: 450,
         targetX: null,
-        hp: 100, 
-        maxHp: 100, 
         dead: false,
         area: "home", 
         activeTask: null,
@@ -177,7 +227,7 @@ function getPlayer(name, color) {
         lastDanceXP: 0,
         stats: loadStats(name)
     };
-    
+    updateCombatLevel(players[lowName]);
     return players[lowName];
 }
 function movePlayer(p, targetArea) {
@@ -370,12 +420,23 @@ function updateSplashText(ctx) {
 function xpNeeded(lvl) { return Math.floor(50 * Math.pow(1.3, lvl)); }
 function updateCombatLevel(p) {
     const s = p.stats;
-    // Get the highest offensive skill
     const highOffense = Math.max(s.attackLevel, s.archerLevel, s.magicLevel);
-    
-    // Combat Level = (HighSkill + Heal + Lurk + Fish/2) / 2
-    // This rewards specialized builds and high-utility players
-    p.stats.combatLevel = Math.floor((highOffense + s.healLevel + s.lurkLevel + (s.fishLevel * 0.5)) / 2);
+    s.combatLevel = Math.floor((highOffense + s.healLevel + s.lurkLevel + (s.fishLevel * 0.5)) / 2);
+
+    // Calculate scaling HP
+    const baseHP = 100;
+    const hpBonus = (s.attackLevel * 4) + 
+                    (Math.max(s.archerLevel, s.magicLevel) * 3) + 
+                    (s.lurkLevel * 2) + (s.healLevel * 2) + 
+                    (s.fishLevel * 1) + (s.swimLevel * 1);
+
+    const newMax = baseHP + hpBonus;
+
+    // Update both the active player property and the stats object
+    p.maxHp = newMax;       // Used for current game logic/drawing
+    p.stats.maxhp = newMax; // Saved to localStorage
+
+    saveStats(p);
 }
 
 
@@ -500,9 +561,9 @@ function performAttack(p) {
 
             // Visual Projectiles
             if (weapon.type === "bow") {
-                spawnProjectile(p.x, p.y - 15, target.x, target.y - 15, "#fff", "arrow");
+                spawnProjectile(p.x, p.y - 15, target.x, target.y - 15, "#fff", "arrow", p.area);
             } else if (weapon.type === "staff") {
-                spawnProjectile(p.x, p.y - 15, target.x, target.y - 15, weapon.color || "#00ffff", "magic");
+                spawnProjectile(p.x, p.y - 15, target.x, target.y - 15, weapon.color || "#00ffff", "magic", p.area);
             }
 
             // Apply Damage
@@ -632,7 +693,7 @@ function applyHealEffect(p, target, amount, mode) {
     target.hp = Math.min(target.maxHp, target.hp + amount);
     
     // Visual Projectile from Healer to Target
-    spawnProjectile(p.x, p.y - 20, target.x, target.y - 20, "#00ff88", "magic");
+	spawnProjectile(p.x, p.y - 20, target.x, target.y - 20, weapon.color || "#00ffff", "magic", p.area);
     spawnFloater(target, `+${amount} HP`, "#0f0");
 
     // XP Award
@@ -806,6 +867,20 @@ function drawBuyer(ctx) {
 // idle actions
 //xp gained by action skills
 // fishing task :
+/* --- FISHING RARITY MAP (Formula: roll^4 * 14) ---
+  The higher the rarity, the exponentially harder it is to roll.
+  
+  RARITY 0-2  (Common):    ~60.0% chance   [Bass, Trout, etc.]
+  RARITY 3-4  (Uncommon):  ~12.0% chance   [Salmon, Tuna]
+  RARITY 5-6  (Rare):      ~8.5%  chance   [Pearl, Black Pearl]
+  RARITY 7-8  (Epic):      ~6.0%  chance   [Catfish, Shark]
+  RARITY 9-10 (Legendary): ~5.0%  chance   [Golden Bass]
+  RARITY 11-12(Mythic):    ~4.5%  chance   [Ancient Finds]
+  RARITY 13   (Godly):     ~4.0%  chance   [Fish Hat / Master Loot]
+
+  Note: Fallback logic ensures if a high rarity roll fails to find a fish 
+  in your current tier, it will give you a standard fish from your max tier.
+*/
 function performFish(p) {
     if (p.area !== "pond" || p.dead) return;
     
@@ -839,9 +914,11 @@ function performFish(p) {
 
     // Find Clean Names from ITEM_DB
     let possibleFish = Object.keys(ITEM_DB).filter(key => {
-        const item = ITEM_DB[key];
-        return item.type === "fish" && item.tier <= currentTier && item.rarity == selectedRarity;
-    });
+		const item = ITEM_DB[key];
+		return item.sources && item.sources.includes("fishing") && 
+			   item.tier <= currentTier && 
+			   item.rarity == selectedRarity;
+	});
 
     // Fallback if rarity roll is too high for current tier
     if (possibleFish.length === 0) {
@@ -1207,7 +1284,28 @@ let dungeonCountdownInterval = null; // To track the interval
 let dungeonEmptyTimer = null; // To track the 60s shutdown
 let dungeonEmptySeconds = 0;
 //-----------------------------------------------------------
+/* --- DUNGEON LOOT RARITY MAP (Formula: roll^4 * 14) ---
+   Normal Mobs follow the Standard Map. Bosses get a +3 Rarity Floor.
 
+   [ NORMAL MOB CHANCES ]
+   RARITY 0-5  (Common/Uncommon): ~80% chance 
+   RARITY 6-9  (Rare/Epic):       ~12% chance  --> [Spawns Loot Beam @ 8+]
+   RARITY 10-13(Legendary/Godly): ~8%  chance  --> [Spawns Loot Beam]
+
+   [ BOSS MOB CHANCES ] (Includes +3 Rarity Bonus)
+   RARITY 3-8  (Uncommon/Epic):   ~80% chance  --> [Harder to get "trash"]
+   RARITY 9-12 (Legendary):       ~15% chance 
+   RARITY 13   (Godly):           ~5%  chance  --> [Max Rarity capped at 13]
+
+   TIER GATING:
+   Items are locked by (Wave - 1 / 5) + 1. 
+   Wave 1-5:   Tier 1  |  Wave 6-10:  Tier 2
+   Wave 11-15: Tier 3  |  Wave 16-20: Tier 4 ... and so on.
+   
+   GEAR STEALING:
+   Independent 10% chance to steal EACH item a mob is wearing before 
+   the rarity roll even happens.
+*/
 //-- MAIN DUNGEON STUFF --
 function joinDungeonQueue(p) {
     if (p.dead) return;
@@ -1428,7 +1526,6 @@ function handleEnemyAttacks() {
     if (dwellers.length === 0) return;
     
     const partySize = dwellers.length;
-    // Damage scales 10% higher for every player beyond the first
     const partyScaling = 1 + (partySize - 1) * 0.1;
 
     let allAttackers = [...enemies];
@@ -1437,24 +1534,36 @@ function handleEnemyAttacks() {
     allAttackers.forEach(e => {
         if (e.dead) return;
 
-        // Calculate Base Damage
+        // 1. Pick a target
+        let target = dwellers[Math.floor(Math.random() * dwellers.length)];
+        
+        // 2. Base Damage Calculation
         let dmg = (3 + Math.floor(dungeonWave * 1.5)) * partyScaling;
-        // --- ADD THIS ---
-		if (e.isTrainingMob) {
-			dmg = 1 + (Math.random() * 2); // Only 1-3 damage per hit
-		}
-        if (e.isBoss) {
-            dmg *= 2.5; // Bosses are significantly more dangerous
-            
-            // BOSS SPECIAL: If party is large, boss hits 2 random players at once!
-            let targetsToHit = (partySize > 3) ? 2 : 1;
-            for (let i = 0; i < targetsToHit; i++) {
-                let target = dwellers[Math.floor(Math.random() * dwellers.length)];
-                applyDamage(target, Math.floor(dmg));
+        if (e.isTrainingMob) dmg = 1 + (Math.random() * 2);
+        if (e.isBoss) dmg *= 2.5;
+
+        // 3. VISUAL PROJECTILES (For Ranged Enemies)
+        if (e.equipped && e.equipped.weapon) {
+            const weaponData = ITEM_DB[e.equipped.weapon];
+            if (weaponData) {
+                if (weaponData.type === "bow") {
+                    spawnProjectile(e.x, e.y - 15, target.x, target.y - 15, "#fff", "arrow", "dungeon");
+                } else if (weaponData.type === "staff") {
+                    spawnProjectile(e.x, e.y - 15, target.x, target.y - 15, weaponData.color || "#ff00ff", "magic", "dungeon");
+                }
             }
+        }
+
+        // 4. Handle Boss Multi-Attack
+        if (e.isBoss && partySize > 3) {
+            // Boss hits two targets
+            applyDamage(target, Math.floor(dmg));
+            let secondTarget = dwellers[Math.floor(Math.random() * dwellers.length)];
+            applyDamage(secondTarget, Math.floor(dmg));
+            // Visual for second hit
+            spawnProjectile(e.x, e.y - 40, secondTarget.x, secondTarget.y - 15, "#ff0000", "magic", "dungeon");
         } else {
-            // Normal enemy hits one random target
-            let target = dwellers[Math.floor(Math.random() * dwellers.length)];
+            // Standard damage application
             applyDamage(target, Math.floor(dmg)); 
         }
     });
@@ -1502,38 +1611,42 @@ function generateRandomLoadout(tier) {
 function handleLoot(p, target) {
     const currentTier = Math.floor((dungeonWave - 1) / 5) + 1;
     let lootFound = [];
-	if (target.isTrainingMob) {
-		p.stats.pixels += 5; // Tiny pixel reward
-		spawnFloater(p, "+5px (Training)", "#888");
-		saveStats(p);
-		return; // Skip the gear/rarity rolls entirely
-	}
-    // 1. CHANCE TO STEAL GEAR (10% per slot)
+
+    if (target.isTrainingMob) {
+        p.stats.pixels += 5;
+        spawnFloater(p, "+5px (Training)", "#888");
+        saveStats(p);
+        return;
+    }
+
+    // 1. GEAR STEALING (Only items from the mob's back)
     if (target.equipped) {
         Object.values(target.equipped).forEach(itemName => {
             if (itemName && Math.random() < 0.10) lootFound.push(itemName);
         });
     }
 
-    // 2. TIERED RARITY ROLL (0-13)
+    // 2. TIERED RARITY ROLL
     if (lootFound.length === 0) {
-        // We use a weighted random: higher numbers are much harder to get
-        // This math makes 0-5 common, 6-9 rare, 10-13 legendary
         let roll = Math.random();
         let selectedRarity = Math.floor(Math.pow(roll, 4) * 14); 
-        if (target.isBoss) selectedRarity = Math.min(13, selectedRarity + 3); // Bosses boost rarity
+        if (target.isBoss) selectedRarity = Math.min(13, selectedRarity + 3);
 
-        // Find items that match Tier (or highest available) and Rarity
+        // NEW: Filter by Source "dungeon"
         let possibleLoot = Object.keys(ITEM_DB).filter(key => {
             const item = ITEM_DB[key];
-            return item.tier <= currentTier && item.rarity == selectedRarity;
+            return item.sources && item.sources.includes("dungeon") && 
+                   item.tier <= currentTier && 
+                   item.rarity == selectedRarity;
         });
 
-        // FIX: The fallback filter was missing the 'item' definition
+        // Fallback (Still respecting dungeon source)
         if (possibleLoot.length === 0) {
             possibleLoot = Object.keys(ITEM_DB).filter(key => {
-                const item = ITEM_DB[key]; // This was missing!
-                return item.tier <= currentTier && item.rarity < selectedRarity;
+                const item = ITEM_DB[key];
+                return item.sources && item.sources.includes("dungeon") && 
+                       item.tier <= currentTier && 
+                       item.rarity < selectedRarity;
             });
         }
 
@@ -1542,20 +1655,15 @@ function handleLoot(p, target) {
         }
     }
 
-    // 3. APPLY LOOT
+    // 3. APPLY LOOT (Existing logic...)
     lootFound.forEach(finalItem => {
-		if (!p.stats.inventory.includes(finalItem)) {
-			p.stats.inventory.push(finalItem);
-			
-			const rarity = ITEM_DB[finalItem].rarity || 0;
-			const hue = Math.min(300, rarity * 25);
-			
-			spawnFloater(p, `✨ ${finalItem}!`, `hsl(${hue}, 80%, 60%)`);
-			systemMessage(`${p.name} found: ${finalItem} (Rarity ${rarity})`);
-			
-			// TRIGGER THE BEAM HERE!
-			spawnLootBeam(p, rarity);
-		} else {
+        if (!p.stats.inventory.includes(finalItem)) {
+            p.stats.inventory.push(finalItem);
+            const rarity = ITEM_DB[finalItem].rarity || 0;
+            spawnFloater(p, `✨ ${finalItem}!`, `hsl(${Math.min(300, rarity * 25)}, 80%, 60%)`);
+            systemMessage(`${p.name} found: ${finalItem} (Rarity ${rarity})`);
+            spawnLootBeam(p, rarity);
+        } else {
             let scrapValue = Math.floor((ITEM_DB[finalItem].value || 50) * 0.2);
             p.stats.pixels += scrapValue;
             spawnFloater(p, `+${scrapValue}px (Duplicate)`, "#888");
@@ -1653,16 +1761,38 @@ function updateDungeonIdleTraining() {
 
 const projectiles = []; // Rename from arrows
 
-function spawnProjectile(startX, startY, endX, endY, color, type) {
-    projectiles.push({ x: startX, y: startY, tx: endX, ty: endY, life: 30, color, type });
+function spawnProjectile(startX, startY, endX, endY, color, type, area) {
+    projectiles.push({ 
+        x: startX, 
+        y: startY, 
+        tx: endX, 
+        ty: endY, 
+        life: 30, 
+        color, 
+        type, 
+        area // Store the area (e.g., "dungeon", "home", "arena")
+    });
 }
 
 function drawProjectiles(ctx) {
     for (let i = projectiles.length - 1; i >= 0; i--) {
         let prj = projectiles[i];
+        
+        // Update logic (always happens)
         prj.x += (prj.tx - prj.x) * 0.15;
         prj.y += (prj.ty - prj.y) * 0.15;
-        
+        prj.life--;
+
+        // Clean up dead projectiles
+        if (prj.life <= 0) {
+            projectiles.splice(i, 1);
+            continue;
+        }
+
+        // --- FILTER VIEW ---
+        // Only draw if the projectile's area matches the viewArea
+        if (prj.area !== viewArea) continue;
+
         ctx.save();
         ctx.strokeStyle = prj.color;
         ctx.globalAlpha = prj.life / 30;
@@ -1683,12 +1813,8 @@ function drawProjectiles(ctx) {
             ctx.fill();
         }
         ctx.restore();
-
-        prj.life--;
-        if (prj.life <= 0) projectiles.splice(i, 1);
     }
 }
-
 /*----------------------------------------------*/
 
 function updatePhysics(p) {
@@ -2745,6 +2871,9 @@ function sendAction(commandStr) {
     processGameCommand(current.name, commandStr, flags, { userColor: current.color });
     console.log(`Action Bar: ${commandStr} sent for ${current.name}`);
 }
+let currentInventoryFilter = "all";
+let currentSortMode = "tier";
+let currentInventoryView = "items"; // Options: "items", "stats", "achievements"
 function toggleInventory() {
     const modal = document.getElementById('inventory-modal');
     modal.classList.toggle('hidden');
@@ -2753,97 +2882,151 @@ function toggleInventory() {
     }
 }
 
-
-
 function renderInventoryUI() {
     const p = getActiveProfile();
     const playerObj = players[p.name.toLowerCase()];
     if (!playerObj) return;
 
+    // 1. Update Header
     document.getElementById('inv-player-name').textContent = p.name.toUpperCase();
-    document.getElementById('inv-pixels-val').textContent = (playerObj.stats.pixels || 0).toFixed(2);
+    document.getElementById('inv-pixels-val').textContent = (playerObj.stats.pixels || 0).toFixed(0);
+    
+    // 2. Container Routing
+    const bpGrid = document.getElementById('backpack-grid');
+    const achGrid = document.getElementById('achievements-grid');
+    const statsGrid = document.getElementById('stats-grid');
+    const filters = document.getElementById('inventory-filters-container'); // Wrap your filters in this ID
 
-    // 1. Get List of Equipped Items to hide them if needed
+    // Hide all containers initially
+    [bpGrid, achGrid, statsGrid, filters].forEach(el => el?.classList.add('hidden'));
+
+    if (currentInventoryView === "achievements") {
+        achGrid.classList.remove('hidden');
+        renderAchievements(playerObj);
+    } 
+    else if (currentInventoryView === "stats") {
+        statsGrid.classList.remove('hidden');
+        renderStatsView(playerObj);
+    } 
+    else {
+        // Show Items View
+        bpGrid.classList.remove('hidden');
+        if (filters) filters.classList.remove('hidden');
+        renderItemsView(playerObj, bpGrid);
+    }
+}
+
+function renderItemsView(playerObj, bpGrid) {
     const equippedItems = [
         playerObj.stats.equippedWeapon, playerObj.stats.equippedArmor,
         playerObj.stats.equippedHelmet, playerObj.stats.equippedPants,
         playerObj.stats.equippedGloves, playerObj.stats.equippedBoots,
         playerObj.stats.equippedCape
-    ].filter(Boolean); // Remove nulls
+    ].filter(Boolean);
 
-    // 2. Render Equipped Slots (Same as your current logic)
-    const eqGrid = document.getElementById('equipped-grid');
-    eqGrid.innerHTML = "";
-    const slots = [
-        { key: 'equippedWeapon', label: 'WEAPON' },
-        { key: 'equippedArmor', label: 'BODY' },
-        { key: 'equippedHelmet', label: 'HEAD' },
-        { key: 'equippedPants', label: 'LEGS' },
-        { key: 'equippedGloves', label: 'HANDS' },
-        { key: 'equippedBoots', label: 'BOOTS' },
-        { key: 'equippedCape', label: 'BACK' }
-    ];
-
-    slots.forEach(slot => {
-        const itemName = playerObj.stats[slot.key];
-        const div = document.createElement('div');
-        div.className = `inv-slot ${!itemName ? 'empty' : ''}`;
-        div.innerHTML = itemName ? `<span>${itemName}</span>` : `<span class="slot-label">${slot.label}</span>`;
-        if (itemName) {
-            div.addEventListener('click', () => {
-                const type = ITEM_DB[itemName]?.type || slot.key.replace('equipped', '').toLowerCase();
-                processGameCommand(p.name, `unequip ${type}`);
-                renderInventoryUI();
-            });
-        }
-        eqGrid.appendChild(div);
-    });
-
-    // 3. Filter and Render Backpack
-    const bpGrid = document.getElementById('backpack-grid');
-    bpGrid.innerHTML = "";
-    
     const hideEquipped = document.getElementById("filter-hide-equipped").checked;
 
-    let filteredInv = playerObj.stats.inventory.filter(item => {
-        // A. Filter Hide Equipped
+    let itemsToRender = playerObj.stats.inventory.filter(item => {
         if (hideEquipped && equippedItems.includes(item)) return false;
-        // B. Category Filters
         const data = ITEM_DB[item] || {};
-        const type = data.type || "";
         if (currentInventoryFilter === "all") return true;
         if (currentInventoryFilter === "gear") {
-            return ["weapon", "armor", "helmet", "pants", "gloves", "boots", "cape", "staff", "bow"].includes(type);
+            return ["weapon", "armor", "helmet", "pants", "gloves", "boots", "cape", "staff", "bow"].includes(data.type);
         }
-        if (currentInventoryFilter === "tools") return type === "tool";
-		if (currentInventoryFilter === "fish") return type === "fish";
-        // Added the material check here
-        if (currentInventoryFilter === "materials") return type === "material";
-        return true;
+        return data.type === currentInventoryFilter;
     });
 
-    filteredInv.forEach((item) => {
+    itemsToRender.sort((a, b) => {
+        const dataA = ITEM_DB[a] || {};
+        const dataB = ITEM_DB[b] || {};
+        if (currentSortMode === "tier") return (dataB.tier || 0) - (dataA.tier || 0);
+        if (currentSortMode === "value") return (dataB.value || 0) - (dataA.value || 0);
+        if (currentSortMode === "rarity") return (dataB.rarity || 0) - (dataA.rarity || 0);
+        if (currentSortMode === "name") return a.localeCompare(b);
+        return 0;
+    });
+
+    bpGrid.innerHTML = "";
+    itemsToRender.forEach((item) => {
+        const itemData = ITEM_DB[item] || {};
+        const isUnsellable = itemData.type === "tool" || (itemData.sources?.includes("achievement"));
         const div = document.createElement('div');
         div.className = "inv-slot";
         div.innerHTML = `
-            <span style="padding:2px; font-size:10px;">${item}</span>
-            <div class="item-actions">
-                <button class="ui-equip-btn">EQUIP</button>
-                <button class="btn-sell">SELL</button>
+            <div class="slot-content">
+                <span class="item-tier">T${itemData.tier || 1}</span>
+                <span style="color:${itemData.color || '#fff'}; font-weight:bold;">${item}</span>
+                <span class="item-price">${isUnsellable ? 'BOUND' : '$'+(itemData.value || 0)}</span>
+                <div class="item-actions">
+                    <button onclick="uiAction('equip', '${item}')">USE</button>
+                    ${isUnsellable ? '' : `<button class="btn-sell" onclick="uiAction('sell', '${item}')">SELL</button>`}
+                </div>
             </div>
         `;
-
-        // Use event listeners instead of onclick strings for the buttons
-        div.querySelector('.ui-equip-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            uiAction('equip', item);
-        });
-        div.querySelector('.btn-sell').addEventListener('click', (e) => {
-            e.stopPropagation();
-            uiAction('sell', item);
-        });
-
         bpGrid.appendChild(div);
+    });
+}
+
+function renderStatsView(playerObj) {
+    const statsGrid = document.getElementById('stats-grid');
+    const s = playerObj.stats;
+
+    statsGrid.innerHTML = `
+        <div class="stats-container">
+            <div class="stats-header-box">
+                <div class="stat-main">
+                    <span class="stat-label">COMBAT LEVEL</span>
+                    <span class="stat-value" style="color:#ff4444">${s.combatLevel}</span>
+                </div>
+                <div class="stat-main">
+                    <span class="stat-label">HEALTH</span>
+                    <span class="stat-value" style="color:#44ff44">${playerObj.hp} / ${playerObj.maxHp}</span>
+                </div>
+            </div>
+            <div class="stats-skills-list">
+                ${renderStatRow("Attack", s.attackLevel, s.attackXP, "#ff6666")}
+                ${renderStatRow("Archery", s.archerLevel, s.archerXP, "#66ff66")}
+                ${renderStatRow("Magic", s.magicLevel, s.magicXP, "#6666ff")}
+                ${renderStatRow("Healing", s.healLevel, s.healXP, "#ff66ff")}
+                ${renderStatRow("Lurking", s.lurkLevel, s.lurkXP, "#888888")}
+                ${renderStatRow("Fishing", s.fishLevel, s.fishXP, "#66ccff")}
+                ${renderStatRow("Swimming", s.swimLevel, s.swimXP, "#4488ff")}
+                ${renderStatRow("Dancing", s.danceLevel, s.danceXP, "#ffcc00")}
+            </div>
+        </div>
+    `;
+}
+
+function renderStatRow(name, level, xp, color) {
+    const nextXP = typeof xpNeeded === 'function' ? xpNeeded(level) : (level * 100);
+    const pct = Math.min(100, (xp / nextXP) * 100);
+    return `
+        <div class="stat-row">
+            <div class="stat-info"><span>${name}</span><span>Lvl ${level}</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${pct}%; background-color:${color}"></div></div>
+            <small>${xp.toFixed(0)} / ${nextXP} XP</small>
+        </div>
+    `;
+}
+
+function renderAchievements(playerObj) {
+    const achGrid = document.getElementById('achievements-grid');
+    achGrid.innerHTML = "<h3>ACHIEVEMENTS</h3>";
+    const achItems = Object.keys(ITEM_DB).filter(key => ITEM_DB[key].sources?.includes("achievement"));
+    
+    achItems.forEach(achName => {
+        const hasIt = playerObj.stats.inventory.includes(achName);
+        const data = ITEM_DB[achName];
+        const div = document.createElement('div');
+        div.className = `ach-row ${hasIt ? 'unlocked' : 'locked'}`;
+        div.innerHTML = `
+            <div class="ach-icon" style="color:${data.color}">${hasIt ? '🏆' : '🔒'}</div>
+            <div class="ach-info">
+                <strong>${achName}</strong><br>
+                <small>${hasIt ? 'UNLOCKED' : 'Requirement not met'}</small>
+            </div>
+        `;
+        achGrid.appendChild(div);
     });
 }
 // Helper to bridge UI clicks to game commands
@@ -2856,53 +3039,69 @@ function uiAction(cmd, itemName) {
     setTimeout(renderInventoryUI, 50);
 }
 // Wait for the DOM to load to ensure the action bar exists
-// Track filter state
-let currentInventoryFilter = "all";
-document.addEventListener("DOMContentLoaded", () => {
-    const actionBar = document.getElementById("action-bar");
 
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Action Bar
+    const actionBar = document.getElementById("action-bar");
     if (actionBar) {
         actionBar.addEventListener("click", (event) => {
-            // Find the closest button element to the click (in case they click the emoji)
             const btn = event.target.closest("button");
-            
             if (btn) {
                 const action = btn.getAttribute("data-action");
-                if (action) {
-                    sendAction(action);
-                }
+                if (action) sendAction(action);
             }
         });
-		const viewSelector = document.getElementById("view-area-selector");
-		if (viewSelector) {
-			viewSelector.addEventListener("change", (e) => {
-				// This assumes your global variable for what the camera sees is called 'viewArea'
-				viewArea = e.target.value; 
-				console.log(`Camera moved to: ${viewArea}`);
-				
-				// Optional: If you have a specific function to handle area switching logic
-				// sendAction(`view ${viewArea}`); 
-			});
-		}
     }
-    // Inventory Filter Listeners
+
+    // 2. View Area Selector
+    const viewSelector = document.getElementById("view-area-selector");
+    if (viewSelector) {
+        viewSelector.addEventListener("change", (e) => {
+            viewArea = e.target.value; 
+        });
+    }
+
+    // 3. Inventory Filters & Sort
     const filterContainer = document.getElementById("inventory-filters");
     if (filterContainer) {
         filterContainer.addEventListener("click", (e) => {
             if (e.target.classList.contains("filter-btn")) {
-                // Update active button UI
                 document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
                 e.target.classList.add("active");
-                
                 currentInventoryFilter = e.target.getAttribute("data-filter");
                 renderInventoryUI();
             }
         });
+    }
 
-        document.getElementById("filter-hide-equipped").addEventListener("change", renderInventoryUI);
+    const hideEquippedCheck = document.getElementById("filter-hide-equipped");
+    if (hideEquippedCheck) hideEquippedCheck.addEventListener("change", renderInventoryUI);
+
+    const sortSelect = document.getElementById("inv-sort-mode");
+    if (sortSelect) {
+        sortSelect.addEventListener("change", (e) => {
+            currentSortMode = e.target.value;
+            renderInventoryUI();
+        });
+    }
+
+    // 4. NEW: Tab Switching for Items / Stats / Achievements
+    const tabContainer = document.getElementById("inventory-tabs"); // Ensure you have a container with this ID
+    if (tabContainer) {
+        tabContainer.addEventListener("click", (e) => {
+            const btn = e.target.closest("button");
+            if (btn && btn.getAttribute("data-view")) {
+                currentInventoryView = btn.getAttribute("data-view");
+                
+                // UI feedback for active tab
+                document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active-tab"));
+                btn.classList.add("active-tab");
+                
+                renderInventoryUI();
+            }
+        });
     }
 });
-
 /* ================= COMMAND FUNCTIONS ================= */
 
 function cmdStop(p, user) {
@@ -3381,62 +3580,68 @@ function cmdInventory(p, user, args) {
 }
 function cmdSell(p, user, args) {
     if (p.dead) return;
+    
+    if (!args || args.length < 2) {
+        systemMessage(`${user}: Use "!sell fish" or click an item in your inventory.`);
+        return;
+    }
+
     if (p.stats.inventory.length === 0) {
         systemMessage(`${user}: Your inventory is empty.`);
         return;
     }
 
-    let target = args[1] ? args[1].toLowerCase() : "";
+    let target = args.slice(1).join(" ").toLowerCase();
     let totalPixels = 0;
     let itemsRemoved = 0;
     
     updateBuyerNPC(); 
 
-    // 1. LOCATION & MULTIPLIER LOGIC
     const isAtPond = (p.area === "pond");
     const isAtTown = (p.area === "town");
     
+    // Calculate Multiplier based on Buyer presence and player count at Pond
     let multiplier = 1;
     if (buyerActive && isAtPond) {
-        // Count how many people are currently at the pond (the "Hype" bonus)
         const fishersCount = Object.values(players).filter(player => player.area === "pond").length;
-        // Base 2x bonus + 0.1x for every extra person there
+        // Base 2x bonus + 0.1x per player at the pond
         multiplier = 2 + (fishersCount * 0.1); 
     }
 
-    // 2. RESTRICTION CHECK
     if (!isAtPond && !isAtTown) {
-        systemMessage(`${user}: You can only sell fish at the Pond or other items in Town!`);
+        systemMessage(`${user}: You can only sell at the Pond or in Town!`);
         return;
     }
 
-    if (target === "fish") {
+	if (target === "fish") {
         p.stats.inventory = p.stats.inventory.filter(item => {
             const itemData = ITEM_DB[item];
-            
-            // Only sell if it's type "fish" (this handles Bass, Shark, Pearl, etc.)
-            if (itemData && itemData.type === "fish") {
-                // Calculation: Base Value * weight (from DB) * multiplier
-                // Use parseFloat to handle strings like "0.1kg" if you kept the 'kg' in the DB value
-                let weight = parseFloat(itemData.weight) || 1;
-                totalPixels += Math.floor((itemData.value * weight) * multiplier);
+            // Only sell if it is a fish AND NOT an achievement fish (if you ever add one)
+            if (itemData && itemData.type === "fish" && !itemData.sources?.includes("achievement")) {
+                totalPixels += Math.floor(itemData.value * multiplier);
                 itemsRemoved++;
-                return false; // Remove from inventory
+                return false;
             }
-            return true; // Keep non-fish
+            return true;
         });
     } else {
-        // Selling a specific item by name (e.g., "!sell fishhat")
         let index = p.stats.inventory.findIndex(i => i.toLowerCase() === target);
         if (index !== -1) {
             let itemName = p.stats.inventory[index];
             let itemData = ITEM_DB[itemName];
             
             if (itemData) {
-                let weight = parseFloat(itemData.weight) || 1;
-                let price = (itemData.value * weight);
+                // --- PROTECTION CHECK ---
+                const isAchievement = itemData.sources?.includes("achievement");
+                const isTool = itemData.type === "tool";
 
-                // Only apply Merchant Multiplier if at Pond and item is fish/material
+                if (isAchievement || isTool || itemData.value === 0 || itemData.value == null) {
+                    systemMessage(`${user}: You cannot sell ${itemName}! It is a soulbound item.`);
+                    return; 
+                }
+                // --- END PROTECTION ---
+
+                let price = itemData.value || 0;
                 if (buyerActive && isAtPond && (itemData.type === "fish" || itemData.type === "material")) {
                     price *= multiplier;
                 }
@@ -3448,16 +3653,15 @@ function cmdSell(p, user, args) {
         }
     }
 
-    // 3. FINALIZE
     if (itemsRemoved > 0) {
         p.stats.pixels = (p.stats.pixels || 0) + totalPixels;
         let msg = `${user} sold ${itemsRemoved} items for ${totalPixels.toFixed(0)} pixels!`;
-        if (buyerActive && isAtPond) msg += ` 💰 [MERCHANT BONUS x${multiplier.toFixed(1)}]`;
+        if (buyerActive && isAtPond) msg += ` 💰 [BONUS x${multiplier.toFixed(1)}]`;
         systemMessage(msg);
         spawnFloater(p, `+$${totalPixels}`, "#44ff44");
         saveStats(p);
     } else {
-        systemMessage(`${user}: Could not find "${target}" to sell. Try "!sell fish".`);
+        systemMessage(`${user}: Could not find "${target}" to sell.`);
     }
 }
 function cmdBalance(p) {

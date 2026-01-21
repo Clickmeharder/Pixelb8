@@ -748,18 +748,28 @@
 			<div class="backpack-section">
 				<h3 style="background: #4444; margin-bottom: 5px;">Backpack</h3>
 				
-				<div id="inventory-filters" style="display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap;">
-					<label style="font-size: 10px; display: flex; align-items: center; color: #aaa;">
-						<input type="checkbox" id="filter-hide-equipped" checked> Hide Equipped
-					</label>
-					<button class="filter-btn active" data-filter="all">All</button>
-					<button class="filter-btn" data-filter="gear">Gear</button>
-					<button class="filter-btn" data-filter="tools">Tools</button>
-					<button class="filter-btn" data-filter="fish">Fish</button>
-					<button class="filter-btn" data-filter="materials">Materials</button>
+				<div id="inventory-filters">
+					<button class="filter-btn active" data-filter="all">ALL</button>
+					<button class="filter-btn" data-filter="gear">GEAR</button>
+					<button class="filter-btn" data-filter="fish">FISH</button>
+					
+					<select id="inv-sort-mode">
+						<option value="tier">Sort by Tier</option>
+						<option value="value">Sort by Value</option>
+						<option value="rarity">Sort by Rarity</option>
+						<option value="name">Sort by Name</option>
+					</select>
+					
+					<div id="inventory-view-controls">
+						<button id="btn-view-items">ITEMS</button>
+						<button id="btn-view-stats">STATS</button>
+						<button id="btn-view-achievements">ACHIEVEMENTS</button>
+					</div>
 				</div>
 
 				<div id="backpack-grid"></div>
+				<div id="achievements-grid" class="hidden"></div>
+				<div id="stats-grid" class="hidden"></div>
 			</div>
         </div>
     </div>

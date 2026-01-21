@@ -1,6 +1,28 @@
 //=============================================================
 /* ================= ITEM LIBRARY =========================== */
 // fixes needed: bow currently looks like is held by the string. we want it to look like the player is holding the bow part.
+/* --- DUNGEON LOOT RARITY MAP (Formula: roll^4 * 14) ---
+   Normal Mobs follow the Standard Map. Bosses get a +3 Rarity Floor.
+
+   [ NORMAL MOB CHANCES ]
+   RARITY 0-5  (Common/Uncommon): ~80% chance 
+   RARITY 6-9  (Rare/Epic):       ~12% chance  --> [Spawns Loot Beam @ 8+]
+   RARITY 10-13(Legendary/Godly): ~8%  chance  --> [Spawns Loot Beam]
+
+   [ BOSS MOB CHANCES ] (Includes +3 Rarity Bonus)
+   RARITY 3-8  (Uncommon/Epic):   ~80% chance  --> [Harder to get "trash"]
+   RARITY 9-12 (Legendary):       ~15% chance 
+   RARITY 13   (Godly):           ~5%  chance  --> [Max Rarity capped at 13]
+
+   TIER GATING:
+   Items are locked by (Wave - 1 / 5) + 1. 
+   Wave 1-5:   Tier 1  |  Wave 6-10:  Tier 2
+   Wave 11-15: Tier 3  |  Wave 16-20: Tier 4 ... and so on.
+   
+   GEAR STEALING:
+   Independent 10% chance to steal EACH item a mob is wearing before 
+   the rarity roll even happens.
+*/
 const ITEM_DB = {
     // --- WEAPONS -----------------------------------------------------------------------------------
 
@@ -164,128 +186,155 @@ const ITEM_DB = {
 	"Dreadnought Pants":{ type: "pants", skill:"attack", tier: 11, rarity: 13, def: 90, value: 450000,color: "#d50000" },
 	//
 	// --- MAGIC GEAR (11 TIERS) ---
-	"Apprentice Robe":    { type: "armor", skill:"magic", tier: 1,  rarity: 1,  def: 1,  value: 100,   color: "#90caf9" },
-	"Apprentice Pants":   { type: "pants", skill:"magic", tier: 1,  rarity: 1,  def: 0,  value: 80,    color: "#64b5f6" },
-	"Wizard Robe":        { type: "armor", skill:"magic", tier: 2,  rarity: 2,  def: 3,  value: 400,   color: "#2196f3" },
-	"Wizard Pants":       { type: "pants", skill:"magic", tier: 2,  rarity: 2,  def: 2,  value: 300,   color: "#1e88e5" },
-	"Mystic Robe":        { type: "armor", skill:"magic", tier: 3,  rarity: 4,  def: 5,  value: 1200,  color: "#9c27b0" },
-	"Mystic Pants":       { type: "pants", skill:"magic", tier: 3,  rarity: 4,  def: 4,  value: 1000,  color: "#8e24aa" },
-	"Sorcerer's Robe":   { type: "armor", skill:"magic", tier: 4,  rarity: 5,  def: 8,  value: 3000,  color: "#673ab7" },
-	"Sorcerer's Pants":  { type: "pants", skill:"magic", tier: 4,  rarity: 5,  def: 6,  value: 2500,  color: "#5e35b1" },
-	"Elementalist Robe":  { type: "armor", skill:"magic", tier: 5,  rarity: 6,  def: 12, value: 7000,  color: "#f44336" },
-	"Elementalist Pants":  { type: "pants", skill:"magic", tier: 5,  rarity: 6,  def: 9,  value: 6000,  color: "#e53935" },
-	"Archmage Robe":  { type: "armor", skill:"magic", tier: 6,  rarity: 8,  def: 18, value: 15000, color: "#3f51b5" },
-	"Archmage Pants":  { type: "pants", skill:"magic", tier: 6,  rarity: 8,  def: 14, value: 12000, color: "#3949ab" },
-	"Void Robe":  { type: "armor", skill:"magic", tier: 7,  rarity: 9,  def: 25, value: 35000, color: "#311b92" },
-	"Void Pants": { type: "pants", skill:"magic", tier: 7,  rarity: 9,  def: 20, value: 30000, color: "#1a237e" },
-	"Star Robe":   { type: "armor", skill:"magic", tier: 8,  rarity: 10, def: 35, value: 80000, color: "#00bcd4" },
-	"Star Pants":  { type: "pants", skill:"magic", tier: 8,  rarity: 10, def: 28, value: 70000, color: "#00acc1" },
-	"Reality Robe":     { type: "armor", skill:"magic", tier: 9,  rarity: 11, def: 48, value: 160000,color: "#e91e63" },
-	"Reality Pants":    { type: "pants", skill:"magic", tier: 9,  rarity: 11, def: 40, value: 140000,color: "#c2185b" },
-	"Mage Robe":    { type: "armor", skill:"magic", tier: 10, rarity: 12, def: 65, value: 350000,color: "#ffd600" },
-	"Mage Pants":  { type: "pants", skill:"magic", tier: 10, rarity: 12, def: 55, value: 300000,color: "#ffab00" },
-	"Astral Robe":     { type: "armor", skill:"magic", tier: 11, rarity: 10, def: 80, value: 550000,color: "#b3e5fc" },
-	"Astral Pants":     { type: "pants", skill:"magic", tier: 11, rarity: 10, def: 80, value: 550000,color: "#b3e5fc" },
-	"Omniscience":        { type: "armor", skill:"magic", tier: 11, rarity: 13, def: 90, value: 600000,color: "#ffffff" },
+	"Apprentice Robe":    { type: "armor", skill:"magic", sources:"dungeon", tier: 1,  rarity: 1,  def: 1,  value: 100,   color: "#90caf9" },
+	"Apprentice Pants":   { type: "pants", skill:"magic", sources:"dungeon",tier: 1,  rarity: 1,  def: 0,  value: 80,    color: "#64b5f6" },
+	"Wizard Robe":        { type: "armor", skill:"magic", sources:"dungeon",tier: 2,  rarity: 2,  def: 3,  value: 400,   color: "#2196f3" },
+	"Wizard Pants":       { type: "pants", skill:"magic", sources:"dungeon",tier: 2,  rarity: 2,  def: 2,  value: 300,   color: "#1e88e5" },
+	"Mystic Robe":        { type: "armor", skill:"magic", sources:"dungeon",tier: 3,  rarity: 4,  def: 5,  value: 1200,  color: "#9c27b0" },
+	"Mystic Pants":       { type: "pants", skill:"magic", sources:"dungeon",tier: 3,  rarity: 4,  def: 4,  value: 1000,  color: "#8e24aa" },
+	"Sorcerer's Robe":   { type: "armor", skill:"magic", sources:"dungeon",tier: 4,  rarity: 5,  def: 8,  value: 3000,  color: "#673ab7" },
+	"Sorcerer's Pants":  { type: "pants", skill:"magic", sources:"dungeon",tier: 4,  rarity: 5,  def: 6,  value: 2500,  color: "#5e35b1" },
+	"Elementalist Robe":  { type: "armor", skill:"magic", sources:"dungeon",tier: 5,  rarity: 6,  def: 12, value: 7000,  color: "#f44336" },
+	"Elementalist Pants":  { type: "pants", skill:"magic", sources:"dungeon",tier: 5,  rarity: 6,  def: 9,  value: 6000,  color: "#e53935" },
+	"Archmage Robe":  { type: "armor", skill:"magic", sources:"dungeon",tier: 6,  rarity: 8,  def: 18, value: 15000, color: "#3f51b5" },
+	"Archmage Pants":  { type: "pants", skill:"magic", sources:"dungeon",tier: 6,  rarity: 8,  def: 14, value: 12000, color: "#3949ab" },
+	"Void Robe":  { type: "armor", skill:"magic",sources:"dungeon", tier: 7,  rarity: 9,  def: 25, value: 35000, color: "#311b92" },
+	"Void Pants": { type: "pants", skill:"magic",sources:"dungeon", tier: 7,  rarity: 9,  def: 20, value: 30000, color: "#1a237e" },
+	"Star Robe":   { type: "armor", skill:"magic",sources:"dungeon", tier: 8,  rarity: 10, def: 35, value: 80000, color: "#00bcd4" },
+	"Star Pants":  { type: "pants", skill:"magic",sources:"dungeon", tier: 8,  rarity: 10, def: 28, value: 70000, color: "#00acc1" },
+	"Reality Robe":     { type: "armor", skill:"magic",sources:"dungeon", tier: 9,  rarity: 11, def: 48, value: 160000,color: "#e91e63" },
+	"Reality Pants":    { type: "pants", skill:"magic",sources:"dungeon", tier: 9,  rarity: 11, def: 40, value: 140000,color: "#c2185b" },
+	"Mage Robe":    { type: "armor", skill:"magic",sources:"dungeon", tier: 10, rarity: 12, def: 65, value: 350000,color: "#ffd600" },
+	"Mage Pants":  { type: "pants", skill:"magic",sources:"dungeon", tier: 10, rarity: 12, def: 55, value: 300000,color: "#ffab00" },
+	"Astral Robe":     { type: "armor", skill:"magic",sources:"dungeon", tier: 11, rarity: 10, def: 80, value: 550000,color: "#b3e5fc" },
+	"Astral Pants":     { type: "pants", skill:"magic",sources:"dungeon", tier: 11, rarity: 10, def: 80, value: 550000,color: "#b3e5fc" },
+	"Omniscience":        { type: "armor", skill:"magic",sources:"dungeon", tier: 11, rarity: 13, def: 90, value: 600000,color: "#ffffff" },
 	//
 	// --- LURKER GEAR (11 TIERS) ---
-	"Lurker Robe":        { type: "armor", skill:"lurker", tier: 1,  rarity: 1,  def: 1,  value: 120,   color: "#424242" },
-	"Lurker Pants":       { type: "pants", skill:"lurker", tier: 1,  rarity: 1,  def: 1,  value: 100,   color: "#212121" },
-	"Shadow Robe":        { type: "armor", skill:"lurker", tier: 2,  rarity: 3,  def: 3,  value: 500,   color: "#37474f" },
-	"Shadow Pants":    { type: "pants", skill:"lurker", tier: 2,  rarity: 3,  def: 2,  value: 400,   color: "#263238" },
-	"Night-Stalker Robe": { type: "armor", skill:"lurker", tier: 3,  rarity: 5,  def: 6,  value: 1500,  color: "#4a148c" },
-	"Night-Stalker Pants": { type: "pants", skill:"lurker", tier: 3,  rarity: 5,  def: 4,  value: 1200,  color: "#311b92" },
-	"Phantom Robe":       { type: "armor", skill:"lurker", tier: 4,  rarity: 6,  def: 10, value: 4000,  color: "#78909c" },
-	"Phantom Pants":      { type: "pants", skill:"lurker", tier: 4,  rarity: 6,  def: 7,  value: 3000,  color: "#607d8b" },
-	"Assassin Robe":    { type: "armor", skill:"lurker", tier: 5,  rarity: 7,  def: 14, value: 9000,  color: "#b71c1c" },
-	"Assassin Pants":   { type: "pants", skill:"lurker", tier: 5,  rarity: 7,  def: 11, value: 7500,  color: "#880e4f" },
-	"Specter Robe":   { type: "armor", skill:"lurker", tier: 6,  rarity: 8,  def: 20, value: 18000, color: "#9e9e9e" },
-	"Specter Pants": { type: "pants", skill:"lurker", tier: 6,  rarity: 8,  def: 16, value: 15000, color: "#757575" },
-	"Venomscale Robe":  { type: "armor", skill:"lurker", tier: 7,  rarity: 9,  def: 28, value: 38000, color: "#00c853" },
-	"Venomscale Pants":  { type: "pants", skill:"lurker", tier: 7,  rarity: 9,  def: 22, value: 32000, color: "#00e676" },
-	"Abyssal Robe":    { type: "armor", skill:"lurker", tier: 8,  rarity: 10, def: 38, value: 85000, color: "#121212" },
-	"Abyssal Pants":      { type: "pants", skill:"lurker", tier: 8,  rarity: 10, def: 30, value: 75000, color: "#000000" },
-	"Eclipse Robe":      { type: "armor", skill:"lurker", tier: 9,  rarity: 11, def: 52, value: 170000,color: "#304ffe" },
-	"Eclipse Pants":   { type: "pants", skill:"lurker", tier: 9,  rarity: 11, def: 42, value: 150000,color: "#1a237e" },
-	"Soul-Reaper Robe": { type: "armor", skill:"lurker", tier: 10, rarity: 12, def: 70, value: 380000,color: "#6200ea" },
-	"Soul-Reaper Pants":  { type: "pants", skill:"lurker", tier: 10, rarity: 12, def: 60, value: 320000,color: "#4a148c" },
-	"Ghost in the Shell": { type: "armor", skill:"lurker", tier: 11, rarity: 13, def: 95, value: 650000,color: "#cfd8dc" },
-	"Ghostly Echoes":     { type: "pants", skill:"lurker", tier: 11, rarity: 13, def: 85, value: 580000,color: "#eceff1" },
+	"Lurker Robe":        { type: "armor", skill:"lurker",sources:"dungeon", tier: 1,  rarity: 1,  def: 1,  value: 120,   color: "#424242" },
+	"Lurker Pants":       { type: "pants", skill:"lurker",sources:"dungeon", tier: 1,  rarity: 1,  def: 1,  value: 100,   color: "#212121" },
+	"Shadow Robe":        { type: "armor", skill:"lurker",sources:"dungeon", tier: 2,  rarity: 3,  def: 3,  value: 500,   color: "#37474f" },
+	"Shadow Pants":    { type: "pants", skill:"lurker",sources:"dungeon", tier: 2,  rarity: 3,  def: 2,  value: 400,   color: "#263238" },
+	"Night-Stalker Robe": { type: "armor", skill:"lurker",sources:"dungeon", tier: 3,  rarity: 5,  def: 6,  value: 1500,  color: "#4a148c" },
+	"Night-Stalker Pants": { type: "pants", skill:"lurker",sources:"dungeon", tier: 3,  rarity: 5,  def: 4,  value: 1200,  color: "#311b92" },
+	"Phantom Robe":       { type: "armor", skill:"lurker",sources:"dungeon", tier: 4,  rarity: 6,  def: 10, value: 4000,  color: "#78909c" },
+	"Phantom Pants":      { type: "pants", skill:"lurker",sources:"dungeon", tier: 4,  rarity: 6,  def: 7,  value: 3000,  color: "#607d8b" },
+	"Assassin Robe":    { type: "armor", skill:"lurker",sources:"dungeon", tier: 5,  rarity: 7,  def: 14, value: 9000,  color: "#b71c1c" },
+	"Assassin Pants":   { type: "pants", skill:"lurker",sources:"dungeon", tier: 5,  rarity: 7,  def: 11, value: 7500,  color: "#880e4f" },
+	"Specter Robe":   { type: "armor", skill:"lurker",sources:"dungeon", tier: 6,  rarity: 8,  def: 20, value: 18000, color: "#9e9e9e" },
+	"Specter Pants": { type: "pants", skill:"lurker",sources:"dungeon", tier: 6,  rarity: 8,  def: 16, value: 15000, color: "#757575" },
+	"Venomscale Robe":  { type: "armor", skill:"lurker",sources:"dungeon", tier: 7,  rarity: 9,  def: 28, value: 38000, color: "#00c853" },
+	"Venomscale Pants":  { type: "pants", skill:"lurker",sources:"dungeon", tier: 7,  rarity: 9,  def: 22, value: 32000, color: "#00e676" },
+	"Abyssal Robe":    { type: "armor", skill:"lurker",sources:"dungeon", tier: 8,  rarity: 10, def: 38, value: 85000, color: "#121212" },
+	"Abyssal Pants":      { type: "pants", skill:"lurker",sources:"dungeon", tier: 8,  rarity: 10, def: 30, value: 75000, color: "#000000" },
+	"Eclipse Robe":      { type: "armor", skill:"lurker",sources:"dungeon", tier: 9,  rarity: 11, def: 52, value: 170000,color: "#304ffe" },
+	"Eclipse Pants":   { type: "pants", skill:"lurker",sources:"dungeon", tier: 9,  rarity: 11, def: 42, value: 150000,color: "#1a237e" },
+	"Soul-Reaper Robe": { type: "armor", skill:"lurker",sources:"dungeon", tier: 10, rarity: 12, def: 70, value: 380000,color: "#6200ea" },
+	"Soul-Reaper Pants":  { type: "pants", skill:"lurker",sources:"dungeon", tier: 10, rarity: 12, def: 60, value: 320000,color: "#4a148c" },
+	"Ghost in the Shell": { type: "armor", skill:"lurker",sources:"dungeon", tier: 11, rarity: 13, def: 95, value: 650000,color: "#cfd8dc" },
+	"Ghostly Echoes":     { type: "pants", skill:"lurker",sources:"dungeon", tier: 11, rarity: 13, def: 85, value: 580000,color: "#eceff1" },
 //
 //
 //------------------------------------------------------------------------------------------------------
 // ------------------------------Boots------------------------------------------------------------------
-    "leather Boots":  { type: "boots", style:"", tier: 2, rarity: 0, def: 1,                 value: 30,   color: "#5c4033" },
-    "leather Booties":{ type: "boots", style:"", tier: 5, rarity: 5, def: 3,                 value: 35,   color: "#5c2033" },
+    "leather Boots":  { type: "boots", style:"", sources:"dungeon", tier: 2, rarity: 0, def: 1,                 value: 30,   color: "#5c4033" },
+    "leather Booties":{ type: "boots", style:"", sources:"dungeon", tier: 5, rarity: 5, def: 3,                 value: 35,   color: "#5c2033" },
 //------------------------------------------------------------------------------------------------------
 
 // ------------------------------Gloves------------------------------------------------------------------
 	// --- Gloves
-	"White Gloves":  { type: "gloves", style:"", tier: 11, rarity: 1,  def: 5,                  value: 200,   color: "red" },
-	"Black Gloves":  { type: "gloves", style:"", tier: 10, rarity: 1,  def: 5,                  value: 200,   color: "red" },
-    "Red Gloves":  { type: "gloves", style:"", tier: 9, rarity: 1,  def: 5,                  value: 90,   color: "red" },
-	"Pink Gloves":  { type: "gloves", style:"", tier: 8, rarity: 1,  def: 4,                  value: 80,   color: "pink" },
-	"Brown Gloves": { type: "gloves", style:"", tier: 7, rarity: 1, def: 1,                  value: 30,   color: "brown" },
-	"Green Gloves":  { type: "gloves", style:"", tier: 6, rarity: 1, def: 1,                  value: 50,   color: "green" },
-	"Orange Gloves":  { type: "gloves", style:"", tier: 5, rarity: 1, def: 0,                  value: 70,   color: "orange" },
-	"Yellow Gloves":  { type: "gloves", style:"", tier: 4, rarity: 1, def: 0,                  value: 60,   color: "yellow" },
-	"Blue Gloves":  { type: "gloves", style:"", tier: 3, rarity: 1, def: 0,                  value: 40,   color: "blue" },
-	"Indigo Gloves": { type: "gloves", style:"", tier: 2, rarity: 1, def: 0,                  value: 20,   color: "indigo" },
-	"Violet Gloves": { type: "gloves", style:"", tier: 1, rarity: 1, def: 0,                  value: 10,   color: "violet" },
-	"Leather Gloves":   { type: "gloves", style:"", tier: 2, rarity: 0, def: 1, value: 100, color: "#5c4033" },
+	"White Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 11, rarity: 1,  def: 5,                  value: 200,   color: "red" },
+	"Black Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 10, rarity: 1,  def: 5,                  value: 200,   color: "red" },
+    "Red Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 9, rarity: 1,  def: 5,                  value: 90,   color: "red" },
+	"Pink Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 8, rarity: 1,  def: 4,                  value: 80,   color: "pink" },
+	"Brown Gloves": { type: "gloves", style:"", sources:"dungeon", tier: 7, rarity: 1, def: 1,                  value: 30,   color: "brown" },
+	"Green Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 6, rarity: 1, def: 1,                  value: 50,   color: "green" },
+	"Orange Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 5, rarity: 1, def: 0,                  value: 70,   color: "orange" },
+	"Yellow Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 4, rarity: 1, def: 0,                  value: 60,   color: "yellow" },
+	"Blue Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 3, rarity: 1, def: 0,                  value: 40,   color: "blue" },
+	"Indigo Gloves": { type: "gloves", style:"", sources:"dungeon", tier: 2, rarity: 1, def: 0,                  value: 20,   color: "indigo" },
+	"Violet Gloves": { type: "gloves", style:"", sources:"dungeon", tier: 1, rarity: 1, def: 0,                  value: 10,   color: "violet" },
+	"Leather Gloves":   { type: "gloves", style:"", sources:"dungeon", tier: 2, rarity: 0, def: 1, value: 100, color: "#5c4033" },
     // --- SPECIALS ---
 // special head
-	"box":      { type: "helmet", style: "box", tier: 1, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
-	"Paper Bag":      { type: "helmet", style: "paperbag", tier: 2, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
-	"wig":            { type: "helmet", style:"", tier: 3, rarity: 0, def: 1,style: "wig",     value: 5000, color: "yellow" },
-	"centurion":    { type: "helmet", style: "centurion", tier: 4, rarity: 0, def: 2,  value: 10000, color: "#ffcc00" },
-	"tv":      { type: "helmet", style: "tv", tier: 5, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
-	"Pirate Hat":    { type: "helmet", style: "pirate", tier: 5, rarity: 0, def: 2,  value: 10000, color: "#222222" },
-	"Space Helmet":      { type: "helmet", style: "spacehelmet", tier: 5, rarity: 10, def: 4, value: 500000, color: "#d2b48c" },
-	"gentleman hat":    { type: "helmet", style: "gentleman", tier: 6, rarity: 0,  def: 2,  value: 10000, color: "#333333" },
-	"fun hat":    { type: "helmet", style: "funhat", tier: 7, rarity: 0, def: 2,  value: 10000, color: "white" }, 
-	"kabuto":    { type: "helmet", style: "samurai", tier: 8, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
-	"stickmenpo":    { type: "helmet", style: "menpo", tier: 9, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
-	"Royal Crown":    { type: "helmet", style: "crown", tier: 10, rarity: 0, def: 2,  value: 10000, color: "#ff0000" },
-	"Angelic Ring":   { type: "helmet", style: "halo", tier: 11, rarity: 13, def: 0,  value: 9999, color: "yellow" },
+	"box":      { type: "helmet", style: "box", sources:"dungeon", tier: 1, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
+	"Paper Bag":      { type: "helmet", style: "paperbag", sources:"dungeon", tier: 2, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
+	"wig":            { type: "helmet", style:"", sources:"dungeon", tier: 3, rarity: 0, def: 1,style: "wig",     value: 5000, color: "yellow" },
+	"centurion":    { type: "helmet", style: "centurion", sources:"dungeon", tier: 4, rarity: 0, def: 2,  value: 10000, color: "#ffcc00" },
+	"tv":      { type: "helmet", style: "tv", sources:"dungeon", tier: 5, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
+	"Pirate Hat":    { type: "helmet", style: "pirate", sources:"dungeon", tier: 5, rarity: 0, def: 2,  value: 10000, color: "#222222" },
+	"Space Helmet":      { type: "helmet", style: "spacehelmet", sources:"dungeon", tier: 5, rarity: 10, def: 4, value: 500000, color: "#d2b48c" },
+	"gentleman hat":    { type: "helmet", style: "gentleman", sources:"dungeon", tier: 6, rarity: 0,  def: 2,  value: 10000, color: "#333333" },
+	"fun hat":    { type: "helmet", style: "funhat", sources:"dungeon", tier: 7, rarity: 0, def: 2,  value: 10000, color: "white" }, 
+	"kabuto":    { type: "helmet", style: "samurai", sources:"dungeon", tier: 8, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
+	"stickmenpo":    { type: "helmet", style: "menpo", sources:"dungeon", tier: 9, rarity: 0, def: 2,  value: 10000, color: "#8B0000" },
+	"Royal Crown":    { type: "helmet", style: "crown", sources:"dungeon", tier: 10, rarity: 0, def: 2,  value: 10000, color: "#ff0000" },
+	"Angelic Ring":   { type: "helmet", style: "halo", sources:"dungeon", tier: 11, rarity: 13, def: 0,  value: 9999, color: "yellow" },
 // special capes
-    "Royal Cape":     { type: "cape", style:"cape", tier: 10, rarity: 10, value: 10000, color: "#880000" },
-    "99 Cape":     { type: "cape", style:"cape", tier: 11, rarity: 0, value: 10000, color: "#880000" },
-    "Cloak":     { type: "cape", style:"cloak", tier: 5, rarity: 10, value: 10000, color: "#333" },
+    "Nuber Cape":           { type: "cape", style:"cape",sources:"achievement",  tier: 10, rarity: 13, value: 10000, color: "#880000" },
+	"Warrior Cape":         { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
+    "Wizard Cape":          { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
+	"Archer Cape":          { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
+	"Lurker Cape":          { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
+	"Healer Cape":          { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
+	"Fishing Cape":         { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
+	"Swimmer Cape":         { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
+    "Uber Cape":            { type: "cape", style:"cape",sources:"achievement",  tier: 10, rarity: 13, value: 10000, color: "#880000" },
+    "Skilled Wizard Cape":  { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
+	"Skilled Archer Cape":  { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
+	"Skilled Lurker Cape":  { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
+	"Skilled Fishing Cape": { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
+	"Skilled Swimmer Cape": { type: "cape", style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#880000" },
+	"99 Tier Cape":         { type: "cape", style:"cape",sources:"dungeon",  tier: 99, rarity: 1, value: 10000, color: "#880000" },
+    "Cloak":     { type: "cape", style:"cloak",sources:"dungeon",  tier: 5, rarity: 10, value: 10000, color: "#333" },
 
 // hair
-	"hair1": { type: "hair", style: "mohawk", tier: 9, rarity: 1, color: "#ff69b4" },// pink mohawk
-	"hair2": { type: "hair", style: "pigtails", tier: 8, rarity: 2, color: "#4b3621" },// pigtails hair
-	"hair3": { type: "hair", style: "scribble", tier: 7, rarity: 3,   color: "#ffeb3b" }, // yellow child scribble
-	"hair4": { type: "hair", style: "messy", tier: 6, rarity: 4,      color: "#614126" }, // messy 
-	"hair5": { type: "hair", style: "braids", tier: 5, rarity: 5,    color: "#f3e5ab" }, // thick blonde braids
-    "hair6": { type: "hair", style: "girly", tier: 4, rarity: 6,  color: "#f3e5ab" }, // girly braids
-	"hair7": { type: "hair", style: "pomp", tier: 3, rarity: 7, color: "#614126" }, // Forward spiky pomp
-    "hair8": { type: "hair", style: "twinspikes", tier: 2, rarity: 9, color: "#ff0000" }, // Red double spikes
-	"hair11": { type: "hair", style: "drills", tier: 1, rarity: 8, color: "#f3e5ab" }, // spiral chunky drills 
-	"oldman beard": { name: "Wizard Beard", tier: 10, rarity: 7, type: "hair", style: "wizardbeard", color: "#ffffff" },
-	"wizard beard": { name: "Dark Mage Beard", tier: 8, rarity: 5, type: "hair", style: "wizardbeard", color: "#333333" },
+	"hair1": { type: "hair", style: "mohawk",sources:"dungeon",  tier: 9, rarity: 1, color: "#ff69b4" },// pink mohawk
+	"hair2": { type: "hair", style: "pigtails",sources:"dungeon",  tier: 8, rarity: 2, color: "#4b3621" },// pigtails hair
+	"hair3": { type: "hair", style: "scribble",sources:"dungeon",  tier: 7, rarity: 3,   color: "#ffeb3b" }, // yellow child scribble
+	"hair4": { type: "hair", style: "messy",sources:"dungeon",  tier: 6, rarity: 4,      color: "#614126" }, // messy 
+	"hair5": { type: "hair", style: "braids", sources:"dungeon",  tier: 5, rarity: 5,    color: "#f3e5ab" }, // thick blonde braids
+    "hair6": { type: "hair", style: "girly", sources:"dungeon",  tier: 4, rarity: 6,  color: "#f3e5ab" }, // girly braids
+	"hair7": { type: "hair", style: "pomp", sources:"dungeon",  tier: 3, rarity: 7, color: "#614126" }, // Forward spiky pomp
+    "hair8": { type: "hair", style: "twinspikes", sources:"dungeon",  tier: 2, rarity: 9, color: "#ff0000" }, // Red double spikes
+	"hair11": { type: "hair", style: "drills", sources:"dungeon",  tier: 1, rarity: 8, color: "#f3e5ab" }, // spiral chunky drills 
+	"oldman beard": { name: "Wizard Beard", sources:"dungeon",  tier: 10, rarity: 7, type: "hair", style: "wizardbeard", color: "#ffffff" },
+	"wizard beard": { name: "Dark Mage Beard", sources:"dungeon",  tier: 8, rarity: 5, type: "hair", style: "wizardbeard", color: "#333333" },
 
 // ---------------------------basic items----------------------------------------------------------------
 	// --- normal fish ----
-	
-	"Bass":    { type: "fish", weight:"0.1kg", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
-	"Trout":    { type: "fish", weight:"0.1kg", tier: 2, rarity: 0, value: 100, color: "#FFD700" },
-	"Salmon":    { type: "fish", weight:"0.1kg", tier: 3, rarity: 0, value: 100, color: "#FFD700" },
-	"Tuna":    { type: "fish", weight:"0.1kg", tier: 4, rarity: 0, value: 100, color: "#FFD700" },
-	"Shark":    { type: "fish", weight:"0.1kg", tier: 5, rarity: 0, value: 100, color: "#FFD700" },
-	"Lobster":    { type: "fish", weight:"0.1kg", tier: 6, rarity: 0, value: 1000, color: "#FFD700" },
+/* --- FISHING RARITY MAP (Formula: roll^4 * 14) ---
+  The higher the rarity, the exponentially harder it is to roll.
+  
+  RARITY 0-2  (Common):    ~60.0% chance   [Bass, Trout, etc.]
+  RARITY 3-4  (Uncommon):  ~12.0% chance   [Salmon, Tuna]
+  RARITY 5-6  (Rare):      ~8.5%  chance   [Pearl, Black Pearl]
+  RARITY 7-8  (Epic):      ~6.0%  chance   [Catfish, Shark]
+  RARITY 9-10 (Legendary): ~5.0%  chance   [Golden Bass]
+  RARITY 11-12(Mythic):    ~4.5%  chance   [Ancient Finds]
+  RARITY 13   (Godly):     ~4.0%  chance   [Fish Hat / Master Loot]
+
+  Note: Fallback logic ensures if a high rarity roll fails to find a fish 
+  in your current tier, it will give you a standard fish from your max tier.
+*/
+	"Bass":    { type: "fish", sources:"fishing", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
+	"Trout":    { type: "fish", sources:"fishing", tier: 2, rarity: 0, value: 100, color: "#FFD700" },
+	"Salmon":    { type: "fish", sources:"fishing", tier: 3, rarity: 0, value: 100, color: "#FFD700" },
+	"Tuna":    { type: "fish", sources:"fishing", tier: 4, rarity: 0, value: 100, color: "#FFD700" },
+	"Shark":    { type: "fish", sources:"fishing", tier: 5, rarity: 0, value: 100, color: "#FFD700" },
+	"Lobster":    { type: "fish", sources:"fishing", tier: 6, rarity: 0, value: 1000, color: "#FFD700" },
 	
 	// --- unique fish ---
-	"Golden Bass":    { type: "fish", tier: 10, rarity: 0, value: 100, color: "#FFD700" },
+	"Golden Bass":    { type: "fish", source:"fishing",  tier: 10, rarity: 0, value: 100, color: "#FFD700" },
 	// --- unique swimming find ---
-	"Pearl":    { type: "fish", tier: 11, rarity: 0, value: 100, color: "white" },
+	"Pearl":    { type: "fish", sources:"fishing swimming",  tier: 3, rarity: 5, value: 100, color: "white" },
+	"Black Pearl":    { type: "fish", sources:"fishing swimming",  tier: 6, rarity: 5, value: 100, color: "black" },
 	//rare fishing finds
-	"fishhat":      { type: "helmet", style: "fishhat", tier: 99, rarity: 13, def: 1, value: 500000, color: "#d2b48c" },
+	"fishhat":      { type: "helmet", sources:"fishing",  style: "fishhat", tier: 99, rarity: 13, def: 1, value: 500000, color: "#d2b48c" },
     // --- MATERIALS ---
-    "Leather scrap":  { type: "material", tier: 1, rarity: 0, value: 15,   color: "#a88d6d" },
-	"Sea Shell":  { type: "material", tier: 8, rarity: 0, value: 15,   color: "#a88d6d" },
-	"Leather scrap":  { type: "material", tier: 1, rarity: 0, value: 15,   color: "#a88d6d" },
+    "Leather scrap":  { type: "material", sources:"fishing",  tier: 1, rarity: 0, value: 15,   color: "#a88d6d" },
+	"Sea Shell":  { type: "material", sources:"fishing swimming",  tier: 8, rarity: 0, value: 15,   color: "#a88d6d" },
+	"a Rock":  { type: "material", sources:"swimming",  tier: 8, rarity: 0, value: 15,   color: "#a88d6d" },
 	// other basic materials will go here
 //-------------------------------------------------------------------------------------------------------
 };
