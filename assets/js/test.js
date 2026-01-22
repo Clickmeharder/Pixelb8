@@ -2987,36 +2987,57 @@ function updateSystemTicks(now) {
 	updateBuyerNPC();
 }
 function updateUI() {
-    // A. Handle Area Text (Dirty Check)
+    // 1. Area Header
     const areaText = "StickmenFall:" + viewArea;
-    if (areaDisplayDiv.textContent !== areaText) {
-        areaDisplayDiv.textContent = areaText;
+    if (areaDisplayDiv.textContent !== areaText) areaDisplayDiv.textContent = areaText;
+
+    // 2. Dungeon Logic
+    const showDungeonTimer = (dungeonCountdownInterval && dungeonSecondsLeft > 0);
+    toggleElement("dungeon-timer-box", showDungeonTimer);
+    if (showDungeonTimer) {
+        updateText("dungeon-timer-val", `DUNGEON START: ${dungeonSecondsLeft}s`);
     }
 
-    // B. Handle Dungeon/Enemy UI
-    let enemyContent = "";
-    if (viewArea === "dungeon") {
-        // Build the content string once per frame
-        if (dungeonActive) {
-            enemyContent += `<div class="wave-header">WAVE: ${dungeonWave}</div>`;
-            enemies.forEach((e, i) => {
-                if (!e.dead) {
-                    const pct = Math.floor((e.hp / e.maxHp) * 100);
-                    enemyContent += `<div class="enemy-row">${e.name}: ${pct}%</div>`;
-                }
-            });
-        }
-    }
-    // This only touches the DOM if the wave or enemy HP changed!
-    syncUI("enemy-list-container", enemyContent, "enemyUI", viewArea !== "dungeon");
+    const inDungeon = viewArea === "dungeon";
+    toggleElement("dungeon-stats", inDungeon);
+    
+    if (inDungeon) {
+        // Update Party (We still use syncUI for the dynamic list of rows)
+        const partyHTML = Object.values(players)
+            .filter(p => p.area === "dungeon")
+            .map(p => `<div style="color:${p.dead ? '#f00' : '#0f0'}">${p.name}: ${Math.floor((p.hp/p.maxHp)*100)}%</div>`)
+            .join("");
+        syncUI("party-list-inner", partyHTML, "party-list");
 
-    // C. Handle Arena UI
-    if (viewArea === "arena") {
-        updateArenaUI(); // Let this function handle arenaUI
-    } else {
-        // Hide it if we aren't there
-        syncUI("arena-ranking-container", "", "arenaUI", true);
+        const tier = Math.floor((dungeonWave - 1) / 5) + 1;
+        updateText("wave-info", dungeonActive ? `WAVE: ${dungeonWave} | TIER: ${tier}` : "Waiting for start...");
+        
+        // Update Enemies
+        const enemyHTML = enemies.filter(e => !e.dead)
+            .map(e => `<div>${e.name}: ${Math.floor((e.hp/e.maxHp)*100)}%</div>`)
+            .join("");
+        syncUI("enemy-list-inner", enemyHTML, "enemy-list");
     }
+
+    // 3. Arena Logic
+    const showArenaTimer = (arenaMatchInterval && arenaTimer > 0);
+    toggleElement("arena-timer-box", showArenaTimer);
+    if (showArenaTimer) {
+        updateText("arena-timer-val", `⚔️ ARENA START: ${arenaTimer}s`);
+    }
+}
+
+// Helper functions to keep it clean
+function updateText(id, val) {
+    const el = document.getElementById(id);
+    if (el && el.textContent !== val) el.textContent = val;
+}
+
+function toggleElement(id, show) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (show) el.classList.remove("hidden");
+    else el.classList.add("hidden");
 }
 function updateArenaUI() {
     let arenaHTML = "";
