@@ -2952,7 +2952,7 @@ const systemTimers = {
     lastEnemyTick: Date.now(),
 	lastAutoSave: Date.now(),
     globalInterval: 3000, // 3 seconds (Fishing, etc.)
-    enemyInterval: 4000   // 4 seconds (Enemy Attacks)
+    enemyInterval: 4000,   // 4 seconds (Enemy Attacks)
     saveInterval: 15000 // 30 seconds
 };
 function updateSystemTicks(now) {
