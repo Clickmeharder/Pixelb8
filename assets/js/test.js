@@ -1675,7 +1675,7 @@ function joinDungeonQueue(p) {
                 // Wait 1.5 seconds for them to fall/land, then organize ranks
                 setTimeout(() => {
                     organizeDungeonRanks();
-                    systemMessage("System: Squad is forming ranks!");
+                    systemMessage("System: Get Ready!");
                 }, 1500);
             }
 
@@ -2996,7 +2996,7 @@ function buildDungeonContent() {
     let html = `<div style="padding:5px; background:rgba(0,0,0,0.4); border-radius:5px;">`;
     
     // Party List
-    html += `<b style="color:#00ffff; font-size:12px;">SQUAD HP:</b><br>`;
+    html += `<b style="color:#00ffff; font-size:12px;">Party:</b><br>`;
     Object.values(players).filter(p => p.area === "dungeon").forEach(p => {
         const hpPct = Math.floor((p.hp / p.maxHp) * 100);
         const color = p.dead ? "#ff0000" : (hpPct < 30 ? "#ffaa00" : "#00ff00");
