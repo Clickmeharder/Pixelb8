@@ -4483,7 +4483,7 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
 };
 
 
-
+let uiCache = {}
 function syncUI(id, content, parentId) {
     // 1. Get or Create from Cache
     if (!uiCache[id]) {
