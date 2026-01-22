@@ -3022,116 +3022,106 @@ function buildDungeonContent() {
 function updateUI() {
     const now = Date.now();
 
-    // 1. Area Header
+    // 1. Area Header Sync
     const areaText = "StickmenFall:" + viewArea;
     if (areaDisplayDiv.textContent !== areaText) areaDisplayDiv.textContent = areaText;
 
     // 2. DUNGEON UI LOGIC
-    let dungeonHTML = "";
-    
-    // --- Dungeon Countdown Timer ---
+    const dungeonBox = document.getElementById("dungeon-stats");
+    const dungeonTimerBox = document.getElementById("dungeon-timer-box");
+
+    // --- Dungeon Countdown Timer (Shows in any area if queue is active) ---
     const shouldShowDungeonTimer = (dungeonCountdownInterval && dungeonSecondsLeft > 0);
-    if (shouldShowDungeonTimer !== uiVisibilityState.dungeonTimer) {
-        uiVisibilityState.dungeonTimer = shouldShowDungeonTimer;
-        const el = document.getElementById("dungeon-timer-box");
-        shouldShowDungeonTimer ? showElement(el, "fade") : hideElement(el, "fade");
-    }
-    if (shouldShowDungeonTimer) {
-        updateText("dungeon-timer-val", `DUNGEON START: ${dungeonSecondsLeft}s`);
-    }
-
-    // --- Dungeon Stats & Party Info ---
-    const shouldShowDungeonStats = (viewArea === "dungeon");
-    if (shouldShowDungeonStats !== uiVisibilityState.dungeonStats) {
-        uiVisibilityState.dungeonStats = shouldShowDungeonStats;
-        const el = document.getElementById("dungeon-stats");
-        shouldShowDungeonStats ? showElement(el, "slide") : hideElement(el, "slide");
+    if (dungeonTimerBox) {
+        if (shouldShowDungeonTimer) {
+            dungeonTimerBox.style.display = "block";
+            updateText("dungeon-timer-val", `DUNGEON START: ${dungeonSecondsLeft}s`);
+        } else {
+            dungeonTimerBox.style.display = "none";
+        }
     }
 
-    if (shouldShowDungeonStats) {
-        // Build Party/Wave/Enemy info
-        dungeonHTML = buildDungeonContent(); 
-        syncUI("dungeon-content-inner", dungeonHTML, "dungeon-stats");
+    // --- Dungeon Stats (ONLY in Dungeon Area) ---
+    if (dungeonBox) {
+        if (viewArea === "dungeon") {
+            dungeonBox.style.display = "block";
+            const dungeonHTML = buildDungeonContent(); 
+            // Direct injection to avoid syncUI hang-ups
+            const inner = document.getElementById("dungeon-content-inner");
+            if (inner) inner.innerHTML = dungeonHTML;
+        } else {
+            dungeonBox.style.display = "none";
+        }
     }
 
     // 3. ARENA UI LOGIC
-    // --- Arena Timer ---
-    const shouldShowArenaTimer = (arenaMatchInterval && arenaTimer > 0);
-    if (shouldShowArenaTimer !== uiVisibilityState.arenaTimer) {
-        uiVisibilityState.arenaTimer = shouldShowArenaTimer;
-        const el = document.getElementById("arena-timer-box");
-        shouldShowArenaTimer ? showElement(el, "fade") : hideElement(el, "fade");
-    }
-    if (shouldShowArenaTimer) {
-        updateText("arena-timer-val", `⚔️ ARENA START: ${arenaTimer}s`);
+    const arenaBox = document.getElementById("arenaUI");
+    const arenaTimerBox = document.getElementById("arena-timer-box");
+
+    // --- Arena Timer (Shows if countdown is active) ---
+    const shouldShowArenaTimer = (typeof arenaMatchInterval !== 'undefined' && arenaMatchInterval && arenaTimer > 0);
+    if (arenaTimerBox) {
+        if (shouldShowArenaTimer) {
+            arenaTimerBox.style.display = "block";
+            updateText("arena-timer-val", `⚔️ ARENA START: ${arenaTimer}s`);
+        } else {
+            arenaTimerBox.style.display = "none";
+        }
     }
 
-	// 3. ARENA UI LOGIC
-	const arenaBox = document.getElementById("arenaUI");
-	if (arenaBox) {
-		if (viewArea === "arena") {
-			// Only show and run the update logic if we are actually there
-			arenaBox.style.display = "block"; 
-			updateArenaUI(); 
-		} else {
-			// If we aren't in the arena, kill the UI immediately
-			arenaBox.style.display = "none";
-		}
-	}
+    // --- Arena Rankings (ONLY in Arena Area) ---
+    if (arenaBox) {
+        if (viewArea === "arena") {
+            arenaBox.style.display = "block";
+            updateArenaUI(); 
+        } else {
+            arenaBox.style.display = "none";
+        }
+    }
 }
-
 
 function updateArenaUI() {
-    let arenaHTML = "";
+    // Only proceed if the box exists and we are in the area
+    const arenaElement = document.getElementById("arenaUI");
+    if (!arenaElement || viewArea !== "arena") return;
+
+    let arenaHTML = `<div style="background: rgba(0,0,0,0.7); padding: 10px; border: 1px solid #ff4444; color: #fff; font-family: monospace;">`;
+    arenaHTML += `<b style="color: #ff4444; font-size: 16px;">🏆 ARENA RANKINGS</b><hr style="border: 0.5px solid #444">`;
     
-    // Only show the leaderboard if we are looking at the Arena
-    if (viewArea === "arena") {
-        arenaHTML += `<div style="background: rgba(0,0,0,0.7); padding: 10px; border: 1px solid #ff4444; color: #fff; font-family: monospace;">`;
-        arenaHTML += `<b style="color: #ff4444; font-size: 16px;">🏆 ARENA RANKINGS</b><hr style="border: 0.5px solid #444">`;
-        
-        // Sort players by Rating (highest first)
-        const sorted = Object.entries(pvpRankings)
-            .sort(([,a], [,b]) => b.rating - a.rating)
-            .slice(0, 5); // Top 5 only
+    // Sort players by Rating
+    const sorted = Object.entries(pvpRankings)
+        .sort(([,a], [,b]) => b.rating - a.rating)
+        .slice(0, 5);
 
-        if (sorted.length === 0) {
-            arenaHTML += `<div style="font-size: 12px; color: #888;">No battles fought yet...</div>`;
-        } else {
-            arenaHTML += `<table style="width: 100%; font-size: 12px; text-align: left;">
-                <tr style="color: #aaa;"><th>Name</th><th>W/K</th><th>Rating</th></tr>`;
-            sorted.forEach(([name, stats]) => {
-                arenaHTML += `<tr>
-                    <td style="color: #00ffff;">${name.toUpperCase()}</td>
-                    <td>${stats.wins}/${stats.kills}</td>
-                    <td style="color: #ffcc00;">${stats.rating}</td>
-                </tr>`;
-            });
-            arenaHTML += `</table>`;
-        }
-        
-        // Add Arena Status Info
-        arenaHTML += `<hr style="border: 0.5px solid #444">`;
-        arenaHTML += `<div style="font-size: 11px;">`;
-        arenaHTML += arenaActive ? `<span style="color: #ff0000;">● MATCH IN PROGRESS</span>` : `<span style="color: #00ff00;">● ARENA OPEN</span>`;
-        arenaHTML += `<br>Players in Arena: ${Object.values(players).filter(p => p.area === "arena").length}`;
-        arenaHTML += `</div></div>`;
+    if (sorted.length === 0) {
+        arenaHTML += `<div style="font-size: 12px; color: #888;">No battles fought yet...</div>`;
+    } else {
+        arenaHTML += `<table style="width: 100%; font-size: 12px; text-align: left;">
+            <tr style="color: #aaa;"><th>Name</th><th>W/K</th><th>Rating</th></tr>`;
+        sorted.forEach(([name, stats]) => {
+            arenaHTML += `<tr>
+                <td style="color: #00ffff;">${name.toUpperCase()}</td>
+                <td>${stats.wins}/${stats.kills}</td>
+                <td style="color: #ffcc00;">${stats.rating}</td>
+            </tr>`;
+        });
+        arenaHTML += `</table>`;
     }
+    
+    arenaHTML += `<hr style="border: 0.5px solid #444">`;
+    arenaHTML += `<div style="font-size: 11px;">`;
+    arenaHTML += (typeof arenaActive !== 'undefined' && arenaActive) ? `<span style="color: #ff0000;">● MATCH IN PROGRESS</span>` : `<span style="color: #00ff00;">● ARENA OPEN</span>`;
+    arenaHTML += `<br>Players in Arena: ${Object.values(players).filter(p => p.area === "arena").length}`;
+    arenaHTML += `</div></div>`;
 
-    // You can either create a new div for this or append it to enemyUI
-    const arenaElement = document.getElementById("arenaUI"); // Make sure this div exists in your HTML
-    if (arenaElement) arenaElement.innerHTML = arenaHTML;
+    arenaElement.innerHTML = arenaHTML;
 }
-
-
-/* ================= GAME LOOP ================= */
-/* ================= GAME LOOP ================= */
-let frameCount = 0; // Global frame tracker
-
+let frameCount = 0;
 function gameLoop() {
     const now = Date.now();
-    frameCount++; // Increment on every frame
+    frameCount++; 
     
-    // 1. SCREEN SHAKE (Visual Processing)
+    // 1. Visual Foundation
     ctx.save();
     if (window.shakeAmount > 0) {
         let sx = (Math.random() - 0.5) * window.shakeAmount;
@@ -3141,16 +3131,14 @@ function gameLoop() {
         if (window.shakeAmount < 0.1) window.shakeAmount = 0;
     }
 
-    // 2. BACKGROUND & UI
     renderScene(); 
     
-    // PERFORMANCE FIX: Only update the DOM every 3rd frame (~20 times/sec)
-    // This significantly reduces Layout Thrashing and CPU usage.
+    // 2. UI Sync (Throttle to 20fps for performance)
     if (frameCount % 3 === 0) {
         updateUI(); 
     }
 
-    // 3. DUNGEON LOGIC (GLOBAL SYSTEM)
+    // 3. World Logic (Always running in background)
     if (dungeonActive) {
         checkDungeonProgress(); 
         checkDungeonFailure();  
@@ -3159,13 +3147,11 @@ function gameLoop() {
         if (anyoneInDungeon) updateDungeonIdleTraining();
     }
 
-    // 3.5 ARENA LOGIC (GLOBAL SYSTEM)
-    // Always check for match completion even if not looking at Arena
-    if (arenaActive) {
+    if (typeof arenaActive !== 'undefined' && arenaActive) {
         checkArenaVictory();
     }
 
-    // 4. DRAW AREA-SPECIFIC ELEMENTS (VIEW ONLY)
+    // 4. Layering: Monsters & Beams
     if (viewArea === "dungeon") {
         drawLootBeams(ctx); 
         if (boss && !boss.dead) drawMonster(ctx, boss);
@@ -3177,14 +3163,12 @@ function gameLoop() {
         });
     }
 
-    // 5. PLAYER PROCESSING
+    // 5. Entity Processing
     Object.values(players).forEach(p => {
-        // LOGIC: Always runs for everyone (Movement, Combat, PvP)
         if (!p.dead) {
-            updatePhysics(p);          
+            updatePhysics(p);           
             updatePlayerStatus(p, now); 
             
-            // Handle PvP specifically if they are in the Arena task
             if (p.activeTask === "pvp") {
                 handlePvPLogic(p, now);
             } else {
@@ -3192,12 +3176,11 @@ function gameLoop() {
             }
         }
 
-        // RENDERING: Only draw players who are in your current view
+        // Render if in view
         if (p.area === viewArea) {
             drawStickman(ctx, p);
             
-            // Visual flair for Arena: Draw Team color under feet if in Teams mode
-            if (viewArea === "arena" && arenaMode === "teams" && p.team) {
+            if (viewArea === "arena" && typeof arenaMode !== 'undefined' && arenaMode === "teams" && p.team) {
                 ctx.fillStyle = p.team === "Red" ? "rgba(255,0,0,0.3)" : "rgba(0,0,255,0.3)";
                 ctx.beginPath();
                 ctx.ellipse(p.x, p.y + 5, 20, 10, 0, 0, Math.PI * 2);
@@ -3206,7 +3189,7 @@ function gameLoop() {
         }
     });
 
-    // 6. WORLD SYSTEMS & OVERLAYS
+    // 6. Global Systems
     updateAreaPlayerCounts();
     updateSystemTicks(now);  
     drawProjectiles(ctx);    
@@ -3214,11 +3197,8 @@ function gameLoop() {
     handleTooltips();        
 
     ctx.restore(); 
-
-    // 7. NEXT FRAME
     requestAnimationFrame(gameLoop);
-}
-/* =================END GAME LOOP ================= */
+}/* =================END GAME LOOP ================= */
 /* =================END GAME LOOP ================= */
 
 
