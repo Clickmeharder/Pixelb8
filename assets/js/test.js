@@ -3030,7 +3030,8 @@ function updateUI() {
     const dungeonBox = document.getElementById("dungeon-stats");
     const dungeonTimerBox = document.getElementById("dungeon-timer-box");
 
-    // --- Dungeon Countdown Timer (Shows in any area if queue is active) ---
+    // --- Dungeon Countdown Timer ---
+    // Rule: Show in ANY area if a queue is active, so people in town see the clock.
     const shouldShowDungeonTimer = (dungeonCountdownInterval && dungeonSecondsLeft > 0);
     if (dungeonTimerBox) {
         if (shouldShowDungeonTimer) {
@@ -3041,14 +3042,16 @@ function updateUI() {
         }
     }
 
-    // --- Dungeon Stats (ONLY in Dungeon Area) ---
+    // --- Dungeon Stats & Party Info ---
+    // Rule: ONLY show the monster/party HP list if the user is actually LOOKING at the dungeon.
     if (dungeonBox) {
         if (viewArea === "dungeon") {
             dungeonBox.style.display = "block";
             const dungeonHTML = buildDungeonContent(); 
-            // Direct injection to avoid syncUI hang-ups
             const inner = document.getElementById("dungeon-content-inner");
-            if (inner) inner.innerHTML = dungeonHTML;
+            if (inner && inner.innerHTML !== dungeonHTML) {
+                inner.innerHTML = dungeonHTML;
+            }
         } else {
             dungeonBox.style.display = "none";
         }
@@ -3058,7 +3061,6 @@ function updateUI() {
     const arenaBox = document.getElementById("arenaUI");
     const arenaTimerBox = document.getElementById("arena-timer-box");
 
-    // --- Arena Timer (Shows if countdown is active) ---
     const shouldShowArenaTimer = (typeof arenaMatchInterval !== 'undefined' && arenaMatchInterval && arenaTimer > 0);
     if (arenaTimerBox) {
         if (shouldShowArenaTimer) {
@@ -3069,7 +3071,6 @@ function updateUI() {
         }
     }
 
-    // --- Arena Rankings (ONLY in Arena Area) ---
     if (arenaBox) {
         if (viewArea === "arena") {
             arenaBox.style.display = "block";
@@ -3079,49 +3080,12 @@ function updateUI() {
         }
     }
 }
-
-function updateArenaUI() {
-    // Only proceed if the box exists and we are in the area
-    const arenaElement = document.getElementById("arenaUI");
-    if (!arenaElement || viewArea !== "arena") return;
-
-    let arenaHTML = `<div style="background: rgba(0,0,0,0.7); padding: 10px; border: 1px solid #ff4444; color: #fff; font-family: monospace;">`;
-    arenaHTML += `<b style="color: #ff4444; font-size: 16px;">🏆 ARENA RANKINGS</b><hr style="border: 0.5px solid #444">`;
-    
-    // Sort players by Rating
-    const sorted = Object.entries(pvpRankings)
-        .sort(([,a], [,b]) => b.rating - a.rating)
-        .slice(0, 5);
-
-    if (sorted.length === 0) {
-        arenaHTML += `<div style="font-size: 12px; color: #888;">No battles fought yet...</div>`;
-    } else {
-        arenaHTML += `<table style="width: 100%; font-size: 12px; text-align: left;">
-            <tr style="color: #aaa;"><th>Name</th><th>W/K</th><th>Rating</th></tr>`;
-        sorted.forEach(([name, stats]) => {
-            arenaHTML += `<tr>
-                <td style="color: #00ffff;">${name.toUpperCase()}</td>
-                <td>${stats.wins}/${stats.kills}</td>
-                <td style="color: #ffcc00;">${stats.rating}</td>
-            </tr>`;
-        });
-        arenaHTML += `</table>`;
-    }
-    
-    arenaHTML += `<hr style="border: 0.5px solid #444">`;
-    arenaHTML += `<div style="font-size: 11px;">`;
-    arenaHTML += (typeof arenaActive !== 'undefined' && arenaActive) ? `<span style="color: #ff0000;">● MATCH IN PROGRESS</span>` : `<span style="color: #00ff00;">● ARENA OPEN</span>`;
-    arenaHTML += `<br>Players in Arena: ${Object.values(players).filter(p => p.area === "arena").length}`;
-    arenaHTML += `</div></div>`;
-
-    arenaElement.innerHTML = arenaHTML;
-}
 let frameCount = 0;
 function gameLoop() {
     const now = Date.now();
     frameCount++; 
     
-    // 1. Visual Foundation
+    // 1. Visual Foundation (Shake & Background)
     ctx.save();
     if (window.shakeAmount > 0) {
         let sx = (Math.random() - 0.5) * window.shakeAmount;
@@ -3133,16 +3097,17 @@ function gameLoop() {
 
     renderScene(); 
     
-    // 2. UI Sync (Throttle to 20fps for performance)
+    // 2. PERFORMANCE: UI Sync (Throttle to ~20fps)
     if (frameCount % 3 === 0) {
         updateUI(); 
     }
 
-    // 3. World Logic (Always running in background)
+    // 3. World Logic (Runs regardless of view)
     if (dungeonActive) {
         checkDungeonProgress(); 
         checkDungeonFailure();  
     } else {
+        // If raid is off, check if anyone is inside doing training
         const anyoneInDungeon = Object.values(players).some(p => p.area === "dungeon");
         if (anyoneInDungeon) updateDungeonIdleTraining();
     }
@@ -3151,7 +3116,7 @@ function gameLoop() {
         checkArenaVictory();
     }
 
-    // 4. Layering: Monsters & Beams
+    // 4. Area-Specific Rendering (Monsters/Beams)
     if (viewArea === "dungeon") {
         drawLootBeams(ctx); 
         if (boss && !boss.dead) drawMonster(ctx, boss);
@@ -3163,8 +3128,9 @@ function gameLoop() {
         });
     }
 
-    // 5. Entity Processing
+    // 5. Player Processing (Loop once for both logic and drawing)
     Object.values(players).forEach(p => {
+        // Logic runs for everyone everywhere
         if (!p.dead) {
             updatePhysics(p);           
             updatePlayerStatus(p, now); 
@@ -3176,10 +3142,11 @@ function gameLoop() {
             }
         }
 
-        // Render if in view
+        // Draw only if in the current view
         if (p.area === viewArea) {
             drawStickman(ctx, p);
             
+            // Team Underglow for Arena
             if (viewArea === "arena" && typeof arenaMode !== 'undefined' && arenaMode === "teams" && p.team) {
                 ctx.fillStyle = p.team === "Red" ? "rgba(255,0,0,0.3)" : "rgba(0,0,255,0.3)";
                 ctx.beginPath();
@@ -3189,7 +3156,7 @@ function gameLoop() {
         }
     });
 
-    // 6. Global Systems
+    // 6. Global Overlays & Ticks
     updateAreaPlayerCounts();
     updateSystemTicks(now);  
     drawProjectiles(ctx);    
@@ -3198,7 +3165,8 @@ function gameLoop() {
 
     ctx.restore(); 
     requestAnimationFrame(gameLoop);
-}/* =================END GAME LOOP ================= */
+}
+/* =================END GAME LOOP ================= */
 /* =================END GAME LOOP ================= */
 
 
