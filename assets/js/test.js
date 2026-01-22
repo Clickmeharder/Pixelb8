@@ -2987,59 +2987,36 @@ function updateSystemTicks(now) {
 	updateBuyerNPC();
 }
 function updateUI() {
-    let uiHTML = "";
-	// --- ARENA COUNTDOWN ---
-    if (arenaMatchInterval && arenaTimer > 0) {
-        uiHTML += `
-            <div style="background: rgba(0,0,50,0.8); padding: 10px; border: 2px solid #00ffff; text-align: center; margin-bottom: 10px; border-radius: 5px;">
-                <b style="color: #00ffff; font-size: 16px;">⚔️ ARENA STARTING: ${arenaTimer}s</b><br>
-                <small style="color: #fff;">Mode: ${arenaQueue.length >= 4 ? 'Teams/FFA' : '1v1'}</small>
-            </div>`;
+    // A. Handle Area Text (Dirty Check)
+    const areaText = "StickmenFall:" + viewArea;
+    if (areaDisplayDiv.textContent !== areaText) {
+        areaDisplayDiv.textContent = areaText;
     }
-    // --- 1. COUNTDOWN SECTION ---
-    if (dungeonCountdownInterval && dungeonSecondsLeft > 0) {
-        uiHTML += `
-            <div style="background: rgba(0,0,0,0.7); padding: 10px; border: 2px solid #ffcc00; text-align: center; margin-bottom: 10px; border-radius: 5px;">
-                <b style="color: #ffcc00; font-size: 16px;">DUNGEON STARTING IN: ${dungeonSecondsLeft}s</b><br>
-                <small style="color: #fff;">Prepare your gear!</small>
-            </div>`;
-    }
-	updateArenaUI();
-    // --- 2. PLAYER STATUS SECTION (Visible in Dungeon) ---
+
+    // B. Handle Dungeon/Enemy UI
+    let enemyContent = "";
     if (viewArea === "dungeon") {
-        uiHTML += `<div style="background: rgba(0,0,0,0.5); padding: 5px; border: 1px solid #00ffff; margin-bottom: 10px;">`;
-        uiHTML += `<b style="color: #00ffff;">PARTY STATUS:</b><br>`;
-        Object.values(players).filter(p => p.area === "dungeon").forEach(p => {
-            const hpPct = Math.floor((p.hp / p.maxHp) * 100);
-            const color = p.dead ? "#ff0000" : (hpPct < 30 ? "#ffaa00" : "#00ff00");
-            uiHTML += `<div style="font-size: 12px; color: ${color};">
-                ${p.name}: ${p.hp}/${p.maxHp} HP [${hpPct}%] ${p.dead ? '💀' : ''}
-            </div>`;
-        });
-        uiHTML += `</div>`;
-    }
-
-    // --- 3. ENEMY & BOSS SECTION ---
-    if (viewArea === "dungeon" && dungeonActive) {
-        uiHTML += `<div style="color: #ff4444; font-weight: bold; border-bottom: 1px solid #555; margin-bottom: 5px;">`;
-        uiHTML += `RAID WAVE: ${dungeonWave} | TIER: ${Math.floor(dungeonWave/5) + 1}`;
-        uiHTML += `</div>`;
-
-        if (boss && !boss.dead) {
-            const bPct = Math.floor((boss.hp / boss.maxHp) * 100);
-            uiHTML += `<b style="color: pixels;">BOSS: ${boss.hp} HP (${bPct}%)</b><br>`;
+        // Build the content string once per frame
+        if (dungeonActive) {
+            enemyContent += `<div class="wave-header">WAVE: ${dungeonWave}</div>`;
+            enemies.forEach((e, i) => {
+                if (!e.dead) {
+                    const pct = Math.floor((e.hp / e.maxHp) * 100);
+                    enemyContent += `<div class="enemy-row">${e.name}: ${pct}%</div>`;
+                }
+            });
         }
-
-        enemies.forEach(e => { 
-            if(!e.dead) {
-                const hpPercent = Math.floor((e.hp / e.maxHp) * 100);
-                uiHTML += `<span style="color: #ddd;">${e.name}:</span> ${e.hp} HP (${hpPercent}%)<br>`; 
-            }
-        });
     }
-	areaDisplayDiv.textContent = "StickmenFall:" + viewArea;
-    const uiElement = document.getElementById("enemyUI");
-    if (uiElement) uiElement.innerHTML = uiHTML;
+    // This only touches the DOM if the wave or enemy HP changed!
+    syncUI("enemy-list-container", enemyContent, "enemyUI", viewArea !== "dungeon");
+
+    // C. Handle Arena UI
+    if (viewArea === "arena") {
+        updateArenaUI(); // Let this function handle arenaUI
+    } else {
+        // Hide it if we aren't there
+        syncUI("arena-ranking-container", "", "arenaUI", true);
+    }
 }
 function updateArenaUI() {
     let arenaHTML = "";
@@ -3081,12 +3058,17 @@ function updateArenaUI() {
     const arenaElement = document.getElementById("arenaUI"); // Make sure this div exists in your HTML
     if (arenaElement) arenaElement.innerHTML = arenaHTML;
 }
+
+
 /* ================= GAME LOOP ================= */
 /* ================= GAME LOOP ================= */
+let frameCount = 0; // Global frame tracker
+
 function gameLoop() {
     const now = Date.now();
+    frameCount++; // Increment on every frame
     
-    // 1. SCREEN SHAKE
+    // 1. SCREEN SHAKE (Visual Processing)
     ctx.save();
     if (window.shakeAmount > 0) {
         let sx = (Math.random() - 0.5) * window.shakeAmount;
@@ -3098,7 +3080,12 @@ function gameLoop() {
 
     // 2. BACKGROUND & UI
     renderScene(); 
-    updateUI();    
+    
+    // PERFORMANCE FIX: Only update the DOM every 3rd frame (~20 times/sec)
+    // This significantly reduces Layout Thrashing and CPU usage.
+    if (frameCount % 3 === 0) {
+        updateUI(); 
+    }
 
     // 3. DUNGEON LOGIC (GLOBAL SYSTEM)
     if (dungeonActive) {
@@ -3131,7 +3118,7 @@ function gameLoop() {
     Object.values(players).forEach(p => {
         // LOGIC: Always runs for everyone (Movement, Combat, PvP)
         if (!p.dead) {
-            updatePhysics(p);         
+            updatePhysics(p);          
             updatePlayerStatus(p, now); 
             
             // Handle PvP specifically if they are in the Arena task
@@ -3168,8 +3155,8 @@ function gameLoop() {
     // 7. NEXT FRAME
     requestAnimationFrame(gameLoop);
 }
-/* ================= GAME LOOP ================= */
-/* ================= GAME LOOP ================= */
+/* =================END GAME LOOP ================= */
+/* =================END GAME LOOP ================= */
 
 
 /* ======================================================= */
@@ -4435,5 +4422,36 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     processGameCommand(user, msg, flags, extra);
 };
 
+// A storage cache for our UI elements so we don't look them up every frame
+const uiCache = {};
+function syncUI(id, content, parentId, isHidden = false) {
+    // 1. Get or Create
+    if (!uiCache[id]) {
+        let el = document.getElementById(id);
+        if (!el) {
+            el = document.createElement("div");
+            el.id = id;
+            const parent = document.getElementById(parentId);
+            if (parent) parent.appendChild(el);
+        }
+        uiCache[id] = el;
+    }
 
+    const element = uiCache[id];
+
+    // 2. Visibility
+    if (isHidden) {
+        if (!element.classList.contains("hidden")) element.classList.add("hidden");
+        return; 
+    }
+    element.classList.remove("hidden");
+
+    // 3. Smart Update (Only touch DOM if content changed)
+    if (element.innerHTML !== content) {
+        element.innerHTML = content;
+    }
+}
+
+//==========================
+//RUNNING ON LOAD
 gameLoop();
