@@ -1024,17 +1024,14 @@
 		<div id="idleActionsBox"></div>
 		<div id="areaUI">
 			<div id="enemyUI">
-				<div id="dungeon-stats">
+				<div id="dungeon-timer-box" style="display: none; position: absolute; top: 50px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px; border: 2px solid #00ffff; z-index: 100;">
+					<span id="dungeon-timer-val">DUNGEON START: 60s</span>
+				</div>
+
+				<div id="dungeon-stats" style="display: none;">
 					<div id="dungeon-content-inner"></div>
 				</div>
-<!-- 				<div id="dungeon-timer-box" class="hidden timer-yellow">
-					<b id="dungeon-timer-val"></b>
-				</div>
-				<div id="dungeon-stats" class="hidden stats-box">
-					<div id="party-list"></div>
-					<div id="wave-info" class="wave-red"></div>
-					<div id="enemy-list"></div>
-				</div> -->
+
 			</div>
 			<div id="arenaUI">
 				<div id="arena-timer-box" class="hidden timer-blue">

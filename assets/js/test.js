@@ -3026,24 +3026,24 @@ function updateUI() {
     const areaText = "StickmenFall:" + viewArea;
     if (areaDisplayDiv.textContent !== areaText) areaDisplayDiv.textContent = areaText;
 
-    // 2. DUNGEON UI LOGIC
+	// 2. DUNGEON UI LOGIC
     const dungeonBox = document.getElementById("dungeon-stats");
     const dungeonTimerBox = document.getElementById("dungeon-timer-box");
 
-    // --- Dungeon Countdown Timer ---
-    // Rule: Show in ANY area if a queue is active, so people in town see the clock.
-    const shouldShowDungeonTimer = (dungeonCountdownInterval && dungeonSecondsLeft > 0);
+    // Fix: Show timer if there is time on the clock, regardless of interval ID
+    const shouldShowDungeonTimer = (dungeonSecondsLeft > 0);
+    
     if (dungeonTimerBox) {
         if (shouldShowDungeonTimer) {
             dungeonTimerBox.style.display = "block";
-            updateText("dungeon-timer-val", `DUNGEON START: ${dungeonSecondsLeft}s`);
+            // Using direct selection to ensure it works
+            const timerVal = document.getElementById("dungeon-timer-val");
+            if (timerVal) timerVal.textContent = `DUNGEON START: ${dungeonSecondsLeft}s`;
         } else {
             dungeonTimerBox.style.display = "none";
         }
     }
 
-    // --- Dungeon Stats & Party Info ---
-    // Rule: ONLY show the monster/party HP list if the user is actually LOOKING at the dungeon.
     if (dungeonBox) {
         if (viewArea === "dungeon") {
             dungeonBox.style.display = "block";
