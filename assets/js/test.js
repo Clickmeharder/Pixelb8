@@ -3529,12 +3529,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	viewAreaSelector.addEventListener("change", (e) => {
 		const newArea = e.target.value;
 		viewArea = newArea;
-		
-		// Update the local player's data immediately
-		if (players[localPlayerName.toLowerCase()]) {
-			players[localPlayerName.toLowerCase()].area = newArea;
-		}
-		
 		// Force the dropdown text to update right now
 		updateAreaPlayerCounts(); 
 	});

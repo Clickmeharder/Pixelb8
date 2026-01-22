@@ -135,7 +135,12 @@ function removeBackgroundImage() {
 //toggleElement("myBox", "slide"); // Uses slide animation
 //<button onclick="toggleElement('myBox')">Toggle Box</button>
 //<button onclick="toggleElement('myBox', 'slide')">Toggle Slide Box</button>
-
+function updateText(id, val) {
+    const el = document.getElementById(id);
+    if (el && el.textContent !== val) {
+        el.textContent = val;
+    }
+}
 function toggleElement(elementId, animationType = "fade") {
   const element = document.getElementById(elementId);
   if (!element) return false;  // Return false if element doesn't exist
