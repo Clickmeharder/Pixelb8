@@ -3066,10 +3066,18 @@ function updateUI() {
         updateText("arena-timer-val", `⚔️ ARENA START: ${arenaTimer}s`);
     }
 
-    // --- Arena Leaderboard ---
-    if (viewArea === "arena") {
-        updateArenaUI(); // Your ranking table function
-    }
+	// 3. ARENA UI LOGIC
+	const arenaBox = document.getElementById("arenaUI");
+	if (arenaBox) {
+		if (viewArea === "arena") {
+			// Only show and run the update logic if we are actually there
+			arenaBox.style.display = "block"; 
+			updateArenaUI(); 
+		} else {
+			// If we aren't in the arena, kill the UI immediately
+			arenaBox.style.display = "none";
+		}
+	}
 }
 
 
