@@ -397,7 +397,7 @@ function getPlayer(name, color) {
     updateCombatLevel(players[lowName]);
     
     // Set HP from persistence or 25% floor
-    players[lowName].hp = loadedStats.currentHp || Math.floor(players[lowName].maxHp * 0.25);
+    players[lowName].hp = loadedStats.currentHp || Math.floor(players[lowName].maxHp);
 
     return players[lowName];
 }
@@ -678,9 +678,10 @@ function updateCombatLevel(p) {
     p.stats.maxhp = newMax; 
 
     // 4. HP SYNC & SAFETY (The New Part)
-    // If the player somehow has no HP (new player), set to 25% floor
+    // If the player somehow has no HP (new player), set to 75% floor
     if (p.hp === undefined || p.hp === null) {
-        p.hp = Math.floor(newMax * 0.25);
+        //p.hp = Math.floor(newMax * 0.85);
+		p.hp = newMax;
     }
 
     // Ensure current HP never exceeds the new Max HP (important for level ups)
@@ -3440,7 +3441,7 @@ function renderStatRow(name, level, xp, color) {
 function renderAchievements(playerObj) {
     const achGrid = document.getElementById('achievements-grid');
     const achItems = Object.keys(ITEM_DB).filter(key => ITEM_DB[key].sources?.includes("achievement"));
-    
+    achGrid.innerHTML = "";
     achItems.forEach(achName => {
         const hasIt = playerObj.stats.inventory.includes(achName);
         const data = ITEM_DB[achName];
