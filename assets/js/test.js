@@ -3080,6 +3080,42 @@ function updateUI() {
         }
     }
 }
+function updateArenaUI() {
+    // Only proceed if the box exists and we are in the area
+    const arenaElement = document.getElementById("arenaUI");
+    if (!arenaElement || viewArea !== "arena") return;
+
+    let arenaHTML = `<div style="background: rgba(0,0,0,0.7); padding: 10px; border: 1px solid #ff4444; color: #fff; font-family: monospace;">`;
+    arenaHTML += `<b style="color: #ff4444; font-size: 16px;">🏆 ARENA RANKINGS</b><hr style="border: 0.5px solid #444">`;
+    
+    // Sort players by Rating
+    const sorted = Object.entries(pvpRankings)
+        .sort(([,a], [,b]) => b.rating - a.rating)
+        .slice(0, 5);
+
+    if (sorted.length === 0) {
+        arenaHTML += `<div style="font-size: 12px; color: #888;">No battles fought yet...</div>`;
+    } else {
+        arenaHTML += `<table style="width: 100%; font-size: 12px; text-align: left;">
+            <tr style="color: #aaa;"><th>Name</th><th>W/K</th><th>Rating</th></tr>`;
+        sorted.forEach(([name, stats]) => {
+            arenaHTML += `<tr>
+                <td style="color: #00ffff;">${name.toUpperCase()}</td>
+                <td>${stats.wins}/${stats.kills}</td>
+                <td style="color: #ffcc00;">${stats.rating}</td>
+            </tr>`;
+        });
+        arenaHTML += `</table>`;
+    }
+    
+    arenaHTML += `<hr style="border: 0.5px solid #444">`;
+    arenaHTML += `<div style="font-size: 11px;">`;
+    arenaHTML += (typeof arenaActive !== 'undefined' && arenaActive) ? `<span style="color: #ff0000;">● MATCH IN PROGRESS</span>` : `<span style="color: #00ff00;">● ARENA OPEN</span>`;
+    arenaHTML += `<br>Players in Arena: ${Object.values(players).filter(p => p.area === "arena").length}`;
+    arenaHTML += `</div></div>`;
+
+    arenaElement.innerHTML = arenaHTML;
+}
 let frameCount = 0;
 function gameLoop() {
     const now = Date.now();
@@ -3166,6 +3202,8 @@ function gameLoop() {
     ctx.restore(); 
     requestAnimationFrame(gameLoop);
 }
+
+
 /* =================END GAME LOOP ================= */
 /* =================END GAME LOOP ================= */
 
