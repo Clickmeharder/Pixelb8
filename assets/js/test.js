@@ -3525,17 +3525,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-
-    const newArea = e.target.value;
-    viewArea = newArea;
-    
-    // Find the local player and move them internally
-    const me = players[localPlayerName.toLowerCase()];
-    if (me) {
-        me.area = newArea; 
-        updateAreaPlayerCounts(); // Force recount immediately
-    }
-
+	const viewAreaSelector = document.getElementById("view-area-selector");
+	viewAreaSelector.addEventListener("change", (e) => {
+		const newArea = e.target.value;
+		viewArea = newArea;
+		
+		// Update the local player's data immediately
+		if (players[localPlayerName.toLowerCase()]) {
+			players[localPlayerName.toLowerCase()].area = newArea;
+		}
+		
+		// Force the dropdown text to update right now
+		updateAreaPlayerCounts(); 
+	});
 
     // 3. Inventory Filters & Sort
     const filterContainer = document.getElementById("inventory-filters");
