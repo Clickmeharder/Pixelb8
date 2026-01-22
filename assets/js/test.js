@@ -307,11 +307,17 @@ function saveStats(p) {
         }
     }
 } */
-
-
 function checkAchievements(p) {
     const s = p.stats;
     let unlockedAny = false;
+
+    // Create a list of everything the player currently owns/wearing
+    const ownedItems = [
+        ...s.inventory,
+        s.equippedWeapon, s.equippedArmor, s.equippedHelmet, 
+        s.equippedBoots, s.equippedPants, s.equippedCape, 
+        s.equippedGloves
+    ];
 
     const requirements = {
         // Dungeon Achievements
@@ -344,11 +350,12 @@ function checkAchievements(p) {
         "Skilled Healer Cape":   () => s.healLevel >= 50,
         "Skilled Fishing Cape":  () => s.fishLevel >= 50,
         "Skilled Swimmer Cape":  () => s.swimLevel >= 50,
-		"Uber Cape":  () => s.combatLevel >= 99,
+		"Uber Cape":  () => s.combatLevel >= 99
     };
 
     Object.keys(requirements).forEach(itemName => {
-        if (requirements[itemName]() && !s.inventory.includes(itemName)) {
+        // Fix: Check if they ALREADY own it anywhere (inv or body)
+        if (requirements[itemName]() && !ownedItems.includes(itemName)) {
             s.inventory.push(itemName);
             unlockedAny = true;
             spawnFloater(p, `🏆 UNLOCKED: ${itemName}`, "#ffcc00");
@@ -359,6 +366,7 @@ function checkAchievements(p) {
 
     return unlockedAny;
 }
+
 /* ================= PLAYER SETUP ================= */
 function getPlayer(name, color) {
     const lowName = name.toLowerCase();
@@ -682,9 +690,7 @@ function updateCombatLevel(p) {
 
     // Push the live HP into the stats object so saveStats() writes it to LocalStorage
     p.stats.currentHp = p.hp;
-
-    // 5. Final Save
-    saveStats(p);
+	saveStats(p);
 }
 
 //===================================================================
@@ -844,7 +850,7 @@ function performAttack(p) {
                 updateCombatLevel(p);
             }
             
-            saveStats(p);
+
         }
     }
 }
@@ -1222,8 +1228,8 @@ function performFish(p) {
         p.stats.fishLevel++;
         p.stats.fishXP = 0;
         systemMessage(`[LEVEL UP] ${p.name} Fisher Lvl ${p.stats.fishLevel}!`);
+		updateCombatLevel(p);
     }
-    saveStats(p);
 }
 function performSwim(p) {
     if (p.area !== "pond" || p.dead) return;
@@ -1271,9 +1277,10 @@ function performSwim(p) {
         
         // Fixed the level-up floater here too!
         spawnFloater(p, `SWIM UP! (Lv ${p.stats.swimLevel})`, "#FFD700");
+		updateCombatLevel(p);
     }
-    updateCombatLevel(p);
-    saveStats(p);
+
+
 }
 //------------------------------------------------------------
 //xp gained over time skills
@@ -1298,7 +1305,7 @@ function handleDancing(p, now) {
             if (p.stats.danceLevel === 10) systemMessage(`${p.name} unlocked Style 3: The Lean!`);
             if (p.stats.danceLevel === 20) systemMessage(`${p.name} unlocked Style 4: The Groupy!`);
             
-            saveStats(p);
+            updateCombatLevel(p);
         }
     }
 }
@@ -1317,7 +1324,7 @@ function handleLurking(p, now) {
             
             // CLEAN CALL: Dark gray for lurking
             spawnFloater(p, `LURK LEVEL ${p.stats.lurkLevel}!`, "#555555");
-            saveStats(p);
+            updateCombatLevel(p);
         }
     }
 }
@@ -2943,8 +2950,10 @@ function updateAreaPlayerCounts() {
 const systemTimers = {
     lastGlobalTick: Date.now(),
     lastEnemyTick: Date.now(),
+	lastAutoSave: Date.now(),
     globalInterval: 3000, // 3 seconds (Fishing, etc.)
     enemyInterval: 4000   // 4 seconds (Enemy Attacks)
+    saveInterval: 15000 // 30 seconds
 };
 function updateSystemTicks(now) {
     // 3s Global Tick
@@ -2968,6 +2977,11 @@ function updateSystemTicks(now) {
     if (now - systemTimers.lastEnemyTick > systemTimers.enemyInterval) {
         if (dungeonActive) handleEnemyAttacks();
         systemTimers.lastEnemyTick = now;
+    }
+	if (now - systemTimers.lastAutoSave > systemTimers.saveInterval) {
+        Object.values(players).forEach(p => saveStats(p));
+        systemTimers.lastAutoSave = now;
+        console.log("Game Autosaved");
     }
 	updateBuyerNPC();
 }
