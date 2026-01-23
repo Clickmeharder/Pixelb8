@@ -302,6 +302,7 @@ const ITEM_DB = {
 	"Tier 8 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 1750, color: "gold" },
 	"Tier 9 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 2000, color: "gold" },
 	"Tier 10 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 2500, color: "gold" },
+	"Achievement Trophy": { type: "material", sources: "achievement", tier: 1, rarity: 1, value: 500, color: "gold", description: "A mark of your progress." },
 	
 // hair
 	"hair1": { type: "hair", style: "mohawk",      sources:"dungeon",  tier: 9, rarity: 1, color: "#ff69b4" },// pink mohawk

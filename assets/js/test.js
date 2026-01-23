@@ -197,7 +197,7 @@ function saveStats(p) {
     }
 }
 
-function checkAchievements(p) {
+/* function checkAchievements(p) {
     const s = p.stats;
     let unlockedAny = false;
 
@@ -224,6 +224,28 @@ function checkAchievements(p) {
         "Tier 99 Cape":     () => s.dungeon.highestTier >= 99,
         //"Viking Helmet":    () => s.dungeon.kills >= 1000,
 
+
+    };
+
+    Object.keys(requirements).forEach(itemName => {
+        // Fix: Check if they ALREADY own it anywhere (inv or body)
+        if (requirements[itemName]() && !ownedItems.includes(itemName)) {
+            s.inventory.push(itemName);
+            unlockedAny = true;
+            spawnFloater(p, `🏆 UNLOCKED: ${itemName}`, "#ffcc00");
+            systemMessage(`🎊 ACHIEVEMENT: ${p.name} earned the ${itemName}!`);
+            spawnLootBeam(p, 13);
+        }
+    });
+
+    return unlockedAny;
+} */
+function checkAchievements(p) {
+    const s = p.stats;
+    let unlockedAny = false;
+
+    // 1. Unique Item Achievements (Stay as they are)
+    const uniqueRewards = {
         // Pond Achievements
         "Fishing Rod":      () => s.pond.visited === true,
         //"Master Angler":    () => s.pond.fishCaught >= 500,
@@ -253,20 +275,40 @@ function checkAchievements(p) {
 		"Uber Cape":  () => s.combatLevel >= 99
     };
 
-    Object.keys(requirements).forEach(itemName => {
-        // Fix: Check if they ALREADY own it anywhere (inv or body)
-        if (requirements[itemName]() && !ownedItems.includes(itemName)) {
+    // Check Uniques
+    Object.keys(uniqueRewards).forEach(itemName => {
+        const owned = s.inventory.includes(itemName) || 
+                     [s.equippedWeapon, s.equippedArmor, s.equippedHelmet, s.equippedBoots, s.equippedPants, s.equippedCape, s.equippedGloves].includes(itemName);
+
+        if (uniqueRewards[itemName]() && !owned) {
             s.inventory.push(itemName);
             unlockedAny = true;
-            spawnFloater(p, `🏆 UNLOCKED: ${itemName}`, "#ffcc00");
-            systemMessage(`🎊 ACHIEVEMENT: ${p.name} earned the ${itemName}!`);
-            spawnLootBeam(p, 13);
+            announceAchievement(p, itemName);
         }
     });
+
+    // 2. Generic Tier Achievements (Consolidated)
+    // We store completed tiers in an array: s.dungeon.completedTiers = [1, 2, 3...]
+    if (!s.dungeon.completedTiers) s.dungeon.completedTiers = [];
+
+    for (let t = 1; t <= 10; t++) {
+        if (s.dungeon.highestTier >= t && !s.dungeon.completedTiers.includes(t)) {
+            s.dungeon.completedTiers.push(t);
+            s.inventory.push("Achievement Trophy"); // Give the generic item
+            unlockedAny = true;
+            announceAchievement(p, `Tier ${t} Mastery`);
+        }
+    }
 
     return unlockedAny;
 }
 
+// Helper to keep code clean
+function announceAchievement(p, label) {
+    spawnFloater(p, `🏆 UNLOCKED: ${label}`, "#ffcc00");
+    systemMessage(`🎊 ACHIEVEMENT: ${p.name} earned ${label}!`);
+    spawnLootBeam(p, 13);
+}
 /* ================= PLAYER SETUP ================= */
 function getPlayer(name, color) {
     const lowName = name.toLowerCase();
@@ -1489,6 +1531,7 @@ function updatePvPRank(name, kill, win) {
 //============================================================
 //======================= DUNGEON AREA =======================
 // --- DUNGEON variables -------------------------------------
+// --- DUNGEON variables -------------------------------------
 let enemies = [];
 let boss = null;
 
@@ -1496,10 +1539,12 @@ let dungeonQueue = [];
 let dungeonTimer = null;
 let dungeonActive = false;
 let dungeonWave = 1;
+let dungeonTier = 1; 
 let dungeonSecondsLeft = 0;
-let dungeonCountdownInterval = null; // To track the interval
-let dungeonEmptyTimer = null; // To track the 60s shutdown
+let dungeonCountdownInterval = null; 
+let dungeonEmptyTimer = null; 
 let dungeonEmptySeconds = 0;
+
 const dungeonUIConfig = {
     header: "PARTY STATUS",
     labels: {
@@ -1507,13 +1552,21 @@ const dungeonUIConfig = {
         timer: (s) => `DUNGEON: ${s}s`,
         boss: (hp) => `BOSS: ${hp}%`
     },
-    // Logic to determine which CSS class to use based on HP
     getStatusClass: (pct, isDead) => {
         if (isDead) return "hp-dead";
         if (pct < 30) return "hp-danger";
         return "hp-healthy";
     }
 };
+
+/**
+ * SINGLE SOURCE OF TRUTH: Tier Calculation
+ * Wave 1-5 = Tier 1, 6-10 = Tier 2, etc.
+ */
+function getTierFromWave(wave) {
+    return Math.floor((wave - 1) / 5) + 1;
+}
+
 //-----------------------------------------------------------
 /* --- DUNGEON LOOT RARITY MAP (Formula: roll^4 * 14) ---
    Normal Mobs follow the Standard Map. Bosses get a +3 Rarity Floor.
@@ -1526,17 +1579,15 @@ const dungeonUIConfig = {
    [ BOSS MOB CHANCES ] (Includes +3 Rarity Bonus)
    RARITY 3-8  (Uncommon/Epic):   ~80% chance  --> [Harder to get "trash"]
    RARITY 9-12 (Legendary):       ~15% chance 
-   RARITY 13   (Godly):           ~5%  chance  --> [Max Rarity capped at 13]
+   RARITY 13   (Godly):            ~5%  chance  --> [Max Rarity capped at 13]
 
    TIER GATING:
    Items are locked by (Wave - 1 / 5) + 1. 
-   Wave 1-5:   Tier 1  |  Wave 6-10:  Tier 2
-   Wave 11-15: Tier 3  |  Wave 16-20: Tier 4 ... and so on.
    
    GEAR STEALING:
-   Independent 10% chance to steal EACH item a mob is wearing before 
-   the rarity roll even happens.
+   Independent 10% chance to steal EACH item a mob is wearing.
 */
+
 //-- MAIN DUNGEON STUFF --
 function joinDungeonQueue(p) {
     if (p.dead) return;
@@ -1554,10 +1605,8 @@ function joinDungeonQueue(p) {
         dungeonCountdownInterval = setInterval(() => {
             dungeonSecondsLeft--;
 
-            // --- 30 SECONDS: TELEPORT & FALL ---
             if (dungeonSecondsLeft === 30) {
                 viewArea = "dungeon";
-                
                 const selector = document.getElementById("view-area-selector");
                 if (selector) selector.value = "dungeon";
                 
@@ -1568,24 +1617,20 @@ function joinDungeonQueue(p) {
                     let player = players[name.toLowerCase()];
                     if (player && !player.dead) {
                         player.area = "dungeon";
-                        player.y = -200;                // Start sky-high
-                        // Drop them on the left half initially
+                        player.y = -200; 
                         player.x = 50 + Math.random() * 250; 
-                        player.targetY = 540;           // Floor
-                        player.targetX = null;          // Wait to land before walking
+                        player.targetY = 540; 
+                        player.targetX = null; 
                         player.activeTask = "attacking"; 
                     }
                 });
 
-                // --- TACTICAL REPOSITIONING ---
-                // Wait 1.5 seconds for them to fall/land, then organize ranks
                 setTimeout(() => {
                     organizeDungeonRanks();
                     systemMessage("System: Get Ready!");
                 }, 1500);
             }
 
-            // --- 0 SECONDS: START COMBAT ---
             if (dungeonSecondsLeft <= 0) {
                 clearInterval(dungeonCountdownInterval);
                 dungeonCountdownInterval = null;
@@ -1597,17 +1642,14 @@ function joinDungeonQueue(p) {
 
 function organizeDungeonRanks() {
     Object.values(players).forEach(p => {
-        // Only move players who are actually in the dungeon and alive
         if (p.area !== "dungeon" || p.dead) return;
 
         const weapon = ITEM_DB[p.stats.equippedWeapon] || { type: "melee" };
         const isRanged = (weapon.type === "bow" || weapon.type === "staff");
 
         if (isRanged) {
-            // RANGED: Backline (Far Left)
             p.targetX = 40 + Math.random() * 60; 
         } else {
-            // MELEE: Frontline (Shield Wall position)
             p.targetX = 160 + Math.random() * 90;
         }
     });
@@ -1616,30 +1658,39 @@ function organizeDungeonRanks() {
 function startDungeon() {
     dungeonActive = true;
     dungeonWave = 1; 
+    dungeonTier = getTierFromWave(dungeonWave);
     
-    areaDisplayDiv.textContent = "StickmenFall:Dungeon" + dungeonWave;
+    areaDisplayDiv.textContent = "StickmenFall: Dungeon Wave " + dungeonWave;
     systemMessage("The Dungeon Gates have opened! The monsters are here!");
 
     dungeonQueue = []; 
     spawnWave();
 }
+
 function spawnWave() {
     enemies = [];
-    // Count live players in the dungeon to scale difficulty
     const partySize = Object.values(players).filter(p => p.area === "dungeon" && !p.dead).length || 1;
-    
     const isBossWave = (dungeonWave % 5 === 0);
     
-    // Scale wave size: Base 2 + (1 per 2 waves) + (1 per extra player)
+    // Sync global tier with current wave
+    dungeonTier = getTierFromWave(dungeonWave);
+
+    // Update Player Stats and check achievements
+    Object.values(players).forEach(p => {
+        if (p.area === "dungeon" && !p.dead) {
+            if (dungeonTier > (p.stats.dungeon.highestTier || 0)) {
+                p.stats.dungeon.highestTier = dungeonTier;
+                if (typeof checkAchievements === "function") checkAchievements(p); 
+            }
+        }
+    });
+
     const waveSize = Math.floor(2 + (dungeonWave / 2) + (partySize - 1));
-	
     const types = ["Slime", "StickmanHunter", "Grumble", "VoidWalker"];
 
     for (let i = 0; i < waveSize; i++) {
         let type = types[Math.floor(Math.random() * types.length)];
         let isStickman = (type === "StickmanHunter" || type === "VoidWalker");
-        const currentTier = Math.floor((dungeonWave - 1) / 5) + 1;
-        // HP SCALING: Scaled by Wave AND Party Size
         let enemyHp = (40 + (dungeonWave * 20)) * (1 + (partySize * 0.2));
 
         enemies.push({ 
@@ -1647,18 +1698,17 @@ function spawnWave() {
             area: "dungeon",
             hp: enemyHp, 
             maxHp: enemyHp, 
-            x: 500 + (i * 60), // Tightened spacing
+            x: 500 + (i * 60),
             y: 540, 
             dead: false,
             isEnemy: true,
             isStickman: isStickman,
             stats: { lurkLevel: 0 },
-            equipped: isStickman ? generateRandomLoadout(currentTier) : {}
+            equipped: isStickman ? generateRandomLoadout(dungeonTier) : {}
         });
     }
 
     if (isBossWave) {
-        // Boss HP scales heavily with party size
         let bossHp = (400 + (dungeonWave * 100)) * partySize;
         boss = {
             name: "DUNGEON OVERLORD",
@@ -1677,31 +1727,27 @@ function spawnWave() {
         boss = null;
     }
 }
+
 function checkDungeonProgress() {
-	if (!dungeonActive) return;
+    if (!dungeonActive) return;
     let aliveEnemies = enemies.filter(e => !e.dead).length;
     if (aliveEnemies === 0 && (!boss || boss.dead)) {
-        dungeonWave++; spawnWave();
+        dungeonWave++; 
+        spawnWave();
     }
 }
+
 function checkDungeonFailure() {
     if (!dungeonActive) return;
-
-    // Check if there are ANY players who are both IN the dungeon AND ALIVE
     const winners = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
     
     if (winners.length === 0) {
-        // The dungeon is full of corpses or empty
         if (!dungeonEmptyTimer) {
-            console.log("Dungeon empty/dead. Starting 60s shutdown...");
             dungeonEmptySeconds = 60;
-            systemMessage("⚠️ ALL HEROES HAVE FALLEN! Dungeon closing in 60s unless someone respawns and returns!");
+            systemMessage("⚠️ ALL HEROES HAVE FALLEN! Dungeon closing in 60s!");
 
-            // Use window.dungeonEmptyTimer to ensure it's globally accessible
             dungeonEmptyTimer = setInterval(() => {
                 dungeonEmptySeconds--;
-
-                // Optional: Sound an alarm or screen flash here
                 if (dungeonEmptySeconds % 10 === 0 && dungeonEmptySeconds > 0) {
                     systemMessage(`⚠️ DUNGEON COLLAPSE: ${dungeonEmptySeconds}s remaining!`);
                 }
@@ -1713,16 +1759,13 @@ function checkDungeonFailure() {
                 }
             }, 1000);
         }
-    } else {
-        // Someone is alive in there!
-        if (dungeonEmptyTimer) {
-            console.log("Hero detected. Aborting shutdown.");
-            systemMessage("🛡️ A hero is standing! Dungeon collapse aborted.");
-            clearInterval(dungeonEmptyTimer);
-            dungeonEmptyTimer = null;
-        }
+    } else if (dungeonEmptyTimer) {
+        systemMessage("🛡️ A hero is standing! Dungeon collapse aborted.");
+        clearInterval(dungeonEmptyTimer);
+        dungeonEmptyTimer = null;
     }
 }
+
 function closeDungeon(reason) {
     dungeonActive = false;
     enemies = [];
@@ -1733,47 +1776,37 @@ function closeDungeon(reason) {
         dungeonEmptyTimer = null;
     }
 
-    systemMessage(reason === "FAILURE" ? "❌ DUNGEON FAILED: The darkness has reclaimed the halls." : "✅ DUNGEON CLEARED!");
+    systemMessage(reason === "FAILURE" ? "❌ DUNGEON FAILED!" : "✅ DUNGEON CLEARED!");
 
-    // Kick everyone back to town
     Object.values(players).forEach(p => {
         if (p.area === "dungeon") {
             p.area = "town";
-            p.x = 400;
-            p.y = 450;
+            p.x = 400; p.y = 450;
             p.activeTask = "none";
         }
     });
 
-    // Reset UI
     viewArea = "town";
-    
     const selector = document.getElementById("view-area-selector");
     if (selector) selector.value = "town";
 }
-// enemy logic
+
 function handleEnemyAttacks() {
     let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
     if (dwellers.length === 0) return;
     
-    const partySize = dwellers.length;
-    const partyScaling = 1 + (partySize - 1) * 0.1;
-
+    const partyScaling = 1 + (dwellers.length - 1) * 0.1;
     let allAttackers = [...enemies];
     if (boss && !boss.dead) allAttackers.push(boss);
 
     allAttackers.forEach(e => {
         if (e.dead) return;
 
-        // 1. Pick a target
         let target = dwellers[Math.floor(Math.random() * dwellers.length)];
-        
-        // 2. Base Damage Calculation
         let dmg = (3 + Math.floor(dungeonWave * 1.5)) * partyScaling;
         if (e.isTrainingMob) dmg = 1 + (Math.random() * 2);
         if (e.isBoss) dmg *= 2.5;
 
-        // 3. VISUAL PROJECTILES (For Ranged Enemies)
         if (e.equipped && e.equipped.weapon) {
             const weaponData = ITEM_DB[e.equipped.weapon];
             if (weaponData) {
@@ -1785,28 +1818,21 @@ function handleEnemyAttacks() {
             }
         }
 
-        // 4. Handle Boss Multi-Attack
-        if (e.isBoss && partySize > 3) {
-            // Boss hits two targets
+        if (e.isBoss && dwellers.length > 3) {
             applyDamage(target, Math.floor(dmg));
             let secondTarget = dwellers[Math.floor(Math.random() * dwellers.length)];
             applyDamage(secondTarget, Math.floor(dmg));
-            // Visual for second hit
             spawnProjectile(e.x, e.y - 40, secondTarget.x, secondTarget.y - 15, "#ff0000", "magic", "dungeon");
         } else {
-            // Standard damage application
             applyDamage(target, Math.floor(dmg)); 
         }
     });
 }
-/*------------------------------------------------------------*/
+
 function getBestAvailableTier(type, desiredTier) {
     const allItemsOfType = Object.values(ITEM_DB).filter(i => i.type === type);
     if (allItemsOfType.length === 0) return [];
-
-    // Find the highest tier actually existing in the DB for this type
     const maxExistingTier = Math.max(...allItemsOfType.map(i => i.tier || 1));
-    // Use the desired tier, but cap it at the max available
     const targetTier = Math.min(desiredTier, maxExistingTier);
 
     return Object.keys(ITEM_DB).filter(key => {
@@ -1814,8 +1840,8 @@ function getBestAvailableTier(type, desiredTier) {
         return item.type === type && item.tier === targetTier;
     });
 }
+
 function generateRandomLoadout(tier) {
-    // Collect ALL weapon categories into one pool
     const weaponPool = Object.keys(ITEM_DB).filter(key => {
         const i = ITEM_DB[key];
         const isWeaponType = (i.type === "weapon" || i.type === "bow" || i.type === "staff");
@@ -1838,9 +1864,9 @@ function generateRandomLoadout(tier) {
         pants:  Math.random() < 0.7 ? pick(legPool) : null
     };
 }
-// Loot Helper to keep performAttack clean
+
 function handleLoot(p, target) {
-    const currentTier = Math.floor((dungeonWave - 1) / 5) + 1;
+    const currentTier = getTierFromWave(dungeonWave);
     let lootFound = [];
 
     if (target.isTrainingMob) {
@@ -1850,20 +1876,17 @@ function handleLoot(p, target) {
         return;
     }
 
-    // 1. GEAR STEALING (Only items from the mob's back)
     if (target.equipped) {
         Object.values(target.equipped).forEach(itemName => {
             if (itemName && Math.random() < 0.10) lootFound.push(itemName);
         });
     }
 
-    // 2. TIERED RARITY ROLL
     if (lootFound.length === 0) {
         let roll = Math.random();
         let selectedRarity = Math.floor(Math.pow(roll, 4) * 14); 
         if (target.isBoss) selectedRarity = Math.min(13, selectedRarity + 3);
 
-        // NEW: Filter by Source "dungeon"
         let possibleLoot = Object.keys(ITEM_DB).filter(key => {
             const item = ITEM_DB[key];
             return item.sources && item.sources.includes("dungeon") && 
@@ -1871,7 +1894,6 @@ function handleLoot(p, target) {
                    item.rarity == selectedRarity;
         });
 
-        // Fallback (Still respecting dungeon source)
         if (possibleLoot.length === 0) {
             possibleLoot = Object.keys(ITEM_DB).filter(key => {
                 const item = ITEM_DB[key];
@@ -1886,7 +1908,6 @@ function handleLoot(p, target) {
         }
     }
 
-    // 3. APPLY LOOT (Existing logic...)
     lootFound.forEach(finalItem => {
         if (!p.stats.inventory.includes(finalItem)) {
             p.stats.inventory.push(finalItem);
@@ -1904,18 +1925,15 @@ function handleLoot(p, target) {
     p.stats.pixels += (10 * currentTier);
     saveStats(p);
 }
+
 let lootBeams = [];
-
 function spawnLootBeam(p, rarity) {
-    // Only show beams for rarity 8 and above
     if (rarity < 8) return;
-
     const hue = Math.min(300, rarity * 25);
     lootBeams.push({
-        x: p.x,
-        y: p.y + 20, // Base of the player
+        x: p.x, y: p.y + 20,
         alpha: 1.0,
-        color: `hsla(${hue}, 100%, 50%, `, // We leave the alpha open
+        color: `hsla(${hue}, 100%, 50%, `,
         width: 10 + (rarity * 2)
     });
 }
@@ -1923,50 +1941,31 @@ function spawnLootBeam(p, rarity) {
 function drawLootBeams(ctx) {
     for (let i = lootBeams.length - 1; i >= 0; i--) {
         let b = lootBeams[i];
-        
-        // Draw the main vertical beam
         let grad = ctx.createLinearGradient(b.x, b.y, b.x, b.y - 600);
         grad.addColorStop(0, b.color + b.alpha + ")");
         grad.addColorStop(1, b.color + "0)");
-
         ctx.fillStyle = grad;
-        ctx.globalCompositeOperation = "lighter"; // Makes it "glow"
+        ctx.globalCompositeOperation = "lighter";
         ctx.fillRect(b.x - b.width/2, b.y - 600, b.width, 600);
         ctx.globalCompositeOperation = "source-over";
-
-        // Fade out
         b.alpha -= 0.02;
         if (b.alpha <= 0) lootBeams.splice(i, 1);
     }
 }
 
-//------------------------------------
 function updateDungeonIdleTraining() {
-    // Only run if a Raid is NOT active
     if (dungeonActive) return;
-
     const dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
     if (dwellers.length === 0) {
-        enemies = []; // Clear enemies if nobody is there
+        enemies = [];
         return;
     }
 
-    // Only spawn if all current enemies are dead
-    let aliveEnemies = enemies.filter(e => !e.dead).length;
-    if (aliveEnemies === 0) {
-        
-        // 1. Calculate Average Combat Level
+    if (enemies.filter(e => !e.dead).length === 0) {
         const avgCombat = dwellers.reduce((sum, p) => sum + (p.stats.combatLevel || 1), 0) / dwellers.length;
-        
-        // 2. Spawn 1-3 training mobs
         const count = Math.floor(Math.random() * 3) + 1;
         for (let i = 0; i < count; i++) {
-            
-            // Training Mob Stats: 
-            // - High HP: (Avg Level * 50)
-            // - Low Damage: handled in handleEnemyAttacks
             let trainingHp = 100 + (avgCombat * 50);
-
             enemies.push({
                 name: "Dungeon Stray",
                 area: "dungeon",
@@ -1976,12 +1975,12 @@ function updateDungeonIdleTraining() {
                 y: 540,
                 dead: false,
                 isEnemy: true,
-                isTrainingMob: true, // Special flag
+                isTrainingMob: true,
                 stats: { lurkLevel: 0 },
                 equipped: {} 
             });
         }
-        systemMessage(`🛡️ Training Mobs spawned (Scaled to Avg Lvl ${Math.floor(avgCombat)})`);
+        systemMessage(`🛡️ Training Mobs spawned (Avg Lvl ${Math.floor(avgCombat)})`);
     }
 }
 //=========================================================================
@@ -3374,25 +3373,52 @@ function renderStatRow(name, level, xp, color) {
         </div>
     `;
 }
-
 function renderAchievements(playerObj) {
     const achGrid = document.getElementById('achievements-grid');
-    const achItems = Object.keys(ITEM_DB).filter(key => ITEM_DB[key].sources?.includes("achievement"));
+    const s = playerObj.stats;
     achGrid.innerHTML = "";
+
+    // 1. UNIQUE ITEM ACHIEVEMENTS
+    // Find all items in DB that are marked as achievement sources
+    const achItems = Object.keys(ITEM_DB).filter(key => ITEM_DB[key].sources?.includes("achievement"));
+    
     achItems.forEach(achName => {
-        const hasIt = playerObj.stats.inventory.includes(achName);
+        // Check inventory AND all equipment slots
+        const hasIt = s.inventory.includes(achName) || 
+                      Object.values(s.equipped || {}).includes(achName);
+        
         const data = ITEM_DB[achName];
-        const div = document.createElement('div');
-        div.className = `ach-row ${hasIt ? 'unlocked' : 'locked'}`;
-        div.innerHTML = `
-            <div class="ach-icon" style="color:${data.color}">${hasIt ? '🏆' : '🔒'}</div>
-            <div class="ach-info">
-                <strong>${achName}</strong><br>
-                <small>${hasIt ? 'UNLOCKED' : 'Requirement not met'}</small>
-            </div>
-        `;
-        achGrid.appendChild(div);
+        renderAchRow(achGrid, achName, hasIt, data.color || "#fff", hasIt ? "UNLOCKED" : "Requirement not met");
     });
+
+    // 2. TIER MASTERY (The Generic Trophy logic)
+    // This loops through 1-10 to show progress even if they don't have the item in bag
+    for (let t = 1; t <= 10; t++) {
+        const hasTier = s.dungeon.completedTiers?.includes(t);
+        const color = `hsl(${t * 30}, 70%, 60%)`; // Dynamic color for different tiers
+        
+        renderAchRow(
+            achGrid, 
+            `Tier ${t} Mastery`, 
+            hasTier, 
+            color, 
+            hasTier ? "UNLOCKED" : `Reach Dungeon Tier ${t}`
+        );
+    }
+}
+
+// Helper function to keep the render loop clean
+function renderAchRow(container, title, isUnlocked, color, subtext) {
+    const div = document.createElement('div');
+    div.className = `ach-row ${isUnlocked ? 'unlocked' : 'locked'}`;
+    div.innerHTML = `
+        <div class="ach-icon" style="color:${color}">${isUnlocked ? '🏆' : '🔒'}</div>
+        <div class="ach-info">
+            <strong>${title}</strong><br>
+            <small>${subtext}</small>
+        </div>
+    `;
+    container.appendChild(div);
 }
 // Helper to bridge UI clicks to game commands
 function uiAction(cmd, itemName) {
