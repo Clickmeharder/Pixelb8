@@ -2683,14 +2683,20 @@ function drawCorpse(ctx, p, now) {
 
 //===============================================================================
 // ================= DRAWING THE SCENERY AND AREAS ===========
-const backgrounds = {
+/* const backgrounds = {
     home: "#1a1a2e",
     town: "#1e272e",
     dungeon: "#160a0a",
     arena: "#000000",
     pond: "#0a1612"
+}; */
+const backgrounds = {
+    home: "",
+    town: "",
+    dungeon: "",
+    arena: "",
+    pond: ""
 };
-
 function drawScenery(ctx) {
     const now = Date.now();
 
