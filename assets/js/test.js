@@ -2993,7 +2993,7 @@ function updateUI() {
     if (aTimerBox) {
         const showArenaTimer = (typeof arenaMatchInterval !== 'undefined' && arenaMatchInterval && arenaTimer > 0);
         aTimerBox.style.display = showArenaTimer ? "block" : "none";
-        updateText("arena-timer-val", arenaUIConfig.labels.timer(arenaTimer));
+        updateText("arena-timer-val", arenaConfig.labels.timer(arenaTimer));
     }
 
     if (arenaBox) {
