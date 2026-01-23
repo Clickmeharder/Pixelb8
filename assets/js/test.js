@@ -1364,7 +1364,7 @@ let arenaQueue = [];
 let arenaTimer = 0;
 let arenaMatchInterval = null;
 let pvpRankings = {}; // {playerName: {wins: 0, kills: 0, rating: 1000}}
-/* const arenaUIConfig = {
+/* const arenaConfig = {
     title: "🏆 ARENA RANKINGS",
     labels: {
         timer: (s) => `⚔️ ARENA START: ${s}s`,
@@ -1380,10 +1380,10 @@ let pvpRankings = {}; // {playerName: {wins: 0, kills: 0, rating: 1000}}
             .slice(0, limit);
     }
 }; */
-const ARENA_CONFIG = {
+const arenaConfig = {
     minPlayers: 2,
     queueTime: 45, // seconds
-    modes: ["1v1", "teams", "ffa"]
+    modes: ["1v1", "teams", "ffa"],
     title: "🏆 ARENA RANKINGS",
     labels: {
         timer: (s) => `⚔️ ARENA START: ${s}s`,
@@ -1410,11 +1410,11 @@ function joinArenaQueue(p) {
     const nameKey = p.name.toLowerCase();
     if (!arenaQueue.includes(nameKey)) {
         arenaQueue.push(nameKey);
-        systemMessage(`⚔️ ${p.name} joined the queue (${arenaQueue.length}/${ARENA_CONFIG.minPlayers})`);
+        systemMessage(`⚔️ ${p.name} joined the queue (${arenaQueue.length}/${arenaConfig.minPlayers})`);
     }
 
     if (!arenaMatchInterval) {
-        arenaTimer = ARENA_CONFIG.queueTime;
+        arenaTimer = arenaConfig.queueTime;
         arenaMatchInterval = setInterval(() => {
             arenaTimer--;
             if (arenaTimer === 10) systemMessage("⚔️ ARENA: Match starting in 10 seconds!");
@@ -1428,7 +1428,7 @@ function joinArenaQueue(p) {
 }
 
 function processArenaStart() {
-    if (arenaQueue.length < ARENA_CONFIG.minPlayers) {
+    if (arenaQueue.length < arenaConfig.minPlayers) {
         systemMessage("⚔️ Arena match cancelled: Not enough players.");
         arenaQueue = [];
         return;
@@ -3079,11 +3079,11 @@ function updateArenaScoreboard() {
     if (!arenaBox) return;
 
     // 1. Update Rankings List
-    const topPlayers = arenaUIConfig.getTopRankings();
+    const topPlayers = arenaConfig.getTopRankings();
     const leaderboardContainer = document.getElementById("arena-leaderboard");
 
     if (topPlayers.length === 0) {
-        updateText("arena-leaderboard", arenaUIConfig.labels.empty);
+        updateText("arena-leaderboard", arenaConfig.labels.empty);
     } else {
         // We sync individual rows to avoid rebuilding the whole table
         topPlayers.forEach(([name, stats], idx) => {
@@ -3097,12 +3097,12 @@ function updateArenaScoreboard() {
     const isMatch = (typeof arenaActive !== 'undefined' && arenaActive);
     const statusEl = document.getElementById("arena-status-text");
     if (statusEl) {
-        statusEl.textContent = isMatch ? arenaUIConfig.labels.matchActive : arenaUIConfig.labels.matchOpen;
+        statusEl.textContent = isMatch ? arenaConfig.labels.matchActive : arenaConfig.labels.matchOpen;
         statusEl.style.color = isMatch ? "#ff0000" : "#00ff00";
     }
 
     const count = Object.values(players).filter(p => p.area === "arena").length;
-    updateText("arena-player-count", arenaUIConfig.labels.count(count));
+    updateText("arena-player-count", arenaConfig.labels.count(count));
 }
 function updateUI() {
     const now = Date.now();
@@ -3194,7 +3194,7 @@ function updateUI() {
     if (aTimerBox) {
         const showArenaTimer = (typeof arenaMatchInterval !== 'undefined' && arenaMatchInterval && arenaTimer > 0);
         aTimerBox.style.display = showArenaTimer ? "block" : "none";
-        updateText("arena-timer-val", arenaUIConfig.labels.timer(arenaTimer));
+        updateText("arena-timer-val", arenaConfig.labels.timer(arenaTimer));
     }
 
     if (arenaBox) {
