@@ -676,6 +676,46 @@
 			border-top: 8px solid #ceae33;
 		}
 		
+		
+		
+/* Container Basics */
+.ui-box { background: rgba(0,0,0,0.7); padding: 10px; border: 1px solid #444; color: #fff; font-family: monospace; border-radius: 5px; }
+.arena-border { border-color: #ff4444; }
+.dungeon-border { border-color: #00ffff; }
+
+/* Typography */
+.ui-header { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block; }
+.text-red { color: #ff4444; }
+.text-cyan { color: #00ffff; }
+.text-gold { color: #ffcc00; }
+.text-dim { color: #888; font-size: 11px; }
+
+/* Tables */
+.ui-table { width: 100%; font-size: 12px; text-align: left; border-collapse: collapse; }
+.ui-table th { color: #aaa; border-bottom: 1px solid #444; }
+
+/* Container Boxes */
+.ui-box { 
+    background: rgba(0,0,0,0.7); 
+    padding: 10px; 
+    border: 1px solid #444; 
+    color: #fff; 
+    font-family: monospace; 
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+.dungeon-border { border-color: #00ffff; }
+.arena-border { border-color: #ff4444; }
+
+/* Colors for HP and Status */
+.hp-healthy { color: #00ff00; font-size: 11px; }
+.hp-danger { color: #ffaa00; font-size: 11px; }
+.hp-dead { color: #ff0000; font-size: 11px; font-weight: bold; }
+
+/* Headers */
+.header-cyan { color: #00ffff; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+.wave-header { color: #ff4444; font-weight: bold; font-size: 11px; }
+.text-red { color: #ff4444; }
         @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
     </style>
 </head>
@@ -1013,32 +1053,49 @@
 <!------- THESE should be dynamically added by each individual plugin so we can keep html clean -------->
 	<!--============== -== STICKMENFALL --== =====================-->
 	<canvas id="c" width="1000" height="600"></canvas>
-	<!-- <div id="enemyUI"></div> -->
-	<!-- <div id="stickmenfall-systemMsgBox"></div> -->
-	<!-- <div id="idleActionsBox"></div> -->
-	<div id="tooltip"></div>
-	<div id="areaDisplay">StickmenFall: HOME</div>
 
+
+	<div id="tooltip"></div>
 	<div id="ui-container">	
+		<div id="areaDisplay">StickmenFall: HOME</div>
 		<div id="stickmenfall-systemMsgBox"></div>
 		<div id="idleActionsBox"></div>
+		
 		<div id="areaUI">
-			<div id="dungeon-timer-box" style="display: none;">
-				<span id="dungeon-timer-val">DUNGEON START: 60s</span>
-			</div>
 			<div id="enemyUI">
-				<div id="dungeon-stats" style="display: none;">
-					<div id="dungeon-content-inner"></div>
+				<div id="dungeon-timer-box" style="display: none;" class="ui-box">
+					<span id="dungeon-timer-val"></span>
+				</div>
+
+				<div id="dungeon-stats" style="display: none;" class="ui-box dungeon-border">
+					<div class="header-cyan">DUNGEON PARTY</div>
+					<div id="dungeon-party-list"></div>
+
+					<div id="dungeon-wave-section" style="display: none;">
+						<hr style="border:0.5px solid #444">
+						<div id="dungeon-wave-display" class="wave-header"></div>
+						<div id="dungeon-boss-hp" class="hp-dead"></div>
+						<div id="dungeon-enemy-list"></div>
+					</div>
 				</div>
 			</div>
-			<div id="arenaUI">
-				<div id="arena-timer-box" class="hidden timer-blue">
+
+			<div id="arenaUI" style="display: none;" class="ui-box arena-border">
+				<div id="arena-timer-box" class="timer-blue">
 					<b id="arena-timer-val"></b>
 				</div>
-				<div id="arena-leaderboard" class="hidden">
-				</div>
+
+				<b class="text-red">🏆 ARENA RANKINGS</b>
+				<hr style="border:0.5px solid #444">
+				
+				<div id="arena-leaderboard"></div>
+
+				<hr style="border:0.5px solid #444">
+				<div id="arena-status-text" style="font-size: 11px;"></div>
+				<div id="arena-player-count" style="font-size: 11px;"></div>
 			</div>
 		</div>
+		
 		<div id="input-wrapper">
 			<div id="stickmencmdInput" style="">
 				<select id="profileSelector" title="Switch Profile"></select>
@@ -1073,6 +1130,8 @@
 				<button data-action="respawn" class="danger">💀 Respawn</button>
 			</div>
 		</div>
+		
+		
 	</div>
 
 <div id="player-context-bubble" class="hidden">
