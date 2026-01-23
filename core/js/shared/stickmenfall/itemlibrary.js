@@ -260,9 +260,9 @@ const ITEM_DB = {
 	"box":            { type: "helmet", style: "box", sources:"dungeon", tier: 1, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
 	"Paper Bag":      { type: "helmet", style: "paperbag", sources:"dungeon", tier: 2, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
 	"wig":            { type: "helmet", style:"", sources:"dungeon", tier: 3, rarity: 0, def: 1,style: "wig",     value: 5000, color: "yellow" },
-	"centurion":      { type: "helmet", style: "centurion", sources:"dungeon", tier: 4, rarity: 0, def: 2,  value: 10000, color: "#ffcc00" },
+	"centurion":      { type: "helmet", style: "centurion", sources:"dungeon", tier: 4, rarity: 0, def: 2,  value: 2500, color: "#ffcc00" },
 	"tv":             { type: "helmet", style: "tv", sources:"dungeon", tier: 5, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
-	"Pirate Hat":     { type: "helmet", style: "pirate", sources:"dungeon", tier: 5, rarity: 0, def: 2,  value: 10000, color: "#222222" },
+	"Pirate Hat":     { type: "helmet", style: "pirate", sources:"dungeon", tier: 5, rarity: 0, def: 2,  value: 5000, color: "#222222" },
 	"Space Helmet":   { type: "helmet", style: "spacehelmet", sources:"dungeon", tier: 5, rarity: 10, def: 4, value: 500000, color: "#d2b48c" },
 	"gentleman hat":  { type: "helmet", style: "gentleman", sources:"dungeon", tier: 6, rarity: 0,  def: 2,  value: 10000, color: "#333333" },
 	"fun hat":        { type: "helmet", style: "funhat", sources:"dungeon", tier: 7, rarity: 0, def: 2,  value: 10000, color: "white" }, 
@@ -292,6 +292,16 @@ const ITEM_DB = {
 	"Skilled Swimmer Cape": { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#3b3b3b" },
 	"99 Tier Cape":         { type:"cape",style:"cape",sources:"achievement",  tier: 99, rarity: 1, value: 10000, color: "#ffd700" },
     "Cloak":                { type:"cape",style:"cloak",sources:"dungeon",     tier: 5, rarity: 10, value: 10000, color: "gray" },
+	"Tier 1 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 500, color: "gold" },
+	"Tier 2 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 500, color: "gold" },
+	"Tier 3 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 500, color: "gold" },
+	"Tier 4 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 500, color: "gold" },
+	"Tier 5 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 1000, color: "gold" },
+	"Tier 6 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 1250, color: "gold" },
+	"Tier 7 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 1500, color: "gold" },
+	"Tier 8 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 1750, color: "gold" },
+	"Tier 9 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 2000, color: "gold" },
+	"Tier 10 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 2500, color: "gold" },
 	
 // hair
 	"hair1": { type: "hair", style: "mohawk",      sources:"dungeon",  tier: 9, rarity: 1, color: "#ff69b4" },// pink mohawk
