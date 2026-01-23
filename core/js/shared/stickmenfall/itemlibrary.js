@@ -292,16 +292,6 @@ const ITEM_DB = {
 	"Skilled Swimmer Cape": { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#3b3b3b" },
 	"99 Tier Cape":         { type:"cape",style:"cape",sources:"achievement",  tier: 99, rarity: 1, value: 10000, color: "#ffd700" },
     "Cloak":                { type:"cape",style:"cloak",sources:"dungeon",     tier: 5, rarity: 10, value: 10000, color: "gray" },
-	"Tier 1 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 500, color: "gold" },
-	"Tier 2 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 500, color: "gold" },
-	"Tier 3 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 500, color: "gold" },
-	"Tier 4 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 500, color: "gold" },
-	"Tier 5 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 1000, color: "gold" },
-	"Tier 6 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 1250, color: "gold" },
-	"Tier 7 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 1500, color: "gold" },
-	"Tier 8 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 1750, color: "gold" },
-	"Tier 9 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 2000, color: "gold" },
-	"Tier 10 Trophy":         { type:"material",sources:"achievement",  tier: 1, rarity: 1, value: 2500, color: "gold" },
 	"Achievement Trophy": { type: "material", sources: "achievement", tier: 1, rarity: 1, value: 500, color: "gold", description: "A mark of your progress." },
 	
 // hair

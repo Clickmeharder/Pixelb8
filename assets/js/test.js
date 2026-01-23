@@ -197,104 +197,61 @@ function saveStats(p) {
     }
 }
 
-/* function checkAchievements(p) {
-    const s = p.stats;
-    let unlockedAny = false;
+const ACHIEVEMENT_DB = {
+    // Pond Achievements
+    "Fishing Rod": { check: (s) => s.pond.visited === true, text: "Visit the Pond" },
+    
+    // Arena Achievements
+    "Great Axe": { check: (s) => s.arena.wins >= 50, text: "Win 50 Arena matches" },
+    "PvP Cape": { check: (s) => s.arena.winStreak >= 10, text: "Get a 10-win streak" },
+    "PvP Boots": { check: (s) => s.arena.totalMatches >= 3, text: "Complete 3 matches" },
 
-    // Create a list of everything the player currently owns/wearing
-    const ownedItems = [
-        ...s.inventory,
-        s.equippedWeapon, s.equippedArmor, s.equippedHelmet, 
-        s.equippedBoots, s.equippedPants, s.equippedCape, 
-        s.equippedGloves
-    ];
+    // Level 50 Capes
+    "Warrior Cape": { check: (s) => s.attackLevel >= 50, text: "Attack Level 50" },
+    "Wizard Cape": { check: (s) => s.magicLevel >= 50, text: "Magic Level 50" },
+    "Archer Cape": { check: (s) => s.archerLevel >= 50, text: "Archer Level 50" },
+    "Lurker Cape": { check: (s) => s.lurkLevel >= 50, text: "Lurk Level 50" },
+    "Healer Cape": { check: (s) => s.healLevel >= 50, text: "Heal Level 50" },
+    "Fishing Cape": { check: (s) => s.fishLevel >= 50, text: "Fishing Level 50" },
+    "Swimmer Cape": { check: (s) => s.swimLevel >= 50, text: "Swim Level 50" },
+    "Nuber Cape": { check: (s) => s.combatLevel >= 50, text: "Combat Level 50" },
 
-    const requirements = {
-        // Dungeon Achievements
-		"Tier 1 Trophy":     () => s.dungeon.highestTier >= 1,
-		"Tier 2 Trophy":     () => s.dungeon.highestTier >= 2,
-		"Tier 3 Trophy":     () => s.dungeon.highestTier >= 3,
-		"Tier 4 Trophy":     () => s.dungeon.highestTier >= 4,
-		"Tier 5 Trophy":     () => s.dungeon.highestTier >= 5,
-		"Tier 6 Trophy":     () => s.dungeon.highestTier >= 6,
-		"Tier 7 Trophy":     () => s.dungeon.highestTier >= 7,
-		"Tier 8 Trophy":     () => s.dungeon.highestTier >= 8,
-		"Tier 9 Trophy":     () => s.dungeon.highestTier >= 9,
-		"Tier 10 Trophy":     () => s.dungeon.highestTier >= 10,
-        "Tier 99 Cape":     () => s.dungeon.highestTier >= 99,
-        //"Viking Helmet":    () => s.dungeon.kills >= 1000,
-
-
-    };
-
-    Object.keys(requirements).forEach(itemName => {
-        // Fix: Check if they ALREADY own it anywhere (inv or body)
-        if (requirements[itemName]() && !ownedItems.includes(itemName)) {
-            s.inventory.push(itemName);
-            unlockedAny = true;
-            spawnFloater(p, `🏆 UNLOCKED: ${itemName}`, "#ffcc00");
-            systemMessage(`🎊 ACHIEVEMENT: ${p.name} earned the ${itemName}!`);
-            spawnLootBeam(p, 13);
-        }
-    });
-
-    return unlockedAny;
-} */
+    // Level 99 Capes
+    "Skilled Warrior Cape": { check: (s) => s.attackLevel >= 99, text: "Attack Level 99" },
+    "Skilled Wizard Cape": { check: (s) => s.magicLevel >= 99, text: "Magic Level 99" },
+    "Skilled Archer Cape": { check: (s) => s.archerLevel >= 99, text: "Archer Level 99" },
+    "Skilled Lurker Cape": { check: (s) => s.lurkLevel >= 99, text: "Lurk Level 99" },
+    "Skilled Healer Cape": { check: (s) => s.healLevel >= 99, text: "Heal Level 99" },
+    "Skilled Fishing Cape": { check: (s) => s.fishLevel >= 99, text: "Fishing Level 99" },
+    "Skilled Swimmer Cape": { check: (s) => s.swimLevel >= 99, text: "Swim Level 99" },
+    "Uber Cape": { check: (s) => s.combatLevel >= 99, text: "Combat Level 99" }
+};
 function checkAchievements(p) {
     const s = p.stats;
     let unlockedAny = false;
 
-    // 1. Unique Item Achievements (Stay as they are)
-    const uniqueRewards = {
-        // Pond Achievements
-        "Fishing Rod":      () => s.pond.visited === true,
-        //"Master Angler":    () => s.pond.fishCaught >= 500,
-
-        // Arena Achievements
-        "Great Axe":  () => s.arena.wins >= 50,
-        "PvP Cape":  () => s.arena.winStreak >= 10,
-		"PvP Boots":  () => s.arena.totalMatches >= 3,
-        // Mixed / Story Achievements
-        //"Hero's Badge":     () => s.story.chapter >= 1 && s.dungeon.highestTier >= 10
-		// Skill capes
-		"Warrior Cape":  () => s.attackLevel >= 50,
-        "Wizard Cape":   () => s.magicLevel >= 50,
-        "Archer Cape":   () => s.archerLevel >= 50,
-		"Lurker Cape":   () => s.lurkLevel >= 50,
-        "Healer Cape":   () => s.healLevel >= 50,
-        "Fishing Cape":  () => s.fishLevel >= 50,
-        "Swimmer Cape":  () => s.swimLevel >= 50,
-		"Nuber Cape":    () => s.combatLevel >= 50,
-		"Skilled Warrior Cape":  () => s.attackLevel >= 99,
-        "Skilled Wizard Cape":   () => s.magicLevel >= 99,
-        "Skilled Archer Cape":   () => s.archerLevel >= 99,
-		"Skilled Lurker Cape":   () => s.lurkLevel >= 99,
-        "Skilled Healer Cape":   () => s.healLevel >= 99,
-        "Skilled Fishing Cape":  () => s.fishLevel >= 99,
-        "Skilled Swimmer Cape":  () => s.swimLevel >= 99,
-		"Uber Cape":  () => s.combatLevel >= 99
-    };
-
-    // Check Uniques
-    Object.keys(uniqueRewards).forEach(itemName => {
+    // 1. Check Unique Achievements from the DB
+    Object.keys(ACHIEVEMENT_DB).forEach(itemName => {
+        const goal = ACHIEVEMENT_DB[itemName];
+        
+        // Check if they already own it (Inventory or any Equipped slot)
         const owned = s.inventory.includes(itemName) || 
-                     [s.equippedWeapon, s.equippedArmor, s.equippedHelmet, s.equippedBoots, s.equippedPants, s.equippedCape, s.equippedGloves].includes(itemName);
+                      Object.values(s.equipped || {}).includes(itemName);
 
-        if (uniqueRewards[itemName]() && !owned) {
+        if (goal.check(s) && !owned) {
             s.inventory.push(itemName);
             unlockedAny = true;
             announceAchievement(p, itemName);
         }
     });
 
-    // 2. Generic Tier Achievements (Consolidated)
-    // We store completed tiers in an array: s.dungeon.completedTiers = [1, 2, 3...]
+    // 2. Generic Tier Achievements (Dungeon)
     if (!s.dungeon.completedTiers) s.dungeon.completedTiers = [];
 
     for (let t = 1; t <= 10; t++) {
         if (s.dungeon.highestTier >= t && !s.dungeon.completedTiers.includes(t)) {
             s.dungeon.completedTiers.push(t);
-            s.inventory.push("Achievement Trophy"); // Give the generic item
+            s.inventory.push("Achievement Trophy");
             unlockedAny = true;
             announceAchievement(p, `Tier ${t} Mastery`);
         }
@@ -3378,36 +3335,36 @@ function renderAchievements(playerObj) {
     const s = playerObj.stats;
     achGrid.innerHTML = "";
 
-    // 1. UNIQUE ITEM ACHIEVEMENTS
-    // Find all items in DB that are marked as achievement sources
-    const achItems = Object.keys(ITEM_DB).filter(key => ITEM_DB[key].sources?.includes("achievement"));
-    
-    achItems.forEach(achName => {
-        // Check inventory AND all equipment slots
-        const hasIt = s.inventory.includes(achName) || 
-                      Object.values(s.equipped || {}).includes(achName);
+    // 1. Render Uniques from DB
+    Object.keys(ACHIEVEMENT_DB).forEach(itemName => {
+        const goal = ACHIEVEMENT_DB[itemName];
+        const hasIt = s.inventory.includes(itemName) || 
+                      Object.values(s.equipped || {}).includes(itemName);
         
-        const data = ITEM_DB[achName];
-        renderAchRow(achGrid, achName, hasIt, data.color || "#fff", hasIt ? "UNLOCKED" : "Requirement not met");
+        const itemData = ITEM_DB[itemName] || { color: "#fff" };
+
+        renderAchRow(
+            achGrid, 
+            itemName, 
+            hasIt, 
+            itemData.color, 
+            hasIt ? "UNLOCKED" : goal.text
+        );
     });
 
-    // 2. TIER MASTERY (The Generic Trophy logic)
-    // This loops through 1-10 to show progress even if they don't have the item in bag
+    // 2. Render Tiers
     for (let t = 1; t <= 10; t++) {
         const hasTier = s.dungeon.completedTiers?.includes(t);
-        const color = `hsl(${t * 30}, 70%, 60%)`; // Dynamic color for different tiers
-        
         renderAchRow(
             achGrid, 
             `Tier ${t} Mastery`, 
             hasTier, 
-            color, 
+            `hsl(${t * 30}, 70%, 60%)`, 
             hasTier ? "UNLOCKED" : `Reach Dungeon Tier ${t}`
         );
     }
 }
 
-// Helper function to keep the render loop clean
 function renderAchRow(container, title, isUnlocked, color, subtext) {
     const div = document.createElement('div');
     div.className = `ach-row ${isUnlocked ? 'unlocked' : 'locked'}`;
@@ -3415,7 +3372,7 @@ function renderAchRow(container, title, isUnlocked, color, subtext) {
         <div class="ach-icon" style="color:${color}">${isUnlocked ? '🏆' : '🔒'}</div>
         <div class="ach-info">
             <strong>${title}</strong><br>
-            <small>${subtext}</small>
+            <small style="color: ${isUnlocked ? '#aaa' : '#ff6666'}">${subtext}</small>
         </div>
     `;
     container.appendChild(div);

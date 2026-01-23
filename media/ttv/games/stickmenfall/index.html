@@ -232,8 +232,7 @@
         #stickmenfall-systemMsgBox { position:absolute; top:10px; left:10px; width:300px; font-size:13px; pointer-events:none; }
 
 		.sysMsg { background:rgba(0,0,0,0.7); color:#0f0; padding:5px; margin-bottom:4px; border-radius:4px; border-left: 3px solid #0f0; animation: fadeout 8s forwards; }
-		#idleActionsBox {position:fixed;bottom: 0px;left: 10px;width: 475px;height:12px; background:rgba(0,0,0,0.7); color:#0f0; font-family:monospace; font-size:12px; overflow-y:auto; padding:10px; border:1px solid #333; pointer-events:none;}
-
+		#idleActionsBox {position: fixed;top: 1%;left: 29%;width: 420px;height: 7px;background: rgba(0, 0, 0, 0.7);color: #0f0;font-family: monospace;font-size: 12px;overflow-y: auto;padding: 10px;padding-bottom: 0px;border: 1px solid #333;pointer-events: none;}
         #tooltip { position: absolute; pointer-events: none; background: rgba(0,0,0,0.9); color: #fff; padding: 8px; border-radius: 4px; border: 1px solid #0ff; font-size: 13px; display: none; z-index: 100; }		
         #areaDisplay { position:absolute; bottom:0px;right: 3%; transform:translateX(-5%); color:#0ff; font-size:13px; background:rgba(0,0,0,0.8); padding:5px 15px; border: 1px solid #0ff; text-transform: uppercase; }
 		#input-wrapper {
@@ -241,7 +240,7 @@
 			bottom: 40px;
 			right: 16px;
 			display: flex;
-			width: 615px;
+			width: 512px;
 			flex-direction: column;
 			flex-wrap: wrap;
 			align-items: flex-start;
@@ -253,13 +252,24 @@
 		#input-wrapper:focus-within {
 			opacity: 0.8 !important;
 		}
-		#stickmencmdInput {display: flex;flex-direction:row;}
+		#stickmencmdInput {
+			flex-direction: row;
+			background: #222;
+			width: 92%;
+			margin-left: 9px;
+			padding: 0px;
+			padding-left: 8px;
+			padding-right: 8px;
+			border-radius: 6px;
+		}
 		input#browserColorPicker {width: 15px;}
 		#action-bar {display: flex;gap: 3px;background: rgba(0, 0, 0, 0.8);padding: 3px;border-radius: 12px;border: 2px solid #444;z-index: 1000;flex-wrap: wrap;}
-.select-enhanced{
-    height: 19px;
-}
-
+		.select-enhanced{
+			height: 19px;
+		}
+		select#profileSelector {
+			background:#333;
+		}
 		#action-bar button {background: #333;color: white;border: 1px solid #555;padding: 1px 1px;cursor: pointer;border-radius: 6px;font-size: 10px;font-family: monospace;transition: all 0.2s;}
 
 		#action-bar button:hover {background: #555;border-color: #00ffff;}
