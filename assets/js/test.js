@@ -172,100 +172,7 @@ function loadStats(name) {
 
     return stats;
 }
-/* ================= DATA PERSISTENCE ================= */
-/* function loadStats(name) {
-    const saved = localStorage.getItem("rpg_" + name);
-    let stats = saved ? JSON.parse(saved) : {
-        attackLevel: 1, attackXP: 0,
-		archerLevel: 1, archerXP: 0,
-		magicLevel: 1, magicXP: 0,
-        healLevel: 1, healXP: 0,
-        fishLevel: 1, fishXP: 0,
-        danceLevel: 1, danceXP: 0,
-		lurkLevel: 1, lurkXP: 0,
-		swimLevel: 1, swimXP: 0,
-        swimDistance: 0,
-        combatLevel: 1,
-		maxhp:100,
-        pixels: 0,
-        inventory: ["Fishing Rod"],
-        equippedWeapon: null,
-        equippedArmor: null,
-        equippedHelmet: null,
-        equippedBoots: null,
-        // --- NEW SLOTS FOR NEW PLAYERS ---
-        equippedPants: null,
-        equippedCape: null,
-        equippedGloves: null,
-        equippedHair: null,
-        wigColor: null 
-    };
-	// --- MIGRATION: STRIP WEIGHT FROM NAMES ---
-	if (stats.inventory && Array.isArray(stats.inventory)) {
-		stats.inventory = stats.inventory.map(item => {
-			if (typeof item === 'string') {
-				// This replaces things like "1.41kg Bass" or "0.5kb Bass" with just "Bass"
-				// It looks for digits, dots, and 'kg' or 'kb' followed by a space
-				return item.replace(/^\d+(\.\d+)?k[gb]\s+/, "");
-			}
-			return item;
-		});
-	}
-	// --- MIGRATION: GOLD TO PIXELS ---
-    if (stats.gold !== undefined) {
-        // If they had pixels already, add gold to it, otherwise just set it
-        stats.pixels = (stats.pixels || 0) + stats.gold;
-        // Remove the old gold key so we don't migrate it again
-        delete stats.gold; 
-        console.log(`Migrated ${name}'s gold to pixels.`);
-    }
-	
-    // --- SAFETY CHECKS FOR OLD SAVES ---
-    if (isNaN(stats.pixels) || stats.pixels === null) stats.pixels = 0;
-	// Inside the initial stats object and the safety checks
-	if (stats.maxhp === undefined) stats.maxhp = 100;
-	if (stats.archerLevel === undefined) stats.archerLevel = 1;
-	if (stats.archerXP === undefined) stats.archerXP = 0;
-	if (stats.magicLevel === undefined) stats.magicLevel = 1;
-	if (stats.magicXP === undefined) stats.magicXP = 0;
-	if (stats.lurkLevel === undefined) stats.lurkLevel = 1;
-	if (stats.lurkXP === undefined) stats.lurkXP = 0;
-	if (stats.swimLevel === undefined) stats.swimLevel = 1;
-    if (stats.swimXP === undefined) stats.swimXP = 0;
-    if (stats.swimDistance === undefined) stats.swimDistance = 0;
-	
-    // --- SAFETY CHECKS FOR OLD SAVES ---
-    if (isNaN(stats.pixels) || stats.pixels === null) stats.pixels = 0;
-    
-    if (!stats.inventory || !Array.isArray(stats.inventory)) {
-        stats.inventory = ["Fishing Rod"];
-    }
 
-    if (!stats.inventory.includes("Fishing Rod")) {
-        stats.inventory.push("Fishing Rod");
-    }
-    
-    // --- PATCH MISSING SLOTS FOR OLD PLAYERS ---
-    if (stats.equippedWeapon === undefined) stats.equippedWeapon = null;
-    if (stats.equippedArmor === undefined) stats.equippedArmor = null;
-    if (stats.equippedHelmet === undefined) stats.equippedHelmet = null;
-    if (stats.equippedBoots === undefined) stats.equippedBoots = null;
-    
-    // New patches for the new items!
-    if (stats.equippedPants === undefined) stats.equippedPants = null;
-    if (stats.equippedCape === undefined) stats.equippedCape = null;
-    if (stats.equippedGloves === undefined) stats.equippedGloves = null;
-    if (stats.equippedHair === undefined) stats.equippedHair = null;
-
-    if (stats.danceLevel === undefined) stats.danceLevel = 1;
-    if (stats.danceXP === undefined) stats.danceXP = 0;
-    if (stats.wigColor === undefined) stats.wigColor = null;
-
-    return stats;
-} */
-/* function saveStats(p) {
-    localStorage.setItem("rpg_" + p.name, JSON.stringify(p.stats));
-} */
 function saveStats(p) {
     // 0. Update the stats object with live data before saving
     p.stats.lastX = p.x;
@@ -289,24 +196,7 @@ function saveStats(p) {
         }
     }
 }
-/* function saveStats(p) {
-    // 1. Run the achievement check before saving
-    const newAchievement = checkAchievements(p);
 
-    // 2. Commit to localStorage
-    localStorage.setItem("rpg_" + p.name, JSON.stringify(p.stats));
-
-    // 3. UI RE-RENDER TRIGGER
-    // Check if the player being saved is the one the local user is looking at
-    const localProfile = getActiveProfile();
-    if (localProfile && p.name.toLowerCase() === localProfile.name.toLowerCase()) {
-        const modal = document.getElementById('inventory-modal');
-        // Only trigger a heavy DOM refresh if the modal is visible
-        if (modal && !modal.classList.contains('hidden')) {
-            renderInventoryUI();
-        }
-    }
-} */
 function checkAchievements(p) {
     const s = p.stats;
     let unlockedAny = false;
@@ -321,6 +211,16 @@ function checkAchievements(p) {
 
     const requirements = {
         // Dungeon Achievements
+		"Tier 1 Trophy":     () => s.dungeon.highestTier >= 1,
+		"Tier 2 Trophy":     () => s.dungeon.highestTier >= 2,
+		"Tier 3 Trophy":     () => s.dungeon.highestTier >= 3,
+		"Tier 4 Trophy":     () => s.dungeon.highestTier >= 4,
+		"Tier 5 Trophy":     () => s.dungeon.highestTier >= 5,
+		"Tier 6 Trophy":     () => s.dungeon.highestTier >= 6,
+		"Tier 7 Trophy":     () => s.dungeon.highestTier >= 7,
+		"Tier 8 Trophy":     () => s.dungeon.highestTier >= 8,
+		"Tier 9 Trophy":     () => s.dungeon.highestTier >= 9,
+		"Tier 10 Trophy":     () => s.dungeon.highestTier >= 10,
         "Tier 99 Cape":     () => s.dungeon.highestTier >= 99,
         //"Viking Helmet":    () => s.dungeon.kills >= 1000,
 
@@ -343,13 +243,13 @@ function checkAchievements(p) {
         "Fishing Cape":  () => s.fishLevel >= 50,
         "Swimmer Cape":  () => s.swimLevel >= 50,
 		"Nuber Cape":    () => s.combatLevel >= 50,
-		"Skilled Warrior Cape":  () => s.attackLevel >= 50,
-        "Skilled Wizard Cape":   () => s.magicLevel >= 50,
-        "Skilled Archer Cape":   () => s.archerLevel >= 50,
-		"Skilled Lurker Cape":   () => s.lurkLevel >= 50,
-        "Skilled Healer Cape":   () => s.healLevel >= 50,
-        "Skilled Fishing Cape":  () => s.fishLevel >= 50,
-        "Skilled Swimmer Cape":  () => s.swimLevel >= 50,
+		"Skilled Warrior Cape":  () => s.attackLevel >= 99,
+        "Skilled Wizard Cape":   () => s.magicLevel >= 99,
+        "Skilled Archer Cape":   () => s.archerLevel >= 99,
+		"Skilled Lurker Cape":   () => s.lurkLevel >= 99,
+        "Skilled Healer Cape":   () => s.healLevel >= 99,
+        "Skilled Fishing Cape":  () => s.fishLevel >= 99,
+        "Skilled Swimmer Cape":  () => s.swimLevel >= 99,
 		"Uber Cape":  () => s.combatLevel >= 99
     };
 
@@ -401,45 +301,7 @@ function getPlayer(name, color) {
 
     return players[lowName];
 }
-/* function getPlayer(name, color) {
-    const lowName = name.toLowerCase();
-    
-    // 1. Check if player exists in the current session
-    if (players[lowName]) {
-        if (color) players[lowName].color = (typeof color === 'object') ? (color.userColor || "orangered") : color;
-        return players[lowName];
-    }
-    
-    // 2. Create new player object
-    const p = {
-        name: name,
-        color: (typeof color === 'object') ? (color.userColor || "#00ffff") : (color || "#00ffff"),
-        x: Math.random() * 800 + 100, 
-        y: 450,
-        targetX: null,
-        dead: false,
-        area: "home", 
-        activeTask: null,
-        danceStyle: 0,
-        lastDanceXP: 0,
-        stats: loadStats(name)
-    };
 
-    // Calculate maxHp first so we have a number to work with
-    updateCombatLevel(p);
-
-    // 3. HP PERSISTENCE LOGIC
-    // Check if stats already has a saved HP, otherwise give them 25% of max
-    if (p.stats.currentHp !== undefined && p.stats.currentHp !== null) {
-        p.hp = p.stats.currentHp;
-    } else {
-        // New player or first time login since update: Start at 25%
-        p.hp = Math.floor(p.maxHp * 0.25);
-    }
-
-    players[lowName] = p;
-    return p;
-} */
 function movePlayer(p, targetArea) {
     if (p.dead) {
         systemMessage(`${p.name} is a corpse and cannot travel!`);
@@ -3105,69 +2967,6 @@ function updateArenaScoreboard() {
     updateText("arena-player-count", arenaConfig.labels.count(count));
 }
 function updateUI() {
-    const now = Date.now();
-
-    // 1. Area Header Sync
-    const areaText = "StickmenFall:" + viewArea;
-    if (areaDisplayDiv.textContent !== areaText) areaDisplayDiv.textContent = areaText;
-
-	// 2. DUNGEON UI LOGIC
-    const dungeonBox = document.getElementById("dungeon-stats");
-    const dungeonTimerBox = document.getElementById("dungeon-timer-box");
-
-    // Fix: Show timer if there is time on the clock, regardless of interval ID
-    const shouldShowDungeonTimer = (dungeonSecondsLeft > 0);
-    
-    if (dungeonTimerBox) {
-        if (shouldShowDungeonTimer) {
-            dungeonTimerBox.style.display = "block";
-            // Using direct selection to ensure it works
-            const timerVal = document.getElementById("dungeon-timer-val");
-            if (timerVal) timerVal.textContent = `DUNGEON START: ${dungeonSecondsLeft}s`;
-        } else {
-            dungeonTimerBox.style.display = "none";
-        }
-    }
-
-    if (dungeonBox) {
-        if (viewArea === "dungeon") {
-            dungeonBox.style.display = "block";
-            const dungeonHTML = buildDungeonContent(); 
-            const inner = document.getElementById("dungeon-content-inner");
-            if (inner && inner.innerHTML !== dungeonHTML) {
-                inner.innerHTML = dungeonHTML;
-            }
-        } else {
-            dungeonBox.style.display = "none";
-        }
-    }
-
-    // 3. ARENA UI LOGIC
-    const arenaBox = document.getElementById("arenaUI");
-    const arenaTimerBox = document.getElementById("arena-timer-box");
-
-    const shouldShowArenaTimer = (typeof arenaMatchInterval !== 'undefined' && arenaMatchInterval && arenaTimer > 0);
-    if (arenaTimerBox) {
-        if (shouldShowArenaTimer) {
-            arenaTimerBox.style.display = "block";
-            updateText("arena-timer-val", `⚔️ ARENA START: ${arenaTimer}s`);
-        } else {
-            arenaTimerBox.style.display = "none";
-        }
-    }
-
-    if (arenaBox) {
-        if (viewArea === "arena") {
-            arenaBox.style.display = "block";
-            updateArenaUI(); 
-        } else {
-            arenaBox.style.display = "none";
-        }
-    }
-}
-
-let frameCount = 0;
-function updateUI() {
     // 1. Area Header
     updateText("areaDisplay", "StickmenFall:" + viewArea);
 
@@ -3194,13 +2993,100 @@ function updateUI() {
     if (aTimerBox) {
         const showArenaTimer = (typeof arenaMatchInterval !== 'undefined' && arenaMatchInterval && arenaTimer > 0);
         aTimerBox.style.display = showArenaTimer ? "block" : "none";
-        updateText("arena-timer-val", arenaConfig.labels.timer(arenaTimer));
+        updateText("arena-timer-val", arenaUIConfig.labels.timer(arenaTimer));
     }
 
     if (arenaBox) {
         arenaBox.style.display = isArena ? "block" : "none";
         if (isArena) updateArenaScoreboard();
     }
+}
+
+let frameCount = 0;
+function gameLoop() {
+    const now = Date.now();
+    frameCount++; 
+    
+    // 1. Visual Foundation (Shake & Background)
+    ctx.save();
+    if (window.shakeAmount > 0) {
+        let sx = (Math.random() - 0.5) * window.shakeAmount;
+        let sy = (Math.random() - 0.5) * window.shakeAmount;
+        ctx.translate(sx, sy);
+        window.shakeAmount *= 0.9; 
+        if (window.shakeAmount < 0.1) window.shakeAmount = 0;
+    }
+
+    renderScene(); 
+    
+    // 2. PERFORMANCE: UI Sync (Throttle to ~20fps)
+    if (frameCount % 3 === 0) {
+        updateUI(); 
+    }
+
+    // 3. World Logic (Runs regardless of view)
+    if (dungeonActive) {
+        checkDungeonProgress(); 
+        checkDungeonFailure();  
+    } else {
+        // If raid is off, check if anyone is inside doing training
+        const anyoneInDungeon = Object.values(players).some(p => p.area === "dungeon");
+        if (anyoneInDungeon) updateDungeonIdleTraining();
+    }
+
+    if (typeof arenaActive !== 'undefined' && arenaActive) {
+        checkArenaVictory();
+    }
+
+    // 4. Area-Specific Rendering (Monsters/Beams)
+    if (viewArea === "dungeon") {
+        drawLootBeams(ctx); 
+        if (boss && !boss.dead) drawMonster(ctx, boss);
+        enemies.forEach(e => {
+            if (!e.dead) {
+                if (e.isStickman) drawEnemyStickman(ctx, e);
+                else drawMonster(ctx, e);
+            }
+        });
+    }
+
+    // 5. Player Processing (Loop once for both logic and drawing)
+    Object.values(players).forEach(p => {
+        // Logic runs for everyone everywhere
+        if (!p.dead) {
+            updatePhysics(p);           
+            updatePlayerStatus(p, now); 
+            
+            if (p.activeTask === "pvp") {
+                handlePvPLogic(p, now);
+            } else {
+                updatePlayerActions(p, now); 
+            }
+        }
+
+        // Draw only if in the current view
+        if (p.area === viewArea) {
+            drawStickman(ctx, p);
+            
+            // Team Underglow for Arena
+            if (viewArea === "arena" && typeof arenaMode !== 'undefined' && arenaMode === "teams" && p.team) {
+                ctx.fillStyle = p.team === "Red" ? "rgba(255,0,0,0.3)" : "rgba(0,0,255,0.3)";
+                ctx.beginPath();
+                ctx.ellipse(p.x, p.y + 5, 20, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+    });
+
+    // 6. Global Overlays & Ticks
+    updateAreaPlayerCounts();
+    updateSystemTicks(now);  
+    drawProjectiles(ctx);    
+    updateSplashText(ctx);   
+    handleTooltips();        
+
+    ctx.restore(); 
+    requestAnimationFrame(gameLoop);
 }
 /* =================END GAME LOOP ================= */
 /* =================END GAME LOOP ================= */
