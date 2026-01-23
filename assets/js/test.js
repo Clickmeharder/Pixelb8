@@ -2090,12 +2090,12 @@ function updatePhysics(p) {
             p.lean = dx > 0 ? 0.2 : -0.2; // Lean into the movement
 
             // Pond Water Interactions
-            if (p.area === "pond") {
-                // Trigger splash when crossing the shore line (x=250)
-                if ((oldX <= 250 && p.x > 250) || (oldX > 250 && p.x <= 250)) {
-                    if (typeof triggerSplash === "function") triggerSplash(p);
-                }
-            }
+			if (p.area === "pond") {
+				const shoreLine = c.width * 0.2; // Shore is at 20% of the screen width
+				if ((oldX <= shoreLine && p.x > shoreLine) || (oldX > shoreLine && p.x <= shoreLine)) {
+					if (typeof triggerSplash === "function") triggerSplash(p);
+				}
+			}
         } else {
             p.x = p.targetX; // Snap exactly to target
             p.lean = 0;
