@@ -3020,7 +3020,11 @@ function updateUI() {
         if (isArena) updateArenaScoreboard();
     }
 }
-
+const visualConfig = {
+    scale: 1.8, // Increase this to make stickmen/monsters bigger
+    playerHeight: 60, // Base height
+    getScaledHeight: function() { return this.playerHeight * this.scale; }
+};
 let frameCount = 0;
 function gameLoop() {
     const now = Date.now();
@@ -3028,6 +3032,12 @@ function gameLoop() {
     
     // 1. Visual Foundation (Shake & Background)
     ctx.save();
+	const zoom = 1.5; 
+    
+    // We translate so the "zoom" anchors to the bottom center
+    ctx.translate(c.width / 2, c.height); 
+    ctx.scale(zoom, zoom);
+    ctx.translate(-c.width / 2, -c.height);
     if (window.shakeAmount > 0) {
         let sx = (Math.random() - 0.5) * window.shakeAmount;
         let sy = (Math.random() - 0.5) * window.shakeAmount;
