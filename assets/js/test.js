@@ -1309,7 +1309,7 @@ function processArenaStart() {
         let p = players[name.toLowerCase()];
         if (p) {
             p.area = "arena";
-            p.y = 450;
+            p.y = 540;
             p.hp = p.maxHp; 
             p.dead = false;
             p.activeTask = "pvp"; // This activates their combat AI
@@ -1571,7 +1571,7 @@ function joinDungeonQueue(p) {
                         player.y = -200;                // Start sky-high
                         // Drop them on the left half initially
                         player.x = 50 + Math.random() * 250; 
-                        player.targetY = 450;           // Floor
+                        player.targetY = 540;           // Floor
                         player.targetX = null;          // Wait to land before walking
                         player.activeTask = "attacking"; 
                     }
@@ -1648,7 +1648,7 @@ function spawnWave() {
             hp: enemyHp, 
             maxHp: enemyHp, 
             x: 500 + (i * 60), // Tightened spacing
-            y: 450, 
+            y: 540, 
             dead: false,
             isEnemy: true,
             isStickman: isStickman,
@@ -1666,7 +1666,7 @@ function spawnWave() {
             hp: bossHp,
             maxHp: bossHp,
             x: 800,
-            y: 450,
+            y: 540,
             dead: false,
             isBoss: true,
             isMonster: true,
@@ -1913,7 +1913,7 @@ function spawnLootBeam(p, rarity) {
     const hue = Math.min(300, rarity * 25);
     lootBeams.push({
         x: p.x,
-        y: p.y + 40, // Base of the player
+        y: p.y + 20, // Base of the player
         alpha: 1.0,
         color: `hsla(${hue}, 100%, 50%, `, // We leave the alpha open
         width: 10 + (rarity * 2)
@@ -1973,7 +1973,7 @@ function updateDungeonIdleTraining() {
                 hp: trainingHp,
                 maxHp: trainingHp,
                 x: 500 + (i * 80),
-                y: 450,
+                y: 540,
                 dead: false,
                 isEnemy: true,
                 isTrainingMob: true, // Special flag
@@ -2049,7 +2049,7 @@ function drawProjectiles(ctx) {
 /*----------------------------------------------*/
 
 function updatePhysics(p) {
-    const groundLevel = 450; // Feet will touch the 475 floor line
+    const groundLevel = 540; // Feet will touch the 475 floor line
 
     // --- STATE 1: FALLING (Area Entry) ---
     // This handles the 'drop-in' effect when traveling
@@ -2415,30 +2415,6 @@ function getAnchorPoints(p, anim) {
     };
 }
 
-/* function getLimbPositions(p, anchors, anim, now) {
-    const isFishing = p.activeTask === "fishing";
-    const isAction = ["attacking", "woodcutting", "mining", "swimming", "lurking"].includes(p.activeTask);
-    let leftHand = { x: anchors.headX - 18, y: anchors.shoulderY + 10 + anim.armMove };
-    let rightHand = { x: anchors.headX + 18, y: anchors.shoulderY + 10 - anim.armMove };
-
-    let activePose = anim.pose || p.forcedPose || (isFishing ? "fishing" : (isAction ? "action" : null));
-    if (activePose && POSE_LIBRARY[activePose]) {
-        const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim);
-        if (overrides.left) leftHand = overrides.left;
-        if (overrides.right) rightHand = overrides.right;
-    }
-
-    const walk = (p.targetX !== null) ? Math.sin(now / 100) * 10 : 0;
-    const legSpread = (activePose === "star") ? 18 : 10;
-    const footY = p.y + 25 + (anchors.bodyY > 0 ? 0 : anchors.bodyY);
-
-    return {
-        leftHand, rightHand,
-        leftFoot: { x: p.x - legSpread - walk, y: footY },
-        rightFoot: { x: p.x + legSpread + walk, y: footY }
-    };
-}
- */
 function getLimbPositions(p, anchors, anim, now) {
     // Explicitly check for swimming first so it doesn't default to "action"
     let activePose = anim.pose || p.forcedPose;
@@ -2759,59 +2735,35 @@ const backgrounds = {
  */
 function drawScenery(ctx) {
     const now = Date.now();
-    const floorY = c.height - 125; // Adjusted for 1080p
-    const floorH = 125;
+    const floorH = 60;                // The thickness of the floor
+    const floorY = c.height - floorH; // 540
 
+    // Set floor color based on area
     if (viewArea === "home") {
         ctx.fillStyle = "#252545";
         ctx.fillRect(0, floorY, c.width, floorH);
-        // Sky is now transparent, stars float in the empty space
-        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-        for(let i=0; i<10; i++) {
-            let x = (i * 100 + (now/50)) % c.width;
-            ctx.fillRect(x, 100 + (i*20), 2, 2);
-        }
-
     } else if (viewArea === "town") {
-        ctx.fillStyle = "#2f3542";
+        ctx.fillStyle = "#2f3542"; 
         ctx.fillRect(0, floorY, c.width, floorH);
-        
+        // Stone details
         ctx.strokeStyle = "#3e4451";
         for(let i=0; i<c.width; i+=100) {
-            ctx.strokeRect(i, floorY, 100, 50);
+            ctx.strokeRect(i, floorY, 100, 30);
         }
-        // Centered Monument
-        ctx.fillStyle = "#57606f";
-        ctx.fillRect(c.width/2 - 50, floorY - 55, 100, 55);
-
     } else if (viewArea === "arena") {
         ctx.fillStyle = "#3d2b1f"; 
         ctx.fillRect(0, floorY, c.width, floorH);
-        
-        // Note: I removed the stadium walls so your stickmen 
-        // appear to fight directly on your desktop/stream background!
-        
+        // Pedestal (Sitting on the new lower floor)
         ctx.fillStyle = "#2c3e50";
-        ctx.fillRect(c.width/2 - 100, floorY - 55, 200, 55); 
-        ctx.fillStyle = "#f1c40f"; 
-        ctx.fillRect(c.width/2 - 100, floorY - 55, 200, 5);
-
+        ctx.fillRect(300, floorY - 55, 200, 55); 
     } else if (viewArea === "pond") {
         ctx.fillStyle = "#1a2e1a"; // Grass
         ctx.fillRect(0, floorY, 250, floorH); 
         ctx.fillStyle = "#0a2e3a"; // Water
         ctx.fillRect(250, floorY + 10, c.width - 250, floorH - 10);
-        drawBuyer(ctx);
-
     } else if (viewArea === "dungeon") {
         ctx.fillStyle = "#110505";
         ctx.fillRect(0, floorY, c.width, floorH);
-        // Crack in the "air"
-        ctx.strokeStyle = "#2a1010";
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(100, 0); ctx.lineTo(120, 100); ctx.lineTo(80, 200);
-        ctx.stroke();
     }
 }
 //================================================================================
