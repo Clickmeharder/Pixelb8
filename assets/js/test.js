@@ -2697,7 +2697,7 @@ const backgrounds = {
     arena: "",
     pond: ""
 };
-function drawScenery(ctx) {
+/* function drawScenery(ctx) {
     const now = Date.now();
 
     if (viewArea === "home") {
@@ -2749,6 +2749,64 @@ function drawScenery(ctx) {
     } else if (viewArea === "dungeon") {
         ctx.fillStyle = "#110505";
         ctx.fillRect(0, 475, c.width, 125);
+        ctx.strokeStyle = "#2a1010";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(100, 0); ctx.lineTo(120, 100); ctx.lineTo(80, 200);
+        ctx.stroke();
+    }
+}
+ */
+function drawScenery(ctx) {
+    const now = Date.now();
+    const floorY = c.height - 125; // Adjusted for 1080p
+    const floorH = 125;
+
+    if (viewArea === "home") {
+        ctx.fillStyle = "#252545";
+        ctx.fillRect(0, floorY, c.width, floorH);
+        // Sky is now transparent, stars float in the empty space
+        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+        for(let i=0; i<10; i++) {
+            let x = (i * 100 + (now/50)) % c.width;
+            ctx.fillRect(x, 100 + (i*20), 2, 2);
+        }
+
+    } else if (viewArea === "town") {
+        ctx.fillStyle = "#2f3542";
+        ctx.fillRect(0, floorY, c.width, floorH);
+        
+        ctx.strokeStyle = "#3e4451";
+        for(let i=0; i<c.width; i+=100) {
+            ctx.strokeRect(i, floorY, 100, 50);
+        }
+        // Centered Monument
+        ctx.fillStyle = "#57606f";
+        ctx.fillRect(c.width/2 - 50, floorY - 55, 100, 55);
+
+    } else if (viewArea === "arena") {
+        ctx.fillStyle = "#3d2b1f"; 
+        ctx.fillRect(0, floorY, c.width, floorH);
+        
+        // Note: I removed the stadium walls so your stickmen 
+        // appear to fight directly on your desktop/stream background!
+        
+        ctx.fillStyle = "#2c3e50";
+        ctx.fillRect(c.width/2 - 100, floorY - 55, 200, 55); 
+        ctx.fillStyle = "#f1c40f"; 
+        ctx.fillRect(c.width/2 - 100, floorY - 55, 200, 5);
+
+    } else if (viewArea === "pond") {
+        ctx.fillStyle = "#1a2e1a"; // Grass
+        ctx.fillRect(0, floorY, 250, floorH); 
+        ctx.fillStyle = "#0a2e3a"; // Water
+        ctx.fillRect(250, floorY + 10, c.width - 250, floorH - 10);
+        drawBuyer(ctx);
+
+    } else if (viewArea === "dungeon") {
+        ctx.fillStyle = "#110505";
+        ctx.fillRect(0, floorY, c.width, floorH);
+        // Crack in the "air"
         ctx.strokeStyle = "#2a1010";
         ctx.lineWidth = 4;
         ctx.beginPath();
