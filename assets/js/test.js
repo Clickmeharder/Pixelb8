@@ -2760,7 +2760,7 @@ function drawScenery(ctx) {
 // This wrapper function just organizes the "Background" layer
 function renderScene() {
     // 1. Draw the base sky/wall color
-    ctx.fillStyle = backgrounds[viewArea];
+    //ctx.fillStyle = backgrounds[viewArea];
     ctx.fillRect(0, 0, c.width, c.height);
 
     // 2. Draw the specific props you wrote (Floor, Ripples, Cracks)
