@@ -8,8 +8,6 @@
 const c = document.getElementById("c");
 const areaDisplayDiv = document.getElementById("areaDisplay");
 const ctx = c.getContext("2d");
-c.width = 1920;
-c.height = 1080;
 let mouse = { x: 0, y: 0 };
 let players = {};
 //
@@ -2051,31 +2049,28 @@ function drawProjectiles(ctx) {
 /*----------------------------------------------*/
 
 function updatePhysics(p) {
+    const groundLevel = 450; // Feet will touch the 475 floor line
 
     // --- STATE 1: FALLING (Area Entry) ---
     // This handles the 'drop-in' effect when traveling
-	const groundLevel = c.height - 150; 
-
-    // --- STATE 1: FALLING (Area Entry) ---
     if (p.targetY !== undefined && p.targetY !== null) {
-        // If they are falling into a new area, ensure targetY is also updated
-        // to the new ground level if it was hardcoded to 450 elsewhere.
         if (p.y < p.targetY) {
-            p.y += 15; // Increased falling speed slightly for 1080p scale
+            p.y += 12; // Falling speed
             p.lean = 0.1; 
-            return; 
+            return; // STOP: Don't allow horizontal movement while in mid-air
         } else {
             p.y = p.targetY;
-            p.targetY = null;
+            p.targetY = null; // Successfully landed
             spawnFloater(p, "LANDED!", "#fff");
-            if (window.shakeAmount !== undefined) window.shakeAmount = 8; // Buffed shake for 1080p
+            if (window.shakeAmount !== undefined) window.shakeAmount = 5; // Tiny landing thud
         }
     }
 
     // --- STATE 2: EMERGENCY FLOOR CHECK ---
-    // Pulls them down to the dynamic ground level
+    // If a player somehow ends up at y=150 (the old bug), 
+    // this will pull them down to the actual floor.
     if (!p.targetY && p.y < groundLevel) {
-        p.y += 8; 
+        p.y += 5; 
         if (p.y > groundLevel) p.y = groundLevel;
     }
 
@@ -2090,12 +2085,12 @@ function updatePhysics(p) {
             p.lean = dx > 0 ? 0.2 : -0.2; // Lean into the movement
 
             // Pond Water Interactions
-			if (p.area === "pond") {
-				const shoreLine = c.width * 0.2; // Shore is at 20% of the screen width
-				if ((oldX <= shoreLine && p.x > shoreLine) || (oldX > shoreLine && p.x <= shoreLine)) {
-					if (typeof triggerSplash === "function") triggerSplash(p);
-				}
-			}
+            if (p.area === "pond") {
+                // Trigger splash when crossing the shore line (x=250)
+                if ((oldX <= 250 && p.x > 250) || (oldX > 250 && p.x <= 250)) {
+                    if (typeof triggerSplash === "function") triggerSplash(p);
+                }
+            }
         } else {
             p.x = p.targetX; // Snap exactly to target
             p.lean = 0;
@@ -2696,23 +2691,12 @@ const backgrounds = {
     pond: "#0a1612"
 };
 
-// Add this to your config section
-const sceneryConfig = {
-    floorHeight: 125, // How tall the ground is
-    getFloorY: () => c.height - 125,
-    getPlatformY: () => c.height - 180 // For monuments/pedestals
-};
-
 function drawScenery(ctx) {
     const now = Date.now();
-    const floorY = sceneryConfig.getFloorY();
-    const floorH = sceneryConfig.floorHeight;
 
     if (viewArea === "home") {
         ctx.fillStyle = "#252545";
-        ctx.fillRect(0, floorY, c.width, floorH);
-        
-        // Stars/Dust relative to top
+        ctx.fillRect(0, 475, c.width, 125);
         ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
         for(let i=0; i<10; i++) {
             let x = (i * 100 + (now/50)) % c.width;
@@ -2720,52 +2704,49 @@ function drawScenery(ctx) {
         }
 
     } else if (viewArea === "town") {
-        ctx.fillStyle = "#2f3542"; 
-        ctx.fillRect(0, floorY, c.width, floorH);
-        
+        // --- TOWN SQUARE ---
+        ctx.fillStyle = "#2f3542"; // Paved stones
+        ctx.fillRect(0, 475, c.width, 125);
         // Stone details
         ctx.strokeStyle = "#3e4451";
         for(let i=0; i<c.width; i+=100) {
-            ctx.strokeRect(i, floorY, 100, 50);
+            ctx.strokeRect(i, 475, 100, 50);
         }
-        
-        // Monument Base (Relative to floor)
+        // Central Monument Base
         ctx.fillStyle = "#57606f";
-        ctx.fillRect(c.width/2 - 50, floorY - 55, 100, 55);
+        ctx.fillRect(350, 420, 100, 55);
 
     } else if (viewArea === "arena") {
-        ctx.fillStyle = "#3d2b1f"; 
-        ctx.fillRect(0, floorY, c.width, floorH);
-        
-        // Walls should cover everything above the floor
+        // --- BATTLE ARENA ---
+        ctx.fillStyle = "#3d2b1f"; // Dirt/Sand floor
+        ctx.fillRect(0, 475, c.width, 125);
+        // Background stadium walls
         ctx.fillStyle = "#1e1e1e";
-        ctx.fillRect(0, 0, c.width, floorY); 
-
-        // Pedestal (Centered horizontally, sitting on floor)
-        ctx.fillStyle = "#2c3e50";
-        ctx.fillRect(c.width/2 - 100, floorY - 55, 200, 55); 
-        ctx.fillStyle = "#f1c40f"; 
-        ctx.fillRect(c.width/2 - 100, floorY - 55, 200, 5);
+        ctx.fillRect(0, 200, c.width, 275);
+        // Torch flickers
+        ctx.fillStyle = (now % 200 < 100) ? "#ff9f43" : "#ee5253";
+        ctx.beginPath(); ctx.arc(100, 250, 5, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.arc(700, 250, 5, 0, 7); ctx.fill();
+		// Inside drawScenery for the Arena section
+		ctx.fillStyle = "#2c3e50";
+		ctx.fillRect(300, 420, 200, 55); // Pedestal for the winner
+		ctx.fillStyle = "#f1c40f"; // Gold trim
+		ctx.fillRect(300, 420, 200, 5);
 
     } else if (viewArea === "pond") {
-        ctx.fillStyle = "#1a2e1a"; // Grass
-        ctx.fillRect(0, floorY, 250, floorH); 
-        
-        ctx.fillStyle = "#0a2e3a"; // Water
-        ctx.fillRect(250, floorY + 10, c.width - 250, floorH - 10);
+        ctx.fillStyle = "#1a2e1a";
+        ctx.fillRect(0, 475, 250, 125); 
+        ctx.fillStyle = "#0a2e3a";
+        ctx.fillRect(250, 485, c.width - 250, 115);
         drawBuyer(ctx);
 
     } else if (viewArea === "dungeon") {
         ctx.fillStyle = "#110505";
-        ctx.fillRect(0, floorY, c.width, floorH);
-        
-        // Crack in wall (Relative to center)
+        ctx.fillRect(0, 475, c.width, 125);
         ctx.strokeStyle = "#2a1010";
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(c.width * 0.1, 0); 
-        ctx.lineTo(c.width * 0.12, c.height * 0.2); 
-        ctx.lineTo(c.width * 0.08, c.height * 0.4);
+        ctx.moveTo(100, 0); ctx.lineTo(120, 100); ctx.lineTo(80, 200);
         ctx.stroke();
     }
 }
@@ -3020,11 +3001,7 @@ function updateUI() {
         if (isArena) updateArenaScoreboard();
     }
 }
-const visualConfig = {
-    scale: 1.8, // Increase this to make stickmen/monsters bigger
-    playerHeight: 60, // Base height
-    getScaledHeight: function() { return this.playerHeight * this.scale; }
-};
+
 let frameCount = 0;
 function gameLoop() {
     const now = Date.now();
@@ -3032,12 +3009,6 @@ function gameLoop() {
     
     // 1. Visual Foundation (Shake & Background)
     ctx.save();
-	const zoom = 1.5; 
-    
-    // We translate so the "zoom" anchors to the bottom center
-    ctx.translate(c.width / 2, c.height); 
-    ctx.scale(zoom, zoom);
-    ctx.translate(-c.width / 2, -c.height);
     if (window.shakeAmount > 0) {
         let sx = (Math.random() - 0.5) * window.shakeAmount;
         let sy = (Math.random() - 0.5) * window.shakeAmount;
