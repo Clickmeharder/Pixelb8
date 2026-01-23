@@ -2819,7 +2819,7 @@ function drawScenery(ctx) {
 function renderScene() {
     // 1. Draw the base sky/wall color
     //ctx.fillStyle = backgrounds[viewArea];
-   // ctx.fillRect(0, 0, c.width, c.height);
+   //ctx.fillRect(0, 0, c.width, c.height);
 
     // 2. Draw the specific props you wrote (Floor, Ripples, Cracks)
     drawScenery(ctx);
@@ -3070,7 +3070,8 @@ let frameCount = 0;
 function gameLoop() {
     const now = Date.now();
     frameCount++; 
-    
+    ctx.clearRect(0, 0, c.width, c.height); 
+
     // 1. Visual Foundation (Shake & Background)
     ctx.save();
     if (window.shakeAmount > 0) {
