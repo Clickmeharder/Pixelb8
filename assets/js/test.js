@@ -112,7 +112,7 @@ function loadStats(name) {
         wigColor: null,
         activeTask: null,
 // --- ORGANIZED AREA STATS ---
-        dungeon: { completed,Tiers: 0, highestTier: 0, kills: 0, bossKills: 0, achievements: 0 },
+        dungeon: { completedTiers: [], highestTier: 0, kills: 0, bossKills: 0, achievements: 0 },
         pond:    { visited: false, fishCaught: 0, deepDives: 0, achievements: 0 },
         arena:   { wins: 0, winStreak: 0, totalMatches: 0, achievements:0 },
         story:   { chapter: 0, progress: 0, achievements:0 }
@@ -181,17 +181,11 @@ function loadStats(name) {
         stats.inventory.push("Fishing Rod");
     }
     
-    // --- PATCH MISSING SLOTS FOR OLD PLAYERS ---
-    if (stats.equippedWeapon === undefined) stats.equippedWeapon = null;
-    if (stats.equippedArmor === undefined) stats.equippedArmor = null;
-    if (stats.equippedHelmet === undefined) stats.equippedHelmet = null;
-    if (stats.equippedBoots === undefined) stats.equippedBoots = null;
-    
-    // New patches for the new items!
-    if (stats.equippedPants === undefined) stats.equippedPants = null;
-    if (stats.equippedCape === undefined) stats.equippedCape = null;
-    if (stats.equippedGloves === undefined) stats.equippedGloves = null;
-    if (stats.equippedHair === undefined) stats.equippedHair = null;
+    // Instead of 8 separate if statements, you could do this:
+	const slots = ["Weapon", "Armor", "Helmet", "Boots", "Pants", "Cape", "Gloves", "Hair"];
+	slots.forEach(slot => {
+		if (stats[`equipped${slot}`] === undefined) stats[`equipped${slot}`] = null;
+	});
 
     if (stats.danceLevel === undefined) stats.danceLevel = 1;
     if (stats.danceXP === undefined) stats.danceXP = 0;
