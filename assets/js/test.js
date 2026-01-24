@@ -269,19 +269,18 @@ function checkAchievements(p) {
 	// 2. Generic Tier Achievements (Dungeon)
     if (!s.dungeon.completedTiers) s.dungeon.completedTiers = [];
 
-    for (let t = 1; t <= 10; t++) {
-        // We use highestTier to see progress, and completedTiers to prevent double-rewards
-        if (s.dungeon.highestTier >= t && !s.dungeon.completedTiers.includes(t)) {
-            s.dungeon.completedTiers.push(t);
-            s.inventory.push("Achievement Trophy");
-            unlockedAny = true;
-            announceAchievement(p, `Tier ${t} Mastery`);
-        }
-    } 
+	for (let t = 1; t <= 10; t++) {
+		if (s.dungeon.highestTier >= t && !s.dungeon.completedTiers.includes(t)) {
+			s.dungeon.completedTiers.push(t);
+			s.inventory.push("Achievement Trophy");
+			unlockedAny = true;
+			announceAchievement(p, `Tier ${t} Mastery`);
+		}
+	}
 
     return unlockedAny;
 }
-
+localStorage.removeItem("rpg_jaedraze");
 // Helper to keep code clean
 function announceAchievement(p, label) {
     spawnFloater(p, `🏆 UNLOCKED: ${label}`, "#ffcc00");
@@ -1653,23 +1652,6 @@ function spawnWave() {
     
 
 	dungeonTier = getTierFromWave(dungeonWave);
-
-	Object.values(players).forEach(p => {
-		if (p.area === "dungeon" && !p.dead) {
-			// Ensure the stat exists
-			if (!p.stats.dungeon) p.stats.dungeon = { highestTier: 0 };
-			
-			// ONLY trigger if the player has actually reached a NEW tier
-			if (dungeonTier > p.stats.dungeon.highestTier) {
-				p.stats.dungeon.highestTier = dungeonTier;
-				
-				// This is the important part: explicitly check achievements
-				// now that the tier has officially increased.
-				checkAchievements(p);
-				saveStats(p); // Force a save so they don't lose the trophy
-			}
-		}
-	});
     const waveSize = Math.floor(2 + (dungeonWave / 2) + (partySize - 1));
     const types = ["Slime", "StickmanHunter", "Grumble", "VoidWalker"];
 
@@ -1715,8 +1697,30 @@ function spawnWave() {
 
 function checkDungeonProgress() {
     if (!dungeonActive) return;
+    
     let aliveEnemies = enemies.filter(e => !e.dead).length;
     if (aliveEnemies === 0 && (!boss || boss.dead)) {
+        
+        // CHECK COMPLETION BEFORE INCREMENTING WAVE
+        const tierFinished = getTierFromWave(dungeonWave);
+        const isCompletionWave = (dungeonWave % 5 === 0);
+
+        if (isCompletionWave) {
+            Object.values(players).forEach(p => {
+                if (p.area === "dungeon" && !p.dead) {
+                    // Update player's highest tier record
+                    if (tierFinished > p.stats.dungeon.highestTier) {
+                        p.stats.dungeon.highestTier = tierFinished;
+                        
+                        // Now check achievements—it will find the new tier!
+                        checkAchievements(p);
+                        saveStats(p);
+                    }
+                }
+            });
+            systemMessage(`⭐ Tier ${tierFinished} Cleared!`);
+        }
+
         dungeonWave++; 
         spawnWave();
     }
