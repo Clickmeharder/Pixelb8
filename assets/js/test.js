@@ -251,13 +251,16 @@ function checkAchievements(p) {
     const s = p.stats;
     let unlockedAny = false;
 
-    // 1. Check Unique Achievements from the DB
     Object.keys(ACHIEVEMENT_DB).forEach(itemName => {
         const goal = ACHIEVEMENT_DB[itemName];
         
-        // Check if they already own it (Inventory or any Equipped slot)
-        const owned = s.inventory.includes(itemName) || 
-                      Object.values(s.equipped || {}).includes(itemName);
+        const equippedItems = [
+            s.equippedWeapon, s.equippedArmor, s.equippedHelmet, 
+            s.equippedBoots, s.equippedPants, s.equippedCape, 
+            s.equippedGloves, s.equippedHair
+        ];
+
+        const owned = s.inventory.includes(itemName) || equippedItems.includes(itemName);
 
         if (goal.check(s) && !owned) {
             s.inventory.push(itemName);
@@ -266,21 +269,21 @@ function checkAchievements(p) {
         }
     });
 
-	// 2. Generic Tier Achievements (Dungeon)
-    if (!s.dungeon.completedTiers) s.dungeon.completedTiers = [];
-
-	for (let t = 1; t <= 10; t++) {
-		if (s.dungeon.highestTier >= t && !s.dungeon.completedTiers.includes(t)) {
-			s.dungeon.completedTiers.push(t);
-			s.inventory.push("Achievement Trophy");
-			unlockedAny = true;
-			announceAchievement(p, `Tier ${t} Mastery`);
-		}
-	}
-
     return unlockedAny;
 }
+// Replace the dungeon section of checkAchievements with this specific function
+function rewardTierMastery(p, tier) {
+    const s = p.stats;
+    if (!s.dungeon.completedTiers) s.dungeon.completedTiers = [];
 
+    // ONLY reward if they haven't cleared THIS specific tier before
+    if (!s.dungeon.completedTiers.includes(tier)) {
+        s.dungeon.completedTiers.push(tier);
+        s.inventory.push("Achievement Trophy");
+        announceAchievement(p, `Tier ${tier} Mastery`);
+        saveStats(p); 
+    }
+}
 // Helper to keep code clean
 function announceAchievement(p, label) {
     spawnFloater(p, `🏆 UNLOCKED: ${label}`, "#ffcc00");
@@ -1701,27 +1704,27 @@ function checkDungeonProgress() {
     let aliveEnemies = enemies.filter(e => !e.dead).length;
     if (aliveEnemies === 0 && (!boss || boss.dead)) {
         
-        // CHECK COMPLETION BEFORE INCREMENTING WAVE
-        const tierFinished = getTierFromWave(dungeonWave);
         const isCompletionWave = (dungeonWave % 5 === 0);
 
         if (isCompletionWave) {
+            // dungeonTier is already set to the current tier in spawnWave
+            const tierJustFinished = dungeonTier; 
+
             Object.values(players).forEach(p => {
                 if (p.area === "dungeon" && !p.dead) {
-                    // Update player's highest tier record
-                    if (tierFinished > p.stats.dungeon.highestTier) {
-                        p.stats.dungeon.highestTier = tierFinished;
-                        
-                        // Now check achievements—it will find the new tier!
-                        checkAchievements(p);
-                        saveStats(p);
+                    // 1. Update persistent record
+                    if (tierJustFinished > p.stats.dungeon.highestTier) {
+                        p.stats.dungeon.highestTier = tierJustFinished;
                     }
+                    // 2. Trigger the one-time reward
+                    rewardTierMastery(p, tierJustFinished);
                 }
             });
-            systemMessage(`⭐ Tier ${tierFinished} Cleared!`);
+            systemMessage(`⭐ Tier ${tierJustFinished} Cleared!`);
         }
 
         dungeonWave++; 
+        // spawnWave will now update the global dungeonTier once for the next set of waves
         spawnWave();
     }
 }
