@@ -292,7 +292,7 @@ const ITEM_DB = {
 	"Skilled Swimmer Cape": { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#3b3b3b" },
 	"99 Tier Cape":         { type:"cape",style:"cape",sources:"achievement",  tier: 99, rarity: 1, value: 10000, color: "#ffd700" },
     "Cloak":                { type:"cape",style:"cloak",sources:"dungeon",     tier: 5, rarity: 10, value: 10000, color: "gray" },
-	"Achievement Trophy": { type: "material", sources: "achievement", tier: 1, rarity: 1, value: 500, color: "gold", description: "A mark of your progress." },
+	"Achievement Trophy": { type: "material", sources:"trophy", tier: 1, rarity: 1, value: 500, color: "gold", description: "A mark of your progress." },
 	
 // hair
 	"hair1": { type: "hair", style: "mohawk",      sources:"dungeon",  tier: 9, rarity: 1, color: "#ff69b4" },// pink mohawk
