@@ -1589,7 +1589,7 @@ function joinDungeonQueue(p) {
                 const selector = document.getElementById("view-area-selector");
                 if (selector) selector.value = "dungeon";
                 
-                areaDisplayDiv.textContent = "StickmenFall: Dungeon (starting!)";
+                areaDisplayDiv.textContent = "Dungeon";
                 systemMessage("System: Sending vanguard to the dungeon floor...");
 
                 dungeonQueue.forEach(name => {
@@ -1639,9 +1639,9 @@ function startDungeon() {
     dungeonWave = 1; 
     dungeonTier = getTierFromWave(dungeonWave);
     
-    areaDisplayDiv.textContent = "StickmenFall: Dungeon Wave " + dungeonWave;
+    areaDisplayDiv.textContent = "Wave " + dungeonWave, "T" + dungeonTier;
     systemMessage("The Dungeon Gates have opened! The monsters are here!");
-
+    enemies = [];
     dungeonQueue = []; 
     spawnWave();
 }
@@ -2970,7 +2970,7 @@ function updateArenaScoreboard() {
 }
 function updateUI() {
     // 1. Area Header
-    updateText("areaDisplay", "StickmenFall:" + viewArea);
+    updateText("areaDisplay", viewArea);
 
     // 2. DUNGEON UI
     const isDungeon = (viewArea === "dungeon");
