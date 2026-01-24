@@ -4256,11 +4256,11 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
             addItemToPlayer(target, item);
             return;
         }
-        if (cmd === "showhome" || cmd = "home") { viewArea = "home"; return; }
-        if (cmd === "showdungeon" || cmd = "dungeon") { viewArea = "dungeon"; return; }
-        if (cmd === "showpond" || cmd = "pond") { viewArea = "pond"; return; }
-        if (cmd === "showarena" || cmd = "arena") { viewArea = "arena"; return; }
-		if (cmd === "showtown" || cmd = "town") { viewArea = "town"; return; }
+        if (cmd === "showhome" || cmd === "home") { viewArea = "home"; return; }
+        if (cmd === "showdungeon" || cmd === "dungeon") { viewArea = "dungeon"; return; }
+        if (cmd === "showpond" || cmd === "pond") { viewArea = "pond"; return; }
+        if (cmd === "showarena" || cmd === "arena") { viewArea = "arena"; return; }
+		if (cmd === "showtown" || cmd === "town") { viewArea = "town"; return; }
         if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[Pond] Merchant spawned."); return; }
         if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[Pond] Merchant removed."); return; }
         if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
