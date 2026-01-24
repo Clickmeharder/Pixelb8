@@ -28,31 +28,51 @@ function systemMessage(text) {
 }
 //        IDLE ACTION MESSAGES
 // ( big bottom right ext box )
+let idleBoxFadeTimeout = null;
+
 function idleActionMsg(playerName, text, color = "#0f0") {
     const box = document.getElementById("idleActionsBox");
     if (!box) return;
 
+    // 1. Create the entry
     const entry = document.createElement("div");
     entry.style.marginBottom = "3px";
-    entry.style.borderLeft = `3px solid ${color}`; // Color is used for the line
+    entry.style.borderLeft = `3px solid ${color}`;
     entry.style.paddingLeft = "8px";
     entry.style.fontFamily = "monospace";
     
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-    // The color variable is only used inside the style attribute here
     entry.innerHTML = `
         <span style="color: #666; font-size: 11px;">[${time}]</span> 
         <strong style="color: ${color};">${playerName}:</strong> 
         <span style="color: #bbb;">${text}</span>
     `;
 
+    // 2. Add to box and scroll
     box.appendChild(entry);
     box.scrollTop = box.scrollHeight;
 
     if (box.childNodes.length > 50) {
         box.removeChild(box.firstChild);
     }
+
+    // 3. THE "POP & FADE" LOGIC
+    // Bring the box to life
+    box.classList.add("active");
+
+    // Clear any existing timer so it doesn't fade too early
+    if (idleBoxFadeTimeout) {
+        clearTimeout(idleBoxFadeTimeout);
+    }
+
+    // Set a timer to hide the box after 5 seconds of inactivity
+    idleBoxFadeTimeout = setTimeout(() => {
+        box.classList.remove("active");
+        
+        // Optional: Clear old messages when it fades out to keep it fresh
+        // setTimeout(() => { box.innerHTML = ""; }, 500); 
+    }, 5000); 
 }
 /* ====grr============= CONFIG & STATE ================== */
 // we can change these [ basically options ] 
