@@ -280,7 +280,7 @@ function checkAchievements(p) {
 
     return unlockedAny;
 }
-localStorage.removeItem("rpg_jaedraze");
+//localStorage.removeItem("rpg_jaedraze");
 // Helper to keep code clean
 function announceAchievement(p, label) {
     spawnFloater(p, `🏆 UNLOCKED: ${label}`, "#ffcc00");
