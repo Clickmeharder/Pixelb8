@@ -112,14 +112,21 @@ function loadStats(name) {
         wigColor: null,
         activeTask: null,
 // --- ORGANIZED AREA STATS ---
-        dungeon: { highestTier: 0, kills: 0, bossKills: 0, achievements: 0 },
+        dungeon: { completed,Tiers: 0, highestTier: 0, kills: 0, bossKills: 0, achievements: 0 },
         pond:    { visited: false, fishCaught: 0, deepDives: 0, achievements: 0 },
         arena:   { wins: 0, winStreak: 0, totalMatches: 0, achievements:0 },
         story:   { chapter: 0, progress: 0, achievements:0 }
     };
 
     // --- SAFETY CHECKS (Ensure objects exist for old saves) ---
-    if (!stats.dungeon) stats.dungeon = { highestTier: 0, kills: 0, bossKills: 0, achievements:0 };
+    if (!stats.dungeon) {
+		stats.dungeon = { highestTier: 0, kills: 0, bossKills: 0, achievements: 0, completedTiers: [] };
+	}
+
+	// Add this line to handle existing players who have a dungeon object but no array yet
+	if (!stats.dungeon.completedTiers) {
+		stats.dungeon.completedTiers = [];
+	}
     if (!stats.pond)    stats.pond = { visited: false, fishCaught: 0, deepDives: 0, achievements:0 };
     if (!stats.arena)   stats.arena = { wins: 0, winStreak: 0, totalMatches: 0, achievements:0 };
     if (!stats.story)   stats.story = { chapter: 0, progress: 0, achievements:0 };
@@ -265,17 +272,18 @@ function checkAchievements(p) {
         }
     });
 
-    // 2. Generic Tier Achievements (Dungeon)
+	// 2. Generic Tier Achievements (Dungeon)
     if (!s.dungeon.completedTiers) s.dungeon.completedTiers = [];
 
     for (let t = 1; t <= 10; t++) {
+        // We use highestTier to see progress, and completedTiers to prevent double-rewards
         if (s.dungeon.highestTier >= t && !s.dungeon.completedTiers.includes(t)) {
             s.dungeon.completedTiers.push(t);
             s.inventory.push("Achievement Trophy");
             unlockedAny = true;
             announceAchievement(p, `Tier ${t} Mastery`);
         }
-    }
+    } 
 
     return unlockedAny;
 }
@@ -1649,19 +1657,25 @@ function spawnWave() {
     const partySize = Object.values(players).filter(p => p.area === "dungeon" && !p.dead).length || 1;
     const isBossWave = (dungeonWave % 5 === 0);
     
-    // Sync global tier with current wave
-    dungeonTier = getTierFromWave(dungeonWave);
 
-    // Update Player Stats and check achievements
-    Object.values(players).forEach(p => {
-        if (p.area === "dungeon" && !p.dead) {
-            if (dungeonTier > (p.stats.dungeon.highestTier || 0)) {
-                p.stats.dungeon.highestTier = dungeonTier;
-                if (typeof checkAchievements === "function") checkAchievements(p); 
-            }
-        }
-    });
+	dungeonTier = getTierFromWave(dungeonWave);
 
+	Object.values(players).forEach(p => {
+		if (p.area === "dungeon" && !p.dead) {
+			// Ensure the stat exists
+			if (!p.stats.dungeon) p.stats.dungeon = { highestTier: 0 };
+			
+			// ONLY trigger if the player has actually reached a NEW tier
+			if (dungeonTier > p.stats.dungeon.highestTier) {
+				p.stats.dungeon.highestTier = dungeonTier;
+				
+				// This is the important part: explicitly check achievements
+				// now that the tier has officially increased.
+				checkAchievements(p);
+				saveStats(p); // Force a save so they don't lose the trophy
+			}
+		}
+	});
     const waveSize = Math.floor(2 + (dungeonWave / 2) + (partySize - 1));
     const types = ["Slime", "StickmanHunter", "Grumble", "VoidWalker"];
 
@@ -1758,7 +1772,7 @@ function closeDungeon(reason) {
     Object.values(players).forEach(p => {
         if (p.area === "dungeon") {
             p.area = "town";
-            p.x = 400; p.y = 450;
+            p.x = 400; p.y = 550;
             p.activeTask = "none";
         }
     });
@@ -2886,43 +2900,45 @@ function updateSystemTicks(now) {
 }
 
 function updateDungeonScoreboard() {
-    // 1. Update Party HP List
-    const partyDwellers = Object.values(players).filter(p => p.area === "dungeon");
+    const partyList = document.getElementById("dungeon-party-list");
+    const enemyList = document.getElementById("dungeon-enemy-list");
     
+    // 1. Clear the enemy list entirely before re-rendering 
+    // This prevents "ghost" enemies from previous waves staying on screen
+    if (enemyList) enemyList.innerHTML = "";
+
+    // 2. Update Party HP List
+    const partyDwellers = Object.values(players).filter(p => p.area === "dungeon");
     partyDwellers.forEach(p => {
-        const hpPct = Math.floor((p.hp / p.maxHp) * 100);
+        const hpPct = Math.max(0, Math.floor((p.hp / p.maxHp) * 100));
         const statusClass = dungeonUIConfig.getStatusClass(hpPct, p.dead);
         const displayText = `${p.name}: ${hpPct}%`;
         
-        // Sync creates the element if missing and updates text
         syncUI(`party-${p.name}`, displayText, "dungeon-party-list");
-        
-        // Update the color/class
         const el = document.getElementById(`party-${p.name}`);
         if (el && el.className !== statusClass) el.className = statusClass;
     });
 
-    // 2. Update Wave & Enemies if active
+    // 3. Update Wave & Enemies
     const waveBox = document.getElementById("dungeon-wave-section");
     if (dungeonActive) {
         waveBox.style.display = "block";
-        
-        const tier = Math.floor((dungeonWave - 1) / 5) + 1;
-        updateText("dungeon-wave-display", dungeonUIConfig.labels.wave(dungeonWave, tier));
+        updateText("dungeon-wave-display", dungeonUIConfig.labels.wave(dungeonWave, dungeonTier));
 
-        // Boss Logic
         const bossEl = document.getElementById("dungeon-boss-hp");
         if (boss && !boss.dead) {
             bossEl.style.display = "block";
-            bossEl.textContent = dungeonUIConfig.labels.boss(Math.floor((boss.hp/boss.maxHp)*100));
+            bossEl.textContent = dungeonUIConfig.labels.boss(Math.max(0, Math.floor((boss.hp/boss.maxHp)*100)));
         } else {
             bossEl.style.display = "none";
         }
 
-        // Enemy List
+        // Only show enemies that are NOT dead
         enemies.filter(e => !e.dead).forEach((e, idx) => {
-            const txt = `${e.name}: ${Math.floor((e.hp/e.maxHp)*100)}%`;
-            syncUI(`enemy-${idx}`, txt, "dungeon-enemy-list");
+            const div = document.createElement("div");
+            div.className = "hp-healthy";
+            div.textContent = `${e.name}: ${Math.max(0, Math.floor((e.hp/e.maxHp)*100))}%`;
+            enemyList.appendChild(div);
         });
     } else {
         waveBox.style.display = "none";
@@ -3358,9 +3374,13 @@ function renderAchievements(playerObj) {
     // 1. Render Uniques from DB
     Object.keys(ACHIEVEMENT_DB).forEach(itemName => {
         const goal = ACHIEVEMENT_DB[itemName];
-        const hasIt = s.inventory.includes(itemName) || 
-                      Object.values(s.equipped || {}).includes(itemName);
-        
+        const equippedItems = [
+			s.equippedWeapon, s.equippedArmor, s.equippedHelmet, 
+			s.equippedBoots, s.equippedPants, s.equippedCape, 
+			s.equippedGloves, s.equippedHair
+		];
+
+		const hasIt = s.inventory.includes(itemName) || equippedItems.includes(itemName);
         const itemData = ITEM_DB[itemName] || { color: "#fff" };
 
         renderAchRow(

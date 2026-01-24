@@ -249,8 +249,8 @@
         #areaDisplay { position:absolute; bottom:0px;right: 3%; transform:translateX(-5%); color:#0ff; font-size:13px; background:rgba(0,0,0,0.8); padding:5px 15px; border: 1px solid #0ff; text-transform: uppercase; }
 		#input-wrapper {
 			position: absolute;
-			bottom: 40px;
-			right: 16px;
+			top: 40%;
+			left: 5px;
 			display: flex;
 			width: 512px;
 			flex-direction: column;
@@ -275,9 +275,22 @@
 			border-radius: 6px;
 		}
 		input#browserColorPicker {width: 15px;}
-		#action-bar {display: flex;gap: 3px;background: rgba(0, 0, 0, 0.8);padding: 3px;border-radius: 12px;border: 2px solid #444;z-index: 1000;flex-wrap: wrap;}
+		#action-bar {
+			display: flex;
+			gap: 1px;
+			background: rgba(0, 0, 0, 0.8);
+			padding: 1px;
+			border-radius: 12px;
+			border: 2px solid #444;
+			z-index: 1000;
+			flex-wrap: wrap;
+		}
 		.select-enhanced{
 			height: 19px;
+		}
+		input#browserChatInput {
+			padding: 0px;
+			width: 65%;
 		}
 		select#profileSelector {
 			background:#333;
@@ -746,6 +759,16 @@
 
 		#idleActionsBox div {
 			animation: msgPop 0.3s ease-out forwards;
+		}
+		.ach-row.locked {
+			background: rgba(0, 0, 0, 0.2);
+			border: 1px dashed #444;
+			filter: grayscale(0.8); /* Makes the whole row look "disabled" */
+		}
+
+		.ach-row.unlocked {
+			background: rgba(255, 204, 0, 0.1);
+			border: 1px solid #ffcc00;
 		}
     </style>
 </head>
