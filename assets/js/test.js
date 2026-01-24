@@ -280,8 +280,6 @@ function checkAchievements(p) {
 
     return unlockedAny;
 }
-localStorage.removeItem("rpg_jaedraze");
-localStorage.removeItem("rpg_JaeDraze");
 
 // Helper to keep code clean
 function announceAchievement(p, label) {
@@ -4426,3 +4424,5 @@ document.addEventListener("DOMContentLoaded", () => {
 //==========================
 //RUNNING ON LOAD
 gameLoop();
+//localStorage.removeItem("rpg_jaedraze");
+//localStorage.removeItem("rpg_JaeDraze");
