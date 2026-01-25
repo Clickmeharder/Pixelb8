@@ -301,6 +301,10 @@
 			flex-wrap: wrap;
 			opacity: 0.0;
 		}
+		#action-bar:hover {opacity:0.08;}
+		#action-bar:focus-within {
+			opacity: 0.6 !important;
+		}
 		.select-enhanced{
 			height: 19px;
 		}
@@ -313,10 +317,8 @@
 		}
 		#action-bar button {background: #333;color: white;border: 1px solid #555;padding: 1px 1px;cursor: pointer;border-radius: 6px;font-size: 10px;font-family: monospace;transition: all 0.2s;}
 
-		#action-bar button:hover {background: #555;border-color: #00ffff; opacity:0.8;}
-		#input-wrapper:focus-within {
-			opacity: 0.6 !important;
-		}
+		#action-bar button:hover {background: #555;border-color: #00ffff;}
+
 		#action-bar button.danger {color: #ff4444;}
 
 		#action-bar .separator {width: 2px;background: #555;margin: 0 5px;}
