@@ -2096,9 +2096,10 @@ function updatePhysics(p) {
 
     // --- STATE 4: SEPARATION (Crowd Control) ---
     // Only resolve crowding if the player is actually on the ground
-    if (p.y >= groundLevel) {
+/*     if (p.y >= groundLevel) {
         resolveCrowding(p);
-    }
+    } */
+	resolveCrowding(p);
 }
 function resolveCrowding(p) {
     const bubble = 35; // Increased slightly for clarity
