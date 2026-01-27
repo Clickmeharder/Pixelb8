@@ -232,90 +232,22 @@
         #stickmenfall-systemMsgBox { position:absolute; top:10px; left:10px; width:300px; font-size:13px; pointer-events:none; }
 
 		.sysMsg { background:rgba(0,0,0,0.7); color:#0f0; padding:5px; margin-bottom:4px; border-radius:4px; border-left: 3px solid #0f0; animation: fadeout 8s forwards; }
-		#idleActionsBox {
-		position: fixed;top: 1%;
-		left: 29%;
-		width: 420px;
-		height: 7px;
-		background: rgba(0, 0, 0, 0.7);
-		color: #0f0;
-		font-family: monospace;
-		font-size: 12px;
-		overflow-y: auto;
-		padding: 10px;
-		padding-bottom: 0px;border: 1px solid #333;opacity: 0;pointer-events: none;transition: opacity 0.5s ease-in-out, transform 0.3s ease-out;}
+		#idleActionsBox {position: fixed;top: 1%;left: 29%;width: 420px;height: 7px;background: rgba(0, 0, 0, 0.7);color: #0f0;font-family: monospace;font-size: 12px;overflow-y: auto;padding: 10px;padding-bottom: 0px;border: 1px solid #333;opacity: 0;pointer-events: none;transition: opacity 0.5s ease-in-out, transform 0.3s ease-out;}
 		#idleActionsBox.active {opacity: 0.9;transform: scale(1);  /* Normal size */}
-        #tooltip { position: absolute; pointer-events: none; background: rgba(0,0,0,0.9); color: #fff; padding: 8px; border-radius: 4px; border: 1px solid #0ff; font-size: 13px; display: none; z-index: 100; }		
-        #areaDisplay {
-			position: absolute;
-			bottom: 7%;
-			left: 1%;
-			transform: translateX(-5%);
-			color: #0ff;
-			font-size: 13px;
-			background: rgba(0, 0, 0, 0.8);
-			padding: 5px 15px;
-			border: 1px solid #0ff;
-			text-transform: uppercase;
-			opacity: 0.6;
-		}
-		#input-wrapper {
-			position: absolute;
-			top: 6%;
-			left: 5px;
-			display: flex;
-			width: 512px;
-			flex-direction: column;
-			flex-wrap: wrap;
-			align-items: flex-start;
-			opacity: 0.0;
-			transition: opacity 2.3s ease-out;
-		}
+        
+        #areaDisplay {position: absolute;bottom: 7%;left: 1%;transform: translateX(-5%);color: #0ff;font-size: 13px;background: rgba(0, 0, 0, 0.8);padding: 5px 15px;border: 1px solid #0ff;text-transform: uppercase;opacity: 0.6;}
+		#input-wrapper {position: absolute;top: 6%;left: 5pxdisplay: flex;width: 512px;flex-direction: column;flex-wrap: wrap;align-items: flex-start;opacity: 0.0;transition: opacity 2.3s ease-out;}
 		#input-wrapper:hover { opacity:0.98;transition: opacity 0.8s ease-out}
 		/* When any input/select inside the wrapper is clicked or typed in */
-		#input-wrapper:focus-within {
-			opacity: 0.8 !important;
-		}
-		#stickmencmdInput {
-			flex-direction: row;
-			background: #222;
-			width: 92%;
-			margin-left: 9px;
-			padding: 0px;
-			padding-left: 8px;
-			padding-right: 8px;
-			border-radius: 6px;
-		}
+		#input-wrapper:focus-within {opacity: 0.8 !important;}
+		#stickmencmdInput {flex-direction: row;background: #222;width: 92%;margin-left: 9px;padding-left: 8px;padding-right: 8px;border-radius: 6px;}
 		input#browserColorPicker {width: 15px;}
-		#action-bar {
-			display: flex;
-			position: absolute;
-			top: 0.5%;
-			left: 1%;
-			gap: 1px;
-			background: rgba(0, 0, 0, 0.8);
-			padding: 1px;
-			border-radius: 12px;
-			border: 2px solid #444;
-			z-index: 1000;
-			flex-wrap: wrap;
-			opacity: 0.0;
-			transition: opacity 2.3s ease-out;
-		}
+		#action-bar {display: flex;position: absolute;top: 0.5%;left: 1%;gap: 1px;padding: 1px;border-radius: 12px;border: 2px solid #444;z-index: 1000;flex-wrap: wrap;opacity: 0.0;transition: opacity 2.3s ease-out;}
 		#action-bar:hover {opacity:0.8;}
-		#action-bar:focus-within {
-			opacity: 0.7 !important;
-		}
-		.select-enhanced{
-			height: 19px;
-		}
-		input#browserChatInput {
-			padding: 0px;
-			width: 65%;
-		}
-		select#profileSelector {
-			background:#333;
-		}
+		#action-bar:focus-within {opacity: 0.7 !important;}
+		.select-enhanced{height: 19px;}
+		input#browserChatInput {padding: 0px;width: 65%;}
+		select#profileSelector {background:#333;}
 		#action-bar button {background: #333;color: white;border: 1px solid #555;padding: 1px 1px;cursor: pointer;border-radius: 6px;font-size: 10px;font-family: monospace;transition: all 0.2s;}
 
 		#action-bar button:hover {background: #555;border-color: #00ffff;}
@@ -323,164 +255,52 @@
 		#action-bar button.danger {color: #ff4444;}
 
 		#action-bar .separator {width: 2px;background: #555;margin: 0 5px;}
-		#view-area-selector {
-			background: #333;
-			color: #ceae33;
-			border: 1px solid #555;
-			padding: 5px;
-			border-radius: 4px;
-			font-family: monospace;
-			cursor: pointer;
-			outline: none;
-		}
+		#view-area-selector {background: #333;border: 1px solid #555;padding: 5px;border-radius: 4px;cursor: pointer;outline: none;}
 
-		#view-area-selector option {
-			background: #222;
-			color: white;
-		}
-		#inventory-modal {
-			position: absolute;
-			display: flex;
-			top: 10%;
-			left: 41px;
-			width: 200px;
-			height: 300px;
-			/* max-height: 67vh; */
-			/* overflow: hidden; */
-			/* resize: both; */
-			/* padding: 12px; */
-			flex-direction: column;
-			flex-wrap: wrap;
-			z-index: 2000;
-		}
+		#view-area-selector option {background: #222;color: white;}
+		#inventory-modal {position: absolute;display: flex;top: 10%;left: 41px;width: 200px;height: 300px;/* max-height: 67vh; *//* overflow: hidden; *//* resize: both; *//* padding: 12px; */flex-direction: column;flex-wrap: wrap;z-index: 2000;}
 		#inventory-modal h3{ background: #4444;}
 		.hidden { display: none !important; }
 
-		.modal-content {
-			background: #222;
-			border: 2px solid #555;
-			/* width: 100%; */
-			/* height: 100%; */
-			padding: 3px;
-			/* display: flex; */
-			border-radius: 10px;
-			font-family: monospace;
-			color: white;
-			color: #fafffead;
-		}
+		.modal-content {background: #222;border: 2px solid #555;/* width: 100%; *//* height: 100%; */padding: 3px;/* display: flex; */border-radius: 10px;font-family: monospace;color: white;color: #fafffead;}
 		.modal-header {display: flex;justify-content: space-between;border-bottom: 1px solid #444;margin-bottom: 3px;}
 		h2#inv-player-name {margin: 0;}
 
 
-		.inventory-layout {
-			display: grid;
-			grid-template-columns: 2fr 3fr;
-			gap: 4px;
-			height: 85%;
-			width: 97%;
-			min-width: 350px;
-			max-width: 732px;
-			min-height: 236px;
-			max-height: 342px;
-			overflow: hidden;
-			resize: both;
-			padding: 4px;
-		}
-		
+		.inventory-layout {display: grid;grid-template-columns: 2fr 3fr;gap: 4px;height: 85%;width: 97%;min-width: 350px;max-width: 732px;min-height: 236px;max-height: 342px;overflow: hidden;resize: both;padding: 4px;}
+
 		/* Ensure the tab containers fill the space */
-		#backpack-Tab, #achievements-tab, #stats-tab {
-			display: flex;
-			flex-direction: column;
-			height: 70%;
-			background: #222;
-			border-bottom-left-radius:15px;
-			border-bottom-right-radius:15px;
-		}
-		.equipped-section {
-			height: 95%;
-		}
-		.backpack-section {
-			max-height: 95%;
-			height: 95%;
-			overflow: hidden;
-		}
+		#backpack-Tab, #achievements-tab, #stats-tab {display: flex;flex-direction: column;height: 70%;background: #222;border-bottom-left-radius:15px;border-bottom-right-radius:15px;}
+		.equipped-section {height: 95%;}
+		.backpack-section {max-height: 95%;height: 95%;overflow: hidden;}
 		/* Specific filter styling inside the backpack tab */
-		#inventory-filters {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 4px;
-			background: rgba(0, 0, 0, 0.3);
-			padding: 2px;
-			margin-bottom: 2px;
-			border-radius: 4px;
-			justify-content: center;
-			align-items: center;
-		}
+		#inventory-filters {display: flex;flex-wrap: wrap;gap: 4px;background: rgba(0, 0, 0, 0.3);padding: 2px;margin-bottom: 2px;border-radius: 4px;justify-content: center;align-items: center;}
 
 		/* Grid Styling */
-		#backpack-grid, #equipped-grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
-			gap: 1px;
-			background: #111;
-			padding: 2px;
-			border-radius: 5px;
-			height: auto;
-			overflow: hidden;
-			overflow-y: auto;}
-		#backpack-grid {
-			/*height: ;*/
-			
-			justify-items: stretch;
-		}
+		#backpack-grid, #equipped-grid {display: grid;grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));gap: 1px;background: #111;padding: 2px;border-radius: 5px;height: auto;overflow: hidden;overflow-y: auto;}
+		#backpack-grid {justify-items: stretch;}
 		/* 1. Define the width and behavior of the scrollbar area */
 		#backpack-grid::-webkit-scrollbar, 
 		#achievements-grid::-webkit-scrollbar,
-		#stats-grid::-webkit-scrollbar {
-			width: 8px;               /* Width of the vertical scrollbar */
-			display: block;           /* Ensures it stays visible */
-		}
+		#stats-grid::-webkit-scrollbar {width: 8px; /* Width of the vertical scrollbar */display: block; /* Ensures it stays visible */}
 
 		/* 2. Style the background track (the part the thumb slides on) */
 		#backpack-grid::-webkit-scrollbar-track,
 		#achievements-grid::-webkit-scrollbar-track,
-		#stats-grid::-webkit-scrollbar-track {
-			background: #050505;      /* Slightly darker than your grid background */
-			border-radius: 5px;
-		}
+		#stats-grid::-webkit-scrollbar-track {background: #050505;      /* Slightly darker than your grid background */border-radius: 5px;}
 
 		/* 3. Style the "Thumb" (the part the user drags) */
 		#backpack-grid::-webkit-scrollbar-thumb,
 		#achievements-grid::-webkit-scrollbar-thumb,
-		#stats-grid::-webkit-scrollbar-thumb {
-			background: #444;         /* Grey thumb */
-			border: 2px solid #111;   /* Creates a gap effect around the thumb */
-			border-radius: 10px;
-		}
+		#stats-grid::-webkit-scrollbar-thumb {background: #444;/* Grey thumb */border: 2px solid #111; /* Creates a gap effect around the thumb */border-radius: 10px;}
 
 		/* 4. Thumb Hover state */
 		#backpack-grid::-webkit-scrollbar-thumb:hover,
 		#achievements-grid::-webkit-scrollbar-thumb:hover,
-		#stats-grid::-webkit-scrollbar-thumb:hover {
-			background: #ffcc00;      /* Gold color on hover to match your active tabs */
-		}
-		.inv-slot {
-			width: 67px;
-			height: 39px;
-			/* flex: 1; */
-			background: #333;
-			border: 1px solid #555;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			font-size: 0.76em;
-			font-weight: bold;
-			cursor: pointer;
-			position: relative;
-			text-align: center;
-			overflow: hidden;
-		}
+		#stats-grid::-webkit-scrollbar-thumb:hover {background: #ffcc00;      /* Gold color on hover to match your active tabs */}
+		.inv-slot {width: 67px;height: 39px;/* flex: 1; */
+			background: #333;border: 1px solid #555;display: flex;flex-direction: column;align-items: center;justify-content: center;font-size: 0.76em;font-weight: bold;
+			cursor: pointer;position: relative;text-align: center;overflow: hidden;}
 		.inv-slot:hover { border-color: #00ffff; background: #444; }
 		.inv-slot.empty { opacity: 0.3; cursor: default; }
 
@@ -491,287 +311,115 @@
 		#pixels-display {margin:auto;margin-left:6px;}
 		.btn-sell { background: #600; color: white; border: none; font-size: 9px; cursor: pointer; margin-top: 2px; }
 		.btn-sell:hover { background: #a00; }
-		#equipped-grid {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			gap: 5px;
-			padding: 10px;
-			height: 205px;
-			max-height: 69%;
-		}
-		.equip-slot {
-			background: rgba(0, 0, 0, 0.4);
-			border: 1px solid #444;
-			padding: 8px;
-			border-radius: 4px;
-			transition: all 0.2s;
-			cursor: default;
-			position: relative;
-			overflow: hidden;
-		}
+		#equipped-grid {display: grid;grid-template-columns: 1fr 1fr;gap: 5px;padding: 10px;height: 205px;max-height: 69%;}
+		.equip-slot {background: rgba(0, 0, 0, 0.4);border: 1px solid #444;padding: 8px;border-radius: 4px;transition: all 0.2s;cursor: default;position: relative;overflow: hidden;}
 
 		/* Hover effect for slots that have an item */
-		.equip-slot.has-item {
-			cursor: pointer;
-		}
+		.equip-slot.has-item {cursor: pointer;}
 
-		.equip-slot.has-item:hover {
-			background: rgba(255, 68, 68, 0.2); /* Slight red tint on hover */
-			border-color: #ff4444;
-		}
+		.equip-slot.has-item:hover {background: rgba(255, 68, 68, 0.2); /* Slight red tint on hover */border-color: #ff4444;}
 
-		.unequip-hint {
-			font-size: 0.6em;
-			color: #ff4444;
-			position: absolute;
-			bottom: 2px;
-			right: 5px;
-			opacity: 0;
-			transition: opacity 0.2s;
-		}
+		.unequip-hint {font-size: 0.6em;color: #ff4444;position: absolute;bottom: 2px;right: 5px;opacity: 0;transition: opacity 0.2s;}
 
-		.equip-slot.has-item:hover .unequip-hint {
-			opacity: 1;
-		}
+		.equip-slot.has-item:hover .unequip-hint {opacity: 1;}
 
-		.slot-label {
-			text-transform: uppercase;
-			letter-spacing: 1px;
-			color: #888;
-		}
+		.slot-label {text-transform: uppercase;letter-spacing: 1px;color: #888;}
 		.slot-label { font-size: 0.3em;opacity: 0.5; color: #aaa; display: block; }
-		.slot-item {
-			font-size: 0.70em;
-			font-weight: bold;
-			overflow: hidden;
-			text-overflow: ellipsis;
-		}
-		#inventoryClosebtn {height: 23px;padding-top: 0px;margin: 0px;width: 25px;text-align: center;}
-		.filter-btn {background: #333;border: 1px solid #555;color: #eee;padding: 2px 2px;font-size: 9px;cursor: pointer;border-radius: 4px;}
+		.slot-item {font-size: 0.70em;font-weight: bold;overflow: hidden;text-overflow: ellipsis;}
 
-		.filter-btn:hover {background: #444;border-color: #ceae33;}
-
-		.filter-btn.active {background: #ceae33;color: #000;border-color: #fff;font-weight: bold;}
-
-		#inventory-filters input[type="checkbox"] {margin-right: 5px;cursor: pointer;}
-		
-		#hide-equipped-checkbox-label{ font-size:0.5em; font-weight:bold ;padding:2px;}
-		/* Shared Grid styling for Achievements */
-		#achievements-grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); /* Slightly wider for titles */
-			gap: 5px;
-			background: #111;
-			padding: 6px;
-			border-radius: 5px;
-			height: ; 
-			max-height: ;
-			overflow-y: auto;
-		}
-
-		/* Achievement Rows */
-		.ach-row {
-			background: rgba(255, 255, 255, 0.05);
-			border: 1px solid #333;
-			border-radius: 4px;
-			padding: 6px;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			text-align: center;
-			font-size: 0.8em;
-			transition: all 0.3s ease;
-		}
-
-		.ach-row.unlocked {
-			background: rgba(255, 215, 0, 0.1);
-			border-color: #ffd700;
-		}
-
-		.ach-row.locked {
-			opacity: 0.6;
-			filter: grayscale(1);
-		}
-
-		/* Stats View Layout */
-		#stats-grid {
-			background: #111;
-			padding: 10px;
-			border-radius: 5px;
-			height: ;
-			max-height: ;
-			overflow-y: auto;
-		}
-
-		.stats-container {
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
-		}
-
-		.stat-main {
-			display: flex;
-			justify-content: space-between;
-			background: rgba(255, 255, 255, 0.05);
-			padding: 8px;
-			border-left: 3px solid #ff4444; /* Combat Red */
-			margin-bottom: 5px;
-		}
-
-		.stat-row {
-			margin-bottom: 10px;
-		}
-
-		.stat-info {
-			display: flex;
-			justify-content: space-between;
-			font-size: 0.85em;
-			margin-bottom: 2px;
-			font-weight: bold;
-		}
-
-		/* Progress Bar Styling */
-		.stat-bar-bg {
-			background: #222;
-			height: 8px;
-			border-radius: 4px;
-			overflow: hidden;
-			border: 1px solid #444;
-		}
-
-		.stat-bar-fill {
-			height: 100%;
-			transition: width 0.5s ease-out;
-		}
-
-		.stat-row small {
-			display: block;
-			text-align: right;
-			font-size: 0.65em;
-			color: #888;
-			margin-top: 2px;
-		}
 		/* Tab Container */
-		#inventory-tabs {
-			display: flex;
-			gap: 5px;
-			margin-bottom: 5px;
-			border-bottom: 2px solid #333;
-			padding-bottom: 4px;
-		}
+		#inventory-tabs {display: flex;gap: 5px;margin-bottom: 5px;border-bottom: 2px solid #333;padding-bottom: 4px;}
 
 		/* Tab Buttons */
-		.tab-btn {
-			flex: 1;
-			background: #222;
-			color: #888;
-			border: 1px solid #444;
-			padding: 2px 5px;
-			margin: -3px;
-			font-size: 0.6em;
-			font-weight: bold;
-			cursor: pointer;
-			border-radius: 4px 4px 0 0;
-			transition: all 0.2s ease;
-		}
-
-		.tab-btn:hover {
-			background: #333;
-			color: #ccc;
-		}
-
-		.tab-btn.active-tab {
-			background: #444;
-			color: #fff;
-			border-bottom: 2px solid #ffcc00; /* Gold highlight for active view */
-		}
+		.tab-btn {flex: 1;background: #222;color: #888;border: 1px solid #444;padding: 2px 5px;margin: -3px;font-size: 0.6em;font-weight: bold;cursor: pointer;border-radius: 4px 4px 0 0;transition: all 0.2s ease;}
+		.tab-btn:hover {background: #333;color: #ccc;}
+		.tab-btn.active-tab {background: #444;color: #fff;border-bottom: 2px solid #ffcc00; /* Gold highlight for active view */}
 
 		/* Sort Select Styling */
-		#inv-sort-mode {
-			background: #222;
-			color: #eee;
-			border: 1px solid #444;
-			padding: 1px;
-			border-radius: 4px;
-			font-size: 0.7em;
-			outline: none;
-			cursor: pointer;
-		}
-		#inv-sort-mode:hover {
-			border-color: #666;
-		}
-		#player-context-bubble {
-			position: absolute;
-			background: #222;
-			border: 2px solid #ceae33;
-			border-radius: 8px;
-			padding: 10px;
-			z-index: 3000;
-			box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-			pointer-events: auto; /* Important: this lets us click the buttons */
-		}
+		#inv-sort-mode {background: #222;color: #eee;border: 1px solid #444;padding: 1px;border-radius: 4px;font-size: 0.7em;outline: none;cursor: pointer;}
+		#inv-sort-mode:hover {border-color: #666;}
+		#inventoryClosebtn {height: 23px;padding-top: 0px;margin: 0px;width: 25px;text-align: center;}
+		.filter-btn {background: #333;border: 1px solid #555;color: #eee;padding: 2px 2px;font-size: 9px;cursor: pointer;border-radius: 4px;}
+		.filter-btn:hover {background: #444;border-color: #ceae33;}
+		.filter-btn.active {background: #ceae33;color: #000;border-color: #fff;font-weight: bold;}
+		#inventory-filters input[type="checkbox"] {margin-right: 5px;cursor: pointer;}
+		#hide-equipped-checkbox-label{ font-size:0.5em; font-weight:bold ;padding:2px;}
+		
+		
+		/* Shared Grid styling for Achievements */
+		#achievements-grid {display: grid;grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); /* Slightly wider for titles */gap: 5px;background: #111;padding: 6px;border-radius: 5px;height: ; max-height: ;overflow-y: auto;}
+		/* Achievement Rows */
+		.ach-row {background: rgba(255, 255, 255, 0.05);border: 1px solid #333;border-radius: 4px;padding: 6px;display: flex;flex-direction: column;align-items: center;text-align: center;font-size: 0.8em;transition: all 0.3s ease;}
+		.ach-row.locked {background: rgba(0, 0, 0, 0.2);border: 1px dashed #444;filter: grayscale(0.8); /* Makes the whole row look "disabled" */}
+		.ach-row.unlocked {background: rgba(255, 204, 0, 0.1);border: 1px solid #ffcc00;}
+		
+		
+		/* Stats View Layout */
+		#stats-grid {background: #111;padding: 10px;border-radius: 5px;height: ;max-height: ;overflow-y: auto;}
+		.stats-container {display: flex;flex-direction: column;gap: 8px;}
+		.stat-main {display: flex;justify-content: space-between;background: rgba(255, 255, 255, 0.05);padding: 8px;border-left: 3px solid #ff4444; /* Combat Red */margin-bottom: 5px;}
+		.stat-row {margin-bottom: 10px;}
+		.stat-info {display: flex;justify-content: space-between;font-size: 0.85em;margin-bottom: 2px;font-weight: bold;}
+		/* Progress Bar Styling */
+		.stat-bar-bg {background: #222;height: 8px;border-radius: 4px;overflow: hidden;border: 1px solid #444;}
+		.stat-bar-fill {height: 100%;transition: width 0.5s ease-out;}
+		.stat-row small {display: block;text-align: right;font-size: 0.65em;color: #888;margin-top: 2px;}
+		.stats-activity-box {border-left: 3px solid #00ffff !important;}
+		.stat-main {display: flex;flex-direction: column;align-items: center;background: rgba(255,255,255,0.05);padding: 5px;border-radius: 4px;flex: 1;margin: 0 5px;}
+		#stat-tooltip {position: fixed;pointer-events: none;background: rgba(10, 10, 10, 0.95);border: 1px solid #666;color: white;padding: 10px;border-radius: 4px;font-size: 11px;z-index: 10000;box-shadow: 0 4px 15px rgba(0,0,0,0.5);width: 180px;line-height: 1.4;}
+		
+		#tooltip { position: absolute; pointer-events: none; background: rgba(0,0,0,0.9); color: #fff; padding: 8px; border-radius: 4px; border: 1px solid #0ff; font-size: 13px; display: none; z-index: 100; }		
+		.hidden-tooltip { display: none; }
 
+		.tooltip-title { color: #ffcc00; font-weight: bold; border-bottom: 1px solid #444; margin-bottom: 5px; display: block; }
+		.tooltip-rate { color: #44ff44; }
+		.tooltip-bonus { color: #44bbff; font-style: italic; }
+
+
+
+		#player-context-bubble {position: absolute;background: #222;border: 2px solid #ceae33;border-radius: 8px;padding: 10px;z-index: 3000;box-shadow: 0 4px 15px rgba(0,0,0,0.5);pointer-events: auto; /* Important: this lets us click the buttons */}
 		.bubble-content h4 { margin: 0 0 8px 0; color: #ceae33; font-size: 14px; text-align: center; }
-
 		.bubble-buttons { display: flex; flex-direction: column; gap: 5px; }
-
-		.bubble-buttons button {
-			background: #333; color: white; border: 1px solid #555;
-			padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;
-		}
-
+		.bubble-buttons button {background: #333; color: white; border: 1px solid #555;padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;}
 		.bubble-buttons button:hover { background: #444; border-color: #ceae33; }
-
 		.bubble-buttons button.danger:hover { background: #600; border-color: #f44; }
-
 		/* The little arrow pointing down */
-		.bubble-arrow {
-			position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
-			width: 0; height: 0; 
-			border-left: 8px solid transparent; border-right: 8px solid transparent;
-			border-top: 8px solid #ceae33;
-		}
+		.bubble-arrow {position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent;border-top: 8px solid #ceae33;}
 		
 		
 		
-/* Container Basics */
-.ui-box { background: rgba(0,0,0,0.7); padding: 10px; border: 1px solid #444; color: #fff; font-family: monospace; border-radius: 5px; }
-.arena-border { border-color: #ff4444; }
-.dungeon-border { border-color: #00ffff; }
+		/* Container Basics */
+		.ui-box { background: rgba(0,0,0,0.7); padding: 10px; border: 1px solid #444; color: #fff; font-family: monospace; border-radius: 5px; }
+		.arena-border { border-color: #ff4444; }
+		.dungeon-border { border-color: #00ffff; }
 
-/* Typography */
-.ui-header { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block; }
-.text-red { color: #ff4444; }
-.text-cyan { color: #00ffff; }
-.text-gold { color: #ffcc00; }
-.text-dim { color: #888; font-size: 11px; }
+		/* Typography */
+		.ui-header { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block; }
+		.text-red { color: #ff4444; }
+		.text-cyan { color: #00ffff; }
+		.text-gold { color: #ffcc00; }
+		.text-dim { color: #888; font-size: 11px; }
 
-/* Tables */
-.ui-table { width: 100%; font-size: 12px; text-align: left; border-collapse: collapse; }
-.ui-table th { color: #aaa; border-bottom: 1px solid #444; }
+		/* Tables */
+		.ui-table { width: 100%; font-size: 12px; text-align: left; border-collapse: collapse; }
+		.ui-table th { color: #aaa; border-bottom: 1px solid #444; }
 
-/* Container Boxes */
-.ui-box { 
-    background: rgba(0,0,0,0.7); 
-    padding: 10px; 
-    border: 1px solid #444; 
-    color: #fff; 
-    font-family: monospace; 
-    border-radius: 5px;
-    margin-bottom: 10px;
-}
-.dungeon-border { border-color: #00ffff; }
-.arena-border { border-color: #ff4444; }
+		/* Container Boxes */
+		.ui-box { background: rgba(0,0,0,0.7); padding: 10px; border: 1px solid #444; color: #fff; font-family: monospace; border-radius: 5px;margin-bottom: 10px;}
+		.dungeon-border { border-color: #00ffff; }
+		.arena-border { border-color: #ff4444; }
 
-/* Colors for HP and Status */
-.hp-healthy { color: #00ff00; font-size: 11px; }
-.hp-danger { color: #ffaa00; font-size: 11px; }
-.hp-dead { color: #ff0000; font-size: 11px; font-weight: bold; }
+		/* Colors for HP and Status */
+		.hp-healthy { color: #00ff00; font-size: 11px; }
+		.hp-danger { color: #ffaa00; font-size: 11px; }
+		.hp-dead { color: #ff0000; font-size: 11px; font-weight: bold; }
 
-/* Headers */
-.header-cyan { color: #00ffff; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
-.wave-header { color: #ff4444; font-weight: bold; font-size: 11px; }
-.text-red { color: #ff4444; }
+		/* Headers */
+		.header-cyan { color: #00ffff; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+		.wave-header { color: #ff4444; font-weight: bold; font-size: 11px; }
+		.text-red { color: #ff4444; }
+		
+		
         @keyframes fadeout { 0% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; } }
 		@keyframes msgPop {
 			0% { transform: translateX(-10px); opacity: 0; }
@@ -781,15 +429,41 @@
 		#idleActionsBox div {
 			animation: msgPop 0.3s ease-out forwards;
 		}
-		.ach-row.locked {
-			background: rgba(0, 0, 0, 0.2);
-			border: 1px dashed #444;
-			filter: grayscale(0.8); /* Makes the whole row look "disabled" */
+
+    </style>
+    <style>	
+		#save-indicator {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			background: rgba(0, 0, 0, 0.7);
+			color: #44ff44;
+			padding: 8px 15px;
+			border-radius: 20px;
+			border: 1px solid #44ff44;
+			font-family: 'monospace';
+			font-size: 12px;
+			pointer-events: none;
+			transition: opacity 0.5s ease;
+			z-index: 1000;
+			display: flex;
+			align-items: center;
+			gap: 8px;
 		}
 
-		.ach-row.unlocked {
-			background: rgba(255, 204, 0, 0.1);
-			border: 1px solid #ffcc00;
+		.save-hidden {
+			opacity: 0;
+		}
+
+		.save-visible {
+			opacity: 1;
+			animation: savePulse 1s infinite;
+		}
+
+		@keyframes savePulse {
+			0% { transform: scale(1); }
+			50% { transform: scale(1.05); text-shadow: 0 0 5px #44ff44; }
+			100% { transform: scale(1); }
 		}
     </style>
 </head>
@@ -1130,6 +804,7 @@
 
 
 	<div id="tooltip"></div>
+	<div id="stat-tooltip" class="hidden-tooltip"></div>
 	<div id="ui-container">	
 		<div id="areaDisplay">HOME</div>
 		<div id="stickmenfall-systemMsgBox"></div>
@@ -1209,70 +884,73 @@
 		
 	</div>
 
-<div id="player-context-bubble" class="hidden">
-    <div class="bubble-arrow"></div>
-    <div class="bubble-content">
-        <h4 id="bubble-name">Player</h4>
-        <div class="bubble-buttons">
-            <button id="bubble-bag-btn">🎒View Bag</button>
-            <button id="bubble-respawn-btn" class="danger">💀Respawn</button>
-        </div>
-    </div>
-</div>
-
-<div id="inventory-modal" class="hidden">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 id="inv-player-name">Inventory</h2>
-            <button id="inventoryClosebtn"class="close-btn">×</button>
-        </div>
-        
-        <div class="inventory-layout">
-            <div class="equipped-section">
-                <h3 style="background: #4444;">Equipped</h3>
-                <div id="equipped-grid">
-                    </div>
-                <div class="piexels-display">
-                    pixels: <span id="inv-pixels-val">0.00</span>
-                </div>
-            </div>
-
-			<div class="backpack-section">
-				<h3 style="background: #4444; margin-bottom: 5px;">Backpack</h3>
-				<div id="inventory-tabs">
-					<button class="tab-btn active-tab" data-view="items" id="btn-view-items">ITEMS</button>
-					<button class="tab-btn" data-view="stats" id="btn-view-stats">STATS</button>
-					<button class="tab-btn" data-view="achievements" id="btn-view-achievements">ACHIEVEMENTS</button>
-				</div>
-				<div id="backpack-Tab">
-					<div id="inventory-filters">
-						<label id="hide-equipped-checkbox-label">
-							<input type="checkbox" id="filter-hide-equipped"> Hide Equipped
-						</label>
-						<button class="filter-btn active" data-filter="all">ALL</button>
-						<button class="filter-btn" data-filter="helmet">Hats</button>
-						<button class="filter-btn" data-filter="gear">GEAR</button>
-						<button class="filter-btn" data-filter="fish">FISH</button>
-						<button class="filter-btn" data-filter="material">Misc</button>
-						<select id="inv-sort-mode">
-							<option value="tier">Tier</option>
-							<option value="value">Value</option>
-							<option value="rarity">Rarity</option>
-							<option value="name">Name</option>
-							<option value="type">Type</option>
-						</select>
-					</div>
-
-					<div id="backpack-grid">
-
-					</div>
-				</div>
-				<div id="achievements-tab" class="hidden"><div id="achievements-grid"></div></div>
-				<div id="stats-tab" class="hidden"><div id="stats-grid"></div></div>
+	<div id="player-context-bubble" class="hidden">
+		<div class="bubble-arrow"></div>
+		<div class="bubble-content">
+			<h4 id="bubble-name">Player</h4>
+			<div class="bubble-buttons">
+				<button id="bubble-bag-btn">🎒View Bag</button>
+				<button id="bubble-respawn-btn" class="danger">💀Respawn</button>
 			</div>
-        </div>
-    </div>
-</div>
+		</div>
+	</div>
+	
+	<div id="inventory-modal" class="hidden">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h2 id="inv-player-name">Inventory</h2>
+				<button id="inventoryClosebtn"class="close-btn">×</button>
+			</div>
+			
+			<div class="inventory-layout">
+				<div class="equipped-section">
+					<h3 style="background: #4444;">Equipped</h3>
+					<div id="equipped-grid">
+						</div>
+					<div class="piexels-display">
+						pixels: <span id="inv-pixels-val">0.00</span>
+					</div>
+				</div>
+
+				<div class="backpack-section">
+					<h3 style="background: #4444; margin-bottom: 5px;">Backpack</h3>
+					<div id="inventory-tabs">
+						<button class="tab-btn active-tab" data-view="items" id="btn-view-items">ITEMS</button>
+						<button class="tab-btn" data-view="stats" id="btn-view-stats">STATS</button>
+						<button class="tab-btn" data-view="achievements" id="btn-view-achievements">ACHIEVEMENTS</button>
+					</div>
+					<div id="backpack-Tab">
+						<div id="inventory-filters">
+							<label id="hide-equipped-checkbox-label">
+								<input type="checkbox" id="filter-hide-equipped"> Hide Equipped
+							</label>
+							<button class="filter-btn active" data-filter="all">ALL</button>
+							<button class="filter-btn" data-filter="helmet">Hats</button>
+							<button class="filter-btn" data-filter="gear">GEAR</button>
+							<button class="filter-btn" data-filter="fish">FISH</button>
+							<button class="filter-btn" data-filter="material">Misc</button>
+							<select id="inv-sort-mode">
+								<option value="tier">Tier</option>
+								<option value="value">Value</option>
+								<option value="rarity">Rarity</option>
+								<option value="name">Name</option>
+								<option value="type">Type</option>
+							</select>
+						</div>
+
+						<div id="backpack-grid">
+
+						</div>
+					</div>
+					<div id="achievements-tab" class="hidden"><div id="achievements-grid"></div></div>
+					<div id="stats-tab" class="hidden"><div id="stats-grid"></div></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="save-indicator" class="save-hidden">
+		<span class="save-icon">💾</span> SAVING...
+	</div>
 <!---->
 <!---->	
 <!---->

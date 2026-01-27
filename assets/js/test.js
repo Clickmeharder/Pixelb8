@@ -11,7 +11,6 @@ const ctx = c.getContext("2d");
 let mouse = { x: 0, y: 0 };
 let players = {};
 let viewArea = "town"; 
-const TASK_DURATION = 15 * 60 * 1000; // 15 Minutes
 
 //
 //
@@ -217,7 +216,16 @@ function saveStats(p) {
         }
     }
 }
-
+const SKILL_INFO = {
+    "Attack": { info: "Gained by hitting enemies.", rate: "5 XP / hit", bonus: "Increases Max Hit" },
+    "Archery": { info: "Gained using bows.", rate: "6 XP / hit", bonus: "Increases Attack Speed" },
+    "Magic": { info: "Gained using staves.", rate: "8 XP / cast", bonus: "Increases Spell Damage" },
+    "Healing": { info: "Gained by healing.", rate: "10 XP / heal", bonus: "Increases Heal Amount" },
+    "Lurking": { info: "Gained while hidden.", rate: "2 XP / sec", bonus: "Increased dodge Chance" },
+    "Fishing": { info: "Gained by catching fish.", rate: "15-50 XP / catch", bonus: "Bigger & Better Fish" },
+    "Swimming": { info: "Gained by swimming in water.", rate: "3 XP / sec", bonus: "Higher Max Oxygen" },
+    "Dancing": { info: "Gained by vibing.", rate: "5 XP / tick", bonus: "Global Luck Boost" }
+};
 const ACHIEVEMENT_DB = {
     // Pond Achievements
     "Fishing Rod": { check: (s) => s.pond.visited === true, text: "Visit the Pond" },
@@ -2394,7 +2402,13 @@ function getAnimationState(p, now) {
     if (p.activeTask === "dancing" && DANCE_LIBRARY[p.danceStyle]) {
         anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
     }
-
+	// Add this to your animation logic
+	if (p.isSleeping && !p.activeTask) {
+		anim.bodyY = 20; // Sit/slouch down
+		anim.lean = 0.5; // Tilt head forward
+		// Add "Zzz" floater every few seconds
+		if (frameCount % 120 === 0) spawnFloater("Zzz...", p.x, p.y - 40, "#fff", p.area);
+	}
     return anim;
 }
 function getAnchorPoints(p, anim) {
@@ -2462,7 +2476,7 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
 
 // --- MAIN FUNCTIONS ---
 function drawStickman(ctx, p) {
-    if (p.area !== viewArea) return;
+    if (p.area !== viewArea || p.isHidden) return;
     const now = Date.now();
     if (p.dead) return drawCorpse(ctx, p, now);
 	ctx.save(); 
@@ -2771,7 +2785,74 @@ function renderScene() {
 }
 //================================================================================
 //-----=======------=======---GAME LOOP STUFF--=======-----========----
+
+/* 
+CB LVL - IDLE time (MIN) - IDLE DURATION (HRS)  
+lvl 1	   -  022 mins	- 0.3 hrs
+lvl 20	   -  155 mins	- 2.5 hrs
+lvl 50	   -  365 mins  - 6.0 hrs
+lvl 80	   -  575 mins	- 9.5 hrs
+lvl 100    -  715 mins	- 11.9 hrs
+ */
+function getDynamicDuration(p) {
+    const baseMinutes = 15;
+    const lvl = p.stats.combatLevel || 1;
+    
+    // This formula adds roughly 7 minutes per level
+    // Level 1: 15 + (1 * 7) = 22 mins
+    // Level 100: 15 + (100 * 7) = 715 mins (just under 12 hours)
+    const totalMinutes = baseMinutes + (lvl * 7);
+    
+    return totalMinutes * 60 * 1000; // Convert to milliseconds
+}
+/**
+ * Sets the active task and end time based on player's combat level.
+ */
+function startTask(p, taskName) {
+    const duration = getDynamicDuration(p);
+    
+    p.activeTask = taskName;
+    p.taskEndTime = Date.now() + duration;
+
+    // Convert to more readable format for your console logs
+    const totalMinutes = Math.floor(duration / 60000);
+    const hrs = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    
+    console.log(`[TASK] ${p.name} -> ${taskName} for ${hrs}h ${mins}m`);
+}
 function updatePlayerStatus(p, now) {
+    if (p.dead && !p.isHidden) {
+        // Even if dead, check if the corpse should vanish after 15 mins of inactivity
+        if (now - (p.lastActionTime || now) > 15 * 60 * 1000) p.isHidden = true;
+        return;
+    }
+
+    const idleTime = now - (p.lastActionTime || now);
+
+    // --- TASK TIMEOUT ---
+    if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
+        systemMessage(`${p.name}'s task expired.`);
+        spawnFloater(p, `Task Finished`, "#ff4444");
+        cmdStop(p, p.name); // Calls the unsheath/shore logic above
+    }
+
+    // --- INACTIVITY STATES ---
+    if (idleTime > 15 * 60 * 1000) { // 15 Minutes
+        p.isHidden = true;
+        if (p.activeTask === "swimming") {
+            p.hp = 0;
+            p.dead = true;
+            systemMessage(`${p.name} drowned while sleeping in the pond.`);
+        }
+    } else if (idleTime > 5 * 60 * 1000) { // 5 Minutes
+        p.isSleeping = true;
+    } else {
+        p.isSleeping = false;
+        p.isHidden = false;
+    }
+}
+/* function updatePlayerStatus(p, now) {
     if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
         systemMessage(`${p.name} stopped ${p.activeTask} (Idle timeout).`);
 		spawnFloater(p, `stopped ${p.activeTask} (Idle timeout)`, "#ff4444");
@@ -2779,7 +2860,7 @@ function updatePlayerStatus(p, now) {
         p.targetX = null;
         p.danceStyle = 0;
     }
-}
+} */
 
 /* function updatePlayerMovement(p) {
     if (p.targetX !== null && p.targetX !== undefined) {
@@ -2875,9 +2956,25 @@ function updateSystemTicks(now) {
         if (dungeonActive) handleEnemyAttacks();
         systemTimers.lastEnemyTick = now;
     }
-	if (now - systemTimers.lastAutoSave > systemTimers.saveInterval) {
+	// Auto-Save Logic
+    if (now - systemTimers.lastAutoSave > systemTimers.saveInterval) {
+        // 1. Save all players
         Object.values(players).forEach(p => saveStats(p));
         systemTimers.lastAutoSave = now;
+        
+        // 2. Trigger UI Visual
+        const saveEl = document.getElementById("save-indicator");
+        if (saveEl) {
+            saveEl.classList.remove("save-hidden");
+            saveEl.classList.add("save-visible");
+
+            // Hide it again after 2 seconds
+            setTimeout(() => {
+                saveEl.classList.remove("save-visible");
+                saveEl.classList.add("save-hidden");
+            }, 2000);
+        }
+
         console.log("Game Autosaved");
     }
 	updateBuyerNPC();
@@ -3013,6 +3110,15 @@ function updateUI() {
         arenaBox.style.display = isArena ? "block" : "none";
         if (isArena) updateArenaScoreboard();
     }
+	// 4. INVENTORY TICK (Only if modal is open and on the Stats tab)
+    // We use frameCount % 30 to update the "Clock" roughly twice a second.
+    if (frameCount % 30 === 0) {
+        const modal = document.getElementById('inventory-modal');
+        if (modal && !modal.classList.contains('hidden') && currentInventoryView === "stats") {
+            // We only need to refresh the stats view, not the whole inventory
+            if (currentInvTarget) renderStatsView(currentInvTarget);
+        }
+    }
 }
 
 let frameCount = 0;
@@ -3037,7 +3143,7 @@ function gameLoop() {
     if (frameCount % 3 === 0) {
         updateUI(); 
     }
-
+}
     // 3. World Logic (Runs regardless of view)
     if (dungeonActive) {
         checkDungeonProgress(); 
@@ -3063,7 +3169,7 @@ function gameLoop() {
             }
         });
     }
-
+	
     // 5. Player Processing (Loop once for both logic and drawing)
     Object.values(players).forEach(p => {
         // Logic runs for everyone everywhere
@@ -3147,6 +3253,31 @@ let currentInventoryView = "items"; // Options: "items", "stats", "achievements"
 
 let currentInvTarget = null;
 // for players to open their own (self) inventory
+const tooltipEl = document.getElementById('stat-tooltip');
+
+function showStatTooltip(e, skillName) {
+    const info = SKILL_INFO[skillName];
+    if (!info) return;
+
+    tooltipEl.innerHTML = `
+        <span class="tooltip-title">${skillName.toUpperCase()}</span>
+        ${info.info}<br>
+        <span class="tooltip-rate">Rate: ${info.rate}</span><br>
+        <span class="tooltip-bonus">Effect: ${info.bonus}</span>
+    `;
+    tooltipEl.classList.remove('hidden-tooltip');
+    moveStatTooltip(e);
+}
+
+function moveStatTooltip(e) {
+    // Offset by 15px so it doesn't sit directly under the cursor
+    tooltipEl.style.left = (e.clientX + 15) + 'px';
+    tooltipEl.style.top = (e.clientY + 15) + 'px';
+}
+
+function hideStatTooltip() {
+    tooltipEl.classList.add('hidden-tooltip');
+}
 function toggleInventory() {
     const modal = document.getElementById('inventory-modal');
     
@@ -3229,70 +3360,7 @@ function uiAction(cmd, itemName) {
     // Refresh the UI after a short delay
     setTimeout(() => renderInventoryUI(p), 50);
 }
-//---------OLD TOGGLE INVENTORY SYSTEM BELOW
-/* function toggleInventory() {
-    const modal = document.getElementById('inventory-modal');
-    modal.classList.toggle('hidden');
-    if (!modal.classList.contains('hidden')) {
-        renderInventoryUI();
-    }
-}
 
-function renderInventoryUI() {
-    const p = getActiveProfile();
-    const playerObj = players[p.name.toLowerCase()];
-    if (!playerObj) return;
-
-    // 1. Update Header & Pixels
-    const nameEl = document.getElementById('inv-player-name');
-    const pixelEl = document.getElementById('inv-pixels-val');
-    if (nameEl) nameEl.textContent = p.name.toUpperCase();
-    if (pixelEl) pixelEl.textContent = (playerObj.stats.pixels || 0).toFixed(0);
-    
-    // 2. Section Routing
-    const backpackTab = document.getElementById('backpack-Tab');
-    const achTab = document.getElementById('achievements-tab');
-    const statsTab = document.getElementById('stats-tab');
-
-    // Grids for rendering
-    const bpGrid = document.getElementById('backpack-grid');
-    const achGrid = document.getElementById('achievements-grid');
-    const statsGrid = document.getElementById('stats-grid');
-
-    // Hide all tab containers first
-    [backpackTab, achTab, statsTab].forEach(el => el?.classList.add('hidden'));
-    
-    // Always render equipped section
-    renderEquippedSection(playerObj);
-
-    // Show active tab and trigger specific render
-    if (currentInventoryView === "achievements") {
-        achTab?.classList.remove('hidden');
-        renderAchievements(playerObj);
-    } 
-    else if (currentInventoryView === "stats") {
-        statsTab?.classList.remove('hidden');
-        renderStatsView(playerObj);
-    } 
-    else {
-        // Default to Items/Backpack
-        backpackTab?.classList.remove('hidden');
-        renderItemsView(playerObj, bpGrid);
-    }
-}
-// Helper to bridge UI clicks to game commands
-function uiAction(cmd, itemName) {
-    const p = getActiveProfile();
-    if (!p) return;
-
-    // Wrapping in quotes handles items with spaces like "Leather Scrap"
-    const fullCommand = `${cmd} "${itemName}"`;
-    
-    processGameCommand(p.name, fullCommand);
-    
-    setTimeout(renderInventoryUI, 50);
-}
- */
 function renderEquippedSection(playerObj) {
     const equipGrid = document.getElementById('equipped-grid');
     if (!equipGrid) return;
@@ -3433,6 +3501,22 @@ function renderStatsView(playerObj) {
     const statsGrid = document.getElementById('stats-grid');
     const s = playerObj.stats;
 
+    // --- NEW: Calculate Idle Durations ---
+    const totalDurationMS = getDynamicDuration(playerObj);
+    const totalMinutes = Math.floor(totalDurationMS / 60000);
+    
+    let timeRemainingStr = "None";
+    if (playerObj.activeTask && playerObj.taskEndTime) {
+        const remainingMS = playerObj.taskEndTime - Date.now();
+        if (remainingMS > 0) {
+            const rMins = Math.floor(remainingMS / 60000);
+            const rSecs = Math.floor((remainingMS % 60000) / 1000);
+            timeRemainingStr = `${rMins}m ${rSecs}s`;
+        } else {
+            timeRemainingStr = "Expiring...";
+        }
+    }
+
     statsGrid.innerHTML = `
         <div class="stats-container">
             <div class="stats-header-box">
@@ -3445,6 +3529,21 @@ function renderStatsView(playerObj) {
                     <span class="stat-value" style="color:#44ff44">${playerObj.hp} / ${playerObj.maxHp}</span>
                 </div>
             </div>
+
+            <div class="stats-activity-box" style="background: rgba(0,0,0,0.3); padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #444;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span style="color:#aaa; font-size:10px;">IDLE CAPACITY (LVL ${s.combatLevel})</span>
+                    <span style="color:#fff; font-weight:bold;">${totalMinutes} Minutes</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#aaa; font-size:10px;">CURRENT TASK TIMER</span>
+                    <span style="color:#00ffff; font-family:monospace;">${timeRemainingStr}</span>
+                </div>
+                <div style="font-size:9px; color:#666; margin-top:5px; text-align:center;">
+                    Task: ${playerObj.activeTask ? playerObj.activeTask.toUpperCase() : "IDLE"}
+                </div>
+            </div>
+
             <div class="stats-skills-list">
                 ${renderStatRow("Attack", s.attackLevel, s.attackXP, "#ff6666")}
                 ${renderStatRow("Archery", s.archerLevel, s.archerXP, "#66ff66")}
@@ -3462,10 +3561,22 @@ function renderStatsView(playerObj) {
 function renderStatRow(name, level, xp, color) {
     const nextXP = typeof xpNeeded === 'function' ? xpNeeded(level) : (level * 100);
     const pct = Math.min(100, (xp / nextXP) * 100);
+    
+    // Convert name to match our SKILL_INFO keys
+    const info = SKILL_INFO[name] || { info: "Generic Skill", rate: "???", bonus: "???" };
+
     return `
-        <div class="stat-row">
-            <div class="stat-info"><span>${name}</span><span>Lvl ${level}</span></div>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${pct}%; background-color:${color}"></div></div>
+        <div class="stat-row" 
+             onmouseenter="showStatTooltip(event, '${name}')" 
+             onmouseleave="hideStatTooltip()"
+             onmousemove="moveStatTooltip(event)">
+            <div class="stat-info">
+                <span>${name}</span>
+                <span>Lvl ${level}</span>
+            </div>
+            <div class="stat-bar-bg">
+                <div class="stat-bar-fill" style="width:${pct}%; background-color:${color}"></div>
+            </div>
             <small>${xp.toFixed(0)} / ${nextXP} XP</small>
         </div>
     `;
@@ -3525,32 +3636,6 @@ function renderAchRow(container, title, isUnlocked, color, subtext) {
 // Wait for the DOM to load to ensure the action bar exists
 
 /* ================= COMMAND FUNCTIONS ================= */
-
-function cmdStop(p, user) {
-    // 1. Restore weapon if it was put away
-    if (p.stats.lastWeapon) {
-        p.stats.equippedWeapon = p.stats.lastWeapon;
-        systemMessage(`${p.name} drew their ${p.stats.equippedWeapon} again.`);
-        p.stats.lastWeapon = null;
-    }
-
-    // 2. Clear Tasks
-    p.activeTask = null;
-    p.taskEndTime = null;
-    p.danceStyle = 0;
-    p.forcedPose = null; 
-
-    // 3. Return to Shore logic
-    if (p.area === "pond" && p.x > 200) {
-        systemMessage(`${user} is heading back to the shore.`);
-        p.targetX = 100 + (Math.random() * 80); // Walk back to a random spot on the sand
-    } else {
-        p.targetX = null; // Just stop where you are if on land
-    }
-    
-    systemMessage(`${user} stopped their current action.`);
-    saveStats(p);
-}
 function cmdSetPose(p, user, args) {
     if (p.dead) return;
     let chosenPose = args[1]?.toLowerCase();
@@ -3567,6 +3652,7 @@ function cmdSetPose(p, user, args) {
         // --- NEW: CANCEL DANCING ---
         if (p.activeTask === "dancing") {
             p.activeTask = null;
+			p.taskEndTime = null;
             p.danceStyle = 0;
         }
         // ---------------------------
@@ -3576,68 +3662,6 @@ function cmdSetPose(p, user, args) {
         const available = Object.keys(POSE_LIBRARY).join(", ");
         systemMessage(`Unknown pose. Available: ${available}`);
     }
-}
-function cmdDance(p, user, args) {
-    if (p.dead) return;
-	// Store weapon before dancing
-    if (p.stats.equippedWeapon) {
-        p.stats.lastWeapon = p.stats.equippedWeapon;
-        p.stats.equippedWeapon = null;
-    }
-
-    const level = p.stats.danceLevel || 1;
-    let chosenStyle = parseInt(args[1]);
-    if (!isNaN(chosenStyle)) {
-        if (!DANCE_UNLOCKS[chosenStyle]) {
-            systemMessage(`${user}, try styles 1, 2, 3, or 4!`);
-            return;
-        }
-        if (level < DANCE_UNLOCKS[chosenStyle].minLvl) {
-            systemMessage(`${user}, you need Dance Lvl ${DANCE_UNLOCKS[chosenStyle].minLvl} for that!`);
-            return;
-        }
-        p.danceStyle = chosenStyle;
-    } else {
-        let unlockedStyles = [1];
-        if (level >= 5) unlockedStyles.push(2);
-        if (level >= 10) unlockedStyles.push(3);
-        if (level >= 20) unlockedStyles.push(4);
-        p.danceStyle = unlockedStyles[Math.floor(Math.random() * unlockedStyles.length)];
-    }
-
-    p.activeTask = "dancing";
-    p.taskEndTime = Date.now() + (15 * 60 * 1000);
-    systemMessage(`${user} is performing ${DANCE_UNLOCKS[p.danceStyle].name}!`);
-    saveStats(p);
-}
-function cmdTestDance(p, user, args, flags) {
-    // Only allow the streamer (broadcaster) or moderators to use this
-/*     if (!flags.broadcaster && !flags.mod) {
-        systemMessage(`${user}, only the host can force-test animations!`);
-        return;
-    } */
-
-    let chosenStyle = parseInt(args[0]); // Using args[0] assuming "!testdance 4"
-
-    if (isNaN(chosenStyle) || !DANCE_UNLOCKS[chosenStyle]) {
-        const available = Object.keys(DANCE_UNLOCKS).join(", ");
-        systemMessage(`Streamer, pick a style to force: ${available}`);
-        return;
-    }
-
-    // Bypass level check entirely
-    p.danceStyle = chosenStyle;
-    p.activeTask = "dancing";
-    p.taskEndTime = Date.now() + (5 * 60 * 1000); // Shorter duration for testing
-    
-    systemMessage(`[TEST MODE] ${user} is force-playing: ${DANCE_UNLOCKS[chosenStyle].name}`);
-}
-function cmdListDances(p) {
-    const lvl = p.stats.danceLevel;
-    let msg = `Your Dance Lvl: ${lvl}. Available Dances: [1] The Hop (Lvl 1) `;
-    msg += lvl >= 5 ? `[2] The Flail (Lvl 5) ` : `[2] LOCKED (Lvl 5) `;
-    msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
-    systemMessage(msg);
 }
 function cmdWigColor(p, args) {
     const equippedId = p.stats.equippedHelmet;
@@ -3685,13 +3709,9 @@ function cmdAttack(p, user) {
         systemMessage(`${user}: Already attacking.`); 
         return; 
     }
-    
-    p.activeTask = "attacking";
-    // Keep your 15-minute timer logic
-    p.taskEndTime = Date.now() + (15 * 60 * 1000); 
+    startTask(p, "attacking");
     // Reset attack cooldown so they hit immediately
     p.lastAttackTime = 0; 
-    
     systemMessage(`${user} started attacking (15m idle)`);
 }
 function cmdHeal(p, user, args) {
@@ -3726,29 +3746,14 @@ function cmdHeal(p, user, args) {
         if (p.activeTask === "healing") {
             systemMessage(`${user}: You are already in auto-healing mode.`);
         } else {
-            p.activeTask = "healing";
-            p.taskEndTime = Date.now() + (15 * 60 * 1000);
+            startTask(p, "healing");
             systemMessage(`${user} started auto-healing the party (15m idle).`);
         }
         saveStats(p);
         return;
     }
 }
-/* function cmdHeal(p, args) {
-    let target = players[args[1]];
-    if (target && target.area === p.area && !target.dead) {
-        let amt = 10 + (p.stats.healLevel * 5);
-        target.hp = Math.min(target.maxHp, target.hp + amt);
-		spawnFloater(`+${amt} HP`, target.x, target.y - 40, "#0f0", target.area);
-        p.stats.healXP += 15;
-        if (p.stats.healXP >= xpNeeded(p.stats.healLevel)) {
-            p.stats.healLevel++; p.stats.healXP = 0; 
-            systemMessage(`${p.name} HEAL UP! (Lv ${p.stats.healLevel})`);
-        }
-        saveStats(p);
-    }
-} */
-//auto unequip version of fish cmd
+
 function cmdRespawn(p) {
     if (!p.dead) {
         systemMessage(`${p.name}, you aren't even dead!`);
@@ -3758,7 +3763,8 @@ function cmdRespawn(p) {
     // 1. Reset Stats
     p.dead = false;
     p.hp = p.maxHp;
-    p.activeTask = "none";
+    p.activeTask = null; // Changed from "none" to null for consistency
+    p.taskEndTime = null; // Clear the timer
 
     // 2. Move to Town
     p.area = "town";
@@ -3778,10 +3784,7 @@ function cmdLurk(p, user) {
         systemMessage(`${user} is already lurking in the shadows...`);
         return;
     }
-
-    p.activeTask = "lurking";
-    p.taskEndTime = Date.now() + (15 * 60 * 1000); // 15 mins
-    
+    startTask(p, "lurking");
     // Optional: Hide the weapon when lurking
 /*     if (p.stats.equippedWeapon) {
         p.manualSheath = true; 
@@ -3819,8 +3822,7 @@ function cmdFish(p, user) {
     p.targetX = 180 + (Math.random() * 40 - 20);
     
     // START TASK
-    p.activeTask = "fishing";
-    p.taskEndTime = Date.now() + (15 * 60 * 1000); // 15-minute idle timer
+    startTask(p, "fishing");
     
     systemMessage(`${user} started fishing! (Costs ${baitCost} pixels per cast)`);
     saveStats(p);
@@ -3842,13 +3844,98 @@ function cmdSwim(p, user) {
     }
     // Move the player INTO the water (x > 250)
     p.targetX = 400 + (Math.random() * 250);
-	
-    p.activeTask = "swimming";
-    p.taskEndTime = Date.now() + (15 * 60 * 1000); // 15 mins
-
+	startTask(p, "swimming");
     systemMessage(`${p.name} jumped into the water!`);
     saveStats(p);
 }
+function cmdDance(p, user, args) {
+    if (p.dead) return;
+	// Store weapon before dancing
+    if (p.stats.equippedWeapon) {
+        p.stats.lastWeapon = p.stats.equippedWeapon;
+        p.stats.equippedWeapon = null;
+    }
+
+    const level = p.stats.danceLevel || 1;
+    let chosenStyle = parseInt(args[1]);
+    if (!isNaN(chosenStyle)) {
+        if (!DANCE_UNLOCKS[chosenStyle]) {
+            systemMessage(`${user}, try styles 1, 2, 3, or 4!`);
+            return;
+        }
+        if (level < DANCE_UNLOCKS[chosenStyle].minLvl) {
+            systemMessage(`${user}, you need Dance Lvl ${DANCE_UNLOCKS[chosenStyle].minLvl} for that!`);
+            return;
+        }
+        p.danceStyle = chosenStyle;
+    } else {
+        let unlockedStyles = [1];
+        if (level >= 5) unlockedStyles.push(2);
+        if (level >= 10) unlockedStyles.push(3);
+        if (level >= 20) unlockedStyles.push(4);
+        p.danceStyle = unlockedStyles[Math.floor(Math.random() * unlockedStyles.length)];
+    }
+    startTask(p, "dancing");
+    systemMessage(`${user} is performing ${DANCE_UNLOCKS[p.danceStyle].name}!`);
+    saveStats(p);
+}
+function cmdTestDance(p, user, args, flags) {
+    // Only allow the streamer (broadcaster) or moderators to use this
+/*     if (!flags.broadcaster && !flags.mod) {
+        systemMessage(`${user}, only the host can force-test animations!`);
+        return;
+    } */
+
+    let chosenStyle = parseInt(args[0]); // Using args[0] assuming "!testdance 4"
+
+    if (isNaN(chosenStyle) || !DANCE_UNLOCKS[chosenStyle]) {
+        const available = Object.keys(DANCE_UNLOCKS).join(", ");
+        systemMessage(`Streamer, pick a style to force: ${available}`);
+        return;
+    }
+
+    // Bypass level check entirely
+    p.danceStyle = chosenStyle;
+    p.activeTask = "dancing";
+    p.taskEndTime = Date.now() + (5 * 60 * 1000); // Shorter duration for testing
+    
+    systemMessage(`[TEST MODE] ${user} is force-playing: ${DANCE_UNLOCKS[chosenStyle].name}`);
+}
+function cmdListDances(p) {
+    const lvl = p.stats.danceLevel;
+    let msg = `Your Dance Lvl: ${lvl}. Available Dances: [1] The Hop (Lvl 1) `;
+    msg += lvl >= 5 ? `[2] The Flail (Lvl 5) ` : `[2] LOCKED (Lvl 5) `;
+    msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
+    systemMessage(msg);
+}
+
+
+function cmdStop(p, user) {
+    // 1. Restore weapon if it was put away (Unsheath Logic)
+    if (p.stats.lastWeapon) {
+        p.stats.equippedWeapon = p.stats.lastWeapon;
+        systemMessage(`${p.name} drew their ${p.stats.equippedWeapon} again.`);
+        p.stats.lastWeapon = null;
+    }
+
+    // 2. Clear Tasks & Timers
+    p.activeTask = null;
+    p.taskEndTime = null;
+    p.danceStyle = 0;
+    p.forcedPose = null; 
+
+    // 3. Return to Shore logic
+    if (p.area === "pond" && p.x > 200) {
+        systemMessage(`${user} is heading back to the shore.`);
+        p.targetX = 100 + (Math.random() * 80); 
+    } else {
+        p.targetX = null; 
+    }
+    
+    saveStats(p);
+}
+
+
 function cmdEquip(p, args) {
     if (p.activeTask && p.activeTask !== "none") {
         systemMessage(`${p.name}: You are too busy ${p.activeTask} to change gear right now! Stop what you are doing first.`);
