@@ -2377,11 +2377,14 @@ function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     
     // Swimming Depth
-    if (p.activeTask === "swimming" && p.area === "pond" && p.x > 250) {
-        const bobbing = Math.sin(now / 400) * 5; 
-        anim.bodyY = 30 + bobbing; 
-    }
+	const isInWater = (p.area === "pond" && p.x > 250);
 
+	if (isInWater) {
+		const bobbing = Math.sin(now / 400) * 5; 
+		// If they are actively swimming, use your swim height (30)
+		// If they are just floating/idling/sleeping in water, they sink a bit lower (45)
+		anim.bodyY = (p.activeTask === "swimming") ? (30 + bobbing) : (45 + bobbing);
+	}
     // Lurking Pose (The Crouch)
     if (p.activeTask === "lurking") {
         const breathe = Math.sin(now / 1000) * 3;
@@ -2813,7 +2816,6 @@ function startTask(p, taskName) {
 }
 function updatePlayerStatus(p, now) {
     if (p.dead && !p.isHidden) {
-        // Even if dead, check if the corpse should vanish after 15 mins of inactivity
         if (now - (p.lastActionTime || now) > 15 * 60 * 1000) p.isHidden = true;
         return;
     }
@@ -2824,19 +2826,29 @@ function updatePlayerStatus(p, now) {
     if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
         systemMessage(`${p.name}'s task expired.`);
         spawnFloater(p, `Task Finished`, "#ff4444");
-        cmdStop(p, p.name); // Calls the unsheath/shore logic above
+        
+        // IMPORTANT: Reset lastActionTime so they have 5 mins to 'walk to shore' 
+        // before they fall asleep on the beach.
+        p.lastActionTime = now; 
+        
+        cmdStop(p, p.name); 
     }
 
     // --- INACTIVITY STATES ---
-    if (idleTime > 15 * 60 * 1000) { // 15 Minutes
-        p.isHidden = true;
-        if (p.activeTask === "swimming") {
-            p.hp = 0;
-            p.dead = true;
-            systemMessage(`${p.name} drowned while sleeping in the pond.`);
+    // If they were swimming and are now hidden (timed out totally), they drown
+    if (idleTime > 15 * 60 * 1000) { 
+        if (!p.isHidden) { // Trigger only once
+            p.isHidden = true;
+            if (p.area === "pond" && p.x > 250) { // If still in water
+                p.hp = 0;
+                p.dead = true;
+                p.deathTime = now;
+                systemMessage(`${p.name} drowned while sleeping in the pond.`);
+            }
         }
-    } else if (idleTime > 5 * 60 * 1000) { // 5 Minutes
+    } else if (idleTime > 5 * 60 * 1000) { 
         p.isSleeping = true;
+        p.isHidden = false;
     } else {
         p.isSleeping = false;
         p.isHidden = false;
@@ -2876,7 +2888,7 @@ function updatePlayerActions(p, now) {
     }
 	if (p.activeTask === "healing") {
 		let weapon = ITEM_DB[p.stats.equippedWeapon];
-		let healSpeed = weapon?.speed || 2500;
+		let healSpeed = weapon?.speed || 500;
 		
 		if (!p.lastHealTime) p.lastHealTime = 0;
 		if (now - p.lastHealTime > healSpeed) {
@@ -3900,30 +3912,47 @@ function cmdListDances(p) {
 
 
 function cmdStop(p, user) {
-    // 1. Restore weapon if it was put away (Unsheath Logic)
+    const now = Date.now();
+    // Check if the timer actually ran out (System Timeout) 
+    // vs. if there was still time left (Manual Stop)
+    const isTimeout = p.taskEndTime && now >= p.taskEndTime;
+
+    // 1. DROWNING LOGIC
+    // If they timed out while deep in the water (x > 250)
+    if (isTimeout && p.area === "pond" && p.x > 250) {
+        p.hp = 0;
+        p.dead = true;
+        p.deathTime = now;
+        p.activeTask = null;
+        p.taskEndTime = null;
+        systemMessage(`💀 ${p.name} was too tired to reach the shore and sank...`);
+        saveStats(p);
+        return; 
+    }
+
+    // 2. SAFE EXIT LOGIC (Manual stop OR timed out on land)
+    // Restore weapon (Unsheath Logic)
     if (p.stats.lastWeapon) {
         p.stats.equippedWeapon = p.stats.lastWeapon;
-        systemMessage(`${p.name} drew their ${p.stats.equippedWeapon} again.`);
         p.stats.lastWeapon = null;
     }
 
-    // 2. Clear Tasks & Timers
-    p.activeTask = null;
-    p.taskEndTime = null;
-    p.danceStyle = 0;
-    p.forcedPose = null; 
-
-    // 3. Return to Shore logic
+    // Return to Shore logic
     if (p.area === "pond" && p.x > 200) {
-        systemMessage(`${user} is heading back to the shore.`);
+        systemMessage(`${p.name} is heading back to the shore.`);
         p.targetX = 100 + (Math.random() * 80); 
     } else {
         p.targetX = null; 
     }
+
+    // 3. Clear Tasks & Timers
+    p.activeTask = null;
+    p.taskEndTime = null;
+    p.danceStyle = 0;
+    p.forcedPose = null; 
     
     saveStats(p);
 }
-
 
 function cmdEquip(p, args) {
     if (p.activeTask && p.activeTask !== "none") {
