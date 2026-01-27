@@ -273,7 +273,10 @@ const ITEM_DB = {
 // --- ACHIEVEMENT REWARDS ---
 	"Fishing Rod":          { type: "tool", style:"",sources:"achievement", tier: 100, rarity: 13, power: 0, value: 100,   color: "#8B4513" },
 	"PvP Boots":            { type:"boots",style:"",sources:"achievement",  tier: 99, rarity: 1, value: 10000, color: "#7a231a" },
-	"Great Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 6,  rarity: 7,  power: 50,  speed: 1800, value: 25000,  color: "#888" },
+	"Crude Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 1,  rarity: 7,  power: 7,  speed: 900, value: 25000,  color: "brown" },
+	"Iron Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 2,  rarity: 7,  power: 15,  speed: 1100, value: 25000,  color: "#888" },
+	"Steel Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 3,  rarity: 7,  power: 20,  speed: 1200, value: 25000,  color: "#888" },
+	"Great Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 6,  rarity: 7,  power: 55,  speed: 1700, value: 25000,  color: "#444" },
 // special capes
     "Nuber Cape":           { type:"cape",style:"cape",sources:"achievement",  tier: 10, rarity: 13, value: 10000, color: "#333" },
 	"Warrior Cape":         { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#555" },

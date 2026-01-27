@@ -231,6 +231,9 @@ const ACHIEVEMENT_DB = {
     "Fishing Rod": { check: (s) => s.pond.visited === true, text: "Visit the Pond" },
     
     // Arena Achievements
+	"Crude Axe": { check: (s) => s.arena.wins >= 1, text: "Win 1 Arena matches" },
+	"Iron Axe": { check: (s) => s.arena.wins >= 10, text: "Win 10 Arena matches" },
+	"Steel Axe": { check: (s) => s.arena.wins >= 25, text: "Win 25 Arena matches" },
     "Great Axe": { check: (s) => s.arena.wins >= 50, text: "Win 50 Arena matches" },
     "PvP Cape": { check: (s) => s.arena.winStreak >= 10, text: "Get a 10-win streak" },
     "PvP Boots": { check: (s) => s.arena.totalMatches >= 3, text: "Complete 3 matches" },
@@ -2374,9 +2377,9 @@ function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     
     // Swimming Depth
-    if (p.activeTask === "swimming" && p.area === "pond" && p.x > 225) {
+    if (p.activeTask === "swimming" && p.area === "pond" && p.x > 250) {
         const bobbing = Math.sin(now / 400) * 5; 
-        anim.bodyY = 60 + bobbing; 
+        anim.bodyY = 30 + bobbing; 
     }
 
     // Lurking Pose (The Crouch)
