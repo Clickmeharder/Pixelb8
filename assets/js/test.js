@@ -874,161 +874,6 @@ function applyHealEffect(p, target, amount, mode) {
         updateCombatLevel(p);
     }
 }
-//============================================================
-// ============== 	FISHING STUFF ============================
-// --- Fishing Merchant --------------------------------------
-const merchantSettings = {
-    stayMinutes: 2,    // How many minutes she stays
-    cycleTotal: 28,     // Total minutes in one full loop (Stay + Away)
-};
-let forceBuyer = null;
-let buyerActive = false;
-//fish merchant----------------
-function updateBuyerNPC() {
-    const now = Date.now();
-    
-    // We use the settings here
-    let cycle = Math.floor(now / 60000) % merchantSettings.cycleTotal; 
-    let wasActive = buyerActive;
-
-    if (forceBuyer !== null) {
-        buyerActive = forceBuyer;
-    } else {
-        // If stayMinutes is 2, she is active during minute 0 and 1
-        buyerActive = (cycle < merchantSettings.stayMinutes); 
-    }
-
-    if (buyerActive && !wasActive) {
-        systemMessage("--- [NPC] THE FISH MERCHANT HAS ARRIVED (2X pixels)! ---");
-    } else if (!buyerActive && wasActive) {
-        systemMessage("--- [NPC] THE FISH MERCHANT HAS LEFT THE AREA. ---");
-    }
-}
-// called inside drawScenery function under the pond section to update time she stays away and time she stays properly:
-function drawBuyer(ctx) {
-    if (!buyerActive || viewArea !== "pond") return;
-    
-    const bx = 115; 
-    const by = 500; 
-    const now = Date.now();
-    
-    // Smooth levitation and cloak sway
-    let floatY = Math.sin(now / 800) * 6;
-    let sway = Math.sin(now / 400) * 3;
-    let gemPulse = 5 + Math.abs(Math.sin(now / 500)) * 10;
-
-    ctx.save();
-    ctx.translate(bx, by + floatY);
-
-    // --- 1. THE TRAILING CAPE (Behind her, blowing slightly) ---
-    ctx.fillStyle = "#2a1233"; // Very dark shadow purple
-    ctx.beginPath();
-    ctx.moveTo(0, -30);
-    ctx.quadraticCurveTo(-25 + sway, 0, -15 + sway, 35);
-    ctx.lineTo(5, 30);
-    ctx.fill();
-
-    // --- 2. THE LEGS ---
-    ctx.strokeStyle = "#111";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(-3, 10); ctx.lineTo(-5, 30);
-    ctx.moveTo(3, 10); ctx.lineTo(5, 30);
-    ctx.stroke();
-
-    // --- 3. STRUCTURED CLOAK (Facing Right/Pond) ---
-    // Main Cloak Body
-    ctx.fillStyle = "#4B0082"; 
-    ctx.beginPath();
-    ctx.moveTo(0, -35); // Neck
-    ctx.bezierCurveTo(-15, -20, -18, 10, -12, 25); // Back curve
-    ctx.lineTo(15, 25); // Bottom front
-    ctx.bezierCurveTo(8, 10, 12, -20, 0, -35); // Front curve (facing pond)
-    ctx.fill();
-
-    // pixels Trim on Cloak
-    ctx.strokeStyle = "#FFD700";
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // --- 4. THE ARMS & STAFF (Staff is on the Pond side) ---
-    ctx.strokeStyle = "#ffdbac"; // Hands
-    ctx.lineWidth = 2.5;
-    
-    // Arm resting on staff (Right arm, facing pond)
-    ctx.beginPath();
-    ctx.moveTo(8, -15);
-    ctx.lineTo(18, -5); 
-    ctx.stroke();
-
-    // The Mystic Staff
-    ctx.strokeStyle = "#3e2723"; // Dark wood
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(20, 30);
-    ctx.lineTo(20, -50);
-    ctx.stroke();
-
-    // Staff Gem (Glow effect)
-    ctx.shadowBlur = gemPulse;
-    ctx.shadowColor = "#00ffff";
-    ctx.fillStyle = "#e0ffff";
-    ctx.beginPath();
-    ctx.arc(20, -55, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // --- 5. THE HEAD & DEEP HOOD ---
-    // Inner Hood
-    ctx.fillStyle = "#0a0a0a";
-    ctx.beginPath();
-    ctx.ellipse(2, -45, 9, 11, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Glowing Eyes (Facing the pond)
-    ctx.fillStyle = "#00ffff";
-    ctx.beginPath();
-    ctx.arc(6, -46, 1.5, 0, Math.PI * 2);
-    ctx.arc(10, -46, 1.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Structured Hood Outer
-    ctx.fillStyle = "#4B0082";
-    ctx.beginPath();
-    ctx.moveTo(-8, -40);
-    ctx.quadraticCurveTo(0, -65, 15, -40);
-    ctx.quadraticCurveTo(18, -30, 10, -35);
-    ctx.lineTo(-8, -35);
-    ctx.fill();
-
-    // --- 6. MAGICAL PARTICLES ---
-    if (Math.random() > 0.85) {
-        ctx.fillStyle = "#FFD700";
-        let px = Math.random() * 30 - 15;
-        let py = Math.random() * 50 - 25;
-        ctx.globalAlpha = 0.5;
-        ctx.beginPath();
-        ctx.arc(px, py, 1.5, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    // --- 7. HUD LABELS ---
-    ctx.restore();
-    ctx.textAlign = "center";
-    ctx.font = "bold 13px monospace";
-    
-    // Label follows the float
-    let textY = by + floatY - 75;
-    
-    ctx.fillStyle = "black";
-    ctx.fillText("MYSTERIOUS MERCHANT", bx + 1, textY + 1);
-    ctx.fillStyle = "#ffff00";
-    ctx.fillText("MYSTERIOUS MERCHANT", bx, textY);
-    
-    ctx.font = "11px monospace";
-    ctx.fillStyle = "#00ffff";
-    ctx.fillText("✦ 2X pixels RATE ✦", bx, textY + 14);
-}
 
 
 // idle actions
@@ -1224,6 +1069,164 @@ function handleLurking(p, now) {
         }
     }
 }
+
+//============================================================
+// ============== 	FISHING MERCHANT STUFF ===================
+// --- Fishing Merchant --------------------------------------
+const merchantSettings = {
+    stayMinutes: 2,    // How many minutes she stays
+    cycleTotal: 28,     // Total minutes in one full loop (Stay + Away)
+};
+let forceBuyer = null;
+let buyerActive = false;
+//fish merchant----------------
+function updateBuyerNPC() {
+    const now = Date.now();
+    
+    // We use the settings here
+    let cycle = Math.floor(now / 60000) % merchantSettings.cycleTotal; 
+    let wasActive = buyerActive;
+
+    if (forceBuyer !== null) {
+        buyerActive = forceBuyer;
+    } else {
+        // If stayMinutes is 2, she is active during minute 0 and 1
+        buyerActive = (cycle < merchantSettings.stayMinutes); 
+    }
+
+    if (buyerActive && !wasActive) {
+        systemMessage("--- [NPC] THE FISH MERCHANT HAS ARRIVED (2X pixels)! ---");
+    } else if (!buyerActive && wasActive) {
+        systemMessage("--- [NPC] THE FISH MERCHANT HAS LEFT THE AREA. ---");
+    }
+}
+// called inside drawScenery function under the pond section to update time she stays away and time she stays properly:
+function drawBuyer(ctx) {
+    if (!buyerActive || viewArea !== "pond") return;
+    
+    const bx = 115; 
+    const by = 500; 
+    const now = Date.now();
+    
+    // Smooth levitation and cloak sway
+    let floatY = Math.sin(now / 800) * 6;
+    let sway = Math.sin(now / 400) * 3;
+    let gemPulse = 5 + Math.abs(Math.sin(now / 500)) * 10;
+
+    ctx.save();
+    ctx.translate(bx, by + floatY);
+
+    // --- 1. THE TRAILING CAPE (Behind her, blowing slightly) ---
+    ctx.fillStyle = "#2a1233"; // Very dark shadow purple
+    ctx.beginPath();
+    ctx.moveTo(0, -30);
+    ctx.quadraticCurveTo(-25 + sway, 0, -15 + sway, 35);
+    ctx.lineTo(5, 30);
+    ctx.fill();
+
+    // --- 2. THE LEGS ---
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-3, 10); ctx.lineTo(-5, 30);
+    ctx.moveTo(3, 10); ctx.lineTo(5, 30);
+    ctx.stroke();
+
+    // --- 3. STRUCTURED CLOAK (Facing Right/Pond) ---
+    // Main Cloak Body
+    ctx.fillStyle = "#4B0082"; 
+    ctx.beginPath();
+    ctx.moveTo(0, -35); // Neck
+    ctx.bezierCurveTo(-15, -20, -18, 10, -12, 25); // Back curve
+    ctx.lineTo(15, 25); // Bottom front
+    ctx.bezierCurveTo(8, 10, 12, -20, 0, -35); // Front curve (facing pond)
+    ctx.fill();
+
+    // pixels Trim on Cloak
+    ctx.strokeStyle = "#FFD700";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // --- 4. THE ARMS & STAFF (Staff is on the Pond side) ---
+    ctx.strokeStyle = "#ffdbac"; // Hands
+    ctx.lineWidth = 2.5;
+    
+    // Arm resting on staff (Right arm, facing pond)
+    ctx.beginPath();
+    ctx.moveTo(8, -15);
+    ctx.lineTo(18, -5); 
+    ctx.stroke();
+
+    // The Mystic Staff
+    ctx.strokeStyle = "#3e2723"; // Dark wood
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(20, 30);
+    ctx.lineTo(20, -50);
+    ctx.stroke();
+
+    // Staff Gem (Glow effect)
+    ctx.shadowBlur = gemPulse;
+    ctx.shadowColor = "#00ffff";
+    ctx.fillStyle = "#e0ffff";
+    ctx.beginPath();
+    ctx.arc(20, -55, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // --- 5. THE HEAD & DEEP HOOD ---
+    // Inner Hood
+    ctx.fillStyle = "#0a0a0a";
+    ctx.beginPath();
+    ctx.ellipse(2, -45, 9, 11, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Glowing Eyes (Facing the pond)
+    ctx.fillStyle = "#00ffff";
+    ctx.beginPath();
+    ctx.arc(6, -46, 1.5, 0, Math.PI * 2);
+    ctx.arc(10, -46, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Structured Hood Outer
+    ctx.fillStyle = "#4B0082";
+    ctx.beginPath();
+    ctx.moveTo(-8, -40);
+    ctx.quadraticCurveTo(0, -65, 15, -40);
+    ctx.quadraticCurveTo(18, -30, 10, -35);
+    ctx.lineTo(-8, -35);
+    ctx.fill();
+
+    // --- 6. MAGICAL PARTICLES ---
+    if (Math.random() > 0.85) {
+        ctx.fillStyle = "#FFD700";
+        let px = Math.random() * 30 - 15;
+        let py = Math.random() * 50 - 25;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // --- 7. HUD LABELS ---
+    ctx.restore();
+    ctx.textAlign = "center";
+    ctx.font = "bold 13px monospace";
+    
+    // Label follows the float
+    let textY = by + floatY - 75;
+    
+    ctx.fillStyle = "black";
+    ctx.fillText("MYSTERIOUS MERCHANT", bx + 1, textY + 1);
+    ctx.fillStyle = "#ffff00";
+    ctx.fillText("MYSTERIOUS MERCHANT", bx, textY);
+    
+    ctx.font = "11px monospace";
+    ctx.fillStyle = "#00ffff";
+    ctx.fillText("✦ 2X pixels RATE ✦", bx, textY + 14);
+}
+
+
 // ( *if at pond & if on shore -> get in boat, and float,
 // else if at fishing pond and in water->float to shore and get off boat
 //rideBoat(){}; 
@@ -2371,7 +2374,7 @@ function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     
     // Swimming Depth
-    if (p.activeTask === "swimming" && p.area === "pond" && p.x > 250) {
+    if (p.activeTask === "swimming" && p.area === "pond" && p.x > 225) {
         const bobbing = Math.sin(now / 400) * 5; 
         anim.bodyY = 60 + bobbing; 
     }
