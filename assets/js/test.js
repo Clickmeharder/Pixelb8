@@ -2815,67 +2815,51 @@ function startTask(p, taskName) {
     console.log(`[TASK] ${p.name} -> ${taskName} for ${hrs}h ${mins}m`);
 }
 function updatePlayerStatus(p, now) {
+    // 1. Handle Dead Players (Vanishing logic)
     if (p.dead && !p.isHidden) {
-        if (now - (p.lastActionTime || now) > 15 * 60 * 1000) p.isHidden = true;
+        const timeSinceAction = now - (p.lastActionTime || now);
+        if (timeSinceAction > 15 * 60 * 1000) {
+            p.isHidden = true;
+        }
         return;
     }
 
-    const idleTime = now - (p.lastActionTime || now);
-
-    // --- TASK TIMEOUT ---
+    // 2. Task Expiration Logic
     if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
         systemMessage(`${p.name}'s task expired.`);
         spawnFloater(p, `Task Finished`, "#ff4444");
         
-        // IMPORTANT: Reset lastActionTime so they have 5 mins to 'walk to shore' 
-        // before they fall asleep on the beach.
-        p.lastActionTime = now; 
-        
+        // We call cmdStop FIRST so it can check if (now > taskEndTime) 
+        // to decide if the player should drown in the pond.
         cmdStop(p, p.name); 
+
+        // THEN we reset the action time so they have a fresh 5 mins 
+        // to walk to shore before falling asleep.
+        p.lastActionTime = now; 
     }
 
-    // --- INACTIVITY STATES ---
-    // If they were swimming and are now hidden (timed out totally), they drown
-    if (idleTime > 15 * 60 * 1000) { 
-        if (!p.isHidden) { // Trigger only once
+    // 3. Inactivity & Sleeping Logic
+    const idleTime = now - (p.lastActionTime || now);
+
+    if (idleTime > 15 * 60 * 1000) { // 15 Minutes: Remove from world
+        if (!p.isHidden) { 
             p.isHidden = true;
-            if (p.area === "pond" && p.x > 250) { // If still in water
+            // Backup check: If they somehow got stuck in the water while idle
+            if (p.area === "pond" && p.x > 250 && !p.dead) {
                 p.hp = 0;
                 p.dead = true;
                 p.deathTime = now;
-                systemMessage(`${p.name} drowned while sleeping in the pond.`);
+                systemMessage(`${p.name} drowned after idling in the water for too long.`);
             }
         }
-    } else if (idleTime > 5 * 60 * 1000) { 
+    } else if (idleTime > 5 * 60 * 1000) { // 5 Minutes: Sleeping state
         p.isSleeping = true;
         p.isHidden = false;
-    } else {
+    } else { // Active state
         p.isSleeping = false;
         p.isHidden = false;
     }
 }
-/* function updatePlayerStatus(p, now) {
-    if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
-        systemMessage(`${p.name} stopped ${p.activeTask} (Idle timeout).`);
-		spawnFloater(p, `stopped ${p.activeTask} (Idle timeout)`, "#ff4444");
-        p.activeTask = null;
-        p.targetX = null;
-        p.danceStyle = 0;
-    }
-} */
-
-/* function updatePlayerMovement(p) {
-    if (p.targetX !== null && p.targetX !== undefined) {
-        let dx = p.targetX - p.x;
-        if (Math.abs(dx) > 5) {
-            p.x += dx * 0.1;
-            p.lean = dx > 0 ? 0.2 : -0.2;
-        } else {
-            p.lean = 0;
-            if (p.activeTask !== "attacking") p.targetX = null;
-        }
-    }
-} */
 
 function updatePlayerActions(p, now) {
     if (p.dead) return;
@@ -2916,10 +2900,6 @@ function updatePlayerActions(p, now) {
 		}
 	}
 }
-
-
-
-
 
 
 // Call this inside your requestAnimationFrame or a 1-second interval
@@ -3909,7 +3889,6 @@ function cmdListDances(p) {
     msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
     systemMessage(msg);
 }
-
 
 function cmdStop(p, user) {
     const now = Date.now();
