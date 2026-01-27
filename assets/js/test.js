@@ -1259,22 +1259,6 @@ let arenaQueue = [];
 let arenaTimer = 0;
 let arenaMatchInterval = null;
 let pvpRankings = {}; // {playerName: {wins: 0, kills: 0, rating: 1000}}
-/* const arenaConfig = {
-    title: "🏆 ARENA RANKINGS",
-    labels: {
-        timer: (s) => `⚔️ ARENA START: ${s}s`,
-        empty: "No battles fought yet...",
-        count: (n) => `Players in Arena: ${n}`,
-        matchActive: "● MATCH IN PROGRESS",
-        matchOpen: "● ARENA OPEN"
-    },
-    // Keep the logic for data processing here
-    getTopRankings: (limit = 5) => {
-        return Object.entries(pvpRankings)
-            .sort(([, a], [, b]) => b.rating - a.rating)
-            .slice(0, limit);
-    }
-}; */
 const arenaConfig = {
     minPlayers: 2,
     queueTime: 45, // seconds
@@ -3139,11 +3123,10 @@ function gameLoop() {
 
     renderScene(); 
     
-    // 2. PERFORMANCE: UI Sync (Throttle to ~20fps)
+    // 2. UI Sync (Throttle to ~20fps for performance)
     if (frameCount % 3 === 0) {
         updateUI(); 
     }
-}
     // 3. World Logic (Runs regardless of view)
     if (dungeonActive) {
         checkDungeonProgress(); 
