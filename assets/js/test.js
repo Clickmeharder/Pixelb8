@@ -10,6 +10,9 @@ const areaDisplayDiv = document.getElementById("areaDisplay");
 const ctx = c.getContext("2d");
 let mouse = { x: 0, y: 0 };
 let players = {};
+let viewArea = "town"; 
+const TASK_DURATION = 15 * 60 * 1000; // 15 Minutes
+
 //
 //
 //=======utility we culd probably group in a shared globaljs
@@ -29,7 +32,6 @@ function systemMessage(text) {
 //        IDLE ACTION MESSAGES
 // ( big bottom right ext box )
 let idleBoxFadeTimeout = null;
-
 function idleActionMsg(playerName, text, color = "#0f0") {
     const box = document.getElementById("idleActionsBox");
     if (!box) return;
@@ -76,8 +78,6 @@ function idleActionMsg(playerName, text, color = "#0f0") {
 }
 /* ====grr============= CONFIG & STATE ================== */
 // we can change these [ basically options ] 
-let viewArea = "home"; 
-const TASK_DURATION = 15 * 60 * 1000; // 15 Minutes
 
 /* ================= DATA PERSISTENCE ================= */
 function loadStats(name) {
@@ -324,7 +324,6 @@ function getPlayer(name, color) {
 
     return players[lowName];
 }
-
 function movePlayer(p, targetArea) {
     if (p.dead) {
         systemMessage(`${p.name} is a corpse and cannot travel!`);
@@ -425,11 +424,13 @@ function handleTooltips() {
         tt.style.display = "block";
         tt.style.left = (mouse.x + 15) + "px";
         tt.style.top = (mouse.y + 15) + "px";
-        if (hover.name === "Minion" || hover.name === "DUNGEON OVERLORD") {
-            tt.innerHTML = `<b style="color:#ff4444">${hover.name}</b><br>HP: ${hover.hp}/${hover.maxHp}`;
-        } else {
-            tt.innerHTML = `<b>${hover.name}</b> [Lv ${hover.stats.combatLevel}]<br>HP: ${hover.hp}/${hover.maxHp}<br>Task: ${hover.activeTask || 'Idle'}`;
-        }
+        // Replace the hardcoded names with a generic check
+		if (hover.isEnemy || hover.isBoss) {
+			tt.innerHTML = `<b style="color:#ff4444">${hover.name}</b><br>HP: ${Math.floor(hover.hp)}/${Math.floor(hover.maxHp)}`;
+		} else {
+			// It's a player or stickman
+			tt.innerHTML = `<b>${hover.name}</b> [Lv ${hover.stats.combatLevel}]<br>HP: ${Math.floor(hover.hp)}/${Math.floor(hover.maxHp)}<br>Task: ${hover.activeTask || 'Idle'}`;
+		}
     } else { tt.style.display = "none"; }
 }
 let selectedPlayerForBubble = null;
@@ -476,8 +477,9 @@ document.addEventListener("DOMContentLoaded", () => {
             selector.value = selectedPlayerForBubble.name;
             
             // Trigger your existing inventory toggle
-            toggleInventory(); 
-            
+
+            //toggleInventory(); 
+            toggleStickmenInventory(selectedPlayerForBubble);
             document.getElementById("player-context-bubble").classList.add('hidden');
         }
     });
@@ -1540,10 +1542,6 @@ const dungeonUIConfig = {
     }
 };
 
-/**
- * SINGLE SOURCE OF TRUTH: Tier Calculation
- * Wave 1-5 = Tier 1, 6-10 = Tier 2, etc.
- */
 function getTierFromWave(wave) {
     return Math.floor((wave - 1) / 5) + 1;
 }
@@ -1570,6 +1568,10 @@ function getTierFromWave(wave) {
 */
 
 //-- MAIN DUNGEON STUFF --
+/**
+ * Wave 1-5 = Tier 1, 6-10 = Tier 2, etc.
+ */
+
 function joinDungeonQueue(p) {
     if (p.dead) return;
 
@@ -1646,6 +1648,42 @@ function startDungeon() {
     enemies = [];
     dungeonQueue = []; 
     spawnWave();
+}
+
+function getBestAvailableTier(type, desiredTier) {
+    const allItemsOfType = Object.values(ITEM_DB).filter(i => i.type === type);
+    if (allItemsOfType.length === 0) return [];
+    const maxExistingTier = Math.max(...allItemsOfType.map(i => i.tier || 1));
+    const targetTier = Math.min(desiredTier, maxExistingTier);
+
+    return Object.keys(ITEM_DB).filter(key => {
+        const item = ITEM_DB[key];
+        return item.type === type && item.tier === targetTier;
+    });
+}
+
+function generateRandomLoadout(tier) {
+    const weaponPool = Object.keys(ITEM_DB).filter(key => {
+        const i = ITEM_DB[key];
+        const isWeaponType = (i.type === "weapon" || i.type === "bow" || i.type === "staff");
+        return isWeaponType && i.tier === tier;
+    });
+
+    const headPool  = getBestAvailableTier("helmet", tier);
+    const armorPool = getBestAvailableTier("armor", tier);
+    const legPool   = getBestAvailableTier("pants", tier);
+
+    const pick = (pool) => {
+        if (!pool || pool.length === 0) return null;
+        return pool[Math.floor(Math.random() * pool.length)];
+    };
+
+    return {
+        weapon: pick(weaponPool),
+        helmet: pick(headPool),
+        armor:  Math.random() < 0.7 ? pick(armorPool) : null,
+        pants:  Math.random() < 0.7 ? pick(legPool) : null
+    };
 }
 
 function spawnWave() {
@@ -1821,42 +1859,6 @@ function handleEnemyAttacks() {
     });
 }
 
-function getBestAvailableTier(type, desiredTier) {
-    const allItemsOfType = Object.values(ITEM_DB).filter(i => i.type === type);
-    if (allItemsOfType.length === 0) return [];
-    const maxExistingTier = Math.max(...allItemsOfType.map(i => i.tier || 1));
-    const targetTier = Math.min(desiredTier, maxExistingTier);
-
-    return Object.keys(ITEM_DB).filter(key => {
-        const item = ITEM_DB[key];
-        return item.type === type && item.tier === targetTier;
-    });
-}
-
-function generateRandomLoadout(tier) {
-    const weaponPool = Object.keys(ITEM_DB).filter(key => {
-        const i = ITEM_DB[key];
-        const isWeaponType = (i.type === "weapon" || i.type === "bow" || i.type === "staff");
-        return isWeaponType && i.tier === tier;
-    });
-
-    const headPool  = getBestAvailableTier("helmet", tier);
-    const armorPool = getBestAvailableTier("armor", tier);
-    const legPool   = getBestAvailableTier("pants", tier);
-
-    const pick = (pool) => {
-        if (!pool || pool.length === 0) return null;
-        return pool[Math.floor(Math.random() * pool.length)];
-    };
-
-    return {
-        weapon: pick(weaponPool),
-        helmet: pick(headPool),
-        armor:  Math.random() < 0.7 ? pick(armorPool) : null,
-        pants:  Math.random() < 0.7 ? pick(legPool) : null
-    };
-}
-
 function handleLoot(p, target) {
     const currentTier = getTierFromWave(dungeonWave);
     let lootFound = [];
@@ -1929,7 +1931,6 @@ function spawnLootBeam(p, rarity) {
         width: 10 + (rarity * 2)
     });
 }
-
 function drawLootBeams(ctx) {
     for (let i = lootBeams.length - 1; i >= 0; i--) {
         let b = lootBeams[i];
@@ -2836,27 +2837,8 @@ function updatePlayerActions(p, now) {
 
 
 
-function updateAreaPlayerCounts() {
-    const counts = { home: 0, town: 0, pond: 0, dungeon: 0, arena: 0 };
-    
-    Object.values(players).forEach(p => {
-        if (counts[p.area] !== undefined) counts[p.area]++;
-    });
 
-    const selector = document.getElementById("view-area-selector");
-    if (selector) {
-        // Change the dungeon icon based on activity
-        const dungeonIcon = dungeonActive ? "👹" : "👾";
-        const dungeonLabel = dungeonActive ? "RAID ACTIVE" : "Dungeon";
 
-        selector.options[0].text = `🏠 Home (${counts.home})`;
-        selector.options[1].text = `🏙️ Town (${counts.town})`;
-		selector.options[2].text = `🏟️ Arena (${counts.arena})`;
-        selector.options[3].text = `🎣 Pond (${counts.pond})`;
-        selector.options[4].text = `👾 Dungeon (${counts.dungeon})`;
-        
-    }
-}
 // Call this inside your requestAnimationFrame or a 1-second interval
 //setInterval(updateAreaPlayerCounts, 1000);
 /* ================= GAME LOOP ================= */
@@ -2899,6 +2881,27 @@ function updateSystemTicks(now) {
         console.log("Game Autosaved");
     }
 	updateBuyerNPC();
+}
+function updateAreaPlayerCounts() {
+    const counts = { home: 0, town: 0, pond: 0, dungeon: 0, arena: 0 };
+    
+    Object.values(players).forEach(p => {
+        if (counts[p.area] !== undefined) counts[p.area]++;
+    });
+
+    const selector = document.getElementById("view-area-selector");
+    if (selector) {
+        // Change the dungeon icon based on activity
+        const dungeonIcon = dungeonActive ? "👹" : "👾";
+        const dungeonLabel = dungeonActive ? "RAID ACTIVE" : "Dungeon";
+
+        selector.options[0].text = `🏠 Home (${counts.home})`;
+        selector.options[1].text = `🏙️ Town (${counts.town})`;
+		selector.options[2].text = `🏟️ Arena (${counts.arena})`;
+        selector.options[3].text = `🎣 Pond (${counts.pond})`;
+        selector.options[4].text = `👾 Dungeon (${counts.dungeon})`;
+        
+    }
 }
 
 function updateDungeonScoreboard() {
@@ -3141,7 +3144,77 @@ function sendAction(commandStr) {
 let currentInventoryFilter = "all";
 let currentSortMode = "tier";
 let currentInventoryView = "items"; // Options: "items", "stats", "achievements"
+
+let currentInvTarget = null;
+// for players to open their own (self) inventory
 function toggleInventory() {
+    const p = getActiveProfile();
+    const playerObj = players[p.name.toLowerCase()];
+    openInventoryModal(playerObj);
+}
+// For viewing other inventories (Stickmen/Enemies/Party Members)
+function toggleStickmenInventory(playerObj) {
+    if (!playerObj) return;
+    openInventoryModal(playerObj);
+}
+
+// Internal function to open the inventory modal
+function openInventoryModal(playerObj) {
+    const modal = document.getElementById('inventory-modal');
+    currentInvTarget = playerObj; // Lock the target
+    
+    modal.classList.remove('hidden');
+    renderInventoryUI(playerObj);
+}
+function renderInventoryUI(playerObj) {
+    // If called without arguments (like from a Tab click), use the global target
+    if (!playerObj) playerObj = currentInvTarget;
+    if (!playerObj) return;
+
+    // 1. Update Header (Uses the name from the passed object)
+    const nameEl = document.getElementById('inv-player-name');
+    const pixelEl = document.getElementById('inv-pixels-val');
+    if (nameEl) nameEl.textContent = playerObj.name.toUpperCase();
+    if (pixelEl) pixelEl.textContent = (playerObj.stats.pixels || 0).toFixed(0);
+    
+    // 2. Section Routing
+    const backpackTab = document.getElementById('backpack-Tab');
+    const achTab = document.getElementById('achievements-tab');
+    const statsTab = document.getElementById('stats-tab');
+    const bpGrid = document.getElementById('backpack-grid');
+
+    [backpackTab, achTab, statsTab].forEach(el => el?.classList.add('hidden'));
+    
+    renderEquippedSection(playerObj);
+
+    if (currentInventoryView === "achievements") {
+        achTab?.classList.remove('hidden');
+        renderAchievements(playerObj);
+    } 
+    else if (currentInventoryView === "stats") {
+        statsTab?.classList.remove('hidden');
+        renderStatsView(playerObj);
+    } 
+    else {
+        backpackTab?.classList.remove('hidden');
+        renderItemsView(playerObj, bpGrid);
+    }
+}
+function uiAction(cmd, itemName) {
+    // Use the current target (the person whose inventory is open)
+    const p = currentInvTarget; 
+    if (!p) return;
+
+    const fullCommand = `${cmd} "${itemName}"`;
+    
+    // Pass the target's name so processGameCommand affects them
+    processGameCommand(p.name, fullCommand);
+    
+    // Refresh the UI after a short delay
+    setTimeout(() => renderInventoryUI(p), 50);
+}
+//---------OLD TOGGLE INVENTORY SYSTEM BELOW
+/* function toggleInventory() {
     const modal = document.getElementById('inventory-modal');
     modal.classList.toggle('hidden');
     if (!modal.classList.contains('hidden')) {
@@ -3191,6 +3264,19 @@ function renderInventoryUI() {
         renderItemsView(playerObj, bpGrid);
     }
 }
+// Helper to bridge UI clicks to game commands
+function uiAction(cmd, itemName) {
+    const p = getActiveProfile();
+    if (!p) return;
+
+    // Wrapping in quotes handles items with spaces like "Leather Scrap"
+    const fullCommand = `${cmd} "${itemName}"`;
+    
+    processGameCommand(p.name, fullCommand);
+    
+    setTimeout(renderInventoryUI, 50);
+}
+ */
 function renderEquippedSection(playerObj) {
     const equipGrid = document.getElementById('equipped-grid');
     if (!equipGrid) return;
@@ -3419,18 +3505,7 @@ function renderAchRow(container, title, isUnlocked, color, subtext) {
     `;
     container.appendChild(div);
 }
-// Helper to bridge UI clicks to game commands
-function uiAction(cmd, itemName) {
-    const p = getActiveProfile();
-    if (!p) return;
 
-    // Wrapping in quotes handles items with spaces like "Leather Scrap"
-    const fullCommand = `${cmd} "${itemName}"`;
-    
-    processGameCommand(p.name, fullCommand);
-    
-    setTimeout(renderInventoryUI, 50);
-}
 // Wait for the DOM to load to ensure the action bar exists
 
 /* ================= COMMAND FUNCTIONS ================= */
