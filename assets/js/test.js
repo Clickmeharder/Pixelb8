@@ -3148,14 +3148,30 @@ let currentInventoryView = "items"; // Options: "items", "stats", "achievements"
 let currentInvTarget = null;
 // for players to open their own (self) inventory
 function toggleInventory() {
-    const p = getActiveProfile();
-    const playerObj = players[p.name.toLowerCase()];
-    openInventoryModal(playerObj);
+    const modal = document.getElementById('inventory-modal');
+    
+    // If it's already open, the button acts as a "Close" toggle
+    if (!modal.classList.contains('hidden')) {
+        closeInventory();
+    } else {
+        const p = getActiveProfile();
+        const playerObj = players[p.name.toLowerCase()];
+        openInventoryModal(playerObj);
+    }
 }
-// For viewing other inventories (Stickmen/Enemies/Party Members)
 function toggleStickmenInventory(playerObj) {
     if (!playerObj) return;
-    openInventoryModal(playerObj);
+
+    const modal = document.getElementById('inventory-modal');
+    const isModalOpen = !modal.classList.contains('hidden');
+
+    // If the modal is open AND we clicked the SAME person, close it.
+    if (isModalOpen && currentInvTarget === playerObj) {
+        closeInventory();
+    } else {
+        // Otherwise, open it (or switch the view to this new person)
+        openInventoryModal(playerObj);
+    }
 }
 
 // Internal function to open the inventory modal
@@ -4434,8 +4450,30 @@ function syncUI(id, content, parentId) {
     }
 }
 
-
-
+// Close button specifically
+document.getElementById('inventoryClosebtn').addEventListener('click', () => {
+    closeInventory();
+});
+function closeInventory() {
+    const modal = document.getElementById('inventory-modal');
+    modal.classList.add('hidden');
+    
+    // Clear the target so toggleStickmenInventory knows 
+    // nothing is currently being viewed.
+    currentInvTarget = null; 
+}
+// Function to handle the cleanup
+document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") {
+        const modal = document.getElementById('inventory-modal');
+        if (!modal.classList.contains('hidden')) {
+            closeInventory();
+        }
+        
+        // Also hide the context bubble if it's open
+        document.getElementById("player-context-bubble").classList.add('hidden');
+    }
+});
 
 
 document.addEventListener("DOMContentLoaded", () => {
