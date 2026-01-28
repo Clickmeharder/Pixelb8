@@ -2140,28 +2140,37 @@ function updatePhysics(p) {
 	resolveCrowding(p);
 }
 function resolveCrowding(p) {
-    const bubble = 35; // Increased slightly for clarity
-    Object.values(players).forEach(other => {
-        if (other === p || other.area !== p.area || other.dead || other.targetY !== undefined) return;
+    const bubble = 35;
+    // Ensure 'players' is globally accessible here
+    for (let id in players) {
+        let other = players[id];
+
+        // 1. Skip if it's the same player, different area, or they are dead
+        if (other === p || other.area !== p.area || other.dead) continue;
+        
+        // 2. Skip if they are still falling (targetY is a number)
+        if (other.targetY !== null && other.targetY !== undefined) continue;
 
         let dx = p.x - other.x;
-        if (Math.abs(dx) < bubble) {
-            let force = (bubble - Math.abs(dx)) * 0.15;
+        let distance = Math.abs(dx);
+
+        if (distance < bubble) {
+            // 3. Handle perfect overlaps (distance 0)
+            if (distance === 0) {
+                dx = p.id > other.id ? 1 : -1; // Force a direction based on ID
+                distance = 1;
+            }
+
+            let force = (bubble - distance) * 0.15;
             
-            // TACTICAL AWARENESS: 
-            // If p is Melee and other is Ranged, Melee has "priority" 
-            // and will push the Ranged unit backward more easily.
-            const pWeapon = ITEM_DB[p.stats.equippedWeapon] || { type: "melee" };
-            const oWeapon = ITEM_DB[other.stats.equippedWeapon] || { type: "melee" };
-            
-            if (pWeapon.type === "melee" && (oWeapon.type === "bow" || oWeapon.type === "staff")) {
-                p.x += dx > 0 ? force * 0.5 : -force * 0.5; // Melee moves less
-                other.x += dx > 0 ? -force * 1.5 : force * 1.5; // Ranged gets pushed more
+            // 4. Apply the push
+            if (dx > 0) {
+                p.x += force;
             } else {
-                p.x += dx > 0 ? force : -force;
+                p.x -= force;
             }
         }
-    });
+    }
 }
 function triggerSplash(p) {
     // We pass 'p' so the floater knows the name, area, and position
