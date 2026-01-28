@@ -2553,48 +2553,58 @@ function getAnchorPoints(p, anim) {
 
 function getLimbPositions(p, anchors, anim, now) {
     let activePose = anim.pose || p.forcedPose;
-    const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
+    const itemKey = p.stats?.equippedWeapon || p.equipped?.weapon;
     const item = ITEM_DB[itemKey];
 
-    // Ensure we have a pose even if naked
+    // 1. Determine Pose
     if (!activePose) {
         if (p.activeTask === "swimming") activePose = "swimming";
-        else if (!item) activePose = "boxing"; 
         else activePose = "idle";
     }
 
-    // Default Limbs (The "Safety Net")
+    // 2. Default "Safety" Limbs (If pose library fails)
     let limbs = {
         leftHand: { x: anchors.headX - 18, y: anchors.shoulderY + 10 },
         rightHand: { x: anchors.headX + 18, y: anchors.shoulderY + 10 },
         leftFoot: { x: p.x - 10, y: p.y + 25 + anim.bodyY },
-        rightFoot: { x: p.x + 10, y: p.y + 25 + anim.bodyY }
+        rightFoot: { x: p.x + 10, y: p.y + 25 + anim.bodyY },
+        leftElbow: null,
+        rightElbow: null,
+        leftKnee: null,
+        rightKnee: null
     };
 
-    // Progress Calculation with a hard fallback to 1000ms
     const speed = item?.speed || 1000;
     const startTime = p.lastAttackTime || p.lastActionTime || now;
-    const progress = Math.min(1, (now - startTime) / speed) || 0; // || 0 catches NaN
+    const progress = Math.min(1, (now - startTime) / speed) || 0;
 
+    // 3. Apply Pose Library with strict fallback
     if (activePose && POSE_LIBRARY[activePose]) {
         try {
             const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim, progress);
             
-            // Apply overrides only if they exist
-            if (overrides.left) limbs.leftHand = overrides.left;
-            if (overrides.right) limbs.rightHand = overrides.right;
-            if (overrides.leftFoot) {
-                limbs.leftFoot.x = overrides.leftFoot.x ?? limbs.leftFoot.x;
-                limbs.leftFoot.y += (overrides.leftFoot.yOffset || 0);
+            if (overrides) {
+                // Map the overrides back to our limb object
+                if (overrides.left) limbs.leftHand = overrides.left;
+                if (overrides.right) limbs.rightHand = overrides.right;
+                
+                if (overrides.leftFoot) {
+                    limbs.leftFoot.x = overrides.leftFoot.x ?? limbs.leftFoot.x;
+                    limbs.leftFoot.y = (p.y + 25 + anim.bodyY) + (overrides.leftFoot.yOffset || 0);
+                }
+                if (overrides.rightFoot) {
+                    limbs.rightFoot.x = overrides.rightFoot.x ?? limbs.rightFoot.x;
+                    limbs.rightFoot.y = (p.y + 25 + anim.bodyY) + (overrides.rightFoot.yOffset || 0);
+                }
+                
+                // Carry over joints
+                limbs.leftElbow = overrides.leftElbow;
+                limbs.rightElbow = overrides.rightElbow;
+                limbs.leftKnee = overrides.leftKnee;
+                limbs.rightKnee = overrides.rightKnee;
             }
-            if (overrides.rightFoot) {
-                limbs.rightFoot.x = overrides.rightFoot.x ?? limbs.rightFoot.x;
-                limbs.rightFoot.y += (overrides.rightFoot.yOffset || 0);
-            }
-            // Include elbows/knees for drawStickmanBody
-            limbs = { ...limbs, ...overrides };
         } catch (e) {
-            console.error("Pose Error:", activePose, e);
+            console.error("Pose Animation Error:", activePose, e);
         }
     }
 
@@ -2712,7 +2722,7 @@ function drawStickman(ctx, p) {
 
     ctx.save(); 
 
-    // 1. Alpha for lurking/swimming
+    // 1. Transparency Logic
     let baseAlpha = 1.0;
     if (p.activeTask === "lurking") {
         baseAlpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
@@ -2720,21 +2730,20 @@ function drawStickman(ctx, p) {
     }
     ctx.globalAlpha = isDeep ? baseAlpha * 0.3 : baseAlpha;
 
-    // --- DRAWING STACK ---
+    // --- DRAWING STACK (Bottom to Top) ---
     
-    // A. Cape (Back-most)
+    // 1. Back Layer
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors);
 
-    // B. Base Body (The Stickman)
+    // 2. The Stickman Body (Always draws now)
     drawStickmanBody(ctx, p, anchors, limbs);
 
-    // C. Under-Head Equipment (Pants, Armor, Gloves, Weapons)
-    // We only draw things that go ON the body here
+    // 3. Body Clothing (Under the head)
     if (p.stats.equippedPants) drawPantsItem(ctx, p, anchors, limbs.leftFoot, limbs.rightFoot, ITEM_DB[p.stats.equippedPants]);
     if (p.stats.equippedArmor) drawArmor(ctx, p, anchors);
     drawGloves(ctx, p, limbs);
-    
-    // Weapon/Tool Logic
+
+    // 4. Weapons/Tools
     const weaponKey = p.stats?.equippedWeapon || p.equipped?.weapon;
     const isToolTask = ["woodcutting", "mining", "fishing"].includes(p.activeTask);
     const task = p.activeTask || "none";
@@ -2744,16 +2753,15 @@ function drawStickman(ctx, p) {
     if (weaponKey || isToolTask) {
         if (shouldHoldWeapon || isToolTask) {
             drawWeaponItem(ctx, p, now, anchors, limbs.rightHand.x, limbs.rightHand.y);
-        } else {
+        } else if (weaponKey) {
             drawSheathedWeapon(ctx, p, anchors, ITEM_DB[weaponKey]);
         }
     }
 
-    // D. The Head (Middle Layer)
-    // Drawn now so it is OVER the armor but UNDER the helmet
+    // 5. The Head (Drawn OVER armor/shoulders)
     BODY_PARTS["stick"].head(ctx, anchors.headX, anchors.headY, p);
 
-    // E. Over-Head Equipment (Hair, Helmets, Boots)
+    // 6. Head/Foot Overlays (Drawn OVER the head/feet)
     if (p.stats.equippedHair) drawHair(ctx, p, anchors.bodyY, anchors.lean);
     if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, anchors.bodyY, anchors.lean);
     if (p.stats.equippedBoots) drawBoots(ctx, p, limbs.leftFoot, limbs.rightFoot);
@@ -2767,25 +2775,12 @@ function drawStickman(ctx, p) {
     ctx.font = "12px monospace"; 
     ctx.fillText(p.name, p.x, p.y + 40);
 
-    const hpBarWidth = 40;
-    const hpBarX = p.x - 20;
-    const hpBarY = p.y + 48;
+    // HP Bar
     ctx.fillStyle = "rgba(68, 68, 68, 0.8)";
-    ctx.fillRect(hpBarX, hpBarY, hpBarWidth, 4);
-
-    let hpColor = (p.struggleStartTime && isDeep && Math.floor(now / 200) % 2 === 0) ? "#ff0000" : "#0f0";
+    ctx.fillRect(p.x - 20, p.y + 48, 40, 4);
+    let hpColor = (p.struggleStartTime && isDeep && Math.floor(now / 200) % 2 === 0) ? "#f00" : "#0f0";
     ctx.fillStyle = hpColor;
-    ctx.fillRect(hpBarX, hpBarY, hpBarWidth * (p.hp / p.maxHp), 4);
-
-    if (p.struggleStartTime && isDeep) {
-        const limit = getStruggleLimit(p);
-        const elapsed = now - p.struggleStartTime;
-        const graceRemaining = Math.max(0, limit - elapsed);
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(p.x - 15, p.y - 60, 30, 4);
-        ctx.fillStyle = (graceRemaining < 10000) ? "#ff0000" : "#00ccff";
-        ctx.fillRect(p.x - 15, p.y - 60, 30 * (graceRemaining / limit), 4);
-    }
+    ctx.fillRect(p.x - 20, p.y + 48, 40 * (p.hp / p.maxHp), 4);
 
     ctx.restore(); 
 }
