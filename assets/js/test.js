@@ -2456,23 +2456,24 @@ function drawWeaponItem(ctx, p, now, anchors, hX, hY) {
 
 // --- drawEquipment ---
 function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon) {
+    // These should always draw regardless of weapons
     if (p.stats.equippedPants) drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
     if (p.stats.equippedArmor) drawArmor(ctx, p, anchors); 
-
     drawGloves(ctx, p, { leftHand, rightHand });
 
+    // Handle Weapon/Tool drawing
     const weaponKey = p.stats?.equippedWeapon || p.equipped?.weapon;
     const weaponItem = ITEM_DB[weaponKey];
+    const isToolTask = ["woodcutting", "mining", "fishing"].includes(p.activeTask);
     
-    const isTask = ["woodcutting", "mining", "fishing"].includes(p.activeTask);
-    
-    // CHANGE: Only call drawWeaponItem if there is actually a weapon OR a virtual tool task
-    if (weaponItem || isTask) {
-        if (shouldHoldWeapon || isTask) {
+    // Only call drawWeaponItem if we have an actual item OR we are doing a tool-based task
+    if (weaponItem || isToolTask) {
+        if (shouldHoldWeapon || isToolTask) {
             drawWeaponItem(ctx, p, now, anchors, rightHand.x, rightHand.y);
         }
     }
 
+    // Head and Feet gear
     if (p.stats.equippedHair) drawHair(ctx, p, anchors.bodyY, anchors.lean);
     if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, anchors.bodyY, anchors.lean);
     if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
@@ -2547,64 +2548,54 @@ function getAnchorPoints(p, anim) {
 }
 
 function getLimbPositions(p, anchors, anim, now) {
-    // 1. Priority: Decision from AnimationState -> Forced Pose -> Task Fallbacks
     let activePose = anim.pose || p.forcedPose;
     const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
     const item = ITEM_DB[itemKey];
 
+    // 1. Fallback Pose Logic
     if (!activePose) {
-        if (p.activeTask === "swimming") {
-            activePose = "swimming";
-        } else if (p.activeTask === "fishing") {
-            activePose = "fishing";
-        } else if (!item) {
-            activePose = "boxing"; // Default stance when unarmed
-        } else if (p.isEnemy) {
-            activePose = "action";
-        }
+        if (p.activeTask === "swimming") activePose = "swimming";
+        else if (p.activeTask === "fishing") activePose = "fishing";
+        else if (!item) activePose = "boxing"; 
+        else if (p.isEnemy) activePose = "action";
     }
 
-    // 2. Standard Default Positions
-    let leftHand = { x: anchors.headX - 18, y: anchors.shoulderY + 10 + anim.armMove };
-    let rightHand = { x: anchors.headX + 18, y: anchors.shoulderY + 10 - anim.armMove };
+    // 2. Base Defaults
+    let limbs = {
+        leftHand: { x: anchors.headX - 18, y: anchors.shoulderY + 10 + anim.armMove },
+        rightHand: { x: anchors.headX + 18, y: anchors.shoulderY + 10 - anim.armMove },
+        leftFoot: { x: p.x - 10, y: p.y + 25 + anim.bodyY },
+        rightFoot: { x: p.x + 10, y: p.y + 25 + anim.bodyY }
+    };
 
-    const isInWater = (p.area === "pond" && p.x > 250);
-    const walk = (p.targetX !== null && !isInWater) ? Math.sin(now / 100) * 10 : 0;
-    const footY = p.y + 25 + anim.bodyY;
-    
-    let leftFoot = { x: p.x - 10 - walk, y: footY };
-    let rightFoot = { x: p.x + 10 + walk, y: footY };
-
-    // Initialize the limbs object with defaults
-    let limbs = { leftHand, rightHand, leftFoot, rightFoot };
-
-    // 3. Calculate Action Progress
-    const speed = item?.speed || 2000;
+    // 3. FIXED PROGRESS CALCULATION
+    // If no item, default to 1000ms (1 second) to prevent division by zero/undefined
+    const speed = item?.speed || 1000; 
     const startTime = p.lastAttackTime || p.lastActionTime || 0;
+    
+    // progress must be a valid number between 0 and 1
     const progress = (p.activeTask === "attacking" || p.activeTask === "pvp") 
         ? Math.min(1, (now - startTime) / speed) 
         : 0;
 
-    // 4. Apply Pose Library Overrides
+    // 4. Apply Pose
     if (activePose && POSE_LIBRARY[activePose]) {
-        const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim, progress);
+        // We pass a valid progress number now
+        const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim, progress || 0);
 
-        // Update Hand Positions
         if (overrides.left) limbs.leftHand = overrides.left;
         if (overrides.right) limbs.rightHand = overrides.right;
         
-        // Update Foot Positions (handling the yOffset system)
         if (overrides.leftFoot) {
+            limbs.leftFoot.x = overrides.leftFoot.x ?? limbs.leftFoot.x;
             limbs.leftFoot.y += (overrides.leftFoot.yOffset || 0);
-            if (overrides.leftFoot.x !== undefined) limbs.leftFoot.x = overrides.leftFoot.x;
         }
         if (overrides.rightFoot) {
+            limbs.rightFoot.x = overrides.rightFoot.x ?? limbs.rightFoot.x;
             limbs.rightFoot.y += (overrides.rightFoot.yOffset || 0);
-            if (overrides.rightFoot.x !== undefined) limbs.rightFoot.x = overrides.rightFoot.x;
         }
 
-        // 5. MERGE EXTRA JOINTS: This ensures leftElbow, rightElbow, knees etc. 
-        // are passed to drawStickmanBody
+        // Merge extra joints (elbows/knees)
         limbs = { ...limbs, ...overrides };
     }
 
