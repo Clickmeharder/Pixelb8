@@ -397,33 +397,19 @@ const DANCE_LIBRARY = {
 To make a Sombrero: Take the gentleman style, set brimSize to 30 and hatTall to 15, then change the color to yellow.
 To make a Tiny Fancy Hat: Take the gentleman style, move the hX (horizontal) in the settings to hX + 8 so it sits tilted on the side of the head, and make all the sizes smaller. */
 const WEAPON_STYLES = {
-    "sword": (ctx, item, isAttacking, now, p, bodyY, lean, progress) => {
-        let rotation;
-        if (isAttacking && progress < 1.0) {
-            // Start at 1.2 (idle behind back), swing to -0.5 (strike), back to 1.2
-            if (progress < 0.2) rotation = 1.2 - (progress * 2); // Wind up
-            else if (progress < 0.5) rotation = 0.8 - ((progress-0.2) * 5); // Strike!
-            else rotation = -0.7 + ((progress-0.5) * 4); // Recover
-        } else {
-            rotation = Math.PI / 1.2; // Idle
-        }
-
-        ctx.rotate(rotation);
+	"sword": (ctx, item, isAttacking, now, p, bodyY, lean, progress) => {
+        // Points straight out from the swinging hand
+        ctx.rotate(-Math.PI / 4); 
         ctx.strokeStyle = item.color || "#ccc";
         ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(25, -2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(25, 0); ctx.stroke();
         // Guard
         ctx.strokeStyle = "#aa8800";
         ctx.beginPath(); ctx.moveTo(5, -6); ctx.lineTo(5, 6); ctx.stroke();
     },
 
     "axe": (ctx, item, isAttacking, now, p, bodyY, lean, progress) => {
-        // Heavy overhead swing
-        let rotation = Math.PI / 1.2;
-        if (isAttacking && progress < 1.0) {
-            rotation = 1.2 - (Math.sin(progress * Math.PI) * 2);
-        }
-        ctx.rotate(rotation);
+        ctx.rotate(-Math.PI / 4);
         ctx.strokeStyle = "#5d4037"; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(22, 0); ctx.stroke();
         ctx.fillStyle = item.color || "#999";
@@ -432,6 +418,96 @@ const WEAPON_STYLES = {
         ctx.fill(); ctx.stroke();
     },
 
+    "dagger": (ctx, item, isAttacking, now, p, bodyY, lean, progress) => {
+        ctx.rotate(-Math.PI / 4);
+        ctx.strokeStyle = item.color || "#777"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(12, 0); ctx.stroke();
+    },
+
+	"bow": (ctx, item, isAttacking, now, p) => {
+		ctx.rotate(isAttacking ? -0.6 : Math.PI / 7);
+
+		// Calculate "Draw Amount" based on attack speed
+		let weaponData = ITEM_DB[p.stats.equippedWeapon];
+		let speed = weaponData?.speed || 2500;
+		let timeSinceLast = now - (p.lastAttackTime || 0);
+		
+		// String pulls back as we get closer to the next attack
+		let drawProgress = Math.min(1, timeSinceLast / speed);
+		let pull = isAttacking ? (drawProgress * 15) : 0;
+
+		// Bow Wood
+		ctx.strokeStyle = item.color || "#8B4513";
+		ctx.lineWidth = 3;
+		ctx.beginPath(); 
+		ctx.arc(-15, 0, 15, -Math.PI / 2, Math.PI / 2, false); 
+		ctx.stroke();
+
+		// Bowstring
+		ctx.strokeStyle = "rgba(255,255,255,0.7)";
+		ctx.lineWidth = 1;
+		ctx.beginPath();
+		ctx.moveTo(-15, -15); 
+		ctx.lineTo(-15 - pull, 0); // Pulls back based on attack timer
+		ctx.lineTo(-15, 15); 
+		ctx.stroke();
+	},
+
+    "staff": (ctx, item, isAttacking, now) => {
+        if (isAttacking) ctx.rotate(Math.sin(now / 150) * 0.5);
+        ctx.strokeStyle = item.poleColor || "#4e342e";
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(0, 20); ctx.lineTo(0, -45); ctx.stroke();
+        let pulse = Math.sin(now / 400) * 5;
+        ctx.fillStyle = item.color || "#00ffff";
+        ctx.shadowBlur = 10 + pulse; ctx.shadowColor = ctx.fillStyle;
+        ctx.beginPath(); ctx.arc(0, -50, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+    },
+	
+	"fishing_rod": (ctx, item, isAttacking, now, p, bodyY, lean) => {
+		const isActuallyFishing = p.activeTask === "fishing";
+		
+		ctx.strokeStyle = item.color || "#8B4513";
+		ctx.lineWidth = 2;
+
+		if (isActuallyFishing) {
+			let bob = Math.sin(now / 300) * 5;
+			
+			// 1. Draw the Rod (Starting at 0,0 which is the Hand)
+			ctx.beginPath();
+			ctx.moveTo(0, 0); 
+			// Tip is 40px right and 30px up from the hand
+			const tipX = 40;
+			const tipY = -30 + bob;
+			ctx.lineTo(tipX, tipY);
+			ctx.stroke();
+
+			// 2. Draw the Line
+			ctx.strokeStyle = "rgba(255,255,255,0.5)";
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.moveTo(tipX, tipY);
+			
+			// This targets the water relative to the player
+			// We subtract the current hand position to find the water in "local" space
+			const waterX = 80; 
+			const waterY = 60 - bodyY; 
+
+			ctx.quadraticCurveTo(tipX + 10, tipY + 30, waterX, waterY);
+			ctx.stroke();
+
+			// 3. Draw the Bobber
+			ctx.fillStyle = "#ff4444";
+			ctx.beginPath(); 
+			ctx.arc(waterX, waterY, 3, 0, Math.PI * 2); 
+			ctx.fill();
+		} else {
+			// Idle/Walking: Carry it upright
+			ctx.rotate(-Math.PI / 8);
+			ctx.beginPath(); ctx.moveTo(0, 5); ctx.lineTo(0, -45); ctx.stroke();
+		}
+	},
     "pickaxe": (ctx, item, isAttacking, now, p, bodyY, lean, progress) => {
         // Mining: Fast strike, slow pull back
         let rotation = Math.PI / 1.2;
@@ -1603,14 +1679,25 @@ const POSE_LIBRARY = {
         right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
     }), */
 	"action": (head, p, anim, progress = 0) => {
-        // If progress is 0.5 (middle of swing), the arm reaches further out
-        const lunge = (p.activeTask === "attacking" && progress > 0 && progress < 1) 
-            ? Math.sin(progress * Math.PI) * 15 
-            : 0;
+        const shoulder = { x: head.x, y: head.y + 15 };
+        const armLength = 25;
+        
+        let angle;
+        if (p.activeTask === "attacking" || p.activeTask === "pvp" || ["woodcutting", "mining"].includes(p.activeTask)) {
+            // Swing from behind head (top-left) to strike point (front)
+            // Starts at -2.5 radians, ends at 0.5 radians
+            angle = -2.5 + (progress * Math.PI); 
+        } else {
+            // Idle carry angle
+            angle = 0.8;
+        }
 
         return {
-            left:  { x: head.x - 18, y: head.y + 20 },
-            right: { x: head.x + 20 + (anim.lean * 10) + lunge, y: head.y + 15 }
+            left:  { x: head.x - 15, y: head.y + 25 }, // Left hand stays down
+            right: { 
+                x: shoulder.x + Math.cos(angle) * armLength, 
+                y: shoulder.y + Math.sin(angle) * armLength 
+            }
         };
     },
     "boxing": (head, p, anim) => ({
