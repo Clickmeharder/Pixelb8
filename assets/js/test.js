@@ -2834,7 +2834,7 @@ function drawStickman(ctx, p) {
     }
     ctx.restore(); 
 }
-function drawEnemyStickman(ctx, e) {
+/* function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
 
@@ -2873,8 +2873,8 @@ function drawEnemyStickman(ctx, e) {
         ctx.fillRect(e.x - 20, e.y + 48, 40 * (e.hp / e.maxHp), 4);
     }
 }
-
-/* function drawEnemyStickman(ctx, e) {
+ */
+function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
 
@@ -2925,7 +2925,7 @@ function drawEnemyStickman(ctx, e) {
     ctx.fillStyle = "#f00"; // Red fill for enemies
     ctx.fillRect(e.x - 20, e.y + 48, 40 * (e.hp / e.maxHp), 4);
 }
- */
+
 function drawMonster(ctx, m) {
     if (m.dead) return;
     ctx.save();
