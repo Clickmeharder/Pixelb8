@@ -102,7 +102,7 @@ const ITEM_DB = {
 //					--- WEAPONS (11 tiers) ---
 // --- SWORDS (MELEE) ---
 	"Rusty Dagger":      { type: "weapon", style: "dagger", sources:"dungeon", tier: 1,  rarity: 0,  power: 5,   speed: 1500, value: 40,     color: "#777" },
-	"Iron Sword":        { type: "weapon", style: "dagger", sources:"dungeon", tier: 2,  rarity: 1,  power: 12,  speed: 1400, value: 200,    color: "#eee" },
+	"Iron Sword":        { type: "weapon", style: "sword", sources:"dungeon", tier: 2,  rarity: 1,  power: 12,  speed: 1400, value: 200,    color: "#eee" },
 	"Steel Sword":       { type: "weapon", style: "sword", sources:"dungeon", tier: 3,  rarity: 2,  power: 18,  speed: 1300, value: 800,    color: "#999" },
 	"Flanged Mace":      { type: "weapon", style: "sword", sources:"dungeon", tier: 4,  rarity: 4,  power: 25,  speed: 1500, value: 2500,   color: "#bbb" },
 	"Golden Sword":      { type: "weapon", style: "sword", sources:"dungeon", tier: 5,  rarity: 5,  power: 35,  speed: 1400, value: 10000,  color: "#ffd700" },
