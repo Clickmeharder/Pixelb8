@@ -1053,7 +1053,7 @@ function handleDancing(p, now) {
         }
     }
 }
-function handleLurking(p, now) {
+/* function handleLurking(p, now) {
     if (!p.lastLurkXP) p.lastLurkXP = 0;
     
     if (now - p.lastLurkXP > 5000) {
@@ -1073,6 +1073,43 @@ function handleLurking(p, now) {
     }
 }
 
+ */
+function handleLurking(p, now) {
+    if (!p.lastLurkXP) p.lastLurkXP = 0;
+    
+    // 1. XP TICK (Every 5 seconds)
+    if (now - p.lastLurkXP > 5000) {
+        // Base gain
+        let xpGain = 8; 
+
+        // BONUS: If an enemy is nearby (within 150px) but hasn't "detected" them, 
+        // give them double XP for the risk!
+        const risky = (typeof enemies !== 'undefined') && enemies.some(e => !e.dead && Math.hypot(e.x - p.x, e.y - p.y) < 150);
+        if (risky) {
+            xpGain *= 2;
+            spawnFloater(p, "Risky Lurk!", "#a020f0");
+        }
+
+        p.stats.lurkXP += xpGain;
+        p.lastLurkXP = now;
+
+        let nextLevelXP = xpNeeded(p.stats.lurkLevel);
+        if (p.stats.lurkXP >= nextLevelXP) {
+            p.stats.lurkLevel++;
+            p.stats.lurkXP = 0;
+            
+            // Level up floater (Dark purple/gray)
+            spawnFloater(p, `LURK LEVEL ${p.stats.lurkLevel}!`, "#4b0082");
+            updateCombatLevel(p);
+        }
+    }
+
+    // 2. VISUAL POLISH (Shadow Particles)
+    // Occasionally spawn a puff of "shadow" to show they are hiding
+    if (frameCount % 180 === 0) {
+        spawnFloater(p, "◌", "rgba(75, 0, 130, 0.3)");
+    }
+}
 //============================================================
 // ============== 	FISHING MERCHANT STUFF ===================
 // --- Fishing Merchant --------------------------------------
@@ -1248,8 +1285,6 @@ function drawBuyer(ctx) {
 //============================================================
 
 //============================================================
-//future Lurking action function section
-//goLurking(){}
 //------------------------------------------------------------
 //rideBoat(){}
 //dockBoat(){}
@@ -2416,37 +2451,49 @@ function getAnchorPoints(p, anim) {
 }
 
 function getLimbPositions(p, anchors, anim, now) {
-    // Explicitly check for swimming first so it doesn't default to "action"
     let activePose = anim.pose || p.forcedPose;
 
-// If it's an enemy, it's usually in "action" pose if near a player
     if (!activePose) {
         if (p.isEnemy) activePose = "action"; 
         else if (p.activeTask === "swimming") activePose = "swimming";
         else if (p.activeTask === "fishing") activePose = "fishing";
         else if (["attacking", "woodcutting", "mining"].includes(p.activeTask)) activePose = "action";
     }
+
+    // Default Hands
     let leftHand = { x: anchors.headX - 18, y: anchors.shoulderY + 10 + anim.armMove };
     let rightHand = { x: anchors.headX + 18, y: anchors.shoulderY + 10 - anim.armMove };
 
-    // Apply the Pose Overrides (This makes the circular arm motion work)
+    // Default Feet (Walk logic)
+    const isInWater = (p.area === "pond" && p.x > 250);
+    const walk = (p.targetX !== null && !isInWater) ? Math.sin(now / 100) * 10 : 0;
+    const footY = p.y + 25 + anim.bodyY;
+    
+    let leftFoot = { x: p.x - 10 - walk, y: footY };
+    let rightFoot = { x: p.x + 10 + walk, y: footY };
+
+    // APPLY POSE OVERRIDES
     if (activePose && POSE_LIBRARY[activePose]) {
         const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim);
+        
         if (overrides.left) leftHand = overrides.left;
         if (overrides.right) rightHand = overrides.right;
+        
+        // Handle Foot Overrides (like the swimming kick)
+        if (overrides.leftFoot) {
+            leftFoot.y += (overrides.leftFoot.yOffset || 0);
+            if (overrides.leftFoot.x !== undefined) leftFoot.x = overrides.leftFoot.x;
+        }
+        if (overrides.rightFoot) {
+            rightFoot.y += (overrides.rightFoot.yOffset || 0);
+            if (overrides.rightFoot.x !== undefined) rightFoot.x = overrides.rightFoot.x;
+        }
     }
 
-    const walk = (p.targetX !== null) ? Math.sin(now / 100) * 10 : 0;
-    const footY = p.y + 25 + anim.bodyY; // Keep feet attached to the sunken body
-
-    return {
-        leftHand, rightHand,
-        leftFoot: { x: p.x - 10 - walk, y: footY },
-        rightFoot: { x: p.x + 10 + walk, y: footY }
-    };
+    return { leftHand, rightHand, leftFoot, rightFoot };
 }
 
-function drawStickmanBody(ctx, p, anchors, limbs) {
+/* function drawStickmanBody(ctx, p, anchors, limbs) {
     const style = BODY_PARTS["stick"]; 
     ctx.save();
     ctx.strokeStyle = p.color; 
@@ -2465,10 +2512,26 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
         ctx.globalAlpha = 0.3; // Make legs "underwater"
     }
     ctx.restore();
-}
+} */
+function drawStickmanBody(ctx, p, anchors, limbs) {
+    const style = BODY_PARTS["stick"]; 
+    ctx.strokeStyle = p.color; 
+    ctx.lineWidth = 3; 
 
+    // We draw the head separately in the main function to keep it opaque
+    // So here we only draw the 'below-neck' parts
+    style.torso(ctx, anchors.headX, anchors.headY, p.x, anchors.hipY); 
+    
+    // Arms
+    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.leftHand.x, limbs.leftHand.y); 
+    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.rightHand.x, limbs.rightHand.y);
+    
+    // Legs
+    style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y); 
+    style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y);
+}
 // --- MAIN FUNCTIONS ---
-function drawStickman(ctx, p) {
+/* function drawStickman(ctx, p) {
     if (p.area !== viewArea || p.isHidden) return;
     const now = Date.now();
     if (p.dead) return drawCorpse(ctx, p, now);
@@ -2508,7 +2571,104 @@ function drawStickman(ctx, p) {
 
     ctx.restore(); // Stop being transparent
 }
+ */
+function drawStickman(ctx, p) {
+    if (p.area !== viewArea || p.isHidden) return;
+    const now = Date.now();
+    if (p.dead) return drawCorpse(ctx, p, now);
 
+    const anim = getAnimationState(p, now);
+    const anchors = getAnchorPoints(p, anim);
+    const limbs = getLimbPositions(p, anchors, anim, now);
+    const isDeep = (p.area === "pond" && p.x > 250);
+
+    ctx.save(); 
+
+    // 1. CALCULATE BASE ALPHA (Lurking)
+    let baseAlpha = 1.0;
+    if (p.activeTask === "lurking") {
+        baseAlpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
+        baseAlpha += (Math.sin(now / 500) * 0.05);
+    }
+
+    // 2. DRAW THE HEAD
+    ctx.globalAlpha = baseAlpha;
+    BODY_PARTS["stick"].head(ctx, anchors.headX, anchors.headY, p);
+
+    // 3. DRAW THE SUBMERGED STUFF (Torso, Arms, Legs, Gear)
+    if (isDeep) {
+        ctx.globalAlpha = baseAlpha * 0.3; 
+    } else {
+        ctx.globalAlpha = baseAlpha;
+    }
+
+    if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors);
+    drawStickmanBody(ctx, p, anchors, limbs);
+    renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
+
+    // 4. UI RENDERING (Name, HP, and Meters)
+    // UI is slightly more visible than the body (0.5 vs 0.3)
+    let uiAlpha = isDeep ? Math.max(0.5, baseAlpha * 0.7) : baseAlpha;
+    ctx.globalAlpha = uiAlpha;
+    
+    ctx.textAlign = "center";
+    
+    // 1. Draw Name
+    ctx.fillStyle = "#fff"; 
+    ctx.font = "12px monospace"; 
+    ctx.fillText(p.name, p.x, p.y + 40);
+
+    // 2. HP Bar
+    const hpBarWidth = 40;
+    const hpBarX = p.x - 20;
+    const hpBarY = p.y + 48;
+
+    ctx.fillStyle = "rgba(68, 68, 68, 0.8)";
+    ctx.fillRect(hpBarX, hpBarY, hpBarWidth, 4);
+
+    // Drowning Flash Logic
+    let hpColor = "#0f0";
+    if (p.struggleStartTime && isDeep) {
+        hpColor = (Math.floor(now / 200) % 2 === 0) ? "#ff0000" : "#0f0";
+    }
+
+    ctx.fillStyle = hpColor;
+    ctx.fillRect(hpBarX, hpBarY, hpBarWidth * (p.hp / p.maxHp), 4);
+
+    // 3. OXYGEN METER (Only during struggle)
+    if (p.struggleStartTime && isDeep) {
+        const struggleLimit = 180000; // 3 mins
+        const elapsed = now - p.struggleStartTime;
+        const graceRemaining = Math.max(0, struggleLimit - elapsed);
+        const secondsLeft = Math.ceil(graceRemaining / 1000);
+        const blink = Math.floor(now / 500) % 2 === 0;
+        
+        const oxBarY = p.y - 60;
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.fillRect(p.x - 15, oxBarY, 30, 4);
+        
+        // Bar turns from cyan to red
+        ctx.fillStyle = secondsLeft < 30 ? (blink ? "#ff0000" : "#550000") : "#00ccff";
+        ctx.fillRect(p.x - 15, oxBarY, 30 * (graceRemaining / struggleLimit), 4);
+        
+        ctx.font = "bold 9px monospace";
+        ctx.fillStyle = (secondsLeft < 30 && blink) ? "#fff" : "#00ccff";
+        ctx.fillText(`AIR ${secondsLeft}s`, p.x, oxBarY - 5);
+    }
+
+    // 4. Lurk Meter
+    if (p.activeTask === "lurking") {
+        const stealthPct = Math.min(100, Math.floor((1 - (baseAlpha - 0.1)) * 100));
+        const barX = p.x - 15;
+        const barY = p.y - 45;
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.fillRect(barX, barY, 30, 4);
+        ctx.fillStyle = stealthPct < 40 ? "#ff4444" : "#a020f0";
+        ctx.fillRect(barX, barY, 30 * (stealthPct / 100), 4);
+    }
+
+    ctx.restore(); 
+}
 function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
@@ -2826,16 +2986,25 @@ function updatePlayerStatus(p, now) {
 
     // 2. Task Expiration Logic
     if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
-        systemMessage(`${p.name}'s task expired.`);
-        spawnFloater(p, `Task Finished`, "#ff4444");
-        
-        // We call cmdStop FIRST so it can check if (now > taskEndTime) 
-        // to decide if the player should drown in the pond.
-        cmdStop(p, p.name); 
+        // If they are in the deep pond, start the 3-minute struggle
+        if (p.area === "pond" && p.x > 250) {
+            if (!p.struggleStartTime) {
+                p.struggleStartTime = now;
+                systemMessage(`${p.name} is exhausted! 3 minutes to reach shore or they will drown!`);
+                spawnFloater(p, "OUT OF AIR!", "#ff0000");
+            }
 
-        // THEN we reset the action time so they have a fresh 5 mins 
-        // to walk to shore before falling asleep.
-        p.lastActionTime = now; 
+            // Check if the 3-minute (180,000ms) grace period is over
+            if (now - p.struggleStartTime > 180000) {
+                cmdStop(p, p.name); // This will now trigger the death logic
+            }
+        } else {
+            // Normal task end (Land or Shallow water)
+            systemMessage(`${p.name}'s task expired.`);
+            spawnFloater(p, `Task Finished`, "#ff4444");
+            cmdStop(p, p.name);
+            p.lastActionTime = now;
+        }
     }
 
     // 3. Inactivity & Sleeping Logic
@@ -3892,24 +4061,23 @@ function cmdListDances(p) {
 
 function cmdStop(p, user) {
     const now = Date.now();
-    // Check if the timer actually ran out (System Timeout) 
-    // vs. if there was still time left (Manual Stop)
     const isTimeout = p.taskEndTime && now >= p.taskEndTime;
+    const struggleDuration = p.struggleStartTime ? (now - p.struggleStartTime) : 0;
 
-    // 1. DROWNING LOGIC
-    // If they timed out while deep in the water (x > 250)
-    if (isTimeout && p.area === "pond" && p.x > 250) {
+    // 1. DROWNING LOGIC (Only if 3-minute struggle has elapsed)
+    if (isTimeout && p.area === "pond" && p.x > 250 && struggleDuration >= 180000) {
         p.hp = 0;
         p.dead = true;
         p.deathTime = now;
         p.activeTask = null;
         p.taskEndTime = null;
-        systemMessage(`💀 ${p.name} was too tired to reach the shore and sank...`);
+        p.struggleStartTime = null; // Reset
+        systemMessage(`💀 ${p.name} struggled for 3 minutes but finally went under...`);
         saveStats(p);
         return; 
     }
 
-    // 2. SAFE EXIT LOGIC (Manual stop OR timed out on land)
+    // 2. SAFE EXIT LOGIC (Manual stop or reached shore during struggle)
     // Restore weapon (Unsheath Logic)
     if (p.stats.lastWeapon) {
         p.stats.equippedWeapon = p.stats.lastWeapon;
@@ -3924,9 +4092,10 @@ function cmdStop(p, user) {
         p.targetX = null; 
     }
 
-    // 3. Clear Tasks & Timers
+    // 3. Clear Tasks, Timers, and Struggle states
     p.activeTask = null;
     p.taskEndTime = null;
+    p.struggleStartTime = null; 
     p.danceStyle = 0;
     p.forcedPose = null; 
     

@@ -1557,27 +1557,30 @@ const POSE_LIBRARY = {
         right: { x: head.x + 22, y: head.y + 15 }
     }),
 	// NEW: Dynamic Swimming Pose
-	"swimming": (head) => {
-		// 1. Slower timing (divided by 600 instead of 200)
-		const time = Date.now() / 600; 
-		
-		// 2. The 'swing' factor: goes from -1 to 1 and back
-		const swing = Math.sin(time); 
+	"swimming": (head, p, anim) => {
+        const now = Date.now();
+        const time = now / 600; 
+        const shoulderY = head.y + 15;
+        const armLen = 20;
+        
+        // Flutter kick math
+        const kickTime = now / 200;
+        const kickAmp = 8;
 
-		return {
-			left: { 
-				// Moves from head.x-30 to head.x (halfway)
-				x: head.x - 15 + (swing * 15), 
-				// Dips slightly as it strokes
-				y: head.y + 25 + (Math.abs(swing) * 5) 
-			},
-			right: { 
-				// Moves from head.x to head.x+30 (halfway)
-				x: head.x + 15 - (swing * 15), 
-				y: head.y + 25 + (Math.abs(swing) * 5)
-			}
-		};
-	},
+        return {
+            left: { 
+                x: (head.x - 12) + Math.cos(time) * armLen, 
+                y: shoulderY + Math.sin(time) * (armLen / 2) 
+            },
+            right: { 
+                x: (head.x + 12) + Math.cos(time + Math.PI) * armLen, 
+                y: shoulderY + Math.sin(time + Math.PI) * (armLen / 2)
+            },
+            // Centralizing the kick here
+            leftFoot:  { yOffset: Math.sin(kickTime) * kickAmp },
+            rightFoot: { yOffset: Math.sin(kickTime + Math.PI) * kickAmp }
+        };
+    },
 	"lurking": (head, p, anim) => {
     // A low, hunched-over posture
 		const breathe = Math.sin(Date.now() / 1000) * 3;
