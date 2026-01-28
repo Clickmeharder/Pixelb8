@@ -672,83 +672,59 @@ function scrubAllInventories() {
 function performAttack(p) {
     if (p.dead) return;
 
-    // 1. Identify Target
+    const now = Date.now();
+
+    // 1. Identify Target (Improved to always look for next available)
     let target = (p.area === "dungeon") 
         ? (enemies.find(e => !e.dead) || (boss && !boss.dead ? boss : null))
         : Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name);
 
-    if (!target || target.dead) {
-        p.activeTask = null;
-        return;
+    // If no target exists, wait in "attacking" pose (don't clear task yet)
+    if (!target) {
+        p.targetX = null;
+        return; 
     }
 
-    // 2. Determine Weapon Stats
+    // 2. Weapon Stats
     const weapon = ITEM_DB[p.stats.equippedWeapon] || { power: 0, type: "melee", speed: 2000 };
-    
-    let skillType = "attack"; 
-    if (weapon.type === "bow") skillType = "archer";
-    if (weapon.type === "staff") skillType = "magic";
-
-    const isRanged = (skillType !== "attack");
-    const rangeNeeded = isRanged ? 250 : 60; 
+    let skillType = weapon.type === "bow" ? "archer" : (weapon.type === "staff" ? "magic" : "attack");
+    const rangeNeeded = (weapon.type === "bow" || weapon.type === "staff") ? 250 : 60;
     const attackSpeed = weapon.speed || 2000;
 
-    // 3. Positioning Logic
+    // 3. Positioning
     const dist = Math.abs(p.x - target.x);
     if (dist > rangeNeeded) {
         const offset = p.x < target.x ? -rangeNeeded + 20 : rangeNeeded - 20;
         p.targetX = target.x + offset;
-        p.activeTask = "moving"; // Ensure they aren't in "attacking" pose while walking
+        // Keep activeTask as "attacking" so weapon stays in hand!
     } else {
-        p.targetX = null; 
-        p.lean = 0;
+        p.targetX = null;
         
-        // IMPORTANT: Set task to ensure getLimbPositions uses the correct pose
-        p.activeTask = "attacking";
+        // Ensure timer is initialized for the first swing
+        if (!p.lastAttackTime) p.lastAttackTime = now - attackSpeed;
 
-        // 4. Attack Execution Logic
-        const now = Date.now();
-        
-        // If we just entered range, reset timer so the swing starts from progress 0
-        if (!p.lastAttackTime || (now - p.lastAttackTime > attackSpeed + 1000)) {
-            p.lastAttackTime = now - attackSpeed; 
-        }
-
+        // 4. Attack Execution
         if (now - p.lastAttackTime > attackSpeed) {
-            // Calculate Raw Damage
             let skillLvl = p.stats[skillType + "Level"] || 1;
             let rawDmg = 5 + (skillLvl * 2) + (weapon.power || 0);
 
-            // Visual Projectiles (y-12 aligns better with the hand positions)
             if (weapon.type === "bow") {
                 spawnProjectile(p.x, p.y - 12, target.x, target.y - 15, "#fff", "arrow", p.area);
             } else if (weapon.type === "staff") {
                 spawnProjectile(p.x, p.y - 12, target.x, target.y - 15, weapon.color || "#00ffff", "magic", p.area);
             }
 
-            // Apply Damage
             applyDamage(target, rawDmg);
-            
-            // RESET: This snaps the animation progress back to 0 for the next swing
-            p.lastAttackTime = now;
+            p.lastAttackTime = now; // Only reset here!
 
-            // 5. Handle Loot (Only for Dungeon Enemies)
-            if (target.hp <= 0 && (target.isEnemy || target.isBoss) && !target.looted) {
-                target.looted = true;
-                
+            // Handle Loot/Stats
+            if (target.hp <= 0 && (target.isEnemy || target.isBoss)) {
                 if (!p.stats.dungeon) p.stats.dungeon = { highestTier: 0, kills: 0, bossKills: 0 };
-                
                 p.stats.dungeon.kills++;
-                if (target.isBoss) p.stats.dungeon.bossKills++;
-                
-                if (typeof dungeonWave !== 'undefined' && dungeonWave > p.stats.dungeon.highestTier) {
-                    p.stats.dungeon.highestTier = dungeonWave;
-                }
-            
                 handleLoot(p, target);
             }
 
-            // 6. Award XP
+            // Award XP
             p.stats[skillType + "XP"] = (p.stats[skillType + "XP"] || 0) + 10;
             if (p.stats[skillType + "XP"] >= xpNeeded(p.stats[skillType + "Level"])) {
                 p.stats[skillType + "Level"]++;
@@ -2954,11 +2930,16 @@ function drawMonster(ctx, m) {
 function renderEquipmentLayer(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot) {
     const weaponItem = ITEM_DB[p.stats.equippedWeapon];
     const task = p.activeTask || "none";
-    let shouldHoldWeapon = (task === "attacking") || (["none", "lurking"].includes(task) && !p.manualSheath);
+    
+    // CHANGE: As long as the task is "attacking", keep the weapon in hand, 
+    // even if we are currently moving toward a target.
+    let shouldHoldWeapon = (task === "attacking" || task === "pvp") || 
+                           (["none", "lurking"].includes(task) && !p.manualSheath);
 
     if (weaponItem && !shouldHoldWeapon) {
         drawSheathedWeapon(ctx, p, anchors, weaponItem);
     }
+    
     drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon);
 }
 
@@ -3213,42 +3194,42 @@ function updatePlayerStatus(p, now) {
 }
 function updatePlayerActions(p, now) {
     if (p.dead) return;
-	if (p.activeTask === "lurking") {
-		handleLurking(p, now);
-	}
-    // Handle Dancing
+
+    // 1. Stealth/Lurking
+    if (p.activeTask === "lurking") {
+        handleLurking(p, now);
+    }
+
+    // 2. Social/Dancing
     if (p.activeTask === "dancing") {
         handleDancing(p, now);
     }
-	if (p.activeTask === "healing") {
-		let weapon = ITEM_DB[p.stats.equippedWeapon];
-		let healSpeed = weapon?.speed || 3500;
-		
-		if (!p.lastHealTime) p.lastHealTime = 0;
-		if (now - p.lastHealTime > healSpeed) {
-			performHeal(p, "auto"); // Runs the auto logic
-			p.lastHealTime = now;
-		}
-	}
-    // Handle Attacking
-    if (p.activeTask === "attacking") {
+
+    // 3. Automated Healing
+    if (p.activeTask === "healing") {
         let weapon = ITEM_DB[p.stats.equippedWeapon];
-        let attackSpeed = weapon?.speed || 2500;
-        if (!p.lastAttackTime) p.lastAttackTime = 0;
-        if (now - p.lastAttackTime > attackSpeed) {
-            performAttack(p);
-            p.lastAttackTime = now;
+        let healSpeed = weapon?.speed || 3500;
+        
+        if (!p.lastHealTime) p.lastHealTime = 0;
+        if (now - p.lastHealTime > healSpeed) {
+            performHeal(p, "auto"); 
+            p.lastHealTime = now;
         }
     }
-	if (p.activeTask === "pvp") {
-		let weapon = ITEM_DB[p.stats.equippedWeapon] || { speed: 2500 };
-		if (!p.lastAttackTime) p.lastAttackTime = 0;
-		
-		if (now - p.lastAttackTime > (weapon.speed || 2500)) {
-			performPvPAttack(p);
-			p.lastAttackTime = now;
-		}
-	}
+
+    // 4. Combat (Dungeons/Enemies)
+    // Removed the timer logic here. performAttack handles its own 
+    // attackSpeed checks and resets p.lastAttackTime only on hit.
+    if (p.activeTask === "attacking") {
+        performAttack(p);
+    }
+
+    // 5. Combat (Player vs Player)
+    // Similarly, performPvPAttack should handle its own internal timing 
+    // to prevent animation flickering.
+    if (p.activeTask === "pvp") {
+        performPvPAttack(p);
+    }
 }
 
 
