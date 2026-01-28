@@ -1737,7 +1737,7 @@ function generateRandomLoadout(tier) {
         gloves: Math.random() < 0.5 ? pick(glovePool) : null,
         boots:  Math.random() < 0.8 ? pick(bootPool) : null,
         // Capes only for T5+ elites, and even then only 30% chance
-        cape:   (tier >= 5 && Math.random() < 0.3) ? pick(capePool) : null
+        cape:   (tier >= 5 && Math.random() < 0.1) ? pick(capePool) : null
     };
 }
 
@@ -3166,7 +3166,7 @@ function updatePlayerActions(p, now) {
     }
 	if (p.activeTask === "healing") {
 		let weapon = ITEM_DB[p.stats.equippedWeapon];
-		let healSpeed = weapon?.speed || 500;
+		let healSpeed = weapon?.speed || 3500;
 		
 		if (!p.lastHealTime) p.lastHealTime = 0;
 		if (now - p.lastHealTime > healSpeed) {
@@ -3185,10 +3185,10 @@ function updatePlayerActions(p, now) {
         }
     }
 	if (p.activeTask === "pvp") {
-		let weapon = ITEM_DB[p.stats.equippedWeapon] || { speed: 2000 };
+		let weapon = ITEM_DB[p.stats.equippedWeapon] || { speed: 2500 };
 		if (!p.lastAttackTime) p.lastAttackTime = 0;
 		
-		if (now - p.lastAttackTime > (weapon.speed || 2000)) {
+		if (now - p.lastAttackTime > (weapon.speed || 2500)) {
 			performPvPAttack(p);
 			p.lastAttackTime = now;
 		}
