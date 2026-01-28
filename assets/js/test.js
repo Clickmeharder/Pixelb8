@@ -2078,97 +2078,77 @@ function drawProjectiles(ctx) {
 /*----------------------------------------------*/
 
 function updatePhysics(p) {
-    const groundLevel = 540; // Feet will touch the 475 floor line
+    // 1. Define the depth area
+    const horizonY = 530; 
+    const frontY = 560;
+    
+    // Each player gets a "lane" so they don't all overlap
+    if (p.zLane === undefined) p.zLane = Math.floor(Math.random() * 25);
+    const groundLevel = horizonY + p.zLane; 
 
-    // --- STATE 1: FALLING (Area Entry) ---
-    // This handles the 'drop-in' effect when traveling
+    // --- STATE 1: FALLING ---
     if (p.targetY !== undefined && p.targetY !== null) {
-        if (p.y < p.targetY) {
-            p.y += 12; // Falling speed
+        if (p.y < groundLevel) { // Fall to their specific lane, not a flat line
+            p.y += 12;
             p.lean = 0.1; 
-            return; // STOP: Don't allow horizontal movement while in mid-air
+            return;
         } else {
-            p.y = p.targetY;
-            p.targetY = null; // Successfully landed
-            spawnFloater(p, "LANDED!", "#fff");
-            if (window.shakeAmount !== undefined) window.shakeAmount = 5; // Tiny landing thud
+            p.y = groundLevel;
+            p.targetY = null;
+            // ... landed effects ...
         }
     }
 
     // --- STATE 2: EMERGENCY FLOOR CHECK ---
-    // If a player somehow ends up at y=150 (the old bug), 
-    // this will pull them down to the actual floor.
-    if (!p.targetY && p.y < groundLevel) {
-        p.y += 5; 
-        if (p.y > groundLevel) p.y = groundLevel;
+    if (!p.targetY && p.y !== groundLevel) {
+        // Smoothly pull them to their lane if they got bumped
+        p.y += (groundLevel - p.y) * 0.1;
     }
 
-    // --- STATE 3: WALKING (Horizontal) ---
+    // --- STATE 3: WALKING ---
     if (p.targetX !== null && p.targetX !== undefined) {
-        let oldX = p.x;
         let dx = p.targetX - p.x;
-        
-        // Use a small buffer (5px) to prevent "shaking" at the destination
         if (Math.abs(dx) > 5) {
-            p.x += dx * 0.1; // Smooth easing
-            p.lean = dx > 0 ? 0.2 : -0.2; // Lean into the movement
-
-            // Pond Water Interactions
-            if (p.area === "pond") {
-                // Trigger splash when crossing the shore line (x=250)
-                if ((oldX <= 250 && p.x > 250) || (oldX > 250 && p.x <= 250)) {
-                    if (typeof triggerSplash === "function") triggerSplash(p);
-                }
-            }
+            p.x += dx * 0.1;
+            p.lean = dx > 0 ? 0.2 : -0.2;
         } else {
-            p.x = p.targetX; // Snap exactly to target
+            p.x = p.targetX;
             p.lean = 0;
-            
-            // Logic: Only clear targetX if we aren't currently in a combat task
-            // This prevents AI from "forgetting" their target during Arena/Dungeon fights
             if (p.activeTask !== "attacking" && p.activeTask !== "pvp") {
                 p.targetX = null;
             }
         }
     }
 
-    // --- STATE 4: SEPARATION (Crowd Control) ---
-    // Only resolve crowding if the player is actually on the ground
-/*     if (p.y >= groundLevel) {
-        resolveCrowding(p);
-    } */
-	resolveCrowding(p);
+    // --- STATE 4: SEPARATION ---
+    // Pass the target goal so we know if they should be "ghosting"
+    resolveCrowding(p);
 }
 function resolveCrowding(p) {
-    const bubble = 35;
-    // Ensure 'players' is globally accessible here
+    const bubbleX = 35; // Horizontal personal space
+    const bubbleY = 8;  // Vertical personal space (tight depth)
+    
+    // GHOSTING LOGIC: If I'm actively moving to intercept/interact, 
+    // disable pushing so I don't get stuck behind idle players.
+    if (p.targetX !== null) return;
+
     for (let id in players) {
         let other = players[id];
-
-        // 1. Skip if it's the same player, different area, or they are dead
-        if (other === p || other.area !== p.area || other.dead) continue;
-        
-        // 2. Skip if they are still falling (targetY is a number)
-        if (other.targetY !== null && other.targetY !== undefined) continue;
+        if (other === p || other.area !== p.area || other.dead || other.targetY) continue;
 
         let dx = p.x - other.x;
-        let distance = Math.abs(dx);
+        let dy = p.y - other.y; // This checks their depth/lane difference
 
-        if (distance < bubble) {
-            // 3. Handle perfect overlaps (distance 0)
-            if (distance === 0) {
-                dx = p.id > other.id ? 1 : -1; // Force a direction based on ID
-                distance = 1;
-            }
+        // Only collide if they are close in BOTH X and Y
+        if (Math.abs(dx) < bubbleX && Math.abs(dy) < bubbleY) {
+            if (dx === 0) dx = p.id > other.id ? 1 : -1;
 
-            let force = (bubble - distance) * 0.15;
+            let force = (bubbleX - Math.abs(dx)) * 0.15;
+            p.x += dx > 0 ? force : -force;
             
-            // 4. Apply the push
-            if (dx > 0) {
-                p.x += force;
-            } else {
-                p.x -= force;
-            }
+            // Optional: Also push them slightly in Y to help them "slip" past
+            let yForce = (bubbleY - Math.abs(dy)) * 0.1;
+            p.y += dy > 0 ? yForce : -yForce;
         }
     }
 }
@@ -3018,6 +2998,14 @@ function drawCorpse(ctx, p, now) {
     renderEquipmentLayer(ctx, corpseActor, now, deadAnchors, deadLimbs.leftHand, deadLimbs.rightHand, deadLimbs.leftFoot, deadLimbs.rightFoot);
     ctx.restore();
 }
+function renderAll() {
+    // Sort players by Y so those with higher Y (closer to screen) draw last
+    const sortedPlayers = Object.values(players).sort((a, b) => a.y - b.y);
+    
+    sortedPlayers.forEach(p => {
+        drawStickman(ctx, p);
+    });
+}
 //-------------------------------------------
 
 //===============================================================================
@@ -3464,7 +3452,111 @@ function updateUI() {
     }
 }
 
+
 let frameCount = 0;
+
+function gameLoop() {
+    const now = Date.now();
+    frameCount++; 
+    ctx.clearRect(0, 0, c.width, c.height); 
+
+    // 1. VISUAL FOUNDATION
+    ctx.save();
+    if (window.shakeAmount > 0) {
+        let sx = (Math.random() - 0.5) * window.shakeAmount;
+        let sy = (Math.random() - 0.5) * window.shakeAmount;
+        ctx.translate(sx, sy);
+        window.shakeAmount *= 0.9; 
+        if (window.shakeAmount < 0.1) window.shakeAmount = 0;
+    }
+
+    renderScene(); 
+    
+    // 2. UI & WORLD LOGIC
+    if (frameCount % 3 === 0) updateUI(); 
+    
+    if (dungeonActive) {
+        checkDungeonProgress(); 
+        checkDungeonFailure();  
+    } else {
+        const anyoneInDungeon = Object.values(players).some(p => p.area === "dungeon");
+        if (anyoneInDungeon) updateDungeonIdleTraining();
+    }
+
+    if (typeof arenaActive !== 'undefined' && arenaActive) {
+        checkArenaVictory();
+    }
+
+    // 3. LOGIC PASS (Update everyone, everywhere)
+    // We do this first so positions are final before we sort for drawing
+    Object.values(players).forEach(p => {
+        if (!p.dead) {
+            updatePhysics(p);           
+            updatePlayerStatus(p, now); 
+            
+            if (p.activeTask === "pvp") {
+                handlePvPLogic(p, now);
+            } else {
+                updatePlayerActions(p, now); 
+            }
+        }
+    });
+
+    // 4. RENDER PASS (Depth Sorting)
+    // Create a list of everything that needs to be drawn in the current view
+    let renderQueue = [];
+
+    // Add Players in the current area to the queue
+    Object.values(players).forEach(p => {
+        if (p.area === viewArea) {
+            renderQueue.push({ type: 'player', data: p, y: p.y });
+        }
+    });
+
+    // Add Enemies/Bosses if in Dungeon
+    if (viewArea === "dungeon") {
+        if (boss && !boss.dead) renderQueue.push({ type: 'monster', data: boss, y: boss.y });
+        enemies.forEach(e => {
+            if (!e.dead) {
+                renderQueue.push({ type: e.isStickman ? 'enemyStickman' : 'monster', data: e, y: e.y });
+            }
+        });
+        drawLootBeams(ctx); // Beams usually sit "behind" players
+    }
+
+    // --- THE MAGIC SORT ---
+    // Sort everything by Y coordinate (Lowest Y = furthest away = drawn first)
+    renderQueue.sort((a, b) => a.y - b.y);
+
+    
+
+    // Draw everything in the correct order
+    renderQueue.forEach(obj => {
+        if (obj.type === 'player') {
+            // Team Underglow (Drawn under the stickman)
+            if (viewArea === "arena" && typeof arenaMode !== 'undefined' && arenaMode === "teams" && obj.data.team) {
+                ctx.fillStyle = obj.data.team === "Red" ? "rgba(255,0,0,0.3)" : "rgba(0,0,255,0.3)";
+                ctx.beginPath();
+                ctx.ellipse(obj.data.x, obj.data.y + 2, 20, 8, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            drawStickman(ctx, obj.data);
+        } 
+        else if (obj.type === 'monster') drawMonster(ctx, obj.data);
+        else if (obj.type === 'enemyStickman') drawEnemyStickman(ctx, obj.data);
+    });
+
+    // 5. GLOBAL OVERLAYS (Always on top)
+    updateAreaPlayerCounts();
+    updateSystemTicks(now);  
+    drawProjectiles(ctx);    
+    updateSplashText(ctx);   
+    handleTooltips();        
+
+    ctx.restore(); 
+    requestAnimationFrame(gameLoop);
+}
+/* let frameCount = 0;
 function gameLoop() {
     const now = Date.now();
     frameCount++; 
@@ -3549,7 +3641,7 @@ function gameLoop() {
 
     ctx.restore(); 
     requestAnimationFrame(gameLoop);
-}
+} */
 /* =================END GAME LOOP ================= */
 /* =================END GAME LOOP ================= */
 
