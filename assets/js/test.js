@@ -5017,7 +5017,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
 
-ComfyJS.onChat = (user, msg, color, flags, extra) => {
+/* ComfyJS.onChat = (user, msg, color, flags, extra) => {
     // Keep track of colors
     if (!userColors[user]) {
         userColors[user] = extra.userColor || "orangered";
@@ -5026,8 +5026,23 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
     // Pass everything to the Master Router
     processGameCommand(user, msg, flags, extra);
 };
+ */
+// 1. The Regular Chat Handler
+ComfyJS.onChat = (user, msg, color, flags, extra) => {
+    if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
+    processGameCommand(user, msg, flags, extra);
+};
 
-
+// 2. The Command Handler (Matches messages starting with !)
+ComfyJS.onCommand = (user, cmd, args, flags, extra) => {
+    if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
+    
+    // Reconstruct the message so processGameCommand can read it normally
+    // We add the "!" back to the cmd so your prefix-stripping logic works perfectly
+    let fullMsg = "!" + cmd + " " + args;
+    
+    processGameCommand(user, fullMsg.trim(), flags, extra);
+};
 let uiCache = {}
 function syncUI(id, content, parentId) {
     // 1. Get or Create from Cache
