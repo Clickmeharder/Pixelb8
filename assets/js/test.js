@@ -4982,10 +4982,10 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === ":dance")  { cmdDance(p, user, args); return; }
 	if (cmd === ":lurk")   { cmdLurk(p, user); return; }
     if (cmd === ":travel") { movePlayer(p, args[1]); return; }
-    if (cmd === ":home")   { movePlayer(p, "home"); return; }
-	if (cmd === ":pond")   { movePlayer(p, "pond"); return; }
-	if (cmd === ":town")   { movePlayer(p, "town"); return; }
-	if (cmd === ":arena")   { movePlayer(p, "arena"); return; }
+    if (cmd === "!home")   { movePlayer(p, "home"); return; }
+	if (cmd === "!pond")   { movePlayer(p, "pond"); return; }
+	if (cmd === "!town")   { movePlayer(p, "town"); return; }
+	if (cmd === "!arena")   { movePlayer(p, "arena"); return; }
     if (cmd === ":dungeon"){ movePlayer(p, "dungeon"); return; }
     if (cmd === ":join")   { joinDungeonQueue(p); return; }
 	if (cmd === ":pvp")   { joinArenaQueue(p); return; }
