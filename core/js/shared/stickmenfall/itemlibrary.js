@@ -430,11 +430,11 @@ const WEAPON_STYLES = {
 
 		const pull = isAttacking ? (progress * 18) : 0;
 
-		// Bow Wood (The Arc) - Facing Right
+		// Bow Wood (The Arc) - Anchored to the hand
 		ctx.strokeStyle = item.color || "#8B4513";
 		ctx.lineWidth = 3;
 		ctx.beginPath(); 
-		// Draw arc on the right side of the hand
+		// Arc faces right
 		ctx.arc(0, 0, 18, -Math.PI / 2, Math.PI / 2, false); 
 		ctx.stroke();
 
@@ -442,19 +442,23 @@ const WEAPON_STYLES = {
 		ctx.strokeStyle = "rgba(255,255,255,0.7)";
 		ctx.lineWidth = 1;
 		ctx.beginPath();
-		ctx.moveTo(0, -18); 
-		// The string pulls BACK (negative X) relative to the right hand
+		ctx.moveTo(0, -18); // Top of bow
+		
+		// The string pulls BACK toward the left hand. 
+		// Since ctx is translated to the RIGHT hand, -pull moves it toward the body.
 		ctx.lineTo(-pull, 0); 
-		ctx.lineTo(0, 18); 
+		
+		ctx.lineTo(0, 18); // Bottom of bow
 		ctx.stroke();
 
-		// Arrow (Visual only while drawing)
+		// Arrow
 		if (isAttacking && progress < 0.9) {
 			ctx.strokeStyle = "#eee";
 			ctx.lineWidth = 2;
 			ctx.beginPath();
+			// Arrow starts at the pulled string and points forward
 			ctx.moveTo(-pull, 0);
-			ctx.lineTo(20 - pull, 0); // Arrow head points right
+			ctx.lineTo(20 - pull, 0); 
 			ctx.stroke();
 		}
 	},
@@ -1720,23 +1724,23 @@ const POSE_LIBRARY = {
         right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
     }),
 	"archer": (head, p, anim, progress = 0) => {
-        const isAttacking = (p.activeTask === "attacking" || p.activeTask === "pvp");
-        // Pull back based on progress, but return to 0 immediately after firing
-        const pullAmount = (isAttacking && progress < 1.0) ? (progress * 18) : 0;
+		const isAttacking = (p.activeTask === "attacking" || p.activeTask === "pvp");
+		// Calculate the pull based on progress
+		const pullAmount = (isAttacking && progress < 1.0) ? (progress * 18) : 0;
 
-        return {
-            // Right Hand: Holds the bow frame out in front
-            right: { 
-                x: head.x + 22 + (anim.lean * 10), 
-                y: head.y + 18 
-            },
-            // Left Hand: Pulls the string back towards the chest
-            left: { 
-                x: head.x + 5 - pullAmount, 
-                y: head.y + 18 
-            }
-        };
-    },
+		return {
+			// RIGHT HAND: Now the static anchor holding the bow frame
+			right: { 
+				x: head.x + 22 + (anim.lean * 10), 
+				y: head.y + 18 
+			},
+			// LEFT HAND: Now the one pulling the string back
+			left: { 
+				x: head.x + 5 - pullAmount, 
+				y: head.y + 18 
+			}
+		};
+	},
     "fishing": (head, p, anim) => ({
         // Fixed the double "right" and the missing parameter
         right: { x: head.x + 22, y: head.y + 15 }
