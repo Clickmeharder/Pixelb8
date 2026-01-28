@@ -1138,124 +1138,145 @@ function drawBuyer(ctx) {
     const by = 325; 
     const now = Date.now();
     
-    // Smooth levitation and cloak sway
-    let floatY = Math.sin(now / 800) * 6;
-    let sway = Math.sin(now / 400) * 3;
-    let gemPulse = 5 + Math.abs(Math.sin(now / 500)) * 10;
+    // Animation Constants
+    let floatY = Math.sin(now / 800) * 8;
+    let sway = Math.sin(now / 400) * 4;
+    let gemPulse = 8 + Math.abs(Math.sin(now / 500)) * 12;
+    let shadowScale = 1 - (Math.abs(floatY) / 40); // Shadow shrinks as she rises
 
     ctx.save();
-    ctx.translate(bx, by + floatY);
 
-    // --- 1. THE TRAILING CAPE (Behind her, blowing slightly) ---
-    ctx.fillStyle = "#2a1233"; // Very dark shadow purple
+    // --- 1. GROUND SHADOW (Static on floor, scales with height) ---
+    ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
     ctx.beginPath();
-    ctx.moveTo(0, -30);
-    ctx.quadraticCurveTo(-25 + sway, 0, -15 + sway, 35);
-    ctx.lineTo(5, 30);
+    ctx.ellipse(bx, by + 32, 15 * shadowScale, 5 * shadowScale, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // --- 2. THE LEGS ---
-    ctx.strokeStyle = "#111";
-    ctx.lineWidth = 2;
+    // Move to floating position
+    ctx.translate(bx, by + floatY);
+
+    // --- 2. THE TRAILING CAPE (Back Layer) ---
+    ctx.fillStyle = "#1a0821"; // Darker depth purple
     ctx.beginPath();
-    ctx.moveTo(-3, 10); ctx.lineTo(-5, 30);
-    ctx.moveTo(3, 10); ctx.lineTo(5, 30);
+    ctx.moveTo(0, -30);
+    ctx.quadraticCurveTo(-30 + sway, 10, -18 + sway, 40);
+    ctx.lineTo(8, 35);
+    ctx.fill();
+
+    // --- 3. THE SKELETON (Using your stickman style for consistency) ---
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    // Legs disappearing into cloak
+    ctx.beginPath();
+    ctx.moveTo(-4, 5); ctx.lineTo(-6, 25);
+    ctx.moveTo(4, 5); ctx.lineTo(6, 25);
     ctx.stroke();
 
-    // --- 3. STRUCTURED CLOAK (Facing Right/Pond) ---
-    // Main Cloak Body
+    // --- 4. STRUCTURED CLOAK & TRIM ---
     ctx.fillStyle = "#4B0082"; 
     ctx.beginPath();
     ctx.moveTo(0, -35); // Neck
-    ctx.bezierCurveTo(-15, -20, -18, 10, -12, 25); // Back curve
-    ctx.lineTo(15, 25); // Bottom front
-    ctx.bezierCurveTo(8, 10, 12, -20, 0, -35); // Front curve (facing pond)
+    ctx.bezierCurveTo(-20, -10, -22, 15, -15, 30); // Back
+    ctx.lineTo(18, 30); // Bottom
+    ctx.bezierCurveTo(12, 15, 15, -10, 0, -35); // Front
     ctx.fill();
 
-    // pixels Trim on Cloak
+    // Golden Trim Border
     ctx.strokeStyle = "#FFD700";
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1.8;
     ctx.stroke();
 
-    // --- 4. THE ARMS & STAFF (Staff is on the Pond side) ---
-    ctx.strokeStyle = "#ffdbac"; // Hands
-    ctx.lineWidth = 2.5;
-    
-    // Arm resting on staff (Right arm, facing pond)
+    // --- 5. THE STAFF (Sandwiched behind arm, in front of body) ---
+    // Staff Wood
+    ctx.strokeStyle = "#3e2723";
+    ctx.lineWidth = 4.5;
     ctx.beginPath();
-    ctx.moveTo(8, -15);
-    ctx.lineTo(18, -5); 
+    ctx.moveTo(22, 35);
+    ctx.lineTo(22, -55);
     ctx.stroke();
 
-    // The Mystic Staff
-    ctx.strokeStyle = "#3e2723"; // Dark wood
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(20, 30);
-    ctx.lineTo(20, -50);
-    ctx.stroke();
-
-    // Staff Gem (Glow effect)
+    // Staff Gemstone Glow
     ctx.shadowBlur = gemPulse;
     ctx.shadowColor = "#00ffff";
     ctx.fillStyle = "#e0ffff";
     ctx.beginPath();
-    ctx.arc(20, -55, 6, 0, Math.PI * 2);
+    ctx.arc(22, -60, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0; // Reset shadow immediately
+
+    // Staff Decorative Rings
+    ctx.strokeStyle = "#FFD700";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(20, -50, 4, 2);
+    ctx.strokeRect(20, -45, 4, 2);
+
+    // --- 6. ARMS ---
+    ctx.strokeStyle = "#ffdbac"; 
+    ctx.lineWidth = 3;
+    // Holding the staff
+    ctx.beginPath();
+    ctx.moveTo(5, -12);
+    ctx.lineTo(22, -15);
+    ctx.stroke();
+
+    // --- 7. THE DEEP HOODED HEAD ---
+    // Black Void of Hood
+    ctx.fillStyle = "#050505";
+    ctx.beginPath();
+    ctx.ellipse(3, -48, 10, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eyes (Bright cyan glow)
+    ctx.fillStyle = "#00ffff";
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = "#00ffff";
+    ctx.beginPath();
+    ctx.arc(7, -49, 2, 0, Math.PI * 2);
+    ctx.arc(12, -49, 2, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // --- 5. THE HEAD & DEEP HOOD ---
-    // Inner Hood
-    ctx.fillStyle = "#0a0a0a";
-    ctx.beginPath();
-    ctx.ellipse(2, -45, 9, 11, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Glowing Eyes (Facing the pond)
-    ctx.fillStyle = "#00ffff";
-    ctx.beginPath();
-    ctx.arc(6, -46, 1.5, 0, Math.PI * 2);
-    ctx.arc(10, -46, 1.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Structured Hood Outer
+    // Outer Hood Cowl
     ctx.fillStyle = "#4B0082";
     ctx.beginPath();
-    ctx.moveTo(-8, -40);
-    ctx.quadraticCurveTo(0, -65, 15, -40);
-    ctx.quadraticCurveTo(18, -30, 10, -35);
-    ctx.lineTo(-8, -35);
+    ctx.moveTo(-10, -42);
+    ctx.quadraticCurveTo(0, -70, 18, -42);
+    ctx.quadraticCurveTo(22, -32, 12, -38);
+    ctx.lineTo(-10, -38);
     ctx.fill();
 
-    // --- 6. MAGICAL PARTICLES ---
-    if (Math.random() > 0.85) {
+    // --- 8. MAGICAL EMISSIONS ---
+    // Gold particles that drift upward
+    if (Math.random() > 0.8) {
         ctx.fillStyle = "#FFD700";
-        let px = Math.random() * 30 - 15;
-        let py = Math.random() * 50 - 25;
-        ctx.globalAlpha = 0.5;
+        let px = (Math.random() * 40) - 20;
+        let py = (Math.random() * 60) - 30;
+        ctx.globalAlpha = Math.random();
         ctx.beginPath();
-        ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+        ctx.arc(px, py, 1.2, 0, Math.PI * 2);
         ctx.fill();
     }
 
-    // --- 7. HUD LABELS ---
     ctx.restore();
+
+    // --- 9. UI LABELS (Outside translate to prevent text wobble) ---
     ctx.textAlign = "center";
     ctx.font = "bold 13px monospace";
-    
-    // Label follows the float
-    let textY = by + floatY - 75;
-    
-    ctx.fillStyle = "black";
-    ctx.fillText("MYSTERIOUS MERCHANT", bx + 1, textY + 1);
-    ctx.fillStyle = "#ffff00";
-    ctx.fillText("MYSTERIOUS MERCHANT", bx, textY);
-    
-    ctx.font = "11px monospace";
-    ctx.fillStyle = "#00ffff";
-    ctx.fillText("✦ 2X pixels RATE ✦", bx, textY + 14);
-}
+    let uiY = by + floatY - 85;
 
+    // Name Label with drop shadow
+    ctx.fillStyle = "black";
+    ctx.fillText("MYSTERIOUS MERCHANT", bx + 1, uiY + 1);
+    ctx.fillStyle = "#FFD700";
+    ctx.fillText("MYSTERIOUS MERCHANT", bx, uiY);
+    
+    // Subtext (Animated pulse)
+    let pulseText = Math.abs(Math.sin(now/1000));
+    ctx.font = "bold 11px monospace";
+    ctx.fillStyle = `rgba(0, 255, 255, ${0.5 + pulseText * 0.5})`;
+    ctx.fillText("✦ 2X PIXEL RATE ✦", bx, uiY + 16);
+}
 
 // ( *if at pond & if on shore -> get in boat, and float,
 // else if at fishing pond and in water->float to shore and get off boat
