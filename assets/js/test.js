@@ -1135,7 +1135,7 @@ function drawBuyer(ctx) {
     if (!buyerActive || viewArea !== "pond") return;
     
     const bx = 115; 
-    const by = 500; 
+    const by = 425; 
     const now = Date.now();
     
     // Smooth levitation and cloak sway
