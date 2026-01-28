@@ -2807,13 +2807,13 @@ function drawStickman(ctx, p) {
     ctx.globalAlpha = uiAlpha;
     ctx.textAlign = "center";
     
-    // Name with Combat Level: "Name (Lvl 126)"
+    // --- 5. Name with Combat Level: "Name (Lvl 126)"
     const combatLvl = p.stats.combatLevel || 3;
     ctx.fillStyle = "#fff"; 
     ctx.font = "12px monospace"; 
     ctx.fillText(`${p.name} (Lvl ${combatLvl})`, p.x, p.y + 40);
 
-    // HP Bar: Only draws if damaged
+    // ---6. HP Bar: Only draws if damaged
     if (p.hp < p.maxHp) {
         ctx.fillStyle = "rgba(68, 68, 68, 0.8)";
         ctx.fillRect(p.x - 20, p.y + 48, 40, 4);
@@ -2823,7 +2823,14 @@ function drawStickman(ctx, p) {
         ctx.fillStyle = hpColor;
         ctx.fillRect(p.x - 20, p.y + 48, 40 * (p.hp / p.maxHp), 4);
     }
-
+	// ---7. CHAT BUBBLE (New Addition)
+    if (p.chatMessage && (now - p.chatTime < 5000)) {
+        // Optional: Fade out effect for the last 1 second
+        const age = now - p.chatTime;
+        if (age > 4000) ctx.globalAlpha = 1 - (age - 4000) / 1000;
+        
+        drawChatBubble(ctx, p, p.x, p.y + anim.bodyY, p.chatMessage);
+    }
     ctx.restore(); 
 }
 function drawEnemyStickman(ctx, e) {
@@ -4837,6 +4844,42 @@ profileSelector.addEventListener("change", (e) => {
     
     systemMessage(`Active Player: ${current.name}`);
 });
+
+function drawChatBubble(ctx, p, x, y, msg) {
+    ctx.font = "11px monospace";
+    const padding = 8;
+    const textWidth = ctx.measureText(msg).width;
+    const bw = textWidth + padding * 2;
+    const bh = 18;
+    const bx = x - bw / 2;
+    const by = y - 65; // Positioned above the name/head
+
+    ctx.save();
+    // Bubble Background
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    
+    // Rounded Rect-ish shape
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, 5);
+    ctx.fill();
+    ctx.stroke();
+
+    // Little triangle pointer at the bottom of the bubble
+    ctx.beginPath();
+    ctx.moveTo(x - 5, by + bh);
+    ctx.lineTo(x + 5, by + bh);
+    ctx.lineTo(x, by + bh + 5);
+    ctx.fill();
+    ctx.stroke();
+
+    // Text
+    ctx.fillStyle = "#000";
+    ctx.textAlign = "center";
+    ctx.fillText(msg, x, by + 13);
+    ctx.restore();
+}
 function processGameCommand(user, msg, flags = {}, extra = {}) {
 	const current = getActiveProfile();
     if (current && user.toLowerCase() === current.name.toLowerCase()) {
@@ -4861,7 +4904,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 
     // --- 1. ADMIN & AUTHORIZATION CHECK ---
 	const adminCommands = [
-			"showhome", "showdungeon", "showpond", "spawnmerchant", 
+			"showhome", "::home", "showtown", "::town", "showpond", "::pond", "showdungeon", "::dungeon", "showarena", "::arena", "::pond", "spawnmerchant", 
 			"despawnmerchant", "resetmerchant", "give", "additem", "scrub",
 			"name", "/name", "color", "/color" // Added these here
 	];
@@ -4895,14 +4938,14 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
             addItemToPlayer(target, item);
             return;
         }
-        if (cmd === "showhome" || cmd === "home") { viewArea = "home"; return; }
-        if (cmd === "showdungeon" || cmd === "dungeon") { viewArea = "dungeon"; return; }
-        if (cmd === "showpond" || cmd === "pond") { viewArea = "pond"; return; }
-        if (cmd === "showarena" || cmd === "arena") { viewArea = "arena"; return; }
-		if (cmd === "showtown" || cmd === "town") { viewArea = "town"; return; }
-        if (cmd === "spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[Pond] Merchant spawned."); return; }
-        if (cmd === "despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[Pond] Merchant removed."); return; }
-        if (cmd === "resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
+        if (cmd === ":showhome" || cmd === "::home") { viewArea = "home"; return; }
+        if (cmd === ":showdungeon" || cmd === "::dungeon") { viewArea = "dungeon"; return; }
+        if (cmd === ":showpond" || cmd === "::pond") { viewArea = "pond"; return; }
+        if (cmd === ":showarena" || cmd === "::arena") { viewArea = "arena"; return; }
+		if (cmd === ":showtown" || cmd === "::town") { viewArea = "town"; return; }
+        if (cmd === ":spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[Pond] Merchant spawned."); return; }
+        if (cmd === ":despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[Pond] Merchant removed."); return; }
+        if (cmd === ":resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
 		// COMMAND: /name [NewName]
 		if (cmd === "name" || cmd === "/name") {
 			if (flags.developer) {
@@ -4929,35 +4972,46 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     }
 
     // --- 2. STANDARD PLAYER COMMANDS (Everyone) ---
-    if (cmd === "clear" || cmd === "!clear") { clearPlayerInventory(p.name); return; }
-    if (cmd === "stop" || cmd === "idle" || cmd === "!reset") { cmdStop(p, user); return; }
-    if (cmd === "attack") { cmdAttack(p, user); return; }
-    if (cmd === "fish")   { cmdFish(p, user); return; }
-    if (cmd === "swim")   { cmdSwim(p, user); return; }
+    if (cmd === ":clear" || cmd === "!clear") { clearPlayerInventory(p.name); return; }
+    if (cmd === ":stop" || cmd === "idle" || cmd === "!reset") { cmdStop(p, user); return; }
+    if (cmd === ":attack") { cmdAttack(p, user); return; }
+    if (cmd === ":fish")   { cmdFish(p, user); return; }
+    if (cmd === ":swim")   { cmdSwim(p, user); return; }
     // Add 'user' so the function gets: (player object, name string, arguments array)
-	if (cmd === "heal") { cmdHeal(p, user, args); return; }
-    if (cmd === "dance")  { cmdDance(p, user, args); return; }
-	if (cmd === "lurk")   { cmdLurk(p, user); return; }
-    if (cmd === "travel") { movePlayer(p, args[1]); return; }
-    if (cmd === "home")   { movePlayer(p, "home"); return; }
-	if (cmd === "pond")   { movePlayer(p, "pond"); return; }
-	if (cmd === "town")   { movePlayer(p, "town"); return; }
-	if (cmd === "arena")   { movePlayer(p, "arena"); return; }
-    if (cmd === "dungeon"){ movePlayer(p, "dungeon"); return; }
-    if (cmd === "join")   { joinDungeonQueue(p); return; }
-	if (cmd === "pvp")   { joinArenaQueue(p); return; }
-    if (cmd === "inventory") { cmdInventory(p, user, args); return; }
-    if (cmd === "equip")     { cmdEquip(p, args); return; }
-	if (cmd === "sheath")     { cmdSheath(p, user); return; }
-    if (cmd === "unequip")   { cmdUnequip(p, args); return; }
-    if (cmd === "sell")      { cmdSell(p, user, args); return; }
-    if (cmd === "bal" || cmd === "money") { cmdBalance(p); return; }
-	if (cmd === "wigcolor")  { cmdWigColor(p, args); return; } // Added back
-	if (cmd === "listdances") { cmdListDances(p); return; }
-    if (cmd === "respawn") { 
+	if (cmd === ":heal") { cmdHeal(p, user, args); return; }
+    if (cmd === ":dance")  { cmdDance(p, user, args); return; }
+	if (cmd === ":lurk")   { cmdLurk(p, user); return; }
+    if (cmd === ":travel") { movePlayer(p, args[1]); return; }
+    if (cmd === ":home")   { movePlayer(p, "home"); return; }
+	if (cmd === ":pond")   { movePlayer(p, "pond"); return; }
+	if (cmd === ":town")   { movePlayer(p, "town"); return; }
+	if (cmd === ":arena")   { movePlayer(p, "arena"); return; }
+    if (cmd === ":dungeon"){ movePlayer(p, "dungeon"); return; }
+    if (cmd === ":join")   { joinDungeonQueue(p); return; }
+	if (cmd === ":pvp")   { joinArenaQueue(p); return; }
+    if (cmd === ":inventory") { cmdInventory(p, user, args); return; }
+    if (cmd === ":equip")     { cmdEquip(p, args); return; }
+	if (cmd === ":sheath")     { cmdSheath(p, user); return; }
+    if (cmd === ":unequip")   { cmdUnequip(p, args); return; }
+    if (cmd === ":sell")      { cmdSell(p, user, args); return; }
+    if (cmd === ":Dbal" || cmd === "money") { cmdBalance(p); return; }
+	if (cmd === ":wigcolor")  { cmdWigColor(p, args); return; } // Added back
+	if (cmd === ":listdances") { cmdListDances(p); return; }
+    if (cmd === ":respawn") { 
 		cmdRespawn(p); 
 		return; 
 	}
+	// --- 3. CHAT BUBBLE LOGIC (Catch-all) ---
+    // Check if the message was intended to be a command (starts with ! or /)
+    // but didn't match any of the logic above.
+    const isAttemptedCommand = msg.startsWith("!") || msg.startsWith(")");
+
+    // Also check if it's a short, normal message.
+    // We don't want to show bubbles for attempted commands that failed.
+    if (!isAttemptedCommand && msg.length <= 40) {
+        p.chatMessage = msg;
+        p.chatTime = Date.now();
+    }
 	
 }
 
