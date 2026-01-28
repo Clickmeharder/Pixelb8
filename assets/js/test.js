@@ -498,7 +498,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById('bubble-respawn-btn').addEventListener('click', () => {
         if (selectedPlayerForBubble) {
-            processGameCommand(selectedPlayerForBubble.name, "respawn");
+            processGameCommand(selectedPlayerForBubble.name, "!respawn");
             document.getElementById("player-context-bubble").classList.add('hidden');
         }
     });
@@ -3838,7 +3838,7 @@ function renderEquippedSection(playerObj) {
         
         // Use the sanitized uiAction
         if (itemName) {
-            div.onclick = () => uiAction('unequip', slot.cmd);
+            div.onclick = () => uiAction('!unequip', slot.cmd);
         }
 
         div.innerHTML = `
@@ -3936,14 +3936,14 @@ function renderItemsView(playerObj, bpGrid) {
 
         div.querySelector('.btn-use').addEventListener('click', (e) => {
             e.stopPropagation();
-            uiAction('equip', item);
+            uiAction('!equip', item);
         });
         
         const sellBtn = div.querySelector('.btn-sell');
         if (sellBtn) {
             sellBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                uiAction('sell', item);
+                uiAction('!sell', item);
             });
         }
 
@@ -5004,8 +5004,8 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     // Now run the actual logic
     if (cmd === "!clearinventory" || cmd === "!clearinv") { clearPlayerInventory(p.name); return; }
     if (cmd === "!stop" || cmd === "!idle" || cmd === "!reset") { cmdStop(p, user); return; }
-    if (cmd === "!attack") { cmdAttack(p, user); return; }
-    if (cmd === "!fish")   { cmdFish(p, user); return; }
+    if (cmd === "!attack" || cmd === "attack") { cmdAttack(p, user); return; }
+    if (cmd === "!fish" || cmd === "fish")   { cmdFish(p, user); return; }
     if (cmd === "!swim")   { cmdSwim(p, user); return; }
     if (cmd === "!heal")   { cmdHeal(p, user, args); return; }
     if (cmd === "!dance")  { cmdDance(p, user, args); return; }
