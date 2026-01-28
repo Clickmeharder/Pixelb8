@@ -1599,81 +1599,51 @@ const CAPE_STYLES = {
 	}
 }
 const BODY_PARTS = {
-	     "stick": {
-		head: (ctx, x, y, p) => {
+    "stick": {
+        head: (ctx, x, y, p) => {
             ctx.save();
-            
-            // 1. Fill the head with a faint version of p.color
-            // This creates the "surface" for the eyes/mouth to sit on
-            ctx.globalAlpha = 0.9; // 30% opacity
+            ctx.globalAlpha = 0.9;
             ctx.fillStyle = p.color;
             ctx.beginPath(); 
             ctx.arc(x, y, 10, 0, Math.PI * 2); 
             ctx.fill();
             ctx.globalAlpha = 1.0;
 
-            // 2. Draw the head outline (Stickman color)
             ctx.strokeStyle = p.color;
             ctx.lineWidth = 3;
             ctx.beginPath(); 
             ctx.arc(x, y, 10, 0, Math.PI * 2); 
             ctx.stroke();
 
-            // 3. Draw the Face features in Solid Black
             ctx.fillStyle = "#000000";
             ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 1; // Thinner lines for the smile
+            ctx.lineWidth = 1;
 
-            // Eyes (Using your fillRect style)
-            ctx.fillRect(x - 4, y - 3, 2, 2); // Left Eye
-            ctx.fillRect(x + 2, y - 3, 2, 2); // Right Eye
+            ctx.fillRect(x - 4, y - 3, 2, 2); 
+            ctx.fillRect(x + 2, y - 3, 2, 2); 
 
-            // Smile (Using your arc style)
             ctx.beginPath(); 
             ctx.arc(x, y + 2, 3, 0.1 * Math.PI, 0.9 * Math.PI); 
             ctx.stroke();
-
             ctx.restore();
         },
-		torso: (ctx, hX, hY, bX, bY) => {
+        torso: (ctx, hX, hY, bX, bY) => {
             ctx.beginPath(); 
             ctx.moveTo(hX, hY + 10); 
             ctx.lineTo(bX, bY);
             ctx.stroke();
         },
-        // ADD 'elbow' as an optional 5th parameter here:
-        limbs: (ctx, startX, startY, endX, endY, elbow = null) => {
+        // Enhanced limbs function to support jointed movements (elbows/knees)
+        limbs: (ctx, startX, startY, endX, endY, joint = null) => {
             ctx.beginPath(); 
             ctx.moveTo(startX, startY);
-            if (elbow) {
-                ctx.lineTo(elbow.x, elbow.y); // Draw to the elbow joint
+            if (joint) {
+                ctx.lineTo(joint.x, joint.y); 
             }
-            ctx.lineTo(endX, endY); // Then to the hand/foot
+            ctx.lineTo(endX, endY);
             ctx.stroke();
         }
     }
-/*     "stick": {
-        head: (ctx, x, y, p) => {
-            ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.stroke();
-            // Face
-            ctx.fillStyle = p.color;
-            ctx.fillRect(x + 2, y - 3, 2, 2); 
-            ctx.fillRect(x + 6, y - 3, 2, 2); 
-            ctx.beginPath(); ctx.arc(x + 4, y + 2, 3, 0, Math.PI); ctx.stroke();
-        },
-        torso: (ctx, hX, hY, bX, bY) => {
-			// hY is head center, we start spine at neck (hY + 10)
-			// bY is the hip position. We stop exactly there.
-			ctx.beginPath(); 
-			ctx.moveTo(hX, hY + 10); 
-			ctx.lineTo(bX, bY); // REMOVED the extra +10 here
-			ctx.stroke();
-		},
-        limbs: (ctx, startX, startY, endX, endY) => {
-            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
-        }
-    } */
-    // You could add "chibi" or "armored" styles here later!
 };
 const POSE_LIBRARY = {
     "head_hands": (head) => ({
@@ -1719,33 +1689,70 @@ const POSE_LIBRARY = {
             }
         };
     },
-    "boxing": (head, p, anim) => ({
-        right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
-    }),
+	"boxing": (head, p, anim, progress = 0) => {
+		const isAttacking = (p.activeTask === "attacking" || p.activeTask === "pvp");
+		
+		// Boxing rhythm: bounce up and down slightly
+		const bounce = Math.sin(Date.now() / 150) * 2;
+		const shoulderY = head.y + 15;
+		
+		// Punching logic: alternate hands based on progress
+		// If progress < 0.5, left punch. If > 0.5, right punch.
+		const punchLeft = isAttacking && progress > 0 && progress < 0.5 ? Math.sin(progress * Math.PI * 2) * 25 : 0;
+		const punchRight = isAttacking && progress >= 0.5 ? Math.sin((progress - 0.5) * Math.PI * 2) * 25 : 0;
+
+		return {
+			// LEFT ARM: Guard or Punch
+			left: { x: head.x - 10 - punchLeft, y: shoulderY + 5 - (punchLeft * 0.2) },
+			leftElbow: { x: head.x - 15 - (punchLeft * 0.5), y: shoulderY + 12 + bounce },
+
+			// RIGHT ARM: Guard or Punch
+			right: { x: head.x + 10 + punchRight, y: shoulderY + 5 - (punchRight * 0.2) },
+			rightElbow: { x: head.x + 15 + (punchRight * 0.5), y: shoulderY + 12 + bounce },
+
+			// LEGS: Fighter's crouch (knees bent and bouncing)
+			leftKnee: { x: p.x - 12, y: p.y + 12 + bounce + anim.bodyY },
+			rightKnee: { x: p.x + 12, y: p.y + 12 - bounce + anim.bodyY },
+			
+			leftFoot: { x: p.x - 15, yOffset: 0 },
+			rightFoot: { x: p.x + 15, yOffset: 0 }
+		};
+	},
 	"archer": (head, p, anim, progress = 0) => {
 		const isAttacking = (p.activeTask === "attacking" || p.activeTask === "pvp");
 		const pullAmount = (isAttacking && progress < 1.0) ? (progress * 22) : 0;
 
+		// --- ARM LOGIC ---
 		const shoulderL = { x: head.x - 5, y: head.y + 15 };
 		const handL = { x: head.x + 5 - pullAmount, y: head.y + 18 };
-
-		// Elbow Logic: As the hand pulls back (pullAmount increases), 
-		// the elbow lifts UP and slightly OUT to the left.
 		const elbowL = {
 			x: shoulderL.x - (pullAmount * 0.4) - 5,
-			y: shoulderL.y - (pullAmount * 0.5) // This lifts the elbow
+			y: shoulderL.y - (pullAmount * 0.5) 
 		};
 
+		// --- DYNAMIC KNEE LOGIC ---
+		// Only bend knees during the attack draw
+		const kneeDip = pullAmount * 0.2;   // How much the knee drops (Y)
+		const kneeFlare = pullAmount * 0.3; // How much the knee pushes OUT (X)
+
+		// Hip position (p.x is the center of the body)
+		const hipY = p.y + 0 + anim.bodyY;
+		const footY = p.y + 25 + anim.bodyY;
+
 		return {
-			// RIGHT HAND: Pushed out front holding the bow
-			right: { 
-				x: head.x + 25 + (anim.lean * 10), 
-				y: head.y + 18 
-			},
-			// LEFT HAND: The one pulling the string
+			// HANDS
+			right: { x: head.x + 25 + (anim.lean * 10), y: head.y + 18 },
 			left: handL,
-			// Custom property to be used in your drawing loop
-			leftElbow: elbowL 
+			leftElbow: elbowL,
+
+			// KNEES (The joints between Hip and Foot)
+			// Left Knee pushes further left, Right Knee pushes further right
+			leftKnee: isAttacking ? { x: p.x - 10 - kneeFlare, y: hipY + 12 + kneeDip } : null,
+			rightKnee: isAttacking ? { x: p.x + 10 + kneeFlare, y: hipY + 12 + kneeDip } : null,
+
+			// FEET (Widen the stance slightly as he pulls)
+			leftFoot: { x: p.x - 10 - (kneeFlare * 0.5), yOffset: 0 },
+			rightFoot: { x: p.x + 10 + (kneeFlare * 0.5), yOffset: 0 }
 		};
 	},
     "fishing": (head, p, anim) => ({

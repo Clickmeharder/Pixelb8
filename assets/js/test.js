@@ -2504,20 +2504,25 @@ function getAnimationState(p, now) {
         anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
     }
 
-    // 4. IMPROVED: Context-Aware Attack Reactivity
+    // 4. Attack Reactivity & Pose Selection
     if ((p.activeTask === "attacking" || p.activeTask === "pvp") && p.lastAttackTime) {
         const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
         const item = ITEM_DB[itemKey];
-        const speed = item?.speed || 2500;
+        const speed = item?.speed || 2000; // Default 2s for fists
         const progress = Math.min(1, (now - p.lastAttackTime) / speed);
 
-        if (item?.type === "bow") {
-            // ARCHER REACTION: Steady lean back as tension increases
+        if (!item) {
+            // UNARMED: Boxing stance
+            anim.pose = "boxing";
+            const lunge = Math.sin(progress * Math.PI);
+            anim.lean += lunge * 0.2; 
+        } else if (item.type === "bow") {
+            // ARCHER: Steady tension
             anim.pose = "archer";
-            anim.lean = -0.1 * progress; // Slight backward tension lean
-            anim.bodyY += 2; // Braced stance
+            anim.lean = -0.1 * progress; 
+            anim.bodyY += 2; 
         } else {
-            // MELEE/ACTION REACTION: The explosive lunge
+            // MELEE: Explosive lunge
             anim.pose = "action";
             const lungePower = Math.sin(progress * Math.PI); 
             anim.lean += lungePower * 0.4;
@@ -2545,26 +2550,26 @@ function getAnchorPoints(p, anim) {
 }
 
 function getLimbPositions(p, anchors, anim, now) {
-    // 1. Use the pose decided by getAnimationState, or forcedPose, or fallbacks
+    // 1. Priority: Decision from AnimationState -> Forced Pose -> Task Fallbacks
     let activePose = anim.pose || p.forcedPose;
-
     const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
     const item = ITEM_DB[itemKey];
 
-    // 2. Fallback Pose Selection (Non-combat)
     if (!activePose) {
         if (p.activeTask === "swimming") {
             activePose = "swimming";
         } else if (p.activeTask === "fishing") {
             activePose = "fishing";
+        } else if (!item) {
+            activePose = "boxing"; // Default stance when unarmed
         } else if (item?.type === "bow") {
-            activePose = "archer"; // Default pose when holding bow but not swinging
+            activePose = "archer"; 
         } else if (p.isEnemy) {
             activePose = "action";
         }
     }
 
-    // 3. Standard Positions
+    // 2. Standard Default Positions
     let leftHand = { x: anchors.headX - 18, y: anchors.shoulderY + 10 + anim.armMove };
     let rightHand = { x: anchors.headX + 18, y: anchors.shoulderY + 10 - anim.armMove };
 
@@ -2575,31 +2580,40 @@ function getLimbPositions(p, anchors, anim, now) {
     let leftFoot = { x: p.x - 10 - walk, y: footY };
     let rightFoot = { x: p.x + 10 + walk, y: footY };
 
-    // 4. Calculate Progress for POSE_LIBRARY animations
-    const speed = item?.speed || 2500;
+    // Initialize the limbs object with defaults
+    let limbs = { leftHand, rightHand, leftFoot, rightFoot };
+
+    // 3. Calculate Action Progress
+    const speed = item?.speed || 2000;
     const startTime = p.lastAttackTime || p.lastActionTime || 0;
     const progress = (p.activeTask === "attacking" || p.activeTask === "pvp") 
         ? Math.min(1, (now - startTime) / speed) 
         : 0;
 
-    // 5. Apply Pose Overrides
+    // 4. Apply Pose Library Overrides
     if (activePose && POSE_LIBRARY[activePose]) {
         const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim, progress);
 
-        if (overrides.left) leftHand = overrides.left;
-        if (overrides.right) rightHand = overrides.right;
+        // Update Hand Positions
+        if (overrides.left) limbs.leftHand = overrides.left;
+        if (overrides.right) limbs.rightHand = overrides.right;
         
+        // Update Foot Positions (handling the yOffset system)
         if (overrides.leftFoot) {
-            leftFoot.y += (overrides.leftFoot.yOffset || 0);
-            if (overrides.leftFoot.x !== undefined) leftFoot.x = overrides.leftFoot.x;
+            limbs.leftFoot.y += (overrides.leftFoot.yOffset || 0);
+            if (overrides.leftFoot.x !== undefined) limbs.leftFoot.x = overrides.leftFoot.x;
         }
         if (overrides.rightFoot) {
-            rightFoot.y += (overrides.rightFoot.yOffset || 0);
-            if (overrides.rightFoot.x !== undefined) rightFoot.x = overrides.rightFoot.x;
+            limbs.rightFoot.y += (overrides.rightFoot.yOffset || 0);
+            if (overrides.rightFoot.x !== undefined) limbs.rightFoot.x = overrides.rightFoot.x;
         }
+
+        // 5. MERGE EXTRA JOINTS: This ensures leftElbow, rightElbow, knees etc. 
+        // are passed to drawStickmanBody
+        limbs = { ...limbs, ...overrides };
     }
 
-    return { leftHand, rightHand, leftFoot, rightFoot };
+    return limbs;
 }
 /*
 //older drawstickmanbody
@@ -2645,32 +2659,16 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
     const style = BODY_PARTS["stick"]; 
     ctx.strokeStyle = p.color; 
     ctx.lineWidth = 3; 
-    ctx.lineCap = "round"; // Makes joints look smoother
+    ctx.lineCap = "round";
 
-    // Torso
     style.torso(ctx, anchors.headX, anchors.headY, p.x, anchors.hipY); 
     
-    // LEFT ARM (Checks for Elbow)
-    ctx.beginPath();
-    ctx.moveTo(anchors.headX, anchors.shoulderY);
-    if (limbs.leftElbow) {
-        ctx.lineTo(limbs.leftElbow.x, limbs.leftElbow.y);
-    }
-    ctx.lineTo(limbs.leftHand.x, limbs.leftHand.y);
-    ctx.stroke();
-
-    // RIGHT ARM (Standard, but prepared for elbow)
-    ctx.beginPath();
-    ctx.moveTo(anchors.headX, anchors.shoulderY);
-    if (limbs.rightElbow) {
-        ctx.lineTo(limbs.rightElbow.x, limbs.rightElbow.y);
-    }
-    ctx.lineTo(limbs.rightHand.x, limbs.rightHand.y);
-    ctx.stroke();
+    // Pass the elbow/knee data if they exist in the limbs object
+    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.leftHand.x, limbs.leftHand.y, limbs.leftElbow); 
+    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.rightHand.x, limbs.rightHand.y, limbs.rightElbow);
     
-    // Legs
-    style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y); 
-    style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y);
+    style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y, limbs.leftKnee); 
+    style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y, limbs.rightKnee);
 }
 // --- MAIN FUNCTIONS ---
 /* function drawStickman(ctx, p) {
