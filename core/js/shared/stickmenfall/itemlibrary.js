@@ -1566,7 +1566,7 @@ const POSE_LIBRARY = {
 		const shoulderY = head.y + 15;
 		
 		// Flutter kick math (slightly faster than arms)
-		const kickTime = now / 200;
+		const kickTime = now / 300;
 		const kickAmp = 8;
 
 		return {
