@@ -2703,11 +2703,8 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
 function drawStickman(ctx, p) {
     if (p.area !== viewArea || p.isHidden) return;
     const now = Date.now();
-    
-    // 1. Handle Death State
     if (p.dead) return drawCorpse(ctx, p, now);
 
-    // 2. Data Preparation
     const anim = getAnimationState(p, now);
     const anchors = getAnchorPoints(p, anim);
     const limbs = getLimbPositions(p, anchors, anim, now);
@@ -2715,84 +2712,79 @@ function drawStickman(ctx, p) {
 
     ctx.save(); 
 
-    // 3. CALCULATE BASE ALPHA (Lurking / Stealth)
+    // 1. Alpha for lurking/swimming
     let baseAlpha = 1.0;
     if (p.activeTask === "lurking") {
         baseAlpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
         baseAlpha += (Math.sin(now / 500) * 0.05);
     }
-
-    // 4. DRAW BODY LAYERS
-    // Set global alpha for the character body
     ctx.globalAlpha = isDeep ? baseAlpha * 0.3 : baseAlpha;
 
-    // A. Back Layer (Cape)
+    // --- DRAWING STACK ---
+    
+    // A. Cape (Back-most)
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors);
 
-    // B. Base Layer (The Stickman Body)
-    // We draw this BEFORE equipment to ensure limbs show up even if naked
+    // B. Base Body (The Stickman)
     drawStickmanBody(ctx, p, anchors, limbs);
 
-    // C. Equipment Layer (Armor, Pants, Boots, Weapons)
-    renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
+    // C. Under-Head Equipment (Pants, Armor, Gloves, Weapons)
+    // We only draw things that go ON the body here
+    if (p.stats.equippedPants) drawPantsItem(ctx, p, anchors, limbs.leftFoot, limbs.rightFoot, ITEM_DB[p.stats.equippedPants]);
+    if (p.stats.equippedArmor) drawArmor(ctx, p, anchors);
+    drawGloves(ctx, p, limbs);
+    
+    // Weapon/Tool Logic
+    const weaponKey = p.stats?.equippedWeapon || p.equipped?.weapon;
+    const isToolTask = ["woodcutting", "mining", "fishing"].includes(p.activeTask);
+    const task = p.activeTask || "none";
+    let shouldHoldWeapon = (task === "attacking" || task === "pvp") || 
+                           (["none", "lurking"].includes(task) && !p.manualSheath);
 
-    // D. Top Layer (The Head & Hair/Helmets)
-    // We draw the head last so it overlaps the armor necklines correctly
+    if (weaponKey || isToolTask) {
+        if (shouldHoldWeapon || isToolTask) {
+            drawWeaponItem(ctx, p, now, anchors, limbs.rightHand.x, limbs.rightHand.y);
+        } else {
+            drawSheathedWeapon(ctx, p, anchors, ITEM_DB[weaponKey]);
+        }
+    }
+
+    // D. The Head (Middle Layer)
+    // Drawn now so it is OVER the armor but UNDER the helmet
     BODY_PARTS["stick"].head(ctx, anchors.headX, anchors.headY, p);
 
+    // E. Over-Head Equipment (Hair, Helmets, Boots)
+    if (p.stats.equippedHair) drawHair(ctx, p, anchors.bodyY, anchors.lean);
+    if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, anchors.bodyY, anchors.lean);
+    if (p.stats.equippedBoots) drawBoots(ctx, p, limbs.leftFoot, limbs.rightFoot);
 
-    // 5. UI RENDERING (Name, HP, and Meters)
-    // UI remains visible even if the body is submerged
+    // --- UI RENDERING ---
     let uiAlpha = isDeep ? Math.max(0.5, baseAlpha * 0.7) : baseAlpha;
     ctx.globalAlpha = uiAlpha;
-    
     ctx.textAlign = "center";
     
-    // Name Tag
     ctx.fillStyle = "#fff"; 
     ctx.font = "12px monospace"; 
     ctx.fillText(p.name, p.x, p.y + 40);
 
-    // HP Bar
     const hpBarWidth = 40;
     const hpBarX = p.x - 20;
     const hpBarY = p.y + 48;
-
     ctx.fillStyle = "rgba(68, 68, 68, 0.8)";
     ctx.fillRect(hpBarX, hpBarY, hpBarWidth, 4);
 
-    // HP Color & Drowning Flash Logic
-    let hpColor = "#0f0";
-    if (p.struggleStartTime && isDeep) {
-        hpColor = (Math.floor(now / 200) % 2 === 0) ? "#ff0000" : "#0f0";
-    }
+    let hpColor = (p.struggleStartTime && isDeep && Math.floor(now / 200) % 2 === 0) ? "#ff0000" : "#0f0";
     ctx.fillStyle = hpColor;
     ctx.fillRect(hpBarX, hpBarY, hpBarWidth * (p.hp / p.maxHp), 4);
 
-    // Oxygen Meter (Submerged Struggle)
     if (p.struggleStartTime && isDeep) {
         const limit = getStruggleLimit(p);
         const elapsed = now - p.struggleStartTime;
         const graceRemaining = Math.max(0, limit - elapsed);
-        const secondsLeft = Math.ceil(graceRemaining / 1000);
-        
-        const oxBarWidth = 30;
         ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(p.x - 15, p.y - 60, oxBarWidth, 4);
-        
-        ctx.fillStyle = secondsLeft < 10 ? "#ff0000" : "#00ccff";
-        ctx.fillRect(p.x - 15, p.y - 60, oxBarWidth * (graceRemaining / limit), 4);
-    }
-
-    // Lurk Meter
-    if (p.activeTask === "lurking") {
-        const stealthPct = Math.min(100, Math.floor((1 - (baseAlpha - 0.1)) * 100));
-        const barX = p.x - 15;
-        const barY = p.y - 45;
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(barX, barY, 30, 4);
-        ctx.fillStyle = stealthPct < 40 ? "#ff4444" : "#a020f0";
-        ctx.fillRect(barX, barY, 30 * (stealthPct / 100), 4);
+        ctx.fillRect(p.x - 15, p.y - 60, 30, 4);
+        ctx.fillStyle = (graceRemaining < 10000) ? "#ff0000" : "#00ccff";
+        ctx.fillRect(p.x - 15, p.y - 60, 30 * (graceRemaining / limit), 4);
     }
 
     ctx.restore(); 
