@@ -698,45 +698,53 @@ function performAttack(p) {
     if (dist > rangeNeeded) {
         const offset = p.x < target.x ? -rangeNeeded + 20 : rangeNeeded - 20;
         p.targetX = target.x + offset;
+        p.activeTask = "moving"; // Ensure they aren't in "attacking" pose while walking
     } else {
         p.targetX = null; 
         p.lean = 0;
+        
+        // IMPORTANT: Set task to ensure getLimbPositions uses the correct pose
+        p.activeTask = "attacking";
 
-        // 4. Attack Execution
+        // 4. Attack Execution Logic
         const now = Date.now();
-        if (!p.lastAttackTime) p.lastAttackTime = 0;
+        
+        // If we just entered range, reset timer so the swing starts from progress 0
+        if (!p.lastAttackTime || (now - p.lastAttackTime > attackSpeed + 1000)) {
+            p.lastAttackTime = now - attackSpeed; 
+        }
 
         if (now - p.lastAttackTime > attackSpeed) {
-            // Calculate Raw Damage (Defense is handled in applyDamage)
+            // Calculate Raw Damage
             let skillLvl = p.stats[skillType + "Level"] || 1;
             let rawDmg = 5 + (skillLvl * 2) + (weapon.power || 0);
 
-            // Visual Projectiles
+            // Visual Projectiles (y-12 aligns better with the hand positions)
             if (weapon.type === "bow") {
-                spawnProjectile(p.x, p.y - 15, target.x, target.y - 15, "#fff", "arrow", p.area);
+                spawnProjectile(p.x, p.y - 12, target.x, target.y - 15, "#fff", "arrow", p.area);
             } else if (weapon.type === "staff") {
-                spawnProjectile(p.x, p.y - 15, target.x, target.y - 15, weapon.color || "#00ffff", "magic", p.area);
+                spawnProjectile(p.x, p.y - 12, target.x, target.y - 15, weapon.color || "#00ffff", "magic", p.area);
             }
 
             // Apply Damage
             applyDamage(target, rawDmg);
+            
+            // RESET: This snaps the animation progress back to 0 for the next swing
             p.lastAttackTime = now;
 
             // 5. Handle Loot (Only for Dungeon Enemies)
             if (target.hp <= 0 && (target.isEnemy || target.isBoss) && !target.looted) {
                 target.looted = true;
-				// --- NEW: INCREMENT DUNGEON STATS ---
-				if (!p.stats.dungeon) p.stats.dungeon = { highestTier: 0, kills: 0, bossKills: 0 };
-				
-				p.stats.dungeon.kills++;
-				if (target.isBoss) p.stats.dungeon.bossKills++;
-				
-				// Update highest tier reached
-				if (dungeonWave > p.stats.dungeon.highestTier) {
-					p.stats.dungeon.highestTier = dungeonWave;
-				}
-				// ------------------------------------
-			
+                
+                if (!p.stats.dungeon) p.stats.dungeon = { highestTier: 0, kills: 0, bossKills: 0 };
+                
+                p.stats.dungeon.kills++;
+                if (target.isBoss) p.stats.dungeon.bossKills++;
+                
+                if (typeof dungeonWave !== 'undefined' && dungeonWave > p.stats.dungeon.highestTier) {
+                    p.stats.dungeon.highestTier = dungeonWave;
+                }
+            
                 handleLoot(p, target);
             }
 
@@ -748,8 +756,6 @@ function performAttack(p) {
                 spawnFloater(p, `${skillType.toUpperCase()} UP!`, "#FFD700");
                 updateCombatLevel(p);
             }
-            
-
         }
     }
 }
@@ -2481,8 +2487,13 @@ function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, righ
     drawGloves(ctx, p, { leftHand, rightHand });
 
     // 2. Draw Weapon/Tool
+	const weaponKey = p.stats?.equippedWeapon || p.equipped?.weapon;
+    const weaponItem = ITEM_DB[weaponKey];
+    
     const isTask = ["woodcutting", "mining", "fishing", "swimming", "lurking"].includes(p.activeTask);
+    
     if (shouldHoldWeapon || isTask) {
+        // ALWAYS use rightHand for weapons/tools now that we've fixed the archer orientation
         drawWeaponItem(ctx, p, now, anchors, rightHand.x, rightHand.y);
     }
 
@@ -2557,38 +2568,46 @@ function getAnchorPoints(p, anim) {
 function getLimbPositions(p, anchors, anim, now) {
     let activePose = anim.pose || p.forcedPose;
 
+    // 1. Identify weapon for pose selection
+    const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
+    const item = ITEM_DB[itemKey];
+
+    // 2. Automatic Pose Selection
     if (!activePose) {
-        if (p.isEnemy) activePose = "action"; 
-        else if (p.activeTask === "swimming") activePose = "swimming";
-        else if (p.activeTask === "fishing") activePose = "fishing";
-        else if (["attacking", "woodcutting", "mining"].includes(p.activeTask)) activePose = "action";
+        if (item?.type === "bow") {
+            activePose = "archer";
+        } else if (p.activeTask === "swimming") {
+            activePose = "swimming";
+        } else if (p.activeTask === "fishing") {
+            activePose = "fishing";
+        } else if (["attacking", "woodcutting", "mining", "pvp"].includes(p.activeTask) || p.isEnemy) {
+            activePose = "action";
+        }
     }
 
-    // Default Hands
+    // 3. Default Hand/Foot positions (Fallback)
     let leftHand = { x: anchors.headX - 18, y: anchors.shoulderY + 10 + anim.armMove };
     let rightHand = { x: anchors.headX + 18, y: anchors.shoulderY + 10 - anim.armMove };
 
-    // Default Feet (Walk logic)
     const isInWater = (p.area === "pond" && p.x > 250);
     const walk = (p.targetX !== null && !isInWater) ? Math.sin(now / 100) * 10 : 0;
     const footY = p.y + 25 + anim.bodyY;
     
     let leftFoot = { x: p.x - 10 - walk, y: footY };
     let rightFoot = { x: p.x + 10 + walk, y: footY };
-// Calculate progress here too
-    const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
-    const item = ITEM_DB[itemKey];
+
+    // 4. Calculate Progress for Snappy Poses
     const speed = item?.speed || 2500;
-    const progress = p.lastAttackTime ? Math.min(1, (now - p.lastAttackTime) / speed) : 0;
-    // APPLY POSE OVERRIDES
+    const startTime = p.lastAttackTime || p.lastActionTime || 0;
+    const progress = p.lastAttackTime ? Math.min(1, (now - startTime) / speed) : 0;
+
+    // 5. Apply Pose Overrides
     if (activePose && POSE_LIBRARY[activePose]) {
-		const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim, progress);
-        // const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim);
+        const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim, progress);
 
         if (overrides.left) leftHand = overrides.left;
         if (overrides.right) rightHand = overrides.right;
         
-        // Handle Foot Overrides (like the swimming kick)
         if (overrides.leftFoot) {
             leftFoot.y += (overrides.leftFoot.yOffset || 0);
             if (overrides.leftFoot.x !== undefined) leftFoot.x = overrides.leftFoot.x;
@@ -2601,7 +2620,6 @@ function getLimbPositions(p, anchors, anim, now) {
 
     return { leftHand, rightHand, leftFoot, rightFoot };
 }
-
 /* function drawStickmanBody(ctx, p, anchors, limbs) {
     const style = BODY_PARTS["stick"]; 
     ctx.save();

@@ -424,33 +424,39 @@ const WEAPON_STYLES = {
         ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(12, 0); ctx.stroke();
     },
 
-	"bow": (ctx, item, isAttacking, now, p) => {
-		ctx.rotate(isAttacking ? -0.6 : Math.PI / 7);
+	"bow": (ctx, item, isAttacking, now, p, bodyY, lean, progress) => {
+		// Slight tilt for the bow
+		ctx.rotate(isAttacking ? -0.1 : 0.2); 
 
-		// Calculate "Draw Amount" based on attack speed
-		let weaponData = ITEM_DB[p.stats.equippedWeapon];
-		let speed = weaponData?.speed || 2500;
-		let timeSinceLast = now - (p.lastAttackTime || 0);
-		
-		// String pulls back as we get closer to the next attack
-		let drawProgress = Math.min(1, timeSinceLast / speed);
-		let pull = isAttacking ? (drawProgress * 15) : 0;
+		const pull = isAttacking ? (progress * 18) : 0;
 
-		// Bow Wood
+		// Bow Wood (The Arc) - Facing Right
 		ctx.strokeStyle = item.color || "#8B4513";
 		ctx.lineWidth = 3;
 		ctx.beginPath(); 
-		ctx.arc(-15, 0, 15, -Math.PI / 2, Math.PI / 2, false); 
+		// Draw arc on the right side of the hand
+		ctx.arc(0, 0, 18, -Math.PI / 2, Math.PI / 2, false); 
 		ctx.stroke();
 
 		// Bowstring
 		ctx.strokeStyle = "rgba(255,255,255,0.7)";
 		ctx.lineWidth = 1;
 		ctx.beginPath();
-		ctx.moveTo(-15, -15); 
-		ctx.lineTo(-15 - pull, 0); // Pulls back based on attack timer
-		ctx.lineTo(-15, 15); 
+		ctx.moveTo(0, -18); 
+		// The string pulls BACK (negative X) relative to the right hand
+		ctx.lineTo(-pull, 0); 
+		ctx.lineTo(0, 18); 
 		ctx.stroke();
+
+		// Arrow (Visual only while drawing)
+		if (isAttacking && progress < 0.9) {
+			ctx.strokeStyle = "#eee";
+			ctx.lineWidth = 2;
+			ctx.beginPath();
+			ctx.moveTo(-pull, 0);
+			ctx.lineTo(20 - pull, 0); // Arrow head points right
+			ctx.stroke();
+		}
 	},
 
     "staff": (ctx, item, isAttacking, now) => {
@@ -1683,17 +1689,27 @@ const POSE_LIBRARY = {
         const armLength = 25;
         
         let angle;
-        if (p.activeTask === "attacking" || p.activeTask === "pvp" || ["woodcutting", "mining"].includes(p.activeTask)) {
-            // Swing from behind head (top-left) to strike point (front)
-            // Starts at -2.5 radians, ends at 0.5 radians
-            angle = -2.5 + (progress * Math.PI); 
+        const isAction = p.activeTask === "attacking" || p.activeTask === "pvp" || ["woodcutting", "mining"].includes(p.activeTask);
+
+        if (isAction && progress < 1.0) {
+            // SNAP MATH:
+            if (progress < 0.4) {
+                // Phase 1: Slow Wind-up (move back slightly)
+                angle = -2.5 - (progress * 0.5); 
+            } else if (progress < 0.6) {
+                // Phase 2: THE SNAP (Travels 180 degrees in 20% of the time)
+                const snapProgress = (progress - 0.4) / 0.2;
+                angle = -2.7 + (snapProgress * 3.5); 
+            } else {
+                // Phase 3: Hold/Recover
+                angle = 0.8;
+            }
         } else {
-            // Idle carry angle
-            angle = 0.8;
+            angle = 0.8; // Idle position
         }
 
         return {
-            left:  { x: head.x - 15, y: head.y + 25 }, // Left hand stays down
+            left:  { x: head.x - 15, y: head.y + 25 },
             right: { 
                 x: shoulder.x + Math.cos(angle) * armLength, 
                 y: shoulder.y + Math.sin(angle) * armLength 
@@ -1703,12 +1719,24 @@ const POSE_LIBRARY = {
     "boxing": (head, p, anim) => ({
         right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
     }),
-    "attack": (head, p, anim) => ({
-        right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
-    }),
-    "archer": (head, p, anim) => ({
-        right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
-    }),
+	"archer": (head, p, anim, progress = 0) => {
+        const isAttacking = (p.activeTask === "attacking" || p.activeTask === "pvp");
+        // Pull back based on progress, but return to 0 immediately after firing
+        const pullAmount = (isAttacking && progress < 1.0) ? (progress * 18) : 0;
+
+        return {
+            // Right Hand: Holds the bow frame out in front
+            right: { 
+                x: head.x + 22 + (anim.lean * 10), 
+                y: head.y + 18 
+            },
+            // Left Hand: Pulls the string back towards the chest
+            left: { 
+                x: head.x + 5 - pullAmount, 
+                y: head.y + 18 
+            }
+        };
+    },
     "fishing": (head, p, anim) => ({
         // Fixed the double "right" and the missing parameter
         right: { x: head.x + 22, y: head.y + 15 }
