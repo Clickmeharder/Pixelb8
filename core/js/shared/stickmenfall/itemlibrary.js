@@ -425,41 +425,32 @@ const WEAPON_STYLES = {
     },
 
 	"bow": (ctx, item, isAttacking, now, p, bodyY, lean, progress) => {
-		// 1. Pivot the bow 
 		ctx.rotate(isAttacking ? -0.1 : 0.2); 
 
-		// 2. The Shift: Move the bow wood to the left so the hand holds the center
-		const bowX = -18; 
-		const pullAmount = isAttacking ? (progress * 20) : 0;
+		const bowX = -15; // Shifted left to stay on the hand
+		const pullAmount = isAttacking ? (progress * 22) : 0;
 
-		// --- DRAW BOW WOOD ---
+		// Wood Arc
 		ctx.strokeStyle = item.color || "#8B4513";
 		ctx.lineWidth = 3;
 		ctx.beginPath(); 
-		// Arc is now drawn centered 18 pixels to the left of the hand translation
 		ctx.arc(bowX, 0, 18, -Math.PI / 2, Math.PI / 2, false); 
 		ctx.stroke();
 
-		// --- DRAW BOWSTRING ---
+		// String (Pulls back exactly to match the hand movement)
 		ctx.strokeStyle = "rgba(255,255,255,0.7)";
 		ctx.lineWidth = 1;
 		ctx.beginPath();
-		// String connects to the top and bottom of the wood
 		ctx.moveTo(bowX, -18); 
-		
-		// The string pulls BACK from the wood position
-		// If bowX is -18 and pull is 20, the string goes to -38 (deep draw)
 		ctx.lineTo(bowX - pullAmount, 0); 
-		
 		ctx.lineTo(bowX, 18); 
 		ctx.stroke();
 
-		// --- DRAW ARROW ---
+		// Arrow (disappears just before firing)
 		if (isAttacking && progress < 0.9) {
 			ctx.strokeStyle = "#eee";
 			ctx.lineWidth = 2;
 			ctx.beginPath();
-			// Arrow rests on the string and extends forward past the hand
 			ctx.moveTo(bowX - pullAmount, 0);
 			ctx.lineTo(bowX + 25 - pullAmount, 0); 
 			ctx.stroke();
@@ -1644,18 +1635,23 @@ const BODY_PARTS = {
 
             ctx.restore();
         },
-        torso: (ctx, hX, hY, bX, bY) => {
-			// hY is head center, we start spine at neck (hY + 10)
-			// bY is the hip position. We stop exactly there.
-			ctx.beginPath(); 
-			ctx.moveTo(hX, hY + 10); 
-			ctx.lineTo(bX, bY); // REMOVED the extra +10 here
-			ctx.stroke();
-		},
-        limbs: (ctx, startX, startY, endX, endY) => {
-            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
+		torso: (ctx, hX, hY, bX, bY) => {
+            ctx.beginPath(); 
+            ctx.moveTo(hX, hY + 10); 
+            ctx.lineTo(bX, bY);
+            ctx.stroke();
+        },
+        // ADD 'elbow' as an optional 5th parameter here:
+        limbs: (ctx, startX, startY, endX, endY, elbow = null) => {
+            ctx.beginPath(); 
+            ctx.moveTo(startX, startY);
+            if (elbow) {
+                ctx.lineTo(elbow.x, elbow.y); // Draw to the elbow joint
+            }
+            ctx.lineTo(endX, endY); // Then to the hand/foot
+            ctx.stroke();
         }
-    } 
+    }
 /*     "stick": {
         head: (ctx, x, y, p) => {
             ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.stroke();
@@ -1728,20 +1724,28 @@ const POSE_LIBRARY = {
     }),
 	"archer": (head, p, anim, progress = 0) => {
 		const isAttacking = (p.activeTask === "attacking" || p.activeTask === "pvp");
-		// Calculate the pull based on progress
-		const pullAmount = (isAttacking && progress < 1.0) ? (progress * 18) : 0;
+		const pullAmount = (isAttacking && progress < 1.0) ? (progress * 22) : 0;
+
+		const shoulderL = { x: head.x - 5, y: head.y + 15 };
+		const handL = { x: head.x + 5 - pullAmount, y: head.y + 18 };
+
+		// Elbow Logic: As the hand pulls back (pullAmount increases), 
+		// the elbow lifts UP and slightly OUT to the left.
+		const elbowL = {
+			x: shoulderL.x - (pullAmount * 0.4) - 5,
+			y: shoulderL.y - (pullAmount * 0.5) // This lifts the elbow
+		};
 
 		return {
-			// RIGHT HAND: Now the static anchor holding the bow frame
+			// RIGHT HAND: Pushed out front holding the bow
 			right: { 
-				x: head.x + 22 + (anim.lean * 10), 
+				x: head.x + 25 + (anim.lean * 10), 
 				y: head.y + 18 
 			},
-			// LEFT HAND: Now the one pulling the string back
-			left: { 
-				x: head.x + 5 - pullAmount, 
-				y: head.y + 18 
-			}
+			// LEFT HAND: The one pulling the string
+			left: handL,
+			// Custom property to be used in your drawing loop
+			leftElbow: elbowL 
 		};
 	},
     "fishing": (head, p, anim) => ({

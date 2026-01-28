@@ -2601,7 +2601,9 @@ function getLimbPositions(p, anchors, anim, now) {
 
     return { leftHand, rightHand, leftFoot, rightFoot };
 }
-/* function drawStickmanBody(ctx, p, anchors, limbs) {
+/*
+//older drawstickmanbody
+ function drawStickmanBody(ctx, p, anchors, limbs) {
     const style = BODY_PARTS["stick"]; 
     ctx.save();
     ctx.strokeStyle = p.color; 
@@ -2621,7 +2623,8 @@ function getLimbPositions(p, anchors, anim, now) {
     }
     ctx.restore();
 } */
-function drawStickmanBody(ctx, p, anchors, limbs) {
+//less old drawstickmanbody
+/* function drawStickmanBody(ctx, p, anchors, limbs) {
     const style = BODY_PARTS["stick"]; 
     ctx.strokeStyle = p.color; 
     ctx.lineWidth = 3; 
@@ -2633,6 +2636,37 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
     // Arms
     style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.leftHand.x, limbs.leftHand.y); 
     style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.rightHand.x, limbs.rightHand.y);
+    
+    // Legs
+    style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y); 
+    style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y);
+} */
+function drawStickmanBody(ctx, p, anchors, limbs) {
+    const style = BODY_PARTS["stick"]; 
+    ctx.strokeStyle = p.color; 
+    ctx.lineWidth = 3; 
+    ctx.lineCap = "round"; // Makes joints look smoother
+
+    // Torso
+    style.torso(ctx, anchors.headX, anchors.headY, p.x, anchors.hipY); 
+    
+    // LEFT ARM (Checks for Elbow)
+    ctx.beginPath();
+    ctx.moveTo(anchors.headX, anchors.shoulderY);
+    if (limbs.leftElbow) {
+        ctx.lineTo(limbs.leftElbow.x, limbs.leftElbow.y);
+    }
+    ctx.lineTo(limbs.leftHand.x, limbs.leftHand.y);
+    ctx.stroke();
+
+    // RIGHT ARM (Standard, but prepared for elbow)
+    ctx.beginPath();
+    ctx.moveTo(anchors.headX, anchors.shoulderY);
+    if (limbs.rightElbow) {
+        ctx.lineTo(limbs.rightElbow.x, limbs.rightElbow.y);
+    }
+    ctx.lineTo(limbs.rightHand.x, limbs.rightHand.y);
+    ctx.stroke();
     
     // Legs
     style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y); 
