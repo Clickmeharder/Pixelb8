@@ -4994,7 +4994,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 	if (cmd === ":sheath")     { cmdSheath(p, user); return; }
     if (cmd === ":unequip")   { cmdUnequip(p, args); return; }
     if (cmd === ":sell")      { cmdSell(p, user, args); return; }
-    if (cmd === ":Dbal" || cmd === "money") { cmdBalance(p); return; }
+    if (cmd === ":bal" || cmd === "money") { cmdBalance(p); return; }
 	if (cmd === ":wigcolor")  { cmdWigColor(p, args); return; } // Added back
 	if (cmd === ":listdances") { cmdListDances(p); return; }
     if (cmd === ":respawn") { 
@@ -5016,8 +5016,17 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 }
 
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
+ComfyJS.onCommand = (user, cmd, msg, color, flags, extra) => {
+    // Keep track of colors
+    if (!userColors[user]) {
+        userColors[user] = extra.userColor || "orangered";
+    }
 
-ComfyJS.onChat = (user, msg, color, flags, extra) => {
+    // Pass everything to the Master Router
+    processGameCommand(user, msg, flags, extra);
+};
+
+ComfyJS.onChat = (user, cmd, msg, color, flags, extra) => {
     // Keep track of colors
     if (!userColors[user]) {
         userColors[user] = extra.userColor || "orangered";
