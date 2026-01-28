@@ -1134,8 +1134,8 @@ function updateBuyerNPC() {
 function drawBuyer(ctx) {
     if (!buyerActive || viewArea !== "pond") return;
     
-    const bx = 115; 
-    const by = 425; 
+    const bx = 75; 
+    const by = 325; 
     const now = Date.now();
     
     // Smooth levitation and cloak sway
