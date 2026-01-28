@@ -2485,14 +2485,14 @@ function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, righ
 function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     
-    // 1. Swimming Depth
+    // 1. Swimming
     const isInWater = (p.area === "pond" && p.x > 250);
     if (isInWater) {
         const bobbing = Math.sin(now / 400) * 5; 
         anim.bodyY = (p.activeTask === "swimming") ? (30 + bobbing) : (45 + bobbing);
     }
 
-    // 2. Lurking Pose (The Crouch)
+    // 2. Lurking
     if (p.activeTask === "lurking") {
         const breathe = Math.sin(now / 1000) * 3;
         anim.bodyY = 15 + breathe; 
@@ -2504,28 +2504,31 @@ function getAnimationState(p, now) {
         anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
     }
 
-    // 4. IMPROVED: Attack Body Reactivity (Syncs with Weapon Speed)
+    // 4. IMPROVED: Context-Aware Attack Reactivity
     if ((p.activeTask === "attacking" || p.activeTask === "pvp") && p.lastAttackTime) {
         const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
         const item = ITEM_DB[itemKey];
         const speed = item?.speed || 2500;
         const progress = Math.min(1, (now - p.lastAttackTime) / speed);
-        
-        // We use a Sine wave so the lean is smooth: 
-        // Starts at 0, peaks at 1.0 (max lunge) in the middle, returns to 0
-        const lungePower = Math.sin(progress * Math.PI); 
-        
-        anim.lean += lungePower * 0.4;  // Sharp lean forward
-        anim.bodyY += lungePower * 8;   // Slight "dip" in height for weight
+
+        if (item?.type === "bow") {
+            // ARCHER REACTION: Steady lean back as tension increases
+            anim.pose = "archer";
+            anim.lean = -0.1 * progress; // Slight backward tension lean
+            anim.bodyY += 2; // Braced stance
+        } else {
+            // MELEE/ACTION REACTION: The explosive lunge
+            anim.pose = "action";
+            const lungePower = Math.sin(progress * Math.PI); 
+            anim.lean += lungePower * 0.4;
+            anim.bodyY += lungePower * 8;
+        }
     }
 
-    // 5. Sleeping Reactivity
+    // 5. Sleeping
     if (p.isSleeping && !p.activeTask) {
         anim.bodyY = 20; 
         anim.lean = 0.5; 
-        if (typeof frameCount !== 'undefined' && frameCount % 120 === 0) {
-            spawnFloater(p, "Zzz...", "#fff"); 
-        }
     }
 
     return anim;
@@ -2542,26 +2545,26 @@ function getAnchorPoints(p, anim) {
 }
 
 function getLimbPositions(p, anchors, anim, now) {
+    // 1. Use the pose decided by getAnimationState, or forcedPose, or fallbacks
     let activePose = anim.pose || p.forcedPose;
 
-    // 1. Identify weapon for pose selection
     const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
     const item = ITEM_DB[itemKey];
 
-    // 2. Automatic Pose Selection
+    // 2. Fallback Pose Selection (Non-combat)
     if (!activePose) {
-        if (item?.type === "bow") {
-            activePose = "archer";
-        } else if (p.activeTask === "swimming") {
+        if (p.activeTask === "swimming") {
             activePose = "swimming";
         } else if (p.activeTask === "fishing") {
             activePose = "fishing";
-        } else if (["attacking", "woodcutting", "mining", "pvp"].includes(p.activeTask) || p.isEnemy) {
+        } else if (item?.type === "bow") {
+            activePose = "archer"; // Default pose when holding bow but not swinging
+        } else if (p.isEnemy) {
             activePose = "action";
         }
     }
 
-    // 3. Default Hand/Foot positions (Fallback)
+    // 3. Standard Positions
     let leftHand = { x: anchors.headX - 18, y: anchors.shoulderY + 10 + anim.armMove };
     let rightHand = { x: anchors.headX + 18, y: anchors.shoulderY + 10 - anim.armMove };
 
@@ -2572,10 +2575,12 @@ function getLimbPositions(p, anchors, anim, now) {
     let leftFoot = { x: p.x - 10 - walk, y: footY };
     let rightFoot = { x: p.x + 10 + walk, y: footY };
 
-    // 4. Calculate Progress for Snappy Poses
+    // 4. Calculate Progress for POSE_LIBRARY animations
     const speed = item?.speed || 2500;
     const startTime = p.lastAttackTime || p.lastActionTime || 0;
-    const progress = p.lastAttackTime ? Math.min(1, (now - startTime) / speed) : 0;
+    const progress = (p.activeTask === "attacking" || p.activeTask === "pvp") 
+        ? Math.min(1, (now - startTime) / speed) 
+        : 0;
 
     // 5. Apply Pose Overrides
     if (activePose && POSE_LIBRARY[activePose]) {
