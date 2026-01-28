@@ -89,13 +89,13 @@ const ITEM_DB = {
 	// --- Pants
 	"White Shirt":  { type: "pants", style:"", sources:"dungeon", tier: 11, rarity: 1,  def: 5,                  value: 200,   color: "red" },
 	"Black Shirt":  { type: "pants", style:"", sources:"dungeon", tier: 10, rarity: 1,  def: 5,                  value: 200,   color: "red" },
-    "Red Shirt":  { type: "pants", style:"", sources:"dungeon", tier: 9, rarity: 1,  def: 5,                  value: 90,   color: "red" },
-	"Pink Shirt":  { type: "pants", style:"", sources:"dungeon", tier: 8, rarity: 1,  def: 4,                  value: 80,   color: "pink" },
-	"Brown Shirt": { type: "pants", style:"", sources:"dungeon", tier: 7, rarity: 1, def: 1,                  value: 30,   color: "brown" },
+    "Red Shirt":    { type: "pants", style:"", sources:"dungeon", tier: 9, rarity: 1,  def: 5,                  value: 90,   color: "red" },
+	"Pink Shirt":   { type: "pants", style:"", sources:"dungeon", tier: 8, rarity: 1,  def: 4,                  value: 80,   color: "pink" },
+	"Brown Shirt":  { type: "pants", style:"", sources:"dungeon", tier: 7, rarity: 1, def: 1,                  value: 30,   color: "brown" },
 	"Green Shirt":  { type: "pants", style:"", sources:"dungeon", tier: 6, rarity: 1, def: 1,                  value: 50,   color: "green" },
-	"Orange Shirt":  { type: "pants", style:"", sources:"dungeon", tier: 5, rarity: 1, def: 0,                  value: 70,   color: "orange" },
-	"Yellow Shirt":  { type: "pants", style:"", sources:"dungeon", tier: 4, rarity: 1, def: 0,                  value: 60,   color: "yellow" },
-	"Blue Shirt":  { type: "pants", style:"", sources:"dungeon", tier: 3, rarity: 1, def: 0,                  value: 40,   color: "blue" },
+	"Orange Shirt": { type: "pants", style:"", sources:"dungeon", tier: 5, rarity: 1, def: 0,                  value: 70,   color: "orange" },
+	"Yellow Shirt": { type: "pants", style:"", sources:"dungeon", tier: 4, rarity: 1, def: 0,                  value: 60,   color: "yellow" },
+	"Blue Shirt":   { type: "pants", style:"", sources:"dungeon", tier: 3, rarity: 1, def: 0,                  value: 40,   color: "blue" },
 	"Indigo Shirt": { type: "pants", style:"", sources:"dungeon", tier: 2, rarity: 1, def: 0,                  value: 20,   color: "indigo" },
 	"Violet Shirt": { type: "pants", style:"", sources:"dungeon", tier: 1, rarity: 1, def: 0,                  value: 10,   color: "violet" },
 //
@@ -106,7 +106,7 @@ const ITEM_DB = {
 	"Steel Sword":       { type: "weapon", style: "sword", sources:"dungeon", tier: 3,  rarity: 2,  power: 18,  speed: 1300, value: 800,    color: "#999" },
 	"Flanged Mace":      { type: "weapon", style: "sword", sources:"dungeon", tier: 4,  rarity: 4,  power: 25,  speed: 1500, value: 2500,   color: "#bbb" },
 	"Golden Sword":      { type: "weapon", style: "sword", sources:"dungeon", tier: 5,  rarity: 5,  power: 35,  speed: 1400, value: 10000,  color: "#ffd700" },
-	"Great Sword":         { type: "weapon", style: "sword", sources:"dungeon", tier: 6,  rarity: 7,  power: 50,  speed: 1800, value: 25000,  color: "#888" },
+	"Great Sword":       { type: "weapon", style: "sword", sources:"dungeon", tier: 6,  rarity: 7,  power: 50,  speed: 1800, value: 25000,  color: "#888" },
 	"Cobalt Claymore":   { type: "weapon", style: "sword", sources:"dungeon", tier: 7,  rarity: 8,  power: 65,  speed: 1600, value: 50000,  color: "#1976d2" },
 	"Mythril Blade":     { type: "weapon", style: "sword", sources:"dungeon", tier: 8,  rarity: 10, power: 85,  speed: 1400, value: 100000, color: "#4fc3f7" },
 	"Dragon-Bone Smasher":{ type: "weapon", style: "sword", sources:"dungeon", tier: 9, rarity: 11, power: 120, speed: 2000, value: 250000, color: "#fff9c4" },
@@ -168,22 +168,22 @@ const ITEM_DB = {
 	"Steel Pants":        { type: "pants", skill:"attack", sources:"dungeon", tier: 2,  rarity: 2,  def: 5,  value: 600,   color: "#ddd" },
 	"Heavy Steel":        { type: "armor", skill:"attack", sources:"dungeon", tier: 3,  rarity: 4,  def: 10, value: 2000,  color: "#cfd8dc" },
 	"Heavy Pants":        { type: "pants", skill:"attack", sources:"dungeon", tier: 3,  rarity: 4,  def: 8,  value: 1500,  color: "#b0bec5" },
-	"Darksteel Plate":   { type: "armor", skill:"attack", sources:"dungeon", tier: 4,  rarity: 5,  def: 14, value: 5000,  color: "#455a64" },
+	"Darksteel Plate":    { type: "armor", skill:"attack", sources:"dungeon", tier: 4,  rarity: 5,  def: 14, value: 5000,  color: "#455a64" },
 	"DarkSteel Pants":    { type: "pants", skill:"attack", sources:"dungeon", tier: 4,  rarity: 5,  def: 11, value: 4000,  color: "#37474f" },
-	"Cobalt Plate": { type: "armor", skill:"attack", sources:"dungeon", tier: 5,  rarity: 6,  def: 19, value: 10000, color: "#1976d2" },
-	"Cobalt Pants":    { type: "pants", skill:"attack", sources:"dungeon", tier: 5,  rarity: 6,  def: 15, value: 8000,  color: "#1565c0" },
+	"Cobalt Plate":       { type: "armor", skill:"attack", sources:"dungeon", tier: 5,  rarity: 6,  def: 19, value: 10000, color: "#1976d2" },
+	"Cobalt Pants":       { type: "pants", skill:"attack", sources:"dungeon", tier: 5,  rarity: 6,  def: 15, value: 8000,  color: "#1565c0" },
 	"Mithril Plate":      { type: "armor", skill:"attack", sources:"dungeon", tier: 6,  rarity: 7,  def: 25, value: 20000, color: "#4fc3f7" },
 	"Mithril Pants":      { type: "pants", skill:"attack", sources:"dungeon", tier: 6,  rarity: 7,  def: 20, value: 18000, color: "#29b6f6" },
 	"Adamantite Plate":   { type: "armor", skill:"attack", sources:"dungeon", tier: 7,  rarity: 9,  def: 32, value: 40000, color: "#d32f2f" },
-	"Adamantite Pants": { type: "pants", skill:"attack", sources:"dungeon", tier: 7,  rarity: 9,  def: 26, value: 35000, color: "#b71c1c" },
-	"Obsidian Plate":  { type: "armor", skill:"attack", sources:"dungeon", tier: 8,  rarity: 10, def: 42, value: 75000, color: "#212121" },
-	"Obsidian Pants":   { type: "pants", skill:"attack", sources:"dungeon", tier: 8,  rarity: 10, def: 35, value: 65000, color: "#000000" },
-	"Paladin Plate": { type: "armor", skill:"attack", sources:"dungeon", tier: 9,  rarity: 11, def: 55, value: 150000,color: "#ffeb3b" },
-	"Paladin Pants":  { type: "pants", skill:"attack", sources:"dungeon", tier: 9,  rarity: 11, def: 48, value: 130000,color: "#fdd835" },
-	"Titan Plate":{ type: "armor", skill:"attack", sources:"dungeon", tier: 10, rarity: 12, def: 75, value: 300000,color: "#7e57c2" },
-	"Titan Pants": { type: "pants", skill:"attack", sources:"dungeon", tier: 10, rarity: 12, def: 65, value: 250000,color: "#5e35b1" },
-	"Dreadnought Plate":   { type: "armor", skill:"attack", sources:"dungeon", tier: 11, rarity: 13, def: 100,value: 500000,color: "#ff1744" },
-	"Dreadnought Pants":{ type: "pants", skill:"attack", sources:"dungeon", tier: 11, rarity: 13, def: 90, value: 450000,color: "#d50000" },
+	"Adamantite Pants":   { type: "pants", skill:"attack", sources:"dungeon", tier: 7,  rarity: 9,  def: 26, value: 35000, color: "#b71c1c" },
+	"Obsidian Plate":     { type: "armor", skill:"attack", sources:"dungeon", tier: 8,  rarity: 10, def: 42, value: 75000, color: "#212121" },
+	"Obsidian Pants":     { type: "pants", skill:"attack", sources:"dungeon", tier: 8,  rarity: 10, def: 35, value: 65000, color: "#000000" },
+	"Paladin Plate":      { type: "armor", skill:"attack", sources:"dungeon", tier: 9,  rarity: 11, def: 55, value: 150000,color: "#ffeb3b" },
+	"Paladin Pants":      { type: "pants", skill:"attack", sources:"dungeon", tier: 9,  rarity: 11, def: 48, value: 130000,color: "#fdd835" },
+	"Titan Plate":        { type: "armor", skill:"attack", sources:"dungeon", tier: 10, rarity: 12, def: 75, value: 300000,color: "#7e57c2" },
+	"Titan Pants":        { type: "pants", skill:"attack", sources:"dungeon", tier: 10, rarity: 12, def: 65, value: 250000,color: "#5e35b1" },
+	"Dreadnought Plate":  { type: "armor", skill:"attack", sources:"dungeon", tier: 11, rarity: 13, def: 100,value: 500000,color: "#ff1744" },
+	"Dreadnought Pants":  { type: "pants", skill:"attack", sources:"dungeon", tier: 11, rarity: 13, def: 90, value: 450000,color: "#d50000" },
 	//
 	// --- MAGIC GEAR (11 TIERS) ---
 	"Apprentice Robe":    { type: "armor", skill:"magic", sources:"dungeon", tier: 1,  rarity: 1,  def: 1,  value: 100,   color: "#90caf9" },
@@ -256,7 +256,7 @@ const ITEM_DB = {
 	"Violet Gloves": { type: "gloves", style:"", sources:"dungeon", tier: 1,  rarity: 1, def: 0,  value: 10,   color: "violet" },
 	"Leather Gloves":{ type: "gloves", style:"", sources:"dungeon", tier: 2,  rarity: 0, def: 1,  value: 100, color: "#5c4033" },
     // --- SPECIALS ---
-// special head
+	// special head
 	"box":            { type: "helmet", style: "box", sources:"dungeon", tier: 1, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
 	"Paper Bag":      { type: "helmet", style: "paperbag", sources:"dungeon", tier: 2, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
 	"wig":            { type: "helmet", style:"", sources:"dungeon", tier: 3, rarity: 0, def: 1,style: "wig",     value: 5000, color: "yellow" },
@@ -397,6 +397,57 @@ const DANCE_LIBRARY = {
 To make a Sombrero: Take the gentleman style, set brimSize to 30 and hatTall to 15, then change the color to yellow.
 To make a Tiny Fancy Hat: Take the gentleman style, move the hX (horizontal) in the settings to hX + 8 so it sits tilted on the side of the head, and make all the sizes smaller. */
 const WEAPON_STYLES = {
+    "sword": (ctx, item, isAttacking, now, p, bodyY, lean, progress) => {
+        let rotation;
+        if (isAttacking && progress < 1.0) {
+            // Start at 1.2 (idle behind back), swing to -0.5 (strike), back to 1.2
+            if (progress < 0.2) rotation = 1.2 - (progress * 2); // Wind up
+            else if (progress < 0.5) rotation = 0.8 - ((progress-0.2) * 5); // Strike!
+            else rotation = -0.7 + ((progress-0.5) * 4); // Recover
+        } else {
+            rotation = Math.PI / 1.2; // Idle
+        }
+
+        ctx.rotate(rotation);
+        ctx.strokeStyle = item.color || "#ccc";
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(25, -2); ctx.stroke();
+        // Guard
+        ctx.strokeStyle = "#aa8800";
+        ctx.beginPath(); ctx.moveTo(5, -6); ctx.lineTo(5, 6); ctx.stroke();
+    },
+
+    "axe": (ctx, item, isAttacking, now, p, bodyY, lean, progress) => {
+        // Heavy overhead swing
+        let rotation = Math.PI / 1.2;
+        if (isAttacking && progress < 1.0) {
+            rotation = 1.2 - (Math.sin(progress * Math.PI) * 2);
+        }
+        ctx.rotate(rotation);
+        ctx.strokeStyle = "#5d4037"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(22, 0); ctx.stroke();
+        ctx.fillStyle = item.color || "#999";
+        ctx.beginPath();
+        ctx.moveTo(15, -5); ctx.lineTo(25, -8); ctx.lineTo(25, 8); ctx.lineTo(15, 5);
+        ctx.fill(); ctx.stroke();
+    },
+
+    "pickaxe": (ctx, item, isAttacking, now, p, bodyY, lean, progress) => {
+        // Mining: Fast strike, slow pull back
+        let rotation = Math.PI / 1.2;
+        if (isAttacking && progress < 1.0) {
+            rotation = (progress < 0.3) 
+                ? 1.2 - (progress * 6) // Rapid strike
+                : -0.6 + (progress * 1.8); // Slow drag back
+        }
+        ctx.rotate(rotation);
+        ctx.strokeStyle = "#4e342e"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(22, 0); ctx.stroke();
+        ctx.strokeStyle = item.color || "#aaa"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(22, 0, 12, Math.PI * 0.7, Math.PI * 1.3); ctx.stroke();
+    }
+};
+/* const WEAPON_STYLES = {
     "sword": (ctx, item, isAttacking, now) => {
         let swing = isAttacking ? Math.sin(now / 150) * 0.8 : Math.PI / 1.2;
         ctx.rotate(swing);
@@ -524,7 +575,7 @@ const WEAPON_STYLES = {
         ctx.stroke();
     }
 };
-
+ */
 const HAT_STYLES = {
     "box": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
@@ -1548,15 +1599,34 @@ const POSE_LIBRARY = {
         left: { x: head.x - 25, y: head.y - 10 },
         right: { x: head.x + 25, y: head.y - 10 }
     }),
-    "action": (head, p, anim) => ({
-        // Use head.x and head.y so the hand stays attached to the shoulder
+/*     "action": (head, p, anim) => ({
+        right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
+    }), */
+	"action": (head, p, anim, progress = 0) => {
+        // If progress is 0.5 (middle of swing), the arm reaches further out
+        const lunge = (p.activeTask === "attacking" && progress > 0 && progress < 1) 
+            ? Math.sin(progress * Math.PI) * 15 
+            : 0;
+
+        return {
+            left:  { x: head.x - 18, y: head.y + 20 },
+            right: { x: head.x + 20 + (anim.lean * 10) + lunge, y: head.y + 15 }
+        };
+    },
+    "boxing": (head, p, anim) => ({
+        right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
+    }),
+    "attack": (head, p, anim) => ({
+        right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
+    }),
+    "archer": (head, p, anim) => ({
         right: { x: head.x + 20 + (anim.lean * 10), y: head.y + 15 }
     }),
     "fishing": (head, p, anim) => ({
         // Fixed the double "right" and the missing parameter
         right: { x: head.x + 22, y: head.y + 15 }
     }),
-	// NEW: Dynamic Swimming Pose
+
 	"swimming": (head, p, anim) => {
 		const now = Date.now();
 		

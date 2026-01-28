@@ -2430,13 +2430,14 @@ function drawEnemyHeadgear(ctx, e, anchors, item) {
 }
 // --- Draw weapons ---
 function drawWeaponItem(ctx, p, now, anchors, hX, hY) {
-    let weaponName = p.stats.equippedWeapon;
+    // 1. Identify the item (Handle Player stats vs Enemy equipped)
+    let weaponName = p.stats ? p.stats.equippedWeapon : (p.equipped ? p.equipped.weapon : null);
     let item = ITEM_DB[weaponName];
     
-    // Virtual tools for tasks
-    if (p.activeTask === "woodcutting" && !item) item = { type: "axe", style: "axe" };
-    if (p.activeTask === "mining" && !item) item = { type: "pickaxe", style: "pickaxe" };
-    if (p.activeTask === "fishing") item = item || { type: "fishing_rod", style: "fishing_rod" };   
+    // 2. Virtual tools for non-combat tasks
+    if (p.activeTask === "woodcutting" && (!item || item.type !== "axe")) item = { type: "axe", style: "axe", speed: 1500 };
+    if (p.activeTask === "mining" && (!item || item.type !== "pickaxe")) item = { type: "pickaxe", style: "pickaxe", speed: 1500 };
+    if (p.activeTask === "fishing") item = item || { type: "fishing_rod", style: "fishing_rod", speed: 2000 };   
     
     if (!item) return;
 
@@ -2446,13 +2447,28 @@ function drawWeaponItem(ctx, p, now, anchors, hX, hY) {
     const style = item.style || item.type || "sword";
     const drawFn = WEAPON_STYLES[style] || WEAPON_STYLES["sword"];
 
-    // COMBAT/ACTION CHECK: 
-    const isAttacking = (p.activeTask === "attacking");
+    // 3. Determine if we are in an "Active" state
+    const isAttacking = (p.activeTask === "attacking" || p.activeTask === "pvp");
     const isWorking = ["woodcutting", "mining"].includes(p.activeTask);
     const isFishing = (p.activeTask === "fishing");
     const useActiveAnim = isAttacking || isWorking || isFishing;
 
-    drawFn(ctx, item, useActiveAnim, now, p, anchors.bodyY, anchors.lean);
+    // 4. Calculate Normalized Progress (0.0 to 1.0)
+    let attackProgress = 0; 
+    if (useActiveAnim) {
+        // Use lastAttackTime for combat, or lastActionTime/now for generic tasks
+        const startTime = p.lastAttackTime || p.lastActionTime || 0;
+        const actionSpeed = item.speed || 2500;
+        const elapsed = now - startTime;
+        
+        // Clamp between 0 and 1
+        attackProgress = Math.min(1, elapsed / actionSpeed);
+    }
+
+    // 5. Execute Draw
+    // We pass attackProgress as the final argument
+    drawFn(ctx, item, useActiveAnim, now, p, anchors.bodyY, anchors.lean, attackProgress);
+    
     ctx.restore();
 }
 
@@ -2482,32 +2498,49 @@ function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, righ
 function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
     
-    // Swimming Depth
-	const isInWater = (p.area === "pond" && p.x > 250);
-
-	if (isInWater) {
-		const bobbing = Math.sin(now / 400) * 5; 
-		// If they are actively swimming, use your swim height (30)
-		// If they are just floating/idling/sleeping in water, they sink a bit lower (45)
-		anim.bodyY = (p.activeTask === "swimming") ? (30 + bobbing) : (45 + bobbing);
-	}
-    // Lurking Pose (The Crouch)
-    if (p.activeTask === "lurking") {
-        const breathe = Math.sin(now / 1000) * 3;
-        anim.bodyY = 15 + breathe; // Sit lower to the ground
-        anim.lean = 0.3; // Lean forward slightly
+    // 1. Swimming Depth
+    const isInWater = (p.area === "pond" && p.x > 250);
+    if (isInWater) {
+        const bobbing = Math.sin(now / 400) * 5; 
+        anim.bodyY = (p.activeTask === "swimming") ? (30 + bobbing) : (45 + bobbing);
     }
 
+    // 2. Lurking Pose (The Crouch)
+    if (p.activeTask === "lurking") {
+        const breathe = Math.sin(now / 1000) * 3;
+        anim.bodyY = 15 + breathe; 
+        anim.lean = 0.3; 
+    }
+
+    // 3. Dancing
     if (p.activeTask === "dancing" && DANCE_LIBRARY[p.danceStyle]) {
         anim = { ...anim, ...DANCE_LIBRARY[p.danceStyle](now, p) };
     }
-	// Add this to your animation logic
-	if (p.isSleeping && !p.activeTask) {
-		anim.bodyY = 20; // Sit/slouch down
-		anim.lean = 0.5; // Tilt head forward
-		// Add "Zzz" floater every few seconds
-		if (frameCount % 120 === 0) spawnFloater("Zzz...", p.x, p.y - 40, "#fff", p.area);
-	}
+
+    // 4. IMPROVED: Attack Body Reactivity (Syncs with Weapon Speed)
+    if ((p.activeTask === "attacking" || p.activeTask === "pvp") && p.lastAttackTime) {
+        const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
+        const item = ITEM_DB[itemKey];
+        const speed = item?.speed || 2500;
+        const progress = Math.min(1, (now - p.lastAttackTime) / speed);
+        
+        // We use a Sine wave so the lean is smooth: 
+        // Starts at 0, peaks at 1.0 (max lunge) in the middle, returns to 0
+        const lungePower = Math.sin(progress * Math.PI); 
+        
+        anim.lean += lungePower * 0.4;  // Sharp lean forward
+        anim.bodyY += lungePower * 8;   // Slight "dip" in height for weight
+    }
+
+    // 5. Sleeping Reactivity
+    if (p.isSleeping && !p.activeTask) {
+        anim.bodyY = 20; 
+        anim.lean = 0.5; 
+        if (typeof frameCount !== 'undefined' && frameCount % 120 === 0) {
+            spawnFloater(p, "Zzz...", "#fff"); 
+        }
+    }
+
     return anim;
 }
 function getAnchorPoints(p, anim) {
@@ -2542,11 +2575,16 @@ function getLimbPositions(p, anchors, anim, now) {
     
     let leftFoot = { x: p.x - 10 - walk, y: footY };
     let rightFoot = { x: p.x + 10 + walk, y: footY };
-
+// Calculate progress here too
+    const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
+    const item = ITEM_DB[itemKey];
+    const speed = item?.speed || 2500;
+    const progress = p.lastAttackTime ? Math.min(1, (now - p.lastAttackTime) / speed) : 0;
     // APPLY POSE OVERRIDES
     if (activePose && POSE_LIBRARY[activePose]) {
-        const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim);
-        
+		const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim, progress);
+        // const overrides = POSE_LIBRARY[activePose]({ x: anchors.headX, y: anchors.headY }, p, anim);
+
         if (overrides.left) leftHand = overrides.left;
         if (overrides.right) rightHand = overrides.right;
         
