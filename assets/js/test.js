@@ -2562,8 +2562,6 @@ function getLimbPositions(p, anchors, anim, now) {
             activePose = "fishing";
         } else if (!item) {
             activePose = "boxing"; // Default stance when unarmed
-        } else if (item?.type === "bow") {
-            activePose = "archer"; 
         } else if (p.isEnemy) {
             activePose = "action";
         }
