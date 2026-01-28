@@ -326,13 +326,14 @@ function getPlayer(name, color) {
         danceStyle: 0,
         lastDanceXP: 0,
         stats: loadedStats
+		cooldowns: {}
     };
 
     updateCombatLevel(players[lowName]);
     
     // Set HP from persistence or 25% floor
-    players[lowName].hp = loadedStats.currentHp || Math.floor(players[lowName].maxHp);
-
+    //players[lowName].hp = loadedStats.currentHp || Math.floor(players[lowName].maxHp);
+	players[lowName].hp = loadedStats.currentHp || loadedStats.maxhp;
     return players[lowName];
 }
 function movePlayer(p, targetArea) {
@@ -4880,6 +4881,20 @@ function drawChatBubble(ctx, p, x, y, msg) {
     ctx.fillText(msg, x, by + 13);
     ctx.restore();
 }
+// --- Helper Function for Cooldowns ---
+function isOnCooldown(p, cmd, seconds) {
+    const now = Date.now();
+    const lastUse = p.cooldowns[cmd] || 0;
+    const diff = (now - lastUse) / 1000;
+
+    if (diff < seconds) {
+        console.log(`${p.name} is on cooldown for ${cmd}: ${Math.ceil(seconds - diff)}s left`);
+        return true;
+    }
+    
+    p.cooldowns[cmd] = now; // Set the new cooldown time
+    return false;
+}
 function processGameCommand(user, msg, flags = {}, extra = {}) {
 	const current = getActiveProfile();
     if (current && user.toLowerCase() === current.name.toLowerCase()) {
@@ -4971,7 +4986,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 		}
     }
 
-    // --- 2. STANDARD PLAYER ACTION COMMANDS (Everyone) ---
+/*     // --- 2. STANDARD PLAYER ACTION COMMANDS (Everyone) ---
     if (cmd === "!clearinventory" || cmd === "!clearinv") { clearPlayerInventory(p.name); return; }
     if (cmd === "!stop" || cmd === "!idle" || cmd === "!reset") { cmdStop(p, user); return; }
     if (cmd === "!attack") { cmdAttack(p, user); return; }
@@ -5001,7 +5016,54 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "!bal" || cmd === "!pixels") { cmdBalance(p); return; }
 	if (cmd === "!listdances") { cmdListDances(p); return; }
 
+ */
+// --- 2. STANDARD PLAYER ACTION COMMANDS (Everyone) ---
+    
+    // Define cooldowns for groups of commands
+    // Actions that can be spammed slightly
+    const fastActions = ["!attack", "!fish", "!swim", "!lurk", "!sheath", "!dance", "!heal", ]; 
+    // Actions that should be slower
+    const mediumActions = ["!respawn", "!equip", "!unequip", "!clearinventory", "!clearinv"];
+    // Travel and UI commands
+    const slowActions = ["!home", "!pond", "!town", "!arena", "!dungeon", "!travel", "!join", "!pvp"];
 
+    // Apply the cooldown checks
+    if (fastActions.includes(cmd) && isOnCooldown(p, "fast", 10)) return;
+    if (mediumActions.includes(cmd) && isOnCooldown(p, "med", 30)) return;
+    if (slowActions.includes(cmd) && isOnCooldown(p, "slow", 45)) return;
+
+    // Now run the actual logic
+    if (cmd === "!clearinventory" || cmd === "!clearinv") { clearPlayerInventory(p.name); return; }
+    if (cmd === "!stop" || cmd === "!idle" || cmd === "!reset") { cmdStop(p, user); return; }
+    if (cmd === "!attack") { cmdAttack(p, user); return; }
+    if (cmd === "!fish")   { cmdFish(p, user); return; }
+    if (cmd === "!swim")   { cmdSwim(p, user); return; }
+    if (cmd === "!heal")   { cmdHeal(p, user, args); return; }
+    if (cmd === "!dance")  { cmdDance(p, user, args); return; }
+    if (cmd === "!lurk")   { cmdLurk(p, user); return; }
+    if (cmd === "!respawn") { cmdRespawn(p); return; }
+
+    // -- Travel commands
+    if (cmd === "!travel") { movePlayer(p, args[1]); return; }
+    if (cmd === "!home")   { movePlayer(p, "home"); return; }
+    if (cmd === "!pond")   { movePlayer(p, "pond"); return; }
+    if (cmd === "!town")   { movePlayer(p, "town"); return; }
+    if (cmd === "!arena")  { movePlayer(p, "arena"); return; }
+    if (cmd === "!dungeon") { movePlayer(p, "dungeon"); return; }
+
+    // -- Events
+    if (cmd === "!join")   { joinDungeonQueue(p); return; }
+    if (cmd === "!pvp")    { joinArenaQueue(p); return; }
+
+    // -- Misc / UI (Usually no cooldown or very short)
+    if (cmd === "!wigcolor")   { cmdWigColor(p, args); return; }
+    if (cmd === "!sheath")     { cmdSheath(p, user); return; }
+    if (cmd === "!equip")      { cmdEquip(p, args); return; }
+    if (cmd === "!unequip")    { cmdUnequip(p, args); return; }
+    if (cmd === "!inventory" || cmd === "!bag") { cmdInventory(p, user, args); return; }
+    if (cmd === "!sell")       { cmdSell(p, user, args); return; }
+    if (cmd === "!bal" || cmd === "!pixels") { cmdBalance(p); return; }
+    if (cmd === "!listdances") { cmdListDances(p); return; }
 	// --- 3. CHAT BUBBLE LOGIC (Catch-all) ---
     // Check if the message was intended to be a command (starts with ! or /)
     // but didn't match any of the logic above.
@@ -5009,25 +5071,17 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 
     // Also check if it's a short, normal message.
     // We don't want to show bubbles for attempted commands that failed.
-    if (!isAttemptedCommand && msg.length <= 40) {
-        p.chatMessage = msg;
-        p.chatTime = Date.now();
-    }
+	// --- Inside Section 3: Chat Bubble Logic ---
+	if (!isAttemptedCommand && msg.length <= 40) {
+		// Only allow a new bubble every 3 seconds
+		if (!isOnCooldown(p, "chat_bubble", 3)) {
+			p.chatMessage = msg;
+			p.chatTime = Date.now();
+		}
+	}
 	
 }
 
-//ComfyJS.onChat = (user, msg, color, flags, extra) => {
-
-/* ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    // Keep track of colors
-    if (!userColors[user]) {
-        userColors[user] = extra.userColor || "orangered";
-    }
-
-    // Pass everything to the Master Router
-    processGameCommand(user, msg, flags, extra);
-};
- */
 // 1. The Regular Chat Handler
 ComfyJS.onChat = (user, msg, color, flags, extra) => {
     if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
@@ -5037,7 +5091,9 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
 // 2. The Command Handler (Matches messages starting with !)
 ComfyJS.onCommand = (user, cmd, args, flags, extra) => {
     if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
-    
+  // Join args array into a space-separated string maybe
+    //let argString = (args && args.length > 0) ? args.join(" ") : "";
+    //let fullMsg = "!" + cmd + " " + argString;
     // Reconstruct the message so processGameCommand can read it normally
     // We add the "!" back to the cmd so your prefix-stripping logic works perfectly
     let fullMsg = "!" + cmd + " " + args;
