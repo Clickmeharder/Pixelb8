@@ -4937,6 +4937,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 	if (cmd === "pvp")   { joinArenaQueue(p); return; }
     if (cmd === "inventory") { cmdInventory(p, user, args); return; }
     if (cmd === "equip")     { cmdEquip(p, args); return; }
+	if (cmd === "sheath")     { cmdSheath(p, user); return; }
     if (cmd === "unequip")   { cmdUnequip(p, args); return; }
     if (cmd === "sell")      { cmdSell(p, user, args); return; }
     if (cmd === "bal" || cmd === "money") { cmdBalance(p); return; }
