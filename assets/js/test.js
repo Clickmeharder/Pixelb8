@@ -2690,6 +2690,8 @@ function drawEnemyStickman(ctx, e) {
 
     ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
     ctx.lineWidth = 1;
+	// --- ADD THIS LINE HERE ---
+    BODY_PARTS["stick"].head(ctx, anchors.headX, anchors.headY, e);
     drawStickmanBody(ctx, e, anchors, limbs);
 
     if (e.equipped) {
@@ -2807,6 +2809,8 @@ function drawCorpse(ctx, p, now) {
     const deadLimbs = { leftHand: { x: -18, y: 0 }, rightHand: { x: 18, y: 0 }, leftFoot: { x: -10, y: 25 }, rightFoot: { x: 10, y: 25 } };
 
     const corpseActor = { ...p, x: 0, y: 0 }; 
+	// DRAW THE HEAD HERE (Relative to the rotated 0,0)
+    BODY_PARTS["stick"].head(ctx, deadAnchors.headX, deadAnchors.headY, corpseActor);
     drawStickmanBody(ctx, corpseActor, deadAnchors, deadLimbs);
 
     ctx.save();
