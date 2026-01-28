@@ -2206,8 +2206,18 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
         : (item.color || "#614126");
 
     ctx.save();
+    
+    // --- THE FIX: RESET STROKE STATE HERE ---
+    ctx.strokeStyle = "#000000"; 
+    ctx.lineWidth = 1.5; 
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.shadowBlur = 0; // Clears any glowing effects from previous draws
+    // ----------------------------------------
+
     const drawFn = HAT_STYLES[style] || HAT_STYLES["hair"];
     drawFn(ctx, hX, hY, finalColor);
+    
     ctx.restore();
 }
 
