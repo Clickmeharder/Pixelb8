@@ -425,40 +425,43 @@ const WEAPON_STYLES = {
     },
 
 	"bow": (ctx, item, isAttacking, now, p, bodyY, lean, progress) => {
-		// Slight tilt for the bow
+		// 1. Pivot the bow 
 		ctx.rotate(isAttacking ? -0.1 : 0.2); 
 
-		const pull = isAttacking ? (progress * 18) : 0;
+		// 2. The Shift: Move the bow wood to the left so the hand holds the center
+		const bowX = -18; 
+		const pullAmount = isAttacking ? (progress * 20) : 0;
 
-		// Bow Wood (The Arc) - Anchored to the hand
+		// --- DRAW BOW WOOD ---
 		ctx.strokeStyle = item.color || "#8B4513";
 		ctx.lineWidth = 3;
 		ctx.beginPath(); 
-		// Arc faces right
-		ctx.arc(0, 0, 18, -Math.PI / 2, Math.PI / 2, false); 
+		// Arc is now drawn centered 18 pixels to the left of the hand translation
+		ctx.arc(bowX, 0, 18, -Math.PI / 2, Math.PI / 2, false); 
 		ctx.stroke();
 
-		// Bowstring
+		// --- DRAW BOWSTRING ---
 		ctx.strokeStyle = "rgba(255,255,255,0.7)";
 		ctx.lineWidth = 1;
 		ctx.beginPath();
-		ctx.moveTo(0, -18); // Top of bow
+		// String connects to the top and bottom of the wood
+		ctx.moveTo(bowX, -18); 
 		
-		// The string pulls BACK toward the left hand. 
-		// Since ctx is translated to the RIGHT hand, -pull moves it toward the body.
-		ctx.lineTo(-pull, 0); 
+		// The string pulls BACK from the wood position
+		// If bowX is -18 and pull is 20, the string goes to -38 (deep draw)
+		ctx.lineTo(bowX - pullAmount, 0); 
 		
-		ctx.lineTo(0, 18); // Bottom of bow
+		ctx.lineTo(bowX, 18); 
 		ctx.stroke();
 
-		// Arrow
+		// --- DRAW ARROW ---
 		if (isAttacking && progress < 0.9) {
 			ctx.strokeStyle = "#eee";
 			ctx.lineWidth = 2;
 			ctx.beginPath();
-			// Arrow starts at the pulled string and points forward
-			ctx.moveTo(-pull, 0);
-			ctx.lineTo(20 - pull, 0); 
+			// Arrow rests on the string and extends forward past the hand
+			ctx.moveTo(bowX - pullAmount, 0);
+			ctx.lineTo(bowX + 25 - pullAmount, 0); 
 			ctx.stroke();
 		}
 	},
