@@ -2459,25 +2459,72 @@ function drawWeaponItem(ctx, p, now, anchors, hX, hY) {
 
 // --- drawEquipment ---
 function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon) {
-    // 1. Clothing
+    // These should always draw regardless of weapons
     if (p.stats.equippedPants) drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
     if (p.stats.equippedArmor) drawArmor(ctx, p, anchors); 
     drawGloves(ctx, p, { leftHand, rightHand });
 
-    // 2. Weapons (Only if drawn)
+    // Handle Weapon/Tool drawing
     const weaponKey = p.stats?.equippedWeapon || p.equipped?.weapon;
+    const weaponItem = ITEM_DB[weaponKey];
     const isToolTask = ["woodcutting", "mining", "fishing"].includes(p.activeTask);
     
-    if (shouldHoldWeapon || isToolTask) {
-        drawWeaponItem(ctx, p, now, anchors, rightHand.x, rightHand.y);
+    // Only call drawWeaponItem if we have an actual item OR we are doing a tool-based task
+    if (weaponItem || isToolTask) {
+        if (shouldHoldWeapon || isToolTask) {
+            drawWeaponItem(ctx, p, now, anchors, rightHand.x, rightHand.y);
+        }
     }
 
-    // 3. Overlays
+    // Head and Feet gear
     if (p.stats.equippedHair) drawHair(ctx, p, anchors.bodyY, anchors.lean);
     if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, anchors.bodyY, anchors.lean);
     if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
 }
+function renderEquipmentLayer(ctx, p, now, anchors, lH, rH, lF, rF) {
+    // Determine source of equipment (Player vs Enemy)
+    const eq = p.stats || p.equipped || {};
+    const weaponKey = eq.equippedWeapon || eq.weapon;
+    const weaponItem = ITEM_DB[weaponKey];
+    
+    const task = p.activeTask || "none";
+    
+    // Enemy behavior: Always "drawn" if they are a guard/voidwalker, 
+    // otherwise use the player's manual sheath logic.
+    let shouldHold = (p.isEnemy) ? true : 
+                     (task === "attacking" || task === "pvp") || 
+                     (["none", "lurking"].includes(task) && !p.manualSheath);
 
+    // 1. Bottom: Sheathed weapon
+    if (weaponItem && !shouldHold) drawSheathedWeapon(ctx, p, anchors, weaponItem);
+    
+    // 2. Middle: Body Clothes
+    const pantsKey = eq.equippedPants || eq.pants;
+    if (pantsKey) drawPantsItem(ctx, p, anchors, lF, rF, ITEM_DB[pantsKey]);
+    
+    const armorKey = eq.equippedArmor || eq.armor;
+    if (armorKey) drawArmor(ctx, p, anchors, ITEM_DB[armorKey]);
+    
+    drawGloves(ctx, p, { leftHand: lH, rightHand: rH });
+
+    // 3. Middle-Top: Held Weapons
+    if (shouldHold || ["woodcutting", "mining", "fishing"].includes(task)) {
+        drawWeaponItem(ctx, p, now, anchors, rH.x, rH.y);
+    }
+
+    // 4. THE SANDWICH: Head first, then Hat on top
+    BODY_PARTS["stick"].head(ctx, anchors.headX, anchors.headY, p);
+    
+    const hairKey = eq.equippedHair || eq.hair;
+    if (hairKey) drawHair(ctx, p, anchors.bodyY, anchors.lean);
+    
+    const helmKey = eq.equippedHelmet || eq.helmet;
+    if (helmKey) drawHelmetItem(ctx, p, anchors.bodyY, anchors.lean);
+
+    // 5. Very Top: Feet
+    const bootsKey = eq.equippedBoots || eq.boots;
+    if (bootsKey) drawBoots(ctx, p, lF, rF);
+}
 // --- HELPERS ---
 function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
@@ -2645,6 +2692,7 @@ function getLimbPositions(p, anchors, anim, now) {
     style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y); 
     style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y);
 } */
+
 function drawStickmanBody(ctx, p, anchors, limbs) {
     const style = BODY_PARTS["stick"]; 
     ctx.strokeStyle = p.color; 
@@ -2708,6 +2756,7 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
 function drawStickman(ctx, p) {
     if (p.area !== viewArea || p.isHidden) return;
     const now = Date.now();
+    
     if (p.dead) return drawCorpse(ctx, p, now);
 
     const anim = getAnimationState(p, now);
@@ -2717,7 +2766,7 @@ function drawStickman(ctx, p) {
 
     ctx.save(); 
 
-    // 1. Transparency Logic
+    // --- 1. TRANSPARENCY & WORLD EFFECTS ---
     let baseAlpha = 1.0;
     if (p.activeTask === "lurking") {
         baseAlpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
@@ -2725,89 +2774,77 @@ function drawStickman(ctx, p) {
     }
     ctx.globalAlpha = isDeep ? baseAlpha * 0.3 : baseAlpha;
 
-    // --- DRAWING STACK ---
-    
-    // 1. Back Layer
+    // --- 2. BACK LAYER & SKELETON ---
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors);
-
-    // 2. The Body
     drawStickmanBody(ctx, p, anchors, limbs);
 
-    // 3. Equipment & Weapons (FIXED LOGIC HERE)
-    // We call renderEquipmentLayer so that 'shouldHoldWeapon' and 'drawSheathedWeapon' 
-    // are handled in one central place.
+    // --- 3. THE EQUIPMENT SANDWICH ---
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
 
-    // 4. The Head (Drawn OVER armor)
-    BODY_PARTS["stick"].head(ctx, anchors.headX, anchors.headY, p);
+    // --- 4. UI RENDERING (Names & Conditional HP) ---
+    let uiAlpha = isDeep ? Math.max(0.5, baseAlpha * 0.7) : baseAlpha;
+    ctx.globalAlpha = uiAlpha;
+    ctx.textAlign = "center";
+    
+    // Name with Combat Level: "Name (Lvl 126)"
+    const combatLvl = p.stats.combatLevel || 3;
+    ctx.fillStyle = "#fff"; 
+    ctx.font = "12px monospace"; 
+    ctx.fillText(`${p.name} (Lvl ${combatLvl})`, p.x, p.y + 40);
 
-    // 5. Head/Foot Overlays
-    // Note: These are now handled inside renderEquipmentLayer/drawEquipment 
-    // to keep the code clean, but you can keep them here if you prefer.
-    // However, drawBoots/drawHelmet are already inside drawEquipment!
+    // HP Bar: Only draws if damaged
+    if (p.hp < p.maxHp) {
+        ctx.fillStyle = "rgba(68, 68, 68, 0.8)";
+        ctx.fillRect(p.x - 20, p.y + 48, 40, 4);
+        
+        // Flashing red if struggling in water, else standard green
+        let hpColor = (p.struggleStartTime && isDeep && Math.floor(now / 200) % 2 === 0) ? "#f00" : "#0f0";
+        ctx.fillStyle = hpColor;
+        ctx.fillRect(p.x - 20, p.y + 48, 40 * (p.hp / p.maxHp), 4);
+    }
 
-    // ... HP Bar and Name logic ...
     ctx.restore(); 
 }
 function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
 
-    // 1. Get real animation state for enemies too
     const anim = getAnimationState(e, now); 
     const anchors = getAnchorPoints(e, anim); 
     const limbs = getLimbPositions(e, anchors, anim, now);
 
     ctx.save();
-    // Enemies face left by default
     ctx.translate(e.x, 0); 
     ctx.scale(-1, 1); 
     ctx.translate(-e.x, 0); 
 
-    // Draw the body parts using the new joint-aware system
     ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
-    ctx.lineWidth = 3; // Match player thickness
-    BODY_PARTS["stick"].head(ctx, anchors.headX, anchors.headY, e);
+    ctx.lineWidth = 3; 
+    e.isEnemy = true; 
+
     drawStickmanBody(ctx, e, anchors, limbs);
+    renderEquipmentLayer(ctx, e, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
 
-    // --- 3. EQUIPMENT LAYERS ---
-    if (e.equipped) {
-        if (e.equipped.pants) drawEnemyPants(ctx, e, anchors, limbs.leftFoot, limbs.rightFoot, ITEM_DB[e.equipped.pants]);
-        if (e.equipped.armor) drawEnemyArmor(ctx, e, anchors, ITEM_DB[e.equipped.armor]);
-        if (e.equipped.helmet) drawEnemyHeadgear(ctx, e, anchors, ITEM_DB[e.equipped.helmet]);
-        
-        if (e.equipped.gloves) {
-            drawGloves(ctx, e, limbs);
-        }
-
-        if (e.equipped.boots) {
-            // Reusing player boot logic
-            const tempP = { stats: { equippedBoots: e.equipped.boots } };
-            drawBoots(ctx, tempP, limbs.leftFoot, limbs.rightFoot);
-        }
-
-        if (e.equipped.weapon) {
-            let weapon = ITEM_DB[e.equipped.weapon];
-            ctx.save();
-            ctx.translate(limbs.rightHand.x, limbs.rightHand.y);
-            const drawFn = WEAPON_STYLES[weapon.style || weapon.type] || WEAPON_STYLES["sword"];
-            drawFn(ctx, weapon, true, now, e, anchors.bodyY, anchors.lean);
-            ctx.restore();
-        }
-    }
     ctx.restore();
 
-    // --- UI (Name & HP) ---
+    // --- UI (Name & Conditional HP) ---
     ctx.textAlign = "center";
-    ctx.fillStyle = "#ff4444";
     ctx.font = "bold 12px monospace";
-    ctx.fillText(e.name, e.x, e.y + 40);
+    
+    // Enemy Level Display
+    const enemyLvl = e.level || e.stats?.combatLevel || "??";
+    ctx.fillStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444";
+    ctx.fillText(`${e.name} [Lvl ${enemyLvl}]`, e.x, e.y + 40);
 
-    ctx.fillStyle = "#444"; 
-    ctx.fillRect(e.x - 20, e.y + 48, 40, 4);
-    ctx.fillStyle = "#f00";
-    ctx.fillRect(e.x - 20, e.y + 48, 40 * (e.hp / e.maxHp), 4);
+    // Enemy HP Bar: Only if damaged
+    if (e.hp < e.maxHp) {
+        ctx.fillStyle = "rgba(40, 40, 40, 0.9)"; 
+        ctx.fillRect(e.x - 20, e.y + 48, 40, 4);
+        ctx.fillStyle = "#f00"; // Enemies always have red HP bars
+        ctx.fillRect(e.x - 20, e.y + 48, 40 * (e.hp / e.maxHp), 4);
+    }
 }
+
 /* function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
@@ -2902,21 +2939,7 @@ function drawMonster(ctx, m) {
     ctx.fillRect(m.x - 25, m.y + textYOffset + 8, 50 * (m.hp / m.maxHp), 5);
 }
 
-function renderEquipmentLayer(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot) {
-    const weaponItem = ITEM_DB[p.stats.equippedWeapon];
-    const task = p.activeTask || "none";
-    
-    // CHANGE: As long as the task is "attacking", keep the weapon in hand, 
-    // even if we are currently moving toward a target.
-    let shouldHoldWeapon = (task === "attacking" || task === "pvp") || 
-                           (["none", "lurking"].includes(task) && !p.manualSheath);
 
-    if (weaponItem && !shouldHoldWeapon) {
-        drawSheathedWeapon(ctx, p, anchors, weaponItem);
-    }
-    
-    drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon);
-}
 
 function drawSheathedWeapon(ctx, p, anchors, item) {
     ctx.save();
