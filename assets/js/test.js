@@ -975,6 +975,14 @@ function performFish(p) {
 		updateCombatLevel(p);
     }
 }
+
+function getStruggleLimit(p) {
+    const swimLvl = p.stats.swimmingLevel || 1;
+    // Level 1 = 30s. Each level adds 10s. 
+    // Formula: 30 + (Level - 1) * 10
+    const seconds = 30 + (swimLvl - 1) * 10;
+    return seconds * 1000; // Return in milliseconds
+}
 function performSwim(p) {
     if (p.area !== "pond" || p.dead) return;
     if (p.stats.swimDistance === undefined) p.stats.swimDistance = 0;
@@ -2636,25 +2644,22 @@ function drawStickman(ctx, p) {
     ctx.fillRect(hpBarX, hpBarY, hpBarWidth * (p.hp / p.maxHp), 4);
 
     // 3. OXYGEN METER (Only during struggle)
-    if (p.struggleStartTime && isDeep) {
-        const struggleLimit = 180000; // 3 mins
-        const elapsed = now - p.struggleStartTime;
-        const graceRemaining = Math.max(0, struggleLimit - elapsed);
-        const secondsLeft = Math.ceil(graceRemaining / 1000);
-        const blink = Math.floor(now / 500) % 2 === 0;
-        
-        const oxBarY = p.y - 60;
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(p.x - 15, oxBarY, 30, 4);
-        
-        // Bar turns from cyan to red
-        ctx.fillStyle = secondsLeft < 30 ? (blink ? "#ff0000" : "#550000") : "#00ccff";
-        ctx.fillRect(p.x - 15, oxBarY, 30 * (graceRemaining / struggleLimit), 4);
-        
-        ctx.font = "bold 9px monospace";
-        ctx.fillStyle = (secondsLeft < 30 && blink) ? "#fff" : "#00ccff";
-        ctx.fillText(`AIR ${secondsLeft}s`, p.x, oxBarY - 5);
-    }
+    // Inside drawStickman UI section...
+	if (p.struggleStartTime && isDeep) {
+		const limit = getStruggleLimit(p);
+		const elapsed = now - p.struggleStartTime;
+		const graceRemaining = Math.max(0, limit - elapsed);
+		const secondsLeft = Math.ceil(graceRemaining / 1000);
+		
+		// The width logic: (graceRemaining / limit) ensures 
+		// the bar works for 30s or 300s players alike.
+		const oxBarWidth = 30;
+		ctx.fillStyle = "rgba(0,0,0,0.6)";
+		ctx.fillRect(p.x - 15, p.y - 60, oxBarWidth, 4);
+		
+		ctx.fillStyle = secondsLeft < 10 ? "#ff0000" : "#00ccff";
+		ctx.fillRect(p.x - 15, p.y - 60, oxBarWidth * (graceRemaining / limit), 4);
+	}
 
     // 4. Lurk Meter
     if (p.activeTask === "lurking") {
@@ -2975,31 +2980,28 @@ function startTask(p, taskName) {
     console.log(`[TASK] ${p.name} -> ${taskName} for ${hrs}h ${mins}m`);
 }
 function updatePlayerStatus(p, now) {
-    // 1. Handle Dead Players (Vanishing logic)
     if (p.dead && !p.isHidden) {
         const timeSinceAction = now - (p.lastActionTime || now);
-        if (timeSinceAction > 15 * 60 * 1000) {
-            p.isHidden = true;
-        }
+        if (timeSinceAction > 15 * 60 * 1000) p.isHidden = true;
         return;
     }
 
-    // 2. Task Expiration Logic
     if (p.activeTask && p.taskEndTime && now > p.taskEndTime) {
-        // If they are in the deep pond, start the 3-minute struggle
         if (p.area === "pond" && p.x > 250) {
+            const limit = getStruggleLimit(p);
+            
             if (!p.struggleStartTime) {
                 p.struggleStartTime = now;
-                systemMessage(`${p.name} is exhausted! 3 minutes to reach shore or they will drown!`);
-                spawnFloater(p, "OUT OF AIR!", "#ff0000");
+                const timeText = Math.floor(limit / 1000);
+                systemMessage(`${p.name} is out of breath! ${timeText}s to reach shore!`);
+                spawnFloater(p, "LOW O2!", "#ff0000");
             }
 
-            // Check if the 3-minute (180,000ms) grace period is over
-            if (now - p.struggleStartTime > 180000) {
-                cmdStop(p, p.name); // This will now trigger the death logic
+            // Drown if struggle duration exceeds level-based limit
+            if (now - p.struggleStartTime > limit) {
+                cmdStop(p, p.name); 
             }
         } else {
-            // Normal task end (Land or Shallow water)
             systemMessage(`${p.name}'s task expired.`);
             spawnFloater(p, `Task Finished`, "#ff4444");
             cmdStop(p, p.name);
@@ -3007,29 +3009,21 @@ function updatePlayerStatus(p, now) {
         }
     }
 
-    // 3. Inactivity & Sleeping Logic
     const idleTime = now - (p.lastActionTime || now);
-
-    if (idleTime > 15 * 60 * 1000) { // 15 Minutes: Remove from world
+    if (idleTime > 15 * 60 * 1000) { 
         if (!p.isHidden) { 
             p.isHidden = true;
-            // Backup check: If they somehow got stuck in the water while idle
             if (p.area === "pond" && p.x > 250 && !p.dead) {
-                p.hp = 0;
-                p.dead = true;
-                p.deathTime = now;
-                systemMessage(`${p.name} drowned after idling in the water for too long.`);
+                p.hp = 0; p.dead = true; p.deathTime = now;
+                systemMessage(`${p.name} drowned after idling in the water.`);
             }
         }
-    } else if (idleTime > 5 * 60 * 1000) { // 5 Minutes: Sleeping state
-        p.isSleeping = true;
-        p.isHidden = false;
-    } else { // Active state
-        p.isSleeping = false;
-        p.isHidden = false;
+    } else if (idleTime > 5 * 60 * 1000) {
+        p.isSleeping = true; p.isHidden = false;
+    } else {
+        p.isSleeping = false; p.isHidden = false;
     }
 }
-
 function updatePlayerActions(p, now) {
     if (p.dead) return;
 	if (p.activeTask === "lurking") {
@@ -4063,28 +4057,27 @@ function cmdStop(p, user) {
     const now = Date.now();
     const isTimeout = p.taskEndTime && now >= p.taskEndTime;
     const struggleDuration = p.struggleStartTime ? (now - p.struggleStartTime) : 0;
+    const limit = getStruggleLimit(p);
 
-    // 1. DROWNING LOGIC (Only if 3-minute struggle has elapsed)
-    if (isTimeout && p.area === "pond" && p.x > 250 && struggleDuration >= 180000) {
+    // 1. DROWNING LOGIC (Check against dynamic limit)
+    if (isTimeout && p.area === "pond" && p.x > 250 && struggleDuration >= limit) {
         p.hp = 0;
         p.dead = true;
         p.deathTime = now;
         p.activeTask = null;
         p.taskEndTime = null;
-        p.struggleStartTime = null; // Reset
-        systemMessage(`💀 ${p.name} struggled for 3 minutes but finally went under...`);
+        p.struggleStartTime = null; 
+        systemMessage(`💀 ${p.name} ran out of air after ${Math.floor(limit/1000)}s of struggling.`);
         saveStats(p);
         return; 
     }
 
-    // 2. SAFE EXIT LOGIC (Manual stop or reached shore during struggle)
-    // Restore weapon (Unsheath Logic)
+    // 2. SAFE EXIT
     if (p.stats.lastWeapon) {
         p.stats.equippedWeapon = p.stats.lastWeapon;
         p.stats.lastWeapon = null;
     }
 
-    // Return to Shore logic
     if (p.area === "pond" && p.x > 200) {
         systemMessage(`${p.name} is heading back to the shore.`);
         p.targetX = 100 + (Math.random() * 80); 
@@ -4092,7 +4085,6 @@ function cmdStop(p, user) {
         p.targetX = null; 
     }
 
-    // 3. Clear Tasks, Timers, and Struggle states
     p.activeTask = null;
     p.taskEndTime = null;
     p.struggleStartTime = null; 

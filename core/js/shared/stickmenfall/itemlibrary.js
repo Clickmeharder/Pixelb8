@@ -1558,29 +1558,33 @@ const POSE_LIBRARY = {
     }),
 	// NEW: Dynamic Swimming Pose
 	"swimming": (head, p, anim) => {
-        const now = Date.now();
-        const time = now / 600; 
-        const shoulderY = head.y + 15;
-        const armLen = 20;
-        
-        // Flutter kick math
-        const kickTime = now / 200;
-        const kickAmp = 8;
+		const now = Date.now();
+		
+		// Arm flapping speed and height
+		const flapTime = now / 400; 
+		const flapAmp = 12; // How high/low they flap
+		const shoulderY = head.y + 15;
+		
+		// Flutter kick math (slightly faster than arms)
+		const kickTime = now / 200;
+		const kickAmp = 8;
 
-        return {
-            left: { 
-                x: (head.x - 12) + Math.cos(time) * armLen, 
-                y: shoulderY + Math.sin(time) * (armLen / 2) 
-            },
-            right: { 
-                x: (head.x + 12) + Math.cos(time + Math.PI) * armLen, 
-                y: shoulderY + Math.sin(time + Math.PI) * (armLen / 2)
-            },
-            // Centralizing the kick here
-            leftFoot:  { yOffset: Math.sin(kickTime) * kickAmp },
-            rightFoot: { yOffset: Math.sin(kickTime + Math.PI) * kickAmp }
-        };
-    },
+		return {
+			left: { 
+				// Stay to the left, but move up and down
+				x: head.x - 22, 
+				y: shoulderY + Math.sin(flapTime) * flapAmp 
+			},
+			right: { 
+				// Stay to the right, move up and down (offset by PI for alternating)
+				x: head.x + 22, 
+				y: shoulderY + Math.sin(flapTime + Math.PI) * flapAmp
+			},
+			// Feet keep their rhythmic kicking
+			leftFoot:  { yOffset: Math.sin(kickTime) * kickAmp },
+			rightFoot: { yOffset: Math.sin(kickTime + Math.PI) * kickAmp }
+		};
+	},
 	"lurking": (head, p, anim) => {
     // A low, hunched-over posture
 		const breathe = Math.sin(Date.now() / 1000) * 3;
