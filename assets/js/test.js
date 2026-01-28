@@ -325,7 +325,7 @@ function getPlayer(name, color) {
         dead: false,
         danceStyle: 0,
         lastDanceXP: 0,
-        stats: loadedStats
+        stats: loadedStats,
 		cooldowns: {}
     };
 
@@ -4986,37 +4986,6 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 		}
     }
 
-/*     // --- 2. STANDARD PLAYER ACTION COMMANDS (Everyone) ---
-    if (cmd === "!clearinventory" || cmd === "!clearinv") { clearPlayerInventory(p.name); return; }
-    if (cmd === "!stop" || cmd === "!idle" || cmd === "!reset") { cmdStop(p, user); return; }
-    if (cmd === "!attack") { cmdAttack(p, user); return; }
-    if (cmd === "!fish")   { cmdFish(p, user); return; }
-    if (cmd === "!swim")   { cmdSwim(p, user); return; }
-	if (cmd === "!heal") { cmdHeal(p, user, args); return; }
-    if (cmd === "!dance")  { cmdDance(p, user, args); return; }
-	if (cmd === "!lurk")   { cmdLurk(p, user); return; }
-    if (cmd === "!respawn") { cmdRespawn(p); return; }
-	// -- travel commands
-    if (cmd === "!travel") { movePlayer(p, args[1]); return; }
-    if (cmd === "!home")   { movePlayer(p, "home"); return; }
-	if (cmd === "!pond")   { movePlayer(p, "pond"); return; }
-	if (cmd === "!town")   { movePlayer(p, "town"); return; }
-	if (cmd === "!arena")   { movePlayer(p, "arena"); return; }
-    if (cmd === "!dungeon"){ movePlayer(p, "dungeon"); return; }
-    //-- events like dungeon raids and pvp in the arena
-    if (cmd === "!join")   { joinDungeonQueue(p); return; }
-	if (cmd === "!pvp")   { joinArenaQueue(p); return; }
-	//-- misc commands
-	if (cmd === "!wigcolor")  { cmdWigColor(p, args); return; } // Added back
-	if (cmd === "!sheath")     { cmdSheath(p, user); return; }
-	if (cmd === "!equip")     { cmdEquip(p, args); return; }
-    if (cmd === "!unequip")   { cmdUnequip(p, args); return; }
-    if (cmd === "!inventory" || cmd === "!bag") { cmdInventory(p, user, args); return; }
-    if (cmd === "!sell")      { cmdSell(p, user, args); return; }
-    if (cmd === "!bal" || cmd === "!pixels") { cmdBalance(p); return; }
-	if (cmd === "!listdances") { cmdListDances(p); return; }
-
- */
 // --- 2. STANDARD PLAYER ACTION COMMANDS (Everyone) ---
     
     // Define cooldowns for groups of commands
