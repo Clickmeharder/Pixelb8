@@ -237,24 +237,24 @@ const ITEM_DB = {
 //
 //------------------------------------------------------------------------------------------------------
 // ------------------------------Boots------------------------------------------------------------------
-    "leather Boots":  { type: "boots", style:"", sources:"dungeon", tier: 2, rarity: 0, def: 1,                 value: 30,   color: "#5c4033" },
-    "leather Booties":{ type: "boots", style:"", sources:"dungeon", tier: 5, rarity: 5, def: 3,                 value: 35,   color: "#5c2033" },
+    "leather Boots":  { type: "boots", style:"", sources:"dungeon", tier: 2, rarity: 0, def: 1, value: 30,   color: "#5c4033" },
+    "leather Booties":{ type: "boots", style:"", sources:"dungeon", tier: 5, rarity: 5, def: 3, value: 35,   color: "#5c2033" },
 //------------------------------------------------------------------------------------------------------
 
 // ------------------------------Gloves------------------------------------------------------------------
 	// --- Gloves
-	"White Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 11, rarity: 1,  def: 5,                  value: 200,   color: "red" },
-	"Black Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 10, rarity: 1,  def: 5,                  value: 200,   color: "red" },
-    "Red Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 9, rarity: 1,  def: 5,                  value: 90,   color: "red" },
-	"Pink Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 8, rarity: 1,  def: 4,                  value: 80,   color: "pink" },
-	"Brown Gloves": { type: "gloves", style:"", sources:"dungeon", tier: 7, rarity: 1, def: 1,                  value: 30,   color: "brown" },
-	"Green Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 6, rarity: 1, def: 1,                  value: 50,   color: "green" },
-	"Orange Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 5, rarity: 1, def: 0,                  value: 70,   color: "orange" },
-	"Yellow Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 4, rarity: 1, def: 0,                  value: 60,   color: "yellow" },
-	"Blue Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 3, rarity: 1, def: 0,                  value: 40,   color: "blue" },
-	"Indigo Gloves": { type: "gloves", style:"", sources:"dungeon", tier: 2, rarity: 1, def: 0,                  value: 20,   color: "indigo" },
-	"Violet Gloves": { type: "gloves", style:"", sources:"dungeon", tier: 1, rarity: 1, def: 0,                  value: 10,   color: "violet" },
-	"Leather Gloves":   { type: "gloves", style:"", sources:"dungeon", tier: 2, rarity: 0, def: 1, value: 100, color: "#5c4033" },
+	"White Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 11, rarity: 1, def: 5,  value: 200,   color: "red" },
+	"Black Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 10, rarity: 1, def: 5,  value: 200,   color: "red" },
+    "Red Gloves":    { type: "gloves", style:"", sources:"dungeon", tier: 9,  rarity: 1, def: 5,  value: 90,   color: "red" },
+	"Pink Gloves":   { type: "gloves", style:"", sources:"dungeon", tier: 8,  rarity: 1, def: 4,  value: 80,   color: "pink" },
+	"Brown Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 7,  rarity: 1, def: 1,  value: 30,   color: "brown" },
+	"Green Gloves":  { type: "gloves", style:"", sources:"dungeon", tier: 6,  rarity: 1, def: 1,  value: 50,   color: "green" },
+	"Orange Gloves": { type: "gloves", style:"", sources:"dungeon", tier: 5,  rarity: 1, def: 0,  value: 70,   color: "orange" },
+	"Yellow Gloves": { type: "gloves", style:"", sources:"dungeon", tier: 4,  rarity: 1, def: 0,  value: 60,   color: "yellow" },
+	"Blue Gloves":   { type: "gloves", style:"", sources:"dungeon", tier: 3,  rarity: 1, def: 0,  value: 40,   color: "blue" },
+	"Indigo Gloves": { type: "gloves", style:"", sources:"dungeon", tier: 2,  rarity: 1, def: 0,  value: 20,   color: "indigo" },
+	"Violet Gloves": { type: "gloves", style:"", sources:"dungeon", tier: 1,  rarity: 1, def: 0,  value: 10,   color: "violet" },
+	"Leather Gloves":{ type: "gloves", style:"", sources:"dungeon", tier: 2,  rarity: 0, def: 1,  value: 100, color: "#5c4033" },
     // --- SPECIALS ---
 // special head
 	"box":            { type: "helmet", style: "box", sources:"dungeon", tier: 1, rarity: 10, def: 1, value: 5, color: "#d2b48c" },
@@ -273,10 +273,10 @@ const ITEM_DB = {
 // --- ACHIEVEMENT REWARDS ---
 	"Fishing Rod":          { type: "tool", style:"",sources:"achievement", tier: 100, rarity: 13, power: 0, value: 100,   color: "#8B4513" },
 	"PvP Boots":            { type:"boots",style:"",sources:"achievement",  tier: 99, rarity: 1, value: 10000, color: "#7a231a" },
-	"Crude Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 1,  rarity: 7,  power: 7,  speed: 1600, value: 25000,  color: "brown" },
-	"Iron Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 2,  rarity: 7,  power: 15,  speed: 1300, value: 25000,  color: "#888" },
-	"Steel Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 3,  rarity: 7,  power: 20,  speed: 1400, value: 25000,  color: "#888" },
-	"Great Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 6,  rarity: 7,  power: 55,  speed: 1500, value: 25000,  color: "#444" },
+	"Crude Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 1,  rarity: 7,  power: 7,  speed: 2000, value: 25000,  color: "brown" },
+	"Iron Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 2,  rarity: 7,  power: 15,  speed: 1800, value: 25000,  color: "#888" },
+	"Steel Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 3,  rarity: 7,  power: 20,  speed: 1750, value: 25000,  color: "#888" },
+	"Great Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 6,  rarity: 7,  power: 55,  speed: 2000, value: 25000,  color: "#444" },
 // special capes
     "Nuber Cape":           { type:"cape",style:"cape",sources:"achievement",  tier: 10, rarity: 13, value: 10000, color: "#333" },
 	"Warrior Cape":         { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#555" },
