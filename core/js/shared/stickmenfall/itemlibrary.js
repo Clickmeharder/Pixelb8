@@ -1599,29 +1599,42 @@ const CAPE_STYLES = {
 	}
 }
 const BODY_PARTS = {
-    "stick": {
-        head: (ctx, x, y, p) => {
-            ctx.save();
-            // Faint face backing
-            ctx.globalAlpha = 0.9;
-            ctx.fillStyle = p.color;
-            ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.fill();
-            ctx.globalAlpha = 1.0;
+		"stick": {
+		head: (ctx, x, y, p) => {
+			ctx.save();
+			
+			// 1. Face Backing (The skin/fill)
+			ctx.globalAlpha = 0.9;
+			ctx.fillStyle = p.color;
+			ctx.beginPath(); 
+			ctx.arc(x, y, 10, 0, Math.PI * 2); 
+			ctx.fill();
+			ctx.globalAlpha = 1.0;
 
-            // Head Outline
-            ctx.strokeStyle = p.color;
-            ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.stroke();
+			// 2. Head Outline (The border)
+			ctx.strokeStyle = p.color;
+			ctx.lineWidth = 3;
+			ctx.beginPath(); 
+			ctx.arc(x, y, 10, 0, Math.PI * 2); 
+			ctx.stroke();
 
-            // Simple Face
-            ctx.fillStyle = "#000";
-            ctx.fillRect(x - 4, y - 3, 2, 2); 
-            ctx.fillRect(x + 2, y - 3, 2, 2); 
-            ctx.beginPath(); 
-            ctx.arc(x, y + 2, 3, 0.1 * Math.PI, 0.9 * Math.PI); 
-            ctx.stroke();
-            ctx.restore();
-        },
+			// 3. Facial Features
+			// We must switch both colors to black for the face!
+			ctx.fillStyle = "#000";   // For the eyes
+			ctx.strokeStyle = "#000"; // For the smile
+			ctx.lineWidth = 1.5;      // Thinner line for a cleaner smile
+
+			// Eyes (fillRect uses fillStyle)
+			ctx.fillRect(x - 4, y - 3, 2, 2); 
+			ctx.fillRect(x + 2, y - 3, 2, 2); 
+
+			// Smile (stroke uses strokeStyle)
+			ctx.beginPath(); 
+			ctx.arc(x, y + 2, 3, 0.1 * Math.PI, 0.9 * Math.PI); 
+			ctx.stroke();
+
+			ctx.restore();
+		},
         torso: (ctx, hX, hY, bX, bY) => {
             ctx.beginPath(); 
             ctx.moveTo(hX, hY + 10); // From neck

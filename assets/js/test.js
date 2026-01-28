@@ -3101,6 +3101,7 @@ function drawScenery(ctx) {
         ctx.fillRect(0, floorY, 250, floorH); 
         ctx.fillStyle = "#0a2e3a"; // Water
         ctx.fillRect(250, floorY + 10, c.width - 250, floorH - 10);
+		drawBuyer(ctx);
     } else if (viewArea === "dungeon") {
         ctx.fillStyle = "#110505";
         ctx.fillRect(0, floorY, c.width, floorH);
