@@ -10,7 +10,7 @@ const areaDisplayDiv = document.getElementById("areaDisplay");
 const ctx = c.getContext("2d");
 let mouse = { x: 0, y: 0 };
 let players = {};
-let viewArea = "town"; 
+let viewArea = "home"; 
 
 //
 //
