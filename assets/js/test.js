@@ -1559,7 +1559,6 @@ function updatePvPRank(name, kill, win) {
 //============================================================
 //======================= DUNGEON AREA =======================
 // --- DUNGEON variables -------------------------------------
-// --- DUNGEON variables -------------------------------------
 let enemies = [];
 let boss = null;
 
@@ -1572,11 +1571,14 @@ let dungeonSecondsLeft = 0;
 let dungeonCountdownInterval = null; 
 let dungeonEmptyTimer = null; 
 let dungeonEmptySeconds = 0;
-
+let dungeonGraceTimer = null;
+let dungeonGraceSeconds = 0;
+let isDungeonResting = false; // Prevents progress checks during rest
 const dungeonUIConfig = {
     header: "PARTY STATUS",
     labels: {
         wave: (num, tier) => `WAVE ${num} (Tier ${tier})`,
+        rest: (s) => `RESTING: ${s}s`, // Added this for consistency
         timer: (s) => `DUNGEON: ${s}s`,
         boss: (hp) => `BOSS: ${hp}%`
     },
@@ -1586,7 +1588,6 @@ const dungeonUIConfig = {
         return "hp-healthy";
     }
 };
-
 function getTierFromWave(wave) {
     return Math.floor((wave - 1) / 5) + 1;
 }
@@ -1627,6 +1628,7 @@ function joinDungeonQueue(p) {
     }
 
     if (!dungeonCountdownInterval) {
+		enemies = [];
         dungeonSecondsLeft = 60;
         systemMessage("Dungeon timer started!");
 
@@ -1794,35 +1796,60 @@ function spawnWave() {
         boss = null;
     }
 }
+function startGracePeriod(seconds) {
+    isDungeonResting = true;
+    dungeonGraceSeconds = seconds;
+    
+    // Clear any existing timer just in case
+    if (dungeonGraceTimer) clearInterval(dungeonGraceTimer);
 
+    // 1. Organize ranks immediately so they walk to position during rest
+    organizeDungeonRanks();
+
+    dungeonGraceTimer = setInterval(() => {
+        dungeonGraceSeconds--;
+
+        // Visual reminders for the players
+        if (dungeonGraceSeconds === 10) systemMessage("⚠️ 10 Seconds until next wave!");
+        if (dungeonGraceSeconds === 3)  systemMessage("3... 2... 1...");
+
+        if (dungeonGraceSeconds <= 0) {
+            clearInterval(dungeonGraceTimer);
+            dungeonGraceTimer = null;
+            isDungeonResting = false;
+            
+            dungeonWave++; 
+            spawnWave();
+            
+            // Final rank check to snap anyone who moved
+            organizeDungeonRanks();
+        }
+    }, 1000);
+}
 function checkDungeonProgress() {
-    if (!dungeonActive) return;
+    if (!dungeonActive || isDungeonResting) return;
     
     let aliveEnemies = enemies.filter(e => !e.dead).length;
     if (aliveEnemies === 0 && (!boss || boss.dead)) {
         
         const isCompletionWave = (dungeonWave % 5 === 0);
+        const tierJustFinished = dungeonTier;
 
         if (isCompletionWave) {
-            // dungeonTier is already set to the current tier in spawnWave
-            const tierJustFinished = dungeonTier; 
-
             Object.values(players).forEach(p => {
                 if (p.area === "dungeon" && !p.dead) {
-                    // 1. Update persistent record
                     if (tierJustFinished > p.stats.dungeon.highestTier) {
                         p.stats.dungeon.highestTier = tierJustFinished;
                     }
-                    // 2. Trigger the one-time reward
                     rewardTierMastery(p, tierJustFinished);
                 }
             });
-            systemMessage(`⭐ Tier ${tierJustFinished} Cleared!`);
+            systemMessage(`⭐ Tier ${tierJustFinished} Cleared! 60s Rest Period.`);
+            startGracePeriod(60); // 60 seconds for Tiers
+        } else {
+            systemMessage(`Wave ${dungeonWave} Cleared! 30s Rest Period.`);
+            startGracePeriod(30); // 30 seconds for Waves
         }
-
-        dungeonWave++; 
-        // spawnWave will now update the global dungeonTier once for the next set of waves
-        spawnWave();
     }
 }
 
@@ -1857,13 +1884,14 @@ function checkDungeonFailure() {
 
 function closeDungeon(reason) {
     dungeonActive = false;
+    isDungeonResting = false;
     enemies = [];
     boss = null;
     
-    if (dungeonEmptyTimer) {
-        clearInterval(dungeonEmptyTimer);
-        dungeonEmptyTimer = null;
-    }
+    // Clear all possible timers
+    if (dungeonEmptyTimer) { clearInterval(dungeonEmptyTimer); dungeonEmptyTimer = null; }
+    if (dungeonGraceTimer) { clearInterval(dungeonGraceTimer); dungeonGraceTimer = null; }
+    if (dungeonCountdownInterval) { clearInterval(dungeonCountdownInterval); dungeonCountdownInterval = null; }
 
     systemMessage(reason === "FAILURE" ? "❌ DUNGEON FAILED!" : "✅ DUNGEON CLEARED!");
 
@@ -1879,7 +1907,6 @@ function closeDungeon(reason) {
     const selector = document.getElementById("view-area-selector");
     if (selector) selector.value = "town";
 }
-
 function handleEnemyAttacks() {
     let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
     if (dwellers.length === 0) return;
@@ -2006,7 +2033,7 @@ function drawLootBeams(ctx) {
 }
 
 function updateDungeonIdleTraining() {
-    if (dungeonActive) return;
+    if (dungeonActive || dungeonCountdownInterval) return;
     const dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
     if (dwellers.length === 0) {
         enemies = [];
@@ -3356,7 +3383,6 @@ function updateDungeonScoreboard() {
     const enemyList = document.getElementById("dungeon-enemy-list");
     
     // 1. Clear the enemy list entirely before re-rendering 
-    // This prevents "ghost" enemies from previous waves staying on screen
     if (enemyList) enemyList.innerHTML = "";
 
     // 2. Update Party HP List
@@ -3375,7 +3401,13 @@ function updateDungeonScoreboard() {
     const waveBox = document.getElementById("dungeon-wave-section");
     if (dungeonActive) {
         waveBox.style.display = "block";
-        updateText("dungeon-wave-display", dungeonUIConfig.labels.wave(dungeonWave, dungeonTier));
+        
+        // Show Rest timer if resting, otherwise show current wave/tier
+        let waveText = isDungeonResting 
+            ? `RESTING: ${dungeonGraceSeconds}s` 
+            : dungeonUIConfig.labels.wave(dungeonWave, dungeonTier);
+            
+        updateText("dungeon-wave-display", waveText);
 
         const bossEl = document.getElementById("dungeon-boss-hp");
         if (boss && !boss.dead) {
@@ -3436,8 +3468,15 @@ function updateUI() {
     const dTimerBox = document.getElementById("dungeon-timer-box");
 
     if (dTimerBox) {
-        dTimerBox.style.display = (dungeonSecondsLeft > 0) ? "block" : "none";
-        updateText("dungeon-timer-val", `DUNGEON START: ${dungeonSecondsLeft}s`);
+        // Show the box if we are in the initial countdown OR in a mid-run rest period
+        const showDungeonTimer = (dungeonSecondsLeft > 0 || isDungeonResting);
+        dTimerBox.style.display = showDungeonTimer ? "block" : "none";
+        
+        if (dungeonSecondsLeft > 0) {
+            updateText("dungeon-timer-val", `DUNGEON START: ${dungeonSecondsLeft}s`);
+        } else if (isDungeonResting) {
+            updateText("dungeon-timer-val", `NEXT WAVE: ${dungeonGraceSeconds}s`);
+        }
     }
 
     if (dungeonBox) {
@@ -3460,17 +3499,15 @@ function updateUI() {
         arenaBox.style.display = isArena ? "block" : "none";
         if (isArena) updateArenaScoreboard();
     }
-	// 4. INVENTORY TICK (Only if modal is open and on the Stats tab)
-    // We use frameCount % 30 to update the "Clock" roughly twice a second.
+
+    // 4. INVENTORY TICK (Only if modal is open and on the Stats tab)
     if (frameCount % 30 === 0) {
         const modal = document.getElementById('inventory-modal');
         if (modal && !modal.classList.contains('hidden') && currentInventoryView === "stats") {
-            // We only need to refresh the stats view, not the whole inventory
             if (currentInvTarget) renderStatsView(currentInvTarget);
         }
     }
 }
-
 
 let frameCount = 0;
 
