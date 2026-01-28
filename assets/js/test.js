@@ -1692,27 +1692,37 @@ function startDungeon() {
 }
 
 function getBestAvailableTier(type, desiredTier) {
-    const allItemsOfType = Object.values(ITEM_DB).filter(i => i.type === type);
-    if (allItemsOfType.length === 0) return [];
-    const maxExistingTier = Math.max(...allItemsOfType.map(i => i.tier || 1));
+    // Only look at items that come from the dungeon
+    const dungeonItemsOfType = Object.values(ITEM_DB).filter(i => 
+        i.type === type && i.sources === "dungeon"
+    );
+
+    if (dungeonItemsOfType.length === 0) return [];
+
+    // Find the highest tier available in the dungeon for this specific type
+    const maxExistingTier = Math.max(...dungeonItemsOfType.map(i => i.tier || 1));
     const targetTier = Math.min(desiredTier, maxExistingTier);
 
     return Object.keys(ITEM_DB).filter(key => {
         const item = ITEM_DB[key];
-        return item.type === type && item.tier === targetTier;
+        return item.type === type && 
+               item.tier === targetTier && 
+               item.sources === "dungeon";
     });
 }
-
 function generateRandomLoadout(tier) {
     const weaponPool = Object.keys(ITEM_DB).filter(key => {
         const i = ITEM_DB[key];
         const isWeaponType = (i.type === "weapon" || i.type === "bow" || i.type === "staff");
-        return isWeaponType && i.tier === tier;
+        return isWeaponType && i.tier === tier && i.sources === "dungeon";
     });
 
-    const headPool  = getBestAvailableTier("helmet", tier);
-    const armorPool = getBestAvailableTier("armor", tier);
-    const legPool   = getBestAvailableTier("pants", tier);
+    const headPool   = getBestAvailableTier("helmet", tier);
+    const armorPool  = getBestAvailableTier("armor", tier);
+    const legPool    = getBestAvailableTier("pants", tier);
+    const glovePool  = getBestAvailableTier("gloves", tier);
+    const bootPool   = getBestAvailableTier("boots", tier);
+    const capePool   = getBestAvailableTier("cape", tier);
 
     const pick = (pool) => {
         if (!pool || pool.length === 0) return null;
@@ -1723,7 +1733,11 @@ function generateRandomLoadout(tier) {
         weapon: pick(weaponPool),
         helmet: pick(headPool),
         armor:  Math.random() < 0.7 ? pick(armorPool) : null,
-        pants:  Math.random() < 0.7 ? pick(legPool) : null
+        pants:  Math.random() < 0.7 ? pick(legPool) : null,
+        gloves: Math.random() < 0.5 ? pick(glovePool) : null,
+        boots:  Math.random() < 0.8 ? pick(bootPool) : null,
+        // Capes only for T5+ elites, and even then only 30% chance
+        cape:   (tier >= 5 && Math.random() < 0.3) ? pick(capePool) : null
     };
 }
 
@@ -2216,7 +2230,7 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
 }
 
 // --- 2. CAPES (Drawn behind the stickman) ---
-function drawCapeItem(ctx, p, anchors) {
+/* function drawCapeItem(ctx, p, anchors) {
 	const item = ITEM_DB[p.stats.equippedCape];
 	if (!item) return;
     const headX = anchors.headX;
@@ -2236,6 +2250,30 @@ function drawCapeItem(ctx, p, anchors) {
     ctx.strokeStyle = "rgba(0,0,0,0.2)"; // Softer outline for capes
     ctx.stroke();
 
+} */
+function drawCapeItem(ctx, p, anchors) {
+    // Check both potential locations for the item key
+    const itemKey = (p.stats && p.stats.equippedCape) || (p.equipped && p.equipped.cape);
+    const item = ITEM_DB[itemKey];
+    
+    if (!item) return;
+
+    const headX = anchors.headX;
+    const centerX = p.x + (anchors.lean * 10);
+    
+    ctx.fillStyle = item.color || "#666";
+    ctx.beginPath();
+    // Start at neck
+    ctx.moveTo(headX, p.y - 40 + anchors.bodyY); 
+    // Left side
+    ctx.quadraticCurveTo(headX - 25, p.y + 10 + anchors.bodyY, centerX - 18, p.y + 22 + anchors.bodyY);
+    // Bottom edge
+    ctx.lineTo(centerX + 10, p.y + 15 + anchors.bodyY);
+    // Right side back to neck
+    ctx.quadraticCurveTo(headX + 25, p.y + 10 + anchors.bodyY, headX, p.y - 10 + anchors.bodyY);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(0,0,0,0.2)";
+    ctx.stroke();
 }
 // --- 3. armor drawn over body ---
 function drawArmor(ctx, p, anchors) {
@@ -2279,7 +2317,7 @@ function drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, item) {
 }
 
 // --- 5. BOOTS ---
-function drawBoots(ctx, p, leftFoot, rightFoot) {
+/* function drawBoots(ctx, p, leftFoot, rightFoot) {
     const item = ITEM_DB[p.stats.equippedBoots];
     if (!item) return;
     ctx.save();
@@ -2293,8 +2331,26 @@ function drawBoots(ctx, p, leftFoot, rightFoot) {
     ctx.strokeRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
     ctx.fillRect(rightFoot.x - 2, rightFoot.y - 6, 4, 5);
     ctx.restore();
+} */
+function drawBoots(ctx, p, leftFoot, rightFoot) {
+    const itemKey = (p.stats && p.stats.equippedBoots) || (p.equipped && p.equipped.boots);
+    const item = ITEM_DB[itemKey];
+    
+    if (!item) return;
+    ctx.save();
+    ctx.fillStyle = item.color || "#444";
+    ctx.strokeStyle = "#000"; 
+    ctx.lineWidth = 1;
+    // Left
+    ctx.fillRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5); 
+    ctx.strokeRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5);
+    ctx.fillRect(leftFoot.x - 2, leftFoot.y - 6, 4, 5); 
+    // Right
+    ctx.fillRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
+    ctx.strokeRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
+    ctx.fillRect(rightFoot.x - 2, rightFoot.y - 6, 4, 5);
+    ctx.restore();
 }
-
 // --- 6. GLOVES (Fixed: Save/Restore prevents lineWidth leakage) ---
 function drawGlovesItem(ctx, handX, handY, item) {
     ctx.save();
@@ -2307,7 +2363,18 @@ function drawGlovesItem(ctx, handX, handY, item) {
     ctx.stroke();
     ctx.restore();
 }
+function drawGloves(ctx, p, limbs) {
+    // 1. Universal Inventory Check
+    const itemKey = (p.stats && p.stats.equippedGloves) || (p.equipped && p.equipped.gloves);
+    const item = ITEM_DB[itemKey];
+    
+    if (!item) return;
 
+    // 2. Call the Painter for both hands
+    // Limbs contains .leftHand and .rightHand objects {x, y}
+    drawGlovesItem(ctx, limbs.leftHand.x, limbs.leftHand.y, item);
+    drawGlovesItem(ctx, limbs.rightHand.x, limbs.rightHand.y, item);
+}
 // --- ENEMY SPECIFIC DRAWING EQUIVALENTS ---
 
 function drawEnemyArmor(ctx, e, anchors, item) {
@@ -2395,11 +2462,7 @@ function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, righ
     if (p.stats.equippedPants) drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
     if (p.stats.equippedArmor) drawArmor(ctx, p, anchors); 
 
-    if (p.stats.equippedGloves) {
-        const gloveItem = ITEM_DB[p.stats.equippedGloves];
-        drawGlovesItem(ctx, leftHand.x, leftHand.y, gloveItem);
-        drawGlovesItem(ctx, rightHand.x, rightHand.y, gloveItem);
-    }
+    drawGloves(ctx, p, { leftHand, rightHand });
 
     // 2. Draw Weapon/Tool
     const isTask = ["woodcutting", "mining", "fishing", "swimming", "lurking"].includes(p.activeTask);
@@ -2683,6 +2746,70 @@ function drawEnemyStickman(ctx, e) {
     const limbs = getLimbPositions(e, anchors, anim, now);
 
     ctx.save();
+    ctx.translate(e.x, 0); 
+    ctx.scale(-1, 1); 
+    ctx.translate(-e.x, 0); 
+
+    // --- 1. CAPE (Drawn behind everything) ---
+    if (e.equipped && e.equipped.cape) {
+        // We temporarily treat the enemy as a player object for the cape function
+        const tempP = { ...e, stats: { equippedCape: e.equipped.cape } };
+        drawCapeItem(ctx, tempP, anchors);
+    }
+
+    // --- 2. BASE BODY & HEAD ---
+    ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
+    ctx.lineWidth = 1;
+    BODY_PARTS["stick"].head(ctx, anchors.headX, anchors.headY, e);
+    drawStickmanBody(ctx, e, anchors, limbs);
+
+    // --- 3. EQUIPMENT LAYERS ---
+    if (e.equipped) {
+        if (e.equipped.pants) drawEnemyPants(ctx, e, anchors, limbs.leftFoot, limbs.rightFoot, ITEM_DB[e.equipped.pants]);
+        if (e.equipped.armor) drawEnemyArmor(ctx, e, anchors, ITEM_DB[e.equipped.armor]);
+        if (e.equipped.helmet) drawEnemyHeadgear(ctx, e, anchors, ITEM_DB[e.equipped.helmet]);
+        
+        if (e.equipped.gloves) {
+            drawGloves(ctx, e, limbs);
+        }
+
+        if (e.equipped.boots) {
+            // Reusing player boot logic
+            const tempP = { stats: { equippedBoots: e.equipped.boots } };
+            drawBoots(ctx, tempP, limbs.leftFoot, limbs.rightFoot);
+        }
+
+        if (e.equipped.weapon) {
+            let weapon = ITEM_DB[e.equipped.weapon];
+            ctx.save();
+            ctx.translate(limbs.rightHand.x, limbs.rightHand.y);
+            const drawFn = WEAPON_STYLES[weapon.style || weapon.type] || WEAPON_STYLES["sword"];
+            drawFn(ctx, weapon, true, now, e, anchors.bodyY, anchors.lean);
+            ctx.restore();
+        }
+    }
+    ctx.restore();
+
+    // --- UI (Name & HP) ---
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#ff4444";
+    ctx.font = "bold 12px monospace";
+    ctx.fillText(e.name, e.x, e.y + 40);
+
+    ctx.fillStyle = "#444"; 
+    ctx.fillRect(e.x - 20, e.y + 48, 40, 4);
+    ctx.fillStyle = "#f00";
+    ctx.fillRect(e.x - 20, e.y + 48, 40 * (e.hp / e.maxHp), 4);
+}
+/* function drawEnemyStickman(ctx, e) {
+    if (e.area !== viewArea || e.dead) return;
+    const now = Date.now();
+
+    const anim = { bodyY: Math.sin(now / 200) * 2, armMove: 0, lean: -0.2 }; 
+    const anchors = getAnchorPoints(e, anim); 
+    const limbs = getLimbPositions(e, anchors, anim, now);
+
+    ctx.save();
     // Flip Logic: Mirroring the body
     ctx.translate(e.x, 0); 
     ctx.scale(-1, 1); 
@@ -2725,7 +2852,7 @@ function drawEnemyStickman(ctx, e) {
     ctx.fillStyle = "#f00"; // Red fill for enemies
     ctx.fillRect(e.x - 20, e.y + 48, 40 * (e.hp / e.maxHp), 4);
 }
-
+ */
 function drawMonster(ctx, m) {
     if (m.dead) return;
     ctx.save();
