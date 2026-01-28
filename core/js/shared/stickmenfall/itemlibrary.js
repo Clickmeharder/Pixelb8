@@ -1602,26 +1602,21 @@ const BODY_PARTS = {
     "stick": {
         head: (ctx, x, y, p) => {
             ctx.save();
+            // Faint face backing
             ctx.globalAlpha = 0.9;
             ctx.fillStyle = p.color;
-            ctx.beginPath(); 
-            ctx.arc(x, y, 10, 0, Math.PI * 2); 
-            ctx.fill();
+            ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.fill();
             ctx.globalAlpha = 1.0;
 
+            // Head Outline
             ctx.strokeStyle = p.color;
             ctx.lineWidth = 3;
-            ctx.beginPath(); 
-            ctx.arc(x, y, 10, 0, Math.PI * 2); 
-            ctx.stroke();
+            ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.stroke();
 
-            ctx.fillStyle = "#000000";
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 1;
-
+            // Simple Face
+            ctx.fillStyle = "#000";
             ctx.fillRect(x - 4, y - 3, 2, 2); 
             ctx.fillRect(x + 2, y - 3, 2, 2); 
-
             ctx.beginPath(); 
             ctx.arc(x, y + 2, 3, 0.1 * Math.PI, 0.9 * Math.PI); 
             ctx.stroke();
@@ -1629,16 +1624,15 @@ const BODY_PARTS = {
         },
         torso: (ctx, hX, hY, bX, bY) => {
             ctx.beginPath(); 
-            ctx.moveTo(hX, hY + 10); 
-            ctx.lineTo(bX, bY);
+            ctx.moveTo(hX, hY + 10); // From neck
+            ctx.lineTo(bX, bY);      // To hips
             ctx.stroke();
         },
-        // Enhanced limbs function to support jointed movements (elbows/knees)
         limbs: (ctx, startX, startY, endX, endY, joint = null) => {
             ctx.beginPath(); 
             ctx.moveTo(startX, startY);
-            if (joint) {
-                ctx.lineTo(joint.x, joint.y); 
+            if (joint && joint.x !== undefined) {
+                ctx.lineTo(joint.x, joint.y); // Only bend if a joint exists
             }
             ctx.lineTo(endX, endY);
             ctx.stroke();
@@ -1691,31 +1685,22 @@ const POSE_LIBRARY = {
     },
 	"boxing": (head, p, anim, progress = 0) => {
 		const isAttacking = (p.activeTask === "attacking" || p.activeTask === "pvp");
-		
-		// Boxing rhythm: bounce up and down slightly
-		const bounce = Math.sin(Date.now() / 150) * 2;
 		const shoulderY = head.y + 15;
 		
-		// Punching logic: alternate hands based on progress
-		// If progress < 0.5, left punch. If > 0.5, right punch.
-		const punchLeft = isAttacking && progress > 0 && progress < 0.5 ? Math.sin(progress * Math.PI * 2) * 25 : 0;
-		const punchRight = isAttacking && progress >= 0.5 ? Math.sin((progress - 0.5) * Math.PI * 2) * 25 : 0;
+		// Only one hand punches at a time, very quickly
+		const punchLeft = (isAttacking && progress < 0.5) ? Math.sin(progress * Math.PI * 2) * 15 : 0;
+		const punchRight = (isAttacking && progress >= 0.5) ? Math.sin((progress - 0.5) * Math.PI * 2) * 15 : 0;
 
 		return {
-			// LEFT ARM: Guard or Punch
-			left: { x: head.x - 10 - punchLeft, y: shoulderY + 5 - (punchLeft * 0.2) },
-			leftElbow: { x: head.x - 15 - (punchLeft * 0.5), y: shoulderY + 12 + bounce },
-
-			// RIGHT ARM: Guard or Punch
-			right: { x: head.x + 10 + punchRight, y: shoulderY + 5 - (punchRight * 0.2) },
-			rightElbow: { x: head.x + 15 + (punchRight * 0.5), y: shoulderY + 12 + bounce },
-
-			// LEGS: Fighter's crouch (knees bent and bouncing)
-			leftKnee: { x: p.x - 12, y: p.y + 12 + bounce + anim.bodyY },
-			rightKnee: { x: p.x + 12, y: p.y + 12 - bounce + anim.bodyY },
+			// High Guard (Classic Stickman look)
+			left:  { x: head.x - 12 - punchLeft, y: shoulderY - 5 },
+			right: { x: head.x + 12 + punchRight, y: shoulderY - 5 },
 			
-			leftFoot: { x: p.x - 15, yOffset: 0 },
-			rightFoot: { x: p.x + 15, yOffset: 0 }
+			// NO ELBOWS defined here = Arms will stay perfectly straight lines!
+			// NO KNEES defined here = Legs will stay perfectly straight lines!
+			
+			leftFoot:  { x: p.x - 12, yOffset: 0 },
+			rightFoot: { x: p.x + 12, yOffset: 0 }
 		};
 	},
 	"archer": (head, p, anim, progress = 0) => {

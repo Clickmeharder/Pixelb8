@@ -686,10 +686,10 @@ function performAttack(p) {
     }
 
     // 2. Weapon Stats
-    const weapon = ITEM_DB[p.stats.equippedWeapon] || { power: 0, type: "melee", speed: 2000 };
-    let skillType = weapon.type === "bow" ? "archer" : (weapon.type === "staff" ? "magic" : "attack");
-    const rangeNeeded = (weapon.type === "bow" || weapon.type === "staff") ? 250 : 60;
-    const attackSpeed = weapon.speed || 2000;
+    const weapon = ITEM_DB[p.stats.equippedWeapon] || { power: 0, type: "unarmed", speed: 1000 }; // Speed up fists to 1s
+	let skillType = weapon.type === "bow" ? "archer" : (weapon.type === "staff" ? "magic" : "attack");
+	const rangeNeeded = (weapon.type === "bow" || weapon.type === "staff") ? 250 : 50; // Punching range is shorter (50)
+	const attackSpeed = weapon.speed || 1000;
 
     // 3. Positioning
     const dist = Math.abs(p.x - target.x);
@@ -2456,28 +2456,25 @@ function drawWeaponItem(ctx, p, now, anchors, hX, hY) {
 
 // --- drawEquipment ---
 function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon) {
-    // 1. Draw items behind/on body
     if (p.stats.equippedPants) drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
     if (p.stats.equippedArmor) drawArmor(ctx, p, anchors); 
 
     drawGloves(ctx, p, { leftHand, rightHand });
 
-    // 2. Draw Weapon/Tool
-	const weaponKey = p.stats?.equippedWeapon || p.equipped?.weapon;
+    const weaponKey = p.stats?.equippedWeapon || p.equipped?.weapon;
     const weaponItem = ITEM_DB[weaponKey];
     
-    const isTask = ["woodcutting", "mining", "fishing", "swimming", "lurking"].includes(p.activeTask);
+    const isTask = ["woodcutting", "mining", "fishing"].includes(p.activeTask);
     
-    if (shouldHoldWeapon || isTask) {
-        // ALWAYS use rightHand for weapons/tools now that we've fixed the archer orientation
-        drawWeaponItem(ctx, p, now, anchors, rightHand.x, rightHand.y);
+    // CHANGE: Only call drawWeaponItem if there is actually a weapon OR a virtual tool task
+    if (weaponItem || isTask) {
+        if (shouldHoldWeapon || isTask) {
+            drawWeaponItem(ctx, p, now, anchors, rightHand.x, rightHand.y);
+        }
     }
 
-    // 3. Draw Head Layers (Original coordinator logic)
     if (p.stats.equippedHair) drawHair(ctx, p, anchors.bodyY, anchors.lean);
     if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, anchors.bodyY, anchors.lean);
-
-    // 4. Draw Feet
     if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
 }
 
@@ -2658,13 +2655,16 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
     ctx.strokeStyle = p.color; 
     ctx.lineWidth = 3; 
     ctx.lineCap = "round";
+    ctx.lineJoin = "round"; // CRITICAL: This connects segments smoothly
 
+    // 1. Torso (The spine)
     style.torso(ctx, anchors.headX, anchors.headY, p.x, anchors.hipY); 
     
-    // Pass the elbow/knee data if they exist in the limbs object
+    // 2. Arms (Use joint if pose provides it, otherwise straight line)
     style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.leftHand.x, limbs.leftHand.y, limbs.leftElbow); 
     style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.rightHand.x, limbs.rightHand.y, limbs.rightElbow);
     
+    // 3. Legs (Use joint if pose provides it, otherwise straight line)
     style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y, limbs.leftKnee); 
     style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y, limbs.rightKnee);
 }
@@ -2808,25 +2808,20 @@ function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
 
-    const anim = { bodyY: Math.sin(now / 200) * 2, armMove: 0, lean: -0.2 }; 
+    // 1. Get real animation state for enemies too
+    const anim = getAnimationState(e, now); 
     const anchors = getAnchorPoints(e, anim); 
     const limbs = getLimbPositions(e, anchors, anim, now);
 
     ctx.save();
+    // Enemies face left by default
     ctx.translate(e.x, 0); 
     ctx.scale(-1, 1); 
     ctx.translate(-e.x, 0); 
 
-    // --- 1. CAPE (Drawn behind everything) ---
-    if (e.equipped && e.equipped.cape) {
-        // We temporarily treat the enemy as a player object for the cape function
-        const tempP = { ...e, stats: { equippedCape: e.equipped.cape } };
-        drawCapeItem(ctx, tempP, anchors);
-    }
-
-    // --- 2. BASE BODY & HEAD ---
+    // Draw the body parts using the new joint-aware system
     ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 3; // Match player thickness
     BODY_PARTS["stick"].head(ctx, anchors.headX, anchors.headY, e);
     drawStickmanBody(ctx, e, anchors, limbs);
 
@@ -3005,12 +3000,13 @@ function drawCorpse(ctx, p, now) {
     ctx.rotate(rot);
 
     const deadAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
+    // Straight limbs for the corpse
     const deadLimbs = { leftHand: { x: -18, y: 0 }, rightHand: { x: 18, y: 0 }, leftFoot: { x: -10, y: 25 }, rightFoot: { x: 10, y: 25 } };
 
     const corpseActor = { ...p, x: 0, y: 0 }; 
 	// DRAW THE HEAD HERE (Relative to the rotated 0,0)
     BODY_PARTS["stick"].head(ctx, deadAnchors.headX, deadAnchors.headY, corpseActor);
-    drawStickmanBody(ctx, corpseActor, deadAnchors, deadLimbs);
+    drawStickmanBody(ctx, corpseActor, deadAnchors, deadLimbs)
 
     ctx.save();
     ctx.strokeStyle = "#000000"; ctx.lineWidth = 2.5;
