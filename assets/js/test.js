@@ -5015,20 +5015,9 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 	
 }
 
-
-ComfyJS.onChat = (user, cmd, msg, color, flags, extra) => {
-    // Keep track of colors
-    if (!userColors[user]) {
-        userColors[user] = extra.userColor || "orangered";
-    }
-
-    // Pass everything to the Master Router
-    processGameCommand(user, msg, flags, extra);
-};
-
-
 //ComfyJS.onChat = (user, msg, color, flags, extra) => {
-ComfyJS.onCommand = (user, cmd, msg, color, flags, extra) => {
+
+ComfyJS.onChat = (user, msg, color, flags, extra) => {
     // Keep track of colors
     if (!userColors[user]) {
         userColors[user] = extra.userColor || "orangered";
@@ -5037,6 +5026,8 @@ ComfyJS.onCommand = (user, cmd, msg, color, flags, extra) => {
     // Pass everything to the Master Router
     processGameCommand(user, msg, flags, extra);
 };
+
+
 let uiCache = {}
 function syncUI(id, content, parentId) {
     // 1. Get or Create from Cache
