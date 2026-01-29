@@ -3681,7 +3681,6 @@ function drawScenery(ctx) {
         for(let i=0; i<c.width; i+=90) {
             ctx.strokeRect(i, floorY, 90, 25);
         }
-    }
     } else if (viewArea === "lab") {
         ctx.fillStyle = "#110505";
         ctx.fillRect(0, floorY, c.width, floorH);
