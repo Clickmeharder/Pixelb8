@@ -3737,7 +3737,7 @@ const backgrounds = {
 }
  */
 let dungeonFloorOffset = 0;
-let dungeonFloorOffset = 0; // Ensure this is declared globally
+
 
 function drawScenery(ctx) {
     const now = Date.now();
