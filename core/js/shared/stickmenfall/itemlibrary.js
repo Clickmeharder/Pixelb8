@@ -534,135 +534,7 @@ const WEAPON_STYLES = {
         ctx.beginPath(); ctx.arc(22, 0, 12, Math.PI * 0.7, Math.PI * 1.3); ctx.stroke();
     }
 };
-/* const WEAPON_STYLES = {
-    "sword": (ctx, item, isAttacking, now) => {
-        let swing = isAttacking ? Math.sin(now / 150) * 0.8 : Math.PI / 1.2;
-        ctx.rotate(swing);
-        ctx.strokeStyle = item.color || "#ccc";
-        ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(25, -2); ctx.stroke();
-        ctx.strokeStyle = "#aa8800";
-        ctx.beginPath(); ctx.moveTo(5, -6); ctx.lineTo(5, 6); ctx.stroke();
-    },
 
-	"bow": (ctx, item, isAttacking, now, p) => {
-		ctx.rotate(isAttacking ? -0.6 : Math.PI / 7);
-
-		// Calculate "Draw Amount" based on attack speed
-		let weaponData = ITEM_DB[p.stats.equippedWeapon];
-		let speed = weaponData?.speed || 2500;
-		let timeSinceLast = now - (p.lastAttackTime || 0);
-		
-		// String pulls back as we get closer to the next attack
-		let drawProgress = Math.min(1, timeSinceLast / speed);
-		let pull = isAttacking ? (drawProgress * 15) : 0;
-
-		// Bow Wood
-		ctx.strokeStyle = item.color || "#8B4513";
-		ctx.lineWidth = 3;
-		ctx.beginPath(); 
-		ctx.arc(-15, 0, 15, -Math.PI / 2, Math.PI / 2, false); 
-		ctx.stroke();
-
-		// Bowstring
-		ctx.strokeStyle = "rgba(255,255,255,0.7)";
-		ctx.lineWidth = 1;
-		ctx.beginPath();
-		ctx.moveTo(-15, -15); 
-		ctx.lineTo(-15 - pull, 0); // Pulls back based on attack timer
-		ctx.lineTo(-15, 15); 
-		ctx.stroke();
-	},
-
-    "staff": (ctx, item, isAttacking, now) => {
-        if (isAttacking) ctx.rotate(Math.sin(now / 150) * 0.5);
-        ctx.strokeStyle = item.poleColor || "#4e342e";
-        ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(0, 20); ctx.lineTo(0, -45); ctx.stroke();
-        let pulse = Math.sin(now / 400) * 5;
-        ctx.fillStyle = item.color || "#00ffff";
-        ctx.shadowBlur = 10 + pulse; ctx.shadowColor = ctx.fillStyle;
-        ctx.beginPath(); ctx.arc(0, -50, 6, 0, Math.PI * 2); ctx.fill();
-        ctx.shadowBlur = 0;
-    },
-	
-	"fishing_rod": (ctx, item, isAttacking, now, p, bodyY, lean) => {
-		const isActuallyFishing = p.activeTask === "fishing";
-		
-		ctx.strokeStyle = item.color || "#8B4513";
-		ctx.lineWidth = 2;
-
-		if (isActuallyFishing) {
-			let bob = Math.sin(now / 300) * 5;
-			
-			// 1. Draw the Rod (Starting at 0,0 which is the Hand)
-			ctx.beginPath();
-			ctx.moveTo(0, 0); 
-			// Tip is 40px right and 30px up from the hand
-			const tipX = 40;
-			const tipY = -30 + bob;
-			ctx.lineTo(tipX, tipY);
-			ctx.stroke();
-
-			// 2. Draw the Line
-			ctx.strokeStyle = "rgba(255,255,255,0.5)";
-			ctx.lineWidth = 1;
-			ctx.beginPath();
-			ctx.moveTo(tipX, tipY);
-			
-			// This targets the water relative to the player
-			// We subtract the current hand position to find the water in "local" space
-			const waterX = 80; 
-			const waterY = 60 - bodyY; 
-
-			ctx.quadraticCurveTo(tipX + 10, tipY + 30, waterX, waterY);
-			ctx.stroke();
-
-			// 3. Draw the Bobber
-			ctx.fillStyle = "#ff4444";
-			ctx.beginPath(); 
-			ctx.arc(waterX, waterY, 3, 0, Math.PI * 2); 
-			ctx.fill();
-		} else {
-			// Idle/Walking: Carry it upright
-			ctx.rotate(-Math.PI / 8);
-			ctx.beginPath(); ctx.moveTo(0, 5); ctx.lineTo(0, -45); ctx.stroke();
-		}
-	},
-	"axe": (ctx, item, isAttacking, now) => {
-        // CHOPPING ANIMATION: A sharp, heavy downward tilt
-        let chop = isAttacking ? Math.sin(now / 100) * 1.2 : Math.PI / 1.2;
-        ctx.rotate(chop);
-        
-        // Handle
-        ctx.strokeStyle = "#5d4037"; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(22, 0); ctx.stroke();
-        
-        // Axe Head
-        ctx.fillStyle = item.color || "#999";
-        ctx.beginPath();
-        ctx.moveTo(15, -5); ctx.lineTo(25, -8); ctx.lineTo(25, 8); ctx.lineTo(15, 5);
-        ctx.fill(); ctx.stroke();
-    },
-
-    "pickaxe": (ctx, item, isAttacking, now) => {
-        // MINING ANIMATION: Similar to axe but with a "rebound" feel
-        let swing = isAttacking ? Math.sin(now / 120) * 1.4 : Math.PI / 1.2;
-        ctx.rotate(swing);
-
-        // Handle
-        ctx.strokeStyle = "#4e342e"; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(22, 0); ctx.stroke();
-
-        // Pickaxe Head (The double-pointed arc)
-        ctx.strokeStyle = item.color || "#aaa";
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.arc(22, 0, 12, Math.PI * 0.7, Math.PI * 1.3);
-        ctx.stroke();
-    }
-};
- */
 const HAT_STYLES = {
     "box": (ctx, hX, hY, color) => {
         // --- SETTINGS ---
@@ -1797,6 +1669,11 @@ const BODY_PARTS = {
             ctx.fillRect(x - 4, y - 3, 2, 2); 
             ctx.fillRect(x + 2, y - 3, 2, 2); 
             ctx.restore();
+			// --- THE SMILE ---
+			ctx.beginPath();
+			// Creates a half-circle arc from left to right below the eyes
+			ctx.arc(x, y + 2, 4, 0.2 * Math.PI, 0.8 * Math.PI); 
+			ctx.stroke();
         },
         torso: (ctx, hX, hY, bX, bY) => {
             ctx.beginPath(); 

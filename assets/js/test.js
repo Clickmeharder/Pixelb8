@@ -2626,21 +2626,7 @@ function drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, item) {
     ctx.restore();
 }
 // --- 5. BOOTS ---
-/* function drawBoots(ctx, p, leftFoot, rightFoot) {
-    const item = ITEM_DB[p.stats.equippedBoots];
-    if (!item) return;
-    ctx.save();
-    ctx.fillStyle = item.color || "#444";
-    ctx.strokeStyle = "#000"; 
-    ctx.lineWidth = 1;
-    ctx.fillRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5); 
-    ctx.strokeRect(leftFoot.x - 4, leftFoot.y - 2, 8, 5);
-    ctx.fillRect(leftFoot.x - 2, leftFoot.y - 6, 4, 5); 
-    ctx.fillRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
-    ctx.strokeRect(rightFoot.x - 4, rightFoot.y - 2, 8, 5);
-    ctx.fillRect(rightFoot.x - 2, rightFoot.y - 6, 4, 5);
-    ctx.restore();
-} */
+
 function drawBoots(ctx, p, leftFoot, rightFoot) {
     const itemKey = (p.stats && p.stats.equippedBoots) || (p.equipped && p.equipped.boots);
     const item = ITEM_DB[itemKey];
@@ -2731,83 +2717,7 @@ function drawWeaponItem(ctx, p, now, anchors, hX, hY) {
 }
 
 
-function drawEnemyArmor(ctx, e, anchors, item) {
-    if (!item) return;
-    const headX = anchors.headX;
-    const hipX = e.x + (anchors.lean * 5);
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(headX - 7, e.y - 18 + anchors.bodyY); 
-    ctx.lineTo(headX + 7, e.y - 18 + anchors.bodyY); 
-    ctx.lineTo(hipX + 7, e.y + 8 + anchors.bodyY);    
-    ctx.lineTo(hipX - 7, e.y + 8 + anchors.bodyY);    
-    ctx.closePath();
-    ctx.fillStyle = item.color || "#777";
-    ctx.globalAlpha = 0.9; 
-    ctx.fill();
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.restore();
-}
-
-function drawEnemyPants(ctx, e, anchors, leftFoot, rightFoot, item) {
-    if (!item) return;
-    ctx.save();
-    ctx.strokeStyle = item.color || "#333";
-    ctx.lineWidth = 5; 
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(e.x, anchors.hipY);
-    ctx.lineTo(leftFoot.x, leftFoot.y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(e.x, anchors.hipY);
-    ctx.lineTo(rightFoot.x, rightFoot.y);
-    ctx.stroke();
-    ctx.restore();
-}
-
-function drawEnemyHeadgear(ctx, e, anchors, item) {
-    if (!item) return;
-    // Determine if it's hair or a helmet based on the item type
-    const style = item.style || (item.type === "hair" ? "hair" : "helmet");
-    const hX = e.x + (anchors.lean * 20);
-    const hY = e.y - 32 + anchors.bodyY;
-    
-    ctx.save();
-    // Use your existing HAT_STYLES library
-    const drawFn = HAT_STYLES[style] || HAT_STYLES["hair"];
-    drawFn(ctx, hX, hY, item.color || "#444");
-    ctx.restore();
-}
-
 // --- drawEquipment ---
-/* function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon) {
-    // These should always draw regardless of weapons
-    if (p.stats.equippedPants) drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
-    if (p.stats.equippedArmor) drawArmor(ctx, p, anchors); 
-    drawGloves(ctx, p, { leftHand, rightHand });
-
-    // Handle Weapon/Tool drawing
-    const weaponKey = p.stats?.equippedWeapon || p.equipped?.weapon;
-    const weaponItem = ITEM_DB[weaponKey];
-    const isToolTask = ["woodcutting", "mining", "fishing"].includes(p.activeTask);
-    
-    // Only call drawWeaponItem if we have an actual item OR we are doing a tool-based task
-    if (weaponItem || isToolTask) {
-        if (shouldHoldWeapon || isToolTask) {
-            drawWeaponItem(ctx, p, now, anchors, rightHand.x, rightHand.y);
-        }
-    }
-
-    // Head and Feet gear
-    if (p.stats.equippedHair) drawHair(ctx, p, anchors.bodyY, anchors.lean);
-    if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, anchors.bodyY, anchors.lean);
-    if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
-} */
-
 function renderEquipmentLayer(ctx, p, now, anchors, lH, rH, lF, rF) {
     // Determine source of equipment (Player vs Enemy)
     const eq = p.stats || p.equipped || {};
@@ -3083,21 +2993,19 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
 function drawStickman(ctx, p) {
     if (p.area !== viewArea || p.isHidden) return;
     const now = Date.now();
-    
     if (p.dead) return drawCorpse(ctx, p, now);
 
     // --- ANTI-OVERLAP LOGIC ---
-    // Count how many players are in the same X-spot in this area
-    // Using p.id or p.name to ensure a consistent stack order
+    // Using alphabetical sort (other.name < p.name) to keep stack order consistent
     const nearbyPlayers = Object.values(players).filter(other => 
         other.area === p.area && 
         !other.dead && 
         other !== p && 
         Math.abs(other.x - p.x) < 35 && 
-        other.name < p.name // Alphabetical sort ensures they don't "flicker" positions
+        other.name < p.name 
     ).length;
     
-    const stackY = nearbyPlayers * 16; // 16px per name plate
+    const stackY = nearbyPlayers * 16; // 16px gap per player nameplate
 
     const anim = getAnimationState(p, now);
     const anchors = getAnchorPoints(p, anim);
@@ -3105,13 +3013,14 @@ function drawStickman(ctx, p) {
     const isDeep = (p.area === "pond" && p.x > 250);
 
     ctx.save(); 
-    // --- Scaling/Flipping Logic ---
+    // ---Scaling/Flipping Logic ---
     if ((p.activeTask === "attacking" || p.activeTask === "pvp") && p.facing === -1) {
         ctx.translate(p.x, 0);
         ctx.scale(-1, 1);
         ctx.translate(-p.x, 0);
     }
 
+    // --- 1. TRANSPARENCY & WORLD EFFECTS ---
     let baseAlpha = 1.0;
     if (p.activeTask === "lurking") {
         baseAlpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
@@ -3119,43 +3028,46 @@ function drawStickman(ctx, p) {
     }
     ctx.globalAlpha = isDeep ? baseAlpha * 0.3 : baseAlpha;
 
+    // --- 2. BACK LAYER & SKELETON ---
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors);
     drawStickmanBody(ctx, p, anchors, limbs);
+
+    // --- 3. THE EQUIPMENT SANDWICH ---
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
-    
     ctx.restore();
 
-    // --- UI RENDERING ---
+    // --- 4. UI RENDERING (Names & Conditional HP) ---
     let uiAlpha = isDeep ? Math.max(0.5, baseAlpha * 0.7) : baseAlpha;
     ctx.globalAlpha = uiAlpha;
     ctx.textAlign = "center";
     
-    // Position UI above the head (y - 45) and apply stacking
-    const uiBaseY = p.y - 45 - stackY;
+    // Applying stackY here (moving downwards from p.y + 36)
+    const nameY = p.y + 36 + stackY;
+    const hpY = p.y + 40 + stackY;
 
-    // 5. Name with Combat Level
+    // --- 5. Name with Combat Level ---
     const combatLvl = p.stats.combatLevel || 3;
     ctx.fillStyle = "#fff"; 
     ctx.font = "12px monospace"; 
-    ctx.fillText(`${p.name} (Lvl ${combatLvl})`, p.x, uiBaseY);
+    ctx.fillText(`${p.name} (Lvl ${combatLvl})`, p.x, nameY);
 
-    // 6. HP Bar (Now stays attached to the name plate)
+    // --- 6. HP Bar ---
     if (p.hp < p.maxHp) {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-        ctx.fillRect(p.x - 20, uiBaseY + 6, 40, 4);
+        ctx.fillStyle = "rgba(68, 68, 68, 0.8)";
+        ctx.fillRect(p.x - 20, hpY, 40, 4);
         
         let hpColor = (p.struggleStartTime && isDeep && Math.floor(now / 200) % 2 === 0) ? "#f00" : "#0f0";
         ctx.fillStyle = hpColor;
-        ctx.fillRect(p.x - 20, uiBaseY + 6, 40 * (p.hp / p.maxHp), 4);
+        ctx.fillRect(p.x - 20, hpY, 40 * (p.hp / p.maxHp), 4);
     }
 
-    // 7. CHAT BUBBLE
+    // --- 7. CHAT BUBBLE ---
     if (p.chatMessage && (now - p.chatTime < 5000)) {
         const age = now - p.chatTime;
         if (age > 4000) ctx.globalAlpha = 1 - (age - 4000) / 1000;
         
-        // Chat bubbles stack even higher than names
-        drawChatBubble(ctx, p, p.x, uiBaseY - 10, p.chatMessage);
+        // Chat bubbles remain above head (p.y + anim.bodyY) as requested
+        drawChatBubble(ctx, p, p.x, p.y + anim.bodyY, p.chatMessage);
     }
 }
 /* function drawEnemyStickman(ctx, e) {
@@ -3204,7 +3116,7 @@ function drawEnemyStickman(ctx, e) {
     
     // Same overlap check
     const nearby = enemies.filter(other => !other.dead && other !== e && Math.abs(other.x - e.x) < 30 && other.id < e.id).length;
-    const stackY = nearby * 15;
+    const stackY = nearby * 18;
 
     const anim = getAnimationState(e, now); 
     const anchors = getAnchorPoints(e, anim);
@@ -3218,22 +3130,7 @@ function drawEnemyStickman(ctx, e) {
     renderEquipmentLayer(ctx, e, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
     ctx.restore(); 
 	drawEnemyUI(ctx, e, 1, stackY);
-/*     // --- UI ---
-    ctx.textAlign = "center";
-    ctx.font = "bold 12px monospace";
-    const enemyLvl = e.level || e.stats?.combatLevel || "??";
-    
-    // Apply stackY to the Y coordinate (subtracting moves it UP)
-    const uiY = e.y - 45 - stackY; 
 
-    ctx.fillStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444";
-    ctx.fillText(`${e.name} [Lvl ${enemyLvl}]`, e.x, uiY);
-
-    // HP Bar
-    ctx.fillStyle = "rgba(40, 40, 40, 0.9)"; 
-    ctx.fillRect(e.x - 20, uiY + 5, 40, 4);
-    ctx.fillStyle = "#f00";
-    ctx.fillRect(e.x - 20, uiY + 5, 40 * (e.hp / e.maxHp), 4); */
 }
 function renderMonsterBody(ctx, e, now) {
     const cfg = e.config;
@@ -3315,7 +3212,7 @@ function drawMonster(ctx, e) {
         Math.abs(other.x - e.x) < 30 && 
         other.id < e.id // Only offset if the other has a lower ID
     ).length;
-    const stackY = nearby * 15; // Move text up 15px per nearby enemy
+    const stackY = nearby * 18; // Move text up 15px per nearby enemy
 
     ctx.save();
     ctx.translate(e.x, e.y);
@@ -3333,76 +3230,38 @@ function drawMonster(ctx, e) {
     ctx.restore(); 
 }
 
-/* function drawMonster(ctx, m) {
-    if (m.dead) return;
-    ctx.save();
-    const bob = Math.sin(Date.now() / 200) * 5;
-    const scale = m.isBoss ? 2.5 : 1;
-
-    ctx.translate(m.x, m.y + bob);
-    ctx.scale(scale, scale);
-
-    // Simple Slime/Blob Body
-    ctx.fillStyle = m.color || "#00ff00";
-    ctx.beginPath();
-    ctx.arc(0, 0, 20, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Aggressive Eyes
-    ctx.fillStyle = "white";
-    ctx.beginPath();
-    ctx.arc(-7, -5, 5, 0, Math.PI * 2); ctx.arc(7, -5, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "black";
-    ctx.fillRect(-9, -6, 4, 4); ctx.fillRect(5, -6, 4, 4);
-
-    ctx.restore(); // Restore before text so scale doesn't mess up font size
-
-    // --- MONSTER NAME & HP BAR ---
-    ctx.textAlign = "center";
-    ctx.fillStyle = m.isBoss ? "#ff00ff" : "#fff"; // Bosses get a special color name
-    ctx.font = m.isBoss ? "bold 14px monospace" : "12px monospace";
-    
-    // Position text slightly lower if it's a big boss
-    const textYOffset = m.isBoss ? 60 : 35;
-    ctx.fillText(m.name, m.x, m.y + textYOffset);
-
-    // HP Bar
-    ctx.fillStyle = "#444";
-    ctx.fillRect(m.x - 25, m.y + textYOffset + 8, 50, 5);
-    ctx.fillStyle = "#ff0000";
-    ctx.fillRect(m.x - 25, m.y + textYOffset + 8, 50 * (m.hp / m.maxHp), 5);
-}
- */
 function drawEnemyUI(ctx, e, scale, stackY = 0) {
     ctx.save();
     
-    // Reverse scale so text doesn't get distorted by monster size
+    // 1. Reset scale so text stays sharp
     ctx.scale(1/scale, 1/scale);
     ctx.textAlign = "center";
-    
-    // Logic: If monster is translated, local X is 0. If stickman, use e.x.
-    // We add stackY to push the UI downward as requested for the feet.
-    const isTranslated = scale !== 1 || e.config?.drawType !== "stickman";
+
+    // 2. Position Logic
+    // If drawing inside drawMonster (translated), drawX/Y are 0 relative to e.x, e.y
+    // If drawing inside drawEnemyStickman (restored), we use e.x, e.y
+    const isTranslated = (scale !== 1 || (e.config && e.config.drawType !== "stickman"));
     const drawX = isTranslated ? 0 : e.x;
     const drawY = isTranslated ? 0 : e.y;
     
+    // "At the feet" logic: move down 38px, then add stackY to push deeper if crowded
     const finalY = drawY + 38 + stackY; 
 
-    // Name Rendering
-    ctx.font = e.isBoss ? "bold 16px monospace" : "bold 12px monospace";
-    ctx.fillStyle = e.isBoss ? "#ff3333" : (e.name === "VoidWalker" ? "#a020f0" : "#ff4444");
+    // 3. Name Rendering (Using your specific requested colors)
+    ctx.font = e.isBoss ? "bold 16px monospace" : "12px monospace";
+    ctx.fillStyle = e.isBoss ? "#ff3333" : (e.name === "VoidWalker" ? "#a020f0" : "#ffffff");
     
     const enemyLvl = e.level || e.stats?.combatLevel || "??";
     ctx.fillText(`${e.name} [Lvl ${enemyLvl}]`, drawX, finalY);
 
-    // HP Bar
+    // 4. HP Bar Rendering (Using your specific requested styles)
     const barWidth = e.isBoss ? 100 : 40;
-    ctx.fillStyle = "rgba(40, 40, 40, 0.9)";
-    ctx.fillRect(drawX - barWidth/2, finalY + 6, barWidth, 5);
-    ctx.fillStyle = "#f00";
-    ctx.fillRect(drawX - barWidth/2, finalY + 6, barWidth * (e.hp / e.maxHp), 5);
+    ctx.fillStyle = "rgba(0,0,0,0.5)"; // Dark background
+    ctx.fillRect(drawX - barWidth/2, finalY + 5, barWidth, 5);
+    
+    // Green if above 30%, Red if low
+    ctx.fillStyle = (e.hp / e.maxHp > 0.3) ? "#0f0" : "#f00";
+    ctx.fillRect(drawX - barWidth/2, finalY + 5, barWidth * (e.hp / e.maxHp), 5);
     
     ctx.restore();
 }
@@ -3460,6 +3319,60 @@ function renderAll() {
         drawStickman(ctx, p);
     });
 }
+
+
+//-- unused draw functions
+function drawEnemyArmor(ctx, e, anchors, item) {
+    if (!item) return;
+    const headX = anchors.headX;
+    const hipX = e.x + (anchors.lean * 5);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(headX - 7, e.y - 18 + anchors.bodyY); 
+    ctx.lineTo(headX + 7, e.y - 18 + anchors.bodyY); 
+    ctx.lineTo(hipX + 7, e.y + 8 + anchors.bodyY);    
+    ctx.lineTo(hipX - 7, e.y + 8 + anchors.bodyY);    
+    ctx.closePath();
+    ctx.fillStyle = item.color || "#777";
+    ctx.globalAlpha = 0.9; 
+    ctx.fill();
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+}
+function drawEnemyPants(ctx, e, anchors, leftFoot, rightFoot, item) {
+    if (!item) return;
+    ctx.save();
+    ctx.strokeStyle = item.color || "#333";
+    ctx.lineWidth = 5; 
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(e.x, anchors.hipY);
+    ctx.lineTo(leftFoot.x, leftFoot.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(e.x, anchors.hipY);
+    ctx.lineTo(rightFoot.x, rightFoot.y);
+    ctx.stroke();
+    ctx.restore();
+}
+function drawEnemyHeadgear(ctx, e, anchors, item) {
+    if (!item) return;
+    // Determine if it's hair or a helmet based on the item type
+    const style = item.style || (item.type === "hair" ? "hair" : "helmet");
+    const hX = e.x + (anchors.lean * 20);
+    const hY = e.y - 32 + anchors.bodyY;
+    
+    ctx.save();
+    // Use your existing HAT_STYLES library
+    const drawFn = HAT_STYLES[style] || HAT_STYLES["hair"];
+    drawFn(ctx, hX, hY, item.color || "#444");
+    ctx.restore();
+}
+
+//----------
 //-------------------------------------------
 // --- WORKSHOP PRO SYSTEM ---
 let isDrawing = false;
@@ -4917,6 +4830,17 @@ function renderAchRow(container, title, isUnlocked, color, subtext) {
 // Wait for the DOM to load to ensure the action bar exists
 
 /* ================= COMMAND FUNCTIONS ================= */
+function cmdEmote(p, type) {
+    p.emote = type;
+    
+    // Clear any existing emote timer
+    if (p.emoteTimer) clearTimeout(p.emoteTimer);
+    
+    // Reset to "normal" after 5 seconds
+    p.emoteTimer = setTimeout(() => {
+        p.emote = null;
+    }, 5000);
+}
 function cmdSetPose(p, user, args) {
     if (p.dead) return;
     let chosenPose = args[1]?.toLowerCase();
@@ -5831,8 +5755,8 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     // Apply the cooldown checks
     if (fastActions.includes(cmd) && isOnCooldown(p, "fast", 3)) return;
     if (mediumActions.includes(cmd) && isOnCooldown(p, "med", 6)) return;
-    if (slowActions.includes(cmd) && isOnCooldown(p, "slow", 15)) return;
-
+    if (slowActions.includes(cmd) && isOnCooldown(p, "slow", 8)) return;
+	
     // Now run the actual logic
     if (cmd === "!clearinventory" || cmd === "!clearinv") { clearPlayerInventory(p.name); return; }
     if (cmd === "!stop" || cmd === "!idle" || cmd === "!reset") { cmdStop(p, user); return; }
@@ -5858,6 +5782,11 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "!pvp")    { joinArenaQueue(p); return; }
 
     // -- Misc / UI (Usually no cooldown or very short)
+	if (cmd === ":)" || cmd === "!happy")     { cmdEmote(p, "happy"); return; }
+	if (cmd === ":(" || cmd === "!sad")       { cmdEmote(p, "sad"); return; }
+	if (cmd === ":'(" || cmd === "!cry")      { cmdEmote(p, "cry"); return; }
+	if (cmd === "xd" || cmd === "!laugh")     { cmdEmote(p, "laugh"); return; }
+	if (cmd === ":o" || cmd === "!surprised") { cmdEmote(p, "surprised"); return; }
     if (cmd === "!wigcolor")   { cmdWigColor(p, args); return; }
     if (cmd === "!sheath")     { cmdSheath(p, user); return; }
     if (cmd === "!equip")      { cmdEquip(p, args); return; }
