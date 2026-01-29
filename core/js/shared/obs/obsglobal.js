@@ -141,6 +141,29 @@ function updateText(id, val) {
         el.textContent = val;
     }
 }
+let uiCache = {}
+function syncUI(id, content, parentId) {
+    // 1. Get or Create from Cache
+    if (!uiCache[id]) {
+        let el = document.getElementById(id);
+        if (!el) {
+            el = document.createElement("div");
+            el.id = id;
+            const parent = document.getElementById(parentId);
+            if (parent) parent.appendChild(el);
+        }
+        uiCache[id] = el;
+    }
+
+    const element = uiCache[id];
+
+    // 2. ONLY update if content is different
+    // This prevents the browser from re-rendering the text 60 times a second
+    if (element.innerHTML !== content) {
+        element.innerHTML = content;
+    }
+}
+
 function toggleElement(elementId, animationType = "fade") {
   const element = document.getElementById(elementId);
   if (!element) return false;  // Return false if element doesn't exist

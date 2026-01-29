@@ -1,3 +1,8 @@
+const CUSTOM_ASSETS = {
+    weapons: {},
+    hats: {},
+    monsters: {}
+};
 //=============================================================
 /* ================= ITEM LIBRARY =========================== */
 // fixes needed: bow currently looks like is held by the string. we want it to look like the player is holding the bow part.
@@ -1553,6 +1558,33 @@ const HAT_STYLES = {
         ctx.fillRect(hX - hatWide, base - 6, hatWide * 2, 5);
     },
 // ----------------------------------------------------------------
+// The "Custom" handler: This will be called for any hat you draw in the workshop
+    "customHat": (ctx, hX, hY, color, styleName) => {
+        const pathData = CUSTOM_ASSETS.hats[styleName];
+        if (!pathData) return;
+
+        ctx.save();
+        ctx.translate(hX, hY); // Move to head position
+        ctx.fillStyle = color || "#ccc";
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 1.5;
+
+        ctx.beginPath();
+        pathData.path.forEach(p => {
+            if (!p) { 
+                ctx.fill(); 
+                ctx.stroke(); 
+                ctx.beginPath(); 
+                return; 
+            }
+            // Normalize relative to the anchor you set in the workshop
+            // We use a slightly larger scale (0.5) for hats compared to weapons (0.2)
+            ctx.lineTo((p.x - pathData.anchor.x) * 0.5, (p.y - pathData.anchor.y) * 0.5);
+        });
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+    }
 };
 const CAPE_STYLES = {
     "cape": (ctx, p, bodyY, lean, item) => { // Paper Bag Style
@@ -1598,60 +1630,6 @@ const CAPE_STYLES = {
 		ctx.stroke();
 	}
 }
-const BODY_PARTS = {
-		"stick": {
-		head: (ctx, x, y, p) => {
-			ctx.save();
-			
-			// 1. Face Backing (The skin/fill)
-			ctx.globalAlpha = 0.9;
-			ctx.fillStyle = p.color;
-			ctx.beginPath(); 
-			ctx.arc(x, y, 10, 0, Math.PI * 2); 
-			ctx.fill();
-			ctx.globalAlpha = 1.0;
-
-			// 2. Head Outline (The border)
-			ctx.strokeStyle = p.color;
-			ctx.lineWidth = 3;
-			ctx.beginPath(); 
-			ctx.arc(x, y, 10, 0, Math.PI * 2); 
-			ctx.stroke();
-
-			// 3. Facial Features
-			// We must switch both colors to black for the face!
-			ctx.fillStyle = "#000";   // For the eyes
-			ctx.strokeStyle = "#000"; // For the smile
-			ctx.lineWidth = 1.5;      // Thinner line for a cleaner smile
-
-			// Eyes (fillRect uses fillStyle)
-			ctx.fillRect(x - 4, y - 3, 2, 2); 
-			ctx.fillRect(x + 2, y - 3, 2, 2); 
-
-			// Smile (stroke uses strokeStyle)
-			ctx.beginPath(); 
-			ctx.arc(x, y + 2, 3, 0.1 * Math.PI, 0.9 * Math.PI); 
-			ctx.stroke();
-
-			ctx.restore();
-		},
-        torso: (ctx, hX, hY, bX, bY) => {
-            ctx.beginPath(); 
-            ctx.moveTo(hX, hY + 10); // From neck
-            ctx.lineTo(bX, bY);      // To hips
-            ctx.stroke();
-        },
-        limbs: (ctx, startX, startY, endX, endY, joint = null) => {
-            ctx.beginPath(); 
-            ctx.moveTo(startX, startY);
-            if (joint && joint.x !== undefined) {
-                ctx.lineTo(joint.x, joint.y); // Only bend if a joint exists
-            }
-            ctx.lineTo(endX, endY);
-            ctx.stroke();
-        }
-    }
-};
 const POSE_LIBRARY = {
     "head_hands": (head) => ({
         left: { x: head.x - 12, y: head.y + 5 },
@@ -1797,4 +1775,186 @@ const POSE_LIBRARY = {
 			right: { x: head.x + 5,  y: head.y + 30 }
 		};
 	}
+};
+
+const BODY_PARTS = {
+    "stick": {
+        head: (ctx, x, y, p) => {
+            ctx.save();
+            ctx.globalAlpha = 0.9;
+            ctx.fillStyle = p.color || "#ff4444";
+            ctx.beginPath(); 
+            ctx.arc(x, y, 10, 0, Math.PI * 2); 
+            ctx.fill();
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Eyes
+            ctx.fillStyle = "#000";
+            ctx.fillRect(x - 4, y - 3, 2, 2); 
+            ctx.fillRect(x + 2, y - 3, 2, 2); 
+            ctx.restore();
+        },
+        torso: (ctx, hX, hY, bX, bY) => {
+            ctx.beginPath(); 
+            ctx.moveTo(hX, hY + 10);
+            ctx.lineTo(bX, bY); 
+            ctx.stroke();
+        },
+        limbs: (ctx, startX, startY, endX, endY, joint = null) => {
+            ctx.beginPath(); 
+            ctx.moveTo(startX, startY);
+            if (joint) ctx.lineTo(joint.x, joint.y);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+        }
+    }
+};
+
+
+const MONSTER_STYLES = {
+    blob: (ctx, e, now, cfg) => {
+        const wobble = Math.sin(now / 150) * 5;
+		ctx.fillStyle = e.color;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, (cfg.bodyW || 20) + wobble, (cfg.bodyH || 15) - wobble, 0, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+    },
+    spider: (ctx, e, now, cfg) => {
+        // Arachnid movement logic: Alternating leg pairs
+        const walk = Math.sin(now / 100) * 12;
+        ctx.strokeStyle = e.color;
+        ctx.lineWidth = cfg.legWidth || 2;
+        for (let i = 0; i < 8; i++) {
+            const side = i < 4 ? -1 : 1;
+            const angle = (i % 4) * (Math.PI / 4) - Math.PI/2;
+            const move = (i % 2 === 0) ? walk : -walk;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            // Jointed legs that "stomp"
+            ctx.lineTo(Math.cos(angle) * 15 * side, -10 + move); 
+            ctx.lineTo(Math.cos(angle) * 25 * side, (cfg.legH || 15));
+            ctx.stroke();
+        }
+        // Thorax/Abdomen
+        ctx.beginPath();
+        ctx.ellipse(0, 0, cfg.bodyW || 15, cfg.bodyH || 12, 0, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+    },
+    canine: (ctx, e, now, cfg) => {
+        const walk = Math.sin(now / 120) * 15;
+        // 4 Legs
+        ctx.lineWidth = 4;
+        [ -10, 10 ].forEach((xOffset, i) => {
+            const move = (i === 0) ? walk : -walk;
+            // Front & Back Legs
+            ctx.beginPath();
+            ctx.moveTo(xOffset, 5);
+            ctx.lineTo(xOffset + move, 20);
+            ctx.stroke();
+        });
+        // Fuzzier body (Wolf style)
+        if (cfg.fuzz) {
+            ctx.beginPath();
+            for(let a=0; a<Math.PI*2; a+=0.4) {
+                let r = (cfg.bodyW || 25) + (Math.random() * 5);
+                ctx.lineTo(Math.cos(a)*r, Math.sin(a)*r - 5);
+            }
+            ctx.closePath();
+        } else {
+            ctx.beginPath();
+            ctx.roundRect(-25, -15, 50, 20, 10);
+        }
+        ctx.fill(); ctx.stroke();
+    },
+    phalic: (ctx, e, now, cfg) => {
+        const sway = Math.sin(now / 200) * 0.1;
+        ctx.rotate(sway);
+        // Shaft
+        ctx.beginPath();
+        ctx.roundRect(-10, -50, 20, 50, 8);
+        ctx.fill(); ctx.stroke();
+        // Tip
+        ctx.beginPath();
+        ctx.arc(0, -50, 12, Math.PI, 0);
+        ctx.fillStyle = "#ffb6c1"; // Pinkish tip
+        ctx.fill(); ctx.stroke();
+        // Base
+        ctx.fillStyle = e.color;
+        ctx.beginPath();
+        ctx.arc(-8, 0, 10, 0, Math.PI * 2);
+        ctx.arc(8, 0, 10, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+    },
+    beast: (ctx, e, now, cfg) => {
+        ctx.strokeStyle = e.color;
+        ctx.lineWidth = 2;
+        for(let i=0; i < (cfg.legCount || 8); i++) {
+            const side = i < (cfg.legCount/2 || 4) ? 1 : -1;
+            const phase = (now / 150) + (i * 0.5);
+            // Assuming BODY_PARTS is global
+            BODY_PARTS.beast.leg(ctx, 0, 10, side === 1 ? 0 : Math.PI, cfg.legH || 25, phase);
+        }
+        BODY_PARTS.beast.body(ctx, 0, 10, cfg.bodyW || 15, e.color);
+    },
+	// Inside your MONSTER_STYLES object:
+	custom_path: (ctx, e, now, cfg) => {
+		if (!cfg.pathData) return;
+		ctx.lineCap = "round";
+		ctx.beginPath();
+		cfg.pathData.forEach(p => {
+			if (!p) { ctx.stroke(); ctx.beginPath(); return; }
+			ctx.strokeStyle = p.color || "#ff0000";
+			ctx.lineWidth = (p.thickness || 2) * (e.scale || 1);
+			ctx.lineTo(p.x, p.y);
+			ctx.stroke();
+			ctx.beginPath();
+			ctx.moveTo(p.x, p.y);
+		});
+	},
+    stickman: (ctx, e, now, cfg) => {
+        // We mirror here because drawEnemyStickman usually expects world coords, 
+        // but inside our new render logic we are already translated.
+        ctx.scale(-1, 1);
+        drawEnemyStickman(ctx, e, true); // Pass a flag to skip internal translation if needed
+    }
+};
+const MONSTER_DB = {
+    // --- SPIDERS ---
+    "Spiderling": { drawType: "spider", scale: 0.5, color: "#555", hpMult: 0.5 },
+    "CaveSpider": { drawType: "spider", scale: 1.0, color: "#333", hpMult: 1.0 },
+    "WolfSpider": { drawType: "spider", scale: 1.8, color: "#5d4037", hpMult: 2.5, special: "web_shot" },
+    "FireSpider": { drawType: "spider", scale: 1.2, color: "#ff4500", glow: true, glowColor: "#ff0", special: "burn" },
+    "IceSpider": { drawType: "spider", scale: 1.2, color: "#00ffff", glow: true, glowColor: "#fff", special: "freeze" },
+
+    // --- CANINES ---
+    "StreetDog": { drawType: "canine", color: "#8b4513", bodyW: 20, headAnchor: {x: -25, y: -10} },
+    "DireWolf": { drawType: "canine", color: "#444", fuzz: true, scale: 1.5, bodyW: 30, headAnchor: {x: -35, y: -15}, hpMult: 3.0 },
+    "FrostWolf": { drawType: "canine", color: "#f0ffff", fuzz: true, scale: 1.5, glow: true, glowColor: "#00f" },
+
+    // --- WEIRD/MIMICS ---
+    "StaffMimic": { drawType: "phalic", color: "#ff69b4", hasArms: true, armAnchor: {x: 0, y: -30} },
+    "PinkWobbler": { drawType: "phalic", color: "#da70d6", scale: 0.8 },
+
+    // --- BOSSES ---
+    "BROOD_MOTHER": { drawType: "spider", scale: 4.0, color: "#1a1a1a", hpMult: 10, special: "spawn_spiderlings" },
+    "FENRIR_LITE": { drawType: "canine", fuzz: true, scale: 3.5, color: "#000", hpMult: 12, glow: true }
+};
+// Theme-based waves
+const DUNGEON_THEMES = {
+    1: { name: "The Training Grounds", mobs: ["Slime", "StickmanHunter"], boss: "DUNGEON_OVERLORD" },
+    2: { name: "The Silken Den", mobs: ["Spiderling", "CaveSpider"], boss: "BROOD_MOTHER" },
+    3: { name: "The Howling Woods", mobs: ["StreetDog", "DireWolf"], boss: "FENRIR_LITE" },
+    4: { name: "The Abyssal Breach", mobs: ["VoidWalker", "ShadowWraith"], boss: "VOID_CORRUPTOR" },
+    5: { name: "The Frozen Tundra", mobs: ["IceSpider", "FrostWolf"], boss: "FROST_JOTUN" },
+    6: { name: "The Scorched Earth", mobs: ["FireSpider", "FireSlime"], boss: "MAGMA_CORE" },
+    7: { name: "The Mimic Pantry", mobs: ["StaffMimic", "PinkWobbler"], boss: "THE_GRAND_MIMIC" },
+    8: { name: "Arachnid Overrun", mobs: ["WolfSpider", "FireSpider", "IceSpider"], boss: "QUEEN_GOSSAMER" },
+    9: { name: "The Cursed Kennel", mobs: ["DireWolf", "FrostWolf"], boss: "CERBERUS_JUNIOR" },
+    10: { name: "The Void Horizon", mobs: ["VoidDragon", "ShadowWraith"], boss: "VOID_EXARCH" },
+    11: { name: "Celestial Spire", mobs: ["StarWraith", "VoidWalker"], boss: "ASTRAL_TITAN" },
+    12: { name: "The End Times", mobs: ["CosmicHorror", "DireWolf"], boss: "CHRONOS" },
+    13: { name: "The Final Singularity", mobs: ["VoidDragon", "CosmicHorror", "WolfSpider"], boss: "THE_CREATOR" }
 };

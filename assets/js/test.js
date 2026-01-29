@@ -806,52 +806,74 @@ function performHeal(p, mode = "auto", target = null) {
     const healLvl = p.stats.healLevel || 1;
     const now = Date.now();
 
-    // Cooldown check for manual commands (prevents spamming)
     if (mode !== "auto" && p.lastManualHeal && now - p.lastManualHeal < 2000) return;
     if (mode !== "auto") p.lastManualHeal = now;
 
     let allies = Object.values(players).filter(pl => pl.area === p.area && !pl.dead);
     
-    // --- 1. CALCULATE POWER ---
+    // --- CALCULATE POWER ---
     let baseAmt = 10 + (healLvl * 5); 
 
     if (mode === "focus" && target) {
-        // STRONG SINGLE HEAL
-        applyHealEffect(p, target, baseAmt, "focus");
+        // Apply Self-Heal Penalty (50% reduction if healing self)
+        let finalAmt = (target.name === p.name) ? Math.floor(baseAmt * 0.5) : baseAmt;
+        applyHealEffect(p, target, finalAmt, "focus");
     } 
     else if (mode === "all") {
-        // WEAK TEAM HEAL
-        let aoeAmt = Math.floor(baseAmt * 0.4); 
-        allies.forEach(a => applyHealEffect(p, a, aoeAmt, "all"));
+        // Team heal: Healer gets 40% of base, Others get 40%
+        allies.forEach(a => {
+            let amount = Math.floor(baseAmt * 0.4);
+            // Even in "all" mode, healers get less back for themselves
+            if (a.name === p.name) amount = Math.floor(amount * 0.5); 
+            applyHealEffect(p, a, amount, "all");
+        });
     } 
     else if (mode === "auto") {
-        // MEDIUM AUTO HEAL (Targets lowest HP)
         let needyAllies = allies.filter(a => a.hp < a.maxHp);
         if (needyAllies.length === 0) return;
         
-        needyAllies.sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp));
+        // BALANCE: Auto-heal now prioritizes other players over the self.
+        // It sorts by HP%, but gives a "priority boost" to anyone who isn't the healer.
+        needyAllies.sort((a, b) => {
+            let scoreA = (a.hp / a.maxHp) + (a.name === p.name ? 0.3 : 0); // Self is treated as having +30% HP
+            let scoreB = (b.hp / b.maxHp) + (b.name === p.name ? 0.3 : 0);
+            return scoreA - scoreB;
+        });
+
         let autoTarget = needyAllies[0];
-        
         let autoAmt = Math.floor(baseAmt * 0.7);
+        
+        // Reduce auto-heal effectiveness if it finally decides to heal the caster
+        if (autoTarget.name === p.name) autoAmt = Math.floor(autoAmt * 0.5);
+        
         applyHealEffect(p, autoTarget, autoAmt, "auto");
     }
 }
-
 // Helper to handle the actual HP gain, XP, and Visuals
 function applyHealEffect(p, target, amount, mode) {
     if (target.hp >= target.maxHp && mode !== "all") return;
 
+    // Diminishing XP: Healing someone already healthy gives less reward
+    const healthRatio = target.hp / target.maxHp;
+    let xpMultiplier = 1.0;
+    if (healthRatio > 0.8) xpMultiplier = 0.5; // Half XP if target is >80% health
+
     target.hp = Math.min(target.maxHp, target.hp + amount);
-// SYNC: Update stats so health gain persists
+
     if (target.stats) {
         target.stats.currentHp = target.hp;
     }
-    const healerWeapon = ITEM_DB[p.stats.equippedWeapon] || {};
-    spawnProjectile(p.x, p.y - 20, target.x, target.y - 20, healerWeapon.color || "#00ffff", "magic", p.area);
-    spawnFloater(target, `+${amount} HP`, "#0f0");
 
-    // XP Award
-    p.stats.healXP = (p.stats.healXP || 0) + (mode === "focus" ? 20 : (mode === "all" ? 10 : 15));
+    const healerWeapon = ITEM_DB[p.stats.equippedWeapon] || {};
+    // Visual distinction: Redder projectile if healing self (Self-penalty indicator)
+    let healColor = (target.name === p.name) ? "#ff99ff" : (healerWeapon.color || "#00ffff");
+    
+    spawnProjectile(p.x, p.y - 20, target.x, target.y - 20, healColor, "magic", p.area);
+    spawnFloater(target, `+${amount} HP`, (target.name === p.name ? "#ffaa00" : "#0f0"));
+
+    // XP Award with Multiplier
+    let baseXP = (mode === "focus" ? 20 : (mode === "all" ? 10 : 15));
+    p.stats.healXP = (p.stats.healXP || 0) + Math.floor(baseXP * xpMultiplier);
 
     if (p.stats.healXP >= xpNeeded(p.stats.healLevel)) {
         p.stats.healLevel++;
@@ -860,7 +882,6 @@ function applyHealEffect(p, target, amount, mode) {
         updateCombatLevel(p);
     }
 }
-
 
 // idle actions
 //xp gained by action skills
@@ -1577,10 +1598,11 @@ let isDungeonResting = false; // Prevents progress checks during rest
 const dungeonUIConfig = {
     header: "PARTY STATUS",
     labels: {
+        theme: (name) => `📍 ${name}`, // New label for the Area Name
         wave: (num, tier) => `WAVE ${num} (Tier ${tier})`,
-        rest: (s) => `RESTING: ${s}s`, // Added this for consistency
+        rest: (s) => `RESTING: ${s}s`,
         timer: (s) => `DUNGEON: ${s}s`,
-        boss: (hp) => `BOSS: ${hp}%`
+        boss: (name, hp) => `${name}: ${hp}%` // Updated to show the Boss Name
     },
     getStatusClass: (pct, isDead) => {
         if (isDead) return "hp-dead";
@@ -1747,7 +1769,7 @@ function generateRandomLoadout(tier) {
     };
 }
 
-function spawnWave() {
+/* function spawnWave() {
     enemies = [];
     const partySize = Object.values(players).filter(p => p.area === "dungeon" && !p.dead).length || 1;
     const isBossWave = (dungeonWave % 5 === 0);
@@ -1792,6 +1814,82 @@ function spawnWave() {
             color: "#ff0000"
         };
         systemMessage(`⚠️ BOSS WAVE! Scaling for ${partySize} hero(es)!`);
+    } else {
+        boss = null;
+    }
+} */
+function spawnWave() {
+    enemies = [];
+    const partySize = Object.values(players).filter(p => p.area === "dungeon" && !p.dead).length || 1;
+    const isBossWave = (dungeonWave % 5 === 0);
+    
+    // 1. Update Tier
+    dungeonTier = getTierFromWave(dungeonWave);
+
+    // 2. Select Theme Config
+    const themeKeys = Object.keys(DUNGEON_THEMES).map(Number);
+    const highestThemeDefined = Math.max(...themeKeys);
+    const themeIndex = Math.min(dungeonTier, highestThemeDefined);
+    const currentTheme = DUNGEON_THEMES[themeIndex] || DUNGEON_THEMES[1];
+    
+    const themePool = currentTheme.mobs;
+    const waveSize = Math.floor(2 + (dungeonWave / 2) + (partySize - 1));
+
+    if (!isBossWave) {
+        systemMessage(`--- Wave ${dungeonWave}: ${currentTheme.name} ---`);
+    }
+
+    // 3. Spawn Normal Mobs
+    for (let i = 0; i < waveSize; i++) {
+        let typeName = themePool[Math.floor(Math.random() * themePool.length)];
+        let config = MONSTER_DB[typeName] || MONSTER_DB["Slime"];
+
+        // HP Scaling: Base + Wave growth, multiplied by monster toughness and party size
+        let enemyHp = (40 + (dungeonWave * 25)) * (config.hpMult || 1.0) * (1 + (partySize * 0.25));
+
+        enemies.push({ 
+            name: typeName, 
+            area: "dungeon",
+            hp: enemyHp, 
+            maxHp: enemyHp, 
+            x: 500 + (i * 70),
+            y: 540 + (Math.random() * 80), // Slight Y variation for depth
+            dead: false,
+            isEnemy: true,
+            config: config, 
+            color: config.color || "#ff4444",
+			drawType: config.drawType, 
+			scale: config.scale || 1.0,
+            isStickman: config.drawType === "stickman",
+            stats: { lurkLevel: 0 },
+            // Only generate gear if config allows
+            equipped: config.canEquip ? generateRandomLoadout(dungeonTier) : {}
+        });
+    }
+
+    // 4. Spawn Theme Boss
+    if (isBossWave) {
+        let bossKey = currentTheme.boss || "DUNGEON_OVERLORD";
+        let bossConfig = MONSTER_DB[bossKey] || MONSTER_DB["DUNGEON_OVERLORD"];
+        
+        let bossHp = (500 + (dungeonWave * 150)) * (bossConfig.hpMult || 5.0) * partySize;
+        
+        boss = {
+            name: bossKey.replace(/_/g, " "),
+            area: "dungeon",
+            hp: bossHp,
+            maxHp: bossHp,
+            x: 850, 
+            y: 540,
+            dead: false,
+            isBoss: true,
+            isMonster: true,
+            config: bossConfig,
+            color: bossConfig.color || "#ff0000",
+            scale: bossConfig.scale || 2.0 
+        };
+        
+        systemMessage(`⚠️ TIER ${dungeonTier} BOSS: ${boss.name} has emerged!`);
     } else {
         boss = null;
     }
@@ -1907,7 +2005,7 @@ function closeDungeon(reason) {
     const selector = document.getElementById("view-area-selector");
     if (selector) selector.value = "town";
 }
-function handleEnemyAttacks() {
+/* function handleEnemyAttacks() {
     let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
     if (dwellers.length === 0) return;
     
@@ -1944,7 +2042,50 @@ function handleEnemyAttacks() {
         }
     });
 }
+ */
+ function handleEnemyAttacks() {
+    let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
+    if (dwellers.length === 0) return;
+    
+    let allAttackers = [...enemies];
+    if (boss && !boss.dead) allAttackers.push(boss);
 
+    allAttackers.forEach(e => {
+        if (e.dead) return;
+        let target = dwellers[Math.floor(Math.random() * dwellers.length)];
+        
+        // --- SPECIAL ABILITIES ---
+        const spec = e.config?.special;
+		if (spec) {
+			const procRoll = Math.random();
+
+			if (spec === "web_shot" && procRoll < 0.2) {
+				target.isWebbed = true;
+				target.webExpiry = Date.now() + 3000;
+				spawnFloater(target, "🕸️ WEBBED!", "#fff");
+				spawnProjectile(e.x, e.y, target.x, target.y, "#ffffff", "web", "dungeon");
+				return; 
+			}
+			
+			if (spec === "burn" && procRoll < 0.3) {
+				target.isBurning = true;
+				target.burnExpiry = Date.now() + 5000;
+				spawnFloater(target, "🔥 BURNING!", "#ff4500");
+			}
+
+			if (spec === "freeze" && procRoll < 0.2) {
+				target.isFrozen = true;
+				target.freezeExpiry = Date.now() + 2000;
+				spawnFloater(target, "❄️ FROZEN!", "#00ffff");
+			}
+		}
+
+        // Standard damage logic...
+        let dmg = (3 + Math.floor(dungeonWave * 1.5));
+        if (e.isBoss) dmg *= 2.5;
+        applyDamage(target, Math.floor(dmg));
+    });
+}
 function handleLoot(p, target) {
     const currentTier = getTierFromWave(dungeonWave);
     let lootFound = [];
@@ -2055,6 +2196,8 @@ function updateDungeonIdleTraining() {
                 dead: false,
                 isEnemy: true,
                 isTrainingMob: true,
+				config: MONSTER_DB["Slime"],
+				drawType: "blob",
                 stats: { lurkLevel: 0 },
                 equipped: {} 
             });
@@ -2952,8 +3095,74 @@ function drawEnemyStickman(ctx, e) {
     ctx.fillStyle = "#f00"; // Red fill for enemies
     ctx.fillRect(e.x - 20, e.y + 48, 40 * (e.hp / e.maxHp), 4);
 }
+function renderMonsterBody(ctx, e, now) {
+    const cfg = e.config;
+    if (!cfg) return;
+    
+    const scale = e.scale || cfg.scale || 1.0;
+    const styleFn = MONSTER_STYLES[cfg.drawType] || MONSTER_STYLES.blob;
 
-function drawMonster(ctx, m) {
+    ctx.save();
+    ctx.translate(e.x, e.y);
+    ctx.scale(scale, scale);
+    
+    // 1. Pre-render: Wings (Behind everything)
+    if (cfg.wings) renderMonsterWings(ctx, e, now, cfg);
+
+    // 2. Core Render: The Body Style
+    ctx.fillStyle = e.color || "#ff4444";
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    styleFn(ctx, e, now, cfg);
+
+    // 3. Post-render: Head & Gear (On top)
+    renderMonsterHead(ctx, e, cfg);
+    if (cfg.hasArms) renderMonsterArms(ctx, e, now, cfg);
+
+    ctx.restore();
+}
+function renderMonsterHead(ctx, e, cfg) {
+    const headAt = cfg.headAnchor || { x: -15, y: -10 };
+    ctx.save();
+    ctx.translate(headAt.x, headAt.y);
+    
+    if (e.equipped?.helmet) {
+        const hat = ITEM_DB[e.equipped.helmet];
+        if (HAT_STYLES[hat.style]) HAT_STYLES[hat.style](ctx, 0, 0, hat.color);
+    } else if (cfg.drawType !== "custom_path") {
+        ctx.beginPath();
+        ctx.arc(0, 0, cfg.headSize || 8, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+        // Eyes
+        ctx.fillStyle = "#000";
+        ctx.fillRect(-4, -2, 2, 2); ctx.fillRect(2, -2, 2, 2);
+    }
+    
+    if (cfg.hasHorn) {
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.moveTo(0, -5); ctx.lineTo(0, -20); ctx.lineTo(5, -5);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+function renderMonsterWings(ctx, e, now, cfg) {
+    const flap = Math.sin(now / 100) * 0.5;
+    ctx.fillStyle = e.color;
+    ctx.globalAlpha = 0.6;
+    [-1, 1].forEach(side => {
+        ctx.save();
+        ctx.translate(cfg.wingAnchor?.x || 0, cfg.wingAnchor?.y || 0);
+        ctx.rotate(side * (Math.PI / 4 + flap));
+        ctx.beginPath();
+        ctx.ellipse(side * 25, 0, 30, 15, 0, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+        ctx.restore();
+    });
+    ctx.globalAlpha = 1.0;
+}
+/* function drawMonster(ctx, m) {
     if (m.dead) return;
     ctx.save();
     const bob = Math.sin(Date.now() / 200) * 5;
@@ -2994,8 +3203,36 @@ function drawMonster(ctx, m) {
     ctx.fillStyle = "#ff0000";
     ctx.fillRect(m.x - 25, m.y + textYOffset + 8, 50 * (m.hp / m.maxHp), 5);
 }
+ */
+function drawMonster(ctx, e) {
+    if (e.area !== viewArea || e.dead) return;
+    const now = Date.now();
+    const cfg = e.config || { drawType: "blob", color: "#f0f" };
+    const styleFn = MONSTER_STYLES[cfg.drawType] || MONSTER_STYLES.blob;
 
+    ctx.save();
+    ctx.translate(e.x, e.y);
+    const scale = e.scale || cfg.scale || 1.0;
+    ctx.scale(scale, scale);
 
+    // Apply Global Effects
+    if (cfg.glow) {
+        ctx.shadowBlur = 15 + Math.sin(now / 200) * 10;
+        ctx.shadowColor = cfg.glowColor || e.color;
+    }
+
+    // DRAW THE ACTUAL ART
+    styleFn(ctx, e, now, cfg);
+
+    // DRAW EXTRAS (Hats/Wings) 
+    // You can keep these here so they work on ANY monster style
+    if (cfg.wings) renderWings(ctx, e, now, cfg);
+    if (e.equipped?.helmet) renderMonsterHelmet(ctx, e);
+
+    ctx.restore();
+    
+    drawEnemyUI(ctx, e); // HP Bar
+}
 
 function drawSheathedWeapon(ctx, p, anchors, item) {
     ctx.save();
@@ -3052,7 +3289,207 @@ function renderAll() {
     });
 }
 //-------------------------------------------
+// --- WORKSHOP PRO SYSTEM ---
+let isDrawing = false;
+let currentPath = [];
+let anchor = { x: 100, y: 100 };
+const wCanvas = document.getElementById('workshop-canvas');
+const wCtx = wCanvas.getContext('2d');
 
+// 1. Mouse Events
+wCanvas.onmousedown = (e) => {
+    isDrawing = true;
+    const rect = wCanvas.getBoundingClientRect();
+    // Add starting point
+    addPoint(e.clientX - rect.left, e.clientY - rect.top);
+};
+
+wCanvas.onmouseup = () => {
+    isDrawing = false;
+    currentPath.push(null); // Line break
+};
+
+wCanvas.onmousemove = (e) => {
+    if (!isDrawing) return;
+    const rect = wCanvas.getBoundingClientRect();
+    addPoint(e.clientX - rect.left, e.clientY - rect.top);
+    drawPreview();
+};
+
+function addPoint(x, y) {
+    const thickness = document.getElementById('brush-thickness').value;
+    const color = document.getElementById('brush-color').value;
+    currentPath.push({ 
+        x: x, 
+        y: y, 
+        thickness: parseInt(thickness), 
+        color: color 
+    });
+}
+
+// 2. Preview Engine
+function drawPreview() {
+    wCtx.clearRect(0, 0, 200, 200);
+    
+    // Draw Anchor Crosshair
+    wCtx.strokeStyle = "rgba(255, 50, 50, 0.6)";
+    wCtx.lineWidth = 1;
+    wCtx.beginPath();
+    wCtx.moveTo(anchor.x - 15, anchor.y); wCtx.lineTo(anchor.x + 15, anchor.y);
+    wCtx.moveTo(anchor.x, anchor.y - 15); wCtx.lineTo(anchor.x, anchor.y + 15);
+    wCtx.stroke();
+
+    // Draw Stylized Lines
+    if (currentPath.length === 0) return;
+
+    for (let i = 0; i < currentPath.length; i++) {
+        const p = currentPath[i];
+        if (!p || i === 0 || !currentPath[i-1]) {
+            if (p) {
+                wCtx.beginPath();
+                wCtx.moveTo(p.x, p.y);
+            }
+            continue;
+        }
+
+        wCtx.lineCap = "round";
+        wCtx.lineJoin = "round";
+        wCtx.strokeStyle = p.color;
+        wCtx.lineWidth = p.thickness;
+        
+        wCtx.lineTo(p.x, p.y);
+        wCtx.stroke();
+        
+        // Start fresh for next segment to allow color/thickness changes
+        wCtx.beginPath();
+        wCtx.moveTo(p.x, p.y);
+    }
+}
+
+// 3. Asset Injection
+function saveAsset(silent = false) {
+    const nameInput = document.getElementById('asset-name');
+    const name = nameInput.value.trim().replace(/\s+/g, '_') || "Custom_" + Date.now();
+    const type = document.getElementById('drawing-type').innerText.toLowerCase();
+    
+    const pathCopy = [...currentPath];
+    const assetAnchor = { ...anchor };
+
+    if (type === "weapon") {
+        WEAPON_STYLES[name] = (ctx, item) => {
+            ctx.lineCap = "round";
+            ctx.beginPath();
+            pathCopy.forEach((p, i) => {
+                if (!p) { ctx.stroke(); ctx.beginPath(); return; }
+                ctx.strokeStyle = p.color;
+                ctx.lineWidth = p.thickness * 0.25; 
+                const tx = (p.x - assetAnchor.x) * 0.25;
+                const ty = (p.y - assetAnchor.y) * 0.25;
+                ctx.lineTo(tx, ty);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(tx, ty);
+            });
+        };
+        ITEM_DB[name] = { type: "weapon", style: name, power: 25, rarity: 5, sources: "dungeon", value: 1500, color: "#fff" };
+    } 
+    
+    else if (type === "helmet") {
+        HAT_STYLES[name] = (ctx, hX, hY, color) => {
+            ctx.save();
+            ctx.translate(hX, hY);
+            ctx.lineCap = "round";
+            ctx.beginPath();
+            pathCopy.forEach((p, i) => {
+                if (!p) { ctx.stroke(); ctx.beginPath(); return; }
+                ctx.strokeStyle = p.color;
+                ctx.lineWidth = p.thickness * 0.4;
+                const tx = (p.x - assetAnchor.x) * 0.4;
+                const ty = (p.y - assetAnchor.y) * 0.4;
+                ctx.lineTo(tx, ty);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(tx, ty);
+            });
+            ctx.restore();
+        };
+        ITEM_DB[name] = { type: "helmet", style: name, def: 12, rarity: 5, sources: "dungeon", value: 1200 };
+    }
+
+    else if (type === "monster") {
+        MONSTER_DB[name] = {
+            drawType: "custom_path",
+            pathData: pathCopy.map(p => p ? { 
+                x: (p.x - assetAnchor.x) * 0.8, 
+                y: (p.y - assetAnchor.y) * 0.8,
+                color: p.color,
+                thickness: p.thickness
+            } : null),
+            hpMult: 2.5,
+            scale: 1.0
+        };
+    }
+
+    if (!silent) {
+        systemMessage(`🎨 Saved ${type}: ${name}`);
+        closeWorkshop();
+    }
+}
+
+// 4. Smart Testing
+function testCurrentCreation() {
+    const nameInput = document.getElementById('asset-name');
+    const name = nameInput.value.trim() || "Test_Asset";
+    const type = document.getElementById('drawing-type').innerText.toLowerCase();
+    
+    saveAsset(true); // Save silently
+
+    if (type === "monster") {
+        enemies.push({
+            name: name,
+            area: viewArea,
+            hp: 1000, maxHp: 1000,
+            x: 550, y: 540,
+            config: MONSTER_DB[name],
+            drawType: "custom_path",
+            dead: false,
+            isEnemy: true,
+            stats: { lurkLevel: 0 }
+        });
+        systemMessage("🧪 Test Monster Spawned!");
+    } else {
+        // Give to player 1
+        const p = Object.values(players)[0];
+        if (p) {
+            if (!p.stats.inventory.includes(name)) p.stats.inventory.push(name);
+            if (type === "weapon") p.stats.equippedWeapon = name;
+            if (type === "helmet") p.stats.equippedHelmet = name;
+            systemMessage(`🧪 ${name} equipped to ${p.name}!`);
+        }
+    }
+}
+
+function setWorkshopType(type) {
+    document.getElementById('drawing-type').innerText = type;
+    clearCanvas();
+}
+
+function clearCanvas() {
+    currentPath = [];
+    wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height);
+    drawPreview();
+}
+
+function closeWorkshop() {
+    document.getElementById('workshop-modal').classList.add('hidden');
+    currentPath = [];
+}
+
+function openWorkshop(type = "Weapon") {
+    document.getElementById('drawing-type').innerText = type;
+    document.getElementById('workshop-modal').classList.remove('hidden');
+    drawPreview();
+}
 //===============================================================================
 // ================= DRAWING THE SCENERY AND AREAS ===========
 /* const backgrounds = {
@@ -3379,51 +3816,58 @@ function updateAreaPlayerCounts() {
 }
 
 function updateDungeonScoreboard() {
-    const partyList = document.getElementById("dungeon-party-list");
     const enemyList = document.getElementById("dungeon-enemy-list");
-    
-    // 1. Clear the enemy list entirely before re-rendering 
-    if (enemyList) enemyList.innerHTML = "";
+    const waveBox = document.getElementById("dungeon-wave-section");
+    if (!enemyList || !waveBox) return;
 
-    // 2. Update Party HP List
+    const currentTheme = DUNGEON_THEMES[dungeonTier] || DUNGEON_THEMES[1];
+
+    // 1. Party HP (Using your existing syncUI helper is good, it prevents re-creating divs)
     const partyDwellers = Object.values(players).filter(p => p.area === "dungeon");
     partyDwellers.forEach(p => {
         const hpPct = Math.max(0, Math.floor((p.hp / p.maxHp) * 100));
         const statusClass = dungeonUIConfig.getStatusClass(hpPct, p.dead);
-        const displayText = `${p.name}: ${hpPct}%`;
-        
-        syncUI(`party-${p.name}`, displayText, "dungeon-party-list");
+        syncUI(`party-${p.name}`, `${p.name}: ${hpPct}%`, "dungeon-party-list");
         const el = document.getElementById(`party-${p.name}`);
-        if (el && el.className !== statusClass) el.className = statusClass;
+        if (el) el.className = statusClass;
     });
 
-    // 3. Update Wave & Enemies
-    const waveBox = document.getElementById("dungeon-wave-section");
     if (dungeonActive) {
         waveBox.style.display = "block";
         
-        // Show Rest timer if resting, otherwise show current wave/tier
-        let waveText = isDungeonResting 
-            ? `RESTING: ${dungeonGraceSeconds}s` 
+        // Update Theme & Wave
+        const themeText = dungeonUIConfig.labels.theme(currentTheme.name);
+        const waveText = isDungeonResting 
+            ? dungeonUIConfig.labels.rest(dungeonGraceSeconds) 
             : dungeonUIConfig.labels.wave(dungeonWave, dungeonTier);
             
+        updateText("dungeon-theme-display", themeText); 
         updateText("dungeon-wave-display", waveText);
 
+        // 2. Boss UI
         const bossEl = document.getElementById("dungeon-boss-hp");
         if (boss && !boss.dead) {
             bossEl.style.display = "block";
-            bossEl.textContent = dungeonUIConfig.labels.boss(Math.max(0, Math.floor((boss.hp/boss.maxHp)*100)));
+            const bossHp = Math.max(0, Math.floor((boss.hp / boss.maxHp) * 100));
+            bossEl.textContent = dungeonUIConfig.labels.boss(boss.name, bossHp);
         } else {
             bossEl.style.display = "none";
         }
 
-        // Only show enemies that are NOT dead
-        enemies.filter(e => !e.dead).forEach((e, idx) => {
-            const div = document.createElement("div");
-            div.className = "hp-healthy";
-            div.textContent = `${e.name}: ${Math.max(0, Math.floor((e.hp/e.maxHp)*100))}%`;
-            enemyList.appendChild(div);
+        // 3. Enemy List Performance Fix
+        // Instead of innerHTML = "", we only update if counts change or use fragments
+        const aliveEnemies = enemies.filter(e => !e.dead);
+        
+        // Simple way: Only update innerHTML if it's actually different or at a lower frequency
+        let enemyHTML = "";
+        aliveEnemies.forEach(e => {
+            const hpPct = Math.max(0, Math.floor((e.hp / e.maxHp) * 100));
+            enemyHTML += `<div class="enemy-list-item" style="color:${e.color || '#ff4444'}">
+                            ${e.name}: ${hpPct}%
+                          </div>`;
         });
+        enemyList.innerHTML = enemyHTML;
+
     } else {
         waveBox.style.display = "none";
     }
@@ -3570,15 +4014,21 @@ function gameLoop() {
     });
 
     // Add Enemies/Bosses if in Dungeon
-    if (viewArea === "dungeon") {
-        if (boss && !boss.dead) renderQueue.push({ type: 'monster', data: boss, y: boss.y });
-        enemies.forEach(e => {
-            if (!e.dead) {
-                renderQueue.push({ type: e.isStickman ? 'enemyStickman' : 'monster', data: e, y: e.y });
-            }
-        });
-        drawLootBeams(ctx); // Beams usually sit "behind" players
-    }
+	if (viewArea === "dungeon") {
+		// Treat the boss exactly like any other monster for the sort
+		if (boss && !boss.dead) {
+			renderQueue.push({ type: 'monster', data: boss, y: boss.y });
+		}
+		
+		enemies.forEach(e => {
+			if (!e.dead) {
+				// We use 'monster' for everything because our drawMonster 
+				// function now handles its own internal branching (stickman vs path)
+				renderQueue.push({ type: 'monster', data: e, y: e.y });
+			}
+		});
+		drawLootBeams(ctx); 
+	}
 
     // --- THE MAGIC SORT ---
     // Sort everything by Y coordinate (Lowest Y = furthest away = drawn first)
@@ -3597,9 +4047,13 @@ function gameLoop() {
                 ctx.fill();
             }
             drawStickman(ctx, obj.data);
-        } 
-        else if (obj.type === 'monster') drawMonster(ctx, obj.data);
-        else if (obj.type === 'enemyStickman') drawEnemyStickman(ctx, obj.data);
+        }
+		else if (obj.type === 'monster') {
+			// This function now handles slimes, beasts, custom_paths, AND stickman enemies
+			drawMonster(ctx, obj.data);
+		}
+        //else if (obj.type === 'monster') drawMonster(ctx, obj.data);
+        //else if (obj.type === 'enemyStickman') drawEnemyStickman(ctx, obj.data);
     });
 
     // 5. GLOBAL OVERLAYS (Always on top)
@@ -5106,28 +5560,6 @@ ComfyJS.onCommand = (user, cmd, args, flags, extra) => {
     
     processGameCommand(user, fullMsg.trim(), flags, extra);
 };
-let uiCache = {}
-function syncUI(id, content, parentId) {
-    // 1. Get or Create from Cache
-    if (!uiCache[id]) {
-        let el = document.getElementById(id);
-        if (!el) {
-            el = document.createElement("div");
-            el.id = id;
-            const parent = document.getElementById(parentId);
-            if (parent) parent.appendChild(el);
-        }
-        uiCache[id] = el;
-    }
-
-    const element = uiCache[id];
-
-    // 2. ONLY update if content is different
-    // This prevents the browser from re-rendering the text 60 times a second
-    if (element.innerHTML !== content) {
-        element.innerHTML = content;
-    }
-}
 
 // Close button specifically
 document.getElementById('inventoryClosebtn').addEventListener('click', () => {
