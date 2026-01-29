@@ -4828,8 +4828,6 @@ function renderAchRow(container, title, isUnlocked, color, subtext) {
 }
 
 // Wait for the DOM to load to ensure the action bar exists
-
-/* ================= COMMAND FUNCTIONS ================= */
 function cmdEmote(p, type) {
     p.emote = type;
     
@@ -4840,6 +4838,7 @@ function cmdEmote(p, type) {
     p.emoteTimer = setTimeout(() => {
         p.emote = null;
     }, 5000);
+	console.log(p + 'used emote' + type);
 }
 function cmdSetPose(p, user, args) {
     if (p.dead) return;

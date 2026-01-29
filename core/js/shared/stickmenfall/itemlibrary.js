@@ -1653,7 +1653,7 @@ const POSE_LIBRARY = {
 
 const BODY_PARTS = {
     "stick": {
-        head: (ctx, x, y, p) => {
+/*         head: (ctx, x, y, p) => {
             ctx.save();
             ctx.globalAlpha = 0.9;
             ctx.fillStyle = p.color || "#ff4444";
@@ -1674,7 +1674,72 @@ const BODY_PARTS = {
 			// Creates a half-circle arc from left to right below the eyes
 			ctx.arc(x, y + 2, 4, 0.2 * Math.PI, 0.8 * Math.PI); 
 			ctx.stroke();
-        },
+        }, */
+		head: (ctx, x, y, p) => {
+			ctx.save();
+			ctx.globalAlpha = 0.9;
+			ctx.fillStyle = p.color || "#ff4444";
+			ctx.beginPath(); 
+			ctx.arc(x, y, 10, 0, Math.PI * 2); 
+			ctx.fill();
+			ctx.strokeStyle = "#000";
+			ctx.lineWidth = 1;
+			ctx.stroke();
+
+			// --- EYES ---
+			ctx.fillStyle = "#000";
+			if (p.emote === "laugh") {
+				// "X X" eyes
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(x - 5, y - 5); ctx.lineTo(x - 2, y - 2);
+				ctx.moveTo(x - 2, y - 5); ctx.lineTo(x - 5, y - 2);
+				ctx.moveTo(x + 2, y - 5); ctx.lineTo(x + 5, y - 2);
+				ctx.moveTo(x + 5, y - 5); ctx.lineTo(x + 2, y - 2);
+				ctx.stroke();
+			} else if (p.emote === "cry") {
+				// Normal eyes + blue teardrops
+				ctx.fillRect(x - 4, y - 3, 2, 2); 
+				ctx.fillRect(x + 2, y - 3, 2, 2);
+				ctx.fillStyle = "#00f";
+				ctx.fillRect(x - 4, y, 2, 4);
+				ctx.fillRect(x + 2, y, 2, 4);
+			} else {
+				// Standard eyes
+				ctx.fillRect(x - 4, y - 3, 2, 2); 
+				ctx.fillRect(x + 2, y - 3, 2, 2); 
+			}
+
+			// --- MOUTHS ---
+			ctx.beginPath();
+			ctx.strokeStyle = "#000";
+			ctx.lineWidth = 1.5;
+
+			switch(p.emote) {
+				case "sad":
+				case "cry":
+					// Frown (Upside down arc)
+					ctx.arc(x, y + 7, 4, 1.2 * Math.PI, 1.8 * Math.PI);
+					break;
+				case "surprised":
+					// Small "o" circle
+					ctx.arc(x, y + 4, 2.5, 0, Math.PI * 2);
+					break;
+				case "laugh":
+					// Big open smile
+					ctx.arc(x, y + 2, 5, 0, Math.PI);
+					ctx.closePath();
+					ctx.fillStyle = "#000";
+					ctx.fill();
+					break;
+				default:
+					// Standard Smile
+					ctx.arc(x, y + 2, 4, 0.2 * Math.PI, 0.8 * Math.PI);
+					break;
+			}
+			ctx.stroke();
+			ctx.restore();
+		},
         torso: (ctx, hX, hY, bX, bY) => {
             ctx.beginPath(); 
             ctx.moveTo(hX, hY + 10);
