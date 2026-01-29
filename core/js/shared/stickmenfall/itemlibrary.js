@@ -242,7 +242,8 @@ const ITEM_DB = {
 //
 //------------------------------------------------------------------------------------------------------
 // ------------------------------Boots------------------------------------------------------------------
-    "leather Boots":  { type: "boots", style:"", sources:"dungeon", tier: 2, rarity: 0, def: 1, value: 30,   color: "#5c4033" },
+	"Cloth Boots":  { type: "boots", style:"", sources:"dungeon", tier: 1, rarity: 0, def: 1, value: 30,   color: "#4d4033" },
+    "leather Boots":  { type: "boots", style:"", sources:"dungeon", tier: 2, rarity: 0, def: 2, value: 30,   color: "#5c4033" },
     "leather Booties":{ type: "boots", style:"", sources:"dungeon", tier: 5, rarity: 5, def: 3, value: 35,   color: "#5c2033" },
 //------------------------------------------------------------------------------------------------------
 

@@ -1847,7 +1847,7 @@ function spawnWave() {
             hp: enemyHp, 
             maxHp: enemyHp, 
             x: 500 + (i * 70),
-            y: 540 + (Math.random() * 30), // Slight Y variation for depth
+            y: 520 + (Math.random() * 30), // Slight Y variation for depth
             dead: false,
             isEnemy: true,
             config: config, 
