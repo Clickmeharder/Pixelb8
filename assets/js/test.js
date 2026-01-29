@@ -1681,7 +1681,7 @@ function joinDungeonQueue(p) {
                         player.area = "dungeon";
                         player.y = -200; 
                         player.x = 50 + Math.random() * 250; 
-                        player.targetY = 540; 
+                        player.targetY = c.height - 45; 
                         player.targetX = null; 
                         player.activeTask = "attacking"; 
                     }
@@ -3738,25 +3738,56 @@ function drawScenery(ctx) {
         }
 	} */
 	else if (viewArea === "dungeon") {
-		// 1. The Base Floor (Deep Obsidian)
-		ctx.fillStyle = "#0a0505";
+		// 1. Dynamic Floor Color (Gets darker/purpler as Tier increases)
+		// Tier 1: #3d2b1f (Brown) -> Tier 13: #0a0510 (Deep Void)
+		const darkness = Math.min(180, (dungeonTier - 1) * 15);
+		ctx.fillStyle = `rgb(${61 - (darkness/4)}, ${43 - (darkness/5)}, ${31 - (darkness/6)})`;
 		ctx.fillRect(0, floorY, c.width, floorH);
 
-		// 2. The "Cracked Earth" & Lava Underglow
-		ctx.strokeStyle = "#4a1010"; // Dark blood red cracks
-		ctx.lineWidth = 2;
-		
-		for (let i = 0; i < c.width; i += 30) {
-			let xOffset = (Math.sin(i) * 10);
-			
-			// Draw jagged floor slabs
+		// 2. Dirt Texture/Pebbles (Scattered logic)
+		ctx.fillStyle = "rgba(0,0,0,0.2)";
+		for (let i = 0; i < c.width; i += 40) {
+			// Use a pseudo-random seed based on 'i' so dirt doesn't jump around
+			let x = i + (Math.sin(i) * 20);
+			let size = 2 + (Math.cos(i) * 2);
 			ctx.beginPath();
-			ctx.moveTo(i + xOffset, floorY);
-			ctx.lineTo(i + xOffset + 40, floorY + 15);
-			ctx.lineTo(i + xOffset - 10, floorY + floorH);
-			ctx.stroke();
+			ctx.arc(x, floorY + 15 + (Math.sin(i) * 10), size, 0, Math.PI * 2);
+			ctx.fill();
 		}
 
+		// 3. Tier-Based Accents (Banner Overlay Style)
+		// We add small visual cues on the floor line itself
+		if (dungeonTier >= 2 && dungeonTier < 5) {
+			// Small Cobwebs for Spider Tiers
+			ctx.strokeStyle = "rgba(255,255,255,0.1)";
+			for(let i=100; i<c.width; i+=300) {
+				ctx.beginPath();
+				ctx.moveTo(i, floorY); ctx.lineTo(i+20, floorY+15);
+				ctx.moveTo(i+20, floorY); ctx.lineTo(i, floorY+15);
+				ctx.stroke();
+			}
+		} else if (dungeonTier >= 5 && dungeonTier < 8) {
+			// Frost/Ice patches
+			ctx.fillStyle = "rgba(150, 220, 255, 0.2)";
+			for(let i=50; i<c.width; i+=200) {
+				ctx.fillRect(i, floorY + 2, 40, 4);
+			}
+		} else if (dungeonTier >= 10) {
+			// Void Cracks for Endgame
+			ctx.strokeStyle = "#a020f0";
+			ctx.lineWidth = 1;
+			for(let i=0; i<c.width; i+=150) {
+				ctx.beginPath();
+				ctx.moveTo(i, floorY);
+				ctx.lineTo(i + 15, floorY + 10);
+				ctx.lineTo(i + 5, floorY + 25);
+				ctx.stroke();
+			}
+		}
+
+		// 4. Subtle "Floor Shadow" (Helps the banner look clean on stream)
+		ctx.fillStyle = "rgba(0,0,0,0.3)";
+		ctx.fillRect(0, floorY, c.width, 3);
 	}
 	else if (viewArea === "lab") {
 		// 1. The Floor (Cold, dark metallic panels)
