@@ -3581,7 +3581,8 @@ const backgrounds = {
     town: "",
     dungeon: "",
     arena: "",
-    pond: ""
+    pond: "",
+	lab: ""
 };
 /* function drawScenery(ctx) {
     const now = Date.now();
@@ -3675,6 +3676,20 @@ function drawScenery(ctx) {
     } else if (viewArea === "dungeon") {
         ctx.fillStyle = "#110505";
         ctx.fillRect(0, floorY, c.width, floorH);
+        // Stone details
+        ctx.strokeStyle = "#3e4451";
+        for(let i=0; i<c.width; i+=90) {
+            ctx.strokeRect(i, floorY, 90, 25);
+        }
+    }
+    } else if (viewArea === "lab") {
+        ctx.fillStyle = "#110505";
+        ctx.fillRect(0, floorY, c.width, floorH);
+        // Stone details
+        ctx.strokeStyle = "#3e4451";
+        for(let i=0; i<c.width; i+=90) {
+            ctx.strokeRect(i, floorY, 90, 25);
+        }
     }
 }
 //================================================================================
@@ -3705,7 +3720,7 @@ function getDynamicDuration(p) {
     // This formula adds roughly 7 minutes per level
     // Level 1: 15 + (1 * 7) = 22 mins
     // Level 100: 15 + (100 * 7) = 715 mins (just under 12 hours)
-    const totalMinutes = baseMinutes + (lvl * 7);
+    const totalMinutes = baseMinutes + (lvl * 5);
     
     return totalMinutes * 60 * 1000; // Convert to milliseconds
 }
