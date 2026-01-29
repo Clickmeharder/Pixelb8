@@ -1706,29 +1706,29 @@ function organizeDungeonRanks() {
     Object.values(players).forEach(p => {
         if (p.area !== "dungeon" || p.dead) return;
 
-        // Force them out of attack state so they focus on moving
-        //p.activeTask = "none";
+        // Save what they were doing (attacking, healing, lurking)
+        // Only save it if they aren't ALREADY organizing, to avoid overwriting with "organizing"
+        if (p.activeTask !== "organizing") {
+            p.lastTask = p.activeTask || "none";
+        }
+        
+        p.activeTask = "organizing";
 
-        // Get weapon data, defaulting to 'unarmed' if nothing is equipped
         const weaponName = p.stats.equippedWeapon;
         const weapon = ITEM_DB[weaponName] || { type: "unarmed" };
         
-        // Define Ranged vs Melee/Unarmed
+        // melee = "weapon" or "unarmed". ranged = "bow" or "staff"
         const isRanged = (weapon.type === "bow" || weapon.type === "staff");
 
         if (isRanged) {
-            // Ranged: Backline (Left side of screen)
             p.targetX = 40 + Math.random() * 60; 
         } else {
-            // Melee: Frontline (Includes type "weapon" and "unarmed")
             p.targetX = 160 + Math.random() * 90;
         }
         
-        // Safety: Ensure they have a lane so they aren't all on one pixel-perfect line
         if (p.zLane === undefined) p.zLane = Math.floor(Math.random() * 25);
     });
 }
-
 function startDungeon() {
     dungeonActive = true;
     dungeonWave = 1; 
@@ -2378,19 +2378,25 @@ function updatePhysics(p) {
     }
 
     // --- STATE 3: WALKING ---
-    if (p.targetX !== null && p.targetX !== undefined) {
-        let dx = p.targetX - p.x;
-        if (Math.abs(dx) > 5) {
-            p.x += dx * 0.1;
-            p.lean = dx > 0 ? 0.2 : -0.2;
-        } else {
-            p.x = p.targetX;
-            p.lean = 0;
-            if (p.activeTask !== "attacking" && p.activeTask !== "pvp") {
-                p.targetX = null;
-            }
-        }
-    }
+	// --- Inside updatePhysics(p) ---
+	if (p.targetX !== null && p.targetX !== undefined) {
+		let dx = p.targetX - p.x;
+		if (Math.abs(dx) > 3) {
+			p.x += dx * 0.12;
+			p.lean = dx > 0 ? 0.2 : -0.2;
+		} else {
+			// --- ARRIVED AT POSITION ---
+			p.x = p.targetX;
+			p.lean = 0;
+			p.targetX = null;
+
+			// If they were organizing, put them back to their previous job
+			if (p.activeTask === "organizing") {
+				p.activeTask = p.lastTask || "none";
+				p.lastTask = null; // Clear it out
+			}
+		}
+	}
 
     // --- STATE 4: SEPARATION ---
     // Pass the target goal so we know if they should be "ghosting"
