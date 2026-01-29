@@ -3491,7 +3491,13 @@ function drawPreview() {
     }
 }
 
-// 3. Asset Injection
+// 3. Asset Injection/asset saving
+// i think we should make it so we can only use creation tool when we are at the lab, and new items and monsters should always start at lvl 1, after--
+// modeling them with the creation tool we should be able to do something in the lab to "grow" the creature/mob/npc/enemy  or "manufacture" the weapon/hat or item - 
+// growing creatures/bosses/monsters/enemies or npc's should reward a new skill "biology" and manufacturing items should go towards a new engineer skill
+// after reaching a certain biology skill we shuld unlock the ability to "mutate" default enemies,monsters and creatures, or custom ones, or make hybrids giving them a mutation stat
+// if the mutated products are further mutated they get mrore mutated allowing users to create new enemies and creatures or npcs, mutate them, make hybrids or w.e --
+// perpetually make them wierder and unique and engineering shuld have a similar mechanic for items 
 function saveAsset(silent = false) {
     const nameInput = document.getElementById('asset-name');
     const name = nameInput.value.trim().replace(/\s+/g, '_') || "Custom_" + Date.now();
@@ -3722,6 +3728,15 @@ function drawScenery(ctx) {
         ctx.fillRect(250, floorY + 10, c.width - 250, floorH - 10);
 		drawBuyer(ctx);
     }
+/* 	else if (viewArea === "dungeon") {
+        ctx.fillStyle = "#110505";
+        ctx.fillRect(0, floorY, c.width, floorH);
+        // Stone details
+        ctx.strokeStyle = "#3e4451";
+        for(let i=0; i<c.width; i+=90) {
+            ctx.strokeRect(i, floorY, 90, 25);
+        }
+	} */
 	else if (viewArea === "dungeon") {
 		// 1. The Base Floor (Deep Obsidian)
 		ctx.fillStyle = "#0a0505";
@@ -3731,8 +3746,8 @@ function drawScenery(ctx) {
 		ctx.strokeStyle = "#4a1010"; // Dark blood red cracks
 		ctx.lineWidth = 2;
 		
-		for (let i = 0; i < c.width; i += 60) {
-			let xOffset = (Math.sin(i) * 20);
+		for (let i = 0; i < c.width; i += 30) {
+			let xOffset = (Math.sin(i) * 10);
 			
 			// Draw jagged floor slabs
 			ctx.beginPath();
@@ -3740,44 +3755,8 @@ function drawScenery(ctx) {
 			ctx.lineTo(i + xOffset + 40, floorY + 15);
 			ctx.lineTo(i + xOffset - 10, floorY + floorH);
 			ctx.stroke();
-
-			// Random Ember Glow (Flickering)
-			if (i % 120 === 0) {
-				let flicker = Math.sin(Date.now() / 200) * 5;
-				ctx.fillStyle = "#ff4400";
-				ctx.shadowBlur = 10 + flicker;
-				ctx.shadowColor = "#ff2200";
-				ctx.beginPath();
-				ctx.arc(i + xOffset, floorY + 5, 2, 0, Math.PI * 2);
-				ctx.fill();
-				ctx.shadowBlur = 0; // Reset for performance
-			}
 		}
 
-		// 3. Scattered Remains (Bones)
-		ctx.fillStyle = "#a0a090"; // Aged bone color
-		for (let i = 150; i < c.width; i += 400) {
-			let bx = i + (Math.cos(i) * 50);
-			// Draw a simple skull/bone shape
-			ctx.fillRect(bx, floorY + 10, 8, 5); 
-			ctx.beginPath();
-			ctx.arc(bx + 4, floorY + 8, 4, 0, Math.PI * 2);
-			ctx.fill();
-		}
-
-		// 4. Dungeon Pillars (Background)
-		ctx.fillStyle = "#1a1111";
-		for (let i = 0; i < c.width; i += 250) {
-			// Shadowy pillars rising into the darkness
-			ctx.fillRect(i, floorY - 150, 40, 150);
-			
-			// Torchlight on the pillars
-			let torchFlicker = Math.random() * 2;
-			ctx.fillStyle = "#ff8800";
-			ctx.beginPath();
-			ctx.arc(i + 20, floorY - 80, 3 + torchFlicker, 0, Math.PI * 2);
-			ctx.fill();
-		}
 	}
 	else if (viewArea === "lab") {
 		// 1. The Floor (Cold, dark metallic panels)
