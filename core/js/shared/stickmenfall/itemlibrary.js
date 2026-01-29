@@ -1966,7 +1966,7 @@ const MONSTER_DB = {
     "CHRONOS": { drawType: "stickman", scale: 10.0, color: "#00d4ff", hpMult: 50 },
     "THE_CREATOR": { drawType: "custom_path", scale: 12.0, hpMult: 100 } 
 };
-// Theme-based waves
+// Theme-based tier waves
 const DUNGEON_THEMES = {
     1: { name: "The Training Grounds", mobs: ["Slime", "StickmanHunter"], boss: "DUNGEON_OVERLORD" },
     2: { name: "The Silken Den", mobs: ["Spiderling", "CaveSpider"], boss: "BROOD_MOTHER" },
