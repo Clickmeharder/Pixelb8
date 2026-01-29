@@ -3047,67 +3047,72 @@ function drawStickman(ctx, p) {
 function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
-    const anim = { bodyY: Math.sin(now / 200) * 2, armMove: 0, lean: -0.2 }; 
+
+    const anim = getAnimationState(e, now); 
     const anchors = getAnchorPoints(e, anim); 
     const limbs = getLimbPositions(e, anchors, anim, now);
 
     ctx.save();
-    ctx.translate(e.x, e.y); // Move to monster root
-    
-    // --- Draw Body (Mirrored) ---
-    ctx.save();
-    ctx.scale(-1, 1); // Flip body only
+    // --- THE FLIP FIX ---
+    ctx.translate(e.x, 0); 
+    ctx.scale(-1, 1); 
+    ctx.translate(-e.x, 0); 
+
     ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 3; 
+    e.isEnemy = true; 
 
-    BODY_PARTS["stick"].head(ctx, anchors.headX, anchors.headY, e);
+    // Draw the actual body
     drawStickmanBody(ctx, e, anchors, limbs);
+    
+    // Draw the gear (Helmets, Weapons, etc.)
+    renderEquipmentLayer(ctx, e, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
 
-    if (e.equipped) {
-        if (e.equipped.pants) drawEnemyPants(ctx, e, anchors, limbs.leftFoot, limbs.rightFoot, ITEM_DB[e.equipped.pants]);
-        if (e.equipped.armor) drawEnemyArmor(ctx, e, anchors, ITEM_DB[e.equipped.armor]);
-        if (e.equipped.helmet) drawEnemyHeadgear(ctx, e, anchors, ITEM_DB[e.equipped.helmet]);
-        if (e.equipped.weapon) {
-            let weapon = ITEM_DB[e.equipped.weapon];
-            ctx.save();
-            ctx.translate(limbs.rightHand.x, limbs.rightHand.y);
-            const drawFn = WEAPON_STYLES[weapon.style || weapon.type] || WEAPON_STYLES["sword"];
-            drawFn(ctx, weapon, true, now, e, anchors.bodyY, anchors.lean);
-            ctx.restore();
-        }
+    ctx.restore(); // Exit the flipped state BEFORE drawing text
+
+    // --- UI (Name & HP) - Now guaranteed not to be backwards ---
+    ctx.textAlign = "center";
+    ctx.font = "bold 12px monospace";
+    
+    const enemyLvl = e.level || e.stats?.combatLevel || "??";
+    ctx.fillStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444";
+    ctx.fillText(`${e.name} [Lvl ${enemyLvl}]`, e.x, e.y + 40);
+
+    if (e.hp < e.maxHp) {
+        ctx.fillStyle = "rgba(40, 40, 40, 0.9)"; 
+        ctx.fillRect(e.x - 20, e.y + 48, 40, 4);
+        ctx.fillStyle = "#f00";
+        ctx.fillRect(e.x - 20, e.y + 48, 40 * (e.hp / e.maxHp), 4);
     }
-    ctx.restore(); // Stop mirroring here
-
-    // --- Draw UI (Not Mirrored) ---
-    drawEnemyUI(ctx, e);
-
-    ctx.restore();
 }
 function renderMonsterBody(ctx, e, now) {
     const cfg = e.config;
     if (!cfg) return;
-    
+
+    // REDIRECT: If it's a stickman, use the stickman function and STOP
+    if (cfg.drawType === "stickman") {
+        drawEnemyStickman(ctx, e);
+        return; 
+    }
+
     const scale = e.scale || cfg.scale || 1.0;
     const styleFn = MONSTER_STYLES[cfg.drawType] || MONSTER_STYLES.blob;
 
     ctx.save();
     ctx.translate(e.x, e.y);
-    ctx.scale(scale, scale);
+    ctx.scale(scale, scale); // This makes bosses massive
     
-    // 1. Pre-render: Wings (Behind everything)
-    if (cfg.wings) renderMonsterWings(ctx, e, now, cfg);
-
-    // 2. Core Render: The Body Style
+    // Core Render
     ctx.fillStyle = e.color || "#ff4444";
     ctx.strokeStyle = "#000";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2 / scale; // Adjust line width so it doesn't get too fat
     styleFn(ctx, e, now, cfg);
 
-    // 3. Post-render: Head & Gear (On top)
     renderMonsterHead(ctx, e, cfg);
-    if (cfg.hasArms) renderMonsterArms(ctx, e, now, cfg);
-
     ctx.restore();
+    
+    // Draw UI AFTER restore so text isn't massive/backwards
+    drawEnemyUI(ctx, e);
 }
 function renderMonsterHead(ctx, e, cfg) {
     const headAt = cfg.headAnchor || { x: 0, y: -15 };
@@ -3134,7 +3139,6 @@ function renderMonsterHead(ctx, e, cfg) {
     }
     ctx.restore();
 }
-
 function renderMonsterWings(ctx, e, now, cfg) {
     const flap = Math.sin(now / 100) * 0.5;
     ctx.fillStyle = e.color;
@@ -3149,82 +3153,6 @@ function renderMonsterWings(ctx, e, now, cfg) {
         ctx.restore();
     });
     ctx.globalAlpha = 1.0;
-}
-/* function drawMonster(ctx, m) {
-    if (m.dead) return;
-    ctx.save();
-    const bob = Math.sin(Date.now() / 200) * 5;
-    const scale = m.isBoss ? 2.5 : 1;
-
-    ctx.translate(m.x, m.y + bob);
-    ctx.scale(scale, scale);
-
-    // Simple Slime/Blob Body
-    ctx.fillStyle = m.color || "#00ff00";
-    ctx.beginPath();
-    ctx.arc(0, 0, 20, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Aggressive Eyes
-    ctx.fillStyle = "white";
-    ctx.beginPath();
-    ctx.arc(-7, -5, 5, 0, Math.PI * 2); ctx.arc(7, -5, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "black";
-    ctx.fillRect(-9, -6, 4, 4); ctx.fillRect(5, -6, 4, 4);
-
-    ctx.restore(); // Restore before text so scale doesn't mess up font size
-
-    // --- MONSTER NAME & HP BAR ---
-    ctx.textAlign = "center";
-    ctx.fillStyle = m.isBoss ? "#ff00ff" : "#fff"; // Bosses get a special color name
-    ctx.font = m.isBoss ? "bold 14px monospace" : "12px monospace";
-    
-    // Position text slightly lower if it's a big boss
-    const textYOffset = m.isBoss ? 60 : 35;
-    ctx.fillText(m.name, m.x, m.y + textYOffset);
-
-    // HP Bar
-    ctx.fillStyle = "#444";
-    ctx.fillRect(m.x - 25, m.y + textYOffset + 8, 50, 5);
-    ctx.fillStyle = "#ff0000";
-    ctx.fillRect(m.x - 25, m.y + textYOffset + 8, 50 * (m.hp / m.maxHp), 5);
-}
- */
-function drawEnemyUI(ctx, e) {
-    if (e.dead) return;
-
-    // We calculate offsets relative to (0,0) which is the monster's base
-    const scale = (e.scale || 1);
-    const barWidth = 40 * scale;
-    const barHeight = 4;
-    
-    // Position the UI above the head (usually negative Y)
-    // Adjust -60 based on how tall your average monster is
-    const yOffset = -60 * scale; 
-
-    // 1. Draw Name
-    ctx.textAlign = "center";
-    ctx.font = `bold ${Math.max(10, 12 * scale)}px monospace`;
-    ctx.fillStyle = e.isBoss ? "#ff00ff" : "#ff4444"; 
-    ctx.fillText(e.name, 0, yOffset - 10);
-
-    // 2. Health Bar Background
-    ctx.fillStyle = "#444";
-    ctx.fillRect(-barWidth / 2, yOffset, barWidth, barHeight);
-
-    // 3. Health Bar Fill
-    const hpPct = Math.max(0, e.hp / e.maxHp);
-    ctx.fillStyle = hpPct > 0.3 ? "#f00" : "#ff8800"; // Red, Orange if critical
-    ctx.fillRect(-barWidth / 2, yOffset, barWidth * hpPct, barHeight);
-
-    // 4. Boss Frame
-    if (e.isBoss) {
-        ctx.strokeStyle = "gold";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(-barWidth / 2 - 2, yOffset - 2, barWidth + 4, barHeight + 4);
-    }
 }
 function drawMonster(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
@@ -3268,6 +3196,68 @@ function drawMonster(ctx, e) {
     ctx.restore(); 
 }
 
+/* function drawMonster(ctx, m) {
+    if (m.dead) return;
+    ctx.save();
+    const bob = Math.sin(Date.now() / 200) * 5;
+    const scale = m.isBoss ? 2.5 : 1;
+
+    ctx.translate(m.x, m.y + bob);
+    ctx.scale(scale, scale);
+
+    // Simple Slime/Blob Body
+    ctx.fillStyle = m.color || "#00ff00";
+    ctx.beginPath();
+    ctx.arc(0, 0, 20, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Aggressive Eyes
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(-7, -5, 5, 0, Math.PI * 2); ctx.arc(7, -5, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "black";
+    ctx.fillRect(-9, -6, 4, 4); ctx.fillRect(5, -6, 4, 4);
+
+    ctx.restore(); // Restore before text so scale doesn't mess up font size
+
+    // --- MONSTER NAME & HP BAR ---
+    ctx.textAlign = "center";
+    ctx.fillStyle = m.isBoss ? "#ff00ff" : "#fff"; // Bosses get a special color name
+    ctx.font = m.isBoss ? "bold 14px monospace" : "12px monospace";
+    
+    // Position text slightly lower if it's a big boss
+    const textYOffset = m.isBoss ? 60 : 35;
+    ctx.fillText(m.name, m.x, m.y + textYOffset);
+
+    // HP Bar
+    ctx.fillStyle = "#444";
+    ctx.fillRect(m.x - 25, m.y + textYOffset + 8, 50, 5);
+    ctx.fillStyle = "#ff0000";
+    ctx.fillRect(m.x - 25, m.y + textYOffset + 8, 50 * (m.hp / m.maxHp), 5);
+}
+ */
+function drawEnemyUI(ctx, e) {
+    ctx.save();
+    // We do NOT translate or scale here, or if we do, we use world coords
+    ctx.textAlign = "center";
+    ctx.scale(1, 1); // Force scale to normal for text
+    
+    const nameY = e.y + (e.isBoss ? 80 : 40);
+    
+    ctx.fillStyle = e.isBoss ? "#ff0000" : "#fff";
+    ctx.font = e.isBoss ? "bold 16px monospace" : "12px monospace";
+    ctx.fillText(e.name, e.x, nameY);
+
+    // HP Bar
+    const barWidth = e.isBoss ? 100 : 40;
+    ctx.fillStyle = "#444";
+    ctx.fillRect(e.x - barWidth/2, nameY + 10, barWidth, 5);
+    ctx.fillStyle = "#0f0";
+    ctx.fillRect(e.x - barWidth/2, nameY + 10, barWidth * (e.hp / e.maxHp), 5);
+    ctx.restore();
+}
 function drawSheathedWeapon(ctx, p, anchors, item) {
     ctx.save();
     ctx.translate(p.x - 5 - (anchors.lean * 5), p.y - 5 + anchors.bodyY);
