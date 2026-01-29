@@ -3086,20 +3086,32 @@ function drawStickman(ctx, p) {
     
     if (p.dead) return drawCorpse(ctx, p, now);
 
+    // --- ANTI-OVERLAP LOGIC ---
+    // Count how many players are in the same X-spot in this area
+    // Using p.id or p.name to ensure a consistent stack order
+    const nearbyPlayers = Object.values(players).filter(other => 
+        other.area === p.area && 
+        !other.dead && 
+        other !== p && 
+        Math.abs(other.x - p.x) < 35 && 
+        other.name < p.name // Alphabetical sort ensures they don't "flicker" positions
+    ).length;
+    
+    const stackY = nearbyPlayers * 16; // 16px per name plate
+
     const anim = getAnimationState(p, now);
     const anchors = getAnchorPoints(p, anim);
     const limbs = getLimbPositions(p, anchors, anim, now);
     const isDeep = (p.area === "pond" && p.x > 250);
 
     ctx.save(); 
-	// ---Scaling/Flipping Logic ---
-    // Only flip if they are attacking and facing left
+    // --- Scaling/Flipping Logic ---
     if ((p.activeTask === "attacking" || p.activeTask === "pvp") && p.facing === -1) {
         ctx.translate(p.x, 0);
         ctx.scale(-1, 1);
         ctx.translate(-p.x, 0);
     }
-    // --- 1. TRANSPARENCY & WORLD EFFECTS ---
+
     let baseAlpha = 1.0;
     if (p.activeTask === "lurking") {
         baseAlpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
@@ -3107,43 +3119,44 @@ function drawStickman(ctx, p) {
     }
     ctx.globalAlpha = isDeep ? baseAlpha * 0.3 : baseAlpha;
 
-    // --- 2. BACK LAYER & SKELETON ---
     if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors);
     drawStickmanBody(ctx, p, anchors, limbs);
-
-    // --- 3. THE EQUIPMENT SANDWICH ---
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
-	ctx.restore();
-    // --- 4. UI RENDERING (Names & Conditional HP) ---
+    
+    ctx.restore();
+
+    // --- UI RENDERING ---
     let uiAlpha = isDeep ? Math.max(0.5, baseAlpha * 0.7) : baseAlpha;
     ctx.globalAlpha = uiAlpha;
     ctx.textAlign = "center";
     
-    // --- 5. Name with Combat Level: "Name (Lvl 126)"
+    // Position UI above the head (y - 45) and apply stacking
+    const uiBaseY = p.y - 45 - stackY;
+
+    // 5. Name with Combat Level
     const combatLvl = p.stats.combatLevel || 3;
     ctx.fillStyle = "#fff"; 
     ctx.font = "12px monospace"; 
-    ctx.fillText(`${p.name} (Lvl ${combatLvl})`, p.x, p.y + 36);
+    ctx.fillText(`${p.name} (Lvl ${combatLvl})`, p.x, uiBaseY);
 
-    // ---6. HP Bar: Only draws if damaged
+    // 6. HP Bar (Now stays attached to the name plate)
     if (p.hp < p.maxHp) {
-        ctx.fillStyle = "rgba(68, 68, 68, 0.8)";
-        ctx.fillRect(p.x - 20, p.y + 40, 40, 4);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+        ctx.fillRect(p.x - 20, uiBaseY + 6, 40, 4);
         
-        // Flashing red if struggling in water, else standard green
         let hpColor = (p.struggleStartTime && isDeep && Math.floor(now / 200) % 2 === 0) ? "#f00" : "#0f0";
         ctx.fillStyle = hpColor;
-        ctx.fillRect(p.x - 20, p.y + 40, 40 * (p.hp / p.maxHp), 4);
+        ctx.fillRect(p.x - 20, uiBaseY + 6, 40 * (p.hp / p.maxHp), 4);
     }
-	// ---7. CHAT BUBBLE (New Addition)
+
+    // 7. CHAT BUBBLE
     if (p.chatMessage && (now - p.chatTime < 5000)) {
-        // Optional: Fade out effect for the last 1 second
         const age = now - p.chatTime;
         if (age > 4000) ctx.globalAlpha = 1 - (age - 4000) / 1000;
         
-        drawChatBubble(ctx, p, p.x, p.y + anim.bodyY, p.chatMessage);
+        // Chat bubbles stack even higher than names
+        drawChatBubble(ctx, p, p.x, uiBaseY - 10, p.chatMessage);
     }
-    ctx.restore(); 
 }
 /* function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
@@ -3188,43 +3201,39 @@ function drawStickman(ctx, p) {
 function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
+    
+    // Same overlap check
+    const nearby = enemies.filter(other => !other.dead && other !== e && Math.abs(other.x - e.x) < 30 && other.id < e.id).length;
+    const stackY = nearby * 15;
 
     const anim = getAnimationState(e, now); 
     const anchors = getAnchorPoints(e, anim);
     const limbs = getLimbPositions(e, anchors, anim, now);
 
     ctx.save();
-    // --- THE FLIP FIX ---
     ctx.translate(e.x, 0); 
     ctx.scale(-1, 1); 
     ctx.translate(-e.x, 0); 
-
-    ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
-    ctx.lineWidth = 3; 
-    e.isEnemy = true; 
-
-    // Draw the actual body
     drawStickmanBody(ctx, e, anchors, limbs);
-    
-    // Draw the gear (Helmets, Weapons, etc.)
     renderEquipmentLayer(ctx, e, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
+    ctx.restore(); 
 
-    ctx.restore(); // Exit the flipped state BEFORE drawing text
-
-    // --- UI (Name & HP) - Now guaranteed not to be backwards ---
+    // --- UI ---
     ctx.textAlign = "center";
     ctx.font = "bold 12px monospace";
-    
     const enemyLvl = e.level || e.stats?.combatLevel || "??";
-    ctx.fillStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444";
-    ctx.fillText(`${e.name} [Lvl ${enemyLvl}]`, e.x, e.y + 40);
+    
+    // Apply stackY to the Y coordinate (subtracting moves it UP)
+    const uiY = e.y - 45 - stackY; 
 
-    if (e.hp < e.maxHp) {
-        ctx.fillStyle = "rgba(40, 40, 40, 0.9)"; 
-        ctx.fillRect(e.x - 20, e.y + 48, 40, 4);
-        ctx.fillStyle = "#f00";
-        ctx.fillRect(e.x - 20, e.y + 48, 40 * (e.hp / e.maxHp), 4);
-    }
+    ctx.fillStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444";
+    ctx.fillText(`${e.name} [Lvl ${enemyLvl}]`, e.x, uiY);
+
+    // HP Bar
+    ctx.fillStyle = "rgba(40, 40, 40, 0.9)"; 
+    ctx.fillRect(e.x - 20, uiY + 5, 40, 4);
+    ctx.fillStyle = "#f00";
+    ctx.fillRect(e.x - 20, uiY + 5, 40 * (e.hp / e.maxHp), 4);
 }
 function renderMonsterBody(ctx, e, now) {
     const cfg = e.config;
@@ -3291,33 +3300,35 @@ function renderMonsterWings(ctx, e, now, cfg) {
 function drawMonster(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
-    const cfg = e.config || { drawType: "blob", color: "#f0f" };
-	// --- THE REDIRECT ---
+    const cfg = e.config || { drawType: "blob" };
+
     if (cfg.drawType === "stickman") {
         drawEnemyStickman(ctx, e);
-        return; // EXIT EARLY so we don't double-draw or double-translate
+        return;
     }
+
+    // --- ANTI-OVERLAP LOGIC ---
+    // Count how many enemies are to the left of this one in the same spot
+    const nearby = enemies.filter(other => 
+        !other.dead && 
+        other !== e && 
+        Math.abs(other.x - e.x) < 30 && 
+        other.id < e.id // Only offset if the other has a lower ID
+    ).length;
+    const stackY = nearby * 15; // Move text up 15px per nearby enemy
+
     ctx.save();
-	// Position the monster
     ctx.translate(e.x, e.y);
     const scale = e.scale || cfg.scale || 1.0;
     ctx.scale(scale, scale);
 
-    // Apply Monster Glow
-    if (cfg.glow) {
-        ctx.shadowBlur = 15 + Math.sin(now / 200) * 10;
-        ctx.shadowColor = cfg.glowColor || e.color;
-    }
-
-    // 1. Draw Body & Wings
+    // 1. Draw Body
     const styleFn = MONSTER_STYLES[cfg.drawType] || MONSTER_STYLES.blob;
     styleFn(ctx, e, now, cfg);
     if (cfg.wings) renderMonsterWings(ctx, e, now, cfg);
 
-
-
-    // 3. Monster UI (Name/HP)
-    drawEnemyUI(ctx, e); 
+    // 2. Draw UI (Pass the scale and stack height)
+    drawEnemyUI(ctx, e, scale, stackY); 
 
     ctx.restore(); 
 }
@@ -3364,24 +3375,30 @@ function drawMonster(ctx, e) {
     ctx.fillRect(m.x - 25, m.y + textYOffset + 8, 50 * (m.hp / m.maxHp), 5);
 }
  */
-function drawEnemyUI(ctx, e) {
+function drawEnemyUI(ctx, e, scale, stackY = 0) {
+    // We are already translated to e.x, e.y from drawMonster
+    // We must reverse the scale for text so it stays readable
     ctx.save();
-    // We do NOT translate or scale here, or if we do, we use world coords
+    ctx.scale(1/scale, 1/scale); 
+    
     ctx.textAlign = "center";
-    ctx.scale(1, 1); // Force scale to normal for text
     
-    const nameY = e.y + (e.isBoss ? 80 : 40);
-    
-    ctx.fillStyle = e.isBoss ? "#ff0000" : "#fff";
+    // Move the UI up based on the monster's size and how many others are here
+    const baseOffset = e.isBoss ? -80 : -45;
+    const finalY = baseOffset - stackY; 
+
+    // Name
     ctx.font = e.isBoss ? "bold 16px monospace" : "12px monospace";
-    ctx.fillText(e.name, e.x, nameY);
+    ctx.fillStyle = e.isBoss ? "#ff3333" : "#ffffff";
+    ctx.fillText(e.name, 0, finalY);
 
     // HP Bar
     const barWidth = e.isBoss ? 100 : 40;
-    ctx.fillStyle = "#444";
-    ctx.fillRect(e.x - barWidth/2, nameY + 10, barWidth, 5);
-    ctx.fillStyle = "#0f0";
-    ctx.fillRect(e.x - barWidth/2, nameY + 10, barWidth * (e.hp / e.maxHp), 5);
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillRect(-barWidth/2, finalY + 5, barWidth, 5);
+    ctx.fillStyle = (e.hp / e.maxHp > 0.3) ? "#0f0" : "#f00"; // Green, Red if low
+    ctx.fillRect(-barWidth/2, finalY + 5, barWidth * (e.hp / e.maxHp), 5);
+    
     ctx.restore();
 }
 function drawSheathedWeapon(ctx, p, anchors, item) {
