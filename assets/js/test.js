@@ -3646,7 +3646,7 @@ const backgrounds = {
  */
 function drawScenery(ctx) {
     const now = Date.now();
-    const floorH = 60;                // The thickness of the floor
+    const floorH = 30;                // The thickness of the floor
     const floorY = c.height - floorH; // 540
 
     // Set floor color based on area
