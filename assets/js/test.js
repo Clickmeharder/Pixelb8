@@ -693,12 +693,22 @@ function performAttack(p) {
 	const attackSpeed = weapon.speed || 1000;
 
     // 3. Positioning
-    const dist = Math.abs(p.x - target.x);
-    if (dist > rangeNeeded) {
+
+    /* if (dist > rangeNeeded) {
         const offset = p.x < target.x ? -rangeNeeded + 20 : rangeNeeded - 20;
         p.targetX = target.x + offset;
         // Keep activeTask as "attacking" so weapon stays in hand!
-    } else {
+    } else { */
+	const dist = Math.abs(p.x - target.x);
+	if (dist > rangeNeeded) {
+		// Generate a slightly unique offset for each player so they don't target the exact same spot
+		// Using p.zLane or p.id to jitter the landing spot
+		const jitter = (p.zLane % 10) - 5; 
+		const finalRange = rangeNeeded - 10 + jitter;
+		
+		const offset = p.x < target.x ? -finalRange : finalRange;
+		p.targetX = target.x + offset;
+	} else {
         p.targetX = null;
         
         // Ensure timer is initialized for the first swing
@@ -2374,9 +2384,47 @@ function updatePhysics(p) {
     // Pass the target goal so we know if they should be "ghosting"
     resolveCrowding(p);
 }
+
 function resolveCrowding(p) {
+    const bubbleX = 30; 
+    const bubbleY = 15; 
+    
+    // We no longer 'return' if targetX exists. 
+    // Instead, we just adjust how much the collision affects them.
+
+    for (let id in players) {
+        let other = players[id];
+        if (other === p || other.area !== p.area || other.dead || other.targetY) continue;
+
+        let dx = p.x - other.x;
+        let dy = p.y - other.y;
+
+        if (Math.abs(dx) < bubbleX && Math.abs(dy) < bubbleY) {
+            // 1. Calculate Force
+            if (dx === 0) dx = p.id > other.id ? 1 : -1;
+            
+            // If the player is ACTIVELY moving (targetX), we reduce the repulsion 
+            // so they can still reach their target, but don't perfectly overlap.
+            let pushStrength = (p.targetX !== null) ? 0.05 : 0.15;
+            let forceX = (bubbleX - Math.abs(dx)) * pushStrength;
+            
+            // 2. APPLY X-AXIS PUSH
+            p.x += dx > 0 ? forceX : -forceX;
+
+            // 3. LATERAL EVASION (The "Go Around" Logic)
+            // If they are colliding horizontally, nudge the Y position 
+            // to help them slip into a different 'lane'.
+            let forceY = (bubbleY - Math.abs(dy)) * 0.12;
+            p.y += dy > 0 ? forceY : -forceY;
+            
+            // Clamp Y so they don't walk off the floor into the sky/UI
+            p.y = Math.max(530, Math.min(565, p.y));
+        }
+    }
+}
+/* function resolveCrowding(p) {
     const bubbleX = 35; // Horizontal personal space
-    const bubbleY = 8;  // Vertical personal space (tight depth)
+    const bubbleY = 12;  // Vertical personal space (tight depth)
     
     // GHOSTING LOGIC: If I'm actively moving to intercept/interact, 
     // disable pushing so I don't get stuck behind idle players.
@@ -2401,7 +2449,7 @@ function resolveCrowding(p) {
             p.y += dy > 0 ? yForce : -yForce;
         }
     }
-}
+} */
 function triggerSplash(p) {
     // We pass 'p' so the floater knows the name, area, and position
     spawnFloater(p, "💦 SPLASH!", "#44ccff");
@@ -5579,9 +5627,9 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     const slowActions = ["!home", "!pond", "!town", "!arena", "!dungeon", "!join", "!pvp"];
 
     // Apply the cooldown checks
-    if (fastActions.includes(cmd) && isOnCooldown(p, "fast", 10)) return;
-    if (mediumActions.includes(cmd) && isOnCooldown(p, "med", 30)) return;
-    if (slowActions.includes(cmd) && isOnCooldown(p, "slow", 45)) return;
+    if (fastActions.includes(cmd) && isOnCooldown(p, "fast", 3)) return;
+    if (mediumActions.includes(cmd) && isOnCooldown(p, "med", 6)) return;
+    if (slowActions.includes(cmd) && isOnCooldown(p, "slow", 15)) return;
 
     // Now run the actual logic
     if (cmd === "!clearinventory" || cmd === "!clearinv") { clearPlayerInventory(p.name); return; }
@@ -5743,7 +5791,7 @@ document.addEventListener("DOMContentLoaded", () => {
 //==========================
 //RUNNING ON LOAD
 gameLoop();
-localStorage.removeItem("rpg_jaedraze");
-//localStorage.removeItem("rpg_JaeDraze");
+//localStorage.removeItem("rpg_jaedraze");
+localStorage.removeItem("rpg_JaeDraze");
 //localStorage.removeItem("rpg_Player1");
 //localStorage.removeItem("rpg_player1");
