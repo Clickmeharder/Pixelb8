@@ -87,7 +87,7 @@ function loadStats(name) {
 		currentHp: 100,
 		pixels: 1500,
 		lastX: 400,
-        lastY: 450,
+        lastY: 460,
         attackLevel: 1, attackXP: 0,
 		archerLevel: 1, archerXP: 0,
 		magicLevel: 1, magicXP: 0,
@@ -131,7 +131,7 @@ function loadStats(name) {
     if (!stats.story)   stats.story = { chapter: 0, progress: 0, achievements:0 };
 	// --- SAFETY CHECKS FOR PERSISTENCE ---
     if (stats.lastX === undefined) stats.lastX = 400;
-    if (stats.lastY === undefined) stats.lastY = 450;
+    if (stats.lastY === undefined) stats.lastY = 460;
     if (stats.lastArea === undefined) stats.lastArea = "home";
     if (stats.activeTask === undefined) stats.activeTask = null;
     if (stats.currentHp === undefined) stats.currentHp = stats.maxhp;
@@ -2706,7 +2706,7 @@ function drawEnemyHeadgear(ctx, e, anchors, item) {
     // Determine if it's hair or a helmet based on the item type
     const style = item.style || (item.type === "hair" ? "hair" : "helmet");
     const hX = e.x + (anchors.lean * 20);
-    const hY = e.y - 30 + anchors.bodyY;
+    const hY = e.y - 32 + anchors.bodyY;
     
     ctx.save();
     // Use your existing HAT_STYLES library
@@ -3646,7 +3646,7 @@ const backgrounds = {
  */
 function drawScenery(ctx) {
     const now = Date.now();
-    const floorH = 30;                // The thickness of the floor
+    const floorH = 45;                // The thickness of the floor
     const floorY = c.height - floorH; // 540
 
     // Set floor color based on area
@@ -5743,7 +5743,7 @@ document.addEventListener("DOMContentLoaded", () => {
 //==========================
 //RUNNING ON LOAD
 gameLoop();
-//localStorage.removeItem("rpg_jaedraze");
+localStorage.removeItem("rpg_jaedraze");
 //localStorage.removeItem("rpg_JaeDraze");
 //localStorage.removeItem("rpg_Player1");
 //localStorage.removeItem("rpg_player1");
