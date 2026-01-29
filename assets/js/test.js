@@ -3110,27 +3110,27 @@ function renderMonsterBody(ctx, e, now) {
     ctx.restore();
 }
 function renderMonsterHead(ctx, e, cfg) {
-    const headAt = cfg.headAnchor || { x: -15, y: -10 };
+    const headAt = cfg.headAnchor || { x: 0, y: -15 };
     ctx.save();
     ctx.translate(headAt.x, headAt.y);
     
     if (e.equipped?.helmet) {
         const hat = ITEM_DB[e.equipped.helmet];
-        if (HAT_STYLES[hat.style]) HAT_STYLES[hat.style](ctx, 0, 0, hat.color);
+        // Use your global HAT_STYLES here too!
+        const style = hat.style || "helmet";
+        if (HAT_STYLES[style]) {
+            HAT_STYLES[style](ctx, 0, 0, hat.color || "#777");
+        }
     } else if (cfg.drawType !== "custom_path") {
+        // Default monster face if no helmet
         ctx.beginPath();
         ctx.arc(0, 0, cfg.headSize || 8, 0, Math.PI * 2);
-        ctx.fill(); ctx.stroke();
+        ctx.fill(); 
+        ctx.stroke();
         // Eyes
         ctx.fillStyle = "#000";
-        ctx.fillRect(-4, -2, 2, 2); ctx.fillRect(2, -2, 2, 2);
-    }
-    
-    if (cfg.hasHorn) {
-        ctx.fillStyle = "#fff";
-        ctx.beginPath();
-        ctx.moveTo(0, -5); ctx.lineTo(0, -20); ctx.lineTo(5, -5);
-        ctx.fill();
+        ctx.fillRect(-4, -2, 2, 2); 
+        ctx.fillRect(2, -2, 2, 2);
     }
     ctx.restore();
 }
@@ -3233,27 +3233,36 @@ function drawMonster(ctx, e) {
     const styleFn = MONSTER_STYLES[cfg.drawType] || MONSTER_STYLES.blob;
 
     ctx.save();
-    // 1. Move to monster position
     ctx.translate(e.x, e.y);
     
     const scale = e.scale || cfg.scale || 1.0;
     ctx.scale(scale, scale);
 
-    // 2. Effects
     if (cfg.glow) {
         ctx.shadowBlur = 15 + Math.sin(now / 200) * 10;
         ctx.shadowColor = cfg.glowColor || e.color;
     }
 
-    // 3. Draw Body
+    // 1. Draw Body
     styleFn(ctx, e, now, cfg);
 
-    // 4. Draw Overlays
-    if (cfg.wings) renderWings(ctx, e, now, cfg);
-    if (e.equipped?.helmet) renderMonsterHelmet(ctx, e);
+    // 2. Draw Wings
+    if (cfg.wings) renderMonsterWings(ctx, e, now, cfg);
 
-    // 5. Draw UI while still translated! 
-    // This ensures (0,0) in the UI function is actually the monster's feet.
+    // 3. Draw Helmet (Replaces the broken renderMonsterHelmet call)
+    if (e.equipped?.helmet) {
+        const item = ITEM_DB[e.equipped.helmet];
+        if (item) {
+            const style = item.style || "helmet";
+            const drawFn = HAT_STYLES[style] || HAT_STYLES["helmet"];
+            // Monsters usually have head anchors, or we default to slightly above center
+            const hX = cfg.headAnchor?.x || 0;
+            const hY = cfg.headAnchor?.y || -15;
+            drawFn(ctx, hX, hY, item.color || "#777");
+        }
+    }
+
+    // 4. Draw UI
     drawEnemyUI(ctx, e); 
 
     ctx.restore(); 
