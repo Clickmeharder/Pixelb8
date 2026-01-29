@@ -87,7 +87,7 @@ function loadStats(name) {
 		currentHp: 100,
 		pixels: 1500,
 		lastX: 400,
-        lastY: 550,
+        lastY: 460,
         attackLevel: 1, attackXP: 0,
 		archerLevel: 1, archerXP: 0,
 		magicLevel: 1, magicXP: 0,
@@ -131,7 +131,7 @@ function loadStats(name) {
     if (!stats.story)   stats.story = { chapter: 0, progress: 0, achievements:0 };
 	// --- SAFETY CHECKS FOR PERSISTENCE ---
     if (stats.lastX === undefined) stats.lastX = 400;
-    if (stats.lastY === undefined) stats.lastY = 550;
+    if (stats.lastY === undefined) stats.lastY = 460;
     if (stats.lastArea === undefined) stats.lastArea = "home";
     if (stats.activeTask === undefined) stats.activeTask = null;
     if (stats.currentHp === undefined) stats.currentHp = stats.maxhp;
@@ -2337,7 +2337,7 @@ function drawProjectiles(ctx) {
 }
 /*----------------------------------------------*/
 
-/* function updatePhysics(p) {
+function updatePhysics(p) {
     // 1. Define the depth area
     const horizonY = 530; 
     const frontY = 560;
@@ -2384,58 +2384,13 @@ function drawProjectiles(ctx) {
     // Pass the target goal so we know if they should be "ghosting"
     resolveCrowding(p);
 }
- */
- function updatePhysics(p) {
-    // --- TREADMILL EFFECT ---
-    // If we are resting between waves, move the floor!
-    if (isDungeonResting && viewArea === "dungeon") {
-        dungeonFloorOffset += 2; // Speed of the walk
-    }
 
-    const horizonY = 530; 
-    const groundLevel = horizonY + (p.zLane || 0); 
-
-    // --- STATE 1: FALLING ---
-    if (p.targetY !== undefined && p.targetY !== null) {
-        if (p.y < groundLevel) {
-            p.y += 12;
-            p.lean = 0.1; 
-            return;
-        } else {
-            p.y = groundLevel;
-            p.targetY = null;
-        }
-    }
-
-    // --- STATE 2: WALKING / POSITIONING ---
-    if (p.targetX !== null && p.targetX !== undefined) {
-        let dx = p.targetX - p.x;
-        // Even if p.activeTask === "attacking", they should still try to reach targetX
-        if (Math.abs(dx) > 2) {
-            p.x += dx * 0.08; // Slightly slower/smoother walk
-            p.lean = dx > 0 ? 0.2 : -0.2;
-            
-            // ANIMATION: If the floor is moving, make the stickman "walk" in place
-            if (isDungeonResting) {
-                p.walkAnim = (Date.now() / 150); // Use this in your drawStickman for leg movement
-            }
-        } else {
-            p.x = p.targetX;
-            p.lean = 0;
-            // Only clear targetX if NOT in a dungeon/arena where positions are forced
-            if (viewArea !== "dungeon" && viewArea !== "arena") {
-                p.targetX = null;
-            }
-        }
-    }
-
-    // --- STATE 3: RESOLVE CROWDING ---
-    // We run this ALWAYS, but we make it "softer" if they have a target
-    resolveCrowding(p);
-}
 function resolveCrowding(p) {
-    const bubbleX = 25; // Smaller bubble for tighter ranks
-    const bubbleY = 10; 
+    const bubbleX = 30; 
+    const bubbleY = 15; 
+    
+    // We no longer 'return' if targetX exists. 
+    // Instead, we just adjust how much the collision affects them.
 
     for (let id in players) {
         let other = players[id];
@@ -2445,17 +2400,24 @@ function resolveCrowding(p) {
         let dy = p.y - other.y;
 
         if (Math.abs(dx) < bubbleX && Math.abs(dy) < bubbleY) {
-            if (dx === 0) dx = Math.random() - 0.5;
+            // 1. Calculate Force
+            if (dx === 0) dx = p.id > other.id ? 1 : -1;
             
-            // If they are in a wave (attacking), they have high "determination" 
-            // to stay at targetX, so the push force is very low (0.02).
-            // If they are just idling, the push is stronger (0.1).
-            let pushForce = (p.targetX !== null) ? 0.02 : 0.1;
+            // If the player is ACTIVELY moving (targetX), we reduce the repulsion 
+            // so they can still reach their target, but don't perfectly overlap.
+            let pushStrength = (p.targetX !== null) ? 0.05 : 0.15;
+            let forceX = (bubbleX - Math.abs(dx)) * pushStrength;
             
-            p.x += dx * pushForce;
-            p.y += dy * pushForce;
+            // 2. APPLY X-AXIS PUSH
+            p.x += dx > 0 ? forceX : -forceX;
 
-            // Keep them within the banner floor bounds
+            // 3. LATERAL EVASION (The "Go Around" Logic)
+            // If they are colliding horizontally, nudge the Y position 
+            // to help them slip into a different 'lane'.
+            let forceY = (bubbleY - Math.abs(dy)) * 0.12;
+            p.y += dy > 0 ? forceY : -forceY;
+            
+            // Clamp Y so they don't walk off the floor into the sky/UI
             p.y = Math.max(530, Math.min(565, p.y));
         }
     }
@@ -3737,8 +3699,6 @@ const backgrounds = {
 }
  */
 let dungeonFloorOffset = 0;
-
-
 function drawScenery(ctx) {
     const now = Date.now();
     const floorH = 45;                // The thickness of the floor
@@ -3767,144 +3727,167 @@ function drawScenery(ctx) {
         ctx.fillRect(0, floorY, 250, floorH); 
         ctx.fillStyle = "#0a2e3a"; // Water
         ctx.fillRect(250, floorY + 10, c.width - 250, floorH - 10);
-        drawBuyer(ctx);
+		drawBuyer(ctx);
     }
-    else if (viewArea === "dungeon") {
-        // 1. Dynamic Floor Color (Gets darker/purpler as Tier increases)
-        const darkness = Math.min(180, (dungeonTier - 1) * 15);
-        ctx.fillStyle = `rgb(${61 - (darkness/4)}, ${43 - (darkness/5)}, ${31 - (darkness/6)})`;
-        ctx.fillRect(0, floorY, c.width, floorH);
+	else if (viewArea === "dungeon") {
+		// 1. Dynamic Floor Color (Gets darker/purpler as Tier increases)
+		// Tier 1: #3d2b1f (Brown) -> Tier 13: #0a0510 (Deep Void)
+		const darkness = Math.min(180, (dungeonTier - 1) * 15);
+		ctx.fillStyle = `rgb(${61 - (darkness/4)}, ${43 - (darkness/5)}, ${31 - (darkness/6)})`;
+		ctx.fillRect(0, floorY, c.width, floorH);
 
-        // Calculate a looping shift for the "Treadmill" effect
-        // 120 is a good common multiple for our detail spacings (40, 150, 200, 300)
-        let moveX = dungeonFloorOffset % 1200; 
+		// 2. Dirt Texture/Pebbles (Scattered logic)
+		ctx.fillStyle = "rgba(0,0,0,0.2)";
+		for (let i = 0; i < c.width; i += 40) {
+			// Use a pseudo-random seed based on 'i' so dirt doesn't jump around
+			let x = i + (Math.sin(i) * 20);
+			let size = 2 + (Math.cos(i) * 2);
+			ctx.beginPath();
+			ctx.arc(x, floorY + 15 + (Math.sin(i) * 10), size, 0, Math.PI * 2);
+			ctx.fill();
+		}
 
-        // 2. Dirt Texture/Pebbles (Animated)
-        ctx.fillStyle = "rgba(0,0,0,0.2)";
-        for (let i = -80; i < c.width + 80; i += 40) {
-            let shiftedX = i - (dungeonFloorOffset % 40); 
-            let x = shiftedX + (Math.sin(i) * 20);
-            let size = 2 + (Math.cos(i) * 2);
-            ctx.beginPath();
-            ctx.arc(x, floorY + 15 + (Math.sin(i) * 10), size, 0, Math.PI * 2);
-            ctx.fill();
-        }
+		// 3. Tier-Based Accents (Banner Overlay Style)
+		// We add small visual cues on the floor line itself
+		if (dungeonTier >= 2 && dungeonTier < 5) {
+			// Small Cobwebs for Spider Tiers
+			ctx.strokeStyle = "rgba(255,255,255,0.1)";
+			for(let i=100; i<c.width; i+=300) {
+				ctx.beginPath();
+				ctx.moveTo(i, floorY); ctx.lineTo(i+20, floorY+15);
+				ctx.moveTo(i+20, floorY); ctx.lineTo(i, floorY+15);
+				ctx.stroke();
+			}
+		} else if (dungeonTier >= 5 && dungeonTier < 8) {
+			// Frost/Ice patches
+			ctx.fillStyle = "rgba(150, 220, 255, 0.2)";
+			for(let i=50; i<c.width; i+=200) {
+				ctx.fillRect(i, floorY + 2, 40, 4);
+			}
+		} else if (dungeonTier >= 10) {
+			// Void Cracks for Endgame
+			ctx.strokeStyle = "#a020f0";
+			ctx.lineWidth = 1;
+			for(let i=0; i<c.width; i+=150) {
+				ctx.beginPath();
+				ctx.moveTo(i, floorY);
+				ctx.lineTo(i + 15, floorY + 10);
+				ctx.lineTo(i + 5, floorY + 25);
+				ctx.stroke();
+			}
+		}
 
-        // 3. Tier-Based Accents (Animated)
-        if (dungeonTier >= 2 && dungeonTier < 5) {
-            // Moving Cobwebs
-            ctx.strokeStyle = "rgba(255,255,255,0.1)";
-            for(let i = -300; i < c.width + 300; i += 300) {
-                let shiftedX = i - (dungeonFloorOffset % 300);
-                ctx.beginPath();
-                ctx.moveTo(shiftedX, floorY); ctx.lineTo(shiftedX + 20, floorY + 15);
-                ctx.moveTo(shiftedX + 20, floorY); ctx.lineTo(shiftedX, floorY + 15);
-                ctx.stroke();
-            }
-        } else if (dungeonTier >= 5 && dungeonTier < 8) {
-            // Moving Frost/Ice patches
-            ctx.fillStyle = "rgba(150, 220, 255, 0.2)";
-            for(let i = -200; i < c.width + 200; i += 200) {
-                let shiftedX = i - (dungeonFloorOffset % 200);
-                ctx.fillRect(shiftedX, floorY + 2, 40, 4);
-            }
-        } else if (dungeonTier >= 10) {
-            // Moving Void Cracks
-            ctx.strokeStyle = "#a020f0";
-            ctx.lineWidth = 1;
-            for(let i = -150; i < c.width + 150; i += 150) {
-                let shiftedX = i - (dungeonFloorOffset % 150);
-                ctx.beginPath();
-                ctx.moveTo(shiftedX, floorY);
-                ctx.lineTo(shiftedX + 15, floorY + 10);
-                ctx.lineTo(shiftedX + 5, floorY + 25);
-                ctx.stroke();
-            }
-        }
+		// 4. Subtle "Floor Shadow" (Helps the banner look clean on stream)
+		ctx.fillStyle = "rgba(0,0,0,0.3)";
+		ctx.fillRect(0, floorY, c.width, 3);
+	}
+	else if (viewArea === "lab") {
+		// 1. The Floor (Cold, dark metallic panels)
+		ctx.fillStyle = "#1a1c2c"; 
+		ctx.fillRect(0, floorY, c.width, floorH);
 
-        // 4. Subtle "Floor Shadow"
-        ctx.fillStyle = "rgba(0,0,0,0.3)";
-        ctx.fillRect(0, floorY, c.width, 3);
-    }
-    else if (viewArea === "lab") {
-        ctx.fillStyle = "#1a1c2c"; 
-        ctx.fillRect(0, floorY, c.width, floorH);
-        ctx.strokeStyle = "#333c57";
-        ctx.lineWidth = 2;
-        for (let i = 0; i < c.width; i += 120) {
-            ctx.beginPath();
-            ctx.moveTo(i, floorY);
-            ctx.lineTo(i, floorY + floorH);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(i, floorY + 10);
-            ctx.lineTo(i + 120, floorY + 10);
-            ctx.stroke();
-            ctx.fillStyle = "#292c3d";
-            ctx.fillRect(i + 5, floorY + 4, 4, 4);
-        }
-        ctx.strokeStyle = "#00f2ff"; 
-        ctx.lineWidth = 1;
-        ctx.shadowBlur = 5;
-        ctx.shadowColor = "#00f2ff";
-        ctx.beginPath();
-        ctx.moveTo(0, floorY + 2);
-        ctx.lineTo(c.width, floorY + 2); 
-        ctx.stroke();
-        ctx.shadowBlur = 0; 
-        for (let i = 100; i < c.width; i += 300) {
-            ctx.fillStyle = "rgba(0, 242, 255, 0.05)";
-            ctx.fillRect(i, floorY - 120, 60, 120);
-            ctx.fillStyle = "#333c57";
-            ctx.fillRect(i - 5, floorY - 5, 70, 5); 
-            ctx.fillRect(i - 5, floorY - 125, 70, 8); 
-            ctx.fillStyle = "rgba(0, 242, 255, 0.3)";
-            for(let b=0; b<3; b++) {
-                let bY = (Date.now() / 20 + (i*b)) % 100;
-                ctx.beginPath();
-                ctx.arc(i + 30 + (Math.sin(bY/10)*10), floorY - bY, 2, 0, Math.PI*2);
-                ctx.fill();
-            }
-        }
-    }
-    else if (viewArea === "graveyard") {
-        ctx.fillStyle = "#1a1a1a"; 
-        ctx.fillRect(0, floorY, c.width, floorH);
-        ctx.strokeStyle = "#2d3319"; 
-        ctx.lineWidth = 1;
-        for (let i = 0; i < c.width; i += 40) {
-            let x = i + (Math.sin(i) * 20);
-            ctx.beginPath();
-            ctx.moveTo(x, floorY);
-            ctx.lineTo(x - 5, floorY - 8);
-            ctx.moveTo(x, floorY);
-            ctx.lineTo(x + 3, floorY - 10);
-            ctx.stroke();
-        }
-        ctx.fillStyle = "#333";
-        for (let i = 50; i < c.width; i += 120) {
-            let h = 20 + (Math.sin(i) * 10);
-            ctx.beginPath();
-            ctx.roundRect(i, floorY - h, 25, h + 5, [10, 10, 0, 0]);
-            ctx.fill();
-            ctx.strokeStyle = "#444";
-            ctx.beginPath();
-            ctx.moveTo(i + 12, floorY - h + 5);
-            ctx.lineTo(i + 12, floorY - h + 15);
-            ctx.moveTo(i + 7, floorY - h + 8);
-            ctx.lineTo(i + 17, floorY - h + 8);
-            ctx.stroke();
-        }
-        ctx.fillStyle = "rgba(200, 200, 255, 0.05)";
-        let fogShift = (Date.now() / 50) % 200;
-        for (let j = 0; j < 2; j++) {
-            for (let i = -200; i < c.width; i += 200) {
-                ctx.beginPath();
-                ctx.ellipse(i + fogShift + (j * 100), floorY - 5, 120, 20, 0, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-    }
+		// 2. High-Tech Floor Paneling
+		ctx.strokeStyle = "#333c57";
+		ctx.lineWidth = 2;
+		for (let i = 0; i < c.width; i += 120) {
+			// Vertical Panel Dividers
+			ctx.beginPath();
+			ctx.moveTo(i, floorY);
+			ctx.lineTo(i, floorY + floorH);
+			ctx.stroke();
+
+			// Horizontal accent line
+			ctx.beginPath();
+			ctx.moveTo(i, floorY + 10);
+			ctx.lineTo(i + 120, floorY + 10);
+			ctx.stroke();
+
+			// Hexagon bolt details in corners
+			ctx.fillStyle = "#292c3d";
+			ctx.fillRect(i + 5, floorY + 4, 4, 4);
+		}
+
+		// 3. Glowing Power Conduits (Cables on the floor)
+		ctx.strokeStyle = "#00f2ff"; // Neon Cyan
+		ctx.lineWidth = 1;
+		ctx.shadowBlur = 5;
+		ctx.shadowColor = "#00f2ff";
+		
+		ctx.beginPath();
+		ctx.moveTo(0, floorY + 2);
+		ctx.lineTo(c.width, floorY + 2); // Thin light strip at top of floor
+		ctx.stroke();
+		ctx.shadowBlur = 0; // Always reset shadow for performance
+
+		// 4. Background Containment Tubes (Silhouettes)
+		for (let i = 100; i < c.width; i += 300) {
+			// Glass Tube
+			ctx.fillStyle = "rgba(0, 242, 255, 0.05)";
+			ctx.fillRect(i, floorY - 120, 60, 120);
+			
+			// Tube Bases
+			ctx.fillStyle = "#333c57";
+			ctx.fillRect(i - 5, floorY - 5, 70, 5); // Bottom rim
+			ctx.fillRect(i - 5, floorY - 125, 70, 8); // Top rim
+			
+			// Bubbles inside tube (Animated)
+			ctx.fillStyle = "rgba(0, 242, 255, 0.3)";
+			for(let b=0; b<3; b++) {
+				let bY = (Date.now() / 20 + (i*b)) % 100;
+				ctx.beginPath();
+				ctx.arc(i + 30 + (Math.sin(bY/10)*10), floorY - bY, 2, 0, Math.PI*2);
+				ctx.fill();
+			}
+		}
+	}
+	else if (viewArea === "graveyard") {
+		// 1. The Ground (Dark Earth/Dead Grass)
+		ctx.fillStyle = "#1a1a1a"; // Very dark grey/brown
+		ctx.fillRect(0, floorY, c.width, floorH);
+
+		// 2. Dead Grass Tufts
+		ctx.strokeStyle = "#2d3319"; // Sickly green
+		ctx.lineWidth = 1;
+		for (let i = 0; i < c.width; i += 40) {
+			let x = i + (Math.sin(i) * 20);
+			ctx.beginPath();
+			ctx.moveTo(x, floorY);
+			ctx.lineTo(x - 5, floorY - 8);
+			ctx.moveTo(x, floorY);
+			ctx.lineTo(x + 3, floorY - 10);
+			ctx.stroke();
+		}
+
+		// 3. Background Tombstones (Distant)
+		ctx.fillStyle = "#333";
+		for (let i = 50; i < c.width; i += 120) {
+			let h = 20 + (Math.sin(i) * 10);
+			// Rounded tombstone shape
+			ctx.beginPath();
+			ctx.roundRect(i, floorY - h, 25, h + 5, [10, 10, 0, 0]);
+			ctx.fill();
+			
+			// Etched Cross detail
+			ctx.strokeStyle = "#444";
+			ctx.beginPath();
+			ctx.moveTo(i + 12, floorY - h + 5);
+			ctx.lineTo(i + 12, floorY - h + 15);
+			ctx.moveTo(i + 7, floorY - h + 8);
+			ctx.lineTo(i + 17, floorY - h + 8);
+			ctx.stroke();
+		}
+
+		// 4. Low-lying Rolling Fog (Optional Visual Polish)
+		ctx.fillStyle = "rgba(200, 200, 255, 0.05)";
+		let fogShift = (Date.now() / 50) % 200;
+		for (let j = 0; j < 2; j++) {
+			for (let i = -200; i < c.width; i += 200) {
+				ctx.beginPath();
+				ctx.ellipse(i + fogShift + (j * 100), floorY - 5, 120, 20, 0, 0, Math.PI * 2);
+				ctx.fill();
+			}
+		}
+	}
 }
 //================================================================================
 // This wrapper function just organizes the "Background" layer
