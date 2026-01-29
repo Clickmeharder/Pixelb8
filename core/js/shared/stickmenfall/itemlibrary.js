@@ -1922,6 +1922,11 @@ const MONSTER_STYLES = {
     }
 };
 const MONSTER_DB = {
+    // --- BASE / TRAINING ---
+    "Slime": { drawType: "blob", color: "#4caf50", hpMult: 1.0, bodyW: 25, bodyH: 20 },
+    "FireSlime": { drawType: "blob", color: "#ff4500", hpMult: 1.2, glow: true, glowColor: "#ff0" },
+    "StickmanHunter": { drawType: "stickman", hpMult: 1.2, canEquip: true },
+
     // --- SPIDERS ---
     "Spiderling": { drawType: "spider", scale: 0.5, color: "#555", hpMult: 0.5 },
     "CaveSpider": { drawType: "spider", scale: 1.0, color: "#333", hpMult: 1.0 },
@@ -1930,17 +1935,34 @@ const MONSTER_DB = {
     "IceSpider": { drawType: "spider", scale: 1.2, color: "#00ffff", glow: true, glowColor: "#fff", special: "freeze" },
 
     // --- CANINES ---
-    "StreetDog": { drawType: "canine", color: "#8b4513", bodyW: 20, headAnchor: {x: -25, y: -10} },
+    "StreetDog": { drawType: "canine", color: "#8b4513", bodyW: 20, headAnchor: {x: -25, y: -10}, hpMult: 1.0 },
     "DireWolf": { drawType: "canine", color: "#444", fuzz: true, scale: 1.5, bodyW: 30, headAnchor: {x: -35, y: -15}, hpMult: 3.0 },
-    "FrostWolf": { drawType: "canine", color: "#f0ffff", fuzz: true, scale: 1.5, glow: true, glowColor: "#00f" },
+    "FrostWolf": { drawType: "canine", color: "#f0ffff", fuzz: true, scale: 1.5, glow: true, glowColor: "#00f", hpMult: 3.0 },
+
+    // --- VOID / ABYSSAL ---
+    "VoidWalker": { drawType: "stickman", color: "#4b0082", hpMult: 2.0, glow: true },
+    "ShadowWraith": { drawType: "blob", color: "#1a1a1a", hpMult: 1.5, bodyW: 15, bodyH: 40 },
+    "VoidDragon": { drawType: "beast", color: "#2e0854", hpMult: 5.0, scale: 2.0, legCount: 4 },
+    "CosmicHorror": { drawType: "beast", color: "#ff00ff", hpMult: 6.0, scale: 2.5, legCount: 12 },
 
     // --- WEIRD/MIMICS ---
-    "StaffMimic": { drawType: "phalic", color: "#ff69b4", hasArms: true, armAnchor: {x: 0, y: -30} },
-    "PinkWobbler": { drawType: "phalic", color: "#da70d6", scale: 0.8 },
+    "StaffMimic": { drawType: "phalic", color: "#ff69b4", hpMult: 2.0, hasArms: true, armAnchor: {x: 0, y: -30} },
+    "PinkWobbler": { drawType: "phalic", color: "#da70d6", hpMult: 1.5, scale: 0.8 },
 
     // --- BOSSES ---
+    "DUNGEON_OVERLORD": { drawType: "stickman", scale: 2.5, color: "#f00", hpMult: 8.0, canEquip: true },
     "BROOD_MOTHER": { drawType: "spider", scale: 4.0, color: "#1a1a1a", hpMult: 10, special: "spawn_spiderlings" },
-    "FENRIR_LITE": { drawType: "canine", fuzz: true, scale: 3.5, color: "#000", hpMult: 12, glow: true }
+    "FENRIR_LITE": { drawType: "canine", fuzz: true, scale: 3.5, color: "#000", hpMult: 12, glow: true },
+    "VOID_CORRUPTOR": { drawType: "beast", scale: 4.0, color: "#000", hpMult: 15, legCount: 10 },
+    "FROST_JOTUN": { drawType: "stickman", scale: 5.0, color: "#fff", hpMult: 18 },
+    "MAGMA_CORE": { drawType: "blob", scale: 6.0, color: "#f00", hpMult: 20 },
+    "THE_GRAND_MIMIC": { drawType: "phalic", scale: 5.0, color: "#ff69b4", hpMult: 15 },
+    "QUEEN_GOSSAMER": { drawType: "spider", scale: 5.0, color: "#gold", hpMult: 25 },
+    "CERBERUS_JUNIOR": { drawType: "canine", scale: 4.0, color: "#500", hpMult: 20 },
+    "VOID_EXARCH": { drawType: "stickman", scale: 6.0, color: "#4b0082", hpMult: 30 },
+    "ASTRAL_TITAN": { drawType: "beast", scale: 8.0, color: "#fff", hpMult: 40 },
+    "CHRONOS": { drawType: "stickman", scale: 10.0, color: "#00d4ff", hpMult: 50 },
+    "THE_CREATOR": { drawType: "custom_path", scale: 12.0, hpMult: 100 } 
 };
 // Theme-based waves
 const DUNGEON_THEMES = {

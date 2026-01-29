@@ -1842,7 +1842,7 @@ function spawnWave() {
     // 3. Spawn Normal Mobs
     for (let i = 0; i < waveSize; i++) {
         let typeName = themePool[Math.floor(Math.random() * themePool.length)];
-        let config = MONSTER_DB[typeName] || MONSTER_DB["Slime"];
+        let config = MONSTER_DB[typeName] || MONSTER_DB["Slime"] || { drawType: "blob", hpMult: 1, color: "#fff" };
 
         // HP Scaling: Base + Wave growth, multiplied by monster toughness and party size
         let enemyHp = (40 + (dungeonWave * 25)) * (config.hpMult || 1.0) * (1 + (partySize * 0.25));
@@ -5481,11 +5481,11 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     
     // Define cooldowns for groups of commands
     // Actions that can be spammed slightly
-    const fastActions = ["!attack", "!fish", "!swim", "!lurk", "!sheath", "!dance", "!heal", ]; 
+    const fastActions = ["!attack", "!fish", "!swim", "!lurk", "!sheath", "!dance", "!heal", "!unequip", "!equip", ]; 
     // Actions that should be slower
-    const mediumActions = ["!respawn", "!equip", "!unequip", "!clearinventory", "!clearinv"];
+    const mediumActions = [ "!travel", "!respawn", "!clearinventory", "!clearinv"];
     // Travel and UI commands
-    const slowActions = ["!home", "!pond", "!town", "!arena", "!dungeon", "!travel", "!join", "!pvp"];
+    const slowActions = ["!home", "!pond", "!town", "!arena", "!dungeon", "!join", "!pvp"];
 
     // Apply the cooldown checks
     if (fastActions.includes(cmd) && isOnCooldown(p, "fast", 10)) return;
