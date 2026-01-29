@@ -2385,21 +2385,25 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
     if (!item) return;
     
     const style = item.style || "hair";
-    const helmKey = p.stats?.equippedHelmet || p.equipped?.helmet || "";
+
+    // 1. SAFELY find the helmet name for the "wig" check
+    const helmKey = (p.stats && p.stats.equippedHelmet) || (p.equipped && p.equipped.helmet) || "";
     const helmetName = helmKey.toLowerCase();
-    const finalColor = (p.stats.wigColor && (item.type === "hair" || helmetName === "wig")) 
+
+    // 2. SAFELY check for wigColor using ?. 
+    // This prevents the "Cannot read properties of undefined" error
+    const finalColor = (p.stats?.wigColor && (item.type === "hair" || helmetName === "wig")) 
         ? p.stats.wigColor 
         : (item.color || "#614126");
 
     ctx.save();
     
-    // --- THE FIX: RESET STROKE STATE HERE ---
+    // Reset state to ensure clean drawing
     ctx.strokeStyle = "#000000"; 
     ctx.lineWidth = 1.5; 
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.shadowBlur = 0; // Clears any glowing effects from previous draws
-    // ----------------------------------------
+    ctx.shadowBlur = 0; 
 
     const drawFn = HAT_STYLES[style] || HAT_STYLES["hair"];
     drawFn(ctx, hX, hY, finalColor);
