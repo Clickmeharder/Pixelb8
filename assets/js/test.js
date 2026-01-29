@@ -3721,15 +3721,65 @@ function drawScenery(ctx) {
         ctx.fillStyle = "#0a2e3a"; // Water
         ctx.fillRect(250, floorY + 10, c.width - 250, floorH - 10);
 		drawBuyer(ctx);
-    } else if (viewArea === "dungeon") {
-        ctx.fillStyle = "#110505";
-        ctx.fillRect(0, floorY, c.width, floorH);
-        // Stone details
-        ctx.strokeStyle = "#3e4451";
-        for(let i=0; i<c.width; i+=90) {
-            ctx.strokeRect(i, floorY, 90, 25);
-        }
-	} else if (viewArea === "lab") {
+    }
+	else if (viewArea === "dungeon") {
+		// 1. The Base Floor (Deep Obsidian)
+		ctx.fillStyle = "#0a0505";
+		ctx.fillRect(0, floorY, c.width, floorH);
+
+		// 2. The "Cracked Earth" & Lava Underglow
+		ctx.strokeStyle = "#4a1010"; // Dark blood red cracks
+		ctx.lineWidth = 2;
+		
+		for (let i = 0; i < c.width; i += 60) {
+			let xOffset = (Math.sin(i) * 20);
+			
+			// Draw jagged floor slabs
+			ctx.beginPath();
+			ctx.moveTo(i + xOffset, floorY);
+			ctx.lineTo(i + xOffset + 40, floorY + 15);
+			ctx.lineTo(i + xOffset - 10, floorY + floorH);
+			ctx.stroke();
+
+			// Random Ember Glow (Flickering)
+			if (i % 120 === 0) {
+				let flicker = Math.sin(Date.now() / 200) * 5;
+				ctx.fillStyle = "#ff4400";
+				ctx.shadowBlur = 10 + flicker;
+				ctx.shadowColor = "#ff2200";
+				ctx.beginPath();
+				ctx.arc(i + xOffset, floorY + 5, 2, 0, Math.PI * 2);
+				ctx.fill();
+				ctx.shadowBlur = 0; // Reset for performance
+			}
+		}
+
+		// 3. Scattered Remains (Bones)
+		ctx.fillStyle = "#a0a090"; // Aged bone color
+		for (let i = 150; i < c.width; i += 400) {
+			let bx = i + (Math.cos(i) * 50);
+			// Draw a simple skull/bone shape
+			ctx.fillRect(bx, floorY + 10, 8, 5); 
+			ctx.beginPath();
+			ctx.arc(bx + 4, floorY + 8, 4, 0, Math.PI * 2);
+			ctx.fill();
+		}
+
+		// 4. Dungeon Pillars (Background)
+		ctx.fillStyle = "#1a1111";
+		for (let i = 0; i < c.width; i += 250) {
+			// Shadowy pillars rising into the darkness
+			ctx.fillRect(i, floorY - 150, 40, 150);
+			
+			// Torchlight on the pillars
+			let torchFlicker = Math.random() * 2;
+			ctx.fillStyle = "#ff8800";
+			ctx.beginPath();
+			ctx.arc(i + 20, floorY - 80, 3 + torchFlicker, 0, Math.PI * 2);
+			ctx.fill();
+		}
+	}
+	else if (viewArea === "lab") {
 		// 1. The Floor (Cold, dark metallic panels)
 		ctx.fillStyle = "#1a1c2c"; 
 		ctx.fillRect(0, floorY, c.width, floorH);
@@ -3787,7 +3837,8 @@ function drawScenery(ctx) {
 				ctx.fill();
 			}
 		}
-	} else if (viewArea === "graveyard") {
+	}
+	else if (viewArea === "graveyard") {
 		// 1. The Ground (Dark Earth/Dead Grass)
 		ctx.fillStyle = "#1a1a1a"; // Very dark grey/brown
 		ctx.fillRect(0, floorY, c.width, floorH);
@@ -4030,7 +4081,7 @@ function updateSystemTicks(now) {
 	updateBuyerNPC();
 }
 function updateAreaPlayerCounts() {
-    const counts = { home: 0, town: 0, pond: 0, dungeon: 0, arena: 0 };
+    const counts = { home: 0, town: 0, pond: 0, dungeon: 0, arena: 0, graveyard: 0, lab: 0, };
     
     Object.values(players).forEach(p => {
         if (counts[p.area] !== undefined) counts[p.area]++;
