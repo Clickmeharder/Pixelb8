@@ -87,7 +87,7 @@ function loadStats(name) {
 		currentHp: 100,
 		pixels: 1500,
 		lastX: 400,
-        lastY: 460,
+        lastY: 550,
         attackLevel: 1, attackXP: 0,
 		archerLevel: 1, archerXP: 0,
 		magicLevel: 1, magicXP: 0,
@@ -131,7 +131,7 @@ function loadStats(name) {
     if (!stats.story)   stats.story = { chapter: 0, progress: 0, achievements:0 };
 	// --- SAFETY CHECKS FOR PERSISTENCE ---
     if (stats.lastX === undefined) stats.lastX = 400;
-    if (stats.lastY === undefined) stats.lastY = 460;
+    if (stats.lastY === undefined) stats.lastY = 550;
     if (stats.lastArea === undefined) stats.lastArea = "home";
     if (stats.activeTask === undefined) stats.activeTask = null;
     if (stats.currentHp === undefined) stats.currentHp = stats.maxhp;
