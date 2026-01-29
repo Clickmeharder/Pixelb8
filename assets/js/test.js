@@ -1720,23 +1720,17 @@ function startDungeon() {
 }
 
 function getBestAvailableTier(type, desiredTier) {
-    // Only look at items that come from the dungeon
-    const dungeonItemsOfType = Object.values(ITEM_DB).filter(i => 
-        i.type === type && i.sources === "dungeon"
-    );
+    const dungeonItemsOfType = Object.keys(ITEM_DB).filter(key => {
+        const i = ITEM_DB[key];
+        return i.type === type && i.sources === "dungeon" && i.tier <= desiredTier;
+    });
 
     if (dungeonItemsOfType.length === 0) return [];
 
-    // Find the highest tier available in the dungeon for this specific type
-    const maxExistingTier = Math.max(...dungeonItemsOfType.map(i => i.tier || 1));
-    const targetTier = Math.min(desiredTier, maxExistingTier);
+    // Find the highest tier that is actually <= our desired tier
+    const highestValidTier = Math.max(...dungeonItemsOfType.map(key => ITEM_DB[key].tier));
 
-    return Object.keys(ITEM_DB).filter(key => {
-        const item = ITEM_DB[key];
-        return item.type === type && 
-               item.tier === targetTier && 
-               item.sources === "dungeon";
-    });
+    return dungeonItemsOfType.filter(key => ITEM_DB[key].tier === highestValidTier);
 }
 function generateRandomLoadout(tier) {
     const weaponPool = Object.keys(ITEM_DB).filter(key => {
@@ -2481,7 +2475,6 @@ function drawArmor(ctx, p, anchors) {
     ctx.stroke();
     ctx.restore();
 }
-
 // --- 4. PANTS (Drawn over the legs) ---
 function drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, item) {
     if (!item) return;
@@ -2564,6 +2557,51 @@ function drawGloves(ctx, p, limbs) {
 }
 // --- ENEMY SPECIFIC DRAWING EQUIVALENTS ---
 
+// --- Draw weapons ---
+function drawWeaponItem(ctx, p, now, anchors, hX, hY) {
+    // 1. Identify the item (Handle Player stats vs Enemy equipped)
+    let weaponName = p.stats ? p.stats.equippedWeapon : (p.equipped ? p.equipped.weapon : null);
+    let item = ITEM_DB[weaponName];
+    
+    // 2. Virtual tools for non-combat tasks
+    if (p.activeTask === "woodcutting" && (!item || item.type !== "axe")) item = { type: "axe", style: "axe", speed: 1500 };
+    if (p.activeTask === "mining" && (!item || item.type !== "pickaxe")) item = { type: "pickaxe", style: "pickaxe", speed: 1500 };
+    if (p.activeTask === "fishing") item = item || { type: "fishing_rod", style: "fishing_rod", speed: 2000 };   
+    
+    if (!item) return;
+
+    ctx.save();
+    ctx.translate(hX, hY);
+
+    const style = item.style || item.type || "sword";
+    const drawFn = WEAPON_STYLES[style] || WEAPON_STYLES["sword"];
+
+    // 3. Determine if we are in an "Active" state
+    const isAttacking = (p.activeTask === "attacking" || p.activeTask === "pvp");
+    const isWorking = ["woodcutting", "mining"].includes(p.activeTask);
+    const isFishing = (p.activeTask === "fishing");
+    const useActiveAnim = isAttacking || isWorking || isFishing;
+
+    // 4. Calculate Normalized Progress (0.0 to 1.0)
+    let attackProgress = 0; 
+    if (useActiveAnim) {
+        // Use lastAttackTime for combat, or lastActionTime/now for generic tasks
+        const startTime = p.lastAttackTime || p.lastActionTime || 0;
+        const actionSpeed = item.speed || 2500;
+        const elapsed = now - startTime;
+        
+        // Clamp between 0 and 1
+        attackProgress = Math.min(1, elapsed / actionSpeed);
+    }
+
+    // 5. Execute Draw
+    // We pass attackProgress as the final argument
+    drawFn(ctx, item, useActiveAnim, now, p, anchors.bodyY, anchors.lean, attackProgress);
+    
+    ctx.restore();
+}
+
+
 function drawEnemyArmor(ctx, e, anchors, item) {
     if (!item) return;
     const headX = anchors.headX;
@@ -2615,52 +2653,9 @@ function drawEnemyHeadgear(ctx, e, anchors, item) {
     drawFn(ctx, hX, hY, item.color || "#444");
     ctx.restore();
 }
-// --- Draw weapons ---
-function drawWeaponItem(ctx, p, now, anchors, hX, hY) {
-    // 1. Identify the item (Handle Player stats vs Enemy equipped)
-    let weaponName = p.stats ? p.stats.equippedWeapon : (p.equipped ? p.equipped.weapon : null);
-    let item = ITEM_DB[weaponName];
-    
-    // 2. Virtual tools for non-combat tasks
-    if (p.activeTask === "woodcutting" && (!item || item.type !== "axe")) item = { type: "axe", style: "axe", speed: 1500 };
-    if (p.activeTask === "mining" && (!item || item.type !== "pickaxe")) item = { type: "pickaxe", style: "pickaxe", speed: 1500 };
-    if (p.activeTask === "fishing") item = item || { type: "fishing_rod", style: "fishing_rod", speed: 2000 };   
-    
-    if (!item) return;
-
-    ctx.save();
-    ctx.translate(hX, hY);
-
-    const style = item.style || item.type || "sword";
-    const drawFn = WEAPON_STYLES[style] || WEAPON_STYLES["sword"];
-
-    // 3. Determine if we are in an "Active" state
-    const isAttacking = (p.activeTask === "attacking" || p.activeTask === "pvp");
-    const isWorking = ["woodcutting", "mining"].includes(p.activeTask);
-    const isFishing = (p.activeTask === "fishing");
-    const useActiveAnim = isAttacking || isWorking || isFishing;
-
-    // 4. Calculate Normalized Progress (0.0 to 1.0)
-    let attackProgress = 0; 
-    if (useActiveAnim) {
-        // Use lastAttackTime for combat, or lastActionTime/now for generic tasks
-        const startTime = p.lastAttackTime || p.lastActionTime || 0;
-        const actionSpeed = item.speed || 2500;
-        const elapsed = now - startTime;
-        
-        // Clamp between 0 and 1
-        attackProgress = Math.min(1, elapsed / actionSpeed);
-    }
-
-    // 5. Execute Draw
-    // We pass attackProgress as the final argument
-    drawFn(ctx, item, useActiveAnim, now, p, anchors.bodyY, anchors.lean, attackProgress);
-    
-    ctx.restore();
-}
 
 // --- drawEquipment ---
-function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon) {
+/* function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, rightFoot, shouldHoldWeapon) {
     // These should always draw regardless of weapons
     if (p.stats.equippedPants) drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, ITEM_DB[p.stats.equippedPants]);
     if (p.stats.equippedArmor) drawArmor(ctx, p, anchors); 
@@ -2682,7 +2677,8 @@ function drawEquipment(ctx, p, now, anchors, leftHand, rightHand, leftFoot, righ
     if (p.stats.equippedHair) drawHair(ctx, p, anchors.bodyY, anchors.lean);
     if (p.stats.equippedHelmet) drawHelmetItem(ctx, p, anchors.bodyY, anchors.lean);
     if (p.stats.equippedBoots) drawBoots(ctx, p, leftFoot, rightFoot);
-}
+} */
+
 function renderEquipmentLayer(ctx, p, now, anchors, lH, rH, lF, rF) {
     // Determine source of equipment (Player vs Enemy)
     const eq = p.stats || p.equipped || {};
