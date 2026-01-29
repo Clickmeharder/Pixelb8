@@ -1720,17 +1720,30 @@ function startDungeon() {
 }
 
 function getBestAvailableTier(type, desiredTier) {
-    const dungeonItemsOfType = Object.keys(ITEM_DB).filter(key => {
+    // 1. Get ALL items of this type from the dungeon
+    const allDungeonItems = Object.keys(ITEM_DB).filter(key => {
         const i = ITEM_DB[key];
-        return i.type === type && i.sources === "dungeon" && i.tier <= desiredTier;
+        return i.type === type && i.sources && i.sources.includes("dungeon");
     });
 
-    if (dungeonItemsOfType.length === 0) return [];
+    // 2. Filter for items that are at or below our current tier
+    const validItems = allDungeonItems.filter(key => ITEM_DB[key].tier <= desiredTier);
 
-    // Find the highest tier that is actually <= our desired tier
-    const highestValidTier = Math.max(...dungeonItemsOfType.map(key => ITEM_DB[key].tier));
+    if (validItems.length === 0) {
+        // Fallback: If absolutely nothing exists at or below tier, 
+        // return the absolute lowest tier available so they aren't naked.
+        if (allDungeonItems.length > 0) {
+            const minTier = Math.min(...allDungeonItems.map(k => ITEM_DB[k].tier));
+            return allDungeonItems.filter(k => ITEM_DB[k].tier === minTier);
+        }
+        return [];
+    }
 
-    return dungeonItemsOfType.filter(key => ITEM_DB[key].tier === highestValidTier);
+    // 3. Find the highest tier within our valid range
+    const maxTierInRange = Math.max(...validItems.map(key => ITEM_DB[key].tier));
+
+    // 4. Return all items that match that specific highest-valid tier
+    return validItems.filter(key => ITEM_DB[key].tier === maxTierInRange);
 }
 function generateRandomLoadout(tier) {
     const weaponPool = Object.keys(ITEM_DB).filter(key => {
