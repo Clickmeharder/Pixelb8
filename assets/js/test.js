@@ -3787,7 +3787,6 @@ function drawScenery(ctx) {
 				ctx.fill();
 			}
 		}
-	}
 	} else if (viewArea === "graveyard") {
 		// 1. The Ground (Dark Earth/Dead Grass)
 		ctx.fillStyle = "#1a1a1a"; // Very dark grey/brown
