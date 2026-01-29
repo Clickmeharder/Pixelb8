@@ -5989,7 +5989,7 @@ document.addEventListener("DOMContentLoaded", () => {
 //==========================
 //RUNNING ON LOAD
 gameLoop();
-//localStorage.removeItem("rpg_jaedraze");
-localStorage.removeItem("rpg_JaeDraze");
+
+//localStorage.removeItem("rpg_JaeDraze");
 //localStorage.removeItem("rpg_Player1");
 //localStorage.removeItem("rpg_player1");
