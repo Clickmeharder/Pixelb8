@@ -1706,14 +1706,26 @@ function organizeDungeonRanks() {
     Object.values(players).forEach(p => {
         if (p.area !== "dungeon" || p.dead) return;
 
-        const weapon = ITEM_DB[p.stats.equippedWeapon] || { type: "melee" };
+        // Force them out of attack state so they focus on moving
+        //p.activeTask = "none";
+
+        // Get weapon data, defaulting to 'unarmed' if nothing is equipped
+        const weaponName = p.stats.equippedWeapon;
+        const weapon = ITEM_DB[weaponName] || { type: "unarmed" };
+        
+        // Define Ranged vs Melee/Unarmed
         const isRanged = (weapon.type === "bow" || weapon.type === "staff");
 
         if (isRanged) {
+            // Ranged: Backline (Left side of screen)
             p.targetX = 40 + Math.random() * 60; 
         } else {
+            // Melee: Frontline (Includes type "weapon" and "unarmed")
             p.targetX = 160 + Math.random() * 90;
         }
+        
+        // Safety: Ensure they have a lane so they aren't all on one pixel-perfect line
+        if (p.zLane === undefined) p.zLane = Math.floor(Math.random() * 25);
     });
 }
 
