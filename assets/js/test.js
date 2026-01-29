@@ -685,7 +685,9 @@ function performAttack(p) {
         p.targetX = null;
         return; 
     }
-
+    // --- Facing Logic ---
+    // If target is to the right, facing is 1. If to the left, facing is -1.
+    p.facing = (target.x > p.x) ? 1 : -1;
     // 2. Weapon Stats
     const weapon = ITEM_DB[p.stats.equippedWeapon] || { power: 0, type: "unarmed", speed: 1000 }; // Speed up fists to 1s
 	let skillType = weapon.type === "bow" ? "archer" : (weapon.type === "staff" ? "magic" : "attack");
@@ -2875,30 +2877,29 @@ function getAnimationState(p, now) {
 
     // 4. Attack Reactivity & Pose Selection
     if ((p.activeTask === "attacking" || p.activeTask === "pvp") && p.lastAttackTime) {
-        //const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
 		const itemKey = p.equipped?.weapon || p.stats?.equippedWeapon; 
-        const item = ITEM_DB[itemKey];
-        const speed = item?.speed || 2000; // Default 2s for fists
-        const progress = Math.min(1, (now - p.lastAttackTime) / speed);
+		const item = ITEM_DB[itemKey];
+		const speed = item?.speed || 2000;
+		const progress = Math.min(1, (now - p.lastAttackTime) / speed);
+		
+		// Ensure facing exists
+		const dir = p.facing || 1; 
 
-        if (!item) {
-            // UNARMED: Boxing stance
-            anim.pose = "boxing";
-            const lunge = Math.sin(progress * Math.PI);
-            anim.lean += lunge * 0.2; 
-        } else if (item.type === "bow") {
-            // ARCHER: Steady tension
-            anim.pose = "archer";
-            anim.lean = -0.1 * progress; 
-            anim.bodyY += 2; 
-        } else {
-            // MELEE: Explosive lunge
-            anim.pose = "action";
-            const lungePower = Math.sin(progress * Math.PI); 
-            anim.lean += lungePower * 0.4;
-            anim.bodyY += lungePower * 8;
-        }
-    }
+		if (!item) {
+			anim.pose = "boxing";
+			const lunge = Math.sin(progress * Math.PI);
+			anim.lean = dir * (0.2 + (lunge * 0.2)); // Lean towards target
+		} else if (item.type === "bow" || item.type === "staff") {
+			anim.pose = (item.type === "bow") ? "archer" : "action";
+			// Lean slightly back/away for tension or slightly forward for casting
+			anim.lean = dir * (item.type === "bow" ? -0.1 : 0.1); 
+		} else {
+			anim.pose = "action";
+			const lungePower = Math.sin(progress * Math.PI); 
+			anim.lean = dir * (0.2 + (lungePower * 0.4));
+			anim.bodyY += lungePower * 8;
+		}
+	}
 
     // 5. Sleeping
     if (p.isSleeping && !p.activeTask) {
@@ -3091,7 +3092,13 @@ function drawStickman(ctx, p) {
     const isDeep = (p.area === "pond" && p.x > 250);
 
     ctx.save(); 
-
+	// ---Scaling/Flipping Logic ---
+    // Only flip if they are attacking and facing left
+    if ((p.activeTask === "attacking" || p.activeTask === "pvp") && p.facing === -1) {
+        ctx.translate(p.x, 0);
+        ctx.scale(-1, 1);
+        ctx.translate(-p.x, 0);
+    }
     // --- 1. TRANSPARENCY & WORLD EFFECTS ---
     let baseAlpha = 1.0;
     if (p.activeTask === "lurking") {
@@ -3106,7 +3113,7 @@ function drawStickman(ctx, p) {
 
     // --- 3. THE EQUIPMENT SANDWICH ---
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
-
+	ctx.restore();
     // --- 4. UI RENDERING (Names & Conditional HP) ---
     let uiAlpha = isDeep ? Math.max(0.5, baseAlpha * 0.7) : baseAlpha;
     ctx.globalAlpha = uiAlpha;
@@ -3116,17 +3123,17 @@ function drawStickman(ctx, p) {
     const combatLvl = p.stats.combatLevel || 3;
     ctx.fillStyle = "#fff"; 
     ctx.font = "12px monospace"; 
-    ctx.fillText(`${p.name} (Lvl ${combatLvl})`, p.x, p.y + 40);
+    ctx.fillText(`${p.name} (Lvl ${combatLvl})`, p.x, p.y + 36);
 
     // ---6. HP Bar: Only draws if damaged
     if (p.hp < p.maxHp) {
         ctx.fillStyle = "rgba(68, 68, 68, 0.8)";
-        ctx.fillRect(p.x - 20, p.y + 48, 40, 4);
+        ctx.fillRect(p.x - 20, p.y + 40, 40, 4);
         
         // Flashing red if struggling in water, else standard green
         let hpColor = (p.struggleStartTime && isDeep && Math.floor(now / 200) % 2 === 0) ? "#f00" : "#0f0";
         ctx.fillStyle = hpColor;
-        ctx.fillRect(p.x - 20, p.y + 48, 40 * (p.hp / p.maxHp), 4);
+        ctx.fillRect(p.x - 20, p.y + 40, 40 * (p.hp / p.maxHp), 4);
     }
 	// ---7. CHAT BUBBLE (New Addition)
     if (p.chatMessage && (now - p.chatTime < 5000)) {
@@ -5203,11 +5210,12 @@ function cmdStop(p, user) {
 }
 
 function cmdEquip(p, args) {
-    if (p.activeTask && p.activeTask !== "none") {
-        systemMessage(`${p.name}: You are too busy ${p.activeTask} to change gear right now! Stop what you are doing first.`);
+	const canEquip = !p.activeTask || p.activeTask === "none" || p.activeTask === "organizing";
+
+    if (!canEquip) {
+        systemMessage(`${p.name}: You are too busy ${p.activeTask} to change gear right now!`);
         return;
     }
-
     // SANITIZATION: Join all args and strip quotes
     let inputName = args.slice(1).join(" ").toLowerCase().replace(/"/g, "");
     
@@ -5253,6 +5261,9 @@ function cmdEquip(p, args) {
         msg = `donned the ${dbKey}`;
     }
 
+    if (p.activeTask === "organizing") {
+        organizeDungeonRanks(); 
+    }
     if (msg) {
         systemMessage(`${p.name} ${msg}!`);
         saveStats(p);
