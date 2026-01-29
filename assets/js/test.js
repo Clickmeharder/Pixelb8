@@ -2372,7 +2372,8 @@ function drawHair(ctx, p, bodyY, lean) {
 
 // 2. The Helmet Coordinator
 function drawHelmetItem(ctx, p, bodyY, lean) {
-    const item = ITEM_DB[p.stats.equippedHelmet];
+    const itemKey = p.stats?.equippedHelmet || p.equipped?.helmet;
+    const item = ITEM_DB[itemKey];
     if (!item) return;
     const hX = p.x + (lean * 20);
     const hY = p.y - 30 + bodyY; 
@@ -2384,8 +2385,8 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
     if (!item) return;
     
     const style = item.style || "hair";
-    const helmetName = p.stats.equippedHelmet ? p.stats.equippedHelmet.toLowerCase() : "";
-
+    const helmKey = p.stats?.equippedHelmet || p.equipped?.helmet || "";
+    const helmetName = helmKey.toLowerCase();
     const finalColor = (p.stats.wigColor && (item.type === "hair" || helmetName === "wig")) 
         ? p.stats.wigColor 
         : (item.color || "#614126");
