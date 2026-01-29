@@ -768,8 +768,8 @@ function applyDamage(target, rawAmount, color = "#f00") {
 
     // --- 2. EVASION CHECK (LURK) ---
     if (target.stats && target.stats.lurkLevel) {
-        // 5% base + 1% per level, capped at 50%
-        let dodgeChance = Math.min(0.50, 0.05 + (target.stats.lurkLevel * 0.01));
+        // 5% base + 1% per level, capped at 35%
+        let dodgeChance = Math.min(0.35, 0.05 + (target.stats.lurkLevel * 0.01));
         if (Math.random() < dodgeChance) {
             spawnFloater(target, "MISS", "#fff");
             
