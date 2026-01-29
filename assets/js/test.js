@@ -1853,7 +1853,7 @@ function spawnWave() {
             hp: enemyHp, 
             maxHp: enemyHp, 
             x: 500 + (i * 70),
-            y: 540 + (Math.random() * 80), // Slight Y variation for depth
+            y: 560 + (Math.random() * 30), // Slight Y variation for depth
             dead: false,
             isEnemy: true,
             config: config, 
@@ -1883,10 +1883,13 @@ function spawnWave() {
             y: 540,
             dead: false,
             isBoss: true,
+            isEnemy: true, // ADD THIS
             isMonster: true,
             config: bossConfig,
             color: bossConfig.color || "#ff0000",
-            scale: bossConfig.scale || 2.0 
+            scale: bossConfig.scale || 2.0,
+            // ADD THIS: Bosses deserve Tier + 1 gear!
+            equipped: bossConfig.canEquip ? generateRandomLoadout(dungeonTier + 1) : {}
         };
         
         systemMessage(`⚠️ TIER ${dungeonTier} BOSS: ${boss.name} has emerged!`);
@@ -2359,7 +2362,8 @@ function triggerSplash(p) {
 
 // 1. The Hair Coordinator
 function drawHair(ctx, p, bodyY, lean) {
-    const item = ITEM_DB[p.stats.equippedHair];
+    const itemKey = p.stats?.equippedHair || p.equipped?.hair;
+    const item = ITEM_DB[itemKey];
     if (!item) return;
     const hX = p.x + (lean * 20);
     const hY = p.y - 30 + bodyY;
@@ -2450,7 +2454,8 @@ function drawCapeItem(ctx, p, anchors) {
 }
 // --- 3. armor drawn over body ---
 function drawArmor(ctx, p, anchors) {
-    const item = ITEM_DB[p.stats.equippedArmor];
+    const itemKey = p.stats?.equippedArmor || p.equipped?.armor;
+    const item = ITEM_DB[itemKey];
     if (!item) return;
     const headX = anchors.headX;
     const hipX = p.x + (anchors.lean * 5);
