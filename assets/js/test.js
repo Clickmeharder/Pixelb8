@@ -5154,6 +5154,28 @@ function cmdStop(p, user) {
     saveStats(p);
 }
 
+// TODO:
+// cmdequip needs ot be made smarter so its easier to use via twitch chat commands, 
+// !equip weapon (should auto equip the highest tier weapon they have, since no type is set it will choose a weapon type matching their their highest skill (
+// !equip staff, equip book or equip wand - should equip highest tier staff wand or book
+// !equip sword (highest tier sword type)
+// !equip highest tier by type, or !equip highest tier by type && skill
+// so !equip armor should take that players highest skill and match their highest tier armor or equipment of that type, with that skill
+// same with !equip legs, !equip boots, !equip pants, !equip helmet, cape, cloak, gloves, bow, sword, axe, staff, book, wand /equip weapon matches their highest skill and equip sword or dagger will just point to the weapon type since all melee weapons are "weapon" type   
+// !equip healer - should equip highest tier staff type that has item.heal: 1; or higher
+// !equip archer - should equip the highest tier bow type and items matching item.skill "archer"
+// !equip lurker - eauips highest tier lurker stuff item.skill = "lurk" 
+//Equip attack or equip melee - equips highest tier "weapon" types & equipment that matches item.skill "attack"
+// !equip sword
+//archer = "bow"
+// and just !equip should find their highest skill and equip matching weapon, bow, or staff, and equipment and gear them up,
+// and of course !equip random 
+
+// attack = "weapon"
+// magic = "staff", "wand" or "book"
+// heal =  "staff", "wand" or "book" && item.heal exists and is greater than 0
+// lurk = (second highest skill lvl matching weapons)"
+
 function cmdEquip(p, args) {
 	const canEquip = !p.activeTask || p.activeTask === "none" || p.activeTask === "organizing";
 
@@ -5786,6 +5808,16 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 	if (cmd === ":'(" || cmd === "!cry")      { cmdEmote(p, "cry"); return; }
 	if (cmd === "xd" || cmd === "!laugh")     { cmdEmote(p, "laugh"); return; }
 	if (cmd === ":o" || cmd === "!surprised") { cmdEmote(p, "surprised"); return; }
+	if (cmd === ":d" || cmd === "!grin")      { cmdEmote(p, "grin"); return; }
+	if (cmd === "0.0" || cmd === "wtf")       { cmdEmote(p, "wtf"); return; }
+	if (cmd === ":@" || cmd === "!angry")     { cmdEmote(p, "angry"); return; }
+	if (cmd === ":3")                         { cmdEmote(p, "cat"); return; }
+	if (cmd === "uwu")                        { cmdEmote(p, "uwu"); return;}
+	if (cmd === ":/")                         { cmdEmote(p, "skeptical"); return; }
+	if (cmd === ":|" || cmd === "-_-")        { cmdEmote(p, "neutral"); return; }
+	if (cmd === ":p")                         { cmdEmote(p, "tongue"); return; }
+	if (cmd === ":#" || cmd === "!blush")      { cmdEmote(p, "blush"); return; }
+	if (cmd === "x.x" || cmd === "!dead") { cmdEmote(p, "ko"); return; }
     if (cmd === "!wigcolor")   { cmdWigColor(p, args); return; }
     if (cmd === "!sheath")     { cmdSheath(p, user); return; }
     if (cmd === "!equip")      { cmdEquip(p, args); return; }

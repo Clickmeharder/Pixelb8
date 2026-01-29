@@ -1686,54 +1686,98 @@ const BODY_PARTS = {
 			ctx.lineWidth = 1;
 			ctx.stroke();
 
-			// --- EYES ---
+			const emote = p.emote;
+
+			// --- 1. EYES ---
 			ctx.fillStyle = "#000";
-			if (p.emote === "laugh") {
+			ctx.lineWidth = 1.5;
+			
+			if (emote === "ko") {
 				// "X X" eyes
-				ctx.lineWidth = 2;
+				const drawX = (ex, ey) => {
+					ctx.beginPath();
+					ctx.moveTo(ex - 2, ey - 2); ctx.lineTo(ex + 2, ey + 2);
+					ctx.moveTo(ex + 2, ey - 2); ctx.lineTo(ex - 2, ey + 2);
+					ctx.stroke();
+				};
+				drawX(x - 4, y - 3);
+				drawX(x + 4, y - 3);
+			} else if (emote === "uwu" || emote === "blush") {
 				ctx.beginPath();
-				ctx.moveTo(x - 5, y - 5); ctx.lineTo(x - 2, y - 2);
-				ctx.moveTo(x - 2, y - 5); ctx.lineTo(x - 5, y - 2);
-				ctx.moveTo(x + 2, y - 5); ctx.lineTo(x + 5, y - 2);
-				ctx.moveTo(x + 5, y - 5); ctx.lineTo(x + 2, y - 2);
+				ctx.arc(x - 4, y - 2, 2, Math.PI, 0); ctx.stroke();
+				ctx.beginPath();
+				ctx.arc(x + 4, y - 2, 2, Math.PI, 0); ctx.stroke();
+			} else if (emote === "wtf") {
+				ctx.beginPath();
+				ctx.arc(x - 4, y - 3, 3, 0, Math.PI * 2); ctx.stroke();
+				ctx.beginPath();
+				ctx.arc(x + 4, y - 3, 3, 0, Math.PI * 2); ctx.stroke();
+			} else if (emote === "angry") {
+				ctx.beginPath();
+				ctx.moveTo(x - 6, y - 5); ctx.lineTo(x - 2, y - 2); 
+				ctx.moveTo(x + 6, y - 5); ctx.lineTo(x + 2, y - 2);
 				ctx.stroke();
-			} else if (p.emote === "cry") {
-				// Normal eyes + blue teardrops
-				ctx.fillRect(x - 4, y - 3, 2, 2); 
-				ctx.fillRect(x + 2, y - 3, 2, 2);
-				ctx.fillStyle = "#00f";
-				ctx.fillRect(x - 4, y, 2, 4);
-				ctx.fillRect(x + 2, y, 2, 4);
 			} else {
-				// Standard eyes
 				ctx.fillRect(x - 4, y - 3, 2, 2); 
 				ctx.fillRect(x + 2, y - 3, 2, 2); 
 			}
 
-			// --- MOUTHS ---
+			// --- 2. UNIQUE OVERLAYS (Blush) ---
+			if (emote === "blush") {
+				ctx.fillStyle = "rgba(255, 100, 100, 0.5)";
+				ctx.beginPath();
+				ctx.arc(x - 6, y + 2, 2.5, 0, Math.PI * 2);
+				ctx.arc(x + 6, y + 2, 2.5, 0, Math.PI * 2);
+				ctx.fill();
+			}
+
+			// --- 3. MOUTHS ---
 			ctx.beginPath();
 			ctx.strokeStyle = "#000";
-			ctx.lineWidth = 1.5;
-
-			switch(p.emote) {
-				case "sad":
-				case "cry":
-					// Frown (Upside down arc)
-					ctx.arc(x, y + 7, 4, 1.2 * Math.PI, 1.8 * Math.PI);
+			
+			switch(emote) {
+				case "ko": // x.x
+					ctx.moveTo(x - 3, y + 5); ctx.lineTo(x + 3, y + 2);
 					break;
-				case "surprised":
-					// Small "o" circle
-					ctx.arc(x, y + 4, 2.5, 0, Math.PI * 2);
+				case "tongue":
+					ctx.moveTo(x - 3, y + 2); ctx.lineTo(x + 3, y + 2);
+					ctx.stroke();
+					ctx.fillStyle = "#ff6666";
+					ctx.beginPath();
+					ctx.arc(x + 2, y + 3, 3, 0, Math.PI);
+					ctx.fill();
 					break;
-				case "laugh":
-					// Big open smile
+				case "blush":
+					ctx.arc(x, y + 4, 3, 0.2 * Math.PI, 0.8 * Math.PI);
+					break;
+				case "grin":
 					ctx.arc(x, y + 2, 5, 0, Math.PI);
 					ctx.closePath();
+					ctx.fillStyle = "#fff";
+					ctx.fill();
+					break;
+				case "uwu": 
+				case "cat":
+					ctx.arc(x - 2, y + 3, 2, 0, Math.PI); 
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.arc(x + 2, y + 3, 2, 0, Math.PI);
+					break;
+				case "angry":
+					ctx.arc(x, y + 6, 3, 0, Math.PI * 2);
 					ctx.fillStyle = "#000";
 					ctx.fill();
 					break;
-				default:
-					// Standard Smile
+				case "skeptical":
+					ctx.moveTo(x - 4, y + 5); ctx.lineTo(x + 4, y + 2);
+					break;
+				case "neutral":
+					ctx.moveTo(x - 4, y + 4); ctx.lineTo(x + 4, y + 4);
+					break;
+				case "wtf":
+					ctx.arc(x, y + 5, 2, 0, Math.PI * 2);
+					break;
+				default: 
 					ctx.arc(x, y + 2, 4, 0.2 * Math.PI, 0.8 * Math.PI);
 					break;
 			}
