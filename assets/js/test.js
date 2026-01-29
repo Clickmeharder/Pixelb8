@@ -2028,15 +2028,15 @@ function closeDungeon(reason) {
 
     Object.values(players).forEach(p => {
         if (p.area === "dungeon") {
-            p.area = "town";
+            p.area = "graveyard";
             p.x = 400; p.y = 550;
             p.activeTask = "none";
         }
     });
 
-    viewArea = "town";
+    viewArea = "graveyard";
     const selector = document.getElementById("view-area-selector");
-    if (selector) selector.value = "town";
+    if (selector) selector.value = "graveyard";
 }
 /* function handleEnemyAttacks() {
     let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
@@ -3729,15 +3729,113 @@ function drawScenery(ctx) {
         for(let i=0; i<c.width; i+=90) {
             ctx.strokeRect(i, floorY, 90, 25);
         }
-    } else if (viewArea === "lab") {
-        ctx.fillStyle = "#110505";
-        ctx.fillRect(0, floorY, c.width, floorH);
-        // Stone details
-        ctx.strokeStyle = "#3e4451";
-        for(let i=0; i<c.width; i+=90) {
-            ctx.strokeRect(i, floorY, 90, 25);
-        }
-    }
+	} else if (viewArea === "lab") {
+		// 1. The Floor (Cold, dark metallic panels)
+		ctx.fillStyle = "#1a1c2c"; 
+		ctx.fillRect(0, floorY, c.width, floorH);
+
+		// 2. High-Tech Floor Paneling
+		ctx.strokeStyle = "#333c57";
+		ctx.lineWidth = 2;
+		for (let i = 0; i < c.width; i += 120) {
+			// Vertical Panel Dividers
+			ctx.beginPath();
+			ctx.moveTo(i, floorY);
+			ctx.lineTo(i, floorY + floorH);
+			ctx.stroke();
+
+			// Horizontal accent line
+			ctx.beginPath();
+			ctx.moveTo(i, floorY + 10);
+			ctx.lineTo(i + 120, floorY + 10);
+			ctx.stroke();
+
+			// Hexagon bolt details in corners
+			ctx.fillStyle = "#292c3d";
+			ctx.fillRect(i + 5, floorY + 4, 4, 4);
+		}
+
+		// 3. Glowing Power Conduits (Cables on the floor)
+		ctx.strokeStyle = "#00f2ff"; // Neon Cyan
+		ctx.lineWidth = 1;
+		ctx.shadowBlur = 5;
+		ctx.shadowColor = "#00f2ff";
+		
+		ctx.beginPath();
+		ctx.moveTo(0, floorY + 2);
+		ctx.lineTo(c.width, floorY + 2); // Thin light strip at top of floor
+		ctx.stroke();
+		ctx.shadowBlur = 0; // Always reset shadow for performance
+
+		// 4. Background Containment Tubes (Silhouettes)
+		for (let i = 100; i < c.width; i += 300) {
+			// Glass Tube
+			ctx.fillStyle = "rgba(0, 242, 255, 0.05)";
+			ctx.fillRect(i, floorY - 120, 60, 120);
+			
+			// Tube Bases
+			ctx.fillStyle = "#333c57";
+			ctx.fillRect(i - 5, floorY - 5, 70, 5); // Bottom rim
+			ctx.fillRect(i - 5, floorY - 125, 70, 8); // Top rim
+			
+			// Bubbles inside tube (Animated)
+			ctx.fillStyle = "rgba(0, 242, 255, 0.3)";
+			for(let b=0; b<3; b++) {
+				let bY = (Date.now() / 20 + (i*b)) % 100;
+				ctx.beginPath();
+				ctx.arc(i + 30 + (Math.sin(bY/10)*10), floorY - bY, 2, 0, Math.PI*2);
+				ctx.fill();
+			}
+		}
+	}
+	} else if (viewArea === "graveyard") {
+		// 1. The Ground (Dark Earth/Dead Grass)
+		ctx.fillStyle = "#1a1a1a"; // Very dark grey/brown
+		ctx.fillRect(0, floorY, c.width, floorH);
+
+		// 2. Dead Grass Tufts
+		ctx.strokeStyle = "#2d3319"; // Sickly green
+		ctx.lineWidth = 1;
+		for (let i = 0; i < c.width; i += 40) {
+			let x = i + (Math.sin(i) * 20);
+			ctx.beginPath();
+			ctx.moveTo(x, floorY);
+			ctx.lineTo(x - 5, floorY - 8);
+			ctx.moveTo(x, floorY);
+			ctx.lineTo(x + 3, floorY - 10);
+			ctx.stroke();
+		}
+
+		// 3. Background Tombstones (Distant)
+		ctx.fillStyle = "#333";
+		for (let i = 50; i < c.width; i += 120) {
+			let h = 20 + (Math.sin(i) * 10);
+			// Rounded tombstone shape
+			ctx.beginPath();
+			ctx.roundRect(i, floorY - h, 25, h + 5, [10, 10, 0, 0]);
+			ctx.fill();
+			
+			// Etched Cross detail
+			ctx.strokeStyle = "#444";
+			ctx.beginPath();
+			ctx.moveTo(i + 12, floorY - h + 5);
+			ctx.lineTo(i + 12, floorY - h + 15);
+			ctx.moveTo(i + 7, floorY - h + 8);
+			ctx.lineTo(i + 17, floorY - h + 8);
+			ctx.stroke();
+		}
+
+		// 4. Low-lying Rolling Fog (Optional Visual Polish)
+		ctx.fillStyle = "rgba(200, 200, 255, 0.05)";
+		let fogShift = (Date.now() / 50) % 200;
+		for (let j = 0; j < 2; j++) {
+			for (let i = -200; i < c.width; i += 200) {
+				ctx.beginPath();
+				ctx.ellipse(i + fogShift + (j * 100), floorY - 5, 120, 20, 0, 0, Math.PI * 2);
+				ctx.fill();
+			}
+		}
+	}
 }
 //================================================================================
 // This wrapper function just organizes the "Background" layer
@@ -3941,7 +4039,7 @@ function updateAreaPlayerCounts() {
 
     const selector = document.getElementById("view-area-selector");
     if (selector) {
-        // Change the dungeon icon based on activity
+        // Change the dungeon icon based on activity👻⚰️👹👾🏠🏙️🏟️🎣
         const dungeonIcon = dungeonActive ? "👹" : "👾";
         const dungeonLabel = dungeonActive ? "RAID ACTIVE" : "Dungeon";
 
@@ -3950,6 +4048,8 @@ function updateAreaPlayerCounts() {
 		selector.options[2].text = `🏟️ Arena (${counts.arena})`;
         selector.options[3].text = `🎣 Pond (${counts.pond})`;
         selector.options[4].text = `👾 Dungeon (${counts.dungeon})`;
+		selector.options[5].text = `⚰️ Graveyard (${counts.graveyard})`;
+		selector.options[6].text = `🧪 Laboratory (${counts.lab})`;
         
     }
 }
@@ -4044,7 +4144,6 @@ function updateArenaScoreboard() {
 function updateUI() {
     // 1. Area Header
     updateText("areaDisplay", viewArea);
-
     // 2. DUNGEON UI
     const isDungeon = (viewArea === "dungeon");
     const dungeonBox = document.getElementById("dungeon-stats");
@@ -5549,7 +5648,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 
     // --- 1. ADMIN & AUTHORIZATION CHECK ---
 	const adminCommands = [
-			"!showhome", "::home", "!showtown", "::town", "!showpond", "::pond", "!showdungeon", "::dungeon", "!showarena", "::arena", "!spawnmerchant", 
+			"!showhome", "::home", "!showtown", "::town", "!showgraveyard", "::graveyard", "::gy", "!showpond", "::pond", "!showdungeon", "::dungeon", "!showarena", "::arena", "!spawnmerchant", 
 			"!despawnmerchant", "!resetmerchant", "!give", "!additem", "!scrub",
 			"name", "/name", "color", "/color" // Added these here
 	];
@@ -5649,7 +5748,8 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "!town")   { movePlayer(p, "town"); return; }
     if (cmd === "!arena")  { movePlayer(p, "arena"); return; }
     if (cmd === "!dungeon") { movePlayer(p, "dungeon"); return; }
-
+	if (cmd === "!lab") { movePlayer(p, "lab"); return; }
+	if (cmd === "!graveyard" || cmd === "!gy") { movePlayer(p, "graveyard"); return; }
     // -- Events
     if (cmd === "!join")   { joinDungeonQueue(p); return; }
     if (cmd === "!pvp")    { joinArenaQueue(p); return; }
