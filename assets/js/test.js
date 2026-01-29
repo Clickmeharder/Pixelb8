@@ -3217,8 +3217,8 @@ function drawEnemyStickman(ctx, e) {
     drawStickmanBody(ctx, e, anchors, limbs);
     renderEquipmentLayer(ctx, e, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
     ctx.restore(); 
-
-    // --- UI ---
+	drawEnemyUI(ctx, e, 1, stackY);
+/*     // --- UI ---
     ctx.textAlign = "center";
     ctx.font = "bold 12px monospace";
     const enemyLvl = e.level || e.stats?.combatLevel || "??";
@@ -3233,7 +3233,7 @@ function drawEnemyStickman(ctx, e) {
     ctx.fillStyle = "rgba(40, 40, 40, 0.9)"; 
     ctx.fillRect(e.x - 20, uiY + 5, 40, 4);
     ctx.fillStyle = "#f00";
-    ctx.fillRect(e.x - 20, uiY + 5, 40 * (e.hp / e.maxHp), 4);
+    ctx.fillRect(e.x - 20, uiY + 5, 40 * (e.hp / e.maxHp), 4); */
 }
 function renderMonsterBody(ctx, e, now) {
     const cfg = e.config;
@@ -3376,28 +3376,33 @@ function drawMonster(ctx, e) {
 }
  */
 function drawEnemyUI(ctx, e, scale, stackY = 0) {
-    // We are already translated to e.x, e.y from drawMonster
-    // We must reverse the scale for text so it stays readable
     ctx.save();
-    ctx.scale(1/scale, 1/scale); 
     
+    // Reverse scale so text doesn't get distorted by monster size
+    ctx.scale(1/scale, 1/scale);
     ctx.textAlign = "center";
     
-    // Move the UI up based on the monster's size and how many others are here
-    const baseOffset = e.isBoss ? -80 : -45;
-    const finalY = baseOffset - stackY; 
+    // Logic: If monster is translated, local X is 0. If stickman, use e.x.
+    // We add stackY to push the UI downward as requested for the feet.
+    const isTranslated = scale !== 1 || e.config?.drawType !== "stickman";
+    const drawX = isTranslated ? 0 : e.x;
+    const drawY = isTranslated ? 0 : e.y;
+    
+    const finalY = drawY + 38 + stackY; 
 
-    // Name
-    ctx.font = e.isBoss ? "bold 16px monospace" : "12px monospace";
-    ctx.fillStyle = e.isBoss ? "#ff3333" : "#ffffff";
-    ctx.fillText(e.name, 0, finalY);
+    // Name Rendering
+    ctx.font = e.isBoss ? "bold 16px monospace" : "bold 12px monospace";
+    ctx.fillStyle = e.isBoss ? "#ff3333" : (e.name === "VoidWalker" ? "#a020f0" : "#ff4444");
+    
+    const enemyLvl = e.level || e.stats?.combatLevel || "??";
+    ctx.fillText(`${e.name} [Lvl ${enemyLvl}]`, drawX, finalY);
 
     // HP Bar
     const barWidth = e.isBoss ? 100 : 40;
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.fillRect(-barWidth/2, finalY + 5, barWidth, 5);
-    ctx.fillStyle = (e.hp / e.maxHp > 0.3) ? "#0f0" : "#f00"; // Green, Red if low
-    ctx.fillRect(-barWidth/2, finalY + 5, barWidth * (e.hp / e.maxHp), 5);
+    ctx.fillStyle = "rgba(40, 40, 40, 0.9)";
+    ctx.fillRect(drawX - barWidth/2, finalY + 6, barWidth, 5);
+    ctx.fillStyle = "#f00";
+    ctx.fillRect(drawX - barWidth/2, finalY + 6, barWidth * (e.hp / e.maxHp), 5);
     
     ctx.restore();
 }
