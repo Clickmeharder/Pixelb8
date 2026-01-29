@@ -3049,7 +3049,7 @@ function drawEnemyStickman(ctx, e) {
     const now = Date.now();
 
     const anim = getAnimationState(e, now); 
-    const anchors = getAnchorPoints(e, anim); 
+    const anchors = getAnchorPoints(e, anim);
     const limbs = getLimbPositions(e, anchors, anim, now);
 
     ctx.save();
@@ -3088,30 +3088,23 @@ function drawEnemyStickman(ctx, e) {
 function renderMonsterBody(ctx, e, now) {
     const cfg = e.config;
     if (!cfg) return;
-
-    // REDIRECT: If it's a stickman, use the stickman function and STOP
-    if (cfg.drawType === "stickman") {
-        drawEnemyStickman(ctx, e);
-        return; 
-    }
-
+    // --- Standard Monster Logic (Slimes, etc.) ---
     const scale = e.scale || cfg.scale || 1.0;
     const styleFn = MONSTER_STYLES[cfg.drawType] || MONSTER_STYLES.blob;
 
     ctx.save();
-    ctx.translate(e.x, e.y);
-    ctx.scale(scale, scale); // This makes bosses massive
+    ctx.translate(e.x, e.y); // Monsters use e.y, Stickmen use a ground-baseline
+    ctx.scale(scale, scale); 
     
-    // Core Render
     ctx.fillStyle = e.color || "#ff4444";
     ctx.strokeStyle = "#000";
-    ctx.lineWidth = 2 / scale; // Adjust line width so it doesn't get too fat
+    ctx.lineWidth = 2 / scale; 
+    
     styleFn(ctx, e, now, cfg);
-
     renderMonsterHead(ctx, e, cfg);
+    
     ctx.restore();
     
-    // Draw UI AFTER restore so text isn't massive/backwards
     drawEnemyUI(ctx, e);
 }
 function renderMonsterHead(ctx, e, cfg) {
@@ -3159,38 +3152,31 @@ function drawMonster(ctx, e) {
     const now = Date.now();
     const cfg = e.config || { drawType: "blob", color: "#f0f" };
     const styleFn = MONSTER_STYLES[cfg.drawType] || MONSTER_STYLES.blob;
-
+	// --- THE REDIRECT ---
+    if (cfg.drawType === "stickman") {
+        drawEnemyStickman(ctx, e);
+        return; // EXIT EARLY so we don't double-draw or double-translate
+    }
     ctx.save();
+	// Position the monster
     ctx.translate(e.x, e.y);
-    
     const scale = e.scale || cfg.scale || 1.0;
     ctx.scale(scale, scale);
 
+    // Apply Monster Glow
     if (cfg.glow) {
         ctx.shadowBlur = 15 + Math.sin(now / 200) * 10;
         ctx.shadowColor = cfg.glowColor || e.color;
     }
 
-    // 1. Draw Body
+    // 1. Draw Body & Wings
+    const styleFn = MONSTER_STYLES[cfg.drawType] || MONSTER_STYLES.blob;
     styleFn(ctx, e, now, cfg);
-
-    // 2. Draw Wings
     if (cfg.wings) renderMonsterWings(ctx, e, now, cfg);
 
-    // 3. Draw Helmet (Replaces the broken renderMonsterHelmet call)
-    if (e.equipped?.helmet) {
-        const item = ITEM_DB[e.equipped.helmet];
-        if (item) {
-            const style = item.style || "helmet";
-            const drawFn = HAT_STYLES[style] || HAT_STYLES["helmet"];
-            // Monsters usually have head anchors, or we default to slightly above center
-            const hX = cfg.headAnchor?.x || 0;
-            const hY = cfg.headAnchor?.y || -15;
-            drawFn(ctx, hX, hY, item.color || "#777");
-        }
-    }
 
-    // 4. Draw UI
+
+    // 3. Monster UI (Name/HP)
     drawEnemyUI(ctx, e); 
 
     ctx.restore(); 
