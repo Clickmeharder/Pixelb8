@@ -1844,6 +1844,7 @@ function spawnWave() {
         enemies.push({ 
             name: typeName, 
             area: "dungeon",
+			level: dungeonTier * 5,
             hp: enemyHp, 
             maxHp: enemyHp, 
             x: 500 + (i * 70),
@@ -1871,6 +1872,7 @@ function spawnWave() {
         boss = {
             name: bossKey.replace(/_/g, " "),
             area: "dungeon",
+			level: (dungeonTier * 5) + 5, 
             hp: bossHp,
             maxHp: bossHp,
             x: 850, 
@@ -1883,7 +1885,7 @@ function spawnWave() {
             color: bossConfig.color || "#ff0000",
             scale: bossConfig.scale || 2.0,
             // ADD THIS: Bosses deserve Tier + 1 gear!
-            equipped: bossConfig.canEquip ? generateRandomLoadout(dungeonTier + 1) : {}
+            equipped: bossConfig.canEquip ? generateRandomLoadout(dungeonTier) : {}
         };
         
         systemMessage(`⚠️ TIER ${dungeonTier} BOSS: ${boss.name} has emerged!`);
