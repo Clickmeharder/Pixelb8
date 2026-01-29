@@ -1866,25 +1866,24 @@ function spawnWave() {
         // HP Scaling: Base + Wave growth, multiplied by monster toughness and party size
         let enemyHp = (40 + (dungeonWave * 25)) * (config.hpMult || 1.0) * (1 + (partySize * 0.25));
 
-        enemies.push({ 
-            name: typeName, 
-            area: "dungeon",
+		enemies.push({ 
+			name: typeName, 
+			area: "dungeon",
 			level: dungeonTier * 5,
-            hp: enemyHp, 
-            maxHp: enemyHp, 
-            x: 500 + (i * 70),
-            y: 520 + (Math.random() * 30), // Slight Y variation for depth
-            dead: false,
-            isEnemy: true,
-            config: config, 
-            color: config.color || "#ff4444",
+			hp: enemyHp, 
+			maxHp: enemyHp, 
+			x: 500 + (i * 70),
+			y: 530 + (Math.random() * 20), // Slight Y variation for depth
+			dead: false,
+			isEnemy: true,
+			config: config, 
+			color: config.color || "#ff4444",
 			drawType: config.drawType, 
 			scale: config.scale || 1.0,
-            isStickman: config.drawType === "stickman",
-            stats: { lurkLevel: 0 },
-            // Only generate gear if config allows
-            equipped: config.canEquip ? generateRandomLoadout(dungeonTier) : {}
-        });
+			isStickman: config.drawType === "stickman",
+			// REMOVED: stats: { lurkLevel: 0 }, <--- Cleaning this out fixes the drawing bug
+			equipped: config.canEquip ? generateRandomLoadout(dungeonTier) : {}
+		});
     }
 
     // 4. Spawn Theme Boss
