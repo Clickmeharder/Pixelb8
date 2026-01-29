@@ -3151,7 +3151,6 @@ function drawMonster(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
     const cfg = e.config || { drawType: "blob", color: "#f0f" };
-    const styleFn = MONSTER_STYLES[cfg.drawType] || MONSTER_STYLES.blob;
 	// --- THE REDIRECT ---
     if (cfg.drawType === "stickman") {
         drawEnemyStickman(ctx, e);
