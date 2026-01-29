@@ -3047,20 +3047,19 @@ function drawStickman(ctx, p) {
 function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
-
     const anim = { bodyY: Math.sin(now / 200) * 2, armMove: 0, lean: -0.2 }; 
     const anchors = getAnchorPoints(e, anim); 
     const limbs = getLimbPositions(e, anchors, anim, now);
 
     ctx.save();
-    // Flip Logic: Mirroring the body
-    ctx.translate(e.x, 0); 
-    ctx.scale(-1, 1); 
-    ctx.translate(-e.x, 0); 
-
+    ctx.translate(e.x, e.y); // Move to monster root
+    
+    // --- Draw Body (Mirrored) ---
+    ctx.save();
+    ctx.scale(-1, 1); // Flip body only
     ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
     ctx.lineWidth = 1;
-	// --- ADD THIS LINE HERE ---
+
     BODY_PARTS["stick"].head(ctx, anchors.headX, anchors.headY, e);
     drawStickmanBody(ctx, e, anchors, limbs);
 
@@ -3068,10 +3067,6 @@ function drawEnemyStickman(ctx, e) {
         if (e.equipped.pants) drawEnemyPants(ctx, e, anchors, limbs.leftFoot, limbs.rightFoot, ITEM_DB[e.equipped.pants]);
         if (e.equipped.armor) drawEnemyArmor(ctx, e, anchors, ITEM_DB[e.equipped.armor]);
         if (e.equipped.helmet) drawEnemyHeadgear(ctx, e, anchors, ITEM_DB[e.equipped.helmet]);
-        if (e.equipped.gloves) {
-            drawGlovesItem(ctx, limbs.leftHand.x, limbs.leftHand.y, ITEM_DB[e.equipped.gloves]);
-            drawGlovesItem(ctx, limbs.rightHand.x, limbs.rightHand.y, ITEM_DB[e.equipped.gloves]);
-        }
         if (e.equipped.weapon) {
             let weapon = ITEM_DB[e.equipped.weapon];
             ctx.save();
@@ -3081,19 +3076,12 @@ function drawEnemyStickman(ctx, e) {
             ctx.restore();
         }
     }
-    ctx.restore(); // Exit mirroring before drawing text!
+    ctx.restore(); // Stop mirroring here
 
-    // --- ENEMY NAME & HP BAR ---
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#ff4444"; // Reddish name for enemies
-    ctx.font = "bold 12px monospace";
-    ctx.fillText(e.name, e.x, e.y + 40);
+    // --- Draw UI (Not Mirrored) ---
+    drawEnemyUI(ctx, e);
 
-    // HP Bar
-    ctx.fillStyle = "#444"; 
-    ctx.fillRect(e.x - 20, e.y + 48, 40, 4);
-    ctx.fillStyle = "#f00"; // Red fill for enemies
-    ctx.fillRect(e.x - 20, e.y + 48, 40 * (e.hp / e.maxHp), 4);
+    ctx.restore();
 }
 function renderMonsterBody(ctx, e, now) {
     const cfg = e.config;
@@ -3204,6 +3192,40 @@ function renderMonsterWings(ctx, e, now, cfg) {
     ctx.fillRect(m.x - 25, m.y + textYOffset + 8, 50 * (m.hp / m.maxHp), 5);
 }
  */
+function drawEnemyUI(ctx, e) {
+    if (e.dead) return;
+
+    // We calculate offsets relative to (0,0) which is the monster's base
+    const scale = (e.scale || 1);
+    const barWidth = 40 * scale;
+    const barHeight = 4;
+    
+    // Position the UI above the head (usually negative Y)
+    // Adjust -60 based on how tall your average monster is
+    const yOffset = -60 * scale; 
+
+    // 1. Draw Name
+    ctx.textAlign = "center";
+    ctx.font = `bold ${Math.max(10, 12 * scale)}px monospace`;
+    ctx.fillStyle = e.isBoss ? "#ff00ff" : "#ff4444"; 
+    ctx.fillText(e.name, 0, yOffset - 10);
+
+    // 2. Health Bar Background
+    ctx.fillStyle = "#444";
+    ctx.fillRect(-barWidth / 2, yOffset, barWidth, barHeight);
+
+    // 3. Health Bar Fill
+    const hpPct = Math.max(0, e.hp / e.maxHp);
+    ctx.fillStyle = hpPct > 0.3 ? "#f00" : "#ff8800"; // Red, Orange if critical
+    ctx.fillRect(-barWidth / 2, yOffset, barWidth * hpPct, barHeight);
+
+    // 4. Boss Frame
+    if (e.isBoss) {
+        ctx.strokeStyle = "gold";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-barWidth / 2 - 2, yOffset - 2, barWidth + 4, barHeight + 4);
+    }
+}
 function drawMonster(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
@@ -3211,27 +3233,30 @@ function drawMonster(ctx, e) {
     const styleFn = MONSTER_STYLES[cfg.drawType] || MONSTER_STYLES.blob;
 
     ctx.save();
+    // 1. Move to monster position
     ctx.translate(e.x, e.y);
+    
     const scale = e.scale || cfg.scale || 1.0;
     ctx.scale(scale, scale);
 
-    // Apply Global Effects
+    // 2. Effects
     if (cfg.glow) {
         ctx.shadowBlur = 15 + Math.sin(now / 200) * 10;
         ctx.shadowColor = cfg.glowColor || e.color;
     }
 
-    // DRAW THE ACTUAL ART
+    // 3. Draw Body
     styleFn(ctx, e, now, cfg);
 
-    // DRAW EXTRAS (Hats/Wings) 
-    // You can keep these here so they work on ANY monster style
+    // 4. Draw Overlays
     if (cfg.wings) renderWings(ctx, e, now, cfg);
     if (e.equipped?.helmet) renderMonsterHelmet(ctx, e);
 
-    ctx.restore();
-    
-    drawEnemyUI(ctx, e); // HP Bar
+    // 5. Draw UI while still translated! 
+    // This ensures (0,0) in the UI function is actually the monster's feet.
+    drawEnemyUI(ctx, e); 
+
+    ctx.restore(); 
 }
 
 function drawSheathedWeapon(ctx, p, anchors, item) {
