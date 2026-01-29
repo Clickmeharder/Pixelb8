@@ -1720,18 +1720,14 @@ function startDungeon() {
 }
 
 function getBestAvailableTier(type, desiredTier) {
-    // 1. Get ALL items of this type from the dungeon
     const allDungeonItems = Object.keys(ITEM_DB).filter(key => {
         const i = ITEM_DB[key];
         return i.type === type && i.sources && i.sources.includes("dungeon");
     });
 
-    // 2. Filter for items that are at or below our current tier
     const validItems = allDungeonItems.filter(key => ITEM_DB[key].tier <= desiredTier);
 
     if (validItems.length === 0) {
-        // Fallback: If absolutely nothing exists at or below tier, 
-        // return the absolute lowest tier available so they aren't naked.
         if (allDungeonItems.length > 0) {
             const minTier = Math.min(...allDungeonItems.map(k => ITEM_DB[k].tier));
             return allDungeonItems.filter(k => ITEM_DB[k].tier === minTier);
@@ -1739,41 +1735,57 @@ function getBestAvailableTier(type, desiredTier) {
         return [];
     }
 
-    // 3. Find the highest tier within our valid range
     const maxTierInRange = Math.max(...validItems.map(key => ITEM_DB[key].tier));
-
-    // 4. Return all items that match that specific highest-valid tier
     return validItems.filter(key => ITEM_DB[key].tier === maxTierInRange);
 }
+
 function generateRandomLoadout(tier) {
+    // 1. Log the attempt
+    console.group(`🛠️ Generating Loadout for Tier: ${tier}`);
+
     const weaponPool = Object.keys(ITEM_DB).filter(key => {
         const i = ITEM_DB[key];
         const isWeaponType = (i.type === "weapon" || i.type === "bow" || i.type === "staff");
         return isWeaponType && i.tier === tier && i.sources === "dungeon";
     });
 
-    const headPool   = getBestAvailableTier("helmet", tier);
-    const armorPool  = getBestAvailableTier("armor", tier);
-    const legPool    = getBestAvailableTier("pants", tier);
-    const glovePool  = getBestAvailableTier("gloves", tier);
-    const bootPool   = getBestAvailableTier("boots", tier);
-    const capePool   = getBestAvailableTier("cape", tier);
+    const pools = {
+        weapon: weaponPool,
+        helmet: getBestAvailableTier("helmet", tier),
+        armor:  getBestAvailableTier("armor", tier),
+        pants:  getBestAvailableTier("pants", tier),
+        gloves: getBestAvailableTier("gloves", tier),
+        boots:  getBestAvailableTier("boots", tier)
+    };
+
+    // 2. Critical Debug: Show exactly what items were found for this Tier
+    Object.keys(pools).forEach(slot => {
+        if (pools[slot].length === 0) {
+            console.error(`❌ Slot [${slot}] is EMPTY for Tier ${tier}!`);
+        } else {
+            console.log(`✅ Slot [${slot}]: ${pools[slot].length} items found.`);
+        }
+    });
 
     const pick = (pool) => {
         if (!pool || pool.length === 0) return null;
         return pool[Math.floor(Math.random() * pool.length)];
     };
 
-    return {
-        weapon: pick(weaponPool),
-        helmet: pick(headPool),
-        armor:  Math.random() < 0.7 ? pick(armorPool) : null,
-        pants:  Math.random() < 0.7 ? pick(legPool) : null,
-        gloves: Math.random() < 0.5 ? pick(glovePool) : null,
-        boots:  Math.random() < 0.8 ? pick(bootPool) : null,
-        // Capes only for T5+ elites, and even then only 30% chance
-        cape:   (tier >= 5 && Math.random() < 0.1) ? pick(capePool) : null
+    const loadout = {
+        weapon: pick(pools.weapon),
+        helmet: pick(pools.helmet),
+        armor:  Math.random() < 0.9 ? pick(pools.armor) : null,
+        pants:  Math.random() < 0.9 ? pick(pools.pants) : null,
+        gloves: Math.random() < 0.5 ? pick(pools.gloves) : null,
+        boots:  Math.random() < 0.5 ? pick(pools.boots) : null,
+        cape:   (tier >= 5 && Math.random() < 0.1) ? pick(getBestAvailableTier("cape", tier)) : null
     };
+
+    console.log("Final Loadout Result:", loadout);
+    console.groupEnd();
+
+    return loadout;
 }
 
 /* function spawnWave() {
