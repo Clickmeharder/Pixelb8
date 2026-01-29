@@ -3375,6 +3375,12 @@ function drawEnemyHeadgear(ctx, e, anchors, item) {
 //----------
 //-------------------------------------------
 // --- WORKSHOP PRO SYSTEM ---
+// i think we should make it so we can only use creation tool when we are at the lab, and new items and monsters should always start at tier 1, after--
+// modeling them with the creation tool we should be able to do something in the lab to "grow" the creature/mob/npc/enemy  or "manufacture" the weapon/hat or item - 
+// growing creatures/bosses/monsters/enemies or npc's should reward a new skill "biology" and manufacturing items should go towards a new engineer skill
+// after reaching a certain biology skill we shuld unlock the ability to "mutate" default enemies,monsters and creatures, or custom ones, or make hybrids giving them a mutation stat
+// if the mutated products are further mutated they get mrore mutated allowing users to create new enemies and creatures or npcs, mutate them, make hybrids or w.e --
+// perpetually make them wierder and unique and engineering shuld have a similar mechanic for items 
 let isDrawing = false;
 let currentPath = [];
 let anchor = { x: 100, y: 100 };
@@ -3452,12 +3458,7 @@ function drawPreview() {
 }
 
 // 3. Asset Injection/asset saving
-// i think we should make it so we can only use creation tool when we are at the lab, and new items and monsters should always start at lvl 1, after--
-// modeling them with the creation tool we should be able to do something in the lab to "grow" the creature/mob/npc/enemy  or "manufacture" the weapon/hat or item - 
-// growing creatures/bosses/monsters/enemies or npc's should reward a new skill "biology" and manufacturing items should go towards a new engineer skill
-// after reaching a certain biology skill we shuld unlock the ability to "mutate" default enemies,monsters and creatures, or custom ones, or make hybrids giving them a mutation stat
-// if the mutated products are further mutated they get mrore mutated allowing users to create new enemies and creatures or npcs, mutate them, make hybrids or w.e --
-// perpetually make them wierder and unique and engineering shuld have a similar mechanic for items 
+
 function saveAsset(silent = false) {
     const nameInput = document.getElementById('asset-name');
     const name = nameInput.value.trim().replace(/\s+/g, '_') || "Custom_" + Date.now();
@@ -5233,8 +5234,10 @@ function cmdEquip(p, args) {
     }
     if (msg) {
         systemMessage(`${p.name} ${msg}!`);
+		renderInventoryUI();
         saveStats(p);
     }
+
 }
 function cmdSheath(p, user) {
     p.manualSheath = !p.manualSheath;
@@ -5267,6 +5270,7 @@ function cmdUnequip(p, args) {
 
     if (found) {
         systemMessage(`${p.name} unequipped ${target === "all" ? "everything" : target}.`);
+		renderInventoryUI();
         saveStats(p);
     } else {
         systemMessage(`${p.name}: Invalid slot "${target}". (weapon/armor/helmet/boots/pants/cape/gloves/all)`);
@@ -5924,13 +5928,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const hideEquippedCheck = document.getElementById("filter-hide-equipped");
     if (hideEquippedCheck) hideEquippedCheck.addEventListener("change", renderInventoryUI);
-
     const sortSelect = document.getElementById("inv-sort-mode");
     if (sortSelect) {
         sortSelect.addEventListener("change", (e) => {
             currentSortMode = e.target.value;
             renderInventoryUI();
         });
+	
     }
 
     // 4. NEW: Tab Switching for Items / Stats / Achievements
