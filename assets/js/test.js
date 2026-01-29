@@ -801,7 +801,7 @@ function applyDamage(target, rawAmount, color = "#f00") {
     }
 }
 //
-// HEALINF
+// HEALING
 function performHeal(p, mode = "auto", target = null) {
     const healLvl = p.stats.healLevel || 1;
     const now = Date.now();
@@ -2066,47 +2066,82 @@ function closeDungeon(reason) {
     });
 }
  */
- function handleEnemyAttacks() {
+function handleEnemyAttacks() {
     let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
-    if (dwellers.length === 0) return;
+    // If no players are in the dungeon, enemies stop attacking
+    if (dwellers.length === 0) {
+        [...enemies, boss].forEach(e => { if(e) e.activeTask = "none"; });
+        return;
+    }
     
     let allAttackers = [...enemies];
     if (boss && !boss.dead) allAttackers.push(boss);
 
+    const now = Date.now();
+
     allAttackers.forEach(e => {
         if (e.dead) return;
+
+        // 1. Target Selection
+        // Enemies stay focused on one target if possible, or pick a random one
         let target = dwellers[Math.floor(Math.random() * dwellers.length)];
         
-        // --- SPECIAL ABILITIES ---
-        const spec = e.config?.special;
-		if (spec) {
-			const procRoll = Math.random();
+        // 2. State Setup (Triggers getAnimationState to draw weapon poses)
+        e.activeTask = "attacking"; 
 
-			if (spec === "web_shot" && procRoll < 0.2) {
-				target.isWebbed = true;
-				target.webExpiry = Date.now() + 3000;
-				spawnFloater(target, "🕸️ WEBBED!", "#fff");
-				spawnProjectile(e.x, e.y, target.x, target.y, "#ffffff", "web", "dungeon");
-				return; 
-			}
-			
-			if (spec === "burn" && procRoll < 0.3) {
-				target.isBurning = true;
-				target.burnExpiry = Date.now() + 5000;
-				spawnFloater(target, "🔥 BURNING!", "#ff4500");
-			}
+        // 3. Weapon Speed & Stats
+        const weaponKey = e.equipped?.weapon;
+        const weapon = ITEM_DB[weaponKey] || { power: 0, type: "unarmed", speed: 1500 };
+        const attackSpeed = weapon.speed || 1500;
 
-			if (spec === "freeze" && procRoll < 0.2) {
-				target.isFrozen = true;
-				target.freezeExpiry = Date.now() + 2000;
-				spawnFloater(target, "❄️ FROZEN!", "#00ffff");
-			}
-		}
+        // Initialize timer if this is the first swing of the wave
+        if (!e.lastAttackTime) e.lastAttackTime = now - attackSpeed;
 
-        // Standard damage logic...
-        let dmg = (3 + Math.floor(dungeonWave * 1.5));
-        if (e.isBoss) dmg *= 2.5;
-        applyDamage(target, Math.floor(dmg));
+        // 4. The Attack Cycle (Only execute at the end of the swing/pull animation)
+        if (now - e.lastAttackTime > attackSpeed) {
+            
+            // --- SPECIAL ABILITIES (20-30% chance on successful hit) ---
+            const spec = e.config?.special;
+            if (spec) {
+                const procRoll = Math.random();
+                if (spec === "web_shot" && procRoll < 0.2) {
+                    target.isWebbed = true;
+                    target.webExpiry = now + 3000;
+                    spawnFloater(target, "🕸️ WEBBED!", "#fff");
+                    spawnProjectile(e.x, e.y - 15, target.x, target.y - 15, "#ffffff", "web", "dungeon");
+                }
+                
+                if (spec === "burn" && procRoll < 0.3) {
+                    target.isBurning = true;
+                    target.burnExpiry = now + 5000;
+                    spawnFloater(target, "🔥 BURNING!", "#ff4500");
+                }
+
+                if (spec === "freeze" && procRoll < 0.2) {
+                    target.isFrozen = true;
+                    target.freezeExpiry = now + 2000;
+                    spawnFloater(target, "❄️ FROZEN!", "#00ffff");
+                }
+            }
+
+            // --- DAMAGE CALCULATION ---
+            // Base wave damage + weapon power
+            let dmg = (3 + (dungeonWave * 1.5)) + (weapon.power || 0);
+            if (e.isBoss) dmg *= 2.5;
+
+            // --- PROJECTILE SPAWNING ---
+            if (weapon.type === "bow") {
+                spawnProjectile(e.x, e.y - 12, target.x, target.y - 15, "#fff", "arrow", "dungeon");
+            } else if (weapon.type === "staff") {
+                spawnProjectile(e.x, e.y - 12, target.x, target.y - 15, weapon.color || "#ff00ff", "magic", "dungeon");
+            }
+
+            // Apply the final damage
+            applyDamage(target, Math.floor(dmg));
+
+            // RESET the swing timer so the animation starts over
+            e.lastAttackTime = now; 
+        }
     });
 }
 function handleLoot(p, target) {
@@ -2774,7 +2809,8 @@ function getAnimationState(p, now) {
 
     // 4. Attack Reactivity & Pose Selection
     if ((p.activeTask === "attacking" || p.activeTask === "pvp") && p.lastAttackTime) {
-        const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
+        //const itemKey = (p.stats && p.stats.equippedWeapon) || (p.equipped && p.equipped.weapon);
+		const itemKey = p.equipped?.weapon || p.stats?.equippedWeapon; 
         const item = ITEM_DB[itemKey];
         const speed = item?.speed || 2000; // Default 2s for fists
         const progress = Math.min(1, (now - p.lastAttackTime) / speed);
