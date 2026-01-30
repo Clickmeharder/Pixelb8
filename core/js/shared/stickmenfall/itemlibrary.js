@@ -2090,6 +2090,99 @@ const MONSTER_STYLES = {
         }
         BODY_PARTS.beast.body(ctx, 0, 10, cfg.bodyW || 15, e.color);
     },
+	horror: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		const bodyW = cfg.bodyW || 20;
+		const color = e.color || "#ff00ff";
+		
+		// 1. THE "GLITCH" SHAKE
+		// Horror monsters shouldn't be smooth. We add a micro-jitter.
+		const jitterX = Math.random() > 0.95 ? (Math.random() - 0.5) * 10 : 0;
+		const jitterY = Math.random() > 0.95 ? (Math.random() - 0.5) * 10 : 0;
+		ctx.translate(jitterX, jitterY);
+
+		// 2. TENTACLES / LIMBS (Drawn behind)
+		const legCount = cfg.legCount || 6;
+		ctx.strokeStyle = color;
+		ctx.lineWidth = 3;
+		for (let i = 0; i < legCount; i++) {
+			const angle = (i / legCount) * Math.PI * 2 + (time * 0.5);
+			const reach = 40 + Math.sin(time * 5 + i) * 15;
+			
+			ctx.save();
+			ctx.beginPath();
+			ctx.moveTo(0, 0);
+			// Spasmodic tentacle movement
+			const cp1x = Math.cos(angle) * reach * 0.5 + Math.sin(time * 10 + i) * 10;
+			const cp1y = Math.sin(angle) * reach * 0.5 + Math.cos(time * 10 + i) * 10;
+			const endX = Math.cos(angle) * reach;
+			const endY = Math.sin(angle) * reach;
+			
+			ctx.quadraticCurveTo(cp1x, cp1y, endX, endY);
+			ctx.stroke();
+			
+			// Small "hooks" or "suckers" at the end
+			ctx.fillStyle = "#000";
+			ctx.beginPath();
+			ctx.arc(endX, endY, 2, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.restore();
+		}
+
+		// 3. THE CORE (Amorphous Mass)
+		ctx.fillStyle = color;
+		ctx.beginPath();
+		for (let a = 0; a < Math.PI * 2; a += 0.4) {
+			// Pulsing, uneven body
+			const pulse = Math.sin(time * 3 + a * 2) * 5;
+			const r = bodyW + pulse;
+			const x = Math.cos(a) * r;
+			const y = Math.sin(a) * r;
+			if (a === 0) ctx.moveTo(x, y);
+			else ctx.lineTo(x, y);
+		}
+		ctx.closePath();
+		ctx.fill();
+		ctx.stroke();
+
+		// 4. MULTIPLE EYES (Scattered)
+		const eyeSeed = (e.id || 1) * 100;
+		for (let i = 0; i < 5; i++) {
+			const eyeX = Math.sin(eyeSeed + i) * (bodyW * 0.6);
+			const eyeY = Math.cos(eyeSeed + i) * (bodyW * 0.6);
+			
+			// Occasional blinking
+			if (Math.sin(time * 2 + i) > -0.8) {
+				ctx.fillStyle = "#fff";
+				ctx.beginPath();
+				ctx.arc(eyeX, eyeY, 4, 0, Math.PI * 2);
+				ctx.fill();
+				
+				ctx.fillStyle = "#000";
+				ctx.beginPath();
+				// Pupils follow the "time" to look around frantically
+				ctx.arc(eyeX + Math.sin(time * 5) * 1.5, eyeY + Math.cos(time * 5) * 1.5, 1.8, 0, Math.PI * 2);
+				ctx.fill();
+			} else {
+				// Closed eye slit
+				ctx.strokeStyle = "#000";
+				ctx.beginPath();
+				ctx.moveTo(eyeX - 3, eyeY);
+				ctx.lineTo(eyeX + 3, eyeY);
+				ctx.stroke();
+			}
+		}
+
+		// 5. VEINS / CRACKS
+		ctx.strokeStyle = "rgba(0,0,0,0.3)";
+		ctx.lineWidth = 1;
+		ctx.beginPath();
+		ctx.moveTo(-bodyW * 0.5, 0);
+		ctx.lineTo(bodyW * 0.5, 0);
+		ctx.moveTo(0, -bodyW * 0.5);
+		ctx.lineTo(0, bodyW * 0.5);
+		ctx.stroke();
+	},
 	wraith: (ctx, e, now, cfg) => {
 		const floatY = Math.sin(now / 400) * 15; // Slow, ghostly hovering
 		const wave = Math.sin(now / 200) * 5;
@@ -2361,7 +2454,7 @@ const MONSTER_DB = {
     "Slime": { drawType: "blob", color: "#4caf50", hpMult: 1.0, bodyW: 25, bodyH: 20 },
     "FireSlime": { drawType: "blob", color: "#ff4500", hpMult: 1.2, glow: true, glowColor: "#ff0" },
     "StickmanHunter": { drawType: "stickman", hpMult: 1.2, canEquip: true },
-
+	"somehing_else": { drawType: "beast", scale: 1.0, color: "#000", hpMult: 15, legCount: 4 },
     // --- SPIDERS ---
     "Spiderling": { drawType: "spider", scale: 0.5, color: "#555", hpMult: 0.5 },
     "CaveSpider": { drawType: "spider", scale: 1.0, color: "#333", hpMult: 1.0 },
@@ -2378,9 +2471,10 @@ const MONSTER_DB = {
     "VoidWalker": { drawType: "stickman", color: "#4b0082", hpMult: 2.0, glow: true },
     "ShadowWraith": { drawType: "wraith", color: "#1a1a1a", glow: true, glowColor: "#4b0082",hpMult: 1.5, bodyW: 15, bodyH: 40 },
     "VoidDragon": { drawType: "dragon", color: "#2e0854", hpMult: 5.0, scale: 2.0, glow: true, glowColor: "#ff00ff" },
-    "CosmicHorror": { drawType: "beast", color: "#ff00ff", hpMult: 4.0, scale: 2.5, legCount: 12 },
+    "CosmicHorror": { drawType: "beast", color: "#ff00ff",},
     "StarWraith": { drawType: "wraith", color: "#fff", glow: true, glowColor: "#00d4ff", hpMult: 2.0, bodyW: 12, bodyH: 45 }, 
 	"SeaWraith": { drawType: "wraith", color: "#e0ffff", glow: true, glowColor: "#00ced1", hpMult: 2.0, bodyW: 12, bodyH: 45 }, 
+	"CosmicHorror": { drawType: "horror", color: "#ff00ff", scale: 2.5, legCount: 8, bodyW: 25 },
 
     // --- WEIRD/MIMICS ---
     "StaffMimic": { drawType: "phalic", color: "#ff69b4", hpMult: 2.0, hasArms: true, armAnchor: {x: 0, y: -30} },
@@ -2390,7 +2484,7 @@ const MONSTER_DB = {
     "DUNGEON_OVERLORD": { drawType: "stickman", scale: 2.5, color: "#f00", hpMult: 8.0, canEquip: true },
     "BROOD_MOTHER": { drawType: "spider", scale: 4.0, color: "#1a1a1a", hpMult: 10, special: "spawn_spiderlings" },
     "FENRIR_LITE": { drawType: "canine", fuzz: true, scale: 3.5, color: "#000", hpMult: 12, glow: true, headAnchor: {x: -20, y: -5} },
-    "VOID_CORRUPTOR": { drawType: "beast", scale: 4.0, color: "#000", hpMult: 15, legCount: 10 },
+    "VOID_CORRUPTOR": { drawType: "horror", scale: 4.0, color: "#1a1a1a", glow: true, glowColor: "#4b0082", hpMult: 15, legCount: 12 },
     "FROST_JOTUN": { drawType: "stickman", scale: 5.0, color: "#fff", hpMult: 18 },
     "MAGMA_CORE": { drawType: "blob", scale: 6.0, color: "#f00", hpMult: 20 },
     "THE_GRAND_MIMIC": { drawType: "phalic", scale: 5.0, color: "#ff69b4", hpMult: 15 },
