@@ -1975,38 +1975,91 @@ const MONSTER_STYLES = {
         }
     },
 
-    canine: (ctx, e, now, cfg) => {
-        const walk = Math.sin(now / 120) * 15;
-        ctx.lineWidth = 4;
-        [ -10, 10 ].forEach((xOffset, i) => {
-            const move = (i === 0) ? walk : -walk;
-            ctx.beginPath();
-            ctx.moveTo(xOffset, 5);
-            ctx.lineTo(xOffset + move, 20);
-            ctx.stroke();
-        });
+	canine: (ctx, e, now, cfg) => {
+		const walk = Math.sin(now / 150) * 12;
+		const breathe = Math.sin(now / 300) * 2;
+		const bodyW = cfg.bodyW || 25;
+		const bodyH = cfg.bodyH || 15;
 
-        // Body logic
-        ctx.fillStyle = e.color;
-        if (cfg.fuzz) {
-            ctx.beginPath();
-            for(let a=0; a<Math.PI*2; a+=0.4) {
-                let r = (cfg.bodyW || 25) + (Math.random() * 5);
-                ctx.lineTo(Math.cos(a)*r, Math.sin(a)*r - 5);
-            }
-            ctx.closePath();
-        } else {
-            ctx.beginPath();
-            ctx.roundRect(-25, -15, 50, 20, 10);
-        }
-        ctx.fill(); ctx.stroke();
+		ctx.strokeStyle = "#000";
+		ctx.lineWidth = 2;
 
-        // --- DOG EYES ---
-        ctx.fillStyle = "#000";
-        ctx.beginPath();
-        ctx.arc(-22, -12, 2, 0, Math.PI * 2); // Head is usually offset for dogs
-        ctx.fill();
-    },
+		// 1. TAIL
+		ctx.save();
+		ctx.translate(bodyW - 5, -5);
+		ctx.rotate(Math.sin(now / 100) * 0.4 + 0.5); // Fast wag
+		ctx.fillStyle = e.color;
+		ctx.beginPath();
+		ctx.ellipse(10, 0, 12, 4, 0, 0, Math.PI * 2);
+		ctx.fill(); ctx.stroke();
+		ctx.restore();
+
+		// 2. LEGS (Back pair then Front pair)
+		ctx.lineWidth = 3;
+		[ -bodyW + 8, bodyW - 8 ].forEach((xOff, i) => {
+			const move = (i === 0) ? walk : -walk;
+			// Back Leg
+			ctx.beginPath();
+			ctx.moveTo(xOff, 5);
+			ctx.lineTo(xOff + move, 20);
+			ctx.stroke();
+			// Front Leg (offset slightly)
+			ctx.beginPath();
+			ctx.moveTo(xOff + 5, 5);
+			ctx.lineTo(xOff + 5 - move, 20);
+			ctx.stroke();
+		});
+
+		// 3. BODY
+		ctx.fillStyle = e.color;
+		ctx.beginPath();
+		if (cfg.fuzz) {
+			// Jagged Wolf Fur
+			for (let a = 0; a < Math.PI * 2; a += 0.5) {
+				let rX = bodyW + (Math.random() * 4);
+				let rY = bodyH + (Math.random() * 4) + breathe;
+				ctx.lineTo(Math.cos(a) * rX, Math.sin(a) * rY);
+			}
+		} else {
+			// Sleek Dog Body
+			ctx.ellipse(0, breathe, bodyW, bodyH, 0, 0, Math.PI * 2);
+		}
+		ctx.fill(); ctx.stroke();
+
+		// 4. HEAD & SNOUT
+		const head = cfg.headAnchor || { x: -bodyW + 5, y: -10 };
+		ctx.save();
+		ctx.translate(head.x, head.y + breathe);
+		
+		// Ears
+		ctx.fillStyle = e.color;
+		[-4, 4].forEach(ex => {
+			ctx.beginPath();
+			ctx.moveTo(ex, -5);
+			ctx.lineTo(ex - 3, -15);
+			ctx.lineTo(ex + 3, -15);
+			ctx.fill(); ctx.stroke();
+		});
+
+		// Face / Snout
+		ctx.beginPath();
+		ctx.ellipse(0, 0, 10, 8, 0, 0, Math.PI * 2); // Skull
+		ctx.ellipse(-8, 3, 8, 5, 0, 0, Math.PI * 2); // Muzzle
+		ctx.fill(); ctx.stroke();
+
+		// Eyes (Glow if config says so)
+		ctx.fillStyle = (cfg.glow) ? (cfg.glowColor || "#f00") : "#000";
+		if (cfg.glow) {
+			ctx.shadowBlur = 10;
+			ctx.shadowColor = cfg.glowColor || "#f00";
+		}
+		ctx.beginPath();
+		ctx.arc(-2, -2, 2, 0, Math.PI * 2);
+		ctx.arc(-8, -2, 1.5, 0, Math.PI * 2);
+		ctx.fill();
+		
+		ctx.restore();
+	},
     phalic: (ctx, e, now, cfg) => {
         const sway = Math.sin(now / 200) * 0.1;
         ctx.rotate(sway);
@@ -2037,6 +2090,250 @@ const MONSTER_STYLES = {
         }
         BODY_PARTS.beast.body(ctx, 0, 10, cfg.bodyW || 15, e.color);
     },
+	wraith: (ctx, e, now, cfg) => {
+		const floatY = Math.sin(now / 400) * 15; // Slow, ghostly hovering
+		const wave = Math.sin(now / 200) * 5;
+		const bodyW = cfg.bodyW || 15;
+		const bodyH = cfg.bodyH || 40;
+		const color = e.color || "#fff";
+		const glowColor = cfg.glowColor || "#00d4ff";
+
+		ctx.save();
+		ctx.translate(0, floatY);
+
+		// 1. GHOSTLY GLOW
+		if (cfg.glow) {
+			ctx.shadowBlur = 20;
+			ctx.shadowColor = glowColor;
+		}
+
+		// 2. THE CLOAK / BODY (Trailing effect)
+		ctx.fillStyle = color;
+		ctx.beginPath();
+		ctx.moveTo(-bodyW, 0);
+		// Head/Shoulders
+		ctx.bezierCurveTo(-bodyW, -bodyH, bodyW, -bodyH, bodyW, 0);
+		// The "Tattered" Bottom
+		for (let i = 0; i <= 3; i++) {
+			const x = bodyW - (i * (bodyW * 2 / 3));
+			const tailWarp = Math.sin((now / 150) + i) * 10;
+			ctx.quadraticCurveTo(x, bodyH + tailWarp, x - (bodyW / 1.5), 0);
+		}
+		ctx.fill();
+
+		// 3. FLOATING HANDS
+		ctx.lineWidth = 2;
+		ctx.strokeStyle = color;
+		[-1, 1].forEach(side => {
+			const handX = side * (bodyW + 15 + wave);
+			const handY = Math.cos(now / 300) * 10;
+			
+			// Arm "Mist"
+			ctx.setLineDash([5, 5]);
+			ctx.beginPath();
+			ctx.moveTo(side * bodyW, -10);
+			ctx.quadraticCurveTo(side * (bodyW + 10), -10, handX, handY);
+			ctx.stroke();
+			ctx.setLineDash([]);
+
+			// Hand
+			ctx.beginPath();
+			ctx.arc(handX, handY, 4, 0, Math.PI * 2);
+			ctx.fill();
+		});
+
+		// 4. THE FACE (Condition for Shadow variants)
+		ctx.shadowBlur = 0; 
+		
+		// Check if it's a Shadow variant based on name or color
+		if (e.name?.includes("Shadow") || color === "#1a1a1a") {
+			// ShadowWraiths get piercing red pin-prick eyes
+			ctx.fillStyle = "#ff0044"; 
+			ctx.shadowBlur = 10;
+			ctx.shadowColor = "#ff0044";
+			[-4, 4].forEach(ex => {
+				ctx.beginPath();
+				ctx.arc(ex, -bodyH * 0.6, 1.5, 0, Math.PI * 2);
+				ctx.fill();
+			});
+		} else {
+			// Standard wraith empty sockets
+			ctx.fillStyle = "rgba(0,0,0,0.8)";
+			[-4, 4].forEach(ex => {
+				ctx.beginPath();
+				// Spooky elongated eyes
+				ctx.ellipse(ex, -bodyH * 0.6, 3, 5, 0, 0, Math.PI * 2);
+				ctx.fill();
+			});
+		}
+
+		ctx.restore();
+	},
+	titan: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		const breathe = Math.sin(time * 2) * 5;
+		const color = e.color || "#fff";
+		const glowColor = cfg.glowColor || "#00d4ff";
+
+		ctx.save();
+		
+		// 1. ASTRAL GLOW (The aura around the titan)
+		ctx.shadowBlur = 30;
+		ctx.shadowColor = glowColor;
+
+		// 2. THE CORE (Central chest piece)
+		ctx.fillStyle = glowColor;
+		ctx.beginPath();
+		ctx.arc(0, -40 + breathe, 15, 0, Math.PI * 2);
+		ctx.fill();
+
+		// 3. ARMOR PLATES (Floating Stone/Metal)
+		ctx.fillStyle = color;
+		ctx.strokeStyle = "#333";
+		ctx.lineWidth = 2;
+
+		// Torso/Shoulders
+		ctx.beginPath();
+		ctx.moveTo(-35, -55 + breathe);
+		ctx.lineTo(35, -55 + breathe);
+		ctx.lineTo(25, -20 + breathe);
+		ctx.lineTo(-25, -20 + breathe);
+		ctx.closePath();
+		ctx.fill(); ctx.stroke();
+
+		// Floating Arms (Bulky gauntlets)
+		[-1, 1].forEach(side => {
+			const swing = Math.sin(time + (side * 0.5)) * 10;
+			ctx.save();
+			ctx.translate(side * 45, -30 + swing);
+			ctx.rotate(side * 0.2);
+			// Gauntlet
+			ctx.beginPath();
+			ctx.roundRect(-10, -5, 20, 35, 5);
+			ctx.fill(); ctx.stroke();
+			// Joint Glow
+			ctx.fillStyle = glowColor;
+			ctx.beginPath();
+			ctx.arc(0, 0, 4, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.restore();
+		});
+
+		// 4. THE LEGS (Heavy Pillars)
+		[-1, 1].forEach(side => {
+			ctx.beginPath();
+			ctx.moveTo(side * 15, -20 + breathe);
+			ctx.lineTo(side * 20, 10);
+			ctx.lineTo(side * 5, 10);
+			ctx.closePath();
+			ctx.fill(); ctx.stroke();
+		});
+
+		// 5. THE HEAD (Floating Crown/Mask)
+		ctx.save();
+		ctx.translate(0, -70 + (breathe * 1.5));
+		// Halo/Crown
+		ctx.strokeStyle = glowColor;
+		ctx.beginPath();
+		ctx.arc(0, 0, 18, Math.PI, 0);
+		ctx.stroke();
+		// Face Plate
+		ctx.fillStyle = color;
+		ctx.beginPath();
+		ctx.moveTo(-8, -5);
+		ctx.lineTo(8, -5);
+		ctx.lineTo(0, 10);
+		ctx.closePath();
+		ctx.fill(); ctx.stroke();
+		ctx.restore();
+
+		ctx.restore();
+	},
+	dragon: (ctx, e, now, cfg) => {
+		const scale = e.scale || 1;
+		const color = e.color || "#2e0854";
+		const time = now / 1000;
+		
+		// 1. WINGS (Draw behind body)
+		const flap = Math.sin(now / 200) * 0.6;
+		ctx.save();
+		ctx.fillStyle = color;
+		ctx.globalAlpha = 0.7;
+		[-1, 1].forEach(side => {
+			ctx.save();
+			ctx.rotate(side * (0.8 + flap));
+			ctx.beginPath();
+			// Webbed wing shape
+			ctx.moveTo(0, 0);
+			ctx.quadraticCurveTo(side * 40, -40, side * 60, 10);
+			ctx.quadraticCurveTo(side * 30, 20, 0, 0);
+			ctx.fill();
+			ctx.strokeStyle = "#000";
+			ctx.stroke();
+			ctx.restore();
+		});
+		ctx.restore();
+
+		// 2. SEGMENTED BODY (Serpentine)
+		const segmentCount = 6;
+		for (let i = segmentCount; i >= 0; i--) {
+			const segmentTime = time - (i * 0.15);
+			const offX = i * 15;
+			const offY = Math.sin(segmentTime * 4) * 10;
+			const segScale = 1 - (i * 0.12); // Tapers toward the tail
+
+			ctx.save();
+			ctx.translate(offX, offY);
+			ctx.scale(segScale, segScale);
+			
+			ctx.fillStyle = color;
+			ctx.beginPath();
+			ctx.arc(0, 0, 15, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.stroke();
+
+			// Add "Void Spikes" on the back
+			ctx.beginPath();
+			ctx.moveTo(0, -15);
+			ctx.lineTo(5, -25);
+			ctx.lineTo(-5, -25);
+			ctx.fill();
+
+			ctx.restore();
+		}
+
+		// 3. HEAD (Draw on top of the front segment)
+		ctx.save();
+		const headBob = Math.sin(time * 4) * 5;
+		ctx.translate(-5, headBob);
+		
+		// Dragon Skull
+		ctx.fillStyle = color;
+		ctx.beginPath();
+		ctx.ellipse(0, 0, 18, 12, 0, 0, Math.PI * 2); // Main head
+		ctx.ellipse(-12, 5, 12, 7, 0.2, 0, Math.PI * 2); // Snout
+		ctx.fill();
+		ctx.stroke();
+
+		// Horns
+		ctx.lineWidth = 3;
+		[-5, 5].forEach(hx => {
+			ctx.beginPath();
+			ctx.moveTo(hx, -8);
+			ctx.quadraticCurveTo(hx + 10, -25, hx + 15, -20);
+			ctx.stroke();
+		});
+
+		// Glowing Void Eyes
+		ctx.fillStyle = "#ff00ff";
+		ctx.shadowBlur = 10;
+		ctx.shadowColor = "#ff00ff";
+		ctx.beginPath();
+		ctx.arc(-5, -2, 3, 0, Math.PI * 2);
+		ctx.fill();
+		
+		ctx.restore();
+	},
 	// Inside your MONSTER_STYLES object:
 	custom_path: (ctx, e, now, cfg) => {
 		if (!cfg.pathData) return;
@@ -2079,10 +2376,11 @@ const MONSTER_DB = {
 
     // --- VOID / ABYSSAL ---
     "VoidWalker": { drawType: "stickman", color: "#4b0082", hpMult: 2.0, glow: true },
-    "ShadowWraith": { drawType: "blob", color: "#1a1a1a", hpMult: 1.5, bodyW: 15, bodyH: 40 },
-    "VoidDragon": { drawType: "beast", color: "#2e0854", hpMult: 5.0, scale: 2.0, legCount: 4 },
+    "ShadowWraith": { drawType: "wraith", color: "#1a1a1a", glow: true, glowColor: "#4b0082",hpMult: 1.5, bodyW: 15, bodyH: 40 },
+    "VoidDragon": { drawType: "dragon", color: "#2e0854", hpMult: 5.0, scale: 2.0, glow: true, glowColor: "#ff00ff" },
     "CosmicHorror": { drawType: "beast", color: "#ff00ff", hpMult: 4.0, scale: 2.5, legCount: 12 },
-    "StarWraith": { drawType: "blob", color: "#fff", glow: true, glowColor: "#00d4ff", hpMult: 2.0, bodyW: 10, bodyH: 35 }, // Added because it was in Themes but missing here
+    "StarWraith": { drawType: "wraith", color: "#fff", glow: true, glowColor: "#00d4ff", hpMult: 2.0, bodyW: 12, bodyH: 45 }, 
+	"SeaWraith": { drawType: "wraith", color: "#e0ffff", glow: true, glowColor: "#00ced1", hpMult: 2.0, bodyW: 12, bodyH: 45 }, 
 
     // --- WEIRD/MIMICS ---
     "StaffMimic": { drawType: "phalic", color: "#ff69b4", hpMult: 2.0, hasArms: true, armAnchor: {x: 0, y: -30} },
@@ -2099,9 +2397,9 @@ const MONSTER_DB = {
     "QUEEN_GOSSAMER": { drawType: "spider", scale: 5.0, color: "gold", hpMult: 25 }, // Fixed color string
     "CERBERUS_JUNIOR": { drawType: "canine", scale: 4.0, color: "#500", hpMult: 20, headAnchor: {x: -15, y: -5} },
     "VOID_EXARCH": { drawType: "stickman", scale: 6.0, color: "#4b0082", hpMult: 30 },
-    "ASTRAL_TITAN": { drawType: "beast", scale: 8.0, color: "#fff", hpMult: 40 },
-    "CHRONOS": { drawType: "stickman", scale: 10.0, color: "#00d4ff", hpMult: 50 },
-    "THE_CREATOR": { drawType: "custom_path", scale: 12.0, hpMult: 100 } 
+    "ASTRAL_TITAN": { drawType: "titan", scale: 5.0, color: "#e0e0e0", glow: true, glowColor: "#00d4ff", hpMult: 40 },
+    "CHRONOS": { drawType: "stickman", scale: 7.0, color: "#00d4ff", hpMult: 50 },
+    "THE_CREATOR": { drawType: "custom_path", scale: 8.5, hpMult: 100 } 
 };
 // Theme-based tier waves
 const DUNGEON_THEMES = {
