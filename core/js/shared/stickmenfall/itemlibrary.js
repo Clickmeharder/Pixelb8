@@ -2447,7 +2447,93 @@ const MONSTER_STYLES = {
         // but inside our new render logic we are already translated.
         ctx.scale(-1, 1);
         drawEnemyStickman(ctx, e, true); // Pass a flag to skip internal translation if needed
-    }
+    },
+	theCreator: (ctx, e, now, cfg) => {
+		const breathe = Math.sin(now / 400) * 3;
+		const sway = Math.sin(now / 600) * 0.05;
+		
+		ctx.save();
+		ctx.rotate(sway);
+		ctx.translate(0, breathe);
+
+		// 1. LEGS (Blue Jeans)
+		ctx.fillStyle = "#3b5998"; // Denim Blue
+		ctx.strokeStyle = "#1a1a1a";
+		ctx.lineWidth = 2;
+		// Left Leg
+		ctx.beginPath();
+		ctx.roundRect(-12, 10, 10, 30, [0, 0, 5, 5]);
+		ctx.fill(); ctx.stroke();
+		// Right Leg
+		ctx.beginPath();
+		ctx.roundRect(2, 10, 10, 30, [0, 0, 5, 5]);
+		ctx.fill(); ctx.stroke();
+
+		// 2. TORSO (Black T-Shirt)
+		ctx.fillStyle = "#1a1a1a";
+		ctx.beginPath();
+		ctx.roundRect(-15, -25, 30, 38, 8);
+		ctx.fill(); ctx.stroke();
+		
+		// Short Sleeves
+		[-1, 1].forEach(side => {
+			ctx.beginPath();
+			ctx.roundRect(side * 15 - (side === -1 ? 8 : 0), -22, 8, 15, 4);
+			ctx.fill(); ctx.stroke();
+		});
+
+		// 3. HEAD (Green Halftone Guy)
+		// Skin
+		ctx.fillStyle = "#22ff22"; // Bright Hacker Green
+		ctx.beginPath();
+		ctx.arc(0, -45, 18, 0, Math.PI * 2);
+		ctx.fill(); ctx.stroke();
+
+		// Square Glasses
+		ctx.strokeStyle = "#000";
+		ctx.lineWidth = 1.5;
+		[-7, 7].forEach(side => {
+			ctx.strokeRect(side - 5, -48, 10, 8); // Lens frames
+		});
+		ctx.beginPath(); ctx.moveTo(-2, -44); ctx.lineTo(2, -44); ctx.stroke(); // Bridge
+
+		// Messy Black Hair
+		ctx.fillStyle = "#000";
+		for(let i=0; i<8; i++) {
+			const hAngle = (i / 8) * Math.PI - Math.PI;
+			ctx.beginPath();
+			ctx.ellipse(Math.cos(hAngle) * 12, -55 + Math.sin(hAngle) * 5, 10, 6, hAngle, 0, Math.PI * 2);
+			ctx.fill();
+		}
+
+		// Bunny Ears
+		const earWiggle = Math.sin(now / 200) * 0.1;
+		[-1, 1].forEach(side => {
+			ctx.save();
+			ctx.translate(side * 8, -60);
+			ctx.rotate(side * 0.3 + (side * earWiggle));
+			// Outer Ear
+			ctx.fillStyle = "#000"; // Black ears to match hair
+			ctx.beginPath();
+			ctx.ellipse(0, -12, 6, 18, 0, 0, Math.PI * 2);
+			ctx.fill(); ctx.stroke();
+			// Inner Ear
+			ctx.fillStyle = "#22ff22"; // Green inner ear
+			ctx.beginPath();
+			ctx.ellipse(0, -12, 3, 12, 0, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.restore();
+		});
+
+		// 4. HACKER AURA (Halftone/Matrix Effect)
+		if (Math.random() > 0.8) {
+			ctx.fillStyle = "#22ff22";
+			ctx.font = "bold 10px monospace";
+			ctx.fillText(Math.random() > 0.5 ? "1" : "0", Math.random() * 40 - 20, Math.random() * -80);
+		}
+
+		ctx.restore();
+	}
 };
 const MONSTER_DB = {
     // --- BASE / TRAINING ---
@@ -2493,7 +2579,8 @@ const MONSTER_DB = {
     "VOID_EXARCH": { drawType: "stickman", scale: 6.0, color: "#4b0082", hpMult: 30 },
     "ASTRAL_TITAN": { drawType: "titan", scale: 5.0, color: "#e0e0e0", glow: true, glowColor: "#00d4ff", hpMult: 40 },
     "CHRONOS": { drawType: "stickman", scale: 7.0, color: "#00d4ff", hpMult: 50 },
-    "THE_CREATOR": { drawType: "custom_path", scale: 8.5, hpMult: 100 } 
+    "THE_CREATOR": { drawType: "theCreator", scale: 4.0, hpMult: 100 },
+	"defaultCustomMonster": { drawType: "custom_path", scale: 8.5, hpMult: 100 } 
 };
 // Theme-based tier waves
 const DUNGEON_THEMES = {
