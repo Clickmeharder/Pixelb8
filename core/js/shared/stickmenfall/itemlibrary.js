@@ -1653,28 +1653,6 @@ const POSE_LIBRARY = {
 
 const BODY_PARTS = {
     "stick": {
-/*         head: (ctx, x, y, p) => {
-            ctx.save();
-            ctx.globalAlpha = 0.9;
-            ctx.fillStyle = p.color || "#ff4444";
-            ctx.beginPath(); 
-            ctx.arc(x, y, 10, 0, Math.PI * 2); 
-            ctx.fill();
-            ctx.strokeStyle = "#000";
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            // Eyes
-            ctx.fillStyle = "#000";
-            ctx.fillRect(x - 4, y - 3, 2, 2); 
-            ctx.fillRect(x + 2, y - 3, 2, 2); 
-            ctx.restore();
-			// --- THE SMILE ---
-			ctx.beginPath();
-			// Creates a half-circle arc from left to right below the eyes
-			ctx.arc(x, y + 2, 4, 0.2 * Math.PI, 0.8 * Math.PI); 
-			ctx.stroke();
-        }, */
 		head: (ctx, x, y, p) => {
 			ctx.save();
 			ctx.globalAlpha = 0.9;
@@ -1821,6 +1799,47 @@ const BODY_PARTS = {
             if (joint) ctx.lineTo(joint.x, joint.y);
             ctx.lineTo(endX, endY);
             ctx.stroke();
+        }
+    },
+	"beast": {
+        leg: (ctx, x, y, angle, length, phase) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+
+            // Create a "jointed" look using the phase (animation time)
+            const kneeX = (length / 2) + Math.cos(phase) * 5;
+            const kneeY = Math.sin(phase) * 10;
+            
+            const footX = length + Math.cos(phase - 0.5) * 5;
+            const footY = 15 + Math.sin(phase - 0.5) * 5;
+
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(kneeX, kneeY); // Hip to Knee
+            ctx.lineTo(footX, footY); // Knee to Foot
+            ctx.stroke();
+            
+            ctx.restore();
+        },
+        body: (ctx, x, y, width, color) => {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            // Draw a main body segment
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.ellipse(0, -5, width * 1.5, width, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Add a "hump" or back segment for more beast-like silhouette
+            ctx.beginPath();
+            ctx.ellipse(-width * 0.5, -width * 0.8, width, width * 0.6, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.restore();
         }
     }
 };
