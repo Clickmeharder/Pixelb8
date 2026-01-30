@@ -3716,34 +3716,30 @@ function openWorkshop(type = "Weapon") {
 // more lab viewArea stuff
 function spawnLabTest(monsterKey) {
     const config = MONSTER_DB[monsterKey];
-    if (!config) {
-        console.error("Monster not found in DB:", monsterKey);
-        return;
-    }
+    if (!config) return;
 
-    // Lab mobs have fixed high HP so they don't die instantly during tests
     const testHp = 5000; 
+    boss = null; // Clear any existing boss so it doesn't draw in the lab
 
     const testMob = {
         name: `TEST_${monsterKey}`,
-        area: "lab",
+        area: "lab", // Matches the check in gameLoop
         level: 99,
         hp: testHp,
         maxHp: testHp,
-        x: 400, // Center of lab view
-        y: 530, // Ground level
+        x: 400, 
+        y: 530, 
         dead: false,
         isEnemy: true,
         config: config,
         color: config.color || "#ffffff",
         drawType: config.drawType,
         scale: config.scale || 1.0,
-        isHanging: (monsterKey === "Spiderling"), // Test hanging for spiderlings
+        isHanging: (monsterKey === "Spiderling"),
         isStickman: config.drawType === "stickman",
         equipped: config.canEquip ? generateRandomLoadout(10) : {}
     };
 
-    // Use a separate array or clear the current one for lab testing
     enemies = [testMob]; 
     systemMessage(`🔬 Lab: Testing ${monsterKey}...`);
 }
@@ -4380,7 +4376,7 @@ function updateUI() {
 
 let frameCount = 0;
 
-
+/* 
 function gameLoop() {
     const now = Date.now();
     frameCount++; 
@@ -4484,7 +4480,128 @@ function gameLoop() {
 
     requestAnimationFrame(gameLoop);
 }
-/* =================END GAME LOOP ================= */
+ *//* =================END GAME LOOP ================= */
+
+function gameLoop() {
+    const now = Date.now();
+    frameCount++; 
+    ctx.clearRect(0, 0, c.width, c.height); 
+
+    // --- 1. LOGIC & TRANSITION UPDATES ---
+    // Update the transition state (Calculates the alpha for this frame)
+    updateAndDrawFade(ctx, c.width, c.height);
+    // Check if the "Director" wants to switch areas
+    runIdleViewMode();
+
+    // --- 2. VISUAL FOUNDATION & ALPHA CONTROL ---
+    ctx.save();
+    
+    // Screen Shake Logic
+    if (window.shakeAmount > 0) {
+        let sx = (Math.random() - 0.5) * window.shakeAmount;
+        let sy = (Math.random() - 0.5) * window.shakeAmount;
+        ctx.translate(sx, sy);
+        window.shakeAmount *= 0.9; 
+        if (window.shakeAmount < 0.1) window.shakeAmount = 0;
+    }
+
+    // --- THE DISSOLVE EFFECT ---
+    // If a transition is active, we use its alpha. Otherwise, we stay at 1.0 (Solid)
+    ctx.globalAlpha = cameraTransition.active ? cameraTransition.alpha : 1.0;
+
+    // --- 3. WORLD RENDERING ---
+    renderScene(); 
+    if (frameCount % 3 === 0) updateUI(); 
+    
+    if (dungeonActive) {
+        checkDungeonProgress(); 
+        checkDungeonFailure();  
+    } else {
+        const anyoneInDungeon = Object.values(players).some(p => p.area === "dungeon");
+        if (anyoneInDungeon) updateDungeonIdleTraining();
+    }
+
+    if (typeof arenaActive !== 'undefined' && arenaActive) {
+        checkArenaVictory();
+    }
+
+    // Update Logic for all players
+    Object.values(players).forEach(p => {
+        if (!p.dead) {
+            updatePhysics(p);           
+            updatePlayerStatus(p, now); 
+            
+            if (p.activeTask === "pvp") {
+                handlePvPLogic(p, now);
+            } else {
+                updatePlayerActions(p, now); 
+            }
+        }
+    });
+
+    // --- 4. RENDER PASS (Depth Sorting) ---
+    let renderQueue = [];
+    
+    // Queue Players in current area
+    Object.values(players).forEach(p => {
+        if (p.area === viewArea) {
+            renderQueue.push({ type: 'player', data: p, y: p.y });
+        }
+    });
+
+    // Queue Monsters (Updated to include LAB view)
+    if (viewArea === "dungeon" || viewArea === "lab") {
+        // Add Boss if exists and matches area
+        if (boss && !boss.dead && boss.area === viewArea) {
+            renderQueue.push({ type: 'monster', data: boss, y: boss.y });
+        }
+        
+        // Add Enemies that match area
+        enemies.forEach(e => {
+            if (!e.dead && e.area === viewArea) {
+                renderQueue.push({ type: 'monster', data: e, y: e.y });
+            }
+        });
+
+        // Only show loot beams in the actual dungeon
+        if (viewArea === "dungeon") {
+            drawLootBeams(ctx); 
+        }
+    }
+
+    // Sort by Y-axis for depth
+    renderQueue.sort((a, b) => a.y - b.y);
+
+    // Draw everything in the sorted queue
+    renderQueue.forEach(obj => {
+        if (obj.type === 'player') {
+            if (viewArea === "arena" && typeof arenaMode !== 'undefined' && arenaMode === "teams" && obj.data.team) {
+                ctx.save();
+                ctx.fillStyle = obj.data.team === "Red" ? "rgba(255,0,0,0.3)" : "rgba(0,0,255,0.3)";
+                ctx.beginPath();
+                ctx.ellipse(obj.data.x, obj.data.y + 2, 20, 8, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+            drawStickman(ctx, obj.data);
+        } else if (obj.type === 'monster') {
+            drawMonster(ctx, obj.data);
+        }
+    });
+
+    // --- 5. OVERLAYS (Fading with the world) ---
+    updateAreaPlayerCounts();
+    updateSystemTicks(now);  
+    drawProjectiles(ctx);    
+    updateSplashText(ctx);   
+    handleTooltips();        
+    drawDirectorIndicator(ctx);
+
+    // --- 6. CLEANUP ---
+    ctx.restore(); // Restores BOTH the shake translation AND the globalAlpha
+
+    requestAnimationFrame(gameLoop);
+}
 /* =================END GAME LOOP ================= */
 
 
@@ -5812,6 +5929,13 @@ const adminCommands = [
 		"!despawnmerchant", "!resetmerchant", "!give", "!additem", "!scrub",
 		"name", "/name", "color", "/color", "!labadmin" // Added these here
 ];
+/* 
+some cmd usage:
+labadmin cmd usage:
+!labadmin parade	Starts the automatic rotation of all monsters.
+!labadmin spawnmob	Spawns a completely random monster from the DB.
+!labadmin spawnmob DireWolf	Spawns the specific Dire Wolf for testing.
+!labadmin spawntier 5	Spawns a random mob from the Tier 5 (Frozen Tundra) pool. */
 function processGameCommand(user, msg, flags = {}, extra = {}) {
 	const current = getActiveProfile();
     if (current && user.toLowerCase() === current.name.toLowerCase()) {
