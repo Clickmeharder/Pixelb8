@@ -1,6 +1,97 @@
 
 // offshoot game called stickmenpo - samurai ninja game?
+const stickmenfall_Config = {
+    // ... your other config settings
+    idleViewInterval: 6 * 60 * 1000, // 6 minutes in ms
+    idleViewEnabled: false          // Off by default
+};
+let cameraTransition = {
+    active: false,
+    alpha: 0,
+    targetArea: null,
+    state: "in" // "in" for fading to black, "out" for fading to clear
+};
+let lastIdleSwitchTime = Date.now();
+function runIdleViewMode() {
+    if (!stickmenfall_Config.idleViewEnabled || (viewArea === "dungeon" && dungeonActive) || cameraTransition.active) {
+        return;
+    }
 
+    const now = Date.now();
+    const areaCounts = {};
+    Object.values(players).forEach(p => {
+        areaCounts[p.area] = (areaCounts[p.area] || 0) + 1;
+    });
+
+    const otherAreasWithPlayers = Object.keys(areaCounts).filter(area => area !== viewArea);
+    if (otherAreasWithPlayers.length === 0) return;
+
+    const currentAreaEmpty = (areaCounts[viewArea] || 0) === 0;
+    const timerExpired = (now - lastIdleSwitchTime) >= stickmenfall_Config.idleViewInterval;
+
+    if (currentAreaEmpty || timerExpired) {
+        // --- WEIGHTED RANDOM SELECTION ---
+        let pool = [];
+        otherAreasWithPlayers.forEach(area => {
+            const count = areaCounts[area];
+            // Add the area name to the pool once for every player there
+            for (let i = 0; i < count; i++) {
+                pool.push(area);
+            }
+        });
+
+        const selectedArea = pool[Math.floor(Math.random() * pool.length)];
+        
+        // Start the fade transition instead of switching instantly
+        startCameraFade(selectedArea);
+        lastIdleSwitchTime = now;
+    }
+}
+function startCameraFade(target) {
+    cameraTransition.active = true;
+    cameraTransition.alpha = 0;
+    cameraTransition.state = "in";
+    cameraTransition.targetArea = target;
+}
+
+function updateAndDrawFade(ctx, width, height) {
+    if (!cameraTransition.active) return;
+
+    // Fade speed
+    const speed = 0.02; 
+
+    if (cameraTransition.state === "in") {
+        cameraTransition.alpha += speed;
+        if (cameraTransition.alpha >= 1) {
+            cameraTransition.alpha = 1;
+            // AT THE PEAK OF DARKNESS: Switch the area
+            changeViewArea(cameraTransition.targetArea);
+            cameraTransition.state = "out";
+        }
+    } else {
+        cameraTransition.alpha -= speed;
+        if (cameraTransition.alpha <= 0) {
+            cameraTransition.alpha = 0;
+            cameraTransition.active = false;
+        }
+    }
+
+    // Draw the black overlay
+    ctx.save();
+    ctx.globalAlpha = cameraTransition.alpha;
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+}
+// Helper to sync the UI when switching
+function changeViewArea(newArea) {
+    viewArea = newArea;
+    const selector = document.getElementById("view-area-selector");
+    if (selector) selector.value = newArea;
+    // Reset the idle timer so the AI waits another 6 minutes 
+    // from the moment the area was changed (manually or automatically)
+    lastIdleSwitchTime = Date.now(); 
+}
 // creation tool. make a pen u can draw with, 
 //choose if its a player body, an enemy, a weapon, an armour, a helmet, a bow, a staff or a graffiti or npc, or projectile or face or  and save data
 
@@ -438,14 +529,32 @@ function handleTooltips() {
         if (hover.isEnemy || hover.isBoss) {
             tt.innerHTML = `<b style="color:#ff4444">${hover.name}</b><br>HP: ${Math.floor(hover.hp)}/${Math.floor(hover.maxHp)}`;
         } else {
-            // --- PLAYER TOOLTIP LOGIC ---
             let statusText = "";
             let nameStyle = "color: white;";
 
             if (hover.dead) {
-                // If they've been dead for 10+ minutes, call them a ghost!
-                const isGhost = (Date.now() - hover.deathTime) > (10 * 60 * 1000);
-                statusText = `<b style="color:#ff4444">${isGhost ? 'GHOST' : 'DEAD'}</b>`;
+                const timeDead = Date.now() - hover.deathTime;
+                
+                // Timeline match: 0-5m (Fresh), 5-10m (Decaying), 10-15m (Buried), 15m+ (Ghost)
+                const isGhost = timeDead > (15 * 60 * 1000);
+                const isBuried = timeDead > (10 * 60 * 1000);
+                const isDecaying = timeDead > (5 * 60 * 1000);
+
+                let statusLabel = "DEAD";
+                let labelColor = "#ff4444";
+
+                if (isGhost) {
+                    statusLabel = "GHOST";
+                    labelColor = "#a0f0ff"; // Ghostly Cyan
+                } else if (isBuried) {
+                    statusLabel = "BURIED";
+                    labelColor = "#888888"; // Stone Grey
+                } else if (isDecaying) {
+                    statusLabel = "DECAYING";
+                    labelColor = "#708090"; // Slate Blue/Grey
+                }
+
+                statusText = `<b style="color:${labelColor}">${statusLabel}</b>`;
                 nameStyle = "color: #aaaaaa; text-decoration: line-through;";
             } else {
                 statusText = `HP: ${Math.floor(hover.hp)}/${Math.floor(hover.maxHp)}<br>Task: ${hover.activeTask || 'Idle'}`;
@@ -2048,26 +2157,31 @@ function closeDungeon(reason) {
     enemies = [];
     boss = null;
     
-    // Clear all possible timers
     if (dungeonEmptyTimer) { clearInterval(dungeonEmptyTimer); dungeonEmptyTimer = null; }
     if (dungeonGraceTimer) { clearInterval(dungeonGraceTimer); dungeonGraceTimer = null; }
     if (dungeonCountdownInterval) { clearInterval(dungeonCountdownInterval); dungeonCountdownInterval = null; }
 
     systemMessage(reason === "FAILURE" ? "❌ DUNGEON FAILED!" : "✅ DUNGEON CLEARED!");
 
-    Object.values(players).forEach(p => {
+    // Convert to array so we can use the index for unique spacing
+    const playerList = Object.values(players);
+
+    playerList.forEach((p, index) => {
         if (p.area === "dungeon") {
             p.area = "graveyard";
             
-            // --- CORPSE SCATTER LOGIC ---
-            // x between 300 and 500, y between 500 and 600
-            p.x = 300 + Math.random() * 200; 
-            p.y = 500 + Math.random() * 100;
+            // --- SMART SCATTER LOGIC ---
+            // Spread X across most of the canvas (50 to 750)
+            // Use (index * 20) to ensure even if Math.random() is similar, 
+            // the corpses are physically offset from each other.
+            p.x = 50 + (Math.random() * 600) + (index * 10 % 50); 
+            
+            // Tighten Y so they sit on the floor (e.g., between 520 and 560)
+            // Adjust 520/40 based on where your floor visual actually sits
+            p.y = 520 + (Math.random() * 40);
             
             p.activeTask = "none";
 
-            // If they died in the dungeon, ensure their deathTime is set 
-            // so the 10-minute ghost timer starts ticking now!
             if (p.dead && !p.deathTime) {
                 p.deathTime = Date.now();
             }
@@ -2078,44 +2192,6 @@ function closeDungeon(reason) {
     const selector = document.getElementById("view-area-selector");
     if (selector) selector.value = "graveyard";
 }
-/* function handleEnemyAttacks() {
-    let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
-    if (dwellers.length === 0) return;
-    
-    const partyScaling = 1 + (dwellers.length - 1) * 0.1;
-    let allAttackers = [...enemies];
-    if (boss && !boss.dead) allAttackers.push(boss);
-
-    allAttackers.forEach(e => {
-        if (e.dead) return;
-
-        let target = dwellers[Math.floor(Math.random() * dwellers.length)];
-        let dmg = (3 + Math.floor(dungeonWave * 1.5)) * partyScaling;
-        if (e.isTrainingMob) dmg = 1 + (Math.random() * 2);
-        if (e.isBoss) dmg *= 2.5;
-
-        if (e.equipped && e.equipped.weapon) {
-            const weaponData = ITEM_DB[e.equipped.weapon];
-            if (weaponData) {
-                if (weaponData.type === "bow") {
-                    spawnProjectile(e.x, e.y - 15, target.x, target.y - 15, "#fff", "arrow", "dungeon");
-                } else if (weaponData.type === "staff") {
-                    spawnProjectile(e.x, e.y - 15, target.x, target.y - 15, weaponData.color || "#ff00ff", "magic", "dungeon");
-                }
-            }
-        }
-
-        if (e.isBoss && dwellers.length > 3) {
-            applyDamage(target, Math.floor(dmg));
-            let secondTarget = dwellers[Math.floor(Math.random() * dwellers.length)];
-            applyDamage(secondTarget, Math.floor(dmg));
-            spawnProjectile(e.x, e.y - 40, secondTarget.x, secondTarget.y - 15, "#ff0000", "magic", "dungeon");
-        } else {
-            applyDamage(target, Math.floor(dmg)); 
-        }
-    });
-}
- */
 function handleEnemyAttacks() {
     let dwellers = Object.values(players).filter(p => p.area === "dungeon" && !p.dead);
     // If no players are in the dungeon, enemies stop attacking
@@ -2915,46 +2991,6 @@ function getLimbPositions(p, anchors, anim, now) {
 
     return limbs;
 }
-/*
-//older drawstickmanbody
- function drawStickmanBody(ctx, p, anchors, limbs) {
-    const style = BODY_PARTS["stick"]; 
-    ctx.save();
-    ctx.strokeStyle = p.color; 
-    ctx.lineWidth = 3; // Standard stickman thickness
-// If they are swimming in the water (x > 250), we submerge them
-    const isDeep = (p.area === "pond" && p.x > 250);
-    style.head(ctx, anchors.headX, anchors.headY, p);
-    style.torso(ctx, anchors.headX, anchors.headY, p.x, anchors.hipY); 
-	//arms
-    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.leftHand.x, limbs.leftHand.y); 
-    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.rightHand.x, limbs.rightHand.y);
-	//legs
-    style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y); 
-    style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y);
-	if (isDeep) {
-        ctx.globalAlpha = 0.3; // Make legs "underwater"
-    }
-    ctx.restore();
-} */
-//less old drawstickmanbody
-/* function drawStickmanBody(ctx, p, anchors, limbs) {
-    const style = BODY_PARTS["stick"]; 
-    ctx.strokeStyle = p.color; 
-    ctx.lineWidth = 3; 
-
-    // We draw the head separately in the main function to keep it opaque
-    // So here we only draw the 'below-neck' parts
-    style.torso(ctx, anchors.headX, anchors.headY, p.x, anchors.hipY); 
-    
-    // Arms
-    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.leftHand.x, limbs.leftHand.y); 
-    style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.rightHand.x, limbs.rightHand.y);
-    
-    // Legs
-    style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y); 
-    style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y);
-} */
 
 function drawStickmanBody(ctx, p, anchors, limbs) {
     const style = BODY_PARTS["stick"]; 
@@ -3222,128 +3258,16 @@ function drawSheathedWeapon(ctx, p, anchors, item) {
     drawFn(ctx, item, false, 0); 
     ctx.restore();
 }
-//working old drawcorpse
-/* 
-function drawCorpse(ctx, p, now) {
-    const timeSinceDeath = now - p.deathTime;
-    const progress = Math.min(1, timeSinceDeath / 800);
-    ctx.save();
-    // 1. Blood Pool
-    ctx.fillStyle = "rgba(180, 0, 0, 0.6)";
-    const poolSize = progress * 25;
-    ctx.beginPath();
-    ctx.ellipse(p.x, p.y + 25, poolSize, poolSize / 3, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // 2. Physics/Rotation
-    ctx.translate(p.x, p.y + (progress * 20));
-    let rot = p.deathStyle === "faceplant" ? (Math.PI / 2) * progress : (-Math.PI / 2) * progress;
-    ctx.rotate(rot);
-    const deadAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
-    const deadLimbs = { 
-        leftHand: { x: -18, y: 0 }, 
-        rightHand: { x: 18, y: 0 }, 
-        leftFoot: { x: -10, y: 25 }, 
-        rightFoot: { x: 10, y: 25 } 
-    };
-    // 3. FORCE THE KO EMOTE
-    // We clone the player but ensure the emote is set to "ko" for the master head function
-    const corpseActor = { ...p, x: 0, y: 0, emote: "ko" }; 
-    // 4. DRAW THE BODY & HEAD
-    // This now uses your master switch-case for the "ko" style (X eyes + slanted mouth)
-    BODY_PARTS["stick"].head(ctx, deadAnchors.headX, deadAnchors.headY, corpseActor);
-    drawStickmanBody(ctx, corpseActor, deadAnchors, deadLimbs);
-    // 5. EQUIPMENT LAYER
-    renderEquipmentLayer(ctx, corpseActor, now, deadAnchors, deadLimbs.leftHand, deadLimbs.rightHand, deadLimbs.leftFoot, deadLimbs.rightFoot);
-    
-    ctx.restore();
-}function renderAll() {
-    // Sort players by Y so those with higher Y (closer to screen) draw last
-    const sortedPlayers = Object.values(players).sort((a, b) => a.y - b.y);
-    
-    sortedPlayers.forEach(p => {
-        drawStickman(ctx, p);
-    });
-}
- */
-// corpse turn to Ghost
-/* // --- Sub-function: The Fresh/Decaying Body ---
-function drawDecayingBody(ctx, p, now, progress) {
-    ctx.save();
-    ctx.translate(0, progress * 20);
-    let rot = p.deathStyle === "faceplant" ? (Math.PI / 2) * progress : (-Math.PI / 2) * progress;
-    ctx.rotate(rot);
 
-    // Blueish-Grey decay color
-    const decayColor = "#708090"; 
-    const corpseActor = { ...p, x: 0, y: 0, color: decayColor, emote: "ko" };
-    
-    const deadAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
-    const deadLimbs = { 
-        leftHand: { x: -18, y: 0 }, rightHand: { x: 18, y: 0 }, 
-        leftFoot: { x: -10, y: 25 }, rightFoot: { x: 10, y: 25 } 
-    };
-
-    BODY_PARTS["stick"].head(ctx, deadAnchors.headX, deadAnchors.headY, corpseActor);
-    drawStickmanBody(ctx, corpseActor, deadAnchors, deadLimbs);
-    
-    // DRAW FLIES (Tiny black dots buzzing)
-    ctx.fillStyle = "#000";
-    for(let i = 0; i < 3; i++) {
-        const flyX = Math.sin(now / 100 + (i * 10)) * 15;
-        const flyY = Math.cos(now / 150 + (i * 20)) * 10 - 20;
-        ctx.fillRect(flyX, flyY, 2, 2);
-    }
-    ctx.restore();
-}
-
-// --- MAIN MANAGER FUNCTION ---
-function drawCorpse(ctx, p, now) {
-    const timeSinceDeath = now - p.deathTime;
-    const progress = Math.min(1, timeSinceDeath / 800);
-    const fiveMin = 5 * 60 * 1000;
-    const tenMin = 10 * 60 * 1000;
-
-    ctx.save();
-    
-    // 1. Blood Pool (Always underneath)
-    ctx.fillStyle = "rgba(180, 0, 0, 0.6)";
-    const poolSize = progress * 25;
-    ctx.beginPath();
-    ctx.ellipse(p.x, p.y + 25, poolSize, poolSize / 3, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.translate(p.x, p.y);
-
-    // 2. Decide Stage
-    if (timeSinceDeath < fiveMin) {
-        drawDecayingBody(ctx, p, now, progress);
-    } else if (timeSinceDeath < tenMin) {
-        drawGravestone(ctx, p.name);
-    } else {
-        // Draw the stone AND the ghost
-        drawGravestone(ctx, p.name);
-        
-        const ghostTime = timeSinceDeath - tenMin;
-        const floatY = Math.sin(ghostTime / 1000) * 10 - 40;
-        const ghostAlpha = Math.min(0.4, (ghostTime / 5000));
-        
-        ctx.save();
-        ctx.globalAlpha = ghostAlpha;
-        ctx.translate(0, floatY);
-        
-        const ghostActor = { ...p, x: 0, y: 0, color: "#e0f7fa", emote: "neutral" };
-        const ghostAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
-        const ghostLimbs = { leftHand: { x: -15, y: -5 }, rightHand: { x: 15, y: -5 }, leftFoot: { x: -5, y: 20 }, rightFoot: { x: 5, y: 20 } };
-
-        BODY_PARTS["stick"].head(ctx, ghostAnchors.headX, ghostAnchors.headY, ghostActor);
-        drawStickmanBody(ctx, ghostActor, ghostAnchors, ghostLimbs);
-        ctx.restore();
-    }
-    
-    ctx.restore();
-}
- */
 // Updated Body Helper to support "Fresh" vs "Rotting"
+function generateGhostTalk() {
+    const length = 8 + Math.floor(Math.random() * 33); // 8 to 40 characters
+    let str = "";
+    for (let i = 0; i < length; i++) {
+        str += (Math.random() > 0.5) ? "o" : "O";
+    }
+    return str;
+}
 function drawDecayingBody(ctx, p, now, progress, isRotting) {
     ctx.save();
     ctx.translate(0, progress * 20);
@@ -3401,17 +3325,16 @@ function drawCorpse(ctx, p, now) {
     const timeSinceDeath = now - p.deathTime;
     const progress = Math.min(1, timeSinceDeath / 800);
     
-    // Timelines (in milliseconds)
-    const stage1_Decay = 5 * 60 * 1000;  // 5 mins
-    const stage2_Grave = 10 * 60 * 1000; // 10 mins
-    const stage3_Ghost = 15 * 60 * 1000; // 15 mins
+    const stage1_Decay = 5 * 60 * 1000;
+    const stage2_Grave = 10 * 60 * 1000;
+    const stage3_Ghost = 15 * 60 * 1000;
 
     ctx.save();
     
-    // --- 1. THE GROUND LAYER (Blood/Dirt) ---
-    let groundColor = "rgba(180, 0, 0, 0.6)"; // Fresh Red
-    if (timeSinceDeath > stage1_Decay) groundColor = "rgba(80, 0, 0, 0.8)"; // Dark Maroon
-    if (timeSinceDeath > stage2_Grave) groundColor = "rgba(101, 67, 33, 0.9)"; // Dirt Brown
+    // --- 1. THE GROUND LAYER ---
+    let groundColor = "rgba(180, 0, 0, 0.6)";
+    if (timeSinceDeath > stage1_Decay) groundColor = "rgba(80, 0, 0, 0.8)";
+    if (timeSinceDeath > stage2_Grave) groundColor = "rgba(101, 67, 33, 0.9)";
     
     ctx.fillStyle = groundColor;
     const poolSize = progress * 25;
@@ -3422,20 +3345,17 @@ function drawCorpse(ctx, p, now) {
     ctx.translate(p.x, p.y);
 
     // --- 2. DECIDE VISUAL STAGE ---
-    
+    let bubbleY = -30; // Default height for bubble
+
     if (timeSinceDeath < stage1_Decay) {
-        // STAGE 0-5m: Fresh Corpse (Original Color)
         drawDecayingBody(ctx, p, now, progress, false);
     } 
     else if (timeSinceDeath < stage2_Grave) {
-        // STAGE 5-10m: Decaying (Blue/Grey + Flies)
         drawDecayingBody(ctx, p, now, progress, true);
+        bubbleY = -10; // Bubbles float lower while decaying on the ground
     } 
     else {
-        // STAGE 10-20m: Gravestone
         drawGravestone(ctx, p.name);
-        
-        // STAGE 15-20m: Ghost starts rising
         if (timeSinceDeath > stage3_Ghost) {
             const ghostTime = timeSinceDeath - stage3_Ghost;
             const floatY = Math.sin(ghostTime / 1000) * 10 - 40;
@@ -3444,6 +3364,7 @@ function drawCorpse(ctx, p, now) {
             ctx.save();
             ctx.globalAlpha = ghostAlpha;
             ctx.translate(0, floatY);
+            bubbleY = floatY - 20; // Bubble follows the ghost as it bobs
             
             const ghostActor = { ...p, x: 0, y: 0, color: "#e0f7fa", emote: "neutral" };
             const ghostAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
@@ -3455,8 +3376,27 @@ function drawCorpse(ctx, p, now) {
         }
     }
     
-    ctx.restore();
+    // --- 3. GHOST CHAT BUBBLES ---
+    // Only show if Decaying OR Ghost (not while "freshly" dead or just a grave)
+    const isDecaying = timeSinceDeath >= stage1_Decay && timeSinceDeath < stage2_Grave;
+    const isGhost = timeSinceDeath >= stage3_Ghost;
+
+    if ((isDecaying || isGhost) && p.chatMessage && (now - p.chatTime < 5000)) {
+        ctx.restore(); // Exit the player translation to use world coordinates
+        ctx.save();
+        
+        const age = now - p.chatTime;
+        if (age > 4000) ctx.globalAlpha = 1 - (age - 4000) / 1000;
+
+        // Draw the bubble. Note: We use p.x and p.y + bubbleY 
+        // because we restored context and are back in world space.
+        drawChatBubble(ctx, p, p.x, p.y + bubbleY, p.chatMessage, "italic");
+        ctx.restore();
+    } else {
+        ctx.restore();
+    }
 }
+
 //----------
 //-------------------------------------------
 // --- WORKSHOP PRO SYSTEM ---
@@ -4305,10 +4245,11 @@ function gameLoop() {
         window.shakeAmount *= 0.9; 
         if (window.shakeAmount < 0.1) window.shakeAmount = 0;
     }
+	runIdleViewMode();
 
-    renderScene(); 
     
     // 2. UI & WORLD LOGIC
+	renderScene(); 
     if (frameCount % 3 === 0) updateUI(); 
     
     if (dungeonActive) {
@@ -4392,15 +4333,21 @@ function gameLoop() {
         //else if (obj.type === 'enemyStickman') drawEnemyStickman(ctx, obj.data);
     });
 
-    // 5. GLOBAL OVERLAYS (Always on top)
+	
+// 5. GLOBAL OVERLAYS (Drawn over players)
     updateAreaPlayerCounts();
     updateSystemTicks(now);  
     drawProjectiles(ctx);    
     updateSplashText(ctx);   
     handleTooltips();        
 
-    ctx.restore(); 
+    // 6. THE CAMERA FADE (Drawn over EVERYTHING)
+    // This stays at the bottom so it can black out the tooltips and names too
+    ctx.restore(); // Restore from the shake/translate before drawing the screen-space fade
+    updateAndDrawFade(ctx, canvas.width, canvas.height);
+
     requestAnimationFrame(gameLoop);
+}
 }
 /* let frameCount = 0;
 function gameLoop() {
@@ -5711,28 +5658,30 @@ profileSelector.addEventListener("change", (e) => {
     systemMessage(`Active Player: ${current.name}`);
 });
 
-function drawChatBubble(ctx, p, x, y, msg) {
-    ctx.font = "11px monospace";
+function drawChatBubble(ctx, p, x, y, msg, fontStyle = "") {
+    ctx.save(); // Save current state (including non-italic font)
+
+    // Apply font style for this bubble only
+    ctx.font = `${fontStyle} 11px monospace`.trim();
+    
     const padding = 8;
     const textWidth = ctx.measureText(msg).width;
     const bw = textWidth + padding * 2;
     const bh = 18;
     const bx = x - bw / 2;
-    const by = y - 65; // Positioned above the name/head
+    const by = y - 65;
 
-    ctx.save();
     // Bubble Background
     ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
     
-    // Rounded Rect-ish shape
     ctx.beginPath();
     ctx.roundRect(bx, by, bw, bh, 5);
     ctx.fill();
     ctx.stroke();
 
-    // Little triangle pointer at the bottom of the bubble
+    // Little triangle pointer
     ctx.beginPath();
     ctx.moveTo(x - 5, by + bh);
     ctx.lineTo(x + 5, by + bh);
@@ -5740,11 +5689,12 @@ function drawChatBubble(ctx, p, x, y, msg) {
     ctx.fill();
     ctx.stroke();
 
-    // Text
+    // Text rendering
     ctx.fillStyle = "#000";
     ctx.textAlign = "center";
     ctx.fillText(msg, x, by + 13);
-    ctx.restore();
+
+    ctx.restore(); // Reset to previous state (removes italics)
 }
 // --- Helper Function for Cooldowns ---
 function isOnCooldown(p, cmd, seconds) {
@@ -5762,7 +5712,7 @@ function isOnCooldown(p, cmd, seconds) {
 }
 
 const adminCommands = [
-		"!showhome", "::home", "!showtown", "::town", "!showgraveyard", "::graveyard", "::gy", "!showpond", "::pond", "!showdungeon", "::dungeon", "!showarena", "::arena", "!spawnmerchant", 
+		"!idlemode", "!showhome", "::home", "!showtown", "::town", "!showgraveyard", "::graveyard", "::gy", "!showpond", "::pond", "!showdungeon", "::dungeon", "!showarena", "::arena", "!spawnmerchant", 
 		"!despawnmerchant", "!resetmerchant", "!give", "!additem", "!scrub",
 		"name", "/name", "color", "/color" // Added these here
 ];
@@ -5820,6 +5770,11 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
             addItemToPlayer(target, item);
             return;
         }
+		if (cmd === "!idlemode") {
+			stickmenfall_Config.idleViewEnabled = !stickmenfall_Config.idleViewEnabled;
+			systemMessage(`Idle View Mode: ${stickmenfall_Config.idleViewEnabled ? "ON" : "OFF"}`);
+			lastIdleSwitchTime = Date.now(); // Reset timer on toggle
+		}
         if (cmd === "!showhome" || cmd === "::home") { viewArea = "home"; return; }
         if (cmd === "!showdungeon" || cmd === "::dungeon") { viewArea = "dungeon"; return; }
         if (cmd === "!showpond" || cmd === "::pond") { viewArea = "pond"; return; }
@@ -5918,10 +5873,28 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     // We don't want to show bubbles for attempted commands that failed.
 	// --- Inside Section 3: Chat Bubble Logic ---
 	if (!isAttemptedCommand && msg.length <= 40) {
-		// Only allow a new bubble every 3 seconds
 		if (!isOnCooldown(p, "chat_bubble", 3)) {
-			p.chatMessage = msg;
-			p.chatTime = Date.now();
+			
+			if (p.dead) {
+				const timeDead = Date.now() - p.deathTime;
+				const stage1_Decay = 5 * 60 * 1000;
+				const stage2_Grave = 10 * 60 * 1000;
+				const stage3_Ghost = 15 * 60 * 1000;
+
+				// Only allow moaning if they are Decaying or a Ghost
+				// This prevents the "Buried" gravestone from moaning
+				const canMoan = (timeDead >= stage1_Decay && timeDead < stage2_Grave) || (timeDead >= stage3_Ghost);
+
+				if (canMoan) {
+					p.chatMessage = generateGhostTalk();
+					p.chatTime = Date.now();
+				}
+				// If they are "Freshly Dead" or "Buried", we do nothing (Silence)
+			} else {
+				// Living players speak normally
+				p.chatMessage = msg;
+				p.chatTime = Date.now();
+			}
 		}
 	}
 }
