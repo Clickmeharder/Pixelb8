@@ -1844,7 +1844,10 @@ const BODY_PARTS = {
     }
 };
 
-
+const MONSTER_PARTS = {
+	
+	
+}
 const MONSTER_STYLES = {
 /*     blob: (ctx, e, now, cfg) => {
         const wobble = Math.sin(now / 150) * 5;
