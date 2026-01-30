@@ -1979,7 +1979,7 @@ const MONSTER_STYLES = {
 		const walk = Math.sin(now / 150) * 12;
 		const breathe = Math.sin(now / 300) * 2;
 		const bodyW = cfg.bodyW || 25;
-		const bodyH = cfg.bodyH || 15;
+		const bodyH = (cfg.bodyH || 15) + breathe; // Breathe affects height slightly
 
 		ctx.strokeStyle = "#000";
 		ctx.lineWidth = 2;
@@ -1987,49 +1987,57 @@ const MONSTER_STYLES = {
 		// 1. TAIL
 		ctx.save();
 		ctx.translate(bodyW - 5, -5);
-		ctx.rotate(Math.sin(now / 100) * 0.4 + 0.5); // Fast wag
+		ctx.rotate(Math.sin(now / 100) * 0.4 + 0.5); 
 		ctx.fillStyle = e.color;
 		ctx.beginPath();
 		ctx.ellipse(10, 0, 12, 4, 0, 0, Math.PI * 2);
 		ctx.fill(); ctx.stroke();
 		ctx.restore();
 
-		// 2. LEGS (Back pair then Front pair)
+		// 2. LEGS
 		ctx.lineWidth = 3;
 		[ -bodyW + 8, bodyW - 8 ].forEach((xOff, i) => {
 			const move = (i === 0) ? walk : -walk;
-			// Back Leg
 			ctx.beginPath();
 			ctx.moveTo(xOff, 5);
 			ctx.lineTo(xOff + move, 20);
 			ctx.stroke();
-			// Front Leg (offset slightly)
 			ctx.beginPath();
 			ctx.moveTo(xOff + 5, 5);
 			ctx.lineTo(xOff + 5 - move, 20);
 			ctx.stroke();
 		});
 
-		// 3. BODY
+		// 3. BODY (With static fur strokes)
 		ctx.fillStyle = e.color;
 		ctx.beginPath();
+		// Base smooth ellipse
+		ctx.ellipse(0, 0, bodyW, bodyH, 0, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.stroke();
+
 		if (cfg.fuzz) {
-			// Jagged Wolf Fur
-			for (let a = 0; a < Math.PI * 2; a += 0.5) {
-				let rX = bodyW + (Math.random() * 4);
-				let rY = bodyH + (Math.random() * 4) + breathe;
-				ctx.lineTo(Math.cos(a) * rX, Math.sin(a) * rY);
+			ctx.beginPath();
+			// Add static fur strokes around the perimeter
+			for (let a = 0; a < Math.PI * 2; a += 0.6) {
+				// We use the angle 'a' to determine the position, 
+				// no Math.random() so it stays stable.
+				const fx = Math.cos(a) * bodyW;
+				const fy = Math.sin(a) * bodyH;
+				
+				// Draw a small "V" shape for fur spikes
+				ctx.moveTo(fx, fy);
+				// Points outward slightly
+				ctx.lineTo(fx * 1.2, fy * 1.2); 
+				ctx.lineTo(fx * 1.1, fy * 0.9);
 			}
-		} else {
-			// Sleek Dog Body
-			ctx.ellipse(0, breathe, bodyW, bodyH, 0, 0, Math.PI * 2);
+			ctx.stroke();
 		}
-		ctx.fill(); ctx.stroke();
 
 		// 4. HEAD & SNOUT
 		const head = cfg.headAnchor || { x: -bodyW + 5, y: -10 };
 		ctx.save();
-		ctx.translate(head.x, head.y + breathe);
+		ctx.translate(head.x, head.y + (breathe * 0.5));
 		
 		// Ears
 		ctx.fillStyle = e.color;
@@ -2039,15 +2047,19 @@ const MONSTER_STYLES = {
 			ctx.lineTo(ex - 3, -15);
 			ctx.lineTo(ex + 3, -15);
 			ctx.fill(); ctx.stroke();
+			// Add a little fur to ears too
+			if (cfg.fuzz) {
+				ctx.moveTo(ex - 3, -15);
+				ctx.lineTo(ex - 5, -18);
+			}
 		});
 
-		// Face / Snout
 		ctx.beginPath();
 		ctx.ellipse(0, 0, 10, 8, 0, 0, Math.PI * 2); // Skull
 		ctx.ellipse(-8, 3, 8, 5, 0, 0, Math.PI * 2); // Muzzle
 		ctx.fill(); ctx.stroke();
 
-		// Eyes (Glow if config says so)
+		// Eyes
 		ctx.fillStyle = (cfg.glow) ? (cfg.glowColor || "#f00") : "#000";
 		if (cfg.glow) {
 			ctx.shadowBlur = 10;
@@ -2095,47 +2107,58 @@ const MONSTER_STYLES = {
 		const bodyW = cfg.bodyW || 20;
 		const color = e.color || "#ff00ff";
 		
-		// 1. THE "GLITCH" SHAKE
-		// Horror monsters shouldn't be smooth. We add a micro-jitter.
-		const jitterX = Math.random() > 0.95 ? (Math.random() - 0.5) * 10 : 0;
-		const jitterY = Math.random() > 0.95 ? (Math.random() - 0.5) * 10 : 0;
-		ctx.translate(jitterX, jitterY);
+		// 1. PHASE SHIFT (The "Cooler" Effect)
+		// Draws a faint, expanding ring/aura that "pulses" out from the center
+		const phase = (now % 1000) / 1000;
+		ctx.save();
+		ctx.strokeStyle = color;
+		ctx.lineWidth = 1;
+		ctx.globalAlpha = 1 - phase;
+		ctx.beginPath();
+		ctx.arc(0, 0, bodyW + (phase * 30), 0, Math.PI * 2);
+		ctx.stroke();
+		ctx.restore();
 
-		// 2. TENTACLES / LIMBS (Drawn behind)
+		// 2. FLUID TENTACLES
 		const legCount = cfg.legCount || 6;
 		ctx.strokeStyle = color;
 		ctx.lineWidth = 3;
 		for (let i = 0; i < legCount; i++) {
-			const angle = (i / legCount) * Math.PI * 2 + (time * 0.5);
-			const reach = 40 + Math.sin(time * 5 + i) * 15;
+			// Slow rotation + independent waving
+			const baseAngle = (i / legCount) * Math.PI * 2 + (time * 0.2);
+			const wave = Math.sin(time * 3 + i) * 0.5;
+			const angle = baseAngle + wave;
 			
-			ctx.save();
+			const reach = 45 + Math.sin(time * 2 + i) * 10;
+			
 			ctx.beginPath();
 			ctx.moveTo(0, 0);
-			// Spasmodic tentacle movement
-			const cp1x = Math.cos(angle) * reach * 0.5 + Math.sin(time * 10 + i) * 10;
-			const cp1y = Math.sin(angle) * reach * 0.5 + Math.cos(time * 10 + i) * 10;
+			// "S" curve math for a more liquid feel
+			const cp1x = Math.cos(angle - 0.4) * (reach * 0.6);
+			const cp1y = Math.sin(angle - 0.4) * (reach * 0.6);
 			const endX = Math.cos(angle) * reach;
 			const endY = Math.sin(angle) * reach;
 			
 			ctx.quadraticCurveTo(cp1x, cp1y, endX, endY);
 			ctx.stroke();
-			
-			// Small "hooks" or "suckers" at the end
-			ctx.fillStyle = "#000";
+
+			// Glowing tips instead of hooks
+			ctx.fillStyle = "#fff";
+			ctx.shadowBlur = 5;
+			ctx.shadowColor = color;
 			ctx.beginPath();
 			ctx.arc(endX, endY, 2, 0, Math.PI * 2);
 			ctx.fill();
-			ctx.restore();
+			ctx.shadowBlur = 0;
 		}
 
-		// 3. THE CORE (Amorphous Mass)
+		// 3. THE VOID CORE (Shifting mass)
 		ctx.fillStyle = color;
 		ctx.beginPath();
-		for (let a = 0; a < Math.PI * 2; a += 0.4) {
-			// Pulsing, uneven body
-			const pulse = Math.sin(time * 3 + a * 2) * 5;
-			const r = bodyW + pulse;
+		for (let a = 0; a < Math.PI * 2; a += 0.3) {
+			// Complex noise: layering two sines for a "breathing meat" effect
+			const noise = Math.sin(time * 2 + a * 3) * 3 + Math.cos(time * 4 + a * 2) * 2;
+			const r = bodyW + noise;
 			const x = Math.cos(a) * r;
 			const y = Math.sin(a) * r;
 			if (a === 0) ctx.moveTo(x, y);
@@ -2145,43 +2168,37 @@ const MONSTER_STYLES = {
 		ctx.fill();
 		ctx.stroke();
 
-		// 4. MULTIPLE EYES (Scattered)
+		// 4. THE "OBSERVER" EYES
 		const eyeSeed = (e.id || 1) * 100;
 		for (let i = 0; i < 5; i++) {
-			const eyeX = Math.sin(eyeSeed + i) * (bodyW * 0.6);
-			const eyeY = Math.cos(eyeSeed + i) * (bodyW * 0.6);
+			// Eyes drift slowly in their sockets
+			const driftX = Math.sin(time + i) * 2;
+			const driftY = Math.cos(time * 0.7 + i) * 2;
+			const eyeX = Math.sin(eyeSeed + i) * (bodyW * 0.5) + driftX;
+			const eyeY = Math.cos(eyeSeed + i) * (bodyW * 0.5) + driftY;
 			
-			// Occasional blinking
-			if (Math.sin(time * 2 + i) > -0.8) {
-				ctx.fillStyle = "#fff";
-				ctx.beginPath();
-				ctx.arc(eyeX, eyeY, 4, 0, Math.PI * 2);
-				ctx.fill();
-				
-				ctx.fillStyle = "#000";
-				ctx.beginPath();
-				// Pupils follow the "time" to look around frantically
-				ctx.arc(eyeX + Math.sin(time * 5) * 1.5, eyeY + Math.cos(time * 5) * 1.5, 1.8, 0, Math.PI * 2);
-				ctx.fill();
-			} else {
-				// Closed eye slit
-				ctx.strokeStyle = "#000";
-				ctx.beginPath();
-				ctx.moveTo(eyeX - 3, eyeY);
-				ctx.lineTo(eyeX + 3, eyeY);
-				ctx.stroke();
-			}
+			// Pupils that always track "The Creator" (0,0 world center or mouse)
+			// Here we just make them look frantic
+			ctx.fillStyle = "#fff";
+			ctx.beginPath();
+			ctx.arc(eyeX, eyeY, 3.5, 0, Math.PI * 2);
+			ctx.fill();
+			
+			ctx.fillStyle = "#000";
+			ctx.beginPath();
+			ctx.arc(eyeX + Math.sin(time * 4 + i) * 1.5, eyeY + Math.cos(time * 4 + i) * 1.5, 1.5, 0, Math.PI * 2);
+			ctx.fill();
 		}
 
-		// 5. VEINS / CRACKS
-		ctx.strokeStyle = "rgba(0,0,0,0.3)";
+		// 5. STATIC OVERLAY (Subtle scanlines)
+		ctx.strokeStyle = "rgba(255,255,255,0.1)";
 		ctx.lineWidth = 1;
-		ctx.beginPath();
-		ctx.moveTo(-bodyW * 0.5, 0);
-		ctx.lineTo(bodyW * 0.5, 0);
-		ctx.moveTo(0, -bodyW * 0.5);
-		ctx.lineTo(0, bodyW * 0.5);
-		ctx.stroke();
+		for(let l = -bodyW; l < bodyW; l += 4) {
+			ctx.beginPath();
+			ctx.moveTo(-bodyW, l);
+			ctx.lineTo(bodyW, l);
+			ctx.stroke();
+		}
 	},
 	wraith: (ctx, e, now, cfg) => {
 		const floatY = Math.sin(now / 400) * 15; // Slow, ghostly hovering
@@ -2427,6 +2444,128 @@ const MONSTER_STYLES = {
 		
 		ctx.restore();
 	},
+	horse: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		const walk = Math.sin(now / 120) * 15;
+		const breathe = Math.sin(now / 300) * 2;
+		const hover = cfg.wings ? Math.sin(now / 200) * 10 : 0; // Pegasus hovers
+		const bodyW = cfg.bodyW || 25;
+		const bodyH = cfg.bodyH || 15;
+		const color = e.color || "#8b4513";
+
+		ctx.save();
+		ctx.translate(0, hover);
+
+		// 1. RAINBOW TRAIL (Unicorn special)
+		if (cfg.horns && cfg.glow) {
+			ctx.save();
+			for (let i = 0; i < 5; i++) {
+				const trailAlpha = 0.5 - (i * 0.1);
+				const trailX = (bodyW + 10) + (i * 12);
+				const trailY = Math.sin(time * 5 + i) * 8;
+				const colors = ["#ff0000", "#ff7f00", "#ffff00", "#00ff00", "#0000ff"];
+				
+				ctx.fillStyle = colors[i % colors.length];
+				ctx.globalAlpha = trailAlpha;
+				ctx.beginPath();
+				ctx.arc(trailX, trailY, 6 - i, 0, Math.PI * 2);
+				ctx.fill();
+			}
+			ctx.restore();
+		}
+
+		// 2. WINGS (Pegasus)
+		if (cfg.wings) {
+			const flap = Math.sin(now / 150) * 0.8;
+			ctx.save();
+			ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+			[-1, 1].forEach(side => {
+				ctx.beginPath();
+				ctx.ellipse(side * 5, -10, 20, 8, side * (0.5 + flap), 0, Math.PI * 2);
+				ctx.fill(); ctx.stroke();
+			});
+			ctx.restore();
+		}
+
+		// 3. TAIL
+		ctx.save();
+		ctx.translate(bodyW - 2, -5);
+		ctx.rotate(Math.sin(now / 200) * 0.3 + 0.8);
+		ctx.strokeStyle = "#000";
+		ctx.beginPath();
+		ctx.moveTo(0, 0);
+		ctx.quadraticCurveTo(10, 20, 5, 30);
+		ctx.stroke();
+		ctx.restore();
+
+		// 4. LEGS (Gallop)
+		ctx.lineWidth = 3;
+		ctx.strokeStyle = "#000";
+		[-bodyW + 8, bodyW - 8].forEach((xOff, i) => {
+			const move = (i === 0) ? walk : -walk;
+			ctx.beginPath();
+			ctx.moveTo(xOff, 5);
+			ctx.lineTo(xOff + move * 0.5, 12); // Knee
+			ctx.lineTo(xOff + move, 25);       // Hoof
+			ctx.stroke();
+			
+			ctx.beginPath();
+			ctx.moveTo(xOff + 4, 5);
+			ctx.lineTo(xOff + 4 - move * 0.5, 12);
+			ctx.lineTo(xOff + 4 - move, 25);
+			ctx.stroke();
+		});
+
+		// 5. BODY
+		ctx.fillStyle = color;
+		ctx.beginPath();
+		ctx.roundRect(-bodyW, -bodyH + breathe, bodyW * 2, bodyH * 2, 10);
+		ctx.fill(); ctx.stroke();
+
+		// 6. HEAD & NECK
+		const head = cfg.headAnchor || { x: -bodyW - 5, y: -15 };
+		ctx.save();
+		ctx.translate(head.x, head.y + (breathe * 0.5));
+		
+		// Neck
+		ctx.beginPath();
+		ctx.moveTo(10, 20);
+		ctx.lineTo(0, 0);
+		ctx.lineWidth = 8;
+		ctx.stroke();
+		ctx.lineWidth = 2;
+
+		// Skull & Muzzle
+		ctx.beginPath();
+		ctx.ellipse(0, 0, 12, 8, -0.4, 0, Math.PI * 2);
+		ctx.ellipse(-10, 4, 8, 5, -0.2, 0, Math.PI * 2);
+		ctx.fill(); ctx.stroke();
+
+		// Horn (Unicorn)
+		if (cfg.horns) {
+			ctx.save();
+			ctx.fillStyle = "#fff";
+			if (cfg.glow) {
+				ctx.shadowBlur = 15;
+				ctx.shadowColor = "gold";
+			}
+			ctx.beginPath();
+			ctx.moveTo(0, -5);
+			ctx.lineTo(-3, -25);
+			ctx.lineTo(3, -5);
+			ctx.fill(); ctx.stroke();
+			ctx.restore();
+		}
+
+		// Eye
+		ctx.fillStyle = "#000";
+		ctx.beginPath();
+		ctx.arc(-4, -2, 2, 0, Math.PI * 2);
+		ctx.fill();
+
+		ctx.restore();
+		ctx.restore();
+	},
 	// Inside your MONSTER_STYLES object:
 	custom_path: (ctx, e, now, cfg) => {
 		if (!cfg.pathData) return;
@@ -2552,7 +2691,11 @@ const MONSTER_DB = {
     "StreetDog": { drawType: "canine", color: "#8b4513", bodyW: 20, headAnchor: {x: -15, y: -5}, hpMult: 1.0 },
     "DireWolf": { drawType: "canine", color: "#444", fuzz: true, scale: 1.5, bodyW: 30, headAnchor: {x: -20, y: -8}, hpMult: 3.0 },
     "FrostWolf": { drawType: "canine", color: "#f0ffff", fuzz: true, scale: 1.5, glow: true, glowColor: "#00f", hpMult: 3.0 },
-
+	// --- HORSES ---
+	"pony": { drawType: "horse", color: "#d2b48c", bodyW: 15, headAnchor: {x: -15, y: -10}, hpMult: 1.0 },
+	"horse": { drawType: "horse", color: "#8b4513", scale: 1.5, bodyW: 25, headAnchor: {x: -25, y: -15}, hpMult: 3.0 },
+	"unicorn": { drawType: "horse", color: "#ffffff", horns: true, scale: 1.5, bodyW: 25, headAnchor: {x: -25, y: -15}, glow: true, glowColor: "#fff0f5", hpMult: 4.0 },
+	"pegasus": { drawType: "horse", color: "#f0f8ff", wings: true, scale: 1.5, bodyW: 25, headAnchor: {x: -25, y: -15}, glow: true, glowColor: "#00ffff", hpMult: 5.0 },
     // --- VOID / ABYSSAL ---
     "VoidWalker": { drawType: "stickman", color: "#4b0082", hpMult: 2.0, glow: true },
     "ShadowWraith": { drawType: "wraith", color: "#1a1a1a", glow: true, glowColor: "#4b0082",hpMult: 1.5, bodyW: 15, bodyH: 40 },
