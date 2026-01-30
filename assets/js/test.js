@@ -2053,28 +2053,42 @@ function spawnWave() {
     const currentTheme = DUNGEON_THEMES[themeIndex] || DUNGEON_THEMES[1];
     
     const themePool = currentTheme.mobs;
-    const waveSize = Math.floor(2 + (dungeonWave / 2) + (partySize - 1));
+
+    // --- NEW CAPPING LOGIC ---
+    const MAX_MOBS = 8; // Adjust this to your preference
+    let calculatedWaveSize = Math.floor(2 + (dungeonWave / 2) + (partySize - 1));
+    
+    let actualSpawnCount = calculatedWaveSize;
+    let strengthMult = 1.0;
+
+    if (calculatedWaveSize > MAX_MOBS) {
+        // Example: if calculated is 16 and max is 8, strengthMult becomes 2.0
+        strengthMult = calculatedWaveSize / MAX_MOBS;
+        actualSpawnCount = MAX_MOBS;
+    }
+    // -------------------------
 
     if (!isBossWave) {
         systemMessage(`--- Wave ${dungeonWave}: ${currentTheme.name} ---`);
+        if (strengthMult > 1) {
+            systemMessage(`⚠️ Warning: Enemies are ${Math.round(strengthMult * 100)}% stronger!`);
+        }
     }
 
     // 3. Spawn Normal Mobs
-    for (let i = 0; i < waveSize; i++) {
+    for (let i = 0; i < actualSpawnCount; i++) {
         let typeName = themePool[Math.floor(Math.random() * themePool.length)];
         let config = MONSTER_DB[typeName] || MONSTER_DB["Slime"] || { drawType: "blob", hpMult: 1, color: "#fff" };
 
-        // HP Scaling
-        let enemyHp = (40 + (dungeonWave * 25)) * (config.hpMult || 1.0) * (1 + (partySize * 0.25));
+        // HP Scaling (Now multiplied by strengthMult)
+        let enemyHp = (40 + (dungeonWave * 25)) * (config.hpMult || 1.0) * (1 + (partySize * 0.25)) * strengthMult;
 
-        // --- SPIDERLING HANGING LOGIC ---
         let isHanging = false;
-        let startY = 530 + (Math.random() * 20); // Default ground Y
+        let startY = 530 + (Math.random() * 20);
 
-        // 40% chance for spiderlings to hang from the ceiling
         if (typeName === "Spiderling" && Math.random() < 0.4) {
             isHanging = true;
-            startY = 50 + (Math.random() * 150); // High up in the air
+            startY = 50 + (Math.random() * 150);
         }
 
         enemies.push({ 
@@ -2085,13 +2099,14 @@ function spawnWave() {
             maxHp: enemyHp, 
             x: 500 + (i * 70),
             y: startY,
-            isHanging: isHanging, // Essential for MONSTER_STYLES web drawing
+            isHanging: isHanging,
             dead: false,
             isEnemy: true,
             config: config, 
             color: config.color || "#ff4444",
             drawType: config.drawType, 
-            scale: config.scale || 1.0,
+            scale: (config.scale || 1.0) * (1 + (strengthMult - 1) * 0.2), // Subtly make them larger
+            strengthMult: strengthMult, // Store this for damage calculation
             isStickman: config.drawType === "stickman",
             equipped: config.canEquip ? generateRandomLoadout(dungeonTier) : {}
         });
@@ -2102,7 +2117,8 @@ function spawnWave() {
         let bossKey = currentTheme.boss || "DUNGEON_OVERLORD";
         let bossConfig = MONSTER_DB[bossKey] || MONSTER_DB["DUNGEON_OVERLORD"];
         
-        let bossHp = (500 + (dungeonWave * 150)) * (bossConfig.hpMult || 5.0) * partySize;
+        // Bosses also benefit from the strengthMult if the wave was supposed to be huge
+        let bossHp = (500 + (dungeonWave * 150)) * (bossConfig.hpMult || 5.0) * partySize * strengthMult;
         
         boss = {
             name: bossKey.replace(/_/g, " "),
@@ -2119,7 +2135,8 @@ function spawnWave() {
             config: bossConfig,
             color: bossConfig.color || "#ff0000",
             scale: bossConfig.scale || 2.0,
-            isHanging: false, // Bosses are too heavy to hang!
+            isHanging: false,
+            strengthMult: strengthMult,
             equipped: bossConfig.canEquip ? generateRandomLoadout(dungeonTier) : {}
         };
         
