@@ -1999,56 +1999,7 @@ function generateRandomLoadout(tier) {
 
     return loadout;
 }
-
-/* function spawnWave() {
-    enemies = [];
-    const partySize = Object.values(players).filter(p => p.area === "dungeon" && !p.dead).length || 1;
-    const isBossWave = (dungeonWave % 5 === 0);
-    
-
-	dungeonTier = getTierFromWave(dungeonWave);
-    const waveSize = Math.floor(2 + (dungeonWave / 2) + (partySize - 1));
-    const types = ["Slime", "StickmanHunter", "Grumble", "VoidWalker"];
-
-    for (let i = 0; i < waveSize; i++) {
-        let type = types[Math.floor(Math.random() * types.length)];
-        let isStickman = (type === "StickmanHunter" || type === "VoidWalker");
-        let enemyHp = (40 + (dungeonWave * 20)) * (1 + (partySize * 0.2));
-
-        enemies.push({ 
-            name: type, 
-            area: "dungeon",
-            hp: enemyHp, 
-            maxHp: enemyHp, 
-            x: 500 + (i * 60),
-            y: 540, 
-            dead: false,
-            isEnemy: true,
-            isStickman: isStickman,
-            stats: { lurkLevel: 0 },
-            equipped: isStickman ? generateRandomLoadout(dungeonTier) : {}
-        });
-    }
-
-    if (isBossWave) {
-        let bossHp = (400 + (dungeonWave * 100)) * partySize;
-        boss = {
-            name: "DUNGEON OVERLORD",
-            area: "dungeon",
-            hp: bossHp,
-            maxHp: bossHp,
-            x: 800,
-            y: 540,
-            dead: false,
-            isBoss: true,
-            isMonster: true,
-            color: "#ff0000"
-        };
-        systemMessage(`⚠️ BOSS WAVE! Scaling for ${partySize} hero(es)!`);
-    } else {
-        boss = null;
-    }
-} */
+/* 
 function spawnWave() {
     enemies = [];
     const partySize = Object.values(players).filter(p => p.area === "dungeon" && !p.dead).length || 1;
@@ -2121,6 +2072,96 @@ function spawnWave() {
             color: bossConfig.color || "#ff0000",
             scale: bossConfig.scale || 2.0,
             // ADD THIS: Bosses deserve Tier + 1 gear!
+            equipped: bossConfig.canEquip ? generateRandomLoadout(dungeonTier) : {}
+        };
+        
+        systemMessage(`⚠️ TIER ${dungeonTier} BOSS: ${boss.name} has emerged!`);
+    } else {
+        boss = null;
+    }
+} */
+function spawnWave() {
+    enemies = [];
+    const partySize = Object.values(players).filter(p => p.area === "dungeon" && !p.dead).length || 1;
+    const isBossWave = (dungeonWave % 5 === 0);
+    
+    // 1. Update Tier
+    dungeonTier = getTierFromWave(dungeonWave);
+
+    // 2. Select Theme Config
+    const themeKeys = Object.keys(DUNGEON_THEMES).map(Number);
+    const highestThemeDefined = Math.max(...themeKeys);
+    const themeIndex = Math.min(dungeonTier, highestThemeDefined);
+    const currentTheme = DUNGEON_THEMES[themeIndex] || DUNGEON_THEMES[1];
+    
+    const themePool = currentTheme.mobs;
+    const waveSize = Math.floor(2 + (dungeonWave / 2) + (partySize - 1));
+
+    if (!isBossWave) {
+        systemMessage(`--- Wave ${dungeonWave}: ${currentTheme.name} ---`);
+    }
+
+    // 3. Spawn Normal Mobs
+    for (let i = 0; i < waveSize; i++) {
+        let typeName = themePool[Math.floor(Math.random() * themePool.length)];
+        let config = MONSTER_DB[typeName] || MONSTER_DB["Slime"] || { drawType: "blob", hpMult: 1, color: "#fff" };
+
+        // HP Scaling
+        let enemyHp = (40 + (dungeonWave * 25)) * (config.hpMult || 1.0) * (1 + (partySize * 0.25));
+
+        // --- SPIDERLING HANGING LOGIC ---
+        let isHanging = false;
+        let startY = 530 + (Math.random() * 20); // Default ground Y
+
+        // 40% chance for spiderlings to hang from the ceiling
+        if (typeName === "Spiderling" && Math.random() < 0.4) {
+            isHanging = true;
+            startY = 50 + (Math.random() * 150); // High up in the air
+        }
+
+        enemies.push({ 
+            name: typeName, 
+            area: "dungeon",
+            level: dungeonTier * 5,
+            hp: enemyHp, 
+            maxHp: enemyHp, 
+            x: 500 + (i * 70),
+            y: startY,
+            isHanging: isHanging, // Essential for MONSTER_STYLES web drawing
+            dead: false,
+            isEnemy: true,
+            config: config, 
+            color: config.color || "#ff4444",
+            drawType: config.drawType, 
+            scale: config.scale || 1.0,
+            isStickman: config.drawType === "stickman",
+            equipped: config.canEquip ? generateRandomLoadout(dungeonTier) : {}
+        });
+    }
+
+    // 4. Spawn Theme Boss
+    if (isBossWave) {
+        let bossKey = currentTheme.boss || "DUNGEON_OVERLORD";
+        let bossConfig = MONSTER_DB[bossKey] || MONSTER_DB["DUNGEON_OVERLORD"];
+        
+        let bossHp = (500 + (dungeonWave * 150)) * (bossConfig.hpMult || 5.0) * partySize;
+        
+        boss = {
+            name: bossKey.replace(/_/g, " "),
+            area: "dungeon",
+            level: (dungeonTier * 5) + 5, 
+            hp: bossHp,
+            maxHp: bossHp,
+            x: 850, 
+            y: 540,
+            dead: false,
+            isBoss: true,
+            isEnemy: true,
+            isMonster: true,
+            config: bossConfig,
+            color: bossConfig.color || "#ff0000",
+            scale: bossConfig.scale || 2.0,
+            isHanging: false, // Bosses are too heavy to hang!
             equipped: bossConfig.canEquip ? generateRandomLoadout(dungeonTier) : {}
         };
         

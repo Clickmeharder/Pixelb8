@@ -1827,7 +1827,7 @@ const BODY_PARTS = {
 
 
 const MONSTER_STYLES = {
-    blob: (ctx, e, now, cfg) => {
+/*     blob: (ctx, e, now, cfg) => {
         const wobble = Math.sin(now / 150) * 5;
 		ctx.fillStyle = e.color;
         ctx.beginPath();
@@ -1881,6 +1881,112 @@ const MONSTER_STYLES = {
             ctx.roundRect(-25, -15, 50, 20, 10);
         }
         ctx.fill(); ctx.stroke();
+    }, */
+	blob: (ctx, e, now, cfg) => {
+        // --- BOUNCE & SQUASH ---
+        const bounce = Math.abs(Math.sin(now / 250)) * 15;
+        const squash = bounce * 0.2;
+        ctx.translate(0, -bounce); 
+
+        // Body
+        ctx.fillStyle = e.color;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, (cfg.bodyW || 25) + squash, (cfg.bodyH || 20) - squash, 0, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+
+        // --- GOOGLY EYES ---
+        const jiggleX = Math.sin(now / 100) * 2;
+        const jiggleY = Math.cos(now / 100) * 2;
+        [-7, 7].forEach(side => {
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.arc(side, -5, 6, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+            // Pupil
+            ctx.fillStyle = "#000";
+            ctx.beginPath();
+            ctx.arc(side + jiggleX, -5 + jiggleY, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    },
+
+    spider: (ctx, e, now, cfg) => {
+        // --- WEB HANGING ---
+        if (e.isHanging) {
+            ctx.save();
+            ctx.strokeStyle = "rgba(238, 238, 238, 0.5)";
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, -e.y - 500); // Draw web line far up
+            ctx.stroke();
+            ctx.restore();
+            ctx.rotate(Math.sin(now / 500) * 0.1);
+        }
+
+        // Legs
+        const walk = Math.sin(now / 100) * 12;
+        ctx.strokeStyle = e.color;
+        ctx.lineWidth = cfg.legWidth || 2;
+        for (let i = 0; i < 8; i++) {
+            const side = i < 4 ? -1 : 1;
+            const angle = (i % 4) * (Math.PI / 4) - Math.PI/2;
+            const move = (i % 2 === 0) ? walk : -walk;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(Math.cos(angle) * 15 * side, -10 + move); 
+            ctx.lineTo(Math.cos(angle) * 25 * side, (cfg.legH || 15));
+            ctx.stroke();
+        }
+
+        // Body
+        ctx.fillStyle = e.color;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, cfg.bodyW || 15, cfg.bodyH || 12, 0, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+
+        // --- SPIDER EYES ---
+        // Only big spiders (scale >= 1) get the creepy red eyes
+        if (cfg.scale >= 1.0) {
+            ctx.fillStyle = "#f00";
+            [{x:-4, y:-2}, {x:4, y:-2}, {x:-2, y:-5}, {x:2, y:-5}].forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+    },
+
+    canine: (ctx, e, now, cfg) => {
+        const walk = Math.sin(now / 120) * 15;
+        ctx.lineWidth = 4;
+        [ -10, 10 ].forEach((xOffset, i) => {
+            const move = (i === 0) ? walk : -walk;
+            ctx.beginPath();
+            ctx.moveTo(xOffset, 5);
+            ctx.lineTo(xOffset + move, 20);
+            ctx.stroke();
+        });
+
+        // Body logic
+        ctx.fillStyle = e.color;
+        if (cfg.fuzz) {
+            ctx.beginPath();
+            for(let a=0; a<Math.PI*2; a+=0.4) {
+                let r = (cfg.bodyW || 25) + (Math.random() * 5);
+                ctx.lineTo(Math.cos(a)*r, Math.sin(a)*r - 5);
+            }
+            ctx.closePath();
+        } else {
+            ctx.beginPath();
+            ctx.roundRect(-25, -15, 50, 20, 10);
+        }
+        ctx.fill(); ctx.stroke();
+
+        // --- DOG EYES ---
+        ctx.fillStyle = "#000";
+        ctx.beginPath();
+        ctx.arc(-22, -12, 2, 0, Math.PI * 2); // Head is usually offset for dogs
+        ctx.fill();
     },
     phalic: (ctx, e, now, cfg) => {
         const sway = Math.sin(now / 200) * 0.1;
