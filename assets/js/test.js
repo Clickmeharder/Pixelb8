@@ -1787,7 +1787,7 @@ let dungeonQueue = [];
 let dungeonTimer = null;
 let dungeonActive = false;
 let dungeonWave = 1;
-let dungeonTier = 2; 
+let dungeonTier = 1; 
 let dungeonSecondsLeft = 0;
 let dungeonCountdownInterval = null; 
 let dungeonEmptyTimer = null; 
@@ -1842,6 +1842,9 @@ function getTierFromWave(wave) {
 function testDungeonTier(p, targetTier, targetWave = null) {
     if (p.dead) return;
 
+    // FIX: Clear the queue so real players don't accidentally get pulled into your test
+    dungeonQueue = []; 
+
     // 1. Force state reset
     dungeonActive = true;
     isDungeonResting = false;
@@ -1849,8 +1852,6 @@ function testDungeonTier(p, targetTier, targetWave = null) {
     boss = null;
     
     // 2. Calculate Wave logic
-    // If targetWave is provided (1-5), it offsets the tier. 
-    // Otherwise starts at Wave 1 of that Tier.
     targetTier = parseInt(targetTier) || 1;
     let waveOffset = targetWave ? (parseInt(targetWave) - 1) : 0;
     dungeonWave = ((targetTier - 1) * 5) + 1 + waveOffset;
@@ -1874,12 +1875,19 @@ function testDungeonTier(p, targetTier, targetWave = null) {
     spawnWave();
     organizeDungeonRanks();
     
-    // 5. Kill any pending timers
+    // 5. FIX: Kill ALL possible dungeon timers to prevent "ghost" waves or collapses
     if (dungeonCountdownInterval) { clearInterval(dungeonCountdownInterval); dungeonCountdownInterval = null; }
     if (dungeonGraceTimer) { clearInterval(dungeonGraceTimer); dungeonGraceTimer = null; }
+    if (dungeonEmptyTimer) { clearInterval(dungeonEmptyTimer); dungeonEmptyTimer = null; }
 }
 function joinDungeonQueue(p) {
     if (p.dead) return;
+
+    // FIX: Prevent joining if a dungeon is already in progress
+    if (dungeonActive) {
+        systemMessage(`❌ ${p.name}, a dungeon is already in progress. Wait for it to finish!`);
+        return;
+    }
 
     const nameKey = p.name.toLowerCase();
     if (!dungeonQueue.includes(nameKey)) {
@@ -1888,8 +1896,15 @@ function joinDungeonQueue(p) {
     }
 
     if (!dungeonCountdownInterval) {
-		enemies = [];
+        // FIX: Ensure enemies are cleared so "Training Mobs" don't stay on screen when timer starts
+        enemies = []; 
         dungeonSecondsLeft = 60;
+        systemMessage("Dungeon timer started!");
+
+        dungeonCountdownInterval = setInterval(() => {
+        dungeonSecondsLeft--;
+
+        if (dungeonSecondsLeft === 30) {
         systemMessage("Dungeon timer started!");
 
         dungeonCountdownInterval = setInterval(() => {
