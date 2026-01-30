@@ -2047,38 +2047,80 @@ const MONSTER_STYLES = {
     },
 
 	spider: (ctx, e, now, cfg) => {
-		// 1. SKITTER & HOP LOGIC
 		let offsetX = 0;
 		let offsetY = 0;
 
-		// Hanging spiders stay centered but sway
+		// --- 1. HANGING & CLIMBING LOGIC ---
 		if (e.isHanging) {
+			// Initialize movement properties if they don't exist
+			if (e.hangY === undefined) e.hangY = e.y; 
+			
+			// Randomly decide to skitter up/down or drop
+			// We use 'now' and the enemy's hash (e.x) to ensure they don't all act at once
+			const seed = Math.sin(now / 2000 + e.x);
+			
+			if (seed > 0.8) { 
+				// Climb up slightly
+				e.y -= 0.5;
+			} else if (seed < -0.95) {
+				// Drop logic: check if we should drop all the way
+				// 1% chance per frame when in "drop zone" to commit to the floor
+				if (Math.random() < 0.01) {
+					e.isHanging = false; 
+					e.isDropping = true;
+				} else {
+					e.y += 0.5; // Just lowering the web
+				}
+			}
+
+			// Draw the web string
 			ctx.save();
-			ctx.strokeStyle = "rgba(238, 238, 238, 0.5)";
+			ctx.strokeStyle = "rgba(238, 238, 238, 0.6)";
+			ctx.setLineDash([5, 3]); // Optional: makes web look "silky"
 			ctx.beginPath();
 			ctx.moveTo(0, 0);
-			ctx.lineTo(0, -e.y - 500);
+			ctx.lineTo(0, -e.y); // Strings up to the ceiling
 			ctx.stroke();
 			ctx.restore();
-			ctx.rotate(Math.sin(now / 500) * 0.1);
+
+			// Swaying rotation
+			ctx.rotate(Math.sin(now / 500 + e.x) * 0.15);
 		} 
-		// Cave Spiders Hop (Up and Down)
-		else if (e.name === "CaveSpider" || cfg.isCave) {
-			offsetY = -Math.abs(Math.sin(now / 200) * 15); // The Hop
-			offsetX = Math.sin(now / 400) * 5;             // Slight side sway
-		} 
-		// Normal Spiders Skitter (Left and Right)
+		
+		// --- 2. DROPPING TO FLOOR LOGIC ---
+		else if (e.isDropping) {
+			const floorY = 540; // Adjust this to your actual ground level
+			if (e.y < floorY) {
+				e.y += 8; // Fast drop speed
+				// Draw a trailing web line while falling
+				ctx.save();
+				ctx.strokeStyle = "rgba(238, 238, 238, 0.4)";
+				ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -e.y); ctx.stroke();
+				ctx.restore();
+			} else {
+				e.y = floorY;
+				e.isDropping = false; // It has landed!
+			}
+		}
+		
+		// --- 3. GROUNDED SKITTER LOGIC ---
 		else {
-			offsetX = Math.sin(now / 80) * 15;             // Fast horizontal skitter
-			offsetY = Math.sin(now / 40) * 2;              // Tiny vertical vibration
+			const jitter = Math.sin(now / 150) * 8;
+			const roam = Math.sin(now / 1200 + e.x) * 40;
+			offsetX = jitter + roam;
+			offsetY = Math.sin(now / 40) * 2;
 		}
 
 		ctx.save();
 		ctx.translate(offsetX, offsetY);
 
-		// 2. LEGS
-		// If hanging, legs are "tucked" or reaching up. If skittering, they flail.
-		const walk = e.isHanging ? Math.sin(now / 400) * 5 : Math.sin(now / 100) * 12;
+		// --- 4. LEGS (Adaptive) ---
+		// If e.isDropping, legs reach UP. If isHanging, legs are TUCKED.
+		let legState = "walking";
+		if (e.isHanging) legState = "hanging";
+		if (e.isDropping) legState = "falling";
+
+		const walk = legState === "walking" ? Math.sin(now / 100) * 12 : Math.sin(now / 400) * 5;
 		ctx.strokeStyle = e.color || "#222";
 		ctx.lineWidth = cfg.legWidth || 2;
 		
@@ -2090,28 +2132,29 @@ const MONSTER_STYLES = {
 			ctx.beginPath();
 			ctx.moveTo(0, 0);
 			
-			if (e.isHanging) {
-				// Reaching upwards legs
+			if (legState === "hanging") {
 				ctx.lineTo(Math.cos(angle) * 10 * side, -15 + move);
 				ctx.lineTo(Math.cos(angle) * 20 * side, -25);
+			} else if (legState === "falling") {
+				// Legs reaching up as it falls
+				ctx.lineTo(Math.cos(angle) * 15 * side, -20 + move);
+				ctx.lineTo(Math.cos(angle) * 10 * side, -35);
 			} else {
-				// Grounded skitter legs
 				ctx.lineTo(Math.cos(angle) * 15 * side, -10 + move); 
 				ctx.lineTo(Math.cos(angle) * 25 * side, (cfg.legH || 15));
 			}
 			ctx.stroke();
 		}
 
-		// 3. BODY
+		// --- 5. BODY & EYES ---
 		ctx.fillStyle = e.color || "#222";
 		ctx.beginPath();
 		ctx.ellipse(0, 0, cfg.bodyW || 15, cfg.bodyH || 12, 0, 0, Math.PI * 2);
 		ctx.fill(); ctx.stroke();
 
-		// 4. EYES (Only for big/scary spiders)
 		if (cfg.scale >= 1.0) {
 			ctx.fillStyle = "#f00";
-			const eyeOffset = Math.sin(now / 100) * 0.5; // Jittery eyes
+			const eyeOffset = Math.sin(now / 100) * 0.5;
 			[{x:-4, y:-2}, {x:4, y:-2}, {x:-2, y:-5}, {x:2, y:-5}].forEach(p => {
 				ctx.beginPath();
 				ctx.arc(p.x + eyeOffset, p.y, 1.5, 0, Math.PI * 2);
@@ -2729,128 +2772,124 @@ const MONSTER_STYLES = {
 		ctx.restore();
 	},
 	cow: (ctx, e, now, cfg) => {
+		// 1. IDENTITY & PERSISTENCE
+		// We use e.x (spawn position) or e.id as a seed so spots stay fixed to the cow
+		const seed = e.id || Math.floor(e.maxHp); 
+		const isCalf = e.name.toLowerCase() === "calf";
+		const isDairy = e.name.toLowerCase() === "dairy_cow";
+		
+		// Scaling for types
+		const scale = isCalf ? 0.6 : (isDairy ? 1.2 : 1.0);
+		const bodyW = (cfg.bodyW || 30) * scale;
+		const bodyH = (cfg.bodyH || 20) * scale;
+		
+		// 2. MOO ANIMATION
+		// Cow moos every ~5 seconds for a brief moment
+		const mooCycle = (now + (seed * 100)) % 5000;
+		const isMooing = mooCycle < 600; // Open mouth for 0.6 seconds
+		const mouthOpen = isMooing ? Math.sin(now / 50) * 5 : 0;
+
 		const walk = Math.sin(now / 180) * 10;
-		const breathe = Math.sin(now / 400) * 2;
-		const bodyW = cfg.bodyW || 30; // Slightly wider for a "cow" look
-		const bodyH = (cfg.bodyH || 20) + breathe;
-		const color = e.color || "#ffffff";
-		const seed = (e.id || 1);
-
+		
 		ctx.save();
+		// Subtle breathing or head bob
+		ctx.translate(0, isMooing ? -2 : 0);
 
-		// 1. BACK LEGS (Draw these first so they are behind the body)
-		ctx.lineWidth = 4;
+		// 3. LEGS (Back)
+		ctx.lineWidth = 3 * scale;
 		ctx.strokeStyle = "#000";
 		[-bodyW + 8, bodyW - 12].forEach((xOff, i) => {
 			const move = (i === 0) ? walk : -walk;
 			ctx.beginPath();
 			ctx.moveTo(xOff, 5);
-			ctx.lineTo(xOff + (move * 0.5), 25);
+			ctx.lineTo(xOff + (move * 0.3), 20 * scale);
 			ctx.stroke();
-			ctx.fillStyle = "#1a1a1a";
-			ctx.fillRect(xOff + (move * 0.5) - 3, 23, 6, 4);
 		});
 
-		// 2. UDDERS (Behind body, above front legs)
-		if (cfg.utters) {
-			const jiggle = Math.sin(now / 180) * 2;
+		// 4. UDDERS (Dairy Cow specific or large Cow)
+		if (isDairy || (cfg.udders && !isCalf)) {
 			ctx.fillStyle = "#ffb6c1";
 			ctx.beginPath();
-			ctx.ellipse(0, 10, 12, 8 + jiggle, 0, 0, Math.PI * 2);
+			ctx.ellipse(5, 8 * scale, 12 * scale, 8 * scale, 0, 0, Math.PI * 2);
 			ctx.fill();
-			[-4, 0, 4].forEach(tx => {
-				ctx.beginPath();
-				ctx.arc(tx, 15 + jiggle, 2, 0, Math.PI * 2);
-				ctx.fill();
-			});
 		}
 
-		// 3. BODY (With Spots)
-		ctx.fillStyle = color;
+		// 5. BODY & STATIC SPOTS
+		ctx.fillStyle = e.color || "#ffffff";
 		ctx.beginPath();
-		ctx.roundRect(-bodyW, -bodyH, bodyW * 2, bodyH * 1.8, 10);
+		ctx.roundRect(-bodyW, -bodyH, bodyW * 2, bodyH * 1.8, 10 * scale);
 		ctx.fill();
 		ctx.stroke();
 
-		// Spots (Static)
+		// SPOTS: Seeded random, not animated
 		ctx.save();
-		ctx.clip(); // Keep spots inside body
+		ctx.clip(); 
 		ctx.fillStyle = "#1a1a1a";
-		for (let i = 0; i < 5; i++) {
-			const spotX = ((seed * (i+1) * 45) % (bodyW * 1.5)) - (bodyW * 0.7);
-			const spotY = ((seed * (i+1) * 88) % (bodyH * 1.5)) - (bodyH * 0.7);
+		// Generate 6 spots based on the cow's seed
+		for (let i = 1; i <= 6; i++) {
+			const spotX = Math.sin(seed * i) * bodyW;
+			const spotY = Math.cos(seed * i) * bodyH - (bodyH * 0.2);
+			const spotSize = (Math.abs(Math.sin(seed + i)) * 10 + 5) * scale;
 			ctx.beginPath();
-			ctx.arc(spotX, spotY, 10, 0, Math.PI * 2);
+			ctx.ellipse(spotX, spotY, spotSize * 1.5, spotSize, seed * i, 0, Math.PI * 2);
 			ctx.fill();
 		}
 		ctx.restore();
 
-		// 4. FRONT LEGS (Draw these on top of body for depth)
-		[-bodyW + 15, bodyW - 5].forEach((xOff, i) => {
-			const move = (i === 0) ? -walk : walk; // Opposite of back legs
-			ctx.beginPath();
-			ctx.moveTo(xOff, 5);
-			ctx.lineTo(xOff + (move * 0.5), 25);
-			ctx.stroke();
-			ctx.fillStyle = "#1a1a1a";
-			ctx.fillRect(xOff + (move * 0.5) - 3, 23, 6, 4);
-		});
-
-		// 5. THE BELL
-		if (cfg.bell) {
-			const ring = Math.sin(now / 180) * 0.2;
-			ctx.save();
-			ctx.translate(-bodyW + 2, 0); // Moved to neck area
-			ctx.rotate(ring);
-			ctx.fillStyle = "gold";
-			ctx.beginPath();
-			ctx.rect(-4, 0, 8, 10);
-			ctx.fill(); ctx.stroke();
-			ctx.fillStyle = "#000";
-			ctx.beginPath(); ctx.arc(0, 10, 2, 0, Math.PI * 2); ctx.fill();
-			ctx.restore();
-		}
-
-		// 6. HEAD
-		// Anchor the head to the front of the body
+		// 6. HEAD & MOOING
 		ctx.save();
-		ctx.translate(-bodyW, -bodyH * 0.5); 
+		ctx.translate(-bodyW, -bodyH * 0.4);
 		
-		// Ears
-		ctx.fillStyle = color;
-		[-8, 8].forEach(side => {
+		// Ears (flapping slightly if mooing)
+		const earFlick = isMooing ? Math.sin(now / 100) * 0.2 : 0;
+		[-1, 1].forEach(side => {
+			ctx.fillStyle = e.color || "#ffffff";
 			ctx.beginPath();
-			ctx.ellipse(side * 8, -5, 6, 3, side * 0.5, 0, Math.PI * 2);
+			ctx.ellipse(side * 8, -5, 6 * scale, 3 * scale, (side * 0.5) + earFlick, 0, Math.PI * 2);
 			ctx.fill(); ctx.stroke();
 		});
 
 		// Face
-		ctx.fillStyle = color;
 		ctx.beginPath();
-		ctx.roundRect(-12, -10, 22, 22, 6);
+		ctx.roundRect(-12 * scale, -10 * scale, 22 * scale, 22 * scale, 5 * scale);
 		ctx.fill(); ctx.stroke();
-		
-		// Muzzle (Pink nose)
+
+		// Muzzle + Mooing logic
 		ctx.fillStyle = "#ffb6c1";
 		ctx.beginPath();
-		ctx.roundRect(-12, 2, 22, 10, 5);
+		// muzzle shifts down when mooing
+		ctx.roundRect(-12 * scale, 2 * scale, 22 * scale, (10 + mouthOpen) * scale, 5 * scale);
 		ctx.fill(); ctx.stroke();
+
+		if (isMooing) {
+			// Mouth hole
+			ctx.fillStyle = "#441111";
+			ctx.beginPath();
+			ctx.ellipse(0, 10 * scale, 4 * scale, (2 + mouthOpen/2) * scale, 0, 0, Math.PI * 2);
+			ctx.fill();
+			// Visual "MOO" text
+			ctx.fillStyle = "#fff";
+			ctx.font = "bold 12px Arial";
+			ctx.fillText("MOO!", 10, -10);
+		}
 
 		// Eyes
 		ctx.fillStyle = "#000";
 		[-5, 5].forEach(ex => {
-			ctx.beginPath(); ctx.arc(ex - 2, -2, 2.5, 0, Math.PI * 2); ctx.fill();
+			ctx.beginPath(); ctx.arc(ex * scale, -2 * scale, 2 * scale, 0, Math.PI * 2); ctx.fill();
 		});
 
-		// Horns
-		ctx.fillStyle = "#eee";
-		[-6, 6].forEach(side => {
-			ctx.beginPath();
-			ctx.moveTo(side * 5, -10);
-			ctx.lineTo(side * 8, -18);
-			ctx.lineTo(side * 2, -10);
-			ctx.fill(); ctx.stroke();
-		});
+		// Horns (Only for Cows/Dairy Cows, not calves)
+		if (!isCalf) {
+			ctx.fillStyle = "#eee";
+			[-1, 1].forEach(side => {
+				ctx.beginPath();
+				ctx.moveTo(side * 5 * scale, -10 * scale);
+				ctx.lineTo(side * 10 * scale, -18 * scale);
+				ctx.lineTo(side * 2 * scale, -10 * scale);
+				ctx.fill(); ctx.stroke();
+			});
+		}
 
 		ctx.restore();
 		ctx.restore();

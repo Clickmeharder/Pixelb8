@@ -1850,7 +1850,10 @@ function testDungeonTier(p, targetTier, targetWave = null) {
     isDungeonResting = false;
     enemies = [];
     boss = null;
-    
+    if (dungeonCountdownInterval) { 
+		clearInterval(dungeonCountdownInterval); 
+		dungeonCountdownInterval = null; 
+	}
     // 2. Calculate Wave logic
     targetTier = parseInt(targetTier) || 1;
     let waveOffset = targetWave ? (parseInt(targetWave) - 1) : 0;
