@@ -2043,8 +2043,19 @@ function closeDungeon(reason) {
     Object.values(players).forEach(p => {
         if (p.area === "dungeon") {
             p.area = "graveyard";
-            p.x = 400; p.y = 550;
+            
+            // --- CORPSE SCATTER LOGIC ---
+            // x between 300 and 500, y between 500 and 600
+            p.x = 300 + Math.random() * 200; 
+            p.y = 500 + Math.random() * 100;
+            
             p.activeTask = "none";
+
+            // If they died in the dungeon, ensure their deathTime is set 
+            // so the 10-minute ghost timer starts ticking now!
+            if (p.dead && !p.deathTime) {
+                p.deathTime = Date.now();
+            }
         }
     });
 
@@ -3276,42 +3287,41 @@ function drawSheathedWeapon(ctx, p, anchors, item) {
     drawFn(ctx, item, false, 0); 
     ctx.restore();
 }
-
+//working old drawcorpse
+/* 
 function drawCorpse(ctx, p, now) {
     const timeSinceDeath = now - p.deathTime;
     const progress = Math.min(1, timeSinceDeath / 800);
     ctx.save();
+    // 1. Blood Pool
     ctx.fillStyle = "rgba(180, 0, 0, 0.6)";
     const poolSize = progress * 25;
     ctx.beginPath();
     ctx.ellipse(p.x, p.y + 25, poolSize, poolSize / 3, 0, 0, Math.PI * 2);
     ctx.fill();
-
+    // 2. Physics/Rotation
     ctx.translate(p.x, p.y + (progress * 20));
     let rot = p.deathStyle === "faceplant" ? (Math.PI / 2) * progress : (-Math.PI / 2) * progress;
     ctx.rotate(rot);
-
     const deadAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
-    // Straight limbs for the corpse
-    const deadLimbs = { leftHand: { x: -18, y: 0 }, rightHand: { x: 18, y: 0 }, leftFoot: { x: -10, y: 25 }, rightFoot: { x: 10, y: 25 } };
-
-    const corpseActor = { ...p, x: 0, y: 0 }; 
-	// DRAW THE HEAD HERE (Relative to the rotated 0,0)
+    const deadLimbs = { 
+        leftHand: { x: -18, y: 0 }, 
+        rightHand: { x: 18, y: 0 }, 
+        leftFoot: { x: -10, y: 25 }, 
+        rightFoot: { x: 10, y: 25 } 
+    };
+    // 3. FORCE THE KO EMOTE
+    // We clone the player but ensure the emote is set to "ko" for the master head function
+    const corpseActor = { ...p, x: 0, y: 0, emote: "ko" }; 
+    // 4. DRAW THE BODY & HEAD
+    // This now uses your master switch-case for the "ko" style (X eyes + slanted mouth)
     BODY_PARTS["stick"].head(ctx, deadAnchors.headX, deadAnchors.headY, corpseActor);
-    drawStickmanBody(ctx, corpseActor, deadAnchors, deadLimbs)
-
-    ctx.save();
-    ctx.strokeStyle = "#000000"; ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.moveTo(-6, -33); ctx.lineTo(-2, -27); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-2, -33); ctx.lineTo(-6, -27); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(2, -33); ctx.lineTo(6, -27); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(6, -33); ctx.lineTo(2, -27); ctx.stroke();
-    ctx.restore();
-
+    drawStickmanBody(ctx, corpseActor, deadAnchors, deadLimbs);
+    // 5. EQUIPMENT LAYER
     renderEquipmentLayer(ctx, corpseActor, now, deadAnchors, deadLimbs.leftHand, deadLimbs.rightHand, deadLimbs.leftFoot, deadLimbs.rightFoot);
+    
     ctx.restore();
-}
-function renderAll() {
+}function renderAll() {
     // Sort players by Y so those with higher Y (closer to screen) draw last
     const sortedPlayers = Object.values(players).sort((a, b) => a.y - b.y);
     
@@ -3319,7 +3329,68 @@ function renderAll() {
         drawStickman(ctx, p);
     });
 }
+ */
+// corpse turn to Ghost
+function drawCorpse(ctx, p, now) {
+    const timeSinceDeath = now - p.deathTime;
+    const progress = Math.min(1, timeSinceDeath / 800);
+    const tenMinutes = 10 * 60 * 1000; // 600,000ms
 
+    ctx.save();
+    
+    // 1. Blood Pool (Stays on the ground)
+    ctx.fillStyle = "rgba(180, 0, 0, 0.6)";
+    const poolSize = progress * 25;
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y + 25, poolSize, poolSize / 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. Physics/Rotation for the physical body
+    ctx.save();
+    ctx.translate(p.x, p.y + (progress * 20));
+    let rot = p.deathStyle === "faceplant" ? (Math.PI / 2) * progress : (-Math.PI / 2) * progress;
+    ctx.rotate(rot);
+
+    const deadAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
+    const deadLimbs = { 
+        leftHand: { x: -18, y: 0 }, rightHand: { x: 18, y: 0 }, 
+        leftFoot: { x: -10, y: 25 }, rightFoot: { x: 10, y: 25 } 
+    };
+
+    const corpseActor = { ...p, x: 0, y: 0, emote: "ko" }; 
+    BODY_PARTS["stick"].head(ctx, deadAnchors.headX, deadAnchors.headY, corpseActor);
+    drawStickmanBody(ctx, corpseActor, deadAnchors, deadLimbs);
+    renderEquipmentLayer(ctx, corpseActor, now, deadAnchors, deadLimbs.leftHand, deadLimbs.rightHand, deadLimbs.leftFoot, deadLimbs.rightFoot);
+    ctx.restore();
+
+    // --- 3. THE GHOST PHASE ---
+    if (timeSinceDeath > tenMinutes) {
+        ctx.save();
+        // Calculate ghost floating
+        const ghostTime = timeSinceDeath - tenMinutes;
+        const floatY = Math.sin(ghostTime / 1000) * 10 - 40; // Bobbing up and down
+        const ghostAlpha = Math.min(0.4, (ghostTime / 5000)); // Fade in slowly over 5 seconds
+        
+        ctx.globalAlpha = ghostAlpha;
+        ctx.translate(p.x, p.y + floatY);
+        
+        // Ghostly appearance: White/Blue tint
+        const ghostActor = { ...p, x: 0, y: 0, color: "#e0f7fa", emote: "neutral" };
+        
+        // Draw a simplified "floating" pose
+        const ghostAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
+        const ghostLimbs = { 
+            leftHand: { x: -15, y: -5 }, rightHand: { x: 15, y: -5 }, 
+            leftFoot: { x: -5, y: 20 }, rightFoot: { x: 5, y: 20 } 
+        };
+
+        BODY_PARTS["stick"].head(ctx, ghostAnchors.headX, ghostAnchors.headY, ghostActor);
+        drawStickmanBody(ctx, ghostActor, ghostAnchors, ghostLimbs);
+        ctx.restore();
+    }
+    
+    ctx.restore();
+}
 
 //-- unused draw functions
 function drawEnemyArmor(ctx, e, anchors, item) {
@@ -4964,13 +5035,12 @@ function cmdRespawn(p) {
         systemMessage(`${p.name}, you aren't even dead!`);
         return;
     }
-
     // 1. Reset Stats
     p.dead = false;
     p.hp = p.maxHp;
     p.activeTask = null; // Changed from "none" to null for consistency
     p.taskEndTime = null; // Clear the timer
-
+	p.deathTime = null;
     // 2. Move to Town
     p.area = "town";
     p.x = 400; // Town center
@@ -5676,6 +5746,12 @@ function isOnCooldown(p, cmd, seconds) {
     p.cooldowns[cmd] = now; // Set the new cooldown time
     return false;
 }
+
+const adminCommands = [
+		"!showhome", "::home", "!showtown", "::town", "!showgraveyard", "::graveyard", "::gy", "!showpond", "::pond", "!showdungeon", "::dungeon", "!showarena", "::arena", "!spawnmerchant", 
+		"!despawnmerchant", "!resetmerchant", "!give", "!additem", "!scrub",
+		"name", "/name", "color", "/color" // Added these here
+];
 function processGameCommand(user, msg, flags = {}, extra = {}) {
 	const current = getActiveProfile();
     if (current && user.toLowerCase() === current.name.toLowerCase()) {
@@ -5699,11 +5775,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     let cmd = args[0].toLowerCase();
 
     // --- 1. ADMIN & AUTHORIZATION CHECK ---
-	const adminCommands = [
-			"!showhome", "::home", "!showtown", "::town", "!showgraveyard", "::graveyard", "::gy", "!showpond", "::pond", "!showdungeon", "::dungeon", "!showarena", "::arena", "!spawnmerchant", 
-			"!despawnmerchant", "!resetmerchant", "!give", "!additem", "!scrub",
-			"name", "/name", "color", "/color" // Added these here
-	];
+
     if (adminCommands.includes(cmd)) {
         // If it's the browser (developer) OR passes your Twitch streamer check
         let isAuthorized = flags.developer || isStreamerAndAuthorize(user, cmd);
@@ -5766,9 +5838,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 			return;
 		}
     }
-
 // --- 2. STANDARD PLAYER ACTION COMMANDS (Everyone) ---
-    
     // Define cooldowns for groups of commands
     // Actions that can be spammed slightly
     const fastActions = ["!attack", "!fish", "!swim", "!lurk", "!sheath", "!dance", "!heal", "!unequip", "!equip", ]; 
@@ -5776,12 +5846,10 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     const mediumActions = [ "!travel", "!respawn", "!clearinventory", "!clearinv"];
     // Travel and UI commands
     const slowActions = ["!home", "!pond", "!town", "!arena", "!dungeon", "!join", "!pvp"];
-
     // Apply the cooldown checks
     if (fastActions.includes(cmd) && isOnCooldown(p, "fast", 3)) return;
     if (mediumActions.includes(cmd) && isOnCooldown(p, "med", 6)) return;
     if (slowActions.includes(cmd) && isOnCooldown(p, "slow", 8)) return;
-	
     // Now run the actual logic
     if (cmd === "!clearinventory" || cmd === "!clearinv") { clearPlayerInventory(p.name); return; }
     if (cmd === "!stop" || cmd === "!idle" || cmd === "!reset") { cmdStop(p, user); return; }
@@ -5830,10 +5898,15 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "!sell")       { cmdSell(p, user, args); return; }
     if (cmd === "!bal" || cmd === "!pixels") { cmdBalance(p); return; }
     if (cmd === "!listdances") { cmdListDances(p); return; }
-	// --- 3. CHAT BUBBLE LOGIC (Catch-all) ---
-    // Check if the message was intended to be a command (starts with ! or /)
-    // but didn't match any of the logic above.
-    const isAttemptedCommand = msg.startsWith("!") || msg.startsWith(")") || msg.startsWith(":") || msg.startsWith("/");
+
+	
+}
+
+// 1. The Regular Chat Handler
+ComfyJS.onChat = (user, msg, color, flags, extra) => {
+    if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
+    processGameCommand(user, msg, flags, extra);
+	const isAttemptedCommand = msg.startsWith("!") || msg.startsWith(")") || msg.startsWith(":") || msg.startsWith("/");
 
     // Also check if it's a short, normal message.
     // We don't want to show bubbles for attempted commands that failed.
@@ -5845,13 +5918,6 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 			p.chatTime = Date.now();
 		}
 	}
-	
-}
-
-// 1. The Regular Chat Handler
-ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
-    processGameCommand(user, msg, flags, extra);
 };
 
 // 2. The Command Handler (Matches messages starting with !)
