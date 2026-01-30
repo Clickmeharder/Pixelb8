@@ -3346,13 +3346,6 @@ function drawCorpse(ctx, p, now) {
 }
  */
 // corpse turn to Ghost
-That is a fantastic idea. Cleaning up drawCorpse makes the code much easier to maintain, especially as you add more visual "stages" like flies and gravestones.
-
-We can break these into sub-functions. This keeps the main drawCorpse as a "manager" that just checks the time and decides which sub-function to run.
-
-The Refactored Logic
-JavaScript
-
 // --- Sub-function: The Fresh/Decaying Body ---
 function drawDecayingBody(ctx, p, now, progress) {
     ctx.save();
@@ -3382,7 +3375,6 @@ function drawDecayingBody(ctx, p, now, progress) {
     }
     ctx.restore();
 }
-
 // --- Sub-function: The Gravestone ---
 function drawGravestone(ctx, name) {
     ctx.save();
@@ -3406,7 +3398,6 @@ function drawGravestone(ctx, name) {
     ctx.fillText(name.substring(0, 8), 0, -8);
     ctx.restore();
 }
-
 // --- MAIN MANAGER FUNCTION ---
 function drawCorpse(ctx, p, now) {
     const timeSinceDeath = now - p.deathTime;
