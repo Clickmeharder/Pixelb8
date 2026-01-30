@@ -1848,6 +1848,103 @@ const MONSTER_PARTS = {
 	
 	
 }
+That is a much cleaner way to organize it. By moving these into a MONSTER_EFFECTS object, you keep your drawMobEffects function as a simple "manager" that just calls the specific styles, exactly like how your MONSTER_STYLES works.
+
+1. The Effects Dictionary
+JavaScript
+
+const MONSTER_EFFECTS = {
+    heatwave: (ctx, now) => {
+        ctx.save();
+        const time = now / 1000;
+        ctx.globalCompositeOperation = "overlay";
+        
+        // Pulsing orange glow
+        ctx.fillStyle = `rgba(255, 80, 0, ${0.1 + Math.sin(time * 2) * 0.05})`;
+        ctx.fillRect(0, 0, c.width, c.height);
+
+        // Shimmering vertical distortion lines
+        ctx.strokeStyle = "rgba(255, 200, 0, 0.15)";
+        ctx.lineWidth = 3;
+        for (let i = 0; i < c.width; i += 60) {
+            const xOff = Math.sin(time * 4 + i) * 20;
+            ctx.beginPath();
+            ctx.moveTo(i + xOff, 0);
+            ctx.bezierCurveTo(i - xOff, c.height/2, i + xOff, c.height/2, i - xOff, c.height);
+            ctx.stroke();
+        }
+        ctx.restore();
+    },
+
+	storm: (ctx, now, data) => {
+        const { stormClouds } = data;
+        
+        // A. Global Atmosphere (Rain & Random Flashes)
+        if (Math.random() > 0.98) {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+            ctx.fillRect(0, 0, c.width, c.height);
+        }
+
+        ctx.strokeStyle = "rgba(174, 194, 224, 0.4)";
+        for (let i = 0; i < 10; i++) {
+            let rx = Math.random() * c.width;
+            let ry = Math.random() * c.height;
+            ctx.beginPath();
+            ctx.moveTo(rx, ry);
+            ctx.lineTo(rx - 4, ry + 12);
+            ctx.stroke();
+        }
+
+        // B. Specific Lightning Bolts (Triggered by Logic)
+        stormClouds.forEach(cloud => {
+            if (cloud.triggerLightning && now < cloud.triggerLightning) {
+                ctx.save();
+                ctx.strokeStyle = "#fff";
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = "cyan";
+                ctx.beginPath();
+                ctx.moveTo(cloud.x, cloud.y + 10);
+                // Simple jagged bolt logic
+                ctx.lineTo(cloud.x - 15, cloud.y + 30);
+                ctx.lineTo(cloud.x + 10, cloud.y + 50);
+                ctx.lineTo(cloud.x - 5, 540); // Ground level
+                ctx.stroke();
+                ctx.restore();
+            }
+        });
+    },
+	gnomePrank: (ctx, now, data) => {
+        const { activeGnomes } = data;
+        
+        activeGnomes.forEach(gnome => {
+            // If the logic function recently triggered a prank (within the last 1 second)
+            if (gnome.lastPrank && now - gnome.lastPrank < 1000) {
+                const progress = (now - gnome.lastPrank) / 1000;
+                
+                ctx.save();
+                ctx.translate(gnome.x, gnome.y - 20);
+                
+                // Draw a few gold "pixel" particles popping out of the gnome
+                ctx.fillStyle = "gold";
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i * 72) * (Math.PI / 180);
+                    const dist = 10 + (progress * 30);
+                    const size = 3 * (1 - progress); // Shrink as they fade
+                    
+                    ctx.beginPath();
+                    ctx.rect(
+                        Math.cos(angle) * dist, 
+                        Math.sin(angle) * dist - (progress * 20), 
+                        size, size
+                    );
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        });
+    }
+};
 const MONSTER_STYLES = {
 /*     blob: (ctx, e, now, cfg) => {
         const wobble = Math.sin(now / 150) * 5;
@@ -2593,7 +2690,265 @@ const MONSTER_STYLES = {
 		ctx.restore();
 		ctx.restore();
 	},
-	// Inside your MONSTER_STYLES object:
+	cow: (ctx, e, now, cfg) => {
+		const walk = Math.sin(now / 180) * 10;
+		const breathe = Math.sin(now / 400) * 2;
+		const bodyW = cfg.bodyW || 25;
+		const bodyH = (cfg.bodyH || 18) + breathe;
+		const color = e.color || "#ffffff";
+
+		ctx.save();
+
+		// 1. UDDERS (Jiggle logic)
+		if (cfg.utters) {
+			const jiggle = Math.sin(now / 180) * 3;
+			ctx.fillStyle = "#ffb6c1"; // Pink
+			ctx.beginPath();
+			// Main udder bag
+			ctx.ellipse(0, bodyH - 5, 12, 8 + jiggle, 0, 0, Math.PI * 2);
+			ctx.fill();
+			// Teats
+			[-4, 0, 4].forEach(tx => {
+				ctx.beginPath();
+				ctx.arc(tx, bodyH + jiggle, 2, 0, Math.PI * 2);
+				ctx.fill();
+			});
+		}
+
+		// 2. LEGS (Heavy Stomp)
+		ctx.lineWidth = 4;
+		ctx.strokeStyle = "#000";
+		[-bodyW + 10, bodyW - 10].forEach((xOff, i) => {
+			const move = (i === 0) ? walk : -walk;
+			// Draw pair of legs
+			[0, 5].forEach(z => {
+				ctx.beginPath();
+				ctx.moveTo(xOff + z, 5);
+				ctx.lineTo(xOff + z + (move * 0.5), 25);
+				ctx.stroke();
+				// Hoof
+				ctx.fillStyle = "#1a1a1a";
+				ctx.fillRect(xOff + z + (move * 0.5) - 3, 23, 6, 4);
+			});
+		});
+
+		// 3. BODY (With Spots)
+		ctx.fillStyle = color;
+		ctx.beginPath();
+		ctx.roundRect(-bodyW, -bodyH, bodyW * 2, bodyH * 2, 8);
+		ctx.fill();
+		ctx.stroke();
+
+		// Procedural Spots (Static based on ID so they don't swim)
+		const seed = (e.id || 1);
+		ctx.fillStyle = "#1a1a1a";
+		ctx.save();
+		ctx.clip(); // Keep spots inside the body
+		for (let i = 0; i < 4; i++) {
+			const spotX = ((seed * i * 33) % (bodyW * 2)) - bodyW;
+			const spotY = ((seed * i * 77) % (bodyH * 2)) - bodyH;
+			ctx.beginPath();
+			ctx.arc(spotX, spotY, 8, 0, Math.PI * 2);
+			ctx.fill();
+		}
+		ctx.restore();
+
+		// 4. THE BELL
+		if (cfg.bell) {
+			const ring = Math.sin(now / 180) * 0.2;
+			ctx.save();
+			ctx.translate(-bodyW + 5, 5);
+			ctx.rotate(ring);
+			ctx.fillStyle = "gold";
+			ctx.beginPath();
+			ctx.rect(-4, 0, 8, 10);
+			ctx.fill(); ctx.stroke();
+			// Clapper
+			ctx.fillStyle = "#000";
+			ctx.beginPath(); ctx.arc(0, 10, 2, 0, Math.PI * 2); ctx.fill();
+			ctx.restore();
+		}
+
+		// 5. HEAD
+		const head = cfg.headAnchor || { x: -bodyW - 8, y: -12 };
+		ctx.save();
+		ctx.translate(head.x, head.y);
+		
+		// Ears (Floppy)
+		ctx.fillStyle = color;
+		[-6, 6].forEach(side => {
+			ctx.beginPath();
+			ctx.ellipse(side * 8, -5, 6, 3, side * 0.5, 0, Math.PI * 2);
+			ctx.fill(); ctx.stroke();
+		});
+
+		// Face / Snout
+		ctx.beginPath();
+		ctx.roundRect(-10, -8, 20, 18, 5); // Main head
+		ctx.fill(); ctx.stroke();
+		
+		// Muzzle (Pink nose)
+		ctx.fillStyle = "#ffb6c1";
+		ctx.beginPath();
+		ctx.roundRect(-10, 2, 20, 10, 5);
+		ctx.fill(); ctx.stroke();
+
+		// Eyes
+		ctx.fillStyle = "#000";
+		[-4, 4].forEach(ex => {
+			ctx.beginPath(); ctx.arc(ex, -2, 2, 0, Math.PI * 2); ctx.fill();
+		});
+
+		// Tiny Horns (optional for all cows)
+		ctx.fillStyle = "#eee";
+		[-5, 5].forEach(side => {
+			ctx.beginPath();
+			ctx.moveTo(side * 5, -8);
+			ctx.lineTo(side * 7, -14);
+			ctx.lineTo(side * 3, -8);
+			ctx.fill(); ctx.stroke();
+		});
+
+		ctx.restore();
+		ctx.restore();
+	},
+	cloud: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		const color = cfg.storm ? "#4a4a4a" : "#ffffff";
+		const puffCount = 6;
+		
+		ctx.save();
+		// Gentle drifting motion
+		ctx.translate(Math.sin(time) * 10, Math.cos(time * 0.5) * 5);
+
+		// Draw the fluffy puffs
+		ctx.fillStyle = color;
+		ctx.strokeStyle = cfg.storm ? "#333" : "#ddd";
+		ctx.lineWidth = 2;
+
+		for (let i = 0; i < puffCount; i++) {
+			const angle = (i / puffCount) * Math.PI * 2;
+			const x = Math.cos(angle) * 20;
+			const y = Math.sin(angle) * 10;
+			const size = 15 + Math.sin(time + i) * 2;
+			
+			ctx.beginPath();
+			ctx.arc(x, y, size, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.stroke();
+		}
+
+		// Storm Logic: Lightning
+		if (cfg.storm && Math.random() > 0.98) {
+			ctx.strokeStyle = "#fff700";
+			ctx.lineWidth = 3;
+			ctx.shadowBlur = 15;
+			ctx.shadowColor = "#fff700";
+			ctx.beginPath();
+			ctx.moveTo(0, 10);
+			ctx.lineTo(-10, 30);
+			ctx.lineTo(5, 30);
+			ctx.lineTo(-5, 50);
+			ctx.stroke();
+		}
+		ctx.restore();
+	},
+	gardenGnome: (ctx, e, now, cfg) => {
+		const walk = Math.sin(now / 150) * 5;
+		
+		ctx.save();
+		// Body (Blue Tunic)
+		ctx.fillStyle = "#3498db";
+		ctx.beginPath();
+		ctx.roundRect(-10, -5, 20, 15, 5);
+		ctx.fill(); ctx.stroke();
+
+		// Beard (White and Fluffy)
+		ctx.fillStyle = "#fff";
+		ctx.beginPath();
+		ctx.moveTo(-8, -5);
+		ctx.quadraticCurveTo(0, 15, 8, -5);
+		ctx.fill();
+
+		// Face
+		ctx.fillStyle = "#ffdbac";
+		ctx.beginPath();
+		ctx.arc(0, -8, 7, 0, Math.PI * 2);
+		ctx.fill();
+
+		// Pointy Red Hat
+		ctx.fillStyle = "#e74c3c";
+		ctx.beginPath();
+		ctx.moveTo(-9, -12);
+		ctx.lineTo(0, -30 + walk);
+		ctx.lineTo(9, -12);
+		ctx.fill(); ctx.stroke();
+
+		// Tiny Eyes
+		ctx.fillStyle = "#000";
+		ctx.fillRect(-3, -10, 2, 2);
+		ctx.fillRect(1, -10, 2, 2);
+		ctx.restore();
+	},
+	sun: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		const isAngry = cfg.isAngry; // Set this via your dungeon controller
+		const sunColor = isAngry ? "#ff4500" : "#ffce00";
+		
+		ctx.save();
+		// Pulse effect
+		const scale = 1 + Math.sin(time * 3) * 0.05;
+		ctx.scale(scale, scale);
+
+		// 1. RAYS
+		ctx.strokeStyle = sunColor;
+		ctx.lineWidth = 6;
+		ctx.lineCap = "round";
+		for (let i = 0; i < 12; i++) {
+			const angle = (i / 12) * Math.PI * 2 + (time * 0.5);
+			const len = isAngry ? 50 : 40;
+			ctx.beginPath();
+			ctx.moveTo(Math.cos(angle) * 25, Math.sin(angle) * 25);
+			ctx.lineTo(Math.cos(angle) * len, Math.sin(angle) * len);
+			ctx.stroke();
+		}
+
+		// 2. CORE
+		ctx.fillStyle = sunColor;
+		ctx.shadowBlur = 20;
+		ctx.shadowColor = sunColor;
+		ctx.beginPath();
+		ctx.arc(0, 0, 30, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.shadowBlur = 0;
+
+		// 3. FACE
+		if (isAngry) {
+			// Angered Face: Downward brows and open mouth
+			ctx.strokeStyle = "#000";
+			ctx.lineWidth = 3;
+			// Angry Brows
+			ctx.beginPath(); ctx.moveTo(-15, -15); ctx.lineTo(-5, -8); ctx.stroke();
+			ctx.beginPath(); ctx.moveTo(15, -15); ctx.lineTo(5, -8); ctx.stroke();
+			// Mouth
+			ctx.fillStyle = "#000";
+			ctx.beginPath(); ctx.arc(0, 12, 8, 0, Math.PI, true); ctx.fill();
+		} else {
+			// Cool Face: Sunglasses and Smile
+			ctx.fillStyle = "#000";
+			// Sunglasses
+			ctx.beginPath();
+			ctx.roundRect(-18, -10, 15, 10, 2);
+			ctx.roundRect(3, -10, 15, 10, 2);
+			ctx.fill();
+			ctx.beginPath(); ctx.moveTo(-3, -5); ctx.lineTo(3, -5); ctx.stroke();
+			// Smile
+			ctx.beginPath();
+			ctx.arc(0, 5, 12, 0.2, Math.PI - 0.2);
+			ctx.stroke();
+		}
+		ctx.restore();
+	},
 	custom_path: (ctx, e, now, cfg) => {
 		if (!cfg.pathData) return;
 		ctx.lineCap = "round";
@@ -2723,6 +3078,10 @@ const MONSTER_DB = {
 	"horse": { drawType: "horse", color: "#8b4513", scale: 1.5, bodyW: 25, headAnchor: {x: -25, y: -15}, hpMult: 3.0 },
 	"unicorn": { drawType: "horse", color: "#ffffff", horns: true, scale: 1.5, bodyW: 25, headAnchor: {x: -25, y: -15}, glow: true, glowColor: "#fff0f5", hpMult: 4.0 },
 	"pegasus": { drawType: "horse", color: "#f0f8ff", wings: true, scale: 1.5, bodyW: 25, headAnchor: {x: -25, y: -15}, glow: true, glowColor: "#00ffff", hpMult: 5.0 },
+	// --- COWS ---
+	"calf": { drawType: "cow", color: "#ffffff", bodyW: 15, headAnchor: {x: -18, y: -10}, hpMult: 5.0 },
+	"Cow": { drawType: "cow", color: "#ffffff", utters: true, scale: 1.5, bodyW: 25, headAnchor: {x: -28, y: -15}, hpMult: 5.0 },
+	"dairy_Cow": { drawType: "cow", color: "#ffffff", bell: true, utters: true, scale: 1.6, bodyW: 28, headAnchor: {x: -30, y: -18}, glow: true, glowColor: "#00ffff", hpMult: 8.0 },
     // --- VOID / ABYSSAL ---
     "VoidWalker": { drawType: "stickman", color: "#4b0082", hpMult: 2.0, glow: true },
     "ShadowWraith": { drawType: "wraith", color: "#1a1a1a", glow: true, glowColor: "#4b0082",hpMult: 1.5, bodyW: 15, bodyH: 40 },
@@ -2730,7 +3089,7 @@ const MONSTER_DB = {
     "CosmicHorror": { drawType: "beast", color: "#ff00ff",},
     "StarWraith": { drawType: "wraith", color: "#fff", glow: true, glowColor: "#00d4ff", hpMult: 2.0, bodyW: 12, bodyH: 45 }, 
 	"SeaWraith": { drawType: "wraith", color: "#e0ffff", glow: true, glowColor: "#00ced1", hpMult: 2.0, bodyW: 12, bodyH: 45 }, 
-	"CosmicHorror": { drawType: "horror", color: "#ff00ff", scale: 2.5, legCount: 8, bodyW: 25 },
+	"CosmicHorror": { drawType: "horror", color: "#ff00ff", scale: 1.5, legCount: 8, bodyW: 25 },
 
     // --- WEIRD/MIMICS ---
     "StaffMimic": { drawType: "phalic", color: "#ff69b4", hpMult: 2.0, hasArms: true, armAnchor: {x: 0, y: -30} },
@@ -2739,18 +3098,22 @@ const MONSTER_DB = {
     // --- BOSSES ---
     "DUNGEON_OVERLORD": { drawType: "stickman", scale: 2.5, color: "#f00", hpMult: 8.0, canEquip: true },
     "BROOD_MOTHER": { drawType: "spider", scale: 4.0, color: "#1a1a1a", hpMult: 10, special: "spawn_spiderlings" },
-    "FENRIR_LITE": { drawType: "canine", fuzz: true, scale: 3.5, color: "#000", hpMult: 12, glow: true, headAnchor: {x: -20, y: -5} },
-    "VOID_CORRUPTOR": { drawType: "horror", scale: 4.0, color: "#1a1a1a", glow: true, glowColor: "#4b0082", hpMult: 15, legCount: 12 },
+    "FENRIR_LITE": { drawType: "canine", fuzz: true, scale: 2, color: "#000", hpMult: 12, glow: true, headAnchor: {x: -20, y: -5} },
+    "VOID_CORRUPTOR": { drawType: "horror", scale: 2.0, color: "#1a1a1a", glow: true, glowColor: "#4b0082", hpMult: 15, legCount: 12 },
     "FROST_JOTUN": { drawType: "stickman", scale: 5.0, color: "#fff", hpMult: 18 },
     "MAGMA_CORE": { drawType: "blob", scale: 6.0, color: "#f00", hpMult: 20 },
     "THE_GRAND_MIMIC": { drawType: "phalic", scale: 5.0, color: "#ff69b4", hpMult: 15 },
     "QUEEN_GOSSAMER": { drawType: "spider", scale: 5.0, color: "gold", hpMult: 25 }, // Fixed color string
-    "CERBERUS_JUNIOR": { drawType: "canine", scale: 4.0, color: "#500", hpMult: 20, headAnchor: {x: -15, y: -5} },
-    "VOID_EXARCH": { drawType: "stickman", scale: 6.0, color: "#4b0082", hpMult: 30 },
-    "ASTRAL_TITAN": { drawType: "titan", scale: 5.0, color: "#e0e0e0", glow: true, glowColor: "#00d4ff", hpMult: 40 },
+    "CERBERUS_JUNIOR": { drawType: "canine", scale: 3.0, color: "#500", hpMult: 20, headAnchor: {x: -15, y: -5} },
+    "VOID_EXARCH": { drawType: "stickman", scale: 4.0, color: "#4b0082", hpMult: 30 },
+    "ASTRAL_TITAN": { drawType: "titan", scale: 3.0, color: "#e0e0e0", glow: true, glowColor: "#00d4ff", hpMult: 40 },
     "CHRONOS": { drawType: "stickman", scale: 7.0, color: "#00d4ff", hpMult: 50, canEquip: true},
     "THE_CREATOR": { drawType: "theCreator", scale: 4.0, hpMult: 100 },
 	"defaultCustomMonster": { drawType: "custom_path", scale: 8.5, hpMult: 100 } 
+	
+	"cool cloud": { drawType: "cloud",, hpMult: 100 },
+	"rainy cloud": { drawType: "cloud", raincloud:true, scale: 2, hpMult: 100 },
+	"The_Sun": { drawType: "sun", scale: 4, hpMult: 100 } ,
 };
 // Theme-based tier waves
 const DUNGEON_THEMES = {
@@ -2766,5 +3129,8 @@ const DUNGEON_THEMES = {
     10: { name: "The Void Horizon", mobs: ["VoidDragon", "ShadowWraith"], boss: "VOID_EXARCH" },
     11: { name: "Celestial Spire", mobs: ["StarWraith", "VoidWalker"], boss: "ASTRAL_TITAN" },
     12: { name: "The End Times", mobs: ["CosmicHorror", "DireWolf"], boss: "CHRONOS" },
-    13: { name: "The Final Singularity", mobs: ["VoidDragon", "CosmicHorror", "WolfSpider"], boss: "THE_CREATOR" }
+    13: { name: "The Final Singularity", mobs: ["VoidDragon", "CosmicHorror", "WolfSpider"], boss: "THE_CREATOR" },
+	14: { name: "Cow", mobs: ["calf", "Cow", "WolfSpider"], boss: "dairy_Cow" },
+	14: { name: "Ig its Horses now", mobs: ["pony", "StickmanHunter", "horse"], boss: "pegasus" }
+	15: { name: "Sunny Day", mobs: ["cloud", "unicorn", "gardenGnome"], boss: "Angry_Sun" }
 };

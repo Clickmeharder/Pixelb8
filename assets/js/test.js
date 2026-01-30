@@ -1999,87 +1999,7 @@ function generateRandomLoadout(tier) {
 
     return loadout;
 }
-/* 
-function spawnWave() {
-    enemies = [];
-    const partySize = Object.values(players).filter(p => p.area === "dungeon" && !p.dead).length || 1;
-    const isBossWave = (dungeonWave % 5 === 0);
-    
-    // 1. Update Tier
-    dungeonTier = getTierFromWave(dungeonWave);
 
-    // 2. Select Theme Config
-    const themeKeys = Object.keys(DUNGEON_THEMES).map(Number);
-    const highestThemeDefined = Math.max(...themeKeys);
-    const themeIndex = Math.min(dungeonTier, highestThemeDefined);
-    const currentTheme = DUNGEON_THEMES[themeIndex] || DUNGEON_THEMES[1];
-    
-    const themePool = currentTheme.mobs;
-    const waveSize = Math.floor(2 + (dungeonWave / 2) + (partySize - 1));
-
-    if (!isBossWave) {
-        systemMessage(`--- Wave ${dungeonWave}: ${currentTheme.name} ---`);
-    }
-
-    // 3. Spawn Normal Mobs
-    for (let i = 0; i < waveSize; i++) {
-        let typeName = themePool[Math.floor(Math.random() * themePool.length)];
-        let config = MONSTER_DB[typeName] || MONSTER_DB["Slime"] || { drawType: "blob", hpMult: 1, color: "#fff" };
-
-        // HP Scaling: Base + Wave growth, multiplied by monster toughness and party size
-        let enemyHp = (40 + (dungeonWave * 25)) * (config.hpMult || 1.0) * (1 + (partySize * 0.25));
-
-		enemies.push({ 
-			name: typeName, 
-			area: "dungeon",
-			level: dungeonTier * 5,
-			hp: enemyHp, 
-			maxHp: enemyHp, 
-			x: 500 + (i * 70),
-			y: 530 + (Math.random() * 20), // Slight Y variation for depth
-			dead: false,
-			isEnemy: true,
-			config: config, 
-			color: config.color || "#ff4444",
-			drawType: config.drawType, 
-			scale: config.scale || 1.0,
-			isStickman: config.drawType === "stickman",
-			// REMOVED: stats: { lurkLevel: 0 }, <--- Cleaning this out fixes the drawing bug
-			equipped: config.canEquip ? generateRandomLoadout(dungeonTier) : {}
-		});
-    }
-
-    // 4. Spawn Theme Boss
-    if (isBossWave) {
-        let bossKey = currentTheme.boss || "DUNGEON_OVERLORD";
-        let bossConfig = MONSTER_DB[bossKey] || MONSTER_DB["DUNGEON_OVERLORD"];
-        
-        let bossHp = (500 + (dungeonWave * 150)) * (bossConfig.hpMult || 5.0) * partySize;
-        
-        boss = {
-            name: bossKey.replace(/_/g, " "),
-            area: "dungeon",
-			level: (dungeonTier * 5) + 5, 
-            hp: bossHp,
-            maxHp: bossHp,
-            x: 850, 
-            y: 540,
-            dead: false,
-            isBoss: true,
-            isEnemy: true, // ADD THIS
-            isMonster: true,
-            config: bossConfig,
-            color: bossConfig.color || "#ff0000",
-            scale: bossConfig.scale || 2.0,
-            // ADD THIS: Bosses deserve Tier + 1 gear!
-            equipped: bossConfig.canEquip ? generateRandomLoadout(dungeonTier) : {}
-        };
-        
-        systemMessage(`⚠️ TIER ${dungeonTier} BOSS: ${boss.name} has emerged!`);
-    } else {
-        boss = null;
-    }
-} */
 function spawnWave() {
     enemies = [];
     const partySize = Object.values(players).filter(p => p.area === "dungeon" && !p.dead).length || 1;
@@ -3503,6 +3423,99 @@ function drawCorpse(ctx, p, now) {
 }
 
 //----------
+function handleMobEffects(now) {
+    if (viewArea !== "dungeon" && viewArea !== "lab") return;
+
+    const activeEnemies = enemies.concat(boss || []).filter(e => e && !e.dead);
+    const alivePlayers = Object.values(players).filter(p => p.area === viewArea && !p.dead);
+
+    if (activeEnemies.length === 0) return;
+
+    // We can pre-count clouds once to save time for the Sun logic
+    let cloudCount = 0;
+    
+    activeEnemies.forEach(e => {
+        const type = e.config?.drawType || e.drawType; // Check both just in case
+
+        // --- 1. THE SUN (Angry State) ---
+        if (type === "sun") {
+            // We'll calculate anger AFTER the loop once we have the total cloudCount
+        }
+
+        // --- 2. STORM CLOUDS ---
+        if (type === "cloud" && e.config?.storm) {
+            cloudCount++; // Storm clouds count for the sun too!
+            if (!e.lastZap) e.lastZap = now + (Math.random() * 2000);
+            if (now - e.lastZap > 4000) {
+                if (alivePlayers.length > 0) {
+                    const target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
+                    applyDamage(target, 15 + (dungeonTier * 3));
+                    spawnFloater(target, "⚡ ZAP!", "#fff700");
+                    e.triggerLightning = now + 150; 
+                }
+                e.lastZap = now + (Math.random() * 2000);
+            }
+        } 
+        
+        // --- 3. COOL CLOUDS ---
+        else if (type === "cloud") {
+            cloudCount++;
+        }
+
+        // --- 4. GARDEN GNOMES ---
+        if (type === "gardenGnome") {
+            if (!e.lastPrank || now - e.lastPrank > 8000) {
+                if (alivePlayers.length > 0) {
+                    const target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
+                    const stolen = 5 * dungeonTier;
+                    target.stats.pixels = Math.max(0, target.stats.pixels - stolen);
+                    spawnFloater(target, `💸 -${stolen}px`, "#ff0000");
+                }
+                e.lastPrank = now;
+            }
+        }
+    });
+
+    // Final Sun Logic Pass (Now that we know the final cloudCount)
+    const sun = activeEnemies.find(e => (e.config?.drawType || e.drawType) === "sun");
+    if (sun) {
+        sun.config.isAngry = (cloudCount === 0);
+        if (sun.config.isAngry && alivePlayers.length > 0) {
+            if (!sun.lastEffectTick || now - sun.lastEffectTick > 2000) {
+                alivePlayers.forEach(p => {
+                    applyDamage(p, 5 + (dungeonTier * 2));
+                    spawnFloater(p, "🔥 SUNBURN", "#ff4500");
+                });
+                sun.lastEffectTick = now;
+            }
+        }
+    }
+}
+function drawMobEffects(ctx, now) {
+    // GATE: If the player isn't looking at the area, don't draw anything.
+    if (viewArea !== "dungeon" && viewArea !== "lab") return;
+    
+    const activeEnemies = enemies.concat(boss || []).filter(e => e && !e.dead);
+    if (activeEnemies.length === 0) return;
+
+    // 1. Sun Heatwave
+    const sun = activeEnemies.find(e => (e.config?.drawType || e.drawType) === "sun");
+    if (sun && sun.config?.isAngry) {
+        MONSTER_EFFECTS.heatwave(ctx, now);
+    }
+
+    // 2. Storm Clouds
+    const stormClouds = activeEnemies.filter(e => (e.config?.drawType || e.drawType) === "cloud" && e.config?.storm);
+    if (stormClouds.length > 0) {
+        MONSTER_EFFECTS.storm(ctx, now, { stormClouds });
+    }
+
+    // 3. Gnomes
+    const activeGnomes = activeEnemies.filter(e => (e.config?.drawType || e.drawType) === "gardenGnome");
+    if (activeGnomes.length > 0) {
+        MONSTER_EFFECTS.gnomePrank(ctx, now, { activeGnomes });
+    }
+}
 //-------------------------------------------
 // --- WORKSHOP PRO SYSTEM ---
 // i think we should make it so we can only use creation tool when we are at the lab, and new items and monsters should always start at tier 1, after--
@@ -4163,6 +4176,7 @@ const systemTimers = {
     lastGlobalTick: Date.now(),
     lastEnemyTick: Date.now(),
 	lastAutoSave: Date.now(),
+	lastEffectTick: Date.now(),
     globalInterval: 3000, // 3 seconds (Fishing, etc.)
     enemyInterval: 4000,   // 4 seconds (Enemy Attacks)
     saveInterval: 15000 // 30 seconds
@@ -4186,10 +4200,20 @@ function updateSystemTicks(now) {
         systemTimers.lastGlobalTick = now;
     }
     // 4s Enemy Tick
+	// ---  COMBAT TICK ---
     if (now - systemTimers.lastEnemyTick > systemTimers.enemyInterval) {
+        // Only attack if the player is in the dungeon and it's active
         if (dungeonActive) handleEnemyAttacks();
         systemTimers.lastEnemyTick = now;
     }
+	// -- mob area effect tick ---  
+	if (now - systemTimers.lastEffectTick > systemTimers.effectInterval) {
+		// Logic runs if the dungeon is active, even if we are looking at the Shop
+		if (dungeonActive || viewArea === "lab") {
+			handleMobEffects(now); 
+		}
+		systemTimers.lastEffectTick = now;
+	}
 	// Auto-Save Logic
     if (now - systemTimers.lastAutoSave > systemTimers.saveInterval) {
         // 1. Save all players
@@ -4508,9 +4532,10 @@ function gameLoop() {
     // --- THE DISSOLVE EFFECT ---
     // If a transition is active, we use its alpha. Otherwise, we stay at 1.0 (Solid)
     ctx.globalAlpha = cameraTransition.active ? cameraTransition.alpha : 1.0;
-
+	handleMobEffects(now);
     // --- 3. WORLD RENDERING ---
-    renderScene(); 
+    renderScene();
+	drawMobEffects(ctx, now);
     if (frameCount % 3 === 0) updateUI(); 
     
     if (dungeonActive) {
