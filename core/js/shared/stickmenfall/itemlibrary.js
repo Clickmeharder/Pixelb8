@@ -3671,8 +3671,8 @@ const DUNGEON_THEMES = {
     1: { name: "The Training Grounds", mobs: ["Slime", "StickmanHunter"], boss: "DUNGEON_OVERLORD" },
     2: { name: "The Silken Den", mobs: ["Spiderling", "CaveSpider"], boss: "BROOD_MOTHER" },
     3: { name: "The Howling Woods", mobs: ["StreetDog", "DireWolf"], boss: "FENRIR_LITE" },
-    4: { name: "The Abyssal Breach", mobs: ["VoidWalker",, "StickmanHunter", "ShadowWraith"], boss: "VOID_CORRUPTOR" },
-    5: { name: "The Frozen Tundra", mobs: ["IceSpider",, "StickmanHunter", "FrostWolf"], boss: "FROST_JOTUN" },
+    4: { name: "The Abyssal Breach", mobs: ["VoidWalker", "StickmanHunter", "ShadowWraith"], boss: "VOID_CORRUPTOR" },
+    5: { name: "The Frozen Tundra", mobs: ["IceSpider", "StickmanHunter", "FrostWolf"], boss: "FROST_JOTUN" },
     6: { name: "The Scorched Earth", mobs: ["FireSpider", "FireSlime"], boss: "MAGMA_CORE" },
     7: { name: "The Mimic Pantry", mobs: ["StaffMimic", "PinkWobbler"], boss: "THE_GRAND_MIMIC" },
     8: { name: "Arachnid Overrun", mobs: ["WolfSpider", "FireSpider", "IceSpider"], boss: "QUEEN_GOSSAMER" },
@@ -3685,6 +3685,6 @@ const DUNGEON_THEMES = {
 	15: { name: "Ig its Horses now", mobs: ["pony", "StickmanHunter", "horse"], boss: "pegasus" },
 	16: { name: "Sunny Day", mobs: ["Cloud", "Storm_Cloud", "unicorn", "gardenGnome"], boss: "The_Sun" },
 	17: { name: "The Whispering Wilds", mobs: ["Maple_Treant", "Oak_Treant", "Living_Bush", "Willow_Treant"], boss: "Void_Singularity" },
-	18: { name: "The Place Below", mobs: ["demon", "little_devil", "tortured_soul", "politition"], boss: "Devil" },
-	19: { name: "The Place Below", mobs: ["Cloud", "angel", "winged_Butt"], boss: "God" }
+	18: { name: "The Place Below", mobs: ["demon", "little_devil", "tortured_soul", "politition"], boss: "a Devil" },
+	19: { name: "The Place Above", mobs: ["Cloud", "angel", "winged_Butt"], boss: "a God" }
 };
