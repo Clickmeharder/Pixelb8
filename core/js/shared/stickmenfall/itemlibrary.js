@@ -1848,10 +1848,7 @@ const MONSTER_PARTS = {
 	
 	
 }
-That is a much cleaner way to organize it. By moving these into a MONSTER_EFFECTS object, you keep your drawMobEffects function as a simple "manager" that just calls the specific styles, exactly like how your MONSTER_STYLES works.
 
-1. The Effects Dictionary
-JavaScript
 
 const MONSTER_EFFECTS = {
     heatwave: (ctx, now) => {
