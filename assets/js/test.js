@@ -3510,7 +3510,8 @@ function drawCorpse(ctx, p, now) {
 // growing creatures/bosses/monsters/enemies or npc's should reward a new skill "biology" and manufacturing items should go towards a new engineer skill
 // after reaching a certain biology skill we shuld unlock the ability to "mutate" default enemies,monsters and creatures, or custom ones, or make hybrids giving them a mutation stat
 // if the mutated products are further mutated they get mrore mutated allowing users to create new enemies and creatures or npcs, mutate them, make hybrids or w.e --
-// perpetually make them wierder and unique and engineering shuld have a similar mechanic for items 
+// perpetually make them wierder and unique and engineering shuld have a similar mechanic for items
+
 let isDrawing = false;
 let currentPath = [];
 let anchor = { x: 100, y: 100 };
@@ -3711,6 +3712,49 @@ function openWorkshop(type = "Weapon") {
     document.getElementById('drawing-type').innerText = type;
     document.getElementById('workshop-modal').classList.remove('hidden');
     drawPreview();
+}
+// more lab viewArea stuff
+function spawnLabTest(monsterKey) {
+    const config = MONSTER_DB[monsterKey];
+    if (!config) {
+        console.error("Monster not found in DB:", monsterKey);
+        return;
+    }
+
+    // Lab mobs have fixed high HP so they don't die instantly during tests
+    const testHp = 5000; 
+
+    const testMob = {
+        name: `TEST_${monsterKey}`,
+        area: "lab",
+        level: 99,
+        hp: testHp,
+        maxHp: testHp,
+        x: 400, // Center of lab view
+        y: 530, // Ground level
+        dead: false,
+        isEnemy: true,
+        config: config,
+        color: config.color || "#ffffff",
+        drawType: config.drawType,
+        scale: config.scale || 1.0,
+        isHanging: (monsterKey === "Spiderling"), // Test hanging for spiderlings
+        isStickman: config.drawType === "stickman",
+        equipped: config.canEquip ? generateRandomLoadout(10) : {}
+    };
+
+    // Use a separate array or clear the current one for lab testing
+    enemies = [testMob]; 
+    systemMessage(`🔬 Lab: Testing ${monsterKey}...`);
+}
+function labParade() {
+    const keys = Object.keys(MONSTER_DB);
+    let i = 0;
+    const interval = setInterval(() => {
+        spawnLabTest(keys[i]);
+        i++;
+        if (i >= keys.length) clearInterval(interval);
+    }, 2000); // Swaps monster every 2 seconds
 }
 //===============================================================================
 // ================= DRAWING THE SCENERY AND AREAS ===========
@@ -5524,6 +5568,53 @@ function cmdMingle(p, user, args) {
     }
 }
 
+function cmdLabTestAdmin(p, args) {
+    const subCmd = args[1]?.toLowerCase();
+    const targetKey = args[2]; // e.g., "WolfSpider" or "5"
+
+    // 1. !lab parade
+    if (subCmd === "parade") {
+        viewArea = "lab";
+        labParade();
+        return;
+    }
+
+    // 2. !lab spawnmob [monsterKey] OR !lab spawnmob (random)
+    if (subCmd === "spawnmob") {
+        viewArea = "lab";
+        let mobToSpawn;
+
+        if (targetKey) {
+            // Find specific key (case-insensitive)
+            mobToSpawn = Object.keys(MONSTER_DB).find(k => k.toLowerCase() === targetKey.toLowerCase());
+        } else {
+            // Random mob from the whole DB
+            const keys = Object.keys(MONSTER_DB);
+            mobToSpawn = keys[Math.floor(Math.random() * keys.length)];
+        }
+
+        if (mobToSpawn) {
+            spawnLabTest(mobToSpawn);
+        } else {
+            systemMessage(`❌ Monster "${targetKey}" not found.`);
+        }
+        return;
+    }
+
+    // 3. !lab spawntier [tierNumber]
+    if (subCmd === "spawntier") {
+        viewArea = "lab";
+        const tier = parseInt(targetKey) || 1;
+        const theme = DUNGEON_THEMES[tier] || DUNGEON_THEMES[1];
+        const randomMob = theme.mobs[Math.floor(Math.random() * theme.mobs.length)];
+        
+        systemMessage(`🔬 Lab: Spawning Tier ${tier} (${theme.name})`);
+        spawnLabTest(randomMob);
+        return;
+    }
+
+    systemMessage("Usage: !lab parade | spawnmob [key] | spawntier [num]");
+}
 /* ================= THE COMFY ROUTER ================= */
 /* maybe we can turn this comfyjsonchat into a function that the twitchchat script can call to run ommands from here? */
 const STICKMEN_USER_CMDS = [
@@ -5719,7 +5810,7 @@ function isOnCooldown(p, cmd, seconds) {
 const adminCommands = [
 		"!idlemode", "!showhome", "::home", "!showtown", "::town", "!showgraveyard", "::graveyard", "::gy", "!showpond", "::pond", "!showdungeon", "::dungeon", "!showarena", "::arena", "!spawnmerchant", 
 		"!despawnmerchant", "!resetmerchant", "!give", "!additem", "!scrub",
-		"name", "/name", "color", "/color" // Added these here
+		"name", "/name", "color", "/color", "!labadmin" // Added these here
 ];
 function processGameCommand(user, msg, flags = {}, extra = {}) {
 	const current = getActiveProfile();
@@ -5775,6 +5866,11 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
             addItemToPlayer(target, item);
             return;
         }
+		if (cmd === "!labadmin") {
+			// We pass 'p' (the player object) and 'args' (the split message)
+			cmdLabTestAdmin(p, args);
+			return;
+		}
 		if (cmd === "!idlemode") {
 			stickmenfall_Config.idleViewEnabled = !stickmenfall_Config.idleViewEnabled;
 			systemMessage(`Idle View Mode: ${stickmenfall_Config.idleViewEnabled ? "ON" : "OFF"}`);
