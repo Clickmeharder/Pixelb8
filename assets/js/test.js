@@ -4344,97 +4344,10 @@ function gameLoop() {
     // 6. THE CAMERA FADE (Drawn over EVERYTHING)
     // This stays at the bottom so it can black out the tooltips and names too
     ctx.restore(); // Restore from the shake/translate before drawing the screen-space fade
-    updateAndDrawFade(ctx, canvas.width, canvas.height);
+    updateAndDrawFade(ctx, c.width, c.height);
 
     requestAnimationFrame(gameLoop);
 }
-
-/* let frameCount = 0;
-function gameLoop() {
-    const now = Date.now();
-    frameCount++; 
-    ctx.clearRect(0, 0, c.width, c.height); 
-
-    // 1. Visual Foundation (Shake & Background)
-    ctx.save();
-    if (window.shakeAmount > 0) {
-        let sx = (Math.random() - 0.5) * window.shakeAmount;
-        let sy = (Math.random() - 0.5) * window.shakeAmount;
-        ctx.translate(sx, sy);
-        window.shakeAmount *= 0.9; 
-        if (window.shakeAmount < 0.1) window.shakeAmount = 0;
-    }
-
-    renderScene(); 
-    
-    // 2. UI Sync (Throttle to ~20fps for performance)
-    if (frameCount % 3 === 0) {
-        updateUI(); 
-    }
-    // 3. World Logic (Runs regardless of view)
-    if (dungeonActive) {
-        checkDungeonProgress(); 
-        checkDungeonFailure();  
-    } else {
-        // If raid is off, check if anyone is inside doing training
-        const anyoneInDungeon = Object.values(players).some(p => p.area === "dungeon");
-        if (anyoneInDungeon) updateDungeonIdleTraining();
-    }
-
-    if (typeof arenaActive !== 'undefined' && arenaActive) {
-        checkArenaVictory();
-    }
-
-    // 4. Area-Specific Rendering (Monsters/Beams)
-    if (viewArea === "dungeon") {
-        drawLootBeams(ctx); 
-        if (boss && !boss.dead) drawMonster(ctx, boss);
-        enemies.forEach(e => {
-            if (!e.dead) {
-                if (e.isStickman) drawEnemyStickman(ctx, e);
-                else drawMonster(ctx, e);
-            }
-        });
-    }
-	
-    // 5. Player Processing (Loop once for both logic and drawing)
-    Object.values(players).forEach(p => {
-        // Logic runs for everyone everywhere
-        if (!p.dead) {
-            updatePhysics(p);           
-            updatePlayerStatus(p, now); 
-            
-            if (p.activeTask === "pvp") {
-                handlePvPLogic(p, now);
-            } else {
-                updatePlayerActions(p, now); 
-            }
-        }
-
-        // Draw only if in the current view
-        if (p.area === viewArea) {
-            drawStickman(ctx, p);
-            
-            // Team Underglow for Arena
-            if (viewArea === "arena" && typeof arenaMode !== 'undefined' && arenaMode === "teams" && p.team) {
-                ctx.fillStyle = p.team === "Red" ? "rgba(255,0,0,0.3)" : "rgba(0,0,255,0.3)";
-                ctx.beginPath();
-                ctx.ellipse(p.x, p.y + 5, 20, 10, 0, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-    });
-
-    // 6. Global Overlays & Ticks
-    updateAreaPlayerCounts();
-    updateSystemTicks(now);  
-    drawProjectiles(ctx);    
-    updateSplashText(ctx);   
-    handleTooltips();        
-
-    ctx.restore(); 
-    requestAnimationFrame(gameLoop);
-} */
 /* =================END GAME LOOP ================= */
 /* =================END GAME LOOP ================= */
 
