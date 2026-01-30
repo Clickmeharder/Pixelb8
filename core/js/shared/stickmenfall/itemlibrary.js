@@ -3073,6 +3073,389 @@ const MONSTER_STYLES = {
 		}
 		ctx.restore();
 	},
+	treant: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		// We check e.config.name because that contains "Maple", "Oak", "Dead", etc.
+		const name = (e.config?.name || "").toLowerCase();
+		
+		const wobble = Math.sin(time * 2) * 0.05;
+		const breath = Math.sin(time * 1.5) * 5;
+
+		ctx.save();
+		// Anchor at the base and wobble slightly
+		ctx.translate(0, 0); 
+		ctx.rotate(wobble);
+
+		// --- 1. SET SPECIES COLORS & LOGIC ---
+		let leafColor = "#2d5a27"; // Default Oak Green
+		let trunkColor = "#5d4037"; // Healthy Brown
+		let isWeeping = false;
+		let isDead = name.includes("dead");
+
+		if (name.includes("maple")) leafColor = "#b22222"; // Deep Red
+		if (name.includes("willow")) { leafColor = "#8fbc8f"; isWeeping = true; }
+		if (name.includes("yew")) leafColor = "#1a3316"; // Dark Forest Green
+		
+		if (isDead) {
+			leafColor = "transparent";
+			trunkColor = "#3e2723"; // Rotted Dark Brown
+		}
+
+		// --- 2. TRUNK (The Body) ---
+		ctx.fillStyle = trunkColor;
+		ctx.strokeStyle = "#221100";
+		ctx.lineWidth = 2;
+		
+		ctx.beginPath();
+		ctx.moveTo(-15, 40); // Root base
+		ctx.lineTo(-10, -20); // Top left
+		ctx.lineTo(10, -20);  // Top right
+		ctx.lineTo(15, 40);  // Root base
+		ctx.closePath();
+		ctx.fill();
+		ctx.stroke();
+
+		// Add wood cracks if Dead
+		if (isDead) {
+			ctx.strokeStyle = "rgba(0,0,0,0.3)";
+			ctx.lineWidth = 1;
+			for(let i = 0; i < 3; i++) {
+				ctx.beginPath();
+				ctx.moveTo(-5, 5 + (i * 8));
+				ctx.lineTo(5, 10 + (i * 8));
+				ctx.stroke();
+			}
+		}
+
+		// --- 3. THE FACE (Glowing Eyes) ---
+		// Dead trees have dull gray eyes, living have glowing lime
+		ctx.fillStyle = isDead ? "#555" : "#e6ee9c";
+		if (!isDead) {
+			ctx.shadowBlur = 8;
+			ctx.shadowColor = "#e6ee9c";
+		}
+		
+		ctx.beginPath();
+		ctx.arc(-5, 0, 3, 0, Math.PI * 2);
+		ctx.arc(5, 0, 3, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.shadowBlur = 0; // Reset shadow for rest of draw
+
+		// --- 4. THE CANOPY (Leaves) ---
+		if (leafColor !== "transparent") {
+			ctx.fillStyle = leafColor;
+			
+			if (isWeeping) {
+				// Willow: Long hanging elliptical vines
+				for (let i = -2; i <= 2; i++) {
+					ctx.beginPath();
+					ctx.ellipse(i * 12, 5 + breath, 8, 25, 0, 0, Math.PI * 2);
+					ctx.fill();
+					ctx.strokeStyle = "rgba(0,0,0,0.1)";
+					ctx.stroke();
+				}
+			} else {
+				// Standard: Circular bushy clumps
+				for (let i = 0; i < 5; i++) {
+					const angle = (i / 5) * Math.PI * 2;
+					const ox = Math.cos(angle) * 15;
+					const oy = -30 + Math.sin(angle) * 10 + (breath * 0.5);
+					ctx.beginPath();
+					ctx.arc(ox, oy, 20, 0, Math.PI * 2);
+					ctx.fill();
+				}
+			}
+		}
+
+		// --- 5. BRANCH ARMS ---
+		ctx.strokeStyle = trunkColor;
+		ctx.lineWidth = 4;
+		ctx.lineCap = "round";
+		
+		const armSwing = Math.sin(time * 3) * 8;
+		
+		// Left Arm
+		ctx.beginPath();
+		ctx.moveTo(-10, 10);
+		ctx.lineTo(-25 + armSwing, 20 + (breath * 0.5));
+		ctx.stroke();
+		
+		// Right Arm
+		ctx.beginPath();
+		ctx.moveTo(10, 10);
+		ctx.lineTo(25 - armSwing, 20 + (breath * 0.5));
+		ctx.stroke();
+
+		ctx.restore();
+	},
+	demon: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		const isBoss = e.config?.isBoss;
+		const breathe = Math.sin(time * 2) * 5;
+
+		ctx.save();
+		// Body (Muscular triangle)
+		ctx.fillStyle = isBoss ? "#660000" : "#a30000";
+		ctx.beginPath();
+		ctx.moveTo(-20, 40);
+		ctx.lineTo(0, -30 - breathe);
+		ctx.lineTo(20, 40);
+		ctx.fill();
+
+		// Horns
+		ctx.strokeStyle = "#222";
+		ctx.lineWidth = 4;
+		ctx.beginPath();
+		ctx.moveTo(-10, -25); ctx.quadraticCurveTo(-25, -50, -30, -30); // Left
+		ctx.moveTo(10, -25); ctx.quadraticCurveTo(25, -50, 30, -30);   // Right
+		ctx.stroke();
+
+		// Glowing Eyes
+		ctx.fillStyle = "#fffa00";
+		ctx.shadowBlur = 10; ctx.shadowColor = "orange";
+		ctx.beginPath();
+		ctx.arc(-8, -15, 3, 0, Math.PI * 2);
+		ctx.arc(8, -15, 3, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.restore();
+	},
+
+	imp: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		const hop = Math.abs(Math.sin(time * 5)) * 10;
+		ctx.save();
+		ctx.translate(0, -hop);
+		ctx.fillStyle = "#ff4500";
+		ctx.beginPath(); ctx.arc(0, 20, 15, 0, Math.PI * 2); ctx.fill(); // Round body
+		// Tiny wings
+		ctx.fillStyle = "#333";
+		ctx.beginPath();
+		ctx.moveTo(-10, 15); ctx.lineTo(-25, 5); ctx.lineTo(-10, 25);
+		ctx.moveTo(10, 15); ctx.lineTo(25, 5); ctx.lineTo(10, 25);
+		ctx.fill();
+		ctx.restore();
+	},
+	polititian: (ctx, e, now, cfg) => {
+		const name = (e.config?.name || "").toLowerCase();
+		ctx.save();
+		
+		// Suit Body
+		ctx.fillStyle = "#222";
+		ctx.fillRect(-10, 0, 20, 30);
+		
+		// White Shirt/Tie
+		ctx.fillStyle = "#fff";
+		ctx.fillRect(-2, 0, 4, 10);
+		ctx.fillStyle = "#f00"; // Red tie
+		ctx.fillRect(-1, 2, 2, 8);
+
+		// Head
+		ctx.fillStyle = "#ffdbac";
+		ctx.beginPath(); ctx.arc(0, -10, 10, 0, Math.PI * 2); ctx.fill();
+
+		// Briefcase
+		ctx.fillStyle = "#4e342e";
+		ctx.fillRect(12, 15, 12, 10);
+		ctx.restore();
+	},
+	satan: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		const breathe = Math.sin(time * 1.5) * 8;
+		const wingFlap = Math.sin(time * 4) * 0.2;
+
+		ctx.save();
+		
+		// --- 1. MASSIVE DEMONIC WINGS ---
+		ctx.fillStyle = "#330000";
+		ctx.strokeStyle = "#000";
+		ctx.lineWidth = 2;
+		
+		// Left Wing
+		ctx.save();
+		ctx.translate(-15, -10);
+		ctx.rotate(-wingFlap);
+		ctx.beginPath();
+		ctx.moveTo(0, 0);
+		ctx.quadraticCurveTo(-60, -60, -80, 20);
+		ctx.quadraticCurveTo(-40, 10, 0, 30);
+		ctx.fill(); ctx.stroke();
+		ctx.restore();
+
+		// Right Wing
+		ctx.save();
+		ctx.translate(15, -10);
+		ctx.rotate(wingFlap);
+		ctx.beginPath();
+		ctx.moveTo(0, 0);
+		ctx.quadraticCurveTo(60, -60, 80, 20);
+		ctx.quadraticCurveTo(40, 10, 0, 30);
+		ctx.fill(); ctx.stroke();
+		ctx.restore();
+
+		// --- 2. THE MAIN BODY (The Throne/Torso) ---
+		// Darker, more muscular red
+		ctx.fillStyle = "#660000";
+		ctx.beginPath();
+		ctx.moveTo(-30, 50);
+		ctx.lineTo(-20, -40 - (breathe * 0.5));
+		ctx.lineTo(20, -40 - (breathe * 0.5));
+		ctx.lineTo(30, 50);
+		ctx.closePath();
+		ctx.fill();
+		ctx.stroke();
+
+		// --- 3. THE HEAD & HORNS ---
+		ctx.fillStyle = "#660000";
+		ctx.beginPath();
+		ctx.arc(0, -50 - breathe, 18, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.stroke();
+
+		// Massive Curved Horns
+		ctx.strokeStyle = "#111";
+		ctx.lineWidth = 6;
+		ctx.lineCap = "round";
+		// Left Horn
+		ctx.beginPath();
+		ctx.moveTo(-10, -60 - breathe);
+		ctx.bezierCurveTo(-30, -90, -50, -60, -45, -40);
+		ctx.stroke();
+		// Right Horn
+		ctx.beginPath();
+		ctx.moveTo(10, -60 - breathe);
+		ctx.bezierCurveTo(30, -90, 50, -60, 45, -40);
+		ctx.stroke();
+
+		// --- 4. GLOWING FEATURES ---
+		// Eyes
+		ctx.fillStyle = "#fff700";
+		ctx.shadowBlur = 15;
+		ctx.shadowColor = "red";
+		ctx.beginPath();
+		ctx.arc(-7, -52 - breathe, 4, 0, Math.PI * 2);
+		ctx.arc(7, -52 - breathe, 4, 0, Math.PI * 2);
+		ctx.fill();
+
+		// Burning Chest Core
+		const corePulse = 0.5 + Math.sin(time * 5) * 0.5;
+		ctx.fillStyle = `rgba(255, 69, 0, ${corePulse})`;
+		ctx.beginPath();
+		ctx.moveTo(-10, -20);
+		ctx.lineTo(0, 10);
+		ctx.lineTo(10, -20);
+		ctx.fill();
+
+		ctx.restore();
+	},
+	angel: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		const breathe = Math.sin(time * 2) * 5;
+		const flap = Math.sin(time * 3) * 0.2;
+
+		ctx.save();
+		// 1. Feathered Wings
+		ctx.fillStyle = "#fff";
+		ctx.strokeStyle = "#ddd";
+		[-1, 1].forEach(side => {
+			ctx.save();
+			ctx.scale(side, 1);
+			ctx.rotate(flap);
+			ctx.beginPath();
+			ctx.moveTo(10, 0);
+			ctx.bezierCurveTo(40, -40, 60, 20, 10, 30);
+			ctx.fill(); ctx.stroke();
+			ctx.restore();
+		});
+
+		// 2. Robed Body
+		ctx.fillStyle = "#f5f5f5";
+		ctx.beginPath();
+		ctx.moveTo(-15, 40); ctx.lineTo(0, -20 - breathe); ctx.lineTo(15, 40);
+		ctx.fill();
+
+		// 3. Halo
+		ctx.strokeStyle = "#ffd700";
+		ctx.lineWidth = 3;
+		ctx.shadowBlur = 10; ctx.shadowColor = "gold";
+		ctx.beginPath();
+		ctx.ellipse(0, -45 - breathe, 15, 5, 0, 0, Math.PI * 2);
+		ctx.stroke();
+		
+		ctx.restore();
+	},
+
+	winged_butt: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		const flap = Math.sin(time * 15) * 0.5; // Fast fluttering
+		
+		ctx.save();
+		// Tiny wings
+		ctx.fillStyle = "#fff";
+		[-1, 1].forEach(side => {
+			ctx.save();
+			ctx.scale(side, 1);
+			ctx.rotate(flap);
+			ctx.beginPath(); ctx.arc(15, -10, 10, 0, Math.PI * 2); ctx.fill();
+			ctx.restore();
+		});
+
+		// The... Body
+		ctx.fillStyle = "#ffdbac";
+		ctx.beginPath();
+		ctx.arc(-8, 0, 12, 0, Math.PI * 2); // Left cheek
+		ctx.arc(8, 0, 12, 0, Math.PI * 2);  // Right cheek
+		ctx.fill();
+		ctx.restore();
+	},
+
+	deity: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		// Hovering effect
+		const float = Math.sin(time * 1.5) * 20;
+		
+		ctx.save();
+		ctx.translate(0, float);
+		
+		// 1. The Aura (Expanding circles)
+		const auraScale = 1 + Math.sin(time * 2) * 0.1;
+		ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+		ctx.beginPath();
+		ctx.arc(0, 0, 80 * auraScale, 0, Math.PI * 2);
+		ctx.fill();
+
+		// 2. The Form (A silhouette of pure light)
+		ctx.shadowBlur = 40;
+		ctx.shadowColor = "#fff";
+		ctx.fillStyle = "#fff";
+		
+		// Abstract triangular "Prime" form
+		ctx.beginPath();
+		ctx.moveTo(0, -60);
+		ctx.lineTo(-40, 60);
+		ctx.lineTo(40, 60);
+		ctx.closePath();
+		ctx.fill();
+
+		// 3. The Eye of Providence
+		ctx.fillStyle = "#ffd700";
+		ctx.beginPath();
+		ctx.arc(0, -10, 8, 0, Math.PI * 2);
+		ctx.fill();
+		
+		// 4. Rings of Power
+		ctx.strokeStyle = "rgba(255, 215, 0, 0.5)";
+		ctx.lineWidth = 2;
+		for(let i=0; i<3; i++) {
+			ctx.save();
+			ctx.rotate(time + i);
+			ctx.beginPath();
+			ctx.ellipse(0, 0, 70, 20, 0, 0, Math.PI * 2);
+			ctx.stroke();
+			ctx.restore();
+		}
+
+		ctx.restore();
+	},
 	custom_path: (ctx, e, now, cfg) => {
 		if (!cfg.pathData) return;
 		ctx.lineCap = "round";
@@ -3218,20 +3601,20 @@ const MONSTER_DB = {
     // --- WEIRD/MIMICS ---
     "StaffMimic": { drawType: "phalic", color: "#ff69b4", hpMult: 2.0, hasArms: true, armAnchor: {x: 0, y: -30} },
     "PinkWobbler": { drawType: "phalic", color: "#da70d6", hpMult: 1.5, scale: 0.8 },
-	"Living_Bush": { 
-		drawType: "bushman", 
-		hpMult: 12, 
-		xpValue: 60, 
-		special: "entangle"
-	},
-	"Void_Singularity": { 
-		drawType: "singularity", 
-		isBoss: false, // Can be a mini-boss
-		hpMult: 60, 
-		xpValue: 800,
-		scale: 1.5
-	},
+	"Living_Bush": { drawType: "bushman", hpMult: 12, special: "entangle"},
+	"Maple_Treant": { drawType: "treant", hpMult: 1.5, scale: 0.8, special: "entangle" },
+    "Oak_Treant":   { drawType: "treant", hpMult: 1.8, scale: 0.9, special: "entangle" },
+    "Willow_Treant":{ drawType: "treant", hpMult: 1.4, scale: 0.8, special: "entangle" },
+    "Yew_Treant":   { drawType: "treant", hpMult: 2.0, scale: 1.0, special: "entangle" },
+    "Dead_Treant":  { drawType: "treant", hpMult: 1.2, scale: 0.8 },
+	//hell types
+	"demon": { drawType: "demon", hpMult: 80, special: "burn", scale: 1.2 },
+	"little_devil": { drawType: "imp", hpMult: 25, special: "web_shot", scale: 0.6 },
+	"tortured_soul": { drawType: "wraith", hpMult: 35, special: "freeze", scale: 0.9 },
+	"A_Polititian": { drawType: "polititian", hpMult: 50, special: "entangle", scale: 0.9 },
+	"Devil": { drawType: "satan", isBoss: true, hpMult: 500, special: "burn", scale: 2.2 },
     // --- BOSSES ---
+	"Void_Singularity": { drawType: "singularity", hpMult: 60, scale: 1.5},
     "DUNGEON_OVERLORD": { drawType: "stickman", scale: 2.5, color: "#f00", hpMult: 8.0, canEquip: true },
     "BROOD_MOTHER": { drawType: "spider", scale: 4.0, color: "#1a1a1a", hpMult: 10, special: "spawn_spiderlings" },
     "FENRIR_LITE": { drawType: "canine", fuzz: true, scale: 2, color: "#000", hpMult: 12, glow: true, headAnchor: {x: -20, y: -5} },
@@ -3265,6 +3648,15 @@ const MONSTER_DB = {
 		xpValue: 30,
 		special: "thief"
 	},
+	"angel": { 
+		drawType: "angel", hpMult: 90, special: "burn", scale: 1.1 
+	}, // "Burn" represents "Holy Fire"
+	"winged_Butt": { 
+		drawType: "winged_butt", hpMult: 30, scale: 0.7 
+	},
+	"God": { 
+		drawType: "deity", hpMult: 1000, scale: 3.0 
+	},
 	"THE_SUN": { 
 		drawType: "sun", 
 		isBoss: true,
@@ -3279,17 +3671,20 @@ const DUNGEON_THEMES = {
     1: { name: "The Training Grounds", mobs: ["Slime", "StickmanHunter"], boss: "DUNGEON_OVERLORD" },
     2: { name: "The Silken Den", mobs: ["Spiderling", "CaveSpider"], boss: "BROOD_MOTHER" },
     3: { name: "The Howling Woods", mobs: ["StreetDog", "DireWolf"], boss: "FENRIR_LITE" },
-    4: { name: "The Abyssal Breach", mobs: ["VoidWalker", "ShadowWraith"], boss: "VOID_CORRUPTOR" },
-    5: { name: "The Frozen Tundra", mobs: ["IceSpider", "FrostWolf"], boss: "FROST_JOTUN" },
+    4: { name: "The Abyssal Breach", mobs: ["VoidWalker",, "StickmanHunter", "ShadowWraith"], boss: "VOID_CORRUPTOR" },
+    5: { name: "The Frozen Tundra", mobs: ["IceSpider",, "StickmanHunter", "FrostWolf"], boss: "FROST_JOTUN" },
     6: { name: "The Scorched Earth", mobs: ["FireSpider", "FireSlime"], boss: "MAGMA_CORE" },
     7: { name: "The Mimic Pantry", mobs: ["StaffMimic", "PinkWobbler"], boss: "THE_GRAND_MIMIC" },
     8: { name: "Arachnid Overrun", mobs: ["WolfSpider", "FireSpider", "IceSpider"], boss: "QUEEN_GOSSAMER" },
     9: { name: "The Cursed Kennel", mobs: ["DireWolf", "FrostWolf"], boss: "CERBERUS_JUNIOR" },
     10: { name: "The Void Horizon", mobs: ["VoidDragon", "ShadowWraith"], boss: "VOID_EXARCH" },
-    11: { name: "Celestial Spire", mobs: ["StarWraith", "VoidWalker"], boss: "ASTRAL_TITAN" },
-    12: { name: "The End Times", mobs: ["CosmicHorror", "DireWolf"], boss: "CHRONOS" },
-    13: { name: "The Final Singularity", mobs: ["VoidDragon", "CosmicHorror", "WolfSpider"], boss: "THE_CREATOR" },
-	14: { name: "Cow", mobs: ["calf", "Cow", "WolfSpider"], boss: "dairy_Cow" },
-	14: { name: "Ig its Horses now", mobs: ["pony", "StickmanHunter", "horse"], boss: "pegasus" },
-	15: { name: "Sunny Day", mobs: ["Cloud", "Storm_Cloud", "unicorn", "gardenGnome"], boss: "The_Sun" }
+    11: { name: "Celestial Spire", mobs: ["StarWraith", "StickmanHunter", "VoidWalker"], boss: "ASTRAL_TITAN" },
+    12: { name: "The End Times", mobs: ["CosmicHorror", "StickmanHunter", "DireWolf"], boss: "CHRONOS" },
+    13: { name: "The Creators Realm", mobs: ["VoidDragon", "CosmicHorror",  "StickmanHunter"], boss: "THE_CREATOR" },
+	14: { name: "Cow", mobs: ["calf", "Cow", "Maple_Treant"], boss: "dairy_Cow" },
+	15: { name: "Ig its Horses now", mobs: ["pony", "StickmanHunter", "horse"], boss: "pegasus" },
+	16: { name: "Sunny Day", mobs: ["Cloud", "Storm_Cloud", "unicorn", "gardenGnome"], boss: "The_Sun" },
+	17: { name: "The Whispering Wilds", mobs: ["Maple_Treant", "Oak_Treant", "Living_Bush", "Willow_Treant"], boss: "Void_Singularity" },
+	18: { name: "The Place Below", mobs: ["demon", "little_devil", "tortured_soul", "politition"], boss: "Devil" },
+	19: { name: "The Place Below", mobs: ["Cloud", "angel", "winged_Butt"], boss: "God" }
 };

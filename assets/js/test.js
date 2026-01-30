@@ -1839,7 +1839,45 @@ function getTierFromWave(wave) {
 /**
  * Wave 1-5 = Tier 1, 6-10 = Tier 2, etc.
  */
+function testDungeonTier(p, targetTier, targetWave = null) {
+    if (p.dead) return;
 
+    // 1. Force state reset
+    dungeonActive = true;
+    isDungeonResting = false;
+    enemies = [];
+    boss = null;
+    
+    // 2. Calculate Wave logic
+    // If targetWave is provided (1-5), it offsets the tier. 
+    // Otherwise starts at Wave 1 of that Tier.
+    targetTier = parseInt(targetTier) || 1;
+    let waveOffset = targetWave ? (parseInt(targetWave) - 1) : 0;
+    dungeonWave = ((targetTier - 1) * 5) + 1 + waveOffset;
+    dungeonTier = targetTier;
+
+    // 3. Move Admin to the floor immediately
+    viewArea = "dungeon";
+    p.area = "dungeon";
+    p.y = 540;
+    p.x = 150;
+    p.activeTask = "attacking";
+
+    // Update UI
+    const selector = document.getElementById("view-area-selector");
+    if (selector) selector.value = "dungeon";
+    areaDisplayDiv.textContent = "Wave " + dungeonWave + " (T" + dungeonTier + ")";
+
+    systemMessage(`🛠️ ADMIN TEST: Jumping to Tier ${dungeonTier} Wave ${dungeonWave}`);
+    
+    // 4. Spawn and Organize
+    spawnWave();
+    organizeDungeonRanks();
+    
+    // 5. Kill any pending timers
+    if (dungeonCountdownInterval) { clearInterval(dungeonCountdownInterval); dungeonCountdownInterval = null; }
+    if (dungeonGraceTimer) { clearInterval(dungeonGraceTimer); dungeonGraceTimer = null; }
+}
 function joinDungeonQueue(p) {
     if (p.dead) return;
 
@@ -6082,10 +6120,13 @@ function isOnCooldown(p, cmd, seconds) {
     return false;
 }
 
+
 const adminCommands = [
-		"!idlemode", "!showhome", "::home", "!showtown", "::town", "!showgraveyard", "::graveyard", "::gy", "!showpond", "::pond", "!showdungeon", "::dungeon", "!showarena", "::arena", "!spawnmerchant", 
-		"!despawnmerchant", "!resetmerchant", "!give", "!additem", "!scrub",
-		"name", "/name", "color", "/color", "!labadmin" // Added these here
+    "!idlemode", "!showhome", "::home", "!showtown", "::town", "!showgraveyard", 
+    "::graveyard", "::gy", "!showpond", "::pond", "!showdungeon", "::dungeon", 
+    "!showarena", "::arena", "!spawnmerchant", "!despawnmerchant", "!resetmerchant", 
+    "!give", "!additem", "!scrub", "name", "/name", "color", "/color", 
+    "!labadmin", "!dungeontest", "!nuke" // <--- Added here
 ];
 /* 
 some cmd usage:
@@ -6187,6 +6228,23 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 					systemMessage("Usage: /color #ff0000");
 				}
 			}
+			return;
+		}
+		if (cmd === "!dungeontest") {
+			// Usage: !dungeontest [Tier] [Wave]
+			// args[1] is Tier, args[2] is Wave (based on your .split(" ") logic)
+			let t = args[1] ? args[1].replace(/\D/g, "") : 1;
+			let w = args[2] ? args[2].replace(/\D/g, "") : 1;
+
+			testDungeonTier(p, t, w);
+			return;
+		}
+
+		if (cmd === "!nuke") {
+			enemies.forEach(e => { e.hp = 0; e.dead = true; });
+			if (boss) { boss.hp = 0; boss.dead = true; }
+			systemMessage("☢️ Admin cleared the floor.");
+			checkDungeonProgress(); // Trigger the wave completion logic immediately
 			return;
 		}
     }
