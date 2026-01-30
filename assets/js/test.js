@@ -421,12 +421,10 @@ function handleTooltips() {
     const tt = document.getElementById("tooltip");
     let hover = null;
 
-    // Check Players in view
     Object.values(players).forEach(p => {
         if (p.area === viewArea && Math.hypot(p.x - mouse.x, p.y - mouse.y) < 30) hover = p;
     });
 
-    // Check Enemies/Boss in view
     if (viewArea === "dungeon") {
         enemies.forEach(e => { if(!e.dead && Math.hypot(e.x - mouse.x, e.y - mouse.y) < 20) hover = e; });
         if (boss && !boss.dead && Math.hypot(boss.x - mouse.x, boss.y - mouse.y) < 40) hover = boss;
@@ -436,13 +434,25 @@ function handleTooltips() {
         tt.style.display = "block";
         tt.style.left = (mouse.x + 15) + "px";
         tt.style.top = (mouse.y + 15) + "px";
-        // Replace the hardcoded names with a generic check
-		if (hover.isEnemy || hover.isBoss) {
-			tt.innerHTML = `<b style="color:#ff4444">${hover.name}</b><br>HP: ${Math.floor(hover.hp)}/${Math.floor(hover.maxHp)}`;
-		} else {
-			// It's a player or stickman
-			tt.innerHTML = `<b>${hover.name}</b> [Lv ${hover.stats.combatLevel}]<br>HP: ${Math.floor(hover.hp)}/${Math.floor(hover.maxHp)}<br>Task: ${hover.activeTask || 'Idle'}`;
-		}
+
+        if (hover.isEnemy || hover.isBoss) {
+            tt.innerHTML = `<b style="color:#ff4444">${hover.name}</b><br>HP: ${Math.floor(hover.hp)}/${Math.floor(hover.maxHp)}`;
+        } else {
+            // --- PLAYER TOOLTIP LOGIC ---
+            let statusText = "";
+            let nameStyle = "color: white;";
+
+            if (hover.dead) {
+                // If they've been dead for 10+ minutes, call them a ghost!
+                const isGhost = (Date.now() - hover.deathTime) > (10 * 60 * 1000);
+                statusText = `<b style="color:#ff4444">${isGhost ? 'GHOST' : 'DEAD'}</b>`;
+                nameStyle = "color: #aaaaaa; text-decoration: line-through;";
+            } else {
+                statusText = `HP: ${Math.floor(hover.hp)}/${Math.floor(hover.maxHp)}<br>Task: ${hover.activeTask || 'Idle'}`;
+            }
+
+            tt.innerHTML = `<span style="${nameStyle}"><b>${hover.name}</b></span> [Lv ${hover.stats.combatLevel}]<br>${statusText}`;
+        }
     } else { tt.style.display = "none"; }
 }
 let selectedPlayerForBubble = null;
@@ -469,17 +479,22 @@ c.addEventListener('click', (e) => {
 
 function showContextBubble(p) {
     const bubble = document.getElementById("player-context-bubble");
+    const respawnBtn = document.getElementById('bubble-respawn-btn');
     const rect = c.getBoundingClientRect();
 
     bubble.classList.remove('hidden');
     document.getElementById('bubble-name').textContent = p.name;
 
-    // Position bubble above player's head
-    // We use rect.left/top to handle page scrolling
+    // Only show the Respawn button if the player is actually dead
+    if (p.dead) {
+        respawnBtn.style.display = "inline-block";
+    } else {
+        respawnBtn.style.display = "none";
+    }
+
     bubble.style.left = (rect.left + p.x - (bubble.offsetWidth / 2)) + "px";
     bubble.style.top = (rect.top + p.y - 100) + "px";
 }
-
 // Wire up the bubble buttons
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('bubble-bag-btn').addEventListener('click', () => {
@@ -5898,14 +5913,6 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "!sell")       { cmdSell(p, user, args); return; }
     if (cmd === "!bal" || cmd === "!pixels") { cmdBalance(p); return; }
     if (cmd === "!listdances") { cmdListDances(p); return; }
-
-	
-}
-
-// 1. The Regular Chat Handler
-ComfyJS.onChat = (user, msg, color, flags, extra) => {
-    if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
-    processGameCommand(user, msg, flags, extra);
 	const isAttemptedCommand = msg.startsWith("!") || msg.startsWith(")") || msg.startsWith(":") || msg.startsWith("/");
 
     // Also check if it's a short, normal message.
@@ -5918,6 +5925,13 @@ ComfyJS.onChat = (user, msg, color, flags, extra) => {
 			p.chatTime = Date.now();
 		}
 	}
+}
+
+// 1. The Regular Chat Handler
+ComfyJS.onChat = (user, msg, color, flags, extra) => {
+    if (!userColors[user]) userColors[user] = extra.userColor || "orangered";
+    processGameCommand(user, msg, flags, extra);
+
 };
 
 // 2. The Command Handler (Matches messages starting with !)
