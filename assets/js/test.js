@@ -2,7 +2,7 @@
 // offshoot game called stickmenpo - samurai ninja game?
 const stickmenfall_Config = {
     // ... your other config settings
-    idleViewInterval: 6 * 60 * 1000, // 6 minutes in ms
+    idleViewInterval: 3 * 60 * 1000, // 6 minutes in ms
     idleViewEnabled: false          // Off by default
 };
 let cameraTransition = {
