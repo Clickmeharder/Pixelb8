@@ -3346,58 +3346,105 @@ function drawCorpse(ctx, p, now) {
 }
  */
 // corpse turn to Ghost
-function drawCorpse(ctx, p, now) {
-    const timeSinceDeath = now - p.deathTime;
-    const progress = Math.min(1, timeSinceDeath / 800);
-    const tenMinutes = 10 * 60 * 1000; // 600,000ms
+That is a fantastic idea. Cleaning up drawCorpse makes the code much easier to maintain, especially as you add more visual "stages" like flies and gravestones.
 
-    ctx.save();
-    
-    // 1. Blood Pool (Stays on the ground)
-    ctx.fillStyle = "rgba(180, 0, 0, 0.6)";
-    const poolSize = progress * 25;
-    ctx.beginPath();
-    ctx.ellipse(p.x, p.y + 25, poolSize, poolSize / 3, 0, 0, Math.PI * 2);
-    ctx.fill();
+We can break these into sub-functions. This keeps the main drawCorpse as a "manager" that just checks the time and decides which sub-function to run.
 
-    // 2. Physics/Rotation for the physical body
+The Refactored Logic
+JavaScript
+
+// --- Sub-function: The Fresh/Decaying Body ---
+function drawDecayingBody(ctx, p, now, progress) {
     ctx.save();
-    ctx.translate(p.x, p.y + (progress * 20));
+    ctx.translate(0, progress * 20);
     let rot = p.deathStyle === "faceplant" ? (Math.PI / 2) * progress : (-Math.PI / 2) * progress;
     ctx.rotate(rot);
 
+    // Blueish-Grey decay color
+    const decayColor = "#708090"; 
+    const corpseActor = { ...p, x: 0, y: 0, color: decayColor, emote: "ko" };
+    
     const deadAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
     const deadLimbs = { 
         leftHand: { x: -18, y: 0 }, rightHand: { x: 18, y: 0 }, 
         leftFoot: { x: -10, y: 25 }, rightFoot: { x: 10, y: 25 } 
     };
 
-    const corpseActor = { ...p, x: 0, y: 0, emote: "ko" }; 
     BODY_PARTS["stick"].head(ctx, deadAnchors.headX, deadAnchors.headY, corpseActor);
     drawStickmanBody(ctx, corpseActor, deadAnchors, deadLimbs);
-    renderEquipmentLayer(ctx, corpseActor, now, deadAnchors, deadLimbs.leftHand, deadLimbs.rightHand, deadLimbs.leftFoot, deadLimbs.rightFoot);
+    
+    // DRAW FLIES (Tiny black dots buzzing)
+    ctx.fillStyle = "#000";
+    for(let i = 0; i < 3; i++) {
+        const flyX = Math.sin(now / 100 + (i * 10)) * 15;
+        const flyY = Math.cos(now / 150 + (i * 20)) * 10 - 20;
+        ctx.fillRect(flyX, flyY, 2, 2);
+    }
     ctx.restore();
+}
 
-    // --- 3. THE GHOST PHASE ---
-    if (timeSinceDeath > tenMinutes) {
+// --- Sub-function: The Gravestone ---
+function drawGravestone(ctx, name) {
+    ctx.save();
+    ctx.translate(0, 10);
+    
+    // Draw Stone
+    ctx.fillStyle = "#888";
+    ctx.strokeStyle = "#444";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(-15, -30, 30, 40, [10, 10, 0, 0]);
+    ctx.fill();
+    ctx.stroke();
+
+    // Draw "R.I.P" and Player Name
+    ctx.fillStyle = "#333";
+    ctx.font = "bold 8px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("R.I.P", 0, -18);
+    ctx.font = "6px Arial";
+    ctx.fillText(name.substring(0, 8), 0, -8);
+    ctx.restore();
+}
+
+// --- MAIN MANAGER FUNCTION ---
+function drawCorpse(ctx, p, now) {
+    const timeSinceDeath = now - p.deathTime;
+    const progress = Math.min(1, timeSinceDeath / 800);
+    const fiveMin = 5 * 60 * 1000;
+    const tenMin = 10 * 60 * 1000;
+
+    ctx.save();
+    
+    // 1. Blood Pool (Always underneath)
+    ctx.fillStyle = "rgba(180, 0, 0, 0.6)";
+    const poolSize = progress * 25;
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y + 25, poolSize, poolSize / 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.translate(p.x, p.y);
+
+    // 2. Decide Stage
+    if (timeSinceDeath < fiveMin) {
+        drawDecayingBody(ctx, p, now, progress);
+    } else if (timeSinceDeath < tenMin) {
+        drawGravestone(ctx, p.name);
+    } else {
+        // Draw the stone AND the ghost
+        drawGravestone(ctx, p.name);
+        
+        const ghostTime = timeSinceDeath - tenMin;
+        const floatY = Math.sin(ghostTime / 1000) * 10 - 40;
+        const ghostAlpha = Math.min(0.4, (ghostTime / 5000));
+        
         ctx.save();
-        // Calculate ghost floating
-        const ghostTime = timeSinceDeath - tenMinutes;
-        const floatY = Math.sin(ghostTime / 1000) * 10 - 40; // Bobbing up and down
-        const ghostAlpha = Math.min(0.4, (ghostTime / 5000)); // Fade in slowly over 5 seconds
-        
         ctx.globalAlpha = ghostAlpha;
-        ctx.translate(p.x, p.y + floatY);
+        ctx.translate(0, floatY);
         
-        // Ghostly appearance: White/Blue tint
         const ghostActor = { ...p, x: 0, y: 0, color: "#e0f7fa", emote: "neutral" };
-        
-        // Draw a simplified "floating" pose
         const ghostAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
-        const ghostLimbs = { 
-            leftHand: { x: -15, y: -5 }, rightHand: { x: 15, y: -5 }, 
-            leftFoot: { x: -5, y: 20 }, rightFoot: { x: 5, y: 20 } 
-        };
+        const ghostLimbs = { leftHand: { x: -15, y: -5 }, rightHand: { x: 15, y: -5 }, leftFoot: { x: -5, y: 20 }, rightFoot: { x: 5, y: 20 } };
 
         BODY_PARTS["stick"].head(ctx, ghostAnchors.headX, ghostAnchors.headY, ghostActor);
         drawStickmanBody(ctx, ghostActor, ghostAnchors, ghostLimbs);
