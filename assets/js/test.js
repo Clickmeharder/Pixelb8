@@ -4348,7 +4348,7 @@ function gameLoop() {
 
     requestAnimationFrame(gameLoop);
 }
-}
+
 /* let frameCount = 0;
 function gameLoop() {
     const now = Date.now();
