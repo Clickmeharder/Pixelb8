@@ -2975,47 +2975,6 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
     style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y, limbs.rightKnee);
 }
 // --- MAIN FUNCTIONS ---
-/* function drawStickman(ctx, p) {
-    if (p.area !== viewArea || p.isHidden) return;
-    const now = Date.now();
-    if (p.dead) return drawCorpse(ctx, p, now);
-	ctx.save(); 
-
-    if (p.activeTask === "lurking") {
-        // Apply transparency to everything drawn until ctx.restore()
-        let alpha = Math.max(0.1, 0.7 - (p.stats.lurkLevel * 0.015));
-        ctx.globalAlpha = alpha + (Math.sin(now / 500) * 0.05);
-    }
-    const anim = getAnimationState(p, now);
-    const anchors = getAnchorPoints(p, anim);
-    const limbs = getLimbPositions(p, anchors, anim, now);
-
-	// Everything inside here (Cape, Body, Items) will now be transparent!
-    if (p.stats.equippedCape) drawCapeItem(ctx, p, anchors);
-	
-
-	
-    drawStickmanBody(ctx, p, anchors, limbs);
-    renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
-// --- HP & NAME ---
-    ctx.textAlign = "center";
-    
-    // 1. Draw Name (stays at p.y + 40)
-    ctx.fillStyle = "#fff"; 
-    ctx.font = "12px monospace"; 
-    ctx.fillText(p.name, p.x, p.y + 40);
-
-    // 2. Draw HP Bar Background (Moved to p.y + 48)
-    ctx.fillStyle = "#444"; 
-    ctx.fillRect(p.x - 20, p.y + 48, 40, 4);
-
-    // 3. Draw HP Bar Fill (Moved to p.y + 48)
-    ctx.fillStyle = "#0f0"; 
-    ctx.fillRect(p.x - 20, p.y + 48, 40 * (p.hp / p.maxHp), 4);
-
-    ctx.restore(); // Stop being transparent
-}
- */
 function drawStickman(ctx, p) {
     if (p.area !== viewArea || p.isHidden) return;
     const now = Date.now();
@@ -3096,46 +3055,7 @@ function drawStickman(ctx, p) {
         drawChatBubble(ctx, p, p.x, p.y + anim.bodyY, p.chatMessage);
     }
 }
-/* function drawEnemyStickman(ctx, e) {
-    if (e.area !== viewArea || e.dead) return;
-    const now = Date.now();
 
-    const anim = getAnimationState(e, now); 
-    const anchors = getAnchorPoints(e, anim); 
-    const limbs = getLimbPositions(e, anchors, anim, now);
-
-    ctx.save();
-    ctx.translate(e.x, 0); 
-    ctx.scale(-1, 1); 
-    ctx.translate(-e.x, 0); 
-
-    ctx.strokeStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444"; 
-    ctx.lineWidth = 3; 
-    e.isEnemy = true; 
-
-    drawStickmanBody(ctx, e, anchors, limbs);
-    renderEquipmentLayer(ctx, e, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
-
-    ctx.restore();
-
-    // --- UI (Name & Conditional HP) ---
-    ctx.textAlign = "center";
-    ctx.font = "bold 12px monospace";
-    
-    // Enemy Level Display
-    const enemyLvl = e.level || e.stats?.combatLevel || "??";
-    ctx.fillStyle = (e.name === "VoidWalker") ? "#a020f0" : "#ff4444";
-    ctx.fillText(`${e.name} [Lvl ${enemyLvl}]`, e.x, e.y + 40);
-
-    // Enemy HP Bar: Only if damaged
-    if (e.hp < e.maxHp) {
-        ctx.fillStyle = "rgba(40, 40, 40, 0.9)"; 
-        ctx.fillRect(e.x - 20, e.y + 48, 40, 4);
-        ctx.fillStyle = "#f00"; // Enemies always have red HP bars
-        ctx.fillRect(e.x - 20, e.y + 48, 40 * (e.hp / e.maxHp), 4);
-    }
-}
- */
 function drawEnemyStickman(ctx, e) {
     if (e.area !== viewArea || e.dead) return;
     const now = Date.now();
@@ -3346,7 +3266,7 @@ function drawCorpse(ctx, p, now) {
 }
  */
 // corpse turn to Ghost
-// --- Sub-function: The Fresh/Decaying Body ---
+/* // --- Sub-function: The Fresh/Decaying Body ---
 function drawDecayingBody(ctx, p, now, progress) {
     ctx.save();
     ctx.translate(0, progress * 20);
@@ -3375,29 +3295,7 @@ function drawDecayingBody(ctx, p, now, progress) {
     }
     ctx.restore();
 }
-// --- Sub-function: The Gravestone ---
-function drawGravestone(ctx, name) {
-    ctx.save();
-    ctx.translate(0, 10);
-    
-    // Draw Stone
-    ctx.fillStyle = "#888";
-    ctx.strokeStyle = "#444";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(-15, -30, 30, 40, [10, 10, 0, 0]);
-    ctx.fill();
-    ctx.stroke();
 
-    // Draw "R.I.P" and Player Name
-    ctx.fillStyle = "#333";
-    ctx.font = "bold 8px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("R.I.P", 0, -18);
-    ctx.font = "6px Arial";
-    ctx.fillText(name.substring(0, 8), 0, -8);
-    ctx.restore();
-}
 // --- MAIN MANAGER FUNCTION ---
 function drawCorpse(ctx, p, now) {
     const timeSinceDeath = now - p.deathTime;
@@ -3444,58 +3342,121 @@ function drawCorpse(ctx, p, now) {
     
     ctx.restore();
 }
-
-//-- unused draw functions
-function drawEnemyArmor(ctx, e, anchors, item) {
-    if (!item) return;
-    const headX = anchors.headX;
-    const hipX = e.x + (anchors.lean * 5);
-
+ */
+// Updated Body Helper to support "Fresh" vs "Rotting"
+function drawDecayingBody(ctx, p, now, progress, isRotting) {
     ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(headX - 7, e.y - 18 + anchors.bodyY); 
-    ctx.lineTo(headX + 7, e.y - 18 + anchors.bodyY); 
-    ctx.lineTo(hipX + 7, e.y + 8 + anchors.bodyY);    
-    ctx.lineTo(hipX - 7, e.y + 8 + anchors.bodyY);    
-    ctx.closePath();
-    ctx.fillStyle = item.color || "#777";
-    ctx.globalAlpha = 0.9; 
-    ctx.fill();
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.restore();
-}
-function drawEnemyPants(ctx, e, anchors, leftFoot, rightFoot, item) {
-    if (!item) return;
-    ctx.save();
-    ctx.strokeStyle = item.color || "#333";
-    ctx.lineWidth = 5; 
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(e.x, anchors.hipY);
-    ctx.lineTo(leftFoot.x, leftFoot.y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(e.x, anchors.hipY);
-    ctx.lineTo(rightFoot.x, rightFoot.y);
-    ctx.stroke();
-    ctx.restore();
-}
-function drawEnemyHeadgear(ctx, e, anchors, item) {
-    if (!item) return;
-    // Determine if it's hair or a helmet based on the item type
-    const style = item.style || (item.type === "hair" ? "hair" : "helmet");
-    const hX = e.x + (anchors.lean * 20);
-    const hY = e.y - 32 + anchors.bodyY;
+    ctx.translate(0, progress * 20);
+    let rot = p.deathStyle === "faceplant" ? (Math.PI / 2) * progress : (-Math.PI / 2) * progress;
+    ctx.rotate(rot);
+
+    // Use player color if fresh, Slate Grey if rotting
+    const displayColor = isRotting ? "#708090" : (p.color || "#ff4444");
+    const corpseActor = { ...p, x: 0, y: 0, color: displayColor, emote: "ko" };
     
-    ctx.save();
-    // Use your existing HAT_STYLES library
-    const drawFn = HAT_STYLES[style] || HAT_STYLES["hair"];
-    drawFn(ctx, hX, hY, item.color || "#444");
+    const deadAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
+    const deadLimbs = { 
+        leftHand: { x: -18, y: 0 }, rightHand: { x: 18, y: 0 }, 
+        leftFoot: { x: -10, y: 25 }, rightFoot: { x: 10, y: 25 } 
+    };
+
+    BODY_PARTS["stick"].head(ctx, deadAnchors.headX, deadAnchors.headY, corpseActor);
+    drawStickmanBody(ctx, corpseActor, deadAnchors, deadLimbs);
+    
+    // Only draw flies if rotting
+    if (isRotting) {
+        ctx.fillStyle = "#000";
+        for(let i = 0; i < 4; i++) {
+            const flyX = Math.sin(now / 100 + (i * 15)) * 18;
+            const flyY = Math.cos(now / 150 + (i * 25)) * 12 - 20;
+            ctx.fillRect(flyX, flyY, 2, 2);
+        }
+    }
     ctx.restore();
 }
+// --- Sub-function: The Gravestone ---
+function drawGravestone(ctx, name) {
+    ctx.save();
+    ctx.translate(0, 10);
+    
+    // Draw Stone
+    ctx.fillStyle = "#888";
+    ctx.strokeStyle = "#444";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(-15, -30, 30, 40, [10, 10, 0, 0]);
+    ctx.fill();
+    ctx.stroke();
 
+    // Draw "R.I.P" and Player Name
+    ctx.fillStyle = "#333";
+    ctx.font = "bold 8px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("R.I.P", 0, -18);
+    ctx.font = "6px Arial";
+    ctx.fillText(name.substring(0, 8), 0, -8);
+    ctx.restore();
+}
+function drawCorpse(ctx, p, now) {
+    const timeSinceDeath = now - p.deathTime;
+    const progress = Math.min(1, timeSinceDeath / 800);
+    
+    // Timelines (in milliseconds)
+    const stage1_Decay = 5 * 60 * 1000;  // 5 mins
+    const stage2_Grave = 10 * 60 * 1000; // 10 mins
+    const stage3_Ghost = 15 * 60 * 1000; // 15 mins
+
+    ctx.save();
+    
+    // --- 1. THE GROUND LAYER (Blood/Dirt) ---
+    let groundColor = "rgba(180, 0, 0, 0.6)"; // Fresh Red
+    if (timeSinceDeath > stage1_Decay) groundColor = "rgba(80, 0, 0, 0.8)"; // Dark Maroon
+    if (timeSinceDeath > stage2_Grave) groundColor = "rgba(101, 67, 33, 0.9)"; // Dirt Brown
+    
+    ctx.fillStyle = groundColor;
+    const poolSize = progress * 25;
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y + 25, poolSize, poolSize / 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.translate(p.x, p.y);
+
+    // --- 2. DECIDE VISUAL STAGE ---
+    
+    if (timeSinceDeath < stage1_Decay) {
+        // STAGE 0-5m: Fresh Corpse (Original Color)
+        drawDecayingBody(ctx, p, now, progress, false);
+    } 
+    else if (timeSinceDeath < stage2_Grave) {
+        // STAGE 5-10m: Decaying (Blue/Grey + Flies)
+        drawDecayingBody(ctx, p, now, progress, true);
+    } 
+    else {
+        // STAGE 10-20m: Gravestone
+        drawGravestone(ctx, p.name);
+        
+        // STAGE 15-20m: Ghost starts rising
+        if (timeSinceDeath > stage3_Ghost) {
+            const ghostTime = timeSinceDeath - stage3_Ghost;
+            const floatY = Math.sin(ghostTime / 1000) * 10 - 40;
+            const ghostAlpha = Math.min(0.4, (ghostTime / 5000));
+            
+            ctx.save();
+            ctx.globalAlpha = ghostAlpha;
+            ctx.translate(0, floatY);
+            
+            const ghostActor = { ...p, x: 0, y: 0, color: "#e0f7fa", emote: "neutral" };
+            const ghostAnchors = { headX: 0, headY: -30, shoulderY: -15, hipY: 10, lean: 0, bodyY: 0 };
+            const ghostLimbs = { leftHand: { x: -15, y: -5 }, rightHand: { x: 15, y: -5 }, leftFoot: { x: -5, y: 20 }, rightFoot: { x: 5, y: 20 } };
+
+            BODY_PARTS["stick"].head(ctx, ghostAnchors.headX, ghostAnchors.headY, ghostActor);
+            drawStickmanBody(ctx, ghostActor, ghostAnchors, ghostLimbs);
+            ctx.restore();
+        }
+    }
+    
+    ctx.restore();
+}
 //----------
 //-------------------------------------------
 // --- WORKSHOP PRO SYSTEM ---
