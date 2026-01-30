@@ -3763,7 +3763,7 @@ function labParade() {
         spawnLabTest(keys[i]);
         i++;
         if (i >= keys.length) clearInterval(interval);
-    }, 2000); // Swaps monster every 2 seconds
+    }, 10000); // Swaps monster every 10 seconds
 }
 //===============================================================================
 // ================= DRAWING THE SCENERY AND AREAS ===========

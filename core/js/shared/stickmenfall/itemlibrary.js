@@ -3108,11 +3108,34 @@ const MONSTER_DB = {
     "ASTRAL_TITAN": { drawType: "titan", scale: 3.0, color: "#e0e0e0", glow: true, glowColor: "#00d4ff", hpMult: 40 },
     "CHRONOS": { drawType: "stickman", scale: 7.0, color: "#00d4ff", hpMult: 50, canEquip: true},
     "THE_CREATOR": { drawType: "theCreator", scale: 4.0, hpMult: 100 },
-	"defaultCustomMonster": { drawType: "custom_path", scale: 8.5, hpMult: 100 } 
-	
-	"cool cloud": { drawType: "cloud",, hpMult: 100 },
-	"rainy cloud": { drawType: "cloud", raincloud:true, scale: 2, hpMult: 100 },
-	"The_Sun": { drawType: "sun", scale: 4, hpMult: 100 } ,
+	"defaultCustomMonster": { drawType: "custom_path", scale: 8.5, hpMult: 100 }, 
+	"Cloud": { 
+			drawType: "cloud", 
+			hpMult: 8, 
+			xpValue: 20,
+			special: "float" // Purely for fluff
+		},
+	"Storm_Cloud": { 
+		drawType: "cloud", 
+		storm: true, 
+		hpMult: 15, 
+		xpValue: 45,
+		special: "lightning" 
+	},
+	"Garden_Gnome": {
+		drawType: "gardenGnome",
+		hpMult: 5,
+		xpValue: 30,
+		special: "thief"
+	},
+	"THE_SUN": { 
+		drawType: "sun", 
+		isBoss: true,
+		scale: 4, 
+		hpMult: 150,
+		xpValue: 5000,
+		isAngry: false // Default state
+	}
 };
 // Theme-based tier waves
 const DUNGEON_THEMES = {
@@ -3130,6 +3153,6 @@ const DUNGEON_THEMES = {
     12: { name: "The End Times", mobs: ["CosmicHorror", "DireWolf"], boss: "CHRONOS" },
     13: { name: "The Final Singularity", mobs: ["VoidDragon", "CosmicHorror", "WolfSpider"], boss: "THE_CREATOR" },
 	14: { name: "Cow", mobs: ["calf", "Cow", "WolfSpider"], boss: "dairy_Cow" },
-	14: { name: "Ig its Horses now", mobs: ["pony", "StickmanHunter", "horse"], boss: "pegasus" }
-	15: { name: "Sunny Day", mobs: ["cloud", "unicorn", "gardenGnome"], boss: "Angry_Sun" }
+	14: { name: "Ig its Horses now", mobs: ["pony", "StickmanHunter", "horse"], boss: "pegasus" },
+	15: { name: "Sunny Day", mobs: ["Cloud", "Storm_Cloud", "unicorn", "gardenGnome"], boss: "The_Sun" }
 };
