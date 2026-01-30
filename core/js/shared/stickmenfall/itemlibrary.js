@@ -3607,6 +3607,7 @@ const MONSTER_DB = {
     "Slime": { drawType: "blob", color: "#4caf50", hpMult: 1.0, bodyW: 25, bodyH: 20 },
     "FireSlime": { drawType: "blob", color: "#ff4500", hpMult: 1.2, glow: true, glowColor: "#ff0" },
     "StickmanHunter": { drawType: "stickman", hpMult: 1.2, canEquip: true },
+	"Stickman_Elite": { drawType: "stickman", hpMult: 1.5, canEquip: true },
 	"somehing_else": { drawType: "beast", scale: 1.0, color: "#000", hpMult: 15, legCount: 4 },
     // --- SPIDERS ---
     "Spiderling": { drawType: "spider", scale: 0.5, color: "#555", hpMult: 0.5 },
@@ -3712,7 +3713,7 @@ const DUNGEON_THEMES = {
     3: { name: "The Howling Woods", mobs: ["StreetDog", "DireWolf"], boss: "FENRIR_LITE" },
     4: { name: "The Abyssal Breach", mobs: ["VoidWalker", "StickmanHunter", "ShadowWraith"], boss: "VOID_CORRUPTOR" },
     5: { name: "The Frozen Tundra", mobs: ["IceSpider", "StickmanHunter", "FrostWolf"], boss: "FROST_JOTUN" },
-    6: { name: "The Scorched Earth", mobs: ["FireSpider", "FireSlime"], boss: "MAGMA_CORE" },
+    6: { name: "The Scorched Earth", mobs: ["FireSpider", "Stickman_Elite", "FireSlime"], boss: "MAGMA_CORE" },
     7: { name: "The Mimic Pantry", mobs: ["StaffMimic", "PinkWobbler"], boss: "THE_GRAND_MIMIC" },
     8: { name: "Arachnid Overrun", mobs: ["WolfSpider", "FireSpider", "IceSpider"], boss: "QUEEN_GOSSAMER" },
     9: { name: "The Cursed Kennel", mobs: ["DireWolf", "FrostWolf"], boss: "CERBERUS_JUNIOR" },
