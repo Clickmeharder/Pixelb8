@@ -2450,7 +2450,7 @@ const MONSTER_STYLES = {
 		const breathe = Math.sin(now / 300) * 2;
 		const hover = cfg.wings ? Math.sin(now / 200) * 10 : 0; // Pegasus hovers
 		const bodyW = cfg.bodyW || 25;
-		const bodyH = cfg.bodyH || 15;
+		const bodyH = cfg.bodyH || 10;
 		const color = e.color || "#8b4513";
 
 		ctx.save();
@@ -2541,19 +2541,43 @@ const MONSTER_STYLES = {
 		ctx.ellipse(-10, 4, 8, 5, -0.2, 0, Math.PI * 2);
 		ctx.fill(); ctx.stroke();
 
-		// Horn (Unicorn)
+		// 6. HORN (Improved Spiral Unicorn Horn)
 		if (cfg.horns) {
 			ctx.save();
-			ctx.fillStyle = "#fff";
+			// Move to the top of the head/forehead
+			ctx.translate(-2, -8); 
+			ctx.rotate(-0.3); // Angle it forward slightly
+
 			if (cfg.glow) {
-				ctx.shadowBlur = 15;
-				ctx.shadowColor = "gold";
+				ctx.shadowBlur = 20;
+				ctx.shadowColor = cfg.glowColor || "gold";
 			}
+
+			const hornHeight = 35; // Taller and pointier
+			const hornWidth = 5;
+
+			// Draw the main horn silhouette
+			ctx.fillStyle = "#fff";
 			ctx.beginPath();
-			ctx.moveTo(0, -5);
-			ctx.lineTo(-3, -25);
-			ctx.lineTo(3, -5);
-			ctx.fill(); ctx.stroke();
+			ctx.moveTo(-hornWidth/2, 0);
+			ctx.lineTo(0, -hornHeight); // The Point
+			ctx.lineTo(hornWidth/2, 0);
+			ctx.closePath();
+			ctx.fill();
+			ctx.stroke();
+
+			// Draw the spiral ridges
+			ctx.strokeStyle = "rgba(0,0,0,0.2)";
+			ctx.lineWidth = 1;
+			for (let i = 1; i < 6; i++) {
+				const h = (i / 6) * hornHeight;
+				const w = hornWidth * (1 - i/6); // Tapers with height
+				ctx.beginPath();
+				// Diagonal lines to create the spiral effect
+				ctx.moveTo(-w/2, -h);
+				ctx.lineTo(w/2, -h + 3);
+				ctx.stroke();
+			}
 			ctx.restore();
 		}
 
