@@ -2578,7 +2578,7 @@ const MONSTER_DB = {
     "CERBERUS_JUNIOR": { drawType: "canine", scale: 4.0, color: "#500", hpMult: 20, headAnchor: {x: -15, y: -5} },
     "VOID_EXARCH": { drawType: "stickman", scale: 6.0, color: "#4b0082", hpMult: 30 },
     "ASTRAL_TITAN": { drawType: "titan", scale: 5.0, color: "#e0e0e0", glow: true, glowColor: "#00d4ff", hpMult: 40 },
-    "CHRONOS": { drawType: "stickman", scale: 7.0, color: "#00d4ff", hpMult: 50 },
+    "CHRONOS": { drawType: "stickman", scale: 7.0, color: "#00d4ff", hpMult: 50, canEquip: true},
     "THE_CREATOR": { drawType: "theCreator", scale: 4.0, hpMult: 100 },
 	"defaultCustomMonster": { drawType: "custom_path", scale: 8.5, hpMult: 100 } 
 };
