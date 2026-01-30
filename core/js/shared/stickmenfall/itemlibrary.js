@@ -1853,61 +1853,49 @@ const MONSTER_PARTS = {
 
 
 const MONSTER_EFFECTS = {
-    heatwave: (ctx, now) => {
+	heatwave: (ctx, now) => {
         ctx.save();
         const time = now / 1000;
         ctx.globalCompositeOperation = "overlay";
-        
-        // Pulsing orange glow
-        ctx.fillStyle = `rgba(255, 80, 0, ${0.1 + Math.sin(time * 2) * 0.05})`;
+        ctx.fillStyle = `rgba(255, 80, 0, ${0.08 + Math.sin(time * 1.5) * 0.03})`; // Slower pulse
         ctx.fillRect(0, 0, c.width, c.height);
-
-        // Shimmering vertical distortion lines
-        ctx.strokeStyle = "rgba(255, 200, 0, 0.15)";
-        ctx.lineWidth = 3;
-        for (let i = 0; i < c.width; i += 60) {
-            const xOff = Math.sin(time * 4 + i) * 20;
-            ctx.beginPath();
-            ctx.moveTo(i + xOff, 0);
-            ctx.bezierCurveTo(i - xOff, c.height/2, i + xOff, c.height/2, i - xOff, c.height);
-            ctx.stroke();
-        }
         ctx.restore();
     },
 
 	storm: (ctx, now, data) => {
         const { stormClouds } = data;
         
-        // A. Global Atmosphere (Rain & Random Flashes)
-        if (Math.random() > 0.98) {
-            ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+        // A. Global Atmosphere (Rare, Soft Flashes)
+        // Reduced from 0.98 to 0.995 (very rare) and lower opacity
+        if (Math.random() > 0.995) {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
             ctx.fillRect(0, 0, c.width, c.height);
         }
 
-        ctx.strokeStyle = "rgba(174, 194, 224, 0.4)";
-        for (let i = 0; i < 10; i++) {
+        // Rain particles
+        ctx.strokeStyle = "rgba(174, 194, 224, 0.3)";
+        for (let i = 0; i < 8; i++) {
             let rx = Math.random() * c.width;
             let ry = Math.random() * c.height;
             ctx.beginPath();
             ctx.moveTo(rx, ry);
-            ctx.lineTo(rx - 4, ry + 12);
+            ctx.lineTo(rx - 3, ry + 10);
             ctx.stroke();
         }
 
-        // B. Specific Lightning Bolts (Triggered by Logic)
+        // B. Specific Lightning Bolts
         stormClouds.forEach(cloud => {
             if (cloud.triggerLightning && now < cloud.triggerLightning) {
                 ctx.save();
-                ctx.strokeStyle = "#fff";
-                ctx.lineWidth = 3;
-                ctx.shadowBlur = 15;
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 10;
                 ctx.shadowColor = "cyan";
                 ctx.beginPath();
                 ctx.moveTo(cloud.x, cloud.y + 10);
-                // Simple jagged bolt logic
-                ctx.lineTo(cloud.x - 15, cloud.y + 30);
-                ctx.lineTo(cloud.x + 10, cloud.y + 50);
-                ctx.lineTo(cloud.x - 5, 540); // Ground level
+                ctx.lineTo(cloud.x - 10, cloud.y + 30);
+                ctx.lineTo(cloud.x + 5, cloud.y + 45);
+                ctx.lineTo(cloud.x - 5, 540); 
                 ctx.stroke();
                 ctx.restore();
             }
@@ -1942,7 +1930,37 @@ const MONSTER_EFFECTS = {
                 ctx.restore();
             }
         });
-    }
+    },
+	voidWarp: (ctx, now, data) => {
+		const { singularities } = data;
+		ctx.save();
+		singularities.forEach(s => {
+			const time = now / 1000;
+			// Center of the singularity is usually ~25px above its base/y
+			const centerX = s.x;
+			const centerY = s.y - 25; 
+
+			for (let i = 0; i < 12; i++) {
+				// Added a spiral rotation to the angle based on distance
+				const loop = (now % 1500) / 1500; 
+				const dist = 120 * (1 - loop);
+				const angle = (i / 12) * Math.PI * 2 + (time * 3) + (loop * 2);
+				
+				// Fade particles in as they appear, out as they hit the center
+				const alpha = loop < 0.2 ? loop * 5 : (1 - loop);
+				ctx.fillStyle = `rgba(180, 0, 255, ${alpha})`;
+				
+				ctx.beginPath();
+				ctx.arc(
+					centerX + Math.cos(angle) * dist, 
+					centerY + Math.sin(angle) * dist, 
+					1 + loop * 2, 0, Math.PI * 2
+				);
+				ctx.fill();
+			}
+		});
+		ctx.restore();
+	}
 };
 const MONSTER_STYLES = {
 /*     blob: (ctx, e, now, cfg) => {
@@ -2028,52 +2046,81 @@ const MONSTER_STYLES = {
         });
     },
 
-    spider: (ctx, e, now, cfg) => {
-        // --- WEB HANGING ---
-        if (e.isHanging) {
-            ctx.save();
-            ctx.strokeStyle = "rgba(238, 238, 238, 0.5)";
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(0, -e.y - 500); // Draw web line far up
-            ctx.stroke();
-            ctx.restore();
-            ctx.rotate(Math.sin(now / 500) * 0.1);
-        }
+	spider: (ctx, e, now, cfg) => {
+		// 1. SKITTER & HOP LOGIC
+		let offsetX = 0;
+		let offsetY = 0;
 
-        // Legs
-        const walk = Math.sin(now / 100) * 12;
-        ctx.strokeStyle = e.color;
-        ctx.lineWidth = cfg.legWidth || 2;
-        for (let i = 0; i < 8; i++) {
-            const side = i < 4 ? -1 : 1;
-            const angle = (i % 4) * (Math.PI / 4) - Math.PI/2;
-            const move = (i % 2 === 0) ? walk : -walk;
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(Math.cos(angle) * 15 * side, -10 + move); 
-            ctx.lineTo(Math.cos(angle) * 25 * side, (cfg.legH || 15));
-            ctx.stroke();
-        }
+		// Hanging spiders stay centered but sway
+		if (e.isHanging) {
+			ctx.save();
+			ctx.strokeStyle = "rgba(238, 238, 238, 0.5)";
+			ctx.beginPath();
+			ctx.moveTo(0, 0);
+			ctx.lineTo(0, -e.y - 500);
+			ctx.stroke();
+			ctx.restore();
+			ctx.rotate(Math.sin(now / 500) * 0.1);
+		} 
+		// Cave Spiders Hop (Up and Down)
+		else if (e.name === "CaveSpider" || cfg.isCave) {
+			offsetY = -Math.abs(Math.sin(now / 200) * 15); // The Hop
+			offsetX = Math.sin(now / 400) * 5;             // Slight side sway
+		} 
+		// Normal Spiders Skitter (Left and Right)
+		else {
+			offsetX = Math.sin(now / 80) * 15;             // Fast horizontal skitter
+			offsetY = Math.sin(now / 40) * 2;              // Tiny vertical vibration
+		}
 
-        // Body
-        ctx.fillStyle = e.color;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, cfg.bodyW || 15, cfg.bodyH || 12, 0, 0, Math.PI * 2);
-        ctx.fill(); ctx.stroke();
+		ctx.save();
+		ctx.translate(offsetX, offsetY);
 
-        // --- SPIDER EYES ---
-        // Only big spiders (scale >= 1) get the creepy red eyes
-        if (cfg.scale >= 1.0) {
-            ctx.fillStyle = "#f00";
-            [{x:-4, y:-2}, {x:4, y:-2}, {x:-2, y:-5}, {x:2, y:-5}].forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
-                ctx.fill();
-            });
-        }
-    },
+		// 2. LEGS
+		// If hanging, legs are "tucked" or reaching up. If skittering, they flail.
+		const walk = e.isHanging ? Math.sin(now / 400) * 5 : Math.sin(now / 100) * 12;
+		ctx.strokeStyle = e.color || "#222";
+		ctx.lineWidth = cfg.legWidth || 2;
+		
+		for (let i = 0; i < 8; i++) {
+			const side = i < 4 ? -1 : 1;
+			const angle = (i % 4) * (Math.PI / 4) - Math.PI/2;
+			const move = (i % 2 === 0) ? walk : -walk;
+			
+			ctx.beginPath();
+			ctx.moveTo(0, 0);
+			
+			if (e.isHanging) {
+				// Reaching upwards legs
+				ctx.lineTo(Math.cos(angle) * 10 * side, -15 + move);
+				ctx.lineTo(Math.cos(angle) * 20 * side, -25);
+			} else {
+				// Grounded skitter legs
+				ctx.lineTo(Math.cos(angle) * 15 * side, -10 + move); 
+				ctx.lineTo(Math.cos(angle) * 25 * side, (cfg.legH || 15));
+			}
+			ctx.stroke();
+		}
 
+		// 3. BODY
+		ctx.fillStyle = e.color || "#222";
+		ctx.beginPath();
+		ctx.ellipse(0, 0, cfg.bodyW || 15, cfg.bodyH || 12, 0, 0, Math.PI * 2);
+		ctx.fill(); ctx.stroke();
+
+		// 4. EYES (Only for big/scary spiders)
+		if (cfg.scale >= 1.0) {
+			ctx.fillStyle = "#f00";
+			const eyeOffset = Math.sin(now / 100) * 0.5; // Jittery eyes
+			[{x:-4, y:-2}, {x:4, y:-2}, {x:-2, y:-5}, {x:2, y:-5}].forEach(p => {
+				ctx.beginPath();
+				ctx.arc(p.x + eyeOffset, p.y, 1.5, 0, Math.PI * 2);
+				ctx.fill();
+			});
+		}
+
+		ctx.restore();
+	},
 	canine: (ctx, e, now, cfg) => {
 		const walk = Math.sin(now / 150) * 12;
 		const breathe = Math.sin(now / 300) * 2;
@@ -2545,266 +2592,263 @@ const MONSTER_STYLES = {
 	},
 	horse: (ctx, e, now, cfg) => {
 		const time = now / 1000;
-		const walk = Math.sin(now / 120) * 15;
+		const walk = Math.sin(now / 120) * 12;
 		const breathe = Math.sin(now / 300) * 2;
-		const hover = cfg.wings ? Math.sin(now / 200) * 10 : 0; // Pegasus hovers
-		const bodyW = cfg.bodyW || 25;
-		const bodyH = cfg.bodyH || 10;
+		const hover = cfg.wings ? Math.sin(now / 200) * 10 : 0;
+		
+		// Proportions: Horses have shorter, taller bodies than dogs
+		const bodyW = cfg.bodyW || 22; 
+		const bodyH = cfg.bodyH || 18; 
 		const color = e.color || "#8b4513";
 
 		ctx.save();
 		ctx.translate(0, hover);
 
-		// 1. RAINBOW TRAIL (Unicorn special)
-		if (cfg.horns && cfg.glow) {
-			ctx.save();
-			for (let i = 0; i < 5; i++) {
-				const trailAlpha = 0.5 - (i * 0.1);
-				const trailX = (bodyW + 10) + (i * 12);
-				const trailY = Math.sin(time * 5 + i) * 8;
-				const colors = ["#ff0000", "#ff7f00", "#ffff00", "#00ff00", "#0000ff"];
-				
-				ctx.fillStyle = colors[i % colors.length];
-				ctx.globalAlpha = trailAlpha;
-				ctx.beginPath();
-				ctx.arc(trailX, trailY, 6 - i, 0, Math.PI * 2);
-				ctx.fill();
-			}
-			ctx.restore();
-		}
-
-		// 2. WINGS (Pegasus)
+		// 1. WINGS (Pegasus) - Drawn behind body
 		if (cfg.wings) {
 			const flap = Math.sin(now / 150) * 0.8;
 			ctx.save();
-			ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+			ctx.fillStyle = "rgba(240, 240, 255, 0.9)";
 			[-1, 1].forEach(side => {
 				ctx.beginPath();
-				ctx.ellipse(side * 5, -10, 20, 8, side * (0.5 + flap), 0, Math.PI * 2);
+				ctx.ellipse(side * 8, -15, 25, 10, side * (0.6 + flap), 0, Math.PI * 2);
 				ctx.fill(); ctx.stroke();
 			});
 			ctx.restore();
 		}
 
-		// 3. TAIL
+		// 2. TAIL (Bushy)
 		ctx.save();
-		ctx.translate(bodyW - 2, -5);
-		ctx.rotate(Math.sin(now / 200) * 0.3 + 0.8);
-		ctx.strokeStyle = "#000";
+		ctx.translate(bodyW - 5, -bodyH + 5);
+		ctx.rotate(Math.sin(now / 200) * 0.4 + 0.5);
+		ctx.fillStyle = "#332211"; // Mane/Tail color
 		ctx.beginPath();
 		ctx.moveTo(0, 0);
-		ctx.quadraticCurveTo(10, 20, 5, 30);
-		ctx.stroke();
+		ctx.quadraticCurveTo(15, 5, 10, 35);
+		ctx.quadraticCurveTo(5, 35, 0, 10);
+		ctx.fill(); ctx.stroke();
 		ctx.restore();
 
-		// 4. LEGS (Gallop)
-		ctx.lineWidth = 3;
+		// 3. LEGS (Taller and joints added)
+		ctx.lineWidth = 3.5;
 		ctx.strokeStyle = "#000";
 		[-bodyW + 8, bodyW - 8].forEach((xOff, i) => {
 			const move = (i === 0) ? walk : -walk;
-			ctx.beginPath();
-			ctx.moveTo(xOff, 5);
-			ctx.lineTo(xOff + move * 0.5, 12); // Knee
-			ctx.lineTo(xOff + move, 25);       // Hoof
-			ctx.stroke();
-			
-			ctx.beginPath();
-			ctx.moveTo(xOff + 4, 5);
-			ctx.lineTo(xOff + 4 - move * 0.5, 12);
-			ctx.lineTo(xOff + 4 - move, 25);
-			ctx.stroke();
+			// Front and back pairs
+			[0, 4].forEach(z => {
+				ctx.beginPath();
+				ctx.moveTo(xOff + z, 0);
+				ctx.lineTo(xOff + z + move * 0.3, 15); // Joint
+				ctx.lineTo(xOff + z + move, 32);       // Hoof
+				ctx.stroke();
+				// Hoof detail
+				ctx.fillStyle = "#222";
+				ctx.fillRect(xOff + z + move - 3, 30, 6, 5);
+			});
 		});
 
-		// 5. BODY
+		// 4. BODY (Deep chest, angled upward)
+		ctx.save();
+		ctx.rotate(-0.1); // Angled up at the front
 		ctx.fillStyle = color;
 		ctx.beginPath();
-		ctx.roundRect(-bodyW, -bodyH + breathe, bodyW * 2, bodyH * 2, 10);
+		// A more anatomical shape: deeper at the chest
+		ctx.roundRect(-bodyW, -bodyH + breathe, bodyW * 2, bodyH * 1.8, 12);
+		ctx.fill(); ctx.stroke();
+		ctx.restore();
+
+		// 5. NECK & HEAD
+		ctx.save();
+		ctx.translate(-bodyW + 5, -bodyH + 5 + breathe);
+		
+		// Arched Neck
+		ctx.fillStyle = color;
+		ctx.beginPath();
+		ctx.moveTo(0, 5);
+		ctx.quadraticCurveTo(-5, -15, -15, -25); // Arched front
+		ctx.lineTo(-5, -30);
+		ctx.lineTo(12, -5); // Back of neck
 		ctx.fill(); ctx.stroke();
 
-		// 6. HEAD & NECK
-		const head = cfg.headAnchor || { x: -bodyW - 5, y: -15 };
-		ctx.save();
-		ctx.translate(head.x, head.y + (breathe * 0.5));
-		
-		// Neck
+		// Mane (Hair)
+		ctx.fillStyle = "#332211";
 		ctx.beginPath();
-		ctx.moveTo(10, 20);
-		ctx.lineTo(0, 0);
-		ctx.lineWidth = 8;
-		ctx.stroke();
-		ctx.lineWidth = 2;
+		ctx.moveTo(5, -10);
+		ctx.quadraticCurveTo(15, -20, 10, -35);
+		ctx.lineTo(0, -25);
+		ctx.fill();
 
 		// Skull & Muzzle
+		ctx.translate(-15, -28);
+		ctx.rotate(0.4); // Tilt head down slightly
+		ctx.fillStyle = color;
 		ctx.beginPath();
-		ctx.ellipse(0, 0, 12, 8, -0.4, 0, Math.PI * 2);
-		ctx.ellipse(-10, 4, 8, 5, -0.2, 0, Math.PI * 2);
+		ctx.roundRect(-6, -6, 20, 10, 4); // Muzzle
+		ctx.roundRect(-2, -10, 12, 14, 6); // Skull
 		ctx.fill(); ctx.stroke();
 
-		// 6. HORN (Improved Spiral Unicorn Horn)
+		// Eye
+		ctx.fillStyle = "#000";
+		ctx.beginPath(); ctx.arc(2, -4, 2, 0, Math.PI * 2); ctx.fill();
+
+		// Ears
+		ctx.beginPath();
+		ctx.ellipse(5, -11, 4, 2, -Math.PI/4, 0, Math.PI * 2);
+		ctx.fill(); ctx.stroke();
+
+		// 6. HORN (Improved Spiral)
 		if (cfg.horns) {
 			ctx.save();
-			// Move to the top of the head/forehead
-			ctx.translate(-2, -8); 
-			ctx.rotate(-0.3); // Angle it forward slightly
-
-			if (cfg.glow) {
-				ctx.shadowBlur = 20;
-				ctx.shadowColor = cfg.glowColor || "gold";
-			}
-
-			const hornHeight = 35; // Taller and pointier
-			const hornWidth = 5;
-
-			// Draw the main horn silhouette
+			ctx.translate(2, -12);
+			ctx.rotate(-0.6);
+			if (cfg.glow) { ctx.shadowBlur = 15; ctx.shadowColor = "gold"; }
 			ctx.fillStyle = "#fff";
 			ctx.beginPath();
-			ctx.moveTo(-hornWidth/2, 0);
-			ctx.lineTo(0, -hornHeight); // The Point
-			ctx.lineTo(hornWidth/2, 0);
-			ctx.closePath();
-			ctx.fill();
-			ctx.stroke();
+			ctx.moveTo(-3, 0); ctx.lineTo(0, -30); ctx.lineTo(3, 0);
+			ctx.fill(); ctx.stroke();
+			ctx.restore();
+		}
+		
+		ctx.restore(); // End Head/Neck
 
-			// Draw the spiral ridges
-			ctx.strokeStyle = "rgba(0,0,0,0.2)";
-			ctx.lineWidth = 1;
-			for (let i = 1; i < 6; i++) {
-				const h = (i / 6) * hornHeight;
-				const w = hornWidth * (1 - i/6); // Tapers with height
+		// 7. RAINBOW TRAIL
+		if (cfg.horns && cfg.glow) {
+			ctx.save();
+			ctx.globalCompositeOperation = "screen";
+			for (let i = 0; i < 5; i++) {
+				const colors = ["#ff4d4d", "#ffcc00", "#33ff33", "#33ccff", "#cc33ff"];
+				ctx.fillStyle = colors[i];
+				ctx.globalAlpha = 0.4 - (i * 0.05);
 				ctx.beginPath();
-				// Diagonal lines to create the spiral effect
-				ctx.moveTo(-w/2, -h);
-				ctx.lineTo(w/2, -h + 3);
-				ctx.stroke();
+				ctx.arc(bodyW + 10 + (i * 10), Math.sin(time * 6 + i) * 10, 8 - i, 0, Math.PI * 2);
+				ctx.fill();
 			}
 			ctx.restore();
 		}
 
-		// Eye
-		ctx.fillStyle = "#000";
-		ctx.beginPath();
-		ctx.arc(-4, -2, 2, 0, Math.PI * 2);
-		ctx.fill();
-
-		ctx.restore();
 		ctx.restore();
 	},
 	cow: (ctx, e, now, cfg) => {
 		const walk = Math.sin(now / 180) * 10;
 		const breathe = Math.sin(now / 400) * 2;
-		const bodyW = cfg.bodyW || 25;
-		const bodyH = (cfg.bodyH || 18) + breathe;
+		const bodyW = cfg.bodyW || 30; // Slightly wider for a "cow" look
+		const bodyH = (cfg.bodyH || 20) + breathe;
 		const color = e.color || "#ffffff";
+		const seed = (e.id || 1);
 
 		ctx.save();
 
-		// 1. UDDERS (Jiggle logic)
-		if (cfg.utters) {
-			const jiggle = Math.sin(now / 180) * 3;
-			ctx.fillStyle = "#ffb6c1"; // Pink
+		// 1. BACK LEGS (Draw these first so they are behind the body)
+		ctx.lineWidth = 4;
+		ctx.strokeStyle = "#000";
+		[-bodyW + 8, bodyW - 12].forEach((xOff, i) => {
+			const move = (i === 0) ? walk : -walk;
 			ctx.beginPath();
-			// Main udder bag
-			ctx.ellipse(0, bodyH - 5, 12, 8 + jiggle, 0, 0, Math.PI * 2);
+			ctx.moveTo(xOff, 5);
+			ctx.lineTo(xOff + (move * 0.5), 25);
+			ctx.stroke();
+			ctx.fillStyle = "#1a1a1a";
+			ctx.fillRect(xOff + (move * 0.5) - 3, 23, 6, 4);
+		});
+
+		// 2. UDDERS (Behind body, above front legs)
+		if (cfg.utters) {
+			const jiggle = Math.sin(now / 180) * 2;
+			ctx.fillStyle = "#ffb6c1";
+			ctx.beginPath();
+			ctx.ellipse(0, 10, 12, 8 + jiggle, 0, 0, Math.PI * 2);
 			ctx.fill();
-			// Teats
 			[-4, 0, 4].forEach(tx => {
 				ctx.beginPath();
-				ctx.arc(tx, bodyH + jiggle, 2, 0, Math.PI * 2);
+				ctx.arc(tx, 15 + jiggle, 2, 0, Math.PI * 2);
 				ctx.fill();
 			});
 		}
 
-		// 2. LEGS (Heavy Stomp)
-		ctx.lineWidth = 4;
-		ctx.strokeStyle = "#000";
-		[-bodyW + 10, bodyW - 10].forEach((xOff, i) => {
-			const move = (i === 0) ? walk : -walk;
-			// Draw pair of legs
-			[0, 5].forEach(z => {
-				ctx.beginPath();
-				ctx.moveTo(xOff + z, 5);
-				ctx.lineTo(xOff + z + (move * 0.5), 25);
-				ctx.stroke();
-				// Hoof
-				ctx.fillStyle = "#1a1a1a";
-				ctx.fillRect(xOff + z + (move * 0.5) - 3, 23, 6, 4);
-			});
-		});
-
 		// 3. BODY (With Spots)
 		ctx.fillStyle = color;
 		ctx.beginPath();
-		ctx.roundRect(-bodyW, -bodyH, bodyW * 2, bodyH * 2, 8);
+		ctx.roundRect(-bodyW, -bodyH, bodyW * 2, bodyH * 1.8, 10);
 		ctx.fill();
 		ctx.stroke();
 
-		// Procedural Spots (Static based on ID so they don't swim)
-		const seed = (e.id || 1);
-		ctx.fillStyle = "#1a1a1a";
+		// Spots (Static)
 		ctx.save();
-		ctx.clip(); // Keep spots inside the body
-		for (let i = 0; i < 4; i++) {
-			const spotX = ((seed * i * 33) % (bodyW * 2)) - bodyW;
-			const spotY = ((seed * i * 77) % (bodyH * 2)) - bodyH;
+		ctx.clip(); // Keep spots inside body
+		ctx.fillStyle = "#1a1a1a";
+		for (let i = 0; i < 5; i++) {
+			const spotX = ((seed * (i+1) * 45) % (bodyW * 1.5)) - (bodyW * 0.7);
+			const spotY = ((seed * (i+1) * 88) % (bodyH * 1.5)) - (bodyH * 0.7);
 			ctx.beginPath();
-			ctx.arc(spotX, spotY, 8, 0, Math.PI * 2);
+			ctx.arc(spotX, spotY, 10, 0, Math.PI * 2);
 			ctx.fill();
 		}
 		ctx.restore();
 
-		// 4. THE BELL
+		// 4. FRONT LEGS (Draw these on top of body for depth)
+		[-bodyW + 15, bodyW - 5].forEach((xOff, i) => {
+			const move = (i === 0) ? -walk : walk; // Opposite of back legs
+			ctx.beginPath();
+			ctx.moveTo(xOff, 5);
+			ctx.lineTo(xOff + (move * 0.5), 25);
+			ctx.stroke();
+			ctx.fillStyle = "#1a1a1a";
+			ctx.fillRect(xOff + (move * 0.5) - 3, 23, 6, 4);
+		});
+
+		// 5. THE BELL
 		if (cfg.bell) {
 			const ring = Math.sin(now / 180) * 0.2;
 			ctx.save();
-			ctx.translate(-bodyW + 5, 5);
+			ctx.translate(-bodyW + 2, 0); // Moved to neck area
 			ctx.rotate(ring);
 			ctx.fillStyle = "gold";
 			ctx.beginPath();
 			ctx.rect(-4, 0, 8, 10);
 			ctx.fill(); ctx.stroke();
-			// Clapper
 			ctx.fillStyle = "#000";
 			ctx.beginPath(); ctx.arc(0, 10, 2, 0, Math.PI * 2); ctx.fill();
 			ctx.restore();
 		}
 
-		// 5. HEAD
-		const head = cfg.headAnchor || { x: -bodyW - 8, y: -12 };
+		// 6. HEAD
+		// Anchor the head to the front of the body
 		ctx.save();
-		ctx.translate(head.x, head.y);
+		ctx.translate(-bodyW, -bodyH * 0.5); 
 		
-		// Ears (Floppy)
+		// Ears
 		ctx.fillStyle = color;
-		[-6, 6].forEach(side => {
+		[-8, 8].forEach(side => {
 			ctx.beginPath();
 			ctx.ellipse(side * 8, -5, 6, 3, side * 0.5, 0, Math.PI * 2);
 			ctx.fill(); ctx.stroke();
 		});
 
-		// Face / Snout
+		// Face
+		ctx.fillStyle = color;
 		ctx.beginPath();
-		ctx.roundRect(-10, -8, 20, 18, 5); // Main head
+		ctx.roundRect(-12, -10, 22, 22, 6);
 		ctx.fill(); ctx.stroke();
 		
 		// Muzzle (Pink nose)
 		ctx.fillStyle = "#ffb6c1";
 		ctx.beginPath();
-		ctx.roundRect(-10, 2, 20, 10, 5);
+		ctx.roundRect(-12, 2, 22, 10, 5);
 		ctx.fill(); ctx.stroke();
 
 		// Eyes
 		ctx.fillStyle = "#000";
-		[-4, 4].forEach(ex => {
-			ctx.beginPath(); ctx.arc(ex, -2, 2, 0, Math.PI * 2); ctx.fill();
+		[-5, 5].forEach(ex => {
+			ctx.beginPath(); ctx.arc(ex - 2, -2, 2.5, 0, Math.PI * 2); ctx.fill();
 		});
 
-		// Tiny Horns (optional for all cows)
+		// Horns
 		ctx.fillStyle = "#eee";
-		[-5, 5].forEach(side => {
+		[-6, 6].forEach(side => {
 			ctx.beginPath();
-			ctx.moveTo(side * 5, -8);
-			ctx.lineTo(side * 7, -14);
-			ctx.lineTo(side * 3, -8);
+			ctx.moveTo(side * 5, -10);
+			ctx.lineTo(side * 8, -18);
+			ctx.lineTo(side * 2, -10);
 			ctx.fill(); ctx.stroke();
 		});
 
@@ -2945,6 +2989,87 @@ const MONSTER_STYLES = {
 			ctx.beginPath();
 			ctx.arc(0, 5, 12, 0.2, Math.PI - 0.2);
 			ctx.stroke();
+		}
+		ctx.restore();
+	},
+	singularity: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		const pulse = Math.sin(time * 4) * 10;
+		
+		ctx.save();
+		// 1. THE EVENT HORIZON (Outer Glow)
+		const gradient = ctx.createRadialGradient(0, 0, 5, 0, 0, 40 + pulse);
+		gradient.addColorStop(0, "#000");
+		gradient.addColorStop(0.5, "#4b0082"); // Indigo
+		gradient.addColorStop(1, "transparent");
+		
+		ctx.fillStyle = gradient;
+		ctx.beginPath();
+		ctx.arc(0, 0, 50 + pulse, 0, Math.PI * 2);
+		ctx.fill();
+
+		// 2. SPATIAL DISTORTION (Swirling Rings)
+		ctx.strokeStyle = "#fff";
+		ctx.lineWidth = 1;
+		for (let i = 0; i < 3; i++) {
+			ctx.save();
+			ctx.rotate(time * (i + 1) * (i % 2 === 0 ? 1 : -1));
+			ctx.beginPath();
+			ctx.ellipse(0, 0, 30 + pulse, 10, 0, 0, Math.PI * 2);
+			ctx.globalAlpha = 0.3;
+			ctx.stroke();
+			ctx.restore();
+		}
+
+		// 3. THE CORE (Black Hole)
+		ctx.fillStyle = "#000";
+		ctx.shadowBlur = 15;
+		ctx.shadowColor = "#ff00ff";
+		ctx.beginPath();
+		ctx.arc(0, 0, 15 - (pulse * 0.2), 0, Math.PI * 2);
+		ctx.fill();
+		ctx.restore();
+	},
+	bushman: (ctx, e, now, cfg) => {
+		const time = now / 1000;
+		const isAttacking = e.activeTask === "attacking";
+		const jitter = isAttacking ? Math.sin(now / 50) * 3 : Math.sin(now / 1000) * 1;
+
+		ctx.save();
+		ctx.translate(jitter, 0);
+
+		// 1. LEAVES (The Disguise)
+		ctx.fillStyle = "#2d5a27"; // Dark Green
+		for (let i = 0; i < 6; i++) {
+			const angle = (i / 6) * Math.PI * 2;
+			ctx.beginPath();
+			ctx.ellipse(Math.cos(angle) * 15, Math.sin(angle) * 10, 18, 12, angle, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.stroke();
+		}
+
+		// 2. THE REVEAL (Hidden Eyes)
+		// Only show red eyes when attacking or low health
+		if (isAttacking || e.hp < (e.maxHp * 0.5)) {
+			ctx.fillStyle = "#ff0000";
+			ctx.beginPath(); ctx.arc(-8, -2, 3, 0, Math.PI * 2); ctx.fill();
+			ctx.beginPath(); ctx.arc(8, -2, 3, 0, Math.PI * 2); ctx.fill();
+			
+			// Scary wooden teeth
+			ctx.fillStyle = "#5d4037";
+			ctx.fillRect(-10, 5, 20, 4);
+		}
+
+		// 3. VINES (Legs)
+		if (isAttacking) {
+			ctx.strokeStyle = "#5d4037";
+			ctx.lineWidth = 3;
+			[-12, 12].forEach(x => {
+				ctx.beginPath();
+				ctx.moveTo(x, 10);
+				ctx.quadraticCurveTo(x + jitter * 5, 20, x, 30);
+				ctx.stroke();
+			});
 		}
 		ctx.restore();
 	},
@@ -3093,7 +3218,19 @@ const MONSTER_DB = {
     // --- WEIRD/MIMICS ---
     "StaffMimic": { drawType: "phalic", color: "#ff69b4", hpMult: 2.0, hasArms: true, armAnchor: {x: 0, y: -30} },
     "PinkWobbler": { drawType: "phalic", color: "#da70d6", hpMult: 1.5, scale: 0.8 },
-
+	"Living_Bush": { 
+		drawType: "bushman", 
+		hpMult: 12, 
+		xpValue: 60, 
+		special: "entangle"
+	},
+	"Void_Singularity": { 
+		drawType: "singularity", 
+		isBoss: false, // Can be a mini-boss
+		hpMult: 60, 
+		xpValue: 800,
+		scale: 1.5
+	},
     // --- BOSSES ---
     "DUNGEON_OVERLORD": { drawType: "stickman", scale: 2.5, color: "#f00", hpMult: 8.0, canEquip: true },
     "BROOD_MOTHER": { drawType: "spider", scale: 4.0, color: "#1a1a1a", hpMult: 10, special: "spawn_spiderlings" },

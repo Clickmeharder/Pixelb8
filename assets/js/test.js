@@ -2273,6 +2273,11 @@ function handleEnemyAttacks() {
                     target.freezeExpiry = now + 2000;
                     spawnFloater(target, "❄️ FROZEN!", "#00ffff");
                 }
+				if (spec === "entangle" && procRoll < 0.4) {
+					target.isEntangled = true;
+					target.entangleExpiry = now + 2500;
+					spawnFloater(target, "🌿 ENTANGLED!", "#2d5a27");
+				}
             }
 
             // --- DAMAGE CALCULATION ---
@@ -2478,7 +2483,7 @@ function drawProjectiles(ctx) {
 }
 /*----------------------------------------------*/
 
-function updatePhysics(p) {
+/* function updatePhysics(p) {
     // 1. Define the depth area
     const horizonY = 530; 
     const frontY = 560;
@@ -2531,7 +2536,71 @@ function updatePhysics(p) {
     // Pass the target goal so we know if they should be "ghosting"
     resolveCrowding(p);
 }
+ */
+function updatePhysics(p) {
+    const now = Date.now();
 
+    // --- 1. STATUS EXPIRY (Check every frame) ---
+    if (p.isEntangled && now > p.entangleExpiry) p.isEntangled = false;
+    if (p.isWebbed && now > p.webExpiry) p.isWebbed = false;
+    if (p.isFrozen && now > p.freezeExpiry) p.isFrozen = false;
+    if (p.isBurning && now > p.burnExpiry) p.isBurning = false;
+
+    // --- 2. DEFINE DEPTH AREA ---
+    const horizonY = 530; 
+    if (p.zLane === undefined) p.zLane = Math.floor(Math.random() * 25);
+    const groundLevel = horizonY + p.zLane; 
+
+    // --- STATE 1: FALLING ---
+    if (p.targetY !== undefined && p.targetY !== null) {
+        if (p.y < groundLevel) { 
+            p.y += 12;
+            p.lean = 0.1; 
+            return;
+        } else {
+            p.y = groundLevel;
+            p.targetY = null;
+        }
+    }
+
+    // --- STATE 2: EMERGENCY FLOOR CHECK ---
+    if (!p.targetY && p.y !== groundLevel) {
+        p.y += (groundLevel - p.y) * 0.1;
+    }
+
+    // --- STATE 3: WALKING ---
+    if (p.targetX !== null && p.targetX !== undefined) {
+        let dx = p.targetX - p.x;
+        
+        // --- APPLY SPEED MODIFIERS ---
+        let moveStrength = 0.12; // Your base walking lerp strength
+        
+        if (p.isFrozen) {
+            moveStrength = 0; // Can't move at all
+        } else if (p.isWebbed) {
+            moveStrength *= 0.25; // 75% slow
+        } else if (p.isEntangled) {
+            moveStrength *= 0.5;  // 50% slow
+        }
+
+        if (Math.abs(dx) > 3) {
+            p.x += dx * moveStrength; // Use the modified strength
+            p.lean = dx > 0 ? 0.2 : -0.2;
+        } else {
+            p.x = p.targetX;
+            p.lean = 0;
+            p.targetX = null;
+
+            if (p.activeTask === "organizing") {
+                p.activeTask = p.lastTask || "none";
+                p.lastTask = null;
+            }
+        }
+    }
+
+    // --- STATE 4: SEPARATION ---
+    resolveCrowding(p);
+}
 function resolveCrowding(p) {
     const bubbleX = 30; 
     const bubbleY = 15; 
@@ -3080,6 +3149,7 @@ function drawStickman(ctx, p) {
 
     // --- 3. THE EQUIPMENT SANDWICH ---
     renderEquipmentLayer(ctx, p, now, anchors, limbs.leftHand, limbs.rightHand, limbs.leftFoot, limbs.rightFoot);
+	drawPlayerStatusEffects(ctx, p, now);
     ctx.restore();
 
     // --- 4. UI RENDERING (Names & Conditional HP) ---
@@ -3431,40 +3501,31 @@ function handleMobEffects(now) {
 
     if (activeEnemies.length === 0) return;
 
-    // We can pre-count clouds once to save time for the Sun logic
     let cloudCount = 0;
     
     activeEnemies.forEach(e => {
-        const type = e.config?.drawType || e.drawType; // Check both just in case
+        const type = e.config?.drawType || e.drawType;
 
-        // --- 1. THE SUN (Angry State) ---
-        if (type === "sun") {
-            // We'll calculate anger AFTER the loop once we have the total cloudCount
-        }
-
-        // --- 2. STORM CLOUDS ---
-        if (type === "cloud" && e.config?.storm) {
-            cloudCount++; // Storm clouds count for the sun too!
-            if (!e.lastZap) e.lastZap = now + (Math.random() * 2000);
-            if (now - e.lastZap > 4000) {
-                if (alivePlayers.length > 0) {
-                    const target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
-                    applyDamage(target, 15 + (dungeonTier * 3));
-                    spawnFloater(target, "⚡ ZAP!", "#fff700");
-                    e.triggerLightning = now + 150; 
-                }
-                e.lastZap = now + (Math.random() * 2000);
-            }
-        } 
-        
-        // --- 3. COOL CLOUDS ---
-        else if (type === "cloud") {
+        // --- 1. CLOUDS (Storm & Regular) ---
+        if (type === "cloud") {
             cloudCount++;
+            if (e.config?.storm) {
+                if (!e.lastZap) e.lastZap = now + (Math.random() * 5000);
+                if (now - e.lastZap > 8000) {
+                    if (alivePlayers.length > 0) {
+                        const target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
+                        applyDamage(target, 15 + (dungeonTier * 3));
+                        spawnFloater(target, "⚡ ZAP!", "#fff700");
+                        e.triggerLightning = now + 100; 
+                    }
+                    e.lastZap = now + (Math.random() * 4000);
+                }
+            }
         }
 
-        // --- 4. GARDEN GNOMES ---
+        // --- 2. GARDEN GNOMES ---
         if (type === "gardenGnome") {
-            if (!e.lastPrank || now - e.lastPrank > 8000) {
+            if (!e.lastPrank || now - e.lastPrank > 12000) {
                 if (alivePlayers.length > 0) {
                     const target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
                     const stolen = 5 * dungeonTier;
@@ -3474,14 +3535,32 @@ function handleMobEffects(now) {
                 e.lastPrank = now;
             }
         }
+
+        // --- 3. VOID SINGULARITY (Gravity Pull) ---
+		if (type === "singularity") {
+			alivePlayers.forEach(p => {
+				const dx = e.x - p.x;
+				const dist = Math.abs(dx);
+				if (dist < 400) { 
+					// Pull strength increases slightly as you get closer
+					const strength = 0.02 * (1 - dist / 500); 
+					p.x += dx * strength;
+					
+					// Optional: If the player gets TOO close, do tiny tick damage
+					if (dist < 20 && now % 1000 < 100) {
+						applyDamage(p, 1);
+					}
+				}
+			});
+		}
     });
 
-    // Final Sun Logic Pass (Now that we know the final cloudCount)
+    // --- 4. THE SUN ---
     const sun = activeEnemies.find(e => (e.config?.drawType || e.drawType) === "sun");
     if (sun) {
         sun.config.isAngry = (cloudCount === 0);
         if (sun.config.isAngry && alivePlayers.length > 0) {
-            if (!sun.lastEffectTick || now - sun.lastEffectTick > 2000) {
+            if (!sun.lastEffectTick || now - sun.lastEffectTick > 3000) {
                 alivePlayers.forEach(p => {
                     applyDamage(p, 5 + (dungeonTier * 2));
                     spawnFloater(p, "🔥 SUNBURN", "#ff4500");
@@ -3492,7 +3571,6 @@ function handleMobEffects(now) {
     }
 }
 function drawMobEffects(ctx, now) {
-    // GATE: If the player isn't looking at the area, don't draw anything.
     if (viewArea !== "dungeon" && viewArea !== "lab") return;
     
     const activeEnemies = enemies.concat(boss || []).filter(e => e && !e.dead);
@@ -3504,17 +3582,71 @@ function drawMobEffects(ctx, now) {
         MONSTER_EFFECTS.heatwave(ctx, now);
     }
 
-    // 2. Storm Clouds
+    // 2. Storm Clouds (Lightning & Rain)
     const stormClouds = activeEnemies.filter(e => (e.config?.drawType || e.drawType) === "cloud" && e.config?.storm);
     if (stormClouds.length > 0) {
         MONSTER_EFFECTS.storm(ctx, now, { stormClouds });
     }
 
-    // 3. Gnomes
+    // 3. Gnomes (Gold particle pops)
     const activeGnomes = activeEnemies.filter(e => (e.config?.drawType || e.drawType) === "gardenGnome");
     if (activeGnomes.length > 0) {
         MONSTER_EFFECTS.gnomePrank(ctx, now, { activeGnomes });
     }
+
+    // 4. Void Warp (Particle suction)
+    const singularities = activeEnemies.filter(e => (e.config?.drawType || e.drawType) === "singularity");
+    if (singularities.length > 0) {
+        MONSTER_EFFECTS.voidWarp(ctx, now, { singularities });
+    }
+}
+function drawPlayerStatusEffects(ctx, p, now) {
+    ctx.save();
+    // Position at player's feet
+    ctx.translate(0, 5); 
+
+    // --- ENTANGLED (Bushman) ---
+    if (p.isEntangled && now < p.entangleExpiry) {
+        ctx.strokeStyle = "#2d5a27";
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 4; i++) {
+            const shake = Math.sin(now / 50 + i) * 2;
+            ctx.beginPath();
+            ctx.moveTo(-15, 0);
+            ctx.quadraticCurveTo(-10 + shake, -15, 0, -5);
+            ctx.quadraticCurveTo(10 - shake, -20, 15, 0);
+            ctx.stroke();
+            // Tiny thorns
+            ctx.fillStyle = "#1a3316";
+            ctx.fillRect(-8 + shake, -10, 2, 2);
+            ctx.fillRect(8 - shake, -12, 2, 2);
+        }
+    }
+
+    // --- WEBBED (Spider) ---
+    if (p.isWebbed && now < p.webExpiry) {
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.moveTo(0, -10);
+            ctx.lineTo(Math.cos(angle) * 20, Math.sin(angle) * 10);
+            ctx.stroke();
+        }
+    }
+
+    // --- FROZEN (Special) ---
+    if (p.isFrozen && now < p.freezeExpiry) {
+        ctx.fillStyle = "rgba(0, 255, 255, 0.3)";
+        ctx.strokeStyle = "#fff";
+        ctx.beginPath();
+        ctx.roundRect(-20, -45, 40, 50, 5);
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    ctx.restore();
 }
 //-------------------------------------------
 // --- WORKSHOP PRO SYSTEM ---
@@ -4177,6 +4309,7 @@ const systemTimers = {
     lastEnemyTick: Date.now(),
 	lastAutoSave: Date.now(),
 	lastEffectTick: Date.now(),
+	effectInterval: 100,
     globalInterval: 3000, // 3 seconds (Fishing, etc.)
     enemyInterval: 4000,   // 4 seconds (Enemy Attacks)
     saveInterval: 15000 // 30 seconds
