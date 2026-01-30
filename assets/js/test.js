@@ -2337,8 +2337,8 @@ function handleEnemyAttacks() {
 
             // --- DAMAGE CALCULATION ---
             // Base wave damage + weapon power
-            let dmg = (3 + (dungeonWave * 1.5)) + (weapon.power || 0);
-            if (e.isBoss) dmg *= 2.5;
+            let dmg = ((3 + (dungeonWave * 1.5)) + (weapon.power || 0)) * (e.strengthMult || 1);
+			if (e.isBoss) dmg *= 2.5;
 
             // --- PROJECTILE SPAWNING ---
             if (weapon.type === "bow") {
