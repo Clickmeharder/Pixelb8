@@ -281,7 +281,7 @@ const ITEM_DB = {
 	"Fishing Rod":          { type: "tool", style:"",sources:"achievement", tier: 100, rarity: 13, power: 0, value: 100,   color: "#8B4513" },
 	"PvP Boots":            { type:"boots",style:"",sources:"achievement",  tier: 99, rarity: 1, value: 10000, color: "#7a231a" },
 	"Crude Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 1,  rarity: 7,  power: 7,  speed: 2000, value: 25000,  color: "brown" },
-	"Iron Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 2,  rarity: 7,  power: 15,  speed: 1800, value: 25000,  color: "#888" },
+	"Iron Axe":             { type: "weapon", style: "axe",sources:"achievement", tier: 2,  rarity: 7,  power: 15,  speed: 1800, value: 25000,  color: "#888" },
 	"Steel Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 3,  rarity: 7,  power: 20,  speed: 1750, value: 25000,  color: "#888" },
 	"Great Axe":            { type: "weapon", style: "axe",sources:"achievement", tier: 6,  rarity: 7,  power: 55,  speed: 2000, value: 25000,  color: "#444" },
 // special capes
@@ -294,7 +294,7 @@ const ITEM_DB = {
 	"Fishing Cape":         { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "teal" },
 	"Swimmer Cape":         { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "red" },
     "Uber Cape":            { type:"cape",style:"cape",sources:"achievement",  tier: 10, rarity: 13, value: 10000, color: "black" },
-	"Skilled Warrior Cape":  { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#2a2a2a" },
+	"Skilled Warrior Cape": { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#2a2a2a" },
     "Skilled Wizard Cape":  { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#1c1c1d" },
 	"Skilled Archer Cape":  { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#1e1e1e" },
 	"Skilled Lurker Cape":  { type:"cape",style:"cape",sources:"achievement",  tier: 11, rarity: 13, value: 10000, color: "#2d2d2d" },
@@ -314,8 +314,8 @@ const ITEM_DB = {
 	"hair7": { type: "hair", style: "pomp",        sources:"dungeon",  tier: 3, rarity: 7, color: "#614126" }, // Forward spiky pomp
     "hair8": { type: "hair", style: "twinspikes",  sources:"dungeon",  tier: 2, rarity: 9, color: "#ff0000" }, // Red double spikes
 	"hair11": { type: "hair", style: "drills",     sources:"dungeon",  tier: 1, rarity: 8, color: "#f3e5ab" }, // spiral chunky drills 
-	"oldman beard": { name: "Wizard Beard",        sources:"dungeon",  tier: 10, rarity: 7, type: "hair", style: "wizardbeard", color: "#ffffff" },
-	"wizard beard": { name: "Dark Mage Beard",     sources:"dungeon",  tier: 8, rarity: 5, type: "hair", style: "wizardbeard", color: "#333333" },
+	"oldman beard": {  type: "hair", style: "wizardbeard", sources:"dungeon",  tier: 10, rarity: 7, color: "#ffffff" },
+	"wizard beard": {  type: "hair", style: "wizardbeard", sources:"dungeon",  tier: 8, rarity: 5, color: "#333333" },
 
 // ---------------------------basic items----------------------------------------------------------------
 	// --- normal fish ----
@@ -333,26 +333,28 @@ const ITEM_DB = {
   Note: Fallback logic ensures if a high rarity roll fails to find a fish 
   in your current tier, it will give you a standard fish from your max tier.
 */
-	"Bass":    { type: "fish", sources:"fishing", tier: 1, rarity: 0, value: 100, color: "#FFD700" },
-	"Trout":    { type: "fish", sources:"fishing", tier: 2, rarity: 0, value: 100, color: "#FFD700" },
-	"Salmon":    { type: "fish", sources:"fishing", tier: 3, rarity: 0, value: 100, color: "#FFD700" },
-	"Tuna":    { type: "fish", sources:"fishing", tier: 4, rarity: 0, value: 100, color: "#FFD700" },
-	"Shark":    { type: "fish", sources:"fishing", tier: 5, rarity: 0, value: 100, color: "#FFD700" },
-	"Lobster":    { type: "fish", sources:"fishing", tier: 6, rarity: 0, value: 1000, color: "#FFD700" },
+	"Bass":    { type: "fish", sources:"fishing", tier: 1, rarity: 0, value: 100, color: "#FFD700", stacks: true },
+	"Trout":    { type: "fish", sources:"fishing", tier: 2, rarity: 0, value: 100, color: "#FFD700", stacks: true  },
+	"Salmon":    { type: "fish", sources:"fishing", tier: 3, rarity: 0, value: 100, color: "#FFD700", stacks: true  },
+	"Tuna":    { type: "fish", sources:"fishing", tier: 4, rarity: 0, value: 100, color: "#FFD700", stacks: true  },
+	"Shark":    { type: "fish", sources:"fishing", tier: 5, rarity: 0, value: 100, color: "#FFD700", stacks: true  },
+	"Lobster":    { type: "fish", sources:"fishing", tier: 6, rarity: 0, value: 1000, color: "#FFD700", stacks: true  },
 	
 	// --- unique fish ---
-	"Golden Bass":    { type: "fish", source:"fishing",  tier: 10, rarity: 0, value: 100, color: "#FFD700" },
-	// --- unique swimming find ---
-	"Pearl":    { type: "fish", sources:"fishing swimming",  tier: 3, rarity: 5, value: 100, color: "white" },
-	"Black Pearl":    { type: "fish", sources:"fishing swimming",  tier: 6, rarity: 5, value: 100, color: "black" },
+	"Golden Bass":    { type: "fish", source:"fishing",  tier: 10, rarity: 0, value: 100, color: "#FFD700", stacks: true },
 	//rare fishing finds
 	"fishhat":      { type: "helmet", sources:"fishing",  style: "fishhat", tier: 99, rarity: 13, def: 1, value: 500000, color: "#d2b48c" },
+	// --- unique swimming find ---
+	"Pearl":    { type: "fish", sources:"fishing swimming",  tier: 3, rarity: 5, value: 100, color: "white", stacks: true },
+	"Black Pearl":    { type: "fish", sources:"fishing swimming",  tier: 6, rarity: 5, value: 100, color: "black", stacks: true },
+
     // --- MATERIALS ---
-    "Leather scrap":  { type: "material", sources:"fishing",  tier: 1, rarity: 0, value: 15,   color: "#a88d6d" },
-	"Sea Shell":  { type: "material", sources:"fishing swimming",  tier: 8, rarity: 0, value: 15,   color: "#a88d6d" },
+    "Leather scrap":  { type: "material", sources:"fishing",  tier: 1, rarity: 0, value: 15,   color: "#a88d6d", stacks: true },
+	"Sea Shell":  { type: "material", sources:"fishing swimming",  tier: 8, rarity: 0, value: 15,   color: "#a88d6d", stacks: true },
 	"a Rock":  { type: "material", sources:"swimming",  tier: 8, rarity: 0, value: 15,   color: "#a88d6d" },
+	"bone":  { type: "material", sources:"dungeon",  tier: 1, rarity: 0, value: 1, color: "#a88d6d", stacks: true },
 	// --- treasure ---
-	"Trophy":         { type:"treasure",style:"", sources:"treasure",  tier: 99, rarity: 13, value: 10000, color: "#ffd700" },
+	"Trophy":         { type:"treasure",style:"", sources:"treasure",  tier: 99, rarity: 13, value: 10000, color: "#ffd700", stacks: true },
 	// other basic materials will go here
 //-------------------------------------------------------------------------------------------------------
 };
