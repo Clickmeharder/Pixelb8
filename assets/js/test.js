@@ -7,9 +7,9 @@ const stickmenfall_Config = {
 };
 let cameraTransition = {
     active: false,
-    alpha: 0,
+    alpha: 1.0, // Start at 1.0 (visible)
     targetArea: null,
-    state: "in" // "in" for fading to black, "out" for fading to clear
+    state: "out" // "out" for fading out (to transparent), "in" for fading back in
 };
 let lastIdleSwitchTime = Date.now();
 function runIdleViewMode() {
@@ -23,65 +23,129 @@ function runIdleViewMode() {
         areaCounts[p.area] = (areaCounts[p.area] || 0) + 1;
     });
 
+    // BUG FIX: Ensure we only look at areas that ARE NOT the current viewArea
     const otherAreasWithPlayers = Object.keys(areaCounts).filter(area => area !== viewArea);
+    
     if (otherAreasWithPlayers.length === 0) return;
 
     const currentAreaEmpty = (areaCounts[viewArea] || 0) === 0;
     const timerExpired = (now - lastIdleSwitchTime) >= stickmenfall_Config.idleViewInterval;
 
     if (currentAreaEmpty || timerExpired) {
-        // --- WEIGHTED RANDOM SELECTION ---
         let pool = [];
         otherAreasWithPlayers.forEach(area => {
             const count = areaCounts[area];
-            // Add the area name to the pool once for every player there
             for (let i = 0; i < count; i++) {
                 pool.push(area);
             }
         });
 
-        const selectedArea = pool[Math.floor(Math.random() * pool.length)];
-        
-        // Start the fade transition instead of switching instantly
-        startCameraFade(selectedArea);
-        lastIdleSwitchTime = now;
+        if (pool.length > 0) {
+            const selectedArea = pool[Math.floor(Math.random() * pool.length)];
+            
+            // Start the opacity dissolve
+            cameraTransition.active = true;
+            cameraTransition.alpha = 1.0;
+            cameraTransition.state = "out";
+            cameraTransition.targetArea = selectedArea;
+            
+            lastIdleSwitchTime = now;
+        }
     }
+}
+function drawDirectorIndicator(ctx) {
+    if (!stickmenfall_Config.idleViewEnabled) return;
+
+    ctx.save();
+
+    // Position in top-right corner
+    const x = c.width - 60;
+    const y = 40;
+    const now = Date.now();
+	// Inside drawDirectorIndicator
+	const timeElapsed = now - lastIdleSwitchTime;
+	const timeLeft = Math.max(0, stickmenfall_Config.idleViewInterval - timeElapsed);
+	const seconds = Math.ceil(timeLeft / 1000);
+
+	if (seconds <= 10) { // Only show countdown for the last 10 seconds
+		ctx.fillStyle = "#ffaa00";
+		ctx.fillText(`Switching in ${seconds}s`, x - 5, y + 28);
+	}
+    // 1. Draw the "REC" Dot (Blinks every second)
+    const isRed = Math.floor(now / 1000) % 2 === 0;
+    ctx.fillStyle = isRed ? "#ff0000" : "#550000";
+    ctx.beginPath();
+    ctx.arc(x - 45, y - 5, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. Draw "AUTO" Text
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.font = "bold 10px monospace";
+    ctx.textAlign = "right";
+    ctx.fillText("AUTO-CAM", x - 5, y + 15);
+
+    // 3. Draw the Cameraman (Mini Stickman)
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2;
+    
+    // Body
+    ctx.beginPath();
+    ctx.moveTo(x, y); ctx.lineTo(x, y + 10); // Torso
+    ctx.moveTo(x, y + 10); ctx.lineTo(x - 5, y + 18); // Leg L
+    ctx.moveTo(x, y + 10); ctx.lineTo(x + 5, y + 18); // Leg R
+    ctx.stroke();
+
+    // Head
+    ctx.beginPath();
+    ctx.arc(x, y - 5, 4, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // The Camera (Rectangle with lens)
+    ctx.fillStyle = "#333";
+    ctx.strokeStyle = "#eee";
+    ctx.lineWidth = 1;
+    ctx.fillRect(x - 12, y - 2, 10, 6); // Camera body
+    ctx.strokeRect(x - 12, y - 2, 10, 6);
+    ctx.beginPath();
+    ctx.arc(x - 14, y + 1, 2, 0, Math.PI * 2); // Lens
+    ctx.fill();
+    ctx.stroke();
+
+    // Arms holding the camera
+    ctx.strokeStyle = "#fff";
+    ctx.beginPath();
+    ctx.moveTo(x, y + 2); ctx.lineTo(x - 6, y + 2);
+    ctx.stroke();
+
+    ctx.restore();
 }
 function startCameraFade(target) {
     cameraTransition.active = true;
-    cameraTransition.alpha = 0;
-    cameraTransition.state = "in";
+    cameraTransition.alpha = 1.0;  // Start fully visible
+    cameraTransition.state = "out"; // Fade OUT to transparent
     cameraTransition.targetArea = target;
 }
 
 function updateAndDrawFade(ctx, width, height) {
     if (!cameraTransition.active) return;
 
-    // Fade speed
     const speed = 0.02; 
 
-    if (cameraTransition.state === "in") {
-        cameraTransition.alpha += speed;
-        if (cameraTransition.alpha >= 1) {
-            cameraTransition.alpha = 1;
-            // AT THE PEAK OF DARKNESS: Switch the area
-            changeViewArea(cameraTransition.targetArea);
-            cameraTransition.state = "out";
-        }
-    } else {
+    if (cameraTransition.state === "out") {
         cameraTransition.alpha -= speed;
         if (cameraTransition.alpha <= 0) {
             cameraTransition.alpha = 0;
+            // SWAP AREA WHILE INVISIBLE
+            changeViewArea(cameraTransition.targetArea);
+            cameraTransition.state = "in";
+        }
+    } else {
+        cameraTransition.alpha += speed;
+        if (cameraTransition.alpha >= 1) {
+            cameraTransition.alpha = 1;
             cameraTransition.active = false;
         }
     }
-
-    // Draw the black overlay
-    ctx.save();
-    ctx.globalAlpha = cameraTransition.alpha;
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, width, height);
-    ctx.restore();
 }
 // Helper to sync the UI when switching
 function changeViewArea(newArea) {
@@ -4231,13 +4295,22 @@ function updateUI() {
 
 let frameCount = 0;
 
+
 function gameLoop() {
     const now = Date.now();
     frameCount++; 
     ctx.clearRect(0, 0, c.width, c.height); 
 
-    // 1. VISUAL FOUNDATION
+    // --- 1. LOGIC & TRANSITION UPDATES ---
+    // Update the transition state (Calculates the alpha for this frame)
+    updateAndDrawFade(ctx, c.width, c.height);
+    // Check if the "Director" wants to switch areas
+    runIdleViewMode();
+
+    // --- 2. VISUAL FOUNDATION & ALPHA CONTROL ---
     ctx.save();
+    
+    // Screen Shake Logic
     if (window.shakeAmount > 0) {
         let sx = (Math.random() - 0.5) * window.shakeAmount;
         let sy = (Math.random() - 0.5) * window.shakeAmount;
@@ -4245,11 +4318,13 @@ function gameLoop() {
         window.shakeAmount *= 0.9; 
         if (window.shakeAmount < 0.1) window.shakeAmount = 0;
     }
-	runIdleViewMode();
 
-    
-    // 2. UI & WORLD LOGIC
-	renderScene(); 
+    // --- THE DISSOLVE EFFECT ---
+    // If a transition is active, we use its alpha. Otherwise, we stay at 1.0 (Solid)
+    ctx.globalAlpha = cameraTransition.active ? cameraTransition.alpha : 1.0;
+
+    // --- 3. WORLD RENDERING ---
+    renderScene(); 
     if (frameCount % 3 === 0) updateUI(); 
     
     if (dungeonActive) {
@@ -4264,8 +4339,7 @@ function gameLoop() {
         checkArenaVictory();
     }
 
-    // 3. LOGIC PASS (Update everyone, everywhere)
-    // We do this first so positions are final before we sort for drawing
+    // Update Logic for all players
     Object.values(players).forEach(p => {
         if (!p.dead) {
             updatePhysics(p);           
@@ -4279,72 +4353,49 @@ function gameLoop() {
         }
     });
 
-    // 4. RENDER PASS (Depth Sorting)
-    // Create a list of everything that needs to be drawn in the current view
+    // --- 4. RENDER PASS (Depth Sorting) ---
     let renderQueue = [];
-
-    // Add Players in the current area to the queue
     Object.values(players).forEach(p => {
         if (p.area === viewArea) {
             renderQueue.push({ type: 'player', data: p, y: p.y });
         }
     });
 
-    // Add Enemies/Bosses if in Dungeon
-	if (viewArea === "dungeon") {
-		// Treat the boss exactly like any other monster for the sort
-		if (boss && !boss.dead) {
-			renderQueue.push({ type: 'monster', data: boss, y: boss.y });
-		}
-		
-		enemies.forEach(e => {
-			if (!e.dead) {
-				// We use 'monster' for everything because our drawMonster 
-				// function now handles its own internal branching (stickman vs path)
-				renderQueue.push({ type: 'monster', data: e, y: e.y });
-			}
-		});
-		drawLootBeams(ctx); 
-	}
+    if (viewArea === "dungeon") {
+        if (boss && !boss.dead) renderQueue.push({ type: 'monster', data: boss, y: boss.y });
+        enemies.forEach(e => {
+            if (!e.dead) renderQueue.push({ type: 'monster', data: e, y: e.y });
+        });
+        drawLootBeams(ctx); 
+    }
 
-    // --- THE MAGIC SORT ---
-    // Sort everything by Y coordinate (Lowest Y = furthest away = drawn first)
     renderQueue.sort((a, b) => a.y - b.y);
 
-    
-
-    // Draw everything in the correct order
     renderQueue.forEach(obj => {
         if (obj.type === 'player') {
-            // Team Underglow (Drawn under the stickman)
             if (viewArea === "arena" && typeof arenaMode !== 'undefined' && arenaMode === "teams" && obj.data.team) {
+                ctx.save();
                 ctx.fillStyle = obj.data.team === "Red" ? "rgba(255,0,0,0.3)" : "rgba(0,0,255,0.3)";
                 ctx.beginPath();
                 ctx.ellipse(obj.data.x, obj.data.y + 2, 20, 8, 0, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.restore();
             }
             drawStickman(ctx, obj.data);
+        } else if (obj.type === 'monster') {
+            drawMonster(ctx, obj.data);
         }
-		else if (obj.type === 'monster') {
-			// This function now handles slimes, beasts, custom_paths, AND stickman enemies
-			drawMonster(ctx, obj.data);
-		}
-        //else if (obj.type === 'monster') drawMonster(ctx, obj.data);
-        //else if (obj.type === 'enemyStickman') drawEnemyStickman(ctx, obj.data);
     });
 
-	
-// 5. GLOBAL OVERLAYS (Drawn over players)
+    // --- 5. OVERLAYS (Fading with the world) ---
     updateAreaPlayerCounts();
     updateSystemTicks(now);  
     drawProjectiles(ctx);    
     updateSplashText(ctx);   
     handleTooltips();        
-
-    // 6. THE CAMERA FADE (Drawn over EVERYTHING)
-    // This stays at the bottom so it can black out the tooltips and names too
-    ctx.restore(); // Restore from the shake/translate before drawing the screen-space fade
-    updateAndDrawFade(ctx, c.width, c.height);
+	drawDirectorIndicator(ctx);
+    // --- 6. CLEANUP ---
+    ctx.restore(); // This restores BOTH the shake translation AND the globalAlpha
 
     requestAnimationFrame(gameLoop);
 }
