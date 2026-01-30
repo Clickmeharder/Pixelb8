@@ -1883,59 +1883,57 @@ function testDungeonTier(p, targetTier, targetWave = null) {
 function joinDungeonQueue(p) {
     if (p.dead) return;
 
-    // FIX: Prevent joining if a dungeon is already in progress
+    // 1. Block entry if a dungeon is already live
     if (dungeonActive) {
-        systemMessage(`❌ ${p.name}, a dungeon is already in progress. Wait for it to finish!`);
+        systemMessage(`❌ ${p.name}, a dungeon is already in progress!`);
         return;
     }
 
+    // 2. Add to queue
     const nameKey = p.name.toLowerCase();
     if (!dungeonQueue.includes(nameKey)) {
         dungeonQueue.push(nameKey);
         systemMessage(`${p.name} joined the queue (${dungeonQueue.length} total)`);
     }
 
+    // 3. Start the timer ONLY if it isn't already running
     if (!dungeonCountdownInterval) {
-        // FIX: Ensure enemies are cleared so "Training Mobs" don't stay on screen when timer starts
-        enemies = []; 
+        enemies = []; // Clear training mobs
         dungeonSecondsLeft = 60;
-        systemMessage("Dungeon timer started!");
-
-        dungeonCountdownInterval = setInterval(() => {
-        dungeonSecondsLeft--;
-
-        if (dungeonSecondsLeft === 30) {
-        systemMessage("Dungeon timer started!");
+        systemMessage("Dungeon timer started! 60 seconds until entry.");
 
         dungeonCountdownInterval = setInterval(() => {
             dungeonSecondsLeft--;
 
+            // Milestone: 30 Seconds - Teleport players to the floor (Vanguard)
             if (dungeonSecondsLeft === 30) {
                 viewArea = "dungeon";
                 const selector = document.getElementById("view-area-selector");
                 if (selector) selector.value = "dungeon";
                 
-                areaDisplayDiv.textContent = "Dungeon";
+                areaDisplayDiv.textContent = "Dungeon Floor";
                 systemMessage("System: Sending vanguard to the dungeon floor...");
 
                 dungeonQueue.forEach(name => {
                     let player = players[name.toLowerCase()];
                     if (player && !player.dead) {
                         player.area = "dungeon";
-                        player.y = -200; 
+                        player.y = -200; // Drop from ceiling
                         player.x = 50 + Math.random() * 250; 
-                        player.targetY = c.height - 45; 
+                        player.targetY = 540; // Floor height
                         player.targetX = null; 
                         player.activeTask = "attacking"; 
                     }
                 });
 
+                // Small delay to let them land before organizing
                 setTimeout(() => {
                     organizeDungeonRanks();
                     systemMessage("System: Get Ready!");
                 }, 1500);
             }
 
+            // Milestone: 0 Seconds - Start the actual fight
             if (dungeonSecondsLeft <= 0) {
                 clearInterval(dungeonCountdownInterval);
                 dungeonCountdownInterval = null;
