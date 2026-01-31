@@ -861,9 +861,6 @@ function scrubAllInventories() {
 }
 //================== COMBAT ==============================
 // --- COMBAT -----------------------
-Here is the full, unified performAttack function. I have integrated the Arena targeting logic, team checks, and PvP stat tracking while keeping your original dungeon logic intact.
-
-JavaScript
 
 function performAttack(p) {
     if (p.dead) return;
