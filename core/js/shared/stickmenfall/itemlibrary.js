@@ -509,7 +509,7 @@ const DANCE_LIBRARY = {
             lean: extremeLean, 
             pose: "matrix"
         };
-    }
+    },
     99: (now, p) => { 
         let bY = Math.min(0, Math.sin(now / 200) * -50); 
         if (bY > -1 && p.wasInAir) {
