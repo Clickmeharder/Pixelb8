@@ -3087,7 +3087,7 @@ function getAnimationState(p, now) {
         anim.bodyY = 18;
 		//anim.lean = -0.1;
         anim.pose = "sit";
-	else if (activePose === "pushups") {
+	} else if (activePose === "pushups") {
 		const rep = (Math.sin(now / 300) + 1) / 2; // 0 at top, 1 at bottom
 		anim.bodyY = 15 + (rep * 12); 
 		
