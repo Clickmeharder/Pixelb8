@@ -1357,14 +1357,16 @@ function handleTraining(p, now) {
     // Award XP every 5 seconds
     if (now - p.lastTrainingXP > 5000) {
 
-        const config = TRAINING_CONFIG[trainingType];
+        // FIX: Change trainingType to p.trainingType
+        const config = TRAINING_CONFIG[p.trainingType]; 
+        
         if (!config) return;
 
         const skillType = config.skill;
         p.stats[skillType + "XP"] = (p.stats[skillType + "XP"] || 0) + config.xp;
         p.lastTrainingXP = now;
 
-        // Level up logic using your xpNeeded function
+        // Level up logic...
         let currentLvl = p.stats[skillType + "Level"] || 1;
         if (p.stats[skillType + "XP"] >= xpNeeded(currentLvl)) {
             p.stats[skillType + "Level"] = currentLvl + 1;
