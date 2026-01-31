@@ -6347,7 +6347,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 	if (cmd === ":3")                         { cmdEmote(p, "cat"); return; }
 	if (cmd === "uwu")                        { cmdEmote(p, "uwu"); return;}
 	if (cmd === ":/")                         { cmdEmote(p, "skeptical"); return; }
-	if (cmd === ":|" || cmd === "-_-")        { cmdEmote(p, "neutral"); return; }
+	if (cmd === ":|" || cmd === "-_-" || cmd === "-.-")        { cmdEmote(p, "neutral"); return; }
 	if (cmd === ":p")                         { cmdEmote(p, "tongue"); return; }
 	if (cmd === ":#" || cmd === "!blush")      { cmdEmote(p, "blush"); return; }
 	if (cmd === "x.x" || cmd === "!dead") { cmdEmote(p, "ko"); return; }
