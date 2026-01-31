@@ -361,13 +361,22 @@ const ITEM_DB = {
 /* ================= EXTENDED ITEM LIBRARY ================= */
 const DANCE_UNLOCKS = {
     1: { name: "The Hop", minLvl: 1 },
-    2: { name: "The paddle", minLvl: 5 },
+    2: { name: "The paddle", minLvl: 1 },
     3: { name: "The Lean",  minLvl: 1 },
     4: { name: "The groupy", minLvl: 1 },
 	5: { name: "The Sway", minLvl: 1 },
     6: { name: "The sixthdance", minLvl: 1 },
     7: { name: "The ninthdance", minLvl: 1 },
-
+	8: { name: "The Slav", minLvl: 10 },
+    9: { name: "The Disco", minLvl: 15 }
+	10: { name: "The Worm", minLvl: 10 },
+    11: { name: "Breakspin", minLvl: 15 },
+	12: { name: "The Moonwalk", minLvl: 20 },
+    13: { name: "The Robot", minLvl: 25 },
+    14: { name: "The Carlton", minLvl: 30 },
+	15: { name: "The Twerk", minLvl: 40 },
+	16: { name: "Backflip", minLvl: 50 },
+	17: { name: "The Matrix", minLvl: 60 },
 	99: { name: "The 99", minLvl: 99 }
 };
 
@@ -388,6 +397,119 @@ const DANCE_LIBRARY = {
         lean: Math.sin(now / 200) * 0.2,
         pose: "action"
     }),
+
+    8: (now) => {
+        // High-intensity squatting (The Slav/Hardbass)
+        const bounce = Math.abs(Math.sin(now / 150)) * 15;
+        return { 
+            bodyY: 10 + bounce, 
+            pose: "crouch",
+            lean: Math.sin(now / 300) * 0.2 
+        };
+    },
+    9: (now) => {
+        // Alternating Dab (Uses the elbow logic)
+        const side = Math.sin(now / 400) > 0 ? 1 : -1;
+        return {
+            bodyY: Math.sin(now / 200) * 5,
+            lean: side * 0.3,
+            pose: "dab"
+        };
+    },
+	10: (now, p) => {
+        // We drop the bodyY significantly so they are on the floor
+        // and add a bit of forward "inchworm" movement to the lean
+        const move = Math.sin(now / 500) * 0.2; 
+        
+        return { 
+            bodyY: 25, 
+            pose: "worm",
+            lean: -0.5 + move // Hunching forward
+        };
+    },
+	11: (now) => {
+        const wobble = Math.sin(now / 100) * 0.1;
+        return { 
+            bodyY: 15,  // Pushes the head down toward the ground level
+            pose: "headspin",
+            lean: wobble // The slight tilt of a balancing spinner
+        };
+    },
+	12: (now) => {
+        // The Moonwalk: Lean forward, glide backward
+        return {
+            bodyY: 2, 
+            lean: 0.3, // Lean "into" the slide
+            pose: "glide"
+        };
+    },
+    13: (now) => {
+        // The Robot: Moves only in "ticks" using a floor function
+        const tick = Math.floor(now / 250);
+        const jerkyLean = (tick % 4 === 0) ? 0.2 : -0.1;
+        return {
+            bodyY: (tick % 2 === 0) ? 2 : 0,
+            lean: jerkyLean,
+            pose: "stiff"
+        };
+    },
+    14: (now) => {
+        // The Carlton: Big torso snaps and arm swings
+        const snap = Math.sin(now / 200);
+        return {
+            bodyY: Math.abs(snap) * 5,
+            lean: snap * 0.5,
+            pose: "swing"
+        };
+    },
+	15: (now) => {
+        // The rhythm: A heavy bounce combined with a rapid vibration
+        const rhythmicBounce = Math.abs(Math.sin(now / 300)) * 5;
+        const vibration = Math.sin(now / 50) * 3;
+
+        return {
+            bodyY: 12 + rhythmicBounce, // Deep squat
+            lean: 0.8, // Heavy lean forward
+            pose: "twerk"
+        };
+    },
+	16: (now, p) => {
+        const duration = 800; // ms per flip
+        const elapsed = now % duration;
+        const progress = elapsed / duration;
+
+        // 1. HEIGHT: Parabolic jump arc
+        // Uses the formula: h = -4 * max * (p - 0.5)^2 + max
+        const jumpHeight = -100 * Math.pow(progress - 0.5, 2) + 25;
+        
+        // 2. ROTATION: Update the pose progress
+        // We pass this into the pose so the limbs know where they are
+        p.flipProgress = progress;
+
+        // 3. OFFSET: Move the head in a circle around the "waist"
+        const radius = 20;
+        const rotX = Math.sin(progress * Math.PI * 2) * radius;
+        const rotY = Math.cos(progress * Math.PI * 2) * radius;
+
+        return {
+            bodyY: -jumpHeight + rotY, 
+            lean: rotX * 0.05, // Tilts the torso as it rotates
+            pose: "flip",
+            flipProgress: progress 
+        };
+    },
+	17: (now) => {
+        // Slow motion sway
+        const slowSway = Math.sin(now / 1200); 
+        // We only want to lean BACKWARDS (positive lean in your system usually)
+        const extremeLean = Math.abs(slowSway) * 1.5; 
+
+        return {
+            bodyY: 10 + (extremeLean * 5), // Drop the hips as we lean back
+            lean: extremeLean, 
+            pose: "matrix"
+        };
+    }
     99: (now, p) => { 
         let bY = Math.min(0, Math.sin(now / 200) * -50); 
         if (bY > -1 && p.wasInAir) {
@@ -1554,20 +1676,43 @@ const POSE_LIBRARY = {
 		const isAttacking = (p.activeTask === "attacking" || p.activeTask === "pvp");
 		const shoulderY = head.y + 15;
 		
-		// Only one hand punches at a time, very quickly
-		const punchLeft = (isAttacking && progress < 0.5) ? Math.sin(progress * Math.PI * 2) * 15 : 0;
-		const punchRight = (isAttacking && progress >= 0.5) ? Math.sin((progress - 0.5) * Math.PI * 2) * 15 : 0;
+		// 1. BOUNCE & WEAVE
+		// Even when idling, boxers bounce. When attacking, they bob faster.
+		const bobSpeed = isAttacking ? 150 : 300;
+		const bounce = Math.abs(Math.sin(Date.now() / bobSpeed)) * 3;
+		const weave = Math.sin(Date.now() / 400) * 4; // Side-to-side head movement
+
+		// 2. PUNCH LOGIC (Snap and Recoil)
+		// We use a power curve so the punch goes out fast and returns slightly slower
+		const punchPower = Math.sin(progress * Math.PI);
+		const punchL = (isAttacking && progress < 0.5) ? punchPower * 25 : 0;
+		const punchR = (isAttacking && progress >= 0.5) ? punchPower * 25 : 0;
+
+		// 3. TORSO LEAN
+		// The body leans INTO the punch
+		const punchLean = (punchL > 0) ? -5 : (punchR > 0 ? 5 : 0);
 
 		return {
-			// High Guard (Classic Stickman look)
-			left:  { x: head.x - 12 - punchLeft, y: shoulderY - 5 },
-			right: { x: head.x + 12 + punchRight, y: shoulderY - 5 },
+			// HANDS: Set in a high "guard" near the face when not punching
+			left:  { 
+				x: head.x - 10 - punchL + weave, 
+				y: shoulderY - 8 - (punchL > 0 ? 2 : 0) + bounce 
+			},
+			right: { 
+				x: head.x + 10 + punchR + weave, 
+				y: shoulderY - 8 - (punchR > 0 ? 2 : 0) + bounce 
+			},
+
+			// KNEES: Bent stance for power
+			leftKnee:  { x: p.x - 14 + punchLean, y: p.y + 12 + bounce },
+			rightKnee: { x: p.x + 14 + punchLean, y: p.y + 12 + bounce },
+
+			// FEET: Wide "Philly Shell" or standard boxing stance
+			leftFoot:  { x: p.x - 15 + (punchL * 0.2), yOffset: -bounce * 0.5 },
+			rightFoot: { x: p.x + 15 - (punchR * 0.2), yOffset: -bounce * 0.5 },
 			
-			// NO ELBOWS defined here = Arms will stay perfectly straight lines!
-			// NO KNEES defined here = Legs will stay perfectly straight lines!
-			
-			leftFoot:  { x: p.x - 12, yOffset: 0 },
-			rightFoot: { x: p.x + 12, yOffset: 0 }
+			// Pass lean back to the renderer if your system supports torso rotation
+			bodyLean: punchLean 
 		};
 	},
 	"archer": (head, p, anim, progress = 0) => {
@@ -1609,6 +1754,7 @@ const POSE_LIBRARY = {
 	},
     "fishing": (head, p, anim) => ({
         // Fixed the double "right" and the missing parameter
+		left:  { x: head.x - 10, y: head.y + 35 },
         right: { x: head.x + 22, y: head.y + 15 }
     }),
 
@@ -1650,7 +1796,311 @@ const POSE_LIBRARY = {
 			left:  { x: head.x - 10, y: head.y + 35 },
 			right: { x: head.x + 5,  y: head.y + 30 }
 		};
-	}
+	},
+	"crouch": (head, p, anim) => {
+        const hipY = p.y + 0 + anim.bodyY;
+        // Knees flare wide and high while the body is low
+        return {
+            left:  { x: head.x - 15, y: head.y + 20 },
+            right: { x: head.x + 15, y: head.y + 20 },
+            leftKnee:  { x: p.x - 18, y: hipY + 5 },
+            rightKnee: { x: p.x + 18, y: hipY + 5 },
+            leftFoot:  { x: p.x - 10, yOffset: 0 },
+            rightFoot: { x: p.x + 10, yOffset: 0 }
+        };
+    },
+    "dab": (head, p, anim) => {
+        const shoulderY = head.y + 15;
+        return {
+            // Left arm tucked (elbow out)
+            left: { x: head.x - 5, y: shoulderY + 2 },
+            leftElbow: { x: head.x - 15, y: shoulderY - 5 },
+            // Right arm pointed straight up/out
+            right: { x: head.x + 25, y: head.y - 10 },
+            // Legs in a stylish split
+            leftFoot: { x: p.x - 15, yOffset: 0 },
+            rightFoot: { x: p.x + 5, yOffset: 0 }
+        };
+    },
+    "kick": (head, p, anim) => {
+        const now = Date.now();
+        const cycle = Math.sin(now / 200);
+        const hipY = p.y + 0 + anim.bodyY;
+        return {
+            left:  { x: head.x - 15, y: head.y + 10 },
+            right: { x: head.x + 15, y: head.y + 10 },
+            // One knee tucks up high
+            leftKnee: { x: p.x - 5, y: hipY - 10 },
+            leftFoot: { x: p.x - 15, yOffset: -10 },
+            rightFoot: { x: p.x + 5, yOffset: 0 }
+        };
+    },
+    "shush": (head, p, anim) => {
+        // One hand to the mouth (elbow sharp)
+        left:  { x: head.x, y: head.y + 5 },
+        leftElbow: { x: head.x - 15, y: head.y + 15 },
+        right: { x: head.x + 12, y: head.y + 25 }
+    },
+	"worm": (head, p, anim) => {
+        const now = Date.now();
+        const speed = 0.008;
+        const amplitude = 15;
+        const frequency = 0.1;
+
+        // The "Worm" moves horizontally. 
+        // We use the segment's distance from the head to determine its wave phase.
+        const getWave = (offset) => Math.sin((now * speed) - (offset * frequency)) * amplitude;
+
+        return {
+            // Hands are tucked under the chest to "push"
+            left:  { x: head.x - 10, y: head.y + 15 + getWave(10) },
+            right: { x: head.x + 10, y: head.y + 15 + getWave(10) },
+
+            // Knees and Feet ripple back behind the head
+            leftKnee:  { x: head.x - 40, y: head.y + 10 + getWave(40) },
+            rightKnee: { x: head.x - 40, y: head.y + 10 + getWave(45) },
+            
+            leftFoot:  { x: head.x - 70, yOffset: -15 + getWave(70) },
+            rightFoot: { x: head.x - 75, yOffset: -15 + getWave(75) }
+        };
+    },
+	"headspin": (head, p, anim) => {
+        const now = Date.now();
+        const spinSpeed = now / 150; // Controls how fast the legs circle
+        const legSpread = 25;
+        const shoulderY = head.y + 15;
+
+        // Calculate circular motion for the feet
+        const lx = Math.cos(spinSpeed) * legSpread;
+        const ly = Math.sin(spinSpeed) * 10;
+        const rx = Math.cos(spinSpeed + Math.PI) * legSpread;
+        const ry = Math.sin(spinSpeed + Math.PI) * 10;
+
+        return {
+            // Hands on the ground for balance
+            left:  { x: head.x - 15, y: head.y + 5 },
+            right: { x: head.x + 15, y: head.y + 5 },
+
+            // Knees tucked or flared out in the air
+            leftKnee:  { x: head.x + lx * 0.5, y: head.y - 15 + ly },
+            rightKnee: { x: head.x + rx * 0.5, y: head.y - 15 + ry },
+
+            // Feet high in the sky
+            leftFoot:  { x: head.x + lx, yOffset: -50 + ly },
+            rightFoot: { x: head.x + rx, yOffset: -50 + ry }
+        };
+    },
+	"glide": (head, p, anim) => {
+        const now = Date.now();
+        // One foot stays flat (the "push"), the other lifts on the toe
+        const cycle = (now / 400) % 2;
+        const leftIsLeading = cycle < 1;
+        
+        return {
+            left:  { x: head.x - 10, y: head.y + 25 },
+            right: { x: head.x + 10, y: head.y + 25 },
+            // Knee logic: The "lifting" leg bends at the knee
+            leftKnee:  { x: p.x - 5, y: p.y + (leftIsLeading ? 5 : 12) },
+            rightKnee: { x: p.x + 5, y: p.y + (!leftIsLeading ? 5 : 12) },
+            // Foot logic: The "sliding" foot stays flat, the "prop" foot is on tip-toe
+            leftFoot:  { x: p.x - 12, yOffset: leftIsLeading ? -4 : 0 },
+            rightFoot: { x: p.x + 12, yOffset: !leftIsLeading ? -4 : 0 }
+        };
+    },
+    "stiff": (head, p, anim) => {
+        // Precise 90-degree angles for elbows and knees
+        return {
+            left:  { x: head.x - 20, y: head.y + 15 },
+            leftElbow: { x: head.x - 20, y: head.y + 25 },
+            right: { x: head.x + 20, y: head.y + 5 },
+            rightElbow: { x: head.x + 5, y: head.y + 5 },
+            leftKnee:  { x: p.x - 10, y: p.y + 10 },
+            rightKnee: { x: p.x + 15, y: p.y + 15 },
+            leftFoot:  { x: p.x - 15, yOffset: 0 },
+            rightFoot: { x: p.x + 20, yOffset: 0 }
+        };
+    },
+    "swing": (head, p, anim) => {
+        const swingX = Math.sin(Date.now() / 200) * 20;
+        return {
+            // Arms swing wildly side to side
+            left:  { x: head.x - 10 + swingX, y: head.y + 15 - Math.abs(swingX) },
+            right: { x: head.x + 10 + swingX, y: head.y + 15 - Math.abs(swingX) },
+            // Knees follow the rhythm
+            leftKnee:  { x: p.x - 10 + (swingX * 0.2), y: p.y + 12 },
+            rightKnee: { x: p.x + 10 + (swingX * 0.2), y: p.y + 12 }
+        };
+    },
+	"twerk": (head, p, anim) => {
+        const now = Date.now();
+        // Rapid oscillation for the "shake"
+        const shake = Math.sin(now / 75) * 8; 
+        const hipY = p.y + 0 + anim.bodyY;
+
+        return {
+            // Hands are placed forward, like they are leaning on knees or a wall
+            left:  { x: head.x + 15, y: head.y + 25 },
+            right: { x: head.x + 18, y: head.y + 25 },
+            
+            // Knees flare out WIDE
+            leftKnee:  { x: p.x - 15, y: hipY + 5 },
+            rightKnee: { x: p.x + 15, y: hipY + 5 },
+
+            // Feet are planted wide
+            leftFoot:  { x: p.x - 12, yOffset: 0 },
+            rightFoot: { x: p.x + 12, yOffset: 0 },
+
+            // Extra bounce data for the torso
+            twerkShake: shake 
+        };
+    },
+	"flip": (head, p, anim) => {
+        const progress = anim.flipProgress || 0; // 0 to 1
+        const angle = progress * Math.PI * 2; // Full circle in radians
+        
+        // As we flip, we "tuck" the knees in for speed
+        const tuck = Math.sin(progress * Math.PI) * 15;
+
+        return {
+            // Hands tucking the knees
+            left:  { x: head.x - 5, y: head.y + 20 },
+            right: { x: head.x + 5, y: head.y + 20 },
+            
+            // Knees pulled close to the chest (tucked)
+            leftKnee:  { x: head.x - 10 + tuck, y: head.y + 10 + tuck },
+            rightKnee: { x: head.x + 10 - tuck, y: head.y + 10 + tuck },
+
+            // Feet following the rotation
+            leftFoot:  { x: head.x - 5, yOffset: -10 },
+            rightFoot: { x: head.x + 5, yOffset: -10 }
+        };
+    },
+	"matrix": (head, p, anim) => {
+        const hipY = p.y + 0 + anim.bodyY;
+        
+        // We calculate a "bend" based on how far back the head is leaning
+        // The further back the head, the further forward the knees go
+        const leanFactor = anim.lean || 0;
+        const kneeForward = leanFactor * 40; 
+
+        return {
+            // Arms out to the sides for balance
+            left:  { x: head.x - 25, y: head.y + 10 },
+            right: { x: head.x + 25, y: head.y + 10 },
+
+            // Knees push FORWARD as the head goes BACK
+            leftKnee:  { x: p.x - 10 + kneeForward, y: hipY - 5 },
+            rightKnee: { x: p.x + 10 + kneeForward, y: hipY - 5 },
+
+            // Feet stay planted firm
+            leftFoot:  { x: p.x - 12, yOffset: 0 },
+            rightFoot: { x: p.x + 12, yOffset: 0 }
+        };
+    },
+	"sit": (head, p, anim) => {
+        anim.bodyY = 15; // Force hips down
+        const hipY = p.y + anim.bodyY;
+        return {
+            left:  { x: head.x - 10, y: hipY - 5 },
+            right: { x: head.x + 10, y: hipY - 5 },
+            leftKnee:  { x: p.x - 20, y: hipY - 10 },
+            rightKnee: { x: p.x + 20, y: hipY - 10 },
+            leftFoot:  { x: p.x - 25, yOffset: 0 },
+            rightFoot: { x: p.x + 25, yOffset: 0 }
+        };
+    },
+
+    "pushups": (head, p, anim) => {
+        const now = Date.now();
+        const rep = (Math.sin(now / 300) + 1) / 2; // Movement logic inside the pose
+        anim.lean = -0.9; // Horizontal
+        anim.bodyY = 20 - (rep * 15);
+
+        return {
+            left:  { x: head.x - 5, y: p.y + 25 }, 
+            right: { x: head.x + 5, y: p.y + 25 },
+            leftElbow:  { x: head.x - 15, y: head.y + 15 + (rep * 5) },
+            rightElbow: { x: head.x + 15, y: head.y + 15 + (rep * 5) },
+            leftKnee:  { x: p.x - 25, y: p.y + 22 },
+            rightKnee: { x: p.x - 25, y: p.y + 22 },
+            leftFoot:  { x: p.x - 45, yOffset: 0 },
+            rightFoot: { x: p.x - 45, yOffset: 0 }
+        };
+    },
+
+    "pee": (head, p, anim) => {
+        const now = Date.now();
+        // Particle logic inside the pose:
+        if (now % 5 === 0) { // Throttled spawning
+            const streamX = p.x + (8 * p.facing);
+            const streamY = p.y + 12;
+            const targetX = p.x + (25 * p.facing);
+            const targetY = p.y + 25;
+            // Assuming spawnProjectile exists in your global scope
+            if (typeof spawnProjectile === "function") {
+                spawnProjectile(streamX, streamY, targetX, targetY, "#ff0", "drop", p.area);
+            }
+        }
+
+        return {
+            left:  { x: head.x, y: head.y + 28 }, 
+            right: { x: head.x + 12, y: head.y + 22 },
+            rightElbow: { x: head.x + 18, y: head.y + 18 },
+            leftFoot: { x: p.x - 8, yOffset: 0 },
+            rightFoot: { x: p.x + 8, yOffset: 0 }
+        };
+    },
+	"meditate": (head, p, anim) => {
+        const now = Date.now();
+        // 1. HOVER LOGIC
+        // Drifts up and down slowly
+        const hover = Math.sin(now / 1000) * 5;
+        anim.bodyY = 10 + hover; // Lift the character
+        const hipY = p.y + anim.bodyY;
+
+        // 2. PARTICLE LOGIC
+        // Spawns small "aura" sparks around the player
+        if (now % 20 === 0 && typeof spawnProjectile === "function") {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 15 + Math.random() * 10;
+            const px = p.x + Math.cos(angle) * dist;
+            const py = p.y + Math.sin(angle) * dist;
+            // Spawning a tiny vertical "spark"
+            spawnProjectile(px, py, px, py - 5, "#00ffff", "magic", p.area);
+        }
+
+        return {
+            // Hands resting on knees in "Mudras" position
+            left:  { x: p.x - 18, y: hipY - 12 },
+            right: { x: p.x + 18, y: hipY - 12 },
+            
+            // Legs crossed (knees tucked inward and upward)
+            leftKnee:  { x: p.x - 12, y: hipY - 8 },
+            rightKnee: { x: p.x + 12, y: hipY - 8 },
+            
+            // Feet tucked under opposite legs
+            leftFoot:  { x: p.x + 5, yOffset: -5 + (hover * 0.2) },
+            rightFoot: { x: p.x - 5, yOffset: -5 + (hover * 0.2) }
+        };
+    },
+	"wave": (head, p, anim) => {
+        const now = Date.now();
+        // Fast oscillation for the hand shake
+        const handSwing = Math.sin(now / 150) * 15;
+        const shoulderY = head.y + 15;
+
+        return {
+            // Left hand at side/hip
+            left:  { x: head.x - 12, y: head.y + 25 },
+            // Right hand waving high
+            right: { x: head.x + 15 + handSwing, y: head.y - 5 },
+            rightElbow: { x: head.x + 18, y: head.y + 10 },
+            
+            // Standard standing legs
+            leftFoot: { x: p.x - 10, yOffset: 0 },
+            rightFoot: { x: p.x + 10, yOffset: 0 }
+        };
+    }
 };
 
 const BODY_PARTS = {

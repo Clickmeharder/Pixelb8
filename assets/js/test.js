@@ -1,5 +1,8 @@
 
 // offshoot game called stickmenpo - samurai ninja game?
+// still need story mode, streamer helped by chat can unlock things for everyone? new areas? new skills? boating?
+
+
 const stickmenfall_Config = {
     // ... your other config settings
     idleViewInterval: 3 * 60 * 1000, // 6 minutes in ms
@@ -863,62 +866,67 @@ function performAttack(p) {
 
     const now = Date.now();
 
-    // 1. Identify Target (Improved to always look for next available)
+    // 1. Identify Target
     let target = (p.area === "dungeon") 
         ? (enemies.find(e => !e.dead) || (boss && !boss.dead ? boss : null))
-        : Object.values(players).find(pl => pl.area === "home" && !pl.dead && pl.name !== p.name);
+        : Object.values(players).find(pl => pl.area === p.area && !pl.dead && pl.name !== p.name);
 
-    // If no target exists, wait in "attacking" pose (don't clear task yet)
     if (!target) {
         p.targetX = null;
         return; 
     }
+
     // --- Facing Logic ---
-    // If target is to the right, facing is 1. If to the left, facing is -1.
     p.facing = (target.x > p.x) ? 1 : -1;
-    // 2. Weapon Stats
-    const weapon = ITEM_DB[p.stats.equippedWeapon] || { power: 0, type: "unarmed", speed: 1000 }; // Speed up fists to 1s
-	let skillType = weapon.type === "bow" ? "archer" : (weapon.type === "staff" ? "magic" : "attack");
-	const rangeNeeded = (weapon.type === "bow" || weapon.type === "staff") ? 250 : 50; // Punching range is shorter (50)
-	const attackSpeed = weapon.speed || 1000;
 
-    // 3. Positioning
+    // 2. Weapon & Style Stats
+    const weaponKey = p.stats?.equippedWeapon || p.equipped?.weapon;
+    const weapon = ITEM_DB[weaponKey];
+    
+    // Fallback to "Unarmed/Boxing" stats
+    const isUnarmed = !weapon;
+    const type = isUnarmed ? "unarmed" : weapon.type;
+    const skillType = (type === "bow") ? "archer" : (type === "staff" ? "magic" : "attack");
+    
+    // Boxing range is tight (40), Melee is (60), Ranged is (250)
+    const rangeNeeded = isUnarmed ? 40 : (type === "bow" || type === "staff" ? 250 : 60);
+    const attackSpeed = isUnarmed ? 800 : (weapon.speed || 1000);
 
-    /* if (dist > rangeNeeded) {
-        const offset = p.x < target.x ? -rangeNeeded + 20 : rangeNeeded - 20;
+    // 3. Positioning Logic
+    const dist = Math.abs(p.x - target.x);
+
+    if (dist > rangeNeeded) {
+        // Generate a slightly unique offset so players don't stack perfectly on one pixel
+        const jitter = ((p.zLane || 0) % 10) - 5; 
+        const finalRange = rangeNeeded - 10 + jitter;
+        
+        const offset = p.x < target.x ? -finalRange : finalRange;
         p.targetX = target.x + offset;
-        // Keep activeTask as "attacking" so weapon stays in hand!
-    } else { */
-	const dist = Math.abs(p.x - target.x);
-	if (dist > rangeNeeded) {
-		// Generate a slightly unique offset for each player so they don't target the exact same spot
-		// Using p.zLane or p.id to jitter the landing spot
-		const jitter = (p.zLane % 10) - 5; 
-		const finalRange = rangeNeeded - 10 + jitter;
-		
-		const offset = p.x < target.x ? -finalRange : finalRange;
-		p.targetX = target.x + offset;
-	} else {
+    } else {
+        // We are in range! Stop walking and start swinging
         p.targetX = null;
         
-        // Ensure timer is initialized for the first swing
+        // Initialize timer if this is the start of the fight
         if (!p.lastAttackTime) p.lastAttackTime = now - attackSpeed;
 
         // 4. Attack Execution
         if (now - p.lastAttackTime > attackSpeed) {
-            let skillLvl = p.stats[skillType + "Level"] || 1;
-            let rawDmg = 5 + (skillLvl * 2) + (weapon.power || 0);
+            const skillLvl = p.stats[skillType + "Level"] || 1;
+            const power = isUnarmed ? 0 : (weapon.power || 0);
+            const rawDmg = 5 + (skillLvl * 2) + power;
 
-            if (weapon.type === "bow") {
+            // Visual Projectiles
+            if (type === "bow") {
                 spawnProjectile(p.x, p.y - 12, target.x, target.y - 15, "#fff", "arrow", p.area);
-            } else if (weapon.type === "staff") {
-                spawnProjectile(p.x, p.y - 12, target.x, target.y - 15, weapon.color || "#00ffff", "magic", p.area);
+            } else if (type === "staff") {
+                spawnProjectile(p.x, p.y - 12, target.x, target.y - 15, weapon?.color || "#00ffff", "magic", p.area);
             }
 
+            // Apply Damage
             applyDamage(target, rawDmg);
-            p.lastAttackTime = now; // Only reset here!
+            p.lastAttackTime = now; 
 
-            // Handle Loot/Stats
+            // Handle Loot/Stats on kill
             if (target.hp <= 0 && (target.isEnemy || target.isBoss)) {
                 if (!p.stats.dungeon) p.stats.dungeon = { highestTier: 0, kills: 0, bossKills: 0 };
                 p.stats.dungeon.kills++;
@@ -926,7 +934,9 @@ function performAttack(p) {
             }
 
             // Award XP
-            p.stats[skillType + "XP"] = (p.stats[skillType + "XP"] || 0) + 10;
+            const xpGain = 10;
+            p.stats[skillType + "XP"] = (p.stats[skillType + "XP"] || 0) + xpGain;
+            
             if (p.stats[skillType + "XP"] >= xpNeeded(p.stats[skillType + "Level"])) {
                 p.stats[skillType + "Level"]++;
                 p.stats[skillType + "XP"] = 0;
@@ -2802,27 +2812,6 @@ function drawHeadLayer(ctx, hX, hY, item, p) {
 }
 
 // --- 2. CAPES (Drawn behind the stickman) ---
-/* function drawCapeItem(ctx, p, anchors) {
-	const item = ITEM_DB[p.stats.equippedCape];
-	if (!item) return;
-    const headX = anchors.headX;
-
-    const centerX = p.x + (anchors.lean * 10);
-    ctx.fillStyle = item.color || "#666";
-    ctx.beginPath();
-    // Start at neck (Higher up than before)
-    ctx.moveTo(headX, p.y - 40 + anchors.bodyY); 
-    // Left side of cape
-    ctx.quadraticCurveTo(headX - 25, p.y + 10 + anchors.bodyY, centerX - 18, p.y + 22 + anchors.bodyY);
-    // Bottom edge
-    ctx.lineTo(centerX + 10, p.y + 15 + anchors.bodyY);
-    // Right side of cape back to neck
-    ctx.quadraticCurveTo(headX + 25, p.y + 10 + anchors.bodyY, headX, p.y - 10 + anchors.bodyY);
-    ctx.fill();
-    ctx.strokeStyle = "rgba(0,0,0,0.2)"; // Softer outline for capes
-    ctx.stroke();
-
-} */
 function drawCapeItem(ctx, p, anchors) {
     // Check both potential locations for the item key
     const itemKey = (p.stats && p.stats.equippedCape) || (p.equipped && p.equipped.cape);
@@ -4603,113 +4592,6 @@ function updateUI() {
 }
 
 let frameCount = 0;
-
-/* 
-function gameLoop() {
-    const now = Date.now();
-    frameCount++; 
-    ctx.clearRect(0, 0, c.width, c.height); 
-
-    // --- 1. LOGIC & TRANSITION UPDATES ---
-    // Update the transition state (Calculates the alpha for this frame)
-    updateAndDrawFade(ctx, c.width, c.height);
-    // Check if the "Director" wants to switch areas
-    runIdleViewMode();
-
-    // --- 2. VISUAL FOUNDATION & ALPHA CONTROL ---
-    ctx.save();
-    
-    // Screen Shake Logic
-    if (window.shakeAmount > 0) {
-        let sx = (Math.random() - 0.5) * window.shakeAmount;
-        let sy = (Math.random() - 0.5) * window.shakeAmount;
-        ctx.translate(sx, sy);
-        window.shakeAmount *= 0.9; 
-        if (window.shakeAmount < 0.1) window.shakeAmount = 0;
-    }
-
-    // --- THE DISSOLVE EFFECT ---
-    // If a transition is active, we use its alpha. Otherwise, we stay at 1.0 (Solid)
-    ctx.globalAlpha = cameraTransition.active ? cameraTransition.alpha : 1.0;
-
-    // --- 3. WORLD RENDERING ---
-    renderScene(); 
-    if (frameCount % 3 === 0) updateUI(); 
-    
-    if (dungeonActive) {
-        checkDungeonProgress(); 
-        checkDungeonFailure();  
-    } else {
-        const anyoneInDungeon = Object.values(players).some(p => p.area === "dungeon");
-        if (anyoneInDungeon) updateDungeonIdleTraining();
-    }
-
-    if (typeof arenaActive !== 'undefined' && arenaActive) {
-        checkArenaVictory();
-    }
-
-    // Update Logic for all players
-    Object.values(players).forEach(p => {
-        if (!p.dead) {
-            updatePhysics(p);           
-            updatePlayerStatus(p, now); 
-            
-            if (p.activeTask === "pvp") {
-                handlePvPLogic(p, now);
-            } else {
-                updatePlayerActions(p, now); 
-            }
-        }
-    });
-
-    // --- 4. RENDER PASS (Depth Sorting) ---
-    let renderQueue = [];
-    Object.values(players).forEach(p => {
-        if (p.area === viewArea) {
-            renderQueue.push({ type: 'player', data: p, y: p.y });
-        }
-    });
-
-    if (viewArea === "dungeon") {
-        if (boss && !boss.dead) renderQueue.push({ type: 'monster', data: boss, y: boss.y });
-        enemies.forEach(e => {
-            if (!e.dead) renderQueue.push({ type: 'monster', data: e, y: e.y });
-        });
-        drawLootBeams(ctx); 
-    }
-
-    renderQueue.sort((a, b) => a.y - b.y);
-
-    renderQueue.forEach(obj => {
-        if (obj.type === 'player') {
-            if (viewArea === "arena" && typeof arenaMode !== 'undefined' && arenaMode === "teams" && obj.data.team) {
-                ctx.save();
-                ctx.fillStyle = obj.data.team === "Red" ? "rgba(255,0,0,0.3)" : "rgba(0,0,255,0.3)";
-                ctx.beginPath();
-                ctx.ellipse(obj.data.x, obj.data.y + 2, 20, 8, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
-            drawStickman(ctx, obj.data);
-        } else if (obj.type === 'monster') {
-            drawMonster(ctx, obj.data);
-        }
-    });
-
-    // --- 5. OVERLAYS (Fading with the world) ---
-    updateAreaPlayerCounts();
-    updateSystemTicks(now);  
-    drawProjectiles(ctx);    
-    updateSplashText(ctx);   
-    handleTooltips();        
-	drawDirectorIndicator(ctx);
-    // --- 6. CLEANUP ---
-    ctx.restore(); // This restores BOTH the shake translation AND the globalAlpha
-
-    requestAnimationFrame(gameLoop);
-}
- *//* =================END GAME LOOP ================= */
-
 function gameLoop() {
     const now = Date.now();
     frameCount++; 
@@ -5255,7 +5137,7 @@ function renderAchRow(container, title, isUnlocked, color, subtext) {
     container.appendChild(div);
 }
 
-// Wait for the DOM to load to ensure the action bar exists
+
 function cmdEmote(p, type) {
     p.emote = type;
     
@@ -5270,30 +5152,77 @@ function cmdEmote(p, type) {
 }
 function cmdSetPose(p, user, args) {
     if (p.dead) return;
+    
+    // args[0] is "!pose", args[1] is the name of the pose
     let chosenPose = args[1]?.toLowerCase();
 
-    if (!chosenPose || chosenPose === "none" || chosenPose === "off") {
+    // 1. CLEAR POSE: "!pose none" or "!pose off"
+    if (!chosenPose || chosenPose === "none" || chosenPose === "off" || chosenPose === "stand") {
         p.forcedPose = null;
-        systemMessage(`${user} cleared their pose.`);
+        p.anim.bodyY = 0;
+        p.anim.lean = 0;
+        if (p.poseTimer) clearTimeout(p.poseTimer); // Cancel any temp timers
+        systemMessage(`${user} is now standing.`);
         return;
     }
 
+    // 2. VALIDATE POSE: Check if it exists in your library
     if (POSE_LIBRARY[chosenPose]) {
+        // Optional: Block combat poses from being set manually if you want them to be auto-only
+        const combatPoses = ["boxing", "archer", "action"];
+        if (combatPoses.includes(chosenPose)) {
+            systemMessage(`The ${chosenPose} pose is for combat only!`);
+            return;
+        }
+
         p.forcedPose = chosenPose;
 
-        // --- NEW: CANCEL DANCING ---
+        // 3. CLEANUP: Cancel dancing and temp timers
         if (p.activeTask === "dancing") {
             p.activeTask = null;
-			p.taskEndTime = null;
             p.danceStyle = 0;
         }
-        // ---------------------------
+        if (p.poseTimer) clearTimeout(p.poseTimer);
 
         systemMessage(`${user} set pose to: ${chosenPose}`);
     } else {
-        const available = Object.keys(POSE_LIBRARY).join(", ");
+        // 4. HELP MESSAGE: List available poses automatically
+        const available = Object.keys(POSE_LIBRARY)
+            .filter(k => !["boxing", "archer", "action"].includes(k))
+            .join(", ");
         systemMessage(`Unknown pose. Available: ${available}`);
     }
+}
+function cmdTempPose(p, poseType, duration = 3000) {
+    if (p.dead || !POSE_LIBRARY[poseType]) return;
+
+    // 1. Set the body pose
+    p.forcedPose = poseType;
+
+    // 2. Cancel dancing so the pose takes priority
+    if (p.activeTask === "dancing") {
+        p.activeTask = null;
+        p.taskEndTime = null;
+        p.danceStyle = 0;
+    }
+
+    // 3. Clear any existing pose timer to prevent overlap
+    if (p.poseTimer) clearTimeout(p.poseTimer);
+
+    // 4. THE BLOCK GOES HERE: Reset to "none" after the duration
+    p.poseTimer = setTimeout(() => {
+        // Only clear if the current pose is still the one we set
+        if (p.forcedPose === poseType) {
+            p.forcedPose = null;
+            p.anim.bodyY = 0;
+            p.anim.lean = 0;
+
+            // NEW: Finish with a satisfied emote if they were peeing
+            if (poseType === "pee") {
+                cmdEmote(p, "neutral"); 
+            }
+        }
+    }, duration);
 }
 function cmdWigColor(p, args) {
     const equippedId = p.stats.equippedHelmet;
@@ -5481,7 +5410,8 @@ function cmdSwim(p, user) {
 }
 function cmdDance(p, user, args) {
     if (p.dead) return;
-	// Store weapon before dancing
+
+    // Handle Weapon Sheathing
     if (p.stats.equippedWeapon) {
         p.stats.lastWeapon = p.stats.equippedWeapon;
         p.stats.equippedWeapon = null;
@@ -5489,23 +5419,31 @@ function cmdDance(p, user, args) {
 
     const level = p.stats.danceLevel || 1;
     let chosenStyle = parseInt(args[1]);
+
+    // Get a list of ALL dances the player currently has the level for
+    const unlockedIDs = Object.keys(DANCE_UNLOCKS)
+        .filter(id => level >= DANCE_UNLOCKS[id].minLvl)
+        .map(id => parseInt(id));
+
     if (!isNaN(chosenStyle)) {
+        // Checking if the specific ID exists and if the player is high enough level
         if (!DANCE_UNLOCKS[chosenStyle]) {
-            systemMessage(`${user}, try styles 1, 2, 3, or 4!`);
+            systemMessage(`${user}, that dance style doesn't exist!`);
             return;
         }
         if (level < DANCE_UNLOCKS[chosenStyle].minLvl) {
-            systemMessage(`${user}, you need Dance Lvl ${DANCE_UNLOCKS[chosenStyle].minLvl} for that!`);
+            systemMessage(`${user}, you need Dance Lvl ${DANCE_UNLOCKS[chosenStyle].minLvl} for ${DANCE_UNLOCKS[chosenStyle].name}!`);
             return;
         }
         p.danceStyle = chosenStyle;
     } else {
-        let unlockedStyles = [1];
-        if (level >= 5) unlockedStyles.push(2);
-        if (level >= 10) unlockedStyles.push(3);
-        if (level >= 20) unlockedStyles.push(4);
-        p.danceStyle = unlockedStyles[Math.floor(Math.random() * unlockedStyles.length)];
+        // Randomize from ALL unlocked dances automatically
+        p.danceStyle = unlockedIDs[Math.floor(Math.random() * unlockedIDs.length)];
     }
+
+    // Force clear any static poses before dancing
+    p.forcedPose = null; 
+    
     startTask(p, "dancing");
     systemMessage(`${user} is performing ${DANCE_UNLOCKS[p.danceStyle].name}!`);
     saveStats(p);
@@ -5533,11 +5471,26 @@ function cmdTestDance(p, user, args, flags) {
     systemMessage(`[TEST MODE] ${user} is force-playing: ${DANCE_UNLOCKS[chosenStyle].name}`);
 }
 function cmdListDances(p) {
-    const lvl = p.stats.danceLevel;
-    let msg = `Your Dance Lvl: ${lvl}. Available Dances: [1] The Hop (Lvl 1) `;
-    msg += lvl >= 5 ? `[2] The Flail (Lvl 5) ` : `[2] LOCKED (Lvl 5) `;
-    msg += lvl >= 10 ? `[3] The Lean (Lvl 10)` : `[3] LOCKED (Lvl 10)`;
-    systemMessage(msg);
+    const lvl = p.stats.danceLevel || 1;
+    let unlocked = [];
+    let nextUnlock = null;
+
+    Object.keys(DANCE_UNLOCKS).forEach(id => {
+        const dance = DANCE_UNLOCKS[id];
+        if (lvl >= dance.minLvl) {
+            unlocked.push(`[${id}] ${dance.name}`);
+        } else {
+            // Track the very next dance they can get
+            if (!nextUnlock || dance.minLvl < nextUnlock.minLvl) {
+                nextUnlock = dance;
+            }
+        }
+    });
+
+    systemMessage(`Lvl ${lvl} Dances: ${unlocked.join(", ")}`);
+    if (nextUnlock) {
+        systemMessage(`Next: ${nextUnlock.name} at Lvl ${nextUnlock.minLvl}!`);
+    }
 }
 
 function cmdStop(p, user) {
@@ -6302,8 +6255,10 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "!heal")   { cmdHeal(p, user, args); return; }
     if (cmd === "!dance")  { cmdDance(p, user, args); return; }
     if (cmd === "!lurk")   { cmdLurk(p, user); return; }
+	if (cmd === "!meditate" || cmd === "!zen") { cmdSetPose(p, p.name, ["!meditate", "meditate"]); return; }
     if (cmd === "!respawn") { cmdRespawn(p); return; }
-
+	// The General Command
+	if (cmd === "!pose" || cmd === "::pose") { cmdSetPose(p, p.name, args);return; }
     // -- Travel commands
     if (cmd === "!travel") { movePlayer(p, args[1]); return; }
     if (cmd === "!home")   { movePlayer(p, "home"); return; }
@@ -6316,7 +6271,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     // -- Events
     if (cmd === "!join")   { joinDungeonQueue(p); return; }
     if (cmd === "!pvp")    { joinArenaQueue(p); return; }
-
+	
     // -- Misc / UI (Usually no cooldown or very short)
 	if (cmd === ":)" || cmd === "!happy")     { cmdEmote(p, "happy"); return; }
 	if (cmd === ":(" || cmd === "!sad")       { cmdEmote(p, "sad"); return; }
@@ -6333,6 +6288,17 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
 	if (cmd === ":p")                         { cmdEmote(p, "tongue"); return; }
 	if (cmd === ":#" || cmd === "!blush")      { cmdEmote(p, "blush"); return; }
 	if (cmd === "x.x" || cmd === "!dead") { cmdEmote(p, "ko"); return; }
+	const greetings = ["0/", "o/", "\\o", "\\0", "hi", "hey", "hello", "ola"];
+    if (greetings.includes(cmd)) {
+        cmdEmote(p, "grin"); 
+        cmdTempPose(p, "wave", 3000); 
+        return; 
+    }
+	if (cmd === "!pee" || cmd === "!relief") { cmdTempPose(p, "pee", 5000); return; }
+	if (cmd === "!sit")     { cmdSetPose(p, p.name, ["!sit", "sit"]); return; }
+	if (cmd === "!pushups") { cmdSetPose(p, p.name, ["!pushups", "pushups"]); return; }
+
+	if (cmd === "!stand" || cmd === "!stop") { cmdSetPose(p, p.name, ["!stand", "none"]); return; }
     if (cmd === "!wigcolor")   { cmdWigColor(p, args); return; }
     if (cmd === "!sheath")     { cmdSheath(p, user); return; }
     if (cmd === "!equip")      { cmdEquip(p, args); return; }
