@@ -2024,29 +2024,30 @@ const POSE_LIBRARY = {
         };
     },
 
-    "pushups": (head, p, anim) => {
-        const hipY = p.y + anim.bodyY;
-        const shoulderY = head.y + 15;
+	"pushups": (head, p, anim) => {
+		const hipY = p.y + anim.bodyY;
+		const shoulderY = head.y + 15;
 
-        return {
-            // Hands pinned to the floor (p.y + 25)
-            // We use yOffset to fight the bodyY movement
-            left:  { x: head.x + 2, yOffset: (p.y + 25) - (p.y + 25 + anim.bodyY) },
-            right: { x: head.x + 12, yOffset: (p.y + 25) - (p.y + 25 + anim.bodyY) },
+		return {
+			// Hands: Pinned to floor. 
+			// We subtract anim.bodyY to cancel the global movement.
+			left:  { x: head.x + 2,  yOffset: -anim.bodyY }, 
+			right: { x: head.x + 12, yOffset: -anim.bodyY },
 
-            // Elbows flare out as the head gets closer to floor
-            leftElbow:  { x: head.x - 12, y: shoulderY + 2 },
-            rightElbow: { x: head.x + 22, y: shoulderY + 2 },
+			// Elbows: These flare out relative to the moving shoulders.
+			// No offset needed here so they stay between shoulder and hand.
+			leftElbow:  { x: head.x - 12, y: shoulderY + 5 },
+			rightElbow: { x: head.x + 22, y: shoulderY + 5 },
 
-            // Knees following the plank line
-            leftKnee:  { x: p.x - 20, y: hipY + 5 },
-            rightKnee: { x: p.x - 18, y: hipY + 8 },
+			// Knees: Moving with the torso plank
+			leftKnee:  { x: p.x - 20, y: hipY + 5 },
+			rightKnee: { x: p.x - 18, y: hipY + 8 },
 
-            // Feet locked to the floor behind the character
-            leftFoot:  { x: p.x - 40, yOffset: -anim.bodyY },
-            rightFoot: { x: p.x - 38, yOffset: -anim.bodyY }
-        };
-    },
+			// Feet: Pinned to the floor behind the body.
+			leftFoot:  { x: p.x - 40, yOffset: -anim.bodyY },
+			rightFoot: { x: p.x - 38, yOffset: -anim.bodyY }
+		};
+	},
 
     "pee": (head, p, anim) => {
         const now = Date.now();
