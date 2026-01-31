@@ -1990,32 +1990,40 @@ const POSE_LIBRARY = {
     },
 
 	"pushups": (head, p, anim) => {
-		// These are our pivot points on the floor
-		const floorY = p.y + 25; 
-		const hipY = p.y + anim.bodyY;
-		const shoulderY = head.y + 15;
+		// 1. Pivot Points (The Floor)
+		const groundYOffset = -anim.bodyY; // Cancels the vertical movement of the body
+
+		// 2. Define Shoulder & Hand Positions (Archer Style)
+		const shoulderL = { x: head.x - 5, y: head.y + 15 };
+		const shoulderR = { x: head.x + 5, y: head.y + 15 };
+		
+		// Hands are pinned to the floor, slightly wider than the shoulders
+		const handL = { x: head.x - 15, yOffset: groundYOffset };
+		const handR = { x: head.x + 25, yOffset: groundYOffset };
+
+		// 3. Elbow Logic (Flare Outwards)
+		// As the shoulder drops (head.y + anim.bodyY), the elbows push further out
+		const elbowL = { x: shoulderL.x - 10, y: shoulderL.y + 5 };
+		const elbowR = { x: shoulderR.x + 10, y: shoulderR.y + 5 };
 
 		return {
-			// HANDS: Pinned to floor. 
-			// We use yOffset to cancel the body's vertical movement.
-			left:  { x: head.x + 5,  yOffset: -anim.bodyY }, 
-			right: { x: head.x + 15, yOffset: -anim.bodyY },
+			// HANDS
+			left: handL,
+			right: handR,
+			
+			// JOINTS
+			leftElbow: elbowL,
+			rightElbow: elbowR,
 
-			// ELBOWS: We push these out and slightly up relative to the shoulders.
-			// As the shoulderY drops, the distance to the pinned Hand increases,
-			// causing the drawStickmanBody function to create a "V" bend.
-			leftElbow:  { x: head.x - 12, y: shoulderY + 5 },
-			rightElbow: { x: head.x + 22, y: shoulderY + 5 },
-
-			// LEGS: We want these perfectly straight. 
-			// By NOT providing a Knee joint, drawStickmanBody draws a straight line 
-			// from Hip to Foot.
-			leftKnee:  null, 
+			// LEGS (Rigid Board)
+			// No knee joints = straight line from hip to foot
+			leftKnee: null,
 			rightKnee: null,
 
-			// FEET: Pinned to floor behind the body.
-			leftFoot:  { x: p.x - 25, yOffset: +anim.bodyY },
-			rightFoot: { x: p.x - 25, yOffset: +anim.bodyY }
+			// FEET (Pivot point behind the body)
+			// Pinned to floor to prevent floating during the 'up' phase
+			leftFoot: { x: p.x - 35, yOffset: groundYOffset },
+			rightFoot: { x: p.x - 32, yOffset: groundYOffset }
 		};
 	},
 
