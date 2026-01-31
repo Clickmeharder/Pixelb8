@@ -1817,7 +1817,7 @@ const POSE_LIBRARY = {
 	"dab": (head, p, anim) => {
         const shoulderY = head.y + 15;
         return {
-            left: { x: head.x - 5, y: shoulderY + 2 },
+            left: { x: head.x - 25, y: head.y - 7 },
             leftElbow: { x: head.x - 15, y: shoulderY - 5 },
             right: { x: head.x + 25, y: head.y - 10 },
             // Ground the feet
