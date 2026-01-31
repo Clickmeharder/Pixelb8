@@ -3059,7 +3059,8 @@ function getAnimationState(p, now) {
     // Fallback: If training and no pose is forced, default to pushups
     if (p.activeTask === "training" && !activePose) activePose = "pushups";
 	if (activePose === "sit") {
-        anim.bodyY = 15;
+        anim.bodyY = 20;
+		anim.lean = -0.3;
         anim.pose = "sit";
 	} else if (activePose === "pushups") {
 		const rep = (Math.sin(now / 300) + 1) / 2;
