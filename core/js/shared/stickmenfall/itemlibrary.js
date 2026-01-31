@@ -1981,8 +1981,8 @@ const POSE_LIBRARY = {
 
 		// 3. Feet: Pushed slightly further out than the knees
 		// No yOffset needed here because we want them to drop with the bodyY
-		const footL = { x: p.x + 15}; 
-		const footR = { x: p.x - 15};
+		const footL = { x: p.x + 15, y: hipY }; 
+		const footR = { x: p.x - 15, y: hipY };
 
 		return {
 			// Joint flare
@@ -1999,25 +1999,27 @@ const POSE_LIBRARY = {
 		const groundYOffset = -anim.bodyY;
 		const shoulderY = head.y + 15;
 		
-		// We use a slight multiplier on lean for the elbows to make them flare
-		// wider as the body gets lower to the ground.
+		// Calculate the length of our plank (Distance from head to feet)
+		// By basing feet on head.x, we prevent the "stretching" effect
+		const plankLength = 70; 
+		const feetX = head.x + plankLength; 
+
 		return {
-			// HANDS: Pinned to floor under the face/chest
+			// HANDS: Glued to floor under the chest
 			left:  { x: head.x - 5, yOffset: groundYOffset },
 			right: { x: head.x + 15, yOffset: groundYOffset },
 
-			// ELBOWS: Flare out further than the hands to create the V-shape
+			// ELBOWS: Flare out for the push
 			leftElbow:  { x: head.x - 18, y: shoulderY + 8 },
 			rightElbow: { x: head.x + 28, y: shoulderY + 8 },
 
-			// LEGS: Keep them perfectly straight (null knees)
+			// LEGS: Explicitly null to keep the line straight
 			leftKnee: null,
 			rightKnee: null,
 
-			// FEET: The anchor point. 
-			// Increased the X offset to 45 to accommodate the deeper lean.
-			leftFoot:  { x: p.x + 45, yOffset: groundYOffset },
-			rightFoot: { x: p.x + 48, yOffset: groundYOffset }
+			// FEET: Now they follow head.x, keeping the body length constant!
+			leftFoot:  { x: feetX, yOffset: groundYOffset },
+			rightFoot: { x: feetX + 3, yOffset: groundYOffset }
 		};
 	},
 
