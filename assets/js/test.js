@@ -3060,7 +3060,7 @@ function getAnimationState(p, now) {
     if (p.activeTask === "training" && !activePose) activePose = "pushups";
 	if (activePose === "sit") {
         anim.bodyY = 20;
-		//anim.lean = -0.4;
+		anim.lean = -0.4;
         anim.pose = "sit";
 	} else if (activePose === "pushups") {
 		const rep = (Math.sin(now / 300) + 1) / 2;
