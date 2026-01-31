@@ -2895,7 +2895,6 @@ function drawArmor(ctx, p, anchors) {
     ctx.lineTo(hipX - 6, p.y + 4 + bodyY);    
     
     ctx.closePath();
-    ctx.globalAlpha = 0.8;
     ctx.fill();
     ctx.globalAlpha = 1.0;
     ctx.stroke();
