@@ -3087,14 +3087,26 @@ function getAnimationState(p, now) {
         anim.bodyY = 18;
 		//anim.lean = -0.1;
         anim.pose = "sit";
-	} else if (activePose === "pushups") {
+	}/*  else if (activePose === "pushups") {
     const rep = (Math.sin(now / 300) + 1) / 2;
     anim.bodyY = 15 + (rep * 12); 
     // Static lean keeps the head on a fixed vertical tracks
     anim.lean = -1.4; 
     anim.pose = "pushups";
 
-    } else if (activePose === "meditation") {
+    } */	else if (activePose === "pushups") {
+		const rep = (Math.sin(now / 300) + 1) / 2; // 0 (up) to 1 (down)
+		
+		// We keep bodyY static so the 'hips' stay at a constant height
+		anim.bodyY = 25; 
+		
+		// The Lean does the work: moving the head from 'angled' to 'flat'
+		// -1.5 is a diagonal plank, -3.5 is nearly flat on the floor
+		anim.lean = -1.5 - (rep * 2.0); 
+		
+		anim.pose = "pushups";
+	}
+	else if (activePose === "meditation") {
         const breathe = Math.sin(now / 1000) * 3;
         anim.bodyY = 10 + breathe; // Gentle hovering/bobbing
         anim.pose = "meditation";
