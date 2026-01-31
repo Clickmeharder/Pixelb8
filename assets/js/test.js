@@ -3091,7 +3091,7 @@ function getAnimationState(p, now) {
     const rep = (Math.sin(now / 300) + 1) / 2;
     anim.bodyY = 15 + (rep * 12); 
     // Static lean keeps the head on a fixed vertical tracks
-    anim.lean = -2.5; 
+    anim.lean = -1; 
     anim.pose = "pushups";
 
     } else if (activePose === "meditation") {
