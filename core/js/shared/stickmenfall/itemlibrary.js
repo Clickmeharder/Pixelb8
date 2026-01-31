@@ -1970,22 +1970,57 @@ const POSE_LIBRARY = {
             rightFoot: { x: p.x + 12, yOffset: -anim.bodyY }
         };
     },
-	"sit": (head, p, anim) => {
-        // Hips are at p.y + anim.bodyY (handled by anchors.hipY)
-        const hipY = p.y + anim.bodyY;
+"sit": (head, p, anim) => {
+        const hipY = p.y + anim.bodyY; // Our anchor for the lower body
         
         return {
-            // Hands resting on knees
+            // Hands: Resting on the thighs
             left:  { x: p.x - 15, y: hipY - 5 },
             right: { x: p.x + 15, y: hipY - 5 },
             
-            // Knees tucked up
-            leftKnee:  { x: p.x - 20, y: hipY - 12 },
-            rightKnee: { x: p.x + 20, y: hipY - 12 },
+            // Knees: Popped upward (relative to hip)
+            leftKnee:  { x: p.x - 22, y: hipY - 12 },
+            rightKnee: { x: p.x + 22, y: hipY - 12 },
             
-            // Feet flat on the floor (yOffset cancels out the body dropping)
-            leftFoot:  { x: p.x - 22, yOffset: -anim.bodyY },
-            rightFoot: { x: p.x + 22, yOffset: -anim.bodyY }
+            // Feet: Pushed slightly forward and out, moving DOWN with the hip
+            // We removed yOffset so they stay 25px below the SHIFTED body
+            leftFoot:  { x: p.x - 24 }, 
+            rightFoot: { x: p.x + 24 }
+        };
+    },
+
+    "pushups": (head, p, anim) => {
+        const hipY = p.y + anim.bodyY;
+        const shoulderY = head.y + 15;
+
+        return {
+            // Hands: Attached to the shoulders but slightly wider
+            left:  { x: head.x - 10, y: shoulderY + 10 },
+            right: { x: head.x + 10, y: shoulderY + 10 },
+
+            // Elbows: Flared out (calculated relative to the leaning shoulder)
+            leftElbow:  { x: head.x - 20, y: shoulderY + 5 },
+            rightElbow: { x: head.x + 20, y: shoulderY + 5 },
+
+            // Knees & Feet: Following the diagonal plank of the body
+            leftKnee:  { x: p.x - 15, y: hipY + 5 },
+            rightKnee: { x: p.x - 12, y: hipY + 8 },
+            
+            // No yOffset here means feet stay attached to the diagonal spine
+            leftFoot:  { x: p.x - 35 }, 
+            rightFoot: { x: p.x - 32 }
+        };
+    },
+
+    "meditate": (head, p, anim) => {
+        const hipY = p.y + anim.bodyY;
+        return {
+            left:  { x: p.x - 15, y: hipY - 2 },
+            right: { x: p.x + 15, y: hipY - 2 },
+            leftKnee:  { x: p.x - 20, y: hipY + 5 },
+            rightKnee: { x: p.x + 20, y: hipY + 5 },
+            leftFoot:  { x: p.x - 8 },
+            rightFoot: { x: p.x + 8 }
         };
     },
 
@@ -2035,27 +2070,6 @@ const POSE_LIBRARY = {
             rightFoot: { x: p.x + 8, yOffset: 0 }
         };
     },
-	"meditate": (head, p, anim) => {
-		const now = Date.now();
-		const hover = Math.sin(now / 1000) * 8;
-		anim.bodyY = 5 + hover; // Floating!
-		const hipY = p.y + anim.bodyY;
-
-		return {
-			// Hands in lap/mudra
-			left:  { x: p.x - 15, y: hipY - 10 },
-			right: { x: p.x + 15, y: hipY - 10 },
-			
-			// Knees tucked high and wide
-			leftKnee:  { x: p.x - 18, y: hipY - 12 },
-			rightKnee: { x: p.x + 18, y: hipY - 12 },
-			
-			// FEET: Placed near the opposite knee (crossed legs)
-			// By leaving yOffset at 0 here, the feet move WITH the bodyY
-			leftFoot:  { x: p.x + 8, yOffset: 0 }, 
-			rightFoot: { x: p.x - 8, yOffset: 0 }
-		};
-	},
 	"wave": (head, p, anim) => {
 		const handSwing = Math.sin(Date.now() / 150) * 15;
 		return {
