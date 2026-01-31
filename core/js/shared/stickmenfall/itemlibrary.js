@@ -2011,25 +2011,24 @@ const POSE_LIBRARY = {
             rightFoot: { x: p.x + 25, yOffset: 0 }
         };
     },
+	"pushups": (head, p, anim) => {
+		const now = Date.now();
+		const rep = (Math.sin(now / 300) + 1) / 2; 
+		anim.lean = -0.9; 
+		anim.bodyY = 20 - (rep * 15);
 
-    "pushups": (head, p, anim) => {
-        const now = Date.now();
-        const rep = (Math.sin(now / 300) + 1) / 2; // Movement logic inside the pose
-        anim.lean = -0.9; // Horizontal
-        anim.bodyY = 20 - (rep * 15);
-
-        return {
-            left:  { x: head.x - 5, y: p.y + 25 }, 
-            right: { x: head.x + 5, y: p.y + 25 },
-            leftElbow:  { x: head.x - 15, y: head.y + 15 + (rep * 5) },
-            rightElbow: { x: head.x + 15, y: head.y + 15 + (rep * 5) },
-            leftKnee:  { x: p.x - 25, y: p.y + 22 },
-            rightKnee: { x: p.x - 25, y: p.y + 22 },
-            leftFoot:  { x: p.x - 45, yOffset: 0 },
-            rightFoot: { x: p.x - 45, yOffset: 0 }
-        };
-    },
-
+		return {
+			left:  { x: head.x - 5, y: p.y + 25 }, 
+			right: { x: head.x + 5, y: p.y + 25 },
+			leftElbow:  { x: head.x - 15, y: head.y + 15 + (rep * 5) },
+			rightElbow: { x: head.x + 15, y: head.y + 15 + (rep * 5) },
+			// Distribute knees and feet so they don't overlap
+			leftKnee:  { x: p.x - 25, y: p.y + 20 },
+			rightKnee: { x: p.x - 20, y: p.y + 24 }, // Offset slightly
+			leftFoot:  { x: p.x - 45, yOffset: 0 },
+			rightFoot: { x: p.x - 43, yOffset: 2 }  // Offset slightly
+		};
+	},
     "pee": (head, p, anim) => {
         const now = Date.now();
         // Particle logic inside the pose:

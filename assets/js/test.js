@@ -2763,34 +2763,7 @@ function resolveCrowding(p) {
         }
     }
 }
-/* function resolveCrowding(p) {
-    const bubbleX = 35; // Horizontal personal space
-    const bubbleY = 12;  // Vertical personal space (tight depth)
-    
-    // GHOSTING LOGIC: If I'm actively moving to intercept/interact, 
-    // disable pushing so I don't get stuck behind idle players.
-    if (p.targetX !== null) return;
 
-    for (let id in players) {
-        let other = players[id];
-        if (other === p || other.area !== p.area || other.dead || other.targetY) continue;
-
-        let dx = p.x - other.x;
-        let dy = p.y - other.y; // This checks their depth/lane difference
-
-        // Only collide if they are close in BOTH X and Y
-        if (Math.abs(dx) < bubbleX && Math.abs(dy) < bubbleY) {
-            if (dx === 0) dx = p.id > other.id ? 1 : -1;
-
-            let force = (bubbleX - Math.abs(dx)) * 0.15;
-            p.x += dx > 0 ? force : -force;
-            
-            // Optional: Also push them slightly in Y to help them "slip" past
-            let yForce = (bubbleY - Math.abs(dy)) * 0.1;
-            p.y += dy > 0 ? yForce : -yForce;
-        }
-    }
-} */
 function triggerSplash(p) {
     // We pass 'p' so the floater knows the name, area, and position
     spawnFloater(p, "💦 SPLASH!", "#44ccff");
@@ -2907,22 +2880,38 @@ function drawArmor(ctx, p, anchors) {
 // --- 4. PANTS (Drawn over the legs) ---
 function drawPantsItem(ctx, p, anchors, leftFoot, rightFoot, item) {
     if (!item) return;
+
+    // 1. Get the same limb data the body uses
+    const now = Date.now();
+    const anim = getAnimationState(p, now);
+    const limbs = getLimbPositions(p, anchors, anim, now);
+
     ctx.save();
     ctx.strokeStyle = item.color || "#333";
-    ctx.lineWidth = 4; // Slightly wider than the stick (3) to "wrap" it
+    ctx.lineWidth = 4; 
     ctx.lineCap = "round";
-    
-    // Left Leg Pant
+    ctx.lineJoin = "round"; // Crucial for the knee bend
+
+    // --- Left Leg Pant ---
     ctx.beginPath();
     ctx.moveTo(p.x, anchors.hipY);
+    if (limbs.leftKnee) {
+        // Bend the pants at the knee
+        ctx.lineTo(limbs.leftKnee.x, limbs.leftKnee.y);
+    }
     ctx.lineTo(leftFoot.x, leftFoot.y);
     ctx.stroke();
     
-    // Right Leg Pant
+    // --- Right Leg Pant ---
     ctx.beginPath();
     ctx.moveTo(p.x, anchors.hipY);
+    if (limbs.rightKnee) {
+        // Bend the pants at the knee
+        ctx.lineTo(limbs.rightKnee.x, limbs.rightKnee.y);
+    }
     ctx.lineTo(rightFoot.x, rightFoot.y);
     ctx.stroke();
+
     ctx.restore();
 }
 // --- 5. BOOTS ---
@@ -5273,18 +5262,17 @@ function cmdTempPose(p, poseType, duration = 3000) {
 
     // 4. THE BLOCK GOES HERE: Reset to "none" after the duration
     p.poseTimer = setTimeout(() => {
-        // Only clear if the current pose is still the one we set
-        if (p.forcedPose === poseType) {
-            p.forcedPose = null;
-            p.anim.bodyY = 0;
-            p.anim.lean = 0;
+		// Check if player and anim object still exist
+		if (p && p.anim && p.forcedPose === poseType) {
+			p.forcedPose = null;
+			p.anim.bodyY = 0;
+			p.anim.lean = 0;
 
-            // NEW: Finish with a satisfied emote if they were peeing
-            if (poseType === "pee") {
-                cmdEmote(p, "neutral"); 
-            }
-        }
-    }, duration);
+			if (poseType === "pee") {
+				cmdEmote(p, "neutral"); 
+			}
+		}
+	}, duration);
 }
 function cmdWigColor(p, args) {
     const equippedId = p.stats.equippedHelmet;
