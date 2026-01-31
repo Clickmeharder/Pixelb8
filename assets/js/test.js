@@ -6315,8 +6315,8 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "!heal")   { cmdHeal(p, user, args); return; }
     if (cmd === "!dance")  { cmdDance(p, user, args); return; }
     if (cmd === "!lurk")   { cmdLurk(p, user); return; }
-	if (cmd === "!meditate" || cmdTrain(p, user, "meditate"); return; }
-	if (cmd === "!pushups" || cmdTrain(p, user, "pushups"); return; }
+	if (cmd === "!meditate"|| cmd === "::meditate" ) { cmdTrain(p, user, "meditate"); return; }
+	if (cmd === "!pushups" || cmd === "::pushups" )  { cmdTrain(p, user, "pushups"); return; }
     if (cmd === "!respawn") { cmdRespawn(p); return; }
 	// The General Command
 	
@@ -6355,10 +6355,10 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         cmdTempPose(p, "wave", 3000); 
         return; 
     }
-	if (cmd === "!pee" || cmd === "!relief") { cmdTempPose(p, "pee", 5000); return; }
-	if (cmd === "!pose" || cmd === "::pose") { cmdSetPose(p, args);return; }
-	if (cmd === "!sit")     { cmdSetPose(p, "sit"); return; }
-	if (cmd === "!stand" || cmd === "!stop") { cmdSetPose(p, "stand"); return; }
+	if (cmd === "!pee" || cmd === "::pee") { cmdTempPose(p, "pee", 5000); return; }
+	if (cmd === "!pose" || cmd === "::pose")    { cmdSetPose(p, args[1]); return; }
+	if (cmd === "!sit" || cmd === "::sit")     { cmdSetPose(p, "sit"); return; }
+	if (cmd === "!stand" || cmd === "::stand")   { cmdSetPose(p, "none"); return; }
     if (cmd === "!wigcolor")   { cmdWigColor(p, args); return; }
     if (cmd === "!sheath")     { cmdSheath(p, user); return; }
     if (cmd === "!equip")      { cmdEquip(p, args); return; }
