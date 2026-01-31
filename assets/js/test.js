@@ -3054,7 +3054,23 @@ function renderEquipmentLayer(ctx, p, now, anchors, lH, rH, lF, rF) {
 // --- HELPERS ---
 function getAnimationState(p, now) {
     let anim = { bodyY: 0, armMove: 0, lean: p.lean || 0, pose: null };
-    
+    // 1. Determine which pose is active
+    let activePose = p.forcedPose || anim.pose;
+    // Fallback: If training and no pose is forced, default to pushups
+    if (p.activeTask === "training" && !activePose) activePose = "pushups";
+	if (activePose === "sit") {
+        anim.bodyY = 15;
+        anim.pose = "sit";
+    } else if (activePose === "pushups") {
+        const rep = (Math.sin(now / 300) + 1) / 2;
+        anim.bodyY = 18 + (rep * 8); 
+        anim.lean = -1.2; // Rotates armor/torso into plank
+        anim.pose = "pushups";
+    } else if (activePose === "meditation") {
+        const breathe = Math.sin(now / 1000) * 3;
+        anim.bodyY = 10 + breathe; // Gentle hovering/bobbing
+        anim.pose = "meditation";
+    }
     // 1. Swimming
     const isInWater = (p.area === "pond" && p.x > 250);
     if (isInWater) {

@@ -1971,55 +1971,47 @@ const POSE_LIBRARY = {
         };
     },
 	"sit": (head, p, anim) => {
-		anim.bodyY = 15; // Hips drop down
-		const hipY = p.y + anim.bodyY;
-		
-		return {
-			// Hands resting on the lap
-			left:  { x: head.x - 10, y: hipY - 5 },
-			right: { x: head.x + 10, y: hipY - 5 },
-			
-			// Knees bent upward and outward
-			leftKnee:  { x: p.x - 20, y: hipY - 10 },
-			rightKnee: { x: p.x + 20, y: hipY - 10 },
-			
-			// FEET: yOffset: -anim.bodyY keeps them on the floor 
-			// while the rest of the body moves down.
-			leftFoot:  { x: p.x - 25, yOffset: -anim.bodyY },
-			rightFoot: { x: p.x + 25, yOffset: -anim.bodyY }
-		};
-	},
-	"pushups": (head, p, anim) => {
-		const now = Date.now();
-		// Movement cycle: 0 is chest-to-floor, 1 is arms-extended
-		const rep = (Math.sin(now / 300) + 1) / 2; 
-		
-		// We drive the body height via anim.bodyY (higher Y = lower to ground)
-		anim.bodyY = 15 + (rep * 10); 
-		anim.lean = -0.7; // Lean forward into the plank
+        // Hips are at p.y + anim.bodyY (handled by anchors.hipY)
+        const hipY = p.y + anim.bodyY;
+        
+        return {
+            // Hands resting on knees
+            left:  { x: p.x - 15, y: hipY - 5 },
+            right: { x: p.x + 15, y: hipY - 5 },
+            
+            // Knees tucked up
+            leftKnee:  { x: p.x - 20, y: hipY - 12 },
+            rightKnee: { x: p.x + 20, y: hipY - 12 },
+            
+            // Feet flat on the floor (yOffset cancels out the body dropping)
+            leftFoot:  { x: p.x - 22, yOffset: -anim.bodyY },
+            rightFoot: { x: p.x + 22, yOffset: -anim.bodyY }
+        };
+    },
 
-		const hipY = p.y + anim.bodyY;
-		const shoulderY = head.y + 15;
+    "pushups": (head, p, anim) => {
+        const hipY = p.y + anim.bodyY;
+        const shoulderY = head.y + 15;
 
-		return {
-			// HANDS: These stay at a fixed "Floor" level relative to the base p.y
-			// As the body (head/hips) moves down via bodyY, the hands "reach up" to the floor
-			left:  { x: head.x + 10, y: p.y + 25 }, 
-			right: { x: head.x + 15, y: p.y + 25 },
+        return {
+            // Hands pinned to the floor (p.y + 25)
+            // We use yOffset to fight the bodyY movement
+            left:  { x: head.x + 2, yOffset: (p.y + 25) - (p.y + 25 + anim.bodyY) },
+            right: { x: head.x + 12, yOffset: (p.y + 25) - (p.y + 25 + anim.bodyY) },
 
-			// ELBOWS: Bend based on the rep. Higher Y when the body is low.
-			leftElbow:  { x: head.x - 5, y: shoulderY + 5 + (rep * 5) },
-			rightElbow: { x: head.x + 20, y: shoulderY + 5 + (rep * 5) },
+            // Elbows flare out as the head gets closer to floor
+            leftElbow:  { x: head.x - 12, y: shoulderY + 2 },
+            rightElbow: { x: head.x + 22, y: shoulderY + 2 },
 
-			// KNEES: Just like your archer pose, we provide a joint
-			leftKnee:  { x: p.x - 20, y: hipY + 5 },
-			rightKnee: { x: p.x - 18, y: hipY + 8 },
+            // Knees following the plank line
+            leftKnee:  { x: p.x - 20, y: hipY + 5 },
+            rightKnee: { x: p.x - 18, y: hipY + 8 },
 
-			// FEET: Placed behind the body at floor level
-			leftFoot:  { x: p.x - 40, yOffset: -anim.bodyY }, 
-			rightFoot: { x: p.x - 38, yOffset: -anim.bodyY }
-		};
-	},
+            // Feet locked to the floor behind the character
+            leftFoot:  { x: p.x - 40, yOffset: -anim.bodyY },
+            rightFoot: { x: p.x - 38, yOffset: -anim.bodyY }
+        };
+    },
     "pee": (head, p, anim) => {
         const now = Date.now();
         // Particle logic inside the pose:
