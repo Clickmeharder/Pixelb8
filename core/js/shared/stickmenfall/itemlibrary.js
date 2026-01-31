@@ -1798,41 +1798,42 @@ const POSE_LIBRARY = {
 		};
 	},
 	"crouch": (head, p, anim) => {
-        const hipY = p.y + 0 + anim.bodyY;
-        // Knees flare wide and high while the body is low
-        return {
-            left:  { x: head.x - 15, y: head.y + 20 },
-            right: { x: head.x + 15, y: head.y + 20 },
-            leftKnee:  { x: p.x - 18, y: hipY + 5 },
-            rightKnee: { x: p.x + 18, y: hipY + 5 },
-            leftFoot:  { x: p.x - 10, yOffset: 0 },
-            rightFoot: { x: p.x + 10, yOffset: 0 }
-        };
-    },
-    "dab": (head, p, anim) => {
+		anim.bodyY = 18; // Very low
+		const hipY = p.y + anim.bodyY;
+		
+		return {
+			left:  { x: head.x - 15, y: head.y + 20 },
+			right: { x: head.x + 15, y: head.y + 20 },
+			
+			// Knees pushed out far to the sides
+			leftKnee:  { x: p.x - 22, y: hipY + 2 },
+			rightKnee: { x: p.x + 22, y: hipY + 2 },
+			
+			// Feet pinned to the ground
+			leftFoot:  { x: p.x - 12, yOffset: -anim.bodyY },
+			rightFoot: { x: p.x + 12, yOffset: -anim.bodyY }
+		};
+	},
+	"dab": (head, p, anim) => {
         const shoulderY = head.y + 15;
         return {
-            // Left arm tucked (elbow out)
             left: { x: head.x - 5, y: shoulderY + 2 },
             leftElbow: { x: head.x - 15, y: shoulderY - 5 },
-            // Right arm pointed straight up/out
             right: { x: head.x + 25, y: head.y - 10 },
-            // Legs in a stylish split
-            leftFoot: { x: p.x - 15, yOffset: 0 },
-            rightFoot: { x: p.x + 5, yOffset: 0 }
+            // Ground the feet
+            leftFoot: { x: p.x - 15, yOffset: -anim.bodyY },
+            rightFoot: { x: p.x + 5, yOffset: -anim.bodyY }
         };
     },
-    "kick": (head, p, anim) => {
-        const now = Date.now();
-        const cycle = Math.sin(now / 200);
-        const hipY = p.y + 0 + anim.bodyY;
+	"kick": (head, p, anim) => {
+        const hipY = p.y + anim.bodyY;
         return {
             left:  { x: head.x - 15, y: head.y + 10 },
             right: { x: head.x + 15, y: head.y + 10 },
-            // One knee tucks up high
+            // Knee tucks relative to moving hips
             leftKnee: { x: p.x - 5, y: hipY - 10 },
-            leftFoot: { x: p.x - 15, yOffset: -10 },
-            rightFoot: { x: p.x + 5, yOffset: 0 }
+            leftFoot: { x: p.x - 15, yOffset: -10 - anim.bodyY }, 
+            rightFoot: { x: p.x + 5, yOffset: -anim.bodyY } // Planted foot
         };
     },
 	"shush": (head, p, anim) => {
@@ -1845,114 +1846,94 @@ const POSE_LIBRARY = {
 	},
 	"worm": (head, p, anim) => {
         const now = Date.now();
-        const speed = 0.008;
-        const amplitude = 15;
-        const frequency = 0.1;
-
-        // The "Worm" moves horizontally. 
-        // We use the segment's distance from the head to determine its wave phase.
-        const getWave = (offset) => Math.sin((now * speed) - (offset * frequency)) * amplitude;
-
+        const getWave = (offset) => Math.sin((now * 0.008) - (offset * 0.1)) * 15;
         return {
-            // Hands are tucked under the chest to "push"
             left:  { x: head.x - 10, y: head.y + 15 + getWave(10) },
             right: { x: head.x + 10, y: head.y + 15 + getWave(10) },
-
-            // Knees and Feet ripple back behind the head
             leftKnee:  { x: head.x - 40, y: head.y + 10 + getWave(40) },
             rightKnee: { x: head.x - 40, y: head.y + 10 + getWave(45) },
-            
-            leftFoot:  { x: head.x - 70, yOffset: -15 + getWave(70) },
-            rightFoot: { x: head.x - 75, yOffset: -15 + getWave(75) }
+            // The worm is horizontal, so we offset the yOffset significantly
+            leftFoot:  { x: head.x - 70, yOffset: -15 + getWave(70) - anim.bodyY },
+            rightFoot: { x: head.x - 75, yOffset: -15 + getWave(75) - anim.bodyY }
         };
     },
 	"headspin": (head, p, anim) => {
-        const now = Date.now();
-        const spinSpeed = now / 150; // Controls how fast the legs circle
-        const legSpread = 25;
-        const shoulderY = head.y + 15;
+		const now = Date.now();
+		const spinSpeed = now / 150;
+		const legSpread = 25;
+		
+		// Circular motion math
+		const lx = Math.cos(spinSpeed) * legSpread;
+		const ly = Math.sin(spinSpeed) * 10;
+		const rx = Math.cos(spinSpeed + Math.PI) * legSpread;
+		const ry = Math.sin(spinSpeed + Math.PI) * 10;
 
-        // Calculate circular motion for the feet
-        const lx = Math.cos(spinSpeed) * legSpread;
-        const ly = Math.sin(spinSpeed) * 10;
-        const rx = Math.cos(spinSpeed + Math.PI) * legSpread;
-        const ry = Math.sin(spinSpeed + Math.PI) * 10;
+		return {
+			// FIX: Hands are on the floor. 
+			// We use p.y + 25 to find the "Floor" and subtract bodyY
+			left:  { x: head.x - 15, y: p.y + 25 }, 
+			right: { x: head.x + 15, y: p.y + 25 },
 
-        return {
-            // Hands on the ground for balance
-            left:  { x: head.x - 15, y: head.y + 5 },
-            right: { x: head.x + 15, y: head.y + 5 },
-
-            // Knees tucked or flared out in the air
-            leftKnee:  { x: head.x + lx * 0.5, y: head.y - 15 + ly },
-            rightKnee: { x: head.x + rx * 0.5, y: head.y - 15 + ry },
-
-            // Feet high in the sky
-            leftFoot:  { x: head.x + lx, yOffset: -50 + ly },
-            rightFoot: { x: head.x + rx, yOffset: -50 + ry }
-        };
-    },
+			// Knees and Feet stay relative to the head/torso (yOffset: 0)
+			// because they are flailing in the air.
+			leftKnee:  { x: head.x + lx * 0.5, y: head.y - 15 + ly },
+			rightKnee: { x: head.x + rx * 0.5, y: head.y - 15 + ry },
+			leftFoot:  { x: head.x + lx, yOffset: -50 + ly },
+			rightFoot: { x: head.x + rx, yOffset: -50 + ry }
+		};
+	},
 	"glide": (head, p, anim) => {
-        const now = Date.now();
-        // One foot stays flat (the "push"), the other lifts on the toe
-        const cycle = (now / 400) % 2;
+        const cycle = (Date.now() / 400) % 2;
         const leftIsLeading = cycle < 1;
-        
+        const hipY = p.y + anim.bodyY;
         return {
             left:  { x: head.x - 10, y: head.y + 25 },
             right: { x: head.x + 10, y: head.y + 25 },
-            // Knee logic: The "lifting" leg bends at the knee
-            leftKnee:  { x: p.x - 5, y: p.y + (leftIsLeading ? 5 : 12) },
-            rightKnee: { x: p.x + 5, y: p.y + (!leftIsLeading ? 5 : 12) },
-            // Foot logic: The "sliding" foot stays flat, the "prop" foot is on tip-toe
-            leftFoot:  { x: p.x - 12, yOffset: leftIsLeading ? -4 : 0 },
-            rightFoot: { x: p.x + 12, yOffset: !leftIsLeading ? -4 : 0 }
+            leftKnee:  { x: p.x - 5, y: hipY + (leftIsLeading ? 5 : 12) },
+            rightKnee: { x: p.x + 5, y: hipY + (!leftIsLeading ? 5 : 12) },
+            // Moonwalk-style gliding requires feet to stay on floor
+            leftFoot:  { x: p.x - 12, yOffset: (leftIsLeading ? -4 : 0) - anim.bodyY },
+            rightFoot: { x: p.x + 12, yOffset: (!leftIsLeading ? -4 : 0) - anim.bodyY }
         };
     },
-    "stiff": (head, p, anim) => {
-        // Precise 90-degree angles for elbows and knees
+	"stiff": (head, p, anim) => {
+        const hipY = p.y + anim.bodyY;
         return {
             left:  { x: head.x - 20, y: head.y + 15 },
             leftElbow: { x: head.x - 20, y: head.y + 25 },
             right: { x: head.x + 20, y: head.y + 5 },
             rightElbow: { x: head.x + 5, y: head.y + 5 },
-            leftKnee:  { x: p.x - 10, y: p.y + 10 },
-            rightKnee: { x: p.x + 15, y: p.y + 15 },
-            leftFoot:  { x: p.x - 15, yOffset: 0 },
-            rightFoot: { x: p.x + 20, yOffset: 0 }
+            leftKnee:  { x: p.x - 10, y: hipY + 10 },
+            rightKnee: { x: p.x + 15, y: hipY + 15 },
+            leftFoot:  { x: p.x - 15, yOffset: -anim.bodyY },
+            rightFoot: { x: p.x + 20, yOffset: -anim.bodyY }
         };
     },
-    "swing": (head, p, anim) => {
-        const swingX = Math.sin(Date.now() / 200) * 20;
-        return {
-            // Arms swing wildly side to side
-            left:  { x: head.x - 10 + swingX, y: head.y + 15 - Math.abs(swingX) },
-            right: { x: head.x + 10 + swingX, y: head.y + 15 - Math.abs(swingX) },
-            // Knees follow the rhythm
-            leftKnee:  { x: p.x - 10 + (swingX * 0.2), y: p.y + 12 },
-            rightKnee: { x: p.x + 10 + (swingX * 0.2), y: p.y + 12 }
-        };
-    },
+	"swing": (head, p, anim) => {
+		const swingX = Math.sin(Date.now() / 200) * 20;
+		const hipY = p.y + anim.bodyY; // Get dynamic hip
+		return {
+			left:  { x: head.x - 10 + swingX, y: head.y + 15 - Math.abs(swingX) },
+			right: { x: head.x + 10 + swingX, y: head.y + 15 - Math.abs(swingX) },
+			// FIX: Knees must be relative to the dynamic hipY
+			leftKnee:  { x: p.x - 10 + (swingX * 0.2), y: hipY + 12 },
+			rightKnee: { x: p.x + 10 + (swingX * 0.2), y: hipY + 12 },
+			// Add feet grounding if you want them planted
+			leftFoot:  { x: p.x - 10, yOffset: -anim.bodyY },
+			rightFoot: { x: p.x + 10, yOffset: -anim.bodyY }
+		};
+	},
 	"twerk": (head, p, anim) => {
-        const now = Date.now();
-        // Rapid oscillation for the "shake"
-        const shake = Math.sin(now / 75) * 8; 
-        const hipY = p.y + 0 + anim.bodyY;
-
+        const shake = Math.sin(Date.now() / 75) * 8; 
+        const hipY = p.y + anim.bodyY;
         return {
-            // Hands are placed forward, like they are leaning on knees or a wall
             left:  { x: head.x + 15, y: head.y + 25 },
             right: { x: head.x + 18, y: head.y + 25 },
-            
-            // Knees flare out WIDE
             leftKnee:  { x: p.x - 15, y: hipY + 5 },
             rightKnee: { x: p.x + 15, y: hipY + 5 },
-
-            // Feet are planted wide
-            leftFoot:  { x: p.x - 12, yOffset: 0 },
-            rightFoot: { x: p.x + 12, yOffset: 0 },
-
-            // Extra bounce data for the torso
+            // Keep the feet wide and planted
+            leftFoot:  { x: p.x - 12, yOffset: -anim.bodyY },
+            rightFoot: { x: p.x + 12, yOffset: -anim.bodyY },
             twerkShake: shake 
         };
     },
@@ -1978,71 +1959,65 @@ const POSE_LIBRARY = {
         };
     },
 	"matrix": (head, p, anim) => {
-        const hipY = p.y + 0 + anim.bodyY;
-        
-        // We calculate a "bend" based on how far back the head is leaning
-        // The further back the head, the further forward the knees go
-        const leanFactor = anim.lean || 0;
-        const kneeForward = leanFactor * 40; 
-
+        const hipY = p.y + anim.bodyY;
+        const kneeForward = (anim.lean || 0) * 40; 
         return {
-            // Arms out to the sides for balance
             left:  { x: head.x - 25, y: head.y + 10 },
             right: { x: head.x + 25, y: head.y + 10 },
-
-            // Knees push FORWARD as the head goes BACK
             leftKnee:  { x: p.x - 10 + kneeForward, y: hipY - 5 },
             rightKnee: { x: p.x + 10 + kneeForward, y: hipY - 5 },
-
-            // Feet stay planted firm
-            leftFoot:  { x: p.x - 12, yOffset: 0 },
-            rightFoot: { x: p.x + 12, yOffset: 0 }
+            leftFoot:  { x: p.x - 12, yOffset: -anim.bodyY },
+            rightFoot: { x: p.x + 12, yOffset: -anim.bodyY }
         };
     },
 	"sit": (head, p, anim) => {
-        anim.bodyY = 15; // Force hips down
-        const hipY = p.y + anim.bodyY;
-        return {
-            left:  { x: head.x - 10, y: hipY - 5 },
-            right: { x: head.x + 10, y: hipY - 5 },
-            leftKnee:  { x: p.x - 20, y: hipY - 10 },
-            rightKnee: { x: p.x + 20, y: hipY - 10 },
-            leftFoot:  { x: p.x - 25, yOffset: 0 },
-            rightFoot: { x: p.x + 25, yOffset: 0 }
-        };
-    },
+		anim.bodyY = 15; // Hips drop down
+		const hipY = p.y + anim.bodyY;
+		
+		return {
+			// Hands resting on the lap
+			left:  { x: head.x - 10, y: hipY - 5 },
+			right: { x: head.x + 10, y: hipY - 5 },
+			
+			// Knees bent upward and outward
+			leftKnee:  { x: p.x - 20, y: hipY - 10 },
+			rightKnee: { x: p.x + 20, y: hipY - 10 },
+			
+			// FEET: yOffset: -anim.bodyY keeps them on the floor 
+			// while the rest of the body moves down.
+			leftFoot:  { x: p.x - 25, yOffset: -anim.bodyY },
+			rightFoot: { x: p.x + 25, yOffset: -anim.bodyY }
+		};
+	},
 	"pushups": (head, p, anim) => {
 		const now = Date.now();
-		const rep = (Math.sin(now / 300) + 1) / 2; // 0 to 1
+		// Movement cycle: 0 is chest-to-floor, 1 is arms-extended
+		const rep = (Math.sin(now / 300) + 1) / 2; 
 		
-		// 1. Set the rotation
-		anim.lean = -1.2; // This makes the stickman "horizontal"
-		
-		// 2. Calculate Body Verticality (the pushup depth)
-		const floorY = p.y + 25;
-		const bodyHeight = 15 - (rep * 12); // How high off the ground the chest is
-		
-		// 3. LOCK the hips to the head so the spine doesn't stretch
-		// Instead of p.x, we calculate hip position based on lean
-		const bodyLength = 30; 
-		const hipX = head.x - (Math.cos(anim.lean) * bodyLength);
-		const hipY = head.y - (Math.sin(anim.lean) * bodyLength);
+		// We drive the body height via anim.bodyY (higher Y = lower to ground)
+		anim.bodyY = 15 + (rep * 10); 
+		anim.lean = -0.7; // Lean forward into the plank
+
+		const hipY = p.y + anim.bodyY;
+		const shoulderY = head.y + 15;
 
 		return {
-			// Hands stay planted on the floor
-			left:  { x: head.x - 5, y: floorY }, 
-			right: { x: head.x + 5, y: floorY },
-			
-			// Elbows flare out as you go down
-			leftElbow:  { x: head.x - 12, y: head.y + 10 + (rep * 5) },
-			rightElbow: { x: head.x + 12, y: head.y + 10 + (rep * 5) },
+			// HANDS: These stay at a fixed "Floor" level relative to the base p.y
+			// As the body (head/hips) moves down via bodyY, the hands "reach up" to the floor
+			left:  { x: head.x + 10, y: p.y + 25 }, 
+			right: { x: head.x + 15, y: p.y + 25 },
 
-			// Feet stay planted on the floor behind the player
-			leftFoot:  { x: head.x - 40, y: floorY },
-			rightFoot: { x: head.x - 40, y: floorY },
-			
-			// Force the hips to match our rotation math
-			customHips: { x: hipX, y: hipY } 
+			// ELBOWS: Bend based on the rep. Higher Y when the body is low.
+			leftElbow:  { x: head.x - 5, y: shoulderY + 5 + (rep * 5) },
+			rightElbow: { x: head.x + 20, y: shoulderY + 5 + (rep * 5) },
+
+			// KNEES: Just like your archer pose, we provide a joint
+			leftKnee:  { x: p.x - 20, y: hipY + 5 },
+			rightKnee: { x: p.x - 18, y: hipY + 8 },
+
+			// FEET: Placed behind the body at floor level
+			leftFoot:  { x: p.x - 40, yOffset: -anim.bodyY }, 
+			rightFoot: { x: p.x - 38, yOffset: -anim.bodyY }
 		};
 	},
     "pee": (head, p, anim) => {
@@ -2068,56 +2043,37 @@ const POSE_LIBRARY = {
         };
     },
 	"meditate": (head, p, anim) => {
-        const now = Date.now();
-        // 1. HOVER LOGIC
-        // Drifts up and down slowly
-        const hover = Math.sin(now / 1000) * 5;
-        anim.bodyY = 10 + hover; // Lift the character
-        const hipY = p.y + anim.bodyY;
+		const now = Date.now();
+		const hover = Math.sin(now / 1000) * 8;
+		anim.bodyY = 5 + hover; // Floating!
+		const hipY = p.y + anim.bodyY;
 
-        // 2. PARTICLE LOGIC
-        // Spawns small "aura" sparks around the player
-        if (now % 20 === 0 && typeof spawnProjectile === "function") {
-            const angle = Math.random() * Math.PI * 2;
-            const dist = 15 + Math.random() * 10;
-            const px = p.x + Math.cos(angle) * dist;
-            const py = p.y + Math.sin(angle) * dist;
-            // Spawning a tiny vertical "spark"
-            spawnProjectile(px, py, px, py - 5, "#00ffff", "magic", p.area);
-        }
-
-        return {
-            // Hands resting on knees in "Mudras" position
-            left:  { x: p.x - 18, y: hipY - 12 },
-            right: { x: p.x + 18, y: hipY - 12 },
-            
-            // Legs crossed (knees tucked inward and upward)
-            leftKnee:  { x: p.x - 12, y: hipY - 8 },
-            rightKnee: { x: p.x + 12, y: hipY - 8 },
-            
-            // Feet tucked under opposite legs
-            leftFoot:  { x: p.x + 5, yOffset: -5 + (hover * 0.2) },
-            rightFoot: { x: p.x - 5, yOffset: -5 + (hover * 0.2) }
-        };
-    },
+		return {
+			// Hands in lap/mudra
+			left:  { x: p.x - 15, y: hipY - 10 },
+			right: { x: p.x + 15, y: hipY - 10 },
+			
+			// Knees tucked high and wide
+			leftKnee:  { x: p.x - 18, y: hipY - 12 },
+			rightKnee: { x: p.x + 18, y: hipY - 12 },
+			
+			// FEET: Placed near the opposite knee (crossed legs)
+			// By leaving yOffset at 0 here, the feet move WITH the bodyY
+			leftFoot:  { x: p.x + 8, yOffset: 0 }, 
+			rightFoot: { x: p.x - 8, yOffset: 0 }
+		};
+	},
 	"wave": (head, p, anim) => {
-        const now = Date.now();
-        // Fast oscillation for the hand shake
-        const handSwing = Math.sin(now / 150) * 15;
-        const shoulderY = head.y + 15;
-
-        return {
-            // Left hand at side/hip
-            left:  { x: head.x - 12, y: head.y + 25 },
-            // Right hand waving high
-            right: { x: head.x + 15 + handSwing, y: head.y - 5 },
-            rightElbow: { x: head.x + 18, y: head.y + 10 },
-            
-            // Standard standing legs
-            leftFoot: { x: p.x - 10, yOffset: 0 },
-            rightFoot: { x: p.x + 10, yOffset: 0 }
-        };
-    }
+		const handSwing = Math.sin(Date.now() / 150) * 15;
+		return {
+			left:  { x: head.x - 12, y: head.y + 25 },
+			right: { x: head.x + 15 + handSwing, y: head.y - 5 },
+			rightElbow: { x: head.x + 18, y: head.y + 10 },
+			// FIX: Ground the feet so they don't slide when the body bobs
+			leftFoot:  { x: p.x - 10, yOffset: -anim.bodyY },
+			rightFoot: { x: p.x + 10, yOffset: -anim.bodyY }
+		};
+	}
 };
 
 const BODY_PARTS = {
