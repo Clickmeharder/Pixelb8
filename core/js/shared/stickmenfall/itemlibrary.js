@@ -1971,8 +1971,8 @@ const POSE_LIBRARY = {
         };
     },
 	"sit": (head, p, anim) => {
-		anim.lean = 0.4;
-		const hipY = p.y + 0 + anim.bodyY;
+		const hipY = p.y + anim.bodyY; // The pivot point for the legs
+		const shoulderY = head.y + 15;
 		// 2. Leg Logic: Hip -> Knee -> Foot
 		// To avoid "weird legs," we keep the knee between the hip and foot
 		// KneeY is slightly ABOVE the hip to show the thighs are angled up
@@ -1985,8 +1985,8 @@ const POSE_LIBRARY = {
 		const footR = { x: p.x - 15 };
 
 		return {
-			left:  { x: head.x - 10, y: head.y + 35 },
-			right: { x: head.x + 5,  y: head.y + 30 }
+			left: handL,
+			right: handR,
 			
 			// Joint flare
 			leftKnee: kneeL,
