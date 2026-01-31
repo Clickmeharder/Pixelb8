@@ -6328,7 +6328,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "!arena")  { movePlayer(p, "arena"); return; }
     if (cmd === "!dungeon") { movePlayer(p, "dungeon"); return; }
 	if (cmd === "!lab") { movePlayer(p, "lab"); return; }
-	if (cmd === "!graveyard" || cmd === "!gy") { movePlayer(p, "graveyard"); return; }
+	if (cmd === "!graveyard" || cmd === "::gy") { movePlayer(p, "graveyard"); return; }
     // -- Events
     if (cmd === "!join")   { joinDungeonQueue(p); return; }
     if (cmd === "!pvp")    { joinArenaQueue(p); return; }
