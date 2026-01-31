@@ -367,17 +367,17 @@ const DANCE_UNLOCKS = {
 	5: { name: "The Sway", minLvl: 1 },
     6: { name: "The sixthdance", minLvl: 1 },
     7: { name: "The ninthdance", minLvl: 1 },
-	8: { name: "The Slav", minLvl: 10 },
-    9: { name: "The Disco", minLvl: 15 },
-	10: { name: "The Worm", minLvl: 10 },
-    11: { name: "Breakspin", minLvl: 15 },
-	12: { name: "The Moonwalk", minLvl: 20 },
-    13: { name: "The Robot", minLvl: 25 },
-    14: { name: "The Carlton", minLvl: 30 },
-	15: { name: "The Twerk", minLvl: 40 },
-	16: { name: "Backflip", minLvl: 50 },
-	17: { name: "The Matrix", minLvl: 60 },
-	99: { name: "The 99", minLvl: 99 }
+	8: { name: "The Slav", minLvl: 1 },
+    9: { name: "The Disco", minLvl: 1 },
+	10: { name: "The Worm", minLvl: 1 },
+    11: { name: "Breakspin", minLvl: 1 },
+	12: { name: "The Moonwalk", minLvl:  },
+    13: { name: "The Robot", minLvl: 1 },
+    14: { name: "The Carlton", minLvl: 1 },
+	15: { name: "The Twerk", minLvl: 1 },
+	16: { name: "Backflip", minLvl: 1 },
+	17: { name: "The Matrix", minLvl: 1 },
+	99: { name: "The 99", minLvl: 1 }
 };
 
 const DANCE_LIBRARY = {
