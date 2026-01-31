@@ -1998,28 +1998,28 @@ const POSE_LIBRARY = {
 	"pushups": (head, p, anim) => {
 		const groundYOffset = -anim.bodyY;
 		const shoulderY = head.y + 15;
-		const hipY = p.y + 0 + anim.bodyY;
-		// THE FIX: Anchor the feet to the player's root X.
-		// This stops the 'sliding' because the pivot point never moves.
-		const pivotX = p.x + 20; 
+		
+		// 1. Lock the body length. 
+		// Since lean * 20 moves the head left, we move feet right to compensate.
+		// This keeps the 'center' of the stickman near p.x
+		const feetX = head.x + 75; 
 
 		return {
-			// HANDS: Pinned to ground. Use head.x so they stay under the face.
+			// HANDS: Glued to floor under the face
 			left:  { x: head.x - 5, yOffset: groundYOffset },
 			right: { x: head.x + 15, yOffset: groundYOffset },
 
-			// ELBOWS: Flare out
+			// ELBOWS: Flare out for the bend
 			leftElbow:  { x: head.x - 18, y: shoulderY + 8 },
 			rightElbow: { x: head.x + 28, y: shoulderY + 8 },
 
-			// LEGS: Null knee ensures a perfectly straight line from hip to foot
+			// LEGS: Null knee for straight plank
 			leftKnee: null,
 			rightKnee: null,
 
-			// FEET: Locked to p.x. No matter how much the head leans, 
-			// the toes stay in this exact spot on the map.
-			leftFoot:  { x: pivotX, yOffset: groundYOffset },
-			rightFoot: { x: pivotX + 3, yOffset: groundYOffset }
+			// FEET: Locked to a fixed distance from the head
+			leftFoot:  { x: feetX, yOffset: groundYOffset },
+			rightFoot: { x: feetX + 3, yOffset: groundYOffset }
 		};
 	},
 

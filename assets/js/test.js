@@ -3090,11 +3090,9 @@ function getAnimationState(p, now) {
 	} else if (activePose === "pushups") {
 		const rep = (Math.sin(now / 300) + 1) / 2;
 		anim.bodyY = 15 + (rep * 12); 
-		// Static lean keeps the head on a fixed vertical tracks
-		anim.lean = -2.9; 
+		anim.lean = -2.0; // Keep this static to stop the "sliding" head
 		anim.pose = "pushups";
-
-    }
+	}
 
 	else if (activePose === "meditation") {
         const breathe = Math.sin(now / 1000) * 3;
@@ -3240,8 +3238,12 @@ function drawStickmanBody(ctx, p, anchors, limbs) {
     style.limbs(ctx, anchors.headX, anchors.shoulderY, limbs.rightHand.x, limbs.rightHand.y, limbs.rightElbow);
     
     // 3. Legs (Use joint if pose provides it, otherwise straight line)
-    style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y, limbs.leftKnee); 
-    style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y, limbs.rightKnee);
+/*     style.limbs(ctx, p.x, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y, limbs.leftKnee); 
+    style.limbs(ctx, p.x, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y, limbs.rightKnee); */
+	// NEW: Use a shifted Hip X so the legs start from the end of the spine
+	const hipX = p.x + (anchors.lean * 10); // Hips lean half as much as the head
+	style.limbs(ctx, hipX, anchors.hipY, limbs.leftFoot.x, limbs.leftFoot.y, limbs.leftKnee);  
+	style.limbs(ctx, hipX, anchors.hipY, limbs.rightFoot.x, limbs.rightFoot.y, limbs.rightKnee);
 }
 // --- MAIN FUNCTIONS ---
 function drawStickman(ctx, p) {
