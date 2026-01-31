@@ -2860,7 +2860,6 @@ function drawArmor(ctx, p, anchors) {
     if (!item) return;
 
     const headX = anchors.headX;
-	const headY	 = anchors.headY;
     const hipX = p.x + (anchors.lean * 5);
     const bodyY = anchors.bodyY;
 
@@ -2871,7 +2870,7 @@ function drawArmor(ctx, p, anchors) {
 
     // 1. Draw Sleeves (Shoulder Caps)
     // Positioned at the "shoulder" height
-    const shoulderY = head.y + 15;
+    const shoulderY = p.y - 18 + bodyY;
     
     // Left Sleeve
     ctx.beginPath();
