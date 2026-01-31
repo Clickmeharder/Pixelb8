@@ -2874,13 +2874,13 @@ function drawArmor(ctx, p, anchors) {
     
     // Left Sleeve
     ctx.beginPath();
-    ctx.arc(headX - 8, shoulderY + 2, 4, 0, Math.PI * 2);
+    ctx.arc(headX - 8, shoulderY, 4, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
     // Right Sleeve
     ctx.beginPath();
-    ctx.arc(headX + 8, shoulderY + 2, 4, 0, Math.PI * 2);
+    ctx.arc(headX + 8, shoulderY, 4, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
@@ -2891,8 +2891,8 @@ function drawArmor(ctx, p, anchors) {
     ctx.lineTo(headX + 7, shoulderY); 
     
     // Bottom line (Waist) - Changed from +8 to +2 to make it shorter
-    ctx.lineTo(hipX + 6, p.y + 2 + bodyY);    
-    ctx.lineTo(hipX - 6, p.y + 2 + bodyY);    
+    ctx.lineTo(hipX + 6, p.y + 4 + bodyY);    
+    ctx.lineTo(hipX - 6, p.y + 4 + bodyY);    
     
     ctx.closePath();
     ctx.globalAlpha = 0.8;

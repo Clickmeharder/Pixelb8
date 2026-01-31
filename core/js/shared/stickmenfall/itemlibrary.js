@@ -1981,8 +1981,8 @@ const POSE_LIBRARY = {
 
 		// 3. Feet: Pushed slightly further out than the knees
 		// No yOffset needed here because we want them to drop with the bodyY
-		const footL = { x: p.x + 15, y: hipY + 1}; 
-		const footR = { x: p.x - 15, y: hipY + 1};
+		const footL = { x: p.x + 15, y: hipY - 12}; 
+		const footR = { x: p.x - 15, y: hipY - 12};
 
 		return {
 			// Joint flare
