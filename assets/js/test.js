@@ -1338,7 +1338,7 @@ const TRAINING_CONFIG = {
 };
 function performTraining(p, trainingType) {
     if (p.dead) return;
-    const config = trainingMap[trainingType];
+    const config = TRAINING_CONFIG[trainingType];
     if (!config) return;
 
     // Set the task so the game loop knows they are currently training
@@ -1357,7 +1357,7 @@ function handleTraining(p, now) {
     // Award XP every 5 seconds
     if (now - p.lastTrainingXP > 5000) {
 
-        const config = trainingMap[p.trainingType];
+        const config = TRAINING_CONFIG[trainingType];
         if (!config) return;
 
         const skillType = config.skill;
