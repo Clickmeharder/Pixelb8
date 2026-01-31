@@ -3061,11 +3061,11 @@ function getAnimationState(p, now) {
 	if (activePose === "sit") {
         anim.bodyY = 15;
         anim.pose = "sit";
-    } else if (activePose === "pushups") {
-        const rep = (Math.sin(now / 300) + 1) / 2;
-        anim.bodyY = 18 + (rep * 8); 
-        anim.lean = -1.2; // Rotates armor/torso into plank
-        anim.pose = "pushups";
+	} else if (activePose === "pushups") {
+		const rep = (Math.sin(now / 300) + 1) / 2;
+		anim.bodyY = 18 + (rep * 10); // How far the chest drops
+		anim.lean = -1.3;             // The "Plank" angle (more negative = more horizontal)
+		anim.pose = "pushups";
     } else if (activePose === "meditation") {
         const breathe = Math.sin(now / 1000) * 3;
         anim.bodyY = 10 + breathe; // Gentle hovering/bobbing
