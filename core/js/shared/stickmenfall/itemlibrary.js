@@ -1971,7 +1971,8 @@ const POSE_LIBRARY = {
         };
     },
 	"sit": (head, p, anim) => {
-		const hipY = p.y + 0 + anim.bodyY; // The pivot point for the legs
+		const hipY = p.y + 0 + anim.bodyY;
+		const footY = p.y + 2 + anim.bodyY;
 		const shoulderY = head.y + 15;
 		// 2. Leg Logic: Hip -> Knee -> Foot
 		// To avoid "weird legs," we keep the knee between the hip and foot
@@ -1981,9 +1982,8 @@ const POSE_LIBRARY = {
 
 		// 3. Feet: Pushed slightly further out than the knees
 		// No yOffset needed here because we want them to drop with the bodyY
-		const footL = { x: p.x + 15, y: hipY }; 
-		const footR = { x: p.x - 15, y: hipY };
-
+		const footL = {  x: p.x - 10 - (kneeFlare * 0.5), yOffset: 0 }; 
+		const footR = { x: p.x + 10 + (kneeFlare * 0.5), yOffset: 0 };
 		return {
 			// Joint flare
 			leftKnee: kneeL,
@@ -1998,7 +1998,7 @@ const POSE_LIBRARY = {
 	"pushups": (head, p, anim) => {
 		const groundYOffset = -anim.bodyY;
 		const shoulderY = head.y + 15;
-		
+		const hipY = p.y + 0 + anim.bodyY;
 		// THE FIX: Anchor the feet to the player's root X.
 		// This stops the 'sliding' because the pivot point never moves.
 		const pivotX = p.x + 20; 
