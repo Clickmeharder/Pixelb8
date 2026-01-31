@@ -6250,6 +6250,8 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         if (cmd === "!showpond" || cmd === "::pond") { viewArea = "pond"; return; }
         if (cmd === "!showarena" || cmd === "::arena") { viewArea = "arena"; return; }
 		if (cmd === "!showtown" || cmd === "::town") { viewArea = "town"; return; }
+		if (cmd === "!showgraveyard" || cmd === "::gy") { viewArea = "graveyard"; return; }
+		if (cmd === "!showlab" || cmd === "::lab") { viewArea = "lab"; return; }
         if (cmd === "!spawnmerchant") { forceBuyer = true; updateBuyerNPC(); systemMessage("[Pond] Merchant spawned."); return; }
         if (cmd === "!despawnmerchant") { forceBuyer = false; updateBuyerNPC(); systemMessage("[Pond] Merchant removed."); return; }
         if (cmd === "!resetmerchant") { forceBuyer = null; updateBuyerNPC(); return; }
@@ -6328,7 +6330,7 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "!arena")  { movePlayer(p, "arena"); return; }
     if (cmd === "!dungeon") { movePlayer(p, "dungeon"); return; }
 	if (cmd === "!lab") { movePlayer(p, "lab"); return; }
-	if (cmd === "!graveyard" || cmd === "::gy") { movePlayer(p, "graveyard"); return; }
+	if (cmd === "!graveyard" || cmd === "!gy") { movePlayer(p, "graveyard"); return; }
     // -- Events
     if (cmd === "!join")   { joinDungeonQueue(p); return; }
     if (cmd === "!pvp")    { joinArenaQueue(p); return; }
