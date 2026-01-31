@@ -2081,9 +2081,9 @@ const POSE_LIBRARY = {
 	"wave": (head, p, anim) => {
 		const handSwing = Math.sin(Date.now() / 150) * 15;
 		return {
-			left:  { x: head.x - 12, y: head.y + 25 },
-			right: { x: head.x + 15 + handSwing, y: head.y - 5 },
-			rightElbow: { x: head.x + 18, y: head.y + 10 },
+			right:  { x: head.x - 12, y: head.y + 25 },
+			left: { x: head.x + 3 + handSwing, y: head.y - 5 },
+			LeftElbow: { x: head.x + 18, y: head.y + 10 },
 			// FIX: Ground the feet so they don't slide when the body bobs
 			leftFoot:  { x: p.x - 10, yOffset: -anim.bodyY },
 			rightFoot: { x: p.x + 10, yOffset: -anim.bodyY }
