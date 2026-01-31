@@ -2005,40 +2005,43 @@ const POSE_LIBRARY = {
 	},
 
 	"pushups": (head, p, anim) => {
-		// 1. Pivot Points (The Floor)
-		const groundYOffset = -anim.bodyY; // Cancels the vertical movement of the body
+		// 1. The Ground Lock
+		const groundYOffset = -anim.bodyY;
 
-		// 2. Define Shoulder & Hand Positions (Archer Style)
-		const shoulderL = { x: head.x - 5, y: head.y + 15 };
-		const shoulderR = { x: head.x + 5, y: head.y + 15 };
+		// 2. Define Shoulders (where the arms start)
+		// These move with the head and the lean
+		const shoulderY = head.y + 15;
 		
-		// Hands are pinned to the floor, slightly wider than the shoulders
-		const handL = { x: head.x - 15, yOffset: groundYOffset };
-		const handR = { x: head.x + 25, yOffset: groundYOffset };
+		// 3. Hand Logic (Gloves attach here)
+		// We place hands on the ground (yOffset) and slightly forward/back from the head
+		const handL = { x: head.x - 10, yOffset: groundYOffset };
+		const handR = { x: head.x + 10, yOffset: groundYOffset };
 
-		// 3. Elbow Logic (Flare Outwards)
-		// As the shoulder drops (head.y + anim.bodyY), the elbows push further out
-		const elbowL = { x: shoulderL.x - 10, y: shoulderL.y + 5 };
-		const elbowR = { x: shoulderR.x + 10, y: shoulderR.y + 5 };
+		// 4. Elbow Logic (The Bend)
+		// To make them bend, the elbow must be OFFSET from the shoulder-to-hand line
+		const elbowL = { x: head.x - 20, y: shoulderY + 5 };
+		const elbowR = { x: head.x + 20, y: shoulderY + 5 };
+
+		// 5. Foot Logic (The Pivot)
+		// If lean is negative (leaning left), feet must be on the RIGHT (+x)
+		const feetX = p.x + 35; 
 
 		return {
-			// HANDS
+			// HANDS (Gloves draw here)
 			left: handL,
 			right: handR,
 			
-			// JOINTS
+			// ARMS (Forces the V-shape)
 			leftElbow: elbowL,
 			rightElbow: elbowR,
 
-			// LEGS (Rigid Board)
-			// No knee joints = straight line from hip to foot
+			// LEGS (Straight line)
 			leftKnee: null,
 			rightKnee: null,
 
-			// FEET (Pivot point behind the body)
-			// Pinned to floor to prevent floating during the 'up' phase
-			leftFoot: { x: p.x - 35, yOffset: groundYOffset },
-			rightFoot: { x: p.x - 32, yOffset: groundYOffset }
+			// FEET (Locked to floor, matching the tilt)
+			leftFoot: { x: feetX, yOffset: groundYOffset },
+			rightFoot: { x: feetX + 3, yOffset: groundYOffset }
 		};
 	},
 
