@@ -3087,11 +3087,15 @@ function getAnimationState(p, now) {
         anim.bodyY = 18;
 		//anim.lean = -0.1;
         anim.pose = "sit";
-	} else if (activePose === "pushups") {
-		const rep = (Math.sin(now / 300) + 1) / 2;
-		anim.bodyY = 18 + (rep * 10); // How far the chest drops
-		anim.lean = -2.3;             // The "Plank" angle (more negative = more horizontal)
+	else if (activePose === "pushups") {
+		const rep = (Math.sin(now / 300) + 1) / 2; // 0 at top, 1 at bottom
+		anim.bodyY = 15 + (rep * 12); 
+		
+		// Dynamic Lean: Start at -1.8 (up) and tilt to -2.8 (down)
+		anim.lean = -1.8 - (rep * 1.0); 
+		
 		anim.pose = "pushups";
+
     } else if (activePose === "meditation") {
         const breathe = Math.sin(now / 1000) * 3;
         anim.bodyY = 10 + breathe; // Gentle hovering/bobbing

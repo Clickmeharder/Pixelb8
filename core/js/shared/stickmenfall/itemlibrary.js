@@ -1996,43 +1996,28 @@ const POSE_LIBRARY = {
 	},
 
 	"pushups": (head, p, anim) => {
-		// 1. The Ground Lock
 		const groundYOffset = -anim.bodyY;
-
-		// 2. Define Shoulders (where the arms start)
-		// These move with the head and the lean
 		const shoulderY = head.y + 15;
 		
-		// 3. Hand Logic (Gloves attach here)
-		// We place hands on the ground (yOffset) and slightly forward/back from the head
-		const handL = { x: head.x - 10, yOffset: groundYOffset };
-		const handR = { x: head.x + 10, yOffset: groundYOffset };
-
-		// 4. Elbow Logic (The Bend)
-		// To make them bend, the elbow must be OFFSET from the shoulder-to-hand line
-		const elbowL = { x: head.x - 20, y: shoulderY + 5 };
-		const elbowR = { x: head.x + 20, y: shoulderY + 5 };
-
-		// 5. Foot Logic (The Pivot)
-		// If lean is negative (leaning left), feet must be on the RIGHT (+x)
-		const feetX = p.x + 35; 
-
+		// We use a slight multiplier on lean for the elbows to make them flare
+		// wider as the body gets lower to the ground.
 		return {
-			// HANDS (Gloves draw here)
-			left: handL,
-			right: handR,
-			
-			// ARMS (Forces the V-shape)
-			leftElbow: elbowL,
-			rightElbow: elbowR,
+			// HANDS: Pinned to floor under the face/chest
+			left:  { x: head.x - 5, yOffset: groundYOffset },
+			right: { x: head.x + 15, yOffset: groundYOffset },
 
-			// LEGS (Straight line)
+			// ELBOWS: Flare out further than the hands to create the V-shape
+			leftElbow:  { x: head.x - 18, y: shoulderY + 8 },
+			rightElbow: { x: head.x + 28, y: shoulderY + 8 },
+
+			// LEGS: Keep them perfectly straight (null knees)
 			leftKnee: null,
 			rightKnee: null,
 
-			// FEET (Locked to floor, matching the tilt)
-			leftFoot: { x: feetX, yOffset: groundYOffset },
-			rightFoot: { x: feetX + 3, yOffset: groundYOffset }
+			// FEET: The anchor point. 
+			// Increased the X offset to 45 to accommodate the deeper lean.
+			leftFoot:  { x: p.x + 45, yOffset: groundYOffset },
+			rightFoot: { x: p.x + 48, yOffset: groundYOffset }
 		};
 	},
 
