@@ -3608,6 +3608,7 @@ const MONSTER_DB = {
     "FireSlime": { drawType: "blob", color: "#ff4500", hpMult: 1.2, glow: true, glowColor: "#ff0" },
     "StickmanHunter": { drawType: "stickman", hpMult: 1.2, canEquip: true },
 	"Stickman_Elite": { drawType: "stickman", hpMult: 1.5, canEquip: true },
+	"Richard": { drawType: "stickman", hpMult: 3 },
 	"somehing_else": { drawType: "beast", scale: 1.0, color: "#000", hpMult: 15, legCount: 4 },
     // --- SPIDERS ---
     "Spiderling": { drawType: "spider", scale: 0.5, color: "#555", hpMult: 0.5 },
@@ -3661,7 +3662,7 @@ const MONSTER_DB = {
     "VOID_CORRUPTOR": { drawType: "horror", scale: 2.0, color: "#1a1a1a", glow: true, glowColor: "#4b0082", hpMult: 15, legCount: 12 },
     "FROST_JOTUN": { drawType: "stickman", scale: 5.0, color: "#fff", hpMult: 18 },
     "MAGMA_CORE": { drawType: "blob", scale: 6.0, color: "#f00", hpMult: 20 },
-    "THE_GRAND_MIMIC": { drawType: "phalic", scale: 5.0, color: "#ff69b4", hpMult: 15 },
+    "THE_MAIN_ATTRACTION": { drawType: "phalic", scale: 5.0, color: "#ff69b4", hpMult: 15 },
     "QUEEN_GOSSAMER": { drawType: "spider", scale: 5.0, color: "gold", hpMult: 25 }, // Fixed color string
     "CERBERUS_JUNIOR": { drawType: "canine", scale: 3.0, color: "#500", hpMult: 20, headAnchor: {x: -15, y: -5} },
     "VOID_EXARCH": { drawType: "stickman", scale: 4.0, color: "#4b0082", hpMult: 30 },
@@ -3672,8 +3673,6 @@ const MONSTER_DB = {
 	"Cloud": { 
 			drawType: "cloud", 
 			hpMult: 8, 
-			xpValue: 20,
-			special: "float" // Purely for fluff
 		},
 	"Storm_Cloud": { 
 		drawType: "cloud", 
@@ -3714,7 +3713,7 @@ const DUNGEON_THEMES = {
     4: { name: "The Abyssal Breach", mobs: ["VoidWalker", "StickmanHunter", "ShadowWraith"], boss: "VOID_CORRUPTOR" },
     5: { name: "The Frozen Tundra", mobs: ["IceSpider", "StickmanHunter", "FrostWolf"], boss: "FROST_JOTUN" },
     6: { name: "The Scorched Earth", mobs: ["FireSpider", "Stickman_Elite", "FireSlime"], boss: "MAGMA_CORE" },
-    7: { name: "The Mimic Pantry", mobs: ["StaffMimic", "PinkWobbler"], boss: "THE_GRAND_MIMIC" },
+    7: { name: "Richards Pantry", mobs: ["StaffMimic", "Richard","winged_Butt", "PinkWobbler"], boss: "THE_MAIN_ATTRACTION" },
     8: { name: "Arachnid Overrun", mobs: ["WolfSpider", "FireSpider", "IceSpider"], boss: "QUEEN_GOSSAMER" },
     9: { name: "The Cursed Kennel", mobs: ["DireWolf", "FrostWolf"], boss: "CERBERUS_JUNIOR" },
     10: { name: "The Void Horizon", mobs: ["VoidDragon", "ShadowWraith"], boss: "VOID_EXARCH" },
