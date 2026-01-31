@@ -2013,20 +2013,36 @@ const POSE_LIBRARY = {
     },
 	"pushups": (head, p, anim) => {
 		const now = Date.now();
-		const rep = (Math.sin(now / 300) + 1) / 2; 
-		anim.lean = -0.9; 
-		anim.bodyY = 20 - (rep * 15);
+		const rep = (Math.sin(now / 300) + 1) / 2; // 0 to 1
+		
+		// 1. Set the rotation
+		anim.lean = -1.2; // This makes the stickman "horizontal"
+		
+		// 2. Calculate Body Verticality (the pushup depth)
+		const floorY = p.y + 25;
+		const bodyHeight = 15 - (rep * 12); // How high off the ground the chest is
+		
+		// 3. LOCK the hips to the head so the spine doesn't stretch
+		// Instead of p.x, we calculate hip position based on lean
+		const bodyLength = 30; 
+		const hipX = head.x - (Math.cos(anim.lean) * bodyLength);
+		const hipY = head.y - (Math.sin(anim.lean) * bodyLength);
 
 		return {
-			left:  { x: head.x - 5, y: p.y + 25 }, 
-			right: { x: head.x + 5, y: p.y + 25 },
-			leftElbow:  { x: head.x - 15, y: head.y + 15 + (rep * 5) },
-			rightElbow: { x: head.x + 15, y: head.y + 15 + (rep * 5) },
-			// Distribute knees and feet so they don't overlap
-			leftKnee:  { x: p.x - 25, y: p.y + 20 },
-			rightKnee: { x: p.x - 20, y: p.y + 24 }, // Offset slightly
-			leftFoot:  { x: p.x - 45, yOffset: 0 },
-			rightFoot: { x: p.x - 43, yOffset: 2 }  // Offset slightly
+			// Hands stay planted on the floor
+			left:  { x: head.x - 5, y: floorY }, 
+			right: { x: head.x + 5, y: floorY },
+			
+			// Elbows flare out as you go down
+			leftElbow:  { x: head.x - 12, y: head.y + 10 + (rep * 5) },
+			rightElbow: { x: head.x + 12, y: head.y + 10 + (rep * 5) },
+
+			// Feet stay planted on the floor behind the player
+			leftFoot:  { x: head.x - 40, y: floorY },
+			rightFoot: { x: head.x - 40, y: floorY },
+			
+			// Force the hips to match our rotation math
+			customHips: { x: hipX, y: hipY } 
 		};
 	},
     "pee": (head, p, anim) => {
