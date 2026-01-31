@@ -1988,34 +1988,35 @@ const POSE_LIBRARY = {
             rightFoot: { x: p.x + 24 }
         };
     },
-
 	"pushups": (head, p, anim) => {
-		// These are our pivot points on the floor
-		const floorY = p.y + 25; 
-		const hipY = p.y + anim.bodyY;
+		// 1. Pivot Points (The Floor)
+		// We cancel anim.bodyY to keep these points locked to the ground
+		const groundYOffset = -anim.bodyY;
+
+		// 2. Shoulder Positions
+		// Since the body is tilted (lean), the shoulders move with the head
 		const shoulderY = head.y + 15;
 
 		return {
-			// HANDS: Pinned to floor. 
-			// We use yOffset to cancel the body's vertical movement.
-			left:  { x: head.x + 5,  yOffset: -anim.bodyY }, 
-			right: { x: head.x + 15, yOffset: -anim.bodyY },
+			// --- HANDS (Pinned to the ground under the chest) ---
+			// We widen them slightly for a stable "pushup" base
+			left:  { x: head.x - 5,  yOffset: groundYOffset }, 
+			right: { x: head.x + 15, yOffset: groundYOffset },
 
-			// ELBOWS: We push these out and slightly up relative to the shoulders.
-			// As the shoulderY drops, the distance to the pinned Hand increases,
-			// causing the drawStickmanBody function to create a "V" bend.
-			leftElbow:  { x: head.x - 12, y: shoulderY + 5 },
-			rightElbow: { x: head.x + 22, y: shoulderY + 5 },
+			// --- ELBOWS (Flare out to the sides) ---
+			// As shoulderY drops closer to the pinned hands, the elbows must bend
+			leftElbow:  { x: head.x - 15, y: shoulderY + 5 },
+			rightElbow: { x: head.x + 25, y: shoulderY + 5 },
 
-			// LEGS: We want these perfectly straight. 
-			// By NOT providing a Knee joint, drawStickmanBody draws a straight line 
-			// from Hip to Foot.
-			leftKnee:  null, 
+			// --- LEGS (The "Rigid Board") ---
+			// No knee joints = perfectly straight legs from hip to foot
+			leftKnee:  null,
 			rightKnee: null,
 
-			// FEET: Pinned to floor behind the body.
-			leftFoot:  { x: p.x - 40, yOffset: -anim.bodyY },
-			rightFoot: { x: p.x - 38, yOffset: -anim.bodyY }
+			// --- FEET (The rear pivot point) ---
+			// Positioned behind the center (p.x) to support the plank
+			leftFoot:  { x: p.x - 35, yOffset: groundYOffset },
+			rightFoot: { x: p.x - 32, yOffset: groundYOffset }
 		};
 	},
 
@@ -2030,36 +2031,6 @@ const POSE_LIBRARY = {
             rightFoot: { x: p.x + 8 }
         };
     },
-
-	"pushups": (head, p, anim) => {
-		// These are our pivot points on the floor
-		const floorY = p.y + 25; 
-		const hipY = p.y + anim.bodyY;
-		const shoulderY = head.y + 15;
-
-		return {
-			// HANDS: Pinned to floor. 
-			// We use yOffset to cancel the body's vertical movement.
-			left:  { x: head.x + 5,  yOffset: -anim.bodyY }, 
-			right: { x: head.x + 15, yOffset: -anim.bodyY },
-
-			// ELBOWS: We push these out and slightly up relative to the shoulders.
-			// As the shoulderY drops, the distance to the pinned Hand increases,
-			// causing the drawStickmanBody function to create a "V" bend.
-			leftElbow:  { x: head.x - 12, y: shoulderY + 5 },
-			rightElbow: { x: head.x + 22, y: shoulderY + 5 },
-
-			// LEGS: We want these perfectly straight. 
-			// By NOT providing a Knee joint, drawStickmanBody draws a straight line 
-			// from Hip to Foot.
-			leftKnee:  null, 
-			rightKnee: null,
-
-			// FEET: Pinned to floor behind the body.
-			leftFoot:  { x: p.x - 40, yOffset: -anim.bodyY },
-			rightFoot: { x: p.x - 38, yOffset: -anim.bodyY }
-		};
-	},
     "pee": (head, p, anim) => {
         const now = Date.now();
         // Particle logic inside the pose:
