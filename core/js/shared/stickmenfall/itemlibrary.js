@@ -1835,12 +1835,14 @@ const POSE_LIBRARY = {
             rightFoot: { x: p.x + 5, yOffset: 0 }
         };
     },
-    "shush": (head, p, anim) => {
-        // One hand to the mouth (elbow sharp)
-        left:  { x: head.x, y: head.y + 5 },
-        leftElbow: { x: head.x - 15, y: head.y + 15 },
-        right: { x: head.x + 12, y: head.y + 25 }
-    },
+	"shush": (head, p, anim) => {
+		// One hand to the mouth (elbow sharp)
+		return {
+			left:      { x: head.x, y: head.y + 5 },
+			leftElbow: { x: head.x - 15, y: head.y + 15 },
+			right:     { x: head.x + 12, y: head.y + 25 }
+		};
+	},
 	"worm": (head, p, anim) => {
         const now = Date.now();
         const speed = 0.008;
