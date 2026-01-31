@@ -1634,14 +1634,15 @@ function drawBuyer(ctx) {
 //======================= ARENA AREA =======================
 // --- ARENA variables ---
 let arenaActive = false;
-let arenaMode = "ffa"; // "1v1", "teams", "ffa"
+let arenaMode = "ffa"; 
 let arenaQueue = [];
 let arenaTimer = 0;
 let arenaMatchInterval = null;
-let pvpRankings = {}; // {playerName: {wins: 0, kills: 0, rating: 1000}}
+let pvpRankings = JSON.parse(localStorage.getItem("pvp_rankings")) || {}; 
+
 const arenaConfig = {
     minPlayers: 2,
-    queueTime: 45, // seconds
+    queueTime: 45, 
     modes: ["1v1", "teams", "ffa"],
     title: "🏆 ARENA RANKINGS",
     labels: {
@@ -1651,7 +1652,6 @@ const arenaConfig = {
         matchActive: "● MATCH IN PROGRESS",
         matchOpen: "● ARENA OPEN"
     },
-    // Keep the logic for data processing here
     getTopRankings: (limit = 5) => {
         return Object.entries(pvpRankings)
             .sort(([, a], [, b]) => b.rating - a.rating)
@@ -1662,7 +1662,7 @@ const arenaConfig = {
 function joinArenaQueue(p) {
     if (p.dead) return;
     if (arenaActive) {
-        systemMessage("⚔️ Match in progress. You will be a spectator until it ends.");
+        systemMessage("⚔️ Match in progress. You can spectate in the Arena tab.");
         return;
     }
 
@@ -1676,7 +1676,11 @@ function joinArenaQueue(p) {
         arenaTimer = arenaConfig.queueTime;
         arenaMatchInterval = setInterval(() => {
             arenaTimer--;
+            
+            // Visual countdown for everyone
             if (arenaTimer === 10) systemMessage("⚔️ ARENA: Match starting in 10 seconds!");
+            if (arenaTimer <= 5 && arenaTimer > 0) systemMessage(`⚔️ Starting in ${arenaTimer}...`);
+
             if (arenaTimer <= 0) {
                 clearInterval(arenaMatchInterval);
                 arenaMatchInterval = null;
@@ -1693,195 +1697,139 @@ function processArenaStart() {
         return;
     }
 
+    // --- 1. SET VIEW ---
+    viewArea = "arena"; // Switches the UI/Camera to Arena mode
+    arenaActive = true;
+
     // Determine Mode
     if (arenaQueue.length === 2) arenaMode = "1v1";
     else if (arenaQueue.length % 2 === 0 && arenaQueue.length <= 6) arenaMode = "teams";
     else arenaMode = "ffa";
 
     systemMessage(`⚔️ ARENA START: ${arenaMode.toUpperCase()} MODE!`);
-    arenaActive = true;
     
-    // Only players in the queue get to fight
+    // --- 2. MOVE PLAYERS ---
     arenaQueue.forEach(name => {
         let p = players[name.toLowerCase()];
         if (p) {
-            p.area = "arena";
-            p.y = 540;
+            movePlayer(p, "arena");
             p.hp = p.maxHp; 
             p.dead = false;
-            p.activeTask = "pvp"; // This activates their combat AI
+            p.activeTask = "pvp";
             p.x = 200 + Math.random() * 400;
+            p.y = 540;
+            if (p.stats) p.stats.currentHp = p.hp;
         }
     });
 
+    // --- 3. TEAM ASSIGNMENT ---
     if (arenaMode === "teams") {
-        arenaQueue.sort((a, b) => players[a].stats.combatLevel - players[b].stats.combatLevel);
+        arenaQueue.sort((a, b) => (players[a]?.stats?.combatLevel || 0) - (players[b]?.stats?.combatLevel || 0));
         arenaQueue.forEach((name, i) => {
-            if(players[name]) players[name].team = (i % 2 === 0) ? "Red" : "Blue";
+            if(players[name.toLowerCase()]) players[name.toLowerCase()].team = (i % 2 === 0) ? "Red" : "Blue";
         });
+        systemMessage("🔴 Red Team vs 🔵 Blue Team - FIGHT!");
     }
 
-    arenaQueue = []; // Reset queue for next game
+    arenaQueue = []; 
 }
+
 function handlePvPLogic(p, now) {
     if (p.dead || !arenaActive) return;
 
-    // 1. Find targets who are ALSO in the PvP task (Excludes spectators)
+    // Find valid targets
     let targets = Object.values(players).filter(t => 
-        t.area === "arena" && 
-        !t.dead && 
-        t.activeTask === "pvp" && 
-        t.name !== p.name
+        t.area === "arena" && !t.dead && t.activeTask === "pvp" && t.name !== p.name
     );
 
     if (arenaMode === "teams") {
         targets = targets.filter(t => t.team !== p.team);
     }
 
-    if (targets.length === 0) return;
-
-    // 2. Find closest target
-    targets.sort((a, b) => Math.abs(a.x - p.x) - Math.abs(b.x - p.x));
-    let target = targets[0];
-
-    // 3. Movement vs Attack
-    let dist = Math.abs(target.x - p.x);
-    let range = 60; // Melee range
-
-    if (dist > range) {
-        p.targetX = target.x; // Move toward them
-    } else {
-        p.targetX = null; // Stay still to attack
-        // Attack logic is handled by updatePlayerActions calling performPvPAttack
-    }
-}
-function performPvPAttack(p) {
-    // Find a target in the Arena
-	let targets = Object.values(players).filter(target => 
-		target.area === "arena" && 
-		!target.dead && 
-		target.activeTask === "pvp" && // CRITICAL: Only hit other fighters
-		target.name !== p.name
-	);
-
-    // Team check
-    if (arenaMode === "teams") {
-        targets = targets.filter(t => t.team !== p.team);
-    }
-
     if (targets.length === 0) {
-        checkArenaVictory();
+        p.targetX = null;
         return;
     }
 
-    // Fairness Logic: Target the player closest to your own combat level
-    targets.sort((a, b) => {
-        let diffA = Math.abs(a.stats.combatLevel - p.stats.combatLevel);
-        let diffB = Math.abs(b.stats.combatLevel - p.stats.combatLevel);
-        return diffA - diffB;
-    });
-
+    // Target closest opponent
+    targets.sort((a, b) => Math.abs(a.x - p.x) - Math.abs(b.x - p.x));
     let target = targets[0];
-    
-    // Calculate Damage
-    let dmg = Math.floor(5 + (p.stats.combatLevel * 1.5));
-    applyDamage(target, dmg);
-    spawnFloater(target, `-${dmg}`, "#ff4444");
 
-    if (target.dead) {
-        systemMessage(`⚔️ ${p.name} eliminated ${target.name}!`);
-        updatePvPRank(p.name, 1, 0); // +1 kill
-		// --- NEW: INCREMENT PERSONAL ARENA STATS ---
-		if (!p.stats.arena) p.stats.arena = { wins: 0, winStreak: 0, totalMatches: 0 };
-		// We can't track "kills" in the arena object yet, so let's add it or use wins
-		saveStats(p);
-        checkArenaVictory();
+    // Dynamic Range based on weapon type
+    const weapon = ITEM_DB[p.stats?.equippedWeapon];
+    const range = (weapon?.type === "bow" || weapon?.type === "staff") ? 220 : 60;
+
+    let dist = Math.abs(target.x - p.x);
+
+    if (dist > range) {
+        // Move toward target
+        const offset = p.x < target.x ? -(range - 10) : (range - 10);
+        p.targetX = target.x + offset;
+    } else {
+        p.targetX = null; // In range, stop moving to attack
     }
 }
-
-
 
 function checkArenaVictory() {
     if (!arenaActive) return;
 
-    // 1. Identify all fighters (excluding spectators)
     const fighters = Object.values(players).filter(p => p.area === "arena" && p.activeTask === "pvp");
     const alive = fighters.filter(p => !p.dead);
     
     let winner = null;
     let winningTeam = null;
 
-    // 2. Determine if the match is over
     if (arenaMode === "teams") {
         const redAlive = alive.filter(p => p.team === "Red");
         const blueAlive = alive.filter(p => p.team === "Blue");
-        
         if (redAlive.length > 0 && blueAlive.length === 0) winningTeam = "Red";
-        if (blueAlive.length > 0 && redAlive.length === 0) winningTeam = "Blue";
-        
+        else if (blueAlive.length > 0 && redAlive.length === 0) winningTeam = "Blue";
         if (winningTeam) winner = winningTeam + " Team";
     } else {
-        // In FFA or 1v1, game ends when only 1 player remains
         if (alive.length === 1) winner = alive[0].name;
+        else if (alive.length === 0) winner = "Draw"; 
     }
 
-    // 3. Process Victory Logic
     if (winner) {
         arenaActive = false;
         systemMessage(`🏆 ARENA VICTORY: ${winner} WINS!`);
         
-        // 4. Update Stats for Everyone Involved
         fighters.forEach(p => {
-            // Ensure the arena stats object exists
             if (!p.stats.arena) p.stats.arena = { wins: 0, winStreak: 0, totalMatches: 0 };
-            
             p.stats.arena.totalMatches++;
 
             const isWinner = (arenaMode === "teams") ? (p.team === winningTeam) : (p.name === winner);
-
             if (isWinner) {
-                // Winner Logic
                 p.stats.arena.wins++;
                 p.stats.arena.winStreak++;
-                
-                // Update Global Rankings (Existing logic)
-                if (arenaMode !== "teams") {
-                    updatePvPRank(p.name, 0, 1);
-                }
-                
+                updatePvPRank(p.name, 0, 1);
                 spawnFloater(p, "WINNER! 🔥", "#FFD700");
             } else {
-                // Loser Logic
-                p.stats.arena.winStreak = 0; // Reset streak on loss
+                p.stats.arena.winStreak = 0;
             }
-
-            // Sync and check achievements (Capes, etc)
             saveStats(p); 
         });
 
-        // 5. Cleanup and Teleportation
+        // Cleanup delay
         setTimeout(() => {
             fighters.forEach(p => {
                 p.activeTask = "none";
                 p.team = null; 
-                // Return them to town or their previous area
                 movePlayer(p, "town"); 
             });
-            
-            // Visual reset for the area
-            systemMessage("⚔️ Arena has been cleared for the next match.");
-        }, 5000); // 5 second delay to let winners celebrate
+            viewArea = "town"; // Reset the camera for the player
+            systemMessage("⚔️ Returning to town...");
+        }, 5000);
     }
 }
+
 function updatePvPRank(name, kill, win) {
     if (!pvpRankings[name]) pvpRankings[name] = { kills: 0, wins: 0, rating: 1000 };
     pvpRankings[name].kills += kill;
     pvpRankings[name].wins += win;
     pvpRankings[name].rating += (win * 25) + (kill * 5);
-    // Save to localStorage
     localStorage.setItem("pvp_rankings", JSON.stringify(pvpRankings));
 }
-
 
 //============================================================
 //======================= DUNGEON AREA =======================
@@ -2660,61 +2608,8 @@ function drawProjectiles(ctx) {
 }
 /*----------------------------------------------*/
 
+
 /* function updatePhysics(p) {
-    // 1. Define the depth area
-    const horizonY = 530; 
-    const frontY = 560;
-    
-    // Each player gets a "lane" so they don't all overlap
-    if (p.zLane === undefined) p.zLane = Math.floor(Math.random() * 25);
-    const groundLevel = horizonY + p.zLane; 
-
-    // --- STATE 1: FALLING ---
-    if (p.targetY !== undefined && p.targetY !== null) {
-        if (p.y < groundLevel) { // Fall to their specific lane, not a flat line
-            p.y += 12;
-            p.lean = 0.1; 
-            return;
-        } else {
-            p.y = groundLevel;
-            p.targetY = null;
-            // ... landed effects ...
-        }
-    }
-
-    // --- STATE 2: EMERGENCY FLOOR CHECK ---
-    if (!p.targetY && p.y !== groundLevel) {
-        // Smoothly pull them to their lane if they got bumped
-        p.y += (groundLevel - p.y) * 0.1;
-    }
-
-    // --- STATE 3: WALKING ---
-	// --- Inside updatePhysics(p) ---
-	if (p.targetX !== null && p.targetX !== undefined) {
-		let dx = p.targetX - p.x;
-		if (Math.abs(dx) > 3) {
-			p.x += dx * 0.12;
-			p.lean = dx > 0 ? 0.2 : -0.2;
-		} else {
-			// --- ARRIVED AT POSITION ---
-			p.x = p.targetX;
-			p.lean = 0;
-			p.targetX = null;
-
-			// If they were organizing, put them back to their previous job
-			if (p.activeTask === "organizing") {
-				p.activeTask = p.lastTask || "none";
-				p.lastTask = null; // Clear it out
-			}
-		}
-	}
-
-    // --- STATE 4: SEPARATION ---
-    // Pass the target goal so we know if they should be "ghosting"
-    resolveCrowding(p);
-}
- */
-function updatePhysics(p) {
     const now = Date.now();
 
     // --- 1. STATUS EXPIRY (Check every frame) ---
@@ -2815,6 +2710,105 @@ function resolveCrowding(p) {
         }
     }
 }
+ */
+function updatePhysics(p) {
+    const now = Date.now();
+
+    // --- 1. STATUS EXPIRY ---
+    if (p.isEntangled && now > p.entangleExpiry) p.isEntangled = false;
+    if (p.isWebbed && now > p.webExpiry) p.isWebbed = false;
+    if (p.isFrozen && now > p.freezeExpiry) p.isFrozen = false;
+    if (p.isBurning && now > p.burnExpiry) p.isBurning = false;
+
+    // --- 2. DEFINE DEPTH AREA ---
+    // Arena often needs more vertical 'walking space' than the town
+    const isArena = (p.area === "arena");
+    const horizonY = 530; 
+    const maxY = isArena ? 580 : 565; 
+    
+    if (p.zLane === undefined) p.zLane = Math.floor(Math.random() * 30);
+    const groundLevel = horizonY + p.zLane; 
+
+    // --- STATE 1: FALLING ---
+    if (p.targetY !== undefined && p.targetY !== null) {
+        if (p.y < groundLevel) { 
+            p.y += 12;
+            p.lean = 0.1; 
+            return;
+        } else {
+            p.y = groundLevel;
+            p.targetY = null;
+        }
+    }
+
+    // --- STATE 2: EMERGENCY FLOOR CHECK ---
+    if (!p.targetY && Math.abs(p.y - groundLevel) > 1) {
+        p.y += (groundLevel - p.y) * 0.1;
+    }
+
+    // --- STATE 3: WALKING ---
+    if (p.targetX !== null && p.targetX !== undefined) {
+        let dx = p.targetX - p.x;
+        
+        // --- APPLY SPEED MODIFIERS ---
+        let moveStrength = 0.12; 
+        
+        if (p.isFrozen) moveStrength = 0;
+        else if (p.isWebbed) moveStrength *= 0.25;
+        else if (p.isEntangled) moveStrength *= 0.5;
+
+        if (Math.abs(dx) > 2) {
+            p.x += dx * moveStrength;
+            // Update facing based on movement
+            p.facing = dx > 0 ? 1 : -1;
+            p.lean = dx > 0 ? 0.2 : -0.2;
+        } else {
+            p.x = p.targetX;
+            p.lean = 0;
+            p.targetX = null;
+
+            if (p.activeTask === "organizing") {
+                p.activeTask = p.lastTask || "none";
+                p.lastTask = null;
+            }
+        }
+    }
+
+    // --- STATE 4: SEPARATION ---
+    // Pass the maxY to resolveCrowding so they stay within bounds
+    resolveCrowding(p, horizonY, maxY);
+}
+function resolveCrowding(p, minY, maxY) {
+    const isArena = (p.area === "arena");
+    const bubbleX = isArena ? 20 : 30; // Thinner bubbles in Arena for tighter fights
+    const bubbleY = 15; 
+
+    for (let id in players) {
+        let other = players[id];
+        if (other === p || other.area !== p.area || other.dead || other.targetY) continue;
+
+        let dx = p.x - other.x;
+        let dy = p.y - other.y;
+
+        if (Math.abs(dx) < bubbleX && Math.abs(dy) < bubbleY) {
+            if (dx === 0) dx = p.id > other.id ? 1 : -1;
+            
+            // Arena players are "heavier" (harder to push) to keep combat stable
+            let pushStrength = (p.targetX !== null || isArena) ? 0.03 : 0.15;
+            let forceX = (bubbleX - Math.abs(dx)) * pushStrength;
+            
+            p.x += dx > 0 ? forceX : -forceX;
+
+            // Lateral evasion
+            let forceY = (bubbleY - Math.abs(dy)) * 0.12;
+            p.y += dy > 0 ? forceY : -forceY;
+            
+            // Dynamic clamping based on the area
+            p.y = Math.max(minY, Math.min(maxY, p.y));
+        }
+    }
+}
+
 
 function triggerSplash(p) {
     // We pass 'p' so the floater knows the name, area, and position
@@ -4483,10 +4477,10 @@ function updatePlayerActions(p, now) {
     }
 
     // 5. Combat (Player vs Player)
-    // Similarly, performPvPAttack should handle its own internal timing 
     // to prevent animation flickering.
     if (p.activeTask === "pvp") {
         //performPvPAttack(p);
+		handlePvPLogic(p, now);
 		performAttack(p);
     }
 	if (p.activeTask === "training") {
