@@ -1972,7 +1972,7 @@ const POSE_LIBRARY = {
     },
 	"sit": (head, p, anim) => {
 		anim.lean = 0.4;
-		const hipY = p.y + anim.bodyY; // The pivot point for the legs
+		const hipY = p.y + 0 + anim.bodyY;
 		// 2. Leg Logic: Hip -> Knee -> Foot
 		// To avoid "weird legs," we keep the knee between the hip and foot
 		// KneeY is slightly ABOVE the hip to show the thighs are angled up
