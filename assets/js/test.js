@@ -861,18 +861,52 @@ function scrubAllInventories() {
 }
 //================== COMBAT ==============================
 // --- COMBAT -----------------------
+Here is the full, unified performAttack function. I have integrated the Arena targeting logic, team checks, and PvP stat tracking while keeping your original dungeon logic intact.
+
+JavaScript
+
 function performAttack(p) {
     if (p.dead) return;
 
     const now = Date.now();
 
-    // 1. Identify Target
-    let target = (p.area === "dungeon") 
-        ? (enemies.find(e => !e.dead) || (boss && !boss.dead ? boss : null))
-        : Object.values(players).find(pl => pl.area === p.area && !pl.dead && pl.name !== p.name);
+    // 1. Identify Target (Unified for Dungeon and Arena)
+    let target = null;
 
+    if (p.area === "dungeon") {
+        // Dungeon Logic: Hit enemies or the boss
+        target = (enemies.find(e => !e.dead) || (boss && !boss.dead ? boss : null));
+    } else if (p.area === "arena" && arenaActive) {
+        // Arena Logic: Identify potential opponents
+        let opponents = Object.values(players).filter(pl => 
+            pl.area === "arena" && 
+            !pl.dead && 
+            pl.name !== p.name && 
+            pl.activeTask === "pvp"
+        );
+
+        // Filter by teams if in Team Mode
+        if (arenaMode === "teams") {
+            opponents = opponents.filter(t => t.team !== p.team);
+        }
+
+        // Sort by closest distance
+        opponents.sort((a, b) => Math.abs(a.x - p.x) - Math.abs(b.x - p.x));
+        target = opponents[0];
+    } else {
+        // Fallback for general world PvP/Aggression
+        target = Object.values(players).find(pl => 
+            pl.area === p.area && 
+            !pl.dead && 
+            pl.name !== p.name
+        );
+    }
+
+    // If no target exists, stop walking and exit
     if (!target) {
         p.targetX = null;
+        // If the arena is active but no targets are left, trigger the win check
+        if (p.area === "arena" && arenaActive) checkArenaVictory();
         return; 
     }
 
@@ -883,12 +917,12 @@ function performAttack(p) {
     const weaponKey = p.stats?.equippedWeapon || p.equipped?.weapon;
     const weapon = ITEM_DB[weaponKey];
     
-    // Fallback to "Unarmed/Boxing" stats
     const isUnarmed = !weapon;
     const type = isUnarmed ? "unarmed" : weapon.type;
-    const skillType = (type === "bow") ? "archer" : (type === "staff" ? "magic" : "attack");
     
-    // Boxing range is tight (40), Melee is (60), Ranged is (250)
+    // skillType mapping: attack, archery, or magic
+    const skillType = (type === "bow") ? "archery" : (type === "staff" ? "magic" : "attack");
+    
     const rangeNeeded = isUnarmed ? 40 : (type === "bow" || type === "staff" ? 250 : 60);
     const attackSpeed = isUnarmed ? 800 : (weapon.speed || 1000);
 
@@ -896,23 +930,21 @@ function performAttack(p) {
     const dist = Math.abs(p.x - target.x);
 
     if (dist > rangeNeeded) {
-        // Generate a slightly unique offset so players don't stack perfectly on one pixel
         const jitter = ((p.zLane || 0) % 10) - 5; 
         const finalRange = rangeNeeded - 10 + jitter;
-        
         const offset = p.x < target.x ? -finalRange : finalRange;
         p.targetX = target.x + offset;
     } else {
-        // We are in range! Stop walking and start swinging
-        p.targetX = null;
+        p.targetX = null; 
         
-        // Initialize timer if this is the start of the fight
         if (!p.lastAttackTime) p.lastAttackTime = now - attackSpeed;
 
         // 4. Attack Execution
         if (now - p.lastAttackTime > attackSpeed) {
             const skillLvl = p.stats[skillType + "Level"] || 1;
             const power = isUnarmed ? 0 : (weapon.power || 0);
+            
+            // Formula: 5 base + (Level * 2) + Weapon Power
             const rawDmg = 5 + (skillLvl * 2) + power;
 
             // Visual Projectiles
@@ -922,18 +954,30 @@ function performAttack(p) {
                 spawnProjectile(p.x, p.y - 12, target.x, target.y - 15, weapon?.color || "#00ffff", "magic", p.area);
             }
 
-            // Apply Damage
+            // Apply Damage (Triggers Defense/Lurk logic in applyDamage)
             applyDamage(target, rawDmg);
             p.lastAttackTime = now; 
 
-            // Handle Loot/Stats on kill
-            if (target.hp <= 0 && (target.isEnemy || target.isBoss)) {
-                if (!p.stats.dungeon) p.stats.dungeon = { highestTier: 0, kills: 0, bossKills: 0 };
-                p.stats.dungeon.kills++;
-                handleLoot(p, target);
+            // 5. Handle Kills & Stats
+            if (target.hp <= 0) {
+                if (target.isEnemy || target.isBoss) {
+                    // Dungeon Kill Tracking
+                    if (!p.stats.dungeon) p.stats.dungeon = { highestTier: 0, kills: 0, bossKills: 0 };
+                    p.stats.dungeon.kills++;
+                    handleLoot(p, target);
+                } else if (p.area === "arena") {
+                    // Arena Kill Tracking
+                    systemMessage(`⚔️ ${p.name} eliminated ${target.name}!`);
+                    if (!p.stats.arena) p.stats.arena = { wins: 0, winStreak: 0, totalMatches: 0, kills: 0 };
+                    p.stats.arena.kills = (p.stats.arena.kills || 0) + 1;
+                    
+                    // Update global rankings
+                    updatePvPRank(p.name, 1, 0); 
+                    checkArenaVictory();
+                }
             }
 
-            // Award XP
+            // 6. Award XP
             const xpGain = 10;
             p.stats[skillType + "XP"] = (p.stats[skillType + "XP"] || 0) + xpGain;
             
@@ -942,6 +986,7 @@ function performAttack(p) {
                 p.stats[skillType + "XP"] = 0;
                 spawnFloater(p, `${skillType.toUpperCase()} UP!`, "#FFD700");
                 updateCombatLevel(p);
+                saveStats(p); // Persist level up
             }
         }
     }
@@ -951,13 +996,12 @@ function applyDamage(target, rawAmount, color = "#f00") {
 
     // --- 1. DEFENSE CALCULATION ---
     let totalDef = 0;
-    // Check if target is a player (stats) or an enemy (equipped)
     let gearSource = target.stats || target.equipped; 
+    
     if (gearSource) {
-        // Map slots based on whether it's a Player object or Enemy object
         const slots = target.stats 
-            ? ["equippedHelmet", "equippedArmor", "equippedPants", "equippedBoots"] 
-            : ["helmet", "armor", "pants", "boots"];
+            ? ["equippedHelmet", "equippedArmor", "equippedPants", "equippedBoots", "equippedCape", "equippedGloves"] 
+            : ["helmet", "armor", "pants", "boots"]; // Add Cape/Gloves for players
             
         slots.forEach(s => {
             let itemName = target.stats ? target.stats[s] : target.equipped[s];
@@ -968,37 +1012,42 @@ function applyDamage(target, rawAmount, color = "#f00") {
 
     // --- 2. EVASION CHECK (LURK) ---
     if (target.stats && target.stats.lurkLevel) {
-        // 5% base + 1% per level, capped at 35%
         let dodgeChance = Math.min(0.35, 0.05 + (target.stats.lurkLevel * 0.01));
         if (Math.random() < dodgeChance) {
             spawnFloater(target, "MISS", "#fff");
             
-            // Award Lurk XP for dodging
-            target.stats.lurkXP = (target.stats.lurkXP || 0) + 5;
-            if (target.stats.lurkXP >= xpNeeded(target.stats.lurkLevel)) {
-                target.stats.lurkLevel++;
-                target.stats.lurkXP = 0;
-                spawnFloater(target, "LURK UP!", "#FFD700");
-                updateCombatLevel(target);
+            // Only award Lurk XP if the target is actually in a fight
+            if (target.activeTask === "pvp" || target.activeTask === "attacking") {
+                target.stats.lurkXP = (target.stats.lurkXP || 0) + 5;
+                if (target.stats.lurkXP >= xpNeeded(target.stats.lurkLevel)) {
+                    target.stats.lurkLevel++;
+                    target.stats.lurkXP = 0;
+                    spawnFloater(target, "LURK UP!", "#FFD700");
+                    updateCombatLevel(target);
+                }
             }
-            return; // Attack missed, exit function
+            return; 
         }
     }
 
     // --- 3. FINAL DAMAGE ---
-    // Subtract defense from raw amount, but ensure at least 1 damage is dealt
-    let finalAmount = Math.max(1, rawAmount - totalDef);
+    // Optional: Add a dampener for Arena so matches last longer
+    let pvpMultiplier = (target.area === "arena") ? 0.7 : 1.0; 
+    
+    let finalAmount = Math.max(1, Math.floor((rawAmount - totalDef) * pvpMultiplier));
 
     target.hp -= finalAmount;
-	if (target.stats) {
+    
+    if (target.stats) {
         target.stats.currentHp = target.hp;
     }
+    
     spawnFloater(target, `-${finalAmount}`, color);
 
     // --- 4. DEATH HANDLING ---
     if (target.hp <= 0) {
         target.hp = 0;
-		if (target.stats) target.stats.currentHp = 0; // Sync death
+        if (target.stats) target.stats.currentHp = 0;
         target.dead = true;
         target.activeTask = "none";
         target.deathTime = Date.now();
@@ -1006,8 +1055,14 @@ function applyDamage(target, rawAmount, color = "#f00") {
         
         const deathMsg = target.isEnemy || target.isBoss 
             ? `${target.name} has been slain!` 
-            : `${target.name} has fallen!`;
+            : `${target.name} has fallen in battle!`;
         systemMessage(deathMsg);
+
+        // --- ARENA SPECIFIC DEATH LOGIC ---
+        if (target.area === "arena" && arenaActive) {
+            // This triggers the win condition check immediately
+            checkArenaVictory();
+        }
     }
 }
 //
@@ -4434,7 +4489,8 @@ function updatePlayerActions(p, now) {
     // Similarly, performPvPAttack should handle its own internal timing 
     // to prevent animation flickering.
     if (p.activeTask === "pvp") {
-        performPvPAttack(p);
+        //performPvPAttack(p);
+		performAttack(p);
     }
 	if (p.activeTask === "training") {
         handleTraining(p, now);
