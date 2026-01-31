@@ -1971,28 +1971,22 @@ const POSE_LIBRARY = {
         };
     },
 	"sit": (head, p, anim) => {
+		anim.lean = 0.4;
 		const hipY = p.y + anim.bodyY; // The pivot point for the legs
-		const shoulderY = head.y + 15;
-
-		// 1. Hands: Resting comfortably on the lap
-		// We position them relative to the hip so they move if the body bobs
-		const handL = { x: p.x - 12, y: hipY - 8 };
-		const handR = { x: p.x + 12, y: hipY - 8 };
-
 		// 2. Leg Logic: Hip -> Knee -> Foot
 		// To avoid "weird legs," we keep the knee between the hip and foot
 		// KneeY is slightly ABOVE the hip to show the thighs are angled up
-		const kneeL = { x: p.x - 22, y: hipY - 5 }; 
-		const kneeR = { x: p.x + 22, y: hipY - 5 };
+		const kneeL = { x: p.x - 15, y: hipY - 2 }; 
+		const kneeR = { x: p.x + 15, y: hipY - 2 };
 
 		// 3. Feet: Pushed slightly further out than the knees
 		// No yOffset needed here because we want them to drop with the bodyY
-		const footL = { x: p.x - 25 }; 
-		const footR = { x: p.x + 25 };
+		const footL = { x: p.x + 15 }; 
+		const footR = { x: p.x - 15 };
 
 		return {
-			left: handL,
-			right: handR,
+			left:  { x: head.x - 10, y: head.y + 35 },
+			right: { x: head.x + 5,  y: head.y + 30 }
 			
 			// Joint flare
 			leftKnee: kneeL,
