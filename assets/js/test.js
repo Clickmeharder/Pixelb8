@@ -2858,23 +2858,48 @@ function drawArmor(ctx, p, anchors) {
     const itemKey = p.stats?.equippedArmor || p.equipped?.armor;
     const item = ITEM_DB[itemKey];
     if (!item) return;
+
     const headX = anchors.headX;
     const hipX = p.x + (anchors.lean * 5);
+    const bodyY = anchors.bodyY;
 
     ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(headX - 7, p.y - 18 + anchors.bodyY); 
-    ctx.lineTo(headX + 7, p.y - 18 + anchors.bodyY); 
-    ctx.lineTo(hipX + 7, p.y + 8 + anchors.bodyY);    
-    ctx.lineTo(hipX - 7, p.y + 8 + anchors.bodyY);    
-    ctx.closePath();
     ctx.fillStyle = item.color;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+
+    // 1. Draw Sleeves (Shoulder Caps)
+    // Positioned at the "shoulder" height
+    const shoulderY = p.y - 18 + bodyY;
+    
+    // Left Sleeve
+    ctx.beginPath();
+    ctx.arc(headX - 8, shoulderY + 2, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Right Sleeve
+    ctx.beginPath();
+    ctx.arc(headX + 8, shoulderY + 2, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 2. Draw Main Torso (Shorter Version)
+    ctx.beginPath();
+    // Top line (Shoulders)
+    ctx.moveTo(headX - 7, shoulderY); 
+    ctx.lineTo(headX + 7, shoulderY); 
+    
+    // Bottom line (Waist) - Changed from +8 to +2 to make it shorter
+    ctx.lineTo(hipX + 6, p.y + 2 + bodyY);    
+    ctx.lineTo(hipX - 6, p.y + 2 + bodyY);    
+    
+    ctx.closePath();
     ctx.globalAlpha = 0.8;
     ctx.fill();
     ctx.globalAlpha = 1.0;
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
     ctx.stroke();
+
     ctx.restore();
 }
 // --- 4. PANTS (Drawn over the legs) ---
