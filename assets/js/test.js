@@ -3059,13 +3059,13 @@ function getAnimationState(p, now) {
     // Fallback: If training and no pose is forced, default to pushups
     if (p.activeTask === "training" && !activePose) activePose = "pushups";
 	if (activePose === "sit") {
-        anim.bodyY = 20;
-		anim.lean = -0.4;
+        anim.bodyY = 18;
+		//anim.lean = -0.1;
         anim.pose = "sit";
 	} else if (activePose === "pushups") {
 		const rep = (Math.sin(now / 300) + 1) / 2;
 		anim.bodyY = 18 + (rep * 10); // How far the chest drops
-		anim.lean = -1.3;             // The "Plank" angle (more negative = more horizontal)
+		anim.lean = -2.3;             // The "Plank" angle (more negative = more horizontal)
 		anim.pose = "pushups";
     } else if (activePose === "meditation") {
         const breathe = Math.sin(now / 1000) * 3;
