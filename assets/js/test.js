@@ -3299,7 +3299,7 @@ function drawStickman(ctx, p) {
     // --- 5. Name with Combat Level ---
     const combatLvl = p.stats.combatLevel || 3;
     ctx.fillStyle = "#fff"; 
-    ctx.font = "12px monospace"; 
+	ctx.font = "10px 'Pixelify Sans', monospace";
     ctx.fillText(`${p.name} (Lvl ${combatLvl})`, p.x, nameY);
 
     // --- 6. HP Bar ---
