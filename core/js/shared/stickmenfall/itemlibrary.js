@@ -371,7 +371,7 @@ const DANCE_UNLOCKS = {
     9: { name: "The Disco", minLvl: 1 },
 	10: { name: "The Worm", minLvl: 1 },
     11: { name: "Breakspin", minLvl: 1 },
-	12: { name: "The Moonwalk", minLvl:  },
+	12: { name: "The Moonwalk", minLvl: 1 },
     13: { name: "The Robot", minLvl: 1 },
     14: { name: "The Carlton", minLvl: 1 },
 	15: { name: "The Twerk", minLvl: 1 },
