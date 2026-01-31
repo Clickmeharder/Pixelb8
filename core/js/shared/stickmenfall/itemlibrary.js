@@ -1999,27 +1999,27 @@ const POSE_LIBRARY = {
 		const groundYOffset = -anim.bodyY;
 		const shoulderY = head.y + 15;
 		
-		// Calculate the length of our plank (Distance from head to feet)
-		// By basing feet on head.x, we prevent the "stretching" effect
-		const plankLength = 70; 
-		const feetX = head.x + plankLength; 
+		// THE FIX: Anchor the feet to the player's root X.
+		// This stops the 'sliding' because the pivot point never moves.
+		const pivotX = p.x + 20; 
 
 		return {
-			// HANDS: Glued to floor under the chest
+			// HANDS: Pinned to ground. Use head.x so they stay under the face.
 			left:  { x: head.x - 5, yOffset: groundYOffset },
 			right: { x: head.x + 15, yOffset: groundYOffset },
 
-			// ELBOWS: Flare out for the push
+			// ELBOWS: Flare out
 			leftElbow:  { x: head.x - 18, y: shoulderY + 8 },
 			rightElbow: { x: head.x + 28, y: shoulderY + 8 },
 
-			// LEGS: Explicitly null to keep the line straight
+			// LEGS: Null knee ensures a perfectly straight line from hip to foot
 			leftKnee: null,
 			rightKnee: null,
 
-			// FEET: Now they follow head.x, keeping the body length constant!
-			leftFoot:  { x: feetX, yOffset: groundYOffset },
-			rightFoot: { x: feetX + 3, yOffset: groundYOffset }
+			// FEET: Locked to p.x. No matter how much the head leans, 
+			// the toes stay in this exact spot on the map.
+			leftFoot:  { x: pivotX, yOffset: groundYOffset },
+			rightFoot: { x: pivotX + 3, yOffset: groundYOffset }
 		};
 	},
 

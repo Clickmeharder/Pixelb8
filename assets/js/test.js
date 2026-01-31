@@ -3088,13 +3088,11 @@ function getAnimationState(p, now) {
 		//anim.lean = -0.1;
         anim.pose = "sit";
 	} else if (activePose === "pushups") {
-		const rep = (Math.sin(now / 300) + 1) / 2; // 0 at top, 1 at bottom
-		anim.bodyY = 15 + (rep * 12); 
-		
-		// Dynamic Lean: Start at -1.8 (up) and tilt to -2.8 (down)
-		anim.lean = -1.8 - (rep * 1.0); 
-		
-		anim.pose = "pushups";
+    const rep = (Math.sin(now / 300) + 1) / 2;
+    anim.bodyY = 15 + (rep * 12); 
+    // Static lean keeps the head on a fixed vertical tracks
+    anim.lean = -2.5; 
+    anim.pose = "pushups";
 
     } else if (activePose === "meditation") {
         const breathe = Math.sin(now / 1000) * 3;
