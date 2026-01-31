@@ -1985,9 +1985,6 @@ const POSE_LIBRARY = {
 		const footR = { x: p.x - 15 };
 
 		return {
-			left: handL,
-			right: handR,
-			
 			// Joint flare
 			leftKnee: kneeL,
 			rightKnee: kneeR,
