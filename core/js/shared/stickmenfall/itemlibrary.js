@@ -1987,6 +1987,11 @@ const POSE_LIBRARY = {
 		return {
 			left: handL,
 			right: handR,
+			
+			// Joint flare
+			leftKnee: kneeL,
+			rightKnee: kneeR,
+			
 			// Ground contact
 			leftFoot: footL,
 			rightFoot: footR
