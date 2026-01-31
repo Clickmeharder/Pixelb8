@@ -1332,6 +1332,48 @@ function handleLurking(p, now) {
         spawnFloater(p, "◌", "rgba(75, 0, 130, 0.3)");
     }
 }
+const TRAINING_CONFIG = {
+    "pushups":  { skill: "attack", xp: 10 },
+    "meditate": { skill: "magic",  xp: 5  }
+};
+function performTraining(p, trainingType) {
+    if (p.dead) return;
+    const config = trainingMap[trainingType];
+    if (!config) return;
+
+    // Set the task so the game loop knows they are currently training
+    p.activeTask = "training";
+    p.trainingType = trainingType; 
+
+    // Initial XP award
+    const skillType = config.skill;
+    p.stats[skillType + "XP"] = (p.stats[skillType + "XP"] || 0) + config.xp;
+    
+    systemMessage(`${p.name} is now training ${skillType}!`);
+}
+function handleTraining(p, now) {
+    if (!p.lastTrainingXP) p.lastTrainingXP = now;
+
+    // Award XP every 5 seconds
+    if (now - p.lastTrainingXP > 5000) {
+
+        const config = trainingMap[p.trainingType];
+        if (!config) return;
+
+        const skillType = config.skill;
+        p.stats[skillType + "XP"] = (p.stats[skillType + "XP"] || 0) + config.xp;
+        p.lastTrainingXP = now;
+
+        // Level up logic using your xpNeeded function
+        let currentLvl = p.stats[skillType + "Level"] || 1;
+        if (p.stats[skillType + "XP"] >= xpNeeded(currentLvl)) {
+            p.stats[skillType + "Level"] = currentLvl + 1;
+            p.stats[skillType + "XP"] = 0;
+            spawnFloater(p, `${skillType.toUpperCase()} LVL ${p.stats[skillType + "Level"]}!`, "#FFD700");
+            updateCombatLevel(p);
+        }
+    }
+}
 //============================================================
 // ============== 	FISHING MERCHANT STUFF ===================
 // --- Fishing Merchant --------------------------------------
@@ -4356,6 +4398,9 @@ function updatePlayerActions(p, now) {
     if (p.activeTask === "pvp") {
         performPvPAttack(p);
     }
+	if (p.activeTask === "training") {
+        handleTraining(p, now);
+    }
 }
 
 
@@ -4379,7 +4424,6 @@ function updateSystemTicks(now) {
     if (now - systemTimers.lastGlobalTick > systemTimers.globalInterval) {
         Object.values(players).forEach(p => {
             if (p.dead || p.area !== "pond") return;
-
             // Existing Fishing logic
             if (p.activeTask === "fishing") {
                 if (Math.random() > 0.8) performFish(p);
@@ -5137,7 +5181,26 @@ function renderAchRow(container, title, isUnlocked, color, subtext) {
     container.appendChild(div);
 }
 
+function cmdTrain(p, user, type) {
+    if (p.dead) return;
 
+    // Call the updated direct pose function
+    cmdSetPose(p, type); 
+
+    // Clear any temporary timers (like a wave timer)
+    if (p.poseTimer) {
+        clearTimeout(p.poseTimer);
+        p.poseTimer = null;
+    }
+
+    // Set task for the game loop to handle XP
+    p.activeTask = "training";
+    p.trainingType = type;
+    p.lastTrainingXP = Date.now(); 
+
+    systemMessage(`${user} is now training: ${type}!`);
+    saveStats(p);
+}
 function cmdEmote(p, type) {
     p.emote = type;
     
@@ -5150,25 +5213,23 @@ function cmdEmote(p, type) {
     }, 5000);
 	console.log(p + 'used emote' + type);
 }
-function cmdSetPose(p, user, args) {
+function cmdSetPose(p, poseName) {
     if (p.dead) return;
     
-    // args[0] is "!pose", args[1] is the name of the pose
-    let chosenPose = args[1]?.toLowerCase();
+    let chosenPose = poseName?.toLowerCase();
 
-    // 1. CLEAR POSE: "!pose none" or "!pose off"
-    if (!chosenPose || chosenPose === "none" || chosenPose === "off" || chosenPose === "stand") {
+    // 1. CLEAR POSE
+    if (!chosenPose || ["none", "off", "stand"].includes(chosenPose)) {
         p.forcedPose = null;
         p.anim.bodyY = 0;
         p.anim.lean = 0;
-        if (p.poseTimer) clearTimeout(p.poseTimer); // Cancel any temp timers
-        systemMessage(`${user} is now standing.`);
+        if (p.poseTimer) clearTimeout(p.poseTimer);
+        systemMessage(`${p.name} is now standing.`);
         return;
     }
 
-    // 2. VALIDATE POSE: Check if it exists in your library
+    // 2. VALIDATE & SET
     if (POSE_LIBRARY[chosenPose]) {
-        // Optional: Block combat poses from being set manually if you want them to be auto-only
         const combatPoses = ["boxing", "archer", "action"];
         if (combatPoses.includes(chosenPose)) {
             systemMessage(`The ${chosenPose} pose is for combat only!`);
@@ -5177,16 +5238,15 @@ function cmdSetPose(p, user, args) {
 
         p.forcedPose = chosenPose;
 
-        // 3. CLEANUP: Cancel dancing and temp timers
+        // 3. CLEANUP
         if (p.activeTask === "dancing") {
             p.activeTask = null;
             p.danceStyle = 0;
         }
         if (p.poseTimer) clearTimeout(p.poseTimer);
 
-        systemMessage(`${user} set pose to: ${chosenPose}`);
+        systemMessage(`${p.name} set pose to: ${chosenPose}`);
     } else {
-        // 4. HELP MESSAGE: List available poses automatically
         const available = Object.keys(POSE_LIBRARY)
             .filter(k => !["boxing", "archer", "action"].includes(k))
             .join(", ");
@@ -6255,10 +6315,11 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "!heal")   { cmdHeal(p, user, args); return; }
     if (cmd === "!dance")  { cmdDance(p, user, args); return; }
     if (cmd === "!lurk")   { cmdLurk(p, user); return; }
-	if (cmd === "!meditate" || cmd === "!zen") { cmdSetPose(p, p.name, ["!meditate", "meditate"]); return; }
+	if (cmd === "!meditate" || cmdTrain(p, user, "meditate"); return; }
+	if (cmd === "!pushups" || cmdTrain(p, user, "pushups"); return; }
     if (cmd === "!respawn") { cmdRespawn(p); return; }
 	// The General Command
-	if (cmd === "!pose" || cmd === "::pose") { cmdSetPose(p, p.name, args);return; }
+	
     // -- Travel commands
     if (cmd === "!travel") { movePlayer(p, args[1]); return; }
     if (cmd === "!home")   { movePlayer(p, "home"); return; }
@@ -6295,10 +6356,9 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
         return; 
     }
 	if (cmd === "!pee" || cmd === "!relief") { cmdTempPose(p, "pee", 5000); return; }
-	if (cmd === "!sit")     { cmdSetPose(p, p.name, ["!sit", "sit"]); return; }
-	if (cmd === "!pushups") { cmdSetPose(p, p.name, ["!pushups", "pushups"]); return; }
-
-	if (cmd === "!stand" || cmd === "!stop") { cmdSetPose(p, p.name, ["!stand", "none"]); return; }
+	if (cmd === "!pose" || cmd === "::pose") { cmdSetPose(p, args);return; }
+	if (cmd === "!sit")     { cmdSetPose(p, "sit"); return; }
+	if (cmd === "!stand" || cmd === "!stop") { cmdSetPose(p, "stand"); return; }
     if (cmd === "!wigcolor")   { cmdWigColor(p, args); return; }
     if (cmd === "!sheath")     { cmdSheath(p, user); return; }
     if (cmd === "!equip")      { cmdEquip(p, args); return; }
