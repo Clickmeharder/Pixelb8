@@ -2012,6 +2012,7 @@ const POSE_LIBRARY = {
             rightFoot: { x: p.x - 38, yOffset: -anim.bodyY }
         };
     },
+
     "pee": (head, p, anim) => {
         const now = Date.now();
         // Particle logic inside the pose:
