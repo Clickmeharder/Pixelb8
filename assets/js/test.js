@@ -5753,7 +5753,7 @@ function equipByDbKey(p, dbKey) {
     const type = item.type;
     if (["weapon", "staff", "bow", "wand", "book"].includes(type)) p.stats.equippedWeapon = dbKey;
     else if (type === "armor") p.stats.equippedArmor = dbKey;
-    else if (["helmet", "hood", "viking", "wizard", "crown"].includes(type)) p.stats.equippedHelmet = dbKey;
+    else if (["helmet", "hair", "hood", "viking", "wizard", "crown"].includes(type)) p.stats.equippedHelmet = dbKey;
     else if (type === "boots") p.stats.equippedBoots = dbKey;
     else if (type === "pants") p.stats.equippedPants = dbKey;
     else if (type === "gloves") p.stats.equippedGloves = dbKey;
