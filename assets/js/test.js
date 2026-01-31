@@ -2874,13 +2874,13 @@ function drawArmor(ctx, p, anchors) {
     
     // Left Sleeve
     ctx.beginPath();
-    ctx.arc(headX - 8, shoulderY, 4, 0, Math.PI * 2);
+    ctx.arc(headX - 12, shoulderY, 4, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
     // Right Sleeve
     ctx.beginPath();
-    ctx.arc(headX + 8, shoulderY, 4, 0, Math.PI * 2);
+    ctx.arc(headX + 12, shoulderY, 4, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
