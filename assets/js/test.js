@@ -2860,6 +2860,7 @@ function drawArmor(ctx, p, anchors) {
     if (!item) return;
 
     const headX = anchors.headX;
+	const headY	 = anchors.headY;
     const hipX = p.x + (anchors.lean * 5);
     const bodyY = anchors.bodyY;
 
