@@ -1971,23 +1971,38 @@ const POSE_LIBRARY = {
         };
     },
 	"sit": (head, p, anim) => {
-        const hipY = p.y + anim.bodyY; // Our anchor for the lower body
-        
-        return {
-            // Hands: Resting on the thighs
-            left:  { x: p.x - 15, y: hipY - 5 },
-            right: { x: p.x + 15, y: hipY - 5 },
-            
-            // Knees: Popped upward (relative to hip)
-            leftKnee:  { x: p.x - 22, y: hipY - 3 },
-            rightKnee: { x: p.x + 22, y: hipY - 3 },
-            
-            // Feet: Pushed slightly forward and out, moving DOWN with the hip
-            // We removed yOffset so they stay 25px below the SHIFTED body
-            leftFoot:  { x: p.x - 24 }, 
-            rightFoot: { x: p.x + 24 }
-        };
-    },
+		const hipY = p.y + anim.bodyY; // The pivot point for the legs
+		const shoulderY = head.y + 15;
+
+		// 1. Hands: Resting comfortably on the lap
+		// We position them relative to the hip so they move if the body bobs
+		const handL = { x: p.x - 12, y: hipY - 8 };
+		const handR = { x: p.x + 12, y: hipY - 8 };
+
+		// 2. Leg Logic: Hip -> Knee -> Foot
+		// To avoid "weird legs," we keep the knee between the hip and foot
+		// KneeY is slightly ABOVE the hip to show the thighs are angled up
+		const kneeL = { x: p.x - 22, y: hipY - 5 }; 
+		const kneeR = { x: p.x + 22, y: hipY - 5 };
+
+		// 3. Feet: Pushed slightly further out than the knees
+		// No yOffset needed here because we want them to drop with the bodyY
+		const footL = { x: p.x - 25 }; 
+		const footR = { x: p.x + 25 };
+
+		return {
+			left: handL,
+			right: handR,
+			
+			// Joint flare
+			leftKnee: kneeL,
+			rightKnee: kneeR,
+			
+			// Ground contact
+			leftFoot: footL,
+			rightFoot: footR
+		};
+	},
 
 	"pushups": (head, p, anim) => {
 		// 1. Pivot Points (The Floor)
