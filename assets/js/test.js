@@ -5260,8 +5260,6 @@ function cmdSetPose(p, poseName) {
     // 1. CLEAR POSE
     if (!chosenPose || ["none", "off", "stand"].includes(chosenPose)) {
         p.forcedPose = null;
-        p.anim.bodyY = 0;
-        p.anim.lean = 0;
         if (p.poseTimer) clearTimeout(p.poseTimer);
         systemMessage(`${p.name} is now standing.`);
         return;
@@ -5313,9 +5311,6 @@ function cmdTempPose(p, poseType, duration = 3000) {
 		// Check if player and anim object still exist
 		if (p && p.anim && p.forcedPose === poseType) {
 			p.forcedPose = null;
-			p.anim.bodyY = 0;
-			p.anim.lean = 0;
-
 			if (poseType === "pee") {
 				cmdEmote(p, "neutral"); 
 			}
