@@ -256,7 +256,7 @@ function loadStats(name) {
 		swimLevel: 1, swimXP: 0,
         swimDistance: 0,
 		combatLevel: 1,
-        inventory: ["Fishing Rod"],
+        inventory: ["Fishing Rod", "Rusty Dagger", "Recurve Bow"],
         equippedWeapon: null,
         equippedArmor: null,
         equippedHelmet: null,
@@ -5626,89 +5626,140 @@ function cmdStop(p, user) {
     saveStats(p);
 }
 
-// TODO:
-// cmdequip needs ot be made smarter so its easier to use via twitch chat commands, 
-// !equip weapon (should auto equip the highest tier weapon they have, since no type is set it will choose a weapon type matching their their highest skill (
-// !equip staff, equip book or equip wand - should equip highest tier staff wand or book
-// !equip sword (highest tier sword type)
-// !equip highest tier by type, or !equip highest tier by type && skill
-// so !equip armor should take that players highest skill and match their highest tier armor or equipment of that type, with that skill
-// same with !equip legs, !equip boots, !equip pants, !equip helmet, cape, cloak, gloves, bow, sword, axe, staff, book, wand /equip weapon matches their highest skill and equip sword or dagger will just point to the weapon type since all melee weapons are "weapon" type   
-// !equip healer - should equip highest tier staff type that has item.heal: 1; or higher
-// !equip archer - should equip the highest tier bow type and items matching item.skill "archer"
-// !equip lurker - eauips highest tier lurker stuff item.skill = "lurk" 
-//Equip attack or equip melee - equips highest tier "weapon" types & equipment that matches item.skill "attack"
-// !equip sword
-//archer = "bow"
-// and just !equip should find their highest skill and equip matching weapon, bow, or staff, and equipment and gear them up,
-// and of course !equip random 
-
-// attack = "weapon"
-// magic = "staff", "wand" or "book"
-// heal =  "staff", "wand" or "book" && item.heal exists and is greater than 0
-// lurk = (second highest skill lvl matching weapons)"
-
 function cmdEquip(p, args) {
-	const canEquip = !p.activeTask || p.activeTask === "none" || p.activeTask === "organizing";
-
+    const canEquip = !p.activeTask || p.activeTask === "none" || p.activeTask === "organizing";
     if (!canEquip) {
-        systemMessage(`${p.name}: You are too busy ${p.activeTask} to change gear right now!`);
+        systemMessage(`${p.name}: You are too busy ${p.activeTask} to change gear!`);
         return;
     }
-    // SANITIZATION: Join all args and strip quotes
-    let inputName = args.slice(1).join(" ").toLowerCase().replace(/"/g, "");
+
+    let input = args.slice(1).join(" ").toLowerCase();
+    let inventory = p.stats.inventory;
+
+    // --- 1. SPECIAL CATEGORY MAPPING ---
+    const aliases = {
+        "healer": { types: ["staff", "wand", "book"], skill: "magic", healOnly: true },
+        "archer": { types: ["bow"], skill: "archery" },
+        "lurker": { types: ["weapon"], skill: "lurk" },
+        "melee":  { types: ["weapon"], skill: "attack" },
+        "attack": { types: ["weapon"], skill: "attack" },
+        "magic":  { types: ["staff", "wand", "book"], skill: "magic" },
+        "weapon": { types: ["weapon", "bow", "staff", "wand", "book"], autoSkill: true }
+    };
+
+    // --- 2. FIND HIGHEST SKILL ---
+    const skills = {
+        attack: p.stats.attackLevel || 1,
+        magic: p.stats.magicLevel || 1,
+        archery: p.stats.archeryLevel || 1,
+        lurk: p.stats.lurkLevel || 1
+    };
+    const highestSkill = Object.keys(skills).reduce((a, b) => skills[a] > skills[b] ? a : b);
+
+    // --- 3. SMART FILTERING ---
+    let targetItems = [];
+
+    if (input === "random") {
+        const randomKey = inventory[Math.floor(Math.random() * inventory.length)];
+        targetItems = [randomKey];
+    } 
+    else if (!input || input === "all") {
+        // Find best gear for their best skill
+        targetItems = autoGearUp(p, highestSkill);
+    }
+    else if (aliases[input]) {
+        // Handle !equip archer, !equip healer, etc.
+        const config = aliases[input];
+        targetItems = [findBestInSlot(p, config)];
+    }
+    else {
+        // Handle specific item names OR broad types (!equip sword, !equip armor)
+        let bestMatch = findBestInSlot(p, { searchTerm: input });
+        targetItems = [bestMatch];
+    }
+
+    // --- 4. EXECUTE EQUIPMENT ---
+    targetItems.filter(i => i !== null).forEach(itemKey => {
+        equipByDbKey(p, itemKey);
+    });
+
+    renderInventoryUI();
+    saveStats(p);
+}
+
+// HELPER: Finds the highest level item in inventory matching criteria
+function findBestInSlot(p, criteria) {
+    let bestItem = null;
+    let highestLvl = -1;
+
+    p.stats.inventory.forEach(invKey => {
+        const item = ITEM_DB[invKey];
+        if (!item) return;
+
+        let match = false;
+        
+        // Search by specific name/type/subtype
+        if (criteria.searchTerm) {
+            if (invKey.toLowerCase().includes(criteria.searchTerm) || 
+                item.type.toLowerCase() === criteria.searchTerm ||
+                (item.subType && item.subType.toLowerCase() === criteria.searchTerm)) {
+                match = true;
+            }
+        }
+        
+        // Search by alias config
+        if (criteria.types && criteria.types.includes(item.type)) {
+            if (criteria.skill && item.skill !== criteria.skill) return;
+            if (criteria.healOnly && !(item.heal > 0)) return;
+            match = true;
+        }
+
+        if (match && (item.level || item.tier || 0) > highestLvl) {
+            highestLvl = (item.level || item.tier || 0);
+            bestItem = invKey;
+        }
+    });
+
+    return bestItem;
+}
+
+// HELPER: Gets a full set of gear based on a specific skill path
+function autoGearUp(p, skill) {
+    const slots = ["armor", "pants", "boots", "helmet", "cape", "gloves"];
+    let set = [];
     
-    // Find the item using the sanitized name
-    let invItem = p.stats.inventory.find(i => i.toLowerCase() === inputName);
-    
-    if (!invItem) {
-        systemMessage(`${p.name}: You don't have "${inputName}".`);
-        return;
-    }
+    // Get Best Weapon for skill
+    const weaponConfig = { 
+        magic: { types: ["staff", "wand", "book"] },
+        archery: { types: ["bow"] },
+        attack: { types: ["weapon"] },
+        lurk: { types: ["weapon"], skill: "lurk" }
+    };
+    set.push(findBestInSlot(p, weaponConfig[skill]));
 
-    // Get the exact casing from the DB
-    let dbKey = Object.keys(ITEM_DB).find(k => k.toLowerCase() === invItem.toLowerCase());
-    let itemData = ITEM_DB[dbKey];
-    const type = itemData.type;
+    // Get Best Armor for each slot
+    slots.forEach(slot => {
+        set.push(findBestInSlot(p, { searchTerm: slot }));
+    });
 
-    if (type === "tool" || type === "fishing_rod" || type === "pickaxe" || type === "axe") {
-        systemMessage(`${p.name}: You don't need to equip tools. Just start the task!`);
-        return;
-    }
+    return set;
+}
 
-    let msg = "";
-    if (["weapon", "staff", "bow"].includes(type)) {
-        p.stats.equippedWeapon = dbKey;
-        msg = `slung the ${dbKey} over their shoulder`;
-    } else if (type === "armor") {
-        p.stats.equippedArmor = dbKey;
-        msg = `put on the ${dbKey}`;
-    } else if (["helmet", "hood", "hair", "viking", "wizard", "crown"].includes(type)) {
-        p.stats.equippedHelmet = dbKey; 
-        msg = `is wearing ${dbKey}`;
-    } else if (type === "boots") {
-        p.stats.equippedBoots = dbKey;
-        msg = `laced up ${dbKey}`;
-    } else if (type === "pants") {
-        p.stats.equippedPants = dbKey;
-        msg = `put on ${dbKey}`;
-    } else if (type === "gloves") {
-        p.stats.equippedGloves = dbKey;
-        msg = `put on ${dbKey}`;
-    } else if (type === "cape") {
-        p.stats.equippedCape = dbKey;
-        msg = `donned the ${dbKey}`;
-    }
+// HELPER: The actual equipping logic
+function equipByDbKey(p, dbKey) {
+    const item = ITEM_DB[dbKey];
+    if (!item) return;
 
-    if (p.activeTask === "organizing") {
-        organizeDungeonRanks(); 
-    }
-    if (msg) {
-        systemMessage(`${p.name} ${msg}!`);
-		renderInventoryUI();
-        saveStats(p);
-    }
+    const type = item.type;
+    if (["weapon", "staff", "bow", "wand", "book"].includes(type)) p.stats.equippedWeapon = dbKey;
+    else if (type === "armor") p.stats.equippedArmor = dbKey;
+    else if (["helmet", "hood", "viking", "wizard", "crown"].includes(type)) p.stats.equippedHelmet = dbKey;
+    else if (type === "boots") p.stats.equippedBoots = dbKey;
+    else if (type === "pants") p.stats.equippedPants = dbKey;
+    else if (type === "gloves") p.stats.equippedGloves = dbKey;
+    else if (type === "cape") p.stats.equippedCape = dbKey;
 
+    systemMessage(`${p.name} equipped the ${dbKey}!`);
 }
 function cmdSheath(p, user) {
     p.manualSheath = !p.manualSheath;
@@ -6396,6 +6447,13 @@ function processGameCommand(user, msg, flags = {}, extra = {}) {
     if (cmd === "!wigcolor")   { cmdWigColor(p, args); return; }
     if (cmd === "!sheath")     { cmdSheath(p, user); return; }
     if (cmd === "!equip")      { cmdEquip(p, args); return; }
+	
+/*
+ !equip (No args): It identifies your highest skill level. If you are a high-level mage, it finds your best Staff/Wand and best armor set automatically.
+!equip healer: It specifically looks for staff, wand, or book types that have item.heal > 0.
+!equip sword: It scans your inventory for any item name containing "sword" and picks the one with the highest level or tier.
+!equip armor: It picks the highest tier "armor" type item.
+!equip random: Fun for twitch chat! It picks a completely random item from their inventory and puts it on. */
     if (cmd === "!unequip")    { cmdUnequip(p, args); return; }
     if (cmd === "!inventory" || cmd === "!bag") { cmdInventory(p, user, args); return; }
     if (cmd === "!sell")       { cmdSell(p, user, args); return; }
