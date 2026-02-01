@@ -5038,7 +5038,7 @@ function renderEquippedSection(playerObj) {
     });
 }
 
-function renderItemsView(playerObj, bpGrid) {
+/* function renderItemsView(playerObj, bpGrid) {
     // 1. Get IDs of currently equipped items
     const equippedItems = [
         playerObj.stats.equippedWeapon, playerObj.stats.equippedArmor,
@@ -5115,6 +5115,108 @@ function renderItemsView(playerObj, bpGrid) {
                 <span class="item-price">${isUnsellable ? 'BOUND' : '$' + (itemData.value || 0)}</span>
                 <div class="item-actions">
                     <button class="btn-use">USE</button>
+                    ${isUnsellable ? '' : `<button class="btn-sell">SELL</button>`}
+                </div>
+            </div>
+        `;
+
+        div.querySelector('.btn-use').addEventListener('click', (e) => {
+            e.stopPropagation();
+            uiAction('!equip', item);
+        });
+        
+        const sellBtn = div.querySelector('.btn-sell');
+        if (sellBtn) {
+            sellBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                uiAction('!sell', item);
+            });
+        }
+
+        bpGrid.appendChild(div);
+    });
+} */
+function renderItemsView(playerObj, bpGrid) {
+    // 1. Get IDs of currently equipped items
+    const equippedItems = [
+        playerObj.stats.equippedWeapon, playerObj.stats.equippedArmor,
+        playerObj.stats.equippedHelmet, playerObj.stats.equippedPants,
+        playerObj.stats.equippedGloves, playerObj.stats.equippedBoots,
+        playerObj.stats.equippedCape
+    ].filter(Boolean);
+
+    const hideEquippedEl = document.getElementById("filter-hide-equipped");
+    const hideEquipped = hideEquippedEl ? hideEquippedEl.checked : false;
+
+    // --- NEW: STACKING LOGIC ---
+    // Group items: { "Bass": { name: "Bass", count: 5 }, "Iron Sword": { name: "Iron Sword", count: 1 } }
+    const groupedItems = {};
+    playerObj.stats.inventory.forEach(itemName => {
+        const data = ITEM_DB[itemName] || {};
+        
+        if (data.stacks) {
+            if (!groupedItems[itemName]) {
+                groupedItems[itemName] = { name: itemName, count: 1 };
+            } else {
+                groupedItems[itemName].count++;
+            }
+        } else {
+            // Unique ID to prevent non-stackables from merging (using a random suffix or index)
+            const uniqueId = itemName + "_" + Math.random(); 
+            groupedItems[uniqueId] = { name: itemName, count: 1, isUnique: true };
+        }
+    });
+
+    // 2. Filter logic (now operating on grouped items)
+    let itemsToRender = Object.values(groupedItems).filter(group => {
+        const item = group.name;
+        if (hideEquipped && equippedItems.includes(item)) return false;
+        
+        const data = ITEM_DB[item] || {};
+        const type = data.type || "";
+
+        if (currentInventoryFilter === "all") return true;
+        if (currentInventoryFilter === "helmet") {
+            return ["helmet", "hood", "viking", "wizard", "crown", "hair"].includes(type);
+        }
+        if (currentInventoryFilter === "gear") {
+            return ["weapon", "armor", "pants", "gloves", "boots", "cape", "staff", "bow"].includes(type);
+        }
+        if (currentInventoryFilter === "material") {
+            return type === "material" || type === "tool" || type === "consumable";
+        }
+        return type === currentInventoryFilter;
+    });
+
+    // 3. Sort logic
+    itemsToRender.sort((a, b) => {
+        const dataA = ITEM_DB[a.name] || {};
+        const dataB = ITEM_DB[b.name] || {};
+        if (currentSortMode === "tier") return (dataB.tier || 0) - (dataA.tier || 0);
+        if (currentSortMode === "value") return (dataB.value || 0) - (dataA.value || 0);
+        if (currentSortMode === "name") return a.name.localeCompare(b.name);
+        return 0;
+    });
+
+    // 4. Render
+    bpGrid.innerHTML = "";
+    bpGrid.classList.remove('hidden'); 
+
+    itemsToRender.forEach((group) => {
+        const item = group.name;
+        const itemData = ITEM_DB[item] || {};
+        const isUnsellable = itemData.type === "tool" || (itemData.sources?.includes("achievement"));
+        
+        const div = document.createElement('div');
+        div.className = "inv-slot";
+        div.innerHTML = `
+            <div class="slot-content">
+                <span class="item-tier">T${itemData.tier || 1}</span>
+                ${group.count > 1 ? `<span class="item-count">x${group.count}</span>` : ''}
+                <span class="slot-item-name" style="color:${itemData.color || '#fff'};">${item}</span>
+                <span class="item-price">${isUnsellable ? 'BOUND' : '$' + (itemData.value || 0)}</span>
+                <div class="item-actions">
+                    <button class="btn-use">${itemData.stacks ? 'USE' : 'EQUIP'}</button>
                     ${isUnsellable ? '' : `<button class="btn-sell">SELL</button>`}
                 </div>
             </div>
