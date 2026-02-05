@@ -6769,6 +6769,6 @@ document.addEventListener("DOMContentLoaded", () => {
 gameLoop();
 
 //localStorage.removeItem("rpg_JaeDraze");
-localStorage.removeItem("rpg_cakeministry");
+//localStorage.removeItem("rpg_cakeministry");
 //localStorage.removeItem("rpg_Player1");
 //localStorage.removeItem("rpg_player1");
