@@ -42,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
         makeElementInteractable(el);
         livePreview.appendChild(el);
         selectElement(el);
+		// FIX: Immediately save this new widget into the current page's data
+		pages[selectedPageIndex].content = livePreview.innerHTML;
         updateCodeView();
     }
 
@@ -224,19 +226,22 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function switchPage(index) {
-		// 1. Save current canvas content to the OLD page before leaving
+		// 1. SAVE: Capture what's currently on the canvas into the OLD page
 		pages[selectedPageIndex].content = livePreview.innerHTML;
-		
-		// 2. Change index
+
+		// 2. UPDATE: Change the active index
 		selectedPageIndex = index;
-		
-		// 3. Load the NEW page content to the canvas
-		livePreview.innerHTML = pages[selectedPageIndex].content;
-		
-		// 4. Re-init interactivity for widgets on the new page
-		const widgets = livePreview.querySelectorAll('.widget');
-		widgets.forEach(w => makeElementInteractable(w));
-		
+
+		// 3. WIPE & LOAD: Clear canvas and inject the NEW page's HTML
+		livePreview.innerHTML = pages[selectedPageIndex].content || "";
+
+		// 4. RE-ANIMATE: HTML strings don't keep JS events. 
+		// We must re-run makeElementInteractable on everything we just loaded.
+		const savedWidgets = livePreview.querySelectorAll('.widget');
+		savedWidgets.forEach(w => {
+			makeElementInteractable(w);
+		});
+
 		renderPages();
 		updateCodeView();
 	}
@@ -251,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			pages.push({ 
 				name: pageName, 
 				id: 'page-' + Date.now(), 
-				content: `<div style="padding:20px;"><h1>${pageName}</h1></div>` 
+				content: `` 
 			});
 			
 			selectedPageIndex = pages.length - 1;
