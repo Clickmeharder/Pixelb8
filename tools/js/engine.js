@@ -1,261 +1,204 @@
-/* =========================
-   PIXELB8 OMEGA ENGINE JS
-========================= */
+/**
+ * PIXELB8 OMEGA ENGINE V5 - Core Logic
+ * Pro-Sovereign CMS & Website Builder
+ */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
+    // --- State & Constants ---
+    let selectedElement = null;
+    const livePreview = document.getElementById('live-preview');
+    const codeBox = document.getElementById('code-box');
+    const inspector = document.getElementById('inspector');
+    const gridSnap = document.getElementById('grid-snap');
 
-    /* =========================
-       STATE
-    ========================= */
-    const PB8 = {
-        meta: {
-            neon: "#00ff41",
-            bg: "#0d0d0d",
-        },
-        pages: {
-            home: { id: "home", widgets: [] }
-        },
-        currentPage: "home",
-    };
+    // --- Initialization ---
+    initDragAndDrop();
+    updateCodeView();
 
-    let activeWidgetId = null;
-    let drag = null;
-    const livePreview = document.getElementById("live-preview");
-    const codePane = document.getElementById("code-pane");
-
-    /* =========================
-       UTIL FUNCTIONS
-    ========================= */
-    const uid = () => crypto.randomUUID();
-
-    const saveState = () => {
-        localStorage.setItem("pb8_state", JSON.stringify(PB8));
-    };
-
-    const loadState = () => {
-        const data = localStorage.getItem("pb8_state");
-        if (data) Object.assign(PB8, JSON.parse(data));
-        renderAll();
-    };
-
-    /* =========================
-       PAGE SYSTEM
-    ========================= */
-    const renderPages = () => {
-        const pageList = document.getElementById("pageList");
-        if (!pageList) return;
-        pageList.innerHTML = "";
-        Object.keys(PB8.pages).forEach(p => {
-            const btn = document.createElement("button");
-            btn.textContent = p;
-            btn.addEventListener("click", () => {
-                PB8.currentPage = p;
-                renderAll();
-            });
-            pageList.appendChild(btn);
+    // --- 1. Widget Creation ---
+    document.querySelectorAll('[data-widget]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const type = btn.getAttribute('data-widget');
+            createWidget(type);
         });
-    };
+    });
 
-    const addPage = () => {
-        const name = prompt("Page name?");
-        if (!name) return;
-        PB8.pages[name] = { id: name, widgets: [] };
-        PB8.currentPage = name;
-        saveState();
-        renderAll();
-    };
+    function createWidget(type) {
+        const el = document.createElement('div');
+        el.classList.add('widget', `widget-${type}`);
+        el.style.position = 'absolute';
+        el.style.top = '50px';
+        el.style.left = '50px';
+        el.style.padding = '10px';
+        el.style.minWidth = '100px';
+        el.style.cursor = 'move';
+        el.setAttribute('data-type', type);
 
-    /* =========================
-       WIDGET SYSTEM
-    ========================= */
-    const getDefaultContent = type => {
+        // Default Content
         switch (type) {
-            case "header": return "New Header";
-            case "text": return "Editable text block...";
-            case "image": return "https://placehold.co/400x200";
-            case "button": return "Click Me";
-            case "gallery": return "https://placehold.co/400x200";
-            case "video": return "";
-            case "shape": return "";
-            case "shop": return "";
-            default: return "";
+            case 'header': el.innerHTML = '<h1>New Heading</h1>'; break;
+            case 'text': el.innerHTML = '<p>Click to edit text...</p>'; break;
+            case 'image': el.innerHTML = `<img src="https://via.placeholder.com/150" style="width:100%; pointer-events:none;">`; break;
+            case 'button': el.innerHTML = `<button style="padding:10px 20px;">Click Me</button>`; break;
+            case 'video': el.innerHTML = `<div style="background:#000; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; color:#fff;">Video Placeholder</div>`; break;
+            case 'shape': el.style.background = 'var(--neon)'; el.style.height = '100px'; el.style.width = '100px'; break;
         }
-    };
 
-    const createWidget = type => {
-        const w = {
-            id: uid(),
-            type,
-            x: 50, y: 50, w: 300, h: null, z: 1,
-            styles: {},
-            content: getDefaultContent(type)
-        };
-        PB8.pages[PB8.currentPage].widgets.push(w);
-        activeWidgetId = w.id;
-        saveState();
-        renderAll();
-    };
+        makeElementInteractable(el);
+        livePreview.appendChild(el);
+        selectElement(el);
+        updateCodeView();
+    }
 
-    const duplicateActive = () => {
-        if (!activeWidgetId) return;
-        const page = PB8.pages[PB8.currentPage];
-        const orig = page.widgets.find(w => w.id === activeWidgetId);
-        if (!orig) return;
-        const clone = JSON.parse(JSON.stringify(orig));
-        clone.id = uid();
-        clone.x += 20; clone.y += 20;
-        page.widgets.push(clone);
-        activeWidgetId = clone.id;
-        saveState();
-        renderAll();
-    };
+    // --- 2. Interaction Logic (Move/Select) ---
+    function makeElementInteractable(el) {
+        el.addEventListener('mousedown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            selectElement(el);
+            
+            let shiftX = e.clientX - el.getBoundingClientRect().left;
+            let shiftY = e.clientY - el.getBoundingClientRect().top;
+            const snap = parseInt(gridSnap.value) || 1;
 
-    const deleteActive = () => {
-        if (!activeWidgetId) return;
-        const page = PB8.pages[PB8.currentPage];
-        page.widgets = page.widgets.filter(w => w.id !== activeWidgetId);
-        activeWidgetId = null;
-        saveState();
-        renderAll();
-    };
-
-    /* =========================
-       RENDER
-    ========================= */
-    const renderAll = () => {
-        renderPages();
-        renderPreview();
-        applyTheme();
-    };
-
-    const renderPreview = () => {
-        const page = PB8.pages[PB8.currentPage];
-        livePreview.innerHTML = "";
-        page.widgets.forEach(w => {
-            const el = document.createElement("div");
-            el.className = "widget";
-            if (w.id === activeWidgetId) el.classList.add("active");
-            el.style.position = "absolute";
-            el.style.left = w.x + "px";
-            el.style.top = w.y + "px";
-            el.style.width = w.w + "px";
-            if (w.h) el.style.height = w.h + "px";
-            Object.assign(el.style, w.styles);
-
-            switch (w.type) {
-                case "header": el.innerHTML = `<h1 contenteditable>${w.content}</h1>`; break;
-                case "text": el.innerHTML = `<p contenteditable>${w.content}</p>`; break;
-                case "image": el.innerHTML = `<img src="${w.content}" style="width:100%">`; break;
-                case "button": el.innerHTML = `<button>${w.content}</button>`; break;
+            function moveAt(pageX, pageY) {
+                let x = pageX - shiftX - livePreview.getBoundingClientRect().left;
+                let y = pageY - shiftY - livePreview.getBoundingClientRect().top;
+                
+                // Grid Snapping
+                el.style.left = Math.round(x / snap) * snap + 'px';
+                el.style.top = Math.round(y / snap) * snap + 'px';
             }
 
-            el.addEventListener("mousedown", e => startDrag(e, w.id));
-            livePreview.appendChild(el);
+            function onMouseMove(e) { moveAt(e.pageX, e.pageY); }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.onmouseup = () => {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.onmouseup = null;
+                updateCodeView();
+            };
         });
-    };
+    }
 
-    const applyTheme = () => {
-        document.documentElement.style.setProperty("--neon", PB8.meta.neon);
-        document.documentElement.style.setProperty("--bg", PB8.meta.bg);
-        livePreview.style.background = PB8.meta.bg;
-    };
+    function selectElement(el) {
+        if (selectedElement) selectedElement.style.outline = 'none';
+        selectedElement = el;
+        selectedElement.style.outline = `2px solid var(--neon)`;
+        
+        // Show Inspector
+        inspector.style.display = 'block';
+        loadInspectorValues(el);
+    }
 
-    /* =========================
-       DRAG SYSTEM
-    ========================= */
-    const startDrag = (e, id) => {
-        activeWidgetId = id;
-        drag = { id, startX: e.clientX, startY: e.clientY };
-        renderAll();
-    };
+    // --- 3. Inspector Syncing ---
+    function loadInspectorValues(el) {
+        const type = el.getAttribute('data-type');
+        
+        // Toggle Panels
+        document.getElementById('ins-media').style.display = (type === 'image' || type === 'video') ? 'block' : 'none';
+        
+        // Load Values
+        document.getElementById('prop-text').value = el.innerText;
+        document.getElementById('prop-size').value = parseInt(window.getComputedStyle(el).fontSize);
+        document.getElementById('prop-rotate').value = getRotationDegrees(el);
+        document.getElementById('prop-opacity').value = window.getComputedStyle(el).opacity;
+    }
 
-    document.addEventListener("mousemove", e => {
-        if (!drag) return;
-        const page = PB8.pages[PB8.currentPage];
-        const w = page.widgets.find(x => x.id === drag.id);
-        w.x += e.clientX - drag.startX;
-        w.y += e.clientY - drag.startY;
-        drag.startX = e.clientX;
-        drag.startY = e.clientY;
-        renderPreview();
+    // Apply Styles from Inspector
+    const inputs = ['prop-text', 'prop-color', 'prop-size', 'prop-font', 'prop-weight', 'prop-bg', 'prop-radius', 'prop-opacity', 'prop-rotate'];
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+            if (!selectedElement) return;
+            const val = e.target.value;
+
+            switch (id) {
+                case 'prop-text': selectedElement.innerText = val; break;
+                case 'prop-color': selectedElement.style.color = val; break;
+                case 'prop-size': selectedElement.style.fontSize = val + 'px'; break;
+                case 'prop-font': selectedElement.style.fontFamily = val; break;
+                case 'prop-weight': selectedElement.style.fontWeight = val; break;
+                case 'prop-bg': selectedElement.style.backgroundColor = val; break;
+                case 'prop-radius': selectedElement.style.borderRadius = val + 'px'; break;
+                case 'prop-opacity': selectedElement.style.opacity = val; break;
+                case 'prop-rotate': selectedElement.style.transform = `rotate(${val}deg)`; break;
+            }
+            updateCodeView();
+        });
     });
 
-    document.addEventListener("mouseup", () => {
-        if (drag) saveState();
-        drag = null;
+    // --- 4. Global Settings & Toolbar ---
+    document.getElementById('theme-neon').addEventListener('input', (e) => {
+        document.documentElement.style.setProperty('--neon', e.target.value);
     });
 
-    /* =========================
-       THEME
-    ========================= */
-    document.getElementById("theme-neon").addEventListener("input", e => {
-        PB8.meta.neon = e.target.value;
-        applyTheme();
-        saveState();
-    });
-    document.getElementById("theme-bg").addEventListener("input", e => {
-        PB8.meta.bg = e.target.value;
-        applyTheme();
-        saveState();
+    document.getElementById('theme-bg').addEventListener('input', (e) => {
+        livePreview.style.backgroundColor = e.target.value;
     });
 
-    /* =========================
-       UI TOGGLE
-    ========================= */
-    const sidebar = document.getElementById("sidebar");
-    document.getElementById("toggle-ui-btn").addEventListener("click", () => {
-        if (sidebar.style.display === "none") sidebar.style.display = "block";
-        else sidebar.style.display = "none";
+    document.getElementById('toggle-ui-btn').addEventListener('click', () => {
+        document.getElementById('sidebar').style.display = 
+            document.getElementById('sidebar').style.display === 'none' ? 'block' : 'none';
     });
 
-    document.getElementById("toggle-code-btn").addEventListener("click", () => {
-        codePane.style.display = codePane.style.display === "flex" ? "none" : "flex";
+    document.getElementById('toggle-mobile-btn').addEventListener('click', () => {
+        const frame = document.getElementById('site-frame');
+        frame.style.width = frame.style.width === '375px' ? '100%' : '375px';
+        frame.style.margin = frame.style.width === '375px' ? '0 auto' : '0';
     });
 
-    /* =========================
-       PAGE BUTTONS
-    ========================= */
-    document.getElementById("add-page-btn").addEventListener("click", addPage);
-
-    /* =========================
-       COMPONENT BUTTONS
-    ========================= */
-    document.querySelectorAll("#sidebar [data-widget]").forEach(btn => {
-        btn.addEventListener("click", () => createWidget(btn.dataset.widget));
+    document.getElementById('toggle-code-btn').addEventListener('click', () => {
+        const pane = document.getElementById('code-pane');
+        pane.style.display = pane.style.display === 'none' ? 'block' : 'none';
     });
 
-    document.getElementById("duplicate-btn").addEventListener("click", duplicateActive);
-    document.getElementById("wipe-btn").addEventListener("click", () => {
-        if (confirm("Wipe current page?")) {
-            PB8.pages[PB8.currentPage].widgets = [];
-            activeWidgetId = null;
-            saveState();
-            renderAll();
+    document.getElementById('wipe-btn').addEventListener('click', () => {
+        if(confirm("Wipe entire canvas?")) {
+            livePreview.innerHTML = "";
+            updateCodeView();
         }
     });
 
-    /* =========================
-       CODE VIEW SYNC
-    ========================= */
-    const codeBox = document.getElementById("code-box");
-    const syncCode = () => {
-        const page = PB8.pages[PB8.currentPage];
-        let html = "", css = "", js = "";
-        page.widgets.forEach(w => {
-            html += `<div>${w.content}</div>\n`;
-        });
-        codeBox.value = html + "\n" + css + "\n" + js;
-    };
-    codeBox.addEventListener("input", syncCode);
+    // --- 5. Assets Clipboard ---
+    document.getElementById('add-asset-btn').addEventListener('click', () => {
+        const url = prompt("Enter Asset URL:");
+        if (url) {
+            const div = document.createElement('div');
+            div.className = 'asset-item';
+            div.innerHTML = `<span style="font-size:10px; overflow:hidden;">${url.substring(0,20)}...</span>`;
+            div.onclick = () => {
+                navigator.clipboard.writeText(url);
+                alert("URL copied to clipboard!");
+            };
+            document.getElementById('asset-list').appendChild(div);
+        }
+    });
 
-    /* =========================
-       SAVE BUTTON
-    ========================= */
-    document.getElementById("save-btn").addEventListener("click", saveState);
+    // --- 6. Code Production ---
+    function updateCodeView() {
+        const cleanHTML = livePreview.innerHTML
+            .replace(/outline:.*?px solid.*?;/g, '') // Remove UI outlines
+            .replace(/cursor: move;/g, '');          // Remove UI cursors
+        
+        codeBox.value = `\n<div class="site-wrapper">\n${cleanHTML}\n</div>`;
+    }
 
-    /* =========================
-       INIT
-    ========================= */
-    loadState();
+    function getRotationDegrees(obj) {
+        const matrix = window.getComputedStyle(obj).getPropertyValue("transform");
+        if (matrix !== 'none') {
+            const values = matrix.split('(')[1].split(')')[0].split(',');
+            const a = values[0];
+            const b = values[1];
+            return Math.round(Math.atan2(b, a) * (180/Math.PI));
+        }
+        return 0;
+    }
 
+    // --- 7. Export ---
+    document.getElementById('download-btn').addEventListener('click', () => {
+        const blob = new Blob([codeBox.value], {type: "text/html"});
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "pixelb8_export.html";
+        link.click();
+    });
 });
