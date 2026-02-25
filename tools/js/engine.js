@@ -109,26 +109,47 @@ document.addEventListener('DOMContentLoaded', () => {
         projects.forEach((proj, index) => {
             const li = document.createElement("li");
             li.textContent = proj.name;
-            li.style.cursor = "pointer";
-            li.style.padding = "5px";
+			li.style.cursor = "pointer";
+			li.style.padding = "5px";
 
-            if (index === currentProjectIndex) {
-                li.style.color = "var(--neon)";
-            }
+			// Select project on click
+			li.onclick = () => {
+				saveCurrentPage();
+				currentProjectIndex = index;
+				selectedPageIndex = 0;
+				renderProjects();
+				renderPages();
+				loadCurrentPage();
+			};
 
-            li.onclick = () => {
-                saveCurrentPage();
-                currentProjectIndex = index;
-                selectedPageIndex = 0;
-                renderProjects();
-                renderPages();
-                loadCurrentPage();
-            };
+			// Rename on double click
+			li.ondblclick = () => {
+				const input = document.createElement("input");
+				input.type = "text";
+				input.value = proj.name;
+				input.style.width = "90%";
 
-            projectList.appendChild(li);
-        });
-    }
+				li.innerHTML = "";
+				li.appendChild(input);
+				input.focus();
 
+				function finishRename() {
+					const newName = input.value.trim();
+					if (newName) {
+						proj.name = newName;
+						saveProjects();
+					}
+					renderProjects();
+				}
+
+				input.addEventListener("blur", finishRename);
+				input.addEventListener("keydown", (e) => {
+					if (e.key === "Enter") finishRename();
+					if (e.key === "Escape") renderProjects();
+				});
+			};
+		}
+	}
     newProjectBtn.addEventListener("click", () => {
         const name = prompt("Project name?");
         if (!name) return;
