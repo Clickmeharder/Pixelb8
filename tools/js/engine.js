@@ -103,16 +103,15 @@ document.addEventListener('DOMContentLoaded', () => {
        PROJECT UI
     ============================== */
 
-    function renderProjects() {
-        projectList.innerHTML = "";
+	function renderProjects() {
+		projectList.innerHTML = "";
 
-        projects.forEach((proj, index) => {
-            const li = document.createElement("li");
-            li.textContent = proj.name;
+		projects.forEach((proj, index) => {
+			const li = document.createElement("li");
+			li.textContent = proj.name;
 			li.style.cursor = "pointer";
 			li.style.padding = "5px";
 
-			// Select project on click
 			li.onclick = () => {
 				saveCurrentPage();
 				currentProjectIndex = index;
@@ -122,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
 				loadCurrentPage();
 			};
 
-			// Rename on double click
 			li.ondblclick = () => {
 				const input = document.createElement("input");
 				input.type = "text";
@@ -148,6 +146,9 @@ document.addEventListener('DOMContentLoaded', () => {
 					if (e.key === "Escape") renderProjects();
 				});
 			};
+
+			// ✅ Append each project to the list
+			projectList.appendChild(li);
 		});
 	}
     newProjectBtn.addEventListener("click", () => {
