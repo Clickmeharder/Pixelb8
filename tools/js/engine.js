@@ -64,11 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.getElementById('sidebar');
 
     const projectList = document.getElementById("projects-list");
+	const newProjectBtn = document.getElementById("new-project-btn");
+	const deleteProjectBtn = document.getElementById("delete-project-btn");
     const pagesList = document.getElementById('pages-list');
 
     const addPageBtn = document.getElementById('add-page-btn');
     const deletePageBtn = document.getElementById('delete-page-btn');
-    const newProjectBtn = document.getElementById("new-project-btn");
+
 
     /* ==============================
        HELPERS
@@ -140,7 +142,29 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPages();
         loadCurrentPage();
     });
+	deleteProjectBtn?.addEventListener("click", () => {
 
+		if (projects.length <= 1) {
+			alert("You can't delete the last project!");
+			return;
+		}
+
+		const currentProject = getCurrentProject();
+
+		if (!confirm(`Delete project "${currentProject.name}"?`)) return;
+
+		// Remove the project
+		projects.splice(currentProjectIndex, 1);
+
+		// Reset index safely
+		currentProjectIndex = 0;
+		selectedPageIndex = 0;
+
+		saveProjects();
+		renderProjects();
+		renderPages();
+		loadCurrentPage();
+	});
     /* ==============================
        PAGE SYSTEM
     ============================== */
