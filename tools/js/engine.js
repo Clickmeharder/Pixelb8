@@ -170,52 +170,7 @@ function loadProjects() {
 			projectList.appendChild(li);
 		});
 	}
-/* ==============================
-   MAIN ENGINE
-============================== */
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    loadProjects();
-
-    let selectedElement = null;
-
-    newProjectBtn.addEventListener("click", () => {
-        const name = prompt("Project name?");
-        if (!name) return;
-
-        projects.push(createNewProject(name));
-        currentProjectIndex = projects.length - 1;
-        selectedPageIndex = 0;
-
-        saveProjects();
-        renderProjects();
-        renderPages();
-        loadCurrentPage();
-    });
-	deleteProjectBtn?.addEventListener("click", () => {
-
-		if (projects.length <= 1) {
-			alert("You can't delete the last project!");
-			return;
-		}
-
-		const currentProject = getCurrentProject();
-
-		if (!confirm(`Delete project "${currentProject.name}"?`)) return;
-
-		// Remove the project
-		projects.splice(currentProjectIndex, 1);
-
-		// Reset index safely
-		currentProjectIndex = 0;
-		selectedPageIndex = 0;
-
-		saveProjects();
-		renderProjects();
-		renderPages();
-		loadCurrentPage();
-	});
+	
     /* ==============================
        PAGE SYSTEM
     ============================== */
@@ -247,53 +202,10 @@ document.addEventListener('DOMContentLoaded', () => {
             pagesList.appendChild(li);
         });
     }
-
-    addPageBtn.addEventListener('click', () => {
-        const pageName = prompt('Enter new page name:');
-        if (!pageName) return;
-
-        saveCurrentPage();
-
-        getCurrentProject().pages.push({
-            name: pageName,
-            content: ""
-        });
-
-        selectedPageIndex = getCurrentProject().pages.length - 1;
-
-        saveProjects();
-        renderPages();
-        loadCurrentPage();
-    });
-
-    deletePageBtn.addEventListener('click', () => {
-        const pages = getCurrentProject().pages;
-
-        if (pages.length <= 1) {
-            alert("Can't delete the last page!");
-            return;
-        }
-
-        if (confirm(`Delete ${pages[selectedPageIndex].name}?`)) {
-            pages.splice(selectedPageIndex, 1);
-            selectedPageIndex = 0;
-
-            saveProjects();
-            renderPages();
-            loadCurrentPage();
-        }
-    });
-
+	
     /* ==============================
        WIDGET CREATION
     ============================== */
-
-    document.querySelectorAll('[data-widget]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            createWidget(btn.getAttribute('data-widget'));
-        });
-    });
-
     function createWidget(type) {
         const el = document.createElement('div');
         el.classList.add('widget', `widget-${type}`);
@@ -382,6 +294,103 @@ document.addEventListener('DOMContentLoaded', () => {
             codeBox.value = `<div class="site-wrapper">\n${cleanHTML}\n</div>`;
         }
     }
+/* ==============================
+   MAIN ENGINE
+============================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    loadProjects();
+
+    let selectedElement = null;
+
+    newProjectBtn.addEventListener("click", () => {
+        const name = prompt("Project name?");
+        if (!name) return;
+
+        projects.push(createNewProject(name));
+        currentProjectIndex = projects.length - 1;
+        selectedPageIndex = 0;
+
+        saveProjects();
+        renderProjects();
+        renderPages();
+        loadCurrentPage();
+    });
+	deleteProjectBtn?.addEventListener("click", () => {
+
+		if (projects.length <= 1) {
+			alert("You can't delete the last project!");
+			return;
+		}
+
+		const currentProject = getCurrentProject();
+
+		if (!confirm(`Delete project "${currentProject.name}"?`)) return;
+
+		// Remove the project
+		projects.splice(currentProjectIndex, 1);
+
+		// Reset index safely
+		currentProjectIndex = 0;
+		selectedPageIndex = 0;
+
+		saveProjects();
+		renderProjects();
+		renderPages();
+		loadCurrentPage();
+	});
+    /* ==============================
+       PAGE SYSTEM
+    ============================== */
+
+
+
+    addPageBtn.addEventListener('click', () => {
+        const pageName = prompt('Enter new page name:');
+        if (!pageName) return;
+
+        saveCurrentPage();
+
+        getCurrentProject().pages.push({
+            name: pageName,
+            content: ""
+        });
+
+        selectedPageIndex = getCurrentProject().pages.length - 1;
+
+        saveProjects();
+        renderPages();
+        loadCurrentPage();
+    });
+
+    deletePageBtn.addEventListener('click', () => {
+        const pages = getCurrentProject().pages;
+
+        if (pages.length <= 1) {
+            alert("Can't delete the last page!");
+            return;
+        }
+
+        if (confirm(`Delete ${pages[selectedPageIndex].name}?`)) {
+            pages.splice(selectedPageIndex, 1);
+            selectedPageIndex = 0;
+
+            saveProjects();
+            renderPages();
+            loadCurrentPage();
+        }
+    });
+
+    /* ==============================
+       WIDGET CREATION
+    ============================== */
+
+    document.querySelectorAll('[data-widget]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            createWidget(btn.getAttribute('data-widget'));
+        });
+    });
 
     document.getElementById('toggle-ui-btn')?.addEventListener('click', () => {
         sidebar.classList.toggle('hidden');
