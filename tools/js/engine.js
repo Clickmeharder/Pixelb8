@@ -120,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. Sidebar / Code Toggle ---
     // Inside your DOMContentLoaded block in engine.js
 	const uiToggleBtn = document.getElementById('toggle-ui-btn');
-	const sidebar = document.getElementById('sidebar');
 
 	uiToggleBtn.addEventListener('click', () => {
 		// This will now smoothly slide the margin
