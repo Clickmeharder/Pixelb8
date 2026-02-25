@@ -47,16 +47,6 @@ function loadProjects() {
     }
 }
 
-/* ==============================
-   MAIN ENGINE
-============================== */
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    loadProjects();
-
-    let selectedElement = null;
-
     const livePreview = document.getElementById('live-preview');
     const codeBox = document.getElementById('code-box');
     const inspector = document.getElementById('inspector');
@@ -111,28 +101,51 @@ document.addEventListener('DOMContentLoaded', () => {
 			li.textContent = proj.name;
 			li.style.cursor = "pointer";
 			li.style.padding = "5px";
+			li.style.userSelect = "none";
 
-			// Highlight selected project
-			if(index === currentProjectIndex){
+			// Highlight the selected project
+			if (index === currentProjectIndex) {
+				li.style.background = "#222";
 				li.style.color = "var(--neon)";
+				li.style.borderLeft = "3px solid var(--neon)";
 			}
 
+			// Single click = select
 			li.addEventListener("click", (e) => {
 				e.stopPropagation();
+				if (currentProjectIndex === index) return; // already selected
+
 				saveCurrentPage();
 				currentProjectIndex = index;
 				selectedPageIndex = 0;
+
 				renderPages();
 				loadCurrentPage();
-				// no renderProjects() here, otherwise dblclick breaks
+
+				// Update highlight on all items
+				projectList.querySelectorAll("li").forEach((el, i) => {
+					if (i === currentProjectIndex) {
+						el.style.background = "#222";
+						el.style.color = "var(--neon)";
+						el.style.borderLeft = "3px solid var(--neon)";
+					} else {
+						el.style.background = "";
+						el.style.color = "#fff";
+						el.style.borderLeft = "none";
+					}
+				});
 			});
 
+			// Double click = rename
 			li.addEventListener("dblclick", (e) => {
 				e.stopPropagation();
+
 				const input = document.createElement("input");
 				input.type = "text";
 				input.value = proj.name;
 				input.style.width = "90%";
+				input.style.fontSize = "0.9em";
+				input.style.padding = "2px";
 
 				li.innerHTML = "";
 				li.appendChild(input);
@@ -140,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				function finishRename() {
 					const newName = input.value.trim();
-					if(newName){
+					if (newName) {
 						proj.name = newName;
 						saveProjects();
 					}
@@ -149,14 +162,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				input.addEventListener("blur", finishRename);
 				input.addEventListener("keydown", (e) => {
-					if(e.key === "Enter") finishRename();
-					if(e.key === "Escape") renderProjects();
+					if (e.key === "Enter") finishRename();
+					if (e.key === "Escape") renderProjects();
 				});
 			});
 
 			projectList.appendChild(li);
 		});
 	}
+/* ==============================
+   MAIN ENGINE
+============================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    loadProjects();
+
+    let selectedElement = null;
+
     newProjectBtn.addEventListener("click", () => {
         const name = prompt("Project name?");
         if (!name) return;
