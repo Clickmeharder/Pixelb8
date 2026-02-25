@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					if (e.key === "Escape") renderProjects();
 				});
 			};
-		}
+		});
 	}
     newProjectBtn.addEventListener("click", () => {
         const name = prompt("Project name?");
