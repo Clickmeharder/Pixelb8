@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gridSnap = document.getElementById('grid-snap');
     const sidebar = document.getElementById('sidebar');
 
-    const projectList = document.getElementById("project-list");
+    const projectList = document.getElementById("projects-list");
     const pagesList = document.getElementById('pages-list');
 
     const addPageBtn = document.getElementById('add-page-btn');
