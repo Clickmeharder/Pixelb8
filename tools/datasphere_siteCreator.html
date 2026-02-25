@@ -1,22 +1,21 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pixelb8 Omega Engine V6</title>
 <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
-<link rel="stylesheet" href="css/datasphere_creation_engine.css">
+<title>Pixelb8 Omega Engine V6</title>
+
+<link rel="stylesheet" href="css/engine.css">
 </head>
 <body>
 
 <div id="sidebar">
 
-<div style="display:flex;justify-content:space-between;align-items:center;">
-<h3>PAGES</h3>
-<button onclick="UI.toggleSidebar()" style="width:auto;padding:4px 8px;">☰</button>
-</div>
-
+<h3 style="display:flex;justify-content:space-between;align-items:center;">
+PAGES
+<button onclick="UI.toggleSidebar()" style="width:auto;padding:2px 6px;font-size:12px;">☰</button>
+</h3>
 <div id="pageList"></div>
 <button onclick="Pages.add()">+ Add Page</button>
 
@@ -40,9 +39,8 @@
 
 <div id="main">
 <div id="toolbar">
-<strong>Pixelb8 Modular Engine</strong>
+<strong>Pixelb8 State Engine</strong>
 </div>
-
 <div id="canvasWrap">
 <div id="frame"></div>
 </div>
@@ -60,6 +58,6 @@
 
 </div>
 
-<script src="js/datasphere_creation_engine.js"></script>
+<script src="js/engine.js"></script>
 </body>
 </html>
