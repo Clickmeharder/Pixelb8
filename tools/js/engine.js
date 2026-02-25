@@ -1,22 +1,222 @@
 /**
- * PIXELB8 OMEGA ENGINE V5 - Core Logic (Fixed)
+ * PIXELB8 Datasphere Creation Tool Engine V5
+ * Fully Fixed – Core Logic + Project System
  */
 
+/* ==============================
+   GLOBAL STATE (MUST BE GLOBAL)
+============================== */
+
+let projects = [];
+let currentProjectIndex = 0;
+let selectedPageIndex = 0;
+
+/* ==============================
+   PROJECT PERSISTENCE
+============================== */
+
+function createNewProject(name = "New Project") {
+    return {
+        name,
+        pages: [
+            { name: "Home", content: "" }
+        ],
+        assets: [],
+        settings: {
+            neon: "#00ff41",
+            bg: "#0d0d0d"
+        },
+        files: {
+            "css/style.css": "/* Your CSS */",
+            "js/script.js": "// Your JS"
+        }
+    };
+}
+
+function saveProjects() {
+    localStorage.setItem("pixelb8-projects", JSON.stringify(projects));
+}
+
+function loadProjects() {
+    const data = localStorage.getItem("pixelb8-projects");
+    if (data) {
+        projects = JSON.parse(data);
+    } else {
+        projects = [createNewProject("My First Site")];
+        saveProjects();
+    }
+}
+
+/* ==============================
+   MAIN ENGINE
+============================== */
+
 document.addEventListener('DOMContentLoaded', () => {
-    // --- State & Constants ---
+
+    loadProjects();
+
     let selectedElement = null;
+
     const livePreview = document.getElementById('live-preview');
     const codeBox = document.getElementById('code-box');
     const inspector = document.getElementById('inspector');
     const gridSnap = document.getElementById('grid-snap');
     const sidebar = document.getElementById('sidebar');
 
-    // --- Initialization ---
-    updateCodeView(); // no more undefined initDragAndDrop
+    const projectList = document.getElementById("project-list");
+    const pagesList = document.getElementById('pages-list');
 
-    // --- 1. Widget Creation ---
+    const addPageBtn = document.getElementById('add-page-btn');
+    const deletePageBtn = document.getElementById('delete-page-btn');
+    const newProjectBtn = document.getElementById("new-project-btn");
+
+    /* ==============================
+       HELPERS
+    ============================== */
+
+    function getCurrentProject() {
+        return projects[currentProjectIndex];
+    }
+
+    function getCurrentPage() {
+        return getCurrentProject().pages[selectedPageIndex];
+    }
+
+    function saveCurrentPage() {
+        getCurrentPage().content = livePreview.innerHTML;
+        saveProjects();
+    }
+
+    function loadCurrentPage() {
+        livePreview.innerHTML = getCurrentPage().content || "";
+
+        // Rebind drag events
+        const widgets = livePreview.querySelectorAll('.widget');
+        widgets.forEach(w => makeElementInteractable(w));
+
+        updateCodeView();
+    }
+
+    /* ==============================
+       PROJECT UI
+    ============================== */
+
+    function renderProjects() {
+        projectList.innerHTML = "";
+
+        projects.forEach((proj, index) => {
+            const li = document.createElement("li");
+            li.textContent = proj.name;
+            li.style.cursor = "pointer";
+            li.style.padding = "5px";
+
+            if (index === currentProjectIndex) {
+                li.style.color = "var(--neon)";
+            }
+
+            li.onclick = () => {
+                saveCurrentPage();
+                currentProjectIndex = index;
+                selectedPageIndex = 0;
+                renderProjects();
+                renderPages();
+                loadCurrentPage();
+            };
+
+            projectList.appendChild(li);
+        });
+    }
+
+    newProjectBtn.addEventListener("click", () => {
+        const name = prompt("Project name?");
+        if (!name) return;
+
+        projects.push(createNewProject(name));
+        currentProjectIndex = projects.length - 1;
+        selectedPageIndex = 0;
+
+        saveProjects();
+        renderProjects();
+        renderPages();
+        loadCurrentPage();
+    });
+
+    /* ==============================
+       PAGE SYSTEM
+    ============================== */
+
+    function renderPages() {
+        pagesList.innerHTML = "";
+        const pages = getCurrentProject().pages;
+
+        pages.forEach((page, index) => {
+            const li = document.createElement('li');
+            li.textContent = page.name;
+            li.style.cursor = 'pointer';
+            li.style.padding = '5px';
+            li.style.borderBottom = '1px solid #222';
+
+            if (index === selectedPageIndex) {
+                li.style.background = '#222';
+                li.style.color = 'var(--neon)';
+                li.style.borderLeft = '3px solid var(--neon)';
+            }
+
+            li.onclick = () => {
+                saveCurrentPage();
+                selectedPageIndex = index;
+                renderPages();
+                loadCurrentPage();
+            };
+
+            pagesList.appendChild(li);
+        });
+    }
+
+    addPageBtn.addEventListener('click', () => {
+        const pageName = prompt('Enter new page name:');
+        if (!pageName) return;
+
+        saveCurrentPage();
+
+        getCurrentProject().pages.push({
+            name: pageName,
+            content: ""
+        });
+
+        selectedPageIndex = getCurrentProject().pages.length - 1;
+
+        saveProjects();
+        renderPages();
+        loadCurrentPage();
+    });
+
+    deletePageBtn.addEventListener('click', () => {
+        const pages = getCurrentProject().pages;
+
+        if (pages.length <= 1) {
+            alert("Can't delete the last page!");
+            return;
+        }
+
+        if (confirm(`Delete ${pages[selectedPageIndex].name}?`)) {
+            pages.splice(selectedPageIndex, 1);
+            selectedPageIndex = 0;
+
+            saveProjects();
+            renderPages();
+            loadCurrentPage();
+        }
+    });
+
+    /* ==============================
+       WIDGET CREATION
+    ============================== */
+
     document.querySelectorAll('[data-widget]').forEach(btn => {
-        btn.addEventListener('click', () => createWidget(btn.getAttribute('data-widget')));
+        btn.addEventListener('click', () => {
+            createWidget(btn.getAttribute('data-widget'));
+        });
     });
 
     function createWidget(type) {
@@ -36,20 +236,28 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'image': el.innerHTML = `<img src="https://via.placeholder.com/150" style="width:100%; pointer-events:none;">`; break;
             case 'button': el.innerHTML = `<button style="padding:10px 20px;">Click Me</button>`; break;
             case 'video': el.innerHTML = `<div style="background:#000; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; color:#fff;">Video Placeholder</div>`; break;
-            case 'shape': el.style.background = 'var(--neon)'; el.style.height = '100px'; el.style.width = '100px'; break;
+            case 'shape': 
+                el.style.background = 'var(--neon)';
+                el.style.height = '100px';
+                el.style.width = '100px';
+                break;
         }
 
         makeElementInteractable(el);
         livePreview.appendChild(el);
         selectElement(el);
-		// FIX: Immediately save this new widget into the current page's data
-		pages[selectedPageIndex].content = livePreview.innerHTML;
+
+        saveCurrentPage();
         updateCodeView();
     }
 
-    // --- 2. Interaction Logic (Move/Select) ---
+    /* ==============================
+       DRAG + SELECT
+    ============================== */
+
     function makeElementInteractable(el) {
         el.addEventListener('mousedown', e => {
+
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
 
             selectElement(el);
@@ -57,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const rect = el.getBoundingClientRect();
             const shiftX = e.clientX - rect.left;
             const shiftY = e.clientY - rect.top;
-            const snap = parseInt(gridSnap.value) || 1;
+            const snap = parseInt(gridSnap?.value) || 1;
 
             function moveAt(pageX, pageY) {
                 let x = pageX - shiftX - livePreview.getBoundingClientRect().left;
@@ -70,11 +278,12 @@ document.addEventListener('DOMContentLoaded', () => {
             function onMouseMove(e) { moveAt(e.pageX, e.pageY); }
 
             document.addEventListener('mousemove', onMouseMove);
-            document.onmouseup = () => {
+
+            document.addEventListener('mouseup', () => {
                 document.removeEventListener('mousemove', onMouseMove);
-                document.onmouseup = null;
+                saveCurrentPage();
                 updateCodeView();
-            };
+            }, { once: true });
         });
     }
 
@@ -82,205 +291,45 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedElement) selectedElement.style.outline = 'none';
         selectedElement = el;
         selectedElement.style.outline = '2px solid var(--neon)';
-        inspector.style.display = 'block';
-        loadInspectorValues(el);
+        if (inspector) inspector.style.display = 'block';
     }
 
-    function loadInspectorValues(el) {
-        const type = el.getAttribute('data-type');
-        document.getElementById('ins-media').style.display = (type === 'image' || type === 'video') ? 'block' : 'none';
-        document.getElementById('prop-text').value = el.innerText || '';
-        document.getElementById('prop-size').value = parseInt(window.getComputedStyle(el).fontSize) || 14;
-        document.getElementById('prop-rotate').value = getRotationDegrees(el);
-        document.getElementById('prop-opacity').value = window.getComputedStyle(el).opacity;
-    }
+    /* ==============================
+       CODE VIEW
+    ============================== */
 
-    const inputs = ['prop-text','prop-color','prop-size','prop-font','prop-weight','prop-bg','prop-radius','prop-opacity','prop-rotate'];
-    inputs.forEach(id => {
-        document.getElementById(id).addEventListener('input', e => {
-            if (!selectedElement) return;
-            const val = e.target.value;
-            switch(id) {
-                case 'prop-text': selectedElement.innerText = val; break;
-                case 'prop-color': selectedElement.style.color = val; break;
-                case 'prop-size': selectedElement.style.fontSize = val + 'px'; break;
-                case 'prop-font': selectedElement.style.fontFamily = val; break;
-                case 'prop-weight': selectedElement.style.fontWeight = val; break;
-                case 'prop-bg': selectedElement.style.backgroundColor = val; break;
-                case 'prop-radius': selectedElement.style.borderRadius = val + 'px'; break;
-                case 'prop-opacity': selectedElement.style.opacity = val; break;
-                case 'prop-rotate': selectedElement.style.transform = `rotate(${val}deg)`; break;
-            }
-            updateCodeView();
-        });
-    });
-
-    // --- 3. Global Settings ---
-    document.getElementById('theme-neon').addEventListener('input', e => document.documentElement.style.setProperty('--neon', e.target.value));
-    document.getElementById('theme-bg').addEventListener('input', e => livePreview.style.backgroundColor = e.target.value);
-
-    // --- 4. Sidebar / Code Toggle ---
-    // Inside your DOMContentLoaded block in engine.js
-	const uiToggleBtn = document.getElementById('toggle-ui-btn');
-
-	uiToggleBtn.addEventListener('click', () => {
-		// This will now smoothly slide the margin
-		sidebar.classList.toggle('hidden');
-		
-		// Optional: Update the button text to show state
-		if (sidebar.classList.contains('hidden')) {
-			uiToggleBtn.innerText = '[≡] SHOW UI';
-		} else {
-			uiToggleBtn.innerText = '[≡] HIDE UI';
-		}
-	});
-    document.getElementById('toggle-code-btn').addEventListener('click', () => {
-        document.getElementById('code-pane').style.display =
-            document.getElementById('code-pane').style.display === 'none' ? 'flex' : 'none';
-    });
-
-    document.getElementById('toggle-mobile-btn').addEventListener('click', () => {
-        const frame = document.getElementById('site-frame');
-        frame.style.width = frame.style.width === '375px' ? '100%' : '375px';
-        frame.style.margin = frame.style.width === '375px' ? '0 auto' : '0';
-    });
-
-    document.getElementById('wipe-btn').addEventListener('click', () => {
-        if(confirm("Wipe entire canvas?")) {
-            livePreview.innerHTML = "";
-            updateCodeView();
-        }
-    });
-
-    // --- 5. Assets ---
-    document.getElementById('add-asset-btn').addEventListener('click', () => {
-        const url = prompt("Enter Asset URL:");
-        if (url) {
-            const div = document.createElement('div');
-            div.className = 'asset-item';
-            div.innerHTML = `<span style="font-size:10px; overflow:hidden;">${url.substring(0,20)}...</span>`;
-            div.onclick = () => {
-                navigator.clipboard.writeText(url);
-                alert("URL copied to clipboard!");
-            };
-            document.getElementById('asset-list').appendChild(div);
-        }
-    });
-
-    // --- 6. Code Production ---
     function updateCodeView() {
         const cleanHTML = livePreview.innerHTML
             .replace(/outline:.*?px solid.*?;/g, '')
             .replace(/cursor: move;/g, '');
-        codeBox.value = `<div class="site-wrapper">\n${cleanHTML}\n</div>`;
-    }
 
-    function getRotationDegrees(obj) {
-        const matrix = window.getComputedStyle(obj).getPropertyValue("transform");
-        if(matrix !== 'none') {
-            const values = matrix.split('(')[1].split(')')[0].split(',');
-            return Math.round(Math.atan2(values[1], values[0]) * (180/Math.PI));
+        if (codeBox) {
+            codeBox.value = `<div class="site-wrapper">\n${cleanHTML}\n</div>`;
         }
-        return 0;
     }
 
-    // --- 7. Export ---
-    document.getElementById('download-btn').addEventListener('click', () => {
+    document.getElementById('toggle-ui-btn')?.addEventListener('click', () => {
+        sidebar.classList.toggle('hidden');
+    });
+
+    document.getElementById('toggle-code-btn')?.addEventListener('click', () => {
+        const pane = document.getElementById('code-pane');
+        pane.style.display = pane.style.display === 'none' ? 'flex' : 'none';
+    });
+
+    document.getElementById('download-btn')?.addEventListener('click', () => {
         const blob = new Blob([codeBox.value], {type: "text/html"});
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = "pixelb8_export.html";
         link.click();
     });
-	
-	// --- 8. Page Tree / Site Builder (Persistance Fix) ---
-	const pagesList = document.getElementById('pages-list');
-	const addPageBtn = document.getElementById('add-page-btn');
-	const deletePageBtn = document.getElementById('delete-page-btn');
 
-	// IMPORTANT: Initialize with content property
-	let pages = [{ name: 'Home', id: 'page-0', content: '' }];
-	let selectedPageIndex = 0;
+    /* ==============================
+       INIT
+    ============================== */
 
-	function renderPages() {
-		pagesList.innerHTML = '';
-		pages.forEach((page, index) => {
-			const li = document.createElement('li');
-			li.textContent = page.name;
-			li.style.cursor = 'pointer';
-			li.style.padding = '5px';
-			li.style.borderBottom = '1px solid #222';
-			
-			if(index === selectedPageIndex) {
-				li.style.background = '#222';
-				li.style.color = 'var(--neon)';
-				li.style.borderLeft = '3px solid var(--neon)';
-			}
-
-			li.addEventListener('click', () => {
-				switchPage(index);
-			});
-
-			pagesList.appendChild(li);
-		});
-	}
-
-	function switchPage(index) {
-		// 1. SAVE: Capture what's currently on the canvas into the OLD page
-		pages[selectedPageIndex].content = livePreview.innerHTML;
-
-		// 2. UPDATE: Change the active index
-		selectedPageIndex = index;
-
-		// 3. WIPE & LOAD: Clear canvas and inject the NEW page's HTML
-		livePreview.innerHTML = pages[selectedPageIndex].content || "";
-
-		// 4. RE-ANIMATE: HTML strings don't keep JS events. 
-		// We must re-run makeElementInteractable on everything we just loaded.
-		const savedWidgets = livePreview.querySelectorAll('.widget');
-		savedWidgets.forEach(w => {
-			makeElementInteractable(w);
-		});
-
-		renderPages();
-		updateCodeView();
-	}
-
-	// Add new page
-	addPageBtn.addEventListener('click', () => {
-		const pageName = prompt('Enter new page name:');
-		if(pageName) {
-			// Save current page before adding new one
-			pages[selectedPageIndex].content = livePreview.innerHTML;
-			
-			pages.push({ 
-				name: pageName, 
-				id: 'page-' + Date.now(), 
-				content: `` 
-			});
-			
-			selectedPageIndex = pages.length - 1;
-			livePreview.innerHTML = pages[selectedPageIndex].content;
-			renderPages();
-			updateCodeView();
-		}
-	});
-
-	// Delete selected page
-	deletePageBtn.addEventListener('click', () => {
-		if(pages.length <= 1){
-			alert("Can't delete the last page!");
-			return;
-		}
-		if(confirm(`Delete ${pages[selectedPageIndex].name}?`)) {
-			pages.splice(selectedPageIndex, 1);
-			selectedPageIndex = 0;
-			livePreview.innerHTML = pages[selectedPageIndex].content;
-			renderPages();
-			updateCodeView();
-		}
-	});
-
-	// Initial render
-	renderPages();
+    renderProjects();
+    renderPages();
+    loadCurrentPage();
 });
