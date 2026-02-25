@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixelb8 | Omega Builder</title>
+    <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
+    <style>
+        :root {
+            --neon: #00ff41;
+            --bg: #0d0d0d;
+            --panel: #161616;
+            --text: #e0e0e0;
+            --accent: #333;
+            --font-main: 'Courier New', monospace;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+            color: var(--text);
+            font-family: var(--font-main);
+        }
+
+        #sidebar {
+            width: 340px;
+            background: var(--panel);
+            border-right: 1px solid var(--accent);
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 5;
+        }
+
+        #sidebar.hidden {
+            transform: translateX(-340px);
+            position: absolute;
+        }
+
+        .side-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--accent);
+        }
+
+        h1 { margin: 0; font-size: 1.15rem; color: var(--neon); }
+        h2 {
+            margin: 0 0 10px;
+            font-size: 0.7rem;
+            color: var(--neon);
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            opacity: 0.9;
+        }
+
+        p { margin: 5px 0 0; font-size: 11px; color: #888; }
+
+        .group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        .row { display: flex; gap: 6px; align-items: center; }
+
+        label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #7b7b7b;
+            font-weight: bold;
+        }
+
+        button, input, select, textarea {
+            width: 100%;
+            background: #000;
+            color: #fff;
+            border: 1px solid var(--accent);
+            font: inherit;
+            font-size: 11px;
+            padding: 8px;
+        }
+
+        button:hover { border-color: var(--neon); color: var(--neon); cursor: pointer; }
+        .btn-prime { background: var(--neon) !important; color: #000 !important; border: none !important; font-weight: bold; }
+
+        #main-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        #toolbar {
+            height: 52px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--accent);
+            background: #050505;
+            padding: 0 12px;
+            gap: 12px;
+        }
+
+        #toolbar .row { width: auto; }
+
+        #workspace {
+            flex: 1;
+            display: flex;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        #canvas-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            overflow: auto;
+            background-image: radial-gradient(#252525 1px, transparent 1px);
+            background-size: 24px 24px;
+            padding: 34px;
+        }
+
+        #site-frame {
+            width: 1000px;
+            min-height: 1200px;
+            position: relative;
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 45px rgba(0, 0, 0, 0.6);
+            background: var(--bg);
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        .mobile-mode #canvas-area { padding: 10px; }
+        .mobile-mode #site-frame { width: 375px !important; min-height: 667px; }
+
+        .widget {
+            position: absolute;
+            min-width: 60px;
+            min-height: 30px;
+            padding: 10px;
+            border: 1px dashed transparent;
+            cursor: move;
+        }
+
+        .widget:hover { border-color: var(--neon); background: rgba(0, 255, 65, 0.03); }
+        .widget.active { border-color: var(--neon); background: rgba(0, 255, 65, 0.07); z-index: 2; }
+
+        .widget-tools {
+            position: absolute;
+            top: -24px;
+            right: 0;
+            display: none;
+            gap: 4px;
+        }
+
+        .widget:hover .widget-tools,
+        .widget.active .widget-tools { display: flex; }
+
+        .tool-btn {
+            border: none;
+            background: var(--neon);
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            cursor: pointer;
+        }
+
+        .tool-btn.danger { background: #ef2b2b; color: #fff; }
+        .tool-btn.dup { background: #007acc; color: #fff; }
+
+        .resizer {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--neon);
+            cursor: nwse-resize;
+            display: none;
+        }
+
+        .widget:hover .resizer,
+        .widget.active .resizer { display: block; }
+
+        .pb8-slideshow { display: flex; overflow-x: auto; gap: 10px; }
+        .pb8-slideshow img { height: 120px; border: 1px solid var(--accent); }
+        .pb8-btn { background: var(--neon); color: #000; text-decoration: none; padding: 10px 16px; display: inline-block; font-weight: 700; }
+        .shop-card { border: 1px solid var(--neon); padding: 10px; background: rgba(0,0,0,0.55); }
+        .markup-val { color: var(--neon); float: right; font-weight: bold; }
+        .buy-btn { display: block; text-decoration: none; text-align: center; margin-top: 10px; padding: 5px 0; background: var(--neon); color: #000; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid var(--accent); padding: 8px; }
+
+        #asset-list {
+            max-height: 120px;
+            overflow-y: auto;
+            border: 1px solid var(--accent);
+            background: #000;
+        }
+
+        .asset-item {
+            font-size: 10px;
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            padding: 4px 6px;
+            border-bottom: 1px solid #1c1c1c;
+            cursor: pointer;
+        }
+
+        .asset-item:hover { color: var(--neon); }
+
+        #code-pane {
+            width: 46%;
+            display: none;
+            flex-direction: column;
+            border-left: 2px solid var(--neon);
+            background: #050505;
+        }
+
+        #code-box {
+            flex: 1;
+            border: none;
+            resize: none;
+            padding: 16px;
+            outline: none;
+            background: transparent;
+            color: #bbb;
+            font-family: Consolas, Monaco, monospace;
+            line-height: 1.4;
+        }
+
+        .ins-group { margin-bottom: 12px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+<div id="sidebar">
+    <div class="side-section">
+        <h1>PIXELB8 OMEGA</h1>
+        <p>Builder alpha for Pixelb8 sites and CMS pages.</p>
+    </div>
+
+    <div class="side-section">
+        <h2>Site Settings</h2>
+        <div class="group">
+            <label>Favicon URL</label>
+            <input type="text" id="site-favicon-input" placeholder="https://...">
+            <label>Background image</label>
+            <input type="text" id="site-bg-img" placeholder="https://...">
+            <div class="row">
+                <select id="site-bg-mode">
+                    <option value="cover">Stretch (Cover)</option>
+                    <option value="contain">Fit (Contain)</option>
+                    <option value="repeat">Tile (Repeat)</option>
+                    <option value="auto">Original</option>
+                </select>
+                <input type="number" id="grid-snap" value="1" min="1" style="width:80px;" title="Snap to grid (px)">
+            </div>
+        </div>
+    </div>
+
+    <div class="side-section">
+        <h2>Components</h2>
+        <div class="group" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <button data-create="header">Header</button>
+            <button data-create="text">Text</button>
+            <button data-create="image">Image</button>
+            <button data-create="gallery">Slideshow</button>
+            <button data-create="video">Video</button>
+            <button data-create="button">Button</button>
+            <button data-create="shape">Shape</button>
+            <button data-create="shop">Shop Card</button>
+            <button id="duplicate-btn">[+] Duplicate</button>
+            <button id="csv-btn">CSV Log</button>
+        </div>
+    </div>
+
+    <div class="side-section">
+        <h2>Asset Clipboard</h2>
+        <div id="asset-list"></div>
+        <button id="add-asset-btn" style="margin-top:6px;">+ Add URL</button>
+    </div>
+
+    <div id="inspector" class="side-section" style="display:none;background:#1a1a1a;">
+        <h2 style="color:#fff;">Inspector</h2>
+        <div id="ins-text" class="ins-group">
+            <div class="group">
+                <label>Content / Link</label>
+                <input type="text" id="prop-text">
+                <input type="text" id="prop-href" placeholder="URL Link (for buttons)">
+            </div>
+            <div class="group">
+                <label>Typography</label>
+                <div class="row">
+                    <input type="color" id="prop-color" title="Text color">
+                    <input type="number" id="prop-size" placeholder="px">
+                </div>
+                <select id="prop-font">
+                    <option value="'Courier New', monospace">Retro Mono</option>
+                    <option value="Arial, sans-serif">Clean Sans</option>
+                    <option value="'Orbitron', sans-serif">Cyber-Tech</option>
+                    <option value="Georgia, serif">Classic Serif</option>
+                </select>
+                <select id="prop-weight">
+                    <option value="normal">Normal</option>
+                    <option value="bold">Bold</option>
+                    <option value="900">Heavy</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="ins-media" class="ins-group" style="display:none;">
+            <label>Source URL (Image/Video)</label>
+            <input type="text" id="prop-src">
+        </div>
+
+        <div id="ins-table" class="ins-group" style="display:none; border-top: 1px solid var(--accent); padding-top: 10px;">
+            <label>Table controls</label>
+            <div class="row" style="margin-top:5px;">
+                <button data-table-action="addRow">+ Row</button>
+                <button data-table-action="addCol">+ Col</button>
+            </div>
+            <div class="row" style="margin-top:5px;">
+                <button data-table-action="delRow" style="background:#441111;">- Row</button>
+                <button data-table-action="delCol" style="background:#441111;">- Col</button>
+            </div>
+        </div>
+
+        <div class="group" style="border-top: 1px solid #333; padding-top: 10px;">
+            <label>Box style</label>
+            <div class="row">
+                <input type="color" id="prop-bg" title="Background">
+                <input type="color" id="prop-border-color" title="Border color">
+            </div>
+            <div class="row">
+                <input type="number" id="prop-border-width" placeholder="Border px">
+                <input type="number" id="prop-radius" placeholder="Radius px">
+            </div>
+            <div class="row">
+                <label style="width:52px;">Opacity</label>
+                <input type="range" id="prop-opacity" min="0" max="1" step="0.1" value="1">
+            </div>
+            <div class="row">
+                <label style="width:52px;">Rotate</label>
+                <input type="range" id="prop-rotate" min="0" max="360" value="0">
+            </div>
+            <label>Animation</label>
+            <select id="prop-animation">
+                <option value="none">None</option>
+                <option value="fadeIn">Fade In</option>
+                <option value="slideUp">Slide Up</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="side-section">
+        <h2>Global Theme</h2>
+        <div class="group">
+            <label>Primary neon</label>
+            <input type="color" id="theme-neon" value="#00ff41">
+            <label>Canvas background</label>
+            <input type="color" id="theme-bg" value="#0d0d0d">
+        </div>
+    </div>
+
+    <div class="side-section">
+        <button class="btn-prime" id="deploy-btn">Deploy (placeholder)</button>
+        <button style="margin-top:5px;" id="download-btn">Download HTML</button>
+    </div>
+</div>
+
+<div id="main-view">
+    <div id="toolbar">
+        <div class="row">
+            <button id="toggle-ui" style="width:auto;">[≡] Toggle UI</button>
+            <button id="toggle-mobile" style="width:auto;">[📱] Device</button>
+        </div>
+        <div class="row">
+            <button id="toggle-code" style="width:auto;">Code</button>
+            <button id="save-btn" style="width:auto;">Save</button>
+            <button id="wipe-btn" style="width:auto;color:#ff4a4a;">Wipe</button>
+        </div>
+    </div>
+
+    <div id="workspace">
+        <div id="canvas-area">
+            <div id="site-frame">
+                <div id="live-preview" style="width:100%;height:100%;"></div>
+            </div>
+        </div>
+
+        <div id="code-pane">
+            <div style="padding:10px; border-bottom:1px solid #333; color:var(--neon); font-size:10px;">Live production source</div>
+            <textarea id="code-box" spellcheck="false"></textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    const STORAGE_KEY = 'pb8_omega_builder_v1';
+    const ASSET_KEY = 'pb8_assets';
+
+    const state = {
+        activeElement: null,
+        isDragging: false,
+        isResizing: false,
+        startX: 0,
+        startY: 0,
+        startW: 0,
+        startH: 0,
+        startL: 0,
+        startT: 0,
+        assetList: JSON.parse(localStorage.getItem(ASSET_KEY) || '[]')
+    };
+
+    const els = {
+        sidebar: document.getElementById('sidebar'),
+        livePreview: document.getElementById('live-preview'),
+        siteFrame: document.getElementById('site-frame'),
+        codePane: document.getElementById('code-pane'),
+        codeBox: document.getElementById('code-box'),
+        inspector: document.getElementById('inspector'),
+        assetList: document.getElementById('asset-list'),
+        faviconInput: document.getElementById('site-favicon-input'),
+        siteBgInput: document.getElementById('site-bg-img'),
+        siteBgMode: document.getElementById('site-bg-mode'),
+        gridSnap: document.getElementById('grid-snap'),
+        themeNeon: document.getElementById('theme-neon'),
+        themeBg: document.getElementById('theme-bg')
+    };
+
+    function createWidget(type, customHTML = null) {
+        const widget = document.createElement('div');
+        widget.className = 'widget';
+        widget.dataset.type = type;
+        widget.style.left = '50px';
+        widget.style.top = '50px';
+        widget.style.width = '320px';
+
+        let content = '';
+        switch (type) {
+            case 'header':
+                content = '<h1 style="margin:0;color:#fff;">NEW HEADER</h1>';
+                break;
+            case 'text':
+                content = '<p style="margin:0;color:#ccc;">Click to edit this text block...</p>';
+                break;
+            case 'image':
+                content = '<img src="https://placehold.co/600x400/000/00ff41?text=IMAGE" style="width:100%;display:block;">';
+                break;
+            case 'video':
+                content = '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" style="width:100%;aspect-ratio:16/9;border:none;"></iframe>';
+                break;
+            case 'gallery':
+                content = '<div class="pb8-slideshow"><img src="https://placehold.co/200"><img src="https://placehold.co/201"></div>';
+                break;
+            case 'button':
+                content = '<a href="#" class="pb8-btn">ACTION BUTTON</a>';
+                break;
+            case 'shape':
+                content = '<div style="width:100%;height:50px;background:var(--neon);"></div>';
+                break;
+            case 'shop':
+                content = '<div class="shop-card" contenteditable="true"><div style="font-weight:bold;border-bottom:1px solid #333;margin-bottom:5px;">ITEM NAME</div><div style="font-size:10px;">Price: 100 PED <span class="markup-val">105%</span></div><a href="#" class="buy-btn" contenteditable="false">CONTACT TO BUY</a></div>';
+                break;
+            default:
+                content = '<p>Unknown component</p>';
+        }
+
+        widget.innerHTML = `
+            <div class="widget-tools">
+                <button class="tool-btn" data-action="z-up">↑</button>
+                <button class="tool-btn" data-action="z-down">↓</button>
+                <button class="tool-btn dup" data-action="duplicate">⧉</button>
+                <button class="tool-btn danger" data-action="delete">✕</button>
+            </div>
+            <div class="content">${customHTML || content}</div>
+            <div class="resizer"></div>
+        `;
+
+        els.livePreview.appendChild(widget);
+        selectElement(widget);
+        saveState();
+    }
+
+    function selectElement(widget) {
+        document.querySelectorAll('.widget').forEach((w) => w.classList.remove('active'));
+        state.activeElement = widget;
+        if (!widget) {
+            els.inspector.style.display = 'none';
+            return;
+        }
+
+        widget.classList.add('active');
+        els.inspector.style.display = 'block';
+
+        const type = widget.dataset.type;
+        const inner = widget.querySelector('.content')?.children[0];
+        const isTable = inner && inner.tagName === 'TABLE';
+
+        document.getElementById('ins-text').style.display = (['header', 'text', 'button'].includes(type) || isTable) ? 'block' : 'none';
+        document.getElementById('ins-media').style.display = (type === 'image' || type === 'video') ? 'block' : 'none';
+        document.getElementById('ins-table').style.display = isTable ? 'block' : 'none';
+
+        if (inner) {
+            if (['header', 'text', 'button'].includes(type) || isTable) {
+                document.getElementById('prop-text').value = isTable ? 'Table selected' : inner.innerText;
+                document.getElementById('prop-href').value = inner.href || '';
+                document.getElementById('prop-color').value = rgbToHex(getComputedStyle(inner).color);
+                document.getElementById('prop-size').value = parseInt(getComputedStyle(inner).fontSize, 10) || 12;
+                document.getElementById('prop-font').value = getComputedStyle(inner).fontFamily;
+                document.getElementById('prop-weight').value = getComputedStyle(inner).fontWeight;
+            }
+            if (type === 'image' || type === 'video') {
+                document.getElementById('prop-src').value = inner.src || '';
+            }
+        }
+
+        document.getElementById('prop-bg').value = rgbToHex(getComputedStyle(widget).backgroundColor);
+        document.getElementById('prop-border-color').value = rgbToHex(getComputedStyle(widget).borderColor);
+        document.getElementById('prop-border-width').value = parseInt(getComputedStyle(widget).borderWidth, 10) || 0;
+        document.getElementById('prop-radius').value = parseInt(getComputedStyle(widget).borderRadius, 10) || 0;
+        document.getElementById('prop-opacity').value = getComputedStyle(widget).opacity || 1;
+    }
+
+    function getTargetContent() {
+        return state.activeElement?.querySelector('.content')?.children[0] || null;
+    }
+
+    function updateProp(prop, value) {
+        const target = getTargetContent();
+        if (!target) return;
+        target[prop] = value;
+        saveState();
+    }
+
+    function updatePropStyle(prop, value) {
+        if (!state.activeElement) return;
+        const boxProps = ['backgroundColor', 'borderColor', 'borderWidth', 'borderStyle', 'borderRadius', 'opacity', 'transform', 'animation'];
+        const target = boxProps.includes(prop) ? state.activeElement : getTargetContent();
+        if (!target) return;
+        target.style[prop] = value;
+        saveState();
+    }
+
+    function updateMediaSrc(url) {
+        const target = getTargetContent();
+        if (!target) return;
+        target.src = url;
+        saveState();
+    }
+
+    function moveZ(widget, dir) {
+        widget.style.zIndex = (parseInt(widget.style.zIndex || '1', 10) + dir).toString();
+        saveState();
+    }
+
+    function duplicateWidget(widget) {
+        const clone = widget.cloneNode(true);
+        clone.classList.remove('active');
+        clone.style.left = (parseInt(widget.style.left || '0', 10) + 20) + 'px';
+        clone.style.top = (parseInt(widget.style.top || '0', 10) + 20) + 'px';
+        els.livePreview.appendChild(clone);
+        selectElement(clone);
+        saveState();
+    }
+
+    function duplicateActive() {
+        if (!state.activeElement) return;
+        duplicateWidget(state.activeElement);
+    }
+
+    function addAsset() {
+        const url = window.prompt('Enter asset URL:');
+        if (!url) return;
+        state.assetList.push(url);
+        updateAssetUI();
+    }
+
+    function updateAssetUI() {
+        els.assetList.innerHTML = state.assetList.map((url, i) => `
+            <div class="asset-item" data-index="${i}" title="Click to copy">
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${url}</span>
+                <span style="color:#f44;" data-remove="${i}">✕</span>
+            </div>
+        `).join('');
+        localStorage.setItem(ASSET_KEY, JSON.stringify(state.assetList));
+    }
+
+    function updateTheme(prop, value) {
+        document.documentElement.style.setProperty(prop, value);
+        saveState();
+    }
+
+    function updateSiteBG() {
+        const img = els.siteBgInput.value.trim();
+        const mode = els.siteBgMode.value;
+        els.siteFrame.style.backgroundImage = img ? `url(${img})` : 'none';
+        els.siteFrame.style.backgroundSize = mode === 'repeat' ? 'auto' : mode;
+        els.siteFrame.style.backgroundRepeat = mode === 'repeat' ? 'repeat' : 'no-repeat';
+        saveState();
+    }
+
+    function toggleCode() {
+        const show = els.codePane.style.display !== 'flex';
+        els.codePane.style.display = show ? 'flex' : 'none';
+        if (show) {
+            const clone = els.livePreview.cloneNode(true);
+            clone.querySelectorAll('.widget-tools, .resizer').forEach((el) => el.remove());
+            els.codeBox.value = clone.innerHTML.trim();
+        }
+    }
+
+    function syncFromCode() {
+        els.livePreview.innerHTML = els.codeBox.value;
+        saveState();
+    }
+
+    function clearAll() {
+        if (!window.confirm('Wipe canvas?')) return;
+        els.livePreview.innerHTML = '';
+        selectElement(null);
+        saveState();
+    }
+
+    function makeTableEditable(table) {
+        table.querySelectorAll('td, th').forEach((cell) => {
+            cell.contentEditable = 'true';
+            cell.addEventListener('blur', saveState);
+        });
+    }
+
+    function modifyTable(action) {
+        const table = state.activeElement?.querySelector('table');
+        if (!table) return;
+
+        if (action === 'addRow') {
+            const row = table.insertRow(-1);
+            const colCount = table.rows[0].cells.length;
+            for (let i = 0; i < colCount; i += 1) {
+                const cell = row.insertCell(i);
+                cell.innerHTML = 'New Cell';
+                cell.style.border = '1px solid var(--accent)';
+                cell.style.padding = '8px';
+            }
+        } else if (action === 'addCol') {
+            Array.from(table.rows).forEach((row, i) => {
+                if (i === 0) {
+                    const th = document.createElement('th');
+                    th.innerHTML = 'New Col';
+                    th.style.border = '1px solid var(--accent)';
+                    th.style.padding = '8px';
+                    row.appendChild(th);
+                } else {
+                    const cell = row.insertCell(-1);
+                    cell.innerHTML = 'New Col';
+                    cell.style.border = '1px solid var(--accent)';
+                    cell.style.padding = '8px';
+                }
+            });
+        } else if (action === 'delRow' && table.rows.length > 1) {
+            table.deleteRow(-1);
+        } else if (action === 'delCol' && table.rows[0].cells.length > 1) {
+            Array.from(table.rows).forEach((row) => row.deleteCell(-1));
+        }
+
+        makeTableEditable(table);
+        saveState();
+    }
+
+    async function processCSV() {
+        let raw = '';
+        const choice = window.confirm('Press OK to upload a CSV file, or CANCEL to paste text.');
+
+        if (choice) {
+            raw = await new Promise((resolve) => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.csv';
+                input.onchange = (event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return resolve('');
+                    const reader = new FileReader();
+                    reader.onload = (f) => resolve(f.target?.result || '');
+                    reader.readAsText(file);
+                };
+                input.click();
+            });
+        } else {
+            raw = window.prompt('Paste your CSV data here (first row should be headers):') || '';
+        }
+
+        if (!raw.trim()) return;
+        const rows = raw.trim().split('\n').map((line) => line.split(','));
+        if (!rows.length) return;
+
+        const headers = rows[0];
+        let html = '<table><thead><tr>';
+        headers.forEach((h) => {
+            html += `<th style="background:rgba(0,255,65,0.1);color:var(--neon);">${h.trim().toUpperCase()}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+
+        for (let i = 1; i < rows.length; i += 1) {
+            if (rows[i].length < headers.length) continue;
+            html += '<tr>';
+            rows[i].forEach((cell) => {
+                html += `<td>${cell.trim()}</td>`;
+            });
+            html += '</tr>';
+        }
+        html += '</tbody></table>';
+
+        createWidget('text', html);
+        const latestTable = els.livePreview.querySelector('.widget:last-child table');
+        if (latestTable) makeTableEditable(latestTable);
+        saveState();
+    }
+
+    function exportCleanHTML() {
+        const preview = els.livePreview.cloneNode(true);
+        preview.querySelectorAll('.widget-tools, .resizer').forEach((el) => el.remove());
+        preview.querySelectorAll('.widget').forEach((w) => w.classList.remove('active'));
+
+        const final = `<!DOCTYPE html><html><head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width,initial-scale=1.0">
+            <link rel="icon" href="${document.getElementById('site-favicon').href}">
+            <style>
+                body { margin: 0; background: #000; font-family: Arial, sans-serif; }
+                #site-frame { width: 1000px; min-height: 1200px; margin: 30px auto; position: relative; background:${getComputedStyle(els.siteFrame).backgroundColor}; background-image:${getComputedStyle(els.siteFrame).backgroundImage}; background-size:${getComputedStyle(els.siteFrame).backgroundSize}; background-repeat:${getComputedStyle(els.siteFrame).backgroundRepeat}; }
+                .widget { position: absolute; box-sizing: border-box; }
+                ${Array.from(document.styleSheets[0].cssRules).map((r) => r.cssText).join('\n')}
+            </style>
+        </head><body><div id="site-frame">${preview.innerHTML}</div></body></html>`;
+
+        const blob = new Blob([final], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'pixelb8-omega-export.html';
+        a.click();
+    }
+
+    function saveState() {
+        const payload = {
+            html: els.livePreview.innerHTML,
+            neon: getComputedStyle(document.documentElement).getPropertyValue('--neon').trim(),
+            bg: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(),
+            favicon: document.getElementById('site-favicon').href,
+            siteBG: els.siteBgInput.value,
+            siteBGMode: els.siteBgMode.value
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    }
+
+    function loadState() {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+        if (saved) {
+            els.livePreview.innerHTML = saved.html || '';
+            if (saved.neon) updateTheme('--neon', saved.neon);
+            if (saved.bg) updateTheme('--bg', saved.bg);
+            if (saved.favicon) document.getElementById('site-favicon').href = saved.favicon;
+            els.siteBgInput.value = saved.siteBG || '';
+            els.siteBgMode.value = saved.siteBGMode || 'cover';
+            updateSiteBG();
+            els.livePreview.querySelectorAll('table').forEach(makeTableEditable);
+        }
+        updateAssetUI();
+    }
+
+    function rgbToHex(rgb) {
+        if (!rgb || rgb === 'rgba(0, 0, 0, 0)') return '#000000';
+        const parts = rgb.match(/\d+/g);
+        if (!parts) return '#000000';
+        return `#${parts.slice(0, 3).map((n) => Number(n).toString(16).padStart(2, '0')).join('')}`;
+    }
+
+    function wireEvents() {
+        document.querySelectorAll('[data-create]').forEach((btn) => {
+            btn.addEventListener('click', () => createWidget(btn.dataset.create));
+        });
+
+        document.getElementById('duplicate-btn').addEventListener('click', duplicateActive);
+        document.getElementById('csv-btn').addEventListener('click', processCSV);
+        document.getElementById('add-asset-btn').addEventListener('click', addAsset);
+
+        document.getElementById('toggle-ui').addEventListener('click', () => els.sidebar.classList.toggle('hidden'));
+        document.getElementById('toggle-mobile').addEventListener('click', () => document.body.classList.toggle('mobile-mode'));
+        document.getElementById('toggle-code').addEventListener('click', toggleCode);
+        document.getElementById('save-btn').addEventListener('click', saveState);
+        document.getElementById('wipe-btn').addEventListener('click', clearAll);
+        document.getElementById('download-btn').addEventListener('click', exportCleanHTML);
+        document.getElementById('deploy-btn').addEventListener('click', () => window.alert('Deploy pipeline will be connected to GitHub Actions/API in a next step.'));
+
+        els.codeBox.addEventListener('input', syncFromCode);
+        els.faviconInput.addEventListener('change', (e) => {
+            document.getElementById('site-favicon').href = e.target.value;
+            saveState();
+        });
+        els.siteBgInput.addEventListener('change', updateSiteBG);
+        els.siteBgMode.addEventListener('change', updateSiteBG);
+        els.themeNeon.addEventListener('input', (e) => updateTheme('--neon', e.target.value));
+        els.themeBg.addEventListener('input', (e) => updateTheme('--bg', e.target.value));
+
+        document.getElementById('prop-text').addEventListener('input', (e) => updateProp('innerText', e.target.value));
+        document.getElementById('prop-href').addEventListener('input', (e) => updateProp('href', e.target.value));
+        document.getElementById('prop-color').addEventListener('input', (e) => updatePropStyle('color', e.target.value));
+        document.getElementById('prop-size').addEventListener('input', (e) => updatePropStyle('fontSize', `${e.target.value}px`));
+        document.getElementById('prop-font').addEventListener('change', (e) => updatePropStyle('fontFamily', e.target.value));
+        document.getElementById('prop-weight').addEventListener('change', (e) => updatePropStyle('fontWeight', e.target.value));
+        document.getElementById('prop-src').addEventListener('change', (e) => updateMediaSrc(e.target.value));
+        document.getElementById('prop-bg').addEventListener('input', (e) => updatePropStyle('backgroundColor', e.target.value));
+        document.getElementById('prop-border-color').addEventListener('input', (e) => updatePropStyle('borderColor', e.target.value));
+        document.getElementById('prop-border-width').addEventListener('input', (e) => updatePropStyle('borderWidth', `${e.target.value}px`));
+        document.getElementById('prop-radius').addEventListener('input', (e) => updatePropStyle('borderRadius', `${e.target.value}px`));
+        document.getElementById('prop-opacity').addEventListener('input', (e) => updatePropStyle('opacity', e.target.value));
+        document.getElementById('prop-rotate').addEventListener('input', (e) => updatePropStyle('transform', `rotate(${e.target.value}deg)`));
+        document.getElementById('prop-animation').addEventListener('change', (e) => {
+            const value = e.target.value === 'none' ? 'none' : `${e.target.value} 1s ease forwards`;
+            updatePropStyle('animation', value);
+        });
+
+        document.querySelectorAll('[data-table-action]').forEach((btn) => {
+            btn.addEventListener('click', () => modifyTable(btn.dataset.tableAction));
+        });
+
+        document.addEventListener('mousedown', (event) => {
+            const widget = event.target.closest('.widget');
+
+            if (!widget) {
+                if (!event.target.closest('#sidebar')) selectElement(null);
+                return;
+            }
+
+            if (event.target.closest('.tool-btn')) return;
+
+            selectElement(widget);
+            state.startX = event.clientX;
+            state.startY = event.clientY;
+            state.startW = parseInt(getComputedStyle(widget).width, 10);
+            state.startH = parseInt(getComputedStyle(widget).height, 10);
+            state.startL = parseInt(widget.style.left || '0', 10);
+            state.startT = parseInt(widget.style.top || '0', 10);
+
+            if (event.target.classList.contains('resizer')) {
+                state.isResizing = true;
+                event.preventDefault();
+            } else {
+                state.isDragging = true;
+            }
+        });
+
+        document.addEventListener('mousemove', (event) => {
+            if (!state.activeElement) return;
+            const snap = Number.parseInt(els.gridSnap.value, 10) || 1;
+
+            if (state.isResizing) {
+                const width = Math.max(60, state.startW + event.clientX - state.startX);
+                const height = Math.max(30, state.startH + event.clientY - state.startY);
+                state.activeElement.style.width = `${Math.round(width / snap) * snap}px`;
+                state.activeElement.style.height = `${Math.round(height / snap) * snap}px`;
+            } else if (state.isDragging) {
+                const left = state.startL + event.clientX - state.startX;
+                const top = state.startT + event.clientY - state.startY;
+                state.activeElement.style.left = `${Math.round(left / snap) * snap}px`;
+                state.activeElement.style.top = `${Math.round(top / snap) * snap}px`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (state.isDragging || state.isResizing) saveState();
+            state.isDragging = false;
+            state.isResizing = false;
+        });
+
+        els.livePreview.addEventListener('click', async (event) => {
+            const asset = event.target.closest('.asset-item');
+            if (asset) return;
+
+            const actionBtn = event.target.closest('.tool-btn');
+            if (!actionBtn) return;
+
+            const widget = actionBtn.closest('.widget');
+            if (!widget) return;
+
+            const action = actionBtn.dataset.action;
+            if (action === 'z-up') moveZ(widget, 1);
+            if (action === 'z-down') moveZ(widget, -1);
+            if (action === 'duplicate') duplicateWidget(widget);
+            if (action === 'delete') {
+                if (state.activeElement === widget) selectElement(null);
+                widget.remove();
+                saveState();
+            }
+        });
+
+        els.assetList.addEventListener('click', async (event) => {
+            const removeTarget = event.target.closest('[data-remove]');
+            if (removeTarget) {
+                const i = Number.parseInt(removeTarget.dataset.remove, 10);
+                state.assetList.splice(i, 1);
+                updateAssetUI();
+                return;
+            }
+
+            const item = event.target.closest('.asset-item');
+            if (!item) return;
+            const i = Number.parseInt(item.dataset.index, 10);
+            const text = state.assetList[i];
+            try {
+                await navigator.clipboard.writeText(text);
+                window.alert('Asset URL copied.');
+            } catch {
+                window.alert('Clipboard blocked by browser permissions.');
+            }
+        });
+    }
+
+    const favicon = document.createElement('link');
+    favicon.id = 'site-favicon';
+    favicon.rel = 'icon';
+    favicon.href = '../assets/images/logo/pixelbotfavicon.png';
+    document.head.appendChild(favicon);
+
+    wireEvents();
+    loadState();
+})();
+</script>
+</body>
+</html>
