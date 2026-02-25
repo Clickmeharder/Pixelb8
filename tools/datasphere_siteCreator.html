@@ -12,28 +12,25 @@
 
 <div id="sidebar">
 
-<h3 style="display:flex;justify-content:space-between;align-items:center;">
-PAGES
-<button onclick="UI.toggleSidebar()" style="width:auto;padding:2px 6px;font-size:12px;">☰</button>
-</h3>
+<h3>PAGES</h3>
 <div id="pageList"></div>
-<button onclick="Pages.add()">+ Add Page</button>
+<button onclick="addPage()">+ Add Page</button>
 
 <h3>COMPONENTS</h3>
-<button onclick="Widgets.add('header')">Header</button>
-<button onclick="Widgets.add('text')">Text</button>
-<button onclick="Widgets.add('image')">Image</button>
-<button onclick="Widgets.add('button')">Button</button>
+<button onclick="addWidget('header')">Header</button>
+<button onclick="addWidget('text')">Text</button>
+<button onclick="addWidget('image')">Image</button>
+<button onclick="addWidget('button')">Button</button>
 
 <h3>THEME</h3>
-<input type="color" onchange="Theme.update('--neon',this.value)">
-<input type="color" onchange="Theme.update('--bg',this.value)">
+<input type="color" onchange="updateTheme('--neon',this.value)">
+<input type="color" onchange="updateTheme('--bg',this.value)">
 
 <h3>ACTIONS</h3>
-<button onclick="Widgets.duplicate()">Duplicate</button>
-<button onclick="Widgets.remove()">Delete</button>
-<button onclick="UI.toggleCode()">Code View</button>
-<button onclick="Pages.wipe()">Wipe Page</button>
+<button onclick="duplicateWidget()">Duplicate</button>
+<button onclick="deleteWidget()">Delete</button>
+<button onclick="exportHTML()">Export HTML</button>
+<button onclick="wipe()">Wipe Page</button>
 
 </div>
 
@@ -44,18 +41,6 @@ PAGES
 <div id="canvasWrap">
 <div id="frame"></div>
 </div>
-
-<!-- CODE VIEW PANEL -->
-<div id="codePanel" style="display:none;position:absolute;top:0;right:0;bottom:0;width:50%;background:#111;color:#0f0;overflow:auto;padding:10px;z-index:999;">
-<div style="display:flex;gap:5px;margin-bottom:5px;">
-<button onclick="CodeView.switchTab('html')">HTML</button>
-<button onclick="CodeView.switchTab('css')">CSS</button>
-<button onclick="CodeView.switchTab('js')">JS</button>
-<button onclick="UI.toggleCode()">Close</button>
-</div>
-<textarea id="codeArea" style="width:100%;height:90%;background:#000;color:#0f0;font-family:Courier New, monospace;"></textarea>
-</div>
-
 </div>
 
 <script src="js/engine.js"></script>
