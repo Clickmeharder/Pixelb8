@@ -220,7 +220,7 @@ function loadProjects() {
         switch (type) {
             case 'header': el.innerHTML = '<h1>New Heading</h1>'; break;
             case 'text': el.innerHTML = '<p>Click to edit text...</p>'; break;
-            case 'image': el.innerHTML = `<img src="https://via.placeholder.com/150" style="width:100%; pointer-events:none;">`; break;
+            case 'image': el.innerHTML = `<img src="https://picsum.photos/200" style="width:100%; pointer-events:none;">`; break;
             case 'button': el.innerHTML = `<button style="padding:10px 20px;">Click Me</button>`; break;
             case 'video': el.innerHTML = `<div style="background:#000; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; color:#fff;">Video Placeholder</div>`; break;
             case 'shape': 
