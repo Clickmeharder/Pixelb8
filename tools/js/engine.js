@@ -408,7 +408,28 @@ document.addEventListener('DOMContentLoaded', () => {
         link.download = "pixelb8_export.html";
         link.click();
     });
+	document.querySelectorAll('.side-section.collapsable').forEach(section => {
+		const header = section.querySelector('h2, h1'); // pick the first heading
+		const content = Array.from(section.children).filter(el => el !== header); // everything else
 
+		// Wrap content in a container div for easier toggle
+		const container = document.createElement('div');
+		content.forEach(el => container.appendChild(el));
+		section.appendChild(container);
+
+		// Initial state (open)
+		container.style.display = 'block';
+		header.style.cursor = 'pointer';
+		header.style.userSelect = 'none';
+
+		header.addEventListener('click', () => {
+			if (container.style.display === 'none') {
+				container.style.display = 'block';
+			} else {
+				container.style.display = 'none';
+			}
+		});
+	});
     /* ==============================
        INIT
     ============================== */
