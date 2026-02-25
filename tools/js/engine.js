@@ -118,10 +118,21 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('theme-bg').addEventListener('input', e => livePreview.style.backgroundColor = e.target.value);
 
     // --- 4. Sidebar / Code Toggle ---
-    document.getElementById('toggle-ui-btn').addEventListener('click', () => {
-        sidebar.classList.toggle('hidden');
-    });
+    // Inside your DOMContentLoaded block in engine.js
+	const uiToggleBtn = document.getElementById('toggle-ui-btn');
+	const sidebar = document.getElementById('sidebar');
 
+	uiToggleBtn.addEventListener('click', () => {
+		// This will now smoothly slide the margin
+		sidebar.classList.toggle('hidden');
+		
+		// Optional: Update the button text to show state
+		if (sidebar.classList.contains('hidden')) {
+			uiToggleBtn.innerText = '[≡] SHOW UI';
+		} else {
+			uiToggleBtn.innerText = '[≡] HIDE UI';
+		}
+	});
     document.getElementById('toggle-code-btn').addEventListener('click', () => {
         document.getElementById('code-pane').style.display =
             document.getElementById('code-pane').style.display === 'none' ? 'flex' : 'none';

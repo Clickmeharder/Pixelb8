@@ -7,8 +7,24 @@
         body { font-family: var(--font-main); background: #000; color: var(--text); display: flex; height: 100vh; margin: 0; overflow: hidden; }
 
         /* SIDEBAR */
-        #sidebar { width: 350px; background: var(--panel); border-right: 1px solid var(--accent); display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1000; overflow-y: auto; }
-        #sidebar.hidden { transform: translateX(-350px); position: absolute; }
+        #sidebar { 
+			width: 350px; 
+			min-width: 350px; /* Keep width consistent */
+			background: var(--panel); 
+			border-right: 1px solid var(--accent); 
+			display: flex; 
+			flex-direction: column; 
+			transition: margin-left 0.3s ease, opacity 0.3s ease; 
+			z-index: 1000; 
+			overflow-y: auto; 
+			margin-left: 0; /* Visible by default */
+		}
+
+		#sidebar.hidden { 
+			margin-left: -350px; /* Slide out of view */
+			opacity: 0;
+			pointer-events: none; /* Prevent clicking hidden buttons */
+		}
         .side-section { padding: 18px; border-bottom: 1px solid var(--accent); }
 
         /* WORKSPACE */
