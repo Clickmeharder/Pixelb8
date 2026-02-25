@@ -4,45 +4,180 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="../assets/images/logo/pixelbotfavicon.png">
-<title>Pixelb8 Omega Engine V6</title>
-
-<link rel="stylesheet" href="css/engine.css">
+<title>Pixelb8 Omega Engine V5</title>
+<link rel="stylesheet" href="engine.css">
 </head>
 <body>
 
 <div id="sidebar">
+    <div class="side-section">
+        <h1 style="color:var(--neon); margin:0; font-size: 1.1rem; letter-spacing: -1px;">PIXELB8 OMEGA</h1>
+        <p style="font-size: 9px; color: #555; margin-top: 2px;">V4.0 | PRO-SOVEREIGN ENGINE</p>
+    </div>
 
-<h3>PAGES</h3>
-<div id="pageList"></div>
-<button onclick="addPage()">+ Add Page</button>
+    <div class="side-section">
+        <h2>SITE SETTINGS</h2>
+        <div class="group">
+            <label>Favicon URL</label>
+            <input type="text" id="site-favicon-input" placeholder="https://...">
+            <label>Background Image</label>
+            <input type="text" id="site-bg-img" placeholder="URL...">
+            <div class="row">
+                <select id="site-bg-mode">
+                    <option value="cover">Stretch (Cover)</option>
+                    <option value="contain">Fit (Contain)</option>
+                    <option value="repeat">Tile (Repeat)</option>
+                    <option value="auto">Original</option>
+                </select>
+                <input type="number" id="grid-snap" value="1" title="Snap to Grid (px)" style="width:60px;">
+            </div>
+        </div>
+    </div>
 
-<h3>COMPONENTS</h3>
-<button >Header</button>
-<button >Text</button>
-<button >Image</button>
-<button >Button</button>
+    <div class="side-section">
+        <h2>COMPONENTS</h2>
+        <div class="group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+            <button data-widget="header">Header</button>
+            <button data-widget="text">Text</button>
+            <button data-widget="image">Image</button>
+            <button data-widget="gallery">Slideshow</button>
+            <button data-widget="video">Video</button>
+            <button data-widget="button">Button</button>
+            <button data-widget="shape">Shape</button>
+            <button data-widget="shop">Shop Card</button>
+            <button id="duplicate-btn" style="background:#004411;">[+] DUPLICATE</button>
+            <button id="csv-btn">CSV Log</button>
+        </div>
+    </div>
 
-<h3>THEME</h3>
-<input type="color" >
-<input type="color" >
+    <div class="side-section">
+        <h2>ASSET CLIPBOARD</h2>
+        <div id="asset-list"></div>
+        <button id="add-asset-btn" style="font-size: 9px; padding:4px;">+ ADD URL</button>
+    </div>
 
-<h3>ACTIONS</h3>
-<button >Duplicate</button>
-<button >Delete</button>
-<button >Export HTML</button>
-<button >Wipe Page</button>
+    <div id="inspector" class="side-section" style="display:none; background: #1a1a1a;">
+        <h2 style="color:#fff;">INSPECTOR</h2>
+        <div id="ins-text" class="ins-group">
+            <div class="group">
+                <label>Content / Link</label>
+                <input type="text" id="prop-text">
+                <input type="text" id="prop-href" placeholder="URL Link (for Buttons)">
+            </div>
+            <div class="group">
+                <label>Typography</label>
+                <div class="row">
+                    <input type="color" id="prop-color" title="Text Color">
+                    <input type="number" id="prop-size" placeholder="px">
+                </div>
+                <select id="prop-font" style="margin-top:5px;">
+                    <option value="'Courier New', monospace">Retro Mono</option>
+                    <option value="Arial, sans-serif">Clean Sans</option>
+                    <option value="'Orbitron', sans-serif">Cyber-Tech</option>
+                    <option value="Georgia, serif">Classic Serif</option>
+                </select>
+                <select id="prop-weight" style="margin-top:5px;">
+                    <option value="normal">Normal</option>
+                    <option value="bold">Bold</option>
+                    <option value="900">Heavy</option>
+                </select>
+            </div>
+            <div class="group">
+                <label>Text Glow (Neon)</label>
+                <input type="range" min="0" max="20" value="0" id="prop-glow">
+            </div>
+        </div>
 
+        <div id="ins-media" class="ins-group" style="display:none;">
+            <div class="group">
+                <label>Source URL (Image/Video)</label>
+                <input type="text" id="prop-src">
+            </div>
+        </div>
+
+        <div id="ins-table" class="ins-group" style="display:none; border-top: 1px solid var(--accent); padding-top: 10px;">
+            <label>Table Controls</label>
+            <div class="row" style="margin-top:5px;">
+                <button data-table="addRow" style="font-size:9px;">+ ROW</button>
+                <button data-table="addCol" style="font-size:9px;">+ COL</button>
+            </div>
+            <div class="row" style="margin-top:5px;">
+                <button data-table="delRow" style="background:#441111; font-size:9px;">- ROW</button>
+                <button data-table="delCol" style="background:#441111; font-size:9px;">- COL</button>
+            </div>
+            <p style="font-size:8px; color:#666; margin-top:5px;">* Double-click cell in canvas to edit text</p>
+        </div>
+
+        <div class="group" style="border-top: 1px solid #333; padding-top: 10px;">
+            <label>Box Style & FX</label>
+            <div class="row">
+                <input type="color" id="prop-bg" title="BG Color">
+                <input type="color" id="prop-border-color" title="Border Color">
+            </div>
+            <div class="row" style="margin-top:5px;">
+                <input type="number" id="prop-border-width" placeholder="B-Width">
+                <input type="number" id="prop-radius" placeholder="Radius">
+            </div>
+            <div class="row">
+                <label style="width:40px;">OPACITY</label>
+                <input type="range" min="0" max="1" step="0.1" value="1" id="prop-opacity">
+            </div>
+            <div class="row">
+                <label style="width:40px;">ROTATE</label>
+                <input type="range" min="0" max="360" value="0" id="prop-rotate">
+            </div>
+            <label>Animation</label>
+            <select id="prop-animation">
+                <option value="none">None</option>
+                <option value="fadeIn">Fade In</option>
+                <option value="slideUp">Slide Up</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="side-section">
+        <h2>GLOBAL THEME</h2>
+        <div class="group">
+            <label>Primary Neon</label>
+            <input type="color" id="theme-neon" value="#00ff41">
+            <label>Canvas BG</label>
+            <input type="color" id="theme-bg" value="#0d0d0d">
+        </div>
+    </div>
+
+    <div class="side-section">
+        <button id="deploy-btn" class="btn-prime">DEPLOY TO GITHUB</button>
+        <button id="download-btn" style="margin-top:5px;">DOWNLOAD HTML</button>
+    </div>
 </div>
 
-<div id="main">
-<div id="toolbar">
-<strong>Pixelb8 State Engine</strong>
-</div>
-<div id="canvasWrap">
-<div id="frame"></div>
-</div>
+<div id="main-view">
+    <div id="toolbar">
+        <div>
+            <button id="toggle-ui-btn" style="width:auto;">[≡] TOGGLE UI</button>
+            <button id="toggle-mobile-btn" style="width:auto;">[📱] DEVICE</button>
+        </div>
+        <div style="display:flex; gap: 8px;">
+            <button id="toggle-code-btn" style="width:auto;">CODE</button>
+            <button id="save-btn" style="width:auto;">SAVE</button>
+            <button id="wipe-btn" style="width:auto; color:red;">WIPE</button>
+        </div>
+    </div>
+
+    <div style="display:flex; flex-grow:1; overflow:hidden;">
+        <div id="canvas-area">
+            <div id="site-frame">
+                <div id="live-preview" style="width:100%; height:100%;"></div>
+            </div>
+        </div>
+
+        <div id="code-pane">
+            <div style="padding:10px; background:#111; font-size:10px; color:var(--neon); border-bottom:1px solid #333;">LIVE PRODUCTION SOURCE</div>
+            <textarea id="code-box" spellcheck="false"></textarea>
+        </div>
+    </div>
 </div>
 
-<script src="js/engine.js"></script>
+<script src="engine.js"></script>
 </body>
 </html>
