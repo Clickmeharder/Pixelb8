@@ -10,7 +10,7 @@
 let projects = [];
 let currentProjectIndex = 0;
 let selectedPageIndex = 0;
-
+let selectedElement = null;
 /* ==============================
    PROJECT PERSISTENCE
 ============================== */
@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadProjects();
 
-    let selectedElement = null;
+
 
     newProjectBtn.addEventListener("click", () => {
         const name = prompt("Project name?");
