@@ -191,14 +191,13 @@ document.addEventListener('DOMContentLoaded', () => {
         link.click();
     });
 	
-	// --- 8. Page Tree / Site Builder ---
+	// --- 8. Page Tree / Site Builder (Persistance Fix) ---
 	const pagesList = document.getElementById('pages-list');
 	const addPageBtn = document.getElementById('add-page-btn');
 	const deletePageBtn = document.getElementById('delete-page-btn');
-	const generatePageBtn = document.getElementById('generate-page-btn');
-	const generateSiteBtn = document.getElementById('generate-site-btn');
 
-	let pages = [{ name: 'Home', id: 'page-0' }];
+	// IMPORTANT: Initialize with content property
+	let pages = [{ name: 'Home', id: 'page-0', content: '' }];
 	let selectedPageIndex = 0;
 
 	function renderPages() {
@@ -207,31 +206,58 @@ document.addEventListener('DOMContentLoaded', () => {
 			const li = document.createElement('li');
 			li.textContent = page.name;
 			li.style.cursor = 'pointer';
-			li.style.padding = '2px 5px';
+			li.style.padding = '5px';
 			li.style.borderBottom = '1px solid #222';
-			li.dataset.index = index;
-
+			
 			if(index === selectedPageIndex) {
-				li.style.background = '#111';
+				li.style.background = '#222';
 				li.style.color = 'var(--neon)';
+				li.style.borderLeft = '3px solid var(--neon)';
 			}
 
 			li.addEventListener('click', () => {
-				selectedPageIndex = index;
-				renderPages();
+				switchPage(index);
 			});
 
 			pagesList.appendChild(li);
 		});
 	}
 
+	function switchPage(index) {
+		// 1. Save current canvas content to the OLD page before leaving
+		pages[selectedPageIndex].content = livePreview.innerHTML;
+		
+		// 2. Change index
+		selectedPageIndex = index;
+		
+		// 3. Load the NEW page content to the canvas
+		livePreview.innerHTML = pages[selectedPageIndex].content;
+		
+		// 4. Re-init interactivity for widgets on the new page
+		const widgets = livePreview.querySelectorAll('.widget');
+		widgets.forEach(w => makeElementInteractable(w));
+		
+		renderPages();
+		updateCodeView();
+	}
+
 	// Add new page
 	addPageBtn.addEventListener('click', () => {
 		const pageName = prompt('Enter new page name:');
 		if(pageName) {
-			pages.push({ name: pageName, id: 'page-' + pages.length });
+			// Save current page before adding new one
+			pages[selectedPageIndex].content = livePreview.innerHTML;
+			
+			pages.push({ 
+				name: pageName, 
+				id: 'page-' + Date.now(), 
+				content: `<div style="padding:20px;"><h1>${pageName}</h1></div>` 
+			});
+			
 			selectedPageIndex = pages.length - 1;
+			livePreview.innerHTML = pages[selectedPageIndex].content;
 			renderPages();
+			updateCodeView();
 		}
 	});
 
@@ -241,34 +267,13 @@ document.addEventListener('DOMContentLoaded', () => {
 			alert("Can't delete the last page!");
 			return;
 		}
-		pages.splice(selectedPageIndex, 1);
-		selectedPageIndex = Math.max(0, selectedPageIndex - 1);
-		renderPages();
-	});
-
-	// Generate selected page template
-	generatePageBtn.addEventListener('click', () => {
-		if(pages[selectedPageIndex]){
-			const template = `<div style="padding:20px;"><h1>${pages[selectedPageIndex].name}</h1><p>Welcome to ${pages[selectedPageIndex].name} page!</p></div>`;
-			livePreview.innerHTML = template;
+		if(confirm(`Delete ${pages[selectedPageIndex].name}?`)) {
+			pages.splice(selectedPageIndex, 1);
+			selectedPageIndex = 0;
+			livePreview.innerHTML = pages[selectedPageIndex].content;
+			renderPages();
 			updateCodeView();
-			alert(`${pages[selectedPageIndex].name} page generated!`);
 		}
-	});
-
-	// Generate full prebuilt site
-	generateSiteBtn.addEventListener('click', () => {
-		livePreview.innerHTML = '';
-		pages.forEach(page => {
-			const pageDiv = document.createElement('div');
-			pageDiv.style.border = '1px dashed #333';
-			pageDiv.style.margin = '5px 0';
-			pageDiv.style.padding = '10px';
-			pageDiv.innerHTML = `<h2>${page.name}</h2><p>Sample content for ${page.name}</p>`;
-			livePreview.appendChild(pageDiv);
-		});
-		updateCodeView();
-		alert('Full site generated!');
 	});
 
 	// Initial render
