@@ -34,7 +34,23 @@
             </div>
         </div>
     </div>
-
+	<div class="side-section">
+		<h2>PAGE TREE</h2>
+		<div class="group" id="page-tree">
+			<ul id="pages-list" style="list-style:none; padding-left:0; max-height:150px; overflow-y:auto; border:1px solid #333; margin:0;">
+				<!-- Existing pages will be added here dynamically -->
+				<li>Home</li>
+			</ul>
+			<div class="row" style="margin-top:5px; gap:5px;">
+				<button id="add-page-btn" style="font-size:9px;">+ ADD PAGE</button>
+				<button id="delete-page-btn" style="font-size:9px; background:#441111;">- DELETE PAGE</button>
+			</div>
+			<div style="margin-top:5px;">
+				<button id="generate-page-btn" style="font-size:9px; width:100%;">GENERATE PREBUILT PAGE</button>
+				<button id="generate-site-btn" style="font-size:9px; width:100%; margin-top:2px;">GENERATE FULL SITE</button>
+			</div>
+		</div>
+	</div>
     <div class="side-section">
         <h2>COMPONENTS</h2>
         <div class="group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">

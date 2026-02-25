@@ -190,4 +190,87 @@ document.addEventListener('DOMContentLoaded', () => {
         link.download = "pixelb8_export.html";
         link.click();
     });
+	
+	// --- 8. Page Tree / Site Builder ---
+	const pagesList = document.getElementById('pages-list');
+	const addPageBtn = document.getElementById('add-page-btn');
+	const deletePageBtn = document.getElementById('delete-page-btn');
+	const generatePageBtn = document.getElementById('generate-page-btn');
+	const generateSiteBtn = document.getElementById('generate-site-btn');
+
+	let pages = [{ name: 'Home', id: 'page-0' }];
+	let selectedPageIndex = 0;
+
+	function renderPages() {
+		pagesList.innerHTML = '';
+		pages.forEach((page, index) => {
+			const li = document.createElement('li');
+			li.textContent = page.name;
+			li.style.cursor = 'pointer';
+			li.style.padding = '2px 5px';
+			li.style.borderBottom = '1px solid #222';
+			li.dataset.index = index;
+
+			if(index === selectedPageIndex) {
+				li.style.background = '#111';
+				li.style.color = 'var(--neon)';
+			}
+
+			li.addEventListener('click', () => {
+				selectedPageIndex = index;
+				renderPages();
+			});
+
+			pagesList.appendChild(li);
+		});
+	}
+
+	// Add new page
+	addPageBtn.addEventListener('click', () => {
+		const pageName = prompt('Enter new page name:');
+		if(pageName) {
+			pages.push({ name: pageName, id: 'page-' + pages.length });
+			selectedPageIndex = pages.length - 1;
+			renderPages();
+		}
+	});
+
+	// Delete selected page
+	deletePageBtn.addEventListener('click', () => {
+		if(pages.length <= 1){
+			alert("Can't delete the last page!");
+			return;
+		}
+		pages.splice(selectedPageIndex, 1);
+		selectedPageIndex = Math.max(0, selectedPageIndex - 1);
+		renderPages();
+	});
+
+	// Generate selected page template
+	generatePageBtn.addEventListener('click', () => {
+		if(pages[selectedPageIndex]){
+			const template = `<div style="padding:20px;"><h1>${pages[selectedPageIndex].name}</h1><p>Welcome to ${pages[selectedPageIndex].name} page!</p></div>`;
+			livePreview.innerHTML = template;
+			updateCodeView();
+			alert(`${pages[selectedPageIndex].name} page generated!`);
+		}
+	});
+
+	// Generate full prebuilt site
+	generateSiteBtn.addEventListener('click', () => {
+		livePreview.innerHTML = '';
+		pages.forEach(page => {
+			const pageDiv = document.createElement('div');
+			pageDiv.style.border = '1px dashed #333';
+			pageDiv.style.margin = '5px 0';
+			pageDiv.style.padding = '10px';
+			pageDiv.innerHTML = `<h2>${page.name}</h2><p>Sample content for ${page.name}</p>`;
+			livePreview.appendChild(pageDiv);
+		});
+		updateCodeView();
+		alert('Full site generated!');
+	});
+
+	// Initial render
+	renderPages();
 });
