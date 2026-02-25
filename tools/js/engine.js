@@ -112,16 +112,23 @@ document.addEventListener('DOMContentLoaded', () => {
 			li.style.cursor = "pointer";
 			li.style.padding = "5px";
 
-			li.onclick = () => {
+			// Highlight selected project
+			if(index === currentProjectIndex){
+				li.style.color = "var(--neon)";
+			}
+
+			li.addEventListener("click", (e) => {
+				e.stopPropagation();
 				saveCurrentPage();
 				currentProjectIndex = index;
 				selectedPageIndex = 0;
-				renderProjects();
 				renderPages();
 				loadCurrentPage();
-			};
+				// no renderProjects() here, otherwise dblclick breaks
+			});
 
-			li.ondblclick = () => {
+			li.addEventListener("dblclick", (e) => {
+				e.stopPropagation();
 				const input = document.createElement("input");
 				input.type = "text";
 				input.value = proj.name;
@@ -133,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				function finishRename() {
 					const newName = input.value.trim();
-					if (newName) {
+					if(newName){
 						proj.name = newName;
 						saveProjects();
 					}
@@ -142,12 +149,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				input.addEventListener("blur", finishRename);
 				input.addEventListener("keydown", (e) => {
-					if (e.key === "Enter") finishRename();
-					if (e.key === "Escape") renderProjects();
+					if(e.key === "Enter") finishRename();
+					if(e.key === "Escape") renderProjects();
 				});
-			};
+			});
 
-			// ✅ Append each project to the list
 			projectList.appendChild(li);
 		});
 	}
