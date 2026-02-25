@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,7 +12,11 @@
 
 <div id="sidebar">
 
+<div style="display:flex;justify-content:space-between;align-items:center;">
 <h3>PAGES</h3>
+<button onclick="UI.toggleSidebar()" style="width:auto;padding:4px 8px;">☰</button>
+</div>
+
 <div id="pageList"></div>
 <button onclick="Pages.add()">+ Add Page</button>
 
@@ -28,9 +33,7 @@
 <h3>ACTIONS</h3>
 <button onclick="Widgets.duplicate()">Duplicate</button>
 <button onclick="Widgets.remove()">Delete</button>
-<button onclick="Export.html()">Export HTML</button>
 <button onclick="UI.toggleCode()">Code View</button>
-<button onclick="UI.toggleSidebar()">Toggle Sidebar</button>
 <button onclick="Pages.wipe()">Wipe Page</button>
 
 </div>
@@ -39,9 +42,22 @@
 <div id="toolbar">
 <strong>Pixelb8 Modular Engine</strong>
 </div>
+
 <div id="canvasWrap">
 <div id="frame"></div>
 </div>
+
+<!-- CODE VIEW PANEL -->
+<div id="codePanel" style="display:none;position:absolute;top:0;right:0;bottom:0;width:50%;background:#111;color:#0f0;overflow:auto;padding:10px;z-index:999;">
+<div style="display:flex;gap:5px;margin-bottom:5px;">
+<button onclick="CodeView.switchTab('html')">HTML</button>
+<button onclick="CodeView.switchTab('css')">CSS</button>
+<button onclick="CodeView.switchTab('js')">JS</button>
+<button onclick="UI.toggleCode()">Close</button>
+</div>
+<textarea id="codeArea" style="width:100%;height:90%;background:#000;color:#0f0;font-family:Courier New, monospace;"></textarea>
+</div>
+
 </div>
 
 <script src="js/datasphere_creation_engine.js"></script>
