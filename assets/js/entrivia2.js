@@ -2930,11 +2930,11 @@ const prizelistcommands = [
         description: "Displays the prize list for a specific user.", 
         usage: "!prizelist [username]" 
     },
-/*     { 
+    { 
         command: "!toggle-bubblebutt", 
         description: "Toggles the visibility of the button bubble overlay (Streamer only).", 
         usage: "!toggle-bubblebutt" 
-    } */
+    }
 ];
 
     const userCommandList = document.getElementById("usercommandList");
