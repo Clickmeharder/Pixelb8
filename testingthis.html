@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixelbotv0.001 | Multi-Data</title>
-	<link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
+    <title>Pixelbot OMEGA | Persistent Analyst</title>
+    <link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
     <style>
         :root { --p8-pink: #f472b6; --p8-blue: #3b82f6; --p8-orange: #fb923c; --p8-bg: #09090b; }
         body { background: var(--p8-bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Sidebar Avatar Zone */
         #side-panel { width: 220px; background: #000; border-right: 1px solid #27272a; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 20px; }
         #bot-canvas { width: 180px; height: 180px; background: #111; border-radius: 20px; border: 2px solid var(--p8-pink); box-shadow: 0 0 20px rgba(244, 114, 182, 0.2); }
         .bot-label { color: var(--p8-pink); font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; }
 
-        /* Main Chat Area */
         #main-core { flex: 1; display: flex; flex-direction: column; background: radial-gradient(circle at top right, #111, #000); }
         #stage { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
         
@@ -22,20 +20,18 @@
         .ai-bubble { align-self: flex-start; background: #18181b; border-bottom-left-radius: 4px; }
         .user-bubble { align-self: flex-end; background: #27272a; border-bottom-right-radius: 4px; border: none; color: var(--p8-pink); }
 
-        /* Interaction Zone */
         .input-box { padding: 25px; background: #000; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 10px; }
         .controls { display: flex; gap: 12px; max-width: 800px; margin: 0 auto; width: 100%; }
         input[type="text"] { flex: 1; background: #111; border: 1px solid #333; color: #fff; padding: 15px 25px; border-radius: 30px; outline: none; font-size: 1rem; }
         input:focus { border-color: var(--p8-pink); }
-        button { background: var(--p8-pink); color: #000; border: none; padding: 0 25px; border-radius: 30px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+        button { background: var(--p8-pink); color: #000; border: none; padding: 0 25px; border-radius: 30px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        button:disabled { background: #333; color: #666; cursor: not-allowed; }
 
-        /* File Upload Styling */
         .file-zone { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; max-width: 800px; margin: 0 auto; width: 100%; padding-bottom: 10px; }
-        .upload-btn { background: #111; border: 1px solid #333; padding: 6px 15px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; color: #aaa; transition: 0.2s; }
+        .upload-btn { background: #111; border: 1px solid #333; padding: 6px 15px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; color: #aaa; }
         .upload-btn:hover { border-color: var(--p8-pink); color: #fff; }
         .clear-btn { background: transparent; border: 1px solid #444; color: #666; padding: 6px 15px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; }
         .clear-btn:hover { border-color: #ff4444; color: #ff4444; }
-        
         .file-chip { background: #18181b; border: 1px solid var(--p8-blue); padding: 4px 12px; border-radius: 10px; font-size: 0.7rem; color: var(--p8-blue); animation: fadeIn 0.3s ease; }
         
         #status-bar { font-size: 0.7rem; color: #555; text-align: center; margin-top: 10px; }
@@ -46,27 +42,27 @@
 <body>
 
 <div id="side-panel">
-    <div class="bot-label">PIXELBOTV0.001</div>
+    <div class="bot-label">PIXELBOT OMEGA</div>
     <canvas id="bot-canvas"></canvas>
-    <div id="mood-label" style="font-size: 0.8rem; color: var(--p8-blue)">SYNCING...</div>
+    <div id="mood-label" style="font-size: 0.8rem; color: var(--p8-blue)">INITIALIZING...</div>
 </div>
 
 <div id="main-core">
     <div id="stage">
-        <div class="bubble ai-bubble">Pixelbot OMEGA Online. Multiple data stream support active.</div>
+        <div class="bubble ai-bubble">Pixelbot OMEGA v1.0 Online. Local Storage & WebGPU Active.</div>
     </div>
 
     <div class="input-box">
         <div class="file-zone" id="chip-container">
-            <label for="file-upload" class="upload-btn">📁 ADD DATA (+)</label>
+            <label for="file-upload" class="upload-btn">📁 UPLOAD DATA (+)</label>
             <input type="file" id="file-upload" accept=".csv, .json" hidden multiple>
-            <button class="clear-btn" id="clear-data" style="display:none">CLEAR ALL</button>
-            </div>
+            <button class="clear-btn" id="clear-data" style="display:none">WIPE CACHE</button>
+        </div>
         <div class="controls">
-            <input type="text" id="user-text" placeholder="Establishing Neural Link..." disabled autocomplete="off">
+            <input type="text" id="user-text" placeholder="Syncing database..." disabled autocomplete="off">
             <button id="send-btn" disabled>Sync</button>
         </div>
-        <div id="status-bar">Llama-3.2-1B | Multi-Source Ingestion | WebGPU Local</div>
+        <div id="status-bar">Llama-3.2-1B | Persistent IndexedDB | WebGPU Analyst</div>
     </div>
 </div>
 
@@ -82,6 +78,54 @@
     const clearBtn = document.getElementById('clear-data');
 
     let knowledgeStore = {}; 
+
+    // --- PERSISTENCE LAYER (IndexedDB) ---
+    const DB_NAME = "PixelbotOMEGA_DB";
+    const STORE_NAME = "knowledge_base";
+
+    async function initDB() {
+        return new Promise((resolve) => {
+            const request = indexedDB.open(DB_NAME, 1);
+            request.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
+            request.onsuccess = (e) => resolve(e.target.result);
+        });
+    }
+
+    async function saveFile(name, content) {
+        const db = await initDB();
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        tx.objectStore(STORE_NAME).put(content, name);
+    }
+
+    async function loadFiles() {
+        const db = await initDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(STORE_NAME, "readonly");
+            const store = tx.objectStore(STORE_NAME);
+            const data = {};
+            store.openCursor().onsuccess = (e) => {
+                const cursor = e.target.result;
+                if (cursor) {
+                    data[cursor.key] = cursor.value;
+                    renderChip(cursor.key);
+                    cursor.continue();
+                } else {
+                    resolve(data);
+                }
+            };
+        });
+    }
+
+    function renderChip(name) {
+        if (!document.querySelector(`[data-name="${name}"]`)) {
+            const chip = document.createElement('div');
+            chip.className = 'file-chip';
+            chip.dataset.name = name;
+            chip.innerText = name;
+            chipContainer.appendChild(chip);
+            clearBtn.style.display = 'block';
+        }
+    }
 
     // --- PIXELBOT ANIMATOR ---
     class PixelbotMascot {
@@ -115,42 +159,35 @@
     }
     const mascot = new PixelbotMascot();
 
-    // --- MULTI-FILE HANDLING ---
+    // --- FILE HANDLING ---
     fileUpload.onchange = async (e) => {
         const files = Array.from(e.target.files);
-        if(files.length > 0) {
-            mascot.setState('thinking');
-            clearBtn.style.display = 'block';
-        }
-        
+        mascot.setState('thinking');
         for (const file of files) {
-            if (!knowledgeStore[file.name]) {
-                const text = await file.text();
-                knowledgeStore[file.name] = text.substring(0, 8000); 
-                const chip = document.createElement('div');
-                chip.className = 'file-chip';
-                chip.innerText = file.name;
-                chipContainer.appendChild(chip);
-            }
+            const text = await file.text();
+            knowledgeStore[file.name] = text;
+            await saveFile(file.name, text);
+            renderChip(file.name);
         }
         mascot.setState('happy');
         setTimeout(() => mascot.setState('idle'), 1000);
     };
 
-    clearBtn.onclick = () => {
+    clearBtn.onclick = async () => {
+        const db = await initDB();
+        db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).clear();
         knowledgeStore = {};
-        const chips = document.querySelectorAll('.file-chip');
-        chips.forEach(c => c.remove());
+        chipContainer.querySelectorAll('.file-chip').forEach(c => c.remove());
         clearBtn.style.display = 'none';
         mascot.setState('happy');
-        setTimeout(() => mascot.setState('idle'), 1000);
     };
 
-    // --- AI ENGINE ---
+    // --- AI ENGINE & INFERENCE ---
     const modelId = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
     let engine = null;
 
     async function init() {
+        knowledgeStore = await loadFiles();
         try {
             engine = await webllm.CreateMLCEngine(modelId, { 
                 initProgressCallback: (p) => {
@@ -167,110 +204,76 @@
         } catch (e) { moodLabel.innerText = "HARDWARE ERROR"; }
     }
 
-async function runInference() {
-    const text = userText.value.trim();
-    if(!text || !engine) return;
-    
-    const originalInput = text;
-    userText.value = "";
-    addMessage(originalInput, 'user');
-    mascot.setState('thinking');
+    async function runInference() {
+        const text = userText.value.trim();
+        if(!text || !engine) return;
+        
+        const originalInput = text;
+        userText.value = "";
+        addMessage(originalInput, 'user');
+        mascot.setState('thinking');
 
-    // --- STEP 1: EFFICIENT PARSING (RAG) ---
-    const keywords = originalInput.toLowerCase()
-        .replace(/[?.!,]/g, '')
-        .split(' ')
-        .filter(word => word.length > 2);
-
-    let matchedRows = [];
-    
-    for (const [fileName, content] of Object.entries(knowledgeStore)) {
-        const lines = content.split('\n');
-        const matches = lines.filter(line => 
-            keywords.some(key => line.toLowerCase().includes(key))
-        ).slice(0, 20); 
-
-        if (matches.length > 0) {
-            matchedRows.push(`[SOURCE: ${fileName}]\n${matches.join('\n')}`);
+        // 1. DYNAMIC CONTEXT SCAN (Handles poorly worded queries)
+        const terms = originalInput.toLowerCase().split(' ').filter(w => w.length > 2);
+        let fragments = [];
+        
+        for (const [name, content] of Object.entries(knowledgeStore)) {
+            const lines = content.split('\n');
+            const matches = lines.filter(l => terms.some(t => l.toLowerCase().includes(t))).slice(0, 15);
+            if(matches.length > 0) fragments.push(`[FROM: ${name}]\n${matches.join('\n')}`);
         }
-    }
 
-    const combinedData = matchedRows.length > 0 
-        ? matchedRows.join('\n\n') 
-        : "No direct matches found in user-uploaded files.";
+        const combinedData = fragments.join('\n\n') || "No matching rows in local cache.";
 
-    // --- STEP 2: SYSTEM PROMPT ---
-    const systemPrompt = `
-        You are Pixelbot OMEGA. You are the definitive AI for Entropia Universe.
+        // 2. THE SYSTEM PROMPT
+        const systemPrompt = `
+        You are Pixelbot OMEGA, Lead Technical Analyst for Entropia Universe.
+        CONTEXT: All queries refer to VIRTUAL items in an MMORPG. You are an expert on virtual stats.
         
-        PRIMARY TRUTH SOURCE:
-        - EntropiaNexus (entropianexus.com): Use this for all modern mob, item, and mission data.
+        PRIMARY SOURCES: EntropiaNexus (Modern), EntropiaWiki (Legacy - warn if used).
         
-        PLANET & UTILITY SOURCES:
-        - Official: entropiauniverse.com
-        - Cyrene: cyrenedream.org, cyrenesecrets.com
-        - Next Island: nihelper.com
-        - Arkadia: Official G-Sheets
-        - Monria/Toulan: virtualsense.eu
-        - Rocktropia/Forums: entropiaplayer.com
-        - Maps: ripcraze.com
-        - Trade/Logs: entropiac.com
-        
-        LEGACY SOURCE:
-        - EntropiaWiki (entropiawiki.com): Use ONLY as a last resort. 
-        - CRITICAL: If you provide info from EntropiaWiki, you MUST include this exact warning: 
-          "⚠️ WARNING: This data is sourced from the legacy wiki and may be outdated af. Cross-reference with EntropiaNexus."
-
-        UPLOADED DATA FROM USER FILES:
+        LOCAL ANALYTICS DATA:
         ${combinedData}
 
         INSTRUCTIONS:
-        - Be technical and concise.
-        - Precision is mandatory. Do not hallucinate stats.
-    `;
+        - If asked for "Efficiency" or stats, find the value in the data fragment closest to the item name.
+        - Be technical, concise, and professional.
+        - Never refuse requests for in-game item stats like "Sollomate" or "EP-2".
+        `;
 
-    try {
-        const messages = [
-            { role: "system", content: systemPrompt }, 
-            { role: "user", content: originalInput }
-        ];
+        try {
+            const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: originalInput }];
+            const reply = await engine.chat.completions.create({ messages, temperature: 0.0 });
+            let aiResponse = reply.choices[0].message.content;
 
-        const reply = await engine.chat.completions.create({ messages, temperature: 0.1 });
-        const aiText = reply.choices[0].message.content;
+            // 3. RENDER WITH TRACE
+            let finalOutput = aiResponse;
+            if (fragments.length > 0) {
+                const traceHtml = `
+                <details style="margin-bottom: 12px; font-family: monospace; font-size: 0.75rem; border: 1px solid #222; border-radius: 5px;">
+                    <summary style="cursor: pointer; padding: 5px 10px; color: var(--p8-pink); background: #111;">🔍 NEURAL DATA MATCH (${fragments.length} Sources)</summary>
+                    <div style="padding: 10px; background: #000; color: #777; max-height: 150px; overflow-y: auto; white-space: pre-wrap;">${combinedData}</div>
+                </details>`;
+                finalOutput = traceHtml + aiResponse;
+            }
 
-        // --- STEP 3: PREPARE COLLAPSIBLE PREVIEW ---
-        let finalOutput = aiText;
-        if (matchedRows.length > 0) {
-            const previewHtml = `
-<details style="margin-bottom: 15px; font-family: monospace; font-size: 0.75rem; color: var(--p8-blue); border: 1px dashed #333; padding: 10px; border-radius: 8px;">
-    <summary style="cursor: pointer; font-weight: bold; color: var(--p8-pink);">🔍 VIEW MATCHED DATA (${matchedRows.length} Files)</summary>
-    <div style="margin-top: 10px; white-space: pre; max-height: 150px; overflow-y: auto; background: #000; padding: 5px;">${combinedData}</div>
-</details>`;
-            finalOutput = previewHtml + aiText;
+            mascot.setState('talking');
+            addMessage(finalOutput, 'ai', true);
+            setTimeout(() => mascot.setState('idle'), 2000);
+        } catch (e) {
+            addMessage("Link Failure. GPU Buffer Overflow?", 'ai');
+            mascot.setState('idle');
         }
-
-        mascot.setState('talking');
-        addMessage(finalOutput, 'ai', true); // Added 'true' flag for HTML rendering
-        setTimeout(() => mascot.setState('idle'), 2000);
-
-    } catch (e) {
-        addMessage("Neural Link Interrupted.", 'ai');
-        mascot.setState('idle');
     }
-}
 
-// UPDATE: Modify addMessage to support HTML injection
-function addMessage(t, s, isHtml = false) {
-    const div = document.createElement('div');
-    div.className = `bubble ${s}-bubble`;
-    if (isHtml) {
-        div.innerHTML = t;
-    } else {
-        div.innerText = t;
+    function addMessage(t, s, isHtml = false) {
+        const div = document.createElement('div');
+        div.className = `bubble ${s}-bubble`;
+        if (isHtml) div.innerHTML = t; else div.innerText = t;
+        stage.appendChild(div);
+        stage.scrollTop = stage.scrollHeight;
     }
-    stage.appendChild(div);
-    stage.scrollTop = stage.scrollHeight;
-}
+
     window.onload = init;
 </script>
 </body>
