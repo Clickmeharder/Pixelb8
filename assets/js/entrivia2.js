@@ -2360,7 +2360,8 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayUserPrizes(message);
 		displayConsoleMessage(user, `!${command} ✅`);
 	}
-	// PixelDisc/SpinWheel Commands	
+//-------------------------------------------------------------------------------
+//    --------------------------------------  PixelDisc/SpinWheel Commands	----|
     if (command.toLowerCase() === "pull-lever") {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
@@ -2874,8 +2875,6 @@ The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
 	{ command: "!entrivia-customquestions", description: "Toggles custom entrivia questions.", usage: "!entrivia-customquestions" }
 ];
 
-// Function to update the command list in the UI
-// Function to update the command list in the UI
 function updateCommandlist() {
     const userCommandList = document.getElementById("usercommandList");
     const broadcasterCommandList = document.getElementById("broadcastercommandList");

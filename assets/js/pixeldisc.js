@@ -716,15 +716,96 @@ function pullDiscRotationLever() {
 }
 
 
-	document.getElementById("discRotationButton").addEventListener("click", () => {
-		console.log(`Wheel done gonna spun!`);
-		showElement(wheelcanvaswrapper, "fade");
-		spinWheel();
-	});
+// New PixelDisc Commands Array
+const pixeldisccommands = [
+    { 
+        command: "!pull-lever", 
+        description: "Shows the wheel and triggers a rotation spin (Streamer only).", 
+        usage: "!pull-lever" 
+    },
+    { 
+        command: "!toggle-wheel", 
+        description: "Toggles the visibility of the wheel on screen (Streamer only).", 
+        usage: "!toggle-wheel" 
+    },
+    { 
+        command: "!spin", 
+        description: "Loads a specific saved wheel by name and spins it immediately (Streamer only).", 
+        usage: "!spin [WheelName]" 
+    },
+    { 
+        command: "!chatterwheel add / !chatterwheel join", 
+        description: "Adds the user's name to the current chatter wheel list.", 
+        usage: "!chatterwheel add" 
+    },
+    { 
+        command: "!chatterwheel show", 
+        description: "Displays the chatter wheel with current entries (Streamer only).", 
+        usage: "!chatterwheel show" 
+    },
+    { 
+        command: "!chatterwheel spin", 
+        description: "Displays and spins the chatter wheel (Streamer only).", 
+        usage: "!chatterwheel spin" 
+    },
+    { 
+        command: "!chatterwheel clear", 
+        description: "Clears all entries from the chatter wheel (Streamer only).", 
+        usage: "!chatterwheel clear" 
+    }
+];
 
-	document.getElementById("discRotationLever").addEventListener("click", () => {
-		pullDiscRotationLever();
-	});
+// New PrizeList Commands Array
+const prizelistcommands = [
+    { 
+        command: "!myprizes", 
+        description: "Lists all prizes you have won in the current session.", 
+        usage: "!myprizes" 
+    },
+    { 
+        command: "!donateprizes", 
+        description: "Clears your prize list, effectively donating them back.", 
+        usage: "!donateprizes" 
+    },
+    { 
+        command: "!prizelist", 
+        description: "Displays the prize list for a specific user.", 
+        usage: "!prizelist [username]" 
+    },
+/*     { 
+        command: "!toggle-bubblebutt", 
+        description: "Toggles the visibility of the button bubble overlay (Streamer only).", 
+        usage: "!toggle-bubblebutt" 
+    } */
+];
+
+
+function updateWheelCommandUI() {
+    // Populate PixelDisc Commands
+    const pixelDiscElement = document.getElementById('pixelDiscCommandList');
+    if (pixelDiscElement && typeof pixeldisccommands !== 'undefined') {
+        pixelDiscElement.innerHTML = ''; 
+        createCommandList(pixeldisccommands, 'pixelDiscCommandList');
+    }
+
+    // Populate Prize List Commands
+    const prizeListElement = document.getElementById('prizeListCommandList');
+    if (prizeListElement && typeof prizelistcommands !== 'undefined') {
+        prizeListElement.innerHTML = ''; 
+        createCommandList(prizelistcommands, 'prizeListCommandList');
+    }
+}
+
+
+document.getElementById("discRotationButton").addEventListener("click", () => {
+	console.log(`Wheel done gonna spun!`);
+	showElement(wheelcanvaswrapper, "fade");
+	spinWheel();
+});
+
+document.getElementById("discRotationLever").addEventListener("click", () => {
+	pullDiscRotationLever();
+});
 
 
 // Initial values from the config
@@ -761,6 +842,7 @@ document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
 		loadPixelDiscConfig();
 		updateAllStatusIndicators(userPixeldiscConfig);
 		addTestChatters(3);
+		updateWheelCommandUI();
 	});
 /*  localStorage.removeItem("pixelDiscConfig"); */
 console.log("disc1.00 side A")
