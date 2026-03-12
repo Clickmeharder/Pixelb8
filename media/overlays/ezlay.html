@@ -773,7 +773,7 @@ _____________________________  -->
 	let showDate = false;
 	function loadPrizeData() {
 		const localData = localStorage.getItem('prizeData');
-		
+		const savedStreamer = localStorage.getItem("lastStreamer");
 		// 1. Check if they already have data in their browser
 		if (localData) {
 			console.log("Loaded prize data from localStorage");
@@ -782,7 +782,7 @@ _____________________________  -->
 		} 
 		// 2. If no local data, check if it's YOU (Jaedraze) to pull from the server
 		// We use .toLowerCase() to be safe with capitalization
-		else if (typeof streamerName !== 'undefined' && streamerName.toLowerCase() === "jaedraze") {
+		else if (typeof savedStreamer !== 'undefined' && savedStreamer.toLowerCase() === "jaedraze") {
 			console.log("No local data, but Jaedraze detected. Fetching from server...");
 			fetchAndSavePrizeData(); 
 			// We don't need filterAndRender() here because fetchAndSavePrizeData calls it
