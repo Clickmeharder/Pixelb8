@@ -167,20 +167,44 @@
         } catch (e) { moodLabel.innerText = "HARDWARE ERROR"; }
     }
 
-	async function runInference() {
-        const text = userText.value.trim();
-        if(!text || !engine) return;
-        userText.value = "";
-        addMessage(text, 'user');
-        mascot.setState('thinking');
+async function runInference() {
+    const text = userText.value.trim();
+    if(!text || !engine) return;
+    
+    const originalInput = text;
+    userText.value = "";
+    addMessage(originalInput, 'user');
+    mascot.setState('thinking');
 
-        // This replaces the old "localKnowledgeBase" variable
-        const combinedData = Object.entries(knowledgeStore)
-            .map(([name, content]) => `FILE [${name}]:\n${content}`)
-            .join("\n\n") || "No local files uploaded.";
+    // --- STEP 1: EFFICIENT PARSING ---
+    // Extract keywords (min 3 chars) to find relevant data in CSV/JSON
+    const keywords = originalInput.toLowerCase()
+        .replace(/[?.!,]/g, '')
+        .split(' ')
+        .filter(word => word.length > 2);
 
-        const systemPrompt = `
-        You are Pixelbot OMEGA. You are the definitive AI for Entropia Universe.
+    let matchedRows = [];
+    
+    // Scan the knowledge store for relevant lines
+    for (const [fileName, content] of Object.entries(knowledgeStore)) {
+        const lines = content.split('\n');
+        const matches = lines.filter(line => 
+            keywords.some(key => line.toLowerCase().includes(key))
+        ).slice(0, 20); // Top 20 relevant rows per session
+
+        if (matches.length > 0) {
+            matchedRows.push(`[SOURCE: ${fileName}]\n${matches.join('\n')}`);
+        }
+    }
+
+    // This variable now feeds your original systemPrompt
+    const combinedData = matchedRows.length > 0 
+        ? matchedRows.join('\n\n') 
+        : "No direct matches found in user-uploaded files for this query.";
+
+    // --- STEP 2: YOUR RETAINED PROMPT ---
+    const systemPrompt = `
+        You are Pixelbot. You are by far the coolest AI for Entropia Universe made by the secret universal services, a clandestine society within entropia.
         
         PRIMARY TRUTH SOURCE:
         - EntropiaNexus (entropianexus.com): Use this for all modern mob, item, and mission data.
@@ -207,20 +231,29 @@
         - Be technical and concise.
         - If the user asks for a coordinate, check ripcraze or nexus data first.
         - Precision is mandatory. Do not hallucinate stats.
-        `;
+    `;
 
-        try {
-            const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: text }];
-            const reply = await engine.chat.completions.create({ messages, temperature: 0.1 });
-            mascot.setState('talking');
-            addMessage(reply.choices[0].message.content, 'ai');
-            setTimeout(() => mascot.setState('idle'), 2000);
-        } catch (e) {
-            addMessage("Link Failure. Is WebGPU supported?", 'ai');
-            mascot.setState('idle');
-        }
+    try {
+        const messages = [
+            { role: "system", content: systemPrompt }, 
+            { role: "user", content: originalInput }
+        ];
+
+        const reply = await engine.chat.completions.create({ 
+            messages, 
+            temperature: 0.1 
+        });
+
+        mascot.setState('talking');
+        addMessage(reply.choices[0].message.content, 'ai');
+        setTimeout(() => mascot.setState('idle'), 2000);
+
+    } catch (e) {
+        console.error("Inference Error:", e);
+        addMessage("Neural Link Interrupted. The filtered data block may still be too large for WebGPU. Try refining your keywords.", 'ai');
+        mascot.setState('idle');
     }
-
+}
     function addMessage(t, s) {
         const div = document.createElement('div');
         div.className = `bubble ${s}-bubble`;
