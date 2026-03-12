@@ -176,8 +176,7 @@ async function runInference() {
     addMessage(originalInput, 'user');
     mascot.setState('thinking');
 
-    // --- STEP 1: EFFICIENT PARSING ---
-    // Extract keywords (min 3 chars) to find relevant data in CSV/JSON
+    // --- STEP 1: EFFICIENT PARSING (RAG) ---
     const keywords = originalInput.toLowerCase()
         .replace(/[?.!,]/g, '')
         .split(' ')
@@ -185,26 +184,24 @@ async function runInference() {
 
     let matchedRows = [];
     
-    // Scan the knowledge store for relevant lines
     for (const [fileName, content] of Object.entries(knowledgeStore)) {
         const lines = content.split('\n');
         const matches = lines.filter(line => 
             keywords.some(key => line.toLowerCase().includes(key))
-        ).slice(0, 20); // Top 20 relevant rows per session
+        ).slice(0, 20); 
 
         if (matches.length > 0) {
             matchedRows.push(`[SOURCE: ${fileName}]\n${matches.join('\n')}`);
         }
     }
 
-    // This variable now feeds your original systemPrompt
     const combinedData = matchedRows.length > 0 
         ? matchedRows.join('\n\n') 
-        : "No direct matches found in user-uploaded files for this query.";
+        : "No direct matches found in user-uploaded files.";
 
-    // --- STEP 2: YOUR RETAINED PROMPT ---
+    // --- STEP 2: SYSTEM PROMPT ---
     const systemPrompt = `
-        You are Pixelbot. You are by far the coolest AI for Entropia Universe made by the secret universal services, a clandestine society within entropia.
+        You are Pixelbot OMEGA. You are the definitive AI for Entropia Universe.
         
         PRIMARY TRUTH SOURCE:
         - EntropiaNexus (entropianexus.com): Use this for all modern mob, item, and mission data.
@@ -229,7 +226,6 @@ async function runInference() {
 
         INSTRUCTIONS:
         - Be technical and concise.
-        - If the user asks for a coordinate, check ripcraze or nexus data first.
         - Precision is mandatory. Do not hallucinate stats.
     `;
 
@@ -239,29 +235,42 @@ async function runInference() {
             { role: "user", content: originalInput }
         ];
 
-        const reply = await engine.chat.completions.create({ 
-            messages, 
-            temperature: 0.1 
-        });
+        const reply = await engine.chat.completions.create({ messages, temperature: 0.1 });
+        const aiText = reply.choices[0].message.content;
+
+        // --- STEP 3: PREPARE COLLAPSIBLE PREVIEW ---
+        let finalOutput = aiText;
+        if (matchedRows.length > 0) {
+            const previewHtml = `
+<details style="margin-bottom: 15px; font-family: monospace; font-size: 0.75rem; color: var(--p8-blue); border: 1px dashed #333; padding: 10px; border-radius: 8px;">
+    <summary style="cursor: pointer; font-weight: bold; color: var(--p8-pink);">🔍 VIEW MATCHED DATA (${matchedRows.length} Files)</summary>
+    <div style="margin-top: 10px; white-space: pre; max-height: 150px; overflow-y: auto; background: #000; padding: 5px;">${combinedData}</div>
+</details>`;
+            finalOutput = previewHtml + aiText;
+        }
 
         mascot.setState('talking');
-        addMessage(reply.choices[0].message.content, 'ai');
+        addMessage(finalOutput, 'ai', true); // Added 'true' flag for HTML rendering
         setTimeout(() => mascot.setState('idle'), 2000);
 
     } catch (e) {
-        console.error("Inference Error:", e);
-        addMessage("Neural Link Interrupted. The filtered data block may still be too large for WebGPU. Try refining your keywords.", 'ai');
+        addMessage("Neural Link Interrupted.", 'ai');
         mascot.setState('idle');
     }
 }
-    function addMessage(t, s) {
-        const div = document.createElement('div');
-        div.className = `bubble ${s}-bubble`;
-        div.innerText = t;
-        stage.appendChild(div);
-        stage.scrollTop = stage.scrollHeight;
-    }
 
+// UPDATE: Modify addMessage to support HTML injection
+function addMessage(t, s, isHtml = false) {
+    const div = document.createElement('div');
+    div.className = `bubble ${s}-bubble`;
+    if (isHtml) {
+        div.innerHTML = t;
+    } else {
+        div.innerText = t;
+    }
+    stage.appendChild(div);
+    stage.scrollTop = stage.scrollHeight;
+}
     window.onload = init;
 </script>
 </body>
