@@ -2966,8 +2966,26 @@ function updateCommandlist() {
 
     createCommandList(usercommands, userCommandList);
     createCommandList(streamercommands, broadcasterCommandList);
+	createCommandList(pixeldisccommands, pixelDiscCommandList);
+	createCommandList(prizelistcommands, prizeListCommandList);
+    
 }
 
+function updateWheelCommandUI() {
+    // Populate PixelDisc Commands
+    const pixelDiscElement = document.getElementById(pixelDiscCommandList);
+    if (pixelDiscElement && typeof pixeldisccommands !== 'undefined') {
+        pixelDiscElement.innerHTML = ''; 
+        createCommandList(pixeldisccommands, 'pixelDiscCommandList');
+    }
+
+    // Populate Prize List Commands
+    const prizeListElement = document.getElementById(prizeListCommandList);
+    if (prizeListElement && typeof prizelistcommands !== 'undefined') {
+        prizeListElement.innerHTML = ''; 
+        createCommandList(prizelistcommands, 'prizeListCommandList');
+    }
+}
 
 
 // Function to dynamically add command spans based on the `data-option`

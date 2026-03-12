@@ -780,21 +780,6 @@ const prizelistcommands = [
 ];
 
 
-function updateWheelCommandUI() {
-    // Populate PixelDisc Commands
-    const pixelDiscElement = document.getElementById('pixelDiscCommandList');
-    if (pixelDiscElement && typeof pixeldisccommands !== 'undefined') {
-        pixelDiscElement.innerHTML = ''; 
-        createCommandList(pixeldisccommands, 'pixelDiscCommandList');
-    }
-
-    // Populate Prize List Commands
-    const prizeListElement = document.getElementById('prizeListCommandList');
-    if (prizeListElement && typeof prizelistcommands !== 'undefined') {
-        prizeListElement.innerHTML = ''; 
-        createCommandList(prizelistcommands, 'prizeListCommandList');
-    }
-}
 
 
 document.getElementById("discRotationButton").addEventListener("click", () => {
@@ -842,7 +827,7 @@ document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
 		loadPixelDiscConfig();
 		updateAllStatusIndicators(userPixeldiscConfig);
 		addTestChatters(3);
-		updateWheelCommandUI();
+		
 	});
 /*  localStorage.removeItem("pixelDiscConfig"); */
 console.log("disc1.00 side A")
