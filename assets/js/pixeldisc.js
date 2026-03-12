@@ -830,4 +830,4 @@ document.getElementById("fadeTimeInput").addEventListener("input", (e) => {
 		
 	});
 /*  localStorage.removeItem("pixelDiscConfig"); */
-console.log("disc1.00 side A")
+console.log("disc1.00 side A")	
