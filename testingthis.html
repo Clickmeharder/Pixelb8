@@ -167,14 +167,14 @@
         } catch (e) { moodLabel.innerText = "HARDWARE ERROR"; }
     }
 
-    async function runInference() {
+	async function runInference() {
         const text = userText.value.trim();
         if(!text || !engine) return;
         userText.value = "";
         addMessage(text, 'user');
         mascot.setState('thinking');
 
-        // FIXED: Merge store entries into a single block
+        // This replaces the old "localKnowledgeBase" variable
         const combinedData = Object.entries(knowledgeStore)
             .map(([name, content]) => `FILE [${name}]:\n${content}`)
             .join("\n\n") || "No local files uploaded.";
@@ -200,8 +200,8 @@
         - CRITICAL: If you provide info from EntropiaWiki, you MUST include this exact warning: 
           "⚠️ WARNING: This data is sourced from the legacy wiki and may be outdated af. Cross-reference with EntropiaNexus."
 
-        UPLOADED DATA:
-        ${localKnowledgeBase}
+        UPLOADED DATA FROM USER FILES:
+        ${combinedData}
 
         INSTRUCTIONS:
         - Be technical and concise.
