@@ -2830,6 +2830,17 @@ valid categories: mining, hunting, crafting, history, beauty, economy, social, m
 !entrivia-suggest easy | mining | What is the most common ore found on Planet Calypso? | lyst;lysterium;lysterium ore
 !entrivia-suggest hard | hunting | What creature drops the EWE EP-41 Military? | atrox`
     },
+	{
+		command: "!entrivia-suggest",
+		description: "Allows viewers to suggest a new trivia question for review.",
+		usage: `\n
+Format: !entrivia-suggest easy/hard | category | question | answer | [options]
+Options parameter is optional.
+Valid difficulties: easy, hard
+Valid categories: mining, hunting, crafting, history, beauty, economy, social, misc
+Example Easy: !entrivia-suggest easy | mining | What is the most common ore on Calypso? | lyst
+Example Hard: !entrivia-suggest hard | hunting | What creature drops the EWE EP-41 Military? | atrox`
+	},
 ];
 
 const streamercommands = [
