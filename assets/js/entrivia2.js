@@ -24,7 +24,7 @@ let entriviaQuestions = { round1: [], round2: [] };
 // entrivia OPTIONS
 //game options
 let audioSetting = "on";
-let hideButtonBubble = "on";
+let hideButtonBubble = "off";
 let twitchChatOverlay = "on";
 let consolemessages = false;
 let chatanswers = false;
@@ -35,7 +35,7 @@ let timetoAnswer = 30;
 let timebetweenQuestions = 30;
 let timebetweenRounds = 30;
 let questionsAsked = 0;
-let questionsPerRound = 1;
+let questionsPerRound = 3;
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 //_________________________________
