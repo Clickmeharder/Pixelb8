@@ -9,34 +9,40 @@
         :root { --p8-pink: #f472b6; --p8-blue: #3b82f6; --p8-orange: #fb923c; --p8-bg: #09090b; }
         body { background: var(--p8-bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        #side-panel { width: 220px; background: #000; border-right: 1px solid #27272a; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 20px; }
-        #bot-canvas { width: 180px; height: 180px; background: #111; border-radius: 20px; border: 2px solid var(--p8-pink); box-shadow: 0 0 20px rgba(244, 114, 182, 0.2); }
-        .bot-label { color: var(--p8-pink); font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; }
+        /* Sidebar Layout */
+        #side-panel { width: 240px; background: #000; border-right: 1px solid #27272a; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 15px; overflow-y: auto; }
+        #bot-canvas { width: 160px; height: 160px; background: #111; border-radius: 20px; border: 2px solid var(--p8-pink); box-shadow: 0 0 20px rgba(244, 114, 182, 0.2); flex-shrink: 0; }
+        .bot-label { color: var(--p8-pink); font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; text-align: center; }
 
+        /* File Gallery */
+        #file-gallery { width: 100%; margin-top: 10px; border-top: 1px solid #222; padding-top: 15px; }
+        .gallery-wrap summary { list-style: none; cursor: pointer; font-size: 0.8rem; color: var(--p8-blue); font-weight: bold; text-align: center; margin-bottom: 10px; }
+        .file-list { display: flex; flex-direction: column; gap: 6px; }
+        .file-item { background: #111; border: 1px solid #222; padding: 6px 10px; border-radius: 6px; font-size: 0.7rem; color: #eee; display: flex; justify-content: space-between; align-items: center; }
+        .delete-file { color: #555; cursor: pointer; font-size: 1rem; line-height: 1; }
+        .delete-file:hover { color: #ff4444; }
+
+        /* Main Chat Area */
         #main-core { flex: 1; display: flex; flex-direction: column; background: radial-gradient(circle at top right, #111, #000); }
         #stage { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
         
-        .bubble { max-width: 80%; padding: 15px 20px; border-radius: 20px; line-height: 1.6; font-size: 0.95rem; border: 1px solid #27272a; position: relative; animation: slideIn 0.3s ease-out; white-space: pre-wrap;}
+        .bubble { max-width: 85%; padding: 15px 20px; border-radius: 20px; line-height: 1.6; font-size: 0.95rem; border: 1px solid #27272a; position: relative; animation: slideIn 0.3s ease-out; white-space: pre-wrap; }
         .ai-bubble { align-self: flex-start; background: #18181b; border-bottom-left-radius: 4px; }
         .user-bubble { align-self: flex-end; background: #27272a; border-bottom-right-radius: 4px; border: none; color: var(--p8-pink); }
 
+        /* Interaction Zone */
         .input-box { padding: 25px; background: #000; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 10px; }
-        .controls { display: flex; gap: 12px; max-width: 800px; margin: 0 auto; width: 100%; }
-        input[type="text"] { flex: 1; background: #111; border: 1px solid #333; color: #fff; padding: 15px 25px; border-radius: 30px; outline: none; font-size: 1rem; }
+        .controls { display: flex; gap: 12px; max-width: 900px; margin: 0 auto; width: 100%; }
+        input[type="text"] { flex: 1; background: #111; border: 1px solid #333; color: #fff; padding: 14px 22px; border-radius: 30px; outline: none; font-size: 1rem; }
         input:focus { border-color: var(--p8-pink); }
         button { background: var(--p8-pink); color: #000; border: none; padding: 0 25px; border-radius: 30px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-        button:disabled { background: #333; color: #666; cursor: not-allowed; }
+        button:disabled { background: #222; color: #555; cursor: not-allowed; }
 
-        .file-zone { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; max-width: 800px; margin: 0 auto; width: 100%; padding-bottom: 10px; }
-        .upload-btn { background: #111; border: 1px solid #333; padding: 6px 15px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; color: #aaa; }
+        .upload-btn { background: #111; border: 1px solid #333; padding: 8px; border-radius: 10px; cursor: pointer; font-size: 0.7rem; color: #aaa; text-align: center; display: block; width: 100%; box-sizing: border-box; }
         .upload-btn:hover { border-color: var(--p8-pink); color: #fff; }
-        .clear-btn { background: transparent; border: 1px solid #444; color: #666; padding: 6px 15px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; }
-        .clear-btn:hover { border-color: #ff4444; color: #ff4444; }
-        .file-chip { background: #18181b; border: 1px solid var(--p8-blue); padding: 4px 12px; border-radius: 10px; font-size: 0.7rem; color: var(--p8-blue); animation: fadeIn 0.3s ease; }
         
-        #status-bar { font-size: 0.7rem; color: #555; text-align: center; margin-top: 10px; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #status-bar { font-size: 0.7rem; color: #444; text-align: center; margin-top: 10px; letter-spacing: 1px; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -44,25 +50,29 @@
 <div id="side-panel">
     <div class="bot-label">PIXELBOT OMEGA</div>
     <canvas id="bot-canvas"></canvas>
-    <div id="mood-label" style="font-size: 0.8rem; color: var(--p8-blue)">INITIALIZING...</div>
+    <div id="mood-label" style="font-size: 0.75rem; color: var(--p8-blue); letter-spacing: 1px;">INITIALIZING...</div>
+
+    <div id="file-gallery">
+        <details class="gallery-wrap" open>
+            <summary>DATA STREAMS</summary>
+            <div id="file-list" class="file-list"></div>
+            <label for="file-upload" class="upload-btn" style="margin-top: 10px;">+ INGEST NEW FILE</label>
+            <input type="file" id="file-upload" accept=".csv, .json" hidden multiple>
+        </details>
+    </div>
 </div>
 
 <div id="main-core">
     <div id="stage">
-        <div class="bubble ai-bubble">Pixelbot OMEGA v1.0 Online. Local Storage & WebGPU Active.</div>
+        <div class="bubble ai-bubble">Pixelbot OMEGA v1.1 Online. Neural Link established.</div>
     </div>
 
     <div class="input-box">
-        <div class="file-zone" id="chip-container">
-            <label for="file-upload" class="upload-btn">📁 UPLOAD DATA (+)</label>
-            <input type="file" id="file-upload" accept=".csv, .json" hidden multiple>
-            <button class="clear-btn" id="clear-data" style="display:none">WIPE CACHE</button>
-        </div>
         <div class="controls">
-            <input type="text" id="user-text" placeholder="Syncing database..." disabled autocomplete="off">
+            <input type="text" id="user-text" placeholder="Establishing Neural Link..." disabled autocomplete="off">
             <button id="send-btn" disabled>Sync</button>
         </div>
-        <div id="status-bar">Llama-3.2-1B | Persistent IndexedDB | WebGPU Analyst</div>
+        <div id="status-bar">LLAMA-3.2-1B | PERSISTENT INDEXED-DB | WEBGPU ANALYST</div>
     </div>
 </div>
 
@@ -74,120 +84,106 @@
     const sendBtn = document.getElementById('send-btn');
     const moodLabel = document.getElementById('mood-label');
     const fileUpload = document.getElementById('file-upload');
-    const chipContainer = document.getElementById('chip-container');
-    const clearBtn = document.getElementById('clear-data');
+    const fileListUI = document.getElementById('file-list');
 
     let knowledgeStore = {}; 
+    let engine = null;
+    const modelId = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
 
-    // --- PERSISTENCE LAYER (IndexedDB) ---
-    const DB_NAME = "PixelbotOMEGA_DB";
-    const STORE_NAME = "knowledge_base";
+    // --- DB PERSISTENCE ---
+    const DB_NAME = "PixelbotOMEGA_v1";
+    const STORE_NAME = "knowledge";
 
     async function initDB() {
-        return new Promise((resolve) => {
-            const request = indexedDB.open(DB_NAME, 1);
-            request.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
-            request.onsuccess = (e) => resolve(e.target.result);
+        return new Promise(res => {
+            const req = indexedDB.open(DB_NAME, 1);
+            req.onupgradeneeded = e => e.target.result.createObjectStore(STORE_NAME);
+            req.onsuccess = e => res(e.target.result);
         });
     }
 
     async function saveFile(name, content) {
         const db = await initDB();
-        const tx = db.transaction(STORE_NAME, "readwrite");
-        tx.objectStore(STORE_NAME).put(content, name);
+        db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(content, name);
     }
 
-    async function loadFiles() {
+    async function deleteFile(name) {
         const db = await initDB();
-        return new Promise((resolve) => {
+        db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).delete(name);
+        delete knowledgeStore[name];
+        document.getElementById(`file-${name}`)?.remove();
+    }
+
+    async function loadStoredKnowledge() {
+        const db = await initDB();
+        return new Promise(res => {
             const tx = db.transaction(STORE_NAME, "readonly");
             const store = tx.objectStore(STORE_NAME);
-            const data = {};
-            store.openCursor().onsuccess = (e) => {
+            store.openCursor().onsuccess = e => {
                 const cursor = e.target.result;
-                if (cursor) {
-                    data[cursor.key] = cursor.value;
-                    renderChip(cursor.key);
+                if(cursor) {
+                    knowledgeStore[cursor.key] = cursor.value;
+                    renderFileItem(cursor.key);
                     cursor.continue();
-                } else {
-                    resolve(data);
-                }
+                } else res();
             };
         });
     }
 
-    function renderChip(name) {
-        if (!document.querySelector(`[data-name="${name}"]`)) {
-            const chip = document.createElement('div');
-            chip.className = 'file-chip';
-            chip.dataset.name = name;
-            chip.innerText = name;
-            chipContainer.appendChild(chip);
-            clearBtn.style.display = 'block';
-        }
+    function renderFileItem(name) {
+        if(document.getElementById(`file-${name}`)) return;
+        const div = document.createElement('div');
+        div.className = 'file-item';
+        div.id = `file-${name}`;
+        div.innerHTML = `<span>${name}</span><span class="delete-file" onclick="removeData('${name}')">×</span>`;
+        fileListUI.appendChild(div);
     }
 
-    // --- PIXELBOT ANIMATOR ---
-    class PixelbotMascot {
+    window.removeData = (name) => deleteFile(name);
+
+    // --- MASCOT ANIMATION ---
+    class Mascot {
         constructor() {
             this.canvas = document.getElementById('bot-canvas');
             this.ctx = this.canvas.getContext('2d');
-            this.canvas.width = 200; this.canvas.height = 200;
             this.state = 'idle'; this.frame = 0;
             this.animate();
         }
         setState(s) { this.state = s; moodLabel.innerText = s.toUpperCase(); }
         draw() {
             const ctx = this.ctx; const t = this.frame * 0.1;
-            ctx.clearRect(0, 0, 200, 200);
-            let b = Math.sin(t) * 3;
-            if (this.state === 'thinking') b = Math.sin(t * 2) * 1;
-            ctx.save(); ctx.translate(100, 100 + b);
-            ctx.shadowBlur = 15; ctx.shadowColor = "rgba(244, 114, 182, 0.5)";
+            ctx.clearRect(0,0,200,200);
+            let b = Math.sin(t) * 4;
+            ctx.save(); ctx.translate(80, 80 + b);
             ctx.fillStyle = "#3b82f6"; this.roundRect(ctx, -40, -50, 80, 70, 15);
-            ctx.fillStyle = "#2563eb"; this.roundRect(ctx, -30, 20, 60, 40, 10);
-            ctx.fillStyle = "#fb923c"; ctx.fillRect(-25, -30, 12, 12); ctx.fillRect(13, -30, 12, 12);
-            ctx.strokeStyle = "#fb923c"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-5, -5); ctx.lineTo(5, -5); ctx.stroke();
+            ctx.fillStyle = "#fb923c"; ctx.fillRect(-20, -30, 10, 10); ctx.fillRect(10, -30, 10, 10);
+            ctx.strokeStyle = "#fb923c"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-5, -5); ctx.lineTo(5, -5); ctx.stroke();
             ctx.restore();
         }
         roundRect(ctx, x, y, w, h, r) {
             ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r);
             ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r);
-            ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); ctx.fill();
+            ctx.arcTo(x, y, x+w, y, r); ctx.fill();
         }
         animate() { this.frame++; this.draw(); requestAnimationFrame(() => this.animate()); }
     }
-    const mascot = new PixelbotMascot();
+    const mascot = new Mascot();
 
-    // --- FILE HANDLING ---
+    // --- FILE UPLOAD ---
     fileUpload.onchange = async (e) => {
-        const files = Array.from(e.target.files);
         mascot.setState('thinking');
-        for (const file of files) {
+        for (const file of Array.from(e.target.files)) {
             const text = await file.text();
             knowledgeStore[file.name] = text;
             await saveFile(file.name, text);
-            renderChip(file.name);
+            renderFileItem(file.name);
         }
-        mascot.setState('happy');
-        setTimeout(() => mascot.setState('idle'), 1000);
+        mascot.setState('idle');
     };
 
-    clearBtn.onclick = async () => {
-        const db = await initDB();
-        db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).clear();
-        knowledgeStore = {};
-        chipContainer.querySelectorAll('.file-chip').forEach(c => c.remove());
-        clearBtn.style.display = 'none';
-        mascot.setState('happy');
-    };
-
-    // --- AI ENGINE & INFERENCE ---
-    const modelId = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
-    let engine = null;
-
+    // --- AI CORE ---
     async function init() {
-        knowledgeStore = await loadFiles();
+        await loadStoredKnowledge();
         try {
             engine = await webllm.CreateMLCEngine(modelId, { 
                 initProgressCallback: (p) => {
@@ -195,73 +191,62 @@
                     if (p.progress === 1) {
                         mascot.setState('idle');
                         userText.disabled = false; sendBtn.disabled = false;
-                        userText.placeholder = "Data links open...";
+                        userText.placeholder = "Ready for analysis...";
                     }
                 }
             });
             sendBtn.onclick = runInference;
-            userText.onkeypress = (e) => { if(e.key === 'Enter') runInference(); };
-        } catch (e) { moodLabel.innerText = "HARDWARE ERROR"; }
+            userText.onkeypress = e => e.key === 'Enter' && runInference();
+        } catch (e) { moodLabel.innerText = "GPU ERROR"; }
     }
 
     async function runInference() {
-        const text = userText.value.trim();
-        if(!text || !engine) return;
-        
-        const originalInput = text;
+        const input = userText.value.trim();
+        if(!input || !engine) return;
         userText.value = "";
-        addMessage(originalInput, 'user');
+        addMessage(input, 'user');
         mascot.setState('thinking');
 
-        // 1. DYNAMIC CONTEXT SCAN (Handles poorly worded queries)
-        const terms = originalInput.toLowerCase().split(' ').filter(w => w.length > 2);
-        let fragments = [];
+        // Efficiency: Smart Context Pruning
+        const queryTerms = input.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+        let contextBlocks = [];
         
         for (const [name, content] of Object.entries(knowledgeStore)) {
             const lines = content.split('\n');
-            const matches = lines.filter(l => terms.some(t => l.toLowerCase().includes(t))).slice(0, 15);
-            if(matches.length > 0) fragments.push(`[FROM: ${name}]\n${matches.join('\n')}`);
+            const matches = lines.filter(line => 
+                queryTerms.some(term => line.toLowerCase().includes(term))
+            ).slice(0, 10); // Only grab top 10 relevant lines per file
+            
+            if(matches.length > 0) contextBlocks.push(`[DATA SOURCE: ${name}]\n${matches.join('\n')}`);
         }
 
-        const combinedData = fragments.join('\n\n') || "No matching rows in local cache.";
+        const context = contextBlocks.join('\n\n') || "No local data matches found.";
 
-        // 2. THE SYSTEM PROMPT
-        const systemPrompt = `
-        You are Pixelbot OMEGA, Lead Technical Analyst for Entropia Universe.
-        CONTEXT: All queries refer to VIRTUAL items in an MMORPG. You are an expert on virtual stats.
+        const systemPrompt = `You are Pixelbot OMEGA, Lead Technical Analyst for Entropia Universe.
+        Task: Provide accurate stats for VIRTUAL in-game items based on local data.
+        If data is available, prioritize it. Be technical and concise.
         
-        PRIMARY SOURCES: EntropiaNexus (Modern), EntropiaWiki (Legacy - warn if used).
-        
-        LOCAL ANALYTICS DATA:
-        ${combinedData}
-
-        INSTRUCTIONS:
-        - If asked for "Efficiency" or stats, find the value in the data fragment closest to the item name.
-        - Be technical, concise, and professional.
-        - Never refuse requests for in-game item stats like "Sollomate" or "EP-2".
-        `;
+        LOCAL ANALYTICS:
+        ${context}`;
 
         try {
-            const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: originalInput }];
+            const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: input }];
             const reply = await engine.chat.completions.create({ messages, temperature: 0.0 });
-            let aiResponse = reply.choices[0].message.content;
+            let response = reply.choices[0].message.content;
 
-            // 3. RENDER WITH TRACE
-            let finalOutput = aiResponse;
-            if (fragments.length > 0) {
-                const traceHtml = `
-                <details style="margin-bottom: 12px; font-family: monospace; font-size: 0.75rem; border: 1px solid #222; border-radius: 5px;">
-                    <summary style="cursor: pointer; padding: 5px 10px; color: var(--p8-pink); background: #111;">🔍 NEURAL DATA MATCH (${fragments.length} Sources)</summary>
-                    <div style="padding: 10px; background: #000; color: #777; max-height: 150px; overflow-y: auto; white-space: pre-wrap;">${combinedData}</div>
+            if (contextBlocks.length > 0) {
+                const trace = `<details style="margin-bottom:10px; font-family:monospace; font-size:0.7rem; border:1px solid #222; border-radius:8px; overflow:hidden;">
+                    <summary style="cursor:pointer; background:#111; padding:6px 10px; color:var(--p8-blue);">🔍 NEURAL DATA TRACE</summary>
+                    <div style="padding:10px; background:#000; color:#666; max-height:120px; overflow-y:auto;">${context}</div>
                 </details>`;
-                finalOutput = traceHtml + aiResponse;
+                response = trace + response;
             }
 
             mascot.setState('talking');
-            addMessage(finalOutput, 'ai', true);
+            addMessage(response, 'ai', true);
             setTimeout(() => mascot.setState('idle'), 2000);
         } catch (e) {
-            addMessage("Link Failure. GPU Buffer Overflow?", 'ai');
+            addMessage("Analytical link lost. Is WebGPU busy?", 'ai');
             mascot.setState('idle');
         }
     }
@@ -269,7 +254,7 @@
     function addMessage(t, s, isHtml = false) {
         const div = document.createElement('div');
         div.className = `bubble ${s}-bubble`;
-        if (isHtml) div.innerHTML = t; else div.innerText = t;
+        isHtml ? div.innerHTML = t : div.innerText = t;
         stage.appendChild(div);
         stage.scrollTop = stage.scrollHeight;
     }
