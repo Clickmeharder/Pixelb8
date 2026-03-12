@@ -4,45 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixelbot OMEGA | Persistent Analyst</title>
-    <link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
     <style>
-        :root { --p8-pink: #f472b6; --p8-blue: #3b82f6; --p8-orange: #fb923c; --p8-bg: #09090b; }
-        body { background: var(--p8-bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root { --p8-pink: #f472b6; --p8-blue: #3b82f6; --p8-bg: #09090b; }
         
-        /* Sidebar Layout */
-        #side-panel { width: 240px; background: #000; border-right: 1px solid #27272a; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 15px; overflow-y: auto; }
-        #bot-canvas { width: 160px; height: 160px; background: #111; border-radius: 20px; border: 2px solid var(--p8-pink); box-shadow: 0 0 20px rgba(244, 114, 182, 0.2); flex-shrink: 0; }
-        .bot-label { color: var(--p8-pink); font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; text-align: center; }
+        * { box-sizing: border-box; }
+        body { 
+            background: var(--p8-bg); color: #fff; font-family: 'Inter', sans-serif; 
+            margin: 0; display: flex; height: 100vh; overflow: hidden;
+            -webkit-user-select: none; user-select: none;
+        }
 
-        /* File Gallery */
-        #file-gallery { width: 100%; margin-top: 10px; border-top: 1px solid #222; padding-top: 15px; }
-        .gallery-wrap summary { list-style: none; cursor: pointer; font-size: 0.8rem; color: var(--p8-blue); font-weight: bold; text-align: center; margin-bottom: 10px; }
-        .file-list { display: flex; flex-direction: column; gap: 6px; }
-        .file-item { background: #111; border: 1px solid #222; padding: 6px 10px; border-radius: 6px; font-size: 0.7rem; color: #eee; display: flex; justify-content: space-between; align-items: center; }
-        .delete-file { color: #555; cursor: pointer; font-size: 1rem; line-height: 1; }
-        .delete-file:hover { color: #ff4444; }
+        /* Side Panel */
+        #side-panel { 
+            width: 240px; background: #000; border-right: 1px solid #27272a; 
+            display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 15px; 
+            z-index: 10;
+        }
+        #bot-canvas { width: 160px; height: 160px; background: #111; border-radius: 20px; border: 2px solid var(--p8-pink); }
+        .bot-label { color: var(--p8-pink); font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; }
 
-        /* Main Chat Area */
-        #main-core { flex: 1; display: flex; flex-direction: column; background: radial-gradient(circle at top right, #111, #000); }
-        #stage { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
+        /* Main Core */
+        #main-core { 
+            flex: 1; display: flex; flex-direction: column; 
+            background: radial-gradient(circle at top right, #111, #000);
+            position: relative;
+        }
         
-        .bubble { max-width: 85%; padding: 15px 20px; border-radius: 20px; line-height: 1.6; font-size: 0.95rem; border: 1px solid #27272a; position: relative; animation: slideIn 0.3s ease-out; white-space: pre-wrap; }
-        .ai-bubble { align-self: flex-start; background: #18181b; border-bottom-left-radius: 4px; }
-        .user-bubble { align-self: flex-end; background: #27272a; border-bottom-right-radius: 4px; border: none; color: var(--p8-pink); }
+        #stage { 
+            flex: 1; overflow-y: auto; padding: 30px; 
+            display: flex; flex-direction: column; gap: 20px;
+            padding-bottom: 120px; /* Space for fixed input */
+        }
 
-        /* Interaction Zone */
-        .input-box { padding: 25px; background: #000; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 10px; }
-        .controls { display: flex; gap: 12px; max-width: 900px; margin: 0 auto; width: 100%; }
-        input[type="text"] { flex: 1; background: #111; border: 1px solid #333; color: #fff; padding: 14px 22px; border-radius: 30px; outline: none; font-size: 1rem; }
-        input:focus { border-color: var(--p8-pink); }
-        button { background: var(--p8-pink); color: #000; border: none; padding: 0 25px; border-radius: 30px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-        button:disabled { background: #222; color: #555; cursor: not-allowed; }
+        /* Input Zone - FIXED TO BOTTOM TO PREVENT GHOSTING */
+        .input-container {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(10px);
+            border-top: 1px solid #27272a; padding: 20px;
+            z-index: 999; /* Highest Priority */
+        }
 
-        .upload-btn { background: #111; border: 1px solid #333; padding: 8px; border-radius: 10px; cursor: pointer; font-size: 0.7rem; color: #aaa; text-align: center; display: block; width: 100%; box-sizing: border-box; }
-        .upload-btn:hover { border-color: var(--p8-pink); color: #fff; }
-        
-        #status-bar { font-size: 0.7rem; color: #444; text-align: center; margin-top: 10px; letter-spacing: 1px; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .controls { 
+            display: flex; gap: 12px; max-width: 900px; margin: 0 auto; width: 100%; 
+            pointer-events: auto; /* Ensure clicks pass through to children */
+        }
+
+        input[type="text"] { 
+            flex: 1; background: #111; border: 1px solid #333; color: #fff; 
+            padding: 14px 22px; border-radius: 30px; outline: none; font-size: 1rem;
+            -webkit-user-select: text; user-select: text; /* ALLOW TYPING */
+        }
+        input:focus { border-color: var(--p8-pink); box-shadow: 0 0 10px rgba(244,114,182,0.2); }
+
+        button { 
+            background: var(--p8-pink); color: #000; border: none; 
+            padding: 0 25px; border-radius: 30px; font-weight: 800; cursor: pointer; 
+        }
+        button:disabled { background: #222; color: #555; cursor: default; }
+
+        /* Bubbles */
+        .bubble { max-width: 85%; padding: 15px 20px; border-radius: 20px; line-height: 1.6; animation: slideIn 0.3s ease-out; }
+        .ai-bubble { align-self: flex-start; background: #18181b; border: 1px solid #27272a; }
+        .user-bubble { align-self: flex-end; background: var(--p8-pink); color: #000; font-weight: 500; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -50,29 +75,23 @@
 <div id="side-panel">
     <div class="bot-label">PIXELBOT OMEGA</div>
     <canvas id="bot-canvas"></canvas>
-    <div id="mood-label" style="font-size: 0.75rem; color: var(--p8-blue); letter-spacing: 1px;">INITIALIZING...</div>
-
-    <div id="file-gallery">
-        <details class="gallery-wrap" open>
-            <summary>DATA STREAMS</summary>
-            <div id="file-list" class="file-list"></div>
-            <label for="file-upload" class="upload-btn" style="margin-top: 10px;">+ INGEST NEW FILE</label>
-            <input type="file" id="file-upload" accept=".csv, .json" hidden multiple>
-        </details>
+    <div id="mood-label" style="font-size: 0.75rem; color: var(--p8-blue)">INITIALIZING...</div>
+    <div style="margin-top: auto; width: 100%;">
+        <label for="file-upload" style="display:block; text-align:center; padding:10px; border:1px dashed #444; border-radius:10px; font-size:0.7rem; cursor:pointer;">📁 INGEST DATA</label>
+        <input type="file" id="file-upload" hidden multiple>
     </div>
 </div>
 
 <div id="main-core">
     <div id="stage">
-        <div class="bubble ai-bubble">Pixelbot OMEGA v1.1 Online. Neural Link established.</div>
+        <div class="bubble ai-bubble">Hardware check complete. Awaiting Neural Link...</div>
     </div>
 
-    <div class="input-box">
+    <div class="input-container">
         <div class="controls">
-            <input type="text" id="user-text" placeholder="Establishing Neural Link..." disabled autocomplete="off">
-            <button id="send-btn" disabled>Sync</button>
+            <input type="text" id="user-text" placeholder="Waiting for engine..." disabled>
+            <button id="send-btn" disabled>SEND</button>
         </div>
-        <div id="status-bar">LLAMA-3.2-1B | PERSISTENT INDEXED-DB | WEBGPU ANALYST</div>
     </div>
 </div>
 
@@ -83,181 +102,75 @@
     const userText = document.getElementById('user-text');
     const sendBtn = document.getElementById('send-btn');
     const moodLabel = document.getElementById('mood-label');
-    const fileUpload = document.getElementById('file-upload');
-    const fileListUI = document.getElementById('file-list');
 
-    let knowledgeStore = {}; 
-    let engine = null;
-    const modelId = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
-
-    // --- DB PERSISTENCE ---
-    const DB_NAME = "PixelbotOMEGA_v1";
-    const STORE_NAME = "knowledge";
-
-    async function initDB() {
-        return new Promise(res => {
-            const req = indexedDB.open(DB_NAME, 1);
-            req.onupgradeneeded = e => e.target.result.createObjectStore(STORE_NAME);
-            req.onsuccess = e => res(e.target.result);
-        });
-    }
-
-    async function saveFile(name, content) {
-        const db = await initDB();
-        db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(content, name);
-    }
-
-    async function deleteFile(name) {
-        const db = await initDB();
-        db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).delete(name);
-        delete knowledgeStore[name];
-        document.getElementById(`file-${name}`)?.remove();
-    }
-
-    async function loadStoredKnowledge() {
-        const db = await initDB();
-        return new Promise(res => {
-            const tx = db.transaction(STORE_NAME, "readonly");
-            const store = tx.objectStore(STORE_NAME);
-            store.openCursor().onsuccess = e => {
-                const cursor = e.target.result;
-                if(cursor) {
-                    knowledgeStore[cursor.key] = cursor.value;
-                    renderFileItem(cursor.key);
-                    cursor.continue();
-                } else res();
-            };
-        });
-    }
-
-    function renderFileItem(name) {
-        if(document.getElementById(`file-${name}`)) return;
-        const div = document.createElement('div');
-        div.className = 'file-item';
-        div.id = `file-${name}`;
-        div.innerHTML = `<span>${name}</span><span class="delete-file" onclick="removeData('${name}')">×</span>`;
-        fileListUI.appendChild(div);
-    }
-
-    window.removeData = (name) => deleteFile(name);
-
-    // --- MASCOT ANIMATION ---
-    class Mascot {
-        constructor() {
-            this.canvas = document.getElementById('bot-canvas');
-            this.ctx = this.canvas.getContext('2d');
-            this.state = 'idle'; this.frame = 0;
-            this.animate();
-        }
-        setState(s) { this.state = s; moodLabel.innerText = s.toUpperCase(); }
-        draw() {
-            const ctx = this.ctx; const t = this.frame * 0.1;
-            ctx.clearRect(0,0,200,200);
-            let b = Math.sin(t) * 4;
-            ctx.save(); ctx.translate(80, 80 + b);
-            ctx.fillStyle = "#3b82f6"; this.roundRect(ctx, -40, -50, 80, 70, 15);
-            ctx.fillStyle = "#fb923c"; ctx.fillRect(-20, -30, 10, 10); ctx.fillRect(10, -30, 10, 10);
-            ctx.strokeStyle = "#fb923c"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-5, -5); ctx.lineTo(5, -5); ctx.stroke();
-            ctx.restore();
-        }
-        roundRect(ctx, x, y, w, h, r) {
-            ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r);
-            ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r);
-            ctx.arcTo(x, y, x+w, y, r); ctx.fill();
-        }
-        animate() { this.frame++; this.draw(); requestAnimationFrame(() => this.animate()); }
-    }
-    const mascot = new Mascot();
-
-    // --- FILE UPLOAD ---
-    fileUpload.onchange = async (e) => {
-        mascot.setState('thinking');
-        for (const file of Array.from(e.target.files)) {
-            const text = await file.text();
-            knowledgeStore[file.name] = text;
-            await saveFile(file.name, text);
-            renderFileItem(file.name);
-        }
-        mascot.setState('idle');
+    // 1. Force focus and prevent "Tab-outs"
+    const enableInput = () => {
+        userText.disabled = false;
+        sendBtn.disabled = false;
+        userText.placeholder = "Querying local knowledge...";
+        userText.focus();
     };
 
-    // --- AI CORE ---
+    // 2. Engine Init
     async function init() {
-        await loadStoredKnowledge();
         try {
-            engine = await webllm.CreateMLCEngine(modelId, { 
+            const engine = await webllm.CreateMLCEngine("Llama-3.2-1B-Instruct-q4f32_1-MLC", { 
                 initProgressCallback: (p) => {
                     moodLabel.innerText = `SYNCING ${Math.round(p.progress * 100)}%`;
                     if (p.progress === 1) {
-                        mascot.setState('idle');
-                        userText.disabled = false; sendBtn.disabled = false;
-                        userText.placeholder = "Ready for analysis...";
+                        moodLabel.innerText = "IDLE";
+                        enableInput();
                     }
                 }
             });
-            sendBtn.onclick = runInference;
-            userText.onkeypress = e => e.key === 'Enter' && runInference();
-        } catch (e) { moodLabel.innerText = "GPU ERROR"; }
-    }
 
-    async function runInference() {
-        const input = userText.value.trim();
-        if(!input || !engine) return;
-        userText.value = "";
-        addMessage(input, 'user');
-        mascot.setState('thinking');
+            const sendMessage = async () => {
+                const val = userText.value.trim();
+                if(!val) return;
+                
+                addMsg(val, 'user');
+                userText.value = "";
+                moodLabel.innerText = "THINKING";
 
-        // Efficiency: Smart Context Pruning
-        const queryTerms = input.toLowerCase().split(/\s+/).filter(t => t.length > 2);
-        let contextBlocks = [];
-        
-        for (const [name, content] of Object.entries(knowledgeStore)) {
-            const lines = content.split('\n');
-            const matches = lines.filter(line => 
-                queryTerms.some(term => line.toLowerCase().includes(term))
-            ).slice(0, 10); // Only grab top 10 relevant lines per file
-            
-            if(matches.length > 0) contextBlocks.push(`[DATA SOURCE: ${name}]\n${matches.join('\n')}`);
-        }
+                const reply = await engine.chat.completions.create({
+                    messages: [{ role: "user", content: val }]
+                });
 
-        const context = contextBlocks.join('\n\n') || "No local data matches found.";
+                addMsg(reply.choices[0].message.content, 'ai');
+                moodLabel.innerText = "IDLE";
+                userText.focus();
+            };
 
-        const systemPrompt = `You are Pixelbot OMEGA, Lead Technical Analyst for Entropia Universe.
-        Task: Provide accurate stats for VIRTUAL in-game items based on local data.
-        If data is available, prioritize it. Be technical and concise.
-        
-        LOCAL ANALYTICS:
-        ${context}`;
+            sendBtn.onclick = sendMessage;
+            userText.onkeydown = (e) => { 
+                if(e.key === 'Enter') sendMessage();
+                e.stopPropagation(); // Stop key events from bubbling up to parents
+            };
 
-        try {
-            const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: input }];
-            const reply = await engine.chat.completions.create({ messages, temperature: 0.0 });
-            let response = reply.choices[0].message.content;
-
-            if (contextBlocks.length > 0) {
-                const trace = `<details style="margin-bottom:10px; font-family:monospace; font-size:0.7rem; border:1px solid #222; border-radius:8px; overflow:hidden;">
-                    <summary style="cursor:pointer; background:#111; padding:6px 10px; color:var(--p8-blue);">🔍 NEURAL DATA TRACE</summary>
-                    <div style="padding:10px; background:#000; color:#666; max-height:120px; overflow-y:auto;">${context}</div>
-                </details>`;
-                response = trace + response;
-            }
-
-            mascot.setState('talking');
-            addMessage(response, 'ai', true);
-            setTimeout(() => mascot.setState('idle'), 2000);
         } catch (e) {
-            addMessage("Analytical link lost. Is WebGPU busy?", 'ai');
-            mascot.setState('idle');
+            moodLabel.innerText = "LINK ERROR";
+            console.error(e);
         }
     }
 
-    function addMessage(t, s, isHtml = false) {
-        const div = document.createElement('div');
-        div.className = `bubble ${s}-bubble`;
-        isHtml ? div.innerHTML = t : div.innerText = t;
-        stage.appendChild(div);
+    function addMsg(t, s) {
+        const d = document.createElement('div');
+        d.className = `bubble ${s}-bubble`;
+        d.innerText = t;
+        stage.appendChild(d);
         stage.scrollTop = stage.scrollHeight;
     }
+
+    // Canvas Mascot (Minimal)
+    const ctx = document.getElementById('bot-canvas').getContext('2d');
+    function anim(t) {
+        ctx.clearRect(0,0,200,200);
+        ctx.fillStyle = "#3b82f6";
+        ctx.roundRect(60, 60 + Math.sin(t/500)*5, 80, 70, 15);
+        ctx.fill();
+        requestAnimationFrame(anim);
+    }
+    anim(0);
 
     window.onload = init;
 </script>
