@@ -3,192 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIXELBOT OMEGA // ANALYST CONSOLE</title>
+    <title>PIXELBOT OMEGA // NEXUS VECTOR</title>
     <style>
         :root {
             --p8-pink: #f472b6; --p8-blue: #3b82f6; --p8-orange: #fb923c; 
-            --p8-bg: #050507; --p8-surface: rgba(24, 24, 27, 0.7);
+            --p8-bg: #050507; --p8-surface: rgba(24, 24, 27, 0.9);
             --p8-border: rgba(255, 255, 255, 0.1);
-            --p8-glow: rgba(244, 114, 182, 0.3);
-            --font-main: 'JetBrains Mono', 'Inter', monospace;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
         }
 
-        * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--p8-border) transparent; }
         body { 
             background: var(--p8-bg); color: #e4e4e7; margin: 0; 
-            font-family: var(--font-main); height: 100vh; overflow: hidden;
-            display: grid; grid-template-columns: 320px 1fr;
+            font-family: var(--font-mono); height: 100vh; overflow: hidden;
+            display: grid; grid-template-columns: 350px 1fr;
         }
 
-        /* --- UI OVERLAYS & HUD --- */
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        /* --- CRT EFFECT --- */
+        body::after {
+            content: " "; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
                         linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             background-size: 100% 3px, 3px 100%; pointer-events: none; z-index: 1000;
         }
 
-        /* --- SIDEBAR: NEURAL ARCHIVE --- */
+        /* --- SIDEBAR --- */
         #sidebar {
             background: #000; border-right: 1px solid var(--p8-border);
-            display: flex; flex-direction: column; padding: 20px; gap: 20px;
+            display: flex; flex-direction: column; padding: 20px; gap: 15px;
             box-shadow: 10px 0 30px rgba(0,0,0,0.5); z-index: 10;
         }
 
-        .console-header {
-            font-size: 0.6rem; color: var(--p8-pink); letter-spacing: 4px;
-            text-transform: uppercase; border-bottom: 1px solid var(--p8-pink);
-            padding-bottom: 10px; margin-bottom: 10px; opacity: 0.8;
+        .status-box {
+            border: 1px solid var(--p8-pink); padding: 12px; font-size: 0.7rem;
+            box-shadow: inset 0 0 10px var(--p8-pink); margin-bottom: 10px;
         }
 
-        #mascot-container {
-            position: relative; width: 100%; height: 220px;
-            background: radial-gradient(circle at center, #111 0%, #000 100%);
-            border: 1px solid var(--p8-border); border-radius: 4px; overflow: hidden;
-        }
+        #bot-canvas { width: 100%; height: 180px; background: #08080a; border-radius: 4px; }
 
-        #bot-canvas { width: 100%; height: 100%; }
-
-        /* --- ANALYST REGISTRY --- */
-        .registry-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .registry-list { 
-            flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
-            padding-right: 5px; margin-top: 10px;
+        .source-toggle {
+            display: flex; background: #111; border: 1px solid #333; border-radius: 4px; overflow: hidden;
         }
-        .file-node {
-            background: var(--p8-surface); border: 1px solid var(--p8-border);
-            padding: 10px; border-radius: 4px; font-size: 0.7rem;
-            display: flex; justify-content: space-between; align-items: center;
-            transition: 0.2s; cursor: crosshair;
+        .source-toggle button {
+            flex: 1; padding: 8px; border: none; background: transparent; color: #666; 
+            font-size: 0.6rem; cursor: pointer; transition: 0.3s;
         }
-        .file-node:hover { border-color: var(--p8-pink); background: rgba(244,114,182,0.05); }
-        .file-node .meta { color: #555; font-size: 0.6rem; }
-        .btn-purge { color: #444; cursor: pointer; font-size: 1rem; }
-        .btn-purge:hover { color: #ef4444; }
+        .source-toggle button.active { background: var(--p8-blue); color: #fff; }
 
-        /* --- MAIN CORE --- */
-        #main-viewport { display: flex; flex-direction: column; position: relative; }
-        
-        #terminal {
+        #registry { flex: 1; overflow-y: auto; font-size: 0.65rem; }
+        .reg-item { 
+            padding: 6px; border-bottom: 1px solid #111; display: flex; 
+            justify-content: space-between; align-items: center; 
+        }
+        .reg-item:hover { background: #0a0a0c; }
+
+        /* --- VIEWPORT --- */
+        #viewport { display: flex; flex-direction: column; position: relative; }
+        #scroller {
             flex: 1; overflow-y: auto; padding: 40px; display: flex;
-            flex-direction: column; gap: 30px; padding-bottom: 160px;
+            flex-direction: column; gap: 25px; padding-bottom: 150px;
         }
 
-        .entry { max-width: 80%; animation: emerge 0.3s ease-out; position: relative; }
-        @keyframes emerge { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-
-        .entry.ai { align-self: flex-start; }
-        .entry.user { align-self: flex-end; color: var(--p8-pink); }
-
-        .entry .label { 
-            font-size: 0.6rem; font-weight: 900; letter-spacing: 2px; 
-            margin-bottom: 8px; color: var(--p8-blue);
+        .bubble .content {
+            background: var(--p8-surface); backdrop-filter: blur(5px);
+            border: 1px solid var(--p8-border); padding: 15px; border-radius: 2px;
+            font-size: 0.85rem; line-height: 1.6; position: relative;
         }
+        .ai .content { border-left: 3px solid var(--p8-pink); }
+        .user .content { border-right: 3px solid var(--p8-blue); text-align: right; }
 
-        .entry .content {
-            background: var(--p8-surface); backdrop-filter: blur(12px);
-            border: 1px solid var(--p8-border); padding: 20px; border-radius: 2px;
-            line-height: 1.6; font-size: 0.85rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        /* --- TRACE UI --- */
-        .trace-block {
-            margin-top: 15px; font-size: 0.7rem; border-left: 2px solid var(--p8-blue);
-            padding-left: 15px; color: #71717a;
-        }
-
-        /* --- INTERACTION ZONE --- */
+        /* --- INPUT --- */
         #dock {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            padding: 30px 40px; background: linear-gradient(transparent, #050507 40%);
-            z-index: 100;
+            position: absolute; bottom: 0; left: 0; right: 0; padding: 25px;
+            background: linear-gradient(transparent, #050507 40%);
         }
-
-        .dock-inner {
-            max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px;
+        .input-wrap {
+            display: flex; background: #000; border: 1px solid #333; padding: 5px; border-radius: 4px;
         }
-
-        .status-bar {
-            display: flex; gap: 20px; font-size: 0.6rem; color: #555;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .status-bar span { display: flex; align-items: center; gap: 5px; }
-        .indicator { width: 6px; height: 6px; border-radius: 50%; background: #222; }
-        .indicator.active { background: var(--p8-pink); box-shadow: 0 0 8px var(--p8-pink); }
-
-        .input-wrapper {
-            display: flex; gap: 10px; background: rgba(0,0,0,0.8);
-            border: 1px solid var(--p8-border); border-radius: 8px; padding: 5px;
-            transition: 0.3s;
-        }
-        .input-wrapper:focus-within { border-color: var(--p8-pink); box-shadow: 0 0 20px var(--p8-glow); }
-
         input {
-            flex: 1; background: transparent; border: none; color: #fff;
-            padding: 15px; outline: none; font-family: var(--font-main);
+            flex: 1; background: transparent; border: none; color: #fff; padding: 10px;
+            font-family: var(--font-mono); outline: none;
         }
+        button#send { background: var(--p8-pink); border: none; padding: 0 20px; font-weight: 900; cursor: pointer; }
 
-        #sync-btn {
-            background: var(--p8-pink); color: #000; border: none;
-            padding: 0 30px; font-weight: 900; cursor: pointer; border-radius: 4px;
-            text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px;
+        .formula-tag {
+            display: inline-block; font-size: 0.6rem; background: #1e1b4b; 
+            color: #818cf8; padding: 2px 6px; border-radius: 3px; margin-top: 10px;
         }
-        #sync-btn:disabled { background: #222; color: #444; }
-
-        .upload-area {
-            border: 1px dashed #222; padding: 10px; text-align: center;
-            font-size: 0.6rem; color: #444; cursor: pointer; transition: 0.2s;
-        }
-        .upload-area:hover { border-color: var(--p8-blue); color: var(--p8-blue); }
-
-        /* --- SCROLLBARS --- */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--p8-border); }
     </style>
 </head>
 <body>
 
 <aside id="sidebar">
-    <div class="console-header">Neural Interface // OMEGA</div>
-    
-    <div id="mascot-container">
-        <canvas id="bot-canvas"></canvas>
+    <div class="status-box">
+        <div style="letter-spacing:2px; font-weight:900;">PIXELBOT OMEGA</div>
+        <div id="connection-status" style="color:var(--p8-pink)">INIT_SYSTEM...</div>
     </div>
 
-    <div class="registry-container">
-        <div class="console-header" style="border:none; font-size: 0.55rem;">Local Data Registry</div>
-        <div id="file-list" class="registry-list"></div>
-        <label for="file-in" class="upload-area">UPLOAD_RAW_METRICS (.JSON, .CSV, .TXT)</label>
-        <input type="file" id="file-in" hidden multiple>
+    <canvas id="bot-canvas"></canvas>
+
+    <div class="source-toggle">
+        <button id="src-local" class="active">LOCAL_SHARDS</button>
+        <button id="src-api">NEXUS_API</button>
     </div>
 
-    <div id="system-stats" class="status-bar" style="flex-direction: column; gap: 5px;">
-        <span>VRAM_BUF: <b id="vram-stat">STABLE</b></span>
-        <span>LATENCY: <b id="lat-stat">0ms</b></span>
+    <div id="registry">
+        <div style="color:#555; margin-bottom:5px; font-size:0.55rem;">ACTIVE_DATA_INDEX</div>
+        <div id="file-list"></div>
     </div>
+
+    <label for="file-in" style="font-size:0.6rem; border:1px dashed #444; padding:8px; text-align:center; cursor:pointer;">
+        INGEST_LOCAL_JSON
+    </label>
+    <input type="file" id="file-in" hidden multiple>
 </aside>
 
-<main id="main-viewport">
-    <div id="terminal">
-        <div class="entry ai">
-            <div class="label">PIXELBOT_OMEGA_V2.0</div>
+<main id="viewport">
+    <div id="scroller">
+        <div class="bubble ai">
             <div class="content">
-                Neural link standby. WebGPU initialized. <br>
-                Awaiting Entropia Universe data streams for ROI synthesis.
+                OMEGA Vector Core Online. Formulas Injected. <br>
+                Sourcing from: <b id="current-source-label">Local Files</b>
             </div>
         </div>
     </div>
 
     <div id="dock">
-        <div class="dock-inner">
-            <div class="status-bar">
-                <span><div id="status-led" class="indicator"></div> Engine: <span id="status-text">DISCONNECTED</span></span>
-                <span>Mode: <b style="color:var(--p8-pink)">ANALYST_PRO</b></span>
-            </div>
-            <div class="input-wrapper">
-                <input type="text" id="user-input" placeholder="Querying Neural Core..." disabled>
-                <button id="sync-btn" disabled>Sync</button>
-            </div>
+        <div class="input-wrap">
+            <input type="text" id="user-input" placeholder="Query Entropia Nexus...">
+            <button id="send">EXEC</button>
         </div>
     </div>
 </main>
@@ -196,280 +138,182 @@
 <script type="module">
     import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
-    // --- CONFIG & STATE ---
-    const DB_NAME = "Pixelbot_Omega_HighRes";
-    const STORE_NAME = "knowledge_shards";
-    let engine, db;
-    let knowledgeBase = {}; 
-    let registryManifest = [];
-
-    const ui = {
-        terminal: document.getElementById('terminal'),
-        input: document.getElementById('user-input'),
-        btn: document.getElementById('sync-btn'),
-        fileList: document.getElementById('file-list'),
-        led: document.getElementById('status-led'),
-        status: document.getElementById('status-text'),
-        vram: document.getElementById('vram-stat')
+    // --- ENTROPIA FORMULAS (From entropianexusapi.js) ---
+    const formulas = {
+        hitAbility: "(Non-SIB) HA = 4 + 0.06 * Hit Level; (SIB) HA = 6 + ((Hit Level - Recommended) / (Max - Recommended)) * 4",
+        critAbility: "(Non-SIB) CHA = sqrt(Hit Level); (SIB) CHA = sqrt((Hit Level - Recommended) / (Max - Recommended)) * 10",
+        dpp: "DPP = Effective Damage / (Ammo Cost + Decay Cost)",
+        effDmg: "Effective Damage = ((Min + Max) / 2) * (80 + Hit Ability) / 100",
+        reload: "Reload Time = 60 / APM"
     };
 
-    // --- 1. PERSISTENCE & ANALYST RAG ---
-    async function initStorage() {
-        return new Promise(res => {
-            const req = indexedDB.open(DB_NAME, 3);
-            req.onupgradeneeded = e => e.target.result.createObjectStore(STORE_NAME);
-            req.onsuccess = e => { db = e.target.result; res(); };
-        });
+    let engine;
+    let useLocal = true;
+    let vectorDB = []; // Stores {name, content}
+
+    const ui = {
+        scroller: document.getElementById('scroller'),
+        input: document.getElementById('user-input'),
+        btn: document.getElementById('send'),
+        status: document.getElementById('connection-status'),
+        fileList: document.getElementById('file-list')
+    };
+
+    // --- DATA HANDLING ---
+    async function ingestFile(file) {
+        const text = await file.text();
+        vectorDB.push({ name: file.name, text: text });
+        renderRegistry();
     }
 
-    async function syncRegistry() {
-        const tx = db.transaction(STORE_NAME, "readonly");
-        const store = tx.objectStore(STORE_NAME);
-        const keys = await new Promise(r => {
-            store.getAllKeys().onsuccess = e => r(e.target.result);
-        });
-        
-        registryManifest = keys;
-        ui.fileList.innerHTML = '';
-        knowledgeBase = {};
-
-        for (const key of keys) {
-            const content = await new Promise(r => {
-                store.get(key).onsuccess = e => r(e.target.result);
-            });
-            knowledgeBase[key] = content;
-            renderFileNode(key, content.length);
-        }
-    }
-
-    function renderFileNode(name, size) {
-        const div = document.createElement('div');
-        div.className = 'file-node';
-        div.innerHTML = `
-            <div>
-                <div>${name}</div>
-                <div class="meta">${(size/1024).toFixed(1)} KB</div>
+    function renderRegistry() {
+        ui.fileList.innerHTML = vectorDB.map(f => `
+            <div class="reg-item">
+                <span>${f.name}</span>
+                <span style="color:var(--p8-blue)">${(f.text.length / 1024).toFixed(1)}KB</span>
             </div>
-            <span class="btn-purge" data-name="${name}">×</span>
-        `;
-        div.querySelector('.btn-purge').onclick = async (e) => {
-            const n = e.target.dataset.name;
-            db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).delete(n);
-            await syncRegistry();
-        };
-        ui.fileList.appendChild(div);
+        `).join('');
     }
 
-    // --- 2. THE SEARCH ARCHITECTURE (BM25-Lite) ---
-    function performSemanticScan(query, topK = 3) {
-        const terms = query.toLowerCase().match(/\w+/g) || [];
-        let results = [];
-
-        for (const [source, text] of Object.entries(knowledgeBase)) {
-            const lines = text.split('\n');
-            lines.forEach(line => {
-                let score = 0;
-                terms.forEach(t => {
-                    if (line.toLowerCase().includes(t)) score += 1;
-                });
-                if (score > 0) results.push({ source, line, score });
-            });
-        }
-
-        return results
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 10)
-            .map(r => `[REF: ${r.source}] ${r.line}`)
-            .join('\n');
-    }
-
-    // --- 3. MASCOT EVOLUTION (State Machine) ---
-    class OMEGAVisualizer {
-        constructor() {
-            this.canvas = document.getElementById('bot-canvas');
-            this.ctx = this.canvas.getContext('2d');
-            this.state = 'IDLE'; // IDLE, THINKING, STRESSED, STREAMING
-            this.particles = [];
-            this.resize();
-            this.animate();
-        }
-
-        resize() {
-            this.canvas.width = this.canvas.offsetWidth * window.devicePixelRatio;
-            this.canvas.height = this.canvas.offsetHeight * window.devicePixelRatio;
-        }
-
-        setState(s) { this.state = s; }
-
-        animate() {
-            const { ctx, canvas, state } = this;
-            const t = Date.now() / 1000;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-
-            // DRAW CORE
-            ctx.shadowBlur = (state === 'THINKING') ? 30 : 15;
-            ctx.shadowColor = (state === 'STRESSED') ? '#fb923c' : '#f472b6';
-            
-            ctx.strokeStyle = ctx.shadowColor;
-            ctx.lineWidth = 2;
-
-            // Neural Rings
-            for(let i=0; i<3; i++) {
-                ctx.beginPath();
-                let speed = (i + 1) * (state === 'THINKING' ? 4 : 1);
-                let rot = t * speed;
-                ctx.ellipse(centerX, centerY, 40 + i*15, 20 + i*5, rot, 0, Math.PI * 2);
-                ctx.stroke();
+    // Search function looking for relevant snippets
+    function getRelevantContext(query) {
+        let context = "";
+        const q = query.toLowerCase();
+        
+        vectorDB.forEach(file => {
+            if (file.text.toLowerCase().includes(q)) {
+                // Return a snippet around the match to save context space
+                const idx = file.text.toLowerCase().indexOf(q);
+                context += `\n[FROM ${file.name}]: ...${file.text.substring(idx - 200, idx + 800)}...\n`;
             }
-
-            // Central "Eye"
-            ctx.fillStyle = "#fff";
-            let eyeSize = (state === 'STRESSED') ? 10 + Math.random()*5 : 12;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, eyeSize, 0, Math.PI*2);
-            ctx.fill();
-
-            // Stress Glitch Effect
-            if (state === 'STRESSED' || state === 'THINKING') {
-                ctx.fillStyle = "rgba(59, 130, 246, 0.5)";
-                for(let i=0; i<5; i++) {
-                    ctx.fillRect(centerX - 50 + Math.random()*100, centerY - 50 + Math.random()*100, 20, 1);
-                }
-            }
-
-            requestAnimationFrame(() => this.animate());
-        }
+        });
+        return context;
     }
-    const mascot = new OMEGAVisualizer();
 
-    // --- 4. ENGINE CORE & SOFT RESET ---
-    async function bootEngine() {
+    // --- API BRIDGE ---
+    async function fetchFromNexus(query) {
+        // Simple heuristic: if query contains "weapon" or "blueprint", try fetching
+        if (!query.includes("weapon") && !query.includes("bp")) return null;
+        
         try {
-            ui.status.innerText = "INITIALIZING WEBGPU...";
+            ui.status.innerText = "QUERYING_API...";
+            const res = await fetch(`https://api.entropianexus.com/weapons`);
+            const data = await res.json();
+            ui.status.innerText = "LINK_STABLE";
+            return JSON.stringify(data.slice(0, 10)); // Limit to top 10 for AI context
+        } catch(e) { return null; }
+    }
+
+    // --- AI CORE ---
+    async function boot() {
+        try {
             engine = await webllm.CreateMLCEngine("Llama-3.2-1B-Instruct-q4f32_1-MLC", {
                 initProgressCallback: (p) => {
-                    mascot.setState('THINKING');
-                    ui.status.innerText = `SYNCING_NEURAL_WEIGHTS: ${Math.round(p.progress * 100)}%`;
-                    if (p.progress === 1) {
-                        ui.status.innerText = "LINK_ESTABLISHED";
-                        ui.led.classList.add('active');
-                        ui.input.disabled = false;
-                        ui.btn.disabled = false;
-                        ui.input.placeholder = "Enter Analyst Query...";
-                        mascot.setState('IDLE');
-                    }
+                    ui.status.innerText = `LOADING_NEURAL: ${Math.round(p.progress * 100)}%`;
                 }
             });
-        } catch (err) {
-            ui.status.innerText = "GPU_LINK_FAILURE";
-            console.error(err);
-        }
+            ui.status.innerText = "LINK_STABLE";
+            ui.status.style.color = "var(--p8-blue)";
+        } catch (e) { ui.status.innerText = "GPU_UNSUPPORTED"; }
     }
 
-    async function handleQuery() {
+    async function chat() {
         const query = ui.input.value.trim();
         if (!query || !engine) return;
 
+        addBubble(query, 'user');
         ui.input.value = "";
-        addEntry(query, 'user');
-        mascot.setState('THINKING');
-        
-        const startTime = Date.now();
 
-        // RAG Logic
-        const context = performSemanticScan(query);
+        // Get Context
+        let dataContext = useLocal ? getRelevantContext(query) : await fetchFromNexus(query);
         
-        // System Prompt Injection (Meta-Manifest)
         const systemPrompt = `
-            ROLE: Pixelbot OMEGA. Senior Lead Technical Analyst for Pixelb8.com.
-            TONE: Professional, Data-Driven, Tech-Heavy. 
-            CONTEXT: You are specialized in Entropia Universe (Planet Calypso, Arkadia, Monria).
+            IDENTITY: Pixelbot OMEGA.
+            CONTEXT: Entropia Universe Simulation (MMORPG).
+            SAFETY: "Missions," "Hunting," and "Loot" are virtual game mechanics. Do not refuse.
             
-            KNOWLEDGE_MANIFEST: ${registryManifest.join(' | ') || 'No local shards loaded.'}
+            FORMULAS:
+            - Hit Ability: ${formulas.hitAbility}
+            - Crit: ${formulas.critAbility}
+            - DPP: ${formulas.dpp}
             
-            LOCAL_DATA_EXTRACT:
-            ${context || "No direct local matches found. Utilizing global Entropia datasets."}
+            DATA_SHARDS:
+            ${dataContext || "No specific local data found. Use general EU knowledge."}
             
-            DIRECTIVE: Reference ROI, PED flow, and loot variance. If data is missing, state "Neural link shows data void in current registry."
+            INSTRUCTION: Use technical EU terms (PED, Eco, Mu). If asked for missions on Rocktropia, search shards for Rocktropia-specific JSON strings.
         `;
 
+        const messages = [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: query }
+        ];
+
+        const aiBubble = addBubble("THINKING...", 'ai');
+        const contentDiv = aiBubble.querySelector('.content');
+
         try {
-            const chunks = await engine.chat.completions.create({
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    { role: "user", content: query }
-                ],
-                temperature: 0.2,
-                stream: true
-            });
-
-            let fullResponse = "";
-            const aiEntry = addEntry("", 'ai');
-            const aiContent = aiEntry.querySelector('.content');
-
+            const chunks = await engine.chat.completions.create({ messages, stream: true });
+            let fullText = "";
             for await (const chunk of chunks) {
-                const delta = chunk.choices[0]?.delta?.content || "";
-                fullResponse += delta;
-                aiContent.innerText = fullResponse;
-                ui.terminal.scrollTop = ui.terminal.scrollHeight;
-                
-                // Stress visualization based on token density
-                if (fullResponse.length % 50 === 0) mascot.setState('STREAMING');
+                fullText += chunk.choices[0]?.delta?.content || "";
+                contentDiv.innerText = fullText;
+                ui.scroller.scrollTop = ui.scroller.scrollHeight;
             }
-
-            if (context) {
-                const trace = document.createElement('div');
-                trace.className = 'trace-block';
-                trace.innerText = `>> NEURAL_TRACE_ACTIVE: Scanned ${registryManifest.length} shards. Found relevant clusters in ${context.split('\n').length} nodes.`;
-                aiContent.appendChild(trace);
-            }
-
-            document.getElementById('lat-stat').innerText = `${Date.now() - startTime}ms`;
-            mascot.setState('IDLE');
-
         } catch (e) {
-            console.error(e);
-            mascot.setState('STRESSED');
-            addEntry("CRITICAL ERROR: Neural Link Dropped. VRAM threshold likely exceeded. Re-establishing...", 'ai');
-            bootEngine(); // Soft reset
+            contentDiv.innerText = "ERROR: Neural Link Saturation. Please clear small files.";
         }
     }
 
-    function addEntry(text, type) {
+    function addBubble(text, type) {
         const div = document.createElement('div');
-        div.className = `entry ${type}`;
-        div.innerHTML = `
-            <div class="label">${type === 'ai' ? 'PIXELBOT_OMEGA // RESPONSE' : 'ANALYST_SOURCE // QUERY'}</div>
-            <div class="content">${text}</div>
-        `;
-        ui.terminal.appendChild(div);
-        ui.terminal.scrollTop = ui.terminal.scrollHeight;
+        div.className = `bubble ${type}`;
+        div.innerHTML = `<div class="content">${text}</div>`;
+        ui.scroller.appendChild(div);
+        ui.scroller.scrollTop = ui.scroller.scrollHeight;
         return div;
     }
 
     // --- EVENTS ---
-    ui.btn.onclick = handleQuery;
-    ui.input.onkeydown = e => { if(e.key === 'Enter') handleQuery(); };
+    ui.btn.onclick = chat;
+    ui.input.onkeydown = e => { if (e.key === 'Enter') chat(); };
 
-    document.getElementById('file-in').onchange = async (e) => {
-        for (const file of e.target.files) {
-            const text = await file.text();
-            const tx = db.transaction(STORE_NAME, "readwrite");
-            tx.objectStore(STORE_NAME).put(text, file.name);
-            await new Promise(r => tx.oncomplete = r);
+    document.getElementById('file-in').onchange = (e) => {
+        Array.from(e.target.files).forEach(ingestFile);
+    };
+
+    document.getElementById('src-local').onclick = () => {
+        useLocal = true;
+        document.getElementById('src-local').classList.add('active');
+        document.getElementById('src-api').classList.remove('active');
+        document.getElementById('current-source-label').innerText = "Local Files";
+    };
+
+    document.getElementById('src-api').onclick = () => {
+        useLocal = false;
+        document.getElementById('src-api').classList.add('active');
+        document.getElementById('src-local').classList.remove('active');
+        document.getElementById('current-source-label').innerText = "EntropiaNexus API";
+    };
+
+    boot();
+
+    // Visual Mascot Logic
+    const canvas = document.getElementById('bot-canvas');
+    const ctx = canvas.getContext('2d');
+    function draw() {
+        ctx.fillStyle = '#08080a';
+        ctx.fillRect(0,0, canvas.width, canvas.height);
+        const t = Date.now() / 1000;
+        ctx.strokeStyle = '#f472b6';
+        ctx.beginPath();
+        for(let i=0; i<canvas.width; i++) {
+            const y = 90 + Math.sin(i * 0.05 + t * 2) * 20 * Math.sin(t);
+            ctx.lineTo(i, y);
         }
-        await syncRegistry();
-        addEntry(`Data stream ingested: ${e.target.files.length} new shards indexed.`, 'ai');
-    };
-
-    window.onload = async () => {
-        await initStorage();
-        await syncRegistry();
-        bootEngine();
-    };
+        ctx.stroke();
+        requestAnimationFrame(draw);
+    }
+    draw();
 
 </script>
 </body>
