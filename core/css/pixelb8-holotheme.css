@@ -1828,7 +1828,7 @@ ul#broadcastercommandlist {
 	margin: 4px 0;
 }
 
-#usercommandList li strong, #broadcastercommandList li strong {
+#usercommandList li strong, #broadcastercommandList li strong, #pixelDiscCommandList li strong, #prizeListCommandList li strong {
   color: #e09d09f7;
   font-weight: bold;
 }
