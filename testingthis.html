@@ -8,10 +8,12 @@
         :root { --p8-pink: #f472b6; --p8-blue: #3b82f6; --p8-orange: #fb923c; --p8-bg: #09090b; }
         body { background: var(--p8-bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
+        /* Sidebar Avatar Zone */
         #side-panel { width: 220px; background: #000; border-right: 1px solid #27272a; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 20px; }
         #bot-canvas { width: 180px; height: 180px; background: #111; border-radius: 20px; border: 2px solid var(--p8-pink); box-shadow: 0 0 20px rgba(244, 114, 182, 0.2); }
         .bot-label { color: var(--p8-pink); font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; }
 
+        /* Main Chat Area */
         #main-core { flex: 1; display: flex; flex-direction: column; background: radial-gradient(circle at top right, #111, #000); }
         #stage { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
         
@@ -19,18 +21,25 @@
         .ai-bubble { align-self: flex-start; background: #18181b; border-bottom-left-radius: 4px; }
         .user-bubble { align-self: flex-end; background: #27272a; border-bottom-right-radius: 4px; border: none; color: var(--p8-pink); }
 
+        /* Interaction Zone */
         .input-box { padding: 25px; background: #000; border-top: 1px solid #27272a; display: flex; flex-direction: column; gap: 10px; }
         .controls { display: flex; gap: 12px; max-width: 800px; margin: 0 auto; width: 100%; }
         input[type="text"] { flex: 1; background: #111; border: 1px solid #333; color: #fff; padding: 15px 25px; border-radius: 30px; outline: none; font-size: 1rem; }
         input:focus { border-color: var(--p8-pink); }
         button { background: var(--p8-pink); color: #000; border: none; padding: 0 25px; border-radius: 30px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
 
+        /* File Upload Styling */
         .file-zone { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; max-width: 800px; margin: 0 auto; width: 100%; padding-bottom: 10px; }
-        .upload-btn { background: #111; border: 1px solid #333; padding: 6px 15px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; color: #aaa; }
-        .file-chip { background: #18181b; border: 1px solid var(--p8-blue); padding: 4px 10px; border-radius: 10px; font-size: 0.7rem; color: var(--p8-blue); }
+        .upload-btn { background: #111; border: 1px solid #333; padding: 6px 15px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; color: #aaa; transition: 0.2s; }
+        .upload-btn:hover { border-color: var(--p8-pink); color: #fff; }
+        .clear-btn { background: transparent; border: 1px solid #444; color: #666; padding: 6px 15px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; }
+        .clear-btn:hover { border-color: #ff4444; color: #ff4444; }
+        
+        .file-chip { background: #18181b; border: 1px solid var(--p8-blue); padding: 4px 12px; border-radius: 10px; font-size: 0.7rem; color: var(--p8-blue); animation: fadeIn 0.3s ease; }
         
         #status-bar { font-size: 0.7rem; color: #555; text-align: center; margin-top: 10px; }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -50,12 +59,13 @@
         <div class="file-zone" id="chip-container">
             <label for="file-upload" class="upload-btn">📁 ADD DATA (+)</label>
             <input type="file" id="file-upload" accept=".csv, .json" hidden multiple>
+            <button class="clear-btn" id="clear-data" style="display:none">CLEAR ALL</button>
             </div>
         <div class="controls">
             <input type="text" id="user-text" placeholder="Establishing Neural Link..." disabled autocomplete="off">
             <button id="send-btn" disabled>Sync</button>
         </div>
-        <div id="status-bar">Llama-3.2-1B | Multi-Source Ingestion | Local GPU</div>
+        <div id="status-bar">Llama-3.2-1B | Multi-Source Ingestion | WebGPU Local</div>
     </div>
 </div>
 
@@ -68,8 +78,9 @@
     const moodLabel = document.getElementById('mood-label');
     const fileUpload = document.getElementById('file-upload');
     const chipContainer = document.getElementById('chip-container');
+    const clearBtn = document.getElementById('clear-data');
 
-    let knowledgeStore = {}; // Store contents by filename
+    let knowledgeStore = {}; 
 
     // --- PIXELBOT ANIMATOR ---
     class PixelbotMascot {
@@ -106,18 +117,30 @@
     // --- MULTI-FILE HANDLING ---
     fileUpload.onchange = async (e) => {
         const files = Array.from(e.target.files);
-        mascot.setState('thinking');
+        if(files.length > 0) {
+            mascot.setState('thinking');
+            clearBtn.style.display = 'block';
+        }
         
         for (const file of files) {
             if (!knowledgeStore[file.name]) {
                 const text = await file.text();
-                knowledgeStore[file.name] = text.substring(0, 8000); // chunking to stay in context
+                knowledgeStore[file.name] = text.substring(0, 8000); 
                 const chip = document.createElement('div');
                 chip.className = 'file-chip';
                 chip.innerText = file.name;
                 chipContainer.appendChild(chip);
             }
         }
+        mascot.setState('happy');
+        setTimeout(() => mascot.setState('idle'), 1000);
+    };
+
+    clearBtn.onclick = () => {
+        knowledgeStore = {};
+        const chips = document.querySelectorAll('.file-chip');
+        chips.forEach(c => c.remove());
+        clearBtn.style.display = 'none';
         mascot.setState('happy');
         setTimeout(() => mascot.setState('idle'), 1000);
     };
@@ -143,14 +166,18 @@
         } catch (e) { moodLabel.innerText = "HARDWARE ERROR"; }
     }
 
-	async function runInference() {
+    async function runInference() {
         const text = userText.value.trim();
         if(!text || !engine) return;
-        
+        userText.value = "";
         addMessage(text, 'user');
         mascot.setState('thinking');
 
-        // Updated System Prompt with EntropiaNexus and Wiki Warning Protocol
+        // FIXED: Merge store entries into a single block
+        const combinedData = Object.entries(knowledgeStore)
+            .map(([name, content]) => `FILE [${name}]:\n${content}`)
+            .join("\n\n") || "No local files uploaded.";
+
         const systemPrompt = `
         You are Pixelbot OMEGA. You are the definitive AI for Entropia Universe.
         
@@ -182,24 +209,17 @@
         `;
 
         try {
-            const messages = [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: text }
-            ];
-
-            const reply = await engine.chat.completions.create({ 
-                messages, 
-                temperature: 0.1 
-            });
-
+            const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: text }];
+            const reply = await engine.chat.completions.create({ messages, temperature: 0.1 });
             mascot.setState('talking');
             addMessage(reply.choices[0].message.content, 'ai');
             setTimeout(() => mascot.setState('idle'), 2000);
         } catch (e) {
-            addMessage("Neural Link Interrupted. Check WebGPU status.", 'ai');
+            addMessage("Link Failure. Is WebGPU supported?", 'ai');
             mascot.setState('idle');
         }
     }
+
     function addMessage(t, s) {
         const div = document.createElement('div');
         div.className = `bubble ${s}-bubble`;
