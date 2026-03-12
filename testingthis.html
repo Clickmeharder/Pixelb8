@@ -18,7 +18,7 @@
         #stage { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
         
         .bubble { max-width: 80%; padding: 15px 20px; border-radius: 20px; line-height: 1.6; font-size: 0.95rem; border: 1px solid #27272a; position: relative; animation: slideIn 0.3s ease-out; }
-        .ai-bubble { align-self: flex-start; background: #18181b; border-bottom-left-radius: 4px; }
+        .ai-bubble { align-self: flex-start; background: #18181b; border-bottom-left-radius: 4px; white-space: pre-wrap; }
         .user-bubble { align-self: flex-end; background: #27272a; border-bottom-right-radius: 4px; border: none; color: var(--p8-pink); }
 
         /* Interaction Zone */
@@ -28,6 +28,12 @@
         input:focus { border-color: var(--p8-pink); box-shadow: 0 0 10px rgba(244, 114, 182, 0.1); }
         button { background: var(--p8-pink); color: #000; border: none; padding: 0 25px; border-radius: 30px; font-weight: 800; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
         button:hover { transform: scale(1.05); }
+
+        /* File Upload Styling */
+        .file-zone { display: flex; align-items: center; gap: 12px; max-width: 800px; margin: 0 auto; width: 100%; padding-bottom: 5px; }
+        .upload-btn { background: #111; border: 1px solid #333; padding: 6px 15px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; color: #aaa; transition: 0.2s; }
+        .upload-btn:hover { border-color: var(--p8-pink); color: #fff; }
+        #file-status { font-size: 0.7rem; color: #555; }
 
         #status-bar { font-size: 0.7rem; color: #555; text-align: center; margin-top: 10px; }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
@@ -44,16 +50,21 @@
 <div id="main-core">
     <div id="stage">
         <div class="bubble ai-bubble">
-            Greetings, Developer. I am the OMEGA core. Waiting for hardware sync...
+            Greetings, Developer. I am the OMEGA core. Grounding modules active. Waiting for hardware sync...
         </div>
     </div>
 
     <div class="input-box">
-        <div class="controls">
-            <input type="text" id="user-text" placeholder="Establishing Neural Link..." disabled>
-            <button id="send-btn" disabled>Send</button>
+        <div class="file-zone">
+            <label for="file-upload" class="upload-btn">📁 INGEST CSV/JSON</label>
+            <input type="file" id="file-upload" accept=".csv, .json" hidden>
+            <span id="file-status">Local Knowledge: Official Sources Only</span>
         </div>
-        <div id="status-bar">Llama-3.2-1B | WebGPU Local Execution | No Logs</div>
+        <div class="controls">
+            <input type="text" id="user-text" placeholder="Establishing Neural Link..." disabled autocomplete="off">
+            <button id="send-btn" disabled>Sync</button>
+        </div>
+        <div id="status-bar">Llama-3.2-1B | Secure Local Environment | Entropia Knowledge v2.6</div>
     </div>
 </div>
 
@@ -64,88 +75,71 @@
     const userText = document.getElementById('user-text');
     const sendBtn = document.getElementById('send-btn');
     const moodLabel = document.getElementById('mood-label');
+    const fileStatus = document.getElementById('file-status');
+    const fileUpload = document.getElementById('file-upload');
 
-    // --- ENHANCED PIXELBOT ANIMATOR ---
+    let localKnowledgeBase = "";
+
+    // --- PIXELBOT ANIMATOR ---
     class PixelbotMascot {
         constructor() {
             this.canvas = document.getElementById('bot-canvas');
             this.ctx = this.canvas.getContext('2d');
             this.canvas.width = 200;
             this.canvas.height = 200;
-            this.state = 'idle'; // idle, thinking, happy, talking
+            this.state = 'idle'; 
             this.frame = 0;
             this.animate();
         }
-
         setState(newState) { 
             this.state = newState; 
             moodLabel.innerText = newState.toUpperCase();
         }
-
         draw() {
             const ctx = this.ctx;
             const t = this.frame * 0.1;
             ctx.clearRect(0, 0, 200, 200);
-            
             let bounce = Math.sin(t) * 3;
             let eyeScale = 1;
             let mouthWidth = 10;
-
             if (this.state === 'thinking') {
                 bounce = Math.sin(t * 2) * 1;
                 eyeScale = Math.sin(t * 3) * 0.2 + 0.8;
             } else if (this.state === 'talking') {
                 mouthWidth = 15 + Math.sin(t * 5) * 5;
             }
-
             ctx.save();
             ctx.translate(100, 100 + bounce);
-
-            // Shadow/Glow
             ctx.shadowBlur = 15;
             ctx.shadowColor = "rgba(244, 114, 182, 0.5)";
-
-            // Head (Rounded Box)
             ctx.fillStyle = "#3b82f6";
             this.roundRect(ctx, -40, -50, 80, 70, 15);
-            
-            // Body
             ctx.fillStyle = "#2563eb";
             this.roundRect(ctx, -30, 20, 60, 40, 10);
-
-            // Eyes (Orange Panels)
             ctx.fillStyle = "#fb923c";
             ctx.fillRect(-25, -30, 12, 12 * eyeScale);
             ctx.fillRect(13, -30, 12, 12 * eyeScale);
-
-            // Mouth (Digital Line)
             ctx.strokeStyle = "#fb923c";
             ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.moveTo(-mouthWidth/2, -5); ctx.lineTo(mouthWidth/2, -5);
             ctx.stroke();
-
-            // Antennas with Glowing Tips
             ctx.strokeStyle = "#fff";
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(-20, -50); ctx.lineTo(-35, -80);
             ctx.moveTo(20, -50); ctx.lineTo(35, -80);
             ctx.stroke();
-
             ctx.fillStyle = this.state === 'thinking' ? '#f472b6' : '#fb923c';
             ctx.beginPath(); ctx.arc(-35, -80, 5, 0, Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(35, -80, 5, 0, Math.PI*2); ctx.fill();
-
             ctx.restore();
         }
-
         roundRect(ctx, x, y, w, h, r) {
             ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r);
             ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r);
             ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); ctx.fill();
         }
-
         animate() {
             this.frame++;
             this.draw();
@@ -155,7 +149,20 @@
 
     const mascot = new PixelbotMascot();
 
-    // --- FAST AI CORE (Llama-3.2-1B) ---
+    // --- KNOWLEDGE INGESTION ---
+    fileUpload.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const text = await file.text();
+            localKnowledgeBase = text.substring(0, 15000); // Guardrails for context window
+            fileStatus.innerText = `Data Synced: ${file.name}`;
+            fileStatus.style.color = "var(--p8-pink)";
+            mascot.setState('happy');
+            setTimeout(() => mascot.setState('idle'), 1500);
+        }
+    };
+
+    // --- AI ENGINE ---
     const modelId = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
     let engine = null;
 
@@ -184,21 +191,46 @@
         addMessage(text, 'user');
         mascot.setState('thinking');
 
+        // System Instruction with Grounding Sources
+        const systemPrompt = `
+        You are Pixelbot OMEGA, a specialized assistant for Entropia Universe.
+        GROUNDING TRUTH SOURCES:
+        - Official: entropiauniverse.com
+        - Cyrene: cyrenedream.org, cyrenesecrets.com
+        - Next Island: nihelper.com
+        - Arkadia: Google Sheets (v1_8Jxspjuh70...)
+        - Monria/Toulan: virtualsense.eu
+        - Rocktropia/Howlingmine/Forums: entropiaplayer.com
+        - Maps: ripcraze.com
+        - Logs/Trade data: entropiac.com
+        - Community: calypsoforum.com
+
+        UPLOADED USER DATA:
+        ${localKnowledgeBase}
+
+        INSTRUCTIONS:
+        1. Use provided data and websites as primary truth. 
+        2. If data is missing, say "Check [relevant website] for the most current logs."
+        3. For coding, use Vanilla JS and CSS variables (Pixelb8 style).
+        4. Be precise. Temperature is 0.1. Do not hallucinate coordinates.
+        `;
+
         try {
             const messages = [
-                { role: "system", content: "You are Pixelbot. Expert in Entropia Universe and coding. Be concise and technical." },
+                { role: "system", content: systemPrompt },
                 { role: "user", content: text }
             ];
 
-            const reply = await engine.chat.completions.create({ messages, temperature: 0.4 });
+            const reply = await engine.chat.completions.create({ 
+                messages, 
+                temperature: 0.1 
+            });
+
             mascot.setState('talking');
-            
-            const fullText = reply.choices[0].message.content;
-            addMessage(fullText, 'ai');
-            
+            addMessage(reply.choices[0].message.content, 'ai');
             setTimeout(() => mascot.setState('idle'), 2000);
         } catch (e) {
-            addMessage("Neural Link Interrupted.", 'ai');
+            addMessage("Neural Link Interrupted. Check WebGPU status.", 'ai');
             mascot.setState('idle');
         }
     }
