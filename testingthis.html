@@ -3,333 +3,474 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixelbot OMEGA | Persistent Lead Tech</title>
-    <link rel="icon" type="image/png" href="assets/images/logo/pixelbotfavicon.png">
+    <title>PIXELBOT OMEGA // ANALYST CONSOLE</title>
     <style>
-        :root { 
+        :root {
             --p8-pink: #f472b6; --p8-blue: #3b82f6; --p8-orange: #fb923c; 
-            --p8-bg: #09090b; --p8-surface: #18181b; --p8-border: #27272a;
+            --p8-bg: #050507; --p8-surface: rgba(24, 24, 27, 0.7);
+            --p8-border: rgba(255, 255, 255, 0.1);
+            --p8-glow: rgba(244, 114, 182, 0.3);
+            --font-main: 'JetBrains Mono', 'Inter', monospace;
         }
+
+        * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--p8-border) transparent; }
+        body { 
+            background: var(--p8-bg); color: #e4e4e7; margin: 0; 
+            font-family: var(--font-main); height: 100vh; overflow: hidden;
+            display: grid; grid-template-columns: 320px 1fr;
+        }
+
+        /* --- UI OVERLAYS & HUD --- */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 3px 100%; pointer-events: none; z-index: 1000;
+        }
+
+        /* --- SIDEBAR: NEURAL ARCHIVE --- */
+        #sidebar {
+            background: #000; border-right: 1px solid var(--p8-border);
+            display: flex; flex-direction: column; padding: 20px; gap: 20px;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5); z-index: 10;
+        }
+
+        .console-header {
+            font-size: 0.6rem; color: var(--p8-pink); letter-spacing: 4px;
+            text-transform: uppercase; border-bottom: 1px solid var(--p8-pink);
+            padding-bottom: 10px; margin-bottom: 10px; opacity: 0.8;
+        }
+
+        #mascot-container {
+            position: relative; width: 100%; height: 220px;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+            border: 1px solid var(--p8-border); border-radius: 4px; overflow: hidden;
+        }
+
+        #bot-canvas { width: 100%; height: 100%; }
+
+        /* --- ANALYST REGISTRY --- */
+        .registry-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .registry-list { 
+            flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+            padding-right: 5px; margin-top: 10px;
+        }
+        .file-node {
+            background: var(--p8-surface); border: 1px solid var(--p8-border);
+            padding: 10px; border-radius: 4px; font-size: 0.7rem;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: 0.2s; cursor: crosshair;
+        }
+        .file-node:hover { border-color: var(--p8-pink); background: rgba(244,114,182,0.05); }
+        .file-node .meta { color: #555; font-size: 0.6rem; }
+        .btn-purge { color: #444; cursor: pointer; font-size: 1rem; }
+        .btn-purge:hover { color: #ef4444; }
+
+        /* --- MAIN CORE --- */
+        #main-viewport { display: flex; flex-direction: column; position: relative; }
         
-        * { box-sizing: border-box; font-family: 'JetBrains Mono', 'Inter', monospace; }
-        body { background: var(--p8-bg); color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-
-        /* Sidebar: Persistence & Mascot */
-        #side-panel { 
-            width: 260px; background: #000; border-right: 1px solid var(--p8-border); 
-            display: flex; flex-direction: column; padding: 20px; gap: 15px; z-index: 10;
+        #terminal {
+            flex: 1; overflow-y: auto; padding: 40px; display: flex;
+            flex-direction: column; gap: 30px; padding-bottom: 160px;
         }
-        #bot-canvas { 
-            width: 180px; height: 180px; background: #111; border-radius: 20px; 
-            border: 2px solid var(--p8-pink); box-shadow: 0 0 20px rgba(244, 114, 182, 0.2); 
-            flex-shrink: 0; align-self: center;
+
+        .entry { max-width: 80%; animation: emerge 0.3s ease-out; position: relative; }
+        @keyframes emerge { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+        .entry.ai { align-self: flex-start; }
+        .entry.user { align-self: flex-end; color: var(--p8-pink); }
+
+        .entry .label { 
+            font-size: 0.6rem; font-weight: 900; letter-spacing: 2px; 
+            margin-bottom: 8px; color: var(--p8-blue);
         }
-        .bot-label { color: var(--p8-pink); font-weight: bold; font-size: 1rem; letter-spacing: 2px; text-align: center; }
-        #mood-label { font-size: 0.7rem; color: var(--p8-blue); text-align: center; letter-spacing: 1px; font-weight: 800; }
 
-        /* Knowledge Registry */
-        #file-gallery { flex: 1; overflow-y: auto; margin-top: 10px; border-top: 1px solid #222; padding-top: 15px; }
-        .gallery-wrap summary { list-style: none; cursor: pointer; font-size: 0.75rem; color: var(--p8-blue); font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; }
-        .file-list { display: flex; flex-direction: column; gap: 6px; }
-        .file-item { 
-            background: var(--p8-surface); border: 1px solid #222; padding: 8px 10px; border-radius: 6px; 
-            font-size: 0.65rem; color: #eee; display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; transition: 0.2s;
+        .entry .content {
+            background: var(--p8-surface); backdrop-filter: blur(12px);
+            border: 1px solid var(--p8-border); padding: 20px; border-radius: 2px;
+            line-height: 1.6; font-size: 0.85rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        .file-item:hover { border-color: var(--p8-pink); }
-        .delete-file { color: #555; cursor: pointer; font-weight: bold; padding: 0 5px; }
-        .delete-file:hover { color: #ff4444; }
 
-        /* Main Core & Chat */
-        #main-core { flex: 1; display: flex; flex-direction: column; background: radial-gradient(circle at top right, #111, #000); position: relative; }
-        #stage { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 150px; }
-        
-        .bubble { max-width: 85%; padding: 15px 20px; border-radius: 20px; line-height: 1.6; font-size: 0.9rem; border: 1px solid var(--p8-border); position: relative; animation: slideIn 0.3s ease-out; }
-        .ai-bubble { align-self: flex-start; background: #18181b; border-bottom-left-radius: 4px; }
-        .user-bubble { align-self: flex-end; background: #27272a; color: var(--p8-pink); border-bottom-right-radius: 4px; }
-
-        /* Thought Trace UI */
-        .trace-wrap { margin-bottom: 10px; font-size: 0.7rem; border: 1px solid #222; border-radius: 8px; overflow: hidden; }
-        .trace-header { background: #111; padding: 6px 10px; color: var(--p8-blue); cursor: pointer; font-weight: bold; }
-        .trace-body { padding: 10px; background: #000; color: #666; max-height: 120px; overflow-y: auto; white-space: pre-wrap; }
-
-        /* Interaction Zone */
-        #interaction-zone { 
-            position: absolute; bottom: 0; left: 0; right: 0; 
-            background: rgba(0,0,0,0.9); backdrop-filter: blur(10px);
-            border-top: 1px solid var(--p8-border); padding: 20px; z-index: 100;
+        /* --- TRACE UI --- */
+        .trace-block {
+            margin-top: 15px; font-size: 0.7rem; border-left: 2px solid var(--p8-blue);
+            padding-left: 15px; color: #71717a;
         }
-        .mode-dock { display: flex; gap: 8px; margin-bottom: 12px; justify-content: center; }
-        .mode-btn { font-size: 0.6rem; padding: 4px 10px; border: 1px solid #333; border-radius: 20px; cursor: pointer; color: #555; transition: 0.2s; }
-        .mode-btn.active { color: var(--p8-pink); border-color: var(--p8-pink); background: rgba(244,114,182,0.1); }
 
-        .controls { display: flex; gap: 12px; max-width: 900px; margin: 0 auto; width: 100%; }
-        input[type="text"] { 
-            flex: 1; background: #111; border: 1px solid #333; color: #fff; padding: 14px 22px; 
-            border-radius: 30px; outline: none; font-size: 1rem;
-            -webkit-user-select: text !important; user-select: text !important;
+        /* --- INTERACTION ZONE --- */
+        #dock {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 30px 40px; background: linear-gradient(transparent, #050507 40%);
+            z-index: 100;
         }
-        input:focus { border-color: var(--p8-pink); box-shadow: 0 0 15px rgba(244,114,182,0.1); }
-        button#send-btn { background: var(--p8-pink); color: #000; border: none; padding: 0 25px; border-radius: 30px; font-weight: 800; cursor: pointer; }
-        button:disabled { background: #222; color: #555; cursor: not-allowed; }
 
-        .upload-trigger { background: #111; border: 1px dashed #444; padding: 8px; border-radius: 10px; cursor: pointer; font-size: 0.65rem; color: #aaa; text-align: center; display: block; margin-top: 10px; }
-        
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .dock-inner {
+            max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px;
+        }
+
+        .status-bar {
+            display: flex; gap: 20px; font-size: 0.6rem; color: #555;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .status-bar span { display: flex; align-items: center; gap: 5px; }
+        .indicator { width: 6px; height: 6px; border-radius: 50%; background: #222; }
+        .indicator.active { background: var(--p8-pink); box-shadow: 0 0 8px var(--p8-pink); }
+
+        .input-wrapper {
+            display: flex; gap: 10px; background: rgba(0,0,0,0.8);
+            border: 1px solid var(--p8-border); border-radius: 8px; padding: 5px;
+            transition: 0.3s;
+        }
+        .input-wrapper:focus-within { border-color: var(--p8-pink); box-shadow: 0 0 20px var(--p8-glow); }
+
+        input {
+            flex: 1; background: transparent; border: none; color: #fff;
+            padding: 15px; outline: none; font-family: var(--font-main);
+        }
+
+        #sync-btn {
+            background: var(--p8-pink); color: #000; border: none;
+            padding: 0 30px; font-weight: 900; cursor: pointer; border-radius: 4px;
+            text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px;
+        }
+        #sync-btn:disabled { background: #222; color: #444; }
+
+        .upload-area {
+            border: 1px dashed #222; padding: 10px; text-align: center;
+            font-size: 0.6rem; color: #444; cursor: pointer; transition: 0.2s;
+        }
+        .upload-area:hover { border-color: var(--p8-blue); color: var(--p8-blue); }
+
+        /* --- SCROLLBARS --- */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--p8-border); }
     </style>
 </head>
 <body>
 
-<div id="side-panel">
-    <div class="bot-label">PIXELBOT OMEGA</div>
-    <canvas id="bot-canvas"></canvas>
-    <div id="mood-label">INITIALIZING...</div>
-
-    <div id="file-gallery">
-        <details class="gallery-wrap" open>
-            <summary>NEURAL DATA STREAMS <span>▼</span></summary>
-            <div id="file-list" class="file-list"></div>
-            <label for="file-upload" class="upload-trigger">+ INGEST DATA</label>
-            <input type="file" id="file-upload" hidden multiple>
-        </details>
-    </div>
-</div>
-
-<div id="main-core">
-    <div id="stage">
-        <div class="bubble ai-bubble">Neural Link Active. All local Knowledge Bases (IndexedDB) loaded and ready for Entropia analysis.</div>
+<aside id="sidebar">
+    <div class="console-header">Neural Interface // OMEGA</div>
+    
+    <div id="mascot-container">
+        <canvas id="bot-canvas"></canvas>
     </div>
 
-    <div id="interaction-zone">
-        <div class="mode-dock">
-            <div class="mode-btn active" data-mode="fast">FAST-SCAN</div>
-            <div class="mode-btn" data-mode="thinking">THOUGHT-CHAIN</div>
-            <div class="mode-btn" data-mode="pro">DEEPTHOUGHT PRO</div>
+    <div class="registry-container">
+        <div class="console-header" style="border:none; font-size: 0.55rem;">Local Data Registry</div>
+        <div id="file-list" class="registry-list"></div>
+        <label for="file-in" class="upload-area">UPLOAD_RAW_METRICS (.JSON, .CSV, .TXT)</label>
+        <input type="file" id="file-in" hidden multiple>
+    </div>
+
+    <div id="system-stats" class="status-bar" style="flex-direction: column; gap: 5px;">
+        <span>VRAM_BUF: <b id="vram-stat">STABLE</b></span>
+        <span>LATENCY: <b id="lat-stat">0ms</b></span>
+    </div>
+</aside>
+
+<main id="main-viewport">
+    <div id="terminal">
+        <div class="entry ai">
+            <div class="label">PIXELBOT_OMEGA_V2.0</div>
+            <div class="content">
+                Neural link standby. WebGPU initialized. <br>
+                Awaiting Entropia Universe data streams for ROI synthesis.
+            </div>
         </div>
-        <div class="controls">
-            <input type="text" id="user-text" placeholder="Syncing GPU..." disabled autocomplete="off">
-            <button id="send-btn" disabled>SYNC</button>
+    </div>
+
+    <div id="dock">
+        <div class="dock-inner">
+            <div class="status-bar">
+                <span><div id="status-led" class="indicator"></div> Engine: <span id="status-text">DISCONNECTED</span></span>
+                <span>Mode: <b style="color:var(--p8-pink)">ANALYST_PRO</b></span>
+            </div>
+            <div class="input-wrapper">
+                <input type="text" id="user-input" placeholder="Querying Neural Core..." disabled>
+                <button id="sync-btn" disabled>Sync</button>
+            </div>
         </div>
     </div>
-</div>
+</main>
 
 <script type="module">
     import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
-    const stage = document.getElementById('stage');
-    const userText = document.getElementById('user-text');
-    const sendBtn = document.getElementById('send-btn');
-    const moodLabel = document.getElementById('mood-label');
-    const fileListUI = document.getElementById('file-list');
-    const modeBtns = document.querySelectorAll('.mode-btn');
+    // --- CONFIG & STATE ---
+    const DB_NAME = "Pixelbot_Omega_HighRes";
+    const STORE_NAME = "knowledge_shards";
+    let engine, db;
+    let knowledgeBase = {}; 
+    let registryManifest = [];
 
-    let knowledgeStore = {}; 
-    let engine = null;
-    let currentMode = 'fast';
-    const DB_NAME = "PixelbotOMEGA_v2";
-    const STORE_NAME = "knowledge";
+    const ui = {
+        terminal: document.getElementById('terminal'),
+        input: document.getElementById('user-input'),
+        btn: document.getElementById('sync-btn'),
+        fileList: document.getElementById('file-list'),
+        led: document.getElementById('status-led'),
+        status: document.getElementById('status-text'),
+        vram: document.getElementById('vram-stat')
+    };
 
-    // --- 1. PERSISTENCE ENGINE (IndexedDB) ---
-    async function initDB() {
+    // --- 1. PERSISTENCE & ANALYST RAG ---
+    async function initStorage() {
         return new Promise(res => {
-            const req = indexedDB.open(DB_NAME, 1);
+            const req = indexedDB.open(DB_NAME, 3);
             req.onupgradeneeded = e => e.target.result.createObjectStore(STORE_NAME);
-            req.onsuccess = e => res(e.target.result);
+            req.onsuccess = e => { db = e.target.result; res(); };
         });
     }
 
-    async function saveFile(name, content) {
-        const db = await initDB();
-        db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(content, name);
-    }
-
-    async function deleteFile(name) {
-        const db = await initDB();
-        db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).delete(name);
-        delete knowledgeStore[name];
-        document.getElementById(`file-${name.replace(/\s+/g, '')}`)?.remove();
-    }
-
-    async function loadStoredKnowledge() {
-        const db = await initDB();
-        return new Promise(res => {
-            const tx = db.transaction(STORE_NAME, "readonly");
-            const store = tx.objectStore(STORE_NAME);
-            store.openCursor().onsuccess = e => {
-                const cursor = e.target.result;
-                if(cursor) {
-                    knowledgeStore[cursor.key] = cursor.value;
-                    renderFileItem(cursor.key);
-                    cursor.continue();
-                } else res();
-            };
+    async function syncRegistry() {
+        const tx = db.transaction(STORE_NAME, "readonly");
+        const store = tx.objectStore(STORE_NAME);
+        const keys = await new Promise(r => {
+            store.getAllKeys().onsuccess = e => r(e.target.result);
         });
+        
+        registryManifest = keys;
+        ui.fileList.innerHTML = '';
+        knowledgeBase = {};
+
+        for (const key of keys) {
+            const content = await new Promise(r => {
+                store.get(key).onsuccess = e => r(e.target.result);
+            });
+            knowledgeBase[key] = content;
+            renderFileNode(key, content.length);
+        }
     }
 
-    function renderFileItem(name) {
-        const safeId = `file-${name.replace(/\s+/g, '')}`;
-        if(document.getElementById(safeId)) return;
+    function renderFileNode(name, size) {
         const div = document.createElement('div');
-        div.className = 'file-item';
-        div.id = safeId;
-        div.innerHTML = `<span>📄 ${name}</span><span class="delete-file" onclick="removeData('${name}')">×</span>`;
-        fileListUI.appendChild(div);
+        div.className = 'file-node';
+        div.innerHTML = `
+            <div>
+                <div>${name}</div>
+                <div class="meta">${(size/1024).toFixed(1)} KB</div>
+            </div>
+            <span class="btn-purge" data-name="${name}">×</span>
+        `;
+        div.querySelector('.btn-purge').onclick = async (e) => {
+            const n = e.target.dataset.name;
+            db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).delete(n);
+            await syncRegistry();
+        };
+        ui.fileList.appendChild(div);
     }
-    window.removeData = (name) => deleteFile(name);
 
-    // --- 2. MASCOT ENGINE (Full States) ---
-    class Mascot {
+    // --- 2. THE SEARCH ARCHITECTURE (BM25-Lite) ---
+    function performSemanticScan(query, topK = 3) {
+        const terms = query.toLowerCase().match(/\w+/g) || [];
+        let results = [];
+
+        for (const [source, text] of Object.entries(knowledgeBase)) {
+            const lines = text.split('\n');
+            lines.forEach(line => {
+                let score = 0;
+                terms.forEach(t => {
+                    if (line.toLowerCase().includes(t)) score += 1;
+                });
+                if (score > 0) results.push({ source, line, score });
+            });
+        }
+
+        return results
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 10)
+            .map(r => `[REF: ${r.source}] ${r.line}`)
+            .join('\n');
+    }
+
+    // --- 3. MASCOT EVOLUTION (State Machine) ---
+    class OMEGAVisualizer {
         constructor() {
             this.canvas = document.getElementById('bot-canvas');
             this.ctx = this.canvas.getContext('2d');
-            this.canvas.width = 200; this.canvas.height = 200;
-            this.state = 'idle'; this.frame = 0;
+            this.state = 'IDLE'; // IDLE, THINKING, STRESSED, STREAMING
+            this.particles = [];
+            this.resize();
             this.animate();
         }
-        setState(s) { 
-            this.state = s; 
-            moodLabel.innerText = s.toUpperCase(); 
-            moodLabel.style.color = s === 'thinking' ? 'var(--p8-orange)' : 'var(--p8-blue)';
+
+        resize() {
+            this.canvas.width = this.canvas.offsetWidth * window.devicePixelRatio;
+            this.canvas.height = this.canvas.offsetHeight * window.devicePixelRatio;
         }
-        draw() {
-            const ctx = this.ctx; const t = this.frame * 0.1;
-            ctx.clearRect(0,0,200,200);
-            let bounce = Math.sin(t) * 5;
-            if(this.state === 'thinking') bounce = Math.sin(t*3) * 2;
 
-            ctx.save(); ctx.translate(100, 100 + bounce);
-            
-            // Body
-            ctx.fillStyle = "#3b82f6";
-            this.roundRect(-40, -50, 80, 70, 15);
-            
-            // Screen
-            ctx.fillStyle = "#1e3a8a";
-            this.roundRect(-32, -42, 64, 48, 10);
+        setState(s) { this.state = s; }
 
-            // Eyes
-            ctx.fillStyle = "#fb923c";
-            let eyeH = (Math.sin(t*0.2) > 0.98) ? 2 : 10;
-            if(this.state === 'thinking') {
-                let shift = Math.sin(t*2) * 8;
-                ctx.fillRect(-20 + shift, -30, 8, eyeH);
-                ctx.fillRect(10 + shift, -30, 8, eyeH);
-            } else {
-                ctx.fillRect(-20, -30, 10, eyeH);
-                ctx.fillRect(10, -30, 10, eyeH);
+        animate() {
+            const { ctx, canvas, state } = this;
+            const t = Date.now() / 1000;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // DRAW CORE
+            ctx.shadowBlur = (state === 'THINKING') ? 30 : 15;
+            ctx.shadowColor = (state === 'STRESSED') ? '#fb923c' : '#f472b6';
+            
+            ctx.strokeStyle = ctx.shadowColor;
+            ctx.lineWidth = 2;
+
+            // Neural Rings
+            for(let i=0; i<3; i++) {
+                ctx.beginPath();
+                let speed = (i + 1) * (state === 'THINKING' ? 4 : 1);
+                let rot = t * speed;
+                ctx.ellipse(centerX, centerY, 40 + i*15, 20 + i*5, rot, 0, Math.PI * 2);
+                ctx.stroke();
             }
 
-            // Mouth
-            ctx.strokeStyle = "#fb923c"; ctx.lineWidth = 2;
+            // Central "Eye"
+            ctx.fillStyle = "#fff";
+            let eyeSize = (state === 'STRESSED') ? 10 + Math.random()*5 : 12;
             ctx.beginPath();
-            let mWidth = (this.state === 'talking') ? Math.abs(Math.sin(t*5))*12 : 8;
-            ctx.moveTo(-mWidth/2, -5); ctx.lineTo(mWidth/2, -5);
-            ctx.stroke();
+            ctx.arc(centerX, centerY, eyeSize, 0, Math.PI*2);
+            ctx.fill();
 
-            ctx.restore();
-        }
-        roundRect(x, y, w, h, r) {
-            this.ctx.beginPath(); this.ctx.moveTo(x+r, y); 
-            this.ctx.arcTo(x+w, y, x+w, y+h, r); this.ctx.arcTo(x+w, y+h, x, y+h, r);
-            this.ctx.arcTo(x, y+h, x, y, r); this.ctx.arcTo(x, y, x+w, y, r); this.ctx.fill();
-        }
-        animate() { this.frame++; this.draw(); requestAnimationFrame(() => this.animate()); }
-    }
-    const bot = new Mascot();
-
-    // --- 3. LOGIC ENGINE ---
-    const ENTROPIA_DOMAINS = ['planetcalypsoforum.com', 'entropiawiki.com', 'entropialife.com'];
-    
-    document.getElementById('file-upload').onchange = async (e) => {
-        bot.setState('thinking');
-        for (const file of Array.from(e.target.files)) {
-            const text = await file.text();
-            knowledgeStore[file.name] = text;
-            await saveFile(file.name, text);
-            renderFileItem(file.name);
-        }
-        bot.setState('idle');
-    };
-
-    modeBtns.forEach(btn => {
-        btn.onclick = () => {
-            modeBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentMode = btn.dataset.mode;
-        };
-    });
-
-    async function runInference() {
-        const inputVal = userText.value.trim();
-        if(!inputVal || !engine) return;
-        userText.value = "";
-        addMessage(inputVal, 'user');
-        bot.setState('thinking');
-
-        // Context Search
-        const queryTerms = inputVal.toLowerCase().split(/\s+/).filter(t => t.length > 2);
-        let contextBlocks = [];
-        for (const [name, content] of Object.entries(knowledgeStore)) {
-            const matches = content.split('\n').filter(line => 
-                queryTerms.some(term => line.toLowerCase().includes(term))
-            ).slice(0, 10);
-            if(matches.length > 0) contextBlocks.push(`[SOURCE: ${name}]\n${matches.join('\n')}`);
-        }
-        const context = contextBlocks.join('\n\n');
-
-        const isEntropia = /ped|calypso|arkadia|loot|mining|sweat/i.test(inputVal);
-        const systemPrompt = `You are PIXELBOT OMEGA. Lead Tech Analyst for Entropia Universe. 
-        MODE: ${currentMode}. 
-        CONTEXT: ${context || "None"}. 
-        If Entropia related, be technical. If context exists, prioritize it.`;
-
-        try {
-            const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: inputVal }];
-            const reply = await engine.chat.completions.create({ messages, temperature: currentMode === 'pro' ? 0.2 : 0.0 });
-            let response = reply.choices[0].message.content;
-
-            if (context) {
-                const trace = `<details class="trace-wrap"><summary class="trace-header">🔍 NEURAL DATA TRACE</summary><div class="trace-body">${context}</div></details>`;
-                response = trace + response;
+            // Stress Glitch Effect
+            if (state === 'STRESSED' || state === 'THINKING') {
+                ctx.fillStyle = "rgba(59, 130, 246, 0.5)";
+                for(let i=0; i<5; i++) {
+                    ctx.fillRect(centerX - 50 + Math.random()*100, centerY - 50 + Math.random()*100, 20, 1);
+                }
             }
 
-            bot.setState('talking');
-            addMessage(response, 'ai', true);
-            setTimeout(() => bot.setState('idle'), 2000);
-        } catch (e) {
-            addMessage("Link Dropped. Engine error.", 'ai');
-            bot.setState('idle');
+            requestAnimationFrame(() => this.animate());
         }
     }
+    const mascot = new OMEGAVisualizer();
 
-    async function init() {
-        await loadStoredKnowledge();
+    // --- 4. ENGINE CORE & SOFT RESET ---
+    async function bootEngine() {
         try {
-            engine = await webllm.CreateMLCEngine("Llama-3.2-1B-Instruct-q4f32_1-MLC", { 
+            ui.status.innerText = "INITIALIZING WEBGPU...";
+            engine = await webllm.CreateMLCEngine("Llama-3.2-1B-Instruct-q4f32_1-MLC", {
                 initProgressCallback: (p) => {
-                    moodLabel.innerText = `SYNCING ${Math.round(p.progress * 100)}%`;
+                    mascot.setState('THINKING');
+                    ui.status.innerText = `SYNCING_NEURAL_WEIGHTS: ${Math.round(p.progress * 100)}%`;
                     if (p.progress === 1) {
-                        bot.setState('idle');
-                        userText.disabled = false; sendBtn.disabled = false;
-                        userText.placeholder = "Query Analyst...";
-                        userText.focus();
+                        ui.status.innerText = "LINK_ESTABLISHED";
+                        ui.led.classList.add('active');
+                        ui.input.disabled = false;
+                        ui.btn.disabled = false;
+                        ui.input.placeholder = "Enter Analyst Query...";
+                        mascot.setState('IDLE');
                     }
                 }
             });
-            sendBtn.onclick = runInference;
-            userText.onkeydown = e => { if(e.key === 'Enter') runInference(); e.stopPropagation(); };
-        } catch (e) { moodLabel.innerText = "GPU ERROR"; }
+        } catch (err) {
+            ui.status.innerText = "GPU_LINK_FAILURE";
+            console.error(err);
+        }
     }
 
-    function addMessage(t, s, isHtml = false) {
+    async function handleQuery() {
+        const query = ui.input.value.trim();
+        if (!query || !engine) return;
+
+        ui.input.value = "";
+        addEntry(query, 'user');
+        mascot.setState('THINKING');
+        
+        const startTime = Date.now();
+
+        // RAG Logic
+        const context = performSemanticScan(query);
+        
+        // System Prompt Injection (Meta-Manifest)
+        const systemPrompt = `
+            ROLE: Pixelbot OMEGA. Senior Lead Technical Analyst for Pixelb8.com.
+            TONE: Professional, Data-Driven, Tech-Heavy. 
+            CONTEXT: You are specialized in Entropia Universe (Planet Calypso, Arkadia, Monria).
+            
+            KNOWLEDGE_MANIFEST: ${registryManifest.join(' | ') || 'No local shards loaded.'}
+            
+            LOCAL_DATA_EXTRACT:
+            ${context || "No direct local matches found. Utilizing global Entropia datasets."}
+            
+            DIRECTIVE: Reference ROI, PED flow, and loot variance. If data is missing, state "Neural link shows data void in current registry."
+        `;
+
+        try {
+            const chunks = await engine.chat.completions.create({
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: query }
+                ],
+                temperature: 0.2,
+                stream: true
+            });
+
+            let fullResponse = "";
+            const aiEntry = addEntry("", 'ai');
+            const aiContent = aiEntry.querySelector('.content');
+
+            for await (const chunk of chunks) {
+                const delta = chunk.choices[0]?.delta?.content || "";
+                fullResponse += delta;
+                aiContent.innerText = fullResponse;
+                ui.terminal.scrollTop = ui.terminal.scrollHeight;
+                
+                // Stress visualization based on token density
+                if (fullResponse.length % 50 === 0) mascot.setState('STREAMING');
+            }
+
+            if (context) {
+                const trace = document.createElement('div');
+                trace.className = 'trace-block';
+                trace.innerText = `>> NEURAL_TRACE_ACTIVE: Scanned ${registryManifest.length} shards. Found relevant clusters in ${context.split('\n').length} nodes.`;
+                aiContent.appendChild(trace);
+            }
+
+            document.getElementById('lat-stat').innerText = `${Date.now() - startTime}ms`;
+            mascot.setState('IDLE');
+
+        } catch (e) {
+            console.error(e);
+            mascot.setState('STRESSED');
+            addEntry("CRITICAL ERROR: Neural Link Dropped. VRAM threshold likely exceeded. Re-establishing...", 'ai');
+            bootEngine(); // Soft reset
+        }
+    }
+
+    function addEntry(text, type) {
         const div = document.createElement('div');
-        div.className = `bubble ${s}-bubble`;
-        isHtml ? div.innerHTML = t : div.innerText = t;
-        stage.appendChild(div);
-        stage.scrollTop = stage.scrollHeight;
+        div.className = `entry ${type}`;
+        div.innerHTML = `
+            <div class="label">${type === 'ai' ? 'PIXELBOT_OMEGA // RESPONSE' : 'ANALYST_SOURCE // QUERY'}</div>
+            <div class="content">${text}</div>
+        `;
+        ui.terminal.appendChild(div);
+        ui.terminal.scrollTop = ui.terminal.scrollHeight;
+        return div;
     }
 
-    window.onload = init;
+    // --- EVENTS ---
+    ui.btn.onclick = handleQuery;
+    ui.input.onkeydown = e => { if(e.key === 'Enter') handleQuery(); };
+
+    document.getElementById('file-in').onchange = async (e) => {
+        for (const file of e.target.files) {
+            const text = await file.text();
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            tx.objectStore(STORE_NAME).put(text, file.name);
+            await new Promise(r => tx.oncomplete = r);
+        }
+        await syncRegistry();
+        addEntry(`Data stream ingested: ${e.target.files.length} new shards indexed.`, 'ai');
+    };
+
+    window.onload = async () => {
+        await initStorage();
+        await syncRegistry();
+        bootEngine();
+    };
+
 </script>
 </body>
 </html>
