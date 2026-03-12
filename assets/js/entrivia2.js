@@ -2874,6 +2874,69 @@ The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
 	{ command: "!entrivia-defaultquestions", description: "Toggles default entrivia questions.", usage: "!entrivia-defaultquestions" },
 	{ command: "!entrivia-customquestions", description: "Toggles custom entrivia questions.", usage: "!entrivia-customquestions" }
 ];
+// New PixelDisc Commands Array
+const pixeldisccommands = [
+    { 
+        command: "!pull-lever", 
+        description: "Shows the wheel and triggers a rotation spin (Streamer only).", 
+        usage: "!pull-lever" 
+    },
+    { 
+        command: "!toggle-wheel", 
+        description: "Toggles the visibility of the wheel on screen (Streamer only).", 
+        usage: "!toggle-wheel" 
+    },
+    { 
+        command: "!spin", 
+        description: "Loads a specific saved wheel by name and spins it immediately (Streamer only).", 
+        usage: "!spin [WheelName]" 
+    },
+    { 
+        command: "!chatterwheel add / !chatterwheel join", 
+        description: "Adds the user's name to the current chatter wheel list.", 
+        usage: "!chatterwheel add" 
+    },
+    { 
+        command: "!chatterwheel show", 
+        description: "Displays the chatter wheel with current entries (Streamer only).", 
+        usage: "!chatterwheel show" 
+    },
+    { 
+        command: "!chatterwheel spin", 
+        description: "Displays and spins the chatter wheel (Streamer only).", 
+        usage: "!chatterwheel spin" 
+    },
+    { 
+        command: "!chatterwheel clear", 
+        description: "Clears all entries from the chatter wheel (Streamer only).", 
+        usage: "!chatterwheel clear" 
+    }
+];
+
+// New PrizeList Commands Array
+const prizelistcommands = [
+    { 
+        command: "!myprizes", 
+        description: "Lists all prizes you have won in the current session.", 
+        usage: "!myprizes" 
+    },
+    { 
+        command: "!donateprizes", 
+        description: "Clears your prize list, effectively donating them back.", 
+        usage: "!donateprizes" 
+    },
+    { 
+        command: "!prizelist", 
+        description: "Displays the prize list for a specific user.", 
+        usage: "!prizelist [username]" 
+    },
+/*     { 
+        command: "!toggle-bubblebutt", 
+        description: "Toggles the visibility of the button bubble overlay (Streamer only).", 
+        usage: "!toggle-bubblebutt" 
+    } */
+];
+
     const userCommandList = document.getElementById("usercommandList");
     const broadcasterCommandList = document.getElementById("broadcastercommandList");
 function createCommandList(commandArray, targetListElement) {
