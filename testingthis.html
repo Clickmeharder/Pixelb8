@@ -6,7 +6,7 @@
     <title>Pixelb8 OMEGA | Roleplay Core</title>
     <style>
         :root { 
-            --p8-accent: #f472b6; /* Pink accent for RP edition */
+            --p8-accent: #f472b6; 
             --p8-bg: #09090b; 
             --bubble-ai: #18181b; 
             --rp-glow: linear-gradient(45deg, #ff00cc, #3333ff, #00d4ff, #ff00cc);
@@ -20,7 +20,6 @@
         .model-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; width: 100%; max-width: 900px; margin-top: 20px; }
         .model-card { position: relative; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 12px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; gap: 8px; }
 
-        /* Roleplay Tier Glow */
         .rp-tier { border: none; background: rgba(0, 0, 0, 0.8); }
         .rp-tier::before {
             content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 2px; 
@@ -60,12 +59,12 @@
     
     let step = 0;
     let engine;
-    let systemPrompt = "You are a versatile roleplay assistant. Follow the user's character prompts exactly.";
+    let systemPrompt = "";
 
     const scripts = [
-        () => addAiBubble("Roleplay Engine Initialized. First, who are you? (User Name)"),
-        () => addAiBubble("Describe the AI's role or character. (e.g. 'You are Nora, a CDF Scout in Entropia Universe')"),
-        () => addAiBubble("Select your 'Brain'. For Roleplay, I highly recommend the **Hermes** variants:"),
+        () => addAiBubble("Roleplay Engine Initialized. First, who are you? (Enter your Name)"),
+        () => addAiBubble("Now, define the AI's persona and the world. (e.g. 'You are Nora, a CDF Scout on Planet Calypso. You are helpful but blunt.')"),
+        () => addAiBubble("Select your 'Brain'. I've filtered for **f32 compatibility** to ensure they run on your hardware:"),
     ];
 
     function addAiBubble(text) {
@@ -82,13 +81,14 @@
         userText.value = "";
 
         if (step === 0) {
-            addAiBubble(`Welcome, ${val}. Now, set the scene. Who should I become?`);
+            addAiBubble(`Identity confirmed: ${val}. Setting the narrative...`);
             step++;
+            scripts[1]();
             return;
         }
         if (step === 1) {
             systemPrompt = val;
-            addAiBubble("System prompt set. Now, select your local model to begin.");
+            addAiBubble("Narrative locked. Choose your local Intelligence Core:");
             showModelPicker();
             step++;
             return;
@@ -99,10 +99,11 @@
         const grid = document.createElement('div');
         grid.className = "model-grid";
         
+        // Using q4f32 models specifically to bypass the f16 extension error
         const models = [
-            { id: "Hermes-3-Llama-3.1-8B-q4f16_1-MLC", name: "Hermes 3 (8B)", tier: "rp-tier", desc: "Best for Unfiltered RP", ram: "6GB" },
-            { id: "Llama-3.1-8B-Instruct-q4f32_1-MLC", name: "Llama 3.1 (8B)", tier: "standard", desc: "Balanced & Smart", ram: "5GB" },
-            { id: "Gemma-2-2b-it-q4f16_1-MLC", name: "Gemma 2 (2B)", tier: "potato", desc: "Fast on any PC", ram: "2GB" }
+            { id: "Hermes-3-Llama-3.1-8B-q4f32_1-MLC", name: "Hermes 3 (8B)", tier: "rp-tier", desc: "Elite Roleplay. Creative & Unfiltered.", ram: "6GB+" },
+            { id: "Hermes-3-Llama-3.2-3B-q4f32_1-MLC", name: "Hermes 3 (3B)", tier: "rp-tier", desc: "The Sweet Spot. High IQ, low requirements.", ram: "3GB" },
+            { id: "Llama-3.2-1B-Instruct-q4f32_1-MLC", name: "Llama 3.2 (1B)", tier: "standard", desc: "Ultra-Fast. Best for weak hardware/mobile.", ram: "1.5GB" }
         ];
 
         models.forEach(m => {
@@ -110,9 +111,9 @@
             card.className = `model-card ${m.tier}`;
             card.innerHTML = `
                 <div class="card-header"><strong>${m.name}</strong></div>
-                <div class="benchmark-tag">RP Optimized</div>
+                <div class="benchmark-tag">PRIVATE / UNFILTERED</div>
                 <div class="skills-list">${m.desc}</div>
-                <div style="font-size:0.7rem; color:#666; margin-top:10px;">Req: ${m.ram} RAM</div>
+                <div style="font-size:0.7rem; color:#666; margin-top:10px;">Req: ${m.ram} VRAM (f32 mode)</div>
             `;
             card.onclick = () => startLoading(m.id);
             grid.appendChild(card);
@@ -121,21 +122,25 @@
     }
 
     async function startLoading(modelId) {
-        stage.innerHTML = `<div class="bubble">Downloading Brain... <span id="progress">0%</span></div>`;
+        stage.innerHTML = `<div class="bubble">OMEGA: Syncing Neural Core... <br><span id="progress">Initializing WebGPU f32 Shaders...</span></div>`;
         try {
             engine = await webllm.CreateMLCEngine(modelId, {
-                initProgressCallback: (p) => { document.getElementById('progress').innerText = `${Math.round(p.progress * 100)}% - ${p.text}`; }
+                initProgressCallback: (p) => { 
+                    document.getElementById('progress').innerText = `${Math.round(p.progress * 100)}% - ${p.text}`; 
+                }
             });
             startChat();
         } catch (e) {
-            addAiBubble("⚠️ Error: Hardware might be too weak. Try the 'Gemma 2B' model instead.");
+            console.error(e);
+            addAiBubble("⚠️ Hardware Alert: That model was too heavy. Please try the 3B or 1B variant.");
             showModelPicker();
         }
     }
 
     function startChat() {
         stage.innerHTML = "";
-        addAiBubble("Neural link established. Your story begins now.");
+        addAiBubble("Neural link established. Your private story begins.");
+        
         sendBtn.onclick = async () => {
             const text = userText.value;
             if(!text) return;
