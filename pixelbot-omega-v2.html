@@ -1,724 +1,1382 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pixelbot OMEGA v2 | Pixelb8 Analyst Console</title>
-
+<meta charset="utf-8">
+<title>Pixelbot Entropia AI Engine</title>
 <style>
-:root{
- --p8-pink:#f472b6;
- --p8-blue:#3b82f6;
- --p8-orange:#fb923c;
-
- --p8-bg:#09090b;
- --p8-surface:#18181b;
- --p8-border:#27272a;
-
- --glass-bg:rgba(255,255,255,0.04);
- --glass-border:rgba(255,255,255,0.08);
-
- --glow-soft:0 0 12px rgba(244,114,182,0.2);
- --glow-strong:0 0 30px rgba(244,114,182,0.45);
-
- --transition-fast:0.18s cubic-bezier(.4,.0,.2,1);
+body {
+    background:#0b0f14;
+    color:#d6e2ff;
+    font-family:Arial,Helvetica,sans-serif;
+    margin:0;
 }
-
-*{box-sizing:border-box;font-family:JetBrains Mono,monospace}
-
-body{
- margin:0;
- background:var(--p8-bg);
- color:white;
- display:flex;
- height:100vh;
- overflow:hidden;
+header {
+    padding:10px 20px;
+    background:#111827;
+    border-bottom:1px solid #222;
 }
-
-#side-panel{
- width:280px;
- background:#000;
- border-right:1px solid var(--p8-border);
- padding:20px;
- display:flex;
- flex-direction:column;
- gap:15px;
+#console {
+    padding:20px;
 }
-
-#bot-canvas{
- width:180px;
- height:180px;
- background:#111;
- border-radius:20px;
- border:2px solid var(--p8-pink);
- box-shadow:var(--glow-soft);
- align-self:center;
+textarea {
+    width:100%;
+    height:90px;
+    background:#0f172a;
+    color:#d6e2ff;
+    border:1px solid #333;
+    padding:10px;
 }
-
-.bot-label{
- text-align:center;
- color:var(--p8-pink);
- letter-spacing:3px;
- font-weight:bold;
+button {
+    padding:10px 18px;
+    background:#2563eb;
+    border:none;
+    color:white;
+    margin-top:10px;
+    cursor:pointer;
 }
-
-#mood-label{
- text-align:center;
- font-size:.7rem;
- color:var(--p8-blue);
-}
-
-#file-gallery{
- flex:1;
- overflow:auto;
- border-top:1px solid #222;
- padding-top:10px;
-}
-
-.file-item{
- background:var(--p8-surface);
- border:1px solid #222;
- padding:8px;
- border-radius:6px;
- font-size:.65rem;
- margin-bottom:6px;
- display:flex;
- justify-content:space-between;
-}
-
-#main-core{
- flex:1;
- display:flex;
- flex-direction:column;
- background:radial-gradient(circle at top right,#111,#000);
-}
-
-#stage{
- flex:1;
- overflow:auto;
- padding:40px;
- display:flex;
- flex-direction:column;
- gap:20px;
- padding-bottom:180px;
-}
-
-.bubble{
- max-width:80%;
- padding:16px 20px;
- border-radius:16px;
- border:1px solid var(--p8-border);
- line-height:1.6;
-}
-
-.ai-bubble{
- align-self:flex-start;
- background:#121214;
- box-shadow:var(--glow-soft);
-}
-
-.user-bubble{
- align-self:flex-end;
- background:#27272a;
- color:var(--p8-pink);
-}
-
-#interaction-zone{
- position:absolute;
- bottom:0;
- left:280px;
- right:0;
- background:var(--glass-bg);
- backdrop-filter:blur(24px) saturate(160%);
- border-top:1px solid var(--glass-border);
- padding:25px;
-}
-
-.controls{
- display:flex;
- gap:10px;
- max-width:900px;
- margin:auto;
-}
-
-input{
- flex:1;
- padding:14px;
- border-radius:10px;
- border:1px solid #333;
- background:#0a0a0c;
- color:white;
-}
-
-button{
- background:var(--p8-pink);
- border:none;
- padding:0 25px;
- border-radius:10px;
- font-weight:bold;
- cursor:pointer;
-}
-
-.upload-trigger{
- margin-top:10px;
- border:1px dashed #333;
- padding:10px;
- text-align:center;
- font-size:.65rem;
- cursor:pointer;
-}
-
-.trace{
- font-size:.7rem;
- margin-top:10px;
- color:#888;
- background:#000;
- border:1px solid #222;
- padding:10px;
- border-radius:6px;
+#output {
+    margin-top:20px;
+    background:#020617;
+    border:1px solid #222;
+    padding:15px;
+    white-space:pre-wrap;
 }
 </style>
 </head>
-
 <body>
 
-<div id="side-panel">
+<header>
+<h2>Pixelbot Entropia AI Engine</h2>
+</header>
 
-<div class="bot-label">PIXELBOT OMEGA</div>
-<canvas id="bot-canvas"></canvas>
-<div id="mood-label">INITIALIZING</div>
+<div id="console">
 
-<div id="file-gallery">
-<div id="file-list"></div>
+<textarea id="question" placeholder="Ask about items, amps, mobs, missions..."></textarea>
+<br>
+<button onclick="askAI()">Query Knowledge</button>
 
-<label class="upload-trigger" for="file-upload">+ INGEST DATA</label>
-<input id="file-upload" type="file" hidden multiple>
-</div>
-
-</div>
-
-<div id="main-core">
-
-<div id="stage">
-<div class="bubble ai-bubble">
-Pixelbot OMEGA v2 initialized.<br>
-Local-first Entropia analyst console online.
-</div>
-</div>
-
-<div id="interaction-zone">
-
-<div class="controls">
-<input id="user-text" placeholder="Linking neural interface..." disabled>
-<button id="send-btn" disabled>SYNC</button>
-</div>
+<div id="output"></div>
 
 </div>
 
-</div>
+<script>
+/* ===============================
+   ORIGINAL ENTROPIA NEXUS SCRIPT
+   =============================== */
 
-<script type="module">
+let isDropdownsInitialized = false;
+// ================= Cached Data =================
+let cachedWeapons = [];
+let cachedAmplifiers = [];
+let cachedVisionAttachments = [];
+let cachedScopes = [];
+let cachedAbsorbers = [];
+let cachedBlueprints = [];
+let cachedClothes = [];   // all clothing items including rings
+let cachedMedicalTools = []; // NEW
+let cachedMedicalChips = []; // NEW
+window.cachedFaps = [];
+// ================= Cached Mining Data =================
+let cachedFinders = [];
+let cachedFinderAmps = [];
+let cachedExcavators = [];
+// ================= Dedicated Mining State ================
+window.miningLoadout = {
+    finder: null,
+    amplifier: null,
+    extractor: null,
+    activeSearches: {
+        enmatter: false,
+        ore: false,
+        treasure: false
+    }
+};
+// ================= Current Data ================
+window.currentLoadout = {
+  weapon: null,
+  amplifier: null,
+  vision1: null,
+  vision2: null,
+  scope: null,
+  absorber: null,
+  LeftRing: null,
+  RightRing: null,
+  mainFap: null, 
+  secondaryFap: null
+};
 
-import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+let currentWeapon = null;
+let currentAmplifier = null;
+let currentVision1 = null;
+let currentVision2 = null;
+let currentScope = null;
+let currentAbsorber = null;
+let currentLeftRing = null;
+let currentRightRing = null;
+// ======================================================
+const BASE_URL = 'https://api.entropianexus.com/';
+const statusEl = document.getElementById('NexusAPIstatus');
 
-const stage=document.getElementById("stage");
-const userText=document.getElementById("user-text");
-const sendBtn=document.getElementById("send-btn");
-const mood=document.getElementById("mood-label");
-const fileList=document.getElementById("file-list");
+// 🔀 Toggle between local JSONs and API
+let USE_LOCAL_DATA = true;
+window.BASE_URL = BASE_URL; // <-- FIX: Set BASE_URL globally
 
-let engine=null;
-let knowledgeStore={};
-let vectors={};
-let manifest={files:[]};
+// 🔀 Toggle between local JSONs and API
+window.USE_LOCAL_DATA = USE_LOCAL_DATA; // <-- FIX: Set USE_LOCAL_DATA globally
+function toggleDataSource(type) {
+  if (type === "data-source") {
+    USE_LOCAL_DATA = !USE_LOCAL_DATA;
+  if (DEBUG) console.log("Data source toggled. Local?", USE_LOCAL_DATA);
+    // Update all elements with class 'NexusAPIstatus'
+    updateStatusElements();
+    initDropdowns(); // repopulate and cache everything
+  }
+}
 
-const DB_NAME="pixelbot_omega_v2";
-const STORE="registry";
+// ================= Formulas =================
+const entropiaFormulas = {
+  hitAbility: `(Non-SIB) HA = 4 + 0.06 * Hit Level
+(SIB) HA = 6 + ((Hit Level - Recommended) / (Max - Recommended)) * 4`,
+  critAbility: `(Non-SIB) CHA = √Hit Level
+(SIB) CHA = √((Hit Level - Recommended) / (Max - Recommended)) * 10`,
+  hitRate: `Hit Rate = (Hit Ability + 80) / 100`,
+  dpp: `DPP = Effective Damage / (Ammo Cost + Decay Cost)`,
+  minDamage: `(Non-SIB) MinDamage = 25% + (0.75 * (DMG Level / Max DMG Level))
+(SIB) MinDamage = 50% + (0.50 * (DMG Level - Recommended) / (Max - Recommended))`,
+  apm: `⚠Proper Formula Unknown⚠\nCurrent approximation:
+APM = BaseAPM * (0.5 + 0.5 * (Hit Level - Start) / (Max - Start))
+(Capped between MinAPM and BaseAPM)`,
+  reloadTime: `⚠Proper Formula Unknown⚠\nCurrent approximation:
+Reload Time = 60 / APM`,
+  effectiveDamage: `Effective damage = Average damage * Hit rate
+Or, more precisely:
+Effective damage = ((Minimal damage + Maximal damage) / 2) * (80 + Hit ability)
+For a maxed weapon: MaxDamage * 0.75 * 0.9`
+};
+
+// ================= Terminal Logging =================
+function appendData(text) {
+  const line = document.createElement("div");
+  line.textContent = text;
+  terminalOutput.appendChild(line);
+  terminalOutput.scrollTop = terminalOutput.scrollHeight;
+}
+
+// ================= Local/API Data Loader =================
+// ================= Local/API Data Loader =================
+async function getData(endpoint, localFile) {
+  // BASE_URL is likely defined globally in this file
+  const fullUrl = window.BASE_URL + endpoint; 
+
+  if (USE_LOCAL_DATA) {
+    try {
+      // 🟢 Attempting local file load
+      const data = await window.electronAPI.loadNexusJSON(localFile);
+      
+      // Check if data was successfully loaded and is not empty
+      if (data && (Array.isArray(data) ? data.length > 0 : data?.items?.length > 0)) {
+		if (DEBUG) console.log(`[NEXUS_SOURCE:SUCCESS] Data found in local cache: ${localFile}`);
+        return Array.isArray(data) ? data : data?.items || [];
+      }
+      
+      // If we reach here, local data failed (empty/null). This indicates a silent local failure.
+      console.warn(`[NEXUS_SOURCE:WARN] Local cache empty/invalid for ${localFile}. Returning []. (No API fallback here)`);
+      return [];
+
+    } catch (err) {
+      // ❌ Local load failed due to an error (e.g., file not found, bad JSON)
+      console.error(`[NEXUS_SOURCE:ERROR] Local load FAILED for ${localFile} due to error.`, err);
+      return [];
+    }
+  } else {
+    try {
+      // 🌍 Attempting external API fetch
+      const res = await fetch(fullUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+    if (DEBUG) console.log(`[NEXUS_SOURCE:SUCCESS] Fetched from External API: ${fullUrl}`);
+      return Array.isArray(data) ? data : data?.items || [];
+    } catch (err) {
+      // ❌ API fetch failed
+      console.error(`[NEXUS_SOURCE:ERROR] Failed to fetch External API ${endpoint}:`, err);
+      return [];
+    }
+  }
+}
+
+//------------------------------------------------------------
+//------------------------------------------------------------
+// ================= DOWNLOADING DATA =================
+async function downloadData(filename, endpoint) {
+  statusEl.innerHTML = `<div class=" NexusAPISpinner"></div>Fetching ${filename}...`;
+  try {
+    const res = await fetch(BASE_URL + endpoint);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    statusEl.textContent = `Status: ${filename} downloaded!`;
+  } catch(err) {
+    console.error(err);
+    statusEl.textContent = `Status: Failed to fetch ${filename}`;
+  }
+}
+
+async function downloadMultiple(endpoints) {
+  for (const ep of endpoints) {
+    await downloadData(ep, ep);
+  }
+}
+
+async function downloadAllZip(endpoints) {
+  statusEl.innerHTML = `<div class=" NexusAPISpinner"></div>Fetching all datasets...`;
+  const zip = new JSZip();
+  try {
+    for (const ep of endpoints) {
+      statusEl.innerHTML = `<div class=" NexusAPISpinner"></div>Fetching ${ep}...`;
+      const res = await fetch(BASE_URL + ep);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      zip.file(ep + '.json', JSON.stringify(data, null, 2));
+    }
+    const content = await zip.generateAsync({type:"blob"});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(content);
+    a.download = 'entropia_nexus_data.zip';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    statusEl.textContent = 'Status: All datasets downloaded as ZIP!';
+  } catch(err) {
+    console.error(err);
+    statusEl.textContent = 'Status: Failed to fetch some datasets for ZIP';
+  }
+}
+
+// ================= FETCHING & PRINT TO TERMINAL =================
+async function fetchData(endpoint, specific = null) {
+  let fullEndpoint = endpoint;
+  if (specific) fullEndpoint += `/${encodeURIComponent(specific)}`;
+  try {
+    const res = await fetch(BASE_URL + fullEndpoint);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error(`Error fetching ${fullEndpoint}:`, err);
+    return null;
+  }
+}
+/*
+async function fetchAndPrint(endpoint, specific = null) {
+  const data = await fetchData(endpoint, specific);
+  if (data) {
+	window.SuSTerminalCommands.printData(data, endpoint);
+  }
+}
+ */
+// Fetch + print into terminal
+async function fetchAndPrint(endpoint, specific = null) {
+  const data = await fetchData(endpoint, specific);
+  if (data) {
+    window.SuSTerminalCommands.printData(data, endpoint);
+  } else {
+    window.SuSTerminalCommands.printData(null, endpoint);
+  }
+}
+
+// Simple filter utility
+function filterData(data, key, value) {
+  if (!Array.isArray(data)) return [];
+  return data.filter(item => String(item[key]).toLowerCase().includes(String(value).toLowerCase()));
+}
+
+// Fetch, filter and print
+async function fetchFilterAndPrint(endpoint, key, value) {
+  const data = await fetchData(endpoint);
+  if (!data) {
+    window.SuSTerminalCommands.printData(null, endpoint);
+    return;
+  }
+  const filtered = filterData(data, key, value);
+  window.SuSTerminalCommands.printData(filtered, `${endpoint} (filtered by ${key}=${value})`);
+}
+function createNoneFromFirstItem(item) {
+  if (!item || typeof item !== "object") return { Name: "None", IsSIB: false };
+
+  const clone = JSON.parse(JSON.stringify(item));
+
+  // Overwrite top-level Name
+  if ("Name" in clone) clone.Name = "None";
+
+  // Recursive zeroing function
+  function zeroOut(obj) {
+    if (Array.isArray(obj)) return [];
+    if (typeof obj !== "object" || obj === null) return obj;
+
+    for (const key in obj) {
+      if (key === "Name") continue; // never overwrite Name
+      if (key.toLowerCase() === "issib") { // handle IsSIB/IsSiB keys anywhere
+        obj[key] = false;
+      } else if (typeof obj[key] === "number") {
+        obj[key] = 0.0001;
+      } else if (typeof obj[key] === "string") {
+        obj[key] = null;
+      } else if (Array.isArray(obj[key])) {
+        obj[key] = [];
+      } else if (typeof obj[key] === "object" && obj[key] !== null) {
+        zeroOut(obj[key]);
+      }
+    }
+    return obj;
+  }
+
+  return zeroOut(clone);
+}
+
+
+//------------------------------------------------------------
+// ================= Populate Dropdown Helper =================
+
+  // Ensure "None" option is always present with full structure
+/* const noneItem = {
+    Id: 0,
+    ItemId: null,
+    Name: "None",
+    Properties: {},
+    Links: {}
+}; */
+function populateDropdown(inputElement, containerId, items, currentRefSetter = null) {
+  if (!inputElement || !containerId || !items) return;
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = "";
+  const isDatalist = container.tagName.toLowerCase() === "datalist";
+
+  if (isDatalist) {
+    // Simple <datalist> handling
+    items.forEach(item => {
+      const opt = document.createElement("option");
+      opt.value = item.Name;
+      container.appendChild(opt);
+    });
+  } else {
+    // Custom dropdown with divs
+    items.forEach(item => {
+      const optionDiv = document.createElement("div");
+      optionDiv.textContent = item.Name;
+
+      // Single click: set input and update selection
+      optionDiv.addEventListener("click", e => {
+        e.stopPropagation(); // prevent outside click from closing immediately
+        inputElement.value = item.Name;
+        if (currentRefSetter) currentRefSetter(item);
+        inputElement.dispatchEvent(new Event("input"));
+        inputElement.dispatchEvent(new Event("change"));
+		container.querySelectorAll("div").forEach(div => {
+      });
+        container.style.display = "none"; // hide dropdown
+      });
+
+      container.appendChild(optionDiv);
+    });
+
+    // Show dropdown on focus
+    inputElement.addEventListener("focus", e => {
+      e.stopPropagation();
+      container.style.display = "block";
+    });
+
+    // Double-click to clear input but keep dropdown open
+    inputElement.addEventListener("dblclick", e => {
+      e.stopPropagation();
+      inputElement.value = "";
+      inputElement.dispatchEvent(new Event("input"));
+      container.style.display = "block"; // ensure dropdown stays visible
+    });
+
+    // Hide dropdown when clicking outside
+    document.addEventListener("click", e => {
+      if (!container.contains(e.target) && e.target !== inputElement) {
+        container.style.display = "none";
+      }
+    });
+
+    // Filter options as user types
+    inputElement.addEventListener("input", () => {
+      const filter = inputElement.value.toLowerCase();
+      container.querySelectorAll("div").forEach(div => {
+        div.style.display = div.textContent.toLowerCase().includes(filter) ? "block" : "none";
+      });
+      container.style.display = "block"; // ensure dropdown stays visible while typing
+    });
+  }
+
+  // Reset input initially
+  //inputElement.value = "";
+}
+// ================= Dropdown Population =================
+/* async function populateMiningDropdowns() {
+    // 1. Finders
+    const finderInput = document.querySelector(".mining-finder-select");
+    cachedFinders = await getData("finders", "finders.json");
+    const noneFinder = cachedFinders.length ? createNoneFromFirstItem(cachedFinders[0]) : { Name: "None" };
+    
+    populateDropdown(finderInput, "mining-finder-options", [noneFinder, ...cachedFinders], (item) => {
+        selectFinder(item); // Call the Loadout Manager function
+    });
+
+    // 2. Amps
+    const ampInput = document.querySelector(".mining-amp-select");
+    cachedFinderAmps = await getData("finderamplifiers", "finderamplifiers.json");
+    const noneAmp = cachedFinderAmps.length ? createNoneFromFirstItem(cachedFinderAmps[0]) : { Name: "None" };
+    
+    populateDropdown(ampInput, "mining-amp-options", [noneAmp, ...cachedFinderAmps], (item) => {
+        selectFinderAmplifier(item); 
+    });
+
+    // 3. Extractors
+    const extractorInput = document.querySelector(".extractor-tool-select");
+    cachedExcavators = await getData("excavators", "excavators.json");
+    const noneExtractor = cachedExcavators.length ? createNoneFromFirstItem(cachedExcavators[0]) : { Name: "None" };
+    
+    populateDropdown(extractorInput, "extractor-tool-options", [noneExtractor, ...cachedExcavators], (item) => {
+        selectExtractor(item);
+    });
+}
+ */
+async function populateMiningDropdowns() {
+    // 1. Populate Finders
+    const finderInput = document.querySelector(".mining-finder-select");
+    cachedFinders = await getData("finders", "finders.json");
+    const noneFinder = cachedFinders.length ? createNoneFromFirstItem(cachedFinders[0]) : { Name: "None" };
+    
+    populateDropdown(finderInput, "mining-finder-options", [noneFinder, ...cachedFinders], (item) => {
+        selectFinder(item);
+    });
+
+    // 2. Populate Amps
+    const ampInput = document.querySelector(".mining-amp-select");
+    cachedFinderAmps = await getData("finderamplifiers", "finderamplifiers.json");
+    const noneAmp = cachedFinderAmps.length ? createNoneFromFirstItem(cachedFinderAmps[0]) : { Name: "None" };
+    
+    populateDropdown(ampInput, "mining-amp-options", [noneAmp, ...cachedFinderAmps], (item) => {
+        selectFinderAmplifier(item); 
+    });
+
+    // 3. Populate Extractors
+    const extractorInput = document.querySelector(".extractor-tool-select");
+    cachedExcavators = await getData("excavators", "excavators.json");
+    const noneExtractor = cachedExcavators.length ? createNoneFromFirstItem(cachedExcavators[0]) : { Name: "None" };
+    
+    populateDropdown(extractorInput, "extractor-tool-options", [noneExtractor, ...cachedExcavators], (item) => {
+        selectExtractor(item);
+    });
+
+    // 🟢 AUTO-RESTORE SAVED SELECTIONS
+    const prefs = window.overlayPreferences;
+    if (prefs) {
+        if (prefs.lastFinderName && prefs.lastFinderName !== "None") {
+            const item = cachedFinders.find(f => f.Name === prefs.lastFinderName);
+            if (item) {
+                finderInput.value = item.Name;
+                selectFinder(item);
+            }
+        }
+        if (prefs.lastAmpName && prefs.lastAmpName !== "None") {
+            const item = cachedFinderAmps.find(a => a.Name === prefs.lastAmpName);
+            if (item) {
+                ampInput.value = item.Name;
+                selectFinderAmplifier(item);
+            }
+        }
+        if (prefs.lastExtractorName && prefs.lastExtractorName !== "None") {
+            const item = cachedExcavators.find(e => e.Name === prefs.lastExtractorName);
+            if (item) {
+                extractorInput.value = item.Name;
+                selectExtractor(item);
+            }
+        }
+    }
+}
+async function populateWeaponDropdown() {
+  const input = document.querySelector(".weapon-select");
+  cachedWeapons = await getData("weapons", "weapons.json");
+
+  // Add None at the front of cachedWeapons
+  const noneItem = cachedWeapons.length ? createNoneFromFirstItem(cachedWeapons[0]) : { Name: "None" };
+  cachedWeapons = [noneItem, ...cachedWeapons];
+
+  populateDropdown(input, "weapon-options", cachedWeapons, (item) => currentWeapon = item);
+  if (!currentWeapon) currentWeapon = cachedWeapons[0];
+}
+
+async function populateAmplifierDropdown() {
+  const input = document.querySelector(".amplifier-select");
+  cachedAmplifiers = await getData("weaponamplifiers", "amplifiers.json");
+
+  const noneItem = cachedAmplifiers.length ? createNoneFromFirstItem(cachedAmplifiers[0]) : { Name: "None" };
+  cachedAmplifiers = [noneItem, ...cachedAmplifiers];
+
+  populateDropdown(input, "amplifier-options", cachedAmplifiers, (item) => currentAmplifier = item);
+  if (!currentAmplifier) currentAmplifier = cachedAmplifiers[0];
+}
+
+async function populateScopeDropdown() {
+  const input = document.querySelector(".scope-select");
+  const allAttachments = await getData("weaponvisionattachments", "weaponvisionattachments.json");
+  cachedScopes = allAttachments.filter(item => item.Properties?.Type === "Scope" || item.Properties?.Type === "Sight");
+  // Add None at the front of cachedWeapons
+  const noneItem = cachedScopes.length ? createNoneFromFirstItem(cachedScopes[0]) : { Name: "None" };
+  cachedScopes = [noneItem, ...cachedScopes];
+
+
+  populateDropdown(input, "scope-options", cachedScopes, (item) => currentScope = item);
+  if (!currentScope) currentScope = cachedScopes[0];
+}
+
+async function populateVisionDropdowns() {
+  const input1 = document.querySelector(".vision1-select");
+  const input2 = document.querySelector(".vision2-select");
+  const allAttachments = await getData("weaponvisionattachments", "weaponvisionattachments.json");
+
+  cachedVisionAttachments = allAttachments.filter(item => item.Properties?.Type === "Sight");
+
+  // Add a "None" option at the front
+  const noneItem = cachedVisionAttachments.length ? createNoneFromFirstItem(cachedVisionAttachments[0]) : { Name: "None" };
+  cachedVisionAttachments = [noneItem, ...cachedVisionAttachments];
+
+  // Populate both dropdowns with the same array
+  populateDropdown(input1, "vision1-options", cachedVisionAttachments, (item) => currentVision1 = item);
+  populateDropdown(input2, "vision2-options", cachedVisionAttachments, (item) => currentVision2 = item);
+
+  // Default to None if nothing selected
+  if (!currentVision1) currentVision1 = cachedVisionAttachments[0];
+  if (!currentVision2) currentVision2 = cachedVisionAttachments[0];
+}
+
+async function populateAbsorberDropdown() {
+  const input = document.querySelector(".absorber-select");
+  cachedAbsorbers = await getData("absorbers", "absorbers.json");
+  // Add None at the front of cachedWeapons
+  const noneItem = cachedAbsorbers.length ? createNoneFromFirstItem(cachedAbsorbers[0]) : { Name: "None" };
+  cachedAbsorbers = [noneItem, ...cachedAbsorbers];
+
+
+  populateDropdown(input, "absorber-options", cachedAbsorbers, (item) => currentAbsorber = item);
+  if (!currentAbsorber) currentAbsorber = cachedAbsorbers[0];
+}
+/* async function populateRingDropdowns() {
+    const leftInput = document.querySelector(".left-ring-select");
+    const rightInput = document.querySelector(".right-ring-select");
+
+    // Fetch all clothes
+    cachedClothes = await getData("clothes", "clothes.json");
+
+    // First filter all rings
+    const allRings = cachedClothes.filter(item => item.Properties?.Type === "Ring");
+    if (DEBUG) console.log("All rings fetched:", allRings);
+
+    // Further filter by slot
+    const leftRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "left finger");
+    if (DEBUG) console.log("Left rings after filter:", leftRings);
+
+    const rightRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "right finger");
+    if (DEBUG) console.log("Right rings after filter:", rightRings);
+
+    // Add "None" option at the top
+    const noneLeft = leftRings.length ? createNoneFromFirstItem(leftRings[0]) : { Name: "None" };
+    const noneRight = rightRings.length ? createNoneFromFirstItem(rightRings[0]) : { Name: "None" };
+    leftRings.unshift(noneLeft);
+    rightRings.unshift(noneRight);
+
+    // Populate dropdowns
+	populateDropdown(leftInput, "left-ring-options", leftRings, (item) => currentLeftRing = item);
+	populateDropdown(rightInput, "right-ring-options", rightRings, (item) => currentRightRing = item);
+
+    // Default selection
+    if (!currentLeftRing) currentLeftRing = leftRings[0];
+    if (!currentRightRing) currentRightRing = rightRings[0];
+} */
+
+//populate ring dropdown('s) functions
+async function populateRingDropdowns() {
+    const leftInput = document.querySelector(".left-ring-select");
+    const rightInput = document.querySelector(".right-ring-select");
+
+    // 1. Load Data
+    cachedClothes = await getData("clothes", "clothes.json");
+
+    const allRings = cachedClothes.filter(item => item.Properties?.Type === "Ring");
+    const leftRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "left finger");
+    const rightRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "right finger");
+
+    // 2. Setup "None" Options
+    const noneLeft = leftRings.length ? createNoneFromFirstItem(leftRings[0]) : { Name: "None" };
+    const noneRight = rightRings.length ? createNoneFromFirstItem(rightRings[0]) : { Name: "None" };
+    leftRings.unshift(noneLeft);
+    rightRings.unshift(noneRight);
+	
+    // 3. Populate and Map to Select Functions
+    // Passing (item.Name) to your select functions ensures the UI text boxes update
+    populateDropdown(leftInput, "left-ring-options", leftRings, (item) => window.selectLeftring(item.Name));
+    populateDropdown(rightInput, "right-ring-options", rightRings, (item) => window.selectRightring(item.Name));
+
+    // 4. Set Initial Safety Defaults (Internal State)
+    if (!window.currentLeftRing) window.currentLeftRing = leftRings[0];
+    if (!window.currentRightRing) window.currentRightRing = rightRings[0];
+
+    // 5. 🔥 TRIGGER PERSISTENCE RESTORATION
+	// Increase timeout slightly to guarantee DOM render
+    if (window.initializeRingsFromSettings) {
+        setTimeout(() => {
+            console.log("🟢 Running delayed Ring initialization...");
+            window.initializeRingsFromSettings();
+        }, 0); // Changed 0 to 100ms to allow DOM render
+    }
+}
+
+/*  async function populateRingDropdowns() {
+    // 1. Load Data
+    cachedClothes = await getData("clothes", "clothes.json");
+    const allRings = cachedClothes.filter(item => item.Properties?.Type === "Ring");
+    
+    const leftRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "left finger");
+    const rightRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "right finger");
+
+    // Add "None" option
+    const noneItem = { Name: "None" };
+    leftRings.unshift(noneItem);
+    rightRings.unshift(noneItem);
+
+    // 2. Select ALL ring dropdowns
+    const ringSelects = document.querySelectorAll(".ring-mapping-select");
+
+    ringSelects.forEach(select => {
+        const action = select.dataset.action; // e.g., "leftRing1"
+        const isLeft = action.toLowerCase().includes('left');
+        const options = isLeft ? leftRings : rightRings;
+
+        // 3. Populate and Map
+        // We use an empty function here for populateDropdown if you don't need immediate state switching,
+        // or keep your existing callback if you need the UI to update visually on change
+        populateDropdown(select, "ring-options", options, (item) => {
+            // Optional: call your existing handler if needed
+            if (isLeft) window.selectLeftring(item.Name);
+            else window.selectRightring(item.Name);
+        });
+
+        // 4. Restore saved preference
+        if (window.overlayPreferences?.keybindMappings?.[action]) {
+            select.value = window.overlayPreferences.keybindMappings[action];
+        }
+    });
+
+    // 5. Trigger Persistence
+    if (window.initializeRingsFromSettings) {
+        setTimeout(() => window.initializeRingsFromSettings(), 0);
+    }
+}
+ */
+async function populateAllClothesDropdown() {
+  const input = document.querySelector(".all-clothes-select"); // your input element
+  const containerId = "all-clothes-options"; // your dropdown div
+
+  // Fetch all clothes
+  cachedClothes = await getData("clothes", "clothes.json");
+
+  // Add a "None" option at the top
+  const noneItem = cachedClothes.length ? createNoneFromFirstItem(cachedClothes[0]) : { Name: "None" };
+  const allClothes = [noneItem, ...cachedClothes];
+
+  // Populate dropdown
+  populateDropdown(input, containerId, allClothes, (item) => {
+    currentLoadout.selectedClothing = item; // optional: track selection
+  });
+
+  // Default selection
+  if (!currentLoadout.selectedClothing) currentLoadout.selectedClothing = allClothes[0];
+}
+
+async function populateFAPDropdowns() {
+    const mainInput = document.querySelector(".main-fap-select");
+    const secondaryInput = document.querySelector(".secondary-fap-select");
+
+    // 1. Fetch medical tools data using the generic helper
+    const tools = await getData("medicaltools", "medicaltools.json");
+    if (tools.length) cachedMedicalTools = tools;
+
+    // 2. Fetch medical chips data (assuming endpoint is 'medicalchips' and local file is 'medicalchips.json')
+    const chips = await getData("medicalchips", "medicalchips.json");
+    if (chips.length) cachedMedicalChips = chips;
+
+    // 3. Merge FAPs: Tools and Chips
+    // Note: Items from the latest fetch (chips) will be appended to the combined list.
+    const allFaps = [...cachedMedicalTools, ...cachedMedicalChips];
+    window.cachedFaps = allFaps; // Store the merged list for potential filtering/lookup
+
+    // 4. Add "None" option at the top (use the first item in the combined list for structure)
+    const noneItem = cachedFaps.length ? createNoneFromFirstItem(cachedFaps[0]) : { Name: "None" };
+    const dropdownItems = [noneItem, ...cachedFaps];
+
+    // 5. Populate dropdowns, using `currentLoadout` setters
+    populateDropdown(mainInput, "main-fap-options", dropdownItems, (item) => currentLoadout.mainFap = item);
+    populateDropdown(secondaryInput, "secondary-fap-options", dropdownItems, (item) => currentLoadout.secondaryFap = item);
+
+    // 6. Default selection
+    if (!currentLoadout.mainFap) currentLoadout.mainFap = dropdownItems[0];
+    if (!currentLoadout.secondaryFap) currentLoadout.secondaryFap = dropdownItems[0];
+    
+    // 🔥 CRITICAL FIX: Delay initialization to ensure the <select> and its options are attached to the DOM
+    if (window.initializeFapsFromSettings) {
+        setTimeout(() => {
+            if (DEBUG) console.log("🟢 Running delayed FAP initialization...");
+            window.initializeFapsFromSettings();
+        }, 0); 
+    }
+}
+
+
+function handleFapHotChange(type, isChecked) {
+    // 1. Update the isHoT state in currentLoadout (for calculation logic)
+    if (window.currentLoadout && window.currentLoadout[type]) {
+        window.currentLoadout[type].isHoT = isChecked;
+    }
+    
+    // 2. Update the global faps state (used by chatsnooper)
+    if (window.faps && window.faps[type]) {
+         window.faps[type].isHoT = isChecked;
+    }
+    
+    // NEW: Update persistence object for immediate save
+    if (window.fapPersistence) {
+        window.fapPersistence[`${type}IsHoT`] = isChecked;
+    }
+
+
+    // Show/hide the HoT percentage input field
+    const hotInputLabel = document.getElementById(`hot-input-label-${type}`);
+    if (hotInputLabel) {
+        // Ensure it's displayed as inline-flex when checked
+        hotInputLabel.style.display = isChecked ? 'inline-flex' : 'none';
+    }
+
+    // Trigger persistence by calling the save function directly with current values.
+    window.saveCurrentFapSettings();
+    window.updateCalculations(); // Recalculate everything
+}
+window.handleFapHotChange = handleFapHotChange;
+// ================= Initialize All Dropdowns =================
+async function initDropdowns() {
+  console.log("🟢 Starting official initialization...");
+  await Promise.all([
+    populateWeaponDropdown(),
+    populateAmplifierDropdown(),
+    populateVisionDropdowns(),
+    populateScopeDropdown(),
+    populateAbsorberDropdown(),
+    populateRingDropdowns(),
+    populateAllClothesDropdown(),
+    populateFAPDropdowns(),
+	populateMiningDropdowns()
+  ]);
+}
+window.initDropdowns = initDropdowns;
+
+// ================= Event Listeners =================
+function updateStatusElements() {
+  const text = USE_LOCAL_DATA ? "📂 Local Storage" : "🌐 EntropiaNexus API";
+  document.querySelectorAll(".NexusAPIstatus").forEach(el => el.textContent = text);
+  appendData(`> Pixelbot: We are Currently sourcing data from ${text}`);
+}
+
+// Call on load
+document.addEventListener("DOMContentLoaded", async () => {
+  updateStatusElements(); // update immediately
+  await initDropdowns();
+
+  document.querySelector(".weapon-select")?.addEventListener("change", e => {
+    selectWeapon(e.target.value);
+    updateWeaponStats(currentWeapon);
+  });
+  document.querySelector(".amplifier-select")?.addEventListener("change", e => selectAmplifier(e.target.value));
+  document.querySelector(".vision1-select")?.addEventListener("change", e => selectVision1(e.target.value));
+  document.querySelector(".vision2-select")?.addEventListener("change", e => selectVision2(e.target.value));
+  document.querySelector(".scope-select")?.addEventListener("change", e => selectScope(e.target.value));
+  document.querySelector(".absorber-select")?.addEventListener("change", e => selectAbsorber(e.target.value));
+	// Rings
+  //document.querySelector(".left-ring-select")?.addEventListener("change", e => selectLeftring(e.target.value));
+  //document.querySelector(".right-ring-select")?.addEventListener("change", e => selectRightring(e.target.value));
+  //document.querySelector(".all-clothes-select")?.addEventListener("change", e => selectAllclothes(e.target.value));
+	// NEW FAP Listeners
+	document.querySelector(".main-fap-select")?.addEventListener("change", e => {
+		selectFap('mainFap', e.target.value);
+		
+		// Manually trigger save to persist FAP name and current HoT state
+		if (window.saveFapSettings && currentLoadout) {
+			window.saveFapSettings(
+				currentLoadout.mainFap?.Name || 'None',
+				currentLoadout.secondaryFap?.Name || 'None',
+				currentLoadout.mainFap?.isHoT || false,
+				currentLoadout.secondaryFap?.isHoT || false
+			);
+		}
+	});
+
+	document.querySelector(".secondary-fap-select")?.addEventListener("change", e => {
+		selectFap('secondaryFap', e.target.value);
+		
+		// Manually trigger save to persist FAP name and current HoT state
+		if (window.saveFapSettings && currentLoadout) {
+			window.saveFapSettings(
+				currentLoadout.mainFap?.Name || 'None',
+				currentLoadout.secondaryFap?.Name || 'None',
+				currentLoadout.mainFap?.isHoT || false,
+				currentLoadout.secondaryFap?.isHoT || false
+			);
+		}
+	});
+  // NEW: HoT Checkbox Listeners
+    document.querySelector(".main-fap-select")?.addEventListener("change", e => selectFap('mainFap', e.target.value));
+    document.querySelector(".secondary-fap-select")?.addEventListener("change", e => selectFap('secondaryFap', e.target.value));
+
+    // NEW: HoT checkbox listeners
+    document.getElementById("isHoT-mainFap")?.addEventListener("change", e => handleFapHotChange('mainFap', e.target.checked));
+    document.getElementById("isHoT-secondaryFap")?.addEventListener("change", e => handleFapHotChange('secondaryFap', e.target.checked));
+
+	// Armour
+	["head", "chest", "thigh", "shin", "arm", "hand", "foot"].forEach(slot => {
+	  document.querySelector(`.${slot}-select`)?.addEventListener("change", e => {
+		const selected = cachedClothes.find(c => c.Name === e.target.value);
+		if (selected) armour[slot] = selected;
+	  });
+	});
+	// --- NEW MINING CHECKBOX LISTENERS ---
+    document.querySelectorAll('.mining-type-check').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+            const type = e.target.getAttribute('data-type'); 
+            if (window.miningLoadout) {
+                window.miningLoadout.activeSearches[type] = e.target.checked;
+                // Check if the function exists before calling to avoid errors
+                if (typeof calculateMiningCosts === 'function') {
+                    calculateMiningCosts();
+                }
+            }
+        });
+    });
+  const dataSourceButton = document.getElementById("DataSourceToggle");
+
+  dataSourceButton.addEventListener("click", () => {
+	toggleDataSource(dataSourceButton.getAttribute("data-toggle"));
+	updateStatusElements(); // update when toggled
+  });
+});
+
+
+//=====================================================
+//============crafting buddy api junk ========================
+//====================================================
+
+ 
+//let cachedBlueprints = [];
+
+function fuzzyMatch(pattern, text) {
+  pattern = pattern.toLowerCase();
+  text = text.toLowerCase();
+
+  let patternIdx = 0;
+  let textIdx = 0;
+
+  while (patternIdx < pattern.length && textIdx < text.length) {
+    if (pattern[patternIdx] === text[textIdx]) {
+      patternIdx++;
+    }
+    textIdx++;
+  }
+
+  return patternIdx === pattern.length;
+}
+
+function renderAllBlueprintsList(filteredList) {
+  const container = document.getElementById("allBlueprintsList");
+  
+  // Optimization: Only show the first 100 matches to prevent UI freezing
+  const topResults = filteredList.slice(0, 100);
+
+  const html = topResults.map(bp => `
+    <div class="bp-list-item" data-name="${bp.Name.replace(/"/g, '&quot;')}">
+      ${bp.Name}
+    </div>
+  `).join('');
+
+  container.innerHTML = html || '<div class="no-results">No blueprints found</div>';
+}
+
+function loadBlueprint(index) {
+  const saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
+  const bp = saved[index];
+  if (!bp) return;
+
+  document.getElementById('itemName').value = bp.bpName;
+  document.getElementById('maxTT').value = bp.maxTT;
+  document.getElementById('bpType').value = bp.bpType;
+  document.getElementById('bpMu').value = bp.bpMu;
+  document.getElementById('sellMu').value = bp.sellMu;
+  document.getElementById('successRate').value = bp.successRate;
+  document.getElementById('residuePerSuccess').value = bp.residuePerSuccess;
+  document.getElementById('clicks').value = bp.clicks;
+  document.getElementById('bpBook').value = bp.bpBook || '';
+
+  document.getElementById('materials').innerHTML = '';
+  materialIndex = 0;
+  bp.materials.forEach(m => addMaterial(m.name, m.qty, m.tt, m.mu));
+  toggleBpMuField();
+  const clicksInput = document.getElementById('clicks');
+  let clicks = parseInt(clicksInput.value);
+  if (typeof window.calculate === 'function') {
+    window.calculate();
+  } else {
+    console.warn("CraftingBuddy not yet loaded. Skipping calculation.");
+  }
+}
+
+function resetBlueprintFieldsNoBlanks() {
+  document.querySelectorAll('.eu-blueprint input').forEach(input => {
+    if (input.id === 'materialFilter') return; // ✅ Don't clear this input
+
+    if (input.type === 'number') input.value = '';
+    if (input.type === 'text') input.value = '';
+	const clicksInput = document.getElementById('clicks');
+	let clicks = parseInt(clicksInput.value);
+
+	if (!clicks || clicks < 1) {
+	  clicks = 1;
+	  clicksInput.value = 1; // Update the field visually
+	}
+  });
+
+  document.querySelectorAll('.eu-blueprint select').forEach(select => {
+    select.selectedIndex = 0;
+  });
+
+  document.getElementById('successRate').value = 38;
+  document.getElementById('nearSuccessRate').value = 50;
+  document.getElementById('failRate').value = 12;
+
+  const qvscSlider = document.getElementById('qvsc');
+  qvscSlider.value = 0;
+  document.getElementById('qvscLabel').innerText = '0%';
+  updateRatesFromSlider();
+
+  const materialsContainer = document.getElementById('materials');
+  materialsContainer.innerHTML = '';
+
+  if (typeof materialIndex !== 'undefined') {
+    materialIndex = 0;
+  }
+}
+
+
+function multiFieldFilter(query, blueprints) {
+  const lowerQuery = query.toLowerCase();
+
+  // Handle level:x input for filtering by level
+  if (lowerQuery.startsWith("level:")) {
+    const level = parseInt(lowerQuery.split(":")[1]);
+    if (!isNaN(level)) {
+      return blueprints.filter(bp => bp.Properties?.Level === level);
+    }
+  }
+
+  return blueprints.filter(bp => {
+    return (
+      bp.Name.toLowerCase().includes(lowerQuery) ||
+      (bp.Product?.Name?.toLowerCase().includes(lowerQuery)) ||
+      (bp.Properties?.Type?.toLowerCase().includes(lowerQuery)) ||
+      (bp.Profession?.Name?.toLowerCase().includes(lowerQuery)) ||
+      (bp.Book?.Name?.toLowerCase().includes(lowerQuery)) ||
+      bp.Materials?.some(mat => mat.Item.Name.toLowerCase().includes(lowerQuery))
+    );
+  });
+}
+
+function renderFilteredBlueprints(filteredList) {
+  const datalist = document.getElementById("bpList");
+  datalist.innerHTML = "";
+  filteredList.forEach(bp => {
+    const option = document.createElement("option");
+    option.value = bp.Name;
+    datalist.appendChild(option);
+  });
+}
+
+
+async function populateNexusDropdown() {
+  try {
+    const spinner = document.getElementById("bpLoadingSpinner");
+    if (spinner) spinner.style.display = "block";
+
+    //const res = await fetch("https://api.entropianexus.com/blueprints");
+	const blueprints = await getData("blueprints", "blueprints.json");
+
+    cachedBlueprints = blueprints;
+
+    // REMOVE OR COMMENT THIS LINE:
+    // renderFilteredBlueprints(blueprints); 
+
+    if (spinner) spinner.style.display = "none";
+  } catch (err) {
+    console.error("Failed to load blueprint list:", err);
+  }
+}
+
+function showMarkupReminder() {
+  const popup = document.getElementById("markupReminderPopup");
+
+  // Check if user previously disabled the popup
+  const disabled = localStorage.getItem("disableMarkupReminder");
+  if (popup && !disabled) {
+    popup.style.display = "block";
+  }
+}
+
+function closeReminderPopup() {
+  document.getElementById("markupReminderPopup").style.display = "none";
+}
+
+function disableReminderPopup() {
+  localStorage.setItem("disableMarkupReminder", "true");
+  closeReminderPopup();
+}
+function resetMarkupReminder() {
+  localStorage.removeItem("disableMarkupReminder");
+}
+
+async function loadBlueprintByName(name, silent = false) {
+  try {
+    let bp;
+    const searchName = name.trim();
+
+    if (USE_LOCAL_DATA) {
+      // Find the blueprint in the already loaded local cache (Case-Insensitive)
+      bp = cachedBlueprints.find(b => b.Name.toLowerCase() === searchName.toLowerCase());
+    } else {
+      // Fetch specifically from the API
+      const res = await fetch("https://api.entropianexus.com/blueprints/" + encodeURIComponent(searchName));
+      bp = await res.json();
+    }
+
+    if (!bp) throw new Error(`Blueprint data for "${searchName}" not found`);
+
+    // Reset UI fields before loading new data
+    resetBlueprintFieldsNoBlanks();
+
+    // Populate Main BP Info
+    document.getElementById("blueprintNameField").value = bp.Name || bp.Product?.Name || '';
+    document.getElementById("bpBook").value = bp.Book?.Name || '';
+    document.getElementById("bpLevel").value = bp.Properties?.Level || 0;
+    document.getElementById("bpType").value = "Unlimited";
+    document.getElementById("bpMu").value = 105;
+    document.getElementById("qr").value = 1;
+    document.getElementById("sellMu").value = 101;
+
+    // Calculate Max TT from materials
+    const totalTT = bp.Materials.reduce((sum, mat) => {
+      const unitTT = mat.Item?.Properties?.Economy?.MaxTT || 0;
+      return sum + mat.Amount * unitTT;
+    }, 0);
+    document.getElementById("maxTT").value = totalTT.toFixed(2);
+
+    // Add individual materials
+    bp.Materials.forEach((mat) => {
+      const matName = mat.Item?.Name || "Unknown Material";
+      const qty = mat.Amount || 1;
+      const tt = mat.Item?.Properties?.Economy?.MaxTT || 0.01;
+      const mu = 100; // Standardize to 100 for cost lookup
+      addMaterial(matName, qty, tt, mu);
+    });
+
+    // Trigger calculation engine
+    if (typeof window.calculate === 'function') {
+      window.calculate();
+    } else {
+      console.warn("CraftingBuddy not yet loaded. Skipping calculation.");
+    }
+
+    // Only show reminder if not in silent mode (importer)
+    if (!silent && typeof showMarkupReminder === "function") {
+      showMarkupReminder();
+    }
+
+    return true; // Success
+
+  } catch (err) {
+    console.error("Failed to load blueprint data:", err);
+    if (!silent) {
+      alert("Failed to load blueprint: " + name);
+    }
+    return false; // Failure
+  }
+}
+// New & improved change listener
+document.getElementById("materialFilter").addEventListener("change", async (e) => {
+    const name = e.target.value;
+    const match = cachedBlueprints.find(bp => bp.Name === name);
+    if (match) {
+        await loadBlueprintByName(name);
+    }
+});
+
+
+let filterTimeout;
+document.getElementById("materialFilter").addEventListener("input", (e) => {
+  const query = e.target.value.trim();
+  
+  clearTimeout(filterTimeout);
+  filterTimeout = setTimeout(() => {
+      const filtered = query
+        ? multiFieldFilter(query, cachedBlueprints)
+        : cachedBlueprints;
+
+      // REMOVE THIS: This is what creates the unnecessary popup
+      // renderFilteredBlueprints(filtered); 
+
+      // KEEP THIS: This renders your nice custom list
+      renderAllBlueprintsList(filtered);
+
+  }, 200); 
+});
+
+document.getElementById("showAllBlueprintsBtn").addEventListener("click", () => {
+  const list = document.getElementById("allBlueprintsList");
+  const btn = document.getElementById("showAllBlueprintsBtn");
+
+  list.classList.toggle("hidden");
+
+  if (!list.classList.contains("hidden")) {
+    renderAllBlueprintsList(cachedBlueprints);  // render first
+    btn.classList.add("active");                // activate after rendering
+  } else {
+    btn.classList.remove("active");             // turn off when hidden
+  }
+});
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  populateNexusDropdown();
+  const btn = document.getElementById("showAllBlueprintsBtn");
+  btn.classList.add("active");
+  btn.classList.remove("active");
+// This handles clicks for every blueprint in the list efficiently
+  const allBpsContainer = document.getElementById("allBlueprintsList");
+  if (allBpsContainer) {
+    allBpsContainer.addEventListener('click', (e) => {
+        const item = e.target.closest('.bp-list-item');
+        if (item) {
+            const bpName = item.getAttribute('data-name');
+            loadBlueprintByName(bpName);
+            if (DEBUG) console.log(`[Nexus API] Loading: ${bpName}`);
+        }
+    });
+  }
+  
+  
+	const listContainer = document.getElementById('blueprintList');
+	if (listContainer) {
+		listContainer.addEventListener('click', (e) => {
+			const clickable = e.target.closest('.bp-clickable');
+			const deleteBtn = e.target.closest('.delete-bp');
+
+			if (clickable) {
+				const index = clickable.getAttribute('data-index');
+				loadBlueprint(parseInt(index));
+			}
+
+			if (deleteBtn) {
+				e.stopPropagation();
+				const index = deleteBtn.getAttribute('data-index');
+				if(confirm("Delete this blueprint?")) {
+					deleteBlueprint(parseInt(index));
+					//renderBlueprintList(); // Refresh list
+				}
+			}
+		});
+	}
+  
+  
+});
+
+
+
+//=====================================================
+//----------------------------------------------------
+
+
+
+
+// ===== Optional Voice Control (stub) =====
+function initVoiceControl() {
+  if (!('webkitSpeechRecognition' in window)) {
+  if (DEBUG) console.log("Voice recognition not supported.");
+    return;
+  }
+  const recognition = new webkitSpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  recognition.onresult = (event) => {
+    const transcript = event.results[event.results.length - 1][0].transcript.trim();
+  if (DEBUG) console.log("Voice command detected:", transcript);
+  };
+  recognition.start();
+}
+
+initVoiceControl();
+
+if (DEBUG) console.log("Current Data Source. Local?", USE_LOCAL_DATA);
+if (DEBUG) console.log('NexusAPI 2.0 script loaded with proper caching and globals');
 
 
 
 /* ===============================
-VECTOR EMBEDDING SYSTEM
-================================*/
+   LOCAL VECTOR / SHARD SYSTEM
+   =============================== */
 
-function embed(text){
-
- const vec=new Array(64).fill(0);
-
- const words=text.toLowerCase().split(/\W+/);
-
- for(const w of words){
-
-  let h=0;
-
-  for(let i=0;i<w.length;i++)
-   h=(h*31+w.charCodeAt(i))%64;
-
-  vec[h]+=1;
- }
-
- const norm=Math.sqrt(vec.reduce((a,b)=>a+b*b,0))||1;
-
- return vec.map(v=>v/norm);
+function embedText(text){
+    const vec = new Array(64).fill(0);
+    const words = text.toLowerCase().split(/\W+/);
+    words.forEach(w=>{
+        let h = 0;
+        for(let i=0;i<w.length;i++) h = (h<<5)-h + w.charCodeAt(i);
+        const idx = Math.abs(h)%64;
+        vec[idx]+=1;
+    });
+    return vec;
 }
-
 
 function cosine(a,b){
-
- let s=0;
-
- for(let i=0;i<a.length;i++)
-  s+=a[i]*b[i];
-
- return s;
+    let dot=0,na=0,nb=0;
+    for(let i=0;i<a.length;i++){
+        dot+=a[i]*b[i];
+        na+=a[i]*a[i];
+        nb+=b[i]*b[i];
+    }
+    return dot/(Math.sqrt(na)*Math.sqrt(nb)+1e-9);
 }
-
 
 
 /* ===============================
-BM25 LIGHT SCORING
-================================*/
+   KNOWLEDGE INDEX
+   =============================== */
 
-function bm25(query,text){
+let knowledgeShards=[];
 
- const words=text.toLowerCase().split(/\W+/);
-
- const freq={};
-
- for(const w of words)
-  freq[w]=(freq[w]||0)+1;
-
- let score=0;
-
- for(const t of query){
-
-  const f=freq[t]||0;
-
-  if(!f)continue;
-
-  score+=1+Math.log(f);
-
- }
-
- return score/(1+words.length/1000);
+function buildKnowledge(items){
+    items.forEach(item=>{
+        const text = JSON.stringify(item);
+        knowledgeShards.push({
+            text,
+            vector: embedText(text),
+            raw:item
+        });
+    });
 }
-
 
 
 /* ===============================
-INDEXED DB
-================================*/
+   AI SEARCH LAYER
+   =============================== */
 
-function initDB(){
+function searchKnowledge(query){
+    const qvec = embedText(query);
+    const scored = knowledgeShards.map(s=>({
+        score: cosine(qvec,s.vector),
+        shard:s
+    }));
 
- return new Promise(res=>{
+    scored.sort((a,b)=>b.score-a.score);
 
-  const r=indexedDB.open(DB_NAME,1);
-
-  r.onupgradeneeded=e=>{
-   e.target.result.createObjectStore(STORE);
-  };
-
-  r.onsuccess=e=>res(e.target.result);
-
- });
-
+    return scored.slice(0,5).map(s=>s.shard.raw);
 }
-
-
-
-async function saveFile(name,data){
-
- const db=await initDB();
-
- db.transaction(STORE,"readwrite")
-   .objectStore(STORE)
-   .put(data,name);
-
-}
-
-
-
-async function loadFiles(){
-
- const db=await initDB();
-
- return new Promise(res=>{
-
-  const tx=db.transaction(STORE,"readonly");
-  const store=tx.objectStore(STORE);
-
-  store.openCursor().onsuccess=e=>{
-
-   const c=e.target.result;
-
-   if(c){
-
-    knowledgeStore[c.key]=c.value;
-    vectors[c.key]=embed(c.value);
-    manifest.files.push(c.key);
-
-    renderFile(c.key);
-
-    c.continue();
-
-   }else res();
-
-  };
-
- });
-
-}
-
-
-
-function renderFile(name){
-
- const d=document.createElement("div");
-
- d.className="file-item";
-
- d.innerHTML=`<span>${name}</span>`;
-
- fileList.appendChild(d);
-
-}
-
 
 
 /* ===============================
-MASCOT
-================================*/
+   ENTROPIA KNOWLEDGE API
+   =============================== */
 
-class Mascot{
+window.entropiaKnowledge = {
 
- constructor(){
+    search(query){
+        return searchKnowledge(query);
+    },
 
-  this.canvas=document.getElementById("bot-canvas");
-  this.ctx=this.canvas.getContext("2d");
-  this.canvas.width=200;
-  this.canvas.height=200;
-  this.state="idle";
-  this.frame=0;
-
-  requestAnimationFrame(()=>this.animate());
-
- }
-
- set(s){
-
-  this.state=s;
-  mood.innerText=s.toUpperCase();
-
- }
-
- draw(){
-
-  const c=this.ctx;
-  const t=this.frame*0.05;
-
-  c.clearRect(0,0,200,200);
-
-  c.save();
-
-  c.translate(100,100+Math.sin(t)*4);
-
-  c.fillStyle="#3b82f6";
-  c.fillRect(-40,-40,80,60);
-
-  c.fillStyle="#000";
-  c.fillRect(-30,-30,60,40);
-
-  c.fillStyle=this.state=="thinking"?"#fb923c":"#f472b6";
-
-  c.fillRect(-15,-20,6,8);
-  c.fillRect(9,-20,6,8);
-
-  if(this.state=="datastream"){
-
-   c.strokeStyle="#3b82f6";
-
-   for(let i=0;i<5;i++){
-
-    c.beginPath();
-    c.moveTo(-40,-10+i*10+Math.sin(t+i)*4);
-    c.lineTo(40,-10+i*10);
-    c.stroke();
-
-   }
-
-  }
-
-  if(this.state=="stress"){
-
-   c.strokeStyle="#fb923c";
-
-   for(let i=0;i<8;i++){
-
-    c.beginPath();
-    c.arc(Math.random()*80-40,Math.random()*40-20,2,0,Math.PI*2);
-    c.stroke();
-
-   }
-
-  }
-
-  c.restore();
-
- }
-
- animate(){
-
-  this.frame++;
-
-  this.draw();
-
-  requestAnimationFrame(()=>this.animate());
-
- }
-
-}
-
-const mascot=new Mascot();
-
-
-
-/* ===============================
-RAG SEARCH
-================================*/
-
-function search(query){
-
- const terms=query.toLowerCase().split(/\W+/);
-
- const qvec=embed(query);
-
- const scored=[];
-
- for(const name in knowledgeStore){
-
-  const text=knowledgeStore[name];
-
-  const bm=bm25(terms,text);
-
-  const sim=cosine(qvec,vectors[name]);
-
-  const score=bm*0.6+sim*0.4;
-
-  if(score>0.1){
-
-   scored.push({name,text,score});
-
-  }
-
- }
-
- scored.sort((a,b)=>b.score-a.score);
-
- return scored.slice(0,3);
-
-}
-
-
-
-/* ===============================
-INFERENCE
-================================*/
-
-async function run(){
-
- let input=userText.value.trim();
-
- if(!input)return;
-
- userText.value="";
-
- addMessage(input,"user");
-
- mascot.set("datastream");
-
- const matches=search(input);
-
- let context="";
-
- for(const m of matches){
-
-  const lines=m.text.split("\n").slice(0,5);
-
-  context+=`[${m.name}]\n${lines.join("\n")}\n\n`;
-
- }
-
- const prompt=`
-You are Pixelbot OMEGA.
-
-Lead technical analyst for Entropia Universe and Pixelb8.
-
-Tasks:
-Analyze PED economy, loot variance, ROI, mining data.
-
-Repository:
-${manifest.files.join(",")}
-
-Context:
-${context}
-`;
-
- try{
-
- const reply=await engine.chat.completions.create({
-
-  messages:[
-   {role:"system",content:prompt},
-   {role:"user",content:input}
-  ],
-
-  temperature:0.3,
-  max_tokens:800
-
- });
-
- mascot.set("talking");
-
- let out=reply.choices[0].message.content;
-
- if(context)
-  out+="<div class='trace'>Local data used<br>"+context+"</div>";
-
- addMessage(out,"ai",true);
-
- setTimeout(()=>mascot.set("idle"),2000);
-
- }catch(e){
-
-  mascot.set("stress");
-
-  addMessage("Neural link destabilized. Attempting reset.","ai");
-
-  resetEngine();
-
- }
-
-}
-
-
-
-/* ===============================
-ENGINE RESET
-================================*/
-
-async function resetEngine(){
-
- try{
-
-  engine=null;
-
-  await new Promise(r=>setTimeout(r,1200));
-
-  engine=await webllm.CreateMLCEngine("Llama-3.2-1B-Instruct-q4f32_1-MLC");
-
-  mascot.set("idle");
-
-  mood.innerText="NEURAL LINK RESTORED";
-
- }catch{
-
-  mood.innerText="RESET FAILED";
-
- }
-
-}
-
-
-
-/* ===============================
-CHAT UI
-================================*/
-
-function addMessage(t,type,html=false){
-
- const d=document.createElement("div");
-
- d.className="bubble "+type+"-bubble";
-
- if(html) d.innerHTML=t;
- else d.innerText=t;
-
- stage.appendChild(d);
-
- stage.scrollTop=stage.scrollHeight;
-
-}
-
-
-
-/* ===============================
-FILE INGEST
-================================*/
-
-document.getElementById("file-upload").onchange=async e=>{
-
- for(const f of e.target.files){
-
-  const text=await f.text();
-
-  knowledgeStore[f.name]=text;
-
-  vectors[f.name]=embed(text);
-
-  manifest.files.push(f.name);
-
-  await saveFile(f.name,text);
-
-  renderFile(f.name);
-
- }
+    registerDataset(data){
+        buildKnowledge(data);
+    }
 
 };
 
 
-
 /* ===============================
-INIT
-================================*/
+   ENTROPIA NEXUS API CONNECTOR
+   =============================== */
 
-async function init(){
-
- await loadFiles();
-
- engine=await webllm.CreateMLCEngine(
-  "Llama-3.2-1B-Instruct-q4f32_1-MLC",
-  {
-   initProgressCallback:p=>{
-
-    mascot.set("thinking");
-
-    mood.innerText="SYNC "+Math.round(p.progress*100)+"%";
-
-    if(p.progress==1){
-
-     mascot.set("idle");
-
-     userText.disabled=false;
-     sendBtn.disabled=false;
-
-     userText.placeholder="Query Entropia intelligence core...";
-
-    }
-
-   }
-  }
- );
-
- sendBtn.onclick=run;
-
- userText.onkeydown=e=>{
-  if(e.key==="Enter")run();
- };
-
+async function fetchNexus(endpoint){
+    const url = "https://entropianexus.com/api/"+endpoint;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data;
 }
 
-window.onload=init;
+
+/* ===============================
+   BASIC AI RESPONSE ENGINE
+   =============================== */
+
+async function askAI(){
+    const q = document.getElementById("question").value;
+
+    let results = searchKnowledge(q);
+
+    if(results.length===0){
+        document.getElementById("output").innerText="No local match. Querying Nexus API...";
+
+        try{
+            const api = await fetchNexus("items?search="+encodeURIComponent(q));
+            results = api;
+            buildKnowledge(api);
+        }
+        catch(e){
+            document.getElementById("output").innerText="API error";
+            return;
+        }
+    }
+
+    document.getElementById("output").innerText =
+        JSON.stringify(results,null,2);
+}
+
+
+/* ===============================
+   EXAMPLE LOCAL DATA REGISTRATION
+   =============================== */
+
+fetch("dailymissions.json")
+.then(r=>r.json())
+.then(data=>{
+    entropiaKnowledge.registerDataset(data);
+})
+.catch(()=>{});
 
 </script>
 
