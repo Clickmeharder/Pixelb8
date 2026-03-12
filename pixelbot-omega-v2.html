@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixelbot OMEGA v2 | Pixelb8 Analyst Console</title>
+
+<style>
+:root{
+ --p8-pink:#f472b6;
+ --p8-blue:#3b82f6;
+ --p8-orange:#fb923c;
+
+ --p8-bg:#09090b;
+ --p8-surface:#18181b;
+ --p8-border:#27272a;
+
+ --glass-bg:rgba(255,255,255,0.04);
+ --glass-border:rgba(255,255,255,0.08);
+
+ --glow-soft:0 0 12px rgba(244,114,182,0.2);
+ --glow-strong:0 0 30px rgba(244,114,182,0.45);
+
+ --transition-fast:0.18s cubic-bezier(.4,.0,.2,1);
+}
+
+*{box-sizing:border-box;font-family:JetBrains Mono,monospace}
+
+body{
+ margin:0;
+ background:var(--p8-bg);
+ color:white;
+ display:flex;
+ height:100vh;
+ overflow:hidden;
+}
+
+#side-panel{
+ width:280px;
+ background:#000;
+ border-right:1px solid var(--p8-border);
+ padding:20px;
+ display:flex;
+ flex-direction:column;
+ gap:15px;
+}
+
+#bot-canvas{
+ width:180px;
+ height:180px;
+ background:#111;
+ border-radius:20px;
+ border:2px solid var(--p8-pink);
+ box-shadow:var(--glow-soft);
+ align-self:center;
+}
+
+.bot-label{
+ text-align:center;
+ color:var(--p8-pink);
+ letter-spacing:3px;
+ font-weight:bold;
+}
+
+#mood-label{
+ text-align:center;
+ font-size:.7rem;
+ color:var(--p8-blue);
+}
+
+#file-gallery{
+ flex:1;
+ overflow:auto;
+ border-top:1px solid #222;
+ padding-top:10px;
+}
+
+.file-item{
+ background:var(--p8-surface);
+ border:1px solid #222;
+ padding:8px;
+ border-radius:6px;
+ font-size:.65rem;
+ margin-bottom:6px;
+ display:flex;
+ justify-content:space-between;
+}
+
+#main-core{
+ flex:1;
+ display:flex;
+ flex-direction:column;
+ background:radial-gradient(circle at top right,#111,#000);
+}
+
+#stage{
+ flex:1;
+ overflow:auto;
+ padding:40px;
+ display:flex;
+ flex-direction:column;
+ gap:20px;
+ padding-bottom:180px;
+}
+
+.bubble{
+ max-width:80%;
+ padding:16px 20px;
+ border-radius:16px;
+ border:1px solid var(--p8-border);
+ line-height:1.6;
+}
+
+.ai-bubble{
+ align-self:flex-start;
+ background:#121214;
+ box-shadow:var(--glow-soft);
+}
+
+.user-bubble{
+ align-self:flex-end;
+ background:#27272a;
+ color:var(--p8-pink);
+}
+
+#interaction-zone{
+ position:absolute;
+ bottom:0;
+ left:280px;
+ right:0;
+ background:var(--glass-bg);
+ backdrop-filter:blur(24px) saturate(160%);
+ border-top:1px solid var(--glass-border);
+ padding:25px;
+}
+
+.controls{
+ display:flex;
+ gap:10px;
+ max-width:900px;
+ margin:auto;
+}
+
+input{
+ flex:1;
+ padding:14px;
+ border-radius:10px;
+ border:1px solid #333;
+ background:#0a0a0c;
+ color:white;
+}
+
+button{
+ background:var(--p8-pink);
+ border:none;
+ padding:0 25px;
+ border-radius:10px;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+.upload-trigger{
+ margin-top:10px;
+ border:1px dashed #333;
+ padding:10px;
+ text-align:center;
+ font-size:.65rem;
+ cursor:pointer;
+}
+
+.trace{
+ font-size:.7rem;
+ margin-top:10px;
+ color:#888;
+ background:#000;
+ border:1px solid #222;
+ padding:10px;
+ border-radius:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="side-panel">
+
+<div class="bot-label">PIXELBOT OMEGA</div>
+<canvas id="bot-canvas"></canvas>
+<div id="mood-label">INITIALIZING</div>
+
+<div id="file-gallery">
+<div id="file-list"></div>
+
+<label class="upload-trigger" for="file-upload">+ INGEST DATA</label>
+<input id="file-upload" type="file" hidden multiple>
+</div>
+
+</div>
+
+<div id="main-core">
+
+<div id="stage">
+<div class="bubble ai-bubble">
+Pixelbot OMEGA v2 initialized.<br>
+Local-first Entropia analyst console online.
+</div>
+</div>
+
+<div id="interaction-zone">
+
+<div class="controls">
+<input id="user-text" placeholder="Linking neural interface..." disabled>
+<button id="send-btn" disabled>SYNC</button>
+</div>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+
+const stage=document.getElementById("stage");
+const userText=document.getElementById("user-text");
+const sendBtn=document.getElementById("send-btn");
+const mood=document.getElementById("mood-label");
+const fileList=document.getElementById("file-list");
+
+let engine=null;
+let knowledgeStore={};
+let vectors={};
+let manifest={files:[]};
+
+const DB_NAME="pixelbot_omega_v2";
+const STORE="registry";
+
+
+
+/* ===============================
+VECTOR EMBEDDING SYSTEM
+================================*/
+
+function embed(text){
+
+ const vec=new Array(64).fill(0);
+
+ const words=text.toLowerCase().split(/\W+/);
+
+ for(const w of words){
+
+  let h=0;
+
+  for(let i=0;i<w.length;i++)
+   h=(h*31+w.charCodeAt(i))%64;
+
+  vec[h]+=1;
+ }
+
+ const norm=Math.sqrt(vec.reduce((a,b)=>a+b*b,0))||1;
+
+ return vec.map(v=>v/norm);
+}
+
+
+function cosine(a,b){
+
+ let s=0;
+
+ for(let i=0;i<a.length;i++)
+  s+=a[i]*b[i];
+
+ return s;
+}
+
+
+
+/* ===============================
+BM25 LIGHT SCORING
+================================*/
+
+function bm25(query,text){
+
+ const words=text.toLowerCase().split(/\W+/);
+
+ const freq={};
+
+ for(const w of words)
+  freq[w]=(freq[w]||0)+1;
+
+ let score=0;
+
+ for(const t of query){
+
+  const f=freq[t]||0;
+
+  if(!f)continue;
+
+  score+=1+Math.log(f);
+
+ }
+
+ return score/(1+words.length/1000);
+}
+
+
+
+/* ===============================
+INDEXED DB
+================================*/
+
+function initDB(){
+
+ return new Promise(res=>{
+
+  const r=indexedDB.open(DB_NAME,1);
+
+  r.onupgradeneeded=e=>{
+   e.target.result.createObjectStore(STORE);
+  };
+
+  r.onsuccess=e=>res(e.target.result);
+
+ });
+
+}
+
+
+
+async function saveFile(name,data){
+
+ const db=await initDB();
+
+ db.transaction(STORE,"readwrite")
+   .objectStore(STORE)
+   .put(data,name);
+
+}
+
+
+
+async function loadFiles(){
+
+ const db=await initDB();
+
+ return new Promise(res=>{
+
+  const tx=db.transaction(STORE,"readonly");
+  const store=tx.objectStore(STORE);
+
+  store.openCursor().onsuccess=e=>{
+
+   const c=e.target.result;
+
+   if(c){
+
+    knowledgeStore[c.key]=c.value;
+    vectors[c.key]=embed(c.value);
+    manifest.files.push(c.key);
+
+    renderFile(c.key);
+
+    c.continue();
+
+   }else res();
+
+  };
+
+ });
+
+}
+
+
+
+function renderFile(name){
+
+ const d=document.createElement("div");
+
+ d.className="file-item";
+
+ d.innerHTML=`<span>${name}</span>`;
+
+ fileList.appendChild(d);
+
+}
+
+
+
+/* ===============================
+MASCOT
+================================*/
+
+class Mascot{
+
+ constructor(){
+
+  this.canvas=document.getElementById("bot-canvas");
+  this.ctx=this.canvas.getContext("2d");
+  this.canvas.width=200;
+  this.canvas.height=200;
+  this.state="idle";
+  this.frame=0;
+
+  requestAnimationFrame(()=>this.animate());
+
+ }
+
+ set(s){
+
+  this.state=s;
+  mood.innerText=s.toUpperCase();
+
+ }
+
+ draw(){
+
+  const c=this.ctx;
+  const t=this.frame*0.05;
+
+  c.clearRect(0,0,200,200);
+
+  c.save();
+
+  c.translate(100,100+Math.sin(t)*4);
+
+  c.fillStyle="#3b82f6";
+  c.fillRect(-40,-40,80,60);
+
+  c.fillStyle="#000";
+  c.fillRect(-30,-30,60,40);
+
+  c.fillStyle=this.state=="thinking"?"#fb923c":"#f472b6";
+
+  c.fillRect(-15,-20,6,8);
+  c.fillRect(9,-20,6,8);
+
+  if(this.state=="datastream"){
+
+   c.strokeStyle="#3b82f6";
+
+   for(let i=0;i<5;i++){
+
+    c.beginPath();
+    c.moveTo(-40,-10+i*10+Math.sin(t+i)*4);
+    c.lineTo(40,-10+i*10);
+    c.stroke();
+
+   }
+
+  }
+
+  if(this.state=="stress"){
+
+   c.strokeStyle="#fb923c";
+
+   for(let i=0;i<8;i++){
+
+    c.beginPath();
+    c.arc(Math.random()*80-40,Math.random()*40-20,2,0,Math.PI*2);
+    c.stroke();
+
+   }
+
+  }
+
+  c.restore();
+
+ }
+
+ animate(){
+
+  this.frame++;
+
+  this.draw();
+
+  requestAnimationFrame(()=>this.animate());
+
+ }
+
+}
+
+const mascot=new Mascot();
+
+
+
+/* ===============================
+RAG SEARCH
+================================*/
+
+function search(query){
+
+ const terms=query.toLowerCase().split(/\W+/);
+
+ const qvec=embed(query);
+
+ const scored=[];
+
+ for(const name in knowledgeStore){
+
+  const text=knowledgeStore[name];
+
+  const bm=bm25(terms,text);
+
+  const sim=cosine(qvec,vectors[name]);
+
+  const score=bm*0.6+sim*0.4;
+
+  if(score>0.1){
+
+   scored.push({name,text,score});
+
+  }
+
+ }
+
+ scored.sort((a,b)=>b.score-a.score);
+
+ return scored.slice(0,3);
+
+}
+
+
+
+/* ===============================
+INFERENCE
+================================*/
+
+async function run(){
+
+ let input=userText.value.trim();
+
+ if(!input)return;
+
+ userText.value="";
+
+ addMessage(input,"user");
+
+ mascot.set("datastream");
+
+ const matches=search(input);
+
+ let context="";
+
+ for(const m of matches){
+
+  const lines=m.text.split("\n").slice(0,5);
+
+  context+=`[${m.name}]\n${lines.join("\n")}\n\n`;
+
+ }
+
+ const prompt=`
+You are Pixelbot OMEGA.
+
+Lead technical analyst for Entropia Universe and Pixelb8.
+
+Tasks:
+Analyze PED economy, loot variance, ROI, mining data.
+
+Repository:
+${manifest.files.join(",")}
+
+Context:
+${context}
+`;
+
+ try{
+
+ const reply=await engine.chat.completions.create({
+
+  messages:[
+   {role:"system",content:prompt},
+   {role:"user",content:input}
+  ],
+
+  temperature:0.3,
+  max_tokens:800
+
+ });
+
+ mascot.set("talking");
+
+ let out=reply.choices[0].message.content;
+
+ if(context)
+  out+="<div class='trace'>Local data used<br>"+context+"</div>";
+
+ addMessage(out,"ai",true);
+
+ setTimeout(()=>mascot.set("idle"),2000);
+
+ }catch(e){
+
+  mascot.set("stress");
+
+  addMessage("Neural link destabilized. Attempting reset.","ai");
+
+  resetEngine();
+
+ }
+
+}
+
+
+
+/* ===============================
+ENGINE RESET
+================================*/
+
+async function resetEngine(){
+
+ try{
+
+  engine=null;
+
+  await new Promise(r=>setTimeout(r,1200));
+
+  engine=await webllm.CreateMLCEngine("Llama-3.2-1B-Instruct-q4f32_1-MLC");
+
+  mascot.set("idle");
+
+  mood.innerText="NEURAL LINK RESTORED";
+
+ }catch{
+
+  mood.innerText="RESET FAILED";
+
+ }
+
+}
+
+
+
+/* ===============================
+CHAT UI
+================================*/
+
+function addMessage(t,type,html=false){
+
+ const d=document.createElement("div");
+
+ d.className="bubble "+type+"-bubble";
+
+ if(html) d.innerHTML=t;
+ else d.innerText=t;
+
+ stage.appendChild(d);
+
+ stage.scrollTop=stage.scrollHeight;
+
+}
+
+
+
+/* ===============================
+FILE INGEST
+================================*/
+
+document.getElementById("file-upload").onchange=async e=>{
+
+ for(const f of e.target.files){
+
+  const text=await f.text();
+
+  knowledgeStore[f.name]=text;
+
+  vectors[f.name]=embed(text);
+
+  manifest.files.push(f.name);
+
+  await saveFile(f.name,text);
+
+  renderFile(f.name);
+
+ }
+
+};
+
+
+
+/* ===============================
+INIT
+================================*/
+
+async function init(){
+
+ await loadFiles();
+
+ engine=await webllm.CreateMLCEngine(
+  "Llama-3.2-1B-Instruct-q4f32_1-MLC",
+  {
+   initProgressCallback:p=>{
+
+    mascot.set("thinking");
+
+    mood.innerText="SYNC "+Math.round(p.progress*100)+"%";
+
+    if(p.progress==1){
+
+     mascot.set("idle");
+
+     userText.disabled=false;
+     sendBtn.disabled=false;
+
+     userText.placeholder="Query Entropia intelligence core...";
+
+    }
+
+   }
+  }
+ );
+
+ sendBtn.onclick=run;
+
+ userText.onkeydown=e=>{
+  if(e.key==="Enter")run();
+ };
+
+}
+
+window.onload=init;
+
+</script>
+
+</body>
+</html>
