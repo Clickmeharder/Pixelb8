@@ -2874,11 +2874,106 @@ The question type is optional and can be 'singlechoice' or 'multiplechoice'.`
 	{ command: "!entrivia-defaultquestions", description: "Toggles default entrivia questions.", usage: "!entrivia-defaultquestions" },
 	{ command: "!entrivia-customquestions", description: "Toggles custom entrivia questions.", usage: "!entrivia-customquestions" }
 ];
+    const userCommandList = document.getElementById("usercommandList");
+    const broadcasterCommandList = document.getElementById("broadcastercommandList");
+function createCommandList(commandArray, targetListElement) {
+    if (!targetListElement) return;
+    targetListElement.innerHTML = ''; // Clear existing to prevent doubling up
 
+    commandArray.forEach(function (command) {
+        const description = document.createElement("div");
+
+        // Command title with ❓ tooltip
+        const strong = document.createElement("strong");
+        strong.textContent = command.command;
+
+        const infoSpan = document.createElement("span");
+        infoSpan.classList.add("command-info");
+        infoSpan.setAttribute("title", "Usage: " + command.usage);
+        infoSpan.textContent = "❓";
+        infoSpan.style.cssFloat = "right";
+
+        strong.appendChild(infoSpan);
+        description.appendChild(strong);
+
+        // Description
+        const commandDescription = document.createElement("p");
+        commandDescription.textContent = command.description;
+        commandDescription.style.fontStyle = "italic";
+        commandDescription.style.fontSize = "small";
+        description.appendChild(commandDescription);
+
+        // Divider after description
+        const dividerAfterDescription = document.createElement("div");
+        dividerAfterDescription.style.borderTop = "3px ridge var(--border-color)";
+        dividerAfterDescription.style.margin = "4px 0";
+        description.appendChild(dividerAfterDescription);
+
+        // Usage label
+        const usageLabel = document.createElement("p");
+        usageLabel.textContent = "Usage:";
+        usageLabel.style.fontSize = "smaller";
+        description.appendChild(usageLabel);
+
+        // Usage label bottom divider
+        const dividerAfterusageLabel = document.createElement("div");
+        dividerAfterusageLabel.style.borderTop = "2px ridge var(--border-color)";
+        dividerAfterusageLabel.style.margin = "4px 0";
+        usageLabel.appendChild(dividerAfterusageLabel);
+
+        // Split usage into lines
+        const usageLines = command.usage.split('\n').map(line => line.trim()).filter(line => line !== "");
+
+        const usageExamples = [];
+        const usageNotes = [];
+
+        usageLines.forEach(line => {
+            // Check if line starts with the command name (handle sub-commands like !chatterwheel add)
+            if (line.startsWith(command.command.split(' ')[0])) {
+                usageExamples.push(line);
+            } else {
+                usageNotes.push(line);
+            }
+        });
+
+        usageExamples.forEach((usageExample, index) => {
+            const p = document.createElement("p");
+            p.textContent = usageExample;
+            p.style.fontSize = "smaller";
+            description.appendChild(p);
+
+            if (index < usageExamples.length - 1) {
+                const usageDivider = document.createElement("div");
+                usageDivider.style.borderTop = "2px ridge var(--border-color)";
+                usageDivider.style.margin = "4px 0";
+                description.appendChild(usageDivider);
+            }
+        });
+
+        usageNotes.forEach(note => {
+            const p = document.createElement("p");
+            p.textContent = note;
+            p.style.fontSize = "smaller";
+            description.appendChild(p);
+        });
+
+        const li = document.createElement("li");
+        li.appendChild(description);
+        targetListElement.appendChild(li);
+    });
+}
+function updateCommandlist() {
+    createCommandList(usercommands, userCommandList);
+    createCommandList(streamercommands, broadcasterCommandList);
+}
+
+function updateWheelCommandUI() {
+    createCommandList(pixeldisccommands, pixelDiscCommandList);
+	createCommandList(prizelistcommands, prizeListCommandList);
+}
 function updateCommandlist() {
     const userCommandList = document.getElementById("usercommandList");
     const broadcasterCommandList = document.getElementById("broadcastercommandList");
-
     function createCommandList(commandArray, targetList) {
         commandArray.forEach(function (command) {
             const description = document.createElement("div");
@@ -2971,25 +3066,39 @@ function updateCommandlist() {
     
 }
 
-function updateWheelCommandUI() {
-    // Populate PixelDisc Commands
-    const pixelDiscElement = document.getElementById(pixelDiscCommandList);
-    if (pixelDiscElement && typeof pixeldisccommands !== 'undefined') {
-        pixelDiscElement.innerHTML = ''; 
-        createCommandList(pixeldisccommands, 'pixelDiscCommandList');
-    }
+// NEW version of Function to dynamically add command spans based on the `data-option`
+function updateTwitchCommandInfo() {
+    const commandInfoElements = document.querySelectorAll('.twitchcmd-info');
+    
+    commandInfoElements.forEach(function(element) {
+        if (element.children.length > 0) return; // Prevent double injection
 
-    // Populate Prize List Commands
-    const prizeListElement = document.getElementById(prizeListCommandList);
-    if (prizeListElement && typeof prizelistcommands !== 'undefined') {
-        prizeListElement.innerHTML = ''; 
-        createCommandList(prizelistcommands, 'prizeListCommandList');
-    }
+        const option = element.getAttribute('data-option');
+        
+        // Search across ALL command arrays
+        let command = usercommands.find(cmd => cmd.command === option) ||
+                      streamercommands.find(cmd => cmd.command === option) ||
+                      pixeldisccommands.find(cmd => cmd.command === option) ||
+                      prizelistcommands.find(cmd => cmd.command === option);
+
+        if (command) {
+            const commandTextSpan = document.createElement('span');
+            commandTextSpan.classList.add('command-text');
+            commandTextSpan.textContent = `Twitch Cmd = ${command.command}`;
+
+            const commandInfoSpan = document.createElement('span');
+            commandInfoSpan.classList.add('command-info');
+            commandInfoSpan.setAttribute("title", "Usage: " + command.usage);
+            commandInfoSpan.textContent = '❓';
+
+            element.appendChild(commandTextSpan);
+            element.appendChild(commandInfoSpan);
+        }
+    });
 }
 
-
-// Function to dynamically add command spans based on the `data-option`
-function updateTwitchCommandInfo() {
+// OLD Function to dynamically add command spans based on the `data-option`
+/* function updateTwitchCommandInfo() {
     // Get all elements with the class 'twitchcmd-info'
     const commandInfoElements = document.querySelectorAll('.twitchcmd-info');
     
@@ -3026,7 +3135,7 @@ function updateTwitchCommandInfo() {
             element.appendChild(commandInfoSpan);
         }
     });
-}
+} */
 
 // Call the function to update the command info on page load
 updateTwitchCommandInfo();
