@@ -1779,7 +1779,7 @@ select.b {}
 	margin-left: 5px;
 	font-size: 16px;
 }
-#commandListContainer {
+#commandListContainer, .commandListContainer {
     font-family: Arial, sans-serif;
     font-weight: bold;
     background-color: var(--bg-color-alt3);
@@ -1790,14 +1790,14 @@ select.b {}
     margin: 10px auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-#commandListContainer h2 {
+#commandListContainer h2, .commandListContainer h2 {
 	color: ;
 	text-align: center;
 	border: ;
 	margin: 0;
 	font-size: large;
 }
-#usercommandList h2 {
+#usercommandList h2, #pixelDiscCommandList h2, #prizeListCommandList h2 {
 	color: ;
 	text-align: center;
 	border: ;
@@ -1813,7 +1813,7 @@ select.b {}
   list-style-type: none;
   padding: 0;
 }
-ul#usercommandList {
+ul#usercommandList, ul#pixelDiscCommandList, ul#prizeListCommandList, ul#broadcastercommandlist {
   list-style-type: none;
   padding: 0;
 }
@@ -1821,7 +1821,7 @@ ul#broadcastercommandlist {
   list-style-type: none;
   padding: 0;
 }
-#usercommandList li, #broadcastercommandList li {
+#usercommandList li, #broadcastercommandList li, #pixelDiscCommandList li, #prizeListCommandList li {
 	color: var(--input-color);
 	padding: 2px;
 	border: 2px ridge #393636;
@@ -1832,7 +1832,7 @@ ul#broadcastercommandlist {
   color: #e09d09f7;
   font-weight: bold;
 }
-#usercommandList p, #broadcastercommandList p { margin:0;}
+#usercommandList p, #broadcastercommandList p, #pixelDiscCommandList p, #prizeListCommandList p { margin:0;}
 
 
 .inputRow {
