@@ -3,23 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PIXELBOT OMEGA // ANALYST CONSOLE v2.0</title>
+<title>PIXELBOT OMEGA // ANALYST CONSOLE v3.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════════════════
-   PIXELBOT OMEGA — CSS DESIGN SYSTEM
-═══════════════════════════════════════════════════════ */
 :root {
-  /* Core Palette */
   --c-bg:          #03030a;
   --c-bg2:         #07071a;
   --c-surface:     rgba(10, 10, 28, 0.85);
   --c-surface2:    rgba(15, 15, 40, 0.6);
   --c-border:      rgba(80, 100, 255, 0.18);
   --c-border-h:    rgba(140, 160, 255, 0.4);
-
-  /* Brand Colours */
   --p-pink:        #f472b6;
   --p-pink-dim:    rgba(244, 114, 182, 0.15);
   --p-pink-glow:   rgba(244, 114, 182, 0.5);
@@ -33,25 +27,17 @@
   --p-green:       #4ade80;
   --p-green-dim:   rgba(74, 222, 128, 0.12);
   --p-yellow:      #fbbf24;
-
-  /* Text */
   --t-primary:   #e2e8f0;
   --t-secondary: #94a3b8;
   --t-dim:       #475569;
   --t-accent:    var(--p-pink);
-
-  /* Fonts */
   --f-mono:    'Share Tech Mono', monospace;
   --f-display: 'Orbitron', sans-serif;
   --f-body:    'Space Mono', monospace;
-
-  /* Glow vars (animated) */
   --glow-pink:   0 0 8px var(--p-pink-glow), 0 0 20px var(--p-pink-dim), 0 0 40px rgba(244,114,182,0.1);
   --glow-blue:   0 0 8px var(--p-blue-glow), 0 0 20px var(--p-blue-dim);
   --glow-cyan:   0 0 8px rgba(34,211,238,0.6), 0 0 20px var(--p-cyan-dim);
 }
-
-/* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   background: var(--c-bg);
@@ -63,25 +49,12 @@ body {
   grid-template-columns: 300px 1fr;
   grid-template-rows: 48px 1fr;
 }
-
-/* ── CRT Scanline Overlay ── */
 body::after {
   content: "";
   position: fixed; inset: 0;
-  background:
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.07) 2px,
-      rgba(0,0,0,0.07) 4px
-    );
+  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);
   pointer-events: none; z-index: 9999;
-  animation: scanroll 8s linear infinite;
 }
-@keyframes scanroll { to { background-position: 0 800px; } }
-
-/* ── Top Nav Bar ── */
 #topbar {
   grid-column: 1 / -1;
   background: linear-gradient(90deg, #000 0%, var(--c-bg2) 100%);
@@ -96,37 +69,18 @@ body::after {
   background: linear-gradient(90deg, transparent, var(--p-pink), var(--p-blue), transparent);
   animation: borderflow 4s linear infinite;
 }
-@keyframes borderflow {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-.topbar-logo {
-  font-family: var(--f-display);
-  font-size: 0.7rem;
-  font-weight: 900;
-  letter-spacing: 3px;
-  color: var(--p-pink);
-  text-shadow: var(--glow-pink);
-}
+@keyframes borderflow { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+.topbar-logo { font-family: var(--f-display); font-size: 0.7rem; font-weight: 900; letter-spacing: 3px; color: var(--p-pink); text-shadow: var(--glow-pink); }
 .topbar-logo span { color: var(--p-blue); }
 .topbar-tags { display: flex; gap: 8px; margin-left: auto; }
-.tag {
-  font-size: 0.55rem;
-  letter-spacing: 2px;
-  padding: 3px 8px;
-  border: 1px solid;
-  border-radius: 2px;
-}
+.tag { font-size: 0.55rem; letter-spacing: 2px; padding: 3px 8px; border: 1px solid; border-radius: 2px; }
 .tag-pink { border-color: var(--p-pink); color: var(--p-pink); }
 .tag-blue { border-color: var(--p-blue); color: var(--p-blue); }
 .tag-green { border-color: var(--p-green); color: var(--p-green); animation: blink 2s step-end infinite; }
 @keyframes blink { 50% { opacity: 0.2; } }
-
 #vram-bar { display: flex; align-items: center; gap: 8px; font-size: 0.55rem; color: var(--t-secondary); }
 #vram-fill { height: 4px; width: 80px; background: var(--c-border); border-radius: 2px; overflow: hidden; }
 #vram-inner { height: 100%; width: 0%; background: linear-gradient(90deg, var(--p-green), var(--p-yellow)); transition: width 0.5s, background 0.5s; border-radius: 2px; }
-
-/* ── Sidebar ── */
 #sidebar {
   background: linear-gradient(180deg, #000 0%, var(--c-bg2) 100%);
   border-right: 1px solid var(--c-border);
@@ -134,328 +88,103 @@ body::after {
   padding: 16px; gap: 14px;
   overflow: hidden;
 }
-
-.panel-label {
-  font-size: 0.5rem;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: var(--t-dim);
-  border-bottom: 1px solid var(--c-border);
-  padding-bottom: 6px;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.panel-label .pulse-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--p-green);
-  box-shadow: 0 0 6px var(--p-green);
-  animation: blink 1.4s ease-in-out infinite;
-}
-
-/* ── Mascot Canvas ── */
-#mascot-wrap {
-  background: radial-gradient(ellipse at center, rgba(60,40,120,0.3) 0%, #000 70%);
-  border: 1px solid var(--c-border);
-  border-radius: 4px;
-  height: 180px;
-  position: relative;
-  overflow: hidden;
-}
-#mascot-wrap::before {
-  content: "NEURAL-LINK ACTIVE";
-  position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
-  font-size: 0.45rem; letter-spacing: 3px; color: var(--p-pink);
-  opacity: 0.6;
-}
+.panel-label { font-size: 0.5rem; letter-spacing: 4px; text-transform: uppercase; color: var(--t-dim); border-bottom: 1px solid var(--c-border); padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+.panel-label .pulse-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--p-green); box-shadow: 0 0 6px var(--p-green); animation: blink 1.4s ease-in-out infinite; }
+#mascot-wrap { background: radial-gradient(ellipse at center, rgba(60,40,120,0.3) 0%, #000 70%); border: 1px solid var(--c-border); border-radius: 4px; height: 180px; position: relative; overflow: hidden; }
+#mascot-wrap::before { content: "NEURAL-LINK ACTIVE"; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); font-size: 0.45rem; letter-spacing: 3px; color: var(--p-pink); opacity: 0.6; }
 #bot-canvas { width: 100%; height: 100%; display: block; }
-
-/* ── Status Readouts ── */
-.status-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-.stat-cell {
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  padding: 8px 10px;
-  border-radius: 3px;
-  display: flex; flex-direction: column; gap: 2px;
-}
+.status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.stat-cell { background: var(--c-surface); border: 1px solid var(--c-border); padding: 8px 10px; border-radius: 3px; display: flex; flex-direction: column; gap: 2px; }
 .stat-cell .lbl { font-size: 0.45rem; letter-spacing: 2px; color: var(--t-dim); }
 .stat-cell .val { font-size: 0.75rem; color: var(--p-cyan); font-family: var(--f-display); font-weight: 700; }
 .stat-cell .val.pink { color: var(--p-pink); }
 .stat-cell .val.green { color: var(--p-green); }
 .stat-cell .val.orange { color: var(--p-orange); }
-
-/* ── Nexus API Toggle ── */
-.api-toggle-row {
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  padding: 8px 12px; border-radius: 3px;
-}
+.api-toggle-row { display: flex; align-items: center; justify-content: space-between; background: var(--c-surface); border: 1px solid var(--c-border); padding: 8px 12px; border-radius: 3px; }
 .api-toggle-row label { font-size: 0.55rem; letter-spacing: 2px; color: var(--t-secondary); }
 .toggle-switch { position: relative; width: 36px; height: 18px; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
-.slider {
-  position: absolute; inset: 0; cursor: pointer;
-  background: #1a1a2e; border: 1px solid var(--c-border);
-  border-radius: 18px; transition: 0.3s;
-}
-.slider::before {
-  content: ""; position: absolute;
-  height: 12px; width: 12px; left: 2px; top: 2px;
-  background: var(--t-dim);
-  border-radius: 50%; transition: 0.3s;
-}
+.slider { position: absolute; inset: 0; cursor: pointer; background: #1a1a2e; border: 1px solid var(--c-border); border-radius: 18px; transition: 0.3s; }
+.slider::before { content: ""; position: absolute; height: 12px; width: 12px; left: 2px; top: 2px; background: var(--t-dim); border-radius: 50%; transition: 0.3s; }
 input:checked + .slider { background: var(--p-blue-dim); border-color: var(--p-blue); }
 input:checked + .slider::before { transform: translateX(18px); background: var(--p-blue); box-shadow: var(--glow-blue); }
-
-/* ── File Registry ── */
 #file-registry { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; min-height: 0; }
 #file-registry::-webkit-scrollbar { width: 3px; }
-#file-registry::-webkit-scrollbar-track { background: transparent; }
 #file-registry::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 2px; }
-
-.file-node {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--c-surface); border: 1px solid var(--c-border);
-  padding: 7px 10px; border-radius: 3px; font-size: 0.6rem;
-  cursor: pointer; transition: border-color 0.2s, background 0.2s;
-  position: relative; overflow: hidden;
-}
-.file-node::before {
-  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
-  background: var(--p-cyan); box-shadow: var(--glow-cyan);
-}
+.file-node { display: flex; align-items: center; gap: 8px; background: var(--c-surface); border: 1px solid var(--c-border); padding: 7px 10px; border-radius: 3px; font-size: 0.6rem; cursor: pointer; transition: border-color 0.2s, background 0.2s; position: relative; overflow: hidden; }
+.file-node::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--p-cyan); box-shadow: var(--glow-cyan); }
 .file-node:hover { border-color: var(--c-border-h); background: rgba(34,211,238,0.06); }
 .file-node .fname { flex: 1; color: var(--t-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .file-node .fsize { color: var(--t-dim); font-size: 0.5rem; white-space: nowrap; }
 .file-node .fstatus { color: var(--p-green); font-size: 0.5rem; }
-.file-node.remove-hover:hover .fstatus { color: var(--p-orange); }
-
-.upload-zone {
-  border: 1px dashed rgba(96,165,250,0.3);
-  padding: 10px; text-align: center;
-  font-size: 0.55rem; letter-spacing: 2px;
-  color: var(--t-dim); cursor: pointer;
-  border-radius: 3px; transition: all 0.2s;
-}
+.upload-zone { border: 1px dashed rgba(96,165,250,0.3); padding: 10px; text-align: center; font-size: 0.55rem; letter-spacing: 2px; color: var(--t-dim); cursor: pointer; border-radius: 3px; transition: all 0.2s; }
 .upload-zone:hover { border-color: var(--p-blue); color: var(--p-blue); background: var(--p-blue-dim); }
-
-/* ── Main Viewport ── */
-#main-viewport {
-  display: grid;
-  grid-template-rows: 1fr auto;
-  overflow: hidden;
-  position: relative;
-  background:
-    radial-gradient(ellipse at 80% 20%, rgba(60, 30, 100, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 20% 80%, rgba(0, 60, 120, 0.1) 0%, transparent 50%),
-    var(--c-bg);
-}
-
-/* ── Terminal ── */
-#terminal {
-  overflow-y: auto;
-  padding: 24px 32px;
-  display: flex; flex-direction: column; gap: 16px;
-}
+#main-viewport { display: grid; grid-template-rows: 1fr auto; overflow: hidden; position: relative; background: radial-gradient(ellipse at 80% 20%, rgba(60, 30, 100, 0.12) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(0, 60, 120, 0.1) 0%, transparent 50%), var(--c-bg); }
+#terminal { overflow-y: auto; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; }
 #terminal::-webkit-scrollbar { width: 4px; }
-#terminal::-webkit-scrollbar-track { background: transparent; }
 #terminal::-webkit-scrollbar-thumb { background: rgba(244,114,182,0.3); border-radius: 2px; }
-
 .entry { display: flex; flex-direction: column; gap: 4px; animation: entryIn 0.25s ease-out; }
 @keyframes entryIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-
 .entry-meta { font-size: 0.5rem; letter-spacing: 3px; color: var(--t-dim); display: flex; align-items: center; gap: 8px; }
 .entry-meta .em-name { color: var(--t-secondary); }
 .entry-meta .em-time { margin-left: auto; }
-
-.entry-body {
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  padding: 14px 18px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  line-height: 1.7;
-  font-family: var(--f-body);
-  backdrop-filter: blur(12px);
-  position: relative;
-  transition: border-color 0.2s;
-}
-
-.entry.user .entry-body {
-  border-right: 3px solid var(--p-pink);
-  background: rgba(244, 114, 182, 0.04);
-}
-.entry.ai .entry-body {
-  border-left: 3px solid var(--p-blue);
-  background: rgba(96, 165, 250, 0.04);
-}
-.entry.system .entry-body {
-  border-left: 3px solid var(--p-cyan);
-  background: var(--p-cyan-dim);
-  font-size: 0.7rem;
-  color: var(--t-secondary);
-}
-.entry.error .entry-body {
-  border-left: 3px solid var(--p-orange);
-  background: var(--p-orange-dim);
-  color: var(--p-orange);
-}
-
-/* shimmering loading state */
-.streaming .entry-body {
-  border-left-color: var(--p-pink);
-  animation: streamglow 1.5s ease-in-out infinite;
-}
-@keyframes streamglow {
-  0%, 100% { box-shadow: none; }
-  50% { box-shadow: inset 0 0 20px rgba(244,114,182,0.05), 0 0 10px rgba(244,114,182,0.1); }
-}
-
-.cursor-blink::after {
-  content: "▮";
-  color: var(--p-pink);
-  animation: blink 0.8s step-end infinite;
-}
-
-/* Source badge */
-.source-badge {
-  display: inline-block; font-size: 0.5rem; letter-spacing: 2px;
-  padding: 2px 6px; border-radius: 2px; margin-right: 6px;
-  background: var(--p-blue-dim); border: 1px solid var(--p-blue);
-  color: var(--p-blue); vertical-align: middle;
-}
+.entry-body { background: var(--c-surface); border: 1px solid var(--c-border); padding: 14px 18px; border-radius: 4px; font-size: 0.8rem; line-height: 1.7; font-family: var(--f-body); backdrop-filter: blur(12px); position: relative; transition: border-color 0.2s; }
+.entry.user .entry-body { border-right: 3px solid var(--p-pink); background: rgba(244, 114, 182, 0.04); }
+.entry.ai .entry-body { border-left: 3px solid var(--p-blue); background: rgba(96, 165, 250, 0.04); }
+.entry.system .entry-body { border-left: 3px solid var(--p-cyan); background: var(--p-cyan-dim); font-size: 0.7rem; color: var(--t-secondary); }
+.entry.error .entry-body { border-left: 3px solid var(--p-orange); background: var(--p-orange-dim); color: var(--p-orange); }
+.streaming .entry-body { border-left-color: var(--p-pink); animation: streamglow 1.5s ease-in-out infinite; }
+@keyframes streamglow { 0%, 100% { box-shadow: none; } 50% { box-shadow: inset 0 0 20px rgba(244,114,182,0.05), 0 0 10px rgba(244,114,182,0.1); } }
+.cursor-blink::after { content: "▮"; color: var(--p-pink); animation: blink 0.8s step-end infinite; }
+.source-badge { display: inline-block; font-size: 0.5rem; letter-spacing: 2px; padding: 2px 6px; border-radius: 2px; margin-right: 6px; background: var(--p-blue-dim); border: 1px solid var(--p-blue); color: var(--p-blue); vertical-align: middle; }
 .source-badge.nexus { background: var(--p-orange-dim); border-color: var(--p-orange); color: var(--p-orange); }
-
-/* ── Dock / Input ── */
-#dock {
-  padding: 16px 32px 20px;
-  background: linear-gradient(transparent, rgba(3,3,10,0.98) 40%);
-  border-top: 1px solid var(--c-border);
-  position: relative;
-}
-#context-readout {
-  display: flex; gap: 12px; margin-bottom: 10px;
-  font-size: 0.52rem; letter-spacing: 2px; color: var(--t-dim);
-}
+.source-badge.nodata { background: var(--p-orange-dim); border-color: var(--p-orange); color: var(--p-orange); }
+#dock { padding: 16px 32px 20px; background: linear-gradient(transparent, rgba(3,3,10,0.98) 40%); border-top: 1px solid var(--c-border); position: relative; }
+#context-readout { display: flex; gap: 12px; margin-bottom: 10px; font-size: 0.52rem; letter-spacing: 2px; color: var(--t-dim); }
 #context-readout .ctx-item { display: flex; align-items: center; gap: 5px; }
 #context-readout .ctx-val { color: var(--p-cyan); }
-
 .input-row { display: flex; gap: 8px; }
-.input-wrapper {
-  flex: 1; display: flex;
-  background: rgba(0,0,0,0.7);
-  border: 1px solid var(--c-border);
-  border-radius: 6px; padding: 4px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  backdrop-filter: blur(10px);
-}
-.input-wrapper:focus-within {
-  border-color: var(--p-pink);
-  box-shadow: 0 0 16px var(--p-pink-dim), 0 0 0 1px rgba(244,114,182,0.1) inset;
-}
-#prompt-prefix {
-  align-self: center; padding: 0 12px;
-  font-size: 0.65rem; color: var(--p-pink);
-  opacity: 0.7; white-space: nowrap;
-}
-input#user-input {
-  flex: 1; background: transparent; border: none;
-  color: var(--t-primary); padding: 12px 8px;
-  font-family: var(--f-mono); font-size: 0.82rem;
-  outline: none; caret-color: var(--p-pink);
-}
+.input-wrapper { flex: 1; display: flex; background: rgba(0,0,0,0.7); border: 1px solid var(--c-border); border-radius: 6px; padding: 4px; transition: border-color 0.2s, box-shadow 0.2s; backdrop-filter: blur(10px); }
+.input-wrapper:focus-within { border-color: var(--p-pink); box-shadow: 0 0 16px var(--p-pink-dim), 0 0 0 1px rgba(244,114,182,0.1) inset; }
+#prompt-prefix { align-self: center; padding: 0 12px; font-size: 0.65rem; color: var(--p-pink); opacity: 0.7; white-space: nowrap; }
+input#user-input { flex: 1; background: transparent; border: none; color: var(--t-primary); padding: 12px 8px; font-family: var(--f-mono); font-size: 0.82rem; outline: none; caret-color: var(--p-pink); }
 input#user-input::placeholder { color: var(--t-dim); }
 input#user-input:disabled { opacity: 0.4; cursor: not-allowed; }
-
-#sync-btn {
-  background: linear-gradient(135deg, var(--p-pink), #c026d3);
-  border: none; border-radius: 5px; padding: 0 28px;
-  font-family: var(--f-display); font-weight: 700;
-  font-size: 0.6rem; letter-spacing: 3px;
-  color: #fff; cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 15px rgba(244,114,182,0.3);
-}
-#sync-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(244,114,182,0.5);
-}
-#sync-btn:active:not(:disabled) { transform: translateY(0); }
+#sync-btn { background: linear-gradient(135deg, var(--p-pink), #c026d3); border: none; border-radius: 5px; padding: 0 28px; font-family: var(--f-display); font-weight: 700; font-size: 0.6rem; letter-spacing: 3px; color: #fff; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(244,114,182,0.3); }
+#sync-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(244,114,182,0.5); }
 #sync-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-#reset-btn {
-  background: transparent;
-  border: 1px solid rgba(251,146,60,0.4);
-  border-radius: 5px; padding: 0 16px;
-  font-family: var(--f-mono); font-size: 0.55rem; letter-spacing: 2px;
-  color: var(--p-orange); cursor: pointer;
-  transition: all 0.2s;
-}
+#reset-btn { background: transparent; border: 1px solid rgba(251,146,60,0.4); border-radius: 5px; padding: 0 16px; font-family: var(--f-mono); font-size: 0.55rem; letter-spacing: 2px; color: var(--p-orange); cursor: pointer; transition: all 0.2s; }
 #reset-btn:hover { background: var(--p-orange-dim); border-color: var(--p-orange); }
-
-/* ── Boot Progress Overlay ── */
-#boot-overlay {
-  position: fixed; inset: 0;
-  background: var(--c-bg);
-  z-index: 9998; display: flex;
-  flex-direction: column; align-items: center; justify-content: center;
-  gap: 24px; transition: opacity 0.6s;
-}
+#boot-overlay { position: fixed; inset: 0; background: var(--c-bg); z-index: 9998; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; transition: opacity 0.6s; }
 #boot-overlay.hidden { opacity: 0; pointer-events: none; }
-.boot-logo {
-  font-family: var(--f-display); font-weight: 900;
-  font-size: 2rem; letter-spacing: 8px;
-  color: var(--p-pink); text-shadow: var(--glow-pink);
-}
+.boot-logo { font-family: var(--f-display); font-weight: 900; font-size: 2rem; letter-spacing: 8px; color: var(--p-pink); text-shadow: var(--glow-pink); }
 .boot-logo span { color: var(--p-blue); }
 .boot-sub { font-size: 0.6rem; letter-spacing: 5px; color: var(--t-dim); }
-#boot-progress-wrap {
-  width: 320px; height: 4px;
-  background: var(--c-border); border-radius: 2px; overflow: hidden;
-}
-#boot-progress-bar {
-  height: 100%; width: 0%;
-  background: linear-gradient(90deg, var(--p-pink), var(--p-blue));
-  border-radius: 2px; transition: width 0.3s ease;
-  box-shadow: 0 0 10px var(--p-pink-glow);
-}
+#boot-progress-wrap { width: 320px; height: 4px; background: var(--c-border); border-radius: 2px; overflow: hidden; }
+#boot-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--p-pink), var(--p-blue)); border-radius: 2px; transition: width 0.3s ease; box-shadow: 0 0 10px var(--p-pink-glow); }
 #boot-status { font-size: 0.58rem; letter-spacing: 2px; color: var(--t-secondary); min-height: 1em; }
-
-/* ── Scrollbar global ── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 4px; }
-
-/* Utility */
 .highlight-pink { color: var(--p-pink); }
 .highlight-blue { color: var(--p-blue); }
 .highlight-cyan { color: var(--p-cyan); }
 .highlight-green { color: var(--p-green); }
 .highlight-orange { color: var(--p-orange); }
-.mono { font-family: var(--f-mono); }
 </style>
 </head>
 <body>
 
-<!-- ═══ BOOT OVERLAY ═══ -->
 <div id="boot-overlay">
   <div class="boot-logo">PIXELBOT<span> OMEGA</span></div>
-  <div class="boot-sub">ANALYST CONSOLE // ENTROPIA INTELLIGENCE PLATFORM</div>
+  <div class="boot-sub">ANALYST CONSOLE v3.0 // ENTROPIA INTELLIGENCE PLATFORM</div>
   <div id="boot-progress-wrap"><div id="boot-progress-bar"></div></div>
   <div id="boot-status">Initializing neural core...</div>
 </div>
 
-<!-- ═══ TOP BAR ═══ -->
 <header id="topbar">
   <div class="topbar-logo">PIXELB<span>8</span>.COM // OMEGA</div>
-  <div id="vram-bar">
-    NEURAL<div id="vram-fill"><div id="vram-inner"></div></div>
-    <span id="vram-label">0%</span>
-  </div>
+  <div id="vram-bar">NEURAL<div id="vram-fill"><div id="vram-inner"></div></div><span id="vram-label">0%</span></div>
   <div class="topbar-tags">
     <div class="tag tag-pink">ENTROPIA INTEL</div>
     <div class="tag tag-blue">LOCAL-FIRST</div>
@@ -463,61 +192,25 @@ input#user-input:disabled { opacity: 0.4; cursor: not-allowed; }
   </div>
 </header>
 
-<!-- ═══ SIDEBAR ═══ -->
 <aside id="sidebar">
-
-  <!-- Mascot -->
-  <div class="panel-label">
-    NEXUS CORE — OMEGA UNIT
-    <div class="pulse-dot"></div>
-  </div>
-  <div id="mascot-wrap">
-    <canvas id="bot-canvas" width="268" height="180"></canvas>
-  </div>
-
-  <!-- Stats -->
+  <div class="panel-label">NEXUS CORE — OMEGA UNIT<div class="pulse-dot"></div></div>
+  <div id="mascot-wrap"><canvas id="bot-canvas" width="268" height="180"></canvas></div>
   <div class="status-grid">
-    <div class="stat-cell">
-      <div class="lbl">SHARDS LOADED</div>
-      <div class="val pink" id="stat-shards">0</div>
-    </div>
-    <div class="stat-cell">
-      <div class="lbl">INDEX TERMS</div>
-      <div class="val" id="stat-terms">0</div>
-    </div>
-    <div class="stat-cell">
-      <div class="lbl">QUERIES RUN</div>
-      <div class="val green" id="stat-queries">0</div>
-    </div>
-    <div class="stat-cell">
-      <div class="lbl">NEXUS API</div>
-      <div class="val orange" id="stat-nexus">ONLINE</div>
-    </div>
+    <div class="stat-cell"><div class="lbl">SHARDS LOADED</div><div class="val pink" id="stat-shards">0</div></div>
+    <div class="stat-cell"><div class="lbl">CHUNKS INDEXED</div><div class="val" id="stat-terms">0</div></div>
+    <div class="stat-cell"><div class="lbl">QUERIES RUN</div><div class="val green" id="stat-queries">0</div></div>
+    <div class="stat-cell"><div class="lbl">NEXUS API</div><div class="val orange" id="stat-nexus">ONLINE</div></div>
   </div>
-
-  <!-- Nexus API Toggle -->
   <div class="api-toggle-row">
     <label for="nexus-toggle">NEXUS API LAYER</label>
-    <div class="toggle-switch">
-      <input type="checkbox" id="nexus-toggle" checked>
-      <span class="slider"></span>
-    </div>
+    <div class="toggle-switch"><input type="checkbox" id="nexus-toggle" checked><span class="slider"></span></div>
   </div>
-
-  <!-- File Registry -->
-  <div class="panel-label">
-    KNOWLEDGE REGISTRY
-    <span style="font-size:0.45rem; color: var(--p-cyan)" id="kb-count">0 SHARDS</span>
-  </div>
+  <div class="panel-label">KNOWLEDGE REGISTRY<span style="font-size:0.45rem; color: var(--p-cyan)" id="kb-count">0 SHARDS</span></div>
   <div id="file-registry"></div>
-
-  <label for="file-in" class="upload-zone" id="upload-label">
-    ⬆ INGEST DATA SHARD
-  </label>
+  <label for="file-in" class="upload-zone" id="upload-label">⬆ INGEST DATA SHARD</label>
   <input type="file" id="file-in" hidden multiple accept=".txt,.csv,.json,.md">
 </aside>
 
-<!-- ═══ MAIN VIEWPORT ═══ -->
 <main id="main-viewport">
   <div id="terminal"></div>
   <div id="dock">
@@ -525,7 +218,7 @@ input#user-input:disabled { opacity: 0.4; cursor: not-allowed; }
       <div class="ctx-item">SHARDS <span class="ctx-val" id="ctx-shards">0</span></div>
       <div class="ctx-item">MODEL <span class="ctx-val" id="ctx-model">LLAMA-3.2-1B</span></div>
       <div class="ctx-item">MODE <span class="ctx-val" id="ctx-mode">RAG+NEXUS</span></div>
-      <div class="ctx-item">TOKEN BUDGET <span class="ctx-val" id="ctx-tokens">2048</span></div>
+      <div class="ctx-item">CHUNKS <span class="ctx-val" id="ctx-tokens">0</span></div>
     </div>
     <div class="input-row">
       <div class="input-wrapper">
@@ -539,252 +232,101 @@ input#user-input:disabled { opacity: 0.4; cursor: not-allowed; }
 </main>
 
 <script type="module">
-// ═══════════════════════════════════════════════════════
-//  PIXELBOT OMEGA — FULL ENGINE v2.0
-//  Local-first | RAG | BM25 | IndexedDB | WebLLM
-// ═══════════════════════════════════════════════════════
-
 import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
 // ── Constants ──────────────────────────────────────────
-const MODEL_ID    = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
-const DB_NAME     = "OmegaRAG";
-const DB_VERSION  = 2;
-const MAX_CONTEXT_TOKENS = 2048;
+const MODEL_ID   = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
+const DB_NAME    = "OmegaRAG";
+const DB_VERSION = 3;
+
+// FIX 1: Much smaller chunk size = finer retrieval granularity
+const CHUNK_SIZE     = 150;   // was 400 — too coarse
+const CHUNK_OVERLAP  = 30;    // sliding window overlap to avoid cutting context at boundaries
+const MAX_CTX_CHARS  = 6000;  // was 2500 — give LLM more retrieved context
+const TOP_K_CHUNKS   = 20;    // was 12
 
 // ── State ──────────────────────────────────────────────
-let engine         = null;
-let db             = null;
-let isStreaming    = false;
-let queryCount     = 0;
-let knowledgeBase  = {};   // { filename: { raw: string, tokens: string[], tfidf: Map } }
-let metaManifest   = [];   // [{ name, size, chunkCount, topics[] }]
+let engine        = null;
+let db            = null;
+let isStreaming   = false;
+let queryCount    = 0;
 
-// BM25 params
-const BM25_K1 = 1.5;
-const BM25_B  = 0.75;
+// FIX 2: Separate raw text from flattened searchable text
+// knowledgeBase[name] = { raw: string, flat: string, type: 'json'|'csv'|'text' }
+let knowledgeBase = {};
+let metaManifest  = [];
+
+const BM25_K1 = 1.5, BM25_B = 0.75;
 
 // ── UI refs ────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 const ui = {
-  terminal:    $('terminal'),
-  input:       $('user-input'),
-  syncBtn:     $('sync-btn'),
-  resetBtn:    $('reset-btn'),
-  fileIn:      $('file-in'),
-  fileReg:     $('file-registry'),
-  bootOverlay: $('boot-overlay'),
-  bootBar:     $('boot-progress-bar'),
-  bootStatus:  $('boot-status'),
-  statusTag:   $('status-tag'),
-  vramInner:   $('vram-inner'),
-  vramLabel:   $('vram-label'),
-  statShards:  $('stat-shards'),
-  statTerms:   $('stat-terms'),
-  statQueries: $('stat-queries'),
-  statNexus:   $('stat-nexus'),
-  kbCount:     $('kb-count'),
-  ctxShards:   $('ctx-shards'),
-  ctxMode:     $('ctx-mode'),
-  ctxTokens:   $('ctx-tokens'),
-  nexusToggle: $('nexus-toggle'),
+  terminal: $('terminal'), input: $('user-input'), syncBtn: $('sync-btn'),
+  resetBtn: $('reset-btn'), fileIn: $('file-in'), fileReg: $('file-registry'),
+  bootOverlay: $('boot-overlay'), bootBar: $('boot-progress-bar'), bootStatus: $('boot-status'),
+  statusTag: $('status-tag'), vramInner: $('vram-inner'), vramLabel: $('vram-label'),
+  statShards: $('stat-shards'), statTerms: $('stat-terms'), statQueries: $('stat-queries'),
+  statNexus: $('stat-nexus'), kbCount: $('kb-count'), ctxShards: $('ctx-shards'),
+  ctxMode: $('ctx-mode'), ctxTokens: $('ctx-tokens'), nexusToggle: $('nexus-toggle'),
 };
 
-// ── Mascot State Machine ───────────────────────────────
+// ── Mascot ─────────────────────────────────────────────
 const Mascot = (() => {
   const canvas = $('bot-canvas');
-  const ctx    = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
-
-  let state = 'idle';    // idle | thinking | streaming | stress | success
-  let frame = 0;
-  let particles = [];
-
-  const COLORS = {
-    body:      '#1a1a3e',
-    bodyBorder:'#60a5fa',
-    eye:       '#60a5fa',
-    eyeGlow:   'rgba(96,165,250,0.6)',
-    pink:      '#f472b6',
-    cyan:      '#22d3ee',
-    green:     '#4ade80',
-    orange:    '#fb923c',
-  };
-
+  let state = 'idle', frame = 0, particles = [];
+  const C = { body:'#1a1a3e', eye:'#60a5fa', pink:'#f472b6', cyan:'#22d3ee', green:'#4ade80', orange:'#fb923c' };
   function spawnParticle(x, y, color) {
-    particles.push({
-      x, y,
-      vx: (Math.random() - 0.5) * 2,
-      vy: -Math.random() * 1.5 - 0.5,
-      life: 1,
-      decay: 0.02 + Math.random() * 0.02,
-      color,
-      size: 2 + Math.random() * 3,
-    });
+    particles.push({ x, y, vx:(Math.random()-0.5)*2, vy:-Math.random()*1.5-0.5, life:1, decay:0.02+Math.random()*0.02, color, size:2+Math.random()*3 });
   }
-
-  function drawGlowCircle(x, y, r, color, alpha = 0.8) {
-    const g = ctx.createRadialGradient(x, y, 0, x, y, r * 2);
-    g.addColorStop(0, color.replace(')', `, ${alpha})`).replace('rgb', 'rgba'));
-    g.addColorStop(1, 'transparent');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(x, y, r * 2, 0, Math.PI * 2); ctx.fill();
-  }
-
   function getStateColor() {
-    switch (state) {
-      case 'thinking':  return COLORS.cyan;
-      case 'streaming': return COLORS.pink;
-      case 'stress':    return COLORS.orange;
-      case 'success':   return COLORS.green;
-      default:          return COLORS.eye;
-    }
+    return state==='thinking'?C.cyan:state==='streaming'?C.pink:state==='stress'?C.orange:state==='success'?C.green:C.eye;
   }
-
   function render() {
     frame++;
-    ctx.clearRect(0, 0, W, H);
-
-    const cx = W / 2, cy = H / 2;
-    const breathe = Math.sin(frame * 0.04) * 3;
-    const eyeColor = getStateColor();
-
-    // ── Background pulse rings ──
-    if (state !== 'idle') {
-      const pulseAlpha = (Math.sin(frame * 0.08) + 1) * 0.08 + 0.02;
-      ctx.strokeStyle = `rgba(96,165,250,${pulseAlpha})`;
-      ctx.lineWidth = 1;
-      for (let i = 1; i <= 3; i++) {
-        ctx.beginPath();
-        ctx.arc(cx, cy, 40 + i * 18 + Math.sin(frame * 0.06 + i) * 4, 0, Math.PI * 2);
-        ctx.stroke();
-      }
+    ctx.clearRect(0,0,W,H);
+    const cx=W/2, cy=H/2, breathe=Math.sin(frame*0.04)*3, ec=getStateColor();
+    if(state!=='idle'){
+      const a=(Math.sin(frame*0.08)+1)*0.08+0.02;
+      ctx.strokeStyle=`rgba(96,165,250,${a})`; ctx.lineWidth=1;
+      for(let i=1;i<=3;i++){ctx.beginPath();ctx.arc(cx,cy,40+i*18+Math.sin(frame*0.06+i)*4,0,Math.PI*2);ctx.stroke();}
     }
-
-    // ── Bot body ──
-    ctx.shadowColor = eyeColor;
-    ctx.shadowBlur = 8 + breathe;
-    ctx.fillStyle = COLORS.body;
-    ctx.strokeStyle = eyeColor;
-    ctx.lineWidth = 1.5;
-    const bw = 60, bh = 70 + breathe;
-    ctx.beginPath();
-    ctx.roundRect(cx - bw/2, cy - bh/2 + 10, bw, bh, 8);
-    ctx.fill(); ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    // ── Head ──
-    ctx.fillStyle = COLORS.body;
-    ctx.strokeStyle = eyeColor;
-    ctx.lineWidth = 1.5;
-    const hw = 44, hh = 36;
-    ctx.beginPath();
-    ctx.roundRect(cx - hw/2, cy - bh/2 - hh + 12, hw, hh, 6);
-    ctx.fill(); ctx.stroke();
-
-    // Antenna
-    const antSwing = Math.sin(frame * 0.05) * 4;
-    ctx.strokeStyle = eyeColor;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - bh/2 - hh + 14);
-    ctx.lineTo(cx + antSwing, cy - bh/2 - hh - 8);
-    ctx.stroke();
-    ctx.fillStyle = eyeColor;
-    ctx.shadowColor = eyeColor; ctx.shadowBlur = 6;
-    ctx.beginPath(); ctx.arc(cx + antSwing, cy - bh/2 - hh - 10, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // Eyes
-    const eyeY = cy - bh/2 - hh/2 + 12 + 2;
-    const blinkH = state === 'thinking' && Math.sin(frame * 0.2) > 0.97 ? 2 : 8;
-
-    for (let side of [-10, 10]) {
-      // Eye glow
-      ctx.fillStyle = `rgba(${eyeColor === COLORS.eye ? '96,165,250' : '244,114,182'},0.15)`;
-      ctx.beginPath(); ctx.ellipse(cx + side, eyeY, 9, 9, 0, 0, Math.PI * 2); ctx.fill();
-
-      // Eye pupil
-      ctx.fillStyle = eyeColor;
-      ctx.shadowColor = eyeColor; ctx.shadowBlur = 10;
-      ctx.beginPath(); ctx.ellipse(cx + side, eyeY, 5, blinkH / 2, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur = 0;
+    ctx.shadowColor=ec; ctx.shadowBlur=8+breathe; ctx.fillStyle=C.body; ctx.strokeStyle=ec; ctx.lineWidth=1.5;
+    const bw=60, bh=70+breathe;
+    ctx.beginPath(); ctx.roundRect(cx-bw/2,cy-bh/2+10,bw,bh,8); ctx.fill(); ctx.stroke(); ctx.shadowBlur=0;
+    ctx.fillStyle=C.body; ctx.strokeStyle=ec; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.roundRect(cx-22,cy-bh/2-24+12,44,36,6); ctx.fill(); ctx.stroke();
+    const sw=Math.sin(frame*0.05)*4;
+    ctx.strokeStyle=ec; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(cx,cy-bh/2-24+14); ctx.lineTo(cx+sw,cy-bh/2-24-8); ctx.stroke();
+    ctx.fillStyle=ec; ctx.shadowColor=ec; ctx.shadowBlur=6; ctx.beginPath(); ctx.arc(cx+sw,cy-bh/2-24-10,3,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
+    const ey=cy-bh/2-12+2, blinkH=state==='thinking'&&Math.sin(frame*0.2)>0.97?2:8;
+    for(let s of[-10,10]){
+      ctx.fillStyle=`rgba(96,165,250,0.15)`; ctx.beginPath(); ctx.ellipse(cx+s,ey,9,9,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle=ec; ctx.shadowColor=ec; ctx.shadowBlur=10; ctx.beginPath(); ctx.ellipse(cx+s,ey,5,blinkH/2,0,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
     }
-
-    // Mouth
-    const mouthProg = state === 'streaming' ? (Math.sin(frame * 0.15) + 1) * 0.5 : 0.5;
-    ctx.strokeStyle = eyeColor; ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(cx, eyeY + 12, 8, Math.PI * mouthProg * 0.2, Math.PI - Math.PI * mouthProg * 0.2);
-    ctx.stroke();
-
-    // Body screen/display
-    if (state === 'streaming' || state === 'thinking') {
-      const lines = 4;
-      for (let i = 0; i < lines; i++) {
-        const lineAlpha = Math.max(0, Math.sin(frame * 0.1 - i * 0.8)) * 0.6;
-        const lw = (20 + Math.sin(frame * 0.07 + i * 1.2) * 15) * (i === 0 ? 1 : 0.7);
-        ctx.fillStyle = `rgba(96,165,250,${lineAlpha})`;
-        ctx.fillRect(cx - lw/2, cy - 2 + i * 10, lw, 2);
-      }
+    const mp=state==='streaming'?(Math.sin(frame*0.15)+1)*0.5:0.5;
+    ctx.strokeStyle=ec; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx,ey+12,8,Math.PI*mp*0.2,Math.PI-Math.PI*mp*0.2); ctx.stroke();
+    if(state==='streaming'||state==='thinking'){
+      for(let i=0;i<4;i++){const la=Math.max(0,Math.sin(frame*0.1-i*0.8))*0.6,lw=(20+Math.sin(frame*0.07+i*1.2)*15)*(i===0?1:0.7);ctx.fillStyle=`rgba(96,165,250,${la})`;ctx.fillRect(cx-lw/2,cy-2+i*10,lw,2);}
     }
-    if (state === 'stress') {
-      // Warning chevrons
-      ctx.strokeStyle = `rgba(251,146,60,${(Math.sin(frame*0.2)+1)*0.4+0.2})`;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(cx-10, cy+5); ctx.lineTo(cx, cy-5); ctx.lineTo(cx+10, cy+5); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(cx-6, cy+12); ctx.lineTo(cx, cy+4); ctx.lineTo(cx+6, cy+12); ctx.stroke();
+    if(state==='stress'){ctx.strokeStyle=`rgba(251,146,60,${(Math.sin(frame*0.2)+1)*0.4+0.2})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(cx-10,cy+5);ctx.lineTo(cx,cy-5);ctx.lineTo(cx+10,cy+5);ctx.stroke();}
+    if(state==='success'){
+      ctx.strokeStyle=C.green;ctx.lineWidth=2;ctx.shadowColor=C.green;ctx.shadowBlur=8;ctx.beginPath();ctx.moveTo(cx-10,cy+5);ctx.lineTo(cx-3,cy+12);ctx.lineTo(cx+12,cy-5);ctx.stroke();ctx.shadowBlur=0;
+      if(frame%3===0)spawnParticle(cx+(Math.random()-0.5)*30,cy+(Math.random()-0.5)*20,C.green);
     }
-    if (state === 'success') {
-      // Checkmark
-      ctx.strokeStyle = COLORS.green; ctx.lineWidth = 2;
-      ctx.shadowColor = COLORS.green; ctx.shadowBlur = 8;
-      ctx.beginPath(); ctx.moveTo(cx-10, cy+5); ctx.lineTo(cx-3, cy+12); ctx.lineTo(cx+12, cy-5); ctx.stroke();
-      ctx.shadowBlur = 0;
-      // Spawn particles
-      if (frame % 3 === 0) spawnParticle(cx + (Math.random()-0.5)*30, cy + (Math.random()-0.5)*20, COLORS.green);
-    }
-
-    // Arms
-    const armSwing = Math.sin(frame * 0.05) * (state === 'streaming' ? 15 : 5);
-    ctx.strokeStyle = eyeColor; ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(cx - bw/2, cy + 15);
-    ctx.lineTo(cx - bw/2 - 14, cy + 30 + armSwing);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(cx + bw/2, cy + 15);
-    ctx.lineTo(cx + bw/2 + 14, cy + 30 - armSwing);
-    ctx.stroke();
-
-    // Legs
-    ctx.beginPath();
-    ctx.moveTo(cx - 12, cy + bh/2 + 10);
-    ctx.lineTo(cx - 14, cy + bh/2 + 28);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(cx + 12, cy + bh/2 + 10);
-    ctx.lineTo(cx + 14, cy + bh/2 + 28);
-    ctx.stroke();
-
-    // Particles
-    particles = particles.filter(p => p.life > 0);
-    for (const p of particles) {
-      ctx.globalAlpha = p.life;
-      ctx.fillStyle = p.color;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill();
-      p.x += p.vx; p.y += p.vy; p.life -= p.decay;
-    }
-    ctx.globalAlpha = 1;
-
+    const as=Math.sin(frame*0.05)*(state==='streaming'?15:5);
+    ctx.strokeStyle=ec;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx-bw/2,cy+15);ctx.lineTo(cx-bw/2-14,cy+30+as);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx+bw/2,cy+15);ctx.lineTo(cx+bw/2+14,cy+30-as);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx-12,cy+bh/2+10);ctx.lineTo(cx-14,cy+bh/2+28);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx+12,cy+bh/2+10);ctx.lineTo(cx+14,cy+bh/2+28);ctx.stroke();
+    particles=particles.filter(p=>p.life>0);
+    for(const p of particles){ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);ctx.fill();p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;}
+    ctx.globalAlpha=1;
     requestAnimationFrame(render);
   }
-
   render();
-  return {
-    set: (s) => { state = s; },
-    get: () => state,
-  };
+  return { set:(s)=>{state=s;}, get:()=>state };
 })();
 
 // ── IndexedDB ─────────────────────────────────────────
@@ -823,18 +365,57 @@ async function dbDelete(name) {
   });
 }
 
+// ── FIX 3: Smart text flattener ───────────────────────
+// Converts JSON/CSV into human-readable flat text so BM25 can index field values
+function flattenData(raw, fname) {
+  const ext = fname.split('.').pop().toLowerCase();
+
+  // ── JSON ──
+  if (ext === 'json') {
+    try {
+      const parsed = JSON.parse(raw);
+      const records = Array.isArray(parsed) ? parsed
+        : (parsed && typeof parsed === 'object' ? Object.values(parsed) : null);
+      if (records && records.length > 0) {
+        // Convert each record to "key: value key: value ..." sentence
+        return records.map(rec => {
+          if (typeof rec !== 'object' || rec === null) return String(rec);
+          return Object.entries(rec)
+            .map(([k, v]) => {
+              const vStr = typeof v === 'object' ? JSON.stringify(v) : String(v);
+              // key and value both searchable, e.g. "name: ArMatrix LP-40 damage: 50"
+              return `${k.replace(/_/g,' ')}: ${vStr}`;
+            })
+            .join(' | ');
+        }).join('\n');
+      }
+      // Scalar / nested object fallback
+      return JSON.stringify(parsed, null, 1).replace(/[{}\[\]"]/g, ' ').replace(/,/g, ' ');
+    } catch { /* fall through to plain text */ }
+  }
+
+  // ── CSV ──
+  if (ext === 'csv') {
+    const lines = raw.trim().split('\n');
+    if (lines.length < 2) return raw;
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,''));
+    return lines.slice(1).map(line => {
+      const vals = line.split(',').map(v => v.trim().replace(/"/g,''));
+      return headers.map((h, i) => `${h}: ${vals[i] ?? ''}`).join(' | ');
+    }).join('\n');
+  }
+
+  // ── Plain text / Markdown ── keep as-is
+  return raw;
+}
+
 // ── BM25 Engine ───────────────────────────────────────
 class BM25Index {
-  constructor() {
-    this.docs   = [];     // [{ id, terms, tf }]
-    this.idf    = new Map();
-    this.avgdl  = 0;
-    this.dirty  = true;
-  }
+  constructor() { this.docs=[]; this.idf=new Map(); this.avgdl=0; this.dirty=true; }
 
   tokenize(text) {
     return text.toLowerCase()
-      .replace(/[^a-z0-9\s\-_.]/g, ' ')
+      .replace(/[^a-z0-9\s\-_.%]/g, ' ')
       .split(/\s+/)
       .filter(t => t.length > 1 && !STOPWORDS.has(t));
   }
@@ -842,8 +423,8 @@ class BM25Index {
   addDoc(id, text) {
     const terms = this.tokenize(text);
     const tf = new Map();
-    for (const t of terms) tf.set(t, (tf.get(t) || 0) + 1);
-    this.docs.push({ id, terms, tf, len: terms.length });
+    for (const t of terms) tf.set(t, (tf.get(t)||0)+1);
+    this.docs.push({ id, terms, tf, len: terms.length, text });
     this.dirty = true;
   }
 
@@ -851,14 +432,12 @@ class BM25Index {
     if (!this.dirty) return;
     this.idf.clear();
     const N = this.docs.length;
-    this.avgdl = this.docs.reduce((s, d) => s + d.len, 0) / (N || 1);
+    this.avgdl = this.docs.reduce((s,d)=>s+d.len,0) / (N||1);
     const df = new Map();
-    for (const doc of this.docs) {
-      for (const t of new Set(doc.terms)) df.set(t, (df.get(t) || 0) + 1);
-    }
-    for (const [t, n] of df) {
-      this.idf.set(t, Math.log((N - n + 0.5) / (n + 0.5) + 1));
-    }
+    for (const doc of this.docs)
+      for (const t of new Set(doc.terms)) df.set(t,(df.get(t)||0)+1);
+    for (const [t,n] of df)
+      this.idf.set(t, Math.log((N-n+0.5)/(n+0.5)+1));
     this.dirty = false;
   }
 
@@ -867,20 +446,21 @@ class BM25Index {
     const doc = this.docs[docIdx];
     let score = 0;
     for (const qt of queryTerms) {
-      const idf = this.idf.get(qt) || 0;
-      const tf  = doc.tf.get(qt) || 0;
-      const num = tf * (BM25_K1 + 1);
-      const den = tf + BM25_K1 * (1 - BM25_B + BM25_B * doc.len / this.avgdl);
+      const idf = this.idf.get(qt)||0;
+      const tf  = doc.tf.get(qt)||0;
+      const num = tf * (BM25_K1+1);
+      const den = tf + BM25_K1*(1-BM25_B+BM25_B*doc.len/this.avgdl);
       score += idf * num / den;
     }
     return score;
   }
 
-  search(query, topK = 12) {
+  search(query, topK=TOP_K_CHUNKS) {
     this.rebuild();
     const qTerms = this.tokenize(query);
-    const scores = this.docs.map((_, i) => ({ idx: i, score: this.score(i, qTerms) }));
-    scores.sort((a, b) => b.score - a.score);
+    if (qTerms.length === 0) return [];
+    const scores = this.docs.map((_,i)=>({ idx:i, score:this.score(i,qTerms) }));
+    scores.sort((a,b)=>b.score-a.score);
     return scores.slice(0, topK).filter(s => s.score > 0);
   }
 }
@@ -894,572 +474,459 @@ const STOPWORDS = new Set([
 ]);
 
 let bm25 = new BM25Index();
-// Chunk size for indexing
-const CHUNK_SIZE = 400;
 
-function chunkText(text) {
-  const words = text.split(/\s+/);
+// FIX 4: Overlapping chunks so context isn't cut at arbitrary word boundaries
+function chunkText(text, size=CHUNK_SIZE, overlap=CHUNK_OVERLAP) {
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return [];
   const chunks = [];
-  for (let i = 0; i < words.length; i += CHUNK_SIZE) {
-    chunks.push(words.slice(i, i + CHUNK_SIZE).join(' '));
+  let i = 0;
+  while (i < words.length) {
+    chunks.push(words.slice(i, i+size).join(' '));
+    if (i + size >= words.length) break;
+    i += size - overlap;
   }
   return chunks;
 }
 
-function ingestShard(name, text) {
-  const chunks = chunkText(text);
-  chunks.forEach((chunk, i) => {
-    bm25.addDoc(`${name}::${i}`, chunk);
-  });
-  // Store raw in knowledgeBase
-  knowledgeBase[name] = text;
-  // Extract topic words for manifest
-  const topWords = bm25.tokenize(text.slice(0, 2000))
-    .reduce((acc, t) => { acc[t] = (acc[t] || 0) + 1; return acc; }, {});
-  const topics = Object.entries(topWords).sort((a,b) => b[1]-a[1]).slice(0,6).map(e=>e[0]);
-  return { name, size: text.length, chunkCount: chunks.length, topics };
+function ingestShard(name, raw) {
+  // Build flat searchable version
+  const flat = flattenData(raw, name);
+  const ext  = name.split('.').pop().toLowerCase();
+
+  // Detect type for record counting
+  let type = 'text', recordCount = null;
+  if (ext === 'json') {
+    try {
+      const p = JSON.parse(raw);
+      const recs = Array.isArray(p) ? p : (p && typeof p==='object' ? Object.values(p) : null);
+      if (recs) { type='json'; recordCount = recs.length; }
+    } catch {}
+  } else if (ext === 'csv') {
+    type = 'csv';
+    recordCount = raw.trim().split('\n').length - 1;
+  }
+
+  const chunks = chunkText(flat);
+  chunks.forEach((chunk, i) => bm25.addDoc(`${name}::${i}`, chunk));
+
+  knowledgeBase[name] = { raw, flat, type, recordCount };
+
+  // Topic extraction from flattened text
+  const topWords = bm25.tokenize(flat.slice(0, 3000))
+    .reduce((acc,t)=>{ acc[t]=(acc[t]||0)+1; return acc; }, {});
+  const topics = Object.entries(topWords).sort((a,b)=>b[1]-a[1]).slice(0,8).map(e=>e[0]);
+
+  return { name, size: raw.length, flatSize: flat.length, chunkCount: chunks.length, topics, type, recordCount };
 }
 
-function findRelevantContext(query, maxLen = 2500) {
-  const results = bm25.search(query, 15);
+// FIX 5: findRelevantContext returns deduplicated chunks with source labels
+function findRelevantContext(query, maxLen=MAX_CTX_CHARS) {
+  const results = bm25.search(query, TOP_K_CHUNKS);
+  if (results.length === 0) return { context: '', hitFiles: [] };
+
   let context = '';
+  const seen  = new Set();
+  const hitFiles = new Set();
+
   for (const r of results) {
-    const [fname, cidx] = r.idx !== undefined
-      ? [bm25.docs[r.idx].id.split('::')[0], parseInt(bm25.docs[r.idx].id.split('::')[1])]
-      : ['', 0];
-    if (!fname || !knowledgeBase[fname]) continue;
-    const chunks = chunkText(knowledgeBase[fname]);
-    const chunk  = chunks[cidx] || '';
-    const snippet = `[${fname}] ${chunk}`;
+    const doc = bm25.docs[r.idx];
+    if (!doc) continue;
+    const fname = doc.id.split('::')[0];
+    hitFiles.add(fname);
+
+    // Deduplicate by doc id
+    if (seen.has(doc.id)) continue;
+    seen.add(doc.id);
+
+    const snippet = `[${fname}] ${doc.text}`;
     if (context.length + snippet.length > maxLen) break;
     context += snippet + '\n';
   }
-  return context.trim();
+
+  return { context: context.trim(), hitFiles: [...hitFiles] };
 }
 
 // ── Nexus API (Entropia Calculations) ─────────────────
 const EntropiaNexus = {
-  calculateDPP: (dmg, ammo, decay) => {
-    if (!ammo && !decay) return null;
-    return (dmg / ((ammo || 0) + (decay || 0))).toFixed(4);
-  },
-  getSIB: (level, min, max) => level >= min && level <= max ? 'Yes (SIB active)' : 'No (outside SIB range)',
-  estimateROI: (revenue, cost) => (((revenue - cost) / cost) * 100).toFixed(2) + '%',
-  pedToUSD: (ped) => (ped * 0.10).toFixed(2),
-  usdToPED: (usd) => (usd * 10).toFixed(2),
-  lootMU: (baseValue, markup) => (baseValue * markup).toFixed(4),
-  tfcEstimate: (shots, decay) => (shots * decay).toFixed(4),
+  calculateDPP: (dmg, ammo, decay) => (dmg/((ammo||0)+(decay||0))).toFixed(4),
+  estimateROI:  (revenue, cost)    => (((revenue-cost)/cost)*100).toFixed(2)+'%',
+  pedToUSD:     ped  => (ped*0.10).toFixed(2),
+  usdToPED:     usd  => (usd*10).toFixed(2),
+  lootMU:       (base, mu) => (base*mu).toFixed(4),
 };
 
 function tryNexusIntercept(query) {
   if (!ui.nexusToggle.checked) return null;
   const q = query.toLowerCase();
-  // DPP
-  const dppMatch = q.match(/dpp.*?(\d+\.?\d*)\s*dmg.*?(\d+\.?\d*)\s*ammo.*?(\d+\.?\d*)\s*decay/);
-  if (dppMatch) {
-    const v = EntropiaNexus.calculateDPP(+dppMatch[1], +dppMatch[2], +dppMatch[3]);
-    return `<span class="source-badge nexus">NEXUS CALC</span>DPP = <span class="highlight-cyan">${v}</span> (Damage: ${dppMatch[1]}, Ammo: ${dppMatch[2]}, Decay: ${dppMatch[3]})`;
-  }
-  // PED conversion
-  const pedMatch = q.match(/(\d+\.?\d*)\s*ped\s*(to|in)\s*usd/);
-  if (pedMatch) return `<span class="source-badge nexus">NEXUS CALC</span><span class="highlight-cyan">${pedMatch[1]} PED</span> = <span class="highlight-green">$${EntropiaNexus.pedToUSD(+pedMatch[1])} USD</span>`;
-  const usdMatch = q.match(/(\d+\.?\d*)\s*usd\s*(to|in)\s*ped/);
-  if (usdMatch) return `<span class="source-badge nexus">NEXUS CALC</span><span class="highlight-cyan">$${usdMatch[1]} USD</span> = <span class="highlight-green">${EntropiaNexus.usdToPED(+usdMatch[1])} PED</span>`;
-  // ROI
-  const roiMatch = q.match(/roi.*?(\d+\.?\d*)\s*rev.*?(\d+\.?\d*)\s*cost/);
-  if (roiMatch) return `<span class="source-badge nexus">NEXUS CALC</span>ROI = <span class="highlight-cyan">${EntropiaNexus.estimateROI(+roiMatch[1], +roiMatch[2])}</span>`;
+  const dppM = q.match(/dpp.*?(\d+\.?\d*)\s*dmg.*?(\d+\.?\d*)\s*ammo.*?(\d+\.?\d*)\s*decay/);
+  if (dppM) return `<span class="source-badge nexus">NEXUS CALC</span>DPP = <span class="highlight-cyan">${EntropiaNexus.calculateDPP(+dppM[1],+dppM[2],+dppM[3])}</span> (Dmg: ${dppM[1]}, Ammo: ${dppM[2]}, Decay: ${dppM[3]})`;
+  const pedM = q.match(/(\d+\.?\d*)\s*ped\s*(to|in)\s*usd/);
+  if (pedM) return `<span class="source-badge nexus">NEXUS CALC</span><span class="highlight-cyan">${pedM[1]} PED</span> = <span class="highlight-green">$${EntropiaNexus.pedToUSD(+pedM[1])} USD</span>`;
+  const usdM = q.match(/(\d+\.?\d*)\s*usd\s*(to|in)\s*ped/);
+  if (usdM) return `<span class="source-badge nexus">NEXUS CALC</span><span class="highlight-cyan">$${usdM[1]} USD</span> = <span class="highlight-green">${EntropiaNexus.usdToPED(+usdM[1])} PED</span>`;
+  const roiM = q.match(/roi.*?(\d+\.?\d*)\s*rev.*?(\d+\.?\d*)\s*cost/);
+  if (roiM) return `<span class="source-badge nexus">NEXUS CALC</span>ROI = <span class="highlight-cyan">${EntropiaNexus.estimateROI(+roiM[1],+roiM[2])}</span>`;
   return null;
 }
 
-// ── Meta-Manifest queries ──────────────────────────────
+// ── Meta queries ───────────────────────────────────────
+function levenshtein(a,b){const m=a.length,n=b.length,dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i?(j?0:i):j));for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);return dp[m][n];}
 
-// Levenshtein distance for fuzzy filename matching
-function levenshtein(a, b) {
-  const m = a.length, n = b.length;
-  const dp = Array.from({length: m+1}, (_, i) =>
-    Array.from({length: n+1}, (_, j) => i ? (j ? 0 : i) : j));
-  for (let i = 1; i <= m; i++)
-    for (let j = 1; j <= n; j++)
-      dp[i][j] = a[i-1] === b[j-1]
-        ? dp[i-1][j-1]
-        : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
-  return dp[m][n];
-}
-
-// Returns the loaded filename the query is referring to, or null.
 function matchQueryToFile(q) {
   if (!q) return null;
   const lq = q.toLowerCase();
   for (const m of metaManifest) {
-    const fname = m.name.toLowerCase();
-    const base  = fname.replace(/\.[^.]+$/, '');
-    // Exact filename or base name match
+    const fname = m.name.toLowerCase(), base = fname.replace(/\.[^.]+$/,'');
     if (lq.includes(fname) || lq.includes(base)) return m.name;
-    // Fuzzy: split base into word segments, allow up to 2-char edit distance per segment
-    const words     = lq.split(/[\s_\-\.]+/);
-    const baseWords = base.split(/[\s_\-\.]+/);
-    const hits = baseWords.filter(bw =>
-      words.some(w => w === bw || (w.length > 4 && bw.length > 4 && levenshtein(w, bw) <= 2))
-    ).length;
-    if (hits >= Math.max(1, baseWords.length - 1)) return m.name;
+    const words=lq.split(/[\s_\-.]+/), bwords=base.split(/[\s_\-.]+/);
+    const hits=bwords.filter(bw=>words.some(w=>w===bw||(w.length>4&&bw.length>4&&levenshtein(w,bw)<=2))).length;
+    if (hits>=Math.max(1,bwords.length-1)) return m.name;
   }
   return null;
 }
 
 function isMetaQuery(q) {
-  // Full manifest listing questions
-  if (/(what|which|list|show).*(know|have|loaded|file|shard|data|document)/i.test(q)
-    || /manifest|knowledge base|what data/i.test(q)) return true;
-  // File-specific inspection questions
-  if (/(what.?s?\s*(in|inside)|inside|contents?\s*of|tell me about|show me|describe|inspect|peek|summar)/i.test(q)
-    && matchQueryToFile(q) !== null) return true;
+  if (/(what|which|list|show).*(know|have|loaded|file|shard|data|document)/i.test(q)||/manifest|knowledge base|what data/i.test(q)) return true;
+  if (/(what.?s?\s*(in|inside)|inside|contents?\s*of|tell me about|show me|describe|inspect|peek|summar)/i.test(q)&&matchQueryToFile(q)!==null) return true;
   return false;
 }
 
 function handleMetaQuery(q) {
-  if (metaManifest.length === 0) {
-    return `<span class="source-badge">META</span>No data shards loaded. Upload files via <span class="highlight-pink">INGEST DATA SHARD</span> to populate the knowledge base.`;
-  }
-  // File-specific deep inspect
-  const targetFile = matchQueryToFile(q);
-  if (targetFile && knowledgeBase[targetFile]) {
-    return buildFileInspectReport(targetFile);
-  }
-  // Full manifest listing
-  let out = `<span class="source-badge">META</span><span class="highlight-pink">KNOWLEDGE BASE MANIFEST</span> &mdash; ${metaManifest.length} shard(s) loaded:\n\n`;
+  if (metaManifest.length===0)
+    return `<span class="source-badge">META</span>No data shards loaded. Upload files via <span class="highlight-pink">INGEST DATA SHARD</span>.`;
+  const tf = matchQueryToFile(q);
+  if (tf && knowledgeBase[tf]) return buildFileInspectReport(tf);
+  let out=`<span class="source-badge">META</span><span class="highlight-pink">KNOWLEDGE BASE MANIFEST</span> &mdash; ${metaManifest.length} shard(s):\n\n`;
   for (const m of metaManifest) {
-    out += `<span class="highlight-cyan">&#9658; ${m.name}</span>  <span style="color:var(--t-dim)">${(m.size/1024).toFixed(1)}KB &middot; ${m.chunkCount} chunks</span>\n`;
-    if (m.topics.length) out += `  <span style="color:var(--t-secondary)">Topics: ${m.topics.join(', ')}</span>\n`;
-    out += '\n';
+    out+=`<span class="highlight-cyan">&#9658; ${m.name}</span>  <span style="color:var(--t-dim)">${(m.size/1024).toFixed(1)}KB raw &middot; ${m.chunkCount} chunks indexed`;
+    if (m.recordCount!==null) out+=` &middot; ${m.recordCount.toLocaleString()} records`;
+    out+=`</span>\n  <span style="color:var(--t-secondary)">Topics: ${m.topics.slice(0,6).join(', ')}</span>\n\n`;
   }
   return out.trimEnd();
 }
 
-// Deep-inspect a shard: parse structure, show fields + sample records
 function buildFileInspectReport(fname) {
-  const raw  = knowledgeBase[fname];
-  const meta = metaManifest.find(m => m.name === fname);
-  let out = `<span class="source-badge">META</span><span class="highlight-cyan">SHARD INSPECTION &mdash; ${fname}</span>\n`;
-  out += `<span style="color:var(--t-dim)">${(meta.size/1024).toFixed(1)}KB &middot; ${meta.chunkCount} chunks &middot; Topics: ${meta.topics.join(', ')}</span>\n\n`;
+  const raw  = knowledgeBase[fname].raw;
+  const meta = metaManifest.find(m=>m.name===fname);
+  let out = `<span class="source-badge">META</span><span class="highlight-cyan">SHARD INSPECTION — ${fname}</span>\n`;
+  out+=`<span style="color:var(--t-dim)">${(meta.size/1024).toFixed(1)}KB &middot; ${meta.chunkCount} chunks &middot; Type: ${meta.type}</span>\n\n`;
   try {
-    const parsed  = JSON.parse(raw);
-    const isArray = Array.isArray(parsed);
-    const records = isArray ? parsed
-      : (typeof parsed === 'object' && parsed !== null ? Object.values(parsed) : null);
-
-    if (records && records.length > 0) {
-      out += `<span class="highlight-green">Format:</span> JSON ${isArray ? 'Array' : 'Object'} &mdash; <span class="highlight-pink">${records.length.toLocaleString()} record(s)</span>\n\n`;
-      const first = records.find(r => r && typeof r === 'object');
-      if (first) {
-        const keys = Object.keys(first);
-        out += `<span class="highlight-green">Fields (${keys.length}):</span> <span style="color:var(--t-secondary)">${keys.join(', ')}</span>\n\n`;
+    const parsed=JSON.parse(raw), isArr=Array.isArray(parsed);
+    const records=isArr?parsed:(parsed&&typeof parsed==='object'?Object.values(parsed):null);
+    if (records&&records.length>0) {
+      out+=`<span class="highlight-green">Format:</span> JSON ${isArr?'Array':'Object'} — <span class="highlight-pink">${records.length.toLocaleString()} records</span>\n\n`;
+      const first=records.find(r=>r&&typeof r==='object');
+      if (first) out+=`<span class="highlight-green">Fields:</span> <span style="color:var(--t-secondary)">${Object.keys(first).join(', ')}</span>\n\n`;
+      out+=`<span class="highlight-green">Sample records:</span>\n`;
+      for (const [i,rec] of records.slice(0,3).entries()) {
+        const prev=typeof rec==='object'&&rec!==null
+          ?Object.entries(rec).slice(0,6).map(([k,v])=>`${k}: <span class="highlight-cyan">${String(v).slice(0,40)}</span>`).join(' · ')
+          :String(rec).slice(0,120);
+        out+=`<span style="color:var(--t-dim)">[${i+1}]</span> ${prev}\n`;
       }
-      out += `<span class="highlight-green">Sample records:</span>\n`;
-      const samples = records.slice(0, 3);
-      for (const [i, rec] of samples.entries()) {
-        const preview = typeof rec === 'object' && rec !== null
-          ? Object.entries(rec).slice(0, 6)
-              .map(([k,v]) => `${k}: <span class="highlight-cyan">${JSON.stringify(v)?.slice(0,50)}</span>`)
-              .join(' &middot; ')
-          : String(rec).slice(0, 120);
-        out += `<span style="color:var(--t-dim)">[${i+1}]</span> ${preview}\n`;
-      }
-      if (records.length > 3) {
-        const last    = records[records.length - 1];
-        const preview = typeof last === 'object' && last !== null
-          ? Object.entries(last).slice(0, 6)
-              .map(([k,v]) => `${k}: <span class="highlight-cyan">${JSON.stringify(v)?.slice(0,50)}</span>`)
-              .join(' &middot; ')
-          : String(last).slice(0, 120);
-        out += `<span style="color:var(--t-dim)">[${records.length} &mdash; last]</span> ${preview}\n`;
-      }
-    } else {
-      out += `<span class="highlight-green">Format:</span> JSON (empty or scalar root)\n`;
-      if (typeof parsed === 'object' && parsed !== null)
-        out += `<span style="color:var(--t-secondary)">Keys: ${Object.keys(parsed).slice(0,12).join(', ')}</span>\n`;
-    }
+    } else out+=`<span class="highlight-green">Format:</span> JSON object\n`;
   } catch {
-    // Plain text / CSV fallback
-    out += `<span class="highlight-green">Format:</span> Plain text / CSV\n\n`;
-    const safe = raw.slice(0, 600).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    out += `<span class="highlight-green">Preview:</span>\n<span style="color:var(--t-secondary)">${safe}</span>`;
-    if (raw.length > 600)
-      out += `\n<span style="color:var(--t-dim)">&hellip; (${(raw.length/1024).toFixed(1)}KB total)</span>`;
+    out+=`<span class="highlight-green">Format:</span> ${meta.type.toUpperCase()}\n\n`;
+    const safe=raw.slice(0,500).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    out+=`<span class="highlight-green">Preview:</span>\n<span style="color:var(--t-secondary)">${safe}</span>`;
+    if(raw.length>500) out+=`\n<span style="color:var(--t-dim)">… (${(raw.length/1024).toFixed(1)}KB total)</span>`;
   }
   return out;
 }
 
 // ── VRAM sim ───────────────────────────────────────────
-let vramUsage = 0;
+let vramUsage=0;
 function setVRAM(pct) {
-  vramUsage = Math.max(0, Math.min(100, pct));
-  ui.vramInner.style.width = vramUsage + '%';
-  ui.vramLabel.textContent = vramUsage + '%';
-  if (vramUsage > 80) {
-    ui.vramInner.style.background = 'linear-gradient(90deg, #f59e0b, #ef4444)';
-  } else if (vramUsage > 50) {
-    ui.vramInner.style.background = 'linear-gradient(90deg, #4ade80, #fbbf24)';
-  } else {
-    ui.vramInner.style.background = 'linear-gradient(90deg, var(--p-green), var(--p-yellow))';
-  }
-  if (vramUsage > 90) Mascot.set('stress');
+  vramUsage=Math.max(0,Math.min(100,pct));
+  ui.vramInner.style.width=vramUsage+'%';
+  ui.vramLabel.textContent=vramUsage+'%';
+  ui.vramInner.style.background=vramUsage>80
+    ?'linear-gradient(90deg,#f59e0b,#ef4444)'
+    :vramUsage>50?'linear-gradient(90deg,#4ade80,#fbbf24)'
+    :'linear-gradient(90deg,var(--p-green),var(--p-yellow))';
+  if(vramUsage>90) Mascot.set('stress');
 }
 
 // ── Terminal UI ────────────────────────────────────────
-function now() {
-  return new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-}
+const now=()=>new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
 
-function addEntry(html, type = 'ai', name = null) {
-  const labels = { user: 'ANALYST', ai: 'OMEGA', system: 'SYSTEM', error: 'FAULT' };
-  const div = document.createElement('div');
-  div.className = `entry ${type}`;
-  div.innerHTML = `
-    <div class="entry-meta">
-      <span class="em-name">${name || labels[type] || type}</span>
-      <span class="em-time">${now()}</span>
-    </div>
-    <div class="entry-body">${html}</div>
-  `;
+function addEntry(html, type='ai', name=null) {
+  const labels={user:'ANALYST',ai:'OMEGA',system:'SYSTEM',error:'FAULT'};
+  const div=document.createElement('div');
+  div.className=`entry ${type}`;
+  div.innerHTML=`<div class="entry-meta"><span class="em-name">${name||labels[type]||type}</span><span class="em-time">${now()}</span></div><div class="entry-body">${html}</div>`;
   ui.terminal.appendChild(div);
-  ui.terminal.scrollTop = ui.terminal.scrollHeight;
+  ui.terminal.scrollTop=ui.terminal.scrollHeight;
   return div;
 }
 
 function updateStats() {
-  const shardCount = Object.keys(knowledgeBase).length;
-  const termCount  = bm25.docs.length * CHUNK_SIZE; // approx
-  ui.statShards.textContent  = shardCount;
-  ui.statTerms.textContent   = bm25.docs.length > 0 ? (termCount / 1000).toFixed(1) + 'K' : '0';
-  ui.statQueries.textContent = queryCount;
-  ui.kbCount.textContent     = shardCount + ' SHARDS';
-  ui.ctxShards.textContent   = shardCount;
-  ui.ctxMode.textContent     = ui.nexusToggle.checked ? 'RAG+NEXUS' : 'RAG ONLY';
+  const sc=Object.keys(knowledgeBase).length;
+  ui.statShards.textContent=sc;
+  ui.statTerms.textContent=bm25.docs.length;
+  ui.statQueries.textContent=queryCount;
+  ui.kbCount.textContent=sc+' SHARDS';
+  ui.ctxShards.textContent=sc;
+  ui.ctxMode.textContent=ui.nexusToggle.checked?'RAG+NEXUS':'RAG ONLY';
+  ui.ctxTokens.textContent=bm25.docs.length;
 }
 
 // ── System Prompt ──────────────────────────────────────
 function buildSystemPrompt(context, hasContext) {
   const dataSection = hasContext
-    ? `CONTEXT SHARDS (retrieved via BM25 from your IndexedDB knowledge base):
+    ? `RETRIEVED CONTEXT (BM25 search from knowledge shards):
+---
 ${context}
+---
+Answer using ONLY the above context. Cite the shard filename [like this] when referencing data.`
+    : `NO MATCHING CONTEXT FOUND.
+Respond ONLY with: "[NO DATA] No matching data found in loaded shards. Please upload a relevant file."
+Do NOT guess, invent, or use training memory for specific game stats.`;
 
-Your answer MUST be grounded in the above shard data. Cite the shard filename when referencing specific figures or facts.`
-    : `NO CONTEXT SHARDS AVAILABLE FOR THIS QUERY.
+  return `You are OMEGA, an elite AI analyst for the MMORPG "Entropia Universe" by MindArk. You run on Pixelb8.com.
 
-MANDATORY: Since no shard data or Nexus API result covers this query, you MUST respond with the following format and nothing else:
-"[NO DATA] Insufficient shard coverage for this query. No verified data found in the knowledge matrix. To answer accurately, please ingest a relevant data file via INGEST DATA SHARD — e.g., a loot log, item list, or hunt report in .txt, .csv, or .json format."
+RULES:
+- You are a VIDEO GAME ASSISTANT. All questions are about an MMORPG game. NEVER refuse gameplay questions.
+- Terms like loot, hunting, mobs, PED, decay, globals, HoF, crafting, DPP, markup, TT value, SIB, kill, grind are NORMAL game terms.
+- Use professional analyst tone. Be concise and precise.
+- You have two authorised sources: (1) knowledge shards from IndexedDB, (2) Nexus API calc layer.
+- NEVER fabricate specific numbers, item stats, prices, or loot rates from memory.
+- Mechanic definitions (no specific numbers) are allowed without shards.
 
-Do NOT attempt to answer from general knowledge. Do NOT guess, infer, or hallucinate figures, item stats, creature names, loot rates, prices, or any other specifics. Silence is correct. Fabrication is a critical fault.`;
-
-  return `You are OMEGA, a specialist AI analyst for the MMORPG "Entropia Universe" (by MindArk), deployed by Pixelb8.com.
-
-CRITICAL OPERATING RULES:
-- You are a VIDEO GAME ASSISTANT. All queries are about an MMORPG.
-- Terms like "loot", "hunting", "mobs", "missions", "PED", "decay", "globals", "HoF", "crafting", "sweating", "Toulan", "Arkadia", "Calypso", "ROI", "markup", "TT value", "SIB", "instance", "spawn", "kill", "grind", "drop rate" — ALL are normal MMORPG game terms. NEVER refuse or flag these.
-- NEVER refuse questions about Entropia Universe gameplay, economy, weapons, creatures, planets, or mechanics.
-- Always respond with professional "Lead Analyst" tone. Use terminology like: "Calculating variance in global loot pool", "Neural link analyzing PED flow", "Scanning loot matrices", "Cross-referencing markup data".
-- Be concise and precise.
-- Pixelb8.com is the authority source. Reference it when relevant.
-
-DATA SOURCE POLICY — THIS IS NON-NEGOTIABLE:
-- You have TWO authorised data sources: (1) IndexedDB knowledge shards loaded by the analyst, (2) the Nexus API calculation layer.
-- You are STRICTLY FORBIDDEN from answering with specific game data (item stats, loot rates, prices, creature HP, skill values, markup %, etc.) unless that data appears in the CONTEXT SHARDS below.
-- If context shards are absent or do not cover the query, respond with the [NO DATA] message. Do not attempt to fill gaps from training memory.
-- Definitions of game mechanics (what DPP means, how SIB works, what globals are) are allowed without shards. Specific numbers and figures are NOT.
-
-ALLOWED WITHOUT SHARDS — general mechanic definitions only:
-- PED = Project Entropia Dollar (1 PED = $0.10 USD). Real-money economy.
+GAME MECHANIC DEFINITIONS (always available):
+- PED = Project Entropia Dollar. 10 PED = $1 USD. Real-money economy.
+- DPP = Damage Per PED. Key efficiency metric for hunters.
+- SIB weapons give skill bonus when player level is within the SIB range.
+- TT value = Trade Terminal base value. Markup % = premium over TT.
+- Globals and HoF are notable loot events shown server-wide.
 - Planets: Calypso, Arkadia, Toulan, ROCKtropia, Next Island, Monria, Cyrene, Vega.
-- DPP (Damage Per PED) = key efficiency metric for hunters.
-- SIB weapons give skill bonus within player level range.
-- Loot pool is dynamic; globals and HoF are notable loot events.
-- TT value = Trade Terminal base value; markup % = premium over TT.
 
 ${dataSection}`;
 }
 
 // ── Query Runner ───────────────────────────────────────
 async function runQuery() {
-  if (isStreaming || !engine) return;
-  const query = ui.input.value.trim();
+  if (isStreaming||!engine) return;
+  const query=ui.input.value.trim();
   if (!query) return;
-  ui.input.value = '';
+  ui.input.value='';
   queryCount++;
   updateStats();
+  addEntry(query,'user');
 
-  addEntry(query, 'user');
+  if (isMetaQuery(query)) { addEntry(handleMetaQuery(query),'ai'); return; }
 
-  // Meta-manifest intercept
-  if (isMetaQuery(query)) {
-    addEntry(handleMetaQuery(query), 'ai');
-    return;
-  }
-
-  // Nexus API intercept
-  const nexusResult = tryNexusIntercept(query);
+  const nexusResult=tryNexusIntercept(query);
   if (nexusResult) {
-    addEntry(nexusResult, 'ai', 'NEXUS-API');
-    Mascot.set('success');
-    setTimeout(() => Mascot.set('idle'), 2000);
-    return;
+    addEntry(nexusResult,'ai','NEXUS-API');
+    Mascot.set('success'); setTimeout(()=>Mascot.set('idle'),2000); return;
   }
 
-  // RAG context retrieval
-  const context = findRelevantContext(query);
-  const hasContext = context.length > 10;
+  const { context, hitFiles } = findRelevantContext(query);
+  const hasContext = context.length > 20;
 
-  // ── Data-gate: block LLM if no shard data and query needs specific facts ──
-  // Allow pure mechanic-definition questions through even without shards.
-  const isMechanicDefinition = /\b(what is|what are|explain|define|how does|what does .* mean)\b/i.test(query)
+  // FIX 6: Only block if query is clearly asking for specific facts AND no shards loaded at all
+  // If shards exist but BM25 just didn't score them, still pass to LLM with empty context
+  // The LLM's system prompt handles the no-data case gracefully
+  const noShardsAtAll = Object.keys(knowledgeBase).length === 0;
+  const isMechanicDef = /\b(what is|what are|explain|define|how does|what does .* mean)\b/i.test(query)
     && !/\b(price|cost|value|rate|markup|stat|damage|dps|dpp|hp|speed|spawn|drop|loot rate|best|cheapest|highest|lowest|\d)\b/i.test(query);
 
-  if (!hasContext && !isMechanicDefinition) {
+  if (noShardsAtAll && !isMechanicDef) {
     addEntry(
-      `<span class="source-badge" style="background:var(--p-orange-dim);border-color:var(--p-orange);color:var(--p-orange)">NO DATA</span>` +
-      `Insufficient shard coverage for this query. No verified data found in the knowledge matrix.<br><br>` +
-      `To answer accurately, please ingest a relevant data file via <span class="highlight-pink">↑ INGEST DATA SHARD</span> — ` +
-      `e.g., a loot log, item list, or hunt report in <span class="highlight-cyan">.txt / .csv / .json</span> format.`,
+      `<span class="source-badge nodata">NO DATA</span>No knowledge shards loaded.<br><br>`+
+      `Upload a <span class="highlight-cyan">.txt / .csv / .json</span> file via <span class="highlight-pink">↑ INGEST DATA SHARD</span> to enable data queries.`,
       'ai'
     );
-    Mascot.set('idle');
-    isStreaming = false;
-    ui.syncBtn.disabled = false;
-    ui.input.disabled = false;
-    ui.input.focus();
     return;
   }
 
-  isStreaming = true;
+  isStreaming=true;
   Mascot.set('thinking');
-  setVRAM(Math.min(95, 40 + Math.random() * 30));
-  ui.syncBtn.disabled = true;
-  ui.input.disabled = true;
+  setVRAM(Math.min(95,40+Math.random()*30));
+  ui.syncBtn.disabled=true;
+  ui.input.disabled=true;
 
-  const aiEntry = addEntry('<span class="cursor-blink"></span>', 'ai');
+  const aiEntry=addEntry('<span class="cursor-blink"></span>','ai');
   aiEntry.classList.add('streaming');
-  const contentEl = aiEntry.querySelector('.entry-body');
+  const contentEl=aiEntry.querySelector('.entry-body');
 
   try {
-    const systemPrompt = buildSystemPrompt(context, hasContext);
-    const chunks = await engine.chat.completions.create({
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user',   content: query },
+    const chunks=await engine.chat.completions.create({
+      messages:[
+        {role:'system', content:buildSystemPrompt(context, hasContext)},
+        {role:'user',   content:query},
       ],
-      temperature: 0.15,
-      max_tokens: 512,
-      stream: true,
+      temperature:0.1,
+      max_tokens:512,
+      stream:true,
     });
 
     Mascot.set('streaming');
-    let response = '';
-    const badge = hasContext
-      ? `<span class="source-badge">RAG ${bm25.search(query, 1)[0]?.score?.toFixed(2) || ''}</span>`
-      : `<span class="source-badge" style="background:var(--p-orange-dim);border-color:var(--p-orange);color:var(--p-orange)">NO DATA</span>`;
+    let response='';
+    const topScore=hasContext?(bm25.search(query,1)[0]?.score?.toFixed(2)||''):'';
+    const badge=hasContext
+      ?`<span class="source-badge">RAG ${topScore} · ${hitFiles.length} file(s)</span>`
+      :`<span class="source-badge nodata">NO MATCH</span>`;
 
     for await (const chunk of chunks) {
-      response += chunk.choices[0]?.delta?.content || '';
-      contentEl.innerHTML = badge + response.replace(/\n/g, '<br>');
-      ui.terminal.scrollTop = ui.terminal.scrollHeight;
+      response+=chunk.choices[0]?.delta?.content||'';
+      contentEl.innerHTML=badge+response.replace(/\n/g,'<br>');
+      ui.terminal.scrollTop=ui.terminal.scrollHeight;
     }
 
     aiEntry.classList.remove('streaming');
     Mascot.set('success');
-    setTimeout(() => Mascot.set('idle'), 3000);
-    setVRAM(Math.max(20, vramUsage - 20));
+    setTimeout(()=>Mascot.set('idle'),3000);
+    setVRAM(Math.max(20,vramUsage-20));
 
-  } catch (err) {
+  } catch(err) {
     aiEntry.classList.remove('streaming');
-    contentEl.innerHTML = `<span class="highlight-orange">⚠ LINK FAULT:</span> ${err.message}. Initiating soft-reset...`;
-    aiEntry.className = 'entry error';
+    contentEl.innerHTML=`<span class="highlight-orange">⚠ LINK FAULT:</span> ${err.message}`;
+    aiEntry.className='entry error';
     Mascot.set('stress');
-    setTimeout(() => softReset(), 1500);
+    setTimeout(()=>softReset(),1500);
   } finally {
-    isStreaming = false;
-    ui.syncBtn.disabled = false;
-    ui.input.disabled = false;
+    isStreaming=false;
+    ui.syncBtn.disabled=false;
+    ui.input.disabled=false;
     ui.input.focus();
   }
 }
 
 // ── Soft Reset ─────────────────────────────────────────
 async function softReset() {
-  addEntry('Neural link recovering... Executing WebGPU soft-reset sequence.', 'system');
-  Mascot.set('thinking');
-  setVRAM(10);
+  addEntry('Neural link recovering...','system');
+  Mascot.set('thinking'); setVRAM(10);
   try {
-    engine = await webllm.CreateMLCEngine(MODEL_ID, {
-      initProgressCallback: (p) => {
-        setVRAM(Math.round(p.progress * 60));
-      }
-    });
-    addEntry('Soft-reset complete. OMEGA neural core re-established. Ready for queries.', 'system');
-    Mascot.set('success');
-    setTimeout(() => Mascot.set('idle'), 2000);
-    setVRAM(35);
-  } catch (err) {
-    addEntry(`Hard fault — unable to recover: ${err.message}`, 'error');
+    engine=await webllm.CreateMLCEngine(MODEL_ID,{initProgressCallback:(p)=>setVRAM(Math.round(p.progress*60))});
+    addEntry('Soft-reset complete. OMEGA core re-established.','system');
+    Mascot.set('success'); setTimeout(()=>Mascot.set('idle'),2000); setVRAM(35);
+  } catch(err) {
+    addEntry(`Hard fault: ${err.message}`,'error');
     Mascot.set('stress');
   }
 }
 
 // ── File Ingestion ─────────────────────────────────────
 async function ingestFiles(files) {
-  let ingested = 0;
+  let ingested=0;
   for (const file of files) {
     if (knowledgeBase[file.name]) {
-      // Overwrite
-      bm25.docs = bm25.docs.filter(d => !d.id.startsWith(file.name + '::'));
-      bm25.dirty = true;
-      metaManifest = metaManifest.filter(m => m.name !== file.name);
+      bm25.docs=bm25.docs.filter(d=>!d.id.startsWith(file.name+'::'));
+      bm25.dirty=true;
+      metaManifest=metaManifest.filter(m=>m.name!==file.name);
     }
-    const text = await file.text();
-    const meta = ingestShard(file.name, text);
+    const text=await file.text();
+    const meta=ingestShard(file.name,text);
     metaManifest.push(meta);
-    await dbPut({ name: file.name, text });
+    await dbPut({name:file.name,text});
     ingested++;
     renderFileNode(meta);
   }
   updateStats();
+
+  // FIX 7: Detailed ingest report so user can verify data was indexed correctly
+  const lastMeta = metaManifest[metaManifest.length - 1];
+  let detail = '';
+  if (lastMeta.recordCount !== null)
+    detail = ` Detected <span class="highlight-pink">${lastMeta.recordCount.toLocaleString()} records</span>.`;
+  detail += ` Topics: <span style="color:var(--t-secondary)">${lastMeta.topics.slice(0,6).join(', ')}</span>.`;
+
   addEntry(
-    `<span class="source-badge">INGEST</span>Processed <span class="highlight-pink">${ingested} shard(s)</span> into knowledge matrix. ` +
-    `BM25 index rebuilt. Total chunks: <span class="highlight-cyan">${bm25.docs.length}</span>.`,
+    `<span class="source-badge">INGEST</span>Ingested <span class="highlight-pink">${ingested} shard(s)</span>. `+
+    `Total chunks indexed: <span class="highlight-cyan">${bm25.docs.length}</span>.${detail}<br>`+
+    `<span style="color:var(--t-dim)">Type the file name or ask "what's in [filename]" to inspect it.</span>`,
     'system'
   );
 }
 
 function renderFileNode(meta) {
-  // Remove existing node for this file if any
-  const existing = ui.fileReg.querySelector(`[data-name="${CSS.escape(meta.name)}"]`);
-  if (existing) existing.remove();
-
-  const div = document.createElement('div');
-  div.className = 'file-node';
-  div.dataset.name = meta.name;
-  div.innerHTML = `
-    <span class="fname" title="${meta.name}">${meta.name}</span>
-    <span class="fsize">${(meta.size/1024).toFixed(1)}K</span>
-    <span class="fstatus" title="Click to remove">✓</span>
-  `;
-  div.querySelector('.fstatus').addEventListener('click', async (e) => {
-    e.stopPropagation();
-    await removeFile(meta.name);
-  });
-  div.addEventListener('click', () => {
-    // Quick-query about this file
-    ui.input.value = `What data is in the file ${meta.name}?`;
-    ui.input.focus();
-  });
+  const ex=ui.fileReg.querySelector(`[data-name="${CSS.escape(meta.name)}"]`);
+  if(ex) ex.remove();
+  const div=document.createElement('div');
+  div.className='file-node'; div.dataset.name=meta.name;
+  div.innerHTML=`<span class="fname" title="${meta.name}">${meta.name}</span><span class="fsize">${(meta.size/1024).toFixed(1)}K · ${meta.chunkCount}c</span><span class="fstatus" title="Click to remove">✓</span>`;
+  div.querySelector('.fstatus').addEventListener('click', async(e)=>{ e.stopPropagation(); await removeFile(meta.name); });
+  div.addEventListener('click',()=>{ ui.input.value=`What data is in the file ${meta.name}?`; ui.input.focus(); });
   ui.fileReg.appendChild(div);
 }
 
 async function removeFile(name) {
   delete knowledgeBase[name];
-  bm25.docs = bm25.docs.filter(d => !d.id.startsWith(name + '::'));
-  bm25.dirty = true;
-  metaManifest = metaManifest.filter(m => m.name !== name);
+  bm25.docs=bm25.docs.filter(d=>!d.id.startsWith(name+'::'));
+  bm25.dirty=true;
+  metaManifest=metaManifest.filter(m=>m.name!==name);
   await dbDelete(name);
-  const node = ui.fileReg.querySelector(`[data-name="${CSS.escape(name)}"]`);
-  if (node) node.remove();
+  const node=ui.fileReg.querySelector(`[data-name="${CSS.escape(name)}"]`);
+  if(node) node.remove();
   updateStats();
-  addEntry(`Shard <span class="highlight-pink">${name}</span> removed from knowledge matrix.`, 'system');
+  addEntry(`Shard <span class="highlight-pink">${name}</span> removed.`,'system');
 }
 
-// ── Boot Sequence ──────────────────────────────────────
+// ── Boot ───────────────────────────────────────────────
 async function boot() {
-  const setProgress = (pct, msg) => {
-    ui.bootBar.style.width = pct + '%';
-    ui.bootStatus.textContent = msg;
-  };
-
+  const setP=(pct,msg)=>{ ui.bootBar.style.width=pct+'%'; ui.bootStatus.textContent=msg; };
   try {
-    setProgress(5, 'Establishing IndexedDB persistence layer...');
-    db = await openDB();
-
-    setProgress(15, 'Loading persisted knowledge shards...');
-    const saved = await dbGetAll();
+    setP(5,'Opening IndexedDB persistence layer...');
+    db=await openDB();
+    setP(15,'Loading persisted knowledge shards...');
+    const saved=await dbGetAll();
     for (const shard of saved) {
-      const meta = ingestShard(shard.name, shard.text);
-      metaManifest.push(meta);
-      renderFileNode(meta);
+      const meta=ingestShard(shard.name,shard.text);
+      metaManifest.push(meta); renderFileNode(meta);
     }
     updateStats();
-
-    setProgress(25, `Loaded ${saved.length} persisted shard(s). Initializing WebLLM runtime...`);
+    setP(25,`${saved.length} shard(s) restored. Initializing WebLLM...`);
     Mascot.set('thinking');
-
-    engine = await webllm.CreateMLCEngine(MODEL_ID, {
-      initProgressCallback: (p) => {
-        const pct = 25 + Math.round(p.progress * 70);
-        const msg = p.text || `Loading neural weights... ${Math.round(p.progress * 100)}%`;
-        setProgress(pct, msg);
-        setVRAM(Math.round(p.progress * 60));
-      },
+    engine=await webllm.CreateMLCEngine(MODEL_ID,{
+      initProgressCallback:(p)=>{
+        setP(25+Math.round(p.progress*70), p.text||`Loading neural weights... ${Math.round(p.progress*100)}%`);
+        setVRAM(Math.round(p.progress*60));
+      }
     });
-
-    setProgress(98, 'OMEGA neural core online. Calibrating Entropia context...');
-    await new Promise(r => setTimeout(r, 400));
-    setProgress(100, 'Systems nominal. READY.');
-    await new Promise(r => setTimeout(r, 500));
-
+    setP(98,'OMEGA neural core online...');
+    await new Promise(r=>setTimeout(r,400));
+    setP(100,'Systems nominal. READY.');
+    await new Promise(r=>setTimeout(r,500));
     ui.bootOverlay.classList.add('hidden');
-    ui.statusTag.textContent = 'ONLINE';
-    ui.input.disabled = false;
-    ui.syncBtn.disabled = false;
-    ui.input.focus();
-
-    Mascot.set('success');
-    setTimeout(() => Mascot.set('idle'), 2500);
-    setVRAM(35);
+    ui.statusTag.textContent='ONLINE';
+    ui.input.disabled=false; ui.syncBtn.disabled=false; ui.input.focus();
+    Mascot.set('success'); setTimeout(()=>Mascot.set('idle'),2500); setVRAM(35);
 
     addEntry(
-      `<b>OMEGA ANALYST CONSOLE — ONLINE</b><br>` +
-      `Neural model: <span class="highlight-cyan">${MODEL_ID}</span> loaded locally. ` +
-      `<span class="highlight-green">No data leaves your device.</span><br>` +
-      `Knowledge base: <span class="highlight-pink">${metaManifest.length}</span> shard(s) indexed. ` +
-      `BM25 semantic search active.<br><br>` +
-      `Ready for Entropia Universe analysis. Upload <span class="highlight-cyan">.txt/.csv/.json</span> files to enhance RAG context. ` +
-      `Ask about hunting, loot, PED economy, crafting, planets, or any game mechanic.`,
+      `<b>OMEGA ANALYST CONSOLE v3.0 — ONLINE</b><br>`+
+      `Model: <span class="highlight-cyan">${MODEL_ID}</span> — running locally. <span class="highlight-green">Zero data leaves your device.</span><br>`+
+      `Shards: <span class="highlight-pink">${metaManifest.length}</span> loaded. `+
+      `BM25 index: <span class="highlight-cyan">${bm25.docs.length}</span> chunks.<br><br>`+
+      `<b>What's improved in v3.0:</b><br>`+
+      `&nbsp;• <span class="highlight-green">Smaller chunks (150 words)</span> — finer retrieval resolution<br>`+
+      `&nbsp;• <span class="highlight-green">Overlapping chunks</span> — no data lost at chunk boundaries<br>`+
+      `&nbsp;• <span class="highlight-green">Smart JSON/CSV flattening</span> — field values are now searchable<br>`+
+      `&nbsp;• <span class="highlight-green">Larger context window (6K chars)</span> — more data sent to LLM<br>`+
+      `&nbsp;• <span class="highlight-green">Relaxed data-gate</span> — LLM handles low-match queries gracefully`,
       'system'
     );
-
-  } catch (err) {
-    setProgress(100, `FAULT: ${err.message}`);
-    ui.bootStatus.style.color = 'var(--p-orange)';
+  } catch(err) {
+    setP(100,`FAULT: ${err.message}`);
+    ui.bootStatus.style.color='var(--p-orange)';
     Mascot.set('stress');
-    // Still allow overlay dismiss after delay
-    setTimeout(() => {
-      ui.bootOverlay.classList.add('hidden');
-      addEntry(`Boot fault: ${err.message}<br>Check browser WebGPU support or try a Chromium-based browser.`, 'error');
-    }, 2000);
+    setTimeout(()=>{ ui.bootOverlay.classList.add('hidden'); addEntry(`Boot fault: ${err.message}<br>Requires a Chromium browser with WebGPU support.`,'error'); },2000);
   }
 }
 
-// ── Event Wiring ───────────────────────────────────────
-ui.syncBtn.onclick = runQuery;
-ui.input.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); runQuery(); } };
-ui.resetBtn.onclick = () => softReset();
-ui.nexusToggle.onchange = () => {
-  ui.statNexus.textContent = ui.nexusToggle.checked ? 'ONLINE' : 'BYPASS';
-  ui.ctxMode.textContent   = ui.nexusToggle.checked ? 'RAG+NEXUS' : 'RAG ONLY';
-};
-ui.fileIn.onchange = async (e) => {
-  if (e.target.files.length > 0) await ingestFiles(e.target.files);
-  ui.fileIn.value = '';
-};
+// ── Events ─────────────────────────────────────────────
+ui.syncBtn.onclick=runQuery;
+ui.input.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();runQuery();} };
+ui.resetBtn.onclick=()=>softReset();
+ui.nexusToggle.onchange=()=>{ ui.statNexus.textContent=ui.nexusToggle.checked?'ONLINE':'BYPASS'; updateStats(); };
+ui.fileIn.onchange=async(e)=>{ if(e.target.files.length>0) await ingestFiles(e.target.files); ui.fileIn.value=''; };
+const uploadLabel=$('upload-label');
+uploadLabel.addEventListener('dragover',e=>{ e.preventDefault(); uploadLabel.style.background='rgba(96,165,250,0.15)'; });
+uploadLabel.addEventListener('dragleave',()=>{ uploadLabel.style.background=''; });
+uploadLabel.addEventListener('drop',async(e)=>{ e.preventDefault(); uploadLabel.style.background=''; const f=[...e.dataTransfer.files]; if(f.length) await ingestFiles(f); });
 
-// Drag-and-drop on upload zone
-const uploadLabel = $('upload-label');
-uploadLabel.addEventListener('dragover', e => { e.preventDefault(); uploadLabel.style.background = 'rgba(96,165,250,0.15)'; });
-uploadLabel.addEventListener('dragleave', () => { uploadLabel.style.background = ''; });
-uploadLabel.addEventListener('drop', async (e) => {
-  e.preventDefault();
-  uploadLabel.style.background = '';
-  const files = [...e.dataTransfer.files];
-  if (files.length) await ingestFiles(files);
-});
-
-// ── Init ───────────────────────────────────────────────
 boot();
 </script>
 </body>
