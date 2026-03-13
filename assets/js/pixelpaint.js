@@ -257,11 +257,15 @@ function rand(min, max) {
     // Initialize canvas
     setCanvasSize();
     restoreDrawing();
+	hidecanvas();
 }
+
+function hidecanvas(){
+// Hide it immediately on script execution
+	canvas.style.display = 'none';
+};
 const canvas = document.getElementById('pixelpaint');
 
-// Hide it immediately on script execution
-canvas.style.display = 'none';
 
 
 document.addEventListener('DOMContentLoaded', initPixelPen);
