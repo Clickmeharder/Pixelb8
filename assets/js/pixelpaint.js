@@ -1,5 +1,6 @@
 
 function initPixelPen() {
+	const canvas = document.getElementById('pixelpaint');
     const ctx = canvas.getContext('2d');
     let painting = false;
     let color = '#000000';
@@ -264,7 +265,7 @@ function hidecanvas(){
 // Hide it immediately on script execution
 	canvas.style.display = 'none';
 };
-const canvas = document.getElementById('pixelpaint');
+
 
 
 
