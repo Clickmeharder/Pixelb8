@@ -991,20 +991,25 @@ function copyprizelisttoClipboard() {
 document.getElementById('copyPrizelistBtn').addEventListener('click', function() {
     const btn = this;
     const originalText = btn.innerHTML;
+    const originalBorder = btn.style.borderColor;
+    const originalColor = btn.style.color;
 
     // Call the dedicated function
     copyprizelisttoClipboard();
 
-    // Visual feedback
+    // 1. Set to Green Success State
     btn.innerHTML = "✅ Copied!";
     btn.style.borderColor = "#00ff00";
     btn.style.color = "#00ff00";
 
+    // 2. Wait 2 seconds, then reset
     setTimeout(() => {
         btn.innerHTML = originalText;
-        btn.style.borderColor = "orange";
-        btn.style.color = "orange";
+        // Use the captured variables to return to exactly how it was
+        btn.style.borderColor = originalBorder;
+        btn.style.color = originalColor;
     }, 2000);
+
 });
 
 function displayUnclaimedPrizes() {
