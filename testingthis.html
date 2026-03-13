@@ -39,13 +39,34 @@
 
         .registry-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
         .file-node { background: var(--p8-surface); border: 1px solid var(--p8-border); padding: 10px; font-size: 0.65rem; display: flex; justify-content: space-between; }
-
-        #terminal { flex: 1; overflow-y: auto; padding: 40px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 160px; }
+		#terminal {
+			flex: 1;
+			overflow-y: auto;
+			padding: 40px;
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+			/* Remove the huge padding-bottom, use flexbox instead */
+		}
+        #terminal {
+			flex: 1;
+			overflow-y: auto;
+			padding: 40px;
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+			/* Remove the huge padding-bottom, use flexbox instead */
+		}
         .entry .content { background: var(--p8-surface); border: 1px solid var(--p8-border); padding: 15px; border-radius: 4px; font-size: 0.85rem; line-height: 1.6; }
         .entry.user .content { border-right: 4px solid var(--p8-pink); }
         .entry.ai .content { border-left: 4px solid var(--p8-blue); }
 
-        #dock { position: absolute; bottom: 0; left: 0; right: 0; padding: 30px; background: linear-gradient(transparent, #050507 50%); }
+        #dock {
+			background: #050507; /* Remove transparency to ensure it's visible */
+			padding: 20px;
+			border-top: 1px solid var(--p8-border);
+			z-index: 10; /* Ensure it stays above the scanning lines */
+		}
         .input-wrapper { display: flex; background: #000; border: 1px solid var(--p8-border); border-radius: 8px; padding: 5px; }
         input { flex: 1; background: transparent; border: none; color: #fff; padding: 12px; font-family: var(--font-main); outline: none; }
         #sync-btn { background: var(--p8-pink); border: none; padding: 0 25px; font-weight: 900; cursor: pointer; }
@@ -110,16 +131,26 @@
     }
 
     // --- AI ENGINE ---
-    async function boot() {
-        engine = await webllm.CreateMLCEngine("Llama-3.2-1B-Instruct-q4f32_1-MLC", {
-            initProgressCallback: (p) => {
-                if (p.progress === 1) {
-                    ui.input.disabled = false; ui.btn.disabled = false;
-                    ui.input.placeholder = "Awaiting Analyst Query...";
-                }
-            }
-        });
-    }
+	async function boot() {
+		try {
+			engine = await webllm.CreateMLCEngine("Llama-3.2-1B-Instruct-q4f32_1-MLC", {
+				initProgressCallback: (p) => {
+					// Using your preferred concatenation style
+					const msg = "CORE_LOAD: " + (p.progress * 100).toFixed(0) + "% — " + p.text;
+					ui.input.placeholder = msg; 
+					
+					if (p.progress === 1) {
+						ui.input.disabled = false; 
+						ui.btn.disabled = false;
+						ui.input.placeholder = "Awaiting Analyst Query...";
+						addEntry("NEURAL_LINK_ESTABLISHED: Model ready.", "ai");
+					}
+				}
+			});
+		} catch (err) {
+			addEntry("CRITICAL_BOOT_ERROR: " + err.message, "error");
+		}
+	}
 
     async function runQuery() {
         const query = ui.input.value.trim();
