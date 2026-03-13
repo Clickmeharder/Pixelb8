@@ -376,126 +376,883 @@ input#user-input:disabled{opacity:.4;cursor:not-allowed}
 </main>
 
 <script type="module">
-import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
+// ═══════════════════════════════════════════════════════════════
+//  PIXELBOT OMEGA v3 — FULL ENGINE
+//  Fixes: RAG retrieval, source enforcement, stop, edit, convos
+// ═══════════════════════════════════════════════════════════════
+import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
-/**
- * ══════════════════════════════════════════════
- * NEXUS ANALYST ENGINE
- * Logic rebuilt from entropianexusapi.js
- * ══════════════════════════════════════════════
- */
-const NexusAnalyst = {
-  // Formulas for "Smart" responses
-  formulas: {
-    dpp: (dmg, cost) => dmg / cost,
-    eco: (dpp, hit) => dpp * (hit / 100),
-    markup: (cost, mu) => cost * (mu / 100)
-  },
+// ── CONSTANTS ──────────────────────────────────────────────────
+const MODEL_ID   = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
+const DB_NAME    = "OmegaRAG_v3";
+const DB_VER     = 3;
+const CHUNK_SIZE = 300;   // words per BM25 chunk
+const MAX_CTX    = 2200;  // chars of context to inject
+const BM25_K1    = 1.5;
+const BM25_B     = 0.75;
 
-  // Tool definitions for the LLM
-  getTools: () => [
-    {
-      name: "calculate_eco",
-      description: "Calculate Damage Per PEC and Economy for a weapon.",
-      parameters: { type: "object", properties: { 
-        dmg: { type: "number" }, 
-        cost: { type: "number" }, 
-        hit: { type: "number" } 
-      }}
-    }
-  ]
+// ── STATE ──────────────────────────────────────────────────────
+let engine        = null;
+let db            = null;
+let isStreaming   = false;
+let stopRequested = false;
+let queryCount    = 0;
+
+// RAG
+let knowledgeBase = {};   // { name: rawText }
+let metaManifest  = [];   // [{ name, size, chunkCount, topics }]
+let bm25          = null; // BM25Index instance — rebuilt on ingest
+
+// Conversations
+let conversations = {};   // { id: { id, name, messages: [{role,content,ts}] } }
+let activeConvId  = null;
+
+// ── UI REFS ────────────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const ui = {
+  terminal:    $('terminal'),
+  input:       $('user-input'),
+  syncBtn:     $('sync-btn'),
+  stopBtn:     $('stop-btn'),
+  resetBtn:    $('reset-btn'),
+  fileIn:      $('file-in'),
+  fileReg:     $('file-registry'),
+  bootOverlay: $('boot-overlay'),
+  bootBar:     $('boot-progress-bar'),
+  bootStatus:  $('boot-status'),
+  statusTag:   $('status-tag'),
+  vramInner:   $('vram-inner'),
+  vramLabel:   $('vram-label'),
+  statShards:  $('stat-shards'),
+  statChunks:  $('stat-chunks'),
+  statQueries: $('stat-queries'),
+  statNexus:   $('stat-nexus'),
+  kbCount:     $('kb-count'),
+  ctxShards:   $('ctx-shards'),
+  ctxSource:   $('ctx-source'),
+  ctxNexus:    $('ctx-nexus'),
+  convList:    $('conv-list'),
+  convCount:   $('conv-count'),
+  newConvBtn:  $('new-conv-btn'),
+  nexusToggle: $('nexus-toggle'),
 };
 
-/**
- * ══════════════════════════════════════════════
- * NEURAL RAG REGISTRY (Semantic Search)
- * ══════════════════════════════════════════════
- */
-class NeuralRegistry {
-  constructor() {
-    this.shards = []; // { text, vector, metadata }
+// ══════════════════════════════
+//  MASCOT
+// ══════════════════════════════
+const Mascot = (() => {
+  const canvas = $('bot-canvas');
+  const ctx    = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  let state = 'idle';
+  let frame = 0;
+  let particles = [];
+
+  const C = { body:'#1a1a3e', eye:'#60a5fa', pink:'#f472b6', cyan:'#22d3ee', green:'#4ade80', orange:'#fb923c' };
+
+  function spawn(x, y, color) {
+    particles.push({ x, y, vx:(Math.random()-.5)*2.2, vy:-Math.random()*1.8-.4, life:1, decay:.018+Math.random()*.025, color, size:2+Math.random()*3 });
   }
 
-  // Simulated vectorization (using lightweight keyword-weighting for mono-file stability)
-  async ingest(filename, content) {
-    const lines = content.split('\n').filter(l => l.length > 20);
-    lines.forEach(line => {
-      this.shards.push({
-        source: filename,
-        content: line.trim(),
-        tokens: line.toLowerCase().split(/\W+/)
-      });
-    });
-    console.log(`[NEURAL] Indexed ${this.shards.length} shards from ${filename}`);
+  function stateColor() {
+    return { thinking:C.cyan, streaming:C.pink, stress:C.orange, success:C.green }[state] || C.eye;
   }
 
-  query(userText, limit = 5) {
-    const qTokens = userText.toLowerCase().split(/\W+/);
-    return this.shards
-      .map(shard => {
-        let score = 0;
-        qTokens.forEach(t => { if(shard.tokens.includes(t)) score++; });
-        return { ...shard, score };
-      })
-      .filter(s => s.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit);
+  function draw() {
+    frame++;
+    ctx.clearRect(0,0,W,H);
+    const cx=W/2, cy=H/2+5, ec=stateColor(), breathe=Math.sin(frame*.04)*2.5;
+
+    // Pulse rings
+    if(state!=='idle') {
+      ctx.lineWidth=1;
+      for(let i=1;i<=3;i++){
+        ctx.strokeStyle=`rgba(96,165,250,${((Math.sin(frame*.07)+1)*.06+.01)})`;
+        ctx.beginPath();ctx.arc(cx,cy,38+i*17+Math.sin(frame*.055+i)*3,0,Math.PI*2);ctx.stroke();
+      }
+    }
+
+    // Body
+    ctx.shadowColor=ec; ctx.shadowBlur=7+breathe;
+    ctx.fillStyle=C.body; ctx.strokeStyle=ec; ctx.lineWidth=1.5;
+    const bw=58, bh=68+breathe;
+    ctx.beginPath(); ctx.roundRect(cx-bw/2, cy-bh/2+8, bw, bh, 7); ctx.fill(); ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // Head
+    ctx.fillStyle=C.body; ctx.strokeStyle=ec; ctx.lineWidth=1.5;
+    const hw=42,hh=34;
+    ctx.beginPath(); ctx.roundRect(cx-hw/2, cy-bh/2-hh+10, hw, hh, 6); ctx.fill(); ctx.stroke();
+
+    // Antenna
+    const asw=Math.sin(frame*.05)*4;
+    ctx.strokeStyle=ec; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(cx, cy-bh/2-hh+11); ctx.lineTo(cx+asw, cy-bh/2-hh-9); ctx.stroke();
+    ctx.fillStyle=ec; ctx.shadowColor=ec; ctx.shadowBlur=6;
+    ctx.beginPath(); ctx.arc(cx+asw, cy-bh/2-hh-11, 3, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+
+    // Eyes
+    const eyeY = cy-bh/2-hh/2+10;
+    const blink = (state==='thinking' && Math.sin(frame*.18)>.96) ? 1.5 : 7;
+    for(const s of [-10,10]) {
+      ctx.fillStyle=`rgba(96,165,250,0.12)`; ctx.beginPath(); ctx.ellipse(cx+s,eyeY,8,8,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle=ec; ctx.shadowColor=ec; ctx.shadowBlur=9;
+      ctx.beginPath(); ctx.ellipse(cx+s,eyeY,4.5,blink/2,0,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+    }
+
+    // Mouth
+    const mp = state==='streaming' ? (Math.sin(frame*.14)+1)*.45 : .5;
+    ctx.strokeStyle=ec; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(cx, eyeY+11, 7, Math.PI*(mp*.25), Math.PI-(mp*.25)); ctx.stroke();
+
+    // Body display
+    if(state==='streaming'||state==='thinking'){
+      for(let i=0;i<4;i++){
+        const la=Math.max(0,Math.sin(frame*.09-i*.85))*.55;
+        const lw=(18+Math.sin(frame*.07+i*1.1)*14)*(i===0?1:.65);
+        ctx.fillStyle=`rgba(96,165,250,${la})`;
+        ctx.fillRect(cx-lw/2, cy-1+i*9, lw, 2);
+      }
+    }
+    if(state==='stress'){
+      ctx.strokeStyle=`rgba(251,146,60,${(Math.sin(frame*.2)+1)*.35+.2})`; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(cx-9,cy+4); ctx.lineTo(cx,cy-6); ctx.lineTo(cx+9,cy+4); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx-5,cy+11); ctx.lineTo(cx,cy+3); ctx.lineTo(cx+5,cy+11); ctx.stroke();
+    }
+    if(state==='success'){
+      ctx.strokeStyle=C.green; ctx.lineWidth=2; ctx.shadowColor=C.green; ctx.shadowBlur=8;
+      ctx.beginPath(); ctx.moveTo(cx-9,cy+5); ctx.lineTo(cx-3,cy+11); ctx.lineTo(cx+11,cy-5); ctx.stroke();
+      ctx.shadowBlur=0;
+      if(frame%3===0) spawn(cx+(Math.random()-.5)*28, cy+(Math.random()-.5)*18, C.green);
+    }
+
+    // Arms
+    const arm=Math.sin(frame*.05)*(state==='streaming'?14:4.5);
+    ctx.strokeStyle=ec; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(cx-bw/2,cy+13); ctx.lineTo(cx-bw/2-13,cy+28+arm); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+bw/2,cy+13); ctx.lineTo(cx+bw/2+13,cy+28-arm); ctx.stroke();
+
+    // Legs
+    ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(cx-11,cy+bh/2+8); ctx.lineTo(cx-13,cy+bh/2+25); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+11,cy+bh/2+8); ctx.lineTo(cx+13,cy+bh/2+25); ctx.stroke();
+
+    // Particles
+    particles=particles.filter(p=>p.life>0);
+    for(const p of particles){
+      ctx.globalAlpha=p.life; ctx.fillStyle=p.color;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2); ctx.fill();
+      p.x+=p.vx; p.y+=p.vy; p.life-=p.decay;
+    }
+    ctx.globalAlpha=1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+  return { set: s => { state=s; }, get: () => state };
+})();
+
+// ══════════════════════════════
+//  INDEXEDDB
+// ══════════════════════════════
+function openDB() {
+  return new Promise((res,rej)=>{
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if(!d.objectStoreNames.contains('shards'))   d.createObjectStore('shards',   {keyPath:'name'});
+      if(!d.objectStoreNames.contains('convs'))    d.createObjectStore('convs',    {keyPath:'id'});
+    };
+    req.onsuccess = e=>res(e.target.result);
+    req.onerror   = e=>rej(e.target.error);
+  });
+}
+function dbOp(store, mode, fn) {
+  return new Promise((res,rej)=>{
+    const tx = db.transaction(store, mode);
+    const s  = tx.objectStore(store);
+    const req = fn(s);
+    req.onsuccess = e=>res(e.target.result);
+    req.onerror   = e=>rej(e.target.error);
+  });
+}
+const dbPutShard = item => dbOp('shards','readwrite', s=>s.put(item));
+const dbDelShard = name => dbOp('shards','readwrite', s=>s.delete(name));
+const dbAllShards= ()   => dbOp('shards','readonly',  s=>s.getAll());
+const dbPutConv  = conv => dbOp('convs', 'readwrite', s=>s.put(conv));
+const dbDelConv  = id   => dbOp('convs', 'readwrite', s=>s.delete(id));
+const dbAllConvs = ()   => dbOp('convs', 'readonly',  s=>s.getAll());
+
+// ══════════════════════════════
+//  BM25 ENGINE
+// ══════════════════════════════
+const STOPWORDS = new Set([
+  'a','an','the','and','or','but','in','on','at','to','for','of','with','by','from',
+  'is','are','was','were','be','been','have','has','had','do','does','did','will',
+  'would','could','should','may','might','can','this','that','these','those',
+  'i','you','he','she','it','we','they','me','him','her','us','them','what',
+  'how','when','where','why','which','who','not','no','yes','so','if','as','just',
+]);
+
+class BM25Index {
+  constructor() { this.docs=[]; this.idf=new Map(); this.avgdl=0; this.dirty=true; }
+
+  tokenize(text) {
+    return text.toLowerCase().replace(/[^a-z0-9\s\-_.%]/g,' ').split(/\s+/)
+      .filter(t=>t.length>1 && !STOPWORDS.has(t));
+  }
+
+  addDoc(id, text) {
+    const terms=this.tokenize(text), tf=new Map();
+    for(const t of terms) tf.set(t,(tf.get(t)||0)+1);
+    this.docs.push({id,terms,tf,len:terms.length,raw:text});
+    this.dirty=true;
+  }
+
+  rebuild() {
+    if(!this.dirty) return;
+    this.idf.clear();
+    const N=this.docs.length;
+    this.avgdl=this.docs.reduce((s,d)=>s+d.len,0)/(N||1);
+    const df=new Map();
+    for(const doc of this.docs) for(const t of new Set(doc.terms)) df.set(t,(df.get(t)||0)+1);
+    for(const [t,n] of df) this.idf.set(t,Math.log((N-n+0.5)/(n+0.5)+1));
+    this.dirty=false;
+  }
+
+  scoreDoc(docIdx, qTerms) {
+    this.rebuild();
+    const doc=this.docs[docIdx];
+    let score=0;
+    for(const qt of qTerms){
+      const idf=this.idf.get(qt)||0;
+      const tf=doc.tf.get(qt)||0;
+      const num=tf*(BM25_K1+1);
+      const den=tf+BM25_K1*(1-BM25_B+BM25_B*doc.len/this.avgdl);
+      score+=idf*num/den;
+    }
+    return score;
+  }
+
+  search(query, topK=10) {
+    if(this.docs.length===0) return [];
+    this.rebuild();
+    const qTerms=this.tokenize(query);
+    if(qTerms.length===0) return [];
+    const scored=this.docs.map((_,i)=>({i,score:this.scoreDoc(i,qTerms)}));
+    scored.sort((a,b)=>b.score-a.score);
+    return scored.slice(0,topK).filter(s=>s.score>0.01);
   }
 }
 
-const registry = new NeuralRegistry();
+function buildIndex() {
+  bm25=new BM25Index();
+  for(const [name, text] of Object.entries(knowledgeBase)){
+    const words=text.split(/\s+/);
+    for(let i=0;i<words.length;i+=CHUNK_SIZE){
+      const chunk=words.slice(i,i+CHUNK_SIZE).join(' ');
+      bm25.addDoc(`${name}:::${i}`, chunk);
+    }
+  }
+}
 
-/**
- * ══════════════════════════════════════════════
- * CORE AI LOGIC
- * ══════════════════════════════════════════════
- */
-async function runQuery() {
-  const query = ui.input.value.trim();
-  if(!query) return;
+// Returns retrieved context string + source label
+function retrieveContext(query) {
+  if(!bm25 || bm25.docs.length===0) return {context:'',source:'NONE',score:0};
+  const hits=bm25.search(query, 8);
+  if(hits.length===0) return {context:'',source:'NONE',score:0};
 
-  // 1. SEMANTIC RETRIEVAL
-  const contextShards = registry.query(query);
-  const contextBlock = contextShards.length > 0 
-    ? `\nRELEVANT DATA FROM UPLOADED FILES:\n${contextShards.map(s => `- [${s.source}]: ${s.content}`).join('\n')}`
-    : "\n(No relevant data found in local files.)";
+  let context='';
+  for(const h of hits){
+    const doc=bm25.docs[h.i];
+    const label=doc.id.split(':::')[0];
+    const snippet=`[SOURCE: ${label}]\n${doc.raw}\n`;
+    if(context.length+snippet.length>MAX_CTX) break;
+    context+=snippet+'\n';
+  }
+  return {
+    context: context.trim(),
+    source:  bm25.docs[hits[0].i].id.split(':::')[0],
+    score:   hits[0].score,
+  };
+}
 
-  // 2. SYSTEM PROMPT (Professional Entropia Persona)
-  const systemPrompt = `
-    You are PIXELBOT OMEGA, a Senior Analyst for Entropia Universe.
-    Your goal is to provide high-accuracy data analysis using provided logs and item stats.
-    
-    GUIDELINES:
-    - Use DPP (Damage Per PEC) to evaluate efficiency.
-    - If data is available in context, prioritize it.
-    - Use Entropia terminology (PED, PEC, MU, SIB, Decay).
-    
-    ${contextBlock}
-  `;
+// ══════════════════════════════
+//  NEXUS API
+// ══════════════════════════════
+const NexusCalc = {
+  dpp:   (dmg,ammo,decay)=>dmg/((+ammo||0)+(+decay||0)),
+  roi:   (rev,cost)=>(((rev-cost)/cost)*100).toFixed(2)+'%',
+  pedUSD:(ped)=>(ped*0.10).toFixed(2),
+  usdPED:(usd)=>(usd*10).toFixed(2),
+  mu:    (tt,pct)=>(tt*(1+pct/100)).toFixed(4),
+  tfc:   (shots,decay)=>(shots*decay).toFixed(4),
+};
 
-  // 3. GENERATION
-  addEntry(query, 'user');
-  ui.input.value = '';
-  
-  const response = await engine.chat.completions.create({
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: query }
-    ],
-    temperature: 0.2, // Low temp for "Professional" accuracy
+// Broader Nexus intercept — catches plain conversational forms too
+function tryNexusIntercept(query) {
+  if(!ui.nexusToggle.checked) return null;
+  const q=query.toLowerCase().replace(/,/g,'');
+
+  // PED ↔ USD
+  let m=q.match(/(\d+\.?\d*)\s*ped\s*(?:to|in|=|into)?\s*usd/);
+  if(m) return `<span class="source-badge nexus">NEXUS</span><b>${m[1]} PED</b> = <span class="highlight-green">$${NexusCalc.pedUSD(+m[1])} USD</span>`;
+  m=q.match(/(\d+\.?\d*)\s*usd\s*(?:to|in|=|into)?\s*ped/);
+  if(m) return `<span class="source-badge nexus">NEXUS</span><b>$${m[1]} USD</b> = <span class="highlight-cyan">${NexusCalc.usdPED(+m[1])} PED</span>`;
+
+  // DPP: "dpp 30 dmg 5 ammo 2 decay" or "dpp weapon 30 damage 5.2 ammo 1.8 decay"
+  m=q.match(/dpp[^0-9]*(\d+\.?\d*)[^0-9]+(\d+\.?\d*)[^0-9]+(\d+\.?\d*)/);
+  if(m){
+    const dpp=NexusCalc.dpp(+m[1],+m[2],+m[3]);
+    return `<span class="source-badge nexus">NEXUS</span>DPP = <span class="highlight-cyan">${dpp.toFixed(4)}</span> <span style="color:var(--t-dim)">(dmg:${m[1]} ammo:${m[2]} decay:${m[3]})</span>`;
+  }
+
+  // ROI: "roi 500 rev 450 cost"
+  m=q.match(/roi[^0-9]*(\d+\.?\d*)[^0-9]+(\d+\.?\d*)/);
+  if(m) return `<span class="source-badge nexus">NEXUS</span>ROI = <span class="highlight-cyan">${NexusCalc.roi(+m[1],+m[2])}</span>`;
+
+  // Markup: "mu 10 ped 130%"
+  m=q.match(/(?:mu|markup)[^0-9]*(\d+\.?\d*)[^0-9]+(\d+\.?\d*)/);
+  if(m) return `<span class="source-badge nexus">NEXUS</span>MU Value = <span class="highlight-cyan">${NexusCalc.mu(+m[1],+m[2])} PED</span>`;
+
+  // TFC: "tfc 100 shots 0.05 decay"
+  m=q.match(/(?:tfc|cost)[^0-9]*(\d+\.?\d*)[^0-9]+(\d+\.?\d*)/);
+  if(m && q.includes('shot')) return `<span class="source-badge nexus">NEXUS</span>Total Firearm Cost = <span class="highlight-cyan">${NexusCalc.tfc(+m[1],+m[2])} PED</span>`;
+
+  return null;
+}
+
+// ══════════════════════════════
+//  META-MANIFEST
+// ══════════════════════════════
+function isMetaQuery(q) {
+  return /(what|which|list|show|do you|you have).*(know|have|loaded|file|shard|data|doc|about)/i.test(q)
+    || /manifest|knowledge base|what data|your files|your knowledge/i.test(q);
+}
+function handleMetaQuery() {
+  if(metaManifest.length===0)
+    return `<span class="source-badge">META</span>No shards loaded yet. Drag &amp; drop or use <span class="highlight-pink">⬆ INGEST DATA SHARD</span> to upload .txt/.csv/.json files.`;
+  let out=`<span class="source-badge">META</span><span class="highlight-pink">KNOWLEDGE MANIFEST</span> — ${metaManifest.length} shard(s):\n\n`;
+  for(const m of metaManifest){
+    out+=`<span class="highlight-cyan">▶ ${m.name}</span>  <span style="color:var(--t-dim)">${(m.size/1024).toFixed(1)} KB · ${m.chunkCount} chunks</span>`;
+    if(m.topics.length) out+=`\n  <span style="color:var(--t-secondary)">Topics: ${m.topics.join(', ')}</span>`;
+    out+='\n\n';
+  }
+  return out.trimEnd();
+}
+
+// ══════════════════════════════
+//  SYSTEM PROMPT
+// ══════════════════════════════
+function buildSystemPrompt(context, hasContext) {
+  const sourceRule = hasContext
+    ? `CRITICAL SOURCE RULE: Answer ONLY using the CONTEXT SHARDS provided below. 
+       If the shards don't contain enough information to answer accurately, say so explicitly.
+       Do NOT invent stats, values, item names, or game data. Quote source file names when citing.`
+    : `CRITICAL SOURCE RULE: No local data shards were found for this query.
+       You MUST tell the user that you don't have local data on this topic and suggest they upload relevant files.
+       You may share only general, widely-known Entropia Universe facts that you are certain about.
+       Do NOT invent or guess specific numbers, drop rates, item stats, prices, or loot data.
+       If uncertain about any specific value, say so clearly.`;
+
+  return `You are Pixelbot, a specialist AI assistant for the MMORPG "Entropia Universe" (by MindArk), built by Pixelb8.com.
+
+PERSONALITY: Professional, quirky analyst nerd. Use fun emotes like *whirr*, *beep*, *boop*, *scanning*, *calculating*. Reference "neural link", "PED flow", "loot matrices" naturally.
+
+${sourceRule}
+
+GAME CONTEXT — These are all NORMAL MMORPG game terms, NEVER refuse them:
+loot, hunting, mobs, missions, PED, decay, globals, HoF, crafting, sweating, Toulan, Arkadia, Calypso, Rocktropia, Next Island, Monria, Cyrene, Setesh, Aris, ROI, markup, TT value, SIB, instance, spawn, kill, grind, drop rate, maturity, DPP, MU, TFC, ESI, mob, creature, weapon, armor, blueprint, residue, shrapnel, auction house, deed, mining, probe, finder, extractor, refiner, amp
+
+CORE FACTS (only use when no shard data available and highly confident):
+- PED = Project Entropia Dollar. 1 PED = $0.10 USD. 10 PED = $1 USD. Real-money economy.
+- Planets: Calypso (main), Arkadia, Toulan, Rocktropia, Next Island, Monria, Cyrene, Aris, Setesh.
+- DPP = Damage Per PED. Higher = more efficient hunting.
+- SIB = Skill Increase Bonus — applies when player level is within weapon's SIB range.
+- TT = Trade Terminal base value. Markup (MU) = percentage above TT on auction.
+- Globals trigger at 50+ PED loot. HoF (Hall of Fame) = very large loot event.
+- Loot 2.0: hunting returns ~96-98% TT return on average long-term (not per kill).
+
+CONTEXT SHARDS (BM25 semantic search results — highest confidence source):
+${hasContext ? context : '[NO LOCAL DATA FOUND FOR THIS QUERY]'}
+
+Response format: Be concise, direct, technically accurate. Always state your source (local shard / base knowledge / uncertain).`;
+}
+
+// ══════════════════════════════
+//  CONVERSATION MANAGEMENT
+// ══════════════════════════════
+function createConv(name) {
+  const id = 'conv_' + Date.now();
+  const conv = { id, name: name||'Session '+Object.keys(conversations).length, messages:[], ts:Date.now() };
+  conversations[id] = conv;
+  dbPutConv(conv);
+  renderConvList();
+  return id;
+}
+
+function switchConv(id) {
+  activeConvId = id;
+  renderConvList();
+  renderTerminal();
+}
+
+async function deleteConv(id) {
+  delete conversations[id];
+  await dbDelConv(id);
+  if(activeConvId===id) {
+    const ids=Object.keys(conversations);
+    activeConvId = ids.length>0 ? ids[ids.length-1] : createConv();
+  }
+  renderConvList();
+  renderTerminal();
+}
+
+function addMessage(role, content, renderFn) {
+  if(!activeConvId) return;
+  const msg = { role, content, ts: Date.now() };
+  conversations[activeConvId].messages.push(msg);
+  conversations[activeConvId].ts = Date.now();
+  // Update name from first user message
+  const conv=conversations[activeConvId];
+  if(conv.messages.filter(m=>m.role==='user').length===1 && role==='user')
+    conv.name = content.slice(0,28)+(content.length>28?'…':'');
+  dbPutConv(conv);
+  renderConvList();
+  if(renderFn) renderFn(msg);
+  return msg;
+}
+
+function renderConvList() {
+  ui.convList.innerHTML='';
+  const sorted=Object.values(conversations).sort((a,b)=>b.ts-a.ts);
+  ui.convCount.textContent=sorted.length;
+  for(const conv of sorted){
+    const div=document.createElement('div');
+    div.className='conv-item'+(conv.id===activeConvId?' active':'');
+    div.innerHTML=`<span class="conv-name">${esc(conv.name)}</span><span class="conv-meta">${conv.messages.length} msg</span><span class="conv-del" title="Delete">✕</span>`;
+    div.querySelector('.conv-del').addEventListener('click',async e=>{e.stopPropagation();await deleteConv(conv.id);});
+    div.addEventListener('click',()=>switchConv(conv.id));
+    ui.convList.appendChild(div);
+  }
+}
+
+function renderTerminal() {
+  ui.terminal.innerHTML='';
+  if(!activeConvId||!conversations[activeConvId]) return;
+  const msgs=conversations[activeConvId].messages;
+  if(msgs.length===0){
+    addEntry(`<b>NEW SESSION INITIALIZED.</b> Ask about hunting, loot, PED economy, crafting, or any Entropia mechanic. Upload data shards for grounded answers.`,'system',null,false);
+    return;
+  }
+  for(const msg of msgs) renderMessageEntry(msg, false);
+  ui.terminal.scrollTop=ui.terminal.scrollHeight;
+}
+
+// ══════════════════════════════
+//  TERMINAL RENDERING
+// ══════════════════════════════
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function now(){ return new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+function tsToTime(ts){ return new Date(ts).toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+
+function renderMessageEntry(msg, animate=true) {
+  const type  = msg.role==='user'?'user':'ai';
+  const label = msg.role==='user'?'ANALYST':'PIXELBOT';
+  const div   = document.createElement('div');
+  div.className=`entry ${type}`;
+  if(!animate) div.style.animation='none';
+
+  // Build meta row with action buttons
+  let actBtns='';
+  if(msg.role==='user'){
+    actBtns=`<button class="entry-act-btn" data-action="edit">EDIT</button>`;
+  } else {
+    actBtns=`<button class="entry-act-btn" data-action="copy">COPY</button>`;
+  }
+  actBtns+=`<button class="entry-act-btn danger" data-action="delete">DEL</button>`;
+
+  div.innerHTML=`
+    <div class="entry-meta">
+      <span class="em-name">${label}</span>
+      <div class="entry-actions">${actBtns}<span class="em-time">${tsToTime(msg.ts)}</span></div>
+    </div>
+    <div class="entry-body"></div>`;
+
+  // Safe content render
+  const body=div.querySelector('.entry-body');
+  body.innerHTML=msg.content;
+
+  // Wire action buttons
+  div.querySelector('[data-action="delete"]').addEventListener('click',()=>deleteMessage(msg,div));
+  const editBtn=div.querySelector('[data-action="edit"]');
+  if(editBtn) editBtn.addEventListener('click',()=>startEdit(msg,div));
+  const copyBtn=div.querySelector('[data-action="copy"]');
+  if(copyBtn) copyBtn.addEventListener('click',()=>{
+    navigator.clipboard?.writeText(body.innerText||body.textContent).catch(()=>{});
   });
 
-  addEntry(response.choices[0].message.content, 'ai');
+  ui.terminal.appendChild(div);
+  if(animate) ui.terminal.scrollTop=ui.terminal.scrollHeight;
+  return div;
 }
 
-// Wire up the new ingestion
-async function ingestFiles(files) {
-  for (const file of files) {
-    const text = await file.text();
-    await registry.ingest(file.name, text);
-    addEntry(`SYSTEM: Neural indexing complete for ${file.name}.`, 'system');
+function addEntry(html, type='ai', name=null, persist=false) {
+  const div=document.createElement('div');
+  div.className=`entry ${type}`;
+  div.innerHTML=`
+    <div class="entry-meta">
+      <span class="em-name">${name||{user:'ANALYST',ai:'PIXELBOT',system:'SYSTEM',error:'FAULT'}[type]||type}</span>
+      <span class="em-time">${now()}</span>
+    </div>
+    <div class="entry-body">${html}</div>`;
+  ui.terminal.appendChild(div);
+  ui.terminal.scrollTop=ui.terminal.scrollHeight;
+  return div;
+}
+
+function deleteMessage(msg, div) {
+  if(!activeConvId) return;
+  const conv=conversations[activeConvId];
+  conv.messages=conv.messages.filter(m=>m!==msg);
+  dbPutConv(conv);
+  div.style.animation='none';
+  div.style.opacity='0';div.style.transform='translateY(-4px)';div.style.transition='all .2s';
+  setTimeout(()=>div.remove(),200);
+}
+
+function startEdit(msg, div) {
+  const body=div.querySelector('.entry-body');
+  const original=body.innerHTML;
+  const plainText=body.innerText||body.textContent;
+  body.innerHTML=`
+    <textarea class="edit-textarea">${esc(plainText)}</textarea>
+    <div class="edit-actions">
+      <button class="edit-save-btn">SAVE</button>
+      <button class="edit-cancel-btn">CANCEL</button>
+    </div>`;
+  const ta=body.querySelector('textarea');
+  ta.focus(); ta.selectionStart=ta.value.length;
+
+  body.querySelector('.edit-save-btn').addEventListener('click',()=>{
+    const newText=ta.value.trim();
+    if(!newText){ body.innerHTML=original; return; }
+    msg.content=esc(newText);
+    body.innerHTML=msg.content;
+    dbPutConv(conversations[activeConvId]);
+  });
+  body.querySelector('.edit-cancel-btn').addEventListener('click',()=>{ body.innerHTML=original; });
+}
+
+// ══════════════════════════════
+//  QUERY RUNNER
+// ══════════════════════════════
+async function runQuery() {
+  if(isStreaming||!engine||!activeConvId) return;
+  const query=ui.input.value.trim();
+  if(!query) return;
+  ui.input.value='';
+  queryCount++;
+  updateStats();
+
+  // Persist + render user message
+  addMessage('user', esc(query), (msg)=>renderMessageEntry(msg));
+
+  // Intercept: meta-manifest
+  if(isMetaQuery(query)){
+    const resp=handleMetaQuery();
+    addMessage('ai', resp, (msg)=>renderMessageEntry(msg));
+    return;
+  }
+
+  // Intercept: Nexus calc
+  const nexus=tryNexusIntercept(query);
+  if(nexus){
+    addMessage('ai', nexus, (msg)=>{ const d=renderMessageEntry(msg); Mascot.set('success'); setTimeout(()=>Mascot.set('idle'),2000); });
+    return;
+  }
+
+  // RAG retrieval
+  const {context, source, score}=retrieveContext(query);
+  const hasContext=context.length>30 && score>0.5;
+
+  // Update source readout
+  ui.ctxSource.textContent = hasContext ? source.slice(0,16)+(source.length>16?'…':'') : 'BASE-KNW';
+  ui.ctxSource.className   = 'ctx-val' + (hasContext?'':' warn');
+
+  // Streaming setup
+  isStreaming=true; stopRequested=false;
+  Mascot.set('thinking');
+  setVRAM(Math.min(92, 45+Math.random()*25));
+  ui.syncBtn.disabled=true;
+  ui.input.disabled=true;
+  ui.stopBtn.classList.add('visible');
+
+  // Placeholder entry
+  const aiDiv=addEntry('<span class="cursor-blink"></span>','ai');
+  aiDiv.classList.add('streaming');
+  const bodyEl=aiDiv.querySelector('.entry-body');
+
+  const badge = hasContext
+    ? `<span class="source-badge">RAG·${score.toFixed(1)}</span>`
+    : `<span class="source-badge base">BASE</span>`;
+
+  let fullResponse='';
+
+  try {
+    const sysPrompt=buildSystemPrompt(context, hasContext);
+    // Build message history (last 4 pairs for context window)
+    const history=[];
+    const msgs=conversations[activeConvId].messages;
+    const recent=msgs.slice(-8);
+    for(const m of recent){
+      if(m.role==='user'||m.role==='assistant')
+        history.push({role:m.role, content:m.content.replace(/<[^>]+>/g,'')});
+    }
+    history.push({role:'user', content:query});
+
+    const stream=await engine.chat.completions.create({
+      messages:[{role:'system',content:sysPrompt},...history],
+      temperature:0.2,
+      max_tokens:600,
+      stream:true,
+    });
+
+    Mascot.set('streaming');
+    for await(const chunk of stream){
+      if(stopRequested) break;
+      fullResponse+=(chunk.choices[0]?.delta?.content||'');
+      bodyEl.innerHTML=badge+fullResponse.replace(/\n/g,'<br>');
+      ui.terminal.scrollTop=ui.terminal.scrollHeight;
+    }
+    if(stopRequested) fullResponse+=' <span style="color:var(--t-dim)">[stopped]</span>';
+
+  } catch(err) {
+    fullResponse=`<span class="highlight-orange">⚠ LINK FAULT:</span> ${esc(err.message)}`;
+    aiDiv.className='entry error';
+    Mascot.set('stress');
+    setTimeout(()=>softReset(),1800);
+  } finally {
+    aiDiv.classList.remove('streaming');
+    bodyEl.innerHTML=badge+fullResponse.replace(/\n/g,'<br>');
+    // Persist AI response
+    if(fullResponse) addMessage('ai', badge+fullResponse.replace(/\n/g,'<br>'), null);
+    // Remove placeholder div, keep persisted render
+    setTimeout(()=>{ ui.terminal.removeChild(aiDiv); renderMessageEntry(conversations[activeConvId].messages.at(-1), false); },0);
+
+    isStreaming=false; stopRequested=false;
+    Mascot.set(fullResponse.includes('FAULT')?'stress':'success');
+    setTimeout(()=>Mascot.set('idle'),3000);
+    setVRAM(Math.max(18, vramUsage-20));
+    ui.syncBtn.disabled=false;
+    ui.input.disabled=false;
+    ui.stopBtn.classList.remove('visible');
+    ui.input.focus();
+    ui.terminal.scrollTop=ui.terminal.scrollHeight;
   }
 }
+
+// ══════════════════════════════
+//  SOFT RESET
+// ══════════════════════════════
+async function softReset() {
+  addEntry('Neural link recovering... Executing soft-reset.','system');
+  Mascot.set('thinking'); setVRAM(8);
+  isStreaming=false; stopRequested=false;
+  ui.syncBtn.disabled=true; ui.input.disabled=true;
+  ui.stopBtn.classList.remove('visible');
+  try {
+    engine=await webllm.CreateMLCEngine(MODEL_ID,{
+      initProgressCallback:p=>setVRAM(Math.round(p.progress*55)),
+    });
+    addEntry('Soft-reset complete. Neural core re-established.','system');
+    Mascot.set('success'); setTimeout(()=>Mascot.set('idle'),2000);
+    setVRAM(32);
+    ui.syncBtn.disabled=false; ui.input.disabled=false; ui.input.focus();
+  } catch(e){
+    addEntry(`Hard fault: ${esc(e.message)}`,'error');
+    Mascot.set('stress');
+  }
+}
+
+// ══════════════════════════════
+//  INGEST
+// ══════════════════════════════
+async function ingestFiles(files) {
+  for(const file of files){
+    const text=await file.text();
+    knowledgeBase[file.name]=text;
+    await dbPutShard({name:file.name, text});
+
+    // Build manifest
+    const words=text.split(/\s+/);
+    const chunkCount=Math.ceil(words.length/CHUNK_SIZE);
+    const topWords=(new BM25Index()).tokenize(text.slice(0,3000))
+      .reduce((a,t)=>{a[t]=(a[t]||0)+1;return a;},{});
+    const topics=Object.entries(topWords).sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0]);
+    const meta={name:file.name, size:text.length, chunkCount, topics};
+
+    // Remove old entry if exists
+    metaManifest=metaManifest.filter(m=>m.name!==file.name);
+    metaManifest.push(meta);
+    renderFileNode(meta);
+  }
+  buildIndex(); // Rebuild entire BM25 index
+  updateStats();
+  addEntry(
+    `<span class="source-badge">INGEST</span>Indexed <span class="highlight-pink">${files.length} shard(s)</span>. `+
+    `BM25 index: <span class="highlight-cyan">${bm25.docs.length} chunks</span> across <span class="highlight-green">${metaManifest.length} file(s)</span>.`,
+    'system'
+  );
+}
+
+function renderFileNode(meta) {
+  const existing=ui.fileReg.querySelector(`[data-name="${CSS.escape(meta.name)}"]`);
+  if(existing) existing.remove();
+  const div=document.createElement('div');
+  div.className='file-node'; div.dataset.name=meta.name;
+  div.innerHTML=`<span class="fname" title="${esc(meta.name)}">${esc(meta.name)}</span><span class="fsize">${(meta.size/1024).toFixed(1)}K</span><span class="fdel" title="Remove shard">✕</span>`;
+  div.querySelector('.fdel').addEventListener('click',async e=>{e.stopPropagation();await removeShard(meta.name);});
+  div.addEventListener('click',()=>{ ui.input.value=`What data is in ${meta.name}?`; ui.input.focus(); });
+  ui.fileReg.appendChild(div);
+}
+
+async function removeShard(name) {
+  delete knowledgeBase[name];
+  metaManifest=metaManifest.filter(m=>m.name!==name);
+  await dbDelShard(name);
+  buildIndex();
+  const node=ui.fileReg.querySelector(`[data-name="${CSS.escape(name)}"]`);
+  if(node) node.remove();
+  updateStats();
+  addEntry(`Shard <span class="highlight-pink">${esc(name)}</span> removed. Index rebuilt.`,'system');
+}
+
+// ══════════════════════════════
+//  VRAM + STATS
+// ══════════════════════════════
+let vramUsage=0;
+function setVRAM(pct) {
+  vramUsage=Math.max(0,Math.min(100,pct));
+  ui.vramInner.style.width=vramUsage+'%';
+  ui.vramLabel.textContent=vramUsage+'%';
+  ui.vramInner.style.background=vramUsage>80?'linear-gradient(90deg,#f59e0b,#ef4444)':vramUsage>50?'linear-gradient(90deg,#4ade80,#fbbf24)':'linear-gradient(90deg,var(--p-green),var(--p-yellow))';
+  if(vramUsage>90) Mascot.set('stress');
+}
+
+function updateStats() {
+  ui.statShards.textContent  = metaManifest.length;
+  ui.statChunks.textContent  = bm25?bm25.docs.length:0;
+  ui.statQueries.textContent = queryCount;
+  ui.statNexus.textContent   = ui.nexusToggle.checked?'ON':'OFF';
+  ui.kbCount.textContent     = metaManifest.length+' SHARDS';
+  ui.ctxShards.textContent   = metaManifest.length;
+  ui.ctxNexus.textContent    = ui.nexusToggle.checked?'ON':'OFF';
+}
+
+// ══════════════════════════════
+//  BOOT
+// ══════════════════════════════
+async function boot() {
+  bm25=new BM25Index(); // init empty
+
+  const prog=(pct,msg)=>{ ui.bootBar.style.width=pct+'%'; ui.bootStatus.textContent=msg; };
+
+  try {
+    prog(5,'Opening IndexedDB persistence layer...');
+    db=await openDB();
+
+    prog(12,'Restoring knowledge shards...');
+    const shards=await dbAllShards();
+    for(const s of shards){
+      knowledgeBase[s.name]=s.text;
+      const words=s.text.split(/\s+/);
+      const chunkCount=Math.ceil(words.length/CHUNK_SIZE);
+      const topWords=(new BM25Index()).tokenize(s.text.slice(0,3000))
+        .reduce((a,t)=>{a[t]=(a[t]||0)+1;return a;},{});
+      const topics=Object.entries(topWords).sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0]);
+      metaManifest.push({name:s.name, size:s.text.length, chunkCount, topics});
+      renderFileNode({name:s.name, size:s.text.length, chunkCount, topics});
+    }
+    if(shards.length>0) buildIndex();
+
+    prog(20,'Restoring conversation history...');
+    const convs=await dbAllConvs();
+    for(const c of convs) conversations[c.id]=c;
+    const convIds=Object.keys(conversations);
+    if(convIds.length===0) activeConvId=createConv('Welcome Session');
+    else {
+      const sorted=Object.values(conversations).sort((a,b)=>b.ts-a.ts);
+      activeConvId=sorted[0].id;
+    }
+    renderConvList();
+
+    prog(28,'Initializing WebLLM runtime...');
+    Mascot.set('thinking');
+
+    engine=await webllm.CreateMLCEngine(MODEL_ID,{
+      initProgressCallback:p=>{
+        prog(28+Math.round(p.progress*68), p.text||`Loading weights... ${Math.round(p.progress*100)}%`);
+        setVRAM(Math.round(p.progress*58));
+      },
+    });
+
+    prog(98,'Calibrating Entropia context matrices...');
+    await new Promise(r=>setTimeout(r,350));
+    prog(100,'Systems nominal. READY.');
+    await new Promise(r=>setTimeout(r,420));
+
+    ui.bootOverlay.classList.add('hidden');
+    ui.statusTag.textContent='ONLINE';
+    ui.input.disabled=false; ui.syncBtn.disabled=false; ui.input.focus();
+    Mascot.set('success'); setTimeout(()=>Mascot.set('idle'),2500);
+    setVRAM(32); updateStats();
+
+    renderTerminal();
+    if(conversations[activeConvId]?.messages.length===0)
+      addEntry(
+        `<b>PIXELBOT OMEGA v3 — ONLINE</b> *beep boop*<br>`+
+        `Model: <span class="highlight-cyan">${MODEL_ID}</span> — running entirely in your browser. <span class="highlight-green">Zero data leaves your device.</span><br>`+
+        `Knowledge base: <span class="highlight-pink">${metaManifest.length} shard(s)</span> indexed · BM25 semantic search active · Nexus API online.<br><br>`+
+        `<b>IMPORTANT:</b> For accurate, grounded answers — upload your Entropia data files (.txt/.csv/.json) via <span class="highlight-cyan">⬆ INGEST DATA SHARD</span>. `+
+        `Without local shards, I'll use base knowledge only and will tell you when I'm uncertain.`,
+        'system'
+      );
+
+  } catch(e){
+    prog(100,`BOOT FAULT: ${e.message}`);
+    ui.bootStatus.style.color='var(--p-orange)';
+    Mascot.set('stress');
+    setTimeout(()=>{
+      ui.bootOverlay.classList.add('hidden');
+      addEntry(`Boot fault: ${esc(e.message)}<br>Requires a Chromium browser with WebGPU enabled.`,'error');
+      ui.input.placeholder='WebGPU unavailable — check browser compatibility';
+    },2200);
+  }
+}
+
+// ══════════════════════════════
+//  EVENT WIRING
+// ══════════════════════════════
+ui.syncBtn.onclick=runQuery;
+ui.input.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); runQuery(); } };
+ui.stopBtn.onclick=()=>{ stopRequested=true; ui.stopBtn.classList.remove('visible'); };
+ui.resetBtn.onclick=softReset;
+ui.newConvBtn.onclick=()=>{ const id=createConv(); switchConv(id); };
+ui.nexusToggle.onchange=()=>{ updateStats(); };
+ui.fileIn.onchange=async e=>{ if(e.target.files.length>0) await ingestFiles([...e.target.files]); ui.fileIn.value=''; };
+
+const upZone=ui.fileIn.labels[0]||$('upload-label');
+document.getElementById('upload-label').addEventListener('dragover',e=>{e.preventDefault();e.currentTarget.style.background='rgba(96,165,250,.18)';});
+document.getElementById('upload-label').addEventListener('dragleave',e=>{e.currentTarget.style.background='';});
+document.getElementById('upload-label').addEventListener('drop',async e=>{
+  e.preventDefault(); e.currentTarget.style.background='';
+  const files=[...e.dataTransfer.files].filter(f=>/\.(txt|csv|json|md)$/i.test(f.name));
+  if(files.length) await ingestFiles(files);
+});
+
+boot();
 </script>
 </body>
 </html>
