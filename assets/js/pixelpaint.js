@@ -254,17 +254,17 @@ function rand(min, max) {
         canvas.style.display = canvas.style.display === 'none' ? 'block' : 'none';
     });
 
- 
+	function hidecanvas(){
+	// Hide it immediately on script execution
+		canvas.style.display = 'none';
+	};
+
     // Initialize canvas
     setCanvasSize();
     restoreDrawing();
 	hidecanvas();
 }
 
-function hidecanvas(){
-// Hide it immediately on script execution
-	canvas.style.display = 'none';
-};
 
 
 
