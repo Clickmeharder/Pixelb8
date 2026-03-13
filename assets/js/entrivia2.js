@@ -2398,7 +2398,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 			displayConsoleMessage(user, `Wheel "${wheelName}" not found ❌`);
 		}
 	}
-	if (command.toLowerCase() === "chatterwheel") {
+	if (command.toLowerCase() === "chatwheel") {
 		const action = message.toLowerCase();
 
 		const wrapper = document.getElementById("wheel-wrapper"); // Adjust if your wrapper has a different ID
@@ -2408,20 +2408,20 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		if (action === "add" || action === "join") {
 			// Anyone can add themselves to the wheel
 			addUserWheelSection(user);
-			sections = chatterWheelsections.slice();
+			sections = chatwheelsections.slice();
 			repaintWheel();
 			displayConsoleMessage(user, `User added to chatter wheel.-> ${sections.length} entries ✅`);
 			displayentriviaMessage(user, `User added to chatter wheel.-> ${sections.length} entries ✅`, flags, extra, true);
 		}
 		else if (action === "show") {
 			if (!isStreamerAndAuthorize(user, command)) return;
-			if (chatterWheelsections.length === 0) {
+			if (chatwheelsections.length === 0) {
 				displayConsoleMessage(user, `No one is on the Chatter Wheel yet ❌`);
 				displayentriviaMessage(user, `No one is on the Chatter Wheel yet ❌`, flags, extra, true);
 				console.log(user, `No one is on the Chatter Wheel yet ❌`);
 				return;
 			}
-			sections = chatterWheelsections.slice();
+			sections = chatwheelsections.slice();
 			forceShowWheel();
 			repaintWheel();
 			displayConsoleMessage(user, `Chatter Wheel is now visible with ${sections.length} entries ✅`);
@@ -2429,12 +2429,12 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		}
 		else if (action === "spin") {
 			if (!isStreamerAndAuthorize(user, command)) return;
-			if (chatterWheelsections.length === 0) {
+			if (chatwheelsections.length === 0) {
 				displayConsoleMessage(user, `No chatters to spin ❌`);
 				displayentriviaMessage(user, `No chatters to spin ❌`, flags, extra, true);
 				return;
 			}
-			sections = chatterWheelsections.slice();
+			sections = chatwheelsections.slice();
 			forceShowWheel();
 			repaintWheel();
 			pullDiscRotationLever();
@@ -2443,13 +2443,13 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		}
 		else if (action === "clear") {
 			if (!isStreamerAndAuthorize(user, command)) return;
-			chatterWheelsections = [];
+			chatwheelsections = [];
 			displayConsoleMessage(user, `Chatter Wheel cleared 🧹`);
 			displayentriviaMessage(user, `Chatter Wheel cleared 🧹`, flags, extra, true);
 		}
 		else {
-			displayConsoleMessage(user, `Try: !chatterwheel add / show / spin / clear`);
-			displayentriviaMessage(user, `Try: !chatterwheel add / show / spin / clear`, flags, extra, true);
+			displayConsoleMessage(user, `Try: !chatwheel add / show / spin / clear`);
+			displayentriviaMessage(user, `Try: !chatwheel add / show / spin / clear`, flags, extra, true);
 		}
 	}
 //--------------------------------------------
@@ -2903,24 +2903,24 @@ const pixeldisccommands = [
         usage: "!spin [WheelName]" 
     },
     { 
-        command: "!chatterwheel add / !chatterwheel join", 
+        command: "!chatwheel add / !chatwheel join", 
         description: "Adds the user's name to the current chatter wheel list.", 
-        usage: "!chatterwheel add" 
+        usage: "!chatwheel add" 
     },
     { 
-        command: "!chatterwheel show", 
+        command: "!chatwheel show", 
         description: "Displays the chatter wheel with current entries (Streamer only).", 
-        usage: "!chatterwheel show" 
+        usage: "!chatwheel show" 
     },
     { 
-        command: "!chatterwheel spin", 
+        command: "!chatwheel spin", 
         description: "Displays and spins the chatter wheel (Streamer only).", 
-        usage: "!chatterwheel spin" 
+        usage: "!chatwheel spin" 
     },
     { 
-        command: "!chatterwheel clear", 
+        command: "!chatwheel clear", 
         description: "Clears all entries from the chatter wheel (Streamer only).", 
-        usage: "!chatterwheel clear" 
+        usage: "!chatwheel clear" 
     }
 ];
 
@@ -3002,7 +3002,7 @@ function createCommandList(commandArray, targetListElement) {
         const usageNotes = [];
 
         usageLines.forEach(line => {
-            // Check if line starts with the command name (handle sub-commands like !chatterwheel add)
+            // Check if line starts with the command name (handle sub-commands like !chatwheel add)
             if (line.startsWith(command.command.split(' ')[0])) {
                 usageExamples.push(line);
             } else {

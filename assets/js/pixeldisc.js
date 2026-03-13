@@ -13,7 +13,7 @@ let lastSoundIndex = -1;
 let canvas = document.getElementById("canvas1");
 let currentWheelName = "";
 let sections = ["Prize 1", "Prize 2", "Prize 3", "Prize 4", "Prize 5", "Prize 6", "Prize 7"];
-let chatterWheelsections = [];
+let chatwheelsections = [];
 let colors = ["#001f1fe8", "#004040eb"];
 let wheels = null;
 let frame = null;
@@ -456,17 +456,17 @@ function updateRemoveDropdown() {
 	function addUserWheelSection(username) {
 		const exampleUsers = ["catgirl01", "User420", "booblover69"];
 
-		if (chatterWheelsections.includes(username)) {
+		if (chatwheelsections.includes(username)) {
 			displayConsoleMessage(username, `You're already on the Chatter Wheel ❌`);
 			return;
 		}
 
-		const exampleIndex = chatterWheelsections.findIndex(entry => exampleUsers.includes(entry));
+		const exampleIndex = chatwheelsections.findIndex(entry => exampleUsers.includes(entry));
 		if (exampleIndex !== -1) {
-			chatterWheelsections[exampleIndex] = username;
+			chatwheelsections[exampleIndex] = username;
 			displayConsoleMessage(username, `You replaced a test user on the Chatter Wheel ✅`);
 		} else {
-			chatterWheelsections.push(username);
+			chatwheelsections.push(username);
 			displayConsoleMessage(username, `You've been added to the Chatter Wheel ✅`);
 		}
 
@@ -573,11 +573,11 @@ function addTestChatters(count = 3) {
 
 	for (let i = 0; i < count && i < exampleUsers.length; i++) {
 		const username = exampleUsers[i];
-		if (!chatterWheelsections.find(entry => entry.label === username)) {
-			chatterWheelsections.push(username);
+		if (!chatwheelsections.find(entry => entry.label === username)) {
+			chatwheelsections.push(username);
 		}
 	}
-	console.log(`✅ Added ${count} test chatters to the Chatter Wheel`, chatterWheelsections);
+	console.log(`✅ Added ${count} test chatters to the Chatter Wheel`, chatwheelsections);
 	repaintWheel(); // Optional: update the wheel display immediately
 }
 	
