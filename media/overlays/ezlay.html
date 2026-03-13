@@ -872,7 +872,77 @@ _____________________________  -->
 			})
 			.catch(error => console.error('Error fetching prize data:', error));
 	}
+// Toggle the Editor Visibility
+document.getElementById('toggleEditorBtn').addEventListener('click', () => {
+    const container = document.getElementById('editorContainer');
+    if (container.style.display === 'none') {
+        renderEditor();
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+    }
+});
 
+function renderEditor() {
+    const data = JSON.parse(localStorage.getItem('prizeData')) || [];
+    const tbody = document.getElementById('editorBody');
+    tbody.innerHTML = '';
+
+    data.forEach((entry, index) => {
+        const row = document.createElement('tr');
+        row.style.borderBottom = "1px solid #333";
+        
+        row.innerHTML = `
+            <td><input type="text" value="${entry.date}" data-index="${index}" data-key="date" style="width:80px; background:transparent; color:white; border:none;"></td>
+            <td><input type="text" value="${entry.winner}" data-index="${index}" data-key="winner" style="background:transparent; color:white; border:none;"></td>
+            <td><input type="number" step="0.01" value="${entry.amount}" data-index="${index}" data-key="amount" style="width:60px; background:transparent; color:white; border:none;"></td>
+            <td><input type="text" value="${entry.prize}" data-index="${index}" data-key="prize" style="background:transparent; color:white; border:none;"></td>
+            <td>
+                <select data-index="${index}" data-key="status" style="background:#222; color:orange;">
+                    <option value="unclaimed" ${entry.status === 'unclaimed' ? 'selected' : ''}>Unclaimed</option>
+                    <option value="claimed" ${entry.status === 'claimed' ? 'selected' : ''}>Claimed</option>
+                </select>
+            </td>
+            <td>
+                <button onclick="deletePrize(${index})" style="background:red; border:none; color:white; cursor:pointer;">X</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function saveEditorChanges() {
+    const tbody = document.getElementById('editorBody');
+    const inputs = tbody.querySelectorAll('input, select');
+    const data = JSON.parse(localStorage.getItem('prizeData')) || [];
+
+    inputs.forEach(input => {
+        const idx = input.getAttribute('data-index');
+        const key = input.getAttribute('data-key');
+        let value = input.value;
+
+        if (key === 'amount') value = parseFloat(value);
+        data[idx][key] = value;
+    });
+
+    localStorage.setItem('prizeData', JSON.stringify(data));
+    // Update the live prizeData variable if you have one globally
+    if (typeof prizeData !== 'undefined') prizeData = data; 
+    
+    alert("Changes Saved!");
+    if (typeof filterAndRender === 'function') filterAndRender(); // Refresh your main table
+}
+
+function deletePrize(index) {
+    if (confirm("Delete this entry forever?")) {
+        let data = JSON.parse(localStorage.getItem('prizeData')) || [];
+        data.splice(index, 1);
+        localStorage.setItem('prizeData', JSON.stringify(data));
+        if (typeof prizeData !== 'undefined') prizeData = data;
+        renderEditor();
+        if (typeof filterAndRender === 'function') filterAndRender();
+    }
+}
 	function clearPrizeDataCache() {
 		localStorage.removeItem('prizeData');
 		console.log("LocalStorage prizeData cleared!");
