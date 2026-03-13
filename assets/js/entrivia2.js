@@ -2043,6 +2043,7 @@ function updateBubblewrapVisibility() {
 updateBubblewrapVisibility();
 //toggles
 		// Toggle the state
+	
 function toggleButtonBubble() {
 	const currentState = String(hideButtonBubble).toLowerCase();
 	hideButtonBubble = !hideButtonBubble;
