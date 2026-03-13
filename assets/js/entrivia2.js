@@ -2360,6 +2360,21 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 		displayUserPrizes(message);
 		displayConsoleMessage(user, `!${command} ✅`);
 	}
+	if (command.toLowerCase() === "toggle-prizeeditor") {
+		if (!isStreamerAndAuthorize(user, command)) return;
+		
+		const container = document.getElementById('editorContainer');
+		if (container) {
+			const isHidden = container.style.display === 'none';
+			if (isHidden) {
+				renderEditor(); // Refresh the data before showing
+				container.style.display = 'block';
+			} else {
+				container.style.display = 'none';
+			}
+			displayConsoleMessage(user, `Editor ${isHidden ? 'Opened' : 'Closed'} ✅`);
+		}
+	}
 //-------------------------------------------------------------------------------
 //    --------------------------------------  PixelDisc/SpinWheel Commands	----|
     if (command.toLowerCase() === "pull-lever") {
@@ -2941,6 +2956,27 @@ const prizelistcommands = [
         command: "!prizelist", 
         description: "Displays the prize list for a specific user.", 
         usage: "!prizelist [username]" 
+    },
+/* --- Streamer Only Management Commands --- */
+	{ 
+        command: "!toggle-prizeeditor", 
+        description: "Shows or hides the scrollable Prizelist Editor panel (Streamer only).", 
+        usage: "!toggle-prizeeditor" 
+    },
+    { 
+        command: "!addprize", 
+        description: "Adds a new prize to a specific user (Streamer only).", 
+        usage: "!addprize [username] [amount] [prize name]" 
+    },
+    { 
+        command: "!rewardprizes", 
+        description: "Marks all prizes for a user as claimed (Streamer only).", 
+        usage: "!rewardprizes [username]" 
+    },
+    { 
+        command: "!deleteprizes", 
+        description: "Permanently removes all prizes for a specific user (Streamer only).", 
+        usage: "!deleteprizes [username]" 
     },
     { 
         command: "!toggle-bubblebutt", 
