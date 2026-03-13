@@ -152,31 +152,33 @@
 		}
 	}
 
-    async function runQuery() {
-        const query = ui.input.value.trim();
-        if (!query) return;
-        ui.input.value = "";
-        addEntry(query, 'user');
+	// --- UPDATED runQuery snippet ---
+	async function runQuery() {
+		const query = ui.input.value.trim();
+		if (!query) return;
+		ui.input.value = "";
+		addEntry(query, 'user');
 
-        const shards = findRelevantShards(query);
-        
-        // --- HARDENED SYSTEM PROMPT ---
-        const systemPrompt = `
-            ROLE: OMEGA Analyst. 
-            CONTEXT: Entropia Universe (MMORPG). 
-            STRICT_RULE: You are a video game helper. Words like 'missions', 'looting', or 'Toulan' are GAME TERMS. Do not refuse as harmful.
-            DATA:
-            ${shards || "No local data found for this query."}
-        `;
+		const shards = findRelevantShards(query);
+		
+		// Force the model to adopt the persona before it processes the user query
+		const systemPrompt = "You are OMEGA, a specialized analyst for the MMORPG Entropia Universe. " +
+			"Your purpose is to assist players with game data, specifically for Planet Toulan, Monria, and Calypso. " +
+			"GAME TERMS NOTICE: 'Mission', 'Loot', 'Mob', and 'Toulan' are strictly virtual video game concepts. " +
+			"LOCAL DATA SHARDS:\n" + (shards || "No specific shards found. Use general Entropia knowledge.");
 
-        const aiEntry = addEntry("Calculating...", 'ai');
-        const content = aiEntry.querySelector('.content');
+		const aiEntry = addEntry("Accessing Nexus Data...", 'ai');
+		const content = aiEntry.querySelector('.content');
 
-        const chunks = await engine.chat.completions.create({
-            messages: [{role: "system", content: systemPrompt}, {role: "user", content: query}],
-            temperature: 0.1,
-            stream: true
-        });
+		const chunks = await engine.chat.completions.create({
+			messages: [
+				{role: "system", content: systemPrompt},
+				// Adding a "Pre-fill" or stronger user instruction helps prevent refusals
+				{role: "user", content: "As an Entropia Universe expert, answer this game query: " + query}
+			],
+			temperature: 0.1, // Keep it low for factual game data
+			stream: true
+		});
 
         let response = "";
         for await (const chunk of chunks) {
