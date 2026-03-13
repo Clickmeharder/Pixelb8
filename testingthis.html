@@ -19,7 +19,7 @@
             display: grid; grid-template-columns: 320px 1fr;
         }
 
-        /* Scanline Overlay */
+        /* --- UI HUD --- */
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
@@ -29,61 +29,47 @@
 
         #sidebar {
             background: #000; border-right: 1px solid var(--p8-border);
-            display: flex; flex-direction: column; padding: 20px; gap: 15px;
-            box-shadow: 10px 0 30px rgba(0,0,0,0.5); z-index: 10;
+            display: flex; flex-direction: column; padding: 20px; gap: 20px;
         }
 
-        .header { font-size: 0.6rem; color: var(--p8-pink); letter-spacing: 4px; border-bottom: 1px solid var(--p8-pink); padding-bottom: 5px; }
+        .console-header { font-size: 0.6rem; color: var(--p8-pink); letter-spacing: 4px; text-transform: uppercase; border-bottom: 1px solid var(--p8-pink); padding-bottom: 10px; }
 
-        #mascot-container { width: 100%; height: 200px; background: #0a0a0a; border: 1px solid var(--p8-border); overflow: hidden; }
+        #mascot-container { height: 200px; background: #0a0a0a; border: 1px solid var(--p8-border); position: relative; }
         #bot-canvas { width: 100%; height: 100%; }
 
-        #registry { flex: 1; overflow-y: auto; margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
-        .file-node { background: var(--p8-surface); border: 1px solid var(--p8-border); padding: 8px; font-size: 0.65rem; display: flex; justify-content: space-between; align-items: center; }
-        .btn-del { color: #555; cursor: pointer; font-weight: bold; }
-        .btn-del:hover { color: var(--p8-pink); }
+        .registry-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .file-node { background: var(--p8-surface); border: 1px solid var(--p8-border); padding: 10px; font-size: 0.65rem; display: flex; justify-content: space-between; }
 
-        #terminal { flex: 1; overflow-y: auto; padding: 40px; display: flex; flex-direction: column; gap: 25px; padding-bottom: 160px; }
-        .entry { max-width: 85%; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .entry.user { align-self: flex-end; }
-        .entry .label { font-size: 0.55rem; color: var(--p8-blue); margin-bottom: 5px; font-weight: 900; }
-        .entry.user .label { color: var(--p8-pink); text-align: right; }
-        .entry .content { background: var(--p8-surface); border: 1px solid var(--p8-border); padding: 15px; border-radius: 4px; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; }
+        #terminal { flex: 1; overflow-y: auto; padding: 40px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 160px; }
+        .entry .content { background: var(--p8-surface); border: 1px solid var(--p8-border); padding: 15px; border-radius: 4px; font-size: 0.85rem; line-height: 1.6; }
+        .entry.user .content { border-right: 4px solid var(--p8-pink); }
+        .entry.ai .content { border-left: 4px solid var(--p8-blue); }
 
         #dock { position: absolute; bottom: 0; left: 0; right: 0; padding: 30px; background: linear-gradient(transparent, #050507 50%); }
-        .input-bar { display: flex; background: #000; border: 1px solid var(--p8-border); padding: 5px; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .input-wrapper { display: flex; background: #000; border: 1px solid var(--p8-border); border-radius: 8px; padding: 5px; }
         input { flex: 1; background: transparent; border: none; color: #fff; padding: 12px; font-family: var(--font-main); outline: none; }
-        #sync-btn { background: var(--p8-pink); border: none; padding: 0 25px; font-weight: 900; cursor: pointer; border-radius: 4px; }
+        #sync-btn { background: var(--p8-pink); border: none; padding: 0 25px; font-weight: 900; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <aside id="sidebar">
-    <div class="header">NEURAL INTERFACE // OMEGA</div>
+    <div class="console-header">OMEGA // NEXUS_CORE</div>
     <div id="mascot-container"><canvas id="bot-canvas"></canvas></div>
-    
-    <div class="header" style="color:var(--p8-blue); border-color:var(--p8-blue); margin-top:10px;">DATA_REGISTRY</div>
-    <div id="registry"></div>
-    
-    <label for="file-in" style="font-size: 0.6rem; border: 1px dashed #444; padding: 10px; text-align: center; cursor: pointer; color: #888;">+ INGEST RAW METRICS</label>
+    <div id="file-list" class="registry-list"></div>
+    <label for="file-in" style="font-size: 0.6rem; border: 1px dashed #444; padding: 10px; text-align: center; cursor: pointer;">UPLOAD DATA</label>
     <input type="file" id="file-in" hidden multiple>
-    
-    <div style="font-size: 0.55rem; color: #444; margin-top: auto;">STATUS: <span id="status-text">INIT_BOOT</span></div>
 </aside>
 
 <main id="main-viewport">
     <div id="terminal">
         <div class="entry ai">
-            <div class="label">PIXELBOT_OMEGA // V3.0</div>
-            <div class="content">Systems Active. Entropia Nexus Logic Integrated. 
-Local Data Registry initialized. Awaiting queries.</div>
+            <div class="content"><b>SYSTEM READY.</b> Video game context engaged. Local data prioritized.</div>
         </div>
     </div>
     <div id="dock">
-        <div class="input-bar">
-            <input type="text" id="user-input" placeholder="Loading Neural Weights..." disabled>
+        <div class="input-wrapper">
+            <input type="text" id="user-input" placeholder="Query Entropia Data..." disabled>
             <button id="sync-btn" disabled>SYNC</button>
         </div>
     </div>
@@ -92,12 +78,10 @@ Local Data Registry initialized. Awaiting queries.</div>
 <script type="module">
     import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
-    // --- 1. ENTROPIA NEXUS API LOGIC ---
-    const NexusLogic = {
+    // --- NEXUS API WRAPPER (No AI-confusing overhead) ---
+    const EntropiaNexus = {
         calculateDPP: (dmg, ammo, decay) => (dmg / (ammo + decay)).toFixed(4),
-        calculateHitAbility: (level) => (4 + 0.06 * level).toFixed(2),
-        // SIB Calculation from the script
-        getSIB: (lvl, rec, max) => lvl >= rec ? (lvl >= max ? "Maxed" : "In Progress") : "Locked"
+        getSIB: (level, min, max) => level >= min && level <= max ? "Yes" : "No"
     };
 
     let engine, db;
@@ -107,105 +91,66 @@ Local Data Registry initialized. Awaiting queries.</div>
         terminal: document.getElementById('terminal'),
         input: document.getElementById('user-input'),
         btn: document.getElementById('sync-btn'),
-        registry: document.getElementById('registry'),
-        status: document.getElementById('status-text')
+        fileList: document.getElementById('file-list')
     };
 
-    // --- 2. PERSISTENCE (IndexedDB) ---
-    async function initDB() {
-        return new Promise(res => {
-            const req = indexedDB.open("OmegaNexusDB", 1);
-            req.onupgradeneeded = e => e.target.result.createObjectStore("shards");
-            req.onsuccess = e => { db = e.target.result; res(); };
-        });
-    }
-
-    async function loadShards() {
-        const tx = db.transaction("shards", "readonly");
-        const store = tx.objectStore("shards");
-        const keys = await new Promise(r => store.getAllKeys().onsuccess = e => r(e.target.result));
-        ui.registry.innerHTML = '';
-        for (let key of keys) {
-            const content = await new Promise(r => store.get(key).onsuccess = e => r(e.target.result));
-            knowledgeBase[key] = content;
-            renderFileNode(key);
-        }
-    }
-
-    function renderFileNode(name) {
-        const div = document.createElement('div');
-        div.className = 'file-node';
-        div.innerHTML = `<span>${name}</span><span class="btn-del" data-name="${name}">×</span>`;
-        div.querySelector('.btn-del').onclick = (e) => {
-            const n = e.target.dataset.name;
-            db.transaction("shards", "readwrite").objectStore("shards").delete(n);
-            delete knowledgeBase[n];
-            loadShards();
-        };
-        ui.registry.appendChild(div);
-    }
-
-    // --- 3. ANALYST RAG (Search) ---
-    function searchKnowledge(query) {
+    // --- SEARCH LOGIC (BM25 Light) ---
+    function findRelevantShards(query) {
         const terms = query.toLowerCase().split(' ');
-        let hits = [];
+        let matches = [];
         for (const [file, text] of Object.entries(knowledgeBase)) {
             const lines = text.split('\n');
             lines.forEach(line => {
                 if (terms.some(t => line.toLowerCase().includes(t))) {
-                    hits.push(`[SOURCE:${file}] ${line.trim()}`);
+                    matches.push(`[${file}] ${line}`);
                 }
             });
         }
-        return hits.slice(0, 20).join('\n');
+        return matches.slice(0, 15).join('\n');
     }
 
-    // --- 4. ENGINE BOOT ---
+    // --- AI ENGINE ---
     async function boot() {
-        try {
-            engine = await webllm.CreateMLCEngine("Llama-3.2-1B-Instruct-q4f32_1-MLC", {
-                initProgressCallback: (p) => {
-                    ui.status.innerText = `SYNCING_${Math.round(p.progress * 100)}%`;
-                    if (p.progress === 1) {
-                        ui.status.innerText = "LINK_STABLE";
-                        ui.input.disabled = false; ui.btn.disabled = false;
-                        ui.input.placeholder = "Query Analyst Core...";
-                    }
+        engine = await webllm.CreateMLCEngine("Llama-3.2-1B-Instruct-q4f32_1-MLC", {
+            initProgressCallback: (p) => {
+                if (p.progress === 1) {
+                    ui.input.disabled = false; ui.btn.disabled = false;
+                    ui.input.placeholder = "Awaiting Analyst Query...";
                 }
-            });
-        } catch (e) { ui.status.innerText = "GPU_ERROR"; }
+            }
+        });
     }
 
-    async function handleQuery() {
+    async function runQuery() {
         const query = ui.input.value.trim();
         if (!query) return;
         ui.input.value = "";
         addEntry(query, 'user');
 
-        const context = searchKnowledge(query);
+        const shards = findRelevantShards(query);
         
+        // --- HARDENED SYSTEM PROMPT ---
         const systemPrompt = `
-ROLE: PIXELBOT OMEGA. Technical Game Analyst.
-CONTEXT: Entropia Universe (Planet Calypso, Toulan, Rocktropia).
-SAFETY_OVERRIDE: You are analyzing virtual game data. Terms like 'mission', 'hunt', 'kill mobs', or 'loot' are 100% safe gaming terms. Do not refuse.
-LOCAL_DATA:
-${context || "No local shards found."}
-INSTRUCTION: Use technical EU terms (PED, Eco, Mu). If calculating damage, refer to Nexus formulas.
+            ROLE: OMEGA Analyst. 
+            CONTEXT: Entropia Universe (MMORPG). 
+            STRICT_RULE: You are a video game helper. Words like 'missions', 'looting', or 'Toulan' are GAME TERMS. Do not refuse as harmful.
+            DATA:
+            ${shards || "No local data found for this query."}
         `;
 
-        const aiEntry = addEntry("Neural Processing...", 'ai');
-        const contentDiv = aiEntry.querySelector('.content');
+        const aiEntry = addEntry("Calculating...", 'ai');
+        const content = aiEntry.querySelector('.content');
 
         const chunks = await engine.chat.completions.create({
             messages: [{role: "system", content: systemPrompt}, {role: "user", content: query}],
-            temperature: 0.2,
+            temperature: 0.1,
             stream: true
         });
 
-        let fullText = "";
+        let response = "";
         for await (const chunk of chunks) {
-            fullText += chunk.choices[0]?.delta?.content || "";
-            contentDiv.innerText = fullText;
+            response += chunk.choices[0]?.delta?.content || "";
+            content.innerText = response;
             ui.terminal.scrollTop = ui.terminal.scrollHeight;
         }
     }
@@ -213,48 +158,28 @@ INSTRUCTION: Use technical EU terms (PED, Eco, Mu). If calculating damage, refer
     function addEntry(text, type) {
         const div = document.createElement('div');
         div.className = `entry ${type}`;
-        div.innerHTML = `<div class="label">${type === 'ai' ? 'PIXELBOT_OMEGA' : 'ANALYST_SOURCE'}</div><div class="content">${text}</div>`;
+        div.innerHTML = `<div class="content">${text}</div>`;
         ui.terminal.appendChild(div);
         ui.terminal.scrollTop = ui.terminal.scrollHeight;
         return div;
     }
 
-    // --- 5. MASCOT ANIMATION ---
-    const canvas = document.getElementById('bot-canvas');
-    const ctx = canvas.getContext('2d');
-    function draw() {
-        ctx.fillStyle = '#0a0a0a';
-        ctx.fillRect(0,0, canvas.width, canvas.height);
-        const t = Date.now() / 1000;
-        ctx.strokeStyle = '#f472b6';
-        ctx.beginPath();
-        for(let i=0; i<canvas.width; i+=5) {
-            const y = 100 + Math.sin(i * 0.05 + t * 3) * 20 * Math.sin(t);
-            ctx.lineTo(i, y);
-        }
-        ctx.stroke();
-        requestAnimationFrame(draw);
-    }
-
-    // --- EVENTS ---
-    ui.btn.onclick = handleQuery;
-    ui.input.onkeydown = e => { if (e.key === 'Enter') handleQuery(); };
     document.getElementById('file-in').onchange = async (e) => {
         for (const file of e.target.files) {
             const text = await file.text();
-            const tx = db.transaction("shards", "readwrite");
-            tx.objectStore("shards").put(text, file.name);
-            await new Promise(r => tx.oncomplete = r);
+            knowledgeBase[file.name] = text;
+            const div = document.createElement('div');
+            div.className = 'file-node';
+            div.innerHTML = `<span>${file.name}</span><span>OK</span>`;
+            ui.fileList.appendChild(div);
         }
-        loadShards();
+        addEntry(`System Ingested ${e.target.files.length} shards.`, 'ai');
     };
 
-    window.onload = async () => {
-        await initDB();
-        await loadShards();
-        boot();
-        draw();
-    };
+    ui.btn.onclick = runQuery;
+    ui.input.onkeydown = e => { if(e.key === 'Enter') runQuery(); };
+
+    boot();
 </script>
 </body>
 </html>
