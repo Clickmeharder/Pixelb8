@@ -250,23 +250,26 @@ function rand(min, max) {
         localStorage.removeItem('savedPixelPen');
     });
 
-	const canvas = document.getElementById('yourCanvasId');
+    document.getElementById('toggleCanvas').addEventListener('click', () => {
+        canvas.style.display = canvas.style.display === 'none' ? 'block' : 'none';
+    });
 
-	// Hide it immediately on script execution
-	canvas.style.display = 'none';
-
-	document.getElementById('toggleCanvas').addEventListener('click', () => {
-		// Check for 'none' or empty string (which defaults to visible)
-		if (canvas.style.display === 'none') {
-			canvas.style.display = 'block';
-		} else {
-			canvas.style.display = 'none';
-		}
-	});
  
     // Initialize canvas
     setCanvasSize();
     restoreDrawing();
 }
+const canvas = document.getElementById('yourCanvasId');
 
+// Hide it immediately on script execution
+canvas.style.display = 'none';
+
+document.getElementById('toggleCanvas').addEventListener('click', () => {
+    // Check for 'none' or empty string (which defaults to visible)
+    if (canvas.style.display === 'none') {
+        canvas.style.display = 'block';
+    } else {
+        canvas.style.display = 'none';
+    }
+});
 document.addEventListener('DOMContentLoaded', initPixelPen);
