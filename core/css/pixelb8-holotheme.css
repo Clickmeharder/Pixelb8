@@ -1695,7 +1695,8 @@ select.b {}
 			text-shadow: var(--glow-color);
 		}
 		.controlpanel input, .controlpanel select, select#questionList {
-
+			background: var(--input-bg-color);
+			color: var(--input-color);
 		}
 		.controlpanel input {
 			font-size: 16px;
@@ -2443,6 +2444,10 @@ input {cursor: var(--cursor000-image);}
 input[type="text"] {}
 input[type="password"] {}
 input[type="number"] {}
+input[type="number"]{
+    background: var(--input-bg-color);
+	color: var(--input-color);
+}
 input[type="email"] {}
 input[type="checkbox"] {}
 input[type="radio"] {}
