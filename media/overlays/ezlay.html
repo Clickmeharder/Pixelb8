@@ -956,56 +956,46 @@ function addPrizeForUser(username, prizeName, amount) {
     filterAndRender(); // Re-render the updated list
 }
 function copyprizelisttoClipboard() {
-	const tbody = document.querySelector('#winnersTable tbody');
-	const rows = tbody.querySelectorAll('tr');
+    // 1. Retrieve the data string from storage
+    const rawData = localStorage.getItem('prizeData');
+    
+    if (!rawData) {
+        console.warn("No prize data found in localStorage.");
+        return;
+    }
 
-	let copiedText = '';
+    try {
+        // 2. Parse the JSON
+        const data = JSON.parse(rawData);
+        
+        if (data.length === 0) return;
 
-	// Add the headers for clarity
-	const headerRow = document.querySelector('#winnersTable thead tr');
-	const headers = headerRow.querySelectorAll('th');
-	let headerText = '';
-	headers.forEach((header, index) => {
-		if (header.style.display !== 'none') {
-			headerText += header.textContent + (index < headers.length - 1 ? '\t' : '');
-		}
-	});
-	copiedText += headerText + '\n';
+        // 3. Create the Header (Tab-separated for spreadsheet compatibility)
+        const header = "Date\tWinner\tAmount\tPrize\tStatus\n";
 
+        // 4. Map the objects to rows
+        const rows = data.map(e => 
+            `${e.date || ''}\t${e.winner || ''}\t${Number(e.amount).toFixed(2)}\t${e.prize || ''}\t${e.status || ''}`
+        ).join('\n');
 
-	rows.forEach(row => {
-		const cells = row.querySelectorAll('td');
-		let rowText = '';
-		cells.forEach((cell, index) => {
-			// Replace newlines and extra spaces for cleaner formatting
-			const textContent = cell.textContent.trim().replace(/\s+/g, ' ');
-			rowText += textContent + (index < cells.length - 1 ? '\t' : '');
-		});
-		copiedText += rowText + '\n';
-	});
+        // 5. Execute copy
+        navigator.clipboard.writeText(header + rows).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
 
-	// Use the Clipboard API to write the text
-	navigator.clipboard.writeText(copiedText)
-		.then(() => {
-			console.log('Prize list copied to clipboard!');
-			// You could also add a visual confirmation message here
-			displayentriviaMessage({name: 'System'}, '📋 Prize list copied to clipboard!', false, false, true); 
-		})
-		.catch(err => {
-			console.error('Failed to copy prize list:', err);
-			// Show an error message if copying fails
-			displayentriviaMessage({name: 'System'}, '⚠️ Failed to copy prize list. Please try again or check your browser permissions.', false, false, true);
-		});
+    } catch (err) {
+        console.error("Error parsing prizeData for clipboard:", err);
+    }
 }
 
 document.getElementById('copyPrizelistBtn').addEventListener('click', function() {
     const btn = this;
     const originalText = btn.innerHTML;
 
-    // Call your copy function
-    copyToClipboard();
+    // Call the dedicated function
+    copyprizelisttoClipboard();
 
-    // Visual feedback: briefly change the button appearance
+    // Visual feedback
     btn.innerHTML = "✅ Copied!";
     btn.style.borderColor = "#00ff00";
     btn.style.color = "#00ff00";
@@ -1016,6 +1006,7 @@ document.getElementById('copyPrizelistBtn').addEventListener('click', function()
         btn.style.color = "orange";
     }, 2000);
 });
+
 function displayUnclaimedPrizes() {
     console.log("Prize Data:", prizeData);
 
