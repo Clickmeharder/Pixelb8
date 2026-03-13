@@ -928,8 +928,7 @@ function saveEditorChanges() {
     localStorage.setItem('prizeData', JSON.stringify(data));
     // Update the live prizeData variable if you have one globally
     if (typeof prizeData !== 'undefined') prizeData = data; 
-    
-    alert("Changes Saved!");
+
     if (typeof filterAndRender === 'function') filterAndRender(); // Refresh your main table
 }
 
