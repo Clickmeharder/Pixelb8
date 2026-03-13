@@ -406,26 +406,28 @@
 						<h2>Prize List Commands</h2>
 						<button id="copyPrizelistBtn" >📋 Copy Prizelist Clipboard</button>
 						<button id="toggleEditorBtn">🛠️ Manage Prizelist</button>
-						<div id="editorContainer" style="display:none; margin-top: 20px; border: 1px solid orange; padding: 10px; background: #1a1a1a;">
-							<h3 style="color: orange;">Prizelist Editor</h3>
-							<div style="max-height: 400px; overflow-y: auto;">
-								<table id="editorTable" style="width: 100%; border-collapse: collapse; color: white;">
+						<div id="editorContainer" style="display:none; margin-top: 20px; border: 1px solid orange; padding: 10px; background: #1a1a1a; width: 100%; box-sizing: border-box;">
+							<h3 style="color: orange; margin-top: 0;">Prizelist Editor</h3>
+							
+							<div style="max-height: 400px; overflow-x: auto; overflow-y: auto; border: 1px solid #333;">
+								<table id="editorTable" style="width: 100%; border-collapse: collapse; color: white; table-layout: fixed; min-width: 500px;">
 									<thead>
-										<tr style="border-bottom: 2px solid orange; text-align: left;">
-											<th>Date</th>
-											<th>Winner</th>
-											<th>PED</th>
-											<th>Prize</th>
-											<th>Status</th>
-											<th>Actions</th>
+										<tr style="border-bottom: 2px solid orange; text-align: left; background: #222;">
+											<th style="width: 80px; padding: 5px;">Date</th>
+											<th style="width: 120px; padding: 5px;">Winner</th>
+											<th style="width: 60px; padding: 5px;">PED</th>
+											<th style="width: 100px; padding: 5px;">Prize</th>
+											<th style="width: 90px; padding: 5px;">Status</th>
+											<th style="width: 40px; padding: 5px; text-align: center;">X</th>
 										</tr>
 									</thead>
 									<tbody id="editorBody"></tbody>
 								</table>
 							</div>
-							<div style="margin-top: 10px;">
-								<button onclick="saveEditorChanges()" style="background: green; color: white; border: none; padding: 10px;">💾 Save All Changes</button>
-								<button onclick="document.getElementById('editorContainer').style.display='none'" style="background: #444; color: white; border: none; padding: 10px;">Close</button>
+							
+							<div style="margin-top: 15px; display: flex; gap: 10px;">
+								<button onclick="saveEditorChanges()" style="background: #2e7d32; color: white; border: 1px solid #4caf50; padding: 8px 15px; cursor: pointer; flex: 1;">💾 Save All Changes</button>
+								<button onclick="document.getElementById('editorContainer').style.display='none'" style="background: #444; color: white; border: none; padding: 8px 15px; cursor: pointer;">Close</button>
 							</div>
 						</div>
 						<ul id="prizeListCommandList">
@@ -888,29 +890,31 @@ function renderEditor() {
     const tbody = document.getElementById('editorBody');
     tbody.innerHTML = '';
 
+    // Helper style for inputs
+    const inputStyle = `width: 100%; background: transparent; color: white; border: 1px solid #333; box-sizing: border-box; padding: 2px;`;
+
     data.forEach((entry, index) => {
         const row = document.createElement('tr');
         row.style.borderBottom = "1px solid #333";
         
         row.innerHTML = `
-            <td><input type="text" value="${entry.date}" data-index="${index}" data-key="date" style="width:80px; background:transparent; color:white; border:none;"></td>
-            <td><input type="text" value="${entry.winner}" data-index="${index}" data-key="winner" style="background:transparent; color:white; border:none;"></td>
-            <td><input type="number" step="0.01" value="${entry.amount}" data-index="${index}" data-key="amount" style="width:60px; background:transparent; color:white; border:none;"></td>
-            <td><input type="text" value="${entry.prize}" data-index="${index}" data-key="prize" style="background:transparent; color:white; border:none;"></td>
-            <td>
-                <select data-index="${index}" data-key="status" style="background:#222; color:orange;">
+            <td style="padding: 2px;"><input type="text" value="${entry.date}" data-index="${index}" data-key="date" style="${inputStyle}"></td>
+            <td style="padding: 2px;"><input type="text" value="${entry.winner}" data-index="${index}" data-key="winner" style="${inputStyle}"></td>
+            <td style="padding: 2px;"><input type="number" step="0.01" value="${entry.amount}" data-index="${index}" data-key="amount" style="${inputStyle}"></td>
+            <td style="padding: 2px;"><input type="text" value="${entry.prize}" data-index="${index}" data-key="prize" style="${inputStyle}"></td>
+            <td style="padding: 2px;">
+                <select data-index="${index}" data-key="status" style="width: 100%; background: #222; color: orange; border: 1px solid #333;">
                     <option value="unclaimed" ${entry.status === 'unclaimed' ? 'selected' : ''}>Unclaimed</option>
                     <option value="claimed" ${entry.status === 'claimed' ? 'selected' : ''}>Claimed</option>
                 </select>
             </td>
-            <td>
-                <button onclick="deletePrize(${index})" style="background:red; border:none; color:white; cursor:pointer;">X</button>
+            <td style="text-align: center;">
+                <button onclick="deletePrize(${index})" style="background: #7b1d1d; border: none; color: white; cursor: pointer; padding: 2px 8px; border-radius: 3px;">&times;</button>
             </td>
         `;
         tbody.appendChild(row);
     });
 }
-
 function saveEditorChanges() {
     const tbody = document.getElementById('editorBody');
     const inputs = tbody.querySelectorAll('input, select');
