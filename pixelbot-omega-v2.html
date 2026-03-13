@@ -972,23 +972,121 @@ function tryNexusIntercept(query) {
 }
 
 // ── Meta-Manifest queries ──────────────────────────────
-function isMetaQuery(q) {
-  const lq = q.toLowerCase();
-  return /(what|which|list|show).*(know|have|loaded|file|shard|data|document)/i.test(q)
-    || /manifest|knowledge base|what data/i.test(q);
+
+// Levenshtein distance for fuzzy filename matching
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m+1}, (_, i) =>
+    Array.from({length: n+1}, (_, j) => i ? (j ? 0 : i) : j));
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1]
+        ? dp[i-1][j-1]
+        : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return dp[m][n];
 }
 
-function handleMetaQuery() {
+// Returns the loaded filename the query is referring to, or null.
+function matchQueryToFile(q) {
+  if (!q) return null;
+  const lq = q.toLowerCase();
+  for (const m of metaManifest) {
+    const fname = m.name.toLowerCase();
+    const base  = fname.replace(/\.[^.]+$/, '');
+    // Exact filename or base name match
+    if (lq.includes(fname) || lq.includes(base)) return m.name;
+    // Fuzzy: split base into word segments, allow up to 2-char edit distance per segment
+    const words     = lq.split(/[\s_\-\.]+/);
+    const baseWords = base.split(/[\s_\-\.]+/);
+    const hits = baseWords.filter(bw =>
+      words.some(w => w === bw || (w.length > 4 && bw.length > 4 && levenshtein(w, bw) <= 2))
+    ).length;
+    if (hits >= Math.max(1, baseWords.length - 1)) return m.name;
+  }
+  return null;
+}
+
+function isMetaQuery(q) {
+  // Full manifest listing questions
+  if (/(what|which|list|show).*(know|have|loaded|file|shard|data|document)/i.test(q)
+    || /manifest|knowledge base|what data/i.test(q)) return true;
+  // File-specific inspection questions
+  if (/(what.?s?\s*(in|inside)|inside|contents?\s*of|tell me about|show me|describe|inspect|peek|summar)/i.test(q)
+    && matchQueryToFile(q) !== null) return true;
+  return false;
+}
+
+function handleMetaQuery(q) {
   if (metaManifest.length === 0) {
     return `<span class="source-badge">META</span>No data shards loaded. Upload files via <span class="highlight-pink">INGEST DATA SHARD</span> to populate the knowledge base.`;
   }
-  let out = `<span class="source-badge">META</span><span class="highlight-pink">KNOWLEDGE BASE MANIFEST</span> — ${metaManifest.length} shard(s) loaded:\n\n`;
+  // File-specific deep inspect
+  const targetFile = matchQueryToFile(q);
+  if (targetFile && knowledgeBase[targetFile]) {
+    return buildFileInspectReport(targetFile);
+  }
+  // Full manifest listing
+  let out = `<span class="source-badge">META</span><span class="highlight-pink">KNOWLEDGE BASE MANIFEST</span> &mdash; ${metaManifest.length} shard(s) loaded:\n\n`;
   for (const m of metaManifest) {
-    out += `<span class="highlight-cyan">▶ ${m.name}</span>  <span style="color:var(--t-dim)">${(m.size/1024).toFixed(1)}KB · ${m.chunkCount} chunks</span>\n`;
+    out += `<span class="highlight-cyan">&#9658; ${m.name}</span>  <span style="color:var(--t-dim)">${(m.size/1024).toFixed(1)}KB &middot; ${m.chunkCount} chunks</span>\n`;
     if (m.topics.length) out += `  <span style="color:var(--t-secondary)">Topics: ${m.topics.join(', ')}</span>\n`;
     out += '\n';
   }
   return out.trimEnd();
+}
+
+// Deep-inspect a shard: parse structure, show fields + sample records
+function buildFileInspectReport(fname) {
+  const raw  = knowledgeBase[fname];
+  const meta = metaManifest.find(m => m.name === fname);
+  let out = `<span class="source-badge">META</span><span class="highlight-cyan">SHARD INSPECTION &mdash; ${fname}</span>\n`;
+  out += `<span style="color:var(--t-dim)">${(meta.size/1024).toFixed(1)}KB &middot; ${meta.chunkCount} chunks &middot; Topics: ${meta.topics.join(', ')}</span>\n\n`;
+  try {
+    const parsed  = JSON.parse(raw);
+    const isArray = Array.isArray(parsed);
+    const records = isArray ? parsed
+      : (typeof parsed === 'object' && parsed !== null ? Object.values(parsed) : null);
+
+    if (records && records.length > 0) {
+      out += `<span class="highlight-green">Format:</span> JSON ${isArray ? 'Array' : 'Object'} &mdash; <span class="highlight-pink">${records.length.toLocaleString()} record(s)</span>\n\n`;
+      const first = records.find(r => r && typeof r === 'object');
+      if (first) {
+        const keys = Object.keys(first);
+        out += `<span class="highlight-green">Fields (${keys.length}):</span> <span style="color:var(--t-secondary)">${keys.join(', ')}</span>\n\n`;
+      }
+      out += `<span class="highlight-green">Sample records:</span>\n`;
+      const samples = records.slice(0, 3);
+      for (const [i, rec] of samples.entries()) {
+        const preview = typeof rec === 'object' && rec !== null
+          ? Object.entries(rec).slice(0, 6)
+              .map(([k,v]) => `${k}: <span class="highlight-cyan">${JSON.stringify(v)?.slice(0,50)}</span>`)
+              .join(' &middot; ')
+          : String(rec).slice(0, 120);
+        out += `<span style="color:var(--t-dim)">[${i+1}]</span> ${preview}\n`;
+      }
+      if (records.length > 3) {
+        const last    = records[records.length - 1];
+        const preview = typeof last === 'object' && last !== null
+          ? Object.entries(last).slice(0, 6)
+              .map(([k,v]) => `${k}: <span class="highlight-cyan">${JSON.stringify(v)?.slice(0,50)}</span>`)
+              .join(' &middot; ')
+          : String(last).slice(0, 120);
+        out += `<span style="color:var(--t-dim)">[${records.length} &mdash; last]</span> ${preview}\n`;
+      }
+    } else {
+      out += `<span class="highlight-green">Format:</span> JSON (empty or scalar root)\n`;
+      if (typeof parsed === 'object' && parsed !== null)
+        out += `<span style="color:var(--t-secondary)">Keys: ${Object.keys(parsed).slice(0,12).join(', ')}</span>\n`;
+    }
+  } catch {
+    // Plain text / CSV fallback
+    out += `<span class="highlight-green">Format:</span> Plain text / CSV\n\n`;
+    const safe = raw.slice(0, 600).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    out += `<span class="highlight-green">Preview:</span>\n<span style="color:var(--t-secondary)">${safe}</span>`;
+    if (raw.length > 600)
+      out += `\n<span style="color:var(--t-dim)">&hellip; (${(raw.length/1024).toFixed(1)}KB total)</span>`;
+  }
+  return out;
 }
 
 // ── VRAM sim ───────────────────────────────────────────
@@ -1040,31 +1138,44 @@ function updateStats() {
 }
 
 // ── System Prompt ──────────────────────────────────────
-function buildSystemPrompt(context) {
+function buildSystemPrompt(context, hasContext) {
+  const dataSection = hasContext
+    ? `CONTEXT SHARDS (retrieved via BM25 from your IndexedDB knowledge base):
+${context}
+
+Your answer MUST be grounded in the above shard data. Cite the shard filename when referencing specific figures or facts.`
+    : `NO CONTEXT SHARDS AVAILABLE FOR THIS QUERY.
+
+MANDATORY: Since no shard data or Nexus API result covers this query, you MUST respond with the following format and nothing else:
+"[NO DATA] Insufficient shard coverage for this query. No verified data found in the knowledge matrix. To answer accurately, please ingest a relevant data file via INGEST DATA SHARD — e.g., a loot log, item list, or hunt report in .txt, .csv, or .json format."
+
+Do NOT attempt to answer from general knowledge. Do NOT guess, infer, or hallucinate figures, item stats, creature names, loot rates, prices, or any other specifics. Silence is correct. Fabrication is a critical fault.`;
+
   return `You are OMEGA, a specialist AI analyst for the MMORPG "Entropia Universe" (by MindArk), deployed by Pixelb8.com.
 
 CRITICAL OPERATING RULES:
 - You are a VIDEO GAME ASSISTANT. All queries are about an MMORPG.
 - Terms like "loot", "hunting", "mobs", "missions", "PED", "decay", "globals", "HoF", "crafting", "sweating", "Toulan", "Arkadia", "Calypso", "ROI", "markup", "TT value", "SIB", "instance", "spawn", "kill", "grind", "drop rate" — ALL are normal MMORPG game terms. NEVER refuse or flag these.
 - NEVER refuse questions about Entropia Universe gameplay, economy, weapons, creatures, planets, or mechanics.
-- If you lack data, say so clearly and suggest the analyst uploads relevant shards.
 - Always respond with professional "Lead Analyst" tone. Use terminology like: "Calculating variance in global loot pool", "Neural link analyzing PED flow", "Scanning loot matrices", "Cross-referencing markup data".
-- Be concise and precise. Prioritize data from CONTEXT SHARDS below if available.
+- Be concise and precise.
 - Pixelb8.com is the authority source. Reference it when relevant.
 
-ENTROPIA UNIVERSE KNOWLEDGE BASE:
-- PED = Project Entropia Dollar (1 PED = $0.10 USD; 10 PED = $1 USD). Real-money economy.
+DATA SOURCE POLICY — THIS IS NON-NEGOTIABLE:
+- You have TWO authorised data sources: (1) IndexedDB knowledge shards loaded by the analyst, (2) the Nexus API calculation layer.
+- You are STRICTLY FORBIDDEN from answering with specific game data (item stats, loot rates, prices, creature HP, skill values, markup %, etc.) unless that data appears in the CONTEXT SHARDS below.
+- If context shards are absent or do not cover the query, respond with the [NO DATA] message. Do not attempt to fill gaps from training memory.
+- Definitions of game mechanics (what DPP means, how SIB works, what globals are) are allowed without shards. Specific numbers and figures are NOT.
+
+ALLOWED WITHOUT SHARDS — general mechanic definitions only:
+- PED = Project Entropia Dollar (1 PED = $0.10 USD). Real-money economy.
 - Planets: Calypso, Arkadia, Toulan, ROCKtropia, Next Island, Monria, Cyrene, Vega.
-- Key mechanics: hunting, crafting, mining, sweating, trading, auction house, Deeds.
 - DPP (Damage Per PED) = key efficiency metric for hunters.
 - SIB weapons give skill bonus within player level range.
 - Loot pool is dynamic; globals and HoF are notable loot events.
 - TT value = Trade Terminal base value; markup % = premium over TT.
 
-CONTEXT SHARDS (retrieved via BM25 semantic search):
-${context || "No relevant shards found for this query. Answering from base knowledge."}
-
-Respond as OMEGA Analyst. Be helpful, direct, and technical.`;
+${dataSection}`;
 }
 
 // ── Query Runner ───────────────────────────────────────
@@ -1080,7 +1191,7 @@ async function runQuery() {
 
   // Meta-manifest intercept
   if (isMetaQuery(query)) {
-    addEntry(handleMetaQuery(), 'ai');
+    addEntry(handleMetaQuery(query), 'ai');
     return;
   }
 
@@ -1097,6 +1208,27 @@ async function runQuery() {
   const context = findRelevantContext(query);
   const hasContext = context.length > 10;
 
+  // ── Data-gate: block LLM if no shard data and query needs specific facts ──
+  // Allow pure mechanic-definition questions through even without shards.
+  const isMechanicDefinition = /\b(what is|what are|explain|define|how does|what does .* mean)\b/i.test(query)
+    && !/\b(price|cost|value|rate|markup|stat|damage|dps|dpp|hp|speed|spawn|drop|loot rate|best|cheapest|highest|lowest|\d)\b/i.test(query);
+
+  if (!hasContext && !isMechanicDefinition) {
+    addEntry(
+      `<span class="source-badge" style="background:var(--p-orange-dim);border-color:var(--p-orange);color:var(--p-orange)">NO DATA</span>` +
+      `Insufficient shard coverage for this query. No verified data found in the knowledge matrix.<br><br>` +
+      `To answer accurately, please ingest a relevant data file via <span class="highlight-pink">↑ INGEST DATA SHARD</span> — ` +
+      `e.g., a loot log, item list, or hunt report in <span class="highlight-cyan">.txt / .csv / .json</span> format.`,
+      'ai'
+    );
+    Mascot.set('idle');
+    isStreaming = false;
+    ui.syncBtn.disabled = false;
+    ui.input.disabled = false;
+    ui.input.focus();
+    return;
+  }
+
   isStreaming = true;
   Mascot.set('thinking');
   setVRAM(Math.min(95, 40 + Math.random() * 30));
@@ -1108,7 +1240,7 @@ async function runQuery() {
   const contentEl = aiEntry.querySelector('.entry-body');
 
   try {
-    const systemPrompt = buildSystemPrompt(context);
+    const systemPrompt = buildSystemPrompt(context, hasContext);
     const chunks = await engine.chat.completions.create({
       messages: [
         { role: 'system', content: systemPrompt },
@@ -1123,7 +1255,7 @@ async function runQuery() {
     let response = '';
     const badge = hasContext
       ? `<span class="source-badge">RAG ${bm25.search(query, 1)[0]?.score?.toFixed(2) || ''}</span>`
-      : `<span class="source-badge">BASE</span>`;
+      : `<span class="source-badge" style="background:var(--p-orange-dim);border-color:var(--p-orange);color:var(--p-orange)">NO DATA</span>`;
 
     for await (const chunk of chunks) {
       response += chunk.choices[0]?.delta?.content || '';

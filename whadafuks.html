@@ -1303,7 +1303,8 @@ async function boot() {
   }
 }
   
-// ── Event Wiring ───────────────────────────────────────
+// ── Event Wiring ─hmm──────────────────────────────────────
+//
 ui.syncBtn.onclick = runQuery;
 ui.input.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); runQuery(); } };
 ui.resetBtn.onclick = () => softReset();
