@@ -795,8 +795,13 @@ _____________________________  -->
 		// We use .toLowerCase() to be safe with capitalization
 		else if (typeof savedStreamer !== 'undefined' && savedStreamer.toLowerCase() === "jaedraze") {
 			console.log("No local data, but Jaedraze detected. Fetching from server...");
-			fetchAndSavePrizeData(); 
-			// We don't need filterAndRender() here because fetchAndSavePrizeData calls it
+			//if u want to use the list saved on a url uncomment the following lines then comment out the lines below it.
+			//fetchAndSavePrizeData();
+			//[THESE THREE LINES]comment or uncomment the following lines to replace fetchandsaveprizedata without fetching from website(local storage only)
+			console.log("Loaded prize data from localStorage");
+			prizeData = JSON.parse(localData);
+			filterAndRender();
+			//-------------------------------------------------
 		} 
 		// 3. For everyone else, start fresh
 		else {
