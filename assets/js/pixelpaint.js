@@ -1,6 +1,5 @@
 
 function initPixelPen() {
-    const canvas = document.getElementById('pixelpaint');
     const ctx = canvas.getContext('2d');
     let painting = false;
     let color = '#000000';
@@ -259,7 +258,7 @@ function rand(min, max) {
     setCanvasSize();
     restoreDrawing();
 }
-const canvas = document.getElementById('yourCanvasId');
+const canvas = document.getElementById('pixelpaint');
 
 // Hide it immediately on script execution
 canvas.style.display = 'none';
