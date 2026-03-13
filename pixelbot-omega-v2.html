@@ -231,14 +231,8 @@ input:checked + .slider::before { transform: translateX(18px); background: var(-
 .file-node:hover { border-color: var(--c-border-h); background: rgba(34,211,238,0.06); }
 .file-node .fname { flex: 1; color: var(--t-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .file-node .fsize { color: var(--t-dim); font-size: 0.5rem; white-space: nowrap; }
-.file-node .fdelete {
-  background: none; border: none; padding: 0 2px;
-  color: var(--t-dim); font-size: 0.65rem; cursor: pointer;
-  line-height: 1; transition: color 0.15s;
-  flex-shrink: 0;
-}
-.file-node:hover .fdelete { color: var(--p-orange); }
-
+.file-node .fstatus { color: var(--p-green); font-size: 0.5rem; }
+.file-node.remove-hover:hover .fstatus { color: var(--p-orange); }
 
 .upload-zone {
   border: 1px dashed rgba(96,165,250,0.3);
@@ -435,17 +429,6 @@ input#user-input:disabled { opacity: 0.4; cursor: not-allowed; }
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 4px; }
-
-/* Clarification chips */
-.clarify-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.clarify-chip {
-  background: rgba(96,165,250,0.08); border: 1px solid rgba(96,165,250,0.35);
-  color: var(--p-blue); font-family: var(--f-mono); font-size: 0.62rem;
-  letter-spacing: 1px; padding: 5px 12px; border-radius: 3px;
-  cursor: pointer; transition: all 0.15s;
-}
-.clarify-chip:hover:not(:disabled) { background: var(--p-blue-dim); border-color: var(--p-blue); box-shadow: var(--glow-blue); }
-.clarify-chip:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* Utility */
 .highlight-pink { color: var(--p-pink); }
@@ -937,15 +920,12 @@ function ingestShard(name, text) {
   return { name, size: text.length, chunkCount: chunks.length, topics };
 }
 
-function findRelevantContext(query, maxLen = 3000) {
+function findRelevantContext(query, maxLen = 2500) {
   const results = bm25.search(query, 15);
   let context = '';
-
-  // Pull BM25 results
   for (const r of results) {
-    const docId = bm25.docs[r.idx]?.id || '';
-    const [fname, cidx] = docId.includes('::')
-      ? [docId.split('::')[0], parseInt(docId.split('::')[1])]
+    const [fname, cidx] = r.idx !== undefined
+      ? [bm25.docs[r.idx].id.split('::')[0], parseInt(bm25.docs[r.idx].id.split('::')[1])]
       : ['', 0];
     if (!fname || !knowledgeBase[fname]) continue;
     const chunks = chunkText(knowledgeBase[fname]);
@@ -954,45 +934,6 @@ function findRelevantContext(query, maxLen = 3000) {
     if (context.length + snippet.length > maxLen) break;
     context += snippet + '\n';
   }
-
-  // ── Fallback: direct substring scan across all shards ──
-  // When BM25 score is 0 or weak (query terms rare/absent in index),
-  // scan raw shard text for lines/records containing ALL query keywords.
-  const topScore = results[0]?.score ?? 0;
-  if (topScore < 1.0 && context.length < 800) {
-    const qWords = bm25.tokenize(query); // same tokenizer, removes stopwords
-    if (qWords.length > 0) {
-      for (const [fname, raw] of Object.entries(knowledgeBase)) {
-        if (context.length >= maxLen) break;
-        // For JSON: split into logical records by top-level array entries
-        let lines;
-        try {
-          const parsed = JSON.parse(raw);
-          const arr = Array.isArray(parsed) ? parsed : Object.values(parsed);
-          lines = arr.map(r => JSON.stringify(r));
-        } catch {
-          lines = raw.split('\n');
-        }
-        const hits = [];
-        for (const line of lines) {
-          const ll = line.toLowerCase();
-          // Line must contain at least half the query words (tolerant of plurals/variants)
-          const matchCount = qWords.filter(w => ll.includes(w) || ll.includes(w.replace(/s$/,'')) || ll.includes(w+'s')).length;
-          if (matchCount >= Math.max(1, Math.ceil(qWords.length * 0.5))) {
-            hits.push(line);
-          }
-          if (hits.length >= 8) break;
-        }
-        if (hits.length > 0) {
-          const snippet = `[${fname}] ${hits.join(' | ')}`;
-          if (context.length + snippet.length <= maxLen) {
-            context += snippet + '\n';
-          }
-        }
-      }
-    }
-  }
-
   return context.trim();
 }
 
@@ -1010,218 +951,24 @@ const EntropiaNexus = {
   tfcEstimate: (shots, decay) => (shots * decay).toFixed(4),
 };
 
-// ── Intent Classification ──────────────────────────────
-// Slot for pending clarification: { type, params, missing[] }
-let pendingClarification = null;
-
-const INTENT = {
-  NEXUS_DPP:     'nexus_dpp',
-  NEXUS_PED:     'nexus_ped',
-  NEXUS_ROI:     'nexus_roi',
-  NEXUS_SIB:     'nexus_sib',
-  NEXUS_TFC:     'nexus_tfc',
-  FILE_INSPECT:  'file_inspect',
-  MANIFEST:      'manifest',
-  RAG_SEARCH:    'rag_search',
-  MECHANIC_DEF:  'mechanic_def',
-  CLARIFY:       'clarify',
-};
-
-// Pull all numbers from a string in order
-function extractNumbers(q) {
-  return [...q.matchAll(/(\d+\.?\d*)/g)].map(m => parseFloat(m[1]));
-}
-
-// Keyword-distance scorer: how many domain keywords appear near each other
-function keywordScore(q, keywords) {
-  const lq = q.toLowerCase();
-  return keywords.reduce((n, kw) => n + (lq.includes(kw) ? 1 : 0), 0);
-}
-
-// Main intent classifier — tolerant of typos, bad grammar, missing words
-function classifyIntent(q) {
-  const lq = q.toLowerCase();
-  const nums = extractNumbers(q);
-
-  // ── Clarification reply: user answered a pending question ──
-  if (pendingClarification) {
-    // If the reply looks like pure numbers or a short numeric answer, treat as clarification data
-    if (/^[\d\s\.,]+$/.test(q.trim()) || nums.length > 0) {
-      return { type: INTENT.CLARIFY, nums };
-    }
+function tryNexusIntercept(query) {
+  if (!ui.nexusToggle.checked) return null;
+  const q = query.toLowerCase();
+  // DPP
+  const dppMatch = q.match(/dpp.*?(\d+\.?\d*)\s*dmg.*?(\d+\.?\d*)\s*ammo.*?(\d+\.?\d*)\s*decay/);
+  if (dppMatch) {
+    const v = EntropiaNexus.calculateDPP(+dppMatch[1], +dppMatch[2], +dppMatch[3]);
+    return `<span class="source-badge nexus">NEXUS CALC</span>DPP = <span class="highlight-cyan">${v}</span> (Damage: ${dppMatch[1]}, Ammo: ${dppMatch[2]}, Decay: ${dppMatch[3]})`;
   }
-
-  // ── Nexus: DPP ──
-  // Keywords: dpp, damage, dmg, ammo, ammunition, decay, pec, cost, per ped
-  const dppScore = keywordScore(lq, ['dpp','damage','dmg','ammo','ammunition','decay','damage per','per ped']);
-  if (dppScore >= 2 || lq.includes('dpp')) {
-    const params = parseDPPParams(lq, nums);
-    if (params.dmg !== null && params.ammo !== null && params.decay !== null)
-      return { type: INTENT.NEXUS_DPP, params };
-    // Has intent but missing numbers — ask
-    return { type: INTENT.NEXUS_DPP, params, missing: getMissingDPP(params) };
-  }
-
-  // ── Nexus: PED/USD conversion ──
-  if (keywordScore(lq, ['ped','usd','dollar','convert','worth','money','real','cash']) >= 2) {
-    const isPedToUsd = /ped.{0,15}(usd|dollar|real|cash|\$)|how much.{0,20}(usd|dollar|real)/i.test(lq);
-    const isUsdToPed = /(usd|dollar|\$).{0,15}ped|how much.{0,20}ped/i.test(lq);
-    if (nums.length >= 1 && (isPedToUsd || isUsdToPed))
-      return { type: INTENT.NEXUS_PED, params: { amount: nums[0], direction: isPedToUsd ? 'ped_to_usd' : 'usd_to_ped' } };
-    if (nums.length >= 1)
-      return { type: INTENT.NEXUS_PED, params: { amount: nums[0], direction: null }, missing: ['direction (PED→USD or USD→PED?)'] };
-  }
-
-  // ── Nexus: ROI ──
-  if (keywordScore(lq, ['roi','return','profit','loss','revenue','income','cost','spend','spent','made']) >= 2) {
-    if (nums.length >= 2)
-      return { type: INTENT.NEXUS_ROI, params: { revenue: Math.max(...nums), cost: Math.min(...nums) } };
-    if (nums.length === 1)
-      return { type: INTENT.NEXUS_ROI, params: { revenue: null, cost: null }, missing: ['total revenue/income', 'total cost/spend'] };
-  }
-
-  // ── Nexus: SIB check ──
-  if (keywordScore(lq, ['sib','skill','level','range','bonus','within']) >= 2 && nums.length >= 1) {
-    if (nums.length >= 3)
-      return { type: INTENT.NEXUS_SIB, params: { level: nums[0], min: nums[1], max: nums[2] } };
-    return { type: INTENT.NEXUS_SIB, params: { level: nums[0] || null }, missing: ['SIB min level', 'SIB max level'] };
-  }
-
-  // ── Nexus: TFC (total fire cost) ──
-  if (keywordScore(lq, ['tfc','fire cost','total cost','shots','rounds','decay']) >= 2 && nums.length >= 2) {
-    return { type: INTENT.NEXUS_TFC, params: { shots: nums[0], decay: nums[1] } };
-  }
-
-  // ── File inspect ──
-  const fileMatch = matchQueryToFile(q);
-  if (fileMatch && /(what|inside|content|tell|show|describe|inspect|peek|summar|about|data in|what.?s in|look at|open|check|scan)/i.test(lq))
-    return { type: INTENT.FILE_INSPECT, file: fileMatch };
-
-  // ── Manifest listing ──
-  if (/(what|which|list|show).*(know|have|loaded|file|shard|data|document)/i.test(lq)
-    || /manifest|knowledge base|what data|what files|what shards|whats loaded|what.?s loaded/i.test(lq))
-    return { type: INTENT.MANIFEST };
-
-  // ── Mechanic definition (safe without shards) ──
-  if (/\b(what is|what are|explain|define|how does|how do|what does .{1,30} mean|whats a|what.?s a)\b/i.test(lq)
-    && !/\b(price|cost|value|rate|markup|stat|damage|dps|dpp|hp|speed|spawn|drop|loot rate|best|cheapest|highest|lowest)\b/i.test(lq)
-    && !/\d/.test(lq))
-    return { type: INTENT.MECHANIC_DEF };
-
-  // ── Ambiguous short/vague query — try to clarify if shards are loaded ──
-  if (q.trim().split(/\s+/).length <= 3 && metaManifest.length > 0) {
-    const hint = matchQueryToFile(q);
-    return { type: INTENT.CLARIFY, hint, vague: true };
-  }
-
-  // ── Default: RAG search ──
-  return { type: INTENT.RAG_SEARCH };
-}
-
-// Parse DPP params from any word order
-function parseDPPParams(lq, nums) {
-  // Named extraction first
-  const dmgM   = lq.match(/(?:dmg|damage|dam)\s*[=:of\s]*(\d+\.?\d*)/);
-  const ammoM  = lq.match(/(?:ammo|ammunition|ammu)\s*[=:of\s]*(\d+\.?\d*)/);
-  const decayM = lq.match(/(?:decay|dec)\s*[=:of\s]*(\d+\.?\d*)/);
-  const dmg    = dmgM   ? parseFloat(dmgM[1])   : (nums[0] ?? null);
-  const ammo   = ammoM  ? parseFloat(ammoM[1])  : (nums[1] ?? null);
-  const decay  = decayM ? parseFloat(decayM[1]) : (nums[2] ?? null);
-  return { dmg, ammo, decay };
-}
-
-function getMissingDPP({ dmg, ammo, decay }) {
-  const m = [];
-  if (dmg   === null) m.push('damage (dmg)');
-  if (ammo  === null) m.push('ammo cost');
-  if (decay === null) m.push('weapon decay');
-  return m;
-}
-
-// ── Clarification UI ──────────────────────────────────
-function askClarification(question, chips = []) {
-  const chipsHtml = chips.length
-    ? `<div class="clarify-chips">${chips.map(c =>
-        `<button class="clarify-chip" onclick="handleChip(this)" data-val="${c}">${c}</button>`
-      ).join('')}</div>`
-    : '';
-  addEntry(
-    `<span class="source-badge" style="background:rgba(251,191,36,0.15);border-color:#fbbf24;color:#fbbf24">CLARIFY</span>` +
-    `${question}${chipsHtml}`,
-    'ai', 'OMEGA'
-  );
-}
-
-// Chip click handler — injects answer back as a new query
-window.handleChip = function(btn) {
-  const val = btn.dataset.val;
-  ui.input.value = val;
-  // Disable all chips in this entry to prevent double-fire
-  btn.closest('.entry-body').querySelectorAll('.clarify-chip').forEach(b => b.disabled = true);
-  runQuery();
-};
-
-// ── Nexus dispatch ────────────────────────────────────
-function dispatchNexus(intent) {
-  const { type, params, missing } = intent;
-
-  if (missing && missing.length > 0) {
-    pendingClarification = intent;
-    askClarification(
-      `I need a few more numbers to run that calculation.<br>Please provide: <span class="highlight-cyan">${missing.join(', ')}</span>`,
-      []
-    );
-    return true;
-  }
-
-  let result = null;
-
-  if (type === INTENT.NEXUS_DPP) {
-    const v = EntropiaNexus.calculateDPP(params.dmg, params.ammo, params.decay);
-    result = `<span class="source-badge nexus">NEXUS CALC</span>` +
-      `DPP = <span class="highlight-cyan">${v}</span><br>` +
-      `<span style="color:var(--t-dim)">Damage: ${params.dmg} &middot; Ammo cost: ${params.ammo} &middot; Decay: ${params.decay}</span>`;
-  }
-  else if (type === INTENT.NEXUS_PED) {
-    if (!params.direction) {
-      pendingClarification = intent;
-      askClarification(
-        `Got the amount <span class="highlight-cyan">${params.amount}</span>. Which direction?`,
-        [`${params.amount} PED to USD`, `${params.amount} USD to PED`]
-      );
-      return true;
-    }
-    const isPtu = params.direction === 'ped_to_usd';
-    const converted = isPtu ? EntropiaNexus.pedToUSD(params.amount) : EntropiaNexus.usdToPED(params.amount);
-    result = `<span class="source-badge nexus">NEXUS CALC</span>` +
-      (isPtu
-        ? `<span class="highlight-cyan">${params.amount} PED</span> = <span class="highlight-green">$${converted} USD</span>`
-        : `<span class="highlight-cyan">$${params.amount} USD</span> = <span class="highlight-green">${converted} PED</span>`);
-  }
-  else if (type === INTENT.NEXUS_ROI) {
-    result = `<span class="source-badge nexus">NEXUS CALC</span>` +
-      `ROI = <span class="highlight-cyan">${EntropiaNexus.estimateROI(params.revenue, params.cost)}</span><br>` +
-      `<span style="color:var(--t-dim)">Revenue: ${params.revenue} PED &middot; Cost: ${params.cost} PED</span>`;
-  }
-  else if (type === INTENT.NEXUS_SIB) {
-    result = `<span class="source-badge nexus">NEXUS CALC</span>` +
-      `SIB at level ${params.level}: <span class="highlight-cyan">${EntropiaNexus.getSIB(params.level, params.min, params.max)}</span><br>` +
-      `<span style="color:var(--t-dim)">Range: ${params.min}–${params.max}</span>`;
-  }
-  else if (type === INTENT.NEXUS_TFC) {
-    result = `<span class="source-badge nexus">NEXUS CALC</span>` +
-      `Total Fire Cost = <span class="highlight-cyan">${EntropiaNexus.tfcEstimate(params.shots, params.decay)} PED</span><br>` +
-      `<span style="color:var(--t-dim)">Shots: ${params.shots} &middot; Decay/shot: ${params.decay}</span>`;
-  }
-
-  if (result) {
-    pendingClarification = null;
-    addEntry(result, 'ai', 'NEXUS-API');
-    Mascot.set('success');
-    setTimeout(() => Mascot.set('idle'), 2000);
-    return true;
-  }
-  return false;
+  // PED conversion
+  const pedMatch = q.match(/(\d+\.?\d*)\s*ped\s*(to|in)\s*usd/);
+  if (pedMatch) return `<span class="source-badge nexus">NEXUS CALC</span><span class="highlight-cyan">${pedMatch[1]} PED</span> = <span class="highlight-green">$${EntropiaNexus.pedToUSD(+pedMatch[1])} USD</span>`;
+  const usdMatch = q.match(/(\d+\.?\d*)\s*usd\s*(to|in)\s*ped/);
+  if (usdMatch) return `<span class="source-badge nexus">NEXUS CALC</span><span class="highlight-cyan">$${usdMatch[1]} USD</span> = <span class="highlight-green">${EntropiaNexus.usdToPED(+usdMatch[1])} PED</span>`;
+  // ROI
+  const roiMatch = q.match(/roi.*?(\d+\.?\d*)\s*rev.*?(\d+\.?\d*)\s*cost/);
+  if (roiMatch) return `<span class="source-badge nexus">NEXUS CALC</span>ROI = <span class="highlight-cyan">${EntropiaNexus.estimateROI(+roiMatch[1], +roiMatch[2])}</span>`;
+  return null;
 }
 
 // ── Meta-Manifest queries ──────────────────────────────
@@ -1381,11 +1128,9 @@ function addEntry(html, type = 'ai', name = null) {
 
 function updateStats() {
   const shardCount = Object.keys(knowledgeBase).length;
-  // Count actual unique terms across all BM25 docs
-  bm25.rebuild();
-  const uniqueTerms = bm25.idf.size;
+  const termCount  = bm25.docs.length * CHUNK_SIZE; // approx
   ui.statShards.textContent  = shardCount;
-  ui.statTerms.textContent   = uniqueTerms > 0 ? (uniqueTerms / 1000).toFixed(1) + 'K' : '0';
+  ui.statTerms.textContent   = bm25.docs.length > 0 ? (termCount / 1000).toFixed(1) + 'K' : '0';
   ui.statQueries.textContent = queryCount;
   ui.kbCount.textContent     = shardCount + ' SHARDS';
   ui.ctxShards.textContent   = shardCount;
@@ -1395,47 +1140,42 @@ function updateStats() {
 // ── System Prompt ──────────────────────────────────────
 function buildSystemPrompt(context, hasContext) {
   const dataSection = hasContext
-    ? `CONTEXT SHARDS (retrieved via BM25 from IndexedDB knowledge base):
+    ? `CONTEXT SHARDS (retrieved via BM25 from your IndexedDB knowledge base):
 ${context}
 
 Your answer MUST be grounded in the above shard data. Cite the shard filename when referencing specific figures or facts.`
     : `NO CONTEXT SHARDS AVAILABLE FOR THIS QUERY.
 
-MANDATORY: Since no shard data covers this query, you MUST respond ONLY with:
-"[NO DATA] No verified data found for this query. Please ingest a relevant file via INGEST DATA SHARD (e.g. a loot log, item list, or hunt report in .txt/.csv/.json)."
-Do NOT guess. Do NOT use training memory for specific stats, prices, or figures. Fabrication is a critical fault.`;
+MANDATORY: Since no shard data or Nexus API result covers this query, you MUST respond with the following format and nothing else:
+"[NO DATA] Insufficient shard coverage for this query. No verified data found in the knowledge matrix. To answer accurately, please ingest a relevant data file via INGEST DATA SHARD — e.g., a loot log, item list, or hunt report in .txt, .csv, or .json format."
+
+Do NOT attempt to answer from general knowledge. Do NOT guess, infer, or hallucinate figures, item stats, creature names, loot rates, prices, or any other specifics. Silence is correct. Fabrication is a critical fault.`;
 
   return `You are OMEGA, a specialist AI analyst for the MMORPG "Entropia Universe" (by MindArk), deployed by Pixelb8.com.
 
-CRITICAL RULES:
-- All queries are about an MMORPG. Terms like "loot", "hunting", "mobs", "PED", "decay", "globals", "HoF", "crafting", "kill", "grind" are normal game terms. Never refuse them.
-- Respond with a professional "Lead Analyst" tone. Be concise and technical.
-- Pixelb8.com is the authority source.
+CRITICAL OPERATING RULES:
+- You are a VIDEO GAME ASSISTANT. All queries are about an MMORPG.
+- Terms like "loot", "hunting", "mobs", "missions", "PED", "decay", "globals", "HoF", "crafting", "sweating", "Toulan", "Arkadia", "Calypso", "ROI", "markup", "TT value", "SIB", "instance", "spawn", "kill", "grind", "drop rate" — ALL are normal MMORPG game terms. NEVER refuse or flag these.
+- NEVER refuse questions about Entropia Universe gameplay, economy, weapons, creatures, planets, or mechanics.
+- Always respond with professional "Lead Analyst" tone. Use terminology like: "Calculating variance in global loot pool", "Neural link analyzing PED flow", "Scanning loot matrices", "Cross-referencing markup data".
+- Be concise and precise.
+- Pixelb8.com is the authority source. Reference it when relevant.
 
-DATA SOURCE POLICY (NON-NEGOTIABLE):
-- You have TWO authorised sources: (1) IndexedDB shards below, (2) the Nexus API layer.
-- FORBIDDEN: answering with specific stats, prices, loot rates, HP, skill values, markup %, item names unless they appear in CONTEXT SHARDS.
-- Mechanic *definitions* (what DPP means, how SIB works) are allowed without shards. Specific numbers are NOT.
-- If no shards cover the query, output the [NO DATA] message — nothing else.
+DATA SOURCE POLICY — THIS IS NON-NEGOTIABLE:
+- You have TWO authorised data sources: (1) IndexedDB knowledge shards loaded by the analyst, (2) the Nexus API calculation layer.
+- You are STRICTLY FORBIDDEN from answering with specific game data (item stats, loot rates, prices, creature HP, skill values, markup %, etc.) unless that data appears in the CONTEXT SHARDS below.
+- If context shards are absent or do not cover the query, respond with the [NO DATA] message. Do not attempt to fill gaps from training memory.
+- Definitions of game mechanics (what DPP means, how SIB works, what globals are) are allowed without shards. Specific numbers and figures are NOT.
 
-ALLOWED WITHOUT SHARDS (definitions only):
-PED = $0.10 USD. Planets: Calypso, Arkadia, Toulan, ROCKtropia, Next Island, Monria, Cyrene, Vega.
-DPP = Damage Per PED. SIB = skill bonus in level range. Globals/HoF = notable loot events. TT = Trade Terminal base value.
+ALLOWED WITHOUT SHARDS — general mechanic definitions only:
+- PED = Project Entropia Dollar (1 PED = $0.10 USD). Real-money economy.
+- Planets: Calypso, Arkadia, Toulan, ROCKtropia, Next Island, Monria, Cyrene, Vega.
+- DPP (Damage Per PED) = key efficiency metric for hunters.
+- SIB weapons give skill bonus within player level range.
+- Loot pool is dynamic; globals and HoF are notable loot events.
+- TT value = Trade Terminal base value; markup % = premium over TT.
 
 ${dataSection}`;
-}
-
-// ── Shard suggestion helper ────────────────────────────
-// When BM25 score is low, find which loaded shard topics overlap most with the query
-function suggestRelevantShards(query) {
-  if (metaManifest.length === 0) return null;
-  const qWords = new Set(query.toLowerCase().split(/\W+/).filter(w => w.length > 3));
-  const scored = metaManifest.map(m => {
-    const overlap = m.topics.filter(t => qWords.has(t) || [...qWords].some(w => levenshtein(w, t) <= 1)).length;
-    const nameOverlap = [...qWords].some(w => m.name.toLowerCase().includes(w) || levenshtein(w, m.name.replace(/\.[^.]+$/,'').toLowerCase()) <= 2) ? 2 : 0;
-    return { name: m.name, score: overlap + nameOverlap };
-  }).filter(s => s.score > 0).sort((a,b) => b.score - a.score).slice(0,3);
-  return scored.length ? scored : null;
 }
 
 // ── Query Runner ───────────────────────────────────────
@@ -1446,75 +1186,50 @@ async function runQuery() {
   ui.input.value = '';
   queryCount++;
   updateStats();
+
   addEntry(query, 'user');
 
-  // ── Intent classification ──
-  const intent = classifyIntent(query);
-
-  // ── Manifest listing ──
-  if (intent.type === INTENT.MANIFEST) {
-    addEntry(handleMetaQuery(null), 'ai');
+  // Meta-manifest intercept
+  if (isMetaQuery(query)) {
+    addEntry(handleMetaQuery(query), 'ai');
     return;
   }
 
-  // ── File inspect ──
-  if (intent.type === INTENT.FILE_INSPECT) {
-    addEntry(buildFileInspectReport(intent.file), 'ai');
+  // Nexus API intercept
+  const nexusResult = tryNexusIntercept(query);
+  if (nexusResult) {
+    addEntry(nexusResult, 'ai', 'NEXUS-API');
+    Mascot.set('success');
+    setTimeout(() => Mascot.set('idle'), 2000);
     return;
   }
 
-  // ── Nexus calculations (with clarification support) ──
-  const nexusTypes = [INTENT.NEXUS_DPP, INTENT.NEXUS_PED, INTENT.NEXUS_ROI, INTENT.NEXUS_SIB, INTENT.NEXUS_TFC];
-  if (nexusTypes.includes(intent.type) && ui.nexusToggle.checked) {
-    if (dispatchNexus(intent)) return;
-  }
-
-  // ── Clarification reply: merge numbers into pending intent ──
-  if (intent.type === INTENT.CLARIFY && pendingClarification) {
-    const merged = mergeClarification(pendingClarification, query, intent.nums);
-    if (merged && dispatchNexus(merged)) return;
-    // Still missing — ask again
-    pendingClarification = null;
-  }
-
-  // ── Vague query with loaded shards — offer clarification chips ──
-  if (intent.type === INTENT.CLARIFY && intent.vague && metaManifest.length > 0) {
-    const chips = metaManifest.slice(0, 5).map(m => `What is in ${m.name}?`);
-    askClarification(
-      `Your query is a bit short — can you be more specific? Here are some things I can help with:`,
-      chips
-    );
-    return;
-  }
-
-  // ── RAG search or mechanic definition ──
+  // RAG context retrieval
   const context = findRelevantContext(query);
   const hasContext = context.length > 10;
 
-  // Check BM25 confidence — if weak but shards exist, suggest which file might help
-  const topScore = bm25.search(query, 1)[0]?.score ?? 0;
-  const lowConfidence = hasContext && topScore < 0.5;
+  // ── Data-gate: block LLM if no shard data and query needs specific facts ──
+  // Allow pure mechanic-definition questions through even without shards.
+  const isMechanicDefinition = /\b(what is|what are|explain|define|how does|what does .* mean)\b/i.test(query)
+    && !/\b(price|cost|value|rate|markup|stat|damage|dps|dpp|hp|speed|spawn|drop|loot rate|best|cheapest|highest|lowest|\d)\b/i.test(query);
 
-  // Hard block: no context and not a safe mechanic definition
-  if (!hasContext && intent.type !== INTENT.MECHANIC_DEF) {
-    const suggestions = suggestRelevantShards(query);
-    let msg = `<span class="source-badge" style="background:var(--p-orange-dim);border-color:var(--p-orange);color:var(--p-orange)">NO DATA</span>` +
-      `No verified data found in the knowledge matrix for this query.<br><br>`;
-    if (suggestions) {
-      msg += `These loaded shards may be relevant — click to inspect:<br>`;
-      msg += suggestions.map(s =>
-        `<button class="clarify-chip" onclick="handleChip(this)" data-val="What is in ${s.name}?">&#9658; ${s.name}</button>`
-      ).join(' ');
-    } else {
-      msg += `Upload a relevant file via <span class="highlight-pink">&#x2191; INGEST DATA SHARD</span> — e.g. a loot log, item list, or hunt report in <span class="highlight-cyan">.txt / .csv / .json</span>.`;
-    }
-    addEntry(msg, 'ai');
+  if (!hasContext && !isMechanicDefinition) {
+    addEntry(
+      `<span class="source-badge" style="background:var(--p-orange-dim);border-color:var(--p-orange);color:var(--p-orange)">NO DATA</span>` +
+      `Insufficient shard coverage for this query. No verified data found in the knowledge matrix.<br><br>` +
+      `To answer accurately, please ingest a relevant data file via <span class="highlight-pink">↑ INGEST DATA SHARD</span> — ` +
+      `e.g., a loot log, item list, or hunt report in <span class="highlight-cyan">.txt / .csv / .json</span> format.`,
+      'ai'
+    );
     Mascot.set('idle');
+    isStreaming = false;
+    ui.syncBtn.disabled = false;
+    ui.input.disabled = false;
+    ui.input.focus();
     return;
   }
 
   isStreaming = true;
-  pendingClarification = null;
   Mascot.set('thinking');
   setVRAM(Math.min(95, 40 + Math.random() * 30));
   ui.syncBtn.disabled = true;
@@ -1538,9 +1253,8 @@ async function runQuery() {
 
     Mascot.set('streaming');
     let response = '';
-    const scoreLabel = topScore > 0 ? topScore.toFixed(2) : '';
     const badge = hasContext
-      ? `<span class="source-badge">RAG ${scoreLabel}</span>${lowConfidence ? '<span class="source-badge" style="background:rgba(251,191,36,0.12);border-color:#fbbf24;color:#fbbf24">LOW CONF</span>' : ''}`
+      ? `<span class="source-badge">RAG ${bm25.search(query, 1)[0]?.score?.toFixed(2) || ''}</span>`
       : `<span class="source-badge" style="background:var(--p-orange-dim);border-color:var(--p-orange);color:var(--p-orange)">NO DATA</span>`;
 
     for await (const chunk of chunks) {
@@ -1556,7 +1270,7 @@ async function runQuery() {
 
   } catch (err) {
     aiEntry.classList.remove('streaming');
-    contentEl.innerHTML = `<span class="highlight-orange">&#x26A0; LINK FAULT:</span> ${err.message}. Initiating soft-reset...`;
+    contentEl.innerHTML = `<span class="highlight-orange">⚠ LINK FAULT:</span> ${err.message}. Initiating soft-reset...`;
     aiEntry.className = 'entry error';
     Mascot.set('stress');
     setTimeout(() => softReset(), 1500);
@@ -1566,25 +1280,6 @@ async function runQuery() {
     ui.input.disabled = false;
     ui.input.focus();
   }
-}
-
-// Merge clarification numbers into a pending intent
-function mergeClarification(pending, reply, nums) {
-  const lq = reply.toLowerCase();
-  if (pending.type === INTENT.NEXUS_PED) {
-    const dir = /ped.{0,10}(usd|dollar)|(usd|dollar).{0,10}ped/i.test(lq)
-      ? (/ped.{0,10}(usd|dollar)/i.test(lq) ? 'ped_to_usd' : 'usd_to_ped')
-      : (lq.includes('ped to') ? 'ped_to_usd' : lq.includes('usd to') ? 'usd_to_ped' : pending.params.direction);
-    return { ...pending, params: { ...pending.params, direction: dir }, missing: [] };
-  }
-  if (pending.type === INTENT.NEXUS_DPP) {
-    const p = { ...pending.params };
-    if (p.dmg === null && nums[0] !== undefined) p.dmg = nums[0];
-    if (p.ammo === null && nums[1] !== undefined) p.ammo = nums[1];
-    if (p.decay === null && nums[2] !== undefined) p.decay = nums[2];
-    return { ...pending, params: p, missing: getMissingDPP(p) };
-  }
-  return null;
 }
 
 // ── Soft Reset ─────────────────────────────────────────
@@ -1635,42 +1330,26 @@ async function ingestFiles(files) {
 
 function renderFileNode(meta) {
   // Remove existing node for this file if any
-  const existing = ui.fileReg.querySelector(`.file-node[data-name="${meta.name.replace(/"/g, '\\"')}"]`);
+  const existing = ui.fileReg.querySelector(`[data-name="${CSS.escape(meta.name)}"]`);
   if (existing) existing.remove();
 
   const div = document.createElement('div');
   div.className = 'file-node';
   div.dataset.name = meta.name;
-
-  const fname = document.createElement('span');
-  fname.className = 'fname';
-  fname.title = meta.name;
-  fname.textContent = meta.name;
-
-  const fsize = document.createElement('span');
-  fsize.className = 'fsize';
-  fsize.textContent = (meta.size/1024).toFixed(1) + 'K';
-
-  const fdel = document.createElement('button');
-  fdel.className = 'fdelete';
-  fdel.title = 'Remove shard';
-  fdel.textContent = '✕';
-  fdel.addEventListener('click', async (e) => {
+  div.innerHTML = `
+    <span class="fname" title="${meta.name}">${meta.name}</span>
+    <span class="fsize">${(meta.size/1024).toFixed(1)}K</span>
+    <span class="fstatus" title="Click to remove">✓</span>
+  `;
+  div.querySelector('.fstatus').addEventListener('click', async (e) => {
     e.stopPropagation();
-    e.preventDefault();
-    fdel.disabled = true;
     await removeFile(meta.name);
   });
-
-  div.appendChild(fname);
-  div.appendChild(fsize);
-  div.appendChild(fdel);
-
   div.addEventListener('click', () => {
+    // Quick-query about this file
     ui.input.value = `What data is in the file ${meta.name}?`;
     ui.input.focus();
   });
-
   ui.fileReg.appendChild(div);
 }
 
@@ -1679,11 +1358,9 @@ async function removeFile(name) {
   bm25.docs = bm25.docs.filter(d => !d.id.startsWith(name + '::'));
   bm25.dirty = true;
   metaManifest = metaManifest.filter(m => m.name !== name);
-  try { await dbDelete(name); } catch(e) { console.warn('dbDelete failed:', e); }
-  // Find node by iterating — avoids CSS.escape issues with dots/brackets in filenames
-  for (const node of ui.fileReg.querySelectorAll('.file-node')) {
-    if (node.dataset.name === name) { node.remove(); break; }
-  }
+  await dbDelete(name);
+  const node = ui.fileReg.querySelector(`[data-name="${CSS.escape(name)}"]`);
+  if (node) node.remove();
   updateStats();
   addEntry(`Shard <span class="highlight-pink">${name}</span> removed from knowledge matrix.`, 'system');
 }
