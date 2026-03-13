@@ -1,1384 +1,1258 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Pixelbot Entropia AI Engine</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PIXELBOT OMEGA // ANALYST CONSOLE v3.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-body {
-    background:#0b0f14;
-    color:#d6e2ff;
-    font-family:Arial,Helvetica,sans-serif;
-    margin:0;
+:root {
+  --c-bg:        #03030a;
+  --c-bg2:       #07071a;
+  --c-surface:   rgba(10,10,28,0.85);
+  --c-border:    rgba(80,100,255,0.18);
+  --c-border-h:  rgba(140,160,255,0.4);
+  --p-pink:      #f472b6;
+  --p-pink-dim:  rgba(244,114,182,0.15);
+  --p-pink-glow: rgba(244,114,182,0.5);
+  --p-blue:      #60a5fa;
+  --p-blue-dim:  rgba(96,165,250,0.12);
+  --p-blue-glow: rgba(96,165,250,0.5);
+  --p-cyan:      #22d3ee;
+  --p-cyan-dim:  rgba(34,211,238,0.1);
+  --p-orange:    #fb923c;
+  --p-orange-dim:rgba(251,146,60,0.15);
+  --p-green:     #4ade80;
+  --p-green-dim: rgba(74,222,128,0.12);
+  --p-yellow:    #fbbf24;
+  --p-red:       #f87171;
+  --t-primary:   #e2e8f0;
+  --t-secondary: #94a3b8;
+  --t-dim:       #475569;
+  --f-mono:      'Share Tech Mono', monospace;
+  --f-display:   'Orbitron', sans-serif;
+  --f-body:      'Space Mono', monospace;
+  --glow-pink:   0 0 8px var(--p-pink-glow),0 0 20px var(--p-pink-dim);
+  --glow-blue:   0 0 8px var(--p-blue-glow),0 0 20px var(--p-blue-dim);
+  --glow-cyan:   0 0 8px rgba(34,211,238,0.6),0 0 20px var(--p-cyan-dim);
 }
-header {
-    padding:10px 20px;
-    background:#111827;
-    border-bottom:1px solid #222;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--c-bg);color:var(--t-primary);font-family:var(--f-mono);
+  height:100vh;overflow:hidden;
+  display:grid;grid-template-columns:300px 1fr;grid-template-rows:48px 1fr;
 }
-#console {
-    padding:20px;
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);
+  animation:scanroll 10s linear infinite;
 }
-textarea {
-    width:100%;
-    height:90px;
-    background:#0f172a;
-    color:#d6e2ff;
-    border:1px solid #333;
-    padding:10px;
+@keyframes scanroll{to{background-position:0 800px}}
+@keyframes blink{50%{opacity:0.2}}
+@keyframes entryIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes streamglow{0%,100%{box-shadow:none}50%{box-shadow:inset 0 0 20px rgba(244,114,182,0.07),0 0 12px rgba(244,114,182,0.12)}}
+@keyframes borderflow{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ── TOP BAR ── */
+#topbar{
+  grid-column:1/-1;background:linear-gradient(90deg,#000,var(--c-bg2));
+  border-bottom:1px solid var(--c-border);
+  display:flex;align-items:center;padding:0 20px;gap:24px;
+  position:relative;z-index:100;
 }
-button {
-    padding:10px 18px;
-    background:#2563eb;
-    border:none;
-    color:white;
-    margin-top:10px;
-    cursor:pointer;
+#topbar::after{
+  content:"";position:absolute;bottom:-1px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--p-pink),var(--p-blue),transparent);
+  background-size:200%;animation:borderflow 4s linear infinite;
 }
-#output {
-    margin-top:20px;
-    background:#020617;
-    border:1px solid #222;
-    padding:15px;
-    white-space:pre-wrap;
+.topbar-logo{font-family:var(--f-display);font-size:.7rem;font-weight:900;letter-spacing:3px;color:var(--p-pink);text-shadow:var(--glow-pink)}
+.topbar-logo span{color:var(--p-blue)}
+.topbar-tags{display:flex;gap:8px;margin-left:auto}
+.tag{font-size:.55rem;letter-spacing:2px;padding:3px 8px;border:1px solid;border-radius:2px}
+.tag-pink{border-color:var(--p-pink);color:var(--p-pink)}
+.tag-blue{border-color:var(--p-blue);color:var(--p-blue)}
+.tag-green{border-color:var(--p-green);color:var(--p-green);animation:blink 2s step-end infinite}
+#vram-bar{display:flex;align-items:center;gap:8px;font-size:.55rem;color:var(--t-secondary)}
+#vram-fill{height:4px;width:80px;background:var(--c-border);border-radius:2px;overflow:hidden}
+#vram-inner{height:100%;width:0%;background:linear-gradient(90deg,var(--p-green),var(--p-yellow));transition:width .5s,background .5s;border-radius:2px}
+
+/* ── SIDEBAR ── */
+#sidebar{
+  background:linear-gradient(180deg,#000,var(--c-bg2));
+  border-right:1px solid var(--c-border);
+  display:flex;flex-direction:column;padding:16px;gap:12px;overflow:hidden;
 }
+.panel-label{
+  font-size:.5rem;letter-spacing:4px;text-transform:uppercase;color:var(--t-dim);
+  border-bottom:1px solid var(--c-border);padding-bottom:6px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.panel-label .pulse-dot{width:5px;height:5px;border-radius:50%;background:var(--p-green);box-shadow:0 0 6px var(--p-green);animation:blink 1.4s ease-in-out infinite}
+#mascot-wrap{
+  background:radial-gradient(ellipse at center,rgba(60,40,120,.3) 0%,#000 70%);
+  border:1px solid var(--c-border);border-radius:4px;height:170px;
+  position:relative;overflow:hidden;flex-shrink:0;
+}
+#mascot-wrap::before{
+  content:"NEURAL-LINK ACTIVE";position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
+  font-size:.45rem;letter-spacing:3px;color:var(--p-pink);opacity:.6;white-space:nowrap;
+}
+#bot-canvas{width:100%;height:100%;display:block}
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.stat-cell{background:var(--c-surface);border:1px solid var(--c-border);padding:7px 9px;border-radius:3px;display:flex;flex-direction:column;gap:2px}
+.stat-cell .lbl{font-size:.44rem;letter-spacing:2px;color:var(--t-dim)}
+.stat-cell .val{font-size:.72rem;color:var(--p-cyan);font-family:var(--f-display);font-weight:700}
+.stat-cell .val.pink{color:var(--p-pink)}.stat-cell .val.green{color:var(--p-green)}.stat-cell .val.orange{color:var(--p-orange)}
+.api-toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--c-surface);border:1px solid var(--c-border);padding:7px 11px;border-radius:3px}
+.api-toggle-row label{font-size:.54rem;letter-spacing:2px;color:var(--t-secondary);cursor:pointer}
+.toggle-switch{position:relative;width:36px;height:18px}
+.toggle-switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;cursor:pointer;background:#1a1a2e;border:1px solid var(--c-border);border-radius:18px;transition:.3s}
+.slider::before{content:"";position:absolute;height:12px;width:12px;left:2px;top:2px;background:var(--t-dim);border-radius:50%;transition:.3s}
+input:checked+.slider{background:var(--p-blue-dim);border-color:var(--p-blue)}
+input:checked+.slider::before{transform:translateX(18px);background:var(--p-blue);box-shadow:var(--glow-blue)}
+
+/* ── CONVERSATION LIST ── */
+#conv-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;min-height:0}
+#conv-list::-webkit-scrollbar{width:3px}
+#conv-list::-webkit-scrollbar-thumb{background:var(--c-border);border-radius:2px}
+.conv-item{
+  display:flex;align-items:center;gap:6px;
+  background:var(--c-surface);border:1px solid var(--c-border);
+  padding:7px 9px;border-radius:3px;font-size:.6rem;
+  cursor:pointer;transition:all .15s;position:relative;overflow:hidden;
+}
+.conv-item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--p-blue);opacity:0;transition:.2s}
+.conv-item:hover{border-color:var(--c-border-h);background:rgba(96,165,250,.07)}
+.conv-item:hover::before{opacity:1}
+.conv-item.active{border-color:var(--p-pink);background:var(--p-pink-dim)}
+.conv-item.active::before{background:var(--p-pink);opacity:1}
+.conv-name{flex:1;color:var(--t-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.58rem}
+.conv-meta{color:var(--t-dim);font-size:.48rem;white-space:nowrap}
+.conv-del{color:var(--t-dim);font-size:.6rem;padding:0 2px;transition:color .15s;flex-shrink:0;line-height:1}
+.conv-del:hover{color:var(--p-red)}
+.new-conv-btn{
+  border:1px dashed rgba(96,165,250,.35);padding:9px;text-align:center;
+  font-size:.54rem;letter-spacing:2px;color:var(--p-blue);cursor:pointer;
+  border-radius:3px;transition:all .2s;flex-shrink:0;
+}
+.new-conv-btn:hover{border-color:var(--p-blue);background:var(--p-blue-dim)}
+
+/* ── FILE REGISTRY ── */
+#file-registry{max-height:100px;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+#file-registry::-webkit-scrollbar{width:3px}
+#file-registry::-webkit-scrollbar-thumb{background:var(--c-border);border-radius:2px}
+.file-node{
+  display:flex;align-items:center;gap:8px;background:var(--c-surface);border:1px solid var(--c-border);
+  padding:6px 9px;border-radius:3px;font-size:.58rem;cursor:pointer;transition:all .15s;
+  position:relative;overflow:hidden;
+}
+.file-node::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--p-cyan);box-shadow:var(--glow-cyan)}
+.file-node:hover{border-color:var(--c-border-h);background:rgba(34,211,238,.06)}
+.file-node .fname{flex:1;color:var(--t-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-node .fsize{color:var(--t-dim);font-size:.48rem;white-space:nowrap}
+.file-node .fdel{color:var(--t-dim);font-size:.6rem;transition:color .15s}
+.file-node .fdel:hover{color:var(--p-red)}
+.upload-zone{
+  border:1px dashed rgba(96,165,250,.3);padding:9px;text-align:center;
+  font-size:.54rem;letter-spacing:2px;color:var(--t-dim);cursor:pointer;
+  border-radius:3px;transition:all .2s;flex-shrink:0;
+}
+.upload-zone:hover{border-color:var(--p-blue);color:var(--p-blue);background:var(--p-blue-dim)}
+
+/* ── MAIN VIEWPORT ── */
+#main-viewport{
+  display:grid;grid-template-rows:1fr auto;overflow:hidden;position:relative;
+  background:radial-gradient(ellipse at 80% 20%,rgba(60,30,100,.12) 0%,transparent 50%),
+             radial-gradient(ellipse at 20% 80%,rgba(0,60,120,.1) 0%,transparent 50%),
+             var(--c-bg);
+}
+
+/* ── TERMINAL ── */
+#terminal{overflow-y:auto;padding:24px 32px;display:flex;flex-direction:column;gap:14px}
+#terminal::-webkit-scrollbar{width:4px}
+#terminal::-webkit-scrollbar-thumb{background:rgba(244,114,182,.3);border-radius:2px}
+.entry{display:flex;flex-direction:column;gap:4px;animation:entryIn .2s ease-out;position:relative}
+.entry-meta{font-size:.5rem;letter-spacing:3px;color:var(--t-dim);display:flex;align-items:center;gap:8px}
+.entry-meta .em-name{color:var(--t-secondary)}
+.entry-meta .em-time{margin-left:auto}
+.entry-actions{display:flex;gap:6px;margin-left:auto}
+.entry-act-btn{
+  font-size:.48rem;letter-spacing:1.5px;padding:2px 7px;
+  border:1px solid var(--c-border);border-radius:2px;
+  color:var(--t-dim);cursor:pointer;background:transparent;
+  font-family:var(--f-mono);transition:all .15s;
+}
+.entry-act-btn:hover{color:var(--p-cyan);border-color:var(--p-cyan);background:var(--p-cyan-dim)}
+.entry-act-btn.danger:hover{color:var(--p-red);border-color:var(--p-red);background:rgba(248,113,113,.1)}
+
+.entry-body{
+  background:var(--c-surface);border:1px solid var(--c-border);
+  padding:13px 17px;border-radius:4px;font-size:.8rem;line-height:1.75;
+  font-family:var(--f-body);backdrop-filter:blur(12px);position:relative;
+  transition:border-color .2s;white-space:pre-wrap;word-break:break-word;
+}
+.entry.user .entry-body{border-right:3px solid var(--p-pink);background:rgba(244,114,182,.04)}
+.entry.ai .entry-body{border-left:3px solid var(--p-blue);background:rgba(96,165,250,.04)}
+.entry.system .entry-body{border-left:3px solid var(--p-cyan);background:var(--p-cyan-dim);font-size:.7rem;color:var(--t-secondary)}
+.entry.error .entry-body{border-left:3px solid var(--p-orange);background:var(--p-orange-dim);color:var(--p-orange)}
+.streaming .entry-body{border-left-color:var(--p-pink);animation:streamglow 1.5s ease-in-out infinite}
+.cursor-blink::after{content:"▮";color:var(--p-pink);animation:blink .8s step-end infinite}
+
+/* Source badge */
+.source-badge{
+  display:inline-block;font-size:.48rem;letter-spacing:2px;
+  padding:2px 6px;border-radius:2px;margin-right:6px;
+  background:var(--p-blue-dim);border:1px solid var(--p-blue);
+  color:var(--p-blue);vertical-align:middle;font-family:var(--f-mono);
+}
+.source-badge.nexus{background:var(--p-orange-dim);border-color:var(--p-orange);color:var(--p-orange)}
+.source-badge.base{background:rgba(100,100,100,.1);border-color:#444;color:#888}
+.source-badge.warn{background:rgba(251,146,60,.15);border-color:var(--p-orange);color:var(--p-orange)}
+
+/* Edit textarea */
+.edit-textarea{
+  width:100%;background:rgba(0,0,0,.6);border:1px solid var(--p-pink);
+  border-radius:4px;color:var(--t-primary);font-family:var(--f-body);
+  font-size:.8rem;line-height:1.75;padding:12px 16px;resize:vertical;
+  outline:none;min-height:80px;
+}
+.edit-actions{display:flex;gap:8px;margin-top:6px}
+.edit-save-btn{
+  background:var(--p-pink);border:none;border-radius:4px;
+  padding:5px 16px;font-family:var(--f-mono);font-size:.55rem;
+  letter-spacing:2px;color:#fff;cursor:pointer;transition:all .2s;
+}
+.edit-save-btn:hover{background:#e05baa}
+.edit-cancel-btn{
+  background:transparent;border:1px solid var(--c-border);
+  border-radius:4px;padding:5px 14px;font-family:var(--f-mono);
+  font-size:.55rem;letter-spacing:2px;color:var(--t-secondary);cursor:pointer;
+  transition:all .15s;
+}
+.edit-cancel-btn:hover{border-color:var(--t-secondary)}
+
+/* ── DOCK ── */
+#dock{
+  padding:14px 32px 18px;
+  background:linear-gradient(transparent,rgba(3,3,10,.98) 40%);
+  border-top:1px solid var(--c-border);
+}
+#context-readout{display:flex;gap:14px;margin-bottom:9px;font-size:.52rem;letter-spacing:2px;color:var(--t-dim);flex-wrap:wrap}
+.ctx-item{display:flex;align-items:center;gap:5px}
+.ctx-val{color:var(--p-cyan)}
+.ctx-val.warn{color:var(--p-orange)}
+.input-row{display:flex;gap:8px}
+.input-wrapper{
+  flex:1;display:flex;background:rgba(0,0,0,.7);
+  border:1px solid var(--c-border);border-radius:6px;padding:4px;
+  transition:border-color .2s,box-shadow .2s;backdrop-filter:blur(10px);
+}
+.input-wrapper:focus-within{border-color:var(--p-pink);box-shadow:0 0 16px var(--p-pink-dim)}
+#prompt-prefix{align-self:center;padding:0 12px;font-size:.65rem;color:var(--p-pink);opacity:.7;white-space:nowrap}
+input#user-input{
+  flex:1;background:transparent;border:none;color:var(--t-primary);
+  padding:11px 8px;font-family:var(--f-mono);font-size:.82rem;outline:none;caret-color:var(--p-pink);
+}
+input#user-input::placeholder{color:var(--t-dim)}
+input#user-input:disabled{opacity:.4;cursor:not-allowed}
+#sync-btn{
+  background:linear-gradient(135deg,var(--p-pink),#c026d3);border:none;border-radius:5px;
+  padding:0 24px;font-family:var(--f-display);font-weight:700;font-size:.58rem;letter-spacing:3px;
+  color:#fff;cursor:pointer;transition:all .2s;box-shadow:0 4px 15px rgba(244,114,182,.3);white-space:nowrap;
+}
+#sync-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(244,114,182,.5)}
+#sync-btn:disabled{opacity:.4;cursor:not-allowed}
+#stop-btn{
+  background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.5);
+  border-radius:5px;padding:0 18px;font-family:var(--f-mono);font-size:.55rem;letter-spacing:2px;
+  color:var(--p-red);cursor:pointer;transition:all .2s;display:none;white-space:nowrap;
+}
+#stop-btn:hover{background:rgba(248,113,113,.25);border-color:var(--p-red)}
+#stop-btn.visible{display:block}
+#reset-btn{
+  background:transparent;border:1px solid rgba(251,146,60,.35);border-radius:5px;
+  padding:0 14px;font-family:var(--f-mono);font-size:.54rem;letter-spacing:2px;
+  color:var(--p-orange);cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+#reset-btn:hover{background:var(--p-orange-dim);border-color:var(--p-orange)}
+
+/* ── BOOT OVERLAY ── */
+#boot-overlay{
+  position:fixed;inset:0;background:var(--c-bg);z-index:9998;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:22px;transition:opacity .6s;
+}
+#boot-overlay.hidden{opacity:0;pointer-events:none}
+.boot-logo{font-family:var(--f-display);font-weight:900;font-size:1.9rem;letter-spacing:8px;color:var(--p-pink);text-shadow:var(--glow-pink)}
+.boot-logo span{color:var(--p-blue)}
+.boot-sub{font-size:.58rem;letter-spacing:5px;color:var(--t-dim)}
+#boot-progress-wrap{width:320px;height:4px;background:var(--c-border);border-radius:2px;overflow:hidden}
+#boot-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--p-pink),var(--p-blue));border-radius:2px;transition:width .3s;box-shadow:0 0 10px var(--p-pink-glow)}
+#boot-status{font-size:.57rem;letter-spacing:2px;color:var(--t-secondary);min-height:1em;text-align:center;max-width:380px}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--c-border);border-radius:4px}
+.highlight-pink{color:var(--p-pink)}.highlight-blue{color:var(--p-blue)}.highlight-cyan{color:var(--p-cyan)}.highlight-green{color:var(--p-green)}.highlight-orange{color:var(--p-orange)}
 </style>
 </head>
 <body>
 
-<header>
-<h2>Pixelbot Entropia AI Engine</h2>
-</header>
-
-<div id="console">
-
-<textarea id="question" placeholder="Ask about items, amps, mobs, missions..."></textarea>
-<br>
-<button onclick="askAI()">Query Knowledge</button>
-
-<div id="output"></div>
-
+<div id="boot-overlay">
+  <div class="boot-logo">PIXELBOT<span> OMEGA</span></div>
+  <div class="boot-sub">ANALYST CONSOLE // ENTROPIA INTELLIGENCE PLATFORM v3</div>
+  <div id="boot-progress-wrap"><div id="boot-progress-bar"></div></div>
+  <div id="boot-status">Initializing neural core...</div>
 </div>
 
-<script>
-/* ===============================
-   ORIGINAL ENTROPIA NEXUS SCRIPT
-   =============================== */
-
-let isDropdownsInitialized = false;
-// ================= Cached Data =================
-let cachedWeapons = [];
-let cachedAmplifiers = [];
-let cachedVisionAttachments = [];
-let cachedScopes = [];
-let cachedAbsorbers = [];
-let cachedBlueprints = [];
-let cachedClothes = [];   // all clothing items including rings
-let cachedMedicalTools = []; // NEW
-let cachedMedicalChips = []; // NEW
-window.cachedFaps = [];
-// ================= Cached Mining Data =================
-let cachedFinders = [];
-let cachedFinderAmps = [];
-let cachedExcavators = [];
-// ================= Dedicated Mining State ================
-window.miningLoadout = {
-    finder: null,
-    amplifier: null,
-    extractor: null,
-    activeSearches: {
-        enmatter: false,
-        ore: false,
-        treasure: false
-    }
-};
-// ================= Current Data ================
-window.currentLoadout = {
-  weapon: null,
-  amplifier: null,
-  vision1: null,
-  vision2: null,
-  scope: null,
-  absorber: null,
-  LeftRing: null,
-  RightRing: null,
-  mainFap: null, 
-  secondaryFap: null
-};
-
-let currentWeapon = null;
-let currentAmplifier = null;
-let currentVision1 = null;
-let currentVision2 = null;
-let currentScope = null;
-let currentAbsorber = null;
-let currentLeftRing = null;
-let currentRightRing = null;
-// ======================================================
-const BASE_URL = 'https://api.entropianexus.com/';
-const statusEl = document.getElementById('NexusAPIstatus');
-
-// 🔀 Toggle between local JSONs and API
-let USE_LOCAL_DATA = true;
-window.BASE_URL = BASE_URL; // <-- FIX: Set BASE_URL globally
-
-// 🔀 Toggle between local JSONs and API
-window.USE_LOCAL_DATA = USE_LOCAL_DATA; // <-- FIX: Set USE_LOCAL_DATA globally
-function toggleDataSource(type) {
-  if (type === "data-source") {
-    USE_LOCAL_DATA = !USE_LOCAL_DATA;
-  if (DEBUG) console.log("Data source toggled. Local?", USE_LOCAL_DATA);
-    // Update all elements with class 'NexusAPIstatus'
-    updateStatusElements();
-    initDropdowns(); // repopulate and cache everything
-  }
-}
-
-// ================= Formulas =================
-const entropiaFormulas = {
-  hitAbility: `(Non-SIB) HA = 4 + 0.06 * Hit Level
-(SIB) HA = 6 + ((Hit Level - Recommended) / (Max - Recommended)) * 4`,
-  critAbility: `(Non-SIB) CHA = √Hit Level
-(SIB) CHA = √((Hit Level - Recommended) / (Max - Recommended)) * 10`,
-  hitRate: `Hit Rate = (Hit Ability + 80) / 100`,
-  dpp: `DPP = Effective Damage / (Ammo Cost + Decay Cost)`,
-  minDamage: `(Non-SIB) MinDamage = 25% + (0.75 * (DMG Level / Max DMG Level))
-(SIB) MinDamage = 50% + (0.50 * (DMG Level - Recommended) / (Max - Recommended))`,
-  apm: `⚠Proper Formula Unknown⚠\nCurrent approximation:
-APM = BaseAPM * (0.5 + 0.5 * (Hit Level - Start) / (Max - Start))
-(Capped between MinAPM and BaseAPM)`,
-  reloadTime: `⚠Proper Formula Unknown⚠\nCurrent approximation:
-Reload Time = 60 / APM`,
-  effectiveDamage: `Effective damage = Average damage * Hit rate
-Or, more precisely:
-Effective damage = ((Minimal damage + Maximal damage) / 2) * (80 + Hit ability)
-For a maxed weapon: MaxDamage * 0.75 * 0.9`
-};
-
-// ================= Terminal Logging =================
-function appendData(text) {
-  const line = document.createElement("div");
-  line.textContent = text;
-  terminalOutput.appendChild(line);
-  terminalOutput.scrollTop = terminalOutput.scrollHeight;
-}
-
-// ================= Local/API Data Loader =================
-// ================= Local/API Data Loader =================
-async function getData(endpoint, localFile) {
-  // BASE_URL is likely defined globally in this file
-  const fullUrl = window.BASE_URL + endpoint; 
-
-  if (USE_LOCAL_DATA) {
-    try {
-      // 🟢 Attempting local file load
-      const data = await window.electronAPI.loadNexusJSON(localFile);
-      
-      // Check if data was successfully loaded and is not empty
-      if (data && (Array.isArray(data) ? data.length > 0 : data?.items?.length > 0)) {
-		if (DEBUG) console.log(`[NEXUS_SOURCE:SUCCESS] Data found in local cache: ${localFile}`);
-        return Array.isArray(data) ? data : data?.items || [];
-      }
-      
-      // If we reach here, local data failed (empty/null). This indicates a silent local failure.
-      console.warn(`[NEXUS_SOURCE:WARN] Local cache empty/invalid for ${localFile}. Returning []. (No API fallback here)`);
-      return [];
-
-    } catch (err) {
-      // ❌ Local load failed due to an error (e.g., file not found, bad JSON)
-      console.error(`[NEXUS_SOURCE:ERROR] Local load FAILED for ${localFile} due to error.`, err);
-      return [];
-    }
-  } else {
-    try {
-      // 🌍 Attempting external API fetch
-      const res = await fetch(fullUrl);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-    if (DEBUG) console.log(`[NEXUS_SOURCE:SUCCESS] Fetched from External API: ${fullUrl}`);
-      return Array.isArray(data) ? data : data?.items || [];
-    } catch (err) {
-      // ❌ API fetch failed
-      console.error(`[NEXUS_SOURCE:ERROR] Failed to fetch External API ${endpoint}:`, err);
-      return [];
-    }
-  }
-}
-
-//------------------------------------------------------------
-//------------------------------------------------------------
-// ================= DOWNLOADING DATA =================
-async function downloadData(filename, endpoint) {
-  statusEl.innerHTML = `<div class=" NexusAPISpinner"></div>Fetching ${filename}...`;
-  try {
-    const res = await fetch(BASE_URL + endpoint);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename + '.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(a.href);
-    statusEl.textContent = `Status: ${filename} downloaded!`;
-  } catch(err) {
-    console.error(err);
-    statusEl.textContent = `Status: Failed to fetch ${filename}`;
-  }
-}
-
-async function downloadMultiple(endpoints) {
-  for (const ep of endpoints) {
-    await downloadData(ep, ep);
-  }
-}
-
-async function downloadAllZip(endpoints) {
-  statusEl.innerHTML = `<div class=" NexusAPISpinner"></div>Fetching all datasets...`;
-  const zip = new JSZip();
-  try {
-    for (const ep of endpoints) {
-      statusEl.innerHTML = `<div class=" NexusAPISpinner"></div>Fetching ${ep}...`;
-      const res = await fetch(BASE_URL + ep);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      zip.file(ep + '.json', JSON.stringify(data, null, 2));
-    }
-    const content = await zip.generateAsync({type:"blob"});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(content);
-    a.download = 'entropia_nexus_data.zip';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(a.href);
-    statusEl.textContent = 'Status: All datasets downloaded as ZIP!';
-  } catch(err) {
-    console.error(err);
-    statusEl.textContent = 'Status: Failed to fetch some datasets for ZIP';
-  }
-}
-
-// ================= FETCHING & PRINT TO TERMINAL =================
-async function fetchData(endpoint, specific = null) {
-  let fullEndpoint = endpoint;
-  if (specific) fullEndpoint += `/${encodeURIComponent(specific)}`;
-  try {
-    const res = await fetch(BASE_URL + fullEndpoint);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error(`Error fetching ${fullEndpoint}:`, err);
-    return null;
-  }
-}
-/*
-async function fetchAndPrint(endpoint, specific = null) {
-  const data = await fetchData(endpoint, specific);
-  if (data) {
-	window.SuSTerminalCommands.printData(data, endpoint);
-  }
-}
- */
-// Fetch + print into terminal
-async function fetchAndPrint(endpoint, specific = null) {
-  const data = await fetchData(endpoint, specific);
-  if (data) {
-    window.SuSTerminalCommands.printData(data, endpoint);
-  } else {
-    window.SuSTerminalCommands.printData(null, endpoint);
-  }
-}
-
-// Simple filter utility
-function filterData(data, key, value) {
-  if (!Array.isArray(data)) return [];
-  return data.filter(item => String(item[key]).toLowerCase().includes(String(value).toLowerCase()));
-}
-
-// Fetch, filter and print
-async function fetchFilterAndPrint(endpoint, key, value) {
-  const data = await fetchData(endpoint);
-  if (!data) {
-    window.SuSTerminalCommands.printData(null, endpoint);
-    return;
-  }
-  const filtered = filterData(data, key, value);
-  window.SuSTerminalCommands.printData(filtered, `${endpoint} (filtered by ${key}=${value})`);
-}
-function createNoneFromFirstItem(item) {
-  if (!item || typeof item !== "object") return { Name: "None", IsSIB: false };
-
-  const clone = JSON.parse(JSON.stringify(item));
-
-  // Overwrite top-level Name
-  if ("Name" in clone) clone.Name = "None";
-
-  // Recursive zeroing function
-  function zeroOut(obj) {
-    if (Array.isArray(obj)) return [];
-    if (typeof obj !== "object" || obj === null) return obj;
-
-    for (const key in obj) {
-      if (key === "Name") continue; // never overwrite Name
-      if (key.toLowerCase() === "issib") { // handle IsSIB/IsSiB keys anywhere
-        obj[key] = false;
-      } else if (typeof obj[key] === "number") {
-        obj[key] = 0.0001;
-      } else if (typeof obj[key] === "string") {
-        obj[key] = null;
-      } else if (Array.isArray(obj[key])) {
-        obj[key] = [];
-      } else if (typeof obj[key] === "object" && obj[key] !== null) {
-        zeroOut(obj[key]);
-      }
-    }
-    return obj;
-  }
-
-  return zeroOut(clone);
-}
-
-
-//------------------------------------------------------------
-// ================= Populate Dropdown Helper =================
-
-  // Ensure "None" option is always present with full structure
-/* const noneItem = {
-    Id: 0,
-    ItemId: null,
-    Name: "None",
-    Properties: {},
-    Links: {}
-}; */
-function populateDropdown(inputElement, containerId, items, currentRefSetter = null) {
-  if (!inputElement || !containerId || !items) return;
-  const container = document.getElementById(containerId);
-  if (!container) return;
-
-  container.innerHTML = "";
-  const isDatalist = container.tagName.toLowerCase() === "datalist";
-
-  if (isDatalist) {
-    // Simple <datalist> handling
-    items.forEach(item => {
-      const opt = document.createElement("option");
-      opt.value = item.Name;
-      container.appendChild(opt);
-    });
-  } else {
-    // Custom dropdown with divs
-    items.forEach(item => {
-      const optionDiv = document.createElement("div");
-      optionDiv.textContent = item.Name;
-
-      // Single click: set input and update selection
-      optionDiv.addEventListener("click", e => {
-        e.stopPropagation(); // prevent outside click from closing immediately
-        inputElement.value = item.Name;
-        if (currentRefSetter) currentRefSetter(item);
-        inputElement.dispatchEvent(new Event("input"));
-        inputElement.dispatchEvent(new Event("change"));
-		container.querySelectorAll("div").forEach(div => {
-      });
-        container.style.display = "none"; // hide dropdown
-      });
-
-      container.appendChild(optionDiv);
-    });
-
-    // Show dropdown on focus
-    inputElement.addEventListener("focus", e => {
-      e.stopPropagation();
-      container.style.display = "block";
-    });
-
-    // Double-click to clear input but keep dropdown open
-    inputElement.addEventListener("dblclick", e => {
-      e.stopPropagation();
-      inputElement.value = "";
-      inputElement.dispatchEvent(new Event("input"));
-      container.style.display = "block"; // ensure dropdown stays visible
-    });
-
-    // Hide dropdown when clicking outside
-    document.addEventListener("click", e => {
-      if (!container.contains(e.target) && e.target !== inputElement) {
-        container.style.display = "none";
-      }
-    });
-
-    // Filter options as user types
-    inputElement.addEventListener("input", () => {
-      const filter = inputElement.value.toLowerCase();
-      container.querySelectorAll("div").forEach(div => {
-        div.style.display = div.textContent.toLowerCase().includes(filter) ? "block" : "none";
-      });
-      container.style.display = "block"; // ensure dropdown stays visible while typing
-    });
-  }
-
-  // Reset input initially
-  //inputElement.value = "";
-}
-// ================= Dropdown Population =================
-/* async function populateMiningDropdowns() {
-    // 1. Finders
-    const finderInput = document.querySelector(".mining-finder-select");
-    cachedFinders = await getData("finders", "finders.json");
-    const noneFinder = cachedFinders.length ? createNoneFromFirstItem(cachedFinders[0]) : { Name: "None" };
-    
-    populateDropdown(finderInput, "mining-finder-options", [noneFinder, ...cachedFinders], (item) => {
-        selectFinder(item); // Call the Loadout Manager function
-    });
-
-    // 2. Amps
-    const ampInput = document.querySelector(".mining-amp-select");
-    cachedFinderAmps = await getData("finderamplifiers", "finderamplifiers.json");
-    const noneAmp = cachedFinderAmps.length ? createNoneFromFirstItem(cachedFinderAmps[0]) : { Name: "None" };
-    
-    populateDropdown(ampInput, "mining-amp-options", [noneAmp, ...cachedFinderAmps], (item) => {
-        selectFinderAmplifier(item); 
-    });
-
-    // 3. Extractors
-    const extractorInput = document.querySelector(".extractor-tool-select");
-    cachedExcavators = await getData("excavators", "excavators.json");
-    const noneExtractor = cachedExcavators.length ? createNoneFromFirstItem(cachedExcavators[0]) : { Name: "None" };
-    
-    populateDropdown(extractorInput, "extractor-tool-options", [noneExtractor, ...cachedExcavators], (item) => {
-        selectExtractor(item);
-    });
-}
- */
-async function populateMiningDropdowns() {
-    // 1. Populate Finders
-    const finderInput = document.querySelector(".mining-finder-select");
-    cachedFinders = await getData("finders", "finders.json");
-    const noneFinder = cachedFinders.length ? createNoneFromFirstItem(cachedFinders[0]) : { Name: "None" };
-    
-    populateDropdown(finderInput, "mining-finder-options", [noneFinder, ...cachedFinders], (item) => {
-        selectFinder(item);
-    });
-
-    // 2. Populate Amps
-    const ampInput = document.querySelector(".mining-amp-select");
-    cachedFinderAmps = await getData("finderamplifiers", "finderamplifiers.json");
-    const noneAmp = cachedFinderAmps.length ? createNoneFromFirstItem(cachedFinderAmps[0]) : { Name: "None" };
-    
-    populateDropdown(ampInput, "mining-amp-options", [noneAmp, ...cachedFinderAmps], (item) => {
-        selectFinderAmplifier(item); 
-    });
-
-    // 3. Populate Extractors
-    const extractorInput = document.querySelector(".extractor-tool-select");
-    cachedExcavators = await getData("excavators", "excavators.json");
-    const noneExtractor = cachedExcavators.length ? createNoneFromFirstItem(cachedExcavators[0]) : { Name: "None" };
-    
-    populateDropdown(extractorInput, "extractor-tool-options", [noneExtractor, ...cachedExcavators], (item) => {
-        selectExtractor(item);
-    });
-
-    // 🟢 AUTO-RESTORE SAVED SELECTIONS
-    const prefs = window.overlayPreferences;
-    if (prefs) {
-        if (prefs.lastFinderName && prefs.lastFinderName !== "None") {
-            const item = cachedFinders.find(f => f.Name === prefs.lastFinderName);
-            if (item) {
-                finderInput.value = item.Name;
-                selectFinder(item);
-            }
-        }
-        if (prefs.lastAmpName && prefs.lastAmpName !== "None") {
-            const item = cachedFinderAmps.find(a => a.Name === prefs.lastAmpName);
-            if (item) {
-                ampInput.value = item.Name;
-                selectFinderAmplifier(item);
-            }
-        }
-        if (prefs.lastExtractorName && prefs.lastExtractorName !== "None") {
-            const item = cachedExcavators.find(e => e.Name === prefs.lastExtractorName);
-            if (item) {
-                extractorInput.value = item.Name;
-                selectExtractor(item);
-            }
-        }
-    }
-}
-async function populateWeaponDropdown() {
-  const input = document.querySelector(".weapon-select");
-  cachedWeapons = await getData("weapons", "weapons.json");
-
-  // Add None at the front of cachedWeapons
-  const noneItem = cachedWeapons.length ? createNoneFromFirstItem(cachedWeapons[0]) : { Name: "None" };
-  cachedWeapons = [noneItem, ...cachedWeapons];
-
-  populateDropdown(input, "weapon-options", cachedWeapons, (item) => currentWeapon = item);
-  if (!currentWeapon) currentWeapon = cachedWeapons[0];
-}
-
-async function populateAmplifierDropdown() {
-  const input = document.querySelector(".amplifier-select");
-  cachedAmplifiers = await getData("weaponamplifiers", "amplifiers.json");
-
-  const noneItem = cachedAmplifiers.length ? createNoneFromFirstItem(cachedAmplifiers[0]) : { Name: "None" };
-  cachedAmplifiers = [noneItem, ...cachedAmplifiers];
-
-  populateDropdown(input, "amplifier-options", cachedAmplifiers, (item) => currentAmplifier = item);
-  if (!currentAmplifier) currentAmplifier = cachedAmplifiers[0];
-}
-
-async function populateScopeDropdown() {
-  const input = document.querySelector(".scope-select");
-  const allAttachments = await getData("weaponvisionattachments", "weaponvisionattachments.json");
-  cachedScopes = allAttachments.filter(item => item.Properties?.Type === "Scope" || item.Properties?.Type === "Sight");
-  // Add None at the front of cachedWeapons
-  const noneItem = cachedScopes.length ? createNoneFromFirstItem(cachedScopes[0]) : { Name: "None" };
-  cachedScopes = [noneItem, ...cachedScopes];
-
-
-  populateDropdown(input, "scope-options", cachedScopes, (item) => currentScope = item);
-  if (!currentScope) currentScope = cachedScopes[0];
-}
-
-async function populateVisionDropdowns() {
-  const input1 = document.querySelector(".vision1-select");
-  const input2 = document.querySelector(".vision2-select");
-  const allAttachments = await getData("weaponvisionattachments", "weaponvisionattachments.json");
-
-  cachedVisionAttachments = allAttachments.filter(item => item.Properties?.Type === "Sight");
-
-  // Add a "None" option at the front
-  const noneItem = cachedVisionAttachments.length ? createNoneFromFirstItem(cachedVisionAttachments[0]) : { Name: "None" };
-  cachedVisionAttachments = [noneItem, ...cachedVisionAttachments];
-
-  // Populate both dropdowns with the same array
-  populateDropdown(input1, "vision1-options", cachedVisionAttachments, (item) => currentVision1 = item);
-  populateDropdown(input2, "vision2-options", cachedVisionAttachments, (item) => currentVision2 = item);
-
-  // Default to None if nothing selected
-  if (!currentVision1) currentVision1 = cachedVisionAttachments[0];
-  if (!currentVision2) currentVision2 = cachedVisionAttachments[0];
-}
-
-async function populateAbsorberDropdown() {
-  const input = document.querySelector(".absorber-select");
-  cachedAbsorbers = await getData("absorbers", "absorbers.json");
-  // Add None at the front of cachedWeapons
-  const noneItem = cachedAbsorbers.length ? createNoneFromFirstItem(cachedAbsorbers[0]) : { Name: "None" };
-  cachedAbsorbers = [noneItem, ...cachedAbsorbers];
-
-
-  populateDropdown(input, "absorber-options", cachedAbsorbers, (item) => currentAbsorber = item);
-  if (!currentAbsorber) currentAbsorber = cachedAbsorbers[0];
-}
-/* async function populateRingDropdowns() {
-    const leftInput = document.querySelector(".left-ring-select");
-    const rightInput = document.querySelector(".right-ring-select");
-
-    // Fetch all clothes
-    cachedClothes = await getData("clothes", "clothes.json");
-
-    // First filter all rings
-    const allRings = cachedClothes.filter(item => item.Properties?.Type === "Ring");
-    if (DEBUG) console.log("All rings fetched:", allRings);
-
-    // Further filter by slot
-    const leftRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "left finger");
-    if (DEBUG) console.log("Left rings after filter:", leftRings);
-
-    const rightRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "right finger");
-    if (DEBUG) console.log("Right rings after filter:", rightRings);
-
-    // Add "None" option at the top
-    const noneLeft = leftRings.length ? createNoneFromFirstItem(leftRings[0]) : { Name: "None" };
-    const noneRight = rightRings.length ? createNoneFromFirstItem(rightRings[0]) : { Name: "None" };
-    leftRings.unshift(noneLeft);
-    rightRings.unshift(noneRight);
-
-    // Populate dropdowns
-	populateDropdown(leftInput, "left-ring-options", leftRings, (item) => currentLeftRing = item);
-	populateDropdown(rightInput, "right-ring-options", rightRings, (item) => currentRightRing = item);
-
-    // Default selection
-    if (!currentLeftRing) currentLeftRing = leftRings[0];
-    if (!currentRightRing) currentRightRing = rightRings[0];
-} */
-
-//populate ring dropdown('s) functions
-async function populateRingDropdowns() {
-    const leftInput = document.querySelector(".left-ring-select");
-    const rightInput = document.querySelector(".right-ring-select");
-
-    // 1. Load Data
-    cachedClothes = await getData("clothes", "clothes.json");
-
-    const allRings = cachedClothes.filter(item => item.Properties?.Type === "Ring");
-    const leftRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "left finger");
-    const rightRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "right finger");
-
-    // 2. Setup "None" Options
-    const noneLeft = leftRings.length ? createNoneFromFirstItem(leftRings[0]) : { Name: "None" };
-    const noneRight = rightRings.length ? createNoneFromFirstItem(rightRings[0]) : { Name: "None" };
-    leftRings.unshift(noneLeft);
-    rightRings.unshift(noneRight);
-	
-    // 3. Populate and Map to Select Functions
-    // Passing (item.Name) to your select functions ensures the UI text boxes update
-    populateDropdown(leftInput, "left-ring-options", leftRings, (item) => window.selectLeftring(item.Name));
-    populateDropdown(rightInput, "right-ring-options", rightRings, (item) => window.selectRightring(item.Name));
-
-    // 4. Set Initial Safety Defaults (Internal State)
-    if (!window.currentLeftRing) window.currentLeftRing = leftRings[0];
-    if (!window.currentRightRing) window.currentRightRing = rightRings[0];
-
-    // 5. 🔥 TRIGGER PERSISTENCE RESTORATION
-	// Increase timeout slightly to guarantee DOM render
-    if (window.initializeRingsFromSettings) {
-        setTimeout(() => {
-            console.log("🟢 Running delayed Ring initialization...");
-            window.initializeRingsFromSettings();
-        }, 0); // Changed 0 to 100ms to allow DOM render
-    }
-}
-
-/*  async function populateRingDropdowns() {
-    // 1. Load Data
-    cachedClothes = await getData("clothes", "clothes.json");
-    const allRings = cachedClothes.filter(item => item.Properties?.Type === "Ring");
-    
-    const leftRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "left finger");
-    const rightRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "right finger");
-
-    // Add "None" option
-    const noneItem = { Name: "None" };
-    leftRings.unshift(noneItem);
-    rightRings.unshift(noneItem);
-
-    // 2. Select ALL ring dropdowns
-    const ringSelects = document.querySelectorAll(".ring-mapping-select");
-
-    ringSelects.forEach(select => {
-        const action = select.dataset.action; // e.g., "leftRing1"
-        const isLeft = action.toLowerCase().includes('left');
-        const options = isLeft ? leftRings : rightRings;
-
-        // 3. Populate and Map
-        // We use an empty function here for populateDropdown if you don't need immediate state switching,
-        // or keep your existing callback if you need the UI to update visually on change
-        populateDropdown(select, "ring-options", options, (item) => {
-            // Optional: call your existing handler if needed
-            if (isLeft) window.selectLeftring(item.Name);
-            else window.selectRightring(item.Name);
-        });
-
-        // 4. Restore saved preference
-        if (window.overlayPreferences?.keybindMappings?.[action]) {
-            select.value = window.overlayPreferences.keybindMappings[action];
-        }
-    });
-
-    // 5. Trigger Persistence
-    if (window.initializeRingsFromSettings) {
-        setTimeout(() => window.initializeRingsFromSettings(), 0);
-    }
-}
- */
-async function populateAllClothesDropdown() {
-  const input = document.querySelector(".all-clothes-select"); // your input element
-  const containerId = "all-clothes-options"; // your dropdown div
-
-  // Fetch all clothes
-  cachedClothes = await getData("clothes", "clothes.json");
-
-  // Add a "None" option at the top
-  const noneItem = cachedClothes.length ? createNoneFromFirstItem(cachedClothes[0]) : { Name: "None" };
-  const allClothes = [noneItem, ...cachedClothes];
-
-  // Populate dropdown
-  populateDropdown(input, containerId, allClothes, (item) => {
-    currentLoadout.selectedClothing = item; // optional: track selection
-  });
-
-  // Default selection
-  if (!currentLoadout.selectedClothing) currentLoadout.selectedClothing = allClothes[0];
-}
-
-async function populateFAPDropdowns() {
-    const mainInput = document.querySelector(".main-fap-select");
-    const secondaryInput = document.querySelector(".secondary-fap-select");
-
-    // 1. Fetch medical tools data using the generic helper
-    const tools = await getData("medicaltools", "medicaltools.json");
-    if (tools.length) cachedMedicalTools = tools;
-
-    // 2. Fetch medical chips data (assuming endpoint is 'medicalchips' and local file is 'medicalchips.json')
-    const chips = await getData("medicalchips", "medicalchips.json");
-    if (chips.length) cachedMedicalChips = chips;
-
-    // 3. Merge FAPs: Tools and Chips
-    // Note: Items from the latest fetch (chips) will be appended to the combined list.
-    const allFaps = [...cachedMedicalTools, ...cachedMedicalChips];
-    window.cachedFaps = allFaps; // Store the merged list for potential filtering/lookup
-
-    // 4. Add "None" option at the top (use the first item in the combined list for structure)
-    const noneItem = cachedFaps.length ? createNoneFromFirstItem(cachedFaps[0]) : { Name: "None" };
-    const dropdownItems = [noneItem, ...cachedFaps];
-
-    // 5. Populate dropdowns, using `currentLoadout` setters
-    populateDropdown(mainInput, "main-fap-options", dropdownItems, (item) => currentLoadout.mainFap = item);
-    populateDropdown(secondaryInput, "secondary-fap-options", dropdownItems, (item) => currentLoadout.secondaryFap = item);
-
-    // 6. Default selection
-    if (!currentLoadout.mainFap) currentLoadout.mainFap = dropdownItems[0];
-    if (!currentLoadout.secondaryFap) currentLoadout.secondaryFap = dropdownItems[0];
-    
-    // 🔥 CRITICAL FIX: Delay initialization to ensure the <select> and its options are attached to the DOM
-    if (window.initializeFapsFromSettings) {
-        setTimeout(() => {
-            if (DEBUG) console.log("🟢 Running delayed FAP initialization...");
-            window.initializeFapsFromSettings();
-        }, 0); 
-    }
-}
-
-
-function handleFapHotChange(type, isChecked) {
-    // 1. Update the isHoT state in currentLoadout (for calculation logic)
-    if (window.currentLoadout && window.currentLoadout[type]) {
-        window.currentLoadout[type].isHoT = isChecked;
-    }
-    
-    // 2. Update the global faps state (used by chatsnooper)
-    if (window.faps && window.faps[type]) {
-         window.faps[type].isHoT = isChecked;
-    }
-    
-    // NEW: Update persistence object for immediate save
-    if (window.fapPersistence) {
-        window.fapPersistence[`${type}IsHoT`] = isChecked;
-    }
-
-
-    // Show/hide the HoT percentage input field
-    const hotInputLabel = document.getElementById(`hot-input-label-${type}`);
-    if (hotInputLabel) {
-        // Ensure it's displayed as inline-flex when checked
-        hotInputLabel.style.display = isChecked ? 'inline-flex' : 'none';
-    }
-
-    // Trigger persistence by calling the save function directly with current values.
-    window.saveCurrentFapSettings();
-    window.updateCalculations(); // Recalculate everything
-}
-window.handleFapHotChange = handleFapHotChange;
-// ================= Initialize All Dropdowns =================
-async function initDropdowns() {
-  console.log("🟢 Starting official initialization...");
-  await Promise.all([
-    populateWeaponDropdown(),
-    populateAmplifierDropdown(),
-    populateVisionDropdowns(),
-    populateScopeDropdown(),
-    populateAbsorberDropdown(),
-    populateRingDropdowns(),
-    populateAllClothesDropdown(),
-    populateFAPDropdowns(),
-	populateMiningDropdowns()
-  ]);
-}
-window.initDropdowns = initDropdowns;
-
-// ================= Event Listeners =================
-function updateStatusElements() {
-  const text = USE_LOCAL_DATA ? "📂 Local Storage" : "🌐 EntropiaNexus API";
-  document.querySelectorAll(".NexusAPIstatus").forEach(el => el.textContent = text);
-  appendData(`> Pixelbot: We are Currently sourcing data from ${text}`);
-}
-
-// Call on load
-document.addEventListener("DOMContentLoaded", async () => {
-  updateStatusElements(); // update immediately
-  await initDropdowns();
-
-  document.querySelector(".weapon-select")?.addEventListener("change", e => {
-    selectWeapon(e.target.value);
-    updateWeaponStats(currentWeapon);
-  });
-  document.querySelector(".amplifier-select")?.addEventListener("change", e => selectAmplifier(e.target.value));
-  document.querySelector(".vision1-select")?.addEventListener("change", e => selectVision1(e.target.value));
-  document.querySelector(".vision2-select")?.addEventListener("change", e => selectVision2(e.target.value));
-  document.querySelector(".scope-select")?.addEventListener("change", e => selectScope(e.target.value));
-  document.querySelector(".absorber-select")?.addEventListener("change", e => selectAbsorber(e.target.value));
-	// Rings
-  //document.querySelector(".left-ring-select")?.addEventListener("change", e => selectLeftring(e.target.value));
-  //document.querySelector(".right-ring-select")?.addEventListener("change", e => selectRightring(e.target.value));
-  //document.querySelector(".all-clothes-select")?.addEventListener("change", e => selectAllclothes(e.target.value));
-	// NEW FAP Listeners
-	document.querySelector(".main-fap-select")?.addEventListener("change", e => {
-		selectFap('mainFap', e.target.value);
-		
-		// Manually trigger save to persist FAP name and current HoT state
-		if (window.saveFapSettings && currentLoadout) {
-			window.saveFapSettings(
-				currentLoadout.mainFap?.Name || 'None',
-				currentLoadout.secondaryFap?.Name || 'None',
-				currentLoadout.mainFap?.isHoT || false,
-				currentLoadout.secondaryFap?.isHoT || false
-			);
-		}
-	});
-
-	document.querySelector(".secondary-fap-select")?.addEventListener("change", e => {
-		selectFap('secondaryFap', e.target.value);
-		
-		// Manually trigger save to persist FAP name and current HoT state
-		if (window.saveFapSettings && currentLoadout) {
-			window.saveFapSettings(
-				currentLoadout.mainFap?.Name || 'None',
-				currentLoadout.secondaryFap?.Name || 'None',
-				currentLoadout.mainFap?.isHoT || false,
-				currentLoadout.secondaryFap?.isHoT || false
-			);
-		}
-	});
-  // NEW: HoT Checkbox Listeners
-    document.querySelector(".main-fap-select")?.addEventListener("change", e => selectFap('mainFap', e.target.value));
-    document.querySelector(".secondary-fap-select")?.addEventListener("change", e => selectFap('secondaryFap', e.target.value));
-
-    // NEW: HoT checkbox listeners
-    document.getElementById("isHoT-mainFap")?.addEventListener("change", e => handleFapHotChange('mainFap', e.target.checked));
-    document.getElementById("isHoT-secondaryFap")?.addEventListener("change", e => handleFapHotChange('secondaryFap', e.target.checked));
-
-	// Armour
-	["head", "chest", "thigh", "shin", "arm", "hand", "foot"].forEach(slot => {
-	  document.querySelector(`.${slot}-select`)?.addEventListener("change", e => {
-		const selected = cachedClothes.find(c => c.Name === e.target.value);
-		if (selected) armour[slot] = selected;
-	  });
-	});
-	// --- NEW MINING CHECKBOX LISTENERS ---
-    document.querySelectorAll('.mining-type-check').forEach(checkbox => {
-        checkbox.addEventListener('change', (e) => {
-            const type = e.target.getAttribute('data-type'); 
-            if (window.miningLoadout) {
-                window.miningLoadout.activeSearches[type] = e.target.checked;
-                // Check if the function exists before calling to avoid errors
-                if (typeof calculateMiningCosts === 'function') {
-                    calculateMiningCosts();
-                }
-            }
-        });
-    });
-  const dataSourceButton = document.getElementById("DataSourceToggle");
-
-  dataSourceButton.addEventListener("click", () => {
-	toggleDataSource(dataSourceButton.getAttribute("data-toggle"));
-	updateStatusElements(); // update when toggled
-  });
-});
-
-
-//=====================================================
-//============crafting buddy api junk ========================
-//====================================================
-
- 
-//let cachedBlueprints = [];
-
-function fuzzyMatch(pattern, text) {
-  pattern = pattern.toLowerCase();
-  text = text.toLowerCase();
-
-  let patternIdx = 0;
-  let textIdx = 0;
-
-  while (patternIdx < pattern.length && textIdx < text.length) {
-    if (pattern[patternIdx] === text[textIdx]) {
-      patternIdx++;
-    }
-    textIdx++;
-  }
-
-  return patternIdx === pattern.length;
-}
-
-function renderAllBlueprintsList(filteredList) {
-  const container = document.getElementById("allBlueprintsList");
-  
-  // Optimization: Only show the first 100 matches to prevent UI freezing
-  const topResults = filteredList.slice(0, 100);
-
-  const html = topResults.map(bp => `
-    <div class="bp-list-item" data-name="${bp.Name.replace(/"/g, '&quot;')}">
-      ${bp.Name}
+<header id="topbar">
+  <div class="topbar-logo">PIXELB<span>8</span>.COM // OMEGA</div>
+  <div id="vram-bar">
+    NEURAL <div id="vram-fill"><div id="vram-inner"></div></div>
+    <span id="vram-label">0%</span>
+  </div>
+  <div class="topbar-tags">
+    <div class="tag tag-pink">ENTROPIA INTEL</div>
+    <div class="tag tag-blue">LOCAL-FIRST</div>
+    <div class="tag tag-green" id="status-tag">LOADING</div>
+  </div>
+</header>
+
+<aside id="sidebar">
+  <div class="panel-label">NEXUS CORE — OMEGA UNIT <div class="pulse-dot"></div></div>
+  <div id="mascot-wrap"><canvas id="bot-canvas" width="268" height="170"></canvas></div>
+
+  <div class="status-grid">
+    <div class="stat-cell"><div class="lbl">SHARDS</div><div class="val pink" id="stat-shards">0</div></div>
+    <div class="stat-cell"><div class="lbl">CHUNKS</div><div class="val" id="stat-chunks">0</div></div>
+    <div class="stat-cell"><div class="lbl">QUERIES</div><div class="val green" id="stat-queries">0</div></div>
+    <div class="stat-cell"><div class="lbl">NEXUS</div><div class="val orange" id="stat-nexus">ON</div></div>
+  </div>
+
+  <div class="api-toggle-row">
+    <label for="nexus-toggle">NEXUS API LAYER</label>
+    <div class="toggle-switch"><input type="checkbox" id="nexus-toggle" checked><span class="slider"></span></div>
+  </div>
+
+  <div class="panel-label">
+    CONVERSATIONS
+    <span style="font-size:.45rem;color:var(--p-cyan)" id="conv-count">0</span>
+  </div>
+  <div id="conv-list"></div>
+  <div class="new-conv-btn" id="new-conv-btn">+ NEW SESSION</div>
+
+  <div class="panel-label">
+    KNOWLEDGE REGISTRY
+    <span style="font-size:.45rem;color:var(--p-cyan)" id="kb-count">0 SHARDS</span>
+  </div>
+  <div id="file-registry"></div>
+  <label for="file-in" class="upload-zone" id="upload-label">⬆ INGEST DATA SHARD</label>
+  <input type="file" id="file-in" hidden multiple accept=".txt,.csv,.json,.md">
+</aside>
+
+<main id="main-viewport">
+  <div id="terminal"></div>
+  <div id="dock">
+    <div id="context-readout">
+      <div class="ctx-item">SHARDS <span class="ctx-val" id="ctx-shards">0</span></div>
+      <div class="ctx-item">MODEL <span class="ctx-val" id="ctx-model">LLAMA-3.2-1B</span></div>
+      <div class="ctx-item">SOURCE <span class="ctx-val" id="ctx-source">—</span></div>
+      <div class="ctx-item">NEXUS <span class="ctx-val" id="ctx-nexus">ON</span></div>
     </div>
-  `).join('');
-
-  container.innerHTML = html || '<div class="no-results">No blueprints found</div>';
-}
-
-function loadBlueprint(index) {
-  const saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
-  const bp = saved[index];
-  if (!bp) return;
-
-  document.getElementById('itemName').value = bp.bpName;
-  document.getElementById('maxTT').value = bp.maxTT;
-  document.getElementById('bpType').value = bp.bpType;
-  document.getElementById('bpMu').value = bp.bpMu;
-  document.getElementById('sellMu').value = bp.sellMu;
-  document.getElementById('successRate').value = bp.successRate;
-  document.getElementById('residuePerSuccess').value = bp.residuePerSuccess;
-  document.getElementById('clicks').value = bp.clicks;
-  document.getElementById('bpBook').value = bp.bpBook || '';
-
-  document.getElementById('materials').innerHTML = '';
-  materialIndex = 0;
-  bp.materials.forEach(m => addMaterial(m.name, m.qty, m.tt, m.mu));
-  toggleBpMuField();
-  const clicksInput = document.getElementById('clicks');
-  let clicks = parseInt(clicksInput.value);
-  if (typeof window.calculate === 'function') {
-    window.calculate();
-  } else {
-    console.warn("CraftingBuddy not yet loaded. Skipping calculation.");
-  }
-}
-
-function resetBlueprintFieldsNoBlanks() {
-  document.querySelectorAll('.eu-blueprint input').forEach(input => {
-    if (input.id === 'materialFilter') return; // ✅ Don't clear this input
-
-    if (input.type === 'number') input.value = '';
-    if (input.type === 'text') input.value = '';
-	const clicksInput = document.getElementById('clicks');
-	let clicks = parseInt(clicksInput.value);
-
-	if (!clicks || clicks < 1) {
-	  clicks = 1;
-	  clicksInput.value = 1; // Update the field visually
-	}
-  });
-
-  document.querySelectorAll('.eu-blueprint select').forEach(select => {
-    select.selectedIndex = 0;
-  });
-
-  document.getElementById('successRate').value = 38;
-  document.getElementById('nearSuccessRate').value = 50;
-  document.getElementById('failRate').value = 12;
-
-  const qvscSlider = document.getElementById('qvsc');
-  qvscSlider.value = 0;
-  document.getElementById('qvscLabel').innerText = '0%';
-  updateRatesFromSlider();
-
-  const materialsContainer = document.getElementById('materials');
-  materialsContainer.innerHTML = '';
-
-  if (typeof materialIndex !== 'undefined') {
-    materialIndex = 0;
-  }
-}
-
-
-function multiFieldFilter(query, blueprints) {
-  const lowerQuery = query.toLowerCase();
-
-  // Handle level:x input for filtering by level
-  if (lowerQuery.startsWith("level:")) {
-    const level = parseInt(lowerQuery.split(":")[1]);
-    if (!isNaN(level)) {
-      return blueprints.filter(bp => bp.Properties?.Level === level);
-    }
-  }
-
-  return blueprints.filter(bp => {
-    return (
-      bp.Name.toLowerCase().includes(lowerQuery) ||
-      (bp.Product?.Name?.toLowerCase().includes(lowerQuery)) ||
-      (bp.Properties?.Type?.toLowerCase().includes(lowerQuery)) ||
-      (bp.Profession?.Name?.toLowerCase().includes(lowerQuery)) ||
-      (bp.Book?.Name?.toLowerCase().includes(lowerQuery)) ||
-      bp.Materials?.some(mat => mat.Item.Name.toLowerCase().includes(lowerQuery))
-    );
-  });
-}
-
-function renderFilteredBlueprints(filteredList) {
-  const datalist = document.getElementById("bpList");
-  datalist.innerHTML = "";
-  filteredList.forEach(bp => {
-    const option = document.createElement("option");
-    option.value = bp.Name;
-    datalist.appendChild(option);
-  });
-}
-
-
-async function populateNexusDropdown() {
-  try {
-    const spinner = document.getElementById("bpLoadingSpinner");
-    if (spinner) spinner.style.display = "block";
-
-    //const res = await fetch("https://api.entropianexus.com/blueprints");
-	const blueprints = await getData("blueprints", "blueprints.json");
-
-    cachedBlueprints = blueprints;
-
-    // REMOVE OR COMMENT THIS LINE:
-    // renderFilteredBlueprints(blueprints); 
-
-    if (spinner) spinner.style.display = "none";
-  } catch (err) {
-    console.error("Failed to load blueprint list:", err);
-  }
-}
-
-function showMarkupReminder() {
-  const popup = document.getElementById("markupReminderPopup");
-
-  // Check if user previously disabled the popup
-  const disabled = localStorage.getItem("disableMarkupReminder");
-  if (popup && !disabled) {
-    popup.style.display = "block";
-  }
-}
-
-function closeReminderPopup() {
-  document.getElementById("markupReminderPopup").style.display = "none";
-}
-
-function disableReminderPopup() {
-  localStorage.setItem("disableMarkupReminder", "true");
-  closeReminderPopup();
-}
-function resetMarkupReminder() {
-  localStorage.removeItem("disableMarkupReminder");
-}
-
-async function loadBlueprintByName(name, silent = false) {
-  try {
-    let bp;
-    const searchName = name.trim();
-
-    if (USE_LOCAL_DATA) {
-      // Find the blueprint in the already loaded local cache (Case-Insensitive)
-      bp = cachedBlueprints.find(b => b.Name.toLowerCase() === searchName.toLowerCase());
-    } else {
-      // Fetch specifically from the API
-      const res = await fetch("https://api.entropianexus.com/blueprints/" + encodeURIComponent(searchName));
-      bp = await res.json();
-    }
-
-    if (!bp) throw new Error(`Blueprint data for "${searchName}" not found`);
-
-    // Reset UI fields before loading new data
-    resetBlueprintFieldsNoBlanks();
-
-    // Populate Main BP Info
-    document.getElementById("blueprintNameField").value = bp.Name || bp.Product?.Name || '';
-    document.getElementById("bpBook").value = bp.Book?.Name || '';
-    document.getElementById("bpLevel").value = bp.Properties?.Level || 0;
-    document.getElementById("bpType").value = "Unlimited";
-    document.getElementById("bpMu").value = 105;
-    document.getElementById("qr").value = 1;
-    document.getElementById("sellMu").value = 101;
-
-    // Calculate Max TT from materials
-    const totalTT = bp.Materials.reduce((sum, mat) => {
-      const unitTT = mat.Item?.Properties?.Economy?.MaxTT || 0;
-      return sum + mat.Amount * unitTT;
-    }, 0);
-    document.getElementById("maxTT").value = totalTT.toFixed(2);
-
-    // Add individual materials
-    bp.Materials.forEach((mat) => {
-      const matName = mat.Item?.Name || "Unknown Material";
-      const qty = mat.Amount || 1;
-      const tt = mat.Item?.Properties?.Economy?.MaxTT || 0.01;
-      const mu = 100; // Standardize to 100 for cost lookup
-      addMaterial(matName, qty, tt, mu);
-    });
-
-    // Trigger calculation engine
-    if (typeof window.calculate === 'function') {
-      window.calculate();
-    } else {
-      console.warn("CraftingBuddy not yet loaded. Skipping calculation.");
-    }
-
-    // Only show reminder if not in silent mode (importer)
-    if (!silent && typeof showMarkupReminder === "function") {
-      showMarkupReminder();
-    }
-
-    return true; // Success
-
-  } catch (err) {
-    console.error("Failed to load blueprint data:", err);
-    if (!silent) {
-      alert("Failed to load blueprint: " + name);
-    }
-    return false; // Failure
-  }
-}
-// New & improved change listener
-document.getElementById("materialFilter").addEventListener("change", async (e) => {
-    const name = e.target.value;
-    const match = cachedBlueprints.find(bp => bp.Name === name);
-    if (match) {
-        await loadBlueprintByName(name);
-    }
-});
-
-
-let filterTimeout;
-document.getElementById("materialFilter").addEventListener("input", (e) => {
-  const query = e.target.value.trim();
-  
-  clearTimeout(filterTimeout);
-  filterTimeout = setTimeout(() => {
-      const filtered = query
-        ? multiFieldFilter(query, cachedBlueprints)
-        : cachedBlueprints;
-
-      // REMOVE THIS: This is what creates the unnecessary popup
-      // renderFilteredBlueprints(filtered); 
-
-      // KEEP THIS: This renders your nice custom list
-      renderAllBlueprintsList(filtered);
-
-  }, 200); 
-});
-
-document.getElementById("showAllBlueprintsBtn").addEventListener("click", () => {
-  const list = document.getElementById("allBlueprintsList");
-  const btn = document.getElementById("showAllBlueprintsBtn");
-
-  list.classList.toggle("hidden");
-
-  if (!list.classList.contains("hidden")) {
-    renderAllBlueprintsList(cachedBlueprints);  // render first
-    btn.classList.add("active");                // activate after rendering
-  } else {
-    btn.classList.remove("active");             // turn off when hidden
-  }
-});
-
-
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  populateNexusDropdown();
-  const btn = document.getElementById("showAllBlueprintsBtn");
-  btn.classList.add("active");
-  btn.classList.remove("active");
-// This handles clicks for every blueprint in the list efficiently
-  const allBpsContainer = document.getElementById("allBlueprintsList");
-  if (allBpsContainer) {
-    allBpsContainer.addEventListener('click', (e) => {
-        const item = e.target.closest('.bp-list-item');
-        if (item) {
-            const bpName = item.getAttribute('data-name');
-            loadBlueprintByName(bpName);
-            if (DEBUG) console.log(`[Nexus API] Loading: ${bpName}`);
-        }
-    });
-  }
-  
-  
-	const listContainer = document.getElementById('blueprintList');
-	if (listContainer) {
-		listContainer.addEventListener('click', (e) => {
-			const clickable = e.target.closest('.bp-clickable');
-			const deleteBtn = e.target.closest('.delete-bp');
-
-			if (clickable) {
-				const index = clickable.getAttribute('data-index');
-				loadBlueprint(parseInt(index));
-			}
-
-			if (deleteBtn) {
-				e.stopPropagation();
-				const index = deleteBtn.getAttribute('data-index');
-				if(confirm("Delete this blueprint?")) {
-					deleteBlueprint(parseInt(index));
-					//renderBlueprintList(); // Refresh list
-				}
-			}
-		});
-	}
-  
-  
-});
-
-
-
-//=====================================================
-//----------------------------------------------------
-
-
-
-
-// ===== Optional Voice Control (stub) =====
-function initVoiceControl() {
-  if (!('webkitSpeechRecognition' in window)) {
-  if (DEBUG) console.log("Voice recognition not supported.");
-    return;
-  }
-  const recognition = new webkitSpeechRecognition();
-  recognition.continuous = true;
-  recognition.interimResults = false;
-  recognition.onresult = (event) => {
-    const transcript = event.results[event.results.length - 1][0].transcript.trim();
-  if (DEBUG) console.log("Voice command detected:", transcript);
-  };
-  recognition.start();
-}
-
-initVoiceControl();
-
-if (DEBUG) console.log("Current Data Source. Local?", USE_LOCAL_DATA);
-if (DEBUG) console.log('NexusAPI 2.0 script loaded with proper caching and globals');
-
-
-
-/* ===============================
-   LOCAL VECTOR / SHARD SYSTEM
-   =============================== */
-
-function embedText(text){
-    const vec = new Array(64).fill(0);
-    const words = text.toLowerCase().split(/\W+/);
-    words.forEach(w=>{
-        let h = 0;
-        for(let i=0;i<w.length;i++) h = (h<<5)-h + w.charCodeAt(i);
-        const idx = Math.abs(h)%64;
-        vec[idx]+=1;
-    });
-    return vec;
-}
-
-function cosine(a,b){
-    let dot=0,na=0,nb=0;
-    for(let i=0;i<a.length;i++){
-        dot+=a[i]*b[i];
-        na+=a[i]*a[i];
-        nb+=b[i]*b[i];
-    }
-    return dot/(Math.sqrt(na)*Math.sqrt(nb)+1e-9);
-}
-
-
-/* ===============================
-   KNOWLEDGE INDEX
-   =============================== */
-
-let knowledgeShards=[];
-
-function buildKnowledge(items){
-    items.forEach(item=>{
-        const text = JSON.stringify(item);
-        knowledgeShards.push({
-            text,
-            vector: embedText(text),
-            raw:item
-        });
-    });
-}
-
-
-/* ===============================
-   AI SEARCH LAYER
-   =============================== */
-
-function searchKnowledge(query){
-    const qvec = embedText(query);
-    const scored = knowledgeShards.map(s=>({
-        score: cosine(qvec,s.vector),
-        shard:s
-    }));
-
-    scored.sort((a,b)=>b.score-a.score);
-
-    return scored.slice(0,5).map(s=>s.shard.raw);
-}
-
-
-/* ===============================
-   ENTROPIA KNOWLEDGE API
-   =============================== */
-
-window.entropiaKnowledge = {
-
-    search(query){
-        return searchKnowledge(query);
-    },
-
-    registerDataset(data){
-        buildKnowledge(data);
-    }
-
+    <div class="input-row">
+      <div class="input-wrapper">
+        <div id="prompt-prefix">OMEGA›</div>
+        <input type="text" id="user-input" placeholder="Awaiting analyst query..." disabled>
+      </div>
+      <button id="stop-btn">■ STOP</button>
+      <button id="reset-btn" title="Soft-reset WebGPU context">RESET</button>
+      <button id="sync-btn" disabled>SYNC</button>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+// ═══════════════════════════════════════════════════════════════
+//  PIXELBOT OMEGA v3 — FULL ENGINE
+//  Fixes: RAG retrieval, source enforcement, stop, edit, convos
+// ═══════════════════════════════════════════════════════════════
+import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+
+// ── CONSTANTS ──────────────────────────────────────────────────
+const MODEL_ID   = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
+const DB_NAME    = "OmegaRAG_v3";
+const DB_VER     = 3;
+const CHUNK_SIZE = 300;   // words per BM25 chunk
+const MAX_CTX    = 2200;  // chars of context to inject
+const BM25_K1    = 1.5;
+const BM25_B     = 0.75;
+
+// ── STATE ──────────────────────────────────────────────────────
+let engine        = null;
+let db            = null;
+let isStreaming   = false;
+let stopRequested = false;
+let queryCount    = 0;
+
+// RAG
+let knowledgeBase = {};   // { name: rawText }
+let metaManifest  = [];   // [{ name, size, chunkCount, topics }]
+let bm25          = null; // BM25Index instance — rebuilt on ingest
+
+// Conversations
+let conversations = {};   // { id: { id, name, messages: [{role,content,ts}] } }
+let activeConvId  = null;
+
+// ── UI REFS ────────────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const ui = {
+  terminal:    $('terminal'),
+  input:       $('user-input'),
+  syncBtn:     $('sync-btn'),
+  stopBtn:     $('stop-btn'),
+  resetBtn:    $('reset-btn'),
+  fileIn:      $('file-in'),
+  fileReg:     $('file-registry'),
+  bootOverlay: $('boot-overlay'),
+  bootBar:     $('boot-progress-bar'),
+  bootStatus:  $('boot-status'),
+  statusTag:   $('status-tag'),
+  vramInner:   $('vram-inner'),
+  vramLabel:   $('vram-label'),
+  statShards:  $('stat-shards'),
+  statChunks:  $('stat-chunks'),
+  statQueries: $('stat-queries'),
+  statNexus:   $('stat-nexus'),
+  kbCount:     $('kb-count'),
+  ctxShards:   $('ctx-shards'),
+  ctxSource:   $('ctx-source'),
+  ctxNexus:    $('ctx-nexus'),
+  convList:    $('conv-list'),
+  convCount:   $('conv-count'),
+  newConvBtn:  $('new-conv-btn'),
+  nexusToggle: $('nexus-toggle'),
 };
 
+// ══════════════════════════════
+//  MASCOT
+// ══════════════════════════════
+const Mascot = (() => {
+  const canvas = $('bot-canvas');
+  const ctx    = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  let state = 'idle';
+  let frame = 0;
+  let particles = [];
 
-/* ===============================
-   ENTROPIA NEXUS API CONNECTOR
-   =============================== */
+  const C = { body:'#1a1a3e', eye:'#60a5fa', pink:'#f472b6', cyan:'#22d3ee', green:'#4ade80', orange:'#fb923c' };
 
-async function fetchNexus(endpoint){
-    const url = "https://entropianexus.com/api/"+endpoint;
-    const res = await fetch(url);
-    const data = await res.json();
-    return data;
-}
+  function spawn(x, y, color) {
+    particles.push({ x, y, vx:(Math.random()-.5)*2.2, vy:-Math.random()*1.8-.4, life:1, decay:.018+Math.random()*.025, color, size:2+Math.random()*3 });
+  }
 
+  function stateColor() {
+    return { thinking:C.cyan, streaming:C.pink, stress:C.orange, success:C.green }[state] || C.eye;
+  }
 
-/* ===============================
-   BASIC AI RESPONSE ENGINE
-   =============================== */
+  function draw() {
+    frame++;
+    ctx.clearRect(0,0,W,H);
+    const cx=W/2, cy=H/2+5, ec=stateColor(), breathe=Math.sin(frame*.04)*2.5;
 
-async function askAI(){
-    const q = document.getElementById("question").value;
-
-    let results = searchKnowledge(q);
-
-    if(results.length===0){
-        document.getElementById("output").innerText="No local match. Querying Nexus API...";
-
-        try{
-            const api = await fetchNexus("items?search="+encodeURIComponent(q));
-            results = api;
-            buildKnowledge(api);
-        }
-        catch(e){
-            document.getElementById("output").innerText="API error";
-            return;
-        }
+    // Pulse rings
+    if(state!=='idle') {
+      ctx.lineWidth=1;
+      for(let i=1;i<=3;i++){
+        ctx.strokeStyle=`rgba(96,165,250,${((Math.sin(frame*.07)+1)*.06+.01)})`;
+        ctx.beginPath();ctx.arc(cx,cy,38+i*17+Math.sin(frame*.055+i)*3,0,Math.PI*2);ctx.stroke();
+      }
     }
 
-    document.getElementById("output").innerText =
-        JSON.stringify(results,null,2);
+    // Body
+    ctx.shadowColor=ec; ctx.shadowBlur=7+breathe;
+    ctx.fillStyle=C.body; ctx.strokeStyle=ec; ctx.lineWidth=1.5;
+    const bw=58, bh=68+breathe;
+    ctx.beginPath(); ctx.roundRect(cx-bw/2, cy-bh/2+8, bw, bh, 7); ctx.fill(); ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // Head
+    ctx.fillStyle=C.body; ctx.strokeStyle=ec; ctx.lineWidth=1.5;
+    const hw=42,hh=34;
+    ctx.beginPath(); ctx.roundRect(cx-hw/2, cy-bh/2-hh+10, hw, hh, 6); ctx.fill(); ctx.stroke();
+
+    // Antenna
+    const asw=Math.sin(frame*.05)*4;
+    ctx.strokeStyle=ec; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(cx, cy-bh/2-hh+11); ctx.lineTo(cx+asw, cy-bh/2-hh-9); ctx.stroke();
+    ctx.fillStyle=ec; ctx.shadowColor=ec; ctx.shadowBlur=6;
+    ctx.beginPath(); ctx.arc(cx+asw, cy-bh/2-hh-11, 3, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+
+    // Eyes
+    const eyeY = cy-bh/2-hh/2+10;
+    const blink = (state==='thinking' && Math.sin(frame*.18)>.96) ? 1.5 : 7;
+    for(const s of [-10,10]) {
+      ctx.fillStyle=`rgba(96,165,250,0.12)`; ctx.beginPath(); ctx.ellipse(cx+s,eyeY,8,8,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle=ec; ctx.shadowColor=ec; ctx.shadowBlur=9;
+      ctx.beginPath(); ctx.ellipse(cx+s,eyeY,4.5,blink/2,0,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+    }
+
+    // Mouth
+    const mp = state==='streaming' ? (Math.sin(frame*.14)+1)*.45 : .5;
+    ctx.strokeStyle=ec; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(cx, eyeY+11, 7, Math.PI*(mp*.25), Math.PI-(mp*.25)); ctx.stroke();
+
+    // Body display
+    if(state==='streaming'||state==='thinking'){
+      for(let i=0;i<4;i++){
+        const la=Math.max(0,Math.sin(frame*.09-i*.85))*.55;
+        const lw=(18+Math.sin(frame*.07+i*1.1)*14)*(i===0?1:.65);
+        ctx.fillStyle=`rgba(96,165,250,${la})`;
+        ctx.fillRect(cx-lw/2, cy-1+i*9, lw, 2);
+      }
+    }
+    if(state==='stress'){
+      ctx.strokeStyle=`rgba(251,146,60,${(Math.sin(frame*.2)+1)*.35+.2})`; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(cx-9,cy+4); ctx.lineTo(cx,cy-6); ctx.lineTo(cx+9,cy+4); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx-5,cy+11); ctx.lineTo(cx,cy+3); ctx.lineTo(cx+5,cy+11); ctx.stroke();
+    }
+    if(state==='success'){
+      ctx.strokeStyle=C.green; ctx.lineWidth=2; ctx.shadowColor=C.green; ctx.shadowBlur=8;
+      ctx.beginPath(); ctx.moveTo(cx-9,cy+5); ctx.lineTo(cx-3,cy+11); ctx.lineTo(cx+11,cy-5); ctx.stroke();
+      ctx.shadowBlur=0;
+      if(frame%3===0) spawn(cx+(Math.random()-.5)*28, cy+(Math.random()-.5)*18, C.green);
+    }
+
+    // Arms
+    const arm=Math.sin(frame*.05)*(state==='streaming'?14:4.5);
+    ctx.strokeStyle=ec; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(cx-bw/2,cy+13); ctx.lineTo(cx-bw/2-13,cy+28+arm); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+bw/2,cy+13); ctx.lineTo(cx+bw/2+13,cy+28-arm); ctx.stroke();
+
+    // Legs
+    ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(cx-11,cy+bh/2+8); ctx.lineTo(cx-13,cy+bh/2+25); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+11,cy+bh/2+8); ctx.lineTo(cx+13,cy+bh/2+25); ctx.stroke();
+
+    // Particles
+    particles=particles.filter(p=>p.life>0);
+    for(const p of particles){
+      ctx.globalAlpha=p.life; ctx.fillStyle=p.color;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2); ctx.fill();
+      p.x+=p.vx; p.y+=p.vy; p.life-=p.decay;
+    }
+    ctx.globalAlpha=1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+  return { set: s => { state=s; }, get: () => state };
+})();
+
+// ══════════════════════════════
+//  INDEXEDDB
+// ══════════════════════════════
+function openDB() {
+  return new Promise((res,rej)=>{
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if(!d.objectStoreNames.contains('shards'))   d.createObjectStore('shards',   {keyPath:'name'});
+      if(!d.objectStoreNames.contains('convs'))    d.createObjectStore('convs',    {keyPath:'id'});
+    };
+    req.onsuccess = e=>res(e.target.result);
+    req.onerror   = e=>rej(e.target.error);
+  });
+}
+function dbOp(store, mode, fn) {
+  return new Promise((res,rej)=>{
+    const tx = db.transaction(store, mode);
+    const s  = tx.objectStore(store);
+    const req = fn(s);
+    req.onsuccess = e=>res(e.target.result);
+    req.onerror   = e=>rej(e.target.error);
+  });
+}
+const dbPutShard = item => dbOp('shards','readwrite', s=>s.put(item));
+const dbDelShard = name => dbOp('shards','readwrite', s=>s.delete(name));
+const dbAllShards= ()   => dbOp('shards','readonly',  s=>s.getAll());
+const dbPutConv  = conv => dbOp('convs', 'readwrite', s=>s.put(conv));
+const dbDelConv  = id   => dbOp('convs', 'readwrite', s=>s.delete(id));
+const dbAllConvs = ()   => dbOp('convs', 'readonly',  s=>s.getAll());
+
+// ══════════════════════════════
+//  BM25 ENGINE
+// ══════════════════════════════
+const STOPWORDS = new Set([
+  'a','an','the','and','or','but','in','on','at','to','for','of','with','by','from',
+  'is','are','was','were','be','been','have','has','had','do','does','did','will',
+  'would','could','should','may','might','can','this','that','these','those',
+  'i','you','he','she','it','we','they','me','him','her','us','them','what',
+  'how','when','where','why','which','who','not','no','yes','so','if','as','just',
+]);
+
+class BM25Index {
+  constructor() { this.docs=[]; this.idf=new Map(); this.avgdl=0; this.dirty=true; }
+
+  tokenize(text) {
+    return text.toLowerCase().replace(/[^a-z0-9\s\-_.%]/g,' ').split(/\s+/)
+      .filter(t=>t.length>1 && !STOPWORDS.has(t));
+  }
+
+  addDoc(id, text) {
+    const terms=this.tokenize(text), tf=new Map();
+    for(const t of terms) tf.set(t,(tf.get(t)||0)+1);
+    this.docs.push({id,terms,tf,len:terms.length,raw:text});
+    this.dirty=true;
+  }
+
+  rebuild() {
+    if(!this.dirty) return;
+    this.idf.clear();
+    const N=this.docs.length;
+    this.avgdl=this.docs.reduce((s,d)=>s+d.len,0)/(N||1);
+    const df=new Map();
+    for(const doc of this.docs) for(const t of new Set(doc.terms)) df.set(t,(df.get(t)||0)+1);
+    for(const [t,n] of df) this.idf.set(t,Math.log((N-n+0.5)/(n+0.5)+1));
+    this.dirty=false;
+  }
+
+  scoreDoc(docIdx, qTerms) {
+    this.rebuild();
+    const doc=this.docs[docIdx];
+    let score=0;
+    for(const qt of qTerms){
+      const idf=this.idf.get(qt)||0;
+      const tf=doc.tf.get(qt)||0;
+      const num=tf*(BM25_K1+1);
+      const den=tf+BM25_K1*(1-BM25_B+BM25_B*doc.len/this.avgdl);
+      score+=idf*num/den;
+    }
+    return score;
+  }
+
+  search(query, topK=10) {
+    if(this.docs.length===0) return [];
+    this.rebuild();
+    const qTerms=this.tokenize(query);
+    if(qTerms.length===0) return [];
+    const scored=this.docs.map((_,i)=>({i,score:this.scoreDoc(i,qTerms)}));
+    scored.sort((a,b)=>b.score-a.score);
+    return scored.slice(0,topK).filter(s=>s.score>0.01);
+  }
 }
 
+function buildIndex() {
+  bm25=new BM25Index();
+  for(const [name, text] of Object.entries(knowledgeBase)){
+    const words=text.split(/\s+/);
+    for(let i=0;i<words.length;i+=CHUNK_SIZE){
+      const chunk=words.slice(i,i+CHUNK_SIZE).join(' ');
+      bm25.addDoc(`${name}:::${i}`, chunk);
+    }
+  }
+}
 
-/* ===============================
-   EXAMPLE LOCAL DATA REGISTRATION
-   ===============================  */
+// Returns retrieved context string + source label
+function retrieveContext(query) {
+  if(!bm25 || bm25.docs.length===0) return {context:'',source:'NONE',score:0};
+  const hits=bm25.search(query, 8);
+  if(hits.length===0) return {context:'',source:'NONE',score:0};
 
-fetch("dailymissions.json")
-.then(r=>r.json())
-.then(data=>{
-    entropiaKnowledge.registerDataset(data);
-})
-.catch(()=>{});
+  let context='';
+  for(const h of hits){
+    const doc=bm25.docs[h.i];
+    const label=doc.id.split(':::')[0];
+    const snippet=`[SOURCE: ${label}]\n${doc.raw}\n`;
+    if(context.length+snippet.length>MAX_CTX) break;
+    context+=snippet+'\n';
+  }
+  return {
+    context: context.trim(),
+    source:  bm25.docs[hits[0].i].id.split(':::')[0],
+    score:   hits[0].score,
+  };
+}
 
+// ══════════════════════════════
+//  NEXUS API
+// ══════════════════════════════
+const NexusCalc = {
+  dpp:   (dmg,ammo,decay)=>dmg/((+ammo||0)+(+decay||0)),
+  roi:   (rev,cost)=>(((rev-cost)/cost)*100).toFixed(2)+'%',
+  pedUSD:(ped)=>(ped*0.10).toFixed(2),
+  usdPED:(usd)=>(usd*10).toFixed(2),
+  mu:    (tt,pct)=>(tt*(1+pct/100)).toFixed(4),
+  tfc:   (shots,decay)=>(shots*decay).toFixed(4),
+};
+
+// Broader Nexus intercept — catches plain conversational forms too
+function tryNexusIntercept(query) {
+  if(!ui.nexusToggle.checked) return null;
+  const q=query.toLowerCase().replace(/,/g,'');
+
+  // PED ↔ USD
+  let m=q.match(/(\d+\.?\d*)\s*ped\s*(?:to|in|=|into)?\s*usd/);
+  if(m) return `<span class="source-badge nexus">NEXUS</span><b>${m[1]} PED</b> = <span class="highlight-green">$${NexusCalc.pedUSD(+m[1])} USD</span>`;
+  m=q.match(/(\d+\.?\d*)\s*usd\s*(?:to|in|=|into)?\s*ped/);
+  if(m) return `<span class="source-badge nexus">NEXUS</span><b>$${m[1]} USD</b> = <span class="highlight-cyan">${NexusCalc.usdPED(+m[1])} PED</span>`;
+
+  // DPP: "dpp 30 dmg 5 ammo 2 decay" or "dpp weapon 30 damage 5.2 ammo 1.8 decay"
+  m=q.match(/dpp[^0-9]*(\d+\.?\d*)[^0-9]+(\d+\.?\d*)[^0-9]+(\d+\.?\d*)/);
+  if(m){
+    const dpp=NexusCalc.dpp(+m[1],+m[2],+m[3]);
+    return `<span class="source-badge nexus">NEXUS</span>DPP = <span class="highlight-cyan">${dpp.toFixed(4)}</span> <span style="color:var(--t-dim)">(dmg:${m[1]} ammo:${m[2]} decay:${m[3]})</span>`;
+  }
+
+  // ROI: "roi 500 rev 450 cost"
+  m=q.match(/roi[^0-9]*(\d+\.?\d*)[^0-9]+(\d+\.?\d*)/);
+  if(m) return `<span class="source-badge nexus">NEXUS</span>ROI = <span class="highlight-cyan">${NexusCalc.roi(+m[1],+m[2])}</span>`;
+
+  // Markup: "mu 10 ped 130%"
+  m=q.match(/(?:mu|markup)[^0-9]*(\d+\.?\d*)[^0-9]+(\d+\.?\d*)/);
+  if(m) return `<span class="source-badge nexus">NEXUS</span>MU Value = <span class="highlight-cyan">${NexusCalc.mu(+m[1],+m[2])} PED</span>`;
+
+  // TFC: "tfc 100 shots 0.05 decay"
+  m=q.match(/(?:tfc|cost)[^0-9]*(\d+\.?\d*)[^0-9]+(\d+\.?\d*)/);
+  if(m && q.includes('shot')) return `<span class="source-badge nexus">NEXUS</span>Total Firearm Cost = <span class="highlight-cyan">${NexusCalc.tfc(+m[1],+m[2])} PED</span>`;
+
+  return null;
+}
+
+// ══════════════════════════════
+//  META-MANIFEST
+// ══════════════════════════════
+function isMetaQuery(q) {
+  return /(what|which|list|show|do you|you have).*(know|have|loaded|file|shard|data|doc|about)/i.test(q)
+    || /manifest|knowledge base|what data|your files|your knowledge/i.test(q);
+}
+function handleMetaQuery() {
+  if(metaManifest.length===0)
+    return `<span class="source-badge">META</span>No shards loaded yet. Drag &amp; drop or use <span class="highlight-pink">⬆ INGEST DATA SHARD</span> to upload .txt/.csv/.json files.`;
+  let out=`<span class="source-badge">META</span><span class="highlight-pink">KNOWLEDGE MANIFEST</span> — ${metaManifest.length} shard(s):\n\n`;
+  for(const m of metaManifest){
+    out+=`<span class="highlight-cyan">▶ ${m.name}</span>  <span style="color:var(--t-dim)">${(m.size/1024).toFixed(1)} KB · ${m.chunkCount} chunks</span>`;
+    if(m.topics.length) out+=`\n  <span style="color:var(--t-secondary)">Topics: ${m.topics.join(', ')}</span>`;
+    out+='\n\n';
+  }
+  return out.trimEnd();
+}
+
+// ══════════════════════════════
+//  SYSTEM PROMPT
+// ══════════════════════════════
+function buildSystemPrompt(context, hasContext) {
+  const sourceRule = hasContext
+    ? `CRITICAL SOURCE RULE: Answer ONLY using the CONTEXT SHARDS provided below. 
+       If the shards don't contain enough information to answer accurately, say so explicitly.
+       Do NOT invent stats, values, item names, or game data. Quote source file names when citing.`
+    : `CRITICAL SOURCE RULE: No local data shards were found for this query.
+       You MUST tell the user that you don't have local data on this topic and suggest they upload relevant files.
+       You may share only general, widely-known Entropia Universe facts that you are certain about.
+       Do NOT invent or guess specific numbers, drop rates, item stats, prices, or loot data.
+       If uncertain about any specific value, say so clearly.`;
+
+  return `You are Pixelbot, a specialist AI assistant for the MMORPG "Entropia Universe" (by MindArk), built by Pixelb8.com.
+
+PERSONALITY: Professional, quirky analyst nerd. Use fun emotes like *whirr*, *beep*, *boop*, *scanning*, *calculating*. Reference "neural link", "PED flow", "loot matrices" naturally.
+
+${sourceRule}
+
+GAME CONTEXT — These are all NORMAL MMORPG game terms, NEVER refuse them:
+loot, hunting, mobs, missions, PED, decay, globals, HoF, crafting, sweating, Toulan, Arkadia, Calypso, Rocktropia, Next Island, Monria, Cyrene, Setesh, Aris, ROI, markup, TT value, SIB, instance, spawn, kill, grind, drop rate, maturity, DPP, MU, TFC, ESI, mob, creature, weapon, armor, blueprint, residue, shrapnel, auction house, deed, mining, probe, finder, extractor, refiner, amp
+
+CORE FACTS (only use when no shard data available and highly confident):
+- PED = Project Entropia Dollar. 1 PED = $0.10 USD. 10 PED = $1 USD. Real-money economy.
+- Planets: Calypso (main), Arkadia, Toulan, Rocktropia, Next Island, Monria, Cyrene, Aris, Setesh.
+- DPP = Damage Per PED. Higher = more efficient hunting.
+- SIB = Skill Increase Bonus — applies when player level is within weapon's SIB range.
+- TT = Trade Terminal base value. Markup (MU) = percentage above TT on auction.
+- Globals trigger at 50+ PED loot. HoF (Hall of Fame) = very large loot event.
+- Loot 2.0: hunting returns ~96-98% TT return on average long-term (not per kill).
+
+CONTEXT SHARDS (BM25 semantic search results — highest confidence source):
+${hasContext ? context : '[NO LOCAL DATA FOUND FOR THIS QUERY]'}
+
+Response format: Be concise, direct, technically accurate. Always state your source (local shard / base knowledge / uncertain).`;
+}
+
+// ══════════════════════════════
+//  CONVERSATION MANAGEMENT
+// ══════════════════════════════
+function createConv(name) {
+  const id = 'conv_' + Date.now();
+  const conv = { id, name: name||'Session '+Object.keys(conversations).length, messages:[], ts:Date.now() };
+  conversations[id] = conv;
+  dbPutConv(conv);
+  renderConvList();
+  return id;
+}
+
+function switchConv(id) {
+  activeConvId = id;
+  renderConvList();
+  renderTerminal();
+}
+
+async function deleteConv(id) {
+  delete conversations[id];
+  await dbDelConv(id);
+  if(activeConvId===id) {
+    const ids=Object.keys(conversations);
+    activeConvId = ids.length>0 ? ids[ids.length-1] : createConv();
+  }
+  renderConvList();
+  renderTerminal();
+}
+
+function addMessage(role, content, renderFn) {
+  if(!activeConvId) return;
+  const msg = { role, content, ts: Date.now() };
+  conversations[activeConvId].messages.push(msg);
+  conversations[activeConvId].ts = Date.now();
+  // Update name from first user message
+  const conv=conversations[activeConvId];
+  if(conv.messages.filter(m=>m.role==='user').length===1 && role==='user')
+    conv.name = content.slice(0,28)+(content.length>28?'…':'');
+  dbPutConv(conv);
+  renderConvList();
+  if(renderFn) renderFn(msg);
+  return msg;
+}
+
+function renderConvList() {
+  ui.convList.innerHTML='';
+  const sorted=Object.values(conversations).sort((a,b)=>b.ts-a.ts);
+  ui.convCount.textContent=sorted.length;
+  for(const conv of sorted){
+    const div=document.createElement('div');
+    div.className='conv-item'+(conv.id===activeConvId?' active':'');
+    div.innerHTML=`<span class="conv-name">${esc(conv.name)}</span><span class="conv-meta">${conv.messages.length} msg</span><span class="conv-del" title="Delete">✕</span>`;
+    div.querySelector('.conv-del').addEventListener('click',async e=>{e.stopPropagation();await deleteConv(conv.id);});
+    div.addEventListener('click',()=>switchConv(conv.id));
+    ui.convList.appendChild(div);
+  }
+}
+
+function renderTerminal() {
+  ui.terminal.innerHTML='';
+  if(!activeConvId||!conversations[activeConvId]) return;
+  const msgs=conversations[activeConvId].messages;
+  if(msgs.length===0){
+    addEntry(`<b>NEW SESSION INITIALIZED.</b> Ask about hunting, loot, PED economy, crafting, or any Entropia mechanic. Upload data shards for grounded answers.`,'system',null,false);
+    return;
+  }
+  for(const msg of msgs) renderMessageEntry(msg, false);
+  ui.terminal.scrollTop=ui.terminal.scrollHeight;
+}
+
+// ══════════════════════════════
+//  TERMINAL RENDERING
+// ══════════════════════════════
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function now(){ return new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+function tsToTime(ts){ return new Date(ts).toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+
+function renderMessageEntry(msg, animate=true) {
+  const type  = msg.role==='user'?'user':'ai';
+  const label = msg.role==='user'?'ANALYST':'PIXELBOT';
+  const div   = document.createElement('div');
+  div.className=`entry ${type}`;
+  if(!animate) div.style.animation='none';
+
+  // Build meta row with action buttons
+  let actBtns='';
+  if(msg.role==='user'){
+    actBtns=`<button class="entry-act-btn" data-action="edit">EDIT</button>`;
+  } else {
+    actBtns=`<button class="entry-act-btn" data-action="copy">COPY</button>`;
+  }
+  actBtns+=`<button class="entry-act-btn danger" data-action="delete">DEL</button>`;
+
+  div.innerHTML=`
+    <div class="entry-meta">
+      <span class="em-name">${label}</span>
+      <div class="entry-actions">${actBtns}<span class="em-time">${tsToTime(msg.ts)}</span></div>
+    </div>
+    <div class="entry-body"></div>`;
+
+  // Safe content render
+  const body=div.querySelector('.entry-body');
+  body.innerHTML=msg.content;
+
+  // Wire action buttons
+  div.querySelector('[data-action="delete"]').addEventListener('click',()=>deleteMessage(msg,div));
+  const editBtn=div.querySelector('[data-action="edit"]');
+  if(editBtn) editBtn.addEventListener('click',()=>startEdit(msg,div));
+  const copyBtn=div.querySelector('[data-action="copy"]');
+  if(copyBtn) copyBtn.addEventListener('click',()=>{
+    navigator.clipboard?.writeText(body.innerText||body.textContent).catch(()=>{});
+  });
+
+  ui.terminal.appendChild(div);
+  if(animate) ui.terminal.scrollTop=ui.terminal.scrollHeight;
+  return div;
+}
+
+function addEntry(html, type='ai', name=null, persist=false) {
+  const div=document.createElement('div');
+  div.className=`entry ${type}`;
+  div.innerHTML=`
+    <div class="entry-meta">
+      <span class="em-name">${name||{user:'ANALYST',ai:'PIXELBOT',system:'SYSTEM',error:'FAULT'}[type]||type}</span>
+      <span class="em-time">${now()}</span>
+    </div>
+    <div class="entry-body">${html}</div>`;
+  ui.terminal.appendChild(div);
+  ui.terminal.scrollTop=ui.terminal.scrollHeight;
+  return div;
+}
+
+function deleteMessage(msg, div) {
+  if(!activeConvId) return;
+  const conv=conversations[activeConvId];
+  conv.messages=conv.messages.filter(m=>m!==msg);
+  dbPutConv(conv);
+  div.style.animation='none';
+  div.style.opacity='0';div.style.transform='translateY(-4px)';div.style.transition='all .2s';
+  setTimeout(()=>div.remove(),200);
+}
+
+function startEdit(msg, div) {
+  const body=div.querySelector('.entry-body');
+  const original=body.innerHTML;
+  const plainText=body.innerText||body.textContent;
+  body.innerHTML=`
+    <textarea class="edit-textarea">${esc(plainText)}</textarea>
+    <div class="edit-actions">
+      <button class="edit-save-btn">SAVE</button>
+      <button class="edit-cancel-btn">CANCEL</button>
+    </div>`;
+  const ta=body.querySelector('textarea');
+  ta.focus(); ta.selectionStart=ta.value.length;
+
+  body.querySelector('.edit-save-btn').addEventListener('click',()=>{
+    const newText=ta.value.trim();
+    if(!newText){ body.innerHTML=original; return; }
+    msg.content=esc(newText);
+    body.innerHTML=msg.content;
+    dbPutConv(conversations[activeConvId]);
+  });
+  body.querySelector('.edit-cancel-btn').addEventListener('click',()=>{ body.innerHTML=original; });
+}
+
+// ══════════════════════════════
+//  QUERY RUNNER
+// ══════════════════════════════
+async function runQuery() {
+  if(isStreaming||!engine||!activeConvId) return;
+  const query=ui.input.value.trim();
+  if(!query) return;
+  ui.input.value='';
+  queryCount++;
+  updateStats();
+
+  // Persist + render user message
+  addMessage('user', esc(query), (msg)=>renderMessageEntry(msg));
+
+  // Intercept: meta-manifest
+  if(isMetaQuery(query)){
+    const resp=handleMetaQuery();
+    addMessage('ai', resp, (msg)=>renderMessageEntry(msg));
+    return;
+  }
+
+  // Intercept: Nexus calc
+  const nexus=tryNexusIntercept(query);
+  if(nexus){
+    addMessage('ai', nexus, (msg)=>{ const d=renderMessageEntry(msg); Mascot.set('success'); setTimeout(()=>Mascot.set('idle'),2000); });
+    return;
+  }
+
+  // RAG retrieval
+  const {context, source, score}=retrieveContext(query);
+  const hasContext=context.length>30 && score>0.5;
+
+  // Update source readout
+  ui.ctxSource.textContent = hasContext ? source.slice(0,16)+(source.length>16?'…':'') : 'BASE-KNW';
+  ui.ctxSource.className   = 'ctx-val' + (hasContext?'':' warn');
+
+  // Streaming setup
+  isStreaming=true; stopRequested=false;
+  Mascot.set('thinking');
+  setVRAM(Math.min(92, 45+Math.random()*25));
+  ui.syncBtn.disabled=true;
+  ui.input.disabled=true;
+  ui.stopBtn.classList.add('visible');
+
+  // Placeholder entry
+  const aiDiv=addEntry('<span class="cursor-blink"></span>','ai');
+  aiDiv.classList.add('streaming');
+  const bodyEl=aiDiv.querySelector('.entry-body');
+
+  const badge = hasContext
+    ? `<span class="source-badge">RAG·${score.toFixed(1)}</span>`
+    : `<span class="source-badge base">BASE</span>`;
+
+  let fullResponse='';
+
+  try {
+    const sysPrompt=buildSystemPrompt(context, hasContext);
+    // Build message history (last 4 pairs for context window)
+    const history=[];
+    const msgs=conversations[activeConvId].messages;
+    const recent=msgs.slice(-8);
+    for(const m of recent){
+      if(m.role==='user'||m.role==='assistant')
+        history.push({role:m.role, content:m.content.replace(/<[^>]+>/g,'')});
+    }
+    history.push({role:'user', content:query});
+
+    const stream=await engine.chat.completions.create({
+      messages:[{role:'system',content:sysPrompt},...history],
+      temperature:0.2,
+      max_tokens:600,
+      stream:true,
+    });
+
+    Mascot.set('streaming');
+    for await(const chunk of stream){
+      if(stopRequested) break;
+      fullResponse+=(chunk.choices[0]?.delta?.content||'');
+      bodyEl.innerHTML=badge+fullResponse.replace(/\n/g,'<br>');
+      ui.terminal.scrollTop=ui.terminal.scrollHeight;
+    }
+    if(stopRequested) fullResponse+=' <span style="color:var(--t-dim)">[stopped]</span>';
+
+  } catch(err) {
+    fullResponse=`<span class="highlight-orange">⚠ LINK FAULT:</span> ${esc(err.message)}`;
+    aiDiv.className='entry error';
+    Mascot.set('stress');
+    setTimeout(()=>softReset(),1800);
+  } finally {
+    aiDiv.classList.remove('streaming');
+    bodyEl.innerHTML=badge+fullResponse.replace(/\n/g,'<br>');
+    // Persist AI response
+    if(fullResponse) addMessage('ai', badge+fullResponse.replace(/\n/g,'<br>'), null);
+    // Remove placeholder div, keep persisted render
+    setTimeout(()=>{ ui.terminal.removeChild(aiDiv); renderMessageEntry(conversations[activeConvId].messages.at(-1), false); },0);
+
+    isStreaming=false; stopRequested=false;
+    Mascot.set(fullResponse.includes('FAULT')?'stress':'success');
+    setTimeout(()=>Mascot.set('idle'),3000);
+    setVRAM(Math.max(18, vramUsage-20));
+    ui.syncBtn.disabled=false;
+    ui.input.disabled=false;
+    ui.stopBtn.classList.remove('visible');
+    ui.input.focus();
+    ui.terminal.scrollTop=ui.terminal.scrollHeight;
+  }
+}
+
+// ══════════════════════════════
+//  SOFT RESET
+// ══════════════════════════════
+async function softReset() {
+  addEntry('Neural link recovering... Executing soft-reset.','system');
+  Mascot.set('thinking'); setVRAM(8);
+  isStreaming=false; stopRequested=false;
+  ui.syncBtn.disabled=true; ui.input.disabled=true;
+  ui.stopBtn.classList.remove('visible');
+  try {
+    engine=await webllm.CreateMLCEngine(MODEL_ID,{
+      initProgressCallback:p=>setVRAM(Math.round(p.progress*55)),
+    });
+    addEntry('Soft-reset complete. Neural core re-established.','system');
+    Mascot.set('success'); setTimeout(()=>Mascot.set('idle'),2000);
+    setVRAM(32);
+    ui.syncBtn.disabled=false; ui.input.disabled=false; ui.input.focus();
+  } catch(e){
+    addEntry(`Hard fault: ${esc(e.message)}`,'error');
+    Mascot.set('stress');
+  }
+}
+
+// ══════════════════════════════
+//  INGEST
+// ══════════════════════════════
+async function ingestFiles(files) {
+  for(const file of files){
+    const text=await file.text();
+    knowledgeBase[file.name]=text;
+    await dbPutShard({name:file.name, text});
+
+    // Build manifest
+    const words=text.split(/\s+/);
+    const chunkCount=Math.ceil(words.length/CHUNK_SIZE);
+    const topWords=(new BM25Index()).tokenize(text.slice(0,3000))
+      .reduce((a,t)=>{a[t]=(a[t]||0)+1;return a;},{});
+    const topics=Object.entries(topWords).sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0]);
+    const meta={name:file.name, size:text.length, chunkCount, topics};
+
+    // Remove old entry if exists
+    metaManifest=metaManifest.filter(m=>m.name!==file.name);
+    metaManifest.push(meta);
+    renderFileNode(meta);
+  }
+  buildIndex(); // Rebuild entire BM25 index
+  updateStats();
+  addEntry(
+    `<span class="source-badge">INGEST</span>Indexed <span class="highlight-pink">${files.length} shard(s)</span>. `+
+    `BM25 index: <span class="highlight-cyan">${bm25.docs.length} chunks</span> across <span class="highlight-green">${metaManifest.length} file(s)</span>.`,
+    'system'
+  );
+}
+
+function renderFileNode(meta) {
+  const existing=ui.fileReg.querySelector(`[data-name="${CSS.escape(meta.name)}"]`);
+  if(existing) existing.remove();
+  const div=document.createElement('div');
+  div.className='file-node'; div.dataset.name=meta.name;
+  div.innerHTML=`<span class="fname" title="${esc(meta.name)}">${esc(meta.name)}</span><span class="fsize">${(meta.size/1024).toFixed(1)}K</span><span class="fdel" title="Remove shard">✕</span>`;
+  div.querySelector('.fdel').addEventListener('click',async e=>{e.stopPropagation();await removeShard(meta.name);});
+  div.addEventListener('click',()=>{ ui.input.value=`What data is in ${meta.name}?`; ui.input.focus(); });
+  ui.fileReg.appendChild(div);
+}
+
+async function removeShard(name) {
+  delete knowledgeBase[name];
+  metaManifest=metaManifest.filter(m=>m.name!==name);
+  await dbDelShard(name);
+  buildIndex();
+  const node=ui.fileReg.querySelector(`[data-name="${CSS.escape(name)}"]`);
+  if(node) node.remove();
+  updateStats();
+  addEntry(`Shard <span class="highlight-pink">${esc(name)}</span> removed. Index rebuilt.`,'system');
+}
+
+// ══════════════════════════════
+//  VRAM + STATS
+// ══════════════════════════════
+let vramUsage=0;
+function setVRAM(pct) {
+  vramUsage=Math.max(0,Math.min(100,pct));
+  ui.vramInner.style.width=vramUsage+'%';
+  ui.vramLabel.textContent=vramUsage+'%';
+  ui.vramInner.style.background=vramUsage>80?'linear-gradient(90deg,#f59e0b,#ef4444)':vramUsage>50?'linear-gradient(90deg,#4ade80,#fbbf24)':'linear-gradient(90deg,var(--p-green),var(--p-yellow))';
+  if(vramUsage>90) Mascot.set('stress');
+}
+
+function updateStats() {
+  ui.statShards.textContent  = metaManifest.length;
+  ui.statChunks.textContent  = bm25?bm25.docs.length:0;
+  ui.statQueries.textContent = queryCount;
+  ui.statNexus.textContent   = ui.nexusToggle.checked?'ON':'OFF';
+  ui.kbCount.textContent     = metaManifest.length+' SHARDS';
+  ui.ctxShards.textContent   = metaManifest.length;
+  ui.ctxNexus.textContent    = ui.nexusToggle.checked?'ON':'OFF';
+}
+
+// ══════════════════════════════
+//  BOOT
+// ══════════════════════════════
+async function boot() {
+  bm25=new BM25Index(); // init empty
+
+  const prog=(pct,msg)=>{ ui.bootBar.style.width=pct+'%'; ui.bootStatus.textContent=msg; };
+
+  try {
+    prog(5,'Opening IndexedDB persistence layer...');
+    db=await openDB();
+
+    prog(12,'Restoring knowledge shards...');
+    const shards=await dbAllShards();
+    for(const s of shards){
+      knowledgeBase[s.name]=s.text;
+      const words=s.text.split(/\s+/);
+      const chunkCount=Math.ceil(words.length/CHUNK_SIZE);
+      const topWords=(new BM25Index()).tokenize(s.text.slice(0,3000))
+        .reduce((a,t)=>{a[t]=(a[t]||0)+1;return a;},{});
+      const topics=Object.entries(topWords).sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0]);
+      metaManifest.push({name:s.name, size:s.text.length, chunkCount, topics});
+      renderFileNode({name:s.name, size:s.text.length, chunkCount, topics});
+    }
+    if(shards.length>0) buildIndex();
+
+    prog(20,'Restoring conversation history...');
+    const convs=await dbAllConvs();
+    for(const c of convs) conversations[c.id]=c;
+    const convIds=Object.keys(conversations);
+    if(convIds.length===0) activeConvId=createConv('Welcome Session');
+    else {
+      const sorted=Object.values(conversations).sort((a,b)=>b.ts-a.ts);
+      activeConvId=sorted[0].id;
+    }
+    renderConvList();
+
+    prog(28,'Initializing WebLLM runtime...');
+    Mascot.set('thinking');
+
+    engine=await webllm.CreateMLCEngine(MODEL_ID,{
+      initProgressCallback:p=>{
+        prog(28+Math.round(p.progress*68), p.text||`Loading weights... ${Math.round(p.progress*100)}%`);
+        setVRAM(Math.round(p.progress*58));
+      },
+    });
+
+    prog(98,'Calibrating Entropia context matrices...');
+    await new Promise(r=>setTimeout(r,350));
+    prog(100,'Systems nominal. READY.');
+    await new Promise(r=>setTimeout(r,420));
+
+    ui.bootOverlay.classList.add('hidden');
+    ui.statusTag.textContent='ONLINE';
+    ui.input.disabled=false; ui.syncBtn.disabled=false; ui.input.focus();
+    Mascot.set('success'); setTimeout(()=>Mascot.set('idle'),2500);
+    setVRAM(32); updateStats();
+
+    renderTerminal();
+    if(conversations[activeConvId]?.messages.length===0)
+      addEntry(
+        `<b>PIXELBOT OMEGA v3 — ONLINE</b> *beep boop*<br>`+
+        `Model: <span class="highlight-cyan">${MODEL_ID}</span> — running entirely in your browser. <span class="highlight-green">Zero data leaves your device.</span><br>`+
+        `Knowledge base: <span class="highlight-pink">${metaManifest.length} shard(s)</span> indexed · BM25 semantic search active · Nexus API online.<br><br>`+
+        `<b>IMPORTANT:</b> For accurate, grounded answers — upload your Entropia data files (.txt/.csv/.json) via <span class="highlight-cyan">⬆ INGEST DATA SHARD</span>. `+
+        `Without local shards, I'll use base knowledge only and will tell you when I'm uncertain.`,
+        'system'
+      );
+
+  } catch(e){
+    prog(100,`BOOT FAULT: ${e.message}`);
+    ui.bootStatus.style.color='var(--p-orange)';
+    Mascot.set('stress');
+    setTimeout(()=>{
+      ui.bootOverlay.classList.add('hidden');
+      addEntry(`Boot fault: ${esc(e.message)}<br>Requires a Chromium browser with WebGPU enabled.`,'error');
+      ui.input.placeholder='WebGPU unavailable — check browser compatibility';
+    },2200);
+  }
+}
+
+// ══════════════════════════════
+//  EVENT WIRING
+// ══════════════════════════════
+ui.syncBtn.onclick=runQuery;
+ui.input.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); runQuery(); } };
+ui.stopBtn.onclick=()=>{ stopRequested=true; ui.stopBtn.classList.remove('visible'); };
+ui.resetBtn.onclick=softReset;
+ui.newConvBtn.onclick=()=>{ const id=createConv(); switchConv(id); };
+ui.nexusToggle.onchange=()=>{ updateStats(); };
+ui.fileIn.onchange=async e=>{ if(e.target.files.length>0) await ingestFiles([...e.target.files]); ui.fileIn.value=''; };
+
+const upZone=ui.fileIn.labels[0]||$('upload-label');
+document.getElementById('upload-label').addEventListener('dragover',e=>{e.preventDefault();e.currentTarget.style.background='rgba(96,165,250,.18)';});
+document.getElementById('upload-label').addEventListener('dragleave',e=>{e.currentTarget.style.background='';});
+document.getElementById('upload-label').addEventListener('drop',async e=>{
+  e.preventDefault(); e.currentTarget.style.background='';
+  const files=[...e.dataTransfer.files].filter(f=>/\.(txt|csv|json|md)$/i.test(f.name));
+  if(files.length) await ingestFiles(files);
+});
+
+boot();
 </script>
-
 </body>
 </html>
