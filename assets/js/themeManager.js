@@ -111,8 +111,12 @@ const backgroundImageURL = "https://pixelb8.lol./assets/images/ads/ads19.jpeg"; 
 function setBackgroundImage(url) {
 	document.body.style.backgroundImage = `url('${url}')`;
 }
+function setBackgroundImageGreen() {
+	document.body.style.backgroundColor = `green`;
+}
 function removeBackgroundImage() {
 	document.body.style.backgroundImage = "none";
+	document.body.style.backgroundColor = "none";
 }
 
 // Toggle element fn 
@@ -281,6 +285,13 @@ document.getElementById('Bubble').addEventListener('click', function(event) {
 document.getElementById("simulatebackground").addEventListener("change", function() {
   if (this.checked) {
     setBackgroundImage(backgroundImageURL);
+  } else {
+    removeBackgroundImage();
+  }
+});
+document.getElementById("simulatebackgroundGreen").addEventListener("change", function() {
+  if (this.checked) {
+    setBackgroundImageGreen();
   } else {
     removeBackgroundImage();
   }
