@@ -404,6 +404,7 @@
 						</ul>
 
 						<h2>Prize List Commands</h2>
+						<button id="copyPrizelistBtn" >📋 Copy Prizelist Clipboard</button>
 						<ul id="prizeListCommandList">
 						</ul>
 					</div>
@@ -954,6 +955,67 @@ function addPrizeForUser(username, prizeName, amount) {
 
     filterAndRender(); // Re-render the updated list
 }
+function copyprizelisttoClipboard() {
+	const tbody = document.querySelector('#winnersTable tbody');
+	const rows = tbody.querySelectorAll('tr');
+
+	let copiedText = '';
+
+	// Add the headers for clarity
+	const headerRow = document.querySelector('#winnersTable thead tr');
+	const headers = headerRow.querySelectorAll('th');
+	let headerText = '';
+	headers.forEach((header, index) => {
+		if (header.style.display !== 'none') {
+			headerText += header.textContent + (index < headers.length - 1 ? '\t' : '');
+		}
+	});
+	copiedText += headerText + '\n';
+
+
+	rows.forEach(row => {
+		const cells = row.querySelectorAll('td');
+		let rowText = '';
+		cells.forEach((cell, index) => {
+			// Replace newlines and extra spaces for cleaner formatting
+			const textContent = cell.textContent.trim().replace(/\s+/g, ' ');
+			rowText += textContent + (index < cells.length - 1 ? '\t' : '');
+		});
+		copiedText += rowText + '\n';
+	});
+
+	// Use the Clipboard API to write the text
+	navigator.clipboard.writeText(copiedText)
+		.then(() => {
+			console.log('Prize list copied to clipboard!');
+			// You could also add a visual confirmation message here
+			displayentriviaMessage({name: 'System'}, '📋 Prize list copied to clipboard!', false, false, true); 
+		})
+		.catch(err => {
+			console.error('Failed to copy prize list:', err);
+			// Show an error message if copying fails
+			displayentriviaMessage({name: 'System'}, '⚠️ Failed to copy prize list. Please try again or check your browser permissions.', false, false, true);
+		});
+}
+
+document.getElementById('copyPrizelistBtn').addEventListener('click', function() {
+    const btn = this;
+    const originalText = btn.innerHTML;
+
+    // Call your copy function
+    copyToClipboard();
+
+    // Visual feedback: briefly change the button appearance
+    btn.innerHTML = "✅ Copied!";
+    btn.style.borderColor = "#00ff00";
+    btn.style.color = "#00ff00";
+
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.style.borderColor = "orange";
+        btn.style.color = "orange";
+    }, 2000);
+});
 function displayUnclaimedPrizes() {
     console.log("Prize Data:", prizeData);
 
