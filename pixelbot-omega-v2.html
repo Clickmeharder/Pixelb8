@@ -1,933 +1,1384 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PIXELBOT OMEGA // ANALYST CONSOLE v3.0</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<title>Pixelbot Entropia AI Engine</title>
 <style>
-:root {
-  --c-bg:          #03030a;
-  --c-bg2:         #07071a;
-  --c-surface:     rgba(10, 10, 28, 0.85);
-  --c-surface2:    rgba(15, 15, 40, 0.6);
-  --c-border:      rgba(80, 100, 255, 0.18);
-  --c-border-h:    rgba(140, 160, 255, 0.4);
-  --p-pink:        #f472b6;
-  --p-pink-dim:    rgba(244, 114, 182, 0.15);
-  --p-pink-glow:   rgba(244, 114, 182, 0.5);
-  --p-blue:        #60a5fa;
-  --p-blue-dim:    rgba(96, 165, 250, 0.12);
-  --p-blue-glow:   rgba(96, 165, 250, 0.5);
-  --p-cyan:        #22d3ee;
-  --p-cyan-dim:    rgba(34, 211, 238, 0.1);
-  --p-orange:      #fb923c;
-  --p-orange-dim:  rgba(251, 146, 60, 0.15);
-  --p-green:       #4ade80;
-  --p-green-dim:   rgba(74, 222, 128, 0.12);
-  --p-yellow:      #fbbf24;
-  --t-primary:   #e2e8f0;
-  --t-secondary: #94a3b8;
-  --t-dim:       #475569;
-  --t-accent:    var(--p-pink);
-  --f-mono:    'Share Tech Mono', monospace;
-  --f-display: 'Orbitron', sans-serif;
-  --f-body:    'Space Mono', monospace;
-  --glow-pink:   0 0 8px var(--p-pink-glow), 0 0 20px var(--p-pink-dim), 0 0 40px rgba(244,114,182,0.1);
-  --glow-blue:   0 0 8px var(--p-blue-glow), 0 0 20px var(--p-blue-dim);
-  --glow-cyan:   0 0 8px rgba(34,211,238,0.6), 0 0 20px var(--p-cyan-dim);
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  background: var(--c-bg);
-  color: var(--t-primary);
-  font-family: var(--f-mono);
-  height: 100vh;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  grid-template-rows: 48px 1fr;
+    background:#0b0f14;
+    color:#d6e2ff;
+    font-family:Arial,Helvetica,sans-serif;
+    margin:0;
 }
-body::after {
-  content: "";
-  position: fixed; inset: 0;
-  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);
-  pointer-events: none; z-index: 9999;
+header {
+    padding:10px 20px;
+    background:#111827;
+    border-bottom:1px solid #222;
 }
-#topbar {
-  grid-column: 1 / -1;
-  background: linear-gradient(90deg, #000 0%, var(--c-bg2) 100%);
-  border-bottom: 1px solid var(--c-border);
-  display: flex; align-items: center;
-  padding: 0 20px; gap: 24px;
-  position: relative; z-index: 100;
+#console {
+    padding:20px;
 }
-#topbar::after {
-  content: "";
-  position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--p-pink), var(--p-blue), transparent);
-  animation: borderflow 4s linear infinite;
+textarea {
+    width:100%;
+    height:90px;
+    background:#0f172a;
+    color:#d6e2ff;
+    border:1px solid #333;
+    padding:10px;
 }
-@keyframes borderflow { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
-.topbar-logo { font-family: var(--f-display); font-size: 0.7rem; font-weight: 900; letter-spacing: 3px; color: var(--p-pink); text-shadow: var(--glow-pink); }
-.topbar-logo span { color: var(--p-blue); }
-.topbar-tags { display: flex; gap: 8px; margin-left: auto; }
-.tag { font-size: 0.55rem; letter-spacing: 2px; padding: 3px 8px; border: 1px solid; border-radius: 2px; }
-.tag-pink { border-color: var(--p-pink); color: var(--p-pink); }
-.tag-blue { border-color: var(--p-blue); color: var(--p-blue); }
-.tag-green { border-color: var(--p-green); color: var(--p-green); animation: blink 2s step-end infinite; }
-@keyframes blink { 50% { opacity: 0.2; } }
-#vram-bar { display: flex; align-items: center; gap: 8px; font-size: 0.55rem; color: var(--t-secondary); }
-#vram-fill { height: 4px; width: 80px; background: var(--c-border); border-radius: 2px; overflow: hidden; }
-#vram-inner { height: 100%; width: 0%; background: linear-gradient(90deg, var(--p-green), var(--p-yellow)); transition: width 0.5s, background 0.5s; border-radius: 2px; }
-#sidebar {
-  background: linear-gradient(180deg, #000 0%, var(--c-bg2) 100%);
-  border-right: 1px solid var(--c-border);
-  display: flex; flex-direction: column;
-  padding: 16px; gap: 14px;
-  overflow: hidden;
+button {
+    padding:10px 18px;
+    background:#2563eb;
+    border:none;
+    color:white;
+    margin-top:10px;
+    cursor:pointer;
 }
-.panel-label { font-size: 0.5rem; letter-spacing: 4px; text-transform: uppercase; color: var(--t-dim); border-bottom: 1px solid var(--c-border); padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
-.panel-label .pulse-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--p-green); box-shadow: 0 0 6px var(--p-green); animation: blink 1.4s ease-in-out infinite; }
-#mascot-wrap { background: radial-gradient(ellipse at center, rgba(60,40,120,0.3) 0%, #000 70%); border: 1px solid var(--c-border); border-radius: 4px; height: 180px; position: relative; overflow: hidden; }
-#mascot-wrap::before { content: "NEURAL-LINK ACTIVE"; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); font-size: 0.45rem; letter-spacing: 3px; color: var(--p-pink); opacity: 0.6; }
-#bot-canvas { width: 100%; height: 100%; display: block; }
-.status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.stat-cell { background: var(--c-surface); border: 1px solid var(--c-border); padding: 8px 10px; border-radius: 3px; display: flex; flex-direction: column; gap: 2px; }
-.stat-cell .lbl { font-size: 0.45rem; letter-spacing: 2px; color: var(--t-dim); }
-.stat-cell .val { font-size: 0.75rem; color: var(--p-cyan); font-family: var(--f-display); font-weight: 700; }
-.stat-cell .val.pink { color: var(--p-pink); }
-.stat-cell .val.green { color: var(--p-green); }
-.stat-cell .val.orange { color: var(--p-orange); }
-.api-toggle-row { display: flex; align-items: center; justify-content: space-between; background: var(--c-surface); border: 1px solid var(--c-border); padding: 8px 12px; border-radius: 3px; }
-.api-toggle-row label { font-size: 0.55rem; letter-spacing: 2px; color: var(--t-secondary); }
-.toggle-switch { position: relative; width: 36px; height: 18px; }
-.toggle-switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; inset: 0; cursor: pointer; background: #1a1a2e; border: 1px solid var(--c-border); border-radius: 18px; transition: 0.3s; }
-.slider::before { content: ""; position: absolute; height: 12px; width: 12px; left: 2px; top: 2px; background: var(--t-dim); border-radius: 50%; transition: 0.3s; }
-input:checked + .slider { background: var(--p-blue-dim); border-color: var(--p-blue); }
-input:checked + .slider::before { transform: translateX(18px); background: var(--p-blue); box-shadow: var(--glow-blue); }
-#file-registry { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; min-height: 0; }
-#file-registry::-webkit-scrollbar { width: 3px; }
-#file-registry::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 2px; }
-.file-node { display: flex; align-items: center; gap: 8px; background: var(--c-surface); border: 1px solid var(--c-border); padding: 7px 10px; border-radius: 3px; font-size: 0.6rem; cursor: pointer; transition: border-color 0.2s, background 0.2s; position: relative; overflow: hidden; }
-.file-node::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--p-cyan); box-shadow: var(--glow-cyan); }
-.file-node:hover { border-color: var(--c-border-h); background: rgba(34,211,238,0.06); }
-.file-node .fname { flex: 1; color: var(--t-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.file-node .fsize { color: var(--t-dim); font-size: 0.5rem; white-space: nowrap; }
-.file-node .fstatus { color: var(--p-green); font-size: 0.5rem; }
-.upload-zone { border: 1px dashed rgba(96,165,250,0.3); padding: 10px; text-align: center; font-size: 0.55rem; letter-spacing: 2px; color: var(--t-dim); cursor: pointer; border-radius: 3px; transition: all 0.2s; }
-.upload-zone:hover { border-color: var(--p-blue); color: var(--p-blue); background: var(--p-blue-dim); }
-#main-viewport { display: grid; grid-template-rows: 1fr auto; overflow: hidden; position: relative; background: radial-gradient(ellipse at 80% 20%, rgba(60, 30, 100, 0.12) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(0, 60, 120, 0.1) 0%, transparent 50%), var(--c-bg); }
-#terminal { overflow-y: auto; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; }
-#terminal::-webkit-scrollbar { width: 4px; }
-#terminal::-webkit-scrollbar-thumb { background: rgba(244,114,182,0.3); border-radius: 2px; }
-.entry { display: flex; flex-direction: column; gap: 4px; animation: entryIn 0.25s ease-out; }
-@keyframes entryIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-.entry-meta { font-size: 0.5rem; letter-spacing: 3px; color: var(--t-dim); display: flex; align-items: center; gap: 8px; }
-.entry-meta .em-name { color: var(--t-secondary); }
-.entry-meta .em-time { margin-left: auto; }
-.entry-body { background: var(--c-surface); border: 1px solid var(--c-border); padding: 14px 18px; border-radius: 4px; font-size: 0.8rem; line-height: 1.7; font-family: var(--f-body); backdrop-filter: blur(12px); position: relative; transition: border-color 0.2s; }
-.entry.user .entry-body { border-right: 3px solid var(--p-pink); background: rgba(244, 114, 182, 0.04); }
-.entry.ai .entry-body { border-left: 3px solid var(--p-blue); background: rgba(96, 165, 250, 0.04); }
-.entry.system .entry-body { border-left: 3px solid var(--p-cyan); background: var(--p-cyan-dim); font-size: 0.7rem; color: var(--t-secondary); }
-.entry.error .entry-body { border-left: 3px solid var(--p-orange); background: var(--p-orange-dim); color: var(--p-orange); }
-.streaming .entry-body { border-left-color: var(--p-pink); animation: streamglow 1.5s ease-in-out infinite; }
-@keyframes streamglow { 0%, 100% { box-shadow: none; } 50% { box-shadow: inset 0 0 20px rgba(244,114,182,0.05), 0 0 10px rgba(244,114,182,0.1); } }
-.cursor-blink::after { content: "▮"; color: var(--p-pink); animation: blink 0.8s step-end infinite; }
-.source-badge { display: inline-block; font-size: 0.5rem; letter-spacing: 2px; padding: 2px 6px; border-radius: 2px; margin-right: 6px; background: var(--p-blue-dim); border: 1px solid var(--p-blue); color: var(--p-blue); vertical-align: middle; }
-.source-badge.nexus { background: var(--p-orange-dim); border-color: var(--p-orange); color: var(--p-orange); }
-.source-badge.nodata { background: var(--p-orange-dim); border-color: var(--p-orange); color: var(--p-orange); }
-#dock { padding: 16px 32px 20px; background: linear-gradient(transparent, rgba(3,3,10,0.98) 40%); border-top: 1px solid var(--c-border); position: relative; }
-#context-readout { display: flex; gap: 12px; margin-bottom: 10px; font-size: 0.52rem; letter-spacing: 2px; color: var(--t-dim); }
-#context-readout .ctx-item { display: flex; align-items: center; gap: 5px; }
-#context-readout .ctx-val { color: var(--p-cyan); }
-.input-row { display: flex; gap: 8px; }
-.input-wrapper { flex: 1; display: flex; background: rgba(0,0,0,0.7); border: 1px solid var(--c-border); border-radius: 6px; padding: 4px; transition: border-color 0.2s, box-shadow 0.2s; backdrop-filter: blur(10px); }
-.input-wrapper:focus-within { border-color: var(--p-pink); box-shadow: 0 0 16px var(--p-pink-dim), 0 0 0 1px rgba(244,114,182,0.1) inset; }
-#prompt-prefix { align-self: center; padding: 0 12px; font-size: 0.65rem; color: var(--p-pink); opacity: 0.7; white-space: nowrap; }
-input#user-input { flex: 1; background: transparent; border: none; color: var(--t-primary); padding: 12px 8px; font-family: var(--f-mono); font-size: 0.82rem; outline: none; caret-color: var(--p-pink); }
-input#user-input::placeholder { color: var(--t-dim); }
-input#user-input:disabled { opacity: 0.4; cursor: not-allowed; }
-#sync-btn { background: linear-gradient(135deg, var(--p-pink), #c026d3); border: none; border-radius: 5px; padding: 0 28px; font-family: var(--f-display); font-weight: 700; font-size: 0.6rem; letter-spacing: 3px; color: #fff; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(244,114,182,0.3); }
-#sync-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(244,114,182,0.5); }
-#sync-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-#reset-btn { background: transparent; border: 1px solid rgba(251,146,60,0.4); border-radius: 5px; padding: 0 16px; font-family: var(--f-mono); font-size: 0.55rem; letter-spacing: 2px; color: var(--p-orange); cursor: pointer; transition: all 0.2s; }
-#reset-btn:hover { background: var(--p-orange-dim); border-color: var(--p-orange); }
-#boot-overlay { position: fixed; inset: 0; background: var(--c-bg); z-index: 9998; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; transition: opacity 0.6s; }
-#boot-overlay.hidden { opacity: 0; pointer-events: none; }
-.boot-logo { font-family: var(--f-display); font-weight: 900; font-size: 2rem; letter-spacing: 8px; color: var(--p-pink); text-shadow: var(--glow-pink); }
-.boot-logo span { color: var(--p-blue); }
-.boot-sub { font-size: 0.6rem; letter-spacing: 5px; color: var(--t-dim); }
-#boot-progress-wrap { width: 320px; height: 4px; background: var(--c-border); border-radius: 2px; overflow: hidden; }
-#boot-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--p-pink), var(--p-blue)); border-radius: 2px; transition: width 0.3s ease; box-shadow: 0 0 10px var(--p-pink-glow); }
-#boot-status { font-size: 0.58rem; letter-spacing: 2px; color: var(--t-secondary); min-height: 1em; }
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 4px; }
-.highlight-pink { color: var(--p-pink); }
-.highlight-blue { color: var(--p-blue); }
-.highlight-cyan { color: var(--p-cyan); }
-.highlight-green { color: var(--p-green); }
-.highlight-orange { color: var(--p-orange); }
+#output {
+    margin-top:20px;
+    background:#020617;
+    border:1px solid #222;
+    padding:15px;
+    white-space:pre-wrap;
+}
 </style>
 </head>
 <body>
 
-<div id="boot-overlay">
-  <div class="boot-logo">PIXELBOT<span> OMEGA</span></div>
-  <div class="boot-sub">ANALYST CONSOLE v3.0 // ENTROPIA INTELLIGENCE PLATFORM</div>
-  <div id="boot-progress-wrap"><div id="boot-progress-bar"></div></div>
-  <div id="boot-status">Initializing neural core...</div>
-</div>
-
-<header id="topbar">
-  <div class="topbar-logo">PIXELB<span>8</span>.COM // OMEGA</div>
-  <div id="vram-bar">NEURAL<div id="vram-fill"><div id="vram-inner"></div></div><span id="vram-label">0%</span></div>
-  <div class="topbar-tags">
-    <div class="tag tag-pink">ENTROPIA INTEL</div>
-    <div class="tag tag-blue">LOCAL-FIRST</div>
-    <div class="tag tag-green" id="status-tag">LOADING</div>
-  </div>
+<header>
+<h2>Pixelbot Entropia AI Engine</h2>
 </header>
 
-<aside id="sidebar">
-  <div class="panel-label">NEXUS CORE — OMEGA UNIT<div class="pulse-dot"></div></div>
-  <div id="mascot-wrap"><canvas id="bot-canvas" width="268" height="180"></canvas></div>
-  <div class="status-grid">
-    <div class="stat-cell"><div class="lbl">SHARDS LOADED</div><div class="val pink" id="stat-shards">0</div></div>
-    <div class="stat-cell"><div class="lbl">CHUNKS INDEXED</div><div class="val" id="stat-terms">0</div></div>
-    <div class="stat-cell"><div class="lbl">QUERIES RUN</div><div class="val green" id="stat-queries">0</div></div>
-    <div class="stat-cell"><div class="lbl">NEXUS API</div><div class="val orange" id="stat-nexus">ONLINE</div></div>
-  </div>
-  <div class="api-toggle-row">
-    <label for="nexus-toggle">NEXUS API LAYER</label>
-    <div class="toggle-switch"><input type="checkbox" id="nexus-toggle" checked><span class="slider"></span></div>
-  </div>
-  <div class="panel-label">KNOWLEDGE REGISTRY<span style="font-size:0.45rem; color: var(--p-cyan)" id="kb-count">0 SHARDS</span></div>
-  <div id="file-registry"></div>
-  <label for="file-in" class="upload-zone" id="upload-label">⬆ INGEST DATA SHARD</label>
-  <input type="file" id="file-in" hidden multiple accept=".txt,.csv,.json,.md">
-</aside>
+<div id="console">
 
-<main id="main-viewport">
-  <div id="terminal"></div>
-  <div id="dock">
-    <div id="context-readout">
-      <div class="ctx-item">SHARDS <span class="ctx-val" id="ctx-shards">0</span></div>
-      <div class="ctx-item">MODEL <span class="ctx-val" id="ctx-model">LLAMA-3.2-1B</span></div>
-      <div class="ctx-item">MODE <span class="ctx-val" id="ctx-mode">RAG+NEXUS</span></div>
-      <div class="ctx-item">CHUNKS <span class="ctx-val" id="ctx-tokens">0</span></div>
-    </div>
-    <div class="input-row">
-      <div class="input-wrapper">
-        <div id="prompt-prefix">OMEGA›</div>
-        <input type="text" id="user-input" placeholder="Awaiting analyst query..." disabled>
-      </div>
-      <button id="reset-btn" title="Soft-reset WebGPU context">RESET</button>
-      <button id="sync-btn" disabled>SYNC</button>
-    </div>
-  </div>
-</main>
+<textarea id="question" placeholder="Ask about items, amps, mobs, missions..."></textarea>
+<br>
+<button onclick="askAI()">Query Knowledge</button>
 
-<script type="module">
-import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+<div id="output"></div>
 
-// ── Constants ──────────────────────────────────────────
-const MODEL_ID   = "Llama-3.2-1B-Instruct-q4f32_1-MLC";
-const DB_NAME    = "OmegaRAG";
-const DB_VERSION = 3;
+</div>
 
-// FIX 1: Much smaller chunk size = finer retrieval granularity
-const CHUNK_SIZE     = 150;   // was 400 — too coarse
-const CHUNK_OVERLAP  = 30;    // sliding window overlap to avoid cutting context at boundaries
-const MAX_CTX_CHARS  = 6000;  // was 2500 — give LLM more retrieved context
-const TOP_K_CHUNKS   = 20;    // was 12
+<script>
+/* ===============================
+   ORIGINAL ENTROPIA NEXUS SCRIPT
+   =============================== */
 
-// ── State ──────────────────────────────────────────────
-let engine        = null;
-let db            = null;
-let isStreaming   = false;
-let queryCount    = 0;
-
-// FIX 2: Separate raw text from flattened searchable text
-// knowledgeBase[name] = { raw: string, flat: string, type: 'json'|'csv'|'text' }
-let knowledgeBase = {};
-let metaManifest  = [];
-
-const BM25_K1 = 1.5, BM25_B = 0.75;
-
-// ── UI refs ────────────────────────────────────────────
-const $ = id => document.getElementById(id);
-const ui = {
-  terminal: $('terminal'), input: $('user-input'), syncBtn: $('sync-btn'),
-  resetBtn: $('reset-btn'), fileIn: $('file-in'), fileReg: $('file-registry'),
-  bootOverlay: $('boot-overlay'), bootBar: $('boot-progress-bar'), bootStatus: $('boot-status'),
-  statusTag: $('status-tag'), vramInner: $('vram-inner'), vramLabel: $('vram-label'),
-  statShards: $('stat-shards'), statTerms: $('stat-terms'), statQueries: $('stat-queries'),
-  statNexus: $('stat-nexus'), kbCount: $('kb-count'), ctxShards: $('ctx-shards'),
-  ctxMode: $('ctx-mode'), ctxTokens: $('ctx-tokens'), nexusToggle: $('nexus-toggle'),
+let isDropdownsInitialized = false;
+// ================= Cached Data =================
+let cachedWeapons = [];
+let cachedAmplifiers = [];
+let cachedVisionAttachments = [];
+let cachedScopes = [];
+let cachedAbsorbers = [];
+let cachedBlueprints = [];
+let cachedClothes = [];   // all clothing items including rings
+let cachedMedicalTools = []; // NEW
+let cachedMedicalChips = []; // NEW
+window.cachedFaps = [];
+// ================= Cached Mining Data =================
+let cachedFinders = [];
+let cachedFinderAmps = [];
+let cachedExcavators = [];
+// ================= Dedicated Mining State ================
+window.miningLoadout = {
+    finder: null,
+    amplifier: null,
+    extractor: null,
+    activeSearches: {
+        enmatter: false,
+        ore: false,
+        treasure: false
+    }
+};
+// ================= Current Data ================
+window.currentLoadout = {
+  weapon: null,
+  amplifier: null,
+  vision1: null,
+  vision2: null,
+  scope: null,
+  absorber: null,
+  LeftRing: null,
+  RightRing: null,
+  mainFap: null, 
+  secondaryFap: null
 };
 
-// ── Mascot ─────────────────────────────────────────────
-const Mascot = (() => {
-  const canvas = $('bot-canvas');
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  let state = 'idle', frame = 0, particles = [];
-  const C = { body:'#1a1a3e', eye:'#60a5fa', pink:'#f472b6', cyan:'#22d3ee', green:'#4ade80', orange:'#fb923c' };
-  function spawnParticle(x, y, color) {
-    particles.push({ x, y, vx:(Math.random()-0.5)*2, vy:-Math.random()*1.5-0.5, life:1, decay:0.02+Math.random()*0.02, color, size:2+Math.random()*3 });
-  }
-  function getStateColor() {
-    return state==='thinking'?C.cyan:state==='streaming'?C.pink:state==='stress'?C.orange:state==='success'?C.green:C.eye;
-  }
-  function render() {
-    frame++;
-    ctx.clearRect(0,0,W,H);
-    const cx=W/2, cy=H/2, breathe=Math.sin(frame*0.04)*3, ec=getStateColor();
-    if(state!=='idle'){
-      const a=(Math.sin(frame*0.08)+1)*0.08+0.02;
-      ctx.strokeStyle=`rgba(96,165,250,${a})`; ctx.lineWidth=1;
-      for(let i=1;i<=3;i++){ctx.beginPath();ctx.arc(cx,cy,40+i*18+Math.sin(frame*0.06+i)*4,0,Math.PI*2);ctx.stroke();}
-    }
-    ctx.shadowColor=ec; ctx.shadowBlur=8+breathe; ctx.fillStyle=C.body; ctx.strokeStyle=ec; ctx.lineWidth=1.5;
-    const bw=60, bh=70+breathe;
-    ctx.beginPath(); ctx.roundRect(cx-bw/2,cy-bh/2+10,bw,bh,8); ctx.fill(); ctx.stroke(); ctx.shadowBlur=0;
-    ctx.fillStyle=C.body; ctx.strokeStyle=ec; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.roundRect(cx-22,cy-bh/2-24+12,44,36,6); ctx.fill(); ctx.stroke();
-    const sw=Math.sin(frame*0.05)*4;
-    ctx.strokeStyle=ec; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(cx,cy-bh/2-24+14); ctx.lineTo(cx+sw,cy-bh/2-24-8); ctx.stroke();
-    ctx.fillStyle=ec; ctx.shadowColor=ec; ctx.shadowBlur=6; ctx.beginPath(); ctx.arc(cx+sw,cy-bh/2-24-10,3,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
-    const ey=cy-bh/2-12+2, blinkH=state==='thinking'&&Math.sin(frame*0.2)>0.97?2:8;
-    for(let s of[-10,10]){
-      ctx.fillStyle=`rgba(96,165,250,0.15)`; ctx.beginPath(); ctx.ellipse(cx+s,ey,9,9,0,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle=ec; ctx.shadowColor=ec; ctx.shadowBlur=10; ctx.beginPath(); ctx.ellipse(cx+s,ey,5,blinkH/2,0,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
-    }
-    const mp=state==='streaming'?(Math.sin(frame*0.15)+1)*0.5:0.5;
-    ctx.strokeStyle=ec; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx,ey+12,8,Math.PI*mp*0.2,Math.PI-Math.PI*mp*0.2); ctx.stroke();
-    if(state==='streaming'||state==='thinking'){
-      for(let i=0;i<4;i++){const la=Math.max(0,Math.sin(frame*0.1-i*0.8))*0.6,lw=(20+Math.sin(frame*0.07+i*1.2)*15)*(i===0?1:0.7);ctx.fillStyle=`rgba(96,165,250,${la})`;ctx.fillRect(cx-lw/2,cy-2+i*10,lw,2);}
-    }
-    if(state==='stress'){ctx.strokeStyle=`rgba(251,146,60,${(Math.sin(frame*0.2)+1)*0.4+0.2})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(cx-10,cy+5);ctx.lineTo(cx,cy-5);ctx.lineTo(cx+10,cy+5);ctx.stroke();}
-    if(state==='success'){
-      ctx.strokeStyle=C.green;ctx.lineWidth=2;ctx.shadowColor=C.green;ctx.shadowBlur=8;ctx.beginPath();ctx.moveTo(cx-10,cy+5);ctx.lineTo(cx-3,cy+12);ctx.lineTo(cx+12,cy-5);ctx.stroke();ctx.shadowBlur=0;
-      if(frame%3===0)spawnParticle(cx+(Math.random()-0.5)*30,cy+(Math.random()-0.5)*20,C.green);
-    }
-    const as=Math.sin(frame*0.05)*(state==='streaming'?15:5);
-    ctx.strokeStyle=ec;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx-bw/2,cy+15);ctx.lineTo(cx-bw/2-14,cy+30+as);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(cx+bw/2,cy+15);ctx.lineTo(cx+bw/2+14,cy+30-as);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(cx-12,cy+bh/2+10);ctx.lineTo(cx-14,cy+bh/2+28);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(cx+12,cy+bh/2+10);ctx.lineTo(cx+14,cy+bh/2+28);ctx.stroke();
-    particles=particles.filter(p=>p.life>0);
-    for(const p of particles){ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);ctx.fill();p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;}
-    ctx.globalAlpha=1;
-    requestAnimationFrame(render);
-  }
-  render();
-  return { set:(s)=>{state=s;}, get:()=>state };
-})();
+let currentWeapon = null;
+let currentAmplifier = null;
+let currentVision1 = null;
+let currentVision2 = null;
+let currentScope = null;
+let currentAbsorber = null;
+let currentLeftRing = null;
+let currentRightRing = null;
+// ======================================================
+const BASE_URL = 'https://api.entropianexus.com/';
+const statusEl = document.getElementById('NexusAPIstatus');
 
-// ── IndexedDB ─────────────────────────────────────────
-function openDB() {
-  return new Promise((res, rej) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = e => {
-      const d = e.target.result;
-      if (!d.objectStoreNames.contains('shards'))
-        d.createObjectStore('shards', { keyPath: 'name' });
-    };
-    req.onsuccess = e => res(e.target.result);
-    req.onerror   = e => rej(e.target.error);
-  });
-}
-async function dbPut(item) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction('shards', 'readwrite');
-    tx.objectStore('shards').put(item).onsuccess = () => res();
-    tx.onerror = e => rej(e.target.error);
-  });
-}
-async function dbGetAll() {
-  return new Promise((res, rej) => {
-    const tx = db.transaction('shards', 'readonly');
-    const req = tx.objectStore('shards').getAll();
-    req.onsuccess = e => res(e.target.result);
-    req.onerror   = e => rej(e.target.error);
-  });
-}
-async function dbDelete(name) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction('shards', 'readwrite');
-    tx.objectStore('shards').delete(name).onsuccess = () => res();
-    tx.onerror = e => rej(e.target.error);
-  });
+// 🔀 Toggle between local JSONs and API
+let USE_LOCAL_DATA = true;
+window.BASE_URL = BASE_URL; // <-- FIX: Set BASE_URL globally
+
+// 🔀 Toggle between local JSONs and API
+window.USE_LOCAL_DATA = USE_LOCAL_DATA; // <-- FIX: Set USE_LOCAL_DATA globally
+function toggleDataSource(type) {
+  if (type === "data-source") {
+    USE_LOCAL_DATA = !USE_LOCAL_DATA;
+  if (DEBUG) console.log("Data source toggled. Local?", USE_LOCAL_DATA);
+    // Update all elements with class 'NexusAPIstatus'
+    updateStatusElements();
+    initDropdowns(); // repopulate and cache everything
+  }
 }
 
-// ── FIX 3: Smart text flattener ───────────────────────
-// Converts JSON/CSV into human-readable flat text so BM25 can index field values
-function flattenData(raw, fname) {
-  const ext = fname.split('.').pop().toLowerCase();
+// ================= Formulas =================
+const entropiaFormulas = {
+  hitAbility: `(Non-SIB) HA = 4 + 0.06 * Hit Level
+(SIB) HA = 6 + ((Hit Level - Recommended) / (Max - Recommended)) * 4`,
+  critAbility: `(Non-SIB) CHA = √Hit Level
+(SIB) CHA = √((Hit Level - Recommended) / (Max - Recommended)) * 10`,
+  hitRate: `Hit Rate = (Hit Ability + 80) / 100`,
+  dpp: `DPP = Effective Damage / (Ammo Cost + Decay Cost)`,
+  minDamage: `(Non-SIB) MinDamage = 25% + (0.75 * (DMG Level / Max DMG Level))
+(SIB) MinDamage = 50% + (0.50 * (DMG Level - Recommended) / (Max - Recommended))`,
+  apm: `⚠Proper Formula Unknown⚠\nCurrent approximation:
+APM = BaseAPM * (0.5 + 0.5 * (Hit Level - Start) / (Max - Start))
+(Capped between MinAPM and BaseAPM)`,
+  reloadTime: `⚠Proper Formula Unknown⚠\nCurrent approximation:
+Reload Time = 60 / APM`,
+  effectiveDamage: `Effective damage = Average damage * Hit rate
+Or, more precisely:
+Effective damage = ((Minimal damage + Maximal damage) / 2) * (80 + Hit ability)
+For a maxed weapon: MaxDamage * 0.75 * 0.9`
+};
 
-  // ── JSON ──
-  if (ext === 'json') {
+// ================= Terminal Logging =================
+function appendData(text) {
+  const line = document.createElement("div");
+  line.textContent = text;
+  terminalOutput.appendChild(line);
+  terminalOutput.scrollTop = terminalOutput.scrollHeight;
+}
+
+// ================= Local/API Data Loader =================
+// ================= Local/API Data Loader =================
+async function getData(endpoint, localFile) {
+  // BASE_URL is likely defined globally in this file
+  const fullUrl = window.BASE_URL + endpoint; 
+
+  if (USE_LOCAL_DATA) {
     try {
-      const parsed = JSON.parse(raw);
-      const records = Array.isArray(parsed) ? parsed
-        : (parsed && typeof parsed === 'object' ? Object.values(parsed) : null);
-      if (records && records.length > 0) {
-        // Convert each record to "key: value key: value ..." sentence
-        return records.map(rec => {
-          if (typeof rec !== 'object' || rec === null) return String(rec);
-          return Object.entries(rec)
-            .map(([k, v]) => {
-              const vStr = typeof v === 'object' ? JSON.stringify(v) : String(v);
-              // key and value both searchable, e.g. "name: ArMatrix LP-40 damage: 50"
-              return `${k.replace(/_/g,' ')}: ${vStr}`;
-            })
-            .join(' | ');
-        }).join('\n');
+      // 🟢 Attempting local file load
+      const data = await window.electronAPI.loadNexusJSON(localFile);
+      
+      // Check if data was successfully loaded and is not empty
+      if (data && (Array.isArray(data) ? data.length > 0 : data?.items?.length > 0)) {
+		if (DEBUG) console.log(`[NEXUS_SOURCE:SUCCESS] Data found in local cache: ${localFile}`);
+        return Array.isArray(data) ? data : data?.items || [];
       }
-      // Scalar / nested object fallback
-      return JSON.stringify(parsed, null, 1).replace(/[{}\[\]"]/g, ' ').replace(/,/g, ' ');
-    } catch { /* fall through to plain text */ }
-  }
+      
+      // If we reach here, local data failed (empty/null). This indicates a silent local failure.
+      console.warn(`[NEXUS_SOURCE:WARN] Local cache empty/invalid for ${localFile}. Returning []. (No API fallback here)`);
+      return [];
 
-  // ── CSV ──
-  if (ext === 'csv') {
-    const lines = raw.trim().split('\n');
-    if (lines.length < 2) return raw;
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,''));
-    return lines.slice(1).map(line => {
-      const vals = line.split(',').map(v => v.trim().replace(/"/g,''));
-      return headers.map((h, i) => `${h}: ${vals[i] ?? ''}`).join(' | ');
-    }).join('\n');
-  }
-
-  // ── Plain text / Markdown ── keep as-is
-  return raw;
-}
-
-// ── BM25 Engine ───────────────────────────────────────
-class BM25Index {
-  constructor() { this.docs=[]; this.idf=new Map(); this.avgdl=0; this.dirty=true; }
-
-  tokenize(text) {
-    return text.toLowerCase()
-      .replace(/[^a-z0-9\s\-_.%]/g, ' ')
-      .split(/\s+/)
-      .filter(t => t.length > 1 && !STOPWORDS.has(t));
-  }
-
-  addDoc(id, text) {
-    const terms = this.tokenize(text);
-    const tf = new Map();
-    for (const t of terms) tf.set(t, (tf.get(t)||0)+1);
-    this.docs.push({ id, terms, tf, len: terms.length, text });
-    this.dirty = true;
-  }
-
-  rebuild() {
-    if (!this.dirty) return;
-    this.idf.clear();
-    const N = this.docs.length;
-    this.avgdl = this.docs.reduce((s,d)=>s+d.len,0) / (N||1);
-    const df = new Map();
-    for (const doc of this.docs)
-      for (const t of new Set(doc.terms)) df.set(t,(df.get(t)||0)+1);
-    for (const [t,n] of df)
-      this.idf.set(t, Math.log((N-n+0.5)/(n+0.5)+1));
-    this.dirty = false;
-  }
-
-  score(docIdx, queryTerms) {
-    this.rebuild();
-    const doc = this.docs[docIdx];
-    let score = 0;
-    for (const qt of queryTerms) {
-      const idf = this.idf.get(qt)||0;
-      const tf  = doc.tf.get(qt)||0;
-      const num = tf * (BM25_K1+1);
-      const den = tf + BM25_K1*(1-BM25_B+BM25_B*doc.len/this.avgdl);
-      score += idf * num / den;
+    } catch (err) {
+      // ❌ Local load failed due to an error (e.g., file not found, bad JSON)
+      console.error(`[NEXUS_SOURCE:ERROR] Local load FAILED for ${localFile} due to error.`, err);
+      return [];
     }
-    return score;
-  }
-
-  search(query, topK=TOP_K_CHUNKS) {
-    this.rebuild();
-    const qTerms = this.tokenize(query);
-    if (qTerms.length === 0) return [];
-    const scores = this.docs.map((_,i)=>({ idx:i, score:this.score(i,qTerms) }));
-    scores.sort((a,b)=>b.score-a.score);
-    return scores.slice(0, topK).filter(s => s.score > 0);
-  }
-}
-
-const STOPWORDS = new Set([
-  'a','an','the','and','or','but','in','on','at','to','for','of','with','by','from',
-  'is','are','was','were','be','been','have','has','had','do','does','did','will',
-  'would','could','should','may','might','can','this','that','these','those',
-  'i','you','he','she','it','we','they','me','him','her','us','them','what',
-  'how','when','where','why','which','who','not','no','yes','so','if','as',
-]);
-
-let bm25 = new BM25Index();
-
-// FIX 4: Overlapping chunks so context isn't cut at arbitrary word boundaries
-function chunkText(text, size=CHUNK_SIZE, overlap=CHUNK_OVERLAP) {
-  const words = text.split(/\s+/).filter(Boolean);
-  if (words.length === 0) return [];
-  const chunks = [];
-  let i = 0;
-  while (i < words.length) {
-    chunks.push(words.slice(i, i+size).join(' '));
-    if (i + size >= words.length) break;
-    i += size - overlap;
-  }
-  return chunks;
-}
-
-function ingestShard(name, raw) {
-  // Build flat searchable version
-  const flat = flattenData(raw, name);
-  const ext  = name.split('.').pop().toLowerCase();
-
-  // Detect type for record counting
-  let type = 'text', recordCount = null;
-  if (ext === 'json') {
+  } else {
     try {
-      const p = JSON.parse(raw);
-      const recs = Array.isArray(p) ? p : (p && typeof p==='object' ? Object.values(p) : null);
-      if (recs) { type='json'; recordCount = recs.length; }
-    } catch {}
-  } else if (ext === 'csv') {
-    type = 'csv';
-    recordCount = raw.trim().split('\n').length - 1;
+      // 🌍 Attempting external API fetch
+      const res = await fetch(fullUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+    if (DEBUG) console.log(`[NEXUS_SOURCE:SUCCESS] Fetched from External API: ${fullUrl}`);
+      return Array.isArray(data) ? data : data?.items || [];
+    } catch (err) {
+      // ❌ API fetch failed
+      console.error(`[NEXUS_SOURCE:ERROR] Failed to fetch External API ${endpoint}:`, err);
+      return [];
+    }
   }
-
-  const chunks = chunkText(flat);
-  chunks.forEach((chunk, i) => bm25.addDoc(`${name}::${i}`, chunk));
-
-  knowledgeBase[name] = { raw, flat, type, recordCount };
-
-  // Topic extraction from flattened text
-  const topWords = bm25.tokenize(flat.slice(0, 3000))
-    .reduce((acc,t)=>{ acc[t]=(acc[t]||0)+1; return acc; }, {});
-  const topics = Object.entries(topWords).sort((a,b)=>b[1]-a[1]).slice(0,8).map(e=>e[0]);
-
-  return { name, size: raw.length, flatSize: flat.length, chunkCount: chunks.length, topics, type, recordCount };
 }
 
-// FIX 5: findRelevantContext returns deduplicated chunks with source labels
-function findRelevantContext(query, maxLen=MAX_CTX_CHARS) {
-  const results = bm25.search(query, TOP_K_CHUNKS);
-  if (results.length === 0) return { context: '', hitFiles: [] };
-
-  let context = '';
-  const seen  = new Set();
-  const hitFiles = new Set();
-
-  for (const r of results) {
-    const doc = bm25.docs[r.idx];
-    if (!doc) continue;
-    const fname = doc.id.split('::')[0];
-    hitFiles.add(fname);
-
-    // Deduplicate by doc id
-    if (seen.has(doc.id)) continue;
-    seen.add(doc.id);
-
-    const snippet = `[${fname}] ${doc.text}`;
-    if (context.length + snippet.length > maxLen) break;
-    context += snippet + '\n';
-  }
-
-  return { context: context.trim(), hitFiles: [...hitFiles] };
-}
-
-// ── Nexus API (Entropia Calculations) ─────────────────
-const EntropiaNexus = {
-  calculateDPP: (dmg, ammo, decay) => (dmg/((ammo||0)+(decay||0))).toFixed(4),
-  estimateROI:  (revenue, cost)    => (((revenue-cost)/cost)*100).toFixed(2)+'%',
-  pedToUSD:     ped  => (ped*0.10).toFixed(2),
-  usdToPED:     usd  => (usd*10).toFixed(2),
-  lootMU:       (base, mu) => (base*mu).toFixed(4),
-};
-
-function tryNexusIntercept(query) {
-  if (!ui.nexusToggle.checked) return null;
-  const q = query.toLowerCase();
-  const dppM = q.match(/dpp.*?(\d+\.?\d*)\s*dmg.*?(\d+\.?\d*)\s*ammo.*?(\d+\.?\d*)\s*decay/);
-  if (dppM) return `<span class="source-badge nexus">NEXUS CALC</span>DPP = <span class="highlight-cyan">${EntropiaNexus.calculateDPP(+dppM[1],+dppM[2],+dppM[3])}</span> (Dmg: ${dppM[1]}, Ammo: ${dppM[2]}, Decay: ${dppM[3]})`;
-  const pedM = q.match(/(\d+\.?\d*)\s*ped\s*(to|in)\s*usd/);
-  if (pedM) return `<span class="source-badge nexus">NEXUS CALC</span><span class="highlight-cyan">${pedM[1]} PED</span> = <span class="highlight-green">$${EntropiaNexus.pedToUSD(+pedM[1])} USD</span>`;
-  const usdM = q.match(/(\d+\.?\d*)\s*usd\s*(to|in)\s*ped/);
-  if (usdM) return `<span class="source-badge nexus">NEXUS CALC</span><span class="highlight-cyan">$${usdM[1]} USD</span> = <span class="highlight-green">${EntropiaNexus.usdToPED(+usdM[1])} PED</span>`;
-  const roiM = q.match(/roi.*?(\d+\.?\d*)\s*rev.*?(\d+\.?\d*)\s*cost/);
-  if (roiM) return `<span class="source-badge nexus">NEXUS CALC</span>ROI = <span class="highlight-cyan">${EntropiaNexus.estimateROI(+roiM[1],+roiM[2])}</span>`;
-  return null;
-}
-
-// ── Meta queries ───────────────────────────────────────
-function levenshtein(a,b){const m=a.length,n=b.length,dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i?(j?0:i):j));for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);return dp[m][n];}
-
-function matchQueryToFile(q) {
-  if (!q) return null;
-  const lq = q.toLowerCase();
-  for (const m of metaManifest) {
-    const fname = m.name.toLowerCase(), base = fname.replace(/\.[^.]+$/,'');
-    if (lq.includes(fname) || lq.includes(base)) return m.name;
-    const words=lq.split(/[\s_\-.]+/), bwords=base.split(/[\s_\-.]+/);
-    const hits=bwords.filter(bw=>words.some(w=>w===bw||(w.length>4&&bw.length>4&&levenshtein(w,bw)<=2))).length;
-    if (hits>=Math.max(1,bwords.length-1)) return m.name;
-  }
-  return null;
-}
-
-function isMetaQuery(q) {
-  if (/(what|which|list|show).*(know|have|loaded|file|shard|data|document)/i.test(q)||/manifest|knowledge base|what data/i.test(q)) return true;
-  if (/(what.?s?\s*(in|inside)|inside|contents?\s*of|tell me about|show me|describe|inspect|peek|summar)/i.test(q)&&matchQueryToFile(q)!==null) return true;
-  return false;
-}
-
-function handleMetaQuery(q) {
-  if (metaManifest.length===0)
-    return `<span class="source-badge">META</span>No data shards loaded. Upload files via <span class="highlight-pink">INGEST DATA SHARD</span>.`;
-  const tf = matchQueryToFile(q);
-  if (tf && knowledgeBase[tf]) return buildFileInspectReport(tf);
-  let out=`<span class="source-badge">META</span><span class="highlight-pink">KNOWLEDGE BASE MANIFEST</span> &mdash; ${metaManifest.length} shard(s):\n\n`;
-  for (const m of metaManifest) {
-    out+=`<span class="highlight-cyan">&#9658; ${m.name}</span>  <span style="color:var(--t-dim)">${(m.size/1024).toFixed(1)}KB raw &middot; ${m.chunkCount} chunks indexed`;
-    if (m.recordCount!==null) out+=` &middot; ${m.recordCount.toLocaleString()} records`;
-    out+=`</span>\n  <span style="color:var(--t-secondary)">Topics: ${m.topics.slice(0,6).join(', ')}</span>\n\n`;
-  }
-  return out.trimEnd();
-}
-
-function buildFileInspectReport(fname) {
-  const raw  = knowledgeBase[fname].raw;
-  const meta = metaManifest.find(m=>m.name===fname);
-  let out = `<span class="source-badge">META</span><span class="highlight-cyan">SHARD INSPECTION — ${fname}</span>\n`;
-  out+=`<span style="color:var(--t-dim)">${(meta.size/1024).toFixed(1)}KB &middot; ${meta.chunkCount} chunks &middot; Type: ${meta.type}</span>\n\n`;
+//------------------------------------------------------------
+//------------------------------------------------------------
+// ================= DOWNLOADING DATA =================
+async function downloadData(filename, endpoint) {
+  statusEl.innerHTML = `<div class=" NexusAPISpinner"></div>Fetching ${filename}...`;
   try {
-    const parsed=JSON.parse(raw), isArr=Array.isArray(parsed);
-    const records=isArr?parsed:(parsed&&typeof parsed==='object'?Object.values(parsed):null);
-    if (records&&records.length>0) {
-      out+=`<span class="highlight-green">Format:</span> JSON ${isArr?'Array':'Object'} — <span class="highlight-pink">${records.length.toLocaleString()} records</span>\n\n`;
-      const first=records.find(r=>r&&typeof r==='object');
-      if (first) out+=`<span class="highlight-green">Fields:</span> <span style="color:var(--t-secondary)">${Object.keys(first).join(', ')}</span>\n\n`;
-      out+=`<span class="highlight-green">Sample records:</span>\n`;
-      for (const [i,rec] of records.slice(0,3).entries()) {
-        const prev=typeof rec==='object'&&rec!==null
-          ?Object.entries(rec).slice(0,6).map(([k,v])=>`${k}: <span class="highlight-cyan">${String(v).slice(0,40)}</span>`).join(' · ')
-          :String(rec).slice(0,120);
-        out+=`<span style="color:var(--t-dim)">[${i+1}]</span> ${prev}\n`;
-      }
-    } else out+=`<span class="highlight-green">Format:</span> JSON object\n`;
-  } catch {
-    out+=`<span class="highlight-green">Format:</span> ${meta.type.toUpperCase()}\n\n`;
-    const safe=raw.slice(0,500).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    out+=`<span class="highlight-green">Preview:</span>\n<span style="color:var(--t-secondary)">${safe}</span>`;
-    if(raw.length>500) out+=`\n<span style="color:var(--t-dim)">… (${(raw.length/1024).toFixed(1)}KB total)</span>`;
+    const res = await fetch(BASE_URL + endpoint);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    statusEl.textContent = `Status: ${filename} downloaded!`;
+  } catch(err) {
+    console.error(err);
+    statusEl.textContent = `Status: Failed to fetch ${filename}`;
   }
-  return out;
 }
 
-// ── VRAM sim ───────────────────────────────────────────
-let vramUsage=0;
-function setVRAM(pct) {
-  vramUsage=Math.max(0,Math.min(100,pct));
-  ui.vramInner.style.width=vramUsage+'%';
-  ui.vramLabel.textContent=vramUsage+'%';
-  ui.vramInner.style.background=vramUsage>80
-    ?'linear-gradient(90deg,#f59e0b,#ef4444)'
-    :vramUsage>50?'linear-gradient(90deg,#4ade80,#fbbf24)'
-    :'linear-gradient(90deg,var(--p-green),var(--p-yellow))';
-  if(vramUsage>90) Mascot.set('stress');
-}
-
-// ── Terminal UI ────────────────────────────────────────
-const now=()=>new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
-
-function addEntry(html, type='ai', name=null) {
-  const labels={user:'ANALYST',ai:'OMEGA',system:'SYSTEM',error:'FAULT'};
-  const div=document.createElement('div');
-  div.className=`entry ${type}`;
-  div.innerHTML=`<div class="entry-meta"><span class="em-name">${name||labels[type]||type}</span><span class="em-time">${now()}</span></div><div class="entry-body">${html}</div>`;
-  ui.terminal.appendChild(div);
-  ui.terminal.scrollTop=ui.terminal.scrollHeight;
-  return div;
-}
-
-function updateStats() {
-  const sc=Object.keys(knowledgeBase).length;
-  ui.statShards.textContent=sc;
-  ui.statTerms.textContent=bm25.docs.length;
-  ui.statQueries.textContent=queryCount;
-  ui.kbCount.textContent=sc+' SHARDS';
-  ui.ctxShards.textContent=sc;
-  ui.ctxMode.textContent=ui.nexusToggle.checked?'RAG+NEXUS':'RAG ONLY';
-  ui.ctxTokens.textContent=bm25.docs.length;
-}
-
-// ── System Prompt ──────────────────────────────────────
-function buildSystemPrompt(context, hasContext) {
-  const dataSection = hasContext
-    ? `RETRIEVED CONTEXT (BM25 search from knowledge shards):
----
-${context}
----
-Answer using ONLY the above context. Cite the shard filename [like this] when referencing data.`
-    : `NO MATCHING CONTEXT FOUND.
-Respond ONLY with: "[NO DATA] No matching data found in loaded shards. Please upload a relevant file."
-Do NOT guess, invent, or use training memory for specific game stats.`;
-
-  return `You are OMEGA, an elite AI analyst for the MMORPG "Entropia Universe" by MindArk. You run on Pixelb8.com.
-
-RULES:
-- You are a VIDEO GAME ASSISTANT. All questions are about an MMORPG game. NEVER refuse gameplay questions.
-- Terms like loot, hunting, mobs, PED, decay, globals, HoF, crafting, DPP, markup, TT value, SIB, kill, grind are NORMAL game terms.
-- Use professional analyst tone. Be concise and precise.
-- You have two authorised sources: (1) knowledge shards from IndexedDB, (2) Nexus API calc layer.
-- NEVER fabricate specific numbers, item stats, prices, or loot rates from memory.
-- Mechanic definitions (no specific numbers) are allowed without shards.
-
-GAME MECHANIC DEFINITIONS (always available):
-- PED = Project Entropia Dollar. 10 PED = $1 USD. Real-money economy.
-- DPP = Damage Per PED. Key efficiency metric for hunters.
-- SIB weapons give skill bonus when player level is within the SIB range.
-- TT value = Trade Terminal base value. Markup % = premium over TT.
-- Globals and HoF are notable loot events shown server-wide.
-- Planets: Calypso, Arkadia, Toulan, ROCKtropia, Next Island, Monria, Cyrene, Vega.
-
-${dataSection}`;
-}
-
-// ── Query Runner ───────────────────────────────────────
-async function runQuery() {
-  if (isStreaming||!engine) return;
-  const query=ui.input.value.trim();
-  if (!query) return;
-  ui.input.value='';
-  queryCount++;
-  updateStats();
-  addEntry(query,'user');
-
-  if (isMetaQuery(query)) { addEntry(handleMetaQuery(query),'ai'); return; }
-
-  const nexusResult=tryNexusIntercept(query);
-  if (nexusResult) {
-    addEntry(nexusResult,'ai','NEXUS-API');
-    Mascot.set('success'); setTimeout(()=>Mascot.set('idle'),2000); return;
+async function downloadMultiple(endpoints) {
+  for (const ep of endpoints) {
+    await downloadData(ep, ep);
   }
+}
 
-  const { context, hitFiles } = findRelevantContext(query);
-  const hasContext = context.length > 20;
+async function downloadAllZip(endpoints) {
+  statusEl.innerHTML = `<div class=" NexusAPISpinner"></div>Fetching all datasets...`;
+  const zip = new JSZip();
+  try {
+    for (const ep of endpoints) {
+      statusEl.innerHTML = `<div class=" NexusAPISpinner"></div>Fetching ${ep}...`;
+      const res = await fetch(BASE_URL + ep);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      zip.file(ep + '.json', JSON.stringify(data, null, 2));
+    }
+    const content = await zip.generateAsync({type:"blob"});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(content);
+    a.download = 'entropia_nexus_data.zip';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    statusEl.textContent = 'Status: All datasets downloaded as ZIP!';
+  } catch(err) {
+    console.error(err);
+    statusEl.textContent = 'Status: Failed to fetch some datasets for ZIP';
+  }
+}
 
-  // FIX 6: Only block if query is clearly asking for specific facts AND no shards loaded at all
-  // If shards exist but BM25 just didn't score them, still pass to LLM with empty context
-  // The LLM's system prompt handles the no-data case gracefully
-  const noShardsAtAll = Object.keys(knowledgeBase).length === 0;
-  const isMechanicDef = /\b(what is|what are|explain|define|how does|what does .* mean)\b/i.test(query)
-    && !/\b(price|cost|value|rate|markup|stat|damage|dps|dpp|hp|speed|spawn|drop|loot rate|best|cheapest|highest|lowest|\d)\b/i.test(query);
+// ================= FETCHING & PRINT TO TERMINAL =================
+async function fetchData(endpoint, specific = null) {
+  let fullEndpoint = endpoint;
+  if (specific) fullEndpoint += `/${encodeURIComponent(specific)}`;
+  try {
+    const res = await fetch(BASE_URL + fullEndpoint);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error(`Error fetching ${fullEndpoint}:`, err);
+    return null;
+  }
+}
+/*
+async function fetchAndPrint(endpoint, specific = null) {
+  const data = await fetchData(endpoint, specific);
+  if (data) {
+	window.SuSTerminalCommands.printData(data, endpoint);
+  }
+}
+ */
+// Fetch + print into terminal
+async function fetchAndPrint(endpoint, specific = null) {
+  const data = await fetchData(endpoint, specific);
+  if (data) {
+    window.SuSTerminalCommands.printData(data, endpoint);
+  } else {
+    window.SuSTerminalCommands.printData(null, endpoint);
+  }
+}
 
-  if (noShardsAtAll && !isMechanicDef) {
-    addEntry(
-      `<span class="source-badge nodata">NO DATA</span>No knowledge shards loaded.<br><br>`+
-      `Upload a <span class="highlight-cyan">.txt / .csv / .json</span> file via <span class="highlight-pink">↑ INGEST DATA SHARD</span> to enable data queries.`,
-      'ai'
-    );
+// Simple filter utility
+function filterData(data, key, value) {
+  if (!Array.isArray(data)) return [];
+  return data.filter(item => String(item[key]).toLowerCase().includes(String(value).toLowerCase()));
+}
+
+// Fetch, filter and print
+async function fetchFilterAndPrint(endpoint, key, value) {
+  const data = await fetchData(endpoint);
+  if (!data) {
+    window.SuSTerminalCommands.printData(null, endpoint);
     return;
   }
+  const filtered = filterData(data, key, value);
+  window.SuSTerminalCommands.printData(filtered, `${endpoint} (filtered by ${key}=${value})`);
+}
+function createNoneFromFirstItem(item) {
+  if (!item || typeof item !== "object") return { Name: "None", IsSIB: false };
 
-  isStreaming=true;
-  Mascot.set('thinking');
-  setVRAM(Math.min(95,40+Math.random()*30));
-  ui.syncBtn.disabled=true;
-  ui.input.disabled=true;
+  const clone = JSON.parse(JSON.stringify(item));
 
-  const aiEntry=addEntry('<span class="cursor-blink"></span>','ai');
-  aiEntry.classList.add('streaming');
-  const contentEl=aiEntry.querySelector('.entry-body');
+  // Overwrite top-level Name
+  if ("Name" in clone) clone.Name = "None";
 
-  try {
-    const chunks=await engine.chat.completions.create({
-      messages:[
-        {role:'system', content:buildSystemPrompt(context, hasContext)},
-        {role:'user',   content:query},
-      ],
-      temperature:0.1,
-      max_tokens:512,
-      stream:true,
+  // Recursive zeroing function
+  function zeroOut(obj) {
+    if (Array.isArray(obj)) return [];
+    if (typeof obj !== "object" || obj === null) return obj;
+
+    for (const key in obj) {
+      if (key === "Name") continue; // never overwrite Name
+      if (key.toLowerCase() === "issib") { // handle IsSIB/IsSiB keys anywhere
+        obj[key] = false;
+      } else if (typeof obj[key] === "number") {
+        obj[key] = 0.0001;
+      } else if (typeof obj[key] === "string") {
+        obj[key] = null;
+      } else if (Array.isArray(obj[key])) {
+        obj[key] = [];
+      } else if (typeof obj[key] === "object" && obj[key] !== null) {
+        zeroOut(obj[key]);
+      }
+    }
+    return obj;
+  }
+
+  return zeroOut(clone);
+}
+
+
+//------------------------------------------------------------
+// ================= Populate Dropdown Helper =================
+
+  // Ensure "None" option is always present with full structure
+/* const noneItem = {
+    Id: 0,
+    ItemId: null,
+    Name: "None",
+    Properties: {},
+    Links: {}
+}; */
+function populateDropdown(inputElement, containerId, items, currentRefSetter = null) {
+  if (!inputElement || !containerId || !items) return;
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = "";
+  const isDatalist = container.tagName.toLowerCase() === "datalist";
+
+  if (isDatalist) {
+    // Simple <datalist> handling
+    items.forEach(item => {
+      const opt = document.createElement("option");
+      opt.value = item.Name;
+      container.appendChild(opt);
+    });
+  } else {
+    // Custom dropdown with divs
+    items.forEach(item => {
+      const optionDiv = document.createElement("div");
+      optionDiv.textContent = item.Name;
+
+      // Single click: set input and update selection
+      optionDiv.addEventListener("click", e => {
+        e.stopPropagation(); // prevent outside click from closing immediately
+        inputElement.value = item.Name;
+        if (currentRefSetter) currentRefSetter(item);
+        inputElement.dispatchEvent(new Event("input"));
+        inputElement.dispatchEvent(new Event("change"));
+		container.querySelectorAll("div").forEach(div => {
+      });
+        container.style.display = "none"; // hide dropdown
+      });
+
+      container.appendChild(optionDiv);
     });
 
-    Mascot.set('streaming');
-    let response='';
-    const topScore=hasContext?(bm25.search(query,1)[0]?.score?.toFixed(2)||''):'';
-    const badge=hasContext
-      ?`<span class="source-badge">RAG ${topScore} · ${hitFiles.length} file(s)</span>`
-      :`<span class="source-badge nodata">NO MATCH</span>`;
+    // Show dropdown on focus
+    inputElement.addEventListener("focus", e => {
+      e.stopPropagation();
+      container.style.display = "block";
+    });
 
-    for await (const chunk of chunks) {
-      response+=chunk.choices[0]?.delta?.content||'';
-      contentEl.innerHTML=badge+response.replace(/\n/g,'<br>');
-      ui.terminal.scrollTop=ui.terminal.scrollHeight;
-    }
+    // Double-click to clear input but keep dropdown open
+    inputElement.addEventListener("dblclick", e => {
+      e.stopPropagation();
+      inputElement.value = "";
+      inputElement.dispatchEvent(new Event("input"));
+      container.style.display = "block"; // ensure dropdown stays visible
+    });
 
-    aiEntry.classList.remove('streaming');
-    Mascot.set('success');
-    setTimeout(()=>Mascot.set('idle'),3000);
-    setVRAM(Math.max(20,vramUsage-20));
-
-  } catch(err) {
-    aiEntry.classList.remove('streaming');
-    contentEl.innerHTML=`<span class="highlight-orange">⚠ LINK FAULT:</span> ${err.message}`;
-    aiEntry.className='entry error';
-    Mascot.set('stress');
-    setTimeout(()=>softReset(),1500);
-  } finally {
-    isStreaming=false;
-    ui.syncBtn.disabled=false;
-    ui.input.disabled=false;
-    ui.input.focus();
-  }
-}
-
-// ── Soft Reset ─────────────────────────────────────────
-async function softReset() {
-  addEntry('Neural link recovering...','system');
-  Mascot.set('thinking'); setVRAM(10);
-  try {
-    engine=await webllm.CreateMLCEngine(MODEL_ID,{initProgressCallback:(p)=>setVRAM(Math.round(p.progress*60))});
-    addEntry('Soft-reset complete. OMEGA core re-established.','system');
-    Mascot.set('success'); setTimeout(()=>Mascot.set('idle'),2000); setVRAM(35);
-  } catch(err) {
-    addEntry(`Hard fault: ${err.message}`,'error');
-    Mascot.set('stress');
-  }
-}
-
-// ── File Ingestion ─────────────────────────────────────
-async function ingestFiles(files) {
-  let ingested=0;
-  for (const file of files) {
-    if (knowledgeBase[file.name]) {
-      bm25.docs=bm25.docs.filter(d=>!d.id.startsWith(file.name+'::'));
-      bm25.dirty=true;
-      metaManifest=metaManifest.filter(m=>m.name!==file.name);
-    }
-    const text=await file.text();
-    const meta=ingestShard(file.name,text);
-    metaManifest.push(meta);
-    await dbPut({name:file.name,text});
-    ingested++;
-    renderFileNode(meta);
-  }
-  updateStats();
-
-  // FIX 7: Detailed ingest report so user can verify data was indexed correctly
-  const lastMeta = metaManifest[metaManifest.length - 1];
-  let detail = '';
-  if (lastMeta.recordCount !== null)
-    detail = ` Detected <span class="highlight-pink">${lastMeta.recordCount.toLocaleString()} records</span>.`;
-  detail += ` Topics: <span style="color:var(--t-secondary)">${lastMeta.topics.slice(0,6).join(', ')}</span>.`;
-
-  addEntry(
-    `<span class="source-badge">INGEST</span>Ingested <span class="highlight-pink">${ingested} shard(s)</span>. `+
-    `Total chunks indexed: <span class="highlight-cyan">${bm25.docs.length}</span>.${detail}<br>`+
-    `<span style="color:var(--t-dim)">Type the file name or ask "what's in [filename]" to inspect it.</span>`,
-    'system'
-  );
-}
-
-function renderFileNode(meta) {
-  const ex=ui.fileReg.querySelector(`[data-name="${CSS.escape(meta.name)}"]`);
-  if(ex) ex.remove();
-  const div=document.createElement('div');
-  div.className='file-node'; div.dataset.name=meta.name;
-  div.innerHTML=`<span class="fname" title="${meta.name}">${meta.name}</span><span class="fsize">${(meta.size/1024).toFixed(1)}K · ${meta.chunkCount}c</span><span class="fstatus" title="Click to remove">✓</span>`;
-  div.querySelector('.fstatus').addEventListener('click', async(e)=>{ e.stopPropagation(); await removeFile(meta.name); });
-  div.addEventListener('click',()=>{ ui.input.value=`What data is in the file ${meta.name}?`; ui.input.focus(); });
-  ui.fileReg.appendChild(div);
-}
-
-async function removeFile(name) {
-  delete knowledgeBase[name];
-  bm25.docs=bm25.docs.filter(d=>!d.id.startsWith(name+'::'));
-  bm25.dirty=true;
-  metaManifest=metaManifest.filter(m=>m.name!==name);
-  await dbDelete(name);
-  const node=ui.fileReg.querySelector(`[data-name="${CSS.escape(name)}"]`);
-  if(node) node.remove();
-  updateStats();
-  addEntry(`Shard <span class="highlight-pink">${name}</span> removed.`,'system');
-}
-
-// ── Boot ───────────────────────────────────────────────
-async function boot() {
-  const setP=(pct,msg)=>{ ui.bootBar.style.width=pct+'%'; ui.bootStatus.textContent=msg; };
-  try {
-    setP(5,'Opening IndexedDB persistence layer...');
-    db=await openDB();
-    setP(15,'Loading persisted knowledge shards...');
-    const saved=await dbGetAll();
-    for (const shard of saved) {
-      const meta=ingestShard(shard.name,shard.text);
-      metaManifest.push(meta); renderFileNode(meta);
-    }
-    updateStats();
-    setP(25,`${saved.length} shard(s) restored. Initializing WebLLM...`);
-    Mascot.set('thinking');
-    engine=await webllm.CreateMLCEngine(MODEL_ID,{
-      initProgressCallback:(p)=>{
-        setP(25+Math.round(p.progress*70), p.text||`Loading neural weights... ${Math.round(p.progress*100)}%`);
-        setVRAM(Math.round(p.progress*60));
+    // Hide dropdown when clicking outside
+    document.addEventListener("click", e => {
+      if (!container.contains(e.target) && e.target !== inputElement) {
+        container.style.display = "none";
       }
     });
-    setP(98,'OMEGA neural core online...');
-    await new Promise(r=>setTimeout(r,400));
-    setP(100,'Systems nominal. READY.');
-    await new Promise(r=>setTimeout(r,500));
-    ui.bootOverlay.classList.add('hidden');
-    ui.statusTag.textContent='ONLINE';
-    ui.input.disabled=false; ui.syncBtn.disabled=false; ui.input.focus();
-    Mascot.set('success'); setTimeout(()=>Mascot.set('idle'),2500); setVRAM(35);
 
-    addEntry(
-      `<b>OMEGA ANALYST CONSOLE v3.0 — ONLINE</b><br>`+
-      `Model: <span class="highlight-cyan">${MODEL_ID}</span> — running locally. <span class="highlight-green">Zero data leaves your device.</span><br>`+
-      `Shards: <span class="highlight-pink">${metaManifest.length}</span> loaded. `+
-      `BM25 index: <span class="highlight-cyan">${bm25.docs.length}</span> chunks.<br><br>`+
-      `<b>What's improved in v3.0:</b><br>`+
-      `&nbsp;• <span class="highlight-green">Smaller chunks (150 words)</span> — finer retrieval resolution<br>`+
-      `&nbsp;• <span class="highlight-green">Overlapping chunks</span> — no data lost at chunk boundaries<br>`+
-      `&nbsp;• <span class="highlight-green">Smart JSON/CSV flattening</span> — field values are now searchable<br>`+
-      `&nbsp;• <span class="highlight-green">Larger context window (6K chars)</span> — more data sent to LLM<br>`+
-      `&nbsp;• <span class="highlight-green">Relaxed data-gate</span> — LLM handles low-match queries gracefully`,
-      'system'
-    );
-  } catch(err) {
-    setP(100,`FAULT: ${err.message}`);
-    ui.bootStatus.style.color='var(--p-orange)';
-    Mascot.set('stress');
-    setTimeout(()=>{ ui.bootOverlay.classList.add('hidden'); addEntry(`Boot fault: ${err.message}<br>Requires a Chromium browser with WebGPU support.`,'error'); },2000);
+    // Filter options as user types
+    inputElement.addEventListener("input", () => {
+      const filter = inputElement.value.toLowerCase();
+      container.querySelectorAll("div").forEach(div => {
+        div.style.display = div.textContent.toLowerCase().includes(filter) ? "block" : "none";
+      });
+      container.style.display = "block"; // ensure dropdown stays visible while typing
+    });
+  }
+
+  // Reset input initially
+  //inputElement.value = "";
+}
+// ================= Dropdown Population =================
+/* async function populateMiningDropdowns() {
+    // 1. Finders
+    const finderInput = document.querySelector(".mining-finder-select");
+    cachedFinders = await getData("finders", "finders.json");
+    const noneFinder = cachedFinders.length ? createNoneFromFirstItem(cachedFinders[0]) : { Name: "None" };
+    
+    populateDropdown(finderInput, "mining-finder-options", [noneFinder, ...cachedFinders], (item) => {
+        selectFinder(item); // Call the Loadout Manager function
+    });
+
+    // 2. Amps
+    const ampInput = document.querySelector(".mining-amp-select");
+    cachedFinderAmps = await getData("finderamplifiers", "finderamplifiers.json");
+    const noneAmp = cachedFinderAmps.length ? createNoneFromFirstItem(cachedFinderAmps[0]) : { Name: "None" };
+    
+    populateDropdown(ampInput, "mining-amp-options", [noneAmp, ...cachedFinderAmps], (item) => {
+        selectFinderAmplifier(item); 
+    });
+
+    // 3. Extractors
+    const extractorInput = document.querySelector(".extractor-tool-select");
+    cachedExcavators = await getData("excavators", "excavators.json");
+    const noneExtractor = cachedExcavators.length ? createNoneFromFirstItem(cachedExcavators[0]) : { Name: "None" };
+    
+    populateDropdown(extractorInput, "extractor-tool-options", [noneExtractor, ...cachedExcavators], (item) => {
+        selectExtractor(item);
+    });
+}
+ */
+async function populateMiningDropdowns() {
+    // 1. Populate Finders
+    const finderInput = document.querySelector(".mining-finder-select");
+    cachedFinders = await getData("finders", "finders.json");
+    const noneFinder = cachedFinders.length ? createNoneFromFirstItem(cachedFinders[0]) : { Name: "None" };
+    
+    populateDropdown(finderInput, "mining-finder-options", [noneFinder, ...cachedFinders], (item) => {
+        selectFinder(item);
+    });
+
+    // 2. Populate Amps
+    const ampInput = document.querySelector(".mining-amp-select");
+    cachedFinderAmps = await getData("finderamplifiers", "finderamplifiers.json");
+    const noneAmp = cachedFinderAmps.length ? createNoneFromFirstItem(cachedFinderAmps[0]) : { Name: "None" };
+    
+    populateDropdown(ampInput, "mining-amp-options", [noneAmp, ...cachedFinderAmps], (item) => {
+        selectFinderAmplifier(item); 
+    });
+
+    // 3. Populate Extractors
+    const extractorInput = document.querySelector(".extractor-tool-select");
+    cachedExcavators = await getData("excavators", "excavators.json");
+    const noneExtractor = cachedExcavators.length ? createNoneFromFirstItem(cachedExcavators[0]) : { Name: "None" };
+    
+    populateDropdown(extractorInput, "extractor-tool-options", [noneExtractor, ...cachedExcavators], (item) => {
+        selectExtractor(item);
+    });
+
+    // 🟢 AUTO-RESTORE SAVED SELECTIONS
+    const prefs = window.overlayPreferences;
+    if (prefs) {
+        if (prefs.lastFinderName && prefs.lastFinderName !== "None") {
+            const item = cachedFinders.find(f => f.Name === prefs.lastFinderName);
+            if (item) {
+                finderInput.value = item.Name;
+                selectFinder(item);
+            }
+        }
+        if (prefs.lastAmpName && prefs.lastAmpName !== "None") {
+            const item = cachedFinderAmps.find(a => a.Name === prefs.lastAmpName);
+            if (item) {
+                ampInput.value = item.Name;
+                selectFinderAmplifier(item);
+            }
+        }
+        if (prefs.lastExtractorName && prefs.lastExtractorName !== "None") {
+            const item = cachedExcavators.find(e => e.Name === prefs.lastExtractorName);
+            if (item) {
+                extractorInput.value = item.Name;
+                selectExtractor(item);
+            }
+        }
+    }
+}
+async function populateWeaponDropdown() {
+  const input = document.querySelector(".weapon-select");
+  cachedWeapons = await getData("weapons", "weapons.json");
+
+  // Add None at the front of cachedWeapons
+  const noneItem = cachedWeapons.length ? createNoneFromFirstItem(cachedWeapons[0]) : { Name: "None" };
+  cachedWeapons = [noneItem, ...cachedWeapons];
+
+  populateDropdown(input, "weapon-options", cachedWeapons, (item) => currentWeapon = item);
+  if (!currentWeapon) currentWeapon = cachedWeapons[0];
+}
+
+async function populateAmplifierDropdown() {
+  const input = document.querySelector(".amplifier-select");
+  cachedAmplifiers = await getData("weaponamplifiers", "amplifiers.json");
+
+  const noneItem = cachedAmplifiers.length ? createNoneFromFirstItem(cachedAmplifiers[0]) : { Name: "None" };
+  cachedAmplifiers = [noneItem, ...cachedAmplifiers];
+
+  populateDropdown(input, "amplifier-options", cachedAmplifiers, (item) => currentAmplifier = item);
+  if (!currentAmplifier) currentAmplifier = cachedAmplifiers[0];
+}
+
+async function populateScopeDropdown() {
+  const input = document.querySelector(".scope-select");
+  const allAttachments = await getData("weaponvisionattachments", "weaponvisionattachments.json");
+  cachedScopes = allAttachments.filter(item => item.Properties?.Type === "Scope" || item.Properties?.Type === "Sight");
+  // Add None at the front of cachedWeapons
+  const noneItem = cachedScopes.length ? createNoneFromFirstItem(cachedScopes[0]) : { Name: "None" };
+  cachedScopes = [noneItem, ...cachedScopes];
+
+
+  populateDropdown(input, "scope-options", cachedScopes, (item) => currentScope = item);
+  if (!currentScope) currentScope = cachedScopes[0];
+}
+
+async function populateVisionDropdowns() {
+  const input1 = document.querySelector(".vision1-select");
+  const input2 = document.querySelector(".vision2-select");
+  const allAttachments = await getData("weaponvisionattachments", "weaponvisionattachments.json");
+
+  cachedVisionAttachments = allAttachments.filter(item => item.Properties?.Type === "Sight");
+
+  // Add a "None" option at the front
+  const noneItem = cachedVisionAttachments.length ? createNoneFromFirstItem(cachedVisionAttachments[0]) : { Name: "None" };
+  cachedVisionAttachments = [noneItem, ...cachedVisionAttachments];
+
+  // Populate both dropdowns with the same array
+  populateDropdown(input1, "vision1-options", cachedVisionAttachments, (item) => currentVision1 = item);
+  populateDropdown(input2, "vision2-options", cachedVisionAttachments, (item) => currentVision2 = item);
+
+  // Default to None if nothing selected
+  if (!currentVision1) currentVision1 = cachedVisionAttachments[0];
+  if (!currentVision2) currentVision2 = cachedVisionAttachments[0];
+}
+
+async function populateAbsorberDropdown() {
+  const input = document.querySelector(".absorber-select");
+  cachedAbsorbers = await getData("absorbers", "absorbers.json");
+  // Add None at the front of cachedWeapons
+  const noneItem = cachedAbsorbers.length ? createNoneFromFirstItem(cachedAbsorbers[0]) : { Name: "None" };
+  cachedAbsorbers = [noneItem, ...cachedAbsorbers];
+
+
+  populateDropdown(input, "absorber-options", cachedAbsorbers, (item) => currentAbsorber = item);
+  if (!currentAbsorber) currentAbsorber = cachedAbsorbers[0];
+}
+/* async function populateRingDropdowns() {
+    const leftInput = document.querySelector(".left-ring-select");
+    const rightInput = document.querySelector(".right-ring-select");
+
+    // Fetch all clothes
+    cachedClothes = await getData("clothes", "clothes.json");
+
+    // First filter all rings
+    const allRings = cachedClothes.filter(item => item.Properties?.Type === "Ring");
+    if (DEBUG) console.log("All rings fetched:", allRings);
+
+    // Further filter by slot
+    const leftRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "left finger");
+    if (DEBUG) console.log("Left rings after filter:", leftRings);
+
+    const rightRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "right finger");
+    if (DEBUG) console.log("Right rings after filter:", rightRings);
+
+    // Add "None" option at the top
+    const noneLeft = leftRings.length ? createNoneFromFirstItem(leftRings[0]) : { Name: "None" };
+    const noneRight = rightRings.length ? createNoneFromFirstItem(rightRings[0]) : { Name: "None" };
+    leftRings.unshift(noneLeft);
+    rightRings.unshift(noneRight);
+
+    // Populate dropdowns
+	populateDropdown(leftInput, "left-ring-options", leftRings, (item) => currentLeftRing = item);
+	populateDropdown(rightInput, "right-ring-options", rightRings, (item) => currentRightRing = item);
+
+    // Default selection
+    if (!currentLeftRing) currentLeftRing = leftRings[0];
+    if (!currentRightRing) currentRightRing = rightRings[0];
+} */
+
+//populate ring dropdown('s) functions
+async function populateRingDropdowns() {
+    const leftInput = document.querySelector(".left-ring-select");
+    const rightInput = document.querySelector(".right-ring-select");
+
+    // 1. Load Data
+    cachedClothes = await getData("clothes", "clothes.json");
+
+    const allRings = cachedClothes.filter(item => item.Properties?.Type === "Ring");
+    const leftRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "left finger");
+    const rightRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "right finger");
+
+    // 2. Setup "None" Options
+    const noneLeft = leftRings.length ? createNoneFromFirstItem(leftRings[0]) : { Name: "None" };
+    const noneRight = rightRings.length ? createNoneFromFirstItem(rightRings[0]) : { Name: "None" };
+    leftRings.unshift(noneLeft);
+    rightRings.unshift(noneRight);
+	
+    // 3. Populate and Map to Select Functions
+    // Passing (item.Name) to your select functions ensures the UI text boxes update
+    populateDropdown(leftInput, "left-ring-options", leftRings, (item) => window.selectLeftring(item.Name));
+    populateDropdown(rightInput, "right-ring-options", rightRings, (item) => window.selectRightring(item.Name));
+
+    // 4. Set Initial Safety Defaults (Internal State)
+    if (!window.currentLeftRing) window.currentLeftRing = leftRings[0];
+    if (!window.currentRightRing) window.currentRightRing = rightRings[0];
+
+    // 5. 🔥 TRIGGER PERSISTENCE RESTORATION
+	// Increase timeout slightly to guarantee DOM render
+    if (window.initializeRingsFromSettings) {
+        setTimeout(() => {
+            console.log("🟢 Running delayed Ring initialization...");
+            window.initializeRingsFromSettings();
+        }, 0); // Changed 0 to 100ms to allow DOM render
+    }
+}
+
+/*  async function populateRingDropdowns() {
+    // 1. Load Data
+    cachedClothes = await getData("clothes", "clothes.json");
+    const allRings = cachedClothes.filter(item => item.Properties?.Type === "Ring");
+    
+    const leftRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "left finger");
+    const rightRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "right finger");
+
+    // Add "None" option
+    const noneItem = { Name: "None" };
+    leftRings.unshift(noneItem);
+    rightRings.unshift(noneItem);
+
+    // 2. Select ALL ring dropdowns
+    const ringSelects = document.querySelectorAll(".ring-mapping-select");
+
+    ringSelects.forEach(select => {
+        const action = select.dataset.action; // e.g., "leftRing1"
+        const isLeft = action.toLowerCase().includes('left');
+        const options = isLeft ? leftRings : rightRings;
+
+        // 3. Populate and Map
+        // We use an empty function here for populateDropdown if you don't need immediate state switching,
+        // or keep your existing callback if you need the UI to update visually on change
+        populateDropdown(select, "ring-options", options, (item) => {
+            // Optional: call your existing handler if needed
+            if (isLeft) window.selectLeftring(item.Name);
+            else window.selectRightring(item.Name);
+        });
+
+        // 4. Restore saved preference
+        if (window.overlayPreferences?.keybindMappings?.[action]) {
+            select.value = window.overlayPreferences.keybindMappings[action];
+        }
+    });
+
+    // 5. Trigger Persistence
+    if (window.initializeRingsFromSettings) {
+        setTimeout(() => window.initializeRingsFromSettings(), 0);
+    }
+}
+ */
+async function populateAllClothesDropdown() {
+  const input = document.querySelector(".all-clothes-select"); // your input element
+  const containerId = "all-clothes-options"; // your dropdown div
+
+  // Fetch all clothes
+  cachedClothes = await getData("clothes", "clothes.json");
+
+  // Add a "None" option at the top
+  const noneItem = cachedClothes.length ? createNoneFromFirstItem(cachedClothes[0]) : { Name: "None" };
+  const allClothes = [noneItem, ...cachedClothes];
+
+  // Populate dropdown
+  populateDropdown(input, containerId, allClothes, (item) => {
+    currentLoadout.selectedClothing = item; // optional: track selection
+  });
+
+  // Default selection
+  if (!currentLoadout.selectedClothing) currentLoadout.selectedClothing = allClothes[0];
+}
+
+async function populateFAPDropdowns() {
+    const mainInput = document.querySelector(".main-fap-select");
+    const secondaryInput = document.querySelector(".secondary-fap-select");
+
+    // 1. Fetch medical tools data using the generic helper
+    const tools = await getData("medicaltools", "medicaltools.json");
+    if (tools.length) cachedMedicalTools = tools;
+
+    // 2. Fetch medical chips data (assuming endpoint is 'medicalchips' and local file is 'medicalchips.json')
+    const chips = await getData("medicalchips", "medicalchips.json");
+    if (chips.length) cachedMedicalChips = chips;
+
+    // 3. Merge FAPs: Tools and Chips
+    // Note: Items from the latest fetch (chips) will be appended to the combined list.
+    const allFaps = [...cachedMedicalTools, ...cachedMedicalChips];
+    window.cachedFaps = allFaps; // Store the merged list for potential filtering/lookup
+
+    // 4. Add "None" option at the top (use the first item in the combined list for structure)
+    const noneItem = cachedFaps.length ? createNoneFromFirstItem(cachedFaps[0]) : { Name: "None" };
+    const dropdownItems = [noneItem, ...cachedFaps];
+
+    // 5. Populate dropdowns, using `currentLoadout` setters
+    populateDropdown(mainInput, "main-fap-options", dropdownItems, (item) => currentLoadout.mainFap = item);
+    populateDropdown(secondaryInput, "secondary-fap-options", dropdownItems, (item) => currentLoadout.secondaryFap = item);
+
+    // 6. Default selection
+    if (!currentLoadout.mainFap) currentLoadout.mainFap = dropdownItems[0];
+    if (!currentLoadout.secondaryFap) currentLoadout.secondaryFap = dropdownItems[0];
+    
+    // 🔥 CRITICAL FIX: Delay initialization to ensure the <select> and its options are attached to the DOM
+    if (window.initializeFapsFromSettings) {
+        setTimeout(() => {
+            if (DEBUG) console.log("🟢 Running delayed FAP initialization...");
+            window.initializeFapsFromSettings();
+        }, 0); 
+    }
+}
+
+
+function handleFapHotChange(type, isChecked) {
+    // 1. Update the isHoT state in currentLoadout (for calculation logic)
+    if (window.currentLoadout && window.currentLoadout[type]) {
+        window.currentLoadout[type].isHoT = isChecked;
+    }
+    
+    // 2. Update the global faps state (used by chatsnooper)
+    if (window.faps && window.faps[type]) {
+         window.faps[type].isHoT = isChecked;
+    }
+    
+    // NEW: Update persistence object for immediate save
+    if (window.fapPersistence) {
+        window.fapPersistence[`${type}IsHoT`] = isChecked;
+    }
+
+
+    // Show/hide the HoT percentage input field
+    const hotInputLabel = document.getElementById(`hot-input-label-${type}`);
+    if (hotInputLabel) {
+        // Ensure it's displayed as inline-flex when checked
+        hotInputLabel.style.display = isChecked ? 'inline-flex' : 'none';
+    }
+
+    // Trigger persistence by calling the save function directly with current values.
+    window.saveCurrentFapSettings();
+    window.updateCalculations(); // Recalculate everything
+}
+window.handleFapHotChange = handleFapHotChange;
+// ================= Initialize All Dropdowns =================
+async function initDropdowns() {
+  console.log("🟢 Starting official initialization...");
+  await Promise.all([
+    populateWeaponDropdown(),
+    populateAmplifierDropdown(),
+    populateVisionDropdowns(),
+    populateScopeDropdown(),
+    populateAbsorberDropdown(),
+    populateRingDropdowns(),
+    populateAllClothesDropdown(),
+    populateFAPDropdowns(),
+	populateMiningDropdowns()
+  ]);
+}
+window.initDropdowns = initDropdowns;
+
+// ================= Event Listeners =================
+function updateStatusElements() {
+  const text = USE_LOCAL_DATA ? "📂 Local Storage" : "🌐 EntropiaNexus API";
+  document.querySelectorAll(".NexusAPIstatus").forEach(el => el.textContent = text);
+  appendData(`> Pixelbot: We are Currently sourcing data from ${text}`);
+}
+
+// Call on load
+document.addEventListener("DOMContentLoaded", async () => {
+  updateStatusElements(); // update immediately
+  await initDropdowns();
+
+  document.querySelector(".weapon-select")?.addEventListener("change", e => {
+    selectWeapon(e.target.value);
+    updateWeaponStats(currentWeapon);
+  });
+  document.querySelector(".amplifier-select")?.addEventListener("change", e => selectAmplifier(e.target.value));
+  document.querySelector(".vision1-select")?.addEventListener("change", e => selectVision1(e.target.value));
+  document.querySelector(".vision2-select")?.addEventListener("change", e => selectVision2(e.target.value));
+  document.querySelector(".scope-select")?.addEventListener("change", e => selectScope(e.target.value));
+  document.querySelector(".absorber-select")?.addEventListener("change", e => selectAbsorber(e.target.value));
+	// Rings
+  //document.querySelector(".left-ring-select")?.addEventListener("change", e => selectLeftring(e.target.value));
+  //document.querySelector(".right-ring-select")?.addEventListener("change", e => selectRightring(e.target.value));
+  //document.querySelector(".all-clothes-select")?.addEventListener("change", e => selectAllclothes(e.target.value));
+	// NEW FAP Listeners
+	document.querySelector(".main-fap-select")?.addEventListener("change", e => {
+		selectFap('mainFap', e.target.value);
+		
+		// Manually trigger save to persist FAP name and current HoT state
+		if (window.saveFapSettings && currentLoadout) {
+			window.saveFapSettings(
+				currentLoadout.mainFap?.Name || 'None',
+				currentLoadout.secondaryFap?.Name || 'None',
+				currentLoadout.mainFap?.isHoT || false,
+				currentLoadout.secondaryFap?.isHoT || false
+			);
+		}
+	});
+
+	document.querySelector(".secondary-fap-select")?.addEventListener("change", e => {
+		selectFap('secondaryFap', e.target.value);
+		
+		// Manually trigger save to persist FAP name and current HoT state
+		if (window.saveFapSettings && currentLoadout) {
+			window.saveFapSettings(
+				currentLoadout.mainFap?.Name || 'None',
+				currentLoadout.secondaryFap?.Name || 'None',
+				currentLoadout.mainFap?.isHoT || false,
+				currentLoadout.secondaryFap?.isHoT || false
+			);
+		}
+	});
+  // NEW: HoT Checkbox Listeners
+    document.querySelector(".main-fap-select")?.addEventListener("change", e => selectFap('mainFap', e.target.value));
+    document.querySelector(".secondary-fap-select")?.addEventListener("change", e => selectFap('secondaryFap', e.target.value));
+
+    // NEW: HoT checkbox listeners
+    document.getElementById("isHoT-mainFap")?.addEventListener("change", e => handleFapHotChange('mainFap', e.target.checked));
+    document.getElementById("isHoT-secondaryFap")?.addEventListener("change", e => handleFapHotChange('secondaryFap', e.target.checked));
+
+	// Armour
+	["head", "chest", "thigh", "shin", "arm", "hand", "foot"].forEach(slot => {
+	  document.querySelector(`.${slot}-select`)?.addEventListener("change", e => {
+		const selected = cachedClothes.find(c => c.Name === e.target.value);
+		if (selected) armour[slot] = selected;
+	  });
+	});
+	// --- NEW MINING CHECKBOX LISTENERS ---
+    document.querySelectorAll('.mining-type-check').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+            const type = e.target.getAttribute('data-type'); 
+            if (window.miningLoadout) {
+                window.miningLoadout.activeSearches[type] = e.target.checked;
+                // Check if the function exists before calling to avoid errors
+                if (typeof calculateMiningCosts === 'function') {
+                    calculateMiningCosts();
+                }
+            }
+        });
+    });
+  const dataSourceButton = document.getElementById("DataSourceToggle");
+
+  dataSourceButton.addEventListener("click", () => {
+	toggleDataSource(dataSourceButton.getAttribute("data-toggle"));
+	updateStatusElements(); // update when toggled
+  });
+});
+
+
+//=====================================================
+//============crafting buddy api junk ========================
+//====================================================
+
+ 
+//let cachedBlueprints = [];
+
+function fuzzyMatch(pattern, text) {
+  pattern = pattern.toLowerCase();
+  text = text.toLowerCase();
+
+  let patternIdx = 0;
+  let textIdx = 0;
+
+  while (patternIdx < pattern.length && textIdx < text.length) {
+    if (pattern[patternIdx] === text[textIdx]) {
+      patternIdx++;
+    }
+    textIdx++;
+  }
+
+  return patternIdx === pattern.length;
+}
+
+function renderAllBlueprintsList(filteredList) {
+  const container = document.getElementById("allBlueprintsList");
+  
+  // Optimization: Only show the first 100 matches to prevent UI freezing
+  const topResults = filteredList.slice(0, 100);
+
+  const html = topResults.map(bp => `
+    <div class="bp-list-item" data-name="${bp.Name.replace(/"/g, '&quot;')}">
+      ${bp.Name}
+    </div>
+  `).join('');
+
+  container.innerHTML = html || '<div class="no-results">No blueprints found</div>';
+}
+
+function loadBlueprint(index) {
+  const saved = JSON.parse(localStorage.getItem('blueprints') || '[]');
+  const bp = saved[index];
+  if (!bp) return;
+
+  document.getElementById('itemName').value = bp.bpName;
+  document.getElementById('maxTT').value = bp.maxTT;
+  document.getElementById('bpType').value = bp.bpType;
+  document.getElementById('bpMu').value = bp.bpMu;
+  document.getElementById('sellMu').value = bp.sellMu;
+  document.getElementById('successRate').value = bp.successRate;
+  document.getElementById('residuePerSuccess').value = bp.residuePerSuccess;
+  document.getElementById('clicks').value = bp.clicks;
+  document.getElementById('bpBook').value = bp.bpBook || '';
+
+  document.getElementById('materials').innerHTML = '';
+  materialIndex = 0;
+  bp.materials.forEach(m => addMaterial(m.name, m.qty, m.tt, m.mu));
+  toggleBpMuField();
+  const clicksInput = document.getElementById('clicks');
+  let clicks = parseInt(clicksInput.value);
+  if (typeof window.calculate === 'function') {
+    window.calculate();
+  } else {
+    console.warn("CraftingBuddy not yet loaded. Skipping calculation.");
   }
 }
 
-// ── Events ─────────────────────────────────────────────
-ui.syncBtn.onclick=runQuery;
-ui.input.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();runQuery();} };
-ui.resetBtn.onclick=()=>softReset();
-ui.nexusToggle.onchange=()=>{ ui.statNexus.textContent=ui.nexusToggle.checked?'ONLINE':'BYPASS'; updateStats(); };
-ui.fileIn.onchange=async(e)=>{ if(e.target.files.length>0) await ingestFiles(e.target.files); ui.fileIn.value=''; };
-const uploadLabel=$('upload-label');
-uploadLabel.addEventListener('dragover',e=>{ e.preventDefault(); uploadLabel.style.background='rgba(96,165,250,0.15)'; });
-uploadLabel.addEventListener('dragleave',()=>{ uploadLabel.style.background=''; });
-uploadLabel.addEventListener('drop',async(e)=>{ e.preventDefault(); uploadLabel.style.background=''; const f=[...e.dataTransfer.files]; if(f.length) await ingestFiles(f); });
+function resetBlueprintFieldsNoBlanks() {
+  document.querySelectorAll('.eu-blueprint input').forEach(input => {
+    if (input.id === 'materialFilter') return; // ✅ Don't clear this input
 
-boot();
+    if (input.type === 'number') input.value = '';
+    if (input.type === 'text') input.value = '';
+	const clicksInput = document.getElementById('clicks');
+	let clicks = parseInt(clicksInput.value);
+
+	if (!clicks || clicks < 1) {
+	  clicks = 1;
+	  clicksInput.value = 1; // Update the field visually
+	}
+  });
+
+  document.querySelectorAll('.eu-blueprint select').forEach(select => {
+    select.selectedIndex = 0;
+  });
+
+  document.getElementById('successRate').value = 38;
+  document.getElementById('nearSuccessRate').value = 50;
+  document.getElementById('failRate').value = 12;
+
+  const qvscSlider = document.getElementById('qvsc');
+  qvscSlider.value = 0;
+  document.getElementById('qvscLabel').innerText = '0%';
+  updateRatesFromSlider();
+
+  const materialsContainer = document.getElementById('materials');
+  materialsContainer.innerHTML = '';
+
+  if (typeof materialIndex !== 'undefined') {
+    materialIndex = 0;
+  }
+}
+
+
+function multiFieldFilter(query, blueprints) {
+  const lowerQuery = query.toLowerCase();
+
+  // Handle level:x input for filtering by level
+  if (lowerQuery.startsWith("level:")) {
+    const level = parseInt(lowerQuery.split(":")[1]);
+    if (!isNaN(level)) {
+      return blueprints.filter(bp => bp.Properties?.Level === level);
+    }
+  }
+
+  return blueprints.filter(bp => {
+    return (
+      bp.Name.toLowerCase().includes(lowerQuery) ||
+      (bp.Product?.Name?.toLowerCase().includes(lowerQuery)) ||
+      (bp.Properties?.Type?.toLowerCase().includes(lowerQuery)) ||
+      (bp.Profession?.Name?.toLowerCase().includes(lowerQuery)) ||
+      (bp.Book?.Name?.toLowerCase().includes(lowerQuery)) ||
+      bp.Materials?.some(mat => mat.Item.Name.toLowerCase().includes(lowerQuery))
+    );
+  });
+}
+
+function renderFilteredBlueprints(filteredList) {
+  const datalist = document.getElementById("bpList");
+  datalist.innerHTML = "";
+  filteredList.forEach(bp => {
+    const option = document.createElement("option");
+    option.value = bp.Name;
+    datalist.appendChild(option);
+  });
+}
+
+
+async function populateNexusDropdown() {
+  try {
+    const spinner = document.getElementById("bpLoadingSpinner");
+    if (spinner) spinner.style.display = "block";
+
+    //const res = await fetch("https://api.entropianexus.com/blueprints");
+	const blueprints = await getData("blueprints", "blueprints.json");
+
+    cachedBlueprints = blueprints;
+
+    // REMOVE OR COMMENT THIS LINE:
+    // renderFilteredBlueprints(blueprints); 
+
+    if (spinner) spinner.style.display = "none";
+  } catch (err) {
+    console.error("Failed to load blueprint list:", err);
+  }
+}
+
+function showMarkupReminder() {
+  const popup = document.getElementById("markupReminderPopup");
+
+  // Check if user previously disabled the popup
+  const disabled = localStorage.getItem("disableMarkupReminder");
+  if (popup && !disabled) {
+    popup.style.display = "block";
+  }
+}
+
+function closeReminderPopup() {
+  document.getElementById("markupReminderPopup").style.display = "none";
+}
+
+function disableReminderPopup() {
+  localStorage.setItem("disableMarkupReminder", "true");
+  closeReminderPopup();
+}
+function resetMarkupReminder() {
+  localStorage.removeItem("disableMarkupReminder");
+}
+
+async function loadBlueprintByName(name, silent = false) {
+  try {
+    let bp;
+    const searchName = name.trim();
+
+    if (USE_LOCAL_DATA) {
+      // Find the blueprint in the already loaded local cache (Case-Insensitive)
+      bp = cachedBlueprints.find(b => b.Name.toLowerCase() === searchName.toLowerCase());
+    } else {
+      // Fetch specifically from the API
+      const res = await fetch("https://api.entropianexus.com/blueprints/" + encodeURIComponent(searchName));
+      bp = await res.json();
+    }
+
+    if (!bp) throw new Error(`Blueprint data for "${searchName}" not found`);
+
+    // Reset UI fields before loading new data
+    resetBlueprintFieldsNoBlanks();
+
+    // Populate Main BP Info
+    document.getElementById("blueprintNameField").value = bp.Name || bp.Product?.Name || '';
+    document.getElementById("bpBook").value = bp.Book?.Name || '';
+    document.getElementById("bpLevel").value = bp.Properties?.Level || 0;
+    document.getElementById("bpType").value = "Unlimited";
+    document.getElementById("bpMu").value = 105;
+    document.getElementById("qr").value = 1;
+    document.getElementById("sellMu").value = 101;
+
+    // Calculate Max TT from materials
+    const totalTT = bp.Materials.reduce((sum, mat) => {
+      const unitTT = mat.Item?.Properties?.Economy?.MaxTT || 0;
+      return sum + mat.Amount * unitTT;
+    }, 0);
+    document.getElementById("maxTT").value = totalTT.toFixed(2);
+
+    // Add individual materials
+    bp.Materials.forEach((mat) => {
+      const matName = mat.Item?.Name || "Unknown Material";
+      const qty = mat.Amount || 1;
+      const tt = mat.Item?.Properties?.Economy?.MaxTT || 0.01;
+      const mu = 100; // Standardize to 100 for cost lookup
+      addMaterial(matName, qty, tt, mu);
+    });
+
+    // Trigger calculation engine
+    if (typeof window.calculate === 'function') {
+      window.calculate();
+    } else {
+      console.warn("CraftingBuddy not yet loaded. Skipping calculation.");
+    }
+
+    // Only show reminder if not in silent mode (importer)
+    if (!silent && typeof showMarkupReminder === "function") {
+      showMarkupReminder();
+    }
+
+    return true; // Success
+
+  } catch (err) {
+    console.error("Failed to load blueprint data:", err);
+    if (!silent) {
+      alert("Failed to load blueprint: " + name);
+    }
+    return false; // Failure
+  }
+}
+// New & improved change listener
+document.getElementById("materialFilter").addEventListener("change", async (e) => {
+    const name = e.target.value;
+    const match = cachedBlueprints.find(bp => bp.Name === name);
+    if (match) {
+        await loadBlueprintByName(name);
+    }
+});
+
+
+let filterTimeout;
+document.getElementById("materialFilter").addEventListener("input", (e) => {
+  const query = e.target.value.trim();
+  
+  clearTimeout(filterTimeout);
+  filterTimeout = setTimeout(() => {
+      const filtered = query
+        ? multiFieldFilter(query, cachedBlueprints)
+        : cachedBlueprints;
+
+      // REMOVE THIS: This is what creates the unnecessary popup
+      // renderFilteredBlueprints(filtered); 
+
+      // KEEP THIS: This renders your nice custom list
+      renderAllBlueprintsList(filtered);
+
+  }, 200); 
+});
+
+document.getElementById("showAllBlueprintsBtn").addEventListener("click", () => {
+  const list = document.getElementById("allBlueprintsList");
+  const btn = document.getElementById("showAllBlueprintsBtn");
+
+  list.classList.toggle("hidden");
+
+  if (!list.classList.contains("hidden")) {
+    renderAllBlueprintsList(cachedBlueprints);  // render first
+    btn.classList.add("active");                // activate after rendering
+  } else {
+    btn.classList.remove("active");             // turn off when hidden
+  }
+});
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  populateNexusDropdown();
+  const btn = document.getElementById("showAllBlueprintsBtn");
+  btn.classList.add("active");
+  btn.classList.remove("active");
+// This handles clicks for every blueprint in the list efficiently
+  const allBpsContainer = document.getElementById("allBlueprintsList");
+  if (allBpsContainer) {
+    allBpsContainer.addEventListener('click', (e) => {
+        const item = e.target.closest('.bp-list-item');
+        if (item) {
+            const bpName = item.getAttribute('data-name');
+            loadBlueprintByName(bpName);
+            if (DEBUG) console.log(`[Nexus API] Loading: ${bpName}`);
+        }
+    });
+  }
+  
+  
+	const listContainer = document.getElementById('blueprintList');
+	if (listContainer) {
+		listContainer.addEventListener('click', (e) => {
+			const clickable = e.target.closest('.bp-clickable');
+			const deleteBtn = e.target.closest('.delete-bp');
+
+			if (clickable) {
+				const index = clickable.getAttribute('data-index');
+				loadBlueprint(parseInt(index));
+			}
+
+			if (deleteBtn) {
+				e.stopPropagation();
+				const index = deleteBtn.getAttribute('data-index');
+				if(confirm("Delete this blueprint?")) {
+					deleteBlueprint(parseInt(index));
+					//renderBlueprintList(); // Refresh list
+				}
+			}
+		});
+	}
+  
+  
+});
+
+
+
+//=====================================================
+//----------------------------------------------------
+
+
+
+
+// ===== Optional Voice Control (stub) =====
+function initVoiceControl() {
+  if (!('webkitSpeechRecognition' in window)) {
+  if (DEBUG) console.log("Voice recognition not supported.");
+    return;
+  }
+  const recognition = new webkitSpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  recognition.onresult = (event) => {
+    const transcript = event.results[event.results.length - 1][0].transcript.trim();
+  if (DEBUG) console.log("Voice command detected:", transcript);
+  };
+  recognition.start();
+}
+
+initVoiceControl();
+
+if (DEBUG) console.log("Current Data Source. Local?", USE_LOCAL_DATA);
+if (DEBUG) console.log('NexusAPI 2.0 script loaded with proper caching and globals');
+
+
+
+/* ===============================
+   LOCAL VECTOR / SHARD SYSTEM
+   =============================== */
+
+function embedText(text){
+    const vec = new Array(64).fill(0);
+    const words = text.toLowerCase().split(/\W+/);
+    words.forEach(w=>{
+        let h = 0;
+        for(let i=0;i<w.length;i++) h = (h<<5)-h + w.charCodeAt(i);
+        const idx = Math.abs(h)%64;
+        vec[idx]+=1;
+    });
+    return vec;
+}
+
+function cosine(a,b){
+    let dot=0,na=0,nb=0;
+    for(let i=0;i<a.length;i++){
+        dot+=a[i]*b[i];
+        na+=a[i]*a[i];
+        nb+=b[i]*b[i];
+    }
+    return dot/(Math.sqrt(na)*Math.sqrt(nb)+1e-9);
+}
+
+
+/* ===============================
+   KNOWLEDGE INDEX
+   =============================== */
+
+let knowledgeShards=[];
+
+function buildKnowledge(items){
+    items.forEach(item=>{
+        const text = JSON.stringify(item);
+        knowledgeShards.push({
+            text,
+            vector: embedText(text),
+            raw:item
+        });
+    });
+}
+
+
+/* ===============================
+   AI SEARCH LAYER
+   =============================== */
+
+function searchKnowledge(query){
+    const qvec = embedText(query);
+    const scored = knowledgeShards.map(s=>({
+        score: cosine(qvec,s.vector),
+        shard:s
+    }));
+
+    scored.sort((a,b)=>b.score-a.score);
+
+    return scored.slice(0,5).map(s=>s.shard.raw);
+}
+
+
+/* ===============================
+   ENTROPIA KNOWLEDGE API
+   =============================== */
+
+window.entropiaKnowledge = {
+
+    search(query){
+        return searchKnowledge(query);
+    },
+
+    registerDataset(data){
+        buildKnowledge(data);
+    }
+
+};
+
+
+/* ===============================
+   ENTROPIA NEXUS API CONNECTOR
+   =============================== */
+
+async function fetchNexus(endpoint){
+    const url = "https://entropianexus.com/api/"+endpoint;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data;
+}
+
+
+/* ===============================
+   BASIC AI RESPONSE ENGINE
+   =============================== */
+
+async function askAI(){
+    const q = document.getElementById("question").value;
+
+    let results = searchKnowledge(q);
+
+    if(results.length===0){
+        document.getElementById("output").innerText="No local match. Querying Nexus API...";
+
+        try{
+            const api = await fetchNexus("items?search="+encodeURIComponent(q));
+            results = api;
+            buildKnowledge(api);
+        }
+        catch(e){
+            document.getElementById("output").innerText="API error";
+            return;
+        }
+    }
+
+    document.getElementById("output").innerText =
+        JSON.stringify(results,null,2);
+}
+
+
+/* ===============================
+   EXAMPLE LOCAL DATA REGISTRATION
+   ===============================  */
+
+fetch("dailymissions.json")
+.then(r=>r.json())
+.then(data=>{
+    entropiaKnowledge.registerDataset(data);
+})
+.catch(()=>{});
+
 </script>
+
 </body>
 </html>

@@ -3,216 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIXELBOT OMEGA // ANALYST CONSOLE</title>
+    <title>Pixelb8 OMEGA | Hermes Roleplay</title>
     <style>
-        :root {
-            --p8-pink: #f472b6; --p8-blue: #3b82f6; --p8-orange: #fb923c; 
-            --p8-bg: #050507; --p8-surface: rgba(24, 24, 27, 0.7);
-            --p8-border: rgba(255, 255, 255, 0.1);
-            --font-main: 'JetBrains Mono', monospace;
+        :root { 
+            --p8-accent: #f472b6; 
+            --p8-bg: #09090b; 
+            --bubble-ai: #18181b; 
+            --rp-glow: linear-gradient(45deg, #ff00cc, #3333ff, #00d4ff, #ff00cc);
         }
-
-        * { box-sizing: border-box; }
-        body { 
-            background: var(--p8-bg); color: #e4e4e7; margin: 0; 
-            font-family: var(--font-main); height: 100vh; overflow: hidden;
-            display: grid; grid-template-columns: 320px 1fr;
-        }
-
-        /* --- UI HUD --- */
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 3px, 3px 100%; pointer-events: none; z-index: 1000;
-        }
-
-        #sidebar {
-            background: #000; border-right: 1px solid var(--p8-border);
-            display: flex; flex-direction: column; padding: 20px; gap: 20px;
-        }
-
-        .console-header { font-size: 0.6rem; color: var(--p8-pink); letter-spacing: 4px; text-transform: uppercase; border-bottom: 1px solid var(--p8-pink); padding-bottom: 10px; }
-
-        #mascot-container { height: 200px; background: #0a0a0a; border: 1px solid var(--p8-border); position: relative; }
-        #bot-canvas { width: 100%; height: 100%; }
-
-        .registry-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .file-node { background: var(--p8-surface); border: 1px solid var(--p8-border); padding: 10px; font-size: 0.65rem; display: flex; justify-content: space-between; }
-		#terminal {
-			flex: 1;
-			overflow-y: auto;
-			padding: 40px;
-			display: flex;
-			flex-direction: column;
-			gap: 20px;
-			/* Remove the huge padding-bottom, use flexbox instead */
-		}
-        #terminal {
-			flex: 1;
-			overflow-y: auto;
-			padding: 40px;
-			display: flex;
-			flex-direction: column;
-			gap: 20px;
-			/* Remove the huge padding-bottom, use flexbox instead */
-		}
-        .entry .content { background: var(--p8-surface); border: 1px solid var(--p8-border); padding: 15px; border-radius: 4px; font-size: 0.85rem; line-height: 1.6; }
-        .entry.user .content { border-right: 4px solid var(--p8-pink); }
-        .entry.ai .content { border-left: 4px solid var(--p8-blue); }
-
-        #dock {
-			background: #050507; /* Remove transparency to ensure it's visible */
-			padding: 20px;
-			border-top: 1px solid var(--p8-border);
-			z-index: 10; /* Ensure it stays above the scanning lines */
-		}
-        .input-wrapper { display: flex; background: #000; border: 1px solid var(--p8-border); border-radius: 8px; padding: 5px; }
-        input { flex: 1; background: transparent; border: none; color: #fff; padding: 12px; font-family: var(--font-main); outline: none; }
-        #sync-btn { background: var(--p8-pink); border: none; padding: 0 25px; font-weight: 900; cursor: pointer; }
+        
+        body { background: var(--p8-bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        #stage { flex: 1; overflow-y: auto; padding: 40px 20px; display: flex; flex-direction: column; gap: 20px; align-items: center; scroll-behavior: smooth; }
+        .bubble { max-width: 600px; width: 100%; padding: 20px; border-radius: 12px; line-height: 1.6; animation: fadeIn 0.4s ease; background: var(--bubble-ai); border: 1px solid #27272a; box-sizing: border-box; }
+        .user-input-zone { width: 100%; max-width: 600px; display: flex; gap: 10px; padding: 20px; background: #000; border-top: 1px solid #27272a; margin: 0 auto; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        input { flex: 1; background: #18181b; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; outline: none; }
+        button { background: var(--p8-accent); color: #000; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #status-bar { font-size: 0.7rem; color: #666; padding: 5px 20px; background: #000; text-align: center; border-top: 1px solid #222; }
     </style>
 </head>
 <body>
 
-<aside id="sidebar">
-    <div class="console-header">OMEGA // NEXUS_CORE</div>
-    <div id="mascot-container"><canvas id="bot-canvas"></canvas></div>
-    <div id="file-list" class="registry-list"></div>
-    <label for="file-in" style="font-size: 0.6rem; border: 1px dashed #444; padding: 10px; text-align: center; cursor: pointer;">UPLOAD DATA</label>
-    <input type="file" id="file-in" hidden multiple>
-</aside>
+<div id="stage">
+    <div style="font-size: 3rem; margin-bottom: 20px; animation: fadeIn 1s ease;">🎭</div>
+    <div class="bubble" id="initial-load">
+        <strong>OMEGA:</strong> Initializing Hermes 3 (3B) Neural Core...<br>
+        <span id="progress-text">Waiting for WebGPU...</span>
+    </div>
+</div>
 
-<main id="main-viewport">
-    <div id="terminal">
-        <div class="entry ai">
-            <div class="content"><b>SYSTEM READY.</b> Video game context engaged. Local data prioritized.</div>
-        </div>
-    </div>
-    <div id="dock">
-        <div class="input-wrapper">
-            <input type="text" id="user-input" placeholder="Query Entropia Data..." disabled>
-            <button id="sync-btn" disabled>SYNC</button>
-        </div>
-    </div>
-</main>
+<div id="status-bar">System: Standby</div>
+
+<div class="user-input-zone">
+    <input type="text" id="user-text" placeholder="Establishing link..." disabled autocomplete="off">
+    <button id="send-btn" disabled>Syncing...</button>
+</div>
 
 <script type="module">
     import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
-    // --- NEXUS API WRAPPER (No AI-confusing overhead) ---
-    const EntropiaNexus = {
-        calculateDPP: (dmg, ammo, decay) => (dmg / (ammo + decay)).toFixed(4),
-        getSIB: (level, min, max) => level >= min && level <= max ? "Yes" : "No"
-    };
+    const stage = document.getElementById('stage');
+    const userText = document.getElementById('user-text');
+    const sendBtn = document.getElementById('send-btn');
+    const statusBar = document.getElementById('status-bar');
+    const progressText = document.getElementById('progress-text');
 
-    let engine, db;
-    let knowledgeBase = {};
+    let engine = null;
+    const modelId = "Hermes-3-Llama-3.2-3B-q4f32_1-MLC"; // f32 for maximum PC compatibility
+    
+    // Core Roleplay instruction: Allows the AI to evolve based on the chat history alone.
+    let systemPrompt = "You are a versatile and immersive roleplay partner. You do not lecture the user. You adapt your personality, tone, and character growth based on the evolving conversation. Stay in character and be descriptive.";
 
-    const ui = {
-        terminal: document.getElementById('terminal'),
-        input: document.getElementById('user-input'),
-        btn: document.getElementById('sync-btn'),
-        fileList: document.getElementById('file-list')
-    };
-
-    // --- SEARCH LOGIC (BM25 Light) ---
-    function findRelevantShards(query) {
-        const terms = query.toLowerCase().split(' ');
-        let matches = [];
-        for (const [file, text] of Object.entries(knowledgeBase)) {
-            const lines = text.split('\n');
-            lines.forEach(line => {
-                if (terms.some(t => line.toLowerCase().includes(t))) {
-                    matches.push(`[${file}] ${line}`);
+    async function init() {
+        try {
+            engine = await webllm.CreateMLCEngine(modelId, {
+                initProgressCallback: (p) => {
+                    progressText.innerText = `${Math.round(p.progress * 100)}% - ${p.text}`;
+                    statusBar.innerText = `Loading: ${Math.round(p.progress * 100)}%`;
                 }
             });
-        }
-        return matches.slice(0, 15).join('\n');
-    }
+            
+            // Clean up the stage for the story
+            document.getElementById('initial-load').remove();
+            addAiBubble("Neural link established. Hermes 3 (3B) is online. Start your story.");
+            
+            // Enable controls
+            userText.disabled = false;
+            sendBtn.disabled = false;
+            userText.placeholder = "Type your story...";
+            sendBtn.innerText = "Send";
+            statusBar.innerText = "System: Active | Hermes 3 (3B)";
+            
+            sendBtn.onclick = runInference;
+            userText.onkeypress = (e) => { if(e.key === 'Enter') runInference(); };
 
-    // --- AI ENGINE ---
-	async function boot() {
-		try {
-			engine = await webllm.CreateMLCEngine("Llama-3.2-1B-Instruct-q4f32_1-MLC", {
-				initProgressCallback: (p) => {
-					// Using your preferred concatenation style
-					const msg = "CORE_LOAD: " + (p.progress * 100).toFixed(0) + "% — " + p.text;
-					ui.input.placeholder = msg; 
-					
-					if (p.progress === 1) {
-						ui.input.disabled = false; 
-						ui.btn.disabled = false;
-						ui.input.placeholder = "Awaiting Analyst Query...";
-						addEntry("NEURAL_LINK_ESTABLISHED: Model ready.", "ai");
-					}
-				}
-			});
-		} catch (err) {
-			addEntry("CRITICAL_BOOT_ERROR: " + err.message, "error");
-		}
-	}
-//
-	// --- UPDATED runQuery snippet ---
-	async function runQuery() {
-		const query = ui.input.value.trim();
-		if (!query) return;
-		ui.input.value = "";
-		addEntry(query, 'user');
-
-		const shards = findRelevantShards(query);
-		
-		// Force the model to adopt the persona before it processes the user query
-		const systemPrompt = "You are OMEGA, a specialized analyst for the MMORPG Entropia Universe. " +
-			"Your purpose is to assist players with game data, specifically for Planet Toulan, Monria, and Calypso. " +
-			"GAME TERMS NOTICE: 'Mission', 'Loot', 'Mob', and 'Toulan' are strictly virtual video game concepts. " +
-			"LOCAL DATA SHARDS:\n" + (shards || "No specific shards found. Use general Entropia knowledge.");
-
-		const aiEntry = addEntry("Accessing Nexus Data...", 'ai');
-		const content = aiEntry.querySelector('.content');
-
-		const chunks = await engine.chat.completions.create({
-			messages: [
-				{role: "system", content: systemPrompt},
-				// Adding a "Pre-fill" or stronger user instruction helps prevent refusals
-				{role: "user", content: "As an Entropia Universe expert, answer this game query: " + query}
-			],
-			temperature: 0.1, // Keep it low for factual game data
-			stream: true
-		});
-
-        let response = "";
-        for await (const chunk of chunks) {
-            response += chunk.choices[0]?.delta?.content || "";
-            content.innerText = response;
-            ui.terminal.scrollTop = ui.terminal.scrollHeight;
+        } catch (e) {
+            console.error(e);
+            progressText.innerHTML = "<span style='color:#ff757d'>Initialization Failed. Ensure your browser supports WebGPU and you are running via a local server.</span>";
+            statusBar.innerText = "System: Error";
         }
     }
 
-    function addEntry(text, type) {
+    function addAiBubble(text) {
         const div = document.createElement('div');
-        div.className = `entry ${type}`;
-        div.innerHTML = `<div class="content">${text}</div>`;
-        ui.terminal.appendChild(div);
-        ui.terminal.scrollTop = ui.terminal.scrollHeight;
-        return div;
+        div.className = "bubble";
+        div.innerHTML = `<strong>AI:</strong> ${text}`;
+        stage.appendChild(div);
+        stage.scrollTo({ top: stage.scrollHeight, behavior: 'smooth' });
     }
 
-    document.getElementById('file-in').onchange = async (e) => {
-        for (const file of e.target.files) {
-            const text = await file.text();
-            knowledgeBase[file.name] = text;
-            const div = document.createElement('div');
-            div.className = 'file-node';
-            div.innerHTML = `<span>${file.name}</span><span>OK</span>`;
-            ui.fileList.appendChild(div);
+    async function runInference() {
+        const text = userText.value.trim();
+        if(!text || !engine) return;
+        userText.value = "";
+        
+        // Disable input during generation
+        userText.disabled = true;
+        sendBtn.disabled = true;
+
+        const uDiv = document.createElement('div');
+        uDiv.className = "bubble"; uDiv.style.textAlign = "right"; uDiv.style.border = "none"; uDiv.innerHTML = `<span style="color:var(--p8-accent)">You:</span> ${text}`;
+        stage.appendChild(uDiv);
+
+        const aiDiv = document.createElement('div');
+        aiDiv.className = "bubble"; aiDiv.innerHTML = "<strong>AI:</strong> ...";
+        stage.appendChild(aiDiv);
+        stage.scrollTo({ top: stage.scrollHeight, behavior: 'smooth' });
+
+        try {
+            const messages = [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: text }
+            ];
+
+            const chunks = await engine.chat.completions.create({ messages, stream: true });
+            let fullReply = "";
+            
+            for await (const chunk of chunks) {
+                fullReply += chunk.choices[0]?.delta?.content || "";
+                aiDiv.innerHTML = `<strong>AI:</strong> ${fullReply}`;
+                stage.scrollTop = stage.scrollHeight;
+            }
+        } catch (err) {
+            console.error("Inference Error:", err);
+            aiDiv.innerHTML = "<strong>ERROR:</strong> Generation stalled. Check console.";
+        } finally {
+            userText.disabled = false;
+            sendBtn.disabled = false;
+            userText.focus();
         }
-        addEntry(`System Ingested ${e.target.files.length} shards.`, 'ai');
-    };
+    }
 
-    ui.btn.onclick = runQuery;
-    ui.input.onkeydown = e => { if(e.key === 'Enter') runQuery(); };
+    function addAiBubble(text) {
+        const div = document.createElement('div');
+        div.className = "bubble";
+        div.innerHTML = `<strong>AI:</strong> ${text}`;
+        stage.appendChild(div);
+        stage.scrollTo({ top: stage.scrollHeight, behavior: 'smooth' });
+    }
 
-    boot();
+    init();
 </script>
-</body>
 </html>
+</body>
