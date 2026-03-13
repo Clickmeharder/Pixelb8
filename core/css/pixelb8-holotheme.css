@@ -148,6 +148,83 @@ body.dark-theme {
 /* end of theme                     */
 /*__________________________________*/
 }
+body.darkamber-theme {
+/*----------------------------------*/
+/* BUBBLE BUTTS (Subtle Glow)      */
+  --pixelbutt-opacity: 0.6;
+  --pixelbutt-hover-opacity: 0.95;
+  --bubblebutt-opacity: 0.4;
+  --bubblebutt-hover-opacity: 0.9;
+/*----------------------------------*/
+/* Main Body (Deep Space)          */
+  --body-color: #e0e0e0;
+  --body-bg-color: #0d0d0f;
+  --body-bg: radial-gradient(circle at center, #1a1a1d 0%, #0d0d0f 100%);
+  --body-opacity: 1;
+/*----------------------------------*/
+/* BG Styles (Industrial Grays)    */
+  --bg-color: #16161aeb;        /* Main Panels */
+  --bg-color-alt: #1f1f2400;    /* Transparent layers */ 
+  --bg-color-alt2: #121214;     /* Darker wells */
+  --bg-color-alt3: #0a0a0c;     /* Deepest contrast */
+  --accent-color: #ff9900;      /* PED Orange */
+  --accent-alt: #ffcc00;       /* Highlight Gold */
+/*----------------------------------*/
+  /* Border Styles (Etched Metal)  */  
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: #333338;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+  --glow-color: rgba(255, 153, 0, 0.15);
+  --shadow-color: rgba(0, 0, 0, 0.8);
+/*----------------------------------*/
+  /* Text Styles (Cyber-Readable)  */
+  --body-font: 'Orbitron', sans-serif;
+  --text-color: #c5c5c5;        /* Soft white/gray */
+  --text-color-alt: #ff9900;    /* Categorical Orange */
+  --h3-color: #ff9900;
+  --h2-color: #ffffff;
+  --default-muted: #5a5a62;
+/*----------------------------------*/
+  /* Entrivia Styles               */  
+   --question-color: #ffffff;
+/*----------------------------------*/
+  /* Wheel Styles                  */
+  --wheel-color: #1a1a1d;
+  --wheel-color2: #252529;
+  --wheel-color3: #ff9900;
+  --wheel-text-color: #ffffff;
+  --wheel-font: var(--body-font);
+/*----------------------------------*/
+    /* regular Button Styles (Tactile) */
+  --button-text-color: #ff9900;
+  --button-bg-color: #1c1c21;
+  --button-padding: 18px;
+  --button-margin: 0px 0;
+  --button-hover-text-color: #ffffff;
+  --button-hover-bg-color: #25252b;
+  --button-border-color: #ff990044;
+  --button-border-style: solid;
+  --button-border-width: 1px;
+  --button-border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
+  --button-border-radius: 4px;
+  --button-text-shadow: 0px 0px 8px rgba(255, 153, 0, 0.4);
+/*-------------------------------------------------------------------------*/
+  /* Input Styles (Terminal Look) */
+  --input-font-size: 16px;
+  --input-font-weight: bold;
+  --input-text-align: center;
+  --input-padding: 8px;
+  --input-margin: 4px 0;
+  --input-color: #ff9900;
+  --input-bg-color: #0a0a0c;
+  --input-opacity: 1;
+  --input-border-width: 1px;
+  --input-border-color: #333338;
+  --input-border-style: solid;
+  --input-border: var(--input-border-width) var(--input-border-style) var(--input-border-color);
+  --input-border-radius: 4px;
+}
 /* 🌞 LIGHT THEME (extra bright) */
 body.light-theme {
   --body-font: 'Segoe UI', sans-serif;
