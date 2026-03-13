@@ -116,7 +116,7 @@ function setBackgroundImageGreen() {
 }
 function removeBackgroundImage() {
 	document.body.style.backgroundImage = "none";
-	document.body.style.backgroundColor = "none";
+	document.body.style.backgroundColor = "unset";
 }
 
 // Toggle element fn 
