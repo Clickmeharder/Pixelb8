@@ -406,37 +406,38 @@
 						<h2>Prize List Commands</h2>
 						<button id="copyPrizelistBtn" >📋 Copy Prizelist Clipboard</button>
 						<button id="toggleEditorBtn">🛠️ Manage Prizelist</button>
-						<div id="editorContainer" style="display:none; margin-top: 20px; border: 1px solid orange; padding: 10px; background: #1a1a1a; width: 100%; box-sizing: border-box;">
-							<h3 style="color: orange; margin-top: 0;">Prizelist Editor</h3>
-							
-							<div style="max-height: 400px; overflow-x: auto; overflow-y: auto; border: 1px solid #333;">
-								<table id="editorTable" style="width: 100%; border-collapse: collapse; color: white; table-layout: fixed; min-width: 500px;">
-									<thead>
-										<tr style="border-bottom: 2px solid orange; text-align: left; background: #222;">
-											<th style="width: 80px; padding: 5px;">Date</th>
-											<th style="width: 120px; padding: 5px;">Winner</th>
-											<th style="width: 60px; padding: 5px;">PED</th>
-											<th style="width: 100px; padding: 5px;">Prize</th>
-											<th style="width: 90px; padding: 5px;">Status</th>
-											<th style="width: 40px; padding: 5px; text-align: center;">X</th>
-										</tr>
-									</thead>
-									<tbody id="editorBody"></tbody>
-								</table>
-							</div>
-							
-							<div style="margin-top: 15px; display: flex; gap: 10px;">
-								<button onclick="saveEditorChanges()" style="background: #2e7d32; color: white; border: 1px solid #4caf50; padding: 8px 15px; cursor: pointer; flex: 1;">💾 Save All Changes</button>
-								<button onclick="document.getElementById('editorContainer').style.display='none'" style="background: #444; color: white; border: none; padding: 8px 15px; cursor: pointer;">Close</button>
-							</div>
-						</div>
+
 						<ul id="prizeListCommandList">
 						</ul>
 						
 					</div>
 				</div>
 			</div>
-		</div>	
+		</div>
+		<div id="editorContainer" style="display:none; margin-top: 20px; border: 1px solid orange; padding: 10px; background: #1a1a1a; width: 100%; box-sizing: border-box;">
+			<h3 style="color: orange; margin-top: 0;">Prizelist Editor</h3>
+			
+			<div style="max-height: 400px; overflow-x: auto; overflow-y: auto; border: 1px solid #333;">
+				<table id="editorTable" style="width: 100%; border-collapse: collapse; color: white; table-layout: fixed; min-width: 500px;">
+					<thead>
+						<tr style="border-bottom: 2px solid orange; text-align: left; background: #222;">
+							<th style="width: 80px; padding: 5px;">Date</th>
+							<th style="width: 120px; padding: 5px;">Winner</th>
+							<th style="width: 60px; padding: 5px;">PED</th>
+							<th style="width: 100px; padding: 5px;">Prize</th>
+							<th style="width: 90px; padding: 5px;">Status</th>
+							<th style="width: 40px; padding: 5px; text-align: center;">X</th>
+						</tr>
+					</thead>
+					<tbody id="editorBody"></tbody>
+				</table>
+			</div>
+			
+			<div style="margin-top: 15px; display: flex; gap: 10px;">
+				<button onclick="saveEditorChanges()" style="background: #2e7d32; color: white; border: 1px solid #4caf50; padding: 8px 15px; cursor: pointer; flex: 1;">💾 Save All Changes</button>
+				<button onclick="document.getElementById('editorContainer').style.display='none'" style="background: #444; color: white; border: none; padding: 8px 15px; cursor: pointer;">Close</button>
+			</div>
+		</div>
 		<!--=====PIXELPEN CONTROLLER=========-->
 		<div class="controller" id="pixelpen-controller">
 			<button class="close-btn">×</button><h2 class="controllerheader">pixelpen</h2>
