@@ -887,9 +887,9 @@ function renderMessageEntry(msg, animate=true) {
   // Wire action buttons
   div.querySelector('[data-action="delete"]').addEventListener('click',()=>deleteMessage(msg,div));
   const editBtn=div.querySelector('[data-action="edit"]');
-  if(editBtn) editBtn.addEventListener('click',()=>startEdit(msg,div));
+  if (editBtn) editBtn.addEventListener('click',()=>startEdit(msg,div));
   const copyBtn=div.querySelector('[data-action="copy"]');
-  if(copyBtn) copyBtn.addEventListener('click',()=>{
+  if (copyBtn) copyBtn.addEventListener('click',()=>{
     navigator.clipboard?.writeText(body.innerText||body.textContent).catch(()=>{});
   });
 
