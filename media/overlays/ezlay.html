@@ -405,8 +405,32 @@
 
 						<h2>Prize List Commands</h2>
 						<button id="copyPrizelistBtn" >📋 Copy Prizelist Clipboard</button>
+						<button id="toggleEditorBtn">🛠️ Manage Prizelist</button>
+						<div id="editorContainer" style="display:none; margin-top: 20px; border: 1px solid orange; padding: 10px; background: #1a1a1a;">
+							<h3 style="color: orange;">Prizelist Editor</h3>
+							<div style="max-height: 400px; overflow-y: auto;">
+								<table id="editorTable" style="width: 100%; border-collapse: collapse; color: white;">
+									<thead>
+										<tr style="border-bottom: 2px solid orange; text-align: left;">
+											<th>Date</th>
+											<th>Winner</th>
+											<th>PED</th>
+											<th>Prize</th>
+											<th>Status</th>
+											<th>Actions</th>
+										</tr>
+									</thead>
+									<tbody id="editorBody"></tbody>
+								</table>
+							</div>
+							<div style="margin-top: 10px;">
+								<button onclick="saveEditorChanges()" style="background: green; color: white; border: none; padding: 10px;">💾 Save All Changes</button>
+								<button onclick="document.getElementById('editorContainer').style.display='none'" style="background: #444; color: white; border: none; padding: 10px;">Close</button>
+							</div>
+						</div>
 						<ul id="prizeListCommandList">
 						</ul>
+						
 					</div>
 				</div>
 			</div>
