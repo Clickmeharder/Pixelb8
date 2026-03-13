@@ -2372,6 +2372,7 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
         if (!isStreamerAndAuthorize(user, command)) return;
         displayConsoleMessage(user, `!${command} ✅`);
 		showWheel();
+		toggleElement(resultDisplay, "slide");
     }
 	// Load a specific wheel by name: !load-wheel WheelName
 	// Load a specific wheel by name and spin it: !load-wheel WheelName
