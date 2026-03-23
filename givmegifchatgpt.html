@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PNG → Transparent GIF (112x112)</title>
+<style>
+    body {
+        background: #111;
+        color: #eee;
+        font-family: sans-serif;
+        text-align: center;
+        padding: 20px;
+    }
+    .box {
+        border: 2px dashed #555;
+        padding: 20px;
+        margin: 20px auto;
+        width: 320px;
+    }
+    canvas {
+        background: repeating-conic-gradient(#222 0% 25%, #333 0% 50%) 50% / 16px 16px;
+        margin-top: 10px;
+    }
+    button {
+        padding: 10px 20px;
+        margin-top: 10px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<h2>PNG → Transparent GIF (112x112)</h2>
+
+<div class="box">
+    <input type="file" id="files" multiple accept="image/png">
+    <br><br>
+    Frame Delay (ms): 
+    <input type="number" id="delay" value="120">
+    <br><br>
+    <button onclick="generateGIF()">Generate GIF</button>
+</div>
+
+<canvas id="preview" width="112" height="112"></canvas>
+
+<br>
+<a id="download" style="display:none;">Download GIF</a>
+
+<!-- GIF.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+
+<script>
+async function loadImages(files) {
+    const images = [];
+    for (let file of files) {
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        await img.decode();
+        images.push(img);
+    }
+    return images;
+}
+
+async function generateGIF() {
+    const files = document.getElementById('files').files;
+    if (!files.length) {
+        alert("Select PNG frames first!");
+        return;
+    }
+
+    const delay = parseInt(document.getElementById('delay').value) || 120;
+
+    const canvas = document.getElementById('preview');
+    const ctx = canvas.getContext('2d');
+
+    const images = await loadImages(files);
+
+    const gif = new GIF({
+        workers: 2,
+        quality: 1,
+        transparent: 0x000000,
+        workerScript: "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js"
+    });
+
+    for (let img of images) {
+        // clear with transparency
+        ctx.clearRect(0, 0, 112, 112);
+
+        // draw resized frame
+        ctx.drawImage(img, 0, 0, 112, 112);
+
+        gif.addFrame(ctx, {copy: true, delay: delay});
+    }
+
+    gif.on('finished', function(blob) {
+        const url = URL.createObjectURL(blob);
+        const link = document.getElementById('download');
+        link.href = url;
+        link.download = "f_smash.gif";
+        link.style.display = "inline";
+        link.textContent = "Download GIF";
+
+        // preview first frame
+        const img = new Image();
+        img.src = url;
+        document.body.appendChild(img);
+    });
+
+    gif.render();
+}
+</script>
+
+</body>
+</html>
