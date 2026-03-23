@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transparent Emote GIF Maker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { background: #1e1e1e; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        input, button { margin-top: 10px; cursor: pointer; }
+        #status { margin-top: 10px; color: #00ffcc; }
+        #result { margin-top: 20px; border: 2px dashed #444; padding: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Twitch Emote GIF Creator</h2>
+    <p>Upload PNGs -> Get 112x112 Transparent GIF</p>
+    
+    <label>Select Frames (Hold Ctrl/Cmd to select multiple):</label><br>
+    <input type="file" id="fileInput" accept="image/png" multiple><br><br>
+    
+    <label>Frame Delay (ms):</label>
+    <input type="number" id="delay" value="100" style="width: 60px;">
+    
+    <button onclick="generateGif()">Generate GIF</button>
+    <div id="status"></div>
+    <div id="result"></div>
+</div>
+
+<script>
+    async function generateGif() {
+        const fileInput = document.getElementById('fileInput');
+        const status = document.getElementById('status');
+        const resultDiv = document.getElementById('result');
+        const delay = parseInt(document.getElementById('delay').value);
+
+        if (fileInput.files.length === 0) {
+            alert("Please select some PNG files first!");
+            return;
+        }
+
+        status.innerText = "Processing frames...";
+        resultDiv.innerHTML = "";
+
+        // Initialize GIF.js
+        // We use a worker from a blob to keep it "monolithic" and avoid CORS issues
+        const gif = new GIF({
+            workers: 2,
+            quality: 10,
+            width: 112,
+            height: 112,
+            transparent: 'rgba(0,0,0,0)', // Key for transparency
+            workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
+        });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 112;
+        canvas.height = 112;
+        const ctx = canvas.getContext('2d');
+
+        for (let file of fileInput.files) {
+            const img = await loadImage(file);
+            ctx.clearRect(0, 0, 112, 112);
+            
+            // Draw image resized to 112x112
+            ctx.drawImage(img, 0, 0, 112, 112);
+            
+            // Add to GIF
+            gif.addFrame(ctx, {copy: true, delay: delay});
+        }
+
+        gif.on('finished', function(blob) {
+            status.innerText = "Done!";
+            const url = URL.createObjectURL(blob);
+            const img = document.createElement('img');
+            img.src = url;
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = "emote.gif";
+            link.innerText = "Download your dope emote.gif";
+            link.style.display = "block";
+            link.style.marginTop = "10px";
+            link.style.color = "#ff00ff";
+
+            resultDiv.appendChild(img);
+            resultDiv.appendChild(link);
+        });
+
+        gif.render();
+    }
+
+    function loadImage(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+</script>
+
+</body>
+</html>
