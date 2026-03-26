@@ -1,12 +1,12 @@
 /**
- * fishyGame.js - NEW UNIQUE GAME: PRO BOW HUNT (way better than fishing!)
- * • First-person pro bow + hands (exactly like your reference photo, but with a modern compound bow)
- * • One command: !hunt
- * • Only ONE hunter at a time + clean queue
- * • Epic arrow flight with trail particles
- * • Random prey with rarity (deer, fox, eagle, legendary dragon, etc.)
- * • Scene is completely transparent until someone hunts, then fades away when done
- * • Much more dynamic & exciting than the old fishing game
+ * fishyGame.js - FULLY ANIMATED VECTOR BOW HUNT (no images needed!)
+ * • Super smooth, high-quality canvas animations (way better than before)
+ * • Real compound bow with tension string, cams, and draw animation
+ * • Arrow flies with rotation + glowing trail + wind effect
+ * • Animated background (swaying forest + rippling lake + sky gradient)
+ * • Prey pops in with impact flash + breathing animation
+ * • Still 100% transparent for OBS until someone types !hunt
+ * • One hunter at a time + queue
  */
 
 const canvas = document.getElementById('fishing-canvas');
@@ -19,14 +19,13 @@ let particles = [];
 let arrowTrail = [];
 
 const huntPrey = [
-    { name: "🦌 Majestic Deer", rarity: 0.45, color: "#8B4513", scale: 1.2 },
-    { name: "🦊 Clever Fox", rarity: 0.22, color: "#e67e22", scale: 1.0 },
-    { name: "🦅 Golden Eagle", rarity: 0.15, color: "#f1c40f", scale: 1.4 },
-    { name: "🐺 Alpha Wolf", rarity: 0.08, color: "#7f8c8d", scale: 1.3 },
-    { name: "🐻 Grizzly Bear", rarity: 0.05, color: "#8d5524", scale: 1.8 },
-    { name: "🐉 Legendary Dragon", rarity: 0.012, color: "#e74c3c", scale: 2.1 },
-    { name: "🌟 Mythic Phoenix", rarity: 0.008, color: "#f39c12", scale: 1.6 },
-    { name: "👑 Royal Elk", rarity: 0.04, color: "#2ecc71", scale: 1.5 }
+    { name: "🦌 Majestic Deer", rarity: 0.45, color: "#8B4513", scale: 1.25 },
+    { name: "🦊 Clever Fox", rarity: 0.22, color: "#e67e22", scale: 1.05 },
+    { name: "🦅 Golden Eagle", rarity: 0.15, color: "#f1c40f", scale: 1.45 },
+    { name: "🐺 Alpha Wolf", rarity: 0.08, color: "#7f8c8d", scale: 1.35 },
+    { name: "🐻 Grizzly Bear", rarity: 0.05, color: "#8d5524", scale: 1.85 },
+    { name: "🐉 Legendary Dragon", rarity: 0.012, color: "#e74c3c", scale: 2.2 },
+    { name: "🌟 Mythic Phoenix", rarity: 0.008, color: "#f39c12", scale: 1.7 }
 ];
 
 function resizeCanvas() {
@@ -40,15 +39,16 @@ resizeCanvas();
 
 function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
-function createSplash(x, y, count = 22, color = "#ffeb3b") {
+function createImpact(x, y, count = 35, color = "#ffeb3b") {
     for (let i = 0; i < count; i++) {
         particles.push({
             x, y,
-            vx: (Math.random() - 0.5) * 11,
-            vy: (Math.random() - 0.5) * 8 - 6,
-            life: 48 + Math.random() * 32,
-            size: 4 + Math.random() * 5,
-            color
+            vx: (Math.random() - 0.5) * 14,
+            vy: (Math.random() - 0.5) * 12 - 8,
+            life: 60 + Math.random() * 40,
+            size: 4.5 + Math.random() * 6,
+            color,
+            gravity: 0.25
         });
     }
 }
@@ -80,18 +80,16 @@ function startHunt(data) {
         user: data.user,
         color: data.color,
         state: 'drawing',
-        bowX: canvasWidth * 0.78,
-        bowY: canvasHeight * 0.78,
-        arrowX: 0,
-        arrowY: 0,
-        targetX: canvasWidth * 0.32,
-        targetY: canvasHeight * 0.55,
         drawStart: Date.now(),
         flightStart: 0,
         hitTime: 0,
-        progress: 0,
+        arrowX: 0,
+        arrowY: 0,
+        targetX: canvasWidth * 0.29,
+        targetY: canvasHeight * 0.47,
         prey: null,
-        opacity: 1
+        opacity: 1,
+        bowTension: 0
     };
 }
 
@@ -101,163 +99,184 @@ function finishHunt() {
     if (queue.length > 0) {
         const next = queue.shift();
         if (typeof displayChatMessage === "function") {
-            displayChatMessage("HUNT", `🏹 ${next.user}'s turn to hunt!`, {}, {userColor: "#00f2ff"});
+            displayChatMessage("HUNT", `🏹 ${next.user}'s turn!`, {}, {userColor: "#00f2ff"});
         }
         startHunt(next);
     }
 }
 
-// ====================== PRO BACKGROUND (same beautiful autumn lake as your photo) ======================
-function drawProLakeBackground() {
-    // Sky
+// ====================== ANIMATED BACKGROUND ======================
+function drawAnimatedBackground() {
+    // Sky gradient
     const sky = ctx.createLinearGradient(0, 0, 0, canvasHeight * 0.58);
-    sky.addColorStop(0, '#87CEEB');
-    sky.addColorStop(1, '#BCE4FF');
+    sky.addColorStop(0, '#7ec0ee');
+    sky.addColorStop(1, '#c3e0ff');
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight * 0.58);
 
-    // Distant forest
-    ctx.fillStyle = '#2E8B57';
-    for (let i = 0; i < 14; i++) {
-        const x = (i * canvasWidth / 13) + (Math.random() * 20 - 10);
+    // Animated forest (gentle sway)
+    const time = Date.now() / 1200;
+    ctx.fillStyle = '#1e6b3a';
+    for (let i = 0; i < 18; i++) {
+        const sway = Math.sin(time + i) * 8;
+        const x = (i * canvasWidth / 17) + sway;
         ctx.beginPath();
         ctx.moveTo(x, canvasHeight * 0.58);
-        ctx.lineTo(x - 42, canvasHeight * 0.58);
-        ctx.lineTo(x - 21, canvasHeight * 0.37);
+        ctx.lineTo(x - 48, canvasHeight * 0.58);
+        ctx.lineTo(x - 24, canvasHeight * 0.34);
         ctx.fill();
     }
 
-    // Water
+    // Lake water
     const water = ctx.createLinearGradient(0, canvasHeight * 0.58, 0, canvasHeight);
-    water.addColorStop(0, '#1E7FD4');
-    water.addColorStop(1, '#0B3A6B');
+    water.addColorStop(0, '#1e7fd4');
+    water.addColorStop(1, '#0b3a6b');
     ctx.fillStyle = water;
     ctx.fillRect(0, canvasHeight * 0.58, canvasWidth, canvasHeight * 0.42);
 
-    // Ripples
+    // Multi-layer animated ripples
     ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.28)";
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
     ctx.lineWidth = 2.8;
-    for (let i = 0; i < 8; i++) {
-        const y = canvasHeight * 0.62 + i * 13;
+    for (let i = 0; i < 9; i++) {
+        const y = canvasHeight * 0.64 + i * 14;
         ctx.beginPath();
         ctx.moveTo(0, y);
-        for (let x = 0; x <= canvasWidth; x += 42) {
-            const offset = Math.sin((Date.now() / 340) + (x / 38) + i) * 7;
-            ctx.quadraticCurveTo(x + 21, y + offset, x + 42, y);
+        for (let x = 0; x <= canvasWidth; x += 38) {
+            const offset = Math.sin((Date.now() / 280) + (x / 35) + i * 1.3) * 9;
+            ctx.quadraticCurveTo(x + 19, y + offset, x + 38, y);
         }
         ctx.stroke();
     }
     ctx.restore();
 }
 
-// ====================== PRO BOW + HANDS (exactly like the photo style) ======================
-function drawProBowAndHands(hunter) {
+// ====================== PRO ANIMATED BOW + HANDS ======================
+function drawAnimatedBow(hunter) {
     ctx.globalAlpha = hunter.opacity;
+    const baseX = canvasWidth * 0.78;
+    const baseY = canvasHeight * 0.79;
 
-    const gripX = hunter.bowX;
-    const gripY = hunter.bowY;
-
-    // Jacket sleeve (dark like your photo)
-    ctx.strokeStyle = '#1C2C3A';
-    ctx.lineWidth = 36;
+    // Jacket sleeve
+    ctx.strokeStyle = '#1c2c3a';
+    ctx.lineWidth = 38;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(gripX + 48, gripY + 48);
-    ctx.quadraticCurveTo(gripX + 72, gripY + 18, gripX + 18, gripY - 22);
+    ctx.moveTo(baseX + 52, baseY + 52);
+    ctx.quadraticCurveTo(baseX + 78, baseY + 12, baseX + 22, baseY - 28);
     ctx.stroke();
 
-    // Right hand on bow grip
-    ctx.fillStyle = '#F5C6AA';
+    // Right hand on grip
+    ctx.fillStyle = '#f5c6aa';
     ctx.beginPath();
-    ctx.ellipse(gripX + 14, gripY - 14, 27, 21, -0.6, 0, Math.PI * 2);
+    ctx.ellipse(baseX + 18, baseY - 18, 29, 22, -0.65, 0, Math.PI * 2);
     ctx.fill();
 
-    // Left hand pulling string (drawing the bow)
-    const pullOffset = (hunter.state === 'drawing') ? Math.min((Date.now() - hunter.drawStart) / 1100, 1) * 68 : 0;
-    ctx.fillStyle = '#F5C6AA';
+    // Left hand pulling string
+    const tension = hunter.state === 'drawing' 
+        ? Math.min((Date.now() - hunter.drawStart) / 1150, 1) 
+        : (hunter.state === 'flying' ? 0 : 0.1);
+    hunter.bowTension = tension;
+
+    ctx.fillStyle = '#f5c6aa';
     ctx.beginPath();
-    ctx.ellipse(gripX - 38 - pullOffset, gripY - 38, 24, 18, 0.8, 0, Math.PI * 2);
+    ctx.ellipse(baseX - 42 - tension * 72, baseY - 42, 26, 19, 0.9, 0, Math.PI * 2);
     ctx.fill();
 
-    // Compound bow riser + limbs (modern pro look)
+    // Compound bow body (modern carbon look)
     ctx.strokeStyle = '#111827';
-    ctx.lineWidth = 18;
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = '#000000';
+    ctx.lineWidth = 19;
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#00000088';
     ctx.beginPath();
-    ctx.moveTo(gripX - 12, gripY - 88);           // top limb
-    ctx.quadraticCurveTo(gripX + 8, gripY - 22, gripX + 12, gripY + 38); // riser
-    ctx.quadraticCurveTo(gripX + 8, gripY + 92, gripX - 14, gripY + 118); // bottom limb
+    ctx.moveTo(baseX + 8, baseY - 95);                    // top limb
+    ctx.quadraticCurveTo(baseX + 18, baseY - 28, baseX + 14, baseY + 42); // riser
+    ctx.quadraticCurveTo(baseX + 12, baseY + 95, baseX - 12, baseY + 122); // bottom limb
     ctx.stroke();
     ctx.shadowBlur = 0;
 
-    // Bow string (pulled back when drawing)
-    ctx.strokeStyle = '#E2E8F0';
-    ctx.lineWidth = 3.5;
+    // Cams (the wheels on compound bows)
+    ctx.fillStyle = '#334155';
     ctx.beginPath();
-    ctx.moveTo(gripX - 12, gripY - 88);
-    ctx.quadraticCurveTo(gripX - 48 - pullOffset * 0.6, gripY - 38, gripX - 14, gripY + 118);
+    ctx.arc(baseX - 8, baseY - 95, 11, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(baseX - 8, baseY + 122, 11, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Bow string (animated tension)
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 4.2;
+    ctx.beginPath();
+    ctx.moveTo(baseX - 8, baseY - 95);
+    ctx.quadraticCurveTo(baseX - 48 - tension * 78, baseY - 42, baseX - 12, baseY + 122);
     ctx.stroke();
 
-    // Arrow (nocked on string)
-    ctx.strokeStyle = '#F1C40F';
-    ctx.lineWidth = 4.5;
+    // Arrow nocked (moves with tension)
+    ctx.strokeStyle = '#fcd34d';
+    ctx.lineWidth = 5.5;
     ctx.beginPath();
-    ctx.moveTo(gripX - 38 - pullOffset, gripY - 38);
-    ctx.lineTo(gripX - 38 - pullOffset - 92, gripY - 38);
+    ctx.moveTo(baseX - 42 - tension * 72, baseY - 42);
+    ctx.lineTo(baseX - 42 - tension * 72 - 105, baseY - 42);
     ctx.stroke();
 
-    // Arrow head
-    ctx.fillStyle = '#E74C3C';
+    // Arrowhead
+    ctx.fillStyle = '#ef4444';
     ctx.beginPath();
-    ctx.moveTo(gripX - 38 - pullOffset - 92, gripY - 38);
-    ctx.lineTo(gripX - 38 - pullOffset - 112, gripY - 44);
-    ctx.lineTo(gripX - 38 - pullOffset - 112, gripY - 32);
+    ctx.moveTo(baseX - 42 - tension * 72 - 105, baseY - 42);
+    ctx.lineTo(baseX - 42 - tension * 72 - 132, baseY - 50);
+    ctx.lineTo(baseX - 42 - tension * 72 - 132, baseY - 34);
     ctx.fill();
 }
 
-// Arrow flight animation
+// Arrow flight + trail
 function drawFlyingArrow(hunter) {
     if (hunter.state !== 'flying') return;
 
     const elapsed = Date.now() - hunter.flightStart;
-    const prog = Math.min(elapsed / 920, 1);
+    const prog = Math.min(elapsed / 880, 1);
     const eased = easeOutCubic(prog);
 
-    hunter.arrowX = hunter.bowX - 130 + (hunter.targetX - (hunter.bowX - 130)) * eased;
-    hunter.arrowY = hunter.bowY - 38 + (hunter.targetY - (hunter.bowY - 38)) * eased - Math.sin(Math.PI * eased) * 210;
+    hunter.arrowX = canvasWidth * 0.71 + (hunter.targetX - canvasWidth * 0.71) * eased;
+    hunter.arrowY = canvasHeight * 0.66 + (hunter.targetY - canvasHeight * 0.66) * eased - Math.sin(Math.PI * eased) * 235;
 
-    // Arrow body
-    ctx.strokeStyle = '#F1C40F';
-    ctx.lineWidth = 5;
+    const angle = Math.atan2(
+        (hunter.targetY - hunter.arrowY),
+        (hunter.targetX - hunter.arrowX)
+    ) + Math.sin(elapsed / 80) * 0.04; // slight wobble
+
+    ctx.save();
+    ctx.translate(hunter.arrowX, hunter.arrowY);
+    ctx.rotate(angle);
+    ctx.strokeStyle = '#fcd34d';
+    ctx.lineWidth = 6;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#fcd34d';
     ctx.beginPath();
-    ctx.moveTo(hunter.arrowX + 22, hunter.arrowY);
-    ctx.lineTo(hunter.arrowX - 42, hunter.arrowY);
+    ctx.moveTo(28, 0);
+    ctx.lineTo(-58, 0);
     ctx.stroke();
+    ctx.shadowBlur = 0;
 
-    // Arrow head
-    ctx.fillStyle = '#E74C3C';
+    // Arrowhead
+    ctx.fillStyle = '#ef4444';
     ctx.beginPath();
-    ctx.moveTo(hunter.arrowX - 42, hunter.arrowY);
-    ctx.lineTo(hunter.arrowX - 68, hunter.arrowY - 9);
-    ctx.lineTo(hunter.arrowX - 68, hunter.arrowY + 9);
+    ctx.moveTo(-58, 0);
+    ctx.lineTo(-88, -12);
+    ctx.lineTo(-88, 12);
     ctx.fill();
+    ctx.restore();
 
-    // Trail particles
-    if (Math.random() < 0.7) {
-        arrowTrail.push({
-            x: hunter.arrowX - 30,
-            y: hunter.arrowY,
-            life: 18
-        });
+    // Glowing trail
+    if (Math.random() < 0.85) {
+        arrowTrail.push({x: hunter.arrowX - 45, y: hunter.arrowY, life: 24});
     }
     ctx.save();
     arrowTrail = arrowTrail.filter(t => {
         t.life--;
-        ctx.globalAlpha = t.life / 18;
-        ctx.fillStyle = '#F1C40F';
-        ctx.fillRect(t.x, t.y, 6, 3);
+        ctx.globalAlpha = t.life / 24;
+        ctx.fillStyle = '#fcd34d';
+        ctx.fillRect(t.x, t.y, 11, 4);
         return t.life > 0;
     });
     ctx.restore();
@@ -266,32 +285,33 @@ function drawFlyingArrow(hunter) {
         hunter.state = 'hit';
         hunter.hitTime = Date.now();
         hunter.prey = getRandomPrey();
-        createSplash(hunter.arrowX, hunter.arrowY, 38, "#ffeb3b");
+        createImpact(hunter.arrowX, hunter.arrowY, 48, "#ffeb3b");
         if (typeof displayChatMessage === "function") {
             displayChatMessage("HUNT", `🏹 ${hunter.user} hunted a ${hunter.prey.name}!`, {}, {userColor: "#00f2ff"});
         }
     }
 }
 
-function drawCaughtPrey(hunter) {
+function drawHitPrey(hunter) {
     if (!hunter.prey) return;
+
     const elapsed = Date.now() - hunter.hitTime;
-    const jump = Math.abs(Math.sin(elapsed / 140)) * 48;
-    const px = canvasWidth * 0.32 + 40;
-    const py = canvasHeight * 0.38 + jump;
+    const breath = Math.sin(elapsed / 180) * 6;
+    const px = hunter.targetX + 55;
+    const py = hunter.targetY - 95 + breath;
 
     ctx.save();
-    ctx.shadowBlur = 22;
+    ctx.shadowBlur = 28;
     ctx.shadowColor = hunter.prey.color;
-    ctx.font = `${38 * hunter.prey.scale}px Arial`;
+    ctx.font = `${44 * hunter.prey.scale}px Arial`;
     ctx.textAlign = "center";
     ctx.fillText(hunter.prey.name.split(' ')[0], px, py);
     ctx.restore();
 
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = 10;
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 21px Arial';
-    ctx.fillText(hunter.prey.name, px, py + 48);
+    ctx.font = 'bold 23px Arial';
+    ctx.fillText(hunter.prey.name, px, py + 56);
     ctx.shadowBlur = 0;
 }
 
@@ -300,9 +320,9 @@ function updateParticles() {
     particles = particles.filter(p => {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.22;
+        p.vy += p.gravity || 0.22;
         p.life--;
-        ctx.globalAlpha = Math.max(0, p.life / 55);
+        ctx.globalAlpha = Math.max(0, p.life / 65);
         ctx.fillStyle = p.color;
         ctx.fillRect(p.x, p.y, p.size, p.size);
         return p.life > 0;
@@ -318,33 +338,31 @@ function animate() {
         return;
     }
 
-    if (currentHunter) drawProLakeBackground();
+    drawAnimatedBackground();
 
     if (currentHunter) {
         const h = currentHunter;
 
         if (h.state === 'drawing') {
             const elapsed = Date.now() - h.drawStart;
-            h.progress = Math.min(elapsed / 1100, 1);
-            if (h.progress >= 1) {
+            if (elapsed > 1180) {
                 h.state = 'flying';
                 h.flightStart = Date.now();
-                createSplash(h.bowX - 110, h.bowY - 38, 14, "#f1c40f");
             }
-            drawProBowAndHands(h);
+            drawAnimatedBow(h);
         }
 
         if (h.state === 'flying') {
-            drawProBowAndHands(h);
+            drawAnimatedBow(h);
             drawFlyingArrow(h);
         }
 
         if (h.state === 'hit') {
-            drawProBowAndHands(h);
-            drawCaughtPrey(h);
+            drawAnimatedBow(h);
+            drawHitPrey(h);
 
-            if (Date.now() - h.hitTime > 3800) {
-                h.opacity -= 0.06;
+            if (Date.now() - h.hitTime > 3900) {
+                h.opacity -= 0.07;
                 if (h.opacity <= 0) finishHunt();
             }
         }
