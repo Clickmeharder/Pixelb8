@@ -67,7 +67,18 @@
     </style>
 </head>
 <body>
-
+		<div class="controller" id="comfy-controller">
+			<button class="close-btn">×</button><h2 class="controllerheader">Get Comfy</h2>
+			<div class="controlpanel" id="">
+				<div class="controls">
+					<input class="a" type="text" name="yourTextName" id="twitchname" placeholder="Enter Your Twitch Streamer Name">
+					<button class="a" id="streamersButt">Connect</button>
+					<button class="a" id="twitchdisconnectButt" onclick="disconnectBot()">Disconnect from Twitch</button>
+				</div>
+				<div id="more-controls" style="">
+				</div>
+			</div>
+		</div>	
     <div id="twitchMessagebox"></div>
     
     <div id="comfycontrolBox">
