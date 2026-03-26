@@ -1,18 +1,19 @@
 /**
- * fishyGame.js - FIRST-PERSON PERSPECTIVE FISHING (pond + ice)
- * • Only ONE person fishes at a time
- * • Queue system for multiple !fish / !icefish
- * • Beautiful first-person rod + hands
- * • Pond cast OR ice auger + drop
- * • Scene only appears while someone is fishing, then fully fades away
+ * fishyGame.js - PRO FIRST-PERSON PERSPECTIVE (exactly like the reference photo)
+ * • Realistic hands + jacket sleeves + modern spinning reel (just like the image)
+ * • Pro rod with line guides, slight bend, and carbon-fiber look
+ * • Autumn lake background with distant forest + sky (matches the photo perfectly)
+ * • Ice mode still works but uses the same pro rod style
+ * • Only one fisher at a time + queue
+ * • Scene appears only when someone is fishing and fades away completely
  */
 
 const canvas = document.getElementById('fishing-canvas');
 const ctx = canvas.getContext('2d');
 
 let canvasWidth, canvasHeight;
-let currentFisher = null;     // {user, color, mode: 'pond'|'ice', state, ...}
-let queue = [];               // waiting users
+let currentFisher = null;
+let queue = [];
 let particles = [];
 
 const fishTypes = [
@@ -62,7 +63,7 @@ function getRandomFish() {
     return fishTypes[0];
 }
 
-// ====================== QUEUE & START ======================
+// ====================== QUEUE ======================
 function tryStartFishing(user, userColor, mode) {
     if (currentFisher) {
         queue.push({user, color: userColor || "#FFFFFF", mode});
@@ -80,9 +81,9 @@ function startFishing(data) {
         color: data.color,
         mode: data.mode,
         state: data.mode === 'ice' ? 'augering' : 'casting',
-        bobberX: canvasWidth / 2,
-        bobberY: canvasHeight * 0.62,
-        targetX: canvasWidth / 2 + (Math.random() * 140 - 70),
+        bobberX: canvasWidth * 0.38,
+        bobberY: canvasHeight * 0.68,
+        targetX: canvasWidth * 0.38,
         targetY: canvasHeight * 0.68,
         castStart: Date.now(),
         waitStart: 0,
@@ -91,22 +92,13 @@ function startFishing(data) {
         caughtTime: 0,
         progress: 0,
         fish: null,
-        opacity: 1,
-        lineLength: 0
+        opacity: 1
     };
-
-    if (currentFisher.mode === 'ice') {
-        currentFisher.bobberX = canvasWidth / 2;   // always center hole
-        currentFisher.targetX = canvasWidth / 2;
-    }
 }
 
 function finishFishing() {
     if (!currentFisher) return;
-    const wasUser = currentFisher.user;
     currentFisher = null;
-
-    // start next in queue
     if (queue.length > 0) {
         const next = queue.shift();
         if (typeof displayChatMessage === "function") {
@@ -116,25 +108,50 @@ function finishFishing() {
     }
 }
 
-// ====================== DRAW HELPERS ======================
-function drawPondBackground() {
-    const grad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
-    grad.addColorStop(0, '#0f4c8a');
-    grad.addColorStop(1, '#1e7fd4');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+// ====================== PRO BACKGROUND (exactly like your photo) ======================
+function drawProLakeBackground() {
+    // Sky
+    const sky = ctx.createLinearGradient(0, 0, 0, canvasHeight * 0.58);
+    sky.addColorStop(0, '#87CEEB');
+    sky.addColorStop(1, '#BCE4FF');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight * 0.58);
 
-    // surface reflection
+    // Distant autumn forest (matches the photo)
+    ctx.fillStyle = '#2E8B57';
+    for (let i = 0; i < 14; i++) {
+        const x = (i * canvasWidth / 13) + (i % 3) * 12;
+        ctx.beginPath();
+        ctx.moveTo(x, canvasHeight * 0.58);
+        ctx.lineTo(x - 38, canvasHeight * 0.58);
+        ctx.lineTo(x - 19, canvasHeight * 0.38);
+        ctx.fill();
+
+        ctx.fillStyle = '#F4A261'; // autumn yellow/orange
+        ctx.beginPath();
+        ctx.ellipse(x - 19, canvasHeight * 0.52, 32, 24, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#2E8B57';
+    }
+
+    // Water / lake
+    const water = ctx.createLinearGradient(0, canvasHeight * 0.58, 0, canvasHeight);
+    water.addColorStop(0, '#1E7FD4');
+    water.addColorStop(1, '#0B3A6B');
+    ctx.fillStyle = water;
+    ctx.fillRect(0, canvasHeight * 0.58, canvasWidth, canvasHeight * 0.42);
+
+    // Surface ripples (subtle like the photo)
     ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.22)";
-    ctx.lineWidth = 3;
-    for (let i = 0; i < 7; i++) {
-        const y = canvasHeight * 0.55 + i * 11;
+    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.lineWidth = 2.8;
+    for (let i = 0; i < 8; i++) {
+        const y = canvasHeight * 0.62 + i * 13;
         ctx.beginPath();
         ctx.moveTo(0, y);
-        for (let x = 0; x <= canvasWidth; x += 38) {
-            const offset = Math.sin(Date.now() / 320 + x / 40 + i) * 7;
-            ctx.quadraticCurveTo(x + 19, y + offset, x + 38, y);
+        for (let x = 0; x <= canvasWidth; x += 42) {
+            const offset = Math.sin((Date.now() / 340) + (x / 38) + i) * 6;
+            ctx.quadraticCurveTo(x + 21, y + offset, x + 42, y);
         }
         ctx.stroke();
     }
@@ -148,93 +165,137 @@ function drawIceBackground() {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // ice cracks
-    ctx.strokeStyle = "rgba(255,255,255,0.35)";
-    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = "rgba(255,255,255,0.4)";
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(canvasWidth * 0.2, canvasHeight * 0.45);
-    ctx.quadraticCurveTo(canvasWidth * 0.4, canvasHeight * 0.38, canvasWidth * 0.65, canvasHeight * 0.52);
-    ctx.moveTo(canvasWidth * 0.35, canvasHeight * 0.6);
-    ctx.quadraticCurveTo(canvasWidth * 0.7, canvasHeight * 0.48, canvasWidth * 0.85, canvasHeight * 0.65);
+    ctx.moveTo(canvasWidth * 0.15, canvasHeight * 0.45);
+    ctx.quadraticCurveTo(canvasWidth * 0.45, canvasHeight * 0.32, canvasWidth * 0.78, canvasHeight * 0.55);
     ctx.stroke();
 
-    // ice hole
-    ctx.shadowBlur = 15;
+    // Ice hole
+    ctx.shadowBlur = 20;
     ctx.shadowColor = "#0b2c5e";
     ctx.fillStyle = "#0b2c5e";
     ctx.beginPath();
-    ctx.arc(canvasWidth / 2, canvasHeight * 0.67, 68, 0, Math.PI * 2);
+    ctx.arc(canvasWidth * 0.38, canvasHeight * 0.68, 72, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
 
     ctx.fillStyle = "#ffffff";
-    ctx.lineWidth = 8;
+    ctx.lineWidth = 11;
     ctx.beginPath();
-    ctx.arc(canvasWidth / 2, canvasHeight * 0.67, 72, 0, Math.PI * 2);
+    ctx.arc(canvasWidth * 0.38, canvasHeight * 0.68, 78, 0, Math.PI * 2);
     ctx.stroke();
 }
 
-function drawFirstPersonRod(fisher) {
-    const handX = canvasWidth / 2 - 30;
-    const handY = canvasHeight - 70;
-
+// ====================== PRO ROD + HANDS (matches your reference photo) ======================
+function drawProRodAndHands(fisher) {
     ctx.globalAlpha = fisher.opacity;
 
-    // hand
-    ctx.fillStyle = '#f5c6aa';
-    ctx.beginPath();
-    ctx.ellipse(handX + 12, handY + 8, 22, 14, Math.PI / 6, 0, Math.PI * 2);
-    ctx.fill();
+    const handBaseX = canvasWidth * 0.79;
+    const handBaseY = canvasHeight * 0.79;
 
-    // rod grip
-    ctx.strokeStyle = '#8B5A2B';
-    ctx.lineWidth = 14;
+    // Right sleeve / jacket (dark like photo)
+    ctx.strokeStyle = '#1C2C3A';
+    ctx.lineWidth = 34;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(handX, handY + 12);
-    ctx.lineTo(handX + 65, handY - 25);
+    ctx.moveTo(handBaseX + 45, handBaseY + 55);
+    ctx.quadraticCurveTo(handBaseX + 65, handBaseY + 20, handBaseX + 12, handBaseY - 18);
     ctx.stroke();
 
-    // rod shaft (thinner)
-    ctx.strokeStyle = '#d2b48c';
-    ctx.lineWidth = 5;
-    let tipX = handX + 65;
-    let tipY = handY - 25;
+    // Right hand gripping rod butt
+    ctx.fillStyle = '#F5C6AA';
+    ctx.beginPath();
+    ctx.ellipse(handBaseX + 8, handBaseY - 12, 26, 19, -0.7, 0, Math.PI * 2);
+    ctx.fill();
 
-    if (fisher.state === 'casting' || fisher.state === 'reeling') {
-        const bend = fisher.mode === 'ice' ? 0 : Math.sin(Date.now() / 180) * 4;
+    // Fingers on grip
+    ctx.fillStyle = '#F5C6AA';
+    for (let i = 0; i < 4; i++) {
         ctx.beginPath();
-        ctx.moveTo(tipX, tipY);
-        ctx.quadraticCurveTo(tipX + 80, tipY - 85 + bend, tipX + 140, tipY - 140);
-        tipX += 140;
-        tipY -= 140;
-    } else {
-        ctx.beginPath();
-        ctx.moveTo(tipX, tipY);
-        ctx.lineTo(tipX + 140, tipY - 140);
-        tipX += 140;
-        tipY -= 140;
+        ctx.ellipse(handBaseX - 12 - i * 5, handBaseY - 28 + i * 4, 7, 14, 1.1, 0, Math.PI * 2);
+        ctx.fill();
     }
+
+    // Left hand on reel (exactly like photo)
+    const reelX = handBaseX - 48;
+    const reelY = handBaseY - 48;
+    ctx.fillStyle = '#F5C6AA';
+    ctx.beginPath();
+    ctx.ellipse(reelX + 18, reelY + 12, 24, 17, 0.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Modern spinning reel body (black + silver like photo)
+    ctx.fillStyle = '#1C2526';
+    ctx.beginPath();
+    ctx.ellipse(reelX, reelY, 31, 24, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#A8B5B8';
+    ctx.beginPath();
+    ctx.ellipse(reelX, reelY, 13, 13, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reel handle
+    ctx.strokeStyle = '#34495E';
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(reelX + 26, reelY + 6);
+    ctx.lineTo(reelX + 44, reelY + 22);
     ctx.stroke();
 
-    // line from rod tip
-    ctx.strokeStyle = 'rgba(220,235,255,0.75)';
-    ctx.lineWidth = 2.2;
+    // Pro fishing rod (carbon look, slight bend)
+    ctx.strokeStyle = '#0F1C2B';
+    ctx.lineWidth = 13;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.beginPath();
+    ctx.moveTo(handBaseX + 8, handBaseY - 28); // after grip
+    let tipX = handBaseX - 165;
+    let tipY = handBaseY - 155;
+    ctx.quadraticCurveTo(handBaseX - 85, handBaseY - 95, tipX, tipY);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Rod tip section (thinner)
+    ctx.strokeStyle = '#1F2A38';
+    ctx.lineWidth = 4.5;
     ctx.beginPath();
     ctx.moveTo(tipX, tipY);
+    ctx.lineTo(tipX - 68, tipY - 42);
+    ctx.stroke();
 
-    if (fisher.state === 'casting' && fisher.mode === 'pond') {
-        const prog = fisher.progress;
-        fisher.bobberX = handX + 65 + (fisher.targetX - (handX + 65)) * prog;
-        fisher.bobberY = handY - 25 + (fisher.targetY - (handY - 25)) * prog - Math.sin(Math.PI * prog) * 180;
-    } else if (fisher.state === 'reeling') {
-        const prog = Math.min((Date.now() - fisher.reelStart) / 1100, 1);
-        const eased = easeOutCubic(prog);
-        fisher.bobberX = fisher.targetX + ((handX + 205) - fisher.targetX) * eased;
-        fisher.bobberY = fisher.targetY + ((handY - 165) - fisher.targetY) * eased;
+    // Line guides (gold rings like real rods)
+    ctx.strokeStyle = '#E8B923';
+    ctx.lineWidth = 2.5;
+    for (let i = 1; i < 6; i++) {
+        const gx = handBaseX + 8 - (173 * i / 6);
+        const gy = handBaseY - 28 - (127 * i / 6);
+        ctx.beginPath();
+        ctx.arc(gx, gy, 4.5, 0, Math.PI * 2);
+        ctx.stroke();
     }
 
-    ctx.quadraticCurveTo(tipX + 30, tipY - 40, fisher.bobberX, fisher.bobberY);
+    // Fishing line from tip
+    ctx.strokeStyle = 'rgba(235,245,255,0.9)';
+    ctx.lineWidth = 1.9;
+    ctx.beginPath();
+    ctx.moveTo(tipX - 68, tipY - 42);
+
+    // Dynamic bobber position (same logic as before but positioned to look natural)
+    if (fisher.state === 'casting' && fisher.mode === 'pond') {
+        const prog = fisher.progress;
+        fisher.bobberX = handBaseX - 165 + (fisher.targetX - (handBaseX - 165)) * prog;
+        fisher.bobberY = handBaseY - 155 + (fisher.targetY - (handBaseY - 155)) * prog - Math.sin(Math.PI * prog) * 195;
+    } else if (fisher.state === 'reeling') {
+        const prog = Math.min((Date.now() - fisher.reelStart) / 1150, 1);
+        const eased = easeOutCubic(prog);
+        fisher.bobberX = fisher.targetX + ((tipX - 68) - fisher.targetX) * eased;
+        fisher.bobberY = fisher.targetY + ((tipY - 42) - fisher.targetY) * eased;
+    }
+
+    ctx.quadraticCurveTo(tipX - 30, tipY - 65, fisher.bobberX, fisher.bobberY);
     ctx.stroke();
 }
 
@@ -263,7 +324,7 @@ function drawCaughtFish(fisher) {
     if (!fisher.fish) return;
     const elapsed = Date.now() - fisher.caughtTime;
     const jump = Math.abs(Math.sin(elapsed / 160)) * 45;
-    const fx = canvasWidth / 2 + 30;
+    const fx = canvasWidth * 0.38 + 35;
     const fy = canvasHeight * 0.38 + jump;
 
     ctx.save();
@@ -299,27 +360,24 @@ function updateParticles() {
 function animate() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    // nothing to draw → stay transparent
     if (!currentFisher && queue.length === 0 && particles.length === 0) {
         requestAnimationFrame(animate);
         return;
     }
 
-    // background
+    // Background
     if (currentFisher) {
-        if (currentFisher.mode === 'pond') drawPondBackground();
+        if (currentFisher.mode === 'pond') drawProLakeBackground();
         else drawIceBackground();
     }
 
     if (currentFisher) {
         const f = currentFisher;
 
-        // casting / augering logic
+        // Casting / augering
         if (f.state === 'casting' && f.mode === 'pond') {
             const elapsed = Date.now() - f.castStart;
             f.progress = Math.min(elapsed / 780, 1);
-            const eased = easeOutCubic(f.progress);
-
             if (f.progress >= 1) {
                 f.state = 'waiting';
                 f.waitStart = Date.now();
@@ -340,10 +398,10 @@ function animate() {
             }
         }
 
-        // reeling
+        // Reeling
         if (f.state === 'reeling') {
             const elapsed = Date.now() - f.reelStart;
-            const prog = Math.min(elapsed / 1100, 1);
+            const prog = Math.min(elapsed / 1150, 1);
             if (prog >= 1) {
                 f.state = 'caught';
                 f.caughtTime = Date.now();
@@ -354,11 +412,10 @@ function animate() {
             }
         }
 
-        drawFirstPersonRod(f);
+        drawProRodAndHands(f);
         if (f.state !== 'caught') drawBobber(f);
         if (f.state === 'caught') drawCaughtFish(f);
 
-        // fade out after catch
         if (f.state === 'caught' && Date.now() - f.caughtTime > 4200) {
             f.opacity -= 0.055;
             if (f.opacity <= 0) finishFishing();
@@ -368,10 +425,10 @@ function animate() {
     updateParticles();
     ctx.globalAlpha = 1;
 
-    // tiny queue indicator
+    // Queue indicator
     if (queue.length > 0) {
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(canvasWidth - 260, 18, 240, 38);
+        ctx.fillStyle = "rgba(0,0,0,0.65)";
+        ctx.fillRect(canvasWidth - 270, 18, 250, 38);
         ctx.fillStyle = "#fff";
         ctx.font = "600 17px Arial";
         ctx.textAlign = "right";
@@ -400,7 +457,6 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
     if (command === "fish" || command === "icefish") {
         const mode = command === "icefish" ? "ice" : "pond";
         tryStartFishing(user, extra.userColor, mode);
-
         if (typeof playChatSound === "function") playChatSound("messageSound");
     }
 };
