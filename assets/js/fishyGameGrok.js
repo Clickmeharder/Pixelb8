@@ -1,4 +1,4 @@
-<DOCUMENT filename="fishyGame.js">
+
 /**
  * fishyGame.js - BEAUTIFIED Twitch Fishing Overlay (animations no longer look like dog shit)
  */
@@ -333,4 +333,3 @@ ComfyJS.onCommand = (user, command, message, flags, extra) => {
 };
 
 animate();
-</DOCUMENT>
