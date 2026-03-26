@@ -177,6 +177,7 @@ let chataudioSetting = "on"; // Change to "off" to mute all sounds
 const chatsounds = {
     messageSound: new Audio("/assets/sounds/snakedie_sound1.mp3"),
 	commandSound: new Audio("/assets/sounds/snakedie_sound1.mp3"),
+	fishing-sound: new Audio("/assets/sounds/fishing-sound.mp3"),
     //gameshowintro: new Audio("/assets/sounds/gameshow_intro.mp3"),
     // Add more sounds here
 };
