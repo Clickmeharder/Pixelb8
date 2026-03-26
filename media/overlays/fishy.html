@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitch Fishing Overlay</title>
+    <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
+    <script src="twitchchat.js"></script>
+    
+    <style>
+        /* Transparency is key for OBS overlays */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #fishing-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* Allows clicks to pass through if needed */
+        }
+
+        /* UI for the Chat/Console from your twitchchat.js requirements */
+        #comfycontrolBox {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            z-index: 100;
+            display: none; /* Toggle with your 'controls-toggle' button */
+        }
+        #comfycontrolBox.active { display: block; }
+
+        #twitchMessagebox {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 300px;
+            max-height: 400px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .chatMessage {
+            background: rgba(0, 0, 0, 0.6);
+            margin: 2px;
+            padding: 5px;
+            border-radius: 4px;
+            transition: opacity 1s;
+        }
+
+        .floatingEmote {
+            position: fixed;
+            pointer-events: none;
+            z-index: 99;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="twitchMessagebox"></div>
+    
+    <div id="comfycontrolBox">
+        <input type="text" name="yourTextName" placeholder="Streamer Name">
+        <button id="streamersButt">Connect</button>
+        <button id="twitchdisconnectButt" style="display:none;">Disconnect</button>
+        <button id="controls-toggle">Close</button>
+    </div>
+
+    <canvas id="fishing-canvas"></canvas>
+		<script src="/assets/js/twitchChat.js"></script>
+    <script>
+        const canvas = document.getElementById('fishing-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // --- Game Logic Variables ---
+        const activeFishers = [];
+        const fishTypes = [
+            { name: "🐟 Common Bass", weight: "1-3lbs", rarity: 0.6, color: "#4fa3a5" },
+            { name: "🐠 Tropical Guppy", weight: "0.5lbs", rarity: 0.2, color: "#ff8c00" },
+            { name: "🐡 Blowfish", weight: "2lbs", rarity: 0.1, color: "#ead864" },
+            { name: "🦈 Rare Shark", weight: "50lbs+", rarity: 0.05, color: "#4b5d67" },
+            { name: "👢 Old Boot", weight: "2lbs", rarity: 0.05, color: "#5d4037" }
+        ];
+
+        // --- The Main Fishing Function ---
+        function spawnFishingEvent(user, userColor) {
+            // Check if user is already fishing to prevent spam
+            if (activeFishers.find(f => f.user === user)) return;
+
+            const fisher = {
+                user: user,
+                color: userColor || "#FFF",
+                x: Math.random() * (canvas.width - 200) + 100,
+                y: canvas.height - 50,
+                state: 'casting', // casting, waiting, reeling, caught
+                bobberY: canvas.height - 50,
+                bobberX: 0,
+                timer: 0,
+                fish: null
+            };
+            
+            fisher.targetBobberX = fisher.x + (Math.random() * 100 - 50);
+            fisher.targetBobberY = canvas.height - 150 - (Math.random() * 100);
+            
+            activeFishers.push(fisher);
+
+            // Logic progression
+            setTimeout(() => fisher.state = 'waiting', 1000);
+            
+            // Wait 2-5 seconds for a bite
+            const waitTime = 2000 + Math.random() * 3000;
+            setTimeout(() => {
+                fisher.state = 'reeling';
+                fisher.fish = determineCatch();
+                
+                // Final result
+                setTimeout(() => {
+                    displayChatMessage("SYSTEM", `🎣 ${fisher.user} caught a ${fisher.fish.name}!`, {}, {userColor: "#00ffcc"});
+                    fisher.state = 'caught';
+                    // Remove fisher after 3 seconds of showing catch
+                    setTimeout(() => {
+                        const index = activeFishers.indexOf(fisher);
+                        if (index > -1) activeFishers.splice(index, 1);
+                    }, 3000);
+                }, 1500);
+            }, waitTime);
+        }
+
+        function determineCatch() {
+            const rand = Math.random();
+            let cumulative = 0;
+            for (let f of fishTypes) {
+                cumulative += f.rarity;
+                if (rand < cumulative) return f;
+            }
+            return fishTypes[0];
+        }
+
+        // --- Animation Loop ---
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            activeFishers.forEach(f => {
+                // Draw Fishing Rod
+                ctx.strokeStyle = "#5d4037";
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(f.x, f.y);
+                ctx.lineTo(f.x + 20, f.y - 80);
+                ctx.stroke();
+
+                // Draw Line
+                ctx.strokeStyle = "rgba(255,255,255,0.6)";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(f.x + 20, f.y - 80);
+
+                if (f.state === 'casting') {
+                    f.bobberX = f.x + 20;
+                    f.bobberY -= 5;
+                } else if (f.state === 'waiting' || f.state === 'reeling') {
+                    f.bobberX = f.targetBobberX;
+                    f.bobberY = f.targetBobberY + (Math.sin(Date.now() / 500) * 5); // Floating bob
+                }
+                
+                ctx.lineTo(f.bobberX, f.bobberY);
+                ctx.stroke();
+
+                // Draw Bobber
+                ctx.fillStyle = "red";
+                ctx.beginPath();
+                ctx.arc(f.bobberX, f.bobberY, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw User Name
+                ctx.fillStyle = f.color;
+                ctx.font = "bold 16px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText(f.user, f.x, f.y + 20);
+
+                // Draw Caught Fish
+                if (f.state === 'caught' && f.fish) {
+                    ctx.fillStyle = f.fish.color;
+                    ctx.font = "30px Arial";
+                    ctx.fillText(f.fish.name.split(' ')[0], f.x + 20, f.y - 110); 
+                    ctx.font = "14px Arial";
+                    ctx.fillText(f.fish.name, f.x + 20, f.y - 140);
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // --- Hooking into ComfyJS (using your twitchchat.js logic) ---
+        ComfyJS.onCommand = (user, command, message, flags, extra) => {
+            if (command === "fish") {
+                spawnFishingEvent(user, extra.userColor);
+                if (typeof playChatSound === "function") playChatSound("messageSound");
+            }
+        };
+
+        // Initialize animation
+        animate();
+
+        // Handle window resizing
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+	<script>
+		
+
+		window.onload = function () {
+
+			loadSettings();
+			updateCommandlist();
+			connectStreamer();
+
+		};
+	</script>
+
+</body>
+</html>
