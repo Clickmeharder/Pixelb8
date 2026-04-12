@@ -1,4 +1,5 @@
-if (!debug) debug = true;
+let debug = true;
+let DEBUG = true;
 let isDropdownsInitialized = false;
 // ================= Cached Data =================
 let cachedWeapons = [];
