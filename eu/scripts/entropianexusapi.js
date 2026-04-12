@@ -1,4 +1,4 @@
-
+if (!debug) debug = true;
 let isDropdownsInitialized = false;
 // ================= Cached Data =================
 let cachedWeapons = [];
@@ -173,72 +173,6 @@ async function getData(endpoint, localFile) {
         }
     }
 }
-
- // ================= Local/API Data Loader - FINAL FIXED VERSION =================
-/* async function getData(endpoint, localFile) {
-    const fullUrl = window.BASE_URL + endpoint;
-
-    if (USE_LOCAL_DATA) {
-        try {
-            let data = null;
-
-            // ── Special smart handling for materials ──
-            if (localFile === 'materials.json' || endpoint.includes('material') || endpoint.includes('items')) {
-                
-                // 1. First try dedicated materials.json (smaller & faster)
-                try {
-                    data = await window.electronAPI.loadNexusJSON('materials.json');
-                    if (data && (Array.isArray(data) ? data.length > 0 : data?.items?.length > 0)) {
-                        if (DEBUG) console.log(`[NEXUS_SOURCE:SUCCESS] Loaded from dedicated materials.json`);
-                        return Array.isArray(data) ? data : data?.items || [];
-                    }
-                } catch (e) {
-                    // materials.json not found or failed → silent, we'll try items.json next
-                }
-
-                // 2. Fallback to items.json (contains all materials + more)
-                console.log(`[NEXUS_SOURCE:INFO] materials.json not found/empty → falling back to items.json`);
-                data = await window.electronAPI.loadNexusJSON('items.json');
-            } 
-            else {
-                // Normal case for everything else
-                data = await window.electronAPI.loadNexusJSON(localFile);
-            }
-
-            // Final check if we got valid data
-            if (data && (Array.isArray(data) ? data.length > 0 : data?.items?.length > 0)) {
-                if (DEBUG) console.log(`[NEXUS_SOURCE:SUCCESS] Data found in local cache: ${localFile}`);
-                return Array.isArray(data) ? data : data?.items || [];
-            }
-
-            // Only warn for non-materials files (materials fallback is expected sometimes)
-            if (localFile !== 'materials.json') {
-                console.warn(`[NEXUS_SOURCE:WARN] Local cache empty/invalid for ${localFile}. Returning [].`);
-            } else {
-                console.log(`[NEXUS_SOURCE:INFO] materials.json and items.json both empty for this lookup.`);
-            }
-            return [];
-
-        } catch (err) {
-            console.error(`[NEXUS_SOURCE:ERROR] Local load FAILED for ${localFile}`, err);
-            return [];
-        }
-    } 
-    else {
-        // ==================== API MODE (unchanged) ====================
-        try {
-            const res = await fetch(fullUrl);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            if (DEBUG) console.log(`[NEXUS_SOURCE:SUCCESS] Fetched from External API: ${fullUrl}`);
-            return Array.isArray(data) ? data : data?.items || [];
-        } catch (err) {
-            console.error(`[NEXUS_SOURCE:ERROR] Failed to fetch External API ${endpoint}:`, err);
-            return [];
-        }
-    }
-}
- */
 //------------------------------------------------------------
 //------------------------------------------------------------
 // ================= DOWNLOADING DATA =================
@@ -295,20 +229,6 @@ async function downloadAllZip(endpoints) {
   }
 }
 
-// ================= FETCHING & PRINT TO TERMINAL =================
-/* async function fetchData(endpoint, specific = null) {
-  let fullEndpoint = endpoint;
-  if (specific) fullEndpoint += `/${encodeURIComponent(specific)}`;
-  try {
-    const res = await fetch(BASE_URL + fullEndpoint);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error(`Error fetching ${fullEndpoint}:`, err);
-    return null;
-  }
-} */
 async function fetchData(endpoint, specific = null) {
   let fullEndpoint = endpoint;
   if (specific) fullEndpoint += `/${encodeURIComponent(specific)}`;
@@ -463,268 +383,201 @@ function populateDropdown(inputElement, containerId, items, currentRefSetter = n
 }
 // ================= Dropdown Population =================
 
-async function populateMiningDropdowns() {
-    // 1. Populate Finders
-    const finderInput = document.querySelector(".mining-finder-select");
+// ================= POPULATE CACHES ONLY (Web Version - No Dropdowns) =================
+async function populateMiningCache() {
     cachedFinders = await getData("finders", "finders.json");
     const noneFinder = cachedFinders.length ? createNoneFromFirstItem(cachedFinders[0]) : { Name: "None" };
-    
-    populateDropdown(finderInput, "mining-finder-options", [noneFinder, ...cachedFinders], (item) => {
-        selectFinder(item);
-    });
+    cachedFinders.unshift(noneFinder);   // Add "None" at start
 
-    // 2. Populate Amps
-    const ampInput = document.querySelector(".mining-amp-select");
     cachedFinderAmps = await getData("finderamplifiers", "finderamplifiers.json");
     const noneAmp = cachedFinderAmps.length ? createNoneFromFirstItem(cachedFinderAmps[0]) : { Name: "None" };
-    
-    populateDropdown(ampInput, "mining-amp-options", [noneAmp, ...cachedFinderAmps], (item) => {
-        selectFinderAmplifier(item); 
-    });
+    cachedFinderAmps.unshift(noneAmp);
 
-    // 3. Populate Extractors
-    const extractorInput = document.querySelector(".extractor-tool-select");
     cachedExcavators = await getData("excavators", "excavators.json");
     const noneExtractor = cachedExcavators.length ? createNoneFromFirstItem(cachedExcavators[0]) : { Name: "None" };
-    
-    populateDropdown(extractorInput, "extractor-tool-options", [noneExtractor, ...cachedExcavators], (item) => {
-        selectExtractor(item);
-    });
+    cachedExcavators.unshift(noneExtractor);
 
-    // 🟢 AUTO-RESTORE SAVED SELECTIONS
-    const prefs = window.overlayPreferences;
-    if (prefs) {
-        if (prefs.lastFinderName && prefs.lastFinderName !== "None") {
-            const item = cachedFinders.find(f => f.Name === prefs.lastFinderName);
-            if (item) {
-                finderInput.value = item.Name;
-                selectFinder(item);
-            }
-        }
-        if (prefs.lastAmpName && prefs.lastAmpName !== "None") {
-            const item = cachedFinderAmps.find(a => a.Name === prefs.lastAmpName);
-            if (item) {
-                ampInput.value = item.Name;
-                selectFinderAmplifier(item);
-            }
-        }
-        if (prefs.lastExtractorName && prefs.lastExtractorName !== "None") {
-            const item = cachedExcavators.find(e => e.Name === prefs.lastExtractorName);
-            if (item) {
-                extractorInput.value = item.Name;
-                selectExtractor(item);
-            }
-        }
-    }
+    console.log(`[CACHE] Mining tools loaded: ${cachedFinders.length} finders, ${cachedFinderAmps.length} amps, ${cachedExcavators.length} extractors`);
 }
-async function populateWeaponDropdown() {
-  const input = document.querySelector(".weapon-select");
-  cachedWeapons = await getData("weapons", "weapons.json");
+async function populateWeaponCache() {
+    cachedWeapons = await getData("weapons", "weapons.json");
+    const noneItem = cachedWeapons.length ? createNoneFromFirstItem(cachedWeapons[0]) : { Name: "None" };
+    cachedWeapons = [noneItem, ...cachedWeapons];
 
-  // Add None at the front of cachedWeapons
-  const noneItem = cachedWeapons.length ? createNoneFromFirstItem(cachedWeapons[0]) : { Name: "None" };
-  cachedWeapons = [noneItem, ...cachedWeapons];
-
-  populateDropdown(input, "weapon-options", cachedWeapons, (item) => currentWeapon = item);
-  if (!currentWeapon) currentWeapon = cachedWeapons[0];
+    if (!currentWeapon) currentWeapon = cachedWeapons[0];
+    console.log(`[CACHE] Weapons loaded: ${cachedWeapons.length} items`);
 }
+async function populateAmplifierCache() {
+    cachedAmplifiers = await getData("weaponamplifiers", "amplifiers.json");
+    const noneItem = cachedAmplifiers.length ? createNoneFromFirstItem(cachedAmplifiers[0]) : { Name: "None" };
+    cachedAmplifiers = [noneItem, ...cachedAmplifiers];
 
-async function populateAmplifierDropdown() {
-  const input = document.querySelector(".amplifier-select");
-  cachedAmplifiers = await getData("weaponamplifiers", "amplifiers.json");
-
-  const noneItem = cachedAmplifiers.length ? createNoneFromFirstItem(cachedAmplifiers[0]) : { Name: "None" };
-  cachedAmplifiers = [noneItem, ...cachedAmplifiers];
-
-  populateDropdown(input, "amplifier-options", cachedAmplifiers, (item) => currentAmplifier = item);
-  if (!currentAmplifier) currentAmplifier = cachedAmplifiers[0];
+    if (!currentAmplifier) currentAmplifier = cachedAmplifiers[0];
+    console.log(`[CACHE] Amplifiers loaded: ${cachedAmplifiers.length} items`);
 }
+async function populateScopeCache() {
+    const allAttachments = await getData("weaponvisionattachments", "weaponvisionattachments.json");
+    cachedScopes = allAttachments.filter(item => 
+        item.Properties?.Type === "Scope" || item.Properties?.Type === "Sight"
+    );
 
-async function populateScopeDropdown() {
-  const input = document.querySelector(".scope-select");
-  const allAttachments = await getData("weaponvisionattachments", "weaponvisionattachments.json");
-  cachedScopes = allAttachments.filter(item => item.Properties?.Type === "Scope" || item.Properties?.Type === "Sight");
-  // Add None at the front of cachedWeapons
-  const noneItem = cachedScopes.length ? createNoneFromFirstItem(cachedScopes[0]) : { Name: "None" };
-  cachedScopes = [noneItem, ...cachedScopes];
+    const noneItem = cachedScopes.length ? createNoneFromFirstItem(cachedScopes[0]) : { Name: "None" };
+    cachedScopes = [noneItem, ...cachedScopes];
 
-
-  populateDropdown(input, "scope-options", cachedScopes, (item) => currentScope = item);
-  if (!currentScope) currentScope = cachedScopes[0];
+    if (!currentScope) currentScope = cachedScopes[0];
+    console.log(`[CACHE] Scopes loaded: ${cachedScopes.length} items`);
 }
+async function populateVisionCache() {
+    const allAttachments = await getData("weaponvisionattachments", "weaponvisionattachments.json");
+    cachedVisionAttachments = allAttachments.filter(item => 
+        item.Properties?.Type === "Sight"
+    );
 
-async function populateVisionDropdowns() {
-  const input1 = document.querySelector(".vision1-select");
-  const input2 = document.querySelector(".vision2-select");
-  const allAttachments = await getData("weaponvisionattachments", "weaponvisionattachments.json");
+    const noneItem = cachedVisionAttachments.length ? createNoneFromFirstItem(cachedVisionAttachments[0]) : { Name: "None" };
+    cachedVisionAttachments = [noneItem, ...cachedVisionAttachments];
 
-  cachedVisionAttachments = allAttachments.filter(item => item.Properties?.Type === "Sight");
+    if (!currentVision1) currentVision1 = cachedVisionAttachments[0];
+    if (!currentVision2) currentVision2 = cachedVisionAttachments[0];
 
-  // Add a "None" option at the front
-  const noneItem = cachedVisionAttachments.length ? createNoneFromFirstItem(cachedVisionAttachments[0]) : { Name: "None" };
-  cachedVisionAttachments = [noneItem, ...cachedVisionAttachments];
-
-  // Populate both dropdowns with the same array
-  populateDropdown(input1, "vision1-options", cachedVisionAttachments, (item) => currentVision1 = item);
-  populateDropdown(input2, "vision2-options", cachedVisionAttachments, (item) => currentVision2 = item);
-
-  // Default to None if nothing selected
-  if (!currentVision1) currentVision1 = cachedVisionAttachments[0];
-  if (!currentVision2) currentVision2 = cachedVisionAttachments[0];
+    console.log(`[CACHE] Vision attachments loaded: ${cachedVisionAttachments.length} items`);
 }
+async function populateAbsorberCache() {
+    cachedAbsorbers = await getData("absorbers", "absorbers.json");
+    const noneItem = cachedAbsorbers.length ? createNoneFromFirstItem(cachedAbsorbers[0]) : { Name: "None" };
+    cachedAbsorbers = [noneItem, ...cachedAbsorbers];
 
-async function populateAbsorberDropdown() {
-  const input = document.querySelector(".absorber-select");
-  cachedAbsorbers = await getData("absorbers", "absorbers.json");
-  // Add None at the front of cachedWeapons
-  const noneItem = cachedAbsorbers.length ? createNoneFromFirstItem(cachedAbsorbers[0]) : { Name: "None" };
-  cachedAbsorbers = [noneItem, ...cachedAbsorbers];
-
-
-  populateDropdown(input, "absorber-options", cachedAbsorbers, (item) => currentAbsorber = item);
-  if (!currentAbsorber) currentAbsorber = cachedAbsorbers[0];
+    if (!currentAbsorber) currentAbsorber = cachedAbsorbers[0];
+    console.log(`[CACHE] Absorbers loaded: ${cachedAbsorbers.length} items`);
 }
-
-
-//populate ring dropdown('s) functions
-async function populateRingDropdowns() {
-    const leftInput = document.querySelector(".left-ring-select");
-    const rightInput = document.querySelector(".right-ring-select");
-
-    // 1. Load Data
+async function populateRingCache() {
     cachedClothes = await getData("clothings", "clothings.json");
 
     const allRings = cachedClothes.filter(item => item.Properties?.Type === "Ring");
     const leftRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "left finger");
     const rightRings = allRings.filter(r => r.Properties?.Slot?.toLowerCase() === "right finger");
 
-    // 2. Setup "None" Options
+    // Add None options
     const noneLeft = leftRings.length ? createNoneFromFirstItem(leftRings[0]) : { Name: "None" };
     const noneRight = rightRings.length ? createNoneFromFirstItem(rightRings[0]) : { Name: "None" };
     leftRings.unshift(noneLeft);
     rightRings.unshift(noneRight);
-	
-    // 3. Populate and Map to Select Functions
-    // Passing (item.Name) to your select functions ensures the UI text boxes update
-    populateDropdown(leftInput, "left-ring-options", leftRings, (item) => window.selectLeftring(item.Name));
-    populateDropdown(rightInput, "right-ring-options", rightRings, (item) => window.selectRightring(item.Name));
 
-    // 4. Set Initial Safety Defaults (Internal State)
+    // Store for later use (you can access them via window if needed)
+    window.cachedLeftRings = leftRings;
+    window.cachedRightRings = rightRings;
+
     if (!window.currentLeftRing) window.currentLeftRing = leftRings[0];
     if (!window.currentRightRing) window.currentRightRing = rightRings[0];
 
+    console.log(`[CACHE] Rings loaded: ${leftRings.length} left, ${rightRings.length} right`);
 }
+async function populateAllClothesCache() {
+    cachedClothes = await getData("clothings", "clothings.json");
+    const noneItem = cachedClothes.length ? createNoneFromFirstItem(cachedClothes[0]) : { Name: "None" };
+    const allClothes = [noneItem, ...cachedClothes];
 
-async function populateAllClothesDropdown() {
-  const input = document.querySelector(".all-clothes-select"); // your input element
-  const containerId = "all-clothes-options"; // your dropdown div
+    window.cachedAllClothes = allClothes;   // expose if needed
 
-  // Fetch all clothes
-  cachedClothes = await getData("clothings", "clothings.json");
-
-  // Add a "None" option at the top
-  const noneItem = cachedClothes.length ? createNoneFromFirstItem(cachedClothes[0]) : { Name: "None" };
-  const allClothes = [noneItem, ...cachedClothes];
-
-  // Populate dropdown
-  populateDropdown(input, containerId, allClothes, (item) => {
-    currentLoadout.selectedClothing = item; // optional: track selection
-  });
-
-  // Default selection
-  if (!currentLoadout.selectedClothing) currentLoadout.selectedClothing = allClothes[0];
+    if (!currentLoadout.selectedClothing) currentLoadout.selectedClothing = allClothes[0];
+    console.log(`[CACHE] All clothes loaded: ${allClothes.length} items`);
 }
-
-async function populateFAPDropdowns() {
-    const mainInput = document.querySelector(".main-fap-select");
-    const secondaryInput = document.querySelector(".secondary-fap-select");
-
-    // 1. Fetch medical tools data using the generic helper
+async function populateFAPCache() {
     const tools = await getData("medicaltools", "medicaltools.json");
     if (tools.length) cachedMedicalTools = tools;
 
-    // 2. Fetch medical chips data (assuming endpoint is 'medicalchips' and local file is 'medicalchips.json')
     const chips = await getData("medicalchips", "medicalchips.json");
     if (chips.length) cachedMedicalChips = chips;
 
-    // 3. Merge FAPs: Tools and Chips
-    // Note: Items from the latest fetch (chips) will be appended to the combined list.
     const allFaps = [...cachedMedicalTools, ...cachedMedicalChips];
-    window.cachedFaps = allFaps; // Store the merged list for potential filtering/lookup
+    window.cachedFaps = allFaps;
 
-    // 4. Add "None" option at the top (use the first item in the combined list for structure)
-    const noneItem = cachedFaps.length ? createNoneFromFirstItem(cachedFaps[0]) : { Name: "None" };
-    const dropdownItems = [noneItem, ...cachedFaps];
+    const noneItem = allFaps.length ? createNoneFromFirstItem(allFaps[0]) : { Name: "None" };
+    const dropdownItems = [noneItem, ...allFaps];   // even if not used as dropdown
 
-    // 5. Populate dropdowns, using `currentLoadout` setters
-    populateDropdown(mainInput, "main-fap-options", dropdownItems, (item) => {
-		if (!window.isfapInitializing) window.selectFap('mainFap', item.Name);
-	});
+    if (!window.currentLoadout.mainFap) window.currentLoadout.mainFap = noneItem;
+    if (!window.currentLoadout.secondaryFap) window.currentLoadout.secondaryFap = noneItem;
 
-	populateDropdown(secondaryInput, "secondary-fap-options", dropdownItems, (item) => {
-		if (!window.isfapInitializing) window.selectFap('secondaryFap', item.Name);
-	});
+    console.log(`[CACHE] FAPs loaded: ${allFaps.length} items`);
+}
+async function populateMaterialsCache() {
+    try {
+        // Use your existing getData helper to pull materials.json
+        const materials = await getData("materials", "materials.json");
+        
+        if (materials && materials.length > 0) {
+            cachedMaterials = materials;
+            window.cachedMaterials = materials; // Sync for the Item Info Terminal
+            if (DEBUG) console.log(`[Materials] Cache populated with ${materials.length} items.`);
+        }
+    } catch (err) {
+        console.error("Failed to load materials list:", err);
+    }
+}
+async function populateRefiningCache() {
+    try {
+        const recipes = await getData("refining", "refiningrecipes.json");
+        if (recipes) {
+            window.cachedRefiningRecipes = recipes;
+            console.log(`[Refining] Cache populated with ${recipes.length} recipes.`);
+        }
+    } catch (err) {
+        console.error("Failed to load refining recipes:", err);
+    }
+}
+async function populateArmorsCache() {
+    try {
+        const armors = await getData("armors", "armors.json");
+        if (armors) {
+            window.cachedArmors = armors;
+            console.log(`[armors] Cache populated with ${armors.length} recipes.`);
+        }
+    } catch (err) {
+        console.error("Failed to load refining recipes:", err);
+    }
+}
+async function populateNexusDropdown() {
+  try {
+    const spinner = document.getElementById("bpLoadingSpinner");
+    if (spinner) spinner.style.display = "block";
 
-    // 6. Default selection
-    // 6. Safety Defaults (Only if nothing is set yet)
-	if (!window.currentLoadout.mainFap) window.currentLoadout.mainFap = noneItem;
-	if (!window.currentLoadout.secondaryFap) window.currentLoadout.secondaryFap = noneItem;
+    //const res = await fetch("https://api.entropianexus.com/blueprints");
+	const blueprints = await getData("blueprints", "blueprints.json");
 
-    // 🔥 CRITICAL FIX: Delay initialization to ensure the <select> and its options are attached to the DOM
-/*     if (window.initializeFapsFromSettings) {
-        setTimeout(() => {
-            console.log("🟢 Running delayed FAP initialization...");
-            window.initializeFapsFromSettings();
-        }, 50); 
-    } */
+    cachedBlueprints = blueprints;
+	syncCachesToWindow();
+    // REMOVE OR COMMENT THIS LINE:
+    // renderFilteredBlueprints(blueprints); 
+
+    if (spinner) spinner.style.display = "none";
+  } catch (err) {
+    console.error("Failed to load blueprint list:", err);
+  }
 }
 
+// ================= MAIN INITIALIZATION =================
+async function initCaches() {
+    console.log("🟢 Starting cache population for web version...");
 
-function handleFapHotChange(type, isChecked) {
-    // 1. Update the isHoT state in currentLoadout (for calculation logic)
-    if (window.currentLoadout && window.currentLoadout[type]) {
-        window.currentLoadout[type].isHoT = isChecked;
-    }
-    
-    // 2. Update the global faps state (used by chatsnooper)
-    if (window.faps && window.faps[type]) {
-         window.faps[type].isHoT = isChecked;
-    }
-    
-    // NEW: Update persistence object for immediate save
-    if (window.fapPersistence) {
-        window.fapPersistence[`${type}IsHoT`] = isChecked;
-    }
+    await Promise.all([
+        populateWeaponCache(),
+        populateAmplifierCache(),
+        populateVisionCache(),
+        populateScopeCache(),
+        populateAbsorberCache(),
+        populateRingCache(),
+        populateAllClothesCache(),
+        populateFAPCache(),
+        populateMiningCache(),
+		populateMaterialsCache(),
+        populateRefiningCache(),
+        populateArmorsCache()
+    ]);
 
+    syncCachesToWindow();
 
-    // Show/hide the HoT percentage input field
-    const hotInputLabel = document.getElementById(`hot-input-label-${type}`);
-    if (hotInputLabel) {
-        // Ensure it's displayed as inline-flex when checked
-        hotInputLabel.style.display = isChecked ? 'inline-flex' : 'none';
-    }
-
-    // Trigger persistence by calling the save function directly with current values.
-    window.saveCurrentFapSettings();
-    window.updateCalculations(); // Recalculate everything
+    console.log("✅ All caches populated successfully for web version.");
 }
-window.handleFapHotChange = handleFapHotChange;
-// ================= Initialize All Dropdowns =================
-async function initDropdowns() {
-  console.log("🟢 Starting official initialization...");
-  await Promise.all([
-    populateWeaponDropdown(),
-    populateAmplifierDropdown(),
-    populateVisionDropdowns(),
-    populateScopeDropdown(),
-    populateAbsorberDropdown(),
-    populateRingDropdowns(),
-    populateAllClothesDropdown(),
-    populateFAPDropdowns(),
-	populateMiningDropdowns()
-  ]);
 
-}
 
 
 window.initDropdowns = initDropdowns;
@@ -742,75 +595,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateStatusElements(); // update immediately
   //await initDropdowns();
 
-  document.querySelector(".weapon-select")?.addEventListener("change", e => {
-    selectWeapon(e.target.value);
-    updateWeaponStats(currentWeapon);
-  });
-  document.querySelector(".amplifier-select")?.addEventListener("change", e => selectAmplifier(e.target.value));
-  document.querySelector(".vision1-select")?.addEventListener("change", e => selectVision1(e.target.value));
-  document.querySelector(".vision2-select")?.addEventListener("change", e => selectVision2(e.target.value));
-  document.querySelector(".scope-select")?.addEventListener("change", e => selectScope(e.target.value));
-  document.querySelector(".absorber-select")?.addEventListener("change", e => selectAbsorber(e.target.value));
-	// Rings
-  //document.querySelector(".left-ring-select")?.addEventListener("change", e => selectLeftring(e.target.value));
-  //document.querySelector(".right-ring-select")?.addEventListener("change", e => selectRightring(e.target.value));
-  //document.querySelector(".all-clothes-select")?.addEventListener("change", e => selectAllclothes(e.target.value));
-	// NEW FAP Listeners
-	document.querySelector(".main-fap-select")?.addEventListener("change", e => {
-		selectFap('mainFap', e.target.value);
-		
-		// Manually trigger save to persist FAP name and current HoT state
-		if (window.saveFapSettings && currentLoadout) {
-			window.saveFapSettings(
-				currentLoadout.mainFap?.Name || 'None',
-				currentLoadout.secondaryFap?.Name || 'None',
-				currentLoadout.mainFap?.isHoT || false,
-				currentLoadout.secondaryFap?.isHoT || false
-			);
-		}
-	});
-
-	document.querySelector(".secondary-fap-select")?.addEventListener("change", e => {
-		selectFap('secondaryFap', e.target.value);
-		
-		// Manually trigger save to persist FAP name and current HoT state
-		if (window.saveFapSettings && currentLoadout) {
-			window.saveFapSettings(
-				currentLoadout.mainFap?.Name || 'None',
-				currentLoadout.secondaryFap?.Name || 'None',
-				currentLoadout.mainFap?.isHoT || false,
-				currentLoadout.secondaryFap?.isHoT || false
-			);
-		}
-	});
-  // NEW: HoT Checkbox Listeners
-    document.querySelector(".main-fap-select")?.addEventListener("change", e => selectFap('mainFap', e.target.value));
-    document.querySelector(".secondary-fap-select")?.addEventListener("change", e => selectFap('secondaryFap', e.target.value));
-
-    // NEW: HoT checkbox listeners
-    document.getElementById("isHoT-mainFap")?.addEventListener("change", e => handleFapHotChange('mainFap', e.target.checked));
-    document.getElementById("isHoT-secondaryFap")?.addEventListener("change", e => handleFapHotChange('secondaryFap', e.target.checked));
-
-	// Armour
-	["head", "chest", "thigh", "shin", "arm", "hand", "foot"].forEach(slot => {
-	  document.querySelector(`.${slot}-select`)?.addEventListener("change", e => {
-		const selected = cachedClothes.find(c => c.Name === e.target.value);
-		if (selected) armour[slot] = selected;
-	  });
-	});
-	// --- NEW MINING CHECKBOX LISTENERS ---
-    document.querySelectorAll('.mining-type-check').forEach(checkbox => {
-        checkbox.addEventListener('change', (e) => {
-            const type = e.target.getAttribute('data-type'); 
-            if (window.miningLoadout) {
-                window.miningLoadout.activeSearches[type] = e.target.checked;
-                // Check if the function exists before calling to avoid errors
-                if (typeof calculateMiningCosts === 'function') {
-                    calculateMiningCosts();
-                }
-            }
-        });
-    });
   const dataSourceButton = document.getElementById("DataSourceToggle");
 
   dataSourceButton.addEventListener("click", () => {
@@ -957,61 +741,6 @@ function renderFilteredBlueprints(filteredList) {
   });
 }
 
-async function populateMaterialsCache() {
-    try {
-        // Use your existing getData helper to pull materials.json
-        const materials = await getData("materials", "materials.json");
-        
-        if (materials && materials.length > 0) {
-            cachedMaterials = materials;
-            window.cachedMaterials = materials; // Sync for the Item Info Terminal
-            if (DEBUG) console.log(`[Materials] Cache populated with ${materials.length} items.`);
-        }
-    } catch (err) {
-        console.error("Failed to load materials list:", err);
-    }
-}
-async function populateRefiningCache() {
-    try {
-        const recipes = await getData("refining", "refiningrecipes.json");
-        if (recipes) {
-            window.cachedRefiningRecipes = recipes;
-            console.log(`[Refining] Cache populated with ${recipes.length} recipes.`);
-        }
-    } catch (err) {
-        console.error("Failed to load refining recipes:", err);
-    }
-}
-async function populateArmorsCache() {
-    try {
-        const armors = await getData("armors", "armors.json");
-        if (armors) {
-            window.cachedArmors = armors;
-            console.log(`[armors] Cache populated with ${armors.length} recipes.`);
-        }
-    } catch (err) {
-        console.error("Failed to load refining recipes:", err);
-    }
-}
-async function populateNexusDropdown() {
-  try {
-    const spinner = document.getElementById("bpLoadingSpinner");
-    if (spinner) spinner.style.display = "block";
-
-    //const res = await fetch("https://api.entropianexus.com/blueprints");
-	const blueprints = await getData("blueprints", "blueprints.json");
-
-    cachedBlueprints = blueprints;
-	syncCachesToWindow();
-    // REMOVE OR COMMENT THIS LINE:
-    // renderFilteredBlueprints(blueprints); 
-
-    if (spinner) spinner.style.display = "none";
-  } catch (err) {
-    console.error("Failed to load blueprint list:", err);
-  }
-}
-
 function showMarkupReminder() {
   const popup = document.getElementById("markupReminderPopup");
 
@@ -1148,9 +877,8 @@ document.getElementById("showAllBlueprintsBtn").addEventListener("click", () => 
 
 document.addEventListener('DOMContentLoaded', () => {
   populateNexusDropdown();
-  populateMaterialsCache();
-  populateRefiningCache();
-  populateArmorsCache();
+
+  await initCaches();
   const btn = document.getElementById("showAllBlueprintsBtn");
   btn.classList.add("active");
   btn.classList.remove("active");
@@ -1192,36 +920,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
     syncCachesToWindow();
 });
-
-
-
-//=====================================================
-//----------------------------------------------------
-
-
-
-
-// ===== Optional Voice Control (stub) =====
-function initVoiceControl() {
-  if (!('webkitSpeechRecognition' in window)) {
-  if (DEBUG) console.log("Voice recognition not supported.");
-    return;
-  }
-  const recognition = new webkitSpeechRecognition();
-  recognition.continuous = true;
-  recognition.interimResults = false;
-  recognition.onresult = (event) => {
-    const transcript = event.results[event.results.length - 1][0].transcript.trim();
-  if (DEBUG) console.log("Voice command detected:", transcript);
-  };
-  recognition.start();
-}
-
-initVoiceControl();
-
-
-
-
 
 
 /*
