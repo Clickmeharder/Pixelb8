@@ -878,8 +878,7 @@ document.getElementById("showAllBlueprintsBtn").addEventListener("click", () => 
 
 document.addEventListener('DOMContentLoaded', () => {
   populateNexusDropdown();
-
-  await initCaches();
+  initCaches();
   const btn = document.getElementById("showAllBlueprintsBtn");
   btn.classList.add("active");
   btn.classList.remove("active");
