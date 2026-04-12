@@ -21,56 +21,79 @@ startApp();
 
 // --- [APP_GUI // STAT TAB LOGIC] ---
 
-const statTabButtons = document.querySelectorAll(".stat-tab-btn");
-// Note: We don't query statSections globally here anymore to avoid cross-talk
+document.addEventListener('DOMContentLoaded', () => {
 
-statTabButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-        const target = btn.dataset.stat;
-        
-        // --- FIX 1: SCOPED BUTTON RESET ---
-        // Find the specific tab bar this button belongs to
-        const parentTabGroup = btn.parentElement;
-        parentTabGroup.querySelectorAll(".stat-tab-btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
+    // === MAIN TABS (Blueprints, Missions, Items, Map, etc.) ===
+    const mainTabButtons = document.querySelectorAll('#tab-buttons .tab-btn');
 
-        // --- FIX 2: SCOPED SECTION SHOW/HIDE ---
-        // Find the content container related to THIS specific group
-        // We look for the next sibling or the closest wrapper
-        const contentContainer = parentTabGroup.nextElementSibling; 
-        if (!contentContainer) return;
+    mainTabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetTab = btn.dataset.tab;
 
-        const localSections = contentContainer.querySelectorAll(".loadout-section");
+            // Deactivate all main tabs
+            mainTabButtons.forEach(b => b.classList.remove('active-subtab', 'active'));
 
-        localSections.forEach(sec => {
-            if (target === "all") {
-                sec.style.display = "block";
-            } else {
-                // Only show the section that matches the target ID
-                sec.style.display = (sec.id === `rightpanel-${target}`) ? "block" : "none";
+            // Activate clicked one
+            btn.classList.add('active-subtab', 'active');
+
+            // Hide all main tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // Show the target tab
+            const targetContent = document.getElementById(targetTab);
+            if (targetContent) {
+                targetContent.style.display = 'block';
             }
         });
     });
-});
-// run once on page load (default to offense)
-// Run on page load to set defaults
-document.addEventListener('DOMContentLoaded', () => {
-    // Helper to activate a specific tab by its data-stat value
-    const activateTab = (statValue) => {
-        const btn = document.querySelector(`.stat-tab-btn[data-stat="${statValue}"]`);
-        if (btn) {
-            // We manually trigger the logic to ensure styles update 
-            // even if the element is currently in a hidden parent tab
-            btn.dispatchEvent(new Event('click', { bubbles: true }));
-        }
-    };
 
-    // 1. Initialize the First Group (e.g. Combat)
-    activateTab("Combat");
+    // === SUBTABS (Inside each main tab) ===
+    const subtabButtons = document.querySelectorAll('.subtab-btn');
 
-    // 2. Initialize the Second Group (Economy)
-    // This will now work because our new click handler only clears its own group
-    activateTab("economy");
+    subtabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetSubtab = btn.dataset.subtab;
+
+            // Find the parent tab content this subtab belongs to
+            const parentTabContent = btn.closest('.tab-content');
+            if (!parentTabContent) return;
+
+            // Deactivate all subtabs in this group
+            parentTabContent.querySelectorAll('.subtab-btn').forEach(b => {
+                b.classList.remove('active-subtab');
+            });
+
+            // Activate this one
+            btn.classList.add('active-subtab');
+
+            // Hide all subtab contents in this group
+            parentTabContent.querySelectorAll('.subtab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // Show the target subtab
+            const targetSubContent = document.getElementById(targetSubtab);
+            if (targetSubContent) {
+                targetSubContent.style.display = 'block';
+            }
+        });
+    });
+
+    // === Set default active tabs on load ===
+    const defaultMainTab = document.querySelector('.tab-btn[data-tab="craftingTab"]');
+    if (defaultMainTab) {
+        defaultMainTab.click();
+    }
+
+    // Activate first subtab inside Crafting tab
+    const defaultSubtab = document.querySelector('#craftingTab .subtab-btn[data-subtab="craftingOverview"]');
+    if (defaultSubtab) {
+        defaultSubtab.click();
+    }
+
+    console.log('✅ Tab system initialized successfully');
 });
 
 // Function to check a single wrapper
