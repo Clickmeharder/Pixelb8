@@ -395,12 +395,7 @@ document.getElementById('toggleIncludeMU').addEventListener('change', (e) => {
 });
 // Run after DOM/stats are loaded
 
-document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && e.key.toLowerCase() === 'l') {
-    overlaySettings.locked = !overlaySettings.locked;
-    saveOverlayPreferences();
-  }
-});
+
 // Refresh overlay (reload)
 
 console.log('✅appgui.js Initialized');
