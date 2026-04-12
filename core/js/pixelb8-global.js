@@ -21,7 +21,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 });
 
 // Subtab switching logic
-document.querySelectorAll('.subtab').forEach(subtab => {
+/* document.querySelectorAll('.subtab').forEach(subtab => {
 	subtab.addEventListener('click', () => {
 		document.querySelectorAll('.subtab').forEach(st => st.classList.remove('active'));
 		document.querySelectorAll('.subtab-content').forEach(sc => sc.classList.remove('active'));
@@ -38,7 +38,7 @@ document.querySelectorAll('.tab-btn').forEach((btn) => {
     const targetId = btn.getAttribute('data-target');
     document.getElementById(targetId).classList.add('active');
   });
-});
+}); */
 //-------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", function() {
     // Get the current path, removing any trailing slashes or "index.html"
