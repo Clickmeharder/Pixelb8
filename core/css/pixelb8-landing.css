@@ -417,7 +417,7 @@ animated twinkly stars background styles
 .fillheight{
   height:calc(90% - 2px);
 }
-.collapsed{height:0;transition:height 0.6s ease;}
+.collapsed1{height:0;transition:height 0.6s ease;}
 .expanded{height:;transition:height 0.6s ease;}
 .resizable{overflow: hidden;overflow-x: hidden;resize: both;}
 .hoveffect1{transition: linear, 3.6s;}
