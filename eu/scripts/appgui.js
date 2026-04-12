@@ -7,8 +7,6 @@ async function startApp() {
     window.isSystemInitializing = true; // 🤐 SILENCE START
     console.log("🚀 Starting Master Bootloader...");
 
-
-	await initializeFapsFromSettings();
     window.isSystemInitializing = false; // 🔊 SILENCE END
     
     // 🔥 FINAL SYNC
