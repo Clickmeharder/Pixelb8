@@ -19,9 +19,6 @@ startApp();
 
 
 
-document.querySelectorAll('.panel-toggle, .data-toggle').forEach(cb => {
-  cb.addEventListener('change', onOverlayCheckboxChange);
-});
 
 
 // --- [APP_GUI // STAT TAB LOGIC] ---
