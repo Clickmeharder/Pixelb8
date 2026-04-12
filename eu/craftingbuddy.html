@@ -1685,6 +1685,1359 @@ div#fulllist-scroll-container {
     font-size: 0.85em;
 }
 </style>
+<!--Messy css fixes-->
+  <style> 
+.materialCardInputRow{display:flex;flex-direction:row; gap: 12px;}	
+#addMattButt,{
+  height:42px;
+  font-size:5px;
+}
+
+#matfilterlabel {
+    margin: auto;
+    margin-bottom: 4px;
+    color: #181616;
+    text-align: center;
+}
+
+
+@media screen and (orientation: portrait) {
+  body::before {
+    content: "Turn Your Phone sideways!";
+    position: fixed;
+    text-align: center;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    z-index: 9999;
+    white-space: normal; /* "wrap" isn't valid here */
+  }
+
+  div#pixelb8Header {
+    display: none !important;
+  }
+  .header {
+    display: none !important;
+  }
+  /* ✅ Override hiding when menu is active */
+  body.menu-active .header {
+    display: block !important;
+  }
+
+}
+
+@media (max-height: 98vh) {
+  .craftingbuddyWrapper {
+    flex-direction: row;
+    margin-left: 28px;
+  }
+
+  .eu-blueprint,
+  #allBlueprintsList {
+    flex: 1 1 100%;
+  }
+  .eu-blueprint {
+    width:12%;
+	max-width: 12%;
+	min-width:12%;
+  }
+  div#pixelb8Header {
+    display: none !important;
+  }
+  .header {
+    display: none !important;
+  }
+	.menu-button {
+		position: fixed;
+		top: 2px;
+		left: 2px;background:black;
+		z-index:100;
+	}
+	.nav-menu {
+	  top:0px;
+	   height:99%;
+	  padding-top:15px;
+	  z-index:99;
+	}
+	.eu-container {
+		margin-top: ;
+		padding-top:10px;
+		width: 99vw;
+	}
+	.material-table th, .material-table td {
+
+	}
+}
+ </style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: url('https://source.unsplash.com/1600x900/?cyberpunk,neon') no-repeat center center/cover;
+            overflow: hidden;
+            color: #0b7272;
+            font-family: 'Orbitron', sans-serif;
+        }
+	    .PageFooterDisclaimer-note {
+			display: none;
+			position: absolute;
+			bottom: 16px;
+			left: 10%;
+		}
+#shittyHitCounter {
+    position: fixed;
+    left: 0px;
+    bottom: -5px;
+    background: #000000e6;
+    opacity: 0.6;
+    scale: 0.7;
+}
+		#shittyHitCounter a {
+			opacity: 0.9;
+		}
+    </style>
+	<style>
+
+	.material { margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; text-align: left; }
+	.results { margin-top: 20px; background: #2e2e2e; padding: 10px; border-radius: 8px; }
+	.results h3 {
+		margin-block-start: 0.2em;
+		margin-block-end: 0.2em;
+	}
+
+	</style>
+	<style>
+	/* Base and fonts */
+	@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+
+	body {
+	font-family: 'Montserrat', sans-serif;
+	}
+
+h1 {
+    font-size: 2em;
+    font-weight: 600;
+    margin-left: 59px;
+    margin-top: -4px;
+    margin-bottom: 5px;
+    width: 29%;
+    padding: 4px;
+    color: rgba(86, 88, 92, 0.64);
+    text-shadow: 0 0 4px #32e9e2, 0 0 8px #32e9e2;
+    text-align: left;
+    border-radius: 15px;
+    outline: 3px ridge rgba(20, 20, 20, 0.9);
+    outline-offset: -3px;
+    text-shadow: 1px 1px 2px #111, -1px -1px 2px #444, 2px 2px 4px rgba(0, 255, 255, 0.1);
+    transition: box-shadow 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
+    z-index: 1000;
+}
+
+	h1:hover {
+	box-shadow: 0 4px 12px rgba(0, 255, 255, 0.7);
+	color: #32e9e2;
+	text-shadow: 0 0 4px #32e9e2, 0 0 8px #32e9e2;
+	transition: box-shadow 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
+	}
+	/* Container card */
+	.container {
+	max-width: 900px;
+	margin: 0 auto;
+	background: #1e1e1e;
+	border-radius: 16px;
+	box-shadow: 0 8px 24px rgba(50,199,233,0.3);
+	padding: 20px 30px;
+	}
+
+	/* Form elements */
+	label {
+	display: flex;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	padding: 4px;
+	padding-top: 2px;
+	padding-bottom: 0px;
+	font-weight: 600;
+	font-size: 0.85rem;
+	text-align: left;
+	flex-direction: column;
+	}
+input[type="text"], input[type="number"], select {
+    padding: 0px 12px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    background: #121212eb;
+    border: 2px solid #383535;
+    border-radius: 12px;
+    color: #ddd;
+    font-size: 1rem;
+    transition: 0.3s ease;
+}
+	input:hover,
+	select:hover {
+	background: rgba(20, 20, 20, 0.9);
+	}
+
+
+	input[type="text"]:focus,
+	input[type="number"]:focus,
+	input[type="text"]:active,
+	input[type="number"]:active,
+	select:focus,
+	select:active {
+	outline: 1px solid red;
+	border-color: #ac4915;
+	box-shadow: 0 0 15px #ac4915;
+	}
+	/* Buttons */
+	.eu-container button {
+	background: #32c7e9;
+	color: #121212;
+	}
+
+
+#playerCraftlvlWrapper {
+    border: 1px outset #505050;
+    border-radius: 5px;
+    margin: 4px;
+    transition: 0.3s ease;
+}
+	#playerCraftlvlWrapper:active {
+	color: #ac4915;
+	}
+	input#playerLevel {
+	width: 82%;
+	}
+
+div#bpbuttonDiv button {
+    cursor: pointer;
+    background: #680606f7;
+    outline: 1px ridge #000;
+    border-width: 4px;
+    border-color: #881717;
+    border-radius: 50%;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.75rem;
+    height: 56px;
+    width: 88px;
+    padding: 4px;
+    margin: auto;
+    margin-right: 4px;
+
+    /* Text outline (black stroke effect) */
+    text-shadow:
+      -1px -1px 0 #000,
+       1px -1px 0 #000,
+      -1px  1px 0 #000,
+       1px  1px 0 #000;
+}
+
+
+button:hover {
+	background: #53e0f6;
+}
+button:active {
+	background: #1a9abf;
+}
+	
+div#bpbuttonDiv2 {
+	display: flex;
+    flex-direction: column;
+    background: #454343;
+    border: 3px outset #2e2b2b6e;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 4px;
+    padding: 2px;
+    padding-bottom: 5px;
+}
+div#bpbuttonDiv2 button, #showAllBlueprintsBtn {
+    background: #4b4d4ef7;
+    outline: 3px solid #27282a;
+    border-color: #555;
+    color: #121212;
+    font-weight: 700;
+    font-size: 0.8rem;
+    width: 95%;
+    padding: 2px;
+    margin: auto;
+}
+#showAllBlueprintsBtn {
+    margin-left: 2px;
+    margin-top: 2px;
+    margin-bottom: 1px;
+    width: 25px;
+    height: 25px;
+}
+
+input#materialFilter {
+    margin-top: 5px;
+}
+
+}
+div#layoutLabel {
+	padding: 0px;
+	width: 100%;
+}
+
+div#layoutToggle {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	flex-direction: row;
+	align-content: flex-start;
+	justify-content: center;
+	background: rgba(15, 15, 15, 0.8);
+	border: 1px solid #2c2c2c;
+	border-radius: 10px;
+}
+	
+div#layoutOptions {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+div#layoutOptions label {
+	border: 2px outset teal;
+}
+
+#blueprintFilters {
+	background-color: rgba(15, 15, 15, 0.8);
+	border: 1px solid #2c2c2c;
+	border-radius: 10px;
+	margin: auto;
+	padding: 2px 2px;
+	display: flex;
+	font-size: 0.85rem;
+	flex-direction: column;
+	flex-wrap: wrap;
+}
+
+	/* Label styling */
+#blueprintFilters label {
+	color: #8bdaf0;
+	font-weight: 600;
+	width: 30%;
+}
+label#filterlabel {
+	width: 80%;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: flex-start;
+	align-content: flex-start;
+}
+	/* Input and select styling */
+#blueprintFilters input[type="text"],
+#blueprintFilters select {
+	background-color: #121212;
+	border: 1px solid #32c7e9;
+	border-radius: 8px;
+	padding: 4px 4px;
+	color: #ddd;
+	font-size: 0.65rem;
+	transition: all 0.2s ease;
+	width: 95%;
+	max-width: 100%;
+	}
+	#blueprintFilters input:hover,
+	#blueprintFilters select:hover {
+	background-color: #1a1a1a;
+	box-shadow: 0 0 8px #32c7e9;
+	transform: scale(1.02);
+	}
+
+	/* Clear Filters button */
+	#clearBPfilterButt {
+	padding: 4px 4px;
+	margin: 0px;
+	font-size: 0.75rem;
+	font-weight: bold;
+	background-color: #2c2c2c;
+	color: #f06666;
+	border: 1px solid #444;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	}
+
+	#clearBPfilterButt:hover {
+	background-color: #3a3a3a;
+	color: #ff5a5a;
+	box-shadow: 0 0 8px rgba(255, 50, 50, 0.4);
+	}
+
+	#clearBPfilterButt:active {
+	background-color: #202020;
+	transform: scale(0.97);
+	}
+
+	.blueprint-list.cards-layout {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	gap: 10px;
+	height: 300px;
+	overflow-y: auto;
+	padding: 5px;
+	border: 1px solid #444;
+	border-radius: 6px;
+	background: #111;
+	z-index:10;
+	transition: 0.3s ease;
+	}
+	.blueprint-list.cards-layout:hover,.blueprint-list.cards-layout:focus {
+	height: 300px;
+	z-index:1000;
+	}
+	.blueprint-item {
+	background: #222;
+	padding: 3px 6px;
+	border-radius: 5px;
+	cursor: pointer;
+	width: 47%;
+	max-width: 47%;
+	box-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+	transition: background-color 0.2s ease;
+	user-select: none;
+	}
+
+
+	.blueprint-item:hover {
+	background-color: #2a8cff;
+	color: white;
+	}
+
+	.bp-name {
+	font-weight: bold;
+	font-size: 1.1em;
+	}
+
+	.bp-book {
+	font-size: 0.9em;
+	color: #88c;
+	margin-top: 2px;
+	}
+
+	.blueprint-list.list-layout {
+	max-height: 300px;
+	overflow-y: auto;
+	padding-left: 20px;
+	border: 1px solid #444;
+	border-radius: 6px;
+	background: #111;
+	list-style-type: disc;
+	transition:0.3s ease;
+	z-index:10;
+	}
+	.blueprint-list.list-layout:hover,.blueprint-list.list-layout:focus {
+	max-height: 300px;
+	z-index:1000;
+	}
+	.blueprint-list-item {
+	padding: 8px 12px;
+	cursor: pointer;
+	border-bottom: 1px solid #333;
+	transition: background-color 0.2s ease;
+	user-select: none;
+	}
+
+	.blueprint-list-item:hover {
+	background-color: #2a8cff;
+	color: white;
+	}
+div#conditionBlock {
+	height: 121px;
+    text-align: left;
+    margin: 2px;
+    padding: 2px;
+    background-color: black;
+    border: 3px ridge #292525a8;
+    overflow: hidden;
+    opacity: 0.8;
+    transition: 0.3s ease;
+}
+	div#conditionBlock:hover {
+	background:black;
+	opacity:1;
+	z-index:1000;
+	}
+input#qvsc {
+    width: 100%;
+    margin: 7px 0 2px 0;
+    outline: 3px inset rgb(57 55 55);
+    background: #00000000;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+	/* WebKit browsers: Chrome, Safari */
+	input#qvsc::-webkit-slider-runnable-track {
+	height: 10px;
+	background: linear-gradient(to right, green, orange, red);
+	border-radius: 5px;
+	}
+
+	/* WebKit slider thumb */
+	input#qvsc::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	height: 16px;
+	width: 16px;
+	background: #fff;
+	border: 2px solid #8000ff;
+	border-radius: 50%;
+	margin-top: -3px;
+	cursor: pointer;
+	}
+
+	/* Firefox */
+	input#qvsc::-moz-range-track {
+	height: 10px;
+	background: linear-gradient(to right, green, orange, red);
+	border-radius: 5px;
+	}
+
+	input#qvsc::-moz-range-thumb {
+	height: 16px;
+	width: 16px;
+	background: #fff;
+	border: 2px solid #8000ff;
+	border-radius: 50%;
+	cursor: pointer;
+	}
+
+
+	/* saved Blueprint list */
+	.eu-myBlueprintList {
+	position: fixed;
+	width: 50%;
+	right: 12px;
+	bottom: 0px;
+	}
+
+	.eu-myBlueprintList h1 {
+	width: 98%;
+	font-size: 1.3em;
+	color: #ac4915;
+	background: rgb(30 31 33 / 92%);
+	text-align: left;
+	margin: auto;
+	margin-top: -4px;
+	margin-bottom: 2px;
+	border: 3px ridge #2a2a2a33;
+	border-radius: 15px;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	}
+
+	.eu-myBlueprintList h1:hover {
+	box-shadow: 0 4px 12px #ac4915;
+	color: #ac4915;
+	text-shadow: 0 0 4px #240f03, 0 0 8px #ad6716;
+	transition: box-shadow 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
+	}
+
+	div#filterOptionGroup {
+	display: flex;
+	flex-wrap: wrap;
+	}
+	#savedList {
+	background: rgba(20, 20, 20, 0.9);
+	border-radius: 16px;
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
+	padding: 4px;
+	padding-top: 20px;
+	margin-top: -25px;
+	box-shadow: 0 4px 14px rgba(50, 199, 233, 0.25);
+	font-size: 1rem;
+	line-height: 1.4;
+	transition: 0.3s ease;
+	}
+	#savedList:hover {
+	box-shadow: 0 0 15px #1dff00b8;
+	}
+	.results#savedList {
+	width: 97%;
+	margin: auto;
+	margin-top: 6px;
+	margin-right: 15px;
+	margin-left: -6px;
+	padding: 14px;
+	padding-right: 12px;
+	padding-top: 4px;
+	padding-bottom: 9px;
+	border: 3px ridge green;
+	box-shadow: 0 4px 14px rgba(50, 199, 233, 0.25);
+	opacity: 0.95;
+	transition: 0.3s ease;
+	}
+	.results#savedList:hover {
+	box-shadow: 0 0 15px #1dff00b8;
+	z-index: 1000;
+	}
+
+
+	/* Material cards */
+.material {
+    position: relative;
+    background: rgba(30, 29, 29, 0.98);
+    border-radius: 12px;
+    padding: 3px 4px;
+    margin: 6px auto;
+    border: 2px inset #263b49c2;
+    outline: 1px solid gray;
+    box-shadow: 0 2px 6px rgba(50, 199, 233, 0.15);
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+    flex-wrap: wrap;
+    transition: 0.3s ease;
+}
+
+	.material:hover {
+	background: rgba(20, 20, 20, 0.95);
+	box-shadow: 0 0 15px cyan;
+	transform: scale(1.03);
+	}
+
+	/* ❌ Top right button */
+	.material-close {
+	position: absolute;
+	top: 4px;
+	right: 8px;
+	background: #911d1d;
+	color: white;
+	border: none;
+	font-size: 1rem;
+	font-weight: bold;
+	border-radius: 6px;
+	padding: 2px 8px;
+	cursor: pointer;
+	z-index: 10;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+	}
+	.material-close:hover {
+	background: #c73636;
+	}
+
+	/* Number bubble */
+	.material strong {
+	font-size: 1.4rem;
+	color: #32c7e9;
+	height: 36px;
+	min-width: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	border: 3px ridge #0b7272;
+	outline: 1px solid gray;
+	background: #000;
+	text-shadow: 1px 1px 2px black;
+	}
+
+	/* Input container: horizontal wrap */
+	div#materialInputs {
+	display: flex;
+	flex: 1;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: ;
+	}
+
+	/* Each input group */
+	.material label {
+	flex: 1 1 120px;
+	display: flex;
+	flex-direction: column;
+	font-weight: 500;
+	font-size: 0.9rem;
+	color: #8bdaf0;
+	}
+
+	/* Inputs */
+	.material input[type="number"],
+	.material input[type="text"] {
+	width: 100%;
+	background: #121212;
+	border: 1px solid #32c7e9;
+	border-radius: 8px;
+	color: #ddd;
+	font-size: 1rem;
+	padding: 4px 6px;
+	transition: border-color 0.3s ease;
+	}
+	/* my blueprint panel buttons */
+	button.delete-bp {
+	background: transparent;
+	border: none;
+	color: #c33; /* soft red */
+	font-size: 1.1em;
+	cursor: pointer;
+	float: right;
+	margin-left: auto;
+	padding: 2px 5px;
+	transition: color 0.2s ease, transform 0.2s ease;
+	}
+
+	button.delete-bp:hover {
+	color: #ff4c4c;
+	transform: scale(1.2);
+	}
+
+	button.delete-bp:focus {
+	outline: none;
+	}
+
+	.results #panelControls {
+	display: flex;
+	flex-direction: row;
+	background: rgb(30 31 33 / 92%);
+	padding: 6px;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	margin: auto;
+	margin-left: -8px;
+	margin-right: -11px;
+	justify-content: space-evenly;
+	}
+	#loadBlueprintsButt {
+	background: transparent;
+	border: 2px outset #4c4c4c;
+	border-radius: 15px;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	color: #ac4915;
+	margin: 0;
+	margin-right: 3px;
+	padding: 6px;
+	padding-bottom: 0;
+	float: right;
+	cursor: pointer;
+	transition: color 0.2s ease, transform 0.2s ease, box-shadow 0.1s ease;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+	}
+
+	#closeMyBlueprintsButton:hover {
+	color: #ff6347;
+	box-shadow: 0 2px 25px rgb(155 12 12 / 82%);
+	}
+
+	#closeMyBlueprintsButton:focus {
+	outline: none;
+	}
+
+	/* 👇 Press-in effect */
+	#closeMyBlueprintsButton:active {
+	transform: scale(0.95);
+	padding:8px;
+	padding-bottom:0px;
+	margin-right: 0px;
+	box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.4);
+	border-style: inset;
+	}
+
+.results#results {
+	color: #ac4915;
+	background: rgba(20, 20, 20, 0.7);
+	width: auto;
+	height: 99%;
+	padding: 4px;
+	padding-left: 0px;
+	margin: 0px;
+	margin-top: -1px;
+	margin-left: ;
+	border: 2px outset #5d5d5d;
+	border-radius: 10px;
+	text-align: left;
+	font-size: 0.9rem;
+	line-height: 1.4;
+	overflow: hidden;
+	overflow-y: auto;
+	transition: 0.3s;
+
+	}
+	.result-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	background: #111;
+	padding: 10px;
+	border: 1px solid #333;
+	border-radius: 10px;
+	font-size: 0.95rem;
+	line-height: 1.5;
+	}
+
+	.result-row {
+	display: flex;
+	justify-content: space-between;
+	border-bottom: 1px dashed #333;
+	padding: 3px 0;
+	}
+
+	.result-row.total {
+	font-weight: bold;
+	color: #00c8ff;
+	}
+
+	.result-row.profit {
+	font-weight: bold;
+	}
+
+	.profit-positive {
+	color: #4caf50; /* green */
+	}
+
+	.profit-negative {
+	color: #ff4444; /* red */
+	}
+
+	.result-grid .label {
+	color: #aaa;
+	min-width: 50%;
+	}
+
+	.multiplier-odds-details {
+	white-space: nowrap;
+	background: #1a1a1a;
+	border: 1px solid #444;
+	border-radius: 8px;
+	padding: 10px 9px;
+	margin-top: -26px;
+	color: #ddd;
+	font-size: 0.9rem;
+	line-height: 1.4;
+	overflow: hidden;
+	transition: background 0.3s ease;
+	}
+
+	.multiplier-odds-details[open] {
+	background: #222;
+	box-shadow: 0 0 8px #0ff;
+	}
+	.multiplier-note {
+	color: #d6590e; /* or red */
+	font-style: normal;
+	font-weight: 600;
+	}
+	.multiplier-odds-details summary {
+	cursor: pointer;
+	font-weight: 600;
+	outline: none;
+	border: 2px inset #00e676;
+	padding: 4px;
+	list-style: none;
+	user-select: none;
+	margin-bottom: 8px;
+	font-size: 1rem;
+	color: #00e676;
+	}
+
+	.multiplier-odds-details summary::-webkit-details-marker {
+	display: none; /* remove default marker in Chrome */
+	}
+
+	.multiplier-odds-details summary::before {
+	content: '🎲 ';
+	}
+
+	.multiplier-chance,
+	.multiplier-hit,
+	.return-multiplier {
+	color: #ffc107; /* amber */
+	}
+
+	.clicks-before-hit.good {
+	color: #4caf50; /* green */
+	}
+
+	.clicks-before-hit.bad {
+	color: #f44336; /* red */
+	}
+
+	.payout-range {
+	color: #03a9f4; /* blue */
+	}
+
+	.highlight-return {
+	background: #222;
+	color: #00e676;
+	padding: 4px 8px;
+	border-radius: 6px;
+	display: inline-block;
+	margin-top: 6px;
+	}
+
+
+.material-table {
+  width: 100%;
+  color: #aaaaaa;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.material-table th, .material-table td {
+    font-size: 0.8rem;
+    border: 3px inset #444;
+    outline: 1px solid #222;
+    padding: 0px 1px;
+    text-align: center;
+}
+.material-table th {
+    background-color: #0b2372;
+    color: #fff;
+    border: 2px inset #090909;
+    outline: 1px solid #153518;
+    cursor: pointer;
+    text-shadow: 2px 1px black;
+}
+.material-table tr.high-cost td {
+  background-color: #ffd1d1;
+}
+.material-table tr.med-cost td {
+  background
+
+
+	/* Responsive */
+@media (max-width: 640px) {
+	.material {
+	  flex-direction: column;
+	  align-items: flex-start;
+	}
+	.material label {
+	  flex: none;
+	  width: 100%;
+	}
+	.material input {
+	  max-width: 100%;
+	}
+	input[type="text"],
+	input[type="number"],
+	select {
+	  max-width: 100%;
+	}
+	}
+	</style>
+	<style>
+	/* Modal base */
+	.modal {
+	  display: none;
+	  position: fixed;
+	  z-index: 9999;
+	  padding-top: 60px;
+	  left: 0; top: 0;
+	  width: 100%;
+	  height: 100%;
+	  overflow: auto;
+	  background-color: rgba(0,0,0,0.6);
+	}
+
+	/* Modal content */
+	.modal-content {
+	  background-color: #1e1e1e;
+	  margin: auto;
+	  padding: 20px;
+	  border: 2px solid #888;
+	  width: 90%;
+	  max-width: 600px;
+	  border-radius: 8px;
+	  color: #eee;
+	}
+
+	/* Close button */
+	.close {
+	  color: #ccc;
+	  float: right;
+	  font-size: 28px;
+	  font-weight: bold;
+	  cursor: pointer;
+	}
+
+	.close:hover,
+	.close:focus {
+	  color: white;
+	}
+	</style>
+	<style>
+		/* 🛠️ Modal Base */
+
+		.modal {
+		  display: none;
+		  position: fixed;
+		  z-index: 9999;
+		  left: 0;
+		  top: 0;
+		  width: 100%;
+		  height: 100%;
+		  overflow: auto;
+		  background-color: rgba(0, 0, 0, 0.7);
+		}
+
+		.modal-content {
+		  background-color: #0d0d0d;
+		  margin: 10% auto;
+		  padding: 20px;
+		  border: 2px solid #33ffcc;
+		  width: 80%;
+		  max-width: 600px;
+		  border-radius: 12px;
+		  color: #eee;
+		  font-family: 'Orbitron', sans-serif;
+		  box-shadow: 0 0 20px #33ffcc;
+		  position: relative;
+		}
+
+		.modal-content .close {
+		  position: absolute;
+		  top: 10px;
+		  right: 20px;
+		  color: #33ffcc;
+		  font-size: 24px;
+		  cursor: pointer;
+		}
+
+		.sim-title {
+		  font-size: 20px;
+		  color: #00ffe6;
+		  text-align: center;
+		  margin-bottom: 20px;
+		}
+
+		.sim-bar-wrapper {
+		  background: #1a1a1a;
+		  border: 1px solid #00ffee;
+		  height: 20px;
+		  border-radius: 10px;
+		  overflow: hidden;
+		  margin-bottom: 20px;
+		}
+
+		.sim-progress-bar {
+		  height: 100%;
+		  width: 0%;
+		  background: linear-gradient(to right, #00ffe6, #33ffcc);
+		  transition: width 0.1s ease-in-out;
+		}
+
+		.sim-log {
+		  max-height: 250px;
+		  overflow-y: auto;
+		  background: #111;
+		  border: 1px solid #555;
+		  padding: 10px;
+		  font-size: 14px;
+		  border-radius: 8px;
+		  margin-bottom: 20px;
+		}
+
+		.sim-log p {
+		  margin: 5px 0;
+		  color: #ccc;
+		}
+
+		.sim-actions {
+		  text-align: center;
+		}
+
+		.sim-actions button {
+		  background-color: #00bfa6;
+		  border: none;
+		  color: #fff;
+		  padding: 10px 20px;
+		  margin: 0 5px;
+		  border-radius: 5px;
+		  font-family: 'Orbitron', sans-serif;
+		  font-size: 14px;
+		  cursor: pointer;
+		  transition: background 0.3s;
+		}
+
+		.sim-actions button:hover {
+		  background-color: #00d7b9;
+		}
+
+  </style>
+<!--entropianexus bp select etc-->
+  <style>
+  /*blueprint select inputs and entropianexus api elements*/
+	 #entropianexusBPselect {
+	  background-color: #111;
+	  color: #fff;
+	  border: 1px solid #3399ff;
+	  padding: 2px 10px;
+	  border-radius: 6px;
+	  font-size: 0.875rem;
+	}
+
+	#entropianexusBPselect::placeholder {
+	  color: #aaa; /* Light grey placeholder text */
+	}
+  .eu-blueprint label {
+    display: block;
+  }
+
+  .eu-blueprint .label-inline {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25em;
+  }
+
+  .eu-blueprint .label-note {
+    font-size: 0.75rem;
+    color: white;
+    font-style: italic;
+  }
+
+  .eu-blueprint input {
+    display: block;
+    margin-top: 0.25em;
+  }
+.blueprint-list {
+    height: 300px;
+    max-height: 600px;
+	overflow: hidden;
+    overflow-y: auto;
+    border: 1px solid #2a2c2c;
+    margin-top: 2px;
+    padding: 10px;
+	padding-left:4px;
+    display: flex;
+    flex-direction: column;
+    background: #001822;
+    color: #0ff;
+    font-family: monospace;
+	font-size:0.8em;
+    transition: all 0.3s ease;
+}
+
+.blueprint-list.hidden div {
+  display: none;
+}
+
+.blueprint-list div {
+  padding: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 1px solid #033;
+}
+
+.blueprint-list div:hover {
+  background: #033;
+}
+
+
+#eu-myBlueprintWrapper-interior {
+    height: 80%;
+}
+
+
+
+
+
+.expandable {
+  max-height: 0vh;
+  overflow: hidden;
+  overflow-y: auto;
+  transition: max-height 0.3s ease;
+}
+
+.expandable.expanded {
+  max-height: 65vh; /* Or something big enough to show your content */
+}
+
+.ExpandableY-button {
+	font-weight: bold;
+    width: 100%;
+    line-height: 0.6;
+    height: 20px;
+	
+}
+button.ExpandableY-button {
+    background: #4b4d4ef7;
+    outline: 2px solid #27282a;
+    border-color: #555;
+    color: #121212;
+    font-weight: 700;
+    font-size: 0.8rem;
+    width: 98%;
+    padding: 2px;
+    margin: 8px 0px;
+}
+
+
+
+
+/*new main css*/
+.eu-container {
+    text-align: center;
+    margin: auto;
+    margin-top: 4%;
+    padding-bottom: 12px;
+    height: 98vh;
+    overflow: hidden;
+    border: 2px ridge #2ce01d6e;
+    width: 99vw;
+}
+.craftingbuddyWrapper {
+    display: flex;
+    flex-direction: row;
+    margin: auto;
+    margin-top: 4px;
+    padding: 0px;
+    height: 99.5%;
+    background: #33333396;
+    border: 3px outset rgb(80 81 82 / 97%);
+    border-radius: 15px;
+    gap: 4px;
+}
+div#nexusJunk {
+    display: flex;
+    width: 20%;
+    height: 90%;
+    border: 8px outset #2e2b2b6e;
+    outline: 1px ridge #000;
+    padding: 4px;
+    margin: 8px;
+    margin-top: 8px;
+	margin-right: 0px;
+    background: #444;
+    flex-direction: column;
+    border-bottom-width: 10px;
+    border-right-width: 10px;
+    border-radius: 15px;
+}
+#craftingbuddy-mainSection {
+    display: flex;
+    flex-direction: row;
+    height: 87%;
+    width: 75%;
+    background: rgba(20, 20, 20, 0.7);
+    border: 3px inset #555;
+    border-radius: 15px;
+    padding: 11px;
+    margin: 15px 8px auto 0px;
+	gap: 4px;
+}
+
+div#eu-myBlueprintWrapper {
+    display: flex;
+    flex-direction: column;
+    border: 3px ridge #292525a8;
+    border-radius: 10px;
+    overflow: hidden;
+    overflow-y: auto;
+    height: 98%;
+}
+.eu-blueprint {
+	color: #ac4915;
+	background: rgba(20, 20, 20, 0.7);
+	width: 25%;
+	max-width: 26%;
+	min-width: 175px;
+	height: 96%;
+	padding: 2px;
+	margin: 0px;
+	margin-top: 1px;
+	margin-left: ;
+	border: 3px ridge #292525a8;
+	border-radius: 10px;
+	text-align: center;
+	overflow: hidden;
+	overflow-y: auto;
+	transition: 0.3s;
+
+	}
+
+label#wvclabelText {
+	display: flex;
+	flex-direction: row;
+	}
+.eu-blueprint:hover {
+	background: rgba(20, 20, 20, 0.9);
+
+	}
+
+.eu-blueprint input[type="text"], .eu-blueprint input[type="number"], .eu-blueprint select {
+	width: 85%;
+	max-width: 200px;
+	padding: 0px 9px;
+	margin-top: 0px;
+	margin-bottom: 4px;
+	background: rgba(20, 20, 20, 0.7);
+	border-radius: 12px;
+	color: #818181;
+	font-size: 0.875rem;
+	transition: border-color 0.3s ease;
+	}
+.eu-blueprint input:hover, .eu-blueprint select:hover{
+	color: #ffffff;
+	background: rgba(20, 20, 20, 0.9);
+	transform: scale(1.01);
+	}
+.eu-blueprint label {
+    border: 1px outset #505050;
+    border-left-width: 2px;
+    border-radius: 8px;
+    width: 95%;
+}
+	
+div#bpbuttonDiv {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+	}
+
+.power-btn {
+  background-color: #2f2f2f;   /* dark grey */
+  border: 3px solid #666;      /* medium grey ridge-style border */
+  border-radius: 50%;          /* round button */
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px #111 inset, -2px -2px 5px #555 inset; /* subtle inner shading */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.power-btn svg {
+  pointer-events: none; /* so clicking registers on button */
+  filter: drop-shadow(1px 1px 1px #0008); /* subtle shadow for retro feel */
+}
+
+.power-btn:hover {
+  background-color: #444; /* lighter grey on hover */
+  box-shadow: 2px 2px 8px #222 inset, -2px -2px 8px #777 inset;
+}
+
+.power-btn.active {
+  /* Example: glow effect */
+  background-color: #003333;
+  color: #00ffcc; /* if you want icon/text color to change */
+  transition: all 0.3s ease;
+}
+.power-btn.active svg {
+  filter: drop-shadow(0 0 4px #00ffcc) brightness(1.5);
+  fill: #00ffcc; /* Change icon color */
+  transition: all 0.3s ease;
+}
+  </style>
 
 </head>
 <body>
