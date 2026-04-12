@@ -81,7 +81,7 @@ function toggleDataSource(type) {
 
     // Only trigger a full repopulate if the system is NOT in the middle of a boot
     if (!window.isSystemInitializing) {
-        initDropdowns(); 
+        initCaches(); 
     }
   }
 }
@@ -581,7 +581,7 @@ async function initCaches() {
 
 
 
-window.initDropdowns = initDropdowns;
+window.initCaches = initCaches;
 // ================= Event Listeners =================
 function updateStatusElements() {
   const text = USE_LOCAL_DATA ? "📂 Local Storage" : "🌐 EntropiaNexus API";
@@ -594,7 +594,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   USE_LOCAL_DATA = localStorage.getItem('USE_LOCAL_DATA') !== 'false';
   window.USE_LOCAL_DATA = USE_LOCAL_DATA;
   updateStatusElements(); // update immediately
-  //await initDropdowns();
+  //await initCaches();
 
   const dataSourceButton = document.getElementById("DataSourceToggle");
 
