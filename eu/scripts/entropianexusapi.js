@@ -115,65 +115,64 @@ function appendData(text) {
 
 // ================= Local/API Data Loader =================
 // ================= Local/API Data Loader =================
-async function getData(endpoint, localFile) {
-    const fullUrl = window.BASE_URL + endpoint;
+// ================= WEB-ONLY DATA LOADER =================
+async function getData(endpoint, localFile = null) {
+    const filename = localFile || `${endpoint}.json`;
 
-    if (USE_LOCAL_DATA) {
-        try {
-            let data = null;
+    console.log(`[NEXUS_WEB] Attempting to load: ${filename}`);
 
-            // ── Special smart handling for materials ONLY ──
-            // Note: We do NOT include 'items' here so items.json loads directly.
-            if (localFile === 'materials.json' || endpoint.includes('material')) {
-                try {
-                    data = await window.electronAPI.loadNexusJSON('materials.json');
-                    if (data && (Array.isArray(data) ? data.length > 0 : data?.items?.length > 0)) {
-                        if (DEBUG) console.log(`[NEXUS_SOURCE:SUCCESS] Loaded from dedicated materials.json`);
-                        return Array.isArray(data) ? data : data?.items || [];
-                    }
-                } catch (e) { /* silent fail, move to items.json fallback */ }
-
-                console.log(`[NEXUS_SOURCE:INFO] materials.json not found/empty → falling back to items.json`);
-                data = await window.electronAPI.loadNexusJSON('items.json');
-            } 
-            else {
-                // Normal case: Load exactly what was requested (e.g., items.json)
-                data = await window.electronAPI.loadNexusJSON(localFile);
+    // 1. Primary: Fetch from ./data/nexus/ folder (recommended)
+    try {
+        const response = await fetch(`./data/nexus/${filename}`);
+        if (response.ok) {
+            const data = await response.json();
+            const items = Array.isArray(data) ? data : (data?.items || []);
+            if (items.length > 0) {
+                console.log(`[NEXUS_WEB] ✅ SUCCESS: Loaded ${items.length} items from ./data/nexus/${filename}`);
+                return items;
             }
-
-            // Check if data is valid
-            if (data) {
-                const items = Array.isArray(data) ? data : data?.items || [];
-                if (items.length > 0) {
-                    if (DEBUG) console.log(`[NEXUS_SOURCE:SUCCESS] Data found in local cache: ${localFile} (${items.length} items)`);
-                    return items;
-                }
-            }
-
-            // If we reach here, data was null or empty
-            console.warn(`[NEXUS_SOURCE:WARN] Local file ${localFile} is empty or missing. Try PATCHING via Sync Dashboard.`);
-            return [];
-
-        } catch (err) {
-            console.error(`[NEXUS_SOURCE:ERROR] Local load FAILED for ${localFile}`, err);
-            return [];
+        } else {
+            console.warn(`[NEXUS_WEB] Fetch returned ${response.status} for ${filename}`);
         }
-    } 
-    else {
-        // 🌍 External API Fetch
+    } catch (err) {
+        console.warn(`[NEXUS_WEB] Fetch failed for ${filename}:`, err.message);
+    }
+
+    // 2. Fallback: Try localStorage cache (if user uploaded files before)
+    try {
+        const cached = localStorage.getItem(`nexus_cache_${filename}`);
+        if (cached) {
+            const data = JSON.parse(cached);
+            const items = Array.isArray(data) ? data : (data?.items || []);
+            if (items.length > 0) {
+                console.log(`[NEXUS_WEB] ✅ Loaded ${items.length} items from localStorage cache for ${filename}`);
+                return items;
+            }
+        }
+    } catch (err) {
+        console.warn(`[NEXUS_WEB] localStorage cache error for ${filename}`);
+    }
+
+    // 3. Special fallback for materials → items.json
+    if (filename.includes('materials') || endpoint.includes('material')) {
+        console.log(`[NEXUS_WEB] materials.json not found → trying items.json as fallback`);
         try {
-            const res = await fetch(fullUrl);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            if (DEBUG) console.log(`[NEXUS_SOURCE:SUCCESS] Fetched from External API: ${fullUrl}`);
-            return Array.isArray(data) ? data : data?.items || [];
+            const response = await fetch('./data/nexus/items.json');
+            if (response.ok) {
+                const data = await response.json();
+                const items = Array.isArray(data) ? data : (data?.items || []);
+                // Optionally filter only materials if you want, but for now return all
+                console.log(`[NEXUS_WEB] ✅ Fallback: Loaded ${items.length} items from items.json`);
+                return items;
+            }
         } catch (err) {
-            console.error(`[NEXUS_SOURCE:ERROR] Failed to fetch External API ${endpoint}:`, err);
-            return [];
+            console.warn(`[NEXUS_WEB] items.json fallback also failed`);
         }
     }
-}
-//------------------------------------------------------------
+
+    console.warn(`[NEXUS_WEB] ❌ No data found for ${filename}. Returning empty array.`);
+    return [];
+}//------------------------------------------------------------
 //------------------------------------------------------------
 // ================= DOWNLOADING DATA =================
 async function downloadData(filename, endpoint) {
