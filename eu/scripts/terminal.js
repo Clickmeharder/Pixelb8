@@ -1,3 +1,4 @@
+let DEBUG = true;
   // -------------------- ELEMENTS --------------------
   const commandInput = document.getElementById('commandInput');
   const executeBtn = document.getElementById('executeCommand');
